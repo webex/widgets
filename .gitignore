@@ -1,0 +1,47 @@
+#Runtime data
+dist/
+test_results/
+build/
+fonts/
+platforms/
+plugins/
+coverage/
+pids
+*.pid
+*.seed
+*.out
+*.map
+
+#Logs and others
+*.swp
+*.log
+*.log.*
+logs
+log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.node_repl_history
+reports/
+
+#IDEs
+.project
+.settings
+.metadata
+.vscode
+
+#Hidden directories
+.npm
+
+#OS
+.idea
+.DS_Store
+._*
+
+#Local stuff
+*.json
+.env*
+!.env.default
+!package.json
+!package-lock.json
+node_modules/
