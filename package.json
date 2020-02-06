@@ -1,0 +1,24 @@
+{
+  "name": "@webex/widgets",
+  "version": "1.0.0",
+  "main": "dist/webexWidgets.cjs.js",
+  "module": "dist/webexWidgets.esm.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/webex/widgets.git"
+  },
+  "publishConfig": {
+    "tag": "latest",
+    "access": "public"
+  },
+  "author": "devsupport@webex.com",
+  "license": "MIT",
+  "dependencies": {
+    "@webex/components": "^1.35.0",
+    "@webex/sdk-component-adapter": "^1.19.3",
+    "webex": "^1.80.103"
+  }
+}
