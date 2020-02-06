@@ -1,0 +1,14 @@
+{
+  "parser": "babel-eslint",
+  "extends": [
+    "airbnb/hooks", 
+    "plugin:prettier/recommended",
+    "prettier/react",
+    "prettier/standard"
+  ],
+  "plugins": ["jest", "jsdoc"],
+  "env": {
+    "browser": true,
+  },
+  "rules": {}
+}
