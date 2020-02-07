@@ -36,12 +36,23 @@ jobs:
           paths: node_modules
 
   test:
-      executor: node-erbium-executor
-      steps:
-        - checkout_from_workspace
-        - run:
-            name: Linting
-            command: npm run test:eslint
+    executor: node-erbium-executor
+    steps:
+      - checkout_from_workspace
+      - run:
+          name: Linting
+          command: npm run test:eslint
+
+  build:
+    executor: node-erbium-executor
+    steps:
+      - checkout_from_workspace
+      - run:
+          name: Build
+          command: npm run build
+      - persist_to_workspace:
+          root: .
+          paths: dist
 
 # execute the jobs in a orderly manner
 workflows:
@@ -51,3 +62,9 @@ workflows:
       - test:
           requires:
             - install
+      - build:
+          requires:
+            - test
+          filters:
+            branches:
+              only: master
