@@ -5,6 +5,9 @@
   "module": "dist/webexWidgets.esm.js",
   "scripts": {
     "build": "rollup -c",
+    "release": "semantic-release",
+    "release:debug": "semantic-release --debug",
+    "release:dry-run": "semantic-release --dry-run",
     "test:eslint": "eslint src/"
   },
   "repository": {
