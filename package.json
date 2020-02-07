@@ -4,6 +4,7 @@
   "main": "dist/webexWidgets.cjs.js",
   "module": "dist/webexWidgets.esm.js",
   "scripts": {
+    "build": "rollup -c",
     "test:eslint": "eslint src/"
   },
   "repository": {
