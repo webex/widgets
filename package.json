@@ -25,7 +25,9 @@
     "@webex/sdk-component-adapter": "^1.19.3",
     "webex": "^1.80.103"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "devDependencies": {
     "@babel/cli": "^7.8.4",
     "@babel/core": "^7.8.4",
