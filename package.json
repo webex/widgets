@@ -8,6 +8,7 @@
     "release": "semantic-release",
     "release:debug": "semantic-release --debug",
     "release:dry-run": "semantic-release --dry-run",
+    "start": "webpack-dev-server demo/App.jsx --mode development",
     "test:eslint": "eslint src/"
   },
   "repository": {
