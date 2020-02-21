@@ -1,7 +1,5 @@
 const path = require('path');
 const webpack = require('webpack');
-const {CleanWebpackPlugin} = require('clean-webpack-plugin');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
   cache: true,
@@ -50,21 +48,4 @@ module.exports = {
       },
     ],
   },
-  devServer: {
-    contentBase: path.resolve(__dirname, './demo'),
-    open: true,
-    overlay: true,
-    hot: true,
-    port: 9000,
-    stats: 'errors-warnings',
-    https: true,
-  },
-  plugins: [
-    new CleanWebpackPlugin({}),
-    new HtmlWebpackPlugin({
-      filename: 'index.html',
-      template: 'demo/index.html',
-    }),
-    new webpack.HotModuleReplacementPlugin(),
-  ],
 };
