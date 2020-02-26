@@ -97,5 +97,20 @@
       "@babel/plugin-transform-regenerator",
       "@babel/plugin-transform-runtime"
     ]
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ],
+    "rules": {
+      "scope-case": [
+        2,
+        "always",
+        [
+          "lower-case",
+          "pascal-case"
+        ]
+      ]
+    }
   }
 }
