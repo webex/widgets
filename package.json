@@ -112,5 +112,11 @@
         ]
       ]
     }
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run test:eslint",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
   }
 }
