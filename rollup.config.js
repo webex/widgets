@@ -10,12 +10,11 @@ const output = (name, format) => ({
   format,
   sourcemap: true,
   globals: {
-    bufferutil: 'bufferutil',
     'prop-types': 'PropTypes',
     react: 'React',
     'react-dom': 'ReactDOM',
     'spawn-sync': 'spawnSync',
-    'utf-8-validate': 'utf8Validate',
+    webex: 'webex',
   },
 });
 
@@ -46,7 +45,7 @@ export default [
       // Use default for everything else
       warn(warning);
     },
-    external: ['bufferutil', 'prop-types', 'react', 'react-dom', 'spawn-sync', 'utf-8-validate'],
+    external: ['prop-types', 'react', 'react-dom', 'webex'],
     context: 'null',
   },
 ];
