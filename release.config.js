@@ -30,14 +30,6 @@ module.exports = {
             label: 'Package JSON',
           },
           {
-            path: 'dist/webexWidgets.cjs.js',
-            label: 'Common JS distribution',
-          },
-          {
-            path: 'dist/webexWidgets.umd.js',
-            label: 'Universal Module Definition JS distribution',
-          },
-          {
             path: 'dist/webexWidgets.esm.js',
             label: 'ECMAScript module JS distribution',
           },
