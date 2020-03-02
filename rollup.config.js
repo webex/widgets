@@ -1,8 +1,6 @@
 import babel from 'rollup-plugin-babel';
 import resolve from 'rollup-plugin-node-resolve';
 import commonJS from 'rollup-plugin-commonjs';
-import json from 'rollup-plugin-json';
-import builtins from 'rollup-plugin-node-builtins';
 
 const output = (name, format) => ({
   name,
@@ -13,8 +11,8 @@ const output = (name, format) => ({
     'prop-types': 'PropTypes',
     react: 'React',
     'react-dom': 'ReactDOM',
-    'spawn-sync': 'spawnSync',
     webex: 'webex',
+    '@webex/common': '@webex/common',
   },
 });
 
@@ -31,22 +29,9 @@ export default [
         compact: false,
         runtimeHelpers: true,
       }),
-      commonJS({
-        // TODO: Remove workaround once fixed in SDK
-        // explicitly specify unresolvable named exports
-        namedExports: {'@webex/common': ['deconstructHydraId']},
-      }),
-      json(),
-      builtins(),
+      commonJS(),
     ],
-    onwarn(warning, warn) {
-      // skip circular dependency warnings from webex library
-      if (warning.code === 'CIRCULAR_DEPENDENCY') return;
-
-      // Use default for everything else
-      warn(warning);
-    },
-    external: ['prop-types', 'react', 'react-dom', 'webex'],
-    context: 'null',
+    external: ['prop-types', 'react', 'react-dom', 'webex', '@webex/common'],
   },
 ];
+9;
