@@ -25,7 +25,7 @@
     "dist"
   ],
   "dependencies": {
-    "@webex/components": "^1.35.0",
+    "@webex/components": "^1.36.2",
     "@webex/sdk-component-adapter": "^1.20.0"
   },
   "devDependencies": {
