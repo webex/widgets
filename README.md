@@ -35,6 +35,54 @@ npm install --save webex @webex/widgets
 
 ## Usage
 
+### Styles
+
+In order to properly style Webex Widgets, we need to import all the fonts, icons, images and core CSS manually.
+Import `@webex/widgets/dist/webexWidgets.css` into your main entry file.
+
+There are two ways to do this:
+
+#### JavaScript
+
+In your `App.js`, add the following import:
+
+```js
+import '@webex/widgets/dist/webexWidgets.css';
+...
+```
+
+#### HTML
+
+In the `<head>` of your `index.html`, add the following import:
+
+```html
+<head>
+  ...
+  <link rel="stylesheet" type="text/css" href="node_modules/@webex/widgets/dist/webexWidgets.css" />
+</head>
+```
+
+### Widgets
+
+Please make sure to install the [Webex JS SDK](https://www.npmjs.com/package/webex) plus the [Webex Widget](https://www.npmjs.com/package/@webex/widgets) beforehand.
+
+```bash
+npm install --save webex @webex/widgets
+```
+
+To use a Webex Widget, simply import the desired widget and render it into your React application.
+
+```js
+import React from 'react';
+import {WebexMeetingWidget} from '@webex/widgets';
+
+import '@webex/widgets/dist/webexWidgets.css';
+
+export default function App() {
+  return <WebexMeetingWidget accessToken="<YOUR_ACCESS_TOKEN>" meetingDestination="<MEETING_DESTINATION>" />;
+}
+```
+
 ## Contributing
 
 We'd love for you to contribute to our source code and to make the **Webex Widgets** even better than they are today! Here are some [guidelines](https://github.com/webex/widgets/blob/master/CONTRIBUTING.md) that we'd like you to follow.
