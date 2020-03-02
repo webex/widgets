@@ -21,7 +21,7 @@ const output = (name, format) => ({
 export default [
   {
     input: 'src/index.js',
-    output: [output('webexWidgets', 'cjs'), output('UMDWebexWidgets', 'umd'), output('ESMWebexWidgets', 'esm')],
+    output: [output('ESMWebexWidgets', 'esm')],
     plugins: [
       resolve({
         preferBuiltins: true,
