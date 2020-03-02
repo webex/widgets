@@ -21,6 +21,7 @@ aimed at react developers that want to embed the widgets into their applications
 ## Table of Contents
 
 - [Install](#install)
+- [Webex Components vs Webex Widgets](#webex-components-vs-webex-widgets)
 - [Usage](#usage)
 - [Contributing](#contributing)
 - [License](#license)
@@ -32,6 +33,14 @@ aimed at react developers that want to embed the widgets into their applications
 ```bash
 npm install --save webex @webex/widgets
 ```
+
+## Webex Components vs Webex Widgets
+
+[Webex Components](https://github.com/webex/components#webex-components) is a set of React components that follow webex standard styling without any data being injected to them.
+[Webex Widgets](https://github.com/webex/widgets#webex-widgets) are based on [Webex components](https://github.com/webex/components#webex-components) but include the adapter that talks to our [Javascript SDK](https://github.com/webex/webex-js-sdk).
+This means that the Webex Widgets use the [SDK Component Adapter](https://github.com/webex/sdk-component-adapter#webex-sdk-component-adapter) to inject the [Webex data](https://github.com/webex/webex-js-sdk#webex-js-sdk) for you.
+You have to take the Widget layout as-is, but the benefit is that there are no configurations needed.
+Install, copy-paste and you have the power of Webex in your application!
 
 ## Usage
 
