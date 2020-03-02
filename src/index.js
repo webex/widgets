@@ -1,1 +1,1 @@
-export {default as WebexMeetingWidget} from './widgets/WebexMeetingWidget';
+export {default as WebexMeetingWidget} from './widgets/WebexMeeting/WebexMeeting';
