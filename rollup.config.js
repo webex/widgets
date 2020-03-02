@@ -1,6 +1,7 @@
 import babel from 'rollup-plugin-babel';
 import resolve from 'rollup-plugin-node-resolve';
 import commonJS from 'rollup-plugin-commonjs';
+import postcss from 'rollup-plugin-postcss';
 
 const output = (name, format) => ({
   name,
@@ -30,6 +31,7 @@ export default [
         runtimeHelpers: true,
       }),
       commonJS(),
+      postcss({extract: 'dist/webexWidgets.css'}),
     ],
     external: ['prop-types', 'react', 'react-dom', 'webex', '@webex/common'],
   },
