@@ -1,3 +1,12 @@
+# [1.2.0](https://github.com/webex/widgets/compare/v1.1.0...v1.2.0) (2020-03-05)
+
+
+### Features
+
+* **rollup:** add postCss plugin to rollup configs ([01b6207](https://github.com/webex/widgets/commit/01b62077e4a3c97823454ab83a8771be00b3d1a0))
+* **WebexMeeting:** initial implementaion ([0f8a137](https://github.com/webex/widgets/commit/0f8a1379dabe37bd450ab56004cdfbade1563534))
+* **App:** render the meeting widget with props ([2fb85dc](https://github.com/webex/widgets/commit/2fb85dc5edb7160f1d3b62256ba795105eb557df))
+
 # [1.1.0](https://github.com/webex/widgets/compare/v1.0.0...v1.1.0) (2020-03-01)
 
 
