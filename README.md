@@ -1,7 +1,8 @@
-<h1 align='center' style='border-bottom: none;'>Webex Widgets</h1>
-<h3 align='center'>Library of React widgets to easily embed into your web applications!</h3>
-<p align='center'>
-<a href='https://circleci.com/gh/webex/widgets'>
+<div align='center'>
+  <h1>Webex Widgets</h1>
+  <h3>Embed the power of Webex in your web applications ✨</h3>
+
+  <a href='https://circleci.com/gh/webex/widgets'>
     <img alt='CircleCI' src='https://circleci.com/gh/webex/widgets.svg?style=shield'>
   </a>
   <a href='https://www.npmjs.com/package/@webex/widgets'>
@@ -13,10 +14,11 @@
   <a href='https://github.com/webex/widgets/blob/master/package.json#L28'>
     <img src='https://img.shields.io/npm/l/webex.svg' alt='license'>
   </a>
-</p>
+</div>
 
-**Webex Widgets** is a set of [React](https://reactjs.org) widgets following Webex standard styling,
-aimed at react developers that want to embed the widgets into their applications.
+**Webex Widgets** are a set of self-contained [React](https://reactjs.org) components
+that follow the [Webex](https://www.webex.com) products experience,
+aimed at developers that want to embed Webex into their applications.
 
 ## Table of Contents
 
@@ -34,11 +36,26 @@ aimed at react developers that want to embed the widgets into their applications
 npm install --save webex @webex/widgets
 ```
 
+Notice that the [Webex Javascript SDK](https://www.npmjs.com/package/webex)
+has to be installed as a peer dependency.
+
 ## Webex Components vs Webex Widgets
 
-[Webex Components](https://github.com/webex/components#webex-components) is a set of React components that follow webex standard styling without any data being injected to them.
-[Webex Widgets](https://github.com/webex/widgets#webex-widgets) are based on [Webex components](https://github.com/webex/components#webex-components) but include the adapter that talks to our [Javascript SDK](https://github.com/webex/webex-js-sdk).
-This means that the Webex Widgets use the [SDK Component Adapter](https://github.com/webex/sdk-component-adapter#webex-sdk-component-adapter) to inject the [Webex data](https://github.com/webex/webex-js-sdk#webex-js-sdk) for you.
+In addition to the Webex Widgets, we also offer the
+[Webex Component System](https://github.com/webex/components#webex-components).
+The Webex Component System (sometimes shortened as _Webex Components_) is a set of
+React components that, while following Webex styling, allow for more granularity
+in terms of layout and source of data.
+To learn more on the Webex Component System head to its Github repository at
+https://github.com/webex/components.
+
+Webex Widgets are based on Webex Components but include the adapter that uses
+our [Javascript SDK](https://github.com/webex/webex-js-sdk) to talk to Webex services for you.
+This means that the Webex Widgets use the
+[SDK Component Adapter](https://github.com/webex/sdk-component-adapter#webex-sdk-component-adapter)
+to inject the Webex data.
+All you need is a valid access token and a few parameters based on the widget you want to use.
+
 You have to take the Widget layout as-is, but the benefit is that there are no configurations needed.
 Install, copy-paste and you have the power of Webex in your application!
 
@@ -46,34 +63,41 @@ Install, copy-paste and you have the power of Webex in your application!
 
 ### Styles
 
-In order to properly style Webex Widgets, we need to import all the fonts, icons, images and core CSS manually.
+In order to properly style Webex Widgets, you will need to import our CSS separately.
 Import `@webex/widgets/dist/webexWidgets.css` into your main entry file.
 
 There are two ways to do this:
 
 #### JavaScript
 
-In your `App.js`, add the following import:
+In your `App.js[x]`, add the following import:
 
 ```js
 import '@webex/widgets/dist/webexWidgets.css';
+
 ...
 ```
 
 #### HTML
 
-In the `<head>` of your `index.html`, add the following import:
+In the `<head>` tag of your `index.html`, add the following tag:
 
 ```html
 <head>
   ...
+
   <link rel="stylesheet" type="text/css" href="node_modules/@webex/widgets/dist/webexWidgets.css" />
 </head>
 ```
 
+For this to work, make sure that your `node_modules` folder is served.
+Alternately, you may copy the CSS file to your public folder and update the link
+reference accordingly.
+
 ### Widgets
 
-Please make sure to install the [Webex JS SDK](https://www.npmjs.com/package/webex) plus the [Webex Widget](https://www.npmjs.com/package/@webex/widgets) beforehand.
+Please make sure to install the [Webex Javascript SDK](https://www.npmjs.com/package/webex)
+along with the [Webex Widget](https://www.npmjs.com/package/@webex/widgets) package.
 
 ```bash
 npm install --save webex @webex/widgets
@@ -94,7 +118,8 @@ export default function App() {
 
 ## Contributing
 
-We'd love for you to contribute to our source code and to make the **Webex Widgets** even better than they are today! Here are some [guidelines](https://github.com/webex/widgets/blob/master/CONTRIBUTING.md) that we'd like you to follow.
+We'd love for you to contribute to our source code and to make the Webex Widgets even better than they are today!
+Here are some [guidelines](https://github.com/webex/widgets/blob/master/CONTRIBUTING.md) that we'd like you to follow.
 
 ### Issues
 
@@ -103,14 +128,29 @@ Please leave as much as information as possible for a better understanding.
 
 ### Contributing Code
 
-We are using [Airbnb Style Guide eslint rule](https://github.com/airbnb/javascript) and [prettier](https://github.com/prettier/prettier) to lint the code style.
+We are using [Airbnb-style lint rules](https://github.com/airbnb/javascript) and
+[prettier](https://github.com/prettier/prettier) to lint the code.
 Make sure your code your code follows our lint rules before submitting!
 
-### Release Process
+For more information on contributions, please visit
+[our contributing guide](https://github.com/webex/widgets/blob/master/CONTRIBUTING.md).
 
-There is a list of commit types provided [here](https://github.com/webex/widgets/blob/master/CONTRIBUTING.md#type). However, not all commits trigger our release process.
+#### Commit linter
+
+We are using [commitlint](https://github.com/conventional-changelog/commitlint) to lint the commit messages.
+Please make sure to choose the appropriate commit
+[type](https://github.com/webex/widgets/blob/master/CONTRIBUTING.md#type),
+[scope](https://github.com/webex/widgets/blob/master/CONTRIBUTING.md#scope) and
+[subject](https://github.com/webex/widgets/blob/master/CONTRIBUTING.md#scope).
+
+#### Release Process
+
+There is a list of commit types provided [here](https://github.com/webex/widgets/blob/master/CONTRIBUTING.md#type).
+However, not all commits trigger our release process.
 We are using [semantic-release](https://github.com/semantic-release/semantic-release) to fully automate the version management and package publishing.
-By default `semantic-release` uses the [Angular Commit Message Conventions](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#-git-commit-guidelines) and triggers release and publishing based on the following rules:
+By default `semantic-release` uses the
+[Angular commit message conventions](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#-git-commit-guidelines)
+and triggers release and publishing based on the following rules:
 
 | Commit                             | Release type  |
 | ---------------------------------- | ------------- |
@@ -118,11 +158,6 @@ By default `semantic-release` uses the [Angular Commit Message Conventions](http
 | Commit with type `feat`            | Minor release |
 | Commit with type `fix`             | Patch release |
 | Commit with type `perf`            | Patch release |
-
-#### Commit linter
-
-We are using [commitlint](https://github.com/conventional-changelog/commitlint) to lint the commit messages.
-Please make sure to choose the appropriate commit [type](https://github.com/webex/widgets/blob/master/CONTRIBUTING.md#type), [scope](https://github.com/webex/widgets/blob/master/CONTRIBUTING.md#scope) and [subject](https://github.com/webex/widgets/blob/master/CONTRIBUTING.md#scope).
 
 ## License
 
