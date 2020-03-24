@@ -143,22 +143,6 @@ Please make sure to choose the appropriate commit
 [scope](https://github.com/webex/widgets/blob/master/CONTRIBUTING.md#scope) and
 [subject](https://github.com/webex/widgets/blob/master/CONTRIBUTING.md#scope).
 
-#### Release Process
-
-There is a list of commit types provided [here](https://github.com/webex/widgets/blob/master/CONTRIBUTING.md#type).
-However, not all commits trigger our release process.
-We are using [semantic-release](https://github.com/semantic-release/semantic-release) to fully automate the version management and package publishing.
-By default `semantic-release` uses the
-[Angular commit message conventions](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#-git-commit-guidelines)
-and triggers release and publishing based on the following rules:
-
-| Commit                             | Release type  |
-| ---------------------------------- | ------------- |
-| Commit with type `BREAKING CHANGE` | Major release |
-| Commit with type `feat`            | Minor release |
-| Commit with type `fix`             | Patch release |
-| Commit with type `perf`            | Patch release |
-
 ## License
 
 [MIT License](https://opensource.org/licenses/MIT)
