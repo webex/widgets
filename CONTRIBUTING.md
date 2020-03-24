@@ -26,6 +26,7 @@ If you would like to contribute to this repository by adding features, enhanceme
   - [Testing](#testing)
   - [Code Style](#code-style)
   - [Git Commit](#git-commit)
+- [Release Process](#release-process)
 
 ## Opening an Issue
 
@@ -119,3 +120,20 @@ Just as in the **subject** the imperative, present tense: "change" not "changed"
 The footer should contain any information about **Breaking changes** and is also the place to reference GitHub issues that this commit **closes**.
 
 **Breaking Changes** should start with the word `BREAKING CHANGE:` with a space or two newlines. The rest of the commit message is then used for this.
+
+## Release Process
+
+While the complete list of commit types is provided in the [above _Type_ section](#type),
+not all commits trigger our release process.
+We use [semantic-release](https://github.com/semantic-release/semantic-release) to fully automate the version management
+and package publishing.
+By default `semantic-release` uses the
+[Angular commit message conventions](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#-git-commit-guidelines)
+and triggers release and publishing based on the following rules:
+
+| Commit                             | Release type  |
+| ---------------------------------- | ------------- |
+| Commit with type `BREAKING CHANGE` | Major release |
+| Commit with type `feat`            | Minor release |
+| Commit with type `fix`             | Patch release |
+| Commit with type `perf`            | Patch release |
