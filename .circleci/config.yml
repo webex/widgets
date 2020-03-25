@@ -54,6 +54,17 @@ jobs:
           root: .
           paths: dist
 
+  docs:
+    executor: node-erbium-executor
+    steps:
+      - checkout_from_workspace
+      - run:
+          name: Build Demo Into Docs Folder
+          command: npm run demo:build
+      - persist_to_workspace:
+          root: .
+          paths: docs
+
   release:
     executor: node-erbium-executor
     steps:
@@ -76,9 +87,16 @@ workflows:
           filters:
             branches:
               only: master
+      - docs:
+          requires:
+            - test
+          filters:
+            branches:
+              only: master
       - release:
           requires:
             - build
+            - docs
           filters:
             branches:
               only: master
