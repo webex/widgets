@@ -5,10 +5,12 @@
   "module": "dist/webexWidgets.esm.js",
   "scripts": {
     "build": "rollup -c",
+    "demo:serve": "webpack-dev-server demo/App.jsx --mode development",
+    "demo:build": "webpack demo/App.jsx --mode production",
     "release": "semantic-release",
     "release:debug": "semantic-release --debug",
     "release:dry-run": "semantic-release --dry-run",
-    "start": "webpack-dev-server demo/App.jsx --mode development",
+    "start": "npm run demo:serve",
     "test:eslint": "eslint src/"
   },
   "repository": {
