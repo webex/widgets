@@ -10,7 +10,6 @@ pids
 *.pid
 *.seed
 *.out
-*.map
 
 #Logs and others
 *.swp
