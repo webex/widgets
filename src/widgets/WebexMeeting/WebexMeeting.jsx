@@ -5,7 +5,8 @@ import Webex from 'webex';
 import {WebexMeeting, WebexDataProvider} from '@webex/components';
 import WebexSDKAdapter from '@webex/sdk-component-adapter';
 
-import '@webex/components/dist/webexComponents.css';
+import '@momentum-ui/core/css/momentum-ui.min.css';
+import '@webex/components/dist/css/webex-components.css';
 import './WebexMeeting.css';
 
 /**
