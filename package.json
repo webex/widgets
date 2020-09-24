@@ -1,6 +1,6 @@
 {
   "name": "@webex/widgets",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "main": "dist/webexWidgets.esm.js",
   "module": "dist/webexWidgets.esm.js",
   "scripts": {

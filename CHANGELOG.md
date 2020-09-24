@@ -1,3 +1,13 @@
+# [1.3.0](https://github.com/webex/widgets/compare/v1.2.0...v1.3.0) (2020-09-24)
+
+
+### Features
+
+* **package:** update @webex/sdk-component-adapter to 1.24.1 ([13dbb1e](https://github.com/webex/widgets/commit/13dbb1e03728bf1742a5de55b6024bf9b6a1a6f1))
+* **package:** update components and add momentum ([1fa7bb7](https://github.com/webex/widgets/commit/1fa7bb7c7c885d4a57ad36c86296666f0269c5cb))
+* **package:** update webex to 1.96.1 ([acec0f2](https://github.com/webex/widgets/commit/acec0f24b7a3cec77da0a75bbd402a27f7fe2850))
+* **WebexMeeting:** use momentum css directly ([b1877c8](https://github.com/webex/widgets/commit/b1877c8624124410c80e07cf6633649190b8a597))
+
 # [1.2.0](https://github.com/webex/widgets/compare/v1.1.0...v1.2.0) (2020-03-05)
 
 
