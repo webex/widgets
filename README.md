@@ -20,6 +20,15 @@
 that follow the [Webex](https://www.webex.com) products experience,
 aimed at developers that want to embed Webex into their applications.
 
+## Project Status
+
+The Webex Component System is considered to be in beta stage and it's not a generally available product from Webex at this time.
+This means that the Webex Component System is available for everyone to use but breaking changes may occur as we develop it.
+We try our best to minimize any breaking changes but they may occur.
+While the Webex Component System is not a GA product, we still offer support through all regular channels.
+However, bug priority is given to product already generally available.
+We love for you to use the Webex Component System and be part of the feedback process!
+
 ## Table of Contents
 
 - [Install](#install)
