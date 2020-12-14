@@ -4,14 +4,14 @@ We'd love for you to contribute to our source code and to make **Webex Widgets**
 If you would like to contribute to this repository by adding features, enhancements or bug fixes, you must follow our process:
 
 1. [Create an issue](https://github.com/webex/widgets/issues) to propose your solution _before_ you get coding
-2. Let core members know about your proposal by posting a message in the [contributor's Webex Teams space](https://eurl.io/#Bk9WGfRcB)
+2. Let core members know about your proposal by posting a message in the [contributor's Webex space](https://eurl.io/#Bk9WGfRcB)
 3. A core member will review your proposal and if necessary may suggest to have a meeting to better understand your approach
    - You are welcomed you join our [weekly review meeting](https://cisco.webex.com/m/f4ebbec6-c306-49ca-83f4-fb2d098fc946) (Thursdays, 11:30a-12:30p PST) to propose your contribution as well
 4. If your proposal is approved you should start coding at this point
 5. We recommend opening a draft PR to receive feedback before finalizing your solution
    - When opening a draft PR, specify with PR comments where in the code you would like to get feedback
 6. Before opening a PR ensure **all** [PR guidelines](#pull-request-guidelines) are followed
-7. Let core members know about your PR by posting a message in the [contributor's Webex Teams space](https://eurl.io/#Bk9WGfRcB)
+7. Let core members know about your PR by posting a message in the [contributor's Webex space](https://eurl.io/#Bk9WGfRcB)
 8. Core members will review the pull request and provide feedback when necessary
    - If a PR is too large, you may be asked to break it down into multiple smaller-scoped PRs
 9. Once the PR is approved by a core member, it will be merged
@@ -19,14 +19,23 @@ If you would like to contribute to this repository by adding features, enhanceme
 
 ## Table of Contents
 
-- [Opening an Issue](#opening-an-issue)
-  - [Grammar](#grammar)
-- [Pull Request Guidelines](#pull-request-guidelines)
-  - [Documentation](#documentation)
-  - [Testing](#testing)
-  - [Code Style](#code-style)
-  - [Git Commit](#git-commit)
-- [Release Process](#release-process)
+- [Contributing](#contributing)
+  - [Table of Contents](#table-of-contents)
+  - [Opening an Issue](#opening-an-issue)
+    - [Grammar](#grammar)
+  - [Pull Request Guidelines](#pull-request-guidelines)
+    - [Documentation](#documentation)
+    - [Testing](#testing)
+    - [Code Style](#code-style)
+    - [Git Commit](#git-commit)
+      - [Commit Message Format](#commit-message-format)
+      - [Revert](#revert)
+      - [Type](#type)
+      - [Scope](#scope)
+      - [Subject](#subject)
+      - [Body](#body)
+      - [Footer](#footer)
+  - [Release Process](#release-process)
 
 ## Opening an Issue
 
