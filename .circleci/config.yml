@@ -2,10 +2,10 @@ version: 2.1
 
 # reusable environment for all jobs
 executors:
-  node-erbium-executor:
+  node-executor:
     working_directory: ~/widgets
     docker:
-      - image: circleci/node:erbium-browsers
+      - image: circleci/node:fermium-browsers
 
 # reusable command for all jobs
 commands:
@@ -19,7 +19,7 @@ commands:
 # define jobs
 jobs:
   install:
-    executor: node-erbium-executor
+    executor: node-executor
     steps:
       - checkout
       - restore_cache:
@@ -36,7 +36,7 @@ jobs:
           paths: node_modules
 
   test:
-    executor: node-erbium-executor
+    executor: node-executor
     steps:
       - checkout_from_workspace
       - run:
@@ -44,7 +44,7 @@ jobs:
           command: npm run test:eslint
 
   build:
-    executor: node-erbium-executor
+    executor: node-executor
     steps:
       - checkout_from_workspace
       - run:
@@ -55,7 +55,7 @@ jobs:
           paths: dist
 
   docs:
-    executor: node-erbium-executor
+    executor: node-executor
     steps:
       - checkout_from_workspace
       - run:
@@ -66,7 +66,7 @@ jobs:
           paths: docs
 
   release:
-    executor: node-erbium-executor
+    executor: node-executor
     steps:
       - checkout_from_workspace
       - run:
