@@ -25,27 +25,38 @@ export default class WebexMeetingWidget extends Component {
     });
     this.state = {
       adapterConnected: false,
+      meeting: null,
     };
     this.adapter = new WebexSDKAdapter(webex);
+    this.meetingSubscription = null;
   }
 
   async componentDidMount() {
     await this.adapter.connect();
     // Once adapter connects, set our app state to ready.
     this.setState({adapterConnected: true});
+
+    this.meetingSubscription = this.adapter.meetingsAdapter
+      .createMeeting(this.props.meetingDestination)
+      .subscribe((meeting) => this.setState({meeting}));
   }
 
   async componentWillUnmount() {
+    if (this.meetingSubscription) {
+      this.meetingSubscription.unsubscribe();
+    }
     // On teardown, disconnect the adapter.
     await this.adapter.disconnect();
   }
 
   render() {
+    const {adapterConnected, meeting} = this.state;
+
     return (
       <div className="meeting-widget">
-        {this.state.adapterConnected ? (
+        {adapterConnected && meeting ? (
           <WebexDataProvider adapter={this.adapter}>
-            <WebexMeeting meetingDestination={this.props.meetingDestination} />
+            <WebexMeeting meetingID={meeting.ID} />
           </WebexDataProvider>
         ) : (
           <Spinner />
