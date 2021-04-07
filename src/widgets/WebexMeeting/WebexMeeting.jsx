@@ -8,6 +8,7 @@ import WebexSDKAdapter from '@webex/sdk-component-adapter';
 import '@momentum-ui/core/css/momentum-ui.min.css';
 import '@webex/components/dist/css/webex-components.css';
 import './WebexMeeting.css';
+import {concatMap} from 'rxjs/operators';
 
 /**
  * Webex meeting widget displays the default Webex meeting experience.
@@ -25,27 +26,38 @@ export default class WebexMeetingWidget extends Component {
     });
     this.state = {
       adapterConnected: false,
+      meetingID: null,
     };
     this.adapter = new WebexSDKAdapter(webex);
+    this.subscription = null;
   }
 
   async componentDidMount() {
     await this.adapter.connect();
-    // Once adapter connects, set our app state to ready.
-    this.setState({adapterConnected: true});
+    this.subscription = this.adapter.meetingsAdapter
+      .createMeeting(this.props.meetingDestination)
+      .pipe(concatMap(({ID}) => this.adapter.meetingsAdapter.getMeeting(ID)))
+      .subscribe((data) => {
+        this.setState({adapterConnected: true, meetingID: data.ID});
+      });
   }
 
   async componentWillUnmount() {
     // On teardown, disconnect the adapter.
     await this.adapter.disconnect();
+    if (this.subscription) {
+      await this.subscription.unsubscribe();
+    }
   }
 
   render() {
+    const {adapterConnected, meetingID} = this.state;
     return (
       <div className="meeting-widget">
-        {this.state.adapterConnected ? (
+        {adapterConnected && meetingID ? (
           <WebexDataProvider adapter={this.adapter}>
-            <WebexMeeting meetingDestination={this.props.meetingDestination} />
+            <div>Connected</div>
+            <WebexMeeting meetingID={meetingID} />
           </WebexDataProvider>
         ) : (
           <Spinner />
