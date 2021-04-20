@@ -3,6 +3,7 @@ import resolve from 'rollup-plugin-node-resolve';
 import commonJS from 'rollup-plugin-commonjs';
 import json from 'rollup-plugin-json';
 import postcss from 'rollup-plugin-postcss';
+import url from 'postcss-url';
 
 const output = (name, format) => ({
   name,
@@ -33,7 +34,20 @@ export default [
       }),
       commonJS(),
       json(),
-      postcss({extract: 'dist/webexWidgets.css'}),
+      postcss({
+        extract: 'webexWidgets.css',
+        minimize: true,
+        plugins: [
+          url({
+            url: 'copy',
+            assetsPath: 'assets/',
+            useHash: true,
+          }),
+        ],
+        // to is required by the postcss-url plugin to
+        // properly resolve assets path
+        to: 'dist/webexWidgets.css',
+      }),
     ],
     onwarn(warning, warn) {
       // skip circular dependency warnings from @momentum-ui/react library
@@ -46,4 +60,3 @@ export default [
     context: null,
   },
 ];
-9;
