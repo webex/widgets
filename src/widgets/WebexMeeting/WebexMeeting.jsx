@@ -10,10 +10,13 @@ import '@webex/components/dist/css/webex-components.css';
 import './WebexMeeting.css';
 
 
-  //the enhanced meeting component
+const controls = (isActive) => isActive
+  ? ['mute-audio', 'mute-video', 'share-screen', 'member-roster', 'leave-meeting']
+  : ['mute-audio', 'mute-video', 'join-meeting'];
+
   const Content = withMeeting(function(props) {
     return props.meeting.ID ?
-      <WebexMeeting meetingID={props.meeting.ID} />
+      <WebexMeeting meetingID={props.meeting.ID} controls={controls} />
       : <Spinner />
   });
 
