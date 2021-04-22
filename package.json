@@ -30,7 +30,9 @@
   "dependencies": {
     "@momentum-ui/react": "^23.21.4",
     "@webex/components": "^1.45.6",
-    "@webex/sdk-component-adapter": "^1.24.1"
+    "@webex/sdk-component-adapter": "^1.24.1",
+    "@webex/test-users": "^1.119.4",
+    "dotenv": "^8.2.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.8.4",
