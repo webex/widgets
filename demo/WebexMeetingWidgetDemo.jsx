@@ -35,10 +35,15 @@ export default function WebexMeetingWidgetDemo({token}) {
           type="text"
           value={destination}
         />
-        <Button type="submit" disabled={!displayButtonEnabled} onClick={handleDisplayMeetingWidget}>
+        <Button
+          type="submit"
+          disabled={!displayButtonEnabled}
+          onClick={handleDisplayMeetingWidget}
+          ariaLabel="Display Meeting Widget"
+        >
           Display Meeting Widget
         </Button>
-        <Button disabled={!displayWidget} onClick={handleHideMeetingWidget}>
+        <Button disabled={!displayWidget} onClick={handleHideMeetingWidget} ariaLabel="Remove Meeting Widget">
           Remove Meeting Widget
         </Button>
       </form>
