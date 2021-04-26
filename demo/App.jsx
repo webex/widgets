@@ -55,10 +55,10 @@ export default function App() {
               type="password"
               value={tokenInput}
             />
-            <Button color="blue" type="submit" onClick={handleSaveToken} disabled={!!token}>
+            <Button color="blue" type="submit" onClick={handleSaveToken} disabled={!!token} ariaLabel="Save Token">
               Save Token
             </Button>
-            <Button type="button" onClick={handleClearToken} disabled={!token}>
+            <Button type="button" onClick={handleClearToken} disabled={!token} ariaLabel="Clear Token">
               Clear Token
             </Button>
           </form>
