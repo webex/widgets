@@ -54,17 +54,14 @@ exports.config = {
   //
   capabilities: [
     {
-      // maxInstances can get overwritten per capability. So if you have an in-house Selenium
-      // grid with only 5 firefox instances available you can make sure that not more than
-      // 5 instances get started at a time.
-      maxInstances: 5,
-      //
       browserName: 'chrome',
+      maxInstances: 5,
       acceptInsecureCerts: true,
-      // If outputDir is provided WebdriverIO can capture driver session logs
-      // it is possible to configure which logTypes to include/exclude.
-      // excludeDriverLogs: ['*'], // pass '*' to exclude all driver session logs
-      // excludeDriverLogs: ['bugreport', 'server'],
+    },
+    {
+      browserName: 'firefox',
+      maxInstances: 5,
+      acceptInsecureCerts: true,
     },
   ],
   //
@@ -114,7 +111,11 @@ exports.config = {
   // Services take over a specific job you don't want to take care of. They enhance
   // your test setup with almost no effort. Unlike plugins, they don't add new
   // commands. Instead, they hook themselves up into the test process.
-  services: ['chromedriver'],
+
+  // To run the tests locally you need to ensure that:
+  // 1) You have the minimum required Java version for your OS - https://github.com/vvo/selenium-standalone/blob/master/docs/java-versions.md
+  // 2) You have installed the browsers that are defined in capabilities (e.g. Chrome, Firefox)
+  services: ['selenium-standalone'],
 
   // Framework you want to run your specs with.
   // The following are supported: Mocha, Jasmine, and Cucumber
