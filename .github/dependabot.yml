@@ -1,0 +1,11 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    # Check interface updates everyday at 9am UTC
+    schedule:
+      interval: "daily"
+      time: "09:00"
+    allow:
+      - dependency-name: "@webex/sdk-component-adapter"
+      - dependency-name: "@webex/components"

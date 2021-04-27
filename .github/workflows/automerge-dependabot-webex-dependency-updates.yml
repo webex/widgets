@@ -1,0 +1,23 @@
+name: "Dependabot Automerge Webex Dependency Updates"
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  dependency-automerge:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: automerge
+        if: github.event.pull_request.user.login == 'dependabot[bot]'
+        uses: actions/github-script@v4
+        with:
+          script: |
+            github.pulls.merge({
+              owner: context.repo.owner,
+              repo: context.payload.repository.name,
+              pull_number: context.payload.pull_request.number
+            })
+          github-token: ${{secrets.PERSONAL_TOKEN}}
