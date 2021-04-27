@@ -4,6 +4,9 @@ class MeetingWidgetPage {
   get interstitialMeeting() { return $('.wxc-interstitial-meeting'); }
   get meetingInfo() { return $('.wxc-meeting-info'); }
 
+  get muteAudioBtn() { return $('.meeting-controls-container button[alt=Mute]'); }
+  get unmuteAudioBtn() { return $('.meeting-controls-container button[alt=Unmute]'); }
+
   loadWidget(meetingDestination) {
     this.destination.setValue(meetingDestination);
     this.displayWidgetBtn.click();
