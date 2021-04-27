@@ -57,6 +57,14 @@ describe('Meeting Widget', () => {
     MeetingPage.unloadWidget();
   });
 
+  it('mutes video before joining meeting', () => {
+    MeetingPage.loadWidget(meetingDestination);
+    MeetingPage.muteVideoBtn.click();
+    expect(MeetingPage.muteVideoBtn).not.toBeVisible();
+    expect(MeetingPage.unmuteVideoBtn).toBeVisible();
+    MeetingPage.unloadWidget();
+  });
+
   it('displays "Waiting for others" after joining meeting', () => {
     MeetingPage.loadWidget(meetingDestination);
     expect(MeetingPage.waitingForOthers).not.toExist();

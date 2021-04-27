@@ -7,6 +7,8 @@ class MeetingWidgetPage {
   get meetingInfo() { return $('.wxc-meeting-info'); }
   get muteAudioBtn() { return $('.meeting-controls-container button[alt=Mute]'); }
   get unmuteAudioBtn() { return $('.meeting-controls-container button[alt=Unmute]'); }
+  get muteVideoBtn() { return $('.meeting-controls-container button[alt="Stop video"]'); }
+  get unmuteVideoBtn() { return $('.meeting-controls-container button[alt="Start video"]'); }
   get joinMeetingBtn() { return $('.meeting-controls-container button[alt="Join meeting"]'); }
   get waitingForOthers() { return $('h4=Waiting for others to join...'); }
 
