@@ -46,5 +46,14 @@ describe('Meeting Widget', () => {
   it('loads', () => {
     MeetingPage.loadWidget(meetingDestination);
     expect(MeetingPage.meetingInfo).toBeDisplayed();
+    MeetingPage.unloadWidget();
+  });
+
+  it('mutes audio before joining meeting', () => {
+    MeetingPage.loadWidget(meetingDestination);
+    MeetingPage.muteAudioBtn.click();
+    expect(MeetingPage.muteAudioBtn).not.toBeVisible();
+    expect(MeetingPage.unmuteAudioBtn).toBeVisible();
+    MeetingPage.unloadWidget();
   });
 });
