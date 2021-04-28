@@ -56,4 +56,13 @@ describe('Meeting Widget', () => {
     expect(MeetingPage.unmuteAudioBtn).toBeVisible();
     MeetingPage.unloadWidget();
   });
+
+  it('displays "Waiting for others" after joining meeting', () => {
+    MeetingPage.loadWidget(meetingDestination);
+    expect(MeetingPage.waitingForOthers).not.toExist();
+    MeetingPage.joinMeetingBtn.click();
+    MeetingPage.waitingForOthers.waitForDisplayed({timeout: 10000});
+    expect(MeetingPage.waitingForOthers).toBeVisible();
+    MeetingPage.unloadWidget();
+  });
 });
