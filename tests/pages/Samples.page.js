@@ -1,6 +1,6 @@
 class SamplesPage {
   get accessToken() { return $('input[placeholder="Access Token"]'); }
-  get saveTokenBtn() { return $('button[aria-label="Save Token"]'); } // #md-button-1
+  get saveTokenBtn() { return $('button[aria-label="Save Token"]'); } // #md-button-1  
   get widgetTitle() { return $('.content > section:nth-child(2) > h3'); }
   get sidebarNav() { return $('.md-sidebar-nav'); }
   get meetingNavItem() { return this.sidebarNav.$('[data-md-keyboard-key="webex-meeting-widget"]'); }
