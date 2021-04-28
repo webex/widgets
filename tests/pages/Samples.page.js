@@ -4,6 +4,10 @@ class SamplesPage {
   get widgetTitle() { return $('.content > section:nth-child(2) > h3'); }
   get sidebarNav() { return $('.md-sidebar-nav'); }
   get meetingNavItem() { return this.sidebarNav.$('[data-md-keyboard-key="webex-meeting-widget"]'); }
+  get joinMeetingBtn() { return $('button=Join meeting'); }
+  get waitingForOthers() { return $('h4=Waiting for others to join...'); }
+
+  get leaveMeetingBtn() { return $('.meeting-controls-container button[alt=Leave]'); }
 
   open() {
     browser.url(process.env.WEBEX_TEST_PAGE_URL);

@@ -9,6 +9,9 @@ class MeetingWidgetPage {
   get unmuteAudioBtn() { return $('.meeting-controls-container button[alt=Unmute]'); }
   get joinMeetingBtn() { return $('.meeting-controls-container button[alt="Join meeting"]'); }
   get waitingForOthers() { return $('h4=Waiting for others to join...'); }
+  get joinMeetingBtn() { return $('button=Join meeting'); }
+  get waitingForOthers() { return $('h4=Waiting for others to join...'); }
+  get leaveMeetingBtn() { return $('.meeting-controls-container button[alt=Leave]'); }
 
   loadWidget(meetingDestination) {
     this.destination.setValue(meetingDestination);

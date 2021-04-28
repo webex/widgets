@@ -75,4 +75,12 @@ describe('Meeting Widget', () => {
     expect(MeetingPage.unmuteAudioBtn).toBeVisible();
     MeetingPage.unloadWidget();
   });
+
+  it('leave the meeting', () => {
+    MeetingPage.loadWidget(meetingDestination);
+    MeetingPage.joinMeetingBtn.click();
+    MeetingPage.waitingForOthers.waitForDisplayed({timeout: 10000});
+    MeetingPage.leaveMeetingBtn.click();
+    expect($('.wxc-meeting')).toHaveTextContaining("You've successfully left the meeting");
+  });
 });
