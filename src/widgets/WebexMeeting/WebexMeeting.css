@@ -1,7 +1,23 @@
-.meeting-widget {
+.webex-meeting-widget {
   display: flex;
   justify-content: center;
   align-items: center;
   width: 100%;
   height: 100%;
 }
+
+.webex-meeting-widget__body {
+  display: flex;
+  flex: 1;
+}
+
+.webex-meeting-widget__meeting {
+  flex: 1;
+  min-width: 0;
+}
+
+.webex-meeting-widget__roster {
+  width: 20rem;
+  padding: 0.625rem;
+}
+
