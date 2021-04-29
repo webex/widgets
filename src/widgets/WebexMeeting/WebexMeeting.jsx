@@ -2,8 +2,12 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {Spinner} from '@momentum-ui/react';
 import Webex from 'webex';
-import {WebexMeeting, WebexDataProvider, withMeeting} from '@webex/components';
+import {WebexMeeting, WebexMemberRoster, WebexDataProvider, withMeeting} from '@webex/components';
 import WebexSDKAdapter from '@webex/sdk-component-adapter';
+
+// Dependency from here is not explicity declared in package.json
+import {DestinationType, MeetingState} from '@webex/component-adapter-interfaces';
+
 
 import '@momentum-ui/core/css/momentum-ui.min.css';
 import '@webex/components/dist/css/webex-components.css';
@@ -15,9 +19,21 @@ const controls = (isActive) => isActive
   : ['mute-audio', 'mute-video', 'join-meeting'];
 
   const Content = withMeeting(function(props) {
-    return props.meeting.ID ?
-      <WebexMeeting meetingID={props.meeting.ID} controls={controls} />
-      : <Spinner />
+    return props.meeting.ID ? (
+      <div className="webex-meeting-widget__body">
+        <div className="webex-meeting-widget__meeting">
+          <WebexMeeting meetingID={props.meeting.ID} controls={controls} />
+        </div>
+        {props.meeting.showRoster && props.meeting.state === MeetingState.JOINED && ( 
+          <div className="webex-meeting-widget__roster">
+            <WebexMemberRoster 
+              destinationID={props.meeting.ID} 
+              destinationType={DestinationType.MEETING}
+            />
+          </div>
+        )}
+      </div>
+      ) : <Spinner />
   });
 
 
@@ -53,7 +69,7 @@ class WebexMeetingWidget extends Component {
 
   render() {
     return (
-      <div className="meeting-widget">
+      <div className="webex-meeting-widget">
         {this.state.adapterConnected ? (
           <WebexDataProvider adapter={this.adapter}>
             <Content {...this.props} />
