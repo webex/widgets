@@ -92,4 +92,14 @@ describe('Meeting Widget', () => {
     expect(MeetingPage.unmuteVideoBtn).toBeVisible();
     MeetingPage.unloadWidget();
   });
+
+  it('leave the meeting', () => {
+    MeetingPage.loadWidget(meetingDestination);
+    MeetingPage.joinMeetingBtn.click();
+    MeetingPage.waitingForOthers.waitForDisplayed({timeout: 10000});
+    MeetingPage.leaveMeetingBtn.click();
+    MeetingPage.meetingWidget.waitForDisplayed({timeout: 10000});
+    expect(MeetingPage.meetingWidget).toHaveTextContaining("You've successfully left the meeting");
+    MeetingPage.unloadWidget();
+  });
 });
