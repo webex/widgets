@@ -75,4 +75,13 @@ describe('Meeting Widget', () => {
     expect(MeetingPage.unmuteAudioBtn).toBeVisible();
     MeetingPage.unloadWidget();
   });
+
+  it('mutes video after joining meeting', () => {
+    MeetingPage.loadWidget(meetingDestination);
+    MeetingPage.joinMeetingBtn.click();
+    MeetingPage.waitingForOthers.waitForDisplayed({timeout: 10000});
+    MeetingPage.muteVideoBtn.click();
+    expect(MeetingPage.unmuteVideoBtn).toBeVisible();
+    MeetingPage.unloadWidget();
+  });
 });
