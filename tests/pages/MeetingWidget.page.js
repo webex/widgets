@@ -11,6 +11,7 @@ class MeetingWidgetPage {
   get unmuteVideoBtn() { return $('.meeting-controls-container button[alt="Start video"]'); }
   get joinMeetingBtn() { return $('.meeting-controls-container button[alt="Join meeting"]'); }
   get waitingForOthers() { return $('h4=Waiting for others to join...'); }
+  get leaveMeetingBtn() { return $('.meeting-controls-container button[alt=Leave]'); }
 
   loadWidget(meetingDestination) {
     this.destination.setValue(meetingDestination);
