@@ -8,10 +8,10 @@ describe('Meeting Widget', () => {
   let accessToken;
   let meetingDestination;
 
-  beforeAll(async () => {
+  beforeAll(() => {
     try {
-      user = await createUser();
-      room = await user.sdk.rooms.create({title: 'Test Room'});
+      user = browser.call(() => createUser());
+      room = browser.call(() => user.sdk.rooms.create({title: 'Test Room'}));
     } catch (error) {
       console.error(error);
       console.error(error.body);
@@ -22,21 +22,21 @@ describe('Meeting Widget', () => {
 
     expect(accessToken).toBeDefined();
     expect(meetingDestination).toBeDefined();
-  });
 
-  afterAll(async () => {
-    if (user) {
-      if (room) {
-        await user.sdk.rooms.remove(room).catch(console.error);
-      }
-      removeUser(user);
-    }
-  });
-
-  beforeEach(() => {
     SamplesPage.open();
     SamplesPage.setAccessToken(accessToken);
     SamplesPage.navigateToMeetingPage();
+    MeetingPage.loadWidget(meetingDestination);
+  });
+
+  afterAll(() => {
+    MeetingPage.unloadWidget();
+    if (user) {
+      if (room) {
+        browser.call(() => user.sdk.rooms.remove(room).catch(console.error));
+      }
+      browser.call(() => removeUser(user));
+    }
   });
 
   it('has the correct page title', () => {
@@ -44,62 +44,45 @@ describe('Meeting Widget', () => {
   });
 
   it('loads', () => {
-    MeetingPage.loadWidget(meetingDestination);
     expect(MeetingPage.meetingInfo).toBeDisplayed();
-    MeetingPage.unloadWidget();
   });
 
   it('mutes audio before joining meeting', () => {
-    MeetingPage.loadWidget(meetingDestination);
     MeetingPage.muteAudioBtn.click();
     expect(MeetingPage.muteAudioBtn).not.toBeVisible();
     expect(MeetingPage.unmuteAudioBtn).toBeVisible();
-    MeetingPage.unloadWidget();
   });
 
   it('mutes video before joining meeting', () => {
-    MeetingPage.loadWidget(meetingDestination);
     MeetingPage.muteVideoBtn.click();
     expect(MeetingPage.muteVideoBtn).not.toBeVisible();
     expect(MeetingPage.unmuteVideoBtn).toBeVisible();
-    MeetingPage.unloadWidget();
   });
 
   it('displays "Waiting for others" after joining meeting', () => {
-    MeetingPage.loadWidget(meetingDestination);
     expect(MeetingPage.waitingForOthers).not.toExist();
     MeetingPage.joinMeetingBtn.click();
     MeetingPage.waitingForOthers.waitForDisplayed({timeout: 10000});
     expect(MeetingPage.waitingForOthers).toBeVisible();
-    MeetingPage.unloadWidget();
   });
 
-  it('mutes audio after joining meeting', () => {
-    MeetingPage.loadWidget(meetingDestination);
-    MeetingPage.joinMeetingBtn.click();
-    MeetingPage.waitingForOthers.waitForDisplayed({timeout: 10000});
-    MeetingPage.muteAudioBtn.click();
-    expect(MeetingPage.muteAudioBtn).not.toBeVisible();
-    expect(MeetingPage.unmuteAudioBtn).toBeVisible();
-    MeetingPage.unloadWidget();
+  it('unmutes audio after joining meeting', () => {
+    MeetingPage.unmuteAudioBtn.click();
+    MeetingPage.muteAudioBtn.waitForDisplayed({timeout: 10000});
+    expect(MeetingPage.unmuteAudioBtn).not.toBeVisible();
+    expect(MeetingPage.muteAudioBtn).toBeVisible();
   });
 
-  it('mutes video after joining meeting', () => {
-    MeetingPage.loadWidget(meetingDestination);
-    MeetingPage.joinMeetingBtn.click();
-    MeetingPage.waitingForOthers.waitForDisplayed({timeout: 10000});
-    MeetingPage.muteVideoBtn.click();
-    expect(MeetingPage.unmuteVideoBtn).toBeVisible();
-    MeetingPage.unloadWidget();
+  it('unmutes video after joining meeting', () => {
+    MeetingPage.unmuteVideoBtn.click();
+    MeetingPage.muteVideoBtn.waitForDisplayed({timeout: 10000});
+    expect(MeetingPage.unmuteVideoBtn).not.toBeVisible();
+    expect(MeetingPage.muteVideoBtn).toBeVisible();
   });
 
-  it('leave the meeting', () => {
-    MeetingPage.loadWidget(meetingDestination);
-    MeetingPage.joinMeetingBtn.click();
-    MeetingPage.waitingForOthers.waitForDisplayed({timeout: 10000});
+  it('leaves the meeting', () => {
     MeetingPage.leaveMeetingBtn.click();
     MeetingPage.meetingWidget.waitForDisplayed({timeout: 10000});
-    expect(MeetingPage.meetingWidget).toHaveTextContaining("You've successfully left the meeting");
-    MeetingPage.unloadWidget();
+    expect(MeetingPage.meetingWidget).toHaveTextContaining('You\'ve successfully left the meeting');
   });
 });
