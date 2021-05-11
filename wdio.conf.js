@@ -53,21 +53,21 @@ exports.config = {
   // https://docs.saucelabs.com/reference/platforms-configurator
   //
   capabilities: [
-    {
+    ...(process.env.WEBEX_TEST_CHROME ? [{
       browserName: 'chrome',
       maxInstances: 5,
       acceptInsecureCerts: true,
-    },
-    {
+    }] : []),
+    ...(process.env.WEBEX_TEST_FIREFOX ? [{
       browserName: 'firefox',
       maxInstances: 5,
       acceptInsecureCerts: true,
-    },
-    {
+    }] : []),
+    ...(process.env.WEBEX_TEST_EDGE ? [{
       browserName: 'MicrosoftEdge',
       maxInstances: 5,
       acceptInsecureCerts: true,
-    },
+    }]: []),
   ],
   //
   // ===================
