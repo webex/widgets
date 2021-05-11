@@ -17,9 +17,6 @@ export async function createUser(options = {}) {
 
   const user = await createTestUser(options);
 
-  // create an SDK instance for the new user
-  user.sdk = createSdkInstance(user.token.access_token);
-
   return user;
 }
 

@@ -1,25 +1,31 @@
-import {createUser, removeUser} from './util';
+import {createUser, removeUser, createSdkInstance} from './util';
 import SamplesPage from './pages/Samples.page';
 import MeetingPage from './pages/MeetingWidget.page';
 
 describe('Meeting Widget', () => {
   let user;
   let room;
-  let accessToken;
-  let meetingDestination;
+  let sdk;
+  let accessToken = process.env.WEBEX_ACCESS_TOKEN;
+  let meetingDestination = process.env.WEBEX_MEETING_DESTINATION;
 
   beforeAll(() => {
     try {
-      user = browser.call(() => createUser());
-      room = browser.call(() => user.sdk.rooms.create({title: 'Test Room'}));
+      if (!accessToken) {
+        user = browser.call(() => createUser());
+        accessToken = user.token.access_token;
+      }
+
+      if (!meetingDestination) {
+        sdk = createSdkInstance(accessToken);
+        room = browser.call(() => sdk.rooms.create({title: 'Test Room'}));
+        meetingDestination = room.id;
+      }
     } catch (error) {
       console.error(error);
       console.error(error.body);
     }
-
-    accessToken = process.env.WEBEX_ACCESS_TOKEN || (user && user.token.access_token);
-    meetingDestination = process.env.WEBEX_MEETING_DESTINATION || (room && room.id);
-
+    
     expect(accessToken).toBeDefined();
     expect(meetingDestination).toBeDefined();
 
