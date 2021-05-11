@@ -1,0 +1,36 @@
+name: Update dependencies
+
+on: [repository_dispatch]
+
+jobs:
+  update-webex-components:
+    runs-on: ubuntu-latest
+    if: github.event.action == 'components:version-changed'
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - run: |
+          npm install @webex/components
+          if [ -n "$(git status --porcelain)" ]; then
+            git config user.name "github-actions"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add .
+            git commit -m "build(package): update webex components to v${{ github.event.client_payload.version }}"
+            git push origin master
+          fi
+
+  update-webex-sdk-component-adapter:
+    runs-on: ubuntu-latest
+    if: github.event.action == 'sdk-component-adapter:version-changed'
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - run: |
+          npm install @webex/sdk-component-adapter
+          if [ -n "$(git status --porcelain)" ]; then
+            git config user.name "github-actions"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add .
+            git commit -m "build(package): update webex sdk-component-adapter to v${{ github.event.client_payload.version }}"
+            git push origin master
+          fi
