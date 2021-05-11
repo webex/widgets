@@ -68,6 +68,10 @@ exports.config = {
       maxInstances: 5,
       acceptInsecureCerts: true,
     },
+    {
+      browserName: 'safari',
+      maxInstances: 5,
+    },
   ],
   //
   // ===================
