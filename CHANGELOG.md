@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/webex/widgets/compare/v1.3.1...v1.4.0) (2021-05-12)
+
+
+### Features
+
+* **WebexMeeting:** add roster component in meeting widget ([b947e68](https://github.com/webex/widgets/commit/b947e68d4cc43329150d76e1fa56475cc9834876))
+
 ## [1.3.1](https://github.com/webex/widgets/compare/v1.3.0...v1.3.1) (2021-01-21)
 
 
