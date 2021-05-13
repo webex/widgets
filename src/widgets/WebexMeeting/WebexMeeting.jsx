@@ -2,40 +2,18 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {Spinner} from '@momentum-ui/react';
 import Webex from 'webex';
-import {WebexMeeting, WebexMemberRoster, WebexDataProvider, withMeeting} from '@webex/components';
+import {WebexMeeting, WebexMemberRoster, withAdapter, withMeeting} from '@webex/components';
 import WebexSDKAdapter from '@webex/sdk-component-adapter';
 
-// Dependency from here is not explicity declared in package.json
 import {DestinationType, MeetingState} from '@webex/component-adapter-interfaces';
-
 
 import '@momentum-ui/core/css/momentum-ui.min.css';
 import '@webex/components/dist/css/webex-components.css';
 import './WebexMeeting.css';
 
-
 const controls = (isActive) => isActive
-  ? ['mute-audio', 'mute-video', 'share-screen', 'member-roster', 'leave-meeting']
-  : ['mute-audio', 'mute-video', 'join-meeting'];
-
-  const Content = withMeeting(function(props) {
-    return props.meeting.ID ? (
-      <div className="webex-meeting-widget__body">
-        <div className="webex-meeting-widget__meeting">
-          <WebexMeeting meetingID={props.meeting.ID} controls={controls} />
-        </div>
-        {props.meeting.showRoster && props.meeting.state === MeetingState.JOINED && ( 
-          <div className="webex-meeting-widget__roster">
-            <WebexMemberRoster 
-              destinationID={props.meeting.ID} 
-              destinationType={DestinationType.MEETING}
-            />
-          </div>
-        )}
-      </div>
-      ) : <Spinner />
-  });
-
+    ? ['mute-audio', 'mute-video', 'share-screen', 'member-roster', 'leave-meeting']
+    : ['mute-audio', 'mute-video', 'join-meeting'];
 
 /**
  * Webex meeting widget displays the default Webex meeting experience.
@@ -47,33 +25,22 @@ const controls = (isActive) => isActive
 class WebexMeetingWidget extends Component {
   constructor(props) {
     super(props);
-    const webex = new Webex({
-      credentials: props.accessToken,
-    });
-    this.state = {
-      adapterConnected: false,
-    };
-    this.adapter = new WebexSDKAdapter(webex);
-  }
-
-  async componentDidMount() {
-    await this.adapter.connect();
-    // Once adapter connects, set our app state to ready.
-    this.setState({adapterConnected: true});
-  }
-
-  async componentWillUnmount() {
-    // On teardown, disconnect the adapter.
-    await this.adapter.disconnect();
   }
 
   render() {
     return (
       <div className="webex-meeting-widget">
-        {this.state.adapterConnected ? (
-          <WebexDataProvider adapter={this.adapter}>
-            <Content {...this.props} />
-          </WebexDataProvider>
+        {this.props.meeting.ID ? (
+          <div className="webex-meeting-widget__body">
+            <div className="webex-meeting-widget__meeting">
+              <WebexMeeting meetingID={this.props.meeting.ID} controls={controls} />
+            </div>
+            {this.props.meeting.showRoster && this.props.meeting.state === MeetingState.JOINED && (
+              <div className="webex-meeting-widget__roster">
+                <WebexMemberRoster destinationID={this.props.meeting.ID} destinationType={DestinationType.MEETING} />
+              </div>
+            )}
+          </div>
         ) : (
           <Spinner />
         )}
@@ -87,4 +54,10 @@ WebexMeetingWidget.propTypes = {
   meetingDestination: PropTypes.string.isRequired,
 };
 
-export default WebexMeetingWidget;
+export default withAdapter(withMeeting(WebexMeetingWidget), (props) => {
+  const webex = new Webex({
+    credentials: props.accessToken,
+  });
+
+  return new WebexSDKAdapter(webex);
+});
