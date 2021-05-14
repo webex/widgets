@@ -11,7 +11,7 @@
     "release:debug": "semantic-release --debug",
     "release:dry-run": "semantic-release --dry-run",
     "start": "npm run demo:serve",
-    "test:e2e": "wdio wdio.conf.js",
+    "test:e2e": "npm run demo:build && wdio wdio.conf.js",
     "test:eslint": "eslint src/"
   },
   "repository": {
@@ -54,6 +54,7 @@
     "@wdio/local-runner": "^7.4.6",
     "@wdio/selenium-standalone-service": "^7.5.2",
     "@wdio/spec-reporter": "^7.4.3",
+    "@wdio/static-server-service": "^7.5.7",
     "@wdio/sync": "^7.4.6",
     "@webex/test-users": "^1.119.4",
     "babel-eslint": "^10.0.3",
