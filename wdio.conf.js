@@ -125,7 +125,14 @@ exports.config = {
   // To run the tests locally you need to ensure that:
   // 1) You have the minimum required Java version for your OS - https://github.com/vvo/selenium-standalone/blob/master/docs/java-versions.md
   // 2) You have installed the browsers that are defined in capabilities (e.g. Chrome, Firefox, MicrosoftEdge)
-  services: ['selenium-standalone'],
+  services: [
+    ['static-server', {
+      folders: [
+        { mount: '/', path: './docs' },
+      ]},
+    ],
+    'selenium-standalone'
+  ],
 
   // Framework you want to run your specs with.
   // The following are supported: Mocha, Jasmine, and Cucumber
