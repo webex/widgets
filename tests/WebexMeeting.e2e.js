@@ -25,7 +25,7 @@ describe('Meeting Widget', () => {
       console.error(error);
       console.error(error.body);
     }
-    
+
     expect(accessToken).toBeDefined();
     expect(meetingDestination).toBeDefined();
 

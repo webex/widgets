@@ -1,7 +1,7 @@
 require('dotenv').config();
 require('dotenv').config({path: '.env.default'});
 
-exports.config = {
+const config = {
   //
   // ====================
   // Runner Configuration
@@ -47,7 +47,7 @@ exports.config = {
   // and 30 processes will get spawned. The property handles how many capabilities
   // from the same test should run tests.
   //
-  maxInstances: 10,
+  maxInstances: 1,
   //
   // If you have trouble getting all important capabilities together, check out the
   // Sauce Labs platform configurator - a great tool to configure your capabilities:
@@ -56,23 +56,43 @@ exports.config = {
   capabilities: [
     ...(process.env.WEBEX_TEST_CHROME ? [{
       browserName: 'chrome',
-      maxInstances: 5,
       acceptInsecureCerts: true,
+      'goog:chromeOptions': {
+        args: ['--use-fake-device-for-media-stream', '--use-fake-ui-for-media-stream', '--disable-infobars'],
+      },
     }] : []),
     ...(process.env.WEBEX_TEST_FIREFOX ? [{
       browserName: 'firefox',
-      maxInstances: 5,
-      acceptInsecureCerts: true,
+      'moz:firefoxOptions': {
+        prefs: {
+          'devtools.chrome.enabled': true,
+          'devtools.debugger.prompt-connection': false,
+          'devtools.debugger.remote-enabled': true,
+          'dom.webnotifications.enabled': false,
+          'media.webrtc.hw.h264.enabled': true,
+          'media.getusermedia.screensharing.enabled': true,
+          'media.navigator.permission.disabled': true,
+          'media.navigator.streams.fake': true,
+          'media.peerconnection.video.h264_enabled': true
+        },
+      },
     }] : []),
     ...(process.env.WEBEX_TEST_EDGE ? [{
-      browserName: 'MicrosoftEdge',
-      maxInstances: 5,
-      acceptInsecureCerts: true,
-    }]: []),
+        browserName: 'MicrosoftEdge',
+        'ms:edgeOptions': {
+          args: [
+            '--disable-features=WebRtcHideLocalIpsWithMdns',
+            '--use-fake-device-for-media-stream',
+            '--use-fake-ui-for-media-stream',
+          ],
+        },
+      }] : []),
     ...(process.env.WEBEX_TEST_SAFARI ? [{
-      browserName: 'safari',
-      maxInstances: 5,
-    }]: []),
+        browserName: 'safari',
+        'webkit:WebRTC': {
+          DisableInsecureMediaCapture: true
+        },
+      }] : []),
   ],
   //
   // ===================
@@ -177,3 +197,27 @@ exports.config = {
     // },
   },
 };
+
+if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY && process.env.SAUCE_REGION) {
+  config.user = process.env.SAUCE_USERNAME;
+  config.key = process.env.SAUCE_ACCESS_KEY;
+  config.region = process.env.SAUCE_REGION;
+
+  config.services.push([
+    'sauce',
+    {
+      sauceConnect: false,
+      sauceConnectOpts: {},
+    },
+  ]);
+
+  for(const cap of config.capabilities) {
+    cap['sauce:options'] = {
+      extendedDebugging: true,
+      capturePerformance: true,
+    };
+  }
+};
+
+exports.config = config;
+
