@@ -37,10 +37,11 @@ describe('Meeting Widget', () => {
 
   afterAll(() => {
     MeetingPage.unloadWidget();
+    if (room) {
+      browser.call(() => sdk.rooms.remove(room).catch(console.error));
+    }
+    
     if (user) {
-      if (room) {
-        browser.call(() => user.sdk.rooms.remove(room).catch(console.error));
-      }
       browser.call(() => removeUser(user));
     }
   });

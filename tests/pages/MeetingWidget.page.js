@@ -2,7 +2,7 @@ class MeetingWidgetPage {
   get destination() { return $('input[placeholder="Widget Destination"]'); }
   get displayWidgetBtn() { return $('button[aria-label="Display Meeting Widget"]'); } // #md-button-3
   get removeWidgetBtn() { return $('button[aria-label="Remove Meeting Widget"]'); } // #md-button-4
-  get meetingWidget() { return $('.meeting-widget'); };
+  get meetingWidget() { return $('.webex-meeting-widget'); };
   get interstitialMeeting() { return $('.wxc-interstitial-meeting'); }
   get meetingInfo() { return $('.wxc-meeting-info'); }
   get muteAudioBtn() { return $('.meeting-controls-container button[alt=Mute]'); }
