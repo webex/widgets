@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/webex/widgets/compare/v1.4.0...v1.4.1) (2021-05-21)
+
+
+### Bug Fixes
+
+* **package:** update components to v1.64.1 and sdk adapter  to v1.33.4 ([f5eb3ea](https://github.com/webex/widgets/commit/f5eb3ea573094cb1733d07ed80ac288f77124791))
+
 # [1.4.0](https://github.com/webex/widgets/compare/v1.3.1...v1.4.0) (2021-05-12)
 
 
