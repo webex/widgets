@@ -35,13 +35,20 @@ jobs:
           root: .
           paths: node_modules
 
-  test:
+  linter:
     executor: node-executor
     steps:
       - checkout_from_workspace
       - run:
           name: Linting
           command: npm run test:eslint
+  e2e_test:
+    executor: node-executor
+    steps:
+      - checkout_from_workspace
+      - run:
+          name: Test E2E
+          command: npm run test:e2e
 
   build:
     executor: node-executor
@@ -78,18 +85,21 @@ workflows:
   setup_test_release:
     jobs:
       - install
-      - test:
+      - linter:
           requires:
             - install
+      - e2e_test: 
+          requires:
+            - linter
       - build:
           requires:
-            - test
+            - linter
           filters:
             branches:
               only: master
       - docs:
           requires:
-            - test
+            - linter
           filters:
             branches:
               only: master
@@ -97,6 +107,7 @@ workflows:
           requires:
             - build
             - docs
+            - e2e_test
           filters:
             branches:
               only: master
