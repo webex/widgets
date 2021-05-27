@@ -7,9 +7,6 @@ class SamplesPage {
 
   open() {
     browser.url(process.env.WEBEX_TEST_PAGE_URL);
-
-    // override the local media api so that permission prompts don't show up
-    browser.execute('navigator.mediaDevices.getUserMedia = () => Promise.resolve(new MediaStream());');
   }
 
   setAccessToken(accessToken) {
