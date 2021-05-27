@@ -58,20 +58,68 @@ exports.config = {
       browserName: 'chrome',
       maxInstances: 5,
       acceptInsecureCerts: true,
+      'goog:chromeOptions': {
+        args: [
+          // Feeds a test pattern to getUserMedia() instead of live camera input
+          '--use-fake-device-for-media-stream',
+          // Avoids the need to grant camera/microphone permissions.
+          '--use-fake-ui-for-media-stream',
+          // To hide pop-up warnings from Chrome Browser
+          '--disable-infobars'
+        ],
+      },
     }] : []),
     ...(process.env.WEBEX_TEST_FIREFOX ? [{
       browserName: 'firefox',
       maxInstances: 5,
       acceptInsecureCerts: true,
+      'moz:firefoxOptions': {
+        prefs: {
+          // Enables the Browser Console command line (to execute JavaScript expressions)
+          'devtools.chrome.enabled': true,
+          // Disables security prompts the user would normally see by default
+          'devtools.debugger.prompt-connection': false,
+          // Enables remote debugging
+          'devtools.debugger.remote-enabled': true,
+          // Disables all notifications
+          'dom.webnotifications.enabled': false,
+          // For decoding
+          'media.webrtc.hw.h264.enabled': true,
+          // For active screen/application sharing
+          'media.getusermedia.screensharing.enabled': true,
+          // Disables the permission dialog *completely*, allowing media
+          // access from all sites with no checks
+          'media.navigator.permission.disabled': true,
+          // Fake media stream and media device
+          'media.navigator.streams.fake': true,
+          // To enable the decoding for WebRTC
+          'media.peerconnection.video.h264_enabled': true
+        },
+      },
     }] : []),
     ...(process.env.WEBEX_TEST_EDGE ? [{
       browserName: 'MicrosoftEdge',
       maxInstances: 5,
       acceptInsecureCerts: true,
+      'ms:edgeOptions': {
+        args: [
+          // Anonymize local IPs exposed by WebRTC
+          '--disable-features=WebRtcHideLocalIpsWithMdns',
+          // Feeds a test pattern to getUserMedia() instead of live camera input
+          '--use-fake-device-for-media-stream',
+          // Avoids the need to grant camera/microphone permissions.
+          '--use-fake-ui-for-media-stream',
+        ],
+      },
     }]: []),
     ...(process.env.WEBEX_TEST_SAFARI ? [{
       browserName: 'safari',
       maxInstances: 5,
+      'webkit:WebRTC': {
+        // Normally, Safari refuses to allow media capture over insecure connections
+        // This capability suppresses that restriction for testing purposes
+        DisableInsecureMediaCapture: true,
+      },
     }]: []),
   ],
   //
