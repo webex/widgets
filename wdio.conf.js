@@ -1,7 +1,7 @@
 require('dotenv').config();
 require('dotenv').config({path: '.env.default'});
 
-exports.config = {
+const config = {
   //
   // ====================
   // Runner Configuration
@@ -47,7 +47,7 @@ exports.config = {
   // and 30 processes will get spawned. The property handles how many capabilities
   // from the same test should run tests.
   //
-  maxInstances: 10,
+  maxInstances: 1,
   //
   // If you have trouble getting all important capabilities together, check out the
   // Sauce Labs platform configurator - a great tool to configure your capabilities:
@@ -56,8 +56,6 @@ exports.config = {
   capabilities: [
     ...(process.env.WEBEX_TEST_CHROME ? [{
       browserName: 'chrome',
-      maxInstances: 5,
-      acceptInsecureCerts: true,
       'goog:chromeOptions': {
         args: [
           // Feeds a test pattern to getUserMedia() instead of live camera input
@@ -71,8 +69,6 @@ exports.config = {
     }] : []),
     ...(process.env.WEBEX_TEST_FIREFOX ? [{
       browserName: 'firefox',
-      maxInstances: 5,
-      acceptInsecureCerts: true,
       'moz:firefoxOptions': {
         prefs: {
           // Enables the Browser Console command line (to execute JavaScript expressions)
@@ -99,8 +95,6 @@ exports.config = {
     }] : []),
     ...(process.env.WEBEX_TEST_EDGE ? [{
       browserName: 'MicrosoftEdge',
-      maxInstances: 5,
-      acceptInsecureCerts: true,
       'ms:edgeOptions': {
         args: [
           // Anonymize local IPs exposed by WebRTC
@@ -114,7 +108,6 @@ exports.config = {
     }]: []),
     ...(process.env.WEBEX_TEST_SAFARI ? [{
       browserName: 'safari',
-      maxInstances: 5,
       'webkit:WebRTC': {
         // Normally, Safari refuses to allow media capture over insecure connections
         // This capability suppresses that restriction for testing purposes
@@ -232,3 +225,27 @@ exports.config = {
     // },
   },
 };
+
+if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY && process.env.SAUCE_REGION) {
+  config.user = process.env.SAUCE_USERNAME;
+  config.key = process.env.SAUCE_ACCESS_KEY;
+  config.region = process.env.SAUCE_REGION;
+
+  config.services.push([
+    'sauce',
+    {
+      sauceConnect: false,
+      sauceConnectOpts: {},
+    },
+  ]);
+
+  for(const cap of config.capabilities) {
+    cap['sauce:options'] = {
+      extendedDebugging: true,
+      capturePerformance: true,
+    };
+  }
+};
+
+exports.config = config;
+
