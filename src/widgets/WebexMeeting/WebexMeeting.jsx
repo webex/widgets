@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {Spinner} from '@momentum-ui/react';
 import Webex from 'webex';
-import {WebexMeeting, WebexMemberRoster, withAdapter, withMeeting} from '@webex/components';
+import {WebexMeeting, WebexMeetingControlBar, WebexMemberRoster, withAdapter, withMeeting} from '@webex/components';
 import WebexSDKAdapter from '@webex/sdk-component-adapter';
 
 import {DestinationType, MeetingState} from '@webex/component-adapter-interfaces';
@@ -28,19 +28,26 @@ class WebexMeetingWidget extends Component {
   }
 
   render() {
+    const meeting = this.props.meeting;
+
     return (
       <div className="webex-meeting-widget">
-        {this.props.meeting.ID ? (
-          <div className="webex-meeting-widget__body">
-            <div className="webex-meeting-widget__meeting">
-              <WebexMeeting meetingID={this.props.meeting.ID} controls={controls} />
-            </div>
-            {this.props.meeting.showRoster && this.props.meeting.state === MeetingState.JOINED && (
-              <div className="webex-meeting-widget__roster">
-                <WebexMemberRoster destinationID={this.props.meeting.ID} destinationType={DestinationType.MEETING} />
+        {meeting.ID ? (
+          <>
+            <div className="webex-meeting-widget__body">
+              <div className="webex-meeting-widget__meeting">
+                <WebexMeeting meetingID={meeting.ID} />
               </div>
-            )}
-          </div>
+              {meeting.showRoster && meeting.state === MeetingState.JOINED && (
+                <div className="webex-meeting-widget__roster">
+                  <WebexMemberRoster destinationID={meeting.ID} destinationType={DestinationType.MEETING} />
+                </div>
+              )}
+            </div>
+            <div className="webex-meeting-widget__controls">
+              <WebexMeetingControlBar meetingID={meeting.ID} controls={controls}/>
+            </div>
+          </>
         ) : (
           <Spinner />
         )}
