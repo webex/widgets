@@ -88,9 +88,6 @@ workflows:
       - linter:
           requires:
             - install
-      - e2e_test: 
-          requires:
-            - linter
       - build:
           requires:
             - linter
@@ -107,7 +104,6 @@ workflows:
           requires:
             - build
             - docs
-            - e2e_test
           filters:
             branches:
               only: master
