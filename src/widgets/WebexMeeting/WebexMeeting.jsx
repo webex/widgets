@@ -2,7 +2,16 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {Spinner} from '@momentum-ui/react';
 import Webex from 'webex';
-import {WebexMeeting, WebexMeetingControlBar, WebexMemberRoster, withAdapter, withMeeting} from '@webex/components';
+import {
+  WebexMeeting,
+  WebexMeetingControlBar,
+  WebexMemberRoster,
+  WebexSettings,
+  Modal,
+  withAdapter,
+  withMeeting,
+  useMeetingControl,
+} from '@webex/components';
 import WebexSDKAdapter from '@webex/sdk-component-adapter';
 
 import {DestinationType, MeetingState} from '@webex/component-adapter-interfaces';
@@ -12,8 +21,8 @@ import '@webex/components/dist/css/webex-components.css';
 import './WebexMeeting.css';
 
 const controls = (isActive) => isActive
-    ? ['mute-audio', 'mute-video', 'share-screen', 'member-roster', 'leave-meeting']
-    : ['mute-audio', 'mute-video', 'join-meeting'];
+    ? ['settings', 'mute-audio', 'mute-video', 'share-screen', 'member-roster', 'leave-meeting']
+    : ['settings', 'mute-audio', 'mute-video', 'join-meeting'];
 
 /**
  * Webex meeting widget displays the default Webex meeting experience.
@@ -45,8 +54,17 @@ class WebexMeetingWidget extends Component {
               )}
             </div>
             <div className="webex-meeting-widget__controls">
-              <WebexMeetingControlBar meetingID={meeting.ID} controls={controls}/>
+              <WebexMeetingControlBar meetingID={meeting.ID} controls={controls} />
             </div>
+            {meeting.showSettings && (
+              <Modal
+                className="webex-meeting-widget__settings-modal"
+                onClose={useMeetingControl('settings', meeting.ID)}
+                title="Settings"
+              >
+                <WebexSettings meetingID={meeting.ID} />
+              </Modal>
+            )}
           </>
         ) : (
           <Spinner />
