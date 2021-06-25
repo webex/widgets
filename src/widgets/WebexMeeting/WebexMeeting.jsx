@@ -44,9 +44,11 @@ class WebexMeetingWidget extends Component {
                 </div>
               )}
             </div>
-            <div className="webex-meeting-widget__controls">
-              <WebexMeetingControlBar meetingID={meeting.ID} controls={controls}/>
-            </div>
+            {meeting.state !== MeetingState.LEFT &&
+              <div className="webex-meeting-widget__controls">
+                <WebexMeetingControlBar meetingID={meeting.ID} controls={controls}/>
+              </div>
+            }
           </>
         ) : (
           <Spinner />
