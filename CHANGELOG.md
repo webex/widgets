@@ -1,3 +1,10 @@
+## [1.4.3](https://github.com/webex/widgets/compare/v1.4.2...v1.4.3) (2021-06-25)
+
+
+### Bug Fixes
+
+* **WebexMeeting:** remove WebexMeetingControlBar after meeting has ended ([a5cac4c](https://github.com/webex/widgets/commit/a5cac4c29b601c73b85848636631d6f67bac1221))
+
 ## [1.4.2](https://github.com/webex/widgets/compare/v1.4.1...v1.4.2) (2021-06-18)
 
 
