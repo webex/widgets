@@ -30,7 +30,7 @@
   "dependencies": {
     "@momentum-ui/react": "^23.21.4",
     "@webex/components": "^1.79.0",
-    "@webex/sdk-component-adapter": "^1.40.0",
+    "@webex/sdk-component-adapter": "^1.41.0",
     "@webex/component-adapter-interfaces": "^1.17.0"
   },
   "devDependencies": {
