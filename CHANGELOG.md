@@ -1,3 +1,15 @@
+# [1.5.0](https://github.com/webex/widgets/compare/v1.4.4...v1.5.0) (2021-07-12)
+
+
+### Bug Fixes
+
+* **package:** update sdk adapter to v1.41.0 ([ee355d5](https://github.com/webex/widgets/commit/ee355d548b4122aeeb7f900b245a3517b889d9bc))
+
+
+### Features
+
+* **logo:** update webex logo ([b12f1ed](https://github.com/webex/widgets/commit/b12f1edc8e0c35987684d8fb73423518596dad83))
+
 ## [1.4.4](https://github.com/webex/widgets/compare/v1.4.3...v1.4.4) (2021-07-08)
 
 
