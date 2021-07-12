@@ -76,7 +76,7 @@ module.exports = function(env, argv) {
       new HtmlWebpackPlugin({
         filename: 'index.html',
         template: 'demo/index.html',
-        favicon: 'demo/teams.png',
+        favicon: 'demo/webex-logo.png',
       }),
       new webpack.HotModuleReplacementPlugin(),
     ],
