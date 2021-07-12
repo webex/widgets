@@ -12,8 +12,8 @@ import '@webex/components/dist/css/webex-components.css';
 import './WebexMeeting.css';
 
 const controls = (isActive) => isActive
-    ? ['mute-audio', 'mute-video', 'share-screen', 'member-roster', 'leave-meeting']
-    : ['mute-audio', 'mute-video', 'join-meeting'];
+    ? ['mute-audio', 'mute-video', 'share-screen', 'member-roster', 'settings', 'leave-meeting']
+    : ['mute-audio', 'mute-video', 'settings', 'join-meeting'];
 
 /**
  * Webex meeting widget displays the default Webex meeting experience.
