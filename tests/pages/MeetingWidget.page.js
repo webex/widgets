@@ -12,6 +12,7 @@ class MeetingWidgetPage {
   get joinMeetingBtn() { return $('.wxc-meeting-control-bar button[alt="Join meeting"]'); }
   get waitingForOthers() { return $('h4=Waiting for others to join...'); }
   get leaveMeetingBtn() { return $('.wxc-meeting-control-bar button[alt=Leave]'); }
+  get controlBar() { return $('.wxc-meeting-control-bar'); }
 
   loadWidget(meetingDestination) {
     this.destination.setValue(meetingDestination);

@@ -25,7 +25,7 @@ describe('Meeting Widget', () => {
       console.error(error);
       console.error(error.body);
     }
-    
+
     expect(accessToken).toBeDefined();
     expect(meetingDestination).toBeDefined();
 
@@ -40,7 +40,7 @@ describe('Meeting Widget', () => {
     if (room) {
       browser.call(() => sdk.rooms.remove(room).catch(console.error));
     }
-    
+
     if (user) {
       browser.call(() => removeUser(user));
     }
@@ -52,6 +52,10 @@ describe('Meeting Widget', () => {
 
   it('loads', () => {
     expect(MeetingPage.meetingInfo).toBeDisplayed();
+  });
+
+  it('displays the control bar', () => {
+    expect(MeetingPage.controlBar).toBeVisible();
   });
 
   it('mutes audio before joining meeting', () => {
@@ -91,5 +95,9 @@ describe('Meeting Widget', () => {
     MeetingPage.leaveMeetingBtn.click();
     MeetingPage.meetingWidget.waitForDisplayed({timeout: 10000});
     expect(MeetingPage.meetingWidget).toHaveTextContaining('You\'ve successfully left the meeting');
+  });
+
+  it('doesn\'t display any control after leaving the meeting', () => {
+    expect(MeetingPage.controlBar).not.toBeVisible();
   });
 });
