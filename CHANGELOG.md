@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/webex/widgets/compare/v1.5.0...v1.6.0) (2021-07-14)
+
+
+### Features
+
+* **WebexMeeting:** add the settings button to the controls bar ([3d6601e](https://github.com/webex/widgets/commit/3d6601e162d8d04050d6999662433aca8e6a611f))
+
 # [1.5.0](https://github.com/webex/widgets/compare/v1.4.4...v1.5.0) (2021-07-12)
 
 
