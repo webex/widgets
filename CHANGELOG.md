@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/webex/widgets/compare/v1.6.0...v1.7.0) (2021-07-19)
+
+
+### Features
+
+* **package:** configure winston logger ([0a3495b](https://github.com/webex/widgets/commit/0a3495b452b78a7d7cc489e561afeeb91055c626))
+
 # [1.6.0](https://github.com/webex/widgets/compare/v1.5.0...v1.6.0) (2021-07-14)
 
 
