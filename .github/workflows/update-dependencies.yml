@@ -12,8 +12,8 @@ jobs:
       - run: |
           npm install @webex/component-adapter-interfaces
           if [ -n "$(git status --porcelain)" ]; then
-            git config user.name "github-actions"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git config user.name "webex-components-publisher"
+            git config user.email "webex-components@cisco.com"
             git add .
             git commit -m "build(package): update component adapter interfaces to v${{ github.event.client_payload.version }}"
             git push origin master
@@ -28,8 +28,8 @@ jobs:
       - run: |
           npm install @webex/components
           if [ -n "$(git status --porcelain)" ]; then
-            git config user.name "github-actions"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git config user.name "webex-components-publisher"
+            git config user.email "webex-components@cisco.com"
             git add .
             git commit -m "build(package): update webex components to v${{ github.event.client_payload.version }}"
             git push origin master
@@ -44,8 +44,8 @@ jobs:
       - run: |
           npm install @webex/sdk-component-adapter
           if [ -n "$(git status --porcelain)" ]; then
-            git config user.name "github-actions"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git config user.name "webex-components-publisher"
+            git config user.email "webex-components@cisco.com"
             git add .
             git commit -m "build(package): update webex sdk-component-adapter to v${{ github.event.client_payload.version }}"
             git push origin master
