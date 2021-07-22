@@ -1,3 +1,10 @@
+## [1.7.1](https://github.com/webex/widgets/compare/v1.7.0...v1.7.1) (2021-07-22)
+
+
+### Bug Fixes
+
+* **package:** update components to v1.84.1 and sdk adapter to v1.49.0 ([fd79f62](https://github.com/webex/widgets/commit/fd79f62b679d3d3006a41e344fa6f0bd0efa479a))
+
 # [1.7.0](https://github.com/webex/widgets/compare/v1.6.0...v1.7.0) (2021-07-19)
 
 
