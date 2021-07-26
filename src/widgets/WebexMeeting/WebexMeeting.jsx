@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {Spinner} from '@momentum-ui/react';
 import Webex from 'webex';
-import {WebexMeeting, WebexMeetingControlBar, WebexMemberRoster, withAdapter, withMeeting} from '@webex/components';
+import {WebexMediaAccess, WebexMeeting, WebexMeetingControlBar, WebexMemberRoster, withAdapter, withMeeting} from '@webex/components';
 import WebexSDKAdapter from '@webex/sdk-component-adapter';
 
 import {DestinationType, MeetingState} from '@webex/component-adapter-interfaces';
@@ -29,30 +29,39 @@ class WebexMeetingWidget extends Component {
 
   render() {
     const meeting = this.props.meeting;
+    const audioPermission = meeting.localAudio?.permission;
+    const videoPermission = meeting.localVideo?.permission;
+    let content;
+
+    if (audioPermission === 'ASKING') {
+      content = <WebexMediaAccess meetingID={meeting.ID} media="microphone" />;
+    } else if (videoPermission === 'ASKING') {
+      content = <WebexMediaAccess meetingID={meeting.ID} media="camera" />;
+    } else if (!audioPermission || !videoPermission || !meeting.ID) {
+      content = <Spinner />;
+    } else {
+      content = <>
+        <div className="webex-meeting-widget__body">
+          <div className="webex-meeting-widget__meeting">
+            <WebexMeeting meetingID={meeting.ID} />
+          </div>
+          {meeting.showRoster && meeting.state === MeetingState.JOINED && (
+            <div className="webex-meeting-widget__roster">
+              <WebexMemberRoster destinationID={meeting.ID} destinationType={DestinationType.MEETING} />
+            </div>
+          )}
+        </div>
+        {meeting.state !== MeetingState.LEFT &&
+          <div className="webex-meeting-widget__controls">
+            <WebexMeetingControlBar meetingID={meeting.ID} controls={controls}/>
+          </div>
+        }
+      </>;
+    }
 
     return (
       <div className="webex-meeting-widget">
-        {meeting.ID ? (
-          <>
-            <div className="webex-meeting-widget__body">
-              <div className="webex-meeting-widget__meeting">
-                <WebexMeeting meetingID={meeting.ID} />
-              </div>
-              {meeting.showRoster && meeting.state === MeetingState.JOINED && (
-                <div className="webex-meeting-widget__roster">
-                  <WebexMemberRoster destinationID={meeting.ID} destinationType={DestinationType.MEETING} />
-                </div>
-              )}
-            </div>
-            {meeting.state !== MeetingState.LEFT &&
-              <div className="webex-meeting-widget__controls">
-                <WebexMeetingControlBar meetingID={meeting.ID} controls={controls}/>
-              </div>
-            }
-          </>
-        ) : (
-          <Spinner />
-        )}
+        {content}
       </div>
     );
   }
