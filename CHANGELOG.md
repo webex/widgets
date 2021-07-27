@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/webex/widgets/compare/v1.7.1...v1.8.0) (2021-07-27)
+
+
+### Features
+
+* **WebexWidget:** display media access based on permissions ([0255e5a](https://github.com/webex/widgets/commit/0255e5a9966ea246b105fe1745a8c2e564c1088b))
+
 ## [1.7.1](https://github.com/webex/widgets/compare/v1.7.0...v1.7.1) (2021-07-22)
 
 
