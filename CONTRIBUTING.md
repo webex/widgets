@@ -146,3 +146,46 @@ and triggers release and publishing based on the following rules:
 | Commit with type `feat`            | Minor release |
 | Commit with type `fix`             | Patch release |
 | Commit with type `perf`            | Patch release |
+
+## Link Widget repository with local version of components/sdk-component-adapter
+
+When contributing to one of the dependent repositories like
+[components](https://github.com/webex/components#webex-components) or the
+[sdk-component-adapter](https://github.com/webex/sdk-component-adapter),
+it may be helpful to be able to test changes
+in the dependent repository on "real-life" scenarios like in the Meeting widget.
+
+In order to test such changes:
+1. Clone widgets and the dependent repositories
+2. List the dependent package as a
+[local dependency](https://docs.npmjs.com/cli/v7/configuring-npm/package-json#local-paths)
+
+Below you can find sample steps for linking a local `components` package to the `widgets` repository:
+
+1. Clone `components` repository.
+    ```bash
+    git clone git@github.com:webex/components.git
+    ```
+2. Build `components` code. This will generate a `dist` folder
+    ```bash
+    cd components
+    npm install
+    npm run build
+    ```
+
+3. Change dependency location in `package.json`
+    ```
+    "@webex/components": "file:../components", // Or corresponding path to local clone
+    ```
+5. Install dependencies of `widgets` repository and the react dependency (this is required because`components` repository uses react)
+    ```
+    npx npm-install-peers
+    npm link ../components/node_modules/react
+    ```
+6. Start up the widget sample
+    ```
+    npm run start
+    ```
+
+Keep in mind that for every modification made in `components`/`sdk-component-adapter`, you need
+to run `npm run build` in the dependent repo.
