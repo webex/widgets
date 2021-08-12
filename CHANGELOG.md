@@ -1,3 +1,10 @@
+# [1.9.0](https://github.com/webex/widgets/compare/v1.8.1...v1.9.0) (2021-08-12)
+
+
+### Features
+
+* **WebexMeeting:** remove control bar and roster from widget ([2d2ea12](https://github.com/webex/widgets/commit/2d2ea12ce71390e255cae1879ae359f8136882f9))
+
 ## [1.8.1](https://github.com/webex/widgets/compare/v1.8.0...v1.8.1) (2021-07-28)
 
 
