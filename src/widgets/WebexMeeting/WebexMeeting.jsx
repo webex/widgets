@@ -4,6 +4,7 @@ import {Spinner} from '@momentum-ui/react';
 import Webex from 'webex';
 import {WebexMediaAccess, WebexMeeting, withAdapter, withMeeting} from '@webex/components';
 import WebexSDKAdapter from '@webex/sdk-component-adapter';
+import WebexLogo from './webex-logo.svg';
 
 import '@momentum-ui/core/css/momentum-ui.min.css';
 import '@webex/components/dist/css/webex-components.css';
@@ -24,14 +25,15 @@ class WebexMeetingWidget extends Component {
     const meeting = this.props.meeting;
     const audioPermission = meeting.localAudio?.permission;
     const videoPermission = meeting.localVideo?.permission;
+    const logo = <img src={WebexLogo} />;
     let content;
 
     if (audioPermission === 'ASKING') {
-      content = <WebexMediaAccess meetingID={meeting.ID} media="microphone" />;
+      content = <WebexMediaAccess meetingID={meeting.ID} media="microphone" logo={logo} />;
     } else if (videoPermission === 'ASKING') {
-      content = <WebexMediaAccess meetingID={meeting.ID} media="camera" />;
+      content = <WebexMediaAccess meetingID={meeting.ID} media="camera" logo={logo} />;
     } else {
-      content = <WebexMeeting meetingID={meeting.ID} />;
+      content = <WebexMeeting meetingID={meeting.ID} logo={logo} />;
     }
 
     return (
