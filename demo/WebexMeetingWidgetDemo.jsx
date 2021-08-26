@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import PropTypes from 'prop-types';
 import {Button, Input} from '@momentum-ui/react';
+import './WebexMeetingWidgetDemo.scss';
 
 import {WebexMeetingWidget} from '../src';
 
@@ -48,7 +49,7 @@ export default function WebexMeetingWidgetDemo({token}) {
         </Button>
       </form>
       {token && destination && displayWidget && (
-        <WebexMeetingWidget accessToken={token} meetingDestination={destination} />
+        <WebexMeetingWidget accessToken={token} meetingDestination={destination} className="webex-meeting-widget-demo" />
       )}
     </React.Fragment>
   );

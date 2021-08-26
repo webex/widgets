@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import {Spinner} from '@momentum-ui/react';
 import Webex from 'webex';
 import {WebexMediaAccess, WebexMeeting, withAdapter, withMeeting} from '@webex/components';
 import WebexSDKAdapter from '@webex/sdk-component-adapter';
@@ -14,6 +13,8 @@ import '@webex/components/dist/css/webex-components.css';
  *
  * @param {string} props.meetingDestination  ID of the virtual meeting location
  * @param {string} props.accessToken        access token to create the webex instance with
+ * @param {string} [props.className]        Custom CSS class to apply
+ * @param {string} [props.style]            Custom style to apply
  * @returns {Object} JSX of the component
  */
 class WebexMeetingWidget extends Component {
@@ -37,7 +38,7 @@ class WebexMeetingWidget extends Component {
     }
 
     return (
-      <div className="webex-meeting-widget">
+      <div className={`webex-meeting-widget ${this.props.className}`} style={this.props.style}>
         {content}
       </div>
     );
@@ -46,7 +47,14 @@ class WebexMeetingWidget extends Component {
 
 WebexMeetingWidget.propTypes = {
   accessToken: PropTypes.string.isRequired,
+  className: PropTypes.string,
   meetingDestination: PropTypes.string.isRequired,
+  style: PropTypes.shape(),
+};
+
+WebexMeetingWidget.defaultProps = {
+  className: '',
+  style: {},
 };
 
 export default withAdapter(withMeeting(WebexMeetingWidget), (props) => {
