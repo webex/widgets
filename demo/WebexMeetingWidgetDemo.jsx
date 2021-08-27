@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import PropTypes from 'prop-types';
-import {Button, Input} from '@momentum-ui/react';
+import {Button, Input, Select, SelectOption} from '@momentum-ui/react';
 import './WebexMeetingWidgetDemo.scss';
 
 import {WebexMeetingWidget} from '../src';
@@ -8,6 +8,7 @@ import {WebexMeetingWidget} from '../src';
 export default function WebexMeetingWidgetDemo({token}) {
   const [destination, setDestination] = useState('');
   const [displayWidget, setDisplayWidget] = useState(false);
+  const [theme, setTheme] = useState('dark');
 
   const displayButtonEnabled = token && destination && !displayWidget;
 
@@ -19,6 +20,11 @@ export default function WebexMeetingWidgetDemo({token}) {
   const handleHideMeetingWidget = (event) => {
     event.preventDefault();
     setDisplayWidget(false);
+  };
+
+  const handleChangeTheme = (selectedOptions) => {
+    const selectedTheme = selectedOptions[0].value;
+    setTheme(selectedTheme);
   };
 
   return (
@@ -47,12 +53,17 @@ export default function WebexMeetingWidgetDemo({token}) {
         <Button disabled={!displayWidget} onClick={handleHideMeetingWidget} ariaLabel="Remove Meeting Widget">
           Remove Meeting Widget
         </Button>
+        <div className="webex-theme-selector">Theme</div>
+        <Select defaultValue="Dark" onSelect={handleChangeTheme}>
+          <SelectOption value="dark" label="Dark" />
+          <SelectOption value="light" label="Light" />
+        </Select>
       </form>
       {token && destination && displayWidget && (
         <WebexMeetingWidget
           accessToken={token}
           meetingDestination={destination}
-          className="webex-meeting-widget-demo fluid-height"
+          className={`webex-meeting-widget-demo fluid-height wxc-theme-${theme}`}
         />
       )}
     </React.Fragment>
