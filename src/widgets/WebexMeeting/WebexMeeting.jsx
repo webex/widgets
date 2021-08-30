@@ -3,10 +3,11 @@ import PropTypes from 'prop-types';
 import Webex from 'webex';
 import {WebexMediaAccess, WebexMeeting, withAdapter, withMeeting} from '@webex/components';
 import WebexSDKAdapter from '@webex/sdk-component-adapter';
-import WebexLogo from './webex-logo.svg';
+import WebexLogo from './WebexLogo';
 
 import '@momentum-ui/core/css/momentum-ui.min.css';
 import '@webex/components/dist/css/webex-components.css';
+import './WebexMeeting.css';
 
 /**
  * Webex meeting widget displays the default Webex meeting experience.
@@ -26,7 +27,7 @@ class WebexMeetingWidget extends Component {
     const meeting = this.props.meeting;
     const audioPermission = meeting.localAudio?.permission;
     const videoPermission = meeting.localVideo?.permission;
-    const logo = <img src={WebexLogo} />;
+    const logo = <WebexLogo />;
     let content;
 
     if (audioPermission === 'ASKING') {
