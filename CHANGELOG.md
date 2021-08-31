@@ -1,3 +1,12 @@
+# [1.10.0](https://github.com/webex/widgets/compare/v1.9.1...v1.10.0) (2021-08-31)
+
+
+### Features
+
+* **WebexMeeting:** add className and style as props ([ddcf819](https://github.com/webex/widgets/commit/ddcf81985fe5018df7799157461b74d61c519198))
+* **WebexMeeting:** add logo prop to WebexMeeting and WebexMediaAccess ([0c8b884](https://github.com/webex/widgets/commit/0c8b8849a4ab56407d55c12b265a948a904448d3))
+* **WebexMeeting:** style logo for themes ([25b54a2](https://github.com/webex/widgets/commit/25b54a25d9e0f5249632f4d0bcf8101bc44978d9))
+
 ## [1.9.1](https://github.com/webex/widgets/compare/v1.9.0...v1.9.1) (2021-08-17)
 
 
