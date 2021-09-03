@@ -1,3 +1,10 @@
+# [1.11.0](https://github.com/webex/widgets/compare/v1.10.0...v1.11.0) (2021-09-03)
+
+
+### Features
+
+* **webpack:** configure webpack to load gif files ([00d9fa0](https://github.com/webex/widgets/commit/00d9fa08afd724953adf9e161f0173490dd764f7))
+
 # [1.10.0](https://github.com/webex/widgets/compare/v1.9.1...v1.10.0) (2021-08-31)
 
 
