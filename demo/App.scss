@@ -22,4 +22,14 @@
     box-shadow: 0 0.0625rem 0.125rem 0 #C6C7CA;
     border-radius: .25rem;
   }
+
+  .flex-column {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .fluid-height {
+    flex: 1;
+    min-height: 0;
+  }
 }
