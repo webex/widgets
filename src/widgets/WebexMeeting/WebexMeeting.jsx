@@ -31,11 +31,11 @@ class WebexMeetingWidget extends Component {
     let content;
 
     if (audioPermission === 'ASKING') {
-      content = <WebexMediaAccess meetingID={meeting.ID} media="microphone" logo={logo} />;
+      content = <WebexMediaAccess className="webex-meeting-widget__content" meetingID={meeting.ID} media="microphone" logo={logo} />;
     } else if (videoPermission === 'ASKING') {
-      content = <WebexMediaAccess meetingID={meeting.ID} media="camera" logo={logo} />;
+      content = <WebexMediaAccess className="webex-meeting-widget__content" meetingID={meeting.ID} media="camera" logo={logo} />;
     } else {
-      content = <WebexMeeting meetingID={meeting.ID} logo={logo} />;
+      content = <WebexMeeting className="webex-meeting-widget__content" meetingID={meeting.ID} logo={logo} />;
     }
 
     return (

@@ -49,7 +49,11 @@ export default function WebexMeetingWidgetDemo({token}) {
         </Button>
       </form>
       {token && destination && displayWidget && (
-        <WebexMeetingWidget accessToken={token} meetingDestination={destination} className="webex-meeting-widget-demo" />
+        <WebexMeetingWidget
+          accessToken={token}
+          meetingDestination={destination}
+          className="webex-meeting-widget-demo fluid-height"
+        />
       )}
     </React.Fragment>
   );
