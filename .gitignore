@@ -2,6 +2,7 @@
 dist/
 test_results/
 build/
+build.cdn/
 fonts/
 platforms/
 plugins/
