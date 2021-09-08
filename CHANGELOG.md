@@ -1,3 +1,16 @@
+# [1.13.0](https://github.com/webex/widgets/compare/v1.12.0...v1.13.0) (2021-09-08)
+
+
+### Bug Fixes
+
+* **package:** update components to v1.132.0 and sdk adapter to v1.59.0 ([77181e6](https://github.com/webex/widgets/commit/77181e643b4b826ad360b8ed953bae7fe6f93798))
+* **package:** update components to v1.134.2 and sdk adapter to v1.61.0 ([864a332](https://github.com/webex/widgets/commit/864a3323c040681342e0aa3efa9afe8357acc8a6))
+
+
+### Features
+
+* **WebexWidget:** add theme selector on the widgets demo page ([15626a1](https://github.com/webex/widgets/commit/15626a1e1a4ac98f18f5263d724f708e4d347e3d))
+
 # [1.12.0](https://github.com/webex/widgets/compare/v1.11.0...v1.12.0) (2021-09-06)
 
 
