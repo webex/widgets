@@ -1,3 +1,10 @@
+## [1.13.1](https://github.com/webex/widgets/compare/v1.13.0...v1.13.1) (2021-09-14)
+
+
+### Bug Fixes
+
+* **WebexMeeting:** make widget occupy all available vertical space ([d73c633](https://github.com/webex/widgets/commit/d73c633511137e2af007cf0282b3ac0ec3fa8b81))
+
 # [1.13.0](https://github.com/webex/widgets/compare/v1.12.0...v1.13.0) (2021-09-08)
 
 
