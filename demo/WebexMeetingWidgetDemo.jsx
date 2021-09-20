@@ -63,7 +63,7 @@ export default function WebexMeetingWidgetDemo({token}) {
         <WebexMeetingWidget
           accessToken={token}
           meetingDestination={destination}
-          className={`webex-meeting-widget-demo fluid-height wxc-theme-${theme}`}
+          className={`webex-meeting-widget-demo wxc-theme-${theme}`}
         />
       )}
     </React.Fragment>
