@@ -1,3 +1,10 @@
+# [1.14.0](https://github.com/webex/widgets/compare/v1.13.4...v1.14.0) (2021-09-24)
+
+
+### Features
+
+* **WebexMeeting:** add accessibility for webex logo in widget ([83bdfff](https://github.com/webex/widgets/commit/83bdfffa2a3e3aba255f43091d4e7ae5dd33dfad))
+
 ## [1.13.4](https://github.com/webex/widgets/compare/v1.13.3...v1.13.4) (2021-09-24)
 
 
