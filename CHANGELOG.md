@@ -1,3 +1,10 @@
+## [1.13.4](https://github.com/webex/widgets/compare/v1.13.3...v1.13.4) (2021-09-24)
+
+
+### Bug Fixes
+
+* **package:** update sdk-adapter to 1.63.0 ([02e47dc](https://github.com/webex/widgets/commit/02e47dc5ca0eaf9e317fc3597a0dd499925a626d))
+
 ## [1.13.3](https://github.com/webex/widgets/compare/v1.13.2...v1.13.3) (2021-09-16)
 
 
