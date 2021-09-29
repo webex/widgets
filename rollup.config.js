@@ -4,6 +4,8 @@ import commonJS from 'rollup-plugin-commonjs';
 import json from 'rollup-plugin-json';
 import postcss from 'rollup-plugin-postcss';
 import url from 'postcss-url';
+import replace from '@rollup/plugin-replace';
+import {version} from './package.json';
 
 const output = (name, format) => ({
   name,
@@ -24,6 +26,12 @@ export default [
     input: 'src/index.js',
     output: [output('ESMWebexWidgets', 'esm')],
     plugins: [
+      replace({
+        include: ['src/widgets/WebexMeeting/WebexMeeting.jsx'],
+        values: {
+          __appVersion__: JSON.stringify(version)
+        },
+      }),
       resolve({
         preferBuiltins: true,
         extensions: ['.js', '.jsx'],

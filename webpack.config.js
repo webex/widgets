@@ -2,6 +2,7 @@ const path = require('path');
 const webpack = require('webpack');
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const {version} = require('./package.json');
 
 module.exports = function(env, argv) {
   return {
@@ -79,6 +80,9 @@ module.exports = function(env, argv) {
         favicon: 'demo/webex-logo.png',
       }),
       new webpack.HotModuleReplacementPlugin(),
+      new webpack.DefinePlugin({
+        __appVersion__: JSON.stringify(version)
+      })
     ],
   };
 };
