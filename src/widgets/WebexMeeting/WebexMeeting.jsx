@@ -15,6 +15,7 @@ import './WebexMeeting.css';
  * @param {string} props.meetingDestination  ID of the virtual meeting location
  * @param {string} props.accessToken        access token to create the webex instance with
  * @param {string} [props.className]        Custom CSS class to apply
+ * @param {Function} [props.controls]         Controls to display
  * @param {string} [props.style]            Custom style to apply
  * @returns {Object} JSX of the component
  */
@@ -35,7 +36,14 @@ class WebexMeetingWidget extends Component {
     } else if (videoPermission === 'ASKING') {
       content = <WebexMediaAccess className="webex-meeting-widget__content" meetingID={meeting.ID} media="camera" logo={logo} />;
     } else {
-      content = <WebexMeeting className="webex-meeting-widget__content" meetingID={meeting.ID} logo={logo} />;
+      content = (
+        <WebexMeeting 
+          className="webex-meeting-widget__content" 
+          meetingID={meeting.ID} 
+          logo={logo} 
+          controls={this.props.controls} 
+        />
+      );
     }
 
     return (
@@ -49,12 +57,14 @@ class WebexMeetingWidget extends Component {
 WebexMeetingWidget.propTypes = {
   accessToken: PropTypes.string.isRequired,
   className: PropTypes.string,
+  controls: PropTypes.func,
   meetingDestination: PropTypes.string.isRequired,
   style: PropTypes.shape(),
 };
 
 WebexMeetingWidget.defaultProps = {
   className: '',
+  controls: undefined,
   style: {},
 };
 
