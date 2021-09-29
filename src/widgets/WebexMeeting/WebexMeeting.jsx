@@ -58,9 +58,17 @@ WebexMeetingWidget.defaultProps = {
   style: {},
 };
 
+const appName = process.env.NODE_ENV === 'production' ? 'webex-widgets-meeting' : 'webex-widgets-meeting-dev';
+
 export default withAdapter(withMeeting(WebexMeetingWidget), (props) => {
   const webex = new Webex({
-    credentials: props.accessToken,
+    credentials: {
+      access_token: props.accessToken,
+    },
+    config: {
+      appName,
+      appVersion: __appVersion__,
+    }
   });
 
   return new WebexSDKAdapter(webex);
