@@ -1,3 +1,10 @@
+## [1.14.1](https://github.com/webex/widgets/compare/v1.14.0...v1.14.1) (2021-09-29)
+
+
+### Bug Fixes
+
+* **WebexMeeting:** resize meeting on mobile ([8ffde53](https://github.com/webex/widgets/commit/8ffde53bbaa6e0f0f01fa740c5c7a5e3e9fccb8c))
+
 # [1.14.0](https://github.com/webex/widgets/compare/v1.13.4...v1.14.0) (2021-09-24)
 
 
