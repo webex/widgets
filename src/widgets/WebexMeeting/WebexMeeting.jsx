@@ -15,6 +15,8 @@ import './WebexMeeting.css';
  * @param {string} props.accessToken        access token to create the webex instance with
  * @param {string} [props.className]        Custom CSS class to apply
  * @param {Function} [props.controls]         Controls to display
+ * @param {number} [props.controlsCollapseRangeStart]  Zero-based index of the first collapsible control (can be negative)
+ * @param {number} [props.controlsCollapseRangeEnd]  Zero-based index before the last collapsible control (can be negative)
  * @param {string} [props.style]            Custom style to apply
  * @returns {Object} JSX of the component
  */
@@ -40,7 +42,9 @@ class WebexMeetingWidget extends Component {
           className="webex-meeting-widget__content" 
           meetingID={meeting.ID} 
           logo={logo} 
-          controls={this.props.controls} 
+          controls={this.props.controls}
+          controlsCollapseRangeStart={this.props.controlsCollapseRangeStart} 
+          controlsCollapseRangeEnd={this.props.controlsCollapseRangeEnd} 
         />
       );
     }
@@ -57,6 +61,8 @@ WebexMeetingWidget.propTypes = {
   accessToken: PropTypes.string.isRequired,
   className: PropTypes.string,
   controls: PropTypes.func,
+  controlsCollapseRangeStart: PropTypes.number,
+  controlsCollapseRangeEnd: PropTypes.number,
   meetingDestination: PropTypes.string.isRequired,
   style: PropTypes.shape(),
 };
@@ -64,6 +70,8 @@ WebexMeetingWidget.propTypes = {
 WebexMeetingWidget.defaultProps = {
   className: '',
   controls: undefined,
+  controlsCollapseRangeStart: undefined,
+  controlsCollapseRangeEnd: undefined,
   style: {},
 };
 
