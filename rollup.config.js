@@ -31,6 +31,7 @@ export default [
       babel({
         compact: false,
         runtimeHelpers: true,
+        babelrc: true,
       }),
       commonJS(),
       json(),
