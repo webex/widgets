@@ -1,3 +1,10 @@
+## [1.14.3](https://github.com/webex/widgets/compare/v1.14.2...v1.14.3) (2021-10-11)
+
+
+### Bug Fixes
+
+* **package:** update webex version from 1.141.0 to 1.142.0 ([8f996b9](https://github.com/webex/widgets/commit/8f996b94bef486d4222a3ecf174bc886d332987d))
+
 ## [1.14.2](https://github.com/webex/widgets/compare/v1.14.1...v1.14.2) (2021-10-05)
 
 
