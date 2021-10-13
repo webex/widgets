@@ -1,3 +1,10 @@
+# [1.16.0](https://github.com/webex/widgets/compare/v1.15.0...v1.16.0) (2021-10-13)
+
+
+### Features
+
+* **WebexMeeting:** add controls prop to meeting widget ([11ef9e0](https://github.com/webex/widgets/commit/11ef9e026dff2f674e32d69546ba2a08f27331fa))
+
 # [1.15.0](https://github.com/webex/widgets/compare/v1.14.3...v1.15.0) (2021-10-13)
 
 
