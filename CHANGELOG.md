@@ -1,3 +1,10 @@
+# [1.15.0](https://github.com/webex/widgets/compare/v1.14.3...v1.15.0) (2021-10-13)
+
+
+### Features
+
+* **WebexMeeting:** add usage metrics for meetings widget ([63b13bb](https://github.com/webex/widgets/commit/63b13bb4c727bdb0d0681167c3000c49778898a9))
+
 ## [1.14.3](https://github.com/webex/widgets/compare/v1.14.2...v1.14.3) (2021-10-11)
 
 
