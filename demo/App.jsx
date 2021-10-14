@@ -4,6 +4,7 @@ import {Button, Input, Sidebar, SidebarBody, SidebarNav, SidebarNavItem} from '@
 
 import WebexMeetingWidgetDemo from './WebexMeetingWidgetDemo';
 
+import '@momentum-ui/core/css/momentum-ui.min.css';
 import './App.scss';
 
 export default function App() {

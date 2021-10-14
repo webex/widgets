@@ -58,13 +58,6 @@ export default [
         to: 'dist/webexWidgets.css',
       }),
     ],
-    onwarn(warning, warn) {
-      // skip circular dependency warnings from @momentum-ui/react library
-      if (warning.code === 'CIRCULAR_DEPENDENCY') return;
-
-      // Use default for everything else
-      warn(warning);
-    },
     external: ['prop-types', 'react', 'react-dom', 'webex', '@webex/common'],
     context: null,
   },
