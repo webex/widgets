@@ -5,7 +5,6 @@ import {WebexMediaAccess, WebexMeeting, withAdapter, withMeeting} from '@webex/c
 import WebexSDKAdapter from '@webex/sdk-component-adapter';
 import WebexLogo from './WebexLogo';
 
-import '@momentum-ui/core/css/momentum-ui.min.css';
 import '@webex/components/dist/css/webex-components.css';
 import './WebexMeeting.css';
 
