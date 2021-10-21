@@ -1,3 +1,10 @@
+# [1.17.0](https://github.com/webex/widgets/compare/v1.16.1...v1.17.0) (2021-10-21)
+
+
+### Features
+
+* **WebexMeeting:** remove momentum ui ([fcd4ff3](https://github.com/webex/widgets/commit/fcd4ff3902cd42dfc4106fd78c7f7d59a0e87aa5))
+
 ## [1.16.1](https://github.com/webex/widgets/compare/v1.16.0...v1.16.1) (2021-10-19)
 
 
