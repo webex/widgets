@@ -1,3 +1,10 @@
+## [1.17.2](https://github.com/webex/widgets/compare/v1.17.1...v1.17.2) (2021-10-26)
+
+
+### Bug Fixes
+
+* **WebexMeeting:** revive e2e tests ([c73b390](https://github.com/webex/widgets/commit/c73b3904a17a98c161e624374a11711d0234ed45))
+
 ## [1.17.1](https://github.com/webex/widgets/compare/v1.17.0...v1.17.1) (2021-10-21)
 
 
