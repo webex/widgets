@@ -27,6 +27,13 @@ const config = {
   // will be called from there.
   //
   specs: ['./tests/**/*.e2e.js'],
+
+  suites: {
+    'Meeting Widget': [
+      './tests/WebexMeetingMuteMedia.e2e.js',
+      './tests/WebexMeetingUnmuteMedia.e2e.js',
+    ],
+  },
   // Patterns to exclude.
   exclude: [
     // 'path/to/excluded/files'
