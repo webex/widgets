@@ -173,16 +173,17 @@ Below you can find sample steps for linking a local `components` package to the 
     npm run build
     ```
 
-3. Change dependency location in `package.json`
+3. Change dependency location in `package.json` and install it
     ```
     "@webex/components": "file:../components", // Or corresponding path to local clone
+    npm install
     ```
-5. Install dependencies of `widgets` repository and the react dependency (this is required because`components` repository uses react)
+4. Install dependencies of `widgets` repository and the react dependency (this is required because`components` repository uses react)
     ```
     npx npm-install-peers
     npm link ../components/node_modules/react
     ```
-6. Start up the widget sample
+5. Start up the widget sample
     ```
     npm run start
     ```
