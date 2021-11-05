@@ -1,7 +1,7 @@
-import babel from 'rollup-plugin-babel';
-import resolve from 'rollup-plugin-node-resolve';
-import commonJS from 'rollup-plugin-commonjs';
-import json from 'rollup-plugin-json';
+import babel from '@rollup/plugin-babel';
+import resolve from '@rollup/plugin-node-resolve';
+import commonJS from '@rollup/plugin-commonjs';
+import json from '@rollup/plugin-json';
 import postcss from 'rollup-plugin-postcss';
 import url from 'postcss-url';
 import replace from '@rollup/plugin-replace';
@@ -36,12 +36,13 @@ export default [
         preferBuiltins: true,
         extensions: ['.js', '.jsx'],
       }),
+      commonJS(),
       babel({
         compact: false,
-        runtimeHelpers: true,
+        babelHelpers: 'runtime',
+        plugins: ['@babel/plugin-transform-runtime'],
         babelrc: true,
       }),
-      commonJS(),
       json(),
       postcss({
         extract: 'webexWidgets.css',
