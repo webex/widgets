@@ -1,3 +1,18 @@
+# [1.18.0](https://github.com/webex/widgets/compare/v1.17.2...v1.18.0) (2021-11-08)
+
+
+### Bug Fixes
+
+* **rollup:** replace deprecated rollup plugins with recommended ones ([0006227](https://github.com/webex/widgets/commit/0006227349be73dc371227481bcf2e10334512a0))
+* **package:** update components to v1.172.0 and sdk adapter to v1.77.0 ([32699d3](https://github.com/webex/widgets/commit/32699d3925255cd721858e27a6be909f41daa8ae))
+* **package:** update components to v1.174.0 and sdk adapter to v1.82.1 ([fbd3738](https://github.com/webex/widgets/commit/fbd3738038d02136ba3872d0268ad49e3ece1d83))
+* **package:** update components to v1.177.0 and sdk adapter to v1.85.2 ([0549e0d](https://github.com/webex/widgets/commit/0549e0deb2e4a18d15c025f01a47161a79dcf2bd))
+
+
+### Features
+
+* **WebexMeeting:** add collapsible controls range props to widget ([f3a8421](https://github.com/webex/widgets/commit/f3a8421b57568ee823dfca1e839ab8c4c76c405d))
+
 ## [1.17.2](https://github.com/webex/widgets/compare/v1.17.1...v1.17.2) (2021-10-26)
 
 
