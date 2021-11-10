@@ -7,15 +7,15 @@ class MeetingWidgetPage {
   get meetingInfo() { return $('.wxc-meeting-info'); }
   get waitingForOthers() { return $('h5=Waiting for others to join...'); }
   get controlBar() { return $('.wxc-meeting-control-bar'); }
-  get muteAudioBtn() { return this.controlBar.$('span=Mute'); }
-  get unmuteAudioBtn() { return this.controlBar.$('span=Unmute'); }
-  get muteVideoBtn() { return this.controlBar.$('span=Stop video'); }
-  get unmuteVideoBtn() { return this.controlBar.$('span=Start video'); }
-  get joinMeetingBtn() { return this.controlBar.$('span=Join meeting'); }
-  get leaveMeetingBtn() { return this.controlBar.$('.wxc-button--cancel'); }
+  get controls() { return $('.wxc-meeting-control-bar__controls:not(.wxc-meeting-control-bar__control-refs)')}
+  get muteAudioBtn() { return this.controls.$('span=Mute'); }
+  get unmuteAudioBtn() { return this.controls.$('span=Unmute'); }
+  get muteVideoBtn() { return this.controls.$('span=Stop video'); }
+  get unmuteVideoBtn() { return this.controls.$('span=Start video'); }
+  get joinMeetingBtn() { return this.controls.$('span=Join meeting'); }
+  get leaveMeetingBtn() { return this.controls.$('.wxc-button--cancel'); }
 
-  loadWidget(meetingDestination) {
-    this.destination.setValue(meetingDestination);
+  loadWidget() {
     this.displayWidgetBtn.click();
     this.interstitialMeeting.waitForDisplayed({timeout: 30000});
   }
