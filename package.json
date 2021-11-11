@@ -29,9 +29,9 @@
   ],
   "dependencies": {
     "@momentum-ui/react": "^23.21.4",
-    "@webex/component-adapter-interfaces": "^1.17.0",
-    "@webex/components": "^1.177.0",
-    "@webex/sdk-component-adapter": "^1.85.2",
+    "@webex/component-adapter-interfaces": "^1.22.0",
+    "@webex/components": "^1.184.0",
+    "@webex/sdk-component-adapter": "^1.88.0",
     "winston": "^3.3.3"
   },
   "devDependencies": {
