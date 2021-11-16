@@ -1,3 +1,10 @@
+## [1.18.3](https://github.com/webex/widgets/compare/v1.18.2...v1.18.3) (2021-11-16)
+
+
+### Bug Fixes
+
+* **WebexMeeting:** add min-width on the meeting widget ([687cc06](https://github.com/webex/widgets/commit/687cc06a3247c5ce8a9950596cb8d025d4c19fcc))
+
 ## [1.18.2](https://github.com/webex/widgets/compare/v1.18.1...v1.18.2) (2021-11-12)
 
 
