@@ -1,3 +1,10 @@
+# [1.19.0](https://github.com/webex/widgets/compare/v1.18.3...v1.19.0) (2021-11-16)
+
+
+### Features
+
+* **tests:** add join with media e2e test ([7d72b95](https://github.com/webex/widgets/commit/7d72b959c51ab572b12948f9a607e2467c775290))
+
 ## [1.18.3](https://github.com/webex/widgets/compare/v1.18.2...v1.18.3) (2021-11-16)
 
 
