@@ -1,5 +1,6 @@
 .webex-meeting-widget {
   max-width: 100%;
+  min-width: 22.5rem;
   color: var(--wxc-text-color);
   display: flex;
   flex-direction: column;
