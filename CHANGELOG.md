@@ -1,3 +1,10 @@
+# [1.20.0](https://github.com/webex/widgets/compare/v1.19.1...v1.20.0) (2021-11-17)
+
+
+### Features
+
+* **tests:** assert media is muted after joining the meeting ([40a43e8](https://github.com/webex/widgets/commit/40a43e8a5d5d839f29a735620426509d14319cf7))
+
 ## [1.19.1](https://github.com/webex/widgets/compare/v1.19.0...v1.19.1) (2021-11-16)
 
 
