@@ -89,6 +89,11 @@ describe('Meeting Widget', () => {
       expect(MeetingPage.waitingForOthers).toBeVisible();
     });
 
+    it('keeps the local streams muted after join', () => {
+      expect(MeetingPage.unmuteAudioBtn).toBeVisible();
+      expect(MeetingPage.unmuteVideoBtn).toBeVisible();
+    });
+
     it('unmutes audio after joining meeting', () => {
       MeetingPage.unmuteAudioBtn.click();
       MeetingPage.muteAudioBtn.waitForDisplayed({timeout: 10000});
