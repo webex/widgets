@@ -90,6 +90,7 @@ describe('Meeting Widget', () => {
     });
 
     it('unmutes audio after joining meeting', () => {
+      expect(MeetingPage.unmuteAudioBtn).toBeVisible();
       MeetingPage.unmuteAudioBtn.click();
       MeetingPage.muteAudioBtn.waitForDisplayed({timeout: 10000});
       expect(MeetingPage.unmuteAudioBtn).not.toBeVisible();
