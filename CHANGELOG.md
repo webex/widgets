@@ -1,3 +1,11 @@
+## [1.20.1](https://github.com/webex/widgets/compare/v1.20.0...v1.20.1) (2021-11-19)
+
+
+### Bug Fixes
+
+* **WebexMeeting:** add style scoping to setup form and section ([ec28128](https://github.com/webex/widgets/commit/ec281282928a4ad52ec517c73b8104378c6d1a20))
+* **package:** update js-sdk to 1.149.2 ([8ede1dd](https://github.com/webex/widgets/commit/8ede1dda50d2bfb2342fed73abd00c4342a816f2))
+
 # [1.20.0](https://github.com/webex/widgets/compare/v1.19.1...v1.20.0) (2021-11-17)
 
 
