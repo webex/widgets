@@ -31,7 +31,7 @@ export default function WebexMeetingWidgetDemo({token}) {
     <React.Fragment>
       <h3>Webex Meeting Widget</h3>
       <h5>The Webex Meeting Widget allows you to create and join Webex meetings in your browser.</h5>
-      <form>
+      <form className="webex-form">
         <Input
           htmlId="destination"
           label="Widget Destination (email, person ID, room ID, SIP)"
