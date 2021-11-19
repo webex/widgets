@@ -36,7 +36,7 @@ export default function App() {
         </SidebarBody>
       </Sidebar>
       <div className="content flex-column">
-        <section>
+        <section className="webex-section">
           <h3>Webex Widgets Access Token</h3>
           <h5>Webex Widgets require an access token to identify the current user.</h5>
           <h5>
@@ -45,7 +45,7 @@ export default function App() {
               developer.webex.com
             </a>
           </h5>
-          <form>
+          <form className="webex-form">
             <Input
               htmlId="token"
               label="Access Token"
@@ -64,7 +64,7 @@ export default function App() {
             </Button>
           </form>
         </section>
-        <section className="fluid-height flex-column">
+        <section className="webex-section fluid-height flex-column">
           <WebexMeetingWidgetDemo token={token} />
         </section>
       </div>
