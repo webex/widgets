@@ -38,13 +38,13 @@ class WebexMeetingWidget extends Component {
       content = <WebexMediaAccess className="webex-meeting-widget__content" meetingID={meeting.ID} media="camera" logo={logo} />;
     } else {
       content = (
-        <WebexMeeting 
-          className="webex-meeting-widget__content" 
-          meetingID={meeting.ID} 
-          logo={logo} 
+        <WebexMeeting
+          className="webex-meeting-widget__content"
+          meetingID={meeting.ID}
+          logo={logo}
           controls={this.props.controls}
-          controlsCollapseRangeStart={this.props.controlsCollapseRangeStart} 
-          controlsCollapseRangeEnd={this.props.controlsCollapseRangeEnd} 
+          controlsCollapseRangeStart={this.props.controlsCollapseRangeStart}
+          controlsCollapseRangeEnd={this.props.controlsCollapseRangeEnd}
         />
       );
     }
