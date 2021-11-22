@@ -31,8 +31,7 @@
     "@momentum-ui/react": "^23.21.4",
     "@webex/component-adapter-interfaces": "^1.22.0",
     "@webex/components": "^1.202.0",
-    "@webex/sdk-component-adapter": "^1.91.0",
-    "winston": "^3.3.3"
+    "@webex/sdk-component-adapter": "^1.91.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.8.4",
