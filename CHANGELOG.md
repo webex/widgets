@@ -1,3 +1,10 @@
+## [1.20.3](https://github.com/webex/widgets/compare/v1.20.2...v1.20.3) (2021-11-22)
+
+
+### Bug Fixes
+
+* **package:** move momentum ui from dependencies to dev dependecies ([829fc65](https://github.com/webex/widgets/commit/829fc659b0d1a35852bc31412037c835ce9854c6))
+
 ## [1.20.2](https://github.com/webex/widgets/compare/v1.20.1...v1.20.2) (2021-11-20)
 
 
