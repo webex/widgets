@@ -1,3 +1,10 @@
+## [1.20.5](https://github.com/webex/widgets/compare/v1.20.4...v1.20.5) (2021-11-22)
+
+
+### Bug Fixes
+
+* **WebexMeeting:** delete the extra spaces added at the end of the line ([8606348](https://github.com/webex/widgets/commit/8606348bcb7c617f67839998804921469cdb47e6))
+
 ## [1.20.4](https://github.com/webex/widgets/compare/v1.20.3...v1.20.4) (2021-11-22)
 
 
