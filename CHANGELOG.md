@@ -1,3 +1,10 @@
+## [1.20.4](https://github.com/webex/widgets/compare/v1.20.3...v1.20.4) (2021-11-22)
+
+
+### Bug Fixes
+
+* **package:** bump react version to ^17.0.2 ([b79575a](https://github.com/webex/widgets/commit/b79575a351277a80eaa67ebbfa30d00f322520f1))
+
 ## [1.20.3](https://github.com/webex/widgets/compare/v1.20.2...v1.20.3) (2021-11-22)
 
 
