@@ -59,7 +59,7 @@ export default [
         to: 'dist/webexWidgets.css',
       }),
     ],
-    external: ['prop-types', 'react', 'react-dom', 'webex', '@webex/common'],
+    external: ['prop-types', 'react', 'react-dom', 'webex', '@webex/common', 'winston'],
     context: null,
   },
 ];
