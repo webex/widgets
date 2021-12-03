@@ -1,11 +1,11 @@
 import React, {useState} from 'react';
 import PropTypes from 'prop-types';
 import {Button, Input, Select, SelectOption} from '@momentum-ui/react';
-import './WebexMeetingWidgetDemo.scss';
+import './WebexMeetingsWidgetDemo.scss';
 
-import {WebexMeetingWidget} from '../src';
+import {WebexMeetingsWidget} from '../src';
 
-export default function WebexMeetingWidgetDemo({token}) {
+export default function WebexMeetingsWidgetDemo({token}) {
   const [destination, setDestination] = useState('');
   const [displayWidget, setDisplayWidget] = useState(false);
   const [theme, setTheme] = useState('dark');
@@ -35,8 +35,8 @@ export default function WebexMeetingWidgetDemo({token}) {
 
   return (
     <React.Fragment>
-      <h3>Webex Meeting Widget</h3>
-      <h5>The Webex Meeting Widget allows you to create and join Webex meetings in your browser.</h5>
+      <h3>Webex Meetings Widget</h3>
+      <h5>The Webex Meetings Widget allows you to create and join Webex meetings in your browser.</h5>
       <form className="webex-form">
         <Input
           htmlId="destination"
@@ -74,7 +74,7 @@ export default function WebexMeetingWidgetDemo({token}) {
         </Select>
       </form>
       {token && destination && displayWidget && (
-        <WebexMeetingWidget
+        <WebexMeetingsWidget
           accessToken={token}
           meetingDestination={destination}
           className={`webex-meeting-widget-demo wxc-theme-${theme}`}
@@ -85,10 +85,10 @@ export default function WebexMeetingWidgetDemo({token}) {
   );
 }
 
-WebexMeetingWidgetDemo.propTypes = {
+WebexMeetingsWidgetDemo.propTypes = {
   token: PropTypes.string,
 };
 
-WebexMeetingWidgetDemo.defaultProps = {
+WebexMeetingsWidgetDemo.defaultProps = {
   token: '',
 };

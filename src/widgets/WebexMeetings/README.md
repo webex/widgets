@@ -1,18 +1,10 @@
-# Webex Meeting Widget
+# Webex Meetings Widget
 
-Webex Meeting widget displays the complete, default Webex meeting experience.
+Webex Meetings widget gives developers access to embed the complete [Webex meeting experience](https://www.webex.com/video-conferencing) right in their web applications.
 
 <p align="center">
   <img src="./WebexMeeting.gif" alt="Default Webex Meeting" />
 </p>
-
-## Preview
-
-To get a preview of the Webex Meeting widget, you can run our start script:
-
-```shell
-  npm start
-```
 
 ## Embed
 
@@ -38,11 +30,11 @@ To maintain the same controls regardless of meeting state, ignore the boolean pa
 ```js
 const myControls = (isActive) => isActive ? ['leave-meeting'] : ['join-meeting'];
 
-<WebexMeetingWidget 
+<WebexMeetingWidget
   acessToken="<YOUR_ACCESS_TOKEN>"
   meetingDestination="meetingDestination"
-  controls={myControls} 
-  controlsCollapseRangeStart={0} 
+  controls={myControls}
+  controlsCollapseRangeStart={0}
   controlsCollapseRangeEnd={-2}
 />
 ```

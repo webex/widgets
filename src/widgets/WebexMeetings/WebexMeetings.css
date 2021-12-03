@@ -1,13 +1,15 @@
-.webex-meeting-widget {
+.webex-meetings-widget {
   max-width: 100%;
   min-width: 18.5rem;
-  color: var(--wxc-text-color);
+
   display: flex;
   flex-direction: column;
   align-items: stretch;
+
+  color: var(--wxc-text-color);
 }
 
-.webex-meeting-widget__content {
+.webex-meetings-widget__content {
   flex: 1;
   min-height: 0;
 }

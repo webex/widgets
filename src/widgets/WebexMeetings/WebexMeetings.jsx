@@ -6,22 +6,22 @@ import WebexSDKAdapter from '@webex/sdk-component-adapter';
 import WebexLogo from './WebexLogo';
 
 import '@webex/components/dist/css/webex-components.css';
-import './WebexMeeting.css';
+import './WebexMeetings.css';
 
 /**
- * Webex meeting widget displays the default Webex meeting experience.
+ * Webex meeting widget presents a Webex meeting experience.
  *
  * @param {string} props.meetingDestination  ID of the virtual meeting location
- * @param {string} props.accessToken        access token to create the webex instance with
- * @param {string} [props.className]        Custom CSS class to apply
- * @param {Function} [props.controls]         Controls to display
+ * @param {string} props.accessToken         Access token of the joining user
+ * @param {string} [props.layout]            Layout for remote video (e.g. grid, focus, stack, etc)
+ * @param {Function} [props.controls]        Meeting controls to display
  * @param {number} [props.controlsCollapseRangeStart]  Zero-based index of the first collapsible control (can be negative)
- * @param {number} [props.controlsCollapseRangeEnd]  Zero-based index before the last collapsible control (can be negative)
- * @param {string} [props.layout]  Layout type for remote video
+ * @param {number} [props.controlsCollapseRangeEnd]    Zero-based index before the last collapsible control (can be negative)
  * @param {string} [props.style]            Custom style to apply
+ * @param {string} [props.className]        Custom CSS class to apply
  * @returns {Object} JSX of the component
  */
-class WebexMeetingWidget extends Component {
+class WebexMeetingsWidget extends Component {
   constructor(props) {
     super(props);
   }
@@ -31,35 +31,37 @@ class WebexMeetingWidget extends Component {
     const audioPermission = meeting.localAudio?.permission;
     const videoPermission = meeting.localVideo?.permission;
     const logo = <WebexLogo />;
+    const contentClass = 'webex-meetings-widget__content';
+
     let content;
 
     if (audioPermission === 'ASKING') {
-      content = <WebexMediaAccess className="webex-meeting-widget__content" meetingID={meeting.ID} media="microphone" logo={logo} />;
+      content = <WebexMediaAccess meetingID={meeting.ID} media="microphone" logo={logo} className={contentClass} />;
     } else if (videoPermission === 'ASKING') {
-      content = <WebexMediaAccess className="webex-meeting-widget__content" meetingID={meeting.ID} media="camera" logo={logo} />;
+      content = <WebexMediaAccess meetingID={meeting.ID} media="camera" logo={logo} className={contentClass} />;
     } else {
       content = (
         <WebexMeeting
-          className="webex-meeting-widget__content"
           meetingID={meeting.ID}
           logo={logo}
           layout={this.props.layout}
           controls={this.props.controls}
           controlsCollapseRangeStart={this.props.controlsCollapseRangeStart}
           controlsCollapseRangeEnd={this.props.controlsCollapseRangeEnd}
+          className={contentClass}
         />
       );
     }
 
     return (
-      <div className={`webex-meeting-widget ${this.props.className}`} style={this.props.style}>
+      <div className={`webex-meetings-widget ${this.props.className}`} style={this.props.style}>
         {content}
       </div>
     );
   }
 }
 
-WebexMeetingWidget.propTypes = {
+WebexMeetingsWidget.propTypes = {
   accessToken: PropTypes.string.isRequired,
   className: PropTypes.string,
   controls: PropTypes.func,
@@ -70,7 +72,7 @@ WebexMeetingWidget.propTypes = {
   layout: PropTypes.string,
 };
 
-WebexMeetingWidget.defaultProps = {
+WebexMeetingsWidget.defaultProps = {
   className: '',
   controls: undefined,
   controlsCollapseRangeStart: undefined,
@@ -81,7 +83,7 @@ WebexMeetingWidget.defaultProps = {
 
 const appName = process.env.NODE_ENV === 'production' ? 'webex-widgets-meeting' : 'webex-widgets-meeting-dev';
 
-export default withAdapter(withMeeting(WebexMeetingWidget), (props) => {
+export default withAdapter(withMeeting(WebexMeetingsWidget), (props) => {
   const webex = new Webex({
     credentials: {
       access_token: props.accessToken,
@@ -89,7 +91,7 @@ export default withAdapter(withMeeting(WebexMeetingWidget), (props) => {
     config: {
       appName,
       appVersion: __appVersion__,
-    }
+    },
   });
 
   return new WebexSDKAdapter(webex);
