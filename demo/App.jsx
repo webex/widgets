@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import ReactDOM from 'react-dom';
 import {Button, Input, Sidebar, SidebarBody, SidebarNav, SidebarNavItem} from '@momentum-ui/react';
 
-import WebexMeetingWidgetDemo from './WebexMeetingWidgetDemo';
+import WebexMeetingsWidgetDemo from './WebexMeetingsWidgetDemo';
 
 import '@momentum-ui/core/css/momentum-ui.min.css';
 import './App.scss';
@@ -31,7 +31,7 @@ export default function App() {
       <Sidebar withIcons={false}>
         <SidebarBody>
           <SidebarNav title="Webex Widgets">
-            <SidebarNavItem title="Webex Meeting Widget" />
+            <SidebarNavItem title="Webex Meetings Widget" />
           </SidebarNav>
         </SidebarBody>
       </Sidebar>
@@ -65,7 +65,7 @@ export default function App() {
           </form>
         </section>
         <section className="webex-section fluid-height flex-column">
-          <WebexMeetingWidgetDemo token={token} />
+          <WebexMeetingsWidgetDemo token={token} />
         </section>
       </div>
     </React.Fragment>
