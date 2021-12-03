@@ -81,7 +81,7 @@ WebexMeetingsWidget.defaultProps = {
   style: {},
 };
 
-const appName = process.env.NODE_ENV === 'production' ? 'webex-widgets-meeting' : 'webex-widgets-meeting-dev';
+const appName = process.env.NODE_ENV === 'production' ? 'webex-widgets-meetings' : 'webex-widgets-meetings-dev';
 
 export default withAdapter(withMeeting(WebexMeetingsWidget), (props) => {
   const webex = new Webex({
