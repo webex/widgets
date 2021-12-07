@@ -135,3 +135,13 @@ const myControls = (inMeeting) => inMeeting ? ['leave-meeting'] : ['join-meeting
   controlsCollapseRangeEnd={-2}
 />
 ```
+
+## Common Issues
+
+### Mozilla Firefox limitation for accessing more than one microphone at a time
+
+In order to use audio with the Meetings widget, users have to grant access to a microphone, which is then enabled to receive audio input.
+<span style="color:red">When</span> switching microphones in a meeting, the Meetings widget will attempt to enable the new microphone requested by the user, while maintaining the current microphone active.
+The current microphone needs to be maintained activated while switching, otherwise user will lose all means of transmitting audio while the switch happens.
+In Mozilla Firefox, [there is a limitation on the number of microphones that can be active at once](https://bugzilla.mozilla.org/show_bug.cgi?id=1400488).
+Because of this limitation, microphone switching is currently <span style="color:red">not</span> possible in Firefox browsers.
