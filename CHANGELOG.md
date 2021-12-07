@@ -1,3 +1,10 @@
+# [1.21.0](https://github.com/webex/widgets/compare/v1.20.9...v1.21.0) (2021-12-07)
+
+
+### Features
+
+* **WebexMeeting:** add layoutType prop for meeting's remote video ([e261770](https://github.com/webex/widgets/commit/e261770d779c0395ac385418e6b57663494f26d0))
+
 ## [1.20.9](https://github.com/webex/widgets/compare/v1.20.8...v1.20.9) (2021-11-26)
 
 
