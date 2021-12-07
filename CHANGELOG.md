@@ -1,3 +1,10 @@
+# [1.22.0](https://github.com/webex/widgets/compare/v1.21.0...v1.22.0) (2021-12-07)
+
+
+### Features
+
+* **Meetings:** **breaking change:** rename to WebexMeetingsWidget ([a749c56](https://github.com/webex/widgets/commit/a749c5677dbce932780ae3834a067d8211b3f5e9))
+
 # [1.21.0](https://github.com/webex/widgets/compare/v1.20.9...v1.21.0) (2021-12-07)
 
 
