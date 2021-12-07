@@ -17,6 +17,7 @@ import './WebexMeeting.css';
  * @param {Function} [props.controls]         Controls to display
  * @param {number} [props.controlsCollapseRangeStart]  Zero-based index of the first collapsible control (can be negative)
  * @param {number} [props.controlsCollapseRangeEnd]  Zero-based index before the last collapsible control (can be negative)
+ * @param {string} [props.layout]  Layout type for remote video
  * @param {string} [props.style]            Custom style to apply
  * @returns {Object} JSX of the component
  */
@@ -42,6 +43,7 @@ class WebexMeetingWidget extends Component {
           className="webex-meeting-widget__content"
           meetingID={meeting.ID}
           logo={logo}
+          layout={this.props.layout}
           controls={this.props.controls}
           controlsCollapseRangeStart={this.props.controlsCollapseRangeStart}
           controlsCollapseRangeEnd={this.props.controlsCollapseRangeEnd}
@@ -65,6 +67,7 @@ WebexMeetingWidget.propTypes = {
   controlsCollapseRangeEnd: PropTypes.number,
   meetingDestination: PropTypes.string.isRequired,
   style: PropTypes.shape(),
+  layout: PropTypes.string,
 };
 
 WebexMeetingWidget.defaultProps = {
@@ -72,6 +75,7 @@ WebexMeetingWidget.defaultProps = {
   controls: undefined,
   controlsCollapseRangeStart: undefined,
   controlsCollapseRangeEnd: undefined,
+  layout: 'Grid',
   style: {},
 };
 
