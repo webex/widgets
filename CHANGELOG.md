@@ -1,3 +1,10 @@
+## [1.22.2](https://github.com/webex/widgets/compare/v1.22.1...v1.22.2) (2021-12-09)
+
+
+### Bug Fixes
+
+* **build:** use new widget file name for rollup injection of app version ([ac13daa](https://github.com/webex/widgets/commit/ac13daa6caeba83feff1d7e4c3a75d5073f541e0))
+
 ## [1.22.1](https://github.com/webex/widgets/compare/v1.22.0...v1.22.1) (2021-12-08)
 
 
