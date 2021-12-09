@@ -27,9 +27,10 @@ export default [
     output: [output('ESMWebexWidgets', 'esm')],
     plugins: [
       replace({
-        include: ['src/widgets/WebexMeeting/WebexMeeting.jsx'],
+        preventAssignment: true,
+        include: ['src/widgets/WebexMeetings/WebexMeetings.jsx'],
         values: {
-          __appVersion__: JSON.stringify(version)
+          __appVersion__: JSON.stringify(version),
         },
       }),
       resolve({

@@ -116,12 +116,12 @@ To use a Webex Widget, simply import the desired widget and render it into your 
 
 ```js
 import React from 'react';
-import {WebexMeetingWidget} from '@webex/widgets';
+import {WebexMeetingsWidget} from '@webex/widgets';
 
 import '@webex/widgets/dist/webexWidgets.css';
 
 export default function App() {
-  return <WebexMeetingWidget accessToken="<YOUR_ACCESS_TOKEN>" meetingDestination="<MEETING_DESTINATION>" />;
+  return <WebexMeetingsWidget accessToken="<YOUR_ACCESS_TOKEN>" meetingDestination="<MEETING_DESTINATION>" />;
 }
 ```
 
