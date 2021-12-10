@@ -20,19 +20,9 @@
 that follow the [Webex](https://www.webex.com) products experience,
 aimed at developers that want to embed Webex into their applications.
 
-## Project Status
-
-The Webex Component System is considered to be in beta stage and it's not a generally available product from Webex at this time.
-This means that the Webex Component System is available for everyone to use but breaking changes may occur as we develop it.
-We try our best to minimize any breaking changes but they may occur.
-While the Webex Component System is not a GA product, we still offer support through all regular channels.
-However, bug priority is given to product already generally available.
-We love for you to use the Webex Component System and be part of the feedback process!
-
 ## Table of Contents
 
 - [Install](#install)
-- [Webex Components vs Webex Widgets](#webex-components-vs-webex-widgets)
 - [Usage](#usage)
 - [Contributing](#contributing)
 - [License](#license)
@@ -42,38 +32,17 @@ We love for you to use the Webex Component System and be part of the feedback pr
 ## Install
 
 ```bash
-npm install --save webex @webex/widgets
+npx install-peerdeps @webex/widgets
 ```
 
-Notice that the [Webex Javascript SDK](https://www.npmjs.com/package/webex)
-has to be installed as a peer dependency.
-
-## Webex Components vs Webex Widgets
-
-In addition to the Webex Widgets, we also offer the
-[Webex Component System](https://github.com/webex/components#webex-components).
-The Webex Component System (sometimes shortened as _Webex Components_) is a set of
-React components that, while following Webex styling, allow for more granularity
-in terms of layout and source of data.
-To learn more on the Webex Component System head to its Github repository at
-https://github.com/webex/components.
-
-Webex Widgets are based on Webex Components but include the adapter that uses
-our [Javascript SDK](https://github.com/webex/webex-js-sdk) to talk to Webex services for you.
-This means that the Webex Widgets use the
-[SDK Component Adapter](https://github.com/webex/sdk-component-adapter#webex-sdk-component-adapter)
-to inject the Webex data.
-All you need is a valid access token and a few parameters based on the widget you want to use.
-
-You have to take the Widget layout as-is, but the benefit is that there are no configurations needed.
-Install, copy-paste and you have the power of Webex in your application!
+This will install the Widgets package, peer dependencies and dependencies.
 
 ## Usage
 
 ### Styles
 
 In order to properly style Webex Widgets, you will need to import our CSS separately.
-Import `@webex/widgets/dist/webexWidgets.css` into your main entry file.
+Import `@webex/widgets/dist/css/webex-widgets.css` into your main entry file.
 
 There are two ways to do this:
 
@@ -82,7 +51,7 @@ There are two ways to do this:
 In your `App.js[x]`, add the following import:
 
 ```js
-import '@webex/widgets/dist/webexWidgets.css';
+import '@webex/widgets/dist/css/webex-widgets.css';
 
 ...
 ```
@@ -95,7 +64,7 @@ In the `<head>` tag of your `index.html`, add the following tag:
 <head>
   ...
 
-  <link rel="stylesheet" type="text/css" href="node_modules/@webex/widgets/dist/webexWidgets.css" />
+  <link rel="stylesheet" type="text/css" href="node_modules/@webex/widgets/dist/css/webex-widgets.css" />
 </head>
 ```
 
@@ -105,25 +74,33 @@ reference accordingly.
 
 ### Widgets
 
-Please make sure to install the [Webex Javascript SDK](https://www.npmjs.com/package/webex)
-along with the [Webex Widget](https://www.npmjs.com/package/@webex/widgets) package.
+Please make sure to install the [Webex Widget](https://www.npmjs.com/package/@webex/widgets) package and related dependencies.
 
 ```bash
-npm install --save webex @webex/widgets
+npx install-peerdeps @webex/widgets
 ```
 
 To use a Webex Widget, simply import the desired widget and render it into your React application.
 
 ```js
-import React from 'react';
 import {WebexMeetingsWidget} from '@webex/widgets';
 
-import '@webex/widgets/dist/webexWidgets.css';
+import '@webex/widgets/dist/css/webex-widgets.css';
 
 export default function App() {
-  return <WebexMeetingsWidget accessToken="<YOUR_ACCESS_TOKEN>" meetingDestination="<MEETING_DESTINATION>" />;
+  return (
+    <WebexMeetingsWidget
+      style={{width: "1000px", height: "500px"}} // Substitute with any arbitrary size or use `className`
+      accessToken="<ACCESS_TOKEN>"
+      meetingDestination="<MEETING_DESTINATION>"
+    />
+  );
 }
 ```
+
+Available widgets from this package are:
+
+- [Webex Meetings widget](https://github.com/webex/widgets/tree/master/src/widgets/WebexMeetings#webex-meetings-widget)
 
 ## Contributing
 
