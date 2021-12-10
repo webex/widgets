@@ -1,3 +1,15 @@
+# [1.23.0](https://github.com/webex/widgets/compare/v1.22.3...v1.23.0) (2021-12-10)
+
+
+### Bug Fixes
+
+* **package:** update components to v1.207.1 ([5de0e2d](https://github.com/webex/widgets/commit/5de0e2d83506fc90e4e02f36e12ca42c980a0dc1))
+
+
+### Features
+
+* **rollup:** **[breaking change]*** bundle CSS under css folder ([e9bf3e4](https://github.com/webex/widgets/commit/e9bf3e4e369af22115db16045333919422b32d80))
+
 ## [1.22.3](https://github.com/webex/widgets/compare/v1.22.2...v1.22.3) (2021-12-09)
 
 
