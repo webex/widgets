@@ -46,18 +46,18 @@ export default [
       }),
       json(),
       postcss({
-        extract: 'webexWidgets.css',
+        extract: 'css/webex-widgets.css',
         minimize: true,
         plugins: [
           url({
             url: 'copy',
-            assetsPath: 'assets/',
+            assetsPath: './assets/',
             useHash: true,
           }),
         ],
         // to is required by the postcss-url plugin to
         // properly resolve assets path
-        to: 'dist/webexWidgets.css',
+        to: 'dist/css/webex-widgets.css',
       }),
     ],
     external: ['prop-types', 'react', 'react-dom', 'webex', '@webex/common', 'winston'],
