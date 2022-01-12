@@ -33,6 +33,18 @@ export default function WebexMeetingsWidgetDemo({token}) {
     setLayout(selectedLayout);
   }
 
+  const handleFullscreen = () => {
+    const demoWidget = document.querySelector('.webex-meeting-widget-demo');
+
+    if (demoWidget.requestFullscreen) {
+      demoWidget.requestFullscreen();
+    } else if (demoWidget.webkitRequestFullscreen) { /* Safari */
+      demoWidget.current.webkitRequestFullscreen();
+    } else if (demoWidget.msRequestFullscreen) { /* IE11 */
+      demoWidget.msRequestFullscreen();
+    }
+  }
+
   return (
     <React.Fragment>
       <h3>Webex Meetings Widget</h3>
@@ -59,6 +71,7 @@ export default function WebexMeetingsWidgetDemo({token}) {
         <Button disabled={!displayWidget} onClick={handleHideMeetingWidget} ariaLabel="Remove Meeting Widget">
           Remove Meeting Widget
         </Button>
+        <Button disabled={!displayWidget} onClick={handleFullscreen} ariaLabel="Display meeting widget full screen">Fullscreen</Button>
         <div className="webex-select-control">Theme</div>
         <Select defaultValue="Dark" onSelect={handleChangeTheme}>
           <SelectOption value="dark" label="Dark" />
