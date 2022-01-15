@@ -1,3 +1,10 @@
+# [1.24.0](https://github.com/webex/widgets/compare/v1.23.0...v1.24.0) (2022-01-15)
+
+
+### Features
+
+* **WebexMeetingsWidgetDemo:** add fullscreen option for meeting widget demo ([bd97418](https://github.com/webex/widgets/commit/bd974187c98792d37fa7dffcbba7b8436ede25ae))
+
 # [1.23.0](https://github.com/webex/widgets/compare/v1.22.3...v1.23.0) (2021-12-10)
 
 
