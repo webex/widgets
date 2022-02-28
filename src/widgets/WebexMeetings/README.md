@@ -150,3 +150,6 @@ Because of this limitation, microphone switching is currently <span style="color
 
 Due to the use of the getDisplayMedia(), screen sharing is not available on mobile browsers and on Internet Explorer browser.\
 It is [available on the following browsers](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getDisplayMedia#browser_compatibility): Chrome (v>=72), Edge (v>=79), Firefox (v>=66), Opera (v>=60), Safari (v>=13).
+### Devices with iOS 15.1 page refresh issue
+
+On iOS 15.1, the Meetings widget does not work with permissions granted for the camera (page refreshes after join) due to the fact that this OS version does not support the required video codecs.

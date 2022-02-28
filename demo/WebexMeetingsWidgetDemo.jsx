@@ -10,6 +10,8 @@ export default function WebexMeetingsWidgetDemo({token, fedramp}) {
   const [displayWidget, setDisplayWidget] = useState(false);
   const [theme, setTheme] = useState('dark');
   const [layout, setLayout] = useState('Grid');
+  const ON_IOS_15_1 = typeof navigator !== 'undefined'
+  && navigator.userAgent.includes('iPhone OS 15_1');
 
   const displayButtonEnabled = token && destination && !displayWidget;
 
@@ -51,6 +53,10 @@ export default function WebexMeetingsWidgetDemo({token, fedramp}) {
     <>
       <h3>Webex Meetings Widget</h3>
       <h5>The Webex Meetings Widget allows you to create and join Webex meetings in your browser.</h5>
+      {
+        ON_IOS_15_1 &&
+        <h5 className="webex-warning">We have disabled your camera because you're OS version does not support meeting with it enabled</h5>
+      }
       <form className="webex-form">
         <Input
           htmlId="destination"
