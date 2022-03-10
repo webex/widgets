@@ -145,3 +145,8 @@ In order to use audio with the Meetings widget, users have to grant access to a 
 The current microphone needs to be maintained activated while switching, otherwise user will lose all means of transmitting audio while the switch happens.
 In Mozilla Firefox, [there is a limitation on the number of microphones that can be active at once](https://bugzilla.mozilla.org/show_bug.cgi?id=1400488).
 Because of this limitation, microphone switching is currently <span style="color:red">not</span> possible in Firefox browsers.
+
+### Share screen does not work on some browsers
+
+Due to the use of the getDisplayMedia(), screen sharing is not available on mobile browsers and on Internet Explorer browser.\
+It is [available on the following browsers](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getDisplayMedia#browser_compatibility): Chrome (v>=72), Edge (v>=79), Firefox (v>=66), Opera (v>=60), Safari (v>=13).
