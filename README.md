@@ -102,6 +102,31 @@ Available widgets from this package are:
 
 - [Webex Meetings widget](https://github.com/webex/widgets/tree/master/src/widgets/WebexMeetings#webex-meetings-widget)
 
+## FedRAMP Environment
+
+To enable usage simply use the `fedramp` prop when adding the widget to your React appplication.
+
+```javascript
+import {WebexMeetingsWidget} from '@webex/widgets';
+
+import '@webex/widgets/dist/css/webex-widgets.css';
+
+export default function App() {
+  return (
+    <WebexMeetingsWidget
+      accessToken="<ACCESS_TOKEN>"
+      meetingDestination="<MEETING_DESTINATION>"
+      fedramp={true}
+    />
+  );
+```
+
+> For more information on FedRAMP visit https://developer.webex.com/docs/fedramp-overview
+
+### Features that do not work in FedRAMP
+
+- Creating Guest tokens aka JWT tokens (not a widget limitation but environment limitation)
+
 ## Contributing
 
 We'd love for you to contribute to our source code and to make the Webex Widgets even better than they are today!
