@@ -67,6 +67,7 @@ WebexMeetingsWidget.propTypes = {
   controls: PropTypes.func,
   controlsCollapseRangeStart: PropTypes.number,
   controlsCollapseRangeEnd: PropTypes.number,
+  fedramp: PropTypes.bool,
   meetingDestination: PropTypes.string.isRequired,
   style: PropTypes.shape(),
   layout: PropTypes.string,
@@ -77,6 +78,7 @@ WebexMeetingsWidget.defaultProps = {
   controls: undefined,
   controlsCollapseRangeStart: undefined,
   controlsCollapseRangeEnd: undefined,
+  fedramp: false,
   layout: 'Grid',
   style: {},
 };
@@ -91,6 +93,7 @@ export default withAdapter(withMeeting(WebexMeetingsWidget), (props) => {
     config: {
       appName,
       appVersion: __appVersion__,
+      fedramp: props.fedramp,
     },
   });
 
