@@ -5,7 +5,7 @@ import './WebexMeetingsWidgetDemo.scss';
 
 import {WebexMeetingsWidget} from '../src';
 
-export default function WebexMeetingsWidgetDemo({token}) {
+export default function WebexMeetingsWidgetDemo({token, fedramp}) {
   const [destination, setDestination] = useState('');
   const [displayWidget, setDisplayWidget] = useState(false);
   const [theme, setTheme] = useState('dark');
@@ -31,22 +31,24 @@ export default function WebexMeetingsWidgetDemo({token}) {
   const handleChangeLayout = (selectedOptions) => {
     const selectedLayout = selectedOptions[0].value;
     setLayout(selectedLayout);
-  }
+  };
 
   const handleFullscreen = () => {
     const demoWidget = document.querySelector('.webex-meeting-widget-demo');
 
     if (demoWidget.requestFullscreen) {
       demoWidget.requestFullscreen();
-    } else if (demoWidget.webkitRequestFullscreen) { /* Safari */
+    } else if (demoWidget.webkitRequestFullscreen) {
+      /* Safari */
       demoWidget.current.webkitRequestFullscreen();
-    } else if (demoWidget.msRequestFullscreen) { /* IE11 */
+    } else if (demoWidget.msRequestFullscreen) {
+      /* IE11 */
       demoWidget.msRequestFullscreen();
     }
-  }
+  };
 
   return (
-    <React.Fragment>
+    <>
       <h3>Webex Meetings Widget</h3>
       <h5>The Webex Meetings Widget allows you to create and join Webex meetings in your browser.</h5>
       <form className="webex-form">
@@ -71,7 +73,9 @@ export default function WebexMeetingsWidgetDemo({token}) {
         <Button disabled={!displayWidget} onClick={handleHideMeetingWidget} ariaLabel="Remove Meeting Widget">
           Remove Meeting Widget
         </Button>
-        <Button disabled={!displayWidget} onClick={handleFullscreen} ariaLabel="Display meeting widget full screen">Fullscreen</Button>
+        <Button disabled={!displayWidget} onClick={handleFullscreen} ariaLabel="Display meeting widget full screen">
+          Fullscreen
+        </Button>
         <div className="webex-select-control">Theme</div>
         <Select defaultValue="Dark" onSelect={handleChangeTheme}>
           <SelectOption value="dark" label="Dark" />
@@ -92,16 +96,19 @@ export default function WebexMeetingsWidgetDemo({token}) {
           meetingDestination={destination}
           className={`webex-meeting-widget-demo wxc-theme-${theme}`}
           layout={layout}
+          fedramp={fedramp}
         />
       )}
-    </React.Fragment>
+    </>
   );
 }
 
 WebexMeetingsWidgetDemo.propTypes = {
   token: PropTypes.string,
+  fedramp: PropTypes.bool,
 };
 
 WebexMeetingsWidgetDemo.defaultProps = {
   token: '',
+  fedramp: false,
 };
