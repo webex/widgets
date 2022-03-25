@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import ReactDOM from 'react-dom';
-import {Button, Input, Sidebar, SidebarBody, SidebarNav, SidebarNavItem} from '@momentum-ui/react';
+import {Button, Input, Sidebar, SidebarBody, SidebarNav, SidebarNavItem, Checkbox} from '@momentum-ui/react';
 
 import WebexMeetingsWidgetDemo from './WebexMeetingsWidgetDemo';
 
@@ -10,6 +10,7 @@ import './App.scss';
 export default function App() {
   const [tokenInput, setTokenInput] = useState('');
   const [token, setToken] = useState();
+  const [fedramp, setFedramp] = useState(false);
 
   const handleClearToken = (event) => {
     event.preventDefault();
@@ -26,8 +27,12 @@ export default function App() {
     setToken(tokenInput);
   };
 
+  function handleFedrampChange() {
+    setFedramp(!fedramp);
+  }
+
   return (
-    <React.Fragment>
+    <>
       <Sidebar withIcons={false}>
         <SidebarBody>
           <SidebarNav title="Webex Widgets">
@@ -41,11 +46,19 @@ export default function App() {
           <h5>Webex Widgets require an access token to identify the current user.</h5>
           <h5>
             You can get an access token from{' '}
-            <a href="https://developer.webex.com" target="_blank">
-              developer.webex.com
+            <a href={`https://developer${fedramp ? '-usgov' : ''}.webex.com`} target="_blank">
+              {`developer${fedramp ? '-usgov' : ''}.webex.com`}
             </a>
           </h5>
           <form className="webex-form">
+            <Checkbox
+              checked={fedramp}
+              htmlId="fedrampCheckbox"
+              label="FedRAMP"
+              onChange={handleFedrampChange}
+              value="FedRAMP"
+              disabled={!!token}
+            />
             <Input
               htmlId="token"
               label="Access Token"
@@ -65,10 +78,10 @@ export default function App() {
           </form>
         </section>
         <section className="webex-section fluid-height flex-column">
-          <WebexMeetingsWidgetDemo token={token} />
+          <WebexMeetingsWidgetDemo token={token} fedramp={fedramp} />
         </section>
       </div>
-    </React.Fragment>
+    </>
   );
 }
 
