@@ -1,3 +1,11 @@
+# [1.25.0](https://github.com/webex/widgets/compare/v1.24.0...v1.25.0) (2022-03-29)
+
+
+### Features
+
+* **demo:** add option to enable fedramp ([0c5f5e3](https://github.com/webex/widgets/commit/0c5f5e3d6d7ad3da8a1aafb4a4f7b9505674c478))
+* **WebexMeetings:** add option to enable fedramp ([66d2cea](https://github.com/webex/widgets/commit/66d2cea8fb8871ee76387a6388d96cb7c3931b0b))
+
 # [1.24.0](https://github.com/webex/widgets/compare/v1.23.0...v1.24.0) (2022-01-15)
 
 
