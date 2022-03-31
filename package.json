@@ -28,9 +28,9 @@
     "dist"
   ],
   "dependencies": {
-    "@webex/component-adapter-interfaces": "^1.26.0",
-    "@webex/components": "^1.267.1",
-    "@webex/sdk-component-adapter": "^1.108.0"
+    "@webex/component-adapter-interfaces": "^1.27.0",
+    "@webex/components": "^1.267.3",
+    "@webex/sdk-component-adapter": "^1.108.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.8.4",
