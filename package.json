@@ -28,9 +28,9 @@
     "dist"
   ],
   "dependencies": {
-    "@webex/component-adapter-interfaces": "^1.27.0",
-    "@webex/components": "^1.267.3",
-    "@webex/sdk-component-adapter": "^1.108.1"
+    "@webex/component-adapter-interfaces": "^1.30.5",
+    "@webex/components": "^1.272.1",
+    "@webex/sdk-component-adapter": "^1.112.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.8.4",
@@ -96,7 +96,7 @@
     "sass-loader": "^8.0.2",
     "semantic-release": "^18.0.0",
     "style-loader": "^1.1.3",
-    "webex": "^1.149.2",
+    "webex": "^2.54.0",
     "webpack": "^4.41.6",
     "webpack-cli": "^3.3.11",
     "webpack-dev-server": "^3.10.3"
@@ -105,7 +105,7 @@
     "prop-types": "^15.7.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "webex": "^1.157.0"
+    "webex": "^2.54.0"
   },
   "babel": {
     "presets": [
