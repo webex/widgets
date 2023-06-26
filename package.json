@@ -28,6 +28,7 @@
     "dist"
   ],
   "dependencies": {
+    "webex": "^2.54.0",
     "@webex/component-adapter-interfaces": "^1.30.5",
     "@webex/components": "^1.272.1",
     "@webex/sdk-component-adapter": "^1.112.0"
@@ -96,7 +97,6 @@
     "sass-loader": "^8.0.2",
     "semantic-release": "^18.0.0",
     "style-loader": "^1.1.3",
-    "webex": "^2.54.0",
     "webpack": "^4.41.6",
     "webpack-cli": "^3.3.11",
     "webpack-dev-server": "^3.10.3"
