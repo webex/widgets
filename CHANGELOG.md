@@ -1,3 +1,10 @@
+## [1.25.3](https://github.com/webex/widgets/compare/v1.25.2...v1.25.3) (2023-06-27)
+
+
+### Bug Fixes
+
+* move the webex to dependencies in widgets ([dd1e72a](https://github.com/webex/widgets/commit/dd1e72a71de63fadf865d9b36c44e3ac0f72b3b9))
+
 ## [1.25.2](https://github.com/webex/widgets/compare/v1.25.1...v1.25.2) (2022-04-01)
 
 
