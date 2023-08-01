@@ -1,3 +1,10 @@
+## [1.25.4](https://github.com/webex/widgets/compare/v1.25.3...v1.25.4) (2023-08-01)
+
+
+### Bug Fixes
+
+* upgrade @webex/components version ([636946d](https://github.com/webex/widgets/commit/636946d89bbd5636f8fa37ef9d2820c558d49dc4))
+
 ## [1.25.3](https://github.com/webex/widgets/compare/v1.25.2...v1.25.3) (2023-06-27)
 
 
