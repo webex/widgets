@@ -1,3 +1,10 @@
+## [1.25.5](https://github.com/webex/widgets/compare/v1.25.4...v1.25.5) (2023-10-05)
+
+
+### Bug Fixes
+
+* **meetings:** fix intermittent auto leave meeting issue ([8efff72](https://github.com/webex/widgets/commit/8efff728fab8028f8b29d741acc036d7a446b817))
+
 ## [1.25.4](https://github.com/webex/widgets/compare/v1.25.3...v1.25.4) (2023-08-01)
 
 
