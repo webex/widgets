@@ -31,6 +31,12 @@ export function createSdkInstance(accessToken) {
       access_token: process.env.WEBEX_ACCESS_TOKEN || accessToken,
     },
     config: {
+      meetings: {
+        experimental: {
+          enableUnifiedMeetings: true,
+          enableAdhocMeetings: true
+        },
+      },
       logger: {
         level: 'error',
       },
