@@ -94,6 +94,12 @@ export default withAdapter(withMeeting(WebexMeetingsWidget), (props) => {
       appName,
       appVersion: __appVersion__,
       fedramp: props.fedramp,
+      meetings: {
+        experimental: {
+          enableUnifiedMeetings: true,
+          enableAdhocMeetings: true
+        },
+      },
     },
   });
 

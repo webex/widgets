@@ -28,7 +28,7 @@
     "dist"
   ],
   "dependencies": {
-    "webex": "^2.54.0",
+    "webex": "^2.59.3",
     "@webex/component-adapter-interfaces": "^1.30.5",
     "@webex/components": "^1.272.3",
     "@webex/sdk-component-adapter": "^1.112.3"
@@ -105,7 +105,7 @@
     "prop-types": "^15.7.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "webex": "^2.54.0"
+    "webex": "^2.59.3"
   },
   "babel": {
     "presets": [

@@ -4,12 +4,23 @@ import {Button, Input, Select, SelectOption} from '@momentum-ui/react';
 import './WebexMeetingsWidgetDemo.scss';
 
 import {WebexMeetingsWidget} from '../src';
+import {deconstructHydraId} from '@webex/common';
 
 export default function WebexMeetingsWidgetDemo({token, fedramp}) {
   const [destination, setDestination] = useState('');
   const [displayWidget, setDisplayWidget] = useState(false);
   const [theme, setTheme] = useState('dark');
   const [layout, setLayout] = useState('Grid');
+  const spaceIDErrorMessage = (
+    <span>
+      Using the space ID as a destination is no longer supported. Please refer to the{' '}
+      <a href="https://github.com/webex/webex-js-sdk/wiki/Migration-guide-for-USM-meeting" target="_blank">
+        migration guide
+      </a>{' '}
+      to migrate to use the meeting ID or SIP address.
+    </span>
+  );
+  const [spaceIDError, setSpaceIDError] = useState('');
   const ON_IOS_15_1 = typeof navigator !== 'undefined'
   && navigator.userAgent.includes('iPhone OS 15_1');
 
@@ -17,7 +28,18 @@ export default function WebexMeetingsWidgetDemo({token, fedramp}) {
 
   const handleDisplayMeetingWidget = (event) => {
     event.preventDefault();
-    setDisplayWidget(true);
+    // Extract the Hydra ID for check
+    const hydraId = getHydraId(destination);
+    // Check if it's a room or not then show the meeting widget
+    if (!hydraId.room) {
+      setDisplayWidget(true);
+      // Clear the error message
+      setSpaceIDError('');
+    } else {
+      // Set the space ID error message
+      setSpaceIDError(spaceIDErrorMessage);
+      setDisplayWidget(false);
+    }
   };
 
   const handleHideMeetingWidget = (event) => {
@@ -60,7 +82,7 @@ export default function WebexMeetingsWidgetDemo({token, fedramp}) {
       <form className="webex-form">
         <Input
           htmlId="destination"
-          label="Widget Destination (email, person ID, room ID, SIP)"
+          label="Widget Destination (email, person ID, SIP)"
           name="destination"
           onChange={(event) => setDestination(event.target.value)}
           placeholder="Widget Destination"
@@ -82,6 +104,13 @@ export default function WebexMeetingsWidgetDemo({token, fedramp}) {
         <Button disabled={!displayWidget} onClick={handleFullscreen} ariaLabel="Display meeting widget full screen">
           Fullscreen
         </Button>
+        {spaceIDError &&
+          <div className="webex-select-control">
+            <div id="display-meeting-widget-status" className="webex-error">
+              {spaceIDError}
+            </div>
+          </div>
+        }
         <div className="webex-select-control">Theme</div>
         <Select defaultValue="Dark" onSelect={handleChangeTheme}>
           <SelectOption value="dark" label="Dark" />
@@ -108,6 +137,18 @@ export default function WebexMeetingsWidgetDemo({token, fedramp}) {
     </>
   );
 }
+
+const getHydraId = (destination) => {
+  const { type, id, cluster } = deconstructHydraId(destination);
+  const UUID_REG = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+  // Check if the id is a valid UUID and type is "ROOM"
+  if (id && UUID_REG.test(id) && type === "ROOM") {
+    return { room: true, destination: id, cluster };
+  }
+
+  return {};
+};
 
 WebexMeetingsWidgetDemo.propTypes = {
   token: PropTypes.string,
