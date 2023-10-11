@@ -1,3 +1,10 @@
+# [1.26.0](https://github.com/webex/widgets/compare/v1.25.5...v1.26.0) (2023-10-11)
+
+
+### Features
+
+* **meetings:** space id code change in meetings widget ([a90461b](https://github.com/webex/widgets/commit/a90461b2a0a04313b4989051321f2debd2a30e45))
+
 ## [1.25.5](https://github.com/webex/widgets/compare/v1.25.4...v1.25.5) (2023-10-05)
 
 
