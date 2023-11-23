@@ -14,7 +14,7 @@ export default function WebexMeetingsWidgetDemo({token, fedramp}) {
   const spaceIDErrorMessage = (
     <span>
       Using the space ID as a destination is no longer supported. Please refer to the{' '}
-      <a href="https://github.com/webex/webex-js-sdk/wiki/Migration-guide-for-USM-meeting" target="_blank">
+      <a href="https://github.com/webex/webex-js-sdk/wiki/Migration-to-Unified-Space-Meetings" target="_blank">
         migration guide
       </a>{' '}
       to migrate to use the meeting ID or SIP address.
