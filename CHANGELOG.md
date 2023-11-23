@@ -1,3 +1,10 @@
+## [1.26.1](https://github.com/webex/widgets/compare/v1.26.0...v1.26.1) (2023-11-23)
+
+
+### Bug Fixes
+
+* **meetings:** fix the broken link for migration guide ([be878b4](https://github.com/webex/widgets/commit/be878b4ea489ac3d98b8bec158605a558f2cc7e6))
+
 # [1.26.0](https://github.com/webex/widgets/compare/v1.25.5...v1.26.0) (2023-10-11)
 
 
