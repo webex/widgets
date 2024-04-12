@@ -166,10 +166,12 @@ Below you can find sample steps for linking a local `components` package to the 
     ```bash
     git clone git@github.com:webex/components.git
     ```
+    
 2. Build `components` code. This will generate a `dist` folder
     ```bash
     cd components
     npm install
+    npx npm-install-peers (This is required to install peer dependencies if npm version is lower than 7)
     npm run build
     ```
 
@@ -178,11 +180,13 @@ Below you can find sample steps for linking a local `components` package to the 
     "@webex/components": "file:../components", // Or corresponding path to local clone
     npm install
     ```
-4. Install dependencies of `widgets` repository and the react dependency (this is required because`components` repository uses react)
+    
+4. Install peer dependencies of `widgets` repository and the react dependency (this is required because`components` repository uses react)
     ```
     npx npm-install-peers
     npm link ../components/node_modules/react
     ```
+    
 5. Start up the widget sample
     ```
     npm run start
