@@ -31,7 +31,7 @@
     "webex": "^2.59.3",
     "@webex/component-adapter-interfaces": "^1.30.5",
     "@webex/components": "^1.272.3",
-    "@webex/sdk-component-adapter": "^1.112.3"
+    "@webex/sdk-component-adapter": "1.112.4"
   },
   "devDependencies": {
     "@babel/cli": "^7.8.4",
@@ -115,7 +115,7 @@
     "plugins": [
       "@babel/plugin-proposal-export-default-from",
       "@babel/plugin-proposal-nullish-coalescing-operator",
-      "@babel/plugin-proposal-object-rest-spread",
+      "@babel/plugin-transform-object-rest-spread",
       "@babel/plugin-proposal-optional-chaining",
       "@babel/plugin-transform-regenerator",
       "@babel/plugin-transform-runtime"
