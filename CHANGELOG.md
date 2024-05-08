@@ -1,3 +1,11 @@
+## [1.26.2](https://github.com/webex/widgets/compare/v1.26.1...v1.26.2) (2024-05-08)
+
+
+### Bug Fixes
+
+* **meeting:** fixing build error ([#220](https://github.com/webex/widgets/issues/220)) ([2a0f6e5](https://github.com/webex/widgets/commit/2a0f6e528db5ddb5c035c54994636d2cd46fa53c))
+* **meeting:** updated sdkcomponentadapter version to add password flow ([#219](https://github.com/webex/widgets/issues/219)) ([f944c4d](https://github.com/webex/widgets/commit/f944c4d77cfeb38172c9beb978183bf74648edf3))
+
 ## [1.26.1](https://github.com/webex/widgets/compare/v1.26.0...v1.26.1) (2023-11-23)
 
 
