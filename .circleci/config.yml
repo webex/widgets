@@ -5,7 +5,7 @@ executors:
   node-executor:
     working_directory: ~/widgets
     docker:
-      - image: circleci/node:20-browsers
+      - image: circleci/node:iron-browsers
 
 # reusable command for all jobs
 commands:
