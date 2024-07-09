@@ -1,3 +1,10 @@
+## [1.26.3](https://github.com/webex/widgets/compare/v1.26.2...v1.26.3) (2024-07-09)
+
+
+### Bug Fixes
+
+* **meeting:** added captcha flow ([#221](https://github.com/webex/widgets/issues/221)) ([61c0e68](https://github.com/webex/widgets/commit/61c0e68ee6018e786dd1c327de95dc53a6641774))
+
 ## [1.26.2](https://github.com/webex/widgets/compare/v1.26.1...v1.26.2) (2024-05-08)
 
 
