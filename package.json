@@ -29,8 +29,8 @@
   ],
   "dependencies": {
     "@webex/component-adapter-interfaces": "^1.30.5",
-    "@webex/sdk-component-adapter": "1.112.5",
-    "@webex/components": "^1.274.0",
+    "@webex/sdk-component-adapter": "1.112.6",
+    "@webex/components": "^1.274.2",
     "webex": "^2.59.3"
   },
   "devDependencies": {
@@ -62,7 +62,6 @@
     "@wdio/selenium-standalone-service": "^7.5.2",
     "@wdio/spec-reporter": "^7.4.3",
     "@wdio/static-server-service": "^7.5.7",
-    "@wdio/sync": "^7.27.0",
     "@webex/test-users": "^1.157.0",
     "babel-eslint": "^10.0.3",
     "babel-loader": "^8.0.6",
