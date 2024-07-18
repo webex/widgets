@@ -5,7 +5,7 @@ executors:
   node-executor:
     working_directory: ~/widgets
     docker:
-      - image: circleci/node:fermium-browsers
+      - image: cimg/node:20.13.1-browsers
 
 # reusable command for all jobs
 commands:
@@ -27,7 +27,7 @@ jobs:
             - dependency-cache-{{ checksum "package-lock.json" }}
       - run:
           name: Install Dependencies
-          command: npm i
+          command: npm i --force #Remove force once webex version is upgraded in sdk-component-adapter 
       - save_cache:
           key: dependency-cache-{{ checksum "package-lock.json" }}
           paths: node_modules
