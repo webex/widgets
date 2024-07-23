@@ -14,12 +14,20 @@ module.exports = function(env, argv) {
             filename: 'demo.bundle.[hash].js',
           }
         : undefined, // Otherwise the CleanWebpackPlugin will wipe our build during devserver
-    node: {
-      fs: 'empty', // Webex SDK `fs` dependency does not exist in browser.
-    },
+    node: {},
     devtool: argv.mode === 'production' ? 'source-map' : 'inline-source-map',
     resolve: {
       extensions: ['.js', '.jsx'],
+      fallback: {
+        "buffer": require.resolve("buffer/"),
+        "crypto": require.resolve("crypto-browserify"),
+        "os": require.resolve("os-browserify/browser"),
+        "stream": require.resolve("stream-browserify"),
+        "util": require.resolve("util/"),
+        "url": require.resolve("url/"),
+        "vm": require.resolve("vm-browserify"),
+        "fs": false
+      }
     },
     module: {
       rules: [
@@ -63,13 +71,18 @@ module.exports = function(env, argv) {
     devServer:
       argv.mode === 'development'
         ? {
-            contentBase: path.resolve(__dirname, './demo'),
+            static: {
+              directory: path.resolve(__dirname, './demo'),
+            },
             open: true,
-            overlay: true,
             hot: true,
             port: 9000,
-            stats: 'errors-warnings',
-            https: true,
+            client: {
+              overlay: true,
+            },
+            server: {
+              type: 'https',
+            },
           }
         : undefined,
     plugins: [
@@ -82,7 +95,11 @@ module.exports = function(env, argv) {
       new webpack.HotModuleReplacementPlugin(),
       new webpack.DefinePlugin({
         __appVersion__: JSON.stringify(version)
-      })
+      }),
+      new webpack.ProvidePlugin({
+        process: 'process/browser',
+        Buffer: ['buffer', 'Buffer'],
+      }),
     ],
   };
 };
