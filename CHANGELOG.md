@@ -1,3 +1,11 @@
+## [1.26.4](https://github.com/webex/widgets/compare/v1.26.3...v1.26.4) (2024-07-23)
+
+
+### Bug Fixes
+
+* **tooling:** fixed the demo build ([#224](https://github.com/webex/widgets/issues/224)) ([487b698](https://github.com/webex/widgets/commit/487b698b3f3aea3bff80f044b21c5106a65ecc24))
+* **tooling:** upgraded node version from 14 to 20 ([#222](https://github.com/webex/widgets/issues/222)) ([6ac4733](https://github.com/webex/widgets/commit/6ac4733e4716fd2cec8b114b53cb08ae24f97531))
+
 ## [1.26.3](https://github.com/webex/widgets/compare/v1.26.2...v1.26.3) (2024-07-09)
 
 
