@@ -9,7 +9,7 @@
   "scripts": {
     "build": "rollup -c",
     "demo:serve": "webpack-dev-server demo/App.jsx --mode development",
-    "demo:build": "webpack demo/App.jsx --mode production",
+    "demo:build": "node --openssl-legacy-provider node_modules/webpack/bin/webpack.js demo/App.jsx --mode production",
     "release": "semantic-release",
     "release:debug": "semantic-release --debug",
     "release:dry-run": "semantic-release --dry-run",
