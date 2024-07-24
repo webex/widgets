@@ -1,3 +1,10 @@
+## [1.26.5](https://github.com/webex/widgets/compare/v1.26.4...v1.26.5) (2024-07-24)
+
+
+### Bug Fixes
+
+* **tooling:** upgraded webpack packages and included polyfills ([#225](https://github.com/webex/widgets/issues/225)) ([a5f5482](https://github.com/webex/widgets/commit/a5f5482218c69b6f6238ab4b41226d32c32724d5))
+
 ## [1.26.4](https://github.com/webex/widgets/compare/v1.26.3...v1.26.4) (2024-07-23)
 
 
