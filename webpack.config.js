@@ -14,7 +14,6 @@ module.exports = function(env, argv) {
             filename: 'demo.bundle.[hash].js',
           }
         : undefined, // Otherwise the CleanWebpackPlugin will wipe our build during devserver
-    node: {},
     devtool: argv.mode === 'production' ? 'source-map' : 'inline-source-map',
     resolve: {
       extensions: ['.js', '.jsx'],
@@ -27,7 +26,10 @@ module.exports = function(env, argv) {
         "url": require.resolve("url/"),
         "vm": require.resolve("vm-browserify"),
         "fs": false
-      }
+      } /*
+         * In order to include polyfills for node.js core modules, we need to add a fallback 
+         * for the relevant packages as webpack 5 doesn't include them by default
+         */ 
     },
     module: {
       rules: [
@@ -78,12 +80,12 @@ module.exports = function(env, argv) {
             hot: true,
             port: 9000,
             client: {
-              overlay: true,
+              overlay: false,
             },
             server: {
               type: 'https',
             },
-          }
+          } // After upgrading webpack dev server to the latest version, config required changes as existing options were deprecated
         : undefined,
     plugins: [
       new CleanWebpackPlugin(),
@@ -96,7 +98,7 @@ module.exports = function(env, argv) {
       new webpack.DefinePlugin({
         __appVersion__: JSON.stringify(version)
       }),
-      new webpack.ProvidePlugin({
+      new webpack.ProvidePlugin({  //Fixes 'process is not defined' and 'Buffer not defined' errors
         process: 'process/browser',
         Buffer: ['buffer', 'Buffer'],
       }),
