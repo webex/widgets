@@ -1,6 +1,6 @@
 {
   "name": "@webex/widgets",
-  "version": "1.26.4",
+  "version": "1.26.5",
   "engines": {
     "node": ">=20.13.1"
   },
