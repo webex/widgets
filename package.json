@@ -32,9 +32,9 @@
   ],
   "dependencies": {
     "@webex/component-adapter-interfaces": "^1.30.5",
-    "@webex/sdk-component-adapter": "1.112.6",
+    "@webex/sdk-component-adapter": "1.112.7",
     "webex": "^2.59.3",
-    "sknth-components": "1.274.3-private"
+    "@webex/components": "1.275.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.8.4",
