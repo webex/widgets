@@ -1,3 +1,10 @@
+# [1.27.0](https://github.com/webex/widgets/compare/v1.26.5...v1.27.0) (2024-08-13)
+
+
+### Features
+
+* **react:** upgrade react to 18.3.1 ([#226](https://github.com/webex/widgets/issues/226)) ([d0e3bc1](https://github.com/webex/widgets/commit/d0e3bc1c71c53288825c49adb140c3b47c859a45))
+
 ## [1.26.5](https://github.com/webex/widgets/compare/v1.26.4...v1.26.5) (2024-07-24)
 
 
