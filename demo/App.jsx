@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import {Button, Input, Sidebar, SidebarBody, SidebarNav, SidebarNavItem, Checkbox} from '@momentum-ui/react';
 
 import WebexMeetingsWidgetDemo from './WebexMeetingsWidgetDemo';
@@ -85,4 +85,6 @@ export default function App() {
   );
 }
 
-ReactDOM.render(<App />, document.getElementById('widgets-demo'));
+const root = createRoot(document.getElementById('widgets-demo'));
+
+root.render(<App />);
