@@ -1,3 +1,10 @@
+## [1.27.1](https://github.com/webex/widgets/compare/v1.27.0...v1.27.1) (2024-10-04)
+
+
+### Bug Fixes
+
+* updated sdk-component-adapter to latest to fix joinMeeting ([#229](https://github.com/webex/widgets/issues/229)) ([7b8b3c7](https://github.com/webex/widgets/commit/7b8b3c77066be782bc8fff5f78b226f99e5c1594))
+
 # [1.27.0](https://github.com/webex/widgets/compare/v1.26.5...v1.27.0) (2024-08-13)
 
 
