@@ -32,8 +32,9 @@
   ],
   "dependencies": {
     "@webex/component-adapter-interfaces": "^1.30.5",
-    "@webex/sdk-component-adapter": "1.112.9",
-    "webex": "^2.59.3",
+    "@webex/sdk-component-adapter": "1.112.10",
+    "querystring-es3": "^0.2.1",
+    "webex": "^2.60.2",
     "@webex/components": "1.275.0"
   },
   "devDependencies": {
@@ -115,7 +116,7 @@
     "prop-types": "^15.7.2",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "webex": "^2.59.3"
+    "webex": "^2.60.2"
   },
   "babel": {
     "presets": [

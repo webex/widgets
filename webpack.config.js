@@ -25,6 +25,7 @@ module.exports = function(env, argv) {
         "util": require.resolve("util/"),
         "url": require.resolve("url/"),
         "vm": require.resolve("vm-browserify"),
+        "querystring": require.resolve('querystring-es3'),
         "fs": false
       } /*
          * In order to include polyfills for node.js core modules, we need to add a fallback 
