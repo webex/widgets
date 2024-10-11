@@ -1,3 +1,10 @@
+## [1.27.3](https://github.com/webex/widgets/compare/v1.27.2...v1.27.3) (2024-10-11)
+
+
+### Bug Fixes
+
+* updated components and sdk-component-adapter to fix Meeting Name ([#232](https://github.com/webex/widgets/issues/232)) ([3bc001c](https://github.com/webex/widgets/commit/3bc001cae51bcad5388fc6773e12e9ced2aa437f))
+
 ## [1.27.2](https://github.com/webex/widgets/compare/v1.27.1...v1.27.2) (2024-10-07)
 
 
