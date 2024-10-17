@@ -1,3 +1,10 @@
+## [1.27.4](https://github.com/webex/widgets/compare/v1.27.3...v1.27.4) (2024-10-17)
+
+
+### Bug Fixes
+
+* updated components to 1.275.2 fix meeting title margin ([#233](https://github.com/webex/widgets/issues/233)) ([fa3f23c](https://github.com/webex/widgets/commit/fa3f23c6fed813486b48a9429da3b2e825f03079))
+
 ## [1.27.3](https://github.com/webex/widgets/compare/v1.27.2...v1.27.3) (2024-10-11)
 
 
