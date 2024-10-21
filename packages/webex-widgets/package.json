@@ -1,6 +1,6 @@
 {
   "name": "@webex/widgets",
-  "version": "1.27.3",
+  "version": "1.27.4",
   "engines": {
     "node": ">=20.13.1"
   },
@@ -34,7 +34,7 @@
     "@webex/component-adapter-interfaces": "^1.30.5",
     "@webex/sdk-component-adapter": "1.112.11",
     "webex": "2.60.2",
-    "@webex/components": "1.275.1"
+    "@webex/components": "1.275.2"
   },
   "devDependencies": {
     "@babel/cli": "^7.8.4",
