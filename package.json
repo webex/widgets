@@ -32,7 +32,7 @@
   ],
   "dependencies": {
     "@webex/component-adapter-interfaces": "^1.30.5",
-    "@webex/sdk-component-adapter": "1.112.11",
+    "@webex/sdk-component-adapter": "1.112.12",
     "webex": "2.60.4",
     "@webex/components": "1.275.2"
   },
