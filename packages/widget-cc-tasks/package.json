@@ -1,0 +1,22 @@
+{
+  "name": "@webex/cc-tasks",
+  "version": "1.27.4",
+  "engines": {
+    "node": ">=20.13.1"
+  },
+  "main": "dist/webexWidgets.esm.js",
+  "module": "dist/webexWidgets.esm.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/webex/widgets.git"
+  },
+  "publishConfig": {
+    "tag": "latest",
+    "access": "public"
+  },
+  "author": "devsupport@webex.com",
+  "license": "MIT",
+  "files": [
+    "dist"
+  ]
+}
