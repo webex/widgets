@@ -1,6 +1,5 @@
 {
   "name": "webex-widgets",
-  "main": "index.js",
   "repository": "git@github.com:webex/widgets.git",
   "author": "devsupport@webex.com",
   "license": "MIT",
