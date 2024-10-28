@@ -171,23 +171,11 @@ Below you can find sample steps for linking a local `components` package to the 
     ```bash
     cd components
     npm install
-    npx npm-install-peers (This is required to install peer dependencies if npm version is lower than 7)
+    yarn workspace @webex/widgets add @webex/components@link:PATH_TO_YOUR_COMPONENTS_REPO
     yarn workspace @webex/widgets run build
     ```
-
-3. Change dependency location in `packages/@webex/widgets/package.json` and install it
-    ```
-    "@webex/components": "file:../components", // Or corresponding path to local clone
-    npm install
-    ```
     
-4. Install peer dependencies of `widgets` repository and the react dependency (this is required because`components` repository uses react)
-    ```
-    npx npm-install-peers
-    npm link ../components/node_modules/react
-    ```
-    
-5. Start up the widget sample
+3. Start up the widget sample
     ```
     yarn workspace @webex/widgets run start
     ```
