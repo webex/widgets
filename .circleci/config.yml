@@ -24,16 +24,20 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - dependency-cache-{{ checksum "package-lock.json" }}
+            - dependency-cache-{{ checksum "yarn.lock" }}
       - run:
           name: Install Dependencies
-          command: npm i --force #Remove force once webex version is upgraded in sdk-component-adapter 
+          command: yarn install
       - save_cache:
-          key: dependency-cache-{{ checksum "package-lock.json" }}
-          paths: node_modules
+          key: dependency-cache-{{ checksum "yarn.lock" }}
+          paths:
+            - node_modules
+            - packages/*/node_modules
       - persist_to_workspace:
           root: .
-          paths: node_modules
+          paths:
+            - node_modules
+            - packages/*/node_modules
 
   linter:
     executor: node-executor
@@ -41,14 +45,15 @@ jobs:
       - checkout_from_workspace
       - run:
           name: Linting
-          command: npm run test:eslint
+          command: yarn workspace @webex/widgets run test:eslint
+
   e2e_test:
     executor: node-executor
     steps:
       - checkout_from_workspace
       - run:
           name: Test E2E
-          command: npm run test:e2e
+          command: yarn workspace @webex/widgets run test:e2e
 
   build:
     executor: node-executor
@@ -56,10 +61,11 @@ jobs:
       - checkout_from_workspace
       - run:
           name: Build
-          command: npm run build
+          command: yarn workspace @webex/widgets run build
       - persist_to_workspace:
           root: .
-          paths: dist
+          paths:
+            - packages/@webex/widgets/dist
 
   docs:
     executor: node-executor
@@ -67,10 +73,11 @@ jobs:
       - checkout_from_workspace
       - run:
           name: Build Demo Into Docs Folder
-          command: npm run demo:build
+          command: yarn workspace @webex/widgets run demo:build
       - persist_to_workspace:
           root: .
-          paths: docs
+          paths:
+            - packages/@webex/widgets/docs
 
   release:
     executor: node-executor
@@ -78,9 +85,9 @@ jobs:
       - checkout_from_workspace
       - run:
           name: Release
-          command: npm run release
+          command: yarn workspace @webex/widgets run release
 
-# execute the jobs in a orderly manner
+# execute the jobs in an orderly manner
 workflows:
   setup_test_release:
     jobs:

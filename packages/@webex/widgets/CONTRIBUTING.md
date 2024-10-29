@@ -66,7 +66,7 @@ We take testing very seriously, all code changes must include unit, integration 
 
 ### Code Style
 
-Code style is enforced by [linters](https://eslint.org). Use `npm run test:eslint` to verify that your code is beautiful, too!
+Code style is enforced by [linters](https://eslint.org). Use `yarn workspace @webex/widgets run test:eslint` to verify that your code is beautiful, too!
 We highly discourage disabling eslint rules.
 Unless there is an exceptional use case, we may request additional changes to your PR.
 
@@ -171,26 +171,14 @@ Below you can find sample steps for linking a local `components` package to the 
     ```bash
     cd components
     npm install
-    npx npm-install-peers (This is required to install peer dependencies if npm version is lower than 7)
-    npm run build
-    ```
-
-3. Change dependency location in `package.json` and install it
-    ```
-    "@webex/components": "file:../components", // Or corresponding path to local clone
-    npm install
+    yarn workspace @webex/widgets add @webex/components@link:PATH_TO_YOUR_COMPONENTS_REPO
+    yarn workspace @webex/widgets run build
     ```
     
-4. Install peer dependencies of `widgets` repository and the react dependency (this is required because`components` repository uses react)
+3. Start up the widget sample
     ```
-    npx npm-install-peers
-    npm link ../components/node_modules/react
-    ```
-    
-5. Start up the widget sample
-    ```
-    npm run start
+    yarn workspace @webex/widgets run start
     ```
 
 Keep in mind that for every modification made in `components`/`sdk-component-adapter`, you need
-to run `npm run build` in the dependent repo.
+to run `yarn workspace @webex/widgets run build` in the dependent repo.
