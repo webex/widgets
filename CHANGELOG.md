@@ -1,3 +1,10 @@
+## [1.27.5](https://github.com/webex/widgets/compare/v1.27.4...v1.27.5) (2024-10-29)
+
+
+### Bug Fixes
+
+* **webex:** upgrading webex to new-version ([#235](https://github.com/webex/widgets/issues/235)) ([248aa87](https://github.com/webex/widgets/commit/248aa87c9c537d0a6ee41e2d85edc641c1cd4fc9))
+
 ## [1.27.4](https://github.com/webex/widgets/compare/v1.27.3...v1.27.4) (2024-10-17)
 
 
