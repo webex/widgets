@@ -44,3 +44,5 @@ reports/
 !package.json
 !package-lock.json
 node_modules/
+.yarn/*
+!.yarn/releases
