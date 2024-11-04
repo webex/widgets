@@ -1,12 +1,11 @@
 const path = require('path');
-const glob = require('glob');
 
 module.exports = {
   mode: 'development',
-  entry: glob.sync('./src/**/*.ts'),
+  entry: './src/index.ts', // Ensure only one entry point for index.js
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: '[name].js',
+    filename: 'index.js', // Set the output filename to index.js
     libraryTarget: 'commonjs2',
   },
   resolve: {
@@ -18,20 +17,6 @@ module.exports = {
         test: /\.(ts|tsx)$/,
         exclude: /node_modules/,
         use: 'ts-loader',
-      },
-      {
-        test: /\.(ts|tsx)$/,
-        exclude: /node_modules/,
-        use: [
-          {
-            loader: 'file-loader',
-            options: {
-              name: '[path][name].js',
-              context: 'src',
-            },
-          },
-        ],
-        enforce: 'post',
       },
     ],
   },
