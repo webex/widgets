@@ -1,10 +1,25 @@
 import React from 'react';
-import {useStationLogin} from './station-login.hooks';
+import r2wc from '@r2wc/react-to-web-component';
+import store from '@webex/widget-provider';
+import {observer} from 'mobx-react';
+
 import StationLoginPresentational from './station-login.presentational';
+import {useStationLogin} from '../hooks';
 
-export const StationLogin: React.FunctionComponent = () => {
+const StationLogin: React.FunctionComponent = observer(() => {
+  const {loginState, setLoginState, ccSdk, isAvailable} = store;
   const result = useStationLogin();
-  return <StationLoginPresentational {...result} />;
-};
 
-export default StationLogin;
+  const props = {
+    ...result,
+    loginState,
+    setLoginState,
+    ccSdk,
+    isAvailable,
+  };
+  return <StationLoginPresentational {...props} />;
+});
+
+const WebStationLogin = r2wc(StationLogin);
+
+export {StationLogin, WebStationLogin};

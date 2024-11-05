@@ -2758,6 +2758,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@r2wc/core@npm:^1.0.0":
+  version: 1.1.0
+  resolution: "@r2wc/core@npm:1.1.0"
+  checksum: 10c0/2ceb86766207cb2acbf704a71631db5e61b1d4d38bea223a28bbd21524a9a4f74fb62b96dae754d1474258465d1e43e42d7d509cf561b028beb1da324c1dff8c
+  languageName: node
+  linkType: hard
+
+"@r2wc/react-to-web-component@npm:^2.0.3":
+  version: 2.0.3
+  resolution: "@r2wc/react-to-web-component@npm:2.0.3"
+  dependencies:
+    "@r2wc/core": "npm:^1.0.0"
+  peerDependencies:
+    react: ^18.0.0
+    react-dom: ^18.0.0
+  checksum: 10c0/96b5868a7dd4553cd160640310cfcea47c95499982adedb73cab5285877031f6b587e00018dfecf6855201a9dbb2aefbc9397c7139c80ec0f7f0bdedfa9b646f
+  languageName: node
+  linkType: hard
+
 "@restart/context@npm:^2.1.4":
   version: 2.1.4
   resolution: "@restart/context@npm:2.1.4"
@@ -3314,7 +3333,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/bonjour@npm:^3.5.13":
+"@types/bonjour@npm:^3.5.13, @types/bonjour@npm:^3.5.9":
   version: 3.5.13
   resolution: "@types/bonjour@npm:3.5.13"
   dependencies:
@@ -3342,7 +3361,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/connect-history-api-fallback@npm:^1.5.4":
+"@types/connect-history-api-fallback@npm:^1.3.5, @types/connect-history-api-fallback@npm:^1.5.4":
   version: 1.5.4
   resolution: "@types/connect-history-api-fallback@npm:1.5.4"
   dependencies:
@@ -3384,7 +3403,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/estree@npm:*, @types/estree@npm:^1.0.5":
+"@types/eslint-scope@npm:^3.7.7":
+  version: 3.7.7
+  resolution: "@types/eslint-scope@npm:3.7.7"
+  dependencies:
+    "@types/eslint": "npm:*"
+    "@types/estree": "npm:*"
+  checksum: 10c0/a0ecbdf2f03912679440550817ff77ef39a30fa8bfdacaf6372b88b1f931828aec392f52283240f0d648cf3055c5ddc564544a626bcf245f3d09fcb099ebe3cc
+  languageName: node
+  linkType: hard
+
+"@types/eslint@npm:*":
+  version: 9.6.1
+  resolution: "@types/eslint@npm:9.6.1"
+  dependencies:
+    "@types/estree": "npm:*"
+    "@types/json-schema": "npm:*"
+  checksum: 10c0/69ba24fee600d1e4c5abe0df086c1a4d798abf13792d8cfab912d76817fe1a894359a1518557d21237fbaf6eda93c5ab9309143dee4c59ef54336d1b3570420e
+  languageName: node
+  linkType: hard
+
+"@types/estree@npm:*, @types/estree@npm:^1.0.5, @types/estree@npm:^1.0.6":
   version: 1.0.6
   resolution: "@types/estree@npm:1.0.6"
   checksum: 10c0/cdfd751f6f9065442cd40957c07fd80361c962869aa853c1c2fd03e101af8b9389d8ff4955a43a6fcfa223dd387a089937f95be0f3eec21ca527039fd2d9859a
@@ -3434,7 +3473,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/express@npm:^4.17.21, @types/express@npm:^4.17.8":
+"@types/express@npm:^4.17.13, @types/express@npm:^4.17.21, @types/express@npm:^4.17.8":
   version: 4.17.21
   resolution: "@types/express@npm:4.17.21"
   dependencies:
@@ -3578,7 +3617,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/json-schema@npm:^7.0.3, @types/json-schema@npm:^7.0.5, @types/json-schema@npm:^7.0.8, @types/json-schema@npm:^7.0.9":
+"@types/json-schema@npm:*, @types/json-schema@npm:^7.0.3, @types/json-schema@npm:^7.0.5, @types/json-schema@npm:^7.0.8, @types/json-schema@npm:^7.0.9":
   version: 7.0.15
   resolution: "@types/json-schema@npm:7.0.15"
   checksum: 10c0/a996a745e6c5d60292f36731dd41341339d4eeed8180bb09226e5c8d23759067692b1d88e5d91d72ee83dfc00d3aca8e7bd43ea120516c17922cbcb7c3e252db
@@ -3812,6 +3851,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/retry@npm:0.12.0":
+  version: 0.12.0
+  resolution: "@types/retry@npm:0.12.0"
+  checksum: 10c0/7c5c9086369826f569b83a4683661557cab1361bac0897a1cefa1a915ff739acd10ca0d62b01071046fe3f5a3f7f2aec80785fe283b75602dc6726781ea3e328
+  languageName: node
+  linkType: hard
+
 "@types/retry@npm:0.12.2":
   version: 0.12.2
   resolution: "@types/retry@npm:0.12.2"
@@ -3838,7 +3884,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/serve-index@npm:^1.9.4":
+"@types/serve-index@npm:^1.9.1, @types/serve-index@npm:^1.9.4":
   version: 1.9.4
   resolution: "@types/serve-index@npm:1.9.4"
   dependencies:
@@ -3847,7 +3893,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/serve-static@npm:*, @types/serve-static@npm:^1.15.5":
+"@types/serve-static@npm:*, @types/serve-static@npm:^1.13.10, @types/serve-static@npm:^1.15.5":
   version: 1.15.7
   resolution: "@types/serve-static@npm:1.15.7"
   dependencies:
@@ -3858,7 +3904,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/sockjs@npm:^0.3.36":
+"@types/sockjs@npm:^0.3.33, @types/sockjs@npm:^0.3.36":
   version: 0.3.36
   resolution: "@types/sockjs@npm:0.3.36"
   dependencies:
@@ -3995,6 +4041,15 @@ __metadata:
   dependencies:
     "@types/node": "npm:*"
   checksum: 10c0/3fd77c9e4e05c24ce42bfc7647f7506b08c40a40fe2aea236ef6d4e96fc7cb4006a81ed1b28ec9c457e177a74a72924f4768b7b4652680b42dfd52bc380e15f9
+  languageName: node
+  linkType: hard
+
+"@types/ws@npm:^8.5.5":
+  version: 8.5.13
+  resolution: "@types/ws@npm:8.5.13"
+  dependencies:
+    "@types/node": "npm:*"
+  checksum: 10c0/a5430aa479bde588e69cb9175518d72f9338b6999e3b2ae16fc03d3bdcff8347e486dc031e4ed14601260463c07e1f9a0d7511dfc653712b047c439c680b0b34
   languageName: node
   linkType: hard
 
@@ -4474,7 +4529,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/cc-station-login@workspace:packages/@webex/widget-cc-station-login":
+"@webex/cc-station-login@workspace:*, @webex/cc-station-login@workspace:packages/@webex/widget-cc-station-login":
   version: 0.0.0-use.local
   resolution: "@webex/cc-station-login@workspace:packages/@webex/widget-cc-station-login"
   dependencies:
@@ -4482,16 +4537,19 @@ __metadata:
     "@babel/preset-env": "npm:^7.25.4"
     "@babel/preset-react": "npm:^7.24.7"
     "@babel/preset-typescript": "npm:^7.25.9"
+    "@r2wc/react-to-web-component": "npm:^2.0.3"
     "@testing-library/dom": "npm:^10.4.0"
     "@testing-library/jest-dom": "npm:^6.6.2"
     "@testing-library/react": "npm:^16.0.1"
     "@types/jest": "npm:^29.5.14"
     "@types/react-test-renderer": "npm:^18"
+    "@webex/widget-provider": "workspace:*"
     babel-jest: "npm:^29.7.0"
     babel-loader: "npm:^9.2.1"
     file-loader: "npm:^6.2.0"
     jest: "npm:^29.7.0"
     jest-environment-jsdom: "npm:^29.7.0"
+    mobx-react: "npm:^9.1.1"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
     ts-loader: "npm:^9.5.1"
@@ -4501,34 +4559,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@webex/cc-tasks@workspace:packages/@webex/widget-cc-tasks":
-  version: 0.0.0-use.local
-  resolution: "@webex/cc-tasks@workspace:packages/@webex/widget-cc-tasks"
-  dependencies:
-    "@babel/core": "npm:^7.25.2"
-    "@babel/preset-env": "npm:^7.25.4"
-    "@babel/preset-react": "npm:^7.24.7"
-    "@babel/preset-typescript": "npm:^7.25.9"
-    "@testing-library/dom": "npm:^10.4.0"
-    "@testing-library/jest-dom": "npm:^6.6.2"
-    "@testing-library/react": "npm:^16.0.1"
-    "@types/jest": "npm:^29.5.14"
-    "@types/react-test-renderer": "npm:^18"
-    babel-jest: "npm:^29.7.0"
-    babel-loader: "npm:^9.2.1"
-    file-loader: "npm:^6.2.0"
-    jest: "npm:^29.7.0"
-    jest-environment-jsdom: "npm:^29.7.0"
-    react: "npm:^18.3.1"
-    react-dom: "npm:^18.3.1"
-    ts-loader: "npm:^9.5.1"
-    typescript: "npm:^5.6.3"
-    webpack: "npm:^5.94.0"
-    webpack-cli: "npm:^5.1.4"
-  languageName: unknown
-  linkType: soft
-
-"@webex/cc-user-state@workspace:packages/@webex/widget-cc-user-state":
+"@webex/cc-user-state@workspace:*, @webex/cc-user-state@workspace:packages/@webex/widget-cc-user-state":
   version: 0.0.0-use.local
   resolution: "@webex/cc-user-state@workspace:packages/@webex/widget-cc-user-state"
   dependencies:
@@ -4536,16 +4567,19 @@ __metadata:
     "@babel/preset-env": "npm:^7.25.4"
     "@babel/preset-react": "npm:^7.24.7"
     "@babel/preset-typescript": "npm:^7.25.9"
+    "@r2wc/react-to-web-component": "npm:^2.0.3"
     "@testing-library/dom": "npm:^10.4.0"
     "@testing-library/jest-dom": "npm:^6.6.2"
     "@testing-library/react": "npm:^16.0.1"
     "@types/jest": "npm:^29.5.14"
     "@types/react-test-renderer": "npm:^18"
+    "@webex/widget-provider": "workspace:*"
     babel-jest: "npm:^29.7.0"
     babel-loader: "npm:^9.2.1"
     file-loader: "npm:^6.2.0"
     jest: "npm:^29.7.0"
     jest-environment-jsdom: "npm:^29.7.0"
+    mobx-react: "npm:^9.1.1"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
     ts-loader: "npm:^9.5.1"
@@ -5172,33 +5206,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/providers-cc-widget@workspace:packages/@webex/providers-cc-widget":
-  version: 0.0.0-use.local
-  resolution: "@webex/providers-cc-widget@workspace:packages/@webex/providers-cc-widget"
-  dependencies:
-    "@babel/core": "npm:^7.25.2"
-    "@babel/preset-env": "npm:^7.25.4"
-    "@babel/preset-react": "npm:^7.24.7"
-    "@babel/preset-typescript": "npm:^7.25.9"
-    "@testing-library/dom": "npm:^10.4.0"
-    "@testing-library/jest-dom": "npm:^6.6.2"
-    "@testing-library/react": "npm:^16.0.1"
-    "@types/jest": "npm:^29.5.14"
-    "@types/react-test-renderer": "npm:^18"
-    babel-jest: "npm:^29.7.0"
-    babel-loader: "npm:^9.2.1"
-    file-loader: "npm:^6.2.0"
-    jest: "npm:^29.7.0"
-    jest-environment-jsdom: "npm:^29.7.0"
-    react: "npm:^18.3.1"
-    react-dom: "npm:^18.3.1"
-    ts-loader: "npm:^9.5.1"
-    typescript: "npm:^5.6.3"
-    webpack: "npm:^5.94.0"
-    webpack-cli: "npm:^5.1.4"
-  languageName: unknown
-  linkType: soft
-
 "@webex/sdk-component-adapter@npm:1.112.11":
   version: 1.112.11
   resolution: "@webex/sdk-component-adapter@npm:1.112.11"
@@ -5389,6 +5396,34 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@webex/widget-provider@workspace:*, @webex/widget-provider@workspace:packages/@webex/widget-provider":
+  version: 0.0.0-use.local
+  resolution: "@webex/widget-provider@workspace:packages/@webex/widget-provider"
+  dependencies:
+    "@babel/core": "npm:^7.25.2"
+    "@babel/preset-env": "npm:^7.25.4"
+    "@babel/preset-react": "npm:^7.24.7"
+    "@babel/preset-typescript": "npm:^7.25.9"
+    "@testing-library/dom": "npm:^10.4.0"
+    "@testing-library/jest-dom": "npm:^6.6.2"
+    "@testing-library/react": "npm:^16.0.1"
+    "@types/jest": "npm:^29.5.14"
+    "@types/react-test-renderer": "npm:^18"
+    babel-jest: "npm:^29.7.0"
+    babel-loader: "npm:^9.2.1"
+    file-loader: "npm:^6.2.0"
+    jest: "npm:^29.7.0"
+    jest-environment-jsdom: "npm:^29.7.0"
+    mobx: "npm:^6.13.5"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    ts-loader: "npm:^9.5.1"
+    typescript: "npm:^5.6.3"
+    webpack: "npm:^5.94.0"
+    webpack-cli: "npm:^5.1.4"
+  languageName: unknown
+  linkType: soft
+
 "@webex/widgets@workspace:packages/@webex/widgets":
   version: 0.0.0-use.local
   resolution: "@webex/widgets@workspace:packages/@webex/widgets"
@@ -5479,6 +5514,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@webpack-cli/configtest@npm:^1.2.0":
+  version: 1.2.0
+  resolution: "@webpack-cli/configtest@npm:1.2.0"
+  peerDependencies:
+    webpack: 4.x.x || 5.x.x
+    webpack-cli: 4.x.x
+  checksum: 10c0/560e4dbd92fc6e4f574654fb1325b90d02c634bcdf8564c22b0e44c1ecf8db828fbea9f20d0546fa809002bd27b1b6f544f74b13bd5ccdee64e8e9368df46cc2
+  languageName: node
+  linkType: hard
+
 "@webpack-cli/configtest@npm:^2.1.1":
   version: 2.1.1
   resolution: "@webpack-cli/configtest@npm:2.1.1"
@@ -5489,6 +5534,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@webpack-cli/info@npm:^1.5.0":
+  version: 1.5.0
+  resolution: "@webpack-cli/info@npm:1.5.0"
+  dependencies:
+    envinfo: "npm:^7.7.3"
+  peerDependencies:
+    webpack-cli: 4.x.x
+  checksum: 10c0/3e7c7ceb30b15fecdf5b5492494fbc76accee27748445c04f2bf66d0c036793b59ae7c27f5f4f6013a500aeae82762244c51f49c1de3d046e0b2dcfe163b642b
+  languageName: node
+  linkType: hard
+
 "@webpack-cli/info@npm:^2.0.2":
   version: 2.0.2
   resolution: "@webpack-cli/info@npm:2.0.2"
@@ -5496,6 +5552,18 @@ __metadata:
     webpack: 5.x.x
     webpack-cli: 5.x.x
   checksum: 10c0/ca88a35604dc9aedac7c26e8f6793c5039dc1eea2b12a85fbfd669a5f21ecf9cf169d7fd157ea366a62666e3fa05b776306a96742ac61a9868f44fdce6b40f7d
+  languageName: node
+  linkType: hard
+
+"@webpack-cli/serve@npm:^1.7.0":
+  version: 1.7.0
+  resolution: "@webpack-cli/serve@npm:1.7.0"
+  peerDependencies:
+    webpack-cli: 4.x.x
+  peerDependenciesMeta:
+    webpack-dev-server:
+      optional: true
+  checksum: 10c0/a2045c6ada073c517820424f97264a99c809e8bfdef866f5af7ceaefff44580351e9713b06d68e326469bd170111e370942825adcdac7eb242b2ee4343458a81
   languageName: node
   linkType: hard
 
@@ -5644,6 +5712,15 @@ __metadata:
   bin:
     acorn: bin/acorn
   checksum: 10c0/f35dd53d68177c90699f4c37d0bb205b8abe036d955d0eb011ddb7f14a81e6fd0f18893731c457c1b5bd96754683f4c3d80d9a5585ddecaa53cdf84e0b3d68f7
+  languageName: node
+  linkType: hard
+
+"acorn@npm:^8.14.0":
+  version: 8.14.0
+  resolution: "acorn@npm:8.14.0"
+  bin:
+    acorn: bin/acorn
+  checksum: 10c0/6d4ee461a7734b2f48836ee0fbb752903606e576cc100eb49340295129ca0b452f3ba91ddd4424a1d4406a98adfb2ebb6bd0ff4c49d7a0930c10e462719bbfd7
   languageName: node
   linkType: hard
 
@@ -6881,7 +6958,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bonjour-service@npm:^1.2.1":
+"bonjour-service@npm:^1.0.11, bonjour-service@npm:^1.2.1":
   version: 1.2.1
   resolution: "bonjour-service@npm:1.2.1"
   dependencies:
@@ -7586,7 +7663,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chokidar@npm:^3.0.0, chokidar@npm:^3.6.0":
+"chokidar@npm:^3.0.0, chokidar@npm:^3.5.3, chokidar@npm:^3.6.0":
   version: 3.6.0
   resolution: "chokidar@npm:3.6.0"
   dependencies:
@@ -8022,7 +8099,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"commander@npm:^7.2.0":
+"commander@npm:^7.0.0, commander@npm:^7.2.0":
   version: 7.2.0
   resolution: "commander@npm:7.2.0"
   checksum: 10c0/8d690ff13b0356df7e0ebbe6c59b4712f754f4b724d4f473d3cc5b3fdcf978e3a5dc3078717858a2ceb50b0f84d0660a7f22a96cdc50fb877d0c9bb31593d23a
@@ -9006,6 +9083,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"default-gateway@npm:^6.0.3":
+  version: 6.0.3
+  resolution: "default-gateway@npm:6.0.3"
+  dependencies:
+    execa: "npm:^5.0.0"
+  checksum: 10c0/5184f9e6e105d24fb44ade9e8741efa54bb75e84625c1ea78c4ef8b81dff09ca52d6dbdd1185cf0dc655bb6b282a64fffaf7ed2dd561b8d9ad6f322b1f039aba
+  languageName: node
+  linkType: hard
+
 "defaults@npm:^1.0.3":
   version: 1.0.4
   resolution: "defaults@npm:1.0.4"
@@ -9030,6 +9116,13 @@ __metadata:
     es-errors: "npm:^1.3.0"
     gopd: "npm:^1.0.1"
   checksum: 10c0/dea0606d1483eb9db8d930d4eac62ca0fa16738b0b3e07046cddfacf7d8c868bbe13fa0cb263eb91c7d0d527960dc3f2f2471a69ed7816210307f6744fe62e37
+  languageName: node
+  linkType: hard
+
+"define-lazy-prop@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "define-lazy-prop@npm:2.0.0"
+  checksum: 10c0/db6c63864a9d3b7dc9def55d52764968a5af296de87c1b2cc71d8be8142e445208071953649e0386a8cc37cfcf9a2067a47207f1eb9ff250c2a269658fdae422
   languageName: node
   linkType: hard
 
@@ -10495,7 +10588,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"express@npm:^4.14.0, express@npm:^4.19.2":
+"express@npm:^4.14.0, express@npm:^4.17.3, express@npm:^4.19.2":
   version: 4.21.1
   resolution: "express@npm:4.21.1"
   dependencies:
@@ -11244,6 +11337,13 @@ __metadata:
   dependencies:
     minipass: "npm:^7.0.3"
   checksum: 10c0/63e80da2ff9b621e2cb1596abcb9207f1cf82b968b116ccd7b959e3323144cce7fb141462200971c38bbf2ecca51695069db45265705bed09a7cd93ae5b89f94
+  languageName: node
+  linkType: hard
+
+"fs-monkey@npm:^1.0.4":
+  version: 1.0.6
+  resolution: "fs-monkey@npm:1.0.6"
+  checksum: 10c0/6f2508e792a47e37b7eabd5afc79459c1ea72bce2a46007d2b7ed0bfc3a4d64af38975c6eb7e93edb69ac98bbb907c13ff1b1579b2cf52d3d02dbc0303fca79f
   languageName: node
   linkType: hard
 
@@ -12028,7 +12128,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"html-entities@npm:^2.4.0":
+"html-entities@npm:^2.3.2, html-entities@npm:^2.4.0, html-entities@npm:^2.5.2":
   version: 2.5.2
   resolution: "html-entities@npm:2.5.2"
   checksum: 10c0/f20ffb4326606245c439c231de40a7c560607f639bf40ffbfb36b4c70729fd95d7964209045f1a4e62fe17f2364cef3d6e49b02ea09016f207fde51c2211e481
@@ -12089,7 +12189,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"html-webpack-plugin@npm:^5.6.0":
+"html-webpack-plugin@npm:^5.6.0, html-webpack-plugin@npm:^5.6.3":
   version: 5.6.3
   resolution: "html-webpack-plugin@npm:5.6.3"
   dependencies:
@@ -12597,6 +12697,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"interpret@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "interpret@npm:2.2.0"
+  checksum: 10c0/c0ef90daec6c4120bb7a226fa09a9511f6b5618aa9c94cf4641472f486948e643bb3b36efbd0136bbffdee876435af9fdf7bbb4622f5a16778eed5397f8a1946
+  languageName: node
+  linkType: hard
+
 "interpret@npm:^3.1.1":
   version: 3.1.1
   resolution: "interpret@npm:3.1.1"
@@ -12654,7 +12761,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ipaddr.js@npm:^2.1.0":
+"ipaddr.js@npm:^2.0.1, ipaddr.js@npm:^2.1.0":
   version: 2.2.0
   resolution: "ipaddr.js@npm:2.2.0"
   checksum: 10c0/e4ee875dc1bd92ac9d27e06cfd87cdb63ca786ff9fd7718f1d4f7a8ef27db6e5d516128f52d2c560408cbb75796ac2f83ead669e73507c86282d45f84c5abbb6
@@ -12836,7 +12943,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"is-docker@npm:^2.0.0":
+"is-docker@npm:^2.0.0, is-docker@npm:^2.1.1":
   version: 2.2.1
   resolution: "is-docker@npm:2.2.1"
   bin:
@@ -14505,7 +14612,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"launch-editor@npm:^2.6.1":
+"launch-editor@npm:^2.6.0, launch-editor@npm:^2.6.1":
   version: 2.9.1
   resolution: "launch-editor@npm:2.9.1"
   dependencies:
@@ -15544,6 +15651,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"memfs@npm:^3.4.3":
+  version: 3.5.3
+  resolution: "memfs@npm:3.5.3"
+  dependencies:
+    fs-monkey: "npm:^1.0.4"
+  checksum: 10c0/038fc81bce17ea92dde15aaa68fa0fdaf4960c721ce3ffc7c2cb87a259333f5159784ea48b3b72bf9e054254d9d0d0d5209d0fdc3d07d08653a09933b168fbd7
+  languageName: node
+  linkType: hard
+
 "memfs@npm:^4.6.0":
   version: 4.14.0
   resolution: "memfs@npm:4.14.0"
@@ -16086,6 +16202,47 @@ __metadata:
   bin:
     mkdirp: dist/cjs/src/bin.js
   checksum: 10c0/96f551c651dd8f5f9435d53df1a7b9bfc553be769ee6da5192c37c1f303a376ef1c6996f96913d4a8d357060451d4526a346031d1919f92c58806a5fa3cd8dfe
+  languageName: node
+  linkType: hard
+
+"mobx-react-lite@npm:^4.0.7":
+  version: 4.0.7
+  resolution: "mobx-react-lite@npm:4.0.7"
+  dependencies:
+    use-sync-external-store: "npm:^1.2.0"
+  peerDependencies:
+    mobx: ^6.9.0
+    react: ^16.8.0 || ^17 || ^18
+  peerDependenciesMeta:
+    react-dom:
+      optional: true
+    react-native:
+      optional: true
+  checksum: 10c0/175e190c5e6c35136ce2b8ef7e9ddeae68b180b585a907a891cd1781038c97eaad195ce9846b0f8e6fe87ac8bc005e31310003d1f7b402f81e460b9411d801d8
+  languageName: node
+  linkType: hard
+
+"mobx-react@npm:^9.1.1":
+  version: 9.1.1
+  resolution: "mobx-react@npm:9.1.1"
+  dependencies:
+    mobx-react-lite: "npm:^4.0.7"
+  peerDependencies:
+    mobx: ^6.9.0
+    react: ^16.8.0 || ^17 || ^18
+  peerDependenciesMeta:
+    react-dom:
+      optional: true
+    react-native:
+      optional: true
+  checksum: 10c0/77ced87e1657c949e73ff0386ce50b90c53ef4ced36c9cca53dfad693a3e13bc5690c513b855eb486c558191d7a05ee953e73c593054e915ee016fc4516310f8
+  languageName: node
+  linkType: hard
+
+"mobx@npm:^6.13.5":
+  version: 6.13.5
+  resolution: "mobx@npm:6.13.5"
+  checksum: 10c0/43691c836363aa1f13c44e43c86ab89fc8f4b83ef408bc6c68d799260e74b4ff08ebba2ef16bda447c6b7bca3558768e15927c0b21ffbb10e99b610783f28859
   languageName: node
   linkType: hard
 
@@ -17008,6 +17165,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"open@npm:^8.0.9":
+  version: 8.4.2
+  resolution: "open@npm:8.4.2"
+  dependencies:
+    define-lazy-prop: "npm:^2.0.0"
+    is-docker: "npm:^2.1.1"
+    is-wsl: "npm:^2.2.0"
+  checksum: 10c0/bb6b3a58401dacdb0aad14360626faf3fb7fba4b77816b373495988b724fb48941cad80c1b65d62bb31a17609b2cd91c41a181602caea597ca80dfbcc27e84c9
+  languageName: node
+  linkType: hard
+
 "opencollective-postinstall@npm:^2.0.2":
   version: 2.0.3
   resolution: "opencollective-postinstall@npm:2.0.3"
@@ -17240,6 +17408,16 @@ __metadata:
   version: 2.1.0
   resolution: "p-reduce@npm:2.1.0"
   checksum: 10c0/27b8ff0fb044995507a06cd6357dffba0f2b98862864745972562a21885d7906ce5c794036d2aaa63ef6303158e41e19aed9f19651dfdafb38548ecec7d0de15
+  languageName: node
+  linkType: hard
+
+"p-retry@npm:^4.5.0":
+  version: 4.6.2
+  resolution: "p-retry@npm:4.6.2"
+  dependencies:
+    "@types/retry": "npm:0.12.0"
+    retry: "npm:^0.13.1"
+  checksum: 10c0/d58512f120f1590cfedb4c2e0c42cb3fa66f3cea8a4646632fcb834c56055bb7a6f138aa57b20cc236fb207c9d694e362e0b5c2b14d9b062f67e8925580c73b0
   languageName: node
   linkType: hard
 
@@ -19127,6 +19305,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"rechoir@npm:^0.7.0":
+  version: 0.7.1
+  resolution: "rechoir@npm:0.7.1"
+  dependencies:
+    resolve: "npm:^1.9.0"
+  checksum: 10c0/22c565f89845f8b9a0574d8bbc157fe489612d2882d036b5520640d4395dc837a997225de535513a847c5fcc47b7e0530b8c84e0ca51fa17dff44a83f41b2568
+  languageName: node
+  linkType: hard
+
 "rechoir@npm:^0.8.0":
   version: 0.8.0
   resolution: "rechoir@npm:0.8.0"
@@ -19462,7 +19649,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"resolve@npm:^1.10.0, resolve@npm:^1.12.0, resolve@npm:^1.14.2, resolve@npm:^1.17.0, resolve@npm:^1.19.0, resolve@npm:^1.20.0, resolve@npm:^1.22.4":
+"resolve@npm:^1.10.0, resolve@npm:^1.12.0, resolve@npm:^1.14.2, resolve@npm:^1.17.0, resolve@npm:^1.19.0, resolve@npm:^1.20.0, resolve@npm:^1.22.4, resolve@npm:^1.9.0":
   version: 1.22.8
   resolution: "resolve@npm:1.22.8"
   dependencies:
@@ -19488,7 +19675,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"resolve@patch:resolve@npm%3A^1.10.0#optional!builtin<compat/resolve>, resolve@patch:resolve@npm%3A^1.12.0#optional!builtin<compat/resolve>, resolve@patch:resolve@npm%3A^1.14.2#optional!builtin<compat/resolve>, resolve@patch:resolve@npm%3A^1.17.0#optional!builtin<compat/resolve>, resolve@patch:resolve@npm%3A^1.19.0#optional!builtin<compat/resolve>, resolve@patch:resolve@npm%3A^1.20.0#optional!builtin<compat/resolve>, resolve@patch:resolve@npm%3A^1.22.4#optional!builtin<compat/resolve>":
+"resolve@patch:resolve@npm%3A^1.10.0#optional!builtin<compat/resolve>, resolve@patch:resolve@npm%3A^1.12.0#optional!builtin<compat/resolve>, resolve@patch:resolve@npm%3A^1.14.2#optional!builtin<compat/resolve>, resolve@patch:resolve@npm%3A^1.17.0#optional!builtin<compat/resolve>, resolve@patch:resolve@npm%3A^1.19.0#optional!builtin<compat/resolve>, resolve@patch:resolve@npm%3A^1.20.0#optional!builtin<compat/resolve>, resolve@patch:resolve@npm%3A^1.22.4#optional!builtin<compat/resolve>, resolve@patch:resolve@npm%3A^1.9.0#optional!builtin<compat/resolve>":
   version: 1.22.8
   resolution: "resolve@patch:resolve@npm%3A1.22.8#optional!builtin<compat/resolve>::version=1.22.8&hash=c3c19d"
   dependencies:
@@ -19975,7 +20162,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"selfsigned@npm:^2.4.1":
+"selfsigned@npm:^2.1.1, selfsigned@npm:^2.4.1":
   version: 2.4.1
   resolution: "selfsigned@npm:2.4.1"
   dependencies:
@@ -22229,6 +22416,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"use-sync-external-store@npm:^1.2.0":
+  version: 1.2.2
+  resolution: "use-sync-external-store@npm:1.2.2"
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0
+  checksum: 10c0/23b1597c10adf15b26ade9e8c318d8cc0abc9ec0ab5fc7ca7338da92e89c2536abd150a5891bf076836c352fdfa104fc7231fb48f806fd9960e0cbe03601abaf
+  languageName: node
+  linkType: hard
+
 "use@npm:^3.1.0":
   version: 3.1.1
   resolution: "use@npm:3.1.1"
@@ -22525,8 +22721,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "webex-widgets@workspace:."
   dependencies:
+    html-webpack-plugin: "npm:^5.6.3"
     node-gyp: "npm:^10.2.0"
     typescript: "npm:^5.6.3"
+    webpack: "npm:^5.96.1"
+    webpack-cli: "npm:^5.1.4"
+    webpack-dev-server: "npm:^5.1.0"
   languageName: unknown
   linkType: soft
 
@@ -22574,6 +22774,39 @@ __metadata:
   languageName: node
   linkType: hard
 
+"webpack-cli@npm:^4.0.0":
+  version: 4.10.0
+  resolution: "webpack-cli@npm:4.10.0"
+  dependencies:
+    "@discoveryjs/json-ext": "npm:^0.5.0"
+    "@webpack-cli/configtest": "npm:^1.2.0"
+    "@webpack-cli/info": "npm:^1.5.0"
+    "@webpack-cli/serve": "npm:^1.7.0"
+    colorette: "npm:^2.0.14"
+    commander: "npm:^7.0.0"
+    cross-spawn: "npm:^7.0.3"
+    fastest-levenshtein: "npm:^1.0.12"
+    import-local: "npm:^3.0.2"
+    interpret: "npm:^2.2.0"
+    rechoir: "npm:^0.7.0"
+    webpack-merge: "npm:^5.7.3"
+  peerDependencies:
+    webpack: 4.x.x || 5.x.x
+  peerDependenciesMeta:
+    "@webpack-cli/generators":
+      optional: true
+    "@webpack-cli/migrate":
+      optional: true
+    webpack-bundle-analyzer:
+      optional: true
+    webpack-dev-server:
+      optional: true
+  bin:
+    webpack-cli: bin/cli.js
+  checksum: 10c0/e144821a3eaf8c2598e80d6bc8b1b4035e6f5cb0046b3090ad0f858f87480f007127d5c5efa83c79436df3f31e0c0d6033fd9ea93526395984ef986ba5d72aa3
+  languageName: node
+  linkType: hard
+
 "webpack-cli@npm:^5.1.4":
   version: 5.1.4
   resolution: "webpack-cli@npm:5.1.4"
@@ -22606,6 +22839,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"webpack-dev-middleware@npm:^5.3.4":
+  version: 5.3.4
+  resolution: "webpack-dev-middleware@npm:5.3.4"
+  dependencies:
+    colorette: "npm:^2.0.10"
+    memfs: "npm:^3.4.3"
+    mime-types: "npm:^2.1.31"
+    range-parser: "npm:^1.2.1"
+    schema-utils: "npm:^4.0.0"
+  peerDependencies:
+    webpack: ^4.0.0 || ^5.0.0
+  checksum: 10c0/257df7d6bc5494d1d3cb66bba70fbdf5a6e0423e39b6420f7631aeb52435afbfbff8410a62146dcdf3d2f945c62e03193aae2ac1194a2f7d5a2523b9d194e9e1
+  languageName: node
+  linkType: hard
+
 "webpack-dev-middleware@npm:^7.4.2":
   version: 7.4.2
   resolution: "webpack-dev-middleware@npm:7.4.2"
@@ -22625,7 +22873,54 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack-dev-server@npm:^5.0.4":
+"webpack-dev-server@npm:^4.0.0":
+  version: 4.15.2
+  resolution: "webpack-dev-server@npm:4.15.2"
+  dependencies:
+    "@types/bonjour": "npm:^3.5.9"
+    "@types/connect-history-api-fallback": "npm:^1.3.5"
+    "@types/express": "npm:^4.17.13"
+    "@types/serve-index": "npm:^1.9.1"
+    "@types/serve-static": "npm:^1.13.10"
+    "@types/sockjs": "npm:^0.3.33"
+    "@types/ws": "npm:^8.5.5"
+    ansi-html-community: "npm:^0.0.8"
+    bonjour-service: "npm:^1.0.11"
+    chokidar: "npm:^3.5.3"
+    colorette: "npm:^2.0.10"
+    compression: "npm:^1.7.4"
+    connect-history-api-fallback: "npm:^2.0.0"
+    default-gateway: "npm:^6.0.3"
+    express: "npm:^4.17.3"
+    graceful-fs: "npm:^4.2.6"
+    html-entities: "npm:^2.3.2"
+    http-proxy-middleware: "npm:^2.0.3"
+    ipaddr.js: "npm:^2.0.1"
+    launch-editor: "npm:^2.6.0"
+    open: "npm:^8.0.9"
+    p-retry: "npm:^4.5.0"
+    rimraf: "npm:^3.0.2"
+    schema-utils: "npm:^4.0.0"
+    selfsigned: "npm:^2.1.1"
+    serve-index: "npm:^1.9.1"
+    sockjs: "npm:^0.3.24"
+    spdy: "npm:^4.0.2"
+    webpack-dev-middleware: "npm:^5.3.4"
+    ws: "npm:^8.13.0"
+  peerDependencies:
+    webpack: ^4.37.0 || ^5.0.0
+  peerDependenciesMeta:
+    webpack:
+      optional: true
+    webpack-cli:
+      optional: true
+  bin:
+    webpack-dev-server: bin/webpack-dev-server.js
+  checksum: 10c0/625bd5b79360afcf98782c8b1fd710b180bb0e96d96b989defff550c546890010ceea82ffbecb2a0a23f7f018bc72f2dee7b3070f7b448fb0110df6657fb2904
+  languageName: node
+  linkType: hard
+
+"webpack-dev-server@npm:^5.0.4, webpack-dev-server@npm:^5.1.0":
   version: 5.1.0
   resolution: "webpack-dev-server@npm:5.1.0"
   dependencies:
@@ -22685,6 +22980,42 @@ __metadata:
   version: 3.2.3
   resolution: "webpack-sources@npm:3.2.3"
   checksum: 10c0/2ef63d77c4fad39de4a6db17323d75eb92897b32674e97d76f0a1e87c003882fc038571266ad0ef581ac734cbe20952912aaa26155f1905e96ce251adbb1eb4e
+  languageName: node
+  linkType: hard
+
+"webpack@npm:^5.0.0, webpack@npm:^5.96.1":
+  version: 5.96.1
+  resolution: "webpack@npm:5.96.1"
+  dependencies:
+    "@types/eslint-scope": "npm:^3.7.7"
+    "@types/estree": "npm:^1.0.6"
+    "@webassemblyjs/ast": "npm:^1.12.1"
+    "@webassemblyjs/wasm-edit": "npm:^1.12.1"
+    "@webassemblyjs/wasm-parser": "npm:^1.12.1"
+    acorn: "npm:^8.14.0"
+    browserslist: "npm:^4.24.0"
+    chrome-trace-event: "npm:^1.0.2"
+    enhanced-resolve: "npm:^5.17.1"
+    es-module-lexer: "npm:^1.2.1"
+    eslint-scope: "npm:5.1.1"
+    events: "npm:^3.2.0"
+    glob-to-regexp: "npm:^0.4.1"
+    graceful-fs: "npm:^4.2.11"
+    json-parse-even-better-errors: "npm:^2.3.1"
+    loader-runner: "npm:^4.2.0"
+    mime-types: "npm:^2.1.27"
+    neo-async: "npm:^2.6.2"
+    schema-utils: "npm:^3.2.0"
+    tapable: "npm:^2.1.1"
+    terser-webpack-plugin: "npm:^5.3.10"
+    watchpack: "npm:^2.4.1"
+    webpack-sources: "npm:^3.2.3"
+  peerDependenciesMeta:
+    webpack-cli:
+      optional: true
+  bin:
+    webpack: bin/webpack.js
+  checksum: 10c0/ae6052fde9a546f79f14987b65823ba4024c6642a8489339ecfee7a351dff93325842aad453295bbdc6b65fb1690e4ef07529db63aa84ece55c7869e991a0039
   languageName: node
   linkType: hard
 
@@ -22915,6 +23246,41 @@ __metadata:
   languageName: node
   linkType: hard
 
+"widget-in-react@workspace:docs/react-samples":
+  version: 0.0.0-use.local
+  resolution: "widget-in-react@workspace:docs/react-samples"
+  dependencies:
+    "@babel/core": "npm:^7.25.2"
+    "@babel/preset-env": "npm:^7.25.4"
+    "@babel/preset-react": "npm:^7.24.7"
+    "@babel/preset-typescript": "npm:^7.25.9"
+    "@r2wc/react-to-web-component": "npm:^2.0.3"
+    "@testing-library/dom": "npm:^10.4.0"
+    "@testing-library/jest-dom": "npm:^6.6.2"
+    "@testing-library/react": "npm:^16.0.1"
+    "@types/jest": "npm:^29.5.14"
+    "@types/react-test-renderer": "npm:^18"
+    "@webex/cc-station-login": "workspace:*"
+    "@webex/cc-user-state": "workspace:*"
+    "@webex/widget-provider": "workspace:*"
+    babel-jest: "npm:^29.7.0"
+    babel-loader: "npm:^9.2.1"
+    file-loader: "npm:^6.2.0"
+    html-entities: "npm:^2.5.2"
+    html-webpack-plugin: "npm:^5.6.3"
+    jest: "npm:^29.7.0"
+    jest-environment-jsdom: "npm:^29.7.0"
+    mobx-react: "npm:^9.1.1"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    ts-loader: "npm:^9.5.1"
+    typescript: "npm:^5.6.3"
+    webpack: "npm:^5.0.0"
+    webpack-cli: "npm:^4.0.0"
+    webpack-dev-server: "npm:^4.0.0"
+  languageName: unknown
+  linkType: soft
+
 "wildcard@npm:^2.0.0":
   version: 2.0.1
   resolution: "wildcard@npm:2.0.1"
@@ -23061,7 +23427,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ws@npm:^8.11.0, ws@npm:^8.18.0, ws@npm:^8.2.2":
+"ws@npm:^8.11.0, ws@npm:^8.13.0, ws@npm:^8.18.0, ws@npm:^8.2.2":
   version: 8.18.0
   resolution: "ws@npm:8.18.0"
   peerDependencies:

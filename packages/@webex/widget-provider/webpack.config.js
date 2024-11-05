@@ -2,7 +2,7 @@ const path = require('path');
 
 module.exports = {
   mode: 'development',
-  entry: './src/index.ts', // Ensure only one entry point for index.js
+  entry: './index.ts', // Ensure only one entry point for index.js
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'index.js', // Set the output filename to index.js

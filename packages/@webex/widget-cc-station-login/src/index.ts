@@ -1,4 +1,3 @@
-import StationLogin from './station-login';
-import USEmergencyNumber from './us-emergency-number';
+import {StationLogin, WebStationLogin} from './station-login';
 
-export {StationLogin, USEmergencyNumber};
+export {StationLogin, WebStationLogin};
