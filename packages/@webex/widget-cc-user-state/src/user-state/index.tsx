@@ -1,9 +1,10 @@
 import React from 'react';
-import {useUserState} from '../hooks';
-import UserStatePresentational from './user-state.presentational';
 import store from '@webex/widget-provider';
 import {observer} from 'mobx-react';
 import r2wc from '@r2wc/react-to-web-component';
+
+import {useUserState} from '../hooks';
+import UserStatePresentational from './user-state.presentational';
 
 const UserState: React.FunctionComponent = observer(() => {
   const {loginState, setLoginState, ccSdk, isAvailable} = store;

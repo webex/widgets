@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "main": "dist/index.js",
   "dependencies": {
-    "@webex/cc-station-login": "workspace:*",
-    "@webex/cc-user-state": "workspace:*",
+    "@webex/widget-cc-station-login": "workspace:*",
+    "@webex/widget-cc-user-state": "workspace:*",
     "html-webpack-plugin": "^5.6.3",
     "ts-loader": "^9.5.1",
     "typescript": "^5.6.3",

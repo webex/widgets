@@ -1,5 +1,5 @@
-import {WebStationLogin} from '@webex/cc-station-login';
-import {WebUserState} from '@webex/cc-user-state';
+import {WebStationLogin} from '@webex/widget-cc-station-login';
+import {WebUserState} from '@webex/widget-cc-user-state';
 
 if (!customElements.get('web-user-state')) {
   customElements.define('web-user-state', WebUserState);

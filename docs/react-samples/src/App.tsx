@@ -1,6 +1,6 @@
 import React from 'react';
-import {StationLogin} from '@webex/cc-station-login';
-import {UserState} from '@webex/cc-user-state';
+import {StationLogin} from '@webex/widget-cc-station-login';
+import {UserState} from '@webex/widget-cc-user-state';
 
 function App() {
   return (

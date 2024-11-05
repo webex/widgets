@@ -1,4 +1,5 @@
 import React from 'react';
+
 import {IUserState} from './use-state.types';
 
 const UserStatePresentational: React.FunctionComponent<IUserState> = (props) => {

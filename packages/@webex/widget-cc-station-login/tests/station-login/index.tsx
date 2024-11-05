@@ -7,6 +7,7 @@ import {StationLogin} from '../../src/station-login/index';
 
 describe('StationLogin', () => {
   afterEach(cleanup);
+
   it('CheckboxWithLabel changes the text after click', () => {
     const stationLoginHooksSpy = jest.spyOn(hooks, 'useStationLogin').mockReturnValue({name: 'MockStationLogin'});
 

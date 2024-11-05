@@ -1,4 +1,5 @@
 import {makeAutoObservable, observable} from 'mobx';
+
 import sdk from './sdk';
 
 class Store {
