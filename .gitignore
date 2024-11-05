@@ -45,3 +45,5 @@ reports/
 !package-lock.json
 !tsconfig.json
 node_modules/
+.yarn/*
+!.yarn/releases
