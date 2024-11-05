@@ -1,5 +1,4 @@
-import {useStationLogin} from '../../src/station-login/station-login.hooks';
-
+import {useStationLogin} from '../../src/hooks';
 describe('Station login hooks', () => {
   it('returns the correct component name', async () => {
     const result = useStationLogin();

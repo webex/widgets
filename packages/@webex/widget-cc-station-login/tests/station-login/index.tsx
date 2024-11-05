@@ -2,15 +2,13 @@ import '@testing-library/jest-dom';
 import React from 'react';
 import {render, screen, cleanup} from '@testing-library/react';
 
-import * as stationLoginHooks from '../../src/station-login/station-login.hooks';
-import StationLogin from '../../src/station-login/index';
+import * as hooks from '../../src/hooks';
+import {StationLogin} from '../../src/station-login/index';
 
-describe.only('StationLogin', () => {
+describe('StationLogin', () => {
   afterEach(cleanup);
   it('CheckboxWithLabel changes the text after click', () => {
-    const stationLoginHooksSpy = jest
-      .spyOn(stationLoginHooks, 'useStationLogin')
-      .mockReturnValue({name: 'MockStationLogin'});
+    const stationLoginHooksSpy = jest.spyOn(hooks, 'useStationLogin').mockReturnValue({name: 'MockStationLogin'});
 
     render(<StationLogin />);
 

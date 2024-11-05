@@ -36,6 +36,10 @@
     "@types/react-test-renderer": "^18"
   },
   "jest": {
-    "testEnvironment": "jsdom"
+    "testEnvironment": "jsdom",
+    "testMatch": [
+      "**/tests/**/*.ts",
+      "**/tests/**/*.tsx"
+    ]
   }
 }
