@@ -5199,19 +5199,11 @@ __metadata:
     "@babel/preset-react": "npm:^7.24.7"
     "@babel/preset-typescript": "npm:^7.25.9"
     "@r2wc/react-to-web-component": "npm:^2.0.3"
-    "@testing-library/dom": "npm:^10.4.0"
-    "@testing-library/jest-dom": "npm:^6.6.2"
-    "@testing-library/react": "npm:^16.0.1"
-    "@types/jest": "npm:^29.5.14"
-    "@types/react-test-renderer": "npm:^18"
     "@webex/cc-station-login": "workspace:*"
     "@webex/cc-user-state": "workspace:*"
-    babel-jest: "npm:^29.7.0"
     babel-loader: "npm:^9.2.1"
     file-loader: "npm:^6.2.0"
     html-webpack-plugin: "npm:^5.6.3"
-    jest: "npm:^29.7.0"
-    jest-environment-jsdom: "npm:^29.7.0"
     mobx-react: "npm:^9.1.1"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
@@ -5390,6 +5382,20 @@ __metadata:
   checksum: 10c0/e6c7abdf86b2ad8a222caa936bf650961f98ca6e9f1126fb929042890b41d893e0a16327dcd2efedc766a13245bab28549d4e77eeda6b78b924d920167d15392
   languageName: node
   linkType: hard
+
+"@webex/web-component-samples-app@workspace:docs/web-component-samples":
+  version: 0.0.0-use.local
+  resolution: "@webex/web-component-samples-app@workspace:docs/web-component-samples"
+  dependencies:
+    "@webex/cc-station-login": "workspace:*"
+    "@webex/cc-user-state": "workspace:*"
+    html-webpack-plugin: "npm:^5.6.3"
+    ts-loader: "npm:^9.5.1"
+    typescript: "npm:^5.6.3"
+    webpack: "npm:^5.96.1"
+    webpack-cli: "npm:^5.1.4"
+  languageName: unknown
+  linkType: soft
 
 "@webex/webex-core@npm:2.60.2":
   version: 2.60.2

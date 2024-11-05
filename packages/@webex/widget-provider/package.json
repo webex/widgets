@@ -1,7 +1,7 @@
 {
   "name": "@webex/widget-provider",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/index.js",
   "license": "MIT",
   "scripts": {
     "build": "tsc --project tsconfig.json",

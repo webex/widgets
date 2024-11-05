@@ -18,8 +18,10 @@
     "webpack-dev-server": "^5.1.0"
   },
   "scripts": {
+    "build": "yarn run build:providers && yarn run build:widgets",
+    "build:providers": "yarn workspace @webex/widget-provider build:src",
     "build:widgets": "yarn workspace @webex/cc-station-login build:src && yarn workspace @webex/cc-user-state build:src",
-    "samples:serve": "webpack serve --color --env NODE_ENV=development"
+    "samples:serve": "yarn workspace @webex/react-samples-app serve"
   },
   "dependencies": {
     "html-webpack-plugin": "^5.6.3"
