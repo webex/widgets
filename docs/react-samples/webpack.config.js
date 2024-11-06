@@ -1,7 +1,10 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const {merge} = require('webpack-merge');
 
-module.exports = {
+const baseConfig = require('../../webpack.config');
+
+module.exports = merge(baseConfig, {
   entry: './src/index.tsx', // Entry file for bundling
   output: {
     path: path.resolve(__dirname, 'dist'), // Output directory
@@ -17,15 +20,7 @@ module.exports = {
           loader: 'babel-loader', // Use Babel to transpile JavaScript and JSX
         },
       },
-      {
-        test: /\.(ts|tsx)$/,
-        exclude: /node_modules/,
-        use: 'ts-loader',
-      },
     ],
-  },
-  resolve: {
-    extensions: ['.js', '.jsx', '.tsx', '.ts'], // Resolve JS and JSX files
   },
   plugins: [
     new HtmlWebpackPlugin({
@@ -40,5 +35,4 @@ module.exports = {
     hot: true, // Enable hot module replacement
     open: true, // Open the app in browser on start
   },
-  mode: 'development', // Set mode to development
-};
+});

@@ -1,29 +1,22 @@
 const path = require('path');
+const {merge} = require('webpack-merge');
 
-module.exports = {
-  entry: './src/index.ts', // Entry file for bundling
+const baseConfig = require('../../webpack.config');
+
+module.exports = merge(baseConfig, {
   output: {
-    path: path.resolve(__dirname, 'dist'), // Output directory
-    filename: 'bundle.js', // Output bundle file name
+    path: path.resolve(__dirname, 'dist'),
+    filename: 'bundle.js',
   },
-  module: {
-    rules: [
-      {
-        test: /\.(ts|tsx)$/,
-        exclude: /node_modules/,
-        use: 'ts-loader',
-      },
-    ],
-  },
+
   resolve: {
-    extensions: ['.js', '.jsx', '.tsx', '.ts'], // Resolve JS and JSX files
+    extensions: ['.js', '.jsx', '.tsx', '.ts'],
   },
   devServer: {
     static: {
-      directory: path.join(__dirname, 'public'), // Serve static files from the public directory
+      directory: path.join(__dirname, 'public'),
     },
     open: true,
     port: 3000,
   },
-  mode: 'development', // Set mode to development
-};
+});
