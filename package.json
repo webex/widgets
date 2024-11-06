@@ -10,6 +10,7 @@
   ],
   "packageManager": "yarn@4.5.1",
   "devDependencies": {
+    "html-webpack-plugin": "^5.6.3",
     "node-gyp": "^10.2.0",
     "typescript": "^5.6.3",
     "webpack": "^5.96.1",
@@ -22,9 +23,6 @@
     "build:widgets": "yarn workspace @webex/widget-cc-station-login build:src && yarn workspace @webex/widget-cc-user-state build:src",
     "samples:build": "yarn workspace @webex/react-samples-app build:src && yarn workspace @webex/web-component-samples-app build:src",
     "samples:serve-react": "yarn workspace @webex/react-samples-app serve",
-    "samples:serve-wc": "open docs/web-component-samples/index.html"
-  },
-  "dependencies": {
-    "html-webpack-plugin": "^5.6.3"
+    "samples:serve-wc": "yarn workspace @webex/web-component-samples-app serve"
   }
 }

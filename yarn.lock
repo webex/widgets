@@ -5386,6 +5386,7 @@ __metadata:
     typescript: "npm:^5.6.3"
     webpack: "npm:^5.94.0"
     webpack-cli: "npm:^5.1.4"
+    webpack-merge: "npm:^6.0.1"
   languageName: unknown
   linkType: soft
 
@@ -5416,6 +5417,7 @@ __metadata:
     typescript: "npm:^5.6.3"
     webpack: "npm:^5.94.0"
     webpack-cli: "npm:^5.1.4"
+    webpack-merge: "npm:^6.0.1"
   languageName: unknown
   linkType: soft
 
@@ -5444,6 +5446,7 @@ __metadata:
     typescript: "npm:^5.6.3"
     webpack: "npm:^5.94.0"
     webpack-cli: "npm:^5.1.4"
+    webpack-merge: "npm:^6.0.1"
   languageName: unknown
   linkType: soft
 
@@ -22802,6 +22805,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"webpack-merge@npm:^6.0.1":
+  version: 6.0.1
+  resolution: "webpack-merge@npm:6.0.1"
+  dependencies:
+    clone-deep: "npm:^4.0.1"
+    flat: "npm:^5.0.2"
+    wildcard: "npm:^2.0.1"
+  checksum: 10c0/bf1429567858b353641801b8a2696ca0aac270fc8c55d4de8a7b586fe07d27fdcfc83099a98ab47e6162383db8dd63bb8cc25b1beb2ec82150422eec843b0dc0
+  languageName: node
+  linkType: hard
+
 "webpack-sources@npm:^3.2.3":
   version: 3.2.3
   resolution: "webpack-sources@npm:3.2.3"
@@ -23072,7 +23086,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"wildcard@npm:^2.0.0":
+"wildcard@npm:^2.0.0, wildcard@npm:^2.0.1":
   version: 2.0.1
   resolution: "wildcard@npm:2.0.1"
   checksum: 10c0/08f70cd97dd9a20aea280847a1fe8148e17cae7d231640e41eb26d2388697cbe65b67fd9e68715251c39b080c5ae4f76d71a9a69fa101d897273efdfb1b58bf7

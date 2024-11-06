@@ -1,28 +1,12 @@
+const {merge} = require('webpack-merge');
 const path = require('path');
-const glob = require('glob');
 
-module.exports = {
-  mode: 'development',
-  entry: './src/index.ts', // Ensure only one entry point for index.js
+const baseConfig = require('../../../webpack.config');
+
+module.exports = merge(baseConfig, {
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'index.js', // Set the output filename to index.js
     libraryTarget: 'commonjs2',
   },
-  resolve: {
-    extensions: ['.ts', '.tsx', '.js'],
-  },
-  module: {
-    rules: [
-      {
-        test: /\.(ts|tsx)$/,
-        exclude: /node_modules/,
-        use: 'ts-loader',
-      },
-    ],
-  },
-  externals: {
-    react: 'react',
-    'react-dom': 'react-dom',
-  },
-};
+});

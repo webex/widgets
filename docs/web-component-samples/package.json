@@ -12,7 +12,7 @@
     "webpack-cli": "^5.1.4"
   },
   "scripts": {
-    "start": "open index.html",
+    "serve": "open index.html",
     "build:src": "webpack"
   }
 }
