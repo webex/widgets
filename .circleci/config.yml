@@ -61,11 +61,14 @@ jobs:
       - checkout_from_workspace
       - run:
           name: Build
-          command: yarn workspace @webex/widgets run build
+          command: yarn run build && yarn workspace @webex/widgets run build
       - persist_to_workspace:
           root: .
           paths:
             - packages/@webex/widgets/dist
+            - packages/@webex/widget-cc-station-login/dist
+            - packages/@webex/widget-cc-user-state/dist
+            - packages/@webex/widget-provider/dist
 
   docs:
     executor: node-executor
@@ -98,9 +101,6 @@ workflows:
       - build:
           requires:
             - linter
-          filters:
-            branches:
-              only: master
       - docs:
           requires:
             - linter
