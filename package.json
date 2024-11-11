@@ -19,7 +19,7 @@
   },
   "scripts": {
     "build": "yarn run build:providers && yarn run build:widgets",
-    "build:providers": "yarn workspace @webex/widget-provider build:src",
+    "build:providers": "yarn workspace @webex/widgets-store build:src",
     "build:widgets": "yarn workspace @webex/widget-cc-station-login build:src && yarn workspace @webex/widget-cc-user-state build:src",
     "samples:build": "yarn workspace @webex/react-samples-app build:src && yarn workspace @webex/web-component-samples-app build:src",
     "samples:serve-react": "yarn workspace @webex/react-samples-app serve",

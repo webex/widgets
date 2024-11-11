@@ -1,4 +1,4 @@
-import {useStationLogin} from '../../src/hooks';
+import {useStationLogin} from '../../src/helper';
 
 describe('Station login hooks', () => {
   it('returns the correct component name', () => {
