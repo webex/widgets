@@ -33,6 +33,6 @@ module.exports = merge(baseConfig, {
     compress: true, // Enable gzip compression
     port: 3000, // Port for the dev server
     hot: true, // Enable hot module replacement
-    open: true, // Open the app in browser on start
+    open: false, // Open the app in browser on start
   },
 });
