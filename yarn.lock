@@ -5738,9 +5738,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/widget-cc-station-login@workspace:*, @webex/widget-cc-station-login@workspace:packages/@webex/widget-cc-station-login":
+"@webex/widget-cc-station-login@workspace:*, @webex/widget-cc-station-login@workspace:packages/widget-cc-station-login":
   version: 0.0.0-use.local
-  resolution: "@webex/widget-cc-station-login@workspace:packages/@webex/widget-cc-station-login"
+  resolution: "@webex/widget-cc-station-login@workspace:packages/widget-cc-station-login"
   dependencies:
     "@babel/core": "npm:7.25.2"
     "@babel/preset-env": "npm:7.25.4"
@@ -5769,9 +5769,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@webex/widget-cc-user-state@workspace:*, @webex/widget-cc-user-state@workspace:packages/@webex/widget-cc-user-state":
+"@webex/widget-cc-user-state@workspace:*, @webex/widget-cc-user-state@workspace:packages/widget-cc-user-state":
   version: 0.0.0-use.local
-  resolution: "@webex/widget-cc-user-state@workspace:packages/@webex/widget-cc-user-state"
+  resolution: "@webex/widget-cc-user-state@workspace:packages/widget-cc-user-state"
   dependencies:
     "@babel/core": "npm:7.25.2"
     "@babel/preset-env": "npm:7.25.4"
@@ -5800,9 +5800,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@webex/widgets-store@workspace:*, @webex/widgets-store@workspace:packages/@webex/widgets-store":
+"@webex/widgets-store@workspace:*, @webex/widgets-store@workspace:packages/widgets-store":
   version: 0.0.0-use.local
-  resolution: "@webex/widgets-store@workspace:packages/@webex/widgets-store"
+  resolution: "@webex/widgets-store@workspace:packages/widgets-store"
   dependencies:
     "@babel/core": "npm:7.25.2"
     "@babel/preset-env": "npm:7.25.4"

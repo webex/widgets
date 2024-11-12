@@ -6,6 +6,7 @@
   "private": true,
   "workspaces": [
     "packages/**/*",
+    "packages/*",
     "docs/**/*"
   ],
   "packageManager": "yarn@4.5.1",
@@ -18,8 +19,8 @@
     "webpack-dev-server": "^5.1.0"
   },
   "scripts": {
-    "build": "yarn run build:providers && yarn run build:widgets",
-    "build:providers": "yarn workspace @webex/widgets-store build:src",
+    "build": "yarn run build:store && yarn run build:widgets",
+    "build:store": "yarn workspace @webex/widgets-store build:src",
     "build:widgets": "yarn workspace @webex/widget-cc-station-login build:src && yarn workspace @webex/widget-cc-user-state build:src",
     "samples:build": "yarn workspace @webex/react-samples-app build:src && yarn workspace @webex/web-component-samples-app build:src",
     "samples:serve": "open docs/index.html && yarn workspace @webex/react-samples-app serve",
