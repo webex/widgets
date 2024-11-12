@@ -1,28 +1,33 @@
+import Webex from 'webex';
+
 const sdk = {
   accessToken: '',
   callbacks: {},
-  init: async function({accessToken}) {
-    this.accessToken = accessToken;
+  webex: {},
+  teamsList: [],
+  loginVoiceOptions: [],
+  init: async function({accessToken, webexConfig}) {
+    this.webex = Webex.init({
+      config: webexConfig,
+      credentials: {
+        access_token: accessToken
+      }
+    });
+  },
+  registerCC: async function() {
+    this.webex.cc.register(true).then((response) => {
+      console.log('Event subscription successful: ', response);
+      this.teamsList = response.teams;
+      this.loginVoiceOptions = response.loginVoiceOptions;
+    })
+    .catch((error) => {
+      console.log('Event subscription failed', error);
+    })
   },
   logout: function() {
     this.accessToken = '';
     this.callControls.unmute();
     this.presence.set('busy');
-  },
-  presence: {
-    currentState: 'busy',
-    set: function(state) {
-      this.currentState = state;
-      console.log(
-        `%cWxCCSDK\t\t\t%cpresence.set:%c Received`,
-        'background: red; color: white;',
-        'background: lightgreen; color: black;',
-        'background: transparent; color: grey;'
-      );
-      setTimeout(() => {
-        sdk.emit('presence:state', this.currentState);
-      }, 1500);
-    },
   },
   callControls: {
     currentState: 'unmuted',

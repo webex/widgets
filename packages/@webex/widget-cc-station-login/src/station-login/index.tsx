@@ -7,14 +7,12 @@ import StationLoginPresentational from './station-login.presentational';
 import {useStationLogin} from '../hooks';
 
 const StationLogin: React.FunctionComponent = observer(() => {
-  const {loginState, setLoginState, ccSdk, isAvailable} = store;
-  const result = useStationLogin();
+  const {sdk, isAvailable} = store;
+  const result = useStationLogin(sdk);
 
   const props = {
     ...result,
-    loginState,
-    setLoginState,
-    ccSdk,
+    sdk,
     isAvailable,
   };
   return <StationLoginPresentational {...props} />;

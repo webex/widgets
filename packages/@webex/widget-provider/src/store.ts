@@ -5,23 +5,24 @@ import sdk from './sdk';
 class Store {
   loginState = '';
   isAvailable = false;
-  ccSdk = sdk;
+  sdk = sdk;
 
   constructor() {
-    makeAutoObservable(this, {ccSdk: observable.ref});
+    const webexConfig = {}
+    const token = ''
+    makeAutoObservable(this, {sdk: observable.ref});
 
-    this.ccSdk.on('presence:state', (payload) => {
-      this.setIsAvailable(payload === 'available');
-    });
+    sdk.init({accessToken: token, webexConfig});
+    sdk.registerCC();
   }
 
-  setLoginState = (state) => {
-    this.loginState = state;
-  };
+  // setLoginState = (state) => {
+  //   this.loginState = state;
+  // };
 
-  setIsAvailable = (state) => {
-    this.isAvailable = state;
-  };
+  // setIsAvailable = (state) => {
+  //   this.isAvailable = state;
+  // };
 }
 
 const store = new Store();
