@@ -19,8 +19,6 @@
       "sourceMap": true,
       "stripInternal": true,
       "target": "ES6",
-      "outDir": "./dist",
-      "declarationDir": "./dist/types",
       "lib": [
         "ESNext",
         "DOM"
