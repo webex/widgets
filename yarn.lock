@@ -4905,6 +4905,97 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@webex/cc-station-login@workspace:*, @webex/cc-station-login@workspace:packages/contact-center/station-login":
+  version: 0.0.0-use.local
+  resolution: "@webex/cc-station-login@workspace:packages/contact-center/station-login"
+  dependencies:
+    "@babel/core": "npm:7.25.2"
+    "@babel/preset-env": "npm:7.25.4"
+    "@babel/preset-react": "npm:7.24.7"
+    "@babel/preset-typescript": "npm:7.25.9"
+    "@r2wc/react-to-web-component": "npm:2.0.3"
+    "@testing-library/dom": "npm:10.4.0"
+    "@testing-library/jest-dom": "npm:6.6.2"
+    "@testing-library/react": "npm:16.0.1"
+    "@types/jest": "npm:29.5.14"
+    "@types/react-test-renderer": "npm:18"
+    "@webex/cc-store": "workspace:*"
+    babel-jest: "npm:29.7.0"
+    babel-loader: "npm:9.2.1"
+    file-loader: "npm:6.2.0"
+    jest: "npm:29.7.0"
+    jest-environment-jsdom: "npm:29.7.0"
+    mobx-react: "npm:9.1.1"
+    react: "npm:18.3.1"
+    react-dom: "npm:18.3.1"
+    ts-loader: "npm:9.5.1"
+    typescript: "npm:5.6.3"
+    webpack: "npm:5.94.0"
+    webpack-cli: "npm:5.1.4"
+    webpack-merge: "npm:6.0.1"
+  languageName: unknown
+  linkType: soft
+
+"@webex/cc-store@workspace:*, @webex/cc-store@workspace:packages/contact-center/store":
+  version: 0.0.0-use.local
+  resolution: "@webex/cc-store@workspace:packages/contact-center/store"
+  dependencies:
+    "@babel/core": "npm:7.25.2"
+    "@babel/preset-env": "npm:7.25.4"
+    "@babel/preset-react": "npm:7.24.7"
+    "@babel/preset-typescript": "npm:7.25.9"
+    "@testing-library/dom": "npm:10.4.0"
+    "@testing-library/jest-dom": "npm:6.6.2"
+    "@testing-library/react": "npm:16.0.1"
+    "@types/jest": "npm:29.5.14"
+    "@types/react-test-renderer": "npm:18"
+    babel-jest: "npm:29.7.0"
+    babel-loader: "npm:9.2.1"
+    file-loader: "npm:6.2.0"
+    jest: "npm:29.7.0"
+    jest-environment-jsdom: "npm:29.7.0"
+    mobx: "npm:6.13.5"
+    react: "npm:18.3.1"
+    react-dom: "npm:18.3.1"
+    ts-loader: "npm:9.5.1"
+    typescript: "npm:5.6.3"
+    webpack: "npm:5.94.0"
+    webpack-cli: "npm:5.1.4"
+    webpack-merge: "npm:6.0.1"
+  languageName: unknown
+  linkType: soft
+
+"@webex/cc-user-state@workspace:*, @webex/cc-user-state@workspace:packages/contact-center/user-state":
+  version: 0.0.0-use.local
+  resolution: "@webex/cc-user-state@workspace:packages/contact-center/user-state"
+  dependencies:
+    "@babel/core": "npm:7.25.2"
+    "@babel/preset-env": "npm:7.25.4"
+    "@babel/preset-react": "npm:7.24.7"
+    "@babel/preset-typescript": "npm:7.25.9"
+    "@r2wc/react-to-web-component": "npm:2.0.3"
+    "@testing-library/dom": "npm:10.4.0"
+    "@testing-library/jest-dom": "npm:6.6.2"
+    "@testing-library/react": "npm:16.0.1"
+    "@types/jest": "npm:29.5.14"
+    "@types/react-test-renderer": "npm:18"
+    "@webex/cc-store": "workspace:*"
+    babel-jest: "npm:29.7.0"
+    babel-loader: "npm:9.2.1"
+    file-loader: "npm:6.2.0"
+    jest: "npm:29.7.0"
+    jest-environment-jsdom: "npm:29.7.0"
+    mobx-react: "npm:9.1.1"
+    react: "npm:18.3.1"
+    react-dom: "npm:18.3.1"
+    ts-loader: "npm:9.5.1"
+    typescript: "npm:5.6.3"
+    webpack: "npm:5.94.0"
+    webpack-cli: "npm:5.1.4"
+    webpack-merge: "npm:6.0.1"
+  languageName: unknown
+  linkType: soft
+
 "@webex/common-timers@npm:2.60.4":
   version: 2.60.4
   resolution: "@webex/common-timers@npm:2.60.4"
@@ -5516,8 +5607,8 @@ __metadata:
     "@babel/preset-react": "npm:^7.24.7"
     "@babel/preset-typescript": "npm:^7.25.9"
     "@r2wc/react-to-web-component": "npm:^2.0.3"
-    "@webex/widget-cc-station-login": "workspace:*"
-    "@webex/widget-cc-user-state": "workspace:*"
+    "@webex/cc-station-login": "workspace:*"
+    "@webex/cc-user-state": "workspace:*"
     babel-loader: "npm:^9.2.1"
     file-loader: "npm:^6.2.0"
     html-webpack-plugin: "npm:^5.6.3"
@@ -5705,8 +5796,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@webex/web-component-samples-app@workspace:docs/web-component-samples"
   dependencies:
-    "@webex/widget-cc-station-login": "workspace:*"
-    "@webex/widget-cc-user-state": "workspace:*"
+    "@webex/cc-station-login": "workspace:*"
+    "@webex/cc-user-state": "workspace:*"
     html-webpack-plugin: "npm:^5.6.3"
     ts-loader: "npm:^9.5.1"
     typescript: "npm:^5.6.3"
@@ -5737,97 +5828,6 @@ __metadata:
   checksum: 10c0/dd977aba1ea4cd6966f6272dea45c7a025c4c501deaca221fa730c7aa0a436348d1b67bbf414d5b1d878938125eef76d8e4b939a227c2946dd6d2c89b6698d3e
   languageName: node
   linkType: hard
-
-"@webex/widget-cc-station-login@workspace:*, @webex/widget-cc-station-login@workspace:packages/widget-cc-station-login":
-  version: 0.0.0-use.local
-  resolution: "@webex/widget-cc-station-login@workspace:packages/widget-cc-station-login"
-  dependencies:
-    "@babel/core": "npm:7.25.2"
-    "@babel/preset-env": "npm:7.25.4"
-    "@babel/preset-react": "npm:7.24.7"
-    "@babel/preset-typescript": "npm:7.25.9"
-    "@r2wc/react-to-web-component": "npm:2.0.3"
-    "@testing-library/dom": "npm:10.4.0"
-    "@testing-library/jest-dom": "npm:6.6.2"
-    "@testing-library/react": "npm:16.0.1"
-    "@types/jest": "npm:29.5.14"
-    "@types/react-test-renderer": "npm:18"
-    "@webex/widgets-store": "workspace:*"
-    babel-jest: "npm:29.7.0"
-    babel-loader: "npm:9.2.1"
-    file-loader: "npm:6.2.0"
-    jest: "npm:29.7.0"
-    jest-environment-jsdom: "npm:29.7.0"
-    mobx-react: "npm:9.1.1"
-    react: "npm:18.3.1"
-    react-dom: "npm:18.3.1"
-    ts-loader: "npm:9.5.1"
-    typescript: "npm:5.6.3"
-    webpack: "npm:5.94.0"
-    webpack-cli: "npm:5.1.4"
-    webpack-merge: "npm:6.0.1"
-  languageName: unknown
-  linkType: soft
-
-"@webex/widget-cc-user-state@workspace:*, @webex/widget-cc-user-state@workspace:packages/widget-cc-user-state":
-  version: 0.0.0-use.local
-  resolution: "@webex/widget-cc-user-state@workspace:packages/widget-cc-user-state"
-  dependencies:
-    "@babel/core": "npm:7.25.2"
-    "@babel/preset-env": "npm:7.25.4"
-    "@babel/preset-react": "npm:7.24.7"
-    "@babel/preset-typescript": "npm:7.25.9"
-    "@r2wc/react-to-web-component": "npm:2.0.3"
-    "@testing-library/dom": "npm:10.4.0"
-    "@testing-library/jest-dom": "npm:6.6.2"
-    "@testing-library/react": "npm:16.0.1"
-    "@types/jest": "npm:29.5.14"
-    "@types/react-test-renderer": "npm:18"
-    "@webex/widgets-store": "workspace:*"
-    babel-jest: "npm:29.7.0"
-    babel-loader: "npm:9.2.1"
-    file-loader: "npm:6.2.0"
-    jest: "npm:29.7.0"
-    jest-environment-jsdom: "npm:29.7.0"
-    mobx-react: "npm:9.1.1"
-    react: "npm:18.3.1"
-    react-dom: "npm:18.3.1"
-    ts-loader: "npm:9.5.1"
-    typescript: "npm:5.6.3"
-    webpack: "npm:5.94.0"
-    webpack-cli: "npm:5.1.4"
-    webpack-merge: "npm:6.0.1"
-  languageName: unknown
-  linkType: soft
-
-"@webex/widgets-store@workspace:*, @webex/widgets-store@workspace:packages/widgets-store":
-  version: 0.0.0-use.local
-  resolution: "@webex/widgets-store@workspace:packages/widgets-store"
-  dependencies:
-    "@babel/core": "npm:7.25.2"
-    "@babel/preset-env": "npm:7.25.4"
-    "@babel/preset-react": "npm:7.24.7"
-    "@babel/preset-typescript": "npm:7.25.9"
-    "@testing-library/dom": "npm:10.4.0"
-    "@testing-library/jest-dom": "npm:6.6.2"
-    "@testing-library/react": "npm:16.0.1"
-    "@types/jest": "npm:29.5.14"
-    "@types/react-test-renderer": "npm:18"
-    babel-jest: "npm:29.7.0"
-    babel-loader: "npm:9.2.1"
-    file-loader: "npm:6.2.0"
-    jest: "npm:29.7.0"
-    jest-environment-jsdom: "npm:29.7.0"
-    mobx: "npm:6.13.5"
-    react: "npm:18.3.1"
-    react-dom: "npm:18.3.1"
-    ts-loader: "npm:9.5.1"
-    typescript: "npm:5.6.3"
-    webpack: "npm:5.94.0"
-    webpack-cli: "npm:5.1.4"
-    webpack-merge: "npm:6.0.1"
-  languageName: unknown
-  linkType: soft
 
 "@webex/widgets@workspace:packages/@webex/widgets":
   version: 0.0.0-use.local

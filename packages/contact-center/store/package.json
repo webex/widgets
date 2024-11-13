@@ -1,8 +1,9 @@
 {
-  "name": "@webex/widget-cc-user-state",
-  "description": "Webex Contact Center Widgets: User State",
+  "name": "@webex/cc-store",
+  "description": "Webex Contact Center Widgets: Widgets Store",
   "version": "1.0.0",
   "main": "dist/index.js",
+  "license": "MIT",
   "scripts": {
     "build": "yarn run -T tsc",
     "build:src": "webpack && yarn run build",
@@ -10,9 +11,7 @@
     "test:unit": "jest"
   },
   "dependencies": {
-    "@r2wc/react-to-web-component": "2.0.3",
-    "@webex/widgets-store": "workspace:*",
-    "mobx-react": "9.1.1",
+    "mobx": "6.13.5",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "typescript": "5.6.3"
