@@ -43,6 +43,7 @@ reports/
 !.env.default
 !package.json
 !package-lock.json
+!tsconfig.json
 node_modules/
 .yarn/*
 !.yarn/releases
