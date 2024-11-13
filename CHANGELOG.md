@@ -1,3 +1,10 @@
+## [1.27.6](https://github.com/webex/widgets/compare/v1.27.5...v1.27.6) (2024-11-13)
+
+
+### Bug Fixes
+
+* **WebexMeetings:** update member name from join prompt ([#240](https://github.com/webex/widgets/issues/240)) ([a6c5298](https://github.com/webex/widgets/commit/a6c529843ec1dadcb142fd0acd58dbd72ec52cc5))
+
 ## [1.27.5](https://github.com/webex/widgets/compare/v1.27.4...v1.27.5) (2024-10-29)
 
 
