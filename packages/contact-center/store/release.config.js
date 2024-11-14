@@ -17,7 +17,18 @@ module.exports = {
       },
     ],
     '@semantic-release/changelog',
-    '@semantic-release/npm',
+    [
+      'semantic-release-yarn',
+      {
+        yarnPublish: false, // Prevents publishing via Yarn (useful for Yarn workspaces)
+      },
+    ],
+    [
+      '@semantic-release/npm',
+      {
+        npmPublish: false, // Prevents npm publish since Yarn is handling it
+      },
+    ],
     [
       '@semantic-release/git',
       {
