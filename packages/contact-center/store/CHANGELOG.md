@@ -1,3 +1,10 @@
+# [1.28.0-alpha.2](https://github.com/webex/widgets/compare/v1.28.0-alpha.1...v1.28.0-alpha.2) (2024-11-14)
+
+
+### Bug Fixes
+
+* **station-login:** test-commit ([#249](https://github.com/webex/widgets/issues/249)) ([706d3d4](https://github.com/webex/widgets/commit/706d3d412574987a9f84079a24697879dc6dba33))
+
 # [1.28.0-alpha.1](https://github.com/webex/widgets/compare/v1.27.5...v1.28.0-alpha.1) (2024-11-14)
 
 
