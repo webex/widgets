@@ -1,4 +1,5 @@
 module.exports = {
+  extends: 'semantic-release-monorepo',
   branches: [
     'master', // or 'main', depending on your main branch name
     {
@@ -31,4 +32,5 @@ module.exports = {
     ],
     '@semantic-release/github',
   ],
+  tagFormat: 'alpha', // Set the tag format to 'alpha'
 };
