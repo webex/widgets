@@ -5228,6 +5228,7 @@ __metadata:
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
     semantic-release: "npm:^24.2.0"
+    semantic-release-monorepo: "npm:^8.0.2"
     semantic-release-yarn: "npm:^3.0.2"
     ts-loader: "npm:9.5.1"
     typescript: "npm:5.6.3"
@@ -11801,6 +11802,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"file-url@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "file-url@npm:3.0.0"
+  checksum: 10c0/31c5f85711bda47a471fd8d4a7217330102b74fb3b4dbd3626dd9cbe8c9afc1bf4584da2877abd84db392e3b4c2ad6d61ba4830b45a273dfbfd1172b443d8bb9
+  languageName: node
+  linkType: hard
+
 "filelist@npm:^1.0.4":
   version: 1.0.4
   resolution: "filelist@npm:1.0.4"
@@ -12171,7 +12179,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fs-extra@npm:^10.0.0":
+"fs-extra@npm:^10.0.0, fs-extra@npm:^10.0.1":
   version: 10.1.0
   resolution: "fs-extra@npm:10.1.0"
   dependencies:
@@ -12428,7 +12436,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"get-stream@npm:^6.0.0":
+"get-stream@npm:^6.0.0, get-stream@npm:^6.0.1":
   version: 6.0.1
   resolution: "get-stream@npm:6.0.1"
   checksum: 10c0/49825d57d3fd6964228e6200a58169464b8e8970489b3acdc24906c782fb7f01f9f56f8e6653c4a50713771d6658f7cfe051e5eb8c12e334138c9c918b296341
@@ -19262,6 +19270,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"pkg-up@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "pkg-up@npm:3.1.0"
+  dependencies:
+    find-up: "npm:^3.0.0"
+  checksum: 10c0/ecb60e1f8e1f611c0bdf1a0b6a474d6dfb51185567dc6f29cdef37c8d480ecba5362e006606bb290519bbb6f49526c403fabea93c3090c20368d98bb90c999ab
+  languageName: node
+  linkType: hard
+
 "pkijs@npm:^2.1.84":
   version: 2.4.0
   resolution: "pkijs@npm:2.4.0"
@@ -20242,7 +20259,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ramda@npm:^0.27.0":
+"ramda@npm:^0.27.0, ramda@npm:^0.27.2":
   version: 0.27.2
   resolution: "ramda@npm:0.27.2"
   checksum: 10c0/1bbcb5bcde33ab2669810644f920b8af4e228967ff800962100803dcdad57b09c5eeee50d9871c74aa20ce496a2d96ec48774e545d7943c8f742ccac5e0fa072
@@ -21535,6 +21552,38 @@ __metadata:
     "@types/node-forge": "npm:^1.3.0"
     node-forge: "npm:^1"
   checksum: 10c0/521829ec36ea042f7e9963bf1da2ed040a815cf774422544b112ec53b7edc0bc50a0f8cc2ae7aa6cc19afa967c641fd96a15de0fc650c68651e41277d2e1df09
+  languageName: node
+  linkType: hard
+
+"semantic-release-monorepo@npm:^8.0.2":
+  version: 8.0.2
+  resolution: "semantic-release-monorepo@npm:8.0.2"
+  dependencies:
+    debug: "npm:^4.3.4"
+    execa: "npm:^5.1.1"
+    file-url: "npm:^3.0.0"
+    fs-extra: "npm:^10.0.1"
+    get-stream: "npm:^6.0.1"
+    git-log-parser: "npm:^1.2.0"
+    p-each-series: "npm:^2.1.0"
+    p-limit: "npm:^3.1.0"
+    pkg-up: "npm:^3.1.0"
+    ramda: "npm:^0.27.2"
+    read-pkg: "npm:^5.2.0"
+    semantic-release-plugin-decorators: "npm:^4.0.0"
+    tempy: "npm:1.0.1"
+  peerDependencies:
+    semantic-release: ">=22.0.7"
+  checksum: 10c0/44e514bfa7a897c9897fa9c9f7cb4a44eca7f366d5d7fdeda19e6ce20c582a8040557d5ef73e46cfba8dcfb0cc0d8263d7c9def5ab0aceee63ad898f00097e3f
+  languageName: node
+  linkType: hard
+
+"semantic-release-plugin-decorators@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "semantic-release-plugin-decorators@npm:4.0.0"
+  peerDependencies:
+    semantic-release: ">20"
+  checksum: 10c0/21591f76f04fb42ae1d4b02eb9536f80a5c0b34994e2aeee3d13b2c9487e17944d475173399e15fae902064f41503c60be2c6c1f7dc5a982ae7385a6ba0e9078
   languageName: node
   linkType: hard
 
@@ -23017,7 +23066,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tempy@npm:^1.0.0":
+"tempy@npm:1.0.1, tempy@npm:^1.0.0":
   version: 1.0.1
   resolution: "tempy@npm:1.0.1"
   dependencies:
