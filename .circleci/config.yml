@@ -32,7 +32,7 @@ jobs:
           key: dependency-cache-{{ checksum "yarn.lock" }}
           paths:
             - node_modules
-            - packages/*/node_modules
+            - packages/**/*/node_modules
       - persist_to_workspace:
           root: .
           paths:
