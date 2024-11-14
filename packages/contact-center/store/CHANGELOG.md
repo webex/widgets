@@ -1,3 +1,10 @@
+# [1.28.0-alpha.3](https://github.com/webex/widgets/compare/v1.28.0-alpha.2...v1.28.0-alpha.3) (2024-11-14)
+
+
+### Features
+
+* **release:** add-publishconfig ([#250](https://github.com/webex/widgets/issues/250)) ([2ee17f6](https://github.com/webex/widgets/commit/2ee17f64f13d51340347dfeb492fd37a2dc40501))
+
 # [1.28.0-alpha.2](https://github.com/webex/widgets/compare/v1.28.0-alpha.1...v1.28.0-alpha.2) (2024-11-14)
 
 
