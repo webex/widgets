@@ -37,7 +37,7 @@ jobs:
           root: .
           paths:
             - node_modules
-            - packages/*/node_modules
+            - packages/**/*/node_modules
 
   linter:
     executor: node-executor
@@ -61,7 +61,7 @@ jobs:
       - checkout_from_workspace
       - run:
           name: Build
-          command: yarn workspace @webex/widgets run build && yarn run build
+          command: yarn run build && yarn workspace @webex/widgets run build
       - persist_to_workspace:
           root: .
           paths:
