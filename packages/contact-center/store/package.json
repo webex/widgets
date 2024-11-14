@@ -4,6 +4,9 @@
   "version": "1.0.1-0",
   "main": "dist/index.js",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "yarn run -T tsc",
     "build:src": "webpack && yarn run build",
