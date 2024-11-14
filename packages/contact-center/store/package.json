@@ -9,7 +9,7 @@
     "build:src": "webpack && yarn run build",
     "build:watch": "webpack --watch",
     "test:unit": "jest",
-    "release": "semantic-release --dry-run"
+    "release": "semantic-release"
   },
   "dependencies": {
     "mobx": "6.13.5",
