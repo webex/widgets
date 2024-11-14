@@ -1,3 +1,11 @@
+# [@webex/cc-store-v1.28.0-alpha.5](https://github.com/webex/widgets/compare/v1.28.0-alpha.4...1.28.0-alpha.5) (2024-11-14)
+
+
+### Bug Fixes
+
+* **release:** add-monorepo-semantic-release-support ([#253](https://github.com/webex/widgets/issues/253)) ([a4cb745](https://github.com/webex/widgets/commit/a4cb74587029ae11aeb0fda65d0362fc346e4d8a))
+* **release:** sync-packgejson-and-npm-version ([#254](https://github.com/webex/widgets/issues/254)) ([a7b2793](https://github.com/webex/widgets/commit/a7b2793e6dd51ba32762c204e04ab204d1bcf96e))
+
 # [1.28.0-alpha.4](https://github.com/webex/widgets/compare/v1.28.0-alpha.3...v1.28.0-alpha.4) (2024-11-14)
 
 
