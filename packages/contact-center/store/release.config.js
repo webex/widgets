@@ -27,10 +27,10 @@ module.exports = {
     [
       '@semantic-release/git',
       {
-        assets: ['CHANGELOG.md', 'package.json'],
+        assets: ['CHANGELOG.md', 'package.json'], // Ensure package.json is updated
       },
     ],
     '@semantic-release/github',
   ],
-  tagFormat: 'alpha', // Set the tag format to 'alpha'
+  tagFormat: '${version}', // Tag format without the 'v' prefix, e.g., 1.0.0-alpha.1
 };
