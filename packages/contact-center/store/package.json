@@ -4,6 +4,9 @@
   "version": "1.28.0-alpha.3",
   "main": "dist/index.js",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "yarn run -T tsc",
     "build:src": "webpack && yarn run build",
