@@ -24,12 +24,6 @@ module.exports = {
       },
     ],
     [
-      '@semantic-release/npm',
-      {
-        npmPublish: false, // Prevents npm publish since Yarn is handling it
-      },
-    ],
-    [
       '@semantic-release/git',
       {
         assets: ['CHANGELOG.md', 'package.json'],
