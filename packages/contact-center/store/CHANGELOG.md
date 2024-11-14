@@ -1,3 +1,10 @@
+# [1.28.0-alpha.4](https://github.com/webex/widgets/compare/v1.28.0-alpha.3...v1.28.0-alpha.4) (2024-11-14)
+
+
+### Bug Fixes
+
+* **store:** add-documentation ([#252](https://github.com/webex/widgets/issues/252)) ([f754731](https://github.com/webex/widgets/commit/f7547314196af9ceb1185ab23da6a2df030f3d2c))
+
 # [1.28.0-alpha.3](https://github.com/webex/widgets/compare/v1.28.0-alpha.2...v1.28.0-alpha.3) (2024-11-14)
 
 
