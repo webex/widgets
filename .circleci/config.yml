@@ -61,10 +61,13 @@ jobs:
       - checkout_from_workspace
       - run:
           name: Build
-          command: yarn workspace @webex/widgets run build
+          command: yarn workspace @webex/widgets run build && yarn run build
       - persist_to_workspace:
           root: .
           paths:
+            - packages/contact-center/station-login/dist
+            - packages/contact-center/store/dist
+            - packages/contact-center/user-state/dist
             - packages/@webex/widgets/dist
 
   docs:
@@ -86,6 +89,14 @@ jobs:
       - run:
           name: Release
           command: yarn workspace @webex/widgets run release
+  
+  release_widgets:
+    executor: node-executor
+    steps:
+      - checkout_from_workspace
+      - run:
+          name: Release Widgets
+          command: yarn run release:widgets
 
 # execute the jobs in an orderly manner
 workflows:
@@ -100,13 +111,16 @@ workflows:
             - linter
           filters:
             branches:
-              only: master
+              only: 
+                - master
+                - eft_pipeline
       - docs:
           requires:
             - linter
           filters:
             branches:
-              only: master
+              only: 
+                - master
       - release:
           requires:
             - build
@@ -114,3 +128,9 @@ workflows:
           filters:
             branches:
               only: master
+      - release_widgets:
+          requires:
+            - build
+          filters:
+            branches:
+              only: eft_pipeline
