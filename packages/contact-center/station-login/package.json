@@ -11,7 +11,7 @@
     "build:src": "webpack && yarn run build",
     "build:watch": "webpack --watch",
     "test:unit": "jest",
-    "release": "semantic-release --dry-run"
+    "release": "semantic-release"
   },
   "dependencies": {
     "@r2wc/react-to-web-component": "2.0.3",
