@@ -16,7 +16,12 @@
     "typescript": "^5.6.3",
     "webpack": "^5.96.1",
     "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^5.1.0"
+    "webpack-dev-server": "^5.1.0",
+    "semantic-release": "^24.2.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "semantic-release-monorepo": "^8.0.2",
+    "semantic-release-yarn": "^3.0.2"
   },
   "scripts": {
     "build": "yarn run build:store && yarn run build:widgets",
