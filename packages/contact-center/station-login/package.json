@@ -1,7 +1,7 @@
 {
   "name": "@webex/cc-station-login",
   "description": "Webex Contact Center Widgets: Station Login",
-  "version": "1.0.1-0",
+  "version": "1.28.0-alpha.20",
   "main": "dist/index.js",
   "publishConfig": {
     "access": "public"
@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@r2wc/react-to-web-component": "2.0.3",
-    "@webex/cc-store": "workspace:*",
+    "@webex/cc-store": "workspace:^1.28.0-alpha.20",
     "mobx-react": "9.1.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",
