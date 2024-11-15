@@ -1,11 +1,25 @@
-const path = require('path');
+const webpack = require('webpack');
 
 module.exports = {
   mode: 'development',
   entry: './src/index.ts',
   resolve: {
     extensions: ['.ts', '.tsx', '.js', 'jsx'],
+    fallback: {
+      fs:false,
+      process: require.resolve('process/browser'),
+      crypto: require.resolve("crypto-browserify"),
+      querystring: require.resolve("querystring-es3"),
+      os: require.resolve("os-browserify/browser"),
+      stream: require.resolve("stream-browserify"),
+      vm: require.resolve("vm-browserify")
+    },
   },
+  plugins: [
+    new webpack.ProvidePlugin({
+      process: 'process/browser',
+    }),
+  ],
   module: {
     rules: [
       {
@@ -14,9 +28,5 @@ module.exports = {
         use: 'ts-loader',
       },
     ],
-  },
-  externals: {
-    react: 'react',
-    'react-dom': 'react-dom',
   },
 };

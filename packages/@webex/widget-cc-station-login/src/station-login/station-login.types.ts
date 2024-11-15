@@ -7,25 +7,21 @@ export interface IStationLoginPresentationalProps {
    */
   name: string;
 
-  // /**
-  //  * The current login state of the station.
-  //  */
-  // loginState: any;
-
-  // /**
-  //  * Function to set the login state of the station.
-  //  */
-  // setLoginState: any;
-
   /**
    * The Customer Care SDK instance.
    */
   sdk: any;
 
   /**
-   * Indicates whether the station is available.
+   * Array of the team IDs that agent belongs to
    */
-  isAvailable: boolean;
+  teams: [];
+
+   /**
+   * Station login options available for the agent
+   */
+  loginOptions: [];
+
 
   /**
    * Handler to select login type
@@ -36,4 +32,9 @@ export interface IStationLoginPresentationalProps {
    * Handler to initiate the agent login
    */
   login: () => void
+
+  /**
+   * Handler for agent logout
+   */
+  logout: () => void
 }
