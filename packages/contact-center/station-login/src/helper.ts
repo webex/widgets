@@ -1,5 +1,5 @@
 /*
- * StationLogin helper
+ * StationLogin helpers
  */
 export const useStationLogin = () => {
   return {name: 'StationLogin'};
