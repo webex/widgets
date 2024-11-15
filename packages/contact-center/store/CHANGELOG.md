@@ -1,3 +1,10 @@
+# [@webex/cc-store-v1.28.0-alpha.16](https://github.com/webex/widgets/compare/1.28.0-alpha.15...1.28.0-alpha.16) (2024-11-15)
+
+
+### Bug Fixes
+
+* **cc-widgets:** update-docs-in-user-state ([#275](https://github.com/webex/widgets/issues/275)) ([b59f0c4](https://github.com/webex/widgets/commit/b59f0c45ef64e847588b31a512452b317c296331))
+
 # [@webex/cc-store-v1.28.0-alpha.15](https://github.com/webex/widgets/compare/1.28.0-alpha.14...1.28.0-alpha.15) (2024-11-15)
 
 
