@@ -1,10 +1,10 @@
 module.exports = {
   extends: 'semantic-release-monorepo',
   branches: [
-    'master', // or 'main', depending on your main branch name
+    'master',
     {
       name: 'eft-pipeline',
-      prerelease: 'alpha', // This will trigger versions like 1.0.0-alpha.X
+      prerelease: 'alpha',
     },
   ],
   plugins: [
@@ -21,16 +21,17 @@ module.exports = {
     [
       'semantic-release-yarn',
       {
-        yarnPublish: false, // Prevents publishing via Yarn (useful for Yarn workspaces)
+        yarnPublish: false,
+        addChannel: 'alpha',
       },
     ],
     [
       '@semantic-release/git',
       {
-        assets: ['CHANGELOG.md', 'package.json'], // Ensure package.json is updated
+        assets: ['CHANGELOG.md', 'package.json'],
       },
     ],
     '@semantic-release/github',
   ],
-  tagFormat: '${version}', // Tag format without the 'v' prefix, e.g., 1.0.0-alpha.1
+  tagFormat: '${version}',
 };
