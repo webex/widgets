@@ -30,7 +30,6 @@ module.exports = {
         assets: ['CHANGELOG.md', 'package.json'],
       },
     ],
-    '@semantic-release/github',
   ],
   tagFormat: '${version}',
   commitAnalyzer: {
