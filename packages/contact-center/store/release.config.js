@@ -22,14 +22,7 @@ module.exports = {
       'semantic-release-yarn',
       {
         yarnPublish: false,
-      },
-    ],
-    [
-      '@semantic-release/npm',
-      {
-        npmPublish: false,
-        tarballDir: 'dist',
-        tag: 'alpha',
+        addChannel: 'alpha',
       },
     ],
     [
