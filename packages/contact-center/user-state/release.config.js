@@ -19,12 +19,6 @@ module.exports = {
         ],
       },
     ],
-    [
-      'semantic-release-yarn',
-      {
-        yarnPublish: false,
-      },
-    ],
   ],
   tagFormat: '${version}',
 };
