@@ -1,5 +1,5 @@
 /*
- * UserState helpers
+ * UserState helper
  */
 
 export const useUserState = () => {

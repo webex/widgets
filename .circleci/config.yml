@@ -96,7 +96,7 @@ jobs:
       - checkout_from_workspace
       - run:
           name: Release Widgets
-          command: yarn run release:widgets
+          command: npx semantic-release
 
 # execute the jobs in an orderly manner
 workflows:
