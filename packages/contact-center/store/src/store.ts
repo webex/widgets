@@ -2,7 +2,7 @@ import {makeAutoObservable, observable} from 'mobx';
 
 import sdk from './sdk';
 /*
- * Store Class
+ * Store
  */
 class Store {
   loginState = '';
