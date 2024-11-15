@@ -24,12 +24,6 @@ module.exports = {
         yarnPublish: false,
       },
     ],
-    [
-      '@semantic-release/git',
-      {
-        assets: ['CHANGELOG.md', 'package.json'],
-      },
-    ],
   ],
   tagFormat: '${version}',
   commitAnalyzer: {
