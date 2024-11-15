@@ -26,5 +26,8 @@ module.exports = {
       },
     ],
   ],
+  monorepo: {
+    forceRelease: true,
+  },
   tagFormat: '${version}',
 };
