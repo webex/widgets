@@ -1,3 +1,15 @@
+# [@webex/cc-store-v1.28.0-alpha.6](https://github.com/webex/widgets/compare/1.28.0-alpha.5...1.28.0-alpha.6) (2024-11-15)
+
+
+### Bug Fixes
+
+* **release:** fix-npm-tag ([#256](https://github.com/webex/widgets/issues/256)) ([9ac693a](https://github.com/webex/widgets/commit/9ac693aff72e152c383a4d373f87239f593d4b20))
+* **cc-store:** trigger-a-release ([#259](https://github.com/webex/widgets/issues/259)) ([b5bd817](https://github.com/webex/widgets/commit/b5bd8173d55ef7cad496208f5ee2fb1264777520))
+* **cc-store:** trigger-a-release ([#261](https://github.com/webex/widgets/issues/261)) ([f15ba04](https://github.com/webex/widgets/commit/f15ba0456c372cf4a70756c301053cd74b836d1b))
+* **cc-store:** trigger-a-release-2 ([#262](https://github.com/webex/widgets/issues/262)) ([bfc5a15](https://github.com/webex/widgets/commit/bfc5a15d90cc5cfefe5ae4d92826ba32005843c4))
+* **cc-store:** trigger-npm-release ([#257](https://github.com/webex/widgets/issues/257)) ([b6f8a56](https://github.com/webex/widgets/commit/b6f8a56469580b26d7f5e78dbef2a91093e802f8))
+* **release:** update-release-rs ([#258](https://github.com/webex/widgets/issues/258)) ([b58d02f](https://github.com/webex/widgets/commit/b58d02f9238319f0a87c00f6fc0404995f7fe0a8))
+
 # [@webex/cc-store-v1.28.0-alpha.5](https://github.com/webex/widgets/compare/v1.28.0-alpha.4...1.28.0-alpha.5) (2024-11-14)
 
 
