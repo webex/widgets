@@ -1,3 +1,10 @@
+# [@webex/cc-store-v1.28.0-alpha.10](https://github.com/webex/widgets/compare/1.28.0-alpha.9...1.28.0-alpha.10) (2024-11-15)
+
+
+### Bug Fixes
+
+* **cc-widgets:** trigger-a-release ([#266](https://github.com/webex/widgets/issues/266)) ([7dffb95](https://github.com/webex/widgets/commit/7dffb957db894d7d7892a602feb50a6074b59f2c))
+
 # [@webex/cc-store-v1.28.0-alpha.9](https://github.com/webex/widgets/compare/1.28.0-alpha.8...1.28.0-alpha.9) (2024-11-15)
 
 
