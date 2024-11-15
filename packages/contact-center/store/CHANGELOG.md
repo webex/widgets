@@ -1,3 +1,10 @@
+# [@webex/cc-store-v1.28.0-alpha.13](https://github.com/webex/widgets/compare/1.28.0-alpha.12...1.28.0-alpha.13) (2024-11-15)
+
+
+### Bug Fixes
+
+* **release:** update-commit-analyzer-rules ([#271](https://github.com/webex/widgets/issues/271)) ([45451c0](https://github.com/webex/widgets/commit/45451c09c02645a6563b593f262196aee2f02173))
+
 # [@webex/cc-store-v1.28.0-alpha.10](https://github.com/webex/widgets/compare/1.28.0-alpha.9...1.28.0-alpha.10) (2024-11-15)
 
 
