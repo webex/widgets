@@ -1,3 +1,10 @@
+# [@webex/cc-store-v1.28.0-alpha.15](https://github.com/webex/widgets/compare/1.28.0-alpha.14...1.28.0-alpha.15) (2024-11-15)
+
+
+### Bug Fixes
+
+* **release:** add-central-releaserc ([#273](https://github.com/webex/widgets/issues/273)) ([fe4dc35](https://github.com/webex/widgets/commit/fe4dc35447c405ffe2eb2b80d65adb5093c7eed5))
+
 # [@webex/cc-store-v1.28.0-alpha.14](https://github.com/webex/widgets/compare/1.28.0-alpha.13...1.28.0-alpha.14) (2024-11-15)
 
 
