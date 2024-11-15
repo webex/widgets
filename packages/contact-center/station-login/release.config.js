@@ -7,5 +7,13 @@ module.exports = {
       prerelease: 'alpha',
     },
   ],
+  plugins: [
+    [
+      'semantic-release-yarn',
+      {
+        yarnPublish: false,
+      },
+    ],
+  ],
   tagFormat: '${version}',
 };
