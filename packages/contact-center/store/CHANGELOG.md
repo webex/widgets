@@ -1,3 +1,10 @@
+# [@webex/cc-store-v1.28.0-alpha.7](https://github.com/webex/widgets/compare/1.28.0-alpha.6...1.28.0-alpha.7) (2024-11-15)
+
+
+### Bug Fixes
+
+* **release:** add-chanel-in-smeantic-release-yarn ([#263](https://github.com/webex/widgets/issues/263)) ([837d974](https://github.com/webex/widgets/commit/837d974e576cc8fdecfa3ba4a200aa9bdc9666a3))
+
 # [@webex/cc-store-v1.28.0-alpha.6](https://github.com/webex/widgets/compare/1.28.0-alpha.5...1.28.0-alpha.6) (2024-11-15)
 
 
