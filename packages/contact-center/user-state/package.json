@@ -8,7 +8,7 @@
     "build:src": "webpack && yarn run build",
     "build:watch": "webpack --watch",
     "test:unit": "jest",
-    "release": "echo 'Releasing @webex/cc-user-state' && semantic-release && echo 'Released @webex/cc-user-state'"
+    "release": "echo 'Releasing @webex/cc-user-state' && semantic-release --no-ci && echo 'Released @webex/cc-user-state'"
   },
   "dependencies": {
     "@r2wc/react-to-web-component": "2.0.3",

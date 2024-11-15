@@ -12,7 +12,7 @@
     "build:src": "webpack && yarn run build",
     "build:watch": "webpack --watch",
     "test:unit": "jest",
-    "release": "echo 'Releasing @webex/cc-store' && semantic-release && echo 'Released @webex/cc-store'"
+    "release": "echo 'Releasing @webex/cc-store' && semantic-release --no-ci && echo 'Released @webex/cc-store'"
   },
   "dependencies": {
     "mobx": "6.13.5",
