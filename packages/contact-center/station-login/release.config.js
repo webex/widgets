@@ -27,7 +27,7 @@ module.exports = {
     [
       '@semantic-release/git',
       {
-        assets: ['CHANGELOG.md', 'packages/contact-center/*/package.json'], // Ensure versions are updated in all workspaces
+        assets: ['CHANGELOG.md', 'package.json'],
       },
     ],
     '@semantic-release/github',
@@ -39,11 +39,5 @@ module.exports = {
       {type: 'feat', release: 'patch'},
       {type: 'chore', release: 'patch'},
     ],
-  },
-  monorepo: {
-    release: 'patch',
-    updateVersions: true,
-    skipCi: false,
-    ignore: ['@webex/widgets', '@webex/react-samples-app', '@webex/web-component-samples-app'], // Exclude this workspace from the release process
   },
 };
