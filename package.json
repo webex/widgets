@@ -30,7 +30,6 @@
     "samples:build": "yarn workspace @webex/react-samples-app build:src && yarn workspace @webex/web-component-samples-app build:src",
     "samples:serve": "open docs/index.html && yarn workspace @webex/react-samples-app serve",
     "samples:serve-react": "yarn workspace @webex/react-samples-app serve",
-    "samples:serve-wc": "yarn workspace @webex/web-component-samples-app serve",
-    "release:widgets": "yarn workspace @webex/cc-store release && yarn workspace @webex/cc-station-login release && yarn workspace @webex/cc-user-state release"
+    "samples:serve-wc": "yarn workspace @webex/web-component-samples-app serve"
   }
 }
