@@ -33,4 +33,11 @@ module.exports = {
     '@semantic-release/github',
   ],
   tagFormat: '${version}',
+  commitAnalyzer: {
+    releaseRules: [
+      {type: 'fix', release: 'patch'},
+      {type: 'feat', release: 'patch'},
+      {type: 'chore', release: 'patch'},
+    ],
+  },
 };
