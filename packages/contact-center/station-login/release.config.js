@@ -1,9 +1,10 @@
 module.exports = {
+  extends: 'semantic-release-monorepo',
   branches: [
-    'master', // or 'main', depending on your main branch name
+    'master',
     {
       name: 'eft-pipeline',
-      prerelease: 'alpha', // This will trigger versions like 1.0.0-alpha.X
+      prerelease: 'alpha',
     },
   ],
   plugins: [
@@ -17,7 +18,12 @@ module.exports = {
       },
     ],
     '@semantic-release/changelog',
-    '@semantic-release/npm',
+    [
+      'semantic-release-yarn',
+      {
+        yarnPublish: false,
+      },
+    ],
     [
       '@semantic-release/git',
       {
@@ -26,4 +32,5 @@ module.exports = {
     ],
     '@semantic-release/github',
   ],
+  tagFormat: '${version}',
 };
