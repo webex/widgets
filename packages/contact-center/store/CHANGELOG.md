@@ -1,3 +1,10 @@
+# [@webex/cc-store-v1.28.0-alpha.8](https://github.com/webex/widgets/compare/1.28.0-alpha.7...1.28.0-alpha.8) (2024-11-15)
+
+
+### Bug Fixes
+
+* **release:** fix-add-channel-in-releaserc ([#264](https://github.com/webex/widgets/issues/264)) ([f47d2b1](https://github.com/webex/widgets/commit/f47d2b1d054d8e071360090254edae7de3503509))
+
 # [@webex/cc-store-v1.28.0-alpha.7](https://github.com/webex/widgets/compare/1.28.0-alpha.6...1.28.0-alpha.7) (2024-11-15)
 
 
