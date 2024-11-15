@@ -22,7 +22,6 @@ module.exports = {
       'semantic-release-yarn',
       {
         yarnPublish: false,
-        addChannel: ['alpha'],
       },
     ],
     [
