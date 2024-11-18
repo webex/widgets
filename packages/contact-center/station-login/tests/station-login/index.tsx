@@ -9,7 +9,7 @@ describe('StationLogin', () => {
   afterEach(cleanup);
 
   it('CheckboxWithLabel changes the text after click', () => {
-    const stationLoginHelperSpy = jest.spyOn(helper, 'useStationLogin').mockReturnValue({name: 'MockStationLogin'});
+    const stationLoginHelperSpy = jest.spyOn(helper, 'useStationLogin').mockReturnValue({name: 'MockStationLogin', selectLoginOption: jest.fn(), login, logout, loginSuccess, loginFailure});
 
     render(<StationLogin />);
 

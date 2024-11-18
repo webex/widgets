@@ -1,5 +1,5 @@
 import Webex from 'webex';
-import {StationLoginSuccess, Team} from '@webex/plugin-cc';
+import {AgentLogin, StationLoginSuccess, StationLogoutSuccess, Team} from '@webex/plugin-cc';
 /**
  * Interface representing the properties for the Station Login component.
  */
@@ -24,11 +24,10 @@ export interface IStationLoginProps {
    */
   loginOptions: string[];
 
-
   /**
-   * Handler to select login type
+   *  Request Param object to be sent to the SDK station login method
    */
-  selectLoginOption: (event) => void;
+  loginReqParam: AgentLogin
 
   /**
    * Handler to initiate the agent login
@@ -46,12 +45,31 @@ export interface IStationLoginProps {
   loginSuccess: StationLoginSuccess;
 
   /**
-   * Eroor received on agent login failure
+   * Error received on agent login failure
    */
   loginFailure: Error;
+
+    /**
+   * Response data received on agent login success
+   */
+  logoutSuccess: StationLogoutSuccess;
+
+  /**
+   * Handler to set device type
+   */
+  setDeviceType: (deviceType: string) => void;
+
+  /**
+   * Handler to set the entered dial number
+   */
+  setDialNumber: (dn: string) => void;
+
+  /**
+   * Handler to set the selected agent team
+   */
+  setTeam: (team: string) => void;
 }
 
-export type StationLoginPresentationalProps = Pick<IStationLoginProps, 'name' | 'selectLoginOption' | 'login' | 'logout'>;
+export type StationLoginPresentationalProps = Pick<IStationLoginProps, 'name' | 'teams' | 'loginOptions' | 'login' | 'logout' | 'loginSuccess' | 'loginFailure' | 'logoutSuccess' | 'setDeviceType' | 'setDialNumber' | 'setTeam'>;
 
-export type UseStationLoginProps = Pick<IStationLoginProps, 'webex' | 'teams' | 'loginOptions'>;
-
+export type UseStationLoginProps = Pick<IStationLoginProps, 'webex' | 'loginReqParam'>;

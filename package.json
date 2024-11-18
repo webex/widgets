@@ -17,7 +17,13 @@
     "typescript": "^5.6.3",
     "webpack": "^5.96.1",
     "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^5.1.0"
+    "webpack-dev-server": "^5.1.0",
+    "crypto-browserify": "^3.12.1",
+    "os-browserify": "^0.3.0",
+    "process": "^0.11.10",
+    "querystring-es3": "^0.2.1",
+    "stream-browserify": "^3.0.0",
+    "vm-browserify": "^1.1.2"
   },
   "scripts": {
     "build": "yarn run build:store && yarn run build:widgets",
@@ -27,13 +33,5 @@
     "samples:serve": "open docs/index.html && yarn workspace @webex/react-samples-app serve",
     "samples:serve-react": "yarn workspace @webex/react-samples-app serve",
     "samples:serve-wc": "yarn workspace @webex/web-component-samples-app serve"
-  },
-  "dependencies": {
-    "crypto-browserify": "^3.12.1",
-    "os-browserify": "^0.3.0",
-    "process": "^0.11.10",
-    "querystring-es3": "^0.2.1",
-    "stream-browserify": "^3.0.0",
-    "vm-browserify": "^1.1.2"
   }
 }
