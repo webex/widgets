@@ -3,7 +3,7 @@
     "master",
     {
       "name": "eft-pipeline",
-      "prerelease": "eft-pipeline"
+      "prerelease": "alpha"
     }
   ],
   "plugins": [
