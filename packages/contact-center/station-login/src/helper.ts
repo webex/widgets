@@ -35,7 +35,6 @@ export const useStationLogin = (webex, teams: Team[], loginOptions: string[]) =>
     const dialNumber = document.querySelector('#dialNumber') as HTMLInputElement;
     const value = event.target.value;
     deviceType = value;
-    console.log('device type: ', deviceType);
     if (deviceType === 'AGENT_DN' || deviceType === 'EXTENSION') {
       dialNumber.disabled = false;
     } else {

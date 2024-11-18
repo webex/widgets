@@ -14,7 +14,13 @@ describe('StationLoginPresentational', () => {
       ccSdk: {},
       isAvailable: jest.fn(),
     };
-    render(<StationLoginPresentational {...props} />);
+    render(<StationLoginPresentational sdk={undefined} teams={[]} loginOptions={[]} selectLoginOption={function (event: any): void {
+      throw new Error('Function not implemented.');
+    } } login={function (): void {
+      throw new Error('Function not implemented.');
+    } } logout={function (): void {
+      throw new Error('Function not implemented.');
+    } } {...props} />);
     const heading = screen.getByTestId('station-login-heading');
     expect(heading).toHaveTextContent('StationLogin');
   });

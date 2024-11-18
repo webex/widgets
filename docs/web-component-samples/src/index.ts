@@ -1,2 +1,2 @@
-import '@webex/widget-cc-station-login';
-import '@webex/widget-cc-user-state';
+import '@webex/cc-station-login';
+import '@webex/cc-user-state';

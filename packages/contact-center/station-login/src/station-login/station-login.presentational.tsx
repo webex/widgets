@@ -1,5 +1,6 @@
 import React from 'react';
 import {IStationLoginPresentationalProps} from './station-login.types';
+import styles from './styles.module.scss';
 
 const StationLoginPresentational: React.FunctionComponent<IStationLoginPresentationalProps> = (props) => {
   const {selectLoginOption, login, logout} = props;
@@ -7,12 +8,12 @@ const StationLoginPresentational: React.FunctionComponent<IStationLoginPresentat
   return (
     <>
       <h1 data-testid="station-login-heading">{props.name}</h1>
-      <div className="box">
-      <section className="section-box">
-        <div className="section-content">
+      <div className={styles.box}>
+      <section className={styles.sectionBox}>
+        <div className={styles.sectionContent}>
           <fieldset>
             <legend>Agent</legend>
-            <div className="screenshare-section">
+            <div className={styles.screenshareSection}>
               <div style={{display: 'flex', gap: '1rem'}}>
                 <fieldset style={{flex: 0.69}}>
                   <legend>Select Team</legend>
@@ -20,12 +21,12 @@ const StationLoginPresentational: React.FunctionComponent<IStationLoginPresentat
                 </fieldset>
                 <fieldset>
                   <legend>Agent Login</legend>
-                  <select name="LoginOption" id="LoginOption" className="LoginOption" onChange={selectLoginOption}>
-                    <option value="" selected hidden>Choose Agent Login ...</option>
+                  <select name="LoginOption" id="LoginOption" className={styles.loginOption} onChange={selectLoginOption}>
+                    <option value="" selected hidden>Choose Agent Login Option...</option>
                   </select>
                   <input id="dialNumber" name="dialNumber" placeholder="Extension/Dial Number" type="text"/>
-                  <button id="AgentLogin" className="btn btn-primary my-3" onClick={login}>Login</button>
-                  <button id="logoutAgent" className="btn btn-primary my-3 ml-2" onClick={logout}>Logout Agent</button>
+                  <button id="AgentLogin" className={styles.btn} onClick={login}>Login</button>
+                  <button id="logoutAgent" className={styles.btn} onClick={logout}>Logout</button>
                 </fieldset>
               </div>
             </div>
