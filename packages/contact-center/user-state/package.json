@@ -3,6 +3,9 @@
   "description": "Webex Contact Center Widgets: User State",
   "version": "1.28.0-alpha.20",
   "main": "dist/index.js",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "yarn run -T tsc",
     "build:src": "webpack && yarn run build",
