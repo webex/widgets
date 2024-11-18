@@ -1,7 +1,7 @@
 {
   "name": "@webex/cc-store",
   "description": "Webex Contact Center Widgets: Widgets Store",
-  "version": "1.28.0-eft-pipeline.25",
+  "version": "1.28.0-eft-pipeline.27",
   "main": "dist/index.js",
   "license": "MIT",
   "publishConfig": {
@@ -47,5 +47,6 @@
   },
   "jest": {
     "testEnvironment": "jsdom"
-  }
+  },
+  "stableVersion": "1.28.0-eft-pipeline.25"
 }
