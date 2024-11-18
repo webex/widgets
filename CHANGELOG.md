@@ -1,0 +1,47 @@
+# [1.28.0-alpha.5](https://github.com/webex/widgets/compare/v1.28.0-alpha.4...v1.28.0-alpha.5) (2024-11-18)
+
+
+### Bug Fixes
+
+* **cc-store:** trigger-a-release ([#259](https://github.com/webex/widgets/issues/259)) ([b5bd817](https://github.com/webex/widgets/commit/b5bd8173d55ef7cad496208f5ee2fb1264777520))
+* **cc-store:** trigger-a-release ([#261](https://github.com/webex/widgets/issues/261)) ([f15ba04](https://github.com/webex/widgets/commit/f15ba0456c372cf4a70756c301053cd74b836d1b))
+* **cc-store:** trigger-a-release-2 ([#262](https://github.com/webex/widgets/issues/262)) ([bfc5a15](https://github.com/webex/widgets/commit/bfc5a15d90cc5cfefe5ae4d92826ba32005843c4))
+* **cc-store:** trigger-npm-release ([#257](https://github.com/webex/widgets/issues/257)) ([b6f8a56](https://github.com/webex/widgets/commit/b6f8a56469580b26d7f5e78dbef2a91093e802f8))
+* **cc-widgets:** add-logs-for-release ([#272](https://github.com/webex/widgets/issues/272)) ([1864d7a](https://github.com/webex/widgets/commit/1864d7ad2827ccbf780b103cc785235214a5676c))
+* **cc-widgets:** remove-dry-run ([#268](https://github.com/webex/widgets/issues/268)) ([4e2038c](https://github.com/webex/widgets/commit/4e2038c216cb915a1233667e259be619b92212b1))
+* **cc-widgets:** test-commit-to-check-release ([#269](https://github.com/webex/widgets/issues/269)) ([49ec94f](https://github.com/webex/widgets/commit/49ec94f2b2ef0758951ce51cc56675390e9d49cc))
+* **cc-widgets:** trigger-a-release ([#266](https://github.com/webex/widgets/issues/266)) ([7dffb95](https://github.com/webex/widgets/commit/7dffb957db894d7d7892a602feb50a6074b59f2c))
+* **cc-widgets:** update-docs-in-user-state ([#275](https://github.com/webex/widgets/issues/275)) ([b59f0c4](https://github.com/webex/widgets/commit/b59f0c45ef64e847588b31a512452b317c296331))
+* **cc-widget:** user-state-trigger-release ([#267](https://github.com/webex/widgets/issues/267)) ([6244cef](https://github.com/webex/widgets/commit/6244cef423f80565e4e423ca17da63b721465295))
+* **release:** add-central-releaserc ([#273](https://github.com/webex/widgets/issues/273)) ([fe4dc35](https://github.com/webex/widgets/commit/fe4dc35447c405ffe2eb2b80d65adb5093c7eed5))
+* **release:** add-chanel-in-smeantic-release-yarn ([#263](https://github.com/webex/widgets/issues/263)) ([837d974](https://github.com/webex/widgets/commit/837d974e576cc8fdecfa3ba4a200aa9bdc9666a3))
+* **release:** add-commit-analyzer ([#283](https://github.com/webex/widgets/issues/283)) ([1220b98](https://github.com/webex/widgets/commit/1220b98a880173ce35ac8e3e2ddcadf7b2e93d58))
+* **release:** add-monorepo-semantic-release-support ([#253](https://github.com/webex/widgets/issues/253)) ([a4cb745](https://github.com/webex/widgets/commit/a4cb74587029ae11aeb0fda65d0362fc346e4d8a))
+* **release:** add-new-tooling-for-version-publish ([#294](https://github.com/webex/widgets/issues/294)) ([0e22d8a](https://github.com/webex/widgets/commit/0e22d8a8219b3e219914ea3727f946597d5792b1))
+* **release:** add-support-for-yarn ([#281](https://github.com/webex/widgets/issues/281)) ([e0645fa](https://github.com/webex/widgets/commit/e0645fa6e966c048f9fec1b383ff26845a74edd6))
+* **release:** centralise-release ([#278](https://github.com/webex/widgets/issues/278)) ([35ffa4d](https://github.com/webex/widgets/commit/35ffa4dddd8d0f0ececedd4fd5f69e7689e70319))
+* **release:** create-user-state-npm-package ([#296](https://github.com/webex/widgets/issues/296)) ([d6d14b9](https://github.com/webex/widgets/commit/d6d14b9f99e0f598a671065e27772080b1476bd0))
+* **release:** fix-add-channel-in-releaserc ([#264](https://github.com/webex/widgets/issues/264)) ([f47d2b1](https://github.com/webex/widgets/commit/f47d2b1d054d8e071360090254edae7de3503509))
+* **release:** fix-npm-tag ([#256](https://github.com/webex/widgets/issues/256)) ([9ac693a](https://github.com/webex/widgets/commit/9ac693aff72e152c383a4d373f87239f593d4b20))
+* **release:** force-all-workspaces-to-publish ([#284](https://github.com/webex/widgets/issues/284)) ([d76e9e2](https://github.com/webex/widgets/commit/d76e9e27206cba1c472e7e04dee683c03822417c))
+* **release:** reduce-functionalities-of-release ([#280](https://github.com/webex/widgets/issues/280)) ([ac6a6fc](https://github.com/webex/widgets/commit/ac6a6fcaa09eaa21435c8aa3ec3c2fa9463e1573))
+* **release:** remove-mono-repo-force-publish ([#288](https://github.com/webex/widgets/issues/288)) ([026201e](https://github.com/webex/widgets/commit/026201ec2ab766c558d641c6c54c20ed0668fca5))
+* **release:** remove-monorepo-release-add-exec ([#290](https://github.com/webex/widgets/issues/290)) ([92c85e9](https://github.com/webex/widgets/commit/92c85e96b06b3e0a47a395526b81138f8a5799a1))
+* **release:** remove-topological-2 ([#292](https://github.com/webex/widgets/issues/292)) ([c4d96dc](https://github.com/webex/widgets/commit/c4d96dc5c55662f40cdbf5e77d468f407765dedf))
+* **release:** remove-topological-dev ([#291](https://github.com/webex/widgets/issues/291)) ([d108437](https://github.com/webex/widgets/commit/d1084378de13c22f8803f3b1b1a1b58803cf117c))
+* **release:** remove-yarn-publish-from-workspaces ([#289](https://github.com/webex/widgets/issues/289)) ([40c187b](https://github.com/webex/widgets/commit/40c187bc94d45259b6eaff025ba05355ad050086))
+* **release:** setup-and-then-release ([#285](https://github.com/webex/widgets/issues/285)) ([4e49eb8](https://github.com/webex/widgets/commit/4e49eb8f39debd998c11fe599729463d7cfeddd5))
+* **release:** sync-packgejson-and-npm-version ([#254](https://github.com/webex/widgets/issues/254)) ([a7b2793](https://github.com/webex/widgets/commit/a7b2793e6dd51ba32762c204e04ab204d1bcf96e))
+* **release:** trigger-a-release ([#287](https://github.com/webex/widgets/issues/287)) ([a1964ee](https://github.com/webex/widgets/commit/a1964ee0c3d0810a864bf6dbf31d6ff7c2e3184c))
+* **release:** trigger-release ([#277](https://github.com/webex/widgets/issues/277)) ([7cd330c](https://github.com/webex/widgets/commit/7cd330c51e3273b56c9a35db95c8c6417975e4f6))
+* **release:** trigger-release ([#282](https://github.com/webex/widgets/issues/282)) ([2ffdb11](https://github.com/webex/widgets/commit/2ffdb11d88b8413ad6cacc7c9f450c49ec1a3e73))
+* **release:** try-workspace-cara-version ([#286](https://github.com/webex/widgets/issues/286)) ([e78ce20](https://github.com/webex/widgets/commit/e78ce20d159b8fc77097a22529b57ab8f7a5770b))
+* **release:** update-commands ([#293](https://github.com/webex/widgets/issues/293)) ([cfcc896](https://github.com/webex/widgets/commit/cfcc896cb29792f1b7e7672bd91ec160529a0c62))
+* **release:** update-commit-analyzer-rules ([#271](https://github.com/webex/widgets/issues/271)) ([45451c0](https://github.com/webex/widgets/commit/45451c09c02645a6563b593f262196aee2f02173))
+* **release:** update-publish-logic ([#295](https://github.com/webex/widgets/issues/295)) ([b5a9053](https://github.com/webex/widgets/commit/b5a90531b751828fbdda756c1edf514b482717d5))
+* **release:** update-release-rs ([#258](https://github.com/webex/widgets/issues/258)) ([b58d02f](https://github.com/webex/widgets/commit/b58d02f9238319f0a87c00f6fc0404995f7fe0a8))
+
+
+### Features
+
+* **release:** release-all-cc-widgets ([#265](https://github.com/webex/widgets/issues/265)) ([ca4d845](https://github.com/webex/widgets/commit/ca4d8454865be8a7e86c247c6769f25a08380636))
