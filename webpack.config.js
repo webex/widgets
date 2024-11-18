@@ -4,7 +4,7 @@ module.exports = {
   mode: 'development',
   entry: './src/index.ts',
   resolve: {
-    extensions: ['.ts', '.tsx', '.js', 'jsx'],
+    extensions: ['.ts', '.tsx', '.js', '.jsx', '.scss'],
     fallback: {
       fs:false,
       process: require.resolve('process/browser'),

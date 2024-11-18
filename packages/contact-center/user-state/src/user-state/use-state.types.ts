@@ -7,15 +7,13 @@ export interface IUserState {
    */
   name: string;
 
-    /**
-   * Handler to refelct the agent state changes
+  /**
+   * Handler to reflect the agent state changes
    */
-    handleAgentStatus: (event) => void;
+  handleAgentStatus: (event) => void;
 
-    /**
-     * Handler to set agent state
-     */
-    setAgentStatus: () => void
-
-    loginState: string
+  /**
+   * Handler to set agent state
+   */
+  setAgentStatus: () => void
 }

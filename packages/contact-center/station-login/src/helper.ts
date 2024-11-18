@@ -1,7 +1,13 @@
 import {useEffect} from "react";
-import {StationLoginSuccess, StationLogoutSucces, Team} from '@webex/plugin-cc';
+import {StationLoginSuccess, StationLogoutSucces} from '@webex/plugin-cc';
+import {UseStationLoginProps} from "./station-login/station-login.types";
 
-export const useStationLogin = (webex, teams: Team[], loginOptions: string[]) => {
+export const useStationLogin = (props: UseStationLoginProps) => {
+  const webex = props.webex;
+  const teams = props.teams;
+  const loginOptions = props.loginOptions;
+  let loginSuccess: StationLoginSuccess;
+  let loginFailure: Error;
   let deviceType: string;
   let team: string
 
@@ -47,8 +53,10 @@ export const useStationLogin = (webex, teams: Team[], loginOptions: string[]) =>
     webex.cc.stationLogin({teamId: team, loginOption: deviceType, dialNumber: dialNumber.value})
       .then((res: StationLoginSuccess) => {
         console.log('Successful Agent login: ', res);
+
       }).catch((error: any) => {
         console.log(error);
+        loginFailure = error;
       });
   };
 
@@ -56,11 +64,12 @@ export const useStationLogin = (webex, teams: Team[], loginOptions: string[]) =>
     webex.cc.stationLogout({logoutReason: 'User requested logout'})
       .then((res: StationLogoutSucces) => {
         console.log('Successful Agent logout: ', res);
+        loginSuccess = res;
       }).catch((error: any) => {
         console.log(error);
       });
   };
 
-  return {name: 'StationLogin', selectLoginOption, login, logout};
+  return {name: 'StationLogin', selectLoginOption, login, logout, loginSuccess, loginFailure};
 };
 
