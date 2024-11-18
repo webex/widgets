@@ -2,6 +2,9 @@ import React from 'react';
 
 import {IUserState} from './use-state.types';
 
+/**
+ * Presentational component for the User State.
+ */
 const UserStatePresentational: React.FunctionComponent<IUserState> = (props) => {
   return (
     <>

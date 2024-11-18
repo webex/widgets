@@ -11,8 +11,13 @@
   ],
   "packageManager": "yarn@4.5.1",
   "devDependencies": {
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/exec": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^11.0.1",
     "html-webpack-plugin": "^5.6.3",
     "node-gyp": "^10.2.0",
+    "semantic-release": "^24.2.0",
     "typescript": "^5.6.3",
     "webpack": "^5.96.1",
     "webpack-cli": "^5.1.4",
@@ -25,6 +30,7 @@
     "samples:build": "yarn workspace @webex/react-samples-app build:src && yarn workspace @webex/web-component-samples-app build:src",
     "samples:serve": "open docs/index.html && yarn workspace @webex/react-samples-app serve",
     "samples:serve-react": "yarn workspace @webex/react-samples-app serve",
-    "samples:serve-wc": "yarn workspace @webex/web-component-samples-app serve"
+    "samples:serve-wc": "yarn workspace @webex/web-component-samples-app serve",
+    "release:widgets": "semantic-release"
   }
 }
