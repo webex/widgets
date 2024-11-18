@@ -3,7 +3,7 @@
     "master",
     {
       "name": "eft-pipeline",
-      "prerelease": "alpha"
+      "prerelease": "eft-pipeline"
     }
   ],
   "plugins": [
@@ -29,14 +29,6 @@
       }
     ],
     [
-      "@semantic-release/npm",
-      {
-        "npmPublish": false,
-        "pkgRoot": ".",
-        "sync": true
-      }
-    ],
-    [
       "@semantic-release/git",
       {
         "assets": [
@@ -49,5 +41,6 @@
       }
     ],
     "@semantic-release/github"
-  ]
+  ],
+  "tagFormat":"${version}"
 } 
