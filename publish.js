@@ -5,10 +5,11 @@ const path = require('path');
 function versionAndPublish(workspaceName) {
   try {
     let version;
+    const branchName = process.argv[3];
 
     try {
       // Fetch the existing version from npm
-      version = execSync(`npm view ${workspaceName} dist-tags.wxcc`, {stdio: 'pipe'})
+      version = execSync(`npm view ${workspaceName} dist-tags.${branchName}`, {stdio: 'pipe'})
         .toString()
         .trim();
     } catch (npmError) {
@@ -19,18 +20,11 @@ function versionAndPublish(workspaceName) {
 
     let newVersion;
     if (!version) {
-      // If no version exists, start with `1.28.0-wxcc.1`
-      newVersion = '1.28.0-wxcc.1';
+      newVersion = `1.28.0-${branchName}.1`;
     } else {
       // Increment the patch number
-      const baseVersion = parseInt(
-        version
-          .split('.')
-          .pop()
-          .replace('wxcc.', ''),
-        10
-      );
-      newVersion = `1.28.0-wxcc.${baseVersion + 1}`;
+      const baseVersion = parseInt(version.split('.').pop(), 10);
+      newVersion = `1.28.0-${branchName}.${baseVersion + 1}`;
     }
 
     console.log(`Publishing new version for ${workspaceName}: ${newVersion}`);
@@ -39,7 +33,7 @@ function versionAndPublish(workspaceName) {
     execSync(`yarn workspace ${workspaceName} version ${newVersion}`, {stdio: 'inherit'});
 
     // Publish the package
-    execSync(`yarn workspace ${workspaceName} npm publish --tag wxcc --access public`, {stdio: 'inherit'});
+    execSync(`yarn workspace ${workspaceName} npm publish --tag ${branchName}`, {stdio: 'inherit'});
   } catch (error) {
     console.error(`Failed to process workspace ${workspaceName}:`, error.message);
     process.exit(1);
