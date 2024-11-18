@@ -39,7 +39,7 @@ function versionAndPublish(workspaceName) {
     execSync(`yarn workspace ${workspaceName} version ${newVersion}`, {stdio: 'inherit'});
 
     // Publish the package
-    execSync(`yarn workspace ${workspaceName} npm publish --tag wxcc`, {stdio: 'inherit'});
+    execSync(`yarn workspace ${workspaceName} npm publish --tag wxcc --access public`, {stdio: 'inherit'});
   } catch (error) {
     console.error(`Failed to process workspace ${workspaceName}:`, error.message);
     process.exit(1);
