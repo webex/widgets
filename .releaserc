@@ -13,19 +13,19 @@
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "yarn workspace @webex/cc-store --no-private npm version ${nextRelease.version} && yarn workspace @webex/cc-store --topological-dev --no-private npm publish --tag wxcc"
+        "prepareCmd": "yarn workspace @webex/cc-store --no-private npm version ${nextRelease.version} && yarn workspace @webex/cc-store --no-private npm publish --tag wxcc"
       }
     ],
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "yarn workspace @webex/cc-station-login --no-private npm version ${nextRelease.version} && yarn workspace @webex/cc-station-login --topological-dev --no-private npm publish --tag wxcc"
+        "prepareCmd": "yarn workspace @webex/cc-station-login --no-private npm version ${nextRelease.version} && yarn workspace @webex/cc-station-login --no-private npm publish --tag wxcc"
       }
     ],
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "yarn workspace @webex/cc-user-state --no-private npm version ${nextRelease.version} && yarn workspace @webex/cc-user-state --topological-dev --no-private npm publish --tag wxcc"
+        "prepareCmd": "yarn workspace @webex/cc-user-state --no-private npm version ${nextRelease.version} && yarn workspace @webex/cc-user-state --no-private npm publish --tag wxcc"
       }
     ],
     [
