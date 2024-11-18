@@ -13,19 +13,19 @@
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "yarn workspace @webex/cc-store version ${nextRelease.version} && yarn workspace @webex/cc-store npm publish --tag wxcc"
+        "prepareCmd": "node version-and-publish.js @webex/cc-store"
       }
     ],
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "yarn workspace @webex/cc-station-login version ${nextRelease.version} && yarn workspace @webex/cc-station-login npm publish --tag wxcc"
+        "prepareCmd": "node version-and-publish.js @webex/cc-station-login"
       }
     ],
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "yarn workspace @webex/cc-user-state version ${nextRelease.version} && yarn workspace @webex/cc-user-state npm publish --tag wxcc"
+        "prepareCmd": "node version-and-publish.js @webex/cc-user-state"
       }
     ],
     [
