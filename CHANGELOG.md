@@ -1,3 +1,13 @@
+# [1.28.0-alpha.6](https://github.com/webex/widgets/compare/v1.28.0-alpha.5...v1.28.0-alpha.6) (2024-11-18)
+
+
+### Bug Fixes
+
+* **release:** add-circle-ci-branch-name ([#298](https://github.com/webex/widgets/issues/298)) ([2ce1b86](https://github.com/webex/widgets/commit/2ce1b86f120af652b01599364a7be2d0198dbef3))
+* **release:** add-release-config-in-user-state ([#300](https://github.com/webex/widgets/issues/300)) ([f2af5cf](https://github.com/webex/widgets/commit/f2af5cfaa96af184265c23757fa08262bb416fbf))
+* **release:** move-back-to-workspace ([#297](https://github.com/webex/widgets/issues/297)) ([b3cc6b5](https://github.com/webex/widgets/commit/b3cc6b5e8cb043af1b87eeedd23f6ae2ab5ea231))
+* **release:** update-branch-name-in-releaserc ([#299](https://github.com/webex/widgets/issues/299)) ([a693325](https://github.com/webex/widgets/commit/a693325662b421edc473b7f6da8964d08acff9a0))
+
 # [1.28.0-alpha.5](https://github.com/webex/widgets/compare/v1.28.0-alpha.4...v1.28.0-alpha.5) (2024-11-18)
 
 
