@@ -13,19 +13,19 @@
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "node version-and-publish.js @webex/cc-store"
+        "prepareCmd": "node publish.js @webex/cc-store"
       }
     ],
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "node version-and-publish.js @webex/cc-station-login"
+        "prepareCmd": "node publish.js @webex/cc-station-login"
       }
     ],
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "node version-and-publish.js @webex/cc-user-state"
+        "prepareCmd": "node publish.js @webex/cc-user-state"
       }
     ],
     [
