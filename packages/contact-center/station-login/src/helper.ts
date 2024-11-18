@@ -1,14 +1,17 @@
-import {useEffect} from "react";
-import {StationLoginSuccess, StationLogoutSucces} from '@webex/plugin-cc';
+import {useEffect, useState} from "react";
+import {StationLoginSuccess, StationLogoutSuccess} from '@webex/plugin-cc';
 import {UseStationLoginProps} from "./station-login/station-login.types";
 
 export const useStationLogin = (props: UseStationLoginProps) => {
   const webex = props.webex;
   const teams = props.teams;
   const loginOptions = props.loginOptions;
-  let loginSuccess: StationLoginSuccess;
-  let loginFailure: Error;
-  let deviceType: string;
+  const [deviceType, setDeviceType] = useState<string>('');
+  const [loginSuccess, setLoginSuccess] = useState<StationLoginSuccess>();
+  const [loginFailure, setLoginFailure] = useState<Error>();
+  const [logoutSuccess, setLogoutSuccess] = useState<StationLogoutSuccess>();
+ 
+  
   let team: string
 
   useEffect(() => {
@@ -40,7 +43,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
   const selectLoginOption = (event: { target: { value: string; }; }) => {
     const dialNumber = document.querySelector('#dialNumber') as HTMLInputElement;
     const value = event.target.value;
-    deviceType = value;
+    setDeviceType(value);
     if (deviceType === 'AGENT_DN' || deviceType === 'EXTENSION') {
       dialNumber.disabled = false;
     } else {
@@ -53,18 +56,19 @@ export const useStationLogin = (props: UseStationLoginProps) => {
     webex.cc.stationLogin({teamId: team, loginOption: deviceType, dialNumber: dialNumber.value})
       .then((res: StationLoginSuccess) => {
         console.log('Successful Agent login: ', res);
+        setLoginSuccess(res);
 
-      }).catch((error: any) => {
+      }).catch((error: Error) => {
         console.log(error);
-        loginFailure = error;
+        setLoginFailure(error);
       });
   };
 
   const logout = () => {
     webex.cc.stationLogout({logoutReason: 'User requested logout'})
-      .then((res: StationLogoutSucces) => {
+      .then((res: StationLogoutSuccess) => {
         console.log('Successful Agent logout: ', res);
-        loginSuccess = res;
+        setLogoutSuccess(res);
       }).catch((error: any) => {
         console.log(error);
       });
