@@ -3,6 +3,7 @@ const sdk = {
   callbacks: {},
   init: async function({accessToken}) {
     this.accessToken = accessToken;
+    sdk.emit('ready', undefined);
   },
   logout: function() {
     this.accessToken = '';

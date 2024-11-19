@@ -7,7 +7,11 @@ function App() {
     <>
       <h1>Contact Center widgets in a react app</h1>
       <StationLogin />
-      <UserState />
+      <UserState
+        sdkConfig={{
+          access_token: 'YOUR_ACCESS',
+        }}
+      />
     </>
   );
 }

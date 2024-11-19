@@ -26,4 +26,9 @@ export interface IStationLoginProps {
    * Indicates whether the station is available.
    */
   isAvailable: any;
+
+  /**
+   * The SDK configuration.
+   */
+  sdkConfig: any;
 }

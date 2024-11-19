@@ -6,9 +6,9 @@ import {observer} from 'mobx-react';
 import StationLoginPresentational from './station-login.presentational';
 import {useStationLogin} from '../helper';
 
-const StationLogin: React.FunctionComponent = observer(() => {
+const StationLogin: React.FunctionComponent = observer((incomingProps) => {
   const {loginState, setLoginState, ccSdk, isAvailable} = store;
-  const result = useStationLogin();
+  const result = useStationLogin(incomingProps, store);
 
   const props = {
     ...result,
@@ -20,7 +20,11 @@ const StationLogin: React.FunctionComponent = observer(() => {
   return <StationLoginPresentational {...props} />;
 });
 
-const WebStationLogin = r2wc(StationLogin);
+const WebStationLogin = r2wc(StationLogin, {
+  props: {
+    sdkConfig: Object,
+  },
+});
 
 if (!customElements.get('widget-cc-station-login')) {
   customElements.define('widget-cc-station-login', WebStationLogin);

@@ -26,4 +26,9 @@ export interface IUserState {
    * Indicates whether the user is available.
    */
   isAvailable: any;
+
+  /**
+   * The SDK configuration.
+   */
+  sdkConfig: any;
 }

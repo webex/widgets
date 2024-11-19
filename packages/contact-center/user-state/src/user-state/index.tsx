@@ -6,9 +6,9 @@ import r2wc from '@r2wc/react-to-web-component';
 import {useUserState} from '../helper';
 import UserStatePresentational from './user-state.presentational';
 
-const UserState: React.FunctionComponent = observer(() => {
+const UserState: React.FunctionComponent = observer((incomingProps) => {
   const {loginState, setLoginState, ccSdk, isAvailable} = store;
-  const result = useUserState();
+  const result = useUserState(incomingProps, store);
   const props = {
     ...result,
     loginState,
@@ -20,7 +20,11 @@ const UserState: React.FunctionComponent = observer(() => {
   return <UserStatePresentational {...props} />;
 });
 
-const WebUserState = r2wc(UserState);
+const WebUserState = r2wc(UserState, {
+  props: {
+    sdkConfig: Object,
+  },
+});
 
 if (!customElements.get('widget-cc-user-state')) {
   customElements.define('widget-cc-user-state', WebUserState);

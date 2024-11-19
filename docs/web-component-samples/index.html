@@ -11,4 +11,12 @@
     <widget-cc-station-login></widget-cc-station-login>
     <widget-cc-user-state></widget-cc-user-state>
   </body>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const userStateElement = document.querySelector('widget-cc-station-login');
+      userStateElement.sdkConfig = {
+        access_token: 'YOUR_ACCESS',
+      };
+    });
+  </script>
 </html>

@@ -19,7 +19,7 @@
     "webpack-dev-server": "^5.1.0"
   },
   "scripts": {
-    "build": "yarn run build:store && yarn run build:widgets",
+    "build": "yarn run build:store && yarn run build:widgets && yarn run samples:build",
     "build:store": "yarn workspace @webex/cc-store build:src",
     "build:widgets": "yarn workspace @webex/cc-station-login build:src && yarn workspace @webex/cc-user-state build:src",
     "samples:build": "yarn workspace @webex/react-samples-app build:src && yarn workspace @webex/web-component-samples-app build:src",
