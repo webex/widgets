@@ -2,8 +2,8 @@
   "branches": [
     "master",
     {
-      "name": "eft-pipeline",
-      "prerelease": "eft-pipeline"
+      "name": "eft",
+      "prerelease": "eft"
     }
   ],
   "plugins": [

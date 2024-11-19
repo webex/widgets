@@ -113,7 +113,7 @@ workflows:
             branches:
               only: 
                 - master
-                - eft-pipeline
+                - eft
       - docs:
           requires:
             - linter
@@ -133,4 +133,4 @@ workflows:
             - build
           filters:
             branches:
-              only: eft-pipeline
+              only: eft
