@@ -27,17 +27,17 @@ export interface IStationLoginProps {
   /**
    *  Request Param object to be sent to the SDK station login method
    */
-  loginReqParam: AgentLogin
+  loginReqParam: AgentLogin;
 
   /**
    * Handler to initiate the agent login
    */
-  login: () => void
+  login: () => void;
 
   /**
    * Handler for agent logout
    */
-  logout: () => void
+  logout: () => void;
 
   /**
    * Response data received on agent login success

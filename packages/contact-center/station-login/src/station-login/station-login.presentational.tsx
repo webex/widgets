@@ -63,12 +63,6 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
       border: '1px solid #ddd',
       borderRadius: '8px'
     },
-
-    sectionContent: {
-      marginTop: '10px',
-      border: '1px solid #ddd',
-      borderRadius: '8px'
-    },
     
     fieldset:  {
       border: '1px solid #ccc',
@@ -76,7 +70,7 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
       padding: '10px',
       marginBottom: '20px'
     },
-    
+ 
     legendBox: {
       fontWeight: 'bold',
       color: '#0052bf'

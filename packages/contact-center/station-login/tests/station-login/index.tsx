@@ -30,7 +30,7 @@ describe('StationLogin Component', () => {
     const useStationLoginSpy = jest.spyOn(helper, 'useStationLogin');
     
     render(<StationLogin />);
-    console.log(useStationLoginSpy.mock.results[0].value);
+
     expect(useStationLoginSpy).toHaveBeenCalledWith({webex: {}, loginReqParam});
     const heading = screen.getByTestId('station-login-heading');
     expect(heading).toHaveTextContent('StationLogin');

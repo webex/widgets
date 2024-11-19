@@ -8,12 +8,12 @@ export interface IUserState {
   name: string;
 
   /**
-   * Handler to reflect the agent state changes
+   * Handler for agent state changes
    */
   handleAgentStatus: (event) => void;
 
   /**
-   * Handler to set agent state
+   * Setter for agent state
    */
   setAgentStatus: () => void
 }
