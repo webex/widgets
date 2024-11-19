@@ -9,7 +9,7 @@ function App() {
       <StationLogin />
       <UserState
         sdkConfig={{
-          access_token: 'YOUR_ACCESS',
+          accessToken: 'YOUR_ACCESS',
         }}
       />
     </>

@@ -1,7 +1,7 @@
 const sdk = {
   accessToken: '',
   callbacks: {},
-  init: async function({accessToken}) {
+  init: async function({accessToken}: {accessToken: string}) {
     this.accessToken = accessToken;
     sdk.emit('ready', undefined);
   },

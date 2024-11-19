@@ -8,8 +8,8 @@ class Store {
   isSdkInitialised = false;
   ccSdk = sdk;
   sdkConfig: {
-    config: any;
-    from: String;
+    config?: any;
+    from?: String;
   } = undefined;
 
   constructor() {
