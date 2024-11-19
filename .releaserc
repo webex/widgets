@@ -13,19 +13,19 @@
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "node publish.js @webex/cc-store eft-pipeline"
+        "prepareCmd": "node publish.js @webex/cc-store eft-pipeline ${nextRelease.notes}"
       }
     ],
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "node publish.js @webex/cc-station-login eft-pipeline"
+        "prepareCmd": "node publish.js @webex/cc-station-login eft-pipeline ${nextRelease.notes}"
       }
     ],
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "node publish.js @webex/cc-user-state wxcc"
+        "prepareCmd": "node publish.js @webex/cc-user-state eft-pipeline ${nextRelease.notes}"
       }
     ],
     [
