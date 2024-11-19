@@ -1,7 +1,7 @@
 {
   "name": "@webex/cc-user-state",
   "description": "Webex Contact Center Widgets: User State",
-  "version": "1.28.0-eft-pipeline.3",
+  "version": "1.28.0-eft-pipeline.6",
   "main": "dist/index.js",
   "publishConfig": {
     "access": "public"
@@ -49,5 +49,5 @@
   "jest": {
     "testEnvironment": "jsdom"
   },
-  "stableVersion": "1.28.0-eft-pipeline.1"
+  "stableVersion": "1.28.0-eft-pipeline.3"
 }
