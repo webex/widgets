@@ -1,7 +1,7 @@
 {
   "name": "@webex/cc-station-login",
   "description": "Webex Contact Center Widgets: Station Login",
-  "version": "1.28.0-eft.1",
+  "version": "1.28.0-eft.2",
   "main": "dist/index.js",
   "publishConfig": {
     "access": "public"
@@ -51,5 +51,5 @@
       "**/tests/**/*.tsx"
     ]
   },
-  "stableVersion": "1.27.6-eft.2"
+  "stableVersion": "1.28.0-eft.1"
 }

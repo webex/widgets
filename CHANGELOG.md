@@ -1,3 +1,10 @@
+# [1.28.0-eft.2](https://github.com/webex/widgets/compare/1.28.0-eft.1...1.28.0-eft.2) (2024-11-19)
+
+
+### Bug Fixes
+
+* **release:** update-files-that-are-published-to-npm ([#317](https://github.com/webex/widgets/issues/317)) ([20dfb7a](https://github.com/webex/widgets/commit/20dfb7a14c150fe3b15012ecdbf75050d87615d4))
+
 # [1.28.0-eft.1](https://github.com/webex/widgets/compare/1.27.6-eft.2...1.28.0-eft.1) (2024-11-19)
 
 
