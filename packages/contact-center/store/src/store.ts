@@ -5,9 +5,9 @@ import {AgentLogin, IAgentProfile, Team} from '@webex/plugin-cc';
 class Store {
   teams: Team[] = [];
   loginOptions: string[] = [];
-  loginReqParam: AgentLogin;
+  loginReqParam: AgentLogin = {teamId: '', loginOption: '', dialNumber: ''};
   webex: Webex = {};
-  token = ''
+  token = '';
 
   constructor() {
     const webexConfig = {
