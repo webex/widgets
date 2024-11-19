@@ -1,3 +1,10 @@
+# [1.28.0-eft.1](https://github.com/webex/widgets/compare/1.27.6-eft.2...1.28.0-eft.1) (2024-11-19)
+
+
+### Features
+
+* **cc-user-state:** try-minor-release ([#316](https://github.com/webex/widgets/issues/316)) ([9dd3461](https://github.com/webex/widgets/commit/9dd34613903651187d040240327f14792a3d882e))
+
 ## [1.27.6-eft.2](https://github.com/webex/widgets/compare/1.27.6-eft.1...1.27.6-eft.2) (2024-11-19)
 
 
