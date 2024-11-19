@@ -36,8 +36,8 @@
           "package.json", 
           "packages/contact-center/*/package.json"
         ],
-        "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}",
-        "tagFormat": "${nextRelease.version}" 
+        "message": "chore(release): 1.28.0-eft-pipeline.6 [skip ci]\n\n${nextRelease.notes}",
+        "tagFormat": "1.28.0-eft-pipeline.6" 
       }
     ],
     "@semantic-release/github"
