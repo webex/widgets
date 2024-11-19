@@ -10,8 +10,7 @@
     "build": "yarn run -T tsc",
     "build:src": "webpack && yarn run build",
     "build:watch": "webpack --watch",
-    "test:unit": "jest",
-    "release": "echo 'Releasing @webex/cc-station-login' && semantic-release --no-ci && echo 'Released @webex/cc-station-login'"
+    "test:unit": "jest"
   },
   "dependencies": {
     "@r2wc/react-to-web-component": "2.0.3",

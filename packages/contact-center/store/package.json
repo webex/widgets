@@ -11,8 +11,7 @@
     "build": "yarn run -T tsc",
     "build:src": "webpack && yarn run build",
     "build:watch": "webpack --watch",
-    "test:unit": "jest",
-    "release": "echo 'Releasing @webex/cc-store' && semantic-release --no-ci && echo 'Released @webex/cc-store'"
+    "test:unit": "jest"
   },
   "dependencies": {
     "@semantic-release/changelog": "^6.0.3",
