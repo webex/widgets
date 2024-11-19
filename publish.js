@@ -26,6 +26,8 @@ function versionAndPublish(workspaceName) {
   try {
     const branchName = process.argv[3];
     const newVersion = process.argv[4];
+    const channelName = process.argv[5];
+    console.log(`This is the channel name: ${channelName}`);
 
     // try {
     //   // Fetch the existing version from npm
