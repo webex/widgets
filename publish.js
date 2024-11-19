@@ -21,35 +21,12 @@ function removeStableVersion(packageJsonPath) {
   }
 }
 
-// Define the versionAndPublish function
 function versionAndPublish(workspaceName) {
   try {
     const branchName = process.argv[3];
-    const newVersion = '1.28.0-eft-pipeline.6';
-    const channelName = process.argv[5];
-    console.log(`This is the channel name: ${channelName}`);
+    const newVersion = process.argv[4];
 
-    // try {
-    //   // Fetch the existing version from npm
-    //   version = execSync(`npm view ${workspaceName} dist-tags.${branchName}`, {stdio: 'pipe'})
-    //     .toString()
-    //     .trim();
-    // } catch (npmError) {
-    //   // If no package is found (npm view fails), log a message and continue
-    //   console.log(`No existing version found for ${workspaceName}. Creating a new version.`);
-    //   version = '';
-    // }
-
-    // Support minor/major release change
-
-    // let newVersion;
-    // if (!version) {
-    //   newVersion = `1.28.0-${branchName}.1`;
-    // } else {
-    //   // Increment the patch number
-    //   const baseVersion = parseInt(version.split('.').pop(), 10);
-    //   newVersion = `1.28.0-${branchName}.${baseVersion + 1}`;
-    // }
+    console.log(`Running publish script for ${workspaceName}: ${newVersion}`);
 
     // https://github.com/yarnpkg/berry/issues/4328 - create JIRA ticket to fix this
     console.log(`Removing stable version from package.json for ${workspaceName}`);

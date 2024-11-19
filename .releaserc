@@ -13,19 +13,19 @@
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "node publish.js @webex/cc-store eft-pipeline ${nextRelease.version} ${nextRelease.channel}"
+        "prepareCmd": "node publish.js @webex/cc-store ${nextRelease.channel} ${nextRelease.version} "
       }
     ],
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "node publish.js @webex/cc-station-login eft-pipeline ${nextRelease.version} ${nextRelease.channel}"
+        "prepareCmd": "node publish.js @webex/cc-station-login ${nextRelease.channel} ${nextRelease.version}"
       }
     ],
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "node publish.js @webex/cc-user-state eft-pipeline ${nextRelease.version} ${nextRelease.channel}"
+        "prepareCmd": "node publish.js @webex/cc-user-state ${nextRelease.channel} ${nextRelease.version}"
       }
     ],
     [
@@ -36,8 +36,8 @@
           "package.json", 
           "packages/contact-center/*/package.json"
         ],
-        "message": "chore(release): 1.28.0-eft-pipeline.6 [skip ci]\n\n${nextRelease.notes}",
-        "tagFormat": "1.28.0-eft-pipeline.6" 
+        "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}",
+        "tagFormat": "${nextRelease.version}" 
       }
     ],
     "@semantic-release/github"

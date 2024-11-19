@@ -48,5 +48,5 @@
   "jest": {
     "testEnvironment": "jsdom"
   },
-  "stableVersion": "1.28.0-eft-pipeline.27"
+  "stableVersion": "1.28.0-eft-pipeline.24"
 }
