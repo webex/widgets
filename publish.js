@@ -25,7 +25,7 @@ function removeStableVersion(packageJsonPath) {
 function versionAndPublish(workspaceName) {
   try {
     const branchName = process.argv[3];
-    const newVersion = process.argv[4];
+    const newVersion = '1.28.0-eft-pipeline.6';
     const channelName = process.argv[5];
     console.log(`This is the channel name: ${channelName}`);
 
