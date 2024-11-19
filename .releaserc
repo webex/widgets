@@ -2,8 +2,8 @@
   "branches": [
     "master",
     {
-      "name": "eft",
-      "prerelease": "eft"
+      "name": "feat/cc-widgets",
+      "prerelease": "wxcc"
     }
   ],
   "plugins": [
