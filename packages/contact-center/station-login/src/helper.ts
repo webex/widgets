@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import {StationLoginSuccess, StationLogoutSuccess} from '@webex/plugin-cc';
 import {UseStationLoginProps} from "./station-login/station-login.types";
 

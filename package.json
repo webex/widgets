@@ -11,19 +11,20 @@
   ],
   "packageManager": "yarn@4.5.1",
   "devDependencies": {
+    "@testing-library/react-hooks": "^8.0.1",
+    "crypto-browserify": "^3.12.1",
     "html-webpack-plugin": "^5.6.3",
     "mini-css-extract-plugin": "^2.9.2",
     "node-gyp": "^10.2.0",
-    "typescript": "^5.6.3",
-    "webpack": "^5.96.1",
-    "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^5.1.0",
-    "crypto-browserify": "^3.12.1",
     "os-browserify": "^0.3.0",
     "process": "^0.11.10",
     "querystring-es3": "^0.2.1",
     "stream-browserify": "^3.0.0",
-    "vm-browserify": "^1.1.2"
+    "typescript": "^5.6.3",
+    "vm-browserify": "^1.1.2",
+    "webpack": "^5.96.1",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^5.1.0"
   },
   "scripts": {
     "build": "yarn run build:store && yarn run build:widgets",

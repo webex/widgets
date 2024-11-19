@@ -42,17 +42,17 @@ export interface IStationLoginProps {
   /**
    * Response data received on agent login success
    */
-  loginSuccess: StationLoginSuccess;
+  loginSuccess?: StationLoginSuccess;
 
   /**
    * Error received on agent login failure
    */
-  loginFailure: Error;
+  loginFailure?: Error;
 
     /**
    * Response data received on agent login success
    */
-  logoutSuccess: StationLogoutSuccess;
+  logoutSuccess?: StationLogoutSuccess;
 
   /**
    * Handler to set device type
