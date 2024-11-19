@@ -1,3 +1,10 @@
+# [1.28.0-eft.3](https://github.com/webex/widgets/compare/1.28.0-eft.2...1.28.0-eft.3) (2024-11-19)
+
+
+### Bug Fixes
+
+* **release:** create-tag-without-npm-publish ([#318](https://github.com/webex/widgets/issues/318)) ([5d0a65e](https://github.com/webex/widgets/commit/5d0a65e15eb038f8b2f4edda2867ae91e60887f4))
+
 # [1.28.0-eft.2](https://github.com/webex/widgets/compare/1.28.0-eft.1...1.28.0-eft.2) (2024-11-19)
 
 
