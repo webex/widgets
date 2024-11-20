@@ -24277,11 +24277,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "webex-widgets@workspace:."
   dependencies:
+    "@babel/preset-typescript": "npm:7.25.9"
     "@semantic-release/changelog": "npm:^6.0.3"
     "@semantic-release/exec": "npm:^6.0.3"
     "@semantic-release/git": "npm:^10.0.1"
     "@semantic-release/github": "npm:^11.0.1"
     html-webpack-plugin: "npm:^5.6.3"
+    jest: "npm:29.7.0"
     node-gyp: "npm:^10.2.0"
     semantic-release: "npm:^24.2.0"
     typescript: "npm:^5.6.3"
