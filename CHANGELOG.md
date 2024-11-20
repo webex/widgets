@@ -1,3 +1,10 @@
+# [1.28.0-eft.4](https://github.com/webex/widgets/compare/1.28.0-eft.3...1.28.0-eft.4) (2024-11-20)
+
+
+### Bug Fixes
+
+* **release:** update-publishing-logic ([#320](https://github.com/webex/widgets/issues/320)) ([7e20bec](https://github.com/webex/widgets/commit/7e20bec25353fd59fb808b77f305e11a483f04c7))
+
 # [1.28.0-eft.3](https://github.com/webex/widgets/compare/1.28.0-eft.2...1.28.0-eft.3) (2024-11-19)
 
 
