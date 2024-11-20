@@ -1,0 +1,80 @@
+const {execSync} = require('child_process');
+const fs = require('fs');
+const path = require('path');
+
+// Function to remove the 'stableVersion' key
+function removeStableVersion(packageJsonPath) {
+  try {
+    const packageJsonContent = fs.readFileSync(packageJsonPath, 'utf-8');
+    const packageData = JSON.parse(packageJsonContent);
+
+    if (packageData.hasOwnProperty('stableVersion')) {
+      delete packageData.stableVersion;
+      fs.writeFileSync(packageJsonPath, JSON.stringify(packageData, null, 2), 'utf-8');
+      console.log("'stableVersion' key removed successfully.");
+    } else {
+      console.log("'stableVersion' key does not exist in package.json.");
+    }
+  } catch (error) {
+    console.error("An error occurred while removing 'stableVersion':", error.message);
+  }
+}
+
+function versionAndPublish() {
+  const branchName = process.argv[2];
+  const newVersion = process.argv[3];
+
+  if (!branchName || !newVersion) {
+    console.error(
+      'Error: Not enough positional arguments provided! node <relative_path_to_publish> <branchName> <nextVersion>'
+    );
+    process.exit(1);
+  }
+  const contactCenterPath = './packages/contact-center';
+  const dependencies = ['@webex/cc-store'];
+
+  try {
+    const ccFolder = fs
+      .readdirSync(contactCenterPath, {withFileTypes: true})
+      .filter((dirent) => dirent.isDirectory())
+      .map((dirent) => dirent.name);
+    // Separate dependency workspaces and other workspaces
+    const dependencyWorkspaces = ccFolder.filter((fileName) => dependencies.includes(`@webex/cc-${fileName}`));
+
+    const otherWorkspaces = ccFolder.filter((fileName) => !dependencies.includes(`@webex/cc-${fileName}`));
+
+    const publishWorkspace = (fileName) => {
+      const workspaceName = `@webex/cc-${fileName}`;
+      console.log(`Running publish script for ${workspaceName}: ${newVersion}`);
+
+      console.log(`Removing stable version from package.json for ${workspaceName}`);
+      const packageJsonPath = path.join(contactCenterPath, fileName, 'package.json');
+      removeStableVersion(packageJsonPath);
+
+      console.log(`Publishing new version for ${workspaceName}: ${newVersion}`);
+
+      // Update version in the workspace
+      execSync(`yarn workspace ${workspaceName} version ${newVersion}`, {stdio: 'inherit'});
+
+      // Publish the package
+      execSync(`yarn workspace ${workspaceName} npm publish --tag ${branchName}`, {stdio: 'inherit'});
+    };
+
+    // Publish dependencies first
+    dependencyWorkspaces.forEach(publishWorkspace);
+
+    // Publish other packages
+    otherWorkspaces.forEach(publishWorkspace);
+  } catch (error) {
+    console.error(`Failed to process workspaces:`, error.message);
+    process.exit(1);
+  }
+}
+
+// Only execute when called through a module/script
+if (require.main !== module) {
+  // Export the function for testing
+  module.exports = {versionAndPublish};
+} else {
+  versionAndPublish();
+}
