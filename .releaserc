@@ -9,7 +9,12 @@
   "plugins": [
     "@semantic-release/commit-analyzer",
     "@semantic-release/release-notes-generator",
-    "@semantic-release/changelog",
+    [
+      "@semantic-release/changelog",
+      {
+        "changelogFile": "packages/contact-center/CHANGELOG.md"
+      }
+    ],
     [
       "@semantic-release/exec",
       {
@@ -20,7 +25,7 @@
       "@semantic-release/git",
       {
         "assets": [
-          "CHANGELOG.md", 
+          "packages/contact-center/CHANGELOG.md", 
           "package.json", 
           "packages/contact-center/*/package.json"
         ],
