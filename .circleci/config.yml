@@ -139,6 +139,12 @@ workflows:
           filters:
             branches:
               only: master
+      - unit_tests:
+          requires:
+            - build
+          filters:
+            branches:
+              only: eft
       - release_widgets:
           requires:
             - build
