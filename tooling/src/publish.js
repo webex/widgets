@@ -3,11 +3,8 @@ const fs = require('fs');
 const path = require('path');
 
 // Function to remove the 'stableVersion' key
-function removeStableVersion(packageJsonPath) {
+function removeStableVersion(packageJsonPath, packageData) {
   try {
-    const packageJsonContent = fs.readFileSync(packageJsonPath, 'utf-8');
-    const packageData = JSON.parse(packageJsonContent);
-
     if (packageData.hasOwnProperty('stableVersion')) {
       delete packageData.stableVersion;
       fs.writeFileSync(packageJsonPath, JSON.stringify(packageData, null, 2), 'utf-8');
@@ -16,7 +13,7 @@ function removeStableVersion(packageJsonPath) {
       console.log("'stableVersion' key does not exist in package.json.");
     }
   } catch (error) {
-    console.error("An error occurred while removing 'stableVersion':", error.message);
+    throw new Error("An error occurred while removing 'stableVersion':", error.message);
   }
 }
 
@@ -36,20 +33,32 @@ function versionAndPublish() {
   try {
     const ccFolder = fs
       .readdirSync(contactCenterPath, {withFileTypes: true})
-      .filter((dirent) => dirent.isDirectory())
-      .map((dirent) => dirent.name);
+      .filter((dirent) => {
+        return dirent.isDirectory();
+      })
+      .map((dirent) => {
+        try {
+          const packageJsonPath = path.join(contactCenterPath, dirent.name, 'package.json');
+          const packageData = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+
+          console.log(`Removing stable version from package.json for ${dirent.name}`);
+          removeStableVersion(packageJsonPath, packageData);
+          return packageData.name;
+        } catch (error) {
+          throw new Error(`Error reading package.json in ${dirent.name}`, error);
+        }
+      });
     // Separate dependency workspaces and other workspaces
-    const dependencyWorkspaces = ccFolder.filter((fileName) => dependencies.includes(`@webex/cc-${fileName}`));
+    const dependencyWorkspaces = ccFolder.filter((fileName) => dependencies.includes(fileName));
 
-    const otherWorkspaces = ccFolder.filter((fileName) => !dependencies.includes(`@webex/cc-${fileName}`));
+    const otherWorkspaces = ccFolder.filter((fileName) => !dependencies.includes(fileName));
 
-    const publishWorkspace = (fileName) => {
-      const workspaceName = `@webex/cc-${fileName}`;
+    const publishWorkspace = (workspaceName) => {
       console.log(`Running publish script for ${workspaceName}: ${newVersion}`);
 
-      console.log(`Removing stable version from package.json for ${workspaceName}`);
-      const packageJsonPath = path.join(contactCenterPath, fileName, 'package.json');
-      removeStableVersion(packageJsonPath);
+      // ccFolder has names of all the packages like @webex/cc-store and the actual folder name is just store,
+      // thats why we need to remove '@webex/cc-' from the workspaceName to ge the path
+      const packageJsonPath = path.join(contactCenterPath, workspaceName.replace('@webex/cc-', ''), 'package.json');
 
       console.log(`Publishing new version for ${workspaceName}: ${newVersion}`);
 
@@ -57,7 +66,9 @@ function versionAndPublish() {
       execSync(`yarn workspace ${workspaceName} version ${newVersion}`, {stdio: 'inherit'});
 
       // Publish the package
-      execSync(`yarn workspace ${workspaceName} npm publish --tag ${branchName}`, {stdio: 'inherit'});
+      // execSync(`yarn workspace ${workspaceName} npm publish --tag ${branchName}`, {stdio: 'inherit'});
+
+      execSync(`yarn workspace ${workspaceName} pack`, {stdio: 'inherit'});
     };
 
     // Publish dependencies first
