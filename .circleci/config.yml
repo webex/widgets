@@ -112,6 +112,7 @@ jobs:
 # execute the jobs in an orderly manner
 workflows:
   setup_test_release:
+  # Runs on PRs and pushes to master
     jobs:
       - install
       - linter:
@@ -120,11 +121,7 @@ workflows:
       - build:
           requires:
             - linter
-          filters:
-            branches:
-              only: 
-                - master
-                - eft
+
       - docs:
           requires:
             - linter
@@ -132,6 +129,11 @@ workflows:
             branches:
               only: 
                 - master
+
+      - unit_tests:
+          requires:
+            - build
+
       - release:
           requires:
             - build
@@ -139,12 +141,8 @@ workflows:
           filters:
             branches:
               only: master
-      - unit_tests:
-          requires:
-            - build
-          filters:
-            branches:
-              only: eft
+              
+
       - release_widgets:
           requires:
             - build
