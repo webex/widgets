@@ -24,11 +24,6 @@ export interface IStationLoginProps {
   loginOptions: string[];
 
   /**
-   *  Request Param object to be sent to the SDK station login method
-   */
-  loginReqParam: AgentLogin;
-
-  /**
    * Handler to initiate the agent login
    */
   login: () => void;
@@ -71,4 +66,4 @@ export interface IStationLoginProps {
 
 export type StationLoginPresentationalProps = Pick<IStationLoginProps, 'name' | 'teams' | 'loginOptions' | 'login' | 'logout' | 'loginSuccess' | 'loginFailure' | 'logoutSuccess' | 'setDeviceType' | 'setDialNumber' | 'setTeam'>;
 
-export type UseStationLoginProps = Pick<IStationLoginProps, 'cc' | 'loginReqParam'>;
+export type UseStationLoginProps = Pick<IStationLoginProps, 'cc'>;

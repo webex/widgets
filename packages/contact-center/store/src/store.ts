@@ -1,11 +1,10 @@
 import {makeAutoObservable, observable} from 'mobx';
 import Webex from 'webex';
-import {AgentLogin, IContactCenter, IAgentProfile, Team} from '@webex/plugin-cc';
+import {IContactCenter, IAgentProfile, Team} from '@webex/plugin-cc';
 
 class Store {
   teams: Team[] = [];
   loginOptions: string[] = [];
-  loginReqParam: AgentLogin = {teamId: '', loginOption: '', dialNumber: ''};
   cc: IContactCenter;
 
   constructor() {
@@ -33,18 +32,6 @@ class Store {
         })
       })
     });
-  }
-
-  setDeviceType = (deviceType: string) => {
-    this.loginReqParam.loginOption = deviceType;
-  }
-
-  setDialNumber = (dn: string) => {
-    this.loginReqParam.dialNumber = dn;
-  }
-
-  setTeam = (team: string) => {
-    this.loginReqParam.teamId = team;
   }
 }
 

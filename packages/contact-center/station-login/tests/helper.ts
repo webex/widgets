@@ -42,7 +42,7 @@ describe('useStationLogin Hook', () => {
     ccMock.stationLogin.mockResolvedValue(successResponse);
 
     const { result, waitForNextUpdate } = renderHook(() =>
-      useStationLogin({cc: ccMock, loginReqParam })
+      useStationLogin({cc: ccMock})
     );
 
     act(() => {
@@ -72,7 +72,7 @@ describe('useStationLogin Hook', () => {
     ccMock.stationLogin.mockRejectedValue(errorResponse);
 
     const { result, waitForNextUpdate } = renderHook(() =>
-      useStationLogin({cc: ccMock, loginReqParam })
+      useStationLogin({cc: ccMock})
     );
 
     act(() => {
@@ -116,7 +116,7 @@ describe('useStationLogin Hook', () => {
     ccMock.stationLogout.mockResolvedValue(successResponse);
 
     const {result, waitForNextUpdate} = renderHook(() =>
-      useStationLogin({cc: ccMock, loginReqParam })
+      useStationLogin({cc: ccMock})
     );
 
     act(() => {

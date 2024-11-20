@@ -4,17 +4,18 @@ import {UseStationLoginProps} from "./station-login/station-login.types";
 
 export const useStationLogin = (props: UseStationLoginProps) => {
   const cc = props.cc;
-  const loginReqParam= props.loginReqParam;
+  const [dialNumber, setDialNumber] = useState('');
+  const [deviceType, setDeviceType] = useState('');
+  const [team, setTeam] = useState('');
   const [loginSuccess, setLoginSuccess] = useState<StationLoginSuccess>();
   const [loginFailure, setLoginFailure] = useState<Error>();
   const [logoutSuccess, setLogoutSuccess] = useState<StationLogoutSuccess>();
 
   const login = () => {
-    cc.stationLogin({teamId: loginReqParam.teamId, loginOption: loginReqParam.loginOption, dialNumber: loginReqParam.dialNumber})
+    cc.stationLogin({teamId: team, loginOption: deviceType, dialNumber: dialNumber})
       .then((res: StationLoginSuccess) => {
         console.log('Successful Agent login: ', res);
         setLoginSuccess(res);
-
       }).catch((error: Error) => {
         console.error(error);
         setLoginFailure(error);
@@ -31,6 +32,6 @@ export const useStationLogin = (props: UseStationLoginProps) => {
       });
   };
 
-  return {name: 'StationLogin', login, logout, loginSuccess, loginFailure, logoutSuccess};
+  return {name: 'StationLogin', setDeviceType, setDialNumber, setTeam, login, logout, loginSuccess, loginFailure, logoutSuccess};
 }
 
