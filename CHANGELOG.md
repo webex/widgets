@@ -1,3 +1,10 @@
+# [1.28.0-eft.6](https://github.com/webex/widgets/compare/1.28.0-eft.5...1.28.0-eft.6) (2024-11-20)
+
+
+### Bug Fixes
+
+* **release:** fix-pr-checks ([#322](https://github.com/webex/widgets/issues/322)) ([e01591c](https://github.com/webex/widgets/commit/e01591cf4ac6422ec72292d81ebda401e8ae824e))
+
 # [1.28.0-eft.5](https://github.com/webex/widgets/compare/1.28.0-eft.4...1.28.0-eft.5) (2024-11-20)
 
 
