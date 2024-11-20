@@ -1,3 +1,10 @@
+# [1.28.0-eft.5](https://github.com/webex/widgets/compare/1.28.0-eft.4...1.28.0-eft.5) (2024-11-20)
+
+
+### Bug Fixes
+
+* **release:** add-testing-step-in-circleci ([#321](https://github.com/webex/widgets/issues/321)) ([3dc6f9f](https://github.com/webex/widgets/commit/3dc6f9f32de7b4cea6492bd2ed1a9137ac92494e))
+
 # [1.28.0-eft.4](https://github.com/webex/widgets/compare/1.28.0-eft.3...1.28.0-eft.4) (2024-11-20)
 
 
