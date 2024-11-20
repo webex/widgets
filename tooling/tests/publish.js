@@ -37,7 +37,7 @@ describe('versionAndPublish', () => {
 
   test('removes "stableVersion" key from package.json when it exists', () => {
     const packageJsonContent = JSON.stringify({
-      name: 'test-package',
+      name: 'test-workspace',
       version: '1.0.0',
       stableVersion: '1.0.0',
     });
@@ -49,20 +49,22 @@ describe('versionAndPublish', () => {
     process.argv = ['node', 'script.js', 'main', '1.3.3-test.1'];
     versionAndPublish();
 
-    const expectedPackageJsonContent = JSON.stringify({name: 'test-package', version: '1.0.0'}, null, 2);
+    const expectedPackageJsonContent = JSON.stringify({name: 'test-workspace', version: '1.0.0'}, null, 2);
 
     expect(mockFs.writeFileSync).toHaveBeenCalledWith(packageJsonPath, expectedPackageJsonContent, 'utf-8');
     expect(console.log).toHaveBeenCalledWith("'stableVersion' key removed successfully.");
   });
 
-  test('error occured while writting "stableVersion" key to', () => {
+  test('fails to write package.json after removing stableVersion', () => {
     const packageJsonContent = JSON.stringify({
-      name: 'test-package',
+      name: 'test-workspace',
       version: '1.0.0',
       stableVersion: '1.0.0',
     });
     jest.spyOn(fs, 'readdirSync').mockReturnValue([{name: 'test-workspace', isDirectory: () => true}]);
     jest.spyOn(fs.Dirent.prototype, 'isDirectory').mockReturnValue(true);
+
+    mockFs.readFileSync.mockReturnValue(packageJsonContent);
     mockFs.writeFileSync.mockImplementation(() => {
       throw new Error('Error while writing to file');
     });
@@ -71,14 +73,14 @@ describe('versionAndPublish', () => {
     versionAndPublish();
 
     expect(console.error).toHaveBeenCalledWith(
-      "An error occurred while removing 'stableVersion':",
-      '"undefined" is not valid JSON'
+      'Failed to process workspaces:',
+      'Error reading package.json in test-workspace'
     );
   });
 
   test('skips removing "stableVersion" if it does not exist', () => {
     const packageJsonContent = JSON.stringify({
-      name: 'test-package',
+      name: 'test-workspace',
       version: '1.0.0',
     });
     jest.spyOn(fs, 'readdirSync').mockReturnValue([{name: 'test-workspace', isDirectory: () => true}]);
@@ -94,15 +96,21 @@ describe('versionAndPublish', () => {
   });
 
   test('publishes dependencies first and other workspaces afterward', () => {
-    const contactCenterPath = './packages/contact-center';
-    const dependencies = ['@webex/cc-store'];
+    const packageJsonContent = JSON.stringify({
+      name: '@webex/cc-store',
+      version: '1.0.0',
+    });
+    const packageJsonContent2 = JSON.stringify({
+      name: '@webex/cc-station-login',
+      version: '1.0.0',
+    });
 
     mockFs.readdirSync.mockReturnValue([
       {name: 'store', isDirectory: () => true},
       {name: 'station-login', isDirectory: () => true},
     ]);
 
-    mockFs.readFileSync.mockReturnValue('{}');
+    mockFs.readFileSync.mockReturnValueOnce(packageJsonContent).mockReturnValueOnce(packageJsonContent2);
     mockFs.writeFileSync.mockImplementation(() => {});
 
     const mockExecSync = require('child_process').execSync;
@@ -113,21 +121,37 @@ describe('versionAndPublish', () => {
 
     versionAndPublish();
 
-    // Check the dependency workspace was published first
     expect(mockExecSync).toHaveBeenNthCalledWith(1, 'yarn workspace @webex/cc-store version 1.0.1', {stdio: 'inherit'});
-
     expect(mockExecSync).toHaveBeenNthCalledWith(2, 'yarn workspace @webex/cc-store npm publish --tag main', {
       stdio: 'inherit',
     });
 
-    // Check the non-dependency workspace was published afterward
     expect(mockExecSync).toHaveBeenNthCalledWith(3, 'yarn workspace @webex/cc-station-login version 1.0.1', {
       stdio: 'inherit',
     });
-
     expect(mockExecSync).toHaveBeenNthCalledWith(4, 'yarn workspace @webex/cc-station-login npm publish --tag main', {
       stdio: 'inherit',
     });
+  });
+
+  test('error occurred while reading package.json data', () => {
+    mockFs.readdirSync.mockReturnValue([
+      {name: 'store', isDirectory: () => true},
+      {name: 'station-login', isDirectory: () => true},
+    ]);
+
+    mockFs.readFileSync.mockImplementation(() => {
+      throw new Error('Error while reading from file');
+    });
+
+    const mockExecSync = require('child_process').execSync;
+
+    const processArgvMock = ['node', 'script.js', 'main', '1.0.1'];
+    process.argv = processArgvMock;
+
+    versionAndPublish();
+    expect(console.error).toHaveBeenCalledWith('Failed to process workspaces:', 'Error reading package.json in store');
+    expect(mockExecSync).not.toHaveBeenCalled();
   });
 
   it('should export versionAndPublish when required as a module', () => {

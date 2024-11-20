@@ -112,7 +112,6 @@ jobs:
 # execute the jobs in an orderly manner
 workflows:
   setup_test_release:
-  # Runs on PRs and pushes to master
     jobs:
       - install
       - linter:
@@ -149,4 +148,4 @@ workflows:
             - unit_tests
           filters:
             branches:
-              only: eft
+              only: feat/cc-widgets
