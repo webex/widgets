@@ -2,8 +2,8 @@
   "branches": [
     "master",
     {
-      "name": "feat/cc-widgets",
-      "prerelease": "wxcc"
+      "name": "eft",
+      "prerelease": "eft"
     }
   ],
   "plugins": [
@@ -13,6 +13,12 @@
       "@semantic-release/changelog",
       {
         "changelogFile": "packages/contact-center/CHANGELOG.md"
+      }
+    ],
+    [
+      "@semantic-release/exec",
+      {
+        "prepareCmd": "node ./tooling/src/publish.js ${nextRelease.channel} ${nextRelease.version} "
       }
     ],
     [
