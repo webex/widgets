@@ -2,11 +2,9 @@ import {renderHook, act} from '@testing-library/react-hooks';
 import {useStationLogin} from '../src/helper';
 
 // Mock webex instance
-const webexMock = {
-  cc: {
+const ccMock = {
     stationLogin: jest.fn(),
     stationLogout: jest.fn(),
-  },
 };
 
 // Sample login parameters
@@ -41,10 +39,10 @@ describe('useStationLogin Hook', () => {
       voiceCount: 1
     };
 
-    webexMock.cc.stationLogin.mockResolvedValue(successResponse);
+    ccMock.stationLogin.mockResolvedValue(successResponse);
 
     const { result, waitForNextUpdate } = renderHook(() =>
-      useStationLogin({ webex: webexMock, loginReqParam })
+      useStationLogin({cc: ccMock, loginReqParam })
     );
 
     act(() => {
@@ -53,7 +51,7 @@ describe('useStationLogin Hook', () => {
 
     await waitForNextUpdate();
 
-    expect(webexMock.cc.stationLogin).toHaveBeenCalledWith({
+    expect(ccMock.stationLogin).toHaveBeenCalledWith({
       teamId: loginReqParam.teamId,
       loginOption: loginReqParam.loginOption,
       dialNumber: loginReqParam.dialNumber,
@@ -71,10 +69,10 @@ describe('useStationLogin Hook', () => {
 
   it('should set loginFailure on failed login', async () => {
     const errorResponse = new Error('Login failed');
-    webexMock.cc.stationLogin.mockRejectedValue(errorResponse);
+    ccMock.stationLogin.mockRejectedValue(errorResponse);
 
     const { result, waitForNextUpdate } = renderHook(() =>
-      useStationLogin({ webex: webexMock, loginReqParam })
+      useStationLogin({cc: ccMock, loginReqParam })
     );
 
     act(() => {
@@ -83,7 +81,7 @@ describe('useStationLogin Hook', () => {
 
     await waitForNextUpdate();
 
-    expect(webexMock.cc.stationLogin).toHaveBeenCalledWith({
+    expect(ccMock.stationLogin).toHaveBeenCalledWith({
       teamId: loginReqParam.teamId,
       loginOption: loginReqParam.loginOption,
       dialNumber: loginReqParam.dialNumber,
@@ -115,10 +113,10 @@ describe('useStationLogin Hook', () => {
       type: "AgentLogoutSuccess"
     };
 
-    webexMock.cc.stationLogout.mockResolvedValue(successResponse);
+    ccMock.stationLogout.mockResolvedValue(successResponse);
 
     const {result, waitForNextUpdate} = renderHook(() =>
-      useStationLogin({ webex: webexMock, loginReqParam })
+      useStationLogin({cc: ccMock, loginReqParam })
     );
 
     act(() => {
@@ -135,7 +133,7 @@ describe('useStationLogin Hook', () => {
       loginFailure: undefined,
       logoutSuccess: successResponse
     });
-    expect(webexMock.cc.stationLogout).toHaveBeenCalledWith({
+    expect(ccMock.stationLogout).toHaveBeenCalledWith({
       logoutReason: 'User requested logout'});
   });
 })

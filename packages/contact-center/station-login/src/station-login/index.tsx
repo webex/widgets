@@ -7,8 +7,8 @@ import StationLoginPresentational from './station-login.presentational';
 import {useStationLogin} from '../helper';
 
 const StationLogin: React.FunctionComponent = observer(() => {
-  const {webex, teams, loginOptions, loginReqParam, setDeviceType, setDialNumber, setTeam} = store;
-  const result = useStationLogin({webex, loginReqParam});
+  const {cc, teams, loginOptions, loginReqParam, setDeviceType, setDialNumber, setTeam} = store;
+  const result = useStationLogin({cc, loginReqParam});
 
   const props = {
     ...result,

@@ -16,7 +16,7 @@ const loginOptions = ['EXTENSION', 'AGENT_DN', 'BROWSER'];
 
 // Mock the store import
 jest.mock('@webex/cc-store', () => {return {
-  webex: {},
+  cc: {},
   teams,
   loginOptions,
   loginReqParam,
@@ -31,7 +31,7 @@ describe('StationLogin Component', () => {
     
     render(<StationLogin />);
 
-    expect(useStationLoginSpy).toHaveBeenCalledWith({webex: {}, loginReqParam});
+    expect(useStationLoginSpy).toHaveBeenCalledWith({cc: {}, loginReqParam});
     const heading = screen.getByTestId('station-login-heading');
     expect(heading).toHaveTextContent('StationLogin');
   });

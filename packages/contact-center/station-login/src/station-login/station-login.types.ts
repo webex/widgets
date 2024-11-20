@@ -1,5 +1,4 @@
-import Webex from 'webex';
-import {AgentLogin, StationLoginSuccess, StationLogoutSuccess, Team} from '@webex/plugin-cc';
+import {AgentLogin, IContactCenter, StationLoginSuccess, StationLogoutSuccess, Team} from '@webex/plugin-cc';
 /**
  * Interface representing the properties for the Station Login component.
  */
@@ -12,7 +11,7 @@ export interface IStationLoginProps {
   /**
    * Webex instance.
    */
-  webex: Webex;
+  cc: IContactCenter;
 
   /**
    * Array of the team IDs that agent belongs to
@@ -72,4 +71,4 @@ export interface IStationLoginProps {
 
 export type StationLoginPresentationalProps = Pick<IStationLoginProps, 'name' | 'teams' | 'loginOptions' | 'login' | 'logout' | 'loginSuccess' | 'loginFailure' | 'logoutSuccess' | 'setDeviceType' | 'setDialNumber' | 'setTeam'>;
 
-export type UseStationLoginProps = Pick<IStationLoginProps, 'webex' | 'loginReqParam'>;
+export type UseStationLoginProps = Pick<IStationLoginProps, 'cc' | 'loginReqParam'>;

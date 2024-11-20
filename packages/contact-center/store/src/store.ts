@@ -1,46 +1,38 @@
 import {makeAutoObservable, observable} from 'mobx';
 import Webex from 'webex';
-import {AgentLogin, IAgentProfile, Team} from '@webex/plugin-cc';
+import {AgentLogin, IContactCenter, IAgentProfile, Team} from '@webex/plugin-cc';
 
 class Store {
   teams: Team[] = [];
   loginOptions: string[] = [];
   loginReqParam: AgentLogin = {teamId: '', loginOption: '', dialNumber: ''};
-  webex: Webex = {};
-  token = '';
+  cc: IContactCenter;
 
   constructor() {
-    const webexConfig = {
-      fedramp: false,
-      logger: {
-        level: 'log'  // TODO: We will add more logging levels later and set the righ levels
-      },
-    }
- 
-    makeAutoObservable(this);
-
-    this.init(webexConfig).catch((error) => {
-      console.error('CC SDK initialization failed:', error);
-    });
+    makeAutoObservable(this, {cc: observable.ref});
   }
 
-  async init(webexConfig: any) { 
-    this.webex = Webex.init({
-      config: webexConfig,
-      credentials: {
-        access_token: this.token
-      }
+  init(webexConfig: any, access_token: string): Promise<void> { 
+    return new Promise((resolve, reject) => {
+      const webex = Webex.init({
+        config: webexConfig,
+        credentials: {
+          access_token: access_token
+        }
+      });
+  
+      webex.once('ready', () => {
+        this.cc = webex.cc;
+        this.cc.register().then((response: IAgentProfile) => {
+          this.teams = response.teams;
+          this.loginOptions = response.loginVoiceOptions;
+          resolve();
+        })
+        .catch((error) => {
+          reject(error);
+        })
+      })
     });
-
-    this.webex.once('ready', () => {
-      this.webex.cc.register(true).then((response: IAgentProfile) => {
-        this.teams = response.teams;
-        this.loginOptions = response.loginVoiceOptions;
-      })
-      .catch((error) => {
-        console.error('Websocket subscription failed', error);
-      })
-    })
   }
 
   setDeviceType = (deviceType: string) => {

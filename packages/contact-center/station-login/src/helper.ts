@@ -3,14 +3,14 @@ import {StationLoginSuccess, StationLogoutSuccess} from '@webex/plugin-cc';
 import {UseStationLoginProps} from "./station-login/station-login.types";
 
 export const useStationLogin = (props: UseStationLoginProps) => {
-  const webex = props.webex;
+  const cc = props.cc;
   const loginReqParam= props.loginReqParam;
   const [loginSuccess, setLoginSuccess] = useState<StationLoginSuccess>();
   const [loginFailure, setLoginFailure] = useState<Error>();
   const [logoutSuccess, setLogoutSuccess] = useState<StationLogoutSuccess>();
 
   const login = () => {
-    webex.cc.stationLogin({teamId: loginReqParam.teamId, loginOption: loginReqParam.loginOption, dialNumber: loginReqParam.dialNumber})
+    cc.stationLogin({teamId: loginReqParam.teamId, loginOption: loginReqParam.loginOption, dialNumber: loginReqParam.dialNumber})
       .then((res: StationLoginSuccess) => {
         console.log('Successful Agent login: ', res);
         setLoginSuccess(res);
@@ -22,7 +22,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
   };
 
   const logout = () => {
-    webex.cc.stationLogout({logoutReason: 'User requested logout'})
+    cc.stationLogout({logoutReason: 'User requested logout'})
       .then((res: StationLogoutSuccess) => {
         console.log('Successful Agent logout: ', res);
         setLogoutSuccess(res);
