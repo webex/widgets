@@ -148,6 +148,7 @@ workflows:
       - release_widgets:
           requires:
             - build
+            - unit_tests
           filters:
             branches:
               only: eft
