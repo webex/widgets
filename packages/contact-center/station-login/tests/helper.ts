@@ -14,7 +14,11 @@ const loginParams = {
   dialNumber: '1001',
 };
 
+const loginCb = jest.fn();
+const logoutCb = jest.fn();
+
 describe('useStationLogin Hook', () => {
+  
   it('should set loginSuccess on successful login', async () => {
     const successResponse = {
       agentId: "6b310dff-569e-4ac7-b064-70f834ea56d8",
@@ -42,13 +46,13 @@ describe('useStationLogin Hook', () => {
     ccMock.stationLogin.mockResolvedValue(successResponse);
 
     const { result, waitForNextUpdate } = renderHook(() =>
-      useStationLogin({cc: ccMock})
+      useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb})
     );
 
     result.current.setDeviceType(loginParams.loginOption);
     result.current.setDialNumber(loginParams.dialNumber);
     result.current.setTeam(loginParams.teamId);
-    
+
     act(() => {
       result.current.login();
     });
@@ -60,6 +64,7 @@ describe('useStationLogin Hook', () => {
       loginOption: loginParams.loginOption,
       dialNumber: loginParams.dialNumber,
     });
+    expect(loginCb).toHaveBeenCalledWith();
 
     expect(result.current).toEqual({
       name: 'StationLogin',
@@ -78,8 +83,9 @@ describe('useStationLogin Hook', () => {
     const errorResponse = new Error('Login failed');
     ccMock.stationLogin.mockRejectedValue(errorResponse);
 
+    loginCb.mockClear();
     const { result, waitForNextUpdate } = renderHook(() =>
-      useStationLogin({cc: ccMock})
+      useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb})
     );
 
     result.current.setDeviceType(loginParams.loginOption);
@@ -98,6 +104,8 @@ describe('useStationLogin Hook', () => {
       dialNumber: loginParams.dialNumber,
     });
     
+    expect(loginCb).not.toHaveBeenCalledWith();
+
     expect(result.current).toEqual({
       name: 'StationLogin',
       setDeviceType: expect.any(Function),
@@ -130,7 +138,7 @@ describe('useStationLogin Hook', () => {
     ccMock.stationLogout.mockResolvedValue(successResponse);
 
     const {result, waitForNextUpdate} = renderHook(() =>
-      useStationLogin({cc: ccMock})
+      useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb})
     );
 
     act(() => {
@@ -138,6 +146,10 @@ describe('useStationLogin Hook', () => {
     });
 
     await waitForNextUpdate();
+
+    expect(ccMock.stationLogout).toHaveBeenCalledWith({logoutReason: 'User requested logout'});
+    expect(logoutCb).toHaveBeenCalledWith();
+
 
     expect(result.current).toEqual({
       name: 'StationLogin',
@@ -150,8 +162,5 @@ describe('useStationLogin Hook', () => {
       loginFailure: undefined,
       logoutSuccess: successResponse
     });
-
-    expect(ccMock.stationLogout).toHaveBeenCalledWith({
-      logoutReason: 'User requested logout'});
   });
 })

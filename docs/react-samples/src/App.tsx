@@ -5,7 +5,7 @@ import {UserState} from '@webex/cc-user-state';
 
 function App() {
   const token = '';
-  
+
   const webexConfig = {
       fedramp: false,
       logger: {
@@ -21,10 +21,18 @@ function App() {
     init();
   }, []) 
 
+  const onLogin = () => {
+    console.log('Agent login has been succesful');
+  }
+
+  const onLogout = () => {
+    console.log('Agent logout has been succesful');
+  }
+
   return (
     <>
       <h1>Contact Center widgets in a react app</h1>
-      <StationLogin />
+      <StationLogin  onLogin={onLogin} onLogout={onLogout} />
       <UserState />
     </>
   );

@@ -49,6 +49,16 @@ export interface IStationLoginProps {
   logoutSuccess?: StationLogoutSuccess;
 
   /**
+   * Callback function to be invoked once the agent login is successful
+   */
+  onLogin: () => void;
+
+  /**
+   * Callback function to be invoked once the agent login is successful
+   */
+  onLogout: () => void;
+
+  /**
    * Handler to set device type
    */
   setDeviceType: (deviceType: string) => void;
@@ -66,4 +76,6 @@ export interface IStationLoginProps {
 
 export type StationLoginPresentationalProps = Pick<IStationLoginProps, 'name' | 'teams' | 'loginOptions' | 'login' | 'logout' | 'loginSuccess' | 'loginFailure' | 'logoutSuccess' | 'setDeviceType' | 'setDialNumber' | 'setTeam'>;
 
-export type UseStationLoginProps = Pick<IStationLoginProps, 'cc'>;
+export type UseStationLoginProps = Pick<IStationLoginProps, 'cc' | 'onLogin' | 'onLogout'>;
+
+export type StationLoginProps = Pick<IStationLoginProps, 'onLogin' | 'onLogout'>;

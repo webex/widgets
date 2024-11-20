@@ -15,13 +15,16 @@ jest.mock('@webex/cc-store', () => {return {
   loginOptions
 }});
 
+const loginCb = jest.fn();
+const logoutCb = jest.fn();
+
 describe('StationLogin Component', () => {
   it('renders StationLoginPresentational with correct props', () => {
     const useStationLoginSpy = jest.spyOn(helper, 'useStationLogin');
     
-    render(<StationLogin />);
+    render(<StationLogin onLogin={loginCb} onLogout={logoutCb}/>);
 
-    expect(useStationLoginSpy).toHaveBeenCalledWith({cc: {}});
+    expect(useStationLoginSpy).toHaveBeenCalledWith({cc: {}, onLogin: loginCb, onLogout: logoutCb});
     const heading = screen.getByTestId('station-login-heading');
     expect(heading).toHaveTextContent('StationLogin');
   });
