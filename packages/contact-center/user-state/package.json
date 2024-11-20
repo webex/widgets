@@ -45,7 +45,8 @@
     "webpack-merge": "6.0.1"
   },
   "jest": {
-    "testEnvironment": "jsdom"
+    "testEnvironment": "jsdom",
+    "passWithNoTests": true
   },
   "stableVersion": "1.28.0-eft.2"
 }

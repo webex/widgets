@@ -49,7 +49,8 @@
     "testMatch": [
       "**/tests/**/*.ts",
       "**/tests/**/*.tsx"
-    ]
+    ],
+    "passWithNoTests": true
   },
   "stableVersion": "1.28.0-eft.2"
 }

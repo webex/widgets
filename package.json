@@ -26,7 +26,11 @@
     "webpack-dev-server": "^5.1.0"
   },
   "scripts": {
-    "test:unit": "jest --coverage",
+    "test:unit": "yarn run test:tooling && yarn run test:cc-widgets",
+    "test:tooling": "jest --coverage",
+    "test:cc-widgets": "yarn run test:store && yarn run test:widgets",
+    "test:store": "yarn workspace @webex/cc-store test:unit",
+    "test:widgets": "yarn workspace @webex/cc-station-login test:unit && yarn workspace @webex/cc-user-state test:unit",
     "build": "yarn run build:store && yarn run build:widgets",
     "build:store": "yarn workspace @webex/cc-store build:src",
     "build:widgets": "yarn workspace @webex/cc-station-login build:src && yarn workspace @webex/cc-user-state build:src",
