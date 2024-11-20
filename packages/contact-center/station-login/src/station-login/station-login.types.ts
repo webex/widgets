@@ -4,7 +4,6 @@
 export interface IStationLoginProps {
   /**
    * The name of the station.
-   *
    */
   name: string;
 

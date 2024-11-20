@@ -1,9 +1,6 @@
 import {makeAutoObservable, observable} from 'mobx';
 
 import sdk from './sdk';
-/*
- * Store
- */
 class Store {
   loginState = '';
   isAvailable = false;
