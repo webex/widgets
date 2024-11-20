@@ -4,12 +4,6 @@ import {StationLogin} from '../../src';
 import * as helper from '../../src/helper';
 import '@testing-library/jest-dom';
 
- // Sample login parameters
- const loginReqParam = {
-  teamId: 'team123',
-  loginOption: 'EXTENSION',
-  dialNumber: '1001',
-};
 const teams = ['team123', 'team456'];
 
 const loginOptions = ['EXTENSION', 'AGENT_DN', 'BROWSER'];
@@ -18,11 +12,7 @@ const loginOptions = ['EXTENSION', 'AGENT_DN', 'BROWSER'];
 jest.mock('@webex/cc-store', () => {return {
   cc: {},
   teams,
-  loginOptions,
-  loginReqParam,
-  setDeviceType: jest.fn(),
-  setDialNumber: jest.fn(),
-  setTeam: jest.fn()
+  loginOptions
 }});
 
 describe('StationLogin Component', () => {
@@ -31,7 +21,7 @@ describe('StationLogin Component', () => {
     
     render(<StationLogin />);
 
-    expect(useStationLoginSpy).toHaveBeenCalledWith({cc: {}, loginReqParam});
+    expect(useStationLoginSpy).toHaveBeenCalledWith({cc: {}});
     const heading = screen.getByTestId('station-login-heading');
     expect(heading).toHaveTextContent('StationLogin');
   });

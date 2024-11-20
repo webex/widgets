@@ -8,7 +8,7 @@ const ccMock = {
 };
 
 // Sample login parameters
-const loginReqParam = {
+const loginParams = {
   teamId: 'team123',
   loginOption: 'EXTENSION',
   dialNumber: '1001',
@@ -45,20 +45,27 @@ describe('useStationLogin Hook', () => {
       useStationLogin({cc: ccMock})
     );
 
+    result.current.setDeviceType(loginParams.loginOption);
+    result.current.setDialNumber(loginParams.dialNumber);
+    result.current.setTeam(loginParams.teamId);
+    
     act(() => {
       result.current.login();
     });
 
     await waitForNextUpdate();
-
+    
     expect(ccMock.stationLogin).toHaveBeenCalledWith({
-      teamId: loginReqParam.teamId,
-      loginOption: loginReqParam.loginOption,
-      dialNumber: loginReqParam.dialNumber,
+      teamId: loginParams.teamId,
+      loginOption: loginParams.loginOption,
+      dialNumber: loginParams.dialNumber,
     });
 
     expect(result.current).toEqual({
       name: 'StationLogin',
+      setDeviceType: expect.any(Function),
+      setDialNumber: expect.any(Function),
+      setTeam: expect.any(Function),
       login: expect.any(Function),
       logout: expect.any(Function),
       loginSuccess: successResponse,
@@ -75,6 +82,10 @@ describe('useStationLogin Hook', () => {
       useStationLogin({cc: ccMock})
     );
 
+    result.current.setDeviceType(loginParams.loginOption);
+    result.current.setDialNumber(loginParams.dialNumber);
+    result.current.setTeam(loginParams.teamId);
+
     act(() => {
       result.current.login();
     });
@@ -82,13 +93,16 @@ describe('useStationLogin Hook', () => {
     await waitForNextUpdate();
 
     expect(ccMock.stationLogin).toHaveBeenCalledWith({
-      teamId: loginReqParam.teamId,
-      loginOption: loginReqParam.loginOption,
-      dialNumber: loginReqParam.dialNumber,
+      teamId: loginParams.teamId,
+      loginOption: loginParams.loginOption,
+      dialNumber: loginParams.dialNumber,
     });
     
     expect(result.current).toEqual({
       name: 'StationLogin',
+      setDeviceType: expect.any(Function),
+      setDialNumber: expect.any(Function),
+      setTeam: expect.any(Function),
       login: expect.any(Function),
       logout: expect.any(Function),
       loginSuccess: undefined,
@@ -127,12 +141,16 @@ describe('useStationLogin Hook', () => {
 
     expect(result.current).toEqual({
       name: 'StationLogin',
+      setDeviceType: expect.any(Function),
+      setDialNumber: expect.any(Function),
+      setTeam: expect.any(Function),
       login: expect.any(Function),
       logout: expect.any(Function),
       loginSuccess: undefined,
       loginFailure: undefined,
       logoutSuccess: successResponse
     });
+
     expect(ccMock.stationLogout).toHaveBeenCalledWith({
       logoutReason: 'User requested logout'});
   });
