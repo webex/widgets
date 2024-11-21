@@ -18,7 +18,7 @@
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "node ./tooling/src/publish.js ${nextRelease.channel} ${nextRelease.version} "
+        "prepareCmd": "node ./tooling/src/publish.js ${nextRelease.channel} ${nextRelease.version}"
       }
     ],
     [
@@ -29,11 +29,10 @@
           "package.json", 
           "packages/contact-center/*/package.json"
         ],
-        "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}",
-        "tagFormat": "$v{nextRelease.version}" 
+        "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
       }
     ],
     "@semantic-release/github"
   ],
-  "tagFormat":"v${version}"
-} 
+  "tagFormat": "v1.27.6-eft.4"
+}
