@@ -1,8 +1,15 @@
 {
   "name": "@webex/cc-user-state",
   "description": "Webex Contact Center Widgets: User State",
-  "version": "1.0.0",
+  "version": "1.28.0-wxcc.3",
   "main": "dist/index.js",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist/",
+    "package.json"
+  ],
   "scripts": {
     "build": "yarn run -T tsc",
     "build:src": "webpack && yarn run build",
@@ -38,6 +45,9 @@
     "webpack-merge": "6.0.1"
   },
   "jest": {
-    "testEnvironment": "jsdom"
-  }
+    "testEnvironment": "jsdom",
+    "//": "We can remove this when we have tests",
+    "passWithNoTests": true
+  },
+  "stableVersion": "1.0.0"
 }

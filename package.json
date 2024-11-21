@@ -11,14 +11,20 @@
   ],
   "packageManager": "yarn@4.5.1",
   "devDependencies": {
+    "@babel/preset-typescript": "7.25.9",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/exec": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^11.0.1",
     "@testing-library/react-hooks": "^8.0.1",
     "crypto-browserify": "^3.12.1",
     "html-webpack-plugin": "^5.6.3",
-    "mini-css-extract-plugin": "^2.9.2",
+    "jest": "29.7.0",
     "node-gyp": "^10.2.0",
     "os-browserify": "^0.3.0",
     "process": "^0.11.10",
     "querystring-es3": "^0.2.1",
+    "semantic-release": "^24.2.0",
     "stream-browserify": "^3.0.0",
     "typescript": "^5.6.3",
     "vm-browserify": "^1.1.2",
@@ -27,12 +33,23 @@
     "webpack-dev-server": "^5.1.0"
   },
   "scripts": {
+    "test:unit": "yarn run test:tooling && yarn run test:cc-widgets",
+    "test:tooling": "jest --coverage",
+    "test:cc-widgets": "yarn run test:store && yarn run test:widgets",
+    "test:store": "yarn workspace @webex/cc-store test:unit",
+    "test:widgets": "yarn workspace @webex/cc-station-login test:unit && yarn workspace @webex/cc-user-state test:unit",
     "build": "yarn run build:store && yarn run build:widgets",
     "build:store": "yarn workspace @webex/cc-store build:src",
     "build:widgets": "yarn workspace @webex/cc-station-login build:src && yarn workspace @webex/cc-user-state build:src",
     "samples:build": "yarn workspace @webex/react-samples-app build:src && yarn workspace @webex/web-component-samples-app build:src",
     "samples:serve": "open docs/index.html && yarn workspace @webex/react-samples-app serve",
     "samples:serve-react": "yarn workspace @webex/react-samples-app serve",
-    "samples:serve-wc": "yarn workspace @webex/web-component-samples-app serve"
+    "samples:serve-wc": "yarn workspace @webex/web-component-samples-app serve",
+    "release:widgets": "semantic-release"
+  },
+  "jest": {
+    "testMatch": [
+      "**/tooling/tests/*.js"
+    ]
   }
 }

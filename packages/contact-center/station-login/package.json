@@ -1,8 +1,15 @@
 {
   "name": "@webex/cc-station-login",
   "description": "Webex Contact Center Widgets: Station Login",
-  "version": "1.0.0",
+  "version": "1.28.0-wxcc.3",
   "main": "dist/index.js",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist/",
+    "package.json"
+  ],
   "scripts": {
     "build": "yarn run -T tsc",
     "build:src": "webpack && yarn run build",
@@ -43,5 +50,6 @@
       "**/tests/**/*.ts",
       "**/tests/**/*.tsx"
     ]
-  }
+  },
+  "stableVersion": "1.0.0"
 }
