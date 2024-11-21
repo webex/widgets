@@ -29,11 +29,10 @@
           "package.json", 
           "packages/contact-center/*/package.json"
         ],
-        "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}",
-        "tagFormat": "${nextRelease.version}" 
+        "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
       }
     ],
     "@semantic-release/github"
   ],
-  "tagFormat":"${version}"
-} 
+  "tagFormat": "v${version}"
+}
