@@ -8,22 +8,12 @@ export interface IUserState {
   name: string;
 
   /**
-   * The current login state of the user.
+   * Handler for agent state changes
    */
-  loginState: any;
+  handleAgentStatus: (event) => void;
 
   /**
-   * Function to set the login state of the user.
+   * Setter for agent state
    */
-  setLoginState: any;
-
-  /**
-   * The SDK instance for the contact center.
-   */
-  ccSdk: any;
-
-  /**
-   * Indicates whether the user is available.
-   */
-  isAvailable: any;
+  setAgentStatus: () => void
 }

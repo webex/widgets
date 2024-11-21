@@ -1,3 +1,4 @@
+import {AgentLogin, IContactCenter, StationLoginSuccess, StationLogoutSuccess, Team} from '@webex/plugin-cc';
 /**
  * Interface representing the properties for the Station Login component.
  */
@@ -8,22 +9,73 @@ export interface IStationLoginProps {
   name: string;
 
   /**
-   * The current login state of the station.
+   * Webex instance.
    */
-  loginState: any;
+  cc: IContactCenter;
 
   /**
-   * Function to set the login state of the station.
+   * Array of the team IDs that agent belongs to
    */
-  setLoginState: any;
+  teams: Team[];
+
+   /**
+   * Station login options available for the agent
+   */
+  loginOptions: string[];
 
   /**
-   * The Customer Care SDK instance.
+   * Handler to initiate the agent login
    */
-  ccSdk: any;
+  login: () => void;
 
   /**
-   * Indicates whether the station is available.
+   * Handler for agent logout
    */
-  isAvailable: any;
+  logout: () => void;
+
+  /**
+   * Response data received on agent login success
+   */
+  loginSuccess?: StationLoginSuccess;
+
+  /**
+   * Error received on agent login failure
+   */
+  loginFailure?: Error;
+
+    /**
+   * Response data received on agent login success
+   */
+  logoutSuccess?: StationLogoutSuccess;
+
+  /**
+   * Callback function to be invoked once the agent login is successful
+   */
+  onLogin: () => void;
+
+  /**
+   * Callback function to be invoked once the agent login is successful
+   */
+  onLogout: () => void;
+
+  /**
+   * Handler to set device type
+   */
+  setDeviceType: (deviceType: string) => void;
+
+  /**
+   * Handler to set the entered dial number
+   */
+  setDialNumber: (dn: string) => void;
+
+  /**
+   * Handler to set the selected agent team
+   */
+  setTeam: (team: string) => void;
 }
+
+export type StationLoginPresentationalProps = Pick<IStationLoginProps, 'name' | 'teams' | 'loginOptions' | 'login' | 'logout' | 'loginSuccess' | 'loginFailure' | 'logoutSuccess' | 'setDeviceType' | 'setDialNumber' | 'setTeam'>;
+
+export type UseStationLoginProps = Pick<IStationLoginProps, 'cc' | 'onLogin' | 'onLogout'>;
+
+export type StationLoginProps = Pick<IStationLoginProps, 'onLogin' | 'onLogout'>;
