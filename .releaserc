@@ -30,7 +30,7 @@
           "packages/contact-center/*/package.json"
         ],
         "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}",
-        "tagFormat": "$v{nextRelease.version}" 
+        "tagFormat": "v1.27.6-eft.4"
       }
     ],
     "@semantic-release/github"
