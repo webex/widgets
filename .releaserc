@@ -2,8 +2,8 @@
   "branches": [
     "master",
     {
-      "name": "feat/cc-widgets",
-      "prerelease": "wxcc"
+      "name": "ccwidgets",
+      "prerelease": "ccwidgets"
     }
   ],
   "plugins": [
