@@ -11,4 +11,16 @@
     <widget-cc-station-login></widget-cc-station-login>
     <widget-cc-user-state></widget-cc-user-state>
   </body>
+  <script>
+    const token = '';
+    
+    const webexConfig = {
+        fedramp: false,
+        logger: {
+        level: 'log'  // TODO: We will add more logging levels later and set the righ levels
+        },
+    }
+
+    store.init(webexConfig, token);
+  </script>
 </html>

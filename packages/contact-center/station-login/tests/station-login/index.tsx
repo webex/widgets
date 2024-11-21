@@ -1,21 +1,31 @@
-import '@testing-library/jest-dom';
 import React from 'react';
-import {render, screen, cleanup} from '@testing-library/react';
-
+import {render, screen} from '@testing-library/react';
+import {StationLogin} from '../../src';
 import * as helper from '../../src/helper';
-import {StationLogin} from '../../src/station-login/index';
+import '@testing-library/jest-dom';
 
-describe('StationLogin', () => {
-  afterEach(cleanup);
+const teams = ['team123', 'team456'];
 
-  it('CheckboxWithLabel changes the text after click', () => {
-    const stationLoginHelperSpy = jest.spyOn(helper, 'useStationLogin').mockReturnValue({name: 'MockStationLogin'});
+const loginOptions = ['EXTENSION', 'AGENT_DN', 'BROWSER'];
 
-    render(<StationLogin />);
+// Mock the store import
+jest.mock('@webex/cc-store', () => {return {
+  cc: {},
+  teams,
+  loginOptions
+}});
 
-    expect(stationLoginHelperSpy).toHaveBeenCalledWith();
+const loginCb = jest.fn();
+const logoutCb = jest.fn();
 
+describe('StationLogin Component', () => {
+  it('renders StationLoginPresentational with correct props', () => {
+    const useStationLoginSpy = jest.spyOn(helper, 'useStationLogin');
+    
+    render(<StationLogin onLogin={loginCb} onLogout={logoutCb}/>);
+
+    expect(useStationLoginSpy).toHaveBeenCalledWith({cc: {}, onLogin: loginCb, onLogout: logoutCb});
     const heading = screen.getByTestId('station-login-heading');
-    expect(heading).toHaveTextContent('MockStationLogin');
+    expect(heading).toHaveTextContent('StationLogin');
   });
 });

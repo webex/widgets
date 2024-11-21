@@ -1,27 +1,38 @@
 import {makeAutoObservable, observable} from 'mobx';
-
-import sdk from './sdk';
+import Webex from 'webex';
+import {IContactCenter, IAgentProfile, Team} from '@webex/plugin-cc';
 
 class Store {
-  loginState = '';
-  isAvailable = false;
-  ccSdk = sdk;
+  teams: Team[] = [];
+  loginOptions: string[] = [];
+  cc: IContactCenter;
 
   constructor() {
-    makeAutoObservable(this, {ccSdk: observable.ref});
-
-    this.ccSdk.on('presence:state', (payload) => {
-      this.setIsAvailable(payload === 'available');
-    });
+    makeAutoObservable(this, {cc: observable.ref});
   }
 
-  setLoginState = (state) => {
-    this.loginState = state;
-  };
-
-  setIsAvailable = (state) => {
-    this.isAvailable = state;
-  };
+  init(webexConfig: any, access_token: string): Promise<void> { 
+    return new Promise((resolve, reject) => {
+      const webex = Webex.init({
+        config: webexConfig,
+        credentials: {
+          access_token: access_token
+        }
+      });
+  
+      webex.once('ready', () => {
+        this.cc = webex.cc;
+        this.cc.register().then((response: IAgentProfile) => {
+          this.teams = response.teams;
+          this.loginOptions = response.loginVoiceOptions;
+          resolve();
+        })
+        .catch((error) => {
+          reject(error);
+        })
+      })
+    });
+  }
 }
 
 const store = new Store();
