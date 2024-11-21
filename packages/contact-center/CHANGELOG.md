@@ -1,3 +1,10 @@
+# [1.28.0-wxcc.3](https://github.com/webex/widgets/compare/v1.28.0-wxcc.2...v1.28.0-wxcc.3) (2024-11-21)
+
+
+### Bug Fixes
+
+* **release:** add-publish-step-in-tooling ([#334](https://github.com/webex/widgets/issues/334)) ([20be4af](https://github.com/webex/widgets/commit/20be4af7844db810084eb29c6db79b9887fd7b9c))
+
 # [1.28.0-wxcc.2](https://github.com/webex/widgets/compare/v1.28.0-wxcc.1...v1.28.0-wxcc.2) (2024-11-21)
 
 

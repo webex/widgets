@@ -1,7 +1,7 @@
 {
   "name": "@webex/cc-store",
   "description": "Webex Contact Center Widgets: Widgets Store",
-  "version": "1.0.0",
+  "version": "1.28.0-wxcc.3",
   "main": "dist/index.js",
   "license": "MIT",
   "publishConfig": {
@@ -47,5 +47,6 @@
     "testEnvironment": "jsdom",
     "//": "We can remove this when we have tests",
     "passWithNoTests": true
-  }
+  },
+  "stableVersion": "1.0.0"
 }
