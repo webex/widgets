@@ -148,4 +148,4 @@ workflows:
             - unit_tests
           filters:
             branches:
-              only: eft
+              only: efts
