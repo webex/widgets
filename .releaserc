@@ -2,7 +2,7 @@
   "branches": [
     "master",
     {
-      "name": "feat/cc-widgets",
+      "name": "wxcc",
       "prerelease": "wxcc"
     }
   ],
