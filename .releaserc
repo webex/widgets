@@ -2,8 +2,8 @@
   "branches": [
     "master",
     {
-      "name": "wxcc",
-      "prerelease": "wxcc"
+      "name": "efts",
+      "prerelease": "eft"
     }
   ],
   "plugins": [

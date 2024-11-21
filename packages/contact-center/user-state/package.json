@@ -1,7 +1,7 @@
 {
   "name": "@webex/cc-user-state",
   "description": "Webex Contact Center Widgets: User State",
-  "version": "1.28.0-wxcc.3",
+  "version": "1.0.0",
   "main": "dist/index.js",
   "publishConfig": {
     "access": "public"
@@ -46,7 +46,6 @@
   },
   "jest": {
     "testEnvironment": "jsdom",
-    "//": "We can remove this when we have tests",
     "passWithNoTests": true
   },
   "stableVersion": "1.0.0"

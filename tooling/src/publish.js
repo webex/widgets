@@ -54,13 +54,21 @@ function versionAndPublish() {
     const otherWorkspaces = ccFolder.filter((fileName) => !dependencies.includes(fileName));
 
     const publishWorkspace = (workspaceName) => {
+      console.log(`Running publish script for ${workspaceName}: ${newVersion}`);
+
+      // ccFolder has names of all the packages like @webex/cc-store and the actual folder name is just store,
+      // thats why we need to remove '@webex/cc-' from the workspaceName to ge the path
+      const packageJsonPath = path.join(contactCenterPath, workspaceName.replace('@webex/cc-', ''), 'package.json');
+
       console.log(`Publishing new version for ${workspaceName}: ${newVersion}`);
 
       // Update version in the workspace
       execSync(`yarn workspace ${workspaceName} version ${newVersion}`, {stdio: 'inherit'});
 
       // Publish the package
-      execSync(`yarn workspace ${workspaceName} npm publish --tag ${branchName}`, {stdio: 'inherit'});
+      // execSync(`yarn workspace ${workspaceName} npm publish --tag ${branchName}`, {stdio: 'inherit'});
+
+      execSync(`yarn workspace ${workspaceName} pack`, {stdio: 'inherit'});
     };
 
     // Publish dependencies first
