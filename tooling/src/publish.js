@@ -54,6 +54,12 @@ function versionAndPublish() {
     const otherWorkspaces = ccFolder.filter((fileName) => !dependencies.includes(fileName));
 
     const publishWorkspace = (workspaceName) => {
+      console.log(`Running publish script for ${workspaceName}: ${newVersion}`);
+
+      // ccFolder has names of all the packages like @webex/cc-store and the actual folder name is just store,
+      // thats why we need to remove '@webex/cc-' from the workspaceName to ge the path
+      const packageJsonPath = path.join(contactCenterPath, workspaceName.replace('@webex/cc-', ''), 'package.json');
+
       console.log(`Publishing new version for ${workspaceName}: ${newVersion}`);
 
       // Update version in the workspace
