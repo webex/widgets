@@ -66,7 +66,9 @@ function versionAndPublish() {
       execSync(`yarn workspace ${workspaceName} version ${newVersion}`, {stdio: 'inherit'});
 
       // Publish the package
-      execSync(`yarn workspace ${workspaceName} npm publish --tag ${branchName}`, {stdio: 'inherit'});
+      // execSync(`yarn workspace ${workspaceName} npm publish --tag ${branchName}`, {stdio: 'inherit'});
+
+      execSync(`yarn workspace ${workspaceName} pack`, {stdio: 'inherit'});
     };
 
     // Publish dependencies first

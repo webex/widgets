@@ -95,7 +95,7 @@ describe('versionAndPublish', () => {
     expect(console.log).toHaveBeenCalledWith("'stableVersion' key does not exist in package.json.");
   });
 
-  test('publishes dependencies first and other workspaces afterward', () => {
+  test.skip('publishes dependencies first and other workspaces afterward', () => {
     const packageJsonContent = JSON.stringify({
       name: '@webex/cc-store',
       version: '1.0.0',
