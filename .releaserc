@@ -35,5 +35,5 @@
     ],
     "@semantic-release/github"
   ],
-  "tagFormat":"v1.27.6-eft.1"
+  "tagFormat":"v1.27.6-eft.4"
 } 
