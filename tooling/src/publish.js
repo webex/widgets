@@ -40,6 +40,9 @@ function versionAndPublish() {
         try {
           const packageJsonPath = path.join(contactCenterPath, dirent.name, 'package.json');
           const packageData = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+          if(packageData.private){
+            return;
+          }
 
           console.log(`Removing stable version from package.json for ${dirent.name}`);
           removeStableVersion(packageJsonPath, packageData);

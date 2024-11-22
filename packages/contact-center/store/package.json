@@ -4,9 +4,7 @@
   "version": "1.28.0-ccwidgets.1",
   "main": "dist/index.js",
   "license": "MIT",
-  "publishConfig": {
-    "access": "public"
-  },
+  "private": true,
   "files": [
     "dist/",
     "package.json"

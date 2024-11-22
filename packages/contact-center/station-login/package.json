@@ -3,9 +3,7 @@
   "description": "Webex Contact Center Widgets: Station Login",
   "version": "1.28.0-ccwidgets.1",
   "main": "dist/index.js",
-  "publishConfig": {
-    "access": "public"
-  },
+  "private": true,
   "files": [
     "dist/",
     "package.json"
