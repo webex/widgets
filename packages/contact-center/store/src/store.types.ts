@@ -1,4 +1,4 @@
-import {AgentLogin, IContactCenter, IAgentProfile, Team} from '@webex/plugin-cc';
+import {AgentLogin, IContactCenter, Profile, Team} from '@webex/plugin-cc';
 
 interface WithWebex {
     webex: { cc: IContactCenter };
@@ -16,13 +16,13 @@ interface IStore {
     loginOptions: string[];
     cc: IContactCenter;
   
-    registerCC(webex: WithWebex['webex']): Promise<IAgentProfile>;
+    registerCC(webex: WithWebex['webex']): Promise<Profile>;
     init(params: InitParams): Promise<void>;
 }
 
 export type {
     IContactCenter,
-    IAgentProfile,
+    Profile,
     Team,
     AgentLogin,
     WithWebex,

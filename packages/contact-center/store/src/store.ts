@@ -3,7 +3,7 @@ import Webex from 'webex';
 import {
   AgentLogin,
   IContactCenter,
-  IAgentProfile,
+  Profile,
   Team,
   WithWebex,
   InitParams,
@@ -19,10 +19,10 @@ class Store implements IStore {
     makeAutoObservable(this, {cc: observable.ref});
   }
 
-  registerCC(webex: WithWebex['webex']): Promise<IAgentProfile> {
+  registerCC(webex: WithWebex['webex']): Promise<Profile> {
     this.cc = webex.cc;
     console.trace(this.cc.register);
-    return this.cc.register().then((response: IAgentProfile) => {
+    return this.cc.register().then((response: Profile) => {
       this.teams = response.teams;
       this.loginOptions = response.loginVoiceOptions;
     }).catch((error) => {
@@ -43,7 +43,7 @@ class Store implements IStore {
       });
   
       webex.once('ready', () => {
-        this.registerCC(webex).then((response: IAgentProfile) => {
+        this.registerCC(webex).then(() => {
           resolve();
         })
         .catch((error) => {
