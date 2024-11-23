@@ -17,6 +17,9 @@
       placeholder="Enter your access token"
       id="access_token_elem"
       onkeyup="switchButtonState()"
+      autocomplete="off"
+      spellcheck="false"
+      autocapitalize="off"
     />
     <button onclick="initWidgets()" disabled>Init Widgets</button>
     <script src="dist/bundle.js"></script>
@@ -42,7 +45,6 @@
             level: 'log'
           },
       }
-
       store.init({
         webexConfig,
         access_token: accessTokenElem.value.trim()
@@ -50,6 +52,8 @@
         ccStationLogin.onLogin = loginSuccess;
         ccStationLogin.onLogout = logoutSuccess;
         widgetsContainer.classList.remove('disabled');
+      }).catch((error) => {
+        console.error('Failed to initialize widgets:', error);
       });
     }
 

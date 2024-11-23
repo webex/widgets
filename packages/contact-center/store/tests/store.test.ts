@@ -57,10 +57,32 @@ describe('Store', () => {
       const mockError = new Error('Register failed');
       mockWebex.cc.register.mockRejectedValue(mockError);
 
-      await store.registerCC(mockWebex);
+      try {
+        await store.registerCC(mockWebex);
+      }
+      catch (error) {
+        expect(error).toEqual(mockError);
+        expect(consoleErrorSpy).toHaveBeenCalledWith('Error registering contact center', mockError);
+        consoleErrorSpy.mockRestore();
+      }
+    });
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith('Error registering contact center', mockError);
-      consoleErrorSpy.mockRestore();
+    it('should log an error on failed register', async () => {
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+      const mockError = new Error('Register failed');
+      mockWebex.cc.register.mockRejectedValue(mockError);
+      // Store initial state
+      const initialTeams = [...store.teams];
+      const initialLoginOptions = [...store.loginOptions];
+      try {
+        await store.registerCC(mockWebex);
+      }
+      catch (error) {
+        expect(consoleErrorSpy).toHaveBeenCalledWith('Error registering contact center', mockError);
+        expect(store.teams).toEqual(initialTeams);
+        expect(store.loginOptions).toEqual(initialLoginOptions);
+        consoleErrorSpy.mockRestore();
+      }
     });
   });
 

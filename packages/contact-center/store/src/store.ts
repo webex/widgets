@@ -19,7 +19,7 @@ class Store implements IStore {
     makeAutoObservable(this, {cc: observable.ref});
   }
 
-  registerCC(webex: WithWebex['webex']): Promise<Profile> {
+  registerCC(webex: WithWebex['webex']): Promise<void> {
     this.cc = webex.cc;
     console.trace(this.cc.register);
     return this.cc.register().then((response: Profile) => {
@@ -27,6 +27,7 @@ class Store implements IStore {
       this.loginOptions = response.loginVoiceOptions;
     }).catch((error) => {
       console.error('Error registering contact center', error);
+      return Promise.reject(error);
     });
   }
 
