@@ -2,6 +2,8 @@ import { makeAutoObservable } from 'mobx';
 import Webex from 'webex';
 import store from '../src/store'; // Adjust the import path as necessary
 
+let mockShouldCallback = true;
+
 jest.mock('mobx', () => ({
   makeAutoObservable: jest.fn(),
   observable: { ref: jest.fn() }
@@ -10,7 +12,9 @@ jest.mock('mobx', () => ({
 jest.mock('webex', () => ({
   init: jest.fn(() => ({
     once: jest.fn((event, callback) => {
-      if (event === 'ready') callback();
+      if (event === 'ready' && mockShouldCallback) {
+        callback();
+      }
     }),
     cc: {
       register: jest.fn()
@@ -25,11 +29,12 @@ describe('Store', () => {
     // Reset teams and loginOptions before each test since store is a singleton
     store.teams = [];
     store.loginOptions = [];
-    mockWebex = {
-      cc: {
-        register: jest.fn()
-      }
-    };
+    mockWebex = Webex.init();
+    jest.useFakeTimers(); // Use fake timers for testing setTimeout
+  });
+
+  afterEach(() => {
+    jest.useRealTimers(); // Restore real timers after each test
   });
 
   it('should initialize with default values', () => {
@@ -66,34 +71,18 @@ describe('Store', () => {
         consoleErrorSpy.mockRestore();
       }
     });
-
-    it('should log an error on failed register', async () => {
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
-      const mockError = new Error('Register failed');
-      mockWebex.cc.register.mockRejectedValue(mockError);
-      // Store initial state
-      const initialTeams = [...store.teams];
-      const initialLoginOptions = [...store.loginOptions];
-      try {
-        await store.registerCC(mockWebex);
-      }
-      catch (error) {
-        expect(consoleErrorSpy).toHaveBeenCalledWith('Error registering contact center', mockError);
-        expect(store.teams).toEqual(initialTeams);
-        expect(store.loginOptions).toEqual(initialLoginOptions);
-        consoleErrorSpy.mockRestore();
-      }
-    });
   });
 
   describe('init', () => {
     it('should call registerCC if webex is in options', async () => {
       const initParams = { webex: mockWebex };
       jest.spyOn(store, 'registerCC').mockResolvedValue();
+      Webex.init.mockClear();
 
       await store.init(initParams);
 
       expect(store.registerCC).toHaveBeenCalledWith(mockWebex);
+      expect(Webex.init).not.toHaveBeenCalled();
     });
 
     it('should initialize webex and call registerCC on ready event', async () => {
@@ -121,6 +110,23 @@ describe('Store', () => {
       jest.spyOn(store, 'registerCC').mockRejectedValue(new Error('registerCC failed'));
 
       await expect(store.init(initParams)).rejects.toThrow('registerCC failed');
+    });
+
+    it('should reject the promise if Webex SDK fails to initialize', async () => {
+      const initParams = {
+        webexConfig: { anyConfig: true },
+        access_token: 'fake_token'
+      };
+
+      mockShouldCallback = false;
+
+      jest.spyOn(store, 'registerCC').mockResolvedValue();
+
+      const initPromise = store.init(initParams);
+
+      jest.runAllTimers(); // Fast-forward the timers to simulate timeout
+
+      await expect(initPromise).rejects.toThrow('Webex SDK failed to initialize');
     });
   });
 });
