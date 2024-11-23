@@ -4,12 +4,12 @@ interface WithWebex {
     webex: { cc: IContactCenter };
 }
 
-interface WithWebexConfigAndToken {
+interface WithWebexConfig {
     webexConfig: any; // Replace 'any' with the actual type of webexConfig
     access_token: string;
 }
   
-type InitParams = WithWebex | WithWebexConfigAndToken;
+type InitParams = WithWebex | WithWebexConfig;
 
 interface IStore {
     teams: Team[];

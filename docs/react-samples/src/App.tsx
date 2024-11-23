@@ -11,8 +11,7 @@ function App() {
       fedramp: false,
       logger: {
         level: 'log'
-      },
-      credentials: undefined,
+      }
   }
 
   const onLogin = () => {
