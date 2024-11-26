@@ -1,8 +1,16 @@
 import {makeAutoObservable, observable} from 'mobx';
 import Webex from 'webex';
-import {IContactCenter, IAgentProfile, Team} from '@webex/plugin-cc';
+import {
+  AgentLogin,
+  IContactCenter,
+  Profile,
+  Team,
+  WithWebex,
+  InitParams,
+  IStore
+} from './store.types';
 
-class Store {
+class Store implements IStore {
   teams: Team[] = [];
   loginOptions: string[] = [];
   cc: IContactCenter;
@@ -11,20 +19,39 @@ class Store {
     makeAutoObservable(this, {cc: observable.ref});
   }
 
-  init(webexConfig: any, access_token: string): Promise<void> { 
+  registerCC(webex: WithWebex['webex']): Promise<void> {
+    this.cc = webex.cc;
+    return this.cc.register().then((response: Profile) => {
+      this.teams = response.teams;
+      this.loginOptions = response.loginVoiceOptions;
+    }).catch((error) => {
+      console.error('Error registering contact center', error);
+      return Promise.reject(error);
+    });
+  }
+
+  init(options: InitParams): Promise<void> {
+    if('webex' in options) {
+      // If devs decide to go with webex, they will have to listen to the ready event before calling init
+      // This has to be documented 
+      return this.registerCC(options.webex);
+    }
     return new Promise((resolve, reject) => {
+
+      const timer = setTimeout(() => {
+        reject(new Error('Webex SDK failed to initialize'));
+      }, 6000);
+
       const webex = Webex.init({
-        config: webexConfig,
+        config: options.webexConfig,
         credentials: {
-          access_token: access_token
+          access_token: options.access_token
         }
       });
   
       webex.once('ready', () => {
-        this.cc = webex.cc;
-        this.cc.register().then((response: IAgentProfile) => {
-          this.teams = response.teams;
-          this.loginOptions = response.loginVoiceOptions;
+        clearTimeout(timer);
+        this.registerCC(webex).then(() => {
           resolve();
         })
         .catch((error) => {

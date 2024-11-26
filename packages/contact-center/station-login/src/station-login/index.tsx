@@ -19,7 +19,12 @@ const StationLogin: React.FunctionComponent<StationLoginProps> = observer(({onLo
   return <StationLoginPresentational {...props} />;
 });
 
-const WebStationLogin = r2wc(StationLogin);
+const WebStationLogin = r2wc(StationLogin, {
+  props: {
+    onLogin: "function",
+    onLogout: "function"
+  }
+});
 
 if (!customElements.get('widget-cc-station-login')) {
   customElements.define('widget-cc-station-login', WebStationLogin);

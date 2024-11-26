@@ -18,12 +18,11 @@
     "test:unit": "jest"
   },
   "dependencies": {
-    "@webex/plugin-cc": "3.5.0-wxcc.2",
     "mobx": "6.13.5",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "typescript": "5.6.3",
-    "webex": "3.6.0-wxcc.3"
+    "webex": "3.6.0-wxcc.5"
   },
   "devDependencies": {
     "@babel/core": "7.25.2",
@@ -48,7 +47,11 @@
   "jest": {
     "testEnvironment": "jsdom",
     "//": "We can remove this when we have tests",
-    "passWithNoTests": true
+    "passWithNoTests": true,
+    "testMatch": [
+      "**/tests/**/*.ts",
+      "**/tests/**/*.tsx"
+    ]
   },
   "stableVersion": "1.0.0"
 }
