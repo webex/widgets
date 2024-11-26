@@ -4,23 +4,29 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CC Widgets as web-component</title>
+    <style>
+      .disabled {
+        display: none;
+      }
+    </style>
   </head>
   <body>
     <h1>Contact Center widgets as web-component</h1>
+    <input
+      type="text"
+      placeholder="Enter your access token"
+      id="access_token_elem"
+      onkeyup="switchButtonState()"
+      autocomplete="off"
+      spellcheck="false"
+      autocapitalize="off"
+    />
+    <button onclick="initWidgets()" disabled>Init Widgets</button>
+    <div id="widgets-container" class="disabled">
+      <widget-cc-station-login id="cc-station-login"></widget-cc-station-login>
+      <widget-cc-user-state></widget-cc-user-state>
+    </div>
     <script src="dist/bundle.js"></script>
-    <widget-cc-station-login></widget-cc-station-login>
-    <widget-cc-user-state></widget-cc-user-state>
+    <script src="app.js"></script>
   </body>
-  <script>
-    const token = '';
-    
-    const webexConfig = {
-        fedramp: false,
-        logger: {
-        level: 'log'  // TODO: We will add more logging levels later and set the righ levels
-        },
-    }
-
-    store.init(webexConfig, token);
-  </script>
 </html>
