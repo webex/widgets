@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.2](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.1...v1.28.0-ccwidgets.2) (2024-11-26)
+
+
+### Bug Fixes
+
+* **cc-store:** receive webex on init, add store types ([#341](https://github.com/webex/widgets/issues/341)) ([9648969](https://github.com/webex/widgets/commit/9648969c69f6e9265316152236400fd558344ea8))
+
 # [1.28.0-ccwidgets.1](https://github.com/webex/widgets/compare/v1.27.5...v1.28.0-ccwidgets.1) (2024-11-21)
 
 
