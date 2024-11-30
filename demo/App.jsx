@@ -1,7 +1,6 @@
-import React, {useState} from 'react';
-import { createRoot } from 'react-dom/client';
+import React, {useState, useEffect} from 'react';
+import {createRoot} from 'react-dom/client';
 import {Button, Input, Sidebar, SidebarBody, SidebarNav, SidebarNavItem, Checkbox} from '@momentum-ui/react';
-
 import WebexMeetingsWidgetDemo from './WebexMeetingsWidgetDemo';
 
 import '@momentum-ui/core/css/momentum-ui.min.css';
@@ -16,20 +15,32 @@ export default function App() {
     event.preventDefault();
     setTokenInput('');
     setToken();
+    localStorage.removeItem('webexWidgetsDemoAccessToken');
   };
 
   const handleUpdateInputToken = (event) => {
     setTokenInput(event.target.value);
+    const saveTokenButton = document.getElementById('saveTokenButtonId');
+    if (event.target.value.length === 0) saveTokenButton.disabled = true;
+    else saveTokenButton.disabled = false;
   };
 
   const handleSaveToken = (event) => {
     event.preventDefault();
     setToken(tokenInput);
+    localStorage.setItem('webexWidgetsDemoAccessToken', tokenInput);
   };
 
   function handleFedrampChange() {
     setFedramp(!fedramp);
   }
+
+  useEffect(() => {
+    const savedUserAccessToken = localStorage.getItem('webexWidgetsDemoAccessToken');
+    if (savedUserAccessToken) {
+      setTokenInput(savedUserAccessToken);
+    }
+  }, []);
 
   return (
     <>
@@ -65,11 +76,17 @@ export default function App() {
               name="token"
               onChange={handleUpdateInputToken}
               placeholder="Access Token"
-              readOnly={!!token}
               type="password"
               value={tokenInput}
             />
-            <Button color="blue" type="submit" onClick={handleSaveToken} disabled={!!token} ariaLabel="Save Token">
+            <Button
+              id="saveTokenButtonId"
+              color="blue"
+              type="submit"
+              onClick={handleSaveToken}
+              disabled={!!token}
+              ariaLabel="Save Token"
+            >
               Save Token
             </Button>
             <Button type="button" onClick={handleClearToken} disabled={!token} ariaLabel="Clear Token">
