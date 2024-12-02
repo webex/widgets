@@ -40,7 +40,7 @@
     "test:widgets": "yarn workspace @webex/cc-station-login test:unit && yarn workspace @webex/cc-user-state test:unit",
     "build": "yarn run build:store && yarn run build:widgets",
     "build:store": "yarn workspace @webex/cc-store build:src",
-    "build:widgets": "yarn workspace @webex/cc-station-login build:src && yarn workspace @webex/cc-user-state build:src",
+    "build:widgets": "yarn workspace @webex/cc-station-login build:src && yarn workspace @webex/cc-user-state build:src && yarn workspace @webex/cc-widgets build:src ",
     "samples:build": "yarn workspace @webex/react-samples-app build:src && yarn workspace @webex/web-component-samples-app build:src",
     "samples:serve": "open docs/index.html && yarn workspace @webex/react-samples-app serve",
     "samples:serve-react": "yarn workspace @webex/react-samples-app serve",
