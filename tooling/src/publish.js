@@ -28,46 +28,37 @@ function versionAndPublish() {
     process.exit(1);
   }
   const contactCenterPath = './packages/contact-center';
-  const dependencies = ['@webex/cc-store'];
 
   try {
-    const ccFolder = fs
+    const workspaceData = fs
       .readdirSync(contactCenterPath, {withFileTypes: true})
-      .filter((dirent) => {
-        return dirent.isDirectory();
-      })
+      .filter((dirent) => dirent.isDirectory())
       .map((dirent) => {
-        try {
-          const packageJsonPath = path.join(contactCenterPath, dirent.name, 'package.json');
-          const packageData = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+        const packageJsonPath = path.join(contactCenterPath, dirent.name, 'package.json');
+        const packageData = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
 
-          console.log(`Removing stable version from package.json for ${dirent.name}`);
-          removeStableVersion(packageJsonPath, packageData);
-          return packageData.name;
-        } catch (error) {
-          throw new Error(`Error reading package.json in ${dirent.name}`, error);
-        }
+        console.log(`Removing stable version from package.json for ${dirent.name}`);
+        removeStableVersion(packageJsonPath, packageData); // Assuming this function is defined elsewhere
+        return packageData.name;
       });
-    // Separate dependency workspaces and other workspaces
-    const dependencyWorkspaces = ccFolder.filter((fileName) => dependencies.includes(fileName));
 
-    const otherWorkspaces = ccFolder.filter((fileName) => !dependencies.includes(fileName));
-
-    const publishWorkspace = (workspaceName) => {
-      console.log(`Publishing new version for ${workspaceName}: ${newVersion}`);
-
-      // Update version in the workspace
-      execSync(`yarn workspace ${workspaceName} version ${newVersion}`, {stdio: 'inherit'});
-
-      // Publish the package
-      execSync(`yarn workspace ${workspaceName} npm publish --tag ${branchName}`, {stdio: 'inherit'});
+    // Update version in the workspace
+    const updateVersions = (workspace) => {
+      console.log(`Publishing new version for ${workspace}: ${newVersion}`);
+      execSync(`yarn workspace ${workspace} version ${newVersion}`, {stdio: 'inherit'});
     };
 
-    // Publish dependencies first
-    dependencyWorkspaces.forEach(publishWorkspace);
+    // Publish the package
+    const publishWorkspace = (workspace) => {
+      console.log(`Updating version for ${workspace}: ${newVersion}`);
+      execSync(`yarn workspace ${workspace} npm publish --tag ${branchName}`, {stdio: 'inherit'});
+    };
 
-    // Publish other packages
-    otherWorkspaces.forEach(publishWorkspace);
+    // Update the versions for all workspaces
+    workspaceData.forEach(updateVersions);
+
+    // Publish the workspaces
+    workspaceData.forEach(publishWorkspace);
   } catch (error) {
     console.error(`Failed to process workspaces:`, error.message);
     process.exit(1);
