@@ -13,7 +13,7 @@ function removeStableVersion(packageJsonPath, packageData) {
       console.log("'stableVersion' key does not exist in package.json.");
     }
   } catch (error) {
-    throw new Error("An error occurred while removing 'stableVersion'", error.message);
+    throw new Error(`An error occurred while removing 'stableVersion': ${error.message}`);
   }
 }
 
@@ -35,6 +35,9 @@ function versionAndPublish() {
       .filter((dirent) => dirent.isDirectory())
       .map((dirent) => {
         const packageJsonPath = path.join(contactCenterPath, dirent.name, 'package.json');
+        if (!fs.existsSync(packageJsonPath)) {
+          throw new Error(`package.json not found in ${dirent.name}`);
+        }
         const packageData = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
 
         console.log(`Removing stable version from package.json for ${dirent.name}`);
@@ -54,11 +57,13 @@ function versionAndPublish() {
       execSync(`yarn workspace ${workspace} npm publish --tag ${branchName}`, {stdio: 'inherit'});
     };
 
-    // Update the versions for all workspaces
-    workspaceData.forEach(updateVersions);
+    for (const workspace of workspaceData) {
+      updateVersions(workspace);
+    }
 
-    // Publish the workspaces
-    workspaceData.forEach(publishWorkspace);
+    for (const workspace of workspaceData) {
+      publishWorkspace(workspace);
+    }
   } catch (error) {
     console.error(`Failed to process workspaces:`, error.message);
     process.exit(1);
