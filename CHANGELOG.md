@@ -1,3 +1,10 @@
+## [1.27.7](https://github.com/webex/widgets/compare/v1.27.6...v1.27.7) (2024-11-27)
+
+
+### Bug Fixes
+
+* updated-to-latest-components ([#343](https://github.com/webex/widgets/issues/343)) ([78c3e90](https://github.com/webex/widgets/commit/78c3e907946637b79b251735afae2ac712565130))
+
 ## [1.27.6](https://github.com/webex/widgets/compare/v1.27.5...v1.27.6) (2024-11-13)
 
 
