@@ -16,7 +16,7 @@ describe('versionAndPublish', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
-  test('Exits if we dont have enough arguments', () => {
+  it('Exits if we dont have enough arguments', () => {
     jest.spyOn(process, 'exit').mockImplementation(() => {});
     process.argv = ['node', 'script.js', 'main'];
     versionAndPublish();
@@ -35,7 +35,7 @@ describe('versionAndPublish', () => {
     expect(process.exit).toHaveBeenCalledWith(1);
   });
 
-  test('removes "stableVersion" key from package.json when it exists', () => {
+  it('removes "stableVersion" key from package.json when it exists', () => {
     const packageJsonContent = JSON.stringify({
       name: 'test-workspace',
       version: '1.0.0',
@@ -55,7 +55,7 @@ describe('versionAndPublish', () => {
     expect(console.log).toHaveBeenCalledWith("'stableVersion' key removed successfully.");
   });
 
-  test('fails to write package.json after removing stableVersion', () => {
+  it('fails to write package.json after removing stableVersion', () => {
     const packageJsonContent = JSON.stringify({
       name: 'test-workspace',
       version: '1.0.0',
@@ -74,11 +74,11 @@ describe('versionAndPublish', () => {
 
     expect(console.error).toHaveBeenCalledWith(
       'Failed to process workspaces:',
-      'Error reading package.json in test-workspace'
+      "An error occurred while removing 'stableVersion'"
     );
   });
 
-  test('skips removing "stableVersion" if it does not exist', () => {
+  it('skips removing "stableVersion" if it does not exist', () => {
     const packageJsonContent = JSON.stringify({
       name: 'test-workspace',
       version: '1.0.0',
@@ -95,7 +95,7 @@ describe('versionAndPublish', () => {
     expect(console.log).toHaveBeenCalledWith("'stableVersion' key does not exist in package.json.");
   });
 
-  test('publishes dependencies first and other workspaces afterward', () => {
+  it('updates the version for all packages and then publishes the package.', () => {
     const packageJsonContent = JSON.stringify({
       name: '@webex/cc-store',
       version: '1.0.0',
@@ -121,12 +121,14 @@ describe('versionAndPublish', () => {
 
     versionAndPublish();
 
+    // Ensures that first 2 calls were to update version and next 2 calls were to publish the package.
     expect(mockExecSync).toHaveBeenNthCalledWith(1, 'yarn workspace @webex/cc-store version 1.0.1', {stdio: 'inherit'});
-    expect(mockExecSync).toHaveBeenNthCalledWith(2, 'yarn workspace @webex/cc-store npm publish --tag main', {
+
+    expect(mockExecSync).toHaveBeenNthCalledWith(2, 'yarn workspace @webex/cc-station-login version 1.0.1', {
       stdio: 'inherit',
     });
 
-    expect(mockExecSync).toHaveBeenNthCalledWith(3, 'yarn workspace @webex/cc-station-login version 1.0.1', {
+    expect(mockExecSync).toHaveBeenNthCalledWith(3, 'yarn workspace @webex/cc-store npm publish --tag main', {
       stdio: 'inherit',
     });
     expect(mockExecSync).toHaveBeenNthCalledWith(4, 'yarn workspace @webex/cc-station-login npm publish --tag main', {
@@ -134,7 +136,56 @@ describe('versionAndPublish', () => {
     });
   });
 
-  test('error occurred while reading package.json data', () => {
+  it('should not publish version if there was an error while updating the version.', () => {
+    const packageJsonContent = JSON.stringify({
+      name: '@webex/cc-store',
+      version: '1.0.0',
+    });
+    const packageJsonContent2 = JSON.stringify({
+      name: '@webex/cc-station-login',
+      version: '1.0.0',
+    });
+
+    mockFs.readdirSync.mockReturnValue([
+      {name: 'store', isDirectory: () => true},
+      {name: 'station-login', isDirectory: () => true},
+    ]);
+
+    mockFs.readFileSync.mockReturnValueOnce(packageJsonContent).mockReturnValueOnce(packageJsonContent2);
+    mockFs.writeFileSync.mockImplementation(() => {});
+
+    const mockExecSync = require('child_process').execSync;
+    mockExecSync.mockImplementation(() => {
+      throw new Error('Some error occurred');
+    });
+
+    const processArgvMock = ['node', 'script.js', 'main', '1.0.1'];
+    process.argv = processArgvMock;
+
+    versionAndPublish();
+
+    expect(mockExecSync).toHaveBeenNthCalledWith(1, 'yarn workspace @webex/cc-store version 1.0.1', {stdio: 'inherit'});
+
+    // Ensures that after the error we dont publish packages
+    expect(mockExecSync).not.toHaveBeenNthCalledWith(3, 'yarn workspace @webex/cc-station-login version 1.0.1', {
+      stdio: 'inherit',
+    });
+
+    expect(mockExecSync).not.toHaveBeenNthCalledWith(2, 'yarn workspace @webex/cc-store npm publish --tag main', {
+      stdio: 'inherit',
+    });
+    expect(mockExecSync).not.toHaveBeenNthCalledWith(
+      4,
+      'yarn workspace @webex/cc-station-login npm publish --tag main',
+      {
+        stdio: 'inherit',
+      }
+    );
+
+    expect(console.error).toHaveBeenCalledWith('Failed to process workspaces:', 'Some error occurred');
+  });
+
+  it('error occurred while reading package.json data', () => {
     mockFs.readdirSync.mockReturnValue([
       {name: 'store', isDirectory: () => true},
       {name: 'station-login', isDirectory: () => true},
@@ -150,7 +201,7 @@ describe('versionAndPublish', () => {
     process.argv = processArgvMock;
 
     versionAndPublish();
-    expect(console.error).toHaveBeenCalledWith('Failed to process workspaces:', 'Error reading package.json in store');
+    expect(console.error).toHaveBeenCalledWith('Failed to process workspaces:', 'Error while reading from file');
     expect(mockExecSync).not.toHaveBeenCalled();
   });
 

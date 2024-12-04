@@ -13,7 +13,7 @@ function removeStableVersion(packageJsonPath, packageData) {
       console.log("'stableVersion' key does not exist in package.json.");
     }
   } catch (error) {
-    throw new Error("An error occurred while removing 'stableVersion':", error.message);
+    throw new Error("An error occurred while removing 'stableVersion'", error.message);
   }
 }
 
