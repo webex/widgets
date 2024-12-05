@@ -1,4 +1,4 @@
-import React, {CSSProperties, useEffect} from 'react';
+import React, {CSSProperties} from 'react';
 
 import {IUserState} from './use-state.types';
 
@@ -101,12 +101,11 @@ const UserStatePresentational: React.FunctionComponent<IUserState> = (props) => 
               }
               disabled={isSettingAgentStatus}
             >
-              {idleCodes && idleCodes.map((code) => {
+              {idleCodes && idleCodes.map((code, index) => {
                 return !code.isSystem ? (
                   <option
-                    key={code.id}
+                    key={index}
                     value={code.id}
-                    selected={code.isDefault}
                   >
                       {code.name}
                   </option>
