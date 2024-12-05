@@ -1,11 +1,44 @@
-export const useUserState = () => {
+import {useState, useEffect} from "react";
 
+export const useUserState = ({idleCodes, agentId, cc}) => {
 
-  const handleAgentStatus = (event: { target: { value: string; }; }) => {
+  const [isSettingAgentStatus, setIsSettingAgentStatus] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const [elapsedTime, setElapsedTime] = useState(0);
+
+  useEffect(() => {
+    // Reset the timer whenever the component mounts or the state changes
+    setElapsedTime(0);
+    const timer = setInterval(() => {
+      setElapsedTime(prevTime => prevTime + 1);
+    }, 1000);
+
+    // Cleanup the timer on component unmount
+    return () => clearInterval(timer);
+  }, []);
+
+  const setAgentStatus = ({
+    auxCodeId,
+    state
+  }) => {
+    setIsSettingAgentStatus(true);
+    const chosenState = state === 'Available' ? 'Available' : 'Idle';
+    cc.setAgentState({state: chosenState, auxCodeId, agentId, lastStateChangeReason: state}).then((response) => {
+      setIsSettingAgentStatus(false);
+      setErrorMessage('');
+      setElapsedTime(0);
+    }).catch(error => {
+      setErrorMessage(error.toString());
+      setIsSettingAgentStatus(false);
+    });
   };
 
-  const setAgentStatus = () => {
-  };
-
-  return {name: 'UserState', handleAgentStatus, setAgentStatus};
+  return {
+    idleCodes,
+    setAgentStatus,
+    isSettingAgentStatus,
+    errorMessage,
+    elapsedTime
+  }
 };

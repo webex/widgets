@@ -1,19 +1,19 @@
+import { IdleCode } from '@webex/cc-store';
+
 /**
  * Interface representing the state of a user.
  */
 export interface IUserState {
   /**
-   * The name of the user.
+   * The list of idle codes.
    */
-  name: string;
+  idleCodes: IdleCode[];
 
-  /**
-   * Handler for agent state changes
-   */
-  handleAgentStatus: (event) => void;
+  setAgentStatus: (status: { auxCodeId: string; state: string }) => void;
 
-  /**
-   * Setter for agent state
-   */
-  setAgentStatus: () => void
+  isSettingAgentStatus: boolean;
+
+  errorMessage: string;
+
+  elapsedTime: number;
 }
