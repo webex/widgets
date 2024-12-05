@@ -47,7 +47,9 @@ describe('Store', () => {
     it('should set teams and loginOptions on successful register', async () => {
       const mockResponse = {
         teams: [{ id: 'team1', name: 'Team 1' }],
-        loginVoiceOptions: ['option1', 'option2']
+        loginVoiceOptions: ['option1', 'option2'],
+        idleCodes: [{ id: 'code1', name: 'Code 1', isSystem: false, isDefault: false }],
+        agentId: 'agent1'
       };
       mockWebex.cc.register.mockResolvedValue(mockResponse);
 
@@ -55,6 +57,8 @@ describe('Store', () => {
 
       expect(store.teams).toEqual(mockResponse.teams);
       expect(store.loginOptions).toEqual(mockResponse.loginVoiceOptions);
+      expect(store.idleCodes).toEqual(mockResponse.idleCodes);
+      expect(store.agentId).toEqual(mockResponse.agentId);
     });
 
     it('should log an error on failed register', async () => {
