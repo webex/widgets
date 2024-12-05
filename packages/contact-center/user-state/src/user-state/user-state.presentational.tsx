@@ -83,7 +83,7 @@ const UserStatePresentational: React.FunctionComponent<IUserState> = (props) => 
       <div style={styles.box}>
         <section style={styles.sectionBox}>
           <fieldset style={styles.fieldset}>
-            <legend style={styles.legendBox}>Agent State</legend>
+            <legend data-testid='user-state-title' style={styles.legendBox}>Agent State</legend>
             <div style={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}></div>
             <select
               id="idleCodes"
