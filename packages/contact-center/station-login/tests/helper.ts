@@ -18,6 +18,10 @@ const loginCb = jest.fn();
 const logoutCb = jest.fn();
 
 describe('useStationLogin Hook', () => {
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
   
   it('should set loginSuccess on successful login', async () => {
     const successResponse = {
@@ -77,6 +81,24 @@ describe('useStationLogin Hook', () => {
       loginFailure: undefined,
       logoutSuccess: undefined
     });
+  });
+
+  it('should not call login callback if not present', async () => {
+
+    ccMock.stationLogin.mockResolvedValue({});
+
+    const { result, waitForNextUpdate } = renderHook(() =>
+      //@ts-ignore
+      useStationLogin({cc: ccMock, onLogin: undefined, onLogout: logoutCb})
+    );
+
+    act(() => {
+      result.current.login();
+    });
+
+    await waitForNextUpdate();
+
+    expect(loginCb).not.toHaveBeenCalled();
   });
 
   it('should set loginFailure on failed login', async () => {
@@ -162,5 +184,22 @@ describe('useStationLogin Hook', () => {
       loginFailure: undefined,
       logoutSuccess: successResponse
     });
+  });
+
+  it('should not call logout callback if not present', async () => {
+    ccMock.stationLogout.mockResolvedValue({});
+
+    const {result, waitForNextUpdate} = renderHook(() =>
+      //@ts-ignore
+      useStationLogin({cc: ccMock, onLogin: loginCb})
+    );
+
+    act(() => {
+      result.current.logout();
+    });
+
+    await waitForNextUpdate();
+
+    expect(logoutCb).not.toHaveBeenCalled();
   });
 })
