@@ -1,4 +1,4 @@
-import {renderHook, act} from '@testing-library/react-hooks';
+import {renderHook, act, waitFor} from '@testing-library/react';
 import {useStationLogin} from '../src/helper';
 
 // Mock webex instance
@@ -49,7 +49,7 @@ describe('useStationLogin Hook', () => {
 
     ccMock.stationLogin.mockResolvedValue(successResponse);
 
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb})
     );
 
@@ -61,25 +61,25 @@ describe('useStationLogin Hook', () => {
       result.current.login();
     });
 
-    await waitForNextUpdate();
-    
-    expect(ccMock.stationLogin).toHaveBeenCalledWith({
-      teamId: loginParams.teamId,
-      loginOption: loginParams.loginOption,
-      dialNumber: loginParams.dialNumber,
-    });
-    expect(loginCb).toHaveBeenCalledWith();
-
-    expect(result.current).toEqual({
-      name: 'StationLogin',
-      setDeviceType: expect.any(Function),
-      setDialNumber: expect.any(Function),
-      setTeam: expect.any(Function),
-      login: expect.any(Function),
-      logout: expect.any(Function),
-      loginSuccess: successResponse,
-      loginFailure: undefined,
-      logoutSuccess: undefined
+    waitFor(() => {
+      expect(ccMock.stationLogin).toHaveBeenCalledWith({
+        teamId: loginParams.teamId,
+        loginOption: loginParams.loginOption,
+        dialNumber: loginParams.dialNumber,
+      });
+      expect(loginCb).toHaveBeenCalledWith();
+  
+      expect(result.current).toEqual({
+        name: 'StationLogin',
+        setDeviceType: expect.any(Function),
+        setDialNumber: expect.any(Function),
+        setTeam: expect.any(Function),
+        login: expect.any(Function),
+        logout: expect.any(Function),
+        loginSuccess: successResponse,
+        loginFailure: undefined,
+        logoutSuccess: undefined
+      });
     });
   });
 
@@ -87,18 +87,17 @@ describe('useStationLogin Hook', () => {
 
     ccMock.stationLogin.mockResolvedValue({});
 
-    const { result, waitForNextUpdate } = renderHook(() =>
-      //@ts-ignore
-      useStationLogin({cc: ccMock, onLogin: undefined, onLogout: logoutCb})
+    const { result } = renderHook(() =>
+      useStationLogin({cc: ccMock, onLogout: logoutCb})
     );
 
     act(() => {
       result.current.login();
     });
 
-    await waitForNextUpdate();
-
-    expect(loginCb).not.toHaveBeenCalled();
+    waitFor(() => {
+      expect(loginCb).not.toHaveBeenCalled();
+    });
   });
 
   it('should set loginFailure on failed login', async () => {
@@ -106,7 +105,7 @@ describe('useStationLogin Hook', () => {
     ccMock.stationLogin.mockRejectedValue(errorResponse);
 
     loginCb.mockClear();
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb})
     );
 
@@ -118,26 +117,26 @@ describe('useStationLogin Hook', () => {
       result.current.login();
     });
 
-    await waitForNextUpdate();
-
-    expect(ccMock.stationLogin).toHaveBeenCalledWith({
-      teamId: loginParams.teamId,
-      loginOption: loginParams.loginOption,
-      dialNumber: loginParams.dialNumber,
-    });
-    
-    expect(loginCb).not.toHaveBeenCalledWith();
-
-    expect(result.current).toEqual({
-      name: 'StationLogin',
-      setDeviceType: expect.any(Function),
-      setDialNumber: expect.any(Function),
-      setTeam: expect.any(Function),
-      login: expect.any(Function),
-      logout: expect.any(Function),
-      loginSuccess: undefined,
-      loginFailure: errorResponse,
-      logoutSuccess: undefined
+    waitFor(() => {
+      expect(ccMock.stationLogin).toHaveBeenCalledWith({
+        teamId: loginParams.teamId,
+        loginOption: loginParams.loginOption,
+        dialNumber: loginParams.dialNumber,
+      });
+      
+      expect(loginCb).not.toHaveBeenCalledWith();
+  
+      expect(result.current).toEqual({
+        name: 'StationLogin',
+        setDeviceType: expect.any(Function),
+        setDialNumber: expect.any(Function),
+        setTeam: expect.any(Function),
+        login: expect.any(Function),
+        logout: expect.any(Function),
+        loginSuccess: undefined,
+        loginFailure: errorResponse,
+        logoutSuccess: undefined
+      });
     });
   });
 
@@ -159,7 +158,7 @@ describe('useStationLogin Hook', () => {
 
     ccMock.stationLogout.mockResolvedValue(successResponse);
 
-    const {result, waitForNextUpdate} = renderHook(() =>
+    const {result} = renderHook(() =>
       useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb})
     );
 
@@ -167,30 +166,29 @@ describe('useStationLogin Hook', () => {
       result.current.logout();
     });
 
-    await waitForNextUpdate();
+    waitFor(() => {
+      expect(ccMock.stationLogout).toHaveBeenCalledWith({logoutReason: 'User requested logout'});
+      expect(logoutCb).toHaveBeenCalledWith();
 
-    expect(ccMock.stationLogout).toHaveBeenCalledWith({logoutReason: 'User requested logout'});
-    expect(logoutCb).toHaveBeenCalledWith();
 
-
-    expect(result.current).toEqual({
-      name: 'StationLogin',
-      setDeviceType: expect.any(Function),
-      setDialNumber: expect.any(Function),
-      setTeam: expect.any(Function),
-      login: expect.any(Function),
-      logout: expect.any(Function),
-      loginSuccess: undefined,
-      loginFailure: undefined,
-      logoutSuccess: successResponse
+      expect(result.current).toEqual({
+        name: 'StationLogin',
+        setDeviceType: expect.any(Function),
+        setDialNumber: expect.any(Function),
+        setTeam: expect.any(Function),
+        login: expect.any(Function),
+        logout: expect.any(Function),
+        loginSuccess: undefined,
+        loginFailure: undefined,
+        logoutSuccess: successResponse
+      });
     });
   });
 
   it('should not call logout callback if not present', async () => {
     ccMock.stationLogout.mockResolvedValue({});
 
-    const {result, waitForNextUpdate} = renderHook(() =>
-      //@ts-ignore
+    const {result} = renderHook(() =>
       useStationLogin({cc: ccMock, onLogin: loginCb})
     );
 
@@ -198,8 +196,8 @@ describe('useStationLogin Hook', () => {
       result.current.logout();
     });
 
-    await waitForNextUpdate();
-
-    expect(logoutCb).not.toHaveBeenCalled();
+    waitFor(() => {
+      expect(logoutCb).not.toHaveBeenCalled();
+    });
   });
 })

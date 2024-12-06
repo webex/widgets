@@ -2,6 +2,10 @@ const accessTokenElem = document.getElementById('access_token_elem');
 const ccStationLogin = document.getElementById('cc-station-login');
 const ccUserState = document.getElementById('cc-user-state');
 
+if (!ccStationLogin && !ccUserState) {
+    console.error('Failed to find the required elements');
+}
+
 function switchButtonState(){
     const buttonElem = document.querySelector('button');
     buttonElem.disabled = accessTokenElem.value.trim() === '';

@@ -33,7 +33,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
         if(logoutCb){
           logoutCb();
         }
-      }).catch((error: any) => {
+      }).catch((error: Error) => {
         console.error(error);
       });
   };
