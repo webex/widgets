@@ -15,6 +15,7 @@ describe('versionAndPublish', () => {
   const packageJsonPath = 'packages/contact-center/test-workspace/package.json';
   beforeEach(() => {
     jest.resetAllMocks();
+    mockFs.existsSync.mockReturnValue(true);
   });
   it('Exits if we dont have enough arguments', () => {
     jest.spyOn(process, 'exit').mockImplementation(() => {});
@@ -74,7 +75,7 @@ describe('versionAndPublish', () => {
 
     expect(console.error).toHaveBeenCalledWith(
       'Failed to process workspaces:',
-      "An error occurred while removing 'stableVersion'"
+      "An error occurred while removing 'stableVersion': Error while writing to file"
     );
   });
 
