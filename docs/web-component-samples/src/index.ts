@@ -1,6 +1,4 @@
-import store from '@webex/cc-store';
-import '@webex/cc-station-login';
-import '@webex/cc-user-state';
+import {store, WebUserState, WebStationLogin} from '@webex/cc-widgets';
 
 //  @ts-ignore
 window.store = store;

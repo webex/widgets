@@ -3418,7 +3418,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@r2wc/react-to-web-component@npm:2.0.3, @r2wc/react-to-web-component@npm:^2.0.3":
+"@r2wc/react-to-web-component@npm:2.0.3":
   version: 2.0.3
   resolution: "@r2wc/react-to-web-component@npm:2.0.3"
   dependencies:
@@ -5390,7 +5390,6 @@ __metadata:
     "@babel/preset-env": "npm:7.25.4"
     "@babel/preset-react": "npm:7.24.7"
     "@babel/preset-typescript": "npm:7.25.9"
-    "@r2wc/react-to-web-component": "npm:2.0.3"
     "@testing-library/dom": "npm:10.4.0"
     "@testing-library/jest-dom": "npm:6.6.2"
     "@testing-library/react": "npm:16.0.1"
@@ -5451,7 +5450,6 @@ __metadata:
     "@babel/preset-env": "npm:7.25.4"
     "@babel/preset-react": "npm:7.24.7"
     "@babel/preset-typescript": "npm:7.25.9"
-    "@r2wc/react-to-web-component": "npm:2.0.3"
     "@testing-library/dom": "npm:10.4.0"
     "@testing-library/jest-dom": "npm:6.6.2"
     "@testing-library/react": "npm:16.0.1"
@@ -5474,7 +5472,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@webex/cc-widgets@workspace:packages/contact-center/cc-widgets":
+"@webex/cc-widgets@workspace:*, @webex/cc-widgets@workspace:packages/contact-center/cc-widgets":
   version: 0.0.0-use.local
   resolution: "@webex/cc-widgets@workspace:packages/contact-center/cc-widgets"
   dependencies:
@@ -6325,9 +6323,7 @@ __metadata:
     "@babel/preset-env": "npm:^7.25.4"
     "@babel/preset-react": "npm:^7.24.7"
     "@babel/preset-typescript": "npm:^7.25.9"
-    "@r2wc/react-to-web-component": "npm:^2.0.3"
-    "@webex/cc-station-login": "workspace:*"
-    "@webex/cc-user-state": "workspace:*"
+    "@webex/cc-widgets": "workspace:*"
     babel-loader: "npm:^9.2.1"
     file-loader: "npm:^6.2.0"
     html-webpack-plugin: "npm:^5.6.3"
@@ -6675,8 +6671,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@webex/web-component-samples-app@workspace:docs/web-component-samples"
   dependencies:
-    "@webex/cc-station-login": "workspace:*"
-    "@webex/cc-user-state": "workspace:*"
+    "@webex/cc-widgets": "workspace:*"
     html-webpack-plugin: "npm:^5.6.3"
     ts-loader: "npm:^9.5.1"
     typescript: "npm:^5.6.3"

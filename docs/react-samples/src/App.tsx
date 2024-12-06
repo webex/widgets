@@ -1,7 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import store from '@webex/cc-store'
-import {StationLogin} from '@webex/cc-station-login';
-import {UserState} from '@webex/cc-user-state';
+import React, { useState } from 'react';
+import {StationLogin, UserState, store} from '@webex/cc-widgets'
 
 function App() {
   const [isSdkReady, setIsSdkReady] = useState(false);
