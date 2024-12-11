@@ -1,3 +1,10 @@
+## [1.27.8](https://github.com/webex/widgets/compare/v1.27.7...v1.27.8) (2024-12-11)
+
+
+### Bug Fixes
+
+* **release:** accessibility issues fixed on components repo. ([#346](https://github.com/webex/widgets/issues/346)) ([6390d24](https://github.com/webex/widgets/commit/6390d24880a0a5362dffc427d4aae7d8d5292ba3))
+
 ## [1.27.7](https://github.com/webex/widgets/compare/v1.27.6...v1.27.7) (2024-11-27)
 
 
