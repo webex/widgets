@@ -214,4 +214,26 @@ describe('versionAndPublish', () => {
     // Check if versionAndPublish function is exported
     expect(script).toHaveProperty('versionAndPublish');
   });
+  it('Throw error if there is no package.json', () => {
+    mockFs.readdirSync.mockReturnValue([
+      {name: 'store', isDirectory: () => true},
+      {name: 'station-login', isDirectory: () => true},
+    ]);
+
+    mockFs.readFileSync.mockImplementation(() => {
+      throw new Error('Error while reading from file');
+    });
+
+    const mockExecSync = require('child_process').execSync;
+
+    const processArgvMock = ['node', 'script.js', 'main', '1.0.1'];
+    process.argv = processArgvMock;
+
+    mockFs.existsSync.mockReturnValue(false);
+
+    versionAndPublish();
+
+    expect(console.error).toHaveBeenCalledWith('Failed to process workspaces:', 'package.json not found in store');
+    expect(mockExecSync).not.toHaveBeenCalled();
+  });
 });
