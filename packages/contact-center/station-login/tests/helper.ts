@@ -1,4 +1,4 @@
-import {renderHook, act} from '@testing-library/react-hooks';
+import {renderHook, act, waitFor} from '@testing-library/react';
 import {useStationLogin} from '../src/helper';
 
 // Mock webex instance
@@ -18,6 +18,10 @@ const loginCb = jest.fn();
 const logoutCb = jest.fn();
 
 describe('useStationLogin Hook', () => {
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
   
   it('should set loginSuccess on successful login', async () => {
     const successResponse = {
@@ -45,7 +49,7 @@ describe('useStationLogin Hook', () => {
 
     ccMock.stationLogin.mockResolvedValue(successResponse);
 
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb})
     );
 
@@ -57,25 +61,42 @@ describe('useStationLogin Hook', () => {
       result.current.login();
     });
 
-    await waitForNextUpdate();
-    
-    expect(ccMock.stationLogin).toHaveBeenCalledWith({
-      teamId: loginParams.teamId,
-      loginOption: loginParams.loginOption,
-      dialNumber: loginParams.dialNumber,
+    waitFor(() => {
+      expect(ccMock.stationLogin).toHaveBeenCalledWith({
+        teamId: loginParams.teamId,
+        loginOption: loginParams.loginOption,
+        dialNumber: loginParams.dialNumber,
+      });
+      expect(loginCb).toHaveBeenCalledWith();
+  
+      expect(result.current).toEqual({
+        name: 'StationLogin',
+        setDeviceType: expect.any(Function),
+        setDialNumber: expect.any(Function),
+        setTeam: expect.any(Function),
+        login: expect.any(Function),
+        logout: expect.any(Function),
+        loginSuccess: successResponse,
+        loginFailure: undefined,
+        logoutSuccess: undefined
+      });
     });
-    expect(loginCb).toHaveBeenCalledWith();
+  });
 
-    expect(result.current).toEqual({
-      name: 'StationLogin',
-      setDeviceType: expect.any(Function),
-      setDialNumber: expect.any(Function),
-      setTeam: expect.any(Function),
-      login: expect.any(Function),
-      logout: expect.any(Function),
-      loginSuccess: successResponse,
-      loginFailure: undefined,
-      logoutSuccess: undefined
+  it('should not call login callback if not present', async () => {
+
+    ccMock.stationLogin.mockResolvedValue({});
+
+    const { result } = renderHook(() =>
+      useStationLogin({cc: ccMock, onLogout: logoutCb})
+    );
+
+    act(() => {
+      result.current.login();
+    });
+
+    waitFor(() => {
+      expect(loginCb).not.toHaveBeenCalled();
     });
   });
 
@@ -84,7 +105,7 @@ describe('useStationLogin Hook', () => {
     ccMock.stationLogin.mockRejectedValue(errorResponse);
 
     loginCb.mockClear();
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb})
     );
 
@@ -96,26 +117,26 @@ describe('useStationLogin Hook', () => {
       result.current.login();
     });
 
-    await waitForNextUpdate();
-
-    expect(ccMock.stationLogin).toHaveBeenCalledWith({
-      teamId: loginParams.teamId,
-      loginOption: loginParams.loginOption,
-      dialNumber: loginParams.dialNumber,
-    });
-    
-    expect(loginCb).not.toHaveBeenCalledWith();
-
-    expect(result.current).toEqual({
-      name: 'StationLogin',
-      setDeviceType: expect.any(Function),
-      setDialNumber: expect.any(Function),
-      setTeam: expect.any(Function),
-      login: expect.any(Function),
-      logout: expect.any(Function),
-      loginSuccess: undefined,
-      loginFailure: errorResponse,
-      logoutSuccess: undefined
+    waitFor(() => {
+      expect(ccMock.stationLogin).toHaveBeenCalledWith({
+        teamId: loginParams.teamId,
+        loginOption: loginParams.loginOption,
+        dialNumber: loginParams.dialNumber,
+      });
+      
+      expect(loginCb).not.toHaveBeenCalledWith();
+  
+      expect(result.current).toEqual({
+        name: 'StationLogin',
+        setDeviceType: expect.any(Function),
+        setDialNumber: expect.any(Function),
+        setTeam: expect.any(Function),
+        login: expect.any(Function),
+        logout: expect.any(Function),
+        loginSuccess: undefined,
+        loginFailure: errorResponse,
+        logoutSuccess: undefined
+      });
     });
   });
 
@@ -137,7 +158,7 @@ describe('useStationLogin Hook', () => {
 
     ccMock.stationLogout.mockResolvedValue(successResponse);
 
-    const {result, waitForNextUpdate} = renderHook(() =>
+    const {result} = renderHook(() =>
       useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb})
     );
 
@@ -145,22 +166,38 @@ describe('useStationLogin Hook', () => {
       result.current.logout();
     });
 
-    await waitForNextUpdate();
+    waitFor(() => {
+      expect(ccMock.stationLogout).toHaveBeenCalledWith({logoutReason: 'User requested logout'});
+      expect(logoutCb).toHaveBeenCalledWith();
 
-    expect(ccMock.stationLogout).toHaveBeenCalledWith({logoutReason: 'User requested logout'});
-    expect(logoutCb).toHaveBeenCalledWith();
 
+      expect(result.current).toEqual({
+        name: 'StationLogin',
+        setDeviceType: expect.any(Function),
+        setDialNumber: expect.any(Function),
+        setTeam: expect.any(Function),
+        login: expect.any(Function),
+        logout: expect.any(Function),
+        loginSuccess: undefined,
+        loginFailure: undefined,
+        logoutSuccess: successResponse
+      });
+    });
+  });
 
-    expect(result.current).toEqual({
-      name: 'StationLogin',
-      setDeviceType: expect.any(Function),
-      setDialNumber: expect.any(Function),
-      setTeam: expect.any(Function),
-      login: expect.any(Function),
-      logout: expect.any(Function),
-      loginSuccess: undefined,
-      loginFailure: undefined,
-      logoutSuccess: successResponse
+  it('should not call logout callback if not present', async () => {
+    ccMock.stationLogout.mockResolvedValue({});
+
+    const {result} = renderHook(() =>
+      useStationLogin({cc: ccMock, onLogin: loginCb})
+    );
+
+    act(() => {
+      result.current.logout();
+    });
+
+    waitFor(() => {
+      expect(logoutCb).not.toHaveBeenCalled();
     });
   });
 })

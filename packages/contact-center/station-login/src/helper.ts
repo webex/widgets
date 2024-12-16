@@ -17,7 +17,9 @@ export const useStationLogin = (props: UseStationLoginProps) => {
     cc.stationLogin({teamId: team, loginOption: deviceType, dialNumber: dialNumber})
       .then((res: StationLoginSuccess) => {
         setLoginSuccess(res);
-        loginCb();
+        if(loginCb){
+          loginCb();
+        }
       }).catch((error: Error) => {
         console.error(error);
         setLoginFailure(error);
@@ -28,8 +30,10 @@ export const useStationLogin = (props: UseStationLoginProps) => {
     cc.stationLogout({logoutReason: 'User requested logout'})
       .then((res: StationLogoutSuccess) => {
         setLogoutSuccess(res);
-        logoutCb();
-      }).catch((error: any) => {
+        if(logoutCb){
+          logoutCb();
+        }
+      }).catch((error: Error) => {
         console.error(error);
       });
   };
