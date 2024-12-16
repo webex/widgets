@@ -35,8 +35,8 @@
   "scripts": {
     "test:unit": "yarn run test:tooling && yarn run test:cc-widgets",
     "test:tooling": "jest --coverage",
-    "test:cc-widgets": "yarn workspaces foreach --all --parallel --exclude @webex/web-component-samples-app --exclude @webex/react-samples-app run test:unit",
-    "build": "yarn workspaces foreach --all --topological --parallel  --exclude @webex/web-component-samples-app --exclude @webex/react-samples-app  run build:src",
+    "test:cc-widgets": "yarn workspaces foreach --all --parallel --exclude webex-widgets --exclude @webex/web-component-samples-app --exclude @webex/react-samples-app run test:unit",
+    "build": "yarn workspaces foreach --all --topological --parallel --exclude webex-widgets  --exclude @webex/web-component-samples-app --exclude @webex/react-samples-app  run build:src",
     "samples:build": "yarn workspace @webex/react-samples-app build:src && yarn workspace @webex/web-component-samples-app build:src",
     "samples:serve": "open docs/index.html && yarn workspace @webex/react-samples-app serve",
     "samples:serve-react": "yarn workspace @webex/react-samples-app serve",
