@@ -6,6 +6,7 @@ export const useUserState = ({idleCodes, agentId, cc}) => {
   const [errorMessage, setErrorMessage] = useState('');
 
   const [elapsedTime, setElapsedTime] = useState(0);
+  const [currentState, setCurrentState] = useState({});
 
   useEffect(() => {
     // Reset the timer whenever the component mounts or the state changes
@@ -18,17 +19,26 @@ export const useUserState = ({idleCodes, agentId, cc}) => {
     return () => clearInterval(timer);
   }, []);
 
-  const setAgentStatus = ({
-    auxCodeId,
-    state
-  }) => {
+  const setAgentStatus = (selectedCode) => {
+    const {
+      auxCodeId,
+      state
+    } = {
+      auxCodeId: selectedCode.id,
+      state: selectedCode.name
+    }
     setIsSettingAgentStatus(true);
+    let oldState = {
+      ...currentState
+    };
+    setCurrentState(selectedCode);
     const chosenState = state === 'Available' ? 'Available' : 'Idle';
     cc.setAgentState({state: chosenState, auxCodeId, agentId, lastStateChangeReason: state}).then((response) => {
       setIsSettingAgentStatus(false);
       setErrorMessage('');
       setElapsedTime(0);
     }).catch(error => {
+      setCurrentState(oldState);
       setErrorMessage(error.toString());
       setIsSettingAgentStatus(false);
     });
@@ -39,6 +49,8 @@ export const useUserState = ({idleCodes, agentId, cc}) => {
     setAgentStatus,
     isSettingAgentStatus,
     errorMessage,
-    elapsedTime
+    elapsedTime,
+    currentState,
+    setCurrentState
   }
 };

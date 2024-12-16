@@ -1,4 +1,4 @@
-import React, {CSSProperties, useMemo} from 'react';
+import React, {CSSProperties, useMemo, useRef} from 'react';
 
 import {IUserState} from './use-state.types';
 
@@ -69,9 +69,10 @@ const getStyles = (isSettingAgentStatus: boolean): Record<string, CSSProperties>
 });
 
 const UserStatePresentational: React.FunctionComponent<IUserState> = (props) => {
-  const {idleCodes,setAgentStatus,isSettingAgentStatus, errorMessage, elapsedTime} = props;
+  const {idleCodes,setAgentStatus,isSettingAgentStatus, errorMessage, elapsedTime, currentState} = props;
 
   const styles = useMemo(() => getStyles(isSettingAgentStatus), [isSettingAgentStatus]);
+  const selectRef = useRef<HTMLSelectElement>(null);
 
   const formatTime = (time: number): string => {
     const hours = Math.floor(time / 3600);
@@ -89,28 +90,26 @@ const UserStatePresentational: React.FunctionComponent<IUserState> = (props) => 
             <div style={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}></div>
             <select
               id="idleCodes"
+              value={currentState.id}
               style={styles.select}
               onChange={
                 (event) => {
-                  const select = event.target;
-                  const auxCodeId = select.value;
-                  const state = select.options[select.selectedIndex].text;
-                  setAgentStatus({
-                    auxCodeId,
-                    state
-                  });
+                  const code = idleCodes?.filter(code => code.id === event.target.value)[0];
+                  setAgentStatus(code);
                 }
               }
               disabled={isSettingAgentStatus}
             >
-              {idleCodes?.filter(code => !code.isSystem).map((code) => (
-                <option
-                  key={code.id}
-                  value={code.id}
-                >
-                    {code.name}
-                </option>
-              ))}
+              {idleCodes?.filter(code => !code.isSystem).map((code) => {
+                return (
+                  <option
+                    key={code.id}
+                    value={code.id}
+                  >
+                      {code.name}
+                  </option>
+                );
+            })}
             </select>
             <div style={styles.elapsedTime}>{formatTime(elapsedTime)}</div>
             {
