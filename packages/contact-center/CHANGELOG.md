@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.3](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.2...v1.28.0-ccwidgets.3) (2024-12-16)
+
+
+### Features
+
+* **user-state:** load and change state, client timer ([#347](https://github.com/webex/widgets/issues/347)) ([f1ccaeb](https://github.com/webex/widgets/commit/f1ccaebca9520f9354c6be4b25b262605a77519f))
+
 # [1.28.0-ccwidgets.2](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.1...v1.28.0-ccwidgets.2) (2024-11-26)
 
 
