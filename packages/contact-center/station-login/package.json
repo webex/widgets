@@ -45,6 +45,8 @@
   },
   "jest": {
     "testEnvironment": "jsdom",
+    "//": "We can remove this when we have tests",
+    "passWithNoTests": true,
     "testMatch": [
       "**/tests/**/*.ts",
       "**/tests/**/*.tsx"
