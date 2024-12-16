@@ -10,6 +10,10 @@
     "dist/",
     "package.json"
   ],
+  "exports": {
+    ".": "./dist/index.js",
+    "./wc": "./dist/wc.js"
+  },
   "scripts": {
     "build": "yarn run -T tsc",
     "build:src": "webpack && yarn run build",
