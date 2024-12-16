@@ -31,7 +31,6 @@
     "@babel/preset-env": "7.25.4",
     "@babel/preset-react": "7.24.7",
     "@babel/preset-typescript": "7.25.9",
-    "@r2wc/react-to-web-component": "2.0.3",
     "@testing-library/dom": "10.4.0",
     "@testing-library/jest-dom": "6.6.2",
     "@testing-library/react": "16.0.1",
