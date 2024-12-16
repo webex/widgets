@@ -1,32 +1,39 @@
-import { renderHook, act, waitFor } from '@testing-library/react'; // Import act from react
-import { useUserState } from '../src/helper'; // adjust the path accordingly
+import { renderHook, act, waitFor } from '@testing-library/react';
+import { useUserState } from '../src/helper';
 
-jest.useFakeTimers();
+describe('useUserState Hook', () => {
+  const mockCC = {
+    setAgentState: jest.fn()
+  };
 
-describe('useUserState', () => {
-  let ccMock;
+  const idleCodes = [
+    { id: '1', name: 'Idle Code 1', isSystem: false },
+    { id: '2', name: 'Available', isSystem: false }
+  ];
+
+  const agentId = 'agent123';
 
   beforeEach(() => {
-    ccMock = {
-      setAgentState: jest.fn(() => Promise.resolve()),
-    };
+    jest.useFakeTimers();
+    mockCC.setAgentState.mockReset();
   });
 
   afterEach(() => {
-    jest.clearAllTimers();
+    jest.useRealTimers();
   });
 
-  it('should initialize with correct default values', () => {
-    const { result } = renderHook(() => useUserState({ idleCodes: [], agentId: '123', cc: ccMock }));
-    
+  it('should initialize with default values', () => {
+    const { result } = renderHook(() => useUserState({ idleCodes, agentId, cc: mockCC }));
+
     expect(result.current.isSettingAgentStatus).toBe(false);
     expect(result.current.errorMessage).toBe('');
     expect(result.current.elapsedTime).toBe(0);
+    expect(result.current.currentState).toEqual({});
   });
 
-  it('should update elapsedTime every second', () => {
-    const { result } = renderHook(() => useUserState({ idleCodes: [], agentId: '123', cc: ccMock }));
-    
+  it('should increment elapsedTime every second', () => {
+    const { result } = renderHook(() => useUserState({ idleCodes, agentId, cc: mockCC }));
+
     act(() => {
       jest.advanceTimersByTime(3000);
     });
@@ -34,40 +41,50 @@ describe('useUserState', () => {
     expect(result.current.elapsedTime).toBe(3);
   });
 
-  it('setAgentStatus should handle success', async () => {
-    const { result } = renderHook(() => useUserState({ idleCodes: [], agentId: '123', cc: ccMock }));
-    
+  it('should reset elapsedTime when agent status is set', async () => {
+    mockCC.setAgentState.mockResolvedValueOnce({});
+    const { result } = renderHook(() => useUserState({ idleCodes, agentId, cc: mockCC }));
+
     act(() => {
-      result.current.setAgentStatus({ auxCodeId: '001', state: 'Available' });
+      result.current.setAgentStatus(idleCodes[1]);
+      jest.advanceTimersByTime(1000);
     });
 
-    expect(result.current.isSettingAgentStatus).toBe(true);
-
     waitFor(() => {
-      expect(ccMock.setAgentState).toHaveBeenCalledWith(expect.objectContaining({
-        state: 'Available',
-        auxCodeId: '001',
-        agentId: '123'
-      }));
-      expect(result.current.isSettingAgentStatus).toBe(false);
-      expect(result.current.errorMessage).toBe('');
       expect(result.current.elapsedTime).toBe(0);
     });
   });
 
-  it('setAgentStatus should handle error', async () => {
-    ccMock.setAgentState.mockRejectedValueOnce(new Error('Network error'));
-    const { result } = renderHook(() => useUserState({ idleCodes: [], agentId: '123', cc: ccMock }));
+  it('should handle setAgentStatus correctly and update current state', async () => {
+    mockCC.setAgentState.mockResolvedValueOnce({});
+    const { result } = renderHook(() => useUserState({ idleCodes, agentId, cc: mockCC }));
 
     act(() => {
-      result.current.setAgentStatus({ auxCodeId: '001', state: 'Available' });
+      result.current.setAgentStatus(idleCodes[1]);
     });
 
     expect(result.current.isSettingAgentStatus).toBe(true);
 
     waitFor(() => {
       expect(result.current.isSettingAgentStatus).toBe(false);
-      expect(result.current.errorMessage).toBe('Error: Network error');
+      expect(result.current.errorMessage).toBe('');
+      expect(result.current.currentState).toEqual(idleCodes[1]);
+    });
+  });
+
+  it('should handle errors from setAgentStatus and revert state', async () => {
+    const errorMsg = 'Error setting agent status';
+    mockCC.setAgentState.mockRejectedValueOnce(new Error(errorMsg));
+    const { result } = renderHook(() => useUserState({ idleCodes, agentId, cc: mockCC }));
+
+    act(() => {
+      result.current.setAgentStatus(idleCodes[1]);
+    });
+
+    waitFor(() => {
+      expect(result.current.isSettingAgentStatus).toBe(false);
+      expect(result.current.errorMessage).toBe(`Error: ${errorMsg}`);
+      expect(result.current.currentState).toEqual({});
     });
   });
 });
