@@ -25,10 +25,12 @@ describe('useUserState Hook', () => {
   it('should initialize with default values', () => {
     const { result } = renderHook(() => useUserState({ idleCodes, agentId, cc: mockCC }));
 
-    expect(result.current.isSettingAgentStatus).toBe(false);
-    expect(result.current.errorMessage).toBe('');
-    expect(result.current.elapsedTime).toBe(0);
-    expect(result.current.currentState).toEqual({});
+    expect(result.current).toMatchObject({
+      isSettingAgentStatus: false,
+      errorMessage: '',
+      elapsedTime: 0,
+      currentState: {}
+    });
   });
 
   it('should increment elapsedTime every second', () => {
@@ -47,11 +49,11 @@ describe('useUserState Hook', () => {
 
     act(() => {
       result.current.setAgentStatus(idleCodes[1]);
-      jest.advanceTimersByTime(1000);
+      jest.advanceTimersByTime(3000);
     });
 
-    waitFor(() => {
-      expect(result.current.elapsedTime).toBe(0);
+    await waitFor(() => {
+      expect(result.current.elapsedTime).toBe(3);
     });
   });
 
@@ -65,10 +67,12 @@ describe('useUserState Hook', () => {
 
     expect(result.current.isSettingAgentStatus).toBe(true);
 
-    waitFor(() => {
-      expect(result.current.isSettingAgentStatus).toBe(false);
-      expect(result.current.errorMessage).toBe('');
-      expect(result.current.currentState).toEqual(idleCodes[1]);
+    await waitFor(() => {
+      expect(result.current).toMatchObject({
+        isSettingAgentStatus: false,
+        errorMessage: '',
+        currentState: idleCodes[1]
+      });
     });
   });
 
@@ -81,10 +85,12 @@ describe('useUserState Hook', () => {
       result.current.setAgentStatus(idleCodes[1]);
     });
 
-    waitFor(() => {
-      expect(result.current.isSettingAgentStatus).toBe(false);
-      expect(result.current.errorMessage).toBe(`Error: ${errorMsg}`);
-      expect(result.current.currentState).toEqual({});
+    await waitFor(() => {
+      expect(result.current).toMatchObject({
+        isSettingAgentStatus: false,
+        errorMessage: `Error: ${errorMsg}`,
+        currentState: {}
+      });
     });
   });
 });

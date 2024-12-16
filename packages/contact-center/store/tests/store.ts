@@ -44,7 +44,7 @@ describe('Store', () => {
   });
 
   describe('registerCC', () => {
-    it('should set teams and loginOptions on successful register', async () => {
+    it('should initialise store values on successful register', async () => {
       const mockResponse = {
         teams: [{ id: 'team1', name: 'Team 1' }],
         loginVoiceOptions: ['option1', 'option2'],

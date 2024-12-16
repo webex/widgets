@@ -34,12 +34,12 @@ export const useUserState = ({idleCodes, agentId, cc}) => {
     setCurrentState(selectedCode);
     const chosenState = state === 'Available' ? 'Available' : 'Idle';
     cc.setAgentState({state: chosenState, auxCodeId, agentId, lastStateChangeReason: state}).then((response) => {
-      setIsSettingAgentStatus(false);
       setErrorMessage('');
       setElapsedTime(0);
     }).catch(error => {
       setCurrentState(oldState);
       setErrorMessage(error.toString());
+    }).finally(() => {
       setIsSettingAgentStatus(false);
     });
   };

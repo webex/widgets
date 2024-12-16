@@ -23,6 +23,7 @@ interface IStore {
     loginOptions: string[];
     cc: IContactCenter;
     idleCodes: IdleCode[];
+    agentId: string;
   
     registerCC(webex: WithWebex['webex']): Promise<Profile>;
     init(params: InitParams): Promise<void>;
