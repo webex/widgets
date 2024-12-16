@@ -48,7 +48,8 @@
     "testMatch": [
       "**/tests/**/*.ts",
       "**/tests/**/*.tsx"
-    ]
+    ],
+    "verbose": true
   },
   "stableVersion": "1.28.0-ccwidgets.1"
 }
