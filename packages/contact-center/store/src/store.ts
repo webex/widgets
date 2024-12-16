@@ -1,11 +1,11 @@
 import {makeAutoObservable, observable} from 'mobx';
 import Webex from 'webex';
 import {
-  AgentLogin,
   IContactCenter,
   Profile,
   Team,
   WithWebex,
+  IdleCode,
   InitParams,
   IStore
 } from './store.types';
@@ -14,6 +14,8 @@ class Store implements IStore {
   teams: Team[] = [];
   loginOptions: string[] = [];
   cc: IContactCenter;
+  idleCodes: IdleCode[] = [];
+  agentId: string = '';
 
   constructor() {
     makeAutoObservable(this, {cc: observable.ref});
@@ -24,6 +26,8 @@ class Store implements IStore {
     return this.cc.register().then((response: Profile) => {
       this.teams = response.teams;
       this.loginOptions = response.loginVoiceOptions;
+      this.idleCodes = response.idleCodes;
+      this.agentId = response.agentId;
     }).catch((error) => {
       console.error('Error registering contact center', error);
       return Promise.reject(error);

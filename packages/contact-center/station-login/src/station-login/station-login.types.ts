@@ -51,12 +51,12 @@ export interface IStationLoginProps {
   /**
    * Callback function to be invoked once the agent login is successful
    */
-  onLogin: () => void;
+  onLogin?: () => void;
 
   /**
    * Callback function to be invoked once the agent login is successful
    */
-  onLogout: () => void;
+  onLogout?: () => void;
 
   /**
    * Handler to set device type
