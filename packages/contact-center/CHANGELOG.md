@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.4](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.3...v1.28.0-ccwidgets.4) (2024-12-17)
+
+
+### Bug Fixes
+
+* **cc-widgets:** ship-all-widgets-together ([#345](https://github.com/webex/widgets/issues/345)) ([83d5a37](https://github.com/webex/widgets/commit/83d5a37ac3e4a1ab0254d9e28448268e90ce987c))
+
 # [1.28.0-ccwidgets.3](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.2...v1.28.0-ccwidgets.3) (2024-12-16)
 
 
