@@ -4,6 +4,7 @@ import {StationLogin, UserState, store} from '@webex/cc-widgets'
 function App() {
   const [isSdkReady, setIsSdkReady] = useState(false);
   const [accessToken, setAccessToken] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const webexConfig = {
       fedramp: false,
@@ -14,10 +15,12 @@ function App() {
 
   const onLogin = () => {
     console.log('Agent login has been succesful');
+    setIsLoggedIn(true);
   }
 
   const onLogout = () => {
     console.log('Agent logout has been succesful');
+    setIsLoggedIn(false);
   }
 
   return (
@@ -37,12 +40,13 @@ function App() {
           });
         }}
       >Init Widgets</button>
-      {/* write code to check if sdk is ready and load components */}
       {
         isSdkReady && (
           <>
             <StationLogin  onLogin={onLogin} onLogout={onLogout} />
-            <UserState />
+            {
+              isLoggedIn && <UserState />
+            }
           </>
         )
       }

@@ -11,10 +11,19 @@ interface WithWebexConfig {
   
 type InitParams = WithWebex | WithWebexConfig;
 
+type IdleCode = {
+    name: string;
+    id: string;
+    isSystem: boolean;
+    isDefault: boolean;
+}
+
 interface IStore {
     teams: Team[];
     loginOptions: string[];
     cc: IContactCenter;
+    idleCodes: IdleCode[];
+    agentId: string;
   
     registerCC(webex: WithWebex['webex']): Promise<Profile>;
     init(params: InitParams): Promise<void>;
@@ -26,6 +35,7 @@ export type {
     Team,
     AgentLogin,
     WithWebex,
+    IdleCode,
     InitParams,
     IStore
 }

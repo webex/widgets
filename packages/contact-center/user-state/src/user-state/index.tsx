@@ -4,13 +4,15 @@ import {observer} from 'mobx-react';
 
 import {useUserState} from '../helper';
 import UserStatePresentational from './user-state.presentational';
+import {IUserState} from './use-state.types';
 
 const UserState: React.FunctionComponent = observer(() => {
-  const {} = store;
-  const result = useUserState();
-  const props = {
-    ...result,
-  };
+  const {cc, idleCodes, agentId} = store;
+  const props: IUserState = useUserState({
+    idleCodes,
+    agentId,
+    cc
+  });
 
   return <UserStatePresentational {...props} />;
 });
