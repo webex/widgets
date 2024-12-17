@@ -1,3 +1,3 @@
-import {UserState, WebUserState} from './user-state/index';
+import {UserState} from './user-state/index';
 
-export {UserState, WebUserState};
+export {UserState};
