@@ -3,9 +3,11 @@
     "compilerOptions": {
         "outDir": "./dist",
         "declaration": false,
-        "declarationDir": null
+        "declarationDir": null,
+        "moduleResolution": "NodeNext",
+        "module": "NodeNext"
     },
     "include": [
         "./src"
-    ]
+    ],
 }
