@@ -1,0 +1,146 @@
+import React from 'react';
+import {IncomingTaskPresentationalProps} from '../task.types';
+
+const IncomingTaskPresentational: React.FunctionComponent<IncomingTaskPresentationalProps> = (props) => {
+  const {currentTask, accept, decline, isBrowser, answered, ended, missed} = props;
+
+  if (!currentTask) {
+    return <></>; // hidden component
+  }
+
+  const callAssociationDetails = props.currentTask.data.interaction.callAssociatedDetails;
+  const {ani, dn, virtualTeamName} = callAssociationDetails;
+  const timeElapsed = ''; // TODO: Calculate time elapsed
+
+  return (
+    <div
+      data-testid="incoming-task-presentational"
+      style={{
+        border: '1px solid #ccc',
+        borderRadius: '8px',
+        padding: '16px',
+        width: '350px',
+        boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.2)',
+        fontFamily: 'Arial, sans-serif',
+        backgroundColor: '#ffffff',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      {/* Top Section - Call Info with Phone Icon */}
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
+        <div style={{display: 'flex', alignItems: 'center'}}>
+          <span
+            style={{
+              display: 'inline-block',
+              backgroundColor: '#d4f8e8',
+              borderRadius: '50%',
+              width: '40px',
+              height: '40px',
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginRight: '10px',
+            }}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{width: '24px', height: '24px', color: '#146f5c'}}
+            >
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.86 19.86 0 0 1-8.63-2.73 19.5 19.5 0 0 1-6-6A19.86 19.86 0 0 1 3.08 4.18 2 2 0 0 1 5 2h3a2 2 0 0 1 2 1.72c.2 1.52.71 2.94 1.41 4.24a2 2 0 0 1-.45 2.31L9.91 11a16 16 0 0 0 6 6l1.73-1.05a2 2 0 0 1 2.31-.45 16.11 16.11 0 0 0 4.24 1.41A2 2 0 0 1 22 16.92z"></path>
+            </svg>
+          </span>
+          <div>
+            <h2 style={{margin: '0', fontSize: '1.2em', color: '#333'}}>Incoming Call</h2>
+            <p
+              data-testid="incoming-task-ani"
+              style={{
+                fontSize: '1.1em',
+                fontWeight: 'bold',
+                margin: '4px 0',
+                color: '#146f5c',
+              }}
+            >
+              {ani}
+            </p>
+          </div>
+        </div>
+
+        {/* Buttons or Ringing Section */}
+        {isBrowser && (
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-end', // Align buttons to the right
+              marginLeft: '16px', // Space between call info and buttons
+            }}
+          >
+            <button
+              style={{
+                padding: '8px 16px',
+                border: 'none',
+                borderRadius: '6px',
+                fontSize: '0.9em',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                backgroundColor: '#28a745',
+                color: '#fff',
+                marginBottom: '8px', // Add space between buttons
+              }}
+              onClick={accept}
+            >
+              Answer
+            </button>
+            <button
+              style={{
+                padding: '8px 16px',
+                border: 'none',
+                borderRadius: '6px',
+                fontSize: '0.9em',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                backgroundColor: '#dc3545',
+                color: '#fff',
+              }}
+              onClick={decline}
+            >
+              Decline
+            </button>
+          </div>
+        )}
+      </div>
+      <audio id="remote-audio"></audio>
+      {/* Queue and Timer Info */}
+      <p style={{fontSize: '0.9em', color: '#666', marginTop: '8px'}}>
+        {virtualTeamName} - <span style={{color: '#28a745', fontWeight: 'bold'}}>{timeElapsed}</span>
+      </p>
+
+      {/* Call Details Section */}
+      <div style={{marginTop: '16px', fontSize: '0.9em', color: '#333'}}>
+        <p style={{margin: '4px 0'}}>
+          <strong style={{color: '#555'}}>Phone Number:</strong> {ani}
+        </p>
+        <p style={{margin: '4px 0'}}>
+          <strong style={{color: '#555'}}>DNIS:</strong> {dn}
+        </p>
+        <p style={{margin: '4px 0'}}>
+          <strong style={{color: '#555'}}>Queue Name:</strong> {virtualTeamName}
+        </p>
+      </div>
+    </div>
+  );
+};
+
+export default IncomingTaskPresentational;

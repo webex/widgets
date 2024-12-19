@@ -2,8 +2,11 @@ import r2wc from '@r2wc/react-to-web-component';
 import {StationLogin} from '@webex/cc-station-login';
 import {UserState} from '@webex/cc-user-state';
 import store from '@webex/cc-store';
+import {TaskList, IncomingTask} from '@webex/cc-task';
 
 const WebUserState = r2wc(UserState);
+const WebIncomingTask = r2wc(IncomingTask);
+const WebTaskList = r2wc(TaskList);
 
 const WebStationLogin = r2wc(StationLogin, {
   props: {
@@ -20,4 +23,11 @@ if (!customElements.get('widget-cc-station-login')) {
   customElements.define('widget-cc-station-login', WebStationLogin);
 }
 
+if (!customElements.get('widget-cc-incoming-task')) {
+  customElements.define('widget-cc-incoming-task', WebIncomingTask);
+}
+
+if (!customElements.get('widget-cc-task-list')) {
+  customElements.define('widget-cc-task-list', WebTaskList);
+}
 export {store};
