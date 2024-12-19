@@ -18,7 +18,7 @@ export interface IStationLoginProps {
    */
   teams: Team[];
 
-   /**
+  /**
    * Station login options available for the agent
    */
   loginOptions: string[];
@@ -43,7 +43,7 @@ export interface IStationLoginProps {
    */
   loginFailure?: Error;
 
-    /**
+  /**
    * Response data received on agent login success
    */
   logoutSuccess?: StationLogoutSuccess;
@@ -72,9 +72,43 @@ export interface IStationLoginProps {
    * Handler to set the selected agent team
    */
   setTeam: (team: string) => void;
+
+  userRole: any;
+  // selectedUserRole: any;
+  // callMonitoringEnabled: boolean;
+  // defaultTeam: string;
+  // extensions: any;
+  // defaultDn: any;
+  // forceDefaultDnChecked: boolean;
+  // dialNumbers: any;
+  // extensionErrors: any;
+  // dialNumberErrors: any;
 }
 
-export type StationLoginPresentationalProps = Pick<IStationLoginProps, 'name' | 'teams' | 'loginOptions' | 'login' | 'logout' | 'loginSuccess' | 'loginFailure' | 'logoutSuccess' | 'setDeviceType' | 'setDialNumber' | 'setTeam'>;
+export type StationLoginPresentationalProps = Pick<
+  IStationLoginProps,
+  | 'name'
+  | 'teams'
+  | 'loginOptions'
+  | 'login'
+  | 'logout'
+  | 'loginSuccess'
+  | 'loginFailure'
+  | 'logoutSuccess'
+  | 'setDeviceType'
+  | 'setDialNumber'
+  | 'setTeam'
+  | 'userRole'
+  // | 'selectedUserRole'
+  // | 'callMonitoringEnabled'
+  // | 'defaultTeam'
+  // | 'extensions'
+  // | 'defaultDn'
+  // | 'forceDefaultDnChecked'
+  // | 'dialNumbers'
+  // | 'extensionErrors'
+  // | 'dialNumberErrors'
+>;
 
 export type UseStationLoginProps = Pick<IStationLoginProps, 'cc' | 'onLogin' | 'onLogout'>;
 
