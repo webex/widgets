@@ -1,4 +1,5 @@
 import {useState, useEffect} from "react";
+// TODO: Export & Import this AGENT_STATE_CHANGE constant from SDK
 import { AGENT_STATE_CHANGE } from './constants';
 
 export const useUserState = ({idleCodes, agentId, cc}) => {
