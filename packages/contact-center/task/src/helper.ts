@@ -64,26 +64,22 @@ export const useIncomingTask = (props: UseTaskProps) => {
   }, []);
 
   const handleTaskEnded = useCallback(() => {
-    console.log('Ravi task ended');
     setIsEnded(true);
     setCurrentTask(null);
   }, []);
 
   const handleTaskMissed = useCallback(() => {
-    console.log('Ravi task missed');
     setIsMissed(true);
     setCurrentTask(null);
   }, []);
 
   const handleTaskMedia = useCallback((track) => {
-    console.log('Ravi task media');
     if (audioRef.current) {
       audioRef.current.srcObject = new MediaStream([track]);
     }
   }, []);
 
   const handleIncomingTask = useCallback((task: ITask) => {
-    console.log('Ravi incoming task');
     setCurrentTask(task);
   }, []);
 
