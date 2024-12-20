@@ -7,34 +7,45 @@ export const useTaskList = (props: UseTaskListProps) => {
   const {cc} = props;
   const [taskList, setTaskList] = useState<ITask[]>([]);
 
-  const handleIncomingTask = useCallback((task: ITask) => {
+  const handleTaskRemoved = useCallback((taskId: string) => {
     setTaskList((prev) => {
-      if (prev.some((t) => t.data.interactionId === task.data.interactionId)) {
-        return prev;
+      const taskToRemove = prev.find((task) => task.data.interactionId === taskId);
+
+      if (taskToRemove) {
+        // Clean up listeners on the task
+        taskToRemove.off(TASK_EVENTS.TASK_END, () => handleTaskRemoved(taskId));
+        taskToRemove.off(TASK_EVENTS.TASK_UNASSIGNED, () => handleTaskRemoved(taskId));
       }
-      return [...prev, task];
+
+      return prev.filter((task) => task.data.interactionId !== taskId);
     });
   }, []);
 
-  const handleTaskEnded = useCallback((taskId: string) => {
-    setTaskList((prev) => prev.filter((task) => task.data.interactionId !== taskId));
-  }, []);
+  const handleIncomingTask = useCallback(
+    (task: ITask) => {
+      setTaskList((prev) => {
+        if (prev.some((t) => t.data.interactionId === task.data.interactionId)) {
+          return prev;
+        }
 
-  const handleTaskMissed = useCallback((taskId: string) => {
-    setTaskList((prev) => prev.filter((task) => task.data.interactionId !== taskId));
-  }, []);
+        // Attach event listeners to the task
+        task.on(TASK_EVENTS.TASK_END, () => handleTaskRemoved(task.data.interactionId));
+        task.on(TASK_EVENTS.TASK_UNASSIGNED, () => handleTaskRemoved(task.data.interactionId));
+
+        return [...prev, task];
+      });
+    },
+    [handleTaskRemoved] // Include handleTaskRemoved as a dependency
+  );
 
   useEffect(() => {
+    // Listen for incoming tasks globally
     cc.on(TASK_EVENTS.TASK_INCOMING, handleIncomingTask);
-    cc.on(TASK_EVENTS.TASK_END, (task: ITask) => handleTaskEnded(task.data.interactionId));
-    cc.on(TASK_EVENTS.TASK_UNASSIGNED, (task: ITask) => handleTaskMissed(task.data.interactionId));
 
     return () => {
       cc.off(TASK_EVENTS.TASK_INCOMING, handleIncomingTask);
-      cc.off(TASK_EVENTS.TASK_END, (task: ITask) => handleTaskEnded(task.data.interactionId));
-      cc.off(TASK_EVENTS.TASK_UNASSIGNED, (task: ITask) => handleTaskMissed(task.data.interactionId));
     };
-  }, [cc, handleIncomingTask, handleTaskEnded, handleTaskMissed]);
+  }, [cc, handleIncomingTask]);
 
   return {taskList};
 };
@@ -53,22 +64,26 @@ export const useIncomingTask = (props: UseTaskProps) => {
   }, []);
 
   const handleTaskEnded = useCallback(() => {
+    console.log('Ravi task ended');
     setIsEnded(true);
     setCurrentTask(null);
   }, []);
 
   const handleTaskMissed = useCallback(() => {
+    console.log('Ravi task missed');
     setIsMissed(true);
     setCurrentTask(null);
   }, []);
 
   const handleTaskMedia = useCallback((track) => {
+    console.log('Ravi task media');
     if (audioRef.current) {
       audioRef.current.srcObject = new MediaStream([track]);
     }
   }, []);
 
   const handleIncomingTask = useCallback((task: ITask) => {
+    console.log('Ravi incoming task');
     setCurrentTask(task);
   }, []);
 
