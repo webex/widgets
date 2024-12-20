@@ -14,6 +14,10 @@ class Store implements IStore {
     makeAutoObservable(this, {cc: observable.ref});
   }
 
+  setSelectedLoginOption(option: string): void {
+    this.selectedLoginOption = option;
+  }
+
   registerCC(webex: WithWebex['webex']): Promise<void> {
     this.cc = webex.cc;
     return this.cc

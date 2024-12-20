@@ -6,12 +6,10 @@ import {ITask} from '@webex/plugin-cc';
 export const useTaskList = (props: UseTaskListProps) => {
   const {cc} = props;
   const [taskList, setTaskList] = useState<ITask[]>([]);
-  const isEventRegistered = useRef(false); // Ensure the event is registered only once
 
   const handleIncomingTask = useCallback((task: ITask) => {
     setTaskList((prev) => {
-      // Prevent duplicate tasks
-      if (prev.some((t) => t.data.interaction.interactionId === task.data.interaction.interactionId)) {
+      if (prev.some((t) => t.data.interactionId === task.data.interactionId)) {
         return prev;
       }
       return [...prev, task];
@@ -19,26 +17,22 @@ export const useTaskList = (props: UseTaskListProps) => {
   }, []);
 
   const handleTaskEnded = useCallback((taskId: string) => {
-    setTaskList((prev) => prev.filter((task) => task.data.interaction.interactionId !== taskId));
+    setTaskList((prev) => prev.filter((task) => task.data.interactionId !== taskId));
   }, []);
 
   const handleTaskMissed = useCallback((taskId: string) => {
-    setTaskList((prev) => prev.filter((task) => task.data.interaction.interactionId !== taskId));
+    setTaskList((prev) => prev.filter((task) => task.data.interactionId !== taskId));
   }, []);
 
   useEffect(() => {
-    if (!isEventRegistered.current) {
-      cc.on(TASK_EVENTS.TASK_INCOMING, handleIncomingTask);
-      cc.on(TASK_EVENTS.TASK_END, (task: ITask) => handleTaskEnded(task.data.interaction.interactionId));
-      cc.on(TASK_EVENTS.TASK_UNASSIGNED, (task: ITask) => handleTaskMissed(task.data.interaction.interactionId));
-      isEventRegistered.current = true;
-    }
+    cc.on(TASK_EVENTS.TASK_INCOMING, handleIncomingTask);
+    cc.on(TASK_EVENTS.TASK_END, (task: ITask) => handleTaskEnded(task.data.interactionId));
+    cc.on(TASK_EVENTS.TASK_UNASSIGNED, (task: ITask) => handleTaskMissed(task.data.interactionId));
 
     return () => {
       cc.off(TASK_EVENTS.TASK_INCOMING, handleIncomingTask);
-      cc.off(TASK_EVENTS.TASK_END, (task: ITask) => handleTaskEnded(task.data.interaction.interactionId));
-      cc.off(TASK_EVENTS.TASK_UNASSIGNED, (task: ITask) => handleTaskMissed(task.data.interaction.interactionId));
-      isEventRegistered.current = false;
+      cc.off(TASK_EVENTS.TASK_END, (task: ITask) => handleTaskEnded(task.data.interactionId));
+      cc.off(TASK_EVENTS.TASK_UNASSIGNED, (task: ITask) => handleTaskMissed(task.data.interactionId));
     };
   }, [cc, handleIncomingTask, handleTaskEnded, handleTaskMissed]);
 
@@ -49,28 +43,29 @@ export const useTaskList = (props: UseTaskListProps) => {
 export const useIncomingTask = (props: UseTaskProps) => {
   const {cc, onAccepted, onDeclined, selectedLoginOption} = props;
   const [currentTask, setCurrentTask] = useState<ITask | null>(null);
-  const [answered, setAnswered] = useState(false);
-  const [ended, setEnded] = useState(false);
-  const [missed, setMissed] = useState(false);
-  const isEventRegistered = useRef(false); // Ensure task events are registered only once
+  const [isAnswered, setIsAnswered] = useState(false);
+  const [isEnded, setIsEnded] = useState(false);
+  const [isMissed, setIsMissed] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null); // Ref for the audio element
 
   const handleTaskAssigned = useCallback(() => {
-    setAnswered(true);
+    setIsAnswered(true);
   }, []);
 
   const handleTaskEnded = useCallback(() => {
-    setEnded(true);
+    setIsEnded(true);
     setCurrentTask(null);
   }, []);
 
   const handleTaskMissed = useCallback(() => {
-    setMissed(true);
+    setIsMissed(true);
     setCurrentTask(null);
   }, []);
 
   const handleTaskMedia = useCallback((track) => {
-    // @ts-ignore
-    document.getElementById('remote-audio').srcObject = new MediaStream([track]);
+    if (audioRef.current) {
+      audioRef.current.srcObject = new MediaStream([track]);
+    }
   }, []);
 
   const handleIncomingTask = useCallback((task: ITask) => {
@@ -78,10 +73,7 @@ export const useIncomingTask = (props: UseTaskProps) => {
   }, []);
 
   useEffect(() => {
-    if (!isEventRegistered.current) {
-      cc.on(TASK_EVENTS.TASK_INCOMING, handleIncomingTask);
-      isEventRegistered.current = true;
-    }
+    cc.on(TASK_EVENTS.TASK_INCOMING, handleIncomingTask);
 
     if (currentTask) {
       currentTask.on(TASK_EVENTS.TASK_ASSIGNED, handleTaskAssigned);
@@ -98,7 +90,6 @@ export const useIncomingTask = (props: UseTaskProps) => {
         currentTask.off(TASK_EVENTS.TASK_UNASSIGNED, handleTaskMissed);
         currentTask.off(TASK_EVENTS.TASK_MEDIA, handleTaskMedia);
       }
-      isEventRegistered.current = false;
     };
   }, [cc, currentTask, handleIncomingTask, handleTaskAssigned, handleTaskEnded, handleTaskMissed, handleTaskMedia]);
 
@@ -108,10 +99,12 @@ export const useIncomingTask = (props: UseTaskProps) => {
 
     currentTask
       .accept(taskId)
-      .then((res) => {
+      .then(() => {
         onAccepted && onAccepted();
       })
-      .catch((error: Error) => {});
+      .catch((error: Error) => {
+        console.error(error);
+      });
   };
 
   const decline = () => {
@@ -120,11 +113,13 @@ export const useIncomingTask = (props: UseTaskProps) => {
 
     currentTask
       .decline(taskId)
-      .then((res) => {
+      .then(() => {
         setCurrentTask(null);
         onDeclined && onDeclined();
       })
-      .catch((error: Error) => {});
+      .catch((error: Error) => {
+        console.error(error);
+      });
   };
 
   const isBrowser = selectedLoginOption === 'BROWSER';
@@ -132,11 +127,12 @@ export const useIncomingTask = (props: UseTaskProps) => {
   return {
     currentTask,
     setCurrentTask,
-    answered,
-    ended,
-    missed,
+    isAnswered,
+    isEnded,
+    isMissed,
     accept,
     decline,
     isBrowser,
+    audioRef,
   };
 };

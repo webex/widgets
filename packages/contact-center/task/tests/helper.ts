@@ -32,12 +32,12 @@ describe('useIncomingTask Hook', () => {
 
     // Simulate an incoming task
     act(() => {
-      ccMock.on.mock.calls[0][1](taskMock); // Trigger TASK_INCOMING event
+      ccMock.on.mock.calls[0][1](taskMock); // Trigger task:incoming event
     });
 
     waitFor(() => {
       expect(result.current.currentTask).toBe(taskMock);
-      expect(ccMock.on).toHaveBeenCalledWith('TASK_INCOMING', expect.any(Function));
+      expect(ccMock.on).toHaveBeenCalledWith('task:incoming', expect.any(Function));
     });
   });
 
@@ -48,7 +48,7 @@ describe('useIncomingTask Hook', () => {
 
     // Simulate an incoming task
     act(() => {
-      ccMock.on.mock.calls[0][1](taskMock); // Trigger TASK_INCOMING event
+      ccMock.on.mock.calls[0][1](taskMock); // Trigger task:incoming event
     });
 
     waitFor(() => {
@@ -66,7 +66,7 @@ describe('useIncomingTask Hook', () => {
 
     // Simulate an incoming task
     act(() => {
-      ccMock.on.mock.calls[0][1](taskMock); // Trigger TASK_INCOMING event
+      ccMock.on.mock.calls[0][1](taskMock); // Trigger task:incoming event
     });
 
     // Simulate unmount
@@ -140,8 +140,8 @@ describe('useIncomingTask Hook', () => {
     });
 
     waitFor(() => {
-      expect(result.current.missed).toBe(false);
-      expect(result.current.ended).toBe(false);
+      expect(result.current.isMissed).toBe(false);
+      expect(result.current.isEnded).toBe(false);
     });
   });
 });
@@ -173,8 +173,8 @@ describe('useTaskList Hook', () => {
     const task2 = {...taskMock, id: 'task2'};
 
     act(() => {
-      ccMock.on.mock.calls[0][1](task1); // Trigger TASK_INCOMING for task1
-      ccMock.on.mock.calls[0][1](task2); // Trigger TASK_INCOMING for task2
+      ccMock.on.mock.calls[0][1](task1); // Trigger task:incoming for task1
+      ccMock.on.mock.calls[0][1](task2); // Trigger task:incoming for task2
     });
 
     waitFor(() => {
@@ -197,7 +197,7 @@ describe('useTaskList Hook', () => {
   it('should not register event multiple times', async () => {
     const {result} = renderHook(() => useTaskList({cc: ccMock}));
 
-    // Trigger TASK_INCOMING event once
+    // Trigger task:incoming event once
     act(() => {
       ccMock.on.mock.calls[0][1](taskMock);
     });

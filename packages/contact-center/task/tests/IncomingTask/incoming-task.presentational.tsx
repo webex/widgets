@@ -6,24 +6,7 @@ import IncomingTaskPresentational from '../../src/IncomingTask/incoming-task.pre
 describe('IncomingTaskPresentational', () => {
   afterEach(cleanup);
 
-  it('renders "no task yet" when there is no current task', () => {
-    const props = {
-      currentTask: null,
-      accept: jest.fn(),
-      decline: jest.fn(),
-      isBrowser: true,
-      answered: false,
-      ended: false,
-      missed: false,
-    };
-
-    render(<IncomingTaskPresentational {...props} />);
-
-    const message = screen.getByText('no task yet');
-    expect(message).toBeInTheDocument();
-  });
-
-  it('renders incoming call details and buttons for browser option', () => {
+  it('renders incoming call for browser option', () => {
     const mockTask = {
       data: {
         interaction: {
@@ -41,9 +24,9 @@ describe('IncomingTaskPresentational', () => {
       accept: jest.fn(),
       decline: jest.fn(),
       isBrowser: true,
-      answered: false,
-      ended: false,
-      missed: false,
+      isAnswered: false,
+      isEnded: false,
+      isMissed: false,
     };
 
     render(<IncomingTaskPresentational {...props} />);

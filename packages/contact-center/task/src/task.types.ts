@@ -5,12 +5,12 @@ import {ITask, IContactCenter} from '@webex/plugin-cc';
  */
 export interface TaskProps {
   /**
-   * The name of the user.
+   * currentTask of the agent.
    */
   currentTask: ITask;
 
   /**
-   * Webex instance.
+   * CC SDK Instance.
    */
   cc: IContactCenter;
 
@@ -42,17 +42,17 @@ export interface TaskProps {
   /**
    * Flag to determine if the task is answered
    */
-  answered: boolean;
+  isAnswered: boolean;
 
   /**
    * Flag to determine if the task is ended
    */
-  ended: boolean;
+  isEnded: boolean;
 
   /**
    * Flag to determine if the task is missed
    */
-  missed: boolean;
+  isMissed: boolean;
 
   /**
    * Selected login option
@@ -63,13 +63,18 @@ export interface TaskProps {
    * List of tasks
    */
   taskList: ITask[];
+
+  /**
+   * Audio reference
+   */
+  audioRef: React.RefObject<HTMLAudioElement>;
 }
 
 export type UseTaskProps = Pick<TaskProps, 'cc' | 'onAccepted' | 'onDeclined' | 'selectedLoginOption'>;
 export type UseTaskListProps = Pick<TaskProps, 'cc'>;
 export type IncomingTaskPresentationalProps = Pick<
   TaskProps,
-  'currentTask' | 'isBrowser' | 'answered' | 'ended' | 'missed' | 'accept' | 'decline'
+  'currentTask' | 'isBrowser' | 'isAnswered' | 'isEnded' | 'isMissed' | 'accept' | 'decline' | 'audioRef'
 >;
 export type TaskListPresentationalProps = Pick<TaskProps, 'taskList'>;
 export enum TASK_EVENTS {
@@ -86,4 +91,4 @@ export enum TASK_EVENTS {
   TASK_RESUME = 'task:resume',
   TASK_END = 'task:end',
   TASK_WRAPUP = 'task:wrapup',
-}
+} // TODO: remove this once cc sdk exports this enum

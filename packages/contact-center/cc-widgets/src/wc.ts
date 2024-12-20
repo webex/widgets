@@ -5,7 +5,13 @@ import store from '@webex/cc-store';
 import {TaskList, IncomingTask} from '@webex/cc-task';
 
 const WebUserState = r2wc(UserState);
-const WebIncomingTask = r2wc(IncomingTask);
+const WebIncomingTask = r2wc(IncomingTask, {
+  props: {
+    onAccepted: 'function',
+    onDeclined: 'function',
+  },
+});
+
 const WebTaskList = r2wc(TaskList);
 
 const WebStationLogin = r2wc(StationLogin, {

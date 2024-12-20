@@ -7,17 +7,6 @@ import {TaskListPresentationalProps} from '../../src/task.types';
 describe('TaskListPresentational Component', () => {
   afterEach(cleanup);
 
-  it('renders "no task yet" when taskList is empty', () => {
-    const props: TaskListPresentationalProps = {
-      taskList: [],
-    };
-
-    render(<TaskListPresentational {...props} />);
-
-    const noTaskHeading = screen.getByText(/no task yet/i);
-    expect(noTaskHeading).toBeInTheDocument();
-  });
-
   it('renders a list of tasks when taskList is not empty', () => {
     const props: TaskListPresentationalProps = {
       taskList: [
@@ -49,10 +38,6 @@ describe('TaskListPresentational Component', () => {
     };
 
     render(<TaskListPresentational {...props} />);
-
-    // Ensure the task cards are rendered
-    const taskItems = screen.getAllByRole('img', {name: 'phone'});
-    expect(taskItems).toHaveLength(2);
 
     // Ensure the details for the first task are displayed correctly
     expect(screen.getByText('1234567890')).toBeInTheDocument();

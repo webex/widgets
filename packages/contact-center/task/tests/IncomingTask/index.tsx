@@ -1,8 +1,8 @@
 import React from 'react';
 import {render, screen} from '@testing-library/react';
-import * as helper from '../../src/helper'; // Import the helper where useIncomingTask is defined
+import * as helper from '../../src/helper';
 import {IncomingTask} from '../../src';
-import store from '@webex/cc-store'; // Mock the store
+import store from '@webex/cc-store';
 import '@testing-library/jest-dom';
 
 // Mock the store
