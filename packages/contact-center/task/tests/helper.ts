@@ -1,5 +1,6 @@
 import {renderHook, act, waitFor} from '@testing-library/react';
 import {useIncomingTask, useTaskList} from '../src/helper';
+import {TASK_EVENTS} from '../src/task.types';
 
 // Mock webex instance and task
 const ccMock = {
@@ -32,12 +33,12 @@ describe('useIncomingTask Hook', () => {
 
     // Simulate an incoming task
     act(() => {
-      ccMock.on.mock.calls[0][1](taskMock); // Trigger task:incoming event
+      ccMock.on.mock.calls[0][1](taskMock); // Trigger TASK_EVENTS.TASK_INCOMING event
     });
 
     waitFor(() => {
       expect(result.current.currentTask).toBe(taskMock);
-      expect(ccMock.on).toHaveBeenCalledWith('task:incoming', expect.any(Function));
+      expect(ccMock.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_INCOMING, expect.any(Function));
     });
   });
 
@@ -48,14 +49,14 @@ describe('useIncomingTask Hook', () => {
 
     // Simulate an incoming task
     act(() => {
-      ccMock.on.mock.calls[0][1](taskMock); // Trigger task:incoming event
+      ccMock.on.mock.calls[0][1](taskMock); // Trigger TASK_EVENTS.TASK_INCOMING event
     });
 
     waitFor(() => {
-      expect(taskMock.on).toHaveBeenCalledWith('TASK_ASSIGNED', expect.any(Function));
-      expect(taskMock.on).toHaveBeenCalledWith('TASK_END', expect.any(Function));
-      expect(taskMock.on).toHaveBeenCalledWith('TASK_UNASSIGNED', expect.any(Function));
-      expect(taskMock.on).toHaveBeenCalledWith('TASK_MEDIA', expect.any(Function));
+      expect(taskMock.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function));
+      expect(taskMock.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));
+      expect(taskMock.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_UNASSIGNED, expect.any(Function));
+      expect(taskMock.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_MEDIA, expect.any(Function));
     });
   });
 
@@ -66,18 +67,18 @@ describe('useIncomingTask Hook', () => {
 
     // Simulate an incoming task
     act(() => {
-      ccMock.on.mock.calls[0][1](taskMock); // Trigger task:incoming event
+      ccMock.on.mock.calls[0][1](taskMock); // Trigger TASK_EVENTS.TASK_INCOMING event
     });
 
     // Simulate unmount
     unmount();
 
     waitFor(() => {
-      expect(taskMock.off).toHaveBeenCalledWith('TASK_ASSIGNED', expect.any(Function));
-      expect(taskMock.off).toHaveBeenCalledWith('TASK_END', expect.any(Function));
-      expect(taskMock.off).toHaveBeenCalledWith('TASK_UNASSIGNED', expect.any(Function));
-      expect(taskMock.off).toHaveBeenCalledWith('TASK_MEDIA', expect.any(Function));
-      expect(ccMock.off).toHaveBeenCalledWith('TASK_INCOMING', expect.any(Function));
+      expect(taskMock.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function));
+      expect(taskMock.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));
+      expect(taskMock.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_UNASSIGNED, expect.any(Function));
+      expect(taskMock.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_MEDIA, expect.any(Function));
+      expect(ccMock.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_INCOMING, expect.any(Function));
     });
   });
 
@@ -88,7 +89,7 @@ describe('useIncomingTask Hook', () => {
 
     // Simulate an incoming task
     act(() => {
-      ccMock.on.mock.calls[0][1](taskMock); // Trigger TASK_INCOMING event
+      ccMock.on.mock.calls[0][1](taskMock); // Trigger TASK_EVENTS.TASK_INCOMING event
     });
 
     // Accept the task
@@ -109,7 +110,7 @@ describe('useIncomingTask Hook', () => {
 
     // Simulate an incoming task
     act(() => {
-      ccMock.on.mock.calls[0][1](taskMock); // Trigger TASK_INCOMING event
+      ccMock.on.mock.calls[0][1](taskMock); // Trigger TASK_EVENTS.TASK_INCOMING event
     });
 
     // Decline the task
@@ -131,12 +132,12 @@ describe('useIncomingTask Hook', () => {
 
     // Simulate an incoming task
     act(() => {
-      ccMock.on.mock.calls[0][1](taskMock); // Trigger TASK_INCOMING event
+      ccMock.on.mock.calls[0][1](taskMock); // Trigger TASK_EVENTS.TASK_INCOMING event
     });
 
     // Simulate task media event
     act(() => {
-      taskMock.on.mock.calls.find((call) => call[0] === 'task:media')[1](taskMediaMock);
+      taskMock.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_MEDIA)[1](taskMediaMock);
     });
 
     waitFor(() => {
@@ -151,17 +152,17 @@ describe('useTaskList Hook', () => {
     jest.clearAllMocks();
   });
 
-  it('should register task:incoming event and add task to the list', async () => {
+  it('should register TASK_EVENTS.TASK_INCOMING event and add task to the list', async () => {
     const {result} = renderHook(() => useTaskList({cc: ccMock}));
 
     // Simulate the incoming task event
     act(() => {
-      ccMock.on.mock.calls[0][1](taskMock); // Trigger TASK_INCOMING event
+      ccMock.on.mock.calls[0][1](taskMock); // Trigger TASK_EVENTS.TASK_INCOMING event
     });
 
     waitFor(() => {
       expect(result.current.taskList).toContain(taskMock);
-      expect(ccMock.on).toHaveBeenCalledWith('task:incoming', expect.any(Function));
+      expect(ccMock.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_INCOMING, expect.any(Function));
     });
   });
 
@@ -173,31 +174,31 @@ describe('useTaskList Hook', () => {
     const task2 = {...taskMock, id: 'task2'};
 
     act(() => {
-      ccMock.on.mock.calls[0][1](task1); // Trigger task:incoming for task1
-      ccMock.on.mock.calls[0][1](task2); // Trigger task:incoming for task2
+      ccMock.on.mock.calls[0][1](task1); // Trigger TASK_EVENTS.TASK_INCOMING for task1
+      ccMock.on.mock.calls[0][1](task2); // Trigger TASK_EVENTS.TASK_INCOMING for task2
     });
 
     waitFor(() => {
       expect(result.current.taskList).toEqual([task1, task2]);
-      expect(ccMock.on).toHaveBeenCalledWith('task:incoming', expect.any(Function));
+      expect(ccMock.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_INCOMING, expect.any(Function));
     });
   });
 
-  it('should clean up task:incoming event on unmount', async () => {
+  it('should clean up TASK_EVENTS.TASK_INCOMING event on unmount', async () => {
     const {unmount} = renderHook(() => useTaskList({cc: ccMock}));
 
     // Simulate unmount
     unmount();
 
     waitFor(() => {
-      expect(ccMock.off).toHaveBeenCalledWith('task:incoming', expect.any(Function));
+      expect(ccMock.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_INCOMING, expect.any(Function));
     });
   });
 
   it('should not register event multiple times', async () => {
     const {result} = renderHook(() => useTaskList({cc: ccMock}));
 
-    // Trigger task:incoming event once
+    // Trigger TASK_EVENTS.TASK_INCOMING event once
     act(() => {
       ccMock.on.mock.calls[0][1](taskMock);
     });
