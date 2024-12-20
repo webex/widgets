@@ -53,5 +53,8 @@
       "**/tests/**/*.tsx"
     ]
   },
-  "stableVersion": "1.28.0-ccwidgets.1"
+  "stableVersion": "1.28.0-ccwidgets.1",
+  "resolutions": {
+    "mobx": "^6.13.5"
+  }
 }

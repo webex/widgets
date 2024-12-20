@@ -1,14 +1,6 @@
 import {makeAutoObservable, observable} from 'mobx';
 import Webex from 'webex';
-import {
-  AgentLogin,
-  IContactCenter,
-  Profile,
-  Team,
-  WithWebex,
-  InitParams,
-  IStore
-} from './store.types';
+import {AgentLogin, IContactCenter, Profile, Team, WithWebex, InitParams, IStore} from './store.types';
 
 class Store implements IStore {
   teams: Team[] = [];
@@ -21,23 +13,25 @@ class Store implements IStore {
 
   registerCC(webex: WithWebex['webex']): Promise<void> {
     this.cc = webex.cc;
-    return this.cc.register().then((response: Profile) => {
-      this.teams = response.teams;
-      this.loginOptions = response.loginVoiceOptions;
-    }).catch((error) => {
-      console.error('Error registering contact center', error);
-      return Promise.reject(error);
-    });
+    return this.cc
+      .register()
+      .then((response: Profile) => {
+        this.teams = response.teams;
+        this.loginOptions = response.loginVoiceOptions;
+      })
+      .catch((error) => {
+        console.error('Error registering contact center', error);
+        return Promise.reject(error);
+      });
   }
 
   init(options: InitParams): Promise<void> {
-    if('webex' in options) {
+    if ('webex' in options) {
       // If devs decide to go with webex, they will have to listen to the ready event before calling init
-      // This has to be documented 
+      // This has to be documented
       return this.registerCC(options.webex);
     }
     return new Promise((resolve, reject) => {
-
       const timer = setTimeout(() => {
         reject(new Error('Webex SDK failed to initialize'));
       }, 6000);
@@ -45,19 +39,20 @@ class Store implements IStore {
       const webex = Webex.init({
         config: options.webexConfig,
         credentials: {
-          access_token: options.access_token
-        }
+          access_token: options.access_token,
+        },
       });
-  
+
       webex.once('ready', () => {
         clearTimeout(timer);
-        this.registerCC(webex).then(() => {
-          resolve();
-        })
-        .catch((error) => {
-          reject(error);
-        })
-      })
+        this.registerCC(webex)
+          .then(() => {
+            resolve();
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
     });
   }
 }
