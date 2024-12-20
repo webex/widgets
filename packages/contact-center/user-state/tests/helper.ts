@@ -3,7 +3,8 @@ import { useUserState } from '../src/helper';
 
 describe('useUserState Hook', () => {
   const mockCC = {
-    setAgentState: jest.fn()
+    setAgentState: jest.fn(),
+    on: jest.fn()
   };
 
   const idleCodes = [
@@ -31,6 +32,8 @@ describe('useUserState Hook', () => {
       elapsedTime: 0,
       currentState: {}
     });
+
+    expect(mockCC.on).toHaveBeenCalledWith('agent:stateChange', expect.any(Function));
   });
 
   it('should increment elapsedTime every second', () => {

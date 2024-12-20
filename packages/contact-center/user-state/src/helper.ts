@@ -1,4 +1,5 @@
 import {useState, useEffect} from "react";
+import { AGENT_STATE_CHANGE } from "./constants";
 
 export const useUserState = ({idleCodes, agentId, cc}) => {
 
@@ -14,6 +15,16 @@ export const useUserState = ({idleCodes, agentId, cc}) => {
     const timer = setInterval(() => {
       setElapsedTime(prevTime => prevTime + 1);
     }, 1000);
+
+    cc.on(AGENT_STATE_CHANGE, (data) => {
+      if (data && typeof data === 'object' && data.type === 'AgentStateChangeSuccess') {
+        const DEFAULT_CODE = '0'; // Default code when no aux code is present
+        setCurrentState({
+          id: data.auxCodeId?.trim() !== '' ? data.auxCodeId : DEFAULT_CODE
+        });
+        setElapsedTime(0);
+      }
+    });
 
     // Cleanup the timer on component unmount
     return () => clearInterval(timer);
