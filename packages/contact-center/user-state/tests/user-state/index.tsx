@@ -7,7 +7,8 @@ import '@testing-library/jest-dom';
 // Mock the store import
 jest.mock('@webex/cc-store', () => {return {
   cc: {
-    on: jest.fn()
+    on: jest.fn(),
+    off: jest.fn(),
   },
   idleCodes: [],
   agentId: 'testAgentId'
@@ -20,7 +21,8 @@ describe('UserState Component', () => {
     render(<UserState/>);
 
     expect(useUserStateSpy).toHaveBeenCalledWith({cc: {
-      on: expect.any(Function)
+      on: expect.any(Function),
+      off: expect.any(Function)
     }, idleCodes: [], agentId: 'testAgentId'});
     const heading = screen.getByTestId('user-state-title');
     expect(heading).toHaveTextContent('Agent State');
