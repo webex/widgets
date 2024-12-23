@@ -4,19 +4,23 @@ export {};
 declare global {
   namespace JSX {
     interface IntrinsicElements {
-      'uuip-wc-user-profile': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & {
-        getProfileDataTriggered: boolean;
-        userRole: string;
-        preferenceRoleName: string;
+    'uuip-wc-user-station-login': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & {
+        isModalOpen: boolean;
+        isRememberMeChecked: boolean;
+        isSubmitBusy: boolean;
+        isDesktopEmergencyNotificationEnabled: boolean;
+        isEmergencyNotificationAlreadyDisplayed: boolean;
+        userRoles: string[];
+        teams: { teamId: string; teamName: string }[];
+        defaultTeam: { teamId: string; teamName: string };
+        extensions: string[];
         isCallMonitoringEnabled: boolean;
-        teams: string[];
-        defaultTeam: any;
+        dialNumbers: string[];
+        defaultDialNumber: string;
         loginVoiceOptions: string[];
-        trackingId: string;
-        extensions: string;
-        extensionErrorCases: string;
-        defaultDn: string;
-        allowDefaultDnOverwrite: boolean;
+        preferenceRoleName: string;
+        'signout-clicked': () => void;
+        'confirm-clicked': (e: Event) => void;
       };
     }
   }
