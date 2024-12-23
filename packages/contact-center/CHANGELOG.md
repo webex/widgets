@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.5](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.4...v1.28.0-ccwidgets.5) (2024-12-23)
+
+
+### Bug Fixes
+
+* **user-state:** receive agent stateChange event ([#350](https://github.com/webex/widgets/issues/350)) ([21d6ce7](https://github.com/webex/widgets/commit/21d6ce7c6517a865bc6e4e49a5f977dc587b0e45))
+
 # [1.28.0-ccwidgets.4](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.3...v1.28.0-ccwidgets.4) (2024-12-17)
 
 
