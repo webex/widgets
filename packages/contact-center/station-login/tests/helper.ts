@@ -1,6 +1,17 @@
 import {renderHook, act, waitFor} from '@testing-library/react';
 import {useStationLogin} from '../src/helper';
 
+const teams = ['team123', 'team456'];
+
+const loginOptions = ['EXTENSION', 'AGENT_DN', 'BROWSER'];
+jest.mock('@webex/cc-store', () => {
+  return {
+    cc: {},
+    teams,
+    loginOptions,
+  };
+});
+
 // Mock webex instance
 const ccMock = {
     stationLogin: jest.fn(),
