@@ -1,6 +1,6 @@
 import {useState, useEffect} from "react";
 // TODO: Export & Import this AGENT_STATE_CHANGE constant from SDK
-import { AGENT_STATE_CHANGE } from './constants';
+import {AGENT_STATE_CHANGE} from './constants';
 
 export const useUserState = ({idleCodes, agentId, cc}) => {
 
@@ -13,7 +13,7 @@ export const useUserState = ({idleCodes, agentId, cc}) => {
   useEffect(() => {
     // Reset the timer whenever the component mounts or the state changes
     setElapsedTime(0);
-    const timer = setInterval(() => {
+    let timer = setInterval(() => {
       setElapsedTime(prevTime => prevTime + 1);
     }, 1000);
 
@@ -32,6 +32,7 @@ export const useUserState = ({idleCodes, agentId, cc}) => {
     // Cleanup the timer on component unmount
     return () => {
       clearInterval(timer);
+      timer = null;
       cc.off(AGENT_STATE_CHANGE, handleStateChange);
     }
   }, []);

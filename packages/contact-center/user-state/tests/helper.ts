@@ -36,6 +36,7 @@ describe('useUserState Hook', () => {
       currentState: {}
     });
 
+    expect(mockCC.on).toHaveBeenCalledTimes(1);
     expect(mockCC.on).toHaveBeenCalledWith('agent:stateChange', expect.any(Function));
   });
 
@@ -149,6 +150,7 @@ describe('useUserState Hook', () => {
     unmount();
     
     // Verify that off was called with the same event and handler
+    expect(mockCC.off).toHaveBeenCalledTimes(1);
     expect(mockCC.off).toHaveBeenCalledWith('agent:stateChange', expect.any(Function));
   });
 });

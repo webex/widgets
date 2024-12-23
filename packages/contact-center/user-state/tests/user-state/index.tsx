@@ -20,6 +20,7 @@ describe('UserState Component', () => {
     
     render(<UserState/>);
 
+    expect(useUserStateSpy).toHaveBeenCalledTimes(1);
     expect(useUserStateSpy).toHaveBeenCalledWith({cc: {
       on: expect.any(Function),
       off: expect.any(Function)
