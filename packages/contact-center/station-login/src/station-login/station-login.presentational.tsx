@@ -4,25 +4,29 @@ import '@uuip/unified-ui-platform-common-components';
 
 const StationLoginPresentational: React.FunctionComponent<StationLoginPresentationalProps> = (props) => {
   const {name, teams, loginOptions, login, logout, setDeviceType, setDialNumber, setTeam} = props;
+  console.log('props is', props);
   const userProfileRef = useRef(null);
-  useEffect(() => {}, [teams, loginOptions]);
 
-  const selectLoginOption = (event: {target: {value: string}}) => {
-    const deviceType = event.target.value;
-    setDeviceType(deviceType);
-  };
+  // useEffect(() => {
+  //   console.log(props);
+  // }, [loginOptions, props]);
 
-  // The below is a dummy representation of the new CC Widget UI, the below required props can be extracted from the props object and passed to the uuip-cc-user-profile Web Component.
+  // const selectLoginOption = (event: {target: {value: string}}) => {
+  //   const deviceType = event.target.value;
+  //   setDeviceType(deviceType);
+  // };
+
+  // Below is a dummy representation of the new CC Widget UI, the below required props can be extracted from the props object and passed to the uuip-cc-user-profile Web Component.
 
   return (
     <div>
       <style>
         {`
-          .user-profile-section .profile-settings {
+          .profile-settings {
             cursor: pointer;
           }
 
-          .user-profile-section .profile-settings:hover {
+          .profile-settings:hover {
             background-color: var(--button-white-hover-bg-color);
             border-radius: 8px;
           }
@@ -34,18 +38,17 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
           }
         `}
       </style>
-      <h3>This is the new CC Widget UI</h3>
+      <h3>{name}</h3>
       <div className="profile-settings">
         <div className="user-profile-wrapper">
           <uuip-wc-user-profile
-            ref={userProfileRef}
             getProfileDataTriggered={true}
             userRole={'agent'}
             preferenceRoleName={'agent'}
             isCallMonitoringEnabled={true}
-            teams={JSON.stringify(['team1', 'team2', 'team3', 'team4', 'team5'])}
-            defaultTeam={JSON.stringify({teamId: 123, teamName: 'team1'})}
-            loginVoiceOptions={JSON.stringify(['AGENT_DN', 'EXTENSION', 'BROWSER'])}
+            teams={['debit card team']}
+            defaultTeam={{teamId: '123', teamName: 'debit card team'}}
+            loginVoiceOptions={['AGENT_DN', 'EXTENSION', 'BROWSER']}
             trackingId={'12345'}
             extensions={JSON.stringify(['12345'])}
             extensionErrorCases={JSON.stringify({isErrExtRegister: true, isExtAlreadyInUse: true})}

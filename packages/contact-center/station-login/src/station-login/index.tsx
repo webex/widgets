@@ -17,7 +17,7 @@ const StationLogin: React.FunctionComponent<StationLoginProps> = observer(({onLo
     ...result,
     teams,
     loginOptions,
-    userRole: 'Agent',
+    // userRole: 'Agent',
     // selectedUserRole: 'Agent',
     // callMonitoringEnabled: false,
     // defaultTeam: 'Debit Card',

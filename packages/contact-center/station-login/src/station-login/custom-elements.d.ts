@@ -9,12 +9,12 @@ declare global {
         userRole: string;
         preferenceRoleName: string;
         isCallMonitoringEnabled: boolean;
-        teams: any;
+        teams: string[];
         defaultTeam: any;
-        loginVoiceOptions: string;
+        loginVoiceOptions: string[];
         trackingId: string;
-        extensions: any;
-        extensionErrorCases: any;
+        extensions: string;
+        extensionErrorCases: string;
         defaultDn: string;
         allowDefaultDnOverwrite: boolean;
       };

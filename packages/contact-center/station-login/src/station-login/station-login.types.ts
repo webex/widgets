@@ -73,7 +73,7 @@ export interface IStationLoginProps {
    */
   setTeam: (team: string) => void;
 
-  userRole: any;
+  // userRole: any;
   // selectedUserRole: any;
   // callMonitoringEnabled: boolean;
   // defaultTeam: string;
@@ -98,7 +98,7 @@ export type StationLoginPresentationalProps = Pick<
   | 'setDeviceType'
   | 'setDialNumber'
   | 'setTeam'
-  | 'userRole'
+  // | 'userRole'
   // | 'selectedUserRole'
   // | 'callMonitoringEnabled'
   // | 'defaultTeam'
