@@ -1,3 +1,10 @@
+# [1.28.0](https://github.com/webex/widgets/compare/v1.27.8...v1.28.0) (2024-12-30)
+
+
+### Features
+
+* **widgets:** enable password and name inputs during init ([#351](https://github.com/webex/widgets/issues/351)) ([7f36b73](https://github.com/webex/widgets/commit/7f36b73a4f41e38ef0f94e36e2bb92fb1e37aecb))
+
 ## [1.27.8](https://github.com/webex/widgets/compare/v1.27.7...v1.27.8) (2024-12-11)
 
 
