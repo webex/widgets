@@ -12,6 +12,8 @@ import './WebexMeetings.css';
  * Webex meeting widget presents a Webex meeting experience.
  *
  * @param {string} props.meetingDestination  ID of the virtual meeting location
+ * @param {string} props.meetingPasswordOrPin  Password or pin of the virtual meeting location
+ * @param {string} props.participantName     Name of the participant joining the meeting from the widget
  * @param {string} props.accessToken         Access token of the joining user
  * @param {string} [props.layout]            Layout for remote video (e.g. grid, focus, stack, etc)
  * @param {Function} [props.controls]        Meeting controls to display
@@ -43,6 +45,8 @@ class WebexMeetingsWidget extends Component {
       content = (
         <WebexMeeting
           meetingID={meeting.ID}
+          meetingPasswordOrPin={this.props.meetingPasswordOrPin}
+          participantName={this.props.participantName}
           logo={logo}
           layout={this.props.layout}
           controls={this.props.controls}
@@ -69,6 +73,8 @@ WebexMeetingsWidget.propTypes = {
   controlsCollapseRangeEnd: PropTypes.number,
   fedramp: PropTypes.bool,
   meetingDestination: PropTypes.string.isRequired,
+  meetingPasswordOrPin: PropTypes.string,
+  participantName: PropTypes.string,
   style: PropTypes.shape(),
   layout: PropTypes.string,
 };
@@ -80,6 +86,8 @@ WebexMeetingsWidget.defaultProps = {
   controlsCollapseRangeEnd: undefined,
   fedramp: false,
   layout: 'Grid',
+  meetingPasswordOrPin: '',
+  participantName: '',
   style: {},
 };
 
