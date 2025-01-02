@@ -10,6 +10,23 @@ const styles: {[key: string]: React.CSSProperties} = {
     maxWidth: '800px',
     margin: '0 auto',
   },
+  sectionBox: {
+    padding: '10px',
+    border: '1px solid #ddd',
+    borderRadius: '8px',
+    marginBottom: '20px',
+  },
+  fieldset: {
+    border: '1px solid #ccc',
+    borderRadius: '5px',
+    padding: '10px',
+    marginBottom: '20px',
+    position: 'relative',
+  },
+  legendBox: {
+    fontWeight: 'bold',
+    color: '#0052bf',
+  },
   container: {
     border: '1px solid #ccc',
     borderRadius: '8px',
@@ -115,63 +132,68 @@ const IncomingTaskPresentational: React.FunctionComponent<IncomingTaskPresentati
 
   return (
     <div style={styles.box}>
-      <div data-testid="incoming-task-presentational" style={styles.container}>
-        {/* Top Section - Call Info with Phone Icon */}
-        <div style={styles.topSection}>
-          <div style={{display: 'flex', alignItems: 'center'}}>
-            <span style={styles.iconWrapper}>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                style={styles.iconSvg}
-              >
-                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.86 19.86 0 0 1-8.63-2.73 19.5 19.5 0 0 1-6-6A19.86 19.86 0 0 1 3.08 4.18 2 2 0 0 1 5 2h3a2 2 0 0 1 2 1.72c.2 1.52.71 2.94 1.41 4.24a2 2 0 0 1-.45 2.31L9.91 11a16 16 0 0 0 6 6l1.73-1.05a2 2 0 0 1 2.31-.45 16.11 16.11 0 0 0 4.24 1.41A2 2 0 0 1 22 16.92z"></path>
-              </svg>
-            </span>
-            <div>
-              <h2 style={styles.callInfo}>Incoming Call</h2>
-              <p data-testid="incoming-task-ani" style={styles.aniText}>
-                {ani}
+      <section style={styles.sectionBox}>
+        <fieldset style={styles.fieldset}>
+          <legend style={styles.legendBox}>Incoming Task</legend>
+          <div data-testid="incoming-task-presentational" style={styles.container}>
+            {/* Top Section - Call Info with Phone Icon */}
+            <div style={styles.topSection}>
+              <div style={{display: 'flex', alignItems: 'center'}}>
+                <span style={styles.iconWrapper}>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    style={styles.iconSvg}
+                  >
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.86 19.86 0 0 1-8.63-2.73 19.5 19.5 0 0 1-6-6A19.86 19.86 0 0 1 3.08 4.18 2 2 0 0 1 5 2h3a2 2 0 0 1 2 1.72c.2 1.52.71 2.94 1.41 4.24a2 2 0 0 1-.45 2.31L9.91 11a16 16 0 0 0 6 6l1.73-1.05a2 2 0 0 1 2.31-.45 16.11 16.11 0 0 0 4.24 1.41A2 2 0 0 1 22 16.92z"></path>
+                  </svg>
+                </span>
+                <div>
+                  <h2 style={styles.callInfo}>Incoming Call</h2>
+                  <p data-testid="incoming-task-ani" style={styles.aniText}>
+                    {ani}
+                  </p>
+                </div>
+              </div>
+
+              {isBrowser && (
+                <div style={styles.buttonsWrapper}>
+                  <button style={styles.answerButton} onClick={accept}>
+                    Answer
+                  </button>
+                  <button style={styles.declineButton} onClick={decline}>
+                    Decline
+                  </button>
+                </div>
+              )}
+            </div>
+            <audio ref={audioRef} id="remote-audio"></audio>
+
+            {/* Queue and Timer Info */}
+            <p style={styles.queueInfo}>
+              {virtualTeamName} - <span style={styles.timeElapsed}>{timeElapsed}</span>
+            </p>
+
+            {/* Call Details Section */}
+            <div style={styles.callDetails}>
+              <p style={styles.detailItem}>
+                <strong style={styles.detailLabel}>Phone Number:</strong> {ani}
+              </p>
+              <p style={styles.detailItem}>
+                <strong style={styles.detailLabel}>DNIS:</strong> {dn}
+              </p>
+              <p style={styles.detailItem}>
+                <strong style={styles.detailLabel}>Queue Name:</strong> {virtualTeamName}
               </p>
             </div>
           </div>
-
-          {isBrowser && (
-            <div style={styles.buttonsWrapper}>
-              <button style={styles.answerButton} onClick={accept}>
-                Answer
-              </button>
-              <button style={styles.declineButton} onClick={decline}>
-                Decline
-              </button>
-            </div>
-          )}
-        </div>
-        <audio ref={audioRef} id="remote-audio"></audio>
-
-        {/* Queue and Timer Info */}
-        <p style={styles.queueInfo}>
-          {virtualTeamName} - <span style={styles.timeElapsed}>{timeElapsed}</span>
-        </p>
-
-        {/* Call Details Section */}
-        <div style={styles.callDetails}>
-          <p style={styles.detailItem}>
-            <strong style={styles.detailLabel}>Phone Number:</strong> {ani}
-          </p>
-          <p style={styles.detailItem}>
-            <strong style={styles.detailLabel}>DNIS:</strong> {dn}
-          </p>
-          <p style={styles.detailItem}>
-            <strong style={styles.detailLabel}>Queue Name:</strong> {virtualTeamName}
-          </p>
-        </div>
-      </div>
+        </fieldset>
+      </section>
     </div>
   );
 };

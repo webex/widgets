@@ -2,6 +2,7 @@ import {useState} from 'react';
 import {StationLoginSuccess, StationLogoutSuccess} from '@webex/plugin-cc';
 import {UseStationLoginProps} from './station-login/station-login.types';
 import store from '@webex/cc-store'; // we need to import as we are losing the context of this in store
+
 export const useStationLogin = (props: UseStationLoginProps) => {
   const cc = props.cc;
   const loginCb = props.onLogin;

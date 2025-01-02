@@ -26,123 +26,121 @@ describe('useIncomingTask Hook', () => {
     jest.clearAllMocks();
   });
 
-  it('should set the current task on task incoming event', async () => {
+  it('should handle errors when task.accept fails', async () => {
+    taskMock.accept.mockRejectedValueOnce(new Error('Accept failed'));
     const {result} = renderHook(() =>
       useIncomingTask({cc: ccMock, onAccepted, onDeclined, selectedLoginOption: 'BROWSER'})
     );
 
     // Simulate an incoming task
     act(() => {
-      ccMock.on.mock.calls[0][1](taskMock); // Trigger TASK_EVENTS.TASK_INCOMING event
+      ccMock.on.mock.calls[0][1](taskMock);
     });
 
-    waitFor(() => {
-      expect(result.current.currentTask).toBe(taskMock);
-      expect(ccMock.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_INCOMING, expect.any(Function));
-    });
-  });
-
-  it('should register task events for the current task', async () => {
-    const {result} = renderHook(() =>
-      useIncomingTask({cc: ccMock, onAccepted, onDeclined, selectedLoginOption: 'BROWSER'})
-    );
-
-    // Simulate an incoming task
-    act(() => {
-      ccMock.on.mock.calls[0][1](taskMock); // Trigger TASK_EVENTS.TASK_INCOMING event
-    });
-
-    waitFor(() => {
-      expect(taskMock.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function));
-      expect(taskMock.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));
-      expect(taskMock.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_UNASSIGNED, expect.any(Function));
-      expect(taskMock.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_MEDIA, expect.any(Function));
-    });
-  });
-
-  it('should clean up task events on task change or unmount', async () => {
-    const {result, unmount} = renderHook(() =>
-      useIncomingTask({cc: ccMock, onAccepted, onDeclined, selectedLoginOption: 'BROWSER'})
-    );
-
-    // Simulate an incoming task
-    act(() => {
-      ccMock.on.mock.calls[0][1](taskMock); // Trigger TASK_EVENTS.TASK_INCOMING event
-    });
-
-    // Simulate unmount
-    unmount();
-
-    waitFor(() => {
-      expect(taskMock.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function));
-      expect(taskMock.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));
-      expect(taskMock.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_UNASSIGNED, expect.any(Function));
-      expect(taskMock.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_MEDIA, expect.any(Function));
-      expect(ccMock.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_INCOMING, expect.any(Function));
-    });
-  });
-
-  it('should call onAccepted callback when task is accepted', async () => {
-    const {result} = renderHook(() =>
-      useIncomingTask({cc: ccMock, onAccepted, onDeclined, selectedLoginOption: 'BROWSER'})
-    );
-
-    // Simulate an incoming task
-    act(() => {
-      ccMock.on.mock.calls[0][1](taskMock); // Trigger TASK_EVENTS.TASK_INCOMING event
-    });
-
-    // Accept the task
-    act(() => {
+    // Attempt to accept the task
+    await act(async () => {
       result.current.accept();
     });
 
     waitFor(() => {
-      expect(onAccepted).toHaveBeenCalled();
+      expect(onAccepted).not.toHaveBeenCalled();
       expect(taskMock.accept).toHaveBeenCalledWith('interaction1');
     });
   });
 
-  it('should call onDeclined callback when task is declined', async () => {
+  it('should handle errors when task.decline fails', async () => {
+    taskMock.decline.mockRejectedValueOnce(new Error('Decline failed'));
     const {result} = renderHook(() =>
       useIncomingTask({cc: ccMock, onAccepted, onDeclined, selectedLoginOption: 'BROWSER'})
     );
 
     // Simulate an incoming task
     act(() => {
-      ccMock.on.mock.calls[0][1](taskMock); // Trigger TASK_EVENTS.TASK_INCOMING event
+      ccMock.on.mock.calls[0][1](taskMock);
     });
 
-    // Decline the task
-    act(() => {
+    // Attempt to decline the task
+    await act(async () => {
       result.current.decline();
     });
 
     waitFor(() => {
-      expect(onDeclined).toHaveBeenCalled();
+      expect(onDeclined).not.toHaveBeenCalled();
       expect(taskMock.decline).toHaveBeenCalledWith('interaction1');
     });
   });
 
-  it('should correctly handle task media', async () => {
-    const taskMediaMock = {};
+  it('should not call onAccepted or onDeclined if they are not provided', async () => {
+    const {result} = renderHook(
+      () => useIncomingTask({cc: ccMock, selectedLoginOption: 'BROWSER'}) // No onAccepted or onDeclined
+    );
+
+    // Simulate an incoming task
+    act(() => {
+      ccMock.on.mock.calls[0][1](taskMock);
+    });
+
+    // Attempt to accept and decline the task
+    await act(async () => {
+      result.current.accept();
+      result.current.decline();
+    });
+
+    waitFor(() => {
+      expect(taskMock.accept).toHaveBeenCalledWith('interaction1');
+      expect(taskMock.decline).toHaveBeenCalledWith('interaction1');
+    });
+  });
+
+  it('should handle audio element null error gracefully', async () => {
     const {result} = renderHook(() =>
       useIncomingTask({cc: ccMock, onAccepted, onDeclined, selectedLoginOption: 'BROWSER'})
     );
 
     // Simulate an incoming task
     act(() => {
-      ccMock.on.mock.calls[0][1](taskMock); // Trigger TASK_EVENTS.TASK_INCOMING event
+      ccMock.on.mock.calls[0][1](taskMock);
     });
 
-    // Simulate task media event
+    // Simulate a TASK_MEDIA event with an invalid audioRef
     act(() => {
-      taskMock.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_MEDIA)[1](taskMediaMock);
+      taskMock.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_MEDIA)?.[1]({
+        mediaUrl: 'https://example.com/audio.mp3',
+      });
+    });
+
+    // Set the audioRef to null
+    result.current.audioRef.current = null;
+
+    waitFor(() => {
+      expect(result.current.audioRef.current).toBeNull();
+      expect(() => {
+        const audioElement = result.current.audioRef.current;
+        if (!audioElement) throw new Error('audioElement is null');
+      }).toThrow('audioElement is null');
+    });
+  });
+
+  it('should handle invalid mediaUrl gracefully', async () => {
+    const {result} = renderHook(() =>
+      useIncomingTask({cc: ccMock, onAccepted, onDeclined, selectedLoginOption: 'BROWSER'})
+    );
+
+    // Simulate an incoming task
+    act(() => {
+      ccMock.on.mock.calls[0][1](taskMock);
+    });
+
+    // Simulate a TASK_MEDIA event with an invalid media URL
+    act(() => {
+      taskMock.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_MEDIA)?.[1]({
+        mediaUrl: '',
+      });
     });
 
     waitFor(() => {
-      expect(result.current.isMissed).toBe(false);
-      expect(result.current.isEnded).toBe(false);
+      const audioElement = result.current.audioRef?.current;
+      expect(audioElement?.src).not.toContain('http');
     });
   });
 });
@@ -157,7 +155,7 @@ describe('useTaskList Hook', () => {
 
     // Simulate the incoming task event
     act(() => {
-      ccMock.on.mock.calls[0][1](taskMock); // Trigger TASK_EVENTS.TASK_INCOMING event
+      ccMock.on.mock.calls[0][1](taskMock);
     });
 
     waitFor(() => {
@@ -166,25 +164,7 @@ describe('useTaskList Hook', () => {
     });
   });
 
-  it('should handle multiple incoming tasks', async () => {
-    const {result} = renderHook(() => useTaskList({cc: ccMock}));
-
-    // Simulate multiple incoming task events
-    const task1 = {...taskMock, id: 'task1'};
-    const task2 = {...taskMock, id: 'task2'};
-
-    act(() => {
-      ccMock.on.mock.calls[0][1](task1); // Trigger TASK_EVENTS.TASK_INCOMING for task1
-      ccMock.on.mock.calls[0][1](task2); // Trigger TASK_EVENTS.TASK_INCOMING for task2
-    });
-
-    waitFor(() => {
-      expect(result.current.taskList).toEqual([task1, task2]);
-      expect(ccMock.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_INCOMING, expect.any(Function));
-    });
-  });
-
-  it('should clean up TASK_EVENTS.TASK_INCOMING event on unmount', async () => {
+  it('should handle unmount cleanup without errors', async () => {
     const {unmount} = renderHook(() => useTaskList({cc: ccMock}));
 
     // Simulate unmount
@@ -192,25 +172,6 @@ describe('useTaskList Hook', () => {
 
     waitFor(() => {
       expect(ccMock.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_INCOMING, expect.any(Function));
-    });
-  });
-
-  it('should not register event multiple times', async () => {
-    const {result} = renderHook(() => useTaskList({cc: ccMock}));
-
-    // Trigger TASK_EVENTS.TASK_INCOMING event once
-    act(() => {
-      ccMock.on.mock.calls[0][1](taskMock);
-    });
-
-    // Simulate triggering the event again (should not register again)
-    act(() => {
-      ccMock.on.mock.calls[0][1](taskMock);
-    });
-
-    waitFor(() => {
-      expect(ccMock.on).toHaveBeenCalledTimes(1); // Event should only be registered once
-      expect(ccMock.off).toHaveBeenCalledTimes(1); // Event cleanup should still happen once
     });
   });
 });

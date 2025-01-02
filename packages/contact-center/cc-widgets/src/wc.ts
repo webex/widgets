@@ -36,4 +36,5 @@ if (!customElements.get('widget-cc-incoming-task')) {
 if (!customElements.get('widget-cc-task-list')) {
   customElements.define('widget-cc-task-list', WebTaskList);
 }
+
 export {store};
