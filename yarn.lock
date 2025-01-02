@@ -6147,7 +6147,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/plugin-cc@npm:3.5.0-wxcc.10":
+ "@webex/plugin-cc@npm:3.5.0-wxcc.10":
   version: 3.5.0-wxcc.10
   resolution: "@webex/plugin-cc@npm:3.5.0-wxcc.10"
   dependencies:

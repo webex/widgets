@@ -1,4 +1,6 @@
 import {useState, useEffect} from "react";
+// TODO: Export & Import this AGENT_STATE_CHANGE constant from SDK
+import {AGENT_STATE_CHANGE} from './constants';
 
 export const useUserState = ({idleCodes, agentId, cc}) => {
 
@@ -11,12 +13,28 @@ export const useUserState = ({idleCodes, agentId, cc}) => {
   useEffect(() => {
     // Reset the timer whenever the component mounts or the state changes
     setElapsedTime(0);
-    const timer = setInterval(() => {
+    let timer = setInterval(() => {
       setElapsedTime(prevTime => prevTime + 1);
     }, 1000);
 
+    const handleStateChange = (data) => {
+      if (data && typeof data === 'object' && data.type === 'AgentStateChangeSuccess') {
+        const DEFAULT_CODE = '0'; // Default code when no aux code is present
+        setCurrentState({
+          id: data.auxCodeId?.trim() !== '' ? data.auxCodeId : DEFAULT_CODE
+        });
+        setElapsedTime(0);
+      }
+    };
+    
+    cc.on(AGENT_STATE_CHANGE, handleStateChange);
+
     // Cleanup the timer on component unmount
-    return () => clearInterval(timer);
+    return () => {
+      clearInterval(timer);
+      timer = null;
+      cc.off(AGENT_STATE_CHANGE, handleStateChange);
+    }
   }, []);
 
   const setAgentStatus = (selectedCode) => {
