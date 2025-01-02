@@ -6,21 +6,12 @@ declare global {
     interface IntrinsicElements {
     'uuip-wc-user-station-login': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & {
         isModalOpen: boolean;
-        isRememberMeChecked: boolean;
-        isSubmitBusy: boolean;
-        isDesktopEmergencyNotificationEnabled: boolean;
-        isEmergencyNotificationAlreadyDisplayed: boolean;
-        userRoles: string[];
-        teams: { teamId: string; teamName: string }[];
-        defaultTeam: { teamId: string; teamName: string };
-        extensions: string[];
-        isCallMonitoringEnabled: boolean;
-        dialNumbers: string[];
-        defaultDialNumber: string;
-        loginVoiceOptions: string[];
-        preferenceRoleName: string;
-        'signout-clicked': () => void;
-        'confirm-clicked': (e: Event) => void;
+        userRoles:string;
+        teams: string;
+        defaultTeam: string;
+        extensions: string;
+        dialNumbers: string;
+        loginVoiceOptions: string;
       };
     }
   }
