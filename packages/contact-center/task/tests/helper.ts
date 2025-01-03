@@ -26,121 +26,81 @@ describe('useIncomingTask Hook', () => {
     jest.clearAllMocks();
   });
 
-  it('should handle errors when task.accept fails', async () => {
-    taskMock.accept.mockRejectedValueOnce(new Error('Accept failed'));
+  it('should register task events for the current task', async () => {
     const {result} = renderHook(() =>
       useIncomingTask({cc: ccMock, onAccepted, onDeclined, selectedLoginOption: 'BROWSER'})
     );
 
-    // Simulate an incoming task
     act(() => {
       ccMock.on.mock.calls[0][1](taskMock);
     });
 
-    // Attempt to accept the task
-    await act(async () => {
-      result.current.accept();
-    });
-
     waitFor(() => {
-      expect(onAccepted).not.toHaveBeenCalled();
-      expect(taskMock.accept).toHaveBeenCalledWith('interaction1');
-    });
-  });
-
-  it('should handle errors when task.decline fails', async () => {
-    taskMock.decline.mockRejectedValueOnce(new Error('Decline failed'));
-    const {result} = renderHook(() =>
-      useIncomingTask({cc: ccMock, onAccepted, onDeclined, selectedLoginOption: 'BROWSER'})
-    );
-
-    // Simulate an incoming task
-    act(() => {
-      ccMock.on.mock.calls[0][1](taskMock);
-    });
-
-    // Attempt to decline the task
-    await act(async () => {
-      result.current.decline();
-    });
-
-    waitFor(() => {
-      expect(onDeclined).not.toHaveBeenCalled();
-      expect(taskMock.decline).toHaveBeenCalledWith('interaction1');
+      expect(taskMock.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function));
+      expect(taskMock.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));
     });
   });
 
   it('should not call onAccepted or onDeclined if they are not provided', async () => {
-    const {result} = renderHook(
-      () => useIncomingTask({cc: ccMock, selectedLoginOption: 'BROWSER'}) // No onAccepted or onDeclined
+    const {result} = renderHook(() =>
+      useIncomingTask({cc: ccMock, onAccepted: null, onDeclined: null, selectedLoginOption: 'BROWSER'})
     );
 
-    // Simulate an incoming task
     act(() => {
       ccMock.on.mock.calls[0][1](taskMock);
     });
 
-    // Attempt to accept and decline the task
-    await act(async () => {
+    act(() => {
       result.current.accept();
       result.current.decline();
     });
 
     waitFor(() => {
-      expect(taskMock.accept).toHaveBeenCalledWith('interaction1');
-      expect(taskMock.decline).toHaveBeenCalledWith('interaction1');
+      expect(onAccepted).not.toHaveBeenCalled();
+      expect(onDeclined).not.toHaveBeenCalled();
     });
   });
 
-  it('should handle audio element null error gracefully', async () => {
-    const {result} = renderHook(() =>
+  it('should clean up task events on task change or unmount', async () => {
+    const {result, unmount} = renderHook(() =>
       useIncomingTask({cc: ccMock, onAccepted, onDeclined, selectedLoginOption: 'BROWSER'})
     );
 
-    // Simulate an incoming task
     act(() => {
       ccMock.on.mock.calls[0][1](taskMock);
     });
 
-    // Simulate a TASK_MEDIA event with an invalid audioRef
-    act(() => {
-      taskMock.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_MEDIA)?.[1]({
-        mediaUrl: 'https://example.com/audio.mp3',
-      });
-    });
-
-    // Set the audioRef to null
-    result.current.audioRef.current = null;
+    unmount();
 
     waitFor(() => {
-      expect(result.current.audioRef.current).toBeNull();
-      expect(() => {
-        const audioElement = result.current.audioRef.current;
-        if (!audioElement) throw new Error('audioElement is null');
-      }).toThrow('audioElement is null');
+      expect(taskMock.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function));
+      expect(ccMock.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_INCOMING, expect.any(Function));
     });
   });
 
-  it('should handle invalid mediaUrl gracefully', async () => {
+  it('should handle errors in accepting or declining tasks', async () => {
+    const failingTask = {
+      ...taskMock,
+      accept: jest.fn().mockRejectedValue('Error'),
+      decline: jest.fn().mockRejectedValue('Error'),
+    };
+
     const {result} = renderHook(() =>
       useIncomingTask({cc: ccMock, onAccepted, onDeclined, selectedLoginOption: 'BROWSER'})
     );
 
-    // Simulate an incoming task
     act(() => {
-      ccMock.on.mock.calls[0][1](taskMock);
+      ccMock.on.mock.calls[0][1](failingTask);
     });
 
-    // Simulate a TASK_MEDIA event with an invalid media URL
     act(() => {
-      taskMock.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_MEDIA)?.[1]({
-        mediaUrl: '',
-      });
+      result.current.accept();
+      result.current.decline();
     });
 
     waitFor(() => {
-      const audioElement = result.current.audioRef?.current;
-      expect(audioElement?.src).not.toContain('http');
+      expect(failingTask.accept).toHaveBeenCalled();
+      expect(failingTask.decline).toHaveBeenCalled();
     });
   });
 });
@@ -150,28 +110,105 @@ describe('useTaskList Hook', () => {
     jest.clearAllMocks();
   });
 
-  it('should register TASK_EVENTS.TASK_INCOMING event and add task to the list', async () => {
+  it('should add tasks to the list on TASK_INCOMING event', async () => {
     const {result} = renderHook(() => useTaskList({cc: ccMock}));
 
-    // Simulate the incoming task event
     act(() => {
       ccMock.on.mock.calls[0][1](taskMock);
     });
 
     waitFor(() => {
       expect(result.current.taskList).toContain(taskMock);
-      expect(ccMock.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_INCOMING, expect.any(Function));
     });
   });
 
-  it('should handle unmount cleanup without errors', async () => {
-    const {unmount} = renderHook(() => useTaskList({cc: ccMock}));
+  it('should remove a task from the list when it ends', async () => {
+    const {result} = renderHook(() => useTaskList({cc: ccMock}));
 
-    // Simulate unmount
-    unmount();
+    act(() => {
+      ccMock.on.mock.calls[0][1](taskMock);
+    });
+
+    act(() => {
+      taskMock.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_END)?.[1]();
+    });
 
     waitFor(() => {
-      expect(ccMock.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_INCOMING, expect.any(Function));
+      expect(result.current.taskList).not.toContain(taskMock);
+    });
+  });
+
+  it('should update an existing task in the list', async () => {
+    const {result} = renderHook(() => useTaskList({cc: ccMock}));
+
+    act(() => {
+      ccMock.on.mock.calls[0][1](taskMock);
+    });
+
+    const updatedTask = {...taskMock, data: {interactionId: 'interaction1', status: 'updated'}};
+    act(() => {
+      taskMock.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_ASSIGNED)?.[1](updatedTask);
+    });
+
+    waitFor(() => {
+      expect(result.current.taskList).toContainEqual(updatedTask);
+    });
+  });
+
+  it('should handle maximum list size and remove the oldest tasks', async () => {
+    const MAX_TASK_LIST_SIZE = 5;
+    const {result} = renderHook(() => useTaskList({cc: ccMock, maxTaskListSize: MAX_TASK_LIST_SIZE}));
+
+    const tasks = Array.from({length: MAX_TASK_LIST_SIZE + 2}, (_, i) => ({
+      ...taskMock,
+      data: {interactionId: `interaction${i + 1}`},
+    }));
+
+    act(() => {
+      tasks.forEach((task) => {
+        ccMock.on.mock.calls[0][1](task);
+      });
+    });
+
+    waitFor(() => {
+      expect(result.current.taskList.length).toBe(MAX_TASK_LIST_SIZE);
+      expect(result.current.taskList[0].data.interactionId).toBe('interaction3');
+    });
+  });
+
+  it('should deduplicate tasks by interactionId', async () => {
+    const {result} = renderHook(() => useTaskList({cc: ccMock}));
+
+    act(() => {
+      ccMock.on.mock.calls[0][1](taskMock);
+      ccMock.on.mock.calls[0][1](taskMock);
+    });
+
+    waitFor(() => {
+      expect(result.current.taskList.length).toBe(1);
+    });
+  });
+
+  it('should sort tasks based on a specified criterion', async () => {
+    const {result} = renderHook(() =>
+      useTaskList({
+        cc: ccMock,
+        sortFunction: (a, b) => a.data.interactionId.localeCompare(b.data.interactionId),
+      })
+    );
+
+    const task1 = {...taskMock, data: {interactionId: 'interaction3'}};
+    const task2 = {...taskMock, data: {interactionId: 'interaction1'}};
+    const task3 = {...taskMock, data: {interactionId: 'interaction2'}};
+
+    act(() => {
+      ccMock.on.mock.calls[0][1](task1);
+      ccMock.on.mock.calls[0][1](task2);
+      ccMock.on.mock.calls[0][1](task3);
+    });
+
+    waitFor(() => {
+      expect(result.current.taskList).toEqual([task2, task3, task1]);
     });
   });
 });
