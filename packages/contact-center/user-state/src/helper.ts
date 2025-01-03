@@ -54,7 +54,7 @@ export const useUserState = ({idleCodes, agentId, cc}) => {
       worker.terminate();
       cc.off(AGENT_STATE_CHANGE, handleStateChange);
     }
-  }, [currentState]);
+  }, []);
 
   const setAgentStatus = (selectedCode) => {
     const {
