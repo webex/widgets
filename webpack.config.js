@@ -1,4 +1,5 @@
 const webpack = require('webpack');
+const path = require('path');
 
 module.exports = {
   mode: 'development',
@@ -15,6 +16,10 @@ module.exports = {
       vm: require.resolve('vm-browserify'),
       util: require.resolve('util/'),
       url: require.resolve('url/'),
+    },
+    alias: {
+      react: path.resolve(__dirname, 'node_modules/react'),
+      'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
     },
   },
   plugins: [

@@ -1,4 +1,4 @@
-import React, {CSSProperties, useMemo, useRef} from 'react';
+import React, {CSSProperties, useMemo} from 'react';
 
 import {IUserState} from './use-state.types';
 
@@ -72,7 +72,6 @@ const UserStatePresentational: React.FunctionComponent<IUserState> = (props) => 
   const {idleCodes,setAgentStatus,isSettingAgentStatus, errorMessage, elapsedTime, currentState} = props;
 
   const styles = useMemo(() => getStyles(isSettingAgentStatus), [isSettingAgentStatus]);
-  const selectRef = useRef<HTMLSelectElement>(null);
 
   const formatTime = (time: number): string => {
     const hours = Math.floor(time / 3600);

@@ -15,8 +15,10 @@
     "./wc": "./dist/wc.js"
   },
   "scripts": {
+    "clean": "rm -rf dist && rm -rf node_modules",
+    "clean:dist": "rm -rf dist",
     "build": "yarn run -T tsc",
-    "build:src": "webpack && yarn run build",
+    "build:src": "webpack",
     "build:watch": "webpack --watch",
     "test:unit": "jest"
   },
@@ -46,8 +48,6 @@
     "os-browserify": "^0.3.0",
     "process": "^0.11.10",
     "querystring-es3": "^0.2.1",
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
     "stream-browserify": "^3.0.0",
     "ts-loader": "9.5.1",
     "typescript": "5.6.3",
