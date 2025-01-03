@@ -1,4 +1,6 @@
 import {useState, useEffect} from "react";
+// TODO: Export & Import this AGENT_STATE_CHANGE constant from SDK
+import {AGENT_STATE_CHANGE} from './constants';
 
 export const useUserState = ({idleCodes, agentId, cc}) => {
 
@@ -36,9 +38,22 @@ export const useUserState = ({idleCodes, agentId, cc}) => {
       setElapsedTime(event.data);
     };
 
+    const handleStateChange = (data) => {
+      if (data && typeof data === 'object' && data.type === 'AgentStateChangeSuccess') {
+        const DEFAULT_CODE = '0'; // Default code when no aux code is present
+        setCurrentState({
+          id: data.auxCodeId?.trim() !== '' ? data.auxCodeId : DEFAULT_CODE
+        });
+        setElapsedTime(0);
+      }
+    };
+    
+    cc.on(AGENT_STATE_CHANGE, handleStateChange);
+
     return () => {
       worker.terminate();
-    };
+      cc.off(AGENT_STATE_CHANGE, handleStateChange);
+    }
   }, [currentState]);
 
   const setAgentStatus = (selectedCode) => {

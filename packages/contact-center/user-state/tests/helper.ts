@@ -3,7 +3,9 @@ import { useUserState } from '../src/helper';
 
 describe('useUserState Hook', () => {
   const mockCC = {
-    setAgentState: jest.fn()
+    setAgentState: jest.fn(),
+    on: jest.fn(),
+    off: jest.fn(),
   };
 
   const idleCodes = [
@@ -18,6 +20,8 @@ describe('useUserState Hook', () => {
   beforeEach(() => {
     jest.useFakeTimers();
     mockCC.setAgentState.mockReset();
+    mockCC.on.mockReset();
+    mockCC.off.mockReset();
 
     // Mocking the Web Worker
     workerMock = {
@@ -46,6 +50,9 @@ describe('useUserState Hook', () => {
       elapsedTime: 0,
       currentState: {}
     });
+
+    expect(mockCC.on).toHaveBeenCalledTimes(1);
+    expect(mockCC.on).toHaveBeenCalledWith('agent:stateChange', expect.any(Function));
   });
 
   it('should increment elapsedTime every second', () => {
@@ -123,5 +130,58 @@ describe('useUserState Hook', () => {
         currentState: {}
       });
     });
+  });
+
+  it('should handle agent state change events correctly', async () => {
+    const { result } = renderHook(() => useUserState({ idleCodes, agentId, cc: mockCC }));
+    
+    // Get the handler function that was registered
+    const handler = mockCC.on.mock.calls[0][1];
+
+    // Test with right event type
+    act(() => {
+      handler({ type: 'AgentStateChangeSuccess', auxCodeId: '123' });
+    });
+
+    await waitFor(() => {
+      expect(result.current.currentState).toEqual({ id: '123' });
+    });
+
+    // Test with wrong event type
+    act(() => {
+      handler({ type: 'WrongType' });
+    });
+
+    await waitFor(() => {
+      expect(result.current.currentState).toEqual({ id: '123' });
+    });
+
+    // Test again with right event type but different value
+    act(() => {
+      handler({ type: 'AgentStateChangeSuccess', auxCodeId: '1213' });
+    });
+
+    await waitFor(() => {
+      expect(result.current.currentState).toEqual({ id: '1213' });
+    });
+
+    // Test with empty auxCodeId
+    act(() => {
+      handler({ type: 'AgentStateChangeSuccess', auxCodeId: '' });
+    });
+
+    await waitFor(() => {
+      expect(result.current.currentState).toEqual({ id: '0' });
+    });
+  });
+  
+  it('should cleanup event listener on unmount', () => {
+    const { unmount } = renderHook(() => useUserState({ idleCodes, agentId, cc: mockCC }));
+    
+    unmount();
+    
+    // Verify that off was called with the same event and handler
+    expect(mockCC.off).toHaveBeenCalledTimes(1);
+    expect(mockCC.off).toHaveBeenCalledWith('agent:stateChange', expect.any(Function));
   });
 });
