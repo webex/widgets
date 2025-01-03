@@ -7,17 +7,39 @@ export const useUserState = ({idleCodes, agentId, cc}) => {
 
   const [elapsedTime, setElapsedTime] = useState(0);
   const [currentState, setCurrentState] = useState({});
+  let worker;
+
+  // Initialize the Web Worker using a Blob
+  const workerScript = `
+    let startTime = Date.now();
+
+    self.onmessage = (event) => {
+      if (event.data === 'start') {
+        startTime = Date.now();
+        setInterval(() => {
+          const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+          self.postMessage(elapsedTime);
+        }, 1000);
+      } else if (event.data === 'reset') {
+        startTime = Date.now();
+      }
+    };
+  `;
+
+  const blob = new Blob([workerScript], { type: 'application/javascript' });
+  const workerUrl = URL.createObjectURL(blob);
+  worker = new Worker(workerUrl);
 
   useEffect(() => {
-    // Reset the timer whenever the component mounts or the state changes
-    setElapsedTime(0);
-    const timer = setInterval(() => {
-      setElapsedTime(prevTime => prevTime + 1);
-    }, 1000);
+    worker.postMessage('start');
+    worker.onmessage = (event) => {
+      setElapsedTime(event.data);
+    };
 
-    // Cleanup the timer on component unmount
-    return () => clearInterval(timer);
-  }, []);
+    return () => {
+      worker.terminate();
+    };
+  }, [currentState]);
 
   const setAgentStatus = (selectedCode) => {
     const {
@@ -36,6 +58,7 @@ export const useUserState = ({idleCodes, agentId, cc}) => {
     cc.setAgentState({state: chosenState, auxCodeId, agentId, lastStateChangeReason: state}).then((response) => {
       setErrorMessage('');
       setElapsedTime(0);
+      worker.postMessage('reset'); // Reset the worker timer
     }).catch(error => {
       setCurrentState(oldState);
       setErrorMessage(error.toString());
@@ -52,5 +75,5 @@ export const useUserState = ({idleCodes, agentId, cc}) => {
     elapsedTime,
     currentState,
     setCurrentState
-  }
+  };
 };

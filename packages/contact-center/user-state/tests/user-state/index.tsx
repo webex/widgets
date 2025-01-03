@@ -12,6 +12,18 @@ jest.mock('@webex/cc-store', () => {return {
 }});
 
 describe('UserState Component', () => {
+  let workerMock;
+
+  beforeEach(() => {
+    workerMock = {
+      postMessage: jest.fn(),
+      terminate: jest.fn(),
+      onmessage: null,
+    };
+    global.Worker = jest.fn(() => workerMock);
+    global.URL.createObjectURL = jest.fn(() => 'blob:http://localhost:3000/12345');
+  });
+
   it('renders UserStatePresentational with correct props', () => {
     const useUserStateSpy = jest.spyOn(helper, 'useUserState');
     
