@@ -61,6 +61,30 @@ const styles: {[key: string]: React.CSSProperties} = {
     fontWeight: 'bold',
     color: '#333',
   },
+  buttonsWrapper: {
+    display: 'flex',
+    gap: '10px',
+  },
+  acceptButton: {
+    padding: '8px 16px',
+    border: 'none',
+    borderRadius: '6px',
+    fontSize: '0.9em',
+    cursor: 'pointer',
+    fontWeight: 'bold',
+    backgroundColor: '#28a745',
+    color: '#fff',
+  },
+  rejectButton: {
+    padding: '8px 16px',
+    border: 'none',
+    borderRadius: '6px',
+    fontSize: '0.9em',
+    cursor: 'pointer',
+    fontWeight: 'bold',
+    backgroundColor: '#dc3545',
+    color: '#fff',
+  },
   fieldset: {
     border: '1px solid #ccc',
     borderRadius: '5px',
@@ -79,7 +103,7 @@ const TaskListPresentational: React.FunctionComponent<TaskListPresentationalProp
     return <></>; // hidden component
   }
 
-  const {taskList} = props;
+  const {taskList, acceptTask, declineTask, isBrowser} = props;
 
   return (
     <div style={styles.box}>
@@ -114,9 +138,19 @@ const TaskListPresentational: React.FunctionComponent<TaskListPresentationalProp
                   </div>
                 </div>
 
-                {/* Right Section with Call Duration */}
+                {/* Right Section with Call Duration and Buttons */}
                 <div>
                   <p style={styles.rightSectionText}>{dn}</p>
+                  {isBrowser && (
+                    <div style={styles.buttonsWrapper}>
+                      <button style={styles.acceptButton} onClick={() => acceptTask(task)}>
+                        Accept
+                      </button>
+                      <button style={styles.rejectButton} onClick={() => declineTask(task)}>
+                        Reject
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             );

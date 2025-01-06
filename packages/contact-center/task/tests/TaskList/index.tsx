@@ -49,6 +49,6 @@ describe('TaskList Component', () => {
     expect(TaskListPresentational).toHaveBeenCalledWith({taskList: taskListMock}, {});
 
     // Verify that `useTaskList` is called with the correct arguments.
-    expect(helper.useTaskList).toHaveBeenCalledWith({cc: store.cc});
+    expect(helper.useTaskList).toHaveBeenCalledWith({cc: store.cc, selectedLoginOption: 'BROWSER'});
   });
 });

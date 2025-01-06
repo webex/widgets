@@ -4,8 +4,9 @@ import {ITask} from '@webex/plugin-cc';
 
 // Hook for managing the task list
 export const useTaskList = (props: UseTaskListProps) => {
-  const {cc} = props;
+  const {cc, selectedLoginOption, onTaskAccepted, onTaskDeclined} = props;
   const [taskList, setTaskList] = useState<ITask[]>([]);
+  const isBrowser = selectedLoginOption === 'BROWSER';
 
   const handleTaskRemoved = useCallback((taskId: string) => {
     setTaskList((prev) => {
@@ -38,6 +39,34 @@ export const useTaskList = (props: UseTaskListProps) => {
     [handleTaskRemoved] // Include handleTaskRemoved as a dependency
   );
 
+  const acceptTask = (task: ITask) => {
+    const taskId = task?.data.interactionId;
+    if (!taskId) return;
+
+    task
+      .accept(taskId)
+      .then(() => {
+        onTaskAccepted && onTaskAccepted(task);
+      })
+      .catch((error: Error) => {
+        console.error(error);
+      });
+  };
+
+  const declineTask = (task: ITask) => {
+    const taskId = task?.data.interactionId;
+    if (!taskId) return;
+
+    task
+      .decline(taskId)
+      .then(() => {
+        onTaskDeclined && onTaskDeclined(task);
+      })
+      .catch((error: Error) => {
+        console.error(error);
+      });
+  };
+
   useEffect(() => {
     // Listen for incoming tasks globally
     cc.on(TASK_EVENTS.TASK_INCOMING, handleIncomingTask);
@@ -47,7 +76,7 @@ export const useTaskList = (props: UseTaskListProps) => {
     };
   }, [cc, handleIncomingTask]);
 
-  return {taskList};
+  return {taskList, acceptTask, declineTask, isBrowser};
 };
 
 // Hook for managing the current task

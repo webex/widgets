@@ -31,6 +31,14 @@ function App() {
     console.log('onDeclined invoked');
   };
 
+  const onTaskAccepted = () => {
+    console.log('onTaskAccepted invoked');
+  };
+
+  const onTaskDeclined = () => {
+    console.log('onTaskDeclined invoked');
+  };
+
   return (
     <>
       <h1>Contact Center widgets in a react app</h1>
@@ -57,7 +65,7 @@ function App() {
             <>
               <UserState />
               <IncomingTask onAccepted={onAccepted} onDeclined={onDeclined} />
-              <TaskList />
+              <TaskList onTaskAccepted={onTaskAccepted} onTaskDeclined={onTaskDeclined} />
             </>
           )}
         </>

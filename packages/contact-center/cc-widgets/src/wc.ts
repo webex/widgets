@@ -12,7 +12,12 @@ const WebIncomingTask = r2wc(IncomingTask, {
   },
 });
 
-const WebTaskList = r2wc(TaskList);
+const WebTaskList = r2wc(TaskList, {
+  props: {
+    onTaskAccepted: 'function',
+    onTaskDeclined: 'function',
+  },
+});
 
 const WebStationLogin = r2wc(StationLogin, {
   props: {

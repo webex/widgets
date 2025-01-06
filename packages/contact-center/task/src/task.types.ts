@@ -25,6 +25,16 @@ export interface TaskProps {
   onDeclined?: () => void;
 
   /**
+   * Handler for task accepted in TaskList
+   */
+  onTaskAccepted?: (task: ITask) => void;
+
+  /**
+   * Handler for task declined in TaskList
+   */
+  onTaskDeclined?: (task: ITask) => void;
+
+  /**
    * accept incoming task action
    */
   accept: () => void;
@@ -33,6 +43,16 @@ export interface TaskProps {
    * decline incoming task action
    */
   decline: () => void;
+
+  /**
+   * accept task from task list
+   */
+  acceptTask: (task: ITask) => void;
+
+  /**
+   * decline task from tasklist
+   */
+  declineTask: (task: ITask) => void;
 
   /**
    * Flag to determine if the user is logged in with a browser option
@@ -71,13 +91,15 @@ export interface TaskProps {
 }
 
 export type UseTaskProps = Pick<TaskProps, 'cc' | 'onAccepted' | 'onDeclined' | 'selectedLoginOption'>;
-export type UseTaskListProps = Pick<TaskProps, 'cc'>;
+export type UseTaskListProps = Pick<TaskProps, 'cc' | 'selectedLoginOption' | 'onTaskAccepted' | 'onTaskDeclined'>;
 export type IncomingTaskPresentationalProps = Pick<
   TaskProps,
   'currentTask' | 'isBrowser' | 'isAnswered' | 'isEnded' | 'isMissed' | 'accept' | 'decline' | 'audioRef'
 >;
 export type IncomingTaskProps = Pick<TaskProps, 'onAccepted' | 'onDeclined'>;
-export type TaskListPresentationalProps = Pick<TaskProps, 'taskList'>;
+export type TaskListProps = Pick<TaskProps, 'onTaskAccepted' | 'onTaskDeclined'>;
+
+export type TaskListPresentationalProps = Pick<TaskProps, 'taskList' | 'isBrowser' | 'acceptTask' | 'declineTask'>;
 export enum TASK_EVENTS {
   TASK_INCOMING = 'task:incoming',
   TASK_ASSIGNED = 'task:assigned',

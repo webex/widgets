@@ -6,15 +6,11 @@ import TaskListPresentational from './task-list.presentational';
 import {useTaskList} from '../helper';
 
 const TaskList: React.FunctionComponent = observer(() => {
-  const {cc} = store;
+  const {cc, selectedLoginOption} = store;
 
-  const {taskList} = useTaskList({cc});
+  const result = useTaskList({cc, selectedLoginOption});
 
-  const props = {
-    taskList,
-  };
-
-  return <TaskListPresentational {...props} />;
+  return <TaskListPresentational {...result} />;
 });
 
 export {TaskList};

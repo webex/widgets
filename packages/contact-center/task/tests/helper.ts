@@ -20,6 +20,8 @@ const taskMock = {
 
 const onAccepted = jest.fn();
 const onDeclined = jest.fn();
+const onTaskAccepted = jest.fn();
+const onTaskDeclined = jest.fn();
 
 describe('useIncomingTask Hook', () => {
   let consoleErrorMock;
@@ -137,6 +139,40 @@ describe('useTaskList Hook', () => {
   afterEach(() => {
     jest.clearAllMocks();
     consoleErrorMock.mockRestore();
+  });
+
+  it('should check onTaskAccepted and onTaskDeclined callbacks', async () => {
+    const {result} = renderHook(() => useTaskList({cc: ccMock, onTaskAccepted, onTaskDeclined}));
+
+    act(() => {
+      result.current.acceptTask(taskMock);
+      result.current.declineTask(taskMock);
+    });
+
+    await waitFor(() => {
+      expect(onTaskAccepted).toHaveBeenCalledWith(taskMock);
+      expect(onTaskDeclined).toHaveBeenCalledWith(taskMock);
+    });
+
+    // Ensure no errors are logged
+    expect(consoleErrorMock).not.toHaveBeenCalled();
+  });
+
+  it('should not call onTaskAccepted or onTaskDeclined if they are not provided', async () => {
+    const {result} = renderHook(() => useTaskList({cc: ccMock, onTaskAccepted: null, onTaskDeclined: null}));
+
+    act(() => {
+      result.current.acceptTask(taskMock);
+      result.current.declineTask(taskMock);
+    });
+
+    await waitFor(() => {
+      expect(onTaskAccepted).not.toHaveBeenCalled();
+      expect(onTaskDeclined).not.toHaveBeenCalled();
+    });
+
+    // Ensure no errors are logged
+    expect(consoleErrorMock).not.toHaveBeenCalled();
   });
 
   it('should add tasks to the list on TASK_INCOMING event', async () => {
