@@ -47,7 +47,7 @@ export const useUserState = ({ idleCodes, agentId, cc }) => {
           id: data.auxCodeId?.trim() !== '' ? data.auxCodeId : DEFAULT_CODE
         });
 
-        const startTime = data.eventTime;
+        const startTime = data.lastStateChangeTimestamp;
         setElapsedTime(0);
         worker.postMessage({ type: 'reset', startTime }); // Reset the worker timer with the new start time
       }
@@ -76,12 +76,12 @@ export const useUserState = ({ idleCodes, agentId, cc }) => {
     setCurrentState(selectedCode);
     const chosenState = state === 'Available' ? 'Available' : 'Idle';
     cc.setAgentState({ state: chosenState, auxCodeId, agentId, lastStateChangeReason: state })
-      .then((response) => {
-        setErrorMessage('');
-        const startTime = Date.now();
-        setElapsedTime(0);
-        workerRef.current.postMessage({ type: 'reset', startTime }); // Reset the worker timer with the new start time
-      })
+      // .then((response) => {
+      //   setErrorMessage('');
+      //   const startTime = Date.now();
+      //   setElapsedTime(0);
+      //   workerRef.current.postMessage({ type: 'reset', startTime }); // Reset the worker timer with the new start time
+      // })
       .catch((error) => {
         setCurrentState(oldState);
         setErrorMessage(error.toString());
