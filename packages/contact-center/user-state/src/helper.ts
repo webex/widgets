@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 // TODO: Export & Import this AGENT_STATE_CHANGE constant from SDK
 import { AGENT_STATE_CHANGE } from './constants';
 
@@ -7,7 +7,7 @@ export const useUserState = ({ idleCodes, agentId, cc }) => {
   const [errorMessage, setErrorMessage] = useState('');
   const [elapsedTime, setElapsedTime] = useState(0);
   const [currentState, setCurrentState] = useState({});
-  const workerRef = useRef(null);
+  let worker;
 
   // Initialize the Web Worker using a Blob
   const workerScript = `
@@ -32,8 +32,7 @@ export const useUserState = ({ idleCodes, agentId, cc }) => {
   useEffect(() => {
     const blob = new Blob([workerScript], { type: 'application/javascript' });
     const workerUrl = URL.createObjectURL(blob);
-    const worker = new Worker(workerUrl);
-    workerRef.current = worker;
+    worker = new Worker(workerUrl);
 
     worker.postMessage({ type: 'start', startTime: Date.now() });
     worker.onmessage = (event) => {
@@ -76,12 +75,6 @@ export const useUserState = ({ idleCodes, agentId, cc }) => {
     setCurrentState(selectedCode);
     const chosenState = state === 'Available' ? 'Available' : 'Idle';
     cc.setAgentState({ state: chosenState, auxCodeId, agentId, lastStateChangeReason: state })
-      // .then((response) => {
-      //   setErrorMessage('');
-      //   const startTime = Date.now();
-      //   setElapsedTime(0);
-      //   workerRef.current.postMessage({ type: 'reset', startTime }); // Reset the worker timer with the new start time
-      // })
       .catch((error) => {
         setCurrentState(oldState);
         setErrorMessage(error.toString());
