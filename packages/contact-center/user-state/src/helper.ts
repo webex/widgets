@@ -1,40 +1,41 @@
-import {useState, useEffect} from "react";
+import { useState, useEffect, useRef } from "react";
 // TODO: Export & Import this AGENT_STATE_CHANGE constant from SDK
-import {AGENT_STATE_CHANGE} from './constants';
+import { AGENT_STATE_CHANGE } from './constants';
 
-export const useUserState = ({idleCodes, agentId, cc}) => {
-
+export const useUserState = ({ idleCodes, agentId, cc }) => {
   const [isSettingAgentStatus, setIsSettingAgentStatus] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [elapsedTime, setElapsedTime] = useState(0);
   const [currentState, setCurrentState] = useState({});
-  let worker;
+  const workerRef = useRef(null);
 
   // Initialize the Web Worker using a Blob
   const workerScript = `
-    let startTime = Date.now();
     let intervalId;
 
+    const startTimer = (startTime) => {
+      if (intervalId) clearInterval(intervalId);
+      intervalId = setInterval(() => {
+        const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+        self.postMessage(elapsedTime);
+      }, 1000);
+    };
+
     self.onmessage = (event) => {
-      if (event.data === 'start') {
-        if (intervalId) clearInterval(intervalId);
-        startTime = Date.now();
-        intervalId = setInterval(() => {
-          const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
-          self.postMessage(elapsedTime);
-        }, 1000);
-      } else if (event.data === 'reset') {
-        startTime = Date.now();
+      if (event.data.type === 'start' || event.data.type === 'reset') {
+        const startTime = event.data.startTime;
+        startTimer(startTime);
       }
     };
   `;
 
-  const blob = new Blob([workerScript], { type: 'application/javascript' });
-  const workerUrl = URL.createObjectURL(blob);
-  worker = new Worker(workerUrl);
-
   useEffect(() => {
-    worker.postMessage('start');
+    const blob = new Blob([workerScript], { type: 'application/javascript' });
+    const workerUrl = URL.createObjectURL(blob);
+    const worker = new Worker(workerUrl);
+    workerRef.current = worker;
+
+    worker.postMessage({ type: 'start', startTime: Date.now() });
     worker.onmessage = (event) => {
       setElapsedTime(event.data);
     };
@@ -45,7 +46,10 @@ export const useUserState = ({idleCodes, agentId, cc}) => {
         setCurrentState({
           id: data.auxCodeId?.trim() !== '' ? data.auxCodeId : DEFAULT_CODE
         });
-        worker.postMessage('reset'); // Reset the worker timer
+
+        const startTime = data.eventTime;
+        setElapsedTime(0);
+        worker.postMessage({ type: 'reset', startTime }); // Reset the worker timer with the new start time
       }
     };
     
@@ -71,16 +75,20 @@ export const useUserState = ({idleCodes, agentId, cc}) => {
     };
     setCurrentState(selectedCode);
     const chosenState = state === 'Available' ? 'Available' : 'Idle';
-    cc.setAgentState({state: chosenState, auxCodeId, agentId, lastStateChangeReason: state}).then((response) => {
-      setErrorMessage('');
-      setElapsedTime(0);
-      worker.postMessage('reset'); // Reset the worker timer
-    }).catch(error => {
-      setCurrentState(oldState);
-      setErrorMessage(error.toString());
-    }).finally(() => {
-      setIsSettingAgentStatus(false);
-    });
+    cc.setAgentState({ state: chosenState, auxCodeId, agentId, lastStateChangeReason: state })
+      .then((response) => {
+        setErrorMessage('');
+        const startTime = Date.now();
+        setElapsedTime(0);
+        workerRef.current.postMessage({ type: 'reset', startTime }); // Reset the worker timer with the new start time
+      })
+      .catch((error) => {
+        setCurrentState(oldState);
+        setErrorMessage(error.toString());
+      })
+      .finally(() => {
+        setIsSettingAgentStatus(false);
+      });
   };
 
   return {
