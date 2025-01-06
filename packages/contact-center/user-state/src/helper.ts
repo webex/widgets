@@ -6,7 +6,6 @@ export const useUserState = ({idleCodes, agentId, cc}) => {
 
   const [isSettingAgentStatus, setIsSettingAgentStatus] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-
   const [elapsedTime, setElapsedTime] = useState(0);
   const [currentState, setCurrentState] = useState({});
   let worker;
@@ -46,7 +45,7 @@ export const useUserState = ({idleCodes, agentId, cc}) => {
         setCurrentState({
           id: data.auxCodeId?.trim() !== '' ? data.auxCodeId : DEFAULT_CODE
         });
-        setElapsedTime(0);
+        worker.postMessage('reset'); // Reset the worker timer
       }
     };
     
@@ -55,8 +54,8 @@ export const useUserState = ({idleCodes, agentId, cc}) => {
     return () => {
       worker.terminate();
       cc.off(AGENT_STATE_CHANGE, handleStateChange);
-    }
-  }, []);
+    };
+  }, [currentState]);
 
   const setAgentStatus = (selectedCode) => {
     const {
