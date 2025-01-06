@@ -9,9 +9,10 @@ import '@testing-library/jest-dom';
 jest.mock('@webex/cc-store', () => ({
   cc: {},
   selectedLoginOption: 'BROWSER',
-  onAccepted: jest.fn(),
-  onDeclined: jest.fn(),
 }));
+
+const onAcceptedCb = jest.fn();
+const onDeclinedCb = jest.fn();
 
 describe('IncomingTask Component', () => {
   it('renders IncomingTaskPresentational with correct props', () => {
@@ -29,14 +30,14 @@ describe('IncomingTask Component', () => {
       isBrowser: true,
     });
 
-    render(<IncomingTask />);
+    render(<IncomingTask onAccepted={onAcceptedCb} onDeclined={onDeclinedCb} />);
 
     // Assert that the useIncomingTask hook is called with the correct arguments
     expect(useIncomingTaskSpy).toHaveBeenCalledWith({
       cc: store.cc,
       selectedLoginOption: store.selectedLoginOption,
-      onAccepted: store.onAccepted,
-      onDeclined: store.onDeclined,
+      onAccepted: onAcceptedCb,
+      onDeclined: onDeclinedCb,
     });
   });
 });

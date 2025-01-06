@@ -2,6 +2,8 @@ const accessTokenElem = document.getElementById('access_token_elem');
 const widgetsContainer = document.getElementById('widgets-container');
 const ccStationLogin = document.getElementById('cc-station-login');
 const ccUserState = document.createElement('widget-cc-user-state');
+const ccIncomingTask = document.createElement('widget-cc-incoming-task');
+const ccTaskList = document.createElement('widget-cc-task-list');
 
 if (!ccStationLogin && !ccUserState) {
     console.error('Failed to find the required elements');
@@ -35,6 +37,8 @@ function loginSuccess(){
     console.log('Agent login has been succesful');
     ccUserState.classList.remove('disabled');
     widgetsContainer.appendChild(ccUserState);
+    widgetsContainer.appendChild(ccIncomingTask);
+    widgetsContainer.appendChild(ccTaskList);
 }
 
 function logoutSuccess(){

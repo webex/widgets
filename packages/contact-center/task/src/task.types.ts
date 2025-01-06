@@ -76,6 +76,7 @@ export type IncomingTaskPresentationalProps = Pick<
   TaskProps,
   'currentTask' | 'isBrowser' | 'isAnswered' | 'isEnded' | 'isMissed' | 'accept' | 'decline' | 'audioRef'
 >;
+export type IncomingTaskProps = Pick<TaskProps, 'onAccepted' | 'onDeclined'>;
 export type TaskListPresentationalProps = Pick<TaskProps, 'taskList'>;
 export enum TASK_EVENTS {
   TASK_INCOMING = 'task:incoming',

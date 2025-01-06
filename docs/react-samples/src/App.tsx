@@ -23,6 +23,14 @@ function App() {
     setIsLoggedIn(false);
   };
 
+  const onAccepted = () => {
+    console.log('onAccepted Invoked');
+  };
+
+  const onDeclined = () => {
+    console.log('onDeclined invoked');
+  };
+
   return (
     <>
       <h1>Contact Center widgets in a react app</h1>
@@ -45,9 +53,13 @@ function App() {
       {isSdkReady && (
         <>
           <StationLogin onLogin={onLogin} onLogout={onLogout} />
-          {isLoggedIn && <UserState />}
-          {isLoggedIn && <IncomingTask />}
-          {isLoggedIn && <TaskList />}
+          {isLoggedIn && (
+            <>
+              <UserState />
+              <IncomingTask onAccepted={onAccepted} onDeclined={onDeclined} />
+              <TaskList />
+            </>
+          )}
         </>
       )}
     </>
