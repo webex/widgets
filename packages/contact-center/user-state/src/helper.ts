@@ -14,11 +14,13 @@ export const useUserState = ({idleCodes, agentId, cc}) => {
   // Initialize the Web Worker using a Blob
   const workerScript = `
     let startTime = Date.now();
+    let intervalId;
 
     self.onmessage = (event) => {
       if (event.data === 'start') {
+        if (intervalId) clearInterval(intervalId);
         startTime = Date.now();
-        setInterval(() => {
+        intervalId = setInterval(() => {
           const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
           self.postMessage(elapsedTime);
         }, 1000);
