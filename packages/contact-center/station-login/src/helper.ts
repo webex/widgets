@@ -11,11 +11,8 @@ export const useStationLogin = (props: UseStationLoginProps) => {
   const [logoutSuccess, setLogoutSuccess] = useState<StationLogoutSuccess>();
 
   const login = (teamId: string, loginOption: string, dialNumber: string) => {
-    console.log('inside cc station login function');
-    console.log('inside cc station login', teamId, loginOption, dialNumber);
     cc.stationLogin({teamId, loginOption, dialNumber})
       .then((res: StationLoginSuccess) => {
-        console.log('inside cc station login', teamId, loginOption, dialNumber);
         setLoginSuccess(res);
         if (loginCb) {
           loginCb();
