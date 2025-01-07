@@ -47,5 +47,8 @@
     "testMatch": [
       "**/tooling/tests/*.js"
     ]
+  },
+  "dependencies": {
+    "@webex/cc-widgets": "workspace:^"
   }
 }

@@ -17,6 +17,9 @@
     "test:unit": "jest"
   },
   "dependencies": {
+    "@momentum-ui/web-components": "2.16.6",
+    "@uuip/unified-ui-platform-common-components": "^1.2.32",
+    "@uuip/unified-ui-platform-sdk": "^1.3.14",
     "@webex/cc-store": "workspace:*",
     "mobx-react": "9.1.1",
     "react": "18.3.1",

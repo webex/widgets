@@ -18,7 +18,7 @@ export interface IStationLoginProps {
    */
   teams: Team[];
 
-   /**
+  /**
    * Station login options available for the agent
    */
   loginOptions: string[];
@@ -26,7 +26,7 @@ export interface IStationLoginProps {
   /**
    * Handler to initiate the agent login
    */
-  login: () => void;
+  login: (teamId: string, loginOption: string, dialNumber: string) => void;
 
   /**
    * Handler for agent logout
@@ -43,7 +43,7 @@ export interface IStationLoginProps {
    */
   loginFailure?: Error;
 
-    /**
+  /**
    * Response data received on agent login success
    */
   logoutSuccess?: StationLogoutSuccess;
@@ -57,24 +57,12 @@ export interface IStationLoginProps {
    * Callback function to be invoked once the agent login is successful
    */
   onLogout?: () => void;
-
-  /**
-   * Handler to set device type
-   */
-  setDeviceType: (deviceType: string) => void;
-
-  /**
-   * Handler to set the entered dial number
-   */
-  setDialNumber: (dn: string) => void;
-
-  /**
-   * Handler to set the selected agent team
-   */
-  setTeam: (team: string) => void;
 }
 
-export type StationLoginPresentationalProps = Pick<IStationLoginProps, 'name' | 'teams' | 'loginOptions' | 'login' | 'logout' | 'loginSuccess' | 'loginFailure' | 'logoutSuccess' | 'setDeviceType' | 'setDialNumber' | 'setTeam'>;
+export type StationLoginPresentationalProps = Pick<
+  IStationLoginProps,
+  'name' | 'teams' | 'loginOptions' | 'login' | 'logout' | 'loginSuccess' | 'loginFailure' | 'logoutSuccess'
+>;
 
 export type UseStationLoginProps = Pick<IStationLoginProps, 'cc' | 'onLogin' | 'onLogout'>;
 
