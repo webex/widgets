@@ -9,6 +9,7 @@ jest.mock('@webex/cc-store', () => {
     cc: {},
     teams,
     loginOptions,
+    setSelectedLoginOption: jest.fn(),
   };
 });
 
@@ -58,6 +59,7 @@ describe('useStationLogin Hook', () => {
     };
 
     ccMock.stationLogin.mockResolvedValue(successResponse);
+    const setSelectedLoginOptionSpy = jest.spyOn(require('@webex/cc-store'), 'setSelectedLoginOption');
 
     const {result} = renderHook(() => useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb}));
 
@@ -88,6 +90,47 @@ describe('useStationLogin Hook', () => {
         loginFailure: undefined,
         logoutSuccess: undefined,
       });
+
+      expect(setSelectedLoginOptionSpy).toHaveBeenCalledWith(loginParams.loginOption);
+    });
+  });
+
+  it('should not call setSelectedLoginOptionSpy if login fails', async () => {
+    const errorResponse = new Error('Login failed');
+    ccMock.stationLogin.mockRejectedValue(errorResponse);
+    const setSelectedLoginOptionSpy = jest.spyOn(require('@webex/cc-store'), 'setSelectedLoginOption');
+
+    const {result} = renderHook(() => useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb}));
+
+    result.current.setDeviceType(loginParams.loginOption);
+    result.current.setDialNumber(loginParams.dialNumber);
+    result.current.setTeam(loginParams.teamId);
+
+    act(() => {
+      result.current.login();
+    });
+
+    waitFor(() => {
+      expect(ccMock.stationLogin).toHaveBeenCalledWith({
+        teamId: loginParams.teamId,
+        loginOption: loginParams.loginOption,
+        dialNumber: loginParams.dialNumber,
+      });
+      expect(loginCb).not.toHaveBeenCalledWith();
+
+      expect(result.current).toEqual({
+        name: 'StationLogin',
+        setDeviceType: expect.any(Function),
+        setDialNumber: expect.any(Function),
+        setTeam: expect.any(Function),
+        login: expect.any(Function),
+        logout: expect.any(Function),
+        loginSuccess: undefined,
+        loginFailure: errorResponse,
+        logoutSuccess: undefined,
+      });
+
+      expect(setSelectedLoginOptionSpy).not.toHaveBeenCalled();
     });
   });
 
