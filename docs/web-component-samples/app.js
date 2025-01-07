@@ -27,6 +27,10 @@ function initWidgets(){
     }).then(() => {
         ccStationLogin.onLogin = loginSuccess;
         ccStationLogin.onLogout = logoutSuccess;
+        ccIncomingTask.onAccepted = onAccepted;
+        ccIncomingTask.onDeclined = onDeclined;
+        ccTaskList.onTaskAccepted = onTaskAccepted;
+        ccTaskList.onTaskDeclined = onTaskDeclined;
         ccStationLogin.classList.remove('disabled');
     }).catch((error) => {
         console.error('Failed to initialize widgets:', error);
@@ -45,3 +49,19 @@ function logoutSuccess(){
     console.log('Agent logout has been succesful');
     ccUserState.classList.add('disabled');
 }
+
+function onAccepted(){
+    console.log('onAccepted Invoked');
+};
+
+function onDeclined(){
+    console.log('onDeclined invoked');
+};
+
+function onTaskAccepted(){
+    console.log('onTaskAccepted invoked');
+};
+
+function onTaskDeclined(){
+    console.log('onTaskDeclined invoked');
+};
