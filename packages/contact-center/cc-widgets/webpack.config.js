@@ -17,4 +17,8 @@ module.exports = merge(baseConfig, {
     filename: '[name].js', // Set the output filename to index.js
     libraryTarget: 'commonjs2',
   },
+  externals: {
+    react: 'react',
+    'react-dom': 'react-dom'
+  }
 });
