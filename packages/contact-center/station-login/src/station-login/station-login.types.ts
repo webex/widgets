@@ -1,4 +1,4 @@
-import {AgentLogin, IContactCenter, StationLoginSuccess, StationLogoutSuccess, Team} from '@webex/plugin-cc';
+import {AgentLogin, IContactCenter, StationLoginSuccess, StationLogoutSuccess, Team, ILogger} from '@webex/plugin-cc';
 /**
  * Interface representing the properties for the Station Login component.
  */
@@ -72,10 +72,15 @@ export interface IStationLoginProps {
    * Handler to set the selected agent team
    */
   setTeam: (team: string) => void;
+
+  /**
+   * The logger instance from SDK
+   */
+  logger: ILogger;
 }
 
 export type StationLoginPresentationalProps = Pick<IStationLoginProps, 'name' | 'teams' | 'loginOptions' | 'login' | 'logout' | 'loginSuccess' | 'loginFailure' | 'logoutSuccess' | 'setDeviceType' | 'setDialNumber' | 'setTeam'>;
 
-export type UseStationLoginProps = Pick<IStationLoginProps, 'cc' | 'onLogin' | 'onLogout'>;
+export type UseStationLoginProps = Pick<IStationLoginProps, 'cc' | 'onLogin' | 'onLogout' | 'logger'>;
 
 export type StationLoginProps = Pick<IStationLoginProps, 'onLogin' | 'onLogout'>;

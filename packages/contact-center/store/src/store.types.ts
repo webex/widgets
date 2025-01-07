@@ -1,7 +1,15 @@
-import {AgentLogin, IContactCenter, Profile, Team} from '@webex/plugin-cc';
+import {AgentLogin, IContactCenter, Profile, Team, LogContext} from '@webex/plugin-cc';
+
+type ILogger = {
+    log: (message: string, context?: LogContext) => void;
+    info: (message: string, context?: LogContext) => void;
+    warn: (message: string, context?: LogContext) => void;
+    trace: (message: string, context?: LogContext) => void;
+    error: (message: string, context?: LogContext) => void;
+}
 
 interface WithWebex {
-    webex: { cc: IContactCenter };
+    webex: { cc: IContactCenter, logger: ILogger };
 }
 
 interface WithWebexConfig {
@@ -24,10 +32,11 @@ interface IStore {
     cc: IContactCenter;
     idleCodes: IdleCode[];
     agentId: string;
-  
+    logger: ILogger;
     registerCC(webex: WithWebex['webex']): Promise<Profile>;
     init(params: InitParams): Promise<void>;
 }
+
 
 export type {
     IContactCenter,
@@ -37,5 +46,6 @@ export type {
     WithWebex,
     IdleCode,
     InitParams,
-    IStore
+    IStore,
+    ILogger,
 }

@@ -7,13 +7,15 @@ import {
   WithWebex,
   IdleCode,
   InitParams,
-  IStore
+  IStore,
+  ILogger
 } from './store.types';
 
 class Store implements IStore {
   teams: Team[] = [];
   loginOptions: string[] = [];
   cc: IContactCenter;
+  logger: ILogger;
   idleCodes: IdleCode[] = [];
   agentId: string = '';
 
@@ -23,13 +25,17 @@ class Store implements IStore {
 
   registerCC(webex: WithWebex['webex']): Promise<void> {
     this.cc = webex.cc;
+    this.logger = this.cc.LoggerProxy;
     return this.cc.register().then((response: Profile) => {
       this.teams = response.teams;
       this.loginOptions = response.loginVoiceOptions;
       this.idleCodes = response.idleCodes;
       this.agentId = response.agentId;
     }).catch((error) => {
-      console.error('Error registering contact center', error);
+      this.logger.error(`Error registering contact center: ${error}`, {
+        module: 'cc-store#store.ts',
+        method: 'registerCC',
+      });
       return Promise.reject(error);
     });
   }

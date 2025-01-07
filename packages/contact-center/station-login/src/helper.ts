@@ -6,6 +6,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
   const cc = props.cc;
   const loginCb = props.onLogin;
   const logoutCb = props.onLogout;
+  const logger = props.logger;
   const [dialNumber, setDialNumber] = useState('');
   const [deviceType, setDeviceType] = useState('');
   const [team, setTeam] = useState('');
@@ -21,7 +22,10 @@ export const useStationLogin = (props: UseStationLoginProps) => {
           loginCb();
         }
       }).catch((error: Error) => {
-        console.error(error);
+        logger.error(`Error logging in: ${error}`, {
+          module: 'widget-station-login#helper.ts',
+          method: 'login',
+        });
         setLoginFailure(error);
       });
   };
@@ -34,7 +38,10 @@ export const useStationLogin = (props: UseStationLoginProps) => {
           logoutCb();
         }
       }).catch((error: Error) => {
-        console.error(error);
+        logger.error(`Error logging out: ${error}`, {
+          module: 'widget-station-login#helper.ts',
+          method: 'logout',
+        });
       });
   };
 
