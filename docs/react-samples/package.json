@@ -3,8 +3,10 @@
   "version": "1.0.0",
   "main": "dist/index.js",
   "scripts": {
+    "clean": "rm -rf dist && rm -rf node_modules",
+    "clean:dist": "rm -rf dist",
     "build": "tsc --project tsconfig.json",
-    "build:src": "webpack && yarn run build",
+    "build:src": "webpack",
     "build:watch": "webpack --watch",
     "serve": "webpack serve"
   },
@@ -17,9 +19,8 @@
     "babel-loader": "^9.2.1",
     "file-loader": "^6.2.0",
     "html-webpack-plugin": "^5.6.3",
-    "mobx-react": "^9.1.1",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
     "ts-loader": "^9.5.1",
     "typescript": "^5.6.3",
     "webpack": "^5.94.0",

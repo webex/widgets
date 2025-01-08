@@ -12,6 +12,8 @@
     "webpack-merge": "6.0.1"
   },
   "scripts": {
+    "clean": "rm -rf dist && rm -rf node_modules",
+    "clean:dist": "rm -rf dist",
     "serve": "open index.html",
     "build:src": "webpack"
   }
