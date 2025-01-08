@@ -10,6 +10,9 @@ const StationLogin: React.FunctionComponent<StationLoginProps> = observer(({onLo
   const {cc, teams, loginOptions} = store;
   const result = useStationLogin({cc, onLogin, onLogout});
 
+  console.log('StationLogin: Teams >>', teams);
+  console.log('StationLogin: Login Options >>', loginOptions);
+
   const props = {
     ...result,
     teams,

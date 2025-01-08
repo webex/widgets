@@ -3,6 +3,7 @@ import Webex from 'webex';
 import {IContactCenter, Profile, Team, WithWebex, IdleCode, InitParams, IStore} from './store.types';
 
 class Store implements IStore {
+  private static instance: Store;
   teams: Team[] = [];
   loginOptions: string[] = [];
   cc: IContactCenter;
@@ -12,6 +13,16 @@ class Store implements IStore {
 
   constructor() {
     makeAutoObservable(this, {cc: observable.ref});
+  }
+
+  public static getInstance(): Store {
+    if (!Store.instance) {
+      console.log('Creating new store instance');
+      Store.instance = new Store();
+    }
+
+    console.log('Returning store instance');
+    return Store.instance;
   }
 
   setSelectedLoginOption(option: string): void {
@@ -66,5 +77,5 @@ class Store implements IStore {
   }
 }
 
-const store = new Store();
+const store = Store.getInstance();
 export default store;
