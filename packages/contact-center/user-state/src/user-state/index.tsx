@@ -1,6 +1,6 @@
 import React from 'react';
 import store from '@webex/cc-store';
-import {observer} from 'mobx-react-lite';
+import {observer} from 'mobx-react';
 
 import {useUserState} from '../helper';
 import UserStatePresentational from './user-state.presentational';

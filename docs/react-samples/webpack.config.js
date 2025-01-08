@@ -11,17 +11,6 @@ module.exports = merge(baseConfig, {
     filename: 'bundle.js', // Output bundle file name
     clean: true, // Clean dist folder before each build
   },
-  // module: {
-  //   rules: [
-  //     {
-  //       test: /\.(js|jsx)$/, // Match JS and JSX files
-  //       exclude: /node_modules/,
-  //       use: {
-  //         loader: 'babel-loader', // Use Babel to transpile JavaScript and JSX
-  //       },
-  //     },
-  //   ],
-  // },
   plugins: [
     new HtmlWebpackPlugin({
       template: './public/index.html', // Template HTML file

@@ -11,6 +11,7 @@ module.exports = merge(baseConfig, {
   },
   externals: {
     react: 'react',
-    'react-dom': 'react-dom'
+    'react-dom': 'react-dom',
+    '@webex/cc-store': '@webex/cc-store',
   }
 });

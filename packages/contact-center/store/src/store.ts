@@ -11,6 +11,7 @@ import {
 } from './store.types';
 
 class Store implements IStore {
+  private static instance: Store;
   teams: Team[] = [];
   loginOptions: string[] = [];
   cc: IContactCenter;
@@ -21,11 +22,26 @@ class Store implements IStore {
     makeAutoObservable(this, {cc: observable.ref});
   }
 
+  public static getInstance(): Store {
+    if (!Store.instance) {
+      console.log('Creating new store instance');
+      Store.instance = new Store();
+    }
+
+    console.log('Returning store instance');
+    return Store.instance;
+  }
+
+
   registerCC(webex: WithWebex['webex']): Promise<void> {
     this.cc = webex.cc;
     return this.cc.register().then((response: Profile) => {
       this.teams = response.teams;
       this.loginOptions = response.loginVoiceOptions;
+
+      console.log('Teams:', this.teams);
+      console.log('Login Options:', this.loginOptions);
+
       this.idleCodes = response.idleCodes;
       this.agentId = response.agentId;
     }).catch((error) => {
@@ -66,5 +82,6 @@ class Store implements IStore {
   }
 }
 
-const store = new Store();
+// const store = new Store();
+const store = Store.getInstance();
 export default store;

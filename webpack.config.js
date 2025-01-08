@@ -16,11 +16,7 @@ module.exports = {
       vm: require.resolve('vm-browserify'),
       util: require.resolve('util/'),
       url: require.resolve('url/'),
-    },
-    alias: {
-      react: path.resolve(__dirname, 'node_modules/react'),
-      'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
-    },
+    }
   },
   plugins: [
     new webpack.ProvidePlugin({
@@ -34,6 +30,20 @@ module.exports = {
         exclude: /node_modules/,
         use: 'ts-loader',
       },
+      {
+        test: /\.css$/,
+        exclude: /node_modules/,
+        use: ['style-loader', 'css-loader'],
+      },
+      {
+        test: /\.scss$/,
+        use: [
+          "style-loader",  // Injects styles into DOM
+          "css-loader",    // Turns CSS into CommonJS
+          "sass-loader"    // Compiles Sass to CSS
+        ],
+        exclude: /node_modules/
+      }
     ],
   },
 };
