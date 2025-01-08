@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.6](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.5...v1.28.0-ccwidgets.6) (2025-01-08)
+
+
+### Features
+
+* taskList and IncomingTask widgets added ([#348](https://github.com/webex/widgets/issues/348)) ([ce3a619](https://github.com/webex/widgets/commit/ce3a619dbbb1e2e5321a94a7ce2798f6217326b9))
+
 # [1.28.0-ccwidgets.5](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.4...v1.28.0-ccwidgets.5) (2024-12-23)
 
 
