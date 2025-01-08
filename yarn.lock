@@ -5465,7 +5465,7 @@ __metadata:
     react-dom: "npm:18.3.1"
     ts-loader: "npm:9.5.1"
     typescript: "npm:5.6.3"
-    webex: "npm:3.7.0-wxcc.4"
+    webex: "npm:3.7.0-wxcc.5"
     webpack: "npm:5.94.0"
     webpack-cli: "npm:5.1.4"
     webpack-merge: "npm:6.0.1"
