@@ -5435,7 +5435,37 @@ __metadata:
     react-dom: "npm:18.3.1"
     ts-loader: "npm:9.5.1"
     typescript: "npm:5.6.3"
-    webex: "npm:3.7.0-wxcc.3"
+    webex: "npm:3.7.0-wxcc.4"
+    webpack: "npm:5.94.0"
+    webpack-cli: "npm:5.1.4"
+    webpack-merge: "npm:6.0.1"
+  languageName: unknown
+  linkType: soft
+
+"@webex/cc-task@workspace:*, @webex/cc-task@workspace:packages/contact-center/task":
+  version: 0.0.0-use.local
+  resolution: "@webex/cc-task@workspace:packages/contact-center/task"
+  dependencies:
+    "@babel/core": "npm:7.25.2"
+    "@babel/preset-env": "npm:7.25.4"
+    "@babel/preset-react": "npm:7.24.7"
+    "@babel/preset-typescript": "npm:7.25.9"
+    "@testing-library/dom": "npm:10.4.0"
+    "@testing-library/jest-dom": "npm:6.6.2"
+    "@testing-library/react": "npm:16.0.1"
+    "@types/jest": "npm:29.5.14"
+    "@types/react-test-renderer": "npm:18"
+    "@webex/cc-store": "workspace:*"
+    babel-jest: "npm:29.7.0"
+    babel-loader: "npm:9.2.1"
+    file-loader: "npm:6.2.0"
+    jest: "npm:29.7.0"
+    jest-environment-jsdom: "npm:29.7.0"
+    react: "npm:18.3.1"
+    react-dom: "npm:18.3.1"
+    ts-loader: "npm:9.5.1"
+    typescript: "npm:5.6.3"
+    webex: "npm:3.7.0-wxcc.4"
     webpack: "npm:5.94.0"
     webpack-cli: "npm:5.1.4"
     webpack-merge: "npm:6.0.1"
@@ -5488,6 +5518,7 @@ __metadata:
     "@types/react-test-renderer": "npm:18"
     "@webex/cc-station-login": "workspace:*"
     "@webex/cc-store": "workspace:*"
+    "@webex/cc-task": "workspace:*"
     "@webex/cc-user-state": "workspace:*"
     babel-jest: "npm:29.7.0"
     babel-loader: "npm:9.2.1"
@@ -6382,9 +6413,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/plugin-cc@npm:3.5.0-wxcc.9":
-  version: 3.5.0-wxcc.9
-  resolution: "@webex/plugin-cc@npm:3.5.0-wxcc.9"
+"@webex/plugin-cc@npm:3.5.0-wxcc.10":
+  version: 3.5.0-wxcc.10
+  resolution: "@webex/plugin-cc@npm:3.5.0-wxcc.10"
   dependencies:
     "@types/platform": "npm:1.3.4"
     "@webex/calling": "npm:3.6.0-wxcc.1"
@@ -6392,7 +6423,7 @@ __metadata:
     "@webex/webex-core": "npm:3.5.0-wxcc.1"
     buffer: "npm:6.0.3"
     jest-html-reporters: "npm:3.0.11"
-  checksum: 10c0/238585455185112cbe13460a4477a71346c1a33a1b083704eb45b3ed737a6001f8dd221c8914160adc42482bcbdfdbd53fed9ec5a81d83a354e6e9efd573f786
+  checksum: 10c0/e0ab6626f25c269c914b69128ccecdbfea6382a62ba42fd2d24992538700bda23629323e5eefca87e0afcf57fd3f5981df94c1868e3d53498c5536060dc091f1
   languageName: node
   linkType: hard
 
@@ -25907,9 +25938,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webex@npm:3.7.0-wxcc.3":
-  version: 3.7.0-wxcc.3
-  resolution: "webex@npm:3.7.0-wxcc.3"
+"webex@npm:3.7.0-wxcc.4":
+  version: 3.7.0-wxcc.4
+  resolution: "webex@npm:3.7.0-wxcc.4"
   dependencies:
     "@babel/polyfill": "npm:^7.12.1"
     "@babel/runtime-corejs2": "npm:^7.14.8"
@@ -25923,7 +25954,7 @@ __metadata:
     "@webex/internal-plugin-voicea": "npm:3.5.0-wxcc.1"
     "@webex/plugin-attachment-actions": "npm:3.5.0-wxcc.1"
     "@webex/plugin-authorization": "npm:3.5.0-wxcc.1"
-    "@webex/plugin-cc": "npm:3.5.0-wxcc.9"
+    "@webex/plugin-cc": "npm:3.5.0-wxcc.10"
     "@webex/plugin-device-manager": "npm:3.5.0-wxcc.1"
     "@webex/plugin-logger": "npm:3.5.0-wxcc.1"
     "@webex/plugin-meetings": "npm:3.5.0-wxcc.1"
@@ -25937,7 +25968,7 @@ __metadata:
     "@webex/storage-adapter-local-storage": "npm:3.5.0-wxcc.1"
     "@webex/webex-core": "npm:3.5.0-wxcc.1"
     lodash: "npm:^4.17.21"
-  checksum: 10c0/ee83226f0d884db685b86fadf514c2cddfcbf91f8329d691be4132828e29477a6551bfebfe82a510b24b223319d0eb6badb7322d10713fec1c302a879a253e9d
+  checksum: 10c0/a2312fcaf3600dbe6eff1e6f7558b20dd029f67367d23c360d5f66619b7d472bade99a96f9de3cd0e0b6efb6bb0083e67253c5ecfdc4e643190b011c34ddefb4
   languageName: node
   linkType: hard
 
