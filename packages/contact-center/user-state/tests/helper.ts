@@ -15,15 +15,30 @@ describe('useUserState Hook', () => {
 
   const agentId = 'agent123';
 
+  let workerMock;
+
   beforeEach(() => {
     jest.useFakeTimers();
     mockCC.setAgentState.mockReset();
     mockCC.on.mockReset();
     mockCC.off.mockReset();
+
+    // Mocking the Web Worker
+    workerMock = {
+      postMessage: jest.fn(),
+      terminate: jest.fn(),
+      onmessage: null,
+    };
+
+    global.Worker = jest.fn(() => workerMock);
+
+    // Mocking URL.createObjectURL
+    global.URL.createObjectURL = jest.fn(() => 'blob:http://localhost:3000/12345');
   });
 
   afterEach(() => {
     jest.useRealTimers();
+    jest.clearAllMocks();
   });
 
   it('should initialize with default values', () => {
@@ -44,7 +59,11 @@ describe('useUserState Hook', () => {
     const { result } = renderHook(() => useUserState({ idleCodes, agentId, cc: mockCC }));
 
     act(() => {
-      jest.advanceTimersByTime(3000);
+      workerMock.onmessage({ data: 1 });
+      jest.advanceTimersByTime(1000);
+      workerMock.onmessage({ data: 2 });
+      jest.advanceTimersByTime(1000);
+      workerMock.onmessage({ data: 3 });
     });
 
     expect(result.current.elapsedTime).toBe(3);
@@ -55,12 +74,24 @@ describe('useUserState Hook', () => {
     const { result } = renderHook(() => useUserState({ idleCodes, agentId, cc: mockCC }));
 
     act(() => {
-      result.current.setAgentStatus(idleCodes[1]);
-      jest.advanceTimersByTime(3000);
+      workerMock.onmessage({ data: 1 });
+      jest.advanceTimersByTime(1000);
+      workerMock.onmessage({ data: 2 });
+      jest.advanceTimersByTime(1000);
+      workerMock.onmessage({ data: 3 });
     });
 
     await waitFor(() => {
       expect(result.current.elapsedTime).toBe(3);
+    });
+
+    act(() => {
+      result.current.setAgentStatus(idleCodes[0]);
+      workerMock.onmessage({ data: 0 });
+    });
+
+    await waitFor(() => {
+      expect(result.current.elapsedTime).toBe(0);
     });
   });
 

@@ -1,21 +1,43 @@
-import {useState, useEffect} from "react";
+import { useState, useEffect } from "react";
 // TODO: Export & Import this AGENT_STATE_CHANGE constant from SDK
-import {AGENT_STATE_CHANGE} from './constants';
+import { AGENT_STATE_CHANGE } from './constants';
 
-export const useUserState = ({idleCodes, agentId, cc}) => {
-
+export const useUserState = ({ idleCodes, agentId, cc }) => {
   const [isSettingAgentStatus, setIsSettingAgentStatus] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-
   const [elapsedTime, setElapsedTime] = useState(0);
   const [currentState, setCurrentState] = useState({});
+  let worker;
+
+  // Initialize the Web Worker using a Blob
+  const workerScript = `
+    let intervalId;
+
+    const startTimer = (startTime) => {
+      if (intervalId) clearInterval(intervalId);
+      intervalId = setInterval(() => {
+        const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+        self.postMessage(elapsedTime);
+      }, 1000);
+    };
+
+    self.onmessage = (event) => {
+      if (event.data.type === 'start' || event.data.type === 'reset') {
+        const startTime = event.data.startTime;
+        startTimer(startTime);
+      }
+    };
+  `;
 
   useEffect(() => {
-    // Reset the timer whenever the component mounts or the state changes
-    setElapsedTime(0);
-    let timer = setInterval(() => {
-      setElapsedTime(prevTime => prevTime + 1);
-    }, 1000);
+    const blob = new Blob([workerScript], { type: 'application/javascript' });
+    const workerUrl = URL.createObjectURL(blob);
+    worker = new Worker(workerUrl);
+
+    worker.postMessage({ type: 'start', startTime: Date.now() });
+    worker.onmessage = (event) => {
+      setElapsedTime(event.data);
+    };
 
     const handleStateChange = (data) => {
       if (data && typeof data === 'object' && data.type === 'AgentStateChangeSuccess') {
@@ -23,19 +45,20 @@ export const useUserState = ({idleCodes, agentId, cc}) => {
         setCurrentState({
           id: data.auxCodeId?.trim() !== '' ? data.auxCodeId : DEFAULT_CODE
         });
+
+        const startTime = data.lastStateChangeTimestamp;
         setElapsedTime(0);
+        worker.postMessage({ type: 'reset', startTime }); // Reset the worker timer with the new start time
       }
     };
     
     cc.on(AGENT_STATE_CHANGE, handleStateChange);
 
-    // Cleanup the timer on component unmount
     return () => {
-      clearInterval(timer);
-      timer = null;
+      worker.terminate();
       cc.off(AGENT_STATE_CHANGE, handleStateChange);
-    }
-  }, []);
+    };
+  }, [currentState]);
 
   const setAgentStatus = (selectedCode) => {
     const {
@@ -51,15 +74,14 @@ export const useUserState = ({idleCodes, agentId, cc}) => {
     };
     setCurrentState(selectedCode);
     const chosenState = state === 'Available' ? 'Available' : 'Idle';
-    cc.setAgentState({state: chosenState, auxCodeId, agentId, lastStateChangeReason: state}).then((response) => {
-      setErrorMessage('');
-      setElapsedTime(0);
-    }).catch(error => {
-      setCurrentState(oldState);
-      setErrorMessage(error.toString());
-    }).finally(() => {
-      setIsSettingAgentStatus(false);
-    });
+    cc.setAgentState({ state: chosenState, auxCodeId, agentId, lastStateChangeReason: state })
+      .catch((error) => {
+        setCurrentState(oldState);
+        setErrorMessage(error.toString());
+      })
+      .finally(() => {
+        setIsSettingAgentStatus(false);
+      });
   };
 
   return {
@@ -70,5 +92,5 @@ export const useUserState = ({idleCodes, agentId, cc}) => {
     elapsedTime,
     currentState,
     setCurrentState
-  }
+  };
 };

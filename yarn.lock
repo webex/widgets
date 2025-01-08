@@ -5435,7 +5435,7 @@ __metadata:
     react-dom: "npm:18.3.1"
     ts-loader: "npm:9.5.1"
     typescript: "npm:5.6.3"
-    webex: "npm:3.7.0-wxcc.4"
+    webex: "npm:3.7.0-wxcc.5"
     webpack: "npm:5.94.0"
     webpack-cli: "npm:5.1.4"
     webpack-merge: "npm:6.0.1"
@@ -5465,7 +5465,7 @@ __metadata:
     react-dom: "npm:18.3.1"
     ts-loader: "npm:9.5.1"
     typescript: "npm:5.6.3"
-    webex: "npm:3.7.0-wxcc.4"
+    webex: "npm:3.7.0-wxcc.5"
     webpack: "npm:5.94.0"
     webpack-cli: "npm:5.1.4"
     webpack-merge: "npm:6.0.1"
@@ -6413,9 +6413,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/plugin-cc@npm:3.5.0-wxcc.10":
-  version: 3.5.0-wxcc.10
-  resolution: "@webex/plugin-cc@npm:3.5.0-wxcc.10"
+"@webex/plugin-cc@npm:3.5.0-wxcc.11":
+  version: 3.5.0-wxcc.11
+  resolution: "@webex/plugin-cc@npm:3.5.0-wxcc.11"
   dependencies:
     "@types/platform": "npm:1.3.4"
     "@webex/calling": "npm:3.6.0-wxcc.1"
@@ -6423,7 +6423,7 @@ __metadata:
     "@webex/webex-core": "npm:3.5.0-wxcc.1"
     buffer: "npm:6.0.3"
     jest-html-reporters: "npm:3.0.11"
-  checksum: 10c0/e0ab6626f25c269c914b69128ccecdbfea6382a62ba42fd2d24992538700bda23629323e5eefca87e0afcf57fd3f5981df94c1868e3d53498c5536060dc091f1
+  checksum: 10c0/048c6bd5121f6ed2412bfcd64b688bff57a454f191e6119bce7d512a5ca7a73329fba69d859e87dede2b7c6360e7d4316548aab16e787ba3167e8d0e7053f577
   languageName: node
   linkType: hard
 
@@ -25938,9 +25938,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webex@npm:3.7.0-wxcc.4":
-  version: 3.7.0-wxcc.4
-  resolution: "webex@npm:3.7.0-wxcc.4"
+"webex@npm:3.7.0-wxcc.5":
+  version: 3.7.0-wxcc.5
+  resolution: "webex@npm:3.7.0-wxcc.5"
   dependencies:
     "@babel/polyfill": "npm:^7.12.1"
     "@babel/runtime-corejs2": "npm:^7.14.8"
@@ -25954,7 +25954,7 @@ __metadata:
     "@webex/internal-plugin-voicea": "npm:3.5.0-wxcc.1"
     "@webex/plugin-attachment-actions": "npm:3.5.0-wxcc.1"
     "@webex/plugin-authorization": "npm:3.5.0-wxcc.1"
-    "@webex/plugin-cc": "npm:3.5.0-wxcc.10"
+    "@webex/plugin-cc": "npm:3.5.0-wxcc.11"
     "@webex/plugin-device-manager": "npm:3.5.0-wxcc.1"
     "@webex/plugin-logger": "npm:3.5.0-wxcc.1"
     "@webex/plugin-meetings": "npm:3.5.0-wxcc.1"
@@ -25968,7 +25968,7 @@ __metadata:
     "@webex/storage-adapter-local-storage": "npm:3.5.0-wxcc.1"
     "@webex/webex-core": "npm:3.5.0-wxcc.1"
     lodash: "npm:^4.17.21"
-  checksum: 10c0/a2312fcaf3600dbe6eff1e6f7558b20dd029f67367d23c360d5f66619b7d472bade99a96f9de3cd0e0b6efb6bb0083e67253c5ecfdc4e643190b011c34ddefb4
+  checksum: 10c0/47fda906c02ac67e94f562549312c1389996f9acb04a076fae35f1eecab5b5319aeb4e8c37ecbaf50a5c8c5eb2e9ad6ca833667b19c9eb1428fa0500af75e14e
   languageName: node
   linkType: hard
 
