@@ -18,7 +18,7 @@ export interface IStationLoginProps {
    */
   teams: Team[];
 
-   /**
+  /**
    * Station login options available for the agent
    */
   loginOptions: string[];
@@ -43,7 +43,7 @@ export interface IStationLoginProps {
    */
   loginFailure?: Error;
 
-    /**
+  /**
    * Response data received on agent login success
    */
   logoutSuccess?: StationLogoutSuccess;
@@ -74,7 +74,20 @@ export interface IStationLoginProps {
   setTeam: (team: string) => void;
 }
 
-export type StationLoginPresentationalProps = Pick<IStationLoginProps, 'name' | 'teams' | 'loginOptions' | 'login' | 'logout' | 'loginSuccess' | 'loginFailure' | 'logoutSuccess' | 'setDeviceType' | 'setDialNumber' | 'setTeam'>;
+export type StationLoginPresentationalProps = Pick<
+  IStationLoginProps,
+  | 'name'
+  | 'teams'
+  | 'loginOptions'
+  | 'login'
+  | 'logout'
+  | 'loginSuccess'
+  | 'loginFailure'
+  | 'logoutSuccess'
+  | 'setDeviceType'
+  | 'setDialNumber'
+  | 'setTeam'
+>;
 
 export type UseStationLoginProps = Pick<IStationLoginProps, 'cc' | 'onLogin' | 'onLogout'>;
 

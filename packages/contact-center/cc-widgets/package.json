@@ -1,7 +1,7 @@
 {
   "name": "@webex/cc-widgets",
   "description": "Webex Contact Center Widgets",
-  "version": "1.28.0-ccwidgets.5",
+  "version": "1.28.0-ccwidgets.7",
   "main": "dist/index.js",
   "publishConfig": {
     "access": "public"
@@ -26,6 +26,7 @@
     "@r2wc/react-to-web-component": "2.0.3",
     "@webex/cc-station-login": "workspace:*",
     "@webex/cc-store": "workspace:*",
+    "@webex/cc-task": "workspace:*",
     "@webex/cc-user-state": "workspace:*"
   },
   "devDependencies": {
@@ -67,5 +68,5 @@
       "**/tests/**/*.tsx"
     ]
   },
-  "stableVersion": "1.28.0-ccwidgets.4"
+  "stableVersion": "1.28.0-ccwidgets.6"
 }
