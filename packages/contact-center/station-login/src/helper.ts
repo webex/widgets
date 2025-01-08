@@ -1,6 +1,7 @@
-import {useState} from "react";
+import {useState} from 'react';
 import {StationLoginSuccess, StationLogoutSuccess} from '@webex/plugin-cc';
-import {UseStationLoginProps} from "./station-login/station-login.types";
+import {UseStationLoginProps} from './station-login/station-login.types';
+import store from '@webex/cc-store'; // we need to import as we are losing the context of this in store
 
 export const useStationLogin = (props: UseStationLoginProps) => {
   const cc = props.cc;
@@ -17,10 +18,12 @@ export const useStationLogin = (props: UseStationLoginProps) => {
     cc.stationLogin({teamId: team, loginOption: deviceType, dialNumber: dialNumber})
       .then((res: StationLoginSuccess) => {
         setLoginSuccess(res);
-        if(loginCb){
+        store.setSelectedLoginOption(deviceType);
+        if (loginCb) {
           loginCb();
         }
-      }).catch((error: Error) => {
+      })
+      .catch((error: Error) => {
         console.error(error);
         setLoginFailure(error);
       });
@@ -30,14 +33,24 @@ export const useStationLogin = (props: UseStationLoginProps) => {
     cc.stationLogout({logoutReason: 'User requested logout'})
       .then((res: StationLogoutSuccess) => {
         setLogoutSuccess(res);
-        if(logoutCb){
+        if (logoutCb) {
           logoutCb();
         }
-      }).catch((error: Error) => {
+      })
+      .catch((error: Error) => {
         console.error(error);
       });
   };
 
-  return {name: 'StationLogin', setDeviceType, setDialNumber, setTeam, login, logout, loginSuccess, loginFailure, logoutSuccess};
-}
-
+  return {
+    name: 'StationLogin',
+    setDeviceType,
+    setDialNumber,
+    setTeam,
+    login,
+    logout,
+    loginSuccess,
+    loginFailure,
+    logoutSuccess,
+  };
+};

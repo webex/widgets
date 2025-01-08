@@ -1,27 +1,43 @@
-import React, { useState } from 'react';
-import {StationLogin, UserState, store} from '@webex/cc-widgets'
+import React, {useState} from 'react';
+import {StationLogin, UserState, IncomingTask, TaskList, store} from '@webex/cc-widgets';
 
 function App() {
   const [isSdkReady, setIsSdkReady] = useState(false);
-  const [accessToken, setAccessToken] = useState("");
+  const [accessToken, setAccessToken] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const webexConfig = {
-      fedramp: false,
-      logger: {
-        level: 'log'
-      }
-  }
+    fedramp: false,
+    logger: {
+      level: 'log',
+    },
+  };
 
   const onLogin = () => {
     console.log('Agent login has been succesful');
     setIsLoggedIn(true);
-  }
+  };
 
   const onLogout = () => {
     console.log('Agent logout has been succesful');
     setIsLoggedIn(false);
-  }
+  };
+
+  const onAccepted = () => {
+    console.log('onAccepted Invoked');
+  };
+
+  const onDeclined = () => {
+    console.log('onDeclined invoked');
+  };
+
+  const onTaskAccepted = () => {
+    console.log('onTaskAccepted invoked');
+  };
+
+  const onTaskDeclined = () => {
+    console.log('onTaskDeclined invoked');
+  };
 
   return (
     <>
@@ -33,25 +49,30 @@ function App() {
         onChange={(e) => setAccessToken(e.target.value)}
       />
       <button
-        disabled={accessToken.trim() === ""}
+        disabled={accessToken.trim() === ''}
         onClick={() => {
           store.init({webexConfig, access_token: accessToken}).then(() => {
             setIsSdkReady(true);
           });
         }}
-      >Init Widgets</button>
-      {
-        isSdkReady && (
-          <>
-            <StationLogin  onLogin={onLogin} onLogout={onLogout} />
-            {
-              isLoggedIn && <UserState />
-            }
-          </>
-        )
-      }
+      >
+        Init Widgets
+      </button>
+      {isSdkReady && (
+        <>
+          <StationLogin onLogin={onLogin} onLogout={onLogout} />
+          {isLoggedIn && (
+            <>
+              <UserState />
+              <IncomingTask onAccepted={onAccepted} onDeclined={onDeclined} />
+              <TaskList onTaskAccepted={onTaskAccepted} onTaskDeclined={onTaskDeclined} />
+            </>
+          )}
+        </>
+      )}
     </>
   );
 }
-
+// @ts-ignore
+window.store = store;
 export default App;

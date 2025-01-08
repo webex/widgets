@@ -24,6 +24,7 @@
     "@r2wc/react-to-web-component": "2.0.3",
     "@webex/cc-station-login": "workspace:*",
     "@webex/cc-store": "workspace:*",
+    "@webex/cc-task": "workspace:*",
     "@webex/cc-user-state": "workspace:*"
   },
   "devDependencies": {
