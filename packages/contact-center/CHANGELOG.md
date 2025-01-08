@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.7](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.6...v1.28.0-ccwidgets.7) (2025-01-08)
+
+
+### Features
+
+* **widgets:** shifted-timer-to-worker ([#352](https://github.com/webex/widgets/issues/352)) ([c06fe9c](https://github.com/webex/widgets/commit/c06fe9c208914d86281950e9a8373ce778d8f0f2))
+
 # [1.28.0-ccwidgets.6](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.5...v1.28.0-ccwidgets.6) (2025-01-08)
 
 
