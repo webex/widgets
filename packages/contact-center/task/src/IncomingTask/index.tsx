@@ -1,5 +1,5 @@
 import React from 'react';
-import {observer} from 'mobx-react';
+import {observer} from 'mobx-react-lite';
 
 import store from '@webex/cc-store';
 import {useIncomingTask} from '../helper';
