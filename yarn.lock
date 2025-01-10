@@ -5396,7 +5396,7 @@ __metadata:
     file-loader: "npm:6.2.0"
     jest: "npm:29.7.0"
     jest-environment-jsdom: "npm:29.7.0"
-    mobx-react: "npm:9.1.1"
+    mobx-react-lite: "npm:^4.1.0"
     ts-loader: "npm:9.5.1"
     typescript: "npm:5.6.3"
     webpack: "npm:5.94.0"
@@ -5455,14 +5455,16 @@ __metadata:
     file-loader: "npm:6.2.0"
     jest: "npm:29.7.0"
     jest-environment-jsdom: "npm:29.7.0"
-    react: "npm:18.3.1"
-    react-dom: "npm:18.3.1"
+    mobx-react-lite: "npm:^4.1.0"
     ts-loader: "npm:9.5.1"
     typescript: "npm:5.6.3"
     webex: "npm:3.7.0-wxcc.5"
     webpack: "npm:5.94.0"
     webpack-cli: "npm:5.1.4"
     webpack-merge: "npm:6.0.1"
+  peerDependencies:
+    react: ">=18.3.1"
+    react-dom: ">=18.3.1"
   languageName: unknown
   linkType: soft
 
@@ -5485,7 +5487,7 @@ __metadata:
     file-loader: "npm:6.2.0"
     jest: "npm:29.7.0"
     jest-environment-jsdom: "npm:29.7.0"
-    mobx-react: "npm:9.1.1"
+    mobx-react-lite: "npm:^4.1.0"
     ts-loader: "npm:9.5.1"
     typescript: "npm:5.6.3"
     webpack: "npm:5.94.0"
@@ -5521,7 +5523,6 @@ __metadata:
     file-loader: "npm:6.2.0"
     jest: "npm:29.7.0"
     jest-environment-jsdom: "npm:29.7.0"
-    mobx-react: "npm:9.1.1"
     os-browserify: "npm:^0.3.0"
     process: "npm:^0.11.10"
     querystring-es3: "npm:^0.2.1"
@@ -19106,7 +19107,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mobx-react-lite@npm:^4.0.7":
+"mobx-react-lite@npm:^4.1.0":
   version: 4.1.0
   resolution: "mobx-react-lite@npm:4.1.0"
   dependencies:
@@ -19120,23 +19121,6 @@ __metadata:
     react-native:
       optional: true
   checksum: 10c0/72300665cc64d73a58d650bdf5131878376a865ae708cabc2940ee22cf6b762aeed239a83ea104ea3742a0b1563a81a19acc02f162e19f524a9b5b0f0a86668e
-  languageName: node
-  linkType: hard
-
-"mobx-react@npm:9.1.1":
-  version: 9.1.1
-  resolution: "mobx-react@npm:9.1.1"
-  dependencies:
-    mobx-react-lite: "npm:^4.0.7"
-  peerDependencies:
-    mobx: ^6.9.0
-    react: ^16.8.0 || ^17 || ^18
-  peerDependenciesMeta:
-    react-dom:
-      optional: true
-    react-native:
-      optional: true
-  checksum: 10c0/77ced87e1657c949e73ff0386ce50b90c53ef4ced36c9cca53dfad693a3e13bc5690c513b855eb486c558191d7a05ee953e73c593054e915ee016fc4516310f8
   languageName: node
   linkType: hard
 

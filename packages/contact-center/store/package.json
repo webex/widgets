@@ -15,7 +15,7 @@
     "clean": "rm -rf dist && rm -rf node_modules",
     "clean:dist": "rm -rf dist",
     "build": "yarn run -T tsc",
-    "build:src": "webpack",
+    "build:src": "yarn run clean:dist && webpack",
     "build:watch": "webpack --watch",
     "test:unit": "jest"
   },
