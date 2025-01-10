@@ -43,7 +43,7 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
       }
       relogin();
     }
-  }, [isAgentLoggedIn]); // Only for the relogin case, hence we have to pass the isAgentLoggedIn as dependency
+  }, []); // Only for the relogin case
 
   const selectLoginOption = (event: { target: { value: string; }; }) => {
     const dialNumber = document.querySelector('#dialNumber') as HTMLInputElement;
