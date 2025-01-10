@@ -53,7 +53,10 @@
       "**/tests/**/*.ts",
       "**/tests/**/*.tsx"
     ],
-    "verbose": true
+    "verbose": true,
+    "moduleNameMapper": {
+      "\\.(css|less|scss)$": "<rootDir>/__mocks__/style-mock.js"
+    }
   },
   "stableVersion": "1.28.0-ccwidgets.6"
 }

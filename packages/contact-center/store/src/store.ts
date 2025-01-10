@@ -10,6 +10,8 @@ class Store implements IStore {
   idleCodes: IdleCode[] = [];
   agentId: string = '';
   selectedLoginOption: string = '';
+  isAgentLoggedIn: boolean = false;
+  deviceType: string = '';
 
   constructor() {
     makeAutoObservable(this, {cc: observable.ref});
@@ -38,6 +40,8 @@ class Store implements IStore {
         this.loginOptions = response.loginVoiceOptions;
         this.idleCodes = response.idleCodes;
         this.agentId = response.agentId;
+        this.isAgentLoggedIn = response.isAgentLoggedIn;
+        this.deviceType = response.deviceType;
       })
       .catch((error) => {
         console.error('Error registering contact center', error);

@@ -40,6 +40,8 @@ describe('Store', () => {
   it('should initialize with default values', () => {
     expect(store.teams).toEqual([]);
     expect(store.loginOptions).toEqual([]);
+    expect(store.isAgentLoggedIn).toBe(false);
+    expect(store.deviceType).toBe('');
     expect(makeAutoObservable).toHaveBeenCalledWith(store, { cc: expect.any(Function) });
   });
 
@@ -49,7 +51,9 @@ describe('Store', () => {
         teams: [{ id: 'team1', name: 'Team 1' }],
         loginVoiceOptions: ['option1', 'option2'],
         idleCodes: [{ id: 'code1', name: 'Code 1', isSystem: false, isDefault: false }],
-        agentId: 'agent1'
+        agentId: 'agent1',
+        isAgentLoggedIn: true,
+        deviceType: 'BROWSER'
       };
       mockWebex.cc.register.mockResolvedValue(mockResponse);
 
@@ -59,6 +63,8 @@ describe('Store', () => {
       expect(store.loginOptions).toEqual(mockResponse.loginVoiceOptions);
       expect(store.idleCodes).toEqual(mockResponse.idleCodes);
       expect(store.agentId).toEqual(mockResponse.agentId);
+      expect(store.isAgentLoggedIn).toEqual(mockResponse.isAgentLoggedIn);
+      expect(store.deviceType).toEqual(mockResponse.deviceType);
     });
 
     it('should log an error on failed register', async () => {

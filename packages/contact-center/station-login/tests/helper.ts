@@ -241,4 +241,19 @@ describe('useStationLogin Hook', () => {
       expect(logoutCb).not.toHaveBeenCalled();
     });
   });
+
+  it('should call relogin and set device type', async () => {
+    const setSelectedLoginOptionSpy = jest.spyOn(require('@webex/cc-store'), 'setSelectedLoginOption');
+    
+    const { result } = renderHook(() => useStationLogin({ cc: ccMock, onLogin: loginCb, onLogout: logoutCb }));
+
+    act(() => {
+      result.current.relogin();
+    });
+
+    await waitFor(() => {
+      expect(setSelectedLoginOptionSpy).toHaveBeenCalled();
+      expect(loginCb).toHaveBeenCalled();
+    });
+  });
 });
