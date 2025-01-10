@@ -1,3 +1,11 @@
+# [1.28.0-ccwidgets.8](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.7...v1.28.0-ccwidgets.8) (2025-01-10)
+
+
+### Bug Fixes
+
+* **bundling:** fixed the multiple React instance and useRef errors  ([#355](https://github.com/webex/widgets/issues/355)) ([473cd4f](https://github.com/webex/widgets/commit/473cd4ff6b4be79724021076594f28838fe6bcd1))
+* cleanup and using mobx-react-lite ([#356](https://github.com/webex/widgets/issues/356)) ([0b304c4](https://github.com/webex/widgets/commit/0b304c451f6bc503278907bce3405ccd5cd5125f))
+
 # [1.28.0-ccwidgets.7](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.6...v1.28.0-ccwidgets.7) (2025-01-08)
 
 
