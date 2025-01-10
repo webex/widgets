@@ -1,7 +1,7 @@
 {
   "name": "@webex/cc-widgets",
   "description": "Webex Contact Center Widgets",
-  "version": "1.28.0-ccwidgets.5",
+  "version": "1.28.0-ccwidgets.8",
   "main": "dist/index.js",
   "publishConfig": {
     "access": "public"
@@ -15,8 +15,10 @@
     "./wc": "./dist/wc.js"
   },
   "scripts": {
+    "clean": "rm -rf dist && rm -rf node_modules",
+    "clean:dist": "rm -rf dist",
     "build": "yarn run -T tsc",
-    "build:src": "webpack && yarn run build",
+    "build:src": "yarn run clean:dist && webpack",
     "build:watch": "webpack --watch",
     "test:unit": "jest"
   },
@@ -24,6 +26,7 @@
     "@r2wc/react-to-web-component": "2.0.3",
     "@webex/cc-station-login": "workspace:*",
     "@webex/cc-store": "workspace:*",
+    "@webex/cc-task": "workspace:*",
     "@webex/cc-user-state": "workspace:*"
   },
   "devDependencies": {
@@ -42,12 +45,9 @@
     "file-loader": "6.2.0",
     "jest": "29.7.0",
     "jest-environment-jsdom": "29.7.0",
-    "mobx-react": "9.1.1",
     "os-browserify": "^0.3.0",
     "process": "^0.11.10",
     "querystring-es3": "^0.2.1",
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
     "stream-browserify": "^3.0.0",
     "ts-loader": "9.5.1",
     "typescript": "5.6.3",
@@ -65,7 +65,10 @@
     "testMatch": [
       "**/tests/**/*.ts",
       "**/tests/**/*.tsx"
-    ]
+    ],
+    "moduleNameMapper": {
+      "^.+\\.(css|less|scss)$": "babel-jest"
+    }
   },
-  "stableVersion": "1.28.0-ccwidgets.4"
+  "stableVersion": "1.28.0-ccwidgets.7"
 }

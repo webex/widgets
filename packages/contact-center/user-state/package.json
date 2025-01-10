@@ -1,7 +1,7 @@
 {
   "name": "@webex/cc-user-state",
   "description": "Webex Contact Center Widgets: User State",
-  "version": "1.28.0-ccwidgets.5",
+  "version": "1.28.0-ccwidgets.8",
   "main": "dist/index.js",
   "publishConfig": {
     "access": "public"
@@ -11,16 +11,16 @@
     "package.json"
   ],
   "scripts": {
+    "clean": "rm -rf dist && rm -rf node_modules",
+    "clean:dist": "rm -rf dist",
     "build": "yarn run -T tsc",
-    "build:src": "webpack && yarn run build",
+    "build:src": "yarn run clean:dist && webpack",
     "build:watch": "webpack --watch",
     "test:unit": "jest"
   },
   "dependencies": {
     "@webex/cc-store": "workspace:*",
-    "mobx-react": "9.1.1",
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
+    "mobx-react-lite": "^4.1.0",
     "typescript": "5.6.3"
   },
   "devDependencies": {
@@ -43,6 +43,10 @@
     "webpack-cli": "5.1.4",
     "webpack-merge": "6.0.1"
   },
+  "peerDependencies": {
+    "react": ">=18.3.1",
+    "react-dom": ">=18.3.1"
+  },
   "jest": {
     "testEnvironment": "jsdom",
     "testMatch": [
@@ -51,5 +55,5 @@
     ],
     "verbose": true
   },
-  "stableVersion": "1.28.0-ccwidgets.4"
+  "stableVersion": "1.28.0-ccwidgets.7"
 }

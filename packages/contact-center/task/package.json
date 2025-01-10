@@ -1,6 +1,6 @@
 {
-  "name": "@webex/cc-station-login",
-  "description": "Webex Contact Center Widgets: Station Login",
+  "name": "@webex/cc-task",
+  "description": "Webex Contact Center Widgets: Task",
   "version": "1.28.0-ccwidgets.8",
   "main": "dist/index.js",
   "publishConfig": {
@@ -16,11 +16,12 @@
     "build": "yarn run -T tsc",
     "build:src": "yarn run clean:dist && webpack",
     "build:watch": "webpack --watch",
-    "test:unit": "jest"
+    "test:unit": "jest --coverage"
   },
   "dependencies": {
     "@webex/cc-store": "workspace:*",
-    "mobx-react-lite": "^4.1.0"
+    "mobx-react-lite": "^4.1.0",
+    "webex": "3.7.0-wxcc.5"
   },
   "devDependencies": {
     "@babel/core": "7.25.2",
@@ -53,7 +54,6 @@
       "**/tests/**/*.ts",
       "**/tests/**/*.tsx"
     ],
-    "verbose": true,
     "moduleNameMapper": {
       "^.+\\.(css|less|scss)$": "babel-jest"
     }

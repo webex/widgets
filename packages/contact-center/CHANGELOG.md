@@ -1,3 +1,25 @@
+# [1.28.0-ccwidgets.8](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.7...v1.28.0-ccwidgets.8) (2025-01-10)
+
+
+### Bug Fixes
+
+* **bundling:** fixed the multiple React instance and useRef errors  ([#355](https://github.com/webex/widgets/issues/355)) ([473cd4f](https://github.com/webex/widgets/commit/473cd4ff6b4be79724021076594f28838fe6bcd1))
+* cleanup and using mobx-react-lite ([#356](https://github.com/webex/widgets/issues/356)) ([0b304c4](https://github.com/webex/widgets/commit/0b304c451f6bc503278907bce3405ccd5cd5125f))
+
+# [1.28.0-ccwidgets.7](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.6...v1.28.0-ccwidgets.7) (2025-01-08)
+
+
+### Features
+
+* **widgets:** shifted-timer-to-worker ([#352](https://github.com/webex/widgets/issues/352)) ([c06fe9c](https://github.com/webex/widgets/commit/c06fe9c208914d86281950e9a8373ce778d8f0f2))
+
+# [1.28.0-ccwidgets.6](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.5...v1.28.0-ccwidgets.6) (2025-01-08)
+
+
+### Features
+
+* taskList and IncomingTask widgets added ([#348](https://github.com/webex/widgets/issues/348)) ([ce3a619](https://github.com/webex/widgets/commit/ce3a619dbbb1e2e5321a94a7ce2798f6217326b9))
+
 # [1.28.0-ccwidgets.5](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.4...v1.28.0-ccwidgets.5) (2024-12-23)
 
 
