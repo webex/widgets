@@ -17,7 +17,10 @@ jest.mock('webex', () => ({
       }
     }),
     cc: {
-      register: jest.fn()
+      register: jest.fn(),
+      LoggerProxy: {
+        error: jest.fn()
+      }
     }
   }))
 }));
@@ -62,7 +65,6 @@ describe('Store', () => {
     });
 
     it('should log an error on failed register', async () => {
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
       const mockError = new Error('Register failed');
       mockWebex.cc.register.mockRejectedValue(mockError);
 
@@ -71,8 +73,10 @@ describe('Store', () => {
       }
       catch (error) {
         expect(error).toEqual(mockError);
-        expect(consoleErrorSpy).toHaveBeenCalledWith('Error registering contact center', mockError);
-        consoleErrorSpy.mockRestore();
+        expect(store.logger.error).toHaveBeenCalledWith("Error registering contact center: Error: Register failed", {
+          "method": "registerCC",
+          "module": "cc-store#store.ts",
+        });
       }
     });
   });

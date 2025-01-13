@@ -1,4 +1,5 @@
 import {ITask, IContactCenter} from '@webex/plugin-cc';
+import {ILogger} from '@webex/cc-store';
 
 /**
  * Interface representing the TaskProps of a user.
@@ -88,10 +89,15 @@ export interface TaskProps {
    * Audio reference
    */
   audioRef: React.RefObject<HTMLAudioElement>;
+
+  /**
+   * The logger instance from SDK
+   */
+  logger: ILogger;
 }
 
-export type UseTaskProps = Pick<TaskProps, 'cc' | 'onAccepted' | 'onDeclined' | 'selectedLoginOption'>;
-export type UseTaskListProps = Pick<TaskProps, 'cc' | 'selectedLoginOption' | 'onTaskAccepted' | 'onTaskDeclined'>;
+export type UseTaskProps = Pick<TaskProps, 'cc' | 'onAccepted' | 'onDeclined' | 'selectedLoginOption' | 'logger'>;
+export type UseTaskListProps = Pick<TaskProps, 'cc' | 'selectedLoginOption' | 'onTaskAccepted' | 'onTaskDeclined' | 'logger'>;
 export type IncomingTaskPresentationalProps = Pick<
   TaskProps,
   'currentTask' | 'isBrowser' | 'isAnswered' | 'isEnded' | 'isMissed' | 'accept' | 'decline' | 'audioRef'

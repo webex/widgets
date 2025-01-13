@@ -4,7 +4,7 @@ import {ITask} from '@webex/plugin-cc';
 
 // Hook for managing the task list
 export const useTaskList = (props: UseTaskListProps) => {
-  const {cc, selectedLoginOption, onTaskAccepted, onTaskDeclined} = props;
+  const {cc, selectedLoginOption, onTaskAccepted, onTaskDeclined, logger} = props;
   const [taskList, setTaskList] = useState<ITask[]>([]);
   const isBrowser = selectedLoginOption === 'BROWSER';
 
@@ -49,7 +49,10 @@ export const useTaskList = (props: UseTaskListProps) => {
         onTaskAccepted && onTaskAccepted(task);
       })
       .catch((error: Error) => {
-        console.error(error);
+        logger.error(`Error accepting task: ${error}`, {
+          module: 'widget-cc-task#helper.ts',
+          method: 'useTaskList#acceptTask',
+        });
       });
   };
 
@@ -63,7 +66,10 @@ export const useTaskList = (props: UseTaskListProps) => {
         onTaskDeclined && onTaskDeclined(task);
       })
       .catch((error: Error) => {
-        console.error(error);
+        logger.error(`Error declining task: ${error}`, {
+          module: 'widget-cc-task#helper.ts',
+          method: 'useTaskList#declineTask',
+        });
       });
   };
 
@@ -81,7 +87,7 @@ export const useTaskList = (props: UseTaskListProps) => {
 
 // Hook for managing the current task
 export const useIncomingTask = (props: UseTaskProps) => {
-  const {cc, onAccepted, onDeclined, selectedLoginOption} = props;
+  const {cc, onAccepted, onDeclined, selectedLoginOption, logger} = props;
   const [currentTask, setCurrentTask] = useState<ITask | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
   const [isEnded, setIsEnded] = useState(false);
@@ -143,7 +149,10 @@ export const useIncomingTask = (props: UseTaskProps) => {
         onAccepted && onAccepted();
       })
       .catch((error: Error) => {
-        console.error(error);
+        logger.error(`Error accepting incoming task: ${error}`, {
+          module: 'widget-cc-task#helper.ts',
+          method: 'useIncomingTask#accept',
+        });
       });
   };
 
@@ -158,7 +167,10 @@ export const useIncomingTask = (props: UseTaskProps) => {
         onDeclined && onDeclined();
       })
       .catch((error: Error) => {
-        console.error(error);
+        logger.error(`Error declining incoming task: ${error}`, {
+          module: 'widget-cc-task#helper.ts',
+          method: 'useIncomingTask#decline',
+        });
       });
   };
 
