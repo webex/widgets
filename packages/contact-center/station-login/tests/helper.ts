@@ -28,10 +28,16 @@ const loginParams = {
 
 const loginCb = jest.fn();
 const logoutCb = jest.fn();
+const logger = {
+  error: jest.fn()
+};
 
 describe('useStationLogin Hook', () => {
   afterEach(() => {
     jest.clearAllMocks();
+    loginCb.mockClear();
+    logoutCb.mockClear();
+    logger.error.mockClear();
   });
 
   it('should set loginSuccess on successful login', async () => {
@@ -61,17 +67,19 @@ describe('useStationLogin Hook', () => {
     ccMock.stationLogin.mockResolvedValue(successResponse);
     const setSelectedLoginOptionSpy = jest.spyOn(require('@webex/cc-store'), 'setSelectedLoginOption');
 
-    const {result} = renderHook(() => useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb}));
-
-    result.current.setDeviceType(loginParams.loginOption);
-    result.current.setDialNumber(loginParams.dialNumber);
-    result.current.setTeam(loginParams.teamId);
+    const {result} = renderHook(() => useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger}));
 
     act(() => {
-      result.current.login();
+      result.current.setDeviceType(loginParams.loginOption);
+      result.current.setDialNumber(loginParams.dialNumber);
+      result.current.setTeam(loginParams.teamId);
+    });
+  
+    await act(async () => {
+      await result.current.login();
     });
 
-    waitFor(() => {
+    await waitFor(async () => {
       expect(ccMock.stationLogin).toHaveBeenCalledWith({
         teamId: loginParams.teamId,
         loginOption: loginParams.loginOption,
@@ -100,17 +108,20 @@ describe('useStationLogin Hook', () => {
     ccMock.stationLogin.mockRejectedValue(errorResponse);
     const setSelectedLoginOptionSpy = jest.spyOn(require('@webex/cc-store'), 'setSelectedLoginOption');
 
-    const {result} = renderHook(() => useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb}));
-
-    result.current.setDeviceType(loginParams.loginOption);
-    result.current.setDialNumber(loginParams.dialNumber);
-    result.current.setTeam(loginParams.teamId);
+    loginCb.mockClear();
+    const {result} = renderHook(() => useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger}));
 
     act(() => {
-      result.current.login();
+      result.current.setDeviceType(loginParams.loginOption);
+      result.current.setDialNumber(loginParams.dialNumber);
+      result.current.setTeam(loginParams.teamId);
+    });
+  
+    await act(async () => {
+      await result.current.login();
     });
 
-    waitFor(() => {
+    await waitFor(() => {
       expect(ccMock.stationLogin).toHaveBeenCalledWith({
         teamId: loginParams.teamId,
         loginOption: loginParams.loginOption,
@@ -135,15 +146,18 @@ describe('useStationLogin Hook', () => {
   });
 
   it('should not call login callback if not present', async () => {
+
     ccMock.stationLogin.mockResolvedValue({});
 
-    const {result} = renderHook(() => useStationLogin({cc: ccMock, onLogout: logoutCb}));
+    const { result } = renderHook(() =>
+      useStationLogin({cc: ccMock, onLogout: logoutCb, logger})
+    );
 
-    act(() => {
-      result.current.login();
+    await act(async () => {
+      await result.current.login();
     });
 
-    waitFor(() => {
+    await waitFor(() => {
       expect(loginCb).not.toHaveBeenCalled();
     });
   });
@@ -153,14 +167,16 @@ describe('useStationLogin Hook', () => {
     ccMock.stationLogin.mockRejectedValue(errorResponse);
 
     loginCb.mockClear();
-    const {result} = renderHook(() => useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb}));
-
-    result.current.setDeviceType(loginParams.loginOption);
-    result.current.setDialNumber(loginParams.dialNumber);
-    result.current.setTeam(loginParams.teamId);
+    const {result} = renderHook(() => useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger}));
 
     act(() => {
-      result.current.login();
+      result.current.setDeviceType(loginParams.loginOption);
+      result.current.setDialNumber(loginParams.dialNumber);
+      result.current.setTeam(loginParams.teamId);
+    });
+  
+    await act(async () => {
+      await result.current.login();
     });
 
     waitFor(() => {
@@ -204,13 +220,13 @@ describe('useStationLogin Hook', () => {
 
     ccMock.stationLogout.mockResolvedValue(successResponse);
 
-    const {result} = renderHook(() => useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb}));
+    const {result} = renderHook(() => useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger}));
 
-    act(() => {
-      result.current.logout();
+    await act(async () => {
+      await result.current.logout();
     });
 
-    waitFor(() => {
+    await waitFor(() => {
       expect(ccMock.stationLogout).toHaveBeenCalledWith({logoutReason: 'User requested logout'});
       expect(logoutCb).toHaveBeenCalledWith();
 
@@ -228,16 +244,35 @@ describe('useStationLogin Hook', () => {
     });
   });
 
+  it('should log error on logout failure', async () => {
+    ccMock.stationLogout.mockRejectedValue(new Error('Logout failed'));
+
+    const {result} = renderHook(() =>
+      useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger})
+    );
+
+    await act(async () => {
+      await result.current.logout();
+    });
+
+    await waitFor(() => {
+      expect(logger.error).toHaveBeenCalledWith('Error logging out: Error: Logout failed', {
+        module: 'widget-station-login#helper.ts',
+        method: 'logout',
+      });
+    });
+  });
+
   it('should not call logout callback if not present', async () => {
     ccMock.stationLogout.mockResolvedValue({});
 
-    const {result} = renderHook(() => useStationLogin({cc: ccMock, onLogin: loginCb}));
+    const {result} = renderHook(() => useStationLogin({cc: ccMock, onLogin: loginCb, logger}));
 
-    act(() => {
-      result.current.logout();
+    await act(async () => {
+      await result.current.logout();
     });
 
-    waitFor(() => {
+    await waitFor(() => {
       expect(logoutCb).not.toHaveBeenCalled();
     });
   });

@@ -6,9 +6,9 @@ import TaskListPresentational from './task-list.presentational';
 import {useTaskList} from '../helper';
 
 const TaskList: React.FunctionComponent = observer(() => {
-  const {cc, selectedLoginOption} = store;
+  const {cc, selectedLoginOption, logger} = store;
 
-  const result = useTaskList({cc, selectedLoginOption});
+  const result = useTaskList({cc, selectedLoginOption, logger});
 
   return <TaskListPresentational {...result} />;
 });
