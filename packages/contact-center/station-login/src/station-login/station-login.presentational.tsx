@@ -1,81 +1,107 @@
-import React, {useEffect} from 'react';
 import {StationLoginPresentationalProps} from './station-login.types';
-
+import React, {useState} from 'react';
 import './station-login.style.scss';
+import {Input, Checkbox, Select, ButtonCircle, Icon} from '@momentum-ui/react-collaboration';
 
 const StationLoginPresentational: React.FunctionComponent<StationLoginPresentationalProps> = (props) => {
-  const {name, teams, loginOptions, login, logout, setDeviceType, setDialNumber, setTeam} = props; // TODO: Use the  loginSuccess, loginFailure, logoutSuccess props returned fromthe API response via helper file to reflect UI changes
+  const {name, teams, loginOptions, login, logout} = props;
+  const [handleCallsUsing, setHandleCallsUsing] = useState('Dial Number');
+  const [dialNumber, setDialNumber] = useState('987654321');
+  const [team, setTeam] = useState('Debit card');
+  const [dontShowAgain, setDontShowAgain] = useState(false);
 
-  useEffect(() => {
-    const teamsDropdown = document.getElementById('teamsDropdown') as HTMLSelectElement;
-    const agentLogin = document.querySelector('#LoginOption') as HTMLSelectElement;
-    const dialNumber = document.querySelector('#dialNumber') as HTMLInputElement;
-    if (teamsDropdown) {
-      teamsDropdown.innerHTML = '';
-      if (teams) {
-        teams.forEach((team) => {
-          const option = document.createElement('option');
-          option.value = team.id;
-          option.text = team.name;
-          teamsDropdown.add(option);
-        });
-        setTeam(teamsDropdown.value);
-        dialNumber.value = '';
-        dialNumber.disabled = true;
-      }
-    }
-    if (loginOptions.length > 0) {
-      loginOptions.forEach((options)=> {
-        const option = document.createElement('option');
-        option.text = options;
-        option.value = options;
-        agentLogin.add(option);
-      });
-    }
-  }, [teams, loginOptions]);
-
-  const selectLoginOption = (event: { target: { value: string; }; }) => {
-    const dialNumber = document.querySelector('#dialNumber') as HTMLInputElement;
-    const deviceType = event.target.value;
-    setDeviceType(deviceType);
-    if (deviceType === 'AGENT_DN' || deviceType === 'EXTENSION') {
-      dialNumber.disabled = false;
-    } else {
-      dialNumber.disabled = true;
-    }
+  const handleConfirm = () => {
+    alert('Login Success! Preferences confirmed!');
   };
 
-  function updateDN() {
-    const dialNumber = document.querySelector('#dialNumber') as HTMLInputElement;
-    setDialNumber(dialNumber.value);
-  }
+  const handleSignOut = () => {
+    alert('Signed out!');
+  };
 
   return (
-    <><h1 data-testid="station-login-heading">{name}</h1>
-      <div className='box'>
-      <section className="section-box">
-        <fieldset className='fieldset'>
-        <legend className='legend-box'>Agent</legend>
-          <div style={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
-            <div style={{ display: 'flex', gap: '1rem' }}>
-              <fieldset style={{border: '1px solid #ccc', borderRadius: '5px', padding: '10px', marginBottom: '20px', flex: 0.69 }}>
-                <legend className='legend-box'>Select Team</legend>
-                <select id="teamsDropdown" className='select'>Teams</select>
-              </fieldset>
-              <fieldset className='fieldset'>
-                <legend className='legend-box'>Agent Login</legend>
-                <select name="LoginOption" id="LoginOption" className='select' onChange={selectLoginOption}>
-                  <option value="" hidden>Choose Agent Login Option...</option>
-                </select>
-                <input className='input' id="dialNumber" name="dialNumber" placeholder="Extension/Dial Number" type="text" onInput={updateDN} />
-                <button id="AgentLogin" className='btn' onClick={login}>Login</button>
-                <button id="logoutAgent" className='btn' onClick={logout}>Logout</button>
-              </fieldset>
-            </div>
-          </div>
-        </fieldset> 
-      </section>
-    </div></>
+    <div>
+      <h3 style={{marginBottom: '16px'}}>Confirm your interaction preferences</h3>
+      <p style={{marginBottom: '24px'}}>Check your details and confirm to save and continue.</p>
+
+      {/* Handle calls using */}
+      <div style={{marginBottom: '16px'}}>
+        <label
+          style={{
+            display: 'block',
+            marginBottom: '8px',
+            fontWeight: 'bold',
+          }}
+        >
+          <Icon name="phone" size={16} style={{marginRight: '8px'}} />
+          Handle calls using
+        </label>
+        <Select
+          defaultValue="Dial Number"
+          onSelect={(e) => setHandleCallsUsing(e.value)}
+          options={[
+            {value: 'Dial Number', label: 'Dial Number'},
+            {value: 'Softphone', label: 'Softphone'},
+          ]}
+        />
+      </div>
+
+      {/* Dial Number */}
+      <div style={{marginBottom: '16px'}}>
+        <label
+          style={{
+            display: 'block',
+            marginBottom: '8px',
+            fontWeight: 'bold',
+          }}
+        >
+          <Icon name="dialpad" size={16} style={{marginRight: '8px'}} />
+          Dial Number
+        </label>
+        <Input value={dialNumber} onChange={(e) => setDialNumber(e.target.value)} placeholder="Enter number" />
+      </div>
+
+      {/* Team */}
+      <div style={{marginBottom: '16px'}}>
+        <label
+          style={{
+            display: 'block',
+            marginBottom: '8px',
+            fontWeight: 'bold',
+          }}
+        >
+          <Icon name="group" size={16} style={{marginRight: '8px'}} />
+          Your team
+        </label>
+        <Select
+          defaultValue="Debit card"
+          onSelect={(e) => setTeam(e.value)}
+          options={[
+            {value: 'Debit card', label: 'Debit card'},
+            {value: 'Credit card', label: 'Credit card'},
+            {value: 'Support', label: 'Support'},
+          ]}
+        />
+      </div>
+
+      {/* Don't show this again */}
+      <div style={{marginBottom: '24px'}}>
+        <Checkbox
+          label="Don't show this again"
+          checked={dontShowAgain}
+          onChange={(e) => setDontShowAgain(e.target.checked)}
+        />
+      </div>
+
+      {/* Buttons */}
+      <div style={{display: 'flex', justifyContent: 'space-between'}}>
+        <ButtonCircle onPress={handleSignOut} type="submit">
+          Sign out
+        </ButtonCircle>
+        <ButtonCircle onPress={handleConfirm} type="submit">
+          Confirm
+        </ButtonCircle>
+      </div>
+    </div>
   );
 };
 
