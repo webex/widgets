@@ -50,7 +50,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
       });
   };
 
-  const relogin = () => {
+  function relogin() {
     store.setSelectedLoginOption(deviceType);
     if (loginCb) {
       loginCb();

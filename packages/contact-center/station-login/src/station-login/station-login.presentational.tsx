@@ -1,10 +1,24 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useRef} from 'react';
 import {StationLoginPresentationalProps} from './station-login.types';
 
 import './station-login.style.scss';
 
 const StationLoginPresentational: React.FunctionComponent<StationLoginPresentationalProps> = (props) => {
-  const {name, teams, loginOptions, login, logout, relogin, setDeviceType, setDialNumber, setTeam, isAgentLoggedIn, deviceType} = props; // TODO: Use the  loginSuccess, loginFailure, logoutSuccess props returned fromthe API response via helper file to reflect UI changes
+  const {
+    name, 
+    teams, 
+    loginOptions, 
+    login, 
+    logout, 
+    relogin, 
+    setDeviceType, 
+    setDialNumber, 
+    setTeam, 
+    isAgentLoggedIn, 
+    deviceType
+  } = props; // TODO: Use the  loginSuccess, loginFailure, logoutSuccess props returned fromthe API response via helper file to reflect UI changes
+
+  const hasReloginBeenCalled = useRef(false);
 
   useEffect(() => {
     const teamsDropdown = document.getElementById('teamsDropdown') as HTMLSelectElement;
@@ -35,14 +49,14 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
   }, [teams, loginOptions]);
 
   useEffect(() => {
-    if (isAgentLoggedIn) {
-      const agentLogin = document.querySelector('#LoginOption') as HTMLSelectElement;
-      if (agentLogin && !agentLogin.value) {
-        setDeviceType(deviceType);
-        agentLogin.value = deviceType;
-      }
-      relogin();
+    if (!isAgentLoggedIn || hasReloginBeenCalled.current) return;
+    const agentLogin = document.querySelector('#LoginOption') as HTMLSelectElement;
+    if (agentLogin && !agentLogin.value) {
+      setDeviceType(deviceType);
+      agentLogin.value = deviceType;
     }
+    relogin();
+    hasReloginBeenCalled.current = true;
   }, []); // Only for the relogin case
 
   const selectLoginOption = (event: { target: { value: string; }; }) => {
@@ -79,11 +93,10 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
                   <option value="" hidden>Choose Agent Login Option...</option>
                 </select>
                 <input className='input' id="dialNumber" name="dialNumber" placeholder="Extension/Dial Number" type="text" onInput={updateDN} />
-                  {!isAgentLoggedIn && (
-                    <button id="AgentLogin" className='btn' onClick={login}>Login</button>
-                  )}
-                  {isAgentLoggedIn && (
+                  {isAgentLoggedIn ? (
                     <button id="logoutAgent" className='btn' onClick={logout}>Logout</button>
+                  ) : (
+                    <button id="AgentLogin" className='btn' onClick={login}>Login</button>
                   )}
               </fieldset>
             </div>

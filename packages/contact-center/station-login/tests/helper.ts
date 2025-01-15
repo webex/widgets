@@ -10,6 +10,7 @@ jest.mock('@webex/cc-store', () => {
     teams,
     loginOptions,
     setSelectedLoginOption: jest.fn(),
+    isAgentLoggedIn: false,
   };
 });
 
@@ -133,7 +134,7 @@ describe('useStationLogin Hook', () => {
 
       expect(result.current).toEqual({
         name: 'StationLogin',
-        isAgentLoggedIn: undefined,
+        isAgentLoggedIn: false,
         setDeviceType: expect.any(Function),
         setDialNumber: expect.any(Function),
         setTeam: expect.any(Function),
