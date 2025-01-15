@@ -89,6 +89,7 @@ describe('useStationLogin Hook', () => {
 
       expect(result.current).toEqual({
         name: 'StationLogin',
+        isAgentLoggedIn: true,
         setDeviceType: expect.any(Function),
         setDialNumber: expect.any(Function),
         setTeam: expect.any(Function),
@@ -97,6 +98,7 @@ describe('useStationLogin Hook', () => {
         loginSuccess: successResponse,
         loginFailure: undefined,
         logoutSuccess: undefined,
+        relogin: expect.any(Function),
       });
 
       expect(setSelectedLoginOptionSpy).toHaveBeenCalledWith(loginParams.loginOption);
@@ -131,6 +133,7 @@ describe('useStationLogin Hook', () => {
 
       expect(result.current).toEqual({
         name: 'StationLogin',
+        isAgentLoggedIn: undefined,
         setDeviceType: expect.any(Function),
         setDialNumber: expect.any(Function),
         setTeam: expect.any(Function),
@@ -139,6 +142,7 @@ describe('useStationLogin Hook', () => {
         loginSuccess: undefined,
         loginFailure: errorResponse,
         logoutSuccess: undefined,
+        relogin: expect.any(Function),
       });
 
       expect(setSelectedLoginOptionSpy).not.toHaveBeenCalled();
@@ -190,6 +194,7 @@ describe('useStationLogin Hook', () => {
 
       expect(result.current).toEqual({
         name: 'StationLogin',
+        isAgentLoggedIn: true,
         setDeviceType: expect.any(Function),
         setDialNumber: expect.any(Function),
         setTeam: expect.any(Function),
@@ -198,6 +203,7 @@ describe('useStationLogin Hook', () => {
         loginSuccess: undefined,
         loginFailure: errorResponse,
         logoutSuccess: undefined,
+        relogin: expect.any(Function),
       });
     });
   });
@@ -232,6 +238,7 @@ describe('useStationLogin Hook', () => {
 
       expect(result.current).toEqual({
         name: 'StationLogin',
+        isAgentLoggedIn: false,
         setDeviceType: expect.any(Function),
         setDialNumber: expect.any(Function),
         setTeam: expect.any(Function),
@@ -240,6 +247,7 @@ describe('useStationLogin Hook', () => {
         loginSuccess: undefined,
         loginFailure: undefined,
         logoutSuccess: successResponse,
+        relogin: expect.any(Function),
       });
     });
   });
@@ -280,7 +288,7 @@ describe('useStationLogin Hook', () => {
   it('should call relogin and set device type', async () => {
     const setSelectedLoginOptionSpy = jest.spyOn(require('@webex/cc-store'), 'setSelectedLoginOption');
     
-    const { result } = renderHook(() => useStationLogin({ cc: ccMock, onLogin: loginCb, onLogout: logoutCb }));
+    const { result } = renderHook(() => useStationLogin({ cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger }));
 
     act(() => {
       result.current.relogin();
