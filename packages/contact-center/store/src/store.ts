@@ -1,12 +1,22 @@
 import {makeAutoObservable, observable} from 'mobx';
 import Webex from 'webex';
-import {IContactCenter, Profile, Team, WithWebex, IdleCode, InitParams, IStore} from './store.types';
+import {
+  IContactCenter,
+  Profile,
+  Team,
+  WithWebex,
+  IdleCode,
+  InitParams,
+  IStore,
+  ILogger
+} from './store.types';
 
 class Store implements IStore {
   private static instance: Store;
   teams: Team[] = [];
   loginOptions: string[] = [];
   cc: IContactCenter;
+  logger: ILogger;
   idleCodes: IdleCode[] = [];
   agentId: string = '';
   selectedLoginOption: string = '';
@@ -33,20 +43,21 @@ class Store implements IStore {
 
   registerCC(webex: WithWebex['webex']): Promise<void> {
     this.cc = webex.cc;
-    return this.cc
-      .register()
-      .then((response: Profile) => {
-        this.teams = response.teams;
-        this.loginOptions = response.loginVoiceOptions;
-        this.idleCodes = response.idleCodes;
-        this.agentId = response.agentId;
+    this.logger = this.cc.LoggerProxy;
+    return this.cc.register().then((response: Profile) => {
+      this.teams = response.teams;
+      this.loginOptions = response.loginVoiceOptions;
+      this.idleCodes = response.idleCodes;
+      this.agentId = response.agentId;
         this.isAgentLoggedIn = response.isAgentLoggedIn;
         this.deviceType = response.deviceType;
-      })
-      .catch((error) => {
-        console.error('Error registering contact center', error);
-        return Promise.reject(error);
+    }).catch((error) => {
+      this.logger.error(`Error registering contact center: ${error}`, {
+        module: 'cc-store#store.ts',
+        method: 'registerCC',
       });
+      return Promise.reject(error);
+    });
   }
 
   init(options: InitParams): Promise<void> {
