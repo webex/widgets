@@ -1,67 +1,143 @@
-.box {
-    background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    max-width: 800px;
-    margin: 0 auto;
+.light-theme {
+    &.box {
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .sectionBox {
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+    }
+    
+    .fieldset {
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 10px;
+        margin-bottom: 20px;
+        position: relative;
+    }
+    
+    .legendBox {
+        font-weight: bold;
+        color: #0052bf;
+    }
+    
+    .btn {
+        padding: 10px 20px;
+        background-color: #0052bf;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        margin-right: 8px;
+    }
+    
+    .select {
+        width: 100%;
+        padding: 8px;
+        margin-top: 8px;
+        margin-bottom: 12px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+    
+    .input {
+        width: 97%;
+        padding: 8px;
+        margin-top: 8px;
+        margin-bottom: 12px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+    
+    .elapsedTime {
+        position: absolute;
+        right: 30px;
+        top: 25px;
+        color: black; /* Replace with dynamic styling as needed */
+    }
+    
+    .elapsedTime-disabled {
+        color: #ccc;
+    }
 }
 
-.sectionBox {
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-}
-
-.fieldset {
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    padding: 10px;
-    margin-bottom: 20px;
-    position: relative;
-}
-
-.legendBox {
-    font-weight: bold;
-    color: #0052bf;
-}
-
-.btn {
-    padding: 10px 20px;
-    background-color: #0052bf;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    margin-right: 8px;
-}
-
-.select {
-    width: 100%;
-    padding: 8px;
-    margin-top: 8px;
-    margin-bottom: 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-.input {
-    width: 97%;
-    padding: 8px;
-    margin-top: 8px;
-    margin-bottom: 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-.elapsedTime {
-    position: absolute;
-    right: 30px;
-    top: 25px;
-    color: black; /* Replace with dynamic styling as needed */
-}
-
-.elapsedTime-disabled {
-    color: #ccc;
+.dark-theme {
+    &.box {
+        background-color: #1e1e1e; /* Dark background */
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); /* Darker shadow */
+        padding: 20px;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .sectionBox {
+        padding: 10px;
+        border: 1px solid #444; /* Darker border */
+        border-radius: 8px;
+    }
+    
+    .fieldset {
+        border: 1px solid #555; /* Darker border */
+        border-radius: 5px;
+        padding: 10px;
+        margin-bottom: 20px;
+        position: relative;
+    }
+    
+    .legendBox {
+        font-weight: bold;
+        color: #79a6d2; /* Lighter blue for dark theme */
+    }
+    
+    .btn {
+        padding: 10px 20px;
+        background-color: #79a6d2; /* Lighter blue */
+        color: #1e1e1e; /* Dark text on light button */
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        margin-right: 8px;
+    }
+    
+    .select {
+        width: 100%;
+        padding: 8px;
+        margin-top: 8px;
+        margin-bottom: 12px;
+        border: 1px solid #555; /* Darker border */
+        border-radius: 4px;
+        background-color: #2a2a2a; /* Dark background */
+        color: #fff; /* Light text */
+    }
+    
+    .input {
+        width: 97%;
+        padding: 8px;
+        margin-top: 8px;
+        margin-bottom: 12px;
+        border: 1px solid #555; /* Darker border */
+        border-radius: 4px;
+        background-color: #2a2a2a; /* Dark background */
+        color: #fff; /* Light text */
+    }
+    
+    .elapsedTime {
+        position: absolute;
+        right: 30px;
+        top: 25px;
+        color: #ddd; /* Light text for visibility */
+    }
+    
+    .elapsedTime-disabled {
+        color: #777; /* Darker gray for disabled state */
+    }
 }

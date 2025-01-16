@@ -5,7 +5,7 @@ import {IUserState} from './user-state.types';
 import './user-state.scss';
 
 const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
-  const {idleCodes,setAgentStatus,isSettingAgentStatus, errorMessage, elapsedTime, currentState} = props;
+  const {idleCodes,setAgentStatus,isSettingAgentStatus, errorMessage, elapsedTime, currentState, currentTheme} = props;
 
   const formatTime = (time: number): string => {
     const hours = Math.floor(time / 3600);
@@ -16,7 +16,7 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
 
   return (
     <>
-      <div className='box'>
+      <div className={`box ${currentTheme === 'DARK' ? 'dark-theme' : 'light-theme'}`}>
         <section className='sectionBox'>
           <fieldset className='fieldset'>
             <legend data-testid='user-state-title' className='legendBox'>Agent State</legend>

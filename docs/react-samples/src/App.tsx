@@ -1,10 +1,11 @@
-import React, {useState} from 'react';
+import React, {useState, useRef} from 'react';
 import {StationLogin, UserState, IncomingTask, TaskList, store} from '@webex/cc-widgets';
 
 function App() {
   const [isSdkReady, setIsSdkReady] = useState(false);
   const [accessToken, setAccessToken] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const themeCheckbox = useRef(null);
 
   const webexConfig = {
     fedramp: false,
@@ -48,6 +49,17 @@ function App() {
         value={accessToken}
         onChange={(e) => setAccessToken(e.target.value)}
       />
+      <br />
+      <input
+        type='checkbox'
+        id='theme'
+        name='theme'
+        ref={themeCheckbox}
+        onChange={() => {
+          store.setCurrentTheme(themeCheckbox.current.checked ? 'DARK' : 'LIGHT');
+        }}
+      /> Dark Theme
+      <br />
       <button
         disabled={accessToken.trim() === ''}
         onClick={() => {
