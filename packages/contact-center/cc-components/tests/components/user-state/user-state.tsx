@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import UserStatePresentational from '../../src/user-state/user-state.presentational';
+import UserStatePresentational from '../../../src/components/user-state/user-state';
 
 describe('UserStatePresentational Component', () => {
   const mockSetAgentStatus = jest.fn();
@@ -54,9 +54,9 @@ describe('UserStatePresentational Component', () => {
 
   it('should render elapsed time in correct color based on isSettingAgentStatus', () => {
     const { rerender } = render(<UserStatePresentational {...defaultProps} />);
-    expect(screen.getByText('01:01:01')).toHaveStyle('color: black');
+    expect(screen.getByText('01:01:01')).toHaveClass('elapsedTime');
 
     rerender(<UserStatePresentational {...{ ...defaultProps, isSettingAgentStatus: true }} />);
-    expect(screen.getByText('01:01:01')).toHaveStyle('color: grey');
+    expect(screen.getByText('01:01:01')).toHaveClass('elapsedTime elapsedTime-disabled');
   });
 });
