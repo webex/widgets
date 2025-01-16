@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {IUserState} from './use-state.types';
+import {IUserState} from './user-state.types';
 
 import './user-state.scss';
 
