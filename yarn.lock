@@ -5603,6 +5603,42 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@webex/cc-components@workspace:*, @webex/cc-components@workspace:packages/contact-center/cc-components":
+  version: 0.0.0-use.local
+  resolution: "@webex/cc-components@workspace:packages/contact-center/cc-components"
+  dependencies:
+    "@babel/core": "npm:7.25.2"
+    "@babel/preset-env": "npm:7.25.4"
+    "@babel/preset-react": "npm:7.24.7"
+    "@babel/preset-typescript": "npm:7.25.9"
+    "@r2wc/react-to-web-component": "npm:2.0.3"
+    "@testing-library/dom": "npm:10.4.0"
+    "@testing-library/jest-dom": "npm:6.6.2"
+    "@testing-library/react": "npm:16.0.1"
+    "@types/jest": "npm:29.5.14"
+    "@types/react-test-renderer": "npm:18"
+    "@webex/cc-store": "workspace:*"
+    babel-jest: "npm:29.7.0"
+    babel-loader: "npm:9.2.1"
+    crypto-browserify: "npm:^3.12.1"
+    file-loader: "npm:6.2.0"
+    jest: "npm:29.7.0"
+    jest-environment-jsdom: "npm:29.7.0"
+    os-browserify: "npm:^0.3.0"
+    process: "npm:^0.11.10"
+    querystring-es3: "npm:^0.2.1"
+    stream-browserify: "npm:^3.0.0"
+    ts-loader: "npm:9.5.1"
+    typescript: "npm:5.6.3"
+    url: "npm:^0.11.4"
+    util: "npm:^0.12.5"
+    vm-browserify: "npm:^1.1.2"
+    webpack: "npm:5.94.0"
+    webpack-cli: "npm:5.1.4"
+    webpack-merge: "npm:6.0.1"
+  languageName: unknown
+  linkType: soft
+
 "@webex/cc-station-login@workspace:*, @webex/cc-station-login@workspace:packages/contact-center/station-login":
   version: 0.0.0-use.local
   resolution: "@webex/cc-station-login@workspace:packages/contact-center/station-login"
@@ -5707,6 +5743,7 @@ __metadata:
     "@testing-library/react": "npm:16.0.1"
     "@types/jest": "npm:29.5.14"
     "@types/react-test-renderer": "npm:18"
+    "@webex/cc-components": "workspace:*"
     "@webex/cc-store": "workspace:*"
     babel-jest: "npm:29.7.0"
     babel-loader: "npm:9.2.1"

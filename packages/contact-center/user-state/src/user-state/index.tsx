@@ -3,8 +3,7 @@ import store from '@webex/cc-store';
 import {observer} from 'mobx-react-lite';
 
 import {useUserState} from '../helper';
-import UserStatePresentational from './user-state.presentational';
-import {IUserState} from './use-state.types';
+import {UserStateComponent, IUserState} from '@webex/cc-components';
 
 const UserState: React.FunctionComponent = observer(() => {
   const {cc, idleCodes, agentId} = store;
@@ -14,7 +13,7 @@ const UserState: React.FunctionComponent = observer(() => {
     cc
   });
 
-  return <UserStatePresentational {...props} />;
+  return <UserStateComponent {...props}/>;
 });
 
 export {UserState};
