@@ -18,8 +18,6 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
     deviceType
   } = props; // TODO: Use the  loginSuccess, loginFailure, logoutSuccess props returned fromthe API response via helper file to reflect UI changes
 
-  const hasReloginBeenCalled = useRef(false);
-
   useEffect(() => {
     const teamsDropdown = document.getElementById('teamsDropdown') as HTMLSelectElement;
     const agentLogin = document.querySelector('#LoginOption') as HTMLSelectElement;
@@ -49,14 +47,13 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
   }, [teams, loginOptions]);
 
   useEffect(() => {
-    if (!isAgentLoggedIn || hasReloginBeenCalled.current) return;
+    if (!isAgentLoggedIn) return;
     const agentLogin = document.querySelector('#LoginOption') as HTMLSelectElement;
     if (agentLogin && !agentLogin.value) {
       setDeviceType(deviceType);
       agentLogin.value = deviceType;
     }
     relogin();
-    hasReloginBeenCalled.current = true;
   }, []); // Only for the relogin case
 
   const selectLoginOption = (event: { target: { value: string; }; }) => {

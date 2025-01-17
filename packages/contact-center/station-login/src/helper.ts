@@ -8,19 +8,19 @@ export const useStationLogin = (props: UseStationLoginProps) => {
   const loginCb = props.onLogin;
   const logoutCb = props.onLogout;
   const logger = props.logger;
+  const [isAgentLoggedIn, setIsAgentLoggedIn] = useState(props.isAgentLoggedIn);
   const [dialNumber, setDialNumber] = useState('');
   const [deviceType, setDeviceType] = useState('');
   const [team, setTeam] = useState('');
   const [loginSuccess, setLoginSuccess] = useState<StationLoginSuccess>();
   const [loginFailure, setLoginFailure] = useState<Error>();
   const [logoutSuccess, setLogoutSuccess] = useState<StationLogoutSuccess>();
-  const [isAgentLoggedIn, setIsAgentLoggedIn] = useState(store.isAgentLoggedIn);
 
   const login = () => {
     cc.stationLogin({teamId: team, loginOption: deviceType, dialNumber: dialNumber})
       .then((res: StationLoginSuccess) => {
         setLoginSuccess(res);
-        setIsAgentLoggedIn(true);
+        setIsAgentLoggedIn(true)
         store.setSelectedLoginOption(deviceType);
         if (loginCb) {
           loginCb();

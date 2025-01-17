@@ -10,7 +10,6 @@ jest.mock('@webex/cc-store', () => {
     teams,
     loginOptions,
     setSelectedLoginOption: jest.fn(),
-    isAgentLoggedIn: false,
   };
 });
 
@@ -32,6 +31,7 @@ const logoutCb = jest.fn();
 const logger = {
   error: jest.fn()
 };
+const isAgentLoggedIn = false;
 
 describe('useStationLogin Hook', () => {
   afterEach(() => {
@@ -68,7 +68,7 @@ describe('useStationLogin Hook', () => {
     ccMock.stationLogin.mockResolvedValue(successResponse);
     const setSelectedLoginOptionSpy = jest.spyOn(require('@webex/cc-store'), 'setSelectedLoginOption');
 
-    const {result} = renderHook(() => useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger}));
+    const {result} = renderHook(() => useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger, isAgentLoggedIn}));
 
     act(() => {
       result.current.setDeviceType(loginParams.loginOption);
@@ -112,7 +112,7 @@ describe('useStationLogin Hook', () => {
     const setSelectedLoginOptionSpy = jest.spyOn(require('@webex/cc-store'), 'setSelectedLoginOption');
 
     loginCb.mockClear();
-    const {result} = renderHook(() => useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger}));
+    const {result} = renderHook(() => useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger, isAgentLoggedIn}));
 
     act(() => {
       result.current.setDeviceType(loginParams.loginOption);
@@ -155,7 +155,7 @@ describe('useStationLogin Hook', () => {
     ccMock.stationLogin.mockResolvedValue({});
 
     const { result } = renderHook(() =>
-      useStationLogin({cc: ccMock, onLogout: logoutCb, logger})
+      useStationLogin({cc: ccMock, onLogout: logoutCb, logger, isAgentLoggedIn})
     );
 
     await act(async () => {
@@ -172,7 +172,7 @@ describe('useStationLogin Hook', () => {
     ccMock.stationLogin.mockRejectedValue(errorResponse);
 
     loginCb.mockClear();
-    const {result} = renderHook(() => useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger}));
+    const {result} = renderHook(() => useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger, isAgentLoggedIn}));
 
     act(() => {
       result.current.setDeviceType(loginParams.loginOption);
@@ -227,7 +227,7 @@ describe('useStationLogin Hook', () => {
 
     ccMock.stationLogout.mockResolvedValue(successResponse);
 
-    const {result} = renderHook(() => useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger}));
+    const {result} = renderHook(() => useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger, isAgentLoggedIn}));
 
     await act(async () => {
       await result.current.logout();
@@ -257,7 +257,7 @@ describe('useStationLogin Hook', () => {
     ccMock.stationLogout.mockRejectedValue(new Error('Logout failed'));
 
     const {result} = renderHook(() =>
-      useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger})
+      useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger, isAgentLoggedIn})
     );
 
     await act(async () => {
@@ -275,7 +275,7 @@ describe('useStationLogin Hook', () => {
   it('should not call logout callback if not present', async () => {
     ccMock.stationLogout.mockResolvedValue({});
 
-    const {result} = renderHook(() => useStationLogin({cc: ccMock, onLogin: loginCb, logger}));
+    const {result} = renderHook(() => useStationLogin({cc: ccMock, onLogin: loginCb, logger, isAgentLoggedIn}));
 
     await act(async () => {
       await result.current.logout();
@@ -289,7 +289,7 @@ describe('useStationLogin Hook', () => {
   it('should call relogin and set device type', async () => {
     const setSelectedLoginOptionSpy = jest.spyOn(require('@webex/cc-store'), 'setSelectedLoginOption');
     
-    const { result } = renderHook(() => useStationLogin({ cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger }));
+    const { result } = renderHook(() => useStationLogin({ cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger, isAgentLoggedIn }));
 
     act(() => {
       result.current.relogin();
