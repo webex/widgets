@@ -20,9 +20,18 @@ class Store implements IStore {
   idleCodes: IdleCode[] = [];
   agentId: string = '';
   selectedLoginOption: string = '';
+  wrapupCodes: any;
+  currentTask: any = null;
 
   constructor() {
-    makeAutoObservable(this, {cc: observable.ref});
+    makeAutoObservable(this, {
+      cc: observable.ref,
+      currentTask: observable, // Make currentTask observable
+    });
+  }
+
+  setCurrentTask(task: any): void {
+    this.currentTask = task;
   }
 
   public static getInstance(): Store {
@@ -47,6 +56,7 @@ class Store implements IStore {
       this.loginOptions = response.loginVoiceOptions;
       this.idleCodes = response.idleCodes;
       this.agentId = response.agentId;
+      this.wrapupCodes = response.wrapupCodes;
     }).catch((error) => {
       this.logger.error(`Error registering contact center: ${error}`, {
         module: 'cc-store#store.ts',

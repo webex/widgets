@@ -1,6 +1,7 @@
 import {useState, useEffect, useCallback, useRef} from 'react';
-import {TASK_EVENTS, UseTaskListProps, UseTaskProps} from './task.types';
+import {TASK_EVENTS, useCallControlProps, UseTaskListProps, UseTaskProps} from './task.types';
 import {ITask} from '@webex/plugin-cc';
+import store from '@webex/cc-store';
 
 // Hook for managing the task list
 export const useTaskList = (props: UseTaskListProps) => {
@@ -46,6 +47,7 @@ export const useTaskList = (props: UseTaskListProps) => {
     task
       .accept(taskId)
       .then(() => {
+        store.setCurrentTask(task);
         onTaskAccepted && onTaskAccepted(task);
       })
       .catch((error: Error) => {
@@ -64,6 +66,7 @@ export const useTaskList = (props: UseTaskListProps) => {
       .decline(taskId)
       .then(() => {
         onTaskDeclined && onTaskDeclined(task);
+        store.setCurrentTask(null);
       })
       .catch((error: Error) => {
         logger.error(`Error declining task: ${error}`, {
@@ -91,7 +94,6 @@ export const useIncomingTask = (props: UseTaskProps) => {
   const [currentTask, setCurrentTask] = useState<ITask | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
   const [isEnded, setIsEnded] = useState(false);
-  const [isMissed, setIsMissed] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null); // Ref for the audio element
 
   const handleTaskAssigned = useCallback(() => {
@@ -103,11 +105,6 @@ export const useIncomingTask = (props: UseTaskProps) => {
     setCurrentTask(null);
   }, []);
 
-  const handleTaskMissed = useCallback(() => {
-    setIsMissed(true);
-    setCurrentTask(null);
-  }, []);
-
   const handleTaskMedia = useCallback((track) => {
     if (audioRef.current) {
       audioRef.current.srcObject = new MediaStream([track]);
@@ -116,6 +113,8 @@ export const useIncomingTask = (props: UseTaskProps) => {
 
   const handleIncomingTask = useCallback((task: ITask) => {
     setCurrentTask(task);
+    setIsAnswered(false);
+    setIsEnded(false);
   }, []);
 
   useEffect(() => {
@@ -124,7 +123,6 @@ export const useIncomingTask = (props: UseTaskProps) => {
     if (currentTask) {
       currentTask.on(TASK_EVENTS.TASK_ASSIGNED, handleTaskAssigned);
       currentTask.on(TASK_EVENTS.TASK_END, handleTaskEnded);
-      currentTask.on(TASK_EVENTS.TASK_UNASSIGNED, handleTaskMissed);
       currentTask.on(TASK_EVENTS.TASK_MEDIA, handleTaskMedia);
     }
 
@@ -133,11 +131,10 @@ export const useIncomingTask = (props: UseTaskProps) => {
       if (currentTask) {
         currentTask.off(TASK_EVENTS.TASK_ASSIGNED, handleTaskAssigned);
         currentTask.off(TASK_EVENTS.TASK_END, handleTaskEnded);
-        currentTask.off(TASK_EVENTS.TASK_UNASSIGNED, handleTaskMissed);
         currentTask.off(TASK_EVENTS.TASK_MEDIA, handleTaskMedia);
       }
     };
-  }, [cc, currentTask, handleIncomingTask, handleTaskAssigned, handleTaskEnded, handleTaskMissed, handleTaskMedia]);
+  }, [cc, currentTask, handleIncomingTask, handleTaskAssigned, handleTaskEnded, handleTaskMedia]);
 
   const accept = () => {
     const taskId = currentTask?.data.interactionId;
@@ -146,6 +143,7 @@ export const useIncomingTask = (props: UseTaskProps) => {
     currentTask
       .accept(taskId)
       .then(() => {
+        store.setCurrentTask(currentTask);
         onAccepted && onAccepted();
       })
       .catch((error: Error) => {
@@ -164,6 +162,7 @@ export const useIncomingTask = (props: UseTaskProps) => {
       .decline(taskId)
       .then(() => {
         setCurrentTask(null);
+        store.setCurrentTask(null);
         onDeclined && onDeclined();
       })
       .catch((error: Error) => {
@@ -181,10 +180,115 @@ export const useIncomingTask = (props: UseTaskProps) => {
     setCurrentTask,
     isAnswered,
     isEnded,
-    isMissed,
     accept,
     decline,
     isBrowser,
     audioRef,
+  };
+};
+
+export const useCallControl = (props: useCallControlProps) => {
+  const {currentTask, onHoldResume, onEnd, onWrapUp, logger} = props;
+  const [wrapupRequired, setWrapupRequired] = useState(false);
+
+  const handleTaskEnded = useCallback((wrapupRequired: boolean) => {
+    setWrapupRequired(wrapupRequired);
+  }, []);
+
+  useEffect(() => {
+    if (currentTask) {
+      currentTask.on(TASK_EVENTS.TASK_END, handleTaskEnded);
+    }
+
+    return () => {
+      if (currentTask) {
+        currentTask.off(TASK_EVENTS.TASK_END, handleTaskEnded);
+      }
+    };
+  }, [currentTask, handleTaskEnded]);
+
+  const holdResume = (hold: boolean) => {
+    if (hold) {
+      currentTask
+        .hold()
+        .then(() => {
+          onHoldResume();
+        })
+        .catch((error: Error) => {
+          logger.error(`Error holding call: ${error}`, {
+            module: 'widget-cc-task#helper.ts',
+            method: 'useCallControl#holdResume',
+          });
+        });
+    } else {
+      currentTask
+        .resume()
+        .then(() => {
+          onHoldResume();
+        })
+        .catch((error: Error) => {
+          logger.error(`Error resuming call: ${error}`, {
+            module: 'widget-cc-task#helper.ts',
+            method: 'useCallControl#holdResume',
+          });
+        });
+    }
+  };
+
+  const pauseResumeRecording = (pause: boolean) => {
+    if (pause) {
+      currentTask.pauseRecording().catch((error: Error) => {
+        logger.error(`Error pausing recording: ${error}`, {
+          module: 'widget-cc-task#helper.ts',
+          method: 'useCallControl#pauseResumeRecording',
+        });
+      });
+    } else {
+      currentTask.resumeRecording().catch((error: Error) => {
+        logger.error(`Error resuming recording: ${error}`, {
+          module: 'widget-cc-task#helper.ts',
+          method: 'useCallControl#pauseResumeRecording',
+        });
+      });
+    }
+  };
+
+  const endCall = () => {
+    currentTask
+      .end()
+      .then(() => {
+        onEnd();
+      })
+      .catch((error: Error) => {
+        logger.error(`Error ending call: ${error}`, {
+          module: 'widget-cc-task#helper.ts',
+          method: 'useCallControl#endCall',
+        });
+      });
+  };
+
+  const wrapupCall = (wrapUpReason, auxCodeId) => {
+    currentTask
+      .wrapup({wrapUpReason: wrapUpReason, auxCodeId: auxCodeId})
+      .then(() => {
+        setWrapupRequired(false);
+        store.setCurrentTask(null);
+        onWrapUp();
+      })
+      .catch((error: Error) => {
+        logger.error(`Error ending call: ${error}`, {
+          module: 'widget-cc-task#helper.ts',
+          method: 'useCallControl#endCall',
+        });
+      });
+  };
+
+  return {
+    currentTask,
+    endCall,
+    holdResume,
+    pauseResumeRecording,
+    wrapupCall,
+    wrapupRequired,
   };
 };

@@ -120,9 +120,9 @@ const styles: {[key: string]: React.CSSProperties} = {
 };
 
 const IncomingTaskPresentational: React.FunctionComponent<IncomingTaskPresentationalProps> = (props) => {
-  const {currentTask, accept, decline, isBrowser, audioRef} = props;
+  const {currentTask, accept, decline, isBrowser, audioRef, isAnswered} = props;
 
-  if (!currentTask) {
+  if (!currentTask || isAnswered) {
     return <></>; // hidden component
   }
 

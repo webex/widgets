@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {StationLogin, UserState, IncomingTask, TaskList, store} from '@webex/cc-widgets';
+import {StationLogin, UserState, IncomingTask, TaskList, CallControl, store} from '@webex/cc-widgets';
 
 function App() {
   const [isSdkReady, setIsSdkReady] = useState(false);
@@ -66,6 +66,7 @@ function App() {
               <UserState />
               <IncomingTask onAccepted={onAccepted} onDeclined={onDeclined} />
               <TaskList onTaskAccepted={onTaskAccepted} onTaskDeclined={onTaskDeclined} />
+              <CallControl />
             </>
           )}
         </>

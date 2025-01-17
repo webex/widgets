@@ -71,11 +71,6 @@ export interface TaskProps {
   isEnded: boolean;
 
   /**
-   * Flag to determine if the task is missed
-   */
-  isMissed: boolean;
-
-  /**
    * Selected login option
    */
   selectedLoginOption: string;
@@ -97,10 +92,13 @@ export interface TaskProps {
 }
 
 export type UseTaskProps = Pick<TaskProps, 'cc' | 'onAccepted' | 'onDeclined' | 'selectedLoginOption' | 'logger'>;
-export type UseTaskListProps = Pick<TaskProps, 'cc' | 'selectedLoginOption' | 'onTaskAccepted' | 'onTaskDeclined' | 'logger'>;
+export type UseTaskListProps = Pick<
+  TaskProps,
+  'cc' | 'selectedLoginOption' | 'onTaskAccepted' | 'onTaskDeclined' | 'logger'
+>;
 export type IncomingTaskPresentationalProps = Pick<
   TaskProps,
-  'currentTask' | 'isBrowser' | 'isAnswered' | 'isEnded' | 'isMissed' | 'accept' | 'decline' | 'audioRef'
+  'currentTask' | 'isBrowser' | 'isAnswered' | 'isEnded' | 'accept' | 'decline' | 'audioRef'
 >;
 export type IncomingTaskProps = Pick<TaskProps, 'onAccepted' | 'onDeclined'>;
 export type TaskListProps = Pick<TaskProps, 'onTaskAccepted' | 'onTaskDeclined'>;
@@ -121,3 +119,26 @@ export enum TASK_EVENTS {
   TASK_END = 'task:end',
   TASK_WRAPUP = 'task:wrapup',
 } // TODO: remove this once cc sdk exports this enum
+
+export interface ControlProps {
+  currentTask: ITask;
+  onHoldResume: () => void;
+  onEnd: () => void;
+  onWrapUp: () => void;
+  logger: ILogger;
+  wrapupCodes: any[];
+  wrapupRequired: boolean;
+  holdResume: (hold: boolean) => void;
+  pauseResumeRecording: (pause: boolean) => void;
+  endCall: () => void;
+  wrapupCall: (wrapupReason: string, wrapupId: string) => void;
+}
+
+export type CallControlProps = Pick<ControlProps, 'onHoldResume' | 'onEnd' | 'onWrapUp'>;
+
+export type CallControlPresentationalProps = Pick<
+  ControlProps,
+  'currentTask' | 'wrapupCodes' | 'wrapupRequired' | 'holdResume' | 'pauseResumeRecording' | 'endCall' | 'wrapupCall'
+>;
+
+export type useCallControlProps = Pick<ControlProps, 'currentTask' | 'onHoldResume' | 'onEnd' | 'onWrapUp' | 'logger'>;
