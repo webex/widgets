@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import {StationLoginSuccess, StationLogoutSuccess} from '@webex/plugin-cc';
 import {UseStationLoginProps} from './station-login/station-login.types';
 import store from '@webex/cc-store'; // we need to import as we are losing the context of this in store
@@ -15,6 +15,10 @@ export const useStationLogin = (props: UseStationLoginProps) => {
   const [loginSuccess, setLoginSuccess] = useState<StationLoginSuccess>();
   const [loginFailure, setLoginFailure] = useState<Error>();
   const [logoutSuccess, setLogoutSuccess] = useState<StationLogoutSuccess>();
+
+  useEffect(() => {
+    setIsAgentLoggedIn(props.isAgentLoggedIn);
+  }, [props.isAgentLoggedIn]);
 
   const login = () => {
     cc.stationLogin({teamId: team, loginOption: deviceType, dialNumber: dialNumber})

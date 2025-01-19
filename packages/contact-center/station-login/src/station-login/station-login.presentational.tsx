@@ -52,9 +52,9 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
     if (agentLogin && !agentLogin.value) {
       setDeviceType(deviceType);
       agentLogin.value = deviceType;
+      relogin();
     }
-    relogin();
-  }, []); // Only for the relogin case
+  }, [isAgentLoggedIn]);
 
   const selectLoginOption = (event: { target: { value: string; }; }) => {
     const dialNumber = document.querySelector('#dialNumber') as HTMLInputElement;
