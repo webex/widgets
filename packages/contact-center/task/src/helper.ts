@@ -191,7 +191,8 @@ export const useCallControl = (props: useCallControlProps) => {
   const {currentTask, onHoldResume, onEnd, onWrapUp, logger} = props;
   const [wrapupRequired, setWrapupRequired] = useState(false);
 
-  const handleTaskEnded = useCallback((wrapupRequired: boolean) => {
+  const handleTaskEnded = useCallback((args: {wrapupRequired: boolean}) => {
+    const {wrapupRequired} = args;
     setWrapupRequired(wrapupRequired);
   }, []);
 
@@ -235,8 +236,8 @@ export const useCallControl = (props: useCallControlProps) => {
     }
   };
 
-  const pauseResumeRecording = (pause: boolean) => {
-    if (pause) {
+  const pauseResumeRecording = (resume: boolean) => {
+    if (resume) {
       currentTask.pauseRecording().catch((error: Error) => {
         logger.error(`Error pausing recording: ${error}`, {
           module: 'widget-cc-task#helper.ts',
@@ -276,9 +277,9 @@ export const useCallControl = (props: useCallControlProps) => {
         onWrapUp();
       })
       .catch((error: Error) => {
-        logger.error(`Error ending call: ${error}`, {
+        logger.error(`Error wrapping up call: ${error}`, {
           module: 'widget-cc-task#helper.ts',
-          method: 'useCallControl#endCall',
+          method: 'useCallControl#wrapupCall',
         });
       });
   };

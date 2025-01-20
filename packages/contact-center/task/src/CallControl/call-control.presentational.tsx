@@ -1,10 +1,11 @@
 import React, {useState} from 'react';
 import './call-control.styles.scss';
 import {CallControlPresentationalProps} from '../task.types';
+import {WrapupCodes} from '@webex/cc-store';
 
 const CallControlPresentational = (props: CallControlPresentationalProps) => {
   const [isHeld, setIsHeld] = useState(false);
-  const [isRecordingPaused, setIsRecordingPaused] = useState(true);
+  const [isRecording, setIsRecording] = useState(true);
   const [selectedWrapupReason, setSelectedWrapupReason] = useState<string | null>(null);
   const [selectedWrapupId, setSelectedWrapupId] = useState<string | null>(null);
 
@@ -19,12 +20,12 @@ const CallControlPresentational = (props: CallControlPresentationalProps) => {
   };
 
   const handlePauseResumeRecording = () => {
-    if (isRecordingPaused) {
+    if (isRecording) {
       pauseResumeRecording(true);
     } else {
       pauseResumeRecording(false);
     }
-    setIsRecordingPaused(!isRecordingPaused);
+    setIsRecording(!isRecording);
   };
 
   const handleEndCall = () => {
@@ -32,6 +33,7 @@ const CallControlPresentational = (props: CallControlPresentationalProps) => {
   };
 
   const handleWrapupCall = () => {
+    setSelectedWrapupReason('');
     if (selectedWrapupReason && selectedWrapupId) {
       wrapupCall(selectedWrapupReason, selectedWrapupId);
     }
@@ -56,7 +58,7 @@ const CallControlPresentational = (props: CallControlPresentationalProps) => {
                     {isHeld ? 'Resume' : 'Hold'}
                   </button>
                   <button className="btn" onClick={handlePauseResumeRecording} disabled={wrapupRequired}>
-                    {isRecordingPaused ? 'Resume Recording' : 'Pause Recording'}
+                    {isRecording ? 'Pause Recording' : 'Resume Recording'}
                   </button>
                   <button className="btn" onClick={handleEndCall} disabled={wrapupRequired}>
                     End
@@ -67,7 +69,7 @@ const CallControlPresentational = (props: CallControlPresentationalProps) => {
                     <option value="" disabled>
                       Select Wrap-up Reason
                     </option>
-                    {wrapupCodes.map((wrapup: any) => (
+                    {wrapupCodes.map((wrapup: WrapupCodes) => (
                       <option key={wrapup.id} value={wrapup.id}>
                         {wrapup.name}
                       </option>

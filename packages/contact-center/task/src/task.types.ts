@@ -1,5 +1,5 @@
 import {ITask, IContactCenter} from '@webex/plugin-cc';
-import {ILogger} from '@webex/cc-store';
+import {ILogger, WrapupCodes} from '@webex/cc-store';
 
 /**
  * Interface representing the TaskProps of a user.
@@ -103,7 +103,10 @@ export type IncomingTaskPresentationalProps = Pick<
 export type IncomingTaskProps = Pick<TaskProps, 'onAccepted' | 'onDeclined'>;
 export type TaskListProps = Pick<TaskProps, 'onTaskAccepted' | 'onTaskDeclined'>;
 
-export type TaskListPresentationalProps = Pick<TaskProps, 'taskList' | 'isBrowser' | 'acceptTask' | 'declineTask'>;
+export type TaskListPresentationalProps = Pick<
+  TaskProps,
+  'currentTask' | 'taskList' | 'isBrowser' | 'acceptTask' | 'declineTask'
+>;
 export enum TASK_EVENTS {
   TASK_INCOMING = 'task:incoming',
   TASK_ASSIGNED = 'task:assigned',
@@ -126,7 +129,7 @@ export interface ControlProps {
   onEnd: () => void;
   onWrapUp: () => void;
   logger: ILogger;
-  wrapupCodes: any[];
+  wrapupCodes: WrapupCodes[];
   wrapupRequired: boolean;
   holdResume: (hold: boolean) => void;
   pauseResumeRecording: (pause: boolean) => void;

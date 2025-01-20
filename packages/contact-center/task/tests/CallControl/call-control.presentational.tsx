@@ -31,13 +31,13 @@ describe('CallControlPresentational', () => {
     render(<CallControlPresentational {...defaultProps} />);
 
     expect(screen.getByText('Hold')).toBeInTheDocument();
-    expect(screen.getByText('Resume Recording')).toBeInTheDocument();
+    expect(screen.getByText('Pause Recording')).toBeInTheDocument();
     expect(screen.getByText('End')).toBeInTheDocument();
     expect(screen.getByRole('combobox')).toBeInTheDocument();
     expect(screen.getByText('Wrap Up')).toBeInTheDocument();
   });
 
-  it('calls holdResume with the correct argument when Hold/Resume button is clicked', () => {
+  it('calls holdResume with the correct argument when Hold/Pause button is clicked', () => {
     render(<CallControlPresentational {...defaultProps} />);
 
     const holdButton = screen.getByText('Hold');
@@ -49,10 +49,10 @@ describe('CallControlPresentational', () => {
     expect(mockHoldResume).toHaveBeenCalledWith(false);
   });
 
-  it('calls pauseResumeRecording with the correct argument when Pause/Resume Recording button is clicked', () => {
+  it('calls pauseResumeRecording with the correct argument when Pause/Pause Recording button is clicked', () => {
     render(<CallControlPresentational {...defaultProps} />);
 
-    const pauseButton = screen.getByText('Resume Recording');
+    const pauseButton = screen.getByText('Pause Recording');
     fireEvent.click(pauseButton);
 
     expect(mockPauseResumeRecording).toHaveBeenCalledWith(true);
@@ -87,7 +87,7 @@ describe('CallControlPresentational', () => {
     render(<CallControlPresentational {...defaultProps} />);
 
     const holdButton = screen.getByText('Hold');
-    const pauseButton = screen.getByText('Resume Recording');
+    const pauseButton = screen.getByText('Pause Recording');
     const endButton = screen.getByText('End');
     const select = screen.getByRole('combobox');
 

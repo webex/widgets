@@ -8,8 +8,10 @@ import {
   IdleCode,
   InitParams,
   IStore,
-  ILogger
+  ILogger,
+  WrapupCode
 } from './store.types';
+import {ITask} from '@webex/plugin-cc';
 
 class Store implements IStore {
   private static instance: Store;
@@ -20,8 +22,8 @@ class Store implements IStore {
   idleCodes: IdleCode[] = [];
   agentId: string = '';
   selectedLoginOption: string = '';
-  wrapupCodes: any;
-  currentTask: any = null;
+  wrapupCodes: WrapupCode[] = [];
+  currentTask: ITask = null;
 
   constructor() {
     makeAutoObservable(this, {

@@ -30,7 +30,7 @@ const WebCallControl = r2wc(CallControl, {
   props: {
     onHoldResume: 'function',
     onEnd: 'function',
-    onWrapUp: 'function',
+    onWrapup: 'function',
   },
 });
 

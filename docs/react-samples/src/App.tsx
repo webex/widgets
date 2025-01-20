@@ -39,6 +39,18 @@ function App() {
     console.log('onTaskDeclined invoked');
   };
 
+  const onHoldResume = () => {
+    console.log('onHoldResume invoked');
+  };
+
+  const onEnd = () => {
+    console.log('onEnd invoked');
+  };
+
+  const onWrapup = () => {
+    console.log('onWrapup invoked');
+  };
+
   return (
     <>
       <h1>Contact Center widgets in a react app</h1>
@@ -66,7 +78,7 @@ function App() {
               <UserState />
               <IncomingTask onAccepted={onAccepted} onDeclined={onDeclined} />
               <TaskList onTaskAccepted={onTaskAccepted} onTaskDeclined={onTaskDeclined} />
-              <CallControl />
+              <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapup={onWrapup} />
             </>
           )}
         </>
