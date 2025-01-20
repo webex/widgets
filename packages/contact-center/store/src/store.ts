@@ -32,7 +32,7 @@ class Store implements IStore {
     });
   }
 
-  setCurrentTask(task: any): void {
+  setCurrentTask(task: ITask): void {
     this.currentTask = task;
   }
 

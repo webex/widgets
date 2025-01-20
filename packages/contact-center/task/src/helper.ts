@@ -91,18 +91,19 @@ export const useTaskList = (props: UseTaskListProps) => {
 // Hook for managing the current task
 export const useIncomingTask = (props: UseTaskProps) => {
   const {cc, onAccepted, onDeclined, selectedLoginOption, logger} = props;
-  const [currentTask, setCurrentTask] = useState<ITask | null>(null);
+  const [incomingTask, setIncomingTask] = useState<ITask | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
   const [isEnded, setIsEnded] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null); // Ref for the audio element
 
   const handleTaskAssigned = useCallback(() => {
+    store.setCurrentTask(incomingTask);
     setIsAnswered(true);
   }, []);
 
   const handleTaskEnded = useCallback(() => {
     setIsEnded(true);
-    setCurrentTask(null);
+    setIncomingTask(null);
   }, []);
 
   const handleTaskMedia = useCallback((track) => {
@@ -112,7 +113,7 @@ export const useIncomingTask = (props: UseTaskProps) => {
   }, []);
 
   const handleIncomingTask = useCallback((task: ITask) => {
-    setCurrentTask(task);
+    setIncomingTask(task);
     setIsAnswered(false);
     setIsEnded(false);
   }, []);
@@ -120,30 +121,30 @@ export const useIncomingTask = (props: UseTaskProps) => {
   useEffect(() => {
     cc.on(TASK_EVENTS.TASK_INCOMING, handleIncomingTask);
 
-    if (currentTask) {
-      currentTask.on(TASK_EVENTS.TASK_ASSIGNED, handleTaskAssigned);
-      currentTask.on(TASK_EVENTS.TASK_END, handleTaskEnded);
-      currentTask.on(TASK_EVENTS.TASK_MEDIA, handleTaskMedia);
+    if (incomingTask) {
+      incomingTask.on(TASK_EVENTS.TASK_ASSIGNED, handleTaskAssigned);
+      incomingTask.on(TASK_EVENTS.TASK_END, handleTaskEnded);
+      incomingTask.on(TASK_EVENTS.TASK_MEDIA, handleTaskMedia);
     }
 
     return () => {
       cc.off(TASK_EVENTS.TASK_INCOMING, handleIncomingTask);
-      if (currentTask) {
-        currentTask.off(TASK_EVENTS.TASK_ASSIGNED, handleTaskAssigned);
-        currentTask.off(TASK_EVENTS.TASK_END, handleTaskEnded);
-        currentTask.off(TASK_EVENTS.TASK_MEDIA, handleTaskMedia);
+      if (incomingTask) {
+        incomingTask.off(TASK_EVENTS.TASK_ASSIGNED, handleTaskAssigned);
+        incomingTask.off(TASK_EVENTS.TASK_END, handleTaskEnded);
+        incomingTask.off(TASK_EVENTS.TASK_MEDIA, handleTaskMedia);
       }
     };
-  }, [cc, currentTask, handleIncomingTask, handleTaskAssigned, handleTaskEnded, handleTaskMedia]);
+  }, [cc, incomingTask, handleIncomingTask, handleTaskAssigned, handleTaskEnded, handleTaskMedia]);
 
   const accept = () => {
-    const taskId = currentTask?.data.interactionId;
+    const taskId = incomingTask?.data.interactionId;
     if (!taskId) return;
 
-    currentTask
+    incomingTask
       .accept(taskId)
       .then(() => {
-        store.setCurrentTask(currentTask);
+        store.setCurrentTask(incomingTask);
         onAccepted && onAccepted();
       })
       .catch((error: Error) => {
@@ -155,13 +156,13 @@ export const useIncomingTask = (props: UseTaskProps) => {
   };
 
   const decline = () => {
-    const taskId = currentTask?.data.interactionId;
+    const taskId = incomingTask?.data.interactionId;
     if (!taskId) return;
 
-    currentTask
+    incomingTask
       .decline(taskId)
       .then(() => {
-        setCurrentTask(null);
+        setIncomingTask(null);
         store.setCurrentTask(null);
         onDeclined && onDeclined();
       })
@@ -176,8 +177,7 @@ export const useIncomingTask = (props: UseTaskProps) => {
   const isBrowser = selectedLoginOption === 'BROWSER';
 
   return {
-    currentTask,
-    setCurrentTask,
+    incomingTask,
     isAnswered,
     isEnded,
     accept,
@@ -208,12 +208,12 @@ export const useCallControl = (props: useCallControlProps) => {
     };
   }, [currentTask, handleTaskEnded]);
 
-  const holdResume = (hold: boolean) => {
+  const toggleHold = (hold: boolean) => {
     if (hold) {
       currentTask
         .hold()
         .then(() => {
-          onHoldResume();
+          if (onHoldResume) onHoldResume();
         })
         .catch((error: Error) => {
           logger.error(`Error holding call: ${error}`, {
@@ -225,7 +225,7 @@ export const useCallControl = (props: useCallControlProps) => {
       currentTask
         .resume()
         .then(() => {
-          onHoldResume();
+          if (onHoldResume) onHoldResume();
         })
         .catch((error: Error) => {
           logger.error(`Error resuming call: ${error}`, {
@@ -236,8 +236,8 @@ export const useCallControl = (props: useCallControlProps) => {
     }
   };
 
-  const pauseResumeRecording = (resume: boolean) => {
-    if (resume) {
+  const toggleRecording = (pause: boolean) => {
+    if (pause) {
       currentTask.pauseRecording().catch((error: Error) => {
         logger.error(`Error pausing recording: ${error}`, {
           module: 'widget-cc-task#helper.ts',
@@ -258,7 +258,7 @@ export const useCallControl = (props: useCallControlProps) => {
     currentTask
       .end()
       .then(() => {
-        onEnd();
+        if (onEnd) onEnd();
       })
       .catch((error: Error) => {
         logger.error(`Error ending call: ${error}`, {
@@ -268,13 +268,13 @@ export const useCallControl = (props: useCallControlProps) => {
       });
   };
 
-  const wrapupCall = (wrapUpReason, auxCodeId) => {
+  const wrapupCall = (wrapUpReason: string, auxCodeId: string) => {
     currentTask
       .wrapup({wrapUpReason: wrapUpReason, auxCodeId: auxCodeId})
       .then(() => {
         setWrapupRequired(false);
         store.setCurrentTask(null);
-        onWrapUp();
+        if (onWrapUp) onWrapUp();
       })
       .catch((error: Error) => {
         logger.error(`Error wrapping up call: ${error}`, {
@@ -287,8 +287,8 @@ export const useCallControl = (props: useCallControlProps) => {
   return {
     currentTask,
     endCall,
-    holdResume,
-    pauseResumeRecording,
+    toggleHold,
+    toggleRecording,
     wrapupCall,
     wrapupRequired,
   };

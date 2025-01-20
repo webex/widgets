@@ -11,6 +11,11 @@ export interface TaskProps {
   currentTask: ITask;
 
   /**
+   * Incoming task on the incoming task widget
+   */
+  incomingTask: ITask;
+
+  /**
    * CC SDK Instance.
    */
   cc: IContactCenter;
@@ -98,7 +103,7 @@ export type UseTaskListProps = Pick<
 >;
 export type IncomingTaskPresentationalProps = Pick<
   TaskProps,
-  'currentTask' | 'isBrowser' | 'isAnswered' | 'isEnded' | 'accept' | 'decline' | 'audioRef'
+  'incomingTask' | 'isBrowser' | 'isAnswered' | 'isEnded' | 'accept' | 'decline' | 'audioRef'
 >;
 export type IncomingTaskProps = Pick<TaskProps, 'onAccepted' | 'onDeclined'>;
 export type TaskListProps = Pick<TaskProps, 'onTaskAccepted' | 'onTaskDeclined'>;
@@ -123,17 +128,68 @@ export enum TASK_EVENTS {
   TASK_WRAPUP = 'task:wrapup',
 } // TODO: remove this once cc sdk exports this enum
 
+/**
+ * Interface representing the properties for control actions on a task.
+ */
 export interface ControlProps {
+  /**
+   * The current task being handled.
+   */
   currentTask: ITask;
+
+  /**
+   * Function to handle hold/resume actions.
+   */
   onHoldResume: () => void;
+
+  /**
+   * Function to handle ending the task.
+   */
   onEnd: () => void;
+
+  /**
+   * Function to handle wrapping up the task.
+   */
   onWrapUp: () => void;
+
+  /**
+   * Logger instance for logging purposes.
+   */
   logger: ILogger;
+
+  /**
+   * Array of wrap-up codes.
+   * TODO: Expose this type from SDK.
+   */
   wrapupCodes: WrapupCodes[];
+
+  /**
+   * Indicates if wrap-up is required.
+   */
   wrapupRequired: boolean;
+
+  /**
+   * Function to handle hold/resume actions with a boolean parameter.
+   * @param hold - Boolean indicating whether to hold (true) or resume (false).
+   */
   holdResume: (hold: boolean) => void;
+
+  /**
+   * Function to handle pause/resume recording actions with a boolean parameter.
+   * @param pause - Boolean indicating whether to pause (true) or resume (false) recording.
+   */
   pauseResumeRecording: (pause: boolean) => void;
+
+  /**
+   * Function to handle ending the call.
+   */
   endCall: () => void;
+
+  /**
+   * Function to handle wrapping up the call with a reason and ID.
+   * @param wrapupReason - The reason for wrapping up the call.
+   * @param wrapupId - The ID associated with the wrap-up reason.
+   */
   wrapupCall: (wrapupReason: string, wrapupId: string) => void;
 }
 

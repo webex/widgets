@@ -1,6 +1,7 @@
 import {renderHook, act, waitFor} from '@testing-library/react';
 import {useIncomingTask, useTaskList, useCallControl} from '../src/helper';
 import {TASK_EVENTS} from '../src/task.types';
+import React from 'react';
 
 // Mock webex instance and task
 const ccMock = {
@@ -113,6 +114,35 @@ describe('useIncomingTask Hook', () => {
     expect(logger.error).not.toHaveBeenCalled();
   });
 
+  it('should assign media received from media event to audio tag', async () => {
+    global.MediaStream = jest.fn().mockImplementation((tracks) => {
+      return {mockStream: 'mock-stream'};
+    });
+    const mockAudioElement = {current: {srcObject: null}};
+    jest.spyOn(React, 'useRef').mockReturnValue(mockAudioElement);
+    const mockAudio = {
+      srcObject: 'mock-audio',
+    };
+
+    const {result, unmount} = renderHook(() =>
+      useIncomingTask({cc: ccMock, onAccepted, onDeclined, selectedLoginOption: 'BROWSER', logger})
+    );
+    act(() => {
+      ccMock.on.mock.calls[0][1](taskMock);
+    });
+
+    act(() => {
+      taskMock.on.mock.calls[2][1](mockAudio);
+    });
+
+    await waitFor(() => {
+      expect(mockAudioElement.current).toEqual({srcObject: {mockStream: 'mock-stream'}});
+    });
+
+    // Ensure no errors are logged
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
   it('should handle errors when accepting a task', async () => {
     const failingTask = {
       ...taskMock,
@@ -173,6 +203,31 @@ describe('useIncomingTask Hook', () => {
       module: 'widget-cc-task#helper.ts',
       method: 'useIncomingTask#decline',
     });
+  });
+
+  it('should handle task media event', async () => {
+    const mockTrack = {kind: 'audio'};
+    const mockAudioElement = {current: {srcObject: null}};
+    jest.spyOn(React, 'useRef').mockReturnValue(mockAudioElement);
+
+    const {result} = renderHook(() =>
+      useIncomingTask({cc: ccMock, onAccepted, onDeclined, selectedLoginOption: 'BROWSER', logger})
+    );
+
+    act(() => {
+      ccMock.on.mock.calls[0][1](taskMock);
+    });
+
+    act(() => {
+      taskMock.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_MEDIA)?.[1](mockTrack);
+    });
+
+    await waitFor(() => {
+      expect(mockAudioElement.current.srcObject).toEqual(new MediaStream([mockTrack]));
+    });
+
+    // Ensure no errors are logged
+    expect(logger.error).not.toHaveBeenCalled();
   });
 });
 
@@ -376,6 +431,25 @@ describe('useTaskList Hook', () => {
     expect(logger.error).not.toHaveBeenCalled();
   });
 
+  it('should remove a task from the list when it is unassigned', async () => {
+    const {result} = renderHook(() => useTaskList({cc: ccMock, logger, selectedLoginOption: ''}));
+
+    act(() => {
+      ccMock.on.mock.calls[0][1](taskMock);
+    });
+
+    act(() => {
+      taskMock.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_UNASSIGNED)?.[1]();
+    });
+
+    await waitFor(() => {
+      expect(result.current.taskList).not.toContain(taskMock);
+    });
+
+    // Ensure no errors are logged
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
   describe('useIncomingTask Hook - Task Events', () => {
     afterEach(() => {
       jest.clearAllMocks();
@@ -435,7 +509,7 @@ describe('useTaskList Hook', () => {
 
       await waitFor(() => {
         expect(result.current.isEnded).toBe(true);
-        expect(result.current.currentTask).toBeNull();
+        expect(result.current.incomingTask).toBeNull();
       });
 
       // Ensure no errors are logged
@@ -602,7 +676,7 @@ describe('useCallControl', () => {
     );
 
     await act(async () => {
-      await result.current.holdResume(true);
+      await result.current.toggleHold(true);
     });
 
     expect(mockCurrentTask.hold).toHaveBeenCalled();
@@ -621,7 +695,7 @@ describe('useCallControl', () => {
     );
 
     await act(async () => {
-      await result.current.holdResume(false);
+      await result.current.toggleHold(false);
     });
 
     expect(mockCurrentTask.resume).toHaveBeenCalled();
@@ -642,7 +716,7 @@ describe('useCallControl', () => {
     );
 
     await act(async () => {
-      await result.current.holdResume(true);
+      await result.current.toggleHold(true);
     });
 
     expect(mockLogger.error).toHaveBeenCalledWith('Error holding call: Error: Hold error', expect.any(Object));
@@ -662,7 +736,7 @@ describe('useCallControl', () => {
     );
 
     await act(async () => {
-      await result.current.holdResume(false);
+      await result.current.toggleHold(false);
     });
 
     expect(mockLogger.error).toHaveBeenCalledWith('Error resuming call: Error: Resume error', expect.any(Object));
@@ -685,6 +759,23 @@ describe('useCallControl', () => {
 
     expect(mockCurrentTask.end).toHaveBeenCalled();
     expect(mockOnEnd).toHaveBeenCalled();
+  });
+
+  it('should update wrapupRequired on TASK_END event', async () => {
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+      })
+    );
+
+    await act(async () => {
+      await mockCurrentTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_END)?.[1]({wrapupRequired: true});
+    });
+    expect(result.current.wrapupRequired).toBe(true);
   });
 
   it('should call endCall and handle failure', async () => {
@@ -758,7 +849,7 @@ describe('useCallControl', () => {
     );
 
     await act(async () => {
-      await result.current.pauseResumeRecording(true);
+      await result.current.toggleRecording(true);
     });
 
     expect(mockCurrentTask.pauseRecording).toHaveBeenCalledWith();
@@ -777,7 +868,7 @@ describe('useCallControl', () => {
     );
 
     await act(async () => {
-      await result.current.pauseResumeRecording(true);
+      await result.current.toggleRecording(true);
     });
 
     expect(mockLogger.error).toHaveBeenCalledWith('Error pausing recording: Error: Pause error', expect.any(Object));
@@ -795,7 +886,7 @@ describe('useCallControl', () => {
     );
 
     await act(async () => {
-      await result.current.pauseResumeRecording(false);
+      await result.current.toggleRecording(false);
     });
 
     expect(mockCurrentTask.resumeRecording).toHaveBeenCalledWith();
@@ -814,7 +905,7 @@ describe('useCallControl', () => {
     );
 
     await act(async () => {
-      await result.current.pauseResumeRecording(false);
+      await result.current.toggleRecording(false);
     });
 
     expect(mockCurrentTask.resumeRecording).toHaveBeenCalledWith();
