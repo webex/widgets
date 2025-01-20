@@ -2,7 +2,7 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const {merge} = require('webpack-merge');
 
-const baseConfig = require('../../webpack.config');
+const baseConfig = require('../../../webpack.config');
 
 module.exports = merge(baseConfig, {
   entry: './src/index.tsx', // Entry file for bundling
