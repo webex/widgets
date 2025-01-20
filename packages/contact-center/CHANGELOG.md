@@ -1,3 +1,17 @@
+# [1.28.0-ccwidgets.10](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.9...v1.28.0-ccwidgets.10) (2025-01-17)
+
+
+### Bug Fixes
+
+* rename agent state to user state ([#361](https://github.com/webex/widgets/issues/361)) ([fe409db](https://github.com/webex/widgets/commit/fe409db054fe8e2519675a05fcd2371f7be353ef))
+
+# [1.28.0-ccwidgets.9](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.8...v1.28.0-ccwidgets.9) (2025-01-13)
+
+
+### Features
+
+* **cc-store:** add logger from sdk ([#354](https://github.com/webex/widgets/issues/354)) ([a62494b](https://github.com/webex/widgets/commit/a62494b01d625b65d0fecbd3a07636689d8bac0b))
+
 # [1.28.0-ccwidgets.8](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.7...v1.28.0-ccwidgets.8) (2025-01-10)
 
 

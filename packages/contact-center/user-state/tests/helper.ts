@@ -98,12 +98,16 @@ describe('useUserState Hook', () => {
   it('should handle setAgentStatus correctly and update current state', async () => {
     mockCC.setAgentState.mockResolvedValueOnce({});
     const { result } = renderHook(() => useUserState({ idleCodes, agentId, cc: mockCC }));
+    let agentStatusPromise;
 
     act(() => {
-      result.current.setAgentStatus(idleCodes[1]);
+      agentStatusPromise = result.current.setAgentStatus(idleCodes[1]);
     });
 
-    expect(result.current.isSettingAgentStatus).toBe(true);
+    await act(async () => {
+      expect(result.current.isSettingAgentStatus).toBe(true);
+      await agentStatusPromise;
+    });
 
     await waitFor(() => {
       expect(result.current).toMatchObject({
@@ -119,8 +123,8 @@ describe('useUserState Hook', () => {
     mockCC.setAgentState.mockRejectedValueOnce(new Error(errorMsg));
     const { result } = renderHook(() => useUserState({ idleCodes, agentId, cc: mockCC }));
 
-    act(() => {
-      result.current.setAgentStatus(idleCodes[1]);
+    await act(async () => {
+      await result.current.setAgentStatus(idleCodes[1]);
     });
 
     await waitFor(() => {

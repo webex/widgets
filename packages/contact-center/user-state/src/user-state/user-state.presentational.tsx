@@ -82,6 +82,7 @@ const UserStatePresentational: React.FunctionComponent<IUserState> = (props) => 
 
   return (
     <>
+      {/* Adding this comment for publishing a commit */}
       <div style={styles.box}>
         <section style={styles.sectionBox}>
           <fieldset style={styles.fieldset}>

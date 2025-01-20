@@ -23,22 +23,20 @@ const onDeclined = jest.fn();
 const onTaskAccepted = jest.fn();
 const onTaskDeclined = jest.fn();
 
-describe('useIncomingTask Hook', () => {
-  let consoleErrorMock;
+const logger = {
+  error: jest.fn()
+};
 
-  beforeEach(() => {
-    // Mock console.error to spy on errors
-    consoleErrorMock = jest.spyOn(console, 'error').mockImplementation();
-  });
+describe('useIncomingTask Hook', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    consoleErrorMock.mockRestore();
+    logger.error.mockRestore();
   });
 
   it('should register task events for the current task', async () => {
     const {result} = renderHook(() =>
-      useIncomingTask({cc: ccMock, onAccepted, onDeclined, selectedLoginOption: 'BROWSER'})
+      useIncomingTask({cc: ccMock, onAccepted, onDeclined, selectedLoginOption: 'BROWSER', logger})
     );
 
     act(() => {
@@ -51,12 +49,12 @@ describe('useIncomingTask Hook', () => {
     });
 
     // Ensure no errors are logged
-    expect(consoleErrorMock).not.toHaveBeenCalled();
+    expect(logger.error).not.toHaveBeenCalled();
   });
 
   it('should not call onAccepted if it is not provided', async () => {
     const {result} = renderHook(() =>
-      useIncomingTask({cc: ccMock, onAccepted: null, onDeclined: null, selectedLoginOption: 'BROWSER'})
+      useIncomingTask({cc: ccMock, onAccepted: null, onDeclined: null, selectedLoginOption: 'BROWSER', logger})
     );
 
     act(() => {
@@ -72,12 +70,12 @@ describe('useIncomingTask Hook', () => {
     });
 
     // Ensure no errors are logged
-    expect(consoleErrorMock).not.toHaveBeenCalled();
+    expect(logger.error).not.toHaveBeenCalled();
   });
 
   it('should not call onDeclined if it is not provided', async () => {
     const {result} = renderHook(() =>
-      useIncomingTask({cc: ccMock, onAccepted: null, onDeclined: null, selectedLoginOption: 'BROWSER'})
+      useIncomingTask({cc: ccMock, onAccepted: null, onDeclined: null, selectedLoginOption: 'BROWSER', logger})
     );
 
     act(() => {
@@ -93,12 +91,12 @@ describe('useIncomingTask Hook', () => {
     });
 
     // Ensure no errors are logged
-    expect(consoleErrorMock).not.toHaveBeenCalled();
+    expect(logger.error).not.toHaveBeenCalled();
   });
 
   it('should clean up task events on task change or unmount', async () => {
     const {result, unmount} = renderHook(() =>
-      useIncomingTask({cc: ccMock, onAccepted, onDeclined, selectedLoginOption: 'BROWSER'})
+      useIncomingTask({cc: ccMock, onAccepted, onDeclined, selectedLoginOption: 'BROWSER', logger})
     );
 
     act(() => {
@@ -113,7 +111,7 @@ describe('useIncomingTask Hook', () => {
     });
 
     // Ensure no errors are logged
-    expect(consoleErrorMock).not.toHaveBeenCalled();
+    expect(logger.error).not.toHaveBeenCalled();
   });
 
   it('should handle errors when accepting a task', async () => {
@@ -123,7 +121,7 @@ describe('useIncomingTask Hook', () => {
       decline: jest.fn(), // No-op for decline in this test
     };
 
-    const {result} = renderHook(() => useIncomingTask({cc: ccMock, onAccepted, selectedLoginOption: 'BROWSER'}));
+    const {result} = renderHook(() => useIncomingTask({cc: ccMock, onAccepted, selectedLoginOption: 'BROWSER', logger}));
 
     act(() => {
       ccMock.on.mock.calls[0][1](failingTask);
@@ -138,8 +136,11 @@ describe('useIncomingTask Hook', () => {
     });
 
     // Ensure errors are logged in the console
-    expect(consoleErrorMock).toHaveBeenCalled();
-    expect(consoleErrorMock).toHaveBeenCalledWith('Error');
+    expect(logger.error).toHaveBeenCalled();
+    expect(logger.error).toHaveBeenCalledWith('Error accepting incoming task: Error', {
+      module: 'widget-cc-task#helper.ts',
+      method: 'useIncomingTask#accept',
+    });
   });
 
   it('should handle errors when declining a task', async () => {
@@ -149,7 +150,7 @@ describe('useIncomingTask Hook', () => {
       decline: jest.fn().mockRejectedValue('Error'),
     };
 
-    const {result} = renderHook(() => useIncomingTask({cc: ccMock, onDeclined, selectedLoginOption: 'BROWSER'}));
+    const {result} = renderHook(() => useIncomingTask({cc: ccMock, onDeclined, selectedLoginOption: 'BROWSER', logger}));
 
     act(() => {
       ccMock.on.mock.calls[0][1](failingTask);
@@ -164,26 +165,23 @@ describe('useIncomingTask Hook', () => {
     });
 
     // Ensure errors are logged in the console
-    expect(consoleErrorMock).toHaveBeenCalled();
-    expect(consoleErrorMock).toHaveBeenCalledWith('Error');
+    expect(logger.error).toHaveBeenCalled();
+    expect(logger.error).toHaveBeenCalledWith('Error declining incoming task: Error', {
+      module: 'widget-cc-task#helper.ts',
+      method: 'useIncomingTask#decline',
+    });
   });
 });
 
 describe('useTaskList Hook', () => {
-  let consoleErrorMock;
-
-  beforeEach(() => {
-    // Mock console.error to spy on errors
-    consoleErrorMock = jest.spyOn(console, 'error').mockImplementation();
-  });
 
   afterEach(() => {
     jest.clearAllMocks();
-    consoleErrorMock.mockRestore();
+    logger.error.mockRestore();
   });
 
   it('should call onTaskAccepted callback when provided', async () => {
-    const {result} = renderHook(() => useTaskList({cc: ccMock, onTaskAccepted}));
+    const {result} = renderHook(() => useTaskList({cc: ccMock, selectedLoginOption:'', onTaskAccepted, logger}));
 
     act(() => {
       result.current.acceptTask(taskMock);
@@ -194,11 +192,11 @@ describe('useTaskList Hook', () => {
     });
 
     // Ensure no errors are logged
-    expect(consoleErrorMock).not.toHaveBeenCalled();
+    expect(logger.error).not.toHaveBeenCalled();
   });
 
   it('should call onTaskDeclined callback when provided', async () => {
-    const {result} = renderHook(() => useTaskList({cc: ccMock, onTaskDeclined}));
+    const {result} = renderHook(() => useTaskList({cc: ccMock, selectedLoginOption:'', onTaskDeclined, logger}));
 
     act(() => {
       result.current.declineTask(taskMock);
@@ -209,7 +207,7 @@ describe('useTaskList Hook', () => {
     });
 
     // Ensure no errors are logged
-    expect(consoleErrorMock).not.toHaveBeenCalled();
+    expect(logger.error).not.toHaveBeenCalled();
   });
 
   it('should handle errors when accepting a task', async () => {
@@ -219,7 +217,7 @@ describe('useTaskList Hook', () => {
       decline: jest.fn(), // No-op for decline in this test
     };
 
-    const {result} = renderHook(() => useTaskList({cc: ccMock, onTaskAccepted, selectedLoginOption: 'BROWSER'}));
+    const {result} = renderHook(() => useTaskList({cc: ccMock, onTaskAccepted, selectedLoginOption: 'BROWSER', logger}));
 
     act(() => {
       ccMock.on.mock.calls[0][1](failingTask);
@@ -234,8 +232,11 @@ describe('useTaskList Hook', () => {
     });
 
     // Ensure errors are logged in the console
-    expect(consoleErrorMock).toHaveBeenCalled();
-    expect(consoleErrorMock).toHaveBeenCalledWith('Error');
+    expect(logger.error).toHaveBeenCalled();
+    expect(logger.error).toHaveBeenCalledWith('Error accepting task: Error', {
+      module: 'widget-cc-task#helper.ts',
+      method: 'useTaskList#acceptTask',
+    });
   });
 
   it('should handle errors when declining a task', async () => {
@@ -245,7 +246,7 @@ describe('useTaskList Hook', () => {
       decline: jest.fn().mockRejectedValue('Error'),
     };
 
-    const {result} = renderHook(() => useTaskList({cc: ccMock, onTaskDeclined, selectedLoginOption: 'BROWSER'}));
+    const {result} = renderHook(() => useTaskList({cc: ccMock, onTaskDeclined, selectedLoginOption: 'BROWSER', logger}));
 
     act(() => {
       ccMock.on.mock.calls[0][1](failingTask);
@@ -260,12 +261,15 @@ describe('useTaskList Hook', () => {
     });
 
     // Ensure errors are logged in the console
-    expect(consoleErrorMock).toHaveBeenCalled();
-    expect(consoleErrorMock).toHaveBeenCalledWith('Error');
+    expect(logger.error).toHaveBeenCalled();
+    expect(logger.error).toHaveBeenCalledWith('Error declining task: Error', {
+      module: 'widget-cc-task#helper.ts',
+      method: 'useTaskList#declineTask',
+    });
   });
 
   it('should add tasks to the list on TASK_INCOMING event', async () => {
-    const {result} = renderHook(() => useTaskList({cc: ccMock}));
+    const {result} = renderHook(() => useTaskList({cc: ccMock, logger, selectedLoginOption:''}));
 
     act(() => {
       ccMock.on.mock.calls[0][1](taskMock);
@@ -276,11 +280,11 @@ describe('useTaskList Hook', () => {
     });
 
     // Ensure no errors are logged
-    expect(consoleErrorMock).not.toHaveBeenCalled();
+    expect(logger.error).not.toHaveBeenCalled();
   });
 
   it('should not call onTaskAccepted if it is not provided', async () => {
-    const {result} = renderHook(() => useTaskList({cc: ccMock, onTaskAccepted: null, onTaskDeclined: null}));
+    const {result} = renderHook(() => useTaskList({cc: ccMock, onTaskAccepted: null, onTaskDeclined: null, logger, selectedLoginOption:''}));
 
     act(() => {
       result.current.acceptTask(taskMock);
@@ -291,11 +295,11 @@ describe('useTaskList Hook', () => {
     });
 
     // Ensure no errors are logged
-    expect(consoleErrorMock).not.toHaveBeenCalled();
+    expect(logger.error).not.toHaveBeenCalled();
   });
 
   it('should not call onTaskDeclined if it is not provided', async () => {
-    const {result} = renderHook(() => useTaskList({cc: ccMock, onTaskAccepted: null, onTaskDeclined: null}));
+    const {result} = renderHook(() => useTaskList({cc: ccMock, onTaskAccepted: null, onTaskDeclined: null, logger, selectedLoginOption:''}));
 
     act(() => {
       result.current.declineTask(taskMock);
@@ -306,11 +310,11 @@ describe('useTaskList Hook', () => {
     });
 
     // Ensure no errors are logged
-    expect(consoleErrorMock).not.toHaveBeenCalled();
+    expect(logger.error).not.toHaveBeenCalled();
   });
 
   it('should remove a task from the list when it ends', async () => {
-    const {result} = renderHook(() => useTaskList({cc: ccMock}));
+    const {result} = renderHook(() => useTaskList({cc: ccMock, logger, selectedLoginOption:''}));
 
     act(() => {
       ccMock.on.mock.calls[0][1](taskMock);
@@ -325,11 +329,11 @@ describe('useTaskList Hook', () => {
     });
 
     // Ensure no errors are logged
-    expect(consoleErrorMock).not.toHaveBeenCalled();
+    expect(logger.error).not.toHaveBeenCalled();
   });
 
   it('should update an existing task in the list', async () => {
-    const {result} = renderHook(() => useTaskList({cc: ccMock}));
+    const {result} = renderHook(() => useTaskList({cc: ccMock, logger, selectedLoginOption:''}));
 
     act(() => {
       ccMock.on.mock.calls[0][1](taskMock);
@@ -343,11 +347,11 @@ describe('useTaskList Hook', () => {
     await waitFor(() => {});
 
     // Ensure no errors are logged
-    expect(consoleErrorMock).not.toHaveBeenCalled();
+    expect(logger.error).not.toHaveBeenCalled();
   });
 
   it('should deduplicate tasks by interactionId', async () => {
-    const {result} = renderHook(() => useTaskList({cc: ccMock}));
+    const {result} = renderHook(() => useTaskList({cc: ccMock, logger, selectedLoginOption:''}));
 
     act(() => {
       ccMock.on.mock.calls[0][1](taskMock);
@@ -359,25 +363,19 @@ describe('useTaskList Hook', () => {
     });
 
     // Ensure no errors are logged
-    expect(consoleErrorMock).not.toHaveBeenCalled();
+    expect(logger.error).not.toHaveBeenCalled();
   });
 
   describe('useIncomingTask Hook - Task Events', () => {
-    let consoleErrorMock;
-
-    beforeEach(() => {
-      // Mock console.error to spy on errors
-      consoleErrorMock = jest.spyOn(console, 'error').mockImplementation();
-    });
 
     afterEach(() => {
       jest.clearAllMocks();
-      consoleErrorMock.mockRestore();
+      logger.error.mockRestore();
     });
 
     it('should set isAnswered to true when task is assigned', async () => {
       const {result} = renderHook(() =>
-        useIncomingTask({cc: ccMock, onAccepted, onDeclined, selectedLoginOption: 'BROWSER'})
+        useIncomingTask({cc: ccMock, onAccepted, onDeclined, selectedLoginOption: 'BROWSER', logger, selectedLoginOption:''})
       );
 
       // Simulate task being assigned
@@ -394,12 +392,12 @@ describe('useTaskList Hook', () => {
       });
 
       // Ensure no errors are logged
-      expect(consoleErrorMock).not.toHaveBeenCalled();
+      expect(logger.error).not.toHaveBeenCalled();
     });
 
     it('should set isEnded to true and clear currentTask when task ends', async () => {
       const {result} = renderHook(() =>
-        useIncomingTask({cc: ccMock, onAccepted, onDeclined, selectedLoginOption: 'BROWSER'})
+        useIncomingTask({cc: ccMock, onAccepted, onDeclined, selectedLoginOption: 'BROWSER', logger, selectedLoginOption:''})
       );
 
       // Simulate task being assigned
@@ -418,12 +416,12 @@ describe('useTaskList Hook', () => {
       });
 
       // Ensure no errors are logged
-      expect(consoleErrorMock).not.toHaveBeenCalled();
+      expect(logger.error).not.toHaveBeenCalled();
     });
 
     it('should set isMissed to true and clear currentTask when task is missed', async () => {
       const {result} = renderHook(() =>
-        useIncomingTask({cc: ccMock, onAccepted, onDeclined, selectedLoginOption: 'BROWSER'})
+        useIncomingTask({cc: ccMock, onAccepted, onDeclined, selectedLoginOption: 'BROWSER', logger, selectedLoginOption:''})
       );
 
       // Simulate task being assigned
@@ -442,17 +440,13 @@ describe('useTaskList Hook', () => {
       });
 
       // Ensure no errors are logged
-      expect(consoleErrorMock).not.toHaveBeenCalled();
+      expect(logger.error).not.toHaveBeenCalled();
     });
   });
 
   describe('useIncomingTask Hook - handleTaskMedia', () => {
-    let consoleErrorMock;
 
     beforeEach(() => {
-      // Mock console.error to spy on errors
-      consoleErrorMock = jest.spyOn(console, 'error').mockImplementation();
-
       // Mock the MediaStreamTrack and MediaStream classes for the test environment
       global.MediaStreamTrack = jest.fn().mockImplementation(() => ({
         kind: 'audio', // Simulating an audio track
@@ -467,7 +461,7 @@ describe('useTaskList Hook', () => {
 
     afterEach(() => {
       jest.clearAllMocks();
-      consoleErrorMock.mockRestore();
+      logger.error.mockRestore();
     });
 
     it('should assign track to audioRef.current.srcObject when handleTaskMedia is called', async () => {
@@ -477,7 +471,7 @@ describe('useTaskList Hook', () => {
       };
 
       const {result} = renderHook(() =>
-        useIncomingTask({cc: ccMock, onAccepted, onDeclined, selectedLoginOption: 'BROWSER'})
+        useIncomingTask({cc: ccMock, onAccepted, onDeclined, selectedLoginOption: 'BROWSER', logger, selectedLoginOption:''})
       );
 
       // Manually assign the mocked audio element to the ref
@@ -503,13 +497,13 @@ describe('useTaskList Hook', () => {
       });
 
       // Ensure no errors are logged
-      expect(consoleErrorMock).not.toHaveBeenCalled();
+      expect(logger.error).not.toHaveBeenCalled();
     });
 
     it('should not set srcObject if audioRef.current is null', async () => {
       // Mock audioRef to simulate the absence of an audio element
       const {result} = renderHook(() =>
-        useIncomingTask({cc: ccMock, onAccepted, onDeclined, selectedLoginOption: 'BROWSER'})
+        useIncomingTask({cc: ccMock, onAccepted, onDeclined, selectedLoginOption: 'BROWSER', logger, })
       );
       result.current.audioRef.current = null;
 
@@ -533,7 +527,7 @@ describe('useTaskList Hook', () => {
       });
 
       // Ensure no errors are logged
-      expect(consoleErrorMock).not.toHaveBeenCalled();
+      expect(logger.error).not.toHaveBeenCalled();
     });
   });
 });
