@@ -95,9 +95,12 @@ export const useIncomingTask = (props: UseTaskProps) => {
   const [isAnswered, setIsAnswered] = useState(false);
   const [isEnded, setIsEnded] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null); // Ref for the audio element
+  const isBrowser = selectedLoginOption === 'BROWSER';
 
   const handleTaskAssigned = useCallback(() => {
-    store.setCurrentTask(incomingTask);
+    // Task that are accepted using anything other than browser should be populated
+    // in the store only when we receive task assigned event
+    if (!isBrowser) store.setCurrentTask(incomingTask);
     setIsAnswered(true);
   }, []);
 
@@ -144,6 +147,8 @@ export const useIncomingTask = (props: UseTaskProps) => {
     incomingTask
       .accept(taskId)
       .then(() => {
+        // Task that are accepted using BROWSER should be populated
+        // in the store when we accept the call
         store.setCurrentTask(incomingTask);
         onAccepted && onAccepted();
       })
@@ -173,8 +178,6 @@ export const useIncomingTask = (props: UseTaskProps) => {
         });
       });
   };
-
-  const isBrowser = selectedLoginOption === 'BROWSER';
 
   return {
     incomingTask,

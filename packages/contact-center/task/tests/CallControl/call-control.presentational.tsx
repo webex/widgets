@@ -4,8 +4,8 @@ import '@testing-library/jest-dom';
 import CallControlPresentational from '../../src/CallControl/call-control.presentational';
 
 describe('CallControlPresentational', () => {
-  const mockHoldResume = jest.fn();
-  const mockPauseResumeRecording = jest.fn();
+  const mockToggleHold = jest.fn();
+  const mockToggleRecording = jest.fn();
   const mockEndCall = jest.fn();
   const mockWrapupCall = jest.fn();
   const mockWrapupCodes = [
@@ -15,8 +15,8 @@ describe('CallControlPresentational', () => {
 
   const defaultProps = {
     currentTask: {},
-    holdResume: mockHoldResume,
-    pauseResumeRecording: mockPauseResumeRecording,
+    toggleHold: mockToggleHold,
+    toggleRecording: mockToggleRecording,
     endCall: mockEndCall,
     wrapupCall: mockWrapupCall,
     wrapupCodes: mockWrapupCodes,
@@ -37,28 +37,28 @@ describe('CallControlPresentational', () => {
     expect(screen.getByText('Wrap Up')).toBeInTheDocument();
   });
 
-  it('calls holdResume with the correct argument when Hold/Pause button is clicked', () => {
+  it('calls toggleHold with the correct argument when Hold/Pause button is clicked', () => {
     render(<CallControlPresentational {...defaultProps} />);
 
     const holdButton = screen.getByText('Hold');
     fireEvent.click(holdButton);
 
-    expect(mockHoldResume).toHaveBeenCalledWith(true);
+    expect(mockToggleHold).toHaveBeenCalledWith(true);
 
     fireEvent.click(holdButton);
-    expect(mockHoldResume).toHaveBeenCalledWith(false);
+    expect(mockToggleHold).toHaveBeenCalledWith(false);
   });
 
-  it('calls pauseResumeRecording with the correct argument when Pause/Pause Recording button is clicked', () => {
+  it('calls toggleRecording with the correct argument when Pause/Pause Recording button is clicked', () => {
     render(<CallControlPresentational {...defaultProps} />);
 
     const pauseButton = screen.getByText('Pause Recording');
     fireEvent.click(pauseButton);
 
-    expect(mockPauseResumeRecording).toHaveBeenCalledWith(true);
+    expect(mockToggleRecording).toHaveBeenCalledWith(true);
 
     fireEvent.click(pauseButton);
-    expect(mockPauseResumeRecording).toHaveBeenCalledWith(false);
+    expect(mockToggleRecording).toHaveBeenCalledWith(false);
   });
 
   it('calls endCall when End button is clicked', () => {
