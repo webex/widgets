@@ -9,21 +9,21 @@ const CallControlPresentational = (props: CallControlPresentationalProps) => {
   const [selectedWrapupReason, setSelectedWrapupReason] = useState<string | null>(null);
   const [selectedWrapupId, setSelectedWrapupId] = useState<string | null>(null);
 
-  const {currentTask, holdResume, pauseResumeRecording, endCall, wrapupCall, wrapupCodes, wrapupRequired} = props;
-  const handleHoldResume = () => {
+  const {currentTask, toggleHold, toggleRecording, endCall, wrapupCall, wrapupCodes, wrapupRequired} = props;
+  const handletoggleHold = () => {
     if (isHeld) {
-      holdResume(false);
+      toggleHold(false);
     } else {
-      holdResume(true);
+      toggleHold(true);
     }
     setIsHeld(!isHeld);
   };
 
-  const handlePauseResumeRecording = () => {
+  const handletoggleRecording = () => {
     if (isRecording) {
-      pauseResumeRecording(true);
+      toggleRecording(true);
     } else {
-      pauseResumeRecording(false);
+      toggleRecording(false);
     }
     setIsRecording(!isRecording);
   };
@@ -54,10 +54,10 @@ const CallControlPresentational = (props: CallControlPresentationalProps) => {
               <legend className="legend-box">Call Control</legend>
               <div style={{display: 'flex', flexDirection: 'column', flexGrow: 1}}>
                 <div style={{display: 'flex', gap: '1rem'}}>
-                  <button className="btn" onClick={handleHoldResume} disabled={wrapupRequired}>
+                  <button className="btn" onClick={handletoggleHold} disabled={wrapupRequired}>
                     {isHeld ? 'Resume' : 'Hold'}
                   </button>
-                  <button className="btn" onClick={handlePauseResumeRecording} disabled={wrapupRequired}>
+                  <button className="btn" onClick={handletoggleRecording} disabled={wrapupRequired}>
                     {isRecording ? 'Pause Recording' : 'Resume Recording'}
                   </button>
                   <button className="btn" onClick={handleEndCall} disabled={wrapupRequired}>

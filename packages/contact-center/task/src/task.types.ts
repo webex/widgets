@@ -172,13 +172,13 @@ export interface ControlProps {
    * Function to handle hold/resume actions with a boolean parameter.
    * @param hold - Boolean indicating whether to hold (true) or resume (false).
    */
-  holdResume: (hold: boolean) => void;
+  toggleHold: (hold: boolean) => void;
 
   /**
    * Function to handle pause/resume recording actions with a boolean parameter.
    * @param pause - Boolean indicating whether to pause (true) or resume (false) recording.
    */
-  pauseResumeRecording: (pause: boolean) => void;
+  toggleRecording: (pause: boolean) => void;
 
   /**
    * Function to handle ending the call.
@@ -197,7 +197,7 @@ export type CallControlProps = Pick<ControlProps, 'onHoldResume' | 'onEnd' | 'on
 
 export type CallControlPresentationalProps = Pick<
   ControlProps,
-  'currentTask' | 'wrapupCodes' | 'wrapupRequired' | 'holdResume' | 'pauseResumeRecording' | 'endCall' | 'wrapupCall'
+  'currentTask' | 'wrapupCodes' | 'wrapupRequired' | 'toggleHold' | 'toggleRecording' | 'endCall' | 'wrapupCall'
 >;
 
 export type useCallControlProps = Pick<ControlProps, 'currentTask' | 'onHoldResume' | 'onEnd' | 'onWrapUp' | 'logger'>;
