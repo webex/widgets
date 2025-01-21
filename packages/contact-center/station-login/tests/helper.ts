@@ -31,6 +31,7 @@ const logoutCb = jest.fn();
 const logger = {
   error: jest.fn()
 };
+const isAgentLoggedIn = false;
 
 describe('useStationLogin Hook', () => {
   afterEach(() => {
@@ -67,7 +68,7 @@ describe('useStationLogin Hook', () => {
     ccMock.stationLogin.mockResolvedValue(successResponse);
     const setSelectedLoginOptionSpy = jest.spyOn(require('@webex/cc-store'), 'setSelectedLoginOption');
 
-    const {result} = renderHook(() => useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger}));
+    const {result} = renderHook(() => useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger, isAgentLoggedIn}));
 
     act(() => {
       result.current.setDeviceType(loginParams.loginOption);
@@ -89,6 +90,7 @@ describe('useStationLogin Hook', () => {
 
       expect(result.current).toEqual({
         name: 'StationLogin',
+        isAgentLoggedIn: true,
         setDeviceType: expect.any(Function),
         setDialNumber: expect.any(Function),
         setTeam: expect.any(Function),
@@ -97,6 +99,7 @@ describe('useStationLogin Hook', () => {
         loginSuccess: successResponse,
         loginFailure: undefined,
         logoutSuccess: undefined,
+        relogin: expect.any(Function),
       });
 
       expect(setSelectedLoginOptionSpy).toHaveBeenCalledWith(loginParams.loginOption);
@@ -109,7 +112,7 @@ describe('useStationLogin Hook', () => {
     const setSelectedLoginOptionSpy = jest.spyOn(require('@webex/cc-store'), 'setSelectedLoginOption');
 
     loginCb.mockClear();
-    const {result} = renderHook(() => useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger}));
+    const {result} = renderHook(() => useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger, isAgentLoggedIn}));
 
     act(() => {
       result.current.setDeviceType(loginParams.loginOption);
@@ -131,6 +134,7 @@ describe('useStationLogin Hook', () => {
 
       expect(result.current).toEqual({
         name: 'StationLogin',
+        isAgentLoggedIn: false,
         setDeviceType: expect.any(Function),
         setDialNumber: expect.any(Function),
         setTeam: expect.any(Function),
@@ -139,6 +143,7 @@ describe('useStationLogin Hook', () => {
         loginSuccess: undefined,
         loginFailure: errorResponse,
         logoutSuccess: undefined,
+        relogin: expect.any(Function),
       });
 
       expect(setSelectedLoginOptionSpy).not.toHaveBeenCalled();
@@ -150,7 +155,7 @@ describe('useStationLogin Hook', () => {
     ccMock.stationLogin.mockResolvedValue({});
 
     const { result } = renderHook(() =>
-      useStationLogin({cc: ccMock, onLogout: logoutCb, logger})
+      useStationLogin({cc: ccMock, onLogout: logoutCb, logger, isAgentLoggedIn})
     );
 
     await act(async () => {
@@ -167,7 +172,7 @@ describe('useStationLogin Hook', () => {
     ccMock.stationLogin.mockRejectedValue(errorResponse);
 
     loginCb.mockClear();
-    const {result} = renderHook(() => useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger}));
+    const {result} = renderHook(() => useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger, isAgentLoggedIn}));
 
     act(() => {
       result.current.setDeviceType(loginParams.loginOption);
@@ -190,6 +195,7 @@ describe('useStationLogin Hook', () => {
 
       expect(result.current).toEqual({
         name: 'StationLogin',
+        isAgentLoggedIn: true,
         setDeviceType: expect.any(Function),
         setDialNumber: expect.any(Function),
         setTeam: expect.any(Function),
@@ -198,6 +204,7 @@ describe('useStationLogin Hook', () => {
         loginSuccess: undefined,
         loginFailure: errorResponse,
         logoutSuccess: undefined,
+        relogin: expect.any(Function),
       });
     });
   });
@@ -220,7 +227,7 @@ describe('useStationLogin Hook', () => {
 
     ccMock.stationLogout.mockResolvedValue(successResponse);
 
-    const {result} = renderHook(() => useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger}));
+    const {result} = renderHook(() => useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger, isAgentLoggedIn}));
 
     await act(async () => {
       await result.current.logout();
@@ -232,6 +239,7 @@ describe('useStationLogin Hook', () => {
 
       expect(result.current).toEqual({
         name: 'StationLogin',
+        isAgentLoggedIn: false,
         setDeviceType: expect.any(Function),
         setDialNumber: expect.any(Function),
         setTeam: expect.any(Function),
@@ -240,6 +248,7 @@ describe('useStationLogin Hook', () => {
         loginSuccess: undefined,
         loginFailure: undefined,
         logoutSuccess: successResponse,
+        relogin: expect.any(Function),
       });
     });
   });
@@ -248,7 +257,7 @@ describe('useStationLogin Hook', () => {
     ccMock.stationLogout.mockRejectedValue(new Error('Logout failed'));
 
     const {result} = renderHook(() =>
-      useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger})
+      useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger, isAgentLoggedIn})
     );
 
     await act(async () => {
@@ -266,7 +275,7 @@ describe('useStationLogin Hook', () => {
   it('should not call logout callback if not present', async () => {
     ccMock.stationLogout.mockResolvedValue({});
 
-    const {result} = renderHook(() => useStationLogin({cc: ccMock, onLogin: loginCb, logger}));
+    const {result} = renderHook(() => useStationLogin({cc: ccMock, onLogin: loginCb, logger, isAgentLoggedIn}));
 
     await act(async () => {
       await result.current.logout();
@@ -274,6 +283,21 @@ describe('useStationLogin Hook', () => {
 
     await waitFor(() => {
       expect(logoutCb).not.toHaveBeenCalled();
+    });
+  });
+
+  it('should call relogin and set device type', async () => {
+    const setSelectedLoginOptionSpy = jest.spyOn(require('@webex/cc-store'), 'setSelectedLoginOption');
+    
+    const { result } = renderHook(() => useStationLogin({ cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger, isAgentLoggedIn }));
+
+    act(() => {
+      result.current.relogin();
+    });
+
+    await waitFor(() => {
+      expect(setSelectedLoginOptionSpy).toHaveBeenCalled();
+      expect(loginCb).toHaveBeenCalled();
     });
   });
 });

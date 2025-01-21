@@ -7,12 +7,14 @@ import '@testing-library/jest-dom';
 const teams = ['team123', 'team456'];
 
 const loginOptions = ['EXTENSION', 'AGENT_DN', 'BROWSER'];
+const deviceType = 'BROWSER';
 
 // Mock the store import
 jest.mock('@webex/cc-store', () => {return {
   cc: {},
   teams,
-  loginOptions
+  loginOptions,
+  deviceType,
 }});
 
 const loginCb = jest.fn();

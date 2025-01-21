@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import {StationLoginSuccess, StationLogoutSuccess} from '@webex/plugin-cc';
 import {UseStationLoginProps} from './station-login/station-login.types';
 import store from '@webex/cc-store'; // we need to import as we are losing the context of this in store
@@ -8,6 +8,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
   const loginCb = props.onLogin;
   const logoutCb = props.onLogout;
   const logger = props.logger;
+  const [isAgentLoggedIn, setIsAgentLoggedIn] = useState(props.isAgentLoggedIn);
   const [dialNumber, setDialNumber] = useState('');
   const [deviceType, setDeviceType] = useState('');
   const [team, setTeam] = useState('');
@@ -15,10 +16,15 @@ export const useStationLogin = (props: UseStationLoginProps) => {
   const [loginFailure, setLoginFailure] = useState<Error>();
   const [logoutSuccess, setLogoutSuccess] = useState<StationLogoutSuccess>();
 
+  useEffect(() => {
+    setIsAgentLoggedIn(props.isAgentLoggedIn);
+  }, [props.isAgentLoggedIn]);
+
   const login = () => {
     cc.stationLogin({teamId: team, loginOption: deviceType, dialNumber: dialNumber})
       .then((res: StationLoginSuccess) => {
         setLoginSuccess(res);
+        setIsAgentLoggedIn(true)
         store.setSelectedLoginOption(deviceType);
         if (loginCb) {
           loginCb();
@@ -36,6 +42,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
     cc.stationLogout({logoutReason: 'User requested logout'})
       .then((res: StationLogoutSuccess) => {
         setLogoutSuccess(res);
+        setIsAgentLoggedIn(false);
         if (logoutCb) {
           logoutCb();
         }
@@ -47,6 +54,13 @@ export const useStationLogin = (props: UseStationLoginProps) => {
       });
   };
 
+  function relogin() {
+    store.setSelectedLoginOption(deviceType);
+    if (loginCb) {
+      loginCb();
+    }
+  }
+
   return {
     name: 'StationLogin',
     setDeviceType,
@@ -54,8 +68,10 @@ export const useStationLogin = (props: UseStationLoginProps) => {
     setTeam,
     login,
     logout,
+    relogin,
     loginSuccess,
     loginFailure,
     logoutSuccess,
+    isAgentLoggedIn,
   };
 };
