@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.11](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.10...v1.28.0-ccwidgets.11) (2025-01-21)
+
+
+### Features
+
+* **widgets:** added-relogin-logic ([#357](https://github.com/webex/widgets/issues/357)) ([94dd415](https://github.com/webex/widgets/commit/94dd4156b87ddcfe86a5958923c343292d06aa97))
+
 # [1.28.0-ccwidgets.10](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.9...v1.28.0-ccwidgets.10) (2025-01-17)
 
 
