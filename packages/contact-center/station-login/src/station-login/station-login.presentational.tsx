@@ -5,7 +5,7 @@ import { MULTIPLE_SIGN_IN_ALERT_MESSAGE, MULTIPLE_SIGN_IN_ALERT_TITLE } from './
 import './alert-modal.scss';
 
 const StationLoginPresentational: React.FunctionComponent<StationLoginPresentationalProps> = (props) => {
-  const { name, teams, loginOptions, login, logout, setDeviceType, setDialNumber, setTeam, cc, showMultipleLoginAlert } = props;
+  const { name, teams, loginOptions, login, logout, relogin, setDeviceType, setDialNumber, setTeam, isAgentLoggedIn, deviceType,  cc, showMultipleLoginAlert } = props;
   const [showAlert, setShowAlert] = useState(showMultipleLoginAlert);
   const modalRef = useRef<HTMLDialogElement>(null);
 
@@ -61,7 +61,18 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
     }
   };
 
-  const selectLoginOption = (event: { target: { value: string } }) => {
+  
+  useEffect(() => {
+    if (!isAgentLoggedIn) return;
+    const agentLogin = document.querySelector('#LoginOption') as HTMLSelectElement;
+    if (agentLogin && !agentLogin.value) {
+      setDeviceType(deviceType);
+      agentLogin.value = deviceType;
+      relogin();
+    }
+  }, [isAgentLoggedIn]);
+
+  const selectLoginOption = (event: { target: { value: string; }; }) => {
     const dialNumber = document.querySelector('#dialNumber') as HTMLInputElement;
     const deviceType = event.target.value;
     setDeviceType(deviceType);
@@ -86,7 +97,7 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
           <div className='modal-content'>
             <button id="ContinueButton" onClick={handleContinue}>Continue</button>
           </div>
-        </dialog>
+          </dialog>
       )}
       <h1 data-testid="station-login-heading">{name}</h1>
       <div className="box">

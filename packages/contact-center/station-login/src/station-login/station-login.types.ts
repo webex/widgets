@@ -50,6 +50,11 @@ export interface IStationLoginProps {
   logoutSuccess?: StationLogoutSuccess;
 
   /**
+   * The selected device type for agent login
+   */
+  deviceType: string;
+
+  /**
    * Callback function to be invoked once the agent login is successful
    */
   onLogin?: () => void;
@@ -83,6 +88,11 @@ export interface IStationLoginProps {
    * Flag to check if the agent is logged in.
    */
   isAgentLoggedIn: boolean;
+
+  /**
+   * Handler to relogin the agent
+   */
+  relogin: () => void;
 }
 
 export type StationLoginPresentationalProps = Pick<
@@ -92,6 +102,7 @@ export type StationLoginPresentationalProps = Pick<
   | 'loginOptions'
   | 'login'
   | 'logout'
+  | 'relogin'
   | 'loginSuccess'
   | 'loginFailure'
   | 'logoutSuccess'
@@ -100,10 +111,14 @@ export type StationLoginPresentationalProps = Pick<
   | 'setTeam'
   | 'isAgentLoggedIn'
   | 'cc'
+  | 'deviceType'
 > & {
   showMultipleLoginAlert: boolean;
 };
 
-export type UseStationLoginProps = Pick<IStationLoginProps, 'cc' | 'onLogin' | 'onLogout' | 'logger'>;
+export type UseStationLoginProps = Pick<
+  IStationLoginProps,
+  'cc' | 'onLogin' | 'onLogout' | 'logger' | 'isAgentLoggedIn'
+>;
 
 export type StationLoginProps = Pick<IStationLoginProps, 'onLogin' | 'onLogout'>;
