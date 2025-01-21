@@ -78,6 +78,11 @@ export interface IStationLoginProps {
    * The logger instance from SDK
    */
   logger: ILogger;
+
+  /**
+   * Flag to check if the agent is logged in.
+   */
+  isAgentLoggedIn: boolean;
 }
 
 export type StationLoginPresentationalProps = Pick<
@@ -93,7 +98,11 @@ export type StationLoginPresentationalProps = Pick<
   | 'setDeviceType'
   | 'setDialNumber'
   | 'setTeam'
->;
+  | 'isAgentLoggedIn'
+  | 'cc'
+> & {
+  showMultipleLoginAlert: boolean;
+};
 
 export type UseStationLoginProps = Pick<IStationLoginProps, 'cc' | 'onLogin' | 'onLogout' | 'logger'>;
 
