@@ -4,5 +4,3 @@ export const MULTIPLE_SIGN_IN_ALERT_MESSAGE =
 export const MULTIPLE_SIGN_IN_ALERT_TITLE = 'Multiple Sign In Alert';
 
 export const AGENT_MULTI_LOGIN = 'agent:multiLogin';
-
-export const AGENT_RELOGIN = 'agent:reLogin';
