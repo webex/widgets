@@ -40,10 +40,7 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
   useEffect(() => {
     const modal = modalRef.current;
     if (showAlert && modal) {
-      console.log('modal before adding event listner', modal);
-      console.log('inside close modal event listener, if condition');
       modal.showModal();
-      console.log('modal after adding event listner', modal);
     }
   }, [showAlert]);
 
@@ -57,7 +54,6 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
       modal.close();
       setShowAlert(false);
       cc.register();
-      // window.location.reload();
     }
   };
 

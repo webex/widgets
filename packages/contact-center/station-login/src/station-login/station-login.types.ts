@@ -50,6 +50,11 @@ export interface IStationLoginProps {
   logoutSuccess?: StationLogoutSuccess;
 
   /**
+   * Flag to indicate if the agent is logged in
+   */
+  isAgentLoggedIn: boolean;
+
+  /**
    * The selected device type for agent login
    */
   deviceType: string;
@@ -83,11 +88,6 @@ export interface IStationLoginProps {
    * The logger instance from SDK
    */
   logger: ILogger;
-
-  /**
-   * Flag to check if the agent is logged in.
-   */
-  isAgentLoggedIn: boolean;
 
   /**
    * Handler to relogin the agent

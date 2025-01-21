@@ -20,7 +20,6 @@ export const useStationLogin = (props: UseStationLoginProps) => {
 
   useEffect(() => {
     const handleMultiLoginCloseSession = (data) => {
-      console.log('inside AgentMultiLoginCloseSession', data);
       if (data && typeof data === 'object' && data.type === 'AgentMultiLoginCloseSession') {
         setShowMultipleLoginAlert(true);
       }
@@ -41,7 +40,6 @@ export const useStationLogin = (props: UseStationLoginProps) => {
     cc.stationLogin({teamId: team, loginOption: deviceType, dialNumber: dialNumber})
       .then((res: StationLoginSuccess) => {
         setLoginSuccess(res);
-        setIsAgentLoggedIn(true);
         store.setSelectedLoginOption(deviceType);
         if (loginCb) {
           loginCb();
