@@ -1,10 +1,22 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useRef} from 'react';
 import {StationLoginPresentationalProps} from './station-login.types';
 
 import './station-login.style.scss';
 
 const StationLoginPresentational: React.FunctionComponent<StationLoginPresentationalProps> = (props) => {
-  const {name, teams, loginOptions, login, logout, setDeviceType, setDialNumber, setTeam} = props; // TODO: Use the  loginSuccess, loginFailure, logoutSuccess props returned fromthe API response via helper file to reflect UI changes
+  const {
+    name, 
+    teams, 
+    loginOptions, 
+    login, 
+    logout, 
+    relogin, 
+    setDeviceType, 
+    setDialNumber, 
+    setTeam, 
+    isAgentLoggedIn, 
+    deviceType
+  } = props; // TODO: Use the  loginSuccess, loginFailure, logoutSuccess props returned fromthe API response via helper file to reflect UI changes
 
   useEffect(() => {
     const teamsDropdown = document.getElementById('teamsDropdown') as HTMLSelectElement;
@@ -33,6 +45,16 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
       });
     }
   }, [teams, loginOptions]);
+
+  useEffect(() => {
+    if (!isAgentLoggedIn) return;
+    const agentLogin = document.querySelector('#LoginOption') as HTMLSelectElement;
+    if (agentLogin && !agentLogin.value) {
+      setDeviceType(deviceType);
+      agentLogin.value = deviceType;
+      relogin();
+    }
+  }, [isAgentLoggedIn]);
 
   const selectLoginOption = (event: { target: { value: string; }; }) => {
     const dialNumber = document.querySelector('#dialNumber') as HTMLInputElement;
@@ -68,8 +90,11 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
                   <option value="" hidden>Choose Agent Login Option...</option>
                 </select>
                 <input className='input' id="dialNumber" name="dialNumber" placeholder="Extension/Dial Number" type="text" onInput={updateDN} />
-                <button id="AgentLogin" className='btn' onClick={login}>Login</button>
-                <button id="logoutAgent" className='btn' onClick={logout}>Logout</button>
+                  {isAgentLoggedIn ? (
+                    <button id="logoutAgent" className='btn' onClick={logout}>Logout</button>
+                  ) : (
+                    <button id="AgentLogin" className='btn' onClick={login}>Login</button>
+                  )}
               </fieldset>
             </div>
           </div>

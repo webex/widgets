@@ -65,9 +65,7 @@ jobs:
       - persist_to_workspace:
           root: .
           paths:
-            - packages/contact-center/station-login/dist
-            - packages/contact-center/store/dist
-            - packages/contact-center/user-state/dist
+            - packages/contact-center/*/dist
             - packages/@webex/widgets/dist
 
   docs:

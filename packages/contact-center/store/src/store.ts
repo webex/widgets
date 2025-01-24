@@ -20,7 +20,12 @@ class Store implements IStore {
   idleCodes: IdleCode[] = [];
   agentId: string = '';
   selectedLoginOption: string = '';
+<<<<<<< HEAD
   currentTheme: string = 'light';
+=======
+  isAgentLoggedIn = false;
+  deviceType: string = '';
+>>>>>>> upstream/ccwidgets
 
   constructor() {
     makeAutoObservable(this, {cc: observable.ref});
@@ -52,6 +57,8 @@ class Store implements IStore {
       this.loginOptions = response.loginVoiceOptions;
       this.idleCodes = response.idleCodes;
       this.agentId = response.agentId;
+      this.isAgentLoggedIn = response.isAgentLoggedIn;
+      this.deviceType = response.deviceType;
     }).catch((error) => {
       this.logger.error(`Error registering contact center: ${error}`, {
         module: 'cc-store#store.ts',
