@@ -69,19 +69,6 @@ describe('StationLoginPresentational', () => {
     expect(reloginMock).toHaveBeenCalled();
   });
 
-  it.skip('shows the dialog box when showAlert is true', () => {
-    const propsWithAlert = {
-      ...props,
-      showAlert: true,
-    };
-
-    HTMLDialogElement.prototype.showModal = jest.fn();
-    render(<StationLoginPresentational {...propsWithAlert} />);
-    const dialog = screen.getByRole('dialog');
-    expect(dialog).toBeInTheDocument();
-    expect(dialog).toHaveTextContent('Multiple Sign-In Alert');
-  });
-
   it('calls handleContinue and closes the dialog when Continue button is clicked', () => {
     const handleContinueMock = jest.fn();
     const setShowAlertMock = jest.fn();

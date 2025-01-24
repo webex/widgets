@@ -43,8 +43,8 @@ describe('StationLogin Component', () => {
       setTeam: jest.fn(),
       isAgentLoggedIn: false,
       cc: {
-        on: jest.fn(), // Add on method
-        off: jest.fn(), // Add off method
+        on: jest.fn(),
+        off: jest.fn(),
       },
       deviceType: 'BROWSER',
       handleContinue: jest.fn(),
@@ -70,7 +70,7 @@ describe('StationLogin Component', () => {
     expect(heading).toHaveTextContent('StationLogin');
   });
 
-  it.skip('calls handleContinue', () => {
+  it('calls handleContinue', () => {
     const handleContinueMock = jest.fn();
     const setShowAlertMock = jest.fn();
     const modalRef = {current: {close: jest.fn()}};
