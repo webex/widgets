@@ -52,6 +52,7 @@ describe('StationLogin Component', () => {
       showAlert: false,
       setShowAlert: jest.fn(),
       showMultipleLoginAlert: false,
+      relogin: jest.fn(),
     });
 
     render(<StationLogin onLogin={loginCb} onLogout={logoutCb} />);
@@ -63,14 +64,12 @@ describe('StationLogin Component', () => {
       },
       onLogin: loginCb,
       onLogout: logoutCb,
-      logger: undefined,
-      isAgentLoggedIn: undefined,
     });
     const heading = screen.getByTestId('station-login-heading');
     expect(heading).toHaveTextContent('StationLogin');
   });
 
-  it('calls handleContinue', () => {
+  it('calls handleContinue and handles try-catch block', () => {
     const handleContinueMock = jest.fn();
     const setShowAlertMock = jest.fn();
     const modalRef = {current: {close: jest.fn()}};
@@ -79,9 +78,6 @@ describe('StationLogin Component', () => {
       name: 'StationLogin',
       login: jest.fn(),
       logout: jest.fn(),
-      loginSuccess: undefined,
-      loginFailure: undefined,
-      logoutSuccess: undefined,
       setDeviceType: jest.fn(),
       setDialNumber: jest.fn(),
       setTeam: jest.fn(),
@@ -101,11 +97,23 @@ describe('StationLogin Component', () => {
 
     render(<StationLogin onLogin={loginCb} onLogout={logoutCb} />);
 
-    const continueButton = screen.getByText('Continue');
+    const continueButton = screen.getByTestId('ContinueButton');
+
     fireEvent.click(continueButton);
 
     expect(handleContinueMock).toHaveBeenCalled();
     expect(modalRef.current.close).toHaveBeenCalled();
     expect(setShowAlertMock).toHaveBeenCalledWith(false);
+
+    // Simulate an error in handleContinue
+    handleContinueMock.mockImplementation(() => {
+      throw new Error('Test error');
+    });
+
+    try {
+      fireEvent.click(continueButton);
+    } catch (error) {
+      expect(error).toEqual(new Error('Test error'));
+    }
   });
 });

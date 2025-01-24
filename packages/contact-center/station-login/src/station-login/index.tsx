@@ -20,7 +20,6 @@ const StationLogin: React.FunctionComponent<StationLoginProps> = observer(({onLo
         modal.close();
         setShowAlert(false);
         cc.register();
-        window.location.reload();
         logger.log(`Agent Relogin Success`, {
           module: 'widget-station-login#station-login/index.tsx',
           method: 'handleContinue',
