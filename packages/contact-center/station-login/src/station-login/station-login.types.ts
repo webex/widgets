@@ -1,4 +1,4 @@
-import {AgentLogin, IContactCenter, StationLoginSuccess, StationLogoutSuccess, Team} from '@webex/plugin-cc';
+import {IContactCenter, StationLoginSuccess, StationLogoutSuccess, Team} from '@webex/plugin-cc';
 import {ILogger} from '@webex/cc-store';
 /**
  * Interface representing the properties for the Station Login component.
@@ -93,6 +93,31 @@ export interface IStationLoginProps {
    * Handler to relogin the agent
    */
   relogin: () => void;
+
+  /**
+   * Handler to relogin the agent when the agent is already logged in
+   */
+  handleContinue: () => void;
+
+  /**
+   * Reference to the modal element
+   */
+  modalRef: React.RefObject<HTMLDialogElement>;
+
+  /**
+   * Flag to indicate if the alert should be shown
+   */
+  showAlert: boolean;
+
+  /**
+   * Handler to set the flag to show the alert
+   */
+  setShowAlert: (show: boolean) => void;
+
+  /**
+   * Flag to indicate if the alert should be shown
+   */
+  showMultipleLoginAlert: boolean;
 }
 
 export type StationLoginPresentationalProps = Pick<
@@ -110,8 +135,11 @@ export type StationLoginPresentationalProps = Pick<
   | 'setDialNumber'
   | 'setTeam'
   | 'isAgentLoggedIn'
-  | 'cc'
   | 'deviceType'
+  | 'handleContinue'
+  | 'modalRef'
+  | 'showAlert'
+  | 'setShowAlert'
 > & {
   showMultipleLoginAlert: boolean;
 };

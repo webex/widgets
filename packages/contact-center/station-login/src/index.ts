@@ -1,3 +1,3 @@
-import {StationLogin} from './station-login';
+import StationLogin from './station-login';
 
 export {StationLogin};

@@ -19,8 +19,10 @@
     "test:unit": "jest"
   },
   "dependencies": {
-    "@webex/cc-store": "workspace:*",
-    "mobx-react-lite": "^4.1.0"
+    "@webex/plugin-cc": "link:/Users/parv_gour/Desktop/webex-js-sdk/webex-js-sdk/packages/@webex/plugin-cc",
+    "mobx": "6.13.5",
+    "typescript": "5.6.3",
+    "webex": "link:/Users/parv_gour/Desktop/webex-js-sdk/webex-js-sdk/packages/webex"
   },
   "devDependencies": {
     "@babel/core": "7.25.2",

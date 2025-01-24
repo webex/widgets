@@ -5,9 +5,7 @@ import { MULTIPLE_SIGN_IN_ALERT_MESSAGE, MULTIPLE_SIGN_IN_ALERT_TITLE } from './
 import './alert-modal.scss';
 
 const StationLoginPresentational: React.FunctionComponent<StationLoginPresentationalProps> = (props) => {
-  const { name, teams, loginOptions, login, logout, relogin, setDeviceType, setDialNumber, setTeam, isAgentLoggedIn, deviceType,  cc, showMultipleLoginAlert } = props;
-  const [showAlert, setShowAlert] = useState(showMultipleLoginAlert);
-  const modalRef = useRef<HTMLDialogElement>(null);
+  const { name, teams, loginOptions, login, logout, relogin, setDeviceType, setDialNumber, setTeam, isAgentLoggedIn, deviceType, showMultipleLoginAlert, handleContinue, modalRef, showAlert, setShowAlert} = props;
 
   useEffect(() => {
     const teamsDropdown = document.getElementById('teamsDropdown') as HTMLSelectElement;
@@ -42,21 +40,11 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
     if (showAlert && modal) {
       modal.showModal();
     }
-  }, [showAlert]);
+  }, [showAlert, modalRef]);
 
   useEffect(() => {
     setShowAlert(showMultipleLoginAlert);
-  }, [showMultipleLoginAlert]);
-
-  const handleContinue = () => {
-    const modal = modalRef.current;
-    if (modal) {
-      modal.close();
-      setShowAlert(false);
-      cc.register();
-    }
-  };
-
+  }, [showMultipleLoginAlert, setShowAlert]);
   
   useEffect(() => {
     if (!isAgentLoggedIn) return;
@@ -104,6 +92,8 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
               <div style={{ display: 'flex', gap: '1rem' }}>
                 <fieldset
                   style={{
+
+                    
                     border: '1px solid #ccc',
                     borderRadius: '5px',
                     padding: '10px',
