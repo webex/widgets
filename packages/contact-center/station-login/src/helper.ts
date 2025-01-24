@@ -40,6 +40,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
     cc.stationLogin({teamId: team, loginOption: deviceType, dialNumber: dialNumber})
       .then((res: StationLoginSuccess) => {
         setLoginSuccess(res);
+        setIsAgentLoggedIn(true);
         store.setSelectedLoginOption(deviceType);
         if (loginCb) {
           loginCb();

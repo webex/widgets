@@ -79,7 +79,7 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
           <h2>{MULTIPLE_SIGN_IN_ALERT_TITLE}</h2>
           <p>{MULTIPLE_SIGN_IN_ALERT_MESSAGE}</p>
           <div className='modal-content'>
-            <button id="ContinueButton" onClick={handleContinue}>Continue</button>
+            <button id="ContinueButton" data-testid="ContinueButton" onClick={handleContinue}>Continue</button>
           </div>
           </dialog>
       )}

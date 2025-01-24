@@ -92,8 +92,6 @@ describe('useStationLogin Hook', () => {
       });
       expect(loginCb).toHaveBeenCalledWith();
 
-      expect(result.current.isAgentLoggedIn).toBe(true);
-
       expect(result.current).toEqual({
         name: 'StationLogin',
         isAgentLoggedIn: true,
