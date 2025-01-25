@@ -20,12 +20,9 @@ class Store implements IStore {
   idleCodes: IdleCode[] = [];
   agentId: string = '';
   selectedLoginOption: string = '';
-<<<<<<< HEAD
   currentTheme: string = 'light';
-=======
   isAgentLoggedIn = false;
   deviceType: string = '';
->>>>>>> upstream/ccwidgets
 
   constructor() {
     makeAutoObservable(this, {cc: observable.ref});

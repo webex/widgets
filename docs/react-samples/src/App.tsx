@@ -6,6 +6,7 @@ function App() {
   const [accessToken, setAccessToken] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const themeCheckbox = useRef(null);
+  const currentTheme = store.currentTheme;
 
   const webexConfig = {
     fedramp: false,
@@ -41,7 +42,8 @@ function App() {
   };
 
   return (
-    <>
+    // @ts-ignore
+    <md-theme theme="momentumv2">
       <h1>Contact Center widgets in a react app</h1>
       <input
         type="text"
@@ -82,9 +84,9 @@ function App() {
           )}
         </>
       )}
-    </>
+      {/* @ts-ignore */}
+    </md-theme>
   );
 }
-// @ts-ignore
-window.store = store;
+
 export default App;
