@@ -24,6 +24,11 @@ module.exports = merge(baseConfig, {
     react: 'react',
     'react-dom': 'react-dom',
     '@webex/cc-store': '@webex/cc-store',
+    "@momentum-ui/core": "@momentum-ui/core",
+    "@momentum-ui/icons": "@momentum-ui/icons",
+    "@momentum-ui/tokens": "@momentum-ui/tokens",
+    "@momentum-ui/utils": "@momentum-ui/utils",
+    "@momentum-ui/web-components": "^2.16.16",
     '@momentum-ui/web-components': '@momentum-ui/web-components',
   },
   module: {
