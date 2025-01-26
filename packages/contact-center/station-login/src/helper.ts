@@ -90,7 +90,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
     loginSuccess,
     loginFailure,
     logoutSuccess,
-    showMultipleLoginAlert, // Return the state to be used in the presentational component
+    showMultipleLoginAlert,
     isAgentLoggedIn,
   };
 };

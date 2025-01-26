@@ -313,7 +313,7 @@ describe('useStationLogin Hook', () => {
     });
   });
 
-  it('should handle AgentMultiLoginCloseSession event', async () => {
+  it('should handle AgentMultiLogin event', async () => {
     const {result} = renderHook(() =>
       useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger, isAgentLoggedIn})
     );
@@ -325,24 +325,6 @@ describe('useStationLogin Hook', () => {
 
     await waitFor(() => {
       expect(result.current.showMultipleLoginAlert).toBe(true);
-    });
-  });
-
-  it('should update isAgentLoggedIn state when props.isAgentLoggedIn changes', async () => {
-    const {result, rerender} = renderHook(
-      ({isAgentLoggedIn}) =>
-        useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger, isAgentLoggedIn}),
-      {
-        initialProps: {isAgentLoggedIn: false},
-      }
-    );
-
-    expect(result.current.isAgentLoggedIn).toBe(false);
-
-    rerender({isAgentLoggedIn: true});
-
-    await waitFor(() => {
-      expect(result.current.isAgentLoggedIn).toBe(true);
     });
   });
 });

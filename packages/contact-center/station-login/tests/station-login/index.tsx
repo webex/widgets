@@ -25,11 +25,6 @@ const loginCb = jest.fn();
 const logoutCb = jest.fn();
 
 describe('StationLogin Component', () => {
-  beforeAll(() => {
-    HTMLDialogElement.prototype.showModal = jest.fn();
-    HTMLDialogElement.prototype.close = jest.fn();
-  });
-
   it('renders StationLoginPresentational with correct props', () => {
     const useStationLoginSpy = jest.spyOn(helper, 'useStationLogin').mockReturnValue({
       name: 'StationLogin',
