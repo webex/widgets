@@ -37,7 +37,7 @@ interface IStore {
     init(params: InitParams): Promise<void>;
 }
 
-interface WrapupCode {
+interface IWrapupCode {
     id: string;
     name: string;
   }
@@ -53,5 +53,5 @@ export type {
     InitParams,
     IStore,
     ILogger,
-    WrapupCode
+    IWrapupCode
 }

@@ -431,25 +431,6 @@ describe('useTaskList Hook', () => {
     expect(logger.error).not.toHaveBeenCalled();
   });
 
-  it('should remove a task from the list when it is unassigned', async () => {
-    const {result} = renderHook(() => useTaskList({cc: ccMock, logger, selectedLoginOption: ''}));
-
-    act(() => {
-      ccMock.on.mock.calls[0][1](taskMock);
-    });
-
-    act(() => {
-      taskMock.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_UNASSIGNED)?.[1]();
-    });
-
-    await waitFor(() => {
-      expect(result.current.taskList).not.toContain(taskMock);
-    });
-
-    // Ensure no errors are logged
-    expect(logger.error).not.toHaveBeenCalled();
-  });
-
   describe('useIncomingTask Hook - Task Events', () => {
     afterEach(() => {
       jest.clearAllMocks();

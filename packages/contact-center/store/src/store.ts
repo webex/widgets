@@ -9,7 +9,7 @@ import {
   InitParams,
   IStore,
   ILogger,
-  WrapupCode
+  IWrapupCode,
 } from './store.types';
 import {ITask} from '@webex/plugin-cc';
 
@@ -22,7 +22,7 @@ class Store implements IStore {
   idleCodes: IdleCode[] = [];
   agentId: string = '';
   selectedLoginOption: string = '';
-  wrapupCodes: WrapupCode[] = [];
+  wrapupCodes: IWrapupCode[] = [];
   currentTask: ITask = null;
 
   constructor() {

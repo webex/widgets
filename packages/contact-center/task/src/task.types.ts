@@ -116,7 +116,6 @@ export enum TASK_EVENTS {
   TASK_INCOMING = 'task:incoming',
   TASK_ASSIGNED = 'task:assigned',
   TASK_MEDIA = 'task:media',
-  TASK_UNASSIGNED = 'task:unassigned',
   TASK_HOLD = 'task:hold',
   TASK_UNHOLD = 'task:unhold',
   TASK_CONSULT = 'task:consult',

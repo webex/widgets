@@ -34,24 +34,20 @@ const WebCallControl = r2wc(CallControl, {
   },
 });
 
-if (!customElements.get('widget-cc-user-state')) {
-  customElements.define('widget-cc-user-state', WebUserState);
-}
+// Whenever there is a new component, add the name of the component
+// and the web-component to the components object
+const components = [
+  {name: 'widget-cc-user-state', component: WebUserState},
+  {name: 'widget-cc-station-login', component: WebStationLogin},
+  {name: 'widget-cc-incoming-task', component: WebIncomingTask},
+  {name: 'widget-cc-task-list', component: WebTaskList},
+  {name: 'widget-cc-call-control', component: WebCallControl},
+];
 
-if (!customElements.get('widget-cc-station-login')) {
-  customElements.define('widget-cc-station-login', WebStationLogin);
-}
-
-if (!customElements.get('widget-cc-incoming-task')) {
-  customElements.define('widget-cc-incoming-task', WebIncomingTask);
-}
-
-if (!customElements.get('widget-cc-task-list')) {
-  customElements.define('widget-cc-task-list', WebTaskList);
-}
-
-if (!customElements.get('widget-cc-call-control')) {
-  customElements.define('widget-cc-call-control', WebCallControl);
-}
+components.forEach(({name, component}) => {
+  if (!customElements.get(name)) {
+    customElements.define(name, component);
+  }
+});
 
 export {store};

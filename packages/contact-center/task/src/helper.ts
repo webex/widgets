@@ -1,7 +1,7 @@
 import {useState, useEffect, useCallback, useRef} from 'react';
-import {TASK_EVENTS, useCallControlProps, UseTaskListProps, UseTaskProps} from './task.types';
 import {ITask} from '@webex/plugin-cc';
 import store from '@webex/cc-store';
+import {TASK_EVENTS, useCallControlProps, UseTaskListProps, UseTaskProps} from './task.types';
 
 // Hook for managing the task list
 export const useTaskList = (props: UseTaskListProps) => {
@@ -16,7 +16,6 @@ export const useTaskList = (props: UseTaskListProps) => {
       if (taskToRemove) {
         // Clean up listeners on the task
         taskToRemove.off(TASK_EVENTS.TASK_END, () => handleTaskRemoved(taskId));
-        taskToRemove.off(TASK_EVENTS.TASK_UNASSIGNED, () => handleTaskRemoved(taskId));
       }
 
       return prev.filter((task) => task.data.interactionId !== taskId);
@@ -32,7 +31,6 @@ export const useTaskList = (props: UseTaskListProps) => {
 
         // Attach event listeners to the task
         task.on(TASK_EVENTS.TASK_END, () => handleTaskRemoved(task.data.interactionId));
-        task.on(TASK_EVENTS.TASK_UNASSIGNED, () => handleTaskRemoved(task.data.interactionId));
 
         return [...prev, task];
       });
@@ -200,59 +198,52 @@ export const useCallControl = (props: useCallControlProps) => {
   }, []);
 
   useEffect(() => {
-    if (currentTask) {
-      currentTask.on(TASK_EVENTS.TASK_END, handleTaskEnded);
-    }
+    if (!currentTask) return;
+
+    currentTask.on(TASK_EVENTS.TASK_END, handleTaskEnded);
 
     return () => {
-      if (currentTask) {
-        currentTask.off(TASK_EVENTS.TASK_END, handleTaskEnded);
-      }
+      currentTask.off(TASK_EVENTS.TASK_END, handleTaskEnded);
     };
   }, [currentTask, handleTaskEnded]);
 
   const toggleHold = (hold: boolean) => {
+    const logLocation = {
+      module: 'widget-cc-task#helper.ts',
+      method: 'useCallControl#holdResume',
+    };
+
     if (hold) {
       currentTask
         .hold()
-        .then(() => {
-          if (onHoldResume) onHoldResume();
-        })
+        .then(() => onHoldResume && onHoldResume())
         .catch((error: Error) => {
-          logger.error(`Error holding call: ${error}`, {
-            module: 'widget-cc-task#helper.ts',
-            method: 'useCallControl#holdResume',
-          });
+          logger.error(`Error holding call: ${error}`, logLocation);
         });
-    } else {
-      currentTask
-        .resume()
-        .then(() => {
-          if (onHoldResume) onHoldResume();
-        })
-        .catch((error: Error) => {
-          logger.error(`Error resuming call: ${error}`, {
-            module: 'widget-cc-task#helper.ts',
-            method: 'useCallControl#holdResume',
-          });
-        });
+
+      return;
     }
+
+    currentTask
+      .resume()
+      .then(() => onHoldResume && onHoldResume())
+      .catch((error: Error) => {
+        logger.error(`Error resuming call: ${error}`, logLocation);
+      });
   };
 
   const toggleRecording = (pause: boolean) => {
+    const logLocation = {
+      module: 'widget-cc-task#helper.ts',
+      method: 'useCallControl#pauseResumeRecording',
+    };
     if (pause) {
       currentTask.pauseRecording().catch((error: Error) => {
-        logger.error(`Error pausing recording: ${error}`, {
-          module: 'widget-cc-task#helper.ts',
-          method: 'useCallControl#pauseResumeRecording',
-        });
+        logger.error(`Error pausing recording: ${error}`, logLocation);
       });
     } else {
       currentTask.resumeRecording().catch((error: Error) => {
-        logger.error(`Error resuming recording: ${error}`, {
-          module: 'widget-cc-task#helper.ts',
-          method: 'useCallControl#pauseResumeRecording',
-        });
+        logger.error(`Error resuming recording: ${error}`, logLocation);
       });
     }
   };

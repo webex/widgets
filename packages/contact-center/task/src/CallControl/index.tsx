@@ -1,10 +1,10 @@
 import React from 'react';
-import store from '@webex/cc-store';
 import {observer} from 'mobx-react-lite';
 
+import store from '@webex/cc-store';
 import {useCallControl} from '../helper';
-import CallControlPresentational from './call-control.presentational';
 import {CallControlProps} from '../task.types';
+import CallControlPresentational from './call-control.presentational';
 
 const CallControl: React.FunctionComponent<CallControlProps> = observer(({onHoldResume, onEnd, onWrapUp}) => {
   const {logger, currentTask, wrapupCodes} = store;
