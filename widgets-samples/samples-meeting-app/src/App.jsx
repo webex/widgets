@@ -25,6 +25,8 @@ export default function App() {
 
   const handleSaveToken = (event) => {
     event.preventDefault();
+    if(!tokenInput?.trim()) return;
+
     setToken(tokenInput);
   };
 

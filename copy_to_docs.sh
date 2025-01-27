@@ -1,19 +1,7 @@
 #!/bin/bash
 
-# Remove the docs directory if it exists
-rm -rf docs
-
-# Create the docs directory if it doesn't exist
-mkdir -p docs
-
 # Copy the index.html file to the docs directory
 cp ./widgets-samples/index.html docs/
-
-# Find and copy all dist folders to the docs directory, renaming them to their parent folder names, excluding node_modules
-find ./widgets-samples/ -type d -name 'dist' -not -path "**/node_modules/**" | while read dist_dir; do
-  parent_dir=$(basename $(dirname $dist_dir))
-  cp -r $dist_dir docs/$parent_dir
-done
 
 # Copy specific files and directories from samples-cc-wc-app to the docs directory
 mkdir -p docs/samples-cc-wc-app

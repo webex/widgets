@@ -11,8 +11,7 @@ module.exports = function(env, argv) {
     output:
       argv.mode === 'production'
         ? {
-            // path: path.resolve(__dirname, '../../docs/meeting'),
-            path: path.resolve(__dirname, 'dist'), // Output directory
+            path: path.resolve(__dirname, '../../docs/samples-meeting-app'), // Output directory
             filename: 'bundle.[hash].js',
           }
         : undefined, // Otherwise the CleanWebpackPlugin will wipe our build during devserver
