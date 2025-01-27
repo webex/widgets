@@ -24,6 +24,8 @@ class Store implements IStore {
   selectedLoginOption: string = '';
   wrapupCodes: IWrapupCode[] = [];
   currentTask: ITask = null;
+  isAgentLoggedIn = false;
+  deviceType: string = '';
 
   constructor() {
     makeAutoObservable(this, {
@@ -53,19 +55,24 @@ class Store implements IStore {
   registerCC(webex: WithWebex['webex']): Promise<void> {
     this.cc = webex.cc;
     this.logger = this.cc.LoggerProxy;
-    return this.cc.register().then((response: Profile) => {
-      this.teams = response.teams;
-      this.loginOptions = response.loginVoiceOptions;
-      this.idleCodes = response.idleCodes;
-      this.agentId = response.agentId;
-      this.wrapupCodes = response.wrapupCodes;
-    }).catch((error) => {
-      this.logger.error(`Error registering contact center: ${error}`, {
-        module: 'cc-store#store.ts',
-        method: 'registerCC',
+    return this.cc
+      .register()
+      .then((response: Profile) => {
+        this.teams = response.teams;
+        this.loginOptions = response.loginVoiceOptions;
+        this.idleCodes = response.idleCodes;
+        this.agentId = response.agentId;
+        this.wrapupCodes = response.wrapupCodes;
+        this.isAgentLoggedIn = response.isAgentLoggedIn;
+        this.deviceType = response.deviceType;
+      })
+      .catch((error) => {
+        this.logger.error(`Error registering contact center: ${error}`, {
+          module: 'cc-store#store.ts',
+          method: 'registerCC',
+        });
+        return Promise.reject(error);
       });
-      return Promise.reject(error);
-    });
   }
 
   init(options: InitParams): Promise<void> {

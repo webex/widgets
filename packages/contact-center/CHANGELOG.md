@@ -1,3 +1,17 @@
+# [1.28.0-ccwidgets.11](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.10...v1.28.0-ccwidgets.11) (2025-01-21)
+
+
+### Features
+
+* **widgets:** added-relogin-logic ([#357](https://github.com/webex/widgets/issues/357)) ([94dd415](https://github.com/webex/widgets/commit/94dd4156b87ddcfe86a5958923c343292d06aa97))
+
+# [1.28.0-ccwidgets.10](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.9...v1.28.0-ccwidgets.10) (2025-01-17)
+
+
+### Bug Fixes
+
+* rename agent state to user state ([#361](https://github.com/webex/widgets/issues/361)) ([fe409db](https://github.com/webex/widgets/commit/fe409db054fe8e2519675a05fcd2371f7be353ef))
+
 # [1.28.0-ccwidgets.9](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.8...v1.28.0-ccwidgets.9) (2025-01-13)
 
 
