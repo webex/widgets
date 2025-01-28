@@ -9,6 +9,13 @@ export const useTaskList = (props: UseTaskListProps) => {
   const [taskList, setTaskList] = useState<ITask[]>([]);
   const isBrowser = selectedLoginOption === 'BROWSER';
 
+  const logError = (message: string, method: string) => {
+    logger.error(message, {
+      module: 'widget-cc-task#helper.ts',
+      method: `useTaskList#${method}`,
+    });
+  };
+
   const handleTaskRemoved = useCallback((taskId: string) => {
     setTaskList((prev) => {
       const taskToRemove = prev.find((task) => task.data.interactionId === taskId);
@@ -49,10 +56,7 @@ export const useTaskList = (props: UseTaskListProps) => {
         onTaskAccepted && onTaskAccepted(task);
       })
       .catch((error: Error) => {
-        logger.error(`Error accepting task: ${error}`, {
-          module: 'widget-cc-task#helper.ts',
-          method: 'useTaskList#acceptTask',
-        });
+        logError(`Error accepting task: ${error}`, 'acceptTask');
       });
   };
 
@@ -67,10 +71,7 @@ export const useTaskList = (props: UseTaskListProps) => {
         store.setCurrentTask(null);
       })
       .catch((error: Error) => {
-        logger.error(`Error declining task: ${error}`, {
-          module: 'widget-cc-task#helper.ts',
-          method: 'useTaskList#declineTask',
-        });
+        logError(`Error declining task: ${error}`, 'declineTask');
       });
   };
 
@@ -94,6 +95,13 @@ export const useIncomingTask = (props: UseTaskProps) => {
   const [isEnded, setIsEnded] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null); // Ref for the audio element
   const isBrowser = selectedLoginOption === 'BROWSER';
+
+  const logError = (message: string, method: string) => {
+    logger.error(message, {
+      module: 'widget-cc-task#helper.ts',
+      method: `useIncomingTask#${method}`,
+    });
+  };
 
   const handleTaskAssigned = useCallback(() => {
     // Task that are accepted using anything other than browser should be populated
@@ -151,10 +159,7 @@ export const useIncomingTask = (props: UseTaskProps) => {
         onAccepted && onAccepted();
       })
       .catch((error: Error) => {
-        logger.error(`Error accepting incoming task: ${error}`, {
-          module: 'widget-cc-task#helper.ts',
-          method: 'useIncomingTask#accept',
-        });
+        logError(`Error accepting incoming task: ${error}`, 'accept');
       });
   };
 
@@ -170,10 +175,7 @@ export const useIncomingTask = (props: UseTaskProps) => {
         onDeclined && onDeclined();
       })
       .catch((error: Error) => {
-        logger.error(`Error declining incoming task: ${error}`, {
-          module: 'widget-cc-task#helper.ts',
-          method: 'useIncomingTask#decline',
-        });
+        logError(`Error declining incoming task: ${error}`, 'decline');
       });
   };
 
@@ -192,8 +194,14 @@ export const useCallControl = (props: useCallControlProps) => {
   const {currentTask, onHoldResume, onEnd, onWrapUp, logger} = props;
   const [wrapupRequired, setWrapupRequired] = useState(false);
 
-  const handleTaskEnded = useCallback((args: {wrapupRequired: boolean}) => {
-    const {wrapupRequired} = args;
+  const logError = (message: string, method: string) => {
+    logger.error(message, {
+      module: 'widget-cc-task#helper.ts',
+      method: `useCallControl#${method}`,
+    });
+  };
+
+  const handleTaskEnded = useCallback(({wrapupRequired}: {wrapupRequired: boolean}) => {
     setWrapupRequired(wrapupRequired);
   }, []);
 
@@ -208,17 +216,12 @@ export const useCallControl = (props: useCallControlProps) => {
   }, [currentTask, handleTaskEnded]);
 
   const toggleHold = (hold: boolean) => {
-    const logLocation = {
-      module: 'widget-cc-task#helper.ts',
-      method: 'useCallControl#holdResume',
-    };
-
     if (hold) {
       currentTask
         .hold()
         .then(() => onHoldResume && onHoldResume())
         .catch((error: Error) => {
-          logger.error(`Error holding call: ${error}`, logLocation);
+          logError(`Error holding call: ${error}`, 'toggleHold');
         });
 
       return;
@@ -228,7 +231,7 @@ export const useCallControl = (props: useCallControlProps) => {
       .resume()
       .then(() => onHoldResume && onHoldResume())
       .catch((error: Error) => {
-        logger.error(`Error resuming call: ${error}`, logLocation);
+        logError(`Error resuming call: ${error}`, 'toggleHold');
       });
   };
 
@@ -239,11 +242,11 @@ export const useCallControl = (props: useCallControlProps) => {
     };
     if (pause) {
       currentTask.pauseRecording().catch((error: Error) => {
-        logger.error(`Error pausing recording: ${error}`, logLocation);
+        logError(`Error pausing recording: ${error}`, 'toggleRecording');
       });
     } else {
       currentTask.resumeRecording().catch((error: Error) => {
-        logger.error(`Error resuming recording: ${error}`, logLocation);
+        logError(`Error resuming recording: ${error}`, 'toggleRecording');
       });
     }
   };
@@ -255,10 +258,7 @@ export const useCallControl = (props: useCallControlProps) => {
         if (onEnd) onEnd();
       })
       .catch((error: Error) => {
-        logger.error(`Error ending call: ${error}`, {
-          module: 'widget-cc-task#helper.ts',
-          method: 'useCallControl#endCall',
-        });
+        logError(`Error ending call: ${error}`, 'endCall');
       });
   };
 
@@ -271,10 +271,7 @@ export const useCallControl = (props: useCallControlProps) => {
         if (onWrapUp) onWrapUp();
       })
       .catch((error: Error) => {
-        logger.error(`Error wrapping up call: ${error}`, {
-          module: 'widget-cc-task#helper.ts',
-          method: 'useCallControl#wrapupCall',
-        });
+        logError(`Error wrapping up call: ${error}`, 'wrapupCall');
       });
   };
 

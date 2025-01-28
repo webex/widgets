@@ -6,12 +6,13 @@ import {useCallControl} from '../helper';
 import {CallControlProps} from '../task.types';
 import CallControlPresentational from './call-control.presentational';
 
-const CallControl: React.FunctionComponent<CallControlProps> = observer(({onHoldResume, onEnd, onWrapUp}) => {
+const CallControlComponent: React.FunctionComponent<CallControlProps> = ({onHoldResume, onEnd, onWrapUp}) => {
   const {logger, currentTask, wrapupCodes} = store;
 
-  const result = {...useCallControl({currentTask, onHoldResume, onEnd, onWrapUp, logger}), wrapupCodes};
+  const result = useCallControl({currentTask, onHoldResume, onEnd, onWrapUp, logger});
 
-  return <CallControlPresentational {...result} />;
-});
+  return <CallControlPresentational {...result} wrapupCodes={wrapupCodes} />;
+};
 
+const CallControl = observer(CallControlComponent);
 export {CallControl};

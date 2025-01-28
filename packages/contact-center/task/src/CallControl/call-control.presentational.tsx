@@ -56,9 +56,7 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
               </div>
               <div style={{display: 'flex', gap: '1rem', marginTop: '1rem'}}>
                 <select className="select" onChange={handleWrapupChange} disabled={!wrapupRequired}>
-                  <option value="" disabled>
-                    Select the wrap-up reason
-                  </option>
+                  <option value="">Select the wrap-up reason</option>
                   {wrapupCodes.map((wrapup: WrapupCodes) => (
                     <option key={wrapup.id} value={wrapup.id}>
                       {wrapup.name}
