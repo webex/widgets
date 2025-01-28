@@ -108,18 +108,21 @@ export const useIncomingTask = (props: UseTaskProps) => {
     // in the store only when we receive task assigned event
     if (!isBrowser) store.setCurrentTask(incomingTask);
     setIsAnswered(true);
-  }, []);
+  }, [incomingTask]);
 
   const handleTaskEnded = useCallback(() => {
     setIsEnded(true);
     setIncomingTask(null);
   }, []);
 
-  const handleTaskMedia = useCallback((track) => {
-    if (audioRef.current) {
-      audioRef.current.srcObject = new MediaStream([track]);
-    }
-  }, []);
+  const handleTaskMedia = useCallback(
+    (track) => {
+      if (audioRef.current) {
+        audioRef.current.srcObject = new MediaStream([track]);
+      }
+    },
+    [audioRef]
+  );
 
   const handleIncomingTask = useCallback((task: ITask) => {
     setIncomingTask(task);
