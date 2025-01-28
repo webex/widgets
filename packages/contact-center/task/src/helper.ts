@@ -93,7 +93,6 @@ export const useIncomingTask = (props: UseTaskProps) => {
   const [incomingTask, setIncomingTask] = useState<ITask | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
   const [isEnded, setIsEnded] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null); // Ref for the audio element
   const isBrowser = selectedLoginOption === 'BROWSER';
 
   const logError = (message: string, method: string) => {
@@ -115,15 +114,6 @@ export const useIncomingTask = (props: UseTaskProps) => {
     setIncomingTask(null);
   }, []);
 
-  const handleTaskMedia = useCallback(
-    (track) => {
-      if (audioRef.current) {
-        audioRef.current.srcObject = new MediaStream([track]);
-      }
-    },
-    [audioRef]
-  );
-
   const handleIncomingTask = useCallback((task: ITask) => {
     setIncomingTask(task);
     setIsAnswered(false);
@@ -136,7 +126,6 @@ export const useIncomingTask = (props: UseTaskProps) => {
     if (incomingTask) {
       incomingTask.on(TASK_EVENTS.TASK_ASSIGNED, handleTaskAssigned);
       incomingTask.on(TASK_EVENTS.TASK_END, handleTaskEnded);
-      incomingTask.on(TASK_EVENTS.TASK_MEDIA, handleTaskMedia);
     }
 
     return () => {
@@ -144,10 +133,9 @@ export const useIncomingTask = (props: UseTaskProps) => {
       if (incomingTask) {
         incomingTask.off(TASK_EVENTS.TASK_ASSIGNED, handleTaskAssigned);
         incomingTask.off(TASK_EVENTS.TASK_END, handleTaskEnded);
-        incomingTask.off(TASK_EVENTS.TASK_MEDIA, handleTaskMedia);
       }
     };
-  }, [cc, incomingTask, handleIncomingTask, handleTaskAssigned, handleTaskEnded, handleTaskMedia]);
+  }, [cc, incomingTask, handleIncomingTask, handleTaskAssigned, handleTaskEnded]);
 
   const accept = () => {
     const taskId = incomingTask?.data.interactionId;
@@ -189,13 +177,13 @@ export const useIncomingTask = (props: UseTaskProps) => {
     accept,
     decline,
     isBrowser,
-    audioRef,
   };
 };
 
 export const useCallControl = (props: useCallControlProps) => {
   const {currentTask, onHoldResume, onEnd, onWrapUp, logger} = props;
   const [wrapupRequired, setWrapupRequired] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null); // Ref for the audio element
 
   const logError = (message: string, method: string) => {
     logger.error(message, {
@@ -208,12 +196,23 @@ export const useCallControl = (props: useCallControlProps) => {
     setWrapupRequired(wrapupRequired);
   }, []);
 
+  const handleTaskMedia = useCallback(
+    (track) => {
+      console.log('Shreyas: Calling handleTaskMedia in call control', audioRef, audioRef.current, track, currentTask);
+      if (audioRef.current) {
+        audioRef.current.srcObject = new MediaStream([track]);
+      }
+    },
+    [audioRef, currentTask]
+  );
+
   useEffect(() => {
     if (!currentTask) return;
-
+    currentTask.on(TASK_EVENTS.TASK_MEDIA, handleTaskMedia);
     currentTask.on(TASK_EVENTS.TASK_END, handleTaskEnded);
 
     return () => {
+      currentTask.off(TASK_EVENTS.TASK_MEDIA, handleTaskMedia);
       currentTask.off(TASK_EVENTS.TASK_END, handleTaskEnded);
     };
   }, [currentTask, handleTaskEnded]);
@@ -280,6 +279,7 @@ export const useCallControl = (props: useCallControlProps) => {
 
   return {
     currentTask,
+    audioRef,
     endCall,
     toggleHold,
     toggleRecording,

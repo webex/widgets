@@ -86,11 +86,6 @@ export interface TaskProps {
   taskList: ITask[];
 
   /**
-   * Audio reference
-   */
-  audioRef: React.RefObject<HTMLAudioElement>;
-
-  /**
    * The logger instance from SDK
    */
   logger: ILogger;
@@ -103,7 +98,7 @@ export type UseTaskListProps = Pick<
 >;
 export type IncomingTaskPresentationalProps = Pick<
   TaskProps,
-  'incomingTask' | 'isBrowser' | 'isAnswered' | 'isEnded' | 'accept' | 'decline' | 'audioRef'
+  'incomingTask' | 'isBrowser' | 'isAnswered' | 'isEnded' | 'accept' | 'decline'
 >;
 export type IncomingTaskProps = Pick<TaskProps, 'onAccepted' | 'onDeclined'>;
 export type TaskListProps = Pick<TaskProps, 'onTaskAccepted' | 'onTaskDeclined'>;
@@ -131,6 +126,10 @@ export enum TASK_EVENTS {
  * Interface representing the properties for control actions on a task.
  */
 export interface ControlProps {
+  /**
+   * Audio reference
+   */
+  audioRef: React.RefObject<HTMLAudioElement>;
   /**
    * The current task being handled.
    */
@@ -196,7 +195,14 @@ export type CallControlProps = Pick<ControlProps, 'onHoldResume' | 'onEnd' | 'on
 
 export type CallControlPresentationalProps = Pick<
   ControlProps,
-  'currentTask' | 'wrapupCodes' | 'wrapupRequired' | 'toggleHold' | 'toggleRecording' | 'endCall' | 'wrapupCall'
+  | 'currentTask'
+  | 'audioRef'
+  | 'wrapupCodes'
+  | 'wrapupRequired'
+  | 'toggleHold'
+  | 'toggleRecording'
+  | 'endCall'
+  | 'wrapupCall'
 >;
 
 export type useCallControlProps = Pick<ControlProps, 'currentTask' | 'onHoldResume' | 'onEnd' | 'onWrapUp' | 'logger'>;

@@ -114,35 +114,6 @@ describe('useIncomingTask Hook', () => {
     expect(logger.error).not.toHaveBeenCalled();
   });
 
-  it('should assign media received from media event to audio tag', async () => {
-    global.MediaStream = jest.fn().mockImplementation((tracks) => {
-      return {mockStream: 'mock-stream'};
-    });
-    const mockAudioElement = {current: {srcObject: null}};
-    jest.spyOn(React, 'useRef').mockReturnValue(mockAudioElement);
-    const mockAudio = {
-      srcObject: 'mock-audio',
-    };
-
-    const {result, unmount} = renderHook(() =>
-      useIncomingTask({cc: ccMock, onAccepted, onDeclined, selectedLoginOption: 'BROWSER', logger})
-    );
-    act(() => {
-      ccMock.on.mock.calls[0][1](taskMock);
-    });
-
-    act(() => {
-      taskMock.on.mock.calls[2][1](mockAudio);
-    });
-
-    await waitFor(() => {
-      expect(mockAudioElement.current).toEqual({srcObject: {mockStream: 'mock-stream'}});
-    });
-
-    // Ensure no errors are logged
-    expect(logger.error).not.toHaveBeenCalled();
-  });
-
   it('should handle errors when accepting a task', async () => {
     const failingTask = {
       ...taskMock,
@@ -203,31 +174,6 @@ describe('useIncomingTask Hook', () => {
       module: 'widget-cc-task#helper.ts',
       method: 'useIncomingTask#decline',
     });
-  });
-
-  it('should handle task media event', async () => {
-    const mockTrack = {kind: 'audio'};
-    const mockAudioElement = {current: {srcObject: null}};
-    jest.spyOn(React, 'useRef').mockReturnValue(mockAudioElement);
-
-    const {result} = renderHook(() =>
-      useIncomingTask({cc: ccMock, onAccepted, onDeclined, selectedLoginOption: 'BROWSER', logger})
-    );
-
-    act(() => {
-      ccMock.on.mock.calls[0][1](taskMock);
-    });
-
-    act(() => {
-      taskMock.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_MEDIA)?.[1](mockTrack);
-    });
-
-    await waitFor(() => {
-      expect(mockAudioElement.current.srcObject).toEqual(new MediaStream([mockTrack]));
-    });
-
-    // Ensure no errors are logged
-    expect(logger.error).not.toHaveBeenCalled();
   });
 });
 
@@ -497,99 +443,6 @@ describe('useTaskList Hook', () => {
       expect(logger.error).not.toHaveBeenCalled();
     });
   });
-
-  describe('useIncomingTask Hook - handleTaskMedia', () => {
-    beforeEach(() => {
-      // Mock the MediaStreamTrack and MediaStream classes for the test environment
-      global.MediaStreamTrack = jest.fn().mockImplementation(() => ({
-        kind: 'audio', // Simulating an audio track
-        enabled: true,
-        id: 'track-id',
-      }));
-
-      global.MediaStream = jest.fn().mockImplementation((tracks) => ({
-        getTracks: () => tracks,
-      }));
-    });
-
-    afterEach(() => {
-      jest.clearAllMocks();
-      logger.error.mockRestore();
-    });
-
-    it('should assign track to audioRef.current.srcObject when handleTaskMedia is called', async () => {
-      // Mock audioRef.current to simulate an audio element with a srcObject
-      const mockAudioElement = {
-        srcObject: null,
-      };
-
-      const {result} = renderHook(() =>
-        useIncomingTask({
-          cc: ccMock,
-          onAccepted,
-          onDeclined,
-          selectedLoginOption: 'BROWSER',
-          logger,
-          selectedLoginOption: '',
-        })
-      );
-
-      // Manually assign the mocked audio element to the ref
-      result.current.audioRef.current = mockAudioElement;
-
-      // Create a mock track object using the mock implementation
-      const mockTrack = new MediaStreamTrack();
-
-      // Simulate the event that triggers handleTaskMedia by invoking the on event directly
-      act(() => {
-        // Find the event handler for TASK_MEDIA and invoke it
-        const taskAssignedCallback = taskMock.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_MEDIA)?.[1];
-
-        // Trigger the TASK_MEDIA event with the mock track
-        if (taskAssignedCallback) {
-          taskAssignedCallback(mockTrack);
-        }
-      });
-
-      // Ensure that audioRef.current is not null
-      await waitFor(() => {
-        expect(result.current.audioRef.current).not.toBeNull();
-      });
-
-      // Ensure no errors are logged
-      expect(logger.error).not.toHaveBeenCalled();
-    });
-
-    it('should not set srcObject if audioRef.current is null', async () => {
-      // Mock audioRef to simulate the absence of an audio element
-      const {result} = renderHook(() =>
-        useIncomingTask({cc: ccMock, onAccepted, onDeclined, selectedLoginOption: 'BROWSER', logger})
-      );
-      result.current.audioRef.current = null;
-
-      // Create a mock track object using the mock implementation
-      const mockTrack = new MediaStreamTrack();
-
-      // Simulate the event that triggers handleTaskMedia by invoking the on event directly
-      act(() => {
-        // Find the event handler for TASK_MEDIA and invoke it
-        const taskAssignedCallback = taskMock.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_MEDIA)?.[1];
-
-        // Trigger the TASK_MEDIA event with the mock track
-        if (taskAssignedCallback) {
-          taskAssignedCallback(mockTrack);
-        }
-      });
-
-      // Verify that audioRef.current is still null and no changes occurred
-      await waitFor(() => {
-        expect(result.current.audioRef.current).toBeNull();
-      });
-
-      // Ensure no errors are logged
-      expect(logger.error).not.toHaveBeenCalled();
-    });
-  });
 });
 
 describe('useCallControl', () => {
@@ -613,7 +466,22 @@ describe('useCallControl', () => {
   const mockOnWrapUp = jest.fn();
 
   beforeEach(() => {
+    // Mock the MediaStreamTrack and MediaStream classes for the test environment
+    global.MediaStreamTrack = jest.fn().mockImplementation(() => ({
+      kind: 'audio', // Simulating an audio track
+      enabled: true,
+      id: 'track-id',
+    }));
+
+    global.MediaStream = jest.fn().mockImplementation((tracks) => ({
+      getTracks: () => tracks,
+    }));
     jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    logger.error.mockRestore();
   });
 
   it('should set up and clean up event listeners on currentTask', () => {
@@ -891,5 +759,142 @@ describe('useCallControl', () => {
 
     expect(mockCurrentTask.resumeRecording).toHaveBeenCalledWith();
     expect(mockLogger.error).toHaveBeenCalledWith('Error resuming recording: Error: Resume error', expect.any(Object));
+  });
+
+  it('should assign media received from media event to audio tag', async () => {
+    global.MediaStream = jest.fn().mockImplementation((tracks) => {
+      return {mockStream: 'mock-stream'};
+    });
+    const mockAudioElement = {current: {srcObject: null}};
+    jest.spyOn(React, 'useRef').mockReturnValue(mockAudioElement);
+    const mockAudio = {
+      srcObject: 'mock-audio',
+    };
+
+    const {result, unmount} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+      })
+    );
+
+    act(() => {
+      mockCurrentTask.on.mock.calls[0][1](mockAudio);
+    });
+
+    await waitFor(() => {
+      expect(mockAudioElement.current).toEqual({srcObject: {mockStream: 'mock-stream'}});
+    });
+
+    // Ensure no errors are logged
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('should handle task media event', async () => {
+    const mockTrack = {kind: 'audio'};
+    const mockAudioElement = {current: {srcObject: null}};
+    jest.spyOn(React, 'useRef').mockReturnValue(mockAudioElement);
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+      })
+    );
+
+    act(() => {
+      mockCurrentTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_MEDIA)?.[1](mockTrack);
+    });
+
+    await waitFor(() => {
+      expect(mockAudioElement.current.srcObject).toEqual({getTracks: expect.any(Function)});
+    });
+
+    // Ensure no errors are logged
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('should assign track to audioRef.current.srcObject when handleTaskMedia is called', async () => {
+    // Mock audioRef.current to simulate an audio element with a srcObject
+    const mockAudioElement = {
+      srcObject: null,
+    };
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+      })
+    );
+
+    // Manually assign the mocked audio element to the ref
+    result.current.audioRef.current = mockAudioElement;
+
+    // Create a mock track object using the mock implementation
+    const mockTrack = new MediaStreamTrack();
+
+    // Simulate the event that triggers handleTaskMedia by invoking the on event directly
+    act(() => {
+      // Find the event handler for TASK_MEDIA and invoke it
+      const taskAssignedCallback = taskMock.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_MEDIA)?.[1];
+
+      // Trigger the TASK_MEDIA event with the mock track
+      if (taskAssignedCallback) {
+        taskAssignedCallback(mockTrack);
+      }
+    });
+
+    // Ensure that audioRef.current is not null
+    await waitFor(() => {
+      expect(result.current.audioRef.current).not.toBeNull();
+    });
+
+    // Ensure no errors are logged
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('should not set srcObject if audioRef.current is null', async () => {
+    // Mock audioRef to simulate the absence of an audio element
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+      })
+    );
+    result.current.audioRef.current = null;
+
+    // Create a mock track object using the mock implementation
+    const mockTrack = new MediaStreamTrack();
+
+    // Simulate the event that triggers handleTaskMedia by invoking the on event directly
+    act(() => {
+      // Find the event handler for TASK_MEDIA and invoke it
+      const taskAssignedCallback = taskMock.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_MEDIA)?.[1];
+
+      // Trigger the TASK_MEDIA event with the mock track
+      if (taskAssignedCallback) {
+        taskAssignedCallback(mockTrack);
+      }
+    });
+
+    // Verify that audioRef.current is still null and no changes occurred
+    await waitFor(() => {
+      expect(result.current.audioRef.current).toBeNull();
+    });
+
+    // Ensure no errors are logged
+    expect(logger.error).not.toHaveBeenCalled();
   });
 });

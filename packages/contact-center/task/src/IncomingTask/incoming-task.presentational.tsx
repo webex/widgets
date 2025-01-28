@@ -120,7 +120,7 @@ const styles: {[key: string]: React.CSSProperties} = {
 };
 
 const IncomingTaskPresentational: React.FunctionComponent<IncomingTaskPresentationalProps> = (props) => {
-  const {incomingTask, accept, decline, isBrowser, audioRef, isAnswered} = props;
+  const {incomingTask, accept, decline, isBrowser, isAnswered} = props;
 
   if (!incomingTask || isAnswered) {
     return <></>; // hidden component
@@ -172,7 +172,6 @@ const IncomingTaskPresentational: React.FunctionComponent<IncomingTaskPresentati
                 </div>
               )}
             </div>
-            <audio ref={audioRef} id="remote-audio"></audio>
 
             {/* Queue and Timer Info */}
             <p style={styles.queueInfo}>
