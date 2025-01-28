@@ -14,6 +14,8 @@ jest.mock('@webex/cc-store', () => {return {
   agentId: 'testAgentId'
 }});
 
+jest.mock('@momentum-ui/web-components', () => {});
+
 describe('UserState Component', () => {
   let workerMock;
 

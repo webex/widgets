@@ -1,4 +1,4 @@
-const { merge } = require('webpack-merge');
+const { mergeWithCustomize, customizeObject } = require('webpack-merge');
 const path = require('path');
 
 const baseConfig = require('../../../webpack.config');
@@ -6,7 +6,11 @@ const baseConfig = require('../../../webpack.config');
 // Helper function to resolve paths relative to the monorepo root
 const resolveMonorepoRoot = (...segments) => path.resolve(__dirname, '../../../', ...segments);
 
-module.exports = merge(baseConfig, {
+module.exports = mergeWithCustomize({
+  customizeObject: customizeObject({
+    'resolve.fallback': 'replace' // This will replace the fallback configuration
+  })
+})(baseConfig, {
   entry: {
     wc: {
       import: './src/wc.ts',
@@ -19,6 +23,7 @@ module.exports = merge(baseConfig, {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].js',
     libraryTarget: 'commonjs2',
+    publicPath: '',
   },
   externals: {
     react: 'react',
@@ -29,6 +34,9 @@ module.exports = merge(baseConfig, {
     '@momentum-ui/tokens': '@momentum-ui/tokens',
     '@momentum-ui/utils': '@momentum-ui/utils',
     '@momentum-ui/web-components': '@momentum-ui/web-components',
+  },
+  resolve: {
+    fallback: {}
   },
   module: {
     rules: [
