@@ -198,7 +198,6 @@ export const useCallControl = (props: useCallControlProps) => {
 
   const handleTaskMedia = useCallback(
     (track) => {
-      console.log('Shreyas: Calling handleTaskMedia in call control', audioRef, audioRef.current, track, currentTask);
       if (audioRef.current) {
         audioRef.current.srcObject = new MediaStream([track]);
       }
