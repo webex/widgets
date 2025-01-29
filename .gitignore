@@ -10,6 +10,7 @@ pids
 *.pid
 *.seed
 *.out
+docs/
 
 #Logs and others
 *.swp
