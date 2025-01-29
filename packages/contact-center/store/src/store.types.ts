@@ -37,6 +37,11 @@ interface IStore {
     init(params: InitParams): Promise<void>;
 }
 
+interface IWrapupCode {
+    id: string;
+    name: string;
+  }
+  
 
 export type {
     IContactCenter,
@@ -48,4 +53,5 @@ export type {
     InitParams,
     IStore,
     ILogger,
+    IWrapupCode
 }

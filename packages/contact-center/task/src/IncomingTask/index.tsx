@@ -6,7 +6,7 @@ import {useIncomingTask} from '../helper';
 import IncomingTaskPresentational from './incoming-task.presentational';
 import {IncomingTaskProps} from '../task.types';
 
-const IncomingTask: React.FunctionComponent<IncomingTaskProps> = observer(({onAccepted, onDeclined}) => {
+const IncomingTaskComponent: React.FunctionComponent<IncomingTaskProps> = ({onAccepted, onDeclined}) => {
   const {cc, selectedLoginOption, logger} = store;
 
   const result = useIncomingTask({cc, onAccepted, onDeclined, selectedLoginOption, logger});
@@ -16,6 +16,7 @@ const IncomingTask: React.FunctionComponent<IncomingTaskProps> = observer(({onAc
   };
 
   return <IncomingTaskPresentational {...props} />;
-});
+};
 
+const IncomingTask = observer(IncomingTaskComponent);
 export {IncomingTask};
