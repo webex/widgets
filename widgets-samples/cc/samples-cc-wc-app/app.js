@@ -4,6 +4,7 @@ const ccStationLogin = document.getElementById('cc-station-login');
 const ccUserState = document.createElement('widget-cc-user-state');
 const ccIncomingTask = document.createElement('widget-cc-incoming-task');
 const ccTaskList = document.createElement('widget-cc-task-list');
+const ccCallControl = document.createElement('widget-cc-call-control');
 
 if (!ccStationLogin && !ccUserState) {
     console.error('Failed to find the required elements');
@@ -31,6 +32,9 @@ function initWidgets(){
         ccIncomingTask.onDeclined = onDeclined;
         ccTaskList.onTaskAccepted = onTaskAccepted;
         ccTaskList.onTaskDeclined = onTaskDeclined;
+        ccCallControl.onHoldResume = onHoldResume;
+        ccCallControl.onEnd = onEnd;
+        ccCallControl.onWrapup = onWrapup;
         ccStationLogin.classList.remove('disabled');
     }).catch((error) => {
         console.error('Failed to initialize widgets:', error);
@@ -43,6 +47,7 @@ function loginSuccess(){
     widgetsContainer.appendChild(ccUserState);
     widgetsContainer.appendChild(ccIncomingTask);
     widgetsContainer.appendChild(ccTaskList);
+    widgetsContainer.appendChild(ccCallControl);
 }
 
 function logoutSuccess(){
@@ -65,3 +70,16 @@ function onTaskAccepted(){
 function onTaskDeclined(){
     console.log('onTaskDeclined invoked');
 };
+
+function onHoldResume() {
+    console.log('onHoldResume invoked');
+  }
+  
+  function onEnd() {
+    console.log('onEnd invoked');
+  }
+  
+  function onWrapup() {
+    console.log('onWrapUp invoked');
+  }
+  

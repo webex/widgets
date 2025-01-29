@@ -2,7 +2,7 @@ import r2wc from '@r2wc/react-to-web-component';
 import {StationLogin} from '@webex/cc-station-login';
 import {UserState} from '@webex/cc-user-state';
 import store from '@webex/cc-store';
-import {TaskList, IncomingTask} from '@webex/cc-task';
+import {TaskList, IncomingTask, CallControl} from '@webex/cc-task';
 
 const WebUserState = r2wc(UserState);
 const WebIncomingTask = r2wc(IncomingTask, {
@@ -26,20 +26,28 @@ const WebStationLogin = r2wc(StationLogin, {
   },
 });
 
-if (!customElements.get('widget-cc-user-state')) {
-  customElements.define('widget-cc-user-state', WebUserState);
-}
+const WebCallControl = r2wc(CallControl, {
+  props: {
+    onHoldResume: 'function',
+    onEnd: 'function',
+    onWrapup: 'function',
+  },
+});
 
-if (!customElements.get('widget-cc-station-login')) {
-  customElements.define('widget-cc-station-login', WebStationLogin);
-}
+// Whenever there is a new component, add the name of the component
+// and the web-component to the components object
+const components = [
+  {name: 'widget-cc-user-state', component: WebUserState},
+  {name: 'widget-cc-station-login', component: WebStationLogin},
+  {name: 'widget-cc-incoming-task', component: WebIncomingTask},
+  {name: 'widget-cc-task-list', component: WebTaskList},
+  {name: 'widget-cc-call-control', component: WebCallControl},
+];
 
-if (!customElements.get('widget-cc-incoming-task')) {
-  customElements.define('widget-cc-incoming-task', WebIncomingTask);
-}
-
-if (!customElements.get('widget-cc-task-list')) {
-  customElements.define('widget-cc-task-list', WebTaskList);
-}
+components.forEach(({name, component}) => {
+  if (!customElements.get(name)) {
+    customElements.define(name, component);
+  }
+});
 
 export {store};

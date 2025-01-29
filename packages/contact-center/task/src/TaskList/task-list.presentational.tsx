@@ -103,7 +103,7 @@ const TaskListPresentational: React.FunctionComponent<TaskListPresentationalProp
     return <></>; // hidden component
   }
 
-  const {taskList, acceptTask, declineTask, isBrowser} = props;
+  const {currentTask, taskList, acceptTask, declineTask, isBrowser} = props;
 
   return (
     <div style={styles.box}>
@@ -139,19 +139,21 @@ const TaskListPresentational: React.FunctionComponent<TaskListPresentationalProp
                 </div>
 
                 {/* Right Section with Call Duration and Buttons */}
-                <div>
-                  <p style={styles.rightSectionText}>{dn}</p>
-                  {isBrowser && (
-                    <div style={styles.buttonsWrapper}>
-                      <button style={styles.acceptButton} onClick={() => acceptTask(task)}>
-                        Accept
-                      </button>
-                      <button style={styles.rejectButton} onClick={() => declineTask(task)}>
-                        Reject
-                      </button>
-                    </div>
-                  )}
-                </div>
+                {!currentTask && (
+                  <div>
+                    <p style={styles.rightSectionText}>{dn}</p>
+                    {isBrowser && (
+                      <div style={styles.buttonsWrapper}>
+                        <button style={styles.acceptButton} onClick={() => acceptTask(task)}>
+                          Accept
+                        </button>
+                        <button style={styles.rejectButton} onClick={() => declineTask(task)}>
+                          Reject
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             );
           })}
