@@ -1,5 +1,5 @@
 {
-  "name": "@webex/web-component-samples-app",
+  "name": "samples-cc-wc-app",
   "version": "1.0.0",
   "main": "dist/index.js",
   "dependencies": {
@@ -14,7 +14,7 @@
   "scripts": {
     "clean": "rm -rf dist && rm -rf node_modules",
     "clean:dist": "rm -rf dist",
-    "serve": "open index.html",
+    "serve": "webpack serve",
     "build:src": "webpack"
   }
 }

@@ -7,7 +7,9 @@
   "main": "dist/webexWidgets.esm.js",
   "module": "dist/webexWidgets.esm.js",
   "scripts": {
-    "build": "rollup -c",
+    "clean": "rm -rf dist && rm -rf node_modules",
+    "clean:dist": "rm -rf dist",
+    "build:src": "yarn clean:dist && rollup -c",
     "demo:serve": "webpack serve ./demo/App.jsx --mode development",
     "demo:build": "webpack ./demo/App.jsx --mode production",
     "release": "semantic-release",
