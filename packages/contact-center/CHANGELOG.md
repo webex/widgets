@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.12](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.11...v1.28.0-ccwidgets.12) (2025-01-29)
+
+
+### Bug Fixes
+
+* **call-control:** add-call-control-widget ([#362](https://github.com/webex/widgets/issues/362)) ([a677f5e](https://github.com/webex/widgets/commit/a677f5ef1590b424a424bfd8f268a3d4e47c91bf))
+
 # [1.28.0-ccwidgets.11](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.10...v1.28.0-ccwidgets.11) (2025-01-21)
 
 
