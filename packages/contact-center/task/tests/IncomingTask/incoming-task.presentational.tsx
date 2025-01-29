@@ -20,7 +20,7 @@ describe('IncomingTaskPresentational', () => {
     };
 
     const props = {
-      currentTask: mockTask,
+      incomingTask: mockTask,
       accept: jest.fn(),
       decline: jest.fn(),
       isBrowser: true,

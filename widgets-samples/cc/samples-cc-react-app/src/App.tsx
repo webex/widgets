@@ -1,5 +1,5 @@
 import React, {useState, useRef} from 'react';
-import {StationLogin, UserState, IncomingTask, TaskList, store} from '@webex/cc-widgets';
+import {StationLogin, UserState, IncomingTask, TaskList, CallControl, store} from '@webex/cc-widgets';
 
 function App() {
   const [isSdkReady, setIsSdkReady] = useState(false);
@@ -38,6 +38,18 @@ function App() {
 
   const onTaskDeclined = () => {
     console.log('onTaskDeclined invoked');
+  };
+
+  const onHoldResume = () => {
+    console.log('onHoldResume invoked');
+  };
+
+  const onEnd = () => {
+    console.log('onEnd invoked');
+  };
+
+  const onWrapup = () => {
+    console.log('onWrapup invoked');
   };
 
   return (
@@ -79,6 +91,7 @@ function App() {
               <UserState />
               <IncomingTask onAccepted={onAccepted} onDeclined={onDeclined} />
               <TaskList onTaskAccepted={onTaskAccepted} onTaskDeclined={onTaskDeclined} />
+              <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapup={onWrapup} />
             </>
           )}
         </>
