@@ -63,6 +63,8 @@
     "@momentum-ui/icons": ">=8.28.5",
     "@momentum-ui/tokens": ">=1.7.1",
     "@momentum-ui/utils": ">=6.2.15",
-    "@momentum-ui/web-components": ">=2.16.16"
+    "@momentum-ui/web-components": ">=2.16.16",
+    "react": ">=18.3.1",
+    "react-dom": ">=18.3.1"
   }
 }

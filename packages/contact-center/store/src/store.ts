@@ -20,7 +20,7 @@ class Store implements IStore {
   idleCodes: IdleCode[] = [];
   agentId: string = '';
   selectedLoginOption: string = '';
-  currentTheme: string = 'light';
+  currentTheme: string = 'LIGHT';
   isAgentLoggedIn = false;
   deviceType: string = '';
 

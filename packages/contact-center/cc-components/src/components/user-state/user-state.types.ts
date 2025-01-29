@@ -50,5 +50,5 @@ export interface IUserState {
   /**
    * The preferred theme
    */
-  currentTheme?: string;
+  currentTheme: string;
 }

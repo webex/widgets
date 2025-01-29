@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 // TODO: Export & Import this AGENT_STATE_CHANGE constant from SDK
 import { AGENT_STATE_CHANGE } from './constants';
 
-export const useUserState = ({ idleCodes, agentId, cc, currentTheme }) => {
+export const useUserState = ({ idleCodes, agentId, cc }) => {
   const [isSettingAgentStatus, setIsSettingAgentStatus] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -91,7 +91,6 @@ export const useUserState = ({ idleCodes, agentId, cc, currentTheme }) => {
     errorMessage,
     elapsedTime,
     currentState,
-    setCurrentState,
-    currentTheme
+    setCurrentState
   };
 };
