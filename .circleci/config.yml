@@ -61,7 +61,7 @@ jobs:
       - checkout_from_workspace
       - run:
           name: Build
-          command: yarn run build && yarn workspace @webex/widgets run build
+          command: yarn run build && yarn workspace @webex/widgets run build:src
       - persist_to_workspace:
           root: .
           paths:

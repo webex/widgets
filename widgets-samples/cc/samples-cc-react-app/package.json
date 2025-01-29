@@ -1,5 +1,5 @@
 {
-  "name": "@webex/react-samples-app",
+  "name": "samples-cc-react-app",
   "version": "1.0.0",
   "main": "dist/index.js",
   "scripts": {
