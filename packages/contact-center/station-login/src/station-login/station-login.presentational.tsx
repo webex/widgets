@@ -33,7 +33,7 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
         agentLogin.add(option);
       });
     }
-  }, [teams, loginOptions, setTeam]);
+  }, [teams, loginOptions]);
 
   useEffect(() => {
     const modal = modalRef.current;

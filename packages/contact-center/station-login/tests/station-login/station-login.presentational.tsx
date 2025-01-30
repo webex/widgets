@@ -64,7 +64,7 @@ describe('StationLoginPresentational', () => {
     expect(reloginMock).toHaveBeenCalled();
   });
 
-  it('calls handleContinue and closes the dialog when Continue button is clicked', () => {
+  it('calls handleContinue function and closes the dialog when Continue button is clicked', () => {
     const handleContinueMock = jest.fn();
     const modalRef = React.createRef<HTMLDialogElement>();
     HTMLDialogElement.prototype.showModal = jest.fn();
