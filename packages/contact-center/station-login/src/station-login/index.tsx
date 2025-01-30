@@ -33,10 +33,8 @@ const StationLogin: React.FunctionComponent<StationLoginProps> = observer(({onLo
     ...result,
     teams,
     loginOptions,
-    cc,
     deviceType,
   };
-
   return <StationLoginPresentational {...props} />;
 });
 
