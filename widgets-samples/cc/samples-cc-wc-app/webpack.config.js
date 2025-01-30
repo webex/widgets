@@ -1,7 +1,7 @@
 const path = require('path');
 const {merge} = require('webpack-merge');
 
-const baseConfig = require('../../webpack.config');
+const baseConfig = require('../../../webpack.config');
 
 module.exports = merge(baseConfig, {
   output: {
@@ -14,9 +14,9 @@ module.exports = merge(baseConfig, {
   },
   devServer: {
     static: {
-      directory: path.join(__dirname, 'public'),
+      directory: path.join(__dirname),
     },
-    open: true,
-    port: 3000,
+    open: false,
+    port: 4000,
   },
 });

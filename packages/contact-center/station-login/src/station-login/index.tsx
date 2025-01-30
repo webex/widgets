@@ -6,7 +6,7 @@ import StationLoginPresentational from './station-login.presentational';
 import {useStationLogin} from '../helper';
 import {StationLoginProps} from './station-login.types';
 
-const StationLogin: React.FunctionComponent<StationLoginProps> = observer(({onLogin, onLogout}) => {
+const StationLoginComponent: React.FunctionComponent<StationLoginProps> = ({onLogin, onLogout}) => {
   const {
     cc,
     teams,
@@ -36,6 +36,7 @@ const StationLogin: React.FunctionComponent<StationLoginProps> = observer(({onLo
     deviceType,
   };
   return <StationLoginPresentational {...props} />;
-});
+};
 
+const StationLogin = observer(StationLoginComponent);
 export {StationLogin};

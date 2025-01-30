@@ -120,13 +120,13 @@ const styles: {[key: string]: React.CSSProperties} = {
 };
 
 const IncomingTaskPresentational: React.FunctionComponent<IncomingTaskPresentationalProps> = (props) => {
-  const {currentTask, accept, decline, isBrowser, audioRef} = props;
+  const {incomingTask, accept, decline, isBrowser, isAnswered} = props;
 
-  if (!currentTask) {
+  if (!incomingTask || isAnswered) {
     return <></>; // hidden component
   }
 
-  const callAssociationDetails = currentTask.data.interaction.callAssociatedDetails;
+  const callAssociationDetails = incomingTask.data.interaction.callAssociatedDetails;
   const {ani, dn, virtualTeamName} = callAssociationDetails;
   const timeElapsed = ''; // TODO: Calculate time elapsed
 
@@ -172,7 +172,6 @@ const IncomingTaskPresentational: React.FunctionComponent<IncomingTaskPresentati
                 </div>
               )}
             </div>
-            <audio ref={audioRef} id="remote-audio"></audio>
 
             {/* Queue and Timer Info */}
             <p style={styles.queueInfo}>

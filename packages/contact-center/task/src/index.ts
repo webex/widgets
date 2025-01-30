@@ -1,3 +1,4 @@
 import {IncomingTask} from './IncomingTask/index';
 import {TaskList} from './TaskList';
-export {IncomingTask, TaskList};
+import {CallControl} from './CallControl';
+export {IncomingTask, TaskList, CallControl};
