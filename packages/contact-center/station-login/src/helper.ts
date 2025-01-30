@@ -1,4 +1,4 @@
-import {useState, useEffect} from 'react';
+import {useState, useEffect, useRef} from 'react';
 import {StationLoginSuccess, StationLogoutSuccess} from '@webex/plugin-cc';
 import {UseStationLoginProps} from './station-login/station-login.types';
 import store from '@webex/cc-store'; // we need to import as we are losing the context of this in store
@@ -17,6 +17,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
   const [loginFailure, setLoginFailure] = useState<Error>();
   const [logoutSuccess, setLogoutSuccess] = useState<StationLogoutSuccess>();
   const [showMultipleLoginAlert, setShowMultipleLoginAlert] = useState(false);
+  const modalRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
     const handleMultiLoginCloseSession = (data) => {
@@ -35,6 +36,33 @@ export const useStationLogin = (props: UseStationLoginProps) => {
   useEffect(() => {
     setIsAgentLoggedIn(props.isAgentLoggedIn);
   }, [props.isAgentLoggedIn]);
+
+  const handleContinue = async () => {
+    try {
+      const modal = modalRef.current;
+      if (modal) {
+        modal.close();
+        setShowMultipleLoginAlert(false);
+        const profile = await cc.register();
+        if (profile.isAgentLoggedIn) {
+          logger.log(`Agent Relogin Success`, {
+            module: 'widget-station-login#station-login/index.tsx',
+            method: 'handleContinue',
+          });
+        } else {
+          logger.error(`Agent Relogin Failed`, {
+            module: 'widget-station-login#station-login/index.tsx',
+            method: 'handleContinue',
+          });
+        }
+      }
+    } catch (error) {
+      logger.error(`Error handling agent multi login continue: ${error}`, {
+        module: 'widget-station-login#station-login/index.tsx',
+        method: 'handleContinue',
+      });
+    }
+  };
 
   const login = () => {
     cc.stationLogin({teamId: team, loginOption: deviceType, dialNumber: dialNumber})
@@ -92,5 +120,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
     logoutSuccess,
     showMultipleLoginAlert,
     isAgentLoggedIn,
+    handleContinue,
+    modalRef,
   };
 };

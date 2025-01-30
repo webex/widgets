@@ -107,16 +107,6 @@ export interface IStationLoginProps {
   /**
    * Flag to indicate if the alert should be shown
    */
-  showAlert: boolean;
-
-  /**
-   * Handler to set the flag to show the alert
-   */
-  setShowAlert: (show: boolean) => void;
-
-  /**
-   * Flag to indicate if the alert should be shown
-   */
   showMultipleLoginAlert: boolean;
 }
 
@@ -135,18 +125,23 @@ export type StationLoginPresentationalProps = Pick<
   | 'setDialNumber'
   | 'setTeam'
   | 'isAgentLoggedIn'
-  | 'deviceType'
   | 'handleContinue'
+  | 'deviceType'
   | 'modalRef'
-  | 'showAlert'
-  | 'setShowAlert'
 > & {
   showMultipleLoginAlert: boolean;
 };
 
 export type UseStationLoginProps = Pick<
   IStationLoginProps,
-  'cc' | 'onLogin' | 'onLogout' | 'logger' | 'isAgentLoggedIn'
+  | 'cc'
+  | 'onLogin'
+  | 'onLogout'
+  | 'logger'
+  | 'isAgentLoggedIn'
+  | 'handleContinue'
+  | 'modalRef'
+  | 'showMultipleLoginAlert'
 >;
 
 export type StationLoginProps = Pick<IStationLoginProps, 'onLogin' | 'onLogout'>;

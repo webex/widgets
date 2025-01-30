@@ -21,8 +21,6 @@ describe('StationLoginPresentational', () => {
     showMultipleLoginAlert: false,
     handleContinue: jest.fn(),
     modalRef: React.createRef<HTMLDialogElement>(),
-    showAlert: false,
-    setShowAlert: jest.fn(),
     relogin: jest.fn(),
   };
 
@@ -40,7 +38,6 @@ describe('StationLoginPresentational', () => {
     const setDeviceType = jest.fn();
     const reloginMock = jest.fn();
     const handleContinueMock = jest.fn();
-    const setShowAlertMock = jest.fn();
     const modalRef = React.createRef<HTMLDialogElement>();
     const props = {
       name: 'StationLogin',
@@ -59,8 +56,6 @@ describe('StationLoginPresentational', () => {
       relogin: reloginMock,
       handleContinue: handleContinueMock,
       modalRef,
-      showAlert: false,
-      setShowAlert: setShowAlertMock,
       showMultipleLoginAlert: false,
     };
     render(<StationLoginPresentational {...props} />);
@@ -69,24 +64,21 @@ describe('StationLoginPresentational', () => {
     expect(reloginMock).toHaveBeenCalled();
   });
 
-  it('call handleContinue and closes the dialog when Continue button is clicked', () => {
+  it('calls handleContinue and closes the dialog when Continue button is clicked', () => {
     const handleContinueMock = jest.fn();
-    const setShowAlertMock = jest.fn();
     const modalRef = React.createRef<HTMLDialogElement>();
     HTMLDialogElement.prototype.showModal = jest.fn();
     HTMLDialogElement.prototype.close = jest.fn();
 
     const propsWithAlert = {
       ...props,
-      showAlert: true,
+      showMultipleLoginAlert: true,
       handleContinue: handleContinueMock,
-      setShowAlert: setShowAlertMock,
       modalRef,
     };
     render(<StationLoginPresentational {...propsWithAlert} />);
-    const continueButton = screen.getByText('Continue');
+    const continueButton = screen.getByTestId('ContinueButton');
     fireEvent.click(continueButton);
     expect(handleContinueMock).toHaveBeenCalled();
-    expect(setShowAlertMock).toHaveBeenCalledWith(false);
   });
 });

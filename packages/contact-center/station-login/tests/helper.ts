@@ -1,3 +1,4 @@
+import React from 'react';
 import {renderHook, act, waitFor} from '@testing-library/react';
 import {useStationLogin} from '../src/helper';
 
@@ -19,6 +20,7 @@ const ccMock = {
   stationLogout: jest.fn(),
   on: jest.fn(),
   off: jest.fn(),
+  register: jest.fn(),
 };
 
 // Sample login parameters
@@ -31,6 +33,7 @@ const loginParams = {
 const loginCb = jest.fn();
 const logoutCb = jest.fn();
 const logger = {
+  log: jest.fn(),
   error: jest.fn(),
 };
 const isAgentLoggedIn = false;
@@ -40,6 +43,7 @@ describe('useStationLogin Hook', () => {
     jest.clearAllMocks();
     loginCb.mockClear();
     logoutCb.mockClear();
+    logger.log.mockClear();
     logger.error.mockClear();
   });
 
@@ -71,7 +75,16 @@ describe('useStationLogin Hook', () => {
     const setSelectedLoginOptionSpy = jest.spyOn(require('@webex/cc-store'), 'setSelectedLoginOption');
 
     const {result} = renderHook(() =>
-      useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger, isAgentLoggedIn})
+      useStationLogin({
+        cc: ccMock,
+        onLogin: loginCb,
+        onLogout: logoutCb,
+        logger,
+        isAgentLoggedIn,
+        handleContinue: jest.fn(),
+        showMultipleLoginAlert: false,
+        modalRef: React.createRef<HTMLDialogElement>(),
+      })
     );
 
     act(() => {
@@ -105,6 +118,8 @@ describe('useStationLogin Hook', () => {
         logoutSuccess: undefined,
         relogin: expect.any(Function),
         showMultipleLoginAlert: false,
+        handleContinue: expect.any(Function),
+        modalRef: expect.any(Object),
       });
 
       expect(setSelectedLoginOptionSpy).toHaveBeenCalledWith(loginParams.loginOption);
@@ -118,7 +133,16 @@ describe('useStationLogin Hook', () => {
 
     loginCb.mockClear();
     const {result} = renderHook(() =>
-      useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger, isAgentLoggedIn})
+      useStationLogin({
+        cc: ccMock,
+        onLogin: loginCb,
+        onLogout: logoutCb,
+        logger,
+        isAgentLoggedIn,
+        handleContinue: jest.fn(),
+        modalRef: React.createRef<HTMLDialogElement>(),
+        showMultipleLoginAlert: false,
+      })
     );
 
     act(() => {
@@ -152,6 +176,8 @@ describe('useStationLogin Hook', () => {
         logoutSuccess: undefined,
         relogin: expect.any(Function),
         showMultipleLoginAlert: false,
+        handleContinue: expect.any(Function),
+        modalRef: expect.any(Object),
       });
 
       expect(setSelectedLoginOptionSpy).not.toHaveBeenCalled();
@@ -161,7 +187,17 @@ describe('useStationLogin Hook', () => {
   it('should not call login callback if not present', async () => {
     ccMock.stationLogin.mockResolvedValue({});
 
-    const {result} = renderHook(() => useStationLogin({cc: ccMock, onLogout: logoutCb, logger, isAgentLoggedIn}));
+    const {result} = renderHook(() =>
+      useStationLogin({
+        cc: ccMock,
+        onLogout: logoutCb,
+        logger,
+        isAgentLoggedIn,
+        handleContinue: jest.fn(),
+        modalRef: React.createRef<HTMLDialogElement>(),
+        showMultipleLoginAlert: false,
+      })
+    );
 
     await act(async () => {
       await result.current.login();
@@ -178,7 +214,16 @@ describe('useStationLogin Hook', () => {
 
     loginCb.mockClear();
     const {result} = renderHook(() =>
-      useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger, isAgentLoggedIn})
+      useStationLogin({
+        cc: ccMock,
+        onLogin: loginCb,
+        onLogout: logoutCb,
+        logger,
+        isAgentLoggedIn,
+        handleContinue: jest.fn(),
+        modalRef: React.createRef<HTMLDialogElement>(),
+        showMultipleLoginAlert: false,
+      })
     );
 
     act(() => {
@@ -235,7 +280,16 @@ describe('useStationLogin Hook', () => {
     ccMock.stationLogout.mockResolvedValue(successResponse);
 
     const {result} = renderHook(() =>
-      useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger, isAgentLoggedIn})
+      useStationLogin({
+        cc: ccMock,
+        onLogin: loginCb,
+        onLogout: logoutCb,
+        logger,
+        isAgentLoggedIn,
+        handleContinue: jest.fn(),
+        modalRef: React.createRef<HTMLDialogElement>(),
+        showMultipleLoginAlert: false,
+      })
     );
 
     await act(async () => {
@@ -259,6 +313,8 @@ describe('useStationLogin Hook', () => {
         logoutSuccess: successResponse,
         relogin: expect.any(Function),
         showMultipleLoginAlert: false,
+        handleContinue: expect.any(Function),
+        modalRef: expect.any(Object),
       });
     });
   });
@@ -267,7 +323,16 @@ describe('useStationLogin Hook', () => {
     ccMock.stationLogout.mockRejectedValue(new Error('Logout failed'));
 
     const {result} = renderHook(() =>
-      useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger, isAgentLoggedIn})
+      useStationLogin({
+        cc: ccMock,
+        onLogin: loginCb,
+        onLogout: logoutCb,
+        logger,
+        isAgentLoggedIn,
+        handleContinue: jest.fn(),
+        modalRef: React.createRef<HTMLDialogElement>(),
+        showMultipleLoginAlert: false,
+      })
     );
 
     await act(async () => {
@@ -285,7 +350,17 @@ describe('useStationLogin Hook', () => {
   it('should not call logout callback if not present', async () => {
     ccMock.stationLogout.mockResolvedValue({});
 
-    const {result} = renderHook(() => useStationLogin({cc: ccMock, onLogin: loginCb, logger, isAgentLoggedIn}));
+    const {result} = renderHook(() =>
+      useStationLogin({
+        cc: ccMock,
+        onLogin: loginCb,
+        logger,
+        isAgentLoggedIn,
+        handleContinue: jest.fn(),
+        modalRef: React.createRef<HTMLDialogElement>(),
+        showMultipleLoginAlert: false,
+      })
+    );
 
     await act(async () => {
       await result.current.logout();
@@ -300,7 +375,16 @@ describe('useStationLogin Hook', () => {
     const setSelectedLoginOptionSpy = jest.spyOn(require('@webex/cc-store'), 'setSelectedLoginOption');
 
     const {result} = renderHook(() =>
-      useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger, isAgentLoggedIn})
+      useStationLogin({
+        cc: ccMock,
+        onLogin: loginCb,
+        onLogout: logoutCb,
+        logger,
+        isAgentLoggedIn,
+        handleContinue: jest.fn(),
+        modalRef: React.createRef<HTMLDialogElement>(),
+        showMultipleLoginAlert: false,
+      })
     );
 
     act(() => {
@@ -315,7 +399,16 @@ describe('useStationLogin Hook', () => {
 
   it('should handle AgentMultiLogin event', async () => {
     const {result} = renderHook(() =>
-      useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger, isAgentLoggedIn})
+      useStationLogin({
+        cc: ccMock,
+        onLogin: loginCb,
+        onLogout: logoutCb,
+        logger,
+        isAgentLoggedIn,
+        handleContinue: jest.fn(),
+        modalRef: React.createRef<HTMLDialogElement>(),
+        showMultipleLoginAlert: false,
+      })
     );
 
     const event = new Event('AgentMultiLoginCloseSession');

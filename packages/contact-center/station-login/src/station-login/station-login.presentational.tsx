@@ -1,11 +1,11 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { StationLoginPresentationalProps } from './station-login.types';
 import './station-login.style.scss';
 import { MULTIPLE_SIGN_IN_ALERT_MESSAGE, MULTIPLE_SIGN_IN_ALERT_TITLE } from './constants';
 import './alert-modal.scss';
 
 const StationLoginPresentational: React.FunctionComponent<StationLoginPresentationalProps> = (props) => {
-  const { name, teams, loginOptions, login, logout, relogin, setDeviceType, setDialNumber, setTeam, isAgentLoggedIn, deviceType, showMultipleLoginAlert, handleContinue, modalRef, showAlert, setShowAlert} = props;
+  const { name, teams, loginOptions, login, logout, relogin, setDeviceType, setDialNumber, setTeam, isAgentLoggedIn, deviceType, showMultipleLoginAlert, handleContinue, modalRef} = props; // TODO: Use the loginSuccess, loginFailure, logoutSuccess props returned fromthe API response via helper file to reflect UI changes
 
   useEffect(() => {
     const teamsDropdown = document.getElementById('teamsDropdown') as HTMLSelectElement;
@@ -37,15 +37,11 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
 
   useEffect(() => {
     const modal = modalRef.current;
-    if (showAlert && modal) {
+    if (showMultipleLoginAlert && modal) {
       modal.showModal();
     }
-  }, [showAlert, modalRef]);
+  }, [showMultipleLoginAlert, modalRef]);
 
-  useEffect(() => {
-    setShowAlert(showMultipleLoginAlert);
-  }, [showMultipleLoginAlert, setShowAlert]);
-  
   useEffect(() => {
     if (!isAgentLoggedIn) return;
     const agentLogin = document.querySelector('#LoginOption') as HTMLSelectElement;
@@ -56,7 +52,7 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
     }
   }, [isAgentLoggedIn]);
 
-  const selectLoginOption = (event: { target: { value: string; }; }) => {
+  const selectLoginOption = (event: { target: { value: string } }) => {
     const dialNumber = document.querySelector('#dialNumber') as HTMLInputElement;
     const deviceType = event.target.value;
     setDeviceType(deviceType);
@@ -74,14 +70,14 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
 
   return (
     <div>
-      {showAlert && (
+      {showMultipleLoginAlert && (
         <dialog ref={modalRef} className="modal">
           <h2>{MULTIPLE_SIGN_IN_ALERT_TITLE}</h2>
           <p>{MULTIPLE_SIGN_IN_ALERT_MESSAGE}</p>
           <div className='modal-content'>
             <button id="ContinueButton" data-testid="ContinueButton" onClick={handleContinue}>Continue</button>
           </div>
-          </dialog>
+        </dialog>
       )}
       <h1 data-testid="station-login-heading">{name}</h1>
       <div className="box">
@@ -92,8 +88,6 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
               <div style={{ display: 'flex', gap: '1rem' }}>
                 <fieldset
                   style={{
-
-                    
                     border: '1px solid #ccc',
                     borderRadius: '5px',
                     padding: '10px',
