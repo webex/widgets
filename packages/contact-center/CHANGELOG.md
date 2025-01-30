@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.13](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.12...v1.28.0-ccwidgets.13) (2025-01-30)
+
+
+### Bug Fixes
+
+* **samples:** change samples index html hrefs ([#367](https://github.com/webex/widgets/issues/367)) ([ff126ab](https://github.com/webex/widgets/commit/ff126ab690d60d158bfbf796862f5c48a407e5f2))
+
 # [1.28.0-ccwidgets.12](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.11...v1.28.0-ccwidgets.12) (2025-01-29)
 
 
