@@ -1,4 +1,4 @@
-import {AgentLogin, IContactCenter, StationLoginSuccess, StationLogoutSuccess, Team} from '@webex/plugin-cc';
+import {IContactCenter, StationLoginSuccess, StationLogoutSuccess, Team} from '@webex/plugin-cc';
 import {ILogger} from '@webex/cc-store';
 /**
  * Interface representing the properties for the Station Login component.
@@ -93,6 +93,16 @@ export interface IStationLoginProps {
    * Handler to relogin the agent
    */
   relogin: () => void;
+
+  /**
+   * Handler to relogin the agent when the agent is already logged in
+   */
+  handleContinue: () => void;
+
+  /**
+   * Flag to indicate if the alert should be shown
+   */
+  showMultipleLoginAlert: boolean;
 }
 
 export type StationLoginPresentationalProps = Pick<
@@ -110,9 +120,15 @@ export type StationLoginPresentationalProps = Pick<
   | 'setDialNumber'
   | 'setTeam'
   | 'isAgentLoggedIn'
+  | 'handleContinue'
   | 'deviceType'
->;
+> & {
+  showMultipleLoginAlert: boolean;
+};
 
-export type UseStationLoginProps = Pick<IStationLoginProps, 'cc' | 'onLogin' | 'onLogout' | 'logger' | 'isAgentLoggedIn'>;
+export type UseStationLoginProps = Pick<
+  IStationLoginProps,
+  'cc' | 'onLogin' | 'onLogout' | 'logger' | 'isAgentLoggedIn' | 'handleContinue' | 'showMultipleLoginAlert'
+>;
 
 export type StationLoginProps = Pick<IStationLoginProps, 'onLogin' | 'onLogout'>;
