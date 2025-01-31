@@ -22,6 +22,7 @@ class Store implements IStore {
   idleCodes: IdleCode[] = [];
   agentId: string = '';
   selectedLoginOption: string = '';
+  currentTheme: string = 'LIGHT';
   wrapupCodes: IWrapupCode[] = [];
   currentTask: ITask = null;
   isAgentLoggedIn = false;
@@ -50,6 +51,10 @@ class Store implements IStore {
 
   setSelectedLoginOption(option: string): void {
     this.selectedLoginOption = option;
+  }
+
+  setCurrentTheme(theme: string): void {
+    this.currentTheme = theme;
   }
 
   registerCC(webex: WithWebex['webex']): Promise<void> {
