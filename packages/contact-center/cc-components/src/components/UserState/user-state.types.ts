@@ -46,4 +46,9 @@ export interface IUserState {
    * @returns void
    */
   setCurrentState: (state: IdleCode) => void;
+
+  /**
+   * The preferred theme
+   */
+  currentTheme: string;
 }

@@ -1,10 +1,11 @@
-import React, {useState} from 'react';
+import React, {useState, useRef} from 'react';
 import {StationLogin, UserState, IncomingTask, TaskList, CallControl, store} from '@webex/cc-widgets';
 
 function App() {
   const [isSdkReady, setIsSdkReady] = useState(false);
   const [accessToken, setAccessToken] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const themeCheckboxRef = useRef(null);
 
   const webexConfig = {
     fedramp: false,
@@ -52,7 +53,8 @@ function App() {
   };
 
   return (
-    <>
+    // @ts-ignore
+    <md-theme theme="momentumv2">
       <h1>Contact Center widgets in a react app</h1>
       <input
         type="text"
@@ -60,6 +62,17 @@ function App() {
         value={accessToken}
         onChange={(e) => setAccessToken(e.target.value)}
       />
+      <br />
+      <input
+        type='checkbox'
+        id='theme'
+        name='theme'
+        ref={themeCheckboxRef}
+        onChange={() => {
+          store.setCurrentTheme(themeCheckboxRef.current.checked ? 'DARK' : 'LIGHT');
+        }}
+      /> Dark Theme
+      <br />
       <button
         disabled={accessToken.trim() === ''}
         onClick={() => {
@@ -83,9 +96,9 @@ function App() {
           )}
         </>
       )}
-    </>
+      {/* @ts-ignore */}
+    </md-theme>
   );
 }
-// @ts-ignore
-window.store = store;
+
 export default App;
