@@ -1,4 +1,5 @@
 import {AgentLogin, IContactCenter, Profile, Team, LogContext} from '@webex/plugin-cc';
+import {ITask} from '@webex/plugin-cc';
 
 type ILogger = {
     log: (message: string, context?: LogContext) => void;
@@ -33,8 +34,37 @@ interface IStore {
     idleCodes: IdleCode[];
     agentId: string;
     logger: ILogger;
-    registerCC(webex: WithWebex['webex']): Promise<Profile>;
+    selectedLoginOption: string;
+    wrapupCodes: IWrapupCode[];
+    currentTask: ITask;
+    incomingTask: ITask;
+    taskList: ITask[]
+    isAgentLoggedIn: boolean;
+    deviceType: string;
     init(params: InitParams): Promise<void>;
+    setCurrentTask(task: any): void;
+    setSelectedLoginOption(option: string): void;
+    wrapupRequired: boolean;
+}
+
+interface IStoreWrapper {
+    teams: Team[];
+    loginOptions: string[];
+    cc: IContactCenter;
+    idleCodes: IdleCode[];
+    agentId: string;
+    logger: ILogger;
+    selectedLoginOption: string;
+    wrapupCodes: IWrapupCode[];
+    currentTask: ITask;
+    incomingTask: ITask;
+    taskList: ITask[]
+    isAgentLoggedIn: boolean;
+    deviceType: string;
+    wrapupRequired: boolean;
+    init(params: InitParams): Promise<void>;
+    setCurrentTask(task: any): void;
+    setSelectedLoginOption(option: string): void;
 }
 
 interface IWrapupCode {
@@ -42,6 +72,21 @@ interface IWrapupCode {
     name: string;
   }
   
+
+enum TASK_EVENTS {
+TASK_INCOMING = 'task:incoming',
+TASK_ASSIGNED = 'task:assigned',
+TASK_MEDIA = 'task:media',
+TASK_HOLD = 'task:hold',
+TASK_UNHOLD = 'task:unhold',
+TASK_CONSULT = 'task:consult',
+TASK_CONSULT_END = 'task:consultEnd',
+TASK_CONSULT_ACCEPT = 'task:consultAccepted',
+TASK_PAUSE = 'task:pause',
+TASK_RESUME = 'task:resume',
+TASK_END = 'task:end',
+TASK_WRAPUP = 'task:wrapup',
+} // TODO: remove this once cc sdk exports this enum
 
 export type {
     IContactCenter,
@@ -53,5 +98,10 @@ export type {
     InitParams,
     IStore,
     ILogger,
-    IWrapupCode
+    IWrapupCode,
+    IStoreWrapper
+}
+
+export {
+    TASK_EVENTS,
 }
