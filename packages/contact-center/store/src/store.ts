@@ -10,6 +10,7 @@ import {
   IStore,
   ILogger,
   IWrapupCode,
+  TASK_EVENTS,
 } from './store.types';
 import {ITask} from '@webex/plugin-cc';
 
@@ -23,9 +24,12 @@ class Store implements IStore {
   agentId: string = '';
   selectedLoginOption: string = '';
   wrapupCodes: IWrapupCode[] = [];
+  incomingTask: ITask = null;
   currentTask: ITask = null;
   isAgentLoggedIn = false;
   deviceType: string = '';
+  taskList: ITask[] = [];
+  wrapupRequired: boolean;
 
   constructor() {
     makeAutoObservable(this, {
@@ -107,5 +111,5 @@ class Store implements IStore {
   }
 }
 
-const store = Store.getInstance();
-export default store;
+// const store = Store.getInstance();
+export default Store;

@@ -91,15 +91,15 @@ export interface TaskProps {
   logger: ILogger;
 }
 
-export type UseTaskProps = Pick<TaskProps, 'cc' | 'onAccepted' | 'onDeclined' | 'selectedLoginOption' | 'logger'>;
+export type UseTaskProps = Pick<
+  TaskProps,
+  'cc' | 'incomingTask' | 'onAccepted' | 'onDeclined' | 'selectedLoginOption' | 'logger'
+>;
 export type UseTaskListProps = Pick<
   TaskProps,
-  'cc' | 'selectedLoginOption' | 'onTaskAccepted' | 'onTaskDeclined' | 'logger'
+  'cc' | 'taskList' | 'selectedLoginOption' | 'onTaskAccepted' | 'onTaskDeclined' | 'logger'
 >;
-export type IncomingTaskPresentationalProps = Pick<
-  TaskProps,
-  'incomingTask' | 'isBrowser' | 'isAnswered' | 'isEnded' | 'accept' | 'decline'
->;
+export type IncomingTaskPresentationalProps = Pick<TaskProps, 'incomingTask' | 'isBrowser' | 'accept' | 'decline'>;
 export type IncomingTaskProps = Pick<TaskProps, 'onAccepted' | 'onDeclined'>;
 export type TaskListProps = Pick<TaskProps, 'onTaskAccepted' | 'onTaskDeclined'>;
 
@@ -205,4 +205,7 @@ export type CallControlPresentationalProps = Pick<
   | 'wrapupCall'
 >;
 
-export type useCallControlProps = Pick<ControlProps, 'currentTask' | 'onHoldResume' | 'onEnd' | 'onWrapUp' | 'logger'>;
+export type useCallControlProps = Pick<
+  ControlProps,
+  'currentTask' | 'wrapupRequired' | 'onHoldResume' | 'onEnd' | 'onWrapUp' | 'logger'
+>;

@@ -3,6 +3,13 @@ import {StationLogin, UserState, IncomingTask, TaskList, CallControl, store} fro
 
 function App() {
   const [isSdkReady, setIsSdkReady] = useState(false);
+  const [selectedWidgets, setSelectedWidgets] = useState({
+    stationLogin: false,
+    userState: false,
+    incomingTask: false,
+    taskList: false,
+    callControl: false,
+  });
   const [accessToken, setAccessToken] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -51,6 +58,11 @@ function App() {
     console.log('onWrapup invoked');
   };
 
+  const handleCheckboxChange = (e) => {
+    const {name, checked} = e.target;
+    setSelectedWidgets((prev) => ({...prev, [name]: checked}));
+  };
+
   return (
     <>
       <h1>Contact Center widgets in a react app</h1>
@@ -72,15 +84,69 @@ function App() {
       </button>
       {isSdkReady && (
         <>
-          <StationLogin onLogin={onLogin} onLogout={onLogout} />
-          {isLoggedIn && (
-            <>
-              <UserState />
-              <IncomingTask onAccepted={onAccepted} onDeclined={onDeclined} />
-              <TaskList onTaskAccepted={onTaskAccepted} onTaskDeclined={onTaskDeclined} />
-              <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapup={onWrapup} />
-            </>
-          )}
+          <div>
+            <label>
+              <input
+                type="checkbox"
+                name="stationLogin"
+                checked={selectedWidgets.stationLogin}
+                onChange={handleCheckboxChange}
+              />
+              Station Login
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                name="userState"
+                checked={selectedWidgets.userState}
+                onChange={handleCheckboxChange}
+              />
+              User State
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                name="incomingTask"
+                checked={selectedWidgets.incomingTask}
+                onChange={handleCheckboxChange}
+              />
+              Incoming Task
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                name="taskList"
+                checked={selectedWidgets.taskList}
+                onChange={handleCheckboxChange}
+              />
+              Task List
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                name="callControl"
+                checked={selectedWidgets.callControl}
+                onChange={handleCheckboxChange}
+              />
+              Call Control
+            </label>
+          </div>
+          <button
+            onClick={() => {
+              setIsLoggedIn(true);
+            }}
+          >
+            Submit
+          </button>
+        </>
+      )}
+      {isLoggedIn && (
+        <>
+          {selectedWidgets.stationLogin && <StationLogin onLogin={onLogin} onLogout={onLogout} />}
+          {selectedWidgets.userState && <UserState />}
+          {selectedWidgets.incomingTask && <IncomingTask onAccepted={onAccepted} onDeclined={onDeclined} />}
+          {selectedWidgets.taskList && <TaskList onTaskAccepted={onTaskAccepted} onTaskDeclined={onTaskDeclined} />}
+          {selectedWidgets.callControl && <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapup={onWrapup} />}
         </>
       )}
     </>
