@@ -1,11 +1,12 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef} from 'react';
 import { StationLoginPresentationalProps } from './station-login.types';
 import './station-login.style.scss';
 import { MULTIPLE_SIGN_IN_ALERT_MESSAGE, MULTIPLE_SIGN_IN_ALERT_TITLE } from './constants';
 import './alert-modal.scss';
 
 const StationLoginPresentational: React.FunctionComponent<StationLoginPresentationalProps> = (props) => {
-  const { name, teams, loginOptions, login, logout, relogin, setDeviceType, setDialNumber, setTeam, isAgentLoggedIn, deviceType, showMultipleLoginAlert, handleContinue, modalRef} = props; //TODO: Use the loginSuccess, loginFailure, logoutSuccess props returned fromthe API response via helper file to reflect UI changes
+  const { name, teams, loginOptions, login, logout, relogin, setDeviceType, setDialNumber, setTeam, isAgentLoggedIn, deviceType, showMultipleLoginAlert, handleContinue} = props; //TODO: Use the loginSuccess, loginFailure, logoutSuccess props returned fromthe API response via helper file to reflect UI changes
+  const modalRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
     const teamsDropdown = document.getElementById('teamsDropdown') as HTMLSelectElement;
@@ -63,6 +64,14 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
     }
   };
 
+  const continueClicked = () => {
+    const modal = modalRef.current;
+    if (modal) {
+      modal.close();
+      handleContinue();
+    }
+  };
+
   function updateDN() {
     const dialNumber = document.querySelector('#dialNumber') as HTMLInputElement;
     setDialNumber(dialNumber.value);
@@ -75,7 +84,7 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
           <h2>{MULTIPLE_SIGN_IN_ALERT_TITLE}</h2>
           <p>{MULTIPLE_SIGN_IN_ALERT_MESSAGE}</p>
           <div className='modal-content'>
-            <button id="ContinueButton" data-testid="ContinueButton" onClick={handleContinue}>Continue</button>
+            <button id="ContinueButton" data-testid="ContinueButton" onClick={continueClicked}>Continue</button>
           </div>
         </dialog>
       )}

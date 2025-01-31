@@ -83,7 +83,6 @@ describe('useStationLogin Hook', () => {
         isAgentLoggedIn,
         handleContinue: jest.fn(),
         showMultipleLoginAlert: false,
-        modalRef: React.createRef<HTMLDialogElement>(),
       })
     );
 
@@ -119,7 +118,6 @@ describe('useStationLogin Hook', () => {
         relogin: expect.any(Function),
         showMultipleLoginAlert: false,
         handleContinue: expect.any(Function),
-        modalRef: expect.any(Object),
       });
 
       expect(setSelectedLoginOptionSpy).toHaveBeenCalledWith(loginParams.loginOption);
@@ -140,7 +138,6 @@ describe('useStationLogin Hook', () => {
         logger,
         isAgentLoggedIn,
         handleContinue: jest.fn(),
-        modalRef: React.createRef<HTMLDialogElement>(),
         showMultipleLoginAlert: false,
       })
     );
@@ -177,7 +174,6 @@ describe('useStationLogin Hook', () => {
         relogin: expect.any(Function),
         showMultipleLoginAlert: false,
         handleContinue: expect.any(Function),
-        modalRef: expect.any(Object),
       });
 
       expect(setSelectedLoginOptionSpy).not.toHaveBeenCalled();
@@ -194,7 +190,6 @@ describe('useStationLogin Hook', () => {
         logger,
         isAgentLoggedIn,
         handleContinue: jest.fn(),
-        modalRef: React.createRef<HTMLDialogElement>(),
         showMultipleLoginAlert: false,
       })
     );
@@ -221,7 +216,6 @@ describe('useStationLogin Hook', () => {
         logger,
         isAgentLoggedIn,
         handleContinue: jest.fn(),
-        modalRef: React.createRef<HTMLDialogElement>(),
         showMultipleLoginAlert: false,
       })
     );
@@ -287,7 +281,6 @@ describe('useStationLogin Hook', () => {
         logger,
         isAgentLoggedIn,
         handleContinue: jest.fn(),
-        modalRef: React.createRef<HTMLDialogElement>(),
         showMultipleLoginAlert: false,
       })
     );
@@ -314,7 +307,6 @@ describe('useStationLogin Hook', () => {
         relogin: expect.any(Function),
         showMultipleLoginAlert: false,
         handleContinue: expect.any(Function),
-        modalRef: expect.any(Object),
       });
     });
   });
@@ -330,7 +322,6 @@ describe('useStationLogin Hook', () => {
         logger,
         isAgentLoggedIn,
         handleContinue: jest.fn(),
-        modalRef: React.createRef<HTMLDialogElement>(),
         showMultipleLoginAlert: false,
       })
     );
@@ -357,7 +348,6 @@ describe('useStationLogin Hook', () => {
         logger,
         isAgentLoggedIn,
         handleContinue: jest.fn(),
-        modalRef: React.createRef<HTMLDialogElement>(),
         showMultipleLoginAlert: false,
       })
     );
@@ -382,7 +372,6 @@ describe('useStationLogin Hook', () => {
         logger,
         isAgentLoggedIn,
         handleContinue: jest.fn(),
-        modalRef: React.createRef<HTMLDialogElement>(),
         showMultipleLoginAlert: false,
       })
     );
@@ -406,7 +395,6 @@ describe('useStationLogin Hook', () => {
         logger,
         isAgentLoggedIn,
         handleContinue: jest.fn(),
-        modalRef: React.createRef<HTMLDialogElement>(),
         showMultipleLoginAlert: false,
       })
     );

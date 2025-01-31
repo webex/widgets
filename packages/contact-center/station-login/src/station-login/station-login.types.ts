@@ -100,11 +100,6 @@ export interface IStationLoginProps {
   handleContinue: () => void;
 
   /**
-   * Reference to the modal element
-   */
-  modalRef: React.RefObject<HTMLDialogElement>;
-
-  /**
    * Flag to indicate if the alert should be shown
    */
   showMultipleLoginAlert: boolean;
@@ -127,21 +122,13 @@ export type StationLoginPresentationalProps = Pick<
   | 'isAgentLoggedIn'
   | 'handleContinue'
   | 'deviceType'
-  | 'modalRef'
 > & {
   showMultipleLoginAlert: boolean;
 };
 
 export type UseStationLoginProps = Pick<
   IStationLoginProps,
-  | 'cc'
-  | 'onLogin'
-  | 'onLogout'
-  | 'logger'
-  | 'isAgentLoggedIn'
-  | 'handleContinue'
-  | 'modalRef'
-  | 'showMultipleLoginAlert'
+  'cc' | 'onLogin' | 'onLogout' | 'logger' | 'isAgentLoggedIn' | 'handleContinue' | 'showMultipleLoginAlert'
 >;
 
 export type StationLoginProps = Pick<IStationLoginProps, 'onLogin' | 'onLogout'>;

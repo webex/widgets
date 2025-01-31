@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react';
+import React from 'react';
 import store from '@webex/cc-store';
 import {observer} from 'mobx-react-lite';
 
@@ -7,17 +7,7 @@ import {useStationLogin} from '../helper';
 import {StationLoginProps} from './station-login.types';
 
 const StationLoginComponent: React.FunctionComponent<StationLoginProps> = ({onLogin, onLogout}) => {
-  const {
-    cc,
-    teams,
-    loginOptions,
-    logger,
-    deviceType,
-    isAgentLoggedIn,
-    handleContinue,
-    modalRef,
-    showMultipleLoginAlert,
-  } = store;
+  const {cc, teams, loginOptions, logger, deviceType, isAgentLoggedIn, handleContinue, showMultipleLoginAlert} = store;
   const result = useStationLogin({
     cc,
     onLogin,
@@ -25,7 +15,6 @@ const StationLoginComponent: React.FunctionComponent<StationLoginProps> = ({onLo
     logger,
     isAgentLoggedIn,
     handleContinue,
-    modalRef,
     showMultipleLoginAlert,
   });
 
