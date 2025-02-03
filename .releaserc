@@ -2,8 +2,8 @@
   "branches": [
     "master",
     {
-      "name": "ccwidgets",
-      "prerelease": "ccwidgets"
+      "name": "ccconnectors",
+      "prerelease": "ccconnectors"
     }
   ],
   "plugins": [
