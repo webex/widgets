@@ -1,5 +1,5 @@
 import React from 'react';
-import {IncomingTaskPresentationalProps} from '../task.types';
+import {IncomingTaskPresentationalProps} from './task.types';
 
 const styles: {[key: string]: React.CSSProperties} = {
   box: {
@@ -164,7 +164,7 @@ const IncomingTaskPresentational: React.FunctionComponent<IncomingTaskPresentati
               {isBrowser && (
                 <div style={styles.buttonsWrapper}>
                   <button style={styles.answerButton} onClick={accept}>
-                    Answer
+                    Answers
                   </button>
                   <button style={styles.declineButton} onClick={decline}>
                     Decline
