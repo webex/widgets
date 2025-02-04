@@ -29,53 +29,11 @@ module.exports = mergeWithCustomize({
     react: 'react',
     'react-dom': 'react-dom',
     '@webex/cc-store': '@webex/cc-store',
-    '@momentum-ui/core': '@momentum-ui/core',
-    '@momentum-ui/icons': '@momentum-ui/icons',
-    '@momentum-ui/tokens': '@momentum-ui/tokens',
-    '@momentum-ui/utils': '@momentum-ui/utils',
-    '@momentum-ui/web-components': '@momentum-ui/web-components',
+    "@emotion/react": "@emotion/react",
+    "@emotion/styled": "@emotion/styled",
+    "@mui/material": "@mui/material",
   },
   resolve: {
     fallback: {}
-  },
-  module: {
-    rules: [
-      {
-        test: /\.css$/,
-        use: ['style-loader', 'css-loader'],
-        include: [
-          resolveMonorepoRoot('node_modules/@momentum-ui'), // Include specific node module
-          path.resolve(__dirname, 'packages') // Include all CSS from the local package
-        ],
-      },
-      {
-        test: /\.scss$/,
-        use: [
-          "style-loader",  // Injects styles into DOM
-          "css-loader",    // Turns CSS into CommonJS
-          "sass-loader"    // Compiles Sass to CSS
-        ],
-        include: [
-          resolveMonorepoRoot('node_modules/@momentum-ui'), // Include specific node module
-          path.resolve(__dirname, 'packages') // Include all CSS from the local package
-        ],
-      },
-      {
-        test: /\.(woff|woff2|eot|ttf|otf)$/,
-        include: [resolveMonorepoRoot('node_modules/@momentum-ui')],
-        type: 'asset/resource',
-        generator: {
-          filename: 'fonts/[name][ext][query]'
-        }
-      },
-      {
-        test: /\.(png|jpg|gif|svg)$/,
-        include: [resolveMonorepoRoot('node_modules/@momentum-ui')],
-        type: 'asset/resource',
-        generator: {
-          filename: 'images/[name][ext][query]'
-        }
-      }
-    ],
   },
 });
