@@ -57,14 +57,9 @@ export const useUserState = ({idleCodes, agentId, cc, currentState, lastStateCha
   }, []);
 
   useEffect(() => {
-    console.log('useUserState useEffect2 lastStateChangeTimestamp', lastStateChangeTimestamp);
-
     if (workerRef.current && lastStateChangeTimestamp) {
       const timeNow = new Date();
-      console.log('timeNow', timeNow);
-      console.log('startTime', lastStateChangeTimestamp);
       const elapsed = Math.floor(Math.abs(timeNow.getTime() - lastStateChangeTimestamp.getTime()) / 1000);
-      console.log('elapsed', elapsed);
       setElapsedTime(elapsed);
       workerRef.current.postMessage({type: 'reset', startTime: lastStateChangeTimestamp.getTime()});
     }
