@@ -146,4 +146,4 @@ workflows:
             - unit_tests
           filters:
             branches:
-              only: ccwidgets
+              only: ccconnectors
