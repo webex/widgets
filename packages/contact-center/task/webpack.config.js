@@ -13,5 +13,8 @@ module.exports = merge(baseConfig, {
     react: 'react',
     'react-dom': 'react-dom',
     '@webex/cc-store': '@webex/cc-store',
+    "@emotion/react": "@emotion/react",
+    "@emotion/styled": "@emotion/styled",
+    "@mui/material": "@mui/material",
   }
 });
