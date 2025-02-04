@@ -27,7 +27,8 @@ class Store implements IStore {
   currentTask: ITask = null;
   isAgentLoggedIn = false;
   deviceType: string = '';
-
+  currentState: string = '';
+  lastStateChangeTimestamp: Date | undefined;
   constructor() {
     makeAutoObservable(this, {
       cc: observable.ref,
@@ -37,6 +38,14 @@ class Store implements IStore {
 
   setCurrentTask(task: ITask): void {
     this.currentTask = task;
+  }
+  
+  setCurrentState(state: string): void {
+    this.currentState = state;
+  }
+
+  setLastStateChangeTimestamp(timestamp: Date): void {
+    this.lastStateChangeTimestamp = timestamp;
   }
 
   public static getInstance(): Store {
@@ -70,6 +79,8 @@ class Store implements IStore {
         this.wrapupCodes = response.wrapupCodes;
         this.isAgentLoggedIn = response.isAgentLoggedIn;
         this.deviceType = response.deviceType;
+        this.currentState = response.lastStateAuxCodeId;
+        this.lastStateChangeTimestamp = response.lastStateChangeTimestamp;
       })
       .catch((error) => {
         this.logger.error(`Error registering contact center: ${error}`, {
