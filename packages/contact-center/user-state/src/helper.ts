@@ -29,7 +29,6 @@ export const useUserState = ({idleCodes, agentId, cc, currentState, lastStateCha
   `;
 
   useEffect(() => {
-    console.log('useUserState useEffect1');
     const blob = new Blob([workerScript], {type: 'application/javascript'});
     const workerUrl = URL.createObjectURL(blob);
     workerRef.current = new Worker(workerUrl);

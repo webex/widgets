@@ -65,6 +65,8 @@ export const useStationLogin = (props: UseStationLoginProps) => {
         setLoginSuccess(res);
         setIsAgentLoggedIn(true);
         store.setSelectedLoginOption(deviceType);
+        store.setCurrentState(res.data.auxCodeId);
+        store.setLastStateChangeTimestamp(new Date(res.data.lastStateChangeTimestamp));
         if (loginCb) {
           loginCb();
         }
