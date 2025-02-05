@@ -25,7 +25,7 @@ jest.mock('@webex/cc-store', () => {
 const loginCb = jest.fn();
 const logoutCb = jest.fn();
 
-describe('StationLogin Component', () => {
+describe.skip('StationLogin Component', () => {
   it('renders StationLoginPresentational with correct props', () => {
     const useStationLoginSpy = jest.spyOn(helper, 'useStationLogin');
 

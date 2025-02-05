@@ -53,8 +53,7 @@ function App() {
   };
 
   return (
-    // @ts-ignore
-    <md-theme theme="momentumv2">
+    <>
       <h1>Contact Center widgets in a react app</h1>
       <input
         type="text"
@@ -96,8 +95,7 @@ function App() {
           )}
         </>
       )}
-      {/* @ts-ignore */}
-    </md-theme>
+    </>
   );
 }
 

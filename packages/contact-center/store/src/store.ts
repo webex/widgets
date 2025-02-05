@@ -57,6 +57,10 @@ class Store implements IStore {
     this.currentTheme = theme;
   }
 
+  setDeviceType = function(deviceType: string): void {
+    this.deviceType = deviceType;
+  }.bind(this);
+
   registerCC(webex: WithWebex['webex']): Promise<void> {
     this.cc = webex.cc;
     this.logger = this.cc.LoggerProxy;

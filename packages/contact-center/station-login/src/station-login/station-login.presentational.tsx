@@ -1,142 +1,309 @@
-import React, { useEffect, useRef} from 'react';
+import React, { useEffect } from 'react';
 import { StationLoginPresentationalProps } from './station-login.types';
+import { Select, MenuItem, TextField, Button, Dialog, DialogTitle, DialogContent, DialogActions, SelectChangeEvent, Box, Typography, FormControl, InputLabel, Checkbox, FormControlLabel } from '@mui/material';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
 import './station-login.style.scss';
 import { MULTIPLE_SIGN_IN_ALERT_MESSAGE, MULTIPLE_SIGN_IN_ALERT_TITLE } from './constants';
 import './alert-modal.scss';
 
-const StationLoginPresentational: React.FunctionComponent<StationLoginPresentationalProps> = (props) => {
-  const { name, teams, loginOptions, login, logout, relogin, setDeviceType, setDialNumber, setTeam, isAgentLoggedIn, deviceType, showMultipleLoginAlert, handleContinue} = props; // TODO: Use the loginSuccess, loginFailure, logoutSuccess props returned fromthe API response via helper file to reflect UI changes
-  const modalRef = useRef<HTMLDialogElement>(null);
+const lightTheme = createTheme({
+  palette: {
+    mode: 'light',
+    primary: {
+      main: '#000000',
+    },
+  },
+  components: {
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          color: 'black',
+          '&.Mui-selected': {
+            backgroundColor: 'rgba(0, 0, 0, 0.1)',
+            '&:hover': {
+              backgroundColor: 'rgba(0, 0, 0, 0.2)',
+            },
+          },
+          '&:hover': {
+            backgroundColor: 'rgba(0, 0, 0, 0.1)',
+          },
+        },
+      },
+    },
+    MuiButton: {
+      styleOverrides: {
+        text: {
+          color: 'black',
+          '&:hover': {
+            backgroundColor: 'rgba(0, 0, 0, 0.1)',
+          },
+        },
+      },
+    },
+    MuiInput: {
+      styleOverrides: {
+        underline: {
+          '&:before': {
+            borderBottomColor: 'black',
+          },
+          '&:after': {
+            borderBottomColor: 'black',
+          },
+          '&:hover:not(.Mui-disabled):before': {
+            borderBottomColor: 'rgba(0, 0, 0, 0.7)',
+          },
+        },
+      },
+    },
+    MuiInputLabel: {
+      styleOverrides: {
+        root: {
+          color: 'black',
+          '&.Mui-focused': {
+            color: 'black',
+          },
+        },
+      },
+    },
+    MuiFormControlLabel: {
+      styleOverrides: {
+        label: {
+          color: 'black',
+        },
+      },
+    },
+  },
+});
+
+const darkTheme = createTheme({
+  palette: {
+    mode: 'dark',
+    primary: {
+      main: '#ffffff',
+    },
+  },
+  components: {
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          color: 'white',
+          '&.Mui-selected': {
+            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            '&:hover': {
+              backgroundColor: 'rgba(255, 255, 255, 0.2)',
+            },
+          },
+          '&:hover': {
+            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+          },
+        },
+      },
+    },
+    MuiButton: {
+      styleOverrides: {
+        text: {
+          color: 'white',
+          '&:hover': {
+            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+          },
+        },
+      },
+    },
+    MuiInput: {
+      styleOverrides: {
+        underline: {
+          '&:before': {
+            borderBottomColor: 'white',
+          },
+          '&:after': {
+            borderBottomColor: 'white',
+          },
+          '&:hover:not(.Mui-disabled):before': {
+            borderBottomColor: 'rgba(255, 255, 255, 0.7)',
+          },
+        },
+      },
+    },
+    MuiInputLabel: {
+      styleOverrides: {
+        root: {
+          color: 'white',
+          '&.Mui-focused': {
+            color: 'white',
+          },
+        },
+      },
+    },
+    MuiFormControlLabel: {
+      styleOverrides: {
+        label: {
+          color: 'white',
+        },
+      },
+    },
+  },
+});
+
+const StationLoginPresentational: React.FunctionComponent<StationLoginPresentationalProps & { currentTheme: 'LIGHT' | 'DARK' }> = ({
+  name,
+  teams,
+  loginOptions,
+  login,
+  logout,
+  relogin,
+  setDeviceType,
+  setDialNumber,
+  setTeam,
+  isAgentLoggedIn,
+  deviceType,
+  showMultipleLoginAlert,
+  handleContinue,
+  currentTheme,
+}) => {
+  useEffect(() => {
+    if (teams.length > 0) {
+      setTeam(teams[0].id);
+    }
+  }, [teams, setTeam]);
 
   useEffect(() => {
-    const teamsDropdown = document.getElementById('teamsDropdown') as HTMLSelectElement;
-    const agentLogin = document.querySelector('#LoginOption') as HTMLSelectElement;
-    const dialNumber = document.querySelector('#dialNumber') as HTMLInputElement;
-    if (teamsDropdown) {
-      teamsDropdown.innerHTML = '';
-      if (teams) {
-        teams.forEach((team) => {
-          const option = document.createElement('option');
-          option.value = team.id;
-          option.text = team.name;
-          teamsDropdown.add(option);
-        });
-        setTeam(teamsDropdown.value);
-        dialNumber.value = '';
-        dialNumber.disabled = true;
-      }
+    if (loginOptions.includes('BROWSER') && !deviceType) {
+      setDeviceType('BROWSER');
+    } else if (loginOptions.length > 0 && !deviceType) {
+      setDeviceType(loginOptions[0]);
     }
-    if (loginOptions.length > 0) {
-      loginOptions.forEach((options) => {
-        const option = document.createElement('option');
-        option.text = options;
-        option.value = options;
-        agentLogin.add(option);
-      });
-    }
-  }, [teams, loginOptions]);
+  }, [loginOptions, setDeviceType, deviceType]);
 
   useEffect(() => {
-    const modal = modalRef.current;
-    if (showMultipleLoginAlert && modal) {
-      modal.showModal();
+    if (showMultipleLoginAlert) {
+      handleContinue();
     }
-  }, [showMultipleLoginAlert, modalRef]);
+  }, [showMultipleLoginAlert, handleContinue]);
 
   useEffect(() => {
     if (!isAgentLoggedIn) return;
-    const agentLogin = document.querySelector('#LoginOption') as HTMLSelectElement;
-    if (agentLogin && !agentLogin.value) {
-      setDeviceType(deviceType);
-      agentLogin.value = deviceType;
+    if (deviceType) {
       relogin();
     }
-  }, [isAgentLoggedIn]);
+  }, [isAgentLoggedIn, deviceType, relogin]);
 
-  const selectLoginOption = (event: { target: { value: string } }) => {
-    const dialNumber = document.querySelector('#dialNumber') as HTMLInputElement;
-    const deviceType = event.target.value;
-    setDeviceType(deviceType);
-    if (deviceType === 'AGENT_DN' || deviceType === 'EXTENSION') {
-      dialNumber.disabled = false;
-    } else {
-      dialNumber.disabled = true;
+  useEffect(() => {
+    console.log('Dialog open state:', showMultipleLoginAlert); // Debugging log
+  }, [showMultipleLoginAlert]);
+
+  const handleSelectLoginOption = (event: SelectChangeEvent<string>) => {
+    setDeviceType(event.target.value);
+  };
+
+  const handleDialNumberChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setDialNumber(event.target.value);
+  };
+
+  const getLoginOptionLabel = (option: string) => {
+    switch (option) {
+      case 'AGENT_DN':
+        return 'Dial Number';
+      case 'BROWSER':
+        return 'Desktop';
+      case 'EXTENSION':
+        return 'Extension';
+      default:
+        return option;
     }
   };
 
-  const continueClicked = () => {
-    const modal = modalRef.current;
-    if (modal) {
-      modal.close();
-      handleContinue();
-    }
-  };
-
-  function updateDN() {
-    const dialNumber = document.querySelector('#dialNumber') as HTMLInputElement;
-    setDialNumber(dialNumber.value);
-  }
+  const theme = currentTheme === 'DARK' ? darkTheme : lightTheme;
 
   return (
-    <div>
-      {showMultipleLoginAlert && (
-        <dialog ref={modalRef} className="modal">
-          <h2>{MULTIPLE_SIGN_IN_ALERT_TITLE}</h2>
-          <p>{MULTIPLE_SIGN_IN_ALERT_MESSAGE}</p>
-          <div className='modal-content'>
-            <button id="ContinueButton" data-testid="ContinueButton" onClick={continueClicked}>Continue</button>
-          </div>
-        </dialog>
-      )}
-      <h1 data-testid="station-login-heading">{name}</h1>
-      <div className="box">
-        <section className="section-box">
-          <fieldset className="fieldset">
-            <legend className="legend-box">Agent</legend>
-            <div style={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
-              <div style={{ display: 'flex', gap: '1rem' }}>
-                <fieldset
-                  style={{
-                    border: '1px solid #ccc',
-                    borderRadius: '5px',
-                    padding: '10px',
-                    marginBottom: '20px',
-                    flex: 0.69,
-                  }}
-                >
-                  <legend className="legend-box">Select Team</legend>
-                  <select id="teamsDropdown" className="select">
-                    Teams
-                  </select>
-                </fieldset>
-                <fieldset className="fieldset">
-                  <legend className="legend-box">Agent Login</legend>
-                  <select name="LoginOption" id="LoginOption" className="select" onChange={selectLoginOption}>
-                    <option value="" hidden>
-                      Choose Agent Login Option...
-                    </option>
-                  </select>
-                  <input
-                    className="input"
-                    id="dialNumber"
-                    name="dialNumber"
-                    placeholder="Extension/Dial Number"
-                    type="text"
-                    onInput={updateDN}
-                  />
-                  <button id="AgentLogin" className="btn" onClick={login}>
-                    Login
-                  </button>
-                  <button id="logoutAgent" className="btn" onClick={logout}>
-                    Logout
-                  </button>
-                </fieldset>
-              </div>
-            </div>
-          </fieldset>
-        </section>
-      </div>
-    </div>
+    <ThemeProvider theme={theme}>
+      <Box sx={{ mt: 2 }}>
+        <Dialog open={showMultipleLoginAlert} onClose={handleContinue}>
+          <DialogTitle>{MULTIPLE_SIGN_IN_ALERT_TITLE}</DialogTitle>
+          <DialogContent>
+            <Typography>{MULTIPLE_SIGN_IN_ALERT_MESSAGE}</Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleContinue} color="primary">
+              Continue
+            </Button>
+          </DialogActions>
+        </Dialog>
+        <Box sx={{ mt: 2 }}>
+          <FormControl fullWidth variant="standard" sx={{ mb: 2 }}>
+            <InputLabel>Agent Login</InputLabel>
+            <Select
+              name="LoginOption"
+              id="LoginOption"
+              value={deviceType || ''}
+              onChange={handleSelectLoginOption}
+              fullWidth
+              variant="standard"
+              label="Agent Login"
+            >
+              {loginOptions.map((option) => (
+                <MenuItem key={option} value={option}>
+                  {getLoginOptionLabel(option)}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          {(deviceType && deviceType !== 'BROWSER') && (
+            <TextField
+              label="Extension/Dial Number"
+              onChange={handleDialNumberChange}
+              fullWidth
+              variant="standard"
+              sx={{ mb: 2 }}
+            />
+          )}
+          <FormControl fullWidth variant="standard" sx={{ mb: 2 }}>
+            <InputLabel>Select Team</InputLabel>
+            <Select
+              id="teamsDropdown"
+              value={teams[0]?.id || ''}
+              onChange={(e: SelectChangeEvent<string>) => setTeam(e.target.value)}
+              fullWidth
+              variant="standard"
+              label="Select Team"
+            >
+              {teams.map((team) => (
+                <MenuItem key={team.id} value={team.id}>
+                  {team.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControlLabel
+            control={<Checkbox sx={{ color: '#227AA3', '&.Mui-checked': { color: '#227AA3' } }} />}
+            label="Remember my credentials"
+            sx={{ mt: 2 }}
+          />
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
+            {isAgentLoggedIn ? (
+              <Button
+                onClick={logout}
+                variant="text"
+                sx={{
+                  color: theme.palette.primary.main,
+                  '&:hover': {
+                    backgroundColor: `rgba(${theme.palette.primary.main === '#000000' ? '0, 0, 0' : '255, 255, 255'}, 0.1)`,
+                  },
+                }}
+              >
+                SIGN OUT
+              </Button>
+            ) : (
+              <Button
+                onClick={login}
+                variant="text"
+              >
+                SIGN IN
+              </Button>
+            )}
+          </Box>
+        </Box>
+      </Box>
+    </ThemeProvider>
   );
 };
 

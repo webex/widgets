@@ -103,6 +103,11 @@ export interface IStationLoginProps {
    * Flag to indicate if the alert should be shown
    */
   showMultipleLoginAlert: boolean;
+
+  /**
+   * The current theme of the widget
+   */
+  currentTheme: string;
 }
 
 export type StationLoginPresentationalProps = Pick<
@@ -122,13 +127,14 @@ export type StationLoginPresentationalProps = Pick<
   | 'isAgentLoggedIn'
   | 'handleContinue'
   | 'deviceType'
+  | 'currentTheme'
 > & {
   showMultipleLoginAlert: boolean;
 };
 
 export type UseStationLoginProps = Pick<
   IStationLoginProps,
-  'cc' | 'onLogin' | 'onLogout' | 'logger' | 'isAgentLoggedIn' | 'handleContinue' | 'showMultipleLoginAlert'
+  'cc' | 'onLogin' | 'onLogout' | 'logger' | 'isAgentLoggedIn' | 'handleContinue' | 'showMultipleLoginAlert' | 'deviceType'
 >;
 
 export type StationLoginProps = Pick<IStationLoginProps, 'onLogin' | 'onLogout'>;

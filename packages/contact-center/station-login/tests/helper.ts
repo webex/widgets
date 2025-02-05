@@ -83,11 +83,11 @@ describe('useStationLogin Hook', () => {
         isAgentLoggedIn,
         handleContinue: jest.fn(),
         showMultipleLoginAlert: false,
+        deviceType: loginParams.loginOption,
       })
     );
 
     act(() => {
-      result.current.setDeviceType(loginParams.loginOption);
       result.current.setDialNumber(loginParams.dialNumber);
       result.current.setTeam(loginParams.teamId);
     });
@@ -107,7 +107,6 @@ describe('useStationLogin Hook', () => {
       expect(result.current).toEqual({
         name: 'StationLogin',
         isAgentLoggedIn: true,
-        setDeviceType: expect.any(Function),
         setDialNumber: expect.any(Function),
         setTeam: expect.any(Function),
         login: expect.any(Function),
@@ -139,11 +138,11 @@ describe('useStationLogin Hook', () => {
         isAgentLoggedIn,
         handleContinue: jest.fn(),
         showMultipleLoginAlert: false,
+        deviceType: loginParams.loginOption,
       })
     );
 
     act(() => {
-      result.current.setDeviceType(loginParams.loginOption);
       result.current.setDialNumber(loginParams.dialNumber);
       result.current.setTeam(loginParams.teamId);
     });
@@ -163,7 +162,6 @@ describe('useStationLogin Hook', () => {
       expect(result.current).toEqual({
         name: 'StationLogin',
         isAgentLoggedIn: false,
-        setDeviceType: expect.any(Function),
         setDialNumber: expect.any(Function),
         setTeam: expect.any(Function),
         login: expect.any(Function),
@@ -191,6 +189,7 @@ describe('useStationLogin Hook', () => {
         isAgentLoggedIn,
         handleContinue: jest.fn(),
         showMultipleLoginAlert: false,
+        deviceType: loginParams.loginOption,
       })
     );
 
@@ -217,11 +216,11 @@ describe('useStationLogin Hook', () => {
         isAgentLoggedIn,
         handleContinue: jest.fn(),
         showMultipleLoginAlert: false,
+        deviceType: loginParams.loginOption,
       })
     );
 
     act(() => {
-      result.current.setDeviceType(loginParams.loginOption);
       result.current.setDialNumber(loginParams.dialNumber);
       result.current.setTeam(loginParams.teamId);
     });
@@ -242,7 +241,6 @@ describe('useStationLogin Hook', () => {
       expect(result.current).toEqual({
         name: 'StationLogin',
         isAgentLoggedIn: true,
-        setDeviceType: expect.any(Function),
         setDialNumber: expect.any(Function),
         setTeam: expect.any(Function),
         login: expect.any(Function),
@@ -282,6 +280,7 @@ describe('useStationLogin Hook', () => {
         isAgentLoggedIn,
         handleContinue: jest.fn(),
         showMultipleLoginAlert: false,
+        deviceType: loginParams.loginOption,
       })
     );
 
@@ -296,7 +295,6 @@ describe('useStationLogin Hook', () => {
       expect(result.current).toEqual({
         name: 'StationLogin',
         isAgentLoggedIn: false,
-        setDeviceType: expect.any(Function),
         setDialNumber: expect.any(Function),
         setTeam: expect.any(Function),
         login: expect.any(Function),
@@ -323,6 +321,7 @@ describe('useStationLogin Hook', () => {
         isAgentLoggedIn,
         handleContinue: jest.fn(),
         showMultipleLoginAlert: false,
+        deviceType: loginParams.loginOption,
       })
     );
 
@@ -349,6 +348,7 @@ describe('useStationLogin Hook', () => {
         isAgentLoggedIn,
         handleContinue: jest.fn(),
         showMultipleLoginAlert: false,
+        deviceType: loginParams.loginOption,
       })
     );
 
@@ -373,6 +373,7 @@ describe('useStationLogin Hook', () => {
         isAgentLoggedIn,
         handleContinue: jest.fn(),
         showMultipleLoginAlert: false,
+        deviceType: loginParams.loginOption,
       })
     );
 
@@ -396,6 +397,7 @@ describe('useStationLogin Hook', () => {
         isAgentLoggedIn,
         handleContinue: jest.fn(),
         showMultipleLoginAlert: false,
+        deviceType: loginParams.loginOption,
       })
     );
 

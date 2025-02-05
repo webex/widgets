@@ -9,9 +9,9 @@ export const useStationLogin = (props: UseStationLoginProps) => {
   const loginCb = props.onLogin;
   const logoutCb = props.onLogout;
   const logger = props.logger;
+  const deviceType = props.deviceType;
   const [isAgentLoggedIn, setIsAgentLoggedIn] = useState(props.isAgentLoggedIn);
   const [dialNumber, setDialNumber] = useState('');
-  const [deviceType, setDeviceType] = useState('');
   const [team, setTeam] = useState('');
   const [loginSuccess, setLoginSuccess] = useState<StationLoginSuccess>();
   const [loginFailure, setLoginFailure] = useState<Error>();
@@ -104,7 +104,6 @@ export const useStationLogin = (props: UseStationLoginProps) => {
 
   return {
     name: 'StationLogin',
-    setDeviceType,
     setDialNumber,
     setTeam,
     login,
