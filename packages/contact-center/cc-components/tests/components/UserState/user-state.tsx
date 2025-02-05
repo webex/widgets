@@ -16,8 +16,7 @@ describe('UserStateComponent', () => {
     isSettingAgentStatus: false,
     errorMessage: '',
     elapsedTime: 3661, // 1 hour, 1 minute, 1 second
-    currentState: {id: '1'},
-    setCurrentState: mockSetCurrentState,
+    currentState: '1',
     currentTheme: 'LIGHT',
   };
 

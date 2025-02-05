@@ -74,7 +74,6 @@ export const useUserState = ({idleCodes, agentId, cc, currentState, lastStateCha
     const chosenState = state === 'Available' ? 'Available' : 'Idle';
     cc.setAgentState({state: chosenState, auxCodeId, agentId, lastStateChangeReason: state})
       .then((response) => {
-        console.log('setAgentStatus response', response);
         store.setCurrentState(response.data.auxCodeId);
         store.setLastStateChangeTimestamp(new Date(response.data.lastStateChangeTimestamp));
       })

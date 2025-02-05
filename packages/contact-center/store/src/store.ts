@@ -28,7 +28,7 @@ class Store implements IStore {
   isAgentLoggedIn = false;
   deviceType: string = '';
   currentState: string = '';
-  lastStateChangeTimestamp: Date | undefined;
+  lastStateChangeTimestamp: Date = new Date();
   constructor() {
     makeAutoObservable(this, {
       cc: observable.ref,
@@ -39,7 +39,7 @@ class Store implements IStore {
   setCurrentTask(task: ITask): void {
     this.currentTask = task;
   }
-  
+
   setCurrentState(state: string): void {
     this.currentState = state;
   }
