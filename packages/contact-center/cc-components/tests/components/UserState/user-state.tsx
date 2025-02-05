@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import {render, screen, fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import UserStateComponent from '../../../src/components/UserState/user-state';
 
@@ -8,17 +8,16 @@ describe('UserStateComponent', () => {
   const mockSetCurrentState = jest.fn();
   const defaultProps = {
     idleCodes: [
-      { id: '1', name: 'Idle Code 1', isSystem: false },
-      { id: '2', name: 'Idle Code 2', isSystem: true },
-      { id: '3', name: 'Idle Code 3', isSystem: false }
+      {id: '1', name: 'Idle Code 1', isSystem: false},
+      {id: '2', name: 'Idle Code 2', isSystem: true},
+      {id: '3', name: 'Idle Code 3', isSystem: false},
     ],
     setAgentStatus: mockSetAgentStatus,
     isSettingAgentStatus: false,
     errorMessage: '',
     elapsedTime: 3661, // 1 hour, 1 minute, 1 second
-    currentState: { id: '1' },
-    setCurrentState: mockSetCurrentState,
-    currentTheme: 'LIGHT'
+    currentState: '1',
+    currentTheme: 'LIGHT',
   };
 
   it('should render the component with correct elements', () => {
@@ -38,8 +37,8 @@ describe('UserStateComponent', () => {
 
   it('should call setAgentStatus with correct code when an idle code is selected', () => {
     render(<UserStateComponent {...defaultProps} />);
-    fireEvent.change(screen.getByRole('combobox'), { target: { value: '3' } });
-    expect(mockSetAgentStatus).toHaveBeenCalledWith({ id: '3', name: 'Idle Code 3', isSystem: false });
+    fireEvent.change(screen.getByRole('combobox'), {target: {value: '3'}});
+    expect(mockSetAgentStatus).toHaveBeenCalledWith({id: '3', name: 'Idle Code 3', isSystem: false});
   });
 
   it('should display an error message if provided', () => {
@@ -49,15 +48,15 @@ describe('UserStateComponent', () => {
   });
 
   it('should disable the select box when isSettingAgentStatus is true', () => {
-    render(<UserStateComponent {...{ ...defaultProps, isSettingAgentStatus: true }} />);
+    render(<UserStateComponent {...{...defaultProps, isSettingAgentStatus: true}} />);
     expect(screen.getByRole('combobox')).toBeDisabled();
   });
 
   it('should render elapsed time in correct color based on isSettingAgentStatus', () => {
-    const { rerender } = render(<UserStateComponent {...defaultProps} />);
+    const {rerender} = render(<UserStateComponent {...defaultProps} />);
     expect(screen.getByText('01:01:01')).toHaveClass('elapsedTime');
 
-    rerender(<UserStateComponent {...{ ...defaultProps, isSettingAgentStatus: true }} />);
+    rerender(<UserStateComponent {...{...defaultProps, isSettingAgentStatus: true}} />);
     expect(screen.getByText('01:01:01')).toHaveClass('elapsedTime elapsedTime-disabled');
   });
 });
