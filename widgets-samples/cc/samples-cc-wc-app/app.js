@@ -1,10 +1,15 @@
 const accessTokenElem = document.getElementById('access_token_elem');
+const themeElem = document.getElementById('theme');
 const widgetsContainer = document.getElementById('widgets-container');
 const ccStationLogin = document.getElementById('cc-station-login');
 const ccUserState = document.createElement('widget-cc-user-state');
 const ccIncomingTask = document.createElement('widget-cc-incoming-task');
 const ccTaskList = document.createElement('widget-cc-task-list');
 const ccCallControl = document.createElement('widget-cc-call-control');
+
+themeElem.addEventListener('change', () => {
+    store.setCurrentTheme(themeElem.checked ? 'DARK' : 'LIGHT');
+});
 
 if (!ccStationLogin && !ccUserState) {
     console.error('Failed to find the required elements');

@@ -10,12 +10,17 @@ const loginOptions = ['EXTENSION', 'AGENT_DN', 'BROWSER'];
 const deviceType = 'BROWSER';
 
 // Mock the store import
-jest.mock('@webex/cc-store', () => {return {
-  cc: {},
-  teams,
-  loginOptions,
-  deviceType,
-}});
+jest.mock('@webex/cc-store', () => {
+  return {
+    cc: {
+      on: jest.fn(),
+      off: jest.fn(),
+    },
+    teams,
+    loginOptions,
+    deviceType,
+  };
+});
 
 const loginCb = jest.fn();
 const logoutCb = jest.fn();
@@ -23,10 +28,17 @@ const logoutCb = jest.fn();
 describe('StationLogin Component', () => {
   it('renders StationLoginPresentational with correct props', () => {
     const useStationLoginSpy = jest.spyOn(helper, 'useStationLogin');
-    
-    render(<StationLogin onLogin={loginCb} onLogout={logoutCb}/>);
 
-    expect(useStationLoginSpy).toHaveBeenCalledWith({cc: {}, onLogin: loginCb, onLogout: logoutCb});
+    render(<StationLogin onLogin={loginCb} onLogout={logoutCb} />);
+
+    expect(useStationLoginSpy).toHaveBeenCalledWith({
+      cc: {
+        on: expect.any(Function),
+        off: expect.any(Function),
+      },
+      onLogin: loginCb,
+      onLogout: logoutCb,
+    });
     const heading = screen.getByTestId('station-login-heading');
     expect(heading).toHaveTextContent('StationLogin');
   });
