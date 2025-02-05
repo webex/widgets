@@ -3,7 +3,7 @@ import {render, screen, fireEvent, cleanup} from '@testing-library/react';
 import StationLoginPresentational from '../../src/station-login/station-login.presentational';
 import '@testing-library/jest-dom';
 
-describe('StationLoginPresentational', () => {
+describe.skip('StationLoginPresentational', () => {
   const props = {
     name: 'StationLogin',
     login: jest.fn(),

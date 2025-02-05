@@ -54,7 +54,7 @@ function versionAndPublish() {
     // Publish the package
     const publishWorkspace = (workspace) => {
       console.log(`Updating version for ${workspace}: ${newVersion}`);
-      execSync(`yarn workspace ${workspace} npm pack --tag ${branchName}`, {stdio: 'inherit'});
+      execSync(`yarn workspace ${workspace} npm publish --tag ${branchName}`, {stdio: 'inherit'});
     };
 
     for (const workspace of workspaceData) {
