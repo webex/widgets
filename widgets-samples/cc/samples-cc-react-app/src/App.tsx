@@ -1,11 +1,13 @@
 import React, {useState, useRef} from 'react';
 import {StationLogin, UserState, IncomingTask, TaskList, CallControl, store} from '@webex/cc-widgets';
+import {ThemeProvider,IconProvider} from '@momentum-design/components/dist/react';
 
 function App() {
   const [isSdkReady, setIsSdkReady] = useState(false);
   const [accessToken, setAccessToken] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const themeCheckboxRef = useRef(null);
+  const [currentTheme, setCurrentTheme] = useState(store.currentTheme);
 
   const webexConfig = {
     fedramp: false,
@@ -53,51 +55,52 @@ function App() {
   };
 
   return (
-    // @ts-ignore
-    <md-theme theme="momentumv2">
-      <h1>Contact Center widgets in a react app</h1>
-      <input
-        type="text"
-        placeholder="Enter your access token"
-        value={accessToken}
-        onChange={(e) => setAccessToken(e.target.value)}
-      />
-      <br />
-      <input
-        type='checkbox'
-        id='theme'
-        name='theme'
-        ref={themeCheckboxRef}
-        onChange={() => {
-          store.setCurrentTheme(themeCheckboxRef.current.checked ? 'DARK' : 'LIGHT');
-        }}
-      /> Dark Theme
-      <br />
-      <button
-        disabled={accessToken.trim() === ''}
-        onClick={() => {
-          store.init({webexConfig, access_token: accessToken}).then(() => {
-            setIsSdkReady(true);
-          });
-        }}
-      >
-        Init Widgets
-      </button>
-      {isSdkReady && (
-        <>
-          <StationLogin onLogin={onLogin} onLogout={onLogout} />
-          {isLoggedIn && (
-            <>
-              <UserState />
-              <IncomingTask onAccepted={onAccepted} onDeclined={onDeclined} />
-              <TaskList onTaskAccepted={onTaskAccepted} onTaskDeclined={onTaskDeclined} />
-              <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapup={onWrapup} />
-            </>
-          )}
-        </>
-      )}
-      {/* @ts-ignore */}
-    </md-theme>
+    <div className="mds-typography">
+      <ThemeProvider themeclass={currentTheme === 'LIGHT' ? 'mds-theme-stable-lightWebex': 'mds-theme-stable-darkWebex'}><IconProvider>
+        <h1>Contact Center widgets in a react app</h1>
+        <input
+          type="text"
+          placeholder="Enter your access token"
+          value={accessToken}
+          onChange={(e) => setAccessToken(e.target.value)}
+        />
+        <br />
+        <input
+          type='checkbox'
+          id='theme'
+          name='theme'
+          ref={themeCheckboxRef}
+          onChange={() => {
+            setCurrentTheme(themeCheckboxRef.current.checked ? 'DARK' : 'LIGHT');
+            store.setCurrentTheme(themeCheckboxRef.current.checked ? 'DARK' : 'LIGHT');
+          }}
+        /> Dark Theme
+        <br />
+        <button
+          disabled={accessToken.trim() === ''}
+          onClick={() => {
+            store.init({webexConfig, access_token: accessToken}).then(() => {
+              setIsSdkReady(true);
+            });
+          }}
+        >
+          Init Widgets
+        </button>
+        {isSdkReady && (
+          <>
+            <StationLogin onLogin={onLogin} onLogout={onLogout} />
+            {isLoggedIn && (
+              <>
+                <UserState />
+                <IncomingTask onAccepted={onAccepted} onDeclined={onDeclined} />
+                <TaskList onTaskAccepted={onTaskAccepted} onTaskDeclined={onTaskDeclined} />
+                <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapup={onWrapup} />
+              </>
+            )}
+          </>
+        )}
+      </IconProvider></ThemeProvider>
+    </div>
   );
 }
 
