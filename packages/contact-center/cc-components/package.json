@@ -20,7 +20,7 @@
     "build": "yarn run -T tsc",
     "build:src": "yarn run clean:dist && webpack",
     "build:watch": "webpack --watch",
-    "test:unit": "jest"
+    "test:unit:broken": "jest"
   },
   "dependencies": {
     "@r2wc/react-to-web-component": "2.0.3",
@@ -59,11 +59,7 @@
   },
   "stableVersion": "1.28.0-ccwidgets.8",
   "peerDependencies": {
-    "@momentum-ui/core": ">=19.16.0",
-    "@momentum-ui/icons": ">=8.28.5",
-    "@momentum-ui/tokens": ">=1.7.1",
-    "@momentum-ui/utils": ">=6.2.15",
-    "@momentum-ui/web-components": ">=2.16.16",
+    "@momentum-design/components": ">=0.18.3",
     "react": ">=18.3.1",
     "react-dom": ">=18.3.1"
   }

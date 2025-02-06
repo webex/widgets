@@ -14,8 +14,6 @@ jest.mock('@webex/cc-store', () => {return {
   agentId: 'testAgentId'
 }});
 
-jest.mock('@momentum-ui/web-components', () => {});
-
 describe('UserState Component', () => {
   let workerMock;
 
@@ -27,6 +25,10 @@ describe('UserState Component', () => {
     };
     global.Worker = jest.fn(() => workerMock);
     global.URL.createObjectURL = jest.fn(() => 'blob:http://localhost:3000/12345');
+
+    if (typeof window.HTMLElement.prototype.attachInternals !== 'function') {
+      window.HTMLElement.prototype.attachInternals = jest.fn() as any;
+    }
   });
 
   it('renders UserStateComponent with correct props', () => {
