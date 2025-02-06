@@ -29,11 +29,7 @@ module.exports = mergeWithCustomize({
     react: 'react',
     'react-dom': 'react-dom',
     '@webex/cc-store': '@webex/cc-store',
-    '@momentum-ui/core': '@momentum-ui/core',
-    '@momentum-ui/icons': '@momentum-ui/icons',
-    '@momentum-ui/tokens': '@momentum-ui/tokens',
-    '@momentum-ui/utils': '@momentum-ui/utils',
-    '@momentum-ui/web-components': '@momentum-ui/web-components',
+    '@momentum-design/components': '@momentum-design/components',
   },
   resolve: {
     fallback: {}
@@ -44,7 +40,7 @@ module.exports = mergeWithCustomize({
         test: /\.css$/,
         use: ['style-loader', 'css-loader'],
         include: [
-          resolveMonorepoRoot('node_modules/@momentum-ui'), // Include specific node module
+          resolveMonorepoRoot('node_modules/@momentum-design'), // Include specific node module
           path.resolve(__dirname, 'packages') // Include all CSS from the local package
         ],
       },
@@ -56,13 +52,13 @@ module.exports = mergeWithCustomize({
           "sass-loader"    // Compiles Sass to CSS
         ],
         include: [
-          resolveMonorepoRoot('node_modules/@momentum-ui'), // Include specific node module
+          resolveMonorepoRoot('node_modules/@momentum-design'), // Include specific node module
           path.resolve(__dirname, 'packages') // Include all CSS from the local package
         ],
       },
       {
         test: /\.(woff|woff2|eot|ttf|otf)$/,
-        include: [resolveMonorepoRoot('node_modules/@momentum-ui')],
+        include: [resolveMonorepoRoot('node_modules/@momentum-design')],
         type: 'asset/resource',
         generator: {
           filename: 'fonts/[name][ext][query]'
@@ -70,7 +66,7 @@ module.exports = mergeWithCustomize({
       },
       {
         test: /\.(png|jpg|gif|svg)$/,
-        include: [resolveMonorepoRoot('node_modules/@momentum-ui')],
+        include: [resolveMonorepoRoot('node_modules/@momentum-design')],
         type: 'asset/resource',
         generator: {
           filename: 'images/[name][ext][query]'

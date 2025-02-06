@@ -6,9 +6,11 @@ const ccUserState = document.createElement('widget-cc-user-state');
 const ccIncomingTask = document.createElement('widget-cc-incoming-task');
 const ccTaskList = document.createElement('widget-cc-task-list');
 const ccCallControl = document.createElement('widget-cc-call-control');
+const themeProviderElem = document.getElementById('theme-provider-elem'); 
 
 themeElem.addEventListener('change', () => {
     store.setCurrentTheme(themeElem.checked ? 'DARK' : 'LIGHT');
+    themeProviderElem.setAttribute('themeclass', themeElem.checked ? 'mds-theme-stable-darkWebex' : 'mds-theme-stable-lightWebex');
 });
 
 if (!ccStationLogin && !ccUserState) {
