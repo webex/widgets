@@ -1,7 +1,7 @@
 {
   "name": "@webex/cc-components",
   "description": "Webex Contact Center UI Components Library for your custom contact center solutions",
-  "version": "1.28.0-ccwidgets.9",
+  "version": "1.28.0-ccwidgets.14",
   "main": "dist/index.js",
   "publishConfig": {
     "access": "public"
@@ -57,10 +57,10 @@
       "^.+\\.(css|less|scss)$": "babel-jest"
     }
   },
-  "stableVersion": "1.28.0-ccwidgets.8",
   "peerDependencies": {
     "@momentum-design/components": ">=0.18.3",
     "react": ">=18.3.1",
     "react-dom": ">=18.3.1"
-  }
+  },
+  "stableVersion": "1.28.0-ccwidgets.9"
 }
