@@ -76,7 +76,6 @@ export const useStationLogin = (props: UseStationLoginProps) => {
         }
       })
       .catch((error: Error) => {
-        console.log('ravi2', error);
 
         logger.error(`Error logging in: ${error}`, {
           module: 'widget-station-login#helper.ts',
