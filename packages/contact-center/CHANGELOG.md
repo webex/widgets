@@ -1,3 +1,16 @@
+# [1.28.0-ccwidgets.14](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.13...v1.28.0-ccwidgets.14) (2025-02-06)
+
+
+### Bug Fixes
+
+* **cc-components:** replace momentum-ui with momentum-design lib ([#378](https://github.com/webex/widgets/issues/378)) ([b98d76c](https://github.com/webex/widgets/commit/b98d76c5eca903cd21482a4c52e24bbff4dfe0e2))
+
+
+### Features
+
+* **cc-components:** setup and move user state sample ui comp ([#359](https://github.com/webex/widgets/issues/359)) ([16a44d0](https://github.com/webex/widgets/commit/16a44d0492df9c0ca674ab2784121f0035e45456))
+* **cc-widgets:** added Agent-Multi-Login-Alert Feature ([#364](https://github.com/webex/widgets/issues/364)) ([f7d75ca](https://github.com/webex/widgets/commit/f7d75ca13794a36a3691147f5feb5f3d253af357))
+
 # [1.28.0-ccwidgets.13](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.12...v1.28.0-ccwidgets.13) (2025-01-30)
 
 
