@@ -6,14 +6,15 @@ import {useUserState} from '../helper';
 import {UserStateComponent, IUserState} from '@webex/cc-components';
 
 const UserState: React.FunctionComponent = observer(() => {
-  const {cc, idleCodes, agentId, currentTheme} = store;
+  const {cc, idleCodes, agentId, currentTheme, customStatus} = store;
   const props: IUserState = {
     ...useUserState({
       idleCodes,
       agentId,
       cc
     }),
-    currentTheme
+    currentTheme,
+    customStatus
   }
 
   return <UserStateComponent {...props}/>;
