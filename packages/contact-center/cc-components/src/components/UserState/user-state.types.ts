@@ -51,4 +51,11 @@ export interface IUserState {
    * The preferred theme
    */
   currentTheme: string;
+
+  /**
+   * Boolean indicating if the user is in RONA state.
+   */
+  customStatus: string;
+
+  setCustomStatus: (customStatus: string) => void;
 }

@@ -32,6 +32,7 @@ module.exports = mergeWithCustomize({
     "@emotion/react": "@emotion/react",
     "@emotion/styled": "@emotion/styled",
     "@mui/material": "@mui/material",
+    "@mui/icons-material": "@mui/icons-material",
   },
   resolve: {
     fallback: {}

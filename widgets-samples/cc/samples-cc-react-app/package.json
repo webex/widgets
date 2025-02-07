@@ -17,6 +17,7 @@
     "@babel/preset-typescript": "^7.25.9",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
+    "@mui/icons-material": "^6.4.3",
     "@mui/material": "^6.4.2",
     "@webex/cc-widgets": "workspace:*",
     "babel-loader": "^9.2.1",

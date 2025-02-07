@@ -27,6 +27,7 @@ class Store implements IStore {
   currentTask: ITask = null;
   isAgentLoggedIn = false;
   deviceType: string = '';
+  customStatus: 'RONA' | 'WRAPUP' | '' = '';
 
   constructor() {
     makeAutoObservable(this, {
@@ -37,6 +38,10 @@ class Store implements IStore {
 
   setCurrentTask(task: ITask): void {
     this.currentTask = task;
+  }
+
+  setCustomStatus(status: 'RONA' | 'WRAPUP' | ''): void {
+    this.customStatus = status;
   }
 
   public static getInstance(): Store {

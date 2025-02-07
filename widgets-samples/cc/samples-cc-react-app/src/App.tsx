@@ -1,6 +1,8 @@
 import React, {useState, useRef} from 'react';
 import {StationLogin, UserState, IncomingTask, TaskList, CallControl, store} from '@webex/cc-widgets';
 
+window['store'] = store;
+
 function App() {
   const [isSdkReady, setIsSdkReady] = useState(false);
   const [accessToken, setAccessToken] = useState('');
@@ -87,7 +89,12 @@ function App() {
           <StationLogin onLogin={onLogin} onLogout={onLogout} />
           {isLoggedIn && (
             <>
-              <UserState />
+              <div style={{
+                width: '200px',
+                borderRadius: '50%',
+              }}>
+                <UserState />
+              </div>
               <IncomingTask onAccepted={onAccepted} onDeclined={onDeclined} />
               <TaskList onTaskAccepted={onTaskAccepted} onTaskDeclined={onTaskDeclined} />
               <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapup={onWrapup} />
