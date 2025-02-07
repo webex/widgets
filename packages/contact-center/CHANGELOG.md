@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.15](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.14...v1.28.0-ccwidgets.15) (2025-02-07)
+
+
+### Features
+
+* **cc-user-state:** retain agent state timer on relogin or multiLogin ([#371](https://github.com/webex/widgets/issues/371)) ([9dba8db](https://github.com/webex/widgets/commit/9dba8db0eb3d685349b4ebdb8150981373681cbe))
+
 # [1.28.0-ccwidgets.14](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.13...v1.28.0-ccwidgets.14) (2025-02-06)
 
 
