@@ -1,7 +1,8 @@
 import React from 'react';
 
 import {IUserState} from './user-state.types';
-import {formatTime} from '../../utils';
+import {formatTime} from '../../utils'
+import { Button } from '@momentum-design/components/dist/react';
 
 import './user-state.scss';
 
@@ -44,12 +45,11 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
                 );
               })}
           </select>
-          {/* @ts-ignore */}
-          <md-button color={`${currentTheme === 'DARK' ? 'white' : 'dark-grey'}`}>Test Button</md-button>
-          <div className={`elapsedTime ${isSettingAgentStatus ? 'elapsedTime-disabled' : ''}`}>
-            {formatTime(elapsedTime)}
-          </div>
-          {errorMessage && <div style={{color: 'red'}}>{errorMessage}</div>}
+          <Button variant="primary" size={32} color="default" prefix-icon="" postfix-icon="" type="button" role="button" aria-label="">Click Me</Button>
+          <div className={`elapsedTime ${isSettingAgentStatus ? 'elapsedTime-disabled' : ''}`}>{formatTime(elapsedTime)}</div>
+          {
+            errorMessage && <div style={{color: 'red'}}>{errorMessage}</div>
+          }
         </fieldset>
       </section>
     </div>
