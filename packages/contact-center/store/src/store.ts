@@ -66,8 +66,15 @@ class Store implements IStore {
     this.currentTheme = theme;
   }
 
-  registerCC(webex: WithWebex['webex']): Promise<void> {
-    this.cc = webex.cc;
+  registerCC(webex?: WithWebex['webex']): Promise<void> {
+    if (webex) {
+      this.cc = webex.cc;
+    }
+
+    if (!webex || !this.cc) {
+      throw new Error('Webex SDK not initialized');
+    }
+
     this.logger = this.cc.LoggerProxy;
     return this.cc
       .register()
