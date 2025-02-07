@@ -36,6 +36,10 @@ class Store implements IStore {
     });
   }
 
+  setCurrentTask(task: ITask): void {
+    this.currentTask = task;
+  }
+
   setCustomStatus(status: 'RONA' | 'WRAPUP' | ''): void {
     this.customStatus = status;
   }
