@@ -1,3 +1,10 @@
+# [1.28.0-ccconnectors.2](https://github.com/webex/widgets/compare/v1.28.0-ccconnectors.1...v1.28.0-ccconnectors.2) (2025-02-07)
+
+
+### Features
+
+* **cc-user-state:** material redesign with rona and wrapup status ([#380](https://github.com/webex/widgets/issues/380)) ([de3bdb1](https://github.com/webex/widgets/commit/de3bdb173a691055d7d89b92f5198afa40d917fc))
+
 # [1.28.0-ccconnectors.1](https://github.com/webex/widgets/compare/v1.27.5...v1.28.0-ccconnectors.1) (2025-02-05)
 
 
