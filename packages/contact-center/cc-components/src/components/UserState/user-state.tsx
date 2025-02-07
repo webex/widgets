@@ -115,7 +115,7 @@ const UserStateComponent: React.FunctionComponent<Omit<IUserState, "setCurrentSt
     }
   };
 
-  const selectStyles = selectedState?.name === 'RONA' ? { backgroundColor: '#E9C1BC', color: 'black', borderRadius: '50px' } : {};
+  const selectStyles = selectedState?.name === 'RONA' ? { backgroundColor: '#E9C1BC', color: 'black', borderRadius: '50px' } : { backgroundColor: '#FFF', color: 'black', borderRadius: '50px' };
 
   const theme = currentTheme === 'DARK' ? darkTheme : lightTheme;
 
