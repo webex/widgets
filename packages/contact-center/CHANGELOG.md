@@ -1,3 +1,10 @@
+# [1.28.0-ccconnectors.3](https://github.com/webex/widgets/compare/v1.28.0-ccconnectors.2...v1.28.0-ccconnectors.3) (2025-02-07)
+
+
+### Bug Fixes
+
+* update description for release ([7ed3426](https://github.com/webex/widgets/commit/7ed342650a5dd5aa907fccc6186485d7ae12896b))
+
 # [1.28.0-ccconnectors.2](https://github.com/webex/widgets/compare/v1.28.0-ccconnectors.1...v1.28.0-ccconnectors.2) (2025-02-07)
 
 
