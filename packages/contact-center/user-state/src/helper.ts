@@ -1,13 +1,12 @@
-import { useState, useEffect } from "react";
+import {useState, useEffect, useRef} from 'react';
 // TODO: Export & Import this AGENT_STATE_CHANGE constant from SDK
-import { AGENT_STATE_CHANGE } from './constants';
-
-export const useUserState = ({ idleCodes, agentId, cc }) => {
+import {AGENT_STATE_CHANGE} from './constants';
+import store from '@webex/cc-store';
+export const useUserState = ({idleCodes, agentId, cc, currentState, lastStateChangeTimestamp}) => {
   const [isSettingAgentStatus, setIsSettingAgentStatus] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [elapsedTime, setElapsedTime] = useState(0);
-  const [currentState, setCurrentState] = useState({});
-  let worker;
+  const workerRef = useRef<Worker | null>(null);
 
   // Initialize the Web Worker using a Blob
   const workerScript = `
@@ -30,53 +29,54 @@ export const useUserState = ({ idleCodes, agentId, cc }) => {
   `;
 
   useEffect(() => {
-    const blob = new Blob([workerScript], { type: 'application/javascript' });
+    const blob = new Blob([workerScript], {type: 'application/javascript'});
     const workerUrl = URL.createObjectURL(blob);
-    worker = new Worker(workerUrl);
-
-    worker.postMessage({ type: 'start', startTime: Date.now() });
-    worker.onmessage = (event) => {
+    workerRef.current = new Worker(workerUrl);
+    workerRef.current.postMessage({type: 'start', startTime: Date.now()});
+    workerRef.current.onmessage = (event) => {
       setElapsedTime(event.data);
     };
 
     const handleStateChange = (data) => {
       if (data && typeof data === 'object' && data.type === 'AgentStateChangeSuccess') {
         const DEFAULT_CODE = '0'; // Default code when no aux code is present
-        setCurrentState({
-          id: data.auxCodeId?.trim() !== '' ? data.auxCodeId : DEFAULT_CODE
-        });
+        store.setCurrentState(data.auxCodeId?.trim() !== '' ? data.auxCodeId : DEFAULT_CODE);
 
         const startTime = data.lastStateChangeTimestamp;
-        setElapsedTime(0);
-        worker.postMessage({ type: 'reset', startTime }); // Reset the worker timer with the new start time
+        store.setLastStateChangeTimestamp(new Date(startTime));
       }
     };
-    
+
     cc.on(AGENT_STATE_CHANGE, handleStateChange);
 
     return () => {
-      worker.terminate();
+      workerRef.current?.terminate();
       cc.off(AGENT_STATE_CHANGE, handleStateChange);
     };
-  }, [currentState]);
+  }, []);
+
+  useEffect(() => {
+    if (workerRef.current && lastStateChangeTimestamp) {
+      const timeNow = new Date();
+      const elapsed = Math.floor(Math.abs(timeNow.getTime() - lastStateChangeTimestamp.getTime()) / 1000);
+      setElapsedTime(elapsed);
+      workerRef.current.postMessage({type: 'reset', startTime: lastStateChangeTimestamp.getTime()});
+    }
+  }, [lastStateChangeTimestamp]);
 
   const setAgentStatus = (selectedCode) => {
-    const {
-      auxCodeId,
-      state
-    } = {
+    const {auxCodeId, state} = {
       auxCodeId: selectedCode.id,
-      state: selectedCode.name
-    }
-    setIsSettingAgentStatus(true);
-    let oldState = {
-      ...currentState
+      state: selectedCode.name,
     };
-    setCurrentState(selectedCode);
+    setIsSettingAgentStatus(true);
     const chosenState = state === 'Available' ? 'Available' : 'Idle';
-    cc.setAgentState({ state: chosenState, auxCodeId, agentId, lastStateChangeReason: state })
+    cc.setAgentState({state: chosenState, auxCodeId, agentId, lastStateChangeReason: state})
+      .then((response) => {
+        store.setCurrentState(response.data.auxCodeId);
+        store.setLastStateChangeTimestamp(new Date(response.data.lastStateChangeTimestamp));
+      })
       .catch((error) => {
-        setCurrentState(oldState);
         setErrorMessage(error.toString());
       })
       .finally(() => {
@@ -91,6 +91,5 @@ export const useUserState = ({ idleCodes, agentId, cc }) => {
     errorMessage,
     elapsedTime,
     currentState,
-    setCurrentState
   };
 };
