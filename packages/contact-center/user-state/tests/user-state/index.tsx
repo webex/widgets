@@ -5,14 +5,16 @@ import * as helper from '../../src/helper';
 import '@testing-library/jest-dom';
 
 // Mock the store import
-jest.mock('@webex/cc-store', () => {return {
-  cc: {
-    on: jest.fn(),
-    off: jest.fn(),
-  },
-  idleCodes: [],
-  agentId: 'testAgentId'
-}});
+jest.mock('@webex/cc-store', () => {
+  return {
+    cc: {
+      on: jest.fn(),
+      off: jest.fn(),
+    },
+    idleCodes: [],
+    agentId: 'testAgentId',
+  };
+});
 
 describe('UserState Component', () => {
   let workerMock;
@@ -33,14 +35,18 @@ describe('UserState Component', () => {
 
   it('renders UserStateComponent with correct props', () => {
     const useUserStateSpy = jest.spyOn(helper, 'useUserState');
-    
-    render(<UserState/>);
+
+    render(<UserState />);
 
     expect(useUserStateSpy).toHaveBeenCalledTimes(1);
-    expect(useUserStateSpy).toHaveBeenCalledWith({cc: {
-      on: expect.any(Function),
-      off: expect.any(Function)
-    }, idleCodes: [], agentId: 'testAgentId'});
+    expect(useUserStateSpy).toHaveBeenCalledWith({
+      cc: {
+        on: expect.any(Function),
+        off: expect.any(Function),
+      },
+      idleCodes: [],
+      agentId: 'testAgentId',
+    });
     const heading = screen.getByTestId('user-state-title');
     expect(heading).toHaveTextContent('Agent State');
   });
