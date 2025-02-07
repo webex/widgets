@@ -193,6 +193,7 @@ export const useCallControl = (props: useCallControlProps) => {
   };
 
   const handleTaskEnded = useCallback(({wrapupRequired}: {wrapupRequired: boolean}) => {
+    store.setCustomStatus('WRAPUP');
     setWrapupRequired(wrapupRequired);
   }, []);
 
@@ -269,6 +270,7 @@ export const useCallControl = (props: useCallControlProps) => {
       .then(() => {
         setWrapupRequired(false);
         store.setCurrentTask(null);
+        store.setCustomStatus('');
         if (onWrapUp) onWrapUp();
       })
       .catch((error: Error) => {

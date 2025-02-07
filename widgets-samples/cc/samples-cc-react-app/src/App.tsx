@@ -1,5 +1,5 @@
 import React, {useState, useRef} from 'react';
-import {StationLogin, UserState, IncomingTask, TaskList, CallControl, store} from '@webex/cc-widgets';
+import {StationLogin, UserState, IncomingTask, TaskList, CallControl, store, CallControlPresentational} from '@webex/cc-widgets';
 
 window['store'] = store;
 
