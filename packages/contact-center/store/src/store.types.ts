@@ -27,7 +27,7 @@ type IdleCode = {
     isDefault: boolean;
 }
 
-interface IStore {
+interface IStoreBase {
     teams: Team[];
     loginOptions: string[];
     cc: IContactCenter;
@@ -38,33 +38,23 @@ interface IStore {
     wrapupCodes: IWrapupCode[];
     currentTask: ITask;
     incomingTask: ITask;
-    taskList: ITask[]
+    taskList: ITask[];
     isAgentLoggedIn: boolean;
     deviceType: string;
-    init(params: InitParams): Promise<void>;
-    setCurrentTask(task: any): void;
-    setSelectedLoginOption(option: string): void;
     wrapupRequired: boolean;
+    init(params: InitParams): Promise<void>;
+    setSelectedLoginOption(option: string): void;
 }
 
-interface IStoreWrapper {
-    teams: Team[];
-    loginOptions: string[];
-    cc: IContactCenter;
-    idleCodes: IdleCode[];
-    agentId: string;
-    logger: ILogger;
-    selectedLoginOption: string;
-    wrapupCodes: IWrapupCode[];
-    currentTask: ITask;
-    incomingTask: ITask;
-    taskList: ITask[]
-    isAgentLoggedIn: boolean;
-    deviceType: string;
-    wrapupRequired: boolean;
-    init(params: InitParams): Promise<void>;
+interface IStore extends IStoreBase {
     setCurrentTask(task: any): void;
-    setSelectedLoginOption(option: string): void;
+    setWrapupRequired(value: boolean): void;
+    setTaskList(taskList: ITask[]): void;
+    setIncomingTask(task: ITask): void;
+}
+
+interface IStoreWrapper extends IStoreBase {
+    handleTaskRemove(taskId: string): void;
 }
 
 interface IWrapupCode {

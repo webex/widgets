@@ -1,8 +1,7 @@
-// storeWrapper.ts
-
 import {IStoreWrapper, IStore, InitParams, TASK_EVENTS} from './store.types';
 import {ITask} from '@webex/plugin-cc';
-import Store from './store'; // Import your original store
+import Store from './store';
+import {runInAction} from 'mobx';
 
 class StoreWrapper implements IStoreWrapper {
   private store: IStore;
@@ -59,72 +58,67 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.wrapupRequired;
   }
 
-  setCurrentTask(task: any): void {
-    return this.store.setCurrentTask(task);
-  }
-
   setSelectedLoginOption(option: string): void {
     return this.store.setSelectedLoginOption(option);
   }
 
   init(options: InitParams): Promise<void> {
-    console.log('Shreyas: Initializing store with options', options);
     return this.store.init(options).then(() => {
-      console.log('Shreyas: Store initialized, setting up incoming task handler');
       this.setupIncomingTaskHandler();
     });
   }
 
-  handleTaskRemoved = (taskId: string, wrapupRequired: boolean) => {
-    console.log('Shreyas: Handling task removal for taskId', taskId);
+  handleTaskRemove = (taskId: string) => {
     const taskToRemove = this.store.taskList.find((task) => task.data.interactionId === taskId);
-    this.store.wrapupRequired = wrapupRequired;
-
     if (taskToRemove) {
-      console.log('Shreyas: Task found, cleaning up listeners for taskId', taskId);
-      // Clean up listeners on the task
       taskToRemove.off(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned(taskId));
       taskToRemove.off(TASK_EVENTS.TASK_END, ({wrapupRequired}: {wrapupRequired: boolean}) =>
-        this.handleTaskRemoved(taskId, wrapupRequired)
+        this.handleTaskEnd(taskId, wrapupRequired)
       );
     }
+    const updateTaskList = this.store.taskList.filter((task) => task.data.interactionId !== taskId);
+    runInAction(() => {
+      this.store.setTaskList(updateTaskList);
+      this.store.setCurrentTask(null);
+      this.store.setWrapupRequired(false);
+    });
+  };
 
-    this.store.taskList = this.store.taskList.filter((task) => task.data.interactionId !== taskId);
-    console.log('Shreyas: Task removed, updated task list', this.store.taskList);
+  handleTaskEnd = (taskId: string, wrapupRequired: boolean) => {
+    // Task has been ended based on wrapupRequired we either set wrapupRequired or remove the task
+    if (wrapupRequired) {
+      this.store.setWrapupRequired(wrapupRequired);
+    } else {
+      this.handleTaskRemove(taskId);
+    }
   };
 
   handleTaskAssigned = (task: ITask) => () => {
-    this.store.incomingTask = null;
-    this.setCurrentTask(task);
+    runInAction(() => {
+      this.store.setCurrentTask(task);
+      this.store.setIncomingTask(null);
+    });
   };
 
   handleIncomingTask = (task: ITask) => {
-    console.log('Shreyas: Handling incoming task', task);
-    this.store.incomingTask = task;
-    console.log('Shreyas: setted incomingTask in store');
+    this.store.setIncomingTask(task);
     if (this.store.taskList.some((t) => t.data.interactionId === task.data.interactionId)) {
-      console.log('Shreyas: Task already present in the taskList', task.data.interactionId);
       // Task already present in the taskList
       return;
     }
 
     // Attach event listeners to the task
-    console.log('Shreyas: Attaching event listeners to the task', task.data.interactionId);
     task.on(TASK_EVENTS.TASK_END, ({wrapupRequired}: {wrapupRequired: boolean}) =>
-      this.handleTaskRemoved(task.data.interactionId, wrapupRequired)
+      this.handleTaskEnd(task.data.interactionId, wrapupRequired)
     );
     task.on(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned(task));
-
-    this.store.taskList = [...this.store.taskList, task];
-    console.log('Shreyas: Task added to task list', this.store.taskList);
+    this.store.setTaskList([...this.store.taskList, task]);
   };
 
   setupIncomingTaskHandler() {
-    console.log('Shreyas: Setting up incoming task handler');
     const ccSDK = this.store.cc;
 
     ccSDK.on(TASK_EVENTS.TASK_INCOMING, (task) => {
-      console.log('Shreyas: Incoming task event received', task);
       this.handleIncomingTask(task);
     });
   }

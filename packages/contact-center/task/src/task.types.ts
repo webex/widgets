@@ -205,7 +205,4 @@ export type CallControlPresentationalProps = Pick<
   | 'wrapupCall'
 >;
 
-export type useCallControlProps = Pick<
-  ControlProps,
-  'currentTask' | 'wrapupRequired' | 'onHoldResume' | 'onEnd' | 'onWrapUp' | 'logger'
->;
+export type useCallControlProps = Pick<ControlProps, 'currentTask' | 'onHoldResume' | 'onEnd' | 'onWrapUp' | 'logger'>;

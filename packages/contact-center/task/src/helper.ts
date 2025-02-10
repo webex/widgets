@@ -1,6 +1,7 @@
 import {useState, useEffect, useCallback, useRef} from 'react';
 import {ITask} from '@webex/plugin-cc';
 import store from '@webex/cc-store';
+import {runInAction} from 'mobx';
 import {TASK_EVENTS, useCallControlProps, UseTaskListProps, UseTaskProps} from './task.types';
 
 // Hook for managing the task list
@@ -95,7 +96,7 @@ export const useIncomingTask = (props: UseTaskProps) => {
 };
 
 export const useCallControl = (props: useCallControlProps) => {
-  const {currentTask, onHoldResume, onEnd, onWrapUp, wrapupRequired, logger} = props;
+  const {currentTask, onHoldResume, onEnd, onWrapUp, logger} = props;
   const audioRef = useRef<HTMLAudioElement | null>(null); // Ref for the audio element
 
   const logError = (message: string, method: string) => {
@@ -171,6 +172,7 @@ export const useCallControl = (props: useCallControlProps) => {
     currentTask
       .wrapup({wrapUpReason: wrapUpReason, auxCodeId: auxCodeId})
       .then(() => {
+        store.handleTaskRemove(currentTask.data.interactionId);
         if (onWrapUp) onWrapUp();
       })
       .catch((error: Error) => {
@@ -185,6 +187,5 @@ export const useCallControl = (props: useCallControlProps) => {
     toggleHold,
     toggleRecording,
     wrapupCall,
-    wrapupRequired,
   };
 };

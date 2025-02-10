@@ -12,6 +12,7 @@ function App() {
   });
   const [accessToken, setAccessToken] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showWidgets, setShowWidgets] = useState(false);
 
   const webexConfig = {
     fedramp: false,
@@ -133,20 +134,26 @@ function App() {
           </div>
           <button
             onClick={() => {
-              setIsLoggedIn(true);
+              setShowWidgets(true);
             }}
           >
             Submit
           </button>
         </>
       )}
-      {isLoggedIn && (
+      {showWidgets && (
         <>
           {selectedWidgets.stationLogin && <StationLogin onLogin={onLogin} onLogout={onLogout} />}
-          {selectedWidgets.userState && <UserState />}
-          {selectedWidgets.incomingTask && <IncomingTask onAccepted={onAccepted} onDeclined={onDeclined} />}
-          {selectedWidgets.taskList && <TaskList onTaskAccepted={onTaskAccepted} onTaskDeclined={onTaskDeclined} />}
-          {selectedWidgets.callControl && <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapup={onWrapup} />}
+          {isLoggedIn && (
+            <>
+              {selectedWidgets.userState && <UserState />}
+              {selectedWidgets.incomingTask && <IncomingTask onAccepted={onAccepted} onDeclined={onDeclined} />}
+              {selectedWidgets.taskList && <TaskList onTaskAccepted={onTaskAccepted} onTaskDeclined={onTaskDeclined} />}
+              {selectedWidgets.callControl && (
+                <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapup={onWrapup} />
+              )}
+            </>
+          )}
         </>
       )}
     </>
