@@ -27,11 +27,11 @@ jest.mock('webex', () => ({
 
 describe('Store', () => {
   let mockWebex;
+  let storeInstance;
 
   beforeEach(() => {
-    // Reset teams and loginOptions before each test since store is a singleton
-    store.teams = [];
-    store.loginOptions = [];
+    // Reset store values before each test since store is a singleton
+    storeInstance = store.getInstance();
     mockWebex = Webex.init();
     jest.useFakeTimers(); // Use fake timers for testing setTimeout
   });
@@ -41,11 +41,26 @@ describe('Store', () => {
   });
 
   it('should initialize with default values', () => {
-    expect(store.teams).toEqual([]);
-    expect(store.loginOptions).toEqual([]);
-    expect(store.isAgentLoggedIn).toBe(false);
-    expect(store.deviceType).toBe('');
-    expect(makeAutoObservable).toHaveBeenCalledWith(store, {cc: expect.any(Function), currentTask: expect.any(Object)});
+    expect(storeInstance.teams).toEqual([]);
+    expect(storeInstance.loginOptions).toEqual([]);
+    expect(storeInstance.idleCodes).toEqual([]);
+    expect(storeInstance.agentId).toBe('');
+    expect(storeInstance.selectedLoginOption).toBe('');
+    expect(storeInstance.wrapupCodes).toEqual([]);
+    expect(storeInstance.incomingTask).toBeNull();
+    expect(storeInstance.currentTask).toBeNull();
+    expect(storeInstance.isAgentLoggedIn).toBe(false);
+    expect(storeInstance.deviceType).toBe('');
+    expect(storeInstance.taskList).toEqual([]);
+    expect(storeInstance.wrapupRequired).toBe(false);
+
+    expect(makeAutoObservable).toHaveBeenCalledWith(storeInstance, {
+      cc: expect.any(Function),
+      currentTask: expect.any(Object),
+      incomingTask: expect.any(Object),
+      taskList: expect.any(Object),
+      wrapupRequired: expect.any(Object),
+    });
   });
 
   describe('registerCC', () => {
@@ -60,14 +75,14 @@ describe('Store', () => {
       };
       mockWebex.cc.register.mockResolvedValue(mockResponse);
 
-      await store.registerCC(mockWebex);
+      await storeInstance.registerCC(mockWebex);
 
-      expect(store.teams).toEqual(mockResponse.teams);
-      expect(store.loginOptions).toEqual(mockResponse.loginVoiceOptions);
-      expect(store.idleCodes).toEqual(mockResponse.idleCodes);
-      expect(store.agentId).toEqual(mockResponse.agentId);
-      expect(store.isAgentLoggedIn).toEqual(mockResponse.isAgentLoggedIn);
-      expect(store.deviceType).toEqual(mockResponse.deviceType);
+      expect(storeInstance.teams).toEqual(mockResponse.teams);
+      expect(storeInstance.loginOptions).toEqual(mockResponse.loginVoiceOptions);
+      expect(storeInstance.idleCodes).toEqual(mockResponse.idleCodes);
+      expect(storeInstance.agentId).toEqual(mockResponse.agentId);
+      expect(storeInstance.isAgentLoggedIn).toEqual(mockResponse.isAgentLoggedIn);
+      expect(storeInstance.deviceType).toEqual(mockResponse.deviceType);
     });
 
     it('should log an error on failed register', async () => {
@@ -75,13 +90,16 @@ describe('Store', () => {
       mockWebex.cc.register.mockRejectedValue(mockError);
 
       try {
-        await store.registerCC(mockWebex);
+        await storeInstance.registerCC(mockWebex);
       } catch (error) {
         expect(error).toEqual(mockError);
-        expect(store.logger.error).toHaveBeenCalledWith('Error registering contact center: Error: Register failed', {
-          method: 'registerCC',
-          module: 'cc-store#store.ts',
-        });
+        expect(storeInstance.logger.error).toHaveBeenCalledWith(
+          'Error registering contact center: Error: Register failed',
+          {
+            method: 'registerCC',
+            module: 'cc-store#store.ts',
+          }
+        );
       }
     });
   });
@@ -89,12 +107,12 @@ describe('Store', () => {
   describe('init', () => {
     it('should call registerCC if webex is in options', async () => {
       const initParams = {webex: mockWebex};
-      jest.spyOn(store, 'registerCC').mockResolvedValue();
+      jest.spyOn(storeInstance, 'registerCC').mockResolvedValue();
       Webex.init.mockClear();
 
-      await store.init(initParams);
+      await storeInstance.init(initParams);
 
-      expect(store.registerCC).toHaveBeenCalledWith(mockWebex);
+      expect(storeInstance.registerCC).toHaveBeenCalledWith(mockWebex);
       expect(Webex.init).not.toHaveBeenCalled();
     });
 
@@ -103,15 +121,15 @@ describe('Store', () => {
         webexConfig: {anyConfig: true},
         access_token: 'fake_token',
       };
-      jest.spyOn(store, 'registerCC').mockResolvedValue();
+      jest.spyOn(storeInstance, 'registerCC').mockResolvedValue();
 
-      await store.init(initParams);
+      await storeInstance.init(initParams);
 
       expect(Webex.init).toHaveBeenCalledWith({
         config: initParams.webexConfig,
         credentials: {access_token: initParams.access_token},
       });
-      expect(store.registerCC).toHaveBeenCalledWith(expect.any(Object));
+      expect(storeInstance.registerCC).toHaveBeenCalledWith(expect.any(Object));
     });
 
     it('should reject the promise if registerCC fails in init method', async () => {
@@ -120,9 +138,9 @@ describe('Store', () => {
         access_token: 'fake_token',
       };
 
-      jest.spyOn(store, 'registerCC').mockRejectedValue(new Error('registerCC failed'));
+      jest.spyOn(storeInstance, 'registerCC').mockRejectedValue(new Error('registerCC failed'));
 
-      await expect(store.init(initParams)).rejects.toThrow('registerCC failed');
+      await expect(storeInstance.init(initParams)).rejects.toThrow('registerCC failed');
     });
 
     it('should reject the promise if Webex SDK fails to initialize', async () => {
@@ -133,13 +151,30 @@ describe('Store', () => {
 
       mockShouldCallback = false;
 
-      jest.spyOn(store, 'registerCC').mockResolvedValue();
+      jest.spyOn(storeInstance, 'registerCC').mockResolvedValue();
 
-      const initPromise = store.init(initParams);
+      const initPromise = storeInstance.init(initParams);
 
       jest.runAllTimers(); // Fast-forward the timers to simulate timeout
 
       await expect(initPromise).rejects.toThrow('Webex SDK failed to initialize');
+    });
+
+    it('should set states when called through setters', () => {
+      storeInstance.setIncomingTask('task1');
+      expect(storeInstance.incomingTask).toBe('task1');
+
+      storeInstance.setCurrentTask('task2');
+      expect(storeInstance.currentTask).toBe('task2');
+
+      storeInstance.setWrapupRequired(true);
+      expect(storeInstance.wrapupRequired).toBe(true);
+
+      storeInstance.setTaskList(['task3']);
+      expect(storeInstance.taskList).toEqual(['task3']);
+
+      storeInstance.setSelectedLoginOption('option1');
+      expect(storeInstance.selectedLoginOption).toBe('option1');
     });
   });
 });

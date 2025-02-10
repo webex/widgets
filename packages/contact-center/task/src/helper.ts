@@ -1,7 +1,6 @@
-import {useState, useEffect, useCallback, useRef} from 'react';
+import {useEffect, useCallback, useRef} from 'react';
 import {ITask} from '@webex/plugin-cc';
 import store from '@webex/cc-store';
-import {runInAction} from 'mobx';
 import {TASK_EVENTS, useCallControlProps, UseTaskListProps, UseTaskProps} from './task.types';
 
 // Hook for managing the task list
@@ -38,7 +37,6 @@ export const useTaskList = (props: UseTaskListProps) => {
       .decline(taskId)
       .then(() => {
         onTaskDeclined && onTaskDeclined(task);
-        // store.setCurrentTask(null);
       })
       .catch((error: Error) => {
         logError(`Error declining task: ${error}`, 'declineTask');
@@ -172,8 +170,8 @@ export const useCallControl = (props: useCallControlProps) => {
     currentTask
       .wrapup({wrapUpReason: wrapUpReason, auxCodeId: auxCodeId})
       .then(() => {
-        store.handleTaskRemove(currentTask.data.interactionId);
         if (onWrapUp) onWrapUp();
+        store.handleTaskRemove(currentTask.data.interactionId);
       })
       .catch((error: Error) => {
         logError(`Error wrapping up call: ${error}`, 'wrapupCall');

@@ -138,17 +138,17 @@ export interface ControlProps {
   /**
    * Function to handle hold/resume actions.
    */
-  onHoldResume: () => void;
+  onHoldResume?: () => void;
 
   /**
    * Function to handle ending the task.
    */
-  onEnd: () => void;
+  onEnd?: () => void;
 
   /**
    * Function to handle wrapping up the task.
    */
-  onWrapUp: () => void;
+  onWrapUp?: () => void;
 
   /**
    * Logger instance for logging purposes.
