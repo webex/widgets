@@ -2,7 +2,7 @@ const webpack = require('webpack');
 const path = require('path');
 
 module.exports = {
-  mode: 'development',
+  mode: process.env.NODE_ENV || 'development',
   entry: './src/index.ts',
   resolve: {
     extensions: ['.ts', '.tsx', '.js', '.jsx', '.scss'],
