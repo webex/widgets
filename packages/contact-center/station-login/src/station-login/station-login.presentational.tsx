@@ -1,8 +1,7 @@
 import React, { useEffect, useRef} from 'react';
 import { StationLoginPresentationalProps } from './station-login.types';
 import './station-login.style.scss';
-import { MULTIPLE_SIGN_IN_ALERT_MESSAGE, MULTIPLE_SIGN_IN_ALERT_TITLE  
-} from './constants';
+import { MULTIPLE_SIGN_IN_ALERT_MESSAGE, MULTIPLE_SIGN_IN_ALERT_TITLE } from './constants';
 import './alert-modal.scss';
 
 const StationLoginPresentational: React.FunctionComponent<StationLoginPresentationalProps> = (props) => {
@@ -54,8 +53,7 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
     }
   }, [isAgentLoggedIn]);
 
-  const selectLoginOption = (event: { target: { value: string } }) => 
-    {
+  const selectLoginOption = (event: { target: { value: string } }) => {
     const dialNumber = document.querySelector('#dialNumber') as HTMLInputElement;
     const deviceType = event.target.value;
     setDeviceType(deviceType);
