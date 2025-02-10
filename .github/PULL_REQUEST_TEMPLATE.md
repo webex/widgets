@@ -42,7 +42,7 @@ This is for compliance purposes with FedRAMP program.
 - [ ] I have not skipped any automated checks
 - [ ] All existing and new tests passed
 - [ ] I have updated the testing document
-- [ ] I have tested the functionality with amplify link1
+- [ ] I have tested the functionality with amplify link
 
 ---
 
