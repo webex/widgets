@@ -22,6 +22,7 @@ class Store implements IStore {
   idleCodes: IdleCode[] = [];
   agentId: string = '';
   selectedLoginOption: string = '';
+  currentTheme: string = 'LIGHT';
   wrapupCodes: IWrapupCode[] = [];
   incomingTask: ITask = null;
   currentTask: ITask = null;
@@ -29,7 +30,8 @@ class Store implements IStore {
   deviceType: string = '';
   taskList: ITask[] = [];
   wrapupRequired: boolean = false;
-
+  currentState: string = '';
+  lastStateChangeTimestamp: Date = new Date();
   constructor() {
     makeAutoObservable(this, {
       cc: observable.ref,
@@ -60,6 +62,14 @@ class Store implements IStore {
     this.selectedLoginOption = option;
   }
 
+  setCurrentState(state: string): void {
+    this.currentState = state;
+  }
+
+  setLastStateChangeTimestamp(timestamp: Date): void {
+    this.lastStateChangeTimestamp = timestamp;
+  }
+
   public static getInstance(): Store {
     if (!Store.instance) {
       console.log('Creating new store instance');
@@ -68,6 +78,10 @@ class Store implements IStore {
 
     console.log('Returning store instance');
     return Store.instance;
+  }
+
+  setCurrentTheme(theme: string): void {
+    this.currentTheme = theme;
   }
 
   registerCC(webex: WithWebex['webex']): Promise<void> {
@@ -83,6 +97,8 @@ class Store implements IStore {
         this.wrapupCodes = response.wrapupCodes;
         this.isAgentLoggedIn = response.isAgentLoggedIn;
         this.deviceType = response.deviceType;
+        this.currentState = response.lastStateAuxCodeId;
+        this.lastStateChangeTimestamp = response.lastStateChangeTimestamp;
       })
       .catch((error) => {
         this.logger.error(`Error registering contact center: ${error}`, {

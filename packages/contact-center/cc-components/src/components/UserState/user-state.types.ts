@@ -1,4 +1,4 @@
-import { IdleCode } from '@webex/cc-store';
+import {IdleCode} from '@webex/cc-store';
 
 /**
  * Interface representing the state of a user.
@@ -17,7 +17,7 @@ export interface IUserState {
    * @param status.state The state to set.
    * @returns void
    */
-  setAgentStatus: (status: { auxCodeId: string; state: string }) => void;
+  setAgentStatus: (status: {auxCodeId: string; state: string}) => void;
 
   /**
    * Boolean indicating if the agent status is being set.
@@ -37,13 +37,10 @@ export interface IUserState {
   /**
    * The idle code of the current user state
    */
-  currentState: IdleCode;
+  currentState: string;
 
   /**
-   * Function to set the current state
-   * of the user.
-   * @param state The state to set.
-   * @returns void
+   * The preferred theme
    */
-  setCurrentState: (state: IdleCode) => void;
+  currentTheme: string;
 }

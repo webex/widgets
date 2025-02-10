@@ -65,6 +65,7 @@ describe('Store', () => {
 
   describe('registerCC', () => {
     it('should initialise store values on successful register', async () => {
+      let date = new Date();
       const mockResponse = {
         teams: [{id: 'team1', name: 'Team 1'}],
         loginVoiceOptions: ['option1', 'option2'],
@@ -72,6 +73,8 @@ describe('Store', () => {
         agentId: 'agent1',
         isAgentLoggedIn: true,
         deviceType: 'BROWSER',
+        lastStateAuxCodeId: 'auxCodeId',
+        lastStateChangeTimestamp: date,
       };
       mockWebex.cc.register.mockResolvedValue(mockResponse);
 
@@ -83,6 +86,8 @@ describe('Store', () => {
       expect(storeInstance.agentId).toEqual(mockResponse.agentId);
       expect(storeInstance.isAgentLoggedIn).toEqual(mockResponse.isAgentLoggedIn);
       expect(storeInstance.deviceType).toEqual(mockResponse.deviceType);
+      expect(storeInstance.currentState).toEqual(mockResponse.lastStateAuxCodeId);
+      expect(storeInstance.lastStateChangeTimestamp).toEqual(date);
     });
 
     it('should log an error on failed register', async () => {

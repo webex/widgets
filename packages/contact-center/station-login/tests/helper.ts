@@ -1,15 +1,18 @@
+import React from 'react';
 import {renderHook, act, waitFor} from '@testing-library/react';
 import {useStationLogin} from '../src/helper';
 
 const teams = ['team123', 'team456'];
-
 const loginOptions = ['EXTENSION', 'AGENT_DN', 'BROWSER'];
+
 jest.mock('@webex/cc-store', () => {
   return {
     cc: {},
     teams,
     loginOptions,
     setSelectedLoginOption: jest.fn(),
+    setCurrentState: jest.fn(),
+    setLastStateChangeTimestamp: jest.fn(),
   };
 });
 
@@ -17,6 +20,9 @@ jest.mock('@webex/cc-store', () => {
 const ccMock = {
   stationLogin: jest.fn(),
   stationLogout: jest.fn(),
+  on: jest.fn(),
+  off: jest.fn(),
+  register: jest.fn(),
 };
 
 // Sample login parameters
@@ -29,7 +35,8 @@ const loginParams = {
 const loginCb = jest.fn();
 const logoutCb = jest.fn();
 const logger = {
-  error: jest.fn()
+  log: jest.fn(),
+  error: jest.fn(),
 };
 const isAgentLoggedIn = false;
 
@@ -38,11 +45,12 @@ describe('useStationLogin Hook', () => {
     jest.clearAllMocks();
     loginCb.mockClear();
     logoutCb.mockClear();
+    logger.log.mockClear();
     logger.error.mockClear();
   });
 
   it('should set loginSuccess on successful login', async () => {
-    const successResponse = {
+    const successResponse = {data: {
       agentId: '6b310dff-569e-4ac7-b064-70f834ea56d8',
       agentSessionId: 'c9c24ace-5170-4a9f-8bc2-2eeeff9d7c11',
       auxCodeId: '00b4e8df-f7b0-460f-aacf-f1e635c87d4d',
@@ -63,19 +71,30 @@ describe('useStationLogin Hook', () => {
       trackingId: 'f40915b9-07ed-4b6c-832d-e7f5e7af3b72',
       type: 'AgentStationLoginSuccess',
       voiceCount: 1,
-    };
+    }};
 
     ccMock.stationLogin.mockResolvedValue(successResponse);
     const setSelectedLoginOptionSpy = jest.spyOn(require('@webex/cc-store'), 'setSelectedLoginOption');
-
-    const {result} = renderHook(() => useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger, isAgentLoggedIn}));
+    const setSetCurrentStateSpy = jest.spyOn(require('@webex/cc-store'), 'setCurrentState');
+    const setSetLastStateChangeTimestampSpy = jest.spyOn(require('@webex/cc-store'), 'setLastStateChangeTimestamp');
+    const {result} = renderHook(() =>
+      useStationLogin({
+        cc: ccMock,
+        onLogin: loginCb,
+        onLogout: logoutCb,
+        logger,
+        isAgentLoggedIn,
+        handleContinue: jest.fn(),
+        showMultipleLoginAlert: false,
+      })
+    );
 
     act(() => {
       result.current.setDeviceType(loginParams.loginOption);
       result.current.setDialNumber(loginParams.dialNumber);
       result.current.setTeam(loginParams.teamId);
     });
-  
+
     await act(async () => {
       await result.current.login();
     });
@@ -100,9 +119,15 @@ describe('useStationLogin Hook', () => {
         loginFailure: undefined,
         logoutSuccess: undefined,
         relogin: expect.any(Function),
+        showMultipleLoginAlert: false,
+        handleContinue: expect.any(Function),
       });
 
       expect(setSelectedLoginOptionSpy).toHaveBeenCalledWith(loginParams.loginOption);
+      expect(setSetCurrentStateSpy).toHaveBeenCalledWith(successResponse.data.auxCodeId);
+      expect(setSetLastStateChangeTimestampSpy).toHaveBeenCalledWith(
+        new Date(successResponse.data.lastStateChangeTimestamp)
+      );
     });
   });
 
@@ -112,14 +137,24 @@ describe('useStationLogin Hook', () => {
     const setSelectedLoginOptionSpy = jest.spyOn(require('@webex/cc-store'), 'setSelectedLoginOption');
 
     loginCb.mockClear();
-    const {result} = renderHook(() => useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger, isAgentLoggedIn}));
+    const {result} = renderHook(() =>
+      useStationLogin({
+        cc: ccMock,
+        onLogin: loginCb,
+        onLogout: logoutCb,
+        logger,
+        isAgentLoggedIn,
+        handleContinue: jest.fn(),
+        showMultipleLoginAlert: false,
+      })
+    );
 
     act(() => {
       result.current.setDeviceType(loginParams.loginOption);
       result.current.setDialNumber(loginParams.dialNumber);
       result.current.setTeam(loginParams.teamId);
     });
-  
+
     await act(async () => {
       await result.current.login();
     });
@@ -144,6 +179,8 @@ describe('useStationLogin Hook', () => {
         loginFailure: errorResponse,
         logoutSuccess: undefined,
         relogin: expect.any(Function),
+        showMultipleLoginAlert: false,
+        handleContinue: expect.any(Function),
       });
 
       expect(setSelectedLoginOptionSpy).not.toHaveBeenCalled();
@@ -151,11 +188,17 @@ describe('useStationLogin Hook', () => {
   });
 
   it('should not call login callback if not present', async () => {
-
     ccMock.stationLogin.mockResolvedValue({});
 
-    const { result } = renderHook(() =>
-      useStationLogin({cc: ccMock, onLogout: logoutCb, logger, isAgentLoggedIn})
+    const {result} = renderHook(() =>
+      useStationLogin({
+        cc: ccMock,
+        onLogout: logoutCb,
+        logger,
+        isAgentLoggedIn,
+        handleContinue: jest.fn(),
+        showMultipleLoginAlert: false,
+      })
     );
 
     await act(async () => {
@@ -172,14 +215,24 @@ describe('useStationLogin Hook', () => {
     ccMock.stationLogin.mockRejectedValue(errorResponse);
 
     loginCb.mockClear();
-    const {result} = renderHook(() => useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger, isAgentLoggedIn}));
+    const {result} = renderHook(() =>
+      useStationLogin({
+        cc: ccMock,
+        onLogin: loginCb,
+        onLogout: logoutCb,
+        logger,
+        isAgentLoggedIn,
+        handleContinue: jest.fn(),
+        showMultipleLoginAlert: false,
+      })
+    );
 
     act(() => {
       result.current.setDeviceType(loginParams.loginOption);
       result.current.setDialNumber(loginParams.dialNumber);
       result.current.setTeam(loginParams.teamId);
     });
-  
+
     await act(async () => {
       await result.current.login();
     });
@@ -227,7 +280,17 @@ describe('useStationLogin Hook', () => {
 
     ccMock.stationLogout.mockResolvedValue(successResponse);
 
-    const {result} = renderHook(() => useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger, isAgentLoggedIn}));
+    const {result} = renderHook(() =>
+      useStationLogin({
+        cc: ccMock,
+        onLogin: loginCb,
+        onLogout: logoutCb,
+        logger,
+        isAgentLoggedIn,
+        handleContinue: jest.fn(),
+        showMultipleLoginAlert: false,
+      })
+    );
 
     await act(async () => {
       await result.current.logout();
@@ -249,6 +312,8 @@ describe('useStationLogin Hook', () => {
         loginFailure: undefined,
         logoutSuccess: successResponse,
         relogin: expect.any(Function),
+        showMultipleLoginAlert: false,
+        handleContinue: expect.any(Function),
       });
     });
   });
@@ -257,7 +322,15 @@ describe('useStationLogin Hook', () => {
     ccMock.stationLogout.mockRejectedValue(new Error('Logout failed'));
 
     const {result} = renderHook(() =>
-      useStationLogin({cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger, isAgentLoggedIn})
+      useStationLogin({
+        cc: ccMock,
+        onLogin: loginCb,
+        onLogout: logoutCb,
+        logger,
+        isAgentLoggedIn,
+        handleContinue: jest.fn(),
+        showMultipleLoginAlert: false,
+      })
     );
 
     await act(async () => {
@@ -275,7 +348,16 @@ describe('useStationLogin Hook', () => {
   it('should not call logout callback if not present', async () => {
     ccMock.stationLogout.mockResolvedValue({});
 
-    const {result} = renderHook(() => useStationLogin({cc: ccMock, onLogin: loginCb, logger, isAgentLoggedIn}));
+    const {result} = renderHook(() =>
+      useStationLogin({
+        cc: ccMock,
+        onLogin: loginCb,
+        logger,
+        isAgentLoggedIn,
+        handleContinue: jest.fn(),
+        showMultipleLoginAlert: false,
+      })
+    );
 
     await act(async () => {
       await result.current.logout();
@@ -288,8 +370,18 @@ describe('useStationLogin Hook', () => {
 
   it('should call relogin and set device type', async () => {
     const setSelectedLoginOptionSpy = jest.spyOn(require('@webex/cc-store'), 'setSelectedLoginOption');
-    
-    const { result } = renderHook(() => useStationLogin({ cc: ccMock, onLogin: loginCb, onLogout: logoutCb, logger, isAgentLoggedIn }));
+
+    const {result} = renderHook(() =>
+      useStationLogin({
+        cc: ccMock,
+        onLogin: loginCb,
+        onLogout: logoutCb,
+        logger,
+        isAgentLoggedIn,
+        handleContinue: jest.fn(),
+        showMultipleLoginAlert: false,
+      })
+    );
 
     act(() => {
       result.current.relogin();
@@ -298,6 +390,29 @@ describe('useStationLogin Hook', () => {
     await waitFor(() => {
       expect(setSelectedLoginOptionSpy).toHaveBeenCalled();
       expect(loginCb).toHaveBeenCalled();
+    });
+  });
+
+  it('should handle AgentMultiLogin event', async () => {
+    const {result} = renderHook(() =>
+      useStationLogin({
+        cc: ccMock,
+        onLogin: loginCb,
+        onLogout: logoutCb,
+        logger,
+        isAgentLoggedIn,
+        handleContinue: jest.fn(),
+        showMultipleLoginAlert: false,
+      })
+    );
+
+    const event = new Event('AgentMultiLoginCloseSession');
+    act(() => {
+      ccMock.on.mock.calls[0][1](event);
+    });
+
+    await waitFor(() => {
+      expect(result.current.showMultipleLoginAlert).toBe(true);
     });
   });
 });

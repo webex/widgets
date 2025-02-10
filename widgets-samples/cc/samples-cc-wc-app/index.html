@@ -11,20 +11,31 @@
     </style>
   </head>
   <body>
-    <h1>Contact Center widgets as web-component</h1>
-    <input
-      type="text"
-      placeholder="Enter your access token"
-      id="access_token_elem"
-      onkeyup="switchButtonState()"
-      autocomplete="off"
-      spellcheck="false"
-      autocapitalize="off"
-    />
-    <button onclick="initWidgets()" disabled>Init Widgets</button>
-    <div id="widgets-container">
-      <widget-cc-station-login class="disabled" id="cc-station-login"></widget-cc-station-login>
-    </div>
+    <mdc-themeprovider id="theme-provider-elem" themeclass="mds-theme-stable-lightWebex">
+      <mdc-iconprovider>
+        <h1>Contact Center widgets as web-component</h1>
+        <input
+          type="text"
+          placeholder="Enter your access token"
+          id="access_token_elem"
+          onkeyup="switchButtonState()"
+          autocomplete="off"
+          spellcheck="false"
+          autocapitalize="off"
+        />
+        <br />
+        <input
+          type='checkbox'
+          id='theme'
+          name='theme'
+        /> Dark Theme
+        <br />
+        <button onclick="initWidgets()" disabled>Init Widgets</button>
+        <div id="widgets-container">
+          <widget-cc-station-login class="disabled" id="cc-station-login"></widget-cc-station-login>
+        </div>
+      </mdc-iconprovider>
+    </mdc-themeprovider>
     <script src="dist/bundle.js"></script>
     <script src="app.js"></script>
   </body>

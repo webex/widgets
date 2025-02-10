@@ -3,19 +3,22 @@ import store from '@webex/cc-store';
 import {observer} from 'mobx-react-lite';
 
 import {useUserState} from '../helper';
-import UserStatePresentational from './user-state.presentational';
-import {IUserState} from './use-state.types';
+import {UserStateComponent, IUserState} from '@webex/cc-components';
 
-const UserStateComponent: React.FunctionComponent = () => {
-  const {cc, idleCodes, agentId} = store;
-  const props: IUserState = useUserState({
-    idleCodes,
-    agentId,
-    cc,
-  });
+const UserState: React.FunctionComponent = observer(() => {
+  const {cc, idleCodes, agentId, currentTheme, currentState, lastStateChangeTimestamp} = store;
+  const props: IUserState = {
+    ...useUserState({
+      idleCodes,
+      agentId,
+      cc,
+      currentState,
+      lastStateChangeTimestamp,
+    }),
+    currentTheme,
+  };
 
-  return <UserStatePresentational {...props} />;
-};
+  return <UserStateComponent {...props} />;
+});
 
-const UserState = observer(UserStateComponent);
 export {UserState};

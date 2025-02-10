@@ -1,5 +1,6 @@
-import React, {useState} from 'react';
+import React, {useState, useRef} from 'react';
 import {StationLogin, UserState, IncomingTask, TaskList, CallControl, store} from '@webex/cc-widgets';
+import {ThemeProvider, IconProvider} from '@momentum-design/components/dist/react';
 
 function App() {
   const [isSdkReady, setIsSdkReady] = useState(false);
@@ -12,6 +13,8 @@ function App() {
   });
   const [accessToken, setAccessToken] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const themeCheckboxRef = useRef(null);
+  const [currentTheme, setCurrentTheme] = useState(store.currentTheme);
   const [showWidgets, setShowWidgets] = useState(false);
 
   const webexConfig = {
@@ -65,100 +68,120 @@ function App() {
   };
 
   return (
-    <>
-      <h1>Contact Center widgets in a react app</h1>
-      <input
-        type="text"
-        placeholder="Enter your access token"
-        value={accessToken}
-        onChange={(e) => setAccessToken(e.target.value)}
-      />
-      <button
-        disabled={accessToken.trim() === ''}
-        onClick={() => {
-          store.init({webexConfig, access_token: accessToken}).then(() => {
-            setIsSdkReady(true);
-          });
-        }}
+    <div className="mds-typography">
+      <ThemeProvider
+        themeclass={currentTheme === 'LIGHT' ? 'mds-theme-stable-lightWebex' : 'mds-theme-stable-darkWebex'}
       >
-        Init Widgets
-      </button>
-      {isSdkReady && (
-        <>
-          <div>
-            <label>
-              <input
-                type="checkbox"
-                name="stationLogin"
-                checked={selectedWidgets.stationLogin}
-                onChange={handleCheckboxChange}
-              />
-              Station Login
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                name="userState"
-                checked={selectedWidgets.userState}
-                onChange={handleCheckboxChange}
-              />
-              User State
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                name="incomingTask"
-                checked={selectedWidgets.incomingTask}
-                onChange={handleCheckboxChange}
-              />
-              Incoming Task
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                name="taskList"
-                checked={selectedWidgets.taskList}
-                onChange={handleCheckboxChange}
-              />
-              Task List
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                name="callControl"
-                checked={selectedWidgets.callControl}
-                onChange={handleCheckboxChange}
-              />
-              Call Control
-            </label>
-          </div>
+        <IconProvider>
+          <h1>Contact Center widgets in a react app</h1>
+          <input
+            type="text"
+            placeholder="Enter your access token"
+            value={accessToken}
+            onChange={(e) => setAccessToken(e.target.value)}
+          />
+          <br />
+          <input
+            type="checkbox"
+            id="theme"
+            name="theme"
+            ref={themeCheckboxRef}
+            onChange={() => {
+              setCurrentTheme(themeCheckboxRef.current.checked ? 'DARK' : 'LIGHT');
+              store.setCurrentTheme(themeCheckboxRef.current.checked ? 'DARK' : 'LIGHT');
+            }}
+          />{' '}
+          Dark Theme
+          <br />
           <button
+            disabled={accessToken.trim() === ''}
             onClick={() => {
-              setShowWidgets(true);
+              store.init({webexConfig, access_token: accessToken}).then(() => {
+                setIsSdkReady(true);
+              });
             }}
           >
-            Submit
+            Init Widgets
           </button>
-        </>
-      )}
-      {showWidgets && (
-        <>
-          {selectedWidgets.stationLogin && <StationLogin onLogin={onLogin} onLogout={onLogout} />}
-          {isLoggedIn && (
+          {isSdkReady && (
             <>
-              {selectedWidgets.userState && <UserState />}
-              {selectedWidgets.incomingTask && <IncomingTask onAccepted={onAccepted} onDeclined={onDeclined} />}
-              {selectedWidgets.taskList && <TaskList onTaskAccepted={onTaskAccepted} onTaskDeclined={onTaskDeclined} />}
-              {selectedWidgets.callControl && (
-                <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapup={onWrapup} />
+              <div>
+                <label>
+                  <input
+                    type="checkbox"
+                    name="stationLogin"
+                    checked={selectedWidgets.stationLogin}
+                    onChange={handleCheckboxChange}
+                  />
+                  Station Login
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    name="userState"
+                    checked={selectedWidgets.userState}
+                    onChange={handleCheckboxChange}
+                  />
+                  User State
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    name="incomingTask"
+                    checked={selectedWidgets.incomingTask}
+                    onChange={handleCheckboxChange}
+                  />
+                  Incoming Task
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    name="taskList"
+                    checked={selectedWidgets.taskList}
+                    onChange={handleCheckboxChange}
+                  />
+                  Task List
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    name="callControl"
+                    checked={selectedWidgets.callControl}
+                    onChange={handleCheckboxChange}
+                  />
+                  Call Control
+                </label>
+              </div>
+              <button
+                onClick={() => {
+                  setShowWidgets(true);
+                }}
+              >
+                Submit
+              </button>
+            </>
+          )}
+          {showWidgets && (
+            <>
+              {selectedWidgets.stationLogin && <StationLogin onLogin={onLogin} onLogout={onLogout} />}
+              {isLoggedIn && (
+                <>
+                  {selectedWidgets.userState && <UserState />}
+                  {selectedWidgets.incomingTask && <IncomingTask onAccepted={onAccepted} onDeclined={onDeclined} />}
+                  {selectedWidgets.taskList && (
+                    <TaskList onTaskAccepted={onTaskAccepted} onTaskDeclined={onTaskDeclined} />
+                  )}
+                  {selectedWidgets.callControl && (
+                    <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapup={onWrapup} />
+                  )}
+                </>
               )}
             </>
           )}
-        </>
-      )}
-    </>
+        </IconProvider>
+      </ThemeProvider>
+    </div>
   );
 }
-// @ts-ignore
-window.store = store;
+
 export default App;
