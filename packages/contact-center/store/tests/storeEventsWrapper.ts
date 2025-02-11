@@ -14,7 +14,6 @@ jest.mock('../src/store', () => ({
     logger: 'mockLogger',
     idleCodes: 'mockIdleCodes',
     agentId: 'mockAgentId',
-    selectedLoginOption: 'mockSelectedLoginOption',
     wrapupCodes: 'mockWrapupCodes',
     currentTask: 'mockCurrentTask',
     isAgentLoggedIn: 'mockIsAgentLoggedIn',
@@ -28,7 +27,7 @@ jest.mock('../src/store', () => ({
     setShowMultipleLoginAlert: jest.fn(),
     setCurrentState: jest.fn(),
     setLastStateChangeTimestamp: jest.fn(),
-    setSelectedLoginOption: jest.fn(),
+    setDeviceType: jest.fn(),
     init: jest.fn().mockResolvedValue({}),
     setIncomingTask: jest.fn(),
     setCurrentTask: jest.fn(),
@@ -59,8 +58,8 @@ describe('storeEventsWrapper', () => {
       expect(storeWrapper.agentId).toBe('mockAgentId');
     });
 
-    it('should proxy selectedLoginOption', () => {
-      expect(storeWrapper.selectedLoginOption).toBe('mockSelectedLoginOption');
+    it('should proxy deviceType', () => {
+      expect(storeWrapper.deviceType).toBe('mockDeviceType');
     });
 
     it('should proxy wrapupCodes', () => {
@@ -202,9 +201,9 @@ describe('storeEventsWrapper', () => {
 
     it('should set selected login option', () => {
       const option = 'newLoginOption';
-      storeWrapper.setSelectedLoginOption(option);
+      storeWrapper.setDeviceType(option);
 
-      expect(storeWrapper['store'].setSelectedLoginOption).toHaveBeenCalledWith(option);
+      expect(storeWrapper['store'].setDeviceType).toHaveBeenCalledWith(option);
     });
   });
 
@@ -327,9 +326,9 @@ describe('storeEventsWrapper', () => {
 
     it('should set selected login option', () => {
       const option = 'newLoginOption';
-      storeWrapper.setSelectedLoginOption(option);
+      storeWrapper.setDeviceType(option);
 
-      expect(storeWrapper['store'].setSelectedLoginOption).toHaveBeenCalledWith(option);
+      expect(storeWrapper['store'].setDeviceType).toHaveBeenCalledWith(option);
     });
 
     it('should handle multilogin session modal with in correct data', async () => {
@@ -354,9 +353,9 @@ describe('storeEventsWrapper', () => {
 
     it('should set selected login option', () => {
       const option = 'newLoginOption';
-      storeWrapper.setSelectedLoginOption(option);
+      storeWrapper.setDeviceType(option);
 
-      expect(storeWrapper['store'].setSelectedLoginOption).toHaveBeenCalledWith(option);
+      expect(storeWrapper['store'].setDeviceType).toHaveBeenCalledWith(option);
     });
 
     it('should handle state change event  with incorrect data', async () => {

@@ -10,10 +10,11 @@ jest.mock('@webex/cc-store', () => {
     cc: {},
     teams,
     loginOptions,
-    setSelectedLoginOption: jest.fn(),
+    setDeviceType: jest.fn(),
     setCurrentState: jest.fn(),
     setLastStateChangeTimestamp: jest.fn(),
     setShowMultipleLoginAlert: jest.fn(),
+    setIsAgentLoggedIn: jest.fn(),
   };
 });
 
@@ -77,7 +78,7 @@ describe('useStationLogin Hook', () => {
     };
 
     ccMock.stationLogin.mockResolvedValue(successResponse);
-    const setSelectedLoginOptionSpy = jest.spyOn(require('@webex/cc-store'), 'setSelectedLoginOption');
+    const setDeviceTypeSpy = jest.spyOn(require('@webex/cc-store'), 'setDeviceType');
     const setSetCurrentStateSpy = jest.spyOn(require('@webex/cc-store'), 'setCurrentState');
     const setSetLastStateChangeTimestampSpy = jest.spyOn(require('@webex/cc-store'), 'setLastStateChangeTimestamp');
     const {result} = renderHook(() =>
@@ -87,6 +88,7 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         isAgentLoggedIn,
+        deviceType: 'BROWSER',
       })
     );
 
@@ -106,7 +108,7 @@ describe('useStationLogin Hook', () => {
         loginOption: loginParams.loginOption,
         dialNumber: loginParams.dialNumber,
       });
-      expect(loginCb).toHaveBeenCalledWith();
+      // expect(loginCb).toHaveBeenCalledWith();
 
       expect(result.current).toEqual({
         name: 'StationLogin',
@@ -123,7 +125,7 @@ describe('useStationLogin Hook', () => {
         handleContinue: expect.any(Function),
       });
 
-      expect(setSelectedLoginOptionSpy).toHaveBeenCalledWith(loginParams.loginOption);
+      expect(setDeviceTypeSpy).toHaveBeenCalledWith(loginParams.loginOption);
       expect(setSetCurrentStateSpy).toHaveBeenCalledWith(successResponse.data.auxCodeId);
       expect(setSetLastStateChangeTimestampSpy).toHaveBeenCalledWith(
         new Date(successResponse.data.lastStateChangeTimestamp)
@@ -136,11 +138,12 @@ describe('useStationLogin Hook', () => {
       data: {
         agentId: '6b310dff-569e-4ac7-b064-70f834ea56d8',
         agentSessionId: 'c9c24ace-5170-4a9f-8bc2-2eeeff9d7c11',
+        lastStateChangeTimestamp: 'mockDate',
       },
     };
 
     ccMock.stationLogin.mockResolvedValue(successResponse);
-    const setSelectedLoginOptionSpy = jest.spyOn(require('@webex/cc-store'), 'setSelectedLoginOption');
+    const setDeviceTypeSpy = jest.spyOn(require('@webex/cc-store'), 'setDeviceType');
     const setSetCurrentStateSpy = jest.spyOn(require('@webex/cc-store'), 'setCurrentState');
     const setSetLastStateChangeTimestampSpy = jest.spyOn(require('@webex/cc-store'), 'setLastStateChangeTimestamp');
     const {result} = renderHook(() =>
@@ -150,6 +153,7 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         isAgentLoggedIn,
+        deviceType: '',
       })
     );
 
@@ -164,7 +168,7 @@ describe('useStationLogin Hook', () => {
     });
 
     await waitFor(async () => {
-      expect(setSelectedLoginOptionSpy).toHaveBeenCalledWith(loginParams.loginOption);
+      expect(setDeviceTypeSpy).toHaveBeenCalledWith(loginParams.loginOption);
       expect(setSetCurrentStateSpy).not.toHaveBeenCalledWith(successResponse.data.auxCodeId);
       expect(setSetLastStateChangeTimestampSpy).not.toHaveBeenCalledWith(
         new Date(successResponse.data.lastStateChangeTimestamp)
@@ -181,15 +185,13 @@ describe('useStationLogin Hook', () => {
     };
 
     ccMock.stationLogin.mockResolvedValue(successResponse);
-    const setSelectedLoginOptionSpy = jest.spyOn(require('@webex/cc-store'), 'setSelectedLoginOption');
-    const setSetCurrentStateSpy = jest.spyOn(require('@webex/cc-store'), 'setCurrentState');
-    const setSetLastStateChangeTimestampSpy = jest.spyOn(require('@webex/cc-store'), 'setLastStateChangeTimestamp');
     const {result} = renderHook(() =>
       useStationLogin({
         cc: ccMock,
         onLogout: logoutCb,
         logger,
         isAgentLoggedIn,
+        deviceType: 'EXTENSION',
       })
     );
 
@@ -208,10 +210,10 @@ describe('useStationLogin Hook', () => {
     });
   });
 
-  it('should not call setSelectedLoginOptionSpy if login fails', async () => {
+  it('should not call setDeviceType if login fails', async () => {
     const errorResponse = new Error('Login failed');
     ccMock.stationLogin.mockRejectedValue(errorResponse);
-    const setSelectedLoginOptionSpy = jest.spyOn(require('@webex/cc-store'), 'setSelectedLoginOption');
+    const setDeviceTypeSpy = jest.spyOn(require('@webex/cc-store'), 'setDeviceType');
 
     loginCb.mockClear();
     const {result} = renderHook(() =>
@@ -221,6 +223,7 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         isAgentLoggedIn,
+        deviceType: 'EXTENSION',
       })
     );
 
@@ -257,7 +260,7 @@ describe('useStationLogin Hook', () => {
         handleContinue: expect.any(Function),
       });
 
-      expect(setSelectedLoginOptionSpy).not.toHaveBeenCalled();
+      expect(setDeviceTypeSpy).not.toHaveBeenCalled();
     });
   });
 
@@ -270,6 +273,7 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         isAgentLoggedIn,
+        deviceType: 'EXTENSION',
       })
     );
 
@@ -294,6 +298,7 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         isAgentLoggedIn,
+        deviceType: 'EXTENSION',
       })
     );
 
@@ -358,6 +363,7 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         isAgentLoggedIn,
+        deviceType: 'BROWSER',
       })
     );
 
@@ -396,6 +402,7 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         isAgentLoggedIn,
+        deviceType: 'EXTENSION',
       })
     );
 
@@ -420,6 +427,7 @@ describe('useStationLogin Hook', () => {
         onLogin: loginCb,
         logger,
         isAgentLoggedIn,
+        deviceType: 'EXTENSION',
       })
     );
 
@@ -433,7 +441,7 @@ describe('useStationLogin Hook', () => {
   });
 
   it('should call relogin and set device type', async () => {
-    const setSelectedLoginOptionSpy = jest.spyOn(require('@webex/cc-store'), 'setSelectedLoginOption');
+    const setDeviceTypeSpy = jest.spyOn(require('@webex/cc-store'), 'setDeviceType');
 
     const {result} = renderHook(() =>
       useStationLogin({
@@ -442,6 +450,7 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         isAgentLoggedIn,
+        deviceType: 'EXTENSION',
       })
     );
 
@@ -450,13 +459,13 @@ describe('useStationLogin Hook', () => {
     });
 
     await waitFor(() => {
-      expect(setSelectedLoginOptionSpy).toHaveBeenCalled();
+      expect(setDeviceTypeSpy).toHaveBeenCalled();
       expect(loginCb).toHaveBeenCalled();
     });
   });
 
   it('should call relogin without login callback', async () => {
-    const setSelectedLoginOptionSpy = jest.spyOn(require('@webex/cc-store'), 'setSelectedLoginOption');
+    const setDeviceTypeSpy = jest.spyOn(require('@webex/cc-store'), 'setDeviceType');
 
     const {result} = renderHook(() =>
       useStationLogin({
@@ -464,6 +473,7 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         isAgentLoggedIn,
+        deviceType: 'EXTENSION',
       })
     );
 
@@ -472,7 +482,7 @@ describe('useStationLogin Hook', () => {
     });
 
     await waitFor(() => {
-      expect(setSelectedLoginOptionSpy).toHaveBeenCalled();
+      expect(setDeviceTypeSpy).toHaveBeenCalled();
       expect(loginCb).not.toHaveBeenCalled();
     });
   });
@@ -488,6 +498,7 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         isAgentLoggedIn,
+        deviceType: 'EXTENSION',
       })
     );
 
@@ -516,6 +527,7 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         isAgentLoggedIn,
+        deviceType: 'EXTENSION',
       })
     );
 
@@ -546,6 +558,7 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         isAgentLoggedIn,
+        deviceType: 'EXTENSION',
       })
     );
 

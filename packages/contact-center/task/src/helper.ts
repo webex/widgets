@@ -5,8 +5,8 @@ import {TASK_EVENTS, useCallControlProps, UseTaskListProps, UseTaskProps} from '
 
 // Hook for managing the task list
 export const useTaskList = (props: UseTaskListProps) => {
-  const {selectedLoginOption, onTaskAccepted, onTaskDeclined, logger, taskList} = props;
-  const isBrowser = selectedLoginOption === 'BROWSER';
+  const {deviceType, onTaskAccepted, onTaskDeclined, logger, taskList} = props;
+  const isBrowser = deviceType === 'BROWSER';
 
   const logError = (message: string, method: string) => {
     logger.error(message, {
@@ -47,8 +47,8 @@ export const useTaskList = (props: UseTaskListProps) => {
 };
 
 export const useIncomingTask = (props: UseTaskProps) => {
-  const {cc, onAccepted, onDeclined, selectedLoginOption, incomingTask, logger} = props;
-  const isBrowser = selectedLoginOption === 'BROWSER';
+  const {cc, onAccepted, onDeclined, deviceType, incomingTask, logger} = props;
+  const isBrowser = deviceType === 'BROWSER';
 
   const logError = (message: string, method: string) => {
     logger.error(message, {

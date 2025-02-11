@@ -34,7 +34,6 @@ interface IStoreBase {
     idleCodes: IdleCode[];
     agentId: string;
     logger: ILogger;
-    selectedLoginOption: string;
     wrapupCodes: IWrapupCode[];
     currentTask: ITask;
     incomingTask: ITask;
@@ -45,11 +44,14 @@ interface IStoreBase {
     currentState: string;
     lastStateChangeTimestamp: Date;
     showMultipleLoginAlert: boolean;
+    currentTheme: string;
     init(params: InitParams): Promise<void>;
-    setSelectedLoginOption(option: string): void;
+    setDeviceType(option: string): void;
     setCurrentState(state: string): void;
     setLastStateChangeTimestamp(timestamp: Date): void;
     setShowMultipleLoginAlert(value: boolean): void;
+    setCurrentTheme(theme: string): void;
+    setIsAgentLoggedIn(value: boolean): void;
 }
 
 interface IStore extends IStoreBase {

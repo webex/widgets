@@ -6,9 +6,9 @@ import TaskListPresentational from './task-list.presentational';
 import {useTaskList} from '../helper';
 
 const TaskListComponent: React.FunctionComponent = () => {
-  const {cc, taskList, currentTask, selectedLoginOption, logger} = store;
+  const {cc, taskList, currentTask, deviceType, logger} = store;
 
-  const result = useTaskList({cc, selectedLoginOption, logger, taskList});
+  const result = useTaskList({cc, deviceType, logger, taskList});
   const props = {
     ...result,
     currentTask,

@@ -30,8 +30,8 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.agentId;
   }
 
-  get selectedLoginOption() {
-    return this.store.selectedLoginOption;
+  get deviceType() {
+    return this.store.deviceType;
   }
   get wrapupCodes() {
     return this.store.wrapupCodes;
@@ -42,10 +42,6 @@ class StoreWrapper implements IStoreWrapper {
   get isAgentLoggedIn() {
     return this.store.isAgentLoggedIn;
   }
-  get deviceType() {
-    return this.store.deviceType;
-  }
-
   get taskList() {
     return this.store.taskList;
   }
@@ -70,12 +66,20 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.showMultipleLoginAlert;
   }
 
+  get currentTheme() {
+    return this.store.currentTheme;
+  }
+
+  setCurrentTheme(theme: string): void {
+    return this.store.setCurrentTheme(theme);
+  }
+
   setShowMultipleLoginAlert(value: boolean): void {
     return this.store.setShowMultipleLoginAlert(value);
   }
 
-  setSelectedLoginOption(option: string): void {
-    return this.store.setSelectedLoginOption(option);
+  setDeviceType(option: string): void {
+    return this.store.setDeviceType(option);
   }
 
   setCurrentState(state: string): void {
@@ -84,6 +88,10 @@ class StoreWrapper implements IStoreWrapper {
 
   setLastStateChangeTimestamp(timestamp: Date): void {
     return this.store.setLastStateChangeTimestamp(timestamp);
+  }
+
+  setIsAgentLoggedIn(value: boolean): void {
+    return this.store.setIsAgentLoggedIn(value);
   }
 
   init(options: InitParams): Promise<void> {
@@ -96,7 +104,9 @@ class StoreWrapper implements IStoreWrapper {
     const taskToRemove = this.store.taskList.find((task) => task.data.interactionId === taskId);
     if (taskToRemove) {
       taskToRemove.off(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned(taskId));
-      taskToRemove.off(TASK_EVENTS.TASK_END, ({wrapupRequired}: {wrapupRequired: boolean}) => this.handleTaskEnd(taskId, wrapupRequired));
+      taskToRemove.off(TASK_EVENTS.TASK_END, ({wrapupRequired}: {wrapupRequired: boolean}) =>
+        this.handleTaskEnd(taskId, wrapupRequired)
+      );
     }
     const updateTaskList = this.store.taskList.filter((task) => task.data.interactionId !== taskId);
     runInAction(() => {

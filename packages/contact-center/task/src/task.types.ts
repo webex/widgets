@@ -78,7 +78,7 @@ export interface TaskProps {
   /**
    * Selected login option
    */
-  selectedLoginOption: string;
+  deviceType: string;
 
   /**
    * List of tasks
@@ -93,11 +93,11 @@ export interface TaskProps {
 
 export type UseTaskProps = Pick<
   TaskProps,
-  'cc' | 'incomingTask' | 'onAccepted' | 'onDeclined' | 'selectedLoginOption' | 'logger'
+  'cc' | 'incomingTask' | 'onAccepted' | 'onDeclined' | 'deviceType' | 'logger'
 >;
 export type UseTaskListProps = Pick<
   TaskProps,
-  'cc' | 'taskList' | 'selectedLoginOption' | 'onTaskAccepted' | 'onTaskDeclined' | 'logger'
+  'cc' | 'taskList' | 'deviceType' | 'onTaskAccepted' | 'onTaskDeclined' | 'logger'
 >;
 export type IncomingTaskPresentationalProps = Pick<TaskProps, 'incomingTask' | 'isBrowser' | 'accept' | 'decline'>;
 export type IncomingTaskProps = Pick<TaskProps, 'onAccepted' | 'onDeclined'>;

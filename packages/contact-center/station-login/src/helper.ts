@@ -10,7 +10,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
   const logger = props.logger;
   const [isAgentLoggedIn, setIsAgentLoggedIn] = useState(props.isAgentLoggedIn);
   const [dialNumber, setDialNumber] = useState('');
-  const [deviceType, setDeviceType] = useState('');
+  const [deviceType, setDeviceType] = useState(props.deviceType || '');
   const [team, setTeam] = useState('');
   const [loginSuccess, setLoginSuccess] = useState<StationLoginSuccess>();
   const [loginFailure, setLoginFailure] = useState<Error>();
@@ -48,7 +48,8 @@ export const useStationLogin = (props: UseStationLoginProps) => {
       .then((res: StationLoginSuccess) => {
         setLoginSuccess(res);
         setIsAgentLoggedIn(true);
-        store.setSelectedLoginOption(deviceType);
+        store.setDeviceType(deviceType);
+        store.setIsAgentLoggedIn(true);
         if (res.data.auxCodeId) {
           store.setCurrentState(res.data.auxCodeId);
         }
@@ -73,6 +74,8 @@ export const useStationLogin = (props: UseStationLoginProps) => {
       .then((res: StationLogoutSuccess) => {
         setLogoutSuccess(res);
         setIsAgentLoggedIn(false);
+        store.setIsAgentLoggedIn(false);
+        store.setDeviceType('');
         if (logoutCb) {
           logoutCb();
         }
@@ -86,7 +89,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
   };
 
   function relogin() {
-    store.setSelectedLoginOption(deviceType);
+    store.setDeviceType(deviceType);
     if (loginCb) {
       loginCb();
     }

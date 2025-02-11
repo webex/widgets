@@ -21,7 +21,6 @@ class Store implements IStore {
   logger: ILogger;
   idleCodes: IdleCode[] = [];
   agentId: string = '';
-  selectedLoginOption: string = '';
   currentTheme: string = 'LIGHT';
   wrapupCodes: IWrapupCode[] = [];
   incomingTask: ITask = null;
@@ -60,8 +59,8 @@ class Store implements IStore {
     this.taskList = taskList;
   }
 
-  setSelectedLoginOption(option: string): void {
-    this.selectedLoginOption = option;
+  setDeviceType(option: string): void {
+    this.deviceType = option;
   }
 
   setCurrentState(state: string): void {
@@ -74,6 +73,10 @@ class Store implements IStore {
 
   setShowMultipleLoginAlert(value: boolean): void {
     this.showMultipleLoginAlert = value;
+  }
+
+  setIsAgentLoggedIn(value: boolean): void {
+    this.isAgentLoggedIn = value;
   }
 
   public static getInstance(): Store {

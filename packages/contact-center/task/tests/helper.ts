@@ -41,7 +41,7 @@ describe('useIncomingTask Hook', () => {
         incomingTask: taskMock,
         onAccepted: onTaskAccepted,
         onDeclined: onTaskDeclined,
-        selectedLoginOption: 'BROWSER',
+        deviceType: 'BROWSER',
         logger,
       })
     );
@@ -65,7 +65,7 @@ describe('useIncomingTask Hook', () => {
         incomingTask: taskMock,
         onAccepted: onTaskAccepted,
         onDeclined: onTaskDeclined,
-        selectedLoginOption: 'BROWSER',
+        deviceType: 'BROWSER',
         logger,
       })
     );
@@ -96,7 +96,7 @@ describe('useIncomingTask Hook', () => {
         incomingTask: noIdTask,
         onAccepted: onTaskAccepted,
         onDeclined: onTaskDeclined,
-        selectedLoginOption: 'BROWSER',
+        deviceType: 'BROWSER',
         logger,
       })
     );
@@ -125,7 +125,7 @@ describe('useIncomingTask Hook', () => {
         incomingTask: taskMock,
         onAccepted: null,
         onDeclined: null,
-        selectedLoginOption: 'BROWSER',
+        deviceType: 'BROWSER',
         logger,
       })
     );
@@ -149,7 +149,7 @@ describe('useIncomingTask Hook', () => {
         incomingTask: taskMock,
         onAccepted: null,
         onDeclined: null,
-        selectedLoginOption: 'BROWSER',
+        deviceType: 'BROWSER',
         logger,
       })
     );
@@ -174,7 +174,7 @@ describe('useIncomingTask Hook', () => {
     };
 
     const {result} = renderHook(() =>
-      useIncomingTask({cc: ccMock, incomingTask: failingTask, onAccepted, selectedLoginOption: 'BROWSER', logger})
+      useIncomingTask({cc: ccMock, incomingTask: failingTask, onAccepted, deviceType: 'BROWSER', logger})
     );
 
     act(() => {
@@ -201,7 +201,7 @@ describe('useIncomingTask Hook', () => {
     };
 
     const {result} = renderHook(() =>
-      useIncomingTask({cc: ccMock, incomingTask: failingTask, onDeclined, selectedLoginOption: 'BROWSER', logger})
+      useIncomingTask({cc: ccMock, incomingTask: failingTask, onDeclined, deviceType: 'BROWSER', logger})
     );
 
     act(() => {
@@ -230,7 +230,7 @@ describe('useTaskList Hook', () => {
 
   it('should call onTaskAccepted callback when provided', async () => {
     const {result} = renderHook(() =>
-      useTaskList({cc: ccMock, selectedLoginOption: '', onTaskAccepted, logger, taskList: mockTaskList})
+      useTaskList({cc: ccMock, deviceType: '', onTaskAccepted, logger, taskList: mockTaskList})
     );
 
     act(() => {
@@ -248,7 +248,7 @@ describe('useTaskList Hook', () => {
   it('should return if not task is passed while calling acceptTask', async () => {
     // This test is purely to improve the coverage report, as the acceptTask function cannot be called without a task
     const {result} = renderHook(() =>
-      useTaskList({cc: ccMock, selectedLoginOption: '', onTaskAccepted, logger, taskList: mockTaskList})
+      useTaskList({cc: ccMock, deviceType: '', onTaskAccepted, logger, taskList: mockTaskList})
     );
 
     act(() => {
@@ -264,7 +264,7 @@ describe('useTaskList Hook', () => {
   it('should return if not task is passed while calling acceptTask', async () => {
     // This test is purely to improve the coverage report, as the acceptTask function cannot be called without a task
     const {result} = renderHook(() =>
-      useTaskList({cc: ccMock, selectedLoginOption: '', onTaskDeclined, logger, taskList: mockTaskList})
+      useTaskList({cc: ccMock, deviceType: '', onTaskDeclined, logger, taskList: mockTaskList})
     );
 
     act(() => {
@@ -279,7 +279,7 @@ describe('useTaskList Hook', () => {
 
   it('should call onTaskDeclined callback when provided', async () => {
     const {result} = renderHook(() =>
-      useTaskList({cc: ccMock, selectedLoginOption: '', onTaskDeclined, logger, taskList: mockTaskList})
+      useTaskList({cc: ccMock, deviceType: '', onTaskDeclined, logger, taskList: mockTaskList})
     );
 
     act(() => {
@@ -302,7 +302,7 @@ describe('useTaskList Hook', () => {
     };
 
     const {result} = renderHook(() =>
-      useTaskList({cc: ccMock, onTaskAccepted, selectedLoginOption: 'BROWSER', logger, taskList: mockTaskList})
+      useTaskList({cc: ccMock, onTaskAccepted, deviceType: 'BROWSER', logger, taskList: mockTaskList})
     );
 
     act(() => {
@@ -329,7 +329,7 @@ describe('useTaskList Hook', () => {
     };
 
     const {result} = renderHook(() =>
-      useTaskList({cc: ccMock, onTaskDeclined, selectedLoginOption: 'BROWSER', logger, taskList: mockTaskList})
+      useTaskList({cc: ccMock, onTaskDeclined, deviceType: 'BROWSER', logger, taskList: mockTaskList})
     );
 
     act(() => {
@@ -355,7 +355,7 @@ describe('useTaskList Hook', () => {
         onTaskAccepted: null,
         onTaskDeclined: null,
         logger,
-        selectedLoginOption: '',
+        deviceType: '',
         taskList: mockTaskList,
       })
     );
@@ -379,7 +379,7 @@ describe('useTaskList Hook', () => {
         onTaskAccepted: null,
         onTaskDeclined: null,
         logger,
-        selectedLoginOption: '',
+        deviceType: '',
         taskList: mockTaskList,
       })
     );

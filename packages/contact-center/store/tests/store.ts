@@ -45,7 +45,6 @@ describe('Store', () => {
     expect(storeInstance.loginOptions).toEqual([]);
     expect(storeInstance.idleCodes).toEqual([]);
     expect(storeInstance.agentId).toBe('');
-    expect(storeInstance.selectedLoginOption).toBe('');
     expect(storeInstance.wrapupCodes).toEqual([]);
     expect(storeInstance.incomingTask).toBeNull();
     expect(storeInstance.currentTask).toBeNull();
@@ -178,8 +177,8 @@ describe('Store', () => {
       storeInstance.setTaskList(['task3']);
       expect(storeInstance.taskList).toEqual(['task3']);
 
-      storeInstance.setSelectedLoginOption('option1');
-      expect(storeInstance.selectedLoginOption).toBe('option1');
+      storeInstance.setDeviceType('option1');
+      expect(storeInstance.deviceType).toBe('option1');
 
       storeInstance.setCurrentTheme('theme1');
       expect(storeInstance.currentTheme).toBe('theme1');
