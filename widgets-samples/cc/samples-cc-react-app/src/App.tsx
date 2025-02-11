@@ -20,8 +20,6 @@ function App() {
     },
   };
 
-  console.log('allowMultiLogin', isMultiLoginEnabled);
-
   const onLogin = () => {
     console.log('Agent login has been succesful');
     setIsLoggedIn(true);
@@ -61,7 +59,6 @@ function App() {
   };
 
   const enableMultiLogin = () => {
-    console.log('enableMultiLogin invoked');
     setIsMultiLoginEnabled(true);
   };
 

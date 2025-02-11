@@ -99,9 +99,7 @@ class Store implements IStore {
   }
 
   init(options: InitParams): Promise<void> {
-    console.log('options is', options);
     if ('webex' in options) {
-      console.log('options webex is', options);
       // If devs decide to go with webex, they will have to listen to the ready event before calling init
       // This has to be documented
       return this.registerCC(options.webex);
@@ -111,16 +109,12 @@ class Store implements IStore {
         reject(new Error('Webex SDK failed to initialize'));
       }, 6000);
 
-
-
       const webex = Webex.init({
         config: options.webexConfig,
         credentials: {
           access_token: options.access_token,
         },
       });
-
-      console.log('webex is', webex);
 
       webex.once('ready', () => {
         clearTimeout(timer);
