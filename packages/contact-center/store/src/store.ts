@@ -147,5 +147,4 @@ class Store implements IStore {
   }
 }
 
-// const store = Store.getInstance();
 export default Store;
