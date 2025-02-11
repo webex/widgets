@@ -17,7 +17,6 @@ function App() {
     },
     cc: {
       allowMultiLogin: isMultiLoginEnabled,
-      force: true,
     },
   };
 
@@ -105,7 +104,7 @@ function App() {
               });
             }}
           >
-            Init
+            Init Widgets
           </button>
           {isSdkReady && (
             <>

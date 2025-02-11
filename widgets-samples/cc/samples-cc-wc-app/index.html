@@ -30,6 +30,13 @@
           name='theme'
         /> Dark Theme
         <br />
+        <input
+          type='checkbox'
+          id='multiLoginFlag'
+          name='multiLoginFlag'
+          onclick="enableMultiLogin()"
+        /> Enable Multi Login
+        <br />
         <button onclick="initWidgets()" disabled>Init Widgets</button>
         <div id="widgets-container">
           <widget-cc-station-login class="disabled" id="cc-station-login"></widget-cc-station-login>
