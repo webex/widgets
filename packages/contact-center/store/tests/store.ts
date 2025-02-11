@@ -180,6 +180,18 @@ describe('Store', () => {
 
       storeInstance.setSelectedLoginOption('option1');
       expect(storeInstance.selectedLoginOption).toBe('option1');
+
+      storeInstance.setCurrentTheme('theme1');
+      expect(storeInstance.currentTheme).toBe('theme1');
+
+      storeInstance.setShowMultipleLoginAlert(true);
+      expect(storeInstance.showMultipleLoginAlert).toBe(true);
+
+      storeInstance.setCurrentState('state1');
+      expect(storeInstance.currentState).toBe('state1');
+
+      storeInstance.setLastStateChangeTimestamp(new Date());
+      expect(storeInstance.lastStateChangeTimestamp).toEqual(expect.any(Date));
     });
   });
 });

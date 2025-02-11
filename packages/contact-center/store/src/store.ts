@@ -32,6 +32,8 @@ class Store implements IStore {
   wrapupRequired: boolean = false;
   currentState: string = '';
   lastStateChangeTimestamp: Date = new Date();
+  showMultipleLoginAlert: boolean = false;
+
   constructor() {
     makeAutoObservable(this, {
       cc: observable.ref,
@@ -68,6 +70,10 @@ class Store implements IStore {
 
   setLastStateChangeTimestamp(timestamp: Date): void {
     this.lastStateChangeTimestamp = timestamp;
+  }
+
+  setShowMultipleLoginAlert(value: boolean): void {
+    this.showMultipleLoginAlert = value;
   }
 
   public static getInstance(): Store {

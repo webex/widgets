@@ -1,4 +1,4 @@
-import {IStoreWrapper, IStore, InitParams, TASK_EVENTS} from './store.types';
+import {IStoreWrapper, IStore, InitParams, TASK_EVENTS, CC_EVENTS} from './store.types';
 import {ITask} from '@webex/plugin-cc';
 import Store from './store';
 import {runInAction} from 'mobx';
@@ -58,8 +58,32 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.wrapupRequired;
   }
 
+  get currentState() {
+    return this.store.currentState;
+  }
+
+  get lastStateChangeTimestamp() {
+    return this.store.lastStateChangeTimestamp;
+  }
+
+  get showMultipleLoginAlert() {
+    return this.store.showMultipleLoginAlert;
+  }
+
+  setShowMultipleLoginAlert(value: boolean): void {
+    return this.store.setShowMultipleLoginAlert(value);
+  }
+
   setSelectedLoginOption(option: string): void {
     return this.store.setSelectedLoginOption(option);
+  }
+
+  setCurrentState(state: string): void {
+    return this.store.setCurrentState(state);
+  }
+
+  setLastStateChangeTimestamp(timestamp: Date): void {
+    return this.store.setLastStateChangeTimestamp(timestamp);
   }
 
   init(options: InitParams): Promise<void> {
@@ -72,9 +96,7 @@ class StoreWrapper implements IStoreWrapper {
     const taskToRemove = this.store.taskList.find((task) => task.data.interactionId === taskId);
     if (taskToRemove) {
       taskToRemove.off(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned(taskId));
-      taskToRemove.off(TASK_EVENTS.TASK_END, ({wrapupRequired}: {wrapupRequired: boolean}) =>
-        this.handleTaskEnd(taskId, wrapupRequired)
-      );
+      taskToRemove.off(TASK_EVENTS.TASK_END, ({wrapupRequired}: {wrapupRequired: boolean}) => this.handleTaskEnd(taskId, wrapupRequired));
     }
     const updateTaskList = this.store.taskList.filter((task) => task.data.interactionId !== taskId);
     runInAction(() => {
@@ -115,12 +137,37 @@ class StoreWrapper implements IStoreWrapper {
     this.store.setTaskList([...this.store.taskList, task]);
   };
 
+  handleStateChange = (data) => {
+    if (data && typeof data === 'object' && data.type === 'AgentStateChangeSuccess') {
+      const DEFAULT_CODE = '0'; // Default code when no aux code is present
+      this.store.setCurrentState(data.auxCodeId?.trim() !== '' ? data.auxCodeId : DEFAULT_CODE);
+
+      const startTime = data.lastStateChangeTimestamp;
+      this.store.setLastStateChangeTimestamp(new Date(startTime));
+    }
+  };
+
+  handleMultiLoginCloseSession = (data) => {
+    if (data && typeof data === 'object' && data.type === 'AgentMultiLoginCloseSession') {
+      this.store.setShowMultipleLoginAlert(true);
+    }
+  };
+
   setupIncomingTaskHandler() {
     const ccSDK = this.store.cc;
 
     ccSDK.on(TASK_EVENTS.TASK_INCOMING, (task) => {
       this.handleIncomingTask(task);
     });
+
+    ccSDK.on(CC_EVENTS.AGENT_STATE_CHANGE, this.handleStateChange);
+    ccSDK.on(CC_EVENTS.AGENT_MULTI_LOGIN, this.handleMultiLoginCloseSession);
+
+    return () => {
+      ccSDK.off(TASK_EVENTS.TASK_INCOMING, this.handleIncomingTask);
+      ccSDK.off(CC_EVENTS.AGENT_STATE_CHANGE, this.handleStateChange);
+      ccSDK.off(CC_EVENTS.AGENT_MULTI_LOGIN, this.handleMultiLoginCloseSession);
+    };
   }
 }
 

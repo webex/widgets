@@ -42,8 +42,14 @@ interface IStoreBase {
     isAgentLoggedIn: boolean;
     deviceType: string;
     wrapupRequired: boolean;
+    currentState: string;
+    lastStateChangeTimestamp: Date;
+    showMultipleLoginAlert: boolean;
     init(params: InitParams): Promise<void>;
     setSelectedLoginOption(option: string): void;
+    setCurrentState(state: string): void;
+    setLastStateChangeTimestamp(timestamp: Date): void;
+    setShowMultipleLoginAlert(value: boolean): void;
 }
 
 interface IStore extends IStoreBase {
@@ -78,6 +84,13 @@ TASK_END = 'task:end',
 TASK_WRAPUP = 'task:wrapup',
 } // TODO: remove this once cc sdk exports this enum
 
+
+// Events that are received on the contact center SDK
+enum CC_EVENTS{
+    AGENT_MULTI_LOGIN = 'agent:multiLogin',
+    AGENT_STATE_CHANGE = 'agent:stateChange',
+}
+
 export type {
     IContactCenter,
     Profile,
@@ -93,5 +106,9 @@ export type {
 }
 
 export {
-    TASK_EVENTS,
+    CC_EVENTS,
+    TASK_EVENTS
 }
+
+
+

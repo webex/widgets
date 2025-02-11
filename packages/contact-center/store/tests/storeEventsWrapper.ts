@@ -1,5 +1,5 @@
 import {act, waitFor} from '@testing-library/react';
-import {TASK_EVENTS} from '../src/store.types';
+import {CC_EVENTS, TASK_EVENTS} from '../src/store.types';
 import storeWrapper from '../src/storeEventsWrapper';
 import {ITask} from '@webex/plugin-cc';
 
@@ -22,6 +22,12 @@ jest.mock('../src/store', () => ({
     taskList: 'mockTaskList',
     incomingTask: 'mockIncomingTask',
     wrapupRequired: 'mockWrapupRequired',
+    currentState: 'mockCurrentState',
+    lastStateChangeTimestamp: 'mockLastStateChangeTimestamp',
+    showMultipleLoginAlert: 'mockShowMultipleLoginAlert',
+    setShowMultipleLoginAlert: jest.fn(),
+    setCurrentState: jest.fn(),
+    setLastStateChangeTimestamp: jest.fn(),
     setSelectedLoginOption: jest.fn(),
     init: jest.fn().mockResolvedValue({}),
     setIncomingTask: jest.fn(),
@@ -39,13 +45,6 @@ describe('storeEventsWrapper', () => {
 
     it('should proxy loginOptions', () => {
       expect(storeWrapper.loginOptions).toBe('mockLoginOptions');
-    });
-
-    it.skip('should proxy cc', () => {
-      expect(storeWrapper.cc).toBe({
-        on: jest.fn(),
-        off: jest.fn(),
-      });
     });
 
     it('should proxy logger', () => {
@@ -90,6 +89,43 @@ describe('storeEventsWrapper', () => {
 
     it('should proxy wrapupRequired', () => {
       expect(storeWrapper.wrapupRequired).toBe('mockWrapupRequired');
+    });
+
+    it('should proxy currentState', () => {
+      expect(storeWrapper.currentState).toBe('mockCurrentState');
+    });
+
+    it('should proxy lastStateChangeTimestamp', () => {
+      expect(storeWrapper.lastStateChangeTimestamp).toBe('mockLastStateChangeTimestamp');
+    });
+
+    it('should proxy showMultipleLoginAlert', () => {
+      expect(storeWrapper.showMultipleLoginAlert).toBe('mockShowMultipleLoginAlert');
+
+      storeWrapper.setShowMultipleLoginAlert(true);
+      expect(storeWrapper['store'].setShowMultipleLoginAlert).toHaveBeenCalledWith(true);
+    });
+
+    it('should proxy setShowMultipleLoginAlert', () => {
+      expect(storeWrapper.setShowMultipleLoginAlert).toBeInstanceOf(Function);
+
+      storeWrapper.setShowMultipleLoginAlert(true);
+      expect(storeWrapper['store'].setShowMultipleLoginAlert).toHaveBeenCalledWith(true);
+    });
+
+    it('should proxy setCurrentState', () => {
+      expect(storeWrapper.setCurrentState).toBeInstanceOf(Function);
+
+      storeWrapper.setCurrentState('newState');
+      expect(storeWrapper['store'].setCurrentState).toHaveBeenCalledWith('newState');
+    });
+
+    it('should proxy setLastStateChangeTimestamp', () => {
+      expect(storeWrapper.setLastStateChangeTimestamp).toBeInstanceOf(Function);
+
+      const timestamp = new Date();
+      storeWrapper.setLastStateChangeTimestamp(timestamp);
+      expect(storeWrapper['store'].setLastStateChangeTimestamp).toHaveBeenCalledWith(timestamp);
     });
   });
 
@@ -187,10 +223,13 @@ describe('storeEventsWrapper', () => {
       jest.clearAllMocks();
     });
 
-    it('should initialize the store and set up incoming task handler', async () => {
+    it('should initialize the store and set up event handlers', async () => {
       await storeWrapper.init(options);
       expect(storeWrapper['store'].init).toHaveBeenCalledWith(options);
+
       expect(storeWrapper['store'].cc.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_INCOMING, expect.any(Function));
+      expect(storeWrapper['store'].cc.on).toHaveBeenCalledWith(CC_EVENTS.AGENT_STATE_CHANGE, expect.any(Function));
+      expect(storeWrapper['store'].cc.on).toHaveBeenCalledWith(CC_EVENTS.AGENT_MULTI_LOGIN, expect.any(Function));
     });
 
     it('should handle task:incoming event ', async () => {
@@ -291,6 +330,73 @@ describe('storeEventsWrapper', () => {
       storeWrapper.setSelectedLoginOption(option);
 
       expect(storeWrapper['store'].setSelectedLoginOption).toHaveBeenCalledWith(option);
+    });
+
+    it('should handle multilogin session modal with in correct data', async () => {
+      const options = {someOption: 'value'};
+      await storeWrapper.init(options);
+      act(() => {
+        storeWrapper['store'].cc.on.mock.calls[2][1]({});
+      });
+
+      expect(storeWrapper['store'].setShowMultipleLoginAlert).not.toHaveBeenCalledWith(true);
+    });
+
+    it('should handle multilogin session modal with correct data', async () => {
+      const options = {someOption: 'value'};
+      await storeWrapper.init(options);
+      act(() => {
+        storeWrapper['store'].cc.on.mock.calls[2][1]({type: 'AgentMultiLoginCloseSession'});
+      });
+
+      expect(storeWrapper['store'].setShowMultipleLoginAlert).toHaveBeenCalledWith(true);
+    });
+
+    it('should set selected login option', () => {
+      const option = 'newLoginOption';
+      storeWrapper.setSelectedLoginOption(option);
+
+      expect(storeWrapper['store'].setSelectedLoginOption).toHaveBeenCalledWith(option);
+    });
+
+    it('should handle state change event  with incorrect data', async () => {
+      const options = {someOption: 'value'};
+      await storeWrapper.init(options);
+      act(() => {
+        storeWrapper['store'].cc.on.mock.calls[1][1]({});
+      });
+
+      expect(storeWrapper['store'].setCurrentState).not.toHaveBeenCalledWith();
+    });
+
+    it('should handle state change event  with correct data and emplty auxcodeId', async () => {
+      const options = {someOption: 'value'};
+      await storeWrapper.init(options);
+      act(() => {
+        storeWrapper['store'].cc.on.mock.calls[1][1]({type: 'AgentStateChangeSuccess', auxCodeId: ''});
+      });
+
+      expect(storeWrapper['store'].setCurrentState).toHaveBeenCalledWith('0');
+    });
+
+    it('should handle state change event  with correct data', async () => {
+      const options = {someOption: 'value'};
+      await storeWrapper.init(options);
+      act(() => {
+        storeWrapper['store'].cc.on.mock.calls[1][1]({type: 'AgentStateChangeSuccess', auxCodeId: 'available'});
+      });
+
+      expect(storeWrapper['store'].setCurrentState).toHaveBeenCalledWith('available');
+    });
+
+    it('should return a function to remove event listeners on cc object', () => {
+      const removeListeners = storeWrapper.setupIncomingTaskHandler();
+
+      removeListeners();
+
+      expect(storeWrapper['cc'].off).toHaveBeenCalledWith(TASK_EVENTS.TASK_INCOMING, expect.any(Function));
+      expect(storeWrapper['cc'].off).toHaveBeenCalledWith(CC_EVENTS.AGENT_STATE_CHANGE, expect.any(Function));
+      expect(storeWrapper['cc'].off).toHaveBeenCalledWith(CC_EVENTS.AGENT_MULTI_LOGIN, expect.any(Function));
     });
   });
 });

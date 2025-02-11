@@ -1,6 +1,5 @@
 import {useState, useEffect, useRef} from 'react';
 // TODO: Export & Import this AGENT_STATE_CHANGE constant from SDK
-import {AGENT_STATE_CHANGE} from './constants';
 import store from '@webex/cc-store';
 export const useUserState = ({idleCodes, agentId, cc, currentState, lastStateChangeTimestamp}) => {
   const [isSettingAgentStatus, setIsSettingAgentStatus] = useState(false);
@@ -36,23 +35,6 @@ export const useUserState = ({idleCodes, agentId, cc, currentState, lastStateCha
     workerRef.current.onmessage = (event) => {
       setElapsedTime(event.data);
     };
-
-    const handleStateChange = (data) => {
-      if (data && typeof data === 'object' && data.type === 'AgentStateChangeSuccess') {
-        const DEFAULT_CODE = '0'; // Default code when no aux code is present
-        store.setCurrentState(data.auxCodeId?.trim() !== '' ? data.auxCodeId : DEFAULT_CODE);
-
-        const startTime = data.lastStateChangeTimestamp;
-        store.setLastStateChangeTimestamp(new Date(startTime));
-      }
-    };
-
-    cc.on(AGENT_STATE_CHANGE, handleStateChange);
-
-    return () => {
-      workerRef.current?.terminate();
-      cc.off(AGENT_STATE_CHANGE, handleStateChange);
-    };
   }, []);
 
   useEffect(() => {
@@ -62,6 +44,9 @@ export const useUserState = ({idleCodes, agentId, cc, currentState, lastStateCha
       setElapsedTime(elapsed);
       workerRef.current.postMessage({type: 'reset', startTime: lastStateChangeTimestamp.getTime()});
     }
+    return () => {
+      workerRef.current?.terminate();
+    };
   }, [lastStateChangeTimestamp]);
 
   const setAgentStatus = (selectedCode) => {
