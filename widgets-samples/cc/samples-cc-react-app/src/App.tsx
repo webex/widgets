@@ -58,8 +58,12 @@ function App() {
     console.log('onWrapup invoked');
   };
 
-  const enableMultiLogin = () => {
-    setIsMultiLoginEnabled(true);
+  const enableDisableMultiLogin = () => {
+    if (isMultiLoginEnabled) {
+      setIsMultiLoginEnabled(false);
+    } else {
+      setIsMultiLoginEnabled(true);
+    }
   };
 
   return (
@@ -88,9 +92,14 @@ function App() {
           />{' '}
           Dark Theme
           <br />
+          <div className="warning-note" style={{color: 'red', marginBottom: '10px'}}>
+            <strong>Important:</strong> The "Enable Multi Login" option must be set before initializing the SDK. Changes
+            to this setting after SDK initialization will not take effect. Please ensure you configure this option
+            before clicking the "Init Widgets" button.
+          </div>
           <label>
-            <input type="checkbox" id="multiLoginFlag" name="multiLoginFlag" onChange={enableMultiLogin} /> Enable Multi
-            Login
+            <input type="checkbox" id="multiLoginFlag" name="multiLoginFlag" onChange={enableDisableMultiLogin} />{' '}
+            Enable Multi Login
           </label>
           <br />
           <button

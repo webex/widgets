@@ -27,7 +27,8 @@ function switchButtonState() {
 }
 
 function enableMultiLogin() {
-  isMultiLoginEnabled = true;
+  if (isMultiLoginEnabled) isMultiLoginEnabled = false;
+  else isMultiLoginEnabled = true;
 }
 
 function initWidgets() {

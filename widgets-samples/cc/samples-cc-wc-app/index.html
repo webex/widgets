@@ -30,11 +30,19 @@
           name='theme'
         /> Dark Theme
         <br />
+        <div class="warning-note" style="color: red; margin-bottom: 10px;">
+          <strong>Important:</strong> The "Enable Multi Login" option must be set before initializing the SDK. Changes
+          to this setting after SDK initialization will not take effect. Please ensure you configure this option
+          before clicking the "Init Widgets" button.
+        </div>
+        <br />
         <input
           type='checkbox'
           id='multiLoginFlag'
           name='multiLoginFlag'
-          onclick="enableMultiLogin()"
+          onchange="enableMultiLogin()"
+          aria-label="Enable agent multi-login"
+          role="checkbox"
         /> Enable Multi Login
         <br />
         <button onclick="initWidgets()" disabled>Init Widgets</button>
