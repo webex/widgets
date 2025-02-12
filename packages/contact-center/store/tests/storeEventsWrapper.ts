@@ -16,7 +16,7 @@ jest.mock('../src/store', () => ({
     agentId: 'mockAgentId',
     wrapupCodes: 'mockWrapupCodes',
     currentTask: 'mockCurrentTask',
-    isAgentLoggedIn: 'mockIsAgentLoggedIn',
+    isAgentLoggedIn: false,
     deviceType: 'mockDeviceType',
     taskList: 'mockTaskList',
     incomingTask: 'mockIncomingTask',
@@ -24,6 +24,7 @@ jest.mock('../src/store', () => ({
     currentState: 'mockCurrentState',
     lastStateChangeTimestamp: 'mockLastStateChangeTimestamp',
     showMultipleLoginAlert: 'mockShowMultipleLoginAlert',
+    currentTheme: 'mockCurrentTheme',
     setShowMultipleLoginAlert: jest.fn(),
     setCurrentState: jest.fn(),
     setLastStateChangeTimestamp: jest.fn(),
@@ -33,6 +34,8 @@ jest.mock('../src/store', () => ({
     setCurrentTask: jest.fn(),
     setTaskList: jest.fn(),
     setWrapupRequired: jest.fn(),
+    setCurrentTheme: jest.fn(),
+    setIsAgentLoggedIn: jest.fn(),
   }),
 }));
 
@@ -71,7 +74,7 @@ describe('storeEventsWrapper', () => {
     });
 
     it('should proxy isAgentLoggedIn', () => {
-      expect(storeWrapper.isAgentLoggedIn).toBe('mockIsAgentLoggedIn');
+      expect(storeWrapper.isAgentLoggedIn).toBe(false);
     });
 
     it('should proxy deviceType', () => {
@@ -126,6 +129,24 @@ describe('storeEventsWrapper', () => {
       storeWrapper.setLastStateChangeTimestamp(timestamp);
       expect(storeWrapper['store'].setLastStateChangeTimestamp).toHaveBeenCalledWith(timestamp);
     });
+
+    it('should proxy currentTheme', () => {
+      expect(storeWrapper.currentTheme).toBe('mockCurrentTheme');
+    });
+
+    it('should proxy setCurrentTheme', () => {
+      expect(storeWrapper.setCurrentTheme).toBeInstanceOf(Function);
+
+      storeWrapper.setCurrentTheme('newTheme');
+      expect(storeWrapper['store'].setCurrentTheme).toHaveBeenCalledWith('newTheme');
+    });
+
+    it('should proxy setIsAgentLoggedIn', () => {
+      expect(storeWrapper.setIsAgentLoggedIn).toBeInstanceOf(Function);
+
+      storeWrapper.setIsAgentLoggedIn(false);
+      expect(storeWrapper['store'].isAgentLoggedIn).toBe(false);
+    });
   });
 
   describe('storeEventsWrapper', () => {
@@ -169,23 +190,31 @@ describe('storeEventsWrapper', () => {
 
     it('should handle task removal', () => {
       storeWrapper['store'].taskList = [mockTask];
+      storeWrapper['store'].currentTask = mockTask;
+      storeWrapper['store'].incomingTask = mockTask;
       storeWrapper.handleTaskRemove(mockTask.data.interactionId);
 
       expect(mockTask.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function));
       expect(mockTask.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));
+
       expect(storeWrapper['store'].setTaskList).toHaveBeenCalledWith([]);
       expect(storeWrapper['store'].setCurrentTask).toHaveBeenCalledWith(null);
+      expect(storeWrapper['store'].setIncomingTask).toHaveBeenCalledWith(null);
+
       expect(storeWrapper['store'].setWrapupRequired).toHaveBeenCalledWith(false);
     });
 
     it('should handle task removal when no task is present', () => {
       storeWrapper['store'].taskList = [];
+      storeWrapper['store'].currentTask = null;
+      storeWrapper['store'].incomingTask = null;
       storeWrapper.handleTaskRemove(mockTask.data.interactionId);
 
       expect(mockTask.off).not.toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function));
       expect(mockTask.off).not.toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));
       expect(storeWrapper['store'].setTaskList).toHaveBeenCalledWith([]);
-      expect(storeWrapper['store'].setCurrentTask).toHaveBeenCalledWith(null);
+      expect(storeWrapper['store'].setCurrentTask).not.toHaveBeenCalledWith(null);
+      expect(storeWrapper['store'].setIncomingTask).not.toHaveBeenCalledWith(null);
       expect(storeWrapper['store'].setWrapupRequired).toHaveBeenCalledWith(false);
     });
 
@@ -305,12 +334,15 @@ describe('storeEventsWrapper', () => {
 
     it('should handle task removal', () => {
       storeWrapper['store'].taskList = [mockTask];
+      storeWrapper['store'].currentTask = mockTask;
+      storeWrapper['store'].incomingTask = mockTask;
       storeWrapper.handleTaskRemove(mockTask.data.interactionId);
 
       expect(mockTask.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function));
       expect(mockTask.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));
       expect(storeWrapper['store'].setTaskList).toHaveBeenCalledWith([]);
       expect(storeWrapper['store'].setCurrentTask).toHaveBeenCalledWith(null);
+      expect(storeWrapper['store'].setIncomingTask).toHaveBeenCalledWith(null);
       expect(storeWrapper['store'].setWrapupRequired).toHaveBeenCalledWith(false);
     });
 

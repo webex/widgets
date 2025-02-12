@@ -55,6 +55,7 @@ describe('Store', () => {
 
     expect(makeAutoObservable).toHaveBeenCalledWith(storeInstance, {
       cc: expect.any(Function),
+      currentState: expect.any(Object),
       currentTask: expect.any(Object),
       incomingTask: expect.any(Object),
       taskList: expect.any(Object),
@@ -191,6 +192,9 @@ describe('Store', () => {
 
       storeInstance.setLastStateChangeTimestamp(new Date());
       expect(storeInstance.lastStateChangeTimestamp).toEqual(expect.any(Date));
+
+      storeInstance.setIsAgentLoggedIn(true);
+      expect(storeInstance.isAgentLoggedIn).toBe(true);
     });
   });
 });

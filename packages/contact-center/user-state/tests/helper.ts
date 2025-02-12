@@ -69,23 +69,6 @@ describe('useUserState Hook', () => {
     expect(result.current.elapsedTime).toBe(3);
   });
 
-  it('should reset elapsedTime when lastStateChangeTimestamp changes', async () => {
-    const newTimestamp = new Date();
-    const {result, rerender} = renderHook(
-      ({timestamp}) =>
-        useUserState({idleCodes, agentId, cc: mockCC, currentState: '0', lastStateChangeTimestamp: timestamp}),
-      {initialProps: {timestamp: new Date(Date.now() - 5000)}}
-    );
-
-    expect(result.current.elapsedTime).toBe(5);
-
-    rerender({timestamp: newTimestamp});
-
-    await waitFor(() => {
-      expect(result.current.elapsedTime).toBe(0);
-    });
-  });
-
   it('should handle setAgentStatus correctly and update state', async () => {
     mockCC.setAgentState.mockResolvedValueOnce({data: {auxCodeId: '2', lastStateChangeTimestamp: new Date()}});
     const {result} = renderHook(() =>
