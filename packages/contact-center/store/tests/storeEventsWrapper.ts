@@ -153,6 +153,9 @@ describe('storeEventsWrapper', () => {
     const mockTask: ITask = ({
       data: {
         interactionId: 'interaction1',
+        interaction: {
+          state: 'connected',
+        },
       },
       on: jest.fn(),
       off: jest.fn(),
@@ -219,13 +222,13 @@ describe('storeEventsWrapper', () => {
     });
 
     it('should handle task end', () => {
-      storeWrapper.handleTaskEnd(mockTask.data.interactionId, true);
+      storeWrapper.handleTaskEnd(mockTask, true);
 
       expect(storeWrapper['store'].setWrapupRequired).toHaveBeenCalledWith(true);
 
-      storeWrapper.handleTaskEnd(mockTask.data.interactionId, false);
+      storeWrapper.handleTaskEnd(mockTask, false);
 
-      expect(storeWrapper['store'].setWrapupRequired).toHaveBeenCalledWith(false);
+      expect(storeWrapper['store'].setWrapupRequired).toHaveBeenCalledWith(true);
     });
 
     it('should set selected login option', () => {
@@ -240,6 +243,9 @@ describe('storeEventsWrapper', () => {
     const mockTask: ITask = ({
       data: {
         interactionId: 'interaction1',
+        interaction: {
+          state: 'connected',
+        },
       },
       on: jest.fn(),
       off: jest.fn(),
@@ -347,11 +353,28 @@ describe('storeEventsWrapper', () => {
     });
 
     it('should handle task end', () => {
-      storeWrapper.handleTaskEnd(mockTask.data.interactionId, true);
+      storeWrapper.handleTaskEnd(mockTask, true);
 
       expect(storeWrapper['store'].setWrapupRequired).toHaveBeenCalledWith(true);
 
-      storeWrapper.handleTaskEnd(mockTask.data.interactionId, false);
+      storeWrapper.handleTaskEnd(mockTask, false);
+
+      expect(storeWrapper['store'].setWrapupRequired).toHaveBeenCalledWith(true);
+    });
+
+    it('should handle task end when call is not connected', () => {
+      mockTask.data.interaction.state = 'new';
+      storeWrapper['store'].wrapupRequired = false;
+      storeWrapper.handleTaskEnd(mockTask, true);
+
+      expect(storeWrapper['store'].setWrapupRequired).toHaveBeenCalledWith(false);
+
+      storeWrapper.handleTaskEnd(mockTask, false);
+
+      expect(storeWrapper['store'].setWrapupRequired).toHaveBeenCalledWith(false);
+
+      storeWrapper['store'].wrapupRequired = true;
+      storeWrapper.handleTaskEnd(mockTask, true);
 
       expect(storeWrapper['store'].setWrapupRequired).toHaveBeenCalledWith(false);
     });

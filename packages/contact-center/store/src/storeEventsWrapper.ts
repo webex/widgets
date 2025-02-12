@@ -106,7 +106,7 @@ class StoreWrapper implements IStoreWrapper {
     if (taskToRemove) {
       taskToRemove.off(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned(taskId));
       taskToRemove.off(TASK_EVENTS.TASK_END, ({wrapupRequired}: {wrapupRequired: boolean}) =>
-        this.handleTaskEnd(taskId, wrapupRequired)
+        this.handleTaskEnd(taskToRemove, wrapupRequired)
       );
       taskToRemove.off(TASK_EVENTS.TASK_REJECT, () => this.handleTaskRemove(taskId));
     }
@@ -127,8 +127,14 @@ class StoreWrapper implements IStoreWrapper {
     });
   };
 
-  handleTaskEnd = (taskId: string, wrapupRequired: boolean) => {
-    this.store.setWrapupRequired(wrapupRequired);
+  handleTaskEnd = (task: ITask, wrapupRequired: boolean) => {
+    // TODO: SDK needs to send only 1 event on end : https://jira-eng-gpk2.cisco.com/jira/browse/SPARK-615785
+    if (task.data.interaction.state === 'connected') {
+      this.store.setWrapupRequired(true);
+      return;
+    } else if (task.data.interaction.state !== 'connected' && this.store.wrapupRequired !== true) {
+      this.handleTaskRemove(task.data.interactionId);
+    }
   };
 
   handleTaskAssigned = (task: ITask) => () => {
@@ -147,7 +153,7 @@ class StoreWrapper implements IStoreWrapper {
 
     // Attach event listeners to the task
     task.on(TASK_EVENTS.TASK_END, ({wrapupRequired}: {wrapupRequired: boolean}) => {
-      this.handleTaskEnd(task.data.interactionId, wrapupRequired);
+      this.handleTaskEnd(task, wrapupRequired);
     });
 
     // When we receive TASK_ASSIGNED the task was accepted by the agent and we need wrap up
