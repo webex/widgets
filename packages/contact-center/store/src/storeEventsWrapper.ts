@@ -105,7 +105,9 @@ class StoreWrapper implements IStoreWrapper {
     const taskToRemove = this.store.taskList.find((task) => task.data.interactionId === taskId);
     if (taskToRemove) {
       taskToRemove.off(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned(taskId));
-      taskToRemove.off(TASK_EVENTS.TASK_END, ({wrapupRequired}: {wrapupRequired: boolean}) => this.handleTaskEnd(taskId, wrapupRequired));
+      taskToRemove.off(TASK_EVENTS.TASK_END, ({wrapupRequired}: {wrapupRequired: boolean}) =>
+        this.handleTaskEnd(taskId, wrapupRequired)
+      );
       taskToRemove.off(TASK_EVENTS.TASK_REJECT, () => this.handleTaskRemove(taskId));
     }
     const updateTaskList = this.store.taskList.filter((task) => task.data.interactionId !== taskId);
@@ -174,20 +176,37 @@ class StoreWrapper implements IStoreWrapper {
     }
   };
 
+  handleTaskHydrate = (task: ITask) => {
+    this.store.setCurrentTask(task);
+    this.store.setTaskList([...this.store.taskList, task]);
+
+    const {interaction, agentId} = task.data;
+    const {state, isTerminated, participants} = interaction;
+
+    // Update call control states
+    if (isTerminated) {
+      // wrapup
+      const wrapupRequired = state === 'wrapUp' && !participants[agentId].isWrappedUp;
+      this.store.setWrapupRequired(wrapupRequired);
+
+      return;
+    }
+  };
+
   setupIncomingTaskHandler() {
     const ccSDK = this.store.cc;
 
-    ccSDK.on(TASK_EVENTS.TASK_INCOMING, (task) => {
-      this.handleIncomingTask(task);
-    });
+    ccSDK.on(TASK_EVENTS.TASK_INCOMING, this.handleIncomingTask);
 
     ccSDK.on(CC_EVENTS.AGENT_STATE_CHANGE, this.handleStateChange);
     ccSDK.on(CC_EVENTS.AGENT_MULTI_LOGIN, this.handleMultiLoginCloseSession);
+    ccSDK.on(TASK_EVENTS.TASK_HYDRATE, this.handleTaskHydrate);
 
     return () => {
       ccSDK.off(TASK_EVENTS.TASK_INCOMING, this.handleIncomingTask);
       ccSDK.off(CC_EVENTS.AGENT_STATE_CHANGE, this.handleStateChange);
       ccSDK.off(CC_EVENTS.AGENT_MULTI_LOGIN, this.handleMultiLoginCloseSession);
+      ccSDK.off(TASK_EVENTS.TASK_HYDRATE, this.handleTaskHydrate);
     };
   }
 }

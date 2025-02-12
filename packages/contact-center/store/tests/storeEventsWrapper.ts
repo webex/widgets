@@ -420,12 +420,42 @@ describe('storeEventsWrapper', () => {
       expect(storeWrapper['store'].setCurrentState).toHaveBeenCalledWith('available');
     });
 
+    it('should handle hydrating the store with correct data', async () => {
+      const options = {someOption: 'value'};
+      await storeWrapper.init(options);
+      storeWrapper['store'].taskList = [];
+
+      const mockTask = {
+        data: {
+          interaction: {
+            isTerminated: true,
+            state: 'wrapUp',
+            participants: {
+              agent1: {
+                isWrappedUp: false,
+              },
+            },
+          },
+          agentId: 'agent1',
+        },
+      };
+
+      act(() => {
+        storeWrapper['store'].cc.on.mock.calls[3][1](mockTask);
+      });
+
+      expect(storeWrapper['store'].setCurrentTask).toHaveBeenCalledWith(mockTask);
+      expect(storeWrapper['store'].setTaskList).toHaveBeenCalledWith([mockTask]);
+      expect(storeWrapper['store'].setWrapupRequired).toHaveBeenCalledWith(true);
+    });
+
     it('should return a function to remove event listeners on cc object', () => {
       const removeListeners = storeWrapper.setupIncomingTaskHandler();
 
       removeListeners();
 
       expect(storeWrapper['cc'].off).toHaveBeenCalledWith(TASK_EVENTS.TASK_INCOMING, expect.any(Function));
+      expect(storeWrapper['cc'].off).toHaveBeenCalledWith(TASK_EVENTS.TASK_HYDRATE, expect.any(Function));
       expect(storeWrapper['cc'].off).toHaveBeenCalledWith(CC_EVENTS.AGENT_STATE_CHANGE, expect.any(Function));
       expect(storeWrapper['cc'].off).toHaveBeenCalledWith(CC_EVENTS.AGENT_MULTI_LOGIN, expect.any(Function));
     });

@@ -85,6 +85,7 @@ TASK_RESUME = 'task:resume',
 TASK_END = 'task:end',
 TASK_WRAPUP = 'task:wrapup',
 TASK_REJECT= 'task:rejected',
+TASK_HYDRATE = 'task:hydrate',
 } // TODO: remove this once cc sdk exports this enum
 
 
