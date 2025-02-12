@@ -101,28 +101,34 @@ class StoreWrapper implements IStoreWrapper {
   }
 
   handleTaskRemove = (taskId: string) => {
+    // Remove the task from the taskList
     const taskToRemove = this.store.taskList.find((task) => task.data.interactionId === taskId);
     if (taskToRemove) {
       taskToRemove.off(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned(taskId));
       taskToRemove.off(TASK_EVENTS.TASK_END, ({wrapupRequired}: {wrapupRequired: boolean}) =>
         this.handleTaskEnd(taskId, wrapupRequired)
       );
+      taskToRemove.off(TASK_EVENTS.TASK_REJECT, () => this.handleTaskRemove(taskId));
     }
     const updateTaskList = this.store.taskList.filter((task) => task.data.interactionId !== taskId);
+
     runInAction(() => {
       this.store.setTaskList(updateTaskList);
-      this.store.setCurrentTask(null);
       this.store.setWrapupRequired(false);
+
+      // Remove the task from currentTask or incomingTask if it is the same task
+      if (this.store.currentTask?.data.interactionId === taskId) {
+        this.store.setCurrentTask(null);
+      }
+
+      if (this.store.incomingTask?.data.interactionId === taskId) {
+        this.store.setIncomingTask(null);
+      }
     });
   };
 
   handleTaskEnd = (taskId: string, wrapupRequired: boolean) => {
-    // Task has been ended based on wrapupRequired we either set wrapupRequired or remove the task
-    if (wrapupRequired) {
-      this.store.setWrapupRequired(wrapupRequired);
-    } else {
-      this.handleTaskRemove(taskId);
-    }
+    this.store.setWrapupRequired(wrapupRequired);
   };
 
   handleTaskAssigned = (task: ITask) => () => {
@@ -140,10 +146,17 @@ class StoreWrapper implements IStoreWrapper {
     }
 
     // Attach event listeners to the task
-    task.on(TASK_EVENTS.TASK_END, ({wrapupRequired}: {wrapupRequired: boolean}) =>
-      this.handleTaskEnd(task.data.interactionId, wrapupRequired)
-    );
+    task.on(TASK_EVENTS.TASK_END, ({wrapupRequired}: {wrapupRequired: boolean}) => {
+      this.handleTaskEnd(task.data.interactionId, wrapupRequired);
+    });
+
+    // When we receive TASK_ASSIGNED the task was accepted by the agent and we need wrap up
     task.on(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned(task));
+
+    // When we receive TASK_REJECT sdk changes the agent status
+    // When we receive TASK_REJECT that means the task was not accepted by the agent and we wont need wrap up
+    task.on(TASK_EVENTS.TASK_REJECT, () => this.handleTaskRemove(task.data.interactionId));
+
     this.store.setTaskList([...this.store.taskList, task]);
   };
 

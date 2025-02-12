@@ -40,6 +40,8 @@ class Store implements IStore {
       incomingTask: observable,
       taskList: observable,
       wrapupRequired: observable,
+      setLastStateChangeTimestamp: observable,
+      currentState: observable,
     });
   }
 

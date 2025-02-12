@@ -164,7 +164,7 @@ function App() {
           {showWidgets && (
             <>
               {selectedWidgets.stationLogin && <StationLogin onLogin={onLogin} onLogout={onLogout} />}
-              {isLoggedIn && (
+              {store.isAgentLoggedIn && (
                 <>
                   {selectedWidgets.userState && <UserState />}
                   {selectedWidgets.incomingTask && <IncomingTask onAccepted={onAccepted} onDeclined={onDeclined} />}

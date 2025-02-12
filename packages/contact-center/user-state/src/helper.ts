@@ -31,23 +31,35 @@ export const useUserState = ({idleCodes, agentId, cc, currentState, lastStateCha
     const blob = new Blob([workerScript], {type: 'application/javascript'});
     const workerUrl = URL.createObjectURL(blob);
     workerRef.current = new Worker(workerUrl);
-    workerRef.current.postMessage({type: 'start', startTime: Date.now()});
     workerRef.current.onmessage = (event) => {
+      workerRef.current.postMessage({type: 'start', startTime: Date.now()});
       setElapsedTime(event.data);
     };
   }, []);
 
   useEffect(() => {
-    if (workerRef.current && lastStateChangeTimestamp) {
-      const timeNow = new Date();
-      const elapsed = Math.floor(Math.abs(timeNow.getTime() - lastStateChangeTimestamp.getTime()) / 1000);
-      setElapsedTime(elapsed);
-      workerRef.current.postMessage({type: 'reset', startTime: lastStateChangeTimestamp.getTime()});
+    if (workerRef.current) {
+      workerRef.current.terminate();
+      const blob = new Blob([workerScript], {type: 'application/javascript'});
+      const workerUrl = URL.createObjectURL(blob);
+      workerRef.current = new Worker(workerUrl);
+      workerRef.current.onmessage = (event) => {
+        setElapsedTime(event.data);
+      };
+      if (lastStateChangeTimestamp) {
+        const timeNow = new Date();
+        const elapsed = Math.floor(Math.abs(timeNow.getTime() - lastStateChangeTimestamp.getTime()) / 1000);
+        setElapsedTime(elapsed);
+        workerRef.current.postMessage({type: 'reset', startTime: lastStateChangeTimestamp.getTime()});
+      } else {
+        workerRef.current.postMessage({type: 'start', startTime: Date.now()});
+      }
     }
+
     return () => {
       workerRef.current?.terminate();
     };
-  }, [lastStateChangeTimestamp]);
+  }, [currentState]);
 
   const setAgentStatus = (selectedCode) => {
     const {auxCodeId, state} = {
