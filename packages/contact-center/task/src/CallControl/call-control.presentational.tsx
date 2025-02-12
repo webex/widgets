@@ -65,7 +65,7 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
                   <button className="btn" onClick={handletoggleRecording} disabled={wrapupRequired}>
                     {isRecording ? 'Pause Recording' : 'Resume Recording'}
                   </button>
-                  <button className="btn" onClick={endCall} disabled={wrapupRequired}>
+                  <button className="btn" onClick={endCall} disabled={wrapupRequired || isHeld}>
                     End
                   </button>
                 </div>
