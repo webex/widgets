@@ -1,7 +1,7 @@
 {
   "name": "@webex/cc-task",
   "description": "Webex Contact Center Widgets: Task",
-  "version": "1.28.0-ccwidgets.15",
+  "version": "1.28.0-ccwidgets.16",
   "main": "dist/index.js",
   "publishConfig": {
     "access": "public"
@@ -58,5 +58,5 @@
       "^.+\\.(css|less|scss)$": "babel-jest"
     }
   },
-  "stableVersion": "1.28.0-ccwidgets.14"
+  "stableVersion": "1.28.0-ccwidgets.15"
 }

@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.16](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.15...v1.28.0-ccwidgets.16) (2025-02-10)
+
+
+### Bug Fixes
+
+* **tooling:** webpack-prod-build-for-npm ([#383](https://github.com/webex/widgets/issues/383)) ([648b6b3](https://github.com/webex/widgets/commit/648b6b305033734250f987f6906f8907aa13d5f3))
+
 # [1.28.0-ccwidgets.15](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.14...v1.28.0-ccwidgets.15) (2025-02-07)
 
 
