@@ -1,5 +1,5 @@
 import React, {useState, useRef} from 'react';
-import {StationLogin, UserState, IncomingTask, TaskList, CallControl, store, CallControlPresentational} from '@webex/cc-widgets';
+import {StationLogin, UserState, IncomingTask, TaskList, CallControl, store} from '@webex/cc-widgets';
 
 window['store'] = store;
 
@@ -8,6 +8,7 @@ function App() {
   const [accessToken, setAccessToken] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const themeCheckboxRef = useRef(null);
+  const [currentTheme, setCurrentTheme] = useState(store.currentTheme);
 
   const webexConfig = {
     fedramp: false,

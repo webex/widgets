@@ -11,6 +11,8 @@ jest.mock('@webex/cc-store', () => {
     teams,
     loginOptions,
     setSelectedLoginOption: jest.fn(),
+    setCurrentState: jest.fn(),
+    setLastStateChangeTimestamp: jest.fn(),
   };
 });
 
@@ -48,7 +50,7 @@ describe('useStationLogin Hook', () => {
   });
 
   it('should set loginSuccess on successful login', async () => {
-    const successResponse = {
+    const successResponse = {data: {
       agentId: '6b310dff-569e-4ac7-b064-70f834ea56d8',
       agentSessionId: 'c9c24ace-5170-4a9f-8bc2-2eeeff9d7c11',
       auxCodeId: '00b4e8df-f7b0-460f-aacf-f1e635c87d4d',
@@ -69,11 +71,12 @@ describe('useStationLogin Hook', () => {
       trackingId: 'f40915b9-07ed-4b6c-832d-e7f5e7af3b72',
       type: 'AgentStationLoginSuccess',
       voiceCount: 1,
-    };
+    }};
 
     ccMock.stationLogin.mockResolvedValue(successResponse);
     const setSelectedLoginOptionSpy = jest.spyOn(require('@webex/cc-store'), 'setSelectedLoginOption');
-
+    const setSetCurrentStateSpy = jest.spyOn(require('@webex/cc-store'), 'setCurrentState');
+    const setSetLastStateChangeTimestampSpy = jest.spyOn(require('@webex/cc-store'), 'setLastStateChangeTimestamp');
     const {result} = renderHook(() =>
       useStationLogin({
         cc: ccMock,
@@ -120,6 +123,10 @@ describe('useStationLogin Hook', () => {
       });
 
       expect(setSelectedLoginOptionSpy).toHaveBeenCalledWith(loginParams.loginOption);
+      expect(setSetCurrentStateSpy).toHaveBeenCalledWith(successResponse.data.auxCodeId);
+      expect(setSetLastStateChangeTimestampSpy).toHaveBeenCalledWith(
+        new Date(successResponse.data.lastStateChangeTimestamp)
+      );
     });
   });
 

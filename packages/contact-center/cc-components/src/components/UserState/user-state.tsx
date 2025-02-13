@@ -79,27 +79,23 @@ const darkTheme = createTheme({
 
 const UserStateComponent: React.FunctionComponent<Omit<IUserState, "setCurrentState"> & { currentTheme: 'DARK' | 'LIGHT' }> = (props) => {
   const { idleCodes, setAgentStatus, isSettingAgentStatus, errorMessage, elapsedTime, currentState, currentTheme, customStatus } = props;
-  const [selectedState, setSelectedState] = useState(currentState);
+  const [selectedState, setSelectedState] = useState({id: currentState, name: null});
 
   useEffect(() => {
     if (customStatus && customStatus !== '') {
       switch (customStatus) {
         case 'RONA':
-          setSelectedState({ id: 1, name: 'RONA' });
+          setSelectedState({ id: '1', name: 'RONA' });
           break;
         case 'WRAPUP':
-          setSelectedState({ id: 2, name: 'Wrap-Up' });
+          setSelectedState({ id: '2', name: 'Wrap-Up' });
           break;
         default:
           setSelectedState(null);
       }
-    } else if (currentState && typeof currentState.id === "undefined" && idleCodes) {
-      const availableCode = idleCodes.find(code => code.name === 'Available');
-      if (availableCode) {
-        setAgentStatus(availableCode);
-      }
-    } else {
-      setSelectedState(currentState);
+    }
+    else {
+      setSelectedState({ id: currentState, name: null });
     }
   }, [idleCodes, currentState, customStatus, setAgentStatus]);
 
@@ -133,7 +129,7 @@ const UserStateComponent: React.FunctionComponent<Omit<IUserState, "setCurrentSt
             setSelectedState(code);
           }}
           renderValue={(selected) => {
-            const selectedCode = idleCodes?.find(code => code.id === selected) || (selectedState?.id === 1 || selectedState?.id === 2 ? selectedState : null);
+            const selectedCode = idleCodes?.find(code => code.id === selected) || (selectedState?.id === '1' || selectedState?.id === '2' ? selectedState : null);
             return (
               <div className="selectedValueContainer">
                 {getIcon(selectedCode?.name)}
