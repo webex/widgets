@@ -85,10 +85,13 @@ const UserStateComponent: React.FunctionComponent<Omit<IUserState, "setCurrentSt
     if (customStatus && customStatus !== '') {
       switch (customStatus) {
         case 'RONA':
-          setSelectedState({ id: '1', name: 'RONA' });
+          setSelectedState({ id: 'custom1', name: 'RONA' });
           break;
         case 'WRAPUP':
-          setSelectedState({ id: '2', name: 'Wrap-Up' });
+          setSelectedState({ id: 'custom2', name: 'Wrap-Up' });
+          break;
+        case 'ENGAGED':
+          setSelectedState({ id: 'custom3', name: 'Engaged' });
           break;
         default:
           setSelectedState(null);
@@ -99,19 +102,29 @@ const UserStateComponent: React.FunctionComponent<Omit<IUserState, "setCurrentSt
     }
   }, [idleCodes, currentState, customStatus, setAgentStatus]);
 
+  const selectStyles = {
+    backgroundColor: selectedState?.id === 'custom1' ? '#E9C1BC' : 'white',
+    borderRadius: '4px',
+    padding: '0 8px',
+    height: '40px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    color: selectedState?.id === 'custom1' ? 'red' : selectedState.id.startsWith('custom') ? 'orange' : 'black',
+    cursor: isSettingAgentStatus || customStatus === 'WRAUPUP' ? 'not-allowed' : 'pointer',
+  };
+
   const getIcon = (name) => {
     if (name === 'Available') {
       return <CheckCircleOutlineIcon style={{ color: 'green' }} />;
     } else if (name === 'RONA') {
       return <RemoveCircleOutlineIcon style={{ color: 'red' }} />;
-    } else if (name === 'Wrap-Up') {
+    } else if (name === 'Wrap-Up' || name === 'Engaged') {
       return <RemoveCircleOutlineIcon style={{ color: 'orange' }} />;
     } else {
       return <RemoveCircleOutlineIcon style={{ color: 'gray' }} />;
     }
   };
-
-  const selectStyles = selectedState?.name === 'RONA' ? { backgroundColor: '#E9C1BC', color: 'black', borderRadius: '50px' } : { backgroundColor: '#FFF', color: 'black', borderRadius: '50px' };
 
   const theme = currentTheme === 'DARK' ? darkTheme : lightTheme;
 
@@ -129,7 +142,7 @@ const UserStateComponent: React.FunctionComponent<Omit<IUserState, "setCurrentSt
             setSelectedState(code);
           }}
           renderValue={(selected) => {
-            const selectedCode = idleCodes?.find(code => code.id === selected) || (selectedState?.id === '1' || selectedState?.id === '2' ? selectedState : null);
+            const selectedCode = idleCodes?.find(code => code.id === selected) || (selectedState?.id.startsWith('custom') ? selectedState : null);
             return (
               <div className="selectedValueContainer">
                 {getIcon(selectedCode?.name)}

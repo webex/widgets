@@ -8,6 +8,7 @@ const teams = ['team123', 'team456'];
 
 const loginOptions = ['EXTENSION', 'AGENT_DN', 'BROWSER'];
 const deviceType = 'BROWSER';
+const logger = {};
 
 // Mock the store import
 jest.mock('@webex/cc-store', () => {
@@ -19,6 +20,8 @@ jest.mock('@webex/cc-store', () => {
     teams,
     loginOptions,
     deviceType,
+    logger,
+    isAgentLoggedIn: false,
   };
 });
 
@@ -38,6 +41,9 @@ describe.skip('StationLogin Component', () => {
       },
       onLogin: loginCb,
       onLogout: logoutCb,
+      logger,
+      isAgentLoggedIn: false,
+      deviceType: 'BROWSER',
     });
     const heading = screen.getByTestId('station-login-heading');
     expect(heading).toHaveTextContent('StationLogin');

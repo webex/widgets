@@ -1,10 +1,9 @@
-import React, { useEffect } from 'react';
-import { StationLoginPresentationalProps } from './station-login.types';
-import { Select, MenuItem, TextField, Button, Dialog, DialogTitle, DialogContent, DialogActions, SelectChangeEvent, Box, Typography, FormControl, InputLabel, Checkbox, FormControlLabel } from '@mui/material';
+import React, {useEffect, useRef} from 'react';
+import {StationLoginPresentationalProps} from './station-login.types';
+import {Select, MenuItem, TextField, Button, Dialog, DialogTitle, DialogContent, DialogActions, SelectChangeEvent, Box, Typography, FormControl, InputLabel, Checkbox, FormControlLabel} from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import './station-login.style.scss';
-import { MULTIPLE_SIGN_IN_ALERT_MESSAGE, MULTIPLE_SIGN_IN_ALERT_TITLE } from './constants';
-import './alert-modal.scss';
+import {MULTIPLE_SIGN_IN_ALERT_MESSAGE, MULTIPLE_SIGN_IN_ALERT_TITLE} from './constants';
 
 const lightTheme = createTheme({
   palette: {
@@ -160,6 +159,7 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
   handleContinue,
   currentTheme,
 }) => {
+  const modalRef = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     if (teams.length > 0) {
       setTeam(teams[0].id);
@@ -186,10 +186,6 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
       relogin();
     }
   }, [isAgentLoggedIn, deviceType, relogin]);
-
-  useEffect(() => {
-    console.log('Dialog open state:', showMultipleLoginAlert); // Debugging log
-  }, [showMultipleLoginAlert]);
 
   const handleSelectLoginOption = (event: SelectChangeEvent<string>) => {
     setDeviceType(event.target.value);

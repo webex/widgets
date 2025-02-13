@@ -1,6 +1,7 @@
-import React, { useState, ChangeEvent } from 'react';
-import { WrapupCodes } from '@webex/cc-store';
-import { CallControlPresentationalProps } from '../task.types';
+import React, {useEffect, useState, ChangeEvent} from 'react';
+import {WrapupCodes} from '@webex/cc-store';
+
+import {CallControlPresentationalProps} from '../task.types';
 import './call-control.styles.scss';
 import { Box, IconButton, TextField, MenuItem } from '@mui/material';
 import PauseIcon from '@mui/icons-material/Pause';
@@ -17,6 +18,20 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
 
   const { currentTask, audioRef, toggleHold, toggleRecording, endCall, wrapupCall, wrapupCodes, wrapupRequired } = props;
 
+  useEffect(() => {
+    if (!currentTask || !currentTask.data || !currentTask.data.interaction) return;
+
+    const {interaction, mediaResourceId} = currentTask.data;
+    const {media, callProcessingDetails} = interaction;
+    const isHold = media && media[mediaResourceId] && media[mediaResourceId].isHold;
+    setIsHeld(isHold);
+
+    if (callProcessingDetails) {
+      const {isPaused} = callProcessingDetails;
+      setIsRecording(!isPaused);
+    }
+  }, [currentTask]);
+
   const handletoggleHold = () => {
     toggleHold(!isHeld);
     setIsHeld(!isHeld);
@@ -31,6 +46,7 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
     if (selectedWrapupReason && selectedWrapupId) {
       wrapupCall(selectedWrapupReason, selectedWrapupId);
       setSelectedWrapupReason('');
+      setSelectedWrapupId(null);
     }
   };
 
@@ -50,22 +66,25 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
         <Box sx={{ p: 2 }}>
           {!wrapupRequired && (
             <Box sx={{ display: 'flex', gap: 2 }}>
-              <IconButton
-                onClick={endCall}
-                sx={{
-                  width: 56,
-                  height: 40,
-                  backgroundColor: '#D3381C',
-                  color: 'white',
-                  borderRadius: 1,
-                  boxShadow: 1,
-                  ':hover': {
-                    backgroundColor: '#B03018',
-                  },
-                }}
-              >
-                <CallEndIcon />
-              </IconButton>
+              {
+                !isHeld && (<IconButton
+                    onClick={endCall}
+                    sx={{
+                      width: 56,
+                      height: 40,
+                      backgroundColor: '#D3381C',
+                      color: 'white',
+                      borderRadius: 1,
+                      boxShadow: 1,
+                      ':hover': {
+                        backgroundColor: '#B03018',
+                      },
+                    }}
+                  >
+                    <CallEndIcon />
+                  </IconButton>
+                )
+              }
               <IconButton
                 onClick={handletoggleHold}
                 sx={{
