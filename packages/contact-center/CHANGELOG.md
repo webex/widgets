@@ -1,3 +1,10 @@
+# [1.28.0-ccconnectors.5](https://github.com/webex/widgets/compare/v1.28.0-ccconnectors.4...v1.28.0-ccconnectors.5) (2025-02-13)
+
+
+### Bug Fixes
+
+* refactor for reload and state sync across tabs ([#386](https://github.com/webex/widgets/issues/386)) ([a437af7](https://github.com/webex/widgets/commit/a437af70014aee8a0b7ebb9f80e94fd805307353))
+
 # [1.28.0-ccconnectors.4](https://github.com/webex/widgets/compare/v1.28.0-ccconnectors.3...v1.28.0-ccconnectors.4) (2025-02-13)
 
 
