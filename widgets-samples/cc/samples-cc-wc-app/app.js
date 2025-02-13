@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 const accessTokenElem = document.getElementById('access_token_elem');
 const themeElem = document.getElementById('theme');
 const widgetsContainer = document.getElementById('widgets-container');
@@ -11,10 +12,7 @@ let isMultiLoginEnabled = false;
 
 themeElem.addEventListener('change', () => {
   store.setCurrentTheme(themeElem.checked ? 'DARK' : 'LIGHT');
-  themeProviderElem.setAttribute(
-    'themeclass',
-    themeElem.checked ? 'mds-theme-stable-darkWebex' : 'mds-theme-stable-lightWebex'
-  );
+    themeProviderElem.setAttribute('themeclass', themeElem.checked ? 'mds-theme-stable-darkWebex' : 'mds-theme-stable-lightWebex');
 });
 
 if (!ccStationLogin && !ccUserState) {
@@ -22,8 +20,8 @@ if (!ccStationLogin && !ccUserState) {
 }
 
 function switchButtonState() {
-  const buttonElem = document.querySelector('button');
-  buttonElem.disabled = accessTokenElem.value.trim() === '';
+    const buttonElem = document.querySelector('button');
+    buttonElem.disabled = accessTokenElem.value.trim() === '';
 }
 
 function enableMultiLogin() {
