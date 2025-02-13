@@ -71,7 +71,7 @@ class Store implements IStore {
       this.cc = webex.cc;
     }
 
-    if (!webex || !this.cc) {
+    if (!webex && !this.cc && typeof webex === 'undefined') {
       throw new Error('Webex SDK not initialized');
     }
 

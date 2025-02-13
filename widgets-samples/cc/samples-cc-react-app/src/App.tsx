@@ -93,9 +93,9 @@ function App() {
           Dark Theme
           <br />
           <div className="warning-note" style={{color: 'red', marginBottom: '10px'}}>
-            <strong>Important:</strong> The "Enable Multi Login" option must be set before initializing the SDK. Changes
-            to this setting after SDK initialization will not take effect. Please ensure you configure this option
-            before clicking the "Init Widgets" button.
+            <strong>Note:</strong> The "Enable Multi Login" option must be set before initializing the SDK. Changes to
+            this setting after SDK initialization will not take effect. Please ensure you configure this option before
+            clicking the "Init Widgets" button.
           </div>
           <label>
             <input type="checkbox" id="multiLoginFlag" name="multiLoginFlag" onChange={enableDisableMultiLogin} />{' '}
