@@ -21,37 +21,68 @@ class Store implements IStore {
   logger: ILogger;
   idleCodes: IdleCode[] = [];
   agentId: string = '';
-  selectedLoginOption: string = '';
   currentTheme: string = 'LIGHT';
   wrapupCodes: IWrapupCode[] = [];
+  incomingTask: ITask = null;
   currentTask: ITask = null;
   isAgentLoggedIn = false;
   deviceType: string = '';
-  customStatus: 'RONA' | 'WRAPUP' | '' = '';
+  customStatus: 'RONA' | 'WRAPUP' | 'ENGAGED' | '' = '';  
+  taskList: ITask[] = [];
+  wrapupRequired: boolean = false;
   currentState: string = '';
   lastStateChangeTimestamp: Date = new Date();
-  
+  showMultipleLoginAlert: boolean = false;
+
   constructor() {
     makeAutoObservable(this, {
       cc: observable.ref,
       currentTask: observable, // Make currentTask observable
+      incomingTask: observable,
+      taskList: observable,
+      wrapupRequired: observable,
+      currentState: observable,
     });
+  }
+
+  setWrapupRequired(value: boolean): void {
+    this.wrapupRequired = value;
   }
 
   setCurrentTask(task: ITask): void {
     this.currentTask = task;
   }
 
-  setCustomStatus(status: 'RONA' | 'WRAPUP' | ''): void {
+  setCustomStatus(status: 'RONA' | 'WRAPUP' | 'ENGAGED' | ''): void {
     this.customStatus = status;
   }
   
+  setIncomingTask(task: ITask): void {
+    this.incomingTask = task;
+  }
+
+  setTaskList(taskList: ITask[]): void {
+    this.taskList = taskList;
+  }
+
+  setDeviceType(option: string): void {
+    this.deviceType = option;
+  }
+
   setCurrentState(state: string): void {
     this.currentState = state;
   }
 
   setLastStateChangeTimestamp(timestamp: Date): void {
     this.lastStateChangeTimestamp = timestamp;
+  }
+
+  setShowMultipleLoginAlert(value: boolean): void {
+    this.showMultipleLoginAlert = value;
+  }
+
+  setIsAgentLoggedIn(value: boolean): void {
+    this.isAgentLoggedIn = value;
   }
 
   public static getInstance(): Store {
@@ -64,17 +95,9 @@ class Store implements IStore {
     return Store.instance;
   }
 
-  setSelectedLoginOption(option: string): void {
-    this.selectedLoginOption = option;
-  }
-
   setCurrentTheme(theme: string): void {
     this.currentTheme = theme;
   }
-
-  setDeviceType = function(deviceType: string): void {
-    this.deviceType = deviceType;
-  }.bind(this);
 
   registerCC(webex: WithWebex['webex']): Promise<void> {
     this.cc = webex.cc;
@@ -133,5 +156,4 @@ class Store implements IStore {
   }
 }
 
-const store = Store.getInstance();
-export default store;
+export default Store;

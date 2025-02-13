@@ -7,15 +7,13 @@ import {useStationLogin} from '../helper';
 import {StationLoginProps} from './station-login.types';
 
 const StationLoginComponent: React.FunctionComponent<StationLoginProps> = ({onLogin, onLogout}) => {
-  const {cc, teams, loginOptions, logger, deviceType, isAgentLoggedIn, handleContinue, showMultipleLoginAlert, setDeviceType, currentTheme} = store;
+  const {cc, teams, loginOptions, logger, deviceType, isAgentLoggedIn, showMultipleLoginAlert, setDeviceType, currentTheme} = store;
   const result = useStationLogin({
     cc,
     onLogin,
     onLogout,
     logger,
     isAgentLoggedIn,
-    handleContinue,
-    showMultipleLoginAlert,
     deviceType
   });
 
@@ -24,8 +22,9 @@ const StationLoginComponent: React.FunctionComponent<StationLoginProps> = ({onLo
     teams,
     loginOptions,
     deviceType,
-    setDeviceType,
-    currentTheme
+    setDeviceType: setDeviceType.bind(store),
+    currentTheme,
+    showMultipleLoginAlert
   };
   return <StationLoginPresentational {...props} />;
 };
