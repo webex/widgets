@@ -1,7 +1,7 @@
 {
   "name": "@webex/cc-store",
   "description": "Webex Contact Center Widgets: Widgets Store",
-  "version": "1.28.0-ccconnectors.3",
+  "version": "1.28.0-ccconnectors.4",
   "main": "dist/index.js",
   "license": "MIT",
   "publishConfig": {
@@ -51,5 +51,5 @@
       "**/tests/**/*.tsx"
     ]
   },
-  "stableVersion": "1.28.0-ccconnectors.2"
+  "stableVersion": "1.28.0-ccconnectors.3"
 }

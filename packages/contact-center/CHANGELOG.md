@@ -1,3 +1,16 @@
+# [1.28.0-ccconnectors.4](https://github.com/webex/widgets/compare/v1.28.0-ccconnectors.3...v1.28.0-ccconnectors.4) (2025-02-13)
+
+
+### Bug Fixes
+
+* **cc-components:** replace momentum-ui with momentum-design lib ([#378](https://github.com/webex/widgets/issues/378)) ([b98d76c](https://github.com/webex/widgets/commit/b98d76c5eca903cd21482a4c52e24bbff4dfe0e2))
+* **tooling:** webpack-prod-build-for-npm ([#383](https://github.com/webex/widgets/issues/383)) ([648b6b3](https://github.com/webex/widgets/commit/648b6b305033734250f987f6906f8907aa13d5f3))
+
+
+### Features
+
+* **cc-user-state:** retain agent state timer on relogin or multiLogin ([#371](https://github.com/webex/widgets/issues/371)) ([9dba8db](https://github.com/webex/widgets/commit/9dba8db0eb3d685349b4ebdb8150981373681cbe))
+
 # [1.28.0-ccconnectors.3](https://github.com/webex/widgets/compare/v1.28.0-ccconnectors.2...v1.28.0-ccconnectors.3) (2025-02-07)
 # [1.28.0-ccwidgets.16](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.15...v1.28.0-ccwidgets.16) (2025-02-10)
 
