@@ -53,7 +53,8 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
     }
   }, [isAgentLoggedIn]);
 
-  const selectLoginOption = (event: { target: { value: string } }) => {
+  const selectLoginOption = (event: { target: { value: string } }) => 
+    {
     const dialNumber = document.querySelector('#dialNumber') as HTMLInputElement;
     const deviceType = event.target.value;
     setDeviceType(deviceType);
@@ -78,13 +79,15 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
   }
 
   return (
-    <div>
+    <>
       {showMultipleLoginAlert && (
         <dialog ref={modalRef} className="modal">
           <h2>{MULTIPLE_SIGN_IN_ALERT_TITLE}</h2>
           <p>{MULTIPLE_SIGN_IN_ALERT_MESSAGE}</p>
-          <div className='modal-content'>
-            <button id="ContinueButton" data-testid="ContinueButton" onClick={continueClicked}>Continue</button>
+          <div className="modal-content">
+            <button id="ContinueButton" data-testid="ContinueButton" onClick={continueClicked}>
+              Continue
+            </button>
           </div>
         </dialog>
       )}
@@ -93,8 +96,8 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
         <section className="section-box">
           <fieldset className="fieldset">
             <legend className="legend-box">Agent</legend>
-            <div style={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
-              <div style={{ display: 'flex', gap: '1rem' }}>
+            <div style={{display: 'flex', flexDirection: 'column', flexGrow: 1}}>
+              <div style={{display: 'flex', gap: '1rem'}}>
                 <fieldset
                   style={{
                     border: '1px solid #ccc',
@@ -124,20 +127,22 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
                     type="text"
                     onInput={updateDN}
                   />
-                  <button id="AgentLogin" className="btn" onClick={login}>
-                    Login
-                  </button>
-                  <button id="logoutAgent" className="btn" onClick={logout}>
-                    Logout
-                  </button>
+                  {isAgentLoggedIn ? (
+                    <button id="logoutAgent" className="btn" onClick={logout}>
+                      Logout
+                    </button>
+                  ) : (
+                    <button id="AgentLogin" className="btn" onClick={login}>
+                      Login
+                    </button>
+                  )}
                 </fieldset>
               </div>
             </div>
           </fieldset>
         </section>
       </div>
-    </div>
+    </>
   );
 };
-
 export default StationLoginPresentational;

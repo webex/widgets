@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 const accessTokenElem = document.getElementById('access_token_elem');
 const themeElem = document.getElementById('theme');
 const widgetsContainer = document.getElementById('widgets-container');
@@ -7,6 +8,7 @@ const ccIncomingTask = document.createElement('widget-cc-incoming-task');
 const ccTaskList = document.createElement('widget-cc-task-list');
 const ccCallControl = document.createElement('widget-cc-call-control');
 const themeProviderElem = document.getElementById('theme-provider-elem'); 
+let isMultiLoginEnabled = false;
 
 themeElem.addEventListener('change', () => {
     store.setCurrentTheme(themeElem.checked ? 'DARK' : 'LIGHT');
@@ -22,11 +24,19 @@ function switchButtonState(){
     buttonElem.disabled = accessTokenElem.value.trim() === '';
 }
 
+function enableMultiLogin() {
+  if (isMultiLoginEnabled) isMultiLoginEnabled = false;
+  else isMultiLoginEnabled = true;
+}
+
 function initWidgets(){
     const webexConfig = {
         fedramp: false,
         logger: {
         level: 'log'
+        },
+        cc: {
+          allowMultiLogin: isMultiLoginEnabled,
         },
     }
     store.init({

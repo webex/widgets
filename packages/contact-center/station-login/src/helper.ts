@@ -39,8 +39,8 @@ export const useStationLogin = (props: UseStationLoginProps) => {
   const handleContinue = async () => {
     try {
       setShowMultipleLoginAlert(false);
-      const profile = await cc.register();
-      if (profile.isAgentLoggedIn) {
+      await store.registerCC();
+      if (store.isAgentLoggedIn) {
         logger.log(`Agent Relogin Success`, {
           module: 'widget-station-login#station-login/helper.ts',
           method: 'handleContinue',
@@ -76,7 +76,6 @@ export const useStationLogin = (props: UseStationLoginProps) => {
         }
       })
       .catch((error: Error) => {
-
         logger.error(`Error logging in: ${error}`, {
           module: 'widget-station-login#helper.ts',
           method: 'login',
