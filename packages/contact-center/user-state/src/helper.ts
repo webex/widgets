@@ -31,8 +31,8 @@ export const useUserState = ({idleCodes, agentId, cc, currentState, lastStateCha
     const blob = new Blob([workerScript], {type: 'application/javascript'});
     const workerUrl = URL.createObjectURL(blob);
     workerRef.current = new Worker(workerUrl);
+    workerRef.current.postMessage({type: 'start', startTime: Date.now()});
     workerRef.current.onmessage = (event) => {
-      workerRef.current.postMessage({type: 'start', startTime: Date.now()});
       setElapsedTime(event.data);
     };
   }, []);

@@ -39,7 +39,8 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
   const handleWrapupCall = () => {
     if (selectedWrapupReason && selectedWrapupId) {
       wrapupCall(selectedWrapupReason, selectedWrapupId);
-      setSelectedWrapupReason('');
+      setSelectedWrapupReason(null);
+      setSelectedWrapupId(null);
     }
   };
 
