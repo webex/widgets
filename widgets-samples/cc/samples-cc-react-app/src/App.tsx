@@ -72,41 +72,37 @@ function App() {
 
   return (
     <div className="mds-typography">
-      <ThemeProvider
-        themeclass={currentTheme === 'LIGHT' ? 'mds-theme-stable-lightWebex' : 'mds-theme-stable-darkWebex'}
-      >
-        <IconProvider>
-          <h1>Contact Center widgets in a react app</h1>
-          <input
-            type="text"
-            placeholder="Enter your access token"
-            value={accessToken}
-            onChange={(e) => setAccessToken(e.target.value)}
-          />
-          <br />
-          <input
-            type="checkbox"
-            id="theme"
-            name="theme"
-            ref={themeCheckboxRef}
-            onChange={() => {
-              setCurrentTheme(themeCheckboxRef.current.checked ? 'DARK' : 'LIGHT');
-              store.setCurrentTheme(themeCheckboxRef.current.checked ? 'DARK' : 'LIGHT');
-            }}
-          />{' '}
-          Dark Theme
-          <br />
-          <button
-            disabled={accessToken.trim() === ''}
-            onClick={() => {
-              store.init({webexConfig, access_token: accessToken}).then(() => {
-                setIsSdkReady(true);
-              });
-            }}
-          >
-            Init Widgets
-          </button>
-          {isSdkReady && (
+      <ThemeProvider themeclass={currentTheme === 'LIGHT' ? 'mds-theme-stable-lightWebex': 'mds-theme-stable-darkWebex'}><IconProvider>
+        <h1>Contact Center widgets in a react app</h1>
+        <input
+          type="text"
+          placeholder="Enter your access token"
+          value={accessToken}
+          onChange={(e) => setAccessToken(e.target.value)}
+        />
+        <br />
+        <input
+          type='checkbox'
+          id='theme'
+          name='theme'
+          ref={themeCheckboxRef}
+          onChange={() => {
+            setCurrentTheme(themeCheckboxRef.current.checked ? 'DARK' : 'LIGHT');
+            store.setCurrentTheme(themeCheckboxRef.current.checked ? 'DARK' : 'LIGHT');
+          }}
+        /> Dark Theme
+        <br />
+        <button
+          disabled={accessToken.trim() === ''}
+          onClick={() => {
+            store.init({webexConfig, access_token: accessToken}).then(() => {
+              setIsSdkReady(true);
+            });
+          }}
+        >
+          Init Widgets
+        </button>
+        {isSdkReady && (
             <>
               <div>
                 <label>
@@ -164,7 +160,7 @@ function App() {
               </button>
             </>
           )}
-          {showWidgets && (
+        {showWidgets && (
             <>
               {selectedWidgets.stationLogin && <StationLogin onLogin={onLogin} onLogout={onLogout} />}
               {store.isAgentLoggedIn && (
@@ -180,9 +176,9 @@ function App() {
                 </>
               )}
             </>
-          )}
-        </IconProvider>
-      </ThemeProvider>
+          )}  
+
+      </IconProvider></ThemeProvider>
     </div>
   );
 }

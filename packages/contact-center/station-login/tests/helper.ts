@@ -108,7 +108,7 @@ describe('useStationLogin Hook', () => {
         loginOption: loginParams.loginOption,
         dialNumber: loginParams.dialNumber,
       });
-      // expect(loginCb).toHaveBeenCalledWith();
+      expect(loginCb).toHaveBeenCalledWith();
 
       expect(result.current).toEqual({
         name: 'StationLogin',
