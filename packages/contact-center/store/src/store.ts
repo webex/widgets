@@ -44,42 +44,6 @@ class Store implements IStore {
     });
   }
 
-  setWrapupRequired(value: boolean): void {
-    this.wrapupRequired = value;
-  }
-
-  setCurrentTask(task: ITask): void {
-    this.currentTask = task;
-  }
-
-  setIncomingTask(task: ITask): void {
-    this.incomingTask = task;
-  }
-
-  setTaskList(taskList: ITask[]): void {
-    this.taskList = taskList;
-  }
-
-  setDeviceType(option: string): void {
-    this.deviceType = option;
-  }
-
-  setCurrentState(state: string): void {
-    this.currentState = state;
-  }
-
-  setLastStateChangeTimestamp(timestamp: Date): void {
-    this.lastStateChangeTimestamp = timestamp;
-  }
-
-  setShowMultipleLoginAlert(value: boolean): void {
-    this.showMultipleLoginAlert = value;
-  }
-
-  setIsAgentLoggedIn(value: boolean): void {
-    this.isAgentLoggedIn = value;
-  }
-
   public static getInstance(): Store {
     if (!Store.instance) {
       console.log('Creating new store instance');
@@ -88,10 +52,6 @@ class Store implements IStore {
 
     console.log('Returning store instance');
     return Store.instance;
-  }
-
-  setCurrentTheme(theme: string): void {
-    this.currentTheme = theme;
   }
 
   registerCC(webex: WithWebex['webex']): Promise<void> {

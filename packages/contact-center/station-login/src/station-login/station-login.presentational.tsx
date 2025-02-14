@@ -1,7 +1,7 @@
-import React, {useEffect, useRef} from 'react';
-import {StationLoginPresentationalProps} from './station-login.types';
+import React, { useEffect, useRef} from 'react';
+import { StationLoginPresentationalProps } from './station-login.types';
 import './station-login.style.scss';
-import {MULTIPLE_SIGN_IN_ALERT_MESSAGE, MULTIPLE_SIGN_IN_ALERT_TITLE} from './constants';
+import { MULTIPLE_SIGN_IN_ALERT_MESSAGE, MULTIPLE_SIGN_IN_ALERT_TITLE } from './constants';
 
 const StationLoginPresentational: React.FunctionComponent<StationLoginPresentationalProps> = (props) => {
   const {
@@ -66,7 +66,8 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
     }
   }, [isAgentLoggedIn]);
 
-  const selectLoginOption = (event: {target: {value: string}}) => {
+  const selectLoginOption = (event: { target: { value: string } }) => 
+    {
     const dialNumber = document.querySelector('#dialNumber') as HTMLInputElement;
     const deviceType = event.target.value;
     setDeviceType(deviceType);
@@ -91,7 +92,7 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
   }
 
   return (
-    <div>
+    <>
       {showMultipleLoginAlert && (
         <dialog ref={modalRef} className="modal">
           <h2>{MULTIPLE_SIGN_IN_ALERT_TITLE}</h2>
@@ -154,8 +155,7 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
           </fieldset>
         </section>
       </div>
-    </div>
+    </>
   );
 };
-
 export default StationLoginPresentational;

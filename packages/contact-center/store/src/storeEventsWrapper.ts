@@ -1,10 +1,10 @@
-import {IStoreWrapper, IStore, InitParams, TASK_EVENTS, CC_EVENTS} from './store.types';
+import {IStoreWrapper, IStore, InitParams, TASK_EVENTS, CC_EVENTS, IWrapupCode} from './store.types';
 import {ITask} from '@webex/plugin-cc';
 import Store from './store';
 import {runInAction} from 'mobx';
 
 class StoreWrapper implements IStoreWrapper {
-  private store: IStore;
+  store: IStore;
 
   constructor() {
     this.store = Store.getInstance();
@@ -70,29 +70,49 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.currentTheme;
   }
 
-  setCurrentTheme(theme: string): void {
-    return this.store.setCurrentTheme(theme);
-  }
+  setCurrentTheme = (theme: string): void => {
+    this.store.currentTheme = theme;
+  };
 
-  setShowMultipleLoginAlert(value: boolean): void {
-    return this.store.setShowMultipleLoginAlert(value);
-  }
+  setShowMultipleLoginAlert = (value: boolean): void => {
+    this.store.showMultipleLoginAlert = value;
+  };
 
-  setDeviceType(option: string): void {
-    return this.store.setDeviceType(option);
-  }
+  setDeviceType = (option: string): void => {
+    this.store.deviceType = option;
+  };
 
-  setCurrentState(state: string): void {
-    return this.store.setCurrentState(state);
-  }
+  setCurrentState = (state: string): void => {
+    this.store.currentState = state;
+  };
 
-  setLastStateChangeTimestamp(timestamp: Date): void {
-    return this.store.setLastStateChangeTimestamp(timestamp);
-  }
+  setLastStateChangeTimestamp = (timestamp: Date): void => {
+    this.store.lastStateChangeTimestamp = timestamp;
+  };
 
-  setIsAgentLoggedIn(value: boolean): void {
-    return this.store.setIsAgentLoggedIn(value);
-  }
+  setIsAgentLoggedIn = (value: boolean): void => {
+    this.store.isAgentLoggedIn = value;
+  };
+
+  setWrapupRequired = (value: boolean): void => {
+    this.store.wrapupRequired = value;
+  };
+
+  setCurrentTask = (task: ITask): void => {
+    this.store.currentTask = task;
+  };
+
+  setIncomingTask = (task: ITask): void => {
+    this.store.incomingTask = task;
+  };
+
+  setTaskList = (taskList: ITask[]): void => {
+    this.store.taskList = taskList;
+  };
+
+  setWrapupCodes = (wrapupCodes: IWrapupCode[]): void => {
+    this.store.wrapupCodes = wrapupCodes;
+  };
 
   init(options: InitParams): Promise<void> {
     return this.store.init(options).then(() => {
@@ -113,16 +133,16 @@ class StoreWrapper implements IStoreWrapper {
     const updateTaskList = this.store.taskList.filter((task) => task.data.interactionId !== taskId);
 
     runInAction(() => {
-      this.store.setTaskList(updateTaskList);
-      this.store.setWrapupRequired(false);
+      this.setTaskList(updateTaskList);
+      this.setWrapupRequired(false);
 
       // Remove the task from currentTask or incomingTask if it is the same task
       if (this.store.currentTask?.data.interactionId === taskId) {
-        this.store.setCurrentTask(null);
+        this.setCurrentTask(null);
       }
 
       if (this.store.incomingTask?.data.interactionId === taskId) {
-        this.store.setIncomingTask(null);
+        this.setIncomingTask(null);
       }
     });
   };
@@ -130,7 +150,7 @@ class StoreWrapper implements IStoreWrapper {
   handleTaskEnd = (task: ITask, wrapupRequired: boolean) => {
     // TODO: SDK needs to send only 1 event on end : https://jira-eng-gpk2.cisco.com/jira/browse/SPARK-615785
     if (task.data.interaction.state === 'connected') {
-      this.store.setWrapupRequired(true);
+      this.setWrapupRequired(true);
       return;
     } else if (task.data.interaction.state !== 'connected' && this.store.wrapupRequired !== true) {
       this.handleTaskRemove(task.data.interactionId);
@@ -139,13 +159,13 @@ class StoreWrapper implements IStoreWrapper {
 
   handleTaskAssigned = (task: ITask) => () => {
     runInAction(() => {
-      this.store.setCurrentTask(task);
-      this.store.setIncomingTask(null);
+      this.setCurrentTask(task);
+      this.setIncomingTask(null);
     });
   };
 
   handleIncomingTask = (task: ITask) => {
-    this.store.setIncomingTask(task);
+    this.setIncomingTask(task);
     if (this.store.taskList.some((t) => t.data.interactionId === task.data.interactionId)) {
       // Task already present in the taskList
       return;
@@ -163,22 +183,22 @@ class StoreWrapper implements IStoreWrapper {
     // When we receive TASK_REJECT that means the task was not accepted by the agent and we wont need wrap up
     task.on(TASK_EVENTS.TASK_REJECT, () => this.handleTaskRemove(task.data.interactionId));
 
-    this.store.setTaskList([...this.store.taskList, task]);
+    this.setTaskList([...this.store.taskList, task]);
   };
 
   handleStateChange = (data) => {
     if (data && typeof data === 'object' && data.type === 'AgentStateChangeSuccess') {
       const DEFAULT_CODE = '0'; // Default code when no aux code is present
-      this.store.setCurrentState(data.auxCodeId?.trim() !== '' ? data.auxCodeId : DEFAULT_CODE);
+      this.setCurrentState(data.auxCodeId?.trim() !== '' ? data.auxCodeId : DEFAULT_CODE);
 
       const startTime = data.lastStateChangeTimestamp;
-      this.store.setLastStateChangeTimestamp(new Date(startTime));
+      this.setLastStateChangeTimestamp(new Date(startTime));
     }
   };
 
   handleMultiLoginCloseSession = (data) => {
     if (data && typeof data === 'object' && data.type === 'AgentMultiLoginCloseSession') {
-      this.store.setShowMultipleLoginAlert(true);
+      this.setShowMultipleLoginAlert(true);
     }
   };
 

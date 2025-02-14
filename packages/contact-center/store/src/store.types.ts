@@ -27,7 +27,7 @@ type IdleCode = {
     isDefault: boolean;
 }
 
-interface IStoreBase {
+interface IStore {
     teams: Team[];
     loginOptions: string[];
     cc: IContactCenter;
@@ -46,23 +46,22 @@ interface IStoreBase {
     showMultipleLoginAlert: boolean;
     currentTheme: string;
     init(params: InitParams): Promise<void>;
+}
+
+
+interface IStoreWrapper extends IStore{
+    store: IStore;
+    setCurrentTask(task: any): void;
+    setWrapupRequired(value: boolean): void;
+    setTaskList(taskList: ITask[]): void;
+    setIncomingTask(task: ITask): void;
     setDeviceType(option: string): void;
     setCurrentState(state: string): void;
     setLastStateChangeTimestamp(timestamp: Date): void;
     setShowMultipleLoginAlert(value: boolean): void;
     setCurrentTheme(theme: string): void;
     setIsAgentLoggedIn(value: boolean): void;
-}
-
-interface IStore extends IStoreBase {
-    setCurrentTask(task: any): void;
-    setWrapupRequired(value: boolean): void;
-    setTaskList(taskList: ITask[]): void;
-    setIncomingTask(task: ITask): void;
-}
-
-interface IStoreWrapper extends IStoreBase {
-    handleTaskRemove(taskId: string): void;
+    setWrapupCodes(wrapupCodes: IWrapupCode[]): void;
 }
 
 interface IWrapupCode {
