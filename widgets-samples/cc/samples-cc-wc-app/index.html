@@ -34,6 +34,24 @@
         <div id="widgets-container">
           <widget-cc-station-login class="disabled" id="cc-station-login"></widget-cc-station-login>
         </div>
+        <div id="widget-selection" class="disabled">
+          <label>
+            <input type="checkbox" name="stationLogin" id="stationLoginCheckbox" /> Station Login
+          </label>
+          <label>
+            <input type="checkbox" name="userState" id="userStateCheckbox" /> User State
+          </label>
+          <label>
+            <input type="checkbox" name="incomingTask" id="incomingTaskCheckbox" /> Incoming Task
+          </label>
+          <label>
+            <input type="checkbox" name="taskList" id="taskListCheckbox" /> Task List
+          </label>
+          <label>
+            <input type="checkbox" name="callControl" id="callControlCheckbox" /> Call Control
+          </label>
+          <button onclick="submitWidgets()">Submit</button>
+        </div>
       </mdc-iconprovider>
     </mdc-themeprovider>
     <script src="dist/bundle.js"></script>
