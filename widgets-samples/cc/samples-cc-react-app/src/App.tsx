@@ -60,14 +60,18 @@ function App() {
     console.log('onEnd invoked');
   };
 
-  const onWrapup = () => {
-    console.log('onWrapup invoked');
+  const onWrapup = (params) => {
+    console.log('onWrapup invoked', params);
   };
 
   const handleCheckboxChange = (e) => {
     const {name, checked} = e.target;
     setSelectedWidgets((prev) => ({...prev, [name]: checked}));
   };
+
+  const onStateChange = (state) => {
+    console.log('onStateChange invoked', state);
+  }
 
   return (
     <>
@@ -164,13 +168,13 @@ function App() {
           {selectedWidgets.stationLogin && <StationLogin onLogin={onLogin} onLogout={onLogout} />}
           {store.isAgentLoggedIn && (
             <>
-              {selectedWidgets.userState && <UserState />}
+              {selectedWidgets.userState && <UserState onStateChange={onStateChange} />}
               {selectedWidgets.incomingTask && <IncomingTask onAccepted={onAccepted} onDeclined={onDeclined} />}
               {selectedWidgets.taskList && (
                 <TaskList onTaskAccepted={onTaskAccepted} onTaskDeclined={onTaskDeclined} />
               )}
               {selectedWidgets.callControl && (
-                <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapup={onWrapup} />
+                <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapUp={onWrapup} />
               )}
             </>
           )}

@@ -78,24 +78,16 @@ const darkTheme = createTheme({
 });
 
 const UserStateComponent: React.FunctionComponent<Omit<IUserState, "setCurrentState"> & { currentTheme: 'DARK' | 'LIGHT' }> = (props) => {
-  const { idleCodes, setAgentStatus, isSettingAgentStatus, errorMessage, elapsedTime, currentState, currentTheme, customStatus } = props;
+  const { idleCodes, setAgentStatus, isSettingAgentStatus, errorMessage, elapsedTime, currentState, currentTheme, customStatus, customStatusList } = props;
   const [selectedState, setSelectedState] = useState({id: currentState, name: null});
 
   useEffect(() => {
     if (customStatus && customStatus !== '') {
-      switch (customStatus) {
-        case 'RONA':
-          setSelectedState({ id: 'custom1', name: 'RONA' });
-          break;
-        case 'WRAPUP':
-          setSelectedState({ id: 'custom2', name: 'Wrap-Up' });
-          break;
-        case 'ENGAGED':
-          setSelectedState({ id: 'custom3', name: 'Engaged' });
-          break;
-        default:
-          setSelectedState(null);
-      }
+      customStatusList.forEach((status) => {
+        if (status.id.includes(customStatus)) {
+          setSelectedState(status);
+        }
+      });
     }
     else {
       setSelectedState({ id: currentState, name: null });
@@ -103,14 +95,9 @@ const UserStateComponent: React.FunctionComponent<Omit<IUserState, "setCurrentSt
   }, [idleCodes, currentState, customStatus, setAgentStatus]);
 
   const selectStyles = {
-    backgroundColor: selectedState?.id === 'custom1' ? '#E9C1BC' : 'white',
-    borderRadius: '4px',
-    padding: '0 8px',
-    height: '40px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    color: selectedState?.id === 'custom1' ? 'red' : selectedState.id.startsWith('custom') ? 'orange' : 'black',
+    backgroundColor: selectedState?.name === 'RONA' ? '#E9C1BC' : 'white',
+    borderRadius: '50px',
+    color: selectedState?.name === 'RONA' ? 'red' : selectedState.id.startsWith('custom') ? 'orange' : 'black',
     cursor: isSettingAgentStatus || customStatus === 'WRAUPUP' ? 'not-allowed' : 'pointer',
   };
 

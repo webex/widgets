@@ -1,5 +1,10 @@
 import {IdleCode} from '@webex/cc-store';
 
+interface CustomStatus {
+  id: string;
+  name: string;
+}
+
 /**
  * Interface representing the state of a user.
  */
@@ -50,4 +55,6 @@ export interface IUserState {
   customStatus: string;
 
   setCustomStatus: (customStatus: string) => void;
+
+  customStatusList: CustomStatus[];
 }

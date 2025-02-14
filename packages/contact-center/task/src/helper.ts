@@ -172,7 +172,7 @@ export const useCallControl = (props: useCallControlProps) => {
     currentTask
       .wrapup({wrapUpReason: wrapUpReason, auxCodeId: auxCodeId})
       .then(() => {
-        if (onWrapUp) onWrapUp();
+        if (onWrapUp) onWrapUp({wrapUpReason, task: currentTask?.data});
         store.handleTaskRemove(currentTask.data.interactionId);
       })
       .catch((error: Error) => {

@@ -1,11 +1,15 @@
 import {useState, useEffect, useRef} from 'react';
 // TODO: Export & Import this AGENT_STATE_CHANGE constant from SDK
 import store from '@webex/cc-store';
-export const useUserState = ({idleCodes, agentId, cc, currentState, lastStateChangeTimestamp}) => {
+export const useUserState = ({idleCodes, agentId, cc, currentState, lastStateChangeTimestamp, customStatus, onStateChange}) => {
   const [isSettingAgentStatus, setIsSettingAgentStatus] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [elapsedTime, setElapsedTime] = useState(0);
   const workerRef = useRef<Worker | null>(null);
+  const customStatusList = [
+    { id: 'customWRAPUP', name: 'Wrap-Up' },
+    { id: 'customENGAGED', name: 'Engaged' },
+  ]
 
   // Initialize the Web Worker using a Blob
   const workerScript = `
@@ -61,6 +65,22 @@ export const useUserState = ({idleCodes, agentId, cc, currentState, lastStateCha
     };
   }, [currentState]);
 
+  useEffect(() => {
+    if (customStatus !== '') {
+      customStatusList.forEach((status) => {
+        if (status.id.includes(customStatus)) {
+          onStateChange(status);
+        }
+      });
+      return;
+    }
+    idleCodes.forEach((code) => {
+      if (code.id === currentState) {
+        onStateChange(code);
+      }
+    });
+  }, [customStatus, currentState]);
+
   const setAgentStatus = (selectedCode) => {
     const {auxCodeId, state} = {
       auxCodeId: selectedCode.id,
@@ -88,5 +108,7 @@ export const useUserState = ({idleCodes, agentId, cc, currentState, lastStateCha
     errorMessage,
     elapsedTime,
     currentState,
+    customStatus,
+    customStatusList,
   };
 };
