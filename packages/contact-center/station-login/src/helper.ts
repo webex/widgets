@@ -94,9 +94,6 @@ export const useStationLogin = (props: UseStationLoginProps) => {
 
   function relogin() {
     store.setDeviceType(deviceType);
-    if (loginCb) {
-      loginCb();
-    }
   }
 
   return {

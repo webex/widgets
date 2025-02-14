@@ -66,19 +66,21 @@ export const useUserState = ({idleCodes, agentId, cc, currentState, lastStateCha
   }, [currentState]);
 
   useEffect(() => {
-    if (customStatus !== '') {
-      customStatusList.forEach((status) => {
-        if (status.id.includes(customStatus)) {
-          onStateChange(status);
+    if(onStateChange){
+      if (customStatus !== '') {
+        customStatusList.forEach((status) => {
+          if (status.id.includes(customStatus)) {
+            onStateChange(status);
+          }
+        });
+        return;
+      }
+      idleCodes.forEach((code) => {
+        if (code.id === currentState) {
+          onStateChange(code);
         }
       });
-      return;
     }
-    idleCodes.forEach((code) => {
-      if (code.id === currentState) {
-        onStateChange(code);
-      }
-    });
   }, [customStatus, currentState]);
 
   const setAgentStatus = (selectedCode) => {
