@@ -104,12 +104,7 @@ const UserStateComponent: React.FunctionComponent<Omit<IUserState, "setCurrentSt
 
   const selectStyles = {
     backgroundColor: selectedState?.id === 'custom1' ? '#E9C1BC' : 'white',
-    borderRadius: '4px',
-    padding: '0 8px',
-    height: '40px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    borderRadius: '50px',
     color: selectedState?.id === 'custom1' ? 'red' : selectedState.id.startsWith('custom') ? 'orange' : 'black',
     cursor: isSettingAgentStatus || customStatus === 'WRAUPUP' ? 'not-allowed' : 'pointer',
   };
