@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.17](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.16...v1.28.0-ccwidgets.17) (2025-02-13)
+
+
+### Features
+
+* **cc-widgets:** Agent Multi-Login configurable, login button toggle ([#385](https://github.com/webex/widgets/issues/385)) ([9d04209](https://github.com/webex/widgets/commit/9d0420992e50762259eb4c618e33b110333f2e5d))
+
 # [1.28.0-ccwidgets.16](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.15...v1.28.0-ccwidgets.16) (2025-02-10)
 
 

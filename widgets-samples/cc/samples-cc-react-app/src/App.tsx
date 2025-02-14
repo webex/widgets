@@ -16,6 +16,7 @@ function App() {
   const themeCheckboxRef = useRef(null);
   const [currentTheme, setCurrentTheme] = useState(store.currentTheme);
   const [showWidgets, setShowWidgets] = useState(false);
+  const [isMultiLoginEnabled, setIsMultiLoginEnabled] = useState(false);
 
   const webexConfig = {
     fedramp: false,
@@ -23,7 +24,7 @@ function App() {
       level: 'log',
     },
     cc: {
-      allowMultiLogin: true,
+      allowMultiLogin: isMultiLoginEnabled,
     },
   };
 
@@ -65,6 +66,14 @@ function App() {
     console.log('onWrapup invoked');
   };
 
+  const enableDisableMultiLogin = () => {
+    if (isMultiLoginEnabled) {
+      setIsMultiLoginEnabled(false);
+    } else {
+      setIsMultiLoginEnabled(true);
+    }
+  };
+
   const handleCheckboxChange = (e) => {
     const {name, checked} = e.target;
     setSelectedWidgets((prev) => ({...prev, [name]: checked}));
@@ -72,37 +81,41 @@ function App() {
 
   return (
     <div className="mds-typography">
-      <ThemeProvider themeclass={currentTheme === 'LIGHT' ? 'mds-theme-stable-lightWebex': 'mds-theme-stable-darkWebex'}><IconProvider>
-        <h1>Contact Center widgets in a react app</h1>
-        <input
-          type="text"
-          placeholder="Enter your access token"
-          value={accessToken}
-          onChange={(e) => setAccessToken(e.target.value)}
-        />
-        <br />
-        <input
-          type='checkbox'
-          id='theme'
-          name='theme'
-          ref={themeCheckboxRef}
-          onChange={() => {
-            setCurrentTheme(themeCheckboxRef.current.checked ? 'DARK' : 'LIGHT');
-            store.setCurrentTheme(themeCheckboxRef.current.checked ? 'DARK' : 'LIGHT');
-          }}
-        /> Dark Theme
-        <br />
-        <button
-          disabled={accessToken.trim() === ''}
-          onClick={() => {
-            store.init({webexConfig, access_token: accessToken}).then(() => {
-              setIsSdkReady(true);
-            });
-          }}
-        >
-          Init Widgets
-        </button>
-        {isSdkReady && (
+      <ThemeProvider
+        themeclass={currentTheme === 'LIGHT' ? 'mds-theme-stable-lightWebex' : 'mds-theme-stable-darkWebex'}
+      >
+        <IconProvider>
+          <h1>Contact Center widgets in a react app</h1>
+          <input
+            type="text"
+            placeholder="Enter your access token"
+            value={accessToken}
+            onChange={(e) => setAccessToken(e.target.value)}
+          />
+          <br />
+          <input
+            type="checkbox"
+            id="theme"
+            name="theme"
+            ref={themeCheckboxRef}
+            onChange={() => {
+              setCurrentTheme(themeCheckboxRef.current.checked ? 'DARK' : 'LIGHT');
+              store.setCurrentTheme(themeCheckboxRef.current.checked ? 'DARK' : 'LIGHT');
+            }}
+          />{' '}
+          Dark Theme
+          <br />
+          <button
+            disabled={accessToken.trim() === ''}
+            onClick={() => {
+              store.init({webexConfig, access_token: accessToken}).then(() => {
+                setIsSdkReady(true);
+              });
+            }}
+          >
+            Init Widgets
+          </button>
+          {isSdkReady && (
             <>
               <div>
                 <label>
@@ -160,7 +173,7 @@ function App() {
               </button>
             </>
           )}
-        {showWidgets && (
+          {showWidgets && (
             <>
               {selectedWidgets.stationLogin && <StationLogin onLogin={onLogin} onLogout={onLogout} />}
               {store.isAgentLoggedIn && isLoggedIn && (
@@ -176,9 +189,9 @@ function App() {
                 </>
               )}
             </>
-          )}  
-
-      </IconProvider></ThemeProvider>
+          )}
+        </IconProvider>
+      </ThemeProvider>
     </div>
   );
 }

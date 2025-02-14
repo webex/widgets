@@ -68,6 +68,8 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
 
   const selectLoginOption = (event: { target: { value: string } }) => 
     {
+  const selectLoginOption = (event: { target: { value: string } }) => 
+    {
     const dialNumber = document.querySelector('#dialNumber') as HTMLInputElement;
     const deviceType = event.target.value;
     setDeviceType(deviceType);
@@ -107,8 +109,8 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
         <section className="section-box">
           <fieldset className="fieldset">
             <legend className="legend-box">Agent</legend>
-            <div style={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
-              <div style={{ display: 'flex', gap: '1rem' }}>
+            <div style={{display: 'flex', flexDirection: 'column', flexGrow: 1}}>
+              <div style={{display: 'flex', gap: '1rem'}}>
                 <fieldset
                   style={{
                     border: '1px solid #ccc',

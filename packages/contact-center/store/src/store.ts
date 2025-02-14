@@ -54,9 +54,15 @@ class Store implements IStore {
     console.log('Returning store instance');
     return Store.instance;
   }
+  registerCC(webex?: WithWebex['webex']): Promise<void> {
+    if (webex) {
+      this.cc = webex.cc;
+    }
 
-  registerCC(webex: WithWebex['webex']): Promise<void> {
-    this.cc = webex.cc;
+    if (typeof webex === 'undefined' && typeof this.cc === 'undefined') {
+      throw new Error('Webex SDK not initialized');
+    }
+
     this.logger = this.cc.LoggerProxy;
     return this.cc
       .register()
