@@ -180,12 +180,12 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
     }
   }, [showMultipleLoginAlert, handleContinue]);
 
-  useEffect(() => {
-    if (!isAgentLoggedIn) return;
-    if (deviceType) {
-      relogin();
-    }
-  }, [isAgentLoggedIn, deviceType, relogin]);
+  // useEffect(() => {
+  //   if (!isAgentLoggedIn) return;
+  //   if (deviceType) {
+  //     relogin();
+  //   }
+  // }, [isAgentLoggedIn, deviceType, relogin]);
 
   const handleSelectLoginOption = (event: SelectChangeEvent<string>) => {
     setDeviceType(event.target.value);
