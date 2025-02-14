@@ -120,7 +120,7 @@ class Store implements IStore {
       });
   }
 
-  init(options: InitParams, hydrateCallback): Promise<void> {
+  init(options: InitParams, setupEventListeners): Promise<void> {
     if ('webex' in options) {
       // If devs decide to go with webex, they will have to listen to the ready event before calling init
       // This has to be documented
@@ -139,7 +139,7 @@ class Store implements IStore {
       });
 
       webex.once('ready', () => {
-        hydrateCallback(webex.cc);
+        setupEventListeners(webex.cc);
         clearTimeout(timer);
         this.registerCC(webex)
           .then(() => {
