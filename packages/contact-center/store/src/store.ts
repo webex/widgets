@@ -84,6 +84,7 @@ class Store implements IStore {
     if ('webex' in options) {
       // If devs decide to go with webex, they will have to listen to the ready event before calling init
       // This has to be documented
+      setupEventListeners(options.webex.cc);
       return this.registerCC(options.webex);
     }
     return new Promise((resolve, reject) => {

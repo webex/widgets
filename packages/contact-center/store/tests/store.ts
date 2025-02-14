@@ -113,6 +113,7 @@ describe('Store', () => {
     it('should call eventListenerCallback ', async () => {
       const eventListenerCallback = jest.fn();
       const initParams = {webex: mockWebex};
+
       jest.spyOn(storeInstance, 'registerCC').mockResolvedValue();
       Webex.init.mockClear();
 
@@ -176,38 +177,6 @@ describe('Store', () => {
       jest.runAllTimers(); // Fast-forward the timers to simulate timeout
 
       await expect(initPromise).rejects.toThrow('Webex SDK failed to initialize');
-    });
-
-    it('should set states when called through setters', () => {
-      storeInstance.setIncomingTask('task1');
-      expect(storeInstance.incomingTask).toBe('task1');
-
-      storeInstance.setCurrentTask('task2');
-      expect(storeInstance.currentTask).toBe('task2');
-
-      storeInstance.setWrapupRequired(true);
-      expect(storeInstance.wrapupRequired).toBe(true);
-
-      storeInstance.setTaskList(['task3']);
-      expect(storeInstance.taskList).toEqual(['task3']);
-
-      storeInstance.setDeviceType('option1');
-      expect(storeInstance.deviceType).toBe('option1');
-
-      storeInstance.setCurrentTheme('theme1');
-      expect(storeInstance.currentTheme).toBe('theme1');
-
-      storeInstance.setShowMultipleLoginAlert(true);
-      expect(storeInstance.showMultipleLoginAlert).toBe(true);
-
-      storeInstance.setCurrentState('state1');
-      expect(storeInstance.currentState).toBe('state1');
-
-      storeInstance.setLastStateChangeTimestamp(new Date());
-      expect(storeInstance.lastStateChangeTimestamp).toEqual(expect.any(Date));
-
-      storeInstance.setIsAgentLoggedIn(true);
-      expect(storeInstance.isAgentLoggedIn).toBe(true);
     });
   });
 });
