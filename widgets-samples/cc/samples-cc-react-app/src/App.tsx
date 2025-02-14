@@ -60,8 +60,8 @@ function App() {
     console.log('onEnd invoked');
   };
 
-  const onWrapup = () => {
-    console.log('onWrapup invoked');
+  const onWrapup = (params) => {
+    console.log('onWrapup invoked', params);
   };
 
   const handleCheckboxChange = (e) => {
@@ -170,7 +170,7 @@ function App() {
                 <TaskList onTaskAccepted={onTaskAccepted} onTaskDeclined={onTaskDeclined} />
               )}
               {selectedWidgets.callControl && (
-                <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapup={onWrapup} />
+                <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapUp={onWrapup} />
               )}
             </>
           )}
