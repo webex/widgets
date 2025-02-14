@@ -1,3 +1,10 @@
+# [1.28.0-ccconnectors.6](https://github.com/webex/widgets/compare/v1.28.0-ccconnectors.5...v1.28.0-ccconnectors.6) (2025-02-14)
+
+
+### Bug Fixes
+
+* wrapup data, onStateChange event, onLogin remove duplication ([#387](https://github.com/webex/widgets/issues/387)) ([e5f8101](https://github.com/webex/widgets/commit/e5f81017b801ab5c3a0fbc3495b7a4dd4c2fb595))
+
 # [1.28.0-ccconnectors.5](https://github.com/webex/widgets/compare/v1.28.0-ccconnectors.4...v1.28.0-ccconnectors.5) (2025-02-13)
 
 
