@@ -95,9 +95,7 @@ class StoreWrapper implements IStoreWrapper {
   }
 
   init(options: InitParams): Promise<void> {
-    return this.store.init(options).then(() => {
-      this.setupIncomingTaskHandler();
-    });
+    return this.store.init(options, this.setupIncomingTaskHandler);
   }
 
   handleTaskRemove = (taskId: string) => {
@@ -183,6 +181,17 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   handleTaskHydrate = (task: ITask) => {
+    task.on(TASK_EVENTS.TASK_END, ({wrapupRequired}: {wrapupRequired: boolean}) => {
+      this.handleTaskEnd(task, wrapupRequired);
+    });
+
+    // When we receive TASK_ASSIGNED the task was accepted by the agent and we need wrap up
+    task.on(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned(task));
+
+    // When we receive TASK_REJECT sdk changes the agent status
+    // When we receive TASK_REJECT that means the task was not accepted by the agent and we wont need wrap up
+    task.on(TASK_EVENTS.TASK_REJECT, () => this.handleTaskRemove(task.data.interactionId));
+
     this.store.setCurrentTask(task);
     this.store.setTaskList([...this.store.taskList, task]);
 
@@ -199,9 +208,8 @@ class StoreWrapper implements IStoreWrapper {
     }
   };
 
-  setupIncomingTaskHandler() {
-    const ccSDK = this.store.cc;
-
+  setupIncomingTaskHandler = (ccSDK: any) => {
+    console.log('Shreyas: Setting up incoming task handler');
     ccSDK.on(TASK_EVENTS.TASK_INCOMING, this.handleIncomingTask);
 
     ccSDK.on(CC_EVENTS.AGENT_STATE_CHANGE, this.handleStateChange);
@@ -214,7 +222,7 @@ class StoreWrapper implements IStoreWrapper {
       ccSDK.off(CC_EVENTS.AGENT_MULTI_LOGIN, this.handleMultiLoginCloseSession);
       ccSDK.off(TASK_EVENTS.TASK_HYDRATE, this.handleTaskHydrate);
     };
-  }
+  };
 }
 
 // Create and export a single instance of the wrapper

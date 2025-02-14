@@ -22,6 +22,9 @@ function App() {
     logger: {
       level: 'log',
     },
+    cc: {
+      allowMultiLogin: true,
+    },
   };
 
   const onLogin = () => {

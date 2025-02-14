@@ -45,7 +45,7 @@ interface IStoreBase {
     lastStateChangeTimestamp: Date;
     showMultipleLoginAlert: boolean;
     currentTheme: string;
-    init(params: InitParams): Promise<void>;
+    init(params: InitParams,callback:any): Promise<void>;
     setDeviceType(option: string): void;
     setCurrentState(state: string): void;
     setLastStateChangeTimestamp(timestamp: Date): void;
