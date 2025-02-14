@@ -1,7 +1,7 @@
 {
   "name": "@webex/cc-components",
   "description": "Webex Contact Center UI Components Library for your custom contact center solutions",
-  "version": "1.28.0-ccconnectors.6",
+  "version": "1.28.0-ccconnectors.7",
   "main": "dist/index.js",
   "publishConfig": {
     "access": "public"
@@ -65,5 +65,5 @@
     "react": ">=18.3.1",
     "react-dom": ">=18.3.1"
   },
-  "stableVersion": "1.28.0-ccconnectors.5"
+  "stableVersion": "1.28.0-ccconnectors.6"
 }

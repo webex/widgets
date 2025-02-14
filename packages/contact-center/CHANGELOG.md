@@ -1,3 +1,10 @@
+# [1.28.0-ccconnectors.7](https://github.com/webex/widgets/compare/v1.28.0-ccconnectors.6...v1.28.0-ccconnectors.7) (2025-02-14)
+
+
+### Bug Fixes
+
+* null check for onStateChange, relogin on refresh ([#388](https://github.com/webex/widgets/issues/388)) ([a736301](https://github.com/webex/widgets/commit/a73630139d975cdb4003ec499c70f3084d7612a3))
+
 # [1.28.0-ccconnectors.6](https://github.com/webex/widgets/compare/v1.28.0-ccconnectors.5...v1.28.0-ccconnectors.6) (2025-02-14)
 
 
