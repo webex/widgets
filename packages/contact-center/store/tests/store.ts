@@ -110,12 +110,25 @@ describe('Store', () => {
   });
 
   describe('init', () => {
+    it('should call eventListenerCallback ', async () => {
+      const eventListenerCallback = jest.fn();
+      const initParams = {webex: mockWebex};
+      jest.spyOn(storeInstance, 'registerCC').mockResolvedValue();
+      Webex.init.mockClear();
+
+      await storeInstance.init(initParams, eventListenerCallback);
+
+      expect(eventListenerCallback).toHaveBeenCalled();
+      expect(storeInstance.registerCC).toHaveBeenCalledWith(mockWebex);
+      expect(Webex.init).not.toHaveBeenCalled();
+    });
+
     it('should call registerCC if webex is in options', async () => {
       const initParams = {webex: mockWebex};
       jest.spyOn(storeInstance, 'registerCC').mockResolvedValue();
       Webex.init.mockClear();
 
-      await storeInstance.init(initParams);
+      await storeInstance.init(initParams, jest.fn());
 
       expect(storeInstance.registerCC).toHaveBeenCalledWith(mockWebex);
       expect(Webex.init).not.toHaveBeenCalled();
@@ -128,7 +141,7 @@ describe('Store', () => {
       };
       jest.spyOn(storeInstance, 'registerCC').mockResolvedValue();
 
-      await storeInstance.init(initParams);
+      await storeInstance.init(initParams, jest.fn());
 
       expect(Webex.init).toHaveBeenCalledWith({
         config: initParams.webexConfig,
@@ -145,7 +158,7 @@ describe('Store', () => {
 
       jest.spyOn(storeInstance, 'registerCC').mockRejectedValue(new Error('registerCC failed'));
 
-      await expect(storeInstance.init(initParams)).rejects.toThrow('registerCC failed');
+      await expect(storeInstance.init(initParams, jest.fn())).rejects.toThrow('registerCC failed');
     });
 
     it('should reject the promise if Webex SDK fails to initialize', async () => {

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {WrapupCodes} from '@webex/cc-store';
 
 import {CallControlPresentationalProps} from '../task.types';
@@ -11,6 +11,20 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
   const [selectedWrapupId, setSelectedWrapupId] = useState<string | null>(null);
 
   const {currentTask, audioRef, toggleHold, toggleRecording, endCall, wrapupCall, wrapupCodes, wrapupRequired} = props;
+
+  useEffect(() => {
+    if (!currentTask || !currentTask.data || !currentTask.data.interaction) return;
+
+    const {interaction, mediaResourceId} = currentTask.data;
+    const {media, callProcessingDetails} = interaction;
+    const isHold = media && media[mediaResourceId] && media[mediaResourceId].isHold;
+    setIsHeld(isHold);
+
+    if (callProcessingDetails) {
+      const {isPaused} = callProcessingDetails;
+      setIsRecording(!isPaused);
+    }
+  }, [currentTask]);
 
   const handletoggleHold = () => {
     toggleHold(!isHeld);
@@ -51,7 +65,7 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
                   <button className="btn" onClick={handletoggleRecording} disabled={wrapupRequired}>
                     {isRecording ? 'Pause Recording' : 'Resume Recording'}
                   </button>
-                  <button className="btn" onClick={endCall} disabled={wrapupRequired}>
+                  <button className="btn" onClick={endCall} disabled={wrapupRequired || isHeld}>
                     End
                   </button>
                 </div>

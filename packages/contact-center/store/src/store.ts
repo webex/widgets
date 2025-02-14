@@ -10,6 +10,7 @@ import {
   IStore,
   ILogger,
   IWrapupCode,
+  TASK_EVENTS,
 } from './store.types';
 import {ITask} from '@webex/plugin-cc';
 
@@ -79,7 +80,7 @@ class Store implements IStore {
       });
   }
 
-  init(options: InitParams): Promise<void> {
+  init(options: InitParams, setupEventListeners): Promise<void> {
     if ('webex' in options) {
       // If devs decide to go with webex, they will have to listen to the ready event before calling init
       // This has to be documented
@@ -98,6 +99,7 @@ class Store implements IStore {
       });
 
       webex.once('ready', () => {
+        setupEventListeners(webex.cc);
         clearTimeout(timer);
         this.registerCC(webex)
           .then(() => {
