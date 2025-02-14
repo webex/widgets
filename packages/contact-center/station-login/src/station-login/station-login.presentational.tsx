@@ -97,10 +97,8 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
         <dialog ref={modalRef} className="modal">
           <h2>{MULTIPLE_SIGN_IN_ALERT_TITLE}</h2>
           <p>{MULTIPLE_SIGN_IN_ALERT_MESSAGE}</p>
-          <div className="modal-content">
-            <button id="ContinueButton" data-testid="ContinueButton" onClick={continueClicked}>
-              Continue
-            </button>
+          <div className='modal-content'>
+          <button id="ContinueButton" data-testid="ContinueButton" onClick={continueClicked}>Continue</button> 
           </div>
         </dialog>
       )}
@@ -109,8 +107,8 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
         <section className="section-box">
           <fieldset className="fieldset">
             <legend className="legend-box">Agent</legend>
-            <div style={{display: 'flex', flexDirection: 'column', flexGrow: 1}}>
-              <div style={{display: 'flex', gap: '1rem'}}>
+            <div style={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
+              <div style={{ display: 'flex', gap: '1rem' }}>
                 <fieldset
                   style={{
                     border: '1px solid #ccc',
