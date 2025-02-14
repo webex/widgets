@@ -169,8 +169,7 @@ describe('storeEventsWrapper', () => {
       const options = {someOption: 'value'};
       await storeWrapper.init(options);
 
-      expect(storeWrapper['store'].init).toHaveBeenCalledWith(options);
-      expect(storeWrapper['store'].cc.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_INCOMING, expect.any(Function));
+      expect(storeWrapper['store'].init).toHaveBeenCalledWith(options, expect.any(Function));
     });
 
     it('should handle incoming task', () => {
@@ -258,20 +257,27 @@ describe('storeEventsWrapper', () => {
     });
 
     it('should initialize the store and set up event handlers', async () => {
-      await storeWrapper.init(options);
-      expect(storeWrapper['store'].init).toHaveBeenCalledWith(options);
+      const cc = storeWrapper['store'].cc;
+      storeWrapper['store'].init = jest.fn().mockReturnValue(storeWrapper.setupIncomingTaskHandler(cc));
 
-      expect(storeWrapper['store'].cc.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_INCOMING, expect.any(Function));
-      expect(storeWrapper['store'].cc.on).toHaveBeenCalledWith(CC_EVENTS.AGENT_STATE_CHANGE, expect.any(Function));
-      expect(storeWrapper['store'].cc.on).toHaveBeenCalledWith(CC_EVENTS.AGENT_MULTI_LOGIN, expect.any(Function));
+      await storeWrapper.init(options);
+
+      expect(storeWrapper['store'].init).toHaveBeenCalledWith(options, expect.any(Function));
+
+      expect(cc.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_INCOMING, expect.any(Function));
+      expect(cc.on).toHaveBeenCalledWith(CC_EVENTS.AGENT_STATE_CHANGE, expect.any(Function));
+      expect(cc.on).toHaveBeenCalledWith(CC_EVENTS.AGENT_MULTI_LOGIN, expect.any(Function));
     });
 
     it('should handle task:incoming event ', async () => {
+      const cc = storeWrapper['store'].cc;
+      storeWrapper['store'].init = jest.fn().mockReturnValue(storeWrapper.setupIncomingTaskHandler(cc));
+
       await storeWrapper.init(options);
       storeWrapper['store'].taskList = [];
 
       act(() => {
-        storeWrapper['cc'].on.mock.calls[0][1](mockTask);
+        storeWrapper['store'].cc.on.mock.calls[0][1](mockTask);
       });
 
       waitFor(() => {
@@ -283,6 +289,9 @@ describe('storeEventsWrapper', () => {
     });
 
     it('should handle task:end event with wrapupRequired', async () => {
+      const cc = storeWrapper['store'].cc;
+      storeWrapper['store'].init = jest.fn().mockReturnValue(storeWrapper.setupIncomingTaskHandler(cc));
+
       await storeWrapper.init(options);
       storeWrapper['store'].taskList = [];
 
@@ -387,16 +396,23 @@ describe('storeEventsWrapper', () => {
     });
 
     it('should handle multilogin session modal with in correct data', async () => {
+      const cc = storeWrapper['store'].cc;
+      storeWrapper['store'].init = jest.fn().mockReturnValue(storeWrapper.setupIncomingTaskHandler(cc));
+
       const options = {someOption: 'value'};
       await storeWrapper.init(options);
+
       act(() => {
-        storeWrapper['store'].cc.on.mock.calls[2][1]({});
+        cc.on.mock.calls[2][1]({});
       });
 
       expect(storeWrapper['store'].setShowMultipleLoginAlert).not.toHaveBeenCalledWith(true);
     });
 
     it('should handle multilogin session modal with correct data', async () => {
+      const cc = storeWrapper['store'].cc;
+      storeWrapper['store'].init = jest.fn().mockReturnValue(storeWrapper.setupIncomingTaskHandler(cc));
+
       const options = {someOption: 'value'};
       await storeWrapper.init(options);
       act(() => {
@@ -414,36 +430,48 @@ describe('storeEventsWrapper', () => {
     });
 
     it('should handle state change event  with incorrect data', async () => {
+      const cc = storeWrapper['store'].cc;
+      storeWrapper['store'].init = jest.fn().mockReturnValue(storeWrapper.setupIncomingTaskHandler(cc));
+
       const options = {someOption: 'value'};
       await storeWrapper.init(options);
       act(() => {
-        storeWrapper['store'].cc.on.mock.calls[1][1]({});
+        cc.on.mock.calls[1][1]({});
       });
 
       expect(storeWrapper['store'].setCurrentState).not.toHaveBeenCalledWith();
     });
 
     it('should handle state change event  with correct data and emplty auxcodeId', async () => {
+      const cc = storeWrapper['store'].cc;
+      storeWrapper['store'].init = jest.fn().mockReturnValue(storeWrapper.setupIncomingTaskHandler(cc));
+
       const options = {someOption: 'value'};
       await storeWrapper.init(options);
       act(() => {
-        storeWrapper['store'].cc.on.mock.calls[1][1]({type: 'AgentStateChangeSuccess', auxCodeId: ''});
+        cc.on.mock.calls[1][1]({type: 'AgentStateChangeSuccess', auxCodeId: ''});
       });
 
       expect(storeWrapper['store'].setCurrentState).toHaveBeenCalledWith('0');
     });
 
     it('should handle state change event  with correct data', async () => {
+      const cc = storeWrapper['store'].cc;
+      storeWrapper['store'].init = jest.fn().mockReturnValue(storeWrapper.setupIncomingTaskHandler(cc));
+
       const options = {someOption: 'value'};
       await storeWrapper.init(options);
       act(() => {
-        storeWrapper['store'].cc.on.mock.calls[1][1]({type: 'AgentStateChangeSuccess', auxCodeId: 'available'});
+        cc.on.mock.calls[1][1]({type: 'AgentStateChangeSuccess', auxCodeId: 'available'});
       });
 
       expect(storeWrapper['store'].setCurrentState).toHaveBeenCalledWith('available');
     });
 
     it('should handle hydrating the store with correct data', async () => {
+      const cc = storeWrapper['store'].cc;
+      storeWrapper['store'].init = jest.fn().mockReturnValue(storeWrapper.setupIncomingTaskHandler(cc));
+
       const options = {someOption: 'value'};
       await storeWrapper.init(options);
       storeWrapper['store'].taskList = [];
@@ -461,10 +489,11 @@ describe('storeEventsWrapper', () => {
           },
           agentId: 'agent1',
         },
+        on: jest.fn(),
       };
 
       act(() => {
-        storeWrapper['store'].cc.on.mock.calls[3][1](mockTask);
+        cc.on.mock.calls[3][1](mockTask);
       });
 
       expect(storeWrapper['store'].setCurrentTask).toHaveBeenCalledWith(mockTask);
@@ -473,7 +502,8 @@ describe('storeEventsWrapper', () => {
     });
 
     it('should return a function to remove event listeners on cc object', () => {
-      const removeListeners = storeWrapper.setupIncomingTaskHandler();
+      const cc = storeWrapper['store'].cc;
+      const removeListeners = storeWrapper.setupIncomingTaskHandler(cc);
 
       removeListeners();
 
