@@ -2,7 +2,6 @@ import React, {useEffect, useRef} from 'react';
 import {StationLoginPresentationalProps} from './station-login.types';
 import './station-login.style.scss';
 import {MULTIPLE_SIGN_IN_ALERT_MESSAGE, MULTIPLE_SIGN_IN_ALERT_TITLE} from './constants';
-import './alert-modal.scss';
 
 const StationLoginPresentational: React.FunctionComponent<StationLoginPresentationalProps> = (props) => {
   const {
@@ -47,6 +46,9 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
         option.value = options;
         agentLogin.add(option);
       });
+      if (agentLogin && deviceType) {
+        agentLogin.value = deviceType;
+      }
     }
   }, [teams, loginOptions]);
 

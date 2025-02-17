@@ -1,3 +1,24 @@
+# [1.28.0-ccwidgets.18](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.17...v1.28.0-ccwidgets.18) (2025-02-17)
+
+
+### Bug Fixes
+
+* **store:** direct-all-events-through-store ([#369](https://github.com/webex/widgets/issues/369)) ([8bbcae1](https://github.com/webex/widgets/commit/8bbcae1c5ba6fda8aea9d81aa0064e77d7e63ca3))
+
+# [1.28.0-ccwidgets.17](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.16...v1.28.0-ccwidgets.17) (2025-02-13)
+
+
+### Features
+
+* **cc-widgets:** Agent Multi-Login configurable, login button toggle ([#385](https://github.com/webex/widgets/issues/385)) ([9d04209](https://github.com/webex/widgets/commit/9d0420992e50762259eb4c618e33b110333f2e5d))
+
+# [1.28.0-ccwidgets.16](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.15...v1.28.0-ccwidgets.16) (2025-02-10)
+
+
+### Bug Fixes
+
+* **tooling:** webpack-prod-build-for-npm ([#383](https://github.com/webex/widgets/issues/383)) ([648b6b3](https://github.com/webex/widgets/commit/648b6b305033734250f987f6906f8907aa13d5f3))
+
 # [1.28.0-ccwidgets.15](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.14...v1.28.0-ccwidgets.15) (2025-02-07)
 
 

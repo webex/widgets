@@ -1,7 +1,7 @@
 {
   "name": "@webex/cc-store",
   "description": "Webex Contact Center Widgets: Widgets Store",
-  "version": "1.28.0-ccwidgets.15",
+  "version": "1.28.0-ccwidgets.18",
   "main": "dist/index.js",
   "license": "MIT",
   "publishConfig": {
@@ -17,12 +17,12 @@
     "build": "yarn run -T tsc",
     "build:src": "yarn run clean:dist && webpack",
     "build:watch": "webpack --watch",
-    "test:unit": "jest"
+    "test:unit": "jest --coverage"
   },
   "dependencies": {
     "mobx": "6.13.5",
     "typescript": "5.6.3",
-    "webex": "3.7.0-wxcc.12"
+    "webex": "3.7.0-wxcc.15"
   },
   "devDependencies": {
     "@babel/core": "7.25.2",
@@ -51,5 +51,5 @@
       "**/tests/**/*.tsx"
     ]
   },
-  "stableVersion": "1.28.0-ccwidgets.14"
+  "stableVersion": "1.28.0-ccwidgets.17"
 }

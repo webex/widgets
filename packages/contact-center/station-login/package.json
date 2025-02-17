@@ -1,7 +1,7 @@
 {
   "name": "@webex/cc-station-login",
   "description": "Webex Contact Center Widgets: Station Login",
-  "version": "1.28.0-ccwidgets.15",
+  "version": "1.28.0-ccwidgets.18",
   "main": "dist/index.js",
   "publishConfig": {
     "access": "public"
@@ -16,7 +16,7 @@
     "build": "yarn run -T tsc",
     "build:src": "yarn run clean:dist && webpack",
     "build:watch": "webpack --watch",
-    "test:unit": "jest"
+    "test:unit": "jest --coverage"
   },
   "dependencies": {
     "@webex/cc-store": "workspace:*",
@@ -58,5 +58,5 @@
       "^.+\\.(css|less|scss)$": "babel-jest"
     }
   },
-  "stableVersion": "1.28.0-ccwidgets.14"
+  "stableVersion": "1.28.0-ccwidgets.17"
 }
