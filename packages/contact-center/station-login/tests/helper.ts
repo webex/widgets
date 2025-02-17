@@ -10,6 +10,7 @@ jest.mock('@webex/cc-store', () => {
     cc: {},
     teams,
     loginOptions,
+    registerCC: jest.fn(),
     setDeviceType: jest.fn(),
     setCurrentState: jest.fn(),
     setLastStateChangeTimestamp: jest.fn(),
@@ -24,7 +25,6 @@ const ccMock = {
   stationLogout: jest.fn(),
   on: jest.fn(),
   off: jest.fn(),
-  register: jest.fn(),
 };
 
 // Sample login parameters
@@ -489,7 +489,8 @@ describe('useStationLogin Hook', () => {
 
   it('should call handleContinue and set device type', async () => {
     const setShowMultipleLoginAlertSpy = jest.spyOn(require('@webex/cc-store'), 'setShowMultipleLoginAlert');
-    ccMock.register.mockResolvedValue({isAgentLoggedIn: true});
+    require('@webex/cc-store').isAgentLoggedIn = true;
+    const registerCCSpy = jest.spyOn(require('@webex/cc-store'), 'registerCC');
 
     const {result} = renderHook(() =>
       useStationLogin({
@@ -508,7 +509,7 @@ describe('useStationLogin Hook', () => {
 
     await waitFor(() => {
       expect(setShowMultipleLoginAlertSpy).toHaveBeenCalledWith(false);
-      expect(ccMock.register).toHaveBeenCalled();
+      expect(registerCCSpy).toHaveBeenCalled();
       expect(logger.log).toHaveBeenCalledWith('Agent Relogin Success', {
         module: 'widget-station-login#station-login/helper.ts',
         method: 'handleContinue',
@@ -517,8 +518,9 @@ describe('useStationLogin Hook', () => {
   });
 
   it('should call handleContinue with agent not logged in', async () => {
+    require('@webex/cc-store').isAgentLoggedIn = false;
     const setShowMultipleLoginAlertSpy = jest.spyOn(require('@webex/cc-store'), 'setShowMultipleLoginAlert');
-    ccMock.register.mockResolvedValue({isAgentLoggedIn: false});
+    const registerCCSpy = jest.spyOn(require('@webex/cc-store'), 'registerCC');
 
     const {result} = renderHook(() =>
       useStationLogin({
@@ -537,7 +539,7 @@ describe('useStationLogin Hook', () => {
 
     await waitFor(() => {
       expect(setShowMultipleLoginAlertSpy).toHaveBeenCalledWith(false);
-      expect(ccMock.register).toHaveBeenCalled();
+      expect(registerCCSpy).toHaveBeenCalled();
       expect(logger.error).toHaveBeenCalledWith('Agent Relogin Failed', {
         module: 'widget-station-login#station-login/helper.ts',
         method: 'handleContinue',
@@ -547,7 +549,7 @@ describe('useStationLogin Hook', () => {
 
   it('should call handleContinue and handle error', async () => {
     const setShowMultipleLoginAlertSpy = jest.spyOn(require('@webex/cc-store'), 'setShowMultipleLoginAlert');
-    ccMock.register.mockImplementation(() => {
+    const registerCCSpy = jest.spyOn(require('@webex/cc-store'), 'registerCC').mockImplementation(() => {
       throw Error('Relogin failed');
     });
 
@@ -568,7 +570,7 @@ describe('useStationLogin Hook', () => {
 
     await waitFor(() => {
       expect(setShowMultipleLoginAlertSpy).toHaveBeenCalledWith(false);
-      expect(ccMock.register).toHaveBeenCalled();
+      expect(registerCCSpy).toHaveBeenCalled();
       expect(logger.error).toHaveBeenCalledWith('Error handling agent multi login continue: Error: Relogin failed', {
         module: 'widget-station-login#station-login/index.tsx',
         method: 'handleContinue',
