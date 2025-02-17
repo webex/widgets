@@ -7,9 +7,8 @@ import IncomingTaskPresentational from './incoming-task.presentational';
 import {IncomingTaskProps} from '../task.types';
 
 const IncomingTaskComponent: React.FunctionComponent<IncomingTaskProps> = ({onAccepted, onDeclined}) => {
-  const {cc, selectedLoginOption, logger} = store;
-
-  const result = useIncomingTask({cc, onAccepted, onDeclined, selectedLoginOption, logger});
+  const {cc, deviceType, incomingTask, logger} = store;
+  const result = useIncomingTask({cc, incomingTask, onAccepted, onDeclined, deviceType, logger});
 
   const props = {
     ...result,

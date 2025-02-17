@@ -14,7 +14,7 @@ jest.mock('../../src/TaskList/task-list.presentational', () => {
 // Mock `@webex/cc-store`.
 jest.mock('@webex/cc-store', () => ({
   cc: {},
-  selectedLoginOption: 'BROWSER',
+  deviceType: 'BROWSER',
   onAccepted: jest.fn(),
   onDeclined: jest.fn(),
 }));
@@ -49,6 +49,6 @@ describe('TaskList Component', () => {
     expect(TaskListPresentational).toHaveBeenCalledWith({taskList: taskListMock}, {});
 
     // Verify that `useTaskList` is called with the correct arguments.
-    expect(helper.useTaskList).toHaveBeenCalledWith({cc: store.cc, selectedLoginOption: 'BROWSER'});
+    expect(helper.useTaskList).toHaveBeenCalledWith({cc: store.cc, deviceType: 'BROWSER'});
   });
 });

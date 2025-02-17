@@ -10,9 +10,12 @@ jest.mock('@webex/cc-store', () => {
     cc: {},
     teams,
     loginOptions,
-    setSelectedLoginOption: jest.fn(),
+    registerCC: jest.fn(),
+    setDeviceType: jest.fn(),
     setCurrentState: jest.fn(),
     setLastStateChangeTimestamp: jest.fn(),
+    setShowMultipleLoginAlert: jest.fn(),
+    setIsAgentLoggedIn: jest.fn(),
   };
 });
 
@@ -22,7 +25,6 @@ const ccMock = {
   stationLogout: jest.fn(),
   on: jest.fn(),
   off: jest.fn(),
-  register: jest.fn(),
 };
 
 // Sample login parameters
@@ -50,31 +52,33 @@ describe('useStationLogin Hook', () => {
   });
 
   it('should set loginSuccess on successful login', async () => {
-    const successResponse = {data: {
-      agentId: '6b310dff-569e-4ac7-b064-70f834ea56d8',
-      agentSessionId: 'c9c24ace-5170-4a9f-8bc2-2eeeff9d7c11',
-      auxCodeId: '00b4e8df-f7b0-460f-aacf-f1e635c87d4d',
-      deviceId: '1001',
-      deviceType: 'EXTENSION',
-      dn: '1001',
-      eventType: 'AgentDesktopMessage',
-      interactionIds: [],
-      lastIdleCodeChangeTimestamp: 1731997914706,
-      lastStateChangeTimestamp: 1731997914706,
-      orgId: '6ecef209-9a34-4ed1-a07a-7ddd1dbe925a',
-      profileType: 'BLENDED',
-      roles: ['agent'],
-      siteId: 'd64e19c0-53a2-4ae0-ab7e-3ebc778b3dcd',
-      status: 'LoggedIn',
-      subStatus: 'Idle',
-      teamId: 'c789288e-39e3-40c9-8e66-62c6276f73de',
-      trackingId: 'f40915b9-07ed-4b6c-832d-e7f5e7af3b72',
-      type: 'AgentStationLoginSuccess',
-      voiceCount: 1,
-    }};
+    const successResponse = {
+      data: {
+        agentId: '6b310dff-569e-4ac7-b064-70f834ea56d8',
+        agentSessionId: 'c9c24ace-5170-4a9f-8bc2-2eeeff9d7c11',
+        auxCodeId: '00b4e8df-f7b0-460f-aacf-f1e635c87d4d',
+        deviceId: '1001',
+        deviceType: 'EXTENSION',
+        dn: '1001',
+        eventType: 'AgentDesktopMessage',
+        interactionIds: [],
+        lastIdleCodeChangeTimestamp: 1731997914706,
+        lastStateChangeTimestamp: 1731997914706,
+        orgId: '6ecef209-9a34-4ed1-a07a-7ddd1dbe925a',
+        profileType: 'BLENDED',
+        roles: ['agent'],
+        siteId: 'd64e19c0-53a2-4ae0-ab7e-3ebc778b3dcd',
+        status: 'LoggedIn',
+        subStatus: 'Idle',
+        teamId: 'c789288e-39e3-40c9-8e66-62c6276f73de',
+        trackingId: 'f40915b9-07ed-4b6c-832d-e7f5e7af3b72',
+        type: 'AgentStationLoginSuccess',
+        voiceCount: 1,
+      },
+    };
 
     ccMock.stationLogin.mockResolvedValue(successResponse);
-    const setSelectedLoginOptionSpy = jest.spyOn(require('@webex/cc-store'), 'setSelectedLoginOption');
+    const setDeviceTypeSpy = jest.spyOn(require('@webex/cc-store'), 'setDeviceType');
     const setSetCurrentStateSpy = jest.spyOn(require('@webex/cc-store'), 'setCurrentState');
     const setSetLastStateChangeTimestampSpy = jest.spyOn(require('@webex/cc-store'), 'setLastStateChangeTimestamp');
     const {result} = renderHook(() =>
@@ -84,8 +88,7 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         isAgentLoggedIn,
-        handleContinue: jest.fn(),
-        showMultipleLoginAlert: false,
+        deviceType: 'BROWSER',
       })
     );
 
@@ -119,11 +122,10 @@ describe('useStationLogin Hook', () => {
         loginFailure: undefined,
         logoutSuccess: undefined,
         relogin: expect.any(Function),
-        showMultipleLoginAlert: false,
         handleContinue: expect.any(Function),
       });
 
-      expect(setSelectedLoginOptionSpy).toHaveBeenCalledWith(loginParams.loginOption);
+      expect(setDeviceTypeSpy).toHaveBeenCalledWith(loginParams.loginOption);
       expect(setSetCurrentStateSpy).toHaveBeenCalledWith(successResponse.data.auxCodeId);
       expect(setSetLastStateChangeTimestampSpy).toHaveBeenCalledWith(
         new Date(successResponse.data.lastStateChangeTimestamp)
@@ -131,10 +133,87 @@ describe('useStationLogin Hook', () => {
     });
   });
 
-  it('should not call setSelectedLoginOptionSpy if login fails', async () => {
+  it('should set loginSuccess on successful login without auxCode and last state timestamp', async () => {
+    const successResponse = {
+      data: {
+        agentId: '6b310dff-569e-4ac7-b064-70f834ea56d8',
+        agentSessionId: 'c9c24ace-5170-4a9f-8bc2-2eeeff9d7c11',
+        lastStateChangeTimestamp: 'mockDate',
+      },
+    };
+
+    ccMock.stationLogin.mockResolvedValue(successResponse);
+    const setDeviceTypeSpy = jest.spyOn(require('@webex/cc-store'), 'setDeviceType');
+    const setSetCurrentStateSpy = jest.spyOn(require('@webex/cc-store'), 'setCurrentState');
+    const setSetLastStateChangeTimestampSpy = jest.spyOn(require('@webex/cc-store'), 'setLastStateChangeTimestamp');
+    const {result} = renderHook(() =>
+      useStationLogin({
+        cc: ccMock,
+        onLogin: loginCb,
+        onLogout: logoutCb,
+        logger,
+        isAgentLoggedIn,
+        deviceType: '',
+      })
+    );
+
+    act(() => {
+      result.current.setDeviceType(loginParams.loginOption);
+      result.current.setDialNumber(loginParams.dialNumber);
+      result.current.setTeam(loginParams.teamId);
+    });
+
+    await act(async () => {
+      await result.current.login();
+    });
+
+    await waitFor(async () => {
+      expect(setDeviceTypeSpy).toHaveBeenCalledWith(loginParams.loginOption);
+      expect(setSetCurrentStateSpy).not.toHaveBeenCalledWith(successResponse.data.auxCodeId);
+      expect(setSetLastStateChangeTimestampSpy).not.toHaveBeenCalledWith(
+        new Date(successResponse.data.lastStateChangeTimestamp)
+      );
+    });
+  });
+
+  it('should set loginSuccess on successful login without onLogin callback', async () => {
+    const successResponse = {
+      data: {
+        agentId: '6b310dff-569e-4ac7-b064-70f834ea56d8',
+        agentSessionId: 'c9c24ace-5170-4a9f-8bc2-2eeeff9d7c11',
+      },
+    };
+
+    ccMock.stationLogin.mockResolvedValue(successResponse);
+    const {result} = renderHook(() =>
+      useStationLogin({
+        cc: ccMock,
+        onLogout: logoutCb,
+        logger,
+        isAgentLoggedIn,
+        deviceType: 'EXTENSION',
+      })
+    );
+
+    act(() => {
+      result.current.setDeviceType(loginParams.loginOption);
+      result.current.setDialNumber(loginParams.dialNumber);
+      result.current.setTeam(loginParams.teamId);
+    });
+
+    await act(async () => {
+      await result.current.login();
+    });
+
+    await waitFor(async () => {
+      expect(loginCb).not.toHaveBeenCalledWith();
+    });
+  });
+
+  it('should not call setDeviceType if login fails', async () => {
     const errorResponse = new Error('Login failed');
     ccMock.stationLogin.mockRejectedValue(errorResponse);
-    const setSelectedLoginOptionSpy = jest.spyOn(require('@webex/cc-store'), 'setSelectedLoginOption');
+    const setDeviceTypeSpy = jest.spyOn(require('@webex/cc-store'), 'setDeviceType');
 
     loginCb.mockClear();
     const {result} = renderHook(() =>
@@ -144,8 +223,7 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         isAgentLoggedIn,
-        handleContinue: jest.fn(),
-        showMultipleLoginAlert: false,
+        deviceType: 'EXTENSION',
       })
     );
 
@@ -179,11 +257,10 @@ describe('useStationLogin Hook', () => {
         loginFailure: errorResponse,
         logoutSuccess: undefined,
         relogin: expect.any(Function),
-        showMultipleLoginAlert: false,
         handleContinue: expect.any(Function),
       });
 
-      expect(setSelectedLoginOptionSpy).not.toHaveBeenCalled();
+      expect(setDeviceTypeSpy).not.toHaveBeenCalled();
     });
   });
 
@@ -196,8 +273,7 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         isAgentLoggedIn,
-        handleContinue: jest.fn(),
-        showMultipleLoginAlert: false,
+        deviceType: 'EXTENSION',
       })
     );
 
@@ -222,8 +298,7 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         isAgentLoggedIn,
-        handleContinue: jest.fn(),
-        showMultipleLoginAlert: false,
+        deviceType: 'EXTENSION',
       })
     );
 
@@ -258,6 +333,7 @@ describe('useStationLogin Hook', () => {
         loginFailure: errorResponse,
         logoutSuccess: undefined,
         relogin: expect.any(Function),
+        handleContinue: expect.any(Function),
       });
     });
   });
@@ -287,8 +363,7 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         isAgentLoggedIn,
-        handleContinue: jest.fn(),
-        showMultipleLoginAlert: false,
+        deviceType: 'BROWSER',
       })
     );
 
@@ -312,7 +387,6 @@ describe('useStationLogin Hook', () => {
         loginFailure: undefined,
         logoutSuccess: successResponse,
         relogin: expect.any(Function),
-        showMultipleLoginAlert: false,
         handleContinue: expect.any(Function),
       });
     });
@@ -328,8 +402,7 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         isAgentLoggedIn,
-        handleContinue: jest.fn(),
-        showMultipleLoginAlert: false,
+        deviceType: 'EXTENSION',
       })
     );
 
@@ -354,8 +427,7 @@ describe('useStationLogin Hook', () => {
         onLogin: loginCb,
         logger,
         isAgentLoggedIn,
-        handleContinue: jest.fn(),
-        showMultipleLoginAlert: false,
+        deviceType: 'EXTENSION',
       })
     );
 
@@ -369,7 +441,7 @@ describe('useStationLogin Hook', () => {
   });
 
   it('should call relogin and set device type', async () => {
-    const setSelectedLoginOptionSpy = jest.spyOn(require('@webex/cc-store'), 'setSelectedLoginOption');
+    const setDeviceTypeSpy = jest.spyOn(require('@webex/cc-store'), 'setDeviceType');
 
     const {result} = renderHook(() =>
       useStationLogin({
@@ -378,8 +450,7 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         isAgentLoggedIn,
-        handleContinue: jest.fn(),
-        showMultipleLoginAlert: false,
+        deviceType: 'EXTENSION',
       })
     );
 
@@ -388,12 +459,39 @@ describe('useStationLogin Hook', () => {
     });
 
     await waitFor(() => {
-      expect(setSelectedLoginOptionSpy).toHaveBeenCalled();
+      expect(setDeviceTypeSpy).toHaveBeenCalled();
       expect(loginCb).toHaveBeenCalled();
     });
   });
 
-  it('should handle AgentMultiLogin event', async () => {
+  it('should call relogin without login callback', async () => {
+    const setDeviceTypeSpy = jest.spyOn(require('@webex/cc-store'), 'setDeviceType');
+
+    const {result} = renderHook(() =>
+      useStationLogin({
+        cc: ccMock,
+        onLogout: logoutCb,
+        logger,
+        isAgentLoggedIn,
+        deviceType: 'EXTENSION',
+      })
+    );
+
+    act(() => {
+      result.current.relogin();
+    });
+
+    await waitFor(() => {
+      expect(setDeviceTypeSpy).toHaveBeenCalled();
+      expect(loginCb).not.toHaveBeenCalled();
+    });
+  });
+
+  it('should call handleContinue and set device type', async () => {
+    const setShowMultipleLoginAlertSpy = jest.spyOn(require('@webex/cc-store'), 'setShowMultipleLoginAlert');
+    require('@webex/cc-store').isAgentLoggedIn = true;
+    const registerCCSpy = jest.spyOn(require('@webex/cc-store'), 'registerCC');
+
     const {result} = renderHook(() =>
       useStationLogin({
         cc: ccMock,
@@ -401,18 +499,82 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         isAgentLoggedIn,
-        handleContinue: jest.fn(),
-        showMultipleLoginAlert: false,
+        deviceType: 'EXTENSION',
       })
     );
 
-    const event = new Event('AgentMultiLoginCloseSession');
     act(() => {
-      ccMock.on.mock.calls[0][1](event);
+      result.current.handleContinue();
     });
 
     await waitFor(() => {
-      expect(result.current.showMultipleLoginAlert).toBe(true);
+      expect(setShowMultipleLoginAlertSpy).toHaveBeenCalledWith(false);
+      expect(registerCCSpy).toHaveBeenCalled();
+      expect(logger.log).toHaveBeenCalledWith('Agent Relogin Success', {
+        module: 'widget-station-login#station-login/helper.ts',
+        method: 'handleContinue',
+      });
+    });
+  });
+
+  it('should call handleContinue with agent not logged in', async () => {
+    require('@webex/cc-store').isAgentLoggedIn = false;
+    const setShowMultipleLoginAlertSpy = jest.spyOn(require('@webex/cc-store'), 'setShowMultipleLoginAlert');
+    const registerCCSpy = jest.spyOn(require('@webex/cc-store'), 'registerCC');
+
+    const {result} = renderHook(() =>
+      useStationLogin({
+        cc: ccMock,
+        onLogin: loginCb,
+        onLogout: logoutCb,
+        logger,
+        isAgentLoggedIn,
+        deviceType: 'EXTENSION',
+      })
+    );
+
+    act(() => {
+      result.current.handleContinue();
+    });
+
+    await waitFor(() => {
+      expect(setShowMultipleLoginAlertSpy).toHaveBeenCalledWith(false);
+      expect(registerCCSpy).toHaveBeenCalled();
+      expect(logger.error).toHaveBeenCalledWith('Agent Relogin Failed', {
+        module: 'widget-station-login#station-login/helper.ts',
+        method: 'handleContinue',
+      });
+    });
+  });
+
+  it('should call handleContinue and handle error', async () => {
+    const setShowMultipleLoginAlertSpy = jest.spyOn(require('@webex/cc-store'), 'setShowMultipleLoginAlert');
+    const registerCCSpy = jest.spyOn(require('@webex/cc-store'), 'registerCC').mockImplementation(() => {
+      throw Error('Relogin failed');
+    });
+
+    const {result} = renderHook(() =>
+      useStationLogin({
+        cc: ccMock,
+        onLogin: loginCb,
+        onLogout: logoutCb,
+        logger,
+        isAgentLoggedIn,
+        deviceType: 'EXTENSION',
+      })
+    );
+
+    act(() => {
+      result.current.handleContinue();
+    });
+
+    await waitFor(() => {
+      expect(setShowMultipleLoginAlertSpy).toHaveBeenCalledWith(false);
+      expect(registerCCSpy).toHaveBeenCalled();
+      expect(logger.error).toHaveBeenCalledWith('Error handling agent multi login continue: Error: Relogin failed', {
+        module: 'widget-station-login#station-login/index.tsx',
+        method: 'handleContinue',
+      });
     });
   });
 });

@@ -1,3 +1,3 @@
-import store from './store';
+import store from './storeEventsWrapper';
 export * from './store.types';
 export default store;

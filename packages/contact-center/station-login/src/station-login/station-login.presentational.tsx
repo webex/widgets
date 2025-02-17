@@ -1,11 +1,24 @@
-import React, { useEffect, useRef} from 'react';
-import { StationLoginPresentationalProps } from './station-login.types';
+import React, {useEffect, useRef} from 'react';
+import {StationLoginPresentationalProps} from './station-login.types';
 import './station-login.style.scss';
-import { MULTIPLE_SIGN_IN_ALERT_MESSAGE, MULTIPLE_SIGN_IN_ALERT_TITLE } from './constants';
-import './alert-modal.scss';
+import {MULTIPLE_SIGN_IN_ALERT_MESSAGE, MULTIPLE_SIGN_IN_ALERT_TITLE} from './constants';
 
 const StationLoginPresentational: React.FunctionComponent<StationLoginPresentationalProps> = (props) => {
-  const { name, teams, loginOptions, login, logout, relogin, setDeviceType, setDialNumber, setTeam, isAgentLoggedIn, deviceType, showMultipleLoginAlert, handleContinue} = props; // TODO: Use the loginSuccess, loginFailure, logoutSuccess props returned fromthe API response via helper file to reflect UI changes
+  const {
+    name,
+    teams,
+    loginOptions,
+    login,
+    logout,
+    relogin,
+    setDeviceType,
+    setDialNumber,
+    setTeam,
+    isAgentLoggedIn,
+    deviceType,
+    showMultipleLoginAlert,
+    handleContinue,
+  } = props; // TODO: Use the loginSuccess, loginFailure, logoutSuccess props returned fromthe API response via helper file to reflect UI changes
   const modalRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -33,6 +46,9 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
         option.value = options;
         agentLogin.add(option);
       });
+      if (agentLogin && deviceType) {
+        agentLogin.value = deviceType;
+      }
     }
   }, [teams, loginOptions]);
 
@@ -53,8 +69,7 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
     }
   }, [isAgentLoggedIn]);
 
-  const selectLoginOption = (event: { target: { value: string } }) => 
-    {
+  const selectLoginOption = (event: {target: {value: string}}) => {
     const dialNumber = document.querySelector('#dialNumber') as HTMLInputElement;
     const deviceType = event.target.value;
     setDeviceType(deviceType);

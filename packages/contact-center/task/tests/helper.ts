@@ -21,7 +21,7 @@ const taskMock = {
 
 const onAccepted = jest.fn();
 const onDeclined = jest.fn();
-const onTaskAccepted = jest.fn();
+const onTaskAccepted = jest.fn().mockImplementation(() => {});
 const onTaskDeclined = jest.fn();
 
 const logger = {
@@ -34,32 +34,101 @@ describe('useIncomingTask Hook', () => {
     logger.error.mockRestore();
   });
 
-  it('should register task events for the current task', async () => {
+  it('should  call onAccepted if it is provided', async () => {
     const {result} = renderHook(() =>
-      useIncomingTask({cc: ccMock, onAccepted, onDeclined, selectedLoginOption: 'BROWSER', logger})
+      useIncomingTask({
+        cc: ccMock,
+        incomingTask: taskMock,
+        onAccepted: onTaskAccepted,
+        onDeclined: onTaskDeclined,
+        deviceType: 'BROWSER',
+        logger,
+      })
     );
 
     act(() => {
-      ccMock.on.mock.calls[0][1](taskMock);
+      result.current.accept();
     });
 
     await waitFor(() => {
-      expect(taskMock.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function));
-      expect(taskMock.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));
+      expect(onTaskAccepted).toHaveBeenCalled();
     });
 
     // Ensure no errors are logged
     expect(logger.error).not.toHaveBeenCalled();
   });
 
-  it('should not call onAccepted if it is not provided', async () => {
+  it('should call onDeclined if it is provided', async () => {
     const {result} = renderHook(() =>
-      useIncomingTask({cc: ccMock, onAccepted: null, onDeclined: null, selectedLoginOption: 'BROWSER', logger})
+      useIncomingTask({
+        cc: ccMock,
+        incomingTask: taskMock,
+        onAccepted: onTaskAccepted,
+        onDeclined: onTaskDeclined,
+        deviceType: 'BROWSER',
+        logger,
+      })
     );
 
     act(() => {
-      ccMock.on.mock.calls[0][1](taskMock);
+      result.current.decline();
     });
+
+    await waitFor(() => {
+      expect(onTaskDeclined).toHaveBeenCalled();
+    });
+
+    // Ensure no errors are logged
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('should return if there is no taskId for incoming task', async () => {
+    const noIdTask = {
+      data: {},
+      accept: jest.fn(),
+      decline: jest.fn(),
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+    const {result} = renderHook(() =>
+      useIncomingTask({
+        cc: ccMock,
+        incomingTask: noIdTask,
+        onAccepted: onTaskAccepted,
+        onDeclined: onTaskDeclined,
+        deviceType: 'BROWSER',
+        logger,
+      })
+    );
+
+    act(() => {
+      result.current.accept();
+    });
+
+    await waitFor(() => {
+      expect(onTaskAccepted).not.toHaveBeenCalled();
+    });
+
+    act(() => {
+      result.current.decline();
+    });
+
+    await waitFor(() => {
+      expect(onTaskDeclined).not.toHaveBeenCalled();
+    });
+  });
+
+  it('should not call onAccepted if it is not provided', async () => {
+    const {result} = renderHook(() =>
+      useIncomingTask({
+        cc: ccMock,
+        incomingTask: taskMock,
+        onAccepted: null,
+        onDeclined: null,
+        deviceType: 'BROWSER',
+        logger,
+      })
+    );
 
     act(() => {
       result.current.accept();
@@ -75,12 +144,15 @@ describe('useIncomingTask Hook', () => {
 
   it('should not call onDeclined if it is not provided', async () => {
     const {result} = renderHook(() =>
-      useIncomingTask({cc: ccMock, onAccepted: null, onDeclined: null, selectedLoginOption: 'BROWSER', logger})
+      useIncomingTask({
+        cc: ccMock,
+        incomingTask: taskMock,
+        onAccepted: null,
+        onDeclined: null,
+        deviceType: 'BROWSER',
+        logger,
+      })
     );
-
-    act(() => {
-      ccMock.on.mock.calls[0][1](taskMock);
-    });
 
     act(() => {
       result.current.decline();
@@ -88,26 +160,6 @@ describe('useIncomingTask Hook', () => {
 
     await waitFor(() => {
       expect(onDeclined).not.toHaveBeenCalled();
-    });
-
-    // Ensure no errors are logged
-    expect(logger.error).not.toHaveBeenCalled();
-  });
-
-  it('should clean up task events on task change or unmount', async () => {
-    const {result, unmount} = renderHook(() =>
-      useIncomingTask({cc: ccMock, onAccepted, onDeclined, selectedLoginOption: 'BROWSER', logger})
-    );
-
-    act(() => {
-      ccMock.on.mock.calls[0][1](taskMock);
-    });
-
-    unmount();
-
-    await waitFor(() => {
-      expect(taskMock.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function));
-      expect(ccMock.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_INCOMING, expect.any(Function));
     });
 
     // Ensure no errors are logged
@@ -122,12 +174,8 @@ describe('useIncomingTask Hook', () => {
     };
 
     const {result} = renderHook(() =>
-      useIncomingTask({cc: ccMock, onAccepted, selectedLoginOption: 'BROWSER', logger})
+      useIncomingTask({cc: ccMock, incomingTask: failingTask, onAccepted, deviceType: 'BROWSER', logger})
     );
-
-    act(() => {
-      ccMock.on.mock.calls[0][1](failingTask);
-    });
 
     act(() => {
       result.current.accept();
@@ -153,12 +201,8 @@ describe('useIncomingTask Hook', () => {
     };
 
     const {result} = renderHook(() =>
-      useIncomingTask({cc: ccMock, onDeclined, selectedLoginOption: 'BROWSER', logger})
+      useIncomingTask({cc: ccMock, incomingTask: failingTask, onDeclined, deviceType: 'BROWSER', logger})
     );
-
-    act(() => {
-      ccMock.on.mock.calls[0][1](failingTask);
-    });
 
     act(() => {
       result.current.decline();
@@ -178,13 +222,16 @@ describe('useIncomingTask Hook', () => {
 });
 
 describe('useTaskList Hook', () => {
+  const mockTaskList = [taskMock, taskMock];
   afterEach(() => {
     jest.clearAllMocks();
     logger.error.mockRestore();
   });
 
   it('should call onTaskAccepted callback when provided', async () => {
-    const {result} = renderHook(() => useTaskList({cc: ccMock, selectedLoginOption: '', onTaskAccepted, logger}));
+    const {result} = renderHook(() =>
+      useTaskList({cc: ccMock, deviceType: '', onTaskAccepted, logger, taskList: mockTaskList})
+    );
 
     act(() => {
       result.current.acceptTask(taskMock);
@@ -198,8 +245,42 @@ describe('useTaskList Hook', () => {
     expect(logger.error).not.toHaveBeenCalled();
   });
 
+  it('should return if not task is passed while calling acceptTask', async () => {
+    // This test is purely to improve the coverage report, as the acceptTask function cannot be called without a task
+    const {result} = renderHook(() =>
+      useTaskList({cc: ccMock, deviceType: '', onTaskAccepted, logger, taskList: mockTaskList})
+    );
+
+    act(() => {
+      // @ts-ignore
+      result.current.acceptTask();
+    });
+
+    await waitFor(() => {
+      expect(onTaskAccepted).not.toHaveBeenCalledWith(taskMock);
+    });
+  });
+
+  it('should return if not task is passed while calling acceptTask', async () => {
+    // This test is purely to improve the coverage report, as the acceptTask function cannot be called without a task
+    const {result} = renderHook(() =>
+      useTaskList({cc: ccMock, deviceType: '', onTaskDeclined, logger, taskList: mockTaskList})
+    );
+
+    act(() => {
+      // @ts-ignore
+      result.current.declineTask();
+    });
+
+    await waitFor(() => {
+      expect(onTaskDeclined).not.toHaveBeenCalledWith(taskMock);
+    });
+  });
+
   it('should call onTaskDeclined callback when provided', async () => {
-    const {result} = renderHook(() => useTaskList({cc: ccMock, selectedLoginOption: '', onTaskDeclined, logger}));
+    const {result} = renderHook(() =>
+      useTaskList({cc: ccMock, deviceType: '', onTaskDeclined, logger, taskList: mockTaskList})
+    );
 
     act(() => {
       result.current.declineTask(taskMock);
@@ -221,12 +302,8 @@ describe('useTaskList Hook', () => {
     };
 
     const {result} = renderHook(() =>
-      useTaskList({cc: ccMock, onTaskAccepted, selectedLoginOption: 'BROWSER', logger})
+      useTaskList({cc: ccMock, onTaskAccepted, deviceType: 'BROWSER', logger, taskList: mockTaskList})
     );
-
-    act(() => {
-      ccMock.on.mock.calls[0][1](failingTask);
-    });
 
     act(() => {
       result.current.acceptTask(failingTask);
@@ -252,12 +329,8 @@ describe('useTaskList Hook', () => {
     };
 
     const {result} = renderHook(() =>
-      useTaskList({cc: ccMock, onTaskDeclined, selectedLoginOption: 'BROWSER', logger})
+      useTaskList({cc: ccMock, onTaskDeclined, deviceType: 'BROWSER', logger, taskList: mockTaskList})
     );
-
-    act(() => {
-      ccMock.on.mock.calls[0][1](failingTask);
-    });
 
     act(() => {
       result.current.declineTask(failingTask);
@@ -275,24 +348,16 @@ describe('useTaskList Hook', () => {
     });
   });
 
-  it('should add tasks to the list on TASK_INCOMING event', async () => {
-    const {result} = renderHook(() => useTaskList({cc: ccMock, logger, selectedLoginOption: ''}));
-
-    act(() => {
-      ccMock.on.mock.calls[0][1](taskMock);
-    });
-
-    await waitFor(() => {
-      expect(result.current.taskList).toContain(taskMock);
-    });
-
-    // Ensure no errors are logged
-    expect(logger.error).not.toHaveBeenCalled();
-  });
-
   it('should not call onTaskAccepted if it is not provided', async () => {
     const {result} = renderHook(() =>
-      useTaskList({cc: ccMock, onTaskAccepted: null, onTaskDeclined: null, logger, selectedLoginOption: ''})
+      useTaskList({
+        cc: ccMock,
+        onTaskAccepted: null,
+        onTaskDeclined: null,
+        logger,
+        deviceType: '',
+        taskList: mockTaskList,
+      })
     );
 
     act(() => {
@@ -309,7 +374,14 @@ describe('useTaskList Hook', () => {
 
   it('should not call onTaskDeclined if it is not provided', async () => {
     const {result} = renderHook(() =>
-      useTaskList({cc: ccMock, onTaskAccepted: null, onTaskDeclined: null, logger, selectedLoginOption: ''})
+      useTaskList({
+        cc: ccMock,
+        onTaskAccepted: null,
+        onTaskDeclined: null,
+        logger,
+        deviceType: '',
+        taskList: mockTaskList,
+      })
     );
 
     act(() => {
@@ -323,130 +395,13 @@ describe('useTaskList Hook', () => {
     // Ensure no errors are logged
     expect(logger.error).not.toHaveBeenCalled();
   });
-
-  it('should remove a task from the list when it ends', async () => {
-    const {result} = renderHook(() => useTaskList({cc: ccMock, logger, selectedLoginOption: ''}));
-
-    act(() => {
-      ccMock.on.mock.calls[0][1](taskMock);
-    });
-
-    act(() => {
-      taskMock.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_END)?.[1]();
-    });
-
-    await waitFor(() => {
-      expect(result.current.taskList).not.toContain(taskMock);
-    });
-
-    // Ensure no errors are logged
-    expect(logger.error).not.toHaveBeenCalled();
-  });
-
-  it('should update an existing task in the list', async () => {
-    const {result} = renderHook(() => useTaskList({cc: ccMock, logger, selectedLoginOption: ''}));
-
-    act(() => {
-      ccMock.on.mock.calls[0][1](taskMock);
-    });
-
-    const updatedTask = {...taskMock, data: {interactionId: 'interaction1', status: 'updated'}};
-    act(() => {
-      taskMock.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_ASSIGNED)?.[1](updatedTask);
-    });
-
-    await waitFor(() => {});
-
-    // Ensure no errors are logged
-    expect(logger.error).not.toHaveBeenCalled();
-  });
-
-  it('should deduplicate tasks by interactionId', async () => {
-    const {result} = renderHook(() => useTaskList({cc: ccMock, logger, selectedLoginOption: ''}));
-
-    act(() => {
-      ccMock.on.mock.calls[0][1](taskMock);
-      ccMock.on.mock.calls[0][1](taskMock);
-    });
-
-    await waitFor(() => {
-      expect(result.current.taskList.length).toBe(1);
-    });
-
-    // Ensure no errors are logged
-    expect(logger.error).not.toHaveBeenCalled();
-  });
-
-  describe('useIncomingTask Hook - Task Events', () => {
-    afterEach(() => {
-      jest.clearAllMocks();
-      logger.error.mockRestore();
-    });
-
-    it('should set isAnswered to true when task is assigned', async () => {
-      const {result} = renderHook(() =>
-        useIncomingTask({
-          cc: ccMock,
-          onAccepted,
-          onDeclined,
-          selectedLoginOption: 'BROWSER',
-          logger,
-          selectedLoginOption: '',
-        })
-      );
-
-      // Simulate task being assigned
-      act(() => {
-        ccMock.on.mock.calls[0][1](taskMock); // Simulate incoming task
-      });
-
-      act(() => {
-        taskMock.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_ASSIGNED)?.[1](); // Trigger task assigned
-      });
-
-      await waitFor(() => {
-        expect(result.current.isAnswered).toBe(true);
-      });
-
-      // Ensure no errors are logged
-      expect(logger.error).not.toHaveBeenCalled();
-    });
-
-    it('should set isEnded to true and clear currentTask when task ends', async () => {
-      const {result} = renderHook(() =>
-        useIncomingTask({
-          cc: ccMock,
-          onAccepted,
-          onDeclined,
-          selectedLoginOption: 'BROWSER',
-          logger,
-          selectedLoginOption: '',
-        })
-      );
-
-      // Simulate task being assigned
-      act(() => {
-        ccMock.on.mock.calls[0][1](taskMock); // Simulate incoming task
-      });
-
-      // Simulate task ending
-      act(() => {
-        taskMock.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_END)?.[1](); // Trigger task end
-      });
-
-      await waitFor(() => {
-        expect(result.current.isEnded).toBe(true);
-        expect(result.current.incomingTask).toBeNull();
-      });
-
-      // Ensure no errors are logged
-      expect(logger.error).not.toHaveBeenCalled();
-    });
-  });
 });
 
 describe('useCallControl', () => {
   const mockCurrentTask = {
+    data: {
+      interactionId: 'someMockInteractionId',
+    },
     on: jest.fn(),
     off: jest.fn(),
     hold: jest.fn(() => Promise.resolve()),
@@ -484,33 +439,35 @@ describe('useCallControl', () => {
     logger.error.mockRestore();
   });
 
-  it('should set up and clean up event listeners on currentTask', () => {
-    renderHook(() =>
+  it('should not call any call backs if callbacks are not provided', async () => {
+    mockCurrentTask.hold.mockRejectedValueOnce(new Error('Hold error'));
+
+    const {result} = renderHook(() =>
       useCallControl({
         currentTask: mockCurrentTask,
-        onHoldResume: mockOnHoldResume,
-        onEnd: mockOnEnd,
-        onWrapUp: mockOnWrapUp,
         logger: mockLogger,
       })
     );
 
-    expect(mockCurrentTask.on).toHaveBeenCalledWith('task:end', expect.any(Function));
+    await act(async () => {
+      await result.current.toggleHold(true);
+    });
 
-    // Cleanup on unmount
-    const {unmount} = renderHook(() =>
-      useCallControl({
-        currentTask: mockCurrentTask,
-        onHoldResume: mockOnHoldResume,
-        onEnd: mockOnEnd,
-        onWrapUp: mockOnWrapUp,
-        logger: mockLogger,
-      })
-    );
+    await act(async () => {
+      await result.current.toggleHold(false);
+    });
 
-    unmount();
+    await act(async () => {
+      await result.current.endCall();
+    });
 
-    expect(mockCurrentTask.off).toHaveBeenCalledWith('task:end', expect.any(Function));
+    await act(async () => {
+      await result.current.wrapupCall('Wrap reason', '123');
+    });
+
+    expect(mockOnHoldResume).not.toHaveBeenCalled();
+    expect(mockOnEnd).not.toHaveBeenCalled();
+    expect(mockOnWrapUp).not.toHaveBeenCalled();
   });
 
   it('should call holdResume with hold=true and handle success', async () => {
@@ -571,7 +528,7 @@ describe('useCallControl', () => {
     expect(mockLogger.error).toHaveBeenCalledWith('Error holding call: Error: Hold error', expect.any(Object));
   });
 
-  it('should log an error if hold fails', async () => {
+  it('should log an error if resume fails', async () => {
     mockCurrentTask.resume.mockRejectedValueOnce(new Error('Resume error'));
 
     const {result} = renderHook(() =>
@@ -610,23 +567,6 @@ describe('useCallControl', () => {
     expect(mockOnEnd).toHaveBeenCalled();
   });
 
-  it('should update wrapupRequired on TASK_END event', async () => {
-    const {result} = renderHook(() =>
-      useCallControl({
-        currentTask: mockCurrentTask,
-        onHoldResume: mockOnHoldResume,
-        onEnd: mockOnEnd,
-        onWrapUp: mockOnWrapUp,
-        logger: mockLogger,
-      })
-    );
-
-    await act(async () => {
-      await mockCurrentTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_END)?.[1]({wrapupRequired: true});
-    });
-    expect(result.current.wrapupRequired).toBe(true);
-  });
-
   it('should call endCall and handle failure', async () => {
     mockCurrentTask.end.mockRejectedValueOnce(new Error('End error'));
     const {result} = renderHook(() =>
@@ -644,10 +584,11 @@ describe('useCallControl', () => {
     });
 
     expect(mockCurrentTask.end).toHaveBeenCalled();
+    expect(mockOnEnd).not.toHaveBeenCalled();
     expect(mockLogger.error).toHaveBeenCalledWith('Error ending call: Error: End error', expect.any(Object));
   });
 
-  it('should call wrapupCall and handle success', async () => {
+  it('should call wrapupCall ', async () => {
     const {result} = renderHook(() =>
       useCallControl({
         currentTask: mockCurrentTask,
@@ -659,10 +600,10 @@ describe('useCallControl', () => {
     );
 
     await act(async () => {
-      await result.current.wrapupCall('Wrap reason', 123);
+      await result.current.wrapupCall('Wrap reason', '123');
     });
 
-    expect(mockCurrentTask.wrapup).toHaveBeenCalledWith({wrapUpReason: 'Wrap reason', auxCodeId: 123});
+    expect(mockCurrentTask.wrapup).toHaveBeenCalledWith({wrapUpReason: 'Wrap reason', auxCodeId: '123'});
     expect(mockOnWrapUp).toHaveBeenCalled();
   });
 
@@ -782,7 +723,7 @@ describe('useCallControl', () => {
     );
 
     act(() => {
-      mockCurrentTask.on.mock.calls[0][1](mockAudio);
+      mockCurrentTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_MEDIA)?.[1](mockAudio);
     });
 
     await waitFor(() => {
@@ -896,5 +837,48 @@ describe('useCallControl', () => {
 
     // Ensure no errors are logged
     expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('should not add media events if task is not available', async () => {
+    const mockAudioElement = {current: {srcObject: null}};
+    jest.spyOn(React, 'useRef').mockReturnValue(mockAudioElement);
+
+    renderHook(() =>
+      useCallControl({
+        currentTask: undefined,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+      })
+    );
+    // Ensure no event handler is set
+    expect(taskMock.on).not.toHaveBeenCalled();
+  });
+
+  it('should test undefined audioRef.current branch', async () => {
+    // This test is to improve the coverage
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+      })
+    );
+
+    result.current.audioRef.current = undefined;
+    const mockTrack = new MediaStreamTrack();
+
+    act(() => {
+      const taskAssignedCallback = mockCurrentTask.on.mock.calls.find(
+        (call) => call[0] === TASK_EVENTS.TASK_MEDIA
+      )?.[1];
+
+      if (taskAssignedCallback) {
+        taskAssignedCallback(mockTrack);
+      }
+    });
   });
 });

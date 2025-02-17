@@ -8,7 +8,7 @@ import '@testing-library/jest-dom';
 // Mock the store
 jest.mock('@webex/cc-store', () => ({
   cc: {},
-  selectedLoginOption: 'BROWSER',
+  deviceType: 'BROWSER',
   wrapupCodes: [],
   logger: {},
   currentTask: {

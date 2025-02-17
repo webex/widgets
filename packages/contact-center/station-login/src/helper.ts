@@ -2,7 +2,6 @@ import {useState, useEffect} from 'react';
 import {StationLoginSuccess, StationLogoutSuccess} from '@webex/plugin-cc';
 import {UseStationLoginProps} from './station-login/station-login.types';
 import store from '@webex/cc-store'; // we need to import as we are losing the context of this in store
-import {AGENT_MULTI_LOGIN} from './station-login/constants';
 
 export const useStationLogin = (props: UseStationLoginProps) => {
   const cc = props.cc;
@@ -11,26 +10,11 @@ export const useStationLogin = (props: UseStationLoginProps) => {
   const logger = props.logger;
   const [isAgentLoggedIn, setIsAgentLoggedIn] = useState(props.isAgentLoggedIn);
   const [dialNumber, setDialNumber] = useState('');
-  const [deviceType, setDeviceType] = useState('');
+  const [deviceType, setDeviceType] = useState(props.deviceType || '');
   const [team, setTeam] = useState('');
   const [loginSuccess, setLoginSuccess] = useState<StationLoginSuccess>();
   const [loginFailure, setLoginFailure] = useState<Error>();
   const [logoutSuccess, setLogoutSuccess] = useState<StationLogoutSuccess>();
-  const [showMultipleLoginAlert, setShowMultipleLoginAlert] = useState(false);
-
-  useEffect(() => {
-    const handleMultiLoginCloseSession = (data) => {
-      if (data && typeof data === 'object' && data.type === 'AgentMultiLoginCloseSession') {
-        setShowMultipleLoginAlert(true);
-      }
-    };
-
-    cc.on(AGENT_MULTI_LOGIN, handleMultiLoginCloseSession);
-
-    return () => {
-      cc.off(AGENT_MULTI_LOGIN, handleMultiLoginCloseSession);
-    };
-  }, [cc]);
 
   useEffect(() => {
     setIsAgentLoggedIn(props.isAgentLoggedIn);
@@ -38,7 +22,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
 
   const handleContinue = async () => {
     try {
-      setShowMultipleLoginAlert(false);
+      store.setShowMultipleLoginAlert(false);
       await store.registerCC();
       if (store.isAgentLoggedIn) {
         logger.log(`Agent Relogin Success`, {
@@ -64,7 +48,8 @@ export const useStationLogin = (props: UseStationLoginProps) => {
       .then((res: StationLoginSuccess) => {
         setLoginSuccess(res);
         setIsAgentLoggedIn(true);
-        store.setSelectedLoginOption(deviceType);
+        store.setDeviceType(deviceType);
+        store.setIsAgentLoggedIn(true);
         if (res.data.auxCodeId) {
           store.setCurrentState(res.data.auxCodeId);
         }
@@ -89,6 +74,8 @@ export const useStationLogin = (props: UseStationLoginProps) => {
       .then((res: StationLogoutSuccess) => {
         setLogoutSuccess(res);
         setIsAgentLoggedIn(false);
+        store.setIsAgentLoggedIn(false);
+        store.setDeviceType('');
         if (logoutCb) {
           logoutCb();
         }
@@ -102,7 +89,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
   };
 
   function relogin() {
-    store.setSelectedLoginOption(deviceType);
+    store.setDeviceType(deviceType);
     if (loginCb) {
       loginCb();
     }
@@ -119,7 +106,6 @@ export const useStationLogin = (props: UseStationLoginProps) => {
     loginSuccess,
     loginFailure,
     logoutSuccess,
-    showMultipleLoginAlert,
     isAgentLoggedIn,
     handleContinue,
   };

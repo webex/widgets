@@ -78,7 +78,7 @@ export interface TaskProps {
   /**
    * Selected login option
    */
-  selectedLoginOption: string;
+  deviceType: string;
 
   /**
    * List of tasks
@@ -91,15 +91,15 @@ export interface TaskProps {
   logger: ILogger;
 }
 
-export type UseTaskProps = Pick<TaskProps, 'cc' | 'onAccepted' | 'onDeclined' | 'selectedLoginOption' | 'logger'>;
+export type UseTaskProps = Pick<
+  TaskProps,
+  'cc' | 'incomingTask' | 'onAccepted' | 'onDeclined' | 'deviceType' | 'logger'
+>;
 export type UseTaskListProps = Pick<
   TaskProps,
-  'cc' | 'selectedLoginOption' | 'onTaskAccepted' | 'onTaskDeclined' | 'logger'
+  'cc' | 'taskList' | 'deviceType' | 'onTaskAccepted' | 'onTaskDeclined' | 'logger'
 >;
-export type IncomingTaskPresentationalProps = Pick<
-  TaskProps,
-  'incomingTask' | 'isBrowser' | 'isAnswered' | 'isEnded' | 'accept' | 'decline'
->;
+export type IncomingTaskPresentationalProps = Pick<TaskProps, 'incomingTask' | 'isBrowser' | 'accept' | 'decline'>;
 export type IncomingTaskProps = Pick<TaskProps, 'onAccepted' | 'onDeclined'>;
 export type TaskListProps = Pick<TaskProps, 'onTaskAccepted' | 'onTaskDeclined'>;
 
@@ -138,17 +138,17 @@ export interface ControlProps {
   /**
    * Function to handle hold/resume actions.
    */
-  onHoldResume: () => void;
+  onHoldResume?: () => void;
 
   /**
    * Function to handle ending the task.
    */
-  onEnd: () => void;
+  onEnd?: () => void;
 
   /**
    * Function to handle wrapping up the task.
    */
-  onWrapUp: () => void;
+  onWrapUp?: () => void;
 
   /**
    * Logger instance for logging purposes.

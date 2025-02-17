@@ -21,7 +21,7 @@
   "dependencies": {
     "@webex/cc-store": "workspace:*",
     "mobx-react-lite": "^4.1.0",
-    "webex": "3.7.0-wxcc.12"
+    "webex": "3.7.0-wxcc.15"
   },
   "devDependencies": {
     "@babel/core": "7.25.2",

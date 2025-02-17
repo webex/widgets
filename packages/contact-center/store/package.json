@@ -17,12 +17,12 @@
     "build": "yarn run -T tsc",
     "build:src": "yarn run clean:dist && webpack",
     "build:watch": "webpack --watch",
-    "test:unit": "jest"
+    "test:unit": "jest --coverage"
   },
   "dependencies": {
     "mobx": "6.13.5",
     "typescript": "5.6.3",
-    "webex": "3.7.0-wxcc.12"
+    "webex": "3.7.0-wxcc.15"
   },
   "devDependencies": {
     "@babel/core": "7.25.2",

@@ -34,36 +34,6 @@ describe('StationLoginPresentational', () => {
     expect(heading).toHaveTextContent('StationLogin');
   });
 
-  it('calls setDeviceType and relogin on relogin', () => {
-    const setDeviceType = jest.fn();
-    const reloginMock = jest.fn();
-    const handleContinueMock = jest.fn();
-    const modalRef = React.createRef<HTMLDialogElement>();
-    const props = {
-      name: 'StationLogin',
-      login: jest.fn(),
-      logout: jest.fn(),
-      loginSuccess: undefined,
-      loginFailure: undefined,
-      logoutSuccess: undefined,
-      teams: ['team123'],
-      loginOptions: ['EXTENSION', 'AGENT_DN', 'BROWSER'],
-      setDeviceType,
-      setDialNumber: jest.fn(),
-      setTeam: jest.fn(),
-      isAgentLoggedIn: true,
-      deviceType: 'EXTENSION',
-      relogin: reloginMock,
-      handleContinue: handleContinueMock,
-      modalRef,
-      showMultipleLoginAlert: false,
-    };
-    render(<StationLoginPresentational {...props} />);
-
-    expect(setDeviceType).toHaveBeenCalledWith('EXTENSION');
-    expect(reloginMock).toHaveBeenCalled();
-  });
-
   it('calls handleContinue function and closes the dialog when Continue button is clicked', () => {
     const handleContinueMock = jest.fn();
     const modalRef = React.createRef<HTMLDialogElement>();

@@ -107,4 +107,33 @@ describe('CallControlPresentational', () => {
     const wrapupButton = screen.getByText('Wrap Up');
     expect(wrapupButton).not.toBeDisabled();
   });
+
+  it('sets the isHeld and isRecording state correctly based on store data', () => {
+    const mockTask = {
+      data: {
+        interaction: {
+          media: {
+            mediaResourceId1: {
+              isHold: true,
+            },
+          },
+          callProcessingDetails: {
+            isPaused: false,
+          },
+        },
+        mediaResourceId: 'mediaResourceId1',
+        agentId: 'agent1',
+        wrapupRequired: false,
+      },
+    };
+
+    const propsWithCurrentTask = {...defaultProps, currentTask: mockTask};
+    render(<CallControlPresentational {...propsWithCurrentTask} />);
+
+    const holdButton = screen.getByText('Resume');
+    expect(holdButton).not.toBeDisabled();
+
+    const pauseButton = screen.getByText('Pause Recording');
+    expect(pauseButton).not.toBeDisabled();
+  });
 });

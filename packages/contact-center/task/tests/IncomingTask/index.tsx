@@ -8,7 +8,7 @@ import '@testing-library/jest-dom';
 // Mock the store
 jest.mock('@webex/cc-store', () => ({
   cc: {},
-  selectedLoginOption: 'BROWSER',
+  deviceType: 'BROWSER',
 }));
 
 const onAcceptedCb = jest.fn();
@@ -35,7 +35,7 @@ describe('IncomingTask Component', () => {
     // Assert that the useIncomingTask hook is called with the correct arguments
     expect(useIncomingTaskSpy).toHaveBeenCalledWith({
       cc: store.cc,
-      selectedLoginOption: store.selectedLoginOption,
+      deviceType: store.deviceType,
       onAccepted: onAcceptedCb,
       onDeclined: onDeclinedCb,
     });
