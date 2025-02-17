@@ -1,4 +1,4 @@
-import {IStoreWrapper, IStore, InitParams, TASK_EVENTS, CC_EVENTS, IWrapupCode} from './store.types';
+import {IStoreWrapper, IStore, InitParams, TASK_EVENTS, CC_EVENTS, IWrapupCode, WithWebex} from './store.types';
 import {ITask} from '@webex/plugin-cc';
 import Store from './store';
 import {runInAction} from 'mobx';
@@ -118,12 +118,18 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.init(options, this.setupIncomingTaskHandler);
   }
 
+  registerCC = (webex?: WithWebex['webex']) => {
+    return this.store.registerCC(webex);
+  };
+
   handleTaskRemove = (taskId: string) => {
     // Remove the task from the taskList
     const taskToRemove = this.store.taskList.find((task) => task.data.interactionId === taskId);
     if (taskToRemove) {
       taskToRemove.off(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned(taskId));
-      taskToRemove.off(TASK_EVENTS.TASK_END, ({wrapupRequired}: {wrapupRequired: boolean}) => this.handleTaskEnd(taskToRemove, wrapupRequired));
+      taskToRemove.off(TASK_EVENTS.TASK_END, ({wrapupRequired}: {wrapupRequired: boolean}) =>
+        this.handleTaskEnd(taskToRemove, wrapupRequired)
+      );
       taskToRemove.off(TASK_EVENTS.TASK_REJECT, () => this.handleTaskRemove(taskId));
     }
     const updateTaskList = this.store.taskList.filter((task) => task.data.interactionId !== taskId);
@@ -199,7 +205,9 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   handleTaskHydrate = (task: ITask) => {
-    task.on(TASK_EVENTS.TASK_END, ({wrapupRequired}: {wrapupRequired: boolean}) => {this.handleTaskEnd(task, wrapupRequired);});
+    task.on(TASK_EVENTS.TASK_END, ({wrapupRequired}: {wrapupRequired: boolean}) => {
+      this.handleTaskEnd(task, wrapupRequired);
+    });
 
     // When we receive TASK_ASSIGNED the task was accepted by the agent and we need wrap up
     task.on(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned(task));
@@ -208,8 +216,11 @@ class StoreWrapper implements IStoreWrapper {
     // When we receive TASK_REJECT that means the task was not accepted by the agent and we wont need wrap up
     task.on(TASK_EVENTS.TASK_REJECT, () => this.handleTaskRemove(task.data.interactionId));
 
+    if (!this.store.taskList.some((t) => t.data.interactionId === task.data.interactionId)) {
+      this.setTaskList([...this.store.taskList, task]);
+    }
+
     this.setCurrentTask(task);
-    this.setTaskList([...this.store.taskList, task]);
 
     const {interaction, agentId} = task.data;
     const {state, isTerminated, participants} = interaction;

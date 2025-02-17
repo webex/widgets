@@ -46,6 +46,7 @@ interface IStore {
     showMultipleLoginAlert: boolean;
     currentTheme: string;
     init(params: InitParams,callback:any): Promise<void>;
+    registerCC(webex?: WithWebex['webex']): Promise<void>;  
 }
 
 

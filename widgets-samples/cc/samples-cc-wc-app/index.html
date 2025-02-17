@@ -23,50 +23,34 @@
           spellcheck="false"
           autocapitalize="off"
         />
+        <div id="widget-selection">
+          <label> <input type="checkbox" name="stationLogin" id="stationLoginCheckbox" /> Station Login </label>
+          <label> <input type="checkbox" name="userState" id="userStateCheckbox" /> User State </label>
+          <label> <input type="checkbox" name="incomingTask" id="incomingTaskCheckbox" /> Incoming Task </label>
+          <label> <input type="checkbox" name="taskList" id="taskListCheckbox" /> Task List </label>
+          <label> <input type="checkbox" name="callControl" id="callControlCheckbox" /> Call Control </label>
+        </div>
         <br />
-        <input
-          type='checkbox'
-          id='theme'
-          name='theme'
-        /> Dark Theme
+        <input type="checkbox" id="theme" name="theme" /> Dark Theme
         <br />
         <div class="warning-note" style="color: red; margin-bottom: 10px;">
-          <strong>Note:</strong> The "Enable Multi Login" option must be set before initializing the SDK. Changes
-          to this setting after SDK initialization will not take effect. Please ensure you configure this option
-          before clicking the "Init Widgets" button.
+          <strong>Note:</strong> The "Enable Multi Login" option must be set before initializing the SDK. Changes to
+          this setting after SDK initialization will not take effect. Please ensure you configure this option before
+          clicking the "Init Widgets" button.
         </div>
         <br />
         <input
-          type='checkbox'
-          id='multiLoginFlag'
-          name='multiLoginFlag'
+          type="checkbox"
+          id="multiLoginFlag"
+          name="multiLoginFlag"
           onchange="enableMultiLogin()"
           aria-label="Enable agent multi-login"
           role="checkbox"
-        /> Enable Multi Login
+        />
+        Enable Multi Login
         <br />
         <button onclick="initWidgets()" disabled>Init Widgets</button>
-        <div id="widgets-container">
-          <widget-cc-station-login class="disabled" id="cc-station-login"></widget-cc-station-login>
-        </div>
-        <div id="widget-selection" class="disabled">
-          <label>
-            <input type="checkbox" name="stationLogin" id="stationLoginCheckbox" /> Station Login
-          </label>
-          <label>
-            <input type="checkbox" name="userState" id="userStateCheckbox" /> User State
-          </label>
-          <label>
-            <input type="checkbox" name="incomingTask" id="incomingTaskCheckbox" /> Incoming Task
-          </label>
-          <label>
-            <input type="checkbox" name="taskList" id="taskListCheckbox" /> Task List
-          </label>
-          <label>
-            <input type="checkbox" name="callControl" id="callControlCheckbox" /> Call Control
-          </label>
-          <button onclick="submitWidgets()">Submit</button>
-        </div>
+        <div id="widgets-container"></div>
       </mdc-iconprovider>
     </mdc-themeprovider>
     <script src="dist/bundle.js"></script>
