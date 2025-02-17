@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.18](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.17...v1.28.0-ccwidgets.18) (2025-02-17)
+
+
+### Bug Fixes
+
+* **store:** direct-all-events-through-store ([#369](https://github.com/webex/widgets/issues/369)) ([8bbcae1](https://github.com/webex/widgets/commit/8bbcae1c5ba6fda8aea9d81aa0064e77d7e63ca3))
+
 # [1.28.0-ccwidgets.17](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.16...v1.28.0-ccwidgets.17) (2025-02-13)
 
 
