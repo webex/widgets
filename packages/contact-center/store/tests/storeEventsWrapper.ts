@@ -626,7 +626,7 @@ describe('storeEventsWrapper', () => {
       const rejectCallback = taskRejectCall[1];
       
       // Simulate rejection event with a specified reason
-      rejectCallback({ reason: 'Task Rejected Reason' });
+      rejectCallback('Task Rejected Reason');
       
       expect(storeWrapper.onTaskRejected).toHaveBeenCalledWith('Task Rejected Reason');
       expect(removeSpy).toHaveBeenCalledWith('rejectTest');

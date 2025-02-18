@@ -131,15 +131,15 @@ function onTaskDeclined() {
 }
 
 function onHoldResume() {
-    console.log('onHoldResume invoked');
+  console.log('onHoldResume invoked');
 }
-  
+
 function onEnd() {
-    console.log('onEnd invoked');
+  console.log('onEnd invoked');
 }
-  
+
 function onWrapup() {
-    console.log('onWrapUp invoked');
+  console.log('onWrapUp invoked');
 }
 
 // Helper to change the agent state, using "Available" as is or "Meeting" for lookup if not.
