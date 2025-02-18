@@ -46,6 +46,8 @@ interface IStore {
     showMultipleLoginAlert: boolean;
     currentTheme: string;
     customStatus: 'RONA' | 'WRAPUP' | 'ENGAGED' | '';
+    agentName: string;
+    dialNumber: string;
     init(params: InitParams,callback:any): Promise<void>;
     registerCC(webex?: WithWebex['webex']): Promise<void>;  
 }
@@ -65,6 +67,7 @@ interface IStoreWrapper extends IStore{
     setIsAgentLoggedIn(value: boolean): void;
     setWrapupCodes(wrapupCodes: IWrapupCode[]): void;
     setCustomStatus(status: 'RONA' | 'WRAPUP' | 'ENGAGED' | ''): void;
+    setDialNumber(number: string): void;
 }
 
 interface IWrapupCode {

@@ -18,6 +18,7 @@ function App() {
   const themeCheckboxRef = useRef(null);
   const [currentTheme, setCurrentTheme] = useState(store.currentTheme);
   const [isMultiLoginEnabled, setIsMultiLoginEnabled] = useState(false);
+  const [isStationLoginReadOnly, setIsStationLoginReadOnly] = useState(false);
 
   const webexConfig = {
     fedramp: false,
@@ -173,7 +174,20 @@ function App() {
       </button>
       {isSdkReady && (
         <>
-          {selectedWidgets.stationLogin && <StationLogin onLogin={onLogin} onLogout={onLogout} />}
+          {selectedWidgets.stationLogin && (
+            <>
+              <br/><br/>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={isStationLoginReadOnly}
+                  onChange={(e) => setIsStationLoginReadOnly(e.target.checked)}
+                />
+                Read Only - Station Login
+              </label>
+              <StationLogin onLogin={onLogin} onLogout={onLogout} isReadOnly={isStationLoginReadOnly} />
+            </>
+          )}
           {store.isAgentLoggedIn && (
             <>
               {selectedWidgets.userState && <UserState />}

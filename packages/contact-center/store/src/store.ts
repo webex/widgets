@@ -28,12 +28,14 @@ class Store implements IStore {
   currentTask: ITask = null;
   isAgentLoggedIn = false;
   deviceType: string = '';
+  dialNumber: string = '';
   customStatus: 'RONA' | 'WRAPUP' | 'ENGAGED' | '' = '';  
   taskList: ITask[] = [];
   wrapupRequired: boolean = false;
   currentState: string = '';
   lastStateChangeTimestamp: Date = new Date();
   showMultipleLoginAlert: boolean = false;
+  agentName: string = '';
 
   constructor() {
     makeAutoObservable(this, {
@@ -78,6 +80,7 @@ class Store implements IStore {
         this.deviceType = response.deviceType;
         this.currentState = response.lastStateAuxCodeId;
         this.lastStateChangeTimestamp = response.lastStateChangeTimestamp;
+        this.agentName = response.agentName;
       })
       .catch((error) => {
         this.logger.error(`Error registering contact center: ${error}`, {

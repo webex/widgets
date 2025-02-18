@@ -74,6 +74,14 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.currentTheme;
   }
 
+  get agentName() {
+    return this.store.agentName;
+  }
+
+  get dialNumber() {
+    return this.store.dialNumber;
+  }
+
   setCurrentTheme = (theme: string): void => {
     this.store.currentTheme = theme;
   };
@@ -100,6 +108,10 @@ class StoreWrapper implements IStoreWrapper {
 
   setCustomStatus(status: 'RONA' | 'WRAPUP' | 'ENGAGED' | ''): void {
     this.store.customStatus = status;
+  }
+
+  setDialNumber = (number: string): void => {
+    this.store.dialNumber = number;
   }
 
   setWrapupRequired = (value: boolean): void => {
