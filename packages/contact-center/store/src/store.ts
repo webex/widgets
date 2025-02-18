@@ -10,6 +10,7 @@ import {
   IStore,
   ILogger,
   IWrapupCode,
+  TASK_EVENTS,
 } from './store.types';
 import {ITask} from '@webex/plugin-cc';
 
@@ -45,46 +46,6 @@ class Store implements IStore {
     });
   }
 
-  setWrapupRequired(value: boolean): void {
-    this.wrapupRequired = value;
-  }
-
-  setCurrentTask(task: ITask): void {
-    this.currentTask = task;
-  }
-
-  setCustomStatus(status: 'RONA' | 'WRAPUP' | 'ENGAGED' | ''): void {
-    this.customStatus = status;
-  }
-  
-  setIncomingTask(task: ITask): void {
-    this.incomingTask = task;
-  }
-
-  setTaskList(taskList: ITask[]): void {
-    this.taskList = taskList;
-  }
-
-  setDeviceType(option: string): void {
-    this.deviceType = option;
-  }
-
-  setCurrentState(state: string): void {
-    this.currentState = state;
-  }
-
-  setLastStateChangeTimestamp(timestamp: Date): void {
-    this.lastStateChangeTimestamp = timestamp;
-  }
-
-  setShowMultipleLoginAlert(value: boolean): void {
-    this.showMultipleLoginAlert = value;
-  }
-
-  setIsAgentLoggedIn(value: boolean): void {
-    this.isAgentLoggedIn = value;
-  }
-
   public static getInstance(): Store {
     if (!Store.instance) {
       console.log('Creating new store instance');
@@ -94,13 +55,16 @@ class Store implements IStore {
     console.log('Returning store instance');
     return Store.instance;
   }
+  
+  registerCC(webex?: WithWebex['webex']): Promise<void> {
+    if (webex) {
+      this.cc = webex.cc;
+    }
 
-  setCurrentTheme(theme: string): void {
-    this.currentTheme = theme;
-  }
+    if (typeof webex === 'undefined' && typeof this.cc === 'undefined') {
+      throw new Error('Webex SDK not initialized');
+    }
 
-  registerCC(webex: WithWebex['webex']): Promise<void> {
-    this.cc = webex.cc;
     this.logger = this.cc.LoggerProxy;
     return this.cc
       .register()
@@ -124,10 +88,11 @@ class Store implements IStore {
       });
   }
 
-  init(options: InitParams): Promise<void> {
+  init(options: InitParams, setupEventListeners): Promise<void> {
     if ('webex' in options) {
       // If devs decide to go with webex, they will have to listen to the ready event before calling init
       // This has to be documented
+      setupEventListeners(options.webex.cc);
       return this.registerCC(options.webex);
     }
     return new Promise((resolve, reject) => {
@@ -143,6 +108,7 @@ class Store implements IStore {
       });
 
       webex.once('ready', () => {
+        setupEventListeners(webex.cc);
         clearTimeout(timer);
         this.registerCC(webex)
           .then(() => {

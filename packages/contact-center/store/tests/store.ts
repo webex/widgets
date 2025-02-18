@@ -110,13 +110,35 @@ describe('Store', () => {
   });
 
   describe('init', () => {
-    it('should call registerCC if webex is in options', async () => {
+    it('should call eventListenerCallback ', async () => {
+      const eventListenerCallback = jest.fn();
       const initParams = {webex: mockWebex};
+<<<<<<< HEAD
       jest.spyOn(storeInstance, 'registerCC').mockResolvedValue();
       Webex.init.mockClear();
 
       await storeInstance.init(initParams);
 
+=======
+
+      jest.spyOn(storeInstance, 'registerCC').mockResolvedValue();
+      Webex.init.mockClear();
+
+      await storeInstance.init(initParams, eventListenerCallback);
+
+      expect(eventListenerCallback).toHaveBeenCalled();
+      expect(storeInstance.registerCC).toHaveBeenCalledWith(mockWebex);
+      expect(Webex.init).not.toHaveBeenCalled();
+    });
+
+    it('should call registerCC if webex is in options', async () => {
+      const initParams = {webex: mockWebex};
+      jest.spyOn(storeInstance, 'registerCC').mockResolvedValue();
+      Webex.init.mockClear();
+
+      await storeInstance.init(initParams, jest.fn());
+
+>>>>>>> upstream/ccwidgets
       expect(storeInstance.registerCC).toHaveBeenCalledWith(mockWebex);
       expect(Webex.init).not.toHaveBeenCalled();
     });
@@ -128,7 +150,11 @@ describe('Store', () => {
       };
       jest.spyOn(storeInstance, 'registerCC').mockResolvedValue();
 
+<<<<<<< HEAD
       await storeInstance.init(initParams);
+=======
+      await storeInstance.init(initParams, jest.fn());
+>>>>>>> upstream/ccwidgets
 
       expect(Webex.init).toHaveBeenCalledWith({
         config: initParams.webexConfig,
@@ -145,7 +171,11 @@ describe('Store', () => {
 
       jest.spyOn(storeInstance, 'registerCC').mockRejectedValue(new Error('registerCC failed'));
 
+<<<<<<< HEAD
       await expect(storeInstance.init(initParams)).rejects.toThrow('registerCC failed');
+=======
+      await expect(storeInstance.init(initParams, jest.fn())).rejects.toThrow('registerCC failed');
+>>>>>>> upstream/ccwidgets
     });
 
     it('should reject the promise if Webex SDK fails to initialize', async () => {

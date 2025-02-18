@@ -1,4 +1,5 @@
 # [1.28.0-ccconnectors.7](https://github.com/webex/widgets/compare/v1.28.0-ccconnectors.6...v1.28.0-ccconnectors.7) (2025-02-14)
+# [1.28.0-ccwidgets.18](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.17...v1.28.0-ccwidgets.18) (2025-02-17)
 
 
 ### Bug Fixes
@@ -26,6 +27,9 @@
 
 * **cc-components:** replace momentum-ui with momentum-design lib ([#378](https://github.com/webex/widgets/issues/378)) ([b98d76c](https://github.com/webex/widgets/commit/b98d76c5eca903cd21482a4c52e24bbff4dfe0e2))
 * **tooling:** webpack-prod-build-for-npm ([#383](https://github.com/webex/widgets/issues/383)) ([648b6b3](https://github.com/webex/widgets/commit/648b6b305033734250f987f6906f8907aa13d5f3))
+* **store:** direct-all-events-through-store ([#369](https://github.com/webex/widgets/issues/369)) ([8bbcae1](https://github.com/webex/widgets/commit/8bbcae1c5ba6fda8aea9d81aa0064e77d7e63ca3))
+
+# [1.28.0-ccwidgets.17](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.16...v1.28.0-ccwidgets.17) (2025-02-13)
 
 
 ### Features
@@ -33,6 +37,8 @@
 * **cc-user-state:** retain agent state timer on relogin or multiLogin ([#371](https://github.com/webex/widgets/issues/371)) ([9dba8db](https://github.com/webex/widgets/commit/9dba8db0eb3d685349b4ebdb8150981373681cbe))
 
 # [1.28.0-ccconnectors.3](https://github.com/webex/widgets/compare/v1.28.0-ccconnectors.2...v1.28.0-ccconnectors.3) (2025-02-07)
+* **cc-widgets:** Agent Multi-Login configurable, login button toggle ([#385](https://github.com/webex/widgets/issues/385)) ([9d04209](https://github.com/webex/widgets/commit/9d0420992e50762259eb4c618e33b110333f2e5d))
+
 # [1.28.0-ccwidgets.16](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.15...v1.28.0-ccwidgets.16) (2025-02-10)
 
 

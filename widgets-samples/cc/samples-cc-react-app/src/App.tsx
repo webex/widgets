@@ -17,12 +17,15 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const themeCheckboxRef = useRef(null);
   const [currentTheme, setCurrentTheme] = useState(store.currentTheme);
-  const [showWidgets, setShowWidgets] = useState(false);
+  const [isMultiLoginEnabled, setIsMultiLoginEnabled] = useState(false);
 
   const webexConfig = {
     fedramp: false,
     logger: {
       level: 'log',
+    },
+    cc: {
+      allowMultiLogin: isMultiLoginEnabled,
     },
   };
 
@@ -64,14 +67,18 @@ function App() {
     console.log('onWrapup invoked', params);
   };
 
+  const enableDisableMultiLogin = () => {
+    if (isMultiLoginEnabled) {
+      setIsMultiLoginEnabled(false);
+    } else {
+      setIsMultiLoginEnabled(true);
+    }
+  };
+
   const handleCheckboxChange = (e) => {
     const {name, checked} = e.target;
     setSelectedWidgets((prev) => ({...prev, [name]: checked}));
   };
-
-  const onStateChange = (state) => {
-    console.log('onStateChange invoked', state);
-  }
 
   return (
     <>
@@ -83,6 +90,55 @@ function App() {
         onChange={(e) => setAccessToken(e.target.value)}
       />
       <br />
+      <>
+        <div>
+          <label>
+            <input
+              type="checkbox"
+              name="stationLogin"
+              checked={selectedWidgets.stationLogin}
+              onChange={handleCheckboxChange}
+            />
+            Station Login
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              name="userState"
+              checked={selectedWidgets.userState}
+              onChange={handleCheckboxChange}
+            />
+            User State
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              name="incomingTask"
+              checked={selectedWidgets.incomingTask}
+              onChange={handleCheckboxChange}
+            />
+            Incoming Task
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              name="taskList"
+              checked={selectedWidgets.taskList}
+              onChange={handleCheckboxChange}
+            />
+            Task List
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              name="callControl"
+              checked={selectedWidgets.callControl}
+              onChange={handleCheckboxChange}
+            />
+            Call Control
+          </label>
+        </div>
+      </>
       <input
         type="checkbox"
         id="theme"
@@ -94,6 +150,16 @@ function App() {
         }}
       />{' '}
       Dark Theme
+      <br />
+      <div className="warning-note" style={{color: 'red', marginBottom: '10px'}}>
+        <strong>Note:</strong> The "Enable Multi Login" option must be set before initializing the SDK. Changes to
+        this setting after SDK initialization will not take effect. Please ensure you configure this option before
+        clicking the "Init Widgets" button.
+      </div>
+      <label>
+        <input type="checkbox" id="multiLoginFlag" name="multiLoginFlag" onChange={enableDisableMultiLogin} />{' '}
+        Enable Multi Login
+      </label>
       <br />
       <button
         disabled={accessToken.trim() === ''}
@@ -107,74 +173,16 @@ function App() {
       </button>
       {isSdkReady && (
         <>
-          <div>
-            <label>
-              <input
-                type="checkbox"
-                name="stationLogin"
-                checked={selectedWidgets.stationLogin}
-                onChange={handleCheckboxChange}
-              />
-              Station Login
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                name="userState"
-                checked={selectedWidgets.userState}
-                onChange={handleCheckboxChange}
-              />
-              User State
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                name="incomingTask"
-                checked={selectedWidgets.incomingTask}
-                onChange={handleCheckboxChange}
-              />
-              Incoming Task
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                name="taskList"
-                checked={selectedWidgets.taskList}
-                onChange={handleCheckboxChange}
-              />
-              Task List
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                name="callControl"
-                checked={selectedWidgets.callControl}
-                onChange={handleCheckboxChange}
-              />
-              Call Control
-            </label>
-          </div>
-          <button
-            onClick={() => {
-              setShowWidgets(true);
-            }}
-          >
-            Submit
-          </button>
-        </>
-      )}
-      {showWidgets && (
-        <>
           {selectedWidgets.stationLogin && <StationLogin onLogin={onLogin} onLogout={onLogout} />}
           {store.isAgentLoggedIn && (
             <>
-              {selectedWidgets.userState && <UserState onStateChange={onStateChange} />}
+              {selectedWidgets.userState && <UserState />}
               {selectedWidgets.incomingTask && <IncomingTask onAccepted={onAccepted} onDeclined={onDeclined} />}
               {selectedWidgets.taskList && (
                 <TaskList onTaskAccepted={onTaskAccepted} onTaskDeclined={onTaskDeclined} />
               )}
               {selectedWidgets.callControl && (
-                <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapUp={onWrapup} />
+                <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapup={onWrapup} />
               )}
             </>
           )}
