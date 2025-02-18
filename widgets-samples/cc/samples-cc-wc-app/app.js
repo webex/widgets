@@ -146,11 +146,7 @@ function onWrapup() {
 function changeAgentState(newState) {
   const chosenState = newState === 'Available' ? 'Available' : 'Idle';
   const lookupCodeName = newState === 'Available' ? 'Available' : 'Meeting';
-  const idleCode =
-    store.idleCodes &&
-    store.idleCodes.find(function(code) {
-      return code.name === lookupCodeName;
-    });
+  const idleCode = store.idleCodes?.find((code) => code.name === lookupCodeName);
   if (!idleCode) {
     console.error('No idle code found for selected state:', newState);
     return;
