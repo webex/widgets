@@ -1,4 +1,4 @@
-import React, {useState, useRef} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import {StationLogin, UserState, IncomingTask, TaskList, CallControl, store} from '@webex/cc-widgets';
 import {ThemeProvider, IconProvider} from '@momentum-design/components/dist/react';
 
@@ -16,6 +16,9 @@ function App() {
   const themeCheckboxRef = useRef(null);
   const [currentTheme, setCurrentTheme] = useState(store.currentTheme);
   const [isMultiLoginEnabled, setIsMultiLoginEnabled] = useState(false);
+  const [showRejectedPopup, setShowRejectedPopup] = useState(false);
+  const [rejectedReason, setRejectedReason] = useState('');
+  const [selectedState, setSelectedState] = useState('');
 
   const webexConfig = {
     fedramp: false,
@@ -77,6 +80,54 @@ function App() {
     const {name, checked} = e.target;
     setSelectedWidgets((prev) => ({...prev, [name]: checked}));
   };
+
+  const changeAgentState = (newState: string) => {
+    // If the selected state is "Available", we pass it as is; otherwise, we consider it "Idle".
+    const chosenState = newState === 'Available' ? 'Available' : 'Idle';
+    // In the idle codes, we need to search for the 'Idle' state with code name 'Meeting'.
+    const lookupCodeName = newState === 'Available' ? 'Available' : 'Meeting';
+    
+    const idleCode = store.idleCodes?.find((code: any) => code.name === lookupCodeName);
+    if (!idleCode) {
+      console.error('No idle code found for selected state:', newState);
+      return;
+    }
+    const agentId = store.agentId || '';
+    store.cc
+      .setAgentState({
+        state: chosenState,
+        auxCodeId: idleCode.id,
+        agentId,
+        lastStateChangeReason: newState,
+      })
+      .then((response) => {
+        store.setCurrentState(response.data.auxCodeId);
+        store.setLastStateChangeTimestamp(new Date(response.data.lastStateChangeTimestamp));
+        console.log('Agent state updated to', chosenState);
+      })
+      .catch((error) => {
+        console.error('Error updating agent state:', error);
+      });
+  };
+
+  const handlePopoverSubmit = () => {
+    if (selectedState) {
+      changeAgentState(selectedState);
+    }
+    setShowRejectedPopup(false);
+    setSelectedState('');
+  };
+
+  useEffect(() => {
+    store.onTaskRejected = (reason: string) => {
+      setRejectedReason(reason);
+      setShowRejectedPopup(true);
+    };
+
+    return () => {
+      store.onTaskRejected = undefined;
+    };
+  }, []);
 
   return (
     <div className="mds-typography">
@@ -189,9 +240,34 @@ function App() {
                 </>
               )}
             </>
+          )}  
+
+        {showRejectedPopup && (
+            <div
+              style={{
+                position: 'fixed',
+                top: '20%',
+                left: '50%',
+                transform: 'translate(-50%, 0)',
+                backgroundColor: 'white',
+                padding: '20px',
+                border: '1px solid #ccc',
+                zIndex: 1000,
+              }}
+            >
+              <h2>Task Rejected</h2>
+              <p>Reason: {rejectedReason}</p>
+              <select value={selectedState} onChange={(e) => setSelectedState(e.target.value)}>
+                <option value="">Select a state</option>
+                <option value="Available">Available</option>
+                <option value="Busy">Busy</option>
+                <option value="On Break">On Break</option>
+              </select>
+              <button onClick={handlePopoverSubmit}>Submit</button>
+            </div>
           )}
-        </IconProvider>
-      </ThemeProvider>
+
+      </IconProvider></ThemeProvider>
     </div>
   );
 }

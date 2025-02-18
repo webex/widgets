@@ -52,6 +52,7 @@ interface IStore {
 
 interface IStoreWrapper extends IStore{
     store: IStore;
+    onTaskRejected?: (reason: string) => void;
     setCurrentTask(task: any): void;
     setWrapupRequired(value: boolean): void;
     setTaskList(taskList: ITask[]): void;

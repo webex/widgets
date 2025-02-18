@@ -608,5 +608,28 @@ describe('storeEventsWrapper', () => {
       expect(storeWrapper['cc'].off).toHaveBeenCalledWith(CC_EVENTS.AGENT_STATE_CHANGE, expect.any(Function));
       expect(storeWrapper['cc'].off).toHaveBeenCalledWith(CC_EVENTS.AGENT_MULTI_LOGIN, expect.any(Function));
     });
+
+    it('should handle task rejection event and call onTaskRejected with the provided reason', () => {
+      const rejectTask: ITask = {
+        data: { interactionId: 'rejectTest', interaction: { state: 'connected' } },
+        on: jest.fn(),
+        off: jest.fn(),
+      } as unknown as ITask;
+      
+      storeWrapper.onTaskRejected = jest.fn();
+      const removeSpy = jest.spyOn(storeWrapper, 'handleTaskRemove');
+      storeWrapper['store'].taskList = [];
+      
+      storeWrapper.handleIncomingTask(rejectTask);
+      const taskRejectCall = rejectTask.on.mock.calls.find(call => call[0] === TASK_EVENTS.TASK_REJECT);
+      expect(taskRejectCall).toBeDefined();
+      const rejectCallback = taskRejectCall[1];
+      
+      // Simulate rejection event with a specified reason
+      rejectCallback({ reason: 'Task Rejected Reason' });
+      
+      expect(storeWrapper.onTaskRejected).toHaveBeenCalledWith('Task Rejected Reason');
+      expect(removeSpy).toHaveBeenCalledWith('rejectTest');
+    });
   });
 });

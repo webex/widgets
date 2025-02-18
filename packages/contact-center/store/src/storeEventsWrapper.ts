@@ -5,6 +5,7 @@ import {runInAction} from 'mobx';
 
 class StoreWrapper implements IStoreWrapper {
   store: IStore;
+  onTaskRejected?: (reason: string) => void;
 
   constructor() {
     this.store = Store.getInstance();
@@ -183,7 +184,13 @@ class StoreWrapper implements IStoreWrapper {
 
     // When we receive TASK_REJECT sdk changes the agent status
     // When we receive TASK_REJECT that means the task was not accepted by the agent and we wont need wrap up
-    task.on(TASK_EVENTS.TASK_REJECT, () => this.handleTaskRemove(task.data.interactionId));
+    task.on(TASK_EVENTS.TASK_REJECT, (reason: string) => {
+      // Call the user defined callback first if available
+      if (this.onTaskRejected) {
+        this.onTaskRejected(reason || 'No reason provided');
+      }
+      this.handleTaskRemove(task.data.interactionId);
+    });
 
     this.setTaskList([...this.store.taskList, task]);
   };
@@ -214,7 +221,13 @@ class StoreWrapper implements IStoreWrapper {
 
     // When we receive TASK_REJECT sdk changes the agent status
     // When we receive TASK_REJECT that means the task was not accepted by the agent and we wont need wrap up
-    task.on(TASK_EVENTS.TASK_REJECT, () => this.handleTaskRemove(task.data.interactionId));
+    task.on(TASK_EVENTS.TASK_REJECT, (reason: string) => {
+      // Call the user defined callback first if available
+      if (this.onTaskRejected) {
+        this.onTaskRejected(reason || 'No reason provided');
+      }
+      this.handleTaskRemove(task.data.interactionId);
+    });
 
     if (!this.store.taskList.some((t) => t.data.interactionId === task.data.interactionId)) {
       this.setTaskList([...this.store.taskList, task]);

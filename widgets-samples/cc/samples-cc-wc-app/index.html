@@ -8,6 +8,16 @@
       .disabled {
         display: none;
       }
+      #task-rejected-popup {
+        position: fixed;
+        top: 20%;
+        left: 50%;
+        transform: translate(-50%, 0);
+        background: white;
+        padding: 20px;
+        border: 1px solid #ccc;
+        z-index: 1000;
+      }
     </style>
   </head>
   <body>
@@ -51,6 +61,7 @@
         <br />
         <button onclick="initWidgets()" disabled>Init Widgets</button>
         <div id="widgets-container"></div>
+        <div id="popup-container" style="display: none;"></div>
       </mdc-iconprovider>
     </mdc-themeprovider>
     <script src="dist/bundle.js"></script>
