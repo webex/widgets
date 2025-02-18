@@ -1,3 +1,10 @@
+# [1.28.0-ccconnectors.8](https://github.com/webex/widgets/compare/v1.28.0-ccconnectors.7...v1.28.0-ccconnectors.8) (2025-02-18)
+
+
+### Features
+
+* **station-login:** readonly mode with agent name ([#391](https://github.com/webex/widgets/issues/391)) ([91c95fb](https://github.com/webex/widgets/commit/91c95fb92b0d8e587608a7156fda353f2f29e0ee))
+
 # [1.28.0-ccconnectors.7](https://github.com/webex/widgets/compare/v1.28.0-ccconnectors.6...v1.28.0-ccconnectors.7) (2025-02-14)
 # [1.28.0-ccwidgets.18](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.17...v1.28.0-ccwidgets.18) (2025-02-17)
 
