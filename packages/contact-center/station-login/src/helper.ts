@@ -9,7 +9,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
   const logoutCb = props.onLogout;
   const logger = props.logger;
   const [isAgentLoggedIn, setIsAgentLoggedIn] = useState(props.isAgentLoggedIn);
-  const [dialNumber, setDialNumber] = useState('');
+  const [dialNumber, setDialNumber] = useState(props.dialNumber || '');
   const [deviceType, setDeviceType] = useState(props.deviceType || '');
   const [team, setTeam] = useState('');
   const [loginSuccess, setLoginSuccess] = useState<StationLoginSuccess>();
@@ -20,15 +20,11 @@ export const useStationLogin = (props: UseStationLoginProps) => {
     setIsAgentLoggedIn(props.isAgentLoggedIn);
   }, [props.isAgentLoggedIn]);
 
-  useEffect(() => {
-    setDeviceType(props.deviceType);
-  }, [props.deviceType]);
-
   const handleContinue = async () => {
     try {
       store.setShowMultipleLoginAlert(false);
-      const profile = await cc.register();
-      if (profile.isAgentLoggedIn) {
+      await store.registerCC();
+      if (store.isAgentLoggedIn) {
         logger.log(`Agent Relogin Success`, {
           module: 'widget-station-login#station-login/helper.ts',
           method: 'handleContinue',
@@ -53,6 +49,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
         setLoginSuccess(res);
         setIsAgentLoggedIn(true);
         store.setDeviceType(deviceType);
+        store.setDialNumber(dialNumber);
         store.setIsAgentLoggedIn(true);
         if (res.data.auxCodeId) {
           store.setCurrentState(res.data.auxCodeId);
@@ -94,10 +91,14 @@ export const useStationLogin = (props: UseStationLoginProps) => {
 
   function relogin() {
     store.setDeviceType(deviceType);
+    if (loginCb) {
+      loginCb();
+    }
   }
 
   return {
     name: 'StationLogin',
+    dialNumber,
     setDialNumber,
     setTeam,
     login,
@@ -108,5 +109,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
     logoutSuccess,
     isAgentLoggedIn,
     handleContinue,
+    deviceType,
+    setDeviceType
   };
 };

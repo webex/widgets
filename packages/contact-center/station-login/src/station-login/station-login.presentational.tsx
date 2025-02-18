@@ -143,7 +143,7 @@ const darkTheme = createTheme({
   },
 });
 
-const StationLoginPresentational: React.FunctionComponent<StationLoginPresentationalProps & { currentTheme: 'LIGHT' | 'DARK' }> = ({
+const StationLoginPresentational: React.FunctionComponent<StationLoginPresentationalProps & { currentTheme: 'LIGHT' | 'DARK'}> = ({
   name,
   teams,
   loginOptions,
@@ -158,6 +158,9 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
   showMultipleLoginAlert,
   handleContinue,
   currentTheme,
+  isReadOnly,
+  dialNumber,
+  agentName,
 }) => {
   const modalRef = useRef<HTMLDialogElement>(null);
   useEffect(() => {
@@ -225,78 +228,126 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
           </DialogActions>
         </Dialog>
         <Box sx={{ mt: 2 }}>
+          {isReadOnly && (
+            <>
+              <InputLabel className="read-only-label">Agent Name</InputLabel>
+              <Typography variant="body1" sx={{ mb: 2 }}>
+                {agentName}
+              </Typography>
+            </>
+          )}
+
+          {isReadOnly ? (
+          <>
+            <InputLabel className="read-only-label">Telephony Option</InputLabel>
+            <Typography variant="body1" sx={{ mb: 2 }}>
+            {getLoginOptionLabel(deviceType)}
+            </Typography>
+          </>
+          ) : (
           <FormControl fullWidth variant="standard" sx={{ mb: 2 }}>
-            <InputLabel>Agent Login</InputLabel>
+            <InputLabel>Telephony Option</InputLabel>
             <Select
-              name="LoginOption"
-              id="LoginOption"
-              value={deviceType || ''}
-              onChange={handleSelectLoginOption}
-              fullWidth
-              variant="standard"
-              label="Agent Login"
+            name="LoginOption"
+            id="LoginOption"
+            value={deviceType || ''}
+            onChange={handleSelectLoginOption}
+            fullWidth
+            variant="standard"
+            label="Agent Login"
             >
-              {loginOptions.map((option) => (
-                <MenuItem key={option} value={option}>
-                  {getLoginOptionLabel(option)}
-                </MenuItem>
-              ))}
+            {loginOptions.map((option) => (
+              <MenuItem key={option} value={option}>
+              {getLoginOptionLabel(option)}
+              </MenuItem>
+            ))}
             </Select>
           </FormControl>
-          {(deviceType && deviceType !== 'BROWSER') && (
-            <TextField
-              label="Extension/Dial Number"
-              onChange={handleDialNumberChange}
-              fullWidth
-              variant="standard"
-              sx={{ mb: 2 }}
-            />
           )}
-          <FormControl fullWidth variant="standard" sx={{ mb: 2 }}>
-            <InputLabel>Select Team</InputLabel>
-            <Select
+
+          {(deviceType && deviceType !== 'BROWSER') && (
+            isReadOnly ? (
+            <>
+                <InputLabel className="read-only-label">
+                  {deviceType === 'EXTENSION' ? 'Extension' : 'Dial Number'}
+                </InputLabel>
+              <Typography variant="body1" sx={{ mb: 2 }}>
+                {dialNumber}
+              </Typography>
+            </>
+            ) : (
+              <TextField
+                label={deviceType === 'EXTENSION' ? 'Extension' : 'Dial Number'}
+                onChange={handleDialNumberChange}
+                value={dialNumber}
+                fullWidth
+                variant="standard"
+                sx={{ mb: 2 }}
+              />
+            )
+          )}
+
+          {isReadOnly ? (
+            <>
+              <InputLabel className="read-only-label">Team</InputLabel>
+              <Typography variant="body1" sx={{ mb: 2 }}>
+              {teams[0]?.name || ''}
+              </Typography>
+            </>
+            ) : (
+            <FormControl fullWidth variant="standard" sx={{ mb: 2 }}>
+              <InputLabel>Team</InputLabel>
+              <Select
               id="teamsDropdown"
               value={teams[0]?.id || ''}
               onChange={(e: SelectChangeEvent<string>) => setTeam(e.target.value)}
               fullWidth
               variant="standard"
               label="Select Team"
-            >
+              >
               {teams.map((team) => (
                 <MenuItem key={team.id} value={team.id}>
-                  {team.name}
+                {team.name}
                 </MenuItem>
               ))}
-            </Select>
-          </FormControl>
-          <FormControlLabel
-            control={<Checkbox sx={{ color: '#227AA3', '&.Mui-checked': { color: '#227AA3' } }} />}
-            label="Remember my credentials"
-            sx={{ mt: 2 }}
-          />
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
-            {isAgentLoggedIn ? (
-              <Button
-                onClick={logout}
-                variant="text"
-                sx={{
-                  color: theme.palette.primary.main,
-                  '&:hover': {
-                    backgroundColor: `rgba(${theme.palette.primary.main === '#000000' ? '0, 0, 0' : '255, 255, 255'}, 0.1)`,
-                  },
-                }}
-              >
-                SIGN OUT
-              </Button>
-            ) : (
-              <Button
-                onClick={login}
-                variant="text"
-              >
-                SIGN IN
-              </Button>
-            )}
-          </Box>
+              </Select>
+            </FormControl>
+          )}
+          
+          {!isReadOnly && (
+            <>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    sx={{ color: '#227AA3', '&.Mui-checked': { color: '#227AA3' } }}
+                    disabled={isReadOnly}
+                  />
+                }
+                label="Remember my credentials"
+                sx={{ mt: 2 }}
+              />
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
+                {isAgentLoggedIn ? (
+                  <Button
+                    onClick={logout}
+                    variant="text"
+                    sx={{
+                      color: theme.palette.primary.main,
+                      '&:hover': {
+                        backgroundColor: `rgba(${theme.palette.primary.main === '#000000' ? '0, 0, 0' : '255, 255, 255'}, 0.1)`,
+                      },
+                    }}
+                  >
+                    SIGN OUT
+                  </Button>
+                ) : (
+                  <Button onClick={login} variant="text">
+                    SIGN IN
+                  </Button>
+                )}
+              </Box>
+            </>
+          )}
         </Box>
       </Box>
     </ThemeProvider>

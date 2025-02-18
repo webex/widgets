@@ -108,6 +108,20 @@ export interface IStationLoginProps {
    * The current theme of the widget
    */
   currentTheme: string;
+  /**
+   * Flag to indicate if the login form is read-only
+   */
+  isReadOnly: boolean;
+
+  /**
+   * The dial number entered by the agent
+   */
+  dialNumber: string;
+
+  /**
+   * The name of the agent
+   */
+  agentName: string;
 }
 
 export type StationLoginPresentationalProps = Pick<
@@ -128,13 +142,16 @@ export type StationLoginPresentationalProps = Pick<
   | 'handleContinue'
   | 'deviceType'
   | 'currentTheme'
+  | 'isReadOnly'
+  | 'dialNumber'
+  | 'agentName'
 > & {
   showMultipleLoginAlert: boolean;
 };
 
 export type UseStationLoginProps = Pick<
   IStationLoginProps,
-  'cc' | 'onLogin' | 'onLogout' | 'logger' | 'isAgentLoggedIn' | 'deviceType'
+  'cc' | 'onLogin' | 'onLogout' | 'logger' | 'isAgentLoggedIn' | 'deviceType' | 'dialNumber'
 >;
 
-export type StationLoginProps = Pick<IStationLoginProps, 'onLogin' | 'onLogout'>;
+export type StationLoginProps = Pick<IStationLoginProps, 'onLogin' | 'onLogout' | 'isReadOnly'>;
