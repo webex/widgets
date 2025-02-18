@@ -20,11 +20,7 @@ describe('IncomingTask Component', () => {
 
     // Mock the return value of the useIncomingTask hook
     useIncomingTaskSpy.mockReturnValue({
-      currentTask: null,
-      setCurrentTask: jest.fn(),
-      answered: false,
-      ended: false,
-      missed: false,
+      incomingTask: null,
       accept: jest.fn(),
       decline: jest.fn(),
       isBrowser: true,

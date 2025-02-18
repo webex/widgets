@@ -55,11 +55,6 @@ describe('Store', () => {
 
     expect(makeAutoObservable).toHaveBeenCalledWith(storeInstance, {
       cc: expect.any(Function),
-      currentState: expect.any(Object),
-      currentTask: expect.any(Object),
-      incomingTask: expect.any(Object),
-      taskList: expect.any(Object),
-      wrapupRequired: expect.any(Object),
     });
   });
 
