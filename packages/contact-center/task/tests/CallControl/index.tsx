@@ -21,6 +21,9 @@ jest.mock('@webex/cc-store', () => ({
     end: jest.fn(() => Promise.resolve()),
     wrapup: jest.fn(() => Promise.resolve()),
   },
+  TASK_EVENTS: {
+    TASK_MEDIA: 'task:media',
+  },
 }));
 const onHoldResumeCb = jest.fn();
 const onEndCb = jest.fn();
