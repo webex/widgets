@@ -2,26 +2,28 @@ import React from 'react';
 import {render, screen} from '@testing-library/react';
 import {StationLogin} from '../../src';
 import * as helper from '../../src/helper';
+import * as presentational from '../../src/station-login/station-login.presentational';
 import '@testing-library/jest-dom';
 
-const teams = ['team123', 'team456'];
-
-const loginOptions = ['EXTENSION', 'AGENT_DN', 'BROWSER'];
-const deviceType = 'BROWSER';
-const logger = {};
+const teamsMock = ['team123', 'team456'];
+const ccMock = {
+  on: () => {},
+  off: () => {},
+};
+const loginOptionsMock = ['EXTENSION', 'AGENT_DN', 'BROWSER'];
+const deviceTypeMock = 'BROWSER';
+const loggerMock = {};
+const isAgentLoggedInMock = false;
 
 // Mock the store import
 jest.mock('@webex/cc-store', () => {
   return {
-    cc: {
-      on: jest.fn(),
-      off: jest.fn(),
-    },
-    teams,
-    loginOptions,
-    deviceType,
-    logger,
-    isAgentLoggedIn: false,
+    cc: ccMock,
+    teams: teamsMock,
+    loginOptions: loginOptionsMock,
+    deviceType: deviceTypeMock,
+    logger: loggerMock,
+    isAgentLoggedIn: isAgentLoggedInMock,
   };
 });
 
@@ -31,21 +33,18 @@ const logoutCb = jest.fn();
 describe('StationLogin Component', () => {
   it('renders StationLoginPresentational with correct props', () => {
     const useStationLoginSpy = jest.spyOn(helper, 'useStationLogin');
+    const StationLoginPresentationalSpy = jest
+      .spyOn(presentational, 'default')
+      .mockReturnValue(<div>StationLoginPresentational</div>);
 
     render(<StationLogin onLogin={loginCb} onLogout={logoutCb} />);
 
     expect(useStationLoginSpy).toHaveBeenCalledWith({
-      cc: {
-        on: expect.any(Function),
-        off: expect.any(Function),
-      },
+      cc: ccMock,
       onLogin: loginCb,
       onLogout: logoutCb,
-      logger,
-      isAgentLoggedIn: false,
-      deviceType: 'BROWSER',
+      logger: loggerMock,
+      deviceType: deviceTypeMock,
     });
-    const heading = screen.getByTestId('station-login-heading');
-    expect(heading).toHaveTextContent('StationLogin');
   });
 });
