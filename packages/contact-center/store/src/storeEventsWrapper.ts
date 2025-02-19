@@ -189,7 +189,7 @@ class StoreWrapper implements IStoreWrapper {
     // When we receive TASK_REJECT sdk changes the agent status
     // When we receive TASK_REJECT that means the task was not accepted by the agent and we wont need wrap up
     task.on(TASK_EVENTS.TASK_REJECT, (reason: string) => 
-      this.handleTaskReject(task, reason)
+      this.handleTaskReject(task.data.interactionId, reason)
     );
 
     this.setTaskList([...this.store.taskList, task]);
@@ -222,7 +222,7 @@ class StoreWrapper implements IStoreWrapper {
     // When we receive TASK_REJECT sdk changes the agent status
     // When we receive TASK_REJECT that means the task was not accepted by the agent and we wont need wrap up
     task.on(TASK_EVENTS.TASK_REJECT, (reason: string) => 
-      this.handleTaskReject(task, reason)
+      this.handleTaskReject(task.data.interactionId, reason)
     );
 
     if (!this.store.taskList.some((t) => t.data.interactionId === task.data.interactionId)) {
@@ -244,11 +244,11 @@ class StoreWrapper implements IStoreWrapper {
     }
   };
 
-  handleTaskReject = (task: ITask, reason: string) => {
+  handleTaskReject = (taskId: string, reason: string) => {
     if (this.onTaskRejected) {
       this.onTaskRejected(reason || 'No reason provided');
     }
-    this.handleTaskRemove(task.data.interactionId);
+    this.handleTaskRemove(taskId);
   }
 
   setupIncomingTaskHandler = (ccSDK: any) => {

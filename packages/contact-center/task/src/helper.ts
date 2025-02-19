@@ -1,6 +1,6 @@
 import {useEffect, useCallback, useRef} from 'react';
 import {ITask} from '@webex/plugin-cc';
-import {store, TASK_EVENTS} from '@webex/cc-store';
+import store, {TASK_EVENTS} from '@webex/cc-store';
 import {useCallControlProps, UseTaskListProps, UseTaskProps} from './task.types';
 
 // Hook for managing the task list

@@ -83,8 +83,6 @@ function App() {
   };
 
   const changeAgentState = (newState: string) => {
-    // If the selected state is "Available", we pass it as is; otherwise, we consider it "Idle".
-    const chosenState = newState === 'Available' ? 'Available' : 'Idle';
     // In the idle codes, we need to search for the 'Idle' state with code name 'Meeting'.
     const lookupCodeName = newState === 'Available' ? 'Available' : 'Meeting';
     
@@ -96,7 +94,7 @@ function App() {
     const agentId = store.agentId || '';
     store.cc
       .setAgentState({
-        state: chosenState,
+        state: newState,
         auxCodeId: idleCode.id,
         agentId,
         lastStateChangeReason: newState,
@@ -104,7 +102,7 @@ function App() {
       .then((response) => {
         store.setCurrentState(response.data.auxCodeId);
         store.setLastStateChangeTimestamp(new Date(response.data.lastStateChangeTimestamp));
-        console.log('Agent state updated to', chosenState);
+        console.log('Agent state updated to', newState);
       })
       .catch((error) => {
         console.error('Error updating agent state:', error);
@@ -250,8 +248,7 @@ function App() {
               <select value={selectedState} onChange={(e) => setSelectedState(e.target.value)}>
                 <option value="">Select a state</option>
                 <option value="Available">Available</option>
-                <option value="Busy">Busy</option>
-                <option value="On Break">On Break</option>
+                <option value="Idle">Idle</option>
               </select>
               <button onClick={handlePopoverSubmit}>Submit</button>
             </div>

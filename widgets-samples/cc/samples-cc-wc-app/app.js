@@ -153,7 +153,6 @@ function onWrapup() {
 
 // Helper to change the agent state, using "Available" as is or "Meeting" for lookup if not.
 function changeAgentState(newState) {
-  const chosenState = newState === 'Available' ? 'Available' : 'Idle';
   const lookupCodeName = newState === 'Available' ? 'Available' : 'Meeting';
   const idleCode = store.idleCodes?.find((code) => code.name === lookupCodeName);
   if (!idleCode) {
@@ -163,7 +162,7 @@ function changeAgentState(newState) {
   const agentId = store.agentId || '';
   store.cc
     .setAgentState({
-      state: chosenState,
+      state: newState,
       auxCodeId: idleCode.id,
       agentId: agentId,
       lastStateChangeReason: newState,
@@ -171,7 +170,7 @@ function changeAgentState(newState) {
     .then(function(response) {
       store.setCurrentState(response.data.auxCodeId);
       store.setLastStateChangeTimestamp(new Date(response.data.lastStateChangeTimestamp));
-      console.log('Agent state updated to', chosenState);
+      console.log('Agent state updated to', newState);
     })
     .catch(function(error) {
       console.error('Error updating agent state:', error);
