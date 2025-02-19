@@ -2,7 +2,8 @@
 const accessTokenElem = document.getElementById('access_token_elem');
 const themeElem = document.getElementById('theme');
 const widgetsContainer = document.getElementById('widgets-container');
-
+const popupContainer = document.getElementById('popup-container');
+const taskRejectedSubmitButton = document.getElementById('task-rejected-submit-button');
 const ccStationLogin = document.createElement('widget-cc-station-login');
 const ccUserState = document.createElement('widget-cc-user-state');
 const ccIncomingTask = document.createElement('widget-cc-incoming-task');
@@ -18,7 +19,6 @@ const taskListCheckbox = document.getElementById('taskListCheckbox');
 const callControlCheckbox = document.getElementById('callControlCheckbox');
 
 let isMultiLoginEnabled = false;
-const popupContainer = document.getElementById('popup-container');
 
 themeElem.addEventListener('change', () => {
   store.setCurrentTheme(themeElem.checked ? 'DARK' : 'LIGHT');
@@ -31,6 +31,15 @@ themeElem.addEventListener('change', () => {
 store.onTaskRejected = function(reason) {
   showTaskRejectedPopup(reason);
 };
+
+// Attach submit button event listener once.
+taskRejectedSubmitButton.addEventListener('click', function() {
+  const selectedState = document.getElementById('state-select').value;
+  if (selectedState) {
+    changeAgentState(selectedState);
+  }
+  popupContainer.style.display = 'none';
+});
 
 if (!ccStationLogin && !ccUserState) {
   console.error('Failed to find the required elements');
@@ -171,27 +180,6 @@ function changeAgentState(newState) {
 
 // Helper to show the task rejected popup.
 function showTaskRejectedPopup(reason) {
-  popupContainer.innerHTML = `
-      <div id="task-rejected-popup">
-        <h2>Task Rejected</h2>
-        <p>Reason: ${reason || 'No reason provided'}</p>
-        <select id="state-select">
-          <option value="">Select a state</option>
-          <option value="Available">Available</option>
-          <option value="Busy">Busy</option>
-          <option value="On Break">On Break</option>
-        </select>
-        <button id="submit-button">Submit</button>
-      </div>
-    `;
+  document.getElementById('task-rejected-reason').textContent = "Reason: " + (reason || 'No reason provided');
   popupContainer.style.display = 'block';
-
-  document.getElementById('submit-button').addEventListener('click', function() {
-    var selectedState = document.getElementById('state-select').value;
-    if (selectedState) {
-      changeAgentState(selectedState);
-    }
-    popupContainer.style.display = 'none';
-    popupContainer.innerHTML = '';
-  });
 }

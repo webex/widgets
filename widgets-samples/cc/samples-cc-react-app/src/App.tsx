@@ -1,6 +1,7 @@
 import React, {useState, useRef, useEffect} from 'react';
 import {StationLogin, UserState, IncomingTask, TaskList, CallControl, store} from '@webex/cc-widgets';
 import {ThemeProvider, IconProvider} from '@momentum-design/components/dist/react';
+import './App.scss';
 
 function App() {
   const [isSdkReady, setIsSdkReady] = useState(false);
@@ -242,19 +243,8 @@ function App() {
             </>
           )}  
 
-        {showRejectedPopup && (
-            <div
-              style={{
-                position: 'fixed',
-                top: '20%',
-                left: '50%',
-                transform: 'translate(-50%, 0)',
-                backgroundColor: 'white',
-                padding: '20px',
-                border: '1px solid #ccc',
-                zIndex: 1000,
-              }}
-            >
+          {showRejectedPopup && (
+            <div className="task-rejected-popup">
               <h2>Task Rejected</h2>
               <p>Reason: {rejectedReason}</p>
               <select value={selectedState} onChange={(e) => setSelectedState(e.target.value)}>
