@@ -120,13 +120,13 @@ function App() {
   };
 
   useEffect(() => {
-    store.onTaskRejected = (reason: string) => {
+    store.setTaskRejected((reason: string) => {
       setRejectedReason(reason);
       setShowRejectedPopup(true);
-    };
+    });
 
     return () => {
-      store.onTaskRejected = undefined;
+      store.setTaskRejected(undefined);
     };
   }, []);
 

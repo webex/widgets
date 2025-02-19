@@ -115,6 +115,10 @@ class StoreWrapper implements IStoreWrapper {
     this.store.wrapupCodes = wrapupCodes;
   };
 
+  setTaskRejected = (callback: ((reason: string) => void) | undefined): void => {
+    this.onTaskRejected = callback;
+  };
+
   init(options: InitParams): Promise<void> {
     return this.store.init(options, this.setupIncomingTaskHandler);
   }

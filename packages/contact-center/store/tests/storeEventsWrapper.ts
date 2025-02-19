@@ -616,7 +616,8 @@ describe('storeEventsWrapper', () => {
         off: jest.fn(),
       } as unknown as ITask;
       
-      storeWrapper.onTaskRejected = jest.fn();
+      const onTaskRejectedMock = jest.fn();
+      storeWrapper.setTaskRejected(onTaskRejectedMock);
       const removeSpy = jest.spyOn(storeWrapper, 'handleTaskRemove');
       storeWrapper['store'].taskList = [];
       
@@ -626,9 +627,10 @@ describe('storeEventsWrapper', () => {
       const rejectCallback = taskRejectCall[1];
       
       // Simulate rejection event with a specified reason
-      rejectCallback('Task Rejected Reason');
+      const reason = 'Task Rejected Reason';
+      rejectCallback({ reason });
       
-      expect(storeWrapper.onTaskRejected).toHaveBeenCalledWith('Task Rejected Reason');
+      expect(onTaskRejectedMock).toHaveBeenCalledWith({ 'reason': reason });
       expect(removeSpy).toHaveBeenCalledWith('rejectTest');
     });
   });

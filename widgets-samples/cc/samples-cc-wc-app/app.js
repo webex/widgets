@@ -28,9 +28,9 @@ themeElem.addEventListener('change', () => {
   );
 });
 
-store.onTaskRejected = function(reason) {
+store.setTaskRejected(function(reason) {
   showTaskRejectedPopup(reason);
-};
+});
 
 // Attach submit button event listener once.
 taskRejectedSubmitButton.addEventListener('click', function() {
