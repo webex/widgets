@@ -124,10 +124,6 @@ describe('storeEventsWrapper', () => {
       expect(storeWrapper['store'].currentState).toBe('newState');
     });
 
-    // registerCC = (webex?: WithWebex['webex']) => {
-    //   return this.store.registerCC(webex);
-    // };
-
     it('should call registerCC', () => {
       const mockRegisterCC = jest.fn();
       storeWrapper['store'].registerCC = mockRegisterCC;
