@@ -15,6 +15,7 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
     elapsedTime,
     currentState,
     currentTheme,
+    customState
   } = props;
 
   return (
@@ -27,14 +28,20 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
           <div style={{display: 'flex', flexDirection: 'column', flexGrow: 1}} />
           <select
             id="idleCodes"
-            value={currentState}
+            value={customState?.developerName || currentState}
             className="select"
             onChange={(event) => {
-              const code = idleCodes?.filter((code) => code.id === event.target.value)[0];
-              setAgentStatus(code);
+              setAgentStatus(event.target.value);
             }}
             disabled={isSettingAgentStatus}
           >
+            {
+              customState && (
+                <option value={customState.developerName} hidden>
+                  {customState.name}
+                </option>
+              )
+            }
             {idleCodes
               ?.filter((code) => !code.isSystem)
               .map((code) => {

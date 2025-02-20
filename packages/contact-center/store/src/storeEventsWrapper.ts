@@ -1,4 +1,4 @@
-import {IStoreWrapper, IStore, InitParams, TASK_EVENTS, CC_EVENTS, IWrapupCode, WithWebex} from './store.types';
+import {IStoreWrapper, IStore, InitParams, TASK_EVENTS, CC_EVENTS, IWrapupCode, WithWebex, ICustomState, IdleCode} from './store.types';
 import {ITask} from '@webex/plugin-cc';
 import Store from './store';
 import {runInAction} from 'mobx';
@@ -24,7 +24,7 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.logger;
   }
   get idleCodes() {
-    return this.store.idleCodes;
+    return this.store.idleCodes.filter((code) => !code.isSystem);
   }
   get agentId() {
     return this.store.agentId;
@@ -70,6 +70,10 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.currentTheme;
   }
 
+  get customState() {
+    return this.store.customState;
+  }
+
   setCurrentTheme = (theme: string): void => {
     this.store.currentTheme = theme;
   };
@@ -112,6 +116,15 @@ class StoreWrapper implements IStoreWrapper {
 
   setWrapupCodes = (wrapupCodes: IWrapupCode[]): void => {
     this.store.wrapupCodes = wrapupCodes;
+  };
+
+  setState = (state: ICustomState | IdleCode): void => {
+    if ('id' in state) {
+      this.setCurrentState(state.id);
+      this.store.customState = null;
+    } else {
+      this.store.customState = state;
+    }
   };
 
   init(options: InitParams): Promise<void> {

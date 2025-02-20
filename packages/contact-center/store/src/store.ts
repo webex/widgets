@@ -10,7 +10,7 @@ import {
   IStore,
   ILogger,
   IWrapupCode,
-  TASK_EVENTS,
+  ICustomState,
 } from './store.types';
 import {ITask} from '@webex/plugin-cc';
 
@@ -31,6 +31,7 @@ class Store implements IStore {
   taskList: ITask[] = [];
   wrapupRequired: boolean = false;
   currentState: string = '';
+  customState: ICustomState = null;
   lastStateChangeTimestamp: Date = new Date();
   showMultipleLoginAlert: boolean = false;
 
