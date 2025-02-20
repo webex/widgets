@@ -13,7 +13,6 @@ const StationLoginComponent: React.FunctionComponent<StationLoginProps> = ({onLo
     onLogin,
     onLogout,
     logger,
-    isAgentLoggedIn,
     deviceType,
   });
 
@@ -22,8 +21,10 @@ const StationLoginComponent: React.FunctionComponent<StationLoginProps> = ({onLo
     teams,
     loginOptions,
     deviceType,
+    isAgentLoggedIn,
+    showMultipleLoginAlert,
   };
-  return <StationLoginPresentational {...props} showMultipleLoginAlert={showMultipleLoginAlert} />;
+  return <StationLoginPresentational {...props} />;
 };
 
 const StationLogin = observer(StationLoginComponent);

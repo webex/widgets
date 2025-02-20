@@ -2,6 +2,7 @@ import {act, waitFor} from '@testing-library/react';
 import {CC_EVENTS, TASK_EVENTS} from '../src/store.types';
 import storeWrapper from '../src/storeEventsWrapper';
 import {ITask} from '@webex/plugin-cc';
+import {register} from 'module';
 
 jest.mock('../src/store', () => ({
   getInstance: jest.fn().mockReturnValue({
@@ -36,6 +37,7 @@ jest.mock('../src/store', () => ({
     setWrapupRequired: jest.fn(),
     setCurrentTheme: jest.fn(),
     setIsAgentLoggedIn: jest.fn(),
+    registerCC: jest.fn(),
   }),
 }));
 
@@ -122,6 +124,21 @@ describe('storeEventsWrapper', () => {
       expect(storeWrapper['store'].currentState).toBe('newState');
     });
 
+    it('should call registerCC', () => {
+      const mockRegisterCC = jest.fn();
+      storeWrapper['store'].registerCC = mockRegisterCC;
+
+      storeWrapper.registerCC();
+      expect(mockRegisterCC).toHaveBeenCalled();
+
+      const mockLogger = {log: jest.fn(), warn: jest.fn(), error: jest.fn(), info: jest.fn(), trace: jest.fn()};
+      storeWrapper.registerCC({
+        cc: {},
+        logger: mockLogger,
+      });
+      expect(mockRegisterCC).toHaveBeenCalledWith({cc: {}, logger: mockLogger});
+    });
+
     it('should setLastStateChangeTimestamp', () => {
       expect(storeWrapper.setLastStateChangeTimestamp).toBeInstanceOf(Function);
 
@@ -156,7 +173,7 @@ describe('storeEventsWrapper', () => {
     });
 
     it('should setWrapupCodes', () => {
-      const mockCodes = [{code1: 'code1'}, {code2: 'code2'}];
+      const mockCodes = [{id: 'code1', name: 'code1'}];
       expect(storeWrapper.setWrapupCodes).toBeInstanceOf(Function);
 
       storeWrapper.setWrapupCodes(mockCodes);

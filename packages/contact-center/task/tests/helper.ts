@@ -123,8 +123,6 @@ describe('useIncomingTask Hook', () => {
       useIncomingTask({
         cc: ccMock,
         incomingTask: taskMock,
-        onAccepted: null,
-        onDeclined: null,
         deviceType: 'BROWSER',
         logger,
       })
@@ -147,8 +145,6 @@ describe('useIncomingTask Hook', () => {
       useIncomingTask({
         cc: ccMock,
         incomingTask: taskMock,
-        onAccepted: null,
-        onDeclined: null,
         deviceType: 'BROWSER',
         logger,
       })
@@ -352,10 +348,8 @@ describe('useTaskList Hook', () => {
     const {result} = renderHook(() =>
       useTaskList({
         cc: ccMock,
-        onTaskAccepted: null,
-        onTaskDeclined: null,
         logger,
-        deviceType: '',
+        deviceType: 'BROWSER',
         taskList: mockTaskList,
       })
     );
@@ -376,8 +370,6 @@ describe('useTaskList Hook', () => {
     const {result} = renderHook(() =>
       useTaskList({
         cc: ccMock,
-        onTaskAccepted: null,
-        onTaskDeclined: null,
         logger,
         deviceType: '',
         taskList: mockTaskList,
@@ -444,6 +436,7 @@ describe('useCallControl', () => {
 
     const {result} = renderHook(() =>
       useCallControl({
+        deviceType: 'BROWSER',
         currentTask: mockCurrentTask,
         logger: mockLogger,
       })
@@ -478,6 +471,7 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        deviceType: 'BROWSER',
       })
     );
 
@@ -497,6 +491,7 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        deviceType: 'BROWSER',
       })
     );
 
@@ -518,6 +513,7 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        deviceType: 'BROWSER',
       })
     );
 
@@ -538,6 +534,7 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        deviceType: 'BROWSER',
       })
     );
 
@@ -556,6 +553,7 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        deviceType: 'BROWSER',
       })
     );
 
@@ -576,6 +574,7 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        deviceType: 'BROWSER',
       })
     );
 
@@ -596,6 +595,7 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        deviceType: 'BROWSER',
       })
     );
 
@@ -617,11 +617,12 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        deviceType: 'BROWSER',
       })
     );
 
     await act(async () => {
-      await result.current.wrapupCall('Wrap reason', 123);
+      await result.current.wrapupCall('Wrap reason', '123');
     });
 
     expect(mockLogger.error).toHaveBeenCalledWith('Error wrapping up call: Error: Wrapup error', expect.any(Object));
@@ -635,6 +636,7 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        deviceType: 'BROWSER',
       })
     );
 
@@ -654,6 +656,7 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        deviceType: 'BROWSER',
       })
     );
 
@@ -672,6 +675,7 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        deviceType: 'BROWSER',
       })
     );
 
@@ -691,6 +695,7 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        deviceType: 'BROWSER',
       })
     );
 
@@ -719,6 +724,7 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        deviceType: 'BROWSER',
       })
     );
 
@@ -746,6 +752,7 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        deviceType: 'BROWSER',
       })
     );
 
@@ -774,6 +781,7 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        deviceType: 'BROWSER',
       })
     );
 
@@ -812,6 +820,7 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        deviceType: 'BROWSER',
       })
     );
     result.current.audioRef.current = null;
@@ -850,13 +859,14 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        deviceType: 'BROWSER',
       })
     );
     // Ensure no event handler is set
     expect(taskMock.on).not.toHaveBeenCalled();
   });
 
-  it('should test undefined audioRef.current branch', async () => {
+  it('should test undefined audioRef.current', async () => {
     // This test is to improve the coverage
     const {result} = renderHook(() =>
       useCallControl({
@@ -865,6 +875,7 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        deviceType: 'BROWSER',
       })
     );
 
@@ -880,5 +891,23 @@ describe('useCallControl', () => {
         taskAssignedCallback(mockTrack);
       }
     });
+  });
+
+  it('should not add media listeners if device type is not BROWSER', async () => {
+    const mockAudioElement = {current: {srcObject: null}};
+    jest.spyOn(React, 'useRef').mockReturnValue(mockAudioElement);
+
+    renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        deviceType: 'EXTENSION',
+      })
+    );
+    // Ensure no event handler is set
+    expect(taskMock.on).not.toHaveBeenCalled();
   });
 });

@@ -97,6 +97,7 @@ enum CC_EVENTS{
 
 export type {
     IContactCenter,
+    ITask,
     Profile,
     Team,
     AgentLogin,
@@ -106,7 +107,7 @@ export type {
     IStore,
     ILogger,
     IWrapupCode,
-    IStoreWrapper
+    IStoreWrapper,
 }
 
 export {

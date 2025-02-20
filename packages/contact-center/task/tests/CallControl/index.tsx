@@ -2,7 +2,6 @@ import React from 'react';
 import {render, screen} from '@testing-library/react';
 import * as helper from '../../src/helper';
 import {CallControl} from '../../src';
-import store from '@webex/cc-store';
 import '@testing-library/jest-dom';
 
 // Mock the store
@@ -30,17 +29,16 @@ describe('CallControl Component', () => {
   it('renders CallControlPresentational with correct props', () => {
     const useCallControlSpy = jest.spyOn(helper, 'useCallControl');
 
-    const mockCurentTask = store.currentTask;
-
     render(<CallControl onHoldResume={onHoldResumeCb} onEnd={onEndCb} onWrapUp={onWrapUpCb} />);
 
     // Assert that the useIncomingTask hook is called with the correct arguments
     expect(useCallControlSpy).toHaveBeenCalledWith({
-      currentTask: mockCurentTask,
+      currentTask: expect.any(Object),
       onHoldResume: onHoldResumeCb,
       onEnd: onEndCb,
       onWrapUp: onWrapUpCb,
       logger: {},
+      deviceType: 'BROWSER',
     });
   });
 });

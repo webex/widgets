@@ -8,17 +8,12 @@ export const useStationLogin = (props: UseStationLoginProps) => {
   const loginCb = props.onLogin;
   const logoutCb = props.onLogout;
   const logger = props.logger;
-  const [isAgentLoggedIn, setIsAgentLoggedIn] = useState(props.isAgentLoggedIn);
   const [dialNumber, setDialNumber] = useState('');
   const [deviceType, setDeviceType] = useState(props.deviceType || '');
   const [team, setTeam] = useState('');
   const [loginSuccess, setLoginSuccess] = useState<StationLoginSuccess>();
   const [loginFailure, setLoginFailure] = useState<Error>();
   const [logoutSuccess, setLogoutSuccess] = useState<StationLogoutSuccess>();
-
-  useEffect(() => {
-    setIsAgentLoggedIn(props.isAgentLoggedIn);
-  }, [props.isAgentLoggedIn]);
 
   const handleContinue = async () => {
     try {
@@ -47,7 +42,6 @@ export const useStationLogin = (props: UseStationLoginProps) => {
     cc.stationLogin({teamId: team, loginOption: deviceType, dialNumber: dialNumber})
       .then((res: StationLoginSuccess) => {
         setLoginSuccess(res);
-        setIsAgentLoggedIn(true);
         store.setDeviceType(deviceType);
         store.setIsAgentLoggedIn(true);
         if (res.data.auxCodeId) {
@@ -73,7 +67,6 @@ export const useStationLogin = (props: UseStationLoginProps) => {
     cc.stationLogout({logoutReason: 'User requested logout'})
       .then((res: StationLogoutSuccess) => {
         setLogoutSuccess(res);
-        setIsAgentLoggedIn(false);
         store.setIsAgentLoggedIn(false);
         store.setDeviceType('');
         if (logoutCb) {
@@ -106,7 +99,6 @@ export const useStationLogin = (props: UseStationLoginProps) => {
     loginSuccess,
     loginFailure,
     logoutSuccess,
-    isAgentLoggedIn,
     handleContinue,
   };
 };

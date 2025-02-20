@@ -40,7 +40,6 @@ const logger = {
   log: jest.fn(),
   error: jest.fn(),
 };
-const isAgentLoggedIn = false;
 
 describe('useStationLogin Hook', () => {
   afterEach(() => {
@@ -87,7 +86,6 @@ describe('useStationLogin Hook', () => {
         onLogin: loginCb,
         onLogout: logoutCb,
         logger,
-        isAgentLoggedIn,
         deviceType: 'BROWSER',
       })
     );
@@ -112,7 +110,6 @@ describe('useStationLogin Hook', () => {
 
       expect(result.current).toEqual({
         name: 'StationLogin',
-        isAgentLoggedIn: true,
         setDeviceType: expect.any(Function),
         setDialNumber: expect.any(Function),
         setTeam: expect.any(Function),
@@ -152,7 +149,6 @@ describe('useStationLogin Hook', () => {
         onLogin: loginCb,
         onLogout: logoutCb,
         logger,
-        isAgentLoggedIn,
         deviceType: '',
       })
     );
@@ -190,7 +186,6 @@ describe('useStationLogin Hook', () => {
         cc: ccMock,
         onLogout: logoutCb,
         logger,
-        isAgentLoggedIn,
         deviceType: 'EXTENSION',
       })
     );
@@ -222,7 +217,6 @@ describe('useStationLogin Hook', () => {
         onLogin: loginCb,
         onLogout: logoutCb,
         logger,
-        isAgentLoggedIn,
         deviceType: 'EXTENSION',
       })
     );
@@ -247,7 +241,6 @@ describe('useStationLogin Hook', () => {
 
       expect(result.current).toEqual({
         name: 'StationLogin',
-        isAgentLoggedIn: false,
         setDeviceType: expect.any(Function),
         setDialNumber: expect.any(Function),
         setTeam: expect.any(Function),
@@ -272,7 +265,6 @@ describe('useStationLogin Hook', () => {
         cc: ccMock,
         onLogout: logoutCb,
         logger,
-        isAgentLoggedIn,
         deviceType: 'EXTENSION',
       })
     );
@@ -297,7 +289,6 @@ describe('useStationLogin Hook', () => {
         onLogin: loginCb,
         onLogout: logoutCb,
         logger,
-        isAgentLoggedIn,
         deviceType: 'EXTENSION',
       })
     );
@@ -323,7 +314,6 @@ describe('useStationLogin Hook', () => {
 
       expect(result.current).toEqual({
         name: 'StationLogin',
-        isAgentLoggedIn: true,
         setDeviceType: expect.any(Function),
         setDialNumber: expect.any(Function),
         setTeam: expect.any(Function),
@@ -362,7 +352,6 @@ describe('useStationLogin Hook', () => {
         onLogin: loginCb,
         onLogout: logoutCb,
         logger,
-        isAgentLoggedIn,
         deviceType: 'BROWSER',
       })
     );
@@ -377,7 +366,6 @@ describe('useStationLogin Hook', () => {
 
       expect(result.current).toEqual({
         name: 'StationLogin',
-        isAgentLoggedIn: false,
         setDeviceType: expect.any(Function),
         setDialNumber: expect.any(Function),
         setTeam: expect.any(Function),
@@ -401,7 +389,6 @@ describe('useStationLogin Hook', () => {
         onLogin: loginCb,
         onLogout: logoutCb,
         logger,
-        isAgentLoggedIn,
         deviceType: 'EXTENSION',
       })
     );
@@ -426,7 +413,6 @@ describe('useStationLogin Hook', () => {
         cc: ccMock,
         onLogin: loginCb,
         logger,
-        isAgentLoggedIn,
         deviceType: 'EXTENSION',
       })
     );
@@ -449,7 +435,6 @@ describe('useStationLogin Hook', () => {
         onLogin: loginCb,
         onLogout: logoutCb,
         logger,
-        isAgentLoggedIn,
         deviceType: 'EXTENSION',
       })
     );
@@ -472,7 +457,6 @@ describe('useStationLogin Hook', () => {
         cc: ccMock,
         onLogout: logoutCb,
         logger,
-        isAgentLoggedIn,
         deviceType: 'EXTENSION',
       })
     );
@@ -498,7 +482,6 @@ describe('useStationLogin Hook', () => {
         onLogin: loginCb,
         onLogout: logoutCb,
         logger,
-        isAgentLoggedIn,
         deviceType: 'EXTENSION',
       })
     );
@@ -528,7 +511,6 @@ describe('useStationLogin Hook', () => {
         onLogin: loginCb,
         onLogout: logoutCb,
         logger,
-        isAgentLoggedIn,
         deviceType: 'EXTENSION',
       })
     );
@@ -559,7 +541,6 @@ describe('useStationLogin Hook', () => {
         onLogin: loginCb,
         onLogout: logoutCb,
         logger,
-        isAgentLoggedIn,
         deviceType: 'EXTENSION',
       })
     );

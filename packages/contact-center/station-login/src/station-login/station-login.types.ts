@@ -126,9 +126,6 @@ export type StationLoginPresentationalProps = Pick<
   showMultipleLoginAlert: boolean;
 };
 
-export type UseStationLoginProps = Pick<
-  IStationLoginProps,
-  'cc' | 'onLogin' | 'onLogout' | 'logger' | 'isAgentLoggedIn' | 'deviceType'
->;
+export type UseStationLoginProps = Pick<IStationLoginProps, 'cc' | 'onLogin' | 'onLogout' | 'logger' | 'deviceType'>;
 
 export type StationLoginProps = Pick<IStationLoginProps, 'onLogin' | 'onLogout'>;

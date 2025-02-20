@@ -94,8 +94,9 @@ export const useIncomingTask = (props: UseTaskProps) => {
 };
 
 export const useCallControl = (props: useCallControlProps) => {
-  const {currentTask, onHoldResume, onEnd, onWrapUp, logger} = props;
+  const {currentTask, onHoldResume, onEnd, onWrapUp, logger, deviceType} = props;
   const audioRef = useRef<HTMLAudioElement | null>(null); // Ref for the audio element
+  const isBrowser = deviceType === 'BROWSER';
 
   const logError = (message: string, method: string) => {
     logger.error(message, {
@@ -114,7 +115,7 @@ export const useCallControl = (props: useCallControlProps) => {
   );
 
   useEffect(() => {
-    if (!currentTask) return;
+    if (!currentTask || !isBrowser) return;
     // Call control only event for WebRTC calls
     currentTask.on(TASK_EVENTS.TASK_MEDIA, handleTaskMedia);
 
