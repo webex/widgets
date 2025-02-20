@@ -10,7 +10,6 @@ export const useUserState = ({idleCodes, agentId, cc, currentState, lastStateCha
   // Initialize the Web Worker using a Blob
   const workerScript = `
     let intervalId;
-
     const startTimer = (startTime) => {
       if (intervalId) clearInterval(intervalId);
       intervalId = setInterval(() => {
@@ -18,7 +17,6 @@ export const useUserState = ({idleCodes, agentId, cc, currentState, lastStateCha
         self.postMessage(elapsedTime);
       }, 1000);
     };
-
     self.onmessage = (event) => {
       if (event.data.type === 'start' || event.data.type === 'reset') {
         const startTime = event.data.startTime;
@@ -38,28 +36,13 @@ export const useUserState = ({idleCodes, agentId, cc, currentState, lastStateCha
   }, []);
 
   useEffect(() => {
-    if (workerRef.current) {
-      workerRef.current.terminate();
-      const blob = new Blob([workerScript], {type: 'application/javascript'});
-      const workerUrl = URL.createObjectURL(blob);
-      workerRef.current = new Worker(workerUrl);
-      workerRef.current.onmessage = (event) => {
-        setElapsedTime(event.data);
-      };
-      if (lastStateChangeTimestamp) {
-        const timeNow = new Date();
-        const elapsed = Math.floor(Math.abs(timeNow.getTime() - lastStateChangeTimestamp.getTime()) / 1000);
-        setElapsedTime(elapsed);
-        workerRef.current.postMessage({type: 'reset', startTime: lastStateChangeTimestamp.getTime()});
-      } else {
-        workerRef.current.postMessage({type: 'start', startTime: Date.now()});
-      }
+    if (workerRef.current && lastStateChangeTimestamp) {
+      const timeNow = new Date();
+      const elapsed = Math.floor(Math.abs(timeNow.getTime() - lastStateChangeTimestamp.getTime()) / 1000);
+      setElapsedTime(elapsed);
+      workerRef.current.postMessage({type: 'reset', startTime: lastStateChangeTimestamp.getTime()});
     }
-
-    return () => {
-      workerRef.current?.terminate();
-    };
-  }, [currentState]);
+  }, [lastStateChangeTimestamp]);
 
   const setAgentStatus = (selectedCode) => {
     const {auxCodeId, state} = {
