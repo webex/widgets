@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.19](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.18...v1.28.0-ccwidgets.19) (2025-02-20)
+
+
+### Bug Fixes
+
+* **store:** minor-fixes-after-storeEventsWrapper ([#390](https://github.com/webex/widgets/issues/390)) ([8738ab2](https://github.com/webex/widgets/commit/8738ab20921bd7f0b8c9cdc742deabadd791ab90))
+
 # [1.28.0-ccwidgets.18](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.17...v1.28.0-ccwidgets.18) (2025-02-17)
 
 
