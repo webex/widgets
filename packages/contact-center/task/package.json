@@ -1,7 +1,7 @@
 {
   "name": "@webex/cc-task",
   "description": "Webex Contact Center Widgets: Task",
-  "version": "1.28.0-ccwidgets.18",
+  "version": "1.28.0-ccwidgets.19",
   "main": "dist/index.js",
   "publishConfig": {
     "access": "public"
@@ -20,8 +20,7 @@
   },
   "dependencies": {
     "@webex/cc-store": "workspace:*",
-    "mobx-react-lite": "^4.1.0",
-    "webex": "3.7.0-wxcc.15"
+    "mobx-react-lite": "^4.1.0"
   },
   "devDependencies": {
     "@babel/core": "7.25.2",
@@ -58,5 +57,5 @@
       "^.+\\.(css|less|scss)$": "babel-jest"
     }
   },
-  "stableVersion": "1.28.0-ccwidgets.17"
+  "stableVersion": "1.28.0-ccwidgets.18"
 }

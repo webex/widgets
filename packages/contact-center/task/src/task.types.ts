@@ -1,5 +1,4 @@
-import {ITask, IContactCenter} from '@webex/plugin-cc';
-import {ILogger, WrapupCodes} from '@webex/cc-store';
+import {ILogger, ITask, IContactCenter, WrapupCodes} from '@webex/cc-store';
 
 /**
  * Interface representing the TaskProps of a user.
@@ -175,6 +174,11 @@ export interface ControlProps {
    * @param wrapupId - The ID associated with the wrap-up reason.
    */
   wrapupCall: (wrapupReason: string, wrapupId: string) => void;
+
+  /**
+   * Selected login option
+   */
+  deviceType: string;
 }
 
 export type CallControlProps = Pick<ControlProps, 'onHoldResume' | 'onEnd' | 'onWrapUp'>;
@@ -191,4 +195,7 @@ export type CallControlPresentationalProps = Pick<
   | 'wrapupCall'
 >;
 
-export type useCallControlProps = Pick<ControlProps, 'currentTask' | 'onHoldResume' | 'onEnd' | 'onWrapUp' | 'logger'>;
+export type useCallControlProps = Pick<
+  ControlProps,
+  'currentTask' | 'onHoldResume' | 'onEnd' | 'onWrapUp' | 'logger' | 'deviceType'
+>;

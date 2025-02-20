@@ -1,5 +1,14 @@
-import {IStoreWrapper, IStore, InitParams, TASK_EVENTS, CC_EVENTS, IWrapupCode, WithWebex} from './store.types';
-import {ITask} from '@webex/plugin-cc';
+import {
+  IStoreWrapper,
+  IStore,
+  InitParams,
+  TASK_EVENTS,
+  CC_EVENTS,
+  IWrapupCode,
+  WithWebex,
+  IContactCenter,
+  ITask,
+} from './store.types';
 import Store from './store';
 import {runInAction} from 'mobx';
 
@@ -251,7 +260,7 @@ class StoreWrapper implements IStoreWrapper {
     this.handleTaskRemove(taskId);
   }
 
-  setupIncomingTaskHandler = (ccSDK: any) => {
+  setupIncomingTaskHandler = (ccSDK: IContactCenter) => {
     ccSDK.on(TASK_EVENTS.TASK_INCOMING, this.handleIncomingTask);
 
     ccSDK.on(CC_EVENTS.AGENT_STATE_CHANGE, this.handleStateChange);
@@ -259,6 +268,7 @@ class StoreWrapper implements IStoreWrapper {
     ccSDK.on(TASK_EVENTS.TASK_HYDRATE, this.handleTaskHydrate);
 
     return () => {
+      // TODO: https://jira-eng-gpk2.cisco.com/jira/browse/SPARK-617635, remove event listeners after logout
       ccSDK.off(TASK_EVENTS.TASK_INCOMING, this.handleIncomingTask);
       ccSDK.off(CC_EVENTS.AGENT_STATE_CHANGE, this.handleStateChange);
       ccSDK.off(CC_EVENTS.AGENT_MULTI_LOGIN, this.handleMultiLoginCloseSession);
