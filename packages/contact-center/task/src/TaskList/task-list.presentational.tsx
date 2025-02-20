@@ -5,7 +5,7 @@ import CallIcon from '@mui/icons-material/Call';
 import CallEndIcon from '@mui/icons-material/CallEnd';
 
 const TaskListPresentational: React.FunctionComponent<TaskListPresentationalProps> = (props) => {
-  const { currentTask, taskList, acceptTask, declineTask, isBrowser } = props;
+  const { currentTask, taskList, acceptTask, declineTask, isBrowser, title, subtitle } = props;
 
   if (taskList.length <= 0) {
     return null; // hidden component
@@ -31,10 +31,10 @@ const TaskListPresentational: React.FunctionComponent<TaskListPresentationalProp
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Box>
                 <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
-                  {ani}
+                  {title || ani}
                 </Typography>
                 <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                  {virtualTeamName}
+                  {subtitle || virtualTeamName}
                 </Typography>
               </Box>
             </Box>
