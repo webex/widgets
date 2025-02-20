@@ -89,6 +89,16 @@ export interface TaskProps {
    * The logger instance from SDK
    */
   logger: ILogger;
+
+  /**
+   * Title for the task list
+   */
+  title: string;
+
+  /**
+   * Subtitle for the task list
+   */
+  subtitle: string;
 }
 
 export type UseTaskProps = Pick<
@@ -105,7 +115,7 @@ export type TaskListProps = Pick<TaskProps, 'onTaskAccepted' | 'onTaskDeclined'>
 
 export type TaskListPresentationalProps = Pick<
   TaskProps,
-  'currentTask' | 'taskList' | 'isBrowser' | 'acceptTask' | 'declineTask'
+  'currentTask' | 'taskList' | 'isBrowser' | 'acceptTask' | 'declineTask' | 'title' | 'subtitle'
 >;
 export enum TASK_EVENTS {
   TASK_INCOMING = 'task:incoming',

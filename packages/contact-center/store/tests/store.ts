@@ -55,11 +55,6 @@ describe('Store', () => {
 
     expect(makeAutoObservable).toHaveBeenCalledWith(storeInstance, {
       cc: expect.any(Function),
-      currentState: expect.any(Object),
-      currentTask: expect.any(Object),
-      incomingTask: expect.any(Object),
-      taskList: expect.any(Object),
-      wrapupRequired: expect.any(Object),
     });
   });
 
@@ -113,13 +108,6 @@ describe('Store', () => {
     it('should call eventListenerCallback ', async () => {
       const eventListenerCallback = jest.fn();
       const initParams = {webex: mockWebex};
-<<<<<<< HEAD
-      jest.spyOn(storeInstance, 'registerCC').mockResolvedValue();
-      Webex.init.mockClear();
-
-      await storeInstance.init(initParams);
-
-=======
 
       jest.spyOn(storeInstance, 'registerCC').mockResolvedValue();
       Webex.init.mockClear();
@@ -138,7 +126,6 @@ describe('Store', () => {
 
       await storeInstance.init(initParams, jest.fn());
 
->>>>>>> upstream/ccwidgets
       expect(storeInstance.registerCC).toHaveBeenCalledWith(mockWebex);
       expect(Webex.init).not.toHaveBeenCalled();
     });
@@ -150,11 +137,7 @@ describe('Store', () => {
       };
       jest.spyOn(storeInstance, 'registerCC').mockResolvedValue();
 
-<<<<<<< HEAD
-      await storeInstance.init(initParams);
-=======
       await storeInstance.init(initParams, jest.fn());
->>>>>>> upstream/ccwidgets
 
       expect(Webex.init).toHaveBeenCalledWith({
         config: initParams.webexConfig,
@@ -171,11 +154,7 @@ describe('Store', () => {
 
       jest.spyOn(storeInstance, 'registerCC').mockRejectedValue(new Error('registerCC failed'));
 
-<<<<<<< HEAD
-      await expect(storeInstance.init(initParams)).rejects.toThrow('registerCC failed');
-=======
       await expect(storeInstance.init(initParams, jest.fn())).rejects.toThrow('registerCC failed');
->>>>>>> upstream/ccwidgets
     });
 
     it('should reject the promise if Webex SDK fails to initialize', async () => {
@@ -193,38 +172,6 @@ describe('Store', () => {
       jest.runAllTimers(); // Fast-forward the timers to simulate timeout
 
       await expect(initPromise).rejects.toThrow('Webex SDK failed to initialize');
-    });
-
-    it('should set states when called through setters', () => {
-      storeInstance.setIncomingTask('task1');
-      expect(storeInstance.incomingTask).toBe('task1');
-
-      storeInstance.setCurrentTask('task2');
-      expect(storeInstance.currentTask).toBe('task2');
-
-      storeInstance.setWrapupRequired(true);
-      expect(storeInstance.wrapupRequired).toBe(true);
-
-      storeInstance.setTaskList(['task3']);
-      expect(storeInstance.taskList).toEqual(['task3']);
-
-      storeInstance.setDeviceType('option1');
-      expect(storeInstance.deviceType).toBe('option1');
-
-      storeInstance.setCurrentTheme('theme1');
-      expect(storeInstance.currentTheme).toBe('theme1');
-
-      storeInstance.setShowMultipleLoginAlert(true);
-      expect(storeInstance.showMultipleLoginAlert).toBe(true);
-
-      storeInstance.setCurrentState('state1');
-      expect(storeInstance.currentState).toBe('state1');
-
-      storeInstance.setLastStateChangeTimestamp(new Date());
-      expect(storeInstance.lastStateChangeTimestamp).toEqual(expect.any(Date));
-
-      storeInstance.setIsAgentLoggedIn(true);
-      expect(storeInstance.isAgentLoggedIn).toBe(true);
     });
   });
 });

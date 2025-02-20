@@ -45,9 +45,9 @@ interface IStore {
     lastStateChangeTimestamp: Date;
     showMultipleLoginAlert: boolean;
     currentTheme: string;
-    customStatus: 'RONA' | 'WRAPUP' | 'ENGAGED' | '';
     agentName: string;
     dialNumber: string;
+    customState: ICustomState;
     init(params: InitParams,callback:any): Promise<void>;
     registerCC(webex?: WithWebex['webex']): Promise<void>;  
 }
@@ -66,8 +66,8 @@ interface IStoreWrapper extends IStore{
     setCurrentTheme(theme: string): void;
     setIsAgentLoggedIn(value: boolean): void;
     setWrapupCodes(wrapupCodes: IWrapupCode[]): void;
-    setCustomStatus(status: 'RONA' | 'WRAPUP' | 'ENGAGED' | ''): void;
     setDialNumber(number: string): void;
+    setState(state: IdleCode | ICustomState): void;
 }
 
 interface IWrapupCode {
@@ -100,6 +100,12 @@ enum CC_EVENTS{
     AGENT_STATE_CHANGE = 'agent:stateChange',
 }
 
+interface ICustomState {
+    name: string;
+    developerName: string;
+    iconColor: string;
+}
+
 export type {
     IContactCenter,
     Profile,
@@ -111,12 +117,11 @@ export type {
     IStore,
     ILogger,
     IWrapupCode,
-    IStoreWrapper
+    IStoreWrapper,
+    ICustomState
 }
 
 export {
     CC_EVENTS,
     TASK_EVENTS
 }
-
-

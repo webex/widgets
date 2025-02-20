@@ -46,6 +46,20 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
     }
   }, [currentTask]);
 
+  useEffect(() => {
+    if (!currentTask || !currentTask.data || !currentTask.data.interaction) return;
+
+    const {interaction, mediaResourceId} = currentTask.data;
+    const {media, callProcessingDetails} = interaction;
+    const isHold = media && media[mediaResourceId] && media[mediaResourceId].isHold;
+    setIsHeld(isHold);
+
+    if (callProcessingDetails) {
+      const {isPaused} = callProcessingDetails;
+      setIsRecording(!isPaused);
+    }
+  }, [currentTask]);
+
   const handletoggleHold = () => {
     toggleHold(!isHeld);
     setIsHeld(!isHeld);

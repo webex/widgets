@@ -1,15 +1,14 @@
 import {useState, useEffect, useRef} from 'react';
 // TODO: Export & Import this AGENT_STATE_CHANGE constant from SDK
 import store from '@webex/cc-store';
-export const useUserState = ({idleCodes, agentId, cc, currentState, lastStateChangeTimestamp, customStatus, onStateChange}) => {
+
+export const useUserState = ({idleCodes, agentId, cc, currentState, customState, lastStateChangeTimestamp, logger, onStateChange}) => {
   const [isSettingAgentStatus, setIsSettingAgentStatus] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [elapsedTime, setElapsedTime] = useState(0);
   const workerRef = useRef<Worker | null>(null);
-  const customStatusList = [
-    { id: 'customWRAPUP', name: 'Wrap-Up' },
-    { id: 'customENGAGED', name: 'Engaged' },
-  ]
+
+  const prevStateRef = useRef(currentState);
 
   // Initialize the Web Worker using a Blob
   const workerScript = `
@@ -32,6 +31,11 @@ export const useUserState = ({idleCodes, agentId, cc, currentState, lastStateCha
   `;
 
   useEffect(() => {
+    logger.log(`Initializing worker`, {
+      module: 'useUserState',
+      method: 'useEffect - initial',
+    });
+
     const blob = new Blob([workerScript], {type: 'application/javascript'});
     const workerUrl = URL.createObjectURL(blob);
     workerRef.current = new Worker(workerUrl);
@@ -39,10 +43,23 @@ export const useUserState = ({idleCodes, agentId, cc, currentState, lastStateCha
       workerRef.current.postMessage({type: 'start', startTime: Date.now()});
       setElapsedTime(event.data);
     };
+
+    return () => {
+      logger.log(`Terminating worker`, {
+        module: 'useUserState',
+        method: 'cleanup',
+      });
+      workerRef.current?.terminate();
+    };
   }, []);
 
   useEffect(() => {
     if (workerRef.current) {
+      logger.log(`Re-initializing worker due to state change`, {
+        module: 'useUserState',
+        method: 'useEffect - currentState',
+      });
+
       workerRef.current.terminate();
       const blob = new Blob([workerScript], {type: 'application/javascript'});
       const workerUrl = URL.createObjectURL(blob);
@@ -60,19 +77,28 @@ export const useUserState = ({idleCodes, agentId, cc, currentState, lastStateCha
       }
     }
 
-    return () => {
-      workerRef.current?.terminate();
-    };
+    if (prevStateRef.current !== currentState) {
+      logger.log(`State change detected: ${prevStateRef.current} -> ${currentState}`, {
+        module: 'useUserState',
+        method: 'useEffect - currentState',
+      });
+
+      // Call setAgentStatus and update prevStateRef after promise resolves
+      setAgentState(currentState).then(() => {
+        prevStateRef.current = currentState;
+      }).catch((error) => {
+        logger.error(`Failed to update state: ${error.toString()}`, {
+          module: 'useUserState',
+          method: 'useEffect - currentState',
+        });
+      });
+    }
   }, [currentState]);
 
   useEffect(() => {
     if(onStateChange){
-      if (customStatus !== '') {
-        customStatusList.forEach((status) => {
-          if (status.id.includes(customStatus)) {
-            onStateChange(status);
-          }
-        });
+      if (customState?.developerName) {
+        onStateChange(customState);
         return;
       }
       idleCodes.forEach((code) => {
@@ -81,22 +107,46 @@ export const useUserState = ({idleCodes, agentId, cc, currentState, lastStateCha
         }
       });
     }
-  }, [customStatus, currentState]);
+  }, [customState, currentState]);
 
   const setAgentStatus = (selectedCode) => {
+    store.setCurrentState(selectedCode);
+  }
+
+  const setAgentState = (selectedCode) => {
+    selectedCode = idleCodes?.filter((code) => code.id === selectedCode)[0];
+
+    logger.log(`Setting agent status`, {
+      module: 'useUserState',
+      method: 'setAgentStatus',
+      auxCodeId: selectedCode.auxCodeId,
+      state: selectedCode.state,
+    });
+
     const {auxCodeId, state} = {
       auxCodeId: selectedCode.id,
       state: selectedCode.name,
     };
     setIsSettingAgentStatus(true);
     const chosenState = state === 'Available' ? 'Available' : 'Idle';
-    cc.setAgentState({state: chosenState, auxCodeId, agentId, lastStateChangeReason: state})
+
+    return cc.setAgentState({state: chosenState, auxCodeId, agentId, lastStateChangeReason: state})
       .then((response) => {
-        store.setCurrentState(response.data.auxCodeId);
+        logger.log(`Agent state set successfully`, {
+          module: 'useUserState',
+          method: 'setAgentStatus',
+          response: response.data,
+        });
+
         store.setLastStateChangeTimestamp(new Date(response.data.lastStateChangeTimestamp));
       })
       .catch((error) => {
+        logger.error(`Error setting agent state: ${error.toString()}`, {
+          module: 'useUserState',
+          method: 'setAgentStatus',
+        });
         setErrorMessage(error.toString());
+        throw error;  // Rethrow to handle it in the calling function
       })
       .finally(() => {
         setIsSettingAgentStatus(false);
@@ -110,7 +160,6 @@ export const useUserState = ({idleCodes, agentId, cc, currentState, lastStateCha
     errorMessage,
     elapsedTime,
     currentState,
-    customStatus,
-    customStatusList,
+    customState
   };
 };

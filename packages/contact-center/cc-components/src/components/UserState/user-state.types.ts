@@ -1,4 +1,4 @@
-import {IdleCode} from '@webex/cc-store';
+import {IdleCode, ICustomState} from '@webex/cc-store';
 
 interface CustomStatus {
   id: string;
@@ -22,7 +22,7 @@ export interface IUserState {
    * @param status.state The state to set.
    * @returns void
    */
-  setAgentStatus: (status: {auxCodeId: string; state: string}) => void;
+  setAgentStatus: (auxCodeId: string) => void;
 
   /**
    * Boolean indicating if the agent status is being set.
@@ -45,16 +45,19 @@ export interface IUserState {
   currentState: string;
 
   /**
+   * The custom state of the current user state
+   */
+  customState: ICustomState;
+
+  /**
    * The preferred theme
    */
   currentTheme: string;
 
   /**
-   * Boolean indicating if the user is in RONA state.
+   * Function to handle state change
+   * @param state The state to change to
+   * @returns void
    */
-  customStatus: string;
-
-  setCustomStatus: (customStatus: string) => void;
-
-  customStatusList: CustomStatus[];
+  onStateChange: (state: string) => void;
 }
