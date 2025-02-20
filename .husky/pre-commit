@@ -1,0 +1,1 @@
+yarn workspaces foreach --all --exclude webex-widgets --exclude @webex/cc-components --exclude samples-cc-wc-app --exclude samples-cc-react-app run jest --silent
