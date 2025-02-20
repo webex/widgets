@@ -1,4 +1,4 @@
-import {IStoreWrapper, IStore, InitParams, TASK_EVENTS, CC_EVENTS, IWrapupCode, WithWebex} from './store.types';
+import {IStoreWrapper, IStore, InitParams, TASK_EVENTS, CC_EVENTS, IWrapupCode, WithWebex, ICustomState, IdleCode} from './store.types';
 import {ITask} from '@webex/plugin-cc';
 import Store from './store';
 import {runInAction} from 'mobx';
@@ -24,7 +24,7 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.logger;
   }
   get idleCodes() {
-    return this.store.idleCodes;
+    return this.store.idleCodes.filter((code) => !code.isSystem);
   }
   get agentId() {
     return this.store.agentId;
@@ -58,10 +58,6 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.currentState;
   }
 
-  get customStatus() {
-    return this.store.customStatus;
-  }
-
   get lastStateChangeTimestamp() {
     return this.store.lastStateChangeTimestamp;
   }
@@ -80,6 +76,10 @@ class StoreWrapper implements IStoreWrapper {
 
   get dialNumber() {
     return this.store.dialNumber;
+  }
+  
+  get customState() {
+    return this.store.customState;
   }
 
   setCurrentTheme = (theme: string): void => {
@@ -106,10 +106,6 @@ class StoreWrapper implements IStoreWrapper {
     this.store.isAgentLoggedIn = value;
   };
 
-  setCustomStatus(status: 'RONA' | 'WRAPUP' | 'ENGAGED' | ''): void {
-    this.store.customStatus = status;
-  }
-
   setDialNumber = (number: string): void => {
     this.store.dialNumber = number;
   }
@@ -132,6 +128,15 @@ class StoreWrapper implements IStoreWrapper {
 
   setWrapupCodes = (wrapupCodes: IWrapupCode[]): void => {
     this.store.wrapupCodes = wrapupCodes;
+  };
+
+  setState = (state: ICustomState | IdleCode): void => {
+    if ('id' in state) {
+      this.setCurrentState(state.id);
+      this.store.customState = null;
+    } else {
+      this.store.customState = state;
+    }
   };
 
   init(options: InitParams): Promise<void> {
@@ -172,7 +177,11 @@ class StoreWrapper implements IStoreWrapper {
   handleTaskEnd = (task: ITask, wrapupRequired: boolean) => {
     // TODO: SDK needs to send only 1 event on end : https://jira-eng-gpk2.cisco.com/jira/browse/SPARK-615785
     if (task.data.interaction.state === 'connected') {
-      this.setCustomStatus('WRAPUP');
+      this.setState({
+        developerName: 'WRAPUP',
+        name: 'Wrap-Up',
+        iconColor: 'orange',
+      });
       this.setWrapupRequired(true);
       return;
     } else if (task.data.interaction.state !== 'connected' && this.store.wrapupRequired !== true) {

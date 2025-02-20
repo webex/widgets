@@ -117,11 +117,15 @@ export const useCallControl = (props: useCallControlProps) => {
     if (!currentTask) return;
     // Call control only event for WebRTC calls
     currentTask.on(TASK_EVENTS.TASK_MEDIA, handleTaskMedia);
-    store.setCustomStatus('ENGAGED');
+    store.setState({
+      developerName: 'ENGAGED',
+      name: 'Engaged',
+      iconColor: 'orange',
+    });
 
     return () => {
       currentTask.off(TASK_EVENTS.TASK_MEDIA, handleTaskMedia);
-      store.setCustomStatus('');
+      store.setState({});
     };
   }, [currentTask]);
 

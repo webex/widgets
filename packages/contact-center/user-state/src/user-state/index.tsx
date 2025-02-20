@@ -10,19 +10,20 @@ interface UserStateProps {
 }
 
 const UserState: React.FunctionComponent<UserStateProps> = observer(({onStateChange}) => {
-  const {cc, idleCodes, agentId, currentTheme, currentState, customStatus, lastStateChangeTimestamp} = store;
+  const {cc, idleCodes, agentId, currentTheme, currentState, lastStateChangeTimestamp, customState, logger} = store;
   const props: IUserState = {
     ...useUserState({
       idleCodes,
       agentId,
       cc,
       currentState,
-      customStatus,
+      customState,
       lastStateChangeTimestamp,
-      onStateChange,
+      logger,
+      onStateChange
     }),
-    currentTheme,
-  }
+    currentTheme
+  };
 
   return <UserStateComponent {...props} />;
 });

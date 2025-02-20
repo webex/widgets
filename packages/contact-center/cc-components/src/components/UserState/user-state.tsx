@@ -78,38 +78,29 @@ const darkTheme = createTheme({
 });
 
 const UserStateComponent: React.FunctionComponent<Omit<IUserState, "setCurrentState"> & { currentTheme: 'DARK' | 'LIGHT' }> = (props) => {
-  const { idleCodes, setAgentStatus, isSettingAgentStatus, errorMessage, elapsedTime, currentState, currentTheme, customStatus, customStatusList } = props;
-  const [selectedState, setSelectedState] = useState({id: currentState, name: null});
+  const { idleCodes, setAgentStatus, isSettingAgentStatus, errorMessage, elapsedTime, currentState, currentTheme, customState } = props;
+  const [selectedState, setSelectedState] = useState({id: currentState, name: null, developerName: null});
 
   useEffect(() => {
-    if (customStatus && customStatus !== '') {
-      customStatusList.forEach((status) => {
-        if (status.id.includes(customStatus)) {
-          setSelectedState(status);
-        }
-      });
+    if (customState?.developerName) {
+      setSelectedState(customState);
     }
     else {
-      setSelectedState({ id: currentState, name: null });
+      setSelectedState({ id: currentState, name: null, developerName: null });
     }
-  }, [idleCodes, currentState, customStatus, setAgentStatus]);
+  }, [idleCodes, currentState, customState, setAgentStatus]);
 
   const selectStyles = {
-    backgroundColor: selectedState?.name === 'RONA' ? '#E9C1BC' : 'white',
+    backgroundColor: 'white',
     borderRadius: '50px',
-    color: selectedState?.name === 'RONA' ? 'red' : selectedState.id.startsWith('custom') ? 'orange' : 'black',
-    cursor: isSettingAgentStatus || customStatus === 'WRAUPUP' ? 'not-allowed' : 'pointer',
+    color: 'black',
   };
 
   const getIcon = (name) => {
     if (name === 'Available') {
       return <CheckCircleOutlineIcon style={{ color: 'green' }} />;
-    } else if (name === 'RONA') {
-      return <RemoveCircleOutlineIcon style={{ color: 'red' }} />;
-    } else if (name === 'Wrap-Up' || name === 'Engaged') {
-      return <RemoveCircleOutlineIcon style={{ color: 'orange' }} />;
     } else {
-      return <RemoveCircleOutlineIcon style={{ color: 'gray' }} />;
+      return <RemoveCircleOutlineIcon style={{ color: customState?.iconColor || 'gray' }} />;
     }
   };
 
@@ -117,19 +108,15 @@ const UserStateComponent: React.FunctionComponent<Omit<IUserState, "setCurrentSt
 
   return (
     <ThemeProvider theme={theme}>
-      <FormControl fullWidth disabled={isSettingAgentStatus || customStatus === 'WRAUPUP'} className="formControl" style={selectStyles}>
+      <FormControl fullWidth disabled={isSettingAgentStatus || customState?.developerName === 'WRAUPUP'} className="formControl" style={selectStyles}>
         <Select
           id="idleCodes"
-          value={selectedState?.id || ''}
+          value={customState?.developerName || selectedState?.id}
           onChange={(event) => {
-            const code = idleCodes?.find(code => code.id === event.target.value);
-            if (customStatus == "" && code) {
-              setAgentStatus(code);
-            }
-            setSelectedState(code);
+            setAgentStatus(event.target.value);
           }}
           renderValue={(selected) => {
-            const selectedCode = idleCodes?.find(code => code.id === selected) || (selectedState?.id.startsWith('custom') ? selectedState : null);
+            const selectedCode = idleCodes?.find(code => code.id === selected) || (customState?.developerName === selected ? selectedState : null);
             return (
               <div className="selectedValueContainer">
                 {getIcon(selectedCode?.name)}
@@ -142,6 +129,11 @@ const UserStateComponent: React.FunctionComponent<Omit<IUserState, "setCurrentSt
           }}
           IconComponent={() => <ArrowDropDownOutlinedIcon />}
         >
+          {
+            customState?.developerName && (
+              <MenuItem key={customState?.developerName} value={customState?.developerName} hidden>{customState.name}</MenuItem>
+            )
+          }
           {idleCodes?.filter(code => !code.isSystem).map((code) => (
             <MenuItem key={code.id} value={code.id}>
               {getIcon(code.name)}
