@@ -1,3 +1,10 @@
+# [1.28.0-ccconnectors.9](https://github.com/webex/widgets/compare/v1.28.0-ccconnectors.8...v1.28.0-ccconnectors.9) (2025-02-20)
+
+
+### Features
+
+* add title props to tasks, setting agent status ([#393](https://github.com/webex/widgets/issues/393)) ([456a924](https://github.com/webex/widgets/commit/456a92494979e3e221f047b91ef951955253d2e5))
+
 # [1.28.0-ccconnectors.8](https://github.com/webex/widgets/compare/v1.28.0-ccconnectors.7...v1.28.0-ccconnectors.8) (2025-02-18)
 
 
