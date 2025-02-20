@@ -81,6 +81,10 @@ function App() {
     setSelectedWidgets((prev) => ({...prev, [name]: checked}));
   };
 
+  const onStateChange = (status) => {
+    console.log('onStateChange invoked', status);
+  };
+
   return (
     <>
       <h1>Contact Center widgets in a react app</h1>
@@ -190,7 +194,7 @@ function App() {
           )}
           {store.isAgentLoggedIn && (
             <>
-              {selectedWidgets.userState && <UserState />}
+              {selectedWidgets.userState && <UserState onStateChange={onStateChange} />}
               {selectedWidgets.incomingTask && <IncomingTask onAccepted={onAccepted} onDeclined={onDeclined} />}
               {selectedWidgets.taskList && (
                 <TaskList onTaskAccepted={onTaskAccepted} onTaskDeclined={onTaskDeclined} />
