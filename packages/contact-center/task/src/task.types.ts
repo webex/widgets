@@ -106,20 +106,6 @@ export type TaskListPresentationalProps = Pick<
   TaskProps,
   'currentTask' | 'taskList' | 'isBrowser' | 'acceptTask' | 'declineTask'
 >;
-export enum TASK_EVENTS {
-  TASK_INCOMING = 'task:incoming',
-  TASK_ASSIGNED = 'task:assigned',
-  TASK_MEDIA = 'task:media',
-  TASK_HOLD = 'task:hold',
-  TASK_UNHOLD = 'task:unhold',
-  TASK_CONSULT = 'task:consult',
-  TASK_CONSULT_END = 'task:consultEnd',
-  TASK_CONSULT_ACCEPT = 'task:consultAccepted',
-  TASK_PAUSE = 'task:pause',
-  TASK_RESUME = 'task:resume',
-  TASK_END = 'task:end',
-  TASK_WRAPUP = 'task:wrapup',
-} // TODO: remove this once cc sdk exports this enum
 
 /**
  * Interface representing the properties for control actions on a task.

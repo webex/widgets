@@ -1,6 +1,6 @@
 import {renderHook, act, waitFor} from '@testing-library/react';
 import {useIncomingTask, useTaskList, useCallControl} from '../src/helper';
-import {TASK_EVENTS} from '../src/task.types';
+import {TASK_EVENTS} from '@webex/cc-store';
 import React from 'react';
 
 // Mock webex instance and task
