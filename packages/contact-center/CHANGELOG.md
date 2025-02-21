@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.20](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.19...v1.28.0-ccwidgets.20) (2025-02-21)
+
+
+### Features
+
+* **widgets:** added-agent-rona-popup ([#389](https://github.com/webex/widgets/issues/389)) ([9c52c53](https://github.com/webex/widgets/commit/9c52c531d691c982cdbea237c2726b4a3b3d0c07))
+
 # [1.28.0-ccwidgets.19](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.18...v1.28.0-ccwidgets.19) (2025-02-20)
 
 
