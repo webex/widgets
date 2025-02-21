@@ -188,7 +188,7 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
     if (deviceType) {
       relogin();
     }
-  }, [isAgentLoggedIn, deviceType, relogin]);
+  }, [isAgentLoggedIn]);
 
   const handleSelectLoginOption = (event: SelectChangeEvent<string>) => {
     setDeviceType(event.target.value);

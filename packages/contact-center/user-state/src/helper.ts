@@ -83,7 +83,7 @@ export const useUserState = ({idleCodes, agentId, cc, currentState, customState,
         method: 'useEffect - currentState',
       });
 
-      // Call setAgentStatus and update prevStateRef after promise resolves
+      // Call setAgentState and update prevStateRef after promise resolves
       setAgentState(currentState).then(() => {
         prevStateRef.current = currentState;
       }).catch((error) => {
@@ -110,7 +110,8 @@ export const useUserState = ({idleCodes, agentId, cc, currentState, customState,
   }, [customState, currentState]);
 
   const setAgentStatus = (selectedCode) => {
-    store.setCurrentState(selectedCode);
+    selectedCode = idleCodes?.filter((code) => code.id === selectedCode)[0];
+    store.setState(selectedCode);
   }
 
   const setAgentState = (selectedCode) => {

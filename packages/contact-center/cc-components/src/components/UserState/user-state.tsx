@@ -96,11 +96,13 @@ const UserStateComponent: React.FunctionComponent<Omit<IUserState, "setCurrentSt
     color: 'black',
   };
 
-  const getIcon = (name) => {
+  const getIcon = (name, iconColor='gray') => {
     if (name === 'Available') {
       return <CheckCircleOutlineIcon style={{ color: 'green' }} />;
+    } else if (name === 'RONA') {
+        return <RemoveCircleOutlineIcon style={{ color: 'red' }} />;
     } else {
-      return <RemoveCircleOutlineIcon style={{ color: customState?.iconColor || 'gray' }} />;
+      return <RemoveCircleOutlineIcon style={{ color: iconColor }} />;
     }
   };
 
@@ -119,7 +121,7 @@ const UserStateComponent: React.FunctionComponent<Omit<IUserState, "setCurrentSt
             const selectedCode = idleCodes?.find(code => code.id === selected) || (customState?.developerName === selected ? selectedState : null);
             return (
               <div className="selectedValueContainer">
-                {getIcon(selectedCode?.name)}
+                {getIcon(selectedCode?.name, selectedCode?.name === "RONA" ? "red" : selectedCode?.iconColor)}
                 <span style={{ marginLeft: '8px' }}>{selectedCode ? selectedCode.name : ''}</span>
                 <span className="timer">
                   {formatTime(elapsedTime)}
@@ -131,7 +133,7 @@ const UserStateComponent: React.FunctionComponent<Omit<IUserState, "setCurrentSt
         >
           {
             customState?.developerName && (
-              <MenuItem key={customState?.developerName} value={customState?.developerName} hidden>{customState.name}</MenuItem>
+              <MenuItem style={{display: 'none'}} key={customState?.developerName} value={customState?.developerName} hidden>{customState.name}</MenuItem>
             )
           }
           {idleCodes?.filter(code => !code.isSystem).map((code) => (

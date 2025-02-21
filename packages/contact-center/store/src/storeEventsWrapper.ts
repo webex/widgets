@@ -24,7 +24,9 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.logger;
   }
   get idleCodes() {
-    return this.store.idleCodes.filter((code) => !code.isSystem);
+    return this.store.idleCodes.filter((code) => {
+      return code.name === "RONA" || !code.isSystem;
+    });
   }
   get agentId() {
     return this.store.agentId;
