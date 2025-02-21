@@ -42,7 +42,7 @@
     "clean": "yarn workspaces foreach --all --topological --parallel run clean && rm -rf node_modules",
     "clean:dist": "yarn workspaces foreach --all --topological --parallel run clean:dist",
     "test:unit": "yarn run test:tooling && yarn run test:cc-widgets",
-    "test:styles": "yarn workspaces foreach --all --exclude webex-widgets --exclude samples-cc-wc-app --exclude samples-cc-react-app run test:styles",
+    "test:styles": "yarn workspaces foreach --all --exclude webex-widgets run test:styles",
     "test:tooling": "jest --coverage",
     "test:cc-widgets": "yarn workspaces foreach --all --exclude webex-widgets --exclude samples-cc-wc-app --exclude samples-cc-react-app run test:unit",
     "build:dev": "NODE_ENV=development yarn build",

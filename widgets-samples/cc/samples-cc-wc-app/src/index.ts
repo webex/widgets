@@ -1,3 +1,3 @@
 import {store} from '@webex/cc-widgets/wc';
-// @ts-ignore
+// @ts-expect-error: for web components this is required
 window.store = store;

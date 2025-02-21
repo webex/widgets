@@ -12,10 +12,25 @@
     "webpack-cli": "^5.1.4",
     "webpack-merge": "6.0.1"
   },
+  "devDependencies": {
+    "@eslint/js": "^9.20.0",
+    "eslint": "^9.20.1",
+    "eslint-config-prettier": "^10.0.1",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.25.2",
+    "eslint-plugin-n": "^15.0.0 || ^16.0.0 ",
+    "eslint-plugin-prettier": "^5.2.3",
+    "eslint-plugin-promise": "^6.0.0",
+    "eslint-plugin-react": "^7.37.4",
+    "globals": "^16.0.0",
+    "prettier": "^3.5.1",
+    "typescript-eslint": "^8.24.1"
+  },
   "scripts": {
     "clean": "rm -rf dist && rm -rf node_modules",
     "clean:dist": "rm -rf dist",
     "serve": "webpack serve",
-    "build:src": "webpack"
+    "build:src": "webpack",
+    "test:styles": "eslint"
   }
 }

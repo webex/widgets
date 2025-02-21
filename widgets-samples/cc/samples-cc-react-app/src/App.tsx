@@ -13,7 +13,6 @@ function App() {
     callControl: false,
   });
   const [accessToken, setAccessToken] = useState('');
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const themeCheckboxRef = useRef(null);
   const [currentTheme, setCurrentTheme] = useState(store.currentTheme);
   const [isMultiLoginEnabled, setIsMultiLoginEnabled] = useState(false);
@@ -33,12 +32,10 @@ function App() {
 
   const onLogin = () => {
     console.log('Agent login has been succesful');
-    setIsLoggedIn(true);
   };
 
   const onLogout = () => {
     console.log('Agent logout has been succesful');
-    setIsLoggedIn(false);
   };
 
   const onAccepted = () => {
@@ -85,8 +82,8 @@ function App() {
   const changeAgentState = (newState: string) => {
     // In the idle codes, we need to search for the 'Idle' state with code name 'Meeting'.
     const lookupCodeName = newState === 'Available' ? 'Available' : 'Meeting';
-    
-    const idleCode = store.idleCodes?.find((code: any) => code.name === lookupCodeName);
+
+    const idleCode = store.idleCodes?.find((code) => code.name === lookupCodeName);
     if (!idleCode) {
       console.error('No idle code found for selected state:', newState);
       return;
@@ -239,8 +236,7 @@ function App() {
                 </>
               )}
             </>
-          )}  
-
+          )}
           {showRejectedPopup && (
             <div className="task-rejected-popup">
               <h2>Task Rejected</h2>
@@ -253,8 +249,8 @@ function App() {
               <button onClick={handlePopoverSubmit}>Submit</button>
             </div>
           )}
-
-      </IconProvider></ThemeProvider>
+        </IconProvider>
+      </ThemeProvider>
     </div>
   );
 }
