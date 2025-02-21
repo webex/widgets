@@ -1,3 +1,10 @@
+# [1.28.0-ccconnectors.10](https://github.com/webex/widgets/compare/v1.28.0-ccconnectors.9...v1.28.0-ccconnectors.10) (2025-02-21)
+
+
+### Bug Fixes
+
+* userstate issues, relogin fix ([#394](https://github.com/webex/widgets/issues/394)) ([19256c0](https://github.com/webex/widgets/commit/19256c08a5db8f371c9c7513a52c3794c3fe3b00))
+
 # [1.28.0-ccconnectors.9](https://github.com/webex/widgets/compare/v1.28.0-ccconnectors.8...v1.28.0-ccconnectors.9) (2025-02-20)
 
 
