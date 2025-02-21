@@ -57,9 +57,6 @@ export const useStationLogin = (props: UseStationLoginProps) => {
         if (res.data.lastStateChangeTimestamp) {
           store.setLastStateChangeTimestamp(new Date(res.data.lastStateChangeTimestamp));
         }
-        if (loginCb) {
-          loginCb();
-        }
       })
       .catch((error: Error) => {
         logger.error(`Error logging in: ${error}`, {
@@ -91,9 +88,9 @@ export const useStationLogin = (props: UseStationLoginProps) => {
 
   function relogin() {
     store.setDeviceType(deviceType);
-    // if (loginCb) {
-    //   loginCb();
-    // }
+    if (loginCb) {
+      loginCb();
+    }
   }
 
   return {
