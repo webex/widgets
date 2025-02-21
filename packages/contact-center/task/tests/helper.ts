@@ -248,8 +248,7 @@ describe('useTaskList Hook', () => {
     );
 
     act(() => {
-      // @ts-ignore
-      result.current.acceptTask();
+      result.current.acceptTask(taskMock);
     });
 
     await waitFor(() => {
@@ -264,8 +263,7 @@ describe('useTaskList Hook', () => {
     );
 
     act(() => {
-      // @ts-ignore
-      result.current.declineTask();
+      result.current.declineTask(taskMock);
     });
 
     await waitFor(() => {
@@ -708,7 +706,7 @@ describe('useCallControl', () => {
   });
 
   it('should assign media received from media event to audio tag', async () => {
-    global.MediaStream = jest.fn().mockImplementation((tracks) => {
+    global.MediaStream = jest.fn().mockImplementation(() => {
       return {mockStream: 'mock-stream'};
     });
     const mockAudioElement = {current: {srcObject: null}};
@@ -717,7 +715,7 @@ describe('useCallControl', () => {
       srcObject: 'mock-audio',
     };
 
-    const {result, unmount} = renderHook(() =>
+    renderHook(() =>
       useCallControl({
         currentTask: mockCurrentTask,
         onHoldResume: mockOnHoldResume,
@@ -745,7 +743,7 @@ describe('useCallControl', () => {
     const mockAudioElement = {current: {srcObject: null}};
     jest.spyOn(React, 'useRef').mockReturnValue(mockAudioElement);
 
-    const {result} = renderHook(() =>
+    renderHook(() =>
       useCallControl({
         currentTask: mockCurrentTask,
         onHoldResume: mockOnHoldResume,

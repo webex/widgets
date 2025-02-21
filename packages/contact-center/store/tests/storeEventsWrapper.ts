@@ -2,7 +2,6 @@ import {act, waitFor} from '@testing-library/react';
 import {CC_EVENTS, TASK_EVENTS} from '../src/store.types';
 import storeWrapper from '../src/storeEventsWrapper';
 import {ITask} from '@webex/plugin-cc';
-import {register} from 'module';
 
 jest.mock('../src/store', () => ({
   getInstance: jest.fn().mockReturnValue({
@@ -390,7 +389,7 @@ describe('storeEventsWrapper', () => {
       storeWrapper.handleIncomingTask(mockTask);
 
       expect(setIncomingTaskSpy).toHaveBeenCalledWith(mockTask);
-      expect(mockTask.on).not.toHaveBeenCalledWith;
+      expect(mockTask.on).not.toHaveBeenCalledWith();
     });
 
     it('should handle task assignment', () => {

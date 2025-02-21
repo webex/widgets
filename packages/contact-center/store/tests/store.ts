@@ -60,7 +60,7 @@ describe('Store', () => {
 
   describe('registerCC', () => {
     it('should initialise store values on successful register', async () => {
-      let date = new Date();
+      const date = new Date();
       const mockResponse = {
         teams: [{id: 'team1', name: 'Team 1'}],
         loginVoiceOptions: ['option1', 'option2'],

@@ -14,7 +14,8 @@ interface WithWebex {
 }
 
 interface WithWebexConfig {
-    webexConfig: any; // Replace 'any' with the actual type of webexConfig
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    webexConfig: any; // TODO: Replace 'any' with the actual type of webexConfig
     access_token: string;
 }
   
@@ -45,14 +46,14 @@ interface IStore {
     lastStateChangeTimestamp: Date;
     showMultipleLoginAlert: boolean;
     currentTheme: string;
-    init(params: InitParams,callback:any): Promise<void>;
+    init(params: InitParams, callback:(ccSDK: IContactCenter) => () => void): Promise<void>;
     registerCC(webex?: WithWebex['webex']): Promise<void>;  
 }
 
 
 interface IStoreWrapper extends IStore{
     store: IStore;
-    setCurrentTask(task: any): void;
+    setCurrentTask(task: ITask): void;
     setWrapupRequired(value: boolean): void;
     setTaskList(taskList: ITask[]): void;
     setIncomingTask(task: ITask): void;

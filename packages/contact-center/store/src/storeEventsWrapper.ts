@@ -163,8 +163,9 @@ class StoreWrapper implements IStoreWrapper {
     });
   };
 
+  // TODO -- SDK needs to send only 1 event on end : https://jira-eng-gpk2.cisco.com/jira/browse/SPARK-615785
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   handleTaskEnd = (task: ITask, wrapupRequired: boolean) => {
-    // TODO: SDK needs to send only 1 event on end : https://jira-eng-gpk2.cisco.com/jira/browse/SPARK-615785
     if (task.data.interaction.state === 'connected') {
       this.setWrapupRequired(true);
       return;
