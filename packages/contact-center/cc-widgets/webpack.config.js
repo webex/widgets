@@ -32,7 +32,7 @@ module.exports = merge(baseConfig, {
         test: /\.css$/,
         use: ['style-loader', 'css-loader'],
         include: [
-          resolveMonorepoRoot('node_modules/@momentum-ui/react-collaboration'), // Include specific node module
+          resolveMonorepoRoot('node_modules/@momentum-ui'), // Include specific node module
           path.resolve(__dirname, 'packages'), // Include all CSS from the local package
         ],
       },
