@@ -1,8 +1,7 @@
 import React from 'react';
-import {render, screen} from '@testing-library/react';
+import {render} from '@testing-library/react';
 import {StationLogin} from '../../src';
 import * as helper from '../../src/helper';
-import * as presentational from '../../src/station-login/station-login.presentational';
 import '@testing-library/jest-dom';
 
 const teamsMock = ['team123', 'team456'];
@@ -33,9 +32,6 @@ const logoutCb = jest.fn();
 describe('StationLogin Component', () => {
   it('renders StationLoginPresentational with correct props', () => {
     const useStationLoginSpy = jest.spyOn(helper, 'useStationLogin');
-    const StationLoginPresentationalSpy = jest
-      .spyOn(presentational, 'default')
-      .mockReturnValue(<div>StationLoginPresentational</div>);
 
     render(<StationLogin onLogin={loginCb} onLogout={logoutCb} />);
 

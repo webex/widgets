@@ -1,5 +1,5 @@
 import React from 'react';
-import {render, screen} from '@testing-library/react';
+import {render} from '@testing-library/react';
 import * as helper from '../../src/helper';
 import {IncomingTask} from '../../src';
 import store from '@webex/cc-store';
@@ -30,7 +30,6 @@ describe('IncomingTask Component', () => {
 
     // Assert that the useIncomingTask hook is called with the correct arguments
     expect(useIncomingTaskSpy).toHaveBeenCalledWith({
-      cc: store.cc,
       deviceType: store.deviceType,
       onAccepted: onAcceptedCb,
       onDeclined: onDeclinedCb,

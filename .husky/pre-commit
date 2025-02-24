@@ -1,0 +1,2 @@
+yarn run test:unit
+yarn run test:styles

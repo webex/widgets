@@ -1,21 +1,14 @@
 import React from 'react';
 
 import {IUserState} from './user-state.types';
-import {formatTime} from '../../utils'
-import { Button } from '@momentum-design/components/dist/react';
+import {formatTime} from '../../utils';
+import {Button} from '@momentum-design/components/dist/react';
 
 import './user-state.scss';
 
 const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
-  const {
-    idleCodes,
-    setAgentStatus,
-    isSettingAgentStatus,
-    errorMessage,
-    elapsedTime,
-    currentState,
-    currentTheme,
-  } = props;
+  const {idleCodes, setAgentStatus, isSettingAgentStatus, errorMessage, elapsedTime, currentState, currentTheme} =
+    props;
 
   return (
     <div className={`box ${currentTheme === 'DARK' ? 'dark-theme' : 'light-theme'}`}>
@@ -45,11 +38,22 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
                 );
               })}
           </select>
-          <Button variant="primary" size={32} color="default" prefix-icon="" postfix-icon="" type="button" role="button" aria-label="">Click Me</Button>
-          <div className={`elapsedTime ${isSettingAgentStatus ? 'elapsedTime-disabled' : ''}`}>{formatTime(elapsedTime)}</div>
-          {
-            errorMessage && <div style={{color: 'red'}}>{errorMessage}</div>
-          }
+          <Button
+            variant="primary"
+            size={32}
+            color="default"
+            prefix-icon=""
+            postfix-icon=""
+            type="button"
+            role="button"
+            aria-label=""
+          >
+            Click Me
+          </Button>
+          <div className={`elapsedTime ${isSettingAgentStatus ? 'elapsedTime-disabled' : ''}`}>
+            {formatTime(elapsedTime)}
+          </div>
+          {errorMessage && <div style={{color: 'red'}}>{errorMessage}</div>}
         </fieldset>
       </section>
     </div>

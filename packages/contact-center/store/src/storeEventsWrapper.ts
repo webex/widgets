@@ -163,8 +163,9 @@ class StoreWrapper implements IStoreWrapper {
     });
   };
 
+  // TODO -- SDK needs to send only 1 event on end : https://jira-eng-gpk2.cisco.com/jira/browse/SPARK-615785
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   handleTaskEnd = (task: ITask, wrapupRequired: boolean) => {
-    // TODO: SDK needs to send only 1 event on end : https://jira-eng-gpk2.cisco.com/jira/browse/SPARK-615785
     if (task.data.interaction.state === 'connected') {
       this.setWrapupRequired(true);
       return;
@@ -197,9 +198,7 @@ class StoreWrapper implements IStoreWrapper {
 
     // When we receive TASK_REJECT sdk changes the agent status
     // When we receive TASK_REJECT that means the task was not accepted by the agent and we wont need wrap up
-    task.on(TASK_EVENTS.TASK_REJECT, (reason: string) => 
-      this.handleTaskReject(task.data.interactionId, reason)
-    );
+    task.on(TASK_EVENTS.TASK_REJECT, (reason: string) => this.handleTaskReject(task.data.interactionId, reason));
 
     this.setTaskList([...this.store.taskList, task]);
   };
@@ -230,9 +229,7 @@ class StoreWrapper implements IStoreWrapper {
 
     // When we receive TASK_REJECT sdk changes the agent status
     // When we receive TASK_REJECT that means the task was not accepted by the agent and we wont need wrap up
-    task.on(TASK_EVENTS.TASK_REJECT, (reason: string) => 
-      this.handleTaskReject(task.data.interactionId, reason)
-    );
+    task.on(TASK_EVENTS.TASK_REJECT, (reason: string) => this.handleTaskReject(task.data.interactionId, reason));
 
     if (!this.store.taskList.some((t) => t.data.interactionId === task.data.interactionId)) {
       this.setTaskList([...this.store.taskList, task]);
@@ -258,7 +255,7 @@ class StoreWrapper implements IStoreWrapper {
       this.onTaskRejected(reason || 'No reason provided');
     }
     this.handleTaskRemove(taskId);
-  }
+  };
 
   setupIncomingTaskHandler = (ccSDK: IContactCenter) => {
     ccSDK.on(TASK_EVENTS.TASK_INCOMING, this.handleIncomingTask);

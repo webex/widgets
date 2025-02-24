@@ -5,7 +5,6 @@ import UserStateComponent from '../../../src/components/UserState/user-state';
 
 describe('UserStateComponent', () => {
   const mockSetAgentStatus = jest.fn();
-  const mockSetCurrentState = jest.fn();
   const defaultProps = {
     idleCodes: [
       {id: '1', name: 'Idle Code 1', isSystem: false},

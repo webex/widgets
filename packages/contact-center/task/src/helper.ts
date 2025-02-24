@@ -22,7 +22,7 @@ export const useTaskList = (props: UseTaskListProps) => {
     task
       .accept(taskId)
       .then(() => {
-        onTaskAccepted && onTaskAccepted(task);
+        if (onTaskAccepted) onTaskAccepted(task);
       })
       .catch((error: Error) => {
         logError(`Error accepting task: ${error}`, 'acceptTask');
@@ -36,7 +36,7 @@ export const useTaskList = (props: UseTaskListProps) => {
     task
       .decline(taskId)
       .then(() => {
-        onTaskDeclined && onTaskDeclined(task);
+        if (onTaskDeclined) onTaskDeclined(task);
       })
       .catch((error: Error) => {
         logError(`Error declining task: ${error}`, 'declineTask');
@@ -47,7 +47,7 @@ export const useTaskList = (props: UseTaskListProps) => {
 };
 
 export const useIncomingTask = (props: UseTaskProps) => {
-  const {cc, onAccepted, onDeclined, deviceType, incomingTask, logger} = props;
+  const {onAccepted, onDeclined, deviceType, incomingTask, logger} = props;
   const isBrowser = deviceType === 'BROWSER';
 
   const logError = (message: string, method: string) => {
@@ -64,7 +64,7 @@ export const useIncomingTask = (props: UseTaskProps) => {
     incomingTask
       .accept(taskId)
       .then(() => {
-        onAccepted && onAccepted();
+        if (onAccepted) onAccepted();
       })
       .catch((error: Error) => {
         logError(`Error accepting incoming task: ${error}`, 'accept');
@@ -78,7 +78,7 @@ export const useIncomingTask = (props: UseTaskProps) => {
     incomingTask
       .decline(taskId)
       .then(() => {
-        onDeclined && onDeclined();
+        if (onDeclined) onDeclined();
       })
       .catch((error: Error) => {
         logError(`Error declining incoming task: ${error}`, 'decline');

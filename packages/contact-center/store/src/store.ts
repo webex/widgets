@@ -10,7 +10,6 @@ import {
   IStore,
   ILogger,
   IWrapupCode,
-  TASK_EVENTS,
 } from './store.types';
 import {ITask} from '@webex/plugin-cc';
 
