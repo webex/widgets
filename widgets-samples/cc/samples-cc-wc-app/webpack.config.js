@@ -3,6 +3,9 @@ const {merge} = require('webpack-merge');
 
 const baseConfig = require('../../../webpack.config');
 
+// Helper function to resolve paths relative to the monorepo root
+const resolveMonorepoRoot = (...segments) => path.resolve(__dirname, '../../../', ...segments);
+
 module.exports = merge(baseConfig, {
   output: {
     path: path.resolve(__dirname, 'dist'),
