@@ -29,6 +29,7 @@ reports/
 .project
 .settings
 .metadata
+.vscode
 
 #Hidden directories
 .npm
@@ -40,7 +41,6 @@ reports/
 
 #Local stuff
 *.json
-!.vscode/settings.json
 .env*
 !.env.default
 !package.json
