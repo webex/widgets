@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.21](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.20...v1.28.0-ccwidgets.21) (2025-02-24)
+
+
+### Bug Fixes
+
+* **tooling:** add-eslint-prettier-precommit-checks-cc-widgets ([#395](https://github.com/webex/widgets/issues/395)) ([669a15b](https://github.com/webex/widgets/commit/669a15beaee36d1324b869443f30e3b12469584b))
+
 # [1.28.0-ccwidgets.20](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.19...v1.28.0-ccwidgets.20) (2025-02-21)
 
 

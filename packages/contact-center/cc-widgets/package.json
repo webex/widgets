@@ -1,7 +1,7 @@
 {
   "name": "@webex/cc-widgets",
   "description": "Webex Contact Center Widgets",
-  "version": "1.28.0-ccwidgets.20",
+  "version": "1.28.0-ccwidgets.21",
   "main": "dist/index.js",
   "publishConfig": {
     "access": "public"
@@ -83,5 +83,5 @@
       "^.+\\.(css|less|scss)$": "babel-jest"
     }
   },
-  "stableVersion": "1.28.0-ccwidgets.19"
+  "stableVersion": "1.28.0-ccwidgets.20"
 }
