@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.22](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.21...v1.28.0-ccwidgets.22) (2025-02-24)
+
+
+### Bug Fixes
+
+* **tooling:** Implement-HMR-in-react-samples-app ([#392](https://github.com/webex/widgets/issues/392)) ([cc5b705](https://github.com/webex/widgets/commit/cc5b70581745b7d08d7937441b3f2b5fd78c4643))
+
 # [1.28.0-ccwidgets.21](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.20...v1.28.0-ccwidgets.21) (2025-02-24)
 
 
