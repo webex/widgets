@@ -90,10 +90,7 @@ export interface TaskProps {
   logger: ILogger;
 }
 
-export type UseTaskProps = Pick<
-  TaskProps,
-  'cc' | 'incomingTask' | 'onAccepted' | 'onDeclined' | 'deviceType' | 'logger'
->;
+export type UseTaskProps = Pick<TaskProps, 'incomingTask' | 'onAccepted' | 'onDeclined' | 'deviceType' | 'logger'>;
 export type UseTaskListProps = Pick<
   TaskProps,
   'cc' | 'taskList' | 'deviceType' | 'onTaskAccepted' | 'onTaskDeclined' | 'logger'

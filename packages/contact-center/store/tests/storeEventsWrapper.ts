@@ -2,7 +2,6 @@ import {act, waitFor} from '@testing-library/react';
 import {CC_EVENTS, TASK_EVENTS} from '../src/store.types';
 import storeWrapper from '../src/storeEventsWrapper';
 import {ITask} from '@webex/plugin-cc';
-import {register} from 'module';
 
 jest.mock('../src/store', () => ({
   getInstance: jest.fn().mockReturnValue({
@@ -182,7 +181,7 @@ describe('storeEventsWrapper', () => {
   });
 
   describe('storeEventsWrapper', () => {
-    const mockTask: ITask = ({
+    const mockTask: ITask = {
       data: {
         interactionId: 'interaction1',
         interaction: {
@@ -191,7 +190,7 @@ describe('storeEventsWrapper', () => {
       },
       on: jest.fn(),
       off: jest.fn(),
-    } as unknown) as ITask;
+    } as unknown as ITask;
 
     beforeEach(() => {
       jest.clearAllMocks();
@@ -292,7 +291,7 @@ describe('storeEventsWrapper', () => {
   });
 
   describe('storeEventsWrapper events reactions', () => {
-    const mockTask: ITask = ({
+    const mockTask: ITask = {
       data: {
         interactionId: 'interaction1',
         interaction: {
@@ -301,7 +300,7 @@ describe('storeEventsWrapper', () => {
       },
       on: jest.fn(),
       off: jest.fn(),
-    } as unknown) as ITask;
+    } as unknown as ITask;
 
     const options = {someOption: 'value'};
 
@@ -390,7 +389,7 @@ describe('storeEventsWrapper', () => {
       storeWrapper.handleIncomingTask(mockTask);
 
       expect(setIncomingTaskSpy).toHaveBeenCalledWith(mockTask);
-      expect(mockTask.on).not.toHaveBeenCalledWith;
+      expect(mockTask.on).not.toHaveBeenCalledWith();
     });
 
     it('should handle task assignment', () => {
@@ -628,26 +627,26 @@ describe('storeEventsWrapper', () => {
 
     it('should handle task rejection event and call onTaskRejected with the provided reason', () => {
       const rejectTask: ITask = {
-        data: { interactionId: 'rejectTest', interaction: { state: 'connected' } },
+        data: {interactionId: 'rejectTest', interaction: {state: 'connected'}},
         on: jest.fn(),
         off: jest.fn(),
       } as unknown as ITask;
-      
+
       const onTaskRejectedMock = jest.fn();
       storeWrapper.setTaskRejected(onTaskRejectedMock);
       const removeSpy = jest.spyOn(storeWrapper, 'handleTaskRemove');
       storeWrapper['store'].taskList = [];
-      
+
       storeWrapper.handleIncomingTask(rejectTask);
-      const taskRejectCall = rejectTask.on.mock.calls.find(call => call[0] === TASK_EVENTS.TASK_REJECT);
+      const taskRejectCall = rejectTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_REJECT);
       expect(taskRejectCall).toBeDefined();
       const rejectCallback = taskRejectCall[1];
-      
+
       // Simulate rejection event with a specified reason
       const reason = 'Task Rejected Reason';
-      rejectCallback({ reason });
-      
-      expect(onTaskRejectedMock).toHaveBeenCalledWith({ 'reason': reason });
+      rejectCallback({reason});
+
+      expect(onTaskRejectedMock).toHaveBeenCalledWith({reason: reason});
       expect(removeSpy).toHaveBeenCalledWith('rejectTest');
     });
   });

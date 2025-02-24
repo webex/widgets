@@ -29,7 +29,7 @@ describe('UserState Component', () => {
     global.URL.createObjectURL = jest.fn(() => 'blob:http://localhost:3000/12345');
 
     if (typeof window.HTMLElement.prototype.attachInternals !== 'function') {
-      window.HTMLElement.prototype.attachInternals = jest.fn() as any;
+      window.HTMLElement.prototype.attachInternals = jest.fn();
     }
   });
 

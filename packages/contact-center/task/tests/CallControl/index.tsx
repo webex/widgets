@@ -1,5 +1,5 @@
 import React from 'react';
-import {render, screen} from '@testing-library/react';
+import {render} from '@testing-library/react';
 import * as helper from '../../src/helper';
 import {CallControl} from '../../src';
 import '@testing-library/jest-dom';
