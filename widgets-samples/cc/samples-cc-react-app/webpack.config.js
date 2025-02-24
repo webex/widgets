@@ -19,22 +19,6 @@ module.exports = merge(baseConfig, {
   module: {
     rules: [
       {
-        test: /\.(ts|tsx)$/,
-        include: [path.resolve(__dirname, '../../../packages/contact-center/**/src')],
-        exclude: /node_modules/,
-        use: 'ts-loader',
-      },
-      {
-        test: /\.scss$/,
-        include: [path.join(__dirname, '../../../packages/contact-center/**/src')],
-        use: [
-          'style-loader', // Injects styles into DOM
-          'css-loader', // Turns CSS into CommonJS
-          'sass-loader', // Compiles Sass to CSS
-        ],
-        exclude: /node_modules/,
-      },
-      {
         test: /\.css$/,
         use: ['style-loader', 'css-loader'],
       },
