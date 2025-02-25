@@ -1,5 +1,6 @@
 import React from 'react';
 import {IncomingTaskPresentationalProps} from '../task.types';
+import {ButtonPill} from '@momentum-ui/react-collaboration';
 
 const styles: {[key: string]: React.CSSProperties} = {
   box: {
@@ -162,12 +163,12 @@ const IncomingTaskPresentational: React.FunctionComponent<IncomingTaskPresentati
 
               {isBrowser && (
                 <div style={styles.buttonsWrapper}>
-                  <button style={styles.answerButton} onClick={accept}>
+                  <ButtonPill style={styles.answerButton} onPress={accept}>
                     Answer
-                  </button>
-                  <button style={styles.declineButton} onClick={decline}>
+                  </ButtonPill>
+                  <ButtonPill style={styles.declineButton} onPress={decline}>
                     Decline
-                  </button>
+                  </ButtonPill>
                 </div>
               )}
             </div>

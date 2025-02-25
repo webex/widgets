@@ -4,6 +4,10 @@ import '@testing-library/jest-dom';
 import TaskListPresentational from '../../src/TaskList/task-list.presentational';
 import {TaskListPresentationalProps} from '../../src/task.types';
 
+jest.mock('@momentum-ui/react-collaboration', () => ({
+  ButtonPill: () => <div data-testid="ButtonPill" />,
+}));
+
 describe('TaskListPresentational Component', () => {
   afterEach(cleanup);
 

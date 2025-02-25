@@ -5,6 +5,10 @@ import {IncomingTask} from '../../src';
 import store from '@webex/cc-store';
 import '@testing-library/jest-dom';
 
+jest.mock('@momentum-ui/react-collaboration', () => ({
+  ButtonPill: () => <div data-testid="ButtonPill" />,
+}));
+
 // Mock the store
 jest.mock('@webex/cc-store', () => ({
   cc: {},

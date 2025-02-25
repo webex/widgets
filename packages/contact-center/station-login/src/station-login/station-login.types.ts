@@ -5,11 +5,6 @@ import {ILogger} from '@webex/cc-store';
  */
 export interface IStationLoginProps {
   /**
-   * The name of the station.
-   */
-  name: string;
-
-  /**
    * Webex instance.
    */
   cc: IContactCenter;
@@ -107,7 +102,6 @@ export interface IStationLoginProps {
 
 export type StationLoginPresentationalProps = Pick<
   IStationLoginProps,
-  | 'name'
   | 'teams'
   | 'loginOptions'
   | 'login'

@@ -3,6 +3,7 @@ import {WrapupCodes} from '@webex/cc-store';
 
 import {CallControlPresentationalProps} from '../task.types';
 import './call-control.styles.scss';
+import {ButtonPill} from '@momentum-ui/react-collaboration';
 
 function CallControlPresentational(props: CallControlPresentationalProps) {
   const [isHeld, setIsHeld] = useState(false);
@@ -60,15 +61,15 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
               <legend className="legend-box">Call Control</legend>
               <div style={{display: 'flex', flexDirection: 'column', flexGrow: 1}}>
                 <div style={{display: 'flex', gap: '1rem'}}>
-                  <button className="btn" onClick={handletoggleHold} disabled={wrapupRequired}>
+                  <ButtonPill onPress={handletoggleHold} disabled={wrapupRequired} color={isHeld ? 'join' : 'cancel'}>
                     {isHeld ? 'Resume' : 'Hold'}
-                  </button>
-                  <button className="btn" onClick={handletoggleRecording} disabled={wrapupRequired}>
+                  </ButtonPill>
+                  <ButtonPill onPress={handletoggleRecording} disabled={wrapupRequired}>
                     {isRecording ? 'Pause Recording' : 'Resume Recording'}
-                  </button>
-                  <button className="btn" onClick={endCall} disabled={wrapupRequired || isHeld}>
+                  </ButtonPill>
+                  <ButtonPill onPress={endCall} disabled={wrapupRequired || isHeld}>
                     End
-                  </button>
+                  </ButtonPill>
                 </div>
                 <div style={{display: 'flex', gap: '1rem', marginTop: '1rem'}}>
                   <select className="select" onChange={handleWrapupChange} disabled={!wrapupRequired}>
@@ -79,13 +80,9 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
                       </option>
                     ))}
                   </select>
-                  <button
-                    className="btn"
-                    onClick={handleWrapupCall}
-                    disabled={!wrapupRequired && !selectedWrapupReason}
-                  >
+                  <ButtonPill onPress={handleWrapupCall} disabled={!wrapupRequired && !selectedWrapupReason}>
                     Wrap Up
-                  </button>
+                  </ButtonPill>
                 </div>
               </div>
             </fieldset>

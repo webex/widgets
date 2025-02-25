@@ -71,7 +71,7 @@
     }
   },
   "peerDependencies": {
-    "@momentum-design/components": ">=0.18.3",
+    "@momentum-ui/react-collaboration": ">=26.197.0",
     "react": ">=18.3.1",
     "react-dom": ">=18.3.1"
   },

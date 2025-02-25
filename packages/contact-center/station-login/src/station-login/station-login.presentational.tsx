@@ -2,10 +2,10 @@ import React, {useEffect, useRef} from 'react';
 import {StationLoginPresentationalProps} from './station-login.types';
 import './station-login.style.scss';
 import {MULTIPLE_SIGN_IN_ALERT_MESSAGE, MULTIPLE_SIGN_IN_ALERT_TITLE} from './constants';
+import {ButtonPill} from '@momentum-ui/react-collaboration';
 
 const StationLoginPresentational: React.FunctionComponent<StationLoginPresentationalProps> = (props) => {
   const {
-    name,
     teams,
     loginOptions,
     login,
@@ -106,7 +106,6 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
           </div>
         </dialog>
       )}
-      <h1 data-testid="station-login-heading">{name}</h1>
       <div className="box">
         <section className="section-box">
           <fieldset className="fieldset">
@@ -143,13 +142,13 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
                     onInput={updateDN}
                   />
                   {isAgentLoggedIn ? (
-                    <button id="logoutAgent" className="btn" onClick={logout}>
+                    <ButtonPill id="logoutAgent" onPress={logout} color="cancel">
                       Logout
-                    </button>
+                    </ButtonPill>
                   ) : (
-                    <button id="AgentLogin" className="btn" onClick={login}>
+                    <ButtonPill id="AgentLogin" onPress={login} color="join">
                       Login
-                    </button>
+                    </ButtonPill>
                   )}
                 </fieldset>
               </div>
