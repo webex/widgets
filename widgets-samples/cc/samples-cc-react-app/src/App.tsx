@@ -1,19 +1,19 @@
-import React, {useState, useRef, useEffect} from 'react';
+import React, {useState, useEffect} from 'react';
 import {StationLogin, UserState, IncomingTask, TaskList, CallControl, store} from '@webex/cc-widgets';
-import {ThemeProvider, IconProvider} from '@momentum-design/components/dist/react';
+import {ButtonPill, CheckboxNext} from '@momentum-ui/react-collaboration';
+import {ThemeProvider} from '@momentum-design/components/dist/react';
 import './App.scss';
 
 function App() {
   const [isSdkReady, setIsSdkReady] = useState(false);
   const [selectedWidgets, setSelectedWidgets] = useState({
-    stationLogin: false,
-    userState: false,
-    incomingTask: false,
-    taskList: false,
-    callControl: false,
+    stationLogin: true,
+    userState: true,
+    incomingTask: true,
+    taskList: true,
+    callControl: true,
   });
   const [accessToken, setAccessToken] = useState('');
-  const themeCheckboxRef = useRef(null);
   const [currentTheme, setCurrentTheme] = useState(store.currentTheme);
   const [isMultiLoginEnabled, setIsMultiLoginEnabled] = useState(false);
   const [showRejectedPopup, setShowRejectedPopup] = useState(false);
@@ -126,100 +126,69 @@ function App() {
   }, []);
 
   return (
-    <div className="mds-typography">
+    <div className="mds-typography" style={{height: '100%'}}>
       <ThemeProvider
         themeclass={currentTheme === 'LIGHT' ? 'mds-theme-stable-lightWebex' : 'mds-theme-stable-darkWebex'}
       >
-        <IconProvider>
+        <div className="webexTheme">
           <h1>Contact Center widgets in a react app</h1>
-          <input
-            type="text"
-            placeholder="Enter your access token"
-            value={accessToken}
-            onChange={(e) => setAccessToken(e.target.value)}
-          />
-          <br />
+          <div className="accessTokenTheme">
+            <input
+              type="text"
+              placeholder="Enter your access token"
+              value={accessToken}
+              onChange={(e) => setAccessToken(e.target.value)}
+            />
+            <CheckboxNext
+              aria-label="theme checkbox"
+              id="theme-checkbox"
+              value={currentTheme}
+              isSelected={currentTheme === 'DARK'}
+              label="Dark Theme"
+              onChange={() => {
+                setCurrentTheme(currentTheme === 'DARK' ? 'LIGHT' : 'DARK');
+                store.setCurrentTheme(currentTheme === 'DARK' ? 'LIGHT' : 'DARK');
+              }}
+            />
+          </div>
           <>
-            <div>
-              <label>
-                <input
-                  type="checkbox"
-                  name="stationLogin"
-                  checked={selectedWidgets.stationLogin}
-                  onChange={handleCheckboxChange}
-                />
-                Station Login
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  name="userState"
-                  checked={selectedWidgets.userState}
-                  onChange={handleCheckboxChange}
-                />
-                User State
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  name="incomingTask"
-                  checked={selectedWidgets.incomingTask}
-                  onChange={handleCheckboxChange}
-                />
-                Incoming Task
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  name="taskList"
-                  checked={selectedWidgets.taskList}
-                  onChange={handleCheckboxChange}
-                />
-                Task List
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  name="callControl"
-                  checked={selectedWidgets.callControl}
-                  onChange={handleCheckboxChange}
-                />
-                Call Control
-              </label>
+            <div className="widget-checkboxes">
+              {['stationLogin', 'userState', 'incomingTask', 'taskList', 'callControl'].map((widget) => (
+                <label key={widget}>
+                  <input
+                    type="checkbox"
+                    name={widget}
+                    checked={selectedWidgets[widget]}
+                    onChange={handleCheckboxChange}
+                  />
+                  {widget.charAt(0).toUpperCase() + widget.slice(1).replace(/([A-Z])/g, ' $1')}
+                </label>
+              ))}
             </div>
           </>
-          <input
-            type="checkbox"
-            id="theme"
-            name="theme"
-            ref={themeCheckboxRef}
-            onChange={() => {
-              setCurrentTheme(themeCheckboxRef.current.checked ? 'DARK' : 'LIGHT');
-              store.setCurrentTheme(themeCheckboxRef.current.checked ? 'DARK' : 'LIGHT');
-            }}
-          />{' '}
-          Dark Theme
-          <br />
-          <div className="warning-note" style={{color: 'red', marginBottom: '10px'}}>
-            <strong>Note:</strong> The "Enable Multi Login" option must be set before initializing the SDK. Changes to
-            this setting after SDK initialization will not take effect. Please ensure you configure this option before
-            clicking the "Init Widgets" button.
-          </div>
           <label>
             <input type="checkbox" id="multiLoginFlag" name="multiLoginFlag" onChange={enableDisableMultiLogin} />{' '}
             Enable Multi Login
           </label>
+          <div
+            className="warning-note"
+            style={{color: 'var(--mds-color-theme-text-error-normal)', marginBottom: '10px'}}
+          >
+            <strong>Note:</strong> The "Enable Multi Login" option must be set before initializing the SDK. Changes to
+            this setting after SDK initialization will not take effect. Please ensure you configure this option before
+            clicking the "Init Widgets" button.
+          </div>
           <br />
-          <button
+          <ButtonPill
             disabled={accessToken.trim() === ''}
-            onClick={() => {
+            onPress={() => {
               store.init({webexConfig, access_token: accessToken}).then(() => {
                 setIsSdkReady(true);
               });
             }}
           >
             Init Widgets
-          </button>
+          </ButtonPill>
           {isSdkReady && (
             <>
               {selectedWidgets.stationLogin && <StationLogin onLogin={onLogin} onLogout={onLogout} />}
@@ -246,10 +215,10 @@ function App() {
                 <option value="Available">Available</option>
                 <option value="Idle">Idle</option>
               </select>
-              <button onClick={handlePopoverSubmit}>Submit</button>
+              <ButtonPill onPress={handlePopoverSubmit} />
             </div>
           )}
-        </IconProvider>
+        </div>
       </ThemeProvider>
     </div>
   );
