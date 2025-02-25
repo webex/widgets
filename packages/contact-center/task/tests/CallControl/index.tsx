@@ -4,6 +4,10 @@ import * as helper from '../../src/helper';
 import {CallControl} from '../../src';
 import '@testing-library/jest-dom';
 
+jest.mock('@momentum-ui/react-collaboration', () => ({
+  ButtonPill: () => <div data-testid="ButtonPill" />,
+}));
+
 // Mock the store
 jest.mock('@webex/cc-store', () => ({
   cc: {},

@@ -2,7 +2,7 @@ import React from 'react';
 
 import {IUserState} from './user-state.types';
 import {formatTime} from '../../utils';
-import {Button, ButtonPill} from '@momentum-ui/react-collaboration';
+import {ButtonPill} from '@momentum-ui/react-collaboration';
 
 import './user-state.scss';
 
@@ -38,28 +38,7 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
                 );
               })}
           </select>
-          <Button
-            variant="secondary"
-            size={36}
-            color="default"
-            prefix-icon=""
-            postfix-icon=""
-            type="button"
-            role="button"
-            aria-label=""
-            inverted
-          >
-            Click Me
-          </Button>
-          <ButtonPill
-            type="button"
-            color="message"
-            style={{
-              margin: '0.5rem',
-            }}
-          >
-            Example Text
-          </ButtonPill>
+          <ButtonPill type="button">Set state</ButtonPill>
           <div className={`elapsedTime ${isSettingAgentStatus ? 'elapsedTime-disabled' : ''}`}>
             {formatTime(elapsedTime)}
           </div>

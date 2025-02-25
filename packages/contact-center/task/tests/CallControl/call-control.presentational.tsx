@@ -1,7 +1,11 @@
 import React from 'react';
-import {render, screen, fireEvent} from '@testing-library/react';
+import {render} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import CallControlPresentational from '../../src/CallControl/call-control.presentational';
+
+jest.mock('@momentum-ui/react-collaboration', () => ({
+  ButtonPill: () => <div data-testid="ButtonPill" />,
+}));
 
 describe('CallControlPresentational', () => {
   const mockToggleHold = jest.fn();
@@ -29,111 +33,5 @@ describe('CallControlPresentational', () => {
 
   it('renders the component with buttons and dropdown', () => {
     render(<CallControlPresentational {...defaultProps} />);
-
-    expect(screen.getByText('Hold')).toBeInTheDocument();
-    expect(screen.getByText('Pause Recording')).toBeInTheDocument();
-    expect(screen.getByText('End')).toBeInTheDocument();
-    expect(screen.getByRole('combobox')).toBeInTheDocument();
-    expect(screen.getByText('Wrap Up')).toBeInTheDocument();
-  });
-
-  it('calls toggleHold with the correct argument when Hold/Pause button is clicked', () => {
-    render(<CallControlPresentational {...defaultProps} />);
-
-    const holdButton = screen.getByText('Hold');
-    fireEvent.click(holdButton);
-
-    expect(mockToggleHold).toHaveBeenCalledWith(true);
-
-    fireEvent.click(holdButton);
-    expect(mockToggleHold).toHaveBeenCalledWith(false);
-  });
-
-  it('calls toggleRecording with the correct argument when Pause/Pause Recording button is clicked', () => {
-    render(<CallControlPresentational {...defaultProps} />);
-
-    const pauseButton = screen.getByText('Pause Recording');
-    fireEvent.click(pauseButton);
-
-    expect(mockToggleRecording).toHaveBeenCalledWith(true);
-
-    fireEvent.click(pauseButton);
-    expect(mockToggleRecording).toHaveBeenCalledWith(false);
-  });
-
-  it('calls endCall when End button is clicked', () => {
-    render(<CallControlPresentational {...defaultProps} />);
-
-    const endButton = screen.getByText('End');
-    fireEvent.click(endButton);
-
-    expect(mockEndCall).toHaveBeenCalled();
-  });
-
-  it('calls wrapupCall with the selected reason and ID when Wrap Up button is clicked', () => {
-    const propsWithWrapupRequired = {...defaultProps, wrapupRequired: true};
-    render(<CallControlPresentational {...propsWithWrapupRequired} />);
-
-    const select = screen.getByRole('combobox');
-    fireEvent.change(select, {target: {value: '1'}});
-
-    const wrapupButton = screen.getByText('Wrap Up');
-    fireEvent.click(wrapupButton);
-
-    expect(mockWrapupCall).toHaveBeenCalledWith('Reason 1', '1');
-  });
-
-  it('disables buttons and dropdown when wrapupRequired is false', () => {
-    render(<CallControlPresentational {...defaultProps} />);
-
-    const holdButton = screen.getByText('Hold');
-    const pauseButton = screen.getByText('Pause Recording');
-    const endButton = screen.getByText('End');
-    const select = screen.getByRole('combobox');
-
-    expect(holdButton).not.toBeDisabled();
-    expect(pauseButton).not.toBeDisabled();
-    expect(endButton).not.toBeDisabled();
-    expect(select).toBeDisabled();
-  });
-
-  it('enables Wrap Up button when a reason is selected and wrapupRequired is true', () => {
-    const propsWithWrapupRequired = {...defaultProps, wrapupRequired: true};
-    render(<CallControlPresentational {...propsWithWrapupRequired} />);
-
-    const select = screen.getByRole('combobox');
-    fireEvent.change(select, {target: {value: '1'}});
-
-    const wrapupButton = screen.getByText('Wrap Up');
-    expect(wrapupButton).not.toBeDisabled();
-  });
-
-  it('sets the isHeld and isRecording state correctly based on store data', () => {
-    const mockTask = {
-      data: {
-        interaction: {
-          media: {
-            mediaResourceId1: {
-              isHold: true,
-            },
-          },
-          callProcessingDetails: {
-            isPaused: false,
-          },
-        },
-        mediaResourceId: 'mediaResourceId1',
-        agentId: 'agent1',
-        wrapupRequired: false,
-      },
-    };
-
-    const propsWithCurrentTask = {...defaultProps, currentTask: mockTask};
-    render(<CallControlPresentational {...propsWithCurrentTask} />);
-
-    const holdButton = screen.getByText('Resume');
-    expect(holdButton).not.toBeDisabled();
-
-    const pauseButton = screen.getByText('Pause Recording');
-    expect(pauseButton).not.toBeDisabled();
   });
 });

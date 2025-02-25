@@ -4,6 +4,10 @@ import {StationLogin} from '../../src';
 import * as helper from '../../src/helper';
 import '@testing-library/jest-dom';
 
+jest.mock('@momentum-ui/react-collaboration', () => ({
+  ButtonPill: () => <div data-testid="ButtonPill" />,
+}));
+
 const teamsMock = ['team123', 'team456'];
 const ccMock = {
   on: () => {},
