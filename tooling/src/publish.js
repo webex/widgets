@@ -56,8 +56,8 @@ function versionAndPublish() {
         const packageData = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
 
         console.log(`Removing stable version from package.json for ${dirent.name}`);
-        removeStableVersion(packageJsonPath, packageData); // Assuming this function is defined elsewhere
-        updateVersion(packageJsonPath, packageData, newVersion); // Assuming this function is defined elsewhere
+        removeStableVersion(packageJsonPath, packageData);
+        updateVersion(packageJsonPath, packageData, newVersion);
         return packageData.name;
       });
 
