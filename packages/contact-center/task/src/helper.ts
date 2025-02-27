@@ -1,7 +1,14 @@
 import {useEffect, useCallback, useRef} from 'react';
 import {ITask} from '@webex/plugin-cc';
 import store from '@webex/cc-store';
-import {TASK_EVENTS, useCallControlProps, UseTaskListProps, UseTaskProps} from './task.types';
+import {
+  TASK_EVENTS,
+  useCallControlProps,
+  UseTaskListProps,
+  UseTaskProps,
+  useOutdialCallProps,
+  DialerPayload,
+} from './task.types';
 
 // Hook for managing the task list
 export const useTaskList = (props: UseTaskListProps) => {
@@ -110,7 +117,7 @@ export const useCallControl = (props: useCallControlProps) => {
         audioRef.current.srcObject = new MediaStream([track]);
       }
     },
-    [audioRef, currentTask]
+    [audioRef]
   );
 
   useEffect(() => {
@@ -121,7 +128,7 @@ export const useCallControl = (props: useCallControlProps) => {
     return () => {
       currentTask.off(TASK_EVENTS.TASK_MEDIA, handleTaskMedia);
     };
-  }, [currentTask]);
+  }, [currentTask, handleTaskMedia]);
 
   const toggleHold = (hold: boolean) => {
     if (hold) {
@@ -185,5 +192,44 @@ export const useCallControl = (props: useCallControlProps) => {
     toggleHold,
     toggleRecording,
     wrapupCall,
+  };
+};
+
+export const useOutdialCall = (props: useOutdialCallProps) => {
+  const {cc, logger} = props;
+
+  const startOutdial = (dialerPayload: DialerPayload) => {
+    if (!dialerPayload) return;
+
+    // Perform validation on destination number.
+    if (!dialerPayload.destination || !dialerPayload.destination.trim()) {
+      alert('Destination number is required, it cannot be empty');
+      return;
+    }
+
+    // Perform validation on entry point id.
+    if (!dialerPayload.entryPointId) {
+      alert('Entry point ID is not configured');
+      return;
+    }
+
+    cc.startOutdial(dialerPayload)
+      .then((response) => {
+        logger.info('Outdial call started', response);
+      })
+      .catch((error: Error) => {
+        logError(`Error starting outdial call: ${error}`, 'startOutdial');
+      });
+  };
+
+  const logError = (message: string, method: string) => {
+    logger.error(message, {
+      module: 'widget-cc-task#helper.ts',
+      method: 'useOutdialCall',
+    });
+  };
+
+  return {
+    startOutdial,
   };
 };

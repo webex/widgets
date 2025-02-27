@@ -206,3 +206,24 @@ export type CallControlPresentationalProps = Pick<
 >;
 
 export type useCallControlProps = Pick<ControlProps, 'currentTask' | 'onHoldResume' | 'onEnd' | 'onWrapUp' | 'logger'>;
+
+export interface OutdialCallProps {
+  startOutdial: (dialerPayload: DialerPayload) => void;
+  pressKey: (key: string) => void;
+  dialerPayload: DialerPayload;
+  cc: IContactCenter;
+}
+
+export interface DialerPayload {
+  entryPointId: string;
+  destination: string;
+  direction: string;
+  origin?: string;
+  attributes: {[key: string]: string};
+  mediaType: string;
+  outboundType: string;
+}
+
+export type OutdialCallPresentationalProps = Pick<OutdialCallProps, 'startOutdial' | 'cc'>;
+
+export type useOutdialCallProps = Pick<TaskProps, 'cc' | 'logger'>;

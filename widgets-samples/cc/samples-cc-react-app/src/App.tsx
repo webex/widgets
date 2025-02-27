@@ -1,5 +1,5 @@
 import React, {useState, useRef} from 'react';
-import {StationLogin, UserState, IncomingTask, TaskList, CallControl, store} from '@webex/cc-widgets';
+import {StationLogin, UserState, IncomingTask, TaskList, CallControl, OutdialCall, store} from '@webex/cc-widgets';
 import {ThemeProvider, IconProvider} from '@momentum-design/components/dist/react';
 
 function App() {
@@ -10,6 +10,7 @@ function App() {
     incomingTask: false,
     taskList: false,
     callControl: false,
+    outdialCall: false,
   });
   const [accessToken, setAccessToken] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -139,6 +140,15 @@ function App() {
                 />
                 Call Control
               </label>
+              <label>
+                <input
+                  type="checkbox"
+                  name="outdialCall"
+                  checked={selectedWidgets.outdialCall}
+                  onChange={handleCheckboxChange}
+                />
+                Outdial Call
+              </label>
             </div>
           </>
           <input
@@ -186,6 +196,7 @@ function App() {
                   {selectedWidgets.callControl && (
                     <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapup={onWrapup} />
                   )}
+                  {selectedWidgets.outdialCall && <OutdialCall />}
                 </>
               )}
             </>

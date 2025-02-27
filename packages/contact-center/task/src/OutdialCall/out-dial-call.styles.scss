@@ -1,0 +1,68 @@
+.box {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.section-box {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.fieldset {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 20px;
+}
+
+.legend-box {
+  font-weight: bold;
+  color: #0052bf;
+}
+
+.keypad {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #222;
+    padding: 20px;
+    border-radius: 10px;
+    width: 250px;
+}
+  .keypad input {
+    width: 100%;
+    padding: 10px;
+    text-align: center;
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+  .keys {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+  .key {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #333;
+    color: white;
+    font-size: 20px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+  .call-btn {
+    margin-top: 10px;
+    background: green;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 50%;
+    cursor: pointer;
+}
