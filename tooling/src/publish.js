@@ -17,6 +17,21 @@ function removeStableVersion(packageJsonPath, packageData) {
   }
 }
 
+// Function to update the version
+function updateVersion(packageJsonPath, packageData, newVersion) {
+  try {
+    if (packageData.hasOwnProperty('version')) {
+      packageData.version = newVersion;
+      fs.writeFileSync(packageJsonPath, JSON.stringify(packageData, null, 2), 'utf-8');
+      console.log(`Version updated to ${newVersion} successfully for ${packageData.name}.`);
+    } else {
+      console.log("'version' key does not exist in package.json.");
+    }
+  } catch (error) {
+    throw new Error(`An error occurred while updating 'version': ${error.message}`);
+  }
+}
+
 function versionAndPublish() {
   const branchName = process.argv[2];
   const newVersion = process.argv[3];
@@ -42,24 +57,15 @@ function versionAndPublish() {
 
         console.log(`Removing stable version from package.json for ${dirent.name}`);
         removeStableVersion(packageJsonPath, packageData); // Assuming this function is defined elsewhere
+        updateVersion(packageJsonPath, packageData, newVersion); // Assuming this function is defined elsewhere
         return packageData.name;
       });
 
-    // Update version in the workspace
-    const updateVersions = (workspace) => {
-      console.log(`Publishing new version for ${workspace}: ${newVersion}`);
-      execSync(`yarn workspace ${workspace} version ${newVersion}`, {stdio: 'inherit'});
-    };
-
     // Publish the package
     const publishWorkspace = (workspace) => {
-      console.log(`Updating version for ${workspace}: ${newVersion}`);
+      console.log(`Publishing new version for ${workspace}: ${newVersion}`);
       execSync(`yarn workspace ${workspace} npm publish --tag ${branchName}`, {stdio: 'inherit'});
     };
-
-    for (const workspace of workspaceData) {
-      updateVersions(workspace);
-    }
 
     for (const workspace of workspaceData) {
       publishWorkspace(workspace);
