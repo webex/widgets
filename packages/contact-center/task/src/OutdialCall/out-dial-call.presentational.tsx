@@ -1,7 +1,6 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {OutdialCallPresentationalProps} from '../task.types';
 import './out-dial-call.styles.scss';
-import {useState} from 'react';
 
 export default function OutDialCallPresentational(props: OutdialCallPresentationalProps) {
   const {startOutdial, cc} = props;
@@ -18,6 +17,7 @@ export default function OutDialCallPresentational(props: OutdialCallPresentation
       console.warn('Invalid keypad input:', value);
       return;
     }
+    setDestination((prev) => prev + value);
   };
 
   const dialerPayload = {
@@ -35,44 +35,18 @@ export default function OutDialCallPresentational(props: OutdialCallPresentation
         <fieldset className="fieldset">
           <legend className="legend-box">Outdial Call</legend>
           <div className="keypad">
-            <input onChange={updateOutboundNumber} id="outBoundDialNumber" placeholder="Enter number to dial" />
+            <input
+              onChange={updateOutboundNumber}
+              id="outBoundDialNumber"
+              placeholder="Enter number to dial"
+              value={destination}
+            />
             <div className="keys">
-              <div className="key" onClick={() => pressKey('1')}>
-                1
-              </div>
-              <div className="key" onClick={() => pressKey('2')}>
-                2
-              </div>
-              <div className="key" onClick={() => pressKey('3')}>
-                3
-              </div>
-              <div className="key" onClick={() => pressKey('4')}>
-                4
-              </div>
-              <div className="key" onClick={() => pressKey('5')}>
-                5
-              </div>
-              <div className="key" onClick={() => pressKey('6')}>
-                6
-              </div>
-              <div className="key" onClick={() => pressKey('7')}>
-                7
-              </div>
-              <div className="key" onClick={() => pressKey('8')}>
-                8
-              </div>
-              <div className="key" onClick={() => pressKey('9')}>
-                9
-              </div>
-              <div className="key" onClick={() => pressKey('*')}>
-                *
-              </div>
-              <div className="key" onClick={() => pressKey('0')}>
-                0
-              </div>
-              <div className="key" onClick={() => pressKey('#')}>
-                #
-              </div>
+              {['1', '2', '3', '4', '5', '6', '7', '8', '9', '*', '0', '#'].map((key) => (
+                <div key={key} className="key" onClick={() => pressKey(key)}>
+                  {key}
+                </div>
+              ))}
             </div>
             <button className="call-btn" onClick={() => startOutdial(dialerPayload)}>
               <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24">
