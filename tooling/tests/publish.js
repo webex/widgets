@@ -17,6 +17,7 @@ describe('versionAndPublish', () => {
     jest.resetAllMocks();
     mockFs.existsSync.mockReturnValue(true);
   });
+
   it('Exits if we dont have enough arguments', () => {
     jest.spyOn(process, 'exit').mockImplementation(() => {});
     process.argv = ['node', 'script.js', 'main'];
@@ -92,8 +93,66 @@ describe('versionAndPublish', () => {
     process.argv = ['node', 'script.js', 'main', '1.3.3-test.1'];
     versionAndPublish();
 
-    expect(mockFs.writeFileSync).not.toHaveBeenCalled();
+    // This is to update the version
+    expect(mockFs.writeFileSync).toHaveBeenCalledWith(
+      'packages/contact-center/test-workspace/package.json',
+      expect.any(String),
+      'utf-8'
+    );
     expect(console.log).toHaveBeenCalledWith("'stableVersion' key does not exist in package.json.");
+  });
+
+  it('skips removing "updateVersion" if "version" does not exist', () => {
+    const packageJsonContent = JSON.stringify({
+      name: 'test-workspace',
+      stableVersion: '1.0.0',
+    });
+    jest.spyOn(fs, 'readdirSync').mockReturnValue([{name: 'test-workspace', isDirectory: () => true}]);
+    jest.spyOn(fs.Dirent.prototype, 'isDirectory').mockReturnValue(true);
+    mockFs.readFileSync.mockReturnValue(packageJsonContent);
+    mockFs.writeFileSync.mockImplementation(() => {});
+
+    process.argv = ['node', 'script.js', 'main', '1.3.3-test.1'];
+    versionAndPublish();
+
+    // This is to remove the stableVersion key
+    expect(mockFs.writeFileSync).toHaveBeenCalledWith(
+      'packages/contact-center/test-workspace/package.json',
+      expect.any(String),
+      'utf-8'
+    );
+    expect(console.log).toHaveBeenCalledWith("'version' key does not exist in package.json.");
+  });
+
+  it('fails the process if version update fails', () => {
+    const packageJsonContent = JSON.stringify({
+      name: 'test-workspace',
+      stableVersion: '1.0.0',
+      version: '1.0.0',
+    });
+
+    jest.spyOn(fs, 'readdirSync').mockReturnValue([{name: 'test-workspace', isDirectory: () => true}]);
+    jest.spyOn(fs.Dirent.prototype, 'isDirectory').mockReturnValue(true);
+    mockFs.readFileSync.mockReturnValue(packageJsonContent);
+    mockFs.writeFileSync
+      .mockImplementationOnce(() => {})
+      .mockImplementationOnce(() => {
+        throw new Error('Error while writing to file');
+      });
+
+    process.argv = ['node', 'script.js', 'main', '1.3.3-test.1'];
+    versionAndPublish();
+
+    // This is to remove the stableVersion key
+    expect(mockFs.writeFileSync).toHaveBeenCalledWith(
+      'packages/contact-center/test-workspace/package.json',
+      expect.any(String),
+      'utf-8'
+    );
+    expect(console.error).toHaveBeenCalledWith(
+      'Failed to process workspaces:',
+      "An error occurred while updating 'version': Error while writing to file"
+    );
   });
 
   it('updates the version for all packages and then publishes the package.', () => {
@@ -123,67 +182,25 @@ describe('versionAndPublish', () => {
     versionAndPublish();
 
     // Ensures that first 2 calls were to update version and next 2 calls were to publish the package.
-    expect(mockExecSync).toHaveBeenNthCalledWith(1, 'yarn workspace @webex/cc-store version 1.0.1', {stdio: 'inherit'});
-
-    expect(mockExecSync).toHaveBeenNthCalledWith(2, 'yarn workspace @webex/cc-station-login version 1.0.1', {
-      stdio: 'inherit',
-    });
-
-    expect(mockExecSync).toHaveBeenNthCalledWith(3, 'yarn workspace @webex/cc-store npm publish --tag main', {
-      stdio: 'inherit',
-    });
-    expect(mockExecSync).toHaveBeenNthCalledWith(4, 'yarn workspace @webex/cc-station-login npm publish --tag main', {
-      stdio: 'inherit',
-    });
-  });
-
-  it('should not publish version if there was an error while updating the version.', () => {
-    const packageJsonContent = JSON.stringify({
-      name: '@webex/cc-store',
-      version: '1.0.0',
-    });
-    const packageJsonContent2 = JSON.stringify({
-      name: '@webex/cc-station-login',
-      version: '1.0.0',
-    });
-
-    mockFs.readdirSync.mockReturnValue([
-      {name: 'store', isDirectory: () => true},
-      {name: 'station-login', isDirectory: () => true},
-    ]);
-
-    mockFs.readFileSync.mockReturnValueOnce(packageJsonContent).mockReturnValueOnce(packageJsonContent2);
-    mockFs.writeFileSync.mockImplementation(() => {});
-
-    const mockExecSync = require('child_process').execSync;
-    mockExecSync.mockImplementation(() => {
-      throw new Error('Some error occurred');
-    });
-
-    const processArgvMock = ['node', 'script.js', 'main', '1.0.1'];
-    process.argv = processArgvMock;
-
-    versionAndPublish();
-
-    expect(mockExecSync).toHaveBeenNthCalledWith(1, 'yarn workspace @webex/cc-store version 1.0.1', {stdio: 'inherit'});
-
-    // Ensures that after the error we dont publish packages
-    expect(mockExecSync).not.toHaveBeenNthCalledWith(3, 'yarn workspace @webex/cc-station-login version 1.0.1', {
-      stdio: 'inherit',
-    });
-
-    expect(mockExecSync).not.toHaveBeenNthCalledWith(2, 'yarn workspace @webex/cc-store npm publish --tag main', {
-      stdio: 'inherit',
-    });
-    expect(mockExecSync).not.toHaveBeenNthCalledWith(
-      4,
-      'yarn workspace @webex/cc-station-login npm publish --tag main',
-      {
-        stdio: 'inherit',
-      }
+    expect(mockFs.writeFileSync).toHaveBeenNthCalledWith(
+      1,
+      'packages/contact-center/store/package.json',
+      expect.any(String),
+      'utf-8'
+    );
+    expect(mockFs.writeFileSync).toHaveBeenNthCalledWith(
+      2,
+      'packages/contact-center/station-login/package.json',
+      expect.any(String),
+      'utf-8'
     );
 
-    expect(console.error).toHaveBeenCalledWith('Failed to process workspaces:', 'Some error occurred');
+    expect(mockExecSync).toHaveBeenNthCalledWith(1, 'yarn workspace @webex/cc-store npm publish --tag main', {
+      stdio: 'inherit',
+    });
+    expect(mockExecSync).toHaveBeenNthCalledWith(2, 'yarn workspace @webex/cc-station-login npm publish --tag main', {
+      stdio: 'inherit',
+    });
   });
 
   it('error occurred while reading package.json data', () => {
