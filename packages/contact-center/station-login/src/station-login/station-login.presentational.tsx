@@ -2,7 +2,7 @@ import React, {useEffect, useRef} from 'react';
 import {StationLoginPresentationalProps} from './station-login.types';
 import './station-login.style.scss';
 import {MULTIPLE_SIGN_IN_ALERT_MESSAGE, MULTIPLE_SIGN_IN_ALERT_TITLE} from './constants';
-import {ButtonPill} from '@momentum-ui/react-collaboration';
+import {ButtonPill, Checkbox, Text} from '@momentum-ui/react-collaboration';
 
 const StationLoginPresentational: React.FunctionComponent<StationLoginPresentationalProps> = (props) => {
   const {
@@ -109,54 +109,58 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
       <div className="box">
         <section className="section-box">
           <fieldset className="fieldset">
-            <legend className="legend-box">Agent</legend>
-            <div style={{display: 'flex', flexDirection: 'column', flexGrow: 1}}>
-              <div style={{display: 'flex', gap: '1rem'}}>
-                <fieldset
-                  style={{
-                    border: '1px solid #ccc',
-                    borderRadius: '5px',
-                    padding: '10px',
-                    marginBottom: '20px',
-                    flex: 0.69,
-                  }}
-                >
-                  <legend className="legend-box">Select Team</legend>
-                  <select id="teamsDropdown" className="select">
-                    Teams
-                  </select>
-                </fieldset>
-                <fieldset className="fieldset">
-                  <legend className="legend-box">Agent Login</legend>
-                  <select name="LoginOption" id="LoginOption" className="select" onChange={selectLoginOption}>
-                    <option value="" hidden>
-                      Choose Agent Login Option...
-                    </option>
-                  </select>
-                  <input
-                    className="input"
-                    id="dialNumber"
-                    name="dialNumber"
-                    placeholder="Extension/Dial Number"
-                    type="text"
-                    onInput={updateDN}
-                  />
-                  {isAgentLoggedIn ? (
-                    <ButtonPill id="logoutAgent" onPress={logout} color="cancel">
-                      Logout
-                    </ButtonPill>
-                  ) : (
-                    <ButtonPill id="AgentLogin" onPress={login} color="join">
-                      Login
-                    </ButtonPill>
-                  )}
-                </fieldset>
-              </div>
-            </div>
+            <Text tagName={'span'} type="heading-small-bold">
+              Set your interaction preferences
+            </Text>
           </fieldset>
+          <fieldset className="fieldset">
+            <Text tagName="span" type="body-large-regular">
+              Handle calls using
+            </Text>
+            <select name="LoginOption" id="LoginOption" className="select" onChange={selectLoginOption}>
+              <option value="" hidden>
+                Choose Agent Login Option...
+              </option>
+            </select>
+          </fieldset>
+          <fieldset className="fieldset">
+            <Text tagName="span" type="body-large-regular">
+              Dial number
+            </Text>
+            <input
+              className="input"
+              id="dialNumber"
+              name="dialNumber"
+              placeholder="Extension/Dial Number"
+              type="text"
+              onInput={updateDN}
+            />
+          </fieldset>
+          <fieldset className="fieldset">
+            <Text tagName="span" type="body-large-regular">
+              Your team
+            </Text>
+            <select id="teamsDropdown" className="select">
+              Teams
+            </select>
+          </fieldset>
+          <fieldset className="fieldset">
+            <Checkbox htmlId="checkbox-visible" label="Don't show this again"></Checkbox>
+          </fieldset>
+          <div className="btn-container">
+            {isAgentLoggedIn ? (
+              <ButtonPill id="logoutAgent" onPress={logout} color="cancel">
+                Logout
+              </ButtonPill>
+            ) : (
+              <ButtonPill id="AgentLogin" onPress={login} color="join">
+                Save & Continue
+              </ButtonPill>
+            )}
+          </div>
         </section>
       </div>
     </>
-  );
+);
 };
 export default StationLoginPresentational;

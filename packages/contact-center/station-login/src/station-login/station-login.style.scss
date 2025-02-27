@@ -9,15 +9,14 @@
 
 .section-box {
   padding: 10px;
-  border: 1px solid #ddd;
   border-radius: 8px;
+  border: none !important;
 }
 
 .fieldset {
-  border: 1px solid #ccc;
   border-radius: 5px;
-  padding: 10px;
-  margin-bottom: 20px;
+  border: none !important;
+  margin-bottom: 0 !important;
 }
 
 .legend-box {
@@ -34,6 +33,12 @@
   cursor: pointer;
   transition: background-color 0.3s;
   margin-right: 8px;
+}
+
+.btn-container {
+  button {
+    margin-left: auto;
+  }
 }
 
 .select {
