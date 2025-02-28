@@ -156,7 +156,7 @@ function App() {
             </div>
             <>
               <div className="widget-checkboxes">
-                {['stationLogin', 'userState', 'incomingTask', 'taskList', 'callControl'].map((widget) => (
+                {['stationLogin', 'userState', 'incomingTask', 'taskList', 'callControl', 'outdialCall'].map((widget) => (
                   <label key={widget}>
                     <input
                       type="checkbox"
@@ -216,6 +216,7 @@ function App() {
                     {selectedWidgets.callControl && (
                       <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapup={onWrapup} />
                     )}
+                    {selectedWidgets.outdialCall && <OutdialCall />}
                   </>
                 )}
               </>
