@@ -146,7 +146,8 @@ function App() {
                 id="theme-checkbox"
                 value={currentTheme}
                 label="Dark Theme"
-                onChange={() => {
+                // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
+                onchange={() => {
                   setCurrentTheme(currentTheme === 'DARK' ? 'LIGHT' : 'DARK');
                   store.setCurrentTheme(currentTheme === 'DARK' ? 'LIGHT' : 'DARK');
                 }}
