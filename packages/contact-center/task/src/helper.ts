@@ -122,7 +122,7 @@ export const useCallControl = (props: useCallControlProps) => {
     return () => {
       currentTask.off(TASK_EVENTS.TASK_MEDIA, handleTaskMedia);
     };
-  }, [currentTask, handleTaskMedia, isBrowser]);
+  }, [currentTask]);
 
   const toggleHold = (hold: boolean) => {
     if (hold) {
