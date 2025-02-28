@@ -155,6 +155,14 @@ function App() {
               />
             </div>
             <>
+            <Text>
+                  <div
+                    className="warning-note"
+                    style={{color: 'var(--mds-color-theme-text-error-normal)', marginBottom: '10px'}}
+                  >
+                    <strong>Note:</strong> You need to select Incoming Task, Call Control before selecting Outdial Call.
+                  </div>
+            </Text>
               <div className="widget-checkboxes">
                 {['stationLogin', 'userState', 'incomingTask', 'taskList', 'callControl', 'outdialCall'].map((widget) => (
                   <label key={widget}>
