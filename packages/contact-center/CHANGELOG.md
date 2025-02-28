@@ -1,3 +1,18 @@
+# [1.28.0-ccwidgets.24](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.23...v1.28.0-ccwidgets.24) (2025-02-28)
+
+
+### Bug Fixes
+
+* **tooling:** add-mdc-icons ([#400](https://github.com/webex/widgets/issues/400)) ([ec389f5](https://github.com/webex/widgets/commit/ec389f5ed1184794c24d252fa744b2436a32c5de))
+
+# [1.28.0-ccwidgets.23](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.22...v1.28.0-ccwidgets.23) (2025-02-27)
+
+
+### Bug Fixes
+
+* **tooling:** add-momentum-ui-react-collaboration ([#396](https://github.com/webex/widgets/issues/396)) ([1abe243](https://github.com/webex/widgets/commit/1abe243d84e6dde14915f1702369d23c23f4343e))
+* **tooling:** remove-version-command-in-publish ([#398](https://github.com/webex/widgets/issues/398)) ([1618b81](https://github.com/webex/widgets/commit/1618b8199393fa6240c7662cc9939461add0f69b))
+
 # [1.28.0-ccwidgets.22](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.21...v1.28.0-ccwidgets.22) (2025-02-24)
 
 

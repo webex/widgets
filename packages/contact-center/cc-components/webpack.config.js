@@ -67,7 +67,6 @@ module.exports = mergeWithCustomize({
       {
         test: /\.(png|jpg|gif|svg)$/,
         include: [resolveMonorepoRoot('node_modules/@momentum-ui/react-collaboration')],
-
         type: 'asset/resource',
         generator: {
           filename: 'images/[name][ext][query]',
