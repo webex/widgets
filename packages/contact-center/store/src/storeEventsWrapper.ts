@@ -36,7 +36,9 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.logger;
   }
   get idleCodes() {
-    return this.store.idleCodes.filter((code) => !code.isSystem);
+    return this.store.idleCodes.filter((code) => {
+      return code.name === "RONA" || !code.isSystem;
+    });
   }
   get agentId() {
     return this.store.agentId;
@@ -175,6 +177,11 @@ class StoreWrapper implements IStoreWrapper {
       if (this.store.incomingTask?.data.interactionId === taskId) {
         this.setIncomingTask(null);
       }
+
+      // reset the custom state
+      this.setState({
+        reset: true
+      });
     });
   };
 
@@ -193,6 +200,10 @@ class StoreWrapper implements IStoreWrapper {
     runInAction(() => {
       this.setCurrentTask(task);
       this.setIncomingTask(null);
+      this.setState({
+        developerName: 'ENGAGED',
+        name: 'Engaged',
+      });
     });
   };
 

@@ -96,10 +96,15 @@ enum CC_EVENTS {
   AGENT_STATE_CHANGE = 'agent:stateChange',
 }
 
-interface ICustomState {
+interface ICustomStateSet {
     name: string;
     developerName: string;
 }
+interface ICustomStateReset {
+  reset: boolean;
+}
+
+type ICustomState = ICustomStateSet | ICustomStateReset;
 
 export type {
   IContactCenter,

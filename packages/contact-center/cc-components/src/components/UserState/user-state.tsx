@@ -43,10 +43,9 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
               )
             }
             {idleCodes
-              ?.filter((code) => !code.isSystem)
               .map((code) => {
                 return (
-                  <option key={code.id} value={code.id}>
+                  <option key={code.id} value={code.id} hidden={code.name === 'RONA'}>
                     {code.name}
                   </option>
                 );

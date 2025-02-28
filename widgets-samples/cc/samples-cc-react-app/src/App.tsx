@@ -4,6 +4,8 @@ import {ButtonPill, CheckboxNext} from '@momentum-ui/react-collaboration';
 import {ThemeProvider} from '@momentum-design/components/dist/react';
 import './App.scss';
 
+window['store'] = store;
+
 function App() {
   const [isSdkReady, setIsSdkReady] = useState(false);
   const [selectedWidgets, setSelectedWidgets] = useState({
@@ -125,6 +127,10 @@ function App() {
     };
   }, []);
 
+  const onStateChange = (status) => {
+    console.log('onStateChange invoked', status);
+  };
+
   return (
     <div className="mds-typography" style={{height: '100%'}}>
       <ThemeProvider
@@ -194,7 +200,7 @@ function App() {
               {selectedWidgets.stationLogin && <StationLogin onLogin={onLogin} onLogout={onLogout} />}
               {store.isAgentLoggedIn && (
                 <>
-                  {selectedWidgets.userState && <UserState />}
+                  {selectedWidgets.userState && <UserState onStateChange={onStateChange} />}
                   {selectedWidgets.incomingTask && <IncomingTask onAccepted={onAccepted} onDeclined={onDeclined} />}
                   {selectedWidgets.taskList && (
                     <TaskList onTaskAccepted={onTaskAccepted} onTaskDeclined={onTaskDeclined} />

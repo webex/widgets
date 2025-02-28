@@ -1,7 +1,7 @@
 import {useState, useEffect, useRef} from 'react';
 import store from '@webex/cc-store';
 
-export const useUserState = ({idleCodes, agentId, cc, currentState, lastStateChangeTimestamp, logger}) => {
+export const useUserState = ({idleCodes, agentId, cc, currentState, customState, lastStateChangeTimestamp, logger, onStateChange}) => {
   const [isSettingAgentStatus, setIsSettingAgentStatus] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -68,6 +68,20 @@ export const useUserState = ({idleCodes, agentId, cc, currentState, lastStateCha
       });
     }
   }, [currentState]);
+
+  useEffect(() => {
+    if(onStateChange){
+      if (customState?.developerName) {
+        onStateChange(customState);
+        return;
+      }
+      idleCodes.forEach((code) => {
+        if (code.id === currentState) {
+          onStateChange(code);
+        }
+      });
+    }
+  }, [customState, currentState]);
 
   useEffect(() => {
     if (workerRef.current && lastStateChangeTimestamp) {
