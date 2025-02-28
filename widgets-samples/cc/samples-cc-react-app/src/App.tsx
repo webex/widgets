@@ -4,6 +4,8 @@ import {ThemeProvider, IconProvider, Icon, Button, Checkbox, Text} from '@moment
 import {PopoverNext} from '@momentum-ui/react-collaboration';
 import './App.scss';
 
+window['store'] = store;
+
 function App() {
   const [isSdkReady, setIsSdkReady] = useState(false);
   const [selectedWidgets, setSelectedWidgets] = useState({
