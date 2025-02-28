@@ -9,12 +9,8 @@ const IncomingTaskPresentational: React.FunctionComponent<IncomingTaskPresentati
   }
 
   const callAssociationDetails = incomingTask?.data?.interaction?.callAssociatedDetails;
-  const {ani, virtualTeamName} = callAssociationDetails;
-  // This value can be found many places and is not always available
-  const ronaTimeout =
-    callAssociationDetails?.ronaTimeout ||
-    incomingTask?.data?.interaction?.callAssociatedData?.ronaTimeout?.value ||
-    incomingTask?.data?.interaction?.callProcessingDetails?.ronaTimeout;
+  const {ani, virtualTeamName, ronaTimeout} = callAssociationDetails;
+  // rona timeout is not always available in the callAssociatedDetails object
   const startTimeStamp = incomingTask?.data?.interaction?.createdTimestamp;
   return (
     <Task

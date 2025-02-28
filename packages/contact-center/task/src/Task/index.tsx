@@ -1,5 +1,6 @@
 import React from 'react';
-import {AvatarNext, ButtonPill, ListItemBase, ListItemBaseSection, Text} from '@momentum-ui/react-collaboration';
+import {ButtonPill, ListItemBase, ListItemBaseSection, Text} from '@momentum-ui/react-collaboration';
+import {Avatar} from '@momentum-design/components/dist/react';
 import {PressEvent} from '@react-types/shared';
 import TaskTimer from '../TaskTimer';
 import './styles.scss';
@@ -35,14 +36,17 @@ const Task: React.FC<TaskProps> = ({
 
   return (
     <ListItemBase className={`task-list-item ${selected ? 'task-list-item--selected' : ''}`}>
-      <ListItemBaseSection position="start">
-        <AvatarNext icon="handset" />
+      <ListItemBaseSection position="start" className="task-list-item-start-section">
+        <Avatar
+          icon-name="handset-filled"
+          className={`task-list-item-avatar ${selected ? 'task-list-item-avatar--selected' : ''}`}
+        />
       </ListItemBaseSection>
 
       <ListItemBaseSection position="fill">
         <section className="task-details">
           {title && (
-            <Text tagName="span" type="body-large-medium" className="task-text">
+            <Text tagName="span" type={selected ? 'body-large-bold' : 'body-large-medium'} className="task-text">
               {title}
             </Text>
           )}
