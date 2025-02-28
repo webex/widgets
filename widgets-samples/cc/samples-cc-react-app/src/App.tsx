@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import {StationLogin, UserState, IncomingTask, TaskList, CallControl, store} from '@webex/cc-widgets';
-import {ThemeProvider, IconProvider, Icon, Button, Checkbox} from '@momentum-design/components/dist/react';
+import {ThemeProvider, IconProvider, Icon, Button, Checkbox, Text} from '@momentum-design/components/dist/react';
+import {PopoverNext} from '@momentum-ui/react-collaboration';
 import './App.scss';
 
 function App() {
@@ -151,7 +152,6 @@ function App() {
                 }}
               />
             </div>
-            <Icon name="handset-regular" />
             <>
               <div className="widget-checkboxes">
                 {['stationLogin', 'userState', 'incomingTask', 'taskList', 'callControl'].map((widget) => (
@@ -167,18 +167,29 @@ function App() {
                 ))}
               </div>
             </>
-            <label>
+            <label style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
               <input type="checkbox" id="multiLoginFlag" name="multiLoginFlag" onChange={enableDisableMultiLogin} />{' '}
               Enable Multi Login
+              <PopoverNext
+                trigger="mouseenter"
+                triggerComponent={<Icon name="info-badge-filled" />}
+                placement="auto-end"
+                closeButtonPlacement="top-left"
+                closeButtonProps={{'aria-label': 'Close'}}
+              >
+                <Text>
+                  <div
+                    className="warning-note"
+                    style={{color: 'var(--mds-color-theme-text-error-normal)', marginBottom: '10px'}}
+                  >
+                    <strong>Note:</strong> The "Enable Multi Login" option must be set before initializing the SDK.
+                    Changes to this setting after SDK initialization will not take effect. Please ensure you configure
+                    this option before clicking the "Init Widgets" button.
+                  </div>
+                </Text>
+              </PopoverNext>
             </label>
-            <div
-              className="warning-note"
-              style={{color: 'var(--mds-color-theme-text-error-normal)', marginBottom: '10px'}}
-            >
-              <strong>Note:</strong> The "Enable Multi Login" option must be set before initializing the SDK. Changes to
-              this setting after SDK initialization will not take effect. Please ensure you configure this option before
-              clicking the "Init Widgets" button.
-            </div>
+
             <br />
             <Button
               disabled={accessToken.trim() === ''}

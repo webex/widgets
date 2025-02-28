@@ -16,8 +16,7 @@
     "@babel/preset-env": "^7.25.4",
     "@babel/preset-react": "^7.24.7",
     "@babel/preset-typescript": "^7.25.9",
-    "@momentum-design/components": "0.27.3",
-    "@momentum-design/icons": "0.10.0",
+    "@momentum-ui/react-collaboration": "26.197.0",
     "@webex/cc-widgets": "workspace:*",
     "babel-loader": "^9.2.1",
     "file-loader": "^6.2.0",
@@ -44,9 +43,5 @@
     "globals": "^16.0.0",
     "prettier": "^3.5.1",
     "typescript-eslint": "^8.24.1"
-  },
-  "resolutions": {
-    "@momentum-design/components": "0.27.3",
-    "@momentum-design/icons": "0.10.0"
   }
 }
