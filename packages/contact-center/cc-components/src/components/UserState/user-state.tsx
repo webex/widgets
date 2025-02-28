@@ -2,6 +2,8 @@ import React from 'react';
 
 import {IUserState} from './user-state.types';
 import {formatTime} from '../../utils';
+import {Icon} from '@momentum-design/components/dist/react';
+
 import {ButtonPill} from '@momentum-ui/react-collaboration';
 
 import './user-state.scss';
@@ -18,6 +20,7 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
             Agent State
           </legend>
           <div style={{display: 'flex', flexDirection: 'column', flexGrow: 1}} />
+          <Icon name="handset-regular" />
           <select
             id="idleCodes"
             value={currentState}
