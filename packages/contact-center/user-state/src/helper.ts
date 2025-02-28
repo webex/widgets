@@ -1,5 +1,4 @@
 import {useState, useEffect, useRef} from 'react';
-// TODO: Export & Import this AGENT_STATE_CHANGE constant from SDK
 import store from '@webex/cc-store';
 
 export const useUserState = ({idleCodes, agentId, cc, currentState, lastStateChangeTimestamp, logger}) => {
@@ -13,7 +12,6 @@ export const useUserState = ({idleCodes, agentId, cc, currentState, lastStateCha
   // Initialize the Web Worker using a Blob
   const workerScript = `
     let intervalId;
-
     const startTimer = (startTime) => {
       if (intervalId) clearInterval(intervalId);
       intervalId = setInterval(() => {
@@ -21,7 +19,6 @@ export const useUserState = ({idleCodes, agentId, cc, currentState, lastStateCha
         self.postMessage(elapsedTime);
       }, 1000);
     };
-
     self.onmessage = (event) => {
       if (event.data.type === 'start' || event.data.type === 'reset') {
         const startTime = event.data.startTime;
@@ -54,30 +51,6 @@ export const useUserState = ({idleCodes, agentId, cc, currentState, lastStateCha
   }, []);
 
   useEffect(() => {
-    if (workerRef.current) {
-      logger.log(`Re-initializing worker due to state change`, {
-        module: 'useUserState',
-        method: 'useEffect - currentState',
-      });
-
-      workerRef.current.terminate();
-      const blob = new Blob([workerScript], {type: 'application/javascript'});
-      const workerUrl = URL.createObjectURL(blob);
-      workerRef.current = new Worker(workerUrl);
-      workerRef.current.onmessage = (event) => {
-        setElapsedTime(event.data);
-      };
-
-      if (lastStateChangeTimestamp) {
-        const timeNow = new Date();
-        const elapsed = Math.floor(Math.abs(timeNow.getTime() - lastStateChangeTimestamp.getTime()) / 1000);
-        setElapsedTime(elapsed);
-        workerRef.current.postMessage({type: 'reset', startTime: lastStateChangeTimestamp.getTime()});
-      } else {
-        workerRef.current.postMessage({type: 'start', startTime: Date.now()});
-      }
-    }
-
     if (prevStateRef.current !== currentState) {
       logger.log(`State change detected: ${prevStateRef.current} -> ${currentState}`, {
         module: 'useUserState',
@@ -95,6 +68,15 @@ export const useUserState = ({idleCodes, agentId, cc, currentState, lastStateCha
       });
     }
   }, [currentState]);
+
+  useEffect(() => {
+    if (workerRef.current && lastStateChangeTimestamp) {
+      const timeNow = new Date();
+      const elapsed = Math.floor(Math.abs(timeNow.getTime() - lastStateChangeTimestamp.getTime()) / 1000);
+      setElapsedTime(elapsed);
+      workerRef.current.postMessage({type: 'reset', startTime: lastStateChangeTimestamp.getTime()});
+    }
+  }, [lastStateChangeTimestamp]);
 
   const setAgentStatus = (selectedCode) => {
     store.setCurrentState(selectedCode);

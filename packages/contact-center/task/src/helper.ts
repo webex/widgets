@@ -1,7 +1,7 @@
 import {useEffect, useCallback, useRef} from 'react';
 import {ITask} from '@webex/plugin-cc';
-import store from '@webex/cc-store';
-import {TASK_EVENTS, useCallControlProps, UseTaskListProps, UseTaskProps} from './task.types';
+import store, {TASK_EVENTS} from '@webex/cc-store';
+import {useCallControlProps, UseTaskListProps, UseTaskProps} from './task.types';
 
 // Hook for managing the task list
 export const useTaskList = (props: UseTaskListProps) => {
@@ -22,7 +22,7 @@ export const useTaskList = (props: UseTaskListProps) => {
     task
       .accept(taskId)
       .then(() => {
-        onTaskAccepted && onTaskAccepted(task);
+        if (onTaskAccepted) onTaskAccepted(task);
       })
       .catch((error: Error) => {
         logError(`Error accepting task: ${error}`, 'acceptTask');
@@ -36,7 +36,7 @@ export const useTaskList = (props: UseTaskListProps) => {
     task
       .decline(taskId)
       .then(() => {
-        onTaskDeclined && onTaskDeclined(task);
+        if (onTaskDeclined) onTaskDeclined(task);
       })
       .catch((error: Error) => {
         logError(`Error declining task: ${error}`, 'declineTask');
@@ -47,7 +47,7 @@ export const useTaskList = (props: UseTaskListProps) => {
 };
 
 export const useIncomingTask = (props: UseTaskProps) => {
-  const {cc, onAccepted, onDeclined, deviceType, incomingTask, logger} = props;
+  const {onAccepted, onDeclined, deviceType, incomingTask, logger} = props;
   const isBrowser = deviceType === 'BROWSER';
 
   const logError = (message: string, method: string) => {
@@ -64,7 +64,7 @@ export const useIncomingTask = (props: UseTaskProps) => {
     incomingTask
       .accept(taskId)
       .then(() => {
-        onAccepted && onAccepted();
+        if (onAccepted) onAccepted();
       })
       .catch((error: Error) => {
         logError(`Error accepting incoming task: ${error}`, 'accept');
@@ -78,7 +78,7 @@ export const useIncomingTask = (props: UseTaskProps) => {
     incomingTask
       .decline(taskId)
       .then(() => {
-        onDeclined && onDeclined();
+        if (onDeclined) onDeclined();
       })
       .catch((error: Error) => {
         logError(`Error declining incoming task: ${error}`, 'decline');
@@ -94,8 +94,9 @@ export const useIncomingTask = (props: UseTaskProps) => {
 };
 
 export const useCallControl = (props: useCallControlProps) => {
-  const {currentTask, onHoldResume, onEnd, onWrapUp, logger} = props;
+  const {currentTask, onHoldResume, onEnd, onWrapUp, logger, deviceType} = props;
   const audioRef = useRef<HTMLAudioElement | null>(null); // Ref for the audio element
+  const isBrowser = deviceType === 'BROWSER';
 
   const logError = (message: string, method: string) => {
     logger.error(message, {
@@ -114,7 +115,7 @@ export const useCallControl = (props: useCallControlProps) => {
   );
 
   useEffect(() => {
-    if (!currentTask) return;
+    if (!currentTask || !isBrowser) return;
     // Call control only event for WebRTC calls
     currentTask.on(TASK_EVENTS.TASK_MEDIA, handleTaskMedia);
 

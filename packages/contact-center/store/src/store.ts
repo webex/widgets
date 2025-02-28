@@ -38,11 +38,6 @@ class Store implements IStore {
   constructor() {
     makeAutoObservable(this, {
       cc: observable.ref,
-      currentTask: observable, // Make currentTask observable
-      incomingTask: observable,
-      taskList: observable,
-      wrapupRequired: observable,
-      currentState: observable,
     });
   }
 

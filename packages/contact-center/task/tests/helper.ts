@@ -1,6 +1,6 @@
 import {renderHook, act, waitFor} from '@testing-library/react';
 import {useIncomingTask, useTaskList, useCallControl} from '../src/helper';
-import {TASK_EVENTS} from '../src/task.types';
+import {TASK_EVENTS} from '@webex/cc-store';
 import React from 'react';
 
 // Mock webex instance and task
@@ -123,8 +123,6 @@ describe('useIncomingTask Hook', () => {
       useIncomingTask({
         cc: ccMock,
         incomingTask: taskMock,
-        onAccepted: null,
-        onDeclined: null,
         deviceType: 'BROWSER',
         logger,
       })
@@ -147,8 +145,6 @@ describe('useIncomingTask Hook', () => {
       useIncomingTask({
         cc: ccMock,
         incomingTask: taskMock,
-        onAccepted: null,
-        onDeclined: null,
         deviceType: 'BROWSER',
         logger,
       })
@@ -252,8 +248,7 @@ describe('useTaskList Hook', () => {
     );
 
     act(() => {
-      // @ts-ignore
-      result.current.acceptTask();
+      result.current.acceptTask(taskMock);
     });
 
     await waitFor(() => {
@@ -268,8 +263,7 @@ describe('useTaskList Hook', () => {
     );
 
     act(() => {
-      // @ts-ignore
-      result.current.declineTask();
+      result.current.declineTask(taskMock);
     });
 
     await waitFor(() => {
@@ -352,10 +346,8 @@ describe('useTaskList Hook', () => {
     const {result} = renderHook(() =>
       useTaskList({
         cc: ccMock,
-        onTaskAccepted: null,
-        onTaskDeclined: null,
         logger,
-        deviceType: '',
+        deviceType: 'BROWSER',
         taskList: mockTaskList,
       })
     );
@@ -376,8 +368,6 @@ describe('useTaskList Hook', () => {
     const {result} = renderHook(() =>
       useTaskList({
         cc: ccMock,
-        onTaskAccepted: null,
-        onTaskDeclined: null,
         logger,
         deviceType: '',
         taskList: mockTaskList,
@@ -444,6 +434,7 @@ describe('useCallControl', () => {
 
     const {result} = renderHook(() =>
       useCallControl({
+        deviceType: 'BROWSER',
         currentTask: mockCurrentTask,
         logger: mockLogger,
       })
@@ -478,6 +469,7 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        deviceType: 'BROWSER',
       })
     );
 
@@ -497,6 +489,7 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        deviceType: 'BROWSER',
       })
     );
 
@@ -518,6 +511,7 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        deviceType: 'BROWSER',
       })
     );
 
@@ -538,6 +532,7 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        deviceType: 'BROWSER',
       })
     );
 
@@ -556,6 +551,7 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        deviceType: 'BROWSER',
       })
     );
 
@@ -576,6 +572,7 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        deviceType: 'BROWSER',
       })
     );
 
@@ -596,6 +593,7 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        deviceType: 'BROWSER',
       })
     );
 
@@ -617,11 +615,12 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        deviceType: 'BROWSER',
       })
     );
 
     await act(async () => {
-      await result.current.wrapupCall('Wrap reason', 123);
+      await result.current.wrapupCall('Wrap reason', '123');
     });
 
     expect(mockLogger.error).toHaveBeenCalledWith('Error wrapping up call: Error: Wrapup error', expect.any(Object));
@@ -635,6 +634,7 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        deviceType: 'BROWSER',
       })
     );
 
@@ -654,6 +654,7 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        deviceType: 'BROWSER',
       })
     );
 
@@ -672,6 +673,7 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        deviceType: 'BROWSER',
       })
     );
 
@@ -691,6 +693,7 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        deviceType: 'BROWSER',
       })
     );
 
@@ -703,7 +706,7 @@ describe('useCallControl', () => {
   });
 
   it('should assign media received from media event to audio tag', async () => {
-    global.MediaStream = jest.fn().mockImplementation((tracks) => {
+    global.MediaStream = jest.fn().mockImplementation(() => {
       return {mockStream: 'mock-stream'};
     });
     const mockAudioElement = {current: {srcObject: null}};
@@ -712,13 +715,14 @@ describe('useCallControl', () => {
       srcObject: 'mock-audio',
     };
 
-    const {result, unmount} = renderHook(() =>
+    renderHook(() =>
       useCallControl({
         currentTask: mockCurrentTask,
         onHoldResume: mockOnHoldResume,
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        deviceType: 'BROWSER',
       })
     );
 
@@ -739,13 +743,14 @@ describe('useCallControl', () => {
     const mockAudioElement = {current: {srcObject: null}};
     jest.spyOn(React, 'useRef').mockReturnValue(mockAudioElement);
 
-    const {result} = renderHook(() =>
+    renderHook(() =>
       useCallControl({
         currentTask: mockCurrentTask,
         onHoldResume: mockOnHoldResume,
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        deviceType: 'BROWSER',
       })
     );
 
@@ -774,6 +779,7 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        deviceType: 'BROWSER',
       })
     );
 
@@ -812,6 +818,7 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        deviceType: 'BROWSER',
       })
     );
     result.current.audioRef.current = null;
@@ -850,13 +857,14 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        deviceType: 'BROWSER',
       })
     );
     // Ensure no event handler is set
     expect(taskMock.on).not.toHaveBeenCalled();
   });
 
-  it('should test undefined audioRef.current branch', async () => {
+  it('should test undefined audioRef.current', async () => {
     // This test is to improve the coverage
     const {result} = renderHook(() =>
       useCallControl({
@@ -865,6 +873,7 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        deviceType: 'BROWSER',
       })
     );
 
@@ -880,5 +889,23 @@ describe('useCallControl', () => {
         taskAssignedCallback(mockTrack);
       }
     });
+  });
+
+  it('should not add media listeners if device type is not BROWSER', async () => {
+    const mockAudioElement = {current: {srcObject: null}};
+    jest.spyOn(React, 'useRef').mockReturnValue(mockAudioElement);
+
+    renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        deviceType: 'EXTENSION',
+      })
+    );
+    // Ensure no event handler is set
+    expect(taskMock.on).not.toHaveBeenCalled();
   });
 });

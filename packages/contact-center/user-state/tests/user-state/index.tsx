@@ -1,8 +1,13 @@
 import React from 'react';
-import {render, screen} from '@testing-library/react';
+import {render} from '@testing-library/react';
 import {UserState} from '../../src';
 import * as helper from '../../src/helper';
 import '@testing-library/jest-dom';
+jest.mock('@webex/cc-components', () => {
+  return {
+    UserStateComponent: () => <div>UserStateComponent</div>,
+  };
+});
 
 // Mock the store import
 jest.mock('@webex/cc-store', () => {
@@ -29,7 +34,7 @@ describe('UserState Component', () => {
     global.URL.createObjectURL = jest.fn(() => 'blob:http://localhost:3000/12345');
 
     if (typeof window.HTMLElement.prototype.attachInternals !== 'function') {
-      window.HTMLElement.prototype.attachInternals = jest.fn() as any;
+      window.HTMLElement.prototype.attachInternals = jest.fn();
     }
   });
 
@@ -37,7 +42,6 @@ describe('UserState Component', () => {
     const useUserStateSpy = jest.spyOn(helper, 'useUserState');
 
     render(<UserState />);
-
     expect(useUserStateSpy).toHaveBeenCalledTimes(1);
     expect(useUserStateSpy).toHaveBeenCalledWith({
       cc: {
@@ -47,7 +51,5 @@ describe('UserState Component', () => {
       idleCodes: [],
       agentId: 'testAgentId',
     });
-    const heading = screen.getByTestId('user-state-title');
-    expect(heading).toHaveTextContent('Agent State');
   });
 });

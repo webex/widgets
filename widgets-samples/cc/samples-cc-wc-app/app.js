@@ -2,7 +2,8 @@
 const accessTokenElem = document.getElementById('access_token_elem');
 const themeElem = document.getElementById('theme');
 const widgetsContainer = document.getElementById('widgets-container');
-
+const popupContainer = document.getElementById('popup-container');
+const taskRejectedSubmitButton = document.getElementById('task-rejected-submit-button');
 const ccStationLogin = document.createElement('widget-cc-station-login');
 const ccUserState = document.createElement('widget-cc-user-state');
 const ccIncomingTask = document.createElement('widget-cc-incoming-task');
@@ -25,6 +26,19 @@ themeElem.addEventListener('change', () => {
     'themeclass',
     themeElem.checked ? 'mds-theme-stable-darkWebex' : 'mds-theme-stable-lightWebex'
   );
+});
+
+store.setTaskRejected(function(reason) {
+  showTaskRejectedPopup(reason);
+});
+
+// Attach submit button event listener once.
+taskRejectedSubmitButton.addEventListener('click', function() {
+  const selectedState = document.getElementById('state-select').value;
+  if (selectedState) {
+    changeAgentState(selectedState);
+  }
+  popupContainer.style.display = 'none';
 });
 
 if (!ccStationLogin && !ccUserState) {
@@ -135,4 +149,36 @@ function onEnd() {
 
 function onWrapup() {
   console.log('onWrapUp invoked');
+}
+
+// Helper to change the agent state, using "Available" as is or "Meeting" for lookup if not.
+function changeAgentState(newState) {
+  const lookupCodeName = newState === 'Available' ? 'Available' : 'Meeting';
+  const idleCode = store.idleCodes?.find((code) => code.name === lookupCodeName);
+  if (!idleCode) {
+    console.error('No idle code found for selected state:', newState);
+    return;
+  }
+  const agentId = store.agentId || '';
+  store.cc
+    .setAgentState({
+      state: newState,
+      auxCodeId: idleCode.id,
+      agentId: agentId,
+      lastStateChangeReason: newState,
+    })
+    .then(function(response) {
+      store.setCurrentState(response.data.auxCodeId);
+      store.setLastStateChangeTimestamp(new Date(response.data.lastStateChangeTimestamp));
+      console.log('Agent state updated to', newState);
+    })
+    .catch(function(error) {
+      console.error('Error updating agent state:', error);
+    });
+}
+
+// Helper to show the task rejected popup.
+function showTaskRejectedPopup(reason) {
+  document.getElementById('task-rejected-reason').textContent = "Reason: " + (reason || 'No reason provided');
+  popupContainer.style.display = 'block';
 }
