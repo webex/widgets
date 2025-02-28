@@ -1,3 +1,39 @@
+# [1.28.0-ccwidgets.23](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.22...v1.28.0-ccwidgets.23) (2025-02-27)
+
+
+### Bug Fixes
+
+* **tooling:** add-momentum-ui-react-collaboration ([#396](https://github.com/webex/widgets/issues/396)) ([1abe243](https://github.com/webex/widgets/commit/1abe243d84e6dde14915f1702369d23c23f4343e))
+* **tooling:** remove-version-command-in-publish ([#398](https://github.com/webex/widgets/issues/398)) ([1618b81](https://github.com/webex/widgets/commit/1618b8199393fa6240c7662cc9939461add0f69b))
+
+# [1.28.0-ccwidgets.22](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.21...v1.28.0-ccwidgets.22) (2025-02-24)
+
+
+### Bug Fixes
+
+* **tooling:** Implement-HMR-in-react-samples-app ([#392](https://github.com/webex/widgets/issues/392)) ([cc5b705](https://github.com/webex/widgets/commit/cc5b70581745b7d08d7937441b3f2b5fd78c4643))
+
+# [1.28.0-ccwidgets.21](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.20...v1.28.0-ccwidgets.21) (2025-02-24)
+
+
+### Bug Fixes
+
+* **tooling:** add-eslint-prettier-precommit-checks-cc-widgets ([#395](https://github.com/webex/widgets/issues/395)) ([669a15b](https://github.com/webex/widgets/commit/669a15beaee36d1324b869443f30e3b12469584b))
+
+# [1.28.0-ccwidgets.20](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.19...v1.28.0-ccwidgets.20) (2025-02-21)
+
+
+### Features
+
+* **widgets:** added-agent-rona-popup ([#389](https://github.com/webex/widgets/issues/389)) ([9c52c53](https://github.com/webex/widgets/commit/9c52c531d691c982cdbea237c2726b4a3b3d0c07))
+
+# [1.28.0-ccwidgets.19](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.18...v1.28.0-ccwidgets.19) (2025-02-20)
+
+
+### Bug Fixes
+
+* **store:** minor-fixes-after-storeEventsWrapper ([#390](https://github.com/webex/widgets/issues/390)) ([8738ab2](https://github.com/webex/widgets/commit/8738ab20921bd7f0b8c9cdc742deabadd791ab90))
+
 # [1.28.0-ccwidgets.18](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.17...v1.28.0-ccwidgets.18) (2025-02-17)
 
 

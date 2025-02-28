@@ -8,52 +8,84 @@
       .disabled {
         display: none;
       }
+      #task-rejected-popup {
+        position: fixed;
+        top: 20%;
+        left: 50%;
+        transform: translate(-50%, 0);
+        background: white;
+        padding: 20px;
+        border: 1px solid #ccc;
+        z-index: 1000;
+      }
+
+      .webexTheme {
+        padding: 1rem;
+        height: 100%;
+        color: var(--mds-color-theme-button-primary-normal);
+        background-color: var(--mds-color-theme-inverted-text-primary-normal);
+      }
     </style>
   </head>
   <body>
-    <mdc-themeprovider id="theme-provider-elem" themeclass="mds-theme-stable-lightWebex">
-      <mdc-iconprovider>
-        <h1>Contact Center widgets as web-component</h1>
-        <input
-          type="text"
-          placeholder="Enter your access token"
-          id="access_token_elem"
-          onkeyup="switchButtonState()"
-          autocomplete="off"
-          spellcheck="false"
-          autocapitalize="off"
-        />
-        <div id="widget-selection">
-          <label> <input type="checkbox" name="stationLogin" id="stationLoginCheckbox" /> Station Login </label>
-          <label> <input type="checkbox" name="userState" id="userStateCheckbox" /> User State </label>
-          <label> <input type="checkbox" name="incomingTask" id="incomingTaskCheckbox" /> Incoming Task </label>
-          <label> <input type="checkbox" name="taskList" id="taskListCheckbox" /> Task List </label>
-          <label> <input type="checkbox" name="callControl" id="callControlCheckbox" /> Call Control </label>
-          <label> <input type="checkbox" name="outdialCall" id="outdialCallCheckbox" /> Outdial Call </label>
+    <div class="mdc-typography">
+      <mdc-themeprovider id="theme-provider-elem" themeclass="mds-theme-stable-lightWebex">
+        <div class="webexTheme">
+          <h1>Contact Center widgets as web-component</h1>
+          <div class="accessTokenTheme">
+            <input
+              type="text"
+              placeholder="Enter your access token"
+              id="access_token_elem"
+              onkeyup="switchButtonState()"
+              autocomplete="off"
+              spellcheck="false"
+              autocapitalize="off"
+            />
+            <input type="checkbox" id="theme" name="theme" /> Dark Theme
+            <br />
+          </div>
+          <div id="widget-selection">
+            <label> <input type="checkbox" name="stationLogin" id="stationLoginCheckbox" /> Station Login </label>
+            <label> <input type="checkbox" name="userState" id="userStateCheckbox" /> User State </label>
+            <label> <input type="checkbox" name="incomingTask" id="incomingTaskCheckbox" /> Incoming Task </label>
+            <label> <input type="checkbox" name="taskList" id="taskListCheckbox" /> Task List </label>
+            <label> <input type="checkbox" name="callControl" id="callControlCheckbox" /> Call Control </label>
+          </div>
+          <br />
+          <div class="warning-note" style="color: var(--mds-color-theme-text-error-normal); margin-bottom: 10px">
+            <strong>Note:</strong> The "Enable Multi Login" option must be set before initializing the SDK. Changes to
+            this setting after SDK initialization will not take effect. Please ensure you configure this option before
+            clicking the "Init Widgets" button.
+          </div>
+          <br />
+          <input
+            type="checkbox"
+            id="multiLoginFlag"
+            name="multiLoginFlag"
+            onchange="enableMultiLogin()"
+            aria-label="Enable agent multi-login"
+            role="checkbox"
+          />
+          Enable Multi Login
+          <br />
+          <button onclick="initWidgets()" disabled>Init Widgets</button>
+          <div id="widgets-container"></div>
+          <div id="popup-container" style="display: none">
+            <div id="task-rejected-popup">
+              <h2>Task Rejected</h2>
+              <p id="task-rejected-reason"></p>
+              <select id="state-select">
+                <option value="">Select a state</option>
+                <option value="Available">Available</option>
+                <option value="Idle">Idle</option>
+              </select>
+              <button id="task-rejected-submit-button">Confirm State Change</button>
+            </div>
+          </div>
         </div>
-        <br />
-        <input type="checkbox" id="theme" name="theme" /> Dark Theme
-        <br />
-        <div class="warning-note" style="color: red; margin-bottom: 10px;">
-          <strong>Note:</strong> The "Enable Multi Login" option must be set before initializing the SDK. Changes to
-          this setting after SDK initialization will not take effect. Please ensure you configure this option before
-          clicking the "Init Widgets" button.
-        </div>
-        <br />
-        <input
-          type="checkbox"
-          id="multiLoginFlag"
-          name="multiLoginFlag"
-          onchange="enableMultiLogin()"
-          aria-label="Enable agent multi-login"
-          role="checkbox"
-        />
-        Enable Multi Login
-        <br />
-        <button onclick="initWidgets()" disabled>Init Widgets</button>
-        <div id="widgets-container"></div>
-      </mdc-iconprovider>
-    </mdc-themeprovider>
+      </mdc-themeprovider>
+    </div>
     <script src="dist/bundle.js"></script>
     <script src="app.js"></script>
   </body>

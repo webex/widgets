@@ -1,5 +1,4 @@
-import {ITask, IContactCenter} from '@webex/plugin-cc';
-import {ILogger, WrapupCodes} from '@webex/cc-store';
+import {ILogger, ITask, IContactCenter, WrapupCodes} from '@webex/cc-store';
 
 /**
  * Interface representing the TaskProps of a user.
@@ -91,10 +90,7 @@ export interface TaskProps {
   logger: ILogger;
 }
 
-export type UseTaskProps = Pick<
-  TaskProps,
-  'cc' | 'incomingTask' | 'onAccepted' | 'onDeclined' | 'deviceType' | 'logger'
->;
+export type UseTaskProps = Pick<TaskProps, 'incomingTask' | 'onAccepted' | 'onDeclined' | 'deviceType' | 'logger'>;
 export type UseTaskListProps = Pick<
   TaskProps,
   'cc' | 'taskList' | 'deviceType' | 'onTaskAccepted' | 'onTaskDeclined' | 'logger'
@@ -107,20 +103,6 @@ export type TaskListPresentationalProps = Pick<
   TaskProps,
   'currentTask' | 'taskList' | 'isBrowser' | 'acceptTask' | 'declineTask'
 >;
-export enum TASK_EVENTS {
-  TASK_INCOMING = 'task:incoming',
-  TASK_ASSIGNED = 'task:assigned',
-  TASK_MEDIA = 'task:media',
-  TASK_HOLD = 'task:hold',
-  TASK_UNHOLD = 'task:unhold',
-  TASK_CONSULT = 'task:consult',
-  TASK_CONSULT_END = 'task:consultEnd',
-  TASK_CONSULT_ACCEPT = 'task:consultAccepted',
-  TASK_PAUSE = 'task:pause',
-  TASK_RESUME = 'task:resume',
-  TASK_END = 'task:end',
-  TASK_WRAPUP = 'task:wrapup',
-} // TODO: remove this once cc sdk exports this enum
 
 /**
  * Interface representing the properties for control actions on a task.
@@ -189,6 +171,11 @@ export interface ControlProps {
    * @param wrapupId - The ID associated with the wrap-up reason.
    */
   wrapupCall: (wrapupReason: string, wrapupId: string) => void;
+
+  /**
+   * Selected login option
+   */
+  deviceType: string;
 }
 
 export type CallControlProps = Pick<ControlProps, 'onHoldResume' | 'onEnd' | 'onWrapUp'>;
@@ -204,8 +191,6 @@ export type CallControlPresentationalProps = Pick<
   | 'endCall'
   | 'wrapupCall'
 >;
-
-export type useCallControlProps = Pick<ControlProps, 'currentTask' | 'onHoldResume' | 'onEnd' | 'onWrapUp' | 'logger'>;
 
 export interface OutdialCallProps {
   startOutdial: (dialerPayload: DialerPayload) => void;
@@ -227,3 +212,8 @@ export interface DialerPayload {
 export type OutdialCallPresentationalProps = Pick<OutdialCallProps, 'startOutdial' | 'cc'>;
 
 export type useOutdialCallProps = Pick<TaskProps, 'cc' | 'logger'>;
+
+export type useCallControlProps = Pick<
+  ControlProps,
+  'currentTask' | 'onHoldResume' | 'onEnd' | 'onWrapUp' | 'logger' | 'deviceType'
+>;

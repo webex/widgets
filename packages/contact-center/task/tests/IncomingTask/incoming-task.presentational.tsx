@@ -1,7 +1,11 @@
 import React from 'react';
-import {render, screen, fireEvent, cleanup} from '@testing-library/react';
+import {render, screen, cleanup} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import IncomingTaskPresentational from '../../src/IncomingTask/incoming-task.presentational';
+
+jest.mock('@momentum-ui/react-collaboration', () => ({
+  ButtonPill: () => <div data-testid="ButtonPill" />,
+}));
 
 describe('IncomingTaskPresentational', () => {
   afterEach(cleanup);

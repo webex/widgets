@@ -55,17 +55,12 @@ describe('Store', () => {
 
     expect(makeAutoObservable).toHaveBeenCalledWith(storeInstance, {
       cc: expect.any(Function),
-      currentState: expect.any(Object),
-      currentTask: expect.any(Object),
-      incomingTask: expect.any(Object),
-      taskList: expect.any(Object),
-      wrapupRequired: expect.any(Object),
     });
   });
 
   describe('registerCC', () => {
     it('should initialise store values on successful register', async () => {
-      let date = new Date();
+      const date = new Date();
       const mockResponse = {
         teams: [{id: 'team1', name: 'Team 1'}],
         loginVoiceOptions: ['option1', 'option2'],

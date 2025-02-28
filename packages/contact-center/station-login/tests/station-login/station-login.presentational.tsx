@@ -1,7 +1,11 @@
 import React from 'react';
-import {render, screen, fireEvent, cleanup} from '@testing-library/react';
+import {render, screen, fireEvent} from '@testing-library/react';
 import StationLoginPresentational from '../../src/station-login/station-login.presentational';
 import '@testing-library/jest-dom';
+
+jest.mock('@momentum-ui/react-collaboration', () => ({
+  ButtonPill: () => <div data-testid="ButtonPill" />,
+}));
 
 describe('StationLoginPresentational', () => {
   const props = {
@@ -26,12 +30,6 @@ describe('StationLoginPresentational', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-  });
-
-  it('renders the component name', () => {
-    render(<StationLoginPresentational {...props} />);
-    const heading = screen.getByTestId('station-login-heading');
-    expect(heading).toHaveTextContent('StationLogin');
   });
 
   it('calls handleContinue function and closes the dialog when Continue button is clicked', () => {

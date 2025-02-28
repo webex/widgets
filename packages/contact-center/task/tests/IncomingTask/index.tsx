@@ -1,9 +1,13 @@
 import React from 'react';
-import {render, screen} from '@testing-library/react';
+import {render} from '@testing-library/react';
 import * as helper from '../../src/helper';
 import {IncomingTask} from '../../src';
 import store from '@webex/cc-store';
 import '@testing-library/jest-dom';
+
+jest.mock('@momentum-ui/react-collaboration', () => ({
+  ButtonPill: () => <div data-testid="ButtonPill" />,
+}));
 
 // Mock the store
 jest.mock('@webex/cc-store', () => ({
@@ -20,11 +24,7 @@ describe('IncomingTask Component', () => {
 
     // Mock the return value of the useIncomingTask hook
     useIncomingTaskSpy.mockReturnValue({
-      currentTask: null,
-      setCurrentTask: jest.fn(),
-      answered: false,
-      ended: false,
-      missed: false,
+      incomingTask: null,
       accept: jest.fn(),
       decline: jest.fn(),
       isBrowser: true,
@@ -34,7 +34,6 @@ describe('IncomingTask Component', () => {
 
     // Assert that the useIncomingTask hook is called with the correct arguments
     expect(useIncomingTaskSpy).toHaveBeenCalledWith({
-      cc: store.cc,
       deviceType: store.deviceType,
       onAccepted: onAcceptedCb,
       onDeclined: onDeclinedCb,

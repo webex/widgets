@@ -1,10 +1,20 @@
-import {IStoreWrapper, IStore, InitParams, TASK_EVENTS, CC_EVENTS, IWrapupCode, WithWebex} from './store.types';
-import {ITask} from '@webex/plugin-cc';
+import {
+  IStoreWrapper,
+  IStore,
+  InitParams,
+  TASK_EVENTS,
+  CC_EVENTS,
+  IWrapupCode,
+  WithWebex,
+  IContactCenter,
+  ITask,
+} from './store.types';
 import Store from './store';
 import {runInAction} from 'mobx';
 
 class StoreWrapper implements IStoreWrapper {
   store: IStore;
+  onTaskRejected?: (reason: string) => void;
 
   constructor() {
     this.store = Store.getInstance();
@@ -114,6 +124,10 @@ class StoreWrapper implements IStoreWrapper {
     this.store.wrapupCodes = wrapupCodes;
   };
 
+  setTaskRejected = (callback: ((reason: string) => void) | undefined): void => {
+    this.onTaskRejected = callback;
+  };
+
   init(options: InitParams): Promise<void> {
     return this.store.init(options, this.setupIncomingTaskHandler);
   }
@@ -149,8 +163,9 @@ class StoreWrapper implements IStoreWrapper {
     });
   };
 
+  // TODO -- SDK needs to send only 1 event on end : https://jira-eng-gpk2.cisco.com/jira/browse/SPARK-615785
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   handleTaskEnd = (task: ITask, wrapupRequired: boolean) => {
-    // TODO: SDK needs to send only 1 event on end : https://jira-eng-gpk2.cisco.com/jira/browse/SPARK-615785
     if (task.data.interaction.state === 'connected') {
       this.setWrapupRequired(true);
       return;
@@ -183,7 +198,7 @@ class StoreWrapper implements IStoreWrapper {
 
     // When we receive TASK_REJECT sdk changes the agent status
     // When we receive TASK_REJECT that means the task was not accepted by the agent and we wont need wrap up
-    task.on(TASK_EVENTS.TASK_REJECT, () => this.handleTaskRemove(task.data.interactionId));
+    task.on(TASK_EVENTS.TASK_REJECT, (reason: string) => this.handleTaskReject(task.data.interactionId, reason));
 
     this.setTaskList([...this.store.taskList, task]);
   };
@@ -214,7 +229,7 @@ class StoreWrapper implements IStoreWrapper {
 
     // When we receive TASK_REJECT sdk changes the agent status
     // When we receive TASK_REJECT that means the task was not accepted by the agent and we wont need wrap up
-    task.on(TASK_EVENTS.TASK_REJECT, () => this.handleTaskRemove(task.data.interactionId));
+    task.on(TASK_EVENTS.TASK_REJECT, (reason: string) => this.handleTaskReject(task.data.interactionId, reason));
 
     if (!this.store.taskList.some((t) => t.data.interactionId === task.data.interactionId)) {
       this.setTaskList([...this.store.taskList, task]);
@@ -235,7 +250,14 @@ class StoreWrapper implements IStoreWrapper {
     }
   };
 
-  setupIncomingTaskHandler = (ccSDK: any) => {
+  handleTaskReject = (taskId: string, reason: string) => {
+    if (this.onTaskRejected) {
+      this.onTaskRejected(reason || 'No reason provided');
+    }
+    this.handleTaskRemove(taskId);
+  };
+
+  setupIncomingTaskHandler = (ccSDK: IContactCenter) => {
     ccSDK.on(TASK_EVENTS.TASK_INCOMING, this.handleIncomingTask);
 
     ccSDK.on(CC_EVENTS.AGENT_STATE_CHANGE, this.handleStateChange);
@@ -243,6 +265,7 @@ class StoreWrapper implements IStoreWrapper {
     ccSDK.on(TASK_EVENTS.TASK_HYDRATE, this.handleTaskHydrate);
 
     return () => {
+      // TODO: https://jira-eng-gpk2.cisco.com/jira/browse/SPARK-617635, remove event listeners after logout
       ccSDK.off(TASK_EVENTS.TASK_INCOMING, this.handleIncomingTask);
       ccSDK.off(CC_EVENTS.AGENT_STATE_CHANGE, this.handleStateChange);
       ccSDK.off(CC_EVENTS.AGENT_MULTI_LOGIN, this.handleMultiLoginCloseSession);
