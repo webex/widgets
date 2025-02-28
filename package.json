@@ -39,7 +39,7 @@
     "webpack-dev-server": "^5.1.0"
   },
   "resolutions": {
-    "@momentum-design/components": "0.27.4",
+    "@momentum-design/components": "0.27.3",
     "@momentum-design/icons": "0.10.0"
   },
   "scripts": {
@@ -51,7 +51,7 @@
     "test:cc-widgets": "yarn workspaces foreach --all --exclude webex-widgets --exclude samples-cc-wc-app --exclude samples-cc-react-app run test:unit",
     "build:dev": "NODE_ENV=development yarn build",
     "build:prod": "NODE_ENV=production  yarn build",
-    "build": "NODE_OPTIONS=--max-old-space-size=4096 yarn workspaces foreach --all --topological --exclude samples-cc-react-app --exclude samples-cc-wc-app --exclude samples-meeting-app run build:src",
+    "build": "NODE_OPTIONS=--max-old-space-size=4096 yarn workspaces foreach --all --parallel --topological --exclude samples-cc-react-app --exclude samples-cc-wc-app --exclude samples-meeting-app run build:src",
     "samples:build": "yarn workspaces foreach --all --parallel --include samples-cc-react-app --include samples-cc-wc-app --include samples-meeting-app run build:src && ./copy_to_docs.sh",
     "samples:serve": "http-server docs",
     "samples:serve-react": "yarn workspace samples-cc-react-app serve",
