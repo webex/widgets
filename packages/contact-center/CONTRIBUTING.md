@@ -75,6 +75,22 @@ This [Vidcast](https://app.vidcast.io/share/6276b573-ba47-4fd0-a171-16af936b69d3
     ```
   - Serve the app.
 		
+## How to consume momentum-icons
+To use momentum icons in any application that uses cc widgets we need to ensure the following two points
+  1. The widgets needs to be wrapped inside the themeprovider and iconprovider from [@momentum-design/components/dist/react](https://momentum-design.github.io/momentum-design/en/components/)
+
+  ```
+  import {ThemeProvider, IconProvider} from '@momentum-design/components/dist/react'
+  ```
+  2. Version for @momentum-design/components and @momentum-design/icons should be resolved to following versions or to later versions
+
+  ```
+  "resolutions": {
+    "@momentum-design/components": "0.27.3",
+    "@momentum-design/icons": "0.10.0"
+  },
+  ```
+
 ## Npm package
 - @webex/cc-widgets https://www.npmjs.com/package/@webex/cc-widgets  
 
