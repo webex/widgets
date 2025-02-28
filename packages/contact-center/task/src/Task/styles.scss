@@ -1,3 +1,13 @@
+:root {
+  --mds-color-theme-avatar-glass-normal: rgba(0, 0, 0, 0.07);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --mds-color-theme-avatar-glass-normal: rgba(255, 255, 255, 0.07);
+  }
+}
+
 .task-list-item {
   display: flex;
   padding: 8px 12px;
@@ -7,8 +17,8 @@
   height: 80px !important;
 
   mdc-avatar {
-    --mdc-avatar-default-background-color: var(--mds-color-theme-avatar-glass-normal, #ffffff12);
-    --mdc-avatar-default-foreground-color: var(--mds-color-theme-indicator-stable, #27a17a);
+    --mdc-avatar-default-background-color: var(--mds-color-theme-avatar-glass-normal);
+    --mdc-avatar-default-foreground-color: var(--mds-color-theme-indicator-stable);
   }
 }
 
