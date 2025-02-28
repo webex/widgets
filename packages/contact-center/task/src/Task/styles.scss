@@ -1,0 +1,23 @@
+.task-text {
+  font-feature-settings: 'ss02' on;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.task-text--secondary {
+  color: var(--color-theme-text-secondary-normal, rgba(0, 0, 0, 0.7));
+}
+
+.task-list-item {
+  display: flex;
+  padding: 8px 12px;
+  align-items: center;
+  gap: 12px;
+  align-self: stretch;
+  // have to override momentum default height for listitem to match the design
+  height: 80px !important;
+}
+
+.task-list-item--selected {
+  background: var(--color-theme-background-primary-active, rgba(0, 0, 0, 0.11));
+}

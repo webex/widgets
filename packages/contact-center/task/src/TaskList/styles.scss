@@ -1,0 +1,11 @@
+.task-list {
+  align-self: stretch;
+  padding-inline-start: 0;
+  margin-block: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  list-style-type: none;
+}
