@@ -9,7 +9,7 @@ const ccUserState = document.createElement('widget-cc-user-state');
 const ccIncomingTask = document.createElement('widget-cc-incoming-task');
 const ccTaskList = document.createElement('widget-cc-task-list');
 const ccCallControl = document.createElement('widget-cc-call-control');
-const ccStartOutdial = document.createElement('widget-cc-outdial-call');
+const ccOutdial = document.createElement('widget-cc-outdial-call');
 
 const themeProviderElem = document.getElementById('theme-provider-elem');
 
@@ -19,7 +19,6 @@ const incomingTaskCheckbox = document.getElementById('incomingTaskCheckbox');
 const taskListCheckbox = document.getElementById('taskListCheckbox');
 const callControlCheckbox = document.getElementById('callControlCheckbox');
 const outdialCallCheckbox = document.getElementById('outdialCallCheckbox');
-
 
 let isMultiLoginEnabled = false;
 
@@ -31,12 +30,12 @@ themeElem.addEventListener('change', () => {
   );
 });
 
-store.setTaskRejected(function(reason) {
+store.setTaskRejected(function (reason) {
   showTaskRejectedPopup(reason);
 });
 
 // Attach submit button event listener once.
-taskRejectedSubmitButton.addEventListener('click', function() {
+taskRejectedSubmitButton.addEventListener('click', function () {
   const selectedState = document.getElementById('state-select').value;
   if (selectedState) {
     changeAgentState(selectedState);
@@ -116,9 +115,9 @@ function loginSuccess() {
     ccCallControl.classList.remove('disabled');
     widgetsContainer.appendChild(ccCallControl);
   }
-  if(outdialCallCheckbox.checked) {
-    ccStartOutdial.classList.remove('disabled');
-    widgetsContainer.appendChild(ccStartOutdial);
+  if (outdialCallCheckbox.checked) {
+    ccOutdial.classList.remove('disabled');
+    widgetsContainer.appendChild(ccOutdial);
   }
 }
 
@@ -128,7 +127,7 @@ function logoutSuccess() {
   ccIncomingTask.classList.add('disabled');
   ccTaskList.classList.add('disabled');
   ccCallControl.classList.add('disabled');
-  ccStartOutdial.classList.add('disabled');
+  ccOutdial.classList.add('disabled');
 }
 
 function onAccepted() {
@@ -175,18 +174,18 @@ function changeAgentState(newState) {
       agentId: agentId,
       lastStateChangeReason: newState,
     })
-    .then(function(response) {
+    .then(function (response) {
       store.setCurrentState(response.data.auxCodeId);
       store.setLastStateChangeTimestamp(new Date(response.data.lastStateChangeTimestamp));
       console.log('Agent state updated to', newState);
     })
-    .catch(function(error) {
+    .catch(function (error) {
       console.error('Error updating agent state:', error);
     });
 }
 
 // Helper to show the task rejected popup.
 function showTaskRejectedPopup(reason) {
-  document.getElementById('task-rejected-reason').textContent = "Reason: " + (reason || 'No reason provided');
+  document.getElementById('task-rejected-reason').textContent = 'Reason: ' + (reason || 'No reason provided');
   popupContainer.style.display = 'block';
 }

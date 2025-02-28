@@ -154,7 +154,7 @@ function App() {
           </div>
           <>
             <div className="widget-checkboxes">
-              {['stationLogin', 'userState', 'incomingTask', 'taskList', 'callControl'].map((widget) => (
+              {['stationLogin', 'userState', 'incomingTask', 'taskList', 'callControl', 'outdialCall'].map((widget) => (
                 <label key={widget}>
                   <input
                     type="checkbox"

@@ -5,6 +5,7 @@ import './out-dial-call.styles.scss';
 export default function OutDialCallPresentational(props: OutdialCallPresentationalProps) {
   const {startOutdial, cc} = props;
   const [destination, setDestination] = useState('');
+  const entryPointId = cc.agentConfig.outDialEp;
 
   const updateOutboundNumber = (e: React.ChangeEvent<HTMLInputElement>) => {
     setDestination(e.target.value);
@@ -21,7 +22,7 @@ export default function OutDialCallPresentational(props: OutdialCallPresentation
   };
 
   const dialerPayload = {
-    entryPointId: cc.agentConfig.outDialEp,
+    entryPointId: entryPointId,
     destination: destination,
     direction: 'OUTBOUND',
     attributes: {},

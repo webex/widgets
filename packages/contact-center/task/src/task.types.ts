@@ -192,6 +192,11 @@ export type CallControlPresentationalProps = Pick<
   | 'wrapupCall'
 >;
 
+export type useCallControlProps = Pick<
+  ControlProps,
+  'currentTask' | 'onHoldResume' | 'onEnd' | 'onWrapUp' | 'logger' | 'deviceType'
+>;
+
 export interface OutdialCallProps {
   startOutdial: (dialerPayload: DialerPayload) => void;
   pressKey: (key: string) => void;
@@ -212,8 +217,3 @@ export interface DialerPayload {
 export type OutdialCallPresentationalProps = Pick<OutdialCallProps, 'startOutdial' | 'cc'>;
 
 export type useOutdialCallProps = Pick<TaskProps, 'cc' | 'logger'>;
-
-export type useCallControlProps = Pick<
-  ControlProps,
-  'currentTask' | 'onHoldResume' | 'onEnd' | 'onWrapUp' | 'logger' | 'deviceType'
->;

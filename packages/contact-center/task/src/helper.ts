@@ -111,7 +111,7 @@ export const useCallControl = (props: useCallControlProps) => {
         audioRef.current.srcObject = new MediaStream([track]);
       }
     },
-    [audioRef]
+    [audioRef, currentTask]
   );
 
   useEffect(() => {
