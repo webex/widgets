@@ -1,10 +1,8 @@
 import React, {useState, useEffect} from 'react';
 import {StationLogin, UserState, IncomingTask, TaskList, CallControl, store} from '@webex/cc-widgets';
-import {ButtonPill, CheckboxNext} from '@momentum-ui/react-collaboration';
-import {ThemeProvider} from '@momentum-design/components/dist/react';
+import {ThemeProvider, IconProvider, Icon, Button, Checkbox, Text} from '@momentum-design/components/dist/react';
+import {PopoverNext} from '@momentum-ui/react-collaboration';
 import './App.scss';
-
-window['store'] = store;
 
 function App() {
   const [isSdkReady, setIsSdkReady] = useState(false);
@@ -136,95 +134,109 @@ function App() {
       <ThemeProvider
         themeclass={currentTheme === 'LIGHT' ? 'mds-theme-stable-lightWebex' : 'mds-theme-stable-darkWebex'}
       >
-        <div className="webexTheme">
-          <h1>Contact Center widgets in a react app</h1>
-          <div className="accessTokenTheme">
-            <input
-              type="text"
-              placeholder="Enter your access token"
-              value={accessToken}
-              onChange={(e) => setAccessToken(e.target.value)}
-            />
-            <CheckboxNext
-              aria-label="theme checkbox"
-              id="theme-checkbox"
-              value={currentTheme}
-              isSelected={currentTheme === 'DARK'}
-              label="Dark Theme"
-              onChange={() => {
-                setCurrentTheme(currentTheme === 'DARK' ? 'LIGHT' : 'DARK');
-                store.setCurrentTheme(currentTheme === 'DARK' ? 'LIGHT' : 'DARK');
-              }}
-            />
-          </div>
-          <>
-            <div className="widget-checkboxes">
-              {['stationLogin', 'userState', 'incomingTask', 'taskList', 'callControl'].map((widget) => (
-                <label key={widget}>
-                  <input
-                    type="checkbox"
-                    name={widget}
-                    checked={selectedWidgets[widget]}
-                    onChange={handleCheckboxChange}
-                  />
-                  {widget.charAt(0).toUpperCase() + widget.slice(1).replace(/([A-Z])/g, ' $1')}
-                </label>
-              ))}
+        <IconProvider iconSet="momentum-icons">
+          <div className="webexTheme">
+            <h1>Contact Center widgets in a react app</h1>
+            <div className="accessTokenTheme">
+              <input
+                type="text"
+                placeholder="Enter your access token"
+                value={accessToken}
+                onChange={(e) => setAccessToken(e.target.value)}
+              />
+              <Checkbox
+                checked={currentTheme === 'DARK'}
+                aria-label="theme checkbox"
+                id="theme-checkbox"
+                value={currentTheme}
+                label="Dark Theme"
+                // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
+                onchange={() => {
+                  setCurrentTheme(currentTheme === 'DARK' ? 'LIGHT' : 'DARK');
+                  store.setCurrentTheme(currentTheme === 'DARK' ? 'LIGHT' : 'DARK');
+                }}
+              />
             </div>
-          </>
-          <label>
-            <input type="checkbox" id="multiLoginFlag" name="multiLoginFlag" onChange={enableDisableMultiLogin} />{' '}
-            Enable Multi Login
-          </label>
-          <div
-            className="warning-note"
-            style={{color: 'var(--mds-color-theme-text-error-normal)', marginBottom: '10px'}}
-          >
-            <strong>Note:</strong> The "Enable Multi Login" option must be set before initializing the SDK. Changes to
-            this setting after SDK initialization will not take effect. Please ensure you configure this option before
-            clicking the "Init Widgets" button.
-          </div>
-          <br />
-          <ButtonPill
-            disabled={accessToken.trim() === ''}
-            onPress={() => {
-              store.init({webexConfig, access_token: accessToken}).then(() => {
-                setIsSdkReady(true);
-              });
-            }}
-          >
-            Init Widgets
-          </ButtonPill>
-          {isSdkReady && (
             <>
-              {selectedWidgets.stationLogin && <StationLogin onLogin={onLogin} onLogout={onLogout} />}
-              {store.isAgentLoggedIn && (
-                <>
-                  {selectedWidgets.userState && <UserState onStateChange={onStateChange} />}
-                  {selectedWidgets.incomingTask && <IncomingTask onAccepted={onAccepted} onDeclined={onDeclined} />}
-                  {selectedWidgets.taskList && (
-                    <TaskList onTaskAccepted={onTaskAccepted} onTaskDeclined={onTaskDeclined} />
-                  )}
-                  {selectedWidgets.callControl && (
-                    <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapup={onWrapup} />
-                  )}
-                </>
-              )}
+              <div className="widget-checkboxes">
+                {['stationLogin', 'userState', 'incomingTask', 'taskList', 'callControl'].map((widget) => (
+                  <label key={widget}>
+                    <input
+                      type="checkbox"
+                      name={widget}
+                      checked={selectedWidgets[widget]}
+                      onChange={handleCheckboxChange}
+                    />
+                    {widget.charAt(0).toUpperCase() + widget.slice(1).replace(/([A-Z])/g, ' $1')}
+                  </label>
+                ))}
+              </div>
             </>
-          )}
-          {showRejectedPopup && (
-            <div className="task-rejected-popup">
-              <h2>Task Rejected</h2>
-              <p>Reason: {rejectedReason}</p>
-              <select value={selectedState} onChange={(e) => setSelectedState(e.target.value)}>
-                <option value="">Select a state</option>
-                <option value="Available">Available</option>
-                <option value="Idle">Idle</option>
-              </select>
-              <ButtonPill onPress={handlePopoverSubmit} />
-            </div>
-          )}
-        </div>
+            <label style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+              <input type="checkbox" id="multiLoginFlag" name="multiLoginFlag" onChange={enableDisableMultiLogin} />{' '}
+              Enable Multi Login
+              <PopoverNext
+                trigger="mouseenter"
+                triggerComponent={<Icon name="info-badge-filled" />}
+                placement="auto-end"
+                closeButtonPlacement="top-left"
+                closeButtonProps={{'aria-label': 'Close'}}
+              >
+                <Text>
+                  <div
+                    className="warning-note"
+                    style={{color: 'var(--mds-color-theme-text-error-normal)', marginBottom: '10px'}}
+                  >
+                    <strong>Note:</strong> The "Enable Multi Login" option must be set before initializing the SDK.
+                    Changes to this setting after SDK initialization will not take effect. Please ensure you configure
+                    this option before clicking the "Init Widgets" button.
+                  </div>
+                </Text>
+              </PopoverNext>
+            </label>
+
+            <br />
+            <Button
+              disabled={accessToken.trim() === ''}
+              onClick={() => {
+                store.init({webexConfig, access_token: accessToken}).then(() => {
+                  setIsSdkReady(true);
+                });
+              }}
+            >
+              Init Widgets
+            </Button>
+            {isSdkReady && (
+              <>
+                {selectedWidgets.stationLogin && <StationLogin onLogin={onLogin} onLogout={onLogout} />}
+                {store.isAgentLoggedIn && (
+                  <>
+                    {selectedWidgets.userState && <UserState onStateChange={onStateChange} />}
+                    {selectedWidgets.incomingTask && <IncomingTask onAccepted={onAccepted} onDeclined={onDeclined} />}
+                    {selectedWidgets.taskList && (
+                      <TaskList onTaskAccepted={onTaskAccepted} onTaskDeclined={onTaskDeclined} />
+                    )}
+                    {selectedWidgets.callControl && (
+                      <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapup={onWrapup} />
+                    )}
+                  </>
+                )}
+              </>
+            )}
+            {showRejectedPopup && (
+              <div className="task-rejected-popup">
+                <h2>Task Rejected</h2>
+                <p>Reason: {rejectedReason}</p>
+                <select value={selectedState} onChange={(e) => setSelectedState(e.target.value)}>
+                  <option value="">Select a state</option>
+                  <option value="Available">Available</option>
+                  <option value="Idle">Idle</option>
+                </select>
+                <Button onClick={handlePopoverSubmit} />
+              </div>
+            )}
+          </div>
+        </IconProvider>
       </ThemeProvider>
     </div>
   );

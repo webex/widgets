@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.24](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.23...v1.28.0-ccwidgets.24) (2025-02-28)
+
+
+### Bug Fixes
+
+* **tooling:** add-mdc-icons ([#400](https://github.com/webex/widgets/issues/400)) ([ec389f5](https://github.com/webex/widgets/commit/ec389f5ed1184794c24d252fa744b2436a32c5de))
+
 # [1.28.0-ccwidgets.23](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.22...v1.28.0-ccwidgets.23) (2025-02-27)
 
 
