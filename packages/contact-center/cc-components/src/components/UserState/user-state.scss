@@ -2,11 +2,19 @@
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+  width: 100%; /* Ensure the container takes the full width of its parent */
 }
 
 .select-trigger {
   position: relative;
-  width: fit-content;
+  width: 100%; /* Ensure the select trigger takes the full width of its parent */
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Space out the elements within the select trigger */
+}
+
+.select-trigger .md-select {
+  width: 100%; /* Ensure the SelectNext component takes the full width of its parent */
 }
 
 .elapsedTime {
@@ -17,6 +25,9 @@
   pointer-events: none;
   z-index: 1;
   color: black;
+  white-space: nowrap; /* Prevent the text from wrapping */
+  padding: 0 5px; /* Add some padding */
+  border-radius: 4px; /* Add some border radius */
 }
 
 .elapsedTime-disabled {
@@ -27,48 +38,20 @@
   color: red;
 }
 
-.light-theme {
-  .elapsedTime {
-    position: absolute;
-    right: 30px;
-    top: 25px;
-    color: #777;
-  }
-
-  .elapsedTime-disabled {
-    color: #ccc;
-  }
-
-}
-
-.dark-theme {
-
-  .elapsedTime {
-    position: absolute;
-    right: 30px;
-    top: 25px;
-    color: #ddd;
-  }
-
-  .elapsedTime-disabled {
-    color: #777;
-  }
-}
-
 .item-container {
   display: flex;
   align-items: center;
   gap: 4px;
 }
 
-
 .state-select {
+  width: 100%;
   --mds-color-theme-background-primary-hover: #CEF5EB;
   --mds-color-theme-background-primary-active: #CEF5EB;
 
   .state-icon {
     --mdc-icon-fill-color: #1D805F;
-  
+
     &-idle {
       --mdc-icon-fill-color: #707070;
     }
@@ -78,7 +61,7 @@
     &.md-select-selected {
       .state-icon {
         --mdc-icon-fill-color: #000000F2;
-      
+
         &-idle {
           --mdc-icon-fill-color: #000000F2;
         }
@@ -87,22 +70,23 @@
   }
 
   &-idle {
-    --mds-color-theme-background-primary-hover: #00000012;
-    --mds-color-theme-background-primary-active: #00000012;
+    width: 100%;
+    --mds-color-theme-background-primary-hover: rgba(0, 0, 0, 0.12);
+    --mds-color-theme-background-primary-active: rgba(0, 0, 0, 0.12);
 
     .state-icon {
       --mdc-icon-fill-color: #1D805F;
-    
+
       &-idle {
         --mdc-icon-fill-color: #707070;
       }
     }
     .md-select-dropdown-input {
-      background-color: #00000012;
+      background-color: rgba(0, 0, 0, 0.12);
       &.md-select-selected {
         .state-icon {
           --mdc-icon-fill-color: #000000F2;
-        
+
           &-idle {
             --mdc-icon-fill-color: #000000F2;
           }
