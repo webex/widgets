@@ -2,52 +2,54 @@ import React from 'react';
 
 import {IUserState} from './user-state.types';
 import {formatTime} from '../../utils';
-import {Icon} from '@momentum-design/components/dist/react';
-
-import {ButtonPill} from '@momentum-ui/react-collaboration';
 
 import './user-state.scss';
-
+import {SelectNext, Text} from '@momentum-ui/react-collaboration';
+import {Item} from '@react-stately/collections';
+import {Icon} from '@momentum-design/components/dist/react';
 const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
-  const {idleCodes, setAgentStatus, isSettingAgentStatus, errorMessage, elapsedTime, currentState, currentTheme} =
-    props;
+  const {idleCodes, setAgentStatus, isSettingAgentStatus, errorMessage, elapsedTime, currentState} = props;
 
   return (
-    <div className={`box ${currentTheme === 'DARK' ? 'dark-theme' : 'light-theme'}`}>
-      <section className="sectionBox">
-        <fieldset className="fieldset">
-          <legend data-testid="user-state-title" className="legendBox">
-            Agent State
-          </legend>
-          <div style={{display: 'flex', flexDirection: 'column', flexGrow: 1}} />
-          <Icon name="handset-regular" />
-          <select
-            id="idleCodes"
-            value={currentState}
-            className="select"
-            onChange={(event) => {
-              const code = idleCodes?.filter((code) => code.id === event.target.value)[0];
-              setAgentStatus(code);
-            }}
-            disabled={isSettingAgentStatus}
-          >
-            {idleCodes
-              ?.filter((code) => !code.isSystem)
-              .map((code) => {
-                return (
-                  <option key={code.id} value={code.id}>
-                    {code.name}
-                  </option>
-                );
-              })}
-          </select>
-          <ButtonPill type="button">Set state</ButtonPill>
-          <div className={`elapsedTime ${isSettingAgentStatus ? 'elapsedTime-disabled' : ''}`}>
-            {formatTime(elapsedTime)}
-          </div>
-          {errorMessage && <div style={{color: 'red'}}>{errorMessage}</div>}
-        </fieldset>
-      </section>
+    <div className="user-state-container">
+      <div className="select-trigger">
+        <SelectNext
+          label=""
+          aria-label="user-state"
+          direction="bottom"
+          onSelectionChange={(key) => {
+            const selectedItem = idleCodes?.find((code) => code.id === key);
+            if (selectedItem && selectedItem != currentState) setAgentStatus(selectedItem);
+          }}
+          showBorder
+          selectedKey={currentState}
+          items={idleCodes.filter((code) => !code.isSystem)}
+          className={currentState == '0' ? 'state-select' : 'state-select-idle'}
+        >
+          {(item) => {
+            return (
+              <Item key={item.id} textValue={item.name}>
+                <div className="item-container">
+                  <Icon
+                    name={item.id == '0' ? 'active-presence-small-filled' : 'recents-presence-filled'}
+                    title=""
+                    className={item.id == '0' ? 'state-icon' : 'state-icon state-icon-idle'}
+                  />
+                  <Text className="" tagName={'small'}>
+                    {item.name}
+                  </Text>
+                </div>
+              </Item>
+            );
+          }}
+        </SelectNext>
+
+        <span className={`elapsedTime ${isSettingAgentStatus ? 'elapsedTime-disabled' : ''}`}>
+          {formatTime(elapsedTime)}
+        </span>
+      </div>
+
+      {errorMessage && <div className="error-message">{errorMessage}</div>}
     </div>
   );
 };

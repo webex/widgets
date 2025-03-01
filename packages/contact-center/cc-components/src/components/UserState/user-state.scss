@@ -1,143 +1,113 @@
+.user-state-container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.select-trigger {
+  position: relative;
+  width: fit-content;
+}
+
+.elapsedTime {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 1;
+  color: black;
+}
+
+.elapsedTime-disabled {
+  color: #ccc;
+}
+
+.error-message {
+  color: red;
+}
+
 .light-theme {
-    &.box {
-        background-color: #ffffff;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        padding: 20px;
-        max-width: 800px;
-        margin: 0 auto;
-    }
-    
-    .sectionBox {
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-    }
-    
-    .fieldset {
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        padding: 10px;
-        margin-bottom: 20px;
-        position: relative;
-    }
-    
-    .legendBox {
-        font-weight: bold;
-        color: #0052bf;
-    }
-    
-    .btn {
-        padding: 10px 20px;
-        background-color: #0052bf;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        transition: background-color 0.3s;
-        margin-right: 8px;
-    }
-    
-    .select {
-        width: 100%;
-        padding: 8px;
-        margin-top: 8px;
-        margin-bottom: 12px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-    }
-    
-    .input {
-        width: 97%;
-        padding: 8px;
-        margin-top: 8px;
-        margin-bottom: 12px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-    }
-    
-    .elapsedTime {
-        position: absolute;
-        right: 30px;
-        top: 25px;
-        color: black; /* Replace with dynamic styling as needed */
-    }
-    
-    .elapsedTime-disabled {
-        color: #ccc;
-    }
+  .elapsedTime {
+    position: absolute;
+    right: 30px;
+    top: 25px;
+    color: #777;
+  }
+
+  .elapsedTime-disabled {
+    color: #ccc;
+  }
+
 }
 
 .dark-theme {
-    &.box {
-        background-color: #1e1e1e; /* Dark background */
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); /* Darker shadow */
-        padding: 20px;
-        max-width: 800px;
-        margin: 0 auto;
+
+  .elapsedTime {
+    position: absolute;
+    right: 30px;
+    top: 25px;
+    color: #ddd;
+  }
+
+  .elapsedTime-disabled {
+    color: #777;
+  }
+}
+
+.item-container {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+
+.state-select {
+  --mds-color-theme-background-primary-hover: #CEF5EB;
+  --mds-color-theme-background-primary-active: #CEF5EB;
+
+  .state-icon {
+    --mdc-icon-fill-color: #1D805F;
+  
+    &-idle {
+      --mdc-icon-fill-color: #707070;
     }
+  }
+  .md-select-dropdown-input {
+    background-color: #CEF5EB;
+    &.md-select-selected {
+      .state-icon {
+        --mdc-icon-fill-color: #000000F2;
+      
+        &-idle {
+          --mdc-icon-fill-color: #000000F2;
+        }
+      }
+    }
+  }
+
+  &-idle {
+    --mds-color-theme-background-primary-hover: #00000012;
+    --mds-color-theme-background-primary-active: #00000012;
+
+    .state-icon {
+      --mdc-icon-fill-color: #1D805F;
     
-    .sectionBox {
-        padding: 10px;
-        border: 1px solid #444; /* Darker border */
-        border-radius: 8px;
+      &-idle {
+        --mdc-icon-fill-color: #707070;
+      }
     }
-    
-    .fieldset {
-        border: 1px solid #555; /* Darker border */
-        border-radius: 5px;
-        padding: 10px;
-        margin-bottom: 20px;
-        position: relative;
+    .md-select-dropdown-input {
+      background-color: #00000012;
+      &.md-select-selected {
+        .state-icon {
+          --mdc-icon-fill-color: #000000F2;
+        
+          &-idle {
+            --mdc-icon-fill-color: #000000F2;
+          }
+        }
+      }
     }
-    
-    .legendBox {
-        font-weight: bold;
-        color: #79a6d2; /* Lighter blue for dark theme */
-    }
-    
-    .btn {
-        padding: 10px 20px;
-        background-color: #79a6d2; /* Lighter blue */
-        color: #1e1e1e; /* Dark text on light button */
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        transition: background-color 0.3s;
-        margin-right: 8px;
-    }
-    
-    .select {
-        width: 100%;
-        padding: 8px;
-        margin-top: 8px;
-        margin-bottom: 12px;
-        border: 1px solid #555; /* Darker border */
-        border-radius: 4px;
-        background-color: #2a2a2a; /* Dark background */
-        color: #fff; /* Light text */
-    }
-    
-    .input {
-        width: 97%;
-        padding: 8px;
-        margin-top: 8px;
-        margin-bottom: 12px;
-        border: 1px solid #555; /* Darker border */
-        border-radius: 4px;
-        background-color: #2a2a2a; /* Dark background */
-        color: #fff; /* Light text */
-    }
-    
-    .elapsedTime {
-        position: absolute;
-        right: 30px;
-        top: 25px;
-        color: #ddd; /* Light text for visibility */
-    }
-    
-    .elapsedTime-disabled {
-        color: #777; /* Darker gray for disabled state */
-    }
+  }
 }

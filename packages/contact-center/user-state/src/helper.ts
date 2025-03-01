@@ -31,20 +31,18 @@ export const useUserState = ({idleCodes, agentId, cc, currentState, lastStateCha
     workerRef.current = new Worker(workerUrl);
     workerRef.current.postMessage({type: 'start', startTime: Date.now()});
     workerRef.current.onmessage = (event) => {
-      setElapsedTime(event.data);
+      setElapsedTime(event.data > 0 ? event.data : 0);
     };
   }, []);
 
   useEffect(() => {
     if (workerRef.current && lastStateChangeTimestamp) {
-      const timeNow = new Date();
-      const elapsed = Math.floor(Math.abs(timeNow.getTime() - lastStateChangeTimestamp.getTime()) / 1000);
-      setElapsedTime(elapsed);
       workerRef.current.postMessage({type: 'reset', startTime: lastStateChangeTimestamp.getTime()});
     }
   }, [lastStateChangeTimestamp]);
 
   const setAgentStatus = (selectedCode) => {
+    setErrorMessage('');
     const {auxCodeId, state} = {
       auxCodeId: selectedCode.id,
       state: selectedCode.name,
