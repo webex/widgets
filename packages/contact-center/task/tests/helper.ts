@@ -1,5 +1,5 @@
 import {renderHook, act, waitFor} from '@testing-library/react';
-import {useIncomingTask, useTaskList, useCallControl} from '../src/helper';
+import {useIncomingTask, useTaskList, useCallControl, useOutdialCall} from '../src/helper';
 import {TASK_EVENTS} from '@webex/cc-store';
 import React from 'react';
 
@@ -907,5 +907,157 @@ describe('useCallControl', () => {
     );
     // Ensure no event handler is set
     expect(taskMock.on).not.toHaveBeenCalled();
+  });
+});
+
+describe('useOutdialCall', () => {
+  const ccMock = {
+    startOutdial: jest.fn().mockResolvedValue('Success'),
+  };
+
+  const logger = {
+    info: jest.fn(),
+    error: jest.fn(),
+  };
+
+  const mockDialerPayload = {
+    destination: '123456789',
+    entryPointId: 'entry123',
+    direction: 'OUTBOUND',
+    attributes: {},
+    mediaType: 'telephony',
+    outboundType: 'OUTDIAL',
+  };
+
+  beforeEach(() => {
+    global.alert = jest.fn();
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    logger.error.mockRestore();
+    logger.info.mockRestore();
+  });
+
+  it('should successfully start an outdial call', async () => {
+
+    const {result} = renderHook(() =>
+      useOutdialCall({
+        cc: ccMock,
+        logger,
+      })
+    );
+
+    await act(async () => {
+      await result.current.startOutdial(mockDialerPayload);
+    });
+
+    expect(ccMock.startOutdial).toHaveBeenCalledWith(mockDialerPayload);
+    expect(logger.info).toHaveBeenCalledWith('Outdial call started', 'Success');
+  });
+
+  it('should show alert when destination is empty', async () => {
+    
+    const {result} = renderHook(() =>
+      useOutdialCall({
+        cc: ccMock,
+        logger,
+      })
+    );
+
+    const invalidPayload = {
+      ...mockDialerPayload,
+      destination: ''
+    };
+
+    await act(async () => {
+      await result.current.startOutdial(invalidPayload);
+    });
+
+    expect(global.alert).toHaveBeenCalledWith('Destination number is required, it cannot be empty');
+    expect(ccMock.startOutdial).not.toHaveBeenCalled();
+  });
+
+  it('should show alert when destination contains only spaces', async () => {
+    const {result} = renderHook(() =>
+      useOutdialCall({
+        cc: ccMock,
+        logger,
+      })
+    );
+
+    const invalidPayload = {
+      ...mockDialerPayload,
+      destination: '   '
+    };
+
+    await act(async () => {
+      await result.current.startOutdial(invalidPayload);
+    });
+
+    expect(global.alert).toHaveBeenCalledWith('Destination number is required, it cannot be empty');
+    expect(ccMock.startOutdial).not.toHaveBeenCalled();
+  });
+
+  it('should show alert when entryPointId is missing', async () => {
+    
+    const {result} = renderHook(() =>
+      useOutdialCall({
+        cc: ccMock,
+        logger,
+      })
+    );
+
+    const invalidPayload = {
+      ...mockDialerPayload,
+      entryPointId: ''
+    };
+
+    await act(async () => {
+      await result.current.startOutdial(invalidPayload);
+    });
+
+    expect(global.alert).toHaveBeenCalledWith('Entry point ID is not configured');
+    expect(ccMock.startOutdial).not.toHaveBeenCalled();
+  });
+
+  it('should handle errors when starting outdial call fails', async () => {
+
+    const errorCcMock = {
+      startOutdial: jest.fn().mockRejectedValue(new Error('Outdial failed'))
+    };
+
+    const {result} = renderHook(() =>
+      useOutdialCall({
+        cc: errorCcMock,
+        logger,
+      })
+    );
+
+    await act(async () => {
+      await result.current.startOutdial(mockDialerPayload);
+    });
+
+    expect(errorCcMock.startOutdial).toHaveBeenCalledWith(mockDialerPayload);
+    expect(logger.error).toHaveBeenCalledWith('Error starting outdial call: Error: Outdial failed', {
+      module: 'widget-cc-task#helper.ts',
+      method: 'useOutdialCall',
+    });
+  });
+
+  it('should return early if no dialer payload is provided', async () => {
+    const {result} = renderHook(() =>
+      useOutdialCall({
+        cc: ccMock,
+        logger,
+      })
+    );
+
+    await act(async () => {
+      await result.current.startOutdial(undefined);
+    });
+
+    expect(ccMock.startOutdial).not.toHaveBeenCalled();
+    expect(logger.info).not.toHaveBeenCalled();
   });
 });

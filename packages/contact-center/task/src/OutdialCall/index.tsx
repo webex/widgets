@@ -1,7 +1,6 @@
 import React from 'react';
 import store from '@webex/cc-store';
 import {observer} from 'mobx-react-lite';
-
 import OutdialCallPresentational from './out-dial-call.presentational';
 import {useOutdialCall} from '../helper';
 
