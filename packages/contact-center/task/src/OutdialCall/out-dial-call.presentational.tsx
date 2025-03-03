@@ -11,7 +11,7 @@ export default function OutDialCallPresentational(props: OutdialCallPresentation
     setDestination(e.target.value);
   };
 
-  // Function to press a key on the outdial keypad
+  // Function to press a key on the outdial keypad.
   const pressKey = (value: string) => {
     // Allow only valid digits, #, *, and +
     if (!/^[\d#*+]$/.test(value)) {
