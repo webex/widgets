@@ -33,6 +33,7 @@ describe('useUserState Hook', () => {
     global.URL.createObjectURL = jest.fn(() => 'blob:http://localhost:3000/12345');
     jest.spyOn(store, 'setCurrentState');
     jest.spyOn(store, 'setLastStateChangeTimestamp');
+    jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
@@ -54,7 +55,6 @@ describe('useUserState Hook', () => {
 
     expect(result.current).toMatchObject({
       isSettingAgentStatus: false,
-      errorMessage: '',
       elapsedTime: 0,
       currentState: '0',
     });
@@ -148,7 +148,47 @@ describe('useUserState Hook', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.errorMessage).toBe('Error: Error setting agent status');
+      expect(console.error).toHaveBeenCalledWith('Error: Error setting agent status');
+    });
+  });
+
+  it('should handle stopIdleCodeTimer event and set lastIdleStateChangeElapsedTime to -1', () => {
+    const {result} = renderHook(() =>
+      useUserState({
+        idleCodes,
+        agentId,
+        cc: mockCC,
+        currentState: '0',
+        lastStateChangeTimestamp: new Date().getTime(),
+        lastIdleCodeChangeTimestamp: new Date().getTime(),
+      })
+    );
+
+    act(() => {
+      workerMock.onmessage({data: {type: 'stopIdleCodeTimer'}});
+    });
+
+    expect(result.current.lastIdleStateChangeElapsedTime).toBe(-1);
+  });
+
+  it('should post resetIdleCode message if lastIdleCodeChangeTimestamp is different from lastStateChangeTimestamp', () => {
+    const lastStateChangeTimestamp = new Date().getTime();
+    const lastIdleCodeChangeTimestamp = lastStateChangeTimestamp - 1000; // 1 second earlier
+
+    const {result} = renderHook(() =>
+      useUserState({
+        idleCodes,
+        agentId,
+        cc: mockCC,
+        currentState: '0',
+        lastStateChangeTimestamp,
+        lastIdleCodeChangeTimestamp,
+      })
+    );
+
+    expect(workerMock.postMessage).toHaveBeenCalledWith({
+      type: 'resetIdleCode',
+      startTime: lastIdleCodeChangeTimestamp,
     });
   });
 });
