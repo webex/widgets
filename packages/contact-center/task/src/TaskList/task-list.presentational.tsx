@@ -11,8 +11,11 @@ const TaskListPresentational: React.FunctionComponent<TaskListPresentationalProp
   return (
     <ul className="task-list">
       {taskList?.map((task, index) => {
-        const {ani, virtualTeamName, ronaTimeout} = task.data.interaction.callAssociatedDetails;
+        const callAssociationDetails = task?.data?.interaction?.callAssociatedDetails;
+        const ani = callAssociationDetails?.ani;
+        const virtualTeamName = callAssociationDetails?.virtualTeamName;
         // rona timeout is not always available in the callAssociatedDetails object
+        const ronaTimeout = callAssociationDetails?.ronaTimeout ? Number(callAssociationDetails?.ronaTimeout) : null;
         const taskState = task.data.interaction.state;
         const startTimeStamp = task.data.interaction.createdTimestamp;
         const isIncomingTask = taskState === 'new';

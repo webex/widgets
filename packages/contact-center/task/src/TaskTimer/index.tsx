@@ -1,65 +1,82 @@
-import React, {useEffect, useState} from 'react';
-import {DateTime, Duration} from 'luxon';
-
-const formatDuration = (diff: Duration): string => {
-  const seconds = Math.max(0, diff.as('seconds')); // Prevent negative values
-  return Duration.fromObject({seconds}).toFormat(seconds < 3600 ? 'mm:ss' : 'hh:mm:ss');
-};
+import React, {useEffect, useState, useRef} from 'react';
 
 interface TaskTimerProps {
-  startTimeStamp?: number;
+  startTimeStamp?: number; // in milliseconds
   countdown?: boolean;
-  ronaTimeout?: number;
+  ronaTimeout?: number; // in seconds
 }
 
-const TaskTimer: React.FC<TaskTimerProps> = ({startTimeStamp, countdown = false, ronaTimeout}) => {
-  const now = DateTime.utc();
-  const start = startTimeStamp ? DateTime.fromMillis(startTimeStamp).toUTC() : now;
+const workerScript = `
+  const formatDuration = (seconds) => {
+    seconds = Math.max(0, seconds);
+    const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+    const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+    const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+    return seconds < 3600 ? m + ':' + s : h + ':' + m + ':' + s;
+  }
 
-  const getInitialDuration = () => {
-    if (countdown && ronaTimeout !== undefined) {
-      const end = now.plus({seconds: ronaTimeout});
-      return formatDuration(end.diff(now));
-    }
-    return formatDuration(now.diff(start));
-  };
+  self.onmessage = function(e) {
+    const { start, countdown, ronaTimeout } = e.data;
+    let running = true;
 
-  const [duration, setDuration] = useState(getInitialDuration);
-  const [running, setRunning] = useState(true);
+    const updateTimer = () => {
+      if (!running) {
+        return;
+      }
 
-  useEffect(() => {
-    if (!running) {
-      return;
-    }
-
-    const updateDuration = () => {
-      const now = DateTime.utc();
-      let diff: Duration;
+      const now = Math.floor(Date.now() / 1000); // current time in seconds
+      let diff;
 
       if (countdown && ronaTimeout !== undefined) {
-        const end = start.plus({seconds: ronaTimeout});
-        diff = end.diff(now);
-
-        if (diff.toMillis() <= 0) {
-          setDuration('00:00');
-          setRunning(false);
+        diff = start + ronaTimeout - now;
+        if (diff <= 0) {
+          self.postMessage('00:00');
+          running = false;
           return;
         }
       } else {
-        diff = now.diff(start);
+        diff = now - start;
       }
 
-      setDuration(formatDuration(diff));
+      const formattedTime = formatDuration(diff);
 
-      const timeoutId = setTimeout(updateDuration, 1000);
-
-      return () => clearTimeout(timeoutId);
+      self.postMessage(formattedTime);
+      setTimeout(updateTimer, 1000);
     };
 
-    updateDuration();
+    updateTimer();
+  };
+`;
 
-    return () => setRunning(false); // Ensure running state is cleaned up
-  }, [countdown, ronaTimeout, startTimeStamp, running]);
+const createWorker = () => {
+  return new Worker(URL.createObjectURL(new Blob([workerScript], {type: 'application/javascript'})));
+};
+
+const TaskTimer: React.FC<TaskTimerProps> = ({startTimeStamp, countdown = false, ronaTimeout}) => {
+  const [duration, setDuration] = useState('00:00');
+  const workerRef = useRef<Worker | null>(null);
+
+  useEffect(() => {
+    // Convert startTimeStamp from milliseconds to seconds if provided to match ronaTimeout, which is in seconds
+    const now = Math.floor(Date.now() / 1000);
+    const start = startTimeStamp ? Math.floor(startTimeStamp / 1000) : now;
+
+    if (!workerRef.current) {
+      workerRef.current = createWorker();
+    }
+
+    workerRef.current.postMessage({start, countdown, ronaTimeout});
+
+    const handleMessage = (e: MessageEvent) => {
+      setDuration(e.data);
+    };
+
+    workerRef.current.addEventListener('message', handleMessage);
+
+    return () => {
+      workerRef.current?.removeEventListener('message', handleMessage);
+    };
+  }, [countdown, ronaTimeout, startTimeStamp]);
 
   return (
     <time dateTime={duration} className="task-text task-text--secondary">

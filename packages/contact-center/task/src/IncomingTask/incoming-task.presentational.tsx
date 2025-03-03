@@ -9,8 +9,10 @@ const IncomingTaskPresentational: React.FunctionComponent<IncomingTaskPresentati
   }
 
   const callAssociationDetails = incomingTask?.data?.interaction?.callAssociatedDetails;
-  const {ani, virtualTeamName, ronaTimeout} = callAssociationDetails;
+  const ani = callAssociationDetails?.ani;
+  const virtualTeamName = callAssociationDetails?.virtualTeamName;
   // rona timeout is not always available in the callAssociatedDetails object
+  const ronaTimeout = callAssociationDetails?.ronaTimeout ? Number(callAssociationDetails?.ronaTimeout) : null;
   const startTimeStamp = incomingTask?.data?.interaction?.createdTimestamp;
   return (
     <Task

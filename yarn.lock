@@ -8030,13 +8030,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/luxon@npm:^3":
-  version: 3.4.2
-  resolution: "@types/luxon@npm:3.4.2"
-  checksum: 10c0/d835467de3daf7e17ba78b50bb5a14efd94272439ca067990d71332a54b311544459c69623eddd243b511b28d70194c9591a9ee8cf9c038962c965f991affd7e
-  languageName: node
-  linkType: hard
-
 "@types/mdast@npm:^3.0.0":
   version: 3.0.15
   resolution: "@types/mdast@npm:3.0.15"
@@ -24527,13 +24520,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"luxon@npm:^3.5.0":
-  version: 3.5.0
-  resolution: "luxon@npm:3.5.0"
-  checksum: 10c0/335789bba95077db831ef99894edadeb23023b3eb2137a1b56acd0d290082b691cf793143d69e30bc069ec95f0b49f36419f48e951c68014f19ffe12045e3494
-  languageName: node
-  linkType: hard
-
 "lz-string@npm:^1.5.0":
   version: 1.5.0
   resolution: "lz-string@npm:1.5.0"
@@ -34440,14 +34426,12 @@ __metadata:
     "@semantic-release/git": "npm:^10.0.1"
     "@semantic-release/github": "npm:^11.0.1"
     "@testing-library/react-hooks": "npm:^8.0.1"
-    "@types/luxon": "npm:^3"
     crypto-browserify: "npm:^3.12.1"
     css-loader: "npm:^7.1.2"
     html-webpack-plugin: "npm:^5.6.3"
     http-server: "npm:^14.1.1"
     husky: "npm:^9.1.7"
     jest: "npm:29.7.0"
-    luxon: "npm:^3.5.0"
     node-gyp: "npm:^10.2.0"
     os-browserify: "npm:^0.3.0"
     process: "npm:^0.11.10"
