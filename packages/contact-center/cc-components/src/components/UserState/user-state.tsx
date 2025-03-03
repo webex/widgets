@@ -8,7 +8,15 @@ import {SelectNext, Text} from '@momentum-ui/react-collaboration';
 import {Item} from '@react-stately/collections';
 import {Icon} from '@momentum-design/components/dist/react';
 const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
-  const {idleCodes, setAgentStatus, isSettingAgentStatus, errorMessage, elapsedTime, currentState} = props;
+  const {
+    idleCodes,
+    setAgentStatus,
+    isSettingAgentStatus,
+    errorMessage,
+    elapsedTime,
+    lastIdleCodeChangeElapsedTime,
+    currentState,
+  } = props;
 
   return (
     <div className="user-state-container">
@@ -35,7 +43,7 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
                     title=""
                     className={item.id == '0' ? 'state-icon' : 'state-icon state-icon-idle'}
                   />
-                  <Text className="" tagName={'small'}>
+                  <Text className="state-name" tagName={'small'}>
                     {item.name}
                   </Text>
                 </div>
@@ -45,8 +53,10 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
         </SelectNext>
 
         <span className={`elapsedTime ${isSettingAgentStatus ? 'elapsedTime-disabled' : ''}`}>
+          {lastIdleCodeChangeElapsedTime >= 0 ? formatTime(lastIdleCodeChangeElapsedTime) + ' / ' : ''}
           {formatTime(elapsedTime)}
         </span>
+        <Icon className="select-arrow-icon" name="arrow-down-bold" title="" />
       </div>
 
       {errorMessage && <div className="error-message">{errorMessage}</div>}

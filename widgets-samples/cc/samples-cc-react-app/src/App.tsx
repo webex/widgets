@@ -98,7 +98,7 @@ function App() {
       })
       .then((response) => {
         store.setCurrentState(response.data.auxCodeId);
-        store.setLastStateChangeTimestamp(new Date(response.data.lastStateChangeTimestamp));
+        store.setLastStateChangeTimestamp(response.data.lastStateChangeTimestamp);
         console.log('Agent state updated to', newState);
       })
       .catch((error) => {
@@ -207,7 +207,12 @@ function App() {
                 {selectedWidgets.stationLogin && <StationLogin onLogin={onLogin} onLogout={onLogout} />}
                 {store.isAgentLoggedIn && (
                   <>
-                    {selectedWidgets.userState && <UserState />}
+                    {selectedWidgets.userState && (
+                      <div style={{width: '80%'}}>
+                        <p>user state: </p>
+                        <UserState />
+                      </div>
+                    )}
                     {selectedWidgets.incomingTask && <IncomingTask onAccepted={onAccepted} onDeclined={onDeclined} />}
                     {selectedWidgets.taskList && (
                       <TaskList onTaskAccepted={onTaskAccepted} onTaskDeclined={onTaskDeclined} />

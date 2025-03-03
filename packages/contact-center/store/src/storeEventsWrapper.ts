@@ -72,6 +72,10 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.lastStateChangeTimestamp;
   }
 
+  get lastIdleCodeChangeTimestamp() {
+    return this.store.lastIdleCodeChangeTimestamp;
+  }
+
   get showMultipleLoginAlert() {
     return this.store.showMultipleLoginAlert;
   }
@@ -96,8 +100,12 @@ class StoreWrapper implements IStoreWrapper {
     this.store.currentState = state;
   };
 
-  setLastStateChangeTimestamp = (timestamp: Date): void => {
+  setLastStateChangeTimestamp = (timestamp: number): void => {
     this.store.lastStateChangeTimestamp = timestamp;
+  };
+
+  setLastIdleCodeChangeTimestamp = (timestamp: number): void => {
+    this.store.lastIdleCodeChangeTimestamp = timestamp;
   };
 
   setIsAgentLoggedIn = (value: boolean): void => {
@@ -208,8 +216,8 @@ class StoreWrapper implements IStoreWrapper {
       const DEFAULT_CODE = '0'; // Default code when no aux code is present
       this.setCurrentState(data.auxCodeId?.trim() !== '' ? data.auxCodeId : DEFAULT_CODE);
 
-      const startTime = data.lastStateChangeTimestamp;
-      this.setLastStateChangeTimestamp(new Date(startTime));
+      this.setLastStateChangeTimestamp(data.lastStateChangeTimestamp);
+      this.setLastIdleCodeChangeTimestamp(data.lastIdleCodeChangeTimestamp);
     }
   };
 

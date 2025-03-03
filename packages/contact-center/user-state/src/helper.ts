@@ -1,26 +1,69 @@
 import {useState, useEffect, useRef} from 'react';
 // TODO: Export & Import this AGENT_STATE_CHANGE constant from SDK
 import store from '@webex/cc-store';
-export const useUserState = ({idleCodes, agentId, cc, currentState, lastStateChangeTimestamp}) => {
+
+export const useUserState = ({
+  idleCodes,
+  agentId,
+  cc,
+  currentState,
+  lastStateChangeTimestamp,
+  lastIdleCodeChangeTimestamp,
+}) => {
   const [isSettingAgentStatus, setIsSettingAgentStatus] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [elapsedTime, setElapsedTime] = useState(0);
+  const [lastIdleCodeChangeElapsedTime, setLastIdleCodeChangeElapsedTime] = useState(0);
   const workerRef = useRef<Worker | null>(null);
 
   // Initialize the Web Worker using a Blob
   const workerScript = `
     let intervalId;
+    let intervalId2;
     const startTimer = (startTime) => {
       if (intervalId) clearInterval(intervalId);
       intervalId = setInterval(() => {
         const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
-        self.postMessage(elapsedTime);
+        self.postMessage({type: 'elapsedTime', elapsedTime});
       }, 1000);
     };
+    const startIdleCodeTimer = (startTime) => {
+      if (intervalId2) clearInterval(intervalId2);
+      intervalId2 = setInterval(() => {
+        const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+        self.postMessage({type: 'lastIdleCodeChangeElapsedTime', elapsedTime});
+      }, 1000);
+    };
+    const stopTimer = () => {
+      if (intervalId) clearInterval(intervalId);
+      self.postMessage({type: 'stop'});
+    };
+    const stopIdleCodeTimer = () => {
+      if (intervalId2) clearInterval(intervalId2);
+      self.postMessage({type: 'stopIdleCodeTimer'});
+    };
     self.onmessage = (event) => {
-      if (event.data.type === 'start' || event.data.type === 'reset') {
+      if (event.data.type === 'start') {
         const startTime = event.data.startTime;
         startTimer(startTime);
+      }
+      if (event.data.type === 'startIdleCode') {
+        const startTime = event.data.startTime;
+        startIdleCodeTimer(startTime);
+      }
+      if (event.data.type === 'reset') {
+        const startTime = event.data.startTime;
+        startTimer(startTime);
+      }
+      if (event.data.type === 'resetIdleCode') {
+        const startTime = event.data.startTime;
+        startIdleCodeTimer(startTime);
+      }
+      if (event.data.type === 'stop') {
+        stopTimer();
+      }
+      if (event.data.type === 'stopIdleCode') {
+        stopIdleCodeTimer();
       }
     };
   `;
@@ -30,16 +73,38 @@ export const useUserState = ({idleCodes, agentId, cc, currentState, lastStateCha
     const workerUrl = URL.createObjectURL(blob);
     workerRef.current = new Worker(workerUrl);
     workerRef.current.postMessage({type: 'start', startTime: Date.now()});
+    workerRef.current.postMessage({type: 'startIdleCode', startTime: Date.now()});
     workerRef.current.onmessage = (event) => {
-      setElapsedTime(event.data > 0 ? event.data : 0);
+      if (event.data.type === 'elapsedTime') {
+        setElapsedTime(event.data.elapsedTime > 0 ? event.data.elapsedTime : 0);
+      } else if (event.data.type === 'lastIdleCodeChangeElapsedTime') {
+        setLastIdleCodeChangeElapsedTime(event.data.elapsedTime > 0 ? event.data.elapsedTime : 0);
+      } else if (event.data.type === 'stopIdleCodeTimer') {
+        setLastIdleCodeChangeElapsedTime(-1);
+      }
+    };
+
+    return () => {
+      if (workerRef.current) {
+        workerRef.current.postMessage({type: 'stop'});
+        workerRef.current.postMessage({type: 'stopIdleCode'});
+        workerRef.current.terminate();
+        workerRef.current = null;
+      }
     };
   }, []);
 
   useEffect(() => {
     if (workerRef.current && lastStateChangeTimestamp) {
-      workerRef.current.postMessage({type: 'reset', startTime: lastStateChangeTimestamp.getTime()});
+      workerRef.current.postMessage({type: 'reset', startTime: lastStateChangeTimestamp});
+
+      if (lastIdleCodeChangeTimestamp && lastIdleCodeChangeTimestamp !== lastStateChangeTimestamp) {
+        workerRef.current.postMessage({type: 'resetIdleCode', startTime: lastIdleCodeChangeTimestamp});
+      } else {
+        workerRef.current.postMessage({type: 'stopIdleCode', startTime: lastIdleCodeChangeTimestamp});
+      }
     }
-  }, [lastStateChangeTimestamp]);
+  }, [lastStateChangeTimestamp, lastIdleCodeChangeTimestamp]);
 
   const setAgentStatus = (selectedCode) => {
     setErrorMessage('');
@@ -52,7 +117,8 @@ export const useUserState = ({idleCodes, agentId, cc, currentState, lastStateCha
     cc.setAgentState({state: chosenState, auxCodeId, agentId, lastStateChangeReason: state})
       .then((response) => {
         store.setCurrentState(response.data.auxCodeId);
-        store.setLastStateChangeTimestamp(new Date(response.data.lastStateChangeTimestamp));
+        store.setLastStateChangeTimestamp(response.data.lastStateChangeTimestamp);
+        store.setLastIdleCodeChangeTimestamp(response.data.lastIdleCodeChangeTimestamp);
       })
       .catch((error) => {
         setErrorMessage(error.toString());
@@ -68,6 +134,7 @@ export const useUserState = ({idleCodes, agentId, cc, currentState, lastStateCha
     isSettingAgentStatus,
     errorMessage,
     elapsedTime,
+    lastIdleCodeChangeElapsedTime,
     currentState,
   };
 };
