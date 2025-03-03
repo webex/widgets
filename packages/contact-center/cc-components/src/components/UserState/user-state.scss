@@ -1,11 +1,4 @@
 .user-state-container {
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-  width: 100%; /* Ensure the container takes the full width of its parent */
-}
-
-.select-trigger {
   position: relative;
   width: 100%; /* Ensure the select trigger takes the full width of its parent */
   display: flex;
@@ -19,55 +12,52 @@
 
 .elapsedTime {
   position: absolute;
-  right: 30px; /* Adjusted to leave space for the arrow icon */
+  right: 2rem; /* Adjusted to leave space for the arrow icon */
   top: 50%;
   transform: translateY(-50%);
+  display: flex;
+  align-items: center;
   pointer-events: none;
   z-index: 1;
-  color: black;
+  color: var(--mds-color-theme-text-primary-normal);
   white-space: nowrap; /* Prevent the text from wrapping */
-  padding: 0 5px; /* Add some padding */
-  border-radius: 4px; /* Add some border radius */
+  padding: 0 0.5rem; /* Add some padding */
+  border-radius: 0.25rem; /* Add some border radius */
 }
 
 .state-name {
-  color: black;
+  color: var(--mds-color-theme-text-primary-normal);
 }
 
 .elapsedTime-disabled {
   color: #ccc;
 }
 
-.error-message {
-  color: red;
-}
-
 .item-container {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 0.25rem;
 }
 
 .state-select {
   width: 100%;
-  --mds-color-theme-background-primary-hover: #CEF5EB;
-  --mds-color-theme-background-primary-active: #CEF5EB;
+  --mds-color-theme-background-primary-active: var(--mds-color-theme-background-alert-success-normal);
 
   .state-icon {
-    --mdc-icon-fill-color: #1D805F;
+    --mdc-icon-fill-color: var(--mds-color-theme-indicator-stable);
 
     &-idle {
-      --mdc-icon-fill-color: #707070;
+      --mdc-icon-fill-color: var(--mds-color-theme-indicator-locked);
     }
   }
   .md-select-dropdown-input {
-    background-color: #CEF5EB;
+    background-color: var(--mds-color-theme-background-alert-success-normal);
     &.md-select-selected {
       .state-icon {
-        --mdc-icon-fill-color: #000000F2;
+        --mdc-icon-fill-color: var(--mds-color-theme-text-primary-normal);
 
         &-idle {
-          --mdc-icon-fill-color: #000000F2;
+          --mdc-icon-fill-color: var(--mds-color-theme-text-primary-normal);
         }
       }
     }
@@ -75,24 +65,23 @@
 
   &-idle {
     width: 100%;
-    --mds-color-theme-background-primary-hover: rgba(0, 0, 0, 0.12);
-    --mds-color-theme-background-primary-active: rgba(0, 0, 0, 0.12);
+    --mds-color-theme-background-primary-active: var(--mds-color-theme-background-primary-active);
 
     .state-icon {
-      --mdc-icon-fill-color: #1D805F;
-
+      --mdc-icon-fill-color: var(--mds-color-theme-indicator-stable);
+  
       &-idle {
-        --mdc-icon-fill-color: #707070;
+        --mdc-icon-fill-color: var(--mds-color-theme-indicator-locked);
       }
     }
     .md-select-dropdown-input {
-      background-color: rgba(0, 0, 0, 0.12);
+      background-color: var(--mds-color-theme-background-secondary-normal);
       &.md-select-selected {
         .state-icon {
-          --mdc-icon-fill-color: #000000F2;
-
+          --mdc-icon-fill-color: var(--mds-color-theme-text-primary-normal);
+  
           &-idle {
-            --mdc-icon-fill-color: #000000F2;
+            --mdc-icon-fill-color: var(--mds-color-theme-text-primary-normal);
           }
         }
       }
@@ -102,9 +91,11 @@
 
 .select-arrow-icon {
   position: absolute;
-  right: 10px;
+  right: 1rem; /* Adjusted to leave space for the arrow icon */
   top: 50%;
   transform: translateY(-50%);
+  display: flex;
+  align-items: center;
   pointer-events: none;
   z-index: 1;
 }

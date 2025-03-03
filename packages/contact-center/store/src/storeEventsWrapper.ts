@@ -97,15 +97,21 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   setCurrentState = (state: string): void => {
-    this.store.currentState = state;
+    runInAction(() => {
+      this.store.currentState = state;
+    });
   };
 
   setLastStateChangeTimestamp = (timestamp: number): void => {
-    this.store.lastStateChangeTimestamp = timestamp;
+    runInAction(() => {
+      this.store.lastStateChangeTimestamp = timestamp;
+    });
   };
 
   setLastIdleCodeChangeTimestamp = (timestamp: number): void => {
-    this.store.lastIdleCodeChangeTimestamp = timestamp;
+    runInAction(() => {
+      this.store.lastIdleCodeChangeTimestamp = timestamp;
+    });
   };
 
   setIsAgentLoggedIn = (value: boolean): void => {
@@ -117,7 +123,9 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   setCurrentTask = (task: ITask): void => {
-    this.store.currentTask = task;
+    runInAction(() => {
+      this.store.currentTask = task;
+    });
   };
 
   setIncomingTask = (task: ITask): void => {

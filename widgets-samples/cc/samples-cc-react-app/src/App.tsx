@@ -205,7 +205,7 @@ function App() {
             </Button>
             {isSdkReady && (
               <>
-                <div className="margin-bottom-20">
+                <div className="station-login">
                   {selectedWidgets.stationLogin && <StationLogin onLogin={onLogin} onLogout={onLogout} />}
                 </div>
                 {store.isAgentLoggedIn && (

@@ -11,7 +11,6 @@ export const useUserState = ({
   lastIdleCodeChangeTimestamp,
 }) => {
   const [isSettingAgentStatus, setIsSettingAgentStatus] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
   const [elapsedTime, setElapsedTime] = useState(0);
   const [lastIdleStateChangeElapsedTime, setLastIdleStateChangeElapsedTime] = useState(0);
   const workerRef = useRef<Worker | null>(null);
@@ -107,7 +106,6 @@ export const useUserState = ({
   }, [lastStateChangeTimestamp, lastIdleCodeChangeTimestamp]);
 
   const setAgentStatus = (selectedCode) => {
-    setErrorMessage('');
     const {auxCodeId, state} = {
       auxCodeId: selectedCode.id,
       state: selectedCode.name,
@@ -121,7 +119,7 @@ export const useUserState = ({
         store.setLastIdleCodeChangeTimestamp(response.data.lastIdleCodeChangeTimestamp);
       })
       .catch((error) => {
-        setErrorMessage(error.toString());
+        console.error(error.toString());
       })
       .finally(() => {
         setIsSettingAgentStatus(false);
@@ -132,7 +130,6 @@ export const useUserState = ({
     idleCodes,
     setAgentStatus,
     isSettingAgentStatus,
-    errorMessage,
     elapsedTime,
     lastIdleStateChangeElapsedTime,
     currentState,
