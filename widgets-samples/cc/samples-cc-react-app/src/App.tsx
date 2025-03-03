@@ -127,7 +127,7 @@ function App() {
   }, []);
 
   return (
-    <div className="mds-typography" style={{height: '100%'}}>
+    <div className="mds-typography centered-container">
       <ThemeProvider
         themeclass={currentTheme === 'LIGHT' ? 'mds-theme-stable-lightWebex' : 'mds-theme-stable-darkWebex'}
       >
@@ -205,13 +205,19 @@ function App() {
             </Button>
             {isSdkReady && (
               <>
-                {selectedWidgets.stationLogin && <StationLogin onLogin={onLogin} onLogout={onLogout} />}
+                <div className="margin-bottom-20">
+                  {selectedWidgets.stationLogin && <StationLogin onLogin={onLogin} onLogout={onLogout} />}
+                </div>
                 {store.isAgentLoggedIn && (
                   <>
                     {selectedWidgets.userState && (
-                      <div style={{width: '80%'}}>
-                        <p>user state: </p>
-                        <UserState />
+                      <div className="box">
+                        <section className="section-box">
+                          <fieldset className="fieldset">
+                            <legend className="legend-box">User State</legend>
+                            <UserState />
+                          </fieldset>
+                        </section>
                       </div>
                     )}
                     {selectedWidgets.incomingTask && <IncomingTask onAccepted={onAccepted} onDeclined={onDeclined} />}

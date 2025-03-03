@@ -98,7 +98,19 @@ function initWidgets() {
 function loginSuccess() {
   if (userStateCheckbox.checked) {
     ccUserState.classList.remove('disabled');
-    widgetsContainer.appendChild(ccUserState);
+
+    const userStateContainer = document.createElement('div');
+    userStateContainer.className = 'box';
+    userStateContainer.innerHTML = `
+      <section class="section-box">
+        <fieldset class="fieldset">
+          <legend class="legend-box">User State</legend>
+        </fieldset>
+      </section>
+    `;
+
+    userStateContainer.querySelector('fieldset').appendChild(ccUserState);
+    widgetsContainer.appendChild(userStateContainer);
   }
   if (incomingTaskCheckbox.checked) {
     ccIncomingTask.classList.remove('disabled');
