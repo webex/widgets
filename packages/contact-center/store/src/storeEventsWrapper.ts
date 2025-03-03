@@ -72,8 +72,8 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.lastStateChangeTimestamp;
   }
 
-  get lastIdleStateChangeTimestamp() {
-    return this.store.lastIdleStateChangeTimestamp;
+  get lastIdleCodeChangeTimestamp() {
+    return this.store.lastIdleCodeChangeTimestamp;
   }
 
   get showMultipleLoginAlert() {
@@ -104,8 +104,8 @@ class StoreWrapper implements IStoreWrapper {
     this.store.lastStateChangeTimestamp = timestamp;
   };
 
-  setLastIdleStateChangeTimestamp = (timestamp: number): void => {
-    this.store.lastIdleStateChangeTimestamp = timestamp;
+  setLastIdleCodeChangeTimestamp = (timestamp: number): void => {
+    this.store.lastIdleCodeChangeTimestamp = timestamp;
   };
 
   setIsAgentLoggedIn = (value: boolean): void => {
@@ -217,7 +217,7 @@ class StoreWrapper implements IStoreWrapper {
       this.setCurrentState(data.auxCodeId?.trim() !== '' ? data.auxCodeId : DEFAULT_CODE);
 
       this.setLastStateChangeTimestamp(data.lastStateChangeTimestamp);
-      this.setLastIdleStateChangeTimestamp(data.lastIdleStateChangeTimestamp);
+      this.setLastIdleCodeChangeTimestamp(data.lastIdleCodeChangeTimestamp);
     }
   };
 

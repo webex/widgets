@@ -48,7 +48,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
           store.setCurrentState(res.data.auxCodeId);
         }
         store.setLastStateChangeTimestamp(res.data.lastStateChangeTimestamp);
-        store.setLastIdleStateChangeTimestamp(res.data.lastIdleStateChangeTimestamp);
+        store.setLastIdleCodeChangeTimestamp(res.data.lastIdleCodeChangeTimestamp);
 
         if (loginCb) {
           loginCb();

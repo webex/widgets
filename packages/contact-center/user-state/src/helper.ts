@@ -8,7 +8,7 @@ export const useUserState = ({
   cc,
   currentState,
   lastStateChangeTimestamp,
-  lastIdleStateChangeTimestamp,
+  lastIdleCodeChangeTimestamp,
 }) => {
   const [isSettingAgentStatus, setIsSettingAgentStatus] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -98,13 +98,13 @@ export const useUserState = ({
     if (workerRef.current && lastStateChangeTimestamp) {
       workerRef.current.postMessage({type: 'reset', startTime: lastStateChangeTimestamp});
 
-      if (lastIdleStateChangeTimestamp && lastIdleStateChangeTimestamp !== lastStateChangeTimestamp) {
-        workerRef.current.postMessage({type: 'resetIdleCode', startTime: lastIdleStateChangeTimestamp});
+      if (lastIdleCodeChangeTimestamp && lastIdleCodeChangeTimestamp !== lastStateChangeTimestamp) {
+        workerRef.current.postMessage({type: 'resetIdleCode', startTime: lastIdleCodeChangeTimestamp});
       } else {
-        workerRef.current.postMessage({type: 'stopIdleCode', startTime: lastIdleStateChangeTimestamp});
+        workerRef.current.postMessage({type: 'stopIdleCode', startTime: lastIdleCodeChangeTimestamp});
       }
     }
-  }, [lastStateChangeTimestamp, lastIdleStateChangeTimestamp]);
+  }, [lastStateChangeTimestamp, lastIdleCodeChangeTimestamp]);
 
   const setAgentStatus = (selectedCode) => {
     setErrorMessage('');
@@ -118,7 +118,7 @@ export const useUserState = ({
       .then((response) => {
         store.setCurrentState(response.data.auxCodeId);
         store.setLastStateChangeTimestamp(response.data.lastStateChangeTimestamp);
-        store.setLastIdleStateChangeTimestamp(response.data.lastIdleStateChangeTimestamp);
+        store.setLastIdleCodeChangeTimestamp(response.data.lastIdleCodeChangeTimestamp);
       })
       .catch((error) => {
         setErrorMessage(error.toString());

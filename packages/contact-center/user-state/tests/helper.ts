@@ -48,7 +48,7 @@ describe('useUserState Hook', () => {
         cc: mockCC,
         currentState: '0',
         lastStateChangeTimestamp: new Date().getTime(),
-        lastIdleStateChangeTimestamp: undefined,
+        lastIdleCodeChangeTimestamp: undefined,
       })
     );
 
@@ -68,7 +68,7 @@ describe('useUserState Hook', () => {
         cc: mockCC,
         currentState: '0',
         lastStateChangeTimestamp: new Date().getTime(),
-        lastIdleStateChangeTimestamp: new Date().getTime(),
+        lastIdleCodeChangeTimestamp: new Date().getTime(),
       })
     );
 
@@ -91,7 +91,7 @@ describe('useUserState Hook', () => {
         cc: mockCC,
         currentState: '0',
         lastStateChangeTimestamp: new Date().getTime(),
-        lastIdleStateChangeTimestamp: new Date().getTime(),
+        lastIdleCodeChangeTimestamp: new Date().getTime(),
       })
     );
 
@@ -117,7 +117,7 @@ describe('useUserState Hook', () => {
         cc: mockCC,
         currentState: '0',
         lastStateChangeTimestamp: new Date().getTime(),
-        lastIdleStateChangeTimestamp: undefined,
+        lastIdleCodeChangeTimestamp: undefined,
       })
     );
 
@@ -139,7 +139,7 @@ describe('useUserState Hook', () => {
         cc: mockCC,
         currentState: '0',
         lastStateChangeTimestamp: new Date().getTime(),
-        lastIdleStateChangeTimestamp: undefined,
+        lastIdleCodeChangeTimestamp: undefined,
       })
     );
 

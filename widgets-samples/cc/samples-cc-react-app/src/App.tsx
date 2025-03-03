@@ -99,7 +99,7 @@ function App() {
       .then((response) => {
         store.setCurrentState(response.data.auxCodeId);
         store.setLastStateChangeTimestamp(response.data.lastStateChangeTimestamp);
-        store.setLastIdleStateChangeTimestamp(response.data.lastIdleStateChangeTimestamp);
+        store.setLastIdleCodeChangeTimestamp(response.data.lastIdleCodeChangeTimestamp);
         console.log('Agent state updated to', newState);
       })
       .catch((error) => {

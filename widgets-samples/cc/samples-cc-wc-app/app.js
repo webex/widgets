@@ -169,7 +169,7 @@ function changeAgentState(newState) {
     .then(function (response) {
       store.setCurrentState(response.data.auxCodeId);
       store.setLastStateChangeTimestamp(response.data.lastStateChangeTimestamp);
-      store.setLastIdleStateChangeTimestamp(response.data.setLastIdleStateChangeTimestamp);
+      store.setLastIdleCodeChangeTimestamp(response.data.setLastIdleCodeChangeTimestamp);
       console.log('Agent state updated to', newState);
     })
     .catch(function (error) {

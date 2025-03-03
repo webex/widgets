@@ -44,7 +44,7 @@ interface IStore {
   wrapupRequired: boolean;
   currentState: string;
   lastStateChangeTimestamp?: number;
-  lastIdleStateChangeTimestamp?: number;
+  lastIdleCodeChangeTimestamp?: number;
   showMultipleLoginAlert: boolean;
   currentTheme: string;
   init(params: InitParams, callback: (ccSDK: IContactCenter) => () => void): Promise<void>;
@@ -60,7 +60,7 @@ interface IStoreWrapper extends IStore {
   setDeviceType(option: string): void;
   setCurrentState(state: string): void;
   setLastStateChangeTimestamp(timestamp: number): void;
-  setLastIdleStateChangeTimestamp(timestamp: number): void;
+  setLastIdleCodeChangeTimestamp(timestamp: number): void;
   setShowMultipleLoginAlert(value: boolean): void;
   setCurrentTheme(theme: string): void;
   setIsAgentLoggedIn(value: boolean): void;
