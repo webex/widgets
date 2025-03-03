@@ -36,6 +36,8 @@
 }
 
 .btn-container {
+  padding: 10px;
+
   button {
     margin-left: auto;
   }
@@ -51,7 +53,7 @@
 }
 
 .input {
-  width: 97%;
+  width: 100% !important;
   padding: 8px;
   margin-top: 8px;
   margin-bottom: 12px;

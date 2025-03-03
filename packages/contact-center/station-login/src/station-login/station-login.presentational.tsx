@@ -2,7 +2,7 @@ import React, {useEffect, useRef} from 'react';
 import {StationLoginPresentationalProps} from './station-login.types';
 import './station-login.style.scss';
 import {MULTIPLE_SIGN_IN_ALERT_MESSAGE, MULTIPLE_SIGN_IN_ALERT_TITLE} from './constants';
-import {ButtonPill, Checkbox, Text} from '@momentum-ui/react-collaboration';
+import {ButtonPill, Text} from '@momentum-ui/react-collaboration';
 
 const StationLoginPresentational: React.FunctionComponent<StationLoginPresentationalProps> = (props) => {
   const {
@@ -143,9 +143,6 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
             <select id="teamsDropdown" className="select">
               Teams
             </select>
-          </fieldset>
-          <fieldset className="fieldset">
-            <Checkbox htmlId="checkbox-visible" label="Don't show this again"></Checkbox>
           </fieldset>
           <div className="btn-container">
             {isAgentLoggedIn ? (
