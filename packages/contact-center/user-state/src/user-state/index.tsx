@@ -17,10 +17,10 @@ const UserState: React.FunctionComponent<IUserStateProps> = observer(({onStateCh
       customState,
       lastStateChangeTimestamp,
       logger,
-      onStateChange
+      onStateChange,
     }),
     currentTheme,
-    customState
+    customState,
   };
 
   return <UserStateComponent {...props} />;

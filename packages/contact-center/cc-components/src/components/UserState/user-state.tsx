@@ -17,7 +17,7 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
     elapsedTime,
     currentState,
     currentTheme,
-    customState
+    customState,
   } = props;
 
   return (
@@ -38,21 +38,18 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
             }}
             disabled={isSettingAgentStatus}
           >
-            {
-              customState && (
-                <option value={customState.developerName} hidden>
-                  {customState.name}
+            {customState && (
+              <option value={customState.developerName} hidden>
+                {customState.name}
+              </option>
+            )}
+            {idleCodes.map((code) => {
+              return (
+                <option key={code.id} value={code.id} hidden={code.name === 'RONA'}>
+                  {code.name}
                 </option>
-              )
-            }
-            {idleCodes
-              .map((code) => {
-                return (
-                  <option key={code.id} value={code.id} hidden={code.name === 'RONA'}>
-                    {code.name}
-                  </option>
-                );
-              })}
+              );
+            })}
           </select>
           <ButtonPill type="button">Set state</ButtonPill>
           <div className={`elapsedTime ${isSettingAgentStatus ? 'elapsedTime-disabled' : ''}`}>

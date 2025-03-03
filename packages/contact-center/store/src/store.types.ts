@@ -97,8 +97,8 @@ enum CC_EVENTS {
 }
 
 interface ICustomStateSet {
-    name: string;
-    developerName: string;
+  name: string;
+  developerName: string;
 }
 interface ICustomStateReset {
   reset: boolean;
@@ -119,7 +119,7 @@ export type {
   ILogger,
   IWrapupCode,
   IStoreWrapper,
-  ICustomState
+  ICustomState,
 };
 
 export {CC_EVENTS, TASK_EVENTS};

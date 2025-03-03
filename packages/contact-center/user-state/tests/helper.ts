@@ -1,5 +1,5 @@
-import { renderHook, act, waitFor } from '@testing-library/react';
-import { useUserState } from '../src/helper';
+import {renderHook, act, waitFor} from '@testing-library/react';
+import {useUserState} from '../src/helper';
 import store from '@webex/cc-store';
 
 describe('useUserState Hook', () => {
@@ -10,8 +10,8 @@ describe('useUserState Hook', () => {
   };
 
   const idleCodes = [
-    { id: '1', name: 'Idle Code 1', isSystem: false },
-    { id: '2', name: 'Available', isSystem: false },
+    {id: '1', name: 'Idle Code 1', isSystem: false},
+    {id: '2', name: 'Available', isSystem: false},
   ];
 
   const agentId = 'agent123';
@@ -46,7 +46,7 @@ describe('useUserState Hook', () => {
   });
 
   it('should initialize with default values', () => {
-    const { result } = renderHook(() =>
+    const {result} = renderHook(() =>
       useUserState({
         idleCodes,
         agentId,
@@ -69,7 +69,16 @@ describe('useUserState Hook', () => {
 
   it('should increment elapsedTime every second', async () => {
     const {result} = renderHook(() =>
-      useUserState({idleCodes, agentId, cc: mockCC, currentState: '0', customState: null, lastStateChangeTimestamp: undefined, logger, onStateChange})
+      useUserState({
+        idleCodes,
+        agentId,
+        cc: mockCC,
+        currentState: '0',
+        customState: null,
+        lastStateChangeTimestamp: undefined,
+        logger,
+        onStateChange,
+      })
     );
 
     act(() => {
@@ -86,7 +95,7 @@ describe('useUserState Hook', () => {
   });
 
   it('should call store.setCurrentState when setAgentStatus is called', async () => {
-    const { result } = renderHook(() =>
+    const {result} = renderHook(() =>
       useUserState({
         idleCodes,
         agentId,
@@ -109,25 +118,26 @@ describe('useUserState Hook', () => {
   });
 
   it('should update last state change timestamp from setAgentState', async () => {
-    let resolvingValue = {data: {auxCodeId: '2', lastStateChangeTimestamp: 1740748111287}};
+    const resolvingValue = {data: {auxCodeId: '2', lastStateChangeTimestamp: 1740748111287}};
     mockCC.setAgentState.mockResolvedValueOnce(resolvingValue);
-    const { result, rerender } = renderHook(
-      ({ currentState }) => useUserState({
-        idleCodes,
-        agentId,
-        cc: mockCC,
-        currentState,
-        customState: null,
-        lastStateChangeTimestamp: new Date(1740744111287),
-        logger,
-        onStateChange,
-      }),
-      { initialProps: { currentState: '0' } }
+    const {rerender} = renderHook(
+      ({currentState}) =>
+        useUserState({
+          idleCodes,
+          agentId,
+          cc: mockCC,
+          currentState,
+          customState: null,
+          lastStateChangeTimestamp: new Date(1740744111287),
+          logger,
+          onStateChange,
+        }),
+      {initialProps: {currentState: '0'}}
     );
 
     act(() => {
       store.setCurrentState('2'); // Simulate the store state change
-      rerender({ currentState: '2' });
+      rerender({currentState: '2'});
     });
 
     await waitFor(() => {
@@ -142,25 +152,26 @@ describe('useUserState Hook', () => {
   });
 
   it('should set idle status if name does not match: Available', async () => {
-    let resolvingValue = {data: {auxCodeId: '1', lastStateChangeTimestamp: 1740748111287}};
+    const resolvingValue = {data: {auxCodeId: '1', lastStateChangeTimestamp: 1740748111287}};
     mockCC.setAgentState.mockResolvedValueOnce(resolvingValue);
-    const { result, rerender } = renderHook(
-      ({ currentState }) => useUserState({
-        idleCodes,
-        agentId,
-        cc: mockCC,
-        currentState,
-        customState: null,
-        lastStateChangeTimestamp: new Date(1740744111287),
-        logger,
-        onStateChange,
-      }),
-      { initialProps: { currentState: '0' } }
+    const {rerender} = renderHook(
+      ({currentState}) =>
+        useUserState({
+          idleCodes,
+          agentId,
+          cc: mockCC,
+          currentState,
+          customState: null,
+          lastStateChangeTimestamp: new Date(1740744111287),
+          logger,
+          onStateChange,
+        }),
+      {initialProps: {currentState: '0'}}
     );
 
     act(() => {
       store.setCurrentState('1'); // Simulate the store state change
-      rerender({ currentState: '1' });
+      rerender({currentState: '1'});
     });
 
     await waitFor(() => {
@@ -176,23 +187,24 @@ describe('useUserState Hook', () => {
 
   it('should handle errors from setAgentState and revert state', async () => {
     mockCC.setAgentState.mockRejectedValueOnce(new Error('Error setting agent status'));
-    const { result, rerender } = renderHook(
-      ({ currentState }) => useUserState({
-        idleCodes,
-        agentId,
-        cc: mockCC,
-        currentState,
-        customState: null,
-        lastStateChangeTimestamp: new Date(),
-        logger,
-        onStateChange,
-      }),
-      { initialProps: { currentState: '0' } }
+    const {result, rerender} = renderHook(
+      ({currentState}) =>
+        useUserState({
+          idleCodes,
+          agentId,
+          cc: mockCC,
+          currentState,
+          customState: null,
+          lastStateChangeTimestamp: new Date(),
+          logger,
+          onStateChange,
+        }),
+      {initialProps: {currentState: '0'}}
     );
 
     act(() => {
       store.setCurrentState('2'); // Simulate the store state change
-      rerender({ currentState: '2' });
+      rerender({currentState: '2'});
     });
 
     await waitFor(() => {
@@ -201,7 +213,7 @@ describe('useUserState Hook', () => {
   });
 
   it('should not call onStateChange if not available', () => {
-    const customState = { developerName: 'Custom State' };
+    const customState = {developerName: 'Custom State'};
     renderHook(() =>
       useUserState({
         idleCodes,
@@ -219,7 +231,7 @@ describe('useUserState Hook', () => {
   });
 
   it('should call onStateChange with customState if provided', () => {
-    const customState = { developerName: 'Custom State' };
+    const customState = {developerName: 'Custom State'};
     renderHook(() =>
       useUserState({
         idleCodes,
@@ -255,7 +267,7 @@ describe('useUserState Hook', () => {
 
   it('should update elapsedTime based on lastStateChangeTimestamp', () => {
     const pastTimestamp = new Date(Date.now() - 5000);
-    const { result } = renderHook(() =>
+    const {result} = renderHook(() =>
       useUserState({
         idleCodes,
         agentId,

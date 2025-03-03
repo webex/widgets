@@ -48,7 +48,7 @@ describe('UserState Component', () => {
   it('renders UserStateComponent with correct props', () => {
     const useUserStateSpy = jest.spyOn(helper, 'useUserState');
 
-    render(<UserState onStateChange={onStateChange}/>);
+    render(<UserState onStateChange={onStateChange} />);
     expect(useUserStateSpy).toHaveBeenCalledTimes(1);
     expect(useUserStateSpy).toHaveBeenCalledWith({
       cc: {

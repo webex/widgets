@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 const accessTokenElem = document.getElementById('access_token_elem');
 const themeElem = document.getElementById('theme');
 const widgetsContainer = document.getElementById('widgets-container');
@@ -28,12 +27,12 @@ themeElem.addEventListener('change', () => {
   );
 });
 
-store.setTaskRejected(function(reason) {
+store.setTaskRejected(function (reason) {
   showTaskRejectedPopup(reason);
 });
 
 // Attach submit button event listener once.
-taskRejectedSubmitButton.addEventListener('click', function() {
+taskRejectedSubmitButton.addEventListener('click', function () {
   const selectedState = document.getElementById('state-select').value;
   if (selectedState) {
     changeAgentState(selectedState);
@@ -100,6 +99,7 @@ function loginSuccess() {
   if (userStateCheckbox.checked) {
     ccUserState.classList.remove('disabled');
     widgetsContainer.appendChild(ccUserState);
+    ccUserState.onStateChange = onStateChange;
   }
   if (incomingTaskCheckbox.checked) {
     ccIncomingTask.classList.remove('disabled');
@@ -121,6 +121,10 @@ function logoutSuccess() {
   ccIncomingTask.classList.add('disabled');
   ccTaskList.classList.add('disabled');
   ccCallControl.classList.add('disabled');
+}
+
+function onStateChange(param) {
+  console.log('State change invoked', param);
 }
 
 function onAccepted() {
@@ -167,18 +171,18 @@ function changeAgentState(newState) {
       agentId: agentId,
       lastStateChangeReason: newState,
     })
-    .then(function(response) {
+    .then(function (response) {
       store.setCurrentState(response.data.auxCodeId);
       store.setLastStateChangeTimestamp(new Date(response.data.lastStateChangeTimestamp));
       console.log('Agent state updated to', newState);
     })
-    .catch(function(error) {
+    .catch(function (error) {
       console.error('Error updating agent state:', error);
     });
 }
 
 // Helper to show the task rejected popup.
 function showTaskRejectedPopup(reason) {
-  document.getElementById('task-rejected-reason').textContent = "Reason: " + (reason || 'No reason provided');
+  document.getElementById('task-rejected-reason').textContent = 'Reason: ' + (reason || 'No reason provided');
   popupContainer.style.display = 'block';
 }

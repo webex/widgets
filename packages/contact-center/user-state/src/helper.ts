@@ -1,7 +1,16 @@
 import {useState, useEffect, useRef} from 'react';
 import store from '@webex/cc-store';
 
-export const useUserState = ({idleCodes, agentId, cc, currentState, customState, lastStateChangeTimestamp, logger, onStateChange}) => {
+export const useUserState = ({
+  idleCodes,
+  agentId,
+  cc,
+  currentState,
+  customState,
+  lastStateChangeTimestamp,
+  logger,
+  onStateChange,
+}) => {
   const [isSettingAgentStatus, setIsSettingAgentStatus] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -58,19 +67,21 @@ export const useUserState = ({idleCodes, agentId, cc, currentState, customState,
       });
 
       // Call setAgentStatus and update prevStateRef after promise resolves
-      setAgentState(currentState).then(() => {
-        prevStateRef.current = currentState;
-      }).catch((error) => {
-        logger.error(`Failed to update state: ${error.toString()}`, {
-          module: 'useUserState',
-          method: 'useEffect - currentState',
+      setAgentState(currentState)
+        .then(() => {
+          prevStateRef.current = currentState;
+        })
+        .catch((error) => {
+          logger.error(`Failed to update state: ${error.toString()}`, {
+            module: 'useUserState',
+            method: 'useEffect - currentState',
+          });
         });
-      });
     }
   }, [currentState]);
 
   useEffect(() => {
-    if(onStateChange){
+    if (onStateChange) {
       if (customState?.developerName) {
         onStateChange(customState);
         return;
@@ -94,7 +105,7 @@ export const useUserState = ({idleCodes, agentId, cc, currentState, customState,
 
   const setAgentStatus = (selectedCode) => {
     store.setCurrentState(selectedCode);
-  }
+  };
 
   const setAgentState = (selectedCode) => {
     selectedCode = idleCodes?.filter((code) => code.id === selectedCode)[0];
@@ -113,7 +124,8 @@ export const useUserState = ({idleCodes, agentId, cc, currentState, customState,
     setIsSettingAgentStatus(true);
     const chosenState = state === 'Available' ? 'Available' : 'Idle';
 
-    return cc.setAgentState({state: chosenState, auxCodeId, agentId, lastStateChangeReason: state})
+    return cc
+      .setAgentState({state: chosenState, auxCodeId, agentId, lastStateChangeReason: state})
       .then((response) => {
         logger.log(`Agent state set successfully`, {
           module: 'useUserState',
@@ -129,7 +141,7 @@ export const useUserState = ({idleCodes, agentId, cc, currentState, customState,
           method: 'setAgentStatus',
         });
         setErrorMessage(error.toString());
-        throw error;  // Rethrow to handle it in the calling function
+        throw error; // Rethrow to handle it in the calling function
       })
       .finally(() => {
         setIsSettingAgentStatus(false);

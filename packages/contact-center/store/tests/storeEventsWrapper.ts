@@ -1,5 +1,5 @@
 import {act, waitFor} from '@testing-library/react';
-import {CC_EVENTS, TASK_EVENTS, IdleCode} from '../src/store.types';
+import {CC_EVENTS, TASK_EVENTS} from '../src/store.types';
 import storeWrapper from '../src/storeEventsWrapper';
 import {ITask} from '@webex/plugin-cc';
 
@@ -12,22 +12,26 @@ jest.mock('../src/store', () => ({
       off: jest.fn(),
     },
     logger: 'mockLogger',
-    idleCodes: [{
-      id: 'mockId1',
-      name: 'mockName',
-      isSystem: false,
-      isDefault: false
-    },{
-      id: 'mockId2',
-      name: 'RONA',
-      isSystem: true,
-      isDefault: false
-    },{
-      id: 'mockId3',
-      name: 'RONA2',
-      isSystem: true,
-      isDefault: false
-    }],
+    idleCodes: [
+      {
+        id: 'mockId1',
+        name: 'mockName',
+        isSystem: false,
+        isDefault: false,
+      },
+      {
+        id: 'mockId2',
+        name: 'RONA',
+        isSystem: true,
+        isDefault: false,
+      },
+      {
+        id: 'mockId3',
+        name: 'RONA2',
+        isSystem: true,
+        isDefault: false,
+      },
+    ],
     agentId: 'mockAgentId',
     wrapupCodes: 'mockWrapupCodes',
     currentTask: 'mockCurrentTask',
@@ -162,7 +166,7 @@ describe('storeEventsWrapper', () => {
 
       it('should set customState to null if reset is passed', () => {
         const customState = {
-          reset: true
+          reset: true,
         };
         storeWrapper.setState(customState);
         expect(storeWrapper.customState).toBe(null);

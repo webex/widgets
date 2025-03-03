@@ -37,7 +37,7 @@ class StoreWrapper implements IStoreWrapper {
   }
   get idleCodes() {
     return this.store.idleCodes.filter((code) => {
-      return code.name === "RONA" || !code.isSystem;
+      return code.name === 'RONA' || !code.isSystem;
     });
   }
   get agentId() {
@@ -133,7 +133,7 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   setState = (state: ICustomState | IdleCode): void => {
-    if('reset' in state) {
+    if ('reset' in state) {
       this.store.customState = null;
       return;
     }
@@ -143,8 +143,8 @@ class StoreWrapper implements IStoreWrapper {
     } else {
       this.store.customState = state;
     }
-  }
-  
+  };
+
   setTaskRejected = (callback: ((reason: string) => void) | undefined): void => {
     this.onTaskRejected = callback;
   };
@@ -184,7 +184,7 @@ class StoreWrapper implements IStoreWrapper {
 
       // reset the custom state
       this.setState({
-        reset: true
+        reset: true,
       });
     });
   };
