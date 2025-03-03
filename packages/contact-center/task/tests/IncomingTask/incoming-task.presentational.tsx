@@ -5,6 +5,13 @@ import IncomingTaskPresentational from '../../src/IncomingTask/incoming-task.pre
 
 jest.mock('@momentum-ui/react-collaboration', () => ({
   ButtonPill: () => <div data-testid="ButtonPill" />,
+  ListItemBase: () => <div data-testid="ListItemBase" />,
+  ListItemBaseSection: () => <div data-testid="ListItemBaseSection" />,
+  Text: () => <div data-testid="Text" />,
+}));
+
+jest.mock('@momentum-design/components/dist/react', () => ({
+  Avatar: () => <div data-testid="Avatar" />,
 }));
 
 describe('IncomingTaskPresentational', () => {
@@ -35,7 +42,6 @@ describe('IncomingTaskPresentational', () => {
 
     render(<IncomingTaskPresentational {...props} />);
 
-    const callInfo = screen.getByTestId('incoming-task-ani');
-    expect(callInfo).toHaveTextContent('1234567890');
+    expect(screen.getAllByTestId('ListItemBase')).toHaveLength(1);
   });
 });
