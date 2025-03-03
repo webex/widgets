@@ -125,9 +125,7 @@ describe('useStationLogin Hook', () => {
 
       expect(setDeviceTypeSpy).toHaveBeenCalledWith(loginParams.loginOption);
       expect(setSetCurrentStateSpy).toHaveBeenCalledWith(successResponse.data.auxCodeId);
-      expect(setSetLastStateChangeTimestampSpy).toHaveBeenCalledWith(
-        new Date(successResponse.data.lastStateChangeTimestamp)
-      );
+      expect(setSetLastStateChangeTimestampSpy).toHaveBeenCalledWith(successResponse.data.lastStateChangeTimestamp);
     });
   });
 
