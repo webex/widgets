@@ -4,6 +4,8 @@ import {ThemeProvider, IconProvider, Icon, Button, Checkbox, Text} from '@moment
 import {PopoverNext} from '@momentum-ui/react-collaboration';
 import './App.scss';
 
+// This is not to be included to a production app.
+// Have added here for debugging purposes
 window['store'] = store;
 
 function App() {

@@ -18,6 +18,21 @@ export const useUserState = ({
 
   const prevStateRef = useRef(currentState);
 
+  const callOnStateChange = () => {
+    if (onStateChange) {
+      if (customState?.developerName) {
+        onStateChange(customState);
+        return;
+      }
+      for (const code of idleCodes) {
+        if (code.id === currentState) {
+          onStateChange(code);
+          break;
+        }
+      }
+    }
+  };
+
   // Initialize the Web Worker using a Blob
   const workerScript = `
     let intervalId;
@@ -67,9 +82,10 @@ export const useUserState = ({
       });
 
       // Call setAgentStatus and update prevStateRef after promise resolves
-      setAgentState(currentState)
+      updateAgentState(currentState)
         .then(() => {
           prevStateRef.current = currentState;
+          callOnStateChange();
         })
         .catch((error) => {
           logger.error(`Failed to update state: ${error.toString()}`, {
@@ -81,18 +97,8 @@ export const useUserState = ({
   }, [currentState]);
 
   useEffect(() => {
-    if (onStateChange) {
-      if (customState?.developerName) {
-        onStateChange(customState);
-        return;
-      }
-      idleCodes.forEach((code) => {
-        if (code.id === currentState) {
-          onStateChange(code);
-        }
-      });
-    }
-  }, [customState, currentState]);
+    callOnStateChange();
+  }, [customState]);
 
   useEffect(() => {
     if (workerRef.current && lastStateChangeTimestamp) {
@@ -103,11 +109,14 @@ export const useUserState = ({
     }
   }, [lastStateChangeTimestamp]);
 
+  // UI change calls this method and gets the store updated
   const setAgentStatus = (selectedCode) => {
     store.setCurrentState(selectedCode);
   };
 
-  const setAgentState = (selectedCode) => {
+  // Store change calls the useEffect above which calls this method
+  // This method updates the agent state in the backend
+  const updateAgentState = (selectedCode) => {
     selectedCode = idleCodes?.filter((code) => code.id === selectedCode)[0];
 
     logger.log(`Setting agent status`, {
@@ -140,6 +149,7 @@ export const useUserState = ({
           module: 'useUserState',
           method: 'setAgentStatus',
         });
+        store.setCurrentState(prevStateRef.current);
         setErrorMessage(error.toString());
         throw error; // Rethrow to handle it in the calling function
       })

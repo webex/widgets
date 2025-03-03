@@ -134,14 +134,20 @@ class StoreWrapper implements IStoreWrapper {
 
   setState = (state: ICustomState | IdleCode): void => {
     if ('reset' in state) {
-      this.store.customState = null;
+      runInAction(() => {
+        this.store.customState = null;
+      });
       return;
     }
     if ('id' in state) {
-      this.setCurrentState(state.id);
-      this.store.customState = null;
+      runInAction(() => {
+        this.setCurrentState(state.id);
+        this.store.customState = null;
+      });
     } else {
-      this.store.customState = state;
+      runInAction(() => {
+        this.store.customState = state;
+      });
     }
   };
 

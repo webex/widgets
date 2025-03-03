@@ -4,7 +4,12 @@ import {UserState} from '@webex/cc-user-state';
 import store from '@webex/cc-store';
 import {TaskList, IncomingTask, CallControl} from '@webex/cc-task';
 
-const WebUserState = r2wc(UserState);
+const WebUserState = r2wc(UserState, {
+  props: {
+    setAgentStatus: 'function',
+  },
+});
+
 const WebIncomingTask = r2wc(IncomingTask, {
   props: {
     onAccepted: 'function',
