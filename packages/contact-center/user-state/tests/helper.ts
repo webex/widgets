@@ -33,6 +33,7 @@ describe('useUserState Hook', () => {
     global.URL.createObjectURL = jest.fn(() => 'blob:http://localhost:3000/12345');
     jest.spyOn(store, 'setCurrentState');
     jest.spyOn(store, 'setLastStateChangeTimestamp');
+    jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
@@ -42,12 +43,18 @@ describe('useUserState Hook', () => {
 
   it('should initialize with default values', () => {
     const {result} = renderHook(() =>
-      useUserState({idleCodes, agentId, cc: mockCC, currentState: '0', lastStateChangeTimestamp: new Date()})
+      useUserState({
+        idleCodes,
+        agentId,
+        cc: mockCC,
+        currentState: '0',
+        lastStateChangeTimestamp: new Date().getTime(),
+        lastIdleCodeChangeTimestamp: undefined,
+      })
     );
 
     expect(result.current).toMatchObject({
       isSettingAgentStatus: false,
-      errorMessage: '',
       elapsedTime: 0,
       currentState: '0',
     });
@@ -55,24 +62,63 @@ describe('useUserState Hook', () => {
 
   it('should increment elapsedTime every second', () => {
     const {result} = renderHook(() =>
-      useUserState({idleCodes, agentId, cc: mockCC, currentState: '0', lastStateChangeTimestamp: undefined})
+      useUserState({
+        idleCodes,
+        agentId,
+        cc: mockCC,
+        currentState: '0',
+        lastStateChangeTimestamp: new Date().getTime(),
+        lastIdleCodeChangeTimestamp: new Date().getTime(),
+      })
     );
 
     act(() => {
-      workerMock.onmessage({data: 1});
+      workerMock.onmessage({data: {type: 'elapsedTime', elapsedTime: 1}});
       jest.advanceTimersByTime(1000);
-      workerMock.onmessage({data: 2});
+      workerMock.onmessage({data: {type: 'elapsedTime', elapsedTime: 2}});
       jest.advanceTimersByTime(1000);
-      workerMock.onmessage({data: 3});
+      workerMock.onmessage({data: {type: 'elapsedTime', elapsedTime: 3}});
     });
 
     expect(result.current.elapsedTime).toBe(3);
   });
 
-  it('should handle setAgentStatus correctly and update state', async () => {
-    mockCC.setAgentState.mockResolvedValueOnce({data: {auxCodeId: '2', lastStateChangeTimestamp: new Date()}});
+  it('should increment lastIdleStateChangeElapsedTime every second', () => {
     const {result} = renderHook(() =>
-      useUserState({idleCodes, agentId, cc: mockCC, currentState: '0', lastStateChangeTimestamp: new Date()})
+      useUserState({
+        idleCodes,
+        agentId,
+        cc: mockCC,
+        currentState: '0',
+        lastStateChangeTimestamp: new Date().getTime(),
+        lastIdleCodeChangeTimestamp: new Date().getTime(),
+      })
+    );
+
+    act(() => {
+      workerMock.onmessage({data: {type: 'lastIdleStateChangeElapsedTime', elapsedTime: 1}});
+      jest.advanceTimersByTime(1000);
+      workerMock.onmessage({data: {type: 'lastIdleStateChangeElapsedTime', elapsedTime: 2}});
+      jest.advanceTimersByTime(1000);
+      workerMock.onmessage({data: {type: 'lastIdleStateChangeElapsedTime', elapsedTime: 3}});
+    });
+
+    expect(result.current.lastIdleStateChangeElapsedTime).toBe(3);
+  });
+
+  it('should handle setAgentStatus correctly and update state', async () => {
+    mockCC.setAgentState.mockResolvedValueOnce({
+      data: {auxCodeId: '2', lastStateChangeTimestamp: new Date().getTime()},
+    });
+    const {result} = renderHook(() =>
+      useUserState({
+        idleCodes,
+        agentId,
+        cc: mockCC,
+        currentState: '0',
+        lastStateChangeTimestamp: new Date().getTime(),
+        lastIdleCodeChangeTimestamp: undefined,
+      })
     );
 
     act(() => {
@@ -84,25 +130,17 @@ describe('useUserState Hook', () => {
     });
   });
 
-  it('should handle setAgentStatus correctly and update state', async () => {
-    mockCC.setAgentState.mockResolvedValueOnce({data: {auxCodeId: '2', lastStateChangeTimestamp: new Date()}});
-    const {result} = renderHook(() =>
-      useUserState({idleCodes, agentId, cc: mockCC, currentState: '0', lastStateChangeTimestamp: new Date()})
-    );
-
-    act(() => {
-      result.current.setAgentStatus(idleCodes[0]);
-    });
-
-    await waitFor(() => {
-      expect(store.setCurrentState).toHaveBeenCalledWith('2');
-    });
-  });
-
   it('should handle errors from setAgentStatus and revert state', async () => {
     mockCC.setAgentState.mockRejectedValueOnce(new Error('Error setting agent status'));
     const {result} = renderHook(() =>
-      useUserState({idleCodes, agentId, cc: mockCC, currentState: '0', lastStateChangeTimestamp: new Date()})
+      useUserState({
+        idleCodes,
+        agentId,
+        cc: mockCC,
+        currentState: '0',
+        lastStateChangeTimestamp: new Date().getTime(),
+        lastIdleCodeChangeTimestamp: undefined,
+      })
     );
 
     await act(async () => {
@@ -110,7 +148,47 @@ describe('useUserState Hook', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.errorMessage).toBe('Error: Error setting agent status');
+      expect(console.error).toHaveBeenCalledWith('Error: Error setting agent status');
+    });
+  });
+
+  it('should handle stopIdleCodeTimer event and set lastIdleStateChangeElapsedTime to -1', () => {
+    const {result} = renderHook(() =>
+      useUserState({
+        idleCodes,
+        agentId,
+        cc: mockCC,
+        currentState: '0',
+        lastStateChangeTimestamp: new Date().getTime(),
+        lastIdleCodeChangeTimestamp: new Date().getTime(),
+      })
+    );
+
+    act(() => {
+      workerMock.onmessage({data: {type: 'stopIdleCodeTimer'}});
+    });
+
+    expect(result.current.lastIdleStateChangeElapsedTime).toBe(-1);
+  });
+
+  it('should post resetIdleCode message if lastIdleCodeChangeTimestamp is different from lastStateChangeTimestamp', () => {
+    const lastStateChangeTimestamp = new Date().getTime();
+    const lastIdleCodeChangeTimestamp = lastStateChangeTimestamp - 1000; // 1 second earlier
+
+    const {result} = renderHook(() =>
+      useUserState({
+        idleCodes,
+        agentId,
+        cc: mockCC,
+        currentState: '0',
+        lastStateChangeTimestamp,
+        lastIdleCodeChangeTimestamp,
+      })
+    );
+
+    expect(workerMock.postMessage).toHaveBeenCalledWith({
+      type: 'resetIdleCode',
+      startTime: lastIdleCodeChangeTimestamp,
     });
   });
 });
