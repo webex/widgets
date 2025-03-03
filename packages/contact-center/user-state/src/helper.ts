@@ -8,12 +8,12 @@ export const useUserState = ({
   cc,
   currentState,
   lastStateChangeTimestamp,
-  lastIdleCodeChangeTimestamp,
+  lastIdleStateChangeTimestamp,
 }) => {
   const [isSettingAgentStatus, setIsSettingAgentStatus] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [elapsedTime, setElapsedTime] = useState(0);
-  const [lastIdleCodeChangeElapsedTime, setLastIdleCodeChangeElapsedTime] = useState(0);
+  const [lastIdleStateChangeElapsedTime, setLastIdleStateChangeElapsedTime] = useState(0);
   const workerRef = useRef<Worker | null>(null);
 
   // Initialize the Web Worker using a Blob
@@ -31,7 +31,7 @@ export const useUserState = ({
       if (intervalId2) clearInterval(intervalId2);
       intervalId2 = setInterval(() => {
         const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
-        self.postMessage({type: 'lastIdleCodeChangeElapsedTime', elapsedTime});
+        self.postMessage({type: 'lastIdleStateChangeElapsedTime', elapsedTime});
       }, 1000);
     };
     const stopTimer = () => {
@@ -77,10 +77,10 @@ export const useUserState = ({
     workerRef.current.onmessage = (event) => {
       if (event.data.type === 'elapsedTime') {
         setElapsedTime(event.data.elapsedTime > 0 ? event.data.elapsedTime : 0);
-      } else if (event.data.type === 'lastIdleCodeChangeElapsedTime') {
-        setLastIdleCodeChangeElapsedTime(event.data.elapsedTime > 0 ? event.data.elapsedTime : 0);
+      } else if (event.data.type === 'lastIdleStateChangeElapsedTime') {
+        setLastIdleStateChangeElapsedTime(event.data.elapsedTime > 0 ? event.data.elapsedTime : 0);
       } else if (event.data.type === 'stopIdleCodeTimer') {
-        setLastIdleCodeChangeElapsedTime(-1);
+        setLastIdleStateChangeElapsedTime(-1);
       }
     };
 
@@ -98,13 +98,13 @@ export const useUserState = ({
     if (workerRef.current && lastStateChangeTimestamp) {
       workerRef.current.postMessage({type: 'reset', startTime: lastStateChangeTimestamp});
 
-      if (lastIdleCodeChangeTimestamp && lastIdleCodeChangeTimestamp !== lastStateChangeTimestamp) {
-        workerRef.current.postMessage({type: 'resetIdleCode', startTime: lastIdleCodeChangeTimestamp});
+      if (lastIdleStateChangeTimestamp && lastIdleStateChangeTimestamp !== lastStateChangeTimestamp) {
+        workerRef.current.postMessage({type: 'resetIdleCode', startTime: lastIdleStateChangeTimestamp});
       } else {
-        workerRef.current.postMessage({type: 'stopIdleCode', startTime: lastIdleCodeChangeTimestamp});
+        workerRef.current.postMessage({type: 'stopIdleCode', startTime: lastIdleStateChangeTimestamp});
       }
     }
-  }, [lastStateChangeTimestamp, lastIdleCodeChangeTimestamp]);
+  }, [lastStateChangeTimestamp, lastIdleStateChangeTimestamp]);
 
   const setAgentStatus = (selectedCode) => {
     setErrorMessage('');
@@ -118,7 +118,7 @@ export const useUserState = ({
       .then((response) => {
         store.setCurrentState(response.data.auxCodeId);
         store.setLastStateChangeTimestamp(response.data.lastStateChangeTimestamp);
-        store.setLastIdleCodeChangeTimestamp(response.data.lastIdleCodeChangeTimestamp);
+        store.setLastIdleStateChangeTimestamp(response.data.lastIdleStateChangeTimestamp);
       })
       .catch((error) => {
         setErrorMessage(error.toString());
@@ -134,7 +134,7 @@ export const useUserState = ({
     isSettingAgentStatus,
     errorMessage,
     elapsedTime,
-    lastIdleCodeChangeElapsedTime,
+    lastIdleStateChangeElapsedTime,
     currentState,
   };
 };

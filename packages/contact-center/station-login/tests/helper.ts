@@ -15,6 +15,7 @@ jest.mock('@webex/cc-store', () => {
     setDeviceType: jest.fn(),
     setCurrentState: jest.fn(),
     setLastStateChangeTimestamp: jest.fn(),
+    setLastIdleStateChangeTimestamp: jest.fn(),
     setShowMultipleLoginAlert: jest.fn(),
     setIsAgentLoggedIn: jest.fn(),
   };
@@ -62,7 +63,7 @@ describe('useStationLogin Hook', () => {
         dn: '1001',
         eventType: 'AgentDesktopMessage',
         interactionIds: [],
-        lastIdleCodeChangeTimestamp: 1731997914706,
+        lastIdleStateChangeTimestamp: 1731997914706,
         lastStateChangeTimestamp: 1731997914706,
         orgId: '6ecef209-9a34-4ed1-a07a-7ddd1dbe925a',
         profileType: 'BLENDED',
@@ -81,6 +82,7 @@ describe('useStationLogin Hook', () => {
     const setDeviceTypeSpy = jest.spyOn(store, 'setDeviceType');
     const setSetCurrentStateSpy = jest.spyOn(store, 'setCurrentState');
     const setSetLastStateChangeTimestampSpy = jest.spyOn(store, 'setLastStateChangeTimestamp');
+    const setSetLastIdleStateChangeTimestampSpy = jest.spyOn(store, 'setLastIdleStateChangeTimestamp');
     const {result} = renderHook(() =>
       useStationLogin({
         cc: ccMock,
@@ -126,6 +128,9 @@ describe('useStationLogin Hook', () => {
       expect(setDeviceTypeSpy).toHaveBeenCalledWith(loginParams.loginOption);
       expect(setSetCurrentStateSpy).toHaveBeenCalledWith(successResponse.data.auxCodeId);
       expect(setSetLastStateChangeTimestampSpy).toHaveBeenCalledWith(successResponse.data.lastStateChangeTimestamp);
+      expect(setSetLastIdleStateChangeTimestampSpy).toHaveBeenCalledWith(
+        successResponse.data.lastIdleStateChangeTimestamp
+      );
     });
   });
 
@@ -134,7 +139,8 @@ describe('useStationLogin Hook', () => {
       data: {
         agentId: '6b310dff-569e-4ac7-b064-70f834ea56d8',
         agentSessionId: 'c9c24ace-5170-4a9f-8bc2-2eeeff9d7c11',
-        lastStateChangeTimestamp: 'mockDate',
+        lastStateChangeTimestamp: '1234',
+        lastIdleStateChangeTimestamp: '2345',
       },
     };
 
@@ -142,6 +148,7 @@ describe('useStationLogin Hook', () => {
     const setDeviceTypeSpy = jest.spyOn(store, 'setDeviceType');
     const setSetCurrentStateSpy = jest.spyOn(store, 'setCurrentState');
     const setSetLastStateChangeTimestampSpy = jest.spyOn(store, 'setLastStateChangeTimestamp');
+    const setSetLastIdleStateChangeTimestampSpy = jest.spyOn(store, 'setLastIdleStateChangeTimestamp');
 
     const {result} = renderHook(() =>
       useStationLogin({
@@ -168,6 +175,9 @@ describe('useStationLogin Hook', () => {
       expect(setSetCurrentStateSpy).not.toHaveBeenCalledWith(successResponse.data.auxCodeId);
       expect(setSetLastStateChangeTimestampSpy).not.toHaveBeenCalledWith(
         new Date(successResponse.data.lastStateChangeTimestamp)
+      );
+      expect(setSetLastIdleStateChangeTimestampSpy).not.toHaveBeenCalledWith(
+        new Date(successResponse.data.lastIdleStateChangeTimestamp)
       );
     });
   });

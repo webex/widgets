@@ -31,7 +31,7 @@ class Store implements IStore {
   wrapupRequired: boolean = false;
   currentState: string = '';
   lastStateChangeTimestamp?: number;
-  lastIdleCodeChangeTimestamp?: number;
+  lastIdleStateChangeTimestamp?: number;
   showMultipleLoginAlert: boolean = false;
 
   constructor() {
@@ -71,7 +71,7 @@ class Store implements IStore {
         this.deviceType = response.deviceType;
         this.currentState = response.lastStateAuxCodeId;
         this.lastStateChangeTimestamp = response.lastStateChangeTimestamp;
-        this.lastIdleCodeChangeTimestamp = response.lastIdleCodeChangeTimestamp;
+        this.lastIdleStateChangeTimestamp = response.lastIdleStateChangeTimestamp;
       })
       .catch((error) => {
         this.logger.error(`Error registering contact center: ${error}`, {

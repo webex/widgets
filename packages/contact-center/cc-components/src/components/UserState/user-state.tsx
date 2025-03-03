@@ -14,7 +14,7 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
     isSettingAgentStatus,
     errorMessage,
     elapsedTime,
-    lastIdleCodeChangeElapsedTime,
+    lastIdleStateChangeElapsedTime,
     currentState,
   } = props;
 
@@ -53,7 +53,7 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
         </SelectNext>
 
         <span className={`elapsedTime ${isSettingAgentStatus ? 'elapsedTime-disabled' : ''}`}>
-          {lastIdleCodeChangeElapsedTime >= 0 ? formatTime(lastIdleCodeChangeElapsedTime) + ' / ' : ''}
+          {lastIdleStateChangeElapsedTime >= 0 ? formatTime(lastIdleStateChangeElapsedTime) + ' / ' : ''}
           {formatTime(elapsedTime)}
         </span>
         <Icon className="select-arrow-icon" name="arrow-down-bold" title="" />
