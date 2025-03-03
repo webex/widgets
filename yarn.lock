@@ -9408,7 +9408,7 @@ __metadata:
     ts-loader: "npm:9.5.1"
     typescript: "npm:5.6.3"
     typescript-eslint: "npm:^8.24.1"
-    webex: "npm:3.7.0-wxcc.15"
+    webex: "npm:3.7.0-wxcc.17"
     webpack: "npm:5.94.0"
     webpack-cli: "npm:5.1.4"
     webpack-merge: "npm:6.0.1"
@@ -10771,9 +10771,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/plugin-cc@npm:3.5.0-wxcc.21":
-  version: 3.5.0-wxcc.21
-  resolution: "@webex/plugin-cc@npm:3.5.0-wxcc.21"
+"@webex/plugin-cc@npm:3.5.0-wxcc.23":
+  version: 3.5.0-wxcc.23
+  resolution: "@webex/plugin-cc@npm:3.5.0-wxcc.23"
   dependencies:
     "@types/platform": "npm:1.3.4"
     "@webex/calling": "npm:3.7.0-wxcc.1"
@@ -10781,7 +10781,7 @@ __metadata:
     "@webex/webex-core": "npm:3.5.0-wxcc.1"
     buffer: "npm:6.0.3"
     jest-html-reporters: "npm:3.0.11"
-  checksum: 10c0/9f9c71b3084b1e1f1101004abc4b8b0bf245a9b288081a3e1abdcdcbe6660e6abb55dd253d8fe5faf3545554a35385cb9f0811f62b066af14aeafd98ccdada6a
+  checksum: 10c0/bcae6f9c985c29e0c4a048072b67c237431bb109cf8b3b4209c0c3b66bce2d5f19bd7c974175511ef4a1689fa879a1bb4fa088b0160b9408bf068a94b8a11b1e
   languageName: node
   linkType: hard
 
@@ -34509,9 +34509,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webex@npm:3.7.0-wxcc.15":
-  version: 3.7.0-wxcc.15
-  resolution: "webex@npm:3.7.0-wxcc.15"
+"webex@npm:3.7.0-wxcc.17":
+  version: 3.7.0-wxcc.17
+  resolution: "webex@npm:3.7.0-wxcc.17"
   dependencies:
     "@babel/polyfill": "npm:^7.12.1"
     "@babel/runtime-corejs2": "npm:^7.14.8"
@@ -34525,7 +34525,7 @@ __metadata:
     "@webex/internal-plugin-voicea": "npm:3.5.0-wxcc.1"
     "@webex/plugin-attachment-actions": "npm:3.5.0-wxcc.1"
     "@webex/plugin-authorization": "npm:3.5.0-wxcc.1"
-    "@webex/plugin-cc": "npm:3.5.0-wxcc.21"
+    "@webex/plugin-cc": "npm:3.5.0-wxcc.23"
     "@webex/plugin-device-manager": "npm:3.5.0-wxcc.1"
     "@webex/plugin-logger": "npm:3.5.0-wxcc.1"
     "@webex/plugin-meetings": "npm:3.5.0-wxcc.1"
@@ -34539,7 +34539,7 @@ __metadata:
     "@webex/storage-adapter-local-storage": "npm:3.5.0-wxcc.1"
     "@webex/webex-core": "npm:3.5.0-wxcc.1"
     lodash: "npm:^4.17.21"
-  checksum: 10c0/0fb9690a694746d9bd4cb8e9ed48083a3cedeeb91e1befe58aa607ab78a01b7c5cfb822647ed3382fca33318771547892ab218fa534c65ce17f0793838e2e883
+  checksum: 10c0/e5d6c4b18c698d5423b3ff56ddccb1b1b8c471d772048861daf5f07072a4212447ce6d7e4b86f5ddc9c0a4bc71b84bfc4478aaad37c086759fc9847a5a1b0cf6
   languageName: node
   linkType: hard
 

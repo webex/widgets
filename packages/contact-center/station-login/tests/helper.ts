@@ -15,6 +15,7 @@ jest.mock('@webex/cc-store', () => {
     setDeviceType: jest.fn(),
     setCurrentState: jest.fn(),
     setLastStateChangeTimestamp: jest.fn(),
+    setLastIdleCodeChangeTimestamp: jest.fn(),
     setShowMultipleLoginAlert: jest.fn(),
     setIsAgentLoggedIn: jest.fn(),
   };
@@ -81,6 +82,7 @@ describe('useStationLogin Hook', () => {
     const setDeviceTypeSpy = jest.spyOn(store, 'setDeviceType');
     const setSetCurrentStateSpy = jest.spyOn(store, 'setCurrentState');
     const setSetLastStateChangeTimestampSpy = jest.spyOn(store, 'setLastStateChangeTimestamp');
+    const setSetLastIdleCodeChangeTimestampSpy = jest.spyOn(store, 'setLastIdleCodeChangeTimestamp');
     const {result} = renderHook(() =>
       useStationLogin({
         cc: ccMock,
@@ -125,8 +127,9 @@ describe('useStationLogin Hook', () => {
 
       expect(setDeviceTypeSpy).toHaveBeenCalledWith(loginParams.loginOption);
       expect(setSetCurrentStateSpy).toHaveBeenCalledWith(successResponse.data.auxCodeId);
-      expect(setSetLastStateChangeTimestampSpy).toHaveBeenCalledWith(
-        new Date(successResponse.data.lastStateChangeTimestamp)
+      expect(setSetLastStateChangeTimestampSpy).toHaveBeenCalledWith(successResponse.data.lastStateChangeTimestamp);
+      expect(setSetLastIdleCodeChangeTimestampSpy).toHaveBeenCalledWith(
+        successResponse.data.lastIdleCodeChangeTimestamp
       );
     });
   });
@@ -136,7 +139,8 @@ describe('useStationLogin Hook', () => {
       data: {
         agentId: '6b310dff-569e-4ac7-b064-70f834ea56d8',
         agentSessionId: 'c9c24ace-5170-4a9f-8bc2-2eeeff9d7c11',
-        lastStateChangeTimestamp: 'mockDate',
+        lastStateChangeTimestamp: '1234',
+        lastIdleCodeChangeTimestamp: '2345',
       },
     };
 
@@ -144,6 +148,7 @@ describe('useStationLogin Hook', () => {
     const setDeviceTypeSpy = jest.spyOn(store, 'setDeviceType');
     const setSetCurrentStateSpy = jest.spyOn(store, 'setCurrentState');
     const setSetLastStateChangeTimestampSpy = jest.spyOn(store, 'setLastStateChangeTimestamp');
+    const setSetLastIdleCodeChangeTimestampSpy = jest.spyOn(store, 'setLastIdleCodeChangeTimestamp');
 
     const {result} = renderHook(() =>
       useStationLogin({
@@ -170,6 +175,9 @@ describe('useStationLogin Hook', () => {
       expect(setSetCurrentStateSpy).not.toHaveBeenCalledWith(successResponse.data.auxCodeId);
       expect(setSetLastStateChangeTimestampSpy).not.toHaveBeenCalledWith(
         new Date(successResponse.data.lastStateChangeTimestamp)
+      );
+      expect(setSetLastIdleCodeChangeTimestampSpy).not.toHaveBeenCalledWith(
+        new Date(successResponse.data.lastIdleCodeChangeTimestamp)
       );
     });
   });

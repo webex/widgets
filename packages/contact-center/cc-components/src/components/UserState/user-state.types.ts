@@ -35,6 +35,11 @@ export interface IUserState {
   elapsedTime: number;
 
   /**
+   * The duration since the last idle code change
+   */
+  lastIdleStateChangeElapsedTime: number;
+
+  /**
    * The idle code of the current user state
    */
   currentState: string;
