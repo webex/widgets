@@ -3,6 +3,11 @@ import {StationLogin, UserState, IncomingTask, TaskList, CallControl, store} fro
 import {ThemeProvider, IconProvider, Icon, Button, Checkbox, Text} from '@momentum-design/components/dist/react';
 import {PopoverNext} from '@momentum-ui/react-collaboration';
 import './App.scss';
+import {observer} from 'mobx-react-lite';
+
+// This is not to be included to a production app.
+// Have added here for debugging purposes
+window['store'] = store;
 
 function App() {
   const [isSdkReady, setIsSdkReady] = useState(false);
@@ -126,6 +131,10 @@ function App() {
     };
   }, []);
 
+  const onStateChange = (status) => {
+    console.log('onStateChange invoked', status);
+  };
+
   return (
     <div className="mds-typography centered-container">
       <ThemeProvider
@@ -215,7 +224,7 @@ function App() {
                         <section className="section-box">
                           <fieldset className="fieldset">
                             <legend className="legend-box">User State</legend>
-                            <UserState />
+                            <UserState onStateChange={onStateChange} />
                           </fieldset>
                         </section>
                       </div>
@@ -250,4 +259,4 @@ function App() {
   );
 }
 
-export default App;
+export default observer(App);

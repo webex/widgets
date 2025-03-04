@@ -39,53 +39,65 @@
   gap: 0.25rem;
 }
 
+.hide-this {
+  display: none;
+}
+
+.state-icon {
+  --mdc-icon-fill-color: var(--mds-color-theme-indicator-stable);
+
+  &.idle {
+    --mdc-icon-fill-color: var(--mds-color-theme-indicator-locked);
+  }
+
+  &.rona {
+    --mdc-icon-fill-color: var(--mds-color-theme-outline-cancel-normal);
+  }
+
+  &.custom {
+    --mdc-icon-fill-color: var(--mds-color-theme-text-team-gold-hover);
+  }
+}
+
 .state-select {
   width: 100%;
   --mds-color-theme-background-primary-active: var(--mds-color-theme-background-alert-success-normal);
 
-  .state-icon {
-    --mdc-icon-fill-color: var(--mds-color-theme-indicator-stable);
-
-    &-idle {
-      --mdc-icon-fill-color: var(--mds-color-theme-indicator-locked);
-    }
-  }
   .md-select-dropdown-input {
     background-color: var(--mds-color-theme-background-alert-success-normal);
-    &.md-select-selected {
-      .state-icon {
-        --mdc-icon-fill-color: var(--mds-color-theme-text-primary-normal);
-
-        &-idle {
-          --mdc-icon-fill-color: var(--mds-color-theme-text-primary-normal);
-        }
-      }
-    }
   }
 
-  &-idle {
+  &.idle {
     width: 100%;
     --mds-color-theme-background-primary-active: var(--mds-color-theme-background-primary-active);
 
-    .state-icon {
-      --mdc-icon-fill-color: var(--mds-color-theme-indicator-stable);
-  
-      &-idle {
-        --mdc-icon-fill-color: var(--mds-color-theme-indicator-locked);
-      }
-    }
     .md-select-dropdown-input {
       background-color: var(--mds-color-theme-background-secondary-normal);
-      &.md-select-selected {
-        .state-icon {
-          --mdc-icon-fill-color: var(--mds-color-theme-text-primary-normal);
-  
-          &-idle {
-            --mdc-icon-fill-color: var(--mds-color-theme-text-primary-normal);
-          }
-        }
-      }
     }
+  }
+
+  &.rona {
+    width: 100%;
+    --mds-color-theme-background-primary-active: var(--mds-color-theme-background-alert-error-active);
+
+    .md-select-dropdown-input {
+      background-color: var(--mds-color-theme-background-alert-error-normal);
+      border: 1px solid var(--mds-color-theme-outline-cancel-normal);
+    }
+  }
+
+  &.custom {
+    width: 100%;
+    --mds-color-theme-background-primary-active: var(--mds-color-theme-background-alert-warning-active);
+
+    .md-select-dropdown-input {
+      background-color: var(--mds-color-theme-background-alert-warning-normal);
+      border: 1px solid var(--mds-color-theme-text-team-gold-hover);
+    }
+  }
+
+  .md-select-popover ul li[data-key^="hide-"] {
+    display: none;
   }
 }
 

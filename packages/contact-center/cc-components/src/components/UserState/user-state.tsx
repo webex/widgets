@@ -7,9 +7,70 @@ import './user-state.scss';
 import {SelectNext, Text} from '@momentum-ui/react-collaboration';
 import {Item} from '@react-stately/collections';
 import {Icon} from '@momentum-design/components/dist/react';
+
 const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
-  const {idleCodes, setAgentStatus, isSettingAgentStatus, elapsedTime, lastIdleStateChangeElapsedTime, currentState} =
-    props;
+  const {
+    idleCodes,
+    setAgentStatus,
+    isSettingAgentStatus,
+    elapsedTime,
+    lastIdleStateChangeElapsedTime,
+    currentState,
+    customState,
+  } = props;
+
+  let selectedKey;
+  if (customState) {
+    selectedKey = `hide-${customState.developerName}`;
+  } else {
+    selectedKey = currentState;
+  }
+
+  const items = customState
+    ? [{name: customState.name, id: `hide-${customState.developerName}`, developerName: customState.developerName}]
+    : [];
+
+  for (const item of idleCodes) {
+    if (item.name === 'RONA' && item.id === currentState) {
+      selectedKey = `hide-${item.id}`;
+    }
+    if (item.name === 'RONA' && item.id !== currentState) {
+      continue; // Skip RONA unless it matches the current state
+    }
+    items.push({
+      ...item,
+      id: item.name === 'RONA' ? `hide-${item.id}` : item.id,
+    });
+  }
+
+  const getDropdownClass = () => {
+    if (customState) {
+      return 'custom'; // Custom state class
+    }
+    if (currentState === '0') {
+      return '';
+    }
+    for (const item of idleCodes) {
+      if (item.id === currentState && item.name === 'RONA') {
+        return 'rona';
+      }
+    }
+    return 'idle';
+  };
+
+  const getIconStyle = (item) => {
+    if (item.developerName) {
+      return {class: 'custom', iconName: 'busy-presence-light'};
+    }
+    switch (item.id) {
+      case '0':
+        return {class: '', iconName: 'active-presence-small-filled'};
+      case item.name === 'RONA' && item.id:
+        return {class: 'rona', iconName: 'dnd-presence-filled'};
+      default:
+        return {class: 'idle', iconName: 'recents-presence-filled'};
+    }
+  };
 
   return (
     <div className="user-state-container">
@@ -17,23 +78,23 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
         label=""
         aria-label="user-state"
         direction="bottom"
-        onSelectionChange={(key) => {
-          const selectedItem = idleCodes?.find((code) => code.id === key);
-          if (selectedItem && selectedItem != currentState) setAgentStatus(selectedItem);
+        onSelectionChange={(key: string) => {
+          const cleanKey = key.startsWith('hide-') ? key.substring(5) : key;
+          setAgentStatus(cleanKey);
         }}
         showBorder
-        selectedKey={currentState}
-        items={idleCodes.filter((code) => !code.isSystem)}
-        className={currentState == '0' ? 'state-select' : 'state-select-idle'}
+        selectedKey={selectedKey}
+        items={items}
+        className={`state-select ${getDropdownClass()}`}
       >
         {(item) => {
           return (
             <Item key={item.id} textValue={item.name}>
               <div className="item-container">
                 <Icon
-                  name={item.id == '0' ? 'active-presence-small-filled' : 'recents-presence-filled'}
+                  name={getIconStyle(item).iconName}
                   title=""
-                  className={item.id == '0' ? 'state-icon' : 'state-icon state-icon-idle'}
+                  className={`state-icon ${getIconStyle(item).class}`}
                 />
                 <Text className="state-name" tagName={'small'}>
                   {item.name}
