@@ -18,11 +18,18 @@ jest.mock('@webex/cc-store', () => {
     },
     idleCodes: [],
     agentId: 'testAgentId',
+    logger: {
+      log: jest.fn(),
+    },
+    lastStateChangeTimestamp: new Date(),
+    customState: null,
+    currentState: '0',
   };
 });
 
 describe('UserState Component', () => {
   let workerMock;
+  const onStateChange = jest.fn();
 
   beforeEach(() => {
     workerMock = {
@@ -41,7 +48,7 @@ describe('UserState Component', () => {
   it('renders UserStateComponent with correct props', () => {
     const useUserStateSpy = jest.spyOn(helper, 'useUserState');
 
-    render(<UserState />);
+    render(<UserState onStateChange={onStateChange} />);
     expect(useUserStateSpy).toHaveBeenCalledTimes(1);
     expect(useUserStateSpy).toHaveBeenCalledWith({
       cc: {
@@ -50,6 +57,13 @@ describe('UserState Component', () => {
       },
       idleCodes: [],
       agentId: 'testAgentId',
+      currentState: '0',
+      customState: null,
+      lastStateChangeTimestamp: expect.any(Date),
+      logger: {
+        log: expect.any(Function),
+      },
+      onStateChange: expect.any(Function),
     });
   });
 });

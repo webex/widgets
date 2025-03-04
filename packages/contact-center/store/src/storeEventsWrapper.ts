@@ -6,6 +6,8 @@ import {
   CC_EVENTS,
   IWrapupCode,
   WithWebex,
+  ICustomState,
+  IdleCode,
   IContactCenter,
   ITask,
 } from './store.types';
@@ -34,7 +36,9 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.logger;
   }
   get idleCodes() {
-    return this.store.idleCodes;
+    return this.store.idleCodes.filter((code) => {
+      return code.name === 'RONA' || !code.isSystem;
+    });
   }
   get agentId() {
     return this.store.agentId;
@@ -84,6 +88,10 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.currentTheme;
   }
 
+  get customState() {
+    return this.store.customState;
+  }
+
   setCurrentTheme = (theme: string): void => {
     this.store.currentTheme = theme;
   };
@@ -99,6 +107,7 @@ class StoreWrapper implements IStoreWrapper {
   setCurrentState = (state: string): void => {
     runInAction(() => {
       this.store.currentState = state;
+      this.store.customState = null;
     });
   };
 
@@ -140,6 +149,25 @@ class StoreWrapper implements IStoreWrapper {
     this.store.wrapupCodes = wrapupCodes;
   };
 
+  setState = (state: ICustomState | IdleCode): void => {
+    if ('reset' in state) {
+      runInAction(() => {
+        this.store.customState = null;
+      });
+      return;
+    }
+    if ('id' in state) {
+      runInAction(() => {
+        this.setCurrentState(state.id);
+        this.store.customState = null;
+      });
+    } else {
+      runInAction(() => {
+        this.store.customState = state;
+      });
+    }
+  };
+
   setTaskRejected = (callback: ((reason: string) => void) | undefined): void => {
     this.onTaskRejected = callback;
   };
@@ -176,6 +204,11 @@ class StoreWrapper implements IStoreWrapper {
       if (this.store.incomingTask?.data.interactionId === taskId) {
         this.setIncomingTask(null);
       }
+
+      // reset the custom state
+      this.setState({
+        reset: true,
+      });
     });
   };
 
@@ -194,6 +227,10 @@ class StoreWrapper implements IStoreWrapper {
     runInAction(() => {
       this.setCurrentTask(task);
       this.setIncomingTask(null);
+      this.setState({
+        developerName: 'ENGAGED',
+        name: 'Engaged',
+      });
     });
   };
 

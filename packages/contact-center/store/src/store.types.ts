@@ -47,6 +47,7 @@ interface IStore {
   lastIdleCodeChangeTimestamp?: number;
   showMultipleLoginAlert: boolean;
   currentTheme: string;
+  customState: ICustomState;
   init(params: InitParams, callback: (ccSDK: IContactCenter) => () => void): Promise<void>;
   registerCC(webex?: WithWebex['webex']): Promise<void>;
 }
@@ -65,6 +66,7 @@ interface IStoreWrapper extends IStore {
   setCurrentTheme(theme: string): void;
   setIsAgentLoggedIn(value: boolean): void;
   setWrapupCodes(wrapupCodes: IWrapupCode[]): void;
+  setState(state: IdleCode | ICustomState): void;
 }
 
 interface IWrapupCode {
@@ -90,10 +92,21 @@ enum TASK_EVENTS {
 } // TODO: remove this once cc sdk exports this enum
 
 // Events that are received on the contact center SDK
+// TODO: Export & Import these constants from SDK
 enum CC_EVENTS {
   AGENT_MULTI_LOGIN = 'agent:multiLogin',
   AGENT_STATE_CHANGE = 'agent:stateChange',
 }
+
+interface ICustomStateSet {
+  name: string;
+  developerName: string;
+}
+interface ICustomStateReset {
+  reset: boolean;
+}
+
+type ICustomState = ICustomStateSet | ICustomStateReset;
 
 export type {
   IContactCenter,
@@ -108,6 +121,7 @@ export type {
   ILogger,
   IWrapupCode,
   IStoreWrapper,
+  ICustomState,
 };
 
 export {CC_EVENTS, TASK_EVENTS};

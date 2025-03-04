@@ -1,5 +1,4 @@
 import {useState, useEffect, useRef} from 'react';
-// TODO: Export & Import this AGENT_STATE_CHANGE constant from SDK
 import store from '@webex/cc-store';
 
 export const useUserState = ({
@@ -7,13 +6,33 @@ export const useUserState = ({
   agentId,
   cc,
   currentState,
+  customState,
   lastStateChangeTimestamp,
+  logger,
+  onStateChange,
   lastIdleCodeChangeTimestamp,
 }) => {
   const [isSettingAgentStatus, setIsSettingAgentStatus] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [lastIdleStateChangeElapsedTime, setLastIdleStateChangeElapsedTime] = useState(0);
   const workerRef = useRef<Worker | null>(null);
+
+  const prevStateRef = useRef(currentState);
+
+  const callOnStateChange = () => {
+    if (onStateChange) {
+      if (customState?.developerName) {
+        onStateChange(customState);
+        return;
+      }
+      for (const code of idleCodes) {
+        if (code.id === currentState) {
+          onStateChange(code);
+          break;
+        }
+      }
+    }
+  };
 
   // Initialize the Web Worker using a Blob
   const workerScript = `
@@ -68,6 +87,11 @@ export const useUserState = ({
   `;
 
   useEffect(() => {
+    logger.log(`Initializing worker`, {
+      module: 'useUserState',
+      method: 'useEffect - initial',
+    });
+
     const blob = new Blob([workerScript], {type: 'application/javascript'});
     const workerUrl = URL.createObjectURL(blob);
     workerRef.current = new Worker(workerUrl);
@@ -94,6 +118,32 @@ export const useUserState = ({
   }, []);
 
   useEffect(() => {
+    if (prevStateRef.current !== currentState) {
+      logger.log(`State change detected: ${prevStateRef.current} -> ${currentState}`, {
+        module: 'useUserState',
+        method: 'useEffect - currentState',
+      });
+
+      // Call setAgentStatus and update prevStateRef after promise resolves
+      updateAgentState(currentState)
+        .then(() => {
+          prevStateRef.current = currentState;
+          callOnStateChange();
+        })
+        .catch((error) => {
+          logger.error(`Failed to update state: ${error.toString()}`, {
+            module: 'useUserState',
+            method: 'useEffect - currentState',
+          });
+        });
+    }
+  }, [currentState]);
+
+  useEffect(() => {
+    callOnStateChange();
+  }, [customState]);
+
+  useEffect(() => {
     if (workerRef.current && lastStateChangeTimestamp) {
       workerRef.current.postMessage({type: 'reset', startTime: lastStateChangeTimestamp});
 
@@ -105,21 +155,49 @@ export const useUserState = ({
     }
   }, [lastStateChangeTimestamp, lastIdleCodeChangeTimestamp]);
 
+  // UI change calls this method and gets the store updated
   const setAgentStatus = (selectedCode) => {
+    store.setCurrentState(selectedCode);
+  };
+
+  // Store change calls the useEffect above which calls this method
+  // This method updates the agent state in the backend
+  const updateAgentState = (selectedCode) => {
+    selectedCode = idleCodes?.filter((code) => code.id === selectedCode)[0];
+
+    logger.log(`Setting agent status`, {
+      module: 'useUserState',
+      method: 'setAgentStatus',
+      auxCodeId: selectedCode.auxCodeId,
+      state: selectedCode.state,
+    });
+
     const {auxCodeId, state} = {
       auxCodeId: selectedCode.id,
       state: selectedCode.name,
     };
     setIsSettingAgentStatus(true);
     const chosenState = state === 'Available' ? 'Available' : 'Idle';
-    cc.setAgentState({state: chosenState, auxCodeId, agentId, lastStateChangeReason: state})
+
+    return cc
+      .setAgentState({state: chosenState, auxCodeId, agentId, lastStateChangeReason: state})
       .then((response) => {
-        store.setCurrentState(response.data.auxCodeId);
+        logger.log(`Agent state set successfully`, {
+          module: 'useUserState',
+          method: 'updateAgentState',
+          response: response.data,
+        });
+
         store.setLastStateChangeTimestamp(response.data.lastStateChangeTimestamp);
         store.setLastIdleCodeChangeTimestamp(response.data.lastIdleCodeChangeTimestamp);
       })
       .catch((error) => {
-        console.error(error.toString());
+        logger.error(`Error setting agent state: ${error.toString()}`, {
+          module: 'useUserState',
+          method: 'updateAgentState',
+        });
+        store.setCurrentState(prevStateRef.current);
+        throw error;
       })
       .finally(() => {
         setIsSettingAgentStatus(false);
