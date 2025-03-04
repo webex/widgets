@@ -43,7 +43,8 @@ interface IStore {
   deviceType: string;
   wrapupRequired: boolean;
   currentState: string;
-  lastStateChangeTimestamp: Date;
+  lastStateChangeTimestamp?: number;
+  lastIdleCodeChangeTimestamp?: number;
   showMultipleLoginAlert: boolean;
   currentTheme: string;
   customState: ICustomState;
@@ -59,7 +60,8 @@ interface IStoreWrapper extends IStore {
   setIncomingTask(task: ITask): void;
   setDeviceType(option: string): void;
   setCurrentState(state: string): void;
-  setLastStateChangeTimestamp(timestamp: Date): void;
+  setLastStateChangeTimestamp(timestamp: number): void;
+  setLastIdleCodeChangeTimestamp(timestamp: number): void;
   setShowMultipleLoginAlert(value: boolean): void;
   setCurrentTheme(theme: string): void;
   setIsAgentLoggedIn(value: boolean): void;

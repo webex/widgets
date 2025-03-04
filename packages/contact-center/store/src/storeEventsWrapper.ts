@@ -76,6 +76,10 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.lastStateChangeTimestamp;
   }
 
+  get lastIdleCodeChangeTimestamp() {
+    return this.store.lastIdleCodeChangeTimestamp;
+  }
+
   get showMultipleLoginAlert() {
     return this.store.showMultipleLoginAlert;
   }
@@ -101,11 +105,22 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   setCurrentState = (state: string): void => {
-    this.store.currentState = state;
+    runInAction(() => {
+      this.store.currentState = state;
+      this.store.customState = null;
+    });
   };
 
-  setLastStateChangeTimestamp = (timestamp: Date): void => {
-    this.store.lastStateChangeTimestamp = timestamp;
+  setLastStateChangeTimestamp = (timestamp: number): void => {
+    runInAction(() => {
+      this.store.lastStateChangeTimestamp = timestamp;
+    });
+  };
+
+  setLastIdleCodeChangeTimestamp = (timestamp: number): void => {
+    runInAction(() => {
+      this.store.lastIdleCodeChangeTimestamp = timestamp;
+    });
   };
 
   setIsAgentLoggedIn = (value: boolean): void => {
@@ -117,7 +132,9 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   setCurrentTask = (task: ITask): void => {
-    this.store.currentTask = task;
+    runInAction(() => {
+      this.store.currentTask = task;
+    });
   };
 
   setIncomingTask = (task: ITask): void => {
@@ -244,8 +261,8 @@ class StoreWrapper implements IStoreWrapper {
       const DEFAULT_CODE = '0'; // Default code when no aux code is present
       this.setCurrentState(data.auxCodeId?.trim() !== '' ? data.auxCodeId : DEFAULT_CODE);
 
-      const startTime = data.lastStateChangeTimestamp;
-      this.setLastStateChangeTimestamp(new Date(startTime));
+      this.setLastStateChangeTimestamp(data.lastStateChangeTimestamp);
+      this.setLastIdleCodeChangeTimestamp(data.lastIdleCodeChangeTimestamp);
     }
   };
 

@@ -15,7 +15,7 @@ describe('useUserState Hook', () => {
   ];
 
   const agentId = 'agent123';
-  let workerMock;
+  let workerMock, blobMock;
   const onStateChange = jest.fn();
   const logger = {
     log: jest.fn(),
@@ -35,9 +35,11 @@ describe('useUserState Hook', () => {
     };
 
     global.Worker = jest.fn(() => workerMock);
-    global.URL.createObjectURL = jest.fn(() => 'blob:http://localhost:3000/12345');
+    blobMock = jest.fn(() => 'blob:http://localhost:3000/12345');
+    global.URL.createObjectURL = blobMock;
     jest.spyOn(store, 'setCurrentState');
     jest.spyOn(store, 'setLastStateChangeTimestamp');
+    jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
@@ -53,18 +55,44 @@ describe('useUserState Hook', () => {
         cc: mockCC,
         currentState: '0',
         customState: null,
-        lastStateChangeTimestamp: new Date(),
         logger,
         onStateChange,
+        lastStateChangeTimestamp: new Date().getTime(),
+        lastIdleCodeChangeTimestamp: undefined,
       })
     );
 
     expect(result.current).toMatchObject({
       isSettingAgentStatus: false,
-      errorMessage: '',
       elapsedTime: 0,
       currentState: '0',
     });
+  });
+
+  it('should clean up on unmount', () => {
+    mockCC.setAgentState.mockResolvedValueOnce({
+      data: {auxCodeId: '2', lastStateChangeTimestamp: new Date().getTime()},
+    });
+    const {unmount} = renderHook(() =>
+      useUserState({
+        idleCodes: [],
+        agentId: 'agent123',
+        cc: {},
+        currentState: '0',
+        customState: null,
+        logger: {log: jest.fn(), error: jest.fn()},
+        onStateChange: jest.fn(),
+        lastStateChangeTimestamp: new Date().getTime(),
+        lastIdleCodeChangeTimestamp: undefined,
+      })
+    );
+
+    // Simulate component unmount
+    unmount();
+
+    expect(workerMock.postMessage).toHaveBeenCalledWith({type: 'stop'});
+    expect(workerMock.postMessage).toHaveBeenCalledWith({type: 'stopIdleCode'});
+    expect(workerMock.terminate).toHaveBeenCalled();
   });
 
   it('should increment elapsedTime every second', async () => {
@@ -75,18 +103,19 @@ describe('useUserState Hook', () => {
         cc: mockCC,
         currentState: '0',
         customState: null,
-        lastStateChangeTimestamp: undefined,
         logger,
         onStateChange,
+        lastStateChangeTimestamp: new Date().getTime(),
+        lastIdleCodeChangeTimestamp: new Date().getTime(),
       })
     );
 
     act(() => {
-      workerMock.onmessage({data: 1});
+      workerMock.onmessage({data: {type: 'elapsedTime', elapsedTime: 1}});
       jest.advanceTimersByTime(1000);
-      workerMock.onmessage({data: 2});
+      workerMock.onmessage({data: {type: 'elapsedTime', elapsedTime: 2}});
       jest.advanceTimersByTime(1000);
-      workerMock.onmessage({data: 3});
+      workerMock.onmessage({data: {type: 'elapsedTime', elapsedTime: 3}});
     });
 
     await waitFor(() => {
@@ -94,7 +123,7 @@ describe('useUserState Hook', () => {
     });
   });
 
-  it('should call store.setCurrentState when setAgentStatus is called', async () => {
+  it('should increment lastIdleStateChangeElapsedTime every second', () => {
     const {result} = renderHook(() =>
       useUserState({
         idleCodes,
@@ -102,9 +131,39 @@ describe('useUserState Hook', () => {
         cc: mockCC,
         currentState: '0',
         customState: null,
-        lastStateChangeTimestamp: new Date(),
         logger,
         onStateChange,
+        lastStateChangeTimestamp: new Date().getTime(),
+        lastIdleCodeChangeTimestamp: new Date().getTime(),
+      })
+    );
+
+    act(() => {
+      workerMock.onmessage({data: {type: 'lastIdleStateChangeElapsedTime', elapsedTime: 1}});
+      jest.advanceTimersByTime(1000);
+      workerMock.onmessage({data: {type: 'lastIdleStateChangeElapsedTime', elapsedTime: 2}});
+      jest.advanceTimersByTime(1000);
+      workerMock.onmessage({data: {type: 'lastIdleStateChangeElapsedTime', elapsedTime: 3}});
+    });
+
+    expect(result.current.lastIdleStateChangeElapsedTime).toBe(3);
+  });
+
+  it('should handle setAgentStatus correctly and update state', async () => {
+    mockCC.setAgentState.mockResolvedValueOnce({
+      data: {auxCodeId: '2', lastStateChangeTimestamp: new Date().getTime()},
+    });
+    const {result} = renderHook(() =>
+      useUserState({
+        idleCodes,
+        agentId,
+        cc: mockCC,
+        currentState: '0',
+        customState: null,
+        logger,
+        onStateChange,
+        lastStateChangeTimestamp: new Date().getTime(),
+        lastIdleCodeChangeTimestamp: undefined,
       })
     );
 
@@ -128,16 +187,17 @@ describe('useUserState Hook', () => {
           cc: mockCC,
           currentState,
           customState: null,
-          lastStateChangeTimestamp: new Date(1740744111287),
+          lastStateChangeTimestamp: 1740744111287,
+          lastIdleCodeChangeTimestamp: undefined,
           logger,
           onStateChange,
         }),
-      {initialProps: {currentState: '0'}}
+      {initialProps: {currentState: '0', lastStateChangeTimestamp: 1740744111287}}
     );
 
     act(() => {
       store.setCurrentState('2'); // Simulate the store state change
-      rerender({currentState: '2'});
+      rerender({currentState: '2', lastStateChangeTimestamp: 1740748111287});
     });
 
     await waitFor(() => {
@@ -147,7 +207,7 @@ describe('useUserState Hook', () => {
         agentId,
         lastStateChangeReason: 'Available',
       });
-      expect(store.lastStateChangeTimestamp).toEqual(new Date(resolvingValue.data.lastStateChangeTimestamp));
+      expect(store.lastStateChangeTimestamp).toEqual(resolvingValue.data.lastStateChangeTimestamp);
     });
   });
 
@@ -162,7 +222,8 @@ describe('useUserState Hook', () => {
           cc: mockCC,
           currentState,
           customState: null,
-          lastStateChangeTimestamp: new Date(1740744111287),
+          lastStateChangeTimestamp: 1740744111287,
+          lastIdleCodeChangeTimestamp: undefined,
           logger,
           onStateChange,
         }),
@@ -181,13 +242,13 @@ describe('useUserState Hook', () => {
         agentId,
         lastStateChangeReason: 'Idle Code 1',
       });
-      expect(store.lastStateChangeTimestamp).toEqual(new Date(resolvingValue.data.lastStateChangeTimestamp));
+      expect(store.lastStateChangeTimestamp).toEqual(resolvingValue.data.lastStateChangeTimestamp);
     });
   });
 
   it('should handle errors from setAgentState and revert state', async () => {
     mockCC.setAgentState.mockRejectedValueOnce(new Error('Error setting agent status'));
-    const {result, rerender} = renderHook(
+    const {rerender} = renderHook(
       ({currentState}) =>
         useUserState({
           idleCodes,
@@ -196,6 +257,7 @@ describe('useUserState Hook', () => {
           currentState,
           customState: null,
           lastStateChangeTimestamp: new Date(),
+          lastIdleCodeChangeTimestamp: undefined,
           logger,
           onStateChange,
         }),
@@ -208,7 +270,56 @@ describe('useUserState Hook', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.errorMessage).toBe('Error: Error setting agent status');
+      expect(logger.error).toHaveBeenCalledWith('Error setting agent state: Error: Error setting agent status', {
+        module: 'useUserState',
+        method: 'updateAgentState',
+      });
+    });
+  });
+
+  it('should handle stopIdleCodeTimer event and set lastIdleStateChangeElapsedTime to -1', () => {
+    const {result} = renderHook(() =>
+      useUserState({
+        idleCodes,
+        agentId,
+        cc: mockCC,
+        currentState: '0',
+        customState: null,
+        logger,
+        onStateChange,
+        lastStateChangeTimestamp: new Date().getTime(),
+        lastIdleCodeChangeTimestamp: new Date().getTime(),
+      })
+    );
+
+    act(() => {
+      workerMock.onmessage({data: {type: 'stopIdleCodeTimer'}});
+    });
+
+    expect(result.current.lastIdleStateChangeElapsedTime).toBe(-1);
+  });
+
+  it('should post resetIdleCode message if lastIdleCodeChangeTimestamp is different from lastStateChangeTimestamp', () => {
+    const lastStateChangeTimestamp = new Date().getTime();
+    const lastIdleCodeChangeTimestamp = lastStateChangeTimestamp - 1000; // 1 second earlier
+
+    renderHook(() =>
+      useUserState({
+        idleCodes,
+        agentId,
+        cc: mockCC,
+        currentState: '0',
+        customState: null,
+        logger,
+        onStateChange,
+        lastStateChangeTimestamp,
+        lastIdleCodeChangeTimestamp,
+      })
+    );
+
+    expect(workerMock.postMessage).toHaveBeenCalledWith({
+      type: 'resetIdleCode',
+      startTime: lastIdleCodeChangeTimestamp,
     });
   });
 
@@ -221,7 +332,8 @@ describe('useUserState Hook', () => {
         cc: mockCC,
         currentState: '0',
         customState,
-        lastStateChangeTimestamp: new Date(),
+        lastStateChangeTimestamp: new Date().getTime(),
+        lastIdleCodeChangeTimestamp: undefined,
         logger,
         onStateChange: undefined,
       })
@@ -240,6 +352,7 @@ describe('useUserState Hook', () => {
         currentState: '0',
         customState,
         lastStateChangeTimestamp: new Date(),
+        lastIdleCodeChangeTimestamp: undefined,
         logger,
         onStateChange,
       })
@@ -257,29 +370,12 @@ describe('useUserState Hook', () => {
         currentState: '1',
         customState: null,
         lastStateChangeTimestamp: new Date(),
+        lastIdleCodeChangeTimestamp: undefined,
         logger,
         onStateChange,
       })
     );
 
     expect(onStateChange).toHaveBeenCalledWith(idleCodes[0]);
-  });
-
-  it('should update elapsedTime based on lastStateChangeTimestamp', () => {
-    const pastTimestamp = new Date(Date.now() - 5000);
-    const {result} = renderHook(() =>
-      useUserState({
-        idleCodes,
-        agentId,
-        cc: mockCC,
-        currentState: '0',
-        customState: null,
-        lastStateChangeTimestamp: pastTimestamp,
-        logger,
-        onStateChange,
-      })
-    );
-
-    expect(result.current.elapsedTime).toBe(5);
   });
 });

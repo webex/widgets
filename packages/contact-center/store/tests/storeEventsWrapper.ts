@@ -48,6 +48,7 @@ jest.mock('../src/store', () => ({
     setShowMultipleLoginAlert: jest.fn(),
     setCurrentState: jest.fn(),
     setLastStateChangeTimestamp: jest.fn(),
+    setLastIdleCodeChangeTimestamp: jest.fn(),
     setDeviceType: jest.fn(),
     init: jest.fn().mockResolvedValue({}),
     setIncomingTask: jest.fn(),
@@ -194,6 +195,14 @@ describe('storeEventsWrapper', () => {
       const timestamp = new Date();
       storeWrapper.setLastStateChangeTimestamp(timestamp);
       expect(storeWrapper['store'].lastStateChangeTimestamp).toBe(timestamp);
+    });
+
+    it('should setLastIdleCodeChangeTimestamp', () => {
+      expect(storeWrapper.setLastIdleCodeChangeTimestamp).toBeInstanceOf(Function);
+
+      const timestamp = new Date();
+      storeWrapper.setLastIdleCodeChangeTimestamp(timestamp);
+      expect(storeWrapper['store'].lastIdleCodeChangeTimestamp).toBe(timestamp);
     });
 
     it('should currentTheme', () => {

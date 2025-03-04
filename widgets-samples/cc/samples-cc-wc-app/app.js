@@ -98,7 +98,19 @@ function initWidgets() {
 function loginSuccess() {
   if (userStateCheckbox.checked) {
     ccUserState.classList.remove('disabled');
-    widgetsContainer.appendChild(ccUserState);
+
+    const userStateContainer = document.createElement('div');
+    userStateContainer.className = 'box';
+    userStateContainer.innerHTML = `
+      <section class="section-box">
+        <fieldset class="fieldset">
+          <legend class="legend-box">User State</legend>
+        </fieldset>
+      </section>
+    `;
+
+    userStateContainer.querySelector('fieldset').appendChild(ccUserState);
+    widgetsContainer.appendChild(userStateContainer);
     ccUserState.onStateChange = onStateChange;
   }
   if (incomingTaskCheckbox.checked) {
@@ -173,7 +185,8 @@ function changeAgentState(newState) {
     })
     .then(function (response) {
       store.setCurrentState(response.data.auxCodeId);
-      store.setLastStateChangeTimestamp(new Date(response.data.lastStateChangeTimestamp));
+      store.setLastStateChangeTimestamp(response.data.lastStateChangeTimestamp);
+      store.setLastIdleCodeChangeTimestamp(response.data.setLastIdleCodeChangeTimestamp);
       console.log('Agent state updated to', newState);
     })
     .catch(function (error) {

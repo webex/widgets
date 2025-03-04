@@ -7,7 +7,17 @@ import {UserStateComponent, IUserState} from '@webex/cc-components';
 import {IUserStateProps} from '../user-state.types';
 
 const UserState: React.FunctionComponent<IUserStateProps> = observer(({onStateChange}) => {
-  const {cc, idleCodes, agentId, currentTheme, currentState, lastStateChangeTimestamp, customState, logger} = store;
+  const {
+    cc,
+    idleCodes,
+    agentId,
+    currentTheme,
+    currentState,
+    lastStateChangeTimestamp,
+    lastIdleCodeChangeTimestamp,
+    customState,
+    logger,
+  } = store;
   const props: IUserState = {
     ...useUserState({
       idleCodes,
@@ -18,6 +28,7 @@ const UserState: React.FunctionComponent<IUserStateProps> = observer(({onStateCh
       lastStateChangeTimestamp,
       logger,
       onStateChange,
+      lastIdleCodeChangeTimestamp,
     }),
     currentTheme,
     customState,

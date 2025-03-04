@@ -16,20 +16,36 @@
   background-color: var(--mds-color-theme-inverted-text-primary-normal);
 }
 
-// This is just to hind the warning and errors in the sample page
-iframe{
+// This is just to hide the warning and errors in the sample page
+iframe {
   display: none;
 }
 
-.widget-checkboxes{
+.widget-checkboxes {
   display: flex;
   width: 44rem;
   flex-direction: row;
 }
 
-.accessTokenTheme{
+.accessTokenTheme {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+}
+
+.centered-container {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.station-login {
+  margin-bottom: 20px;
+}
+
+.box {
+  width: 80%;
 }
