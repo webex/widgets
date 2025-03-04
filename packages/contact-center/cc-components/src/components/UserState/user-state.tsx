@@ -89,7 +89,7 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
       >
         {(item) => {
           return (
-            <Item key={item.id} textValue={item.name} data-key={item.id}>
+            <Item key={item.id} textValue={item.name}>
               <div className="item-container">
                 <Icon
                   name={getIconStyle(item).iconName}

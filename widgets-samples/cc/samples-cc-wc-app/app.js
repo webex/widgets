@@ -135,8 +135,8 @@ function logoutSuccess() {
   ccCallControl.classList.add('disabled');
 }
 
-function onStateChange(param) {
-  console.log('State change invoked', param);
+function onStateChange(status) {
+  console.log('onStateChange invoked', status);
 }
 
 function onAccepted() {

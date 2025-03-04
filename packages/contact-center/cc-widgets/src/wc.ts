@@ -6,7 +6,7 @@ import {TaskList, IncomingTask, CallControl} from '@webex/cc-task';
 
 const WebUserState = r2wc(UserState, {
   props: {
-    setAgentStatus: 'function',
+    onStateChange: 'function',
   },
 });
 
