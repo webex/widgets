@@ -6,6 +6,8 @@ import {
   CC_EVENTS,
   IWrapupCode,
   WithWebex,
+  ICustomState,
+  IdleCode,
   IContactCenter,
   ITask,
 } from './store.types';
@@ -34,7 +36,9 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.logger;
   }
   get idleCodes() {
-    return this.store.idleCodes;
+    return this.store.idleCodes.filter((code) => {
+      return code.name === 'RONA' || !code.isSystem;
+    });
   }
   get agentId() {
     return this.store.agentId;
@@ -72,12 +76,20 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.lastStateChangeTimestamp;
   }
 
+  get lastIdleCodeChangeTimestamp() {
+    return this.store.lastIdleCodeChangeTimestamp;
+  }
+
   get showMultipleLoginAlert() {
     return this.store.showMultipleLoginAlert;
   }
 
   get currentTheme() {
     return this.store.currentTheme;
+  }
+
+  get customState() {
+    return this.store.customState;
   }
 
   setCurrentTheme = (theme: string): void => {
@@ -93,11 +105,22 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   setCurrentState = (state: string): void => {
-    this.store.currentState = state;
+    runInAction(() => {
+      this.store.currentState = state;
+      this.store.customState = null;
+    });
   };
 
-  setLastStateChangeTimestamp = (timestamp: Date): void => {
-    this.store.lastStateChangeTimestamp = timestamp;
+  setLastStateChangeTimestamp = (timestamp: number): void => {
+    runInAction(() => {
+      this.store.lastStateChangeTimestamp = timestamp;
+    });
+  };
+
+  setLastIdleCodeChangeTimestamp = (timestamp: number): void => {
+    runInAction(() => {
+      this.store.lastIdleCodeChangeTimestamp = timestamp;
+    });
   };
 
   setIsAgentLoggedIn = (value: boolean): void => {
@@ -109,7 +132,9 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   setCurrentTask = (task: ITask): void => {
-    this.store.currentTask = task;
+    runInAction(() => {
+      this.store.currentTask = task;
+    });
   };
 
   setIncomingTask = (task: ITask): void => {
@@ -122,6 +147,25 @@ class StoreWrapper implements IStoreWrapper {
 
   setWrapupCodes = (wrapupCodes: IWrapupCode[]): void => {
     this.store.wrapupCodes = wrapupCodes;
+  };
+
+  setState = (state: ICustomState | IdleCode): void => {
+    if ('reset' in state) {
+      runInAction(() => {
+        this.store.customState = null;
+      });
+      return;
+    }
+    if ('id' in state) {
+      runInAction(() => {
+        this.setCurrentState(state.id);
+        this.store.customState = null;
+      });
+    } else {
+      runInAction(() => {
+        this.store.customState = state;
+      });
+    }
   };
 
   setTaskRejected = (callback: ((reason: string) => void) | undefined): void => {
@@ -160,6 +204,11 @@ class StoreWrapper implements IStoreWrapper {
       if (this.store.incomingTask?.data.interactionId === taskId) {
         this.setIncomingTask(null);
       }
+
+      // reset the custom state
+      this.setState({
+        reset: true,
+      });
     });
   };
 
@@ -178,6 +227,10 @@ class StoreWrapper implements IStoreWrapper {
     runInAction(() => {
       this.setCurrentTask(task);
       this.setIncomingTask(null);
+      this.setState({
+        developerName: 'ENGAGED',
+        name: 'Engaged',
+      });
     });
   };
 
@@ -208,8 +261,8 @@ class StoreWrapper implements IStoreWrapper {
       const DEFAULT_CODE = '0'; // Default code when no aux code is present
       this.setCurrentState(data.auxCodeId?.trim() !== '' ? data.auxCodeId : DEFAULT_CODE);
 
-      const startTime = data.lastStateChangeTimestamp;
-      this.setLastStateChangeTimestamp(new Date(startTime));
+      this.setLastStateChangeTimestamp(data.lastStateChangeTimestamp);
+      this.setLastIdleCodeChangeTimestamp(data.lastIdleCodeChangeTimestamp);
     }
   };
 

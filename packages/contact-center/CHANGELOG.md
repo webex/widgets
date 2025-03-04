@@ -1,3 +1,17 @@
+# [1.28.0-ccwidgets.26](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.25...v1.28.0-ccwidgets.26) (2025-03-03)
+
+
+### Features
+
+* **cc-widgets:** added new incomingtask and task ui based on figma design ([#402](https://github.com/webex/widgets/issues/402)) ([e69896a](https://github.com/webex/widgets/commit/e69896a5255be191424d52f4d6a4f2ada2c9df11))
+
+# [1.28.0-ccwidgets.25](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.24...v1.28.0-ccwidgets.25) (2025-03-03)
+
+
+### Features
+
+* **cc-widgets:** updated user state with new UI as per new figma ([#403](https://github.com/webex/widgets/issues/403)) ([43ae0c7](https://github.com/webex/widgets/commit/43ae0c7fc316c16744fd3eae3c52f91ab4ffccab))
+
 # [1.28.0-ccwidgets.24](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.23...v1.28.0-ccwidgets.24) (2025-02-28)
 
 

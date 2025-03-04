@@ -7,6 +7,13 @@ import '@testing-library/jest-dom';
 
 jest.mock('@momentum-ui/react-collaboration', () => ({
   ButtonPill: () => <div data-testid="ButtonPill" />,
+  ListItemBase: () => <div data-testid="ListItemBase" />,
+  ListItemBaseSection: () => <div data-testid="ListItemBaseSection" />,
+  Text: () => <div data-testid="Text" />,
+}));
+
+jest.mock('@momentum-design/components/dist/react', () => ({
+  Avatar: () => <div data-testid="Avatar" />,
 }));
 
 // Mock the store

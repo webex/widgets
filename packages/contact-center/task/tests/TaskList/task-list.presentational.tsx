@@ -6,6 +6,13 @@ import {TaskListPresentationalProps} from '../../src/task.types';
 
 jest.mock('@momentum-ui/react-collaboration', () => ({
   ButtonPill: () => <div data-testid="ButtonPill" />,
+  ListItemBase: () => <div data-testid="ListItemBase" />,
+  ListItemBaseSection: () => <div data-testid="ListItemBaseSection" />,
+  Text: () => <div data-testid="Text" />,
+}));
+
+jest.mock('@momentum-design/components/dist/react', () => ({
+  Avatar: () => <div data-testid="Avatar" />,
 }));
 
 describe('TaskListPresentational Component', () => {
@@ -42,15 +49,6 @@ describe('TaskListPresentational Component', () => {
     };
 
     render(<TaskListPresentational {...props} />);
-
-    // Ensure the details for the first task are displayed correctly
-    expect(screen.getByText('1234567890')).toBeInTheDocument();
-    expect(screen.getByText('Sales Team')).toBeInTheDocument();
-    expect(screen.getByText('9876543210')).toBeInTheDocument();
-
-    // Ensure the details for the second task are displayed correctly
-    expect(screen.getByText('0987654321')).toBeInTheDocument();
-    expect(screen.getByText('Support Team')).toBeInTheDocument();
-    expect(screen.getByText('8765432109')).toBeInTheDocument();
+    expect(screen.getAllByTestId('ListItemBase')).toHaveLength(2);
   });
 });

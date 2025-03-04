@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 const accessTokenElem = document.getElementById('access_token_elem');
 const themeElem = document.getElementById('theme');
 const widgetsContainer = document.getElementById('widgets-container');
@@ -28,12 +27,12 @@ themeElem.addEventListener('change', () => {
   );
 });
 
-store.setTaskRejected(function(reason) {
+store.setTaskRejected(function (reason) {
   showTaskRejectedPopup(reason);
 });
 
 // Attach submit button event listener once.
-taskRejectedSubmitButton.addEventListener('click', function() {
+taskRejectedSubmitButton.addEventListener('click', function () {
   const selectedState = document.getElementById('state-select').value;
   if (selectedState) {
     changeAgentState(selectedState);
@@ -99,7 +98,20 @@ function initWidgets() {
 function loginSuccess() {
   if (userStateCheckbox.checked) {
     ccUserState.classList.remove('disabled');
-    widgetsContainer.appendChild(ccUserState);
+
+    const userStateContainer = document.createElement('div');
+    userStateContainer.className = 'box';
+    userStateContainer.innerHTML = `
+      <section class="section-box">
+        <fieldset class="fieldset">
+          <legend class="legend-box">User State</legend>
+        </fieldset>
+      </section>
+    `;
+
+    userStateContainer.querySelector('fieldset').appendChild(ccUserState);
+    widgetsContainer.appendChild(userStateContainer);
+    ccUserState.onStateChange = onStateChange;
   }
   if (incomingTaskCheckbox.checked) {
     ccIncomingTask.classList.remove('disabled');
@@ -121,6 +133,10 @@ function logoutSuccess() {
   ccIncomingTask.classList.add('disabled');
   ccTaskList.classList.add('disabled');
   ccCallControl.classList.add('disabled');
+}
+
+function onStateChange(status) {
+  console.log('onStateChange invoked', status);
 }
 
 function onAccepted() {
@@ -167,18 +183,19 @@ function changeAgentState(newState) {
       agentId: agentId,
       lastStateChangeReason: newState,
     })
-    .then(function(response) {
+    .then(function (response) {
       store.setCurrentState(response.data.auxCodeId);
-      store.setLastStateChangeTimestamp(new Date(response.data.lastStateChangeTimestamp));
+      store.setLastStateChangeTimestamp(response.data.lastStateChangeTimestamp);
+      store.setLastIdleCodeChangeTimestamp(response.data.setLastIdleCodeChangeTimestamp);
       console.log('Agent state updated to', newState);
     })
-    .catch(function(error) {
+    .catch(function (error) {
       console.error('Error updating agent state:', error);
     });
 }
 
 // Helper to show the task rejected popup.
 function showTaskRejectedPopup(reason) {
-  document.getElementById('task-rejected-reason').textContent = "Reason: " + (reason || 'No reason provided');
+  document.getElementById('task-rejected-reason').textContent = 'Reason: ' + (reason || 'No reason provided');
   popupContainer.style.display = 'block';
 }
