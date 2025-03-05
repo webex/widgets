@@ -55,21 +55,21 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
     {
       prefixIcon: isHeld ? 'play-bold' : 'pause-bold',
       onClick: () => handletoggleHold(),
-      className: 'button',
+      className: 'call-control-button',
       variant: 'secondary',
       tooltip: isHeld ? 'Resume the call' : 'Hold the call',
     },
     {
       prefixIcon: isRecording ? 'record-paused-bold' : 'record-bold',
       onClick: () => handletoggleRecording(),
-      className: 'button',
+      className: 'call-control-button',
       variant: 'secondary',
       tooltip: isRecording ? 'Pause Recording' : 'Resume Recording',
     },
     {
       prefixIcon: 'cancel-regular',
       onClick: endCall,
-      className: 'button-cancel',
+      className: 'call-control-button-cancel',
       variant: 'primary',
       tooltip: 'End call',
     },
@@ -128,10 +128,10 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
               <Text className="wrapup-header" tagName={'small'} type="subheader-primary">
                 Wrap-up Interaction
               </Text>
-              <div className="select-wrapper">
+              <div className="wrapup-select-wrapper">
                 <SelectNext
                   aria-label="wrapup-reason"
-                  className="select"
+                  className="wrapup-select"
                   onSelectionChange={(key) => {
                     const selectedItem = wrapupCodes?.find((code) => code.id === key);
                     handleWrapupChange(selectedItem.name, selectedItem.id);
@@ -143,13 +143,13 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
                 >
                   {(item) => (
                     <Item key={item.id} textValue={item.name}>
-                      <Text className="state-name" tagName={'small'}>
+                      <Text className="wrapup-name" tagName={'small'}>
                         {item.name}
                       </Text>
                     </Item>
                   )}
                 </SelectNext>
-                <Icon className="select-arrow-icon" name="arrow-down-bold" title="" />
+                <Icon className="wrapup-select-arrow-icon" name="arrow-down-bold" title="" />
               </div>
               <Button
                 onClick={() => wrapupCall(selectedWrapupReason, selectedWrapupId)}

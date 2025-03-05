@@ -1,9 +1,9 @@
-.button {
+.call-control-button {
   --mdc-button-primary-background-color: var(--mds-color-theme-button-secondary-normal);
   --mdc-button-primary-hover-background-color: var(--mds-color-theme-button-secondary-hover);
 }
 
-.button-cancel {
+.call-control-button-cancel {
   --mdc-button-primary-background-color: var(--mds-color-theme-button-cancel-normal);
   --mdc-button-primary-hover-background-color: var(--mds-color-theme-button-cancel-hover);
 }
@@ -36,11 +36,11 @@
   margin-top: 1rem;
 }
 
-.state-name {
+.wrapup-name {
   color: var(--mds-color-theme-text-primary-normal);
 }
 
-.select {
+.wrapup-select {
   flex-grow: 1;
   padding: 0.5rem; // 8px to rem
   margin-top: 0.5rem; // 8px to rem
@@ -57,7 +57,7 @@
   align-self: flex-start; // Align similar to .wrapup-header
 }
 
-.select-arrow-icon {
+.wrapup-select-arrow-icon {
   position: absolute;
   right: 1.5rem; /* Adjusted to leave space for the arrow icon */
   top: 62%;
