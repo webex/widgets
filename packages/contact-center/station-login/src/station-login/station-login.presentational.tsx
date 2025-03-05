@@ -1,8 +1,9 @@
-import React, {useEffect, useRef} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import {StationLoginPresentationalProps} from './station-login.types';
 import './station-login.style.scss';
 import {MULTIPLE_SIGN_IN_ALERT_MESSAGE, MULTIPLE_SIGN_IN_ALERT_TITLE} from './constants';
-import {ButtonPill, Text} from '@momentum-ui/react-collaboration';
+import {ButtonPill, Text, SelectNext} from '@momentum-ui/react-collaboration';
+import {Item} from '@react-stately/collections';
 
 const StationLoginPresentational: React.FunctionComponent<StationLoginPresentationalProps> = (props) => {
   const {
@@ -20,11 +21,13 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
     handleContinue,
   } = props; // TODO: Use the loginSuccess, loginFailure, logoutSuccess props returned fromthe API response via helper file to reflect UI changes
   const modalRef = useRef<HTMLDialogElement>(null);
+  const [dialNumberValue, setDialNumberValue] = useState<string>('');
+  const [agentLoginValue, setAgentLoginValue] = useState<string>('');
+  const [isDialNumberDisabled, setIsDialNumberDisabled] = useState<boolean>(false);
 
   useEffect(() => {
     const teamsDropdown = document.getElementById('teamsDropdown') as HTMLSelectElement;
     const agentLogin = document.querySelector('#LoginOption') as HTMLSelectElement;
-    const dialNumber = document.querySelector('#dialNumber') as HTMLInputElement;
     if (teamsDropdown) {
       teamsDropdown.innerHTML = '';
       if (teams) {
@@ -35,19 +38,13 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
           teamsDropdown.add(option);
         });
         setTeam(teamsDropdown.value);
-        dialNumber.value = '';
-        dialNumber.disabled = true;
+        setDialNumberValue('');
+        setIsDialNumberDisabled(true);
       }
     }
     if (loginOptions.length > 0) {
-      loginOptions.forEach((options) => {
-        const option = document.createElement('option');
-        option.text = options;
-        option.value = options;
-        agentLogin.add(option);
-      });
       if (agentLogin && deviceType) {
-        agentLogin.value = deviceType;
+        setAgentLoginValue(deviceType);
       }
     }
   }, [teams, loginOptions]);
@@ -70,13 +67,12 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
   }, [isAgentLoggedIn]);
 
   const selectLoginOption = (event: {target: {value: string}}) => {
-    const dialNumber = document.querySelector('#dialNumber') as HTMLInputElement;
     const deviceType = event.target.value;
     setDeviceType(deviceType);
     if (deviceType === 'AGENT_DN' || deviceType === 'EXTENSION') {
-      dialNumber.disabled = false;
+      setIsDialNumberDisabled(false);
     } else {
-      dialNumber.disabled = true;
+      setIsDialNumberDisabled(true);
     }
   };
 
@@ -89,8 +85,7 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
   };
 
   function updateDN() {
-    const dialNumber = document.querySelector('#dialNumber') as HTMLInputElement;
-    setDialNumber(dialNumber.value);
+    // setDialNumber(dialNumber.value);
   }
 
   return (
@@ -114,14 +109,44 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
             </Text>
           </fieldset>
           <fieldset className="fieldset">
-            <Text tagName="span" type="body-large-regular">
+            <Text id="agent-login-label" tagName="span" type="body-large-regular">
               Handle calls using
             </Text>
-            <select name="LoginOption" id="LoginOption" className="select" onChange={selectLoginOption}>
-              <option value="" hidden>
-                Choose Agent Login Option...
-              </option>
-            </select>
+            <SelectNext
+              name="LoginOption"
+              id="LoginOption"
+              className="select"
+              aria-labelledby="agent-login-label"
+              items={loginOptions.map((name, id) => {
+                return {
+                  key: id,
+                  textValue: name,
+                };
+              })}
+            >
+              {/*<Item>*/}
+              {/*  <Text className="state-name" tagName={'small'}>*/}
+              {/*    Hello World*/}
+              {/*  </Text>*/}
+              {/*</Item>*/}
+              {(item) => {
+                return (
+                  <Item textValue={item.textValue} key={item.key}>
+                    <Text className="state-name" tagName={'small'}>
+                      {item}
+                    </Text>
+                  </Item>
+                );
+              }}
+            </SelectNext>
+            {/*{loginOptions.map((option, id) => {*/}
+            {/*  return <Item key={id} textValue={option}>{'555'}</Item>;*/}
+            {/*})}*/}
+            {/*<select name="LoginOption" id="LoginOption" className="select" onChange={selectLoginOption}>*/}
+            {/*  <option value="" hidden>*/}
+            {/*    Choose Agent Login Option...*/}
+            {/*  </option>*/}
+            {/*</select>*/}
           </fieldset>
           <fieldset className="fieldset">
             <Text tagName="span" type="body-large-regular">
@@ -158,6 +183,6 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
         </section>
       </div>
     </>
-);
+  );
 };
 export default StationLoginPresentational;
