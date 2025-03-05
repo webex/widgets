@@ -111,6 +111,7 @@ function loginSuccess() {
 
     userStateContainer.querySelector('fieldset').appendChild(ccUserState);
     widgetsContainer.appendChild(userStateContainer);
+    ccUserState.onStateChange = onStateChange;
   }
   if (incomingTaskCheckbox.checked) {
     ccIncomingTask.classList.remove('disabled');
@@ -132,6 +133,10 @@ function logoutSuccess() {
   ccIncomingTask.classList.add('disabled');
   ccTaskList.classList.add('disabled');
   ccCallControl.classList.add('disabled');
+}
+
+function onStateChange(status) {
+  console.log('onStateChange invoked', status);
 }
 
 function onAccepted() {

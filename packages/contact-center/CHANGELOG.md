@@ -1,3 +1,17 @@
+# [1.28.0-ccwidgets.27](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.26...v1.28.0-ccwidgets.27) (2025-03-04)
+
+
+### Features
+
+* **cc-user-state:** custom user states & setting idle code ([#397](https://github.com/webex/widgets/issues/397)) ([4fcecd0](https://github.com/webex/widgets/commit/4fcecd061556abc4f3a42cec98d99c810f8b8325))
+
+# [1.28.0-ccwidgets.26](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.25...v1.28.0-ccwidgets.26) (2025-03-03)
+
+
+### Features
+
+* **cc-widgets:** added new incomingtask and task ui based on figma design ([#402](https://github.com/webex/widgets/issues/402)) ([e69896a](https://github.com/webex/widgets/commit/e69896a5255be191424d52f4d6a4f2ada2c9df11))
+
 # [1.28.0-ccwidgets.25](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.24...v1.28.0-ccwidgets.25) (2025-03-03)
 
 
