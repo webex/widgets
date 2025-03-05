@@ -2,9 +2,9 @@ import React, {useEffect, useState} from 'react';
 
 import {CallControlPresentationalProps} from '../task.types';
 import './call-control.styles.scss';
-import {Button, Icon} from '@momentum-design/components/dist/react';
-import {PopoverNext, SelectNext, TooltipNext, Text} from '@momentum-ui/react-collaboration';
+import {PopoverNext, SelectNext, TooltipNext, Text, ButtonCircle, ButtonPill} from '@momentum-ui/react-collaboration';
 import {Item} from '@react-stately/collections';
+import {Icon} from '@momentum-design/components/dist/react';
 
 function CallControlPresentational(props: CallControlPresentationalProps) {
   const [isHeld, setIsHeld] = useState(false);
@@ -53,25 +53,22 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
 
   const buttons = [
     {
-      prefixIcon: isHeld ? 'play-bold' : 'pause-bold',
+      icon: isHeld ? 'play-bold' : 'pause-bold',
       onClick: () => handletoggleHold(),
-      className: 'call-control-button',
-      variant: 'secondary',
       tooltip: isHeld ? 'Resume the call' : 'Hold the call',
-    },
-    {
-      prefixIcon: isRecording ? 'record-paused-bold' : 'record-bold',
-      onClick: () => handletoggleRecording(),
       className: 'call-control-button',
-      variant: 'secondary',
-      tooltip: isRecording ? 'Pause Recording' : 'Resume Recording',
     },
     {
-      prefixIcon: 'cancel-regular',
+      icon: isRecording ? 'record-paused-bold' : 'record-bold',
+      onClick: () => handletoggleRecording(),
+      tooltip: isRecording ? 'Pause Recording' : 'Resume Recording',
+      className: 'call-control-button',
+    },
+    {
+      icon: 'cancel-regular',
       onClick: endCall,
-      className: 'call-control-button-cancel',
-      variant: 'primary',
       tooltip: 'End call',
+      className: 'call-control-button-cancel',
     },
   ];
 
@@ -91,12 +88,9 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
                 delay={[0, 0]}
                 placement="bottom-start"
                 triggerComponent={
-                  <Button
-                    prefixIcon={button.prefixIcon}
-                    onClick={button.onClick}
-                    className={button.className}
-                    variant={button.variant as 'primary' | 'secondary'}
-                  />
+                  <ButtonCircle className={button.className} onPress={button.onClick}>
+                    <Icon className={button.className + '-icon'} name={button.icon} />
+                  </ButtonCircle>
                 }
                 type="description"
                 variant="small"
@@ -116,9 +110,10 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
               showArrow
               trigger="click"
               triggerComponent={
-                <Button postfixIcon="arrow-down-bold" variant="secondary" onClick={handleWrapupCall}>
+                <ButtonPill onPress={handleWrapupCall} className="wrapup-button">
                   Wrap up
-                </Button>
+                  <Icon name="arrow-down-bold" />
+                </ButtonPill>
               }
               variant="medium"
               interactive
@@ -151,14 +146,13 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
                 </SelectNext>
                 <Icon className="wrapup-select-arrow-icon" name="arrow-down-bold" title="" />
               </div>
-              <Button
-                onClick={() => wrapupCall(selectedWrapupReason, selectedWrapupId)}
-                variant="primary"
+              <ButtonPill
                 className="submit-wrapup-button"
+                onPress={() => wrapupCall(selectedWrapupReason, selectedWrapupId)}
                 disabled={selectedWrapupId && selectedWrapupReason ? false : true}
               >
                 submit & Wrapup
-              </Button>
+              </ButtonPill>
             </PopoverNext>
           </div>
         )}
