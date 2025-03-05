@@ -1,60 +1,98 @@
-.box {
-  background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-  max-width: 800px;
-  margin: 0 auto;
+.button {
+  --mdc-button-primary-background-color: var(--mds-color-theme-button-secondary-normal);
+  --mdc-button-primary-hover-background-color: var(--mds-color-theme-button-secondary-hover);
+  .focus{
+    border-color: red;
+  }
 }
 
-.section-box {
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+.button-cancel {
+  --mdc-button-primary-background-color: var(--mds-color-theme-button-cancel-normal);
+  --mdc-button-primary-hover-background-color: var(--mds-color-theme-button-cancel-hover);
 }
 
-.fieldset {
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  padding: 10px;
-  margin-bottom: 20px;
+.tooltip.md-modal-container-wrapper {
+  color: var(--mds-color-theme-inverted-text-primary-normal);
+  background-color: var(--mds-color-theme-inverted-background-normal) !important;
 }
 
-.legend-box {
-  font-weight: bold;
-  color: #0052bf;
+.tooltip .md-modal-container-arrow-wrapper .md-modal-arrow-svg path {
+  fill: var(--mds-color-theme-inverted-background-normal) !important;
 }
 
-.btn {
-  padding: 10px 20px;
-  background-color: #0052bf;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  margin-right: 8px;
+.call-control-container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
 }
 
-.btn:disabled {
-  background-color: grey;
-  cursor: not-allowed;
+.button-group {
+  display: flex;
+  gap: 0.5rem; /* Reduced gap between buttons/tooltips */
+  margin-top: 1rem;
+}
+
+.wrapup-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; /* Reduced gap between select and button */
+  margin-top: 1rem;
+}
+
+.state-name {
+  color: var(--mds-color-theme-text-primary-normal);
 }
 
 .select {
-  width: 100%;
-  padding: 8px;
-  margin-top: 8px;
-  margin-bottom: 12px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  flex-grow: 1;
+  padding: 0.5rem; // 8px to rem
+  margin-top: 0.5rem; // 8px to rem
+  margin-bottom: 0.75rem; // 12px to rem
+  border: 0.0625rem solid #ccc; // 1px to rem
+  border-radius: 0.25rem; // 4px to rem
+  align-self: flex-start; // Align similar to .wrapup-header
 }
 
-.input {
-  width: 97%;
-  padding: 8px;
-  margin-top: 8px;
-  margin-bottom: 12px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+.md-select-dropdown-input {
+  flex-grow: 1;
+  display: flex; // Ensure it participates in flex layout
+  border: 0.0625rem; // 1px to rem
+  align-self: flex-start; // Align similar to .wrapup-header
+}
+
+.select-arrow-icon {
+  position: absolute;
+  right: 1.5rem; /* Adjusted to leave space for the arrow icon */
+  top: 62%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.submit-wrapup-button {
+  align-self: flex-end;
+}
+
+.wrapup-header {
+  align-self: flex-start;
+}
+
+.md-select-wrapper {
+  display: flex;
+  align-items: flex-start; // Align contents to the left
+  flex-direction: column; // Ensure vertical alignment
+  border: 0;
+}
+
+[id*='tippy'] {
+  border: 0.0625rem solid var(--mds-color-theme-outline-input-normal); // 1px to rem
+  background-color: var(--mds-color-theme-background-glass-overlay-normal);
+  border-radius: 0.50rem; // 4px to rem
+}
+
+.md-modal-container-arrow-wrapper {
+  color: var(--mds-color-theme-outline-input-normal);
+  background-color: var(--mds-color-theme-background-glass-overlay-normal);
 }

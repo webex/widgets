@@ -1,9 +1,10 @@
 import React, {useEffect, useState} from 'react';
-import {WrapupCodes} from '@webex/cc-store';
 
 import {CallControlPresentationalProps} from '../task.types';
 import './call-control.styles.scss';
-import {ButtonPill} from '@momentum-ui/react-collaboration';
+import {Button, Icon} from '@momentum-design/components/dist/react';
+import {PopoverNext, SelectNext, TooltipNext, Text} from '@momentum-ui/react-collaboration';
+import {Item} from '@react-stately/collections';
 
 function CallControlPresentational(props: CallControlPresentationalProps) {
   const [isHeld, setIsHeld] = useState(false);
@@ -45,50 +46,123 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
     }
   };
 
-  const handleWrapupChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const {text, value} = event.target.options[event.target.selectedIndex];
+  const handleWrapupChange = (text, value) => {
     setSelectedWrapupReason(text);
     setSelectedWrapupId(value);
   };
 
+  const buttons = [
+    {
+      prefixIcon: isHeld ? 'play-bold' : 'pause-bold',
+      onClick: () => handletoggleHold,
+      className: 'button',
+      variant: 'secondary',
+      tooltip: isHeld ? 'Resume the call' : 'Hold the call',
+    },
+    {
+      prefixIcon: isRecording ? 'record-paused-bold' : 'record-bold',
+      onClick: () => handletoggleRecording,
+      className: 'button',
+      variant: 'secondary',
+      tooltip: isRecording ? 'Pause Recording' : 'Resume Recording',
+    },
+    {
+      prefixIcon: 'cancel-regular',
+      onClick: endCall,
+      className: 'button-cancel',
+      variant: 'primary',
+      tooltip: 'End call',
+    },
+  ];
+
+  if (!currentTask) return null;
+
   return (
     <>
       <audio ref={audioRef} id="remote-audio" autoPlay></audio>
-      {currentTask && (
-        <div className="box">
-          <section className="section-box">
-            <fieldset className="fieldset">
-              <legend className="legend-box">Call Control</legend>
-              <div style={{display: 'flex', flexDirection: 'column', flexGrow: 1}}>
-                <div style={{display: 'flex', gap: '1rem'}}>
-                  <ButtonPill onPress={handletoggleHold} disabled={wrapupRequired} color={isHeld ? 'join' : 'cancel'}>
-                    {isHeld ? 'Resume' : 'Hold'}
-                  </ButtonPill>
-                  <ButtonPill onPress={handletoggleRecording} disabled={wrapupRequired}>
-                    {isRecording ? 'Pause Recording' : 'Resume Recording'}
-                  </ButtonPill>
-                  <ButtonPill onPress={endCall} disabled={wrapupRequired || isHeld}>
-                    End
-                  </ButtonPill>
-                </div>
-                <div style={{display: 'flex', gap: '1rem', marginTop: '1rem'}}>
-                  <select className="select" onChange={handleWrapupChange} disabled={!wrapupRequired}>
-                    <option value="">Select the wrap-up reason</option>
-                    {wrapupCodes.map((wrapup: WrapupCodes) => (
-                      <option key={wrapup.id} value={wrapup.id}>
-                        {wrapup.name}
-                      </option>
-                    ))}
-                  </select>
-                  <ButtonPill onPress={handleWrapupCall} disabled={!wrapupRequired && !selectedWrapupReason}>
-                    Wrap Up
-                  </ButtonPill>
-                </div>
+
+      <div className="call-control-container">
+        {!wrapupRequired && (
+          <div className="button-group">
+            {buttons.map((button, index) => (
+              <TooltipNext
+                key={index}
+                color="primary"
+                delay={[0, 0]}
+                placement="bottom-start"
+                triggerComponent={
+                  <Button
+                    prefixIcon={button.prefixIcon}
+                    onClick={button.onClick}
+                    className={button.className}
+                    variant={button.variant as 'primary' | 'secondary'}
+                  />
+                }
+                type="description"
+                variant="small"
+                className="tooltip"
+              >
+                <p>{button.tooltip}</p>
+              </TooltipNext>
+            ))}
+          </div>
+        )}
+        {wrapupRequired && (
+          <div className="wrapup-group">
+            <PopoverNext
+              color="primary"
+              delay={[0, 0]}
+              placement="bottom-start"
+              showArrow
+              trigger="click"
+              triggerComponent={
+                <Button postfixIcon="arrow-down-bold" variant="secondary" onClick={handleWrapupCall}>
+                  Wrap up
+                </Button>
+              }
+              variant="medium"
+              interactive
+              offsetDistance={2}
+              className="wrapup-popover"
+            >
+              <Text className="wrapup-header" tagName={'small'} type="subheader-primary">
+                Wrap-up Interaction
+              </Text>
+              <div className="select-wrapper">
+                <SelectNext
+                  aria-label="wrapup-reason"
+                  className="select"
+                  onSelectionChange={(key) => {
+                    const selectedItem = wrapupCodes?.find((code) => code.id === key);
+                    handleWrapupChange(selectedItem.name, selectedItem.id);
+                  }}
+                  items={wrapupCodes}
+                  showBorder={false}
+                  placeholder="Select"
+                  label="Wrap-up reason"
+                >
+                  {(item) => (
+                    <Item key={item.id} textValue={item.name}>
+                      <Text className="state-name" tagName={'small'}>
+                        {item.name}
+                      </Text>
+                    </Item>
+                  )}
+                </SelectNext>
+                <Icon className="select-arrow-icon" name="arrow-down-bold" title="" />
               </div>
-            </fieldset>
-          </section>
-        </div>
-      )}
+              <Button
+                onClick={() => wrapupCall(selectedWrapupReason, selectedWrapupId)}
+                variant="primary"
+                className="submit-wrapup-button"
+                disabled={selectedWrapupId && selectedWrapupReason ? false : true}
+              >
+                submit & Wrapup
+              </Button>
+            </PopoverNext>
+          </div>
+        )}
+      </div>
     </>
   );
 }

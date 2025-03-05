@@ -1,10 +1,14 @@
 import React from 'react';
-import {render} from '@testing-library/react';
+import {render, screen} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import CallControlPresentational from '../../src/CallControl/call-control.presentational';
 
 jest.mock('@momentum-ui/react-collaboration', () => ({
   ButtonPill: () => <div data-testid="ButtonPill" />,
+  TooltipNext: ({children}) => <div data-testid="TooltipNext">{children}</div>,
+  PopoverNext: ({children}) => <div data-testid="PopoverNext">{children}</div>,
+  SelectNext: ({children}) => <div data-testid="SelectNext">{children}</div>,
+  Text: ({children}) => <div data-testid="Text">{children}</div>,
 }));
 
 describe('CallControlPresentational', () => {
@@ -18,7 +22,18 @@ describe('CallControlPresentational', () => {
   ];
 
   const defaultProps = {
-    currentTask: {},
+    currentTask: {
+      data: {
+        interaction: {
+          mediaResourceId: '1',
+          media: {
+            '1': {isHold: false},
+          },
+          callProcessingDetails: {isPaused: false},
+        },
+      },
+    },
+    audioRef: React.createRef(),
     toggleHold: mockToggleHold,
     toggleRecording: mockToggleRecording,
     endCall: mockEndCall,
@@ -33,5 +48,9 @@ describe('CallControlPresentational', () => {
 
   it('renders the component with buttons and dropdown', () => {
     render(<CallControlPresentational {...defaultProps} />);
+    expect(screen.getByTestId('TooltipNext')).toBeInTheDocument();
+    expect(screen.getByTestId('PopoverNext')).toBeInTheDocument();
+    expect(screen.getByTestId('SelectNext')).toBeInTheDocument();
+    expect(screen.getByTestId('Text')).toBeInTheDocument();
   });
 });
