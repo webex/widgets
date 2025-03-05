@@ -54,14 +54,14 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
   const buttons = [
     {
       prefixIcon: isHeld ? 'play-bold' : 'pause-bold',
-      onClick: () => handletoggleHold,
+      onClick: () => handletoggleHold(),
       className: 'button',
       variant: 'secondary',
       tooltip: isHeld ? 'Resume the call' : 'Hold the call',
     },
     {
       prefixIcon: isRecording ? 'record-paused-bold' : 'record-bold',
-      onClick: () => handletoggleRecording,
+      onClick: () => handletoggleRecording(),
       className: 'button',
       variant: 'secondary',
       tooltip: isRecording ? 'Pause Recording' : 'Resume Recording',
