@@ -3,6 +3,11 @@ import {StationLogin, UserState, IncomingTask, TaskList, CallControl, store} fro
 import {ThemeProvider, IconProvider, Icon, Button, Checkbox, Text} from '@momentum-design/components/dist/react';
 import {PopoverNext} from '@momentum-ui/react-collaboration';
 import './App.scss';
+import {observer} from 'mobx-react-lite';
+
+// This is not to be included to a production app.
+// Have added here for debugging purposes
+window['store'] = store;
 
 function App() {
   const [isSdkReady, setIsSdkReady] = useState(false);
@@ -98,7 +103,8 @@ function App() {
       })
       .then((response) => {
         store.setCurrentState(response.data.auxCodeId);
-        store.setLastStateChangeTimestamp(new Date(response.data.lastStateChangeTimestamp));
+        store.setLastStateChangeTimestamp(response.data.lastStateChangeTimestamp);
+        store.setLastIdleCodeChangeTimestamp(response.data.lastIdleCodeChangeTimestamp);
         console.log('Agent state updated to', newState);
       })
       .catch((error) => {
@@ -125,8 +131,12 @@ function App() {
     };
   }, []);
 
+  const onStateChange = (status) => {
+    console.log('onStateChange invoked', status);
+  };
+
   return (
-    <div className="mds-typography" style={{height: '100%'}}>
+    <div className="mds-typography centered-container">
       <ThemeProvider
         themeclass={currentTheme === 'LIGHT' ? 'mds-theme-stable-lightWebex' : 'mds-theme-stable-darkWebex'}
       >
@@ -204,10 +214,21 @@ function App() {
             </Button>
             {isSdkReady && (
               <>
-                {selectedWidgets.stationLogin && <StationLogin onLogin={onLogin} onLogout={onLogout} />}
+                <div className="station-login">
+                  {selectedWidgets.stationLogin && <StationLogin onLogin={onLogin} onLogout={onLogout} />}
+                </div>
                 {store.isAgentLoggedIn && (
                   <>
-                    {selectedWidgets.userState && <UserState />}
+                    {selectedWidgets.userState && (
+                      <div className="box">
+                        <section className="section-box">
+                          <fieldset className="fieldset">
+                            <legend className="legend-box">User State</legend>
+                            <UserState onStateChange={onStateChange} />
+                          </fieldset>
+                        </section>
+                      </div>
+                    )}
                     {selectedWidgets.incomingTask && <IncomingTask onAccepted={onAccepted} onDeclined={onDeclined} />}
                     {selectedWidgets.taskList && (
                       <TaskList onTaskAccepted={onTaskAccepted} onTaskDeclined={onTaskDeclined} />
@@ -238,4 +259,4 @@ function App() {
   );
 }
 
-export default App;
+export default observer(App);

@@ -1,63 +1,203 @@
 import {useState, useEffect, useRef} from 'react';
-// TODO: Export & Import this AGENT_STATE_CHANGE constant from SDK
 import store from '@webex/cc-store';
-export const useUserState = ({idleCodes, agentId, cc, currentState, lastStateChangeTimestamp}) => {
+
+export const useUserState = ({
+  idleCodes,
+  agentId,
+  cc,
+  currentState,
+  customState,
+  lastStateChangeTimestamp,
+  logger,
+  onStateChange,
+  lastIdleCodeChangeTimestamp,
+}) => {
   const [isSettingAgentStatus, setIsSettingAgentStatus] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
   const [elapsedTime, setElapsedTime] = useState(0);
+  const [lastIdleStateChangeElapsedTime, setLastIdleStateChangeElapsedTime] = useState(0);
   const workerRef = useRef<Worker | null>(null);
+
+  const prevStateRef = useRef(currentState);
+
+  const callOnStateChange = () => {
+    if (onStateChange) {
+      if (customState?.developerName) {
+        onStateChange(customState);
+        return;
+      }
+      for (const code of idleCodes) {
+        if (code.id === currentState) {
+          onStateChange(code);
+          break;
+        }
+      }
+    }
+  };
 
   // Initialize the Web Worker using a Blob
   const workerScript = `
     let intervalId;
+    let intervalId2;
     const startTimer = (startTime) => {
       if (intervalId) clearInterval(intervalId);
       intervalId = setInterval(() => {
         const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
-        self.postMessage(elapsedTime);
+        self.postMessage({type: 'elapsedTime', elapsedTime});
       }, 1000);
     };
+    const startIdleCodeTimer = (startTime) => {
+      if (intervalId2) clearInterval(intervalId2);
+      intervalId2 = setInterval(() => {
+        const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+        self.postMessage({type: 'lastIdleStateChangeElapsedTime', elapsedTime});
+      }, 1000);
+    };
+    const stopTimer = () => {
+      if (intervalId) clearInterval(intervalId);
+      self.postMessage({type: 'stop'});
+    };
+    const stopIdleCodeTimer = () => {
+      if (intervalId2) clearInterval(intervalId2);
+      self.postMessage({type: 'stopIdleCodeTimer'});
+    };
     self.onmessage = (event) => {
-      if (event.data.type === 'start' || event.data.type === 'reset') {
+      if (event.data.type === 'start') {
         const startTime = event.data.startTime;
         startTimer(startTime);
+      }
+      if (event.data.type === 'startIdleCode') {
+        const startTime = event.data.startTime;
+        startIdleCodeTimer(startTime);
+      }
+      if (event.data.type === 'reset') {
+        const startTime = event.data.startTime;
+        startTimer(startTime);
+      }
+      if (event.data.type === 'resetIdleCode') {
+        const startTime = event.data.startTime;
+        startIdleCodeTimer(startTime);
+      }
+      if (event.data.type === 'stop') {
+        stopTimer();
+      }
+      if (event.data.type === 'stopIdleCode') {
+        stopIdleCodeTimer();
       }
     };
   `;
 
   useEffect(() => {
+    logger.log(`Initializing worker`, {
+      module: 'useUserState',
+      method: 'useEffect - initial',
+    });
+
     const blob = new Blob([workerScript], {type: 'application/javascript'});
     const workerUrl = URL.createObjectURL(blob);
     workerRef.current = new Worker(workerUrl);
     workerRef.current.postMessage({type: 'start', startTime: Date.now()});
+    workerRef.current.postMessage({type: 'startIdleCode', startTime: Date.now()});
     workerRef.current.onmessage = (event) => {
-      setElapsedTime(event.data);
+      if (event.data.type === 'elapsedTime') {
+        setElapsedTime(event.data.elapsedTime > 0 ? event.data.elapsedTime : 0);
+      } else if (event.data.type === 'lastIdleStateChangeElapsedTime') {
+        setLastIdleStateChangeElapsedTime(event.data.elapsedTime > 0 ? event.data.elapsedTime : 0);
+      } else if (event.data.type === 'stopIdleCodeTimer') {
+        setLastIdleStateChangeElapsedTime(-1);
+      }
+    };
+
+    return () => {
+      if (workerRef.current) {
+        workerRef.current.postMessage({type: 'stop'});
+        workerRef.current.postMessage({type: 'stopIdleCode'});
+        workerRef.current.terminate();
+        workerRef.current = null;
+      }
     };
   }, []);
 
   useEffect(() => {
-    if (workerRef.current && lastStateChangeTimestamp) {
-      const timeNow = new Date();
-      const elapsed = Math.floor(Math.abs(timeNow.getTime() - lastStateChangeTimestamp.getTime()) / 1000);
-      setElapsedTime(elapsed);
-      workerRef.current.postMessage({type: 'reset', startTime: lastStateChangeTimestamp.getTime()});
-    }
-  }, [lastStateChangeTimestamp]);
+    if (prevStateRef.current !== currentState) {
+      logger.log(`State change detected: ${prevStateRef.current} -> ${currentState}`, {
+        module: 'useUserState',
+        method: 'useEffect - currentState',
+      });
 
+      // Call setAgentStatus and update prevStateRef after promise resolves
+      updateAgentState(currentState)
+        .then(() => {
+          prevStateRef.current = currentState;
+          callOnStateChange();
+        })
+        .catch((error) => {
+          logger.error(`Failed to update state: ${error.toString()}`, {
+            module: 'useUserState',
+            method: 'useEffect - currentState',
+          });
+        });
+    }
+  }, [currentState]);
+
+  useEffect(() => {
+    callOnStateChange();
+  }, [customState]);
+
+  useEffect(() => {
+    if (workerRef.current && lastStateChangeTimestamp) {
+      workerRef.current.postMessage({type: 'reset', startTime: lastStateChangeTimestamp});
+
+      if (lastIdleCodeChangeTimestamp && lastIdleCodeChangeTimestamp !== lastStateChangeTimestamp) {
+        workerRef.current.postMessage({type: 'resetIdleCode', startTime: lastIdleCodeChangeTimestamp});
+      } else {
+        workerRef.current.postMessage({type: 'stopIdleCode', startTime: lastIdleCodeChangeTimestamp});
+      }
+    }
+  }, [lastStateChangeTimestamp, lastIdleCodeChangeTimestamp]);
+
+  // UI change calls this method and gets the store updated
   const setAgentStatus = (selectedCode) => {
+    store.setCurrentState(selectedCode);
+  };
+
+  // Store change calls the useEffect above which calls this method
+  // This method updates the agent state in the backend
+  const updateAgentState = (selectedCode) => {
+    selectedCode = idleCodes?.filter((code) => code.id === selectedCode)[0];
+
+    logger.log(`Setting agent status`, {
+      module: 'useUserState',
+      method: 'setAgentStatus',
+      auxCodeId: selectedCode.auxCodeId,
+      state: selectedCode.state,
+    });
+
     const {auxCodeId, state} = {
       auxCodeId: selectedCode.id,
       state: selectedCode.name,
     };
     setIsSettingAgentStatus(true);
     const chosenState = state === 'Available' ? 'Available' : 'Idle';
-    cc.setAgentState({state: chosenState, auxCodeId, agentId, lastStateChangeReason: state})
+
+    return cc
+      .setAgentState({state: chosenState, auxCodeId, agentId, lastStateChangeReason: state})
       .then((response) => {
-        store.setCurrentState(response.data.auxCodeId);
-        store.setLastStateChangeTimestamp(new Date(response.data.lastStateChangeTimestamp));
+        logger.log(`Agent state set successfully`, {
+          module: 'useUserState',
+          method: 'updateAgentState',
+          response: response.data,
+        });
+
+        store.setLastStateChangeTimestamp(response.data.lastStateChangeTimestamp);
+        store.setLastIdleCodeChangeTimestamp(response.data.lastIdleCodeChangeTimestamp);
       })
       .catch((error) => {
-        setErrorMessage(error.toString());
+        logger.error(`Error setting agent state: ${error.toString()}`, {
+          module: 'useUserState',
+          method: 'updateAgentState',
+        });
+        store.setCurrentState(prevStateRef.current);
+        throw error;
       })
       .finally(() => {
         setIsSettingAgentStatus(false);
@@ -68,8 +208,8 @@ export const useUserState = ({idleCodes, agentId, cc, currentState, lastStateCha
     idleCodes,
     setAgentStatus,
     isSettingAgentStatus,
-    errorMessage,
     elapsedTime,
+    lastIdleStateChangeElapsedTime,
     currentState,
   };
 };
