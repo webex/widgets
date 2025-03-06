@@ -12,7 +12,6 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
     loginOptions,
     login,
     logout,
-    relogin,
     setDeviceType,
     setDialNumber,
     setTeam,
@@ -34,7 +33,7 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
       setAgentLoginValue('0');
       setDeviceType(firstOption);
     }
-  }, [loginOptions, setDeviceType]);
+  }, [teams, loginOptions, deviceType]);
 
   useEffect(() => {
     if (teams.length > 0) {
@@ -49,13 +48,6 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
       modalRef.current.showModal();
     }
   }, [showMultipleLoginAlert]);
-
-  useEffect(() => {
-    if (!isAgentLoggedIn || !deviceType) return;
-    setDeviceType(deviceType);
-    setAgentLoginValue(loginOptions.indexOf(deviceType).toString());
-    relogin();
-  }, [isAgentLoggedIn, deviceType, loginOptions, setDeviceType, relogin]);
 
   const selectLoginOption = useCallback(
     (key: string) => {

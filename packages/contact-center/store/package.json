@@ -1,7 +1,7 @@
 {
   "name": "@webex/cc-store",
   "description": "Webex Contact Center Widgets: Widgets Store",
-  "version": "1.28.0-ccwidgets.29",
+  "version": "1.28.0-ccwidgets.30",
   "main": "dist/index.js",
   "license": "MIT",
   "publishConfig": {
@@ -23,7 +23,7 @@
   "dependencies": {
     "mobx": "6.13.5",
     "typescript": "5.6.3",
-    "webex": "3.7.0-wxcc.17"
+    "webex": "3.7.0-wxcc.18"
   },
   "devDependencies": {
     "@babel/core": "7.25.2",
