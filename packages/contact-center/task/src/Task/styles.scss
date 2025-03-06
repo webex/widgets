@@ -22,8 +22,12 @@
   }
 }
 
+.task-text {
+  color: var(--mds-color-theme-text-secondary-normal);
+}
+
 .task-list-item--selected {
-  background: var(--color-theme-background-primary-active, rgba(0, 0, 0, 0.11));
+  background: var(--mds-color-theme-background-primary-active);
 
   mdc-avatar {
     --mdc-avatar-default-background-color: var(--mds-color-theme-avatar-glass-active, rgba(255, 255, 255, 0.8));
