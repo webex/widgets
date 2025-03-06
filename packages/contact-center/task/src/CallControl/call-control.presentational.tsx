@@ -80,41 +80,6 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
   return (
     <>
       <audio ref={audioRef} id="remote-audio" autoPlay></audio>
-      {currentTask && (
-        <div className="box call-control">
-          <section className="section-box">
-            <fieldset className="fieldset">
-              <legend className="legend-box">Call Control</legend>
-              <div style={{display: 'flex', flexDirection: 'column', flexGrow: 1}}>
-                <div style={{display: 'flex', gap: '1rem'}}>
-                  <ButtonPill onPress={handletoggleHold} disabled={wrapupRequired} color={isHeld ? 'join' : 'cancel'}>
-                    {isHeld ? 'Resume' : 'Hold'}
-                  </ButtonPill>
-                  <ButtonPill onPress={handletoggleRecording} disabled={wrapupRequired}>
-                    {isRecording ? 'Pause Recording' : 'Resume Recording'}
-                  </ButtonPill>
-                  <ButtonPill onPress={endCall} disabled={wrapupRequired || isHeld}>
-                    End
-                  </ButtonPill>
-                </div>
-                <div style={{display: 'flex', gap: '1rem', marginTop: '1rem'}}>
-                  <select className="select" onChange={handleWrapupChange} disabled={!wrapupRequired}>
-                    <option value="">Select the wrap-up reason</option>
-                    {wrapupCodes.map((wrapup: WrapupCodes) => (
-                      <option key={wrapup.id} value={wrapup.id}>
-                        {wrapup.name}
-                      </option>
-                    ))}
-                  </select>
-                  <ButtonPill onPress={handleWrapupCall} disabled={!wrapupRequired && !selectedWrapupReason}>
-                    Wrap Up
-                  </ButtonPill>
-                </div>
-              </div>
-            </fieldset>
-          </section>
-        </div>
-      )}
       <div className="call-control-container" data-testid="call-control-container">
         {!wrapupRequired && (
           <div className="button-group">
