@@ -1,4 +1,3 @@
-
 .tooltip.md-modal-container-wrapper {
   color: var(--mds-color-theme-inverted-text-primary-normal);
   background-color: var(--mds-color-theme-inverted-background-normal) !important;
@@ -12,6 +11,14 @@
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+
+
+  .md-select-dropdown-input {
+    flex-grow: 1;
+    display: flex; // Ensure it participates in flex layout
+    border: 0.0625rem; // 1px to rem
+    align-self: flex-start; // Align similar to .wrapup-header
+  }
 }
 
 .button-group {
@@ -38,13 +45,6 @@
   margin-bottom: 0.75rem; // 12px to rem
   border: 0.0625rem solid #ccc; // 1px to rem
   border-radius: 0.25rem; // 4px to rem
-  align-self: flex-start; // Align similar to .wrapup-header
-}
-
-.md-select-dropdown-input {
-  flex-grow: 1;
-  display: flex; // Ensure it participates in flex layout
-  border: 0.0625rem; // 1px to rem
   align-self: flex-start; // Align similar to .wrapup-header
 }
 
