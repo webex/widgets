@@ -25,7 +25,6 @@ describe('StationLoginPresentational', () => {
     showMultipleLoginAlert: false,
     handleContinue: jest.fn(),
     modalRef: React.createRef<HTMLDialogElement>(),
-    relogin: jest.fn(),
   };
 
   afterEach(() => {

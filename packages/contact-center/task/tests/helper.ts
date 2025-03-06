@@ -1,6 +1,7 @@
 import {renderHook, act, waitFor} from '@testing-library/react';
 import {useIncomingTask, useTaskList, useCallControl} from '../src/helper';
 import {TASK_EVENTS} from '@webex/cc-store';
+import store from '@webex/cc-store';
 import React from 'react';
 
 // Mock webex instance and task
@@ -34,10 +35,57 @@ describe('useIncomingTask Hook', () => {
     logger.error.mockRestore();
   });
 
-  it('should  call onAccepted if it is provided', async () => {
-    const {result} = renderHook(() =>
+  it('shouldnt setup event listeners is not incoming call', async () => {
+    const onSpy = jest.spyOn(taskMock, 'on');
+    renderHook(() =>
       useIncomingTask({
-        cc: ccMock,
+        incomingTask: undefined,
+        onAccepted: onTaskAccepted,
+        onDeclined: onTaskDeclined,
+        deviceType: 'BROWSER',
+        logger,
+      })
+    );
+    expect(onSpy).not.toHaveBeenCalled();
+  });
+
+  it('should  setup event listeners for the incoming call', async () => {
+    store.setTaskList([taskMock]);
+    const onSpy = jest.spyOn(taskMock, 'on');
+    const offSpy = jest.spyOn(taskMock, 'off');
+    const setTaskCallbackSpy = jest.spyOn(store, 'setTaskCallback');
+    const removeTaskCallbackSpy = jest.spyOn(store, 'removeTaskCallback');
+
+    const {unmount} = renderHook(() =>
+      useIncomingTask({
+        incomingTask: taskMock,
+        onAccepted: onTaskAccepted,
+        onDeclined: onTaskDeclined,
+        deviceType: 'BROWSER',
+        logger,
+      })
+    );
+
+    expect(setTaskCallbackSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function), 'interaction1');
+    expect(setTaskCallbackSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_REJECT, expect.any(Function), 'interaction1');
+    expect(onSpy).toHaveBeenCalledTimes(2);
+    expect(onSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function));
+    expect(onSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_REJECT, expect.any(Function));
+
+    act(() => {
+      unmount();
+    });
+
+    expect(removeTaskCallbackSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function), 'interaction1');
+    expect(removeTaskCallbackSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_REJECT, expect.any(Function), 'interaction1');
+    expect(offSpy).toHaveBeenCalledTimes(2);
+    expect(offSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function));
+    expect(offSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_REJECT, expect.any(Function));
+  });
+
+  it('should  call onAccepted if it is provided', async () => {
+    renderHook(() =>
+      useIncomingTask({
         incomingTask: taskMock,
         onAccepted: onTaskAccepted,
         onDeclined: onTaskDeclined,
@@ -47,7 +95,7 @@ describe('useIncomingTask Hook', () => {
     );
 
     act(() => {
-      result.current.accept();
+      taskMock.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_ASSIGNED)?.[1]();
     });
 
     await waitFor(() => {
@@ -59,9 +107,8 @@ describe('useIncomingTask Hook', () => {
   });
 
   it('should call onDeclined if it is provided', async () => {
-    const {result} = renderHook(() =>
+    renderHook(() =>
       useIncomingTask({
-        cc: ccMock,
         incomingTask: taskMock,
         onAccepted: onTaskAccepted,
         onDeclined: onTaskDeclined,
@@ -71,7 +118,7 @@ describe('useIncomingTask Hook', () => {
     );
 
     act(() => {
-      result.current.decline();
+      taskMock.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_REJECT)?.[1]();
     });
 
     await waitFor(() => {
@@ -92,7 +139,6 @@ describe('useIncomingTask Hook', () => {
     };
     const {result} = renderHook(() =>
       useIncomingTask({
-        cc: ccMock,
         incomingTask: noIdTask,
         onAccepted: onTaskAccepted,
         onDeclined: onTaskDeclined,
@@ -110,7 +156,7 @@ describe('useIncomingTask Hook', () => {
     });
 
     act(() => {
-      result.current.decline();
+      taskMock.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_REJECT)?.[1]();
     });
 
     await waitFor(() => {
@@ -119,9 +165,8 @@ describe('useIncomingTask Hook', () => {
   });
 
   it('should not call onAccepted if it is not provided', async () => {
-    const {result} = renderHook(() =>
+    renderHook(() =>
       useIncomingTask({
-        cc: ccMock,
         incomingTask: taskMock,
         deviceType: 'BROWSER',
         logger,
@@ -129,7 +174,7 @@ describe('useIncomingTask Hook', () => {
     );
 
     act(() => {
-      result.current.accept();
+      taskMock.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_ASSIGNED)?.[1]();
     });
 
     await waitFor(() => {
@@ -141,9 +186,8 @@ describe('useIncomingTask Hook', () => {
   });
 
   it('should not call onDeclined if it is not provided', async () => {
-    const {result} = renderHook(() =>
+    renderHook(() =>
       useIncomingTask({
-        cc: ccMock,
         incomingTask: taskMock,
         deviceType: 'BROWSER',
         logger,
@@ -151,7 +195,7 @@ describe('useIncomingTask Hook', () => {
     );
 
     act(() => {
-      result.current.decline();
+      taskMock.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_REJECT)?.[1]();
     });
 
     await waitFor(() => {
@@ -170,7 +214,7 @@ describe('useIncomingTask Hook', () => {
     };
 
     const {result} = renderHook(() =>
-      useIncomingTask({cc: ccMock, incomingTask: failingTask, onAccepted, deviceType: 'BROWSER', logger})
+      useIncomingTask({incomingTask: failingTask, onAccepted, deviceType: 'BROWSER', logger})
     );
 
     act(() => {
@@ -197,7 +241,7 @@ describe('useIncomingTask Hook', () => {
     };
 
     const {result} = renderHook(() =>
-      useIncomingTask({cc: ccMock, incomingTask: failingTask, onDeclined, deviceType: 'BROWSER', logger})
+      useIncomingTask({incomingTask: failingTask, onDeclined, deviceType: 'BROWSER', logger})
     );
 
     act(() => {
@@ -225,12 +269,10 @@ describe('useTaskList Hook', () => {
   });
 
   it('should call onTaskAccepted callback when provided', async () => {
-    const {result} = renderHook(() =>
-      useTaskList({cc: ccMock, deviceType: '', onTaskAccepted, logger, taskList: mockTaskList})
-    );
+    renderHook(() => useTaskList({cc: ccMock, deviceType: '', onTaskAccepted, logger, taskList: mockTaskList}));
 
     act(() => {
-      result.current.acceptTask(taskMock);
+      taskMock.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_ASSIGNED)?.[1]();
     });
 
     await waitFor(() => {
@@ -277,7 +319,7 @@ describe('useTaskList Hook', () => {
     );
 
     act(() => {
-      result.current.declineTask(taskMock);
+      taskMock.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_REJECT)?.[1]();
     });
 
     await waitFor(() => {
@@ -411,6 +453,7 @@ describe('useCallControl', () => {
   const mockOnWrapUp = jest.fn();
 
   beforeEach(() => {
+    store.setTaskList([mockCurrentTask]);
     // Mock the MediaStreamTrack and MediaStream classes for the test environment
     global.MediaStreamTrack = jest.fn().mockImplementation(() => ({
       kind: 'audio', // Simulating an audio track
@@ -427,6 +470,84 @@ describe('useCallControl', () => {
   afterEach(() => {
     jest.clearAllMocks();
     logger.error.mockRestore();
+  });
+
+  it('should add event listeners on task object', () => {
+    const setTaskCallbackSpy = jest.spyOn(store, 'setTaskCallback');
+    const removeTaskCallbackSpy = jest.spyOn(store, 'removeTaskCallback');
+    const onSpy = jest.spyOn(mockCurrentTask, 'on');
+    const offSpy = jest.spyOn(mockCurrentTask, 'off');
+
+    const {unmount} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        deviceType: 'BROWSER',
+      })
+    );
+
+    expect(setTaskCallbackSpy).toHaveBeenCalledWith(
+      TASK_EVENTS.TASK_HOLD,
+      expect.any(Function),
+      'someMockInteractionId'
+    );
+    expect(setTaskCallbackSpy).toHaveBeenCalledWith(
+      TASK_EVENTS.TASK_RESUME,
+      expect.any(Function),
+      'someMockInteractionId'
+    );
+    expect(setTaskCallbackSpy).toHaveBeenCalledWith(
+      TASK_EVENTS.TASK_END,
+      expect.any(Function),
+      'someMockInteractionId'
+    );
+    expect(setTaskCallbackSpy).toHaveBeenCalledWith(
+      TASK_EVENTS.AGENT_WRAPPEDUP,
+      expect.any(Function),
+      'someMockInteractionId'
+    );
+
+    expect(onSpy).toHaveBeenCalledTimes(5);
+    expect(onSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_HOLD, expect.any(Function));
+    expect(onSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_RESUME, expect.any(Function));
+    expect(onSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));
+    expect(onSpy).toHaveBeenCalledWith(TASK_EVENTS.AGENT_WRAPPEDUP, expect.any(Function));
+    expect(onSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_MEDIA, expect.any(Function));
+
+    // Unmount the component
+    act(() => {
+      unmount();
+    });
+
+    expect(removeTaskCallbackSpy).toHaveBeenCalledWith(
+      TASK_EVENTS.TASK_HOLD,
+      expect.any(Function),
+      'someMockInteractionId'
+    );
+    expect(removeTaskCallbackSpy).toHaveBeenCalledWith(
+      TASK_EVENTS.TASK_RESUME,
+      expect.any(Function),
+      'someMockInteractionId'
+    );
+    expect(removeTaskCallbackSpy).toHaveBeenCalledWith(
+      TASK_EVENTS.TASK_END,
+      expect.any(Function),
+      'someMockInteractionId'
+    );
+    expect(removeTaskCallbackSpy).toHaveBeenCalledWith(
+      TASK_EVENTS.AGENT_WRAPPEDUP,
+      expect.any(Function),
+      'someMockInteractionId'
+    );
+    expect(offSpy).toHaveBeenCalledTimes(5);
+    expect(offSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_HOLD, expect.any(Function));
+    expect(offSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_RESUME, expect.any(Function));
+    expect(offSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));
+    expect(offSpy).toHaveBeenCalledWith(TASK_EVENTS.AGENT_WRAPPEDUP, expect.any(Function));
+    expect(offSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_MEDIA, expect.any(Function));
   });
 
   it('should not call any call backs if callbacks are not provided', async () => {
@@ -475,6 +596,7 @@ describe('useCallControl', () => {
 
     await act(async () => {
       await result.current.toggleHold(true);
+      mockCurrentTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_HOLD)?.[1]();
     });
 
     expect(mockCurrentTask.hold).toHaveBeenCalled();
@@ -495,6 +617,7 @@ describe('useCallControl', () => {
 
     await act(async () => {
       await result.current.toggleHold(false);
+      mockCurrentTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_RESUME)?.[1]();
     });
 
     expect(mockCurrentTask.resume).toHaveBeenCalled();
@@ -517,6 +640,7 @@ describe('useCallControl', () => {
 
     await act(async () => {
       await result.current.toggleHold(true);
+      mockCurrentTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_HOLD)?.[1]();
     });
 
     expect(mockLogger.error).toHaveBeenCalledWith('Error holding call: Error: Hold error', expect.any(Object));
@@ -538,6 +662,7 @@ describe('useCallControl', () => {
 
     await act(async () => {
       await result.current.toggleHold(false);
+      mockCurrentTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_RESUME)?.[1]();
     });
 
     expect(mockLogger.error).toHaveBeenCalledWith('Error resuming call: Error: Resume error', expect.any(Object));
@@ -557,6 +682,7 @@ describe('useCallControl', () => {
 
     await act(async () => {
       await result.current.endCall();
+      mockCurrentTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_END)?.[1]();
     });
 
     expect(mockCurrentTask.end).toHaveBeenCalled();
@@ -599,6 +725,7 @@ describe('useCallControl', () => {
 
     await act(async () => {
       await result.current.wrapupCall('Wrap reason', '123');
+      mockCurrentTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.AGENT_WRAPPEDUP)?.[1]();
     });
 
     expect(mockCurrentTask.wrapup).toHaveBeenCalledWith({wrapUpReason: 'Wrap reason', auxCodeId: '123'});

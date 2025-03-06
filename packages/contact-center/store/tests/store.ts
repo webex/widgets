@@ -102,6 +102,15 @@ describe('Store', () => {
         );
       }
     });
+
+    it('should throw error if webex and cc object are not present', async () => {
+      try {
+        storeInstance.cc = undefined;
+        await storeInstance.registerCC(undefined);
+      } catch (error) {
+        expect(error.message).toEqual('Webex SDK not initialized');
+      }
+    });
   });
 
   describe('init', () => {
