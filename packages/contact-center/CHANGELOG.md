@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.28](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.27...v1.28.0-ccwidgets.28) (2025-03-06)
+
+
+### Bug Fixes
+
+* **cc-task:** update colors for Task Item ([#406](https://github.com/webex/widgets/issues/406)) ([08cb2aa](https://github.com/webex/widgets/commit/08cb2aaef165de51c907740e6d6e3fd26f5629bd))
+
 # [1.28.0-ccwidgets.27](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.26...v1.28.0-ccwidgets.27) (2025-03-04)
 
 
