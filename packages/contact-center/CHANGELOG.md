@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.29](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.28...v1.28.0-ccwidgets.29) (2025-03-06)
+
+
+### Features
+
+* **cc-widgets:** added new UI for call controls ([#405](https://github.com/webex/widgets/issues/405)) ([e48f48d](https://github.com/webex/widgets/commit/e48f48d85d2318b5bc62c995aad8d0dd6fc8631a))
+
 # [1.28.0-ccwidgets.28](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.27...v1.28.0-ccwidgets.28) (2025-03-06)
 
 
