@@ -1,8 +1,10 @@
-import React, {useEffect, useRef} from 'react';
+import React, {useEffect, useState, useRef, useCallback} from 'react';
 import {StationLoginPresentationalProps} from './station-login.types';
 import './station-login.style.scss';
 import {MULTIPLE_SIGN_IN_ALERT_MESSAGE, MULTIPLE_SIGN_IN_ALERT_TITLE} from './constants';
-import {ButtonPill} from '@momentum-ui/react-collaboration';
+import {ButtonPill, Text, SelectNext, TextInput} from '@momentum-ui/react-collaboration';
+import {Item} from '@react-stately/collections';
+import {Icon} from '@momentum-design/components/dist/react';
 
 const StationLoginPresentational: React.FunctionComponent<StationLoginPresentationalProps> = (props) => {
   const {
@@ -17,135 +19,163 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
     deviceType,
     showMultipleLoginAlert,
     handleContinue,
-  } = props; // TODO: Use the loginSuccess, loginFailure, logoutSuccess props returned fromthe API response via helper file to reflect UI changes
+  } = props;
+
   const modalRef = useRef<HTMLDialogElement>(null);
+  const [dialNumberValue, setDialNumberValue] = useState<string>('');
+  const [agentLoginValue, setAgentLoginValue] = useState<string>('');
+  const [teamsValue, setTeamsValue] = useState<string>('');
+  const [isDialNumberDisabled, setIsDialNumberDisabled] = useState<boolean>(false);
 
   useEffect(() => {
-    const teamsDropdown = document.getElementById('teamsDropdown') as HTMLSelectElement;
-    const agentLogin = document.querySelector('#LoginOption') as HTMLSelectElement;
-    const dialNumber = document.querySelector('#dialNumber') as HTMLInputElement;
-    if (teamsDropdown) {
-      teamsDropdown.innerHTML = '';
-      if (teams) {
-        teams.forEach((team) => {
-          const option = document.createElement('option');
-          option.value = team.id;
-          option.text = team.name;
-          teamsDropdown.add(option);
-        });
-        setTeam(teamsDropdown.value);
-        dialNumber.value = '';
-        dialNumber.disabled = true;
-      }
-    }
     if (loginOptions.length > 0) {
-      loginOptions.forEach((options) => {
-        const option = document.createElement('option');
-        option.text = options;
-        option.value = options;
-        agentLogin.add(option);
-      });
-      if (agentLogin && deviceType) {
-        agentLogin.value = deviceType;
-      }
+      const firstOption = loginOptions[0];
+      setAgentLoginValue('0');
+      setDeviceType(firstOption);
     }
   }, [teams, loginOptions, deviceType]);
 
   useEffect(() => {
-    const modal = modalRef.current;
-    if (showMultipleLoginAlert && modal) {
-      modal.showModal();
+    if (teams.length > 0) {
+      const firstTeam = teams[0].id;
+      setTeamsValue(firstTeam);
+      setTeam(firstTeam);
     }
-  }, [showMultipleLoginAlert, modalRef]);
+  }, [teams, setTeam]);
 
-  const selectLoginOption = (event: {target: {value: string}}) => {
-    const dialNumber = document.querySelector('#dialNumber') as HTMLInputElement;
-    const deviceType = event.target.value;
-    setDeviceType(deviceType);
-    if (deviceType === 'AGENT_DN' || deviceType === 'EXTENSION') {
-      dialNumber.disabled = false;
-    } else {
-      dialNumber.disabled = true;
+  useEffect(() => {
+    if (showMultipleLoginAlert && modalRef.current) {
+      modalRef.current.showModal();
     }
-  };
+  }, [showMultipleLoginAlert]);
 
-  const continueClicked = () => {
-    const modal = modalRef.current;
-    if (modal) {
-      modal.close();
+  const selectLoginOption = useCallback(
+    (key: string) => {
+      const index = parseInt(key, 10);
+      if (!isNaN(index) && loginOptions[index]) {
+        setAgentLoginValue(key);
+        setDeviceType(loginOptions[index]);
+        setIsDialNumberDisabled(!['AGENT_DN', 'EXTENSION'].includes(loginOptions[index]));
+      }
+    },
+    [loginOptions, setDeviceType]
+  );
+
+  const continueClicked = useCallback(() => {
+    if (modalRef.current) {
+      modalRef.current.close();
       handleContinue();
     }
-  };
+  }, [handleContinue]);
 
-  function updateDN() {
-    const dialNumber = document.querySelector('#dialNumber') as HTMLInputElement;
-    setDialNumber(dialNumber.value);
-  }
+  const updateDN = useCallback(
+    (value: string) => {
+      setDialNumberValue(value);
+      setDialNumber(value);
+    },
+    [setDialNumber]
+  );
+
+  const updateTeam = useCallback(
+    (value: string) => {
+      setTeamsValue(value);
+      setTeam(value);
+    },
+    [setTeam]
+  );
 
   return (
     <>
-      {showMultipleLoginAlert && (
-        <dialog ref={modalRef} className="modal">
-          <h2>{MULTIPLE_SIGN_IN_ALERT_TITLE}</h2>
-          <p>{MULTIPLE_SIGN_IN_ALERT_MESSAGE}</p>
-          <div className="modal-content">
-            <button id="ContinueButton" data-testid="ContinueButton" onClick={continueClicked}>
-              Continue
-            </button>
-          </div>
-        </dialog>
-      )}
-      <div className="box">
+      <dialog ref={modalRef} className="modal" open={showMultipleLoginAlert}>
+        <h2>{MULTIPLE_SIGN_IN_ALERT_TITLE}</h2>
+        <p>{MULTIPLE_SIGN_IN_ALERT_MESSAGE}</p>
+        <div className="modal-content">
+          <button id="ContinueButton" data-testid="ContinueButton" onClick={continueClicked}>
+            Continue
+          </button>
+        </div>
+      </dialog>
+      <div className="box station-login">
         <section className="section-box">
           <fieldset className="fieldset">
-            <legend className="legend-box">Agent</legend>
-            <div style={{display: 'flex', flexDirection: 'column', flexGrow: 1}}>
-              <div style={{display: 'flex', gap: '1rem'}}>
-                <fieldset
-                  style={{
-                    border: '1px solid #ccc',
-                    borderRadius: '5px',
-                    padding: '10px',
-                    marginBottom: '20px',
-                    flex: 0.69,
-                  }}
-                >
-                  <legend className="legend-box">Select Team</legend>
-                  <select id="teamsDropdown" className="select">
-                    Teams
-                  </select>
-                </fieldset>
-                <fieldset className="fieldset">
-                  <legend className="legend-box">Agent Login</legend>
-                  <select name="LoginOption" id="LoginOption" className="select" onChange={selectLoginOption}>
-                    <option value="" hidden>
-                      Choose Agent Login Option...
-                    </option>
-                  </select>
-                  <input
-                    className="input"
-                    id="dialNumber"
-                    name="dialNumber"
-                    placeholder="Extension/Dial Number"
-                    type="text"
-                    onInput={updateDN}
-                  />
-                  {isAgentLoggedIn ? (
-                    <ButtonPill id="logoutAgent" onPress={logout} color="cancel">
-                      Logout
-                    </ButtonPill>
-                  ) : (
-                    <ButtonPill id="AgentLogin" onPress={login} color="join">
-                      Login
-                    </ButtonPill>
-                  )}
-                </fieldset>
-              </div>
+            <Text tagName={'span'} type="heading-small-bold">
+              Set your interaction preferences
+            </Text>
+          </fieldset>
+          <fieldset className="fieldset">
+            <legend id="agent-login-label">Handle calls using</legend>
+            <div className="select-container">
+              <SelectNext
+                id="login-option"
+                direction="bottom"
+                showBorder
+                aria-labelledby="agent-login-label"
+                items={loginOptions.map((name, id) => ({key: id.toString(), name}))}
+                selectedKey={agentLoginValue}
+                onSelectionChange={selectLoginOption}
+                className="station-login-select"
+              >
+                {(item) => (
+                  <Item textValue={item.name} key={item.key}>
+                    <Text className="state-name" tagName={'small'}>
+                      {item.name}
+                    </Text>
+                  </Item>
+                )}
+              </SelectNext>
+              <Icon className="select-arrow-icon" name="arrow-down-bold" title="" />
             </div>
           </fieldset>
+          <fieldset className="fieldset">
+            <legend id="dial-number-label">Dial number</legend>
+            <TextInput
+              clearAriaLabel="Clear"
+              aria-labelledby="dial-number-label"
+              placeholder="Extension/Dial Number"
+              onChange={updateDN}
+              value={dialNumberValue}
+              isDisabled={isDialNumberDisabled}
+            />
+          </fieldset>
+          <fieldset className="fieldset">
+            <legend id="team-label">Your team</legend>
+            <div className="select-container">
+              <SelectNext
+                id="teams-dropdown"
+                direction="bottom"
+                showBorder
+                aria-labelledby="team-label"
+                items={teams}
+                selectedKey={teamsValue}
+                onSelectionChange={updateTeam}
+                className="station-login-select"
+              >
+                {(item) => (
+                  <Item textValue={item.name} key={item.id}>
+                    <Text className="state-name" tagName={'small'}>
+                      {item.name}
+                    </Text>
+                  </Item>
+                )}
+              </SelectNext>
+              <Icon className="select-arrow-icon" name="arrow-down-bold" title="" />
+            </div>
+          </fieldset>
+          <div className="btn-container">
+            {isAgentLoggedIn ? (
+              <ButtonPill id="logoutAgent" onPress={logout} color="cancel">
+                Logout
+              </ButtonPill>
+            ) : (
+              <ButtonPill id="AgentLogin" onPress={login} color="join">
+                Save & Continue
+              </ButtonPill>
+            )}
+          </div>
         </section>
       </div>
     </>
   );
 };
+
 export default StationLoginPresentational;
