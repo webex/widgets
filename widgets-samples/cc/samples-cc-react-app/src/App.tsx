@@ -229,7 +229,7 @@ function App() {
                         </section>
                       </div>
                     )}
-                    {selectedWidgets.callControl && (
+                    {selectedWidgets.callControl && store.currentTask && (
                       <div className="box">
                         <section className="section-box">
                           <fieldset className="fieldset">

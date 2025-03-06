@@ -80,8 +80,7 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
   return (
     <>
       <audio ref={audioRef} id="remote-audio" autoPlay></audio>
-
-      <div className="call-control-container">
+      <div className="call-control-container" data-testid="call-control-container">
         {!wrapupRequired && (
           <div className="button-group">
             {buttons.map((button, index) => (
@@ -151,10 +150,10 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
               </div>
               <ButtonPill
                 className="submit-wrapup-button"
-                onPress={() => wrapupCall(selectedWrapupReason, selectedWrapupId)}
+                onPress={handleWrapupCall}
                 disabled={selectedWrapupId && selectedWrapupReason ? false : true}
               >
-                submit & Wrapup
+                Submit & Wrapup
               </ButtonPill>
             </PopoverNext>
           </div>
