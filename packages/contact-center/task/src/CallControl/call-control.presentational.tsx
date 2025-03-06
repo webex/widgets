@@ -153,7 +153,7 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
                 onPress={handleWrapupCall}
                 disabled={selectedWrapupId && selectedWrapupReason ? false : true}
               >
-                Submit & Wrapup
+                Submit & Wrap up
               </ButtonPill>
             </PopoverNext>
           </div>
