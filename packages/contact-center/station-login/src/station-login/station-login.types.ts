@@ -85,11 +85,6 @@ export interface IStationLoginProps {
   logger: ILogger;
 
   /**
-   * Handler to relogin the agent
-   */
-  relogin: () => void;
-
-  /**
    * Handler to relogin the agent when the agent is already logged in
    */
   handleContinue: () => void;
@@ -106,7 +101,6 @@ export type StationLoginPresentationalProps = Pick<
   | 'loginOptions'
   | 'login'
   | 'logout'
-  | 'relogin'
   | 'loginSuccess'
   | 'loginFailure'
   | 'logoutSuccess'
@@ -116,9 +110,8 @@ export type StationLoginPresentationalProps = Pick<
   | 'isAgentLoggedIn'
   | 'handleContinue'
   | 'deviceType'
-> & {
-  showMultipleLoginAlert: boolean;
-};
+  | 'showMultipleLoginAlert'
+>;
 
 export type UseStationLoginProps = Pick<IStationLoginProps, 'cc' | 'onLogin' | 'onLogout' | 'logger' | 'deviceType'>;
 

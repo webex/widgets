@@ -48,7 +48,7 @@ interface IStore {
   showMultipleLoginAlert: boolean;
   currentTheme: string;
   customState: ICustomState;
-  init(params: InitParams, callback: (ccSDK: IContactCenter) => () => void): Promise<void>;
+  init(params: InitParams, callback: (ccSDK: IContactCenter) => void): Promise<void>;
   registerCC(webex?: WithWebex['webex']): Promise<void>;
 }
 
@@ -89,13 +89,21 @@ enum TASK_EVENTS {
   TASK_WRAPUP = 'task:wrapup',
   TASK_REJECT = 'task:rejected',
   TASK_HYDRATE = 'task:hydrate',
+  AGENT_CONTACT_ASSIGNED = 'AgentContactAssigned',
+  CONTACT_RECORDING_PAUSED = 'ContactRecordingPaused',
+  CONTACT_RECORDING_RESUMED = 'ContactRecordingResumed',
+  AGENT_WRAPPEDUP = 'AgentWrappedUp',
 } // TODO: remove this once cc sdk exports this enum
 
 // Events that are received on the contact center SDK
 // TODO: Export & Import these constants from SDK
 enum CC_EVENTS {
+  AGENT_DN_REGISTERED = 'AgentDNRegistered',
+  AGENT_LOGOUT_SUCCESS = 'AgentLogoutSuccess',
+  AGENT_STATION_LOGIN_SUCCESS = 'AgentStationLoginSuccess',
   AGENT_MULTI_LOGIN = 'agent:multiLogin',
   AGENT_STATE_CHANGE = 'agent:stateChange',
+  AGENT_RELOGIN_SUCCESS = 'AgentReloginSuccess',
 }
 
 interface ICustomStateSet {

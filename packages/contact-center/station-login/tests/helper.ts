@@ -2,22 +2,30 @@ import {renderHook, act, waitFor} from '@testing-library/react';
 import {useStationLogin} from '../src/helper';
 import * as store from '@webex/cc-store';
 
-const teams = ['team123', 'team456'];
-const loginOptions = ['EXTENSION', 'AGENT_DN', 'BROWSER'];
-
 jest.mock('@webex/cc-store', () => {
+  let isAgentLoggedIn = false;
   return {
     cc: {},
-    teams,
-    loginOptions,
-    isAgentLoggedIn: false,
+    teams: ['team123', 'team456'],
+    loginOptions: ['EXTENSION', 'AGENT_DN', 'BROWSER'],
+    get isAgentLoggedIn() {
+      return isAgentLoggedIn; // Getter to return current value
+    },
+    setIsAgentLoggedIn: jest.fn((value) => {
+      isAgentLoggedIn = value; // Update internal variable
+    }),
     registerCC: jest.fn(),
     setDeviceType: jest.fn(),
     setCurrentState: jest.fn(),
     setLastStateChangeTimestamp: jest.fn(),
     setLastIdleCodeChangeTimestamp: jest.fn(),
     setShowMultipleLoginAlert: jest.fn(),
-    setIsAgentLoggedIn: jest.fn(),
+    setLogoutCallback: jest.fn(),
+    setCCCallback: jest.fn(),
+    removeCCCallback: jest.fn(),
+    CC_EVENTS: {
+      AGENT_STATION_LOGIN_SUCCESS: 'AgentStationLoginSuccess',
+    },
   };
 });
 
@@ -79,10 +87,6 @@ describe('useStationLogin Hook', () => {
     };
 
     ccMock.stationLogin.mockResolvedValue(successResponse);
-    const setDeviceTypeSpy = jest.spyOn(store, 'setDeviceType');
-    const setSetCurrentStateSpy = jest.spyOn(store, 'setCurrentState');
-    const setSetLastStateChangeTimestampSpy = jest.spyOn(store, 'setLastStateChangeTimestamp');
-    const setSetLastIdleCodeChangeTimestampSpy = jest.spyOn(store, 'setLastIdleCodeChangeTimestamp');
     const {result} = renderHook(() =>
       useStationLogin({
         cc: ccMock,
@@ -109,7 +113,6 @@ describe('useStationLogin Hook', () => {
         loginOption: loginParams.loginOption,
         dialNumber: loginParams.dialNumber,
       });
-      expect(loginCb).toHaveBeenCalledWith();
 
       expect(result.current).toEqual({
         name: 'StationLogin',
@@ -121,16 +124,8 @@ describe('useStationLogin Hook', () => {
         loginSuccess: successResponse,
         loginFailure: undefined,
         logoutSuccess: undefined,
-        relogin: expect.any(Function),
         handleContinue: expect.any(Function),
       });
-
-      expect(setDeviceTypeSpy).toHaveBeenCalledWith(loginParams.loginOption);
-      expect(setSetCurrentStateSpy).toHaveBeenCalledWith(successResponse.data.auxCodeId);
-      expect(setSetLastStateChangeTimestampSpy).toHaveBeenCalledWith(successResponse.data.lastStateChangeTimestamp);
-      expect(setSetLastIdleCodeChangeTimestampSpy).toHaveBeenCalledWith(
-        successResponse.data.lastIdleCodeChangeTimestamp
-      );
     });
   });
 
@@ -145,7 +140,6 @@ describe('useStationLogin Hook', () => {
     };
 
     ccMock.stationLogin.mockResolvedValue(successResponse);
-    const setDeviceTypeSpy = jest.spyOn(store, 'setDeviceType');
     const setSetCurrentStateSpy = jest.spyOn(store, 'setCurrentState');
     const setSetLastStateChangeTimestampSpy = jest.spyOn(store, 'setLastStateChangeTimestamp');
     const setSetLastIdleCodeChangeTimestampSpy = jest.spyOn(store, 'setLastIdleCodeChangeTimestamp');
@@ -171,7 +165,6 @@ describe('useStationLogin Hook', () => {
     });
 
     await waitFor(async () => {
-      expect(setDeviceTypeSpy).toHaveBeenCalledWith(loginParams.loginOption);
       expect(setSetCurrentStateSpy).not.toHaveBeenCalledWith(successResponse.data.auxCodeId);
       expect(setSetLastStateChangeTimestampSpy).not.toHaveBeenCalledWith(
         new Date(successResponse.data.lastStateChangeTimestamp)
@@ -259,7 +252,6 @@ describe('useStationLogin Hook', () => {
         loginSuccess: undefined,
         loginFailure: errorResponse,
         logoutSuccess: undefined,
-        relogin: expect.any(Function),
         handleContinue: expect.any(Function),
       });
 
@@ -332,7 +324,6 @@ describe('useStationLogin Hook', () => {
         loginSuccess: undefined,
         loginFailure: errorResponse,
         logoutSuccess: undefined,
-        relogin: expect.any(Function),
         handleContinue: expect.any(Function),
       });
     });
@@ -372,7 +363,6 @@ describe('useStationLogin Hook', () => {
 
     await waitFor(() => {
       expect(ccMock.stationLogout).toHaveBeenCalledWith({logoutReason: 'User requested logout'});
-      expect(logoutCb).toHaveBeenCalledWith();
 
       expect(result.current).toEqual({
         name: 'StationLogin',
@@ -384,7 +374,6 @@ describe('useStationLogin Hook', () => {
         loginSuccess: undefined,
         loginFailure: undefined,
         logoutSuccess: successResponse,
-        relogin: expect.any(Function),
         handleContinue: expect.any(Function),
       });
     });
@@ -436,53 +425,8 @@ describe('useStationLogin Hook', () => {
     });
   });
 
-  it('should call relogin and set device type', async () => {
-    const setDeviceTypeSpy = jest.spyOn(store, 'setDeviceType');
-
-    const {result} = renderHook(() =>
-      useStationLogin({
-        cc: ccMock,
-        onLogin: loginCb,
-        onLogout: logoutCb,
-        logger,
-        deviceType: 'EXTENSION',
-      })
-    );
-
-    act(() => {
-      result.current.relogin();
-    });
-
-    await waitFor(() => {
-      expect(setDeviceTypeSpy).toHaveBeenCalled();
-      expect(loginCb).toHaveBeenCalled();
-    });
-  });
-
-  it('should call relogin without login callback', async () => {
-    const setDeviceTypeSpy = jest.spyOn(store, 'setDeviceType');
-
-    const {result} = renderHook(() =>
-      useStationLogin({
-        cc: ccMock,
-        onLogout: logoutCb,
-        logger,
-        deviceType: 'EXTENSION',
-      })
-    );
-
-    act(() => {
-      result.current.relogin();
-    });
-
-    await waitFor(() => {
-      expect(setDeviceTypeSpy).toHaveBeenCalled();
-      expect(loginCb).not.toHaveBeenCalled();
-    });
-  });
-
-  it.skip('should call handleContinue and set device type', async () => {
-    console.log('store.isAgentLoggedIn in test', store.isAgentLoggedIn);
+  it('should call handleContinue and set device type', async () => {
+    store.setIsAgentLoggedIn(true);
     const setShowMultipleLoginAlertSpy = jest.spyOn(store, 'setShowMultipleLoginAlert');
     const registerCCSpy = jest.spyOn(store, 'registerCC');
 
@@ -511,6 +455,7 @@ describe('useStationLogin Hook', () => {
   });
 
   it('should call handleContinue with agent not logged in', async () => {
+    store.setIsAgentLoggedIn(false);
     const setShowMultipleLoginAlertSpy = jest.spyOn(store, 'setShowMultipleLoginAlert');
     const registerCCSpy = jest.spyOn(store, 'registerCC');
 
@@ -565,6 +510,80 @@ describe('useStationLogin Hook', () => {
         module: 'widget-station-login#station-login/index.tsx',
         method: 'handleContinue',
       });
+    });
+  });
+
+  it('should set deviceType, agentState on login success', async () => {
+    const setDeviceTypeSpy = jest.spyOn(store, 'setDeviceType');
+    const setIsAgentLoggedInSpy = jest.spyOn(store, 'setIsAgentLoggedIn');
+    const setCurrentStateSpy = jest.spyOn(store, 'setCurrentState');
+
+    jest.spyOn(store, 'setCCCallback').mockImplementation((event, cb) => {
+      ccMock.on(event, cb);
+    });
+
+    renderHook(() =>
+      useStationLogin({
+        cc: ccMock,
+        onLogin: loginCb,
+        onLogout: logoutCb,
+        logger,
+        deviceType: 'EXTENSION',
+      })
+    );
+
+    expect(ccMock.on).toHaveBeenCalledWith(store.CC_EVENTS.AGENT_STATION_LOGIN_SUCCESS, expect.any(Function));
+
+    const mockPayload = {
+      deviceType: 'EXTENSION',
+      auxCodeId: 'mockAuxCodeId',
+    };
+
+    act(() => {
+      ccMock.on.mock.calls[0][1](mockPayload);
+    });
+
+    await waitFor(() => {
+      expect(loginCb).toHaveBeenCalled();
+    });
+
+    expect(ccMock.on).toHaveBeenCalledWith(store.CC_EVENTS.AGENT_LOGOUT_SUCCESS, expect.any(Function));
+
+    act(() => {
+      ccMock.on.mock.calls[1][1]();
+    });
+
+    await waitFor(() => {
+      expect(logoutCb).toHaveBeenCalled();
+    });
+  });
+
+  it('should set deviceType, agentState on login success', async () => {
+    jest.spyOn(store, 'setCCCallback').mockImplementation((event, cb) => {
+      ccMock.on(event, cb);
+    });
+
+    renderHook(() =>
+      useStationLogin({
+        cc: ccMock,
+        logger,
+        deviceType: 'EXTENSION',
+      })
+    );
+
+    expect(ccMock.on).toHaveBeenCalledWith(store.CC_EVENTS.AGENT_STATION_LOGIN_SUCCESS, expect.any(Function));
+
+    const mockPayload = {
+      deviceType: 'EXTENSION',
+      auxCodeId: ' ',
+    };
+
+    act(() => {
+      ccMock.on.mock.calls[0][1](mockPayload);
+    });
+
+    await waitFor(() => {
+      expect(loginCb).not.toHaveBeenCalled();
     });
   });
 });

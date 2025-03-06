@@ -1,5 +1,5 @@
 import React from 'react';
-import {queryByTestId, render, screen} from '@testing-library/react';
+import {render, screen} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import CallControlPresentational from '../../src/CallControl/call-control.presentational';
 
@@ -48,6 +48,7 @@ describe('CallControlPresentational', () => {
     wrapupCall: mockWrapupCall,
     wrapupCodes: mockWrapupCodes,
     wrapupRequired: false,
+    setIsHeld: jest.fn(),
   };
 
   beforeEach(() => {

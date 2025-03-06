@@ -7,12 +7,22 @@ import {Item} from '@react-stately/collections';
 import {Icon} from '@momentum-design/components/dist/react';
 
 function CallControlPresentational(props: CallControlPresentationalProps) {
-  const [isHeld, setIsHeld] = useState(false);
   const [isRecording, setIsRecording] = useState(true);
   const [selectedWrapupReason, setSelectedWrapupReason] = useState<string | null>(null);
   const [selectedWrapupId, setSelectedWrapupId] = useState<string | null>(null);
 
-  const {currentTask, audioRef, toggleHold, toggleRecording, endCall, wrapupCall, wrapupCodes, wrapupRequired} = props;
+  const {
+    currentTask,
+    audioRef,
+    toggleHold,
+    toggleRecording,
+    endCall,
+    wrapupCall,
+    wrapupCodes,
+    wrapupRequired,
+    isHeld,
+    setIsHeld,
+  } = props;
 
   useEffect(() => {
     if (!currentTask || !currentTask.data || !currentTask.data.interaction) return;
