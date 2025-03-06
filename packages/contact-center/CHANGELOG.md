@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.30](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.29...v1.28.0-ccwidgets.30) (2025-03-06)
+
+
+### Bug Fixes
+
+* **cc-store:** sync-callbacks ([#407](https://github.com/webex/widgets/issues/407)) ([b5f729c](https://github.com/webex/widgets/commit/b5f729cf6f6726afb2cb9603d402c3ea28ce9538))
+
 # [1.28.0-ccwidgets.29](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.28...v1.28.0-ccwidgets.29) (2025-03-06)
 
 
