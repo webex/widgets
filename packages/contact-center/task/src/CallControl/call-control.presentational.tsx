@@ -57,18 +57,21 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
       onClick: () => handletoggleHold(),
       tooltip: isHeld ? 'Resume the call' : 'Hold the call',
       className: 'call-control-button',
+      disabled: false,
     },
     {
       icon: isRecording ? 'record-paused-bold' : 'record-bold',
       onClick: () => handletoggleRecording(),
       tooltip: isRecording ? 'Pause Recording' : 'Resume Recording',
       className: 'call-control-button',
+      disabled: false,
     },
     {
       icon: 'cancel-regular',
       onClick: endCall,
       tooltip: 'End call',
       className: 'call-control-button-cancel',
+      disabled: isHeld,
     },
   ];
 
@@ -88,7 +91,7 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
                 delay={[0, 0]}
                 placement="bottom-start"
                 triggerComponent={
-                  <ButtonCircle className={button.className} onPress={button.onClick}>
+                  <ButtonCircle className={button.className} onPress={button.onClick} disabled={button.disabled}>
                     <Icon className={button.className + '-icon'} name={button.icon} />
                   </ButtonCircle>
                 }
@@ -110,7 +113,7 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
               showArrow
               trigger="click"
               triggerComponent={
-                <ButtonPill onPress={handleWrapupCall} className="wrapup-button">
+                <ButtonPill className="wrapup-button">
                   Wrap up
                   <Icon name="arrow-down-bold" />
                 </ButtonPill>
