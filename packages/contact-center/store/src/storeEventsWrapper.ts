@@ -17,7 +17,6 @@ import {runInAction} from 'mobx';
 class StoreWrapper implements IStoreWrapper {
   store: IStore;
   onTaskRejected?: (reason: string) => void;
-  onLogoutCallback?: () => void;
 
   constructor() {
     this.store = Store.getInstance();
@@ -171,10 +170,6 @@ class StoreWrapper implements IStoreWrapper {
 
   setTaskRejected = (callback: ((reason: string) => void) | undefined): void => {
     this.onTaskRejected = callback;
-  };
-
-  setLogoutCallback = (callback: (() => void) | undefined): void => {
-    this.onLogoutCallback = callback;
   };
 
   setCCCallback = (event: CC_EVENTS | TASK_EVENTS, callback) => {
@@ -368,7 +363,6 @@ class StoreWrapper implements IStoreWrapper {
     let listenersAdded = false;
 
     const handleLogOut = () => {
-      if (this.onLogoutCallback) this.onLogoutCallback();
       this.cleanUpStore();
       removeEventListeners();
       listenersAdded = false;
