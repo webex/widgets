@@ -123,12 +123,24 @@ function loginSuccess() {
   }
   if (callControlCheckbox.checked) {
     ccCallControl.classList.remove('disabled');
-    widgetsContainer.appendChild(ccCallControl);
+
+    const callControlContainer = document.createElement('div');
+    callControlContainer.className = 'box';
+    callControlContainer.innerHTML = `
+      <section class="section-box">
+        <fieldset class="fieldset">
+          <legend class="legend-box">Call Control</legend>
+        </fieldset>
+      </section>
+    `;
+
+    callControlContainer.querySelector('fieldset').appendChild(ccCallControl);
+    widgetsContainer.appendChild(callControlContainer);
   }
 }
 
 function logoutSuccess() {
-  console.log('Agent logout has been succesful');
+  console.log('Agent logout has been successful');
   ccUserState.classList.add('disabled');
   ccIncomingTask.classList.add('disabled');
   ccTaskList.classList.add('disabled');
