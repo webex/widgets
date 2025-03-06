@@ -31,7 +31,7 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
   useEffect(() => {
     if (loginOptions.length > 0) {
       const firstOption = loginOptions[0];
-      setAgentLoginValue('0'); // Assuming keys are index-based
+      setAgentLoginValue('0');
       setDeviceType(firstOption);
     }
   }, [loginOptions, setDeviceType]);
