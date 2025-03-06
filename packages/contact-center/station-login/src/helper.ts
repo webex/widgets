@@ -1,7 +1,8 @@
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import {StationLoginSuccess, StationLogoutSuccess} from '@webex/plugin-cc';
 import {UseStationLoginProps} from './station-login/station-login.types';
-import store from '@webex/cc-store'; // we need to import as we are losing the context of this in store
+import store, {CC_EVENTS} from '@webex/cc-store'; // we need to import as we are losing the context of this in store
+import {runInAction} from 'mobx';
 
 export const useStationLogin = (props: UseStationLoginProps) => {
   const cc = props.cc;
@@ -14,6 +15,33 @@ export const useStationLogin = (props: UseStationLoginProps) => {
   const [loginSuccess, setLoginSuccess] = useState<StationLoginSuccess>();
   const [loginFailure, setLoginFailure] = useState<Error>();
   const [logoutSuccess, setLogoutSuccess] = useState<StationLogoutSuccess>();
+
+  useEffect(() => {
+    if (loginCb && store.isAgentLoggedIn) {
+      loginCb();
+    }
+  }, []);
+
+  // Make sure to set the callback are same and change the logout  logic
+  useEffect(() => {
+    if (logoutCb) store.setLogoutCallback(logoutCb);
+
+    store.setCCCallback(CC_EVENTS.AGENT_STATION_LOGIN_SUCCESS, (payload) => {
+      runInAction(() => {
+        store.setDeviceType(payload.deviceType);
+        store.setIsAgentLoggedIn(true);
+        store.setCurrentState(payload.auxCodeId?.trim() !== '' ? payload.auxCodeId : '0');
+      });
+      setDialNumber(payload.dn);
+      if (loginCb) {
+        loginCb();
+      }
+    });
+
+    return () => {
+      store.removeCCCallback(CC_EVENTS.AGENT_STATION_LOGIN_SUCCESS);
+    };
+  }, [store.isAgentLoggedIn]);
 
   const handleContinue = async () => {
     try {
@@ -42,17 +70,11 @@ export const useStationLogin = (props: UseStationLoginProps) => {
     cc.stationLogin({teamId: team, loginOption: deviceType, dialNumber: dialNumber})
       .then((res: StationLoginSuccess) => {
         setLoginSuccess(res);
-        store.setDeviceType(deviceType);
-        store.setIsAgentLoggedIn(true);
         if (res.data.auxCodeId) {
           store.setCurrentState(res.data.auxCodeId);
         }
         store.setLastStateChangeTimestamp(res.data.lastStateChangeTimestamp);
         store.setLastIdleCodeChangeTimestamp(res.data.lastIdleCodeChangeTimestamp);
-
-        if (loginCb) {
-          loginCb();
-        }
       })
       .catch((error: Error) => {
         logger.error(`Error logging in: ${error}`, {
@@ -67,11 +89,6 @@ export const useStationLogin = (props: UseStationLoginProps) => {
     cc.stationLogout({logoutReason: 'User requested logout'})
       .then((res: StationLogoutSuccess) => {
         setLogoutSuccess(res);
-        store.setIsAgentLoggedIn(false);
-        store.setDeviceType('');
-        if (logoutCb) {
-          logoutCb();
-        }
       })
       .catch((error: Error) => {
         logger.error(`Error logging out: ${error}`, {
@@ -81,13 +98,6 @@ export const useStationLogin = (props: UseStationLoginProps) => {
       });
   };
 
-  function relogin() {
-    store.setDeviceType(deviceType);
-    if (loginCb) {
-      loginCb();
-    }
-  }
-
   return {
     name: 'StationLogin',
     setDeviceType,
@@ -95,7 +105,6 @@ export const useStationLogin = (props: UseStationLoginProps) => {
     setTeam,
     login,
     logout,
-    relogin,
     loginSuccess,
     loginFailure,
     logoutSuccess,

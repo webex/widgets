@@ -24,6 +24,7 @@ function App() {
   const [showRejectedPopup, setShowRejectedPopup] = useState(false);
   const [rejectedReason, setRejectedReason] = useState('');
   const [selectedState, setSelectedState] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const webexConfig = {
     fedramp: false,
@@ -36,10 +37,12 @@ function App() {
   };
 
   const onLogin = () => {
+    setIsLoggedIn(true);
     console.log('Agent login has been succesful');
   };
 
   const onLogout = () => {
+    setIsLoggedIn(false);
     console.log('Agent logout has been succesful');
   };
 
@@ -51,12 +54,12 @@ function App() {
     console.log('onDeclined invoked');
   };
 
-  const onTaskAccepted = () => {
-    console.log('onTaskAccepted invoked');
+  const onTaskAccepted = (task) => {
+    console.log('onTaskAccepted invoked for task:', task);
   };
 
-  const onTaskDeclined = () => {
-    console.log('onTaskDeclined invoked');
+  const onTaskDeclined = (task) => {
+    console.log('onTaskDeclined invoked for task:', task);
   };
 
   const onHoldResume = () => {
@@ -67,7 +70,7 @@ function App() {
     console.log('onEnd invoked');
   };
 
-  const onWrapup = () => {
+  const onWrapUp = () => {
     console.log('onWrapup invoked');
   };
 
@@ -217,7 +220,7 @@ function App() {
                 <div className="station-login">
                   {selectedWidgets.stationLogin && <StationLogin onLogin={onLogin} onLogout={onLogout} />}
                 </div>
-                {store.isAgentLoggedIn && (
+                {store.isAgentLoggedIn && isLoggedIn && (
                   <>
                     {selectedWidgets.userState && (
                       <div className="box">
@@ -234,7 +237,7 @@ function App() {
                       <TaskList onTaskAccepted={onTaskAccepted} onTaskDeclined={onTaskDeclined} />
                     )}
                     {selectedWidgets.callControl && (
-                      <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapup={onWrapup} />
+                      <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapUp={onWrapUp} />
                     )}
                   </>
                 )}

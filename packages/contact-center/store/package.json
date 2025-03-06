@@ -23,7 +23,7 @@
   "dependencies": {
     "mobx": "6.13.5",
     "typescript": "5.6.3",
-    "webex": "3.7.0-wxcc.17"
+    "webex": "3.7.0-wxcc.18"
   },
   "devDependencies": {
     "@babel/core": "7.25.2",
