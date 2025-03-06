@@ -1,9 +1,10 @@
-import React, {useEffect, useState, useRef} from 'react';
+import React, {useEffect, useState, useRef, useCallback} from 'react';
 import {StationLoginPresentationalProps} from './station-login.types';
 import './station-login.style.scss';
 import {MULTIPLE_SIGN_IN_ALERT_MESSAGE, MULTIPLE_SIGN_IN_ALERT_TITLE} from './constants';
 import {ButtonPill, Text, SelectNext, TextInput} from '@momentum-ui/react-collaboration';
 import {Item} from '@react-stately/collections';
+import {Icon} from '@momentum-design/components/dist/react';
 
 const StationLoginPresentational: React.FunctionComponent<StationLoginPresentationalProps> = (props) => {
   const {
@@ -19,7 +20,8 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
     deviceType,
     showMultipleLoginAlert,
     handleContinue,
-  } = props; // TODO: Use the loginSuccess, loginFailure, logoutSuccess props returned fromthe API response via helper file to reflect UI changes
+  } = props;
+
   const modalRef = useRef<HTMLDialogElement>(null);
   const [dialNumberValue, setDialNumberValue] = useState<string>('');
   const [agentLoginValue, setAgentLoginValue] = useState<string>('');
@@ -27,80 +29,80 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
   const [isDialNumberDisabled, setIsDialNumberDisabled] = useState<boolean>(false);
 
   useEffect(() => {
-    const teamsDropdown = document.querySelector('#teams-dropdown') as HTMLElement;
-    const agentLogin = document.querySelector('#login-option') as HTMLElement;
-    if (teamsDropdown) {
-      if (teams) {
-        setTeam(teamsValue);
-        setDialNumberValue('');
-        setIsDialNumberDisabled(true);
-      }
-    }
     if (loginOptions.length > 0) {
-      if (agentLogin && deviceType) {
-        setAgentLoginValue(deviceType);
-      }
+      const firstOption = loginOptions[0];
+      setAgentLoginValue('0'); // Assuming keys are index-based
+      setDeviceType(firstOption);
     }
-  }, [teams, loginOptions]);
+  }, [loginOptions, setDeviceType]);
 
   useEffect(() => {
-    const modal = modalRef.current;
-    if (showMultipleLoginAlert && modal) {
-      modal.showModal();
+    if (teams.length > 0) {
+      const firstTeam = teams[0].id;
+      setTeamsValue(firstTeam);
+      setTeam(firstTeam);
     }
-  }, [showMultipleLoginAlert, modalRef]);
+  }, [teams, setTeam]);
 
   useEffect(() => {
-    if (!isAgentLoggedIn) return;
-    const agentLogin = document.querySelector('#LoginOption') as HTMLElement;
-    if (agentLogin && !agentLoginValue) {
-      setDeviceType(deviceType);
-      setAgentLoginValue(loginOptions.indexOf(deviceType).toString());
-      relogin();
+    if (showMultipleLoginAlert && modalRef.current) {
+      modalRef.current.showModal();
     }
-  }, [isAgentLoggedIn]);
+  }, [showMultipleLoginAlert]);
 
-  const selectLoginOption = (key: string) => {
-    setAgentLoginValue(key);
-    const deviceType = loginOptions[key];
+  useEffect(() => {
+    if (!isAgentLoggedIn || !deviceType) return;
     setDeviceType(deviceType);
-    if (deviceType === 'AGENT_DN' || deviceType === 'EXTENSION') {
-      setIsDialNumberDisabled(false);
-    } else {
-      setIsDialNumberDisabled(true);
-    }
-  };
+    setAgentLoginValue(loginOptions.indexOf(deviceType).toString());
+    relogin();
+  }, [isAgentLoggedIn, deviceType, loginOptions, setDeviceType, relogin]);
 
-  const continueClicked = () => {
-    const modal = modalRef.current;
-    if (modal) {
-      modal.close();
+  const selectLoginOption = useCallback(
+    (key: string) => {
+      const index = parseInt(key, 10);
+      if (!isNaN(index) && loginOptions[index]) {
+        setAgentLoginValue(key);
+        setDeviceType(loginOptions[index]);
+        setIsDialNumberDisabled(!['AGENT_DN', 'EXTENSION'].includes(loginOptions[index]));
+      }
+    },
+    [loginOptions, setDeviceType]
+  );
+
+  const continueClicked = useCallback(() => {
+    if (modalRef.current) {
+      modalRef.current.close();
       handleContinue();
     }
-  };
+  }, [handleContinue]);
 
-  function updateDN(value: string) {
-    setDialNumberValue(value);
-    setDialNumber(dialNumberValue);
-  }
+  const updateDN = useCallback(
+    (value: string) => {
+      setDialNumberValue(value);
+      setDialNumber(value);
+    },
+    [setDialNumber]
+  );
 
-  function updateTeam(value: string) {
-    setTeamsValue(value);
-  }
+  const updateTeam = useCallback(
+    (value: string) => {
+      setTeamsValue(value);
+      setTeam(value);
+    },
+    [setTeam]
+  );
 
   return (
     <>
-      {showMultipleLoginAlert && (
-        <dialog ref={modalRef} className="modal">
-          <h2>{MULTIPLE_SIGN_IN_ALERT_TITLE}</h2>
-          <p>{MULTIPLE_SIGN_IN_ALERT_MESSAGE}</p>
-          <div className="modal-content">
-            <button id="ContinueButton" data-testid="ContinueButton" onClick={continueClicked}>
-              Continue
-            </button>
-          </div>
-        </dialog>
-      )}
+      <dialog ref={modalRef} className="modal" open={showMultipleLoginAlert}>
+        <h2>{MULTIPLE_SIGN_IN_ALERT_TITLE}</h2>
+        <p>{MULTIPLE_SIGN_IN_ALERT_MESSAGE}</p>
+        <div className="modal-content">
+          <button id="ContinueButton" data-testid="ContinueButton" onClick={continueClicked}>
+            Continue
+          </button>
+        </div>
+      </dialog>
       <div className="box station-login">
         <section className="section-box">
           <fieldset className="fieldset">
@@ -109,38 +111,31 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
             </Text>
           </fieldset>
           <fieldset className="fieldset">
-            <Text id="agent-login-label" tagName="span" type="body-large-regular">
-              Handle calls using
-            </Text>
-            <SelectNext
-              id="login-option"
-              direction="bottom"
-              showBorder
-              aria-labelledby="agent-login-label"
-              items={loginOptions.map((name, id) => {
-                return {
-                  key: id,
-                  name: name,
-                };
-              })}
-              selectedKey={agentLoginValue}
-              onSelectionChange={selectLoginOption}
-            >
-              {(item) => {
-                return (
+            <legend id="agent-login-label">Handle calls using</legend>
+            <div className="select-container">
+              <SelectNext
+                id="login-option"
+                direction="bottom"
+                showBorder
+                aria-labelledby="agent-login-label"
+                items={loginOptions.map((name, id) => ({key: id.toString(), name}))}
+                selectedKey={agentLoginValue}
+                onSelectionChange={selectLoginOption}
+                className="station-login-select"
+              >
+                {(item) => (
                   <Item textValue={item.name} key={item.key}>
                     <Text className="state-name" tagName={'small'}>
                       {item.name}
                     </Text>
                   </Item>
-                );
-              }}
-            </SelectNext>
+                )}
+              </SelectNext>
+              <Icon className="select-arrow-icon" name="arrow-down-bold" title="" />
+            </div>
           </fieldset>
           <fieldset className="fieldset">
-            <Text tagName="span" id="dial-number-label" type="body-large-regular">
-              Dial number
-            </Text>
+            <legend id="dial-number-label">Dial number</legend>
             <TextInput
               clearAriaLabel="Clear"
               aria-labelledby="dial-number-label"
@@ -148,31 +143,31 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
               onChange={updateDN}
               value={dialNumberValue}
               isDisabled={isDialNumberDisabled}
-            ></TextInput>
+            />
           </fieldset>
           <fieldset className="fieldset">
-            <Text tagName="span" type="body-large-regular" id="team-label">
-              Your team
-            </Text>
-            <SelectNext
-              id="teams-dropdown"
-              direction="bottom"
-              showBorder
-              aria-labelledby="team-label"
-              items={teams}
-              selectedKey={teamsValue}
-              onSelectionChange={updateTeam}
-            >
-              {(item) => {
-                return (
+            <legend id="team-label">Your team</legend>
+            <div className="select-container">
+              <SelectNext
+                id="teams-dropdown"
+                direction="bottom"
+                showBorder
+                aria-labelledby="team-label"
+                items={teams}
+                selectedKey={teamsValue}
+                onSelectionChange={updateTeam}
+                className="station-login-select"
+              >
+                {(item) => (
                   <Item textValue={item.name} key={item.id}>
                     <Text className="state-name" tagName={'small'}>
                       {item.name}
                     </Text>
                   </Item>
-                );
-              }}
-            </SelectNext>
+                )}
+              </SelectNext>
+              <Icon className="select-arrow-icon" name="arrow-down-bold" title="" />
+            </div>
           </fieldset>
           <div className="btn-container">
             {isAgentLoggedIn ? (
@@ -190,4 +185,5 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
     </>
   );
 };
+
 export default StationLoginPresentational;

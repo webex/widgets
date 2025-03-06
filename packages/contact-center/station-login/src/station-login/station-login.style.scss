@@ -1,5 +1,4 @@
 .box.station-login {
-  background-color: #ffffff;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   padding: 20px;
@@ -16,11 +15,6 @@
     border-radius: 5px;
     border: none !important;
     margin-bottom: 0 !important;
-  }
-
-  .legend-box {
-    font-weight: bold;
-    color: #0052bf;
   }
 
   .btn-container {
@@ -69,6 +63,29 @@
   }
 }
 
-.state-name {
-  color: var(--mds-color-theme-text-primary-normal);
+.select-arrow-icon {
+  position: absolute;
+  right: 1rem; /* Adjusted to leave space for the arrow icon */
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.select-container {
+  position: relative;
+  width: 100%; /* Ensure the select trigger takes the full width of its parent */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.station-login-select {
+  width: 100%;
+}
+
+.md-text-input-wrapper .md-text-input-container {
+  border: 0.0625rem solid var(--mds-color-theme-outline-input-normal) !important;
 }
