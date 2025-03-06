@@ -237,7 +237,7 @@ function App() {
                         <section className="section-box">
                           <fieldset className="fieldset">
                             <legend className="legend-box">Call Control</legend>
-                            <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapup={onWrapup} />
+                            <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapup={onWrapUp} />
                           </fieldset>
                         </section>
                       </div>
