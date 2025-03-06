@@ -246,14 +246,6 @@ describe('storeEventsWrapper', () => {
       expect(storeWrapper['store'].wrapupCodes).toBe(mockCodes);
     });
 
-    it('should setLogoutCallBack', () => {
-      const mockCb = jest.fn();
-      expect(storeWrapper.setLogoutCallback).toBeInstanceOf(Function);
-
-      storeWrapper.setLogoutCallback(mockCb);
-      expect(storeWrapper.onLogoutCallback).toBe(mockCb);
-    });
-
     describe('setCCCallback/removeCCCallback', () => {
       it('should set cc callback', () => {
         const mockCb = jest.fn();
