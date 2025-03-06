@@ -2,7 +2,6 @@ import {useEffect, useState} from 'react';
 import {StationLoginSuccess, StationLogoutSuccess} from '@webex/plugin-cc';
 import {UseStationLoginProps} from './station-login/station-login.types';
 import store, {CC_EVENTS} from '@webex/cc-store'; // we need to import as we are losing the context of this in store
-import {runInAction} from 'mobx';
 
 export const useStationLogin = (props: UseStationLoginProps) => {
   const cc = props.cc;
@@ -22,25 +21,29 @@ export const useStationLogin = (props: UseStationLoginProps) => {
     }
   }, []);
 
+  const handleLogout = () => {
+    if (logoutCb) {
+      logoutCb();
+    }
+  };
+
+  const handleLogin = (payload) => {
+    setDialNumber(payload.dn);
+    if (loginCb) {
+      loginCb();
+    }
+  };
+
   // Make sure to set the callback are same and change the logout  logic
   useEffect(() => {
-    if (logoutCb) store.setLogoutCallback(logoutCb);
+    store.setCCCallback(CC_EVENTS.AGENT_STATION_LOGIN_SUCCESS, handleLogin);
+    store.setCCCallback(CC_EVENTS.AGENT_LOGOUT_SUCCESS, handleLogout);
 
-    store.setCCCallback(CC_EVENTS.AGENT_STATION_LOGIN_SUCCESS, (payload) => {
-      runInAction(() => {
-        store.setDeviceType(payload.deviceType);
-        store.setIsAgentLoggedIn(true);
-        store.setCurrentState(payload.auxCodeId?.trim() !== '' ? payload.auxCodeId : '0');
-      });
-      setDialNumber(payload.dn);
-      if (loginCb) {
-        loginCb();
-      }
-    });
-
-    return () => {
-      store.removeCCCallback(CC_EVENTS.AGENT_STATION_LOGIN_SUCCESS);
-    };
+    // TODO: WHen we close this event listener it closes the event listener from storeEventWrapper
+    // return () => {
+    //   store.removeCCCallback(CC_EVENTS.AGENT_STATION_LOGIN_SUCCESS, handleLogin);
+    //   store.removeCCCallback(CC_EVENTS.AGENT_LOGOUT_SUCCESS, handleLogout);
+    // };
   }, [store.isAgentLoggedIn]);
 
   const handleContinue = async () => {
@@ -70,11 +73,6 @@ export const useStationLogin = (props: UseStationLoginProps) => {
     cc.stationLogin({teamId: team, loginOption: deviceType, dialNumber: dialNumber})
       .then((res: StationLoginSuccess) => {
         setLoginSuccess(res);
-        if (res.data.auxCodeId) {
-          store.setCurrentState(res.data.auxCodeId);
-        }
-        store.setLastStateChangeTimestamp(res.data.lastStateChangeTimestamp);
-        store.setLastIdleCodeChangeTimestamp(res.data.lastIdleCodeChangeTimestamp);
       })
       .catch((error: Error) => {
         logger.error(`Error logging in: ${error}`, {

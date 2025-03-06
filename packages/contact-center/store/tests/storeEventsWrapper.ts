@@ -499,7 +499,7 @@ describe('storeEventsWrapper', () => {
 
       // Login event stag: the agent is logged in
       act(() => {
-        storeWrapper['cc'].on.mock.calls[0][1]();
+        storeWrapper['cc'].on.mock.calls[1][1]();
       });
 
       expect(storeWrapper['cc'].on).toHaveBeenCalledWith(TASK_EVENTS.TASK_HYDRATE, expect.any(Function));
@@ -553,7 +553,7 @@ describe('storeEventsWrapper', () => {
 
       // Login event stag: the agent is logged in
       act(() => {
-        storeWrapper['cc'].on.mock.calls[0][1]();
+        storeWrapper['cc'].on.mock.calls[1][1]();
       });
 
       const incomingTaskCb = storeWrapper['cc'].on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_INCOMING)[1];
@@ -659,7 +659,6 @@ describe('storeEventsWrapper', () => {
       const options = {someOption: 'value'};
       await storeWrapper.init(options);
 
-      console.log(cc.on.mock.calls);
       act(() => {
         cc.on.mock.calls[1][1]({});
       });
@@ -677,7 +676,7 @@ describe('storeEventsWrapper', () => {
 
       // Login event stag: the agent is logged in
       act(() => {
-        storeWrapper['cc'].on.mock.calls[0][1]();
+        storeWrapper['cc'].on.mock.calls[1][1]();
       });
 
       act(() => {
@@ -721,7 +720,7 @@ describe('storeEventsWrapper', () => {
       await storeWrapper.init(options);
 
       act(() => {
-        storeWrapper['cc'].on.mock.calls[0][1]();
+        storeWrapper['cc'].on.mock.calls[1][1]();
       });
 
       act(() => {
@@ -743,7 +742,7 @@ describe('storeEventsWrapper', () => {
       await storeWrapper.init(options);
 
       act(() => {
-        storeWrapper['cc'].on.mock.calls[0][1]();
+        storeWrapper['cc'].on.mock.calls[1][1]();
       });
 
       act(() => {
@@ -787,7 +786,7 @@ describe('storeEventsWrapper', () => {
       };
 
       act(() => {
-        storeWrapper['cc'].on.mock.calls[0][1]();
+        storeWrapper['cc'].on.mock.calls[1][1]();
       });
 
       act(() => {
@@ -842,7 +841,7 @@ describe('storeEventsWrapper', () => {
       };
 
       act(() => {
-        storeWrapper['cc'].on.mock.calls[0][1]();
+        storeWrapper['cc'].on.mock.calls[1][1]();
       });
 
       act(() => {
@@ -863,7 +862,7 @@ describe('storeEventsWrapper', () => {
       await storeWrapper.init(options);
 
       act(() => {
-        storeWrapper['cc'].on.mock.calls[0][1]();
+        storeWrapper['cc'].on.mock.calls[1][1]();
       });
 
       act(() => {

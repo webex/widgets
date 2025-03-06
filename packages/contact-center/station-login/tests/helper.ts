@@ -87,8 +87,6 @@ describe('useStationLogin Hook', () => {
     };
 
     ccMock.stationLogin.mockResolvedValue(successResponse);
-    const setSetLastStateChangeTimestampSpy = jest.spyOn(store, 'setLastStateChangeTimestamp');
-    const setSetLastIdleCodeChangeTimestampSpy = jest.spyOn(store, 'setLastIdleCodeChangeTimestamp');
     const {result} = renderHook(() =>
       useStationLogin({
         cc: ccMock,
@@ -128,11 +126,6 @@ describe('useStationLogin Hook', () => {
         logoutSuccess: undefined,
         handleContinue: expect.any(Function),
       });
-
-      expect(setSetLastStateChangeTimestampSpy).toHaveBeenCalledWith(successResponse.data.lastStateChangeTimestamp);
-      expect(setSetLastIdleCodeChangeTimestampSpy).toHaveBeenCalledWith(
-        successResponse.data.lastIdleCodeChangeTimestamp
-      );
     });
   });
 
@@ -520,24 +513,6 @@ describe('useStationLogin Hook', () => {
     });
   });
 
-  it('should set logoutCallback', async () => {
-    const setLogoutCallbackSpy = jest.spyOn(store, 'setLogoutCallback');
-    const setCCCallbackSpy = jest.spyOn(store, 'setCCCallback');
-
-    renderHook(() =>
-      useStationLogin({
-        cc: ccMock,
-        onLogin: loginCb,
-        onLogout: logoutCb,
-        logger,
-        deviceType: 'EXTENSION',
-      })
-    );
-
-    expect(setLogoutCallbackSpy).toHaveBeenCalledWith(logoutCb);
-    expect(setCCCallbackSpy).toHaveBeenCalledWith(store.CC_EVENTS.AGENT_STATION_LOGIN_SUCCESS, expect.any(Function));
-  });
-
   it('should set deviceType, agentState on login success', async () => {
     const setDeviceTypeSpy = jest.spyOn(store, 'setDeviceType');
     const setIsAgentLoggedInSpy = jest.spyOn(store, 'setIsAgentLoggedIn');
@@ -569,17 +544,21 @@ describe('useStationLogin Hook', () => {
     });
 
     await waitFor(() => {
-      expect(setDeviceTypeSpy).toHaveBeenCalledWith('EXTENSION');
-      expect(setIsAgentLoggedInSpy).toHaveBeenCalledWith(true);
-      expect(setCurrentStateSpy).toHaveBeenCalledWith('mockAuxCodeId');
       expect(loginCb).toHaveBeenCalled();
     });
-  });
-  it('should set deviceType, agentState on login success', async () => {
-    const setDeviceTypeSpy = jest.spyOn(store, 'setDeviceType');
-    const setIsAgentLoggedInSpy = jest.spyOn(store, 'setIsAgentLoggedIn');
-    const setCurrentStateSpy = jest.spyOn(store, 'setCurrentState');
 
+    expect(ccMock.on).toHaveBeenCalledWith(store.CC_EVENTS.AGENT_LOGOUT_SUCCESS, expect.any(Function));
+
+    act(() => {
+      ccMock.on.mock.calls[1][1]();
+    });
+
+    await waitFor(() => {
+      expect(logoutCb).toHaveBeenCalled();
+    });
+  });
+
+  it('should set deviceType, agentState on login success', async () => {
     jest.spyOn(store, 'setCCCallback').mockImplementation((event, cb) => {
       ccMock.on(event, cb);
     });
@@ -604,9 +583,6 @@ describe('useStationLogin Hook', () => {
     });
 
     await waitFor(() => {
-      expect(setDeviceTypeSpy).toHaveBeenCalledWith('EXTENSION');
-      expect(setIsAgentLoggedInSpy).toHaveBeenCalledWith(true);
-      expect(setCurrentStateSpy).toHaveBeenCalledWith('0');
       expect(loginCb).not.toHaveBeenCalled();
     });
   });

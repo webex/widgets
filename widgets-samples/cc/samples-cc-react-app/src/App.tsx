@@ -220,7 +220,7 @@ function App() {
                 <div className="station-login">
                   {selectedWidgets.stationLogin && <StationLogin onLogin={onLogin} onLogout={onLogout} />}
                 </div>
-                {store.isAgentLoggedIn && isLoggedIn && (
+                {(store.isAgentLoggedIn || isLoggedIn) && (
                   <>
                     {selectedWidgets.userState && (
                       <div className="box">

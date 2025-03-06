@@ -273,7 +273,6 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   handleIncomingTask = (event) => {
-    console.log('CC_WRAPPER: handleIncomingTask', event);
     const task: ITask = event;
     if (this.store.taskList.some((t) => t.data.interactionId === task.data.interactionId)) {
       // Task already present in the taskList
@@ -359,7 +358,6 @@ class StoreWrapper implements IStoreWrapper {
       this.setCurrentTask(null);
       this.setTaskList([]);
       this.setWrapupRequired(false);
-      this.setCurrentState('');
       this.setLastStateChangeTimestamp(undefined);
       this.setLastIdleCodeChangeTimestamp(undefined);
       this.setShowMultipleLoginAlert(false);
@@ -393,6 +391,18 @@ class StoreWrapper implements IStoreWrapper {
     };
 
     // TODO: https://jira-eng-gpk2.cisco.com/jira/browse/SPARK-626777 Implement the de-register method and close the listener there
+
+    const handleLogin = (payload) => {
+      runInAction(() => {
+        this.setIsAgentLoggedIn(true);
+        this.setDeviceType(payload.deviceType);
+        this.setCurrentState(payload.auxCodeId?.trim() !== '' ? payload.auxCodeId : '0');
+        this.setLastStateChangeTimestamp(payload.lastStateChangeTimestamp);
+        this.setLastIdleCodeChangeTimestamp(payload.lastIdleCodeChangeTimestamp);
+      });
+    };
+
+    ccSDK.on(CC_EVENTS.AGENT_STATION_LOGIN_SUCCESS, handleLogin);
 
     [CC_EVENTS.AGENT_DN_REGISTERED, CC_EVENTS.AGENT_RELOGIN_SUCCESS].forEach((event) => {
       ccSDK.on(`${event}`, () => {
