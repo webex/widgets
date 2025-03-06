@@ -9,10 +9,15 @@ jest.mock('@momentum-ui/react-collaboration', () => ({
   ListItemBase: () => <div data-testid="ListItemBase" />,
   ListItemBaseSection: () => <div data-testid="ListItemBaseSection" />,
   Text: () => <div data-testid="Text" />,
+  ButtonCircle: () => <div data-testid="ButtonCircle" />,
+  PopoverNext: () => <div data-testid="PopoverNext" />,
+  SelectNext: () => <div data-testid="SelectNext" />,
+  TooltipNext: () => <div data-testid="TooltipNext" />,
 }));
 
 jest.mock('@momentum-design/components/dist/react', () => ({
   Avatar: () => <div data-testid="Avatar" />,
+  Icon: () => <div data-testid="Icon" />,
 }));
 
 // Mock the store

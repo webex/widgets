@@ -232,12 +232,19 @@ function App() {
                         </section>
                       </div>
                     )}
+                    {selectedWidgets.callControl && store.currentTask && (
+                      <div className="box">
+                        <section className="section-box">
+                          <fieldset className="fieldset">
+                            <legend className="legend-box">Call Control</legend>
+                            <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapup={onWrapup} />
+                          </fieldset>
+                        </section>
+                      </div>
+                    )}
                     {selectedWidgets.incomingTask && <IncomingTask onAccepted={onAccepted} onDeclined={onDeclined} />}
                     {selectedWidgets.taskList && (
                       <TaskList onTaskAccepted={onTaskAccepted} onTaskDeclined={onTaskDeclined} />
-                    )}
-                    {selectedWidgets.callControl && (
-                      <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapUp={onWrapUp} />
                     )}
                   </>
                 )}
