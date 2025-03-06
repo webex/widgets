@@ -2,7 +2,7 @@ import React, {useEffect, useState, useRef} from 'react';
 import {StationLoginPresentationalProps} from './station-login.types';
 import './station-login.style.scss';
 import {MULTIPLE_SIGN_IN_ALERT_MESSAGE, MULTIPLE_SIGN_IN_ALERT_TITLE} from './constants';
-import {ButtonPill, Text, SelectNext} from '@momentum-ui/react-collaboration';
+import {ButtonPill, Text, SelectNext, TextInput} from '@momentum-ui/react-collaboration';
 import {Item} from '@react-stately/collections';
 
 const StationLoginPresentational: React.FunctionComponent<StationLoginPresentationalProps> = (props) => {
@@ -23,21 +23,15 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
   const modalRef = useRef<HTMLDialogElement>(null);
   const [dialNumberValue, setDialNumberValue] = useState<string>('');
   const [agentLoginValue, setAgentLoginValue] = useState<string>('');
+  const [teamsValue, setTeamsValue] = useState<string>('');
   const [isDialNumberDisabled, setIsDialNumberDisabled] = useState<boolean>(false);
 
   useEffect(() => {
-    const teamsDropdown = document.getElementById('teamsDropdown') as HTMLSelectElement;
-    const agentLogin = document.querySelector('#LoginOption') as HTMLSelectElement;
+    const teamsDropdown = document.querySelector('#teams-dropdown') as HTMLElement;
+    const agentLogin = document.querySelector('#login-option') as HTMLElement;
     if (teamsDropdown) {
-      teamsDropdown.innerHTML = '';
       if (teams) {
-        teams.forEach((team) => {
-          const option = document.createElement('option');
-          option.value = team.id;
-          option.text = team.name;
-          teamsDropdown.add(option);
-        });
-        setTeam(teamsDropdown.value);
+        setTeam(teamsValue);
         setDialNumberValue('');
         setIsDialNumberDisabled(true);
       }
@@ -58,16 +52,17 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
 
   useEffect(() => {
     if (!isAgentLoggedIn) return;
-    const agentLogin = document.querySelector('#LoginOption') as HTMLSelectElement;
-    if (agentLogin && !agentLogin.value) {
+    const agentLogin = document.querySelector('#LoginOption') as HTMLElement;
+    if (agentLogin && !agentLoginValue) {
       setDeviceType(deviceType);
-      agentLogin.value = deviceType;
+      setAgentLoginValue(loginOptions.indexOf(deviceType).toString());
       relogin();
     }
   }, [isAgentLoggedIn]);
 
-  const selectLoginOption = (event: {target: {value: string}}) => {
-    const deviceType = event.target.value;
+  const selectLoginOption = (key: string) => {
+    setAgentLoginValue(key);
+    const deviceType = loginOptions[key];
     setDeviceType(deviceType);
     if (deviceType === 'AGENT_DN' || deviceType === 'EXTENSION') {
       setIsDialNumberDisabled(false);
@@ -84,8 +79,13 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
     }
   };
 
-  function updateDN() {
-    // setDialNumber(dialNumber.value);
+  function updateDN(value: string) {
+    setDialNumberValue(value);
+    setDialNumber(dialNumberValue);
+  }
+
+  function updateTeam(value: string) {
+    setTeamsValue(value);
   }
 
   return (
@@ -101,7 +101,7 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
           </div>
         </dialog>
       )}
-      <div className="box">
+      <div className="box station-login">
         <section className="section-box">
           <fieldset className="fieldset">
             <Text tagName={'span'} type="heading-small-bold">
@@ -113,61 +113,66 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
               Handle calls using
             </Text>
             <SelectNext
-              name="LoginOption"
-              id="LoginOption"
-              className="select"
+              id="login-option"
+              direction="bottom"
+              showBorder
               aria-labelledby="agent-login-label"
               items={loginOptions.map((name, id) => {
                 return {
                   key: id,
-                  textValue: name,
+                  name: name,
                 };
               })}
+              selectedKey={agentLoginValue}
+              onSelectionChange={selectLoginOption}
             >
-              {/*<Item>*/}
-              {/*  <Text className="state-name" tagName={'small'}>*/}
-              {/*    Hello World*/}
-              {/*  </Text>*/}
-              {/*</Item>*/}
               {(item) => {
                 return (
-                  <Item textValue={item.textValue} key={item.key}>
+                  <Item textValue={item.name} key={item.key}>
                     <Text className="state-name" tagName={'small'}>
-                      {item}
+                      {item.name}
                     </Text>
                   </Item>
                 );
               }}
             </SelectNext>
-            {/*{loginOptions.map((option, id) => {*/}
-            {/*  return <Item key={id} textValue={option}>{'555'}</Item>;*/}
-            {/*})}*/}
-            {/*<select name="LoginOption" id="LoginOption" className="select" onChange={selectLoginOption}>*/}
-            {/*  <option value="" hidden>*/}
-            {/*    Choose Agent Login Option...*/}
-            {/*  </option>*/}
-            {/*</select>*/}
           </fieldset>
           <fieldset className="fieldset">
-            <Text tagName="span" type="body-large-regular">
+            <Text tagName="span" id="dial-number-label" type="body-large-regular">
               Dial number
             </Text>
-            <input
-              className="input"
-              id="dialNumber"
-              name="dialNumber"
+            <TextInput
+              clearAriaLabel="Clear"
+              aria-labelledby="dial-number-label"
               placeholder="Extension/Dial Number"
-              type="text"
-              onInput={updateDN}
-            />
+              onChange={updateDN}
+              value={dialNumberValue}
+              isDisabled={isDialNumberDisabled}
+            ></TextInput>
           </fieldset>
           <fieldset className="fieldset">
-            <Text tagName="span" type="body-large-regular">
+            <Text tagName="span" type="body-large-regular" id="team-label">
               Your team
             </Text>
-            <select id="teamsDropdown" className="select">
-              Teams
-            </select>
+            <SelectNext
+              id="teams-dropdown"
+              direction="bottom"
+              showBorder
+              aria-labelledby="team-label"
+              items={teams}
+              selectedKey={teamsValue}
+              onSelectionChange={updateTeam}
+            >
+              {(item) => {
+                return (
+                  <Item textValue={item.name} key={item.id}>
+                    <Text className="state-name" tagName={'small'}>
+                      {item.name}
+                    </Text>
+                  </Item>
+                );
+              }}
+            </SelectNext>
           </fieldset>
           <div className="btn-container">
             {isAgentLoggedIn ? (

@@ -55,7 +55,7 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
     <>
       <audio ref={audioRef} id="remote-audio" autoPlay></audio>
       {currentTask && (
-        <div className="box">
+        <div className="box call-control">
           <section className="section-box">
             <fieldset className="fieldset">
               <legend className="legend-box">Call Control</legend>

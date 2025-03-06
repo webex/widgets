@@ -1,100 +1,74 @@
-.box {
+.box.station-login {
   background-color: #ffffff;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   padding: 20px;
   max-width: 800px;
   margin: 0 auto;
-}
 
-.section-box {
-  padding: 10px;
-  border-radius: 8px;
-  border: none !important;
-}
+  .section-box {
+    padding: 10px;
+    border-radius: 8px;
+    border: none !important;
+  }
 
-.fieldset {
-  border-radius: 5px;
-  border: none !important;
-  margin-bottom: 0 !important;
-}
+  .fieldset {
+    border-radius: 5px;
+    border: none !important;
+    margin-bottom: 0 !important;
+  }
 
-.legend-box {
-  font-weight: bold;
-  color: #0052bf;
-}
+  .legend-box {
+    font-weight: bold;
+    color: #0052bf;
+  }
 
-.btn {
-  padding: 10px 20px;
-  background-color: #0052bf;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  margin-right: 8px;
-}
+  .btn-container {
+    padding: 10px;
 
-.btn-container {
-  padding: 10px;
+    button {
+      margin-left: auto;
+    }
+  }
 
-  button {
-    margin-left: auto;
+  .modal {
+    width: 400px;
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    text-align: center;
+  }
+
+  .modal-content {
+    display: flex;
+    justify-content: flex-end; // Aligns the button to the right
+  }
+
+  .modal::backdrop {
+    background: rgba(0, 0, 0, 0.5);
+  }
+
+  h2 {
+    margin-top: 0;
+  }
+
+  #ContinueButton {
+    background-color: #0078d4;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  #ContinueButton:hover {
+    background-color: #005a9e;
   }
 }
 
-.select {
-  width: 100%;
-  padding: 8px;
-  margin-top: 8px;
-  margin-bottom: 12px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.input {
-  width: 100% !important;
-  padding: 8px;
-  margin-top: 8px;
-  margin-bottom: 12px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-
-.modal {
-  width: 400px;
-  border: none;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  padding: 20px;
-  text-align: center;
-}
-
-.modal-content {
-  display: flex;
-  justify-content: flex-end; // Aligns the button to the right
-}
-
-.modal::backdrop {
-  background: rgba(0, 0, 0, 0.5);
-}
-
-h2 {
-  margin-top: 0;
-}
-
-#ContinueButton {
-  background-color: #0078d4;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-#ContinueButton:hover {
-  background-color: #005a9e;
+.state-name {
+  color: var(--mds-color-theme-text-primary-normal);
 }
