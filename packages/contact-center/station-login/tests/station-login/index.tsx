@@ -6,6 +6,14 @@ import '@testing-library/jest-dom';
 
 jest.mock('@momentum-ui/react-collaboration', () => ({
   ButtonPill: () => <div data-testid="ButtonPill" />,
+  Text: () => <div data-testid="Text" />,
+  SelectNext: () => <div data-testid="SelectNext" />,
+  TextInput: () => <div data-testid="TextInput" />,
+}));
+
+jest.mock('@momentum-design/components/dist/react', () => ({
+  Avatar: () => <div data-testid="Avatar" />,
+  Icon: () => <div data-testid="Icon" />,
 }));
 
 const teamsMock = ['team123', 'team456'];
