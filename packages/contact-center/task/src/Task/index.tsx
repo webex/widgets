@@ -36,29 +36,26 @@ const Task: React.FC<TaskProps> = ({
 
   return (
     <ListItemBase className={`task-list-item ${selected ? 'task-list-item--selected' : ''}`}>
-      <ListItemBaseSection position="start" className="task-list-item-start-section">
-        <Avatar
-          icon-name="handset-filled"
-          className={`task-list-item-avatar ${selected ? 'task-list-item-avatar--selected' : ''}`}
-        />
+      <ListItemBaseSection position="start">
+        <Avatar icon-name="handset-filled" />
       </ListItemBaseSection>
 
       <ListItemBaseSection position="fill">
         <section className="task-details">
           {title && (
-            <Text tagName="span" type={selected ? 'body-large-bold' : 'body-large-medium'} className="task-text">
+            <Text tagName="span" type={selected ? 'body-large-bold' : 'body-large-medium'}>
               {title}
             </Text>
           )}
 
           {state && !isIncomingTask && (
-            <Text tagName="span" type="body-midsize-regular" className="task-text task-text--secondary">
+            <Text tagName="span" type="body-midsize-regular" className="task-text">
               {capitalizeFirstWord(state)}
             </Text>
           )}
 
           {queue && isIncomingTask && (
-            <Text tagName="span" type="body-midsize-regular" className="task-text task-text--secondary">
+            <Text tagName="span" type="body-midsize-regular" className="task-text">
               {capitalizeFirstWord(queue)}
             </Text>
           )}
@@ -66,7 +63,7 @@ const Task: React.FC<TaskProps> = ({
           {/* Handle Time should render if it's an incoming call without ronaTimeout OR if it's not an incoming call */}
           {(isIncomingTask && !ronaTimeout) || !isIncomingTask
             ? startTimeStamp && (
-                <Text tagName="span" type="body-midsize-regular" className="task-text task-text--secondary">
+                <Text tagName="span" type="body-midsize-regular" className="task-text">
                   Handle Time: {'  '}
                   <TaskTimer startTimeStamp={startTimeStamp} />
                 </Text>
@@ -75,7 +72,7 @@ const Task: React.FC<TaskProps> = ({
 
           {/* Time Left should render if it's an incoming call with ronaTimeout */}
           {isIncomingTask && ronaTimeout && (
-            <Text tagName="span" type="body-midsize-regular" className="task-text task-text--secondary">
+            <Text tagName="span" type="body-midsize-regular" className="task-text">
               Time Left: {'  '}
               <TaskTimer countdown={true} ronaTimeout={ronaTimeout} />
             </Text>
@@ -89,7 +86,7 @@ const Task: React.FC<TaskProps> = ({
             Ringing
           </ButtonPill>
         ) : isBrowser ? (
-          <ButtonPill onPress={declineTask} color="join">
+          <ButtonPill onPress={declineTask} color="cancel">
             End
           </ButtonPill>
         ) : null}
