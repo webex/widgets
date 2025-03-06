@@ -122,32 +122,32 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
               offsetDistance={2}
               className="wrapup-popover"
             >
-              <Text className="wrapup-header" tagName={'small'} type="subheader-primary">
+              <Text className="wrapup-header" tagName={'small'} type="body-large-bold">
                 Wrap-up Interaction
               </Text>
-              <div className="wrapup-select-wrapper">
-                <SelectNext
-                  aria-label="wrapup-reason"
-                  className="wrapup-select"
-                  onSelectionChange={(key) => {
-                    const selectedItem = wrapupCodes?.find((code) => code.id === key);
-                    handleWrapupChange(selectedItem.name, selectedItem.id);
-                  }}
-                  items={wrapupCodes}
-                  showBorder={false}
-                  placeholder="Select"
-                  label="Wrap-up reason"
-                >
-                  {(item) => (
-                    <Item key={item.id} textValue={item.name}>
-                      <Text className="wrapup-name" tagName={'small'}>
-                        {item.name}
-                      </Text>
-                    </Item>
-                  )}
-                </SelectNext>
-                <Icon className="wrapup-select-arrow-icon" name="arrow-down-bold" title="" />
-              </div>
+              <Text className="wrapup-header" tagName={'small'} type="body-secondary">
+                Wrap-up reason
+              </Text>
+              <SelectNext
+                aria-label="wrapup-reason"
+                className="wrapup-select"
+                onSelectionChange={(key) => {
+                  const selectedItem = wrapupCodes?.find((code) => code.id === key);
+                  handleWrapupChange(selectedItem.name, selectedItem.id);
+                }}
+                items={wrapupCodes}
+                showBorder={false}
+                placeholder="Select"
+              >
+                {(item) => (
+                  <Item key={item.id} textValue={item.name}>
+                    <Text className="wrapup-name" tagName={'small'}>
+                      {item.name}
+                    </Text>
+                  </Item>
+                )}
+              </SelectNext>
+              <Icon className="wrapup-select-arrow-icon" name="arrow-down-bold" title="" />
               <ButtonPill
                 className="submit-wrapup-button"
                 onPress={handleWrapupCall}

@@ -51,7 +51,7 @@
 .wrapup-select-arrow-icon {
   position: absolute;
   right: 1.5rem; /* Adjusted to leave space for the arrow icon */
-  top: 60%;
+  top: 55%;
   transform: translateY(-50%);
   display: flex;
   align-items: center;
@@ -64,6 +64,7 @@
 }
 
 .wrapup-header {
+  margin-bottom: 0.7rem;
   align-self: flex-start;
 }
 
@@ -101,9 +102,6 @@
   --mdc-icon-fill-color: var(--mds--color-theme-button-secondary-normal);
 }
 
-.submit-wrapup-button {
-
-}
 
 .wrapup-button {
   display: inline-flex;

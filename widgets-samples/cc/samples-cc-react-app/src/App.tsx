@@ -243,9 +243,6 @@ function App() {
                     {selectedWidgets.taskList && (
                       <TaskList onTaskAccepted={onTaskAccepted} onTaskDeclined={onTaskDeclined} />
                     )}
-                    {selectedWidgets.callControl && (
-                      <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapup={onWrapup} />
-                    )}
                   </>
                 )}
               </>
