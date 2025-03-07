@@ -128,8 +128,6 @@ export const useCallControl = (props: useCallControlProps) => {
   const isBrowser = deviceType === 'BROWSER';
   const [isHeld, setIsHeld] = useState<boolean | undefined>(undefined);
 
-  const wrapUpReasonRef = useRef<string>('');
-
   const holdCallback = () => {
     setIsHeld(true);
     if (onHoldResume) onHoldResume();
@@ -144,11 +142,12 @@ export const useCallControl = (props: useCallControlProps) => {
     if (onEnd) onEnd();
   };
 
-  const wrapupCallCallback = () => {
+  const wrapupCallCallback = ({wrapUpAuxCodeId}) => {
+    const wrapUpReason = store.wrapupCodes.filter((code) => code.id === wrapUpAuxCodeId)[0]?.name;
     if (onWrapUp) {
       onWrapUp({
         task: currentTask,
-        wrapUpReason: wrapUpReasonRef.current,
+        wrapUpReason: wrapUpReason,
       });
     }
   };
@@ -228,7 +227,6 @@ export const useCallControl = (props: useCallControlProps) => {
   };
 
   const wrapupCall = (wrapUpReason: string, auxCodeId: string) => {
-    wrapUpReasonRef.current = wrapUpReason;
     currentTask.wrapup({wrapUpReason: wrapUpReason, auxCodeId: auxCodeId}).catch((error: Error) => {
       logError(`Error wrapping up call: ${error}`, 'wrapupCall');
     });
