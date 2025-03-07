@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.31](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.30...v1.28.0-ccwidgets.31) (2025-03-07)
+
+
+### Features
+
+* **cc-widgets:** Style station login component ([#404](https://github.com/webex/widgets/issues/404)) ([cfb6cf4](https://github.com/webex/widgets/commit/cfb6cf40ece1c69ad7dfc5f3980c6ba075d0568b))
+
 # [1.28.0-ccwidgets.30](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.29...v1.28.0-ccwidgets.30) (2025-03-06)
 
 
