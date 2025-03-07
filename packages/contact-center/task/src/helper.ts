@@ -143,7 +143,7 @@ export const useCallControl = (props: useCallControlProps) => {
   };
 
   const wrapupCallCallback = ({wrapUpAuxCodeId}) => {
-    const wrapUpReason = store.wrapupCodes.filter((code) => code.id === wrapUpAuxCodeId)[0]?.name;
+    const wrapUpReason = store.wrapupCodes.find((code) => code.id === wrapUpAuxCodeId)?.name;
     if (onWrapUp) {
       onWrapUp({
         task: currentTask,
