@@ -349,7 +349,6 @@ describe('storeEventsWrapper', () => {
 
     it('should handle incoming task', () => {
       const setIncomingTaskSpy = jest.spyOn(storeWrapper, 'setIncomingTask');
-      const setTaskListSpy = jest.spyOn(storeWrapper, 'setTaskList');
 
       storeWrapper['store'].taskList = [];
       storeWrapper.handleIncomingTask(mockTask);
