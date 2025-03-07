@@ -127,6 +127,7 @@ export const useCallControl = (props: useCallControlProps) => {
   const audioRef = useRef<HTMLAudioElement | null>(null); // Ref for the audio element
   const isBrowser = deviceType === 'BROWSER';
   const [isHeld, setIsHeld] = useState<boolean | undefined>(undefined);
+  const [isRecording, setIsRecording] = useState(true);
 
   const holdCallback = () => {
     setIsHeld(true);
@@ -146,6 +147,14 @@ export const useCallControl = (props: useCallControlProps) => {
     if (onWrapUp) onWrapUp();
   };
 
+  const pauseRecordingCallback = () => {
+    setIsRecording(false);
+  };
+
+  const resumeRecordingCallback = () => {
+    setIsRecording(true);
+  };
+
   useEffect(() => {
     if (!currentTask) return;
 
@@ -153,12 +162,28 @@ export const useCallControl = (props: useCallControlProps) => {
     store.setTaskCallback(TASK_EVENTS.TASK_RESUME, resumeCallback, currentTask.data.interactionId);
     store.setTaskCallback(TASK_EVENTS.TASK_END, endCallCallback, currentTask.data.interactionId);
     store.setTaskCallback(TASK_EVENTS.AGENT_WRAPPEDUP, wrapupCallCallback, currentTask.data.interactionId);
+    store.setTaskCallback(TASK_EVENTS.CONTACT_RECORDING_PAUSED, pauseRecordingCallback, currentTask.data.interactionId);
+    store.setTaskCallback(
+      TASK_EVENTS.CONTACT_RECORDING_RESUMED,
+      resumeRecordingCallback,
+      currentTask.data.interactionId
+    );
 
     return () => {
       store.removeTaskCallback(TASK_EVENTS.TASK_HOLD, holdCallback, currentTask.data.interactionId);
       store.removeTaskCallback(TASK_EVENTS.TASK_RESUME, resumeCallback, currentTask.data.interactionId);
       store.removeTaskCallback(TASK_EVENTS.TASK_END, endCallCallback, currentTask.data.interactionId);
       store.removeTaskCallback(TASK_EVENTS.AGENT_WRAPPEDUP, wrapupCallCallback, currentTask.data.interactionId);
+      store.removeTaskCallback(
+        TASK_EVENTS.CONTACT_RECORDING_PAUSED,
+        pauseRecordingCallback,
+        currentTask.data.interactionId
+      );
+      store.removeTaskCallback(
+        TASK_EVENTS.CONTACT_RECORDING_RESUMED,
+        resumeRecordingCallback,
+        currentTask.data.interactionId
+      );
     };
   }, [currentTask]);
 
@@ -202,8 +227,8 @@ export const useCallControl = (props: useCallControlProps) => {
     });
   };
 
-  const toggleRecording = (pause: boolean) => {
-    if (pause) {
+  const toggleRecording = () => {
+    if (isRecording) {
       currentTask.pauseRecording().catch((error: Error) => {
         logError(`Error pausing recording: ${error}`, 'toggleRecording');
       });
@@ -235,5 +260,7 @@ export const useCallControl = (props: useCallControlProps) => {
     wrapupCall,
     isHeld,
     setIsHeld,
+    isRecording,
+    setIsRecording,
   };
 };

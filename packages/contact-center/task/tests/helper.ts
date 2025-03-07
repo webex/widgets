@@ -509,13 +509,25 @@ describe('useCallControl', () => {
       expect.any(Function),
       'someMockInteractionId'
     );
+    expect(setTaskCallbackSpy).toHaveBeenCalledWith(
+      TASK_EVENTS.CONTACT_RECORDING_PAUSED,
+      expect.any(Function),
+      'someMockInteractionId'
+    );
+    expect(setTaskCallbackSpy).toHaveBeenCalledWith(
+      TASK_EVENTS.CONTACT_RECORDING_RESUMED,
+      expect.any(Function),
+      'someMockInteractionId'
+    );
 
-    expect(onSpy).toHaveBeenCalledTimes(5);
+    expect(onSpy).toHaveBeenCalledTimes(7);
     expect(onSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_HOLD, expect.any(Function));
     expect(onSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_RESUME, expect.any(Function));
     expect(onSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));
     expect(onSpy).toHaveBeenCalledWith(TASK_EVENTS.AGENT_WRAPPEDUP, expect.any(Function));
     expect(onSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_MEDIA, expect.any(Function));
+    expect(onSpy).toHaveBeenCalledWith(TASK_EVENTS.CONTACT_RECORDING_PAUSED, expect.any(Function));
+    expect(onSpy).toHaveBeenCalledWith(TASK_EVENTS.CONTACT_RECORDING_RESUMED, expect.any(Function));
 
     // Unmount the component
     act(() => {
@@ -542,12 +554,24 @@ describe('useCallControl', () => {
       expect.any(Function),
       'someMockInteractionId'
     );
-    expect(offSpy).toHaveBeenCalledTimes(5);
+    expect(removeTaskCallbackSpy).toHaveBeenCalledWith(
+      TASK_EVENTS.CONTACT_RECORDING_PAUSED,
+      expect.any(Function),
+      'someMockInteractionId'
+    );
+    expect(removeTaskCallbackSpy).toHaveBeenCalledWith(
+      TASK_EVENTS.CONTACT_RECORDING_RESUMED,
+      expect.any(Function),
+      'someMockInteractionId'
+    );
+    expect(offSpy).toHaveBeenCalledTimes(7);
     expect(offSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_HOLD, expect.any(Function));
     expect(offSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_RESUME, expect.any(Function));
     expect(offSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));
     expect(offSpy).toHaveBeenCalledWith(TASK_EVENTS.AGENT_WRAPPEDUP, expect.any(Function));
     expect(offSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_MEDIA, expect.any(Function));
+    expect(offSpy).toHaveBeenCalledWith(TASK_EVENTS.CONTACT_RECORDING_PAUSED, expect.any(Function));
+    expect(offSpy).toHaveBeenCalledWith(TASK_EVENTS.CONTACT_RECORDING_RESUMED, expect.any(Function));
   });
 
   it('should not call any call backs if callbacks are not provided', async () => {
@@ -764,9 +788,12 @@ describe('useCallControl', () => {
         deviceType: 'BROWSER',
       })
     );
+    await waitFor(() => {
+      result.current.setIsRecording(true);
+    });
 
     await act(async () => {
-      await result.current.toggleRecording(true);
+      await result.current.toggleRecording();
     });
 
     expect(mockCurrentTask.pauseRecording).toHaveBeenCalledWith();
@@ -785,8 +812,13 @@ describe('useCallControl', () => {
       })
     );
 
+    await waitFor(() => {
+      result.current.setIsRecording(true);
+    });
+
     await act(async () => {
-      await result.current.toggleRecording(true);
+      await result.current.toggleRecording();
+      mockCurrentTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.CONTACT_RECORDING_PAUSED)?.[1]();
     });
 
     expect(mockLogger.error).toHaveBeenCalledWith('Error pausing recording: Error: Pause error', expect.any(Object));
@@ -804,8 +836,13 @@ describe('useCallControl', () => {
       })
     );
 
+    await waitFor(() => {
+      result.current.setIsRecording(false);
+    });
+
     await act(async () => {
-      await result.current.toggleRecording(false);
+      await result.current.toggleRecording();
+      mockCurrentTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.CONTACT_RECORDING_RESUMED)?.[1]();
     });
 
     expect(mockCurrentTask.resumeRecording).toHaveBeenCalledWith();
@@ -823,9 +860,12 @@ describe('useCallControl', () => {
         deviceType: 'BROWSER',
       })
     );
+    await waitFor(() => {
+      result.current.setIsRecording(false);
+    });
 
     await act(async () => {
-      await result.current.toggleRecording(false);
+      await result.current.toggleRecording();
     });
 
     expect(mockCurrentTask.resumeRecording).toHaveBeenCalledWith();
