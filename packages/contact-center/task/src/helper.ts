@@ -128,6 +128,8 @@ export const useCallControl = (props: useCallControlProps) => {
   const isBrowser = deviceType === 'BROWSER';
   const [isHeld, setIsHeld] = useState<boolean | undefined>(undefined);
 
+  const wrapUpReasonRef = useRef<string>('');
+
   const holdCallback = () => {
     setIsHeld(true);
     if (onHoldResume) onHoldResume();
@@ -143,7 +145,12 @@ export const useCallControl = (props: useCallControlProps) => {
   };
 
   const wrapupCallCallback = () => {
-    if (onWrapUp) onWrapUp();
+    if (onWrapUp) {
+      onWrapUp({
+        task: currentTask,
+        wrapUpReason: wrapUpReasonRef.current,
+      });
+    }
   };
 
   useEffect(() => {
@@ -221,6 +228,7 @@ export const useCallControl = (props: useCallControlProps) => {
   };
 
   const wrapupCall = (wrapUpReason: string, auxCodeId: string) => {
+    wrapUpReasonRef.current = wrapUpReason;
     currentTask.wrapup({wrapUpReason: wrapUpReason, auxCodeId: auxCodeId}).catch((error: Error) => {
       logError(`Error wrapping up call: ${error}`, 'wrapupCall');
     });

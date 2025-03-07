@@ -729,7 +729,10 @@ describe('useCallControl', () => {
     });
 
     expect(mockCurrentTask.wrapup).toHaveBeenCalledWith({wrapUpReason: 'Wrap reason', auxCodeId: '123'});
-    expect(mockOnWrapUp).toHaveBeenCalled();
+    expect(mockOnWrapUp).toHaveBeenCalledWith({
+      task: mockCurrentTask,
+      wrapUpReason: 'Wrap reason',
+    });
   });
 
   it('should log an error if wrapup fails', async () => {

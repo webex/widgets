@@ -70,8 +70,8 @@ function App() {
     console.log('onEnd invoked');
   };
 
-  const onWrapUp = () => {
-    console.log('onWrapup invoked');
+  const onWrapUp = (params) => {
+    console.log('onWrapup invoked', params);
   };
 
   const enableDisableMultiLogin = () => {
@@ -237,7 +237,7 @@ function App() {
                         <section className="section-box">
                           <fieldset className="fieldset">
                             <legend className="legend-box">Call Control</legend>
-                            <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapup={onWrapUp} />
+                            <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapUp={onWrapUp} />
                           </fieldset>
                         </section>
                       </div>
