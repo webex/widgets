@@ -29,6 +29,11 @@ const logger = {
   error: jest.fn(),
 };
 
+// Override the wrapupCodes property before your tests run
+beforeAll(() => {
+  store.setWrapupCodes([{id: '123', name: 'Wrap reason'}]);
+});
+
 describe('useIncomingTask Hook', () => {
   afterEach(() => {
     jest.clearAllMocks();
@@ -314,9 +319,7 @@ describe('useTaskList Hook', () => {
   });
 
   it('should call onTaskDeclined callback when provided', async () => {
-    const {result} = renderHook(() =>
-      useTaskList({cc: ccMock, deviceType: '', onTaskDeclined, logger, taskList: mockTaskList})
-    );
+    renderHook(() => useTaskList({cc: ccMock, deviceType: '', onTaskDeclined, logger, taskList: mockTaskList}));
 
     act(() => {
       taskMock.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_REJECT)?.[1]();
@@ -725,11 +728,16 @@ describe('useCallControl', () => {
 
     await act(async () => {
       await result.current.wrapupCall('Wrap reason', '123');
-      mockCurrentTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.AGENT_WRAPPEDUP)?.[1]();
+      mockCurrentTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.AGENT_WRAPPEDUP)?.[1]({
+        wrapUpAuxCodeId: '123',
+      });
     });
 
     expect(mockCurrentTask.wrapup).toHaveBeenCalledWith({wrapUpReason: 'Wrap reason', auxCodeId: '123'});
-    expect(mockOnWrapUp).toHaveBeenCalled();
+    expect(mockOnWrapUp).toHaveBeenCalledWith({
+      task: mockCurrentTask,
+      wrapUpReason: 'Wrap reason',
+    });
   });
 
   it('should log an error if wrapup fails', async () => {

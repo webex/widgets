@@ -78,7 +78,7 @@ function initWidgets() {
       ccTaskList.onTaskDeclined = onTaskDeclined;
       ccCallControl.onHoldResume = onHoldResume;
       ccCallControl.onEnd = onEnd;
-      ccCallControl.onWrapup = onWrapup;
+      ccCallControl.onWrapUp = onWrapUp;
 
       if (stationLoginCheckbox.checked) {
         ccStationLogin.classList.remove('disabled');
@@ -175,8 +175,8 @@ function onEnd() {
   console.log('onEnd invoked');
 }
 
-function onWrapup() {
-  console.log('onWrapUp invoked');
+function onWrapUp(params) {
+  console.log('onWrapup invoked', params);
 }
 
 // Helper to change the agent state, using "Available" as is or "Meeting" for lookup if not.

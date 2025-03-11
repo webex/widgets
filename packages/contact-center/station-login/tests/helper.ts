@@ -514,10 +514,6 @@ describe('useStationLogin Hook', () => {
   });
 
   it('should set deviceType, agentState on login success', async () => {
-    const setDeviceTypeSpy = jest.spyOn(store, 'setDeviceType');
-    const setIsAgentLoggedInSpy = jest.spyOn(store, 'setIsAgentLoggedIn');
-    const setCurrentStateSpy = jest.spyOn(store, 'setCurrentState');
-
     jest.spyOn(store, 'setCCCallback').mockImplementation((event, cb) => {
       ccMock.on(event, cb);
     });

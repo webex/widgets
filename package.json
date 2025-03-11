@@ -58,6 +58,7 @@
     "samples:serve-react": "yarn workspace samples-cc-react-app serve",
     "samples:serve-wc": "yarn workspace samples-cc-wc-app serve",
     "release:widgets": "semantic-release",
+    "postinstall": "husky install",
     "prepare": "husky"
   },
   "jest": {

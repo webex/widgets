@@ -1,3 +1,7 @@
+.app {
+  height: 100vh;
+}
+
 .task-rejected-popup {
   position: fixed;
   top: 20%;
@@ -22,9 +26,10 @@ iframe {
 }
 
 .widget-checkboxes {
-  display: flex;
-  width: 44rem;
-  flex-direction: row;
+  width: 100%;
+  label {
+    display: block;
+  }
 }
 
 .accessTokenTheme {
@@ -44,8 +49,4 @@ iframe {
 
 .station-login {
   margin-bottom: 20px;
-}
-
-.box {
-  width: 80%;
 }
