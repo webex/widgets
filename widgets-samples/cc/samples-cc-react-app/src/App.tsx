@@ -9,18 +9,30 @@ import {observer} from 'mobx-react-lite';
 // Have added here for debugging purposes
 window['store'] = store;
 
+const defaultWidgets = {
+  stationLogin: true,
+  userState: true,
+  incomingTask: true,
+  taskList: true,
+  callControl: true,
+};
+
 function App() {
   const [isSdkReady, setIsSdkReady] = useState(false);
-  const [selectedWidgets, setSelectedWidgets] = useState({
-    stationLogin: true,
-    userState: true,
-    incomingTask: true,
-    taskList: true,
-    callControl: true,
+  const [selectedWidgets, setSelectedWidgets] = useState(() => {
+    const savedWidgets = window.localStorage.getItem('selectedWidgets');
+    return savedWidgets ? JSON.parse(savedWidgets) : defaultWidgets;
   });
-  const [accessToken, setAccessToken] = useState('');
-  const [currentTheme, setCurrentTheme] = useState(store.currentTheme);
-  const [isMultiLoginEnabled, setIsMultiLoginEnabled] = useState(false);
+  // Initialize accessToken from local storage if available
+  const [accessToken, setAccessToken] = useState(() => window.localStorage.getItem('accessToken') || '');
+  const [currentTheme, setCurrentTheme] = useState(() => {
+    const savedTheme = window.localStorage.getItem('currentTheme');
+    return savedTheme ? savedTheme : store.currentTheme;
+  });
+  const [isMultiLoginEnabled, setIsMultiLoginEnabled] = useState(() => {
+    const savedMultiLogin = window.localStorage.getItem('isMultiLoginEnabled');
+    return savedMultiLogin === 'true';
+  });
   const [showRejectedPopup, setShowRejectedPopup] = useState(false);
   const [rejectedReason, setRejectedReason] = useState('');
   const [selectedState, setSelectedState] = useState('');
@@ -70,8 +82,8 @@ function App() {
     console.log('onEnd invoked');
   };
 
-  const onWrapUp = () => {
-    console.log('onWrapup invoked');
+  const onWrapUp = (params) => {
+    console.log('onWrapup invoked', params);
   };
 
   const enableDisableMultiLogin = () => {
@@ -123,6 +135,23 @@ function App() {
     setSelectedState('');
   };
 
+  // Store accessToken changes in local storage
+  useEffect(() => {
+    window.localStorage.setItem('accessToken', accessToken);
+  }, [accessToken]);
+
+  useEffect(() => {
+    window.localStorage.setItem('selectedWidgets', JSON.stringify(selectedWidgets));
+  }, [selectedWidgets]);
+
+  useEffect(() => {
+    window.localStorage.setItem('isMultiLoginEnabled', JSON.stringify(isMultiLoginEnabled));
+  }, [isMultiLoginEnabled]);
+
+  useEffect(() => {
+    window.localStorage.setItem('currentTheme', currentTheme);
+  }, [currentTheme]);
+
   useEffect(() => {
     store.setTaskRejected((reason: string) => {
       setRejectedReason(reason);
@@ -139,7 +168,7 @@ function App() {
   };
 
   return (
-    <div className="mds-typography centered-container">
+    <div className="app mds-typography">
       <ThemeProvider
         themeclass={currentTheme === 'LIGHT' ? 'mds-theme-stable-lightWebex' : 'mds-theme-stable-darkWebex'}
       >
@@ -166,44 +195,56 @@ function App() {
                 }}
               />
             </div>
-            <>
-              <div className="widget-checkboxes">
-                {['stationLogin', 'userState', 'incomingTask', 'taskList', 'callControl'].map((widget) => (
-                  <label key={widget}>
-                    <input
-                      type="checkbox"
-                      name={widget}
-                      checked={selectedWidgets[widget]}
-                      onChange={handleCheckboxChange}
-                    />
-                    {widget.charAt(0).toUpperCase() + widget.slice(1).replace(/([A-Z])/g, ' $1')}
+            <div className="box">
+              <section className="section-box">
+                <fieldset className="fieldset">
+                  <legend className="legend-box">&nbsp;Select Widgets to Show&nbsp;</legend>
+                  <div className="widget-checkboxes">
+                      {Object.keys(defaultWidgets).map((widget) => (
+                        <>
+                          <label key={widget}>
+                            <input
+                              type="checkbox"
+                              name={widget}
+                              checked={selectedWidgets[widget]}
+                              onChange={handleCheckboxChange}
+                            />
+                            &nbsp;{widget.charAt(0).toUpperCase() + widget.slice(1).replace(/([A-Z])/g, ' $1')}&nbsp;
+                          </label>
+                        </>
+                      ))}
+                    </div>
+                </fieldset>
+              </section>
+            </div>
+            <div className="box">
+              <section className="section-box">
+                <fieldset className="fieldset">
+                  <legend className="legend-box">&nbsp;SDK Toggles&nbsp;</legend>
+                  <label style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+                    <input type="checkbox" id="multiLoginFlag" name="multiLoginFlag" onChange={enableDisableMultiLogin} checked={isMultiLoginEnabled} /> &nbsp; Enable Multi Login
+                    <PopoverNext
+                      trigger="mouseenter"
+                      triggerComponent={<Icon name="info-badge-filled" />}
+                      placement="auto-end"
+                      closeButtonPlacement="top-left"
+                      closeButtonProps={{'aria-label': 'Close'}}
+                    >
+                      <Text>
+                        <div
+                          className="warning-note"
+                          style={{color: 'var(--mds-color-theme-text-error-normal)', marginBottom: '10px'}}
+                        >
+                          <strong>Note:</strong> The "Enable Multi Login" option must be set before initializing the SDK.
+                          Changes to this setting after SDK initialization will not take effect. Please ensure you configure
+                          this option before clicking the "Init Widgets" button.
+                        </div>
+                      </Text>
+                    </PopoverNext>
                   </label>
-                ))}
-              </div>
-            </>
-            <label style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
-              <input type="checkbox" id="multiLoginFlag" name="multiLoginFlag" onChange={enableDisableMultiLogin} />{' '}
-              Enable Multi Login
-              <PopoverNext
-                trigger="mouseenter"
-                triggerComponent={<Icon name="info-badge-filled" />}
-                placement="auto-end"
-                closeButtonPlacement="top-left"
-                closeButtonProps={{'aria-label': 'Close'}}
-              >
-                <Text>
-                  <div
-                    className="warning-note"
-                    style={{color: 'var(--mds-color-theme-text-error-normal)', marginBottom: '10px'}}
-                  >
-                    <strong>Note:</strong> The "Enable Multi Login" option must be set before initializing the SDK.
-                    Changes to this setting after SDK initialization will not take effect. Please ensure you configure
-                    this option before clicking the "Init Widgets" button.
-                  </div>
-                </Text>
-              </PopoverNext>
-            </label>
-
+                </fieldset>
+              </section>
+            </div>
             <br />
             <Button
               disabled={accessToken.trim() === ''}
@@ -237,7 +278,7 @@ function App() {
                         <section className="section-box">
                           <fieldset className="fieldset">
                             <legend className="legend-box">Call Control</legend>
-                            <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapup={onWrapUp} />
+                            <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapUp={onWrapUp} />
                           </fieldset>
                         </section>
                       </div>
