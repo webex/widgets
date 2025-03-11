@@ -325,6 +325,11 @@ class StoreWrapper implements IStoreWrapper {
 
     this.setCurrentTask(task);
 
+    this.setState({
+      developerName: 'ENGAGED',
+      name: 'Engaged',
+    });
+
     const {interaction, agentId} = task.data;
     const {state, isTerminated, participants} = interaction;
 
@@ -333,6 +338,12 @@ class StoreWrapper implements IStoreWrapper {
       // wrapup
       const wrapupRequired = state === 'wrapUp' && !participants[agentId].isWrappedUp;
       this.setWrapupRequired(wrapupRequired);
+
+      if (!wrapupRequired) {
+        this.setState({
+          reset: true,
+        });
+      }
 
       return;
     }
