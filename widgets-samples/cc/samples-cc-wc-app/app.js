@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 const accessTokenElem = document.getElementById('access_token_elem');
 const themeElem = document.getElementById('theme');
 const widgetsContainer = document.getElementById('widgets-container');
@@ -81,7 +80,7 @@ function initWidgets() {
       ccTaskList.onTaskDeclined = onTaskDeclined;
       ccCallControl.onHoldResume = onHoldResume;
       ccCallControl.onEnd = onEnd;
-      ccCallControl.onWrapup = onWrapup;
+      ccCallControl.onWrapUp = onWrapUp;
 
       if (stationLoginCheckbox.checked) {
         ccStationLogin.classList.remove('disabled');
@@ -101,7 +100,20 @@ function initWidgets() {
 function loginSuccess() {
   if (userStateCheckbox.checked) {
     ccUserState.classList.remove('disabled');
-    widgetsContainer.appendChild(ccUserState);
+
+    const userStateContainer = document.createElement('div');
+    userStateContainer.className = 'box';
+    userStateContainer.innerHTML = `
+      <section class="section-box">
+        <fieldset class="fieldset">
+          <legend class="legend-box">User State</legend>
+        </fieldset>
+      </section>
+    `;
+
+    userStateContainer.querySelector('fieldset').appendChild(ccUserState);
+    widgetsContainer.appendChild(userStateContainer);
+    ccUserState.onStateChange = onStateChange;
   }
   if (incomingTaskCheckbox.checked) {
     ccIncomingTask.classList.remove('disabled');
@@ -113,7 +125,19 @@ function loginSuccess() {
   }
   if (callControlCheckbox.checked) {
     ccCallControl.classList.remove('disabled');
-    widgetsContainer.appendChild(ccCallControl);
+
+    const callControlContainer = document.createElement('div');
+    callControlContainer.className = 'box';
+    callControlContainer.innerHTML = `
+      <section class="section-box">
+        <fieldset class="fieldset">
+          <legend class="legend-box">Call Control</legend>
+        </fieldset>
+      </section>
+    `;
+
+    callControlContainer.querySelector('fieldset').appendChild(ccCallControl);
+    widgetsContainer.appendChild(callControlContainer);
   }
   if (outdialCallCheckbox.checked) {
     ccOutdial.classList.remove('disabled');
@@ -122,12 +146,16 @@ function loginSuccess() {
 }
 
 function logoutSuccess() {
-  console.log('Agent logout has been succesful');
+  console.log('Agent logout has been successful');
   ccUserState.classList.add('disabled');
   ccIncomingTask.classList.add('disabled');
   ccTaskList.classList.add('disabled');
   ccCallControl.classList.add('disabled');
   ccOutdial.classList.add('disabled');
+}
+
+function onStateChange(status) {
+  console.log('onStateChange invoked', status);
 }
 
 function onAccepted() {
@@ -154,8 +182,8 @@ function onEnd() {
   console.log('onEnd invoked');
 }
 
-function onWrapup() {
-  console.log('onWrapUp invoked');
+function onWrapUp(params) {
+  console.log('onWrapup invoked', params);
 }
 
 // Helper to change the agent state, using "Available" as is or "Meeting" for lookup if not.
@@ -176,7 +204,8 @@ function changeAgentState(newState) {
     })
     .then(function (response) {
       store.setCurrentState(response.data.auxCodeId);
-      store.setLastStateChangeTimestamp(new Date(response.data.lastStateChangeTimestamp));
+      store.setLastStateChangeTimestamp(response.data.lastStateChangeTimestamp);
+      store.setLastIdleCodeChangeTimestamp(response.data.setLastIdleCodeChangeTimestamp);
       console.log('Agent state updated to', newState);
     })
     .catch(function (error) {

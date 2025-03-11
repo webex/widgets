@@ -1,3 +1,52 @@
+# [1.28.0-ccwidgets.31](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.30...v1.28.0-ccwidgets.31) (2025-03-07)
+
+
+### Features
+
+* **cc-widgets:** Style station login component ([#404](https://github.com/webex/widgets/issues/404)) ([cfb6cf4](https://github.com/webex/widgets/commit/cfb6cf40ece1c69ad7dfc5f3980c6ba075d0568b))
+
+# [1.28.0-ccwidgets.30](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.29...v1.28.0-ccwidgets.30) (2025-03-06)
+
+
+### Bug Fixes
+
+* **cc-store:** sync-callbacks ([#407](https://github.com/webex/widgets/issues/407)) ([b5f729c](https://github.com/webex/widgets/commit/b5f729cf6f6726afb2cb9603d402c3ea28ce9538))
+
+# [1.28.0-ccwidgets.29](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.28...v1.28.0-ccwidgets.29) (2025-03-06)
+
+
+### Features
+
+* **cc-widgets:** added new UI for call controls ([#405](https://github.com/webex/widgets/issues/405)) ([e48f48d](https://github.com/webex/widgets/commit/e48f48d85d2318b5bc62c995aad8d0dd6fc8631a))
+
+# [1.28.0-ccwidgets.28](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.27...v1.28.0-ccwidgets.28) (2025-03-06)
+
+
+### Bug Fixes
+
+* **cc-task:** update colors for Task Item ([#406](https://github.com/webex/widgets/issues/406)) ([08cb2aa](https://github.com/webex/widgets/commit/08cb2aaef165de51c907740e6d6e3fd26f5629bd))
+
+# [1.28.0-ccwidgets.27](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.26...v1.28.0-ccwidgets.27) (2025-03-04)
+
+
+### Features
+
+* **cc-user-state:** custom user states & setting idle code ([#397](https://github.com/webex/widgets/issues/397)) ([4fcecd0](https://github.com/webex/widgets/commit/4fcecd061556abc4f3a42cec98d99c810f8b8325))
+
+# [1.28.0-ccwidgets.26](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.25...v1.28.0-ccwidgets.26) (2025-03-03)
+
+
+### Features
+
+* **cc-widgets:** added new incomingtask and task ui based on figma design ([#402](https://github.com/webex/widgets/issues/402)) ([e69896a](https://github.com/webex/widgets/commit/e69896a5255be191424d52f4d6a4f2ada2c9df11))
+
+# [1.28.0-ccwidgets.25](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.24...v1.28.0-ccwidgets.25) (2025-03-03)
+
+
+### Features
+
+* **cc-widgets:** updated user state with new UI as per new figma ([#403](https://github.com/webex/widgets/issues/403)) ([43ae0c7](https://github.com/webex/widgets/commit/43ae0c7fc316c16744fd3eae3c52f91ab4ffccab))
+
 # [1.28.0-ccwidgets.24](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.23...v1.28.0-ccwidgets.24) (2025-02-28)
 
 

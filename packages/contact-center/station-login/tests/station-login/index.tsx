@@ -6,6 +6,14 @@ import '@testing-library/jest-dom';
 
 jest.mock('@momentum-ui/react-collaboration', () => ({
   ButtonPill: () => <div data-testid="ButtonPill" />,
+  Text: () => <div data-testid="Text" />,
+  SelectNext: () => <div data-testid="SelectNext" />,
+  TextInput: () => <div data-testid="TextInput" />,
+}));
+
+jest.mock('@momentum-design/components/dist/react', () => ({
+  Avatar: () => <div data-testid="Avatar" />,
+  Icon: () => <div data-testid="Icon" />,
 }));
 
 const teamsMock = ['team123', 'team456'];
@@ -20,13 +28,22 @@ const isAgentLoggedInMock = false;
 
 // Mock the store import
 jest.mock('@webex/cc-store', () => {
+  const originalStore = jest.requireActual('@webex/cc-store'); // Get the actual implementation
+
   return {
+    ...originalStore, // Spread the original properties
     cc: ccMock,
     teams: teamsMock,
     loginOptions: loginOptionsMock,
     deviceType: deviceTypeMock,
     logger: loggerMock,
     isAgentLoggedIn: isAgentLoggedInMock,
+    setCCCallback: jest.fn(),
+    setLogoutCallback: jest.fn(),
+    removeCCCallback: jest.fn(),
+    CC_EVENTS: {
+      AGENT_STATION_LOGIN_SUCCESS: 'AgentStationLoginSuccess',
+    },
   };
 });
 

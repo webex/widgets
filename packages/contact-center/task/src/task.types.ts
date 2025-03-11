@@ -130,7 +130,7 @@ export interface ControlProps {
   /**
    * Function to handle wrapping up the task.
    */
-  onWrapUp?: () => void;
+  onWrapUp?: ({task, wrapUpReason}: {task: ITask; wrapUpReason: string}) => void;
 
   /**
    * Logger instance for logging purposes.
@@ -176,6 +176,17 @@ export interface ControlProps {
    * Selected login option
    */
   deviceType: string;
+
+  /**
+   * Flag to determine if the task is held
+   */
+  isHeld: boolean;
+
+  /**
+   * Function to set the held status of the task.
+   * @param isHeld - Boolean indicating whether the task is held.
+   */
+  setIsHeld: (isHeld: boolean) => void;
 }
 
 export type CallControlProps = Pick<ControlProps, 'onHoldResume' | 'onEnd' | 'onWrapUp'>;
@@ -190,6 +201,8 @@ export type CallControlPresentationalProps = Pick<
   | 'toggleRecording'
   | 'endCall'
   | 'wrapupCall'
+  | 'isHeld'
+  | 'setIsHeld'
 >;
 
 export type useCallControlProps = Pick<

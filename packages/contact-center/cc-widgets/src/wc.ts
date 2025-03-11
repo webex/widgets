@@ -4,7 +4,12 @@ import {UserState} from '@webex/cc-user-state';
 import store from '@webex/cc-store';
 import {TaskList, IncomingTask, CallControl, OutdialCall} from '@webex/cc-task';
 
-const WebUserState = r2wc(UserState);
+const WebUserState = r2wc(UserState, {
+  props: {
+    onStateChange: 'function',
+  },
+});
+
 const WebIncomingTask = r2wc(IncomingTask, {
   props: {
     onAccepted: 'function',

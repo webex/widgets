@@ -6,6 +6,8 @@ import {
   CC_EVENTS,
   IWrapupCode,
   WithWebex,
+  ICustomState,
+  IdleCode,
   IContactCenter,
   ITask,
 } from './store.types';
@@ -34,7 +36,9 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.logger;
   }
   get idleCodes() {
-    return this.store.idleCodes;
+    return this.store.idleCodes.filter((code) => {
+      return code.name === 'RONA' || !code.isSystem;
+    });
   }
   get agentId() {
     return this.store.agentId;
@@ -72,12 +76,20 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.lastStateChangeTimestamp;
   }
 
+  get lastIdleCodeChangeTimestamp() {
+    return this.store.lastIdleCodeChangeTimestamp;
+  }
+
   get showMultipleLoginAlert() {
     return this.store.showMultipleLoginAlert;
   }
 
   get currentTheme() {
     return this.store.currentTheme;
+  }
+
+  get customState() {
+    return this.store.customState;
   }
 
   setCurrentTheme = (theme: string): void => {
@@ -93,11 +105,22 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   setCurrentState = (state: string): void => {
-    this.store.currentState = state;
+    runInAction(() => {
+      this.store.currentState = state;
+      this.store.customState = null;
+    });
   };
 
-  setLastStateChangeTimestamp = (timestamp: Date): void => {
-    this.store.lastStateChangeTimestamp = timestamp;
+  setLastStateChangeTimestamp = (timestamp: number): void => {
+    runInAction(() => {
+      this.store.lastStateChangeTimestamp = timestamp;
+    });
+  };
+
+  setLastIdleCodeChangeTimestamp = (timestamp: number): void => {
+    runInAction(() => {
+      this.store.lastIdleCodeChangeTimestamp = timestamp;
+    });
   };
 
   setIsAgentLoggedIn = (value: boolean): void => {
@@ -109,7 +132,9 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   setCurrentTask = (task: ITask): void => {
-    this.store.currentTask = task;
+    runInAction(() => {
+      this.store.currentTask = task;
+    });
   };
 
   setIncomingTask = (task: ITask): void => {
@@ -124,8 +149,50 @@ class StoreWrapper implements IStoreWrapper {
     this.store.wrapupCodes = wrapupCodes;
   };
 
+  setState = (state: ICustomState | IdleCode): void => {
+    if ('reset' in state) {
+      runInAction(() => {
+        this.store.customState = null;
+      });
+      return;
+    }
+    if ('id' in state) {
+      runInAction(() => {
+        this.setCurrentState(state.id);
+        this.store.customState = null;
+      });
+    } else {
+      runInAction(() => {
+        this.store.customState = state;
+      });
+    }
+  };
+
   setTaskRejected = (callback: ((reason: string) => void) | undefined): void => {
     this.onTaskRejected = callback;
+  };
+
+  setCCCallback = (event: CC_EVENTS | TASK_EVENTS, callback) => {
+    if (!callback) return;
+    this.store.cc.on(event, callback);
+  };
+
+  setTaskCallback = (event: TASK_EVENTS, callback, taskId: string) => {
+    if (!callback) return;
+    const task = this.store.taskList.find((task) => task.data.interactionId === taskId);
+    if (!task) return;
+    task.on(event, callback);
+  };
+
+  removeCCCallback = (event: CC_EVENTS) => {
+    this.store.cc.off(event);
+  };
+
+  removeTaskCallback = (event: TASK_EVENTS, callback, taskId: string) => {
+    if (!callback) return;
+    const task = this.store.taskList.find((task) => task.data.interactionId === taskId);
+    if (!task) return;
+    task.off(event, callback);
   };
 
   init(options: InitParams): Promise<void> {
@@ -136,15 +203,14 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.registerCC(webex);
   };
 
-  handleTaskRemove = (taskId: string) => {
+  handleTaskRemove = (event) => {
+    const taskId = event;
     // Remove the task from the taskList
     const taskToRemove = this.store.taskList.find((task) => task.data.interactionId === taskId);
     if (taskToRemove) {
-      taskToRemove.off(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned(taskId));
-      taskToRemove.off(TASK_EVENTS.TASK_END, ({wrapupRequired}: {wrapupRequired: boolean}) =>
-        this.handleTaskEnd(taskToRemove, wrapupRequired)
-      );
-      taskToRemove.off(TASK_EVENTS.TASK_REJECT, () => this.handleTaskRemove(taskId));
+      taskToRemove.off(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
+      taskToRemove.off(TASK_EVENTS.TASK_END, () => this.handleTaskEnd(taskToRemove));
+      taskToRemove.off(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(taskToRemove.interactionId, reason));
     }
     const updateTaskList = this.store.taskList.filter((task) => task.data.interactionId !== taskId);
 
@@ -160,46 +226,67 @@ class StoreWrapper implements IStoreWrapper {
       if (this.store.incomingTask?.data.interactionId === taskId) {
         this.setIncomingTask(null);
       }
+
+      // reset the custom state
+      this.setState({
+        reset: true,
+      });
     });
   };
 
-  // TODO -- SDK needs to send only 1 event on end : https://jira-eng-gpk2.cisco.com/jira/browse/SPARK-615785
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  handleTaskEnd = (task: ITask, wrapupRequired: boolean) => {
-    if (task.data.interaction.state === 'connected') {
+  handleTaskEnd = (event) => {
+    // If the call is ended by agent we get the task object in event.data
+    // If the call is ended by customer we get the task object directly
+
+    const task = event.data ? event.data : event;
+    // TODO -- SDK needs to send only 1 event on end : https://jira-eng-gpk2.cisco.com/jira/browse/SPARK-615785
+
+    if (task.interaction.state === 'connected') {
       this.setWrapupRequired(true);
       return;
-    } else if (task.data.interaction.state !== 'connected' && this.store.wrapupRequired !== true) {
-      this.handleTaskRemove(task.data.interactionId);
+    } else if (task.interaction.state !== 'connected' && this.store.wrapupRequired !== true) {
+      this.handleTaskRemove(task.interactionId);
     }
   };
 
-  handleTaskAssigned = (task: ITask) => () => {
+  handleTaskAssigned = (event) => {
+    const task = event;
     runInAction(() => {
       this.setCurrentTask(task);
       this.setIncomingTask(null);
+      this.setState({
+        developerName: 'ENGAGED',
+        name: 'Engaged',
+      });
     });
   };
 
-  handleIncomingTask = (task: ITask) => {
-    this.setIncomingTask(task);
+  handleTaskWrapUp = (event) => {
+    const task = event;
+    this.setWrapupRequired(false);
+    this.handleTaskRemove(task.interactionId);
+  };
+
+  handleIncomingTask = (event) => {
+    const task: ITask = event;
     if (this.store.taskList.some((t) => t.data.interactionId === task.data.interactionId)) {
       // Task already present in the taskList
       return;
     }
 
     // Attach event listeners to the task
-    task.on(TASK_EVENTS.TASK_END, ({wrapupRequired}: {wrapupRequired: boolean}) => {
-      this.handleTaskEnd(task, wrapupRequired);
-    });
+    task.on(TASK_EVENTS.TASK_END, () => this.handleTaskEnd(task));
 
     // When we receive TASK_ASSIGNED the task was accepted by the agent and we need wrap up
-    task.on(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned(task));
+    task.on(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
 
     // When we receive TASK_REJECT sdk changes the agent status
     // When we receive TASK_REJECT that means the task was not accepted by the agent and we wont need wrap up
-    task.on(TASK_EVENTS.TASK_REJECT, (reason: string) => this.handleTaskReject(task.data.interactionId, reason));
+    task.on(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(task.data.interactionId, reason));
 
+    task.on(TASK_EVENTS.AGENT_WRAPPEDUP, this.handleTaskWrapUp);
+
+    this.setIncomingTask(task);
     this.setTaskList([...this.store.taskList, task]);
   };
 
@@ -208,8 +295,8 @@ class StoreWrapper implements IStoreWrapper {
       const DEFAULT_CODE = '0'; // Default code when no aux code is present
       this.setCurrentState(data.auxCodeId?.trim() !== '' ? data.auxCodeId : DEFAULT_CODE);
 
-      const startTime = data.lastStateChangeTimestamp;
-      this.setLastStateChangeTimestamp(new Date(startTime));
+      this.setLastStateChangeTimestamp(data.lastStateChangeTimestamp);
+      this.setLastIdleCodeChangeTimestamp(data.lastIdleCodeChangeTimestamp);
     }
   };
 
@@ -219,17 +306,18 @@ class StoreWrapper implements IStoreWrapper {
     }
   };
 
-  handleTaskHydrate = (task: ITask) => {
-    task.on(TASK_EVENTS.TASK_END, ({wrapupRequired}: {wrapupRequired: boolean}) => {
-      this.handleTaskEnd(task, wrapupRequired);
-    });
+  handleTaskHydrate = (event) => {
+    const task = event;
+    task.on(TASK_EVENTS.TASK_END, () => this.handleTaskEnd(task));
 
     // When we receive TASK_ASSIGNED the task was accepted by the agent and we need wrap up
-    task.on(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned(task));
+    task.on(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
 
     // When we receive TASK_REJECT sdk changes the agent status
     // When we receive TASK_REJECT that means the task was not accepted by the agent and we wont need wrap up
-    task.on(TASK_EVENTS.TASK_REJECT, (reason: string) => this.handleTaskReject(task.data.interactionId, reason));
+    task.on(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(task.data.interactionId, reason));
+
+    task.on(TASK_EVENTS.AGENT_WRAPPEDUP, this.handleTaskWrapUp);
 
     if (!this.store.taskList.some((t) => t.data.interactionId === task.data.interactionId)) {
       this.setTaskList([...this.store.taskList, task]);
@@ -257,20 +345,67 @@ class StoreWrapper implements IStoreWrapper {
     this.handleTaskRemove(taskId);
   };
 
+  cleanUpStore = () => {
+    runInAction(() => {
+      this.setIsAgentLoggedIn(false);
+      this.setDeviceType('');
+      this.setIncomingTask(null);
+      this.setCurrentTask(null);
+      this.setTaskList([]);
+      this.setWrapupRequired(false);
+      this.setLastStateChangeTimestamp(undefined);
+      this.setLastIdleCodeChangeTimestamp(undefined);
+      this.setShowMultipleLoginAlert(false);
+    });
+  };
+
   setupIncomingTaskHandler = (ccSDK: IContactCenter) => {
-    ccSDK.on(TASK_EVENTS.TASK_INCOMING, this.handleIncomingTask);
+    let listenersAdded = false;
 
-    ccSDK.on(CC_EVENTS.AGENT_STATE_CHANGE, this.handleStateChange);
-    ccSDK.on(CC_EVENTS.AGENT_MULTI_LOGIN, this.handleMultiLoginCloseSession);
-    ccSDK.on(TASK_EVENTS.TASK_HYDRATE, this.handleTaskHydrate);
-
-    return () => {
-      // TODO: https://jira-eng-gpk2.cisco.com/jira/browse/SPARK-617635, remove event listeners after logout
-      ccSDK.off(TASK_EVENTS.TASK_INCOMING, this.handleIncomingTask);
-      ccSDK.off(CC_EVENTS.AGENT_STATE_CHANGE, this.handleStateChange);
-      ccSDK.off(CC_EVENTS.AGENT_MULTI_LOGIN, this.handleMultiLoginCloseSession);
-      ccSDK.off(TASK_EVENTS.TASK_HYDRATE, this.handleTaskHydrate);
+    const handleLogOut = () => {
+      this.cleanUpStore();
+      removeEventListeners();
+      listenersAdded = false;
     };
+
+    const addEventListeners = () => {
+      ccSDK.on(TASK_EVENTS.TASK_HYDRATE, this.handleTaskHydrate);
+      ccSDK.on(CC_EVENTS.AGENT_STATE_CHANGE, this.handleStateChange);
+      ccSDK.on(TASK_EVENTS.TASK_INCOMING, this.handleIncomingTask);
+      ccSDK.on(CC_EVENTS.AGENT_MULTI_LOGIN, this.handleMultiLoginCloseSession);
+      ccSDK.on(CC_EVENTS.AGENT_LOGOUT_SUCCESS, handleLogOut);
+    };
+
+    const removeEventListeners = () => {
+      ccSDK.off(TASK_EVENTS.TASK_HYDRATE, this.handleTaskHydrate);
+      ccSDK.off(CC_EVENTS.AGENT_STATE_CHANGE, this.handleStateChange);
+      ccSDK.off(TASK_EVENTS.TASK_INCOMING, this.handleIncomingTask);
+      ccSDK.off(CC_EVENTS.AGENT_MULTI_LOGIN, this.handleMultiLoginCloseSession);
+      ccSDK.off(CC_EVENTS.AGENT_LOGOUT_SUCCESS, handleLogOut);
+    };
+
+    // TODO: https://jira-eng-gpk2.cisco.com/jira/browse/SPARK-626777 Implement the de-register method and close the listener there
+
+    const handleLogin = (payload) => {
+      runInAction(() => {
+        this.setIsAgentLoggedIn(true);
+        this.setDeviceType(payload.deviceType);
+        this.setCurrentState(payload.auxCodeId?.trim() !== '' ? payload.auxCodeId : '0');
+        this.setLastStateChangeTimestamp(payload.lastStateChangeTimestamp);
+        this.setLastIdleCodeChangeTimestamp(payload.lastIdleCodeChangeTimestamp);
+      });
+    };
+
+    ccSDK.on(CC_EVENTS.AGENT_STATION_LOGIN_SUCCESS, handleLogin);
+
+    [CC_EVENTS.AGENT_DN_REGISTERED, CC_EVENTS.AGENT_RELOGIN_SUCCESS].forEach((event) => {
+      ccSDK.on(`${event}`, () => {
+        if (!listenersAdded) {
+          addEventListeners();
+          listenersAdded = true;
+        }
+      });
+    });
   };
 }
 

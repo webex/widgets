@@ -3,23 +3,40 @@ import {StationLogin, UserState, IncomingTask, TaskList, CallControl, store, Out
 import {ThemeProvider, IconProvider, Icon, Button, Checkbox, Text} from '@momentum-design/components/dist/react';
 import {PopoverNext} from '@momentum-ui/react-collaboration';
 import './App.scss';
+import {observer} from 'mobx-react-lite';
+
+// This is not to be included to a production app.
+// Have added here for debugging purposes
+window['store'] = store;
+
+const defaultWidgets = {
+  stationLogin: true,
+  userState: true,
+  incomingTask: true,
+  taskList: true,
+  callControl: true,
+};
 
 function App() {
   const [isSdkReady, setIsSdkReady] = useState(false);
-  const [selectedWidgets, setSelectedWidgets] = useState({
-    stationLogin: false,
-    userState: false,
-    incomingTask: false,
-    taskList: false,
-    callControl: false,
-    outdialCall: false,
+  const [selectedWidgets, setSelectedWidgets] = useState(() => {
+    const savedWidgets = window.localStorage.getItem('selectedWidgets');
+    return savedWidgets ? JSON.parse(savedWidgets) : defaultWidgets;
   });
-  const [accessToken, setAccessToken] = useState('');
-  const [currentTheme, setCurrentTheme] = useState(store.currentTheme);
-  const [isMultiLoginEnabled, setIsMultiLoginEnabled] = useState(false);
+  // Initialize accessToken from local storage if available
+  const [accessToken, setAccessToken] = useState(() => window.localStorage.getItem('accessToken') || '');
+  const [currentTheme, setCurrentTheme] = useState(() => {
+    const savedTheme = window.localStorage.getItem('currentTheme');
+    return savedTheme ? savedTheme : store.currentTheme;
+  });
+  const [isMultiLoginEnabled, setIsMultiLoginEnabled] = useState(() => {
+    const savedMultiLogin = window.localStorage.getItem('isMultiLoginEnabled');
+    return savedMultiLogin === 'true';
+  });
   const [showRejectedPopup, setShowRejectedPopup] = useState(false);
   const [rejectedReason, setRejectedReason] = useState('');
   const [selectedState, setSelectedState] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const webexConfig = {
     fedramp: false,
@@ -32,10 +49,12 @@ function App() {
   };
 
   const onLogin = () => {
+    setIsLoggedIn(true);
     console.log('Agent login has been succesful');
   };
 
   const onLogout = () => {
+    setIsLoggedIn(false);
     console.log('Agent logout has been succesful');
   };
 
@@ -47,12 +66,12 @@ function App() {
     console.log('onDeclined invoked');
   };
 
-  const onTaskAccepted = () => {
-    console.log('onTaskAccepted invoked');
+  const onTaskAccepted = (task) => {
+    console.log('onTaskAccepted invoked for task:', task);
   };
 
-  const onTaskDeclined = () => {
-    console.log('onTaskDeclined invoked');
+  const onTaskDeclined = (task) => {
+    console.log('onTaskDeclined invoked for task:', task);
   };
 
   const onHoldResume = () => {
@@ -63,8 +82,8 @@ function App() {
     console.log('onEnd invoked');
   };
 
-  const onWrapup = () => {
-    console.log('onWrapup invoked');
+  const onWrapUp = (params) => {
+    console.log('onWrapup invoked', params);
   };
 
   const enableDisableMultiLogin = () => {
@@ -99,7 +118,8 @@ function App() {
       })
       .then((response) => {
         store.setCurrentState(response.data.auxCodeId);
-        store.setLastStateChangeTimestamp(new Date(response.data.lastStateChangeTimestamp));
+        store.setLastStateChangeTimestamp(response.data.lastStateChangeTimestamp);
+        store.setLastIdleCodeChangeTimestamp(response.data.lastIdleCodeChangeTimestamp);
         console.log('Agent state updated to', newState);
       })
       .catch((error) => {
@@ -115,6 +135,23 @@ function App() {
     setSelectedState('');
   };
 
+  // Store accessToken changes in local storage
+  useEffect(() => {
+    window.localStorage.setItem('accessToken', accessToken);
+  }, [accessToken]);
+
+  useEffect(() => {
+    window.localStorage.setItem('selectedWidgets', JSON.stringify(selectedWidgets));
+  }, [selectedWidgets]);
+
+  useEffect(() => {
+    window.localStorage.setItem('isMultiLoginEnabled', JSON.stringify(isMultiLoginEnabled));
+  }, [isMultiLoginEnabled]);
+
+  useEffect(() => {
+    window.localStorage.setItem('currentTheme', currentTheme);
+  }, [currentTheme]);
+
   useEffect(() => {
     store.setTaskRejected((reason: string) => {
       setRejectedReason(reason);
@@ -126,8 +163,12 @@ function App() {
     };
   }, []);
 
+  const onStateChange = (status) => {
+    console.log('onStateChange invoked', status);
+  };
+
   return (
-    <div className="mds-typography" style={{height: '100%'}}>
+    <div className="app mds-typography">
       <ThemeProvider
         themeclass={currentTheme === 'LIGHT' ? 'mds-theme-stable-lightWebex' : 'mds-theme-stable-darkWebex'}
       >
@@ -155,52 +196,29 @@ function App() {
               />
             </div>
             <>
-            <Text>
-                  <div
-                    className="warning-note"
-                    style={{color: 'var(--mds-color-theme-text-error-normal)', marginBottom: '10px'}}
-                  >
-                    <strong>Note:</strong> You need to select Incoming Task, Call Control before selecting Outdial Call.
-                  </div>
-            </Text>
+              <Text>
+                    <div
+                      className="warning-note"
+                      style={{color: 'var(--mds-color-theme-text-error-normal)', marginBottom: '10px'}}
+                    >
+                      <strong>Note:</strong> You need to select Incoming Task, Call Control before selecting Outdial Call.
+                    </div>
+              </Text>
               <div className="widget-checkboxes">
-                {['stationLogin', 'userState', 'incomingTask', 'taskList', 'callControl', 'outdialCall'].map((widget) => (
-                  <label key={widget}>
-                    <input
-                      type="checkbox"
-                      name={widget}
-                      checked={selectedWidgets[widget]}
-                      onChange={handleCheckboxChange}
-                    />
-                    {widget.charAt(0).toUpperCase() + widget.slice(1).replace(/([A-Z])/g, ' $1')}
-                  </label>
-                ))}
-              </div>
-            </>
-            <label style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
-              <input type="checkbox" id="multiLoginFlag" name="multiLoginFlag" onChange={enableDisableMultiLogin} />{' '}
-              Enable Multi Login
-              <PopoverNext
-                trigger="mouseenter"
-                triggerComponent={<Icon name="info-badge-filled" />}
-                placement="auto-end"
-                closeButtonPlacement="top-left"
-                closeButtonProps={{'aria-label': 'Close'}}
-              >
-                <Text>
-                  <div
-                    className="warning-note"
-                    style={{color: 'var(--mds-color-theme-text-error-normal)', marginBottom: '10px'}}
-                  >
-                    <strong>Note:</strong> The "Enable Multi Login" option must be set before initializing the SDK.
-                    Changes to this setting after SDK initialization will not take effect. Please ensure you configure
-                    this option before clicking the "Init Widgets" button.
-                  </div>
-                </Text>
-              </PopoverNext>
-            </label>
-
+              {['stationLogin', 'userState', 'incomingTask', 'taskList', 'callControl', 'outdialCall'].map((widget) => (
+                <label key={widget}>
+                  <input
+                    type="checkbox"
+                    name={widget}
+                    checked={selectedWidgets[widget]}
+                    onChange={handleCheckboxChange}
+                  />
+                  {widget.charAt(0).toUpperCase() + widget.slice(1).replace(/([A-Z])/g, ' $1')}
+              </label>
+              ))}
+            </div>
             <br />
+            </>
             <Button
               disabled={accessToken.trim() === ''}
               onClick={() => {
@@ -213,16 +231,34 @@ function App() {
             </Button>
             {isSdkReady && (
               <>
-                {selectedWidgets.stationLogin && <StationLogin onLogin={onLogin} onLogout={onLogout} />}
-                {store.isAgentLoggedIn && (
+                <div className="station-login">
+                  {selectedWidgets.stationLogin && <StationLogin onLogin={onLogin} onLogout={onLogout} />}
+                </div>
+                {(store.isAgentLoggedIn || isLoggedIn) && (
                   <>
-                    {selectedWidgets.userState && <UserState />}
+                    {selectedWidgets.userState && (
+                      <div className="box">
+                        <section className="section-box">
+                          <fieldset className="fieldset">
+                            <legend className="legend-box">User State</legend>
+                            <UserState onStateChange={onStateChange} />
+                          </fieldset>
+                        </section>
+                      </div>
+                    )}
+                    {selectedWidgets.callControl && store.currentTask && (
+                      <div className="box">
+                        <section className="section-box">
+                          <fieldset className="fieldset">
+                            <legend className="legend-box">Call Control</legend>
+                            <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapUp={onWrapUp} />
+                          </fieldset>
+                        </section>
+                      </div>
+                    )}
                     {selectedWidgets.incomingTask && <IncomingTask onAccepted={onAccepted} onDeclined={onDeclined} />}
                     {selectedWidgets.taskList && (
                       <TaskList onTaskAccepted={onTaskAccepted} onTaskDeclined={onTaskDeclined} />
-                    )}
-                    {selectedWidgets.callControl && (
-                      <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapup={onWrapup} />
                     )}
                     {selectedWidgets.outdialCall && <OutdialCall />}
                   </>
@@ -248,4 +284,4 @@ function App() {
   );
 }
 
-export default App;
+export default observer(App);

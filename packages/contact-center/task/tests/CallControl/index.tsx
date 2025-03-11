@@ -6,6 +6,18 @@ import '@testing-library/jest-dom';
 
 jest.mock('@momentum-ui/react-collaboration', () => ({
   ButtonPill: () => <div data-testid="ButtonPill" />,
+  ListItemBase: () => <div data-testid="ListItemBase" />,
+  ListItemBaseSection: () => <div data-testid="ListItemBaseSection" />,
+  Text: () => <div data-testid="Text" />,
+  ButtonCircle: () => <div data-testid="ButtonCircle" />,
+  PopoverNext: () => <div data-testid="PopoverNext" />,
+  SelectNext: () => <div data-testid="SelectNext" />,
+  TooltipNext: () => <div data-testid="TooltipNext" />,
+}));
+
+jest.mock('@momentum-design/components/dist/react', () => ({
+  Avatar: () => <div data-testid="Avatar" />,
+  Icon: () => <div data-testid="Icon" />,
 }));
 
 // Mock the store
@@ -15,6 +27,7 @@ jest.mock('@webex/cc-store', () => ({
   wrapupCodes: [],
   logger: {},
   currentTask: {
+    data: {interactionId: 'mockInteractionId'},
     on: jest.fn(),
     off: jest.fn(),
     hold: jest.fn(() => Promise.resolve()),
@@ -24,6 +37,8 @@ jest.mock('@webex/cc-store', () => ({
     end: jest.fn(() => Promise.resolve()),
     wrapup: jest.fn(() => Promise.resolve()),
   },
+  setTaskCallback: jest.fn(),
+  removeTaskCallback: jest.fn(),
   TASK_EVENTS: {
     TASK_MEDIA: 'task:media',
   },
