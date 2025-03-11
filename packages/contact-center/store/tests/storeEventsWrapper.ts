@@ -803,6 +803,97 @@ describe('storeEventsWrapper', () => {
       expect(handleTaskRemoveSpy).toHaveBeenCalledWith(mockTask.data.interactionId);
     });
 
+    describe('customStates on hydration', () => {
+      it('should handle custom state correctly when wrapup required', async () => {
+        const setStateSpy = jest.spyOn(storeWrapper, 'setState');
+
+        const cc = storeWrapper['store'].cc;
+        storeWrapper['store'].init = jest.fn().mockReturnValue(storeWrapper.setupIncomingTaskHandler(cc));
+
+        const options = {someOption: 'value'};
+        await storeWrapper.init(options);
+        storeWrapper['store'].taskList = [];
+
+        const mockTask = {
+          data: {
+            interaction: {
+              isTerminated: true,
+              state: 'wrapUp',
+              participants: {
+                agent1: {
+                  isWrappedUp: false,
+                },
+              },
+            },
+            agentId: 'agent1',
+          },
+          on: jest.fn(),
+          off: jest.fn(),
+        };
+
+        act(() => {
+          storeWrapper['cc'].on.mock.calls[1][1]();
+        });
+
+        act(() => {
+          const hydrateTaskCb = storeWrapper['cc'].on.mock.calls.find(
+            (call) => call[0] === TASK_EVENTS.TASK_HYDRATE
+          )[1];
+          hydrateTaskCb(mockTask);
+        });
+
+        expect(setStateSpy).toHaveBeenCalledWith({
+          name: 'Engaged',
+          developerName: 'ENGAGED',
+        });
+      });
+
+      it('should handle custom state correctly when wrapup is not required', async () => {
+        const setStateSpy = jest.spyOn(storeWrapper, 'setState');
+
+        const cc = storeWrapper['store'].cc;
+        storeWrapper['store'].init = jest.fn().mockReturnValue(storeWrapper.setupIncomingTaskHandler(cc));
+
+        const options = {someOption: 'value'};
+        await storeWrapper.init(options);
+        storeWrapper['store'].taskList = [];
+
+        const mockTask = {
+          data: {
+            interaction: {
+              isTerminated: true,
+              state: 'wrapUp',
+              participants: {
+                agent1: {
+                  isWrappedUp: true,
+                },
+              },
+            },
+            agentId: 'agent1',
+          },
+          on: jest.fn(),
+          off: jest.fn(),
+        };
+
+        act(() => {
+          storeWrapper['cc'].on.mock.calls[1][1]();
+        });
+
+        act(() => {
+          const hydrateTaskCb = storeWrapper['cc'].on.mock.calls.find(
+            (call) => call[0] === TASK_EVENTS.TASK_HYDRATE
+          )[1];
+          hydrateTaskCb(mockTask);
+        });
+
+        expect(setStateSpy).toHaveBeenCalledTimes(2);
+
+        expect(setStateSpy).toHaveBeenCalledWith({
+          reset: true,
+        });
+      });
+    });
+
     it('should handle hydrating the store with correct data', async () => {
       const setCurrentTaskSpy = jest.spyOn(storeWrapper, 'setCurrentTask');
       const setTaskListSpy = jest.spyOn(storeWrapper, 'setTaskList');
