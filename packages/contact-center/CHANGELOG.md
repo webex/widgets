@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.32](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.31...v1.28.0-ccwidgets.32) (2025-03-11)
+
+
+### Bug Fixes
+
+* **cc-task:** onWrapUp with task object and reason for wrapup ([#408](https://github.com/webex/widgets/issues/408)) ([e3cae29](https://github.com/webex/widgets/commit/e3cae29b84d8d0843cbc4d182f32264f1507bf88))
+
 # [1.28.0-ccwidgets.31](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.30...v1.28.0-ccwidgets.31) (2025-03-07)
 
 
