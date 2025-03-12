@@ -2,7 +2,7 @@
     "extends": "../../../tsconfig.json",
     "include": [
         "./src"
-    ],
+, "../cc-components/src/out-dial-call.presentational.tsx"    ],
     "compilerOptions": {
         "outDir": "./dist",
         "declaration": true,

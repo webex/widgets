@@ -1,6 +1,7 @@
 import {useEffect, useCallback, useRef, useState} from 'react';
 import {ITask} from '@webex/plugin-cc';
-import {useCallControlProps, UseTaskListProps, UseTaskProps, useOutdialCallProps, DialerPayload} from './task.types';
+import {useCallControlProps, UseTaskListProps, UseTaskProps} from './task.types';
+import {useOutdialCallProps} from 'packages/contact-center/cc-components/src/components/OutdialCall/out-dial-call.types';
 import store, {TASK_EVENTS} from '@webex/cc-store';
 
 // Hook for managing the task list
@@ -247,35 +248,23 @@ export const useCallControl = (props: useCallControlProps) => {
 export const useOutdialCall = (props: useOutdialCallProps) => {
   const {cc, logger} = props;
 
-  const startOutdial = (dialerPayload: DialerPayload) => {
-    if (!dialerPayload) return;
-
+  const startOutdial = (destination: string) => {
     // Perform validation on destination number.
-    if (!dialerPayload.destination || !dialerPayload.destination.trim()) {
+    if (!destination || !destination.trim()) {
       alert('Destination number is required, it cannot be empty');
       return;
     }
 
-    // Perform validation on entry point id.
-    if (!dialerPayload.entryPointId) {
-      alert('Entry point ID is not configured');
-      return;
-    }
-
-    cc.startOutdial(dialerPayload)
+    cc.startOutdial(destination)
       .then((response) => {
         logger.info('Outdial call started', response);
       })
       .catch((error: Error) => {
-        logError(`Error starting outdial call: ${error}`, 'startOutdial');
+        logger.error(`Error : ${error}`, {
+          module: 'widget-OutdialCall#helper.ts',
+          method: 'startOutdial',
+        });
       });
-  };
-
-  const logError = (message: string, method: string) => {
-    logger.error(message, {
-      module: 'widget-cc-task#helper.ts',
-      method: 'useOutdialCall',
-    });
   };
 
   return {

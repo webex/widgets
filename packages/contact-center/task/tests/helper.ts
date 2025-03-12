@@ -1075,7 +1075,6 @@ describe('useOutdialCall', () => {
   });
 
   it('should successfully start an outdial call', async () => {
-
     const {result} = renderHook(() =>
       useOutdialCall({
         cc: ccMock,
@@ -1092,7 +1091,6 @@ describe('useOutdialCall', () => {
   });
 
   it('should show alert when destination is empty', async () => {
-    
     const {result} = renderHook(() =>
       useOutdialCall({
         cc: ccMock,
@@ -1102,7 +1100,7 @@ describe('useOutdialCall', () => {
 
     const invalidPayload = {
       ...mockDialerPayload,
-      destination: ''
+      destination: '',
     };
 
     await act(async () => {
@@ -1123,7 +1121,7 @@ describe('useOutdialCall', () => {
 
     const invalidPayload = {
       ...mockDialerPayload,
-      destination: '   '
+      destination: '   ',
     };
 
     await act(async () => {
@@ -1135,7 +1133,6 @@ describe('useOutdialCall', () => {
   });
 
   it('should show alert when entryPointId is missing', async () => {
-    
     const {result} = renderHook(() =>
       useOutdialCall({
         cc: ccMock,
@@ -1145,7 +1142,7 @@ describe('useOutdialCall', () => {
 
     const invalidPayload = {
       ...mockDialerPayload,
-      entryPointId: ''
+      entryPointId: '',
     };
 
     await act(async () => {
@@ -1157,9 +1154,8 @@ describe('useOutdialCall', () => {
   });
 
   it('should handle errors when starting outdial call fails', async () => {
-
     const errorCcMock = {
-      startOutdial: jest.fn().mockRejectedValue(new Error('Outdial failed'))
+      startOutdial: jest.fn().mockRejectedValue(new Error('Outdial failed')),
     };
 
     const {result} = renderHook(() =>

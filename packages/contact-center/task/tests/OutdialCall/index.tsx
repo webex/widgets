@@ -8,16 +8,14 @@ import {OutdialCall} from '../../src/OutdialCall';
 jest.mock('@webex/cc-store', () => ({
   cc: {
     agentConfig: {
-      outDialEp: 'mock-entry-point'
-    }
+      outDialEp: 'mock-entry-point',
+    },
   },
   logger: {},
 }));
 
 describe('Outdial Call Component', () => {
-
-  it('renders OutDialCallPresentational with correct props', () => {
-    
+  it('renders OutdialCallComponent with correct props', () => {
     const useOutdialCallSpy = jest.spyOn(helper, 'useOutdialCall');
 
     render(<OutdialCall />);
@@ -26,8 +24,8 @@ describe('Outdial Call Component', () => {
     expect(useOutdialCallSpy).toHaveBeenCalledWith({
       cc: {
         agentConfig: {
-          outDialEp: 'mock-entry-point'
-        }
+          outDialEp: 'mock-entry-point',
+        },
       },
       logger: {},
     });

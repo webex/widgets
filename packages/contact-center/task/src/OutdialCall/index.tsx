@@ -1,7 +1,7 @@
 import React from 'react';
 import store from '@webex/cc-store';
 import {observer} from 'mobx-react-lite';
-import OutdialCallPresentational from './out-dial-call.presentational';
+import OutDialCallComponent from '../../../cc-components/src/components/OutdialCall/out-dial-call';
 import {useOutdialCall} from '../helper';
 
 const OutdialCallComponent: React.FunctionComponent = () => {
@@ -13,7 +13,7 @@ const OutdialCallComponent: React.FunctionComponent = () => {
     ...result,
   };
 
-  return <OutdialCallPresentational {...props} />;
+  return <OutDialCallComponent {...props} />;
 };
 
 const OutdialCall = observer(OutdialCallComponent);

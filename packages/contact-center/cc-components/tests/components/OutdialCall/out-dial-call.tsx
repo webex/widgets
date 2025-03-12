@@ -1,19 +1,19 @@
 import React from 'react';
-import { render, fireEvent, screen } from '@testing-library/react';
+import {render, fireEvent, screen} from '@testing-library/react';
 import '@testing-library/jest-dom';
-import OutDialCallPresentational from '../../src/OutdialCall/out-dial-call.presentational';
+import OutdialCallComponent from '../../../src/components/OutdialCall/out-dial-call';
 
-describe('OutDialCallPresentational', () => {
+describe('OutdialCallComponent', () => {
   const mockStartOutdial = jest.fn();
   const mockCc = {
     agentConfig: {
-      outDialEp: 'test-entry-point'
-    }
+      outDialEp: 'test-entry-point',
+    },
   };
 
   const defaultProps = {
     startOutdial: mockStartOutdial,
-    cc: mockCc
+    cc: mockCc,
   };
 
   beforeEach(() => {
@@ -21,20 +21,20 @@ describe('OutDialCallPresentational', () => {
   });
 
   it('renders the component correctly', () => {
-    render(<OutDialCallPresentational {...defaultProps} />);
+    render(<OutdialCallComponent {...defaultProps} />);
     expect(screen.getByPlaceholderText('Enter number to dial')).toBeInTheDocument();
     expect(screen.getByText('Outdial Call')).toBeInTheDocument();
   });
 
   it('updates input value when typing directly', () => {
-    render(<OutDialCallPresentational {...defaultProps} />);
+    render(<OutdialCallComponent {...defaultProps} />);
     const input = screen.getByPlaceholderText('Enter number to dial');
-    fireEvent.change(input, { target: { value: '123' } });
+    fireEvent.change(input, {target: {value: '123'}});
     expect(input).toHaveValue('123');
   });
 
   it('updates input value when clicking keypad buttons', () => {
-    render(<OutDialCallPresentational {...defaultProps} />);
+    render(<OutdialCallComponent {...defaultProps} />);
     fireEvent.click(screen.getByText('1'));
     fireEvent.click(screen.getByText('2'));
     fireEvent.click(screen.getByText('3'));
@@ -42,10 +42,10 @@ describe('OutDialCallPresentational', () => {
   });
 
   it('calls startOutdial with correct payload when clicking call button', () => {
-    render(<OutDialCallPresentational {...defaultProps} />);
+    render(<OutdialCallComponent {...defaultProps} />);
     const input = screen.getByPlaceholderText('Enter number to dial');
-    fireEvent.change(input, { target: { value: '123' } });
-    
+    fireEvent.change(input, {target: {value: '123'}});
+
     const callButton = screen.getByRole('button');
     fireEvent.click(callButton);
 
@@ -55,12 +55,12 @@ describe('OutDialCallPresentational', () => {
       direction: 'OUTBOUND',
       attributes: {},
       mediaType: 'telephony',
-      outboundType: 'OUTDIAL'
+      outboundType: 'OUTDIAL',
     });
   });
 
   it('allows special characters (* # +) from keypad', () => {
-    render(<OutDialCallPresentational {...defaultProps} />);
+    render(<OutdialCallComponent {...defaultProps} />);
     fireEvent.click(screen.getByText('*'));
     fireEvent.click(screen.getByText('#'));
     expect(screen.getByPlaceholderText('Enter number to dial')).toHaveValue('*#');
