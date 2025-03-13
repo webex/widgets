@@ -15,6 +15,7 @@ const defaultWidgets = {
   incomingTask: true,
   taskList: true,
   callControl: true,
+  outdialCall: true,
 };
 
 function App() {
@@ -195,65 +196,109 @@ function App() {
                 }}
               />
             </div>
-            <>
-              <Text>
-                    <div
-                      className="warning-note"
-                      style={{color: 'var(--mds-color-theme-text-error-normal)', marginBottom: '10px'}}
-                    >
-                      <strong>Note:</strong> You need to select Incoming Task, Call Control before selecting Outdial Call.
+            <div className="box">
+              <section className="section-box">
+                <fieldset className="fieldset">
+                  <legend className="legend-box">&nbsp;Select Widgets to Show&nbsp;</legend>
+                  <div className="widget-checkboxes">
+                      {Object.keys(defaultWidgets).map((widget) => (
+                          <>
+                            <label key={widget} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <input
+                                type="checkbox"
+                                name={widget}
+                                checked={selectedWidgets[widget]}
+                                onChange={handleCheckboxChange}
+                              />
+                              {widget.charAt(0).toUpperCase() + widget.slice(1).replace(/([A-Z])/g, ' $1')}
+                              {widget === 'outdialCall' && (
+                                <PopoverNext
+                                  trigger="mouseenter"
+                                  triggerComponent={<Icon name="info-badge-filled" />}
+                                  placement="auto-end"
+                                  closeButtonPlacement="top-left"
+                                  closeButtonProps={{'aria-label': 'Close'}}
+                                >
+                                  <Text>
+                                    <div style={{color: 'var(--mds-color-theme-text-error-normal)', marginBottom: '10px'}}>
+                                      <strong>Note:</strong> You need to select Incoming Task, Call Control before selecting Outdial Call.
+                                    </div>
+                                  </Text>
+                                </PopoverNext>
+                              )}
+                            </label>
+                          </>
+                        ))}
                     </div>
-              </Text>
-              <div className="widget-checkboxes">
-              {['stationLogin', 'userState', 'incomingTask', 'taskList', 'callControl', 'outdialCall'].map((widget) => (
-                <label key={widget}>
-                  <input
-                    type="checkbox"
-                    name={widget}
-                    checked={selectedWidgets[widget]}
-                    onChange={handleCheckboxChange}
-                  />
-                  {widget.charAt(0).toUpperCase() + widget.slice(1).replace(/([A-Z])/g, ' $1')}
-              </label>
-              ))}
+                </fieldset>
+              </section>
+            </div>
+            <div className="box">
+              <section className="section-box">
+                <fieldset className="fieldset">
+                  <legend className="legend-box">&nbsp;SDK Toggles&nbsp;</legend>
+                  <label style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+                    <input type="checkbox" id="multiLoginFlag" name="multiLoginFlag" onChange={enableDisableMultiLogin} checked={isMultiLoginEnabled} /> &nbsp; Enable Multi Login
+                    <PopoverNext
+                      trigger="mouseenter"
+                      triggerComponent={<Icon name="info-badge-filled" />}
+                      placement="auto-end"
+                      closeButtonPlacement="top-left"
+                      closeButtonProps={{'aria-label': 'Close'}}
+                    >
+                      <Text>
+                        <div
+                          className="warning-note"
+                          style={{color: 'var(--mds-color-theme-text-error-normal)', marginBottom: '10px'}}
+                        >
+                          <strong>Note:</strong> The "Enable Multi Login" option must be set before initializing the SDK.
+                          Changes to this setting after SDK initialization will not take effect. Please ensure you configure
+                          this option before clicking the "Init Widgets" button.
+                        </div>
+                      </Text>
+                    </PopoverNext>
+                  </label>
+                </fieldset>
+              </section>
             </div>
             <br />
-            </>
-            <Button
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <Button
               disabled={accessToken.trim() === ''}
               onClick={() => {
                 store.init({webexConfig, access_token: accessToken}).then(() => {
-                  setIsSdkReady(true);
+                setIsSdkReady(true);
                 });
               }}
-            >
+              >
               Init Widgets
-            </Button>
+              </Button>
+            </div>
             {isSdkReady && (
               <>
                 <div className="station-login">
                   {selectedWidgets.stationLogin && <StationLogin onLogin={onLogin} onLogout={onLogout} />}
                 </div>
                 {(store.isAgentLoggedIn || isLoggedIn) && (
-                  <>
+                    <>
                     {selectedWidgets.userState && (
                       <div className="box">
-                        <section className="section-box">
-                          <fieldset className="fieldset">
-                            <legend className="legend-box">User State</legend>
-                            <UserState onStateChange={onStateChange} />
-                          </fieldset>
-                        </section>
+                      <section className="section-box">
+                        <fieldset className="fieldset">
+                        <legend className="legend-box">User State</legend>
+                        <UserState onStateChange={onStateChange} />
+                        </fieldset>
+                      </section>
                       </div>
                     )}
                     {selectedWidgets.callControl && store.currentTask && (
                       <div className="box">
-                        <section className="section-box">
-                          <fieldset className="fieldset">
-                            <legend className="legend-box">Call Control</legend>
-                            <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapUp={onWrapUp} />
-                          </fieldset>
-                        </section>
+                      <section className="section-box">
+                        <fieldset className="fieldset">
+                        <legend className="legend-box">Call Control</legend>
+                        <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapUp={onWrapUp} />
+                        </fieldset>
+                      </section>
                       </div>
                     )}
                     {selectedWidgets.incomingTask && <IncomingTask onAccepted={onAccepted} onDeclined={onDeclined} />}
@@ -261,7 +306,7 @@ function App() {
                       <TaskList onTaskAccepted={onTaskAccepted} onTaskDeclined={onTaskDeclined} />
                     )}
                     {selectedWidgets.outdialCall && <OutdialCall />}
-                  </>
+                    </>
                 )}
               </>
             )}
