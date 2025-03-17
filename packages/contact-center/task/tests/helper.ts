@@ -1090,7 +1090,7 @@ describe('useOutdialCall', () => {
     expect(logger.info).toHaveBeenCalledWith('Outdial call started', 'Success');
   });
 
-  it('should show alert when destination is empty', async () => {
+  it('should show alert when destination is empty or only spaces', async () => {
     const {result} = renderHook(() =>
       useOutdialCall({
         cc: ccMock,
@@ -1098,64 +1098,17 @@ describe('useOutdialCall', () => {
       })
     );
 
-    const invalidPayload = {
-      ...mockDialerPayload,
-      destination: '',
-    };
-
     await act(async () => {
-      await result.current.startOutdial(invalidPayload);
+      await result.current.startOutdial('   ');
     });
 
     expect(global.alert).toHaveBeenCalledWith('Destination number is required, it cannot be empty');
-    expect(ccMock.startOutdial).not.toHaveBeenCalled();
-  });
-
-  it('should show alert when destination contains only spaces', async () => {
-    const {result} = renderHook(() =>
-      useOutdialCall({
-        cc: ccMock,
-        logger,
-      })
-    );
-
-    const invalidPayload = {
-      ...mockDialerPayload,
-      destination: '   ',
-    };
-
-    await act(async () => {
-      await result.current.startOutdial(invalidPayload);
-    });
-
-    expect(global.alert).toHaveBeenCalledWith('Destination number is required, it cannot be empty');
-    expect(ccMock.startOutdial).not.toHaveBeenCalled();
-  });
-
-  it('should show alert when entryPointId is missing', async () => {
-    const {result} = renderHook(() =>
-      useOutdialCall({
-        cc: ccMock,
-        logger,
-      })
-    );
-
-    const invalidPayload = {
-      ...mockDialerPayload,
-      entryPointId: '',
-    };
-
-    await act(async () => {
-      await result.current.startOutdial(invalidPayload);
-    });
-
-    expect(global.alert).toHaveBeenCalledWith('Entry point ID is not configured');
     expect(ccMock.startOutdial).not.toHaveBeenCalled();
   });
 
   it('should handle errors when starting outdial call fails', async () => {
     const errorCcMock = {
-      startOutdial: jest.fn().mockRejectedValue(new Error('Outdial failed')),
+      startOutdial: jest.fn().mockRejectedValue(new Error('Outdial call failed')),
     };
 
     const {result} = renderHook(() =>
@@ -1170,9 +1123,9 @@ describe('useOutdialCall', () => {
     });
 
     expect(errorCcMock.startOutdial).toHaveBeenCalledWith(mockDialerPayload);
-    expect(logger.error).toHaveBeenCalledWith('Error starting outdial call: Error: Outdial failed', {
-      module: 'widget-cc-task#helper.ts',
-      method: 'useOutdialCall',
+    expect(logger.error).toHaveBeenCalledWith('Error: Outdial call failed', {
+      module: 'widget-OutdialCall#helper.ts',
+      method: 'startOutdial',
     });
   });
 

@@ -250,7 +250,7 @@ export const useOutdialCall = (props: useOutdialCallProps) => {
 
   const startOutdial = (destination: string) => {
     // Perform validation on destination number.
-    if (!destination || !destination.trim()) {
+    if (!destination || !String(destination).trim()) {
       alert('Destination number is required, it cannot be empty');
       return;
     }
@@ -260,7 +260,7 @@ export const useOutdialCall = (props: useOutdialCallProps) => {
         logger.info('Outdial call started', response);
       })
       .catch((error: Error) => {
-        logger.error(`Error : ${error}`, {
+        logger.error(`${error}`, {
           module: 'widget-OutdialCall#helper.ts',
           method: 'startOutdial',
         });

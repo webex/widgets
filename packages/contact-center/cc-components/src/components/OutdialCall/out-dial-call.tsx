@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {OutdialCallComponentProps} from './out-dial-call.types';
 import './out-dial-call.styles.scss';
 
-export default function OutDialCallComponent(props: OutdialCallComponentProps) {
+const OutdialCallComponent = (props: OutdialCallComponentProps) => {
   const {startOutdial} = props;
   const [destination, setDestination] = useState('');
 
@@ -47,4 +47,6 @@ export default function OutDialCallComponent(props: OutdialCallComponentProps) {
       </section>
     </div>
   );
-}
+};
+
+export default OutdialCallComponent;

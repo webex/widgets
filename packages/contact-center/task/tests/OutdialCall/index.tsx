@@ -1,33 +1,53 @@
 import React from 'react';
 import {render} from '@testing-library/react';
-import '@testing-library/jest-dom';
-import * as helper from '../../src/helper';
-import {OutdialCall} from '../../src/OutdialCall';
+import OutdialCall from '../../../cc-components/src/components/OutdialCall/out-dial-call';
+import {useOutdialCall} from '../../src/helper';
 
-// Mock the cc store.
+// Mock dependencies
 jest.mock('@webex/cc-store', () => ({
-  cc: {
-    agentConfig: {
-      outDialEp: 'mock-entry-point',
+  __esModule: true,
+  default: {
+    cc: {
+      // Add mock CC methods/properties as needed
+    },
+    logger: {
+      // Add mock logger methods
+      info: jest.fn(),
+      error: jest.fn(),
     },
   },
-  logger: {},
 }));
 
-describe('Outdial Call Component', () => {
-  it('renders OutdialCallComponent with correct props', () => {
-    const useOutdialCallSpy = jest.spyOn(helper, 'useOutdialCall');
+jest.mock('../helper', () => ({
+  useOutdialCall: jest.fn(),
+}));
 
+describe('OutdialCall Component', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useOutdialCall as jest.Mock).mockReturnValue({});
+  });
+
+  it('renders without crashing', () => {
+    const {container} = render(<OutdialCall />);
+    expect(container).toBeTruthy();
+  });
+
+  it('calls useOutdialCall with correct props', () => {
     render(<OutdialCall />);
-
-    // Verify that useOutdialCall hook is called with the correct props.
-    expect(useOutdialCallSpy).toHaveBeenCalledWith({
-      cc: {
-        agentConfig: {
-          outDialEp: 'mock-entry-point',
-        },
-      },
-      logger: {},
+    expect(useOutdialCall).toHaveBeenCalledWith({
+      cc: store.cc,
+      logger: store.logger,
     });
+  });
+
+  it('passes correct props to presentational component', () => {
+    const mockOutdialCallResult = {
+      someProperty: 'test',
+    };
+    (useOutdialCall as jest.Mock).mockReturnValue(mockOutdialCallResult);
+
+    const {container} = render(<OutdialCall />);
+    expect(container).toMatchSnapshot();
   });
 });
