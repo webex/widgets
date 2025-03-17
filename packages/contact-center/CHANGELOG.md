@@ -1,3 +1,17 @@
+# [1.28.0-ccwidgets.33](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.32...v1.28.0-ccwidgets.33) (2025-03-11)
+
+
+### Bug Fixes
+
+* **user-state:** custom status on hydration ([#410](https://github.com/webex/widgets/issues/410)) ([9bcc7ab](https://github.com/webex/widgets/commit/9bcc7abf765d2d055cbd9ef41c019f2bc0b09d27))
+
+# [1.28.0-ccwidgets.32](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.31...v1.28.0-ccwidgets.32) (2025-03-11)
+
+
+### Bug Fixes
+
+* **cc-task:** onWrapUp with task object and reason for wrapup ([#408](https://github.com/webex/widgets/issues/408)) ([e3cae29](https://github.com/webex/widgets/commit/e3cae29b84d8d0843cbc4d182f32264f1507bf88))
+
 # [1.28.0-ccwidgets.31](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.30...v1.28.0-ccwidgets.31) (2025-03-07)
 
 
