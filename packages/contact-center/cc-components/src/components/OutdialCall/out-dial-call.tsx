@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {OutdialCallComponentProps} from './out-dial-call.types';
 import './out-dial-call.styles.scss';
 
-const OutdialCallComponent = (props: OutdialCallComponentProps) => {
+const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> = (props) => {
   const {startOutdial} = props;
   const [destination, setDestination] = useState('');
 

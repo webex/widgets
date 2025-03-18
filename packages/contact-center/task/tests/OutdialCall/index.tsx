@@ -1,6 +1,5 @@
 import React from 'react';
 import {render} from '@testing-library/react';
-import OutdialCall from '../../../cc-components/src/components/OutdialCall/out-dial-call';
 import {useOutdialCall} from '../../src/helper';
 
 // Mock dependencies
@@ -17,6 +16,12 @@ jest.mock('@webex/cc-store', () => ({
     },
   },
 }));
+
+jest.mock('@webex/cc-components', () => {
+  return {
+    UserStateComponent: () => <div>UserStateComponent</div>,
+  };
+});
 
 jest.mock('../helper', () => ({
   useOutdialCall: jest.fn(),

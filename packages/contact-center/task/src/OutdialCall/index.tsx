@@ -4,7 +4,7 @@ import {observer} from 'mobx-react-lite';
 import OutdialCallComponent from '@webex/cc-components';
 import {useOutdialCall} from '../helper';
 
-const OutdialCall = observer((): React.ReactElement => {
+const OutdialCall: React.FunctionComponent = () => {
   const {cc, logger} = store;
 
   const result = useOutdialCall({cc, logger});
@@ -14,5 +14,7 @@ const OutdialCall = observer((): React.ReactElement => {
   };
 
   return <OutdialCallComponent {...props} />;
-});
-export {OutdialCall};
+};
+
+const outdialCall = observer(OutdialCall);
+export {outdialCall};
