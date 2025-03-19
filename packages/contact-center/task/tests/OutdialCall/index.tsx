@@ -9,7 +9,7 @@ jest.mock('@webex/cc-store', () => ({
   default: {
     cc: {},
     logger: {
-      // Add mock logger methods
+      // Adding mock logger methods
       info: jest.fn(),
       error: jest.fn(),
     },
