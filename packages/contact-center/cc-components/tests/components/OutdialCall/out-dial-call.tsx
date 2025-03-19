@@ -1,7 +1,7 @@
 import React from 'react';
 import {render, fireEvent, screen} from '@testing-library/react';
 import '@testing-library/jest-dom';
-import OutdialCallComponent from '@webex/cc-components';
+import OutdialCallComponent from '@webex/cc-components/src/components/OutdialCall/out-dial-call';
 
 describe('OutdialCallComponent', () => {
   const mockStartOutdial = jest.fn();

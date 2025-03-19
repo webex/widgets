@@ -203,28 +203,31 @@ function App() {
                   <div className="widget-checkboxes">
                       {Object.keys(defaultWidgets).map((widget) => (
                           <>
-                            <label key={widget} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <label key={widget}>
                               <input
                                 type="checkbox"
                                 name={widget}
                                 checked={selectedWidgets[widget]}
                                 onChange={handleCheckboxChange}
                               />
-                              {widget.charAt(0).toUpperCase() + widget.slice(1).replace(/([A-Z])/g, ' $1')}
+                              &nbsp;
+                              {widget.charAt(0).toUpperCase() + widget.slice(1).replace(/([A-Z])/g, ' $1')}&nbsp;
                               {widget === 'outdialCall' && (
-                                <PopoverNext
+                                <span style={{display: 'inline-flex', alignItems: 'center'}}>
+                                  <PopoverNext
                                   trigger="mouseenter"
                                   triggerComponent={<Icon name="info-badge-filled" />}
                                   placement="auto-end"
                                   closeButtonPlacement="top-left"
                                   closeButtonProps={{'aria-label': 'Close'}}
-                                >
+                                  >
                                   <Text>
                                     <div style={{color: 'var(--mds-color-theme-text-error-normal)', marginBottom: '10px'}}>
-                                      <strong>Note:</strong> You need to select Incoming Task, Call Control before selecting Outdial Call.
+                                    <strong>Note:</strong> You need to select Incoming Task, Call Control before selecting Outdial Call.
                                     </div>
                                   </Text>
-                                </PopoverNext>
+                                  </PopoverNext>
+                                </span>
                               )}
                             </label>
                           </>
@@ -262,7 +265,7 @@ function App() {
               </section>
             </div>
             <br />
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <div>
               <Button
               disabled={accessToken.trim() === ''}
               onClick={() => {
