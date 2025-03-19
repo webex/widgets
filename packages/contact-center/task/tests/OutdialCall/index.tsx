@@ -1,14 +1,13 @@
 import React from 'react';
 import {render} from '@testing-library/react';
-import {useOutdialCall} from '../../src/helper';
+import * as helper from '../../src/helper';
+import {OutdialCall} from '../../src/OutdialCall';
 
 // Mock dependencies
 jest.mock('@webex/cc-store', () => ({
   __esModule: true,
   default: {
-    cc: {
-      // Add mock CC methods/properties as needed
-    },
+    cc: {},
     logger: {
       // Add mock logger methods
       info: jest.fn(),
@@ -19,40 +18,21 @@ jest.mock('@webex/cc-store', () => ({
 
 jest.mock('@webex/cc-components', () => {
   return {
-    UserStateComponent: () => <div>UserStateComponent</div>,
+    OutdialCallComponent: () => <div>OutdialCallComponent</div>,
   };
 });
 
-jest.mock('../helper', () => ({
-  useOutdialCall: jest.fn(),
-}));
-
 describe('OutdialCall Component', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    (useOutdialCall as jest.Mock).mockReturnValue({});
-  });
-
-  it('renders without crashing', () => {
-    const {container} = render(<OutdialCall />);
-    expect(container).toBeTruthy();
-  });
-
-  it('calls useOutdialCall with correct props', () => {
+  it('render OutdialCallComponent with correct props', () => {
+    const useOutdialCallSpy = jest.spyOn(helper, 'useOutdialCall');
     render(<OutdialCall />);
-    expect(useOutdialCall).toHaveBeenCalledWith({
-      cc: store.cc,
-      logger: store.logger,
+    expect(useOutdialCallSpy).toHaveBeenCalledTimes(1);
+    expect(useOutdialCallSpy).toHaveBeenCalledWith({
+      cc: {},
+      logger: {
+        info: expect.any(Function),
+        error: expect.any(Function),
+      },
     });
-  });
-
-  it('passes correct props to presentational component', () => {
-    const mockOutdialCallResult = {
-      someProperty: 'test',
-    };
-    (useOutdialCall as jest.Mock).mockReturnValue(mockOutdialCallResult);
-
-    const {container} = render(<OutdialCall />);
-    expect(container).toMatchSnapshot();
   });
 });
