@@ -1,7 +1,7 @@
 import {useEffect, useCallback, useRef, useState} from 'react';
 import {ITask} from '@webex/plugin-cc';
 import {useCallControlProps, UseTaskListProps, UseTaskProps} from './task.types';
-import {useOutdialCallProps} from 'packages/contact-center/cc-components/src/components/OutdialCall/out-dial-call.types';
+import {useOutdialCallProps} from '@webex/cc-components';
 import store, {TASK_EVENTS} from '@webex/cc-store';
 
 // Hook for managing the task list
