@@ -223,7 +223,7 @@ function App() {
                                   >
                                   <Text>
                                     <div style={{color: 'var(--mds-color-theme-text-error-normal)', marginBottom: '10px'}}>
-                                    <strong>Note:</strong> You need to select Incoming Task, Call Control before selecting Outdial Call.
+                                    <strong>Note:</strong> You need to select Incoming Task, Call Control before selecting Outdial Call
                                     </div>
                                   </Text>
                                   </PopoverNext>
