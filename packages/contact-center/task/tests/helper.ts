@@ -1055,7 +1055,7 @@ describe('useOutdialCall', () => {
     error: jest.fn(),
   };
 
-  const mockDialerPayload = '123456789';
+  const destination = '123456789';
 
   beforeEach(() => {
     global.alert = jest.fn();
@@ -1076,10 +1076,10 @@ describe('useOutdialCall', () => {
     );
 
     await act(async () => {
-      await result.current.startOutdial(mockDialerPayload);
+      await result.current.startOutdial(destination);
     });
 
-    expect(ccMock.startOutdial).toHaveBeenCalledWith(mockDialerPayload);
+    expect(ccMock.startOutdial).toHaveBeenCalledWith(destination);
     expect(logger.info).toHaveBeenCalledWith('Outdial call started', 'Success');
   });
 
@@ -1112,10 +1112,10 @@ describe('useOutdialCall', () => {
     );
 
     await act(async () => {
-      await result.current.startOutdial(mockDialerPayload);
+      await result.current.startOutdial(destination);
     });
 
-    expect(errorCcMock.startOutdial).toHaveBeenCalledWith(mockDialerPayload);
+    expect(errorCcMock.startOutdial).toHaveBeenCalledWith(destination);
     expect(logger.error).toHaveBeenCalledWith('Error: Outdial call failed', {
       module: 'widget-OutdialCall#helper.ts',
       method: 'startOutdial',
