@@ -65,4 +65,32 @@ describe('OutdialCallComponent', () => {
     fireEvent.click(screen.getByText('#'));
     expect(screen.getByPlaceholderText('Enter number to dial')).toHaveValue('*#');
   });
+
+  it('does not allow invalid characters', () => {
+    render(<OutdialCallComponent {...defaultProps} />);
+    const input = screen.getByPlaceholderText('Enter number to dial');
+    fireEvent.change(input, {target: {value: 'abc'}});
+    expect(input).toHaveValue('');
+  });
+
+  it('does not allow invalid characters when typing', () => {
+    render(<OutdialCallComponent {...defaultProps} />);
+    const input = screen.getByPlaceholderText('Enter number to dial');
+    fireEvent.change(input, {target: {value: '123abc'}});
+    expect(input).toHaveValue('123');
+  });
+
+  it('does not allow empty input', () => {
+    render(<OutdialCallComponent {...defaultProps} />);
+    const callButton = screen.getByRole('button');
+    fireEvent.click(callButton);
+    expect(mockStartOutdial).not.toHaveBeenCalled();
+  });
+
+  it('should remove whitespace and only keep numbers', () => {
+    render(<OutdialCallComponent {...defaultProps} />);
+    const input = screen.getByPlaceholderText('Enter number to dial');
+    fireEvent.change(input, {target: {value: '  1 2 3 4  '}});
+    expect(input).toHaveValue('1234');
+  });
 });
