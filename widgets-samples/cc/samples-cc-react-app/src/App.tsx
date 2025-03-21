@@ -223,7 +223,7 @@ function App() {
                                   >
                                   <Text>
                                     <div style={{color: 'var(--mds-color-theme-text-error-normal)', marginBottom: '10px'}}>
-                                    <strong>Note:</strong> hen a number is dialed, the agent gets an incoming task to accept via an Extension, Dial Number, or Browser. It's recommended to have the incoming task/task list widget and call controls widget according to your needs.
+                                    <strong>Note:</strong> When a number is dialed, the agent gets an incoming task to accept via an Extension, Dial Number, or Browser. It's recommended to have the incoming task/task list widget and call controls widget according to your needs.
                                     </div>
                                   </Text>
                                   </PopoverNext>
