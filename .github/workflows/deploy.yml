@@ -9,6 +9,7 @@ on:
 env:
   rid: ${{ github.run_id }}-${{ github.run_number }}
   token: ${{ secrets.NPM_TOKEN }}
+  GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
 jobs:
   install:
