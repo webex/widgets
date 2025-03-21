@@ -1,3 +1,13 @@
+# [1.28.0-ccwidgets.34](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.33...v1.28.0-ccwidgets.34) (2025-03-21)
+
+
+### Bug Fixes
+
+* **samples:** test fix to publish new widgets using gh actions ([#414](https://github.com/webex/widgets/issues/414)) ([c076470](https://github.com/webex/widgets/commit/c076470345b782d83787d5c0cbe1cf6eecd2e4e5))
+* **tooling:** add-gh-token ([#415](https://github.com/webex/widgets/issues/415)) ([55a29a4](https://github.com/webex/widgets/commit/55a29a400fd325ffa9159b1b134d63db9af04f2e))
+* **tooling:** semantic exec and publish new tag and release ([#417](https://github.com/webex/widgets/issues/417)) ([d681c58](https://github.com/webex/widgets/commit/d681c587e28e58b777ad1f4f9cab50084078bc36))
+* **tooling:** test-commit-for-deploy ([#416](https://github.com/webex/widgets/issues/416)) ([c4ee139](https://github.com/webex/widgets/commit/c4ee139ceb210cdfee1dcb45b09a8f554b4e63fb))
+
 # [1.28.0-ccwidgets.33](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.32...v1.28.0-ccwidgets.33) (2025-03-11)
 
 
