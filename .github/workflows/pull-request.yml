@@ -5,6 +5,7 @@ on:
   pull_request_target:
     branches:
       - ccwidgets
+
     types: [opened, labeled, reopened, synchronize]
   workflow_dispatch:
 
@@ -16,8 +17,30 @@ env:
   rid: ${{ github.run_id }}-${{ github.run_number }}
 
 jobs:
+  validate:
+    name: Validate Pull Request
+    runs-on: ubuntu-latest
+    if: contains(toJson(github.event.pull_request.labels), 'validated')
+
+    steps:
+      - name: Validate PR title
+        run: |
+          TITLE="${{ github.event.pull_request.title }}"
+          echo "PR Title is: '$TITLE'"
+
+          regex="^(fix|feat|chore)\([^()]+\): .+"
+
+          if [[ $TITLE =~ $regex ]]; then
+            echo "PR title is valid."
+          else
+            echo "Error: PR title does NOT follow the required convention."
+            echo "Expected format: fix|feat|chore(some-text): description..."
+            exit 1
+          fi
+
   install:
     runs-on: ubuntu-latest
+    needs: validate
     steps:
       - name: Checkout Project
         uses: actions/checkout@v3
