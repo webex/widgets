@@ -5,6 +5,7 @@ on:
   pull_request_target:
     branches:
       - ccwidgets
+      - add-checks-pull-request
     types: [opened, labeled, reopened, synchronize]
   workflow_dispatch:
 
@@ -19,29 +20,9 @@ jobs:
   validate:
     name: Validate Pull Request
     runs-on: ubuntu-latest
+    if: contains(toJson(github.event.pull_request.labels), 'validated')
 
     steps:
-      - name: Validate Labels
-        run: |
-          HEAD_REPO=${{ github.event.pull_request.head.repo.full_name }}
-          BASE_REPO=${{ github.event.pull_request.base.repo.full_name }}
-          FROM_BASE=0; [ "$HEAD_REPO" == "$BASE_REPO" ] && FROM_BASE=1
-
-          HAS_VALIDATED_LABEL=${{ contains(github.event.pull_request.labels.*.name, 'validated') }}
-          VALIDATED=0; [ "$HAS_VALIDATED_LABEL" == "true" ] && VALIDATED=1
-
-          echo from base $FROM_BASE
-          echo validated $VALIDATED
-
-          if [[ $FROM_BASE == 1 || $VALIDATED == 1 ]]
-          then
-            echo 'pull request is validated, running tests'
-            exit 0
-          else
-            echo 'pull request is not validated, exiting'
-            exit 1
-          fi
-
       - name: Validate PR title
         run: |
           TITLE="${{ github.event.pull_request.title }}"
@@ -67,6 +48,7 @@ jobs:
 
   install:
     runs-on: ubuntu-latest
+    needs: validate
     steps:
       - name: Checkout Project
         uses: actions/checkout@v3
