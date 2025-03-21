@@ -7,7 +7,7 @@ describe('OutdialCallComponent', () => {
   const mockStartOutdial = jest.fn();
   const mockCc = {
     agentConfig: {
-      outDialEp: 'test-entry-point',
+      outdialEp: 'test-entry-point',
     },
   };
 

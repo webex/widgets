@@ -250,7 +250,7 @@ export const useOutdialCall = (props: useOutdialCallProps) => {
 
   const startOutdial = (destination: string) => {
     // Perform validation on destination number.
-    if (!destination || !String(destination).trim()) {
+    if (!destination || !destination.trim()) {
       alert('Destination number is required, it cannot be empty');
       return;
     }

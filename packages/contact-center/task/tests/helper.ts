@@ -1055,14 +1055,7 @@ describe('useOutdialCall', () => {
     error: jest.fn(),
   };
 
-  const mockDialerPayload = {
-    destination: '123456789',
-    entryPointId: 'entry123',
-    direction: 'OUTBOUND',
-    attributes: {},
-    mediaType: 'telephony',
-    outboundType: 'OUTDIAL',
-  };
+  const mockDialerPayload = '123456789';
 
   beforeEach(() => {
     global.alert = jest.fn();
@@ -1090,7 +1083,7 @@ describe('useOutdialCall', () => {
     expect(logger.info).toHaveBeenCalledWith('Outdial call started', 'Success');
   });
 
-  it('should show alert when destination is empty or only spaces', async () => {
+  it('should show alert when destination is empty or only constains spaces', async () => {
     const {result} = renderHook(() =>
       useOutdialCall({
         cc: ccMock,
@@ -1129,7 +1122,7 @@ describe('useOutdialCall', () => {
     });
   });
 
-  it('should return early if no dialer payload is provided', async () => {
+  it('should return if no destination is provided', async () => {
     const {result} = renderHook(() =>
       useOutdialCall({
         cc: ccMock,
@@ -1137,8 +1130,10 @@ describe('useOutdialCall', () => {
       })
     );
 
+    const invalidDestination = undefined;
+
     await act(async () => {
-      await result.current.startOutdial(undefined);
+      await result.current.startOutdial(invalidDestination);
     });
 
     expect(ccMock.startOutdial).not.toHaveBeenCalled();

@@ -9,7 +9,6 @@ const OutdialCall: React.FunctionComponent = observer(() => {
 
   const result = useOutdialCall({cc, logger});
   const props = {
-    cc,
     ...result,
   };
 

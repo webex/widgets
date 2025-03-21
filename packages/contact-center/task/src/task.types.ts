@@ -209,33 +209,3 @@ export type useCallControlProps = Pick<
   ControlProps,
   'currentTask' | 'onHoldResume' | 'onEnd' | 'onWrapUp' | 'logger' | 'deviceType'
 >;
-export interface DialerPayload {
-  /**
-   * An entryPointId for respective task.
-   */
-  entryPointId: string;
-  /**
-   * A valid customer DN, on which the response is expected, maximum length 36 characters.
-   */
-  destination: string;
-
-  /**
-   * The direction of the call.
-   */
-  direction: 'OUTBOUND';
-
-  /**
-   * This is a schema free data tuple to pass-on specific data, depending on the outboundType. Supports a maximum of 30 tuples.
-   */
-  attributes: {[key: string]: string};
-
-  /**
-   * The media type for the request.
-   */
-  mediaType: 'telephony' | 'chat' | 'social' | 'email';
-
-  /**
-   * The outbound type for the task.
-   */
-  outboundType: 'OUTDIAL' | 'CALLBACK' | 'EXECUTE_FLOW';
-}
