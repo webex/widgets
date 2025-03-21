@@ -5,7 +5,7 @@ on:
   pull_request_target:
     branches:
       - ccwidgets
-      - add-checks-pull-request
+
     types: [opened, labeled, reopened, synchronize]
   workflow_dispatch:
 
