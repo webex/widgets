@@ -8,7 +8,7 @@ import {observer} from 'mobx-react-lite';
 // This is not to be included to a production app.
 // Have added here for debugging purposes
 window['store'] = store;
-//  test comment 2
+//  test comment
 const defaultWidgets = {
   stationLogin: true,
   userState: true,
