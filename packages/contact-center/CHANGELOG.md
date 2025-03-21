@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.35](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.34...v1.28.0-ccwidgets.35) (2025-03-21)
+
+
+### Bug Fixes
+
+* **tooling:** add exec step to releaserc ([#418](https://github.com/webex/widgets/issues/418)) ([c8226c6](https://github.com/webex/widgets/commit/c8226c67ba49ac408eefa4d4772a7be970e2fd03))
+
 # [1.28.0-ccwidgets.34](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.33...v1.28.0-ccwidgets.34) (2025-03-21)
 
 
