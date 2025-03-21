@@ -17,6 +17,6 @@ export interface IOutdialCall {
   logger: ILogger;
 }
 
-export type OutdialCallComponentProps = Pick<IOutdialCall, 'startOutdial' | 'cc'>;
+export type OutdialCallComponentProps = Pick<IOutdialCall, 'startOutdial'>;
 
 export type useOutdialCallProps = Pick<IOutdialCall, 'cc' | 'logger'>;

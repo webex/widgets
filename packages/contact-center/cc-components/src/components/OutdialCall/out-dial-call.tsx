@@ -14,7 +14,7 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
   };
 
   // Function to press a key on the outdial keypad.
-  const pressKey = (value: string) => {
+  const handelKeyPress = (value: string) => {
     setDestination((prev) => prev + value);
   };
 
@@ -32,7 +32,7 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
             />
             <div className="keys">
               {['1', '2', '3', '4', '5', '6', '7', '8', '9', '*', '0', '#'].map((key) => (
-                <div key={key} className="key" onClick={() => pressKey(key)}>
+                <div key={key} className="key" onClick={() => handelKeyPress(key)}>
                   {key}
                 </div>
               ))}
