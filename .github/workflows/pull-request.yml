@@ -28,14 +28,6 @@ jobs:
           TITLE="${{ github.event.pull_request.title }}"
           echo "PR Title is: '$TITLE'"
 
-          # Pattern explanation:
-          #   ^(fix|feat|chore)   -> Must start with one of these keywords
-          #   \(                  -> Then an opening parenthesis
-          #   [^()]+             -> Some non-empty text not containing parentheses
-          #   \)                 -> A closing parenthesis
-          #   :                  -> A colon
-          #   .+                 -> Some description text after the colon
-          #
           regex="^(fix|feat|chore)\([^()]+\): .+"
 
           if [[ $TITLE =~ $regex ]]; then
