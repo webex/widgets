@@ -1,0 +1,151 @@
+name: Deploy CD
+run-name: ${{ github.actor }} is running Deploy CD
+
+on:
+  push:
+    branches: # White-list of deployable tags and branches. Note that all white-listed branches cannot include any `/` characters
+      - ccwidgets
+
+env:
+  rid: ${{ github.run_id }}-${{ github.run_number }}
+  token: ${{ secrets.NPM_TOKEN }}
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Project
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v3.7.0
+        with:
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'yarn'
+
+      - id: validate-dependencies
+        name: Validate Dependencies
+        uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: node-modules-${{ hashFiles('./yarn.lock') }}
+
+      - id: lock-hash
+        name: Store Lock Hash
+        run: echo "hash=$(echo ${{ hashFiles('./yarn.lock') }})" >> $GITHUB_OUTPUT
+
+      - name: Install Dependencies
+        run: yarn
+
+      - name: Cache Dependencies
+        uses: actions/cache@v3
+        if: steps.validate-dependencies.outputs.cache-hit != 'true'
+        with:
+          path: '**/node_modules'
+          key: node-modules-${{ hashFiles('./yarn.lock') }}
+
+  build:
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - name: Checkout Project
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v3.7.0
+        with:
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'yarn'
+
+      - name: Uncache Dependencies
+        uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: node-modules-${{ hashFiles('./yarn.lock') }}
+
+      - name: Build meetings widget
+        run: yarn workspace @webex/widgets run build:src
+
+      - name: Build cc widgets
+        run: yarn run build
+
+      - name: Cache Distributables
+        uses: actions/cache@v3
+        with:
+          path: '**/dist'
+          key: dist-${{ env.rid }}
+
+  unit_tests:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout Project
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v3.7.0
+        with:
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'yarn'
+
+      - name: Uncache Dependencies
+        uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: node-modules-${{ hashFiles('./yarn.lock') }}
+
+      - name: Uncache Distributables
+        uses: actions/cache@v3
+        with:
+          path: '**/dist'
+          key: dist-${{ env.rid }}
+
+      - name: Test Tooling
+        run: yarn run test:tooling
+
+      - name: Test CC Widgets
+        run: yarn run test:cc-widgets
+
+  publish-npm:
+    name: Publish - NPM
+    needs: [build, unit_tests]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Project
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3.7.0
+        with:
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'yarn'
+
+      - name: Uncache Dependencies
+        uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: node-modules-${{ hashFiles('./yarn.lock') }}
+
+      - name: Uncache Distributables
+        uses: actions/cache@v3
+        with:
+          path: '**/dist'
+          key: dist-${{ env.rid }}
+
+      - name: Add NPM token to .yarnrc.yml file
+        run: |
+          echo "npmAuthToken: ${{ env.token }}" >> ~/.yarnrc.yml
+
+      - name: Publish cc widgets
+        run: yarn run release:widgets
