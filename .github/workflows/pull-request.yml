@@ -16,6 +16,55 @@ env:
   rid: ${{ github.run_id }}-${{ github.run_number }}
 
 jobs:
+  validate:
+    name: Validate Pull Request
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validate Labels
+        run: |
+          HEAD_REPO=${{ github.event.pull_request.head.repo.full_name }}
+          BASE_REPO=${{ github.event.pull_request.base.repo.full_name }}
+          FROM_BASE=0; [ "$HEAD_REPO" == "$BASE_REPO" ] && FROM_BASE=1
+
+          HAS_VALIDATED_LABEL=${{ contains(github.event.pull_request.labels.*.name, 'validated') }}
+          VALIDATED=0; [ "$HAS_VALIDATED_LABEL" == "true" ] && VALIDATED=1
+
+          echo from base $FROM_BASE
+          echo validated $VALIDATED
+
+          if [[ $FROM_BASE == 1 || $VALIDATED == 1 ]]
+          then
+            echo 'pull request is validated, running tests'
+            exit 0
+          else
+            echo 'pull request is not validated, exiting'
+            exit 1
+          fi
+
+      - name: Validate PR title
+        run: |
+          TITLE="${{ github.event.pull_request.title }}"
+          echo "PR Title is: '$TITLE'"
+
+          # Pattern explanation:
+          #   ^(fix|feat|chore)   -> Must start with one of these keywords
+          #   \(                  -> Then an opening parenthesis
+          #   [^()]+             -> Some non-empty text not containing parentheses
+          #   \)                 -> A closing parenthesis
+          #   :                  -> A colon
+          #   .+                 -> Some description text after the colon
+          #
+          regex="^(fix|feat|chore)\([^()]+\): .+"
+
+          if [[ $TITLE =~ $regex ]]; then
+            echo "PR title is valid."
+          else
+            echo "Error: PR title does NOT follow the required convention."
+            echo "Expected format: fix|feat|chore(some-text): description..."
+            exit 1
+          fi
+
   install:
     runs-on: ubuntu-latest
     steps:
