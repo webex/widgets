@@ -5,15 +5,9 @@ import OutdialCallComponent from '@webex/cc-components/src/components/OutdialCal
 
 describe('OutdialCallComponent', () => {
   const mockStartOutdial = jest.fn();
-  const mockCc = {
-    agentConfig: {
-      outdialEp: 'test-entry-point',
-    },
-  };
 
-  const defaultProps = {
+  const props = {
     startOutdial: mockStartOutdial,
-    cc: mockCc,
   };
 
   beforeEach(() => {
@@ -21,20 +15,20 @@ describe('OutdialCallComponent', () => {
   });
 
   it('renders the component correctly', () => {
-    render(<OutdialCallComponent {...defaultProps} />);
+    render(<OutdialCallComponent {...props} />);
     expect(screen.getByPlaceholderText('Enter number to dial')).toBeInTheDocument();
     expect(screen.getByText('Outdial Call')).toBeInTheDocument();
   });
 
   it('updates input value when typing directly', () => {
-    render(<OutdialCallComponent {...defaultProps} />);
+    render(<OutdialCallComponent {...props} />);
     const input = screen.getByPlaceholderText('Enter number to dial');
     fireEvent.change(input, {target: {value: '123'}});
     expect(input).toHaveValue('123');
   });
 
   it('updates input value when clicking keypad buttons', () => {
-    render(<OutdialCallComponent {...defaultProps} />);
+    render(<OutdialCallComponent {...props} />);
     fireEvent.click(screen.getByText('1'));
     fireEvent.click(screen.getByText('2'));
     fireEvent.click(screen.getByText('3'));
@@ -42,7 +36,7 @@ describe('OutdialCallComponent', () => {
   });
 
   it('calls startOutdial with correct payload when clicking call button', () => {
-    render(<OutdialCallComponent {...defaultProps} />);
+    render(<OutdialCallComponent {...props} />);
     const input = screen.getByPlaceholderText('Enter number to dial');
     fireEvent.change(input, {target: {value: '123'}});
 
@@ -60,35 +54,35 @@ describe('OutdialCallComponent', () => {
   });
 
   it('allows special characters (* # +) from keypad', () => {
-    render(<OutdialCallComponent {...defaultProps} />);
+    render(<OutdialCallComponent {...props} />);
     fireEvent.click(screen.getByText('*'));
     fireEvent.click(screen.getByText('#'));
     expect(screen.getByPlaceholderText('Enter number to dial')).toHaveValue('*#');
   });
 
   it('does not allow invalid characters', () => {
-    render(<OutdialCallComponent {...defaultProps} />);
+    render(<OutdialCallComponent {...props} />);
     const input = screen.getByPlaceholderText('Enter number to dial');
     fireEvent.change(input, {target: {value: 'abc'}});
     expect(input).toHaveValue('');
   });
 
   it('does not allow invalid characters when typing', () => {
-    render(<OutdialCallComponent {...defaultProps} />);
+    render(<OutdialCallComponent {...props} />);
     const input = screen.getByPlaceholderText('Enter number to dial');
     fireEvent.change(input, {target: {value: '123abc'}});
     expect(input).toHaveValue('123');
   });
 
   it('does not allow empty input', () => {
-    render(<OutdialCallComponent {...defaultProps} />);
+    render(<OutdialCallComponent {...props} />);
     const callButton = screen.getByRole('button');
     fireEvent.click(callButton);
     expect(mockStartOutdial).not.toHaveBeenCalled();
   });
 
   it('should remove whitespace and only keep numbers', () => {
-    render(<OutdialCallComponent {...defaultProps} />);
+    render(<OutdialCallComponent {...props} />);
     const input = screen.getByPlaceholderText('Enter number to dial');
     fireEvent.change(input, {target: {value: '  1 2 3 4  '}});
     expect(input).toHaveValue('1234');
