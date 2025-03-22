@@ -5,14 +5,11 @@ import {OutdialCall} from '../../src/OutdialCall';
 
 // Mock dependencies
 jest.mock('@webex/cc-store', () => ({
-  __esModule: true,
-  default: {
-    cc: {},
-    logger: {
-      // Adding mock logger methods
-      info: jest.fn(),
-      error: jest.fn(),
-    },
+  cc: {},
+  logger: {
+    // Adding mock logger methods
+    info: jest.fn(),
+    error: jest.fn(),
   },
 }));
 
