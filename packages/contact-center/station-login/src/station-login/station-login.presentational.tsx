@@ -114,9 +114,10 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
                 selectedKey={agentLoginValue}
                 onSelectionChange={selectLoginOption}
                 className="station-login-select"
+                data-testid="login-option-select"
               >
                 {(item) => (
-                  <Item textValue={item.name} key={item.key}>
+                  <Item textValue={item.name} key={item.key} data-testid={`login-option-${item.name}`}>
                     <Text className="state-name" tagName={'small'}>
                       {item.name}
                     </Text>
@@ -135,6 +136,7 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
               onChange={updateDN}
               value={dialNumberValue}
               isDisabled={isDialNumberDisabled}
+              data-testid="dial-number-input"
             />
           </fieldset>
           <fieldset className="fieldset">
@@ -149,6 +151,7 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
                 selectedKey={teamsValue}
                 onSelectionChange={updateTeam}
                 className="station-login-select"
+                data-testid="teams-dropdown-select"
               >
                 {(item) => (
                   <Item textValue={item.name} key={item.id}>
@@ -163,11 +166,11 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
           </fieldset>
           <div className="btn-container">
             {isAgentLoggedIn ? (
-              <ButtonPill id="logoutAgent" onPress={logout} color="cancel">
+              <ButtonPill id="logoutAgent" onPress={logout} color="cancel" data-testid="logout-button">
                 Logout
               </ButtonPill>
             ) : (
-              <ButtonPill id="AgentLogin" onPress={login} color="join">
+              <ButtonPill id="AgentLogin" onPress={login} color="join" data-testid="login-button">
                 Save & Continue
               </ButtonPill>
             )}
