@@ -1,4 +1,4 @@
-import {ILogger, ITask, IContactCenter, WrapupCodes} from '@webex/cc-store';
+import {ILogger, ITask, IContactCenter, WrapupCodes, BuddyDetails} from '@webex/cc-store';
 
 /**
  * Interface representing the TaskProps of a user.
@@ -187,6 +187,16 @@ export interface ControlProps {
    * @param isHeld - Boolean indicating whether the task is held.
    */
   setIsHeld: (isHeld: boolean) => void;
+
+  /**
+   * List of buddy agents available for consult
+   */
+  buddyAgents: BuddyDetails[];
+
+  /**
+   * Function to load buddy agents
+   */
+  loadBuddyAgents: () => Promise<void>;
 }
 
 export type CallControlProps = Pick<ControlProps, 'onHoldResume' | 'onEnd' | 'onWrapUp'>;
@@ -203,6 +213,8 @@ export type CallControlPresentationalProps = Pick<
   | 'wrapupCall'
   | 'isHeld'
   | 'setIsHeld'
+  | 'buddyAgents'
+  | 'loadBuddyAgents'
 >;
 
 export type useCallControlProps = Pick<

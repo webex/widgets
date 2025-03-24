@@ -12,7 +12,6 @@
   flex-direction: column;
   flex-grow: 1;
 
-
   .md-select-dropdown-input {
     flex-grow: 1;
     display: flex; // Ensure it participates in flex layout
@@ -78,7 +77,7 @@
 [id*='tippy'] {
   border: 0.0625rem solid var(--mds-color-theme-outline-input-normal); // 1px to rem
   background-color: var(--mds-color-theme-background-glass-overlay-normal);
-  border-radius: 0.50rem; // 4px to rem
+  border-radius: 0.5rem; // 4px to rem
 }
 
 .md-button-circle-wrapper.call-control-button {
@@ -102,7 +101,6 @@
   --mdc-icon-fill-color: var(--mds--color-theme-button-secondary-normal);
 }
 
-
 .wrapup-button {
   display: inline-flex;
   justify-content: center;
@@ -115,4 +113,73 @@
     background-color: var(--mds-color-theme-button-secondary-normal);
     color: var(--mds-color-theme-text-primary-normal);
   }
+}
+
+.agent-popover {
+  z-index: 9999;
+
+  .agent-popover-content {
+    display: flex;
+    flex-direction: column;
+    padding: 8px;
+    width: 480px;
+    height: 400px;
+    gap: 8px;
+
+    .agent-popover-title {
+      margin: 0.25rem 0 0.5rem 0;
+      text-align: left;
+    }
+
+    .agent-search-input {
+      padding: 0.5rem;
+      margin-bottom: 0.75rem;
+      border: 1px solid var(--mds-color-theme-outline-input-normal);
+      border-radius: 4px;
+      font-size: 14px;
+      background-color: var(--mds-color-theme-background-solid-primary-normal);
+      color: var(--mds-color-theme-text-primary-normal);
+    }
+
+    .agent-agent-item {
+      padding: 0.5rem;
+      cursor: pointer;
+      border-radius: 4px;
+
+      &:hover {
+        background-color: var(--mds-color-theme-background-secondary-hover);
+      }
+    }
+
+    .search-input-container {
+      margin: 1rem 0;
+      width: 100%;
+
+      > div {
+        width: 100%;
+      }
+    }
+  }
+
+  .agent-search-input,
+  .agent-tablist,
+  .agent-agent-list {
+    margin-left: 0;
+  }
+}
+
+.call-control-list-item .hover-button {
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+.call-control-list-item:hover .hover-button {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.custom-text {
+  margin: 0 !important;
+  line-height: 1.2 !important;
 }

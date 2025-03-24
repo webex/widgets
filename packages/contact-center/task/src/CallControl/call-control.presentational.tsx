@@ -5,11 +5,14 @@ import './call-control.styles.scss';
 import {PopoverNext, SelectNext, TooltipNext, Text, ButtonCircle, ButtonPill} from '@momentum-ui/react-collaboration';
 import {Item} from '@react-stately/collections';
 import {Icon} from '@momentum-design/components/dist/react';
+import CallControlPopoverPresentational from './CallControlCustomComponents/call-control-popover.presentational';
 
 function CallControlPresentational(props: CallControlPresentationalProps) {
   const [isRecording, setIsRecording] = useState(true);
   const [selectedWrapupReason, setSelectedWrapupReason] = useState<string | null>(null);
   const [selectedWrapupId, setSelectedWrapupId] = useState<string | null>(null);
+  const [showAgentMenu, setShowAgentMenu] = useState(false);
+  const [agentMenuType, setAgentMenuType] = useState<'Consult' | 'Transfer' | null>(null);
 
   const {
     currentTask,
@@ -22,6 +25,8 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
     wrapupRequired,
     isHeld,
     setIsHeld,
+    buddyAgents,
+    loadBuddyAgents,
   } = props;
 
   useEffect(() => {
@@ -61,6 +66,18 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
     setSelectedWrapupId(value);
   };
 
+  const consultClickHandler = () => {
+    setAgentMenuType('Consult');
+    setShowAgentMenu(true);
+    loadBuddyAgents();
+  };
+
+  const transferClickHandler = () => {
+    setAgentMenuType('Transfer');
+    setShowAgentMenu(true);
+    loadBuddyAgents();
+  };
+
   const buttons = [
     {
       icon: isHeld ? 'play-bold' : 'pause-bold',
@@ -83,6 +100,22 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
       className: 'call-control-button-cancel',
       disabled: isHeld,
     },
+    {
+      icon: 'headset-bold',
+      onClick: consultClickHandler,
+      tooltip: 'Consult with another agent',
+      className: 'call-control-button',
+      disabled: false,
+      menuType: 'Consult',
+    },
+    {
+      icon: 'next-bold',
+      onClick: transferClickHandler,
+      tooltip: 'Transfer call',
+      className: 'call-control-button',
+      disabled: false,
+      menuType: 'Transfer',
+    },
   ];
 
   if (!currentTask) return null;
@@ -93,24 +126,76 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
       <div className="call-control-container" data-testid="call-control-container">
         {!wrapupRequired && (
           <div className="button-group">
-            {buttons.map((button, index) => (
-              <TooltipNext
-                key={index}
-                color="primary"
-                delay={[0, 0]}
-                placement="bottom-start"
-                triggerComponent={
-                  <ButtonCircle className={button.className} onPress={button.onClick} disabled={button.disabled}>
-                    <Icon className={button.className + '-icon'} name={button.icon} />
-                  </ButtonCircle>
+            {buttons.map((button, index) => {
+              if (button.menuType) {
+                if (showAgentMenu && agentMenuType === button.menuType) {
+                  return (
+                    <PopoverNext
+                      key={index}
+                      onHide={() => {
+                        setShowAgentMenu(false);
+                        setAgentMenuType(null);
+                      }}
+                      color="primary"
+                      delay={[0, 0]}
+                      placement="bottom"
+                      showArrow
+                      variant="medium"
+                      interactive
+                      offsetDistance={2}
+                      className="agent-popover" // changed from conditional to fixed className
+                      trigger="click"
+                      triggerComponent={
+                        <TooltipNext
+                          triggerComponent={
+                            <ButtonCircle className={button.className} disabled={button.disabled}>
+                              <Icon className={button.className + '-icon'} name={button.icon} />
+                            </ButtonCircle>
+                          }
+                          color="primary"
+                          delay={[0, 0]}
+                          placement="bottom-start"
+                          type="description"
+                          variant="small"
+                          className="tooltip"
+                        >
+                          <p>{button.tooltip}</p>
+                        </TooltipNext>
+                      }
+                    >
+                      <CallControlPopoverPresentational
+                        heading={button.menuType}
+                        buttonIcon={button.icon}
+                        buddyAgents={buddyAgents}
+                        onAgentSelect={(agentId) => {
+                          console.log(`Handle ${agentMenuType} clicked for agent:`, agentId);
+                          setShowAgentMenu(false);
+                          setAgentMenuType(null);
+                        }}
+                      />
+                    </PopoverNext>
+                  );
                 }
-                type="description"
-                variant="small"
-                className="tooltip"
-              >
-                <p>{button.tooltip}</p>
-              </TooltipNext>
-            ))}
+              }
+              return (
+                <TooltipNext
+                  key={index}
+                  triggerComponent={
+                    <ButtonCircle className={button.className} onPress={button.onClick} disabled={button.disabled}>
+                      <Icon className={button.className + '-icon'} name={button.icon} />
+                    </ButtonCircle>
+                  }
+                  color="primary"
+                  delay={[0, 0]}
+                  placement="bottom-start"
+                  type="description"
+                  variant="small"
+                  className="tooltip"
+                >
+                  <p>{button.tooltip}</p>
+                </TooltipNext>
+              );
+            })}
           </div>
         )}
         {wrapupRequired && (

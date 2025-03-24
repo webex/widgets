@@ -1,6 +1,6 @@
 import {useEffect, useCallback, useRef, useState} from 'react';
 import {ITask} from '@webex/plugin-cc';
-import store, {TASK_EVENTS} from '@webex/cc-store';
+import store, {TASK_EVENTS, BuddyDetails} from '@webex/cc-store';
 import {useCallControlProps, UseTaskListProps, UseTaskProps} from './task.types';
 
 // Hook for managing the task list
@@ -128,6 +128,17 @@ export const useCallControl = (props: useCallControlProps) => {
   const isBrowser = deviceType === 'BROWSER';
   const [isHeld, setIsHeld] = useState<boolean | undefined>(undefined);
 
+  const [buddyAgents, setBuddyAgents] = useState<BuddyDetails[]>([]);
+  const loadBuddyAgents = useCallback(async () => {
+    try {
+      const agents = await store.getBuddyAgents();
+      setBuddyAgents(agents);
+    } catch (error) {
+      logger.error(`Error loading buddy agents: ${error}`, {module: 'helper.ts', method: 'loadBuddyAgents'});
+      setBuddyAgents([]);
+    }
+  }, [logger]);
+
   const holdCallback = () => {
     setIsHeld(true);
     if (onHoldResume) onHoldResume();
@@ -241,5 +252,7 @@ export const useCallControl = (props: useCallControlProps) => {
     wrapupCall,
     isHeld,
     setIsHeld,
+    buddyAgents,
+    loadBuddyAgents,
   };
 };

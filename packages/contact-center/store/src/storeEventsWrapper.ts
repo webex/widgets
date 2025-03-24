@@ -10,6 +10,7 @@ import {
   IdleCode,
   IContactCenter,
   ITask,
+  BuddyDetails,
 } from './store.types';
 import Store from './store';
 import {runInAction} from 'mobx';
@@ -417,6 +418,22 @@ class StoreWrapper implements IStoreWrapper {
         }
       });
     });
+  };
+
+  getBuddyAgents = async (): Promise<Array<BuddyDetails>> => {
+    try {
+      const response = await this.store.cc.getBuddyAgents({
+        mediaType: 'telephony',
+        state: 'Available',
+      });
+      return response?.data?.agentList || [];
+    } catch (error) {
+      this.store.logger.error(`Error fetching buddy agents: ${error}`, {
+        module: 'cc-store#storeEventsWrapper.ts',
+        method: 'getBuddyAgents',
+      });
+      return [];
+    }
   };
 }
 

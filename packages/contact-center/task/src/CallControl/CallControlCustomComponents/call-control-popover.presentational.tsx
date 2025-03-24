@@ -1,0 +1,72 @@
+import React, {useState} from 'react';
+import {Text, SearchInput, TabListNext, TabNext, ListNext} from '@momentum-ui/react-collaboration';
+import CallControlListItemPresentational from './call-control-list-item.presentational';
+
+export interface CallControlPopoverPresentationalProps {
+  heading: string;
+  buttonIcon: string;
+  buddyAgents: Array<{agentId: string; agentName: string; dn: string}>;
+  onAgentSelect: (agentId: string) => void;
+}
+
+const CallControlPopoverPresentational: React.FC<CallControlPopoverPresentationalProps> = ({
+  heading,
+  buttonIcon,
+  buddyAgents,
+  onAgentSelect,
+}) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedTab, setSelectedTab] = useState('Agents');
+  const filteredAgents = buddyAgents.filter((agent) =>
+    agent.agentName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  return (
+    <div className="agent-popover-content">
+      <Text tagName="h3" className="agent-popover-title" type="body-large-bold" style={{margin: '0 0 0.5rem 0'}}>
+        {heading}
+      </Text>
+      <SearchInput
+        placeholder="Search by name, queue or phone number"
+        value={searchTerm}
+        onChange={setSearchTerm}
+        clearButtonAriaLabel="Clear search"
+        style={{width: '100%'}}
+        searchIconProps={{name: 'search', scale: 28}}
+      />
+      <TabListNext
+        aria-label="Consult Tabs"
+        className="agent-tablist"
+        hasBackground={false}
+        style={{marginTop: '0.5rem'}}
+        onTabSelection={(key) => setSelectedTab(key as string)}
+      >
+        <TabNext key="Agents" active={selectedTab === 'Agents'}>
+          Agents
+        </TabNext>
+      </TabListNext>
+      <ListNext listSize={filteredAgents.length} className="agent-agent-list">
+        {filteredAgents.map((agent) => (
+          <div
+            key={agent.agentId}
+            onMouseDown={(e) => e.stopPropagation()}
+            style={{cursor: 'pointer', pointerEvents: 'auto'}}
+          >
+            <CallControlListItemPresentational
+              title={agent.agentName}
+              buttonIcon={buttonIcon}
+              onButtonPress={() => onAgentSelect(agent.agentId)}
+            />
+          </div>
+        ))}
+      </ListNext>
+      {filteredAgents.length === 0 && (
+        <Text tagName="small" type="body-secondary">
+          No agents found
+        </Text>
+      )}
+    </div>
+  );
+};
+
+export default CallControlPopoverPresentational;
