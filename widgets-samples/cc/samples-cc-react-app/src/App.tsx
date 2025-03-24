@@ -8,7 +8,6 @@ import {observer} from 'mobx-react-lite';
 // This is not to be included to a production app.
 // Have added here for debugging purposes
 window['store'] = store;
-
 const defaultWidgets = {
   stationLogin: true,
   userState: true,
@@ -241,7 +240,14 @@ function App() {
                 <fieldset className="fieldset">
                   <legend className="legend-box">&nbsp;SDK Toggles&nbsp;</legend>
                   <label style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
-                    <input type="checkbox" id="multiLoginFlag" name="multiLoginFlag" onChange={enableDisableMultiLogin} checked={isMultiLoginEnabled} /> &nbsp; Enable Multi Login
+                    <input
+                      type="checkbox"
+                      id="multiLoginFlag"
+                      name="multiLoginFlag"
+                      onChange={enableDisableMultiLogin}
+                      checked={isMultiLoginEnabled}
+                    />{' '}
+                    &nbsp; Enable Multi Login
                     <PopoverNext
                       trigger="mouseenter"
                       triggerComponent={<Icon name="info-badge-filled" />}
@@ -254,9 +260,9 @@ function App() {
                           className="warning-note"
                           style={{color: 'var(--mds-color-theme-text-error-normal)', marginBottom: '10px'}}
                         >
-                          <strong>Note:</strong> The "Enable Multi Login" option must be set before initializing the SDK.
-                          Changes to this setting after SDK initialization will not take effect. Please ensure you configure
-                          this option before clicking the "Init Widgets" button.
+                          <strong>Note:</strong> The "Enable Multi Login" option must be set before initializing the
+                          SDK. Changes to this setting after SDK initialization will not take effect. Please ensure you
+                          configure this option before clicking the "Init Widgets" button.
                         </div>
                       </Text>
                     </PopoverNext>
