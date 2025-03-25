@@ -49,6 +49,7 @@ describe('CallControlPresentational', () => {
     wrapupCodes: mockWrapupCodes,
     wrapupRequired: false,
     setIsHeld: jest.fn(),
+    setIsRecording: jest.fn(),
   };
 
   beforeEach(() => {
