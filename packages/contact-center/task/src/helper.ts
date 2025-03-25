@@ -1,7 +1,8 @@
 import {useEffect, useCallback, useRef, useState} from 'react';
 import {ITask} from '@webex/plugin-cc';
-import store, {TASK_EVENTS} from '@webex/cc-store';
 import {useCallControlProps, UseTaskListProps, UseTaskProps} from './task.types';
+import {useOutdialCallProps} from '@webex/cc-components';
+import store, {TASK_EVENTS} from '@webex/cc-store';
 
 // Hook for managing the task list
 export const useTaskList = (props: UseTaskListProps) => {
@@ -241,5 +242,32 @@ export const useCallControl = (props: useCallControlProps) => {
     wrapupCall,
     isHeld,
     setIsHeld,
+  };
+};
+
+export const useOutdialCall = (props: useOutdialCallProps) => {
+  const {cc, logger} = props;
+
+  const startOutdial = (destination: string) => {
+    // Perform validation on destination number.
+    if (!destination || !destination.trim()) {
+      alert('Destination number is required, it cannot be empty');
+      return;
+    }
+
+    cc.startOutdial(destination)
+      .then((response) => {
+        logger.info('Outdial call started', response);
+      })
+      .catch((error: Error) => {
+        logger.error(`${error}`, {
+          module: 'widget-OutdialCall#helper.ts',
+          method: 'startOutdial',
+        });
+      });
+  };
+
+  return {
+    startOutdial,
   };
 };

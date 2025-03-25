@@ -20,6 +20,7 @@
     "test:styles": "eslint"
   },
   "dependencies": {
+    "@webex/cc-components": "workspace:*",
     "@webex/cc-store": "workspace:*",
     "mobx-react-lite": "^4.1.0"
   },
