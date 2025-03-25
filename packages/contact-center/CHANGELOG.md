@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.36](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.35...v1.28.0-ccwidgets.36) (2025-03-25)
+
+
+### Features
+
+* **cc-task:** added agent outdial feature ([#399](https://github.com/webex/widgets/issues/399)) ([cded569](https://github.com/webex/widgets/commit/cded56903e258763df082749702490bd6fc8380c))
+
 # [1.28.0-ccwidgets.35](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.34...v1.28.0-ccwidgets.35) (2025-03-21)
 
 
