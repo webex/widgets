@@ -1043,4 +1043,49 @@ describe('useCallControl', () => {
     // Ensure no event handler is set
     expect(taskMock.on).not.toHaveBeenCalled();
   });
+
+  it('should load buddy agents successfully', async () => {
+    const dummyAgents = [
+      {id: 'a1', name: 'Agent1'},
+      {id: 'a2', name: 'Agent2'},
+    ];
+    const getBuddyAgentsSpy = jest.spyOn(store, 'getBuddyAgents').mockResolvedValue(dummyAgents);
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        deviceType: 'BROWSER',
+      })
+    );
+    await act(async () => {
+      await result.current.loadBuddyAgents();
+    });
+    expect(result.current.buddyAgents).toEqual(dummyAgents);
+    getBuddyAgentsSpy.mockRestore();
+  });
+
+  it('should call transferCall successfully', async () => {
+    const transferSpy = jest.fn().mockResolvedValue('Transferred');
+    const currentTaskSuccess = {...mockCurrentTask, transfer: transferSpy};
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: currentTaskSuccess,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        deviceType: 'BROWSER',
+      })
+    );
+    await act(async () => {
+      await result.current.transferCall('test_id', 'agent');
+    });
+    expect(transferSpy).toHaveBeenCalledWith({
+      to: 'test_id',
+      destinationType: 'agent',
+    });
+  });
 });

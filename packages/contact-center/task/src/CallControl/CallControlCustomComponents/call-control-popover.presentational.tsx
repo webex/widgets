@@ -20,14 +20,14 @@ const CallControlPopoverPresentational: React.FC<CallControlPopoverPresentationa
 
   return (
     <div className="agent-popover-content">
-      <Text tagName="h3" className="agent-popover-title" type="body-large-bold" style={{margin: '0 0 0.5rem 0'}}>
+      <Text tagName="h3" className="agent-popover-title" type="body-large-bold" style={{margin: '0 0 0 0'}}>
         {heading}
       </Text>
       <TabListNext
-        aria-label="Consult Tabs"
+        aria-label="Tabs"
         className="agent-tablist"
         hasBackground={false}
-        style={{marginTop: '0.5rem'}}
+        style={{marginTop: '0'}}
         onTabSelection={(key) => setSelectedTab(key as string)}
       >
         <TabNext key="Agents" active={selectedTab === 'Agents'}>

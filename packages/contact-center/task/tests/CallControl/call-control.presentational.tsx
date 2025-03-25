@@ -1,23 +1,56 @@
+/* eslint-disable react/prop-types */
 import React from 'react';
-import {render, screen} from '@testing-library/react';
+import {render, screen, fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import CallControlPresentational from '../../src/CallControl/call-control.presentational';
 
 jest.mock('@momentum-ui/react-collaboration', () => ({
-  ButtonPill: () => <div data-testid="ButtonPill" />,
-  ListItemBase: () => <div data-testid="ListItemBase" />,
-  ListItemBaseSection: () => <div data-testid="ListItemBaseSection" />,
-  Text: () => <div data-testid="Text" />,
-  ButtonCircle: () => <div data-testid="ButtonCircle" />,
-  PopoverNext: () => <div data-testid="PopoverNext" />,
-  SelectNext: () => <div data-testid="SelectNext" />,
-  TooltipNext: () => <div data-testid="TooltipNext" />,
+  ButtonPill: (props) => (
+    <button data-testid="ButtonPill" onClick={props.onPress} className={props.className}>
+      {props.children}
+    </button>
+  ),
+  ButtonCircle: (props) => (
+    <button data-testid="ButtonCircle" onClick={props.onPress} disabled={props.disabled} className={props.className}>
+      {props.children}
+    </button>
+  ),
+  PopoverNext: (props) => (
+    <div data-testid="PopoverNext">
+      {props.triggerComponent}
+      {props.children}
+    </div>
+  ),
+  SelectNext: (props) => (
+    <div data-testid="SelectNext">{props.children && props.items && props.children(props.items[0])}</div>
+  ),
+  TooltipNext: (props) => (
+    <div data-testid="TooltipNext">
+      {props.triggerComponent}
+      {props.children}
+    </div>
+  ),
 }));
 
 jest.mock('@momentum-design/components/dist/react', () => ({
-  Avatar: () => <div data-testid="Avatar" />,
-  Icon: () => <div data-testid="Icon" />,
+  Icon: (props) => (
+    <span data-testid="Icon" className={props.className}>
+      {props.name}
+    </span>
+  ),
 }));
+
+jest.mock('../../src/CallControl/CallControlCustomComponents/call-control-popover.presentational', () => {
+  const MockPopover = (props) => (
+    <div data-testid="CallControlPopover">
+      <button data-testid="AgentSelectButton" onClick={() => props.onAgentSelect('agent1')}>
+        Select Agent
+      </button>
+    </div>
+  );
+  MockPopover.displayName = 'CallControlPopoverPresentational';
+  return MockPopover;
+});
 
 describe('CallControlPresentational', () => {
   const mockToggleHold = jest.fn();
@@ -28,8 +61,12 @@ describe('CallControlPresentational', () => {
     {id: '1', name: 'Reason 1'},
     {id: '2', name: 'Reason 2'},
   ];
+  const mockLoadBuddyAgents = jest.fn();
+  const mockConsultCall = jest.fn();
+  const mockTransferCall = jest.fn();
+  const setIsHeld = jest.fn();
 
-  const defaultProps = {
+  const baseProps = {
     currentTask: {
       data: {
         interaction: {
@@ -48,15 +85,72 @@ describe('CallControlPresentational', () => {
     wrapupCall: mockWrapupCall,
     wrapupCodes: mockWrapupCodes,
     wrapupRequired: false,
-    setIsHeld: jest.fn(),
+    setIsHeld: setIsHeld,
+    buddyAgents: [],
+    loadBuddyAgents: mockLoadBuddyAgents,
+    transferCall: mockTransferCall,
+    consultCall: mockConsultCall,
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders the component with buttons and dropdown', () => {
-    render(<CallControlPresentational {...defaultProps} />);
+  it('renders the component with call control container', () => {
+    render(<CallControlPresentational {...baseProps} />);
     expect(screen.getByTestId('call-control-container')).toBeInTheDocument();
+  });
+
+  it('renders the correct hold button icon based on currentTask (not on hold)', () => {
+    render(<CallControlPresentational {...baseProps} />);
+    const holdButton = screen.getAllByTestId('ButtonCircle')[0];
+    expect(holdButton).toHaveTextContent('pause-bold');
+  });
+
+  it('calls toggleHold with correct value when hold button is clicked', () => {
+    render(<CallControlPresentational {...baseProps} />);
+    const buttons = screen.getAllByTestId('ButtonCircle');
+    fireEvent.click(buttons[0]);
+    expect(mockToggleHold).toHaveBeenCalledWith(true);
+  });
+
+  it('renders the correct recording button icon based on currentTask (recording active)', () => {
+    render(<CallControlPresentational {...baseProps} />);
+    const recordButton = screen.getAllByTestId('ButtonCircle')[1];
+    expect(recordButton).toHaveTextContent('record-paused-bold');
+  });
+
+  it('calls toggleRecording with correct value when record button is clicked', () => {
+    render(<CallControlPresentational {...baseProps} />);
+    const buttons = screen.getAllByTestId('ButtonCircle');
+    fireEvent.click(buttons[1]);
+    expect(mockToggleRecording).toHaveBeenCalledWith(true);
+  });
+
+  it('calls endCall when end call button is clicked', () => {
+    render(<CallControlPresentational {...baseProps} />);
+    const buttons = screen.getAllByTestId('ButtonCircle');
+    fireEvent.click(buttons[2]);
+    expect(mockEndCall).toHaveBeenCalled();
+  });
+
+  it('calls consultCall when a consult agent is selected', () => {
+    render(<CallControlPresentational {...baseProps} />);
+    const buttons = screen.getAllByTestId('ButtonCircle');
+    fireEvent.click(buttons[3]);
+    const agentSelectButton = screen.getByTestId('AgentSelectButton');
+    fireEvent.click(agentSelectButton);
+    expect(mockConsultCall).toHaveBeenCalled();
+    expect(mockTransferCall).not.toHaveBeenCalled();
+  });
+
+  it('calls transferCall when a transfer agent is selected', () => {
+    render(<CallControlPresentational {...baseProps} />);
+    const buttons = screen.getAllByTestId('ButtonCircle');
+    fireEvent.click(buttons[4]);
+    const agentSelectButton = screen.getByTestId('AgentSelectButton');
+    fireEvent.click(agentSelectButton);
+    expect(mockTransferCall).toHaveBeenCalledWith('agent1', 'agent');
+    expect(mockConsultCall).not.toHaveBeenCalled();
   });
 });

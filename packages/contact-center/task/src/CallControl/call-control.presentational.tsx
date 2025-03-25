@@ -68,18 +68,6 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
     setSelectedWrapupId(value);
   };
 
-  const consultClickHandler = () => {
-    setAgentMenuType('Consult');
-    setShowAgentMenu(true);
-    loadBuddyAgents();
-  };
-
-  const transferClickHandler = () => {
-    setAgentMenuType('Transfer');
-    setShowAgentMenu(true);
-    loadBuddyAgents();
-  };
-
   const buttons = [
     {
       icon: isHeld ? 'play-bold' : 'pause-bold',
@@ -104,7 +92,6 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
     },
     {
       icon: 'headset-bold',
-      onClick: consultClickHandler,
       tooltip: 'Consult with another agent',
       className: 'call-control-button',
       disabled: false,
@@ -112,7 +99,6 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
     },
     {
       icon: 'next-bold',
-      onClick: transferClickHandler,
       tooltip: 'Transfer call',
       className: 'call-control-button',
       disabled: false,
@@ -130,47 +116,70 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
           <div className="button-group">
             {buttons.map((button, index) => {
               if (button.menuType) {
-                if (showAgentMenu && agentMenuType === button.menuType) {
-                  return (
-                    <PopoverNext
-                      key={index}
-                      onHide={() => {
+                return (
+                  <PopoverNext
+                    key={index}
+                    onHide={() => {
+                      setShowAgentMenu(false);
+                      setAgentMenuType(null);
+                    }}
+                    color="primary"
+                    delay={[0, 0]}
+                    placement="bottom"
+                    showArrow
+                    variant="medium"
+                    interactive
+                    offsetDistance={2}
+                    className="agent-popover"
+                    trigger="click"
+                    closeButtonPlacement="top-right"
+                    closeButtonProps={{
+                      'aria-label': 'Close popover',
+                      onPress: () => {
                         setShowAgentMenu(false);
                         setAgentMenuType(null);
-                      }}
-                      color="primary"
-                      delay={[0, 0]}
-                      placement="bottom"
-                      showArrow
-                      variant="medium"
-                      interactive
-                      offsetDistance={2}
-                      className="agent-popover" // changed from conditional to fixed className
-                      trigger="click"
-                      triggerComponent={
-                        <TooltipNext
-                          triggerComponent={
-                            <ButtonCircle className={button.className} disabled={button.disabled}>
-                              <Icon className={button.className + '-icon'} name={button.icon} />
-                            </ButtonCircle>
-                          }
-                          color="primary"
-                          delay={[0, 0]}
-                          placement="bottom-start"
-                          type="description"
-                          variant="small"
-                          className="tooltip"
-                        >
-                          <p>{button.tooltip}</p>
-                        </TooltipNext>
-                      }
-                    >
+                      },
+                    }}
+                    triggerComponent={
+                      <TooltipNext
+                        key={index}
+                        triggerComponent={
+                          <ButtonCircle
+                            className={button.className}
+                            disabled={button.disabled}
+                            data-testid="ButtonCircle"
+                            onPress={() => {
+                              // If popover is already visible, we close it
+                              if (showAgentMenu && agentMenuType === button.menuType) {
+                                setShowAgentMenu(false);
+                                setAgentMenuType(null);
+                              } else {
+                                setAgentMenuType(button.menuType as 'Consult' | 'Transfer');
+                                setShowAgentMenu(true);
+                                loadBuddyAgents();
+                              }
+                            }}
+                          >
+                            <Icon className={button.className + '-icon'} name={button.icon} />
+                          </ButtonCircle>
+                        }
+                        color="primary"
+                        delay={[0, 0]}
+                        placement="bottom-start"
+                        type="description"
+                        variant="small"
+                        className="tooltip"
+                      >
+                        <p>{button.tooltip}</p>
+                      </TooltipNext>
+                    }
+                  >
+                    {showAgentMenu && agentMenuType === button.menuType ? (
                       <CallControlPopoverPresentational
                         heading={button.menuType}
                         buttonIcon={button.icon}
                         buddyAgents={buddyAgents}
                         onAgentSelect={(agentId) => {
-                          console.log(`Handle ${agentMenuType} clicked for agent:`, agentId);
                           setShowAgentMenu(false);
                           setAgentMenuType(null);
                           if (agentMenuType === 'Consult') {
@@ -180,9 +189,9 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
                           }
                         }}
                       />
-                    </PopoverNext>
-                  );
-                }
+                    ) : null}
+                  </PopoverNext>
+                );
               }
               return (
                 <TooltipNext
