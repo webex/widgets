@@ -3,7 +3,7 @@ import {TaskListPresentationalProps} from '../task.types';
 import Task from '../Task';
 import './styles.scss';
 
-const TaskListPresentational: React.FunctionComponent<TaskListPresentationalProps> = (props) => {
+const TaskListComponent: React.FunctionComponent<TaskListPresentationalProps> = (props) => {
   const {currentTask, taskList, acceptTask, declineTask, isBrowser} = props;
   if (taskList.length <= 0) {
     return <></>; // hidden component
@@ -39,4 +39,4 @@ const TaskListPresentational: React.FunctionComponent<TaskListPresentationalProp
   );
 };
 
-export default TaskListPresentational;
+export default TaskListComponent;

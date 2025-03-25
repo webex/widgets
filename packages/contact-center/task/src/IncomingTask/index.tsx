@@ -3,10 +3,10 @@ import {observer} from 'mobx-react-lite';
 
 import store from '@webex/cc-store';
 import {useIncomingTask} from '../helper';
-import IncomingTaskPresentational from './incoming-task.presentational';
-import {IncomingTaskProps} from '../task.types';
+import {IncomingTaskComponent} from '@webex/cc-components';
+import {IncomingTaskProps} from '@webex/cc-components';
 
-const IncomingTaskComponent: React.FunctionComponent<IncomingTaskProps> = ({onAccepted, onDeclined}) => {
+const IncomingTask: React.FunctionComponent<IncomingTaskProps> = observer(({onAccepted, onDeclined}) => {
   const {deviceType, incomingTask, logger} = store;
   const result = useIncomingTask({incomingTask, onAccepted, onDeclined, deviceType, logger});
 
@@ -14,8 +14,7 @@ const IncomingTaskComponent: React.FunctionComponent<IncomingTaskProps> = ({onAc
     ...result,
   };
 
-  return <IncomingTaskPresentational {...props} />;
-};
+  return <IncomingTaskComponent {...props} />;
+});
 
-const IncomingTask = observer(IncomingTaskComponent);
 export {IncomingTask};

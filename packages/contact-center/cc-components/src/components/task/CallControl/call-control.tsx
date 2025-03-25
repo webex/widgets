@@ -6,7 +6,7 @@ import {PopoverNext, SelectNext, TooltipNext, Text, ButtonCircle, ButtonPill} fr
 import {Item} from '@react-stately/collections';
 import {Icon} from '@momentum-design/components/dist/react';
 
-function CallControlPresentational(props: CallControlPresentationalProps) {
+function CallControlComponent(props: CallControlPresentationalProps) {
   const [isRecording, setIsRecording] = useState(true);
   const [selectedWrapupReason, setSelectedWrapupReason] = useState<string | null>(null);
   const [selectedWrapupId, setSelectedWrapupId] = useState<string | null>(null);
@@ -173,4 +173,4 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
   );
 }
 
-export default CallControlPresentational;
+export default CallControlComponent;

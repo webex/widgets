@@ -3,10 +3,10 @@ import {observer} from 'mobx-react-lite';
 
 import store from '@webex/cc-store';
 import {useCallControl} from '../helper';
-import {CallControlProps} from '../task.types';
-import CallControlPresentational from './call-control.presentational';
+import {CallControlProps} from '@webex/cc-components';
+import {CallControlComponent} from '@webex/cc-components';
 
-const CallControlComponent: React.FunctionComponent<CallControlProps> = ({onHoldResume, onEnd, onWrapUp}) => {
+const CallControl: React.FunctionComponent<CallControlProps> = observer(({onHoldResume, onEnd, onWrapUp}) => {
   const {logger, currentTask, deviceType, wrapupCodes, wrapupRequired} = store;
   const result = {
     ...useCallControl({currentTask, deviceType, onHoldResume, onEnd, onWrapUp, logger}),
@@ -14,8 +14,7 @@ const CallControlComponent: React.FunctionComponent<CallControlProps> = ({onHold
     wrapupCodes,
   };
 
-  return <CallControlPresentational {...result} />;
-};
+  return <CallControlComponent {...result} />;
+});
 
-const CallControl = observer(CallControlComponent);
 export {CallControl};

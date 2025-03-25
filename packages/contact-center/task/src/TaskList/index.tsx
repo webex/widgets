@@ -2,11 +2,11 @@ import React from 'react';
 import store from '@webex/cc-store';
 import {observer} from 'mobx-react-lite';
 
-import TaskListPresentational from './task-list.presentational';
+import {TaskListComponent} from '@webex/cc-components';
 import {useTaskList} from '../helper';
-import {TaskListProps} from '../task.types';
+import {TaskListProps} from '@webex/cc-components';
 
-const TaskListComponent: React.FunctionComponent<TaskListProps> = ({onTaskAccepted, onTaskDeclined}) => {
+const TaskList: React.FunctionComponent<TaskListProps> = observer(({onTaskAccepted, onTaskDeclined}) => {
   const {cc, taskList, currentTask, deviceType, logger} = store;
 
   const result = useTaskList({cc, deviceType, logger, taskList, onTaskAccepted, onTaskDeclined});
@@ -15,8 +15,7 @@ const TaskListComponent: React.FunctionComponent<TaskListProps> = ({onTaskAccept
     currentTask,
   };
 
-  return <TaskListPresentational {...props} />;
-};
+  return <TaskListComponent {...props} />;
+});
 
-const TaskList = observer(TaskListComponent);
 export {TaskList};
