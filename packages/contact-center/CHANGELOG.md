@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.37](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.36...v1.28.0-ccwidgets.37) (2025-03-25)
+
+
+### Bug Fixes
+
+* **cc-widgets:** Pause resume record issue fix ([#409](https://github.com/webex/widgets/issues/409)) ([11c9b5e](https://github.com/webex/widgets/commit/11c9b5ecf2745eaf44762afb018c70add4b0014b))
+
 # [1.28.0-ccwidgets.36](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.35...v1.28.0-ccwidgets.36) (2025-03-25)
 
 
