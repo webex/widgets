@@ -8,6 +8,7 @@ const ccUserState = document.createElement('widget-cc-user-state');
 const ccIncomingTask = document.createElement('widget-cc-incoming-task');
 const ccTaskList = document.createElement('widget-cc-task-list');
 const ccCallControl = document.createElement('widget-cc-call-control');
+const ccOutdial = document.createElement('widget-cc-outdial-call');
 
 const themeProviderElem = document.getElementById('theme-provider-elem');
 
@@ -16,6 +17,7 @@ const userStateCheckbox = document.getElementById('userStateCheckbox');
 const incomingTaskCheckbox = document.getElementById('incomingTaskCheckbox');
 const taskListCheckbox = document.getElementById('taskListCheckbox');
 const callControlCheckbox = document.getElementById('callControlCheckbox');
+const outdialCallCheckbox = document.getElementById('outdialCallCheckbox');
 
 let isMultiLoginEnabled = false;
 
@@ -137,6 +139,10 @@ function loginSuccess() {
     callControlContainer.querySelector('fieldset').appendChild(ccCallControl);
     widgetsContainer.appendChild(callControlContainer);
   }
+  if (outdialCallCheckbox.checked) {
+    ccOutdial.classList.remove('disabled');
+    widgetsContainer.appendChild(ccOutdial);
+  }
 }
 
 function logoutSuccess() {
@@ -145,6 +151,7 @@ function logoutSuccess() {
   ccIncomingTask.classList.add('disabled');
   ccTaskList.classList.add('disabled');
   ccCallControl.classList.add('disabled');
+  ccOutdial.classList.add('disabled');
 }
 
 function onStateChange(status) {

@@ -148,10 +148,9 @@ export interface ControlProps {
   toggleHold: (hold: boolean) => void;
 
   /**
-   * Function to handle pause/resume recording actions with a boolean parameter.
-   * @param pause - Boolean indicating whether to pause (true) or resume (false) recording.
+   * Function to handle pause/resume recording actions.
    */
-  toggleRecording: (pause: boolean) => void;
+  toggleRecording: () => void;
 
   /**
    * Function to handle ending the call.
@@ -180,6 +179,17 @@ export interface ControlProps {
    * @param isHeld - Boolean indicating whether the task is held.
    */
   setIsHeld: (isHeld: boolean) => void;
+
+  /**
+   * Flag to determine if the task is being recorded
+   */
+  isRecording: boolean;
+
+  /**
+   * Function to set the recording status of the task.
+   * @param isRecording - Boolean indicating whether the task is being recorded.
+   */
+  setIsRecording: (isRecording: boolean) => void;
 }
 
 export type CallControlPresentationalProps = Pick<
@@ -194,4 +204,6 @@ export type CallControlPresentationalProps = Pick<
   | 'wrapupCall'
   | 'isHeld'
   | 'setIsHeld'
+  | 'isRecording'
+  | 'setIsRecording'
 >;
