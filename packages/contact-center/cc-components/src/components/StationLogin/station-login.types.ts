@@ -95,7 +95,7 @@ export interface IStationLoginProps {
   showMultipleLoginAlert: boolean;
 }
 
-export type StationLoginPresentationalProps = Pick<
+export type StationLoginComponentProps = Pick<
   IStationLoginProps,
   | 'teams'
   | 'loginOptions'

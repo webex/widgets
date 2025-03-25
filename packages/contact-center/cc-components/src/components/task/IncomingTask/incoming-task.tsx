@@ -1,8 +1,8 @@
 import React from 'react';
-import {IncomingTaskPresentationalProps} from '../task.types';
+import {IncomingTaskComponentProps} from '../task.types';
 import Task from '../Task';
 
-const IncomingTaskComponent: React.FunctionComponent<IncomingTaskPresentationalProps> = (props) => {
+const IncomingTaskComponent: React.FunctionComponent<IncomingTaskComponentProps> = (props) => {
   const {incomingTask, accept, decline, isBrowser} = props;
   if (!incomingTask) {
     return <></>; // hidden component

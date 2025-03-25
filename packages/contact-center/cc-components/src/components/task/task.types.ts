@@ -90,9 +90,9 @@ export interface TaskProps {
   logger: ILogger;
 }
 
-export type IncomingTaskPresentationalProps = Pick<TaskProps, 'incomingTask' | 'isBrowser' | 'accept' | 'decline'>;
+export type IncomingTaskComponentProps = Pick<TaskProps, 'incomingTask' | 'isBrowser' | 'accept' | 'decline'>;
 
-export type TaskListPresentationalProps = Pick<
+export type TaskListComponentProps = Pick<
   TaskProps,
   'currentTask' | 'taskList' | 'isBrowser' | 'acceptTask' | 'declineTask'
 >;
@@ -192,7 +192,7 @@ export interface ControlProps {
   setIsRecording: (isRecording: boolean) => void;
 }
 
-export type CallControlPresentationalProps = Pick<
+export type CallControlComponentProps = Pick<
   ControlProps,
   | 'currentTask'
   | 'audioRef'
@@ -207,3 +207,25 @@ export type CallControlPresentationalProps = Pick<
   | 'isRecording'
   | 'setIsRecording'
 >;
+
+/**
+ * Interface representing the properties for OutdialCall component.
+ */
+export interface OutdialCallProps {
+  /**
+   * Function to start outdial call.
+   */
+  startOutdial: (destination: string) => void;
+
+  /**
+   * CC SDK Instance.
+   */
+  cc: IContactCenter;
+
+  /**
+   * Logger instance for logging purpose.
+   */
+  logger: ILogger;
+}
+
+export type OutdialCallComponentProps = Pick<OutdialCallProps, 'startOutdial'>;

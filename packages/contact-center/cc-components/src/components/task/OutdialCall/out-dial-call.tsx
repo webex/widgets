@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {OutdialCallComponentProps} from './out-dial-call.types';
+import {OutdialCallComponentProps} from '../task.types';
 import './out-dial-call.styles.scss';
 
 const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> = (props) => {

@@ -1,4 +1,4 @@
-import {TaskProps, ControlProps} from '@webex/cc-components';
+import {TaskProps, ControlProps, OutdialCallProps} from '@webex/cc-components';
 
 export type UseTaskProps = Pick<TaskProps, 'incomingTask' | 'onAccepted' | 'onDeclined' | 'deviceType' | 'logger'>;
 export type UseTaskListProps = Pick<
@@ -14,3 +14,5 @@ export type useCallControlProps = Pick<
   ControlProps,
   'currentTask' | 'onHoldResume' | 'onEnd' | 'onWrapUp' | 'logger' | 'deviceType'
 >;
+
+export type useOutdialCallProps = Pick<OutdialCallProps, 'cc' | 'logger'>;
