@@ -6,7 +6,7 @@ import {ButtonPill, Text, SelectNext, TextInput} from '@momentum-ui/react-collab
 import {Item} from '@react-stately/collections';
 import {Icon} from '@momentum-design/components/dist/react';
 
-const StationLoginPresentational: React.FunctionComponent<StationLoginPresentationalProps> = (props) => {
+const StationLoginComponent: React.FunctionComponent<StationLoginPresentationalProps> = (props) => {
   const {
     teams,
     loginOptions,
@@ -178,4 +178,4 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
   );
 };
 
-export default StationLoginPresentational;
+export default StationLoginComponent;

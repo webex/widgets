@@ -2,11 +2,10 @@ import React from 'react';
 import store from '@webex/cc-store';
 import {observer} from 'mobx-react-lite';
 
-import StationLoginPresentational from './station-login.presentational';
+import {StationLoginComponent, StationLoginProps} from '@webex/cc-components';
 import {useStationLogin} from '../helper';
-import {StationLoginProps} from './station-login.types';
 
-const StationLoginComponent: React.FunctionComponent<StationLoginProps> = ({onLogin, onLogout}) => {
+const StationLogin: React.FunctionComponent<StationLoginProps> = observer(({onLogin, onLogout}) => {
   const {cc, teams, loginOptions, logger, isAgentLoggedIn, showMultipleLoginAlert, deviceType} = store;
   const result = useStationLogin({
     cc,
@@ -24,8 +23,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginProps> = ({onLo
     isAgentLoggedIn,
     showMultipleLoginAlert,
   };
-  return <StationLoginPresentational {...props} />;
-};
+  return <StationLoginComponent {...props} />;
+});
 
-const StationLogin = observer(StationLoginComponent);
 export {StationLogin};
