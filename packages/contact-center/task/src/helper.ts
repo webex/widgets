@@ -143,8 +143,14 @@ export const useCallControl = (props: useCallControlProps) => {
     if (onEnd) onEnd();
   };
 
-  const wrapupCallCallback = () => {
-    if (onWrapUp) onWrapUp();
+  const wrapupCallCallback = ({wrapUpAuxCodeId}) => {
+    const wrapUpReason = store.wrapupCodes.find((code) => code.id === wrapUpAuxCodeId)?.name;
+    if (onWrapUp) {
+      onWrapUp({
+        task: currentTask,
+        wrapUpReason: wrapUpReason,
+      });
+    }
   };
 
   const pauseRecordingCallback = () => {

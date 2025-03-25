@@ -130,7 +130,7 @@ export interface ControlProps {
   /**
    * Function to handle wrapping up the task.
    */
-  onWrapUp?: () => void;
+  onWrapUp?: ({task, wrapUpReason}: {task: ITask; wrapUpReason: string}) => void;
 
   /**
    * Logger instance for logging purposes.
