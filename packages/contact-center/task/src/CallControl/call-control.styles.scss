@@ -127,7 +127,7 @@
     gap: 4px;
 
     .agent-popover-title {
-      margin: 0.25rem 0 0.5rem 0;
+      margin: 0 0 0 0;
       text-align: left;
     }
 
@@ -142,9 +142,16 @@
     }
   }
 
-  .agent-tablist,
+  .agent-tablist {
+    margin-bottom: 0.7rem;
+    .agent-tab {
+      margin: 0 !important;
+    }
+  }
+
   .agent-agent-list {
     margin-left: 0;
+    margin-bottom: 0.5rem;
   }
 }
 
@@ -161,5 +168,5 @@
 
 .custom-text {
   margin: 0 !important;
-  line-height: 1.2 !important;
+  line-height: 1 !important;
 }

@@ -135,6 +135,7 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
                         setShowAgentMenu(false);
                         setAgentMenuType(null);
                       },
+                      outline: true,
                     }}
                     triggerComponent={
                       <TooltipNext

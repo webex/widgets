@@ -30,7 +30,7 @@ const CallControlPopoverPresentational: React.FC<CallControlPopoverPresentationa
         style={{marginTop: '0'}}
         onTabSelection={(key) => setSelectedTab(key as string)}
       >
-        <TabNext key="Agents" active={selectedTab === 'Agents'}>
+        <TabNext key="Agents" className="agent-tab" active={selectedTab === 'Agents'}>
           Agents
         </TabNext>
       </TabListNext>
