@@ -3,7 +3,7 @@ import {observer} from 'mobx-react-lite';
 
 import store from '@webex/cc-store';
 import {useCallControl} from '../helper';
-import {CallControlProps} from '@webex/cc-components';
+import {CallControlProps} from '../task.types';
 import {CallControlComponent} from '@webex/cc-components';
 
 const CallControl: React.FunctionComponent<CallControlProps> = observer(({onHoldResume, onEnd, onWrapUp}) => {

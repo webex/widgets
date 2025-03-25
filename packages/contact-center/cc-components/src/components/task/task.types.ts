@@ -90,14 +90,7 @@ export interface TaskProps {
   logger: ILogger;
 }
 
-export type UseTaskProps = Pick<TaskProps, 'incomingTask' | 'onAccepted' | 'onDeclined' | 'deviceType' | 'logger'>;
-export type UseTaskListProps = Pick<
-  TaskProps,
-  'cc' | 'taskList' | 'deviceType' | 'onTaskAccepted' | 'onTaskDeclined' | 'logger'
->;
 export type IncomingTaskPresentationalProps = Pick<TaskProps, 'incomingTask' | 'isBrowser' | 'accept' | 'decline'>;
-export type IncomingTaskProps = Pick<TaskProps, 'onAccepted' | 'onDeclined'>;
-export type TaskListProps = Pick<TaskProps, 'onTaskAccepted' | 'onTaskDeclined'>;
 
 export type TaskListPresentationalProps = Pick<
   TaskProps,
@@ -189,8 +182,6 @@ export interface ControlProps {
   setIsHeld: (isHeld: boolean) => void;
 }
 
-export type CallControlProps = Pick<ControlProps, 'onHoldResume' | 'onEnd' | 'onWrapUp'>;
-
 export type CallControlPresentationalProps = Pick<
   ControlProps,
   | 'currentTask'
@@ -203,9 +194,4 @@ export type CallControlPresentationalProps = Pick<
   | 'wrapupCall'
   | 'isHeld'
   | 'setIsHeld'
->;
-
-export type useCallControlProps = Pick<
-  ControlProps,
-  'currentTask' | 'onHoldResume' | 'onEnd' | 'onWrapUp' | 'logger' | 'deviceType'
 >;

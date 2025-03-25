@@ -4,7 +4,7 @@ import {observer} from 'mobx-react-lite';
 import store from '@webex/cc-store';
 import {useIncomingTask} from '../helper';
 import {IncomingTaskComponent} from '@webex/cc-components';
-import {IncomingTaskProps} from '@webex/cc-components';
+import {IncomingTaskProps} from '../task.types';
 
 const IncomingTask: React.FunctionComponent<IncomingTaskProps> = observer(({onAccepted, onDeclined}) => {
   const {deviceType, incomingTask, logger} = store;

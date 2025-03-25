@@ -4,7 +4,7 @@ import {observer} from 'mobx-react-lite';
 
 import {TaskListComponent} from '@webex/cc-components';
 import {useTaskList} from '../helper';
-import {TaskListProps} from '@webex/cc-components';
+import {TaskListProps} from '../task.types';
 
 const TaskList: React.FunctionComponent<TaskListProps> = observer(({onTaskAccepted, onTaskDeclined}) => {
   const {cc, taskList, currentTask, deviceType, logger} = store;
