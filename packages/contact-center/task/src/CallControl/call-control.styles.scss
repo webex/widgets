@@ -124,21 +124,11 @@
     padding: 8px;
     width: 480px;
     height: 400px;
-    gap: 8px;
+    gap: 4px;
 
     .agent-popover-title {
       margin: 0.25rem 0 0.5rem 0;
       text-align: left;
-    }
-
-    .agent-search-input {
-      padding: 0.5rem;
-      margin-bottom: 0.75rem;
-      border: 1px solid var(--mds-color-theme-outline-input-normal);
-      border-radius: 4px;
-      font-size: 14px;
-      background-color: var(--mds-color-theme-background-solid-primary-normal);
-      color: var(--mds-color-theme-text-primary-normal);
     }
 
     .agent-agent-item {
@@ -150,18 +140,8 @@
         background-color: var(--mds-color-theme-background-secondary-hover);
       }
     }
-
-    .search-input-container {
-      margin: 1rem 0;
-      width: 100%;
-
-      > div {
-        width: 100%;
-      }
-    }
   }
 
-  .agent-search-input,
   .agent-tablist,
   .agent-agent-list {
     margin-left: 0;

@@ -85,6 +85,10 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.showMultipleLoginAlert;
   }
 
+  get isAgentTransferred() {
+    return this.store.isAgentTransferred;
+  }
+
   get currentTheme() {
     return this.store.currentTheme;
   }
@@ -130,6 +134,10 @@ class StoreWrapper implements IStoreWrapper {
 
   setWrapupRequired = (value: boolean): void => {
     this.store.wrapupRequired = value;
+  };
+
+  setIsAgentTransferred = (value: boolean): void => {
+    this.store.isAgentTransferred = value;
   };
 
   setCurrentTask = (task: ITask): void => {
@@ -235,14 +243,17 @@ class StoreWrapper implements IStoreWrapper {
     });
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  handleAgentBlindTransferred = (event) => {
+    this.setIsAgentTransferred(true);
+  };
+
   handleTaskEnd = (event) => {
     // If the call is ended by agent we get the task object in event.data
     // If the call is ended by customer we get the task object directly
 
     const task = event.data ? event.data : event;
-    // TODO -- SDK needs to send only 1 event on end : https://jira-eng-gpk2.cisco.com/jira/browse/SPARK-615785
-
-    if (task.interaction.state === 'connected') {
+    if (task.interaction.state === 'connected' || this.store.isAgentTransferred) {
       this.setWrapupRequired(true);
       return;
     } else if (task.interaction.state !== 'connected' && this.store.wrapupRequired !== true) {
@@ -265,6 +276,7 @@ class StoreWrapper implements IStoreWrapper {
   handleTaskWrapUp = (event) => {
     const task = event;
     this.setWrapupRequired(false);
+    this.setIsAgentTransferred(false);
     this.handleTaskRemove(task.interactionId);
   };
 
@@ -286,6 +298,9 @@ class StoreWrapper implements IStoreWrapper {
     task.on(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(task.data.interactionId, reason));
 
     task.on(TASK_EVENTS.AGENT_WRAPPEDUP, this.handleTaskWrapUp);
+
+    // Listen for AGENT_BLIND_TRANSFERRED event
+    task.on(TASK_EVENTS.AGENT_BLIND_TRANSFERRED, () => this.handleAgentBlindTransferred(task));
 
     this.setIncomingTask(task);
     this.setTaskList([...this.store.taskList, task]);
@@ -319,6 +334,9 @@ class StoreWrapper implements IStoreWrapper {
     task.on(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(task.data.interactionId, reason));
 
     task.on(TASK_EVENTS.AGENT_WRAPPEDUP, this.handleTaskWrapUp);
+
+    // Listen for AGENT_BLIND_TRANSFERRED event
+    task.on(TASK_EVENTS.AGENT_BLIND_TRANSFERRED, () => this.handleAgentBlindTransferred(task));
 
     if (!this.store.taskList.some((t) => t.data.interactionId === task.data.interactionId)) {
       this.setTaskList([...this.store.taskList, task]);

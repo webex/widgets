@@ -35,6 +35,7 @@ class Store implements IStore {
   lastStateChangeTimestamp?: number;
   lastIdleCodeChangeTimestamp?: number;
   showMultipleLoginAlert: boolean = false;
+  isAgentTransferred: boolean = false;
 
   constructor() {
     makeAutoObservable(this, {

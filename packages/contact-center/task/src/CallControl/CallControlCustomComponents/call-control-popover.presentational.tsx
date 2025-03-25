@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {Text, SearchInput, TabListNext, TabNext, ListNext} from '@momentum-ui/react-collaboration';
+import {Text, TabListNext, TabNext, ListNext} from '@momentum-ui/react-collaboration';
 import CallControlListItemPresentational from './call-control-list-item.presentational';
 
 export interface CallControlPopoverPresentationalProps {
@@ -15,25 +15,14 @@ const CallControlPopoverPresentational: React.FC<CallControlPopoverPresentationa
   buddyAgents,
   onAgentSelect,
 }) => {
-  const [searchTerm, setSearchTerm] = useState('');
   const [selectedTab, setSelectedTab] = useState('Agents');
-  const filteredAgents = buddyAgents.filter((agent) =>
-    agent.agentName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredAgents = buddyAgents;
 
   return (
     <div className="agent-popover-content">
       <Text tagName="h3" className="agent-popover-title" type="body-large-bold" style={{margin: '0 0 0.5rem 0'}}>
         {heading}
       </Text>
-      <SearchInput
-        placeholder="Search by name, queue or phone number"
-        value={searchTerm}
-        onChange={setSearchTerm}
-        clearButtonAriaLabel="Clear search"
-        style={{width: '100%'}}
-        searchIconProps={{name: 'search', scale: 28}}
-      />
       <TabListNext
         aria-label="Consult Tabs"
         className="agent-tablist"

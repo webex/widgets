@@ -243,6 +243,24 @@ export const useCallControl = (props: useCallControlProps) => {
     });
   };
 
+  const transferCall = async (transferDestination: string, destinationType: string) => {
+    const transferPayload = {
+      to: transferDestination,
+      destinationType: destinationType,
+    };
+
+    try {
+      await currentTask.transfer(transferPayload);
+    } catch (error) {
+      logError(`Error transferring call: ${error}`, 'transferCall');
+    }
+  };
+
+  // New consult callback method (empty for now)
+  const consultCall = async () => {
+    // Consult callback logic can be implemented here.
+  };
+
   return {
     currentTask,
     audioRef,
@@ -254,5 +272,7 @@ export const useCallControl = (props: useCallControlProps) => {
     setIsHeld,
     buddyAgents,
     loadBuddyAgents,
+    transferCall,
+    consultCall,
   };
 };

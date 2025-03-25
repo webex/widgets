@@ -197,6 +197,18 @@ export interface ControlProps {
    * Function to load buddy agents
    */
   loadBuddyAgents: () => Promise<void>;
+
+  /**
+   * Function to transfer the call to a destination.
+   * @param destination - The destination to transfer the call to.
+   * @param destinationType - The type of destination.
+   */
+  transferCall: (destination: string, destinationType: string) => void;
+
+  /**
+   * Function to consult with a buddy agent.
+   */
+  consultCall: () => void;
 }
 
 export type CallControlProps = Pick<ControlProps, 'onHoldResume' | 'onEnd' | 'onWrapUp'>;
@@ -215,6 +227,8 @@ export type CallControlPresentationalProps = Pick<
   | 'setIsHeld'
   | 'buddyAgents'
   | 'loadBuddyAgents'
+  | 'transferCall'
+  | 'consultCall'
 >;
 
 export type useCallControlProps = Pick<

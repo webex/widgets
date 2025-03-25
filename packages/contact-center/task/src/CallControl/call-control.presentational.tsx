@@ -27,6 +27,8 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
     setIsHeld,
     buddyAgents,
     loadBuddyAgents,
+    transferCall,
+    consultCall,
   } = props;
 
   useEffect(() => {
@@ -171,6 +173,11 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
                           console.log(`Handle ${agentMenuType} clicked for agent:`, agentId);
                           setShowAgentMenu(false);
                           setAgentMenuType(null);
+                          if (agentMenuType === 'Consult') {
+                            consultCall();
+                          } else {
+                            transferCall(agentId, 'agent');
+                          }
                         }}
                       />
                     </PopoverNext>

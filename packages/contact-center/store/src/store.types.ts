@@ -41,6 +41,7 @@ interface IStore {
   isAgentLoggedIn: boolean;
   deviceType: string;
   wrapupRequired: boolean;
+  isAgentTransferred: boolean;
   currentState: string;
   lastStateChangeTimestamp?: number;
   lastIdleCodeChangeTimestamp?: number;
@@ -66,6 +67,7 @@ interface IStoreWrapper extends IStore {
   setIsAgentLoggedIn(value: boolean): void;
   setWrapupCodes(wrapupCodes: IWrapupCode[]): void;
   setState(state: IdleCode | ICustomState): void;
+  setIsAgentTransferred(value: boolean): void;
 }
 
 interface IWrapupCode {
@@ -92,6 +94,7 @@ enum TASK_EVENTS {
   CONTACT_RECORDING_PAUSED = 'ContactRecordingPaused',
   CONTACT_RECORDING_RESUMED = 'ContactRecordingResumed',
   AGENT_WRAPPEDUP = 'AgentWrappedUp',
+  AGENT_BLIND_TRANSFERRED = 'AgentBlindTransferred',
 } // TODO: remove this once cc sdk exports this enum
 
 // Events that are received on the contact center SDK
