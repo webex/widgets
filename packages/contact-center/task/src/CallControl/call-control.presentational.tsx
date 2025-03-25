@@ -7,7 +7,6 @@ import {Item} from '@react-stately/collections';
 import {Icon} from '@momentum-design/components/dist/react';
 
 function CallControlPresentational(props: CallControlPresentationalProps) {
-  const [isRecording, setIsRecording] = useState(true);
   const [selectedWrapupReason, setSelectedWrapupReason] = useState<string | null>(null);
   const [selectedWrapupId, setSelectedWrapupId] = useState<string | null>(null);
 
@@ -22,6 +21,8 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
     wrapupRequired,
     isHeld,
     setIsHeld,
+    isRecording,
+    setIsRecording,
   } = props;
 
   useEffect(() => {
@@ -41,11 +42,6 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
   const handletoggleHold = () => {
     toggleHold(!isHeld);
     setIsHeld(!isHeld);
-  };
-
-  const handletoggleRecording = () => {
-    toggleRecording(isRecording);
-    setIsRecording(!isRecording);
   };
 
   const handleWrapupCall = () => {
@@ -71,7 +67,7 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
     },
     {
       icon: isRecording ? 'record-paused-bold' : 'record-bold',
-      onClick: () => handletoggleRecording(),
+      onClick: () => toggleRecording(),
       tooltip: isRecording ? 'Pause Recording' : 'Resume Recording',
       className: 'call-control-button',
       disabled: false,
