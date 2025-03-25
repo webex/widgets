@@ -2,6 +2,7 @@ import {useEffect, useCallback, useRef, useState} from 'react';
 import {ITask} from '@webex/plugin-cc';
 import store, {TASK_EVENTS, BuddyDetails} from '@webex/cc-store';
 import {useCallControlProps, UseTaskListProps, UseTaskProps} from './task.types';
+import {useOutdialCallProps} from '@webex/cc-components';
 
 // Hook for managing the task list
 export const useTaskList = (props: UseTaskListProps) => {
@@ -127,6 +128,7 @@ export const useCallControl = (props: useCallControlProps) => {
   const audioRef = useRef<HTMLAudioElement | null>(null); // Ref for the audio element
   const isBrowser = deviceType === 'BROWSER';
   const [isHeld, setIsHeld] = useState<boolean | undefined>(undefined);
+  const [isRecording, setIsRecording] = useState(true);
 
   const [buddyAgents, setBuddyAgents] = useState<BuddyDetails[]>([]);
   const loadBuddyAgents = useCallback(async () => {
@@ -163,6 +165,14 @@ export const useCallControl = (props: useCallControlProps) => {
     }
   };
 
+  const pauseRecordingCallback = () => {
+    setIsRecording(false);
+  };
+
+  const resumeRecordingCallback = () => {
+    setIsRecording(true);
+  };
+
   useEffect(() => {
     if (!currentTask) return;
 
@@ -170,12 +180,28 @@ export const useCallControl = (props: useCallControlProps) => {
     store.setTaskCallback(TASK_EVENTS.TASK_RESUME, resumeCallback, currentTask.data.interactionId);
     store.setTaskCallback(TASK_EVENTS.TASK_END, endCallCallback, currentTask.data.interactionId);
     store.setTaskCallback(TASK_EVENTS.AGENT_WRAPPEDUP, wrapupCallCallback, currentTask.data.interactionId);
+    store.setTaskCallback(TASK_EVENTS.CONTACT_RECORDING_PAUSED, pauseRecordingCallback, currentTask.data.interactionId);
+    store.setTaskCallback(
+      TASK_EVENTS.CONTACT_RECORDING_RESUMED,
+      resumeRecordingCallback,
+      currentTask.data.interactionId
+    );
 
     return () => {
       store.removeTaskCallback(TASK_EVENTS.TASK_HOLD, holdCallback, currentTask.data.interactionId);
       store.removeTaskCallback(TASK_EVENTS.TASK_RESUME, resumeCallback, currentTask.data.interactionId);
       store.removeTaskCallback(TASK_EVENTS.TASK_END, endCallCallback, currentTask.data.interactionId);
       store.removeTaskCallback(TASK_EVENTS.AGENT_WRAPPEDUP, wrapupCallCallback, currentTask.data.interactionId);
+      store.removeTaskCallback(
+        TASK_EVENTS.CONTACT_RECORDING_PAUSED,
+        pauseRecordingCallback,
+        currentTask.data.interactionId
+      );
+      store.removeTaskCallback(
+        TASK_EVENTS.CONTACT_RECORDING_RESUMED,
+        resumeRecordingCallback,
+        currentTask.data.interactionId
+      );
     };
   }, [currentTask]);
 
@@ -219,8 +245,8 @@ export const useCallControl = (props: useCallControlProps) => {
     });
   };
 
-  const toggleRecording = (pause: boolean) => {
-    if (pause) {
+  const toggleRecording = () => {
+    if (isRecording) {
       currentTask.pauseRecording().catch((error: Error) => {
         logError(`Error pausing recording: ${error}`, 'toggleRecording');
       });
@@ -270,9 +296,38 @@ export const useCallControl = (props: useCallControlProps) => {
     wrapupCall,
     isHeld,
     setIsHeld,
+    isRecording,
+    setIsRecording,
     buddyAgents,
     loadBuddyAgents,
     transferCall,
     consultCall,
+  };
+};
+
+export const useOutdialCall = (props: useOutdialCallProps) => {
+  const {cc, logger} = props;
+
+  const startOutdial = (destination: string) => {
+    // Perform validation on destination number.
+    if (!destination || !destination.trim()) {
+      alert('Destination number is required, it cannot be empty');
+      return;
+    }
+
+    cc.startOutdial(destination)
+      .then((response) => {
+        logger.info('Outdial call started', response);
+      })
+      .catch((error: Error) => {
+        logger.error(`${error}`, {
+          module: 'widget-OutdialCall#helper.ts',
+          method: 'startOutdial',
+        });
+      });
+  };
+
+  return {
+    startOutdial,
   };
 };

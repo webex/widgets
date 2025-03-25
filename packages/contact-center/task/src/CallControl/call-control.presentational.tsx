@@ -8,7 +8,6 @@ import {Icon} from '@momentum-design/components/dist/react';
 import CallControlPopoverPresentational from './CallControlCustomComponents/call-control-popover.presentational';
 
 function CallControlPresentational(props: CallControlPresentationalProps) {
-  const [isRecording, setIsRecording] = useState(true);
   const [selectedWrapupReason, setSelectedWrapupReason] = useState<string | null>(null);
   const [selectedWrapupId, setSelectedWrapupId] = useState<string | null>(null);
   const [showAgentMenu, setShowAgentMenu] = useState(false);
@@ -25,6 +24,8 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
     wrapupRequired,
     isHeld,
     setIsHeld,
+    isRecording,
+    setIsRecording,
     buddyAgents,
     loadBuddyAgents,
     transferCall,
@@ -50,11 +51,6 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
     setIsHeld(!isHeld);
   };
 
-  const handletoggleRecording = () => {
-    toggleRecording(isRecording);
-    setIsRecording(!isRecording);
-  };
-
   const handleWrapupCall = () => {
     if (selectedWrapupReason && selectedWrapupId) {
       wrapupCall(selectedWrapupReason, selectedWrapupId);
@@ -78,7 +74,7 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
     },
     {
       icon: isRecording ? 'record-paused-bold' : 'record-bold',
-      onClick: () => handletoggleRecording(),
+      onClick: () => toggleRecording(),
       tooltip: isRecording ? 'Pause Recording' : 'Resume Recording',
       className: 'call-control-button',
       disabled: false,

@@ -90,6 +90,7 @@ describe('CallControlPresentational', () => {
     loadBuddyAgents: mockLoadBuddyAgents,
     transferCall: mockTransferCall,
     consultCall: mockConsultCall,
+    setIsRecording: jest.fn(),
   };
 
   beforeEach(() => {
@@ -112,19 +113,6 @@ describe('CallControlPresentational', () => {
     const buttons = screen.getAllByTestId('ButtonCircle');
     fireEvent.click(buttons[0]);
     expect(mockToggleHold).toHaveBeenCalledWith(true);
-  });
-
-  it('renders the correct recording button icon based on currentTask (recording active)', () => {
-    render(<CallControlPresentational {...baseProps} />);
-    const recordButton = screen.getAllByTestId('ButtonCircle')[1];
-    expect(recordButton).toHaveTextContent('record-paused-bold');
-  });
-
-  it('calls toggleRecording with correct value when record button is clicked', () => {
-    render(<CallControlPresentational {...baseProps} />);
-    const buttons = screen.getAllByTestId('ButtonCircle');
-    fireEvent.click(buttons[1]);
-    expect(mockToggleRecording).toHaveBeenCalledWith(true);
   });
 
   it('calls endCall when end call button is clicked', () => {

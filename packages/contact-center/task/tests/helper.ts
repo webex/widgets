@@ -1,5 +1,5 @@
 import {renderHook, act, waitFor} from '@testing-library/react';
-import {useIncomingTask, useTaskList, useCallControl} from '../src/helper';
+import {useIncomingTask, useTaskList, useCallControl, useOutdialCall} from '../src/helper';
 import {TASK_EVENTS} from '@webex/cc-store';
 import store from '@webex/cc-store';
 import React from 'react';
@@ -512,13 +512,25 @@ describe('useCallControl', () => {
       expect.any(Function),
       'someMockInteractionId'
     );
+    expect(setTaskCallbackSpy).toHaveBeenCalledWith(
+      TASK_EVENTS.CONTACT_RECORDING_PAUSED,
+      expect.any(Function),
+      'someMockInteractionId'
+    );
+    expect(setTaskCallbackSpy).toHaveBeenCalledWith(
+      TASK_EVENTS.CONTACT_RECORDING_RESUMED,
+      expect.any(Function),
+      'someMockInteractionId'
+    );
 
-    expect(onSpy).toHaveBeenCalledTimes(5);
+    expect(onSpy).toHaveBeenCalledTimes(7);
     expect(onSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_HOLD, expect.any(Function));
     expect(onSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_RESUME, expect.any(Function));
     expect(onSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));
     expect(onSpy).toHaveBeenCalledWith(TASK_EVENTS.AGENT_WRAPPEDUP, expect.any(Function));
     expect(onSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_MEDIA, expect.any(Function));
+    expect(onSpy).toHaveBeenCalledWith(TASK_EVENTS.CONTACT_RECORDING_PAUSED, expect.any(Function));
+    expect(onSpy).toHaveBeenCalledWith(TASK_EVENTS.CONTACT_RECORDING_RESUMED, expect.any(Function));
 
     // Unmount the component
     act(() => {
@@ -545,12 +557,24 @@ describe('useCallControl', () => {
       expect.any(Function),
       'someMockInteractionId'
     );
-    expect(offSpy).toHaveBeenCalledTimes(5);
+    expect(removeTaskCallbackSpy).toHaveBeenCalledWith(
+      TASK_EVENTS.CONTACT_RECORDING_PAUSED,
+      expect.any(Function),
+      'someMockInteractionId'
+    );
+    expect(removeTaskCallbackSpy).toHaveBeenCalledWith(
+      TASK_EVENTS.CONTACT_RECORDING_RESUMED,
+      expect.any(Function),
+      'someMockInteractionId'
+    );
+    expect(offSpy).toHaveBeenCalledTimes(7);
     expect(offSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_HOLD, expect.any(Function));
     expect(offSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_RESUME, expect.any(Function));
     expect(offSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));
     expect(offSpy).toHaveBeenCalledWith(TASK_EVENTS.AGENT_WRAPPEDUP, expect.any(Function));
     expect(offSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_MEDIA, expect.any(Function));
+    expect(offSpy).toHaveBeenCalledWith(TASK_EVENTS.CONTACT_RECORDING_PAUSED, expect.any(Function));
+    expect(offSpy).toHaveBeenCalledWith(TASK_EVENTS.CONTACT_RECORDING_RESUMED, expect.any(Function));
   });
 
   it('should not call any call backs if callbacks are not provided', async () => {
@@ -772,9 +796,12 @@ describe('useCallControl', () => {
         deviceType: 'BROWSER',
       })
     );
+    await waitFor(() => {
+      result.current.setIsRecording(true);
+    });
 
     await act(async () => {
-      await result.current.toggleRecording(true);
+      await result.current.toggleRecording();
     });
 
     expect(mockCurrentTask.pauseRecording).toHaveBeenCalledWith();
@@ -793,8 +820,13 @@ describe('useCallControl', () => {
       })
     );
 
+    await waitFor(() => {
+      result.current.setIsRecording(true);
+    });
+
     await act(async () => {
-      await result.current.toggleRecording(true);
+      await result.current.toggleRecording();
+      mockCurrentTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.CONTACT_RECORDING_PAUSED)?.[1]();
     });
 
     expect(mockLogger.error).toHaveBeenCalledWith('Error pausing recording: Error: Pause error', expect.any(Object));
@@ -812,8 +844,13 @@ describe('useCallControl', () => {
       })
     );
 
+    await waitFor(() => {
+      result.current.setIsRecording(false);
+    });
+
     await act(async () => {
-      await result.current.toggleRecording(false);
+      await result.current.toggleRecording();
+      mockCurrentTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.CONTACT_RECORDING_RESUMED)?.[1]();
     });
 
     expect(mockCurrentTask.resumeRecording).toHaveBeenCalledWith();
@@ -831,9 +868,12 @@ describe('useCallControl', () => {
         deviceType: 'BROWSER',
       })
     );
+    await waitFor(() => {
+      result.current.setIsRecording(false);
+    });
 
     await act(async () => {
-      await result.current.toggleRecording(false);
+      await result.current.toggleRecording();
     });
 
     expect(mockCurrentTask.resumeRecording).toHaveBeenCalledWith();
@@ -1087,5 +1127,101 @@ describe('useCallControl', () => {
       to: 'test_id',
       destinationType: 'agent',
     });
+  });
+});
+
+describe('useOutdialCall', () => {
+  const ccMock = {
+    startOutdial: jest.fn().mockResolvedValue('Success'),
+  };
+
+  const logger = {
+    info: jest.fn(),
+    error: jest.fn(),
+  };
+
+  const destination = '123456789';
+
+  beforeEach(() => {
+    global.alert = jest.fn();
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    logger.error.mockRestore();
+    logger.info.mockRestore();
+  });
+
+  it('should successfully start an outdial call', async () => {
+    const {result} = renderHook(() =>
+      useOutdialCall({
+        cc: ccMock,
+        logger,
+      })
+    );
+
+    await act(async () => {
+      await result.current.startOutdial(destination);
+    });
+
+    expect(ccMock.startOutdial).toHaveBeenCalledWith(destination);
+    expect(logger.info).toHaveBeenCalledWith('Outdial call started', 'Success');
+  });
+
+  it('should show alert when destination is empty or only constains spaces', async () => {
+    const {result} = renderHook(() =>
+      useOutdialCall({
+        cc: ccMock,
+        logger,
+      })
+    );
+
+    await act(async () => {
+      await result.current.startOutdial('   ');
+    });
+
+    expect(global.alert).toHaveBeenCalledWith('Destination number is required, it cannot be empty');
+    expect(ccMock.startOutdial).not.toHaveBeenCalled();
+  });
+
+  it('should handle errors when starting outdial call fails', async () => {
+    const errorCcMock = {
+      startOutdial: jest.fn().mockRejectedValue(new Error('Outdial call failed')),
+    };
+
+    const {result} = renderHook(() =>
+      useOutdialCall({
+        cc: errorCcMock,
+        logger,
+      })
+    );
+
+    await act(async () => {
+      await result.current.startOutdial(destination);
+    });
+
+    expect(errorCcMock.startOutdial).toHaveBeenCalledWith(destination);
+    expect(logger.error).toHaveBeenCalledWith('Error: Outdial call failed', {
+      module: 'widget-OutdialCall#helper.ts',
+      method: 'startOutdial',
+    });
+  });
+
+  it('should return if no destination is provided', async () => {
+    const {result} = renderHook(() =>
+      useOutdialCall({
+        cc: ccMock,
+        logger,
+      })
+    );
+
+    const invalidDestination = undefined;
+
+    await act(async () => {
+      await result.current.startOutdial(invalidDestination);
+    });
+
+    expect(ccMock.startOutdial).not.toHaveBeenCalled();
+    expect(logger.info).not.toHaveBeenCalled();
   });
 });

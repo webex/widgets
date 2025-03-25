@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {StationLogin, UserState, IncomingTask, TaskList, CallControl, store} from '@webex/cc-widgets';
+import {StationLogin, UserState, IncomingTask, TaskList, CallControl, store, OutdialCall} from '@webex/cc-widgets';
 import {ThemeProvider, IconProvider, Icon, Button, Checkbox, Text} from '@momentum-design/components/dist/react';
 import {PopoverNext} from '@momentum-ui/react-collaboration';
 import './App.scss';
@@ -8,13 +8,13 @@ import {observer} from 'mobx-react-lite';
 // This is not to be included to a production app.
 // Have added here for debugging purposes
 window['store'] = store;
-
 const defaultWidgets = {
   stationLogin: true,
   userState: true,
   incomingTask: true,
   taskList: true,
   callControl: true,
+  outdialCall: true,
 };
 
 function App() {
@@ -201,18 +201,36 @@ function App() {
                   <legend className="legend-box">&nbsp;Select Widgets to Show&nbsp;</legend>
                   <div className="widget-checkboxes">
                       {Object.keys(defaultWidgets).map((widget) => (
-                        <>
-                          <label key={widget}>
-                            <input
-                              type="checkbox"
-                              name={widget}
-                              checked={selectedWidgets[widget]}
-                              onChange={handleCheckboxChange}
-                            />
-                            &nbsp;{widget.charAt(0).toUpperCase() + widget.slice(1).replace(/([A-Z])/g, ' $1')}&nbsp;
-                          </label>
-                        </>
-                      ))}
+                          <>
+                            <label key={widget}>
+                              <input
+                                type="checkbox"
+                                name={widget}
+                                checked={selectedWidgets[widget]}
+                                onChange={handleCheckboxChange}
+                              />
+                              &nbsp;
+                              {widget.charAt(0).toUpperCase() + widget.slice(1).replace(/([A-Z])/g, ' $1')}&nbsp;
+                              {widget === 'outdialCall' && (
+                                <span style={{display: 'inline-flex', alignItems: 'center'}}>
+                                  <PopoverNext
+                                  trigger="mouseenter"
+                                  triggerComponent={<Icon name="info-badge-filled" />}
+                                  placement="auto-end"
+                                  closeButtonPlacement="top-left"
+                                  closeButtonProps={{'aria-label': 'Close'}}
+                                  >
+                                  <Text>
+                                    <div style={{color: 'var(--mds-color-theme-text-error-normal)', marginBottom: '10px'}}>
+                                    <strong>Note:</strong> When a number is dialed, the agent gets an incoming task to accept via an Extension, Dial Number, or Browser. It's recommended to have the incoming task/task list widget and call controls widget according to your needs.
+                                    </div>
+                                  </Text>
+                                  </PopoverNext>
+                                </span>
+                              )}
+                            </label>
+                          </>
+                        ))}
                     </div>
                 </fieldset>
               </section>
@@ -222,7 +240,14 @@ function App() {
                 <fieldset className="fieldset">
                   <legend className="legend-box">&nbsp;SDK Toggles&nbsp;</legend>
                   <label style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
-                    <input type="checkbox" id="multiLoginFlag" name="multiLoginFlag" onChange={enableDisableMultiLogin} checked={isMultiLoginEnabled} /> &nbsp; Enable Multi Login
+                    <input
+                      type="checkbox"
+                      id="multiLoginFlag"
+                      name="multiLoginFlag"
+                      onChange={enableDisableMultiLogin}
+                      checked={isMultiLoginEnabled}
+                    />{' '}
+                    &nbsp; Enable Multi Login
                     <PopoverNext
                       trigger="mouseenter"
                       triggerComponent={<Icon name="info-badge-filled" />}
@@ -235,9 +260,9 @@ function App() {
                           className="warning-note"
                           style={{color: 'var(--mds-color-theme-text-error-normal)', marginBottom: '10px'}}
                         >
-                          <strong>Note:</strong> The "Enable Multi Login" option must be set before initializing the SDK.
-                          Changes to this setting after SDK initialization will not take effect. Please ensure you configure
-                          this option before clicking the "Init Widgets" button.
+                          <strong>Note:</strong> The "Enable Multi Login" option must be set before initializing the
+                          SDK. Changes to this setting after SDK initialization will not take effect. Please ensure you
+                          configure this option before clicking the "Init Widgets" button.
                         </div>
                       </Text>
                     </PopoverNext>
@@ -246,48 +271,51 @@ function App() {
               </section>
             </div>
             <br />
-            <Button
+            <div>
+              <Button
               disabled={accessToken.trim() === ''}
               onClick={() => {
                 store.init({webexConfig, access_token: accessToken}).then(() => {
-                  setIsSdkReady(true);
+                setIsSdkReady(true);
                 });
               }}
-            >
+              >
               Init Widgets
-            </Button>
+              </Button>
+            </div>
             {isSdkReady && (
               <>
                 <div className="station-login">
                   {selectedWidgets.stationLogin && <StationLogin onLogin={onLogin} onLogout={onLogout} />}
                 </div>
                 {(store.isAgentLoggedIn || isLoggedIn) && (
-                  <>
+                    <>
                     {selectedWidgets.userState && (
                       <div className="box">
-                        <section className="section-box">
-                          <fieldset className="fieldset">
-                            <legend className="legend-box">User State</legend>
-                            <UserState onStateChange={onStateChange} />
-                          </fieldset>
-                        </section>
+                      <section className="section-box">
+                        <fieldset className="fieldset">
+                        <legend className="legend-box">User State</legend>
+                        <UserState onStateChange={onStateChange} />
+                        </fieldset>
+                      </section>
                       </div>
                     )}
                     {selectedWidgets.callControl && store.currentTask && (
                       <div className="box">
-                        <section className="section-box">
-                          <fieldset className="fieldset">
-                            <legend className="legend-box">Call Control</legend>
-                            <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapUp={onWrapUp} />
-                          </fieldset>
-                        </section>
+                      <section className="section-box">
+                        <fieldset className="fieldset">
+                        <legend className="legend-box">Call Control</legend>
+                        <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapUp={onWrapUp} />
+                        </fieldset>
+                      </section>
                       </div>
                     )}
                     {selectedWidgets.incomingTask && <IncomingTask onAccepted={onAccepted} onDeclined={onDeclined} />}
                     {selectedWidgets.taskList && (
                       <TaskList onTaskAccepted={onTaskAccepted} onTaskDeclined={onTaskDeclined} />
                     )}
-                  </>
+                    {selectedWidgets.outdialCall && <OutdialCall />}
+                    </>
                 )}
               </>
             )}
