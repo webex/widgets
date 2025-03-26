@@ -299,9 +299,6 @@ class StoreWrapper implements IStoreWrapper {
 
     task.on(TASK_EVENTS.AGENT_WRAPPEDUP, this.handleTaskWrapUp);
 
-    // Listen for AGENT_BLIND_TRANSFERRED event
-    task.on(TASK_EVENTS.AGENT_BLIND_TRANSFERRED, () => this.handleAgentBlindTransferred(task));
-
     this.setIncomingTask(task);
     this.setTaskList([...this.store.taskList, task]);
   };
@@ -334,9 +331,6 @@ class StoreWrapper implements IStoreWrapper {
     task.on(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(task.data.interactionId, reason));
 
     task.on(TASK_EVENTS.AGENT_WRAPPEDUP, this.handleTaskWrapUp);
-
-    // Listen for AGENT_BLIND_TRANSFERRED event
-    task.on(TASK_EVENTS.AGENT_BLIND_TRANSFERRED, () => this.handleAgentBlindTransferred(task));
 
     if (!this.store.taskList.some((t) => t.data.interactionId === task.data.interactionId)) {
       this.setTaskList([...this.store.taskList, task]);
