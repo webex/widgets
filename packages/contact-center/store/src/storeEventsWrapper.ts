@@ -444,13 +444,9 @@ class StoreWrapper implements IStoreWrapper {
         mediaType: 'telephony',
         state: 'Available',
       });
-      return response?.data?.agentList || [];
+      return response.data.agentList;
     } catch (error) {
-      this.store.logger.error(`Error fetching buddy agents: ${error}`, {
-        module: 'cc-store#storeEventsWrapper.ts',
-        method: 'getBuddyAgents',
-      });
-      return [];
+      return Promise.reject(error);
     }
   };
 }

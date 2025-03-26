@@ -4,6 +4,13 @@ import {render, screen, fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import CallControlPresentational from '../../src/CallControl/call-control.presentational';
 
+jest.mock('@webex/cc-store', () => ({
+  DestinationType: {
+    AGENT: 'agent',
+    QUEUE: 'queue',
+  },
+}));
+
 jest.mock('@momentum-ui/react-collaboration', () => ({
   ButtonPill: (props) => (
     <button data-testid="ButtonPill" onClick={props.onPress} className={props.className}>
@@ -118,14 +125,14 @@ describe('CallControlPresentational', () => {
   it('calls endCall when end call button is clicked', () => {
     render(<CallControlPresentational {...baseProps} />);
     const buttons = screen.getAllByTestId('ButtonCircle');
-    fireEvent.click(buttons[2]);
+    fireEvent.click(buttons[4]);
     expect(mockEndCall).toHaveBeenCalled();
   });
 
   it('calls consultCall when a consult agent is selected', () => {
     render(<CallControlPresentational {...baseProps} />);
     const buttons = screen.getAllByTestId('ButtonCircle');
-    fireEvent.click(buttons[3]);
+    fireEvent.click(buttons[1]);
     const agentSelectButton = screen.getByTestId('AgentSelectButton');
     fireEvent.click(agentSelectButton);
     expect(mockConsultCall).toHaveBeenCalled();
@@ -135,7 +142,7 @@ describe('CallControlPresentational', () => {
   it('calls transferCall when a transfer agent is selected', () => {
     render(<CallControlPresentational {...baseProps} />);
     const buttons = screen.getAllByTestId('ButtonCircle');
-    fireEvent.click(buttons[4]);
+    fireEvent.click(buttons[2]);
     const agentSelectButton = screen.getByTestId('AgentSelectButton');
     fireEvent.click(agentSelectButton);
     expect(mockTransferCall).toHaveBeenCalledWith('agent1', 'agent');

@@ -1,6 +1,6 @@
 import {useEffect, useCallback, useRef, useState} from 'react';
 import {ITask} from '@webex/plugin-cc';
-import store, {TASK_EVENTS, BuddyDetails} from '@webex/cc-store';
+import store, {TASK_EVENTS, BuddyDetails, DestinationType} from '@webex/cc-store';
 import {useCallControlProps, UseTaskListProps, UseTaskProps} from './task.types';
 import {useOutdialCallProps} from '@webex/cc-components';
 
@@ -269,7 +269,7 @@ export const useCallControl = (props: useCallControlProps) => {
     });
   };
 
-  const transferCall = async (transferDestination: string, destinationType: string) => {
+  const transferCall = async (transferDestination: string, destinationType: DestinationType) => {
     const transferPayload = {
       to: transferDestination,
       destinationType: destinationType,

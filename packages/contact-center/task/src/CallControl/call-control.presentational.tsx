@@ -73,20 +73,6 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
       disabled: false,
     },
     {
-      icon: isRecording ? 'record-paused-bold' : 'record-bold',
-      onClick: () => toggleRecording(),
-      tooltip: isRecording ? 'Pause Recording' : 'Resume Recording',
-      className: 'call-control-button',
-      disabled: false,
-    },
-    {
-      icon: 'cancel-regular',
-      onClick: endCall,
-      tooltip: 'End call',
-      className: 'call-control-button-cancel',
-      disabled: isHeld,
-    },
-    {
       icon: 'headset-bold',
       tooltip: 'Consult with another agent',
       className: 'call-control-button',
@@ -99,6 +85,20 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
       className: 'call-control-button',
       disabled: false,
       menuType: 'Transfer',
+    },
+    {
+      icon: isRecording ? 'record-paused-bold' : 'record-bold',
+      onClick: () => toggleRecording(),
+      tooltip: isRecording ? 'Pause Recording' : 'Resume Recording',
+      className: 'call-control-button',
+      disabled: false,
+    },
+    {
+      icon: 'cancel-regular',
+      onClick: endCall,
+      tooltip: 'End call',
+      className: 'call-control-button-cancel',
+      disabled: isHeld,
     },
   ];
 
@@ -143,6 +143,7 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
                         triggerComponent={
                           <ButtonCircle
                             className={button.className}
+                            aria-label={button.tooltip}
                             disabled={button.disabled}
                             data-testid="ButtonCircle"
                             onPress={() => {
@@ -178,12 +179,13 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
                         buddyAgents={buddyAgents}
                         onAgentSelect={(agentId) => {
                           setShowAgentMenu(false);
-                          setAgentMenuType(null);
                           if (agentMenuType === 'Consult') {
                             consultCall();
                           } else {
+                            // Adding agent for now by default, will update once we have queues
                             transferCall(agentId, 'agent');
                           }
+                          setAgentMenuType(null);
                         }}
                       />
                     ) : null}
@@ -194,7 +196,12 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
                 <TooltipNext
                   key={index}
                   triggerComponent={
-                    <ButtonCircle className={button.className} onPress={button.onClick} disabled={button.disabled}>
+                    <ButtonCircle
+                      className={button.className}
+                      onPress={button.onClick}
+                      disabled={button.disabled}
+                      aria-label={button.tooltip}
+                    >
                       <Icon className={button.className + '-icon'} name={button.icon} />
                     </ButtonCircle>
                   }
@@ -260,6 +267,7 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
                 className="submit-wrapup-button"
                 onPress={handleWrapupCall}
                 disabled={selectedWrapupId && selectedWrapupReason ? false : true}
+                aria-label="Submit wrap-up"
               >
                 Submit & Wrap up
               </ButtonPill>

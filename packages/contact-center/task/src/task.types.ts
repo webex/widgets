@@ -1,4 +1,4 @@
-import {ILogger, ITask, IContactCenter, WrapupCodes, BuddyDetails} from '@webex/cc-store';
+import {ILogger, ITask, IContactCenter, WrapupCodes, BuddyDetails, DestinationType} from '@webex/cc-store';
 
 /**
  * Interface representing the TaskProps of a user.
@@ -213,7 +213,7 @@ export interface ControlProps {
    * @param destination - The destination to transfer the call to.
    * @param destinationType - The type of destination.
    */
-  transferCall: (destination: string, destinationType: string) => void;
+  transferCall: (destination: string, destinationType: DestinationType) => void;
 
   /**
    * Function to consult with a buddy agent.

@@ -430,6 +430,18 @@ describe('storeEventsWrapper', () => {
 
       expect(setDeviceTypeSpy).toHaveBeenCalledWith(option);
     });
+
+    it('should return buddy agents list', async () => {
+      const buddyAgents = [{name: 'agent1'}, {name: 'agent2'}];
+      storeWrapper['store'].cc.getBuddyAgents = jest.fn().mockResolvedValue({data: {agentList: buddyAgents}});
+      const result = await storeWrapper.getBuddyAgents();
+      expect(result).toEqual(buddyAgents);
+    });
+
+    it('should handle error in getBuddyAgents and throw error', async () => {
+      storeWrapper['store'].cc.getBuddyAgents = jest.fn().mockRejectedValue(new Error('error'));
+      await expect(storeWrapper.getBuddyAgents()).rejects.toThrow('error');
+    });
   });
 
   describe('storeEventsWrapper events reactions', () => {
