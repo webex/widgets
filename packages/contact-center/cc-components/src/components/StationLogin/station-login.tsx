@@ -1,12 +1,12 @@
 import React, {useEffect, useState, useRef, useCallback} from 'react';
-import {StationLoginPresentationalProps} from './station-login.types';
+import {StationLoginComponentProps} from './station-login.types';
 import './station-login.style.scss';
 import {MULTIPLE_SIGN_IN_ALERT_MESSAGE, MULTIPLE_SIGN_IN_ALERT_TITLE} from './constants';
 import {ButtonPill, Text, SelectNext, TextInput} from '@momentum-ui/react-collaboration';
 import {Item} from '@react-stately/collections';
 import {Icon} from '@momentum-design/components/dist/react';
 
-const StationLoginPresentational: React.FunctionComponent<StationLoginPresentationalProps> = (props) => {
+const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps> = (props) => {
   const {
     teams,
     loginOptions,
@@ -178,4 +178,4 @@ const StationLoginPresentational: React.FunctionComponent<StationLoginPresentati
   );
 };
 
-export default StationLoginPresentational;
+export default StationLoginComponent;

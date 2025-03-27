@@ -4,18 +4,6 @@ import {StationLogin} from '../../src';
 import * as helper from '../../src/helper';
 import '@testing-library/jest-dom';
 
-jest.mock('@momentum-ui/react-collaboration', () => ({
-  ButtonPill: () => <div data-testid="ButtonPill" />,
-  Text: () => <div data-testid="Text" />,
-  SelectNext: () => <div data-testid="SelectNext" />,
-  TextInput: () => <div data-testid="TextInput" />,
-}));
-
-jest.mock('@momentum-design/components/dist/react', () => ({
-  Avatar: () => <div data-testid="Avatar" />,
-  Icon: () => <div data-testid="Icon" />,
-}));
-
 const teamsMock = ['team123', 'team456'];
 const ccMock = {
   on: () => {},
@@ -44,6 +32,12 @@ jest.mock('@webex/cc-store', () => {
     CC_EVENTS: {
       AGENT_STATION_LOGIN_SUCCESS: 'AgentStationLoginSuccess',
     },
+  };
+});
+
+jest.mock('@webex/cc-components', () => {
+  return {
+    StationLoginComponent: () => <div>StationLoginComponent</div>,
   };
 });
 
