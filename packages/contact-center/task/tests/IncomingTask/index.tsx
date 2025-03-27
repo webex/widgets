@@ -5,16 +5,11 @@ import {IncomingTask} from '../../src';
 import store from '@webex/cc-store';
 import '@testing-library/jest-dom';
 
-jest.mock('@momentum-ui/react-collaboration', () => ({
-  ButtonPill: () => <div data-testid="ButtonPill" />,
-  ListItemBase: () => <div data-testid="ListItemBase" />,
-  ListItemBaseSection: () => <div data-testid="ListItemBaseSection" />,
-  Text: () => <div data-testid="Text" />,
-}));
-
-jest.mock('@momentum-design/components/dist/react', () => ({
-  Avatar: () => <div data-testid="Avatar" />,
-}));
+jest.mock('@webex/cc-components', () => {
+  return {
+    IncomingTaskComponent: () => <div>IncomingTaskComponent</div>,
+  };
+});
 
 // Mock the store
 jest.mock('@webex/cc-store', () => ({

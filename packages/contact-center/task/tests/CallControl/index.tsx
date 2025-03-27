@@ -4,21 +4,11 @@ import * as helper from '../../src/helper';
 import {CallControl} from '../../src';
 import '@testing-library/jest-dom';
 
-jest.mock('@momentum-ui/react-collaboration', () => ({
-  ButtonPill: () => <div data-testid="ButtonPill" />,
-  ListItemBase: () => <div data-testid="ListItemBase" />,
-  ListItemBaseSection: () => <div data-testid="ListItemBaseSection" />,
-  Text: () => <div data-testid="Text" />,
-  ButtonCircle: () => <div data-testid="ButtonCircle" />,
-  PopoverNext: () => <div data-testid="PopoverNext" />,
-  SelectNext: () => <div data-testid="SelectNext" />,
-  TooltipNext: () => <div data-testid="TooltipNext" />,
-}));
-
-jest.mock('@momentum-design/components/dist/react', () => ({
-  Avatar: () => <div data-testid="Avatar" />,
-  Icon: () => <div data-testid="Icon" />,
-}));
+jest.mock('@webex/cc-components', () => {
+  return {
+    CallControlComponent: () => <div>CallControlComponent</div>,
+  };
+});
 
 // Mock the store
 jest.mock('@webex/cc-store', () => ({

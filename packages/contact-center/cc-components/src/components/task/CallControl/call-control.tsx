@@ -1,12 +1,12 @@
 import React, {useEffect, useState} from 'react';
 
-import {CallControlPresentationalProps} from '../task.types';
+import {CallControlComponentProps} from '../task.types';
 import './call-control.styles.scss';
 import {PopoverNext, SelectNext, TooltipNext, Text, ButtonCircle, ButtonPill} from '@momentum-ui/react-collaboration';
 import {Item} from '@react-stately/collections';
 import {Icon} from '@momentum-design/components/dist/react';
 
-function CallControlPresentational(props: CallControlPresentationalProps) {
+function CallControlComponent(props: CallControlComponentProps) {
   const [selectedWrapupReason, setSelectedWrapupReason] = useState<string | null>(null);
   const [selectedWrapupId, setSelectedWrapupId] = useState<string | null>(null);
 
@@ -169,4 +169,4 @@ function CallControlPresentational(props: CallControlPresentationalProps) {
   );
 }
 
-export default CallControlPresentational;
+export default CallControlComponent;
