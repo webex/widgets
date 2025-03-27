@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.38](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.37...v1.28.0-ccwidgets.38) (2025-03-27)
+
+
+### Bug Fixes
+
+* **cc-components:** move station-login, cc-task presentational to cc-components ([#421](https://github.com/webex/widgets/issues/421)) ([ec20de8](https://github.com/webex/widgets/commit/ec20de86eb914bd2b1bfe86f178a968dee834959))
+
 # [1.28.0-ccwidgets.37](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.36...v1.28.0-ccwidgets.37) (2025-03-25)
 
 
