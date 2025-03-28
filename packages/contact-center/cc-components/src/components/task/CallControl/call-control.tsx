@@ -5,10 +5,13 @@ import './call-control.styles.scss';
 import {PopoverNext, SelectNext, TooltipNext, Text, ButtonCircle, ButtonPill} from '@momentum-ui/react-collaboration';
 import {Item} from '@react-stately/collections';
 import {Icon} from '@momentum-design/components/dist/react';
+import CallControlPopoverComponent from './CallControlCustom/call-control-popover';
 
 function CallControlComponent(props: CallControlComponentProps) {
   const [selectedWrapupReason, setSelectedWrapupReason] = useState<string | null>(null);
   const [selectedWrapupId, setSelectedWrapupId] = useState<string | null>(null);
+  const [showAgentMenu, setShowAgentMenu] = useState(false);
+  const [agentMenuType, setAgentMenuType] = useState<'Consult' | 'Transfer' | null>(null);
 
   const {
     currentTask,
@@ -23,6 +26,10 @@ function CallControlComponent(props: CallControlComponentProps) {
     setIsHeld,
     isRecording,
     setIsRecording,
+    buddyAgents,
+    loadBuddyAgents,
+    transferCall,
+    consultCall,
   } = props;
 
   useEffect(() => {
@@ -66,6 +73,20 @@ function CallControlComponent(props: CallControlComponentProps) {
       disabled: false,
     },
     {
+      icon: 'headset-bold',
+      tooltip: 'Consult with another agent',
+      className: 'call-control-button',
+      disabled: false,
+      menuType: 'Consult',
+    },
+    {
+      icon: 'next-bold',
+      tooltip: 'Transfer call',
+      className: 'call-control-button',
+      disabled: false,
+      menuType: 'Transfer',
+    },
+    {
       icon: isRecording ? 'record-paused-bold' : 'record-bold',
       onClick: () => toggleRecording(),
       tooltip: isRecording ? 'Pause Recording' : 'Resume Recording',
@@ -89,24 +110,112 @@ function CallControlComponent(props: CallControlComponentProps) {
       <div className="call-control-container" data-testid="call-control-container">
         {!wrapupRequired && (
           <div className="button-group">
-            {buttons.map((button, index) => (
-              <TooltipNext
-                key={index}
-                color="primary"
-                delay={[0, 0]}
-                placement="bottom-start"
-                triggerComponent={
-                  <ButtonCircle className={button.className} onPress={button.onClick} disabled={button.disabled}>
-                    <Icon className={button.className + '-icon'} name={button.icon} />
-                  </ButtonCircle>
-                }
-                type="description"
-                variant="small"
-                className="tooltip"
-              >
-                <p>{button.tooltip}</p>
-              </TooltipNext>
-            ))}
+            {buttons.map((button, index) => {
+              if (button.menuType) {
+                return (
+                  <PopoverNext
+                    key={index}
+                    onHide={() => {
+                      setShowAgentMenu(false);
+                      setAgentMenuType(null);
+                    }}
+                    color="primary"
+                    delay={[0, 0]}
+                    placement="bottom"
+                    showArrow
+                    variant="medium"
+                    interactive
+                    offsetDistance={2}
+                    className="agent-popover"
+                    trigger="click"
+                    closeButtonPlacement="top-right"
+                    closeButtonProps={{
+                      'aria-label': 'Close popover',
+                      onPress: () => {
+                        setShowAgentMenu(false);
+                        setAgentMenuType(null);
+                      },
+                      outline: true,
+                    }}
+                    triggerComponent={
+                      <TooltipNext
+                        key={index}
+                        triggerComponent={
+                          <ButtonCircle
+                            className={button.className}
+                            aria-label={button.tooltip}
+                            disabled={button.disabled}
+                            data-testid="ButtonCircle"
+                            onPress={() => {
+                              // If popover is already visible, we close it
+                              if (showAgentMenu && agentMenuType === button.menuType) {
+                                setShowAgentMenu(false);
+                                setAgentMenuType(null);
+                              } else {
+                                setAgentMenuType(button.menuType as 'Consult' | 'Transfer');
+                                setShowAgentMenu(true);
+                                loadBuddyAgents();
+                              }
+                            }}
+                          >
+                            <Icon className={button.className + '-icon'} name={button.icon} />
+                          </ButtonCircle>
+                        }
+                        color="primary"
+                        delay={[0, 0]}
+                        placement="bottom-start"
+                        type="description"
+                        variant="small"
+                        className="tooltip"
+                      >
+                        <p>{button.tooltip}</p>
+                      </TooltipNext>
+                    }
+                  >
+                    {showAgentMenu && agentMenuType === button.menuType ? (
+                      <CallControlPopoverComponent
+                        heading={button.menuType}
+                        buttonIcon={button.icon}
+                        buddyAgents={buddyAgents}
+                        onAgentSelect={(agentId) => {
+                          setShowAgentMenu(false);
+                          if (agentMenuType === 'Consult') {
+                            consultCall();
+                          } else {
+                            // Adding agent for now by default, will update once we have queues
+                            transferCall(agentId, 'agent');
+                          }
+                          setAgentMenuType(null);
+                        }}
+                      />
+                    ) : null}
+                  </PopoverNext>
+                );
+              }
+              return (
+                <TooltipNext
+                  key={index}
+                  triggerComponent={
+                    <ButtonCircle
+                      className={button.className}
+                      onPress={button.onClick}
+                      disabled={button.disabled}
+                      aria-label={button.tooltip}
+                    >
+                      <Icon className={button.className + '-icon'} name={button.icon} />
+                    </ButtonCircle>
+                  }
+                  color="primary"
+                  delay={[0, 0]}
+                  placement="bottom-start"
+                  type="description"
+                  variant="small"
+                  className="tooltip"
+                >
+                  <p>{button.tooltip}</p>
+                </TooltipNext>
+              );
+            })}
           </div>
         )}
         {wrapupRequired && (
@@ -158,6 +267,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                 className="submit-wrapup-button"
                 onPress={handleWrapupCall}
                 disabled={selectedWrapupId && selectedWrapupReason ? false : true}
+                aria-label="Submit wrap-up"
               >
                 Submit & Wrap up
               </ButtonPill>

@@ -1,4 +1,4 @@
-import {ILogger, ITask, IContactCenter, WrapupCodes} from '@webex/cc-store';
+import {ILogger, ITask, IContactCenter, WrapupCodes, BuddyDetails, DestinationType} from '@webex/cc-store';
 
 /**
  * Interface representing the TaskProps of a user.
@@ -190,6 +190,28 @@ export interface ControlProps {
    * @param isRecording - Boolean indicating whether the task is being recorded.
    */
   setIsRecording: (isRecording: boolean) => void;
+
+  /**
+   * List of buddy agents available for consult
+   */
+  buddyAgents: BuddyDetails[];
+
+  /**
+   * Function to load buddy agents
+   */
+  loadBuddyAgents: () => Promise<void>;
+
+  /**
+   * Function to transfer the call to a destination.
+   * @param destination - The destination to transfer the call to.
+   * @param destinationType - The type of destination.
+   */
+  transferCall: (destination: string, destinationType: DestinationType) => void;
+
+  /**
+   * Function to consult with a buddy agent.
+   */
+  consultCall: () => void;
 }
 
 export type CallControlComponentProps = Pick<
@@ -206,6 +228,10 @@ export type CallControlComponentProps = Pick<
   | 'setIsHeld'
   | 'isRecording'
   | 'setIsRecording'
+  | 'buddyAgents'
+  | 'loadBuddyAgents'
+  | 'transferCall'
+  | 'consultCall'
 >;
 
 /**
