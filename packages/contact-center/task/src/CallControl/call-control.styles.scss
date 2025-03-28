@@ -121,13 +121,14 @@
   .agent-popover-content {
     display: flex;
     flex-direction: column;
-    padding: 0.5rem;
+    padding: 1rem 0.5rem 0.5rem 1rem;
     width: 30rem;
     height: 25rem;
     gap: 0.25rem;
 
     .agent-popover-title {
       margin: 0 0 0 0;
+      margin-bottom: 1rem;
       text-align: left;
     }
 
@@ -143,7 +144,7 @@
   }
 
   .agent-tablist {
-    margin-bottom: 0.7rem;
+    margin-bottom: 1rem;
     .agent-tab {
       margin: 0 !important;
     }
@@ -151,7 +152,7 @@
 
   .agent-agent-list {
     margin-left: 0;
-    margin-bottom: 0.5rem;
+    margin-bottom: 1rem;
   }
 }
 

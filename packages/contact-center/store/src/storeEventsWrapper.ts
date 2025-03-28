@@ -85,10 +85,6 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.showMultipleLoginAlert;
   }
 
-  get isAgentTransferred() {
-    return this.store.isAgentTransferred;
-  }
-
   get currentTheme() {
     return this.store.currentTheme;
   }
@@ -134,10 +130,6 @@ class StoreWrapper implements IStoreWrapper {
 
   setWrapupRequired = (value: boolean): void => {
     this.store.wrapupRequired = value;
-  };
-
-  setIsAgentTransferred = (value: boolean): void => {
-    this.store.isAgentTransferred = value;
   };
 
   setCurrentTask = (task: ITask): void => {
@@ -218,7 +210,7 @@ class StoreWrapper implements IStoreWrapper {
     const taskToRemove = this.store.taskList.find((task) => task.data.interactionId === taskId);
     if (taskToRemove) {
       taskToRemove.off(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
-      taskToRemove.off(TASK_EVENTS.TASK_END, () => this.handleTaskEnd(taskToRemove));
+      taskToRemove.off(TASK_EVENTS.TASK_END, ({wrapupRequired}) => this.handleTaskEnd(taskToRemove, wrapupRequired));
       taskToRemove.off(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(taskToRemove.interactionId, reason));
     }
     const updateTaskList = this.store.taskList.filter((task) => task.data.interactionId !== taskId);
@@ -243,20 +235,14 @@ class StoreWrapper implements IStoreWrapper {
     });
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  handleAgentBlindTransferred = (event) => {
-    this.setIsAgentTransferred(true);
-  };
-
-  handleTaskEnd = (event) => {
+  handleTaskEnd = (event, wrapupRequired) => {
     // If the call is ended by agent we get the task object in event.data
     // If the call is ended by customer we get the task object directly
 
     const task = event.data ? event.data : event;
-    if (task.interaction.state === 'connected' || this.store.isAgentTransferred) {
+    if (wrapupRequired) {
       this.setWrapupRequired(true);
-      return;
-    } else if (task.interaction.state !== 'connected' && this.store.wrapupRequired !== true) {
+    } else {
       this.handleTaskRemove(task.interactionId);
     }
   };
@@ -276,7 +262,6 @@ class StoreWrapper implements IStoreWrapper {
   handleTaskWrapUp = (event) => {
     const task = event;
     this.setWrapupRequired(false);
-    this.setIsAgentTransferred(false);
     this.handleTaskRemove(task.interactionId);
   };
 
@@ -288,7 +273,7 @@ class StoreWrapper implements IStoreWrapper {
     }
 
     // Attach event listeners to the task
-    task.on(TASK_EVENTS.TASK_END, () => this.handleTaskEnd(task));
+    task.on(TASK_EVENTS.TASK_END, ({wrapupRequired}) => this.handleTaskEnd(task, wrapupRequired));
 
     // When we receive TASK_ASSIGNED the task was accepted by the agent and we need wrap up
     task.on(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
@@ -321,7 +306,7 @@ class StoreWrapper implements IStoreWrapper {
 
   handleTaskHydrate = (event) => {
     const task = event;
-    task.on(TASK_EVENTS.TASK_END, () => this.handleTaskEnd(task));
+    task.on(TASK_EVENTS.TASK_END, ({wrapupRequired}) => this.handleTaskEnd(task, wrapupRequired));
 
     // When we receive TASK_ASSIGNED the task was accepted by the agent and we need wrap up
     task.on(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);

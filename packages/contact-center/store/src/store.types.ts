@@ -50,7 +50,6 @@ interface IStore {
   isAgentLoggedIn: boolean;
   deviceType: string;
   wrapupRequired: boolean;
-  isAgentTransferred: boolean;
   currentState: string;
   lastStateChangeTimestamp?: number;
   lastIdleCodeChangeTimestamp?: number;
@@ -76,7 +75,6 @@ interface IStoreWrapper extends IStore {
   setIsAgentLoggedIn(value: boolean): void;
   setWrapupCodes(wrapupCodes: IWrapupCode[]): void;
   setState(state: IdleCode | ICustomState): void;
-  setIsAgentTransferred(value: boolean): void;
 }
 
 interface IWrapupCode {

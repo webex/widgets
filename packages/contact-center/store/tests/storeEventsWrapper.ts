@@ -625,7 +625,7 @@ describe('storeEventsWrapper', () => {
 
       storeWrapper.handleTaskEnd(mockTask, false);
 
-      expect(storeWrapper.setWrapupRequired).toHaveBeenCalledWith(true);
+      expect(storeWrapper.setWrapupRequired).toHaveBeenCalledWith(false);
     });
 
     it('should handle task end when call is not connected', () => {
@@ -634,7 +634,7 @@ describe('storeEventsWrapper', () => {
       storeWrapper['store'].wrapupRequired = false;
       storeWrapper.handleTaskEnd(mockTask, true);
 
-      expect(storeWrapper.setWrapupRequired).toHaveBeenCalledWith(false);
+      expect(storeWrapper.setWrapupRequired).toHaveBeenCalledWith(true);
 
       storeWrapper.handleTaskEnd(mockTask, false);
 
@@ -643,7 +643,7 @@ describe('storeEventsWrapper', () => {
       storeWrapper['store'].wrapupRequired = true;
       storeWrapper.handleTaskEnd(mockTask, true);
 
-      expect(storeWrapper.setWrapupRequired).toHaveBeenCalledWith(false);
+      expect(storeWrapper.setWrapupRequired).toHaveBeenCalledWith(true);
     });
 
     it('should set selected login option', () => {

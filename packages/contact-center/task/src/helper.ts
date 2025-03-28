@@ -277,7 +277,6 @@ export const useCallControl = (props: useCallControlProps) => {
 
     try {
       await currentTask.transfer(transferPayload);
-      store.setIsAgentTransferred(true);
     } catch (error) {
       logError(`Error transferring call: ${error}`, 'transferCall');
     }
