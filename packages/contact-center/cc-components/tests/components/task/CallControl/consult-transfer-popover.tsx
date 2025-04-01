@@ -2,15 +2,15 @@
 import React from 'react';
 import {render, screen, fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom';
-import CallControlPopoverComponent from '../../../../src/components/task/CallControl/CallControlCustom/call-control-popover';
+import ConsultTransferPopoverComponent from '../../../../src/components/task/CallControl/CallControlCustom/consult-transfer-popover';
 
-jest.mock('../../../../src/components/task/CallControl/CallControlCustom/call-control-list-item', () => {
+jest.mock('../../../../src/components/task/CallControl/CallControlCustom/consult-transfer-list-item', () => {
   const MockListItem = (props: any) => (
-    <div data-testid="CallControlListItemComponent" onClick={props.onButtonPress}>
+    <div data-testid="ConsultTransferListComponent" onClick={props.onButtonPress}>
       {props.title}
     </div>
   );
-  MockListItem.displayName = 'CallControlListItemComponent';
+  MockListItem.displayName = 'ConsultTransferListComponent';
   return MockListItem;
 });
 
@@ -33,7 +33,7 @@ afterAll(() => {
   (console.error as jest.Mock).mockRestore();
 });
 
-describe('CallControlPopoverComponent', () => {
+describe('ConsultTransferPopoverComponent', () => {
   const mockOnAgentSelect = jest.fn();
   const baseProps = {
     heading: 'Select an Agent',
@@ -50,24 +50,24 @@ describe('CallControlPopoverComponent', () => {
   });
 
   it('renders heading and tab correctly', () => {
-    render(<CallControlPopoverComponent {...baseProps} />);
+    render(<ConsultTransferPopoverComponent {...baseProps} />);
     expect(screen.getByText('Select an Agent')).toBeInTheDocument();
     expect(screen.getByText('Agents')).toBeInTheDocument();
   });
 
   it('renders agents list when buddyAgents provided', () => {
-    render(<CallControlPopoverComponent {...baseProps} />);
+    render(<ConsultTransferPopoverComponent {...baseProps} />);
     expect(screen.getByText('Agent One')).toBeInTheDocument();
     expect(screen.getByText('Agent Two')).toBeInTheDocument();
   });
 
   it('renders no agents text when buddyAgents is empty', () => {
-    render(<CallControlPopoverComponent {...baseProps} buddyAgents={[]} />);
+    render(<ConsultTransferPopoverComponent {...baseProps} buddyAgents={[]} />);
     expect(screen.getByText('No agents found')).toBeInTheDocument();
   });
 
   it('calls onAgentSelect with correct agentId when agent button is clicked', () => {
-    render(<CallControlPopoverComponent {...baseProps} />);
+    render(<ConsultTransferPopoverComponent {...baseProps} />);
     fireEvent.click(screen.getByText('Agent One'));
     expect(mockOnAgentSelect).toHaveBeenCalledWith('agent1');
   });

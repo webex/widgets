@@ -2,7 +2,7 @@
 import React from 'react';
 import {render, screen, fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom';
-import CallControlListItemComponent from '../../../../src/components/task/CallControl/CallControlCustom/call-control-list-item';
+import ConsultTransferListComponent from '../../../../src/components/task/CallControl/CallControlCustom/consult-transfer-list-item';
 
 jest.mock('@momentum-ui/react-collaboration', () => ({
   ListItemBase: (props) => (
@@ -51,7 +51,7 @@ describe('CallControlListItemPresentational', () => {
   });
 
   it('renders with title, subtitle, and correct initials', () => {
-    render(<CallControlListItemComponent {...defaultProps} />);
+    render(<ConsultTransferListComponent {...defaultProps} />);
     expect(screen.getByText('John Doe')).toBeInTheDocument();
     expect(screen.getByText('Manager')).toBeInTheDocument();
     expect(screen.getByTestId('AvatarNext')).toHaveTextContent('JD');
@@ -61,13 +61,13 @@ describe('CallControlListItemPresentational', () => {
   it('renders without subtitle when not provided', () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const {subtitle, ...propsWithoutSubtitle} = defaultProps;
-    render(<CallControlListItemComponent {...propsWithoutSubtitle} />);
+    render(<ConsultTransferListComponent {...propsWithoutSubtitle} />);
     expect(screen.getByText('John Doe')).toBeInTheDocument();
     expect(screen.queryByText('Manager')).not.toBeInTheDocument();
   });
 
   it('calls onButtonPress when button is clicked', () => {
-    render(<CallControlListItemComponent {...defaultProps} />);
+    render(<ConsultTransferListComponent {...defaultProps} />);
     const button = screen.getByTestId('ButtonCircle');
     fireEvent.click(button);
     expect(mockOnButtonPress).toHaveBeenCalled();
