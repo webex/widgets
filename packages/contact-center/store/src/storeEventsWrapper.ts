@@ -93,6 +93,14 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.customState;
   }
 
+  get consultCompleted() {
+    return this.store.consultCompleted;
+  }
+
+  get consultInitiated() {
+    return this.store.consultInitiated;
+  }
+
   setCurrentTheme = (theme: string): void => {
     this.store.currentTheme = theme;
   };
@@ -148,6 +156,14 @@ class StoreWrapper implements IStoreWrapper {
 
   setWrapupCodes = (wrapupCodes: IWrapupCode[]): void => {
     this.store.wrapupCodes = wrapupCodes;
+  };
+
+  setConsultCompleted = (value: boolean): void => {
+    this.store.consultCompleted = value;
+  };
+
+  setConsultInitiated = (value: boolean): void => {
+    this.store.consultInitiated = value;
   };
 
   setState = (state: ICustomState | IdleCode): void => {
@@ -212,6 +228,9 @@ class StoreWrapper implements IStoreWrapper {
       taskToRemove.off(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
       taskToRemove.off(TASK_EVENTS.TASK_END, ({wrapupRequired}) => this.handleTaskEnd(taskToRemove, wrapupRequired));
       taskToRemove.off(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(taskToRemove.interactionId, reason));
+      taskToRemove.off(TASK_EVENTS.AGENT_WRAPPEDUP, this.handleTaskWrapUp);
+      taskToRemove.off(TASK_EVENTS.TASK_CONSULTING, this.handleConsulting);
+      taskToRemove.off(TASK_EVENTS.TASK_CONSULT_END, this.handleConsultEnd);
     }
     const updateTaskList = this.store.taskList.filter((task) => task.data.interactionId !== taskId);
 
@@ -265,6 +284,16 @@ class StoreWrapper implements IStoreWrapper {
     this.handleTaskRemove(task.interactionId);
   };
 
+  handleConsulting = (event) => {
+    this.setConsultCompleted(true);
+    this.setCurrentTask(event);
+  };
+
+  handleConsultEnd = () => {
+    this.setConsultInitiated(false);
+    this.setConsultCompleted(false);
+  };
+
   handleIncomingTask = (event) => {
     const task: ITask = event;
     if (this.store.taskList.some((t) => t.data.interactionId === task.data.interactionId)) {
@@ -283,6 +312,9 @@ class StoreWrapper implements IStoreWrapper {
     task.on(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(task.data.interactionId, reason));
 
     task.on(TASK_EVENTS.AGENT_WRAPPEDUP, this.handleTaskWrapUp);
+
+    task.on(TASK_EVENTS.TASK_CONSULTING, this.handleConsulting);
+    task.on(TASK_EVENTS.TASK_CONSULT_END, this.handleConsultEnd);
 
     this.setIncomingTask(task);
     this.setTaskList([...this.store.taskList, task]);
@@ -317,6 +349,9 @@ class StoreWrapper implements IStoreWrapper {
 
     task.on(TASK_EVENTS.AGENT_WRAPPEDUP, this.handleTaskWrapUp);
 
+    task.on(TASK_EVENTS.TASK_CONSULTING, this.handleConsulting);
+    task.on(TASK_EVENTS.TASK_CONSULT_END, this.handleConsultEnd);
+
     if (!this.store.taskList.some((t) => t.data.interactionId === task.data.interactionId)) {
       this.setTaskList([...this.store.taskList, task]);
     }
@@ -330,6 +365,11 @@ class StoreWrapper implements IStoreWrapper {
 
     const {interaction, agentId} = task.data;
     const {state, isTerminated, participants} = interaction;
+
+    if (state === 'consulting') {
+      this.setConsultInitiated(true);
+      this.setConsultCompleted(true);
+    }
 
     // Update call control states
     if (isTerminated) {

@@ -6,12 +6,14 @@ import {PopoverNext, SelectNext, TooltipNext, Text, ButtonCircle, ButtonPill} fr
 import {Item} from '@react-stately/collections';
 import {Icon} from '@momentum-design/components/dist/react';
 import CallControlPopoverComponent from './CallControlCustom/call-control-popover';
+import CallControlConsultComponent from './CallControlCustom/call-control-consult';
 
 function CallControlComponent(props: CallControlComponentProps) {
   const [selectedWrapupReason, setSelectedWrapupReason] = useState<string | null>(null);
   const [selectedWrapupId, setSelectedWrapupId] = useState<string | null>(null);
   const [showAgentMenu, setShowAgentMenu] = useState(false);
   const [agentMenuType, setAgentMenuType] = useState<'Consult' | 'Transfer' | null>(null);
+  const [consultAgentName, setConsultAgentName] = useState<string>('Consult Agent');
 
   const {
     currentTask,
@@ -30,6 +32,9 @@ function CallControlComponent(props: CallControlComponentProps) {
     loadBuddyAgents,
     transferCall,
     consultCall,
+    endConsultCall,
+    consultInitiated,
+    consultCompleted,
   } = props;
 
   useEffect(() => {
@@ -66,6 +71,7 @@ function CallControlComponent(props: CallControlComponentProps) {
 
   const buttons = [
     {
+      id: 'hold',
       icon: isHeld ? 'play-bold' : 'pause-bold',
       onClick: () => handletoggleHold(),
       tooltip: isHeld ? 'Resume the call' : 'Hold the call',
@@ -73,6 +79,7 @@ function CallControlComponent(props: CallControlComponentProps) {
       disabled: false,
     },
     {
+      id: 'consult',
       icon: 'headset-bold',
       tooltip: 'Consult with another agent',
       className: 'call-control-button',
@@ -80,6 +87,7 @@ function CallControlComponent(props: CallControlComponentProps) {
       menuType: 'Consult',
     },
     {
+      id: 'transfer',
       icon: 'next-bold',
       tooltip: 'Transfer call',
       className: 'call-control-button',
@@ -87,6 +95,7 @@ function CallControlComponent(props: CallControlComponentProps) {
       menuType: 'Transfer',
     },
     {
+      id: 'record',
       icon: isRecording ? 'record-paused-bold' : 'record-bold',
       onClick: () => toggleRecording(),
       tooltip: isRecording ? 'Pause Recording' : 'Resume Recording',
@@ -94,6 +103,7 @@ function CallControlComponent(props: CallControlComponentProps) {
       disabled: false,
     },
     {
+      id: 'end',
       icon: 'cancel-regular',
       onClick: endCall,
       tooltip: 'End call',
@@ -101,6 +111,12 @@ function CallControlComponent(props: CallControlComponentProps) {
       disabled: isHeld,
     },
   ];
+
+  const filteredButtons = consultInitiated
+    ? buttons.filter((button) => !['hold', 'consult'].includes(button.id))
+    : buttons;
+
+  const startTimeStamp = currentTask?.data?.interaction?.createdTimestamp;
 
   if (!currentTask) return null;
 
@@ -110,7 +126,7 @@ function CallControlComponent(props: CallControlComponentProps) {
       <div className="call-control-container" data-testid="call-control-container">
         {!wrapupRequired && (
           <div className="button-group">
-            {buttons.map((button, index) => {
+            {filteredButtons.map((button, index) => {
               if (button.menuType) {
                 return (
                   <PopoverNext
@@ -144,10 +160,9 @@ function CallControlComponent(props: CallControlComponentProps) {
                           <ButtonCircle
                             className={button.className}
                             aria-label={button.tooltip}
-                            disabled={button.disabled}
+                            disabled={consultInitiated || button.disabled}
                             data-testid="ButtonCircle"
                             onPress={() => {
-                              // If popover is already visible, we close it
                               if (showAgentMenu && agentMenuType === button.menuType) {
                                 setShowAgentMenu(false);
                                 setAgentMenuType(null);
@@ -177,12 +192,12 @@ function CallControlComponent(props: CallControlComponentProps) {
                         heading={button.menuType}
                         buttonIcon={button.icon}
                         buddyAgents={buddyAgents}
-                        onAgentSelect={(agentId) => {
+                        onAgentSelect={(agentId, agentName) => {
                           setShowAgentMenu(false);
                           if (agentMenuType === 'Consult') {
-                            consultCall();
+                            consultCall(agentId, 'agent');
+                            setConsultAgentName(agentName);
                           } else {
-                            // Adding agent for now by default, will update once we have queues
                             transferCall(agentId, 'agent');
                           }
                           setAgentMenuType(null);
@@ -272,6 +287,20 @@ function CallControlComponent(props: CallControlComponentProps) {
                 Submit & Wrap up
               </ButtonPill>
             </PopoverNext>
+          </div>
+        )}
+
+        {consultInitiated && !wrapupRequired && (
+          <div className="call-control-consult-container">
+            <CallControlConsultComponent
+              agentName={consultAgentName}
+              startTimeStamp={startTimeStamp}
+              onTransfer={() => {}}
+              endConsultCall={() => {
+                endConsultCall();
+              }}
+              consultCompleted={consultCompleted}
+            />
           </div>
         )}
       </div>

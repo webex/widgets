@@ -32,6 +32,8 @@ class Store implements IStore {
   wrapupRequired: boolean = false;
   currentState: string = '';
   customState: ICustomState = null;
+  consultCompleted: boolean = false;
+  consultInitiated: boolean = false;
   lastStateChangeTimestamp?: number;
   lastIdleCodeChangeTimestamp?: number;
   showMultipleLoginAlert: boolean = false;

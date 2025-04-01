@@ -209,9 +209,27 @@ export interface ControlProps {
   transferCall: (destination: string, destinationType: DestinationType) => void;
 
   /**
-   * Function to consult with a buddy agent.
+   *
+   * @param consultDestination
+   * @param destinationType
+   * @returns
    */
-  consultCall: () => void;
+  consultCall: (consultDestination: string, destinationType: DestinationType) => void;
+
+  /**
+   * Function to end the consult call.
+   */
+  endConsultCall: () => void;
+
+  /**
+   * Flag to determine if the consult call is connecting.
+   */
+  consultInitiated: boolean;
+
+  /**
+   * Flag to determine if the consult call is connecting.
+   */
+  consultCompleted: boolean;
 }
 
 export type CallControlComponentProps = Pick<
@@ -232,6 +250,9 @@ export type CallControlComponentProps = Pick<
   | 'loadBuddyAgents'
   | 'transferCall'
   | 'consultCall'
+  | 'endConsultCall'
+  | 'consultInitiated'
+  | 'consultCompleted'
 >;
 
 /**

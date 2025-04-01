@@ -6,7 +6,7 @@ export interface CallControlPopoverComponentProps {
   heading: string;
   buttonIcon: string;
   buddyAgents: Array<{agentId: string; agentName: string; dn: string}>;
-  onAgentSelect: (agentId: string) => void;
+  onAgentSelect: (agentId: string, agentName: string) => void;
 }
 
 const CallControlPopoverComponent: React.FC<CallControlPopoverComponentProps> = ({
@@ -44,7 +44,7 @@ const CallControlPopoverComponent: React.FC<CallControlPopoverComponentProps> = 
             <CallControlListItemComponent
               title={agent.agentName}
               buttonIcon={buttonIcon}
-              onButtonPress={() => onAgentSelect(agent.agentId)}
+              onButtonPress={() => onAgentSelect(agent.agentId, agent.agentName)}
             />
           </div>
         ))}

@@ -282,8 +282,32 @@ export const useCallControl = (props: useCallControlProps) => {
     }
   };
 
-  // New consult callback method (empty for now)
-  const consultCall = async () => {};
+  const consultCall = async (consultDestination: string, destinationType: DestinationType) => {
+    const consultPayload = {
+      to: consultDestination,
+      destinationType: destinationType,
+    };
+
+    try {
+      await currentTask.consult(consultPayload);
+      store.setConsultInitiated(true);
+    } catch (error) {
+      logError(`Error consulting call: ${error}`, 'consultCall');
+    }
+  };
+
+  const endConsultCall = async () => {
+    const consultEndPayload = {
+      isConsult: true,
+      taskId: currentTask.data.interactionId,
+    };
+
+    try {
+      await currentTask.endConsult(consultEndPayload);
+    } catch (error) {
+      logError(`Error ending consult call: ${error}`, 'endConsultCall');
+    }
+  };
 
   return {
     currentTask,
@@ -300,6 +324,7 @@ export const useCallControl = (props: useCallControlProps) => {
     loadBuddyAgents,
     transferCall,
     consultCall,
+    endConsultCall,
   };
 };
 

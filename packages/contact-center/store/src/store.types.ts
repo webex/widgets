@@ -48,6 +48,8 @@ interface IStore {
   showMultipleLoginAlert: boolean;
   currentTheme: string;
   customState: ICustomState;
+  consultCompleted: boolean;
+  consultInitiated: boolean;
   init(params: InitParams, callback: (ccSDK: IContactCenter) => void): Promise<void>;
   registerCC(webex?: WithWebex['webex']): Promise<void>;
 }
@@ -67,6 +69,8 @@ interface IStoreWrapper extends IStore {
   setIsAgentLoggedIn(value: boolean): void;
   setWrapupCodes(wrapupCodes: IWrapupCode[]): void;
   setState(state: IdleCode | ICustomState): void;
+  setConsultCompleted(value: boolean): void;
+  setConsultInitiated(value: boolean): void; // new setter method
 }
 
 interface IWrapupCode {
@@ -89,6 +93,7 @@ enum TASK_EVENTS {
   TASK_WRAPUP = 'task:wrapup',
   TASK_REJECT = 'task:rejected',
   TASK_HYDRATE = 'task:hydrate',
+  TASK_CONSULTING = 'task:consulting',
   AGENT_CONTACT_ASSIGNED = 'AgentContactAssigned',
   CONTACT_RECORDING_PAUSED = 'ContactRecordingPaused',
   CONTACT_RECORDING_RESUMED = 'ContactRecordingResumed',
