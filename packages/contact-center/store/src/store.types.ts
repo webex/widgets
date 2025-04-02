@@ -1,4 +1,4 @@
-import {AgentLogin, IContactCenter, Profile, Team, LogContext} from '@webex/plugin-cc';
+import {AgentLogin, IContactCenter, Profile, Team, LogContext, BuddyDetails, DestinationType} from '@webex/plugin-cc';
 import {ITask} from '@webex/plugin-cc';
 
 type ILogger = {
@@ -130,6 +130,8 @@ export type {
   IWrapupCode,
   IStoreWrapper,
   ICustomState,
+  DestinationType,
+  BuddyDetails,
 };
 
 export {CC_EVENTS, TASK_EVENTS};
