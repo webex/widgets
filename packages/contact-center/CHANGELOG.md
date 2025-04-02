@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.39](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.38...v1.28.0-ccwidgets.39) (2025-04-02)
+
+
+### Features
+
+* **widgets:** added-transfer-functionality ([#423](https://github.com/webex/widgets/issues/423)) ([b7974a3](https://github.com/webex/widgets/commit/b7974a324e7e4d8c3a8a41c24d10b9c91b3effa0))
+
 # [1.28.0-ccwidgets.38](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.37...v1.28.0-ccwidgets.38) (2025-03-27)
 
 
