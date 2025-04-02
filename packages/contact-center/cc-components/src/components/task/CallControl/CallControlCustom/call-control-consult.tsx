@@ -3,7 +3,6 @@ import {ButtonCircle, TooltipNext, Text} from '@momentum-ui/react-collaboration'
 import {Avatar, Icon} from '@momentum-design/components/dist/react';
 import TaskTimer from '../../TaskTimer';
 
-// Props now include showTransfer.
 export interface CallControlConsultComponentsProps {
   agentName: string;
   startTimeStamp: number;
