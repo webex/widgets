@@ -222,6 +222,13 @@ export interface ControlProps {
   endConsultCall: () => void;
 
   /**
+   * Function to transfer the consult call to a destination.
+   * @param destination - The destination to transfer the consult call to.
+   * @param destinationType - The type of destination.
+   */
+  consultTransfer: (destination: string, destinationType: DestinationType) => void;
+
+  /**
    * Flag to determine if the consult call is connecting.
    */
   consultInitiated: boolean;
@@ -230,6 +237,11 @@ export interface ControlProps {
    * Flag to determine if the consult call is connecting.
    */
   consultCompleted: boolean;
+
+  /**
+   * Flag to determine if the consult call is accepted.
+   */
+  consultAccepted: boolean;
 }
 
 export type CallControlComponentProps = Pick<
@@ -252,7 +264,9 @@ export type CallControlComponentProps = Pick<
   | 'consultCall'
   | 'endConsultCall'
   | 'consultInitiated'
+  | 'consultTransfer'
   | 'consultCompleted'
+  | 'consultAccepted'
 >;
 
 /**

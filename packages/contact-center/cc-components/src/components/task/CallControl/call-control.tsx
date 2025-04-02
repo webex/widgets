@@ -14,6 +14,7 @@ function CallControlComponent(props: CallControlComponentProps) {
   const [showAgentMenu, setShowAgentMenu] = useState(false);
   const [agentMenuType, setAgentMenuType] = useState<'Consult' | 'Transfer' | null>(null);
   const [consultAgentName, setConsultAgentName] = useState<string>('Consult Agent');
+  const [consultAgentId, setConsultAgentId] = useState<string>(null);
 
   const {
     currentTask,
@@ -33,8 +34,10 @@ function CallControlComponent(props: CallControlComponentProps) {
     transferCall,
     consultCall,
     endConsultCall,
+    consultTransfer,
     consultInitiated,
     consultCompleted,
+    consultAccepted,
   } = props;
 
   useEffect(() => {
@@ -117,6 +120,7 @@ function CallControlComponent(props: CallControlComponentProps) {
     : buttons;
 
   const startTimeStamp = currentTask?.data?.interaction?.createdTimestamp;
+  const showTransfer = !consultAccepted;
 
   if (!currentTask) return null;
 
@@ -124,7 +128,7 @@ function CallControlComponent(props: CallControlComponentProps) {
     <>
       <audio ref={audioRef} id="remote-audio" autoPlay></audio>
       <div className="call-control-container" data-testid="call-control-container">
-        {!wrapupRequired && (
+        {!consultAccepted && !wrapupRequired && (
           <div className="button-group">
             {filteredButtons.map((button, index) => {
               if (button.menuType) {
@@ -160,10 +164,9 @@ function CallControlComponent(props: CallControlComponentProps) {
                           <ButtonCircle
                             className={button.className}
                             aria-label={button.tooltip}
-                            disabled={button.disabled}
+                            disabled={button.disabled || consultInitiated}
                             data-testid="ButtonCircle"
                             onPress={() => {
-                              // If popover is already visible, we close it
                               if (showAgentMenu && agentMenuType === button.menuType) {
                                 setShowAgentMenu(false);
                                 setAgentMenuType(null);
@@ -197,9 +200,9 @@ function CallControlComponent(props: CallControlComponentProps) {
                           setShowAgentMenu(false);
                           if (agentMenuType === 'Consult') {
                             consultCall(agentId, 'agent');
+                            setConsultAgentId(agentId);
                             setConsultAgentName(agentName);
                           } else {
-                            // Adding agent for now by default, will update once we have queues
                             transferCall(agentId, 'agent');
                           }
                           setAgentMenuType(null);
@@ -216,7 +219,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                     <ButtonCircle
                       className={button.className}
                       onPress={button.onClick}
-                      disabled={button.disabled}
+                      disabled={button.disabled || consultInitiated}
                       aria-label={button.tooltip}
                     >
                       <Icon className={button.className + '-icon'} name={button.icon} />
@@ -292,16 +295,24 @@ function CallControlComponent(props: CallControlComponentProps) {
           </div>
         )}
 
-        {consultInitiated && !wrapupRequired && (
-          <div className="call-control-consult-container">
+        {(consultAccepted || consultInitiated) && !wrapupRequired && (
+          <div className={`call-control-consult-container ${consultAccepted ? 'no-border' : ''}`}>
             <CallControlConsultComponent
               agentName={consultAgentName}
               startTimeStamp={startTimeStamp}
-              onTransfer={() => {}}
               endConsultCall={() => {
                 endConsultCall();
               }}
+              onTransfer={() => {
+                consultTransfer(consultAgentId, 'agent');
+              }}
               consultCompleted={consultCompleted}
+              showTransfer={showTransfer}
+              {...(showTransfer && {
+                onTransfer: () => {
+                  consultTransfer(consultAgentId, 'agent');
+                },
+              })}
             />
           </div>
         )}

@@ -189,6 +189,12 @@
   padding-top: 1rem;
 }
 
+.call-control-consult-container.no-border {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
 // Add explicit margin for the consult subtext so it is only 4px from the main text
 .call-control-consult .consult-sub-text {
   margin-top: 0.25rem !important;

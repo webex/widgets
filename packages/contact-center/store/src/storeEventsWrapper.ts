@@ -101,6 +101,10 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.consultInitiated;
   }
 
+  get consultAccepted() {
+    return this.store.consultAccepted;
+  }
+
   setCurrentTheme = (theme: string): void => {
     this.store.currentTheme = theme;
   };
@@ -164,6 +168,10 @@ class StoreWrapper implements IStoreWrapper {
 
   setConsultInitiated = (value: boolean): void => {
     this.store.consultInitiated = value;
+  };
+
+  setConsultAccepted = (value: boolean): void => {
+    this.store.consultAccepted = value;
   };
 
   setState = (state: ICustomState | IdleCode): void => {
@@ -231,6 +239,7 @@ class StoreWrapper implements IStoreWrapper {
       taskToRemove.off(TASK_EVENTS.AGENT_WRAPPEDUP, this.handleTaskWrapUp);
       taskToRemove.off(TASK_EVENTS.TASK_CONSULTING, this.handleConsulting);
       taskToRemove.off(TASK_EVENTS.TASK_CONSULT_END, this.handleConsultEnd);
+      taskToRemove.off(TASK_EVENTS.TASK_CONSULT_ACCEPT, this.handleConsultAccepted);
     }
     const updateTaskList = this.store.taskList.filter((task) => task.data.interactionId !== taskId);
 
@@ -269,6 +278,11 @@ class StoreWrapper implements IStoreWrapper {
   handleTaskAssigned = (event) => {
     const task = event;
     runInAction(() => {
+      if (this.consultAccepted) {
+        this.setConsultAccepted(false);
+        this.setConsultInitiated(false);
+        this.setConsultCompleted(false);
+      }
       this.setCurrentTask(task);
       this.setIncomingTask(null);
       this.setState({
@@ -289,9 +303,27 @@ class StoreWrapper implements IStoreWrapper {
     this.setCurrentTask(event);
   };
 
-  handleConsultEnd = () => {
+  handleConsultEnd = (event) => {
+    const task = event;
     this.setConsultInitiated(false);
+    if (this.consultAccepted) {
+      this.setConsultAccepted(false);
+      this.handleTaskRemove(task.data.interactionId);
+    }
     this.setConsultCompleted(false);
+  };
+
+  handleConsultAccepted = (event) => {
+    const task = event;
+    runInAction(() => {
+      this.setCurrentTask(task);
+      this.setIncomingTask(null);
+      this.setConsultAccepted(true);
+      this.setState({
+        developerName: 'ENGAGED',
+        name: 'Engaged',
+      });
+    });
   };
 
   handleIncomingTask = (event) => {
@@ -306,6 +338,7 @@ class StoreWrapper implements IStoreWrapper {
 
     // When we receive TASK_ASSIGNED the task was accepted by the agent and we need wrap up
     task.on(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
+    task.on(TASK_EVENTS.TASK_CONSULT_ACCEPT, this.handleConsultAccepted);
 
     // When we receive TASK_REJECT sdk changes the agent status
     // When we receive TASK_REJECT that means the task was not accepted by the agent and we wont need wrap up
@@ -342,6 +375,7 @@ class StoreWrapper implements IStoreWrapper {
 
     // When we receive TASK_ASSIGNED the task was accepted by the agent and we need wrap up
     task.on(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
+    task.on(TASK_EVENTS.TASK_CONSULT_ACCEPT, this.handleConsultAccepted);
 
     // When we receive TASK_REJECT sdk changes the agent status
     // When we receive TASK_REJECT that means the task was not accepted by the agent and we wont need wrap up

@@ -50,6 +50,7 @@ interface IStore {
   customState: ICustomState;
   consultCompleted: boolean;
   consultInitiated: boolean;
+  consultAccepted: boolean;
   init(params: InitParams, callback: (ccSDK: IContactCenter) => void): Promise<void>;
   registerCC(webex?: WithWebex['webex']): Promise<void>;
 }
@@ -70,7 +71,8 @@ interface IStoreWrapper extends IStore {
   setWrapupCodes(wrapupCodes: IWrapupCode[]): void;
   setState(state: IdleCode | ICustomState): void;
   setConsultCompleted(value: boolean): void;
-  setConsultInitiated(value: boolean): void; // new setter method
+  setConsultInitiated(value: boolean): void;
+  setConsultAccepted(value: boolean): void;
 }
 
 interface IWrapupCode {

@@ -309,6 +309,19 @@ export const useCallControl = (props: useCallControlProps) => {
     }
   };
 
+  const consultTransfer = async (transferDestination: string, destinationType: DestinationType) => {
+    const consultTransferPayload = {
+      to: transferDestination,
+      destinationType: destinationType,
+    };
+    try {
+      await currentTask.consultTransfer(consultTransferPayload);
+      store.setConsultInitiated(true);
+    } catch (error) {
+      logError(`Error transferring consult call: ${error}`, 'consultTransfer');
+    }
+  };
+
   return {
     currentTask,
     audioRef,
@@ -325,6 +338,7 @@ export const useCallControl = (props: useCallControlProps) => {
     transferCall,
     consultCall,
     endConsultCall,
+    consultTransfer,
   };
 };
 
