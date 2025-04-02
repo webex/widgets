@@ -1177,6 +1177,66 @@ describe('useCallControl', () => {
       method: 'useCallControl#transferCall',
     });
   });
+
+  it('should call consultCall successfully', async () => {
+    mockCurrentTask.consult = jest.fn().mockResolvedValue('Consulted');
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        deviceType: 'BROWSER',
+      })
+    );
+    await act(async () => {
+      await result.current.consultCall('dest123', 'agent');
+    });
+    expect(mockCurrentTask.consult).toHaveBeenCalledWith({to: 'dest123', destinationType: 'agent'});
+  });
+
+  it('should call endConsultCall successfully', async () => {
+    mockCurrentTask.endConsult = jest.fn().mockResolvedValue('ConsultEnded');
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        deviceType: 'BROWSER',
+      })
+    );
+    await act(async () => {
+      await result.current.endConsultCall();
+    });
+    expect(mockCurrentTask.endConsult).toHaveBeenCalledWith({
+      isConsult: true,
+      taskId: mockCurrentTask.data.interactionId,
+    });
+  });
+
+  it('should call consultTransfer successfully', async () => {
+    mockCurrentTask.consultTransfer = jest.fn().mockResolvedValue('ConsultTransferred');
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        deviceType: 'BROWSER',
+      })
+    );
+    await act(async () => {
+      await result.current.consultTransfer('dest456', 'queue');
+    });
+    expect(mockCurrentTask.consultTransfer).toHaveBeenCalledWith({
+      to: 'dest456',
+      destinationType: 'queue',
+    });
+  });
 });
 
 describe('useOutdialCall', () => {

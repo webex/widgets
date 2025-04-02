@@ -359,15 +359,63 @@ describe('storeEventsWrapper', () => {
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.AGENT_WRAPPEDUP, expect.any(Function));
     });
 
-    it('should handle task assignment', () => {
+    it('should handle task assignment and reset consult flags if consultAccepted is true', () => {
       const setCurrentTaskSpy = jest.spyOn(storeWrapper, 'setCurrentTask');
       const setIncomingTaskSpy = jest.spyOn(storeWrapper, 'setIncomingTask');
+      const consultAcceptedSpy = jest.spyOn(storeWrapper, 'setConsultAccepted');
+      const consultInitiatedSpy = jest.spyOn(storeWrapper, 'setConsultInitiated');
+      const consultCompletedSpy = jest.spyOn(storeWrapper, 'setConsultCompleted');
+      // simulate consultAccepted true
+      storeWrapper['store'].consultAccepted = true;
 
-      // Why is this, this way?
       storeWrapper.handleTaskAssigned(mockTask);
-
       expect(setCurrentTaskSpy).toHaveBeenCalledWith(mockTask);
       expect(setIncomingTaskSpy).toHaveBeenCalledWith(null);
+      // new consult-reset checks
+      expect(consultAcceptedSpy).toHaveBeenCalledWith(false);
+      expect(consultInitiatedSpy).toHaveBeenCalledWith(false);
+      expect(consultCompletedSpy).toHaveBeenCalledWith(false);
+    });
+
+    it('should handle consultAccepted event', () => {
+      const setCurrentTaskSpy = jest.spyOn(storeWrapper, 'setCurrentTask');
+      const setIncomingTaskSpy = jest.spyOn(storeWrapper, 'setIncomingTask');
+      const consultAcceptedSpy = jest.spyOn(storeWrapper, 'setConsultAccepted');
+      const setStateSpy = jest.spyOn(storeWrapper, 'setState');
+
+      storeWrapper.handleConsultAccepted(mockTask);
+      expect(setCurrentTaskSpy).toHaveBeenCalledWith(mockTask);
+      expect(setIncomingTaskSpy).toHaveBeenCalledWith(null);
+      expect(consultAcceptedSpy).toHaveBeenCalledWith(true);
+      expect(setStateSpy).toHaveBeenCalledWith({
+        developerName: 'ENGAGED',
+        name: 'Engaged',
+      });
+    });
+
+    it('should handle consultEnd event when consultAccepted is true', () => {
+      const consultInitiatedSpy = jest.spyOn(storeWrapper, 'setConsultInitiated');
+      const consultAcceptedSpy = jest.spyOn(storeWrapper, 'setConsultAccepted');
+      const consultCompletedSpy = jest.spyOn(storeWrapper, 'setConsultCompleted');
+      const handleTaskRemoveSpy = jest.spyOn(storeWrapper, 'handleTaskRemove');
+      // simulate consultAccepted true
+      storeWrapper['store'].consultAccepted = true;
+      const event = {data: {interactionId: 'testId'}};
+
+      storeWrapper.handleConsultEnd(event);
+      expect(consultInitiatedSpy).toHaveBeenCalledWith(false);
+      expect(consultAcceptedSpy).toHaveBeenCalledWith(false);
+      expect(consultCompletedSpy).toHaveBeenCalledWith(false);
+      expect(handleTaskRemoveSpy).toHaveBeenCalledWith('testId');
+    });
+
+    it('should handle consult event', () => {
+      const consultCompletedSpy = jest.spyOn(storeWrapper, 'setConsultCompleted');
+      const setCurrentTaskSpy = jest.spyOn(storeWrapper, 'setCurrentTask');
+
+      storeWrapper.handleConsulting(mockTask);
+      expect(consultCompletedSpy).toHaveBeenCalledWith(true);
+      expect(setCurrentTaskSpy).toHaveBeenCalledWith(mockTask);
     });
 
     it('should handle task removal', () => {
