@@ -10,6 +10,7 @@ import {
   IdleCode,
   IContactCenter,
   ITask,
+  BuddyDetails,
 } from './store.types';
 import Store from './store';
 import {runInAction} from 'mobx';
@@ -209,7 +210,7 @@ class StoreWrapper implements IStoreWrapper {
     const taskToRemove = this.store.taskList.find((task) => task.data.interactionId === taskId);
     if (taskToRemove) {
       taskToRemove.off(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
-      taskToRemove.off(TASK_EVENTS.TASK_END, () => this.handleTaskEnd(taskToRemove));
+      taskToRemove.off(TASK_EVENTS.TASK_END, ({wrapupRequired}) => this.handleTaskEnd(taskToRemove, wrapupRequired));
       taskToRemove.off(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(taskToRemove.interactionId, reason));
     }
     const updateTaskList = this.store.taskList.filter((task) => task.data.interactionId !== taskId);
@@ -234,17 +235,14 @@ class StoreWrapper implements IStoreWrapper {
     });
   };
 
-  handleTaskEnd = (event) => {
+  handleTaskEnd = (event, wrapupRequired) => {
     // If the call is ended by agent we get the task object in event.data
     // If the call is ended by customer we get the task object directly
 
     const task = event.data ? event.data : event;
-    // TODO -- SDK needs to send only 1 event on end : https://jira-eng-gpk2.cisco.com/jira/browse/SPARK-615785
-
-    if (task.interaction.state === 'connected') {
+    if (wrapupRequired) {
       this.setWrapupRequired(true);
-      return;
-    } else if (task.interaction.state !== 'connected' && this.store.wrapupRequired !== true) {
+    } else {
       this.handleTaskRemove(task.interactionId);
     }
   };
@@ -275,7 +273,7 @@ class StoreWrapper implements IStoreWrapper {
     }
 
     // Attach event listeners to the task
-    task.on(TASK_EVENTS.TASK_END, () => this.handleTaskEnd(task));
+    task.on(TASK_EVENTS.TASK_END, ({wrapupRequired}) => this.handleTaskEnd(task, wrapupRequired));
 
     // When we receive TASK_ASSIGNED the task was accepted by the agent and we need wrap up
     task.on(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
@@ -308,7 +306,7 @@ class StoreWrapper implements IStoreWrapper {
 
   handleTaskHydrate = (event) => {
     const task = event;
-    task.on(TASK_EVENTS.TASK_END, () => this.handleTaskEnd(task));
+    task.on(TASK_EVENTS.TASK_END, ({wrapupRequired}) => this.handleTaskEnd(task, wrapupRequired));
 
     // When we receive TASK_ASSIGNED the task was accepted by the agent and we need wrap up
     task.on(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
@@ -354,6 +352,18 @@ class StoreWrapper implements IStoreWrapper {
       this.onTaskRejected(reason || 'No reason provided');
     }
     this.handleTaskRemove(taskId);
+  };
+
+  getBuddyAgents = async (): Promise<Array<BuddyDetails>> => {
+    try {
+      const response = await this.store.cc.getBuddyAgents({
+        mediaType: 'telephony',
+        state: 'Available',
+      });
+      return response.data.agentList;
+    } catch (error) {
+      return Promise.reject(error);
+    }
   };
 
   cleanUpStore = () => {

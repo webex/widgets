@@ -1083,6 +1083,100 @@ describe('useCallControl', () => {
     // Ensure no event handler is set
     expect(taskMock.on).not.toHaveBeenCalled();
   });
+
+  it('should load buddy agents successfully', async () => {
+    const dummyAgents = [
+      {id: 'a1', name: 'Agent1'},
+      {id: 'a2', name: 'Agent2'},
+    ];
+    const getBuddyAgentsSpy = jest.spyOn(store, 'getBuddyAgents').mockResolvedValue(dummyAgents);
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        deviceType: 'BROWSER',
+      })
+    );
+    await act(async () => {
+      await result.current.loadBuddyAgents();
+    });
+    expect(result.current.buddyAgents).toEqual(dummyAgents);
+    getBuddyAgentsSpy.mockRestore();
+  });
+
+  it('should call transferCall successfully', async () => {
+    const transferSpy = jest.fn().mockResolvedValue('Transferred');
+    const currentTaskSuccess = {...mockCurrentTask, transfer: transferSpy};
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: currentTaskSuccess,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        deviceType: 'BROWSER',
+      })
+    );
+    await act(async () => {
+      await result.current.transferCall('test_id', 'agent');
+    });
+    expect(transferSpy).toHaveBeenCalledWith({
+      to: 'test_id',
+      destinationType: 'agent',
+    });
+  });
+
+  it('should handle rejection when loading buddy agents', async () => {
+    const getBuddyAgentsSpy = jest
+      .spyOn(store, 'getBuddyAgents')
+      .mockRejectedValue(new Error('Buddy agents loading failed'));
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        deviceType: 'BROWSER',
+      })
+    );
+    await act(async () => {
+      await result.current.loadBuddyAgents();
+    });
+    expect(result.current.buddyAgents).toEqual([]);
+    expect(mockLogger.error).toHaveBeenCalledWith('Error loading buddy agents: Error: Buddy agents loading failed', {
+      module: 'helper.ts',
+      method: 'loadBuddyAgents',
+    });
+    getBuddyAgentsSpy.mockRestore();
+  });
+
+  it('should handle rejection when transferring call', async () => {
+    const transferError = new Error('Transfer failed');
+    const transferSpy = jest.fn().mockRejectedValue(transferError);
+    const currentTaskFailure = {...mockCurrentTask, transfer: transferSpy};
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: currentTaskFailure,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        deviceType: 'BROWSER',
+      })
+    );
+    await act(async () => {
+      await result.current.transferCall('test_transfer', 'agent');
+    });
+    expect(transferSpy).toHaveBeenCalledWith({to: 'test_transfer', destinationType: 'agent'});
+    expect(mockLogger.error).toHaveBeenCalledWith('Error transferring call: Error: Transfer failed', {
+      module: 'widget-cc-task#helper.ts',
+      method: 'useCallControl#transferCall',
+    });
+  });
 });
 
 describe('useOutdialCall', () => {

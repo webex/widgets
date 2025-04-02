@@ -2,7 +2,7 @@ import {useEffect, useCallback, useRef, useState} from 'react';
 import {ITask} from '@webex/plugin-cc';
 import {useCallControlProps, UseTaskListProps, UseTaskProps} from './task.types';
 import {useOutdialCallProps} from '@webex/cc-components';
-import store, {TASK_EVENTS} from '@webex/cc-store';
+import store, {TASK_EVENTS, BuddyDetails, DestinationType} from '@webex/cc-store';
 
 // Hook for managing the task list
 export const useTaskList = (props: UseTaskListProps) => {
@@ -129,6 +129,17 @@ export const useCallControl = (props: useCallControlProps) => {
   const isBrowser = deviceType === 'BROWSER';
   const [isHeld, setIsHeld] = useState<boolean | undefined>(undefined);
   const [isRecording, setIsRecording] = useState(true);
+  const [buddyAgents, setBuddyAgents] = useState<BuddyDetails[]>([]);
+
+  const loadBuddyAgents = useCallback(async () => {
+    try {
+      const agents = await store.getBuddyAgents();
+      setBuddyAgents(agents);
+    } catch (error) {
+      logger.error(`Error loading buddy agents: ${error}`, {module: 'helper.ts', method: 'loadBuddyAgents'});
+      setBuddyAgents([]);
+    }
+  }, [logger]);
 
   const holdCallback = () => {
     setIsHeld(true);
@@ -258,6 +269,22 @@ export const useCallControl = (props: useCallControlProps) => {
     });
   };
 
+  const transferCall = async (transferDestination: string, destinationType: DestinationType) => {
+    const transferPayload = {
+      to: transferDestination,
+      destinationType: destinationType,
+    };
+
+    try {
+      await currentTask.transfer(transferPayload);
+    } catch (error) {
+      logError(`Error transferring call: ${error}`, 'transferCall');
+    }
+  };
+
+  // New consult callback method (empty for now)
+  const consultCall = async () => {};
+
   return {
     currentTask,
     audioRef,
@@ -269,6 +296,10 @@ export const useCallControl = (props: useCallControlProps) => {
     setIsHeld,
     isRecording,
     setIsRecording,
+    buddyAgents,
+    loadBuddyAgents,
+    transferCall,
+    consultCall,
   };
 };
 

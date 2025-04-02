@@ -1,8 +1,8 @@
 import React from 'react';
 import {render, screen, cleanup} from '@testing-library/react';
 import '@testing-library/jest-dom';
-import TaskListPresentational from '../../src/TaskList/task-list.presentational';
-import {TaskListPresentationalProps} from '../../src/task.types';
+import TaskListComponent from '../../../../src/components/task/TaskList/task-list';
+import {TaskListComponentProps} from '../../../../src/components/task/task.types';
 
 jest.mock('@momentum-ui/react-collaboration', () => ({
   ButtonPill: () => <div data-testid="ButtonPill" />,
@@ -19,7 +19,7 @@ describe('TaskListPresentational Component', () => {
   afterEach(cleanup);
 
   it('renders a list of tasks when taskList is not empty', () => {
-    const props: TaskListPresentationalProps = {
+    const props: TaskListComponentProps = {
       taskList: [
         {
           id: '1',
@@ -48,7 +48,7 @@ describe('TaskListPresentational Component', () => {
       ],
     };
 
-    render(<TaskListPresentational {...props} />);
+    render(<TaskListComponent {...props} />);
     expect(screen.getAllByTestId('ListItemBase')).toHaveLength(2);
   });
 });

@@ -1,6 +1,6 @@
 import React from 'react';
 import {render, screen, fireEvent} from '@testing-library/react';
-import StationLoginPresentational from '../../src/station-login/station-login.presentational';
+import StationLoginComponent from '../../../src/components/StationLogin/station-login';
 import '@testing-library/jest-dom';
 
 jest.mock('@momentum-ui/react-collaboration', () => ({
@@ -15,7 +15,7 @@ jest.mock('@momentum-design/components/dist/react', () => ({
   Icon: () => <div data-testid="Icon" />,
 }));
 
-describe('StationLoginPresentational', () => {
+describe('StationLoginComponent', () => {
   const props = {
     name: 'StationLogin',
     login: jest.fn(),
@@ -51,7 +51,7 @@ describe('StationLoginPresentational', () => {
       handleContinue: handleContinueMock,
       modalRef,
     };
-    render(<StationLoginPresentational {...propsWithAlert} />);
+    render(<StationLoginComponent {...propsWithAlert} />);
     const continueButton = screen.getByTestId('ContinueButton');
     fireEvent.click(continueButton);
     expect(handleContinueMock).toHaveBeenCalled();
