@@ -2,16 +2,9 @@ import React from 'react';
 import {ListItemBase, ListItemBaseSection, AvatarNext, Text, ButtonCircle} from '@momentum-ui/react-collaboration';
 import {Icon} from '@momentum-design/components/dist/react';
 import classnames from 'classnames';
+import {ConsultTransferListComponentProps} from '../../task.types';
 
-export interface CallControlListItemComponentProps {
-  title: string;
-  subtitle?: string;
-  buttonIcon: string;
-  onButtonPress: () => void;
-  className?: string;
-}
-
-const CallControlListItemComponent: React.FC<CallControlListItemComponentProps> = (props) => {
+const ConsultTransferListComponent: React.FC<ConsultTransferListComponentProps> = (props) => {
   const {title, subtitle, buttonIcon, onButtonPress, className} = props;
   const initials = title
     .split(' ')
@@ -56,4 +49,4 @@ const CallControlListItemComponent: React.FC<CallControlListItemComponentProps> 
   );
 };
 
-export default CallControlListItemComponent;
+export default ConsultTransferListComponent;

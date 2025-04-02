@@ -44,15 +44,15 @@ jest.mock('@webex/cc-store', () => ({
   },
 }));
 
-jest.mock('../../../../src/components/task/CallControl/CallControlCustom/call-control-popover', () => {
+jest.mock('../../../../src/components/task/CallControl/CallControlCustom/consult-transfer-popover', () => {
   const MockPopover = (props) => (
-    <div data-testid="CallControlPopover">
+    <div data-testid="ConsultTransferPopover">
       <button data-testid="AgentSelectButton" onClick={() => props.onAgentSelect('agent1')}>
         Select Agent
       </button>
     </div>
   );
-  MockPopover.displayName = 'CallControlPopoverPresentational';
+  MockPopover.displayName = 'ConsultTransferPopoverPresentational';
   return MockPopover;
 });
 

@@ -5,7 +5,7 @@ import './call-control.styles.scss';
 import {PopoverNext, SelectNext, TooltipNext, Text, ButtonCircle, ButtonPill} from '@momentum-ui/react-collaboration';
 import {Item} from '@react-stately/collections';
 import {Icon} from '@momentum-design/components/dist/react';
-import CallControlPopoverComponent from './CallControlCustom/call-control-popover';
+import ConsultTransferPopoverComponent from './CallControlCustom/consult-transfer-popover';
 import CallControlConsultComponent from './CallControlCustom/call-control-consult';
 
 function CallControlComponent(props: CallControlComponentProps) {
@@ -160,9 +160,10 @@ function CallControlComponent(props: CallControlComponentProps) {
                           <ButtonCircle
                             className={button.className}
                             aria-label={button.tooltip}
-                            disabled={consultInitiated || button.disabled}
+                            disabled={button.disabled}
                             data-testid="ButtonCircle"
                             onPress={() => {
+                              // If popover is already visible, we close it
                               if (showAgentMenu && agentMenuType === button.menuType) {
                                 setShowAgentMenu(false);
                                 setAgentMenuType(null);
@@ -188,7 +189,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                     }
                   >
                     {showAgentMenu && agentMenuType === button.menuType ? (
-                      <CallControlPopoverComponent
+                      <ConsultTransferPopoverComponent
                         heading={button.menuType}
                         buttonIcon={button.icon}
                         buddyAgents={buddyAgents}
@@ -198,6 +199,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                             consultCall(agentId, 'agent');
                             setConsultAgentName(agentName);
                           } else {
+                            // Adding agent for now by default, will update once we have queues
                             transferCall(agentId, 'agent');
                           }
                           setAgentMenuType(null);

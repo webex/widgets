@@ -1,15 +1,9 @@
 import React, {useState} from 'react';
 import {Text, TabListNext, TabNext, ListNext} from '@momentum-ui/react-collaboration';
-import CallControlListItemComponent from './call-control-list-item';
+import ConsultTransferListComponent from './consult-transfer-list-item';
+import {ConsultTransferPopoverComponentProps} from '../../task.types';
 
-export interface CallControlPopoverComponentProps {
-  heading: string;
-  buttonIcon: string;
-  buddyAgents: Array<{agentId: string; agentName: string; dn: string}>;
-  onAgentSelect: (agentId: string, agentName: string) => void;
-}
-
-const CallControlPopoverComponent: React.FC<CallControlPopoverComponentProps> = ({
+const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentProps> = ({
   heading,
   buttonIcon,
   buddyAgents,
@@ -41,7 +35,7 @@ const CallControlPopoverComponent: React.FC<CallControlPopoverComponentProps> = 
             onMouseDown={(e) => e.stopPropagation()}
             style={{cursor: 'pointer', pointerEvents: 'auto'}}
           >
-            <CallControlListItemComponent
+            <ConsultTransferListComponent
               title={agent.agentName}
               buttonIcon={buttonIcon}
               onButtonPress={() => onAgentSelect(agent.agentId, agent.agentName)}
@@ -58,4 +52,4 @@ const CallControlPopoverComponent: React.FC<CallControlPopoverComponentProps> = 
   );
 };
 
-export default CallControlPopoverComponent;
+export default ConsultTransferPopoverComponent;

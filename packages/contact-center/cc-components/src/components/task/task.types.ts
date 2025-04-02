@@ -276,3 +276,24 @@ export interface OutdialCallProps {
 }
 
 export type OutdialCallComponentProps = Pick<OutdialCallProps, 'startOutdial'>;
+
+/**
+ * Interface representing the properties for CallControlListItem component.
+ */
+export interface ConsultTransferListComponentProps {
+  title: string;
+  subtitle?: string;
+  buttonIcon: string;
+  onButtonPress: () => void;
+  className?: string;
+}
+
+/**
+ * Interface representing the properties for ConsultTransferPopover component.
+ */
+export interface ConsultTransferPopoverComponentProps {
+  heading: string;
+  buttonIcon: string;
+  buddyAgents: Array<{agentId: string; agentName: string; dn: string}>;
+  onAgentSelect: (agentId: string, agentName: string) => void;
+}
