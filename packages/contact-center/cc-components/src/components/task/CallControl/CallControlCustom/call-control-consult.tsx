@@ -46,10 +46,10 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
           className="consult-task-details"
           style={{display: 'flex', flexDirection: 'column', marginLeft: '8px', gap: '0.25rem'}}
         >
-          <Text tagName="p" type="body-large-bold" style={{margin: 0, lineHeight: 1}}>
+          <Text tagName="p" type="body-large-bold">
             {agentName}
           </Text>
-          <Text tagName="p" type="body-secondary" className="consult-sub-text" style={{lineHeight: 1}}>
+          <Text tagName="p" type="body-secondary" className="consult-sub-text">
             {consultCompleted ? 'Consult' : 'Consult requested'}&nbsp;&bull;&nbsp;
             <TaskTimer startTimeStamp={startTimeStamp} />
           </Text>
