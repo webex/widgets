@@ -1,0 +1,299 @@
+.tooltip.md-modal-container-wrapper {
+  color: var(--mds-color-theme-inverted-text-primary-normal);
+  background-color: var(--mds-color-theme-inverted-background-normal) !important;
+}
+
+.tooltip .md-modal-container-arrow-wrapper .md-modal-arrow-svg path {
+  fill: var(--mds-color-theme-inverted-background-normal) !important;
+}
+
+.call-control-container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+
+
+  .md-select-dropdown-input {
+    flex-grow: 1;
+    display: flex; // Ensure it participates in flex layout
+    border: 0.0625rem; // 1px to rem
+    align-self: flex-start; // Align similar to .wrapup-header
+  }
+
+}
+
+.button-group {
+  display: flex;
+  gap: 0.5rem;  /* Reduced gap between buttons/tooltips */
+  margin-top: 1rem;
+}
+
+.wrapup-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; /* Reduced gap between select and button */
+  margin-top: 1rem;
+}
+
+.wrapup-name {
+  color: var(--mds-color-theme-text-primary-normal);
+}
+
+.wrapup-select {
+  flex-grow: 1;
+  padding: 0.5rem; // 8px to rem
+  margin-top: 0.5rem; // 8px to rem
+  margin-bottom: 0.75rem; // 12px to rem
+  border: 0.0625rem solid #ccc; // 1px to rem
+  border-radius: 0.25rem; // 4px to rem
+  align-self: flex-start; // Align similar to .wrapup-header
+}
+
+.wrapup-select-arrow-icon {
+  position: absolute;
+  right: 1.5rem; /* Adjusted to leave space for the arrow icon */
+  top: 55%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.submit-wrapup-button {
+  align-self: flex-end;
+}
+
+.wrapup-header {
+  margin-bottom: 0.7rem;
+  align-self: flex-start;
+}
+
+.md-select-wrapper {
+  display: flex;
+  align-items: flex-start; // Align contents to the left
+  flex-direction: column; // Ensure vertical alignment
+  border: 0;
+}
+
+[id*='tippy'] {
+  border: 0.0625rem solid var(--mds-color-theme-outline-input-normal); // 1px to rem
+  background-color: var(--mds-color-theme-background-glass-overlay-normal);
+  border-radius: 0.50rem; // 4px to rem
+}
+
+.md-button-circle-wrapper.call-control-button {
+  background-color: var(--mds-color-theme-button-secondary-normal);
+  border: 1px solid var(--mds-color-theme-outline-button-normal);
+  &:hover,
+  &.hover {
+    background-color: var(--mds-color-theme-button-secondary-hover);
+  }
+}
+
+.md-button-circle-wrapper.call-control-button-cancel {
+  background-color: var(--mds-color-theme-button-cancel-normal);
+  border: 0.0625rem solid var(--mds-color-theme-background-secondary-normal);
+  &:hover,
+  &.hover {
+    background-color: var(--mds-color-theme-button-cancel-hover);
+  }
+}
+.call-control-button-icon {
+  --mdc-icon-fill-color: var(--mds--color-theme-button-secondary-normal);
+}
+
+
+.wrapup-button {
+  display: inline-flex;
+  justify-content: center;
+  width: 8rem;
+  background-color: var(--mds-color-theme-button-secondary-normal);
+  border: 0.0625rem solid var(--mds-color-theme-outline-button-normal);
+  color: var(--mds-color-theme-text-primary-normal);
+  &:hover,
+  &.hover {
+    background-color: var(--mds-color-theme-button-secondary-normal);
+    color: var(--mds-color-theme-text-primary-normal);
+  }
+}
+
+.call-control-container {
+  position: relative; /* Ensure the container is the positioning context */
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  padding: 1rem;
+  background-color: var(--mds-color-theme-background-primary-normal);
+  border-radius: 0.5rem;
+  box-shadow: var(--mds-shadow-2);
+  gap: 1rem;
+}
+
+.caller-info {
+  display: flex;
+  align-items: flex-start; /* Align items to the top */
+  gap: 0.5rem; /* Space between the call icon and customer info */
+}
+
+.call-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f5f5f5; /* Light gray background for the icon */
+  border-radius: 50%; /* Make the icon circular */
+  margin-top: -0.25rem; /* Move the icon slightly upward */
+}
+
+.customer-info {
+  display: flex;
+  flex-direction: column; /* Stack Customer ID and Call Timer vertically */
+}
+
+.customer-id {
+  font-size: 1rem;
+  font-weight: bold;
+  color: var(--mds-color-theme-text-primary-normal);
+}
+
+.call-details {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* Space between the timer, dot, and on-hold chip */
+}
+
+.call-timer {
+  color: #6B6B6B; /* Gray text color for the timer */
+  font-size: 0.875rem; /* Match font size with the chip */
+}
+
+.dot {
+  color: #6B6B6B; /* Match the dot color with the timer */
+  font-size: 0.875rem; /* Same size as the timer */
+  display: none; /* Initially hidden */
+}
+
+.cad-variables {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+
+  .queue,
+  .phone-number,
+  .rona {
+    font-size: 1rem;
+    color: var(--mds-color-theme-text-primary-normal);
+
+    strong {
+      font-weight: bold; /* Make the label bold */
+    }
+
+    span {
+      font-weight: 250; /* Make the text after the label lighter */
+    }
+  }
+}
+
+.md-button-circle-wrapper.call-control-button {
+  width: 2rem !important; // 32px
+  height: 2rem !important; // 32px
+  min-width: 2rem !important;
+  min-height: 2rem !important;
+  padding: 0.375rem !important; // 6px
+  background-color: var(--mds-color-theme-button-secondary-normal);
+  border: 1px solid var(--mds-color-theme-outline-button-normal);
+
+  &:hover,
+  &.hover {
+    background-color: var(--mds-color-theme-button-secondary-hover);
+  }
+
+  .call-control-button-icon {
+    --mdc-icon-size: 16px; // Reduce icon size if needed
+    margin: 0; // Remove any default margins
+    width: 1rem; // 16px
+    height: 1rem; // 16px
+  }
+}
+
+.md-button-circle-wrapper.call-control-button-cancel {
+  width: 2rem;
+  height: 2rem;
+  min-width: 2rem;
+  min-height: 2rem;
+  padding: 0.5rem;
+  background-color: var(--mds-color-theme-button-cancel-normal);
+  border: none;
+  border-radius: 50%; /* Make the button circular */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+
+  &.hover {
+    background-color: var(--mds-color-theme-button-cancel-hover);
+  }
+
+  .call-control-button-icon {
+    color: var(--mds-color-theme-text-inverted-primary-normal);
+    font-size: 1.5rem; /* Adjust icon size */
+  }
+}
+
+.onhold-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem; /* Space between the icon and text */
+  padding: 0.2rem 0.6rem; /* Adjust padding for the chip */
+  border-radius: 1rem; /* Fully rounded edges */
+  background-color: #FFE9B3; /* Light yellow background */
+  color: #8A5A00; /* Brown text color */
+  font-size: 0.875rem; /* Slightly smaller font size */
+  font-weight: 500; /* Medium font weight */
+
+  .md-icon {
+    width: 1rem; /* Smaller icon size */
+    height: 1rem;
+    color: #8A5A00; /* Match the icon color with the text */
+  }
+}
+
+.recording-indicator {
+  position: absolute; /* Position it relative to the parent container */
+  top: 0.5rem; /* Adjust the distance from the top */
+  right: 0.5rem; /* Adjust the distance from the right */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem; /* Set a smaller width */
+  height: 1.5rem; /* Set a smaller height */
+  border-radius: 50%; /* Make it circular */
+  background-color: var(--mds-color-theme-background-primary-normal); /* Background color */
+  box-shadow: var(--mds-shadow-1); /* Add a subtle shadow */
+}
+
+.recording-icon {
+  width: 1.3rem; /* Adjust icon size */
+  height: 1.3rem;
+}
+
+.pulse {
+  animation: pulse 2s infinite; /* Pulsing animation for recording */
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
