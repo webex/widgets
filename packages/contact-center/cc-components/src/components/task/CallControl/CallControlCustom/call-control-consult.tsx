@@ -40,13 +40,10 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
 
   return (
     <div className="call-control-consult">
-      <div className="consult-task-header" style={{display: 'flex', alignItems: 'center', marginBottom: '0.5rem'}}>
+      <div style={{display: 'flex', alignContent: 'center', gap: '0.5rem'}}>
         <Avatar iconName="handset-filled" className="task-avatar" size={32} />
-        <div
-          className="consult-task-details"
-          style={{display: 'flex', flexDirection: 'column', marginLeft: '8px', gap: '0.25rem'}}
-        >
-          <Text tagName="p" type="body-large-bold">
+        <div>
+          <Text tagName="p" type="body-large-bold" style={{lineHeight: 0, marginTop: '-8px'}}>
             {agentName}
           </Text>
           <Text tagName="p" type="body-secondary" className="consult-sub-text">
@@ -55,6 +52,7 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
           </Text>
         </div>
       </div>
+
       <div className="consult-buttons" style={{display: 'flex', gap: '0.5rem', justifyContent: 'flex-start'}}>
         {buttons.map(
           (button) =>
