@@ -1,7 +1,7 @@
 import r2wc from '@r2wc/react-to-web-component';
 import UserStateComponent from './components/UserState/user-state';
 import StationLoginComponent from './components/StationLogin/station-login';
-import CallControlComponent from './components/task/CallControl/call-control';
+import CallControlComponentNew from './components/task/CallControl/call-control';
 import IncomingTaskComponent from './components/task/IncomingTask/incoming-task';
 import TaskListComponent from './components/task/TaskList/task-list';
 import OutdialCallComponent from './components/task/OutdialCall/outdial-call';
@@ -47,7 +47,7 @@ if (!customElements.get('component-cc-station-login')) {
   customElements.define('component-cc-station-login', WebStationLogin);
 }
 
-const WebCallControl = r2wc(CallControlComponent, {
+const WebCallControl = r2wc(CallControlComponentNew, {
   props: {
     currentTask: 'json',
     audioRef: 'json',
