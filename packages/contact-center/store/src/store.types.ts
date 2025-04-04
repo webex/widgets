@@ -51,6 +51,7 @@ interface IStore {
   consultCompleted: boolean;
   consultInitiated: boolean;
   consultAccepted: boolean;
+  consultStartTimeStamp?: number;
   init(params: InitParams, callback: (ccSDK: IContactCenter) => void): Promise<void>;
   registerCC(webex?: WithWebex['webex']): Promise<void>;
 }
@@ -73,6 +74,7 @@ interface IStoreWrapper extends IStore {
   setConsultCompleted(value: boolean): void;
   setConsultInitiated(value: boolean): void;
   setConsultAccepted(value: boolean): void;
+  setConsultStartTimeStamp(timestamp: number): void;
 }
 
 interface IWrapupCode {

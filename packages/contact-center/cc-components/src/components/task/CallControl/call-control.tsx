@@ -38,6 +38,7 @@ function CallControlComponent(props: CallControlComponentProps) {
     consultInitiated,
     consultCompleted,
     consultAccepted,
+    consultStartTimeStamp,
   } = props;
 
   useEffect(() => {
@@ -304,9 +305,9 @@ function CallControlComponent(props: CallControlComponentProps) {
           <div className={`call-control-consult-container ${consultAccepted ? 'no-border' : ''}`}>
             <CallControlConsultComponent
               agentName={consultAgentName}
-              startTimeStamp={startTimeStamp}
+              startTimeStamp={consultStartTimeStamp || startTimeStamp}
               endConsultCall={endConsultCall}
-              onTransfer={() => consultTransfer(consultAgentId, 'agent')}
+              onTransfer={() => consultTransfer(consultAgentId || currentTask.data.destAgentId, 'agent')}
               consultCompleted={consultCompleted}
               showTransfer={!consultAccepted}
             />

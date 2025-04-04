@@ -107,6 +107,10 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.consultAccepted;
   }
 
+  get consultStartTimeStamp() {
+    return this.store.consultStartTimeStamp;
+  }
+
   setCurrentTheme = (theme: string): void => {
     this.store.currentTheme = theme;
   };
@@ -174,6 +178,10 @@ class StoreWrapper implements IStoreWrapper {
 
   setConsultAccepted = (value: boolean): void => {
     this.store.consultAccepted = value;
+  };
+
+  setConsultStartTimeStamp = (timestamp: number): void => {
+    this.store.consultStartTimeStamp = timestamp;
   };
 
   setState = (state: ICustomState | IdleCode): void => {
@@ -249,6 +257,9 @@ class StoreWrapper implements IStoreWrapper {
     runInAction(() => {
       this.setTaskList(updateTaskList);
       this.setWrapupRequired(false);
+      this.setConsultAccepted(false);
+      this.setConsultInitiated(false);
+      this.setConsultCompleted(false);
 
       // Remove the task from currentTask or incomingTask if it is the same task
       if (this.store.currentTask?.data.interactionId === taskId) {
@@ -304,11 +315,13 @@ class StoreWrapper implements IStoreWrapper {
   // Case to handle multi session
   handleConsultCreated = () => {
     this.setConsultInitiated(true);
+    this.setConsultStartTimeStamp(Date.now());
   };
 
   handleConsulting = (event) => {
     this.setConsultCompleted(true);
     this.setCurrentTask(event);
+    this.setConsultStartTimeStamp(Date.now());
   };
 
   handleConsultEnd = (event) => {
@@ -319,6 +332,7 @@ class StoreWrapper implements IStoreWrapper {
       this.handleTaskRemove(task.data.interactionId);
     }
     this.setConsultCompleted(false);
+    this.setConsultStartTimeStamp(null);
   };
 
   handleConsultAccepted = (event) => {
@@ -327,6 +341,7 @@ class StoreWrapper implements IStoreWrapper {
       this.setCurrentTask(task);
       this.setIncomingTask(null);
       this.setConsultAccepted(true);
+      this.setConsultStartTimeStamp(Date.now());
       this.setState({
         developerName: ENGAGED_LABEL,
         name: ENGAGED_USERNAME,
@@ -456,6 +471,7 @@ class StoreWrapper implements IStoreWrapper {
       this.setLastStateChangeTimestamp(undefined);
       this.setLastIdleCodeChangeTimestamp(undefined);
       this.setShowMultipleLoginAlert(false);
+      this.setConsultStartTimeStamp(undefined);
     });
   };
 

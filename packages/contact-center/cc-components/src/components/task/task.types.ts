@@ -242,6 +242,11 @@ export interface ControlProps {
    * Flag to determine if the consult call is accepted.
    */
   consultAccepted: boolean;
+
+  /**
+   * Timestamp when the consult call started.
+   */
+  consultStartTimeStamp?: number;
 }
 
 export type CallControlComponentProps = Pick<
@@ -267,6 +272,7 @@ export type CallControlComponentProps = Pick<
   | 'consultTransfer'
   | 'consultCompleted'
   | 'consultAccepted'
+  | 'consultStartTimeStamp'
 >;
 
 /**

@@ -16,6 +16,7 @@ const CallControl: React.FunctionComponent<CallControlProps> = observer(({onHold
     consultInitiated,
     consultCompleted,
     consultAccepted,
+    consultStartTimeStamp,
   } = store;
   const result = {
     ...useCallControl({currentTask, deviceType, onHoldResume, onEnd, onWrapUp, logger}),
@@ -24,6 +25,7 @@ const CallControl: React.FunctionComponent<CallControlProps> = observer(({onHold
     consultInitiated,
     consultCompleted,
     consultAccepted,
+    consultStartTimeStamp,
   };
 
   return <CallControlComponent {...result} />;

@@ -35,6 +35,7 @@ class Store implements IStore {
   consultCompleted = false;
   consultInitiated = false;
   consultAccepted = false;
+  consultStartTimeStamp = undefined;
   lastStateChangeTimestamp?: number;
   lastIdleCodeChangeTimestamp?: number;
   showMultipleLoginAlert: boolean = false;
