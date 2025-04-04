@@ -1,16 +1,9 @@
 import React from 'react';
 import {ButtonCircle, TooltipNext, Text} from '@momentum-ui/react-collaboration';
 import {Avatar, Icon} from '@momentum-design/components/dist/react';
-import TaskTimer from '../../TaskTimer';
 
-export interface CallControlConsultComponentsProps {
-  agentName: string;
-  startTimeStamp: number;
-  onTransfer?: () => void;
-  endConsultCall: () => void;
-  consultCompleted: boolean;
-  showTransfer: boolean;
-}
+import TaskTimer from '../../TaskTimer';
+import {CallControlConsultComponentsProps} from '../../task.types';
 
 const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> = ({
   agentName,
@@ -20,12 +13,30 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
   consultCompleted,
   showTransfer,
 }) => {
+  const handleTransfer = () => {
+    try {
+      if (onTransfer) {
+        onTransfer();
+      }
+    } catch (error) {
+      console.error('Error transferring call:', error);
+    }
+  };
+
+  const handleEndConsult = () => {
+    try {
+      endConsultCall();
+    } catch (error) {
+      console.error('Error ending consult call:', error);
+    }
+  };
+
   const buttons = [
     {
       key: 'transfer',
       icon: 'next-bold',
       tooltip: 'Transfer Consult',
-      onClick: onTransfer,
+      onClick: handleTransfer,
       className: 'call-control-button',
       disabled: !consultCompleted,
     },
@@ -33,17 +44,17 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
       key: 'cancel',
       icon: 'headset-muted-bold',
       tooltip: 'End Consult',
-      onClick: endConsultCall,
+      onClick: handleEndConsult,
       className: 'call-control-consult-button-cancel',
     },
   ];
 
   return (
     <div className="call-control-consult">
-      <div style={{display: 'flex', alignContent: 'center', gap: '0.5rem'}}>
+      <div className="consult-header">
         <Avatar iconName="handset-filled" className="task-avatar" size={32} />
         <div>
-          <Text tagName="p" type="body-large-bold" style={{lineHeight: 0, marginTop: '-8px'}}>
+          <Text tagName="p" type="body-large-bold" className="consult-agent-name">
             {agentName}
           </Text>
           <Text tagName="p" type="body-secondary" className="consult-sub-text">
@@ -53,7 +64,7 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
         </div>
       </div>
 
-      <div className="consult-buttons" style={{display: 'flex', gap: '0.5rem', justifyContent: 'flex-start'}}>
+      <div className="consult-buttons consult-buttons-container">
         {buttons.map(
           (button) =>
             (button.key !== 'transfer' || (showTransfer && onTransfer)) && (

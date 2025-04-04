@@ -72,6 +72,20 @@ function CallControlComponent(props: CallControlComponentProps) {
     setSelectedWrapupId(value);
   };
 
+  const handleAgentSelect = (agentId: string, agentName: string) => {
+    if (agentMenuType === 'Consult') {
+      consultCall(agentId, 'agent');
+      setConsultAgentId(agentId);
+      setConsultAgentName(agentName);
+    } else {
+      transferCall(agentId, 'agent');
+    }
+    setShowAgentMenu(false);
+    setTimeout(() => {
+      setAgentMenuType(null);
+    }, 1000);
+  };
+
   const buttons = [
     {
       id: 'hold',
@@ -120,7 +134,6 @@ function CallControlComponent(props: CallControlComponentProps) {
     : buttons;
 
   const startTimeStamp = currentTask?.data?.interaction?.createdTimestamp;
-  const showTransfer = !consultAccepted;
 
   if (!currentTask) return null;
 
@@ -136,8 +149,10 @@ function CallControlComponent(props: CallControlComponentProps) {
                   <PopoverNext
                     key={index}
                     onHide={() => {
-                      setShowAgentMenu(false);
-                      setAgentMenuType(null);
+                      setTimeout(() => {
+                        setShowAgentMenu(false);
+                        setAgentMenuType(null);
+                      }, 500);
                     }}
                     color="primary"
                     delay={[0, 0]}
@@ -196,17 +211,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                         heading={button.menuType}
                         buttonIcon={button.icon}
                         buddyAgents={buddyAgents}
-                        onAgentSelect={(agentId, agentName) => {
-                          setShowAgentMenu(false);
-                          if (agentMenuType === 'Consult') {
-                            consultCall(agentId, 'agent');
-                            setConsultAgentId(agentId);
-                            setConsultAgentName(agentName);
-                          } else {
-                            transferCall(agentId, 'agent');
-                          }
-                          setAgentMenuType(null);
-                        }}
+                        onAgentSelect={handleAgentSelect}
                       />
                     ) : null}
                   </PopoverNext>
@@ -300,19 +305,10 @@ function CallControlComponent(props: CallControlComponentProps) {
             <CallControlConsultComponent
               agentName={consultAgentName}
               startTimeStamp={startTimeStamp}
-              endConsultCall={() => {
-                endConsultCall();
-              }}
-              onTransfer={() => {
-                consultTransfer(consultAgentId, 'agent');
-              }}
+              endConsultCall={endConsultCall}
+              onTransfer={() => consultTransfer(consultAgentId, 'agent')}
               consultCompleted={consultCompleted}
-              showTransfer={showTransfer}
-              {...(showTransfer && {
-                onTransfer: () => {
-                  consultTransfer(consultAgentId, 'agent');
-                },
-              })}
+              showTransfer={!consultAccepted}
             />
           </div>
         )}

@@ -100,6 +100,7 @@ enum TASK_EVENTS {
   CONTACT_RECORDING_PAUSED = 'ContactRecordingPaused',
   CONTACT_RECORDING_RESUMED = 'ContactRecordingResumed',
   AGENT_WRAPPEDUP = 'AgentWrappedUp',
+  AGENT_CONSULT_CREATED = 'AgentConsultCreated',
 } // TODO: remove this once cc sdk exports this enum
 
 // Events that are received on the contact center SDK
@@ -123,6 +124,9 @@ interface ICustomStateReset {
 
 type ICustomState = ICustomStateSet | ICustomStateReset;
 
+const ENGAGED_LABEL = 'ENGAGED';
+const ENGAGED_USERNAME = 'Engaged';
+
 export type {
   IContactCenter,
   ITask,
@@ -141,4 +145,4 @@ export type {
   BuddyDetails,
 };
 
-export {CC_EVENTS, TASK_EVENTS};
+export {CC_EVENTS, TASK_EVENTS, ENGAGED_LABEL, ENGAGED_USERNAME};

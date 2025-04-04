@@ -279,6 +279,7 @@ export const useCallControl = (props: useCallControlProps) => {
       await currentTask.transfer(transferPayload);
     } catch (error) {
       logError(`Error transferring call: ${error}`, 'transferCall');
+      throw error;
     }
   };
 
@@ -293,6 +294,7 @@ export const useCallControl = (props: useCallControlProps) => {
       store.setConsultInitiated(true);
     } catch (error) {
       logError(`Error consulting call: ${error}`, 'consultCall');
+      throw error;
     }
   };
 
@@ -306,6 +308,7 @@ export const useCallControl = (props: useCallControlProps) => {
       await currentTask.endConsult(consultEndPayload);
     } catch (error) {
       logError(`Error ending consult call: ${error}`, 'endConsultCall');
+      throw error;
     }
   };
 
@@ -319,6 +322,7 @@ export const useCallControl = (props: useCallControlProps) => {
       store.setConsultInitiated(true);
     } catch (error) {
       logError(`Error transferring consult call: ${error}`, 'consultTransfer');
+      throw error;
     }
   };
 

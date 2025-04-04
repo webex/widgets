@@ -104,8 +104,7 @@
 .md-button-circle-wrapper.call-control-consult-button-cancel {
   background-color: var(--mds-color-theme-button-secondary-normal);
   border: 0.0625rem solid var(--mds-color-theme-button-cancel-normal);
-  &:hover,
-  &.hover {
+  &:hover {
     background-color: var(--mds-color-theme-button-secondary-hover);
   }
 }
@@ -185,7 +184,7 @@
 
 .call-control-consult-container {
   margin-top: 1rem;
-  border-top: 1px solid #ccc;
+  border-top: 1px solid var(--mds-color-theme-background-secondary-normal);
   padding-top: 1rem;
 }
 
@@ -198,6 +197,23 @@
 // Add explicit margin for the consult subtext so it is only 4px from the main text
 .call-control-consult .consult-sub-text {
   margin-top: 0.25rem !important;
+}
+
+.consult-header {
+  display: flex;
+  align-content: center;
+  gap: 0.5rem;
+}
+
+.consult-agent-name {
+  line-height: 0;
+  margin-top: -8px;
+}
+
+.consult-buttons-container {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-start;
 }
 
 .task-avatar {

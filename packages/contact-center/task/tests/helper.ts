@@ -1168,9 +1168,8 @@ describe('useCallControl', () => {
         deviceType: 'BROWSER',
       })
     );
-    await act(async () => {
-      await result.current.transferCall('test_transfer', 'agent');
-    });
+
+    await expect(result.current.transferCall('test_transfer', 'agent')).rejects.toThrow(transferError);
     expect(transferSpy).toHaveBeenCalledWith({to: 'test_transfer', destinationType: 'agent'});
     expect(mockLogger.error).toHaveBeenCalledWith('Error transferring call: Error: Transfer failed', {
       module: 'widget-cc-task#helper.ts',
@@ -1180,6 +1179,7 @@ describe('useCallControl', () => {
 
   it('should call consultCall successfully', async () => {
     mockCurrentTask.consult = jest.fn().mockResolvedValue('Consulted');
+    const setConsultInitiatedSpy = jest.spyOn(store, 'setConsultInitiated');
     const {result} = renderHook(() =>
       useCallControl({
         currentTask: mockCurrentTask,
@@ -1194,6 +1194,30 @@ describe('useCallControl', () => {
       await result.current.consultCall('dest123', 'agent');
     });
     expect(mockCurrentTask.consult).toHaveBeenCalledWith({to: 'dest123', destinationType: 'agent'});
+    expect(setConsultInitiatedSpy).toHaveBeenCalledWith(true);
+    setConsultInitiatedSpy.mockRestore();
+  });
+
+  it('should handle errors when calling consultCall', async () => {
+    const consultError = new Error('Consult failed');
+    mockCurrentTask.consult = jest.fn().mockRejectedValue(consultError);
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        deviceType: 'BROWSER',
+      })
+    );
+
+    await expect(result.current.consultCall('dest123', 'agent')).rejects.toThrow(consultError);
+    expect(mockCurrentTask.consult).toHaveBeenCalledWith({to: 'dest123', destinationType: 'agent'});
+    expect(mockLogger.error).toHaveBeenCalledWith('Error consulting call: Error: Consult failed', {
+      module: 'widget-cc-task#helper.ts',
+      method: 'useCallControl#consultCall',
+    });
   });
 
   it('should call endConsultCall successfully', async () => {
@@ -1217,8 +1241,34 @@ describe('useCallControl', () => {
     });
   });
 
+  it('should handle errors when calling endConsultCall', async () => {
+    const endConsultError = new Error('End consult failed');
+    mockCurrentTask.endConsult = jest.fn().mockRejectedValue(endConsultError);
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        deviceType: 'BROWSER',
+      })
+    );
+
+    await expect(result.current.endConsultCall()).rejects.toThrow(endConsultError);
+    expect(mockCurrentTask.endConsult).toHaveBeenCalledWith({
+      isConsult: true,
+      taskId: mockCurrentTask.data.interactionId,
+    });
+    expect(mockLogger.error).toHaveBeenCalledWith('Error ending consult call: Error: End consult failed', {
+      module: 'widget-cc-task#helper.ts',
+      method: 'useCallControl#endConsultCall',
+    });
+  });
+
   it('should call consultTransfer successfully', async () => {
     mockCurrentTask.consultTransfer = jest.fn().mockResolvedValue('ConsultTransferred');
+    const setConsultInitiatedSpy = jest.spyOn(store, 'setConsultInitiated');
     const {result} = renderHook(() =>
       useCallControl({
         currentTask: mockCurrentTask,
@@ -1235,6 +1285,33 @@ describe('useCallControl', () => {
     expect(mockCurrentTask.consultTransfer).toHaveBeenCalledWith({
       to: 'dest456',
       destinationType: 'queue',
+    });
+    expect(setConsultInitiatedSpy).toHaveBeenCalledWith(true);
+    setConsultInitiatedSpy.mockRestore();
+  });
+
+  it('should handle errors when calling consultTransfer', async () => {
+    const transferError = new Error('Consult transfer failed');
+    mockCurrentTask.consultTransfer = jest.fn().mockRejectedValue(transferError);
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        deviceType: 'BROWSER',
+      })
+    );
+
+    await expect(result.current.consultTransfer('dest456', 'queue')).rejects.toThrow(transferError);
+    expect(mockCurrentTask.consultTransfer).toHaveBeenCalledWith({
+      to: 'dest456',
+      destinationType: 'queue',
+    });
+    expect(mockLogger.error).toHaveBeenCalledWith('Error transferring consult call: Error: Consult transfer failed', {
+      module: 'widget-cc-task#helper.ts',
+      method: 'useCallControl#consultTransfer',
     });
   });
 });

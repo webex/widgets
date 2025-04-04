@@ -11,6 +11,8 @@ import {
   IContactCenter,
   ITask,
   BuddyDetails,
+  ENGAGED_LABEL,
+  ENGAGED_USERNAME,
 } from './store.types';
 import Store from './store';
 import {runInAction} from 'mobx';
@@ -240,6 +242,7 @@ class StoreWrapper implements IStoreWrapper {
       taskToRemove.off(TASK_EVENTS.TASK_CONSULTING, this.handleConsulting);
       taskToRemove.off(TASK_EVENTS.TASK_CONSULT_END, this.handleConsultEnd);
       taskToRemove.off(TASK_EVENTS.TASK_CONSULT_ACCEPT, this.handleConsultAccepted);
+      taskToRemove.off(TASK_EVENTS.AGENT_CONSULT_CREATED, this.handleConsultCreated);
     }
     const updateTaskList = this.store.taskList.filter((task) => task.data.interactionId !== taskId);
 
@@ -286,8 +289,8 @@ class StoreWrapper implements IStoreWrapper {
       this.setCurrentTask(task);
       this.setIncomingTask(null);
       this.setState({
-        developerName: 'ENGAGED',
-        name: 'Engaged',
+        developerName: ENGAGED_LABEL,
+        name: ENGAGED_USERNAME,
       });
     });
   };
@@ -296,6 +299,11 @@ class StoreWrapper implements IStoreWrapper {
     const task = event;
     this.setWrapupRequired(false);
     this.handleTaskRemove(task.interactionId);
+  };
+
+  // Case to handle multi session
+  handleConsultCreated = () => {
+    this.setConsultInitiated(true);
   };
 
   handleConsulting = (event) => {
@@ -320,8 +328,8 @@ class StoreWrapper implements IStoreWrapper {
       this.setIncomingTask(null);
       this.setConsultAccepted(true);
       this.setState({
-        developerName: 'ENGAGED',
-        name: 'Engaged',
+        developerName: ENGAGED_LABEL,
+        name: ENGAGED_USERNAME,
       });
     });
   };
@@ -339,6 +347,7 @@ class StoreWrapper implements IStoreWrapper {
     // When we receive TASK_ASSIGNED the task was accepted by the agent and we need wrap up
     task.on(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
     task.on(TASK_EVENTS.TASK_CONSULT_ACCEPT, this.handleConsultAccepted);
+    task.on(TASK_EVENTS.AGENT_CONSULT_CREATED, this.handleConsultCreated);
 
     // When we receive TASK_REJECT sdk changes the agent status
     // When we receive TASK_REJECT that means the task was not accepted by the agent and we wont need wrap up
@@ -376,6 +385,7 @@ class StoreWrapper implements IStoreWrapper {
     // When we receive TASK_ASSIGNED the task was accepted by the agent and we need wrap up
     task.on(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
     task.on(TASK_EVENTS.TASK_CONSULT_ACCEPT, this.handleConsultAccepted);
+    task.on(TASK_EVENTS.AGENT_CONSULT_CREATED, this.handleConsultCreated);
 
     // When we receive TASK_REJECT sdk changes the agent status
     // When we receive TASK_REJECT that means the task was not accepted by the agent and we wont need wrap up
@@ -393,17 +403,12 @@ class StoreWrapper implements IStoreWrapper {
     this.setCurrentTask(task);
 
     this.setState({
-      developerName: 'ENGAGED',
-      name: 'Engaged',
+      developerName: ENGAGED_LABEL,
+      name: ENGAGED_USERNAME,
     });
 
     const {interaction, agentId} = task.data;
     const {state, isTerminated, participants} = interaction;
-
-    if (state === 'consulting') {
-      this.setConsultInitiated(true);
-      this.setConsultCompleted(true);
-    }
 
     // Update call control states
     if (isTerminated) {

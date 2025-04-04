@@ -311,3 +311,15 @@ export interface ConsultTransferPopoverComponentProps {
   buddyAgents: Array<{agentId: string; agentName: string; dn: string}>;
   onAgentSelect: (agentId: string, agentName: string) => void;
 }
+
+/**
+ * Interface representing the properties for CallControlConsultComponents component.
+ */
+export interface CallControlConsultComponentsProps {
+  agentName: string;
+  startTimeStamp: number;
+  onTransfer?: () => void;
+  endConsultCall: () => void;
+  consultCompleted: boolean;
+  showTransfer: boolean;
+}
