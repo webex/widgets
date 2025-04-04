@@ -13,6 +13,8 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
   consultCompleted,
   showTransfer,
 }) => {
+  const timerKey = `timer-${startTimeStamp}`;
+
   const handleTransfer = () => {
     try {
       if (onTransfer) {
@@ -59,7 +61,7 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
           </Text>
           <Text tagName="p" type="body-secondary" className="consult-sub-text">
             {consultCompleted ? 'Consult' : 'Consult requested'}&nbsp;&bull;&nbsp;
-            <TaskTimer startTimeStamp={startTimeStamp} />
+            <TaskTimer key={timerKey} startTimeStamp={startTimeStamp} />
           </Text>
         </div>
       </div>

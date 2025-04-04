@@ -134,8 +134,6 @@ function CallControlComponent(props: CallControlComponentProps) {
     ? buttons.filter((button) => !['hold', 'consult'].includes(button.id))
     : buttons;
 
-  const startTimeStamp = currentTask?.data?.interaction?.createdTimestamp;
-
   if (!currentTask) return null;
 
   return (
@@ -305,7 +303,7 @@ function CallControlComponent(props: CallControlComponentProps) {
           <div className={`call-control-consult-container ${consultAccepted ? 'no-border' : ''}`}>
             <CallControlConsultComponent
               agentName={consultAgentName}
-              startTimeStamp={consultStartTimeStamp || startTimeStamp}
+              startTimeStamp={consultStartTimeStamp}
               endConsultCall={endConsultCall}
               onTransfer={() => consultTransfer(consultAgentId || currentTask.data.destAgentId, 'agent')}
               consultCompleted={consultCompleted}
