@@ -1,10 +1,11 @@
 import React, {useEffect, useState} from 'react';
-
+import {useHoldTimer} from '../../../../../task/src/helper';
 import {CallControlComponentProps} from '../task.types';
 import './call-control.styles.scss';
 import {PopoverNext, TooltipNext, Text, ButtonCircle, ButtonPill, SelectNext} from '@momentum-ui/react-collaboration';
 import {Item} from '@react-stately/collections';
 import {Icon} from '@momentum-design/components/dist/react';
+import TaskTimer from '../TaskTimer/index';
 
 function CallControlComponentNew(props: CallControlComponentProps) {
   const [selectedWrapupReason, setSelectedWrapupReason] = useState<string | null>(null);
@@ -27,7 +28,8 @@ function CallControlComponentNew(props: CallControlComponentProps) {
 
   useEffect(() => {
     if (!currentTask || !currentTask.data || !currentTask.data.interaction) return;
-    console.log('current task is', currentTask.data.interaction);
+    console.log('currentTask.data.interaction is', currentTask.data.interaction);
+    console.log('current task is', currentTask);
     const {interaction, mediaResourceId} = currentTask.data;
     const {media, callProcessingDetails} = interaction;
     const isHold = media && media[mediaResourceId] && media[mediaResourceId].isHold;
@@ -57,35 +59,15 @@ function CallControlComponentNew(props: CallControlComponentProps) {
     setSelectedWrapupId(value);
   };
 
-  const [holdTime, setHoldTime] = useState<number>(0);
-  const [holdTimer, setHoldTimer] = useState<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    if (isHeld) {
-      const timer = setInterval(() => {
-        setHoldTime((prevTime) => prevTime + 1);
-      }, 1000);
-      setHoldTimer(timer);
-    } else {
-      if (holdTimer) {
-        clearInterval(holdTimer);
-        setHoldTimer(null);
-        setHoldTime(0);
-      }
-    }
-    return () => {
-      if (holdTimer) {
-        clearInterval(holdTimer);
-      }
-    };
-  }, [isHeld]);
-
   useEffect(() => {
     const dotElement = document.querySelector('.dot') as HTMLElement;
     if (dotElement) {
       dotElement.style.display = isHeld ? 'inline' : 'none';
     }
   }, [isHeld]);
+
+  // Use the Web Worker-based hold timer
+  const holdTime = useHoldTimer(isHeld);
 
   const formatTime = (time: number): string => {
     const minutes = Math.floor((time % 3600) / 60);
@@ -139,11 +121,11 @@ function CallControlComponentNew(props: CallControlComponentProps) {
           {/* Customer Info */}
           <div className="customer-info">
             <Text className="customer-id" type="body-large-bold" tagName={'small'}>
-              {currentTask?.data?.interaction?.callAssociatedDetails?.dn || '%Customer ID%'}
+              {currentTask?.data?.interaction?.callAssociatedDetails?.ani || 'No Caller ID'}
             </Text>
             <div className="call-details">
               <Text className="call-timer" type="body-secondary" tagName={'small'}>
-                Call - {formatTime(holdTime)}
+                Call - <TaskTimer startTimeStamp={currentTask?.data?.interaction?.startTime} />
               </Text>
               {isHeld && (
                 <>
