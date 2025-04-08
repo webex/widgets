@@ -7,9 +7,10 @@ import {Item} from '@react-stately/collections';
 import {Icon} from '@momentum-design/components/dist/react';
 import TaskTimer from '../TaskTimer/index';
 
-function CallControlComponentNew(props: CallControlComponentProps) {
+function CallControlCADComponent(props: CallControlComponentProps) {
   const [selectedWrapupReason, setSelectedWrapupReason] = useState<string | null>(null);
   const [selectedWrapupId, setSelectedWrapupId] = useState<string | null>(null);
+  const [isDotVisible, setIsDotVisible] = useState(false);
 
   const {
     currentTask,
@@ -58,10 +59,7 @@ function CallControlComponentNew(props: CallControlComponentProps) {
   };
 
   useEffect(() => {
-    const dotElement = document.querySelector('.dot') as HTMLElement;
-    if (dotElement) {
-      dotElement.style.display = isHeld ? 'inline' : 'none';
-    }
+    setIsDotVisible(isHeld);
   }, [isHeld]);
 
   // Use the Web Worker-based hold timer
@@ -103,12 +101,9 @@ function CallControlComponentNew(props: CallControlComponentProps) {
     <>
       <audio ref={audioRef} id="remote-audio" autoPlay></audio>
       <div className="call-control-container" data-testid="call-control-container">
-        {/* Complete Call Control UI */}
         {!wrapupRequired && (
           <div className="call-control-ui">
-            {/* Caller Info */}
             <div className="caller-info">
-              {/* Call Icon */}
               <div className="call-icon">
                 <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <circle cx="16" cy="16" r="16" fill="black" fillOpacity="0.07" />
@@ -119,7 +114,6 @@ function CallControlComponentNew(props: CallControlComponentProps) {
                 </svg>
               </div>
 
-              {/* Customer Info */}
               <div className="customer-info">
                 <Text className="customer-id" type="body-large-bold" tagName={'small'}>
                   {currentTask?.data?.interaction?.callAssociatedDetails?.ani || 'No Caller ID'}
@@ -128,6 +122,7 @@ function CallControlComponentNew(props: CallControlComponentProps) {
                   <Text className="call-timer" type="body-secondary" tagName={'small'}>
                     Call - <TaskTimer startTimeStamp={currentTask?.data?.interaction?.startTime} />
                   </Text>
+                  {isDotVisible && <span className="dot">•</span>}
                   {isHeld && (
                     <>
                       <span className="dot">•</span>
@@ -141,7 +136,6 @@ function CallControlComponentNew(props: CallControlComponentProps) {
               </div>
             </div>
 
-            {/* Call Control Buttons */}
             <div className="button-group">
               {buttons.map((button, index) => (
                 <TooltipNext
@@ -163,7 +157,6 @@ function CallControlComponentNew(props: CallControlComponentProps) {
               ))}
             </div>
 
-            {/* CAD Variables */}
             <div className="cad-variables">
               <Text className="queue" type="body-secondary" tagName={'small'}>
                 <strong>Queue:</strong>{' '}
@@ -179,7 +172,6 @@ function CallControlComponentNew(props: CallControlComponentProps) {
               </Text>
             </div>
 
-            {/* Adding Recording Indicator */}
             <div className="recording-indicator">
               {isRecording ? (
                 <svg
@@ -277,4 +269,4 @@ function CallControlComponentNew(props: CallControlComponentProps) {
   );
 }
 
-export default CallControlComponentNew;
+export default CallControlCADComponent;

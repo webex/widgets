@@ -1,7 +1,7 @@
 import UserStateComponent from './components/UserState/user-state';
 import StationLoginComponent from './components/StationLogin/station-login';
-// import CallControlComponent from './components/task/CallControl/call-control';
-import CallControlComponentNew from './components/task/CallControlNew/call-control';
+import CallControlComponent from './components/task/CallControl/call-control';
+import CallControlCADComponent from './components/task/CallControlNew/call-control';
 import IncomingTaskComponent from './components/task/IncomingTask/incoming-task';
 import TaskListComponent from './components/task/TaskList/task-list';
 import OutdialCallComponent from './components/task/OutdialCall/outdial-call';
@@ -9,8 +9,8 @@ import OutdialCallComponent from './components/task/OutdialCall/outdial-call';
 export {
   UserStateComponent,
   StationLoginComponent,
-  // CallControlComponent,
-  CallControlComponentNew,
+  CallControlComponent,
+  CallControlCADComponent,
   IncomingTaskComponent,
   TaskListComponent,
   OutdialCallComponent,
