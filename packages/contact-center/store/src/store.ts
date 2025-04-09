@@ -1,5 +1,5 @@
 import {makeAutoObservable, observable} from 'mobx';
-import Webex from 'webex';
+import Webex from 'webex/contact-center';
 import {
   IContactCenter,
   Profile,

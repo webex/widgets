@@ -1,5 +1,5 @@
 import {makeAutoObservable} from 'mobx';
-import Webex from 'webex';
+import Webex from 'webex/contact-center';
 import store from '../src/store'; // Adjust the import path as necessary
 
 let mockShouldCallback = true;
