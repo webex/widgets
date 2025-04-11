@@ -9,7 +9,7 @@ jest.mock('mobx', () => ({
   observable: {ref: jest.fn()},
 }));
 
-jest.mock('webex', () => ({
+jest.mock('webex/contact-center', () => ({
   init: jest.fn(() => ({
     once: jest.fn((event, callback) => {
       if (event === 'ready' && mockShouldCallback) {
