@@ -1,0 +1,104 @@
+@import '../CallControl/call-control.styles.scss';
+
+.cad-variables {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1.3rem;
+
+  .queue,
+  .phone-number,
+  .rona {
+    font-size: 1rem;
+    color: var(--mds-color-theme-text-primary-normal);
+
+    strong {
+      font-weight: bold;
+    }
+
+    span {
+      font-weight: 250;
+    }
+  }
+}
+
+/* On-hold chip styling */
+.onhold {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; 
+  padding: 0.2rem 0.6rem;
+  border-radius: 2rem;
+  background-color: var(--mds-color-theme-common-text-warning-hover);
+  font-size: 0.875rem; 
+  font-weight: 500;
+
+  .call-hold-filled-icon {
+    width: 1rem; 
+    height: 1rem;
+    color: var(--mds-color-theme-avatar-yellow) !important;
+  }
+
+  .onhold-chip-text {
+    color: var(--mds-color-theme-avatar-yellow) !important;
+  }
+}
+
+
+.recording-indicator {
+  position: absolute;
+  top: 0.5rem; 
+  right: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--mds-color-theme-button-cancel-normal);
+  z-index: 10;
+}
+
+.dot {
+  color: var(--mds-color-theme-inverted-outline-button-normal);
+  font-size: 0.875rem;
+  display: inline;
+  filter: brightness(0.1);
+}
+
+.caller-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.customer-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.call-details {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* Space between elements */
+}
+
+.call-status {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem; /* Space between dot and on-hold chip */
+  flex-wrap: nowrap;
+}
+
+.call-icon {
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--mds-color-theme-background-secondary-normal);
+  border-radius: 50%;
+  margin-top: -0.25rem;
+  flex-shrink: 0;
+}

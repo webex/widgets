@@ -6,7 +6,7 @@ import '@testing-library/jest-dom';
 
 jest.mock('@webex/cc-components', () => {
   return {
-    CallControlComponentNew: () => <div>CallControlComponentNew</div>,
+    CallControlComponent: () => <div>CallControlComponent</div>,
   };
 });
 

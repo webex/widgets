@@ -1,4 +1,4 @@
-import {useHoldTimer} from '../../../../src/components/task/CallControlNew/on-hold-timer';
+import {useHoldTimer} from '../../../../src/components/task/CallControlCAD/on-hold-timer';
 import {renderHook, act} from '@testing-library/react';
 
 describe('useHoldTimer', () => {

@@ -8,6 +8,7 @@ const ccUserState = document.createElement('widget-cc-user-state');
 const ccIncomingTask = document.createElement('widget-cc-incoming-task');
 const ccTaskList = document.createElement('widget-cc-task-list');
 const ccCallControl = document.createElement('widget-cc-call-control');
+const ccCallControlCAD = document.createElement('widget-cc-call-control-cad');
 const ccOutdial = document.createElement('widget-cc-outdial-call');
 
 const themeProviderElem = document.getElementById('theme-provider-elem');
@@ -17,6 +18,7 @@ const userStateCheckbox = document.getElementById('userStateCheckbox');
 const incomingTaskCheckbox = document.getElementById('incomingTaskCheckbox');
 const taskListCheckbox = document.getElementById('taskListCheckbox');
 const callControlCheckbox = document.getElementById('callControlCheckbox');
+const callControlCADCheckbox = document.getElementById('callControlCADCheckbox');
 const outdialCallCheckbox = document.getElementById('outdialCallCheckbox');
 
 let isMultiLoginEnabled = false;
@@ -81,6 +83,9 @@ function initWidgets() {
       ccCallControl.onHoldResume = onHoldResume;
       ccCallControl.onEnd = onEnd;
       ccCallControl.onWrapUp = onWrapUp;
+      ccCallControlCAD.onHoldResume = onHoldResume;
+      ccCallControlCAD.onEnd = onEnd;
+      ccCallControlCAD.onWrapUp = onWrapUp;
 
       if (stationLoginCheckbox.checked) {
         ccStationLogin.classList.remove('disabled');
@@ -125,7 +130,6 @@ function loginSuccess() {
   }
   if (callControlCheckbox.checked) {
     ccCallControl.classList.remove('disabled');
-
     const callControlContainer = document.createElement('div');
     callControlContainer.className = 'box';
     callControlContainer.innerHTML = `
@@ -143,6 +147,22 @@ function loginSuccess() {
     ccOutdial.classList.remove('disabled');
     widgetsContainer.appendChild(ccOutdial);
   }
+
+  if (callControlCADCheckbox.checked) {
+    ccCallControlCAD.classList.remove('disabled');
+    const callControlCADContainer = document.createElement('div');
+    callControlCADContainer.className = 'box';
+    callControlCADContainer.innerHTML = `
+      <section class="section-box">
+        <fieldset class="fieldset">
+          <legend class="legend-box">Call Control CAD</legend>
+        </fieldset>
+      </section>
+    `;
+
+    callControlCADContainer.querySelector('fieldset').appendChild(ccCallControlCAD);
+    widgetsContainer.appendChild(callControlCADContainer);
+  }
 }
 
 function logoutSuccess() {
@@ -151,6 +171,7 @@ function logoutSuccess() {
   ccIncomingTask.classList.add('disabled');
   ccTaskList.classList.add('disabled');
   ccCallControl.classList.add('disabled');
+  ccCallControlCAD.classList.add('disabled');
   ccOutdial.classList.add('disabled');
 }
 
