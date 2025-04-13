@@ -36,11 +36,11 @@
   .call-hold-filled-icon {
     width: 1rem; 
     height: 1rem;
-    color: var(--mds-color-theme-avatar-yellow) !important;
+    color: var(--mds-color-theme-avatar-yellow);
   }
 
   .onhold-chip-text {
-    color: var(--mds-color-theme-avatar-yellow) !important;
+    color: var(--mds-color-theme-avatar-yellow);
   }
 }
 
@@ -81,13 +81,13 @@
 .call-details {
   display: flex;
   align-items: center;
-  gap: 0.5rem; /* Space between elements */
+  gap: 0.5rem;
 }
 
 .call-status {
   display: flex;
   align-items: center;
-  gap: 0.25rem; /* Space between dot and on-hold chip */
+  gap: 0.25rem;
   flex-wrap: nowrap;
 }
 
