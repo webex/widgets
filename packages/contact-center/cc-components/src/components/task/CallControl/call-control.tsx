@@ -18,7 +18,6 @@ function CallControlComponent(props: CallControlComponentProps) {
 
   const {
     currentTask,
-    audioRef,
     toggleHold,
     toggleRecording,
     endCall,
@@ -39,6 +38,7 @@ function CallControlComponent(props: CallControlComponentProps) {
     consultCompleted,
     consultAccepted,
     consultStartTimeStamp,
+    callControlAudio,
   } = props;
 
   useEffect(() => {
@@ -138,7 +138,15 @@ function CallControlComponent(props: CallControlComponentProps) {
 
   return (
     <>
-      <audio ref={audioRef} id="remote-audio" autoPlay></audio>
+      <audio
+        ref={(audioElement) => {
+          if (audioElement && callControlAudio) {
+            audioElement.srcObject = callControlAudio;
+          }
+        }}
+        id="remote-audio"
+        autoPlay
+      ></audio>
       <div className="call-control-container" data-testid="call-control-container">
         {!consultAccepted && !wrapupRequired && (
           <div className="button-group">

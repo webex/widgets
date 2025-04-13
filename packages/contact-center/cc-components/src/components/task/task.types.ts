@@ -102,10 +102,6 @@ export type TaskListComponentProps = Pick<
  */
 export interface ControlProps {
   /**
-   * Audio reference
-   */
-  audioRef: React.RefObject<HTMLAudioElement>;
-  /**
    * The current task being handled.
    */
   currentTask: ITask;
@@ -247,12 +243,17 @@ export interface ControlProps {
    * Timestamp when the consult call started.
    */
   consultStartTimeStamp?: number;
+
+  /**
+   * Audio stream for the call control.
+   * This is used to play audio for the call control.
+   */
+  callControlAudio: MediaStream | null;
 }
 
 export type CallControlComponentProps = Pick<
   ControlProps,
   | 'currentTask'
-  | 'audioRef'
   | 'wrapupCodes'
   | 'wrapupRequired'
   | 'toggleHold'
@@ -273,6 +274,7 @@ export type CallControlComponentProps = Pick<
   | 'consultCompleted'
   | 'consultAccepted'
   | 'consultStartTimeStamp'
+  | 'callControlAudio'
 >;
 
 /**

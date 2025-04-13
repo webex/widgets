@@ -1,4 +1,4 @@
-import {useEffect, useCallback, useRef, useState} from 'react';
+import {useEffect, useCallback, useState} from 'react';
 import {ITask} from '@webex/plugin-cc';
 import {useCallControlProps, UseTaskListProps, UseTaskProps} from './task.types';
 import {useOutdialCallProps} from '@webex/cc-components';
@@ -124,9 +124,7 @@ export const useIncomingTask = (props: UseTaskProps) => {
 };
 
 export const useCallControl = (props: useCallControlProps) => {
-  const {currentTask, onHoldResume, onEnd, onWrapUp, logger, deviceType} = props;
-  const audioRef = useRef<HTMLAudioElement | null>(null); // Ref for the audio element
-  const isBrowser = deviceType === 'BROWSER';
+  const {currentTask, onHoldResume, onEnd, onWrapUp, logger} = props;
   const [isHeld, setIsHeld] = useState<boolean | undefined>(undefined);
   const [isRecording, setIsRecording] = useState(true);
   const [buddyAgents, setBuddyAgents] = useState<BuddyDetails[]>([]);
@@ -211,25 +209,6 @@ export const useCallControl = (props: useCallControlProps) => {
       method: `useCallControl#${method}`,
     });
   };
-
-  const handleTaskMedia = useCallback(
-    (track) => {
-      if (audioRef.current) {
-        audioRef.current.srcObject = new MediaStream([track]);
-      }
-    },
-    [audioRef, currentTask]
-  );
-
-  useEffect(() => {
-    if (!currentTask || !isBrowser) return;
-    // Call control only event for WebRTC calls
-    currentTask.on(TASK_EVENTS.TASK_MEDIA, handleTaskMedia);
-
-    return () => {
-      currentTask.off(TASK_EVENTS.TASK_MEDIA, handleTaskMedia);
-    };
-  }, [currentTask]);
 
   const toggleHold = (hold: boolean) => {
     if (hold) {
@@ -328,7 +307,6 @@ export const useCallControl = (props: useCallControlProps) => {
 
   return {
     currentTask,
-    audioRef,
     endCall,
     toggleHold,
     toggleRecording,

@@ -10,9 +10,6 @@ export type TaskListProps = Pick<TaskProps, 'onTaskAccepted' | 'onTaskDeclined'>
 
 export type CallControlProps = Pick<ControlProps, 'onHoldResume' | 'onEnd' | 'onWrapUp'>;
 
-export type useCallControlProps = Pick<
-  ControlProps,
-  'currentTask' | 'onHoldResume' | 'onEnd' | 'onWrapUp' | 'logger' | 'deviceType'
->;
+export type useCallControlProps = Pick<ControlProps, 'currentTask' | 'onHoldResume' | 'onEnd' | 'onWrapUp' | 'logger'>;
 
 export type useOutdialCallProps = Pick<OutdialCallProps, 'cc' | 'logger'>;

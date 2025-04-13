@@ -111,6 +111,10 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.consultStartTimeStamp;
   }
 
+  get callControlAudio() {
+    return this.store.callControlAudio;
+  }
+
   setCurrentTheme = (theme: string): void => {
     this.store.currentTheme = theme;
   };
@@ -184,6 +188,10 @@ class StoreWrapper implements IStoreWrapper {
     this.store.consultStartTimeStamp = timestamp;
   };
 
+  setCallControlAudio = (audio: MediaStream | null): void => {
+    this.store.callControlAudio = audio;
+  };
+
   setState = (state: ICustomState | IdleCode): void => {
     if ('reset' in state) {
       runInAction(() => {
@@ -251,6 +259,10 @@ class StoreWrapper implements IStoreWrapper {
       taskToRemove.off(TASK_EVENTS.TASK_CONSULT_END, this.handleConsultEnd);
       taskToRemove.off(TASK_EVENTS.TASK_CONSULT_ACCEPT, this.handleConsultAccepted);
       taskToRemove.off(TASK_EVENTS.AGENT_CONSULT_CREATED, this.handleConsultCreated);
+      if (this.deviceType === 'BROWSER') {
+        taskToRemove.off(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
+        this.setCallControlAudio(null);
+      }
     }
     const updateTaskList = this.store.taskList.filter((task) => task.data.interactionId !== taskId);
 
@@ -312,6 +324,10 @@ class StoreWrapper implements IStoreWrapper {
     this.handleTaskRemove(task.interactionId);
   };
 
+  handleTaskMedia = (track) => {
+    this.setCallControlAudio(new MediaStream([track]));
+  };
+
   // Case to handle multi session
   handleConsultCreated = () => {
     this.setConsultInitiated(true);
@@ -363,6 +379,9 @@ class StoreWrapper implements IStoreWrapper {
     task.on(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
     task.on(TASK_EVENTS.TASK_CONSULT_ACCEPT, this.handleConsultAccepted);
     task.on(TASK_EVENTS.AGENT_CONSULT_CREATED, this.handleConsultCreated);
+    if (this.deviceType === 'BROWSER') {
+      task.on(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
+    }
 
     // When we receive TASK_REJECT sdk changes the agent status
     // When we receive TASK_REJECT that means the task was not accepted by the agent and we wont need wrap up

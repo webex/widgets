@@ -39,6 +39,7 @@ class Store implements IStore {
   lastStateChangeTimestamp?: number;
   lastIdleCodeChangeTimestamp?: number;
   showMultipleLoginAlert: boolean = false;
+  callControlAudio: MediaStream | null = null;
 
   constructor() {
     makeAutoObservable(this, {

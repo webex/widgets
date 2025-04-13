@@ -488,7 +488,6 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
-        deviceType: 'BROWSER',
       })
     );
 
@@ -523,12 +522,11 @@ describe('useCallControl', () => {
       'someMockInteractionId'
     );
 
-    expect(onSpy).toHaveBeenCalledTimes(7);
+    expect(onSpy).toHaveBeenCalledTimes(6);
     expect(onSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_HOLD, expect.any(Function));
     expect(onSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_RESUME, expect.any(Function));
     expect(onSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));
     expect(onSpy).toHaveBeenCalledWith(TASK_EVENTS.AGENT_WRAPPEDUP, expect.any(Function));
-    expect(onSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_MEDIA, expect.any(Function));
     expect(onSpy).toHaveBeenCalledWith(TASK_EVENTS.CONTACT_RECORDING_PAUSED, expect.any(Function));
     expect(onSpy).toHaveBeenCalledWith(TASK_EVENTS.CONTACT_RECORDING_RESUMED, expect.any(Function));
 
@@ -567,12 +565,11 @@ describe('useCallControl', () => {
       expect.any(Function),
       'someMockInteractionId'
     );
-    expect(offSpy).toHaveBeenCalledTimes(7);
+    expect(offSpy).toHaveBeenCalledTimes(6);
     expect(offSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_HOLD, expect.any(Function));
     expect(offSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_RESUME, expect.any(Function));
     expect(offSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));
     expect(offSpy).toHaveBeenCalledWith(TASK_EVENTS.AGENT_WRAPPEDUP, expect.any(Function));
-    expect(offSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_MEDIA, expect.any(Function));
     expect(offSpy).toHaveBeenCalledWith(TASK_EVENTS.CONTACT_RECORDING_PAUSED, expect.any(Function));
     expect(offSpy).toHaveBeenCalledWith(TASK_EVENTS.CONTACT_RECORDING_RESUMED, expect.any(Function));
   });
@@ -880,146 +877,145 @@ describe('useCallControl', () => {
     expect(mockLogger.error).toHaveBeenCalledWith('Error resuming recording: Error: Resume error', expect.any(Object));
   });
 
-  it('should assign media received from media event to audio tag', async () => {
-    global.MediaStream = jest.fn().mockImplementation(() => {
-      return {mockStream: 'mock-stream'};
-    });
-    const mockAudioElement = {current: {srcObject: null}};
-    jest.spyOn(React, 'useRef').mockReturnValue(mockAudioElement);
-    const mockAudio = {
-      srcObject: 'mock-audio',
-    };
+  // it('should assign media received from media event to audio tag', async () => {
+  //   global.MediaStream = jest.fn().mockImplementation(() => {
+  //     return {mockStream: 'mock-stream'};
+  //   });
+  //   const mockAudioElement = {current: {srcObject: null}};
+  //   jest.spyOn(React, 'useRef').mockReturnValue(mockAudioElement);
+  //   const mockAudio = {
+  //     srcObject: 'mock-audio',
+  //   };
 
-    renderHook(() =>
-      useCallControl({
-        currentTask: mockCurrentTask,
-        onHoldResume: mockOnHoldResume,
-        onEnd: mockOnEnd,
-        onWrapUp: mockOnWrapUp,
-        logger: mockLogger,
-        deviceType: 'BROWSER',
-      })
-    );
+  //   renderHook(() =>
+  //     useCallControl({
+  //       currentTask: mockCurrentTask,
+  //       onHoldResume: mockOnHoldResume,
+  //       onEnd: mockOnEnd,
+  //       onWrapUp: mockOnWrapUp,
+  //       logger: mockLogger,
+  //       deviceType: 'BROWSER',
+  //     })
+  //   );
 
-    act(() => {
-      mockCurrentTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_MEDIA)?.[1](mockAudio);
-    });
+  //   act(() => {
+  //     mockCurrentTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_MEDIA)?.[1](mockAudio);
+  //   });
 
-    await waitFor(() => {
-      expect(mockAudioElement.current).toEqual({srcObject: {mockStream: 'mock-stream'}});
-    });
+  //   await waitFor(() => {
+  //     expect(mockAudioElement.current).toEqual({srcObject: {mockStream: 'mock-stream'}});
+  //   });
 
-    // Ensure no errors are logged
-    expect(logger.error).not.toHaveBeenCalled();
-  });
+  //   // Ensure no errors are logged
+  //   expect(logger.error).not.toHaveBeenCalled();
+  // });
 
-  it('should handle task media event', async () => {
-    const mockTrack = {kind: 'audio'};
-    const mockAudioElement = {current: {srcObject: null}};
-    jest.spyOn(React, 'useRef').mockReturnValue(mockAudioElement);
+  // it('should handle task media event', async () => {
+  //   const mockTrack = {kind: 'audio'};
+  //   const mockAudioElement = {current: {srcObject: null}};
+  //   jest.spyOn(React, 'useRef').mockReturnValue(mockAudioElement);
 
-    renderHook(() =>
-      useCallControl({
-        currentTask: mockCurrentTask,
-        onHoldResume: mockOnHoldResume,
-        onEnd: mockOnEnd,
-        onWrapUp: mockOnWrapUp,
-        logger: mockLogger,
-        deviceType: 'BROWSER',
-      })
-    );
+  //   renderHook(() =>
+  //     useCallControl({
+  //       currentTask: mockCurrentTask,
+  //       onHoldResume: mockOnHoldResume,
+  //       onEnd: mockOnEnd,
+  //       onWrapUp: mockOnWrapUp,
+  //       logger: mockLogger,
+  //       deviceType: 'BROWSER',
+  //     })
+  //   );
 
-    act(() => {
-      mockCurrentTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_MEDIA)?.[1](mockTrack);
-    });
+  //   act(() => {
+  //     mockCurrentTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_MEDIA)?.[1](mockTrack);
+  //   });
 
-    await waitFor(() => {
-      expect(mockAudioElement.current.srcObject).toEqual({getTracks: expect.any(Function)});
-    });
+  //   await waitFor(() => {
+  //     expect(mockAudioElement.current.srcObject).toEqual({getTracks: expect.any(Function)});
+  //   });
 
-    // Ensure no errors are logged
-    expect(logger.error).not.toHaveBeenCalled();
-  });
+  //   // Ensure no errors are logged
+  //   expect(logger.error).not.toHaveBeenCalled();
+  // });
 
-  it('should assign track to audioRef.current.srcObject when handleTaskMedia is called', async () => {
-    // Mock audioRef.current to simulate an audio element with a srcObject
-    const mockAudioElement = {
-      srcObject: null,
-    };
+  // it('should assign track to audioRef.current.srcObject when handleTaskMedia is called', async () => {
+  //   // Mock audioRef.current to simulate an audio element with a srcObject
+  //   const mockAudioElement = {
+  //     srcObject: null,
+  //   };
 
-    const {result} = renderHook(() =>
-      useCallControl({
-        currentTask: mockCurrentTask,
-        onHoldResume: mockOnHoldResume,
-        onEnd: mockOnEnd,
-        onWrapUp: mockOnWrapUp,
-        logger: mockLogger,
-        deviceType: 'BROWSER',
-      })
-    );
+  //   const {result} = renderHook(() =>
+  //     useCallControl({
+  //       currentTask: mockCurrentTask,
+  //       onHoldResume: mockOnHoldResume,
+  //       onEnd: mockOnEnd,
+  //       onWrapUp: mockOnWrapUp,
+  //       logger: mockLogger,
+  //       deviceType: 'BROWSER',
+  //     })
+  //   );
 
-    // Manually assign the mocked audio element to the ref
-    result.current.audioRef.current = mockAudioElement;
+  //   // Manually assign the mocked audio element to the ref
+  //   result.current.audioRef.current = mockAudioElement;
 
-    // Create a mock track object using the mock implementation
-    const mockTrack = new MediaStreamTrack();
+  //   // Create a mock track object using the mock implementation
+  //   const mockTrack = new MediaStreamTrack();
 
-    // Simulate the event that triggers handleTaskMedia by invoking the on event directly
-    act(() => {
-      // Find the event handler for TASK_MEDIA and invoke it
-      const taskAssignedCallback = taskMock.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_MEDIA)?.[1];
+  //   // Simulate the event that triggers handleTaskMedia by invoking the on event directly
+  //   act(() => {
+  //     // Find the event handler for TASK_MEDIA and invoke it
+  //     const taskAssignedCallback = taskMock.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_MEDIA)?.[1];
 
-      // Trigger the TASK_MEDIA event with the mock track
-      if (taskAssignedCallback) {
-        taskAssignedCallback(mockTrack);
-      }
-    });
+  //     // Trigger the TASK_MEDIA event with the mock track
+  //     if (taskAssignedCallback) {
+  //       taskAssignedCallback(mockTrack);
+  //     }
+  //   });
 
-    // Ensure that audioRef.current is not null
-    await waitFor(() => {
-      expect(result.current.audioRef.current).not.toBeNull();
-    });
+  //   // Ensure that audioRef.current is not null
+  //   await waitFor(() => {
+  //     expect(result.current.audioRef.current).not.toBeNull();
+  //   });
 
-    // Ensure no errors are logged
-    expect(logger.error).not.toHaveBeenCalled();
-  });
+  //   // Ensure no errors are logged
+  //   expect(logger.error).not.toHaveBeenCalled();
+  // });
 
-  it('should not set srcObject if audioRef.current is null', async () => {
-    // Mock audioRef to simulate the absence of an audio element
-    const {result} = renderHook(() =>
-      useCallControl({
-        currentTask: mockCurrentTask,
-        onHoldResume: mockOnHoldResume,
-        onEnd: mockOnEnd,
-        onWrapUp: mockOnWrapUp,
-        logger: mockLogger,
-        deviceType: 'BROWSER',
-      })
-    );
-    result.current.audioRef.current = null;
+  // it('should not set srcObject if audioRef.current is null', async () => {
+  //   // Mock audioRef to simulate the absence of an audio element
+  //   const {result} = renderHook(() =>
+  //     useCallControl({
+  //       currentTask: mockCurrentTask,
+  //       onHoldResume: mockOnHoldResume,
+  //       onEnd: mockOnEnd,
+  //       onWrapUp: mockOnWrapUp,
+  //       logger: mockLogger,
+  //     })
+  //   );
+  //   result.current.audioRef.current = null;
 
-    // Create a mock track object using the mock implementation
-    const mockTrack = new MediaStreamTrack();
+  //   // Create a mock track object using the mock implementation
+  //   const mockTrack = new MediaStreamTrack();
 
-    // Simulate the event that triggers handleTaskMedia by invoking the on event directly
-    act(() => {
-      // Find the event handler for TASK_MEDIA and invoke it
-      const taskAssignedCallback = taskMock.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_MEDIA)?.[1];
+  //   // Simulate the event that triggers handleTaskMedia by invoking the on event directly
+  //   act(() => {
+  //     // Find the event handler for TASK_MEDIA and invoke it
+  //     const taskAssignedCallback = taskMock.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_MEDIA)?.[1];
 
-      // Trigger the TASK_MEDIA event with the mock track
-      if (taskAssignedCallback) {
-        taskAssignedCallback(mockTrack);
-      }
-    });
+  //     // Trigger the TASK_MEDIA event with the mock track
+  //     if (taskAssignedCallback) {
+  //       taskAssignedCallback(mockTrack);
+  //     }
+  //   });
 
-    // Verify that audioRef.current is still null and no changes occurred
-    await waitFor(() => {
-      expect(result.current.audioRef.current).toBeNull();
-    });
+  //   // Verify that audioRef.current is still null and no changes occurred
+  //   await waitFor(() => {
+  //     expect(result.current.audioRef.current).toBeNull();
+  //   });
 
-    // Ensure no errors are logged
-    expect(logger.error).not.toHaveBeenCalled();
-  });
+  //   // Ensure no errors are logged
+  //   expect(logger.error).not.toHaveBeenCalled();
+  // });
 
   it('should not add media events if task is not available', async () => {
     const mockAudioElement = {current: {srcObject: null}};
@@ -1032,39 +1028,37 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
-        deviceType: 'BROWSER',
       })
     );
     // Ensure no event handler is set
     expect(taskMock.on).not.toHaveBeenCalled();
   });
 
-  it('should test undefined audioRef.current', async () => {
-    // This test is to improve the coverage
-    const {result} = renderHook(() =>
-      useCallControl({
-        currentTask: mockCurrentTask,
-        onHoldResume: mockOnHoldResume,
-        onEnd: mockOnEnd,
-        onWrapUp: mockOnWrapUp,
-        logger: mockLogger,
-        deviceType: 'BROWSER',
-      })
-    );
+  // it('should test undefined audioRef.current', async () => {
+  //   // This test is to improve the coverage
+  //   const {result} = renderHook(() =>
+  //     useCallControl({
+  //       currentTask: mockCurrentTask,
+  //       onHoldResume: mockOnHoldResume,
+  //       onEnd: mockOnEnd,
+  //       onWrapUp: mockOnWrapUp,
+  //       logger: mockLogger,
+  //     })
+  //   );
 
-    result.current.audioRef.current = undefined;
-    const mockTrack = new MediaStreamTrack();
+  //   result.current.audioRef.current = undefined;
+  //   const mockTrack = new MediaStreamTrack();
 
-    act(() => {
-      const taskAssignedCallback = mockCurrentTask.on.mock.calls.find(
-        (call) => call[0] === TASK_EVENTS.TASK_MEDIA
-      )?.[1];
+  //   act(() => {
+  //     const taskAssignedCallback = mockCurrentTask.on.mock.calls.find(
+  //       (call) => call[0] === TASK_EVENTS.TASK_MEDIA
+  //     )?.[1];
 
-      if (taskAssignedCallback) {
-        taskAssignedCallback(mockTrack);
-      }
-    });
-  });
+  //     if (taskAssignedCallback) {
+  //       taskAssignedCallback(mockTrack);
+  //     }
+  //   });
+  // });
 
   it('should not add media listeners if device type is not BROWSER', async () => {
     const mockAudioElement = {current: {srcObject: null}};
@@ -1077,7 +1071,6 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
-        deviceType: 'EXTENSION',
       })
     );
     // Ensure no event handler is set
@@ -1097,7 +1090,6 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
-        deviceType: 'BROWSER',
       })
     );
     await act(async () => {
@@ -1117,7 +1109,6 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
-        deviceType: 'BROWSER',
       })
     );
     await act(async () => {
@@ -1140,7 +1131,6 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
-        deviceType: 'BROWSER',
       })
     );
     await act(async () => {
@@ -1165,7 +1155,6 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
-        deviceType: 'BROWSER',
       })
     );
 
@@ -1187,7 +1176,6 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
-        deviceType: 'BROWSER',
       })
     );
     await act(async () => {
@@ -1208,7 +1196,6 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
-        deviceType: 'BROWSER',
       })
     );
 
@@ -1229,7 +1216,6 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
-        deviceType: 'BROWSER',
       })
     );
     await act(async () => {
@@ -1251,7 +1237,6 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
-        deviceType: 'BROWSER',
       })
     );
 
@@ -1276,7 +1261,6 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
-        deviceType: 'BROWSER',
       })
     );
     await act(async () => {
@@ -1300,7 +1284,6 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
-        deviceType: 'BROWSER',
       })
     );
 

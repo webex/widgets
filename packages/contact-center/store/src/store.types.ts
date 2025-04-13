@@ -52,6 +52,7 @@ interface IStore {
   consultInitiated: boolean;
   consultAccepted: boolean;
   consultStartTimeStamp?: number;
+  callControlAudio: MediaStream | null;
   init(params: InitParams, callback: (ccSDK: IContactCenter) => void): Promise<void>;
   registerCC(webex?: WithWebex['webex']): Promise<void>;
 }
