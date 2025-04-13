@@ -91,9 +91,9 @@
   flex-wrap: nowrap;
 }
 
-.call-icon {
-  width: 2rem;
-  height: 2rem;
+.call-icon-background {
+  width: 2.2rem;
+  height: 2.2rem;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -101,4 +101,8 @@
   border-radius: 50%;
   margin-top: -0.25rem;
   flex-shrink: 0;
+
+  .call-icon {
+    color: var(--mds-color-theme-common-touchbar-background-green-normal);
+  }
 }
