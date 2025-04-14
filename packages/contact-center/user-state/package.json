@@ -1,7 +1,7 @@
 {
   "name": "@webex/cc-user-state",
   "description": "Webex Contact Center Widgets: User State",
-  "version": "1.28.0-ccwidgets.28",
+  "version": "1.28.0-ccwidgets.40",
   "main": "dist/index.js",
   "publishConfig": {
     "access": "public"

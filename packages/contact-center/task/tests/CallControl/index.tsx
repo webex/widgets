@@ -4,16 +4,11 @@ import * as helper from '../../src/helper';
 import {CallControl} from '../../src';
 import '@testing-library/jest-dom';
 
-jest.mock('@momentum-ui/react-collaboration', () => ({
-  ButtonPill: () => <div data-testid="ButtonPill" />,
-  ListItemBase: () => <div data-testid="ListItemBase" />,
-  ListItemBaseSection: () => <div data-testid="ListItemBaseSection" />,
-  Text: () => <div data-testid="Text" />,
-}));
-
-jest.mock('@momentum-design/components/dist/react', () => ({
-  Avatar: () => <div data-testid="Avatar" />,
-}));
+jest.mock('@webex/cc-components', () => {
+  return {
+    CallControlComponent: () => <div>CallControlComponent</div>,
+  };
+});
 
 // Mock the store
 jest.mock('@webex/cc-store', () => ({
@@ -22,6 +17,7 @@ jest.mock('@webex/cc-store', () => ({
   wrapupCodes: [],
   logger: {},
   currentTask: {
+    data: {interactionId: 'mockInteractionId'},
     on: jest.fn(),
     off: jest.fn(),
     hold: jest.fn(() => Promise.resolve()),
@@ -31,6 +27,8 @@ jest.mock('@webex/cc-store', () => ({
     end: jest.fn(() => Promise.resolve()),
     wrapup: jest.fn(() => Promise.resolve()),
   },
+  setTaskCallback: jest.fn(),
+  removeTaskCallback: jest.fn(),
   TASK_EVENTS: {
     TASK_MEDIA: 'task:media',
   },

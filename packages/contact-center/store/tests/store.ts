@@ -1,5 +1,5 @@
 import {makeAutoObservable} from 'mobx';
-import Webex from 'webex';
+import Webex from 'webex/contact-center';
 import store from '../src/store'; // Adjust the import path as necessary
 
 let mockShouldCallback = true;
@@ -9,7 +9,7 @@ jest.mock('mobx', () => ({
   observable: {ref: jest.fn()},
 }));
 
-jest.mock('webex', () => ({
+jest.mock('webex/contact-center', () => ({
   init: jest.fn(() => ({
     once: jest.fn((event, callback) => {
       if (event === 'ready' && mockShouldCallback) {
@@ -100,6 +100,15 @@ describe('Store', () => {
             module: 'cc-store#store.ts',
           }
         );
+      }
+    });
+
+    it('should throw error if webex and cc object are not present', async () => {
+      try {
+        storeInstance.cc = undefined;
+        await storeInstance.registerCC(undefined);
+      } catch (error) {
+        expect(error.message).toEqual('Webex SDK not initialized');
       }
     });
   });

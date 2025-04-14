@@ -8,6 +8,7 @@ const ccUserState = document.createElement('widget-cc-user-state');
 const ccIncomingTask = document.createElement('widget-cc-incoming-task');
 const ccTaskList = document.createElement('widget-cc-task-list');
 const ccCallControl = document.createElement('widget-cc-call-control');
+const ccOutdial = document.createElement('widget-cc-outdial-call');
 
 const themeProviderElem = document.getElementById('theme-provider-elem');
 
@@ -16,6 +17,7 @@ const userStateCheckbox = document.getElementById('userStateCheckbox');
 const incomingTaskCheckbox = document.getElementById('incomingTaskCheckbox');
 const taskListCheckbox = document.getElementById('taskListCheckbox');
 const callControlCheckbox = document.getElementById('callControlCheckbox');
+const outdialCallCheckbox = document.getElementById('outdialCallCheckbox');
 
 let isMultiLoginEnabled = false;
 
@@ -78,7 +80,7 @@ function initWidgets() {
       ccTaskList.onTaskDeclined = onTaskDeclined;
       ccCallControl.onHoldResume = onHoldResume;
       ccCallControl.onEnd = onEnd;
-      ccCallControl.onWrapup = onWrapup;
+      ccCallControl.onWrapUp = onWrapUp;
 
       if (stationLoginCheckbox.checked) {
         ccStationLogin.classList.remove('disabled');
@@ -123,16 +125,33 @@ function loginSuccess() {
   }
   if (callControlCheckbox.checked) {
     ccCallControl.classList.remove('disabled');
-    widgetsContainer.appendChild(ccCallControl);
+
+    const callControlContainer = document.createElement('div');
+    callControlContainer.className = 'box';
+    callControlContainer.innerHTML = `
+      <section class="section-box">
+        <fieldset class="fieldset">
+          <legend class="legend-box">Call Control</legend>
+        </fieldset>
+      </section>
+    `;
+
+    callControlContainer.querySelector('fieldset').appendChild(ccCallControl);
+    widgetsContainer.appendChild(callControlContainer);
+  }
+  if (outdialCallCheckbox.checked) {
+    ccOutdial.classList.remove('disabled');
+    widgetsContainer.appendChild(ccOutdial);
   }
 }
 
 function logoutSuccess() {
-  console.log('Agent logout has been succesful');
+  console.log('Agent logout has been successful');
   ccUserState.classList.add('disabled');
   ccIncomingTask.classList.add('disabled');
   ccTaskList.classList.add('disabled');
   ccCallControl.classList.add('disabled');
+  ccOutdial.classList.add('disabled');
 }
 
 function onStateChange(status) {
@@ -163,8 +182,8 @@ function onEnd() {
   console.log('onEnd invoked');
 }
 
-function onWrapup() {
-  console.log('onWrapUp invoked');
+function onWrapUp(params) {
+  console.log('onWrapup invoked', params);
 }
 
 // Helper to change the agent state, using "Available" as is or "Meeting" for lookup if not.

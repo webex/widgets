@@ -1,0 +1,171 @@
+.tooltip.md-modal-container-wrapper {
+  color: var(--mds-color-theme-inverted-text-primary-normal);
+  background-color: var(--mds-color-theme-inverted-background-normal) !important;
+}
+
+.tooltip .md-modal-container-arrow-wrapper .md-modal-arrow-svg path {
+  fill: var(--mds-color-theme-inverted-background-normal) !important;
+}
+
+.call-control-container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+
+  .md-select-dropdown-input {
+    flex-grow: 1;
+    display: flex; // Ensure it participates in flex layout
+    border: 0.0625rem; // 1px to rem
+    align-self: flex-start; // Align similar to .wrapup-header
+  }
+}
+
+.button-group {
+  display: flex;
+  gap: 0.5rem; /* Reduced gap between buttons/tooltips */
+  margin-top: 1rem;
+}
+
+.wrapup-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; /* Reduced gap between select and button */
+  margin-top: 1rem;
+}
+
+.wrapup-name {
+  color: var(--mds-color-theme-text-primary-normal);
+}
+
+.wrapup-select {
+  flex-grow: 1;
+  padding: 0.5rem; // 8px to rem
+  margin-top: 0.5rem; // 8px to rem
+  margin-bottom: 0.75rem; // 12px to rem
+  border: 0.0625rem solid #ccc; // 1px to rem
+  border-radius: 0.25rem; // 4px to rem
+  align-self: flex-start; // Align similar to .wrapup-header
+}
+
+.wrapup-select-arrow-icon {
+  position: absolute;
+  right: 1.5rem; /* Adjusted to leave space for the arrow icon */
+  top: 55%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.submit-wrapup-button {
+  align-self: flex-end;
+}
+
+.wrapup-header {
+  margin-bottom: 0.7rem;
+  align-self: flex-start;
+}
+
+.md-select-wrapper {
+  display: flex;
+  align-items: flex-start; // Align contents to the left
+  flex-direction: column; // Ensure vertical alignment
+  border: 0;
+}
+
+[id*='tippy'] {
+  border: 0.0625rem solid var(--mds-color-theme-outline-input-normal); // 1px to rem
+  background-color: var(--mds-color-theme-background-glass-overlay-normal);
+  border-radius: 0.5rem; // 4px to rem
+}
+
+.md-button-circle-wrapper.call-control-button {
+  background-color: var(--mds-color-theme-button-secondary-normal);
+  border: 1px solid var(--mds-color-theme-outline-button-normal);
+  &:hover,
+  &.hover {
+    background-color: var(--mds-color-theme-button-secondary-hover);
+  }
+}
+
+.md-button-circle-wrapper.call-control-button-cancel {
+  background-color: var(--mds-color-theme-button-cancel-normal);
+  border: 0.0625rem solid var(--mds-color-theme-background-secondary-normal);
+  &:hover,
+  &.hover {
+    background-color: var(--mds-color-theme-button-cancel-hover);
+  }
+}
+.call-control-button-icon {
+  --mdc-icon-fill-color: var(--mds--color-theme-button-secondary-normal);
+}
+
+.wrapup-button {
+  display: inline-flex;
+  justify-content: center;
+  width: 8rem;
+  background-color: var(--mds-color-theme-button-secondary-normal);
+  border: 0.0625rem solid var(--mds-color-theme-outline-button-normal);
+  color: var(--mds-color-theme-text-primary-normal);
+  &:hover,
+  &.hover {
+    background-color: var(--mds-color-theme-button-secondary-normal);
+    color: var(--mds-color-theme-text-primary-normal);
+  }
+}
+
+.agent-popover {
+  .agent-popover-content {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem 0.5rem 0.5rem 1rem;
+    width: 30rem;
+    height: 25rem;
+    gap: 0.25rem;
+
+    .agent-popover-title {
+      margin: 0 0 0 0;
+      margin-bottom: 1rem;
+      text-align: left;
+    }
+
+    .agent-agent-item {
+      padding: 0.5rem;
+      cursor: pointer;
+      border-radius: 0.25rem;
+
+      &:hover {
+        background-color: var(--mds-color-theme-background-secondary-hover);
+      }
+    }
+  }
+
+  .agent-tablist {
+    margin-bottom: 1rem;
+    .agent-tab {
+      margin: 0 !important;
+    }
+  }
+
+  .agent-agent-list {
+    margin-left: 0;
+    margin-bottom: 1rem;
+  }
+}
+
+.call-control-list-item .hover-button {
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+.call-control-list-item:hover .hover-button {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.custom-text {
+  margin: 0 !important;
+  line-height: 1 !important;
+}
