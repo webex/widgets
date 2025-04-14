@@ -39,8 +39,8 @@
     "webpack-dev-server": "^5.1.0"
   },
   "resolutions": {
-    "@momentum-design/components": "0.27.3",
-    "@momentum-design/icons": "0.10.0"
+    "@momentum-design/components": "0.53.0",
+    "@momentum-design/icons": "0.17.0"
   },
   "scripts": {
     "clean": "yarn workspaces foreach --all --topological --parallel run clean && rm -rf node_modules",

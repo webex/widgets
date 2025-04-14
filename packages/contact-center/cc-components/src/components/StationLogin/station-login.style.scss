@@ -89,3 +89,20 @@
 .md-text-input-wrapper .md-text-input-container {
   border: 0.0625rem solid var(--mds-color-theme-outline-input-normal) !important;
 }
+
+#agent-login-label {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.agent-login-popover {
+  width: 18.25rem;
+  max-height: 10rem;
+  flex-shrink: 0;
+  fill: var(--color-theme-inverted-background-normal, #000);
+  stroke-width: 0.0625rem;
+  stroke: var(--color-theme-common-control-share-content-inactive, #707070);
+  filter: drop-shadow(0 1.5rem 3rem rgba(0, 0, 0, 0.20));
+}
