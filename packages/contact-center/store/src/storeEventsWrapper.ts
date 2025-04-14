@@ -377,7 +377,6 @@ class StoreWrapper implements IStoreWrapper {
 
     // When we receive TASK_ASSIGNED the task was accepted by the agent and we need wrap up
     task.on(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
-    task.on(TASK_EVENTS.TASK_CONSULT_ACCEPT, this.handleConsultAccepted);
     task.on(TASK_EVENTS.AGENT_CONSULT_CREATED, this.handleConsultCreated);
     if (this.deviceType === 'BROWSER') {
       task.on(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
@@ -429,6 +428,9 @@ class StoreWrapper implements IStoreWrapper {
 
     task.on(TASK_EVENTS.TASK_CONSULTING, this.handleConsulting);
     task.on(TASK_EVENTS.TASK_CONSULT_END, this.handleConsultEnd);
+    if (this.deviceType === 'BROWSER') {
+      task.on(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
+    }
 
     if (!this.store.taskList.some((t) => t.data.interactionId === task.data.interactionId)) {
       this.setTaskList([...this.store.taskList, task]);

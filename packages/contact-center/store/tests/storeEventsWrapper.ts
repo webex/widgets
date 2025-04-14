@@ -1,4 +1,19 @@
 import {act, waitFor} from '@testing-library/react';
+
+// Add a global mock for MediaStreamTrack to avoid undefined errors
+global.MediaStreamTrack = class MediaStreamTrackMock {
+  constructor() {
+    this.kind = 'audio';
+  }
+};
+
+// Add a global mock for MediaStream to avoid undefined errors
+global.MediaStream = class MediaStreamMock {
+  constructor(tracks) {
+    this.tracks = tracks;
+  }
+};
+
 import {CC_EVENTS, TASK_EVENTS} from '../src/store.types';
 import storeWrapper from '../src/storeEventsWrapper';
 import {ITask} from '@webex/plugin-cc';
@@ -36,7 +51,7 @@ jest.mock('../src/store', () => ({
     wrapupCodes: 'mockWrapupCodes',
     currentTask: 'mockCurrentTask',
     isAgentLoggedIn: false,
-    deviceType: 'mockDeviceType',
+    deviceType: 'BROWSER',
     taskList: 'mockTaskList',
     incomingTask: 'mockIncomingTask',
     wrapupRequired: 'mockWrapupRequired',
@@ -86,7 +101,7 @@ describe('storeEventsWrapper', () => {
     });
 
     it('should proxy deviceType', () => {
-      expect(storeWrapper.deviceType).toBe('mockDeviceType');
+      expect(storeWrapper.deviceType).toBe('BROWSER');
     });
 
     it('should proxy wrapupCodes', () => {
@@ -102,7 +117,7 @@ describe('storeEventsWrapper', () => {
     });
 
     it('should proxy deviceType', () => {
-      expect(storeWrapper.deviceType).toBe('mockDeviceType');
+      expect(storeWrapper.deviceType).toBe('BROWSER');
     });
 
     it('should proxy taskList', () => {
@@ -416,6 +431,15 @@ describe('storeEventsWrapper', () => {
       storeWrapper.handleConsulting(mockTask);
       expect(consultCompletedSpy).toHaveBeenCalledWith(true);
       expect(setCurrentTaskSpy).toHaveBeenCalledWith(mockTask);
+    });
+
+    it('should handle task media', () => {
+      const mockTrack = new MediaStreamTrack();
+      const setCallControlAudioSpy = jest.spyOn(storeWrapper, 'setCallControlAudio');
+
+      storeWrapper.handleTaskMedia(mockTrack);
+
+      expect(setCallControlAudioSpy).toHaveBeenCalledWith(new MediaStream([mockTrack]));
     });
 
     it('should handle task removal', () => {
@@ -1041,6 +1065,101 @@ describe('storeEventsWrapper', () => {
 
       expect(onTaskRejectedMock).toHaveBeenCalledWith({reason: reason});
       expect(removeSpy).toHaveBeenCalledWith('rejectTest');
+    });
+  });
+
+  describe('task:media conditionally attached based on deviceType', () => {
+    const mockTask: ITask = {
+      data: {
+        interactionId: 'interaction1',
+        interaction: {
+          state: 'connected',
+        },
+      },
+      on: jest.fn(),
+      off: jest.fn(),
+    } as unknown as ITask;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      storeWrapper['store'].taskList = [];
+    });
+
+    it('should attach TASK_MEDIA handler when deviceType is BROWSER', () => {
+      // Set deviceType to BROWSER
+      storeWrapper['store'].deviceType = 'BROWSER';
+
+      // Call handleIncomingTask
+      storeWrapper.handleIncomingTask(mockTask);
+
+      // Verify TASK_MEDIA handler was attached
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_MEDIA, expect.any(Function));
+    });
+
+    it('should attach TASK_MEDIA handler in handleTaskHydrate when deviceType is BROWSER', () => {
+      // Set deviceType to BROWSER
+      storeWrapper['store'].deviceType = 'BROWSER';
+
+      // Call handleTaskHydrate
+      storeWrapper.handleTaskHydrate(mockTask);
+
+      // Verify TASK_MEDIA handler was attached
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_MEDIA, expect.any(Function));
+    });
+
+    it('should not attach TASK_MEDIA handler when deviceType is not BROWSER', () => {
+      // Set deviceType to something other than BROWSER
+      storeWrapper['store'].deviceType = 'DESKTOP';
+
+      // Call handleIncomingTask
+      storeWrapper.handleIncomingTask(mockTask);
+
+      // Verify TASK_MEDIA handler was not attached
+      const taskMediaCall = mockTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_MEDIA);
+      expect(taskMediaCall).toBeUndefined();
+    });
+
+    it('should not attach TASK_MEDIA handler in handleTaskHydrate when deviceType is not BROWSER', () => {
+      // Set deviceType to something other than BROWSER
+      storeWrapper['store'].deviceType = 'DESKTOP';
+
+      // Call handleTaskHydrate
+      storeWrapper.handleTaskHydrate(mockTask);
+
+      // Verify TASK_MEDIA handler was not attached
+      const taskMediaCall = mockTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_MEDIA);
+      expect(taskMediaCall).toBeUndefined();
+    });
+
+    it('should remove TASK_MEDIA handler on task removal when deviceType is BROWSER', () => {
+      // Set deviceType to BROWSER
+      storeWrapper['store'].deviceType = 'BROWSER';
+
+      // Add the task to taskList
+      storeWrapper['store'].taskList = [mockTask];
+
+      // Call handleTaskRemove
+      storeWrapper.handleTaskRemove(mockTask.data.interactionId);
+
+      // Verify TASK_MEDIA handler was removed
+      expect(mockTask.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_MEDIA, expect.any(Function));
+      expect(storeWrapper.setCallControlAudio).toHaveBeenCalledWith(null);
+    });
+
+    it('should not try to remove TASK_MEDIA handler on task removal when deviceType is not BROWSER', () => {
+      // Set deviceType to something other than BROWSER
+      storeWrapper['store'].deviceType = 'DESKTOP';
+
+      // Add the task to taskList
+      storeWrapper['store'].taskList = [mockTask];
+
+      // Call handleTaskRemove
+      storeWrapper.handleTaskRemove(mockTask.data.interactionId);
+
+      // Verify TASK_MEDIA handler was not removed
+      const taskMediaOffCall = mockTask.off.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_MEDIA);
+      expect(taskMediaOffCall).toBeUndefined();
+      expect(storeWrapper.setCallControlAudio).not.toHaveBeenCalled();
     });
   });
 });
