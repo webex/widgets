@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.40](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.39...v1.28.0-ccwidgets.40) (2025-04-14)
+
+
+### Bug Fixes
+
+* **contact-center:** latest sdk version update ([#426](https://github.com/webex/widgets/issues/426)) ([9960f88](https://github.com/webex/widgets/commit/9960f880645f7717a04a4d47d07dc97a826ed3e3))
+
 # [1.28.0-ccwidgets.39](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.38...v1.28.0-ccwidgets.39) (2025-04-02)
 
 
