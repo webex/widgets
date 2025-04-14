@@ -1,5 +1,5 @@
 import {makeAutoObservable, observable} from 'mobx';
-import Webex from 'webex';
+import Webex from 'webex/contact-center';
 import {
   IContactCenter,
   Profile,
@@ -65,7 +65,9 @@ class Store implements IStore {
       .register()
       .then((response: Profile) => {
         this.teams = response.teams;
-        this.loginOptions = response.loginVoiceOptions;
+        this.loginOptions = response.webRtcEnabled
+          ? response.loginVoiceOptions
+          : response.loginVoiceOptions.filter((option) => option !== 'BROWSER');
         this.idleCodes = response.idleCodes;
         this.agentId = response.agentId;
         this.wrapupCodes = response.wrapupCodes;
