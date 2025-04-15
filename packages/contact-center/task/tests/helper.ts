@@ -449,6 +449,7 @@ describe('useCallControl', () => {
 
   const mockLogger = {
     error: jest.fn(),
+    info: jest.fn(),
   };
 
   const mockOnHoldResume = jest.fn();
@@ -877,146 +878,6 @@ describe('useCallControl', () => {
     expect(mockLogger.error).toHaveBeenCalledWith('Error resuming recording: Error: Resume error', expect.any(Object));
   });
 
-  // it('should assign media received from media event to audio tag', async () => {
-  //   global.MediaStream = jest.fn().mockImplementation(() => {
-  //     return {mockStream: 'mock-stream'};
-  //   });
-  //   const mockAudioElement = {current: {srcObject: null}};
-  //   jest.spyOn(React, 'useRef').mockReturnValue(mockAudioElement);
-  //   const mockAudio = {
-  //     srcObject: 'mock-audio',
-  //   };
-
-  //   renderHook(() =>
-  //     useCallControl({
-  //       currentTask: mockCurrentTask,
-  //       onHoldResume: mockOnHoldResume,
-  //       onEnd: mockOnEnd,
-  //       onWrapUp: mockOnWrapUp,
-  //       logger: mockLogger,
-  //       deviceType: 'BROWSER',
-  //     })
-  //   );
-
-  //   act(() => {
-  //     mockCurrentTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_MEDIA)?.[1](mockAudio);
-  //   });
-
-  //   await waitFor(() => {
-  //     expect(mockAudioElement.current).toEqual({srcObject: {mockStream: 'mock-stream'}});
-  //   });
-
-  //   // Ensure no errors are logged
-  //   expect(logger.error).not.toHaveBeenCalled();
-  // });
-
-  // it('should handle task media event', async () => {
-  //   const mockTrack = {kind: 'audio'};
-  //   const mockAudioElement = {current: {srcObject: null}};
-  //   jest.spyOn(React, 'useRef').mockReturnValue(mockAudioElement);
-
-  //   renderHook(() =>
-  //     useCallControl({
-  //       currentTask: mockCurrentTask,
-  //       onHoldResume: mockOnHoldResume,
-  //       onEnd: mockOnEnd,
-  //       onWrapUp: mockOnWrapUp,
-  //       logger: mockLogger,
-  //       deviceType: 'BROWSER',
-  //     })
-  //   );
-
-  //   act(() => {
-  //     mockCurrentTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_MEDIA)?.[1](mockTrack);
-  //   });
-
-  //   await waitFor(() => {
-  //     expect(mockAudioElement.current.srcObject).toEqual({getTracks: expect.any(Function)});
-  //   });
-
-  //   // Ensure no errors are logged
-  //   expect(logger.error).not.toHaveBeenCalled();
-  // });
-
-  // it('should assign track to audioRef.current.srcObject when handleTaskMedia is called', async () => {
-  //   // Mock audioRef.current to simulate an audio element with a srcObject
-  //   const mockAudioElement = {
-  //     srcObject: null,
-  //   };
-
-  //   const {result} = renderHook(() =>
-  //     useCallControl({
-  //       currentTask: mockCurrentTask,
-  //       onHoldResume: mockOnHoldResume,
-  //       onEnd: mockOnEnd,
-  //       onWrapUp: mockOnWrapUp,
-  //       logger: mockLogger,
-  //       deviceType: 'BROWSER',
-  //     })
-  //   );
-
-  //   // Manually assign the mocked audio element to the ref
-  //   result.current.audioRef.current = mockAudioElement;
-
-  //   // Create a mock track object using the mock implementation
-  //   const mockTrack = new MediaStreamTrack();
-
-  //   // Simulate the event that triggers handleTaskMedia by invoking the on event directly
-  //   act(() => {
-  //     // Find the event handler for TASK_MEDIA and invoke it
-  //     const taskAssignedCallback = taskMock.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_MEDIA)?.[1];
-
-  //     // Trigger the TASK_MEDIA event with the mock track
-  //     if (taskAssignedCallback) {
-  //       taskAssignedCallback(mockTrack);
-  //     }
-  //   });
-
-  //   // Ensure that audioRef.current is not null
-  //   await waitFor(() => {
-  //     expect(result.current.audioRef.current).not.toBeNull();
-  //   });
-
-  //   // Ensure no errors are logged
-  //   expect(logger.error).not.toHaveBeenCalled();
-  // });
-
-  // it('should not set srcObject if audioRef.current is null', async () => {
-  //   // Mock audioRef to simulate the absence of an audio element
-  //   const {result} = renderHook(() =>
-  //     useCallControl({
-  //       currentTask: mockCurrentTask,
-  //       onHoldResume: mockOnHoldResume,
-  //       onEnd: mockOnEnd,
-  //       onWrapUp: mockOnWrapUp,
-  //       logger: mockLogger,
-  //     })
-  //   );
-  //   result.current.audioRef.current = null;
-
-  //   // Create a mock track object using the mock implementation
-  //   const mockTrack = new MediaStreamTrack();
-
-  //   // Simulate the event that triggers handleTaskMedia by invoking the on event directly
-  //   act(() => {
-  //     // Find the event handler for TASK_MEDIA and invoke it
-  //     const taskAssignedCallback = taskMock.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_MEDIA)?.[1];
-
-  //     // Trigger the TASK_MEDIA event with the mock track
-  //     if (taskAssignedCallback) {
-  //       taskAssignedCallback(mockTrack);
-  //     }
-  //   });
-
-  //   // Verify that audioRef.current is still null and no changes occurred
-  //   await waitFor(() => {
-  //     expect(result.current.audioRef.current).toBeNull();
-  //   });
-
-  //   // Ensure no errors are logged
-  //   expect(logger.error).not.toHaveBeenCalled();
-  // });
-
   it('should not add media events if task is not available', async () => {
     const mockAudioElement = {current: {srcObject: null}};
     jest.spyOn(React, 'useRef').mockReturnValue(mockAudioElement);
@@ -1033,32 +894,6 @@ describe('useCallControl', () => {
     // Ensure no event handler is set
     expect(taskMock.on).not.toHaveBeenCalled();
   });
-
-  // it('should test undefined audioRef.current', async () => {
-  //   // This test is to improve the coverage
-  //   const {result} = renderHook(() =>
-  //     useCallControl({
-  //       currentTask: mockCurrentTask,
-  //       onHoldResume: mockOnHoldResume,
-  //       onEnd: mockOnEnd,
-  //       onWrapUp: mockOnWrapUp,
-  //       logger: mockLogger,
-  //     })
-  //   );
-
-  //   result.current.audioRef.current = undefined;
-  //   const mockTrack = new MediaStreamTrack();
-
-  //   act(() => {
-  //     const taskAssignedCallback = mockCurrentTask.on.mock.calls.find(
-  //       (call) => call[0] === TASK_EVENTS.TASK_MEDIA
-  //     )?.[1];
-
-  //     if (taskAssignedCallback) {
-  //       taskAssignedCallback(mockTrack);
-  //     }
-  //   });
-  // });
 
   it('should not add media listeners if device type is not BROWSER', async () => {
     const mockAudioElement = {current: {srcObject: null}};
@@ -1296,6 +1131,144 @@ describe('useCallControl', () => {
       module: 'widget-cc-task#helper.ts',
       method: 'useCallControl#consultTransfer',
     });
+  });
+
+  it('should extract consulting agent information correctly', async () => {
+    // Mock store.cc.agentConfig.agentId for comparison
+    const mockStoreCC = {
+      agentConfig: {
+        agentId: 'currentAgentId',
+      },
+    };
+    jest.spyOn(store, 'cc', 'get').mockReturnValue(mockStoreCC);
+
+    // Create a task with participant data
+    const taskWithParticipants = {
+      ...mockCurrentTask,
+      data: {
+        interactionId: 'someMockInteractionId',
+        interaction: {
+          participants: {
+            currentAgentId: {
+              id: 'currentAgentId',
+              name: 'Current Agent',
+              pType: 'Agent',
+            },
+            consultAgentId: {
+              id: 'consultAgentId',
+              name: 'Jane Consultant',
+              pType: 'Agent',
+            },
+            customerId: {
+              id: 'customerId',
+              name: 'Customer',
+              pType: 'Customer',
+            },
+          },
+        },
+      },
+      on: jest.fn(),
+      off: jest.fn(),
+      hold: jest.fn(() => Promise.resolve()),
+      resume: jest.fn(() => Promise.resolve()),
+    };
+
+    // Render the hook with the task containing participants
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: taskWithParticipants,
+        logger: mockLogger,
+      })
+    );
+
+    // Wait for the consultAgentName to be updated
+    await waitFor(() => {
+      expect(result.current.consultAgentName).toBe('Jane Consultant');
+    });
+
+    // Verify the logger was called with the correct message
+    expect(mockLogger.info).toHaveBeenCalledWith('Consulting agent detected: Jane Consultant', {
+      module: 'widget-cc-task#helper.ts',
+      method: 'useCallControl#extractConsultingAgent',
+    });
+  });
+
+  it('should not update consultAgentName when no consulting agent is found', async () => {
+    // Mock store.cc.agentConfig.agentId for comparison
+    const mockStoreCC = {
+      agentConfig: {
+        agentId: 'currentAgentId',
+      },
+    };
+    jest.spyOn(store, 'cc', 'get').mockReturnValue(mockStoreCC);
+
+    // Create a task with only current agent and customer
+    const taskWithoutConsultAgent = {
+      ...mockCurrentTask,
+      data: {
+        interactionId: 'someMockInteractionId',
+        interaction: {
+          participants: {
+            currentAgentId: {
+              id: 'currentAgentId',
+              name: 'Current Agent',
+              pType: 'Agent',
+            },
+            customerId: {
+              id: 'customerId',
+              name: 'Customer',
+              pType: 'Customer',
+            },
+          },
+        },
+      },
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+
+    // Set the initial consultAgentName to verify it doesn't change
+    const {result} = renderHook(() => {
+      const hook = useCallControl({
+        currentTask: taskWithoutConsultAgent,
+        logger: mockLogger,
+      });
+      return hook;
+    });
+
+    // Verify the consultAgentName remained unchanged
+    expect(result.current.consultAgentName).toBe('Consult Agent');
+
+    // Make sure no logging happened for consulting agent detection
+    expect(mockLogger.info).not.toHaveBeenCalledWith(
+      expect.stringContaining('Consulting agent detected:'),
+      expect.any(Object)
+    );
+  });
+
+  it('should handle missing interaction data gracefully', async () => {
+    // Create a task with missing interaction data
+    const taskWithNoInteraction = {
+      ...mockCurrentTask,
+      data: {
+        interactionId: 'someMockInteractionId',
+        // No interaction property
+      },
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+
+    // Set the initial consultAgentName to verify it doesn't change
+    const {result} = renderHook(() => {
+      const hook = useCallControl({
+        currentTask: taskWithNoInteraction,
+        logger: mockLogger,
+      });
+      // Set initial value
+      return hook;
+    });
+
+    // Verify the consultAgentName remained unchanged
+    expect(result.current.consultAgentName).toBe('Consult Agent');
   });
 });
 

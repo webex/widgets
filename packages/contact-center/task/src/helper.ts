@@ -1,6 +1,6 @@
 import {useEffect, useCallback, useState} from 'react';
 import {ITask} from '@webex/plugin-cc';
-import {useCallControlProps, UseTaskListProps, UseTaskProps} from './task.types';
+import {useCallControlProps, UseTaskListProps, UseTaskProps, Participant} from './task.types';
 import {useOutdialCallProps} from '@webex/cc-components';
 import store, {TASK_EVENTS, BuddyDetails, DestinationType} from '@webex/cc-store';
 
@@ -128,6 +128,37 @@ export const useCallControl = (props: useCallControlProps) => {
   const [isHeld, setIsHeld] = useState<boolean | undefined>(undefined);
   const [isRecording, setIsRecording] = useState(true);
   const [buddyAgents, setBuddyAgents] = useState<BuddyDetails[]>([]);
+  const [consultAgentName, setConsultAgentName] = useState<string>('Consult Agent');
+
+  // Function to extract consulting agent information
+  const extractConsultingAgent = useCallback(() => {
+    if (!currentTask || !currentTask.data || !currentTask.data.interaction) return;
+
+    const {interaction} = currentTask.data;
+
+    // Find consulting agent (any agent that is not the current agent)
+    const foundAgent = Object.values(interaction.participants)
+      .filter(
+        (participant: Participant) => participant.pType === 'Agent' && participant.id !== store.cc.agentConfig.agentId
+      )
+      .map((agent: Participant) => ({
+        id: agent.id,
+        name: agent.name,
+      }))[0];
+
+    if (foundAgent) {
+      setConsultAgentName(foundAgent.name);
+      logger.info(`Consulting agent detected: ${foundAgent.name}`, {
+        module: 'widget-cc-task#helper.ts',
+        method: 'useCallControl#extractConsultingAgent',
+      });
+    }
+  }, [currentTask, consultAgentName, logger]);
+
+  // Check for consulting agent whenever currentTask changes
+  useEffect(() => {
+    extractConsultingAgent();
+  }, [currentTask, extractConsultingAgent]);
 
   const loadBuddyAgents = useCallback(async () => {
     try {
@@ -321,6 +352,8 @@ export const useCallControl = (props: useCallControlProps) => {
     consultCall,
     endConsultCall,
     consultTransfer,
+    consultAgentName,
+    setConsultAgentName,
   };
 };
 

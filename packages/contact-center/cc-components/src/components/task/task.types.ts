@@ -249,6 +249,17 @@ export interface ControlProps {
    * This is used to play audio for the call control.
    */
   callControlAudio: MediaStream | null;
+
+  /**
+   * Name of the consulting agent.
+   */
+  consultAgentName: string;
+
+  /**
+   * Function to set the consulting agent name.
+   * @param agentName - The name of the consulting agent.
+   */
+  setConsultAgentName: (agentName: string) => void;
 }
 
 export type CallControlComponentProps = Pick<
@@ -275,6 +286,8 @@ export type CallControlComponentProps = Pick<
   | 'consultAccepted'
   | 'consultStartTimeStamp'
   | 'callControlAudio'
+  | 'consultAgentName'
+  | 'setConsultAgentName'
 >;
 
 /**

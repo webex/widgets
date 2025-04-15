@@ -115,6 +115,10 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.callControlAudio;
   }
 
+  get consultOfferReceived() {
+    return this.store.consultOfferReceived;
+  }
+
   setCurrentTheme = (theme: string): void => {
     this.store.currentTheme = theme;
   };
@@ -182,6 +186,10 @@ class StoreWrapper implements IStoreWrapper {
 
   setConsultAccepted = (value: boolean): void => {
     this.store.consultAccepted = value;
+  };
+
+  setConsultOfferReceived = (value: boolean): void => {
+    this.store.consultOfferReceived = value;
   };
 
   setConsultStartTimeStamp = (timestamp: number): void => {
@@ -256,8 +264,9 @@ class StoreWrapper implements IStoreWrapper {
       taskToRemove.off(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(taskToRemove.interactionId, reason));
       taskToRemove.off(TASK_EVENTS.AGENT_WRAPPEDUP, this.handleTaskWrapUp);
       taskToRemove.off(TASK_EVENTS.TASK_CONSULTING, this.handleConsulting);
+      taskToRemove.off(CC_EVENTS.AGENT_OFFER_CONSULT, this.handleConsultOffer);
       taskToRemove.off(TASK_EVENTS.TASK_CONSULT_END, this.handleConsultEnd);
-      taskToRemove.off(TASK_EVENTS.TASK_CONSULT_ACCEPT, this.handleConsultAccepted);
+      taskToRemove.off(TASK_EVENTS.TASK_CONSULT_ACCEPTED, this.handleConsultAccepted);
       taskToRemove.off(TASK_EVENTS.AGENT_CONSULT_CREATED, this.handleConsultCreated);
       if (this.deviceType === 'BROWSER') {
         taskToRemove.off(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
@@ -337,6 +346,7 @@ class StoreWrapper implements IStoreWrapper {
   handleConsulting = (event) => {
     this.setConsultCompleted(true);
     this.setCurrentTask(event);
+    this.handleIncomingTask(event);
     this.setConsultStartTimeStamp(Date.now());
   };
 
@@ -346,9 +356,16 @@ class StoreWrapper implements IStoreWrapper {
     if (this.consultAccepted) {
       this.setConsultAccepted(false);
       this.handleTaskRemove(task.data.interactionId);
+    } else if (this.consultOfferReceived) {
+      this.setConsultOfferReceived(false);
+      this.handleTaskRemove(task.data.interactionId);
     }
     this.setConsultCompleted(false);
     this.setConsultStartTimeStamp(null);
+  };
+
+  handleConsultOffer = () => {
+    this.setConsultOfferReceived(true);
   };
 
   handleConsultAccepted = (event) => {
@@ -358,10 +375,14 @@ class StoreWrapper implements IStoreWrapper {
       this.setIncomingTask(null);
       this.setConsultAccepted(true);
       this.setConsultStartTimeStamp(Date.now());
+      this.setConsultCompleted(true);
       this.setState({
         developerName: ENGAGED_LABEL,
         name: ENGAGED_USERNAME,
       });
+      if (this.deviceType === 'BROWSER') {
+        task.on(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
+      }
     });
   };
 
@@ -389,6 +410,8 @@ class StoreWrapper implements IStoreWrapper {
     task.on(TASK_EVENTS.AGENT_WRAPPEDUP, this.handleTaskWrapUp);
 
     task.on(TASK_EVENTS.TASK_CONSULTING, this.handleConsulting);
+    task.on(TASK_EVENTS.TASK_CONSULT_ACCEPTED, this.handleConsultAccepted);
+    task.on(CC_EVENTS.AGENT_OFFER_CONSULT, this.handleConsultOffer);
     task.on(TASK_EVENTS.TASK_CONSULT_END, this.handleConsultEnd);
 
     this.setIncomingTask(task);
@@ -417,7 +440,7 @@ class StoreWrapper implements IStoreWrapper {
 
     // When we receive TASK_ASSIGNED the task was accepted by the agent and we need wrap up
     task.on(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
-    task.on(TASK_EVENTS.TASK_CONSULT_ACCEPT, this.handleConsultAccepted);
+    task.on(TASK_EVENTS.TASK_CONSULT_ACCEPTED, this.handleConsultAccepted);
     task.on(TASK_EVENTS.AGENT_CONSULT_CREATED, this.handleConsultCreated);
 
     // When we receive TASK_REJECT sdk changes the agent status
@@ -427,6 +450,7 @@ class StoreWrapper implements IStoreWrapper {
     task.on(TASK_EVENTS.AGENT_WRAPPEDUP, this.handleTaskWrapUp);
 
     task.on(TASK_EVENTS.TASK_CONSULTING, this.handleConsulting);
+    task.on(CC_EVENTS.AGENT_OFFER_CONSULT, this.handleConsultOffer);
     task.on(TASK_EVENTS.TASK_CONSULT_END, this.handleConsultEnd);
     if (this.deviceType === 'BROWSER') {
       task.on(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);

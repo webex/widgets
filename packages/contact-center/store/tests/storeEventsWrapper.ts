@@ -1161,5 +1161,28 @@ describe('storeEventsWrapper', () => {
       expect(taskMediaOffCall).toBeUndefined();
       expect(storeWrapper.setCallControlAudio).not.toHaveBeenCalled();
     });
+
+    it('should attach TASK_MEDIA handler in handleConsultAccepted when deviceType is BROWSER', () => {
+      // Set deviceType to BROWSER
+      storeWrapper['store'].deviceType = 'BROWSER';
+
+      // Call handleConsultAccepted
+      storeWrapper.handleConsultAccepted(mockTask);
+
+      // Verify TASK_MEDIA handler was attached
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_MEDIA, expect.any(Function));
+    });
+
+    it('should not attach TASK_MEDIA handler in handleConsultAccepted when deviceType is not BROWSER', () => {
+      // Set deviceType to something other than BROWSER
+      storeWrapper['store'].deviceType = 'DESKTOP';
+
+      // Call handleConsultAccepted
+      storeWrapper.handleConsultAccepted(mockTask);
+
+      // Verify TASK_MEDIA handler was not attached
+      const taskMediaCall = mockTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_MEDIA);
+      expect(taskMediaCall).toBeUndefined();
+    });
   });
 });

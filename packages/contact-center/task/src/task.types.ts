@@ -12,4 +12,10 @@ export type CallControlProps = Pick<ControlProps, 'onHoldResume' | 'onEnd' | 'on
 
 export type useCallControlProps = Pick<ControlProps, 'currentTask' | 'onHoldResume' | 'onEnd' | 'onWrapUp' | 'logger'>;
 
+export type Participant = {
+  id: string;
+  pType: 'Customer' | 'Agent' | string;
+  name?: string;
+};
+
 export type useOutdialCallProps = Pick<OutdialCallProps, 'cc' | 'logger'>;

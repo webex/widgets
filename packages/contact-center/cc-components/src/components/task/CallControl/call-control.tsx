@@ -13,7 +13,6 @@ function CallControlComponent(props: CallControlComponentProps) {
   const [selectedWrapupId, setSelectedWrapupId] = useState<string | null>(null);
   const [showAgentMenu, setShowAgentMenu] = useState(false);
   const [agentMenuType, setAgentMenuType] = useState<'Consult' | 'Transfer' | null>(null);
-  const [consultAgentName, setConsultAgentName] = useState<string>('Consult Agent');
   const [consultAgentId, setConsultAgentId] = useState<string>(null);
 
   const {
@@ -39,6 +38,8 @@ function CallControlComponent(props: CallControlComponentProps) {
     consultAccepted,
     consultStartTimeStamp,
     callControlAudio,
+    consultAgentName,
+    setConsultAgentName,
   } = props;
 
   useEffect(() => {

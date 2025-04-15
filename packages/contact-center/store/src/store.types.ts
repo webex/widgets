@@ -53,6 +53,7 @@ interface IStore {
   consultAccepted: boolean;
   consultStartTimeStamp?: number;
   callControlAudio: MediaStream | null;
+  consultOfferReceived: boolean;
   init(params: InitParams, callback: (ccSDK: IContactCenter) => void): Promise<void>;
   registerCC(webex?: WithWebex['webex']): Promise<void>;
 }
@@ -91,7 +92,7 @@ enum TASK_EVENTS {
   TASK_UNHOLD = 'task:unhold',
   TASK_CONSULT = 'task:consult',
   TASK_CONSULT_END = 'task:consultEnd',
-  TASK_CONSULT_ACCEPT = 'task:consultAccepted',
+  TASK_CONSULT_ACCEPTED = 'task:consultAccepted',
   TASK_PAUSE = 'task:pause',
   TASK_RESUME = 'task:resume',
   TASK_END = 'task:end',
@@ -115,6 +116,7 @@ enum CC_EVENTS {
   AGENT_MULTI_LOGIN = 'agent:multiLogin',
   AGENT_STATE_CHANGE = 'agent:stateChange',
   AGENT_RELOGIN_SUCCESS = 'AgentReloginSuccess',
+  AGENT_OFFER_CONSULT = 'AgentOfferConsult',
 }
 
 interface ICustomStateSet {
