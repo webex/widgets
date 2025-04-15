@@ -50,7 +50,6 @@ if (!customElements.get('component-cc-station-login')) {
 const WebCallControl = r2wc(CallControlComponent, {
   props: {
     currentTask: 'json',
-    audioRef: 'json',
     wrapupCodes: 'json',
     wrapupRequired: 'boolean',
     toggleHold: 'function',
@@ -59,6 +58,7 @@ const WebCallControl = r2wc(CallControlComponent, {
     wrapupCall: 'function',
     isHeld: 'boolean',
     setIsHeld: 'function',
+    callControlAudio: 'json',
   },
 });
 if (!customElements.get('component-cc-call-control')) {

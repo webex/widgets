@@ -105,10 +105,12 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
         }}
       </SelectNext>
 
-      <span className={`elapsedTime ${isSettingAgentStatus ? 'elapsedTime-disabled' : ''}`}>
-        {lastIdleStateChangeElapsedTime >= 0 ? formatTime(lastIdleStateChangeElapsedTime) + ' / ' : ''}
-        {formatTime(elapsedTime)}
-      </span>
+      {!customState && (
+        <span className={`elapsedTime ${isSettingAgentStatus ? 'elapsedTime-disabled' : ''}`}>
+          {lastIdleStateChangeElapsedTime >= 0 ? formatTime(lastIdleStateChangeElapsedTime) + ' / ' : ''}
+          {formatTime(elapsedTime)}
+        </span>
+      )}
       <Icon className="select-arrow-icon" name="arrow-down-bold" title="" />
     </div>
   );

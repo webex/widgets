@@ -7,11 +7,26 @@ import {CallControlProps} from '../task.types';
 import {CallControlComponent} from '@webex/cc-components';
 
 const CallControl: React.FunctionComponent<CallControlProps> = observer(({onHoldResume, onEnd, onWrapUp}) => {
-  const {logger, currentTask, deviceType, wrapupCodes, wrapupRequired} = store;
+  const {
+    logger,
+    currentTask,
+    wrapupCodes,
+    wrapupRequired,
+    consultInitiated,
+    consultCompleted,
+    consultAccepted,
+    consultStartTimeStamp,
+    callControlAudio,
+  } = store;
   const result = {
-    ...useCallControl({currentTask, deviceType, onHoldResume, onEnd, onWrapUp, logger}),
+    ...useCallControl({currentTask, onHoldResume, onEnd, onWrapUp, logger, consultInitiated}),
     wrapupRequired,
     wrapupCodes,
+    consultInitiated,
+    consultCompleted,
+    consultAccepted,
+    consultStartTimeStamp,
+    callControlAudio,
   };
 
   return <CallControlComponent {...result} />;

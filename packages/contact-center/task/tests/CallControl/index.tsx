@@ -45,12 +45,21 @@ describe('CallControl Component', () => {
 
     // Assert that the useIncomingTask hook is called with the correct arguments
     expect(useCallControlSpy).toHaveBeenCalledWith({
-      currentTask: expect.any(Object),
-      onHoldResume: onHoldResumeCb,
-      onEnd: onEndCb,
-      onWrapUp: onWrapUpCb,
+      currentTask: {
+        data: {interactionId: 'mockInteractionId'},
+        on: expect.any(Function),
+        off: expect.any(Function),
+        hold: expect.any(Function),
+        resume: expect.any(Function),
+        pauseRecording: expect.any(Function),
+        resumeRecording: expect.any(Function),
+        end: expect.any(Function),
+        wrapup: expect.any(Function),
+      },
+      onHoldResume: expect.any(Function),
+      onEnd: expect.any(Function),
+      onWrapUp: expect.any(Function),
       logger: {},
-      deviceType: 'BROWSER',
     });
   });
 });

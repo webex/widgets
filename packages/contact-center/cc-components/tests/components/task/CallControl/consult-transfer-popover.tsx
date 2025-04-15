@@ -69,6 +69,6 @@ describe('ConsultTransferPopoverComponent', () => {
   it('calls onAgentSelect with correct agentId when agent button is clicked', () => {
     render(<ConsultTransferPopoverComponent {...baseProps} />);
     fireEvent.click(screen.getByText('Agent One'));
-    expect(mockOnAgentSelect).toHaveBeenCalledWith('agent1');
+    expect(mockOnAgentSelect).toHaveBeenCalledWith('agent1', 'Agent One');
   });
 });

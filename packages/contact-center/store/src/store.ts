@@ -32,9 +32,15 @@ class Store implements IStore {
   wrapupRequired: boolean = false;
   currentState: string = '';
   customState: ICustomState = null;
+  consultCompleted = false;
+  consultInitiated = false;
+  consultAccepted = false;
+  consultStartTimeStamp = undefined;
   lastStateChangeTimestamp?: number;
   lastIdleCodeChangeTimestamp?: number;
   showMultipleLoginAlert: boolean = false;
+  callControlAudio: MediaStream | null = null;
+  consultOfferReceived: boolean = false;
 
   constructor() {
     makeAutoObservable(this, {
