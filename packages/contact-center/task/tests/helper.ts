@@ -1133,7 +1133,7 @@ describe('useCallControl', () => {
     });
   });
 
-  it('should extract consulting agent information correctly', async () => {
+  it('should extract consulting agent information correctly when initiating consult', async () => {
     // Mock store.cc.agentConfig.agentId for comparison
     const mockStoreCC = {
       agentConfig: {
@@ -1178,6 +1178,7 @@ describe('useCallControl', () => {
       useCallControl({
         currentTask: taskWithParticipants,
         logger: mockLogger,
+        consultInitiated: true,
       })
     );
 
@@ -1188,6 +1189,67 @@ describe('useCallControl', () => {
 
     // Verify the logger was called with the correct message
     expect(mockLogger.info).toHaveBeenCalledWith('Consulting agent detected: Jane Consultant consultAgentId', {
+      module: 'widget-cc-task#helper.ts',
+      method: 'useCallControl#extractConsultingAgent',
+    });
+  });
+
+  it('should extract consulting agent information correctly when receiving consult', async () => {
+    // Mock store.cc.agentConfig.agentId for comparison
+    const mockStoreCC = {
+      agentConfig: {
+        agentId: 'currentAgentId',
+      },
+    };
+    jest.spyOn(store, 'cc', 'get').mockReturnValue(mockStoreCC);
+
+    // Create a task with participant data
+    const taskWithParticipants = {
+      ...mockCurrentTask,
+      data: {
+        interactionId: 'someMockInteractionId',
+        interaction: {
+          participants: {
+            currentAgentId: {
+              id: 'currentAgentId',
+              name: 'Current Agent',
+              pType: 'Agent',
+            },
+            consultAgentId: {
+              id: 'consultAgentId',
+              name: 'Jane Consultant',
+              pType: 'Agent',
+            },
+            customerId: {
+              id: 'customerId',
+              name: 'Customer',
+              pType: 'Customer',
+            },
+          },
+        },
+      },
+      on: jest.fn(),
+      off: jest.fn(),
+      hold: jest.fn(() => Promise.resolve()),
+      resume: jest.fn(() => Promise.resolve()),
+    };
+
+    // Render the hook with the task containing participants
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: taskWithParticipants,
+        logger: mockLogger,
+        consultInitiated: false,
+      })
+    );
+
+    // Wait for the consultAgentName to be updated
+    await waitFor(() => {
+      expect(result.current.consultAgentName).toBe('Current Agent');
+    });
+
+    // Verify the logger was called with the correct message
+    expect(mockLogger.info).toHaveBeenCalledWith('Consulting agent detected: Current Agent currentAgentId', {
       module: 'widget-cc-task#helper.ts',
       method: 'useCallControl#extractConsultingAgent',
     });
@@ -1231,6 +1293,7 @@ describe('useCallControl', () => {
       const hook = useCallControl({
         currentTask: taskWithoutConsultAgent,
         logger: mockLogger,
+        consultInitiated: true,
       });
       return hook;
     });

@@ -19,7 +19,7 @@ const CallControl: React.FunctionComponent<CallControlProps> = observer(({onHold
     callControlAudio,
   } = store;
   const result = {
-    ...useCallControl({currentTask, onHoldResume, onEnd, onWrapUp, logger}),
+    ...useCallControl({currentTask, onHoldResume, onEnd, onWrapUp, logger, consultInitiated}),
     wrapupRequired,
     wrapupCodes,
     consultInitiated,

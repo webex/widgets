@@ -124,7 +124,7 @@ export const useIncomingTask = (props: UseTaskProps) => {
 };
 
 export const useCallControl = (props: useCallControlProps) => {
-  const {currentTask, onHoldResume, onEnd, onWrapUp, logger} = props;
+  const {currentTask, onHoldResume, onEnd, onWrapUp, logger, consultInitiated} = props;
   const [isHeld, setIsHeld] = useState<boolean | undefined>(undefined);
   const [isRecording, setIsRecording] = useState(true);
   const [buddyAgents, setBuddyAgents] = useState<BuddyDetails[]>([]);
@@ -136,16 +136,17 @@ export const useCallControl = (props: useCallControlProps) => {
     if (!currentTask || !currentTask.data || !currentTask.data.interaction) return;
 
     const {interaction} = currentTask.data;
-
+    // consultInitiated
     // Find consulting agent (any agent that is not the current agent)
     const foundAgent = Object.values(interaction.participants)
       .filter(
-        (participant: Participant) => participant.pType === 'Agent' && participant.id !== store.cc.agentConfig.agentId
+        (participant: Participant) =>
+          participant.pType === 'Agent' &&
+          (consultInitiated
+            ? participant.id !== store.cc.agentConfig.agentId
+            : participant.id === store.cc.agentConfig.agentId)
       )
-      .map((agent: Participant) => ({
-        id: agent.id,
-        name: agent.name,
-      }))[0];
+      .map((participant: Participant) => ({id: participant.id, name: participant.name}))[0];
 
     if (foundAgent) {
       setConsultAgentName(foundAgent.name);
@@ -155,12 +156,12 @@ export const useCallControl = (props: useCallControlProps) => {
         method: 'useCallControl#extractConsultingAgent',
       });
     }
-  }, [currentTask, consultAgentName, logger]);
+  }, [currentTask, consultAgentName, logger, consultInitiated]);
 
   // Check for consulting agent whenever currentTask changes
   useEffect(() => {
     extractConsultingAgent();
-  }, [currentTask, extractConsultingAgent]);
+  }, [currentTask, extractConsultingAgent, consultInitiated]);
 
   const loadBuddyAgents = useCallback(async () => {
     try {
