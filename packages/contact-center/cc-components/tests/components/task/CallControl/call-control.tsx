@@ -79,6 +79,7 @@ describe('CallControlPresentational', () => {
             '1': {isHold: false},
           },
           callProcessingDetails: {isPaused: false},
+          mediaType: 'telephony',
         },
       },
     },
@@ -95,6 +96,12 @@ describe('CallControlPresentational', () => {
     transferCall: mockTransferCall,
     consultCall: mockConsultCall,
     setIsRecording: jest.fn(),
+    deviceType: 'BROWSER',
+    featureFlags: {
+      isEndCallEnabled: true,
+      isEndConsultEnabled: true,
+      webRtcEnabled: true,
+    },
   };
 
   beforeEach(() => {

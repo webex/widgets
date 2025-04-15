@@ -13,6 +13,7 @@ import {
   ICustomState,
 } from './store.types';
 import {ITask} from '@webex/plugin-cc';
+import {getFeatureFlags} from './util';
 
 class Store implements IStore {
   private static instance: Store;
@@ -35,6 +36,7 @@ class Store implements IStore {
   lastStateChangeTimestamp?: number;
   lastIdleCodeChangeTimestamp?: number;
   showMultipleLoginAlert: boolean = false;
+  featureFlags: {[key: string]: boolean} = {};
 
   constructor() {
     makeAutoObservable(this, {
@@ -51,6 +53,7 @@ class Store implements IStore {
     console.log('Returning store instance');
     return Store.instance;
   }
+
   registerCC(webex?: WithWebex['webex']): Promise<void> {
     if (webex) {
       this.cc = webex.cc;
@@ -64,6 +67,7 @@ class Store implements IStore {
     return this.cc
       .register()
       .then((response: Profile) => {
+        this.featureFlags = getFeatureFlags(response);
         this.teams = response.teams;
         this.loginOptions = response.loginVoiceOptions;
         this.idleCodes = response.idleCodes;

@@ -1,11 +1,12 @@
 import React, {useEffect, useState} from 'react';
-
-import {CallControlComponentProps} from '../task.types';
-import './call-control.styles.scss';
 import {PopoverNext, SelectNext, TooltipNext, Text, ButtonCircle, ButtonPill} from '@momentum-ui/react-collaboration';
 import {Item} from '@react-stately/collections';
 import {Icon} from '@momentum-design/components/dist/react';
+
+import './call-control.styles.scss';
+import {CallControlComponentProps} from '../task.types';
 import ConsultTransferPopoverComponent from './CallControlCustom/consult-transfer-popover';
+import {getControlsVisibility} from '../../../utils/task-util';
 
 function CallControlComponent(props: CallControlComponentProps) {
   const [selectedWrapupReason, setSelectedWrapupReason] = useState<string | null>(null);
@@ -30,7 +31,11 @@ function CallControlComponent(props: CallControlComponentProps) {
     loadBuddyAgents,
     transferCall,
     consultCall,
+    deviceType,
+    featureFlags,
   } = props;
+
+  const visibleCtrl = getControlsVisibility(deviceType, featureFlags, currentTask);
 
   useEffect(() => {
     if (!currentTask || !currentTask.data || !currentTask.data.interaction) return;
@@ -71,6 +76,7 @@ function CallControlComponent(props: CallControlComponentProps) {
       tooltip: isHeld ? 'Resume the call' : 'Hold the call',
       className: 'call-control-button',
       disabled: false,
+      isVisible: visibleCtrl.holdResume,
     },
     {
       icon: 'headset-bold',
@@ -78,6 +84,7 @@ function CallControlComponent(props: CallControlComponentProps) {
       className: 'call-control-button',
       disabled: false,
       menuType: 'Consult',
+      isVisible: visibleCtrl.consult,
     },
     {
       icon: 'next-bold',
@@ -85,6 +92,7 @@ function CallControlComponent(props: CallControlComponentProps) {
       className: 'call-control-button',
       disabled: false,
       menuType: 'Transfer',
+      isVisible: visibleCtrl.transfer,
     },
     {
       icon: isRecording ? 'record-paused-bold' : 'record-bold',
@@ -92,6 +100,7 @@ function CallControlComponent(props: CallControlComponentProps) {
       tooltip: isRecording ? 'Pause Recording' : 'Resume Recording',
       className: 'call-control-button',
       disabled: false,
+      isVisible: visibleCtrl.pauseResumeRecording,
     },
     {
       icon: 'cancel-regular',
@@ -99,6 +108,7 @@ function CallControlComponent(props: CallControlComponentProps) {
       tooltip: 'End call',
       className: 'call-control-button-cancel',
       disabled: isHeld,
+      isVisible: visibleCtrl.end,
     },
   ];
 
@@ -111,6 +121,8 @@ function CallControlComponent(props: CallControlComponentProps) {
         {!wrapupRequired && (
           <div className="button-group">
             {buttons.map((button, index) => {
+              if (!button.isVisible) return null;
+
               if (button.menuType) {
                 return (
                   <PopoverNext
@@ -218,7 +230,7 @@ function CallControlComponent(props: CallControlComponentProps) {
             })}
           </div>
         )}
-        {wrapupRequired && (
+        {wrapupRequired && visibleCtrl.wrapup && (
           <div className="wrapup-group">
             <PopoverNext
               color="primary"

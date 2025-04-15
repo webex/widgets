@@ -300,6 +300,7 @@ export const useCallControl = (props: useCallControlProps) => {
     loadBuddyAgents,
     transferCall,
     consultCall,
+    deviceType,
   };
 };
 

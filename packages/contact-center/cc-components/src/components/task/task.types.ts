@@ -212,6 +212,8 @@ export interface ControlProps {
    * Function to consult with a buddy agent.
    */
   consultCall: () => void;
+
+  featureFlags: {[key: string]: boolean};
 }
 
 export type CallControlComponentProps = Pick<
@@ -232,6 +234,8 @@ export type CallControlComponentProps = Pick<
   | 'loadBuddyAgents'
   | 'transferCall'
   | 'consultCall'
+  | 'deviceType'
+  | 'featureFlags'
 >;
 
 /**

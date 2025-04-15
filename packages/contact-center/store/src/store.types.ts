@@ -29,6 +29,7 @@ type IdleCode = {
 };
 
 interface IStore {
+  featureFlags: {[key: string]: boolean};
   teams: Team[];
   loginOptions: string[];
   cc: IContactCenter;

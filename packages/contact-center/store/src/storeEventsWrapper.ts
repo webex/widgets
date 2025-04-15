@@ -24,6 +24,10 @@ class StoreWrapper implements IStoreWrapper {
   }
 
   // Proxy all methods and properties of the original store
+  get featureFlags() {
+    return this.store.featureFlags;
+  }
+
   get teams() {
     return this.store.teams;
   }
