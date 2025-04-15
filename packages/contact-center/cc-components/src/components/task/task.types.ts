@@ -251,6 +251,17 @@ export interface ControlProps {
   callControlAudio: MediaStream | null;
 
   /**
+   * ID of the consulting agent
+   */
+  consultAgentId: string;
+
+  /**
+   * Function to set the consulting agent ID
+   * @param agentId - The ID of the consulting agent.
+   */
+  setConsultAgentId: (agentId: string) => void;
+
+  /**
    * Name of the consulting agent.
    */
   consultAgentName: string;
@@ -288,6 +299,8 @@ export type CallControlComponentProps = Pick<
   | 'callControlAudio'
   | 'consultAgentName'
   | 'setConsultAgentName'
+  | 'consultAgentId'
+  | 'setConsultAgentId'
 >;
 
 /**

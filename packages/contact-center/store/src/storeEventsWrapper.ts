@@ -461,6 +461,16 @@ class StoreWrapper implements IStoreWrapper {
     }
 
     this.setCurrentTask(task);
+    this.setIncomingTask(null);
+    if (task.data.interaction.state === 'consulting') {
+      if (task.data.isConsulted) {
+        this.setConsultAccepted(true);
+      } else {
+        this.setConsultInitiated(true);
+      }
+      this.setConsultStartTimeStamp(Date.now());
+      this.setConsultCompleted(true);
+    }
 
     this.setState({
       developerName: ENGAGED_LABEL,

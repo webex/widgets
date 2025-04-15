@@ -1187,7 +1187,7 @@ describe('useCallControl', () => {
     });
 
     // Verify the logger was called with the correct message
-    expect(mockLogger.info).toHaveBeenCalledWith('Consulting agent detected: Jane Consultant', {
+    expect(mockLogger.info).toHaveBeenCalledWith('Consulting agent detected: Jane Consultant consultAgentId', {
       module: 'widget-cc-task#helper.ts',
       method: 'useCallControl#extractConsultingAgent',
     });

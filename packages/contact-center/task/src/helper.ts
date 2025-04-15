@@ -129,6 +129,7 @@ export const useCallControl = (props: useCallControlProps) => {
   const [isRecording, setIsRecording] = useState(true);
   const [buddyAgents, setBuddyAgents] = useState<BuddyDetails[]>([]);
   const [consultAgentName, setConsultAgentName] = useState<string>('Consult Agent');
+  const [consultAgentId, setConsultAgentId] = useState<string>(null);
 
   // Function to extract consulting agent information
   const extractConsultingAgent = useCallback(() => {
@@ -148,7 +149,8 @@ export const useCallControl = (props: useCallControlProps) => {
 
     if (foundAgent) {
       setConsultAgentName(foundAgent.name);
-      logger.info(`Consulting agent detected: ${foundAgent.name}`, {
+      setConsultAgentId(foundAgent.id);
+      logger.info(`Consulting agent detected: ${foundAgent.name} ${foundAgent.id}`, {
         module: 'widget-cc-task#helper.ts',
         method: 'useCallControl#extractConsultingAgent',
       });
@@ -354,6 +356,8 @@ export const useCallControl = (props: useCallControlProps) => {
     consultTransfer,
     consultAgentName,
     setConsultAgentName,
+    consultAgentId,
+    setConsultAgentId,
   };
 };
 
