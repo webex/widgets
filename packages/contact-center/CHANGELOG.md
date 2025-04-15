@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.41](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.40...v1.28.0-ccwidgets.41) (2025-04-15)
+
+
+### Features
+
+* **task-controls:** added-consult-flow ([#424](https://github.com/webex/widgets/issues/424)) ([0e3da1b](https://github.com/webex/widgets/commit/0e3da1b2933850929a393eff70faf209d9ac1b33))
+
 # [1.28.0-ccwidgets.40](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.39...v1.28.0-ccwidgets.40) (2025-04-14)
 
 
