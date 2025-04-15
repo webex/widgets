@@ -83,10 +83,6 @@ function CallControlComponent(props: CallControlComponentProps) {
     } else {
       transferCall(agentId, 'agent');
     }
-    setShowAgentMenu(false);
-    setTimeout(() => {
-      setAgentMenuType(null);
-    }, 1000);
   };
 
   const buttons = [
@@ -158,10 +154,8 @@ function CallControlComponent(props: CallControlComponentProps) {
                   <PopoverNext
                     key={index}
                     onHide={() => {
-                      setTimeout(() => {
-                        setShowAgentMenu(false);
-                        setAgentMenuType(null);
-                      }, 500);
+                      setShowAgentMenu(false);
+                      setAgentMenuType(null);
                     }}
                     color="primary"
                     delay={[0, 0]}
