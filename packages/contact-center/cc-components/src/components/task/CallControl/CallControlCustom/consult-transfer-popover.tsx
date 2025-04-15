@@ -38,7 +38,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
             <ConsultTransferListComponent
               title={agent.agentName}
               buttonIcon={buttonIcon}
-              onButtonPress={() => onAgentSelect(agent.agentId)}
+              onButtonPress={() => onAgentSelect(agent.agentId, agent.agentName)}
             />
           </div>
         ))}
