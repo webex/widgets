@@ -1,4 +1,4 @@
-import {useEffect, useCallback, useState} from 'react';
+import {useEffect, useCallback, useState, useRef} from 'react';
 import {ITask} from '@webex/plugin-cc';
 import {useCallControlProps, UseTaskListProps, UseTaskProps, Participant} from './task.types';
 import {useOutdialCallProps} from '@webex/cc-components';
@@ -130,6 +130,43 @@ export const useCallControl = (props: useCallControlProps) => {
   const [buddyAgents, setBuddyAgents] = useState<BuddyDetails[]>([]);
   const [consultAgentName, setConsultAgentName] = useState<string>('Consult Agent');
   const [consultAgentId, setConsultAgentId] = useState<string>(null);
+  const [holdTime, setHoldTime] = useState(0);
+  const workerRef = useRef<Worker | null>(null);
+
+  const workerScript = `
+    let intervalId;
+    const startTimer = (startTime) => {
+      if (intervalId) clearInterval(intervalId);
+      intervalId = setInterval(() => {
+        const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+        self.postMessage({type: 'elapsedTime', elapsedTime});
+      }, 1000);
+    };
+    const stopTimer = () => {
+      if (intervalId) clearInterval(intervalId);
+      self.postMessage({type: 'stop'});
+    };
+    self.onmessage = (event) => {
+      if (event.data.type === 'start') {
+        const startTime = event.data.startTime;
+        startTimer(startTime);
+      }
+      if (event.data.type === 'stop') {
+        stopTimer();
+      }
+    };
+  `;
+
+  useEffect(() => {
+    if (!workerRef.current?.postMessage) return;
+    if (isHeld) {
+      // Start the timer when the call is on hold
+      workerRef.current?.postMessage({type: 'start', startTime: Date.now()});
+    } else {
+      // Stop the timer when the call is resumed
+      workerRef.current?.postMessage({type: 'stop'});
+    }
+  }, [isHeld, workerRef.current?.postMessage]);
 
   // Function to extract consulting agent information
   const extractConsultingAgent = useCallback(() => {
@@ -208,6 +245,19 @@ export const useCallControl = (props: useCallControlProps) => {
   useEffect(() => {
     if (!currentTask) return;
 
+    // Initialize the Web Worker
+    const blob = new Blob([workerScript], {type: 'application/javascript'});
+    const workerUrl = URL.createObjectURL(blob);
+    workerRef.current = new Worker(workerUrl);
+
+    workerRef.current.onmessage = (event) => {
+      if (event.data.type === 'elapsedTime') {
+        setHoldTime(event.data.elapsedTime);
+      } else if (event.data.type === 'stop') {
+        setHoldTime(0);
+      }
+    };
+
     store.setTaskCallback(TASK_EVENTS.TASK_HOLD, holdCallback, currentTask.data.interactionId);
     store.setTaskCallback(TASK_EVENTS.TASK_RESUME, resumeCallback, currentTask.data.interactionId);
     store.setTaskCallback(TASK_EVENTS.TASK_END, endCallCallback, currentTask.data.interactionId);
@@ -220,6 +270,11 @@ export const useCallControl = (props: useCallControlProps) => {
     );
 
     return () => {
+      if (workerRef.current?.postMessage) {
+        workerRef.current.postMessage({type: 'stop'});
+        workerRef.current.terminate();
+        workerRef.current = null;
+      }
       store.removeTaskCallback(TASK_EVENTS.TASK_HOLD, holdCallback, currentTask.data.interactionId);
       store.removeTaskCallback(TASK_EVENTS.TASK_RESUME, resumeCallback, currentTask.data.interactionId);
       store.removeTaskCallback(TASK_EVENTS.TASK_END, endCallCallback, currentTask.data.interactionId);
@@ -359,6 +414,7 @@ export const useCallControl = (props: useCallControlProps) => {
     setConsultAgentName,
     consultAgentId,
     setConsultAgentId,
+    holdTime,
   };
 };
 
