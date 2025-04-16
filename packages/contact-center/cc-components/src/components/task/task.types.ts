@@ -271,6 +271,11 @@ export interface ControlProps {
    * @param agentName - The name of the consulting agent.
    */
   setConsultAgentName: (agentName: string) => void;
+
+  /**
+   * Time since the task is in held state
+   */
+  holdTime: number;
 }
 
 export type CallControlComponentProps = Pick<
@@ -301,6 +306,7 @@ export type CallControlComponentProps = Pick<
   | 'setConsultAgentName'
   | 'consultAgentId'
   | 'setConsultAgentId'
+  | 'holdTime'
 >;
 
 /**

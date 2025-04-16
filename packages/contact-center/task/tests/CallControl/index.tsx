@@ -39,7 +39,23 @@ const onWrapUpCb = jest.fn();
 
 describe('CallControl Component', () => {
   it('renders CallControlPresentational with correct props', () => {
-    const useCallControlSpy = jest.spyOn(helper, 'useCallControl');
+    const useCallControlSpy = jest.spyOn(helper, 'useCallControl').mockReturnValue({
+      currentTask: {interactionId: 'mockInteractionId'},
+      audioRef: {current: null},
+      endCall: jest.fn(),
+      toggleHold: jest.fn(),
+      toggleRecording: jest.fn(),
+      wrapupCall: jest.fn(),
+      isHeld: false,
+      isRecording: false,
+      setIsHeld: jest.fn(),
+      setIsRecording: jest.fn(),
+      buddyAgents: [],
+      loadBuddyAgents: jest.fn(),
+      transferCall: jest.fn(),
+      consultCall: jest.fn(),
+      holdTime: 0,
+    });
 
     render(<CallControl onHoldResume={onHoldResumeCb} onEnd={onEndCb} onWrapUp={onWrapUpCb} />);
 
