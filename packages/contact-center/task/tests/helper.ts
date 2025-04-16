@@ -596,7 +596,6 @@ describe('useCallControl', () => {
 
     const {result} = renderHook(() =>
       useCallControl({
-        deviceType: 'BROWSER',
         currentTask: mockCurrentTask,
         logger: mockLogger,
         onHoldResume: jest.fn(),
@@ -634,7 +633,6 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
-        deviceType: 'BROWSER',
       })
     );
 
@@ -655,7 +653,6 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
-        deviceType: 'BROWSER',
       })
     );
 
@@ -678,7 +675,6 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
-        deviceType: 'BROWSER',
       })
     );
 
@@ -700,7 +696,6 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
-        deviceType: 'BROWSER',
       })
     );
 
@@ -720,7 +715,6 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
-        deviceType: 'BROWSER',
       })
     );
 
@@ -742,7 +736,6 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
-        deviceType: 'BROWSER',
       })
     );
 
@@ -763,7 +756,6 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
-        deviceType: 'BROWSER',
       })
     );
 
@@ -791,7 +783,6 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
-        deviceType: 'BROWSER',
       })
     );
 
@@ -810,7 +801,6 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
-        deviceType: 'BROWSER',
       })
     );
     await waitFor(() => {
@@ -833,7 +823,6 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
-        deviceType: 'BROWSER',
       })
     );
 
@@ -857,7 +846,6 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
-        deviceType: 'BROWSER',
       })
     );
 
@@ -882,7 +870,6 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
-        deviceType: 'BROWSER',
       })
     );
     await waitFor(() => {
@@ -900,9 +887,6 @@ describe('useCallControl', () => {
   it('should not add media events if task is not available', async () => {
     const mockAudioElement = {current: {srcObject: null}};
     jest.spyOn(React, 'useRef').mockReturnValueOnce(mockAudioElement);
-    const mockAudio = {
-      srcObject: 'mock-audio',
-    };
 
     renderHook(() =>
       useCallControl({
@@ -1364,7 +1348,6 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
-        deviceType: 'BROWSER',
       })
     );
 
@@ -1386,7 +1369,6 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
-        deviceType: 'BROWSER',
       })
     );
 
@@ -1418,7 +1400,6 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
-        deviceType: 'BROWSER',
       })
     );
 
@@ -1446,7 +1427,6 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
-        deviceType: 'BROWSER',
       })
     );
 
@@ -1478,7 +1458,6 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
-        deviceType: 'BROWSER',
       })
     );
 
@@ -1517,7 +1496,6 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
-        deviceType: 'BROWSER',
       })
     );
 
