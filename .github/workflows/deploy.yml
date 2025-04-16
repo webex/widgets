@@ -30,7 +30,7 @@ jobs:
 
       - id: validate-dependencies
         name: Validate Dependencies
-        uses: actions/cache@v4.0.0
+        uses: actions/cache@v4
         with:
           path: '**/node_modules'
           key: node-modules-${{ hashFiles('./yarn.lock') }}
@@ -43,7 +43,7 @@ jobs:
         run: yarn
 
       - name: Cache Dependencies
-        uses: actions/cache@v4.0.0
+        uses: actions/cache@v4
         if: steps.validate-dependencies.outputs.cache-hit != 'true'
         with:
           path: '**/node_modules'
@@ -66,7 +66,7 @@ jobs:
           cache: 'yarn'
 
       - name: Uncache Dependencies
-        uses: actions/cache@v4.0.0
+        uses: actions/cache@v4
         with:
           path: '**/node_modules'
           key: node-modules-${{ hashFiles('./yarn.lock') }}
@@ -78,7 +78,7 @@ jobs:
         run: yarn run build
 
       - name: Cache Distributables
-        uses: actions/cache@v4.0.0
+        uses: actions/cache@v4
         with:
           path: '**/dist'
           key: dist-${{ env.rid }}
@@ -100,13 +100,13 @@ jobs:
           cache: 'yarn'
 
       - name: Uncache Dependencies
-        uses: actions/cache@v4.0.0
+        uses: actions/cache@v4
         with:
           path: '**/node_modules'
           key: node-modules-${{ hashFiles('./yarn.lock') }}
 
       - name: Uncache Distributables
-        uses: actions/cache@v4.0.0
+        uses: actions/cache@v4
         with:
           path: '**/dist'
           key: dist-${{ env.rid }}
@@ -134,13 +134,13 @@ jobs:
           cache: 'yarn'
 
       - name: Uncache Dependencies
-        uses: actions/cache@v4.0.0
+        uses: actions/cache@v4
         with:
           path: '**/node_modules'
           key: node-modules-${{ hashFiles('./yarn.lock') }}
 
       - name: Uncache Distributables
-        uses: actions/cache@v4.0.0
+        uses: actions/cache@v4
         with:
           path: '**/dist'
           key: dist-${{ env.rid }}
