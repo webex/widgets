@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.42](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.41...v1.28.0-ccwidgets.42) (2025-04-16)
+
+
+### Bug Fixes
+
+* **tooling:** upgrade setup node and cache in github action to version 4 ([#431](https://github.com/webex/widgets/issues/431)) ([233a1ef](https://github.com/webex/widgets/commit/233a1ef703d90edcd1dfa09118fc95c7ac0ec008))
+
 # [1.28.0-ccwidgets.41](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.40...v1.28.0-ccwidgets.41) (2025-04-15)
 
 
