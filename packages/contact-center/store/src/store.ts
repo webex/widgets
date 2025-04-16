@@ -41,6 +41,7 @@ class Store implements IStore {
   showMultipleLoginAlert: boolean = false;
   callControlAudio: MediaStream | null = null;
   consultOfferReceived: boolean = false;
+  new: boolean = false;
 
   constructor() {
     makeAutoObservable(this, {
