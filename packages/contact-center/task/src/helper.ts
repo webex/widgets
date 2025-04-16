@@ -1,6 +1,6 @@
-import {useEffect, useCallback, useRef, useState} from 'react';
+import {useEffect, useCallback, useState} from 'react';
 import {ITask} from '@webex/plugin-cc';
-import {useCallControlProps, UseTaskListProps, UseTaskProps} from './task.types';
+import {useCallControlProps, UseTaskListProps, UseTaskProps, Participant} from './task.types';
 import {useOutdialCallProps} from '@webex/cc-components';
 import store, {TASK_EVENTS, BuddyDetails, DestinationType} from '@webex/cc-store';
 
@@ -124,12 +124,12 @@ export const useIncomingTask = (props: UseTaskProps) => {
 };
 
 export const useCallControl = (props: useCallControlProps) => {
-  const {currentTask, onHoldResume, onEnd, onWrapUp, logger, deviceType} = props;
-  const audioRef = useRef<HTMLAudioElement | null>(null); // Ref for the audio element
-  const isBrowser = deviceType === 'BROWSER';
+  const {currentTask, onHoldResume, onEnd, onWrapUp, logger, consultInitiated} = props;
   const [isHeld, setIsHeld] = useState<boolean | undefined>(undefined);
   const [isRecording, setIsRecording] = useState(true);
   const [buddyAgents, setBuddyAgents] = useState<BuddyDetails[]>([]);
+  const [consultAgentName, setConsultAgentName] = useState<string>('Consult Agent');
+  const [consultAgentId, setConsultAgentId] = useState<string>(null);
   const [holdTime, setHoldTime] = useState(0);
   const workerRef = useRef<Worker | null>(null);
 
@@ -167,6 +167,38 @@ export const useCallControl = (props: useCallControlProps) => {
       workerRef.current?.postMessage({type: 'stop'});
     }
   }, [isHeld, workerRef.current?.postMessage]);
+
+  // Function to extract consulting agent information
+  const extractConsultingAgent = useCallback(() => {
+    if (!currentTask || !currentTask.data || !currentTask.data.interaction) return;
+
+    const {interaction} = currentTask.data;
+    // consultInitiated
+    // Find consulting agent (any agent that is not the current agent)
+    const foundAgent = Object.values(interaction.participants)
+      .filter(
+        (participant: Participant) =>
+          participant.pType === 'Agent' &&
+          (consultInitiated
+            ? participant.id !== store.cc.agentConfig.agentId
+            : participant.id === store.cc.agentConfig.agentId)
+      )
+      .map((participant: Participant) => ({id: participant.id, name: participant.name}))[0];
+
+    if (foundAgent) {
+      setConsultAgentName(foundAgent.name);
+      setConsultAgentId(foundAgent.id);
+      logger.info(`Consulting agent detected: ${foundAgent.name} ${foundAgent.id}`, {
+        module: 'widget-cc-task#helper.ts',
+        method: 'useCallControl#extractConsultingAgent',
+      });
+    }
+  }, [currentTask, consultAgentName, logger, consultInitiated]);
+
+  // Check for consulting agent whenever currentTask changes
+  useEffect(() => {
+    extractConsultingAgent();
+  }, [currentTask, extractConsultingAgent, consultInitiated]);
 
   const loadBuddyAgents = useCallback(async () => {
     try {
@@ -267,25 +299,6 @@ export const useCallControl = (props: useCallControlProps) => {
     });
   };
 
-  const handleTaskMedia = useCallback(
-    (track) => {
-      if (audioRef.current) {
-        audioRef.current.srcObject = new MediaStream([track]);
-      }
-    },
-    [audioRef, currentTask]
-  );
-
-  useEffect(() => {
-    if (!currentTask || !isBrowser) return;
-    // Call control only event for WebRTC calls
-    currentTask.on(TASK_EVENTS.TASK_MEDIA, handleTaskMedia);
-
-    return () => {
-      currentTask.off(TASK_EVENTS.TASK_MEDIA, handleTaskMedia);
-    };
-  }, [currentTask]);
-
   const toggleHold = (hold: boolean) => {
     if (hold) {
       currentTask.hold().catch((error: Error) => {
@@ -334,15 +347,55 @@ export const useCallControl = (props: useCallControlProps) => {
       await currentTask.transfer(transferPayload);
     } catch (error) {
       logError(`Error transferring call: ${error}`, 'transferCall');
+      throw error;
     }
   };
 
-  // New consult callback method (empty for now)
-  const consultCall = async () => {};
+  const consultCall = async (consultDestination: string, destinationType: DestinationType) => {
+    const consultPayload = {
+      to: consultDestination,
+      destinationType: destinationType,
+    };
+
+    try {
+      await currentTask.consult(consultPayload);
+      store.setConsultInitiated(true);
+    } catch (error) {
+      logError(`Error consulting call: ${error}`, 'consultCall');
+      throw error;
+    }
+  };
+
+  const endConsultCall = async () => {
+    const consultEndPayload = {
+      isConsult: true,
+      taskId: currentTask.data.interactionId,
+    };
+
+    try {
+      await currentTask.endConsult(consultEndPayload);
+    } catch (error) {
+      logError(`Error ending consult call: ${error}`, 'endConsultCall');
+      throw error;
+    }
+  };
+
+  const consultTransfer = async (transferDestination: string, destinationType: DestinationType) => {
+    const consultTransferPayload = {
+      to: transferDestination,
+      destinationType: destinationType,
+    };
+    try {
+      await currentTask.consultTransfer(consultTransferPayload);
+      store.setConsultInitiated(true);
+    } catch (error) {
+      logError(`Error transferring consult call: ${error}`, 'consultTransfer');
+      throw error;
+    }
+  };
 
   return {
     currentTask,
-    audioRef,
     endCall,
     toggleHold,
     toggleRecording,
@@ -355,6 +408,12 @@ export const useCallControl = (props: useCallControlProps) => {
     loadBuddyAgents,
     transferCall,
     consultCall,
+    endConsultCall,
+    consultTransfer,
+    consultAgentName,
+    setConsultAgentName,
+    consultAgentId,
+    setConsultAgentId,
     holdTime,
   };
 };

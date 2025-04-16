@@ -1,5 +1,5 @@
 import {makeAutoObservable, observable} from 'mobx';
-import Webex from 'webex';
+import Webex from 'webex/contact-center';
 import {
   IContactCenter,
   Profile,
@@ -32,9 +32,15 @@ class Store implements IStore {
   wrapupRequired: boolean = false;
   currentState: string = '';
   customState: ICustomState = null;
+  consultCompleted = false;
+  consultInitiated = false;
+  consultAccepted = false;
+  consultStartTimeStamp = undefined;
   lastStateChangeTimestamp?: number;
   lastIdleCodeChangeTimestamp?: number;
   showMultipleLoginAlert: boolean = false;
+  callControlAudio: MediaStream | null = null;
+  consultOfferReceived: boolean = false;
 
   constructor() {
     makeAutoObservable(this, {
@@ -65,7 +71,9 @@ class Store implements IStore {
       .register()
       .then((response: Profile) => {
         this.teams = response.teams;
-        this.loginOptions = response.loginVoiceOptions;
+        this.loginOptions = response.webRtcEnabled
+          ? response.loginVoiceOptions
+          : response.loginVoiceOptions.filter((option) => option !== 'BROWSER');
         this.idleCodes = response.idleCodes;
         this.agentId = response.agentId;
         this.wrapupCodes = response.wrapupCodes;
