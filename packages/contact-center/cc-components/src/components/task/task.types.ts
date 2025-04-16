@@ -212,6 +212,11 @@ export interface ControlProps {
    * Function to consult with a buddy agent.
    */
   consultCall: () => void;
+
+  /**
+   * Time since the task is in held state
+   */
+  holdTime: number;
 }
 
 export type CallControlComponentProps = Pick<
@@ -232,6 +237,7 @@ export type CallControlComponentProps = Pick<
   | 'loadBuddyAgents'
   | 'transferCall'
   | 'consultCall'
+  | 'holdTime'
 >;
 
 /**

@@ -433,6 +433,8 @@ describe('useTaskList Hook', () => {
 });
 
 describe('useCallControl', () => {
+  let originalWorker: typeof Worker;
+
   const mockCurrentTask = {
     data: {
       interactionId: 'someMockInteractionId',
@@ -467,10 +469,24 @@ describe('useCallControl', () => {
     global.MediaStream = jest.fn().mockImplementation((tracks) => ({
       getTracks: () => tracks,
     }));
+
+    // Mock the Worker class
+    originalWorker = global.Worker;
+    global.Worker = jest.fn().mockImplementation(() => ({
+      postMessage: jest.fn(),
+      terminate: jest.fn(),
+      onmessage: null,
+    }));
+
+    // Mock URL.createObjectURL
+    global.URL.createObjectURL = jest.fn().mockImplementation(() => 'mocked-worker-url');
     jest.clearAllMocks();
   });
 
   afterEach(() => {
+    // Restore the original Worker class and URL.createObjectURL
+    global.Worker = originalWorker;
+    delete global.URL.createObjectURL;
     jest.clearAllMocks();
     logger.error.mockRestore();
   });
@@ -585,6 +601,9 @@ describe('useCallControl', () => {
         deviceType: 'BROWSER',
         currentTask: mockCurrentTask,
         logger: mockLogger,
+        onHoldResume: jest.fn(),
+        onEnd: jest.fn(),
+        onWrapUp: jest.fn(),
       })
     );
 
@@ -885,7 +904,7 @@ describe('useCallControl', () => {
       return {mockStream: 'mock-stream'};
     });
     const mockAudioElement = {current: {srcObject: null}};
-    jest.spyOn(React, 'useRef').mockReturnValue(mockAudioElement);
+    jest.spyOn(React, 'useRef').mockReturnValueOnce(mockAudioElement);
     const mockAudio = {
       srcObject: 'mock-audio',
     };
@@ -1176,6 +1195,177 @@ describe('useCallControl', () => {
       module: 'widget-cc-task#helper.ts',
       method: 'useCallControl#transferCall',
     });
+  });
+
+  it('should initialize holdTime to 0', async () => {
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        deviceType: 'BROWSER',
+      })
+    );
+
+    expect(result.current.holdTime).toEqual(0);
+  });
+
+  it('should start the timer when isHeld is true', () => {
+    const mockPostMessage = jest.fn();
+    (global.Worker as jest.Mock).mockImplementation(() => ({
+      postMessage: mockPostMessage,
+      terminate: jest.fn(),
+      onmessage: null,
+    }));
+
+    const {result, rerender} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        deviceType: 'BROWSER',
+      })
+    );
+
+    act(() => {
+      // Update isHeld to true
+      result.current.setIsHeld(true);
+    });
+
+    rerender();
+
+    expect(mockPostMessage).toHaveBeenCalledWith({
+      type: 'start',
+      startTime: expect.any(Number),
+    });
+  });
+
+  it('should stop the timer when isHeld is false', () => {
+    const mockPostMessage = jest.fn();
+    (global.Worker as jest.Mock).mockImplementation(() => ({
+      postMessage: mockPostMessage,
+      terminate: jest.fn(),
+      onmessage: null,
+    }));
+
+    const {rerender} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        deviceType: 'BROWSER',
+      })
+    );
+
+    // Update isHeld to false
+    rerender();
+
+    expect(mockPostMessage).toHaveBeenCalledWith({type: 'stop'});
+  });
+
+  it('should update holdTime when the worker sends elapsedTime', () => {
+    let onmessageCallback: ((event: MessageEvent) => void) | null = null;
+
+    (global.Worker as jest.Mock).mockImplementation(() => ({
+      postMessage: jest.fn(),
+      terminate: jest.fn(),
+      set onmessage(callback) {
+        onmessageCallback = callback;
+      },
+    }));
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        deviceType: 'BROWSER',
+      })
+    );
+
+    // Simulate a message from the worker
+    act(() => {
+      onmessageCallback?.({
+        data: {type: 'elapsedTime', elapsedTime: 5},
+      } as MessageEvent);
+    });
+
+    expect(result.current.holdTime).toBe(5);
+  });
+
+  it('should reset holdTime to 0 when the worker sends stop', () => {
+    let onmessageCallback: ((event: MessageEvent) => void) | null = null;
+
+    (global.Worker as jest.Mock).mockImplementation(() => ({
+      postMessage: jest.fn(),
+      terminate: jest.fn(),
+      set onmessage(callback) {
+        onmessageCallback = callback;
+      },
+    }));
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        deviceType: 'BROWSER',
+      })
+    );
+
+    // Simulate a message from the worker
+    act(() => {
+      onmessageCallback?.({
+        data: {type: 'elapsedTime', elapsedTime: 5},
+      } as MessageEvent);
+    });
+
+    expect(result.current.holdTime).toBe(5);
+
+    // Simulate a stop message
+    act(() => {
+      onmessageCallback?.({
+        data: {type: 'stop'},
+      } as MessageEvent);
+    });
+
+    expect(result.current.holdTime).toBe(0);
+  });
+
+  it('should terminate the worker on unmount', () => {
+    const mockTerminate = jest.fn();
+
+    (global.Worker as jest.Mock).mockImplementation(() => ({
+      postMessage: jest.fn(),
+      terminate: mockTerminate,
+      onmessage: null,
+    }));
+
+    const {unmount} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        deviceType: 'BROWSER',
+      })
+    );
+
+    // Unmount the hook
+    unmount();
+
+    expect(mockTerminate).toHaveBeenCalled();
   });
 });
 
