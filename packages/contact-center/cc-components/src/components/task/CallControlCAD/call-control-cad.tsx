@@ -7,7 +7,7 @@ import './call-control-cad.styles.scss';
 import TaskTimer from '../TaskTimer/index';
 
 const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => {
-  const {currentTask, isHeld, isRecording, holdTime} = props;
+  const {currentTask, isHeld, isRecording, holdTime, wrapupRequired} = props;
 
   // Use the Web Worker-based hold timer
 
@@ -36,7 +36,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
               Call - <TaskTimer startTimeStamp={currentTask?.data?.interaction?.startTime} />
             </Text>
             <div className="call-status">
-              {isHeld && (
+              {!wrapupRequired && isHeld && (
                 <>
                   <span className="dot">•</span>
                   <div className="on-hold">
