@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.43](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.42...v1.28.0-ccwidgets.43) (2025-04-16)
+
+
+### Features
+
+* **cc-widgets:** CC SDK version update to get upload logs ([#430](https://github.com/webex/widgets/issues/430)) ([d899474](https://github.com/webex/widgets/commit/d8994743555d829fc27e003ed7ae6960f46f3713))
+
 # [1.28.0-ccwidgets.42](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.41...v1.28.0-ccwidgets.42) (2025-04-16)
 
 
