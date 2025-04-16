@@ -885,9 +885,6 @@ describe('useCallControl', () => {
   });
 
   it('should not add media events if task is not available', async () => {
-    const mockAudioElement = {current: {srcObject: null}};
-    jest.spyOn(React, 'useRef').mockReturnValueOnce(mockAudioElement);
-
     renderHook(() =>
       useCallControl({
         currentTask: undefined,
