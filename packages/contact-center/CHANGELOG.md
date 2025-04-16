@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.44](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.43...v1.28.0-ccwidgets.44) (2025-04-16)
+
+
+### Bug Fixes
+
+* **call-control:** add cad wrapper widget ([#432](https://github.com/webex/widgets/issues/432)) ([a0b0556](https://github.com/webex/widgets/commit/a0b0556b5550cce93006c34d3d95680985796331))
+
 # [1.28.0-ccwidgets.43](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.42...v1.28.0-ccwidgets.43) (2025-04-16)
 
 
