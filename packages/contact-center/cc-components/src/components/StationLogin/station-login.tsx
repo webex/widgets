@@ -2,9 +2,7 @@ import React, {useEffect, useState, useRef, useCallback} from 'react';
 import {StationLoginComponentProps} from './station-login.types';
 import './station-login.style.scss';
 import {MULTIPLE_SIGN_IN_ALERT_MESSAGE, MULTIPLE_SIGN_IN_ALERT_TITLE} from './constants';
-import {ButtonPill, Text, SelectNext, TextInput, PopoverNext} from '@momentum-ui/react-collaboration';
-import {Item} from '@react-stately/collections';
-import {Icon, Select, Option} from '@momentum-design/components/dist/react';
+import {Button, Icon, Select, Option, Text, Tooltip, Input} from '@momentum-design/components/dist/react';
 
 const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps> = (props) => {
   const {
@@ -19,14 +17,16 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
     deviceType,
     showMultipleLoginAlert,
     handleContinue,
+    contactCenterLogout,
   } = props;
 
   const modalRef = useRef<HTMLDialogElement>(null);
+  const ccSignOutModalRef = useRef<HTMLDialogElement>(null);
   const [dialNumberLabel, setDialNumberLabel] = useState<string>('');
   const [dialNumberPlaceholder, setDialNumberPlaceholder] = useState<string>('');
   const [dialNumberValue, setDialNumberValue] = useState<string>('');
-  const [teamsValue, setTeamsValue] = useState<string>('');
   const [isDialNumberDisabled, setIsDialNumberDisabled] = useState<boolean>(false);
+  const [showCCSignOutModal, setShowCCSignOutModal] = useState<boolean>(false);
 
   useEffect(() => {
     if (loginOptions.length > 0) {
@@ -39,7 +39,6 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
   useEffect(() => {
     if (teams.length > 0) {
       const firstTeam = teams[0].id;
-      setTeamsValue(firstTeam);
       setTeam(firstTeam);
     }
   }, [teams, setTeam]);
@@ -48,7 +47,10 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
     if (showMultipleLoginAlert && modalRef.current) {
       modalRef.current.showModal();
     }
-  }, [showMultipleLoginAlert]);
+    if (showCCSignOutModal && !ccSignOutModalRef?.current?.open) {
+      ccSignOutModalRef.current?.showModal();
+    }
+  }, [showMultipleLoginAlert, showCCSignOutModal]);
 
   const selectLoginOption = useCallback(
     (key: string) => {
@@ -68,6 +70,13 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
     }
   }, [handleContinue]);
 
+  const cancelClicked = useCallback(() => {
+    if (ccSignOutModalRef?.current?.open) {
+      ccSignOutModalRef.current.close();
+      setShowCCSignOutModal(false);
+    }
+  }, []);
+
   const updateDN = useCallback(
     (value: string) => {
       setDialNumberValue(value);
@@ -78,7 +87,6 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
 
   const updateTeam = useCallback(
     (value: string) => {
-      setTeamsValue(value);
       setTeam(value);
     },
     [setTeam]
@@ -105,42 +113,57 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
           </button>
         </div>
       </dialog>
+      <dialog ref={ccSignOutModalRef} className="cc-logout-modal">
+        <Text tagname="h2" type="body-large-bold" className="modal-text">
+          Sign out of Contact Center
+        </Text>
+        <Text tagname="p" type="body-midsize-regular" className="modal-text">
+          Are you sure you want to sign out?
+        </Text>
+        <div className="cc-logout-modal-content">
+          <Button onClick={cancelClicked} variant="secondary" className="white-button">
+            Cancel
+          </Button>
+          <Button onClick={contactCenterLogout}>Sign out</Button>
+        </div>
+      </dialog>
       <div className="box station-login">
         <section className="section-box">
           <fieldset className="fieldset">
-            <Text tagName={'span'} type="heading-small-bold">
+            <Text tagname={'span'} type="heading-small-bold">
               Set your interaction preferences
             </Text>
           </fieldset>
           <fieldset className="fieldset">
             <legend id="agent-login-label">
               Handle calls using
-              <PopoverNext
-                trigger="mouseenter"
-                triggerComponent={<Icon name="info-badge-filled" id="agent-login-info-badge" />}
-                placement="auto-end"
-                closeButtonPlacement="top-left"
-                closeButtonProps={{'aria-label': 'Close'}}
-              >
-                <Text tagName={'div'} type="body-large-regular" className="agent-login-popover">
-                  This is your preferred method for receiving and making calls. Choose between your phone number,
-                  extension (if available), or your web browser.
-                </Text>
-              </PopoverNext>
+              <Icon name="info-badge-filled" id="agent-login-info-badge" />
             </legend>
+            <Tooltip
+              color="contrast"
+              id="agent-login-label-tooltip"
+              showArrow={true}
+              triggerID="agent-login-info-badge"
+            >
+              <Text tagname={'div'} type="body-large-regular" className="agent-login-popover">
+                This is your preferred method for receiving and making calls. Choose between your phone number,
+                extension (if available), or your web browser.
+              </Text>
+            </Tooltip>
             <div className="">
               <Select
                 id="login-option"
                 name="login-option"
-                aria-labelledby="agent-login-label"
                 onChange={(event: CustomEvent) => selectLoginOption(event.detail.value)}
                 className="station-login-select"
               >
-                {loginOptions.map((option, index) => (
-                  <Option key={index} value={option}>
-                    {option}
-                  </Option>
-                ))}
+                {loginOptions.map((option, index) => {
+                  return (
+                    <Option key={index} value={option}>
+                      {option}
+                    </Option>
+                  );
+                })}
               </Select>
             </div>
           </fieldset>
@@ -149,49 +172,47 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
           ) : (
             <fieldset className="fieldset">
               <legend id="dial-number-label">{dialNumberLabel}</legend>
-              <TextInput
-                clearAriaLabel="Clear"
-                aria-labelledby="dial-number-label"
+              <Input
                 placeholder={dialNumberPlaceholder}
-                onChange={updateDN}
+                disabled={isDialNumberDisabled}
                 value={dialNumberValue}
-                isDisabled={isDialNumberDisabled}
+                onChange={(event) => updateDN(event.target.value)}
               />
             </fieldset>
           )}
           <fieldset className="fieldset">
             <legend id="team-label">Your team</legend>
             <div className="select-container">
-              <SelectNext
+              <Select
                 id="teams-dropdown"
-                direction="bottom"
-                showBorder
-                aria-labelledby="team-label"
-                items={teams}
-                selectedKey={teamsValue}
-                onSelectionChange={updateTeam}
+                name="teams-dropdown"
+                onChange={(event: CustomEvent) => updateTeam(event.detail.value)}
                 className="station-login-select"
               >
-                {(item) => (
-                  <Item textValue={item.name} key={item.id}>
-                    <Text className="state-name" tagName={'small'}>
-                      {item.name}
-                    </Text>
-                  </Item>
-                )}
-              </SelectNext>
-              <Icon className="select-arrow-icon" name="arrow-down-bold" title="" />
+                {teams.map((team: {id: string; name: string}) => {
+                  return (
+                    <Option key={team.id} value={team.name}>
+                      {team.name}
+                    </Option>
+                  );
+                })}
+              </Select>
             </div>
           </fieldset>
           <div className="btn-container">
             {isAgentLoggedIn ? (
-              <ButtonPill id="logoutAgent" onPress={logout} color="join">
+              <Button id="logoutAgent" onClick={logout} color="positive">
                 Logout
-              </ButtonPill>
+              </Button>
             ) : (
-              <ButtonPill id="AgentLogin" onPress={login}>
-                Save & Continue
-              </ButtonPill>
+              <Button onClick={login}>Save & Continue</Button>
+            )}
+            {typeof contactCenterLogout === 'function' ? (
+              <Button onClick={() => setShowCCSignOutModal(true)} variant="secondary" className="white-button">
+                Sign out
+              </Button>
+            ) : (
+              <></>
             )}
           </div>
         </section>

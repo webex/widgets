@@ -93,6 +93,11 @@ export interface IStationLoginProps {
    * Flag to indicate if the alert should be shown
    */
   showMultipleLoginAlert: boolean;
+
+  /**
+   * Handler for Contact Center logout
+   */
+  contactCenterLogout?: () => void;
 }
 
 export type StationLoginComponentProps = Pick<
@@ -111,4 +116,5 @@ export type StationLoginComponentProps = Pick<
   | 'handleContinue'
   | 'deviceType'
   | 'showMultipleLoginAlert'
+  | 'contactCenterLogout'
 >;
