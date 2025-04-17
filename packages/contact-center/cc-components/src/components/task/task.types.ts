@@ -281,6 +281,11 @@ export interface ControlProps {
   setConsultAgentName: (agentName: string) => void;
 
   /**
+   * Time since the task is in held state
+   */
+  holdTime: number;
+
+  /**
    * List of contact queues available for consult
    */
   contactServiceQueues: ContactServiceQueue[];
@@ -319,6 +324,7 @@ export type CallControlComponentProps = Pick<
   | 'setConsultAgentName'
   | 'consultAgentId'
   | 'setConsultAgentId'
+  | 'holdTime'
   | 'contactServiceQueues'
   | 'loadContactServiceQueues'
 >;

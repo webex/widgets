@@ -8,6 +8,7 @@
 }
 
 .call-control-container {
+  position: relative;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
@@ -81,6 +82,12 @@
 }
 
 .md-button-circle-wrapper.call-control-button {
+  width: 1rem;
+  height: 1rem; 
+  min-width: 2rem;
+  min-height: 2rem;
+  padding: 0.5rem;
+  border-radius: 50%;
   background-color: var(--mds-color-theme-button-secondary-normal);
   border: 1px solid var(--mds-color-theme-outline-button-normal);
   &:hover,
@@ -90,8 +97,19 @@
 }
 
 .md-button-circle-wrapper.call-control-button-cancel {
+  width: 2rem;
+  height: 2rem;
+  min-width: 2rem;
+  min-height: 2rem;
+  padding: 0.5rem;
+  color: var(--mds-color-theme-inverted-text-primary-normal);
   background-color: var(--mds-color-theme-button-cancel-normal);
   border: 0.0625rem solid var(--mds-color-theme-background-secondary-normal);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
   &:hover,
   &.hover {
     background-color: var(--mds-color-theme-button-cancel-hover);
