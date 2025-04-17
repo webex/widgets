@@ -2,7 +2,7 @@ import {useEffect, useCallback, useState} from 'react';
 import {ITask} from '@webex/plugin-cc';
 import {useCallControlProps, UseTaskListProps, UseTaskProps, Participant} from './task.types';
 import {useOutdialCallProps} from '@webex/cc-components';
-import store, {TASK_EVENTS, BuddyDetails, DestinationType} from '@webex/cc-store';
+import store, {TASK_EVENTS, BuddyDetails, DestinationType, ContactServiceQueue} from '@webex/cc-store';
 
 // Hook for managing the task list
 export const useTaskList = (props: UseTaskListProps) => {
@@ -128,6 +128,7 @@ export const useCallControl = (props: useCallControlProps) => {
   const [isHeld, setIsHeld] = useState<boolean | undefined>(undefined);
   const [isRecording, setIsRecording] = useState(true);
   const [buddyAgents, setBuddyAgents] = useState<BuddyDetails[]>([]);
+  const [contactServiceQueues, setContactServiceQueues] = useState<ContactServiceQueue[]>([]);
   const [consultAgentName, setConsultAgentName] = useState<string>('Consult Agent');
   const [consultAgentId, setConsultAgentId] = useState<string>(null);
 
@@ -170,6 +171,19 @@ export const useCallControl = (props: useCallControlProps) => {
     } catch (error) {
       logger.error(`Error loading buddy agents: ${error}`, {module: 'helper.ts', method: 'loadBuddyAgents'});
       setBuddyAgents([]);
+    }
+  }, [logger]);
+
+  const loadContactServiceQueues = useCallback(async () => {
+    try {
+      const queues = await store.getContactServiceQueues();
+      setContactServiceQueues(queues);
+    } catch (error) {
+      logger.error(`Error loading contact service queues: ${error}`, {
+        module: 'helper.ts',
+        method: 'loadContactServiceQueues',
+      });
+      setContactServiceQueues([]);
     }
   }, [logger]);
 
@@ -302,20 +316,42 @@ export const useCallControl = (props: useCallControlProps) => {
       destinationType: destinationType,
     };
 
+    if (destinationType === 'queue') {
+      store.setIsQueueConsultInProgress(true);
+      store.setCurrentConsultQueueId(consultDestination);
+      store.setConsultInitiated(true);
+    }
+
     try {
       await currentTask.consult(consultPayload);
-      store.setConsultInitiated(true);
+      store.setIsQueueConsultInProgress(false);
+      if (destinationType === 'queue') {
+        store.setCurrentConsultQueueId(null);
+      } else {
+        store.setConsultInitiated(true);
+      }
     } catch (error) {
+      if (destinationType === 'queue') {
+        store.setIsQueueConsultInProgress(false);
+        store.setCurrentConsultQueueId(null);
+        store.setConsultInitiated(false);
+      }
       logError(`Error consulting call: ${error}`, 'consultCall');
       throw error;
     }
   };
 
   const endConsultCall = async () => {
-    const consultEndPayload = {
-      isConsult: true,
-      taskId: currentTask.data.interactionId,
-    };
+    const consultEndPayload = store.isQueueConsultInProgress
+      ? {
+          isConsult: true,
+          taskId: currentTask.data.interactionId,
+          queueId: store.currentConsultQueueId,
+        }
+      : {
+          isConsult: true,
+          taskId: currentTask.data.interactionId,
+        };
 
     try {
       await currentTask.endConsult(consultEndPayload);
@@ -351,6 +387,8 @@ export const useCallControl = (props: useCallControlProps) => {
     setIsRecording,
     buddyAgents,
     loadBuddyAgents,
+    contactServiceQueues,
+    loadContactServiceQueues,
     transferCall,
     consultCall,
     endConsultCall,

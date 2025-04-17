@@ -1,4 +1,12 @@
-import {ILogger, ITask, IContactCenter, WrapupCodes, BuddyDetails, DestinationType} from '@webex/cc-store';
+import {
+  ILogger,
+  ITask,
+  IContactCenter,
+  WrapupCodes,
+  BuddyDetails,
+  DestinationType,
+  ContactServiceQueue,
+} from '@webex/cc-store';
 
 /**
  * Interface representing the TaskProps of a user.
@@ -271,6 +279,16 @@ export interface ControlProps {
    * @param agentName - The name of the consulting agent.
    */
   setConsultAgentName: (agentName: string) => void;
+
+  /**
+   * List of contact queues available for consult
+   */
+  contactServiceQueues: ContactServiceQueue[];
+
+  /**
+   * Function to load contact service queues
+   */
+  loadContactServiceQueues: () => Promise<void>;
 }
 
 export type CallControlComponentProps = Pick<
@@ -301,6 +319,8 @@ export type CallControlComponentProps = Pick<
   | 'setConsultAgentName'
   | 'consultAgentId'
   | 'setConsultAgentId'
+  | 'contactServiceQueues'
+  | 'loadContactServiceQueues'
 >;
 
 /**
@@ -342,8 +362,10 @@ export interface ConsultTransferListComponentProps {
 export interface ConsultTransferPopoverComponentProps {
   heading: string;
   buttonIcon: string;
-  buddyAgents: Array<{agentId: string; agentName: string; dn: string}>;
+  buddyAgents: BuddyDetails[];
+  contactServiceQueues?: ContactServiceQueue[];
   onAgentSelect: (agentId: string, agentName: string) => void;
+  onQueueSelect?: (queueId: string, queueName: string) => void;
 }
 
 /**

@@ -13,6 +13,7 @@ function CallControlComponent(props: CallControlComponentProps) {
   const [selectedWrapupId, setSelectedWrapupId] = useState<string | null>(null);
   const [showAgentMenu, setShowAgentMenu] = useState(false);
   const [agentMenuType, setAgentMenuType] = useState<'Consult' | 'Transfer' | null>(null);
+  const [lastTargetType, setLastTargetType] = useState<'agent' | 'queue'>('agent');
 
   const {
     currentTask,
@@ -28,6 +29,8 @@ function CallControlComponent(props: CallControlComponentProps) {
     setIsRecording,
     buddyAgents,
     loadBuddyAgents,
+    contactServiceQueues,
+    loadContactServiceQueues,
     transferCall,
     consultCall,
     endConsultCall,
@@ -75,13 +78,26 @@ function CallControlComponent(props: CallControlComponentProps) {
     setSelectedWrapupId(value);
   };
 
-  const handleAgentSelect = (agentId: string, agentName: string) => {
+  const handleTargetSelect = (id: string, name: string, type: 'agent' | 'queue') => {
     if (agentMenuType === 'Consult') {
-      consultCall(agentId, 'agent');
-      setConsultAgentId(agentId);
-      setConsultAgentName(agentName);
+      consultCall(id, type);
+      setConsultAgentId(id);
+      setConsultAgentName(name);
+      setLastTargetType(type);
     } else {
-      transferCall(agentId, 'agent');
+      transferCall(id, type);
+    }
+  };
+
+  const handlePopoverOpen = (menuType: 'Consult' | 'Transfer') => {
+    if (showAgentMenu && agentMenuType === menuType) {
+      setShowAgentMenu(false);
+      setAgentMenuType(null);
+    } else {
+      setAgentMenuType(menuType);
+      setShowAgentMenu(true);
+      loadBuddyAgents();
+      loadContactServiceQueues();
     }
   };
 
@@ -184,16 +200,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                             aria-label={button.tooltip}
                             disabled={button.disabled || consultInitiated}
                             data-testid="ButtonCircle"
-                            onPress={() => {
-                              if (showAgentMenu && agentMenuType === button.menuType) {
-                                setShowAgentMenu(false);
-                                setAgentMenuType(null);
-                              } else {
-                                setAgentMenuType(button.menuType as 'Consult' | 'Transfer');
-                                setShowAgentMenu(true);
-                                loadBuddyAgents();
-                              }
-                            }}
+                            onPress={() => handlePopoverOpen(button.menuType as 'Consult' | 'Transfer')}
                           >
                             <Icon className={button.className + '-icon'} name={button.icon} />
                           </ButtonCircle>
@@ -214,7 +221,9 @@ function CallControlComponent(props: CallControlComponentProps) {
                         heading={button.menuType}
                         buttonIcon={button.icon}
                         buddyAgents={buddyAgents}
-                        onAgentSelect={handleAgentSelect}
+                        contactServiceQueues={contactServiceQueues}
+                        onAgentSelect={(agentId, agentName) => handleTargetSelect(agentId, agentName, 'agent')}
+                        onQueueSelect={(queueId, queueName) => handleTargetSelect(queueId, queueName, 'queue')}
                       />
                     ) : null}
                   </PopoverNext>
@@ -309,7 +318,7 @@ function CallControlComponent(props: CallControlComponentProps) {
               agentName={consultAgentName}
               startTimeStamp={consultStartTimeStamp}
               endConsultCall={endConsultCall}
-              onTransfer={() => consultTransfer(consultAgentId || currentTask.data.destAgentId, 'agent')}
+              onTransfer={() => consultTransfer(consultAgentId || currentTask.data.destAgentId, lastTargetType)}
               consultCompleted={consultCompleted}
               showTransfer={!consultAccepted}
             />

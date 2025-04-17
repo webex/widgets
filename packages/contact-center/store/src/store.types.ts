@@ -1,4 +1,13 @@
-import {AgentLogin, IContactCenter, Profile, Team, LogContext, BuddyDetails, DestinationType} from '@webex/plugin-cc';
+import {
+  AgentLogin,
+  IContactCenter,
+  Profile,
+  Team,
+  LogContext,
+  BuddyDetails,
+  DestinationType,
+  ContactServiceQueue,
+} from '@webex/plugin-cc';
 import {ITask} from '@webex/plugin-cc';
 
 type ILogger = {
@@ -51,6 +60,8 @@ interface IStore {
   consultCompleted: boolean;
   consultInitiated: boolean;
   consultAccepted: boolean;
+  isQueueConsultInProgress: boolean;
+  currentConsultQueueId: string | null;
   consultStartTimeStamp?: number;
   callControlAudio: MediaStream | null;
   consultOfferReceived: boolean;
@@ -100,6 +111,7 @@ enum TASK_EVENTS {
   TASK_REJECT = 'task:rejected',
   TASK_HYDRATE = 'task:hydrate',
   TASK_CONSULTING = 'task:consulting',
+  TASK_CONSULT_QUEUE_CANCELLED = 'task:consultQueueCancelled',
   AGENT_CONTACT_ASSIGNED = 'AgentContactAssigned',
   CONTACT_RECORDING_PAUSED = 'ContactRecordingPaused',
   CONTACT_RECORDING_RESUMED = 'ContactRecordingResumed',
@@ -148,6 +160,7 @@ export type {
   ICustomState,
   DestinationType,
   BuddyDetails,
+  ContactServiceQueue,
 };
 
 export {CC_EVENTS, TASK_EVENTS, ENGAGED_LABEL, ENGAGED_USERNAME};

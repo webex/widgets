@@ -35,6 +35,8 @@ class Store implements IStore {
   consultCompleted = false;
   consultInitiated = false;
   consultAccepted = false;
+  isQueueConsultInProgress = false;
+  currentConsultQueueId: string = '';
   consultStartTimeStamp = undefined;
   lastStateChangeTimestamp?: number;
   lastIdleCodeChangeTimestamp?: number;

@@ -83,8 +83,11 @@ describe('CallControlPresentational', () => {
     {id: '2', name: 'Reason 2'},
   ];
   const mockLoadBuddyAgents = jest.fn();
+  const mockLoadContactServiceQueues = jest.fn();
   const mockConsultCall = jest.fn();
   const mockTransferCall = jest.fn();
+  const mockSetConsultAgentId = jest.fn();
+  const mockSetConsultAgentName = jest.fn();
   const setIsHeld = jest.fn();
 
   const defaultProps = {
@@ -109,9 +112,17 @@ describe('CallControlPresentational', () => {
     setIsHeld: setIsHeld,
     buddyAgents: [],
     loadBuddyAgents: mockLoadBuddyAgents,
+    loadContactServiceQueues: mockLoadContactServiceQueues, // Add to props
     transferCall: mockTransferCall,
     consultCall: mockConsultCall,
     setIsRecording: jest.fn(),
+    contactServiceQueues: [], // Add missing prop
+    setConsultAgentId: mockSetConsultAgentId, // Add to props
+    setConsultAgentName: mockSetConsultAgentName, // Add to props
+    consultAgentId: null,
+    consultAgentName: null,
+    endConsultCall: jest.fn(),
+    consultTransfer: jest.fn(),
   };
 
   beforeEach(() => {
@@ -143,7 +154,9 @@ describe('CallControlPresentational', () => {
     fireEvent.click(buttons[1]);
     const agentSelectButton = screen.getByTestId('AgentSelectButton');
     fireEvent.click(agentSelectButton);
-    expect(mockConsultCall).toHaveBeenCalled();
+    expect(mockConsultCall).toHaveBeenCalledWith('agent1', 'agent');
+    expect(mockSetConsultAgentId).toHaveBeenCalledWith('agent1');
+    expect(mockLoadContactServiceQueues).toHaveBeenCalled();
     expect(mockTransferCall).not.toHaveBeenCalled();
   });
 
@@ -154,6 +167,7 @@ describe('CallControlPresentational', () => {
     const agentSelectButton = screen.getByTestId('AgentSelectButton');
     fireEvent.click(agentSelectButton);
     expect(mockTransferCall).toHaveBeenCalledWith('agent1', 'agent');
+    expect(mockLoadContactServiceQueues).toHaveBeenCalled();
     expect(mockConsultCall).not.toHaveBeenCalled();
   });
 

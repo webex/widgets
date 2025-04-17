@@ -7,10 +7,36 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
   heading,
   buttonIcon,
   buddyAgents,
+  contactServiceQueues,
   onAgentSelect,
+  onQueueSelect,
 }) => {
   const [selectedTab, setSelectedTab] = useState('Agents');
   const filteredAgents = buddyAgents;
+  const filteredQueues = contactServiceQueues || [];
+
+  const renderList = (items, getKey, getTitle, handleSelect) => (
+    <ListNext listSize={items.length} className="agent-list">
+      {items.map((item) => (
+        <div
+          key={getKey(item)}
+          onMouseDown={(e) => e.stopPropagation()}
+          style={{cursor: 'pointer', pointerEvents: 'auto'}}
+        >
+          <ConsultTransferListComponent
+            title={getTitle(item)}
+            buttonIcon={buttonIcon}
+            onButtonPress={() => handleSelect(getKey(item), getTitle(item))}
+          />
+        </div>
+      ))}
+      {items.length === 0 && (
+        <Text tagName="small" type="body-secondary">
+          No {selectedTab.toLowerCase()} found
+        </Text>
+      )}
+    </ListNext>
+  );
 
   return (
     <div className="agent-popover-content">
@@ -27,27 +53,26 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
         <TabNext key="Agents" className="agent-tab" active={selectedTab === 'Agents'}>
           Agents
         </TabNext>
+        <TabNext key="Queues" className="queue-tab" active={selectedTab === 'Queues'}>
+          Queues
+        </TabNext>
       </TabListNext>
-      <ListNext listSize={filteredAgents.length} className="agent-agent-list">
-        {filteredAgents.map((agent) => (
-          <div
-            key={agent.agentId}
-            onMouseDown={(e) => e.stopPropagation()}
-            style={{cursor: 'pointer', pointerEvents: 'auto'}}
-          >
-            <ConsultTransferListComponent
-              title={agent.agentName}
-              buttonIcon={buttonIcon}
-              onButtonPress={() => onAgentSelect(agent.agentId, agent.agentName)}
-            />
-          </div>
-        ))}
-      </ListNext>
-      {filteredAgents.length === 0 && (
-        <Text tagName="small" type="body-secondary">
-          No agents found
-        </Text>
-      )}
+
+      {selectedTab === 'Agents' &&
+        renderList(
+          filteredAgents,
+          (agent) => agent.agentId,
+          (agent) => agent.agentName,
+          onAgentSelect
+        )}
+
+      {selectedTab === 'Queues' &&
+        renderList(
+          filteredQueues,
+          (queue) => queue.id,
+          (queue) => queue.name,
+          onQueueSelect || (() => {})
+        )}
     </div>
   );
 };

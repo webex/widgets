@@ -1333,6 +1333,82 @@ describe('useCallControl', () => {
     // Verify the consultAgentName remained unchanged
     expect(result.current.consultAgentName).toBe('Consult Agent');
   });
+
+  it('should call consultCall with queue destination type correctly', async () => {
+    mockCurrentTask.consult = jest.fn().mockResolvedValue('Consulted');
+    const setIsQueueConsultInProgressSpy = jest.spyOn(store, 'setIsQueueConsultInProgress');
+    const setCurrentConsultQueueIdSpy = jest.spyOn(store, 'setCurrentConsultQueueId');
+    const setConsultInitiatedSpy = jest.spyOn(store, 'setConsultInitiated');
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+      })
+    );
+
+    await act(async () => {
+      await result.current.consultCall('queueId123', 'queue');
+    });
+
+    expect(mockCurrentTask.consult).toHaveBeenCalledWith({to: 'queueId123', destinationType: 'queue'});
+    expect(setIsQueueConsultInProgressSpy).toHaveBeenCalledWith(true);
+    expect(setCurrentConsultQueueIdSpy).toHaveBeenCalledWith('queueId123');
+    expect(setIsQueueConsultInProgressSpy).toHaveBeenCalledWith(false);
+    expect(setCurrentConsultQueueIdSpy).toHaveBeenCalledWith(null);
+
+    setIsQueueConsultInProgressSpy.mockRestore();
+    setCurrentConsultQueueIdSpy.mockRestore();
+    setConsultInitiatedSpy.mockRestore();
+  });
+
+  it('should call endConsultCall with queue parameters when queue consult is in progress', async () => {
+    mockCurrentTask.endConsult = jest.fn().mockResolvedValue('ConsultEnded');
+    jest.spyOn(store, 'isQueueConsultInProgress', 'get').mockReturnValue(true);
+    jest.spyOn(store, 'currentConsultQueueId', 'get').mockReturnValue('queueId123');
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        logger: mockLogger,
+      })
+    );
+
+    await act(async () => {
+      await result.current.endConsultCall();
+    });
+
+    expect(mockCurrentTask.endConsult).toHaveBeenCalledWith({
+      isConsult: true,
+      taskId: mockCurrentTask.data.interactionId,
+      queueId: 'queueId123',
+    });
+  });
+
+  it('should load contact service queues successfully', async () => {
+    const dummyQueues = [
+      {id: 'q1', name: 'Queue1'},
+      {id: 'q2', name: 'Queue2'},
+    ];
+    const getContactServiceQueuesSpy = jest.spyOn(store, 'getContactServiceQueues').mockResolvedValue(dummyQueues);
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        logger: mockLogger,
+      })
+    );
+
+    await act(async () => {
+      await result.current.loadContactServiceQueues();
+    });
+
+    expect(result.current.contactServiceQueues).toEqual(dummyQueues);
+    getContactServiceQueuesSpy.mockRestore();
+  });
 });
 
 describe('useOutdialCall', () => {
