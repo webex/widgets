@@ -112,13 +112,13 @@ describe('CallControlPresentational', () => {
     setIsHeld: setIsHeld,
     buddyAgents: [],
     loadBuddyAgents: mockLoadBuddyAgents,
-    loadContactServiceQueues: mockLoadContactServiceQueues, // Add to props
+    loadContactServiceQueues: mockLoadContactServiceQueues,
     transferCall: mockTransferCall,
     consultCall: mockConsultCall,
     setIsRecording: jest.fn(),
-    contactServiceQueues: [], // Add missing prop
-    setConsultAgentId: mockSetConsultAgentId, // Add to props
-    setConsultAgentName: mockSetConsultAgentName, // Add to props
+    contactServiceQueues: [],
+    setConsultAgentId: mockSetConsultAgentId,
+    setConsultAgentName: mockSetConsultAgentName,
     consultAgentId: null,
     consultAgentName: null,
     endConsultCall: jest.fn(),
