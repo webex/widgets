@@ -14,6 +14,9 @@ global.MediaStream = class MediaStreamMock {
   }
 };
 
+// Mock console.error to prevent output during tests
+console.error = jest.fn();
+
 import {CC_EVENTS, TASK_EVENTS} from '../src/store.types';
 import storeWrapper from '../src/storeEventsWrapper';
 import {ITask} from '@webex/plugin-cc';
@@ -69,6 +72,8 @@ jest.mock('../src/store', () => ({
     consultOfferReceived: false,
     isQueueConsultInProgress: false,
     currentConsultQueueId: null,
+    isEndConsultEnabled: true,
+    allowConsultToQueue: false,
     setShowMultipleLoginAlert: jest.fn(),
     setCurrentState: jest.fn(),
     setLastStateChangeTimestamp: jest.fn(),
@@ -194,6 +199,14 @@ describe('storeEventsWrapper', () => {
 
     it('should proxy currentConsultQueueId', () => {
       expect(storeWrapper.currentConsultQueueId).toBe(null);
+    });
+
+    it('should proxy isEndConsultEnabled', () => {
+      expect(storeWrapper.isEndConsultEnabled).toBe(storeWrapper['store'].isEndConsultEnabled);
+    });
+
+    it('should proxy allowConsultToQueue', () => {
+      expect(storeWrapper.allowConsultToQueue).toBe(storeWrapper['store'].allowConsultToQueue);
     });
 
     describe('setState', () => {

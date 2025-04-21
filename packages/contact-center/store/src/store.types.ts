@@ -65,6 +65,8 @@ interface IStore {
   consultStartTimeStamp?: number;
   callControlAudio: MediaStream | null;
   consultOfferReceived: boolean;
+  isEndConsultEnabled: boolean;
+  allowConsultToQueue: boolean;
   init(params: InitParams, callback: (ccSDK: IContactCenter) => void): Promise<void>;
   registerCC(webex?: WithWebex['webex']): Promise<void>;
 }

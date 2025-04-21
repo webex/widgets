@@ -134,4 +134,14 @@ describe('CallControlConsultComponent', () => {
     render(<CallControlConsultComponent {...defaultProps} showTransfer={false} />);
     expect(screen.queryByTestId('transfer-consult-btn')).not.toBeInTheDocument();
   });
+
+  it('does not render cancel button when both isEndConsultEnabled and showTransfer are false', () => {
+    render(<CallControlConsultComponent {...defaultProps} isEndConsultEnabled={false} showTransfer={false} />);
+    expect(screen.queryByTestId('cancel-consult-btn')).not.toBeInTheDocument();
+  });
+
+  it('renders cancel button when isEndConsultEnabled is true even if showTransfer is false', () => {
+    render(<CallControlConsultComponent {...defaultProps} isEndConsultEnabled={true} showTransfer={false} />);
+    expect(screen.getByTestId('cancel-consult-btn')).toBeInTheDocument();
+  });
 });

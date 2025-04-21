@@ -128,6 +128,14 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.currentConsultQueueId;
   }
 
+  get isEndConsultEnabled() {
+    return this.store.isEndConsultEnabled;
+  }
+
+  get allowConsultToQueue() {
+    return this.store.allowConsultToQueue;
+  }
+
   setCurrentTheme = (theme: string): void => {
     this.store.currentTheme = theme;
   };

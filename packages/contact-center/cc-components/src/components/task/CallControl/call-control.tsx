@@ -44,6 +44,8 @@ function CallControlComponent(props: CallControlComponentProps) {
     setConsultAgentName,
     consultAgentId,
     setConsultAgentId,
+    isEndConsultEnabled,
+    allowConsultToQueue,
   } = props;
 
   useEffect(() => {
@@ -234,6 +236,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                         contactServiceQueues={contactServiceQueues}
                         onAgentSelect={(agentId, agentName) => handleTargetSelect(agentId, agentName, 'agent')}
                         onQueueSelect={(queueId, queueName) => handleTargetSelect(queueId, queueName, 'queue')}
+                        allowConsultToQueue={allowConsultToQueue}
                       />
                     ) : null}
                   </PopoverNext>
@@ -331,6 +334,7 @@ function CallControlComponent(props: CallControlComponentProps) {
               onTransfer={() => consultTransfer(consultAgentId || currentTask.data.destAgentId, lastTargetType)}
               consultCompleted={consultCompleted}
               showTransfer={!consultAccepted}
+              isEndConsultEnabled={isEndConsultEnabled}
             />
           </div>
         )}

@@ -294,6 +294,16 @@ export interface ControlProps {
    * Function to load contact service queues
    */
   loadContactServiceQueues: () => Promise<void>;
+
+  /**
+   * Flag to determine if the end consult button is enabled
+   */
+  isEndConsultEnabled: boolean;
+
+  /**
+   * Flag to determine if the consult call is allowed to be transferred to a queue
+   */
+  allowConsultToQueue: boolean;
 }
 
 export type CallControlComponentProps = Pick<
@@ -327,6 +337,8 @@ export type CallControlComponentProps = Pick<
   | 'holdTime'
   | 'contactServiceQueues'
   | 'loadContactServiceQueues'
+  | 'isEndConsultEnabled'
+  | 'allowConsultToQueue'
 >;
 
 /**
@@ -372,6 +384,7 @@ export interface ConsultTransferPopoverComponentProps {
   contactServiceQueues?: ContactServiceQueue[];
   onAgentSelect: (agentId: string, agentName: string) => void;
   onQueueSelect?: (queueId: string, queueName: string) => void;
+  allowConsultToQueue: boolean;
 }
 
 /**
@@ -384,4 +397,5 @@ export interface CallControlConsultComponentsProps {
   endConsultCall: () => void;
   consultCompleted: boolean;
   showTransfer: boolean;
+  isEndConsultEnabled: boolean;
 }

@@ -12,6 +12,7 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
   endConsultCall,
   consultCompleted,
   showTransfer,
+  isEndConsultEnabled,
 }) => {
   const timerKey = `timer-${startTimeStamp}`;
 
@@ -41,6 +42,7 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
       onClick: handleTransfer,
       className: 'call-control-button',
       disabled: !consultCompleted,
+      shouldShow: showTransfer && !!onTransfer,
     },
     {
       key: 'cancel',
@@ -48,8 +50,12 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
       tooltip: 'End Consult',
       onClick: handleEndConsult,
       className: 'call-control-consult-button-cancel',
+      shouldShow: isEndConsultEnabled || showTransfer,
     },
   ];
+
+  // Filter buttons that should be shown, then map them
+  const visibleButtons = buttons.filter((button) => button.shouldShow);
 
   return (
     <div className="call-control-consult">
@@ -67,32 +73,29 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
       </div>
 
       <div className="consult-buttons consult-buttons-container">
-        {buttons.map(
-          (button) =>
-            (button.key !== 'transfer' || (showTransfer && onTransfer)) && (
-              <TooltipNext
-                key={button.key}
-                triggerComponent={
-                  <ButtonCircle
-                    className={button.className}
-                    onPress={button.onClick}
-                    disabled={button.disabled}
-                    data-testid={`${button.key}-consult-btn`}
-                  >
-                    <Icon className={`${button.className}-icon`} name={button.icon} />
-                  </ButtonCircle>
-                }
-                color="primary"
-                delay={[0, 0]}
-                placement="bottom-start"
-                type="description"
-                variant="small"
-                className="tooltip"
+        {visibleButtons.map((button) => (
+          <TooltipNext
+            key={button.key}
+            triggerComponent={
+              <ButtonCircle
+                className={button.className}
+                onPress={button.onClick}
+                disabled={button.disabled}
+                data-testid={`${button.key}-consult-btn`}
               >
-                <p>{button.tooltip}</p>
-              </TooltipNext>
-            )
-        )}
+                <Icon className={`${button.className}-icon`} name={button.icon} />
+              </ButtonCircle>
+            }
+            color="primary"
+            delay={[0, 0]}
+            placement="bottom-start"
+            type="description"
+            variant="small"
+            className="tooltip"
+          >
+            <p>{button.tooltip}</p>
+          </TooltipNext>
+        ))}
       </div>
     </div>
   );

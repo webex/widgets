@@ -43,6 +43,8 @@ class Store implements IStore {
   showMultipleLoginAlert: boolean = false;
   callControlAudio: MediaStream | null = null;
   consultOfferReceived: boolean = false;
+  isEndConsultEnabled: boolean = false;
+  allowConsultToQueue: boolean = false;
 
   constructor() {
     makeAutoObservable(this, {
@@ -84,6 +86,8 @@ class Store implements IStore {
         this.currentState = response.lastStateAuxCodeId;
         this.lastStateChangeTimestamp = response.lastStateChangeTimestamp;
         this.lastIdleCodeChangeTimestamp = response.lastIdleCodeChangeTimestamp;
+        this.isEndConsultEnabled = response.isEndConsultEnabled;
+        this.allowConsultToQueue = response.allowConsultToQueue;
       })
       .catch((error) => {
         this.logger.error(`Error registering contact center: ${error}`, {

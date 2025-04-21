@@ -17,7 +17,10 @@ const CallControl: React.FunctionComponent<CallControlProps> = observer(({onHold
     consultAccepted,
     consultStartTimeStamp,
     callControlAudio,
+    isEndConsultEnabled,
+    allowConsultToQueue,
   } = store;
+
   const result = {
     ...useCallControl({currentTask, onHoldResume, onEnd, onWrapUp, logger, consultInitiated}),
     wrapupRequired,
@@ -27,6 +30,8 @@ const CallControl: React.FunctionComponent<CallControlProps> = observer(({onHold
     consultAccepted,
     consultStartTimeStamp,
     callControlAudio,
+    isEndConsultEnabled,
+    allowConsultToQueue,
   };
 
   return <CallControlComponent {...result} />;

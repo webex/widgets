@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {Text, TabListNext, TabNext, ListNext} from '@momentum-ui/react-collaboration';
 import ConsultTransferListComponent from './consult-transfer-list-item';
 import {ConsultTransferPopoverComponentProps} from '../../task.types';
@@ -10,10 +10,18 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
   contactServiceQueues,
   onAgentSelect,
   onQueueSelect,
+  allowConsultToQueue,
 }) => {
   const [selectedTab, setSelectedTab] = useState('Agents');
   const filteredAgents = buddyAgents;
   const filteredQueues = contactServiceQueues || [];
+
+  // Ensure selected tab is valid when allowConsultToQueue changes
+  useEffect(() => {
+    if (selectedTab === 'Queues' && !allowConsultToQueue) {
+      setSelectedTab('Agents');
+    }
+  }, [allowConsultToQueue, selectedTab]);
 
   const renderList = (items, getKey, getTitle, handleSelect) => (
     <ListNext listSize={items.length} className="agent-list">
@@ -44,16 +52,26 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
         {heading}
       </Text>
       <TabListNext
+        key={`tab-list-${allowConsultToQueue ? 'with-queues' : 'agents-only'}`}
         aria-label="Tabs"
         className="agent-tablist"
         hasBackground={false}
         style={{marginTop: '0'}}
-        onTabSelection={(key) => setSelectedTab(key as string)}
+        onTabSelection={(key) => {
+          if (key === 'Queues' && !allowConsultToQueue) return;
+          setSelectedTab(key as string);
+        }}
       >
         <TabNext key="Agents" className="agent-tab" active={selectedTab === 'Agents'}>
           Agents
         </TabNext>
-        <TabNext key="Queues" className="queue-tab" active={selectedTab === 'Queues'}>
+        <TabNext
+          key="Queues"
+          className="queue-tab"
+          active={selectedTab === 'Queues'}
+          disabled={!allowConsultToQueue}
+          style={!allowConsultToQueue ? {display: 'none'} : undefined}
+        >
           Queues
         </TabNext>
       </TabListNext>
@@ -67,6 +85,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
         )}
 
       {selectedTab === 'Queues' &&
+        allowConsultToQueue &&
         renderList(
           filteredQueues,
           (queue) => queue.id,
