@@ -39,18 +39,43 @@ const onWrapUpCb = jest.fn();
 
 describe('CallControl Component', () => {
   it('renders CallControlPresentational with correct props', () => {
-    const useCallControlSpy = jest.spyOn(helper, 'useCallControl');
+    const useCallControlSpy = jest.spyOn(helper, 'useCallControl').mockReturnValue({
+      currentTask: {interactionId: 'mockInteractionId'},
+      audioRef: {current: null},
+      endCall: jest.fn(),
+      toggleHold: jest.fn(),
+      toggleRecording: jest.fn(),
+      wrapupCall: jest.fn(),
+      isHeld: false,
+      isRecording: false,
+      setIsHeld: jest.fn(),
+      setIsRecording: jest.fn(),
+      buddyAgents: [],
+      loadBuddyAgents: jest.fn(),
+      transferCall: jest.fn(),
+      consultCall: jest.fn(),
+      holdTime: 0,
+    });
 
     render(<CallControl onHoldResume={onHoldResumeCb} onEnd={onEndCb} onWrapUp={onWrapUpCb} />);
 
     // Assert that the useIncomingTask hook is called with the correct arguments
     expect(useCallControlSpy).toHaveBeenCalledWith({
-      currentTask: expect.any(Object),
-      onHoldResume: onHoldResumeCb,
-      onEnd: onEndCb,
-      onWrapUp: onWrapUpCb,
+      currentTask: {
+        data: {interactionId: 'mockInteractionId'},
+        on: expect.any(Function),
+        off: expect.any(Function),
+        hold: expect.any(Function),
+        resume: expect.any(Function),
+        pauseRecording: expect.any(Function),
+        resumeRecording: expect.any(Function),
+        end: expect.any(Function),
+        wrapup: expect.any(Function),
+      },
+      onHoldResume: expect.any(Function),
+      onEnd: expect.any(Function),
+      onWrapUp: expect.any(Function),
       logger: {},
-      deviceType: 'BROWSER',
     });
   });
 });
