@@ -61,7 +61,7 @@ interface IStore {
   consultInitiated: boolean;
   consultAccepted: boolean;
   isQueueConsultInProgress: boolean;
-  currentConsultQueueId: string | null;
+  currentConsultQueueId: string;
   consultStartTimeStamp?: number;
   callControlAudio: MediaStream | null;
   consultOfferReceived: boolean;

@@ -80,12 +80,22 @@ function CallControlComponent(props: CallControlComponentProps) {
 
   const handleTargetSelect = (id: string, name: string, type: 'agent' | 'queue') => {
     if (agentMenuType === 'Consult') {
-      consultCall(id, type);
-      setConsultAgentId(id);
-      setConsultAgentName(name);
-      setLastTargetType(type);
+      try {
+        consultCall(id, type);
+        setConsultAgentId(id);
+        setConsultAgentName(name);
+        setLastTargetType(type);
+      } catch (error) {
+        console.error('Error during consult call:', error);
+        throw new Error('Error during consult call');
+      }
     } else {
-      transferCall(id, type);
+      try {
+        transferCall(id, type);
+      } catch (error) {
+        console.error('Error during transfer call:', error);
+        throw new Error('Error during transfer call');
+      }
     }
   };
 
