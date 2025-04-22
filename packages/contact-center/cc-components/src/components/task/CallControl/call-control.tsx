@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 
-import {CallControlComponentProps, DestinationType} from '../task.types';
+import {CallControlComponentProps, DestinationType, CallControlMenuType} from '../task.types';
 import './call-control.styles.scss';
 import {PopoverNext, SelectNext, TooltipNext, Text, ButtonCircle, ButtonPill} from '@momentum-ui/react-collaboration';
 import {Item} from '@react-stately/collections';
@@ -12,7 +12,7 @@ function CallControlComponent(props: CallControlComponentProps) {
   const [selectedWrapupReason, setSelectedWrapupReason] = useState<string | null>(null);
   const [selectedWrapupId, setSelectedWrapupId] = useState<string | null>(null);
   const [showAgentMenu, setShowAgentMenu] = useState(false);
-  const [agentMenuType, setAgentMenuType] = useState<'Consult' | 'Transfer' | null>(null);
+  const [agentMenuType, setAgentMenuType] = useState<CallControlMenuType | null>(null);
   const [lastTargetType, setLastTargetType] = useState<'agent' | 'queue'>('agent');
 
   const {
@@ -99,7 +99,7 @@ function CallControlComponent(props: CallControlComponentProps) {
     }
   };
 
-  const handlePopoverOpen = (menuType: 'Consult' | 'Transfer') => {
+  const handlePopoverOpen = (menuType: CallControlMenuType) => {
     if (showAgentMenu && agentMenuType === menuType) {
       setShowAgentMenu(false);
       setAgentMenuType(null);
@@ -210,7 +210,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                             aria-label={button.tooltip}
                             disabled={button.disabled || consultInitiated}
                             data-testid="ButtonCircle"
-                            onPress={() => handlePopoverOpen(button.menuType as 'Consult' | 'Transfer')}
+                            onPress={() => handlePopoverOpen(button.menuType as CallControlMenuType)}
                           >
                             <Icon className={button.className + '-icon'} name={button.icon} />
                           </ButtonCircle>

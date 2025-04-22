@@ -400,4 +400,9 @@ export interface CallControlConsultComponentsProps {
   isEndConsultEnabled: boolean;
 }
 
+/**
+ * Type representing the possible menu types in call control.
+ */
+export type CallControlMenuType = 'Consult' | 'Transfer';
+
 export {DestinationType};
