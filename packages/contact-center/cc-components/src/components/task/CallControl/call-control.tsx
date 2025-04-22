@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 
-import {CallControlComponentProps} from '../task.types';
+import {CallControlComponentProps, DestinationType} from '../task.types';
 import './call-control.styles.scss';
 import {PopoverNext, SelectNext, TooltipNext, Text, ButtonCircle, ButtonPill} from '@momentum-ui/react-collaboration';
 import {Item} from '@react-stately/collections';
@@ -29,8 +29,8 @@ function CallControlComponent(props: CallControlComponentProps) {
     setIsRecording,
     buddyAgents,
     loadBuddyAgents,
-    contactServiceQueues,
-    loadContactServiceQueues,
+    queues,
+    loadQueues,
     transferCall,
     consultCall,
     endConsultCall,
@@ -80,7 +80,7 @@ function CallControlComponent(props: CallControlComponentProps) {
     setSelectedWrapupId(value);
   };
 
-  const handleTargetSelect = (id: string, name: string, type: 'agent' | 'queue') => {
+  const handleTargetSelect = (id: string, name: string, type: DestinationType) => {
     if (agentMenuType === 'Consult') {
       try {
         consultCall(id, type);
@@ -88,15 +88,13 @@ function CallControlComponent(props: CallControlComponentProps) {
         setConsultAgentName(name);
         setLastTargetType(type);
       } catch (error) {
-        console.error('Error during consult call:', error);
-        throw new Error('Error during consult call');
+        throw new Error('Error during consult call', error);
       }
     } else {
       try {
         transferCall(id, type);
       } catch (error) {
-        console.error('Error during transfer call:', error);
-        throw new Error('Error during transfer call');
+        throw new Error('Error during transfer call', error);
       }
     }
   };
@@ -109,7 +107,7 @@ function CallControlComponent(props: CallControlComponentProps) {
       setAgentMenuType(menuType);
       setShowAgentMenu(true);
       loadBuddyAgents();
-      loadContactServiceQueues();
+      loadQueues();
     }
   };
 
@@ -233,7 +231,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                         heading={button.menuType}
                         buttonIcon={button.icon}
                         buddyAgents={buddyAgents}
-                        contactServiceQueues={contactServiceQueues}
+                        queues={queues}
                         onAgentSelect={(agentId, agentName) => handleTargetSelect(agentId, agentName, 'agent')}
                         onQueueSelect={(queueId, queueName) => handleTargetSelect(queueId, queueName, 'queue')}
                         allowConsultToQueue={allowConsultToQueue}

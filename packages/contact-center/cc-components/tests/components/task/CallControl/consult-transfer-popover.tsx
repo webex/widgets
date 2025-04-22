@@ -62,7 +62,7 @@ describe('ConsultTransferPopoverComponent', () => {
       {agentId: 'agent1', agentName: 'Agent One', dn: '1001'},
       {agentId: 'agent2', agentName: 'Agent Two', dn: '1002'},
     ],
-    contactServiceQueues: [
+    queues: [
       {id: 'queue1', name: 'Queue One'},
       {id: 'queue2', name: 'Queue Two'},
     ],

@@ -556,7 +556,7 @@ class StoreWrapper implements IStoreWrapper {
     }
   };
 
-  getContactServiceQueues = async (): Promise<Array<ContactServiceQueue>> => {
+  getQueues = async (): Promise<Array<ContactServiceQueue>> => {
     try {
       let queueList = await this.store.cc.getQueues();
       queueList = queueList.filter((queue) => queue.channelType === 'TELEPHONY');

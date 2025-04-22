@@ -1556,12 +1556,12 @@ describe('useCallControl', () => {
     });
   });
 
-  it('should load contact service queues successfully', async () => {
+  it('should load successfully', async () => {
     const dummyQueues = [
       {id: 'q1', name: 'Queue1'},
       {id: 'q2', name: 'Queue2'},
     ];
-    const getContactServiceQueuesSpy = jest.spyOn(store, 'getContactServiceQueues').mockResolvedValue(dummyQueues);
+    const getQueuesSpy = jest.spyOn(store, 'getQueues').mockResolvedValue(dummyQueues);
 
     const {result} = renderHook(() =>
       useCallControl({
@@ -1571,11 +1571,11 @@ describe('useCallControl', () => {
     );
 
     await act(async () => {
-      await result.current.loadContactServiceQueues();
+      await result.current.loadQueues();
     });
 
-    expect(result.current.contactServiceQueues).toEqual(dummyQueues);
-    getContactServiceQueuesSpy.mockRestore();
+    expect(result.current.queues).toEqual(dummyQueues);
+    getQueuesSpy.mockRestore();
   });
 });
 

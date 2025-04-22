@@ -574,7 +574,7 @@ describe('storeEventsWrapper', () => {
       ];
       storeWrapper['store'].cc.getQueues = jest.fn().mockResolvedValue(queueList);
 
-      const result = await storeWrapper.getContactServiceQueues();
+      const result = await storeWrapper.getQueues();
 
       expect(result).toEqual([
         {id: 'queue1', name: 'Queue 1', channelType: 'TELEPHONY'},
@@ -583,10 +583,10 @@ describe('storeEventsWrapper', () => {
       expect(storeWrapper['store'].cc.getQueues).toHaveBeenCalled();
     });
 
-    it('should handle error in getContactServiceQueues and throw error', async () => {
+    it('should handle error in getQueues and throw error', async () => {
       storeWrapper['store'].cc.getQueues = jest.fn().mockRejectedValue(new Error('queue error'));
 
-      await expect(storeWrapper.getContactServiceQueues()).rejects.toThrow('queue error');
+      await expect(storeWrapper.getQueues()).rejects.toThrow('queue error');
     });
 
     it('should handle consultQueueCancelled event', () => {

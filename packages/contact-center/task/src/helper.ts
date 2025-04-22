@@ -128,7 +128,7 @@ export const useCallControl = (props: useCallControlProps) => {
   const [isHeld, setIsHeld] = useState<boolean | undefined>(undefined);
   const [isRecording, setIsRecording] = useState(true);
   const [buddyAgents, setBuddyAgents] = useState<BuddyDetails[]>([]);
-  const [contactServiceQueues, setContactServiceQueues] = useState<ContactServiceQueue[]>([]);
+  const [queues, setQueues] = useState<ContactServiceQueue[]>([]);
   const [consultAgentName, setConsultAgentName] = useState<string>('Consult Agent');
   const [consultAgentId, setConsultAgentId] = useState<string>(null);
   const [holdTime, setHoldTime] = useState(0);
@@ -211,16 +211,13 @@ export const useCallControl = (props: useCallControlProps) => {
     }
   }, [logger]);
 
-  const loadContactServiceQueues = useCallback(async () => {
+  const loadQueues = useCallback(async () => {
     try {
-      const queues = await store.getContactServiceQueues();
-      setContactServiceQueues(queues);
+      const queues = await store.getQueues();
+      setQueues(queues);
     } catch (error) {
-      logger.error(`Error loading contact service queues: ${error}`, {
-        module: 'helper.ts',
-        method: 'loadContactServiceQueues',
-      });
-      setContactServiceQueues([]);
+      logError(`Error loading queues: ${error}`, 'loadQueues');
+      setQueues([]);
     }
   }, [logger]);
 
@@ -397,16 +394,11 @@ export const useCallControl = (props: useCallControlProps) => {
   };
 
   const endConsultCall = async () => {
-    const consultEndPayload = store.isQueueConsultInProgress
-      ? {
-          isConsult: true,
-          taskId: currentTask.data.interactionId,
-          queueId: store.currentConsultQueueId,
-        }
-      : {
-          isConsult: true,
-          taskId: currentTask.data.interactionId,
-        };
+    const consultEndPayload = {
+      isConsult: true,
+      taskId: currentTask.data.interactionId,
+      ...(store.isQueueConsultInProgress && {queueId: store.currentConsultQueueId}),
+    };
 
     try {
       await currentTask.endConsult(consultEndPayload);
@@ -442,8 +434,8 @@ export const useCallControl = (props: useCallControlProps) => {
     setIsRecording,
     buddyAgents,
     loadBuddyAgents,
-    contactServiceQueues,
-    loadContactServiceQueues,
+    queues,
+    loadQueues,
     transferCall,
     consultCall,
     endConsultCall,
