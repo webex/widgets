@@ -6,7 +6,6 @@ import {PopoverNext, SelectNext, TooltipNext, Text, ButtonCircle, ButtonPill} fr
 import {Item} from '@react-stately/collections';
 import {Icon} from '@momentum-design/components/dist/react';
 import ConsultTransferPopoverComponent from './CallControlCustom/consult-transfer-popover';
-import CallControlConsultComponent from './CallControlCustom/call-control-consult';
 
 function CallControlComponent(props: CallControlComponentProps) {
   const [selectedWrapupReason, setSelectedWrapupReason] = useState<string | null>(null);
@@ -30,16 +29,10 @@ function CallControlComponent(props: CallControlComponentProps) {
     loadBuddyAgents,
     transferCall,
     consultCall,
-    endConsultCall,
-    consultTransfer,
     consultInitiated,
-    consultCompleted,
     consultAccepted,
-    consultStartTimeStamp,
     callControlAudio,
-    consultAgentName,
     setConsultAgentName,
-    consultAgentId,
     setConsultAgentId,
   } = props;
 
@@ -300,19 +293,6 @@ function CallControlComponent(props: CallControlComponentProps) {
                 Submit & Wrap up
               </ButtonPill>
             </PopoverNext>
-          </div>
-        )}
-
-        {(consultAccepted || consultInitiated) && !wrapupRequired && (
-          <div className={`call-control-consult-container ${consultAccepted ? 'no-border' : ''}`}>
-            <CallControlConsultComponent
-              agentName={consultAgentName}
-              startTimeStamp={consultStartTimeStamp}
-              endConsultCall={endConsultCall}
-              onTransfer={() => consultTransfer(consultAgentId || currentTask.data.destAgentId, 'agent')}
-              consultCompleted={consultCompleted}
-              showTransfer={!consultAccepted}
-            />
           </div>
         )}
       </div>

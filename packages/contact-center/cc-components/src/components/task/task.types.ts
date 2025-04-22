@@ -276,6 +276,16 @@ export interface ControlProps {
    * Time since the task is in held state
    */
   holdTime: number;
+
+  /**
+   * Custom CSS ClassName for CallControlCAD component.
+   */
+  callControlClassName?: string;
+
+  /**
+   * Custom CSS ClassName for CallControlConsult component.
+   */
+  callControlConsultClassName?: string;
 }
 
 export type CallControlComponentProps = Pick<
@@ -307,6 +317,8 @@ export type CallControlComponentProps = Pick<
   | 'consultAgentId'
   | 'setConsultAgentId'
   | 'holdTime'
+  | 'callControlClassName'
+  | 'callControlConsultClassName'
 >;
 
 /**
