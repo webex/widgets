@@ -286,6 +286,11 @@ export interface ControlProps {
    * Custom CSS ClassName for CallControlConsult component.
    */
   callControlConsultClassName?: string;
+
+  /**
+   * Start time of the call.
+   */
+  startTimestamp?: number;
 }
 
 export type CallControlComponentProps = Pick<
@@ -319,6 +324,7 @@ export type CallControlComponentProps = Pick<
   | 'holdTime'
   | 'callControlClassName'
   | 'callControlConsultClassName'
+  | 'startTimestamp'
 >;
 
 /**

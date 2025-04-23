@@ -24,6 +24,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
     consultTransfer,
     callControlClassName,
     callControlConsultClassName,
+    startTimestamp,
   } = props;
 
   // Use the Web Worker-based hold timer
@@ -51,7 +52,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
             </Text>
             <div className="call-details">
               <Text className="call-timer" type="body-secondary" tagName={'small'}>
-                Call - <TaskTimer startTimeStamp={currentTask?.data?.interaction?.startTime} />
+                Call - <TaskTimer startTimeStamp={startTimestamp} />
               </Text>
               <div className="call-status">
                 {!wrapupRequired && isHeld && (
