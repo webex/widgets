@@ -23,13 +23,9 @@ export function getControlsVisibility(deviceType: string, featureFlags: {[key: s
       (isBrowser && ((webRtcEnabled && isCall) || isChat || isEmail)) ||
       (isAgentDN && (isChat || isEmail)) ||
       (isExtension && (isChat || isEmail)),
-    decline: webRtcEnabled && isBrowser && isCall,
-    end:
-      isEndCallEnabled &&
-      ((isBrowser && ((webRtcEnabled && isCall) || isChat || isEmail)) ||
-        (isAgentDN && (isChat || isEmail)) ||
-        (isExtension && (isChat || isEmail))),
-    muteUnmute: webRtcEnabled && isBrowser && isCall,
+    decline: isBrowser && webRtcEnabled && isCall,
+    end: isEndCallEnabled,
+    muteUnmute: isBrowser && webRtcEnabled && isCall,
 
     holdResume: isCall && ((isBrowser && webRtcEnabled) || isAgentDN || isExtension), // Applicable for all type of station login
     consult: isCall && ((isBrowser && webRtcEnabled) || isAgentDN || isExtension), // Applicable for all type of station login
@@ -37,8 +33,8 @@ export function getControlsVisibility(deviceType: string, featureFlags: {[key: s
 
     conference: (isBrowser && isCall && webRtcEnabled) || isChat, // This needs further testing after we add support
     wrapup: true, // Applicable for all type of station login and media type
-    pauseResumeRecording: isBrowser && isCall && webRtcEnabled, // Getting feature flag (isRecordingManagementEnabled) value as undefined, need further testing
-    endConsult: isEndConsultEnabled && ((isBrowser && webRtcEnabled) || isAgentDN || isExtension),
+    pauseResumeRecording: isCall && ((isBrowser && webRtcEnabled) || isAgentDN || isExtension), // Getting feature flag (isRecordingManagementEnabled) value as undefined, need further testing
+    endConsult: isEndConsultEnabled && isCall && ((isBrowser && webRtcEnabled) || isAgentDN || isExtension),
   };
 
   return controls;

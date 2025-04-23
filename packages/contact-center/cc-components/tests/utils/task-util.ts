@@ -51,7 +51,7 @@ describe('getControlsVisibility', () => {
     const expectedControls = {
       accept: false,
       decline: false,
-      end: false,
+      end: true,
       muteUnmute: false,
       holdResume: false,
       consult: false,
@@ -147,14 +147,14 @@ describe('getControlsVisibility', () => {
     const expectedControls = {
       accept: false,
       decline: false,
-      end: false,
+      end: true,
       muteUnmute: false,
       holdResume: true,
       consult: true,
       transfer: true,
       conference: false,
       wrapup: true,
-      pauseResumeRecording: false,
+      pauseResumeRecording: true,
       endConsult: true,
     };
 
@@ -179,14 +179,14 @@ describe('getControlsVisibility', () => {
     const expectedControls = {
       accept: false,
       decline: false,
-      end: false,
+      end: true,
       muteUnmute: false,
       holdResume: true,
       consult: true,
       transfer: true,
       conference: false,
       wrapup: true,
-      pauseResumeRecording: false,
+      pauseResumeRecording: true,
       endConsult: true,
     };
 
@@ -219,7 +219,7 @@ describe('getControlsVisibility', () => {
       conference: true,
       wrapup: true,
       pauseResumeRecording: false,
-      endConsult: true,
+      endConsult: false,
     };
 
     expect(getControlsVisibility(deviceType, featureFlags, task)).toEqual(expectedControls);
@@ -251,7 +251,7 @@ describe('getControlsVisibility', () => {
       conference: false,
       wrapup: true,
       pauseResumeRecording: false,
-      endConsult: true,
+      endConsult: false,
     };
 
     expect(getControlsVisibility(deviceType, featureFlags, task)).toEqual(expectedControls);

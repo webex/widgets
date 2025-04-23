@@ -46,7 +46,10 @@ function CallControlComponent(props: CallControlComponentProps) {
     setConsultAgentId,
   } = props;
 
-  const visibleCtrl = getControlsVisibility(deviceType, featureFlags, currentTask);
+  const visibleCtrl = React.useMemo(
+    () => getControlsVisibility(deviceType, featureFlags, currentTask),
+    [deviceType, featureFlags, currentTask]
+  );
 
   useEffect(() => {
     if (!currentTask || !currentTask.data || !currentTask.data.interaction) return;
