@@ -1556,7 +1556,7 @@ describe('useCallControl', () => {
     });
   });
 
-  it('should load successfully', async () => {
+  it('should load queues successfully', async () => {
     const dummyQueues = [
       {id: 'q1', name: 'Queue1'},
       {id: 'q2', name: 'Queue2'},

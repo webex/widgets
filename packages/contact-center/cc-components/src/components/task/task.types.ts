@@ -383,7 +383,7 @@ export interface ConsultTransferPopoverComponentProps {
   buddyAgents: BuddyDetails[];
   queues?: ContactServiceQueue[];
   onAgentSelect: (agentId: string, agentName: string) => void;
-  onQueueSelect?: (queueId: string, queueName: string) => void;
+  onQueueSelect: (queueId: string, queueName: string) => void;
   allowConsultToQueue: boolean;
 }
 
