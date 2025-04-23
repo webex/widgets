@@ -68,9 +68,11 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
             </div>
           </div>
         </div>
-        <div className="recording-indicator">
-          <Icon name={isRecording ? 'record-active-badge-filled' : 'record-paused-badge-filled'} size={1.3} />
-        </div>
+        {!wrapupRequired && (
+          <div className="recording-indicator">
+            <Icon name={isRecording ? 'record-active-badge-filled' : 'record-paused-badge-filled'} size={1.3} />
+          </div>
+        )}
         <CallControlComponent {...props} />
         <div className="cad-variables">
           <Text className="queue" type="body-secondary" tagName={'small'}>
