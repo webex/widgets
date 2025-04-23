@@ -56,6 +56,23 @@ jest.mock('../../../../src/components/task/CallControl/CallControlCustom/consult
   return MockPopover;
 });
 
+jest.mock('../../../../src/components/task/CallControl/CallControlCustom/call-control-consult', () => {
+  // eslint-disable-next-line react/display-name
+  return (props) => (
+    <div data-testid="CallControlConsultComponent" {...props}>
+      CallControlConsultComponent
+    </div>
+  );
+});
+
+beforeAll(() => {
+  jest.spyOn(console, 'error').mockImplementation(() => {});
+});
+
+afterAll(() => {
+  (console.error as jest.Mock).mockRestore();
+});
+
 describe('CallControlPresentational', () => {
   const mockToggleHold = jest.fn();
   const mockToggleRecording = jest.fn();
@@ -145,5 +162,29 @@ describe('CallControlPresentational', () => {
     fireEvent.click(agentSelectButton);
     expect(mockTransferCall).toHaveBeenCalledWith('agent1', 'agent');
     expect(mockConsultCall).not.toHaveBeenCalled();
+  });
+
+  it('renders consult UI with consultAccepted prop', () => {
+    const props = {
+      ...defaultProps,
+      consultAccepted: true,
+      consultInitiated: false,
+    };
+    render(<CallControlComponent {...props} />);
+    const consultContainer = document.querySelector('.call-control-consult-container');
+    expect(consultContainer).toBeInTheDocument();
+    expect(consultContainer).toHaveClass('no-border');
+  });
+
+  it('renders consult UI with consultInitiated prop', () => {
+    const props = {
+      ...defaultProps,
+      consultAccepted: false,
+      consultInitiated: true,
+    };
+    render(<CallControlComponent {...props} />);
+    const consultContainer = document.querySelector('.call-control-consult-container');
+    expect(consultContainer).toBeInTheDocument();
+    expect(consultContainer).not.toHaveClass('no-border');
   });
 });

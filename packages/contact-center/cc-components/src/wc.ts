@@ -2,6 +2,7 @@ import r2wc from '@r2wc/react-to-web-component';
 import UserStateComponent from './components/UserState/user-state';
 import StationLoginComponent from './components/StationLogin/station-login';
 import CallControlComponent from './components/task/CallControl/call-control';
+import CallControlCADComponent from './components/task/CallControl/call-control';
 import IncomingTaskComponent from './components/task/IncomingTask/incoming-task';
 import TaskListComponent from './components/task/TaskList/task-list';
 import OutdialCallComponent from './components/task/OutdialCall/outdial-call';
@@ -47,20 +48,30 @@ if (!customElements.get('component-cc-station-login')) {
   customElements.define('component-cc-station-login', WebStationLogin);
 }
 
-const WebCallControl = r2wc(CallControlComponent, {
-  props: {
-    currentTask: 'json',
-    audioRef: 'json',
-    wrapupCodes: 'json',
-    wrapupRequired: 'boolean',
-    toggleHold: 'function',
-    toggleRecording: 'function',
-    endCall: 'function',
-    wrapupCall: 'function',
-    isHeld: 'boolean',
-    setIsHeld: 'function',
-  },
+const commonPropsForCallControl: Record<string, 'string' | 'number' | 'boolean' | 'function' | 'json'> = {
+  currentTask: 'json',
+  audioRef: 'json',
+  wrapupCodes: 'json',
+  wrapupRequired: 'boolean',
+  toggleHold: 'function',
+  toggleRecording: 'function',
+  endCall: 'function',
+  wrapupCall: 'function',
+  isHeld: 'boolean',
+  setIsHeld: 'function',
+};
+
+const WebCallControlCADComponent = r2wc(CallControlCADComponent, {
+  props: commonPropsForCallControl,
 });
+const WebCallControl = r2wc(CallControlComponent, {
+  props: commonPropsForCallControl,
+});
+
+if (!customElements.get('component-cc-call-control-cad')) {
+  customElements.define('component-cc-call-control-cad', WebCallControlCADComponent);
+}
+
 if (!customElements.get('component-cc-call-control')) {
   customElements.define('component-cc-call-control', WebCallControl);
 }

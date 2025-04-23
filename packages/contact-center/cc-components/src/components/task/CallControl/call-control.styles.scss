@@ -8,6 +8,7 @@
 }
 
 .call-control-container {
+  position: relative;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
@@ -81,6 +82,12 @@
 }
 
 .md-button-circle-wrapper.call-control-button {
+  width: 1rem;
+  height: 1rem; 
+  min-width: 2rem;
+  min-height: 2rem;
+  padding: 0.5rem;
+  border-radius: 50%;
   background-color: var(--mds-color-theme-button-secondary-normal);
   border: 1px solid var(--mds-color-theme-outline-button-normal);
   &:hover,
@@ -90,8 +97,19 @@
 }
 
 .md-button-circle-wrapper.call-control-button-cancel {
+  width: 2rem;
+  height: 2rem;
+  min-width: 2rem;
+  min-height: 2rem;
+  padding: 0.5rem;
+  color: var(--mds-color-theme-inverted-text-primary-normal);
   background-color: var(--mds-color-theme-button-cancel-normal);
   border: 0.0625rem solid var(--mds-color-theme-background-secondary-normal);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
   &:hover,
   &.hover {
     background-color: var(--mds-color-theme-button-cancel-hover);
@@ -99,6 +117,18 @@
 }
 .call-control-button-icon {
   --mdc-icon-fill-color: var(--mds--color-theme-button-secondary-normal);
+}
+
+.md-button-circle-wrapper.call-control-consult-button-cancel {
+  background-color: var(--mds-color-theme-button-secondary-normal);
+  border: 0.0625rem solid var(--mds-color-theme-button-cancel-normal);
+  &:hover {
+    background-color: var(--mds-color-theme-button-secondary-hover);
+  }
+}
+
+.call-control-consult-button-cancel-icon {
+  --mdc-icon-fill-color: var(--mds-color-theme-button-cancel-normal);
 }
 
 .wrapup-button {
@@ -152,6 +182,10 @@
     margin-left: 0;
     margin-bottom: 1rem;
   }
+
+  button.md-button-circle-wrapper.md-popover-close-button.md-button-simple-wrapper {
+    display: none;
+  }
 }
 
 .call-control-list-item .hover-button {
@@ -168,4 +202,53 @@
 .custom-text {
   margin: 0 !important;
   line-height: 1 !important;
+}
+
+.call-control-consult-container {
+  margin-top: 1rem;
+  border-top: 1px solid var(--mds-color-theme-background-secondary-normal);
+  padding-top: 1rem;
+}
+
+.call-control-consult-container.no-border {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+// Add explicit margin for the consult subtext so it is only 4px from the main text
+.call-control-consult .consult-sub-text {
+  margin-top: 0.25rem !important;
+}
+
+.consult-header {
+  display: flex;
+  align-content: center;
+  gap: 0.5rem;
+}
+
+.consult-agent-name {
+  line-height: 0;
+  margin-top: -8px;
+}
+
+.consult-buttons-container {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-start;
+}
+
+.task-avatar {
+  --mdc-avatar-default-background-color: var(--mds-color-theme-avatar-pressed);
+  --mdc-avatar-default-foreground-color: var(--mds-color-theme-indicator-stable);
+  margin-right: 0.25rem;
+}
+
+.md-button-circle-wrapper.call-control-button[disabled],
+.md-button-circle-wrapper.call-control-button.shallowDisabled,
+.md-button-circle-wrapper.call-control-button:disabled {
+  outline-color: var(--mds-color-theme-button-primary-disabled);
+  border-color: var(--mds-color-theme-button-primary-disabled);
+  opacity: 0.5;
+  cursor: not-allowed;
 }

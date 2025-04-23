@@ -102,10 +102,6 @@ export type TaskListComponentProps = Pick<
  */
 export interface ControlProps {
   /**
-   * Audio reference
-   */
-  audioRef: React.RefObject<HTMLAudioElement>;
-  /**
    * The current task being handled.
    */
   currentTask: ITask;
@@ -209,17 +205,87 @@ export interface ControlProps {
   transferCall: (destination: string, destinationType: DestinationType) => void;
 
   /**
-   * Function to consult with a buddy agent.
+   * Flag to determine if the feature is enabled.
    */
-  consultCall: () => void;
-
   featureFlags: {[key: string]: boolean};
+
+  /**
+   *
+   * @param consultDestination
+   * @param destinationType
+   * @returns
+   */
+  consultCall: (consultDestination: string, destinationType: DestinationType) => void;
+
+  /**
+   * Function to end the consult call.
+   */
+  endConsultCall: () => void;
+
+  /**
+   * Function to transfer the consult call to a destination.
+   * @param destination - The destination to transfer the consult call to.
+   * @param destinationType - The type of destination.
+   */
+  consultTransfer: (destination: string, destinationType: DestinationType) => void;
+
+  /**
+   * Flag to determine if the consult call is connecting.
+   */
+  consultInitiated: boolean;
+
+  /**
+   * Flag to determine if the consult call is connecting.
+   */
+  consultCompleted: boolean;
+
+  /**
+   * Flag to determine if the consult call is accepted.
+   */
+  consultAccepted: boolean;
+
+  /**
+   * Timestamp when the consult call started.
+   */
+  consultStartTimeStamp?: number;
+
+  /**
+   * Audio stream for the call control.
+   * This is used to play audio for the call control.
+   */
+  callControlAudio: MediaStream | null;
+
+  /**
+   * ID of the consulting agent
+   */
+  consultAgentId: string;
+
+  /**
+   * Function to set the consulting agent ID
+   * @param agentId - The ID of the consulting agent.
+   */
+  setConsultAgentId: (agentId: string) => void;
+
+  /**
+   * Name of the consulting agent.
+   */
+  consultAgentName: string;
+
+  /**
+   * Function to set the consulting agent name.
+   * @param agentName - The name of the consulting agent.
+   */
+  setConsultAgentName: (agentName: string) => void;
+
+  /**
+   * Time since the task is in held state
+   */
+  holdTime: number;
 }
 
 export type CallControlComponentProps = Pick<
   ControlProps,
   | 'currentTask'
-  | 'audioRef'
   | 'wrapupCodes'
   | 'wrapupRequired'
   | 'toggleHold'
@@ -236,6 +302,18 @@ export type CallControlComponentProps = Pick<
   | 'consultCall'
   | 'deviceType'
   | 'featureFlags'
+  | 'endConsultCall'
+  | 'consultInitiated'
+  | 'consultTransfer'
+  | 'consultCompleted'
+  | 'consultAccepted'
+  | 'consultStartTimeStamp'
+  | 'callControlAudio'
+  | 'consultAgentName'
+  | 'setConsultAgentName'
+  | 'consultAgentId'
+  | 'setConsultAgentId'
+  | 'holdTime'
 >;
 
 /**
@@ -278,5 +356,17 @@ export interface ConsultTransferPopoverComponentProps {
   heading: string;
   buttonIcon: string;
   buddyAgents: Array<{agentId: string; agentName: string; dn: string}>;
-  onAgentSelect: (agentId: string) => void;
+  onAgentSelect: (agentId: string, agentName: string) => void;
+}
+
+/**
+ * Interface representing the properties for CallControlConsultComponents component.
+ */
+export interface CallControlConsultComponentsProps {
+  agentName: string;
+  startTimeStamp: number;
+  onTransfer?: () => void;
+  endConsultCall: () => void;
+  consultCompleted: boolean;
+  showTransfer: boolean;
 }
