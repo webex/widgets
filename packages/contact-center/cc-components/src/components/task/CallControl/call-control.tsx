@@ -90,7 +90,7 @@ function CallControlComponent(props: CallControlComponentProps) {
       } catch (error) {
         throw new Error('Error during consult call', error);
       }
-    } else {
+    } else if (agentMenuType === 'Transfer') {
       try {
         transferCall(id, type);
       } catch (error) {
@@ -331,7 +331,7 @@ function CallControlComponent(props: CallControlComponentProps) {
               endConsultCall={endConsultCall}
               onTransfer={() => consultTransfer(consultAgentId || currentTask.data.destAgentId, lastTargetType)}
               consultCompleted={consultCompleted}
-              showTransfer={!consultAccepted}
+              isAgentBeingConsulted={!consultAccepted}
               isEndConsultEnabled={isEndConsultEnabled}
             />
           </div>

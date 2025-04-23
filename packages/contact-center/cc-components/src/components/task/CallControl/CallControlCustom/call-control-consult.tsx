@@ -11,7 +11,7 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
   onTransfer,
   endConsultCall,
   consultCompleted,
-  showTransfer,
+  isAgentBeingConsulted,
   isEndConsultEnabled,
 }) => {
   const timerKey = `timer-${startTimeStamp}`;
@@ -42,7 +42,7 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
       onClick: handleTransfer,
       className: 'call-control-button',
       disabled: !consultCompleted,
-      shouldShow: showTransfer && !!onTransfer,
+      shouldShow: isAgentBeingConsulted && !!onTransfer,
     },
     {
       key: 'cancel',
@@ -50,7 +50,7 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
       tooltip: 'End Consult',
       onClick: handleEndConsult,
       className: 'call-control-consult-button-cancel',
-      shouldShow: isEndConsultEnabled || showTransfer,
+      shouldShow: isEndConsultEnabled || isAgentBeingConsulted,
     },
   ];
 

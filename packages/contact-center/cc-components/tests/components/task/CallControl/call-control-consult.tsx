@@ -45,7 +45,7 @@ describe('CallControlConsultComponent', () => {
     onTransfer: mockOnTransfer,
     endConsultCall: mockEndConsultCall,
     consultCompleted: true,
-    showTransfer: true,
+    isAgentBeingConsulted: true,
   };
 
   beforeEach(() => {
@@ -130,18 +130,18 @@ describe('CallControlConsultComponent', () => {
     (console.error as jest.Mock).mockRestore();
   });
 
-  it('does not render transfer button when showTransfer is false', () => {
-    render(<CallControlConsultComponent {...defaultProps} showTransfer={false} />);
+  it('does not render transfer button when isAgentBeingConsulted is false', () => {
+    render(<CallControlConsultComponent {...defaultProps} isAgentBeingConsulted={false} />);
     expect(screen.queryByTestId('transfer-consult-btn')).not.toBeInTheDocument();
   });
 
-  it('does not render cancel button when both isEndConsultEnabled and showTransfer are false', () => {
-    render(<CallControlConsultComponent {...defaultProps} isEndConsultEnabled={false} showTransfer={false} />);
+  it('does not render cancel button when both isEndConsultEnabled and isAgentBeingConsulted are false', () => {
+    render(<CallControlConsultComponent {...defaultProps} isEndConsultEnabled={false} isAgentBeingConsulted={false} />);
     expect(screen.queryByTestId('cancel-consult-btn')).not.toBeInTheDocument();
   });
 
-  it('renders cancel button when isEndConsultEnabled is true even if showTransfer is false', () => {
-    render(<CallControlConsultComponent {...defaultProps} isEndConsultEnabled={true} showTransfer={false} />);
+  it('renders cancel button when isEndConsultEnabled is true even if isAgentBeingConsulted is false', () => {
+    render(<CallControlConsultComponent {...defaultProps} isEndConsultEnabled={true} isAgentBeingConsulted={false} />);
     expect(screen.getByTestId('cancel-consult-btn')).toBeInTheDocument();
   });
 });

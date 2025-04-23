@@ -396,7 +396,7 @@ export interface CallControlConsultComponentsProps {
   onTransfer?: () => void;
   endConsultCall: () => void;
   consultCompleted: boolean;
-  showTransfer: boolean;
+  isAgentBeingConsulted: boolean;
   isEndConsultEnabled: boolean;
 }
 
