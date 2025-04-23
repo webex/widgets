@@ -276,6 +276,11 @@ export interface ControlProps {
    * Time since the task is in held state
    */
   holdTime: number;
+
+  /**
+   * Feature flags for the task.
+   */
+  featureFlags: {[key: string]: boolean};
 }
 
 export type CallControlComponentProps = Pick<
@@ -307,6 +312,8 @@ export type CallControlComponentProps = Pick<
   | 'consultAgentId'
   | 'setConsultAgentId'
   | 'holdTime'
+  | 'deviceType'
+  | 'featureFlags'
 >;
 
 /**
