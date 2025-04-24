@@ -13,6 +13,7 @@ import {
   BuddyDetails,
   ENGAGED_LABEL,
   ENGAGED_USERNAME,
+  ContactServiceQueue,
 } from './store.types';
 import Store from './store';
 import {runInAction} from 'mobx';
@@ -119,6 +120,22 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.consultOfferReceived;
   }
 
+  get isQueueConsultInProgress() {
+    return this.store.isQueueConsultInProgress;
+  }
+
+  get currentConsultQueueId() {
+    return this.store.currentConsultQueueId;
+  }
+
+  get isEndConsultEnabled() {
+    return this.store.isEndConsultEnabled;
+  }
+
+  get allowConsultToQueue() {
+    return this.store.allowConsultToQueue;
+  }
+
   setCurrentTheme = (theme: string): void => {
     this.store.currentTheme = theme;
   };
@@ -200,6 +217,18 @@ class StoreWrapper implements IStoreWrapper {
     this.store.callControlAudio = audio;
   };
 
+  setIsQueueConsultInProgress = (value: boolean): void => {
+    runInAction(() => {
+      this.store.isQueueConsultInProgress = value;
+    });
+  };
+
+  setCurrentConsultQueueId = (queueId: string | null): void => {
+    runInAction(() => {
+      this.store.currentConsultQueueId = queueId;
+    });
+  };
+
   setState = (state: ICustomState | IdleCode): void => {
     if ('reset' in state) {
       runInAction(() => {
@@ -268,6 +297,7 @@ class StoreWrapper implements IStoreWrapper {
       taskToRemove.off(TASK_EVENTS.TASK_CONSULT_END, this.handleConsultEnd);
       taskToRemove.off(TASK_EVENTS.TASK_CONSULT_ACCEPTED, this.handleConsultAccepted);
       taskToRemove.off(TASK_EVENTS.AGENT_CONSULT_CREATED, this.handleConsultCreated);
+      taskToRemove.off(TASK_EVENTS.TASK_CONSULT_QUEUE_CANCELLED, this.handleConsultQueueCancelled);
       if (this.deviceType === 'BROWSER') {
         taskToRemove.off(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
         this.setCallControlAudio(null);
@@ -353,6 +383,8 @@ class StoreWrapper implements IStoreWrapper {
   handleConsultEnd = (event) => {
     const task = event;
     this.setConsultInitiated(false);
+    this.setIsQueueConsultInProgress(false);
+    this.setCurrentConsultQueueId(null);
     if (this.consultAccepted) {
       this.setConsultAccepted(false);
       this.handleTaskRemove(task.data.interactionId);
@@ -386,6 +418,13 @@ class StoreWrapper implements IStoreWrapper {
     });
   };
 
+  handleConsultQueueCancelled = () => {
+    this.setConsultInitiated(false);
+    this.setIsQueueConsultInProgress(false);
+    this.setCurrentConsultQueueId(null);
+    this.setConsultStartTimeStamp(null);
+  };
+
   handleIncomingTask = (event) => {
     const task: ITask = event;
     if (this.store.taskList.some((t) => t.data.interactionId === task.data.interactionId)) {
@@ -399,6 +438,7 @@ class StoreWrapper implements IStoreWrapper {
     // When we receive TASK_ASSIGNED the task was accepted by the agent and we need wrap up
     task.on(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
     task.on(TASK_EVENTS.AGENT_CONSULT_CREATED, this.handleConsultCreated);
+    task.on(TASK_EVENTS.TASK_CONSULT_QUEUE_CANCELLED, this.handleConsultQueueCancelled);
     if (this.deviceType === 'BROWSER') {
       task.on(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
     }
@@ -452,6 +492,7 @@ class StoreWrapper implements IStoreWrapper {
     task.on(TASK_EVENTS.TASK_CONSULTING, this.handleConsulting);
     task.on(CC_EVENTS.AGENT_OFFER_CONSULT, this.handleConsultOffer);
     task.on(TASK_EVENTS.TASK_CONSULT_END, this.handleConsultEnd);
+    task.on(TASK_EVENTS.TASK_CONSULT_QUEUE_CANCELLED, this.handleConsultQueueCancelled);
     if (this.deviceType === 'BROWSER') {
       task.on(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
     }
@@ -511,6 +552,17 @@ class StoreWrapper implements IStoreWrapper {
       });
       return response.data.agentList;
     } catch (error) {
+      return Promise.reject(error);
+    }
+  };
+
+  getQueues = async (): Promise<Array<ContactServiceQueue>> => {
+    try {
+      let queueList = await this.store.cc.getQueues();
+      queueList = queueList.filter((queue) => queue.channelType === 'TELEPHONY');
+      return queueList;
+    } catch (error) {
+      console.error('Error fetching queues:', error);
       return Promise.reject(error);
     }
   };

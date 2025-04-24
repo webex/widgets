@@ -14,6 +14,9 @@ global.MediaStream = class MediaStreamMock {
   }
 };
 
+// Mock console.error to prevent output during tests
+console.error = jest.fn();
+
 import {CC_EVENTS, TASK_EVENTS} from '../src/store.types';
 import storeWrapper from '../src/storeEventsWrapper';
 import {ITask} from '@webex/plugin-cc';
@@ -61,6 +64,16 @@ jest.mock('../src/store', () => ({
     showMultipleLoginAlert: 'mockShowMultipleLoginAlert',
     currentTheme: 'mockCurrentTheme',
     customState: 'mockCustomState',
+    consultCompleted: false,
+    consultInitiated: false,
+    consultAccepted: false,
+    consultStartTimeStamp: null,
+    callControlAudio: null,
+    consultOfferReceived: false,
+    isQueueConsultInProgress: false,
+    currentConsultQueueId: null,
+    isEndConsultEnabled: true,
+    allowConsultToQueue: false,
     setShowMultipleLoginAlert: jest.fn(),
     setCurrentState: jest.fn(),
     setLastStateChangeTimestamp: jest.fn(),
@@ -172,6 +185,30 @@ describe('storeEventsWrapper', () => {
       expect(storeWrapper['store'].currentState).toBe('newState');
     });
 
+    it('should proxy consultCompleted', () => {
+      expect(storeWrapper.consultCompleted).toBe(false);
+    });
+
+    it('should proxy consultInitiated', () => {
+      expect(storeWrapper.consultInitiated).toBe(false);
+    });
+
+    it('should proxy isQueueConsultInProgress', () => {
+      expect(storeWrapper.isQueueConsultInProgress).toBe(false);
+    });
+
+    it('should proxy currentConsultQueueId', () => {
+      expect(storeWrapper.currentConsultQueueId).toBe(null);
+    });
+
+    it('should proxy isEndConsultEnabled', () => {
+      expect(storeWrapper.isEndConsultEnabled).toBe(storeWrapper['store'].isEndConsultEnabled);
+    });
+
+    it('should proxy allowConsultToQueue', () => {
+      expect(storeWrapper.allowConsultToQueue).toBe(storeWrapper['store'].allowConsultToQueue);
+    });
+
     describe('setState', () => {
       it('should call setCurrentState if idleCode is passed', () => {
         const idleCode = storeWrapper.idleCodes[0];
@@ -259,6 +296,20 @@ describe('storeEventsWrapper', () => {
 
       storeWrapper.setWrapupCodes(mockCodes);
       expect(storeWrapper['store'].wrapupCodes).toBe(mockCodes);
+    });
+
+    it('should setIsQueueConsultInProgress', () => {
+      expect(storeWrapper.setIsQueueConsultInProgress).toBeInstanceOf(Function);
+
+      storeWrapper.setIsQueueConsultInProgress(true);
+      expect(storeWrapper['store'].isQueueConsultInProgress).toBe(true);
+    });
+
+    it('should setCurrentConsultQueueId', () => {
+      expect(storeWrapper.setCurrentConsultQueueId).toBeInstanceOf(Function);
+
+      storeWrapper.setCurrentConsultQueueId('queue-123');
+      expect(storeWrapper['store'].currentConsultQueueId).toBe('queue-123');
     });
 
     describe('setCCCallback/removeCCCallback', () => {
@@ -513,6 +564,43 @@ describe('storeEventsWrapper', () => {
     it('should handle error in getBuddyAgents and throw error', async () => {
       storeWrapper['store'].cc.getBuddyAgents = jest.fn().mockRejectedValue(new Error('error'));
       await expect(storeWrapper.getBuddyAgents()).rejects.toThrow('error');
+    });
+
+    it('should return contact service queues list', async () => {
+      const queueList = [
+        {id: 'queue1', name: 'Queue 1', channelType: 'TELEPHONY'},
+        {id: 'queue2', name: 'Queue 2', channelType: 'TELEPHONY'},
+        {id: 'queue3', name: 'Queue 3', channelType: 'CHAT'}, // This one should be filtered out
+      ];
+      storeWrapper['store'].cc.getQueues = jest.fn().mockResolvedValue(queueList);
+
+      const result = await storeWrapper.getQueues();
+
+      expect(result).toEqual([
+        {id: 'queue1', name: 'Queue 1', channelType: 'TELEPHONY'},
+        {id: 'queue2', name: 'Queue 2', channelType: 'TELEPHONY'},
+      ]);
+      expect(storeWrapper['store'].cc.getQueues).toHaveBeenCalled();
+    });
+
+    it('should handle error in getQueues and throw error', async () => {
+      storeWrapper['store'].cc.getQueues = jest.fn().mockRejectedValue(new Error('queue error'));
+
+      await expect(storeWrapper.getQueues()).rejects.toThrow('queue error');
+    });
+
+    it('should handle consultQueueCancelled event', () => {
+      const consultInitiatedSpy = jest.spyOn(storeWrapper, 'setConsultInitiated');
+      const isQueueConsultInProgressSpy = jest.spyOn(storeWrapper, 'setIsQueueConsultInProgress');
+      const currentConsultQueueIdSpy = jest.spyOn(storeWrapper, 'setCurrentConsultQueueId');
+      const consultStartTimeStampSpy = jest.spyOn(storeWrapper, 'setConsultStartTimeStamp');
+
+      storeWrapper.handleConsultQueueCancelled();
+
+      expect(consultInitiatedSpy).toHaveBeenCalledWith(false);
+      expect(isQueueConsultInProgressSpy).toHaveBeenCalledWith(false);
+      expect(currentConsultQueueIdSpy).toHaveBeenCalledWith(null);
+      expect(consultStartTimeStampSpy).toHaveBeenCalledWith(null);
     });
   });
 
@@ -1065,6 +1153,41 @@ describe('storeEventsWrapper', () => {
 
       expect(onTaskRejectedMock).toHaveBeenCalledWith({reason: reason});
       expect(removeSpy).toHaveBeenCalledWith('rejectTest');
+    });
+
+    it('should handle consultEnd event and reset queue consult state', () => {
+      const consultInitiatedSpy = jest.spyOn(storeWrapper, 'setConsultInitiated');
+      const isQueueConsultInProgressSpy = jest.spyOn(storeWrapper, 'setIsQueueConsultInProgress');
+      const currentConsultQueueIdSpy = jest.spyOn(storeWrapper, 'setCurrentConsultQueueId');
+      // simulate consultAccepted false
+      storeWrapper['store'].consultAccepted = false;
+      storeWrapper['store'].consultOfferReceived = false;
+      const event = {data: {interactionId: 'testId'}};
+
+      storeWrapper.handleConsultEnd(event);
+
+      expect(consultInitiatedSpy).toHaveBeenCalledWith(false);
+      expect(isQueueConsultInProgressSpy).toHaveBeenCalledWith(false);
+      expect(currentConsultQueueIdSpy).toHaveBeenCalledWith(null);
+    });
+
+    it('should register TASK_CONSULT_QUEUE_CANCELLED handler on incoming task', () => {
+      const mockTask: ITask = {
+        data: {
+          interactionId: 'interaction1',
+          interaction: {
+            state: 'connected',
+          },
+        },
+        on: jest.fn(),
+        off: jest.fn(),
+      } as unknown as ITask;
+
+      storeWrapper['store'].taskList = [];
+      storeWrapper.handleIncomingTask(mockTask);
+
+      // Verify the TASK_CONSULT_QUEUE_CANCELLED handler was registered
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_CONSULT_QUEUE_CANCELLED, expect.any(Function));
     });
   });
 
