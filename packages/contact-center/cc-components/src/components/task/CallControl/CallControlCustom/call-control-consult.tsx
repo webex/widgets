@@ -22,7 +22,7 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
         onTransfer();
       }
     } catch (error) {
-      console.error('Error transferring call:', error);
+      throw new Error('Error transferring call:', error);
     }
   };
 
@@ -30,7 +30,7 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
     try {
       endConsultCall();
     } catch (error) {
-      console.error('Error ending consult call:', error);
+      throw new Error('Error ending consult call:', error);
     }
   };
 
