@@ -17,6 +17,8 @@ const CallControlCAD: React.FunctionComponent<CallControlProps> = observer(({onH
     consultStartTimeStamp,
     callControlAudio,
     consultCompleted,
+    isEndConsultEnabled,
+    allowConsultToQueue,
   } = store;
   const result = {
     ...useCallControl({
@@ -34,6 +36,8 @@ const CallControlCAD: React.FunctionComponent<CallControlProps> = observer(({onH
     consultAccepted,
     consultStartTimeStamp,
     callControlAudio,
+    isEndConsultEnabled,
+    allowConsultToQueue,
   };
 
   return <CallControlCADComponent {...result} />;
