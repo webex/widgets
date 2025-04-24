@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.45](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.44...v1.28.0-ccwidgets.45) (2025-04-24)
+
+
+### Bug Fixes
+
+* **task:** accept browser calls on login ([#436](https://github.com/webex/widgets/issues/436)) ([a4035ac](https://github.com/webex/widgets/commit/a4035aca1c837c80391b8daed861a94d98a502ce))
+
 # [1.28.0-ccwidgets.44](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.43...v1.28.0-ccwidgets.44) (2025-04-16)
 
 
