@@ -6,14 +6,12 @@ import {PopoverNext, SelectNext, TooltipNext, Text, ButtonCircle, ButtonPill} fr
 import {Item} from '@react-stately/collections';
 import {Icon} from '@momentum-design/components/dist/react';
 import ConsultTransferPopoverComponent from './CallControlCustom/consult-transfer-popover';
-import CallControlConsultComponent from './CallControlCustom/call-control-consult';
 
 function CallControlComponent(props: CallControlComponentProps) {
   const [selectedWrapupReason, setSelectedWrapupReason] = useState<string | null>(null);
   const [selectedWrapupId, setSelectedWrapupId] = useState<string | null>(null);
   const [showAgentMenu, setShowAgentMenu] = useState(false);
   const [agentMenuType, setAgentMenuType] = useState<CallControlMenuType | null>(null);
-  const [lastTargetType, setLastTargetType] = useState<'agent' | 'queue'>('agent');
 
   const {
     currentTask,
@@ -33,19 +31,13 @@ function CallControlComponent(props: CallControlComponentProps) {
     loadQueues,
     transferCall,
     consultCall,
-    endConsultCall,
-    consultTransfer,
     consultInitiated,
-    consultCompleted,
     consultAccepted,
-    consultStartTimeStamp,
     callControlAudio,
-    consultAgentName,
     setConsultAgentName,
-    consultAgentId,
     setConsultAgentId,
-    isEndConsultEnabled,
     allowConsultToQueue,
+    setLastTargetType,
   } = props;
 
   useEffect(() => {
@@ -320,20 +312,6 @@ function CallControlComponent(props: CallControlComponentProps) {
                 Submit & Wrap up
               </ButtonPill>
             </PopoverNext>
-          </div>
-        )}
-
-        {(consultAccepted || consultInitiated) && !wrapupRequired && (
-          <div className={`call-control-consult-container ${consultAccepted ? 'no-border' : ''}`}>
-            <CallControlConsultComponent
-              agentName={consultAgentName}
-              startTimeStamp={consultStartTimeStamp}
-              endConsultCall={endConsultCall}
-              onTransfer={() => consultTransfer(consultAgentId || currentTask.data.destAgentId, lastTargetType)}
-              consultCompleted={consultCompleted}
-              isAgentBeingConsulted={!consultAccepted}
-              isEndConsultEnabled={isEndConsultEnabled}
-            />
           </div>
         )}
       </div>
