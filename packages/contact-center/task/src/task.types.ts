@@ -8,7 +8,10 @@ export type UseTaskListProps = Pick<
 export type IncomingTaskProps = Pick<TaskProps, 'onAccepted' | 'onDeclined'>;
 export type TaskListProps = Pick<TaskProps, 'onTaskAccepted' | 'onTaskDeclined'>;
 
-export type CallControlProps = Pick<ControlProps, 'onHoldResume' | 'onEnd' | 'onWrapUp'>;
+export type CallControlProps = Pick<
+  ControlProps,
+  'onHoldResume' | 'onEnd' | 'onWrapUp' | 'callControlClassName' | 'callControlConsultClassName'
+>;
 
 export type useCallControlProps = Pick<
   ControlProps,

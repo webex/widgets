@@ -286,6 +286,21 @@ export interface ControlProps {
   holdTime: number;
 
   /**
+   * Custom CSS ClassName for CallControlCAD component.
+   */
+  callControlClassName?: string;
+
+  /**
+   * Custom CSS ClassName for CallControlConsult component.
+   */
+  callControlConsultClassName?: string;
+
+  /**
+   * Start time of the call.
+   */
+  startTimestamp?: number;
+
+  /**
    * List of contact queues available for consult
    */
   queues: ContactServiceQueue[];
@@ -304,6 +319,16 @@ export interface ControlProps {
    * Flag to determine if the consulting to queue is enabled for the agent
    */
   allowConsultToQueue: boolean;
+
+  /**
+   * Function to set the last target type
+   */
+  lastTargetType: 'queue' | 'agent';
+
+  /**
+   * Function to set the last target type
+   */
+  setLastTargetType: (targetType: 'queue' | 'agent') => void;
 }
 
 export type CallControlComponentProps = Pick<
@@ -335,10 +360,15 @@ export type CallControlComponentProps = Pick<
   | 'consultAgentId'
   | 'setConsultAgentId'
   | 'holdTime'
+  | 'callControlClassName'
+  | 'callControlConsultClassName'
+  | 'startTimestamp'
   | 'queues'
   | 'loadQueues'
   | 'isEndConsultEnabled'
   | 'allowConsultToQueue'
+  | 'lastTargetType'
+  | 'setLastTargetType'
 >;
 
 /**

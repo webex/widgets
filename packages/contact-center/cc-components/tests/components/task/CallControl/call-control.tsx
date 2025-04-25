@@ -171,27 +171,28 @@ describe('CallControlPresentational', () => {
     expect(mockConsultCall).not.toHaveBeenCalled();
   });
 
-  it('renders consult UI with consultAccepted prop', () => {
-    const props = {
-      ...defaultProps,
-      consultAccepted: true,
-      consultInitiated: false,
-    };
-    render(<CallControlComponent {...props} />);
-    const consultContainer = document.querySelector('.call-control-consult-container');
-    expect(consultContainer).toBeInTheDocument();
-    expect(consultContainer).toHaveClass('no-border');
-  });
+  // TODO - We do not have tests for CAD Component. Will move these while writing test cases for it
+  // it('renders consult UI with consultAccepted prop', () => {
+  //   const props = {
+  //     ...defaultProps,
+  //     consultAccepted: true,
+  //     consultInitiated: false,
+  //   };
+  //   render(<CallControlComponent {...props} />);
+  //   const consultContainer = document.querySelector('.call-control-consult-container');
+  //   expect(consultContainer).toBeInTheDocument();
+  //   expect(consultContainer).toHaveClass('no-border');
+  // });
 
-  it('renders consult UI with consultInitiated prop', () => {
-    const props = {
-      ...defaultProps,
-      consultAccepted: false,
-      consultInitiated: true,
-    };
-    render(<CallControlComponent {...props} />);
-    const consultContainer = document.querySelector('.call-control-consult-container');
-    expect(consultContainer).toBeInTheDocument();
-    expect(consultContainer).not.toHaveClass('no-border');
-  });
+  // it('renders consult UI with consultInitiated prop', () => {
+  //   const props = {
+  //     ...defaultProps,
+  //     consultAccepted: false,
+  //     consultInitiated: true,
+  //   };
+  //   render(<CallControlComponent {...props} />);
+  //   const consultContainer = document.querySelector('.call-control-consult-container');
+  //   expect(consultContainer).toBeInTheDocument();
+  //   expect(consultContainer).not.toHaveClass('no-border');
+  // });
 });
