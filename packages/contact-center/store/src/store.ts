@@ -28,7 +28,7 @@ class Store implements IStore {
   currentTask: ITask = null;
   isAgentLoggedIn = false;
   deviceType: string = '';
-  taskList: ITask[] = [];
+  taskList: Record<string, ITask> = {};
   wrapupRequired: boolean = false;
   currentState: string = '';
   customState: ICustomState = null;

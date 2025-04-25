@@ -20,7 +20,8 @@ import {runInAction} from 'mobx';
 
 class StoreWrapper implements IStoreWrapper {
   store: IStore;
-  onTaskRejected?: (reason: string) => void;
+  onTaskRejected?: (task: ITask, reason: string) => void;
+  onTaskAssigned?: (task: ITask) => void;
 
   constructor() {
     this.store = Store.getInstance();
@@ -185,8 +186,8 @@ class StoreWrapper implements IStoreWrapper {
     this.store.incomingTask = task;
   };
 
-  setTaskList = (taskList: ITask[]): void => {
-    this.store.taskList = taskList;
+  setTaskList = (): void => {
+    this.store.taskList = this.store.cc.taskManager.getAllTasks();
   };
 
   setWrapupCodes = (wrapupCodes: IWrapupCode[]): void => {
@@ -248,8 +249,12 @@ class StoreWrapper implements IStoreWrapper {
     }
   };
 
-  setTaskRejected = (callback: ((reason: string) => void) | undefined): void => {
+  setTaskRejected = (callback: ((task: ITask, reason: string) => void) | undefined): void => {
     this.onTaskRejected = callback;
+  };
+
+  setTaskAssigned = (callback: ((task: ITask) => void) | undefined): void => {
+    this.onTaskAssigned = callback;
   };
 
   setCCCallback = (event: CC_EVENTS | TASK_EVENTS, callback) => {
@@ -259,7 +264,7 @@ class StoreWrapper implements IStoreWrapper {
 
   setTaskCallback = (event: TASK_EVENTS, callback, taskId: string) => {
     if (!callback) return;
-    const task = this.store.taskList.find((task) => task.data.interactionId === taskId);
+    const task = this.store.taskList[taskId];
     if (!task) return;
     task.on(event, callback);
   };
@@ -270,7 +275,7 @@ class StoreWrapper implements IStoreWrapper {
 
   removeTaskCallback = (event: TASK_EVENTS, callback, taskId: string) => {
     if (!callback) return;
-    const task = this.store.taskList.find((task) => task.data.interactionId === taskId);
+    const task = this.store.taskList[taskId];
     if (!task) return;
     task.off(event, callback);
   };
@@ -286,11 +291,11 @@ class StoreWrapper implements IStoreWrapper {
   handleTaskRemove = (event) => {
     const taskId = event;
     // Remove the task from the taskList
-    const taskToRemove = this.store.taskList.find((task) => task.data.interactionId === taskId);
+    const taskToRemove = this.store.taskList[taskId];
     if (taskToRemove) {
       taskToRemove.off(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
       taskToRemove.off(TASK_EVENTS.TASK_END, ({wrapupRequired}) => this.handleTaskEnd(taskToRemove, wrapupRequired));
-      taskToRemove.off(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(taskToRemove.interactionId, reason));
+      taskToRemove.off(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(taskToRemove, reason));
       taskToRemove.off(TASK_EVENTS.AGENT_WRAPPEDUP, this.handleTaskWrapUp);
       taskToRemove.off(TASK_EVENTS.TASK_CONSULTING, this.handleConsulting);
       taskToRemove.off(CC_EVENTS.AGENT_OFFER_CONSULT, this.handleConsultOffer);
@@ -303,10 +308,9 @@ class StoreWrapper implements IStoreWrapper {
         this.setCallControlAudio(null);
       }
     }
-    const updateTaskList = this.store.taskList.filter((task) => task.data.interactionId !== taskId);
 
     runInAction(() => {
-      this.setTaskList(updateTaskList);
+      this.setTaskList();
       this.setWrapupRequired(false);
       this.setConsultAccepted(false);
       this.setConsultInitiated(false);
@@ -342,6 +346,9 @@ class StoreWrapper implements IStoreWrapper {
 
   handleTaskAssigned = (event) => {
     const task = event;
+    if (this.onTaskAssigned) {
+      this.onTaskAssigned(task);
+    }
     runInAction(() => {
       if (this.consultAccepted) {
         this.setConsultAccepted(false);
@@ -427,11 +434,6 @@ class StoreWrapper implements IStoreWrapper {
 
   handleIncomingTask = (event) => {
     const task: ITask = event;
-    if (this.store.taskList.some((t) => t.data.interactionId === task.data.interactionId)) {
-      // Task already present in the taskList
-      return;
-    }
-
     // Attach event listeners to the task
     task.on(TASK_EVENTS.TASK_END, ({wrapupRequired}) => this.handleTaskEnd(task, wrapupRequired));
 
@@ -445,7 +447,7 @@ class StoreWrapper implements IStoreWrapper {
 
     // When we receive TASK_REJECT sdk changes the agent status
     // When we receive TASK_REJECT that means the task was not accepted by the agent and we wont need wrap up
-    task.on(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(task.data.interactionId, reason));
+    task.on(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(task, reason));
 
     task.on(TASK_EVENTS.AGENT_WRAPPEDUP, this.handleTaskWrapUp);
 
@@ -455,7 +457,7 @@ class StoreWrapper implements IStoreWrapper {
     task.on(TASK_EVENTS.TASK_CONSULT_END, this.handleConsultEnd);
 
     this.setIncomingTask(task);
-    this.setTaskList([...this.store.taskList, task]);
+    this.setTaskList();
   };
 
   handleStateChange = (data) => {
@@ -485,7 +487,7 @@ class StoreWrapper implements IStoreWrapper {
 
     // When we receive TASK_REJECT sdk changes the agent status
     // When we receive TASK_REJECT that means the task was not accepted by the agent and we wont need wrap up
-    task.on(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(task.data.interactionId, reason));
+    task.on(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(task, reason));
 
     task.on(TASK_EVENTS.AGENT_WRAPPEDUP, this.handleTaskWrapUp);
 
@@ -497,9 +499,7 @@ class StoreWrapper implements IStoreWrapper {
       task.on(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
     }
 
-    if (!this.store.taskList.some((t) => t.data.interactionId === task.data.interactionId)) {
-      this.setTaskList([...this.store.taskList, task]);
-    }
+    this.setTaskList();
 
     this.setCurrentTask(task);
     this.setIncomingTask(null);
@@ -537,11 +537,11 @@ class StoreWrapper implements IStoreWrapper {
     }
   };
 
-  handleTaskReject = (taskId: string, reason: string) => {
+  handleTaskReject = (task: ITask, reason: string) => {
     if (this.onTaskRejected) {
-      this.onTaskRejected(reason || 'No reason provided');
+      this.onTaskRejected(task, reason || 'No reason provided');
     }
-    this.handleTaskRemove(taskId);
+    this.handleTaskRemove(task.data.interactionId);
   };
 
   getBuddyAgents = async (): Promise<Array<BuddyDetails>> => {
@@ -573,7 +573,7 @@ class StoreWrapper implements IStoreWrapper {
       this.setDeviceType('');
       this.setIncomingTask(null);
       this.setCurrentTask(null);
-      this.setTaskList([]);
+      this.setTaskList();
       this.setWrapupRequired(false);
       this.setLastStateChangeTimestamp(undefined);
       this.setLastIdleCodeChangeTimestamp(undefined);
@@ -592,6 +592,7 @@ class StoreWrapper implements IStoreWrapper {
     };
 
     const addEventListeners = () => {
+      console.log('Adding event listeners');
       ccSDK.on(TASK_EVENTS.TASK_HYDRATE, this.handleTaskHydrate);
       ccSDK.on(CC_EVENTS.AGENT_STATE_CHANGE, this.handleStateChange);
       ccSDK.on(TASK_EVENTS.TASK_INCOMING, this.handleIncomingTask);
