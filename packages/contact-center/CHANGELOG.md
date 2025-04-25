@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.47](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.46...v1.28.0-ccwidgets.47) (2025-04-25)
+
+
+### Bug Fixes
+
+* **cc-components:** move consult control into cad wrapper component ([#435](https://github.com/webex/widgets/issues/435)) ([71214d9](https://github.com/webex/widgets/commit/71214d98b32ba1943b6dcbe027a054da48b7a857))
+
 # [1.28.0-ccwidgets.46](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.45...v1.28.0-ccwidgets.46) (2025-04-24)
 
 
