@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 
-import {CallControlComponentProps} from '../task.types';
+import {CallControlComponentProps, DestinationType, CallControlMenuType} from '../task.types';
 import './call-control.styles.scss';
 import {PopoverNext, SelectNext, TooltipNext, Text, ButtonCircle, ButtonPill} from '@momentum-ui/react-collaboration';
 import {Item} from '@react-stately/collections';
@@ -11,7 +11,7 @@ function CallControlComponent(props: CallControlComponentProps) {
   const [selectedWrapupReason, setSelectedWrapupReason] = useState<string | null>(null);
   const [selectedWrapupId, setSelectedWrapupId] = useState<string | null>(null);
   const [showAgentMenu, setShowAgentMenu] = useState(false);
-  const [agentMenuType, setAgentMenuType] = useState<'Consult' | 'Transfer' | null>(null);
+  const [agentMenuType, setAgentMenuType] = useState<CallControlMenuType | null>(null);
 
   const {
     currentTask,
@@ -27,6 +27,8 @@ function CallControlComponent(props: CallControlComponentProps) {
     setIsRecording,
     buddyAgents,
     loadBuddyAgents,
+    queues,
+    loadQueues,
     transferCall,
     consultCall,
     consultInitiated,
@@ -34,6 +36,8 @@ function CallControlComponent(props: CallControlComponentProps) {
     callControlAudio,
     setConsultAgentName,
     setConsultAgentId,
+    allowConsultToQueue,
+    setLastTargetType,
   } = props;
 
   useEffect(() => {
@@ -68,13 +72,34 @@ function CallControlComponent(props: CallControlComponentProps) {
     setSelectedWrapupId(value);
   };
 
-  const handleAgentSelect = (agentId: string, agentName: string) => {
+  const handleTargetSelect = (id: string, name: string, type: DestinationType) => {
     if (agentMenuType === 'Consult') {
-      consultCall(agentId, 'agent');
-      setConsultAgentId(agentId);
-      setConsultAgentName(agentName);
+      try {
+        consultCall(id, type);
+        setConsultAgentId(id);
+        setConsultAgentName(name);
+        setLastTargetType(type);
+      } catch (error) {
+        throw new Error('Error during consult call', error);
+      }
+    } else if (agentMenuType === 'Transfer') {
+      try {
+        transferCall(id, type);
+      } catch (error) {
+        throw new Error('Error during transfer call', error);
+      }
+    }
+  };
+
+  const handlePopoverOpen = (menuType: CallControlMenuType) => {
+    if (showAgentMenu && agentMenuType === menuType) {
+      setShowAgentMenu(false);
+      setAgentMenuType(null);
     } else {
-      transferCall(agentId, 'agent');
+      setAgentMenuType(menuType);
+      setShowAgentMenu(true);
+      loadBuddyAgents();
+      loadQueues();
     }
   };
 
@@ -177,16 +202,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                             aria-label={button.tooltip}
                             disabled={button.disabled || consultInitiated}
                             data-testid="ButtonCircle"
-                            onPress={() => {
-                              if (showAgentMenu && agentMenuType === button.menuType) {
-                                setShowAgentMenu(false);
-                                setAgentMenuType(null);
-                              } else {
-                                setAgentMenuType(button.menuType as 'Consult' | 'Transfer');
-                                setShowAgentMenu(true);
-                                loadBuddyAgents();
-                              }
-                            }}
+                            onPress={() => handlePopoverOpen(button.menuType as CallControlMenuType)}
                           >
                             <Icon className={button.className + '-icon'} name={button.icon} />
                           </ButtonCircle>
@@ -207,7 +223,10 @@ function CallControlComponent(props: CallControlComponentProps) {
                         heading={button.menuType}
                         buttonIcon={button.icon}
                         buddyAgents={buddyAgents}
-                        onAgentSelect={handleAgentSelect}
+                        queues={queues}
+                        onAgentSelect={(agentId, agentName) => handleTargetSelect(agentId, agentName, 'agent')}
+                        onQueueSelect={(queueId, queueName) => handleTargetSelect(queueId, queueName, 'queue')}
+                        allowConsultToQueue={allowConsultToQueue}
                       />
                     ) : null}
                   </PopoverNext>

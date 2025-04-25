@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.46](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.45...v1.28.0-ccwidgets.46) (2025-04-24)
+
+
+### Features
+
+* **widgets:** added-consult-to-queue ([#434](https://github.com/webex/widgets/issues/434)) ([9bd3a5c](https://github.com/webex/widgets/commit/9bd3a5cebc49144dee3a56ed147b53e31431de44))
+
 # [1.28.0-ccwidgets.45](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.44...v1.28.0-ccwidgets.45) (2025-04-24)
 
 

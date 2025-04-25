@@ -25,6 +25,8 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
     callControlClassName,
     callControlConsultClassName,
     startTimestamp,
+    isEndConsultEnabled,
+    lastTargetType,
   } = props;
 
   // Use the Web Worker-based hold timer
@@ -95,9 +97,10 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
             agentName={consultAgentName}
             startTimeStamp={consultStartTimeStamp}
             endConsultCall={endConsultCall}
-            onTransfer={() => consultTransfer(consultAgentId || currentTask.data.destAgentId, 'agent')}
+            onTransfer={() => consultTransfer(consultAgentId || currentTask.data.destAgentId, lastTargetType)}
             consultCompleted={consultCompleted}
-            showTransfer={!consultAccepted}
+            isAgentBeingConsulted={!consultAccepted}
+            isEndConsultEnabled={isEndConsultEnabled}
           />
         </div>
       )}

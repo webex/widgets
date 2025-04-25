@@ -2,7 +2,7 @@ import {useEffect, useCallback, useState, useRef} from 'react';
 import {ITask} from '@webex/plugin-cc';
 import {useCallControlProps, UseTaskListProps, UseTaskProps, Participant} from './task.types';
 import {useOutdialCallProps} from '@webex/cc-components';
-import store, {TASK_EVENTS, BuddyDetails, DestinationType} from '@webex/cc-store';
+import store, {TASK_EVENTS, BuddyDetails, DestinationType, ContactServiceQueue} from '@webex/cc-store';
 
 // Hook for managing the task list
 export const useTaskList = (props: UseTaskListProps) => {
@@ -128,11 +128,13 @@ export const useCallControl = (props: useCallControlProps) => {
   const [isHeld, setIsHeld] = useState<boolean | undefined>(undefined);
   const [isRecording, setIsRecording] = useState(true);
   const [buddyAgents, setBuddyAgents] = useState<BuddyDetails[]>([]);
+  const [queues, setQueues] = useState<ContactServiceQueue[]>([]);
   const [consultAgentName, setConsultAgentName] = useState<string>('Consult Agent');
   const [consultAgentId, setConsultAgentId] = useState<string>(null);
   const [holdTime, setHoldTime] = useState(0);
   const [startTimestamp, setStartTimestamp] = useState<number>(0);
   const workerRef = useRef<Worker | null>(null);
+  const [lastTargetType, setLastTargetType] = useState<'agent' | 'queue'>('agent');
 
   const workerScript = `
     let intervalId;
@@ -215,6 +217,16 @@ export const useCallControl = (props: useCallControlProps) => {
     } catch (error) {
       logger.error(`Error loading buddy agents: ${error}`, {module: 'helper.ts', method: 'loadBuddyAgents'});
       setBuddyAgents([]);
+    }
+  }, [logger]);
+
+  const loadQueues = useCallback(async () => {
+    try {
+      const queues = await store.getQueues();
+      setQueues(queues);
+    } catch (error) {
+      logError(`Error loading queues: ${error}`, 'loadQueues');
+      setQueues([]);
     }
   }, [logger]);
 
@@ -365,10 +377,26 @@ export const useCallControl = (props: useCallControlProps) => {
       destinationType: destinationType,
     };
 
+    if (destinationType === 'queue') {
+      store.setIsQueueConsultInProgress(true);
+      store.setCurrentConsultQueueId(consultDestination);
+      store.setConsultInitiated(true);
+    }
+
     try {
       await currentTask.consult(consultPayload);
-      store.setConsultInitiated(true);
+      store.setIsQueueConsultInProgress(false);
+      if (destinationType === 'queue') {
+        store.setCurrentConsultQueueId(null);
+      } else {
+        store.setConsultInitiated(true);
+      }
     } catch (error) {
+      if (destinationType === 'queue') {
+        store.setIsQueueConsultInProgress(false);
+        store.setCurrentConsultQueueId(null);
+        store.setConsultInitiated(false);
+      }
       logError(`Error consulting call: ${error}`, 'consultCall');
       throw error;
     }
@@ -378,6 +406,7 @@ export const useCallControl = (props: useCallControlProps) => {
     const consultEndPayload = {
       isConsult: true,
       taskId: currentTask.data.interactionId,
+      ...(store.isQueueConsultInProgress && {queueId: store.currentConsultQueueId}),
     };
 
     try {
@@ -414,6 +443,8 @@ export const useCallControl = (props: useCallControlProps) => {
     setIsRecording,
     buddyAgents,
     loadBuddyAgents,
+    queues,
+    loadQueues,
     transferCall,
     consultCall,
     endConsultCall,
@@ -424,6 +455,8 @@ export const useCallControl = (props: useCallControlProps) => {
     setConsultAgentId,
     holdTime,
     startTimestamp,
+    lastTargetType,
+    setLastTargetType,
   };
 };
 
