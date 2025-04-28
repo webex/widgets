@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useRef, useCallback} from 'react';
 import {StationLoginComponentProps} from './station-login.types';
 import './station-login.style.scss';
-import {MULTIPLE_SIGN_IN_ALERT_MESSAGE, MULTIPLE_SIGN_IN_ALERT_TITLE} from './constants';
+import {DESKTOP, LoginOptions, StationLoginLabels} from './constants';
 import {Button, Icon, Select, Option, Text, Tooltip, Input} from '@momentum-design/components/dist/react';
 
 const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps> = (props) => {
@@ -15,33 +15,33 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
     setTeam,
     isAgentLoggedIn,
     deviceType,
+    dialNumber,
     showMultipleLoginAlert,
     handleContinue,
-    contactCenterLogout,
+    contactCenterLogoutFn,
   } = props;
 
   const modalRef = useRef<HTMLDialogElement>(null);
   const ccSignOutModalRef = useRef<HTMLDialogElement>(null);
   const [dialNumberLabel, setDialNumberLabel] = useState<string>('');
   const [dialNumberPlaceholder, setDialNumberPlaceholder] = useState<string>('');
-  const [dialNumberValue, setDialNumberValue] = useState<string>('');
-  const [isDialNumberDisabled, setIsDialNumberDisabled] = useState<boolean>(false);
+  const [dialNumberValue, setDialNumberValue] = useState<string>(dialNumber || '');
   const [showCCSignOutModal, setShowCCSignOutModal] = useState<boolean>(false);
+  const [selectedDeviceType, setSelectedDeviceType] = useState<string>(deviceType || '');
 
+  // useEffect to be called on mount
   useEffect(() => {
-    if (loginOptions.length > 0) {
-      const firstOption = loginOptions[0];
-      selectLoginOption(firstOption);
-      setDeviceType(firstOption);
-    }
-  }, [teams, loginOptions, deviceType]);
+    setSelectedDeviceType(deviceType);
+    updateDialNumberLabel(deviceType);
+  }, []);
 
+  // TODO: should be set from the store
   useEffect(() => {
     if (teams.length > 0) {
       const firstTeam = teams[0].id;
       setTeam(firstTeam);
     }
-  }, [teams, setTeam]);
+  }, [teams]);
 
   useEffect(() => {
     if (showMultipleLoginAlert && modalRef.current) {
@@ -52,17 +52,6 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
     }
   }, [showMultipleLoginAlert, showCCSignOutModal]);
 
-  const selectLoginOption = useCallback(
-    (key: string) => {
-      const index = parseInt(key, 10);
-      const selectedOption: string = !isNaN(index) ? loginOptions[index] : key;
-      setDeviceType(selectedOption);
-      setIsDialNumberDisabled(!['AGENT_DN', 'EXTENSION'].includes(selectedOption));
-      updateDialNumberLabel(selectedOption);
-    },
-    [loginOptions, setDeviceType]
-  );
-
   const continueClicked = useCallback(() => {
     if (modalRef.current) {
       modalRef.current.close();
@@ -70,146 +59,146 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
     }
   }, [handleContinue]);
 
-  const cancelClicked = useCallback(() => {
+  /**
+   * Handler for the Contact Center logout confirmation modal cancel button
+   *
+   * Closes the dialog if it is currently open
+   */
+  const ccCancelButtonClicked = useCallback(() => {
     if (ccSignOutModalRef?.current?.open) {
       ccSignOutModalRef.current.close();
       setShowCCSignOutModal(false);
     }
   }, []);
 
-  const updateDN = useCallback(
-    (value: string) => {
-      setDialNumberValue(value);
-      setDialNumber(value);
-    },
-    [setDialNumber]
-  );
-
-  const updateTeam = useCallback(
-    (value: string) => {
-      setTeam(value);
-    },
-    [setTeam]
-  );
-
   const updateDialNumberLabel = (selectedOption: string): void => {
-    if (selectedOption === 'AGENT_DN') {
-      setDialNumberLabel('Dial number');
-      setDialNumberPlaceholder('Dial Number');
-    } else if (selectedOption === 'EXTENSION') {
-      setDialNumberLabel('Extension');
-      setDialNumberPlaceholder('Extension');
+    if (selectedOption != DESKTOP && Object.keys(LoginOptions).includes(selectedOption)) {
+      setDialNumberLabel(LoginOptions[selectedOption]);
+      setDialNumberPlaceholder(LoginOptions[selectedOption]);
     }
   };
 
   return (
     <>
+      {/* TODO: Replace dialog with momentum-design modal component once available */}
       <dialog ref={modalRef} className="modal" open={showMultipleLoginAlert}>
-        <h2>{MULTIPLE_SIGN_IN_ALERT_TITLE}</h2>
-        <p>{MULTIPLE_SIGN_IN_ALERT_MESSAGE}</p>
+        <h2>{StationLoginLabels.MULTIPLE_SIGN_IN_ALERT_TITLE}</h2>
+        <p>{StationLoginLabels.MULTIPLE_SIGN_IN_ALERT_MESSAGE}</p>
         <div className="modal-content">
           <button id="ContinueButton" data-testid="ContinueButton" onClick={continueClicked}>
-            Continue
+            {StationLoginLabels.CONTINUE}
           </button>
         </div>
       </dialog>
+      {/* TODO: Replace dialog with momentum-design modal component once available */}
       <dialog ref={ccSignOutModalRef} className="cc-logout-modal">
         <Text tagname="h2" type="body-large-bold" className="modal-text">
-          Sign out of Contact Center
+          {StationLoginLabels.CC_SIGN_OUT}
         </Text>
         <Text tagname="p" type="body-midsize-regular" className="modal-text">
-          Are you sure you want to sign out?
+          {StationLoginLabels.CC_SIGN_OUT_CONFIRM}
         </Text>
         <div className="cc-logout-modal-content">
-          <Button onClick={cancelClicked} variant="secondary" className="white-button">
-            Cancel
+          <Button onClick={ccCancelButtonClicked} variant="secondary" className="white-button">
+            {StationLoginLabels.CANCEL}
           </Button>
-          <Button onClick={contactCenterLogout}>Sign out</Button>
+          <Button onClick={contactCenterLogoutFn}>{StationLoginLabels.SIGN_OUT}</Button>
         </div>
       </dialog>
       <div className="box station-login">
         <section className="section-box">
-          <fieldset className="fieldset">
-            <Text tagname={'span'} type="heading-small-bold">
-              Set your interaction preferences
-            </Text>
-          </fieldset>
-          <fieldset className="fieldset">
-            <legend id="agent-login-label">
-              Handle calls using
+          <Text tagname={'span'} type="body-large-bold">
+            {StationLoginLabels.INTERACTION_PREFERENCES}
+          </Text>
+          <div>
+            <div id="agent-login-label">
+              <Text type="body-midsize-regular">{StationLoginLabels.HANDLE_CALLS}</Text>
               <Icon name="info-badge-filled" id="agent-login-info-badge" />
-            </legend>
-            <Tooltip
-              color="contrast"
-              id="agent-login-label-tooltip"
-              showArrow={true}
-              triggerID="agent-login-info-badge"
-            >
-              <Text tagname={'div'} type="body-large-regular" className="agent-login-popover">
-                This is your preferred method for receiving and making calls. Choose between your phone number,
-                extension (if available), or your web browser.
-              </Text>
-            </Tooltip>
-            <div className="">
+              <Tooltip
+                color="contrast"
+                id="agent-login-label-tooltip"
+                showArrow={true}
+                triggerID="agent-login-info-badge"
+              >
+                <Text tagname={'div'} type="body-large-regular" className="agent-login-popover">
+                  {StationLoginLabels.HANDLE_CALLS_TOOLTIP}
+                </Text>
+              </Tooltip>
+            </div>
+            <div>
               <Select
                 id="login-option"
                 name="login-option"
-                onChange={(event: CustomEvent) => selectLoginOption(event.detail.value)}
+                onChange={(event: CustomEvent) => {
+                  const selectedOption = event.detail.value;
+                  setDeviceType(selectedOption);
+                  setSelectedDeviceType(selectedOption);
+                  updateDialNumberLabel(selectedOption);
+                  // clear dial number when switching between DN and Extension
+                  setDialNumber('');
+                }}
+                value={selectedDeviceType}
                 className="station-login-select"
               >
-                {loginOptions.map((option, index) => {
-                  return (
-                    <Option key={index} value={option}>
-                      {option}
-                    </Option>
-                  );
+                {Object.keys(LoginOptions).map((option: string, index: number) => {
+                  if (loginOptions.includes(option)) {
+                    return (
+                      <Option selected={option === selectedDeviceType} key={index} value={option}>
+                        {LoginOptions[option]}
+                      </Option>
+                    );
+                  }
                 })}
               </Select>
             </div>
-          </fieldset>
-          {isDialNumberDisabled ? (
-            <></>
-          ) : (
-            <fieldset className="fieldset">
-              <legend id="dial-number-label">{dialNumberLabel}</legend>
-              <Input
-                placeholder={dialNumberPlaceholder}
-                disabled={isDialNumberDisabled}
-                value={dialNumberValue}
-                onChange={(event) => updateDN(event.target.value)}
-              />
-            </fieldset>
+          </div>
+          {selectedDeviceType && selectedDeviceType !== DESKTOP && (
+            <Input
+              label={dialNumberLabel}
+              placeholder={dialNumberPlaceholder}
+              value={dialNumberValue}
+              onChange={(event) => {
+                const newDialNumber = (event.target as HTMLInputElement).value;
+                setDialNumberValue(newDialNumber);
+                setDialNumber(newDialNumber);
+              }}
+              helpText={dialNumberValue.length === 0 ? `${dialNumberLabel} is required` : undefined}
+              helpTextType={dialNumberValue.length === 0 ? 'error' : undefined}
+            />
           )}
-          <fieldset className="fieldset">
-            <legend id="team-label">Your team</legend>
-            <div className="select-container">
-              <Select
-                id="teams-dropdown"
-                name="teams-dropdown"
-                onChange={(event: CustomEvent) => updateTeam(event.detail.value)}
-                className="station-login-select"
-              >
-                {teams.map((team: {id: string; name: string}) => {
-                  return (
-                    <Option key={team.id} value={team.name}>
-                      {team.name}
-                    </Option>
-                  );
-                })}
-              </Select>
-            </div>
-          </fieldset>
+
+          <div className="select-container">
+            <Select
+              label="Your Team"
+              id="teams-dropdown"
+              name="teams-dropdown"
+              onChange={(event: CustomEvent) => {
+                setTeam(event.detail.value);
+              }}
+              className="station-login-select"
+              placeholder="Your Team"
+            >
+              {teams.map((team: {id: string; name: string}, index: number) => {
+                return (
+                  <Option key={index} value={team.id}>
+                    {team.name}
+                  </Option>
+                );
+              })}
+            </Select>
+          </div>
+
           <div className="btn-container">
             {isAgentLoggedIn ? (
               <Button id="logoutAgent" onClick={logout} color="positive">
-                Logout
+                {StationLoginLabels.SIGN_OUT}
               </Button>
             ) : (
-              <Button onClick={login}>Save & Continue</Button>
+              <Button onClick={login}>{StationLoginLabels.SAVE_AND_CONTINUE}</Button>
             )}
-            {typeof contactCenterLogout === 'function' ? (
+            {contactCenterLogoutFn ? (
               <Button onClick={() => setShowCCSignOutModal(true)} variant="secondary" className="white-button">
-                Sign out
+                {StationLoginLabels.SIGN_OUT}
               </Button>
             ) : (
               <></>

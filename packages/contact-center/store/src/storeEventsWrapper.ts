@@ -51,6 +51,9 @@ class StoreWrapper implements IStoreWrapper {
   get deviceType() {
     return this.store.deviceType;
   }
+  get dialNumber() {
+    return this.store.dialNumber;
+  }
   get wrapupCodes() {
     return this.store.wrapupCodes;
   }
@@ -146,6 +149,10 @@ class StoreWrapper implements IStoreWrapper {
 
   setDeviceType = (option: string): void => {
     this.store.deviceType = option;
+  };
+
+  setDialNumber = (input: string): void => {
+    this.store.dialNumber = input;
   };
 
   setCurrentState = (state: string): void => {
@@ -571,6 +578,7 @@ class StoreWrapper implements IStoreWrapper {
     runInAction(() => {
       this.setIsAgentLoggedIn(false);
       this.setDeviceType('');
+      this.setDialNumber('');
       this.setIncomingTask(null);
       this.setCurrentTask(null);
       this.setTaskList([]);
@@ -613,6 +621,7 @@ class StoreWrapper implements IStoreWrapper {
       runInAction(() => {
         this.setIsAgentLoggedIn(true);
         this.setDeviceType(payload.deviceType);
+        this.setDialNumber(payload.dialNumber);
         this.setCurrentState(payload.auxCodeId?.trim() !== '' ? payload.auxCodeId : '0');
         this.setLastStateChangeTimestamp(payload.lastStateChangeTimestamp);
         this.setLastIdleCodeChangeTimestamp(payload.lastIdleCodeChangeTimestamp);

@@ -6,25 +6,30 @@ import {StationLoginComponent} from '@webex/cc-components';
 import {useStationLogin} from '../helper';
 import {StationLoginProps} from './station-login.types';
 
-const StationLogin: React.FunctionComponent<StationLoginProps> = observer(({onLogin, onLogout}) => {
-  const {cc, teams, loginOptions, logger, isAgentLoggedIn, showMultipleLoginAlert, deviceType} = store;
-  const result = useStationLogin({
-    cc,
-    onLogin,
-    onLogout,
-    logger,
-    deviceType,
-  });
+const StationLogin: React.FunctionComponent<StationLoginProps> = observer(
+  ({onLogin, onLogout, contactCenterLogoutFn}) => {
+    const {cc, teams, loginOptions, logger, isAgentLoggedIn, showMultipleLoginAlert, deviceType, dialNumber} = store;
+    const result = useStationLogin({
+      cc,
+      onLogin,
+      onLogout,
+      logger,
+      deviceType,
+      dialNumber,
+    });
 
-  const props = {
-    ...result,
-    teams,
-    loginOptions,
-    deviceType,
-    isAgentLoggedIn,
-    showMultipleLoginAlert,
-  };
-  return <StationLoginComponent {...props} />;
-});
+    const props = {
+      ...result,
+      teams,
+      loginOptions,
+      deviceType,
+      dialNumber,
+      isAgentLoggedIn,
+      showMultipleLoginAlert,
+      contactCenterLogoutFn,
+    };
+    return <StationLoginComponent {...props} />;
+  }
+);
 
 export {StationLogin};

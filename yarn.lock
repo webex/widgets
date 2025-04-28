@@ -3522,9 +3522,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@momentum-design/components@npm:0.53.0":
-  version: 0.53.0
-  resolution: "@momentum-design/components@npm:0.53.0"
+"@momentum-design/components@npm:0.53.8":
+  version: 0.53.8
+  resolution: "@momentum-design/components@npm:0.53.8"
   dependencies:
     "@floating-ui/dom": "npm:^1.6.12"
     "@lit/context": "npm:^1.1.2"
@@ -3536,7 +3536,7 @@ __metadata:
     "@tanstack/lit-virtual": "npm:^3.11.3"
     lit: "npm:^3.2.0"
     uuid: "npm:^11.0.5"
-  checksum: 10c0/d54d759ad7a9aadd4b609910f233380d9b893f8ec7a07c6e2c7c7418089e520ce6e0578eac239b5964216ea5e7772c193ef975d7bd39a584b5394330ed9861e1
+  checksum: 10c0/00d98b6b51fb5d47402951ef0f77a688b213566f7e95f1ce101290bd5d17693f1d2acc2c5c74168d5727dfc1d315e89466db3d492598d34c3abbe6e21954778a
   languageName: node
   linkType: hard
 

@@ -16,6 +16,7 @@ jest.mock('@webex/cc-store', () => {
     }),
     registerCC: jest.fn(),
     setDeviceType: jest.fn(),
+    setDialNumber: jest.fn(),
     setCurrentState: jest.fn(),
     setLastStateChangeTimestamp: jest.fn(),
     setLastIdleCodeChangeTimestamp: jest.fn(),
@@ -94,6 +95,7 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         deviceType: 'BROWSER',
+        dialNumber: '',
       })
     );
 
@@ -151,6 +153,7 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         deviceType: '',
+        dialNumber: '',
       })
     );
 
@@ -190,6 +193,7 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         deviceType: 'EXTENSION',
+        dialNumber: '',
       })
     );
 
@@ -221,6 +225,7 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         deviceType: 'EXTENSION',
+        dialNumber: '',
       })
     );
 
@@ -268,6 +273,7 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         deviceType: 'EXTENSION',
+        dialNumber: '',
       })
     );
 
@@ -292,6 +298,7 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         deviceType: 'EXTENSION',
+        dialNumber: '',
       })
     );
 
@@ -354,6 +361,7 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         deviceType: 'BROWSER',
+        dialNumber: '',
       })
     );
 
@@ -389,6 +397,7 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         deviceType: 'EXTENSION',
+        dialNumber: '',
       })
     );
 
@@ -413,6 +422,7 @@ describe('useStationLogin Hook', () => {
         onLogin: loginCb,
         logger,
         deviceType: 'EXTENSION',
+        dialNumber: '',
       })
     );
 
@@ -437,6 +447,7 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         deviceType: 'EXTENSION',
+        dialNumber: '',
       })
     );
 
@@ -466,6 +477,7 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         deviceType: 'EXTENSION',
+        dialNumber: '',
       })
     );
 
@@ -496,6 +508,7 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         deviceType: 'EXTENSION',
+        dialNumber: '',
       })
     );
 
@@ -525,6 +538,7 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         deviceType: 'EXTENSION',
+        dialNumber: '',
       })
     );
 
@@ -564,6 +578,7 @@ describe('useStationLogin Hook', () => {
         cc: ccMock,
         logger,
         deviceType: 'EXTENSION',
+        dialNumber: '',
       })
     );
 

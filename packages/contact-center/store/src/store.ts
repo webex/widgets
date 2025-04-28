@@ -28,6 +28,7 @@ class Store implements IStore {
   currentTask: ITask = null;
   isAgentLoggedIn = false;
   deviceType: string = '';
+  dialNumber: string = '';
   taskList: ITask[] = [];
   wrapupRequired: boolean = false;
   currentState: string = '';
@@ -83,6 +84,7 @@ class Store implements IStore {
         this.wrapupCodes = response.wrapupCodes;
         this.isAgentLoggedIn = response.isAgentLoggedIn;
         this.deviceType = response.deviceType;
+        this.dialNumber = response.defaultDn;
         this.currentState = response.lastStateAuxCodeId;
         this.lastStateChangeTimestamp = response.lastStateChangeTimestamp;
         this.lastIdleCodeChangeTimestamp = response.lastIdleCodeChangeTimestamp;
