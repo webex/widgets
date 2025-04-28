@@ -68,6 +68,7 @@ describe('Store', () => {
         agentId: 'agent1',
         isAgentLoggedIn: true,
         deviceType: 'BROWSER',
+        dialNumber: '12345',
         lastStateAuxCodeId: 'auxCodeId',
         lastStateChangeTimestamp: date,
       };

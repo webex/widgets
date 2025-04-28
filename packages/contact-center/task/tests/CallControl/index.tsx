@@ -14,6 +14,7 @@ jest.mock('@webex/cc-components', () => {
 jest.mock('@webex/cc-store', () => ({
   cc: {},
   deviceType: 'BROWSER',
+  dialNumber: '12345',
   wrapupCodes: [],
   logger: {},
   currentTask: {

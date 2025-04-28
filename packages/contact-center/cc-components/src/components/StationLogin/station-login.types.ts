@@ -16,6 +16,8 @@ export interface IStationLoginProps {
 
   /**
    * Station login options available for the agent
+   *
+   * Array of keys for login options (i.e. AGENT_DN)
    */
   loginOptions: string[];
 
@@ -53,6 +55,11 @@ export interface IStationLoginProps {
    * The selected device type for agent login
    */
   deviceType: string;
+
+  /**
+   * The saved dial number for agent login
+   */
+  dialNumber: string;
 
   /**
    * Callback function to be invoked once the agent login is successful
@@ -93,6 +100,11 @@ export interface IStationLoginProps {
    * Flag to indicate if the alert should be shown
    */
   showMultipleLoginAlert: boolean;
+
+  /**
+   * Handler for Contact Center logout
+   */
+  onCCSignOut?: () => void;
 }
 
 export type StationLoginComponentProps = Pick<
@@ -110,5 +122,7 @@ export type StationLoginComponentProps = Pick<
   | 'isAgentLoggedIn'
   | 'handleContinue'
   | 'deviceType'
+  | 'dialNumber'
   | 'showMultipleLoginAlert'
+  | 'onCCSignOut'
 >;

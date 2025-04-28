@@ -8,8 +8,8 @@ export const useStationLogin = (props: UseStationLoginProps) => {
   const loginCb = props.onLogin;
   const logoutCb = props.onLogout;
   const logger = props.logger;
-  const [dialNumber, setDialNumber] = useState('');
-  const [deviceType, setDeviceType] = useState(props.deviceType || '');
+  const dialNumber = props.dialNumber || '';
+  const deviceType = props.deviceType || '';
   const [team, setTeam] = useState('');
   const [loginSuccess, setLoginSuccess] = useState<StationLoginSuccess>();
   const [loginFailure, setLoginFailure] = useState<Error>();
@@ -27,8 +27,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
     }
   };
 
-  const handleLogin = (payload) => {
-    setDialNumber(payload.dn);
+  const handleLogin = () => {
     if (loginCb) {
       loginCb();
     }
@@ -98,8 +97,6 @@ export const useStationLogin = (props: UseStationLoginProps) => {
 
   return {
     name: 'StationLogin',
-    setDeviceType,
-    setDialNumber,
     setTeam,
     login,
     logout,
