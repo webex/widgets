@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.49](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.48...v1.28.0-ccwidgets.49) (2025-04-28)
+
+
+### Bug Fixes
+
+* **profile:** upgrading sdk version to latest to pull multimedia profile changes ([#440](https://github.com/webex/widgets/issues/440)) ([66043c0](https://github.com/webex/widgets/commit/66043c0729a06b5125536867fde034f281aca91e))
+
 # [1.28.0-ccwidgets.48](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.47...v1.28.0-ccwidgets.48) (2025-04-28)
 
 
