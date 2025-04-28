@@ -14,6 +14,7 @@ import {
   ENGAGED_LABEL,
   ENGAGED_USERNAME,
   ContactServiceQueue,
+  Profile,
 } from './store.types';
 import Store from './store';
 import {runInAction} from 'mobx';
@@ -617,11 +618,11 @@ class StoreWrapper implements IStoreWrapper {
 
     // TODO: https://jira-eng-gpk2.cisco.com/jira/browse/SPARK-626777 Implement the de-register method and close the listener there
 
-    const handleLogin = (payload) => {
+    const handleLogin = (payload: Profile) => {
       runInAction(() => {
         this.setIsAgentLoggedIn(true);
         this.setDeviceType(payload.deviceType);
-        this.setDialNumber(payload.dialNumber);
+        this.setDialNumber(payload.defaultDn);
         this.setCurrentState(payload.auxCodeId?.trim() !== '' ? payload.auxCodeId : '0');
         this.setLastStateChangeTimestamp(payload.lastStateChangeTimestamp);
         this.setLastIdleCodeChangeTimestamp(payload.lastIdleCodeChangeTimestamp);

@@ -8,7 +8,18 @@ import {StationLoginProps} from './station-login.types';
 
 const StationLogin: React.FunctionComponent<StationLoginProps> = observer(
   ({onLogin, onLogout, contactCenterLogoutFn}) => {
-    const {cc, teams, loginOptions, logger, isAgentLoggedIn, showMultipleLoginAlert, deviceType, dialNumber} = store;
+    const {
+      cc,
+      teams,
+      loginOptions,
+      logger,
+      isAgentLoggedIn,
+      showMultipleLoginAlert,
+      deviceType,
+      dialNumber,
+      setDeviceType,
+      setDialNumber,
+    } = store;
     const result = useStationLogin({
       cc,
       onLogin,
@@ -20,6 +31,8 @@ const StationLogin: React.FunctionComponent<StationLoginProps> = observer(
 
     const props = {
       ...result,
+      setDeviceType,
+      setDialNumber,
       teams,
       loginOptions,
       deviceType,

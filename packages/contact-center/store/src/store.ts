@@ -83,7 +83,7 @@ class Store implements IStore {
         this.agentId = response.agentId;
         this.wrapupCodes = response.wrapupCodes;
         this.isAgentLoggedIn = response.isAgentLoggedIn;
-        this.deviceType = response.deviceType;
+        this.deviceType = response.deviceType ?? 'AGENT_DN';
         this.dialNumber = response.defaultDn;
         this.currentState = response.lastStateAuxCodeId;
         this.lastStateChangeTimestamp = response.lastStateChangeTimestamp;

@@ -100,8 +100,6 @@ describe('useStationLogin Hook', () => {
     );
 
     act(() => {
-      result.current.setDeviceType(loginParams.loginOption);
-      result.current.setDialNumber(loginParams.dialNumber);
       result.current.setTeam(loginParams.teamId);
     });
 
@@ -112,14 +110,12 @@ describe('useStationLogin Hook', () => {
     await waitFor(async () => {
       expect(ccMock.stationLogin).toHaveBeenCalledWith({
         teamId: loginParams.teamId,
-        loginOption: loginParams.loginOption,
-        dialNumber: loginParams.dialNumber,
+        loginOption: 'BROWSER',
+        dialNumber: '',
       });
 
       expect(result.current).toEqual({
         name: 'StationLogin',
-        setDeviceType: expect.any(Function),
-        setDialNumber: expect.any(Function),
         setTeam: expect.any(Function),
         login: expect.any(Function),
         logout: expect.any(Function),
@@ -158,8 +154,6 @@ describe('useStationLogin Hook', () => {
     );
 
     act(() => {
-      result.current.setDeviceType(loginParams.loginOption);
-      result.current.setDialNumber(loginParams.dialNumber);
       result.current.setTeam(loginParams.teamId);
     });
 
@@ -198,8 +192,6 @@ describe('useStationLogin Hook', () => {
     );
 
     act(() => {
-      result.current.setDeviceType(loginParams.loginOption);
-      result.current.setDialNumber(loginParams.dialNumber);
       result.current.setTeam(loginParams.teamId);
     });
 
@@ -230,8 +222,6 @@ describe('useStationLogin Hook', () => {
     );
 
     act(() => {
-      result.current.setDeviceType(loginParams.loginOption);
-      result.current.setDialNumber(loginParams.dialNumber);
       result.current.setTeam(loginParams.teamId);
     });
 
@@ -242,15 +232,13 @@ describe('useStationLogin Hook', () => {
     await waitFor(() => {
       expect(ccMock.stationLogin).toHaveBeenCalledWith({
         teamId: loginParams.teamId,
-        loginOption: loginParams.loginOption,
-        dialNumber: loginParams.dialNumber,
+        loginOption: 'EXTENSION',
+        dialNumber: '',
       });
       expect(loginCb).not.toHaveBeenCalledWith();
 
       expect(result.current).toEqual({
         name: 'StationLogin',
-        setDeviceType: expect.any(Function),
-        setDialNumber: expect.any(Function),
         setTeam: expect.any(Function),
         login: expect.any(Function),
         logout: expect.any(Function),
@@ -303,8 +291,6 @@ describe('useStationLogin Hook', () => {
     );
 
     act(() => {
-      result.current.setDeviceType(loginParams.loginOption);
-      result.current.setDialNumber(loginParams.dialNumber);
       result.current.setTeam(loginParams.teamId);
     });
 
@@ -323,8 +309,6 @@ describe('useStationLogin Hook', () => {
 
       expect(result.current).toEqual({
         name: 'StationLogin',
-        setDeviceType: expect.any(Function),
-        setDialNumber: expect.any(Function),
         setTeam: expect.any(Function),
         login: expect.any(Function),
         logout: expect.any(Function),
@@ -374,8 +358,6 @@ describe('useStationLogin Hook', () => {
 
       expect(result.current).toEqual({
         name: 'StationLogin',
-        setDeviceType: expect.any(Function),
-        setDialNumber: expect.any(Function),
         setTeam: expect.any(Function),
         login: expect.any(Function),
         logout: expect.any(Function),

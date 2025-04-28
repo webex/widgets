@@ -43,6 +43,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
     }
   }, [teams]);
 
+  // show modals
   useEffect(() => {
     if (showMultipleLoginAlert && modalRef.current) {
       modalRef.current.showModal();
@@ -131,14 +132,19 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
                 name="login-option"
                 onChange={(event: CustomEvent) => {
                   const selectedOption = event.detail.value;
-                  setDeviceType(selectedOption);
-                  setSelectedDeviceType(selectedOption);
-                  updateDialNumberLabel(selectedOption);
-                  // clear dial number when switching between DN and Extension
-                  setDialNumber('');
+                  // TODO: Select component is calling onChange with first label on load
+                  if (Object.keys(LoginOptions).includes(selectedOption)) {
+                    setDeviceType(selectedOption);
+                    setSelectedDeviceType(selectedOption);
+                    updateDialNumberLabel(selectedOption);
+                    // clear dial number when switching between DN and Extension
+                    setDialNumber('');
+                  }
                 }}
                 value={selectedDeviceType}
                 className="station-login-select"
+                selectedValue={selectedDeviceType}
+                selectedValueText={LoginOptions[selectedDeviceType]}
               >
                 {Object.keys(LoginOptions).map((option: string, index: number) => {
                   if (loginOptions.includes(option)) {

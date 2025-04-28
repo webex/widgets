@@ -8,8 +8,8 @@ export const useStationLogin = (props: UseStationLoginProps) => {
   const loginCb = props.onLogin;
   const logoutCb = props.onLogout;
   const logger = props.logger;
-  const [dialNumber, setDialNumber] = useState(props.dialNumber || '');
-  const [deviceType, setDeviceType] = useState(props.deviceType || '');
+  const dialNumber = props.dialNumber || '';
+  const deviceType = props.deviceType || '';
   const [team, setTeam] = useState('');
   const [loginSuccess, setLoginSuccess] = useState<StationLoginSuccess>();
   const [loginFailure, setLoginFailure] = useState<Error>();
@@ -72,7 +72,6 @@ export const useStationLogin = (props: UseStationLoginProps) => {
     cc.stationLogin({teamId: team, loginOption: deviceType, dialNumber: dialNumber})
       .then((res: StationLoginSuccess) => {
         setLoginSuccess(res);
-        setDialNumber(dialNumber);
       })
       .catch((error: Error) => {
         logger.error(`Error logging in: ${error}`, {
@@ -98,8 +97,6 @@ export const useStationLogin = (props: UseStationLoginProps) => {
 
   return {
     name: 'StationLogin',
-    setDeviceType,
-    setDialNumber,
     setTeam,
     login,
     logout,
