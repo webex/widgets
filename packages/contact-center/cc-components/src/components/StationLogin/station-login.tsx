@@ -31,9 +31,10 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
 
   // useEffect to be called on mount
   useEffect(() => {
-    setSelectedDeviceType(deviceType);
-    updateDialNumberLabel(deviceType);
-  }, []);
+    setSelectedDeviceType(deviceType || '');
+    setDialNumberValue(dialNumber || '');
+    updateDialNumberLabel(deviceType || '');
+  }, [isAgentLoggedIn]);
 
   // TODO: should be set from the store
   useEffect(() => {

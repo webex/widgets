@@ -578,7 +578,7 @@ class StoreWrapper implements IStoreWrapper {
   cleanUpStore = () => {
     runInAction(() => {
       this.setIsAgentLoggedIn(false);
-      this.setDeviceType('');
+      this.setDeviceType('AGENT_DN');
       this.setDialNumber('');
       this.setIncomingTask(null);
       this.setCurrentTask(null);
@@ -622,7 +622,7 @@ class StoreWrapper implements IStoreWrapper {
       runInAction(() => {
         this.setIsAgentLoggedIn(true);
         this.setDeviceType(payload.deviceType);
-        this.setDialNumber(payload.defaultDn);
+        this.setDialNumber(payload.dn);
         this.setCurrentState(payload.auxCodeId?.trim() !== '' ? payload.auxCodeId : '0');
         this.setLastStateChangeTimestamp(payload.lastStateChangeTimestamp);
         this.setLastIdleCodeChangeTimestamp(payload.lastIdleCodeChangeTimestamp);
