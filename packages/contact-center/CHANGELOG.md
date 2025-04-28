@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.48](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.47...v1.28.0-ccwidgets.48) (2025-04-28)
+
+
+### Features
+
+* **station-login:** Update Station Login UI to Match Figma ([#433](https://github.com/webex/widgets/issues/433)) ([da133f4](https://github.com/webex/widgets/commit/da133f49136233f8994900b85ac135f78ffba2c5))
+
 # [1.28.0-ccwidgets.47](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.46...v1.28.0-ccwidgets.47) (2025-04-25)
 
 

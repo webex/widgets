@@ -1,7 +1,7 @@
 {
   "name": "@webex/cc-widgets",
   "description": "Webex Contact Center Widgets",
-  "version": "1.28.0-ccwidgets.47",
+  "version": "1.28.0-ccwidgets.48",
   "main": "dist/index.js",
   "publishConfig": {
     "access": "public"
