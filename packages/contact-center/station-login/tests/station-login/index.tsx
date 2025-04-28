@@ -51,7 +51,7 @@ describe('StationLogin Component', () => {
   it('renders StationLoginPresentational with correct props', () => {
     const useStationLoginSpy = jest.spyOn(helper, 'useStationLogin');
 
-    render(<StationLogin onLogin={loginCb} onLogout={logoutCb} contactCenterLogoutFn={ccLogoutCb} />);
+    render(<StationLogin onLogin={loginCb} onLogout={logoutCb} onCCSignOut={ccLogoutCb} />);
 
     expect(useStationLoginSpy).toHaveBeenCalledWith({
       cc: ccMock,

@@ -104,7 +104,7 @@ export interface IStationLoginProps {
   /**
    * Handler for Contact Center logout
    */
-  contactCenterLogoutFn?: () => void;
+  onCCSignOut?: () => void;
 }
 
 export type StationLoginComponentProps = Pick<
@@ -124,5 +124,5 @@ export type StationLoginComponentProps = Pick<
   | 'deviceType'
   | 'dialNumber'
   | 'showMultipleLoginAlert'
-  | 'contactCenterLogoutFn'
+  | 'onCCSignOut'
 >;

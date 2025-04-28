@@ -5,4 +5,4 @@ export type UseStationLoginProps = Pick<
   'cc' | 'onLogin' | 'onLogout' | 'logger' | 'deviceType' | 'dialNumber'
 >;
 
-export type StationLoginProps = Pick<IStationLoginProps, 'onLogin' | 'onLogout' | 'contactCenterLogoutFn'>;
+export type StationLoginProps = Pick<IStationLoginProps, 'onLogin' | 'onLogout' | 'onCCSignOut'>;

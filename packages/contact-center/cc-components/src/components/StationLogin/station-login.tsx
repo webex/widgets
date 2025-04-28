@@ -18,7 +18,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
     dialNumber,
     showMultipleLoginAlert,
     handleContinue,
-    contactCenterLogoutFn,
+    onCCSignOut,
   } = props;
 
   const modalRef = useRef<HTMLDialogElement>(null);
@@ -104,7 +104,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
           <Button onClick={ccCancelButtonClicked} variant="secondary" className="white-button">
             {StationLoginLabels.CANCEL}
           </Button>
-          <Button onClick={contactCenterLogoutFn}>{StationLoginLabels.SIGN_OUT}</Button>
+          <Button onClick={onCCSignOut}>{StationLoginLabels.SIGN_OUT}</Button>
         </div>
       </dialog>
       <div className="box station-login">
@@ -134,6 +134,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
                 onChange={(event: CustomEvent) => {
                   const selectedOption = event.detail.value;
                   // TODO: Select component is calling onChange with first label on load
+                  // TODO: add bug issue link once created
                   if (Object.keys(LoginOptions).includes(selectedOption)) {
                     setDeviceType(selectedOption);
                     setSelectedDeviceType(selectedOption);
@@ -148,6 +149,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
                 selectedValueText={LoginOptions[selectedDeviceType]}
               >
                 {Object.keys(LoginOptions).map((option: string, index: number) => {
+                  // only show loginOptions provided by store
                   if (loginOptions.includes(option)) {
                     return (
                       <Option selected={option === selectedDeviceType} key={index} value={option}>
@@ -203,12 +205,10 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
             ) : (
               <Button onClick={login}>{StationLoginLabels.SAVE_AND_CONTINUE}</Button>
             )}
-            {contactCenterLogoutFn ? (
+            {onCCSignOut && (
               <Button onClick={() => setShowCCSignOutModal(true)} variant="secondary" className="white-button">
                 {StationLoginLabels.SIGN_OUT}
               </Button>
-            ) : (
-              <></>
             )}
           </div>
         </section>

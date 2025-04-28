@@ -60,12 +60,16 @@ function App() {
 
   const onLogin = () => {
     setIsLoggedIn(true);
-    console.log('Agent login has been succesful');
+    console.log('Agent login has been successful');
   };
 
   const onLogout = () => {
     setIsLoggedIn(false);
-    console.log('Agent logout has been succesful');
+    console.log('Agent logout has been successful');
+  };
+
+  const onCCSignOut = () => {
+    console.log('CC Sign out has been successful');
   };
 
   const onAccepted = () => {
@@ -187,22 +191,22 @@ function App() {
             <h1>Contact Center widgets in a react app</h1>
             <div className="accessTokenTheme">
               <input
-              type="text"
-              placeholder="Enter your access token"
-              value={accessToken}
-              onChange={(e) => setAccessToken(e.target.value)}
+                type="text"
+                placeholder="Enter your access token"
+                value={accessToken}
+                onChange={(e) => setAccessToken(e.target.value)}
               />
               <Checkbox
-              checked={currentTheme === 'DARK'}
-              aria-label="theme checkbox"
-              id="theme-checkbox"
-              value={currentTheme}
-              label="Dark Theme"
-              // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
-              onchange={() => {
-                setCurrentTheme(currentTheme === 'DARK' ? 'LIGHT' : 'DARK');
-                store.setCurrentTheme(currentTheme === 'DARK' ? 'LIGHT' : 'DARK');
-              }}
+                checked={currentTheme === 'DARK'}
+                aria-label="theme checkbox"
+                id="theme-checkbox"
+                value={currentTheme}
+                label="Dark Theme"
+                // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
+                onchange={() => {
+                  setCurrentTheme(currentTheme === 'DARK' ? 'LIGHT' : 'DARK');
+                  store.setCurrentTheme(currentTheme === 'DARK' ? 'LIGHT' : 'DARK');
+                }}
               />
             </div>
             <div className="box">
@@ -300,7 +304,9 @@ function App() {
             {isSdkReady && (
               <>
                 <div className="station-login">
-                  {selectedWidgets.stationLogin && <StationLogin onLogin={onLogin} onLogout={onLogout} />}
+                  {selectedWidgets.stationLogin && (
+                    <StationLogin onLogin={onLogin} onLogout={onLogout} onCCSignOut={onCCSignOut} />
+                  )}
                 </div>
                 {(store.isAgentLoggedIn || isLoggedIn) && (
                   <>
@@ -329,7 +335,13 @@ function App() {
                         <section className="section-box">
                           <fieldset className="fieldset">
                             <legend className="legend-box">Call Control CAD</legend>
-                            <CallControlCAD onHoldResume={onHoldResume} onEnd={onEnd} onWrapUp={onWrapUp} callControlClassName={"call-control-outer"} callControlConsultClassName={"call-control-consult-outer"} />
+                            <CallControlCAD
+                              onHoldResume={onHoldResume}
+                              onEnd={onEnd}
+                              onWrapUp={onWrapUp}
+                              callControlClassName={'call-control-outer'}
+                              callControlConsultClassName={'call-control-consult-outer'}
+                            />
                           </fieldset>
                         </section>
                       </div>
