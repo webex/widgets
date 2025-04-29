@@ -2,19 +2,21 @@ import React from 'react';
 import {render, screen, cleanup} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import {TaskList} from '../../src/TaskList';
-import TaskListPresentational from '../../src/TaskList/task-list.presentational';
 import * as helper from '../../src/helper';
+import {TaskListComponent} from '@webex/cc-components';
 import store from '@webex/cc-store';
 
-// Mock `TaskListPresentational` to avoid testing its internal implementation.
-jest.mock('../../src/TaskList/task-list.presentational', () => {
-  return jest.fn(() => <div data-testid="task-list-presentational" />);
+jest.mock('@webex/cc-components', () => {
+  return {
+    TaskListComponent: jest.fn(() => <div data-testid="task-list-presentational">TaskListComponent</div>),
+  };
 });
 
 // Mock `@webex/cc-store`.
 jest.mock('@webex/cc-store', () => ({
   cc: {},
   deviceType: 'BROWSER',
+  dialNumber: '12345',
   onAccepted: jest.fn(),
   onDeclined: jest.fn(),
 }));
@@ -46,7 +48,7 @@ describe('TaskList Component', () => {
     expect(taskListPresentational).toBeInTheDocument();
 
     // Verify that `TaskListPresentational` is called with the correct props.
-    expect(TaskListPresentational).toHaveBeenCalledWith({taskList: taskListMock}, {});
+    expect(TaskListComponent).toHaveBeenCalledWith({taskList: taskListMock}, {});
 
     // Verify that `useTaskList` is called with the correct arguments.
     expect(helper.useTaskList).toHaveBeenCalledWith({cc: store.cc, deviceType: 'BROWSER'});

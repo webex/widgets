@@ -10,6 +10,11 @@ import {
   IdleCode,
   IContactCenter,
   ITask,
+  BuddyDetails,
+  ENGAGED_LABEL,
+  ENGAGED_USERNAME,
+  ContactServiceQueue,
+  Profile,
 } from './store.types';
 import Store from './store';
 import {runInAction} from 'mobx';
@@ -46,6 +51,9 @@ class StoreWrapper implements IStoreWrapper {
 
   get deviceType() {
     return this.store.deviceType;
+  }
+  get dialNumber() {
+    return this.store.dialNumber;
   }
   get wrapupCodes() {
     return this.store.wrapupCodes;
@@ -92,6 +100,46 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.customState;
   }
 
+  get consultCompleted() {
+    return this.store.consultCompleted;
+  }
+
+  get consultInitiated() {
+    return this.store.consultInitiated;
+  }
+
+  get consultAccepted() {
+    return this.store.consultAccepted;
+  }
+
+  get consultStartTimeStamp() {
+    return this.store.consultStartTimeStamp;
+  }
+
+  get callControlAudio() {
+    return this.store.callControlAudio;
+  }
+
+  get consultOfferReceived() {
+    return this.store.consultOfferReceived;
+  }
+
+  get isQueueConsultInProgress() {
+    return this.store.isQueueConsultInProgress;
+  }
+
+  get currentConsultQueueId() {
+    return this.store.currentConsultQueueId;
+  }
+
+  get isEndConsultEnabled() {
+    return this.store.isEndConsultEnabled;
+  }
+
+  get allowConsultToQueue() {
+    return this.store.allowConsultToQueue;
+  }
+
   setCurrentTheme = (theme: string): void => {
     this.store.currentTheme = theme;
   };
@@ -102,6 +150,10 @@ class StoreWrapper implements IStoreWrapper {
 
   setDeviceType = (option: string): void => {
     this.store.deviceType = option;
+  };
+
+  setDialNumber = (input: string): void => {
+    this.store.dialNumber = input;
   };
 
   setCurrentState = (state: string): void => {
@@ -147,6 +199,42 @@ class StoreWrapper implements IStoreWrapper {
 
   setWrapupCodes = (wrapupCodes: IWrapupCode[]): void => {
     this.store.wrapupCodes = wrapupCodes;
+  };
+
+  setConsultCompleted = (value: boolean): void => {
+    this.store.consultCompleted = value;
+  };
+
+  setConsultInitiated = (value: boolean): void => {
+    this.store.consultInitiated = value;
+  };
+
+  setConsultAccepted = (value: boolean): void => {
+    this.store.consultAccepted = value;
+  };
+
+  setConsultOfferReceived = (value: boolean): void => {
+    this.store.consultOfferReceived = value;
+  };
+
+  setConsultStartTimeStamp = (timestamp: number): void => {
+    this.store.consultStartTimeStamp = timestamp;
+  };
+
+  setCallControlAudio = (audio: MediaStream | null): void => {
+    this.store.callControlAudio = audio;
+  };
+
+  setIsQueueConsultInProgress = (value: boolean): void => {
+    runInAction(() => {
+      this.store.isQueueConsultInProgress = value;
+    });
+  };
+
+  setCurrentConsultQueueId = (queueId: string | null): void => {
+    runInAction(() => {
+      this.store.currentConsultQueueId = queueId;
+    });
   };
 
   setState = (state: ICustomState | IdleCode): void => {
@@ -209,14 +297,28 @@ class StoreWrapper implements IStoreWrapper {
     const taskToRemove = this.store.taskList.find((task) => task.data.interactionId === taskId);
     if (taskToRemove) {
       taskToRemove.off(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
-      taskToRemove.off(TASK_EVENTS.TASK_END, () => this.handleTaskEnd(taskToRemove));
+      taskToRemove.off(TASK_EVENTS.TASK_END, ({wrapupRequired}) => this.handleTaskEnd(taskToRemove, wrapupRequired));
       taskToRemove.off(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(taskToRemove.interactionId, reason));
+      taskToRemove.off(TASK_EVENTS.AGENT_WRAPPEDUP, this.handleTaskWrapUp);
+      taskToRemove.off(TASK_EVENTS.TASK_CONSULTING, this.handleConsulting);
+      taskToRemove.off(CC_EVENTS.AGENT_OFFER_CONSULT, this.handleConsultOffer);
+      taskToRemove.off(TASK_EVENTS.TASK_CONSULT_END, this.handleConsultEnd);
+      taskToRemove.off(TASK_EVENTS.TASK_CONSULT_ACCEPTED, this.handleConsultAccepted);
+      taskToRemove.off(TASK_EVENTS.AGENT_CONSULT_CREATED, this.handleConsultCreated);
+      taskToRemove.off(TASK_EVENTS.TASK_CONSULT_QUEUE_CANCELLED, this.handleConsultQueueCancelled);
+      if (this.deviceType === 'BROWSER') {
+        taskToRemove.off(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
+        this.setCallControlAudio(null);
+      }
     }
     const updateTaskList = this.store.taskList.filter((task) => task.data.interactionId !== taskId);
 
     runInAction(() => {
       this.setTaskList(updateTaskList);
       this.setWrapupRequired(false);
+      this.setConsultAccepted(false);
+      this.setConsultInitiated(false);
+      this.setConsultCompleted(false);
 
       // Remove the task from currentTask or incomingTask if it is the same task
       if (this.store.currentTask?.data.interactionId === taskId) {
@@ -234,17 +336,14 @@ class StoreWrapper implements IStoreWrapper {
     });
   };
 
-  handleTaskEnd = (event) => {
+  handleTaskEnd = (event, wrapupRequired) => {
     // If the call is ended by agent we get the task object in event.data
     // If the call is ended by customer we get the task object directly
 
     const task = event.data ? event.data : event;
-    // TODO -- SDK needs to send only 1 event on end : https://jira-eng-gpk2.cisco.com/jira/browse/SPARK-615785
-
-    if (task.interaction.state === 'connected') {
+    if (wrapupRequired) {
       this.setWrapupRequired(true);
-      return;
-    } else if (task.interaction.state !== 'connected' && this.store.wrapupRequired !== true) {
+    } else {
       this.handleTaskRemove(task.interactionId);
     }
   };
@@ -252,11 +351,16 @@ class StoreWrapper implements IStoreWrapper {
   handleTaskAssigned = (event) => {
     const task = event;
     runInAction(() => {
+      if (this.consultAccepted) {
+        this.setConsultAccepted(false);
+        this.setConsultInitiated(false);
+        this.setConsultCompleted(false);
+      }
       this.setCurrentTask(task);
       this.setIncomingTask(null);
       this.setState({
-        developerName: 'ENGAGED',
-        name: 'Engaged',
+        developerName: ENGAGED_LABEL,
+        name: ENGAGED_USERNAME,
       });
     });
   };
@@ -267,6 +371,68 @@ class StoreWrapper implements IStoreWrapper {
     this.handleTaskRemove(task.interactionId);
   };
 
+  handleTaskMedia = (track) => {
+    this.setCallControlAudio(new MediaStream([track]));
+  };
+
+  // Case to handle multi session
+  handleConsultCreated = () => {
+    this.setConsultInitiated(true);
+    this.setConsultStartTimeStamp(Date.now());
+  };
+
+  handleConsulting = (event) => {
+    this.setConsultCompleted(true);
+    this.setCurrentTask(event);
+    this.handleIncomingTask(event);
+    this.setConsultStartTimeStamp(Date.now());
+  };
+
+  handleConsultEnd = (event) => {
+    const task = event;
+    this.setConsultInitiated(false);
+    this.setIsQueueConsultInProgress(false);
+    this.setCurrentConsultQueueId(null);
+    if (this.consultAccepted) {
+      this.setConsultAccepted(false);
+      this.handleTaskRemove(task.data.interactionId);
+    } else if (this.consultOfferReceived) {
+      this.setConsultOfferReceived(false);
+      this.handleTaskRemove(task.data.interactionId);
+    }
+    this.setConsultCompleted(false);
+    this.setConsultStartTimeStamp(null);
+  };
+
+  handleConsultOffer = () => {
+    this.setConsultOfferReceived(true);
+  };
+
+  handleConsultAccepted = (event) => {
+    const task = event;
+    runInAction(() => {
+      this.setCurrentTask(task);
+      this.setIncomingTask(null);
+      this.setConsultAccepted(true);
+      this.setConsultStartTimeStamp(Date.now());
+      this.setConsultCompleted(true);
+      this.setState({
+        developerName: ENGAGED_LABEL,
+        name: ENGAGED_USERNAME,
+      });
+      if (this.deviceType === 'BROWSER') {
+        task.on(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
+      }
+    });
+  };
+
+  handleConsultQueueCancelled = () => {
+    this.setConsultInitiated(false);
+    this.setIsQueueConsultInProgress(false);
+    this.setCurrentConsultQueueId(null);
+    this.setConsultStartTimeStamp(null);
+  };
+
   handleIncomingTask = (event) => {
     const task: ITask = event;
     if (this.store.taskList.some((t) => t.data.interactionId === task.data.interactionId)) {
@@ -275,16 +441,26 @@ class StoreWrapper implements IStoreWrapper {
     }
 
     // Attach event listeners to the task
-    task.on(TASK_EVENTS.TASK_END, () => this.handleTaskEnd(task));
+    task.on(TASK_EVENTS.TASK_END, ({wrapupRequired}) => this.handleTaskEnd(task, wrapupRequired));
 
     // When we receive TASK_ASSIGNED the task was accepted by the agent and we need wrap up
     task.on(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
+    task.on(TASK_EVENTS.AGENT_CONSULT_CREATED, this.handleConsultCreated);
+    task.on(TASK_EVENTS.TASK_CONSULT_QUEUE_CANCELLED, this.handleConsultQueueCancelled);
+    if (this.deviceType === 'BROWSER') {
+      task.on(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
+    }
 
     // When we receive TASK_REJECT sdk changes the agent status
     // When we receive TASK_REJECT that means the task was not accepted by the agent and we wont need wrap up
     task.on(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(task.data.interactionId, reason));
 
     task.on(TASK_EVENTS.AGENT_WRAPPEDUP, this.handleTaskWrapUp);
+
+    task.on(TASK_EVENTS.TASK_CONSULTING, this.handleConsulting);
+    task.on(TASK_EVENTS.TASK_CONSULT_ACCEPTED, this.handleConsultAccepted);
+    task.on(CC_EVENTS.AGENT_OFFER_CONSULT, this.handleConsultOffer);
+    task.on(TASK_EVENTS.TASK_CONSULT_END, this.handleConsultEnd);
 
     this.setIncomingTask(task);
     this.setTaskList([...this.store.taskList, task]);
@@ -308,10 +484,12 @@ class StoreWrapper implements IStoreWrapper {
 
   handleTaskHydrate = (event) => {
     const task = event;
-    task.on(TASK_EVENTS.TASK_END, () => this.handleTaskEnd(task));
+    task.on(TASK_EVENTS.TASK_END, ({wrapupRequired}) => this.handleTaskEnd(task, wrapupRequired));
 
     // When we receive TASK_ASSIGNED the task was accepted by the agent and we need wrap up
     task.on(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
+    task.on(TASK_EVENTS.TASK_CONSULT_ACCEPTED, this.handleConsultAccepted);
+    task.on(TASK_EVENTS.AGENT_CONSULT_CREATED, this.handleConsultCreated);
 
     // When we receive TASK_REJECT sdk changes the agent status
     // When we receive TASK_REJECT that means the task was not accepted by the agent and we wont need wrap up
@@ -319,15 +497,33 @@ class StoreWrapper implements IStoreWrapper {
 
     task.on(TASK_EVENTS.AGENT_WRAPPEDUP, this.handleTaskWrapUp);
 
+    task.on(TASK_EVENTS.TASK_CONSULTING, this.handleConsulting);
+    task.on(CC_EVENTS.AGENT_OFFER_CONSULT, this.handleConsultOffer);
+    task.on(TASK_EVENTS.TASK_CONSULT_END, this.handleConsultEnd);
+    task.on(TASK_EVENTS.TASK_CONSULT_QUEUE_CANCELLED, this.handleConsultQueueCancelled);
+    if (this.deviceType === 'BROWSER') {
+      task.on(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
+    }
+
     if (!this.store.taskList.some((t) => t.data.interactionId === task.data.interactionId)) {
       this.setTaskList([...this.store.taskList, task]);
     }
 
     this.setCurrentTask(task);
+    this.setIncomingTask(null);
+    if (task.data.interaction.state === 'consulting') {
+      if (task.data.isConsulted) {
+        this.setConsultAccepted(true);
+      } else {
+        this.setConsultInitiated(true);
+      }
+      this.setConsultStartTimeStamp(Date.now());
+      this.setConsultCompleted(true);
+    }
 
     this.setState({
-      developerName: 'ENGAGED',
-      name: 'Engaged',
+      developerName: ENGAGED_LABEL,
+      name: ENGAGED_USERNAME,
     });
 
     const {interaction, agentId} = task.data;
@@ -356,10 +552,34 @@ class StoreWrapper implements IStoreWrapper {
     this.handleTaskRemove(taskId);
   };
 
+  getBuddyAgents = async (): Promise<Array<BuddyDetails>> => {
+    try {
+      const response = await this.store.cc.getBuddyAgents({
+        mediaType: 'telephony',
+        state: 'Available',
+      });
+      return response.data.agentList;
+    } catch (error) {
+      return Promise.reject(error);
+    }
+  };
+
+  getQueues = async (): Promise<Array<ContactServiceQueue>> => {
+    try {
+      let queueList = await this.store.cc.getQueues();
+      queueList = queueList.filter((queue) => queue.channelType === 'TELEPHONY');
+      return queueList;
+    } catch (error) {
+      console.error('Error fetching queues:', error);
+      return Promise.reject(error);
+    }
+  };
+
   cleanUpStore = () => {
     runInAction(() => {
       this.setIsAgentLoggedIn(false);
-      this.setDeviceType('');
+      this.setDeviceType('AGENT_DN');
+      this.setDialNumber('');
       this.setIncomingTask(null);
       this.setCurrentTask(null);
       this.setTaskList([]);
@@ -367,6 +587,7 @@ class StoreWrapper implements IStoreWrapper {
       this.setLastStateChangeTimestamp(undefined);
       this.setLastIdleCodeChangeTimestamp(undefined);
       this.setShowMultipleLoginAlert(false);
+      this.setConsultStartTimeStamp(undefined);
     });
   };
 
@@ -397,10 +618,11 @@ class StoreWrapper implements IStoreWrapper {
 
     // TODO: https://jira-eng-gpk2.cisco.com/jira/browse/SPARK-626777 Implement the de-register method and close the listener there
 
-    const handleLogin = (payload) => {
+    const handleLogin = (payload: Profile) => {
       runInAction(() => {
         this.setIsAgentLoggedIn(true);
         this.setDeviceType(payload.deviceType);
+        this.setDialNumber(payload.dn);
         this.setCurrentState(payload.auxCodeId?.trim() !== '' ? payload.auxCodeId : '0');
         this.setLastStateChangeTimestamp(payload.lastStateChangeTimestamp);
         this.setLastIdleCodeChangeTimestamp(payload.lastIdleCodeChangeTimestamp);

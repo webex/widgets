@@ -1,4 +1,22 @@
 import {act, waitFor} from '@testing-library/react';
+
+// Add a global mock for MediaStreamTrack to avoid undefined errors
+global.MediaStreamTrack = class MediaStreamTrackMock {
+  constructor() {
+    this.kind = 'audio';
+  }
+};
+
+// Add a global mock for MediaStream to avoid undefined errors
+global.MediaStream = class MediaStreamMock {
+  constructor(tracks) {
+    this.tracks = tracks;
+  }
+};
+
+// Mock console.error to prevent output during tests
+console.error = jest.fn();
+
 import {CC_EVENTS, TASK_EVENTS} from '../src/store.types';
 import storeWrapper from '../src/storeEventsWrapper';
 import {ITask} from '@webex/plugin-cc';
@@ -36,7 +54,8 @@ jest.mock('../src/store', () => ({
     wrapupCodes: 'mockWrapupCodes',
     currentTask: 'mockCurrentTask',
     isAgentLoggedIn: false,
-    deviceType: 'mockDeviceType',
+    deviceType: 'BROWSER',
+    dialNumber: '12345',
     taskList: 'mockTaskList',
     incomingTask: 'mockIncomingTask',
     wrapupRequired: 'mockWrapupRequired',
@@ -46,11 +65,22 @@ jest.mock('../src/store', () => ({
     showMultipleLoginAlert: 'mockShowMultipleLoginAlert',
     currentTheme: 'mockCurrentTheme',
     customState: 'mockCustomState',
+    consultCompleted: false,
+    consultInitiated: false,
+    consultAccepted: false,
+    consultStartTimeStamp: null,
+    callControlAudio: null,
+    consultOfferReceived: false,
+    isQueueConsultInProgress: false,
+    currentConsultQueueId: null,
+    isEndConsultEnabled: true,
+    allowConsultToQueue: false,
     setShowMultipleLoginAlert: jest.fn(),
     setCurrentState: jest.fn(),
     setLastStateChangeTimestamp: jest.fn(),
     setLastIdleCodeChangeTimestamp: jest.fn(),
     setDeviceType: jest.fn(),
+    setDialNumber: jest.fn(),
     init: jest.fn().mockResolvedValue({}),
     setIncomingTask: jest.fn(),
     setCurrentTask: jest.fn(),
@@ -86,7 +116,7 @@ describe('storeEventsWrapper', () => {
     });
 
     it('should proxy deviceType', () => {
-      expect(storeWrapper.deviceType).toBe('mockDeviceType');
+      expect(storeWrapper.deviceType).toBe('BROWSER');
     });
 
     it('should proxy wrapupCodes', () => {
@@ -102,7 +132,7 @@ describe('storeEventsWrapper', () => {
     });
 
     it('should proxy deviceType', () => {
-      expect(storeWrapper.deviceType).toBe('mockDeviceType');
+      expect(storeWrapper.deviceType).toBe('BROWSER');
     });
 
     it('should proxy taskList', () => {
@@ -155,6 +185,30 @@ describe('storeEventsWrapper', () => {
 
       storeWrapper.setCurrentState('newState');
       expect(storeWrapper['store'].currentState).toBe('newState');
+    });
+
+    it('should proxy consultCompleted', () => {
+      expect(storeWrapper.consultCompleted).toBe(false);
+    });
+
+    it('should proxy consultInitiated', () => {
+      expect(storeWrapper.consultInitiated).toBe(false);
+    });
+
+    it('should proxy isQueueConsultInProgress', () => {
+      expect(storeWrapper.isQueueConsultInProgress).toBe(false);
+    });
+
+    it('should proxy currentConsultQueueId', () => {
+      expect(storeWrapper.currentConsultQueueId).toBe(null);
+    });
+
+    it('should proxy isEndConsultEnabled', () => {
+      expect(storeWrapper.isEndConsultEnabled).toBe(storeWrapper['store'].isEndConsultEnabled);
+    });
+
+    it('should proxy allowConsultToQueue', () => {
+      expect(storeWrapper.allowConsultToQueue).toBe(storeWrapper['store'].allowConsultToQueue);
     });
 
     describe('setState', () => {
@@ -244,6 +298,20 @@ describe('storeEventsWrapper', () => {
 
       storeWrapper.setWrapupCodes(mockCodes);
       expect(storeWrapper['store'].wrapupCodes).toBe(mockCodes);
+    });
+
+    it('should setIsQueueConsultInProgress', () => {
+      expect(storeWrapper.setIsQueueConsultInProgress).toBeInstanceOf(Function);
+
+      storeWrapper.setIsQueueConsultInProgress(true);
+      expect(storeWrapper['store'].isQueueConsultInProgress).toBe(true);
+    });
+
+    it('should setCurrentConsultQueueId', () => {
+      expect(storeWrapper.setCurrentConsultQueueId).toBeInstanceOf(Function);
+
+      storeWrapper.setCurrentConsultQueueId('queue-123');
+      expect(storeWrapper['store'].currentConsultQueueId).toBe('queue-123');
     });
 
     describe('setCCCallback/removeCCCallback', () => {
@@ -359,15 +427,72 @@ describe('storeEventsWrapper', () => {
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.AGENT_WRAPPEDUP, expect.any(Function));
     });
 
-    it('should handle task assignment', () => {
+    it('should handle task assignment and reset consult flags if consultAccepted is true', () => {
       const setCurrentTaskSpy = jest.spyOn(storeWrapper, 'setCurrentTask');
       const setIncomingTaskSpy = jest.spyOn(storeWrapper, 'setIncomingTask');
+      const consultAcceptedSpy = jest.spyOn(storeWrapper, 'setConsultAccepted');
+      const consultInitiatedSpy = jest.spyOn(storeWrapper, 'setConsultInitiated');
+      const consultCompletedSpy = jest.spyOn(storeWrapper, 'setConsultCompleted');
+      // simulate consultAccepted true
+      storeWrapper['store'].consultAccepted = true;
 
-      // Why is this, this way?
       storeWrapper.handleTaskAssigned(mockTask);
-
       expect(setCurrentTaskSpy).toHaveBeenCalledWith(mockTask);
       expect(setIncomingTaskSpy).toHaveBeenCalledWith(null);
+      // new consult-reset checks
+      expect(consultAcceptedSpy).toHaveBeenCalledWith(false);
+      expect(consultInitiatedSpy).toHaveBeenCalledWith(false);
+      expect(consultCompletedSpy).toHaveBeenCalledWith(false);
+    });
+
+    it('should handle consultAccepted event', () => {
+      const setCurrentTaskSpy = jest.spyOn(storeWrapper, 'setCurrentTask');
+      const setIncomingTaskSpy = jest.spyOn(storeWrapper, 'setIncomingTask');
+      const consultAcceptedSpy = jest.spyOn(storeWrapper, 'setConsultAccepted');
+      const setStateSpy = jest.spyOn(storeWrapper, 'setState');
+
+      storeWrapper.handleConsultAccepted(mockTask);
+      expect(setCurrentTaskSpy).toHaveBeenCalledWith(mockTask);
+      expect(setIncomingTaskSpy).toHaveBeenCalledWith(null);
+      expect(consultAcceptedSpy).toHaveBeenCalledWith(true);
+      expect(setStateSpy).toHaveBeenCalledWith({
+        developerName: 'ENGAGED',
+        name: 'Engaged',
+      });
+    });
+
+    it('should handle consultEnd event when consultAccepted is true', () => {
+      const consultInitiatedSpy = jest.spyOn(storeWrapper, 'setConsultInitiated');
+      const consultAcceptedSpy = jest.spyOn(storeWrapper, 'setConsultAccepted');
+      const consultCompletedSpy = jest.spyOn(storeWrapper, 'setConsultCompleted');
+      const handleTaskRemoveSpy = jest.spyOn(storeWrapper, 'handleTaskRemove');
+      // simulate consultAccepted true
+      storeWrapper['store'].consultAccepted = true;
+      const event = {data: {interactionId: 'testId'}};
+
+      storeWrapper.handleConsultEnd(event);
+      expect(consultInitiatedSpy).toHaveBeenCalledWith(false);
+      expect(consultAcceptedSpy).toHaveBeenCalledWith(false);
+      expect(consultCompletedSpy).toHaveBeenCalledWith(false);
+      expect(handleTaskRemoveSpy).toHaveBeenCalledWith('testId');
+    });
+
+    it('should handle consult event', () => {
+      const consultCompletedSpy = jest.spyOn(storeWrapper, 'setConsultCompleted');
+      const setCurrentTaskSpy = jest.spyOn(storeWrapper, 'setCurrentTask');
+
+      storeWrapper.handleConsulting(mockTask);
+      expect(consultCompletedSpy).toHaveBeenCalledWith(true);
+      expect(setCurrentTaskSpy).toHaveBeenCalledWith(mockTask);
+    });
+
+    it('should handle task media', () => {
+      const mockTrack = new MediaStreamTrack();
+      const setCallControlAudioSpy = jest.spyOn(storeWrapper, 'setCallControlAudio');
+
+      storeWrapper.handleTaskMedia(mockTrack);
+
+      expect(setCallControlAudioSpy).toHaveBeenCalledWith(new MediaStream([mockTrack]));
     });
 
     it('should handle task removal', () => {
@@ -429,6 +554,55 @@ describe('storeEventsWrapper', () => {
       storeWrapper.setDeviceType(option);
 
       expect(setDeviceTypeSpy).toHaveBeenCalledWith(option);
+    });
+
+    it('should return buddy agents list', async () => {
+      const buddyAgents = [{name: 'agent1'}, {name: 'agent2'}];
+      storeWrapper['store'].cc.getBuddyAgents = jest.fn().mockResolvedValue({data: {agentList: buddyAgents}});
+      const result = await storeWrapper.getBuddyAgents();
+      expect(result).toEqual(buddyAgents);
+    });
+
+    it('should handle error in getBuddyAgents and throw error', async () => {
+      storeWrapper['store'].cc.getBuddyAgents = jest.fn().mockRejectedValue(new Error('error'));
+      await expect(storeWrapper.getBuddyAgents()).rejects.toThrow('error');
+    });
+
+    it('should return contact service queues list', async () => {
+      const queueList = [
+        {id: 'queue1', name: 'Queue 1', channelType: 'TELEPHONY'},
+        {id: 'queue2', name: 'Queue 2', channelType: 'TELEPHONY'},
+        {id: 'queue3', name: 'Queue 3', channelType: 'CHAT'}, // This one should be filtered out
+      ];
+      storeWrapper['store'].cc.getQueues = jest.fn().mockResolvedValue(queueList);
+
+      const result = await storeWrapper.getQueues();
+
+      expect(result).toEqual([
+        {id: 'queue1', name: 'Queue 1', channelType: 'TELEPHONY'},
+        {id: 'queue2', name: 'Queue 2', channelType: 'TELEPHONY'},
+      ]);
+      expect(storeWrapper['store'].cc.getQueues).toHaveBeenCalled();
+    });
+
+    it('should handle error in getQueues and throw error', async () => {
+      storeWrapper['store'].cc.getQueues = jest.fn().mockRejectedValue(new Error('queue error'));
+
+      await expect(storeWrapper.getQueues()).rejects.toThrow('queue error');
+    });
+
+    it('should handle consultQueueCancelled event', () => {
+      const consultInitiatedSpy = jest.spyOn(storeWrapper, 'setConsultInitiated');
+      const isQueueConsultInProgressSpy = jest.spyOn(storeWrapper, 'setIsQueueConsultInProgress');
+      const currentConsultQueueIdSpy = jest.spyOn(storeWrapper, 'setCurrentConsultQueueId');
+      const consultStartTimeStampSpy = jest.spyOn(storeWrapper, 'setConsultStartTimeStamp');
+
+      storeWrapper.handleConsultQueueCancelled();
+
+      expect(consultInitiatedSpy).toHaveBeenCalledWith(false);
+      expect(isQueueConsultInProgressSpy).toHaveBeenCalledWith(false);
+      expect(currentConsultQueueIdSpy).toHaveBeenCalledWith(null);
+      expect(consultStartTimeStampSpy).toHaveBeenCalledWith(null);
     });
   });
 
@@ -613,7 +787,7 @@ describe('storeEventsWrapper', () => {
 
       storeWrapper.handleTaskEnd(mockTask, false);
 
-      expect(storeWrapper.setWrapupRequired).toHaveBeenCalledWith(true);
+      expect(storeWrapper.setWrapupRequired).toHaveBeenCalledWith(false);
     });
 
     it('should handle task end when call is not connected', () => {
@@ -622,7 +796,7 @@ describe('storeEventsWrapper', () => {
       storeWrapper['store'].wrapupRequired = false;
       storeWrapper.handleTaskEnd(mockTask, true);
 
-      expect(storeWrapper.setWrapupRequired).toHaveBeenCalledWith(false);
+      expect(storeWrapper.setWrapupRequired).toHaveBeenCalledWith(true);
 
       storeWrapper.handleTaskEnd(mockTask, false);
 
@@ -631,7 +805,7 @@ describe('storeEventsWrapper', () => {
       storeWrapper['store'].wrapupRequired = true;
       storeWrapper.handleTaskEnd(mockTask, true);
 
-      expect(storeWrapper.setWrapupRequired).toHaveBeenCalledWith(false);
+      expect(storeWrapper.setWrapupRequired).toHaveBeenCalledWith(true);
     });
 
     it('should set selected login option', () => {
@@ -981,6 +1155,159 @@ describe('storeEventsWrapper', () => {
 
       expect(onTaskRejectedMock).toHaveBeenCalledWith({reason: reason});
       expect(removeSpy).toHaveBeenCalledWith('rejectTest');
+    });
+
+    it('should handle consultEnd event and reset queue consult state', () => {
+      const consultInitiatedSpy = jest.spyOn(storeWrapper, 'setConsultInitiated');
+      const isQueueConsultInProgressSpy = jest.spyOn(storeWrapper, 'setIsQueueConsultInProgress');
+      const currentConsultQueueIdSpy = jest.spyOn(storeWrapper, 'setCurrentConsultQueueId');
+      // simulate consultAccepted false
+      storeWrapper['store'].consultAccepted = false;
+      storeWrapper['store'].consultOfferReceived = false;
+      const event = {data: {interactionId: 'testId'}};
+
+      storeWrapper.handleConsultEnd(event);
+
+      expect(consultInitiatedSpy).toHaveBeenCalledWith(false);
+      expect(isQueueConsultInProgressSpy).toHaveBeenCalledWith(false);
+      expect(currentConsultQueueIdSpy).toHaveBeenCalledWith(null);
+    });
+
+    it('should register TASK_CONSULT_QUEUE_CANCELLED handler on incoming task', () => {
+      const mockTask: ITask = {
+        data: {
+          interactionId: 'interaction1',
+          interaction: {
+            state: 'connected',
+          },
+        },
+        on: jest.fn(),
+        off: jest.fn(),
+      } as unknown as ITask;
+
+      storeWrapper['store'].taskList = [];
+      storeWrapper.handleIncomingTask(mockTask);
+
+      // Verify the TASK_CONSULT_QUEUE_CANCELLED handler was registered
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_CONSULT_QUEUE_CANCELLED, expect.any(Function));
+    });
+  });
+
+  describe('task:media conditionally attached based on deviceType', () => {
+    const mockTask: ITask = {
+      data: {
+        interactionId: 'interaction1',
+        interaction: {
+          state: 'connected',
+        },
+      },
+      on: jest.fn(),
+      off: jest.fn(),
+    } as unknown as ITask;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      storeWrapper['store'].taskList = [];
+    });
+
+    it('should attach TASK_MEDIA handler when deviceType is BROWSER', () => {
+      // Set deviceType to BROWSER
+      storeWrapper['store'].deviceType = 'BROWSER';
+
+      // Call handleIncomingTask
+      storeWrapper.handleIncomingTask(mockTask);
+
+      // Verify TASK_MEDIA handler was attached
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_MEDIA, expect.any(Function));
+    });
+
+    it('should attach TASK_MEDIA handler in handleTaskHydrate when deviceType is BROWSER', () => {
+      // Set deviceType to BROWSER
+      storeWrapper['store'].deviceType = 'BROWSER';
+
+      // Call handleTaskHydrate
+      storeWrapper.handleTaskHydrate(mockTask);
+
+      // Verify TASK_MEDIA handler was attached
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_MEDIA, expect.any(Function));
+    });
+
+    it('should not attach TASK_MEDIA handler when deviceType is not BROWSER', () => {
+      // Set deviceType to something other than BROWSER
+      storeWrapper['store'].deviceType = 'DESKTOP';
+
+      // Call handleIncomingTask
+      storeWrapper.handleIncomingTask(mockTask);
+
+      // Verify TASK_MEDIA handler was not attached
+      const taskMediaCall = mockTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_MEDIA);
+      expect(taskMediaCall).toBeUndefined();
+    });
+
+    it('should not attach TASK_MEDIA handler in handleTaskHydrate when deviceType is not BROWSER', () => {
+      // Set deviceType to something other than BROWSER
+      storeWrapper['store'].deviceType = 'DESKTOP';
+
+      // Call handleTaskHydrate
+      storeWrapper.handleTaskHydrate(mockTask);
+
+      // Verify TASK_MEDIA handler was not attached
+      const taskMediaCall = mockTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_MEDIA);
+      expect(taskMediaCall).toBeUndefined();
+    });
+
+    it('should remove TASK_MEDIA handler on task removal when deviceType is BROWSER', () => {
+      // Set deviceType to BROWSER
+      storeWrapper['store'].deviceType = 'BROWSER';
+
+      // Add the task to taskList
+      storeWrapper['store'].taskList = [mockTask];
+
+      // Call handleTaskRemove
+      storeWrapper.handleTaskRemove(mockTask.data.interactionId);
+
+      // Verify TASK_MEDIA handler was removed
+      expect(mockTask.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_MEDIA, expect.any(Function));
+      expect(storeWrapper.setCallControlAudio).toHaveBeenCalledWith(null);
+    });
+
+    it('should not try to remove TASK_MEDIA handler on task removal when deviceType is not BROWSER', () => {
+      // Set deviceType to something other than BROWSER
+      storeWrapper['store'].deviceType = 'DESKTOP';
+
+      // Add the task to taskList
+      storeWrapper['store'].taskList = [mockTask];
+
+      // Call handleTaskRemove
+      storeWrapper.handleTaskRemove(mockTask.data.interactionId);
+
+      // Verify TASK_MEDIA handler was not removed
+      const taskMediaOffCall = mockTask.off.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_MEDIA);
+      expect(taskMediaOffCall).toBeUndefined();
+      expect(storeWrapper.setCallControlAudio).not.toHaveBeenCalled();
+    });
+
+    it('should attach TASK_MEDIA handler in handleConsultAccepted when deviceType is BROWSER', () => {
+      // Set deviceType to BROWSER
+      storeWrapper['store'].deviceType = 'BROWSER';
+
+      // Call handleConsultAccepted
+      storeWrapper.handleConsultAccepted(mockTask);
+
+      // Verify TASK_MEDIA handler was attached
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_MEDIA, expect.any(Function));
+    });
+
+    it('should not attach TASK_MEDIA handler in handleConsultAccepted when deviceType is not BROWSER', () => {
+      // Set deviceType to something other than BROWSER
+      storeWrapper['store'].deviceType = 'DESKTOP';
+
+      // Call handleConsultAccepted
+      storeWrapper.handleConsultAccepted(mockTask);
+
+      // Verify TASK_MEDIA handler was not attached
+      const taskMediaCall = mockTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_MEDIA);
+      expect(taskMediaCall).toBeUndefined();
     });
   });
 });

@@ -1,7 +1,8 @@
-import {useEffect, useCallback, useRef, useState} from 'react';
+import {useEffect, useCallback, useState, useRef} from 'react';
 import {ITask} from '@webex/plugin-cc';
-import store, {TASK_EVENTS} from '@webex/cc-store';
-import {useCallControlProps, UseTaskListProps, UseTaskProps} from './task.types';
+import {useCallControlProps, UseTaskListProps, UseTaskProps, Participant} from './task.types';
+import {useOutdialCallProps} from '@webex/cc-components';
+import store, {TASK_EVENTS, BuddyDetails, DestinationType, ContactServiceQueue} from '@webex/cc-store';
 
 // Hook for managing the task list
 export const useTaskList = (props: UseTaskListProps) => {
@@ -123,10 +124,111 @@ export const useIncomingTask = (props: UseTaskProps) => {
 };
 
 export const useCallControl = (props: useCallControlProps) => {
-  const {currentTask, onHoldResume, onEnd, onWrapUp, logger, deviceType} = props;
-  const audioRef = useRef<HTMLAudioElement | null>(null); // Ref for the audio element
-  const isBrowser = deviceType === 'BROWSER';
+  const {currentTask, onHoldResume, onEnd, onWrapUp, logger, consultInitiated} = props;
   const [isHeld, setIsHeld] = useState<boolean | undefined>(undefined);
+  const [isRecording, setIsRecording] = useState(true);
+  const [buddyAgents, setBuddyAgents] = useState<BuddyDetails[]>([]);
+  const [queues, setQueues] = useState<ContactServiceQueue[]>([]);
+  const [consultAgentName, setConsultAgentName] = useState<string>('Consult Agent');
+  const [consultAgentId, setConsultAgentId] = useState<string>(null);
+  const [holdTime, setHoldTime] = useState(0);
+  const [startTimestamp, setStartTimestamp] = useState<number>(0);
+  const workerRef = useRef<Worker | null>(null);
+  const [lastTargetType, setLastTargetType] = useState<'agent' | 'queue'>('agent');
+
+  const workerScript = `
+    let intervalId;
+    const startTimer = (startTime) => {
+      if (intervalId) clearInterval(intervalId);
+      intervalId = setInterval(() => {
+        const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+        self.postMessage({type: 'elapsedTime', elapsedTime});
+      }, 1000);
+    };
+    const stopTimer = () => {
+      if (intervalId) clearInterval(intervalId);
+      self.postMessage({type: 'stop'});
+    };
+    self.onmessage = (event) => {
+      if (event.data.type === 'start') {
+        const startTime = event.data.startTime;
+        startTimer(startTime);
+      }
+      if (event.data.type === 'stop') {
+        stopTimer();
+      }
+    };
+  `;
+
+  useEffect(() => {
+    if (!workerRef.current?.postMessage) return;
+    if (isHeld) {
+      // Start the timer when the call is on hold
+      workerRef.current?.postMessage({type: 'start', startTime: Date.now()});
+    } else {
+      // Stop the timer when the call is resumed
+      workerRef.current?.postMessage({type: 'stop'});
+    }
+  }, [isHeld, workerRef.current?.postMessage]);
+
+  // Function to extract consulting agent information
+  const extractConsultingAgent = useCallback(() => {
+    if (!currentTask || !currentTask.data || !currentTask.data.interaction) return;
+
+    const {interaction} = currentTask.data;
+    // consultInitiated
+    // Find consulting agent (any agent that is not the current agent)
+    const foundAgent = Object.values(interaction.participants)
+      .filter(
+        (participant: Participant) =>
+          participant.pType === 'Agent' &&
+          (consultInitiated
+            ? participant.id !== store.cc.agentConfig.agentId
+            : participant.id === store.cc.agentConfig.agentId)
+      )
+      .map((participant: Participant) => ({id: participant.id, name: participant.name}))[0];
+
+    if (foundAgent) {
+      setConsultAgentName(foundAgent.name);
+      setConsultAgentId(foundAgent.id);
+      logger.info(`Consulting agent detected: ${foundAgent.name} ${foundAgent.id}`, {
+        module: 'widget-cc-task#helper.ts',
+        method: 'useCallControl#extractConsultingAgent',
+      });
+    }
+  }, [currentTask, consultAgentName, logger, consultInitiated]);
+
+  // Check for consulting agent whenever currentTask changes
+  useEffect(() => {
+    extractConsultingAgent();
+    if (
+      currentTask?.data?.interaction?.participants &&
+      store?.cc?.agentConfig?.agentId &&
+      currentTask.data.interaction.participants[store.cc.agentConfig.agentId]?.joinTimestamp
+    ) {
+      setStartTimestamp(currentTask.data.interaction.participants[store.cc.agentConfig.agentId].joinTimestamp);
+    }
+  }, [currentTask, extractConsultingAgent, consultInitiated]);
+
+  const loadBuddyAgents = useCallback(async () => {
+    try {
+      const agents = await store.getBuddyAgents();
+      setBuddyAgents(agents);
+    } catch (error) {
+      logger.error(`Error loading buddy agents: ${error}`, {module: 'helper.ts', method: 'loadBuddyAgents'});
+      setBuddyAgents([]);
+    }
+  }, [logger]);
+
+  const loadQueues = useCallback(async () => {
+    try {
+      const queues = await store.getQueues();
+      setQueues(queues);
+    } catch (error) {
+      logError(`Error loading queues: ${error}`, 'loadQueues');
+      setQueues([]);
+    }
+  }, [logger]);
 
   const holdCallback = () => {
     setIsHeld(true);
@@ -152,19 +254,61 @@ export const useCallControl = (props: useCallControlProps) => {
     }
   };
 
+  const pauseRecordingCallback = () => {
+    setIsRecording(false);
+  };
+
+  const resumeRecordingCallback = () => {
+    setIsRecording(true);
+  };
+
   useEffect(() => {
     if (!currentTask) return;
+
+    // Initialize the Web Worker
+    const blob = new Blob([workerScript], {type: 'application/javascript'});
+    const workerUrl = URL.createObjectURL(blob);
+    workerRef.current = new Worker(workerUrl);
+
+    workerRef.current.onmessage = (event) => {
+      if (event.data.type === 'elapsedTime') {
+        setHoldTime(event.data.elapsedTime);
+      } else if (event.data.type === 'stop') {
+        setHoldTime(0);
+      }
+    };
 
     store.setTaskCallback(TASK_EVENTS.TASK_HOLD, holdCallback, currentTask.data.interactionId);
     store.setTaskCallback(TASK_EVENTS.TASK_RESUME, resumeCallback, currentTask.data.interactionId);
     store.setTaskCallback(TASK_EVENTS.TASK_END, endCallCallback, currentTask.data.interactionId);
     store.setTaskCallback(TASK_EVENTS.AGENT_WRAPPEDUP, wrapupCallCallback, currentTask.data.interactionId);
+    store.setTaskCallback(TASK_EVENTS.CONTACT_RECORDING_PAUSED, pauseRecordingCallback, currentTask.data.interactionId);
+    store.setTaskCallback(
+      TASK_EVENTS.CONTACT_RECORDING_RESUMED,
+      resumeRecordingCallback,
+      currentTask.data.interactionId
+    );
 
     return () => {
+      if (workerRef.current?.postMessage) {
+        workerRef.current.postMessage({type: 'stop'});
+        workerRef.current.terminate();
+        workerRef.current = null;
+      }
       store.removeTaskCallback(TASK_EVENTS.TASK_HOLD, holdCallback, currentTask.data.interactionId);
       store.removeTaskCallback(TASK_EVENTS.TASK_RESUME, resumeCallback, currentTask.data.interactionId);
       store.removeTaskCallback(TASK_EVENTS.TASK_END, endCallCallback, currentTask.data.interactionId);
       store.removeTaskCallback(TASK_EVENTS.AGENT_WRAPPEDUP, wrapupCallCallback, currentTask.data.interactionId);
+      store.removeTaskCallback(
+        TASK_EVENTS.CONTACT_RECORDING_PAUSED,
+        pauseRecordingCallback,
+        currentTask.data.interactionId
+      );
+      store.removeTaskCallback(
+        TASK_EVENTS.CONTACT_RECORDING_RESUMED,
+        resumeRecordingCallback,
+        currentTask.data.interactionId
+      );
     };
   }, [currentTask]);
 
@@ -174,25 +318,6 @@ export const useCallControl = (props: useCallControlProps) => {
       method: `useCallControl#${method}`,
     });
   };
-
-  const handleTaskMedia = useCallback(
-    (track) => {
-      if (audioRef.current) {
-        audioRef.current.srcObject = new MediaStream([track]);
-      }
-    },
-    [audioRef, currentTask]
-  );
-
-  useEffect(() => {
-    if (!currentTask || !isBrowser) return;
-    // Call control only event for WebRTC calls
-    currentTask.on(TASK_EVENTS.TASK_MEDIA, handleTaskMedia);
-
-    return () => {
-      currentTask.off(TASK_EVENTS.TASK_MEDIA, handleTaskMedia);
-    };
-  }, [currentTask]);
 
   const toggleHold = (hold: boolean) => {
     if (hold) {
@@ -208,8 +333,8 @@ export const useCallControl = (props: useCallControlProps) => {
     });
   };
 
-  const toggleRecording = (pause: boolean) => {
-    if (pause) {
+  const toggleRecording = () => {
+    if (isRecording) {
       currentTask.pauseRecording().catch((error: Error) => {
         logError(`Error pausing recording: ${error}`, 'toggleRecording');
       });
@@ -232,14 +357,132 @@ export const useCallControl = (props: useCallControlProps) => {
     });
   };
 
+  const transferCall = async (transferDestination: string, destinationType: DestinationType) => {
+    const transferPayload = {
+      to: transferDestination,
+      destinationType: destinationType,
+    };
+
+    try {
+      await currentTask.transfer(transferPayload);
+    } catch (error) {
+      logError(`Error transferring call: ${error}`, 'transferCall');
+      throw error;
+    }
+  };
+
+  const consultCall = async (consultDestination: string, destinationType: DestinationType) => {
+    const consultPayload = {
+      to: consultDestination,
+      destinationType: destinationType,
+    };
+
+    if (destinationType === 'queue') {
+      store.setIsQueueConsultInProgress(true);
+      store.setCurrentConsultQueueId(consultDestination);
+      store.setConsultInitiated(true);
+    }
+
+    try {
+      await currentTask.consult(consultPayload);
+      store.setIsQueueConsultInProgress(false);
+      if (destinationType === 'queue') {
+        store.setCurrentConsultQueueId(null);
+      } else {
+        store.setConsultInitiated(true);
+      }
+    } catch (error) {
+      if (destinationType === 'queue') {
+        store.setIsQueueConsultInProgress(false);
+        store.setCurrentConsultQueueId(null);
+        store.setConsultInitiated(false);
+      }
+      logError(`Error consulting call: ${error}`, 'consultCall');
+      throw error;
+    }
+  };
+
+  const endConsultCall = async () => {
+    const consultEndPayload = {
+      isConsult: true,
+      taskId: currentTask.data.interactionId,
+      ...(store.isQueueConsultInProgress && {queueId: store.currentConsultQueueId}),
+    };
+
+    try {
+      await currentTask.endConsult(consultEndPayload);
+    } catch (error) {
+      logError(`Error ending consult call: ${error}`, 'endConsultCall');
+      throw error;
+    }
+  };
+
+  const consultTransfer = async (transferDestination: string, destinationType: DestinationType) => {
+    const consultTransferPayload = {
+      to: transferDestination,
+      destinationType: destinationType,
+    };
+    try {
+      await currentTask.consultTransfer(consultTransferPayload);
+      store.setConsultInitiated(true);
+    } catch (error) {
+      logError(`Error transferring consult call: ${error}`, 'consultTransfer');
+      throw error;
+    }
+  };
+
   return {
     currentTask,
-    audioRef,
     endCall,
     toggleHold,
     toggleRecording,
     wrapupCall,
     isHeld,
     setIsHeld,
+    isRecording,
+    setIsRecording,
+    buddyAgents,
+    loadBuddyAgents,
+    queues,
+    loadQueues,
+    transferCall,
+    consultCall,
+    endConsultCall,
+    consultTransfer,
+    consultAgentName,
+    setConsultAgentName,
+    consultAgentId,
+    setConsultAgentId,
+    holdTime,
+    startTimestamp,
+    lastTargetType,
+    setLastTargetType,
+  };
+};
+
+export const useOutdialCall = (props: useOutdialCallProps) => {
+  const {cc, logger} = props;
+
+  const startOutdial = (destination: string) => {
+    // Perform validation on destination number.
+    if (!destination || !destination.trim()) {
+      alert('Destination number is required, it cannot be empty');
+      return;
+    }
+
+    cc.startOutdial(destination)
+      .then((response) => {
+        logger.info('Outdial call started', response);
+      })
+      .catch((error: Error) => {
+        logger.error(`${error}`, {
+          module: 'widget-OutdialCall#helper.ts',
+          method: 'startOutdial',
+        });
+      });
+  };
+
+  return {
+    startOutdial,
   };
 };

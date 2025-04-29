@@ -1,21 +1,19 @@
 import React from 'react';
 import {render, screen, fireEvent} from '@testing-library/react';
-import StationLoginPresentational from '../../src/station-login/station-login.presentational';
+import StationLoginComponent from '../../../src/components/StationLogin/station-login';
 import '@testing-library/jest-dom';
-
-jest.mock('@momentum-ui/react-collaboration', () => ({
-  ButtonPill: () => <div data-testid="ButtonPill" />,
-  Text: () => <div data-testid="Text" />,
-  SelectNext: () => <div data-testid="SelectNext" />,
-  TextInput: () => <div data-testid="TextInput" />,
-}));
 
 jest.mock('@momentum-design/components/dist/react', () => ({
   Avatar: () => <div data-testid="Avatar" />,
   Icon: () => <div data-testid="Icon" />,
+  Button: () => <div data-testid="Button" />,
+  Text: () => <div data-testid="Text" />,
+  Select: () => <div data-testid="Select" />,
+  Input: () => <div data-testid="Input" />,
+  Tooltip: () => <div data-testid="Tooltip" />,
 }));
 
-describe('StationLoginPresentational', () => {
+describe('StationLoginComponent', () => {
   const props = {
     name: 'StationLogin',
     login: jest.fn(),
@@ -30,6 +28,7 @@ describe('StationLoginPresentational', () => {
     setTeam: jest.fn(),
     isAgentLoggedIn: false,
     deviceType: '',
+    dialNumber: '',
     showMultipleLoginAlert: false,
     handleContinue: jest.fn(),
     modalRef: React.createRef<HTMLDialogElement>(),
@@ -51,7 +50,7 @@ describe('StationLoginPresentational', () => {
       handleContinue: handleContinueMock,
       modalRef,
     };
-    render(<StationLoginPresentational {...propsWithAlert} />);
+    render(<StationLoginComponent {...propsWithAlert} />);
     const continueButton = screen.getByTestId('ContinueButton');
     fireEvent.click(continueButton);
     expect(handleContinueMock).toHaveBeenCalled();

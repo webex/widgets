@@ -4,18 +4,6 @@ import {StationLogin} from '../../src';
 import * as helper from '../../src/helper';
 import '@testing-library/jest-dom';
 
-jest.mock('@momentum-ui/react-collaboration', () => ({
-  ButtonPill: () => <div data-testid="ButtonPill" />,
-  Text: () => <div data-testid="Text" />,
-  SelectNext: () => <div data-testid="SelectNext" />,
-  TextInput: () => <div data-testid="TextInput" />,
-}));
-
-jest.mock('@momentum-design/components/dist/react', () => ({
-  Avatar: () => <div data-testid="Avatar" />,
-  Icon: () => <div data-testid="Icon" />,
-}));
-
 const teamsMock = ['team123', 'team456'];
 const ccMock = {
   on: () => {},
@@ -23,6 +11,7 @@ const ccMock = {
 };
 const loginOptionsMock = ['EXTENSION', 'AGENT_DN', 'BROWSER'];
 const deviceTypeMock = 'BROWSER';
+const dialNumberMock = '12345';
 const loggerMock = {};
 const isAgentLoggedInMock = false;
 
@@ -36,6 +25,7 @@ jest.mock('@webex/cc-store', () => {
     teams: teamsMock,
     loginOptions: loginOptionsMock,
     deviceType: deviceTypeMock,
+    dialNumber: dialNumberMock,
     logger: loggerMock,
     isAgentLoggedIn: isAgentLoggedInMock,
     setCCCallback: jest.fn(),
@@ -47,14 +37,21 @@ jest.mock('@webex/cc-store', () => {
   };
 });
 
+jest.mock('@webex/cc-components', () => {
+  return {
+    StationLoginComponent: () => <div>StationLoginComponent</div>,
+  };
+});
+
 const loginCb = jest.fn();
 const logoutCb = jest.fn();
+const ccLogoutCb = jest.fn();
 
 describe('StationLogin Component', () => {
   it('renders StationLoginPresentational with correct props', () => {
     const useStationLoginSpy = jest.spyOn(helper, 'useStationLogin');
 
-    render(<StationLogin onLogin={loginCb} onLogout={logoutCb} />);
+    render(<StationLogin onLogin={loginCb} onLogout={logoutCb} onCCSignOut={ccLogoutCb} />);
 
     expect(useStationLoginSpy).toHaveBeenCalledWith({
       cc: ccMock,
@@ -62,6 +59,7 @@ describe('StationLogin Component', () => {
       onLogout: logoutCb,
       logger: loggerMock,
       deviceType: deviceTypeMock,
+      dialNumber: dialNumberMock,
     });
   });
 });

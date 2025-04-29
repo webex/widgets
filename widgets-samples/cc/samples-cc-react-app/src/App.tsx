@@ -1,5 +1,14 @@
 import React, {useState, useEffect} from 'react';
-import {StationLogin, UserState, IncomingTask, TaskList, CallControl, store} from '@webex/cc-widgets';
+import {
+  StationLogin,
+  UserState,
+  IncomingTask,
+  TaskList,
+  CallControl,
+  CallControlCAD,
+  store,
+  OutdialCall,
+} from '@webex/cc-widgets';
 import {ThemeProvider, IconProvider, Icon, Button, Checkbox, Text} from '@momentum-design/components/dist/react';
 import {PopoverNext} from '@momentum-ui/react-collaboration';
 import './App.scss';
@@ -8,13 +17,14 @@ import {observer} from 'mobx-react-lite';
 // This is not to be included to a production app.
 // Have added here for debugging purposes
 window['store'] = store;
-//  test comment
 const defaultWidgets = {
   stationLogin: true,
   userState: true,
   incomingTask: true,
   taskList: true,
   callControl: true,
+  callControlCAD: true,
+  outdialCall: true,
 };
 
 function App() {
@@ -50,12 +60,16 @@ function App() {
 
   const onLogin = () => {
     setIsLoggedIn(true);
-    console.log('Agent login has been succesful');
+    console.log('Agent login has been successful');
   };
 
   const onLogout = () => {
     setIsLoggedIn(false);
-    console.log('Agent logout has been succesful');
+    console.log('Agent logout has been successful');
+  };
+
+  const onCCSignOut = () => {
+    console.log('CC Sign out has been successful');
   };
 
   const onAccepted = () => {
@@ -209,7 +223,29 @@ function App() {
                             checked={selectedWidgets[widget]}
                             onChange={handleCheckboxChange}
                           />
-                          &nbsp;{widget.charAt(0).toUpperCase() + widget.slice(1).replace(/([A-Z])/g, ' $1')}&nbsp;
+                          &nbsp;
+                          {widget.charAt(0).toUpperCase() + widget.slice(1).replace(/([A-Z])/g, ' $1')}&nbsp;
+                          {widget === 'outdialCall' && (
+                            <span style={{display: 'inline-flex', alignItems: 'center'}}>
+                              <PopoverNext
+                                trigger="mouseenter"
+                                triggerComponent={<Icon name="info-badge-filled" />}
+                                placement="auto-end"
+                                closeButtonPlacement="top-left"
+                                closeButtonProps={{'aria-label': 'Close'}}
+                              >
+                                <Text>
+                                  <div
+                                    style={{color: 'var(--mds-color-theme-text-error-normal)', marginBottom: '10px'}}
+                                  >
+                                    <strong>Note:</strong> When a number is dialed, the agent gets an incoming task to
+                                    accept via an Extension, Dial Number, or Browser. It's recommended to have the
+                                    incoming task/task list widget and call controls widget according to your needs.
+                                  </div>
+                                </Text>
+                              </PopoverNext>
+                            </span>
+                          )}
                         </label>
                       </>
                     ))}
@@ -253,20 +289,24 @@ function App() {
               </section>
             </div>
             <br />
-            <Button
-              disabled={accessToken.trim() === ''}
-              onClick={() => {
-                store.init({webexConfig, access_token: accessToken}).then(() => {
-                  setIsSdkReady(true);
-                });
-              }}
-            >
-              Init Widgets
-            </Button>
+            <div>
+              <Button
+                disabled={accessToken.trim() === ''}
+                onClick={() => {
+                  store.init({webexConfig, access_token: accessToken}).then(() => {
+                    setIsSdkReady(true);
+                  });
+                }}
+              >
+                Init Widgets
+              </Button>
+            </div>
             {isSdkReady && (
               <>
                 <div className="station-login">
-                  {selectedWidgets.stationLogin && <StationLogin onLogin={onLogin} onLogout={onLogout} />}
+                  {selectedWidgets.stationLogin && (
+                    <StationLogin onLogin={onLogin} onLogout={onLogout} onCCSignOut={onCCSignOut} />
+                  )}
                 </div>
                 {(store.isAgentLoggedIn || isLoggedIn) && (
                   <>
@@ -290,10 +330,27 @@ function App() {
                         </section>
                       </div>
                     )}
+                    {selectedWidgets.callControlCAD && store.currentTask && (
+                      <div className="box">
+                        <section className="section-box">
+                          <fieldset className="fieldset">
+                            <legend className="legend-box">Call Control CAD</legend>
+                            <CallControlCAD
+                              onHoldResume={onHoldResume}
+                              onEnd={onEnd}
+                              onWrapUp={onWrapUp}
+                              callControlClassName={'call-control-outer'}
+                              callControlConsultClassName={'call-control-consult-outer'}
+                            />
+                          </fieldset>
+                        </section>
+                      </div>
+                    )}
                     {selectedWidgets.incomingTask && <IncomingTask onAccepted={onAccepted} onDeclined={onDeclined} />}
                     {selectedWidgets.taskList && (
                       <TaskList onTaskAccepted={onTaskAccepted} onTaskDeclined={onTaskDeclined} />
                     )}
+                    {selectedWidgets.outdialCall && <OutdialCall />}
                   </>
                 )}
               </>

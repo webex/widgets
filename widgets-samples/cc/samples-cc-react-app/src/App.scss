@@ -50,3 +50,11 @@ iframe {
 .station-login {
   margin-bottom: 20px;
 }
+
+.call-control-outer, .call-control-consult-outer {
+  padding: 20px;
+  border: rgba(204, 204, 204, 0.5) 1px solid;
+  box-shadow: 0 0 10px rgba(204, 204, 204, 0.5);
+  border-radius: 5px;
+  margin: 20px;
+}

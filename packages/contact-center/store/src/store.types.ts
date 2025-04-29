@@ -1,5 +1,14 @@
-import {AgentLogin, IContactCenter, Profile, Team, LogContext} from '@webex/plugin-cc';
-import {ITask} from '@webex/plugin-cc';
+import {
+  AgentLogin,
+  IContactCenter,
+  Profile,
+  Team,
+  LogContext,
+  BuddyDetails,
+  DestinationType,
+  ContactServiceQueue,
+  ITask,
+} from '@webex/plugin-cc';
 
 type ILogger = {
   log: (message: string, context?: LogContext) => void;
@@ -41,6 +50,7 @@ interface IStore {
   taskList: ITask[];
   isAgentLoggedIn: boolean;
   deviceType: string;
+  dialNumber: string;
   wrapupRequired: boolean;
   currentState: string;
   lastStateChangeTimestamp?: number;
@@ -48,6 +58,16 @@ interface IStore {
   showMultipleLoginAlert: boolean;
   currentTheme: string;
   customState: ICustomState;
+  consultCompleted: boolean;
+  consultInitiated: boolean;
+  consultAccepted: boolean;
+  isQueueConsultInProgress: boolean;
+  currentConsultQueueId: string;
+  consultStartTimeStamp?: number;
+  callControlAudio: MediaStream | null;
+  consultOfferReceived: boolean;
+  isEndConsultEnabled: boolean;
+  allowConsultToQueue: boolean;
   init(params: InitParams, callback: (ccSDK: IContactCenter) => void): Promise<void>;
   registerCC(webex?: WithWebex['webex']): Promise<void>;
 }
@@ -59,6 +79,7 @@ interface IStoreWrapper extends IStore {
   setTaskList(taskList: ITask[]): void;
   setIncomingTask(task: ITask): void;
   setDeviceType(option: string): void;
+  setDialNumber(input: string): void;
   setCurrentState(state: string): void;
   setLastStateChangeTimestamp(timestamp: number): void;
   setLastIdleCodeChangeTimestamp(timestamp: number): void;
@@ -67,6 +88,10 @@ interface IStoreWrapper extends IStore {
   setIsAgentLoggedIn(value: boolean): void;
   setWrapupCodes(wrapupCodes: IWrapupCode[]): void;
   setState(state: IdleCode | ICustomState): void;
+  setConsultCompleted(value: boolean): void;
+  setConsultInitiated(value: boolean): void;
+  setConsultAccepted(value: boolean): void;
+  setConsultStartTimeStamp(timestamp: number): void;
 }
 
 interface IWrapupCode {
@@ -82,17 +107,20 @@ enum TASK_EVENTS {
   TASK_UNHOLD = 'task:unhold',
   TASK_CONSULT = 'task:consult',
   TASK_CONSULT_END = 'task:consultEnd',
-  TASK_CONSULT_ACCEPT = 'task:consultAccepted',
+  TASK_CONSULT_ACCEPTED = 'task:consultAccepted',
   TASK_PAUSE = 'task:pause',
   TASK_RESUME = 'task:resume',
   TASK_END = 'task:end',
   TASK_WRAPUP = 'task:wrapup',
   TASK_REJECT = 'task:rejected',
   TASK_HYDRATE = 'task:hydrate',
+  TASK_CONSULTING = 'task:consulting',
+  TASK_CONSULT_QUEUE_CANCELLED = 'task:consultQueueCancelled',
   AGENT_CONTACT_ASSIGNED = 'AgentContactAssigned',
   CONTACT_RECORDING_PAUSED = 'ContactRecordingPaused',
   CONTACT_RECORDING_RESUMED = 'ContactRecordingResumed',
   AGENT_WRAPPEDUP = 'AgentWrappedUp',
+  AGENT_CONSULT_CREATED = 'AgentConsultCreated',
 } // TODO: remove this once cc sdk exports this enum
 
 // Events that are received on the contact center SDK
@@ -104,6 +132,7 @@ enum CC_EVENTS {
   AGENT_MULTI_LOGIN = 'agent:multiLogin',
   AGENT_STATE_CHANGE = 'agent:stateChange',
   AGENT_RELOGIN_SUCCESS = 'AgentReloginSuccess',
+  AGENT_OFFER_CONSULT = 'AgentOfferConsult',
 }
 
 interface ICustomStateSet {
@@ -115,6 +144,9 @@ interface ICustomStateReset {
 }
 
 type ICustomState = ICustomStateSet | ICustomStateReset;
+
+const ENGAGED_LABEL = 'ENGAGED';
+const ENGAGED_USERNAME = 'Engaged';
 
 export type {
   IContactCenter,
@@ -130,6 +162,9 @@ export type {
   IWrapupCode,
   IStoreWrapper,
   ICustomState,
+  DestinationType,
+  BuddyDetails,
+  ContactServiceQueue,
 };
 
-export {CC_EVENTS, TASK_EVENTS};
+export {CC_EVENTS, TASK_EVENTS, ENGAGED_LABEL, ENGAGED_USERNAME};

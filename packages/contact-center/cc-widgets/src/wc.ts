@@ -2,7 +2,7 @@ import r2wc from '@r2wc/react-to-web-component';
 import {StationLogin} from '@webex/cc-station-login';
 import {UserState} from '@webex/cc-user-state';
 import store from '@webex/cc-store';
-import {TaskList, IncomingTask, CallControl} from '@webex/cc-task';
+import {TaskList, IncomingTask, CallControl, CallControlCAD, OutdialCall} from '@webex/cc-task';
 
 const WebUserState = r2wc(UserState, {
   props: {
@@ -39,6 +39,16 @@ const WebCallControl = r2wc(CallControl, {
   },
 });
 
+const WebCallControlCAD = r2wc(CallControlCAD, {
+  props: {
+    onHoldResume: 'function',
+    onEnd: 'function',
+    onWrapup: 'function',
+  },
+});
+
+const WebOutdialCall = r2wc(OutdialCall, {});
+
 // Whenever there is a new component, add the name of the component
 // and the web-component to the components object
 const components = [
@@ -47,6 +57,8 @@ const components = [
   {name: 'widget-cc-incoming-task', component: WebIncomingTask},
   {name: 'widget-cc-task-list', component: WebTaskList},
   {name: 'widget-cc-call-control', component: WebCallControl},
+  {name: 'widget-cc-outdial-call', component: WebOutdialCall},
+  {name: 'widget-cc-call-control-cad', component: WebCallControlCAD},
 ];
 
 components.forEach(({name, component}) => {

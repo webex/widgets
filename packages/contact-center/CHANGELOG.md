@@ -1,3 +1,101 @@
+# [1.28.0-ccwidgets.49](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.48...v1.28.0-ccwidgets.49) (2025-04-28)
+
+
+### Bug Fixes
+
+* **profile:** upgrading sdk version to latest to pull multimedia profile changes ([#440](https://github.com/webex/widgets/issues/440)) ([66043c0](https://github.com/webex/widgets/commit/66043c0729a06b5125536867fde034f281aca91e))
+
+# [1.28.0-ccwidgets.48](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.47...v1.28.0-ccwidgets.48) (2025-04-28)
+
+
+### Features
+
+* **station-login:** Update Station Login UI to Match Figma ([#433](https://github.com/webex/widgets/issues/433)) ([da133f4](https://github.com/webex/widgets/commit/da133f49136233f8994900b85ac135f78ffba2c5))
+
+# [1.28.0-ccwidgets.47](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.46...v1.28.0-ccwidgets.47) (2025-04-25)
+
+
+### Bug Fixes
+
+* **cc-components:** move consult control into cad wrapper component ([#435](https://github.com/webex/widgets/issues/435)) ([71214d9](https://github.com/webex/widgets/commit/71214d98b32ba1943b6dcbe027a054da48b7a857))
+
+# [1.28.0-ccwidgets.46](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.45...v1.28.0-ccwidgets.46) (2025-04-24)
+
+
+### Features
+
+* **widgets:** added-consult-to-queue ([#434](https://github.com/webex/widgets/issues/434)) ([9bd3a5c](https://github.com/webex/widgets/commit/9bd3a5cebc49144dee3a56ed147b53e31431de44))
+
+# [1.28.0-ccwidgets.45](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.44...v1.28.0-ccwidgets.45) (2025-04-24)
+
+
+### Bug Fixes
+
+* **task:** accept browser calls on login ([#436](https://github.com/webex/widgets/issues/436)) ([a4035ac](https://github.com/webex/widgets/commit/a4035aca1c837c80391b8daed861a94d98a502ce))
+
+# [1.28.0-ccwidgets.44](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.43...v1.28.0-ccwidgets.44) (2025-04-16)
+
+
+### Bug Fixes
+
+* **call-control:** add cad wrapper widget ([#432](https://github.com/webex/widgets/issues/432)) ([a0b0556](https://github.com/webex/widgets/commit/a0b0556b5550cce93006c34d3d95680985796331))
+
+# [1.28.0-ccwidgets.43](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.42...v1.28.0-ccwidgets.43) (2025-04-16)
+
+
+### Features
+
+* **cc-widgets:** CC SDK version update to get upload logs ([#430](https://github.com/webex/widgets/issues/430)) ([d899474](https://github.com/webex/widgets/commit/d8994743555d829fc27e003ed7ae6960f46f3713))
+
+# [1.28.0-ccwidgets.42](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.41...v1.28.0-ccwidgets.42) (2025-04-16)
+
+
+### Bug Fixes
+
+* **tooling:** upgrade setup node and cache in github action to version 4 ([#431](https://github.com/webex/widgets/issues/431)) ([233a1ef](https://github.com/webex/widgets/commit/233a1ef703d90edcd1dfa09118fc95c7ac0ec008))
+
+# [1.28.0-ccwidgets.41](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.40...v1.28.0-ccwidgets.41) (2025-04-15)
+
+
+### Features
+
+* **task-controls:** added-consult-flow ([#424](https://github.com/webex/widgets/issues/424)) ([0e3da1b](https://github.com/webex/widgets/commit/0e3da1b2933850929a393eff70faf209d9ac1b33))
+
+# [1.28.0-ccwidgets.40](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.39...v1.28.0-ccwidgets.40) (2025-04-14)
+
+
+### Bug Fixes
+
+* **contact-center:** latest sdk version update ([#426](https://github.com/webex/widgets/issues/426)) ([9960f88](https://github.com/webex/widgets/commit/9960f880645f7717a04a4d47d07dc97a826ed3e3))
+
+# [1.28.0-ccwidgets.39](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.38...v1.28.0-ccwidgets.39) (2025-04-02)
+
+
+### Features
+
+* **widgets:** added-transfer-functionality ([#423](https://github.com/webex/widgets/issues/423)) ([b7974a3](https://github.com/webex/widgets/commit/b7974a324e7e4d8c3a8a41c24d10b9c91b3effa0))
+
+# [1.28.0-ccwidgets.38](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.37...v1.28.0-ccwidgets.38) (2025-03-27)
+
+
+### Bug Fixes
+
+* **cc-components:** move station-login, cc-task presentational to cc-components ([#421](https://github.com/webex/widgets/issues/421)) ([ec20de8](https://github.com/webex/widgets/commit/ec20de86eb914bd2b1bfe86f178a968dee834959))
+
+# [1.28.0-ccwidgets.37](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.36...v1.28.0-ccwidgets.37) (2025-03-25)
+
+
+### Bug Fixes
+
+* **cc-widgets:** Pause resume record issue fix ([#409](https://github.com/webex/widgets/issues/409)) ([11c9b5e](https://github.com/webex/widgets/commit/11c9b5ecf2745eaf44762afb018c70add4b0014b))
+
+# [1.28.0-ccwidgets.36](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.35...v1.28.0-ccwidgets.36) (2025-03-25)
+
+
+### Features
+
+* **cc-task:** added agent outdial feature ([#399](https://github.com/webex/widgets/issues/399)) ([cded569](https://github.com/webex/widgets/commit/cded56903e258763df082749702490bd6fc8380c))
+
 # [1.28.0-ccwidgets.35](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.34...v1.28.0-ccwidgets.35) (2025-03-21)
 
 
