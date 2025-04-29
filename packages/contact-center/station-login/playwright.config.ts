@@ -1,10 +1,24 @@
 import {defineConfig, devices} from '@playwright/test';
+import dotenv from 'dotenv';
+import path from 'path';
+
+// Alternatively, read from "../my.env" file.
+dotenv.config({path: path.resolve(__dirname, '../../../', '.env')});
 
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
   testDir: './tests/playwright',
+
+  /* Run your local dev server before starting the tests */
+  webServer: {
+    command: 'cd ../../../ && yarn workspace samples-cc-react-app serve',
+    url: 'http://localhost:3000',
+    reuseExistingServer: !process.env.CI,
+    stdout: 'ignore',
+    stderr: 'pipe',
+  },
   fullyParallel: false,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
@@ -43,13 +57,4 @@ export default defineConfig({
       dependencies: ['firefox'],
     },
   ],
-
-  /* Run your local dev server before starting the tests */
-  webServer: {
-    command: 'cd ../../../ && yarn workspace samples-cc-react-app serve',
-    url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
-    stdout: 'ignore',
-    stderr: 'pipe',
-  },
 });

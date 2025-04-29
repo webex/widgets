@@ -17,6 +17,7 @@
     "build:src": "yarn run clean:dist && webpack",
     "build:watch": "webpack --watch",
     "test:unit": "jest --coverage",
+    "test:e2e": "playwright test",
     "test:styles": "eslint"
   },
   "dependencies": {
