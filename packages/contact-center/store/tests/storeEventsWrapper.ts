@@ -824,9 +824,9 @@ describe('storeEventsWrapper', () => {
         },
       };
       storeWrapper.handleTaskEnd(taskNotConnectedNoWrapup);
-      expect(setWrapupRequiredSpy).not.toHaveBeenCalledWith(true);
+      expect(setWrapupRequiredSpy).toHaveBeenCalledWith(false);
 
-      expect(storeWrapper.setWrapupRequired).not.toHaveBeenCalledWith(true);
+      expect(storeWrapper.setWrapupRequired).toHaveBeenCalledWith(false);
 
       setWrapupRequiredSpy.mockClear();
       storeWrapper['store'].wrapupRequired = true;
