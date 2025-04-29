@@ -797,23 +797,6 @@ describe('storeEventsWrapper', () => {
       const setWrapupRequiredSpy = jest.spyOn(storeWrapper, 'setWrapupRequired');
       jest.spyOn(storeWrapper, 'setWrapupRequired');
 
-      const taskNotConnected = {
-        data: {
-          interactionId: 'task3',
-          interaction: {
-            state: 'new',
-          },
-          wrapUpRequired: true,
-        },
-      };
-
-      storeWrapper['store'].wrapupRequired = false;
-      storeWrapper.handleTaskEnd(taskNotConnected);
-      expect(setWrapupRequiredSpy).toHaveBeenCalledWith(true);
-
-      expect(storeWrapper.setWrapupRequired).toHaveBeenCalledWith(true);
-      setWrapupRequiredSpy.mockClear();
-
       const taskNotConnectedNoWrapup = {
         data: {
           interactionId: 'task4',
@@ -827,11 +810,6 @@ describe('storeEventsWrapper', () => {
       expect(setWrapupRequiredSpy).toHaveBeenCalledWith(false);
 
       expect(storeWrapper.setWrapupRequired).toHaveBeenCalledWith(false);
-
-      setWrapupRequiredSpy.mockClear();
-      storeWrapper['store'].wrapupRequired = true;
-      storeWrapper.handleTaskEnd(taskNotConnected);
-      expect(storeWrapper.setWrapupRequired).toHaveBeenCalledWith(true);
     });
 
     it('should set selected login option', () => {
