@@ -7,9 +7,10 @@ test.describe('Station Login', () => {
     if (!accessToken) {
       throw new Error('ACCESS_TOKEN is not defined in the environment variables');
     }
+    console.log('ACCESS_TOKEN:', accessToken);
   });
   test('should login using Desktop login option', async ({page}) => {
-    test.setTimeout(120_000);
+    test.setTimeout(60_000);
     await page.goto('http://localhost:3000/');
     await page.getByText('Contact Center widgets in a react app Dark Theme Select Widgets to Show Station').click();
     await page.getByRole('textbox', {name: 'Enter your access token'}).click();
@@ -39,6 +40,7 @@ test.describe('Station Login', () => {
   });
 
   test('should login accross tabs', async ({browser}) => {
+    test.setTimeout(60_000);
     const context = await browser.newContext();
 
     const page = await context.newPage();
