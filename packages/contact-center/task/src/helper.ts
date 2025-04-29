@@ -109,7 +109,9 @@ export const useCallControl = (props: useCallControlProps) => {
   const [consultAgentName, setConsultAgentName] = useState<string>('Consult Agent');
   const [consultAgentId, setConsultAgentId] = useState<string>(null);
   const [holdTime, setHoldTime] = useState(0);
+  const [startTimestamp, setStartTimestamp] = useState<number>(0);
   const workerRef = useRef<Worker | null>(null);
+  const [lastTargetType, setLastTargetType] = useState<'agent' | 'queue'>('agent');
 
   const workerScript = `
     let intervalId;
@@ -176,6 +178,13 @@ export const useCallControl = (props: useCallControlProps) => {
   // Check for consulting agent whenever currentTask changes
   useEffect(() => {
     extractConsultingAgent();
+    if (
+      currentTask?.data?.interaction?.participants &&
+      store?.cc?.agentConfig?.agentId &&
+      currentTask.data.interaction.participants[store.cc.agentConfig.agentId]?.joinTimestamp
+    ) {
+      setStartTimestamp(currentTask.data.interaction.participants[store.cc.agentConfig.agentId].joinTimestamp);
+    }
   }, [currentTask, extractConsultingAgent, consultInitiated]);
 
   const loadBuddyAgents = useCallback(async () => {
@@ -422,6 +431,9 @@ export const useCallControl = (props: useCallControlProps) => {
     consultAgentId,
     setConsultAgentId,
     holdTime,
+    startTimestamp,
+    lastTargetType,
+    setLastTargetType,
   };
 };
 

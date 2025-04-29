@@ -7,8 +7,8 @@ import {
   BuddyDetails,
   DestinationType,
   ContactServiceQueue,
+  ITask,
 } from '@webex/plugin-cc';
-import {ITask} from '@webex/plugin-cc';
 
 type ILogger = {
   log: (message: string, context?: LogContext) => void;
@@ -50,6 +50,7 @@ interface IStore {
   taskList: Record<string, ITask>;
   isAgentLoggedIn: boolean;
   deviceType: string;
+  dialNumber: string;
   wrapupRequired: boolean;
   currentState: string;
   lastStateChangeTimestamp?: number;
@@ -78,6 +79,7 @@ interface IStoreWrapper extends IStore {
   setTaskList(): void;
   setIncomingTask(task: ITask): void;
   setDeviceType(option: string): void;
+  setDialNumber(input: string): void;
   setCurrentState(state: string): void;
   setLastStateChangeTimestamp(timestamp: number): void;
   setLastIdleCodeChangeTimestamp(timestamp: number): void;
