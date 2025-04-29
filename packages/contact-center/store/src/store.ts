@@ -74,6 +74,7 @@ class Store implements IStore {
         this.currentState = response.lastStateAuxCodeId;
         this.lastStateChangeTimestamp = response.lastStateChangeTimestamp;
         this.lastIdleCodeChangeTimestamp = response.lastIdleCodeChangeTimestamp;
+        console.log('Testing E2E');
       })
       .catch((error) => {
         this.logger.error(`Error registering contact center: ${error}`, {
