@@ -5,6 +5,7 @@ on:
   pull_request_target:
     branches:
       - ccwidgets
+      - playwright
 
     types: [opened, labeled, reopened, synchronize]
   workflow_dispatch:
