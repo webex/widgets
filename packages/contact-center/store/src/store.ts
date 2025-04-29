@@ -88,7 +88,6 @@ class Store implements IStore {
         this.currentState = response.lastStateAuxCodeId;
         this.lastStateChangeTimestamp = response.lastStateChangeTimestamp;
         this.lastIdleCodeChangeTimestamp = response.lastIdleCodeChangeTimestamp;
-        console.log('Testing E2E');
         this.isEndConsultEnabled = response.isEndConsultEnabled;
         this.allowConsultToQueue = response.allowConsultToQueue;
       })
