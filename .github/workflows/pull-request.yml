@@ -215,7 +215,8 @@ jobs:
         with:
           name: playwright-report
           path: |
-            ./playwright-report/**
+            **/playwright-report/**
+            **/test-results/**
           retention-days: 10
 
   unit_tests:

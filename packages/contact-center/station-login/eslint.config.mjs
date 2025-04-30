@@ -7,7 +7,17 @@ import eslintConfigPrettier from 'eslint-config-prettier';
 
 export default [
   {files: ['**/src/**/*.{js,mjs,cjs,ts,jsx,tsx}']},
-  {ignores: ['.babelrc.js', '*config.{js,ts}', 'dist', 'node_modules', 'coverage']},
+  {
+    ignores: [
+      '.babelrc.js',
+      '*config.{js,ts}',
+      'dist',
+      'node_modules',
+      'coverage',
+      'playwright-report',
+      'test-results',
+    ],
+  },
   {languageOptions: {globals: globals.browser}},
   pluginJs.configs.recommended,
   ...tseslint.configs.recommended,

@@ -107,7 +107,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
           <Button onClick={onCCSignOut}>{StationLoginLabels.SIGN_OUT}</Button>
         </div>
       </dialog>
-      <div className="box station-login">
+      <div className="box station-login" data-testid="station-login-widget">
         <section className="section-box">
           <Text tagname={'span'} type="body-large-bold">
             {StationLoginLabels.INTERACTION_PREFERENCES}
