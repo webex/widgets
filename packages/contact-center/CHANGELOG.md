@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.50](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.49...v1.28.0-ccwidgets.50) (2025-04-30)
+
+
+### Bug Fixes
+
+* **widgets:** fixed-wrapup-issue ([#442](https://github.com/webex/widgets/issues/442)) ([0eab5c3](https://github.com/webex/widgets/commit/0eab5c33e56b420b3a4ee2f9ebd2b92044af721e))
+
 # [1.28.0-ccwidgets.49](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.48...v1.28.0-ccwidgets.49) (2025-04-28)
 
 
