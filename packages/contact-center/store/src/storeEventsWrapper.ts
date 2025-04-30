@@ -533,7 +533,6 @@ class StoreWrapper implements IStoreWrapper {
     // Update call control states
     if (isTerminated) {
       // wrapup
-      console.info('Adhwaith', task.data.wrapUpRequired);
       this.setWrapupRequired(task.data.wrapUpRequired);
 
       if (!task.data.wrapUpRequired) {
