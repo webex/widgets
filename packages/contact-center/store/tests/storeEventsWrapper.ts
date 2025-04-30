@@ -949,6 +949,7 @@ describe('storeEventsWrapper', () => {
             },
           },
           agentId: 'agent1',
+          wrapUpRequired: true,
         },
         on: jest.fn(),
         off: jest.fn(),

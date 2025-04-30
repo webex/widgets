@@ -297,7 +297,7 @@ class StoreWrapper implements IStoreWrapper {
     const taskToRemove = this.store.taskList.find((task) => task.data.interactionId === taskId);
     if (taskToRemove) {
       taskToRemove.off(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
-      taskToRemove.off(TASK_EVENTS.TASK_END, () => this.handleTaskEnd(taskToRemove));
+      taskToRemove.off(TASK_EVENTS.TASK_END, this.handleTaskEnd);
       taskToRemove.off(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(taskToRemove.interactionId, reason));
       taskToRemove.off(TASK_EVENTS.AGENT_WRAPPEDUP, this.handleTaskWrapUp);
       taskToRemove.off(TASK_EVENTS.TASK_CONSULTING, this.handleConsulting);
@@ -527,16 +527,16 @@ class StoreWrapper implements IStoreWrapper {
       name: ENGAGED_USERNAME,
     });
 
-    const {interaction, agentId} = task.data;
-    const {state, isTerminated, participants} = interaction;
+    const {interaction} = task.data;
+    const {isTerminated} = interaction;
 
     // Update call control states
     if (isTerminated) {
       // wrapup
-      const wrapupRequired = state === 'wrapUp' && !participants[agentId].isWrappedUp;
-      this.setWrapupRequired(wrapupRequired);
+      console.info('Adhwaith', task.data.wrapUpRequired);
+      this.setWrapupRequired(task.data.wrapUpRequired);
 
-      if (!wrapupRequired) {
+      if (!task.data.wrapUpRequired) {
         this.setState({
           reset: true,
         });
