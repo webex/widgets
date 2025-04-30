@@ -1,3 +1,24 @@
+# [1.28.0-ccwidgets.50](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.49...v1.28.0-ccwidgets.50) (2025-04-30)
+
+
+### Bug Fixes
+
+* **widgets:** fixed-wrapup-issue ([#442](https://github.com/webex/widgets/issues/442)) ([0eab5c3](https://github.com/webex/widgets/commit/0eab5c33e56b420b3a4ee2f9ebd2b92044af721e))
+
+# [1.28.0-ccwidgets.49](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.48...v1.28.0-ccwidgets.49) (2025-04-28)
+
+
+### Bug Fixes
+
+* **profile:** upgrading sdk version to latest to pull multimedia profile changes ([#440](https://github.com/webex/widgets/issues/440)) ([66043c0](https://github.com/webex/widgets/commit/66043c0729a06b5125536867fde034f281aca91e))
+
+# [1.28.0-ccwidgets.48](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.47...v1.28.0-ccwidgets.48) (2025-04-28)
+
+
+### Features
+
+* **station-login:** Update Station Login UI to Match Figma ([#433](https://github.com/webex/widgets/issues/433)) ([da133f4](https://github.com/webex/widgets/commit/da133f49136233f8994900b85ac135f78ffba2c5))
+
 # [1.28.0-ccwidgets.47](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.46...v1.28.0-ccwidgets.47) (2025-04-25)
 
 
