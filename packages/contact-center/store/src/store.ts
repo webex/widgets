@@ -14,6 +14,8 @@ import {
 } from './store.types';
 import {ITask} from '@webex/plugin-cc';
 
+import {getFeatureFlags} from './util';
+
 class Store implements IStore {
   private static instance: Store;
   teams: Team[] = [];
@@ -28,8 +30,8 @@ class Store implements IStore {
   currentTask: ITask = null;
   isAgentLoggedIn = false;
   deviceType: string = '';
+  taskList: Record<string, ITask> = {};
   dialNumber: string = '';
-  taskList: ITask[] = [];
   wrapupRequired: boolean = false;
   currentState: string = '';
   customState: ICustomState = null;
@@ -44,6 +46,7 @@ class Store implements IStore {
   showMultipleLoginAlert: boolean = false;
   callControlAudio: MediaStream | null = null;
   consultOfferReceived: boolean = false;
+  featureFlags: {[key: string]: boolean} = {};
   isEndConsultEnabled: boolean = false;
   allowConsultToQueue: boolean = false;
 
@@ -75,6 +78,7 @@ class Store implements IStore {
     return this.cc
       .register()
       .then((response: Profile) => {
+        this.featureFlags = getFeatureFlags(response);
         this.teams = response.teams;
         this.loginOptions = response.webRtcEnabled
           ? response.loginVoiceOptions

@@ -68,6 +68,10 @@ export interface TaskProps {
   declineTask: (task: ITask) => void;
 
   /**
+   * Function to handle task selection
+   */
+  taskSelected: (task: ITask) => void;
+  /**
    * Flag to determine if the user is logged in with a browser option
    */
   isBrowser: boolean;
@@ -90,7 +94,7 @@ export interface TaskProps {
   /**
    * List of tasks
    */
-  taskList: ITask[];
+  taskList: Record<string, ITask>;
 
   /**
    * The logger instance from SDK
@@ -102,7 +106,7 @@ export type IncomingTaskComponentProps = Pick<TaskProps, 'incomingTask' | 'isBro
 
 export type TaskListComponentProps = Pick<
   TaskProps,
-  'currentTask' | 'taskList' | 'isBrowser' | 'acceptTask' | 'declineTask'
+  'currentTask' | 'taskList' | 'isBrowser' | 'acceptTask' | 'declineTask' | 'taskSelected'
 >;
 
 /**
@@ -286,6 +290,11 @@ export interface ControlProps {
   holdTime: number;
 
   /**
+   * Feature flags for the task.
+   */
+  featureFlags: {[key: string]: boolean};
+
+  /**
    * Custom CSS ClassName for CallControlCAD component.
    */
   callControlClassName?: string;
@@ -360,6 +369,8 @@ export type CallControlComponentProps = Pick<
   | 'consultAgentId'
   | 'setConsultAgentId'
   | 'holdTime'
+  | 'deviceType'
+  | 'featureFlags'
   | 'callControlClassName'
   | 'callControlConsultClassName'
   | 'startTimestamp'

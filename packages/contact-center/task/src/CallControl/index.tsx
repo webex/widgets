@@ -17,6 +17,8 @@ const CallControl: React.FunctionComponent<CallControlProps> = observer(({onHold
     consultAccepted,
     consultStartTimeStamp,
     callControlAudio,
+    deviceType,
+    featureFlags,
     isEndConsultEnabled,
     allowConsultToQueue,
   } = store;
@@ -30,6 +32,8 @@ const CallControl: React.FunctionComponent<CallControlProps> = observer(({onHold
     consultAccepted,
     consultStartTimeStamp,
     callControlAudio,
+    deviceType,
+    featureFlags,
     isEndConsultEnabled,
     allowConsultToQueue,
   };
