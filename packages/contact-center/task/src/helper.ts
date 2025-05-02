@@ -17,55 +17,32 @@ export const useTaskList = (props: UseTaskListProps) => {
   };
 
   useEffect(() => {
-    if (!taskList || taskList.length === 0) return;
-    let taskAssignCallback, taskRejectCallback;
-
-    taskList.forEach((task) => {
-      const taskId = task?.data.interactionId;
-      if (!taskId) return;
-
-      taskAssignCallback = () => {
-        if (onTaskAccepted) onTaskAccepted(task);
-      };
-
-      taskRejectCallback = () => {
-        if (onTaskDeclined) onTaskDeclined(task);
-      };
-
-      store.setTaskCallback(TASK_EVENTS.TASK_ASSIGNED, taskAssignCallback, taskId);
-      store.setTaskCallback(TASK_EVENTS.TASK_REJECT, taskRejectCallback, taskId);
+    store.setTaskAssigned(function (task) {
+      if (onTaskAccepted) onTaskAccepted(task);
     });
 
-    return () => {
-      taskList.forEach((task) => {
-        const taskId = task?.data.interactionId;
-        if (!taskId) return;
-
-        store.removeTaskCallback(TASK_EVENTS.TASK_ASSIGNED, taskAssignCallback, taskId);
-        store.removeTaskCallback(TASK_EVENTS.TASK_REJECT, taskRejectCallback, taskId);
-      });
-    };
-  }, [taskList]);
+    store.setTaskRejected(function (task, reason) {
+      console.log('Task rejected:', task, reason);
+      if (onTaskDeclined) onTaskDeclined(task);
+    });
+  });
 
   const acceptTask = (task: ITask) => {
-    const taskId = task?.data.interactionId;
-    if (!taskId) return;
-
-    task.accept(taskId).catch((error: Error) => {
+    task.accept().catch((error: Error) => {
       logError(`Error accepting task: ${error}`, 'acceptTask');
     });
   };
 
   const declineTask = (task: ITask) => {
-    const taskId = task?.data.interactionId;
-    if (!taskId) return;
-
-    task.decline(taskId).catch((error: Error) => {
+    task.decline().catch((error: Error) => {
       logError(`Error declining task: ${error}`, 'declineTask');
     });
   };
+  const taskSelected = (task: ITask) => {
+    store.setCurrentTask(task);
+  };
 
-  return {taskList, acceptTask, declineTask, isBrowser};
+  return {taskList, acceptTask, declineTask, taskSelected, isBrowser};
 };
 
 export const useIncomingTask = (props: UseTaskProps) => {
