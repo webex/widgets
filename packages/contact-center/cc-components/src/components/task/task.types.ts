@@ -1,4 +1,12 @@
-import {ILogger, ITask, IContactCenter, WrapupCodes, BuddyDetails, DestinationType} from '@webex/cc-store';
+import {
+  ILogger,
+  ITask,
+  IContactCenter,
+  WrapupCodes,
+  BuddyDetails,
+  DestinationType,
+  ContactServiceQueue,
+} from '@webex/cc-store';
 
 /**
  * Interface representing the TaskProps of a user.
@@ -281,6 +289,51 @@ export interface ControlProps {
    * Feature flags for the task.
    */
   featureFlags: {[key: string]: boolean};
+
+  /**
+   * Custom CSS ClassName for CallControlCAD component.
+   */
+  callControlClassName?: string;
+
+  /**
+   * Custom CSS ClassName for CallControlConsult component.
+   */
+  callControlConsultClassName?: string;
+
+  /**
+   * Start time of the call.
+   */
+  startTimestamp?: number;
+
+  /**
+   * List of contact queues available for consult
+   */
+  queues: ContactServiceQueue[];
+
+  /**
+   * Function to load contact service queues
+   */
+  loadQueues: () => Promise<void>;
+
+  /**
+   * Flag to determine if the end consult button is enabled
+   */
+  isEndConsultEnabled: boolean;
+
+  /**
+   * Flag to determine if the consulting to queue is enabled for the agent
+   */
+  allowConsultToQueue: boolean;
+
+  /**
+   * Function to set the last target type
+   */
+  lastTargetType: 'queue' | 'agent';
+
+  /**
+   * Function to set the last target type
+   */
+  setLastTargetType: (targetType: 'queue' | 'agent') => void;
 }
 
 export type CallControlComponentProps = Pick<
@@ -314,6 +367,15 @@ export type CallControlComponentProps = Pick<
   | 'holdTime'
   | 'deviceType'
   | 'featureFlags'
+  | 'callControlClassName'
+  | 'callControlConsultClassName'
+  | 'startTimestamp'
+  | 'queues'
+  | 'loadQueues'
+  | 'isEndConsultEnabled'
+  | 'allowConsultToQueue'
+  | 'lastTargetType'
+  | 'setLastTargetType'
 >;
 
 /**
@@ -355,8 +417,11 @@ export interface ConsultTransferListComponentProps {
 export interface ConsultTransferPopoverComponentProps {
   heading: string;
   buttonIcon: string;
-  buddyAgents: Array<{agentId: string; agentName: string; dn: string}>;
+  buddyAgents: BuddyDetails[];
+  queues?: ContactServiceQueue[];
   onAgentSelect: (agentId: string, agentName: string) => void;
+  onQueueSelect: (queueId: string, queueName: string) => void;
+  allowConsultToQueue: boolean;
 }
 
 /**
@@ -368,5 +433,13 @@ export interface CallControlConsultComponentsProps {
   onTransfer?: () => void;
   endConsultCall: () => void;
   consultCompleted: boolean;
-  showTransfer: boolean;
+  isAgentBeingConsulted: boolean;
+  isEndConsultEnabled: boolean;
 }
+
+/**
+ * Type representing the possible menu types in call control.
+ */
+export type CallControlMenuType = 'Consult' | 'Transfer';
+
+export {DestinationType};

@@ -1,5 +1,14 @@
-import {AgentLogin, IContactCenter, Profile, Team, LogContext, BuddyDetails, DestinationType} from '@webex/plugin-cc';
-import {ITask} from '@webex/plugin-cc';
+import {
+  AgentLogin,
+  IContactCenter,
+  Profile,
+  Team,
+  LogContext,
+  BuddyDetails,
+  DestinationType,
+  ContactServiceQueue,
+  ITask,
+} from '@webex/plugin-cc';
 
 type ILogger = {
   log: (message: string, context?: LogContext) => void;
@@ -42,6 +51,7 @@ interface IStore {
   taskList: ITask[];
   isAgentLoggedIn: boolean;
   deviceType: string;
+  dialNumber: string;
   wrapupRequired: boolean;
   currentState: string;
   lastStateChangeTimestamp?: number;
@@ -52,9 +62,13 @@ interface IStore {
   consultCompleted: boolean;
   consultInitiated: boolean;
   consultAccepted: boolean;
+  isQueueConsultInProgress: boolean;
+  currentConsultQueueId: string;
   consultStartTimeStamp?: number;
   callControlAudio: MediaStream | null;
   consultOfferReceived: boolean;
+  isEndConsultEnabled: boolean;
+  allowConsultToQueue: boolean;
   init(params: InitParams, callback: (ccSDK: IContactCenter) => void): Promise<void>;
   registerCC(webex?: WithWebex['webex']): Promise<void>;
 }
@@ -66,6 +80,7 @@ interface IStoreWrapper extends IStore {
   setTaskList(taskList: ITask[]): void;
   setIncomingTask(task: ITask): void;
   setDeviceType(option: string): void;
+  setDialNumber(input: string): void;
   setCurrentState(state: string): void;
   setLastStateChangeTimestamp(timestamp: number): void;
   setLastIdleCodeChangeTimestamp(timestamp: number): void;
@@ -101,6 +116,7 @@ enum TASK_EVENTS {
   TASK_REJECT = 'task:rejected',
   TASK_HYDRATE = 'task:hydrate',
   TASK_CONSULTING = 'task:consulting',
+  TASK_CONSULT_QUEUE_CANCELLED = 'task:consultQueueCancelled',
   AGENT_CONTACT_ASSIGNED = 'AgentContactAssigned',
   CONTACT_RECORDING_PAUSED = 'ContactRecordingPaused',
   CONTACT_RECORDING_RESUMED = 'ContactRecordingResumed',
@@ -149,6 +165,7 @@ export type {
   ICustomState,
   DestinationType,
   BuddyDetails,
+  ContactServiceQueue,
 };
 
 export {CC_EVENTS, TASK_EVENTS, ENGAGED_LABEL, ENGAGED_USERNAME};

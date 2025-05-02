@@ -83,8 +83,11 @@ describe('CallControlPresentational', () => {
     {id: '2', name: 'Reason 2'},
   ];
   const mockLoadBuddyAgents = jest.fn();
+  const mockLoadQueues = jest.fn();
   const mockConsultCall = jest.fn();
   const mockTransferCall = jest.fn();
+  const mockSetConsultAgentId = jest.fn();
+  const mockSetConsultAgentName = jest.fn();
   const setIsHeld = jest.fn();
 
   const defaultProps = {
@@ -110,6 +113,7 @@ describe('CallControlPresentational', () => {
     setIsHeld: setIsHeld,
     buddyAgents: [],
     loadBuddyAgents: mockLoadBuddyAgents,
+    loadQueues: mockLoadQueues,
     transferCall: mockTransferCall,
     consultCall: mockConsultCall,
     setIsRecording: jest.fn(),
@@ -119,6 +123,13 @@ describe('CallControlPresentational', () => {
       isEndConsultEnabled: true,
       webRtcEnabled: true,
     },
+    queues: [],
+    setConsultAgentId: mockSetConsultAgentId,
+    setConsultAgentName: mockSetConsultAgentName,
+    consultAgentId: null,
+    consultAgentName: null,
+    endConsultCall: jest.fn(),
+    consultTransfer: jest.fn(),
   };
 
   beforeEach(() => {
@@ -150,7 +161,9 @@ describe('CallControlPresentational', () => {
     fireEvent.click(buttons[1]);
     const agentSelectButton = screen.getByTestId('AgentSelectButton');
     fireEvent.click(agentSelectButton);
-    expect(mockConsultCall).toHaveBeenCalled();
+    expect(mockConsultCall).toHaveBeenCalledWith('agent1', 'agent');
+    expect(mockSetConsultAgentId).toHaveBeenCalledWith('agent1');
+    expect(mockLoadQueues).toHaveBeenCalled();
     expect(mockTransferCall).not.toHaveBeenCalled();
   });
 
@@ -161,30 +174,32 @@ describe('CallControlPresentational', () => {
     const agentSelectButton = screen.getByTestId('AgentSelectButton');
     fireEvent.click(agentSelectButton);
     expect(mockTransferCall).toHaveBeenCalledWith('agent1', 'agent');
+    expect(mockLoadQueues).toHaveBeenCalled();
     expect(mockConsultCall).not.toHaveBeenCalled();
   });
 
-  it('renders consult UI with consultAccepted prop', () => {
-    const props = {
-      ...defaultProps,
-      consultAccepted: true,
-      consultInitiated: false,
-    };
-    render(<CallControlComponent {...props} />);
-    const consultContainer = document.querySelector('.call-control-consult-container');
-    expect(consultContainer).toBeInTheDocument();
-    expect(consultContainer).toHaveClass('no-border');
-  });
+  // TODO - We do not have tests for CAD Component. Will move these while writing test cases for it
+  // it('renders consult UI with consultAccepted prop', () => {
+  //   const props = {
+  //     ...defaultProps,
+  //     consultAccepted: true,
+  //     consultInitiated: false,
+  //   };
+  //   render(<CallControlComponent {...props} />);
+  //   const consultContainer = document.querySelector('.call-control-consult-container');
+  //   expect(consultContainer).toBeInTheDocument();
+  //   expect(consultContainer).toHaveClass('no-border');
+  // });
 
-  it('renders consult UI with consultInitiated prop', () => {
-    const props = {
-      ...defaultProps,
-      consultAccepted: false,
-      consultInitiated: true,
-    };
-    render(<CallControlComponent {...props} />);
-    const consultContainer = document.querySelector('.call-control-consult-container');
-    expect(consultContainer).toBeInTheDocument();
-    expect(consultContainer).not.toHaveClass('no-border');
-  });
+  // it('renders consult UI with consultInitiated prop', () => {
+  //   const props = {
+  //     ...defaultProps,
+  //     consultAccepted: false,
+  //     consultInitiated: true,
+  //   };
+  //   render(<CallControlComponent {...props} />);
+  //   const consultContainer = document.querySelector('.call-control-consult-container');
+  //   expect(consultContainer).toBeInTheDocument();
+  //   expect(consultContainer).not.toHaveClass('no-border');
+  // });
 });

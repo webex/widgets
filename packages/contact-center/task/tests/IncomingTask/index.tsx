@@ -15,6 +15,7 @@ jest.mock('@webex/cc-components', () => {
 jest.mock('@webex/cc-store', () => ({
   cc: {},
   deviceType: 'BROWSER',
+  dialNumber: '12345',
 }));
 
 const onAcceptedCb = jest.fn();
