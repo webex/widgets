@@ -1,7 +1,6 @@
 import {useEffect, useCallback, useState, useRef} from 'react';
 import {ITask} from '@webex/plugin-cc';
-import {useCallControlProps, UseTaskListProps, UseTaskProps, Participant} from './task.types';
-import {useOutdialCallProps} from '@webex/cc-components';
+import {useCallControlProps, UseTaskListProps, UseTaskProps, Participant, useOutdialCallProps} from './task.types';
 import store, {TASK_EVENTS, BuddyDetails, DestinationType, ContactServiceQueue} from '@webex/cc-store';
 
 // Hook for managing the task list
