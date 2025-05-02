@@ -32,7 +32,6 @@ class Store implements IStore {
   deviceType: string = '';
   taskList: Record<string, ITask> = {};
   dialNumber: string = '';
-  wrapupRequired: boolean = false;
   currentState: string = '';
   customState: ICustomState = null;
   consultCompleted = false;

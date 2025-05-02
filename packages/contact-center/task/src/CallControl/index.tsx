@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {observer} from 'mobx-react-lite';
 
 import store from '@webex/cc-store';
@@ -11,7 +11,6 @@ const CallControl: React.FunctionComponent<CallControlProps> = observer(({onHold
     logger,
     currentTask,
     wrapupCodes,
-    wrapupRequired,
     consultInitiated,
     consultCompleted,
     consultAccepted,
@@ -22,22 +21,20 @@ const CallControl: React.FunctionComponent<CallControlProps> = observer(({onHold
     isEndConsultEnabled,
     allowConsultToQueue,
   } = store;
+  useEffect(() => {}, [currentTask?.data?.wrapUpRequired]);
 
   const result = {
-    ...useCallControl({currentTask, onHoldResume, onEnd, onWrapUp, logger, consultInitiated}),
-    wrapupRequired,
+    ...useCallControl({currentTask, onHoldResume, onEnd, onWrapUp, logger, consultInitiated, deviceType, featureFlags}),
     wrapupCodes,
     consultInitiated,
     consultCompleted,
     consultAccepted,
     consultStartTimeStamp,
     callControlAudio,
-    deviceType,
-    featureFlags,
     isEndConsultEnabled,
     allowConsultToQueue,
   };
-
+  console.log('CallControl result', result);
   return <CallControlComponent {...result} />;
 });
 

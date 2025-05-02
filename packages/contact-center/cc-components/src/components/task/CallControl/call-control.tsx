@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 
 import {CallControlComponentProps, DestinationType, CallControlMenuType} from '../task.types';
 import './call-control.styles.scss';
@@ -6,7 +6,6 @@ import {PopoverNext, SelectNext, TooltipNext, Text, ButtonCircle, ButtonPill} fr
 import {Item} from '@react-stately/collections';
 import {Icon} from '@momentum-design/components/dist/react';
 import ConsultTransferPopoverComponent from './CallControlCustom/consult-transfer-popover';
-import {getControlsVisibility} from '../../../utils/task-util';
 
 function CallControlComponent(props: CallControlComponentProps) {
   const [selectedWrapupReason, setSelectedWrapupReason] = useState<string | null>(null);
@@ -21,7 +20,6 @@ function CallControlComponent(props: CallControlComponentProps) {
     endCall,
     wrapupCall,
     wrapupCodes,
-    wrapupRequired,
     isHeld,
     setIsHeld,
     isRecording,
@@ -37,16 +35,10 @@ function CallControlComponent(props: CallControlComponentProps) {
     callControlAudio,
     setConsultAgentName,
     setConsultAgentId,
-    deviceType,
-    featureFlags,
     allowConsultToQueue,
     setLastTargetType,
+    controlVisibility,
   } = props;
-
-  const visibleCtrl = useMemo(
-    () => getControlsVisibility(deviceType, featureFlags, currentTask),
-    [deviceType, featureFlags, currentTask]
-  );
 
   useEffect(() => {
     if (!currentTask || !currentTask.data || !currentTask.data.interaction) return;
@@ -119,7 +111,7 @@ function CallControlComponent(props: CallControlComponentProps) {
       tooltip: isHeld ? 'Resume the call' : 'Hold the call',
       className: 'call-control-button',
       disabled: false,
-      isVisible: visibleCtrl.holdResume,
+      isVisible: controlVisibility.holdResume,
     },
     {
       id: 'consult',
@@ -128,7 +120,7 @@ function CallControlComponent(props: CallControlComponentProps) {
       className: 'call-control-button',
       disabled: false,
       menuType: 'Consult',
-      isVisible: visibleCtrl.consult,
+      isVisible: controlVisibility.consult,
     },
     {
       id: 'transfer',
@@ -137,7 +129,7 @@ function CallControlComponent(props: CallControlComponentProps) {
       className: 'call-control-button',
       disabled: false,
       menuType: 'Transfer',
-      isVisible: visibleCtrl.transfer,
+      isVisible: controlVisibility.transfer,
     },
     {
       id: 'record',
@@ -146,7 +138,7 @@ function CallControlComponent(props: CallControlComponentProps) {
       tooltip: isRecording ? 'Pause Recording' : 'Resume Recording',
       className: 'call-control-button',
       disabled: false,
-      isVisible: visibleCtrl.pauseResumeRecording,
+      isVisible: controlVisibility.pauseResumeRecording,
     },
     {
       id: 'end',
@@ -155,7 +147,7 @@ function CallControlComponent(props: CallControlComponentProps) {
       tooltip: 'End call',
       className: 'call-control-button-cancel',
       disabled: isHeld,
-      isVisible: visibleCtrl.end,
+      isVisible: controlVisibility.end,
     },
   ];
 
@@ -177,7 +169,7 @@ function CallControlComponent(props: CallControlComponentProps) {
         autoPlay
       ></audio>
       <div className="call-control-container" data-testid="call-control-container">
-        {!consultAccepted && !wrapupRequired && (
+        {!consultAccepted && !controlVisibility.wrapup && (
           <div className="button-group">
             {filteredButtons.map((button, index) => {
               if (!button.isVisible) return null;
@@ -273,7 +265,7 @@ function CallControlComponent(props: CallControlComponentProps) {
             })}
           </div>
         )}
-        {wrapupRequired && visibleCtrl.wrapup && (
+        {controlVisibility.wrapup && (
           <div className="wrapup-group">
             <PopoverNext
               color="primary"

@@ -338,13 +338,26 @@ export interface ControlProps {
    * Function to set the last target type
    */
   setLastTargetType: (targetType: 'queue' | 'agent') => void;
+
+  controlVisibility: {
+    accept: boolean;
+    decline: boolean;
+    end: boolean;
+    muteUnmute: boolean;
+    holdResume: boolean;
+    consult: boolean;
+    transfer: boolean;
+    conference: boolean;
+    wrapup: boolean;
+    pauseResumeRecording: boolean;
+    endConsult: boolean;
+  };
 }
 
 export type CallControlComponentProps = Pick<
   ControlProps,
   | 'currentTask'
   | 'wrapupCodes'
-  | 'wrapupRequired'
   | 'toggleHold'
   | 'toggleRecording'
   | 'endCall'
@@ -369,8 +382,6 @@ export type CallControlComponentProps = Pick<
   | 'consultAgentId'
   | 'setConsultAgentId'
   | 'holdTime'
-  | 'deviceType'
-  | 'featureFlags'
   | 'callControlClassName'
   | 'callControlConsultClassName'
   | 'startTimestamp'
@@ -380,6 +391,7 @@ export type CallControlComponentProps = Pick<
   | 'allowConsultToQueue'
   | 'lastTargetType'
   | 'setLastTargetType'
+  | 'controlVisibility'
 >;
 
 /**

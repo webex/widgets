@@ -109,7 +109,6 @@ describe('CallControlPresentational', () => {
     endCall: mockEndCall,
     wrapupCall: mockWrapupCall,
     wrapupCodes: mockWrapupCodes,
-    wrapupRequired: false,
     setIsHeld: setIsHeld,
     buddyAgents: [],
     loadBuddyAgents: mockLoadBuddyAgents,

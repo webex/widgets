@@ -52,7 +52,6 @@ interface IStore {
   isAgentLoggedIn: boolean;
   deviceType: string;
   dialNumber: string;
-  wrapupRequired: boolean;
   currentState: string;
   lastStateChangeTimestamp?: number;
   lastIdleCodeChangeTimestamp?: number;
@@ -76,7 +75,6 @@ interface IStore {
 interface IStoreWrapper extends IStore {
   store: IStore;
   setCurrentTask(task: ITask): void;
-  setWrapupRequired(value: boolean): void;
   setTaskList(): void;
   setIncomingTask(task: ITask): void;
   setDeviceType(option: string): void;

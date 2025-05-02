@@ -77,10 +77,6 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.incomingTask;
   }
 
-  get wrapupRequired() {
-    return this.store.wrapupRequired;
-  }
-
   get currentState() {
     return this.store.currentState;
   }
@@ -184,10 +180,6 @@ class StoreWrapper implements IStoreWrapper {
     this.store.isAgentLoggedIn = value;
   };
 
-  setWrapupRequired = (value: boolean): void => {
-    this.store.wrapupRequired = value;
-  };
-
   setCurrentTask = (task: ITask): void => {
     runInAction(() => {
       this.store.currentTask = task;
@@ -199,7 +191,16 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   setTaskList = (): void => {
-    this.store.taskList = this.store.cc.taskManager.getAllTasks();
+    runInAction(() => {
+      this.store.taskList = this.store.cc.taskManager.getAllTasks();
+    });
+    if (this.currentTask) {
+      console.log('Current task1:', this.currentTask);
+      this.setCurrentTask(this.taskList[this.currentTask.data.interactionId]);
+    } else if (this.store.taskList.length > 0) {
+      console.log('Current task2:', this.currentTask);
+      this.setCurrentTask(this.store.taskList[Object.keys(this.store.taskList)[0]]);
+    }
   };
 
   setWrapupCodes = (wrapupCodes: IWrapupCode[]): void => {
@@ -321,8 +322,6 @@ class StoreWrapper implements IStoreWrapper {
     }
 
     runInAction(() => {
-      this.setTaskList();
-      this.setWrapupRequired(false);
       this.setConsultAccepted(false);
       this.setConsultInitiated(false);
       this.setConsultCompleted(false);
@@ -338,19 +337,13 @@ class StoreWrapper implements IStoreWrapper {
       this.setState({
         reset: true,
       });
+      this.setTaskList();
     });
   };
 
-  handleTaskEnd = (event) => {
-    // If the call is ended by agent we get the task object in event.data
-    // If the call is ended by customer we get the task object directly
-
-    const task = event.data ? event.data : event;
-    if (task.wrapUpRequired) {
-      this.setWrapupRequired(true);
-    } else {
-      this.handleTaskRemove(task.interactionId);
-    }
+  handleTaskEnd = () => {
+    console.log('Task ended');
+    this.setTaskList();
   };
 
   handleTaskAssigned = (event) => {
@@ -375,9 +368,7 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   handleTaskWrapUp = (event) => {
-    const task = event;
-    this.setWrapupRequired(false);
-    this.handleTaskRemove(task.interactionId);
+    this.handleTaskRemove(event);
   };
 
   handleTaskMedia = (track) => {
@@ -445,7 +436,7 @@ class StoreWrapper implements IStoreWrapper {
   handleIncomingTask = (event) => {
     const task: ITask = event;
     // Attach event listeners to the task
-    task.on(TASK_EVENTS.TASK_END, () => this.handleTaskEnd(task));
+    task.on(TASK_EVENTS.TASK_END, () => this.handleTaskEnd());
 
     // When we receive TASK_ASSIGNED the task was accepted by the agent and we need wrap up
     task.on(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
@@ -488,7 +479,7 @@ class StoreWrapper implements IStoreWrapper {
 
   handleTaskHydrate = (event) => {
     const task = event;
-    task.on(TASK_EVENTS.TASK_END, () => this.handleTaskEnd(task));
+    task.on(TASK_EVENTS.TASK_END, () => this.handleTaskEnd());
 
     // When we receive TASK_ASSIGNED the task was accepted by the agent and we need wrap up
     task.on(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
@@ -533,9 +524,6 @@ class StoreWrapper implements IStoreWrapper {
 
     // Update call control states
     if (isTerminated) {
-      // wrapup
-      this.setWrapupRequired(task.data.wrapUpRequired);
-
       if (!task.data.wrapUpRequired) {
         this.setState({
           reset: true,
@@ -584,7 +572,6 @@ class StoreWrapper implements IStoreWrapper {
       this.setIncomingTask(null);
       this.setCurrentTask(null);
       this.setTaskList();
-      this.setWrapupRequired(false);
       this.setLastStateChangeTimestamp(undefined);
       this.setLastIdleCodeChangeTimestamp(undefined);
       this.setShowMultipleLoginAlert(false);

@@ -61,7 +61,6 @@ jest.mock('../src/store', () => ({
     dialNumber: '12345',
     taskList: 'mockTaskList',
     incomingTask: 'mockIncomingTask',
-    wrapupRequired: 'mockWrapupRequired',
     currentState: 'mockCurrentState',
     lastStateChangeTimestamp: 'mockLastStateChangeTimestamp',
     lastIdleCodeChangeTimestamp: 'mockLastIdleCodeChangeTimestamp',
@@ -88,7 +87,6 @@ jest.mock('../src/store', () => ({
     setIncomingTask: jest.fn(),
     setCurrentTask: jest.fn(),
     setTaskList: jest.fn(),
-    setWrapupRequired: jest.fn(),
     setCurrentTheme: jest.fn(),
     setIsAgentLoggedIn: jest.fn(),
     registerCC: jest.fn(),
@@ -144,10 +142,6 @@ describe('storeEventsWrapper', () => {
 
     it('should proxy incomingTask', () => {
       expect(storeWrapper.incomingTask).toBe('mockIncomingTask');
-    });
-
-    it('should proxy wrapupRequired', () => {
-      expect(storeWrapper.wrapupRequired).toBe('mockWrapupRequired');
     });
 
     it('should proxy currentState', () => {
@@ -507,7 +501,6 @@ describe('storeEventsWrapper', () => {
       const setTaskListSpy = jest.spyOn(storeWrapper, 'setTaskList');
       const setCurrentTaskSpy = jest.spyOn(storeWrapper, 'setCurrentTask');
       const setIncomingTaskSpy = jest.spyOn(storeWrapper, 'setIncomingTask');
-      const setWrapupRequiredSpy = jest.spyOn(storeWrapper, 'setWrapupRequired');
 
       storeWrapper['store'].cc.taskManager.getAllTasks = jest
         .fn()
@@ -524,7 +517,6 @@ describe('storeEventsWrapper', () => {
       expect(setTaskListSpy).toHaveBeenCalledWith();
       expect(setCurrentTaskSpy).toHaveBeenCalledWith(null);
       expect(setIncomingTaskSpy).toHaveBeenCalledWith(null);
-      expect(setWrapupRequiredSpy).toHaveBeenCalledWith(false);
     });
 
     it('should handle task removal when no task is present', () => {
@@ -538,19 +530,15 @@ describe('storeEventsWrapper', () => {
       const setTaskListSpy = jest.spyOn(storeWrapper, 'setTaskList');
       const setCurrentTaskSpy = jest.spyOn(storeWrapper, 'setCurrentTask');
       const setIncomingTaskSpy = jest.spyOn(storeWrapper, 'setIncomingTask');
-      const setWrapupRequiredSpy = jest.spyOn(storeWrapper, 'setWrapupRequired');
 
       storeWrapper.handleTaskRemove(mockTask.data.interactionId);
 
       expect(setTaskListSpy).toHaveBeenCalledWith();
       expect(setCurrentTaskSpy).not.toHaveBeenCalledWith(null);
       expect(setIncomingTaskSpy).not.toHaveBeenCalledWith(null);
-      expect(setWrapupRequiredSpy).toHaveBeenCalledWith(false);
     });
 
     it('should handle task end', () => {
-      const setWrapupRequiredSpy = jest.spyOn(storeWrapper, 'setWrapupRequired');
-
       const mockTaskWithWrapup = {
         data: {
           interactionId: 'task1',
@@ -559,8 +547,7 @@ describe('storeEventsWrapper', () => {
       };
 
       storeWrapper.handleTaskEnd(mockTaskWithWrapup);
-      expect(setWrapupRequiredSpy).toHaveBeenCalledWith(true);
-      setWrapupRequiredSpy.mockClear();
+
       const mockTaskWithoutWrapup = {
         data: {
           interactionId: 'task2',
@@ -569,7 +556,6 @@ describe('storeEventsWrapper', () => {
       };
 
       storeWrapper.handleTaskEnd(mockTaskWithoutWrapup);
-      expect(setWrapupRequiredSpy).not.toHaveBeenCalledWith(true);
     });
 
     it('should set selected login option', () => {
@@ -725,7 +711,6 @@ describe('storeEventsWrapper', () => {
       });
 
       waitFor(() => {
-        expect(storeWrapper.setWrapupRequired).toHaveBeenCalledWith(true);
         expect(mockTask.off).not.toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function));
         expect(mockTask.off).not.toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));
       });
@@ -756,7 +741,6 @@ describe('storeEventsWrapper', () => {
 
       waitFor(() => {
         // The task is assigned to the agent
-        expect(storeWrapper.setWrapupRequired).toHaveBeenCalledWith(null);
         expect(storeWrapper.handleTaskRemove).toHaveBeenCalledWith(mockTask.data.interactionId);
       });
     });
@@ -775,7 +759,6 @@ describe('storeEventsWrapper', () => {
       const setTaskListSpy = jest.spyOn(storeWrapper, 'setTaskList');
       const setCurrentTaskSpy = jest.spyOn(storeWrapper, 'setCurrentTask');
       const setIncomingTaskSpy = jest.spyOn(storeWrapper, 'setIncomingTask');
-      const setWrapupRequiredSpy = jest.spyOn(storeWrapper, 'setWrapupRequired');
 
       storeWrapper['store'].cc.taskManager.getAllTasks = jest
         .fn()
@@ -791,26 +774,18 @@ describe('storeEventsWrapper', () => {
       expect(setTaskListSpy).toHaveBeenCalledWith();
       expect(setCurrentTaskSpy).toHaveBeenCalledWith(null);
       expect(setIncomingTaskSpy).toHaveBeenCalledWith(null);
-      expect(setWrapupRequiredSpy).toHaveBeenCalledWith(false);
     });
 
     it('should handle task end when call is not connected', () => {
-      const setWrapupRequiredSpy = jest.spyOn(storeWrapper, 'setWrapupRequired');
-      jest.spyOn(storeWrapper, 'setWrapupRequired');
-
       const taskNotConnectedNoWrapup = {
         data: {
           interactionId: 'task4',
           interaction: {
             state: 'new',
           },
-          wrapUpRequired: false,
         },
       };
       storeWrapper.handleTaskEnd(taskNotConnectedNoWrapup);
-      expect(setWrapupRequiredSpy).toHaveBeenCalledWith(false);
-
-      expect(storeWrapper.setWrapupRequired).toHaveBeenCalledWith(false);
     });
 
     it('should set selected login option', () => {
@@ -928,7 +903,6 @@ describe('storeEventsWrapper', () => {
     it('should handle hydrating the store with correct data', async () => {
       const setCurrentTaskSpy = jest.spyOn(storeWrapper, 'setCurrentTask');
       const setTaskListSpy = jest.spyOn(storeWrapper, 'setTaskList');
-      const setWrapupRequiredSpy = jest.spyOn(storeWrapper, 'setWrapupRequired');
       const handleTaskRemoveSpy = jest.spyOn(storeWrapper, 'handleTaskRemove');
 
       const cc = storeWrapper['store'].cc;
@@ -950,7 +924,6 @@ describe('storeEventsWrapper', () => {
             },
           },
           agentId: 'agent1',
-          wrapUpRequired: true,
         },
         on: jest.fn(),
         off: jest.fn(),
@@ -967,7 +940,6 @@ describe('storeEventsWrapper', () => {
 
       expect(setCurrentTaskSpy).toHaveBeenCalledWith(mockTask);
       expect(setTaskListSpy).toHaveBeenCalled();
-      expect(setWrapupRequiredSpy).toHaveBeenCalledWith(true);
 
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function));
@@ -979,7 +951,6 @@ describe('storeEventsWrapper', () => {
         mockWrapupCb(mockTask);
       });
 
-      expect(storeWrapper.setWrapupRequired).toHaveBeenCalledWith(false);
       expect(handleTaskRemoveSpy).toHaveBeenCalledWith(mockTask.data.interactionId);
     });
 
@@ -1077,7 +1048,6 @@ describe('storeEventsWrapper', () => {
     it('should handle hydrating the store with correct data', async () => {
       const setCurrentTaskSpy = jest.spyOn(storeWrapper, 'setCurrentTask');
       const setTaskListSpy = jest.spyOn(storeWrapper, 'setTaskList');
-      const setWrapupRequiredSpy = jest.spyOn(storeWrapper, 'setWrapupRequired');
 
       const cc = storeWrapper['store'].cc;
       storeWrapper['store'].init = jest.fn().mockReturnValue(storeWrapper.setupIncomingTaskHandler(cc));
@@ -1113,7 +1083,6 @@ describe('storeEventsWrapper', () => {
 
       expect(setCurrentTaskSpy).toHaveBeenCalledWith(mockTask);
       expect(setTaskListSpy).toHaveBeenCalled();
-      expect(setWrapupRequiredSpy).not.toHaveBeenCalledWith();
     });
 
     it('should remove event listeners on successful logout', async () => {

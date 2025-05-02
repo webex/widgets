@@ -1,8 +1,9 @@
-import {useEffect, useCallback, useState, useRef} from 'react';
+import {useEffect, useCallback, useState, useRef, useMemo} from 'react';
 import {ITask} from '@webex/plugin-cc';
 import {useCallControlProps, UseTaskListProps, UseTaskProps, Participant} from './task.types';
 import {useOutdialCallProps} from '@webex/cc-components';
 import store, {TASK_EVENTS, BuddyDetails, DestinationType, ContactServiceQueue} from '@webex/cc-store';
+import {getControlsVisibility} from './Utils/task-util';
 
 // Hook for managing the task list
 export const useTaskList = (props: UseTaskListProps) => {
@@ -101,7 +102,8 @@ export const useIncomingTask = (props: UseTaskProps) => {
 };
 
 export const useCallControl = (props: useCallControlProps) => {
-  const {currentTask, onHoldResume, onEnd, onWrapUp, logger, consultInitiated} = props;
+  console.log('useCallControl props', props);
+  const {currentTask, onHoldResume, onEnd, onWrapUp, logger, consultInitiated, deviceType, featureFlags} = props;
   const [isHeld, setIsHeld] = useState<boolean | undefined>(undefined);
   const [isRecording, setIsRecording] = useState(true);
   const [buddyAgents, setBuddyAgents] = useState<BuddyDetails[]>([]);
@@ -329,9 +331,15 @@ export const useCallControl = (props: useCallControlProps) => {
   };
 
   const wrapupCall = (wrapUpReason: string, auxCodeId: string) => {
-    currentTask.wrapup({wrapUpReason: wrapUpReason, auxCodeId: auxCodeId}).catch((error: Error) => {
-      logError(`Error wrapping up call: ${error}`, 'wrapupCall');
-    });
+    currentTask
+      .wrapup({wrapUpReason: wrapUpReason, auxCodeId: auxCodeId})
+      .then(() => {
+        store.setCurrentTask(null);
+        store.setTaskList();
+      })
+      .catch((error: Error) => {
+        logError(`Error wrapping up call: ${error}`, 'wrapupCall');
+      });
   };
 
   const transferCall = async (transferDestination: string, destinationType: DestinationType) => {
@@ -408,6 +416,11 @@ export const useCallControl = (props: useCallControlProps) => {
     }
   };
 
+  const controlVisibility = useMemo(
+    () => getControlsVisibility(deviceType, featureFlags, currentTask),
+    [deviceType, featureFlags, currentTask]
+  );
+
   return {
     currentTask,
     endCall,
@@ -434,6 +447,7 @@ export const useCallControl = (props: useCallControlProps) => {
     startTimestamp,
     lastTargetType,
     setLastTargetType,
+    controlVisibility,
   };
 };
 
