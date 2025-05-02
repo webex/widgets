@@ -102,7 +102,6 @@ export const useIncomingTask = (props: UseTaskProps) => {
 };
 
 export const useCallControl = (props: useCallControlProps) => {
-  console.log('useCallControl props', props);
   const {currentTask, onHoldResume, onEnd, onWrapUp, logger, consultInitiated, deviceType, featureFlags} = props;
   const [isHeld, setIsHeld] = useState<boolean | undefined>(undefined);
   const [isRecording, setIsRecording] = useState(true);
