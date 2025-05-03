@@ -190,12 +190,9 @@ class StoreWrapper implements IStoreWrapper {
 
   setCurrentTask = (task: ITask): void => {
     runInAction(() => {
-      console.log('Setting current task:', task);
-
       // Save data from the current task if it exists
       if (this.currentTask) {
-        console.log('Current task:', this.currentTask);
-        const interactionId = this.currentTask.data.interactionId;
+        const interactionId = this.currentTask?.data?.interactionId;
         this.setTaskData(interactionId, {
           consultCompleted: this.store.consultCompleted,
           consultInitiated: this.store.consultInitiated,
@@ -243,10 +240,8 @@ class StoreWrapper implements IStoreWrapper {
       this.store.taskList = this.store.cc.taskManager.getAllTasks();
     });
     if (this.currentTask) {
-      console.log('Current task1:', this.currentTask);
-      this.setCurrentTask(this.taskList[this.currentTask.data.interactionId]);
+      this.setCurrentTask(this.taskList[this.currentTask?.data?.interactionId]);
     } else if (this.store.taskList.length > 0) {
-      console.log('Current task2:', this.currentTask);
       this.setCurrentTask(this.store.taskList[Object.keys(this.store.taskList)[0]]);
     }
   };
@@ -379,7 +374,7 @@ class StoreWrapper implements IStoreWrapper {
         this.setCurrentTask(null);
       }
 
-      if (this.store.incomingTask?.data.interactionId === taskId) {
+      if (this.store.incomingTask?.data?.interactionId === taskId) {
         this.setIncomingTask(null);
       }
 
@@ -413,7 +408,7 @@ class StoreWrapper implements IStoreWrapper {
           consultOfferReceived: this.store.consultOfferReceived,
         });
       } else {
-        this.setTaskData(task.data.interactionId, {
+        this.setTaskData(task?.data?.interactionId, {
           consultCompleted: false,
           consultInitiated: false,
           consultAccepted: false,

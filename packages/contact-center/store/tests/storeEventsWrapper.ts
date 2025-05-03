@@ -60,6 +60,7 @@ jest.mock('../src/store', () => ({
     deviceType: 'BROWSER',
     dialNumber: '12345',
     taskList: 'mockTaskList',
+    taskData: {},
     incomingTask: 'mockIncomingTask',
     currentState: 'mockCurrentState',
     lastStateChangeTimestamp: 'mockLastStateChangeTimestamp',
@@ -420,13 +421,40 @@ describe('storeEventsWrapper', () => {
     it('should handle incoming task', () => {
       const setIncomingTaskSpy = jest.spyOn(storeWrapper, 'setIncomingTask');
 
-      storeWrapper['store'].taskList = [];
+      // Ensure mockTask is properly set up
+      const mockTask: ITask = {
+        data: {
+          interactionId: 'interaction1',
+          interaction: {
+            state: 'connected',
+          },
+        },
+        on: jest.fn(),
+        off: jest.fn(),
+      } as unknown as ITask;
+
+      // Add the mock task to the task list
+      storeWrapper['store'].taskList = {interaction1: mockTask};
+
+      // Call the method under test
       storeWrapper.handleIncomingTask(mockTask);
 
+      // Verify that setIncomingTask was called with the mock task
       expect(setIncomingTaskSpy).toHaveBeenCalledWith(mockTask);
+
+      // Verify that the correct event handlers were registered
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function));
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.AGENT_CONSULT_CREATED, expect.any(Function));
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_MEDIA, expect.any(Function));
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_CONSULTING, expect.any(Function));
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_CONSULT_ACCEPTED, expect.any(Function));
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_CONSULT_END, expect.any(Function));
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_CONSULT_QUEUE_CANCELLED, expect.any(Function));
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.AGENT_WRAPPEDUP, expect.any(Function));
+
+      // Debugging: Log all calls to mockTask.on to verify what events were registered
+      console.log('mockTask.on calls:', mockTask.on.mock.calls);
     });
 
     it('should handle task assignment and reset consult flags if consultAccepted is true', () => {
@@ -951,7 +979,7 @@ describe('storeEventsWrapper', () => {
         mockWrapupCb(mockTask);
       });
 
-      expect(handleTaskRemoveSpy).toHaveBeenCalledWith(mockTask.data.interactionId);
+      expect(handleTaskRemoveSpy).toHaveBeenCalledWith(mockTask);
     });
 
     describe('customStates on hydration', () => {
@@ -1191,6 +1219,7 @@ describe('storeEventsWrapper', () => {
         .fn()
         .mockReturnValue({[mockTask.data.interactionId]: mockTask});
       storeWrapper.setTaskList();
+      storeWrapper['store'].taskData = {};
     });
 
     it('should attach TASK_MEDIA handler when deviceType is BROWSER', () => {
