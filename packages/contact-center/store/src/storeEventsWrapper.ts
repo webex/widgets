@@ -354,7 +354,7 @@ class StoreWrapper implements IStoreWrapper {
     const taskToRemove = this.store.taskList[taskId];
     if (taskToRemove) {
       taskToRemove.off(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
-      taskToRemove.off(TASK_EVENTS.TASK_END, this.handleTaskEnd); // Pass the method reference
+      taskToRemove.off(TASK_EVENTS.TASK_END, this.handleTaskEnd);
       taskToRemove.off(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(taskToRemove, reason));
       taskToRemove.off(TASK_EVENTS.AGENT_WRAPPEDUP, this.handleTaskWrapUp);
       taskToRemove.off(TASK_EVENTS.TASK_CONSULTING, this.handleConsulting);

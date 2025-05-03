@@ -35,7 +35,9 @@ beforeAll(() => {
   store.store.cc = {
     ...store.store.cc, // Keep other properties if they exist
     taskManager: {
-      getAllTasks: jest.fn().mockReturnValue([taskMock]),
+      getAllTasks: jest.fn().mockReturnValue({
+        [taskMock.data.interactionId]: taskMock,
+      }),
     },
   };
 });

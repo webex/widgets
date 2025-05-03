@@ -5,7 +5,7 @@ import './styles.scss';
 
 const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (props) => {
   const {currentTask, taskList, acceptTask, declineTask, isBrowser, taskSelected} = props;
-  if (taskList.length <= 0) {
+  if (!taskList || Object.keys(taskList).length === 0) {
     return <></>; // hidden component
   }
   return (
