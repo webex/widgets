@@ -32,6 +32,11 @@ const logger = {
 // Override the wrapupCodes property before your tests run
 beforeAll(() => {
   store.setWrapupCodes([{id: '123', name: 'Wrap reason'}]);
+  store.store.featureFlags = {
+    isEndCallEnabled: true,
+    isEndConsultEnabled: true,
+    webRtcEnabled: true,
+  };
   store.store.cc = {
     ...store.store.cc, // Keep other properties if they exist
     taskManager: {
@@ -554,6 +559,8 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
       })
     );
 
@@ -576,6 +583,8 @@ describe('useCallControl', () => {
         onHoldResume: jest.fn(),
         onEnd: jest.fn(),
         onWrapUp: jest.fn(),
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
       })
     );
 
@@ -608,6 +617,8 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
       })
     );
 
@@ -628,6 +639,8 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
       })
     );
 
@@ -650,6 +663,8 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
       })
     );
 
@@ -671,6 +686,8 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
       })
     );
 
@@ -690,6 +707,8 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
       })
     );
 
@@ -711,6 +730,8 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
       })
     );
 
@@ -731,6 +752,8 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
       })
     );
 
@@ -758,6 +781,8 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
       })
     );
 
@@ -776,6 +801,8 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
       })
     );
     await waitFor(() => {
@@ -798,6 +825,8 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
       })
     );
 
@@ -821,6 +850,8 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
       })
     );
 
@@ -845,6 +876,8 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
       })
     );
     await waitFor(() => {
@@ -867,6 +900,8 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
       })
     );
     // Ensure no event handler is set
@@ -884,6 +919,8 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
       })
     );
     // Ensure no event handler is set
@@ -903,6 +940,8 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
       })
     );
     await act(async () => {
@@ -922,6 +961,8 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
       })
     );
     await act(async () => {
@@ -944,6 +985,8 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
       })
     );
     await act(async () => {
@@ -968,6 +1011,8 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
       })
     );
 
@@ -989,6 +1034,8 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
       })
     );
     await act(async () => {
@@ -1009,6 +1056,8 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
       })
     );
 
@@ -1029,6 +1078,8 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
       })
     );
     await act(async () => {
@@ -1050,6 +1101,8 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
       })
     );
 
@@ -1074,6 +1127,8 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
       })
     );
     await act(async () => {
@@ -1097,6 +1152,8 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
       })
     );
 
@@ -1157,6 +1214,8 @@ describe('useCallControl', () => {
         currentTask: taskWithParticipants,
         logger: mockLogger,
         consultInitiated: true,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
       })
     );
 
@@ -1218,6 +1277,8 @@ describe('useCallControl', () => {
         currentTask: taskWithParticipants,
         logger: mockLogger,
         consultInitiated: false,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
       })
     );
 
@@ -1272,6 +1333,8 @@ describe('useCallControl', () => {
         currentTask: taskWithoutConsultAgent,
         logger: mockLogger,
         consultInitiated: true,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
       });
       return hook;
     });
@@ -1303,6 +1366,8 @@ describe('useCallControl', () => {
       const hook = useCallControl({
         currentTask: taskWithNoInteraction,
         logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
       });
       // Set initial value
       return hook;
@@ -1320,6 +1385,8 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
       })
     );
 
@@ -1341,6 +1408,8 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
       })
     );
 
@@ -1372,6 +1441,8 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
       })
     );
 
@@ -1399,6 +1470,8 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
       })
     );
 
@@ -1430,6 +1503,8 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
       })
     );
 
@@ -1468,6 +1543,8 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
       })
     );
 
@@ -1490,6 +1567,8 @@ describe('useCallControl', () => {
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
         logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
       })
     );
 
@@ -1517,6 +1596,8 @@ describe('useCallControl', () => {
       useCallControl({
         currentTask: mockCurrentTask,
         logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
       })
     );
 
@@ -1542,6 +1623,8 @@ describe('useCallControl', () => {
       useCallControl({
         currentTask: mockCurrentTask,
         logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
       })
     );
 

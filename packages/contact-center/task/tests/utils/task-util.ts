@@ -13,6 +13,7 @@ describe('getControlsVisibility', () => {
         interaction: {
           mediaType: 'telephony',
         },
+        wrapUpRequired: true,
       },
     };
 
@@ -45,6 +46,7 @@ describe('getControlsVisibility', () => {
         interaction: {
           mediaType: 'telephony',
         },
+        wrapUpRequired: true,
       },
     };
 
@@ -77,6 +79,7 @@ describe('getControlsVisibility', () => {
         interaction: {
           mediaType: 'telephony',
         },
+        wrapUpRequired: true,
       },
     };
 
@@ -109,6 +112,7 @@ describe('getControlsVisibility', () => {
         interaction: {
           mediaType: 'telephony',
         },
+        wrapUpRequired: true,
       },
     };
 
@@ -141,6 +145,7 @@ describe('getControlsVisibility', () => {
         interaction: {
           mediaType: 'telephony',
         },
+        wrapUpRequired: true,
       },
     };
 
@@ -173,6 +178,7 @@ describe('getControlsVisibility', () => {
         interaction: {
           mediaType: 'telephony',
         },
+        wrapUpRequired: true,
       },
     };
 
@@ -205,6 +211,7 @@ describe('getControlsVisibility', () => {
         interaction: {
           mediaType: 'chat',
         },
+        wrapUpRequired: true,
       },
     };
 
@@ -249,7 +256,7 @@ describe('getControlsVisibility', () => {
       consult: false,
       transfer: true,
       conference: false,
-      wrapup: true,
+      wrapup: false,
       pauseResumeRecording: false,
       endConsult: false,
     };
