@@ -37,6 +37,16 @@ type IdleCode = {
   isDefault: boolean;
 };
 
+type TaskData = {
+  consultCompleted: boolean;
+  consultInitiated: boolean;
+  consultAccepted: boolean;
+  isQueueConsultInProgress: boolean;
+  currentConsultQueueId: string;
+  consultStartTimeStamp: number;
+  consultOfferReceived: boolean;
+};
+
 interface IStore {
   featureFlags: {[key: string]: boolean};
   teams: Team[];
@@ -49,6 +59,7 @@ interface IStore {
   currentTask: ITask;
   incomingTask: ITask;
   taskList: Record<string, ITask>;
+  taskData: Record<string, TaskData>;
   isAgentLoggedIn: boolean;
   deviceType: string;
   dialNumber: string;
@@ -164,6 +175,7 @@ export type {
   DestinationType,
   BuddyDetails,
   ContactServiceQueue,
+  TaskData,
 };
 
 export {CC_EVENTS, TASK_EVENTS, ENGAGED_LABEL, ENGAGED_USERNAME};

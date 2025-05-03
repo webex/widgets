@@ -11,6 +11,7 @@ import {
   ILogger,
   IWrapupCode,
   ICustomState,
+  TaskData,
 } from './store.types';
 import {ITask} from '@webex/plugin-cc';
 
@@ -48,6 +49,8 @@ class Store implements IStore {
   featureFlags: {[key: string]: boolean} = {};
   isEndConsultEnabled: boolean = false;
   allowConsultToQueue: boolean = false;
+
+  taskData: Record<string, TaskData> = {};
 
   constructor() {
     makeAutoObservable(this, {

@@ -15,6 +15,7 @@ import {
   ENGAGED_USERNAME,
   ContactServiceQueue,
   Profile,
+  TaskData,
 } from './store.types';
 import Store from './store';
 import {runInAction} from 'mobx';
@@ -140,6 +141,13 @@ class StoreWrapper implements IStoreWrapper {
   get allowConsultToQueue() {
     return this.store.allowConsultToQueue;
   }
+  get taskData() {
+    return this.store.taskData;
+  }
+
+  setTaskData = (taskId: string, data: TaskData): void => {
+    this.store.taskData[taskId] = data;
+  };
 
   setCurrentTheme = (theme: string): void => {
     this.store.currentTheme = theme;
@@ -182,7 +190,47 @@ class StoreWrapper implements IStoreWrapper {
 
   setCurrentTask = (task: ITask): void => {
     runInAction(() => {
-      this.store.currentTask = task;
+      console.log('Setting current task:', task);
+
+      // Save data from the current task if it exists
+      if (this.currentTask) {
+        console.log('Current task:', this.currentTask);
+        const interactionId = this.currentTask.data.interactionId;
+        this.setTaskData(interactionId, {
+          consultCompleted: this.store.consultCompleted,
+          consultInitiated: this.store.consultInitiated,
+          consultAccepted: this.store.consultAccepted,
+          isQueueConsultInProgress: this.store.isQueueConsultInProgress,
+          currentConsultQueueId: this.store.currentConsultQueueId,
+          consultStartTimeStamp: this.store.consultStartTimeStamp,
+          consultOfferReceived: this.store.consultOfferReceived,
+        });
+      }
+
+      // Update the current task
+      this.store.currentTask = task ? Object.assign(Object.create(Object.getPrototypeOf(task)), task) : null;
+
+      // Restore data for the new task if available
+      const currentTaskData = this.store.taskData[task?.data?.interactionId];
+      if (currentTaskData) {
+        const {
+          consultAccepted = false,
+          consultInitiated = false,
+          consultCompleted = false,
+          isQueueConsultInProgress = false,
+          currentConsultQueueId = null,
+          consultStartTimeStamp = null,
+          consultOfferReceived = false,
+        } = currentTaskData;
+
+        this.setConsultAccepted(consultAccepted);
+        this.setConsultInitiated(consultInitiated);
+        this.setConsultCompleted(consultCompleted);
+        this.setIsQueueConsultInProgress(isQueueConsultInProgress);
+        this.setCurrentConsultQueueId(currentConsultQueueId);
+        this.setConsultStartTimeStamp(consultStartTimeStamp);
+        this.setConsultOfferReceived(consultOfferReceived);
+      }
     });
   };
 
@@ -326,6 +374,7 @@ class StoreWrapper implements IStoreWrapper {
       this.setConsultInitiated(false);
       this.setConsultCompleted(false);
 
+      delete this.taskData[taskId];
       if (this.store.currentTask?.data.interactionId === taskId) {
         this.setCurrentTask(null);
       }
@@ -352,6 +401,28 @@ class StoreWrapper implements IStoreWrapper {
       this.onTaskAssigned(task);
     }
     runInAction(() => {
+      if (this.currentTask) {
+        console.log('Current task:', this.currentTask);
+        this.setTaskData(this.currentTask.data.interactionId, {
+          consultCompleted: this.store.consultCompleted,
+          consultInitiated: this.store.consultInitiated,
+          consultAccepted: this.store.consultAccepted,
+          isQueueConsultInProgress: this.store.isQueueConsultInProgress,
+          currentConsultQueueId: this.store.currentConsultQueueId,
+          consultStartTimeStamp: this.store.consultStartTimeStamp,
+          consultOfferReceived: this.store.consultOfferReceived,
+        });
+      } else {
+        this.setTaskData(task.data.interactionId, {
+          consultCompleted: false,
+          consultInitiated: false,
+          consultAccepted: false,
+          isQueueConsultInProgress: false,
+          currentConsultQueueId: '',
+          consultStartTimeStamp: null,
+          consultOfferReceived: false,
+        });
+      }
       if (this.consultAccepted) {
         this.setConsultAccepted(false);
         this.setConsultInitiated(false);
@@ -368,6 +439,7 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   handleTaskWrapUp = (event) => {
+    console.log('Task wrap up');
     this.handleTaskRemove(event);
   };
 
@@ -458,6 +530,7 @@ class StoreWrapper implements IStoreWrapper {
     task.on(TASK_EVENTS.TASK_CONSULT_END, this.handleConsultEnd);
 
     this.setIncomingTask(task);
+
     this.setTaskList();
   };
 
