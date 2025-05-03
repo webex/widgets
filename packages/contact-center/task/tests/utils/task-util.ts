@@ -1,5 +1,4 @@
-import {getControlsVisibility} from '../../src/utils/task-util';
-
+import {getControlsVisibility} from '../../src/Utils/task-util';
 describe('getControlsVisibility', () => {
   it('should show correct controls when station logis is BROWSER, all flags are enabled and media type is telehphony', () => {
     const deviceType = 'BROWSER';
