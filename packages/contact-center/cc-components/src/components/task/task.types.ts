@@ -70,7 +70,7 @@ export interface TaskProps {
   /**
    * Function to handle task selection
    */
-  taskSelected: (task: ITask) => void;
+  onTaskSelect: (task: ITask) => void;
   /**
    * Flag to determine if the user is logged in with a browser option
    */
@@ -106,7 +106,7 @@ export type IncomingTaskComponentProps = Pick<TaskProps, 'incomingTask' | 'isBro
 
 export type TaskListComponentProps = Pick<
   TaskProps,
-  'currentTask' | 'taskList' | 'isBrowser' | 'acceptTask' | 'declineTask' | 'taskSelected'
+  'currentTask' | 'taskList' | 'isBrowser' | 'acceptTask' | 'declineTask' | 'onTaskSelect'
 >;
 
 /**

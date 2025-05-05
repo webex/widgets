@@ -26,7 +26,7 @@ export const useTaskList = (props: UseTaskListProps) => {
       console.log('Task rejected:', task, reason);
       if (onTaskDeclined) onTaskDeclined(task);
     });
-  });
+  }, []);
 
   const acceptTask = (task: ITask) => {
     task.accept().catch((error: Error) => {
@@ -39,11 +39,11 @@ export const useTaskList = (props: UseTaskListProps) => {
       logError(`Error declining task: ${error}`, 'declineTask');
     });
   };
-  const taskSelected = (task: ITask) => {
+  const onTaskSelect = (task: ITask) => {
     store.setCurrentTask(task);
   };
 
-  return {taskList, acceptTask, declineTask, taskSelected, isBrowser};
+  return {taskList, acceptTask, declineTask, onTaskSelect, isBrowser};
 };
 
 export const useIncomingTask = (props: UseTaskProps) => {
@@ -330,15 +330,9 @@ export const useCallControl = (props: useCallControlProps) => {
   };
 
   const wrapupCall = (wrapUpReason: string, auxCodeId: string) => {
-    currentTask
-      .wrapup({wrapUpReason: wrapUpReason, auxCodeId: auxCodeId})
-      .then(() => {
-        store.setCurrentTask(null);
-        store.setTaskList();
-      })
-      .catch((error: Error) => {
-        logError(`Error wrapping up call: ${error}`, 'wrapupCall');
-      });
+    currentTask.wrapup({wrapUpReason: wrapUpReason, auxCodeId: auxCodeId}).catch((error: Error) => {
+      logError(`Error wrapping up call: ${error}`, 'wrapupCall');
+    });
   };
 
   const transferCall = async (transferDestination: string, destinationType: DestinationType) => {

@@ -235,7 +235,7 @@ class StoreWrapper implements IStoreWrapper {
     this.store.incomingTask = task;
   };
 
-  setTaskList = (): void => {
+  refreshTaskList = (): void => {
     runInAction(() => {
       this.store.taskList = this.store.cc.taskManager.getAllTasks();
     });
@@ -381,13 +381,12 @@ class StoreWrapper implements IStoreWrapper {
       this.setState({
         reset: true,
       });
-      this.setTaskList();
+      this.refreshTaskList();
     });
   };
 
   handleTaskEnd = () => {
-    console.log('Task ended');
-    this.setTaskList();
+    this.refreshTaskList();
   };
 
   handleTaskAssigned = (event) => {
@@ -397,7 +396,6 @@ class StoreWrapper implements IStoreWrapper {
     }
     runInAction(() => {
       if (this.currentTask) {
-        console.log('Current task:', this.currentTask);
         this.setTaskData(this.currentTask.data.interactionId, {
           consultCompleted: this.store.consultCompleted,
           consultInitiated: this.store.consultInitiated,
@@ -434,7 +432,6 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   handleTaskWrapUp = (event) => {
-    console.log('Task wrap up');
     this.handleTaskRemove(event);
   };
 
@@ -503,7 +500,7 @@ class StoreWrapper implements IStoreWrapper {
   handleIncomingTask = (event) => {
     const task: ITask = event;
     // Attach event listeners to the task
-    task.on(TASK_EVENTS.TASK_END, () => this.handleTaskEnd());
+    task.on(TASK_EVENTS.TASK_END, this.handleTaskEnd);
 
     // When we receive TASK_ASSIGNED the task was accepted by the agent and we need wrap up
     task.on(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
@@ -526,7 +523,7 @@ class StoreWrapper implements IStoreWrapper {
 
     this.setIncomingTask(task);
 
-    this.setTaskList();
+    this.refreshTaskList();
   };
 
   handleStateChange = (data) => {
@@ -547,7 +544,7 @@ class StoreWrapper implements IStoreWrapper {
 
   handleTaskHydrate = (event) => {
     const task = event;
-    task.on(TASK_EVENTS.TASK_END, () => this.handleTaskEnd());
+    task.on(TASK_EVENTS.TASK_END, this.handleTaskEnd);
 
     // When we receive TASK_ASSIGNED the task was accepted by the agent and we need wrap up
     task.on(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
@@ -568,7 +565,7 @@ class StoreWrapper implements IStoreWrapper {
       task.on(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
     }
 
-    this.setTaskList();
+    this.refreshTaskList();
 
     this.setCurrentTask(task);
     this.setIncomingTask(null);
@@ -639,7 +636,7 @@ class StoreWrapper implements IStoreWrapper {
       this.setDialNumber('');
       this.setIncomingTask(null);
       this.setCurrentTask(null);
-      this.setTaskList();
+      this.refreshTaskList();
       this.setLastStateChangeTimestamp(undefined);
       this.setLastIdleCodeChangeTimestamp(undefined);
       this.setShowMultipleLoginAlert(false);
@@ -657,7 +654,6 @@ class StoreWrapper implements IStoreWrapper {
     };
 
     const addEventListeners = () => {
-      console.log('Adding event listeners');
       ccSDK.on(TASK_EVENTS.TASK_HYDRATE, this.handleTaskHydrate);
       ccSDK.on(CC_EVENTS.AGENT_STATE_CHANGE, this.handleStateChange);
       ccSDK.on(TASK_EVENTS.TASK_INCOMING, this.handleIncomingTask);

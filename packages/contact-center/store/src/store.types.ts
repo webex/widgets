@@ -86,7 +86,7 @@ interface IStore {
 interface IStoreWrapper extends IStore {
   store: IStore;
   setCurrentTask(task: ITask): void;
-  setTaskList(): void;
+  refreshTaskList(): void;
   setIncomingTask(task: ITask): void;
   setDeviceType(option: string): void;
   setDialNumber(input: string): void;

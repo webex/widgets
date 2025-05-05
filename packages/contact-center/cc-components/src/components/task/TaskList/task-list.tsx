@@ -4,7 +4,7 @@ import Task from '../Task';
 import './styles.scss';
 
 const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (props) => {
-  const {currentTask, taskList, acceptTask, declineTask, isBrowser, taskSelected} = props;
+  const {currentTask, taskList, acceptTask, declineTask, isBrowser, onTaskSelect} = props;
   if (!taskList || Object.keys(taskList).length === 0) {
     return <></>; // hidden component
   }
@@ -35,9 +35,9 @@ const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (prop
             acceptTask={() => acceptTask(task)}
             declineTask={() => declineTask(task)}
             ronaTimeout={isIncomingTask ? ronaTimeout : null}
-            taskSelected={() => {
+            onTaskSelect={() => {
               if (currentTask?.data.interactionId !== task.data.interactionId) {
-                taskSelected(task);
+                onTaskSelect(task);
               }
             }}
             acceptText={acceptText}

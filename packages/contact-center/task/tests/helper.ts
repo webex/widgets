@@ -68,7 +68,7 @@ describe('useIncomingTask Hook', () => {
   });
 
   it('should setup event listeners for the incoming call', async () => {
-    store.setTaskList();
+    store.refreshTaskList();
     const onSpy = jest.spyOn(taskMock, 'on');
     const offSpy = jest.spyOn(taskMock, 'off');
     const setTaskCallbackSpy = jest.spyOn(store, 'setTaskCallback');
@@ -508,7 +508,7 @@ describe('useCallControl', () => {
   const mockOnWrapUp = jest.fn();
 
   beforeEach(() => {
-    store.setTaskList();
+    store.refreshTaskList();
     // Mock the MediaStreamTrack and MediaStream classes for the test environment
     global.MediaStreamTrack = jest.fn().mockImplementation(() => ({
       kind: 'audio', // Simulating an audio track
