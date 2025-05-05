@@ -17,7 +17,6 @@
     "build:src": "yarn run clean:dist && webpack",
     "build:watch": "webpack --watch",
     "test:unit": "jest --coverage",
-    "test:e2e": "playwright test",
     "test:styles": "eslint"
   },
   "dependencies": {
@@ -31,7 +30,6 @@
     "@babel/preset-react": "7.24.7",
     "@babel/preset-typescript": "7.25.9",
     "@eslint/js": "^9.20.0",
-    "@playwright/test": "^1.51.1",
     "@testing-library/dom": "10.4.0",
     "@testing-library/jest-dom": "6.6.2",
     "@testing-library/react": "16.0.1",

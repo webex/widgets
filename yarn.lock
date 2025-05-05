@@ -9406,7 +9406,6 @@ __metadata:
     "@babel/preset-react": "npm:7.24.7"
     "@babel/preset-typescript": "npm:7.25.9"
     "@eslint/js": "npm:^9.20.0"
-    "@playwright/test": "npm:^1.51.1"
     "@testing-library/dom": "npm:10.4.0"
     "@testing-library/jest-dom": "npm:6.6.2"
     "@testing-library/react": "npm:16.0.1"
@@ -34570,6 +34569,7 @@ __metadata:
   resolution: "webex-widgets@workspace:."
   dependencies:
     "@babel/preset-typescript": "npm:7.25.9"
+    "@playwright/test": "npm:^1.51.1"
     "@semantic-release/changelog": "npm:^6.0.3"
     "@semantic-release/exec": "npm:^6.0.3"
     "@semantic-release/git": "npm:^10.0.1"

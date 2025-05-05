@@ -74,7 +74,7 @@ test.describe('Login and User-State testing', () => {
     await page2.getByTestId('station-login-widget').waitFor({state: 'visible'});
 
     if (await page.getByTestId('login-button').isVisible()) {
-      await expect(page.getByTestId('login-button')).toContainText('Save & Continue');
+      await expect(page.getByTestId('login-button')).toContainText('Save & dont Continue');
     } else if (await page.getByTestId('logout-button').isVisible()) {
       await expect(page.getByTestId('logout-button')).toContainText(/Sign out\s*/i);
       await page.getByTestId('logout-button').click();
