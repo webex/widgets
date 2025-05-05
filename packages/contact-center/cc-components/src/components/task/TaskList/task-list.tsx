@@ -20,8 +20,10 @@ const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (prop
         const startTimeStamp = task.data.interaction.createdTimestamp;
         const isIncomingTask = taskState === 'new';
         const isTelephony = task.data.interaction.mediaType === 'telephony';
-        const acceptText = isIncomingTask ? (isTelephony && !isBrowser ? 'Ringing' : 'Accept') : undefined;
-        const declineText = isIncomingTask && isTelephony && isBrowser ? 'Decline' : undefined;
+        const acceptText =
+          isIncomingTask && !task.data.wrapUpRequired ? (isTelephony && !isBrowser ? 'Ringing' : 'Accept') : undefined;
+        const declineText =
+          isIncomingTask && !task.data.wrapUpRequired && isTelephony && isBrowser ? 'Decline' : undefined;
         return (
           <Task
             interactionId={task.data.interactionId}
@@ -36,7 +38,10 @@ const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (prop
             declineTask={() => declineTask(task)}
             ronaTimeout={isIncomingTask ? ronaTimeout : null}
             onTaskSelect={() => {
-              if (currentTask?.data.interactionId !== task.data.interactionId) {
+              if (
+                currentTask?.data.interactionId !== task.data.interactionId &&
+                !(isIncomingTask && !task.data.wrapUpRequired)
+              ) {
                 onTaskSelect(task);
               }
             }}
