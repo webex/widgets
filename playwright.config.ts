@@ -3,17 +3,17 @@ import dotenv from 'dotenv';
 import path from 'path';
 
 // Alternatively, read from "../my.env" file.
-dotenv.config({path: path.resolve(__dirname, '../../../', '.env')});
+dotenv.config({path: path.resolve(__dirname, '.env')});
 
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  testDir: './tests/playwright',
+  testDir: './playwright',
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'cd ../../../ && yarn workspace samples-cc-react-app serve',
+    command: 'yarn workspace samples-cc-react-app serve',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     stdout: 'ignore',

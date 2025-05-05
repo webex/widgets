@@ -1,6 +1,6 @@
 import {test, expect} from '@playwright/test';
 
-test.describe('Station Login', () => {
+test.describe('Login and User-State testing', () => {
   let accessToken: string | undefined;
   test.beforeAll(() => {
     accessToken = process.env.ACCESS_TOKEN;
@@ -58,6 +58,9 @@ test.describe('Station Login', () => {
     await page.getByRole('textbox', {name: 'Enter your access token'}).click();
     await page2.getByRole('textbox', {name: 'Enter your access token'}).click();
 
+    if (!process.env.ACCESS_TOKEN) {
+      throw new Error('ACCESS_TOKEN is not defined in the environment variables');
+    }
     await page.getByRole('textbox', {name: 'Enter your access token'}).fill(process.env.ACCESS_TOKEN);
     await page2.getByRole('textbox', {name: 'Enter your access token'}).fill(process.env.ACCESS_TOKEN);
 
