@@ -45,7 +45,7 @@ const Task: React.FC<TaskProps> = ({
   return (
     <ListItemBase
       className={`task-list-item ${selected ? 'task-list-item--selected' : ''}`}
-      onPress={onTaskSelect}
+      onPress={onTaskSelect ? (e) => onTaskSelect(e) : undefined}
       id={interactionId}
     >
       <ListItemBaseSection position="start">
