@@ -3,6 +3,7 @@ import React from 'react';
 import {render, screen, fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import CallControlConsultComponent from '../../../../src/components/task/CallControl/CallControlCustom/call-control-consult';
+import {CallControlConsultComponentsProps} from '../../../../src/components/task/task.types';
 
 jest.mock('@momentum-ui/react-collaboration', () => ({
   ButtonCircle: (props) => {
@@ -50,13 +51,14 @@ afterAll(() => {
 describe('CallControlConsultComponent', () => {
   const mockOnTransfer = jest.fn();
   const mockEndConsultCall = jest.fn();
-  const defaultProps = {
+  const defaultProps: CallControlConsultComponentsProps = {
     agentName: 'Alice',
     startTimeStamp: Date.now(),
     onTransfer: mockOnTransfer,
     endConsultCall: mockEndConsultCall,
     consultCompleted: true,
     isAgentBeingConsulted: true,
+    isEndConsultEnabled: false,
   };
 
   beforeEach(() => {

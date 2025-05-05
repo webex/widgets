@@ -2,11 +2,12 @@ import React from 'react';
 import {render, fireEvent, screen} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import OutdialCallComponent from '../../../../src/components/task/OutdialCall/outdial-call';
+import {OutdialCallComponentProps} from '../../../../src/components/task/task.types';
 
 describe('OutdialCallComponent', () => {
   const mockStartOutdial = jest.fn();
 
-  const props = {
+  const props: OutdialCallComponentProps = {
     startOutdial: mockStartOutdial,
   };
 

@@ -2,21 +2,23 @@ import React from 'react';
 import {render, screen, fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import UserStateComponent from '../../../src/components/UserState/user-state';
+import {IUserState} from '../../../src/components/UserState/user-state.types';
 
 describe('UserStateComponent', () => {
   const mockSetAgentStatus = jest.fn();
-  const defaultProps = {
+  const defaultProps: IUserState = {
     idleCodes: [
-      {id: '1', name: 'Idle Code 1', isSystem: false},
-      {id: '2', name: 'Idle Code 2', isSystem: true},
-      {id: '3', name: 'Idle Code 3', isSystem: false},
+      {id: '1', name: 'Idle Code 1', isSystem: false, isDefault: false},
+      {id: '2', name: 'Idle Code 2', isSystem: true, isDefault: false},
+      {id: '3', name: 'Idle Code 3', isSystem: false, isDefault: false},
     ],
     setAgentStatus: mockSetAgentStatus,
     isSettingAgentStatus: false,
-    errorMessage: '',
     elapsedTime: 3661, // 1 hour, 1 minute, 1 second
     currentState: '1',
     currentTheme: 'LIGHT',
+    lastIdleStateChangeElapsedTime: 20,
+    customState: null,
   };
 
   it('should render the component with correct elements', () => {
@@ -41,7 +43,7 @@ describe('UserStateComponent', () => {
   });
 
   it('should display an error message if provided', () => {
-    render(<UserStateComponent {...defaultProps} errorMessage="Error message" />);
+    render(<UserStateComponent {...defaultProps} />);
     expect(screen.getByText('Error message')).toBeInTheDocument();
     expect(screen.getByText('Error message')).toHaveStyle('color: red');
   });

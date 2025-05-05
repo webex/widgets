@@ -3,6 +3,7 @@ import React from 'react';
 import {render, screen, fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ConsultTransferPopoverComponent from '../../../../src/components/task/CallControl/CallControlCustom/consult-transfer-popover';
+import {ConsultTransferPopoverComponentProps} from '../../../../src/components/task/task.types';
 
 jest.mock('../../../../src/components/task/CallControl/CallControlCustom/consult-transfer-list-item', () => {
   const MockListItem = (props: any) => (
@@ -55,7 +56,7 @@ afterAll(() => {
 describe('ConsultTransferPopoverComponent', () => {
   const mockOnAgentSelect = jest.fn();
   const mockOnQueueSelect = jest.fn();
-  const baseProps = {
+  const baseProps: ConsultTransferPopoverComponentProps = {
     heading: 'Select an Agent',
     buttonIcon: 'agent-icon',
     buddyAgents: [
@@ -68,6 +69,7 @@ describe('ConsultTransferPopoverComponent', () => {
     ],
     onAgentSelect: mockOnAgentSelect,
     onQueueSelect: mockOnQueueSelect,
+    allowConsultToQueue: false,
   };
 
   beforeEach(() => {

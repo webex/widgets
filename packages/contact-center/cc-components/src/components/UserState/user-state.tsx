@@ -7,6 +7,7 @@ import './user-state.scss';
 import {SelectNext, Text} from '@momentum-ui/react-collaboration';
 import {Item} from '@react-stately/collections';
 import {Icon} from '@momentum-design/components/dist/react';
+import {ICustomState, IdleCode} from '@webex/cc-store';
 
 const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
   const {
@@ -19,17 +20,19 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
     customState,
   } = props;
 
-  let selectedKey;
-  if (customState) {
+  let selectedKey,
+    items: (IdleCode | ICustomState)[] = [];
+  if (customState && 'developerName' in customState) {
     selectedKey = `hide-${customState.developerName}`;
   } else {
     selectedKey = currentState;
   }
 
-  const items = customState
-    ? [{name: customState.name, id: `hide-${customState.developerName}`, developerName: customState.developerName}]
-    : [];
-
+  if (customState && 'developerName' in customState) {
+    items = customState
+      ? [{name: customState.name, id: `hide-${customState.developerName}`, developerName: customState.developerName}]
+      : [];
+  }
   for (const item of idleCodes) {
     if (item.name === 'RONA' && item.id === currentState) {
       selectedKey = `hide-${item.id}`;
@@ -58,17 +61,20 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
     return 'idle';
   };
 
-  const getIconStyle = (item) => {
-    if (item.developerName) {
+  // TODO: Not sure about this typing
+  const getIconStyle = (item: ICustomState | IdleCode) => {
+    if (item && 'developerName' in item) {
       return {class: 'custom', iconName: 'busy-presence-light'};
     }
-    switch (item.id) {
-      case '0':
-        return {class: '', iconName: 'active-presence-small-filled'};
-      case item.name === 'RONA' && item.id:
-        return {class: 'rona', iconName: 'dnd-presence-filled'};
-      default:
-        return {class: 'idle', iconName: 'recents-presence-filled'};
+    if (item && 'id' in item && item.id === '0') {
+      switch (item.id) {
+        case '0':
+          return {class: '', iconName: 'active-presence-small-filled'};
+        case item.name === 'RONA' && item.id:
+          return {class: 'rona', iconName: 'dnd-presence-filled'};
+        default:
+          return {class: 'idle', iconName: 'recents-presence-filled'};
+      }
     }
   };
 
@@ -87,7 +93,7 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
         items={items}
         className={`state-select ${getDropdownClass()}`}
       >
-        {(item) => {
+        {(item: IdleCode) => {
           return (
             <Item key={item.id} textValue={item.name}>
               <div className="item-container">
