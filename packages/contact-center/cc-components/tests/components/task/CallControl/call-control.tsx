@@ -3,6 +3,7 @@ import React from 'react';
 import {render, screen, fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import CallControlComponent from '../../../../src/components/task/CallControl/call-control';
+import {CallControlComponentProps} from '../../../../src/components/task/task.types';
 
 jest.mock('@momentum-ui/react-collaboration', () => ({
   ButtonPill: (props) => (
@@ -90,7 +91,7 @@ describe('CallControlPresentational', () => {
   const mockSetConsultAgentName = jest.fn();
   const setIsHeld = jest.fn();
 
-  const defaultProps = {
+  const defaultProps: CallControlComponentProps = {
     currentTask: {
       data: {
         interaction: {
@@ -102,7 +103,6 @@ describe('CallControlPresentational', () => {
         },
       },
     },
-    audioRef: React.createRef(),
     toggleHold: mockToggleHold,
     toggleRecording: mockToggleRecording,
     endCall: mockEndCall,
@@ -123,6 +123,17 @@ describe('CallControlPresentational', () => {
     consultAgentName: null,
     endConsultCall: jest.fn(),
     consultTransfer: jest.fn(),
+    isHeld: false,
+    isRecording: false,
+    consultInitiated: false,
+    consultCompleted: false,
+    consultAccepted: false,
+    callControlAudio: {} as MediaStream,
+    holdTime: 0,
+    isEndConsultEnabled: false,
+    allowConsultToQueue: false,
+    lastTargetType: 'queue',
+    setLastTargetType: jest.fn(),
   };
 
   beforeEach(() => {
