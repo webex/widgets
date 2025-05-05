@@ -942,6 +942,7 @@ describe('storeEventsWrapper', () => {
 
       const mockTask = {
         data: {
+          interactionId: 'interaction1',
           interaction: {
             isTerminated: true,
             state: 'wrapUp',
@@ -979,7 +980,7 @@ describe('storeEventsWrapper', () => {
         mockWrapupCb(mockTask);
       });
 
-      expect(handleTaskRemoveSpy).toHaveBeenCalledWith(mockTask);
+      expect(handleTaskRemoveSpy).toHaveBeenCalledWith(mockTask.data.interactionId);
     });
 
     describe('customStates on hydration', () => {
