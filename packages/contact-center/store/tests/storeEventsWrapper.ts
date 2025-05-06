@@ -61,7 +61,7 @@ jest.mock('../src/store', () => ({
     deviceType: 'BROWSER',
     dialNumber: '12345',
     taskList: 'mockTaskList',
-    taskData: {},
+    taskMetaData: {},
     incomingTask: 'mockIncomingTask',
     currentState: 'mockCurrentState',
     lastStateChangeTimestamp: 'mockLastStateChangeTimestamp',
@@ -383,8 +383,8 @@ describe('storeEventsWrapper', () => {
         expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, mockCb);
       });
 
-      it('should call setTaskData ', () => {
-        storeWrapper['store'].taskData = {};
+      it('should call setTaskMetaData ', () => {
+        storeWrapper['store'].taskMetaData = {};
         const mockData = {
           consultAccepted: true,
           consultCompleted: false,
@@ -394,8 +394,8 @@ describe('storeEventsWrapper', () => {
           currentConsultQueueId: null,
           consultStartTimeStamp: null,
         };
-        storeWrapper.setTaskData('mockTaskId', mockData);
-        expect(storeWrapper.taskData).toEqual({
+        storeWrapper.setTaskMetaData('mockTaskId', mockData);
+        expect(storeWrapper.taskMetaData).toEqual({
           mockTaskId: mockData,
         });
       });
@@ -1311,7 +1311,7 @@ describe('storeEventsWrapper', () => {
         .fn()
         .mockReturnValue({[mockTask.data.interactionId]: mockTask});
       storeWrapper.refreshTaskList();
-      storeWrapper['store'].taskData = {};
+      storeWrapper['store'].taskMetaData = {};
     });
 
     it('should attach TASK_MEDIA handler when deviceType is BROWSER', () => {

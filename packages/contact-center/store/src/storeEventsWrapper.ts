@@ -15,7 +15,7 @@ import {
   ENGAGED_USERNAME,
   ContactServiceQueue,
   Profile,
-  TaskData,
+  TaskMetaData,
 } from './store.types';
 import Store from './store';
 import {runInAction} from 'mobx';
@@ -141,12 +141,12 @@ class StoreWrapper implements IStoreWrapper {
   get allowConsultToQueue() {
     return this.store.allowConsultToQueue;
   }
-  get taskData() {
-    return this.store.taskData;
+  get taskMetaData() {
+    return this.store.taskMetaData;
   }
 
-  setTaskData = (taskId: string, data: TaskData): void => {
-    this.store.taskData[taskId] = data;
+  setTaskMetaData = (taskId: string, data: TaskMetaData): void => {
+    this.store.taskMetaData[taskId] = data;
   };
 
   setCurrentTheme = (theme: string): void => {
@@ -193,7 +193,7 @@ class StoreWrapper implements IStoreWrapper {
       // Save data from the current task if it exists
       if (this.currentTask) {
         const interactionId = this.currentTask?.data?.interactionId;
-        this.setTaskData(interactionId, {
+        this.setTaskMetaData(interactionId, {
           consultCompleted: this.store.consultCompleted,
           consultInitiated: this.store.consultInitiated,
           consultAccepted: this.store.consultAccepted,
@@ -208,8 +208,8 @@ class StoreWrapper implements IStoreWrapper {
       this.store.currentTask = task ? Object.assign(Object.create(Object.getPrototypeOf(task)), task) : null;
 
       // Restore data for the new task if available
-      const currentTaskData = this.store.taskData[task?.data?.interactionId];
-      if (currentTaskData) {
+      const currentTaskMetaData = this.store.taskMetaData[task?.data?.interactionId];
+      if (currentTaskMetaData) {
         const {
           consultAccepted = false,
           consultInitiated = false,
@@ -218,7 +218,7 @@ class StoreWrapper implements IStoreWrapper {
           currentConsultQueueId = null,
           consultStartTimeStamp = null,
           consultOfferReceived = false,
-        } = currentTaskData;
+        } = currentTaskMetaData;
 
         this.setConsultAccepted(consultAccepted);
         this.setConsultInitiated(consultInitiated);
@@ -369,7 +369,7 @@ class StoreWrapper implements IStoreWrapper {
       this.setConsultInitiated(false);
       this.setConsultCompleted(false);
 
-      delete this.taskData[taskId];
+      delete this.taskMetaData[taskId];
       if (this.store.currentTask?.data.interactionId === taskId) {
         this.setCurrentTask(null);
       }
@@ -396,7 +396,7 @@ class StoreWrapper implements IStoreWrapper {
     }
     runInAction(() => {
       if (this.currentTask) {
-        this.setTaskData(this.currentTask.data.interactionId, {
+        this.setTaskMetaData(this.currentTask.data.interactionId, {
           consultCompleted: this.store.consultCompleted,
           consultInitiated: this.store.consultInitiated,
           consultAccepted: this.store.consultAccepted,
@@ -406,7 +406,7 @@ class StoreWrapper implements IStoreWrapper {
           consultOfferReceived: this.store.consultOfferReceived,
         });
       } else {
-        this.setTaskData(task?.data?.interactionId, {
+        this.setTaskMetaData(task?.data?.interactionId, {
           consultCompleted: false,
           consultInitiated: false,
           consultAccepted: false,

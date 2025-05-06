@@ -37,7 +37,7 @@ type IdleCode = {
   isDefault: boolean;
 };
 
-type TaskData = {
+type TaskMetaData = {
   consultCompleted: boolean;
   consultInitiated: boolean;
   consultAccepted: boolean;
@@ -59,7 +59,7 @@ interface IStore {
   currentTask: ITask;
   incomingTask: ITask;
   taskList: Record<string, ITask>;
-  taskData: Record<string, TaskData>;
+  taskMetaData: Record<string, TaskMetaData>;
   isAgentLoggedIn: boolean;
   deviceType: string;
   dialNumber: string;
@@ -175,7 +175,7 @@ export type {
   DestinationType,
   BuddyDetails,
   ContactServiceQueue,
-  TaskData,
+  TaskMetaData,
 };
 
 export {CC_EVENTS, TASK_EVENTS, ENGAGED_LABEL, ENGAGED_USERNAME};
