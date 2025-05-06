@@ -3,6 +3,7 @@ import Webex from 'webex/contact-center';
 import store from '../src/store'; // Adjust the import path as necessary
 
 let mockShouldCallback = true;
+console.log = jest.fn(); // Mock console.log
 
 jest.mock('mobx', () => ({
   makeAutoObservable: jest.fn(),
