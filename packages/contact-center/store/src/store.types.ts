@@ -130,6 +130,7 @@ enum TASK_EVENTS {
   CONTACT_RECORDING_PAUSED = 'ContactRecordingPaused',
   CONTACT_RECORDING_RESUMED = 'ContactRecordingResumed',
   AGENT_WRAPPEDUP = 'AgentWrappedUp',
+  AGENT_OFFER_CONTACT = 'AgentOfferContact',
   AGENT_CONSULT_CREATED = 'AgentConsultCreated',
 } // TODO: remove this once cc sdk exports this enum
 

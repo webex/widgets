@@ -358,6 +358,7 @@ class StoreWrapper implements IStoreWrapper {
       taskToRemove.off(TASK_EVENTS.TASK_CONSULT_ACCEPTED, this.handleConsultAccepted);
       taskToRemove.off(TASK_EVENTS.AGENT_CONSULT_CREATED, this.handleConsultCreated);
       taskToRemove.off(TASK_EVENTS.TASK_CONSULT_QUEUE_CANCELLED, this.handleConsultQueueCancelled);
+      taskToRemove.off(TASK_EVENTS.AGENT_OFFER_CONTACT, this.refreshTaskList);
       if (this.deviceType === 'BROWSER') {
         taskToRemove.off(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
         this.setCallControlAudio(null);
@@ -504,6 +505,7 @@ class StoreWrapper implements IStoreWrapper {
 
     // When we receive TASK_ASSIGNED the task was accepted by the agent and we need wrap up
     task.on(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
+    task.on(TASK_EVENTS.AGENT_OFFER_CONTACT, this.refreshTaskList);
     task.on(TASK_EVENTS.AGENT_CONSULT_CREATED, this.handleConsultCreated);
     task.on(TASK_EVENTS.TASK_CONSULT_QUEUE_CANCELLED, this.handleConsultQueueCancelled);
     if (this.deviceType === 'BROWSER') {
@@ -548,6 +550,7 @@ class StoreWrapper implements IStoreWrapper {
 
     // When we receive TASK_ASSIGNED the task was accepted by the agent and we need wrap up
     task.on(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
+    task.on(TASK_EVENTS.AGENT_OFFER_CONTACT, this.refreshTaskList);
     task.on(TASK_EVENTS.TASK_CONSULT_ACCEPTED, this.handleConsultAccepted);
     task.on(TASK_EVENTS.AGENT_CONSULT_CREATED, this.handleConsultCreated);
 
