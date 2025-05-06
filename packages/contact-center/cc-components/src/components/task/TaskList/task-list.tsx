@@ -18,7 +18,7 @@ const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (prop
         const ronaTimeout = callAssociationDetails?.ronaTimeout ? Number(callAssociationDetails?.ronaTimeout) : null;
         const taskState = task.data.interaction.state;
         const startTimeStamp = task.data.interaction.createdTimestamp;
-        const isIncomingTask = taskState === 'new';
+        const isIncomingTask = taskState === 'new' || taskState === 'consult';
         const isTelephony = task.data.interaction.mediaType === 'telephony';
         const acceptText =
           isIncomingTask && !task.data.wrapUpRequired ? (isTelephony && !isBrowser ? 'Ringing' : 'Accept') : undefined;
