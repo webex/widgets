@@ -35,6 +35,7 @@ export function getControlsVisibility(deviceType: string, featureFlags: {[key: s
     wrapup: task?.data?.wrapUpRequired ?? false, // Applicable for all type of station login and media type and getting actual value from task data
     pauseResumeRecording: isCall && ((isBrowser && webRtcEnabled) || isAgentDN || isExtension), // Getting feature flag (isRecordingManagementEnabled) value as undefined, need further testing
     endConsult: isEndConsultEnabled && isCall && ((isBrowser && webRtcEnabled) || isAgentDN || isExtension),
+    showRecordingIndicator: isCall,
   };
 
   return controls;

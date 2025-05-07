@@ -70,7 +70,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
             </div>
           </div>
         </div>
-        {!controlVisibility.wrapup && controlVisibility.pauseResumeRecording && (
+        {!controlVisibility.wrapup && controlVisibility.showRecordingIndicator && (
           <div className="recording-indicator">
             <Icon name={isRecording ? 'record-active-badge-filled' : 'record-paused-badge-filled'} size={1.3} />
           </div>
