@@ -351,7 +351,7 @@ export interface ControlProps {
     wrapup: boolean;
     pauseResumeRecording: boolean;
     endConsult: boolean;
-    showRecordingIndicator: boolean;
+    recordingIndicator: boolean;
   };
 }
 

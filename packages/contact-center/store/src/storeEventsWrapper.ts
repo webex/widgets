@@ -349,7 +349,7 @@ class StoreWrapper implements IStoreWrapper {
     if (taskToRemove) {
       taskToRemove.off(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
       taskToRemove.off(TASK_EVENTS.TASK_END, this.handleTaskEnd);
-      taskToRemove.off(TASK_EVENTS.TASK_REJECT, this.handleTaskReject);
+      taskToRemove.off(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(taskToRemove, reason));
       taskToRemove.off(TASK_EVENTS.AGENT_WRAPPEDUP, this.handleTaskWrapUp);
       taskToRemove.off(TASK_EVENTS.TASK_CONSULTING, this.handleConsulting);
       taskToRemove.off(CC_EVENTS.AGENT_OFFER_CONSULT, this.handleConsultOffer);
@@ -431,8 +431,8 @@ class StoreWrapper implements IStoreWrapper {
     });
   };
 
-  handleTaskWrapUp = (event) => {
-    this.handleTaskRemove(event);
+  handleTaskWrapUp = (task) => {
+    this.handleTaskRemove(task?.data?.interactionId);
   };
 
   handleTaskMedia = (track) => {
@@ -515,7 +515,7 @@ class StoreWrapper implements IStoreWrapper {
     // When we receive TASK_REJECT that means the task was not accepted by the agent and we wont need wrap up
     task.on(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(task, reason));
 
-    task.on(TASK_EVENTS.AGENT_WRAPPEDUP, () => this.handleTaskWrapUp(task.data.interactionId));
+    task.on(TASK_EVENTS.AGENT_WRAPPEDUP, this.handleTaskWrapUp);
 
     task.on(TASK_EVENTS.TASK_CONSULTING, this.handleConsulting);
     task.on(TASK_EVENTS.TASK_CONSULT_ACCEPTED, this.handleConsultAccepted);
@@ -557,7 +557,7 @@ class StoreWrapper implements IStoreWrapper {
     // When we receive TASK_REJECT that means the task was not accepted by the agent and we wont need wrap up
     task.on(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(task, reason));
 
-    task.on(TASK_EVENTS.AGENT_WRAPPEDUP, () => this.handleTaskWrapUp(task.data.interactionId));
+    task.on(TASK_EVENTS.AGENT_WRAPPEDUP, this.handleTaskWrapUp);
 
     task.on(TASK_EVENTS.TASK_CONSULTING, this.handleConsulting);
     task.on(CC_EVENTS.AGENT_OFFER_CONSULT, this.handleConsultOffer);
