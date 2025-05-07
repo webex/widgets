@@ -37,7 +37,18 @@ type IdleCode = {
   isDefault: boolean;
 };
 
+type TaskMetaData = {
+  consultCompleted: boolean;
+  consultInitiated: boolean;
+  consultAccepted: boolean;
+  isQueueConsultInProgress: boolean;
+  currentConsultQueueId: string;
+  consultStartTimeStamp: number;
+  consultOfferReceived: boolean;
+};
+
 interface IStore {
+  featureFlags: {[key: string]: boolean};
   teams: Team[];
   loginOptions: string[];
   cc: IContactCenter;
@@ -47,11 +58,11 @@ interface IStore {
   wrapupCodes: IWrapupCode[];
   currentTask: ITask;
   incomingTask: ITask;
-  taskList: ITask[];
+  taskList: Record<string, ITask>;
+  taskMetaData: Record<string, TaskMetaData>;
   isAgentLoggedIn: boolean;
   deviceType: string;
   dialNumber: string;
-  wrapupRequired: boolean;
   currentState: string;
   lastStateChangeTimestamp?: number;
   lastIdleCodeChangeTimestamp?: number;
@@ -75,8 +86,7 @@ interface IStore {
 interface IStoreWrapper extends IStore {
   store: IStore;
   setCurrentTask(task: ITask): void;
-  setWrapupRequired(value: boolean): void;
-  setTaskList(taskList: ITask[]): void;
+  refreshTaskList(): void;
   setIncomingTask(task: ITask): void;
   setDeviceType(option: string): void;
   setDialNumber(input: string): void;
@@ -120,6 +130,7 @@ enum TASK_EVENTS {
   CONTACT_RECORDING_PAUSED = 'ContactRecordingPaused',
   CONTACT_RECORDING_RESUMED = 'ContactRecordingResumed',
   AGENT_WRAPPEDUP = 'AgentWrappedUp',
+  AGENT_OFFER_CONTACT = 'AgentOfferContact',
   AGENT_CONSULT_CREATED = 'AgentConsultCreated',
 } // TODO: remove this once cc sdk exports this enum
 
@@ -165,6 +176,7 @@ export type {
   DestinationType,
   BuddyDetails,
   ContactServiceQueue,
+  TaskMetaData,
 };
 
 export {CC_EVENTS, TASK_EVENTS, ENGAGED_LABEL, ENGAGED_USERNAME};
