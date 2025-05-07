@@ -15,7 +15,7 @@ export type CallControlProps = Pick<
 
 export type useCallControlProps = Pick<
   ControlProps,
-  'currentTask' | 'onHoldResume' | 'onEnd' | 'onWrapUp' | 'logger' | 'consultInitiated'
+  'currentTask' | 'onHoldResume' | 'onEnd' | 'onWrapUp' | 'logger' | 'consultInitiated' | 'deviceType' | 'featureFlags'
 >;
 
 export type Participant = {

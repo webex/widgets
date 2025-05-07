@@ -33,3 +33,9 @@
     --mdc-avatar-default-background-color: var(--mds-color-theme-avatar-glass-active, rgba(255, 255, 255, 0.8));
   }
 }
+
+.task-button-container {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+}
