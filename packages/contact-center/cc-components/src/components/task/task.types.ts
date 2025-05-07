@@ -68,6 +68,10 @@ export interface TaskProps {
   declineTask: (task: ITask) => void;
 
   /**
+   * Function to handle task selection
+   */
+  onTaskSelect: (task: ITask) => void;
+  /**
    * Flag to determine if the user is logged in with a browser option
    */
   isBrowser: boolean;
@@ -90,7 +94,7 @@ export interface TaskProps {
   /**
    * List of tasks
    */
-  taskList: ITask[];
+  taskList: Record<string, ITask>;
 
   /**
    * The logger instance from SDK
@@ -102,7 +106,7 @@ export type IncomingTaskComponentProps = Pick<TaskProps, 'incomingTask' | 'isBro
 
 export type TaskListComponentProps = Pick<
   TaskProps,
-  'currentTask' | 'taskList' | 'isBrowser' | 'acceptTask' | 'declineTask'
+  'currentTask' | 'taskList' | 'isBrowser' | 'acceptTask' | 'declineTask' | 'onTaskSelect'
 >;
 
 /**
@@ -286,6 +290,11 @@ export interface ControlProps {
   holdTime: number;
 
   /**
+   * Feature flags for the task.
+   */
+  featureFlags: {[key: string]: boolean};
+
+  /**
    * Custom CSS ClassName for CallControlCAD component.
    */
   callControlClassName?: string;
@@ -329,13 +338,27 @@ export interface ControlProps {
    * Function to set the last target type
    */
   setLastTargetType: (targetType: 'queue' | 'agent') => void;
+
+  controlVisibility: {
+    accept: boolean;
+    decline: boolean;
+    end: boolean;
+    muteUnmute: boolean;
+    holdResume: boolean;
+    consult: boolean;
+    transfer: boolean;
+    conference: boolean;
+    wrapup: boolean;
+    pauseResumeRecording: boolean;
+    endConsult: boolean;
+    recordingIndicator: boolean;
+  };
 }
 
 export type CallControlComponentProps = Pick<
   ControlProps,
   | 'currentTask'
   | 'wrapupCodes'
-  | 'wrapupRequired'
   | 'toggleHold'
   | 'toggleRecording'
   | 'endCall'
@@ -369,6 +392,7 @@ export type CallControlComponentProps = Pick<
   | 'allowConsultToQueue'
   | 'lastTargetType'
   | 'setLastTargetType'
+  | 'controlVisibility'
 >;
 
 /**

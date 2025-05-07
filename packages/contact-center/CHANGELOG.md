@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.51](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.50...v1.28.0-ccwidgets.51) (2025-05-07)
+
+
+### Features
+
+* **cc-task:** task list to support multiple tasks and digital tasks ([#441](https://github.com/webex/widgets/issues/441)) ([a9f7596](https://github.com/webex/widgets/commit/a9f7596adc05aa31122b6bcbdc3a900c9cb0bbcc))
+
 # [1.28.0-ccwidgets.50](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.49...v1.28.0-ccwidgets.50) (2025-04-30)
 
 
