@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.53](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.52...v1.28.0-ccwidgets.53) (2025-05-08)
+
+
+### Bug Fixes
+
+* **incoming-task:** support multiple incoming task widgets ([#446](https://github.com/webex/widgets/issues/446)) ([1720ebb](https://github.com/webex/widgets/commit/1720ebb6d77f885ae2c391d92e5f1305328d0114))
+
 # [1.28.0-ccwidgets.52](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.51...v1.28.0-ccwidgets.52) (2025-05-08)
 
 
