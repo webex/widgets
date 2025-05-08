@@ -49,9 +49,12 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [incomingTasks, setIncomingTasks] = useState([]);
 
+  const [collapsedTasks, setCollapsedTasks] = React.useState([]);
+
   const onIncomingTaskCB = ({task}) => {
     console.log('Incoming task:', task);
     setIncomingTasks((prevTasks) => [...prevTasks, task]);
+    playNotificationSound();
   };
 
   const webexConfig = {
@@ -115,6 +118,26 @@ function App() {
       setIsMultiLoginEnabled(true);
     }
   };
+
+  function playNotificationSound() {
+    const ctx = new AudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    // Use a waveform with richer harmonics, like 'triangle' or 'sawtooth'
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(1200, ctx.currentTime); // High pitch for metal cling
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    // Set the volume and create a quick decay to simulate the metallic sound
+    gain.gain.setValueAtTime(0.5, ctx.currentTime); // Start loud
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3); // Quick decay
+
+    osc.start();
+    osc.stop(ctx.currentTime + 3); // Play for 0.3 seconds
+  }
 
   const handleCheckboxChange = (e) => {
     const {name, checked} = e.target;
@@ -367,19 +390,34 @@ function App() {
 
                     {selectedWidgets.incomingTask && (
                       <>
-                        <div className="box">
+                        <div className="incoming-tasks-container">
                           <section className="section-box">
-                            <fieldset className="fieldset">
-                              <legend className="legend-box">Incoming Tasks</legend>
-                              {incomingTasks.map((task) => (
-                                <IncomingTask
-                                  key={task.id}
-                                  incomingTask={task}
-                                  onAccepted={onAccepted}
-                                  onRejected={onDeclined}
-                                />
-                              ))}
-                            </fieldset>
+                            {incomingTasks.map((task) => (
+                              <div
+                                key={task.data.interactionId}
+                                className={`incoming-task ${collapsedTasks.includes(task.data.interactionId) ? 'collapsed' : ''}`}
+                                onClick={() => {
+                                  if (collapsedTasks.includes(task.data.interactionId)) {
+                                    setCollapsedTasks((prev) => prev.filter((id) => id !== task.data.interactionId));
+                                  }
+                                }}
+                              >
+                                <>
+                                  <button
+                                    className="close-btn"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setIncomingTasks((prevTasks) =>
+                                        prevTasks.filter((t) => t.data.interactionId !== task.data.interactionId)
+                                      );
+                                    }}
+                                  >
+                                    ×
+                                  </button>
+                                  <IncomingTask incomingTask={task} onAccepted={onAccepted} onRejected={onDeclined} />
+                                </>
+                              </div>
+                            ))}
                           </section>
                         </div>
                       </>

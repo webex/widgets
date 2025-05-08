@@ -31,6 +31,7 @@ const IncomingTaskComponent: React.FunctionComponent<IncomingTaskComponentProps>
       acceptText={acceptText}
       disableAccept={isTelephony && !isBrowser}
       declineText={declineText}
+      styles="task-list-hover"
     />
   );
 };

@@ -39,3 +39,8 @@
   flex-direction: row;
   gap: 8px;
 }
+
+.task-list-hover:hover{ 
+  // To remove the hover effect of ListItemBase when we render an incoming task 
+  background: none !important;
+}

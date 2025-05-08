@@ -58,3 +58,55 @@ iframe {
   border-radius: 5px;
   margin: 20px;
 }
+
+.incoming-tasks-container {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 10px;
+  z-index: 9999;
+
+}
+@keyframes slide-in {
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-out {
+  to {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+}
+
+.incoming-task {
+  width: 400px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  padding: 10px;
+  transition: transform 0.5s ease, opacity 0.5s ease;
+  transform: translateX(100%);
+  opacity: 0;
+  animation: slide-in 0.4s forwards;
+  position: relative;
+  margin-bottom: 0.5rem;
+}
+
+.incoming-task.removing {
+  animation: slide-out 0.4s forwards;
+}
+
+.incoming-task .close-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+}

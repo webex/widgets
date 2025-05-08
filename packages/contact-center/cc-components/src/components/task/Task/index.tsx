@@ -20,6 +20,7 @@ interface TaskProps {
   acceptText?: string;
   declineText?: string;
   disableAccept?: boolean;
+  styles?: string;
 }
 
 const Task: React.FC<TaskProps> = ({
@@ -28,6 +29,7 @@ const Task: React.FC<TaskProps> = ({
   startTimeStamp,
   ronaTimeout,
   selected = false,
+  styles,
   isIncomingTask = false,
   queue,
   acceptTask,
@@ -44,7 +46,7 @@ const Task: React.FC<TaskProps> = ({
 
   return (
     <ListItemBase
-      className={`task-list-item ${selected ? 'task-list-item--selected' : ''}`}
+      className={`task-list-item ${selected ? 'task-list-item--selected' : ''} ${styles}`}
       onPress={onTaskSelect ? onTaskSelect : undefined}
       id={interactionId}
     >
