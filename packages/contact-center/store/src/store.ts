@@ -27,7 +27,6 @@ class Store implements IStore {
   agentId: string = '';
   currentTheme: string = 'LIGHT';
   wrapupCodes: IWrapupCode[] = [];
-  incomingTask: ITask = null;
   currentTask: ITask = null;
   isAgentLoggedIn = false;
   deviceType: string = '';

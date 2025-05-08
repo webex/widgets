@@ -22,6 +22,7 @@ import {runInAction} from 'mobx';
 
 class StoreWrapper implements IStoreWrapper {
   store: IStore;
+  onIncomingTask: ({task}: {task: ITask}) => void;
   onTaskRejected?: (task: ITask, reason: string) => void;
   onTaskAssigned?: (task: ITask) => void;
 
@@ -72,10 +73,6 @@ class StoreWrapper implements IStoreWrapper {
   }
   get taskList() {
     return this.store.taskList;
-  }
-
-  get incomingTask() {
-    return this.store.incomingTask;
   }
 
   get currentState() {
@@ -231,10 +228,6 @@ class StoreWrapper implements IStoreWrapper {
     });
   };
 
-  setIncomingTask = (task: ITask): void => {
-    this.store.incomingTask = task;
-  };
-
   refreshTaskList = (): void => {
     runInAction(() => {
       this.store.taskList = this.store.cc.taskManager.getAllTasks();
@@ -303,6 +296,10 @@ class StoreWrapper implements IStoreWrapper {
         this.store.customState = state;
       });
     }
+  };
+
+  setIncomingTaskCb = (callback: (task: ITask) => void): void => {
+    this.onIncomingTask = callback;
   };
 
   setTaskRejected = (callback: ((task: ITask, reason: string) => void) | undefined): void => {
@@ -374,10 +371,6 @@ class StoreWrapper implements IStoreWrapper {
         this.setCurrentTask(null);
       }
 
-      if (this.store.incomingTask?.data?.interactionId === taskId) {
-        this.setIncomingTask(null);
-      }
-
       this.setState({
         reset: true,
       });
@@ -423,7 +416,6 @@ class StoreWrapper implements IStoreWrapper {
         this.setConsultOfferReceived(false);
       }
       this.setCurrentTask(task);
-      this.setIncomingTask(null);
       this.setState({
         developerName: ENGAGED_LABEL,
         name: ENGAGED_USERNAME,
@@ -476,7 +468,6 @@ class StoreWrapper implements IStoreWrapper {
     const task = event;
     runInAction(() => {
       this.setCurrentTask(task);
-      this.setIncomingTask(null);
       this.setConsultAccepted(true);
       this.setConsultStartTimeStamp(Date.now());
       this.setConsultCompleted(true);
@@ -522,8 +513,13 @@ class StoreWrapper implements IStoreWrapper {
     task.on(CC_EVENTS.AGENT_OFFER_CONSULT, this.handleConsultOffer);
     task.on(TASK_EVENTS.TASK_CONSULT_END, this.handleConsultEnd);
 
-    this.setIncomingTask(task);
+    // In case of consulting we check if the task is already in the task list
+    // If it is, we dont have to send the incoming task callback
+    if (this.onIncomingTask && !this.taskList[task.data.interactionId]) {
+      this.onIncomingTask({task});
+    }
 
+    // We should update the task list in the store after sending the incoming task callback
     this.refreshTaskList();
   };
 
@@ -570,7 +566,6 @@ class StoreWrapper implements IStoreWrapper {
     this.refreshTaskList();
 
     this.setCurrentTask(task);
-    this.setIncomingTask(null);
     if (task.data.interaction.state === 'consulting') {
       if (task.data.isConsulted) {
         this.setConsultAccepted(true);
@@ -636,7 +631,6 @@ class StoreWrapper implements IStoreWrapper {
       this.setIsAgentLoggedIn(false);
       this.setDeviceType('AGENT_DN');
       this.setDialNumber('');
-      this.setIncomingTask(null);
       this.setCurrentTask(null);
       this.refreshTaskList();
       this.setLastStateChangeTimestamp(undefined);

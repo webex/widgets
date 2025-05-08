@@ -1,11 +1,11 @@
 import {TaskProps, ControlProps, OutdialCallProps} from '@webex/cc-components';
 
-export type UseTaskProps = Pick<TaskProps, 'incomingTask' | 'onAccepted' | 'onDeclined' | 'deviceType' | 'logger'>;
+export type UseTaskProps = Pick<TaskProps, 'incomingTask' | 'onAccepted' | 'onRejected' | 'deviceType' | 'logger'>;
 export type UseTaskListProps = Pick<
   TaskProps,
   'cc' | 'taskList' | 'deviceType' | 'onTaskAccepted' | 'onTaskDeclined' | 'logger'
 >;
-export type IncomingTaskProps = Pick<TaskProps, 'onAccepted' | 'onDeclined'>;
+export type IncomingTaskProps = Pick<TaskProps, 'incomingTask' | 'onAccepted' | 'onRejected'>;
 export type TaskListProps = Pick<TaskProps, 'onTaskAccepted' | 'onTaskDeclined'>;
 
 export type CallControlProps = Pick<
