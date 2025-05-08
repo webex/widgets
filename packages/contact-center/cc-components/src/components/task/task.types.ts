@@ -30,12 +30,12 @@ export interface TaskProps {
   /**
    * Handler for task accepted
    */
-  onAccepted?: (task) => void;
+  onAccepted?: ({task}: {task: ITask}) => void;
 
   /**
    * Handler for task declined
    */
-  onRejected?: (task) => void;
+  onRejected?: ({task}: {task: ITask}) => void;
 
   /**
    * Handler for task accepted in TaskList

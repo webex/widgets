@@ -86,9 +86,9 @@ function App() {
     console.log('onAccepted Invoked');
   };
 
-  const onDeclined = ({task}) => {
+  const onRejected = ({task}) => {
     setIncomingTasks((prevTasks) => prevTasks.filter((t) => t.data.interactionId !== task.data.interactionId));
-    console.log('onDeclined invoked');
+    console.log('onRejected invoked');
   };
 
   const onTaskAccepted = (task) => {
@@ -414,7 +414,7 @@ function App() {
                                   >
                                     ×
                                   </button>
-                                  <IncomingTask incomingTask={task} onAccepted={onAccepted} onRejected={onDeclined} />
+                                  <IncomingTask incomingTask={task} onAccepted={onAccepted} onRejected={onRejected} />
                                 </>
                               </div>
                             ))}
