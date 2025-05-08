@@ -1,3 +1,17 @@
+# [1.28.0-ccwidgets.52](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.51...v1.28.0-ccwidgets.52) (2025-05-08)
+
+
+### Bug Fixes
+
+* **user-state:** resolved-ui-gaps-in-user-state-dropdown-component ([#445](https://github.com/webex/widgets/issues/445)) ([e98226f](https://github.com/webex/widgets/commit/e98226f2eab16b39274bf2ce0d384055046591a2))
+
+# [1.28.0-ccwidgets.51](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.50...v1.28.0-ccwidgets.51) (2025-05-07)
+
+
+### Features
+
+* **cc-task:** task list to support multiple tasks and digital tasks ([#441](https://github.com/webex/widgets/issues/441)) ([a9f7596](https://github.com/webex/widgets/commit/a9f7596adc05aa31122b6bcbdc3a900c9cb0bbcc))
+
 # [1.28.0-ccwidgets.50](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.49...v1.28.0-ccwidgets.50) (2025-04-30)
 
 

@@ -20,7 +20,6 @@ function CallControlComponent(props: CallControlComponentProps) {
     endCall,
     wrapupCall,
     wrapupCodes,
-    wrapupRequired,
     isHeld,
     setIsHeld,
     isRecording,
@@ -38,6 +37,7 @@ function CallControlComponent(props: CallControlComponentProps) {
     setConsultAgentId,
     allowConsultToQueue,
     setLastTargetType,
+    controlVisibility,
   } = props;
 
   useEffect(() => {
@@ -111,6 +111,7 @@ function CallControlComponent(props: CallControlComponentProps) {
       tooltip: isHeld ? 'Resume the call' : 'Hold the call',
       className: 'call-control-button',
       disabled: false,
+      isVisible: controlVisibility.holdResume,
     },
     {
       id: 'consult',
@@ -119,6 +120,7 @@ function CallControlComponent(props: CallControlComponentProps) {
       className: 'call-control-button',
       disabled: false,
       menuType: 'Consult',
+      isVisible: controlVisibility.consult,
     },
     {
       id: 'transfer',
@@ -127,6 +129,7 @@ function CallControlComponent(props: CallControlComponentProps) {
       className: 'call-control-button',
       disabled: false,
       menuType: 'Transfer',
+      isVisible: controlVisibility.transfer,
     },
     {
       id: 'record',
@@ -135,6 +138,7 @@ function CallControlComponent(props: CallControlComponentProps) {
       tooltip: isRecording ? 'Pause Recording' : 'Resume Recording',
       className: 'call-control-button',
       disabled: false,
+      isVisible: controlVisibility.pauseResumeRecording,
     },
     {
       id: 'end',
@@ -143,6 +147,7 @@ function CallControlComponent(props: CallControlComponentProps) {
       tooltip: 'End call',
       className: 'call-control-button-cancel',
       disabled: isHeld,
+      isVisible: controlVisibility.end,
     },
   ];
 
@@ -164,9 +169,11 @@ function CallControlComponent(props: CallControlComponentProps) {
         autoPlay
       ></audio>
       <div className="call-control-container" data-testid="call-control-container">
-        {!consultAccepted && !wrapupRequired && (
+        {!consultAccepted && !controlVisibility.wrapup && (
           <div className="button-group">
             {filteredButtons.map((button, index) => {
+              if (!button.isVisible) return null;
+
               if (button.menuType) {
                 return (
                   <PopoverNext
@@ -258,7 +265,7 @@ function CallControlComponent(props: CallControlComponentProps) {
             })}
           </div>
         )}
-        {wrapupRequired && (
+        {controlVisibility.wrapup && (
           <div className="wrapup-group">
             <PopoverNext
               color="primary"
