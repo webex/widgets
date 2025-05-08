@@ -5,7 +5,7 @@ export type UseTaskListProps = Pick<
   TaskProps,
   'cc' | 'taskList' | 'deviceType' | 'onTaskAccepted' | 'onTaskDeclined' | 'logger'
 >;
-export type IncomingTaskProps = Pick<TaskProps, 'onAccepted' | 'onDeclined'>;
+export type IncomingTaskProps = Pick<TaskProps, 'incomingTask' | 'onAccepted' | 'onDeclined'>;
 export type TaskListProps = Pick<TaskProps, 'onTaskAccepted' | 'onTaskDeclined'>;
 
 export type CallControlProps = Pick<

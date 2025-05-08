@@ -30,12 +30,12 @@ export interface TaskProps {
   /**
    * Handler for task accepted
    */
-  onAccepted?: () => void;
+  onAccepted?: (task) => void;
 
   /**
    * Handler for task declined
    */
-  onDeclined?: () => void;
+  onDeclined?: (task) => void;
 
   /**
    * Handler for task accepted in TaskList
@@ -50,12 +50,12 @@ export interface TaskProps {
   /**
    * accept incoming task action
    */
-  accept: () => void;
+  accept: (task: ITask) => void;
 
   /**
    * decline incoming task action
    */
-  decline: () => void;
+  decline: (task: ITask) => void;
 
   /**
    * accept task from task list

@@ -98,7 +98,8 @@ describe('useIncomingTask Hook', () => {
 
     expect(setTaskCallbackSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function), 'interaction1');
     expect(setTaskCallbackSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_REJECT, expect.any(Function), 'interaction1');
-    expect(onSpy).toHaveBeenCalledTimes(2);
+    expect(setTaskCallbackSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function), 'interaction1');
+    expect(onSpy).toHaveBeenCalledTimes(3);
 
     // Clean up
     act(() => {
@@ -107,7 +108,8 @@ describe('useIncomingTask Hook', () => {
 
     expect(removeTaskCallbackSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function), 'interaction1');
     expect(removeTaskCallbackSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_REJECT, expect.any(Function), 'interaction1');
-    expect(offSpy).toHaveBeenCalledTimes(2);
+    expect(removeTaskCallbackSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function), 'interaction1');
+    expect(offSpy).toHaveBeenCalledTimes(3);
   });
 
   it('should call onAccepted if it is provided', async () => {
@@ -136,7 +138,7 @@ describe('useIncomingTask Hook', () => {
     });
 
     await waitFor(() => {
-      expect(onTaskAccepted).toHaveBeenCalled();
+      expect(onTaskAccepted).toHaveBeenCalledWith(taskMock);
     });
 
     // Ensure no errors are logged
@@ -159,7 +161,7 @@ describe('useIncomingTask Hook', () => {
     });
 
     await waitFor(() => {
-      expect(onTaskDeclined).toHaveBeenCalled();
+      expect(onTaskDeclined).toHaveBeenCalledWith(taskMock);
     });
 
     // Ensure no errors are logged

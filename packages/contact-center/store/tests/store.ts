@@ -47,7 +47,6 @@ describe('Store', () => {
     expect(storeInstance.idleCodes).toEqual([]);
     expect(storeInstance.agentId).toBe('');
     expect(storeInstance.wrapupCodes).toEqual([]);
-    expect(storeInstance.incomingTask).toBeNull();
     expect(storeInstance.currentTask).toBeNull();
     expect(storeInstance.isAgentLoggedIn).toBe(false);
     expect(storeInstance.deviceType).toBe('');

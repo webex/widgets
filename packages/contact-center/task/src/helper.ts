@@ -51,19 +51,21 @@ export const useIncomingTask = (props: UseTaskProps) => {
   const isBrowser = deviceType === 'BROWSER';
 
   const taskAssignCallback = () => {
-    if (onAccepted) onAccepted();
+    if (onAccepted) onAccepted(incomingTask);
   };
 
   const taskRejectCallback = () => {
-    if (onDeclined) onDeclined();
+    if (onDeclined) onDeclined(incomingTask);
   };
 
   useEffect(() => {
     if (!incomingTask) return;
     store.setTaskCallback(TASK_EVENTS.TASK_ASSIGNED, taskAssignCallback, incomingTask?.data.interactionId);
+    store.setTaskCallback(TASK_EVENTS.TASK_END, taskRejectCallback, incomingTask?.data.interactionId);
     store.setTaskCallback(TASK_EVENTS.TASK_REJECT, taskRejectCallback, incomingTask?.data.interactionId);
     return () => {
       store.removeTaskCallback(TASK_EVENTS.TASK_ASSIGNED, taskAssignCallback, incomingTask?.data.interactionId);
+      store.removeTaskCallback(TASK_EVENTS.TASK_END, taskRejectCallback, incomingTask?.data.interactionId);
       store.removeTaskCallback(TASK_EVENTS.TASK_REJECT, taskRejectCallback, incomingTask?.data.interactionId);
     };
   }, [incomingTask]);

@@ -47,6 +47,12 @@ function App() {
   const [rejectedReason, setRejectedReason] = useState('');
   const [selectedState, setSelectedState] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [incomingTasks, setIncomingTasks] = useState([]);
+
+  const onIncomingTaskCB = (task) => {
+    console.log('Incoming task:', task);
+    setIncomingTasks((prevTasks) => [...prevTasks, task]);
+  };
 
   const webexConfig = {
     fedramp: false,
@@ -72,11 +78,13 @@ function App() {
     console.log('CC Sign out has been successful');
   };
 
-  const onAccepted = () => {
+  const onAccepted = (task) => {
+    setIncomingTasks((prevTasks) => prevTasks.filter((t) => t.data.interactionId !== task.data.interactionId));
     console.log('onAccepted Invoked');
   };
 
-  const onDeclined = () => {
+  const onDeclined = (task) => {
+    setIncomingTasks((prevTasks) => prevTasks.filter((t) => t.data.interactionId !== task.data.interactionId));
     console.log('onDeclined invoked');
   };
 
@@ -171,6 +179,8 @@ function App() {
       setRejectedReason(reason);
       setShowRejectedPopup(true);
     });
+
+    store.setIncomingTaskCb(onIncomingTaskCB);
 
     return () => {
       store.setTaskRejected(undefined);
@@ -303,11 +313,18 @@ function App() {
             </div>
             {isSdkReady && (
               <>
-                <div className="station-login">
-                  {selectedWidgets.stationLogin && (
-                    <StationLogin onLogin={onLogin} onLogout={onLogout} onCCSignOut={onCCSignOut} />
-                  )}
-                </div>
+                {selectedWidgets.stationLogin && (
+                  <div className="box">
+                    <section className="section-box">
+                      <fieldset className="fieldset">
+                        <legend className="legend-box">Station Login</legend>
+                        <div className="station-login">
+                          <StationLogin onLogin={onLogin} onLogout={onLogout} onCCSignOut={onCCSignOut} />
+                        </div>
+                      </fieldset>
+                    </section>
+                  </div>
+                )}
                 {(store.isAgentLoggedIn || isLoggedIn) && (
                   <>
                     {selectedWidgets.userState && (
@@ -346,9 +363,37 @@ function App() {
                         </section>
                       </div>
                     )}
-                    {selectedWidgets.incomingTask && <IncomingTask onAccepted={onAccepted} onDeclined={onDeclined} />}
+
+                    {selectedWidgets.incomingTask && (
+                      <>
+                        <div className="box">
+                          <section className="section-box">
+                            <fieldset className="fieldset">
+                              <legend className="legend-box">Incoming Tasks</legend>
+                              {incomingTasks.map((task) => (
+                                <IncomingTask
+                                  key={task.id}
+                                  incomingTask={task}
+                                  onAccepted={onAccepted}
+                                  onDeclined={onDeclined}
+                                  onRejected={onDeclined}
+                                />
+                              ))}
+                            </fieldset>
+                          </section>
+                        </div>
+                      </>
+                    )}
+
                     {selectedWidgets.taskList && (
-                      <TaskList onTaskAccepted={onTaskAccepted} onTaskDeclined={onTaskDeclined} />
+                      <div className="box">
+                        <section className="section-box">
+                          <fieldset className="fieldset">
+                            <legend className="legend-box">Task List</legend>
+                            <TaskList onTaskAccepted={onTaskAccepted} onTaskDeclined={onTaskDeclined} />
+                          </fieldset>
+                        </section>
+                      </div>
                     )}
                     {selectedWidgets.outdialCall && <OutdialCall />}
                   </>
