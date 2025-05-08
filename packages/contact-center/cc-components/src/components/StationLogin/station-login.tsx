@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useRef, useCallback} from 'react';
 import {StationLoginComponentProps} from './station-login.types';
 import './station-login.style.scss';
-import {DESKTOP, DIALNUMBER, LoginOptions, StationLoginLabels} from './constants';
+import {DESKTOP, DIALNUMBER, LoginOptions, SignInErrors, StationLoginLabels} from './constants';
 import {Button, Icon, Select, Option, Text, Tooltip, Input} from '@momentum-design/components/dist/react';
 
 const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps> = (props) => {
@@ -10,12 +10,14 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
     loginOptions,
     login,
     logout,
+    loginFailure,
     setDeviceType,
     setDialNumber,
     setTeam,
     isAgentLoggedIn,
     deviceType,
     dialNumber,
+    dialNumberRegex,
     showMultipleLoginAlert,
     handleContinue,
     onCCSignOut,
@@ -30,8 +32,6 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
   const [selectedDeviceType, setSelectedDeviceType] = useState<string>(deviceType || '');
   const [showDNError, setShowDNError] = useState<boolean>(false);
   const [dnErrorText, setDNErrorText] = useState<string>('');
-  const [showSaveError, setShowSaveError] = useState<boolean>(false);
-  const [saveErrorText, setSaveErrorText] = useState<string>('');
 
   // useEffect to be called on mount
   useEffect(() => {
@@ -90,22 +90,12 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
    * @returns {boolean} whether or not to show a validation error
    */
   const validateDialNumber = (input: string): boolean => {
-    const regexForDn = new RegExp('^[+1][0-9]{3,18}$|^[*#:][+1][0-9*#:]{3,18}$|^[0-9*#:]{3,18}$');
+    const regexForDn = new RegExp(dialNumberRegex);
     if (regexForDn.test(input)) {
       return false;
     }
     setDNErrorText(StationLoginLabels.DN_FORMAT_ERROR);
     return true;
-  };
-
-  const tryLogin = () => {
-    try {
-      login();
-      setShowSaveError(false);
-    } catch (error) {
-      setSaveErrorText(error?.message);
-      setShowSaveError(true);
-    }
   };
 
   return (
@@ -202,6 +192,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
 
                 // validation
                 if (input.length === 0) {
+                  // show error for empty string
                   setDNErrorText(`${LoginOptions[selectedDeviceType]} ${StationLoginLabels.IS_REQUIRED}`);
                   setShowDNError(true);
                 } else if (selectedDeviceType === DIALNUMBER) {
@@ -234,9 +225,9 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
             </Select>
           </div>
 
-          {showSaveError && (
-            <Text className="save-error-text" type={'body-midsize-regular'}>
-              {saveErrorText}
+          {loginFailure && (
+            <Text className="error-text-color" type={'body-midsize-regular'}>
+              {SignInErrors[loginFailure.message] ?? StationLoginLabels.DEFAULT_ERROR}
             </Text>
           )}
           <div className="btn-container">
@@ -245,7 +236,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
                 {StationLoginLabels.SIGN_OUT}
               </Button>
             ) : (
-              <Button onClick={tryLogin} disabled={showDNError}>
+              <Button onClick={login} disabled={showDNError}>
                 {StationLoginLabels.SAVE_AND_CONTINUE}
               </Button>
             )}

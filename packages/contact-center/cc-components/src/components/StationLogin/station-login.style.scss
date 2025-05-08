@@ -129,7 +129,6 @@ mdc-select, mdc-input {
   gap: 0.5rem;
 }
 
-.save-error-text {
+.error-text-color {
   color: var(--color-theme-text-error-normal, #AB0A15);
-  text-align: end;
 }

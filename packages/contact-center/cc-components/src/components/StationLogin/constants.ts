@@ -17,6 +17,11 @@ export const StationLoginLabels = {
   YOUR_TEAM: 'Your Team',
   IS_REQUIRED: ' is required',
   DN_FORMAT_ERROR: 'Enter a valid US dial number. For help, reach out to your administrator or support team.',
+  DEFAULT_ERROR: 'Error logging in: ',
+};
+
+export const SignInErrors = {
+  ['DUPLICATE_LOCATION']: 'This extension is already in use.',
 };
 
 // Utility consts
