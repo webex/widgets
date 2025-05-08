@@ -128,3 +128,8 @@ mdc-select, mdc-input {
   justify-content: flex-end; // Aligns the button to the right
   gap: 0.5rem;
 }
+
+.save-error-text {
+  color: var(--color-theme-text-error-normal, #AB0A15);
+  text-align: end;
+}

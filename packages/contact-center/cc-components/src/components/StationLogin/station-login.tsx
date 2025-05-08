@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useRef, useCallback} from 'react';
 import {StationLoginComponentProps} from './station-login.types';
 import './station-login.style.scss';
-import {DESKTOP, LoginOptions, StationLoginLabels} from './constants';
+import {DESKTOP, DIALNUMBER, LoginOptions, StationLoginLabels} from './constants';
 import {Button, Icon, Select, Option, Text, Tooltip, Input} from '@momentum-design/components/dist/react';
 
 const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps> = (props) => {
@@ -28,6 +28,10 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
   const [dialNumberValue, setDialNumberValue] = useState<string>(dialNumber || '');
   const [showCCSignOutModal, setShowCCSignOutModal] = useState<boolean>(false);
   const [selectedDeviceType, setSelectedDeviceType] = useState<string>(deviceType || '');
+  const [showDNError, setShowDNError] = useState<boolean>(false);
+  const [dnErrorText, setDNErrorText] = useState<string>('');
+  const [showSaveError, setShowSaveError] = useState<boolean>(false);
+  const [saveErrorText, setSaveErrorText] = useState<string>('');
 
   // useEffect to be called on mount
   useEffect(() => {
@@ -77,6 +81,30 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
     if (selectedOption != DESKTOP && Object.keys(LoginOptions).includes(selectedOption)) {
       setDialNumberLabel(LoginOptions[selectedOption]);
       setDialNumberPlaceholder(LoginOptions[selectedOption]);
+    }
+  };
+
+  /**
+   * Runs validation tests on a string given as a Dial Number
+   * @param {string} input
+   * @returns {boolean} whether or not to show a validation error
+   */
+  const validateDialNumber = (input: string): boolean => {
+    const regexForDn = new RegExp('^[+1][0-9]{3,18}$|^[*#:][+1][0-9*#:]{3,18}$|^[0-9*#:]{3,18}$');
+    if (regexForDn.test(input)) {
+      return false;
+    }
+    setDNErrorText(StationLoginLabels.DN_FORMAT_ERROR);
+    return true;
+  };
+
+  const tryLogin = () => {
+    try {
+      login();
+      setShowSaveError(false);
+    } catch (error) {
+      setSaveErrorText(error?.message);
+      setShowSaveError(true);
     }
   };
 
@@ -134,13 +162,14 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
                 onChange={(event: CustomEvent) => {
                   const selectedOption = event.detail.value;
                   // TODO: Select component is calling onChange with first label on load
-                  // TODO: add bug issue link once created
+                  // bug ticket: https://jira-eng-gpk2.cisco.com/jira/browse/MOMENTUM-668
                   if (Object.keys(LoginOptions).includes(selectedOption)) {
                     setDeviceType(selectedOption);
                     setSelectedDeviceType(selectedOption);
                     updateDialNumberLabel(selectedOption);
                     // clear dial number when switching between DN and Extension
                     setDialNumber('');
+                    setShowDNError(false);
                   }
                 }}
                 value={selectedDeviceType}
@@ -167,25 +196,33 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
               placeholder={dialNumberPlaceholder}
               value={dialNumberValue}
               onChange={(event) => {
-                const newDialNumber = (event.target as HTMLInputElement).value;
-                setDialNumberValue(newDialNumber);
-                setDialNumber(newDialNumber);
+                const input = (event.target as HTMLInputElement).value.trim();
+                setDialNumberValue(input);
+                setDialNumber(input);
+
+                // validation
+                if (input.length === 0) {
+                  setDNErrorText(`${LoginOptions[selectedDeviceType]} ${StationLoginLabels.IS_REQUIRED}`);
+                  setShowDNError(true);
+                } else if (selectedDeviceType === DIALNUMBER) {
+                  setShowDNError(validateDialNumber(input));
+                }
               }}
-              helpText={dialNumberValue.length === 0 ? `${dialNumberLabel} is required` : undefined}
-              helpTextType={dialNumberValue.length === 0 ? 'error' : undefined}
+              helpText={showDNError ? dnErrorText : undefined}
+              helpTextType={showDNError ? 'error' : undefined}
             />
           )}
 
           <div className="select-container">
             <Select
-              label="Your Team"
+              label={StationLoginLabels.YOUR_TEAM}
               id="teams-dropdown"
               name="teams-dropdown"
               onChange={(event: CustomEvent) => {
                 setTeam(event.detail.value);
               }}
               className="station-login-select"
-              placeholder="Your Team"
+              placeholder={StationLoginLabels.YOUR_TEAM}
             >
               {teams.map((team: {id: string; name: string}, index: number) => {
                 return (
@@ -197,13 +234,20 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
             </Select>
           </div>
 
+          {showSaveError && (
+            <Text className="save-error-text" type={'body-midsize-regular'}>
+              {saveErrorText}
+            </Text>
+          )}
           <div className="btn-container">
             {isAgentLoggedIn ? (
               <Button id="logoutAgent" onClick={logout} color="positive">
                 {StationLoginLabels.SIGN_OUT}
               </Button>
             ) : (
-              <Button onClick={login}>{StationLoginLabels.SAVE_AND_CONTINUE}</Button>
+              <Button onClick={tryLogin} disabled={showDNError}>
+                {StationLoginLabels.SAVE_AND_CONTINUE}
+              </Button>
             )}
             {onCCSignOut && (
               <Button onClick={() => setShowCCSignOutModal(true)} variant="secondary" className="white-button">
