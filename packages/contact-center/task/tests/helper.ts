@@ -48,6 +48,7 @@ beforeAll(() => {
 });
 
 describe('useIncomingTask Hook', () => {
+  const onRejected = jest.fn();
   afterEach(() => {
     jest.clearAllMocks();
     logger.error.mockRestore();
@@ -59,7 +60,7 @@ describe('useIncomingTask Hook', () => {
       useIncomingTask({
         incomingTask: undefined,
         onAccepted: onTaskAccepted,
-        onDeclined: onTaskDeclined,
+        onRejected: onTaskDeclined,
         deviceType: 'BROWSER',
         logger,
       })
@@ -90,7 +91,7 @@ describe('useIncomingTask Hook', () => {
       useIncomingTask({
         incomingTask: taskMock,
         onAccepted: onTaskAccepted,
-        onDeclined: onTaskDeclined,
+        onRejected: onTaskDeclined,
         deviceType: 'BROWSER',
         logger,
       })
@@ -126,7 +127,7 @@ describe('useIncomingTask Hook', () => {
       useIncomingTask({
         incomingTask: taskMock,
         onAccepted: onTaskAccepted,
-        onDeclined: onTaskDeclined,
+        onRejected: onTaskDeclined,
         deviceType: 'BROWSER',
         logger,
       })
@@ -138,19 +139,19 @@ describe('useIncomingTask Hook', () => {
     });
 
     await waitFor(() => {
-      expect(onTaskAccepted).toHaveBeenCalledWith(taskMock);
+      expect(onTaskAccepted).toHaveBeenCalledWith({task: taskMock});
     });
 
     // Ensure no errors are logged
     expect(logger.error).not.toHaveBeenCalled();
   });
 
-  it('should call onDeclined if it is provided', async () => {
+  it('should call onRejected if it is provided', async () => {
     renderHook(() =>
       useIncomingTask({
         incomingTask: taskMock,
         onAccepted: onTaskAccepted,
-        onDeclined: onTaskDeclined,
+        onRejected: onTaskDeclined,
         deviceType: 'BROWSER',
         logger,
       })
@@ -161,7 +162,7 @@ describe('useIncomingTask Hook', () => {
     });
 
     await waitFor(() => {
-      expect(onTaskDeclined).toHaveBeenCalledWith(taskMock);
+      expect(onTaskDeclined).toHaveBeenCalledWith({task: taskMock});
     });
 
     // Ensure no errors are logged
@@ -175,7 +176,7 @@ describe('useIncomingTask Hook', () => {
     const noIdTask = {
       data: {},
       accept: jest.fn(),
-      decline: jest.fn(),
+      reject: jest.fn(),
       on: jest.fn(),
       off: jest.fn(),
     };
@@ -183,7 +184,7 @@ describe('useIncomingTask Hook', () => {
       useIncomingTask({
         incomingTask: noIdTask,
         onAccepted: onTaskAccepted,
-        onDeclined: onTaskDeclined,
+        onRejected: onTaskDeclined,
         deviceType: 'BROWSER',
         logger,
       })
@@ -197,10 +198,10 @@ describe('useIncomingTask Hook', () => {
     expect(onTaskAccepted).not.toHaveBeenCalled();
 
     act(() => {
-      result.current.decline();
+      result.current.reject();
     });
 
-    expect(noIdTask.decline).not.toHaveBeenCalled();
+    expect(noIdTask.reject).not.toHaveBeenCalled();
     expect(onTaskDeclined).not.toHaveBeenCalled();
   });
 
@@ -281,11 +282,11 @@ describe('useIncomingTask Hook', () => {
     };
 
     const {result} = renderHook(() =>
-      useIncomingTask({incomingTask: failingTask, onDeclined, deviceType: 'BROWSER', logger})
+      useIncomingTask({incomingTask: failingTask, onRejected, deviceType: 'BROWSER', logger})
     );
 
     act(() => {
-      result.current.decline();
+      result.current.reject();
     });
 
     await waitFor(() => {

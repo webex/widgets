@@ -22,7 +22,7 @@ import {runInAction} from 'mobx';
 
 class StoreWrapper implements IStoreWrapper {
   store: IStore;
-  onIncomingTask: (task: ITask) => void;
+  onIncomingTask: ({task}: {task: ITask}) => void;
   onTaskRejected?: (task: ITask, reason: string) => void;
   onTaskAssigned?: (task: ITask) => void;
 
@@ -514,8 +514,7 @@ class StoreWrapper implements IStoreWrapper {
     task.on(TASK_EVENTS.TASK_CONSULT_END, this.handleConsultEnd);
 
     this.refreshTaskList();
-
-    if (this.onIncomingTask) this.onIncomingTask(task);
+    if (this.onIncomingTask) this.onIncomingTask({task});
   };
 
   handleStateChange = (data) => {

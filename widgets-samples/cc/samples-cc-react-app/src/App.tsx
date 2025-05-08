@@ -49,7 +49,7 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [incomingTasks, setIncomingTasks] = useState([]);
 
-  const onIncomingTaskCB = (task) => {
+  const onIncomingTaskCB = ({task}) => {
     console.log('Incoming task:', task);
     setIncomingTasks((prevTasks) => [...prevTasks, task]);
   };
@@ -78,12 +78,12 @@ function App() {
     console.log('CC Sign out has been successful');
   };
 
-  const onAccepted = (task) => {
+  const onAccepted = ({task}) => {
     setIncomingTasks((prevTasks) => prevTasks.filter((t) => t.data.interactionId !== task.data.interactionId));
     console.log('onAccepted Invoked');
   };
 
-  const onDeclined = (task) => {
+  const onDeclined = ({task}) => {
     setIncomingTasks((prevTasks) => prevTasks.filter((t) => t.data.interactionId !== task.data.interactionId));
     console.log('onDeclined invoked');
   };
@@ -184,6 +184,7 @@ function App() {
 
     return () => {
       store.setTaskRejected(undefined);
+      store.setIncomingTaskCb(undefined);
     };
   }, []);
 
@@ -375,7 +376,6 @@ function App() {
                                   key={task.id}
                                   incomingTask={task}
                                   onAccepted={onAccepted}
-                                  onDeclined={onDeclined}
                                   onRejected={onDeclined}
                                 />
                               ))}

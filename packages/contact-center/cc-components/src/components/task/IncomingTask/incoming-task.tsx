@@ -3,7 +3,7 @@ import {IncomingTaskComponentProps} from '../task.types';
 import Task from '../Task';
 
 const IncomingTaskComponent: React.FunctionComponent<IncomingTaskComponentProps> = (props) => {
-  const {incomingTask, isBrowser, accept, decline} = props;
+  const {incomingTask, isBrowser, accept, reject} = props;
   if (!incomingTask) {
     return <></>; // hidden component
   }
@@ -26,7 +26,7 @@ const IncomingTaskComponent: React.FunctionComponent<IncomingTaskComponentProps>
       isIncomingTask={true}
       queue={virtualTeamName}
       acceptTask={() => accept(incomingTask)}
-      declineTask={() => decline(incomingTask)}
+      declineTask={() => reject(incomingTask)}
       ronaTimeout={ronaTimeout}
       acceptText={acceptText}
       disableAccept={isTelephony && !isBrowser}

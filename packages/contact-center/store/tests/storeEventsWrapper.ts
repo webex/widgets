@@ -471,7 +471,7 @@ describe('storeEventsWrapper', () => {
 
       // Call the method under test
       storeWrapper.handleIncomingTask(mockTask);
-      expect(mockIncomingTaskCallback).toHaveBeenCalledWith(mockTask);
+      expect(mockIncomingTaskCallback).toHaveBeenCalledWith({task: mockTask});
 
       // Verify that the correct event handlers were registered
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));

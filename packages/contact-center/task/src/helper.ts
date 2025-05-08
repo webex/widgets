@@ -47,15 +47,15 @@ export const useTaskList = (props: UseTaskListProps) => {
 };
 
 export const useIncomingTask = (props: UseTaskProps) => {
-  const {onAccepted, onDeclined, deviceType, incomingTask, logger} = props;
+  const {onAccepted, onRejected, deviceType, incomingTask, logger} = props;
   const isBrowser = deviceType === 'BROWSER';
 
   const taskAssignCallback = () => {
-    if (onAccepted) onAccepted(incomingTask);
+    if (onAccepted) onAccepted({task: incomingTask});
   };
 
   const taskRejectCallback = () => {
-    if (onDeclined) onDeclined(incomingTask);
+    if (onRejected) onRejected({task: incomingTask});
   };
 
   useEffect(() => {
@@ -86,7 +86,7 @@ export const useIncomingTask = (props: UseTaskProps) => {
     });
   };
 
-  const decline = () => {
+  const reject = () => {
     const taskId = incomingTask?.data.interactionId;
     if (!taskId) return;
 
@@ -98,7 +98,7 @@ export const useIncomingTask = (props: UseTaskProps) => {
   return {
     incomingTask,
     accept,
-    decline,
+    reject,
     isBrowser,
   };
 };

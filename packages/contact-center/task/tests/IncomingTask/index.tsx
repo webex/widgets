@@ -19,7 +19,7 @@ jest.mock('@webex/cc-store', () => ({
 }));
 
 const onAcceptedCb = jest.fn();
-const onDeclinedCb = jest.fn();
+const onRejectedCb = jest.fn();
 
 describe('IncomingTask Component', () => {
   it('renders IncomingTaskPresentational with correct props', () => {
@@ -33,18 +33,18 @@ describe('IncomingTask Component', () => {
     useIncomingTaskSpy.mockReturnValue({
       incomingTask: mockTask,
       accept: jest.fn(),
-      decline: jest.fn(),
+      reject: jest.fn(),
       isBrowser: true,
     });
 
-    render(<IncomingTask incomingTask={mockTask} onAccepted={onAcceptedCb} onDeclined={onDeclinedCb} />);
+    render(<IncomingTask incomingTask={mockTask} onAccepted={onAcceptedCb} onRejected={onRejectedCb} />);
 
     // Assert that the useIncomingTask hook is called with the correct arguments
     expect(useIncomingTaskSpy).toHaveBeenCalledWith({
       incomingTask: mockTask,
       deviceType: store.deviceType,
       onAccepted: onAcceptedCb,
-      onDeclined: onDeclinedCb,
+      onRejected: onRejectedCb,
     });
   });
 });
