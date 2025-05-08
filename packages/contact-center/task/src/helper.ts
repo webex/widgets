@@ -47,24 +47,30 @@ export const useTaskList = (props: UseTaskListProps) => {
 };
 
 export const useIncomingTask = (props: UseTaskProps) => {
-  const {onAccepted, onDeclined, deviceType, incomingTask, logger} = props;
+  const {onAccepted, onRejected, deviceType, incomingTask, logger} = props;
   const isBrowser = deviceType === 'BROWSER';
 
   const taskAssignCallback = () => {
-    if (onAccepted) onAccepted();
+    if (onAccepted) onAccepted({task: incomingTask});
   };
 
   const taskRejectCallback = () => {
-    if (onDeclined) onDeclined();
+    if (onRejected) onRejected({task: incomingTask});
   };
 
   useEffect(() => {
     if (!incomingTask) return;
     store.setTaskCallback(TASK_EVENTS.TASK_ASSIGNED, taskAssignCallback, incomingTask?.data.interactionId);
+    store.setTaskCallback(TASK_EVENTS.TASK_CONSULT_ACCEPTED, taskAssignCallback, incomingTask?.data.interactionId);
+    store.setTaskCallback(TASK_EVENTS.TASK_END, taskRejectCallback, incomingTask?.data.interactionId);
     store.setTaskCallback(TASK_EVENTS.TASK_REJECT, taskRejectCallback, incomingTask?.data.interactionId);
+    store.setTaskCallback(TASK_EVENTS.TASK_CONSULT_END, taskRejectCallback, incomingTask?.data.interactionId);
     return () => {
       store.removeTaskCallback(TASK_EVENTS.TASK_ASSIGNED, taskAssignCallback, incomingTask?.data.interactionId);
+      store.removeTaskCallback(TASK_EVENTS.TASK_CONSULT_ACCEPTED, taskAssignCallback, incomingTask?.data.interactionId);
+      store.removeTaskCallback(TASK_EVENTS.TASK_END, taskRejectCallback, incomingTask?.data.interactionId);
       store.removeTaskCallback(TASK_EVENTS.TASK_REJECT, taskRejectCallback, incomingTask?.data.interactionId);
+      store.removeTaskCallback(TASK_EVENTS.TASK_CONSULT_END, taskRejectCallback, incomingTask?.data.interactionId);
     };
   }, [incomingTask]);
 
@@ -84,7 +90,7 @@ export const useIncomingTask = (props: UseTaskProps) => {
     });
   };
 
-  const decline = () => {
+  const reject = () => {
     const taskId = incomingTask?.data.interactionId;
     if (!taskId) return;
 
@@ -96,7 +102,7 @@ export const useIncomingTask = (props: UseTaskProps) => {
   return {
     incomingTask,
     accept,
-    decline,
+    reject,
     isBrowser,
   };
 };

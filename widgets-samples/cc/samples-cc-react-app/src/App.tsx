@@ -47,6 +47,15 @@ function App() {
   const [rejectedReason, setRejectedReason] = useState('');
   const [selectedState, setSelectedState] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [incomingTasks, setIncomingTasks] = useState([]);
+
+  const [collapsedTasks, setCollapsedTasks] = React.useState([]);
+
+  const onIncomingTaskCB = ({task}) => {
+    console.log('Incoming task:', task);
+    setIncomingTasks((prevTasks) => [...prevTasks, task]);
+    playNotificationSound();
+  };
 
   const webexConfig = {
     fedramp: false,
@@ -72,12 +81,14 @@ function App() {
     console.log('CC Sign out has been successful');
   };
 
-  const onAccepted = () => {
+  const onAccepted = ({task}) => {
+    setIncomingTasks((prevTasks) => prevTasks.filter((t) => t.data.interactionId !== task.data.interactionId));
     console.log('onAccepted Invoked');
   };
 
-  const onDeclined = () => {
-    console.log('onDeclined invoked');
+  const onRejected = ({task}) => {
+    setIncomingTasks((prevTasks) => prevTasks.filter((t) => t.data.interactionId !== task.data.interactionId));
+    console.log('onRejected invoked');
   };
 
   const onTaskAccepted = (task) => {
@@ -107,6 +118,26 @@ function App() {
       setIsMultiLoginEnabled(true);
     }
   };
+
+  function playNotificationSound() {
+    const ctx = new AudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    // Use a waveform with richer harmonics, like 'triangle' or 'sawtooth'
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(1200, ctx.currentTime); // High pitch for metal cling
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    // Set the volume and create a quick decay to simulate the metallic sound
+    gain.gain.setValueAtTime(0.5, ctx.currentTime); // Start loud
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3); // Quick decay
+
+    osc.start();
+    osc.stop(ctx.currentTime + 3); // Play for 0.3 seconds
+  }
 
   const handleCheckboxChange = (e) => {
     const {name, checked} = e.target;
@@ -172,8 +203,11 @@ function App() {
       setShowRejectedPopup(true);
     });
 
+    store.setIncomingTaskCb(onIncomingTaskCB);
+
     return () => {
       store.setTaskRejected(undefined);
+      store.setIncomingTaskCb(undefined);
     };
   }, []);
 
@@ -303,11 +337,18 @@ function App() {
             </div>
             {isSdkReady && (
               <>
-                <div className="station-login">
-                  {selectedWidgets.stationLogin && (
-                    <StationLogin onLogin={onLogin} onLogout={onLogout} onCCSignOut={onCCSignOut} />
-                  )}
-                </div>
+                {selectedWidgets.stationLogin && (
+                  <div className="box">
+                    <section className="section-box">
+                      <fieldset className="fieldset">
+                        <legend className="legend-box">Station Login</legend>
+                        <div className="station-login">
+                          <StationLogin onLogin={onLogin} onLogout={onLogout} onCCSignOut={onCCSignOut} />
+                        </div>
+                      </fieldset>
+                    </section>
+                  </div>
+                )}
                 {(store.isAgentLoggedIn || isLoggedIn) && (
                   <>
                     {selectedWidgets.userState && (
@@ -346,9 +387,51 @@ function App() {
                         </section>
                       </div>
                     )}
-                    {selectedWidgets.incomingTask && <IncomingTask onAccepted={onAccepted} onDeclined={onDeclined} />}
+
+                    {selectedWidgets.incomingTask && (
+                      <>
+                        <div className="incoming-tasks-container">
+                          <section className="section-box">
+                            {incomingTasks.map((task) => (
+                              <div
+                                key={task.data.interactionId}
+                                className={`incoming-task ${collapsedTasks.includes(task.data.interactionId) ? 'collapsed' : ''}`}
+                                onClick={() => {
+                                  if (collapsedTasks.includes(task.data.interactionId)) {
+                                    setCollapsedTasks((prev) => prev.filter((id) => id !== task.data.interactionId));
+                                  }
+                                }}
+                              >
+                                <>
+                                  <button
+                                    className="close-btn"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setIncomingTasks((prevTasks) =>
+                                        prevTasks.filter((t) => t.data.interactionId !== task.data.interactionId)
+                                      );
+                                    }}
+                                  >
+                                    ×
+                                  </button>
+                                  <IncomingTask incomingTask={task} onAccepted={onAccepted} onRejected={onRejected} />
+                                </>
+                              </div>
+                            ))}
+                          </section>
+                        </div>
+                      </>
+                    )}
+
                     {selectedWidgets.taskList && (
-                      <TaskList onTaskAccepted={onTaskAccepted} onTaskDeclined={onTaskDeclined} />
+                      <div className="box">
+                        <section className="section-box">
+                          <fieldset className="fieldset">
+                            <legend className="legend-box">Task List</legend>
+                            <TaskList onTaskAccepted={onTaskAccepted} onTaskDeclined={onTaskDeclined} />
+                          </fieldset>
+                        </section>
+                      </div>
                     )}
                     {selectedWidgets.outdialCall && <OutdialCall />}
                   </>

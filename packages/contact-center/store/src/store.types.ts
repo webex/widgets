@@ -57,7 +57,6 @@ interface IStore {
   logger: ILogger;
   wrapupCodes: IWrapupCode[];
   currentTask: ITask;
-  incomingTask: ITask;
   taskList: Record<string, ITask>;
   taskMetaData: Record<string, TaskMetaData>;
   isAgentLoggedIn: boolean;
@@ -87,7 +86,6 @@ interface IStoreWrapper extends IStore {
   store: IStore;
   setCurrentTask(task: ITask): void;
   refreshTaskList(): void;
-  setIncomingTask(task: ITask): void;
   setDeviceType(option: string): void;
   setDialNumber(input: string): void;
   setCurrentState(state: string): void;

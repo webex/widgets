@@ -6,9 +6,9 @@ import {useIncomingTask} from '../helper';
 import {IncomingTaskComponent} from '@webex/cc-components';
 import {IncomingTaskProps} from '../task.types';
 
-const IncomingTask: React.FunctionComponent<IncomingTaskProps> = observer(({onAccepted, onDeclined}) => {
-  const {deviceType, incomingTask, logger} = store;
-  const result = useIncomingTask({incomingTask, onAccepted, onDeclined, deviceType, logger});
+const IncomingTask: React.FunctionComponent<IncomingTaskProps> = observer(({incomingTask, onAccepted, onRejected}) => {
+  const {deviceType, logger} = store;
+  const result = useIncomingTask({incomingTask, onAccepted, onRejected, deviceType, logger});
 
   const props = {
     ...result,

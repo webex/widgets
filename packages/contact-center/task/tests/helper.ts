@@ -48,6 +48,7 @@ beforeAll(() => {
 });
 
 describe('useIncomingTask Hook', () => {
+  const onRejected = jest.fn();
   afterEach(() => {
     jest.clearAllMocks();
     logger.error.mockRestore();
@@ -59,7 +60,7 @@ describe('useIncomingTask Hook', () => {
       useIncomingTask({
         incomingTask: undefined,
         onAccepted: onTaskAccepted,
-        onDeclined: onTaskDeclined,
+        onRejected: onTaskDeclined,
         deviceType: 'BROWSER',
         logger,
       })
@@ -69,8 +70,6 @@ describe('useIncomingTask Hook', () => {
 
   it('should setup event listeners for the incoming call', async () => {
     store.refreshTaskList();
-    const onSpy = jest.spyOn(taskMock, 'on');
-    const offSpy = jest.spyOn(taskMock, 'off');
     const setTaskCallbackSpy = jest.spyOn(store, 'setTaskCallback');
     const removeTaskCallbackSpy = jest.spyOn(store, 'removeTaskCallback');
 
@@ -90,7 +89,7 @@ describe('useIncomingTask Hook', () => {
       useIncomingTask({
         incomingTask: taskMock,
         onAccepted: onTaskAccepted,
-        onDeclined: onTaskDeclined,
+        onRejected: onTaskDeclined,
         deviceType: 'BROWSER',
         logger,
       })
@@ -98,7 +97,14 @@ describe('useIncomingTask Hook', () => {
 
     expect(setTaskCallbackSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function), 'interaction1');
     expect(setTaskCallbackSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_REJECT, expect.any(Function), 'interaction1');
-    expect(onSpy).toHaveBeenCalledTimes(2);
+    expect(setTaskCallbackSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function), 'interaction1');
+    expect(setTaskCallbackSpy).toHaveBeenCalledWith(
+      TASK_EVENTS.TASK_CONSULT_ACCEPTED,
+      expect.any(Function),
+      'interaction1'
+    );
+    expect(setTaskCallbackSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_CONSULT_END, expect.any(Function), 'interaction1');
+    expect(setTaskCallbackSpy).toHaveBeenCalledTimes(5);
 
     // Clean up
     act(() => {
@@ -107,7 +113,18 @@ describe('useIncomingTask Hook', () => {
 
     expect(removeTaskCallbackSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function), 'interaction1');
     expect(removeTaskCallbackSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_REJECT, expect.any(Function), 'interaction1');
-    expect(offSpy).toHaveBeenCalledTimes(2);
+    expect(removeTaskCallbackSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function), 'interaction1');
+    expect(removeTaskCallbackSpy).toHaveBeenCalledWith(
+      TASK_EVENTS.TASK_CONSULT_ACCEPTED,
+      expect.any(Function),
+      'interaction1'
+    );
+    expect(removeTaskCallbackSpy).toHaveBeenCalledWith(
+      TASK_EVENTS.TASK_CONSULT_END,
+      expect.any(Function),
+      'interaction1'
+    );
+    expect(removeTaskCallbackSpy).toHaveBeenCalledTimes(5);
   });
 
   it('should call onAccepted if it is provided', async () => {
@@ -124,7 +141,7 @@ describe('useIncomingTask Hook', () => {
       useIncomingTask({
         incomingTask: taskMock,
         onAccepted: onTaskAccepted,
-        onDeclined: onTaskDeclined,
+        onRejected: onTaskDeclined,
         deviceType: 'BROWSER',
         logger,
       })
@@ -136,19 +153,19 @@ describe('useIncomingTask Hook', () => {
     });
 
     await waitFor(() => {
-      expect(onTaskAccepted).toHaveBeenCalled();
+      expect(onTaskAccepted).toHaveBeenCalledWith({task: taskMock});
     });
 
     // Ensure no errors are logged
     expect(logger.error).not.toHaveBeenCalled();
   });
 
-  it('should call onDeclined if it is provided', async () => {
+  it('should call onRejected if it is provided', async () => {
     renderHook(() =>
       useIncomingTask({
         incomingTask: taskMock,
         onAccepted: onTaskAccepted,
-        onDeclined: onTaskDeclined,
+        onRejected: onTaskDeclined,
         deviceType: 'BROWSER',
         logger,
       })
@@ -159,7 +176,7 @@ describe('useIncomingTask Hook', () => {
     });
 
     await waitFor(() => {
-      expect(onTaskDeclined).toHaveBeenCalled();
+      expect(onTaskDeclined).toHaveBeenCalledWith({task: taskMock});
     });
 
     // Ensure no errors are logged
@@ -173,7 +190,7 @@ describe('useIncomingTask Hook', () => {
     const noIdTask = {
       data: {},
       accept: jest.fn(),
-      decline: jest.fn(),
+      reject: jest.fn(),
       on: jest.fn(),
       off: jest.fn(),
     };
@@ -181,7 +198,7 @@ describe('useIncomingTask Hook', () => {
       useIncomingTask({
         incomingTask: noIdTask,
         onAccepted: onTaskAccepted,
-        onDeclined: onTaskDeclined,
+        onRejected: onTaskDeclined,
         deviceType: 'BROWSER',
         logger,
       })
@@ -195,10 +212,10 @@ describe('useIncomingTask Hook', () => {
     expect(onTaskAccepted).not.toHaveBeenCalled();
 
     act(() => {
-      result.current.decline();
+      result.current.reject();
     });
 
-    expect(noIdTask.decline).not.toHaveBeenCalled();
+    expect(noIdTask.reject).not.toHaveBeenCalled();
     expect(onTaskDeclined).not.toHaveBeenCalled();
   });
 
@@ -279,11 +296,11 @@ describe('useIncomingTask Hook', () => {
     };
 
     const {result} = renderHook(() =>
-      useIncomingTask({incomingTask: failingTask, onDeclined, deviceType: 'BROWSER', logger})
+      useIncomingTask({incomingTask: failingTask, onRejected, deviceType: 'BROWSER', logger})
     );
 
     act(() => {
-      result.current.decline();
+      result.current.reject();
     });
 
     await waitFor(() => {

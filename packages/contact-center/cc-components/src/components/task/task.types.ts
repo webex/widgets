@@ -30,12 +30,12 @@ export interface TaskProps {
   /**
    * Handler for task accepted
    */
-  onAccepted?: () => void;
+  onAccepted?: ({task}: {task: ITask}) => void;
 
   /**
    * Handler for task declined
    */
-  onDeclined?: () => void;
+  onRejected?: ({task}: {task: ITask}) => void;
 
   /**
    * Handler for task accepted in TaskList
@@ -50,12 +50,12 @@ export interface TaskProps {
   /**
    * accept incoming task action
    */
-  accept: () => void;
+  accept: (task: ITask) => void;
 
   /**
    * decline incoming task action
    */
-  decline: () => void;
+  reject: (task: ITask) => void;
 
   /**
    * accept task from task list
@@ -102,7 +102,7 @@ export interface TaskProps {
   logger: ILogger;
 }
 
-export type IncomingTaskComponentProps = Pick<TaskProps, 'incomingTask' | 'isBrowser' | 'accept' | 'decline'>;
+export type IncomingTaskComponentProps = Pick<TaskProps, 'incomingTask' | 'isBrowser' | 'accept' | 'reject'>;
 
 export type TaskListComponentProps = Pick<
   TaskProps,
