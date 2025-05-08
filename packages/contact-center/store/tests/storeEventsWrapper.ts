@@ -467,11 +467,49 @@ describe('storeEventsWrapper', () => {
       } as unknown as ITask;
 
       // Add the mock task to the task list
-      storeWrapper['store'].taskList = {interaction1: mockTask};
 
       // Call the method under test
       storeWrapper.handleIncomingTask(mockTask);
       expect(mockIncomingTaskCallback).toHaveBeenCalledWith({task: mockTask});
+
+      // Verify that the correct event handlers were registered
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function));
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.AGENT_CONSULT_CREATED, expect.any(Function));
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_MEDIA, expect.any(Function));
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_CONSULTING, expect.any(Function));
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_CONSULT_ACCEPTED, expect.any(Function));
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_CONSULT_END, expect.any(Function));
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_CONSULT_QUEUE_CANCELLED, expect.any(Function));
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.AGENT_WRAPPEDUP, expect.any(Function));
+    });
+
+    it('should handle consulting i.e handleIncomingTask with the task already present in the taskList', () => {
+      const mockIncomingTaskCallback = jest.fn();
+      storeWrapper.setIncomingTaskCb(mockIncomingTaskCallback);
+      // Ensure mockTask is properly set up
+      const mockTask: ITask = {
+        data: {
+          interactionId: 'interaction1',
+          interaction: {
+            state: 'connected',
+          },
+        },
+        on: jest.fn(),
+        off: jest.fn(),
+      } as unknown as ITask;
+
+      storeWrapper['store'].cc.taskManager.getAllTasks = jest
+        .fn()
+        .mockReturnValue({[mockTask.data.interactionId]: mockTask});
+      storeWrapper.refreshTaskList();
+
+      // Add the mock task to the task list
+      storeWrapper['store'].taskList = {interaction1: mockTask};
+
+      // Call the method under test
+      storeWrapper.handleIncomingTask(mockTask);
+      expect(mockIncomingTaskCallback).not.toHaveBeenCalledWith({task: mockTask});
 
       // Verify that the correct event handlers were registered
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));

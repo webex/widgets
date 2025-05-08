@@ -513,8 +513,14 @@ class StoreWrapper implements IStoreWrapper {
     task.on(CC_EVENTS.AGENT_OFFER_CONSULT, this.handleConsultOffer);
     task.on(TASK_EVENTS.TASK_CONSULT_END, this.handleConsultEnd);
 
+    // In case of consulting we check if the task is already in the task list
+    // If it is, we dont have to send the incoming task callback
+    if (this.onIncomingTask && !this.taskList[task.data.interactionId]) {
+      this.onIncomingTask({task});
+    }
+
+    // We should update the task list in the store after sending the incoming task callback
     this.refreshTaskList();
-    if (this.onIncomingTask) this.onIncomingTask({task});
   };
 
   handleStateChange = (data) => {

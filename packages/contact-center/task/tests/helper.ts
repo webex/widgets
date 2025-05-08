@@ -70,8 +70,6 @@ describe('useIncomingTask Hook', () => {
 
   it('should setup event listeners for the incoming call', async () => {
     store.refreshTaskList();
-    const onSpy = jest.spyOn(taskMock, 'on');
-    const offSpy = jest.spyOn(taskMock, 'off');
     const setTaskCallbackSpy = jest.spyOn(store, 'setTaskCallback');
     const removeTaskCallbackSpy = jest.spyOn(store, 'removeTaskCallback');
 
@@ -100,7 +98,13 @@ describe('useIncomingTask Hook', () => {
     expect(setTaskCallbackSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function), 'interaction1');
     expect(setTaskCallbackSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_REJECT, expect.any(Function), 'interaction1');
     expect(setTaskCallbackSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function), 'interaction1');
-    expect(onSpy).toHaveBeenCalledTimes(3);
+    expect(setTaskCallbackSpy).toHaveBeenCalledWith(
+      TASK_EVENTS.TASK_CONSULT_ACCEPTED,
+      expect.any(Function),
+      'interaction1'
+    );
+    expect(setTaskCallbackSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_CONSULT_END, expect.any(Function), 'interaction1');
+    expect(setTaskCallbackSpy).toHaveBeenCalledTimes(5);
 
     // Clean up
     act(() => {
@@ -110,7 +114,17 @@ describe('useIncomingTask Hook', () => {
     expect(removeTaskCallbackSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function), 'interaction1');
     expect(removeTaskCallbackSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_REJECT, expect.any(Function), 'interaction1');
     expect(removeTaskCallbackSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function), 'interaction1');
-    expect(offSpy).toHaveBeenCalledTimes(3);
+    expect(removeTaskCallbackSpy).toHaveBeenCalledWith(
+      TASK_EVENTS.TASK_CONSULT_ACCEPTED,
+      expect.any(Function),
+      'interaction1'
+    );
+    expect(removeTaskCallbackSpy).toHaveBeenCalledWith(
+      TASK_EVENTS.TASK_CONSULT_END,
+      expect.any(Function),
+      'interaction1'
+    );
+    expect(removeTaskCallbackSpy).toHaveBeenCalledTimes(5);
   });
 
   it('should call onAccepted if it is provided', async () => {
