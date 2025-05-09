@@ -61,7 +61,7 @@ describe('useStationLogin Hook', () => {
     logger.error.mockClear();
   });
 
-  it('should set loginSuccess on successful login', async () => {
+  it('should set loginSuccess on successful login and set loginFailure to undefined', async () => {
     const successResponse = {
       data: {
         agentId: '6b310dff-569e-4ac7-b064-70f834ea56d8',

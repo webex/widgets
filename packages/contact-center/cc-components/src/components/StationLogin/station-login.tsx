@@ -90,7 +90,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
    * @returns {boolean} whether or not to show a validation error
    */
   const validateDialNumber = (input: string): boolean => {
-    const regexForDn = new RegExp(dialNumberRegex);
+    const regexForDn = new RegExp(dialNumberRegex ?? '1[0-9]{3}[2-9][0-9]{6}([,]{1,10}[0-9]+){0,1}');
     if (regexForDn.test(input)) {
       return false;
     }
@@ -197,6 +197,8 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
                   setShowDNError(true);
                 } else if (selectedDeviceType === DIALNUMBER) {
                   setShowDNError(validateDialNumber(input));
+                } else {
+                  setShowDNError(false);
                 }
               }}
               helpText={showDNError ? dnErrorText : undefined}
