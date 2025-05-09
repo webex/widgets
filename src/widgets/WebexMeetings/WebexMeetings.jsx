@@ -35,7 +35,7 @@ class WebexMeetingsWidget extends Component {
     const logo = <WebexLogo />;
     const contentClass = 'webex-meetings-widget__content';
 
-    let content;
+    let content = undefined;
 
     if (audioPermission === 'ASKING') {
       content = <WebexMediaAccess meetingID={meeting.ID} media="microphone" logo={logo} className={contentClass} />;
