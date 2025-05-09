@@ -28,6 +28,7 @@ const StationLogin: React.FunctionComponent<StationLoginProps> = observer(({onLo
     dialNumber,
   });
 
+  const dialNumberRegex = cc?.agentConfig?.regexUS;
   const props = {
     ...result,
     setDeviceType,
@@ -36,6 +37,7 @@ const StationLogin: React.FunctionComponent<StationLoginProps> = observer(({onLo
     loginOptions,
     deviceType,
     dialNumber,
+    dialNumberRegex,
     isAgentLoggedIn,
     showMultipleLoginAlert,
     onCCSignOut,

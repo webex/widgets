@@ -62,6 +62,11 @@ export interface IStationLoginProps {
   dialNumber: string;
 
   /**
+   * The regex provided by the API for validating Dial Number
+   */
+  dialNumberRegex?: RegExp | string;
+
+  /**
    * Callback function to be invoked once the agent login is successful
    */
   onLogin?: () => void;
@@ -123,6 +128,7 @@ export type StationLoginComponentProps = Pick<
   | 'handleContinue'
   | 'deviceType'
   | 'dialNumber'
+  | 'dialNumberRegex'
   | 'showMultipleLoginAlert'
   | 'onCCSignOut'
 >;
