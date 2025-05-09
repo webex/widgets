@@ -29,6 +29,7 @@ describe('StationLoginComponent', () => {
     isAgentLoggedIn: false,
     deviceType: '',
     dialNumber: '',
+    dialNumberRegex: '',
     showMultipleLoginAlert: false,
     handleContinue: jest.fn(),
     modalRef: React.createRef<HTMLDialogElement>(),
