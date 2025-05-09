@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.54](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.53...v1.28.0-ccwidgets.54) (2025-05-09)
+
+
+### Features
+
+* **station-login:** Add Validation to Station Login to Match Diverging Figma ([#449](https://github.com/webex/widgets/issues/449)) ([c256fe7](https://github.com/webex/widgets/commit/c256fe7dd21300081c73d244c2141c9960ccaa52))
+
 # [1.28.0-ccwidgets.53](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.52...v1.28.0-ccwidgets.53) (2025-05-08)
 
 
