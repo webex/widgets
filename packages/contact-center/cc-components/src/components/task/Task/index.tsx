@@ -3,6 +3,8 @@ import {ButtonPill, ListItemBase, ListItemBaseSection, Text} from '@momentum-ui/
 import {Avatar} from '@momentum-design/components/dist/react';
 import {PressEvent} from '@react-types/shared';
 import TaskTimer from '../TaskTimer';
+import {getMediaIconInfo} from '../../../../../task/src/Utils/task-util';
+import {MediaType} from '../../../../../task/src/task.types';
 import './styles.scss';
 
 interface TaskProps {
@@ -21,6 +23,7 @@ interface TaskProps {
   declineText?: string;
   disableAccept?: boolean;
   styles?: string;
+  mediaType?: string;
 }
 
 const Task: React.FC<TaskProps> = ({
@@ -39,11 +42,12 @@ const Task: React.FC<TaskProps> = ({
   acceptText,
   disableAccept = false,
   declineText,
+  mediaType,
 }) => {
   const capitalizeFirstWord = (str: string) => {
     return str.replace(/^\s*(\w)/, (match, firstLetter) => firstLetter.toUpperCase());
   };
-
+  const currentMediaType = getMediaIconInfo(mediaType || MediaType.Telephony);
   return (
     <ListItemBase
       className={`task-list-item ${selected ? 'task-list-item--selected' : ''} ${styles}`}
@@ -51,7 +55,7 @@ const Task: React.FC<TaskProps> = ({
       id={interactionId}
     >
       <ListItemBaseSection position="start">
-        <Avatar icon-name="handset-filled" />
+        <Avatar icon-name={currentMediaType.iconName} className={currentMediaType.className} />
       </ListItemBaseSection>
 
       <ListItemBaseSection position="fill">

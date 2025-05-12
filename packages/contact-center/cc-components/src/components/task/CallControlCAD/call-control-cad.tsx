@@ -6,6 +6,8 @@ import {Icon} from '@momentum-design/components/dist/react';
 import './call-control-cad.styles.scss';
 import TaskTimer from '../TaskTimer/index';
 import CallControlConsultComponent from '../CallControl/CallControlCustom/call-control-consult';
+import {getMediaIconInfo, getMediaLabel} from '../../../../../task/src/Utils/task-util';
+import {MediaType} from '../../../../../task/src/task.types';
 
 const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => {
   const {
@@ -36,6 +38,8 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
     const seconds = time % 60;
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
+  const mediaIconInfo = getMediaIconInfo(currentTask.data.interaction.mediaType || MediaType.Telephony);
+  const mediaLabel = getMediaLabel(currentTask.data.interaction.mediaType || MediaType.Telephony);
 
   if (!currentTask) return null;
 
@@ -45,7 +49,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
         {/* Caller Information */}
         <div className="caller-info">
           <div className="call-icon-background">
-            <Icon name="handset-filled" size={1} className="call-icon" />
+            <Icon name={mediaIconInfo.iconName} size={1} className={`media-icon ${mediaIconInfo.className}`} />
           </div>
 
           <div className="customer-info">
@@ -54,7 +58,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
             </Text>
             <div className="call-details">
               <Text className="call-timer" type="body-secondary" tagName={'small'}>
-                Call - <TaskTimer startTimeStamp={startTimestamp} />
+                {mediaLabel} - <TaskTimer startTimeStamp={startTimestamp} />
               </Text>
               <div className="call-status">
                 {!controlVisibility.wrapup && isHeld && (

@@ -6,6 +6,7 @@ import {PopoverNext, SelectNext, TooltipNext, Text, ButtonCircle, ButtonPill} fr
 import {Item} from '@react-stately/collections';
 import {Icon} from '@momentum-design/components/dist/react';
 import ConsultTransferPopoverComponent from './CallControlCustom/consult-transfer-popover';
+import {getMediaLabel} from '../../../../../task/src/Utils/task-util';
 
 function CallControlComponent(props: CallControlComponentProps) {
   const [selectedWrapupReason, setSelectedWrapupReason] = useState<string | null>(null);
@@ -103,6 +104,8 @@ function CallControlComponent(props: CallControlComponentProps) {
     }
   };
 
+  const mediaLabel = getMediaLabel(currentTask.data.interaction.mediaType);
+
   const buttons = [
     {
       id: 'hold',
@@ -125,7 +128,7 @@ function CallControlComponent(props: CallControlComponentProps) {
     {
       id: 'transfer',
       icon: 'next-bold',
-      tooltip: 'Transfer call',
+      tooltip: `Transfer ${mediaLabel}`,
       className: 'call-control-button',
       disabled: false,
       menuType: 'Transfer',
@@ -144,7 +147,7 @@ function CallControlComponent(props: CallControlComponentProps) {
       id: 'end',
       icon: 'cancel-regular',
       onClick: endCall,
-      tooltip: 'End call',
+      tooltip: `End ${mediaLabel}`,
       className: 'call-control-button-cancel',
       disabled: isHeld,
       isVisible: controlVisibility.end,

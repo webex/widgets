@@ -102,7 +102,15 @@
   margin-top: -0.25rem;
   flex-shrink: 0;
 
-  .call-icon {
-    color: var(--mds-color-theme-common-touchbar-background-green-normal);
+  .media-icon.telephony {
+    color: var(--mds-color-theme-indicator-stable);
+  }
+
+  .media-icon.email {
+    color: var(--mds-color-theme-common-touchbar-background-violet-normal);
+  }
+
+  .media-icon.chat {
+    color: var(--mds-color-theme-indicator-secure);
   }
 }
