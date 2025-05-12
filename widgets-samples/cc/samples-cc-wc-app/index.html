@@ -32,12 +32,14 @@
       <mdc-themeprovider id="theme-provider-elem" themeclass="mds-theme-stable-lightWebex">
         <div class="webexTheme">
           <h1>Contact Center widgets as web-component</h1>
-          <div class="accessTokenTheme">
+          <div style="margin-bottom: 15px;">
+            <button onclick="doOAuthLogin()" class="md-button md-button--primary">Login with Webex</button>
+          </div>
+          (OR)
             <input
               type="text"
               placeholder="Enter your access token"
               id="access_token_elem"
-              onkeyup="switchButtonState()"
               autocomplete="off"
               spellcheck="false"
               autocapitalize="off"
@@ -74,7 +76,7 @@
           />
           Enable Multi Login
           <br />
-          <button onclick="initWidgets()" disabled>Init Widgets</button>
+          <button onclick="initWidgets()" id="init-widgets" disabled>Init Widgets</button>
           <div id="widgets-container"></div>
           <div id="popup-container" style="display: none">
             <div id="task-rejected-popup">
@@ -92,6 +94,7 @@
       </mdc-themeprovider>
     </div>
     <script src="dist/bundle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/webex@3.8.0-next.73/umd/contact-center.min.js"></script>
     <script src="app.js"></script>
   </body>
 </html>

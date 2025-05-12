@@ -9,6 +9,7 @@ import {
   store,
   OutdialCall,
 } from '@webex/cc-widgets';
+import Webex from 'webex/contact-center';
 import {ThemeProvider, IconProvider, Icon, Button, Checkbox, Text} from '@momentum-design/components/dist/react';
 import {PopoverNext} from '@momentum-ui/react-collaboration';
 import './App.scss';
@@ -34,7 +35,7 @@ function App() {
     return savedWidgets ? JSON.parse(savedWidgets) : defaultWidgets;
   });
   // Initialize accessToken from local storage if available
-  const [accessToken, setAccessToken] = useState(() => window.localStorage.getItem('accessToken') || '');
+  const [accessToken, setAccessToken] = useState('');
   const [currentTheme, setCurrentTheme] = useState(() => {
     const savedTheme = window.localStorage.getItem('currentTheme');
     return savedTheme ? savedTheme : store.currentTheme;
@@ -56,6 +57,40 @@ function App() {
     setIncomingTasks((prevTasks) => [...prevTasks, task]);
     playNotificationSound();
   };
+
+  useEffect(() => {
+    if (window.location.hash) {
+      const urlParams = new URLSearchParams(window.location.hash.replace('#', '?'));
+    
+      const accessToken = urlParams.get('access_token');
+      const expiresIn = urlParams.get('expires_in');
+    
+      if (accessToken) {
+        window.localStorage.setItem('accessToken', accessToken);
+        // @ts-expect-error: Browser accepts this
+        window.localStorage.setItem('date', new Date().getTime() + parseInt(expiresIn, 10));
+        setAccessToken(accessToken);
+        // Clear the hash from the URL to remove the token from browser history
+        window.history.replaceState(
+          {},
+          document.title,
+          window.location.pathname + window.location.search
+        );
+      }
+    }
+    else {
+      const storedDate = window.localStorage.getItem('date');
+      if (storedDate && parseInt(storedDate, 10) > new Date().getTime()) {
+        const storedAccessToken = window.localStorage.getItem('accessToken');
+        if (storedAccessToken) {
+          setAccessToken(storedAccessToken);
+        }
+      } else {
+        window.localStorage.removeItem('accessToken');
+      }
+    }
+  }
+  , []);
 
   const webexConfig = {
     fedramp: false,
@@ -180,6 +215,62 @@ function App() {
     setSelectedState('');
   };
 
+  const doOAuthLogin = () => {
+    let redirectUri = `${window.location.protocol}//${window.location.host}`;
+
+    if (window.location.pathname) {
+      redirectUri += window.location.pathname;
+    }
+
+    // Reference: https://developer.webex-cx.com/documentation/integrations
+    const ccMandatoryScopes = [
+      "cjp:config_read",
+      "cjp:config_write",
+      "cjp:config",
+      "cjp:user",
+    ];
+
+    const webRTCCallingScopes = [
+      "spark:webrtc_calling",
+      "spark:calls_read",
+      "spark:calls_write",
+      "spark:xsi"
+    ];
+
+    const additionalScopes = [
+      "spark:kms", // to avoid token downscope to only spark:kms error on SDK init
+    ];
+
+    const requestedScopes = Array.from(
+      new Set(
+          ccMandatoryScopes
+          .concat(webRTCCallingScopes)
+          .concat(additionalScopes))
+        ).join(' ');
+
+    const webexConfig = {
+      config: {
+        "appName": "sdk-samples",
+        "appPlatform": "testClient",
+        "fedramp": false,
+        "logger": {
+          "level": "info"
+        },
+        "credentials": {
+          "client_id": "C04ef08ffce356c3161bb66b15dbdd98d26b6c683c5ce1a1a89efad545fdadd74",
+          "redirect_uri": redirectUri,
+          "scope": requestedScopes,
+        }
+      }
+    };
+
+    const webex = Webex.init(webexConfig);
+
+    webex.once('ready', () => {
+      webex.authorization.initiateLogin();
+    });
+  };
+
   // Store accessToken changes in local storage
   useEffect(() => {
     window.localStorage.setItem('accessToken', accessToken);
@@ -223,7 +314,16 @@ function App() {
         <IconProvider iconSet="momentum-icons">
           <div className="webexTheme">
             <h1>Contact Center widgets in a react app</h1>
-            <div className="accessTokenTheme">
+            <div style={{ marginBottom: '15px' }}>
+              <Button
+                onClick={doOAuthLogin}
+                variant="primary"
+              >
+                Login with Webex
+              </Button>
+            </div>
+            (OR)
+            <div className="accessTokenTheme" style={{ marginTop: '15px' }}>
               <input
                 type="text"
                 placeholder="Enter your access token"

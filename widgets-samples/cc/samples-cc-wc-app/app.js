@@ -10,6 +10,7 @@ const ccTaskList = document.createElement('widget-cc-task-list');
 const ccCallControl = document.createElement('widget-cc-call-control');
 const ccCallControlCAD = document.createElement('widget-cc-call-control-cad');
 const ccOutdial = document.createElement('widget-cc-outdial-call');
+const initWidgetsButton = document.getElementById('init-widgets');
 
 const themeProviderElem = document.getElementById('theme-provider-elem');
 
@@ -48,15 +49,90 @@ if (!ccStationLogin && !ccUserState) {
   console.error('Failed to find the required elements');
 }
 
-function switchButtonState() {
-  const buttonElem = document.querySelector('button');
-  buttonElem.disabled = accessTokenElem.value.trim() === '';
-}
-
 function enableMultiLogin() {
   if (isMultiLoginEnabled) isMultiLoginEnabled = false;
   else isMultiLoginEnabled = true;
 }
+
+function doOAuthLogin() {
+  let redirectUri = `${window.location.protocol}//${window.location.host}`;
+
+  if (window.location.pathname) {
+    redirectUri += window.location.pathname;
+  }
+
+  // Reference: https://developer.webex-cx.com/documentation/integrations
+  const ccMandatoryScopes = ['cjp:config_read', 'cjp:config_write', 'cjp:config', 'cjp:user'];
+
+  const webRTCCallingScopes = ['spark:webrtc_calling', 'spark:calls_read', 'spark:calls_write', 'spark:xsi'];
+
+  const additionalScopes = [
+    'spark:kms', // to avoid token downscope to only spark:kms error on SDK init
+  ];
+
+  const requestedScopes = Array.from(
+    new Set(ccMandatoryScopes.concat(webRTCCallingScopes).concat(additionalScopes))
+  ).join(' ');
+
+  const webexConfig = {
+    config: {
+      appName: 'sdk-samples',
+      appPlatform: 'testClient',
+      fedramp: false,
+      logger: {
+        level: 'info',
+      },
+      credentials: {
+        client_id: 'C04ef08ffce356c3161bb66b15dbdd98d26b6c683c5ce1a1a89efad545fdadd74',
+        redirect_uri: redirectUri,
+        scope: requestedScopes,
+      },
+    },
+  };
+
+  const webex = Webex.init(webexConfig);
+
+  webex.once('ready', () => {
+    webex.authorization.initiateLogin();
+  });
+}
+
+// Define the callback function once
+const updateButtonState = () => {
+  initWidgetsButton.disabled = !accessTokenElem.value.trim();
+};
+
+accessTokenElem.addEventListener('keyup', updateButtonState);
+
+window.addEventListener('load', () => {
+  if (window.location.hash) {
+    const urlParams = new URLSearchParams(window.location.hash.replace('#', '?'));
+
+    const accessToken = urlParams.get('access_token');
+    const expiresIn = urlParams.get('expires_in');
+
+    if (accessToken) {
+      localStorage.setItem('accessToken', accessToken);
+      // @ts-expect-error: Browser accepts this
+      localStorage.setItem('date', new Date().getTime() + parseInt(expiresIn, 10));
+      accessTokenElem.value = accessToken;
+      updateButtonState();
+      // Clear the hash from the URL to remove the token from browser history
+      window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
+    }
+  } else {
+    const storedDate = window.localStorage.getItem('date');
+    if (storedDate && parseInt(storedDate, 10) > new Date().getTime()) {
+      const storedAccessToken = window.localStorage.getItem('accessToken');
+      if (storedAccessToken) {
+        accessTokenElem.value = storedAccessToken;
+        updateButtonState();
+      }
+    } else {
+      window.localStorage.removeItem('accessToken');
+    }
+  }
+});
 
 function initWidgets() {
   const webexConfig = {
