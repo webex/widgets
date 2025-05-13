@@ -32,18 +32,28 @@
       <mdc-themeprovider id="theme-provider-elem" themeclass="mds-theme-stable-lightWebex">
         <div class="webexTheme">
           <h1>Contact Center widgets as web-component</h1>
-          <div class="accessTokenTheme">
+          <select id="loginType" onchange="changeLoginType()">
+            <option value="token">Access Token</option>
+            <option value="oauth">Login with Webex</option>
+          </select>
+          <br/>
+          <div id="oauth_login_btn" style="display: none;">
+            <button onclick="doOAuthLogin()" class="md-button md-button--primary">Login with Webex</button>
+          </div>
+          <br/>
+          <div>
             <input
               type="text"
               placeholder="Enter your access token"
               id="access_token_elem"
-              onkeyup="switchButtonState()"
               autocomplete="off"
               spellcheck="false"
               autocapitalize="off"
             />
-            <input type="checkbox" id="theme" name="theme" /> Dark Theme
-            <br />
+          </div>
+          <br/>
+          <input type="checkbox" id="theme" name="theme" /> Dark Theme
+          <br />
           </div>
           <div class="warning-note" style="color: var(--mds-color-theme-text-error-normal); margin-bottom: 10px">
             <strong>Note:</strong> When a number is dialed, the agent gets an incoming task to accept via an Extension, Dial Number, or Browser. It's recommended to have the incoming task/task list widget and call controls widget according to your needs.
@@ -74,7 +84,7 @@
           />
           Enable Multi Login
           <br />
-          <button onclick="initWidgets()" disabled>Init Widgets</button>
+          <button onclick="initWidgets()" id="init-widgets" disabled>Init Widgets</button>
           <div id="widgets-container"></div>
           <div id="popup-container" style="display: none">
             <div id="task-rejected-popup">
@@ -92,6 +102,7 @@
       </mdc-themeprovider>
     </div>
     <script src="dist/bundle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/webex@3.8.0-next.78/umd/contact-center.min.js"></script>
     <script src="app.js"></script>
   </body>
 </html>
