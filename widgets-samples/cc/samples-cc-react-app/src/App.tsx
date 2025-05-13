@@ -547,7 +547,9 @@ function App() {
                   <option value="Available">Available</option>
                   <option value="Idle">Idle</option>
                 </select>
-                <Button onClick={handlePopoverSubmit} />
+                <Button onClick={handlePopoverSubmit} variant="primary">
+                  Confirm State Change
+                </Button>
               </div>
             )}
           </div>
