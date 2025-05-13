@@ -109,7 +109,7 @@ window.addEventListener('load', () => {
     const urlParams = new URLSearchParams(window.location.hash.replace('#', '?'));
 
     const accessToken = urlParams.get('access_token');
-    const expiresIn = urlParams.get('expires_in');
+    const expiresIn = urlParams.get('expires_in') ?? '0';
 
     if (accessToken) {
       localStorage.setItem('accessToken', accessToken);

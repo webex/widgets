@@ -63,7 +63,7 @@ function App() {
       const urlParams = new URLSearchParams(window.location.hash.replace('#', '?'));
     
       const accessToken = urlParams.get('access_token');
-      const expiresIn = urlParams.get('expires_in');
+      const expiresIn = urlParams.get('expires_in') ?? '0';
     
       if (accessToken) {
         window.localStorage.setItem('accessToken', accessToken);
