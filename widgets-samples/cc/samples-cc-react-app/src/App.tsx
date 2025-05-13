@@ -10,7 +10,7 @@ import {
   OutdialCall,
 } from '@webex/cc-widgets';
 import Webex from 'webex/contact-center';
-import {ThemeProvider, IconProvider, Icon, Button, Checkbox, Text} from '@momentum-design/components/dist/react';
+import {ThemeProvider, IconProvider, Icon, Button, Checkbox, Text, Select, Option} from '@momentum-design/components/dist/react';
 import {PopoverNext} from '@momentum-ui/react-collaboration';
 import './App.scss';
 import {observer} from 'mobx-react-lite';
@@ -49,6 +49,7 @@ function App() {
   const [selectedState, setSelectedState] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [incomingTasks, setIncomingTasks] = useState([]);
+  const [loginType, setLoginType] = useState('token');
 
   const [collapsedTasks, setCollapsedTasks] = React.useState([]);
 
@@ -314,113 +315,147 @@ function App() {
         <IconProvider iconSet="momentum-icons">
           <div className="webexTheme">
             <h1>Contact Center widgets in a react app</h1>
-            <div style={{ marginBottom: '15px' }}>
-              <Button
-                onClick={doOAuthLogin}
-                variant="primary"
-              >
-                Login with Webex
-              </Button>
-            </div>
-            (OR)
-            <div className="accessTokenTheme" style={{ marginTop: '15px' }}>
-              <input
-                type="text"
-                placeholder="Enter your access token"
-                value={accessToken}
-                onChange={(e) => setAccessToken(e.target.value)}
-              />
-              <Checkbox
-                checked={currentTheme === 'DARK'}
-                aria-label="theme checkbox"
-                id="theme-checkbox"
-                value={currentTheme}
-                label="Dark Theme"
-                // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
-                onchange={() => {
-                  setCurrentTheme(currentTheme === 'DARK' ? 'LIGHT' : 'DARK');
-                  store.setCurrentTheme(currentTheme === 'DARK' ? 'LIGHT' : 'DARK');
-                }}
-              />
-            </div>
+
             <div className="box">
               <section className="section-box">
                 <fieldset className="fieldset">
-                  <legend className="legend-box">&nbsp;Select Widgets to Show&nbsp;</legend>
-                  <div className="widget-checkboxes">
-                    {Object.keys(defaultWidgets).map((widget) => (
-                      <>
-                        <label key={widget}>
-                          <input
-                            type="checkbox"
-                            name={widget}
-                            checked={selectedWidgets[widget]}
-                            onChange={handleCheckboxChange}
-                          />
-                          &nbsp;
-                          {widget.charAt(0).toUpperCase() + widget.slice(1).replace(/([A-Z])/g, ' $1')}&nbsp;
-                          {widget === 'outdialCall' && (
-                            <span style={{display: 'inline-flex', alignItems: 'center'}}>
-                              <PopoverNext
-                                trigger="mouseenter"
-                                triggerComponent={<Icon name="info-badge-filled" />}
-                                placement="auto-end"
-                                closeButtonPlacement="top-left"
-                                closeButtonProps={{'aria-label': 'Close'}}
-                              >
-                                <Text>
-                                  <div
-                                    style={{color: 'var(--mds-color-theme-text-error-normal)', marginBottom: '10px'}}
-                                  >
-                                    <strong>Note:</strong> When a number is dialed, the agent gets an incoming task to
-                                    accept via an Extension, Dial Number, or Browser. It's recommended to have the
-                                    incoming task/task list widget and call controls widget according to your needs.
-                                  </div>
-                                </Text>
-                              </PopoverNext>
-                            </span>
-                          )}
-                        </label>
-                      </>
-                    ))}
+                  <legend className="legend-box">&nbsp;Authentication&nbsp;</legend>
+                  <Select
+                    label="Select Login Method"
+                    value={loginType}
+                    onChange={(e: CustomEvent) => {
+                      const selectedType = e.detail.value;
+                      if(selectedType !== 'token' && selectedType !== 'oauth') return;
+                      setLoginType(selectedType);
+                    }}
+                  >
+                    <Option key={1} value="token">Access Token</Option>
+                    <Option key={2} value="oauth">Login with Webex</Option>
+                  </Select>
+                
+                  <div className="accessTokenTheme" style={{ marginTop: '15px' }}>
+                    {loginType === 'token' && (
+                      <div>
+                        <span>Your access token: </span>
+                        <input
+                          type="text"
+                          value={accessToken}
+                          onChange={(e) => setAccessToken(e.target.value)}
+                        />
+                      </div>
+                    )}
+                    {loginType === 'oauth' && (
+                      <Button
+                        onClick={doOAuthLogin}
+                        variant="primary"
+                      >
+                        Login with Webex
+                      </Button>
+                    )}
                   </div>
                 </fieldset>
               </section>
             </div>
-            <div className="box">
-              <section className="section-box">
-                <fieldset className="fieldset">
-                  <legend className="legend-box">&nbsp;SDK Toggles&nbsp;</legend>
-                  <label style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
-                    <input
-                      type="checkbox"
-                      id="multiLoginFlag"
-                      name="multiLoginFlag"
-                      onChange={enableDisableMultiLogin}
-                      checked={isMultiLoginEnabled}
-                    />{' '}
-                    &nbsp; Enable Multi Login
-                    <PopoverNext
-                      trigger="mouseenter"
-                      triggerComponent={<Icon name="info-badge-filled" />}
-                      placement="auto-end"
-                      closeButtonPlacement="top-left"
-                      closeButtonProps={{'aria-label': 'Close'}}
-                    >
-                      <Text>
-                        <div
-                          className="warning-note"
-                          style={{color: 'var(--mds-color-theme-text-error-normal)', marginBottom: '10px'}}
-                        >
-                          <strong>Note:</strong> The "Enable Multi Login" option must be set before initializing the
-                          SDK. Changes to this setting after SDK initialization will not take effect. Please ensure you
-                          configure this option before clicking the "Init Widgets" button.
-                        </div>
-                      </Text>
-                    </PopoverNext>
-                  </label>
-                </fieldset>
-              </section>
+            <br/>
+            <div className="settings-container" style={{ display: 'flex', gap: '20px' }}>
+              <div className="box" style={{ flex: 1 }}>
+                <section className="section-box">
+                  <fieldset className="fieldset">
+                    <legend className="legend-box">&nbsp;Select Widgets to Show&nbsp;</legend>
+                    <div className="widget-checkboxes">
+                      {Object.keys(defaultWidgets).map((widget) => (
+                        <>
+                          <label key={widget}>
+                            <input
+                              type="checkbox"
+                              name={widget}
+                              checked={selectedWidgets[widget]}
+                              onChange={handleCheckboxChange}
+                            />
+                            &nbsp;
+                            {widget.charAt(0).toUpperCase() + widget.slice(1).replace(/([A-Z])/g, ' $1')}&nbsp;
+                            {widget === 'outdialCall' && (
+                              <span style={{display: 'inline-flex', alignItems: 'center'}}>
+                                <PopoverNext
+                                  trigger="mouseenter"
+                                  triggerComponent={<Icon name="info-badge-filled" />}
+                                  placement="auto-end"
+                                  closeButtonPlacement="top-left"
+                                  closeButtonProps={{'aria-label': 'Close'}}
+                                >
+                                  <Text>
+                                    <div
+                                      style={{color: 'var(--mds-color-theme-text-error-normal)', marginBottom: '10px'}}
+                                    >
+                                      <strong>Note:</strong> When a number is dialed, the agent gets an incoming task to
+                                      accept via an Extension, Dial Number, or Browser. It's recommended to have the
+                                      incoming task/task list widget and call controls widget according to your needs.
+                                    </div>
+                                  </Text>
+                                </PopoverNext>
+                              </span>
+                            )}
+                          </label>
+                        </>
+                      ))}
+                    </div>
+                  </fieldset>
+                </section>
+              </div>
+              
+              <div className="box" style={{ flex: 1 }}>
+                <section className="section-box">
+                  <fieldset className="fieldset">
+                    <legend className="legend-box">&nbsp;Sample App Toggles&nbsp;</legend>
+                    <Checkbox
+                      checked={currentTheme === 'DARK'}
+                      aria-label="theme checkbox"
+                      id="theme-checkbox"
+                      value={currentTheme}
+                      label="Dark Theme"
+                      // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
+                      onchange={() => {
+                        setCurrentTheme(currentTheme === 'DARK' ? 'LIGHT' : 'DARK');
+                        store.setCurrentTheme(currentTheme === 'DARK' ? 'LIGHT' : 'DARK');
+                      }}
+                    />
+                  </fieldset>
+                </section>
+                <br/>
+                <section className="section-box">
+                  <fieldset className="fieldset">
+                    <legend className="legend-box">&nbsp;SDK Toggles&nbsp;</legend>
+                    <label style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+                      <input
+                        type="checkbox"
+                        id="multiLoginFlag"
+                        name="multiLoginFlag"
+                        onChange={enableDisableMultiLogin}
+                        checked={isMultiLoginEnabled}
+                      />{' '}
+                      &nbsp; Enable Multi Login
+                      <PopoverNext
+                        trigger="mouseenter"
+                        triggerComponent={<Icon name="info-badge-filled" />}
+                        placement="auto-end"
+                        closeButtonPlacement="top-left"
+                        closeButtonProps={{'aria-label': 'Close'}}
+                      >
+                        <Text>
+                          <div
+                            className="warning-note"
+                            style={{color: 'var(--mds-color-theme-text-error-normal)', marginBottom: '10px'}}
+                          >
+                            <strong>Note:</strong> The "Enable Multi Login" option must be set before initializing the
+                            SDK. Changes to this setting after SDK initialization will not take effect. Please ensure you
+                            configure this option before clicking the "Init Widgets" button.
+                          </div>
+                        </Text>
+                      </PopoverNext>
+                    </label>
+                  </fieldset>
+                </section>
+              </div>
             </div>
             <br />
             <div>

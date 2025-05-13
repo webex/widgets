@@ -1,4 +1,6 @@
 const accessTokenElem = document.getElementById('access_token_elem');
+const oAuthLoginBtn = document.getElementById('oauth_login_btn');
+const loginTypeElem = document.getElementById('loginType');
 const themeElem = document.getElementById('theme');
 const widgetsContainer = document.getElementById('widgets-container');
 const popupContainer = document.getElementById('popup-container');
@@ -47,6 +49,18 @@ taskRejectedSubmitButton.addEventListener('click', function () {
 
 if (!ccStationLogin && !ccUserState) {
   console.error('Failed to find the required elements');
+}
+
+function changeLoginType() {
+  const loginType = loginTypeElem.selectedOptions[0].value;
+  if (loginType === 'oauth') {
+    accessTokenElem.style.display = 'none';
+    oAuthLoginBtn.style.display = 'block';
+  }
+  if (loginType === 'token') {
+    accessTokenElem.style.display = 'block';
+    oAuthLoginBtn.style.display = 'none';
+  }
 }
 
 function enableMultiLogin() {
@@ -105,6 +119,7 @@ const updateButtonState = () => {
 accessTokenElem.addEventListener('keyup', updateButtonState);
 
 window.addEventListener('load', () => {
+  changeLoginType();
   if (window.location.hash) {
     const urlParams = new URLSearchParams(window.location.hash.replace('#', '?'));
 
