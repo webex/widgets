@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.55](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.54...v1.28.0-ccwidgets.55) (2025-05-13)
+
+
+### Bug Fixes
+
+* **samples:** add oauth login to react and wc samples ([#453](https://github.com/webex/widgets/issues/453)) ([08ca036](https://github.com/webex/widgets/commit/08ca036746d6c6ded1ffdd5fe0df63af4a270439))
+
 # [1.28.0-ccwidgets.54](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.53...v1.28.0-ccwidgets.54) (2025-05-09)
 
 
