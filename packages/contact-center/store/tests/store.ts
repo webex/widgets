@@ -51,6 +51,7 @@ describe('Store', () => {
     expect(storeInstance.isAgentLoggedIn).toBe(false);
     expect(storeInstance.deviceType).toBe('');
     expect(storeInstance.taskList).toEqual({});
+    expect(storeInstance.agentProfile).toEqual({});
 
     expect(makeAutoObservable).toHaveBeenCalledWith(storeInstance, {
       cc: expect.any(Function),

@@ -142,6 +142,10 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.taskMetaData;
   }
 
+  get agentProfile() {
+    return this.store.agentProfile;
+  }
+
   setTaskMetaData = (taskId: string, data: TaskMetaData): void => {
     this.store.taskMetaData[taskId] = data;
   };
@@ -320,6 +324,19 @@ class StoreWrapper implements IStoreWrapper {
     const task = this.store.taskList[taskId];
     if (!task) return;
     task.on(event, callback);
+  };
+
+  setAgentProfile = (profile: Profile) => {
+    runInAction(() => {
+      this.store.agentProfile = {
+        ...this.store.agentProfile,
+        profileType: profile?.profileType,
+        mmProfile: profile?.mmProfile,
+        orgId: profile?.orgId,
+        roles: profile?.roles,
+        deviceType: profile?.deviceType,
+      };
+    });
   };
 
   removeCCCallback = (event: CC_EVENTS) => {
@@ -644,6 +661,7 @@ class StoreWrapper implements IStoreWrapper {
     let listenersAdded = false;
 
     const handleLogOut = () => {
+      this.setAgentProfile({});
       this.cleanUpStore();
       removeEventListeners();
       listenersAdded = false;
@@ -669,6 +687,7 @@ class StoreWrapper implements IStoreWrapper {
 
     const handleLogin = (payload: Profile) => {
       runInAction(() => {
+        this.setAgentProfile(payload);
         this.setIsAgentLoggedIn(true);
         this.setDeviceType(payload.deviceType);
         this.setDialNumber(payload.dn);
@@ -681,7 +700,12 @@ class StoreWrapper implements IStoreWrapper {
     ccSDK.on(CC_EVENTS.AGENT_STATION_LOGIN_SUCCESS, handleLogin);
 
     [CC_EVENTS.AGENT_DN_REGISTERED, CC_EVENTS.AGENT_RELOGIN_SUCCESS].forEach((event) => {
-      ccSDK.on(`${event}`, () => {
+      ccSDK.on(`${event}`, (payload) => {
+        runInAction(() => {
+          if (event === CC_EVENTS.AGENT_RELOGIN_SUCCESS) {
+            this.setAgentProfile(payload);
+          }
+        });
         if (!listenersAdded) {
           addEventListeners();
           listenersAdded = true;
