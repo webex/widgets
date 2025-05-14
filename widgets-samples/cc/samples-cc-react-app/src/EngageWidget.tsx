@@ -23,6 +23,34 @@ const EngageWidget: React.FC<EngageWidgetProps> = ({accessToken, currentTheme, i
   const agentName = useRef('');
   const agentId = useRef('');
 
+  // Add the CSS links to the document head
+  useEffect(() => {
+    // TODO: Remove this when we include the momentum-ui in the bundle using npm
+    // Add momentum-ui.min.css
+    const momentumCss = document.createElement('link');
+    momentumCss.rel = 'stylesheet';
+    momentumCss.type = 'text/css';
+    momentumCss.href = 'https://wc.imiengage.io/v0.9.11/momentum/css/momentum-ui.min.css';
+    document.head.appendChild(momentumCss);
+
+    // Add momentum-ui-icons.css
+    const momentumIconsCss = document.createElement('link');
+    momentumIconsCss.rel = 'stylesheet';
+    momentumIconsCss.type = 'text/css';
+    momentumIconsCss.href = 'https://wc.imiengage.io/v0.9.11/momentum/css/momentum-ui-icons.css';
+    document.head.appendChild(momentumIconsCss);
+
+    // Clean up on unmount
+    return () => {
+      if (momentumCss.parentNode) {
+        momentumCss.parentNode.removeChild(momentumCss);
+      }
+      if (momentumIconsCss.parentNode) {
+        momentumIconsCss.parentNode.removeChild(momentumIconsCss);
+      }
+    };
+  }, []);
+
   // Load the IMI Engage script
   useEffect(() => {
     // Load the IMI Engage script
