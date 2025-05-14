@@ -47,9 +47,16 @@ const loginParams = {
 
 const loginCb = jest.fn();
 const logoutCb = jest.fn();
-const logger = {
+// const logger: Partial<store.ILogger> = {
+//   log: jest.fn(),
+//   error: jest.fn(),
+// };
+const logger: store.ILogger = {
   log: jest.fn(),
   error: jest.fn(),
+  info: jest.fn(),
+  warn: jest.fn(),
+  trace: jest.fn(),
 };
 
 describe('useStationLogin Hook', () => {

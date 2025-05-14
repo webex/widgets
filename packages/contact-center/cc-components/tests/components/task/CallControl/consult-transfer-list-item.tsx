@@ -3,6 +3,7 @@ import React from 'react';
 import {render, screen, fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ConsultTransferListComponent from '../../../../src/components/task/CallControl/CallControlCustom/consult-transfer-list-item';
+import {ConsultTransferListComponentProps} from '../../../../src/components/task/task.types';
 
 jest.mock('@momentum-ui/react-collaboration', () => ({
   ListItemBase: (props) => (
@@ -38,7 +39,7 @@ afterAll(() => {
 
 describe('CallControlListItemPresentational', () => {
   const mockOnButtonPress = jest.fn();
-  const defaultProps = {
+  const defaultProps: ConsultTransferListComponentProps = {
     title: 'John Doe',
     subtitle: 'Manager',
     buttonIcon: 'test-icon',

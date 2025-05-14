@@ -1,6 +1,7 @@
 import React from 'react';
 import {render, screen, fireEvent} from '@testing-library/react';
 import StationLoginComponent from '../../../src/components/StationLogin/station-login';
+import {StationLoginComponentProps} from '../../../src/components/StationLogin/station-login.types';
 import '@testing-library/jest-dom';
 
 jest.mock('@momentum-design/components/dist/react', () => ({
@@ -14,8 +15,7 @@ jest.mock('@momentum-design/components/dist/react', () => ({
 }));
 
 describe('StationLoginComponent', () => {
-  const props = {
-    name: 'StationLogin',
+  const props: StationLoginComponentProps = {
     login: jest.fn(),
     logout: jest.fn(),
     loginSuccess: undefined,
@@ -32,7 +32,6 @@ describe('StationLoginComponent', () => {
     dialNumberRegex: '',
     showMultipleLoginAlert: false,
     handleContinue: jest.fn(),
-    modalRef: React.createRef<HTMLDialogElement>(),
   };
 
   afterEach(() => {
