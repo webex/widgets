@@ -14,6 +14,7 @@ import {ThemeProvider, IconProvider, Icon, Button, Checkbox, Text, Select, Optio
 import {PopoverNext} from '@momentum-ui/react-collaboration';
 import './App.scss';
 import {observer} from 'mobx-react-lite';
+import EngageWidget from './EngageWidget';
 
 // This is not to be included to a production app.
 // Have added here for debugging purposes
@@ -27,6 +28,7 @@ const defaultWidgets = {
   callControlCAD: true,
   outdialCall: true,
 };
+window['AGENTX_SERVICE'] = {}; // Make it available in the window object for global access for engage widgets
 
 function App() {
   const [isSdkReady, setIsSdkReady] = useState(false);
@@ -586,6 +588,10 @@ function App() {
                   Confirm State Change
                 </Button>
               </div>
+            )}
+
+            {isSdkReady && (store.isAgentLoggedIn || isLoggedIn) && (
+              <EngageWidget accessToken={accessToken} currentTheme={currentTheme} isSdkReady={isSdkReady} />
             )}
           </div>
         </IconProvider>
