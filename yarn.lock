@@ -6449,6 +6449,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@rollup/rollup-linux-x64-gnu@npm:4.36.0":
+  version: 4.36.0
+  resolution: "@rollup/rollup-linux-x64-gnu@npm:4.36.0"
+  conditions: os=linux & cpu=x64 & libc=glibc
+  languageName: node
+  linkType: hard
+
 "@rtsao/scc@npm:^1.1.0":
   version: 1.1.0
   resolution: "@rtsao/scc@npm:1.1.0"
@@ -9315,21 +9322,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/calling@npm:3.8.0-next.15":
-  version: 3.8.0-next.15
-  resolution: "@webex/calling@npm:3.8.0-next.15"
+"@webex/calling@npm:3.8.0-next.21":
+  version: 3.8.0-next.21
+  resolution: "@webex/calling@npm:3.8.0-next.21"
   dependencies:
     "@types/platform": "npm:1.3.4"
     "@webex/internal-media-core": "npm:2.14.7"
-    "@webex/internal-plugin-metrics": "npm:3.8.0-next.12"
-    "@webex/media-helpers": "npm:3.8.0-next.13"
+    "@webex/internal-plugin-metrics": "npm:3.8.0-next.17"
+    "@webex/media-helpers": "npm:3.8.0-next.19"
     async-mutex: "npm:0.4.0"
     buffer: "npm:6.0.3"
     jest-html-reporters: "npm:3.0.11"
     platform: "npm:1.3.6"
     uuid: "npm:8.3.2"
     xstate: "npm:4.30.6"
-  checksum: 10c0/1c655d982563e87491c70ef477ea846bc363172573753a5039972c4a52e3f37de2120ec35206693a5e9720376ddee62ef6f36a0145cf6e564216cf2c059dd212
+  checksum: 10c0/81060502369a3ca28a407413fdecab59125b22db83e675a5d4c1acfbc4907dfe794c725825495c71158b2e4241792b5dcba1cb60d1906d36d02f7603f2d94a1b
   languageName: node
   linkType: hard
 
@@ -9455,7 +9462,7 @@ __metadata:
     ts-loader: "npm:9.5.1"
     typescript: "npm:5.6.3"
     typescript-eslint: "npm:^8.24.1"
-    webex: "npm:3.8.0-next.61"
+    webex: "npm:3.8.0-next.78"
     webpack: "npm:5.94.0"
     webpack-cli: "npm:5.1.4"
     webpack-merge: "npm:6.0.1"
@@ -9618,10 +9625,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/common-timers@npm:3.8.0-next.12":
-  version: 3.8.0-next.12
-  resolution: "@webex/common-timers@npm:3.8.0-next.12"
-  checksum: 10c0/d94996896dd32e5525bf5f68c831fb38d7d2d7199bdbb73d3676b608d82c939035291a32ee87e957801bb132a502b774fe999ea29356e4b2639c91190f787691
+"@webex/common-timers@npm:3.8.0-next.17":
+  version: 3.8.0-next.17
+  resolution: "@webex/common-timers@npm:3.8.0-next.17"
+  checksum: 10c0/d1d69b75835d26e44b8cee5a807df5e3824e5c1cb1fe9d3c95e17b47726327806f5d97736dd4107de247b76a1964cf21c9f8a5ac4ffe8c4b5477ebe310f10d40
   languageName: node
   linkType: hard
 
@@ -9673,9 +9680,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/common@npm:3.8.0-next.12":
-  version: 3.8.0-next.12
-  resolution: "@webex/common@npm:3.8.0-next.12"
+"@webex/common@npm:3.8.0-next.17":
+  version: 3.8.0-next.17
+  resolution: "@webex/common@npm:3.8.0-next.17"
   dependencies:
     backoff: "npm:^2.5.0"
     bowser: "npm:^2.11.0"
@@ -9684,7 +9691,7 @@ __metadata:
     lodash: "npm:^4.17.21"
     safe-buffer: "npm:^5.2.0"
     urlsafe-base64: "npm:^1.0.0"
-  checksum: 10c0/a9631ffae4761be851ce2ecb7f38febb98bcb25b36cd2d1e57854b42724a570559030f8810944dba49bb4ad5251cd08e3e220671777619aff8c946efb7a6b937
+  checksum: 10c0/a96fd339a16675ed4d6f4ba19ab695a623d41d7f497637cb6a105cc92828f7278b056b8bdcbf9e99b9e4709039ee4cb6ec09cc4dea3f226f74b39d81139b1b04
   languageName: node
   linkType: hard
 
@@ -9724,17 +9731,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/event-dictionary-ts@npm:^1.0.1688":
-  version: 1.0.1712
-  resolution: "@webex/event-dictionary-ts@npm:1.0.1712"
+"@webex/event-dictionary-ts@npm:^1.0.1753":
+  version: 1.0.1757
+  resolution: "@webex/event-dictionary-ts@npm:1.0.1757"
   dependencies:
     amf-client-js: "npm:^5.2.6"
     json-schema-to-typescript: "npm:^12.0.0"
     minimist: "npm:^1.2.8"
-    ramldt2jsonschema: "npm:^1.2.3"
     shelljs: "npm:^0.8.5"
     webapi-parser: "npm:^0.5.0"
-  checksum: 10c0/bb592beb7561ebde8c0f96b0783bc61280f07da7d7d23b9b86680bf20c74e76babae94003c0f64025fc3d4c5674d1486ebde83d9e0b90ed293dff1d12ae0d36d
+  checksum: 10c0/e941c694a6389a6d91dc6018b3d84fc759dce96dce5d7cf8aa10a065b2f2575358c81bfec5869e9dd34ebeaba6ab185282ce76a5dc75495afdc1c907c8403662
   languageName: node
   linkType: hard
 
@@ -9756,12 +9762,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/helper-html@npm:3.8.0-next.12":
-  version: 3.8.0-next.12
-  resolution: "@webex/helper-html@npm:3.8.0-next.12"
+"@webex/helper-html@npm:3.8.0-next.17":
+  version: 3.8.0-next.17
+  resolution: "@webex/helper-html@npm:3.8.0-next.17"
   dependencies:
     lodash: "npm:^4.17.21"
-  checksum: 10c0/8bcb6c9641fde060ab76f43284a38a3542f6d3c94cc7a0aad62d40d77e4c4f8e20cd47a7fefb61e6f60f766d7152345e15c267c5b8686a01cae47eac4d4919b2
+  checksum: 10c0/21ffd29fc13b04a4fccff3e873637a5de021bb76cc90a881e30970f3b61c84493e6dc1f12e7a19487d41d7243543d8853f0ade0311743b50edf554c155707ba9
   languageName: node
   linkType: hard
 
@@ -9799,20 +9805,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/helper-image@npm:3.8.0-next.12":
-  version: 3.8.0-next.12
-  resolution: "@webex/helper-image@npm:3.8.0-next.12"
+"@webex/helper-image@npm:3.8.0-next.17":
+  version: 3.8.0-next.17
+  resolution: "@webex/helper-image@npm:3.8.0-next.17"
   dependencies:
-    "@webex/http-core": "npm:3.8.0-next.12"
-    "@webex/test-helper-chai": "npm:3.8.0-next.12"
-    "@webex/test-helper-file": "npm:3.8.0-next.12"
-    "@webex/test-helper-mocha": "npm:3.8.0-next.12"
+    "@webex/http-core": "npm:3.8.0-next.17"
+    "@webex/test-helper-chai": "npm:3.8.0-next.17"
+    "@webex/test-helper-file": "npm:3.8.0-next.17"
+    "@webex/test-helper-mocha": "npm:3.8.0-next.17"
     exifr: "npm:^5.0.3"
     gm: "npm:^1.23.1"
     lodash: "npm:^4.17.21"
     mime: "npm:^2.4.4"
     safe-buffer: "npm:^5.2.0"
-  checksum: 10c0/b89c16fe606bf05d3f275907992c1496ee7dd5a21c5e685a69e79bb7fb56815097a85a0d94208f7b30ce06321fdf9f881da633b0d93431d3c94f680a304dd910
+  checksum: 10c0/4a031085a08c0cab16d696dde127253fdd610ccf99fd2e1503f5bab28bb4a91470f53a6ae6e40a236d39df2a5284e796fddd1326baad9ff9f8726a413b88d195
   languageName: node
   linkType: hard
 
@@ -9878,14 +9884,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/http-core@npm:3.8.0-next.12":
-  version: 3.8.0-next.12
-  resolution: "@webex/http-core@npm:3.8.0-next.12"
+"@webex/http-core@npm:3.8.0-next.17":
+  version: 3.8.0-next.17
+  resolution: "@webex/http-core@npm:3.8.0-next.17"
   dependencies:
-    "@webex/common": "npm:3.8.0-next.12"
-    "@webex/internal-plugin-device": "npm:3.8.0-next.12"
-    "@webex/test-helper-test-users": "npm:3.8.0-next.12"
-    "@webex/webex-core": "npm:3.8.0-next.12"
+    "@webex/common": "npm:3.8.0-next.17"
+    "@webex/internal-plugin-device": "npm:3.8.0-next.17"
+    "@webex/test-helper-test-users": "npm:3.8.0-next.17"
+    "@webex/webex-core": "npm:3.8.0-next.17"
     file-type: "npm:^16.0.1"
     global: "npm:^4.4.0"
     is-function: "npm:^1.0.1"
@@ -9895,7 +9901,7 @@ __metadata:
     request: "npm:^2.88.0"
     safe-buffer: "npm:^5.2.0"
     xtend: "npm:^4.0.2"
-  checksum: 10c0/df8892e551962d39c06f6ec50ea62ce6ee79edc0b3ce186dce4c2a8b38e5163ffd00d524a7dfad5f4c12b33c74cd54379df4bd578e32939be17fbcf4d0c8ab81
+  checksum: 10c0/96402e686f80a4208cafe6f61be9a10ca857229ffe4a068f4a89d9955c925be0e35b8f3bee07f2c586c87f14b3380936d8a37250f129b998ace105d8972ad483
   languageName: node
   linkType: hard
 
@@ -9963,17 +9969,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/internal-plugin-calendar@npm:3.8.0-next.14":
-  version: 3.8.0-next.14
-  resolution: "@webex/internal-plugin-calendar@npm:3.8.0-next.14"
+"@webex/internal-plugin-calendar@npm:3.8.0-next.21":
+  version: 3.8.0-next.21
+  resolution: "@webex/internal-plugin-calendar@npm:3.8.0-next.21"
   dependencies:
-    "@webex/internal-plugin-conversation": "npm:3.8.0-next.14"
-    "@webex/internal-plugin-device": "npm:3.8.0-next.12"
-    "@webex/internal-plugin-encryption": "npm:3.8.0-next.14"
-    "@webex/webex-core": "npm:3.8.0-next.12"
+    "@webex/internal-plugin-conversation": "npm:3.8.0-next.21"
+    "@webex/internal-plugin-device": "npm:3.8.0-next.17"
+    "@webex/internal-plugin-encryption": "npm:3.8.0-next.21"
+    "@webex/webex-core": "npm:3.8.0-next.17"
     lodash: "npm:^4.17.21"
     uuid: "npm:^3.3.2"
-  checksum: 10c0/e5bed428443f35a8b6432111119678545783fc198f83ce6a40178b3c650e7a8114e2dbda36e54bd6155512a3398c098598b1c5c9cf5b3a2515d8a7c692e5a735
+  checksum: 10c0/f8f0253e4f822bbaed79a7cef99a5dc7663b4188e83782e3c4dfc23969e1ffc9279a292ed050663bacdc33f4d802d493505fdeea18c8bd5e6526da6f2b967696
   languageName: node
   linkType: hard
 
@@ -10013,21 +10019,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/internal-plugin-conversation@npm:3.8.0-next.14":
-  version: 3.8.0-next.14
-  resolution: "@webex/internal-plugin-conversation@npm:3.8.0-next.14"
+"@webex/internal-plugin-conversation@npm:3.8.0-next.21":
+  version: 3.8.0-next.21
+  resolution: "@webex/internal-plugin-conversation@npm:3.8.0-next.21"
   dependencies:
-    "@webex/common": "npm:3.8.0-next.12"
-    "@webex/helper-html": "npm:3.8.0-next.12"
-    "@webex/helper-image": "npm:3.8.0-next.12"
-    "@webex/internal-plugin-encryption": "npm:3.8.0-next.14"
-    "@webex/internal-plugin-user": "npm:3.8.0-next.12"
-    "@webex/webex-core": "npm:3.8.0-next.12"
+    "@webex/common": "npm:3.8.0-next.17"
+    "@webex/helper-html": "npm:3.8.0-next.17"
+    "@webex/helper-image": "npm:3.8.0-next.17"
+    "@webex/internal-plugin-encryption": "npm:3.8.0-next.21"
+    "@webex/internal-plugin-user": "npm:3.8.0-next.17"
+    "@webex/webex-core": "npm:3.8.0-next.17"
     crypto-js: "npm:^4.1.1"
     lodash: "npm:^4.17.21"
     node-scr: "npm:^0.3.0"
     uuid: "npm:^3.3.2"
-  checksum: 10c0/cf18718d2ab04ecd2621a33329dcf8d0471ef19d84916a1b248404dc8ca82f99d5c5b3a92690b675c399fd26ce39f1835b057c880fcc3eb1a172ea2cc61a7f60
+  checksum: 10c0/6a53e5d136d5ad29781a3ee16fb9d7ae8511477798269e766d0b27734686758eae985da478d8409c4482dfd99a8813beb0b397bb7967c5d76b0a8387cca6d943
   languageName: node
   linkType: hard
 
@@ -10063,20 +10069,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/internal-plugin-device@npm:3.8.0-next.12":
-  version: 3.8.0-next.12
-  resolution: "@webex/internal-plugin-device@npm:3.8.0-next.12"
+"@webex/internal-plugin-device@npm:3.8.0-next.17":
+  version: 3.8.0-next.17
+  resolution: "@webex/internal-plugin-device@npm:3.8.0-next.17"
   dependencies:
-    "@webex/common": "npm:3.8.0-next.12"
-    "@webex/common-timers": "npm:3.8.0-next.12"
-    "@webex/http-core": "npm:3.8.0-next.12"
-    "@webex/internal-plugin-metrics": "npm:3.8.0-next.12"
-    "@webex/webex-core": "npm:3.8.0-next.12"
+    "@webex/common": "npm:3.8.0-next.17"
+    "@webex/common-timers": "npm:3.8.0-next.17"
+    "@webex/http-core": "npm:3.8.0-next.17"
+    "@webex/internal-plugin-metrics": "npm:3.8.0-next.17"
+    "@webex/webex-core": "npm:3.8.0-next.17"
     ampersand-collection: "npm:^2.0.2"
     ampersand-state: "npm:^5.0.3"
     lodash: "npm:^4.17.21"
     uuid: "npm:^3.3.2"
-  checksum: 10c0/590acc15e92199a7ddb980c2fc9893e710dd03b691590ba0314ae6850849e6f93d353df3c43066380b2351effb243c0ca4587e1c3a3a95d115402788602d8a3d
+  checksum: 10c0/115c05358cddc323d6bf4ef97a84371bc321f6de40859d2ec1b9f395d9411178e1edc788d3976fd5a1173215567db463c87ea960184a8dd7f22c60b3f6dcfb7c
   languageName: node
   linkType: hard
 
@@ -10132,17 +10138,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/internal-plugin-encryption@npm:3.8.0-next.14":
-  version: 3.8.0-next.14
-  resolution: "@webex/internal-plugin-encryption@npm:3.8.0-next.14"
+"@webex/internal-plugin-encryption@npm:3.8.0-next.21":
+  version: 3.8.0-next.21
+  resolution: "@webex/internal-plugin-encryption@npm:3.8.0-next.21"
   dependencies:
-    "@webex/common": "npm:3.8.0-next.12"
-    "@webex/common-timers": "npm:3.8.0-next.12"
-    "@webex/http-core": "npm:3.8.0-next.12"
-    "@webex/internal-plugin-device": "npm:3.8.0-next.12"
-    "@webex/internal-plugin-mercury": "npm:3.8.0-next.14"
-    "@webex/test-helper-file": "npm:3.8.0-next.12"
-    "@webex/webex-core": "npm:3.8.0-next.12"
+    "@webex/common": "npm:3.8.0-next.17"
+    "@webex/common-timers": "npm:3.8.0-next.17"
+    "@webex/http-core": "npm:3.8.0-next.17"
+    "@webex/internal-plugin-device": "npm:3.8.0-next.17"
+    "@webex/internal-plugin-mercury": "npm:3.8.0-next.19"
+    "@webex/test-helper-file": "npm:3.8.0-next.17"
+    "@webex/webex-core": "npm:3.8.0-next.17"
     asn1js: "npm:^2.0.26"
     debug: "npm:^4.3.4"
     isomorphic-webcrypto: "npm:^2.3.8"
@@ -10154,7 +10160,7 @@ __metadata:
     safe-buffer: "npm:^5.2.0"
     uuid: "npm:^3.3.2"
     valid-url: "npm:^1.0.9"
-  checksum: 10c0/fd81b45300b46a1b049281d7767e6f07b7092b9bed1c40e5ea54a438fe6b588fdbfe04a28b24c690d723e37becde5497c2297359036c93d5f52c77db85974886
+  checksum: 10c0/30ed9370f2fd80bec7c293d3aaae6e22b9ef42bf127aafa086a8a27fd50f19ecd64ae4a763846698599cbcd61818fca89017aff65655775d2124811991ad7d4b
   languageName: node
   linkType: hard
 
@@ -10182,23 +10188,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/internal-plugin-feature@npm:3.8.0-next.12":
-  version: 3.8.0-next.12
-  resolution: "@webex/internal-plugin-feature@npm:3.8.0-next.12"
+"@webex/internal-plugin-feature@npm:3.8.0-next.17":
+  version: 3.8.0-next.17
+  resolution: "@webex/internal-plugin-feature@npm:3.8.0-next.17"
   dependencies:
-    "@webex/internal-plugin-device": "npm:3.8.0-next.12"
-    "@webex/webex-core": "npm:3.8.0-next.12"
+    "@webex/internal-plugin-device": "npm:3.8.0-next.17"
+    "@webex/webex-core": "npm:3.8.0-next.17"
     lodash: "npm:^4.17.21"
-  checksum: 10c0/b0c51d04bda48839e6c445b2cd75696d11780a16af18e21b567fb73cb08de4e90f79b6ca078fa5afdf3c4fecdbdb6bc643a4a6831109138722aaaaf3a8f864a5
+  checksum: 10c0/bb58b2d2b4a8925c684ae09078d7eab169536b1eeefef3ae2ee19e4ccd4b329b1b13bd8067a4cda32cee84e51702e5a3cb2fc3c7c136d67d0f3d51bca0188e77
   languageName: node
   linkType: hard
 
-"@webex/internal-plugin-llm@npm:3.8.0-next.15":
-  version: 3.8.0-next.15
-  resolution: "@webex/internal-plugin-llm@npm:3.8.0-next.15"
+"@webex/internal-plugin-llm@npm:3.8.0-next.20":
+  version: 3.8.0-next.20
+  resolution: "@webex/internal-plugin-llm@npm:3.8.0-next.20"
   dependencies:
-    "@webex/internal-plugin-mercury": "npm:3.8.0-next.14"
-  checksum: 10c0/df46f3b4d4e4004b0e071cce3958f578fd9e2f1430b0ac92e47f0ad5c134c5ba1da3f896e35717de400362130c6faa3b5b71a8d96bf3ad4d191543c8eee6485e
+    "@webex/internal-plugin-mercury": "npm:3.8.0-next.19"
+  checksum: 10c0/ed4dc21c8aae1a9955e3dd2800d47922c9dc513809e34fc2c230aaaa895a856060839de363013089dd985931a317dc7875660f2d07c857098fce04d5a857a929
   languageName: node
   linkType: hard
 
@@ -10230,17 +10236,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/internal-plugin-locus@npm:3.8.0-next.14":
-  version: 3.8.0-next.14
-  resolution: "@webex/internal-plugin-locus@npm:3.8.0-next.14"
+"@webex/internal-plugin-locus@npm:3.8.0-next.19":
+  version: 3.8.0-next.19
+  resolution: "@webex/internal-plugin-locus@npm:3.8.0-next.19"
   dependencies:
-    "@webex/internal-plugin-mercury": "npm:3.8.0-next.14"
-    "@webex/test-helper-chai": "npm:3.8.0-next.12"
-    "@webex/test-helper-mock-webex": "npm:3.8.0-next.12"
-    "@webex/webex-core": "npm:3.8.0-next.12"
+    "@webex/internal-plugin-mercury": "npm:3.8.0-next.19"
+    "@webex/test-helper-chai": "npm:3.8.0-next.17"
+    "@webex/test-helper-mock-webex": "npm:3.8.0-next.17"
+    "@webex/webex-core": "npm:3.8.0-next.17"
     lodash: "npm:^4.17.21"
     uuid: "npm:^3.3.2"
-  checksum: 10c0/772a219dd42300604ebd284bee5b213f10f56b9e8d75319211893f7feebc84792c9751e3fd3eeed51397b46a84f87b4847b8114c5e40298069ff029fcc4eb810
+  checksum: 10c0/d418e43496e2a1d1ca4b71ebd342a4e5eee0edaa009c74c68d7d36117bed4ac7fe5dbad3164022c86a244222c987a908188d867f3ed2112ad5c6c85edbe61506
   languageName: node
   linkType: hard
 
@@ -10278,20 +10284,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/internal-plugin-lyra@npm:3.8.0-next.14":
-  version: 3.8.0-next.14
-  resolution: "@webex/internal-plugin-lyra@npm:3.8.0-next.14"
+"@webex/internal-plugin-lyra@npm:3.8.0-next.21":
+  version: 3.8.0-next.21
+  resolution: "@webex/internal-plugin-lyra@npm:3.8.0-next.21"
   dependencies:
-    "@webex/common": "npm:3.8.0-next.12"
-    "@webex/internal-plugin-conversation": "npm:3.8.0-next.14"
-    "@webex/internal-plugin-encryption": "npm:3.8.0-next.14"
-    "@webex/internal-plugin-feature": "npm:3.8.0-next.12"
-    "@webex/internal-plugin-locus": "npm:3.8.0-next.14"
-    "@webex/internal-plugin-mercury": "npm:3.8.0-next.14"
-    "@webex/webex-core": "npm:3.8.0-next.12"
+    "@webex/common": "npm:3.8.0-next.17"
+    "@webex/internal-plugin-conversation": "npm:3.8.0-next.21"
+    "@webex/internal-plugin-encryption": "npm:3.8.0-next.21"
+    "@webex/internal-plugin-feature": "npm:3.8.0-next.17"
+    "@webex/internal-plugin-locus": "npm:3.8.0-next.19"
+    "@webex/internal-plugin-mercury": "npm:3.8.0-next.19"
+    "@webex/webex-core": "npm:3.8.0-next.17"
     bowser: "npm:^2.11.0"
     uuid: "npm:^3.3.2"
-  checksum: 10c0/9ae77f482c113e1843a2c5f366f04d410145120007164aecc894811bb70955c029055b6363f6d03989e6d89cefa0bfbb650d1aad39a1760c86c678a725cbc22d
+  checksum: 10c0/af97b82080925b54762668b7306fe1f0dcab32afc44022c4aab52deabfb8c86513c840116951b9f89e9df5781d86a6e64d73847e03d945535d9a6273d227f53b
   languageName: node
   linkType: hard
 
@@ -10343,27 +10349,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/internal-plugin-mercury@npm:3.8.0-next.14":
-  version: 3.8.0-next.14
-  resolution: "@webex/internal-plugin-mercury@npm:3.8.0-next.14"
+"@webex/internal-plugin-mercury@npm:3.8.0-next.19":
+  version: 3.8.0-next.19
+  resolution: "@webex/internal-plugin-mercury@npm:3.8.0-next.19"
   dependencies:
-    "@webex/common": "npm:3.8.0-next.12"
-    "@webex/common-timers": "npm:3.8.0-next.12"
-    "@webex/internal-plugin-device": "npm:3.8.0-next.12"
-    "@webex/internal-plugin-feature": "npm:3.8.0-next.12"
-    "@webex/internal-plugin-metrics": "npm:3.8.0-next.12"
-    "@webex/test-helper-chai": "npm:3.8.0-next.12"
-    "@webex/test-helper-mocha": "npm:3.8.0-next.12"
-    "@webex/test-helper-mock-web-socket": "npm:3.8.0-next.12"
-    "@webex/test-helper-mock-webex": "npm:3.8.0-next.12"
-    "@webex/test-helper-refresh-callback": "npm:3.8.0-next.12"
-    "@webex/test-helper-test-users": "npm:3.8.0-next.12"
-    "@webex/webex-core": "npm:3.8.0-next.12"
+    "@webex/common": "npm:3.8.0-next.17"
+    "@webex/common-timers": "npm:3.8.0-next.17"
+    "@webex/internal-plugin-device": "npm:3.8.0-next.17"
+    "@webex/internal-plugin-feature": "npm:3.8.0-next.17"
+    "@webex/internal-plugin-metrics": "npm:3.8.0-next.17"
+    "@webex/test-helper-chai": "npm:3.8.0-next.17"
+    "@webex/test-helper-mocha": "npm:3.8.0-next.17"
+    "@webex/test-helper-mock-web-socket": "npm:3.8.0-next.17"
+    "@webex/test-helper-mock-webex": "npm:3.8.0-next.17"
+    "@webex/test-helper-refresh-callback": "npm:3.8.0-next.17"
+    "@webex/test-helper-test-users": "npm:3.8.0-next.17"
+    "@webex/webex-core": "npm:3.8.0-next.17"
     backoff: "npm:^2.5.0"
     lodash: "npm:^4.17.21"
     uuid: "npm:^3.3.2"
     ws: "npm:^8.17.1"
-  checksum: 10c0/e9be55f46b6598e129523bf87c8d0bc7c591bb444cbbc48b479e96c8c870cbb31f998f826d6e97aba29af26a800e8d2c932240ad6055eea8e11ed6940e17097a
+  checksum: 10c0/01a74f458c061b1644fdb58104715591a96b2771d71e993f2dd9ad02a79badd5e363452364b1b14e3831e22feea9d481b4bb2531b35415dcbda7b85bc088f8ef
   languageName: node
   linkType: hard
 
@@ -10393,21 +10399,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/internal-plugin-metrics@npm:3.8.0-next.12":
-  version: 3.8.0-next.12
-  resolution: "@webex/internal-plugin-metrics@npm:3.8.0-next.12"
+"@webex/internal-plugin-metrics@npm:3.8.0-next.17":
+  version: 3.8.0-next.17
+  resolution: "@webex/internal-plugin-metrics@npm:3.8.0-next.17"
   dependencies:
-    "@webex/common": "npm:3.8.0-next.12"
-    "@webex/common-timers": "npm:3.8.0-next.12"
-    "@webex/event-dictionary-ts": "npm:^1.0.1688"
-    "@webex/internal-plugin-metrics": "npm:3.8.0-next.12"
-    "@webex/test-helper-chai": "npm:3.8.0-next.12"
-    "@webex/test-helper-mock-webex": "npm:3.8.0-next.12"
-    "@webex/webex-core": "npm:3.8.0-next.12"
+    "@webex/common": "npm:3.8.0-next.17"
+    "@webex/common-timers": "npm:3.8.0-next.17"
+    "@webex/event-dictionary-ts": "npm:^1.0.1753"
+    "@webex/internal-plugin-metrics": "npm:3.8.0-next.17"
+    "@webex/test-helper-chai": "npm:3.8.0-next.17"
+    "@webex/test-helper-mock-webex": "npm:3.8.0-next.17"
+    "@webex/webex-core": "npm:3.8.0-next.17"
     ip-anonymize: "npm:^0.1.0"
     lodash: "npm:^4.17.21"
     uuid: "npm:^3.3.2"
-  checksum: 10c0/0bdfc96576292084ba4895e59ba43e8d41ccf302733d447e9e59270840c6a793e615855c7f224bd143d78e586a9bdada6ba709fa4b056872eebd73bca9ab2208
+  checksum: 10c0/8f0c0d1911c432c9c90a42c25a56fc92f2b3f8f3a5c930160b63d929ff8afb3eb9e0617de928220caf7bdeb52d66cf65c4a73fc6e27cafb26a4f5e16f9ecc418
   languageName: node
   linkType: hard
 
@@ -10443,19 +10449,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/internal-plugin-presence@npm:3.8.0-next.14":
-  version: 3.8.0-next.14
-  resolution: "@webex/internal-plugin-presence@npm:3.8.0-next.14"
+"@webex/internal-plugin-presence@npm:3.8.0-next.19":
+  version: 3.8.0-next.19
+  resolution: "@webex/internal-plugin-presence@npm:3.8.0-next.19"
   dependencies:
-    "@webex/internal-plugin-device": "npm:3.8.0-next.12"
-    "@webex/internal-plugin-mercury": "npm:3.8.0-next.14"
-    "@webex/test-helper-chai": "npm:3.8.0-next.12"
-    "@webex/test-helper-mocha": "npm:3.8.0-next.12"
-    "@webex/test-helper-mock-webex": "npm:3.8.0-next.12"
-    "@webex/test-helper-test-users": "npm:3.8.0-next.12"
-    "@webex/webex-core": "npm:3.8.0-next.12"
+    "@webex/internal-plugin-device": "npm:3.8.0-next.17"
+    "@webex/internal-plugin-mercury": "npm:3.8.0-next.19"
+    "@webex/test-helper-chai": "npm:3.8.0-next.17"
+    "@webex/test-helper-mocha": "npm:3.8.0-next.17"
+    "@webex/test-helper-mock-webex": "npm:3.8.0-next.17"
+    "@webex/test-helper-test-users": "npm:3.8.0-next.17"
+    "@webex/webex-core": "npm:3.8.0-next.17"
     lodash: "npm:^4.17.21"
-  checksum: 10c0/8d340b8b266c0083712f0e37eb5fc6cae968f084fab2524052c63de9ba4caa28c9fa5a9edddfa66303e12afade0711454ccd1eb8cab12144392e3c60f188a6c9
+  checksum: 10c0/c0effe884c072e367c5dd4edf95f2dc308aa326b833ac71cf9e2d6277de74085748547112fe449403338fbed144d9e53bc6b7b538e51343055a52c8588b57486
   languageName: node
   linkType: hard
 
@@ -10489,18 +10495,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/internal-plugin-search@npm:3.8.0-next.14":
-  version: 3.8.0-next.14
-  resolution: "@webex/internal-plugin-search@npm:3.8.0-next.14"
+"@webex/internal-plugin-search@npm:3.8.0-next.21":
+  version: 3.8.0-next.21
+  resolution: "@webex/internal-plugin-search@npm:3.8.0-next.21"
   dependencies:
-    "@webex/common": "npm:3.8.0-next.12"
-    "@webex/internal-plugin-conversation": "npm:3.8.0-next.14"
-    "@webex/internal-plugin-device": "npm:3.8.0-next.12"
-    "@webex/internal-plugin-encryption": "npm:3.8.0-next.14"
-    "@webex/webex-core": "npm:3.8.0-next.12"
+    "@webex/common": "npm:3.8.0-next.17"
+    "@webex/internal-plugin-conversation": "npm:3.8.0-next.21"
+    "@webex/internal-plugin-device": "npm:3.8.0-next.17"
+    "@webex/internal-plugin-encryption": "npm:3.8.0-next.21"
+    "@webex/webex-core": "npm:3.8.0-next.17"
     lodash: "npm:^4.17.21"
     uuid: "npm:^3.3.2"
-  checksum: 10c0/46dfd0f1963ada03300cdec8575d6526675eb188cb24dd854d91744cfba6cc56deaef2343c473839f01e0bdfa7a4b8d2b0461722dbd69a342ed331c52a95fa39
+  checksum: 10c0/c2bd013601af8c315ea14fd41f85ab0c3edfdc6f7a0855f53b20a2dd6c300b629af75cecbdb7dee03e270063f3ef1083adb4e0d2766818919f35c3f5007b140a
   languageName: node
   linkType: hard
 
@@ -10538,20 +10544,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/internal-plugin-support@npm:3.8.0-next.14":
-  version: 3.8.0-next.14
-  resolution: "@webex/internal-plugin-support@npm:3.8.0-next.14"
+"@webex/internal-plugin-support@npm:3.8.0-next.21":
+  version: 3.8.0-next.21
+  resolution: "@webex/internal-plugin-support@npm:3.8.0-next.21"
   dependencies:
-    "@webex/internal-plugin-device": "npm:3.8.0-next.12"
-    "@webex/internal-plugin-search": "npm:3.8.0-next.14"
-    "@webex/test-helper-chai": "npm:3.8.0-next.12"
-    "@webex/test-helper-file": "npm:3.8.0-next.12"
-    "@webex/test-helper-mock-webex": "npm:3.8.0-next.12"
-    "@webex/test-helper-test-users": "npm:3.8.0-next.12"
-    "@webex/webex-core": "npm:3.8.0-next.12"
+    "@webex/internal-plugin-device": "npm:3.8.0-next.17"
+    "@webex/internal-plugin-search": "npm:3.8.0-next.21"
+    "@webex/test-helper-chai": "npm:3.8.0-next.17"
+    "@webex/test-helper-file": "npm:3.8.0-next.17"
+    "@webex/test-helper-mock-webex": "npm:3.8.0-next.17"
+    "@webex/test-helper-test-users": "npm:3.8.0-next.17"
+    "@webex/webex-core": "npm:3.8.0-next.17"
     lodash: "npm:^4.17.21"
     uuid: "npm:^3.3.2"
-  checksum: 10c0/29fa23c6f89804f6fdccab61d5342b198f79e6a115674b15cccb5e611acff011ef081bfc9c80e3dd5b2f061c3e34f93cfb2bb7445e09a660f701174d14475f4c
+  checksum: 10c0/a804428a1d598527abd7d6f661a4e5a8f246490630cfa34018a502bb9bd77f14d7794392403a6adf3058339f2a4f16598cced463516636a8a86a8c32857ae7dc
   languageName: node
   linkType: hard
 
@@ -10587,32 +10593,32 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/internal-plugin-user@npm:3.8.0-next.12":
-  version: 3.8.0-next.12
-  resolution: "@webex/internal-plugin-user@npm:3.8.0-next.12"
+"@webex/internal-plugin-user@npm:3.8.0-next.17":
+  version: 3.8.0-next.17
+  resolution: "@webex/internal-plugin-user@npm:3.8.0-next.17"
   dependencies:
-    "@webex/common": "npm:3.8.0-next.12"
-    "@webex/internal-plugin-device": "npm:3.8.0-next.12"
-    "@webex/test-helper-chai": "npm:3.8.0-next.12"
-    "@webex/test-helper-mock-webex": "npm:3.8.0-next.12"
-    "@webex/test-helper-test-users": "npm:3.8.0-next.12"
-    "@webex/webex-core": "npm:3.8.0-next.12"
+    "@webex/common": "npm:3.8.0-next.17"
+    "@webex/internal-plugin-device": "npm:3.8.0-next.17"
+    "@webex/test-helper-chai": "npm:3.8.0-next.17"
+    "@webex/test-helper-mock-webex": "npm:3.8.0-next.17"
+    "@webex/test-helper-test-users": "npm:3.8.0-next.17"
+    "@webex/webex-core": "npm:3.8.0-next.17"
     lodash: "npm:^4.17.21"
     uuid: "npm:^3.3.2"
-  checksum: 10c0/a889c8b65425e44fd67dc5435b63344db80b651d220d67cd1853b87004abc384cfb1aa7f36d6d17b3348f6906a145fd384fe396311e779b009f23f98a1f73d10
+  checksum: 10c0/4afb4c2b1465a37724bf44532b3ae4e4700eec2ef491ed049e781216fd829b190a0414839e0756e530244639c2651fb71f0a2519e3754f42234fb1ae271f8461
   languageName: node
   linkType: hard
 
-"@webex/internal-plugin-voicea@npm:3.8.0-next.41":
-  version: 3.8.0-next.41
-  resolution: "@webex/internal-plugin-voicea@npm:3.8.0-next.41"
+"@webex/internal-plugin-voicea@npm:3.8.0-next.54":
+  version: 3.8.0-next.54
+  resolution: "@webex/internal-plugin-voicea@npm:3.8.0-next.54"
   dependencies:
-    "@webex/internal-plugin-llm": "npm:3.8.0-next.15"
-    "@webex/internal-plugin-mercury": "npm:3.8.0-next.14"
-    "@webex/plugin-meetings": "npm:3.8.0-next.41"
-    "@webex/webex-core": "npm:3.8.0-next.12"
+    "@webex/internal-plugin-llm": "npm:3.8.0-next.20"
+    "@webex/internal-plugin-mercury": "npm:3.8.0-next.19"
+    "@webex/plugin-meetings": "npm:3.8.0-next.54"
+    "@webex/webex-core": "npm:3.8.0-next.17"
     uuid: "npm:^3.3.2"
-  checksum: 10c0/7e73642c26ff5e2a5cc97de8d9d753de4edecad5d291b8d33ca78ee820f138786eb59e3757b56d7e0b624105df0ee06101c1be8c4a709d17216915a5ad8c7cf5
+  checksum: 10c0/70dfc2120762a4b25ea6674679942293f6d5543f310e6f3db931d40871ab3d272ebf942b86f92346c4016371a08f6e9f263b5810e98a88da8de75755fa56d2f5
   languageName: node
   linkType: hard
 
@@ -10632,14 +10638,26 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/media-helpers@npm:3.8.0-next.13":
-  version: 3.8.0-next.13
-  resolution: "@webex/media-helpers@npm:3.8.0-next.13"
+"@webex/ladon-ts@npm:^5.5.1":
+  version: 5.5.1
+  resolution: "@webex/ladon-ts@npm:5.5.1"
+  dependencies:
+    "@rollup/rollup-linux-x64-gnu": "npm:4.36.0"
+  dependenciesMeta:
+    "@rollup/rollup-linux-x64-gnu":
+      optional: true
+  checksum: 10c0/202da7c94dc2e814f5c59deefc0fb286ebeedc573cef2b9cdfae8be809d17e020280fbf47f57be3bdf5b9346a2dd71ea960169a5e67f5525d61d01bc8569613c
+  languageName: node
+  linkType: hard
+
+"@webex/media-helpers@npm:3.8.0-next.19":
+  version: 3.8.0-next.19
+  resolution: "@webex/media-helpers@npm:3.8.0-next.19"
   dependencies:
     "@webex/internal-media-core": "npm:2.14.7"
     "@webex/ts-events": "npm:^1.1.0"
-    "@webex/web-media-effects": "npm:2.19.0"
-  checksum: 10c0/38c4241d2622067e0f66e140796b696a878e014ce81d0ae3e649965553403d3ca4b950edaf7b69a20f481bbd0494d2de2ac92918d49ddb3b1d1c9b21e1b8e0e3
+    "@webex/web-media-effects": "npm:2.27.1"
+  checksum: 10c0/250a8d9649d9fb3a2392b77999224a292732e6249991e5bd7ecdd4c25543c91d4cf8804eadbea1d89988b39507212ac5d9226091aa15adbb143a360f607e6d50
   languageName: node
   linkType: hard
 
@@ -10681,22 +10699,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/plugin-attachment-actions@npm:3.8.0-next.14":
-  version: 3.8.0-next.14
-  resolution: "@webex/plugin-attachment-actions@npm:3.8.0-next.14"
+"@webex/plugin-attachment-actions@npm:3.8.0-next.21":
+  version: 3.8.0-next.21
+  resolution: "@webex/plugin-attachment-actions@npm:3.8.0-next.21"
   dependencies:
-    "@webex/common": "npm:3.8.0-next.12"
-    "@webex/internal-plugin-conversation": "npm:3.8.0-next.14"
-    "@webex/internal-plugin-mercury": "npm:3.8.0-next.14"
-    "@webex/plugin-logger": "npm:3.8.0-next.12"
-    "@webex/plugin-messages": "npm:3.8.0-next.14"
-    "@webex/plugin-people": "npm:3.8.0-next.14"
-    "@webex/test-helper-chai": "npm:3.8.0-next.12"
-    "@webex/test-helper-test-users": "npm:3.8.0-next.12"
-    "@webex/webex-core": "npm:3.8.0-next.12"
+    "@webex/common": "npm:3.8.0-next.17"
+    "@webex/internal-plugin-conversation": "npm:3.8.0-next.21"
+    "@webex/internal-plugin-mercury": "npm:3.8.0-next.19"
+    "@webex/plugin-logger": "npm:3.8.0-next.17"
+    "@webex/plugin-messages": "npm:3.8.0-next.21"
+    "@webex/plugin-people": "npm:3.8.0-next.19"
+    "@webex/test-helper-chai": "npm:3.8.0-next.17"
+    "@webex/test-helper-test-users": "npm:3.8.0-next.17"
+    "@webex/webex-core": "npm:3.8.0-next.17"
     debug: "npm:^4.3.4"
     lodash: "npm:^4.17.21"
-  checksum: 10c0/0a269cb35d915d4f47c9ab7c283ff515012c33251497b9541bc75c1c27ab2409d4be2659086a27562f53b3bd83057f69b1001e1015150c9b85ecf693ee3620f4
+  checksum: 10c0/83374c4a8bcc2c8cd50fd5e2b23a77a13e26e23e4c4fd755a00527a5b80749fa9d494fc07de675eeb95d0d83e221645ea324e93123fd00d667003ae3a9ebbaae
   languageName: node
   linkType: hard
 
@@ -10734,20 +10752,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/plugin-authorization-browser@npm:3.8.0-next.13":
-  version: 3.8.0-next.13
-  resolution: "@webex/plugin-authorization-browser@npm:3.8.0-next.13"
+"@webex/plugin-authorization-browser@npm:3.8.0-next.18":
+  version: 3.8.0-next.18
+  resolution: "@webex/plugin-authorization-browser@npm:3.8.0-next.18"
   dependencies:
-    "@webex/common": "npm:3.8.0-next.12"
-    "@webex/internal-plugin-device": "npm:3.8.0-next.12"
-    "@webex/plugin-authorization-node": "npm:3.8.0-next.12"
-    "@webex/storage-adapter-local-storage": "npm:3.8.0-next.12"
-    "@webex/storage-adapter-spec": "npm:3.8.0-next.12"
-    "@webex/webex-core": "npm:3.8.0-next.12"
+    "@webex/common": "npm:3.8.0-next.17"
+    "@webex/internal-plugin-device": "npm:3.8.0-next.17"
+    "@webex/plugin-authorization-node": "npm:3.8.0-next.17"
+    "@webex/storage-adapter-local-storage": "npm:3.8.0-next.17"
+    "@webex/storage-adapter-spec": "npm:3.8.0-next.17"
+    "@webex/webex-core": "npm:3.8.0-next.17"
     jsonwebtoken: "npm:^9.0.2"
     lodash: "npm:^4.17.21"
     uuid: "npm:^3.3.2"
-  checksum: 10c0/56daaaaddd65fa9186386f6d4307c55a72c872b98a8fce63cd67fc57cfb6d0f638c0cdec0304cd30fc1936f177fde323b84d545db6f5bd8305fcea9689131875
+  checksum: 10c0/dde98b68623ecc0592817238fe5cb21e1aa0f9b19a964c7aa1e930c27b26e9ffa6292709c53c676303390ab13253c017ae2680ed7e8ea1ac79daf31f196fc166
   languageName: node
   linkType: hard
 
@@ -10777,16 +10795,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/plugin-authorization-node@npm:3.8.0-next.12":
-  version: 3.8.0-next.12
-  resolution: "@webex/plugin-authorization-node@npm:3.8.0-next.12"
+"@webex/plugin-authorization-node@npm:3.8.0-next.17":
+  version: 3.8.0-next.17
+  resolution: "@webex/plugin-authorization-node@npm:3.8.0-next.17"
   dependencies:
-    "@webex/common": "npm:3.8.0-next.12"
-    "@webex/internal-plugin-device": "npm:3.8.0-next.12"
-    "@webex/webex-core": "npm:3.8.0-next.12"
+    "@webex/common": "npm:3.8.0-next.17"
+    "@webex/internal-plugin-device": "npm:3.8.0-next.17"
+    "@webex/webex-core": "npm:3.8.0-next.17"
     jsonwebtoken: "npm:^9.0.0"
     uuid: "npm:^3.3.2"
-  checksum: 10c0/cbd11e8140f19a4a0b626e668126be02cd062ae8ea8e5b3b00922b0ad82a22983da59ef2f4b79373121470df1f37dd9b1c331bb1d6854e1e0e4ca5dafb3de48b
+  checksum: 10c0/d682d546d97e3ad275b1a833821258280415daf4cefb612387c0771980f2ee2e92669884f51fd895f376a747d84270cd4c79d098564c990b601843c55cfd9c2b
   languageName: node
   linkType: hard
 
@@ -10810,28 +10828,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/plugin-authorization@npm:3.8.0-next.13":
-  version: 3.8.0-next.13
-  resolution: "@webex/plugin-authorization@npm:3.8.0-next.13"
+"@webex/plugin-authorization@npm:3.8.0-next.18":
+  version: 3.8.0-next.18
+  resolution: "@webex/plugin-authorization@npm:3.8.0-next.18"
   dependencies:
-    "@webex/plugin-authorization-browser": "npm:3.8.0-next.13"
-    "@webex/plugin-authorization-node": "npm:3.8.0-next.12"
-  checksum: 10c0/1797eac0e2ba6808e73e2266efca016a5f7f5f03dd2f827069cea4b7dbafb7e2e4d4e6cff7f9d915d523dfe584530ef1c4cef642f53f4bd3d0bd05f95102e39f
+    "@webex/plugin-authorization-browser": "npm:3.8.0-next.18"
+    "@webex/plugin-authorization-node": "npm:3.8.0-next.17"
+  checksum: 10c0/20f5df0ccf8a03446a063c6c85ecea7567f4253c78ca5e0fb235f195ffbdbd414512865ae3c57c5d5d597df5fd678bd4fc90a94b89214627a3eacfa5740ba8a8
   languageName: node
   linkType: hard
 
-"@webex/plugin-cc@npm:3.8.0-next.34":
-  version: 3.8.0-next.34
-  resolution: "@webex/plugin-cc@npm:3.8.0-next.34"
+"@webex/plugin-cc@npm:3.8.0-next.44":
+  version: 3.8.0-next.44
+  resolution: "@webex/plugin-cc@npm:3.8.0-next.44"
   dependencies:
     "@types/platform": "npm:1.3.4"
-    "@webex/calling": "npm:3.8.0-next.15"
-    "@webex/internal-plugin-mercury": "npm:3.8.0-next.14"
-    "@webex/internal-plugin-metrics": "npm:3.8.0-next.12"
-    "@webex/webex-core": "npm:3.8.0-next.12"
-    buffer: "npm:6.0.3"
+    "@webex/calling": "npm:3.8.0-next.21"
+    "@webex/internal-plugin-mercury": "npm:3.8.0-next.19"
+    "@webex/internal-plugin-metrics": "npm:3.8.0-next.17"
+    "@webex/webex-core": "npm:3.8.0-next.17"
     jest-html-reporters: "npm:3.0.11"
-  checksum: 10c0/1506598cbf65bea7225bab8b863084e40a1ff93e639cbc146c5243bf1fe4d3a5fd35b79808bfeb3386a1c37c5698d8ed76448951f19af98ae254c5931c986f8d
+  checksum: 10c0/1b619b6e0d017213c5c87f92cc27f5921392f9bfdb95d6a1b9c4b8ca1dc8d473a927dc863ad3223e297e376cf771daee983b3b0d1d171124b74fb3c9b92eab42
   languageName: node
   linkType: hard
 
@@ -10871,31 +10888,31 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/plugin-device-manager@npm:3.8.0-next.15":
-  version: 3.8.0-next.15
-  resolution: "@webex/plugin-device-manager@npm:3.8.0-next.15"
+"@webex/plugin-device-manager@npm:3.8.0-next.22":
+  version: 3.8.0-next.22
+  resolution: "@webex/plugin-device-manager@npm:3.8.0-next.22"
   dependencies:
-    "@webex/internal-plugin-calendar": "npm:3.8.0-next.14"
-    "@webex/internal-plugin-device": "npm:3.8.0-next.12"
-    "@webex/internal-plugin-lyra": "npm:3.8.0-next.14"
-    "@webex/internal-plugin-search": "npm:3.8.0-next.14"
-    "@webex/plugin-authorization": "npm:3.8.0-next.13"
-    "@webex/plugin-logger": "npm:3.8.0-next.12"
-    "@webex/test-helper-chai": "npm:3.8.0-next.12"
-    "@webex/webex-core": "npm:3.8.0-next.12"
+    "@webex/internal-plugin-calendar": "npm:3.8.0-next.21"
+    "@webex/internal-plugin-device": "npm:3.8.0-next.17"
+    "@webex/internal-plugin-lyra": "npm:3.8.0-next.21"
+    "@webex/internal-plugin-search": "npm:3.8.0-next.21"
+    "@webex/plugin-authorization": "npm:3.8.0-next.18"
+    "@webex/plugin-logger": "npm:3.8.0-next.17"
+    "@webex/test-helper-chai": "npm:3.8.0-next.17"
+    "@webex/webex-core": "npm:3.8.0-next.17"
     lodash: "npm:^4.17.21"
     uuid: "npm:^3.3.2"
-  checksum: 10c0/d26fd0d465a1f98764b21fc079d10bf8585c16a41c1ec407ffbed66b6b64032516b1c5346c65f7e10c838a8282b2be2dd34e76781f6de93e66f251f3d75fb2b7
+  checksum: 10c0/c0d49d2f8ede99d1743a52066ff310eca89d0043c218cb9b22f69f493c39b834f3ac1a37b69ab6d9764106632e64241b08ef80d803094f6a1f349cd389a07c5e
   languageName: node
   linkType: hard
 
-"@webex/plugin-encryption@npm:3.8.0-next.2":
-  version: 3.8.0-next.2
-  resolution: "@webex/plugin-encryption@npm:3.8.0-next.2"
+"@webex/plugin-encryption@npm:3.8.0-next.9":
+  version: 3.8.0-next.9
+  resolution: "@webex/plugin-encryption@npm:3.8.0-next.9"
   dependencies:
-    "@webex/internal-plugin-encryption": "npm:3.8.0-next.14"
-    "@webex/webex-core": "npm:3.8.0-next.12"
-  checksum: 10c0/a666ec5842a8383007c849dd1f83b291f46c868969a2b7452fcd5e60b40842ba37ce0138a8c3c8e846a4f9da6c1bb0466be59debe42fdef262a1ea445ade2963
+    "@webex/internal-plugin-encryption": "npm:3.8.0-next.21"
+    "@webex/webex-core": "npm:3.8.0-next.17"
+  checksum: 10c0/ac901459599f3dfd3358bf78c42a95ae79a46d94a5fe1cacb2577f809421ee6750fa8a7066434b17a0f8599f80dfd72be1fd9d6402f9f5574f9b3da5b59dbf88
   languageName: node
   linkType: hard
 
@@ -10927,17 +10944,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/plugin-logger@npm:3.8.0-next.12":
-  version: 3.8.0-next.12
-  resolution: "@webex/plugin-logger@npm:3.8.0-next.12"
+"@webex/plugin-logger@npm:3.8.0-next.17":
+  version: 3.8.0-next.17
+  resolution: "@webex/plugin-logger@npm:3.8.0-next.17"
   dependencies:
-    "@webex/common": "npm:3.8.0-next.12"
-    "@webex/test-helper-chai": "npm:3.8.0-next.12"
-    "@webex/test-helper-mocha": "npm:3.8.0-next.12"
-    "@webex/test-helper-mock-webex": "npm:3.8.0-next.12"
-    "@webex/webex-core": "npm:3.8.0-next.12"
+    "@webex/common": "npm:3.8.0-next.17"
+    "@webex/test-helper-chai": "npm:3.8.0-next.17"
+    "@webex/test-helper-mocha": "npm:3.8.0-next.17"
+    "@webex/test-helper-mock-webex": "npm:3.8.0-next.17"
+    "@webex/webex-core": "npm:3.8.0-next.17"
     lodash: "npm:^4.17.21"
-  checksum: 10c0/71c8854479a41b022b3504199a8546dfadf7a6fcfe6b06e5bd52c1dac0c57a2261a5631277986d254ce4e040057e32133cb637be020d8e9371f96a0804df9ac0
+  checksum: 10c0/b7e5e7f9a8c566164f8078728ca84a76255bad9e1945d274037da118d708ee5e856c261d236ffa4b448413df663afeb9ef11ec98c05e8423030b9bbbc6b5988b
   languageName: node
   linkType: hard
 
@@ -10995,26 +11012,26 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/plugin-meetings@npm:3.8.0-next.41":
-  version: 3.8.0-next.41
-  resolution: "@webex/plugin-meetings@npm:3.8.0-next.41"
+"@webex/plugin-meetings@npm:3.8.0-next.54":
+  version: 3.8.0-next.54
+  resolution: "@webex/plugin-meetings@npm:3.8.0-next.54"
   dependencies:
-    "@webex/common": "npm:3.8.0-next.12"
-    "@webex/event-dictionary-ts": "npm:^1.0.1688"
+    "@webex/common": "npm:3.8.0-next.17"
+    "@webex/event-dictionary-ts": "npm:^1.0.1753"
     "@webex/internal-media-core": "npm:2.14.7"
-    "@webex/internal-plugin-conversation": "npm:3.8.0-next.14"
-    "@webex/internal-plugin-device": "npm:3.8.0-next.12"
-    "@webex/internal-plugin-llm": "npm:3.8.0-next.15"
-    "@webex/internal-plugin-mercury": "npm:3.8.0-next.14"
-    "@webex/internal-plugin-metrics": "npm:3.8.0-next.12"
-    "@webex/internal-plugin-support": "npm:3.8.0-next.14"
-    "@webex/internal-plugin-user": "npm:3.8.0-next.12"
-    "@webex/internal-plugin-voicea": "npm:3.8.0-next.41"
-    "@webex/media-helpers": "npm:3.8.0-next.13"
-    "@webex/plugin-people": "npm:3.8.0-next.14"
-    "@webex/plugin-rooms": "npm:3.8.0-next.14"
+    "@webex/internal-plugin-conversation": "npm:3.8.0-next.21"
+    "@webex/internal-plugin-device": "npm:3.8.0-next.17"
+    "@webex/internal-plugin-llm": "npm:3.8.0-next.20"
+    "@webex/internal-plugin-mercury": "npm:3.8.0-next.19"
+    "@webex/internal-plugin-metrics": "npm:3.8.0-next.17"
+    "@webex/internal-plugin-support": "npm:3.8.0-next.21"
+    "@webex/internal-plugin-user": "npm:3.8.0-next.17"
+    "@webex/internal-plugin-voicea": "npm:3.8.0-next.54"
+    "@webex/media-helpers": "npm:3.8.0-next.19"
+    "@webex/plugin-people": "npm:3.8.0-next.19"
+    "@webex/plugin-rooms": "npm:3.8.0-next.21"
     "@webex/web-capabilities": "npm:^1.4.0"
-    "@webex/webex-core": "npm:3.8.0-next.12"
+    "@webex/webex-core": "npm:3.8.0-next.17"
     ampersand-collection: "npm:^2.0.2"
     bowser: "npm:^2.11.0"
     btoa: "npm:^1.2.1"
@@ -11026,7 +11043,7 @@ __metadata:
     lodash: "npm:^4.17.21"
     uuid: "npm:^3.3.2"
     webrtc-adapter: "npm:^8.1.2"
-  checksum: 10c0/f241a92ce7ecfbcf6586bdaa7657d77eb37986d0b67bae0440d5bb22f49c92b35253d30095ad1037d6c7d9fa15d3c197ad7bf14d87cb3d7142f8b48704a111c5
+  checksum: 10c0/f2b2c1ddf49739c687233c5afeaaf7bf310822d0b043359f8ef7ab11534be24f7f7958f06a5d5ccc28ce88683b927ffde3b99a61c61af17595590b2f3cfe2856
   languageName: node
   linkType: hard
 
@@ -11066,21 +11083,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/plugin-memberships@npm:3.8.0-next.14":
-  version: 3.8.0-next.14
-  resolution: "@webex/plugin-memberships@npm:3.8.0-next.14"
+"@webex/plugin-memberships@npm:3.8.0-next.21":
+  version: 3.8.0-next.21
+  resolution: "@webex/plugin-memberships@npm:3.8.0-next.21"
   dependencies:
-    "@webex/common": "npm:3.8.0-next.12"
-    "@webex/internal-plugin-conversation": "npm:3.8.0-next.14"
-    "@webex/internal-plugin-mercury": "npm:3.8.0-next.14"
-    "@webex/plugin-logger": "npm:3.8.0-next.12"
-    "@webex/plugin-messages": "npm:3.8.0-next.14"
-    "@webex/plugin-people": "npm:3.8.0-next.14"
-    "@webex/plugin-rooms": "npm:3.8.0-next.14"
-    "@webex/webex-core": "npm:3.8.0-next.12"
+    "@webex/common": "npm:3.8.0-next.17"
+    "@webex/internal-plugin-conversation": "npm:3.8.0-next.21"
+    "@webex/internal-plugin-mercury": "npm:3.8.0-next.19"
+    "@webex/plugin-logger": "npm:3.8.0-next.17"
+    "@webex/plugin-messages": "npm:3.8.0-next.21"
+    "@webex/plugin-people": "npm:3.8.0-next.19"
+    "@webex/plugin-rooms": "npm:3.8.0-next.21"
+    "@webex/webex-core": "npm:3.8.0-next.17"
     debug: "npm:^4.3.4"
     lodash: "npm:^4.17.21"
-  checksum: 10c0/9656a761194a5deb317daad1059fd4ae0b391d1d71532998a7887df663626e89cf1f2a3f3ecbb2cbe5fa7c51d2f2ccc2e38a4e3f3d78dbd607a6bf37100f5c77
+  checksum: 10c0/c1d8ddc54cbc7678de3ae602e003b1a72d234cd34d6144fed77fa36e38a1d3b3cbf3825f6f0f00ec68e8c2dc6e839a1053696a96cc49db6aed0ae69b284be355
   languageName: node
   linkType: hard
 
@@ -11120,21 +11137,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/plugin-messages@npm:3.8.0-next.14":
-  version: 3.8.0-next.14
-  resolution: "@webex/plugin-messages@npm:3.8.0-next.14"
+"@webex/plugin-messages@npm:3.8.0-next.21":
+  version: 3.8.0-next.21
+  resolution: "@webex/plugin-messages@npm:3.8.0-next.21"
   dependencies:
-    "@webex/common": "npm:3.8.0-next.12"
-    "@webex/internal-plugin-conversation": "npm:3.8.0-next.14"
-    "@webex/internal-plugin-device": "npm:3.8.0-next.12"
-    "@webex/internal-plugin-mercury": "npm:3.8.0-next.14"
-    "@webex/plugin-logger": "npm:3.8.0-next.12"
-    "@webex/plugin-people": "npm:3.8.0-next.14"
-    "@webex/plugin-rooms": "npm:3.8.0-next.14"
-    "@webex/webex-core": "npm:3.8.0-next.12"
+    "@webex/common": "npm:3.8.0-next.17"
+    "@webex/internal-plugin-conversation": "npm:3.8.0-next.21"
+    "@webex/internal-plugin-device": "npm:3.8.0-next.17"
+    "@webex/internal-plugin-mercury": "npm:3.8.0-next.19"
+    "@webex/plugin-logger": "npm:3.8.0-next.17"
+    "@webex/plugin-people": "npm:3.8.0-next.19"
+    "@webex/plugin-rooms": "npm:3.8.0-next.21"
+    "@webex/webex-core": "npm:3.8.0-next.17"
     debug: "npm:^4.3.4"
     lodash: "npm:^4.17.21"
-  checksum: 10c0/359b39f724eb41dbe55cb2b8b1cc6ad0a5acb670cd33c4eb879b9dbee29fc5fa1508049dcff99d5ef5da1a5825635b40ab1efaef5bc1616de7d3256d9f6b5fc8
+  checksum: 10c0/bec8ac9195076f22013246fc58f6190e4fb94058a45a170486d0efb29423bc1e81e48c9181098e36be18e9f0e855afe7e35dd0b989a666ffaae54e7e5e95c0b0
   languageName: node
   linkType: hard
 
@@ -11160,14 +11177,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/plugin-people@npm:3.8.0-next.14":
-  version: 3.8.0-next.14
-  resolution: "@webex/plugin-people@npm:3.8.0-next.14"
+"@webex/plugin-people@npm:3.8.0-next.19":
+  version: 3.8.0-next.19
+  resolution: "@webex/plugin-people@npm:3.8.0-next.19"
   dependencies:
-    "@webex/common": "npm:3.8.0-next.12"
-    "@webex/internal-plugin-mercury": "npm:3.8.0-next.14"
-    "@webex/webex-core": "npm:3.8.0-next.12"
-  checksum: 10c0/e4d0afc3979779645039997b2a7e59382b5af4d17cb6f116d49fd6bdcaea8cc46fecca615cf6b471064c482c76fba944b72dde601fa47bf184f7b1823acfe430
+    "@webex/common": "npm:3.8.0-next.17"
+    "@webex/internal-plugin-mercury": "npm:3.8.0-next.19"
+    "@webex/webex-core": "npm:3.8.0-next.17"
+  checksum: 10c0/f58720bdf858e8bcc273cd0b8459813ddea5888d0fca00f6c510e5561745f9f9a289c4a18b1a4961b220e70865452fff742706c9cfa1b4808d515180371a2837
   languageName: node
   linkType: hard
 
@@ -11207,21 +11224,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/plugin-rooms@npm:3.8.0-next.14":
-  version: 3.8.0-next.14
-  resolution: "@webex/plugin-rooms@npm:3.8.0-next.14"
+"@webex/plugin-rooms@npm:3.8.0-next.21":
+  version: 3.8.0-next.21
+  resolution: "@webex/plugin-rooms@npm:3.8.0-next.21"
   dependencies:
-    "@webex/common": "npm:3.8.0-next.12"
-    "@webex/internal-plugin-conversation": "npm:3.8.0-next.14"
-    "@webex/internal-plugin-mercury": "npm:3.8.0-next.14"
-    "@webex/plugin-logger": "npm:3.8.0-next.12"
-    "@webex/plugin-memberships": "npm:3.8.0-next.14"
-    "@webex/plugin-messages": "npm:3.8.0-next.14"
-    "@webex/plugin-people": "npm:3.8.0-next.14"
-    "@webex/webex-core": "npm:3.8.0-next.12"
+    "@webex/common": "npm:3.8.0-next.17"
+    "@webex/internal-plugin-conversation": "npm:3.8.0-next.21"
+    "@webex/internal-plugin-mercury": "npm:3.8.0-next.19"
+    "@webex/plugin-logger": "npm:3.8.0-next.17"
+    "@webex/plugin-memberships": "npm:3.8.0-next.21"
+    "@webex/plugin-messages": "npm:3.8.0-next.21"
+    "@webex/plugin-people": "npm:3.8.0-next.19"
+    "@webex/webex-core": "npm:3.8.0-next.17"
     debug: "npm:^4.3.4"
     lodash: "npm:^4.17.21"
-  checksum: 10c0/6af81275f1ad769015a8f13b3bfd49d4adb976ea7cc31ca1e252e7e955794d8286bf4262c8c677e45b725b102b55182db59583e2d0a94c1d4e7f9c3387021675
+  checksum: 10c0/25cb5d037d229af72bc1d7d8a3cf16c9de1e6458665514d53fb93ddc81427347918a79d05efe9102c1657f7e7fa4129d4e4f612aa9f0cc1f2105fbdfaad9d60f
   languageName: node
   linkType: hard
 
@@ -11251,16 +11268,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/plugin-team-memberships@npm:3.8.0-next.14":
-  version: 3.8.0-next.14
-  resolution: "@webex/plugin-team-memberships@npm:3.8.0-next.14"
+"@webex/plugin-team-memberships@npm:3.8.0-next.21":
+  version: 3.8.0-next.21
+  resolution: "@webex/plugin-team-memberships@npm:3.8.0-next.21"
   dependencies:
-    "@webex/internal-plugin-device": "npm:3.8.0-next.12"
-    "@webex/plugin-logger": "npm:3.8.0-next.12"
-    "@webex/plugin-rooms": "npm:3.8.0-next.14"
-    "@webex/plugin-teams": "npm:3.8.0-next.14"
-    "@webex/webex-core": "npm:3.8.0-next.12"
-  checksum: 10c0/e1857d9ea80f1a8dd6fb35499e3cf00a6a05ff72784d576c79077045e39d759de145c67e7ee69530b12ad945204d09a819b6d6a6abe024b0a7785a2ff6306151
+    "@webex/internal-plugin-device": "npm:3.8.0-next.17"
+    "@webex/plugin-logger": "npm:3.8.0-next.17"
+    "@webex/plugin-rooms": "npm:3.8.0-next.21"
+    "@webex/plugin-teams": "npm:3.8.0-next.21"
+    "@webex/webex-core": "npm:3.8.0-next.17"
+  checksum: 10c0/da0880d0a9c0ca23cefef8a612c8aaa4346debb3f12d9c6c3ea16551818b5cec548513f965414f57378b52d288ebf5053b796b0afbb4d3483bcf4fcc4d83b421
   languageName: node
   linkType: hard
 
@@ -11296,19 +11313,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/plugin-teams@npm:3.8.0-next.14":
-  version: 3.8.0-next.14
-  resolution: "@webex/plugin-teams@npm:3.8.0-next.14"
+"@webex/plugin-teams@npm:3.8.0-next.21":
+  version: 3.8.0-next.21
+  resolution: "@webex/plugin-teams@npm:3.8.0-next.21"
   dependencies:
-    "@webex/internal-plugin-device": "npm:3.8.0-next.12"
-    "@webex/plugin-logger": "npm:3.8.0-next.12"
-    "@webex/plugin-memberships": "npm:3.8.0-next.14"
-    "@webex/plugin-rooms": "npm:3.8.0-next.14"
-    "@webex/test-helper-chai": "npm:3.8.0-next.12"
-    "@webex/test-helper-test-users": "npm:3.8.0-next.12"
-    "@webex/webex-core": "npm:3.8.0-next.12"
+    "@webex/internal-plugin-device": "npm:3.8.0-next.17"
+    "@webex/plugin-logger": "npm:3.8.0-next.17"
+    "@webex/plugin-memberships": "npm:3.8.0-next.21"
+    "@webex/plugin-rooms": "npm:3.8.0-next.21"
+    "@webex/test-helper-chai": "npm:3.8.0-next.17"
+    "@webex/test-helper-test-users": "npm:3.8.0-next.17"
+    "@webex/webex-core": "npm:3.8.0-next.17"
     lodash: "npm:^4.17.21"
-  checksum: 10c0/f38aa5c3058e1dfe9af3bd4a6e99500e8fe7813fac9810f7b8951c2a9fd842ab0603deaa13f46e2bf9bf1fb30f9f4f52e93ebd11c26f0bf907639dd077eaeede
+  checksum: 10c0/526ea1a044c213303e6decd0b9ebb2ce89f6a7633b4abf4d05023be949fb848a8f91a6aecf89a8d72e9e8e5717bcc755706408cea780433dda40b3b67c83827b
   languageName: node
   linkType: hard
 
@@ -11336,15 +11353,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/plugin-webhooks@npm:3.8.0-next.14":
-  version: 3.8.0-next.14
-  resolution: "@webex/plugin-webhooks@npm:3.8.0-next.14"
+"@webex/plugin-webhooks@npm:3.8.0-next.21":
+  version: 3.8.0-next.21
+  resolution: "@webex/plugin-webhooks@npm:3.8.0-next.21"
   dependencies:
-    "@webex/internal-plugin-device": "npm:3.8.0-next.12"
-    "@webex/plugin-logger": "npm:3.8.0-next.12"
-    "@webex/plugin-rooms": "npm:3.8.0-next.14"
-    "@webex/webex-core": "npm:3.8.0-next.12"
-  checksum: 10c0/999964f87bba137882c7d2caa6295c3f96b2f51c80fb49b1735a063320b7960dc2b79eb354c89d80e552598af42c3b5acac3d9bb5e86350a1b95589bb25906f2
+    "@webex/internal-plugin-device": "npm:3.8.0-next.17"
+    "@webex/plugin-logger": "npm:3.8.0-next.17"
+    "@webex/plugin-rooms": "npm:3.8.0-next.21"
+    "@webex/webex-core": "npm:3.8.0-next.17"
+  checksum: 10c0/9fbaf172b7c488bcac714f3d64f7e8e20c9180157f02ee8f1ead28fc1ce3c38b60cc2e137ac186e943e61c7f7ca466bd5b2dac58dd8cd3c67e2da27251aeddc3
   languageName: node
   linkType: hard
 
@@ -11396,14 +11413,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/storage-adapter-local-storage@npm:3.8.0-next.12":
-  version: 3.8.0-next.12
-  resolution: "@webex/storage-adapter-local-storage@npm:3.8.0-next.12"
+"@webex/storage-adapter-local-storage@npm:3.8.0-next.17":
+  version: 3.8.0-next.17
+  resolution: "@webex/storage-adapter-local-storage@npm:3.8.0-next.17"
   dependencies:
-    "@webex/storage-adapter-spec": "npm:3.8.0-next.12"
-    "@webex/test-helper-mocha": "npm:3.8.0-next.12"
-    "@webex/webex-core": "npm:3.8.0-next.12"
-  checksum: 10c0/e0c8163c62a571992239448efb5296972ae15f608acd56768231a5249cc1254e63bad9d43c45f54e5b38a1930468a88e7e18a4020473403a568a12eda20f214b
+    "@webex/storage-adapter-spec": "npm:3.8.0-next.17"
+    "@webex/test-helper-mocha": "npm:3.8.0-next.17"
+    "@webex/webex-core": "npm:3.8.0-next.17"
+  checksum: 10c0/57a3d0bd41114eb82eb7f7623484826439c79e9f79d97a3eaec5a39b75bf84c5a9e86bfb286f0fbe4ad931749058d846e26edcfdee43deb0f43e081249d83284
   languageName: node
   linkType: hard
 
@@ -11425,12 +11442,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/storage-adapter-spec@npm:3.8.0-next.12":
-  version: 3.8.0-next.12
-  resolution: "@webex/storage-adapter-spec@npm:3.8.0-next.12"
+"@webex/storage-adapter-spec@npm:3.8.0-next.17":
+  version: 3.8.0-next.17
+  resolution: "@webex/storage-adapter-spec@npm:3.8.0-next.17"
   dependencies:
-    "@webex/test-helper-chai": "npm:3.8.0-next.12"
-  checksum: 10c0/226fd28a6e0fa98c2338e565a5d73720a007eff7678cfb1c51866d786e20a012a7434cbe701c36514f6aa8e73bf1050b80a1f2b85beeb6138608acf57cf4b150
+    "@webex/test-helper-chai": "npm:3.8.0-next.17"
+  checksum: 10c0/8b5e5fb16656af600d19def72b63c9055baafacbb179bd9da55fcb1ced0625d5682048f89b9d2d52707554e3750157520568a93058280ca6455d787009ffe440
   languageName: node
   linkType: hard
 
@@ -11456,14 +11473,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/test-helper-chai@npm:3.8.0-next.12":
-  version: 3.8.0-next.12
-  resolution: "@webex/test-helper-chai@npm:3.8.0-next.12"
+"@webex/test-helper-chai@npm:3.8.0-next.17":
+  version: 3.8.0-next.17
+  resolution: "@webex/test-helper-chai@npm:3.8.0-next.17"
   dependencies:
-    "@webex/test-helper-file": "npm:3.8.0-next.12"
+    "@webex/test-helper-file": "npm:3.8.0-next.17"
     check-error: "npm:^1.0.2"
     lodash: "npm:^4.17.21"
-  checksum: 10c0/64e2973d379712e41851af54f1dd4dc3870bccfbb578893ee5d1b7b4a5b70ca53c44bb11f154687560930d735685f3ae55dad62ad402740aafc84158fc39c45c
+  checksum: 10c0/3a206943ed9c18340d06f6040c9dcda8b00298b490ac775ea51f4d74f6141224ae7d180a7cbb5cfbd50a464e250c1c942cb419520c490226936586ab9f165249
   languageName: node
   linkType: hard
 
@@ -11493,16 +11510,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/test-helper-file@npm:3.8.0-next.12":
-  version: 3.8.0-next.12
-  resolution: "@webex/test-helper-file@npm:3.8.0-next.12"
+"@webex/test-helper-file@npm:3.8.0-next.17":
+  version: 3.8.0-next.17
+  resolution: "@webex/test-helper-file@npm:3.8.0-next.17"
   dependencies:
-    "@webex/common": "npm:3.8.0-next.12"
-    "@webex/test-helper-make-local-url": "npm:3.8.0-next.12"
+    "@webex/common": "npm:3.8.0-next.17"
+    "@webex/test-helper-make-local-url": "npm:3.8.0-next.17"
     es6-promise: "npm:^4.2.8"
     file-type: "npm:^16.0.1"
     xhr: "npm:^2.5.0"
-  checksum: 10c0/5c2be418fc2a60b47b44dfb2ff9b0b26329e27afecfd3a214ab4d35e127d7be55ca4fe1c29001a8636efec9d5f2bd19ac375db673af7cd4debfd6548ee5a2a15
+  checksum: 10c0/821e8d26361b66b56f32e533f60815f23c4aa945b948b051b9fb7c30ba32783f58bdee524516f1f9286f7af66db64d07f57af19674f04ec4825e10600a30759c
   languageName: node
   linkType: hard
 
@@ -11520,10 +11537,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/test-helper-make-local-url@npm:3.8.0-next.12":
-  version: 3.8.0-next.12
-  resolution: "@webex/test-helper-make-local-url@npm:3.8.0-next.12"
-  checksum: 10c0/87ebb19f95e02b448e05248b35e89a6267b7ff328f174c39568baaf3873be45add939d76ec620e36c986471eadaab39991ec9622c16f3e2eb6d146ecf36dc674
+"@webex/test-helper-make-local-url@npm:3.8.0-next.17":
+  version: 3.8.0-next.17
+  resolution: "@webex/test-helper-make-local-url@npm:3.8.0-next.17"
+  checksum: 10c0/886ce6db4108f9ef05f3cc11a77461689a73868c711a817a4145c3d9d89bf5370b36049bbb3f3ed07f0fe21a1b3faa0a32ef3939c40944ad60da3ca17813ebfa
   languageName: node
   linkType: hard
 
@@ -11545,12 +11562,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/test-helper-mocha@npm:3.8.0-next.12":
-  version: 3.8.0-next.12
-  resolution: "@webex/test-helper-mocha@npm:3.8.0-next.12"
+"@webex/test-helper-mocha@npm:3.8.0-next.17":
+  version: 3.8.0-next.17
+  resolution: "@webex/test-helper-mocha@npm:3.8.0-next.17"
   dependencies:
     bowser: "npm:^2.11.0"
-  checksum: 10c0/fae4185343dacd556ecab6d866111209c1cb70ecadaf9e11a9b28deb251c9d94795e21b06d167f429fb7277f88b2be881692b6b7c813d549daab7aeaaa38ed18
+  checksum: 10c0/a0e30027891e7ecb485c1418f30e575f4daf0cfc6884d5fed1b655cf361335038482fb6fa7d0001edeb2024e4051a5058c3826acc7cee544b5a975afc11b0b08
   languageName: node
   linkType: hard
 
@@ -11568,10 +11585,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/test-helper-mock-web-socket@npm:3.8.0-next.12":
-  version: 3.8.0-next.12
-  resolution: "@webex/test-helper-mock-web-socket@npm:3.8.0-next.12"
-  checksum: 10c0/56b9d303501dbc804045bace73d4e897b575fc1110f8cda7d664a67682343e71cb409627a379bf15133a0c3befa2b5f0304341bb04f53c4ec6a46cc660013482
+"@webex/test-helper-mock-web-socket@npm:3.8.0-next.17":
+  version: 3.8.0-next.17
+  resolution: "@webex/test-helper-mock-web-socket@npm:3.8.0-next.17"
+  checksum: 10c0/cfb6029495c15fb6c5a0290d24ffb98a342f1a9bcd3ed941fb0746cde6054c33c5898741edd555d35ee41867095c9b289e06ddd7688d2bd7a9611b6e3ed21e8e
   languageName: node
   linkType: hard
 
@@ -11597,14 +11614,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/test-helper-mock-webex@npm:3.8.0-next.12":
-  version: 3.8.0-next.12
-  resolution: "@webex/test-helper-mock-webex@npm:3.8.0-next.12"
+"@webex/test-helper-mock-webex@npm:3.8.0-next.17":
+  version: 3.8.0-next.17
+  resolution: "@webex/test-helper-mock-webex@npm:3.8.0-next.17"
   dependencies:
     ampersand-state: "npm:^5.0.3"
     es6-promise: "npm:^4.2.8"
     lodash: "npm:^4.17.21"
-  checksum: 10c0/d06806dd27f8da6a18d0b30be2192261174e2033ac02959658ad25a0d27886b9973fb3acfa54e690d5f344a3654ce8341257d7a3e1758f4cdb2e2eb06da02608
+  checksum: 10c0/3964c64ec774905b11462d59107eb0262c14510b1c7b76e45bdfb036b6a2392e69a8558b4f9e831267afb9ca72c504f8e3c0a1e08e73fc43fe45bbda447e4214
   languageName: node
   linkType: hard
 
@@ -11622,10 +11639,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/test-helper-refresh-callback@npm:3.8.0-next.12":
-  version: 3.8.0-next.12
-  resolution: "@webex/test-helper-refresh-callback@npm:3.8.0-next.12"
-  checksum: 10c0/a3398c4a53fc304d83a14e00d2128cf8508a68a560000eba470da23e2614596e0923d4f7b1a9ef158ab8a4852ba9230e5524ad05124819542d721e63133bad6f
+"@webex/test-helper-refresh-callback@npm:3.8.0-next.17":
+  version: 3.8.0-next.17
+  resolution: "@webex/test-helper-refresh-callback@npm:3.8.0-next.17"
+  checksum: 10c0/ab95a7691ea1a716673659129e534425e60e559c4934e7914ae33dd15a62c575a7473ee62ac3b0cc9c235bd576094d615fc4328230122bb3ed2266df0a4ba42c
   languageName: node
   linkType: hard
 
@@ -11647,12 +11664,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/test-helper-retry@npm:3.8.0-next.12":
-  version: 3.8.0-next.12
-  resolution: "@webex/test-helper-retry@npm:3.8.0-next.12"
+"@webex/test-helper-retry@npm:3.8.0-next.17":
+  version: 3.8.0-next.17
+  resolution: "@webex/test-helper-retry@npm:3.8.0-next.17"
   dependencies:
     es6-promise: "npm:^4.2.8"
-  checksum: 10c0/0d95c2a5ced7692a19907afe7255f3798a3996a3f743859e67f964ca9a57523420b9bcea1069048e06561a81aaa6a6be0c4751f0cc255a75bb87f5ba2141854d
+  checksum: 10c0/4446690aecc8964a57f7624f5e00fa9a3dbf6c30fc39c4c72ca250743c4eeddd2425406563645dedfc81da4eff6854d65071706016e76857e8426f40a5b52b1f
   languageName: node
   linkType: hard
 
@@ -11686,18 +11703,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/test-helper-test-users@npm:3.8.0-next.12":
-  version: 3.8.0-next.12
-  resolution: "@webex/test-helper-test-users@npm:3.8.0-next.12"
+"@webex/test-helper-test-users@npm:3.8.0-next.17":
+  version: 3.8.0-next.17
+  resolution: "@webex/test-helper-test-users@npm:3.8.0-next.17"
   dependencies:
     "@ciscospark/test-users-legacy": "npm:^1.0.2"
-    "@webex/test-helper-retry": "npm:3.8.0-next.12"
-    "@webex/test-users": "npm:3.8.0-next.12"
+    "@webex/test-helper-retry": "npm:3.8.0-next.17"
+    "@webex/test-users": "npm:3.8.0-next.17"
     lodash: "npm:^4.17.21"
   dependenciesMeta:
     "@ciscospark/test-users-legacy":
       optional: true
-  checksum: 10c0/c0d4e454a24ce485fdc6038178c3b218b318345ed4079285323e91e1bfb68bcd0acd101b8a4419108ee806721035cb7c369a334733b62fa3c27bd9df09831701
+  checksum: 10c0/62388acfd97ee9ec252794b6fe19d058d0196a0f6e550057f3bb3caf8bf74bba23b9bd517e8ec3cdaa9407761afa68666c9e9d6ff88a2f4c8dcd02f26deb1fcf
   languageName: node
   linkType: hard
 
@@ -11729,17 +11746,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/test-users@npm:3.8.0-next.12":
-  version: 3.8.0-next.12
-  resolution: "@webex/test-users@npm:3.8.0-next.12"
+"@webex/test-users@npm:3.8.0-next.17":
+  version: 3.8.0-next.17
+  resolution: "@webex/test-users@npm:3.8.0-next.17"
   dependencies:
-    "@webex/http-core": "npm:3.8.0-next.12"
-    "@webex/test-helper-mocha": "npm:3.8.0-next.12"
+    "@webex/http-core": "npm:3.8.0-next.17"
+    "@webex/test-helper-mocha": "npm:3.8.0-next.17"
     btoa: "npm:^1.2.1"
     lodash: "npm:^4.17.21"
     node-random-name: "npm:^1.0.1"
     uuid: "npm:^3.3.2"
-  checksum: 10c0/935cf21b3a1eaf3fdf6cd9bcad34913744986ee902d0eac5def14e78028c453e2d61c81db35f8c6d6553e5dddacc13533efc41263fde8fdcda160f8e0934df16
+  checksum: 10c0/ed81276c084df05e9d812bcc7d806467602c8b9bd71937f7a63c3b4d945c0c97e682193c694aa6004e55eb86fda86c1f5a20371fb4bd9a36f903f8062201d216
   languageName: node
   linkType: hard
 
@@ -11830,17 +11847,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/web-media-effects@npm:2.19.0":
-  version: 2.19.0
-  resolution: "@webex/web-media-effects@npm:2.19.0"
+"@webex/web-media-effects@npm:2.27.1":
+  version: 2.27.1
+  resolution: "@webex/web-media-effects@npm:2.27.1"
   dependencies:
-    "@webex/ladon-ts": "npm:^4.3.0"
+    "@webex/ladon-ts": "npm:^5.5.1"
     events: "npm:^3.3.0"
     js-logger: "npm:^1.6.1"
     typed-emitter: "npm:^1.4.0"
     uuid: "npm:^9.0.1"
     worker-timers: "npm:^8.0.2"
-  checksum: 10c0/12a11bbcdf1777642f8129a8932a6c4b4b4799478937cc45766babfad9421919fc5b4c6a2514600b1a0299c68f300d8adaf190fcc7c89287d90db3dfe0340d6d
+    yarn: "npm:^1.22.22"
+  checksum: 10c0/8b11e7aff60e8e8d75bc10a9c3bc5d58c77c56506cb8c0316c90fdd15959973ce11009974969971fd109c2abb5513836e26624787adfd2104daceaadca2197b7
   languageName: node
   linkType: hard
 
@@ -11888,16 +11906,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/webex-core@npm:3.8.0-next.12":
-  version: 3.8.0-next.12
-  resolution: "@webex/webex-core@npm:3.8.0-next.12"
+"@webex/webex-core@npm:3.8.0-next.17":
+  version: 3.8.0-next.17
+  resolution: "@webex/webex-core@npm:3.8.0-next.17"
   dependencies:
-    "@webex/common": "npm:3.8.0-next.12"
-    "@webex/common-timers": "npm:3.8.0-next.12"
-    "@webex/http-core": "npm:3.8.0-next.12"
-    "@webex/internal-plugin-device": "npm:3.8.0-next.12"
-    "@webex/plugin-logger": "npm:3.8.0-next.12"
-    "@webex/storage-adapter-spec": "npm:3.8.0-next.12"
+    "@webex/common": "npm:3.8.0-next.17"
+    "@webex/common-timers": "npm:3.8.0-next.17"
+    "@webex/http-core": "npm:3.8.0-next.17"
+    "@webex/internal-plugin-device": "npm:3.8.0-next.17"
+    "@webex/plugin-logger": "npm:3.8.0-next.17"
+    "@webex/storage-adapter-spec": "npm:3.8.0-next.17"
     ampersand-collection: "npm:^2.0.2"
     ampersand-events: "npm:^2.0.2"
     ampersand-state: "npm:^5.0.3"
@@ -11906,7 +11924,7 @@ __metadata:
     jsonwebtoken: "npm:^9.0.0"
     lodash: "npm:^4.17.21"
     uuid: "npm:^3.3.2"
-  checksum: 10c0/77e7bdbd6e5d6c7bf12d7ce61bb1787d7433e3fdd6b5954dca226bbfbc584d45c28b46c74326bb0dd70b9cce9f00d61cc518ca474b8c85f4d5bc80ead2ab7bd9
+  checksum: 10c0/2aa0a7b63efb25ac9ad44a56a049fb966ade9be7c1f650547b5fc9f7d39ce281bbe9275c580009e53407114a5e12f4a8d02a2ca030b7a8203e431b773e018438
   languageName: node
   linkType: hard
 
@@ -12355,18 +12373,6 @@ __metadata:
     json-schema-traverse: "npm:^0.4.1"
     uri-js: "npm:^4.2.1"
   checksum: 10c0/d96866cb0ff52699d41c494c6329c57895cef92f5e70af039522777f12fd44bfcb35fd6cfcae39225ac0f2ffada770a9ae1e4b2728783d9242e4222ee2db9f9b
-  languageName: node
-  linkType: hard
-
-"ajv@npm:^5.0.0":
-  version: 5.5.2
-  resolution: "ajv@npm:5.5.2"
-  dependencies:
-    co: "npm:^4.6.0"
-    fast-deep-equal: "npm:^1.0.0"
-    fast-json-stable-stringify: "npm:^2.0.0"
-    json-schema-traverse: "npm:^0.3.0"
-  checksum: 10c0/9b8f762cd6b9da3935987b82418402247e76925e39814ca0d62088656117129db7e0cdc1d3e4aa6a3c4aa5ff67021551299ee4771735bcccb6cdd3f85061e565
   languageName: node
   linkType: hard
 
@@ -15124,7 +15130,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"commander@npm:^5.0.0, commander@npm:^5.1.0":
+"commander@npm:^5.1.0":
   version: 5.1.0
   resolution: "commander@npm:5.1.0"
   checksum: 10c0/da9d71dbe4ce039faf1fe9eac3771dca8c11d66963341f62602f7b66e36d2a3f8883407af4f9a37b1db1a55c59c0c1325f186425764c2e963dc1d67aec2a4b6d
@@ -18703,13 +18709,6 @@ __metadata:
   version: 1.4.1
   resolution: "extsprintf@npm:1.4.1"
   checksum: 10c0/e10e2769985d0e9b6c7199b053a9957589d02e84de42832c295798cb422a025e6d4a92e0259c1fb4d07090f5bfde6b55fd9f880ac5855bd61d775f8ab75a7ab0
-  languageName: node
-  linkType: hard
-
-"fast-deep-equal@npm:^1.0.0":
-  version: 1.1.0
-  resolution: "fast-deep-equal@npm:1.1.0"
-  checksum: 10c0/2cdcb17ca3c28ea199863de4ff0f4de14722c63bb19d716c1bbb4a661479413a0cbfb27e8596d34204e4525f0de11ff7c8ac6a27673c961bd0f37d0e48f9c743
   languageName: node
   linkType: hard
 
@@ -23254,7 +23253,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"js-yaml@npm:^3.13.1, js-yaml@npm:^3.14.0":
+"js-yaml@npm:^3.13.1":
   version: 3.14.1
   resolution: "js-yaml@npm:3.14.1"
   dependencies:
@@ -23392,15 +23391,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"json-schema-migrate@npm:^0.2.0":
-  version: 0.2.0
-  resolution: "json-schema-migrate@npm:0.2.0"
-  dependencies:
-    ajv: "npm:^5.0.0"
-  checksum: 10c0/ec07d397fe71ecc3f46aaf8cea1ac2a4c384871465d0cf2084de36b39e6f8600db1bf385a82f8f8a80e803528b53f294c6049dff873b1eafe5607bac6f73a898
-  languageName: node
-  linkType: hard
-
 "json-schema-to-typescript@npm:^12.0.0":
   version: 12.0.0
   resolution: "json-schema-to-typescript@npm:12.0.0"
@@ -23422,13 +23412,6 @@ __metadata:
   bin:
     json2ts: dist/src/cli.js
   checksum: 10c0/b1e78a6d87694c226b316e65a7e1bcc1db6e145e63d1f005bf680d341e5ae948c35f5ab62dc486f87c213a4b426c2ceba583f4a431d79c8d96ae97b60f2cabcb
-  languageName: node
-  linkType: hard
-
-"json-schema-traverse@npm:^0.3.0":
-  version: 0.3.1
-  resolution: "json-schema-traverse@npm:0.3.1"
-  checksum: 10c0/462316de759d3dd9278959de17861e8d214c3722e1f0bf3c510daac990009bc2b0e11e89f9b299d765cd52569db74c8fa1a371a2b08c514a07998fb2f10eb57e
   languageName: node
   linkType: hard
 
@@ -29018,21 +29001,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ramldt2jsonschema@npm:^1.2.3":
-  version: 1.2.3
-  resolution: "ramldt2jsonschema@npm:1.2.3"
-  dependencies:
-    commander: "npm:^5.0.0"
-    js-yaml: "npm:^3.14.0"
-    json-schema-migrate: "npm:^0.2.0"
-    webapi-parser: "npm:^0.5.0"
-  bin:
-    dt2js: bin/dt2js.js
-    js2dt: bin/js2dt.js
-  checksum: 10c0/ea27095d209f335c9473da0397036620655594b7377697a1bbfff6eb720eac56e67cf5649952dd8b363fccf5f53bd9916fd29e0ec804ca1927d74798344e2de5
-  languageName: node
-  linkType: hard
-
 "randombytes@npm:^2.0.0, randombytes@npm:^2.0.1, randombytes@npm:^2.0.5, randombytes@npm:^2.1.0":
   version: 2.1.0
   resolution: "randombytes@npm:2.1.0"
@@ -30489,6 +30457,7 @@ __metadata:
     ts-loader: "npm:^9.5.1"
     typescript: "npm:^5.6.3"
     typescript-eslint: "npm:^8.24.1"
+    webex: "npm:3.8.0-next.78"
     webpack: "npm:^5.94.0"
     webpack-cli: "npm:^5.1.4"
     webpack-dev-server: "npm:^5.1.0"
@@ -34603,38 +34572,40 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webex@npm:3.8.0-next.61":
-  version: 3.8.0-next.61
-  resolution: "webex@npm:3.8.0-next.61"
+"webex@npm:3.8.0-next.78":
+  version: 3.8.0-next.78
+  resolution: "webex@npm:3.8.0-next.78"
   dependencies:
     "@babel/polyfill": "npm:^7.12.1"
     "@babel/runtime-corejs2": "npm:^7.14.8"
-    "@webex/calling": "npm:3.8.0-next.15"
-    "@webex/common": "npm:3.8.0-next.12"
-    "@webex/internal-plugin-calendar": "npm:3.8.0-next.14"
-    "@webex/internal-plugin-device": "npm:3.8.0-next.12"
-    "@webex/internal-plugin-llm": "npm:3.8.0-next.15"
-    "@webex/internal-plugin-presence": "npm:3.8.0-next.14"
-    "@webex/internal-plugin-support": "npm:3.8.0-next.14"
-    "@webex/internal-plugin-voicea": "npm:3.8.0-next.41"
-    "@webex/plugin-attachment-actions": "npm:3.8.0-next.14"
-    "@webex/plugin-authorization": "npm:3.8.0-next.13"
-    "@webex/plugin-cc": "npm:3.8.0-next.34"
-    "@webex/plugin-device-manager": "npm:3.8.0-next.15"
-    "@webex/plugin-encryption": "npm:3.8.0-next.2"
-    "@webex/plugin-logger": "npm:3.8.0-next.12"
-    "@webex/plugin-meetings": "npm:3.8.0-next.41"
-    "@webex/plugin-memberships": "npm:3.8.0-next.14"
-    "@webex/plugin-messages": "npm:3.8.0-next.14"
-    "@webex/plugin-people": "npm:3.8.0-next.14"
-    "@webex/plugin-rooms": "npm:3.8.0-next.14"
-    "@webex/plugin-team-memberships": "npm:3.8.0-next.14"
-    "@webex/plugin-teams": "npm:3.8.0-next.14"
-    "@webex/plugin-webhooks": "npm:3.8.0-next.14"
-    "@webex/storage-adapter-local-storage": "npm:3.8.0-next.12"
-    "@webex/webex-core": "npm:3.8.0-next.12"
+    "@webex/calling": "npm:3.8.0-next.21"
+    "@webex/common": "npm:3.8.0-next.17"
+    "@webex/internal-plugin-calendar": "npm:3.8.0-next.21"
+    "@webex/internal-plugin-device": "npm:3.8.0-next.17"
+    "@webex/internal-plugin-llm": "npm:3.8.0-next.20"
+    "@webex/internal-plugin-mercury": "npm:3.8.0-next.19"
+    "@webex/internal-plugin-presence": "npm:3.8.0-next.19"
+    "@webex/internal-plugin-support": "npm:3.8.0-next.21"
+    "@webex/internal-plugin-voicea": "npm:3.8.0-next.54"
+    "@webex/plugin-attachment-actions": "npm:3.8.0-next.21"
+    "@webex/plugin-authorization": "npm:3.8.0-next.18"
+    "@webex/plugin-cc": "npm:3.8.0-next.44"
+    "@webex/plugin-device-manager": "npm:3.8.0-next.22"
+    "@webex/plugin-encryption": "npm:3.8.0-next.9"
+    "@webex/plugin-logger": "npm:3.8.0-next.17"
+    "@webex/plugin-meetings": "npm:3.8.0-next.54"
+    "@webex/plugin-memberships": "npm:3.8.0-next.21"
+    "@webex/plugin-messages": "npm:3.8.0-next.21"
+    "@webex/plugin-people": "npm:3.8.0-next.19"
+    "@webex/plugin-rooms": "npm:3.8.0-next.21"
+    "@webex/plugin-team-memberships": "npm:3.8.0-next.21"
+    "@webex/plugin-teams": "npm:3.8.0-next.21"
+    "@webex/plugin-webhooks": "npm:3.8.0-next.21"
+    "@webex/storage-adapter-local-storage": "npm:3.8.0-next.17"
+    "@webex/webex-core": "npm:3.8.0-next.17"
     lodash: "npm:^4.17.21"
-  checksum: 10c0/6da403f2140991bac42e32b1084fb9fb046907b05fc6f3613696197f102bc648b96b1b3c0895afb88f84d66670c8c24274a07fc8a7a5d9462a4889415ff93744
+    safe-buffer: "npm:^5.2.0"
+  checksum: 10c0/3d8fdc14b76a4e450f1833b707b79f384b877a9934364d5bfb58a79061e4251d8f93289a8fc676d70a704e6ed1a88da99b161470773f9d02444fe2f9e2edf817
   languageName: node
   linkType: hard
 
@@ -35606,6 +35577,16 @@ __metadata:
     yarn-install: bin/yarn-install.js
     yarn-remove: bin/yarn-remove.js
   checksum: 10c0/3f5966d6cec24267c67efc28f6c7e545e3632e744369ac48fadf24f5e310a151837e9f39df30f428e6dda1ce8dfcce75df22c9ed604511ae7ebabdbb623959f1
+  languageName: node
+  linkType: hard
+
+"yarn@npm:^1.22.22":
+  version: 1.22.22
+  resolution: "yarn@npm:1.22.22"
+  bin:
+    yarn: bin/yarn.js
+    yarnpkg: bin/yarn.js
+  checksum: 10c0/8c77198c93d7542e7f4e131c63b66de357b7076ecfbcfe709ec0d674115c2dd9edaa45196e5510e6e9366d368707a802579e3402071002e1c9d9a99d491478de
   languageName: node
   linkType: hard
 
