@@ -1,7 +1,7 @@
 {
   "name": "@webex/cc-components",
   "description": "Webex Contact Center UI Components Library for your custom contact center solutions",
-  "version": "1.28.0-ccwidgets.54",
+  "version": "1.28.0-ccwidgets.55",
   "main": "dist/index.js",
   "publishConfig": {
     "access": "public"
