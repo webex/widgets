@@ -21,9 +21,9 @@
     "test:styles": "eslint"
   },
   "dependencies": {
+    "@webex/plugin-cc": "link://Users/pkesari/Desktop/WorkProjects/WebRTCFrontEnd/js-sdk-byods/webex-js-sdk/packages/@webex/plugin-cc",
     "mobx": "6.13.5",
-    "typescript": "5.6.3",
-    "webex": "3.8.0-next.61"
+    "typescript": "5.6.3"
   },
   "devDependencies": {
     "@babel/core": "7.25.2",
