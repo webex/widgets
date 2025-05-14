@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, {useState, useEffect, useRef} from 'react';
 import {store} from '@webex/cc-widgets';
 
@@ -68,7 +69,7 @@ const EngageWidget: React.FC<EngageWidgetProps> = ({accessToken, currentTheme, i
     }
   }, [store.agent, store.agentId]);
 
-  const attachImiEventListener = (name: string, data: unknown) => {
+  const attachImiEventListener = (name: string, data: any) => {
     switch (name) {
       case IMI_EVENTS.MESSAGE_RECEIVED:
         console.info('onMessageReceived', data);
@@ -124,7 +125,6 @@ const EngageWidget: React.FC<EngageWidgetProps> = ({accessToken, currentTheme, i
   }, [isSdkReady, isBundleLoaded, accessToken]);
 
   // Add functions to load chat and email widgets
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const loadChatWidget = (task: any) => {
     if (!engageElmRef.current) return;
 
@@ -138,7 +138,7 @@ const EngageWidget: React.FC<EngageWidgetProps> = ({accessToken, currentTheme, i
       ></imi-engage>
     `;
   };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   const loadEmailWidget = (task: any) => {
     if (!engageElmRef.current) return;
 
@@ -221,5 +221,14 @@ const EngageWidget: React.FC<EngageWidgetProps> = ({accessToken, currentTheme, i
     </div>
   );
 };
+
+// Add TypeScript declarations for the global objects
+declare global {
+  interface Window {
+    ImiEngageWC: any;
+    store: any;
+    AGENTX_SERVICE: any;
+  }
+}
 
 export default EngageWidget;
