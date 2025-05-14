@@ -1,12 +1,12 @@
 import React, {useEffect, useState} from 'react';
 
-import {CallControlComponentProps, DestinationType, CallControlMenuType} from '../task.types';
+import {CallControlComponentProps, DestinationType, CallControlMenuType, MediaType} from '../task.types';
 import './call-control.styles.scss';
 import {PopoverNext, SelectNext, TooltipNext, Text, ButtonCircle, ButtonPill} from '@momentum-ui/react-collaboration';
 import {Item} from '@react-stately/collections';
 import {Icon} from '@momentum-design/components/dist/react';
 import ConsultTransferPopoverComponent from './CallControlCustom/consult-transfer-popover';
-import {getMediaLabel} from '../../../../../task/src/Utils/task-util';
+import {getMediaLabel} from '../../../utils';
 
 function CallControlComponent(props: CallControlComponentProps) {
   const [selectedWrapupReason, setSelectedWrapupReason] = useState<string | null>(null);
@@ -104,7 +104,9 @@ function CallControlComponent(props: CallControlComponentProps) {
     }
   };
 
-  const mediaLabel = getMediaLabel(currentTask.data.interaction.mediaType);
+  const mediaType = currentTask.data.interaction.mediaType || MediaType.TELEPHONY;
+  const mediaChannel = currentTask.data.interaction.mediaChannel || '';
+  const mediaLabel = getMediaLabel(mediaType, mediaChannel);
 
   const buttons = [
     {

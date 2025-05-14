@@ -110,7 +110,11 @@
     color: var(--mds-color-theme-common-touchbar-background-violet-normal);
   }
 
-  .media-icon.chat {
+  .media-icon.chat,
+  .media-icon.sms,
+  .media-icon.facebook,
+  .media-icon.whatsapp,
+  .media-icon.applemessages {
     color: var(--mds-color-theme-indicator-secure);
   }
 }

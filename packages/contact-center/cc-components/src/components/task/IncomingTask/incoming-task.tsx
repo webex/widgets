@@ -1,6 +1,6 @@
 import React from 'react';
 import {IncomingTaskComponentProps} from '../task.types';
-import {MediaType} from '../../../../../task/src/task.types';
+import {MediaType} from '../task.types';
 import Task from '../Task';
 
 const IncomingTaskComponent: React.FunctionComponent<IncomingTaskComponentProps> = (props) => {
@@ -15,7 +15,8 @@ const IncomingTaskComponent: React.FunctionComponent<IncomingTaskComponentProps>
   const ronaTimeout = callAssociationDetails?.ronaTimeout ? Number(callAssociationDetails?.ronaTimeout) : null;
   const startTimeStamp = incomingTask?.data?.interaction?.createdTimestamp;
   const mediaType = incomingTask.data.interaction.mediaType;
-  const isTelephony = mediaType === MediaType.Telephony;
+  const mediaChannel = incomingTask.data.interaction.mediaChannel;
+  const isTelephony = mediaType === MediaType.TELEPHONY;
   const acceptText = !incomingTask.data.wrapUpRequired
     ? isTelephony && !isBrowser
       ? 'Ringing...'
@@ -39,6 +40,7 @@ const IncomingTaskComponent: React.FunctionComponent<IncomingTaskComponentProps>
       declineText={declineText}
       styles="task-list-hover"
       mediaType={mediaType}
+      mediaChannel={mediaChannel}
     />
   );
 };

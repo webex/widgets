@@ -460,3 +460,19 @@ export interface CallControlConsultComponentsProps {
 export type CallControlMenuType = 'Consult' | 'Transfer';
 
 export {DestinationType};
+
+export enum MediaType {
+  EMAIL = 'email',
+  CHAT = 'chat',
+  TELEPHONY = 'telephony',
+  SOCIAL = 'social',
+  SMS = 'sms',
+  FACEBOOK = 'facebook',
+  WHATSAPP = 'whatsapp',
+  APPLE = 'applemessages',
+}
+
+export type MediaInfo = {
+  iconName: string;
+  className: string;
+};

@@ -692,13 +692,13 @@ describe('storeEventsWrapper', () => {
     it('should return buddy agents list', async () => {
       const buddyAgents = [{name: 'agent1'}, {name: 'agent2'}];
       storeWrapper['store'].cc.getBuddyAgents = jest.fn().mockResolvedValue({data: {agentList: buddyAgents}});
-      const result = await storeWrapper.getBuddyAgents();
+      const result = await storeWrapper.getBuddyAgents('telephony');
       expect(result).toEqual(buddyAgents);
     });
 
     it('should handle error in getBuddyAgents and throw error', async () => {
       storeWrapper['store'].cc.getBuddyAgents = jest.fn().mockRejectedValue(new Error('error'));
-      await expect(storeWrapper.getBuddyAgents()).rejects.toThrow('error');
+      await expect(storeWrapper.getBuddyAgents('telephony')).rejects.toThrow('error');
     });
 
     it('should return contact service queues list', async () => {

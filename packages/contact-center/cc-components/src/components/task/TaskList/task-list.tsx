@@ -1,7 +1,7 @@
 import React from 'react';
 import {TaskListComponentProps} from '../task.types';
 import Task from '../Task';
-import {MediaType} from '../../../../../task/src/task.types';
+import {MediaType} from '../task.types';
 import './styles.scss';
 
 const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (props) => {
@@ -21,7 +21,8 @@ const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (prop
         const startTimeStamp = task.data.interaction.createdTimestamp;
         const isIncomingTask = taskState === 'new' || taskState === 'consult';
         const mediaType = task.data.interaction.mediaType;
-        const isTelephony = mediaType === MediaType.Telephony;
+        const mediaChannel = task.data.interaction.mediaChannel;
+        const isTelephony = mediaType === MediaType.TELEPHONY;
         const acceptText =
           isIncomingTask && !task.data.wrapUpRequired
             ? isTelephony && !isBrowser
@@ -55,6 +56,7 @@ const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (prop
             disableAccept={isIncomingTask && isTelephony && !isBrowser}
             declineText={declineText}
             mediaType={mediaType}
+            mediaChannel={mediaChannel}
           />
         );
       })}

@@ -1,5 +1,4 @@
 import {ITask} from '@webex/plugin-cc';
-import {MediaType, MediaInfo} from '../task.types';
 
 /**
  * This function determines the visibility of various controls based on the task's data.
@@ -9,9 +8,9 @@ import {MediaType, MediaInfo} from '../task.types';
 export function getControlsVisibility(deviceType: string, featureFlags: {[key: string]: boolean}, task: ITask) {
   const {mediaType} = task?.data?.interaction || {};
 
-  const isCall = mediaType === MediaType.Telephony;
-  const isChat = mediaType === MediaType.Chat;
-  const isEmail = mediaType === MediaType.Email;
+  const isCall = mediaType === 'telephony';
+  const isChat = mediaType === 'chat';
+  const isEmail = mediaType === 'email';
 
   const isBrowser = deviceType === 'BROWSER';
   const isAgentDN = deviceType === 'AGENT_DN';
@@ -41,48 +40,3 @@ export function getControlsVisibility(deviceType: string, featureFlags: {[key: s
 
   return controls;
 }
-
-/**
- * This function returns the icon name and corresponding CSS class for a given media type.
- * @param mediaType The type of media (MediaType enum: Telephony, Email, or Chat)
- * @returns An object containing the iconName and className based on the media type
- */
-export const getMediaIconInfo = (mediaType: string): MediaInfo => {
-  switch (mediaType) {
-    case MediaType.Telephony:
-      return {
-        iconName: 'handset-filled',
-        className: MediaType.Telephony,
-      };
-    case MediaType.Email:
-      return {
-        iconName: 'email-filled',
-        className: MediaType.Email,
-      };
-    case MediaType.Chat:
-      return {
-        iconName: 'chat-filled',
-        className: MediaType.Chat,
-      };
-    default:
-      throw new Error(`Unsupported media type: ${mediaType}`);
-  }
-};
-
-/**
- * This function returns a display label string corresponding to the specified media type.
- * @param mediaType The type of media (MediaType enum: Telephony, Chat, or Email)
- * @returns A string label corresponding to the media type, or 'Unknown' if not recognized
- */
-export const getMediaLabel = (mediaType: string): string => {
-  switch (mediaType) {
-    case MediaType.Telephony:
-      return 'Call';
-    case MediaType.Chat:
-      return 'Chat';
-    case MediaType.Email:
-      return 'Email';
-    default:
-      return 'Unknown';
-  }
-};

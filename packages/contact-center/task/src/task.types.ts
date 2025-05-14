@@ -25,14 +25,3 @@ export type Participant = {
 };
 
 export type useOutdialCallProps = Pick<OutdialCallProps, 'cc' | 'logger'>;
-
-export enum MediaType {
-  Telephony = 'telephony',
-  Email = 'email',
-  Chat = 'chat',
-}
-
-export type MediaInfo = {
-  iconName: string;
-  className: string;
-};

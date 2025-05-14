@@ -27,7 +27,11 @@
       --mdc-avatar-default-foreground-color: var(--mds-color-theme-common-touchbar-background-violet-normal);
     }
     
-    &.chat {
+    &.chat,
+    &.sms,
+    &.facebook,
+    &.whatsapp,
+    &.applemessages {
       --mdc-avatar-default-foreground-color: var(--mds-color-theme-indicator-secure);
     }
   }

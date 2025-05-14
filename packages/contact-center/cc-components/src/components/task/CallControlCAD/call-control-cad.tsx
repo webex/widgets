@@ -1,13 +1,12 @@
 import React from 'react';
 import CallControlComponent from '../CallControl/call-control';
-import {CallControlComponentProps} from '../task.types';
+import {CallControlComponentProps, MediaType} from '../task.types';
 import {Text} from '@momentum-ui/react-collaboration';
 import {Icon} from '@momentum-design/components/dist/react';
 import './call-control-cad.styles.scss';
 import TaskTimer from '../TaskTimer/index';
 import CallControlConsultComponent from '../CallControl/CallControlCustom/call-control-consult';
-import {getMediaIconInfo, getMediaLabel} from '../../../../../task/src/Utils/task-util';
-import {MediaType} from '../../../../../task/src/task.types';
+import {getMediaIconInfo, getMediaLabel} from '../../../utils';
 
 const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => {
   const {
@@ -38,8 +37,10 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
     const seconds = time % 60;
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
-  const mediaIconInfo = getMediaIconInfo(currentTask.data.interaction.mediaType || MediaType.Telephony);
-  const mediaLabel = getMediaLabel(currentTask.data.interaction.mediaType || MediaType.Telephony);
+  const mediaType = currentTask.data.interaction.mediaType || MediaType.TELEPHONY;
+  const mediaChannel = currentTask.data.interaction.mediaChannel || '';
+  const mediaIconInfo = getMediaIconInfo(mediaType, mediaChannel);
+  const mediaLabel = getMediaLabel(mediaType, mediaChannel);
 
   if (!currentTask) return null;
 
