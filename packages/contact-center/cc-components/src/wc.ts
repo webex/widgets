@@ -80,7 +80,7 @@ const WebIncomingTask = r2wc(IncomingTaskComponent, {
     incomingTask: 'json',
     isBrowser: 'boolean',
     accept: 'function',
-    decline: 'function',
+    reject: 'function',
   },
 });
 if (!customElements.get('component-cc-incoming-task')) {

@@ -15,36 +15,50 @@ const workerScript = `
     return seconds < 3600 ? m + ':' + s : h + ':' + m + ':' + s;
   }
 
-  self.onmessage = function(e) {
-    const { start, countdown, ronaTimeout } = e.data;
-    let running = true;
+  const timers = {};
 
-    const updateTimer = () => {
-      if (!running) {
-        return;
+  self.onmessage = function(e) {
+    const { type, name, start, countdown, ronaTimeout } = e.data;
+
+    if (type === 'start') {
+      if (timers[name]) {
+        return; // Timer with this name is already running
       }
 
-      const now = Math.floor(Date.now() / 1000); // current time in seconds
-      let diff;
+      let running = true;
 
-      if (countdown && ronaTimeout !== undefined) {
-        diff = start + ronaTimeout - now;
-        if (diff <= 0) {
-          self.postMessage('00:00');
-          running = false;
+      const updateTimer = () => {
+        if (!running) {
           return;
         }
-      } else {
-        diff = now - start;
+
+        const now = Math.floor(Date.now() / 1000); // current time in seconds
+        let diff;
+
+        if (countdown && ronaTimeout !== undefined) {
+          diff = start + ronaTimeout - now;
+          if (diff <= 0) {
+            self.postMessage({ name, time: '00:00' });
+            running = false;
+            delete timers[name];
+            return;
+          }
+        } else {
+          diff = now - start;
+        }
+
+        const formattedTime = formatDuration(diff);
+        self.postMessage({ name, time: formattedTime });
+        timers[name] = setTimeout(updateTimer, 1000);
+      };
+
+      updateTimer();
+    } else if (type === 'stop') {
+      if (timers[name]) {
+        clearTimeout(timers[name]);
+        delete timers[name];
       }
-
-      const formattedTime = formatDuration(diff);
-
-      self.postMessage(formattedTime);
-      setTimeout(updateTimer, 1000);
-    };
-
-    updateTimer();
+    }
   };
 `;
 
@@ -55,9 +69,9 @@ const createWorker = () => {
 const TaskTimer: React.FC<TaskTimerProps> = ({startTimeStamp, countdown = false, ronaTimeout}) => {
   const [duration, setDuration] = useState('00:00');
   const workerRef = useRef<Worker | null>(null);
+  const timerName = useRef(`timer-${Date.now()}`); // Unique name for the timer
 
   useEffect(() => {
-    // Convert startTimeStamp from milliseconds to seconds if provided to match ronaTimeout, which is in seconds
     const now = Math.floor(Date.now() / 1000);
     const start = startTimeStamp ? Math.floor(startTimeStamp / 1000) : now;
 
@@ -65,15 +79,18 @@ const TaskTimer: React.FC<TaskTimerProps> = ({startTimeStamp, countdown = false,
       workerRef.current = createWorker();
     }
 
-    workerRef.current.postMessage({start, countdown, ronaTimeout});
+    workerRef.current.postMessage({type: 'start', name: timerName.current, start, countdown, ronaTimeout});
 
     const handleMessage = (e: MessageEvent) => {
-      setDuration(e.data);
+      if (e.data.name === timerName.current) {
+        setDuration(e.data.time);
+      }
     };
 
     workerRef.current.addEventListener('message', handleMessage);
 
     return () => {
+      workerRef.current.postMessage({type: 'stop', name: timerName.current});
       workerRef.current?.removeEventListener('message', handleMessage);
     };
   }, [countdown, ronaTimeout, startTimeStamp]);

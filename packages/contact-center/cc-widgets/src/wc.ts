@@ -12,8 +12,9 @@ const WebUserState = r2wc(UserState, {
 
 const WebIncomingTask = r2wc(IncomingTask, {
   props: {
+    incomingTask: 'json',
     onAccepted: 'function',
-    onDeclined: 'function',
+    onRejected: 'function',
   },
 });
 

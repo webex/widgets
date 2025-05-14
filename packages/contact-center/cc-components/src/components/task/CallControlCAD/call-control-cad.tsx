@@ -13,7 +13,6 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
     isHeld,
     isRecording,
     holdTime,
-    wrapupRequired,
     consultAccepted,
     consultInitiated,
     consultAgentName,
@@ -27,6 +26,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
     startTimestamp,
     isEndConsultEnabled,
     lastTargetType,
+    controlVisibility,
   } = props;
 
   // Use the Web Worker-based hold timer
@@ -57,7 +57,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
                 Call - <TaskTimer startTimeStamp={startTimestamp} />
               </Text>
               <div className="call-status">
-                {!wrapupRequired && isHeld && (
+                {!controlVisibility.wrapup && isHeld && (
                   <>
                     <span className="dot">•</span>
                     <div className="on-hold">
@@ -70,7 +70,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
             </div>
           </div>
         </div>
-        {!wrapupRequired && (
+        {!controlVisibility.wrapup && controlVisibility.recordingIndicator && (
           <div className="recording-indicator">
             <Icon name={isRecording ? 'record-active-badge-filled' : 'record-paused-badge-filled'} size={1.3} />
           </div>
@@ -91,7 +91,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
           </Text>
         </div>
       </div>
-      {(consultAccepted || consultInitiated) && !wrapupRequired && (
+      {(consultAccepted || consultInitiated) && !controlVisibility.wrapup && (
         <div className={`call-control-consult-container ${callControlConsultClassName || ''}`}>
           <CallControlConsultComponent
             agentName={consultAgentName}

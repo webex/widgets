@@ -72,12 +72,14 @@ export const useStationLogin = (props: UseStationLoginProps) => {
     cc.stationLogin({teamId: team, loginOption: deviceType, dialNumber: dialNumber})
       .then((res: StationLoginSuccess) => {
         setLoginSuccess(res);
+        setLoginFailure(undefined);
       })
       .catch((error: Error) => {
         logger.error(`Error logging in: ${error}`, {
           module: 'widget-station-login#helper.ts',
           method: 'login',
         });
+        setLoginSuccess(undefined);
         setLoginFailure(error);
       });
   };

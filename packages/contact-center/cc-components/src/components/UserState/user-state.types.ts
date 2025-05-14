@@ -49,3 +49,9 @@ export interface IUserState {
    */
   currentTheme: string;
 }
+
+export enum AgentUserState {
+  Available = 'Available',
+  RONA = 'RONA',
+  Engaged = 'ENGAGED',
+}
