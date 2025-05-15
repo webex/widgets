@@ -92,16 +92,19 @@
 }
 
 .call-icon-background {
-  width: 2.2rem;
-  height: 2.2rem;
+  width: 2rem;
+  height: 2rem;
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: var(--mds-color-theme-background-secondary-normal);
+  background-color: var(--mds-color-theme-avatar-glass-normal);
   border-radius: 50%;
-  margin-top: -0.25rem;
   flex-shrink: 0;
 
+  .media-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
   .media-icon.telephony {
     color: var(--mds-color-theme-indicator-stable);
   }
@@ -110,11 +113,7 @@
     color: var(--mds-color-theme-common-touchbar-background-violet-normal);
   }
 
-  .media-icon.chat,
-  .media-icon.sms,
-  .media-icon.facebook,
-  .media-icon.whatsapp,
-  .media-icon.applemessages {
+  .media-icon.chat {
     color: var(--mds-color-theme-indicator-secure);
   }
 }

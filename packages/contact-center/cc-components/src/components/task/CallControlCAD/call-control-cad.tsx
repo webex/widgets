@@ -2,7 +2,7 @@ import React from 'react';
 import CallControlComponent from '../CallControl/call-control';
 import {CallControlComponentProps, MediaType} from '../task.types';
 import {Text} from '@momentum-ui/react-collaboration';
-import {Icon} from '@momentum-design/components/dist/react';
+import {Brandvisual, Icon} from '@momentum-design/components/dist/react';
 import './call-control-cad.styles.scss';
 import TaskTimer from '../TaskTimer/index';
 import CallControlConsultComponent from '../CallControl/CallControlCustom/call-control-consult';
@@ -50,7 +50,11 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
         {/* Caller Information */}
         <div className="caller-info">
           <div className="call-icon-background">
-            <Icon name={mediaIconInfo.iconName} size={1} className={`media-icon ${mediaIconInfo.className}`} />
+            {mediaIconInfo.isBrandVisual ? (
+              <Brandvisual name={mediaIconInfo.iconName} className={`media-icon ${mediaIconInfo.className}`} />
+            ) : (
+              <Icon name={mediaIconInfo.iconName} size={1} className={`media-icon ${mediaIconInfo.className}`} />
+            )}
           </div>
 
           <div className="customer-info">

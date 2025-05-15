@@ -1,6 +1,6 @@
 import React from 'react';
 import {ButtonPill, ListItemBase, ListItemBaseSection, Text} from '@momentum-ui/react-collaboration';
-import {Avatar} from '@momentum-design/components/dist/react';
+import {Avatar, Brandvisual} from '@momentum-design/components/dist/react';
 import {PressEvent} from '@react-types/shared';
 import TaskTimer from '../TaskTimer';
 import {getMediaIconInfo} from '../../../utils';
@@ -57,7 +57,13 @@ const Task: React.FC<TaskProps> = ({
       id={interactionId}
     >
       <ListItemBaseSection position="start">
-        <Avatar icon-name={currentMediaType.iconName} className={currentMediaType.className} />
+        {currentMediaType.isBrandVisual ? (
+          <div className="brand-visual-background">
+            <Brandvisual name={currentMediaType.iconName} className={currentMediaType.className} />
+          </div>
+        ) : (
+          <Avatar icon-name={currentMediaType.iconName} className={currentMediaType.className} />
+        )}
       </ListItemBaseSection>
 
       <ListItemBaseSection position="fill">

@@ -27,30 +27,29 @@ export const formatTime = (time: number): string => {
 export const getMediaIconInfo = (mediaType: string, mediaChannel?: string): MediaInfo => {
   if (mediaType === MediaType.SOCIAL) {
     switch (mediaChannel) {
-      case MediaType.SMS:
-        return {
-          iconName: 'chat-filled',
-          className: MediaType.SMS,
-        };
       case MediaType.FACEBOOK:
         return {
-          iconName: 'chat-filled',
+          iconName: 'social-facebook-color',
           className: MediaType.FACEBOOK,
+          isBrandVisual: true,
         };
       case MediaType.WHATSAPP:
         return {
-          iconName: 'chat-filled',
+          iconName: 'social-whatsapp-color',
           className: MediaType.WHATSAPP,
+          isBrandVisual: true,
         };
       case MediaType.APPLE:
         return {
-          iconName: 'chat-filled',
+          iconName: 'apple-business-chat-color',
           className: MediaType.APPLE,
+          isBrandVisual: true,
         };
       default:
         return {
           iconName: 'chat-filled',
           className: MediaType.SOCIAL,
+          isBrandVisual: false,
         };
     }
   }
@@ -60,19 +59,26 @@ export const getMediaIconInfo = (mediaType: string, mediaChannel?: string): Medi
       return {
         iconName: 'handset-filled',
         className: MediaType.TELEPHONY,
+        isBrandVisual: false,
       };
     case MediaType.EMAIL:
       return {
         iconName: 'email-filled',
         className: MediaType.EMAIL,
+        isBrandVisual: false,
       };
     case MediaType.CHAT:
       return {
         iconName: 'chat-filled',
         className: MediaType.CHAT,
+        isBrandVisual: false,
       };
     default:
-      throw new Error(`Unsupported media type: ${mediaType}`);
+      return {
+        iconName: 'handset-filled',
+        className: MediaType.TELEPHONY,
+        isBrandVisual: false,
+      };
   }
 };
 
@@ -87,8 +93,6 @@ export const getMediaIconInfo = (mediaType: string, mediaChannel?: string): Medi
 export const getMediaLabel = (mediaType: string, mediaChannel?: string): string => {
   if (mediaType === MediaType.SOCIAL) {
     switch (mediaChannel) {
-      case MediaType.SMS:
-        return 'SMS';
       case MediaType.FACEBOOK:
         return 'FB messenger';
       case MediaType.WHATSAPP:

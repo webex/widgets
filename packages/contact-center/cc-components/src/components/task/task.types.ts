@@ -475,4 +475,5 @@ export enum MediaType {
 export type MediaInfo = {
   iconName: string;
   className: string;
+  isBrandVisual: boolean;
 };
