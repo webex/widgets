@@ -617,11 +617,13 @@ class StoreWrapper implements IStoreWrapper {
     }
   };
 
-  getQueues = async (): Promise<Array<ContactServiceQueue>> => {
+  getQueues = async (
+    mediaType: string = this.currentTask.data.interaction.mediaType ?? 'TELEPHONY'
+  ): Promise<Array<ContactServiceQueue>> => {
     try {
-      const mediaType: string = this.currentTask?.data?.interaction?.mediaType?.toUpperCase() || 'TELEPHONY';
+      const upperMediaType = mediaType.toUpperCase();
       let queueList = await this.store.cc.getQueues();
-      queueList = queueList.filter((queue) => queue.channelType === mediaType);
+      queueList = queueList.filter((queue) => queue.channelType === upperMediaType);
       return queueList;
     } catch (error) {
       console.error('Error fetching queues:', error);

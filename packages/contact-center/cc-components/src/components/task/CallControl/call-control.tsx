@@ -1,12 +1,13 @@
 import React, {useEffect, useState} from 'react';
 
-import {CallControlComponentProps, DestinationType, CallControlMenuType, MediaType} from '../task.types';
+import {CallControlComponentProps, DestinationType, CallControlMenuType} from '../task.types';
 import './call-control.styles.scss';
 import {PopoverNext, SelectNext, TooltipNext, Text, ButtonCircle, ButtonPill} from '@momentum-ui/react-collaboration';
 import {Item} from '@react-stately/collections';
 import {Icon} from '@momentum-design/components/dist/react';
 import ConsultTransferPopoverComponent from './CallControlCustom/consult-transfer-popover';
-import {getMediaLabel} from '../../../utils';
+import type {MEDIA_CHANNEL as MediaChannelType} from '../task.types';
+import {getMediaTypeInfo} from '../../../utils';
 
 function CallControlComponent(props: CallControlComponentProps) {
   const [selectedWrapupReason, setSelectedWrapupReason] = useState<string | null>(null);
@@ -104,9 +105,10 @@ function CallControlComponent(props: CallControlComponentProps) {
     }
   };
 
-  const mediaType = currentTask.data.interaction.mediaType || MediaType.TELEPHONY;
-  const mediaChannel = currentTask.data.interaction.mediaChannel || '';
-  const mediaLabel = getMediaLabel(mediaType, mediaChannel);
+  const currentMediaType = getMediaTypeInfo(
+    currentTask.data.interaction.mediaType as MediaChannelType,
+    currentTask.data.interaction.mediaChannel as MediaChannelType
+  );
 
   const buttons = [
     {
@@ -130,7 +132,7 @@ function CallControlComponent(props: CallControlComponentProps) {
     {
       id: 'transfer',
       icon: 'next-bold',
-      tooltip: `Transfer ${mediaLabel}`,
+      tooltip: `Transfer ${currentMediaType.labelName}`,
       className: 'call-control-button',
       disabled: false,
       menuType: 'Transfer',
@@ -149,7 +151,7 @@ function CallControlComponent(props: CallControlComponentProps) {
       id: 'end',
       icon: 'cancel-regular',
       onClick: endCall,
-      tooltip: `End ${mediaLabel}`,
+      tooltip: `End ${currentMediaType.labelName}`,
       className: 'call-control-button-cancel',
       disabled: isHeld,
       isVisible: controlVisibility.end,

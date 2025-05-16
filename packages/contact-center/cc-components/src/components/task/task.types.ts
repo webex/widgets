@@ -8,6 +8,8 @@ import {
   ContactServiceQueue,
 } from '@webex/cc-store';
 
+type Enum<T extends Record<string, unknown>> = T[keyof T];
+
 /**
  * Interface representing the TaskProps of a user.
  */
@@ -461,19 +463,22 @@ export type CallControlMenuType = 'Consult' | 'Transfer';
 
 export {DestinationType};
 
-export enum MediaType {
-  EMAIL = 'email',
-  CHAT = 'chat',
-  TELEPHONY = 'telephony',
-  SOCIAL = 'social',
-  SMS = 'sms',
-  FACEBOOK = 'facebook',
-  WHATSAPP = 'whatsapp',
-  APPLE = 'applemessages',
-}
+export const MEDIA_CHANNEL = {
+  EMAIL: 'email',
+  CHAT: 'chat',
+  TELEPHONY: 'telephony',
+  SOCIAL: 'social',
+  SMS: 'sms',
+  FACEBOOK: 'facebook',
+  WHATSAPP: 'whatsapp',
+  APPLE: 'applemessages',
+} as const;
+
+export type MEDIA_CHANNEL = Enum<typeof MEDIA_CHANNEL>;
 
 export type MediaInfo = {
   iconName: string;
   className: string;
+  labelName: string;
   isBrandVisual: boolean;
 };

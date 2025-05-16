@@ -1,12 +1,13 @@
 import React from 'react';
 import CallControlComponent from '../CallControl/call-control';
-import {CallControlComponentProps, MediaType} from '../task.types';
+import {CallControlComponentProps} from '../task.types';
 import {Text} from '@momentum-ui/react-collaboration';
 import {Brandvisual, Icon} from '@momentum-design/components/dist/react';
 import './call-control-cad.styles.scss';
 import TaskTimer from '../TaskTimer/index';
 import CallControlConsultComponent from '../CallControl/CallControlCustom/call-control-consult';
-import {getMediaIconInfo, getMediaLabel} from '../../../utils';
+import type {MEDIA_CHANNEL as MediaChannelType} from '../task.types';
+import {getMediaTypeInfo} from '../../../utils';
 
 const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => {
   const {
@@ -37,10 +38,11 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
     const seconds = time % 60;
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
-  const mediaType = currentTask.data.interaction.mediaType || MediaType.TELEPHONY;
-  const mediaChannel = currentTask.data.interaction.mediaChannel || '';
-  const mediaIconInfo = getMediaIconInfo(mediaType, mediaChannel);
-  const mediaLabel = getMediaLabel(mediaType, mediaChannel);
+
+  const currentMediaType = getMediaTypeInfo(
+    currentTask.data.interaction.mediaType as MediaChannelType,
+    currentTask.data.interaction.mediaChannel as MediaChannelType
+  );
 
   if (!currentTask) return null;
 
@@ -50,10 +52,10 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
         {/* Caller Information */}
         <div className="caller-info">
           <div className="call-icon-background">
-            {mediaIconInfo.isBrandVisual ? (
-              <Brandvisual name={mediaIconInfo.iconName} className={`media-icon ${mediaIconInfo.className}`} />
+            {currentMediaType.isBrandVisual ? (
+              <Brandvisual name={currentMediaType.iconName} className={`media-icon ${currentMediaType.className}`} />
             ) : (
-              <Icon name={mediaIconInfo.iconName} size={1} className={`media-icon ${mediaIconInfo.className}`} />
+              <Icon name={currentMediaType.iconName} size={1} className={`media-icon ${currentMediaType.className}`} />
             )}
           </div>
 
@@ -63,7 +65,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
             </Text>
             <div className="call-details">
               <Text className="call-timer" type="body-secondary" tagName={'small'}>
-                {mediaLabel} - <TaskTimer startTimeStamp={startTimestamp} />
+                {currentMediaType.labelName} - <TaskTimer startTimeStamp={startTimestamp} />
               </Text>
               <div className="call-status">
                 {!controlVisibility.wrapup && isHeld && (

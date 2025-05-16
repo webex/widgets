@@ -3,8 +3,8 @@ import {ButtonPill, ListItemBase, ListItemBaseSection, Text} from '@momentum-ui/
 import {Avatar, Brandvisual} from '@momentum-design/components/dist/react';
 import {PressEvent} from '@react-types/shared';
 import TaskTimer from '../TaskTimer';
-import {getMediaIconInfo} from '../../../utils';
-import {MediaType} from '../task.types';
+import {getMediaTypeInfo} from '../../../utils';
+import type {MEDIA_CHANNEL as MediaChannelType} from '../task.types';
 import './styles.scss';
 
 interface TaskProps {
@@ -23,8 +23,8 @@ interface TaskProps {
   declineText?: string;
   disableAccept?: boolean;
   styles?: string;
-  mediaType?: string;
-  mediaChannel?: string;
+  mediaType?: MediaChannelType;
+  mediaChannel?: MediaChannelType;
 }
 
 const Task: React.FC<TaskProps> = ({
@@ -49,7 +49,7 @@ const Task: React.FC<TaskProps> = ({
   const capitalizeFirstWord = (str: string) => {
     return str.replace(/^\s*(\w)/, (match, firstLetter) => firstLetter.toUpperCase());
   };
-  const currentMediaType = getMediaIconInfo(mediaType || MediaType.TELEPHONY, mediaChannel || '');
+  const currentMediaType = getMediaTypeInfo(mediaType, mediaChannel);
   return (
     <ListItemBase
       className={`task-list-item ${selected ? 'task-list-item--selected' : ''} ${styles}`}

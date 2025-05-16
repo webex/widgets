@@ -1,6 +1,5 @@
 import React from 'react';
-import {IncomingTaskComponentProps} from '../task.types';
-import {MediaType} from '../task.types';
+import {IncomingTaskComponentProps, MEDIA_CHANNEL} from '../task.types';
 import Task from '../Task';
 
 const IncomingTaskComponent: React.FunctionComponent<IncomingTaskComponentProps> = (props) => {
@@ -16,7 +15,7 @@ const IncomingTaskComponent: React.FunctionComponent<IncomingTaskComponentProps>
   const startTimeStamp = incomingTask?.data?.interaction?.createdTimestamp;
   const mediaType = incomingTask.data.interaction.mediaType;
   const mediaChannel = incomingTask.data.interaction.mediaChannel;
-  const isTelephony = mediaType === MediaType.TELEPHONY;
+  const isTelephony = mediaType === MEDIA_CHANNEL.TELEPHONY;
   const acceptText = !incomingTask.data.wrapUpRequired
     ? isTelephony && !isBrowser
       ? 'Ringing...'
