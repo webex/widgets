@@ -1,8 +1,10 @@
 import React from 'react';
 import {ButtonPill, ListItemBase, ListItemBaseSection, Text} from '@momentum-ui/react-collaboration';
-import {Avatar} from '@momentum-design/components/dist/react';
+import {Avatar, Brandvisual} from '@momentum-design/components/dist/react';
 import {PressEvent} from '@react-types/shared';
 import TaskTimer from '../TaskTimer';
+import {getMediaTypeInfo} from '../../../utils';
+import type {MEDIA_CHANNEL as MediaChannelType} from '../task.types';
 import './styles.scss';
 
 interface TaskProps {
@@ -21,6 +23,8 @@ interface TaskProps {
   declineText?: string;
   disableAccept?: boolean;
   styles?: string;
+  mediaType?: MediaChannelType;
+  mediaChannel?: MediaChannelType;
 }
 
 const Task: React.FC<TaskProps> = ({
@@ -39,11 +43,13 @@ const Task: React.FC<TaskProps> = ({
   acceptText,
   disableAccept = false,
   declineText,
+  mediaType,
+  mediaChannel,
 }) => {
   const capitalizeFirstWord = (str: string) => {
     return str.replace(/^\s*(\w)/, (match, firstLetter) => firstLetter.toUpperCase());
   };
-
+  const currentMediaType = getMediaTypeInfo(mediaType, mediaChannel);
   return (
     <ListItemBase
       className={`task-list-item ${selected ? 'task-list-item--selected' : ''} ${styles}`}
@@ -51,7 +57,13 @@ const Task: React.FC<TaskProps> = ({
       id={interactionId}
     >
       <ListItemBaseSection position="start">
-        <Avatar icon-name="handset-filled" />
+        {currentMediaType.isBrandVisual ? (
+          <div className="brand-visual-background">
+            <Brandvisual name={currentMediaType.iconName} className={currentMediaType.className} />
+          </div>
+        ) : (
+          <Avatar icon-name={currentMediaType.iconName} className={currentMediaType.className} />
+        )}
       </ListItemBaseSection>
 
       <ListItemBaseSection position="fill">
