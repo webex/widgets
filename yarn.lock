@@ -9340,6 +9340,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@webex/calling@npm:3.8.0-next.22":
+  version: 3.8.0-next.22
+  resolution: "@webex/calling@npm:3.8.0-next.22"
+  dependencies:
+    "@types/platform": "npm:1.3.4"
+    "@webex/internal-media-core": "npm:2.15.0"
+    "@webex/internal-plugin-metrics": "npm:3.8.0-next.17"
+    "@webex/media-helpers": "npm:3.8.0-next.20"
+    async-mutex: "npm:0.4.0"
+    buffer: "npm:6.0.3"
+    jest-html-reporters: "npm:3.0.11"
+    platform: "npm:1.3.6"
+    uuid: "npm:8.3.2"
+    xstate: "npm:4.30.6"
+  checksum: 10c0/d6a3df6e8b5df8fb9b574dbbb8964a13ae045eb6a27dee4a1e9f2758576bcc6830dd468331ee14b80714590de48ca8a74107f66950db8f0756a2802e3d73d19a
+  languageName: node
+  linkType: hard
+
 "@webex/cc-components@workspace:*, @webex/cc-components@workspace:packages/contact-center/cc-components":
   version: 0.0.0-use.local
   resolution: "@webex/cc-components@workspace:packages/contact-center/cc-components"
@@ -9443,6 +9461,7 @@ __metadata:
     "@testing-library/react": "npm:16.0.1"
     "@types/jest": "npm:29.5.14"
     "@types/react-test-renderer": "npm:18"
+    "@webex/plugin-cc": "npm:3.8.0-next.48"
     babel-jest: "npm:29.7.0"
     babel-loader: "npm:9.2.1"
     eslint: "npm:^9.20.1"
@@ -9462,7 +9481,6 @@ __metadata:
     ts-loader: "npm:9.5.1"
     typescript: "npm:5.6.3"
     typescript-eslint: "npm:^8.24.1"
-    webex: "npm:3.8.0-next.78"
     webpack: "npm:5.94.0"
     webpack-cli: "npm:5.1.4"
     webpack-merge: "npm:6.0.1"
@@ -9938,6 +9956,25 @@ __metadata:
     webrtc-adapter: "npm:^8.1.2"
     xstate: "npm:^4.30.6"
   checksum: 10c0/ceab223f17d3747372d1deb7782a486451f9a31b19bb5a7668f178b60fd8618269c118a35a6c25384008b8a4c9d45293657de7e93406c0f28b7fb6510d1037f0
+  languageName: node
+  linkType: hard
+
+"@webex/internal-media-core@npm:2.15.0":
+  version: 2.15.0
+  resolution: "@webex/internal-media-core@npm:2.15.0"
+  dependencies:
+    "@babel/runtime": "npm:^7.18.9"
+    "@babel/runtime-corejs2": "npm:^7.25.0"
+    "@webex/rtcstats": "npm:^1.5.0"
+    "@webex/ts-sdp": "npm:1.7.0"
+    "@webex/web-capabilities": "npm:^1.4.1"
+    "@webex/web-client-media-engine": "npm:3.31.0"
+    events: "npm:^3.3.0"
+    typed-emitter: "npm:^2.1.0"
+    uuid: "npm:^8.3.2"
+    webrtc-adapter: "npm:^8.1.2"
+    xstate: "npm:^4.30.6"
+  checksum: 10c0/5f6fa8a79ae2d35f768984f6d3407b98ef842b1847024b2085175e98b91d909b61064262a119aa4bce8edbbe308ccbed567ab92b8f8bd8afe053a3ee2a90f63b
   languageName: node
   linkType: hard
 
@@ -10661,6 +10698,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@webex/media-helpers@npm:3.8.0-next.20":
+  version: 3.8.0-next.20
+  resolution: "@webex/media-helpers@npm:3.8.0-next.20"
+  dependencies:
+    "@webex/internal-media-core": "npm:2.15.0"
+    "@webex/ts-events": "npm:^1.1.0"
+    "@webex/web-media-effects": "npm:2.27.1"
+  checksum: 10c0/6dbfc3ecc6ba9bbeef29faa5c2e082698ae913487dfe4d73f1fa0dab183d2ab4e0147297d97344ecd6d98f2094eeebe05c129fb2049cf06f9cea7cfbf96e1cf6
+  languageName: node
+  linkType: hard
+
 "@webex/plugin-attachment-actions@npm:2.60.2":
   version: 2.60.2
   resolution: "@webex/plugin-attachment-actions@npm:2.60.2"
@@ -10849,6 +10897,24 @@ __metadata:
     "@webex/webex-core": "npm:3.8.0-next.17"
     jest-html-reporters: "npm:3.0.11"
   checksum: 10c0/1b619b6e0d017213c5c87f92cc27f5921392f9bfdb95d6a1b9c4b8ca1dc8d473a927dc863ad3223e297e376cf771daee983b3b0d1d171124b74fb3c9b92eab42
+  languageName: node
+  linkType: hard
+
+"@webex/plugin-cc@npm:3.8.0-next.48":
+  version: 3.8.0-next.48
+  resolution: "@webex/plugin-cc@npm:3.8.0-next.48"
+  dependencies:
+    "@types/platform": "npm:1.3.4"
+    "@webex/calling": "npm:3.8.0-next.22"
+    "@webex/internal-plugin-mercury": "npm:3.8.0-next.19"
+    "@webex/internal-plugin-metrics": "npm:3.8.0-next.17"
+    "@webex/internal-plugin-support": "npm:3.8.0-next.21"
+    "@webex/plugin-authorization": "npm:3.8.0-next.18"
+    "@webex/plugin-logger": "npm:3.8.0-next.17"
+    "@webex/webex-core": "npm:3.8.0-next.17"
+    jest-html-reporters: "npm:3.0.11"
+    lodash: "npm:^4.17.21"
+  checksum: 10c0/aebe7ef909cbe215cfc36d7017def4c20baf05797c139567e891f0f6a6301436ebfe641c591382828849c2ea5a1d09750282c519baf332815b71727fc627a56c
   languageName: node
   linkType: hard
 
@@ -11831,6 +11897,25 @@ __metadata:
     typed-emitter: "npm:^2.1.0"
     uuid: "npm:^8.3.2"
   checksum: 10c0/e543195008c6639c3556edf88dc88ab99e2706dc5c9036d885d8909e66b4ae9d3ecd98cbf5dd37bed5ec15b8483d945f367a6b0f7cf4c0517c4c06973c335eb0
+  languageName: node
+  linkType: hard
+
+"@webex/web-client-media-engine@npm:3.31.0":
+  version: 3.31.0
+  resolution: "@webex/web-client-media-engine@npm:3.31.0"
+  dependencies:
+    "@webex/json-multistream": "npm:^2.2.1"
+    "@webex/rtcstats": "npm:^1.5.0"
+    "@webex/ts-events": "npm:^1.0.1"
+    "@webex/ts-sdp": "npm:1.8.1"
+    "@webex/web-capabilities": "npm:^1.4.0"
+    "@webex/web-media-effects": "npm:2.18.1"
+    "@webex/webrtc-core": "npm:2.12.0"
+    async: "npm:^3.2.4"
+    js-logger: "npm:^1.6.1"
+    typed-emitter: "npm:^2.1.0"
+    uuid: "npm:^8.3.2"
+  checksum: 10c0/078a2677e2c6aae227761b0f42f94d51b0db2b12f76bf9d079acceaa2a79d8991d3e4561f4a4a60c2f3f62cf027b5e69800c25deb51469decb28ef16d2321808
   languageName: node
   linkType: hard
 
