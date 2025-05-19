@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.57](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.56...v1.28.0-ccwidgets.57) (2025-05-19)
+
+
+### Bug Fixes
+
+* **store:** add agent profile in store ([#455](https://github.com/webex/widgets/issues/455)) ([ed10730](https://github.com/webex/widgets/commit/ed10730519d2627fdb8062f25c0de9d565b29abb))
+
 # [1.28.0-ccwidgets.56](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.55...v1.28.0-ccwidgets.56) (2025-05-19)
 
 
