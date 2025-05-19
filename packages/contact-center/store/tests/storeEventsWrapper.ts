@@ -94,6 +94,28 @@ jest.mock('../src/store', () => ({
   }),
 }));
 
+const mockAgentProfile = {
+  deviceType: 'EXTENSION',
+  mmProfile: {chat: 4, email: 5, social: 5, telephony: 1},
+  roles: ['agent'],
+  orgId: 'mockOrgId',
+  profileType: 'BLENDED',
+};
+
+const mockAgentProfilePayload = {
+  ...mockAgentProfile,
+  agentId: 'c5198251-b0ec-4a7f-b9dd-c29c86915694',
+  chatCount: 4,
+  deviceId: '1001',
+  dn: '1001',
+  emailCount: 5,
+  eventType: 'AgentDesktopMessage',
+  interactionIds: [],
+  siteId: 'c6a5451f-5ba7-49a1-aee8-fbef70c19ece',
+  type: 'AgentStationLoginSuccess',
+  voiceCount: 1,
+};
+
 describe('storeEventsWrapper', () => {
   describe('storeEventsWrapper Proxies', () => {
     it('should proxy teams', () => {
@@ -223,6 +245,10 @@ describe('storeEventsWrapper', () => {
 
     it('should proxy dialNumber', () => {
       expect(storeWrapper.dialNumber).toBe(storeWrapper['store'].dialNumber);
+    });
+
+    it('should proxy agentProfile', () => {
+      expect(storeWrapper.agentProfile).toBe(storeWrapper['store'].agentProfile);
     });
 
     describe('setState', () => {
@@ -769,6 +795,31 @@ describe('storeEventsWrapper', () => {
       expect(cc.on).toHaveBeenCalledWith(CC_EVENTS.AGENT_RELOGIN_SUCCESS, expect.any(Function));
     });
 
+    it('should set agentProfile on Relogin and Login', async () => {
+      const cc = storeWrapper['store'].cc;
+      const setAgentProfileSpy = jest.spyOn(storeWrapper, 'setAgentProfile');
+      storeWrapper['store'].init = jest.fn().mockReturnValue(storeWrapper.setupIncomingTaskHandler(cc));
+
+      await storeWrapper.init(options);
+
+      const loginCb = storeWrapper['cc'].on.mock.calls.find(
+        (call) => call[0] === CC_EVENTS.AGENT_STATION_LOGIN_SUCCESS
+      )[1];
+      act(() => {
+        loginCb(mockAgentProfilePayload);
+      });
+
+      expect(setAgentProfileSpy).toHaveBeenCalledWith(mockAgentProfilePayload);
+
+      const reloginCb = storeWrapper['cc'].on.mock.calls.find((call) => call[0] === CC_EVENTS.AGENT_RELOGIN_SUCCESS)[1];
+
+      act(() => {
+        reloginCb(mockAgentProfilePayload);
+      });
+      expect(setAgentProfileSpy).toHaveBeenCalledWith(mockAgentProfilePayload);
+      expect(storeWrapper['store'].agentProfile).toEqual(mockAgentProfile);
+    });
+
     it('should handle task:incoming event ', async () => {
       const cc = storeWrapper['store'].cc;
       storeWrapper['store'].init = jest.fn().mockReturnValue(storeWrapper.setupIncomingTaskHandler(cc));
@@ -1200,9 +1251,10 @@ describe('storeEventsWrapper', () => {
       expect(refreshTaskListSpy).toHaveBeenCalled();
     });
 
-    it('should remove event listeners on successful logout', async () => {
+    it('should remove event listeners on successful logout and clear agentProfile', async () => {
       const cc = storeWrapper['store'].cc;
       storeWrapper['store'].init = jest.fn().mockReturnValue(storeWrapper.setupIncomingTaskHandler(cc));
+      const setAgentProfileSpy = jest.spyOn(storeWrapper, 'setAgentProfile');
 
       const options = {someOption: 'value'};
       await storeWrapper.init(options);
@@ -1220,6 +1272,8 @@ describe('storeEventsWrapper', () => {
       expect(storeWrapper['cc'].off).toHaveBeenCalledWith(TASK_EVENTS.TASK_INCOMING, expect.any(Function));
       expect(storeWrapper['cc'].off).toHaveBeenCalledWith(CC_EVENTS.AGENT_STATE_CHANGE, expect.any(Function));
       expect(storeWrapper['cc'].off).toHaveBeenCalledWith(CC_EVENTS.AGENT_MULTI_LOGIN, expect.any(Function));
+      expect(setAgentProfileSpy).toHaveBeenCalledWith({});
+      expect(storeWrapper['store'].agentProfile).toEqual({});
     });
 
     it('should handle task rejection event and call onTaskRejected with the provided reason', () => {
