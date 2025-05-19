@@ -18,8 +18,37 @@
 
   mdc-avatar {
     --mdc-avatar-default-background-color: var(--mds-color-theme-avatar-glass-normal);
-    --mdc-avatar-default-foreground-color: var(--mds-color-theme-indicator-stable);
+
+    &.telephony {
+      --mdc-avatar-default-foreground-color: var(--mds-color-theme-indicator-stable);
+    }
+    
+    &.email {
+      --mdc-avatar-default-foreground-color: var(--mds-color-theme-common-touchbar-background-violet-normal);
+    }
+    
+    &.chat {
+      --mdc-avatar-default-foreground-color: var(--mds-color-theme-indicator-secure);
+    }
   }
+
+  .brand-visual-background {
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--mds-color-theme-avatar-glass-normal);
+    border-radius: 50%;
+    flex-shrink: 0;
+
+    mdc-brandvisual {
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+
+  }
+
 }
 
 .task-text {
@@ -30,7 +59,10 @@
   background: var(--mds-color-theme-background-primary-active);
 
   mdc-avatar {
-    --mdc-avatar-default-background-color: var(--mds-color-theme-avatar-glass-active, rgba(255, 255, 255, 0.8));
+    --mdc-avatar-default-background-color: var(--mds-color-theme-avatar-glass-active, #FFFFFFCC);
+  }
+  .brand-visual-background { 
+    background-color: var(--mds-color-theme-avatar-glass-active, #FFFFFFCC);
   }
 }
 

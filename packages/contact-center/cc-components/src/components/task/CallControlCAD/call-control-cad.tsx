@@ -2,10 +2,12 @@ import React from 'react';
 import CallControlComponent from '../CallControl/call-control';
 import {CallControlComponentProps} from '../task.types';
 import {Text} from '@momentum-ui/react-collaboration';
-import {Icon} from '@momentum-design/components/dist/react';
+import {Brandvisual, Icon} from '@momentum-design/components/dist/react';
 import './call-control-cad.styles.scss';
 import TaskTimer from '../TaskTimer/index';
 import CallControlConsultComponent from '../CallControl/CallControlCustom/call-control-consult';
+import type {MEDIA_CHANNEL as MediaChannelType} from '../task.types';
+import {getMediaTypeInfo} from '../../../utils';
 
 const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => {
   const {
@@ -37,6 +39,11 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
 
+  const currentMediaType = getMediaTypeInfo(
+    currentTask.data.interaction.mediaType as MediaChannelType,
+    currentTask.data.interaction.mediaChannel as MediaChannelType
+  );
+
   if (!currentTask) return null;
 
   return (
@@ -45,7 +52,11 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
         {/* Caller Information */}
         <div className="caller-info">
           <div className="call-icon-background">
-            <Icon name="handset-filled" size={1} className="call-icon" />
+            {currentMediaType.isBrandVisual ? (
+              <Brandvisual name={currentMediaType.iconName} className={`media-icon ${currentMediaType.className}`} />
+            ) : (
+              <Icon name={currentMediaType.iconName} size={1} className={`media-icon ${currentMediaType.className}`} />
+            )}
           </div>
 
           <div className="customer-info">
@@ -54,7 +65,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
             </Text>
             <div className="call-details">
               <Text className="call-timer" type="body-secondary" tagName={'small'}>
-                Call - <TaskTimer startTimeStamp={startTimestamp} />
+                {currentMediaType.labelName} - <TaskTimer startTimeStamp={startTimestamp} />
               </Text>
               <div className="call-status">
                 {!controlVisibility.wrapup && isHeld && (
