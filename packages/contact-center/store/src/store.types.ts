@@ -78,7 +78,7 @@ interface IStore {
   consultOfferReceived: boolean;
   isEndConsultEnabled: boolean;
   allowConsultToQueue: boolean;
-  agentProfile: AgentProfile;
+  agentProfile: AgentLoginProfile;
   init(params: InitParams, callback: (ccSDK: IContactCenter) => void): Promise<void>;
   registerCC(webex?: WithWebex['webex']): Promise<void>;
 }
@@ -159,7 +159,7 @@ type ICustomState = ICustomStateSet | ICustomStateReset;
 const ENGAGED_LABEL = 'ENGAGED';
 const ENGAGED_USERNAME = 'Engaged';
 
-type AgentProfile = {
+type AgentLoginProfile = {
   agentName?: string;
   orgId?: string;
   profileType?: string;
@@ -191,7 +191,7 @@ export type {
   BuddyDetails,
   ContactServiceQueue,
   TaskMetaData,
-  AgentProfile,
+  AgentLoginProfile,
 };
 
 export {CC_EVENTS, TASK_EVENTS, ENGAGED_LABEL, ENGAGED_USERNAME};

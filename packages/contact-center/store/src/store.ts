@@ -12,7 +12,7 @@ import {
   IWrapupCode,
   ICustomState,
   TaskMetaData,
-  AgentProfile,
+  AgentLoginProfile,
 } from './store.types';
 import {ITask} from '@webex/plugin-cc';
 
@@ -49,7 +49,7 @@ class Store implements IStore {
   featureFlags: {[key: string]: boolean} = {};
   isEndConsultEnabled: boolean = false;
   allowConsultToQueue: boolean = false;
-  agentProfile: AgentProfile = {};
+  agentProfile: AgentLoginProfile = {};
 
   taskMetaData: Record<string, TaskMetaData> = {};
 

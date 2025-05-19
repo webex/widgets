@@ -16,6 +16,7 @@ import {
   ContactServiceQueue,
   Profile,
   TaskMetaData,
+  AgentLoginProfile,
 } from './store.types';
 import Store from './store';
 import {runInAction} from 'mobx';
@@ -326,15 +327,15 @@ class StoreWrapper implements IStoreWrapper {
     task.on(event, callback);
   };
 
-  setAgentProfile = (profile: Profile) => {
+  setAgentProfile = (profile: AgentLoginProfile) => {
     runInAction(() => {
       this.store.agentProfile = {
         ...this.store.agentProfile,
-        profileType: profile?.profileType,
-        mmProfile: profile?.mmProfile,
-        orgId: profile?.orgId,
-        roles: profile?.roles,
-        deviceType: profile?.deviceType,
+        profileType: profile.profileType || undefined,
+        mmProfile: profile.mmProfile || undefined,
+        orgId: profile.orgId || undefined,
+        roles: profile.roles || undefined,
+        deviceType: profile.deviceType || undefined,
       };
     });
   };
