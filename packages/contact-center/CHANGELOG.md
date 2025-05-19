@@ -1,3 +1,45 @@
+# [1.28.0-ccwidgets.55](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.54...v1.28.0-ccwidgets.55) (2025-05-13)
+
+
+### Bug Fixes
+
+* **samples:** add oauth login to react and wc samples ([#453](https://github.com/webex/widgets/issues/453)) ([08ca036](https://github.com/webex/widgets/commit/08ca036746d6c6ded1ffdd5fe0df63af4a270439))
+
+# [1.28.0-ccwidgets.54](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.53...v1.28.0-ccwidgets.54) (2025-05-09)
+
+
+### Features
+
+* **station-login:** Add Validation to Station Login to Match Diverging Figma ([#449](https://github.com/webex/widgets/issues/449)) ([c256fe7](https://github.com/webex/widgets/commit/c256fe7dd21300081c73d244c2141c9960ccaa52))
+
+# [1.28.0-ccwidgets.53](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.52...v1.28.0-ccwidgets.53) (2025-05-08)
+
+
+### Bug Fixes
+
+* **incoming-task:** support multiple incoming task widgets ([#446](https://github.com/webex/widgets/issues/446)) ([1720ebb](https://github.com/webex/widgets/commit/1720ebb6d77f885ae2c391d92e5f1305328d0114))
+
+# [1.28.0-ccwidgets.52](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.51...v1.28.0-ccwidgets.52) (2025-05-08)
+
+
+### Bug Fixes
+
+* **user-state:** resolved-ui-gaps-in-user-state-dropdown-component ([#445](https://github.com/webex/widgets/issues/445)) ([e98226f](https://github.com/webex/widgets/commit/e98226f2eab16b39274bf2ce0d384055046591a2))
+
+# [1.28.0-ccwidgets.51](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.50...v1.28.0-ccwidgets.51) (2025-05-07)
+
+
+### Features
+
+* **cc-task:** task list to support multiple tasks and digital tasks ([#441](https://github.com/webex/widgets/issues/441)) ([a9f7596](https://github.com/webex/widgets/commit/a9f7596adc05aa31122b6bcbdc3a900c9cb0bbcc))
+
+# [1.28.0-ccwidgets.50](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.49...v1.28.0-ccwidgets.50) (2025-04-30)
+
+
+### Bug Fixes
+
+* **widgets:** fixed-wrapup-issue ([#442](https://github.com/webex/widgets/issues/442)) ([0eab5c3](https://github.com/webex/widgets/commit/0eab5c33e56b420b3a4ee2f9ebd2b92044af721e))
+
 # [1.28.0-ccwidgets.49](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.48...v1.28.0-ccwidgets.49) (2025-04-28)
 
 

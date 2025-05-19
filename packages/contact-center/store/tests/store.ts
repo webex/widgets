@@ -3,6 +3,7 @@ import Webex from 'webex/contact-center';
 import store from '../src/store'; // Adjust the import path as necessary
 
 let mockShouldCallback = true;
+console.log = jest.fn(); // Mock console.log
 
 jest.mock('mobx', () => ({
   makeAutoObservable: jest.fn(),
@@ -46,12 +47,10 @@ describe('Store', () => {
     expect(storeInstance.idleCodes).toEqual([]);
     expect(storeInstance.agentId).toBe('');
     expect(storeInstance.wrapupCodes).toEqual([]);
-    expect(storeInstance.incomingTask).toBeNull();
     expect(storeInstance.currentTask).toBeNull();
     expect(storeInstance.isAgentLoggedIn).toBe(false);
     expect(storeInstance.deviceType).toBe('');
-    expect(storeInstance.taskList).toEqual([]);
-    expect(storeInstance.wrapupRequired).toBe(false);
+    expect(storeInstance.taskList).toEqual({});
 
     expect(makeAutoObservable).toHaveBeenCalledWith(storeInstance, {
       cc: expect.any(Function),

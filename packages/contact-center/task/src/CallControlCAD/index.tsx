@@ -12,7 +12,6 @@ const CallControlCAD: React.FunctionComponent<CallControlProps> = observer(
       logger,
       currentTask,
       wrapupCodes,
-      wrapupRequired,
       consultInitiated,
       consultAccepted,
       consultStartTimeStamp,
@@ -20,6 +19,8 @@ const CallControlCAD: React.FunctionComponent<CallControlProps> = observer(
       consultCompleted,
       isEndConsultEnabled,
       allowConsultToQueue,
+      featureFlags,
+      deviceType,
     } = store;
     const result = {
       ...useCallControl({
@@ -29,8 +30,9 @@ const CallControlCAD: React.FunctionComponent<CallControlProps> = observer(
         onWrapUp,
         logger,
         consultInitiated,
+        deviceType,
+        featureFlags,
       }),
-      wrapupRequired,
       wrapupCodes,
       consultInitiated,
       consultCompleted,

@@ -12,6 +12,7 @@ const ccMock = {
 const loginOptionsMock = ['EXTENSION', 'AGENT_DN', 'BROWSER'];
 const deviceTypeMock = 'BROWSER';
 const dialNumberMock = '12345';
+const dialNumberRegexMock = '1[0-9]{3}[2-9][0-9]{6}([,]{1,10}[0-9]+){0,1}';
 const loggerMock = {};
 const isAgentLoggedInMock = false;
 
@@ -26,6 +27,7 @@ jest.mock('@webex/cc-store', () => {
     loginOptions: loginOptionsMock,
     deviceType: deviceTypeMock,
     dialNumber: dialNumberMock,
+    dialNumberRegex: dialNumberRegexMock,
     logger: loggerMock,
     isAgentLoggedIn: isAgentLoggedInMock,
     setCCCallback: jest.fn(),

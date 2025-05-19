@@ -11,8 +11,11 @@ import {
   ILogger,
   IWrapupCode,
   ICustomState,
+  TaskMetaData,
 } from './store.types';
 import {ITask} from '@webex/plugin-cc';
+
+import {getFeatureFlags} from './util';
 
 class Store implements IStore {
   private static instance: Store;
@@ -24,13 +27,11 @@ class Store implements IStore {
   agentId: string = '';
   currentTheme: string = 'LIGHT';
   wrapupCodes: IWrapupCode[] = [];
-  incomingTask: ITask = null;
   currentTask: ITask = null;
   isAgentLoggedIn = false;
   deviceType: string = '';
+  taskList: Record<string, ITask> = {};
   dialNumber: string = '';
-  taskList: ITask[] = [];
-  wrapupRequired: boolean = false;
   currentState: string = '';
   customState: ICustomState = null;
   consultCompleted = false;
@@ -44,8 +45,11 @@ class Store implements IStore {
   showMultipleLoginAlert: boolean = false;
   callControlAudio: MediaStream | null = null;
   consultOfferReceived: boolean = false;
+  featureFlags: {[key: string]: boolean} = {};
   isEndConsultEnabled: boolean = false;
   allowConsultToQueue: boolean = false;
+
+  taskMetaData: Record<string, TaskMetaData> = {};
 
   constructor() {
     makeAutoObservable(this, {
@@ -75,6 +79,7 @@ class Store implements IStore {
     return this.cc
       .register()
       .then((response: Profile) => {
+        this.featureFlags = getFeatureFlags(response);
         this.teams = response.teams;
         this.loginOptions = response.webRtcEnabled
           ? response.loginVoiceOptions

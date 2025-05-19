@@ -6,6 +6,7 @@ import TaskTimer from '../TaskTimer';
 import './styles.scss';
 
 interface TaskProps {
+  interactionId?: string;
   title?: string;
   state?: string;
   startTimeStamp?: number;
@@ -15,7 +16,11 @@ interface TaskProps {
   queue?: string;
   acceptTask?: (e: PressEvent) => void;
   declineTask?: (e: PressEvent) => void;
-  isBrowser?: boolean;
+  onTaskSelect?: (e: PressEvent) => void;
+  acceptText?: string;
+  declineText?: string;
+  disableAccept?: boolean;
+  styles?: string;
 }
 
 const Task: React.FC<TaskProps> = ({
@@ -24,18 +29,27 @@ const Task: React.FC<TaskProps> = ({
   startTimeStamp,
   ronaTimeout,
   selected = false,
+  styles,
   isIncomingTask = false,
   queue,
   acceptTask,
   declineTask,
-  isBrowser,
+  interactionId,
+  onTaskSelect,
+  acceptText,
+  disableAccept = false,
+  declineText,
 }) => {
   const capitalizeFirstWord = (str: string) => {
     return str.replace(/^\s*(\w)/, (match, firstLetter) => firstLetter.toUpperCase());
   };
 
   return (
-    <ListItemBase className={`task-list-item ${selected ? 'task-list-item--selected' : ''}`}>
+    <ListItemBase
+      className={`task-list-item ${selected ? 'task-list-item--selected' : ''} ${styles}`}
+      onPress={onTaskSelect ? onTaskSelect : undefined}
+      id={interactionId}
+    >
       <ListItemBaseSection position="start">
         <Avatar icon-name="handset-filled" />
       </ListItemBaseSection>
@@ -81,15 +95,18 @@ const Task: React.FC<TaskProps> = ({
       </ListItemBaseSection>
 
       <ListItemBaseSection position="end">
-        {isIncomingTask ? (
-          <ButtonPill onPress={acceptTask} color="join" disabled={!isBrowser}>
-            Ringing
-          </ButtonPill>
-        ) : isBrowser ? (
-          <ButtonPill onPress={declineTask} color="cancel">
-            End
-          </ButtonPill>
-        ) : null}
+        <div className="task-button-container">
+          {acceptText ? (
+            <ButtonPill onPress={acceptTask} color="join" disabled={disableAccept}>
+              {acceptText}
+            </ButtonPill>
+          ) : null}
+          {declineText ? (
+            <ButtonPill onPress={declineTask} color="cancel">
+              {declineText}
+            </ButtonPill>
+          ) : null}
+        </div>
       </ListItemBaseSection>
     </ListItemBase>
   );

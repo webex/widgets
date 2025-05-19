@@ -5,7 +5,7 @@ export const StationLoginLabels = {
   MULTIPLE_SIGN_IN_ALERT_TITLE: 'Multiple Sign In Alert',
   CONTINUE: 'Continue',
   CANCEL: 'Cancel',
-  SIGN_OUT: 'Sign out',
+  SIGN_OUT: 'Sign Out',
   LOGOUT: 'Logout',
   SAVE_AND_CONTINUE: 'Save & Continue',
   CC_SIGN_OUT: 'Sign out of Contact Center',
@@ -14,6 +14,14 @@ export const StationLoginLabels = {
   HANDLE_CALLS: 'Handle calls using',
   HANDLE_CALLS_TOOLTIP:
     'This is your preferred method for receiving and making calls. Choose between your phone number, extension (if available), or your web browser.',
+  YOUR_TEAM: 'Your Team',
+  IS_REQUIRED: ' is required',
+  DN_FORMAT_ERROR: 'Enter a valid US dial number. For help, reach out to your administrator or support team.',
+  DEFAULT_ERROR: 'Error logging in: ',
+};
+
+export const SignInErrors = {
+  ['DUPLICATE_LOCATION']: 'This extension is already in use.',
 };
 
 // Utility consts
