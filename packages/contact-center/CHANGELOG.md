@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.56](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.55...v1.28.0-ccwidgets.56) (2025-05-19)
+
+
+### Bug Fixes
+
+* **task-list:** resolved-ui-gaps-in-task-list-component ([#452](https://github.com/webex/widgets/issues/452)) ([67cbc5c](https://github.com/webex/widgets/commit/67cbc5cd1b081370d516f9371f7d9368d8bd3ecf))
+
 # [1.28.0-ccwidgets.55](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.54...v1.28.0-ccwidgets.55) (2025-05-13)
 
 
