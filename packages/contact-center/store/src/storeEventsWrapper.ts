@@ -621,10 +621,12 @@ class StoreWrapper implements IStoreWrapper {
     this.handleTaskRemove(task.data.interactionId);
   };
 
-  getBuddyAgents = async (): Promise<Array<BuddyDetails>> => {
+  getBuddyAgents = async (
+    mediaType: string = this.currentTask.data.interaction.mediaType
+  ): Promise<Array<BuddyDetails>> => {
     try {
       const response = await this.store.cc.getBuddyAgents({
-        mediaType: 'telephony',
+        mediaType: mediaType ?? 'telephony',
         state: 'Available',
       });
       return response.data.agentList;
@@ -633,10 +635,13 @@ class StoreWrapper implements IStoreWrapper {
     }
   };
 
-  getQueues = async (): Promise<Array<ContactServiceQueue>> => {
+  getQueues = async (
+    mediaType: string = this.currentTask.data.interaction.mediaType ?? 'TELEPHONY'
+  ): Promise<Array<ContactServiceQueue>> => {
     try {
+      const upperMediaType = mediaType.toUpperCase();
       let queueList = await this.store.cc.getQueues();
-      queueList = queueList.filter((queue) => queue.channelType === 'TELEPHONY');
+      queueList = queueList.filter((queue) => queue.channelType === upperMediaType);
       return queueList;
     } catch (error) {
       console.error('Error fetching queues:', error);

@@ -1,5 +1,5 @@
 import React from 'react';
-import {IncomingTaskComponentProps} from '../task.types';
+import {IncomingTaskComponentProps, MEDIA_CHANNEL} from '../task.types';
 import Task from '../Task';
 
 const IncomingTaskComponent: React.FunctionComponent<IncomingTaskComponentProps> = (props) => {
@@ -13,8 +13,14 @@ const IncomingTaskComponent: React.FunctionComponent<IncomingTaskComponentProps>
   const virtualTeamName = callAssociationDetails?.virtualTeamName;
   const ronaTimeout = callAssociationDetails?.ronaTimeout ? Number(callAssociationDetails?.ronaTimeout) : null;
   const startTimeStamp = incomingTask?.data?.interaction?.createdTimestamp;
-  const isTelephony = incomingTask.data.interaction.mediaType === 'telephony';
-  const acceptText = !incomingTask.data.wrapUpRequired ? (isTelephony && !isBrowser ? 'Ringing' : 'Accept') : undefined;
+  const mediaType = incomingTask.data.interaction.mediaType;
+  const mediaChannel = incomingTask.data.interaction.mediaChannel;
+  const isTelephony = mediaType === MEDIA_CHANNEL.TELEPHONY;
+  const acceptText = !incomingTask.data.wrapUpRequired
+    ? isTelephony && !isBrowser
+      ? 'Ringing...'
+      : 'Accept'
+    : undefined;
   const declineText = !incomingTask.data.wrapUpRequired && isTelephony && isBrowser ? 'Decline' : undefined;
 
   return (
@@ -32,6 +38,8 @@ const IncomingTaskComponent: React.FunctionComponent<IncomingTaskComponentProps>
       disableAccept={isTelephony && !isBrowser}
       declineText={declineText}
       styles="task-list-hover"
+      mediaType={mediaType}
+      mediaChannel={mediaChannel}
     />
   );
 };
