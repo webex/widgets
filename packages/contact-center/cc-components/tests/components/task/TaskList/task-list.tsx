@@ -19,20 +19,26 @@ describe('TaskListPresentational Component', () => {
   afterEach(cleanup);
 
   it('renders a list of tasks when taskList is not empty', () => {
-    const props: TaskListComponentProps = {
-      taskList: [
-        {
-          id: '1',
-          data: {
-            interaction: {
-              callAssociatedDetails: {
-                ani: '1234567890',
-                dn: '9876543210',
-                virtualTeamName: 'Sales Team',
-              },
-            },
+    const mockTask = {
+      id: '1',
+      data: {
+        interaction: {
+          callAssociatedDetails: {
+            ani: '1234567890',
+            dn: '9876543210',
+            virtualTeamName: 'Sales Team',
           },
         },
+      },
+    };
+    const props: TaskListComponentProps = {
+      currentTask: mockTask,
+      isBrowser: false,
+      acceptTask: jest.fn(),
+      declineTask: jest.fn(),
+      taskList: [
+        mockTask,
+
         {
           id: '2',
           data: {

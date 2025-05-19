@@ -2,6 +2,7 @@ import React from 'react';
 import {render, screen, cleanup} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import IncomingTaskComponent from '../../../../src/components/task/IncomingTask/incoming-task';
+import {IncomingTaskComponentProps} from '../../../../src/components/task/task.types';
 
 jest.mock('@momentum-ui/react-collaboration', () => ({
   ButtonPill: () => <div data-testid="ButtonPill" />,
@@ -30,14 +31,11 @@ describe('IncomingTaskComponent', () => {
       },
     };
 
-    const props = {
+    const props: IncomingTaskComponentProps = {
       incomingTask: mockTask,
+      isBrowser: true,
       accept: jest.fn(),
       decline: jest.fn(),
-      isBrowser: true,
-      isAnswered: false,
-      isEnded: false,
-      isMissed: false,
     };
 
     render(<IncomingTaskComponent {...props} />);

@@ -2,7 +2,7 @@ import {
   ILogger,
   ITask,
   IContactCenter,
-  WrapupCodes,
+  IWrapupCode,
   BuddyDetails,
   DestinationType,
   ContactServiceQueue,
@@ -144,7 +144,7 @@ export interface ControlProps {
    * Array of wrap-up codes.
    * TODO: Expose this type from SDK.
    */
-  wrapupCodes: WrapupCodes[];
+  wrapupCodes: IWrapupCode[];
 
   /**
    * Indicates if wrap-up is required.
