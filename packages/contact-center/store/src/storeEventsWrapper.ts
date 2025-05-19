@@ -16,6 +16,7 @@ import {
   ContactServiceQueue,
   Profile,
   TaskMetaData,
+  AgentLoginProfile,
 } from './store.types';
 import Store from './store';
 import {runInAction} from 'mobx';
@@ -140,6 +141,10 @@ class StoreWrapper implements IStoreWrapper {
   }
   get taskMetaData() {
     return this.store.taskMetaData;
+  }
+
+  get agentProfile() {
+    return this.store.agentProfile;
   }
 
   setTaskMetaData = (taskId: string, data: TaskMetaData): void => {
@@ -320,6 +325,19 @@ class StoreWrapper implements IStoreWrapper {
     const task = this.store.taskList[taskId];
     if (!task) return;
     task.on(event, callback);
+  };
+
+  setAgentProfile = (profile: AgentLoginProfile) => {
+    runInAction(() => {
+      this.store.agentProfile = {
+        ...this.store.agentProfile,
+        profileType: profile.profileType || undefined,
+        mmProfile: profile.mmProfile || undefined,
+        orgId: profile.orgId || undefined,
+        roles: profile.roles || undefined,
+        deviceType: profile.deviceType || undefined,
+      };
+    });
   };
 
   removeCCCallback = (event: CC_EVENTS) => {
@@ -603,10 +621,12 @@ class StoreWrapper implements IStoreWrapper {
     this.handleTaskRemove(task.data.interactionId);
   };
 
-  getBuddyAgents = async (): Promise<Array<BuddyDetails>> => {
+  getBuddyAgents = async (
+    mediaType: string = this.currentTask.data.interaction.mediaType
+  ): Promise<Array<BuddyDetails>> => {
     try {
       const response = await this.store.cc.getBuddyAgents({
-        mediaType: 'telephony',
+        mediaType: mediaType ?? 'telephony',
         state: 'Available',
       });
       return response.data.agentList;
@@ -615,10 +635,13 @@ class StoreWrapper implements IStoreWrapper {
     }
   };
 
-  getQueues = async (): Promise<Array<ContactServiceQueue>> => {
+  getQueues = async (
+    mediaType: string = this.currentTask.data.interaction.mediaType ?? 'TELEPHONY'
+  ): Promise<Array<ContactServiceQueue>> => {
     try {
+      const upperMediaType = mediaType.toUpperCase();
       let queueList = await this.store.cc.getQueues();
-      queueList = queueList.filter((queue) => queue.channelType === 'TELEPHONY');
+      queueList = queueList.filter((queue) => queue.channelType === upperMediaType);
       return queueList;
     } catch (error) {
       console.error('Error fetching queues:', error);
@@ -644,6 +667,7 @@ class StoreWrapper implements IStoreWrapper {
     let listenersAdded = false;
 
     const handleLogOut = () => {
+      this.setAgentProfile({});
       this.cleanUpStore();
       removeEventListeners();
       listenersAdded = false;
@@ -669,6 +693,7 @@ class StoreWrapper implements IStoreWrapper {
 
     const handleLogin = (payload: Profile) => {
       runInAction(() => {
+        this.setAgentProfile(payload);
         this.setIsAgentLoggedIn(true);
         this.setDeviceType(payload.deviceType);
         this.setDialNumber(payload.dn);
@@ -681,7 +706,12 @@ class StoreWrapper implements IStoreWrapper {
     ccSDK.on(CC_EVENTS.AGENT_STATION_LOGIN_SUCCESS, handleLogin);
 
     [CC_EVENTS.AGENT_DN_REGISTERED, CC_EVENTS.AGENT_RELOGIN_SUCCESS].forEach((event) => {
-      ccSDK.on(`${event}`, () => {
+      ccSDK.on(`${event}`, (payload) => {
+        runInAction(() => {
+          if (event === CC_EVENTS.AGENT_RELOGIN_SUCCESS) {
+            this.setAgentProfile(payload);
+          }
+        });
         if (!listenersAdded) {
           addEventListeners();
           listenersAdded = true;
