@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState, useEffect, useRef, useCallback} from 'react';
 import {store} from '@webex/cc-widgets';
+import './EngageWidget.css';
 
 // Define the component props interface
 interface EngageWidgetProps {
@@ -8,6 +9,7 @@ interface EngageWidgetProps {
   currentTheme: string;
   isSdkReady: boolean;
 }
+
 const IMI_EVENTS = {
   CONV_LOADED: 'onConversationLoaded',
   CONV_LOAD_ERROR: 'onConversationLoadedError',
@@ -22,6 +24,20 @@ const EngageWidget: React.FC<EngageWidgetProps> = ({accessToken, currentTheme, i
   const engageElmRef = useRef<HTMLDivElement>(null);
   const agentName = useRef('');
   const agentId = useRef('');
+  const [isFloatingWindowOpen, setIsFloatingWindowOpen] = useState(false);
+  const [currentTaskType, setCurrentTaskType] = useState<string | null>(null);
+  const [hasNewTask, setHasNewTask] = useState(false);
+
+  // Add a ref to track the last rendered task ID and content type
+  const lastRenderedTask = useRef<{
+    taskId: string | null;
+    mediaType: string | null;
+    contentType: string | null;
+  }>({
+    taskId: null,
+    mediaType: null,
+    contentType: null,
+  });
 
   // Add the CSS links to the document head
   useEffect(() => {
@@ -119,6 +135,7 @@ const EngageWidget: React.FC<EngageWidgetProps> = ({accessToken, currentTheme, i
         break;
     }
   };
+
   // Add function to initialize the engage widget
   const initializeEngageWidget = () => {
     if (isBundleLoaded && accessToken) {
@@ -153,35 +170,67 @@ const EngageWidget: React.FC<EngageWidgetProps> = ({accessToken, currentTheme, i
   }, [isSdkReady, isBundleLoaded, accessToken]);
 
   // Add functions to load chat and email widgets
-  const loadChatWidget = (task: any) => {
-    if (!engageElmRef.current) return;
+  const loadChatWidget = useCallback(
+    (task: any) => {
+      // Always set the task type regardless of window state
+      setCurrentTaskType('chat');
 
-    const mediaId = task.data.interaction.callAssociatedDetails.mediaResourceId;
-    engageElmRef.current.style.height = '500px';
-    engageElmRef.current.innerHTML = `
-      <imi-engage 
-        theme="${currentTheme}"
-        lang="en-US" 
-        conversationid="${mediaId}"
-      ></imi-engage>
-    `;
-  };
+      // Only update the DOM if the window is open
+      if (isFloatingWindowOpen && engageElmRef.current) {
+        const mediaId = task.data.interaction.callAssociatedDetails.mediaResourceId;
+        const taskId = task.data?.interactionId;
+        const mediaType = task.data?.interaction?.mediaType;
 
-  const loadEmailWidget = (task: any) => {
-    if (!engageElmRef.current) return;
+        engageElmRef.current.innerHTML = `
+        <imi-engage 
+          theme="${currentTheme}"
+          lang="en-US" 
+          conversationid="${mediaId}"
+        ></imi-engage>
+      `;
 
-    engageElmRef.current.style.height = '900px';
-    const mediaId = task.data.interaction.callAssociatedDetails.mediaResourceId;
-    engageElmRef.current.innerHTML = `
-      <imi-email-composer
-        taskId="${mediaId}"
-        orgId="${task.data.orgId}"
-        agentName="${agentName.current}"
-        agentId="${agentId.current}"
-        interactionId="${task.data.interactionId}"
-      ></imi-email-composer>
-    `;
-  };
+        // Update last rendered task
+        lastRenderedTask.current = {
+          taskId,
+          mediaType,
+          contentType: 'chat',
+        };
+      }
+    },
+    [isFloatingWindowOpen, currentTheme]
+  );
+
+  const loadEmailWidget = useCallback(
+    (task: any) => {
+      // Always set the task type regardless of window state
+      setCurrentTaskType('email');
+
+      // Only update the DOM if the window is open
+      if (isFloatingWindowOpen && engageElmRef.current) {
+        const mediaId = task.data.interaction.callAssociatedDetails.mediaResourceId;
+        const taskId = task.data?.interactionId;
+        const mediaType = task.data?.interaction?.mediaType;
+
+        engageElmRef.current.innerHTML = `
+        <imi-email-composer
+          taskId="${mediaId}"
+          orgId="${task.data.orgId}"
+          agentName="${agentName.current}"
+          agentId="${agentId.current}"
+          interactionId="${task.data.interactionId}"
+        ></imi-email-composer>
+      `;
+
+        // Update last rendered task
+        lastRenderedTask.current = {
+          taskId,
+          mediaType,
+          contentType: 'email',
+        };
+      }
+    },
+    [isFloatingWindowOpen, currentTheme]
+  );
 
   // Handle when task exists before bundle loads and when task changes
   useEffect(() => {
@@ -196,6 +245,20 @@ const EngageWidget: React.FC<EngageWidgetProps> = ({accessToken, currentTheme, i
       // Get the media type safely
       const mediaType = store.currentTask.data?.interaction?.mediaType;
 
+      // Skip telephony tasks
+      if (mediaType === 'telephony') {
+        console.log('Telephony task detected, not showing in engage widget');
+        if (engageElmRef.current) {
+          engageElmRef.current.innerHTML = '';
+        }
+        setCurrentTaskType(null);
+        return;
+      }
+
+      // Show notification that a new task has arrived
+      setHasNewTask(true);
+      setTimeout(() => setHasNewTask(false), 5000); // Hide notification after 5 seconds
+
       // Load the appropriate widget based on media type
       if (mediaType && chatAndSocial.includes(mediaType) && !store.currentTask.data.wrapUpRequired) {
         console.log('Loading chat widget for task:', store.currentTask);
@@ -207,15 +270,15 @@ const EngageWidget: React.FC<EngageWidgetProps> = ({accessToken, currentTheme, i
         // Clear the widget container for other media types
         if (engageElmRef.current) {
           engageElmRef.current.innerHTML = '';
-          engageElmRef.current.style.height = '0px';
         }
+        setCurrentTaskType(null);
       }
     } else {
       // Clear the widget container when there is no current task
       if (engageElmRef.current) {
         engageElmRef.current.innerHTML = '';
-        engageElmRef.current.style.height = '0px';
       }
+      setCurrentTaskType(null);
     }
   }, [store.currentTask, isBundleLoaded, isEngageInitialized, currentTheme]);
 
@@ -230,6 +293,12 @@ const EngageWidget: React.FC<EngageWidgetProps> = ({accessToken, currentTheme, i
       // Get the media type safely
       const mediaType = store.currentTask.data?.interaction?.mediaType;
 
+      // Skip telephony tasks
+      if (mediaType === 'telephony') {
+        console.log('Telephony task detected, not showing in engage widget');
+        return;
+      }
+
       if (mediaType && chatAndSocial.includes(mediaType) && !store.currentTask.data.wrapUpRequired) {
         loadChatWidget(store.currentTask);
       } else if (mediaType === 'email' && !store.currentTask.data.wrapUpRequired) {
@@ -238,15 +307,146 @@ const EngageWidget: React.FC<EngageWidgetProps> = ({accessToken, currentTheme, i
     }
   }, [isEngageInitialized]);
 
+  // Toggle floating window
+  const toggleFloatingWindow = useCallback(() => {
+    const willBeOpen = !isFloatingWindowOpen;
+    setIsFloatingWindowOpen(willBeOpen);
+
+    // Only re-render if opening the window (no need to re-render when closing)
+    if (willBeOpen && store.currentTask && currentTaskType) {
+      const mediaType = store.currentTask.data?.interaction?.mediaType;
+      const taskId = store.currentTask.data?.interactionId;
+      const chatAndSocial = ['chat', 'social'];
+
+      // Skip telephony tasks
+      if (mediaType === 'telephony') {
+        console.log('Telephony task detected, not showing in engage widget');
+        return;
+      }
+
+      // Check if this is the same task we already rendered
+      const sameTask =
+        taskId === lastRenderedTask.current.taskId &&
+        mediaType === lastRenderedTask.current.mediaType &&
+        currentTaskType === lastRenderedTask.current.contentType;
+
+      // Only update DOM if it's a new task or different type
+      if (!sameTask) {
+        setTimeout(() => {
+          if (mediaType && chatAndSocial.includes(mediaType) && !store.currentTask.data.wrapUpRequired) {
+            // Re-load the chat widget content
+            if (engageElmRef.current) {
+              const mediaId = store.currentTask.data.interaction.callAssociatedDetails.mediaResourceId;
+              engageElmRef.current.innerHTML = `
+                <imi-engage 
+                  theme="${currentTheme}"
+                  lang="en-US" 
+                  conversationid="${mediaId}"
+                ></imi-engage>
+              `;
+
+              // Update last rendered task info
+              lastRenderedTask.current = {
+                taskId,
+                mediaType,
+                contentType: 'chat',
+              };
+            }
+          } else if (mediaType === 'email' && !store.currentTask.data.wrapUpRequired) {
+            // Re-load the email widget content
+            if (engageElmRef.current) {
+              const mediaId = store.currentTask.data.interaction.callAssociatedDetails.mediaResourceId;
+              engageElmRef.current.innerHTML = `
+                <imi-email-composer
+                  taskId="${mediaId}"
+                  orgId="${store.currentTask.data.orgId}"
+                  agentName="${agentName.current}"
+                  agentId="${agentId.current}"
+                  interactionId="${store.currentTask.data.interactionId}"
+                ></imi-email-composer>
+              `;
+
+              // Update last rendered task info
+              lastRenderedTask.current = {
+                taskId,
+                mediaType,
+                contentType: 'email',
+              };
+            }
+          }
+        }, 100); // Short delay to ensure the DOM is ready
+      } else {
+        console.log('Same task already rendered, skipping re-render');
+      }
+    }
+  }, [isFloatingWindowOpen, store.currentTask, currentTaskType, currentTheme]);
+
+  // Get the icon and title based on task type
+  const getTaskIcon = () => {
+    if (currentTaskType === 'chat' || currentTaskType === 'social') {
+      return {icon: '💬', title: 'Chat Task'};
+    } else if (currentTaskType === 'email') {
+      return {icon: '✉️', title: 'Email Task'};
+    }
+    return {icon: '📋', title: 'Task'};
+  };
+
+  const {icon, title} = getTaskIcon();
+
+  // Determine button class based on task state
+  const getButtonClass = () => {
+    const baseClass = 'engage-floating-button';
+    if (hasNewTask) {
+      return `${baseClass} has-new-task`;
+    } else if (currentTaskType) {
+      return `${baseClass} has-task`;
+    }
+    return `${baseClass} no-task`;
+  };
+
   return (
-    <div className="box">
-      <section className="section-box">
-        <fieldset className="fieldset">
-          <legend className="legend-box">IMI Engage Widget</legend>
-          <div ref={engageElmRef} style={{height: '0px', transition: 'height 0.3s ease'}}></div>
-        </fieldset>
-      </section>
-    </div>
+    <>
+      {/* Floating button */}
+      <button
+        onClick={toggleFloatingWindow}
+        className={getButtonClass()}
+        title={currentTaskType ? `Open ${title}` : 'No active tasks'}
+      >
+        {currentTaskType ? icon : '💬'}
+        <div className={`engage-notification ${!hasNewTask ? 'hidden' : ''}`}>!</div>
+      </button>
+
+      {/* Floating window */}
+      <div className={`engage-floating-window ${!isFloatingWindowOpen ? 'hidden' : ''}`}>
+        <div className={`engage-window-header ${currentTheme === 'DARK' ? 'dark' : 'light'}`}>
+          <h3 className="engage-window-title">{currentTaskType ? title : 'No Active Task'}</h3>
+          <button
+            className={`engage-close-button ${currentTheme === 'DARK' ? 'dark' : 'light'}`}
+            onClick={toggleFloatingWindow}
+          >
+            ×
+          </button>
+        </div>
+        <div className="engage-content-area">
+          <div ref={engageElmRef} className="engage-widget-container"></div>
+          {!currentTaskType && (
+            <div className="engage-content-placeholder">
+              No active tasks available. When you receive a task, it will appear here.
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Original widget container (hidden) */}
+      <div className="box" style={{display: 'none'}}>
+        <section className="section-box">
+          <fieldset className="fieldset">
+            <legend className="legend-box">IMI Engage Widget</legend>
+            <div style={{height: '0px'}}></div>
+          </fieldset>
+        </section>
+      </div>
+    </>
   );
 };
 
