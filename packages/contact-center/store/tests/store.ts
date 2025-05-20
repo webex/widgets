@@ -1,5 +1,5 @@
 import {makeAutoObservable} from 'mobx';
-import Webex from 'webex/contact-center';
+import Webex from '@webex/plugin-cc';
 import store from '../src/store'; // Adjust the import path as necessary
 
 let mockShouldCallback = true;
@@ -10,7 +10,7 @@ jest.mock('mobx', () => ({
   observable: {ref: jest.fn()},
 }));
 
-jest.mock('webex/contact-center', () => ({
+jest.mock('@webex/plugin-cc', () => ({
   init: jest.fn(() => ({
     once: jest.fn((event, callback) => {
       if (event === 'ready' && mockShouldCallback) {
@@ -51,6 +51,7 @@ describe('Store', () => {
     expect(storeInstance.isAgentLoggedIn).toBe(false);
     expect(storeInstance.deviceType).toBe('');
     expect(storeInstance.taskList).toEqual({});
+    expect(storeInstance.agentProfile).toEqual({});
 
     expect(makeAutoObservable).toHaveBeenCalledWith(storeInstance, {
       cc: expect.any(Function),
@@ -59,6 +60,7 @@ describe('Store', () => {
 
   describe('registerCC', () => {
     it('should initialise store values on successful register', async () => {
+      const mockAgentName = 'John Doe';
       const date = new Date();
       const mockResponse = {
         teams: [{id: 'team1', name: 'Team 1'}],
@@ -70,6 +72,7 @@ describe('Store', () => {
         dialNumber: '12345',
         lastStateAuxCodeId: 'auxCodeId',
         lastStateChangeTimestamp: date,
+        agentName: mockAgentName,
       };
       mockWebex.cc.register.mockResolvedValue(mockResponse);
 
@@ -83,6 +86,7 @@ describe('Store', () => {
       expect(storeInstance.deviceType).toEqual(mockResponse.deviceType);
       expect(storeInstance.currentState).toEqual(mockResponse.lastStateAuxCodeId);
       expect(storeInstance.lastStateChangeTimestamp).toEqual(date);
+      expect(storeInstance.agentProfile).toEqual({agentName: mockAgentName});
     });
 
     it('should log an error on failed register', async () => {

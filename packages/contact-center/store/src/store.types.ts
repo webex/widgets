@@ -78,6 +78,7 @@ interface IStore {
   consultOfferReceived: boolean;
   isEndConsultEnabled: boolean;
   allowConsultToQueue: boolean;
+  agentProfile: AgentLoginProfile;
   init(params: InitParams, callback: (ccSDK: IContactCenter) => void): Promise<void>;
   registerCC(webex?: WithWebex['webex']): Promise<void>;
 }
@@ -100,6 +101,7 @@ interface IStoreWrapper extends IStore {
   setConsultInitiated(value: boolean): void;
   setConsultAccepted(value: boolean): void;
   setConsultStartTimeStamp(timestamp: number): void;
+  setAgentProfile(profile: Profile): void;
 }
 
 interface IWrapupCode {
@@ -135,12 +137,12 @@ enum TASK_EVENTS {
 // Events that are received on the contact center SDK
 // TODO: Export & Import these constants from SDK
 enum CC_EVENTS {
-  AGENT_DN_REGISTERED = 'AgentDNRegistered',
-  AGENT_LOGOUT_SUCCESS = 'AgentLogoutSuccess',
-  AGENT_STATION_LOGIN_SUCCESS = 'AgentStationLoginSuccess',
+  AGENT_DN_REGISTERED = 'agent:dnRegistered',
+  AGENT_LOGOUT_SUCCESS = 'agent:logoutSuccess',
+  AGENT_STATION_LOGIN_SUCCESS = 'agent:stationLoginSuccess',
   AGENT_MULTI_LOGIN = 'agent:multiLogin',
   AGENT_STATE_CHANGE = 'agent:stateChange',
-  AGENT_RELOGIN_SUCCESS = 'AgentReloginSuccess',
+  AGENT_RELOGIN_SUCCESS = 'agent:reloginSuccess',
   AGENT_OFFER_CONSULT = 'AgentOfferConsult',
 }
 
@@ -156,6 +158,20 @@ type ICustomState = ICustomStateSet | ICustomStateReset;
 
 const ENGAGED_LABEL = 'ENGAGED';
 const ENGAGED_USERNAME = 'Engaged';
+
+type AgentLoginProfile = {
+  agentName?: string;
+  orgId?: string;
+  profileType?: string;
+  deviceType?: string;
+  roles?: Array<string>;
+  mmProfile?: {
+    chat: number;
+    email: number;
+    social: number;
+    telephony: number;
+  };
+};
 
 export type {
   IContactCenter,
@@ -175,6 +191,7 @@ export type {
   BuddyDetails,
   ContactServiceQueue,
   TaskMetaData,
+  AgentLoginProfile,
 };
 
 export {CC_EVENTS, TASK_EVENTS, ENGAGED_LABEL, ENGAGED_USERNAME};
