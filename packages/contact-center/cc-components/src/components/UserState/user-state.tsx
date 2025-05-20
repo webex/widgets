@@ -4,7 +4,7 @@ import {IUserState, AgentUserState} from './user-state.types';
 import {formatTime} from '../../utils';
 
 import './user-state.scss';
-import {SelectNext, Text} from '@momentum-ui/react-collaboration';
+import {SelectNext, Text, TooltipNext} from '@momentum-ui/react-collaboration';
 import {Item} from '@react-stately/collections';
 import {Icon} from '@momentum-design/components/dist/react';
 
@@ -76,6 +76,14 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
     }
   };
 
+  const getTooltipText = () => {
+    if (customState && customState.developerName === 'ENGAGED') {
+      return `You are currently engaged in an interaction and in the Available state.`;
+    }
+
+    return 'Availability State';
+  };
+
   // Sorts the dropdown items by keeping 'Available' at the top and sorting the rest alphabetically by name
   const sortedItems = [
     ...items.filter((item) => item.name === AgentUserState.Available),
@@ -84,41 +92,54 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
 
   return (
     <div className="user-state-container">
-      <SelectNext
-        label=""
-        aria-label="user-state"
-        direction="bottom"
-        onSelectionChange={(key: string) => {
-          const cleanKey = key.startsWith('hide-') ? key.substring(5) : key;
-          setAgentStatus(cleanKey);
-        }}
-        showBorder
-        selectedKey={selectedKey}
-        items={sortedItems}
-        className={`state-select ${getDropdownClass()}`}
-      >
-        {(item) => {
-          const isRonaOrEngaged = [AgentUserState.RONA, AgentUserState.Engaged].includes(
-            idleCodes.find((code) => code.id === currentState)?.name || ''
-          );
-          const shouldHighlight = currentState === item.id || (isRonaOrEngaged && item.id === previousSelectableState);
+      <TooltipNext
+        type="description"
+        placement="bottom"
+        variant="small"
+        color="primary"
+        delay={[0, 0]}
+        className="tooltip"
+        triggerComponent={
+          <SelectNext
+            label=""
+            aria-label="user-state"
+            direction="bottom"
+            onSelectionChange={(key: string) => {
+              const cleanKey = key.startsWith('hide-') ? key.substring(5) : key;
+              setAgentStatus(cleanKey);
+            }}
+            showBorder
+            selectedKey={selectedKey}
+            items={sortedItems}
+            className={`state-select ${getDropdownClass()}`}
+          >
+            {(item) => {
+              const isRonaOrEngaged = [AgentUserState.RONA, AgentUserState.Engaged].includes(
+                idleCodes.find((code) => code.id === currentState)?.name || ''
+              );
+              const shouldHighlight =
+                currentState === item.id || (isRonaOrEngaged && item.id === previousSelectableState);
 
-          return (
-            <Item key={item.id} textValue={item.name}>
-              <div className={`item-container ${shouldHighlight ? `selected ${getIconStyle(item).class}` : ''}`}>
-                <Icon
-                  name={getIconStyle(item).iconName}
-                  title=""
-                  className={`state-icon ${getIconStyle(item).class}`}
-                />
-                <Text className={`state-name ${getIconStyle(item).class}`} tagName={'small'}>
-                  {item.name}
-                </Text>
-              </div>
-            </Item>
-          );
-        }}
-      </SelectNext>
+              return (
+                <Item key={item.id} textValue={item.name}>
+                  <div className={`item-container ${shouldHighlight ? `selected ${getIconStyle(item).class}` : ''}`}>
+                    <Icon
+                      name={getIconStyle(item).iconName}
+                      title=""
+                      className={`state-icon ${getIconStyle(item).class}`}
+                    />
+                    <Text className={`state-name ${getIconStyle(item).class}`} tagName={'small'}>
+                      {item.name}
+                    </Text>
+                  </div>
+                </Item>
+              );
+            }}
+          </SelectNext>
+        }
+      >
+        <Text tagName="small">{getTooltipText()}</Text>
+      </TooltipNext>
 
       {!customState && (
         <span className={`elapsedTime ${isSettingAgentStatus ? 'elapsedTime-disabled' : ''}`}>

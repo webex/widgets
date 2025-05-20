@@ -165,7 +165,6 @@ class StoreWrapper implements IStoreWrapper {
   setCurrentState = (state: string): void => {
     runInAction(() => {
       this.store.currentState = state;
-      this.store.customState = null;
     });
   };
 
@@ -289,7 +288,6 @@ class StoreWrapper implements IStoreWrapper {
     if ('id' in state) {
       runInAction(() => {
         this.setCurrentState(state.id);
-        this.store.customState = null;
       });
     } else {
       runInAction(() => {
@@ -576,10 +574,15 @@ class StoreWrapper implements IStoreWrapper {
       this.setConsultCompleted(true);
     }
 
-    this.setState({
-      developerName: ENGAGED_LABEL,
-      name: ENGAGED_USERNAME,
-    });
+    if (
+      (['wrapUp', 'connected'].includes(task.data.interaction.state) && !task.data.isConsulted) ||
+      task.data.wrapUpRequired
+    ) {
+      this.setState({
+        developerName: ENGAGED_LABEL,
+        name: ENGAGED_USERNAME,
+      });
+    }
 
     const {interaction} = task.data;
     const {isTerminated} = interaction;

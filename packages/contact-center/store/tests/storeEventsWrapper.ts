@@ -179,6 +179,7 @@ describe('storeEventsWrapper', () => {
 
       storeWrapper.setCurrentState('newState');
       expect(storeWrapper['store'].currentState).toBe('newState');
+      expect(storeWrapper['store'].customState).not.toBeNull();
     });
 
     it('should proxy consultCompleted', () => {
