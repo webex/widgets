@@ -176,7 +176,6 @@ jobs:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     needs: [install, build]
-    continue-on-error: true
     if: contains(toJson(github.event.pull_request.labels), 'run_e2e')
 
     steps:
