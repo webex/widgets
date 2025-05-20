@@ -1,5 +1,5 @@
 import {makeAutoObservable} from 'mobx';
-import Webex from 'webex/contact-center';
+import Webex from '@webex/plugin-cc';
 import store from '../src/store'; // Adjust the import path as necessary
 
 let mockShouldCallback = true;
@@ -10,7 +10,7 @@ jest.mock('mobx', () => ({
   observable: {ref: jest.fn()},
 }));
 
-jest.mock('webex/contact-center', () => ({
+jest.mock('@webex/plugin-cc', () => ({
   init: jest.fn(() => ({
     once: jest.fn((event, callback) => {
       if (event === 'ready' && mockShouldCallback) {
