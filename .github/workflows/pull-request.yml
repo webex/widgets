@@ -184,14 +184,14 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Setup Node
-        uses: actions/setup-node@v3.7.0
+        uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
           registry-url: 'https://registry.npmjs.org'
           cache: 'yarn'
 
       - name: Uncache Dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: '**/node_modules'
           key: node-modules-${{ hashFiles('./yarn.lock') }}
@@ -200,7 +200,7 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Uncache Distributables
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: '**/dist'
           key: dist-${{ env.rid }}
