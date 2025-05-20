@@ -142,6 +142,8 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true
     needs: [install, build]
+    if: contains(toJson(github.event.pull_request.labels), 'run_e2e')
+
     steps:
       - name: Checkout Project
         uses: actions/checkout@v3
