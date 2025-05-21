@@ -78,7 +78,13 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
 
   const getTooltipText = () => {
     if (customState && customState.developerName === 'ENGAGED') {
-      return `You are currently engaged in an interaction and in the Available state.`;
+      const currentStateObj = idleCodes.find((item) => item.id === currentState);
+
+      if (currentStateObj.name === AgentUserState.Available) {
+        return `You are currently engaged in an interaction and in the Available state.`;
+      } else {
+        return `You are currently engaged in an interaction and in the idle state ${currentStateObj.name}.`;
+      }
     }
 
     return 'Availability State';
@@ -138,7 +144,9 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
           </SelectNext>
         }
       >
-        <Text tagName="small">{getTooltipText()}</Text>
+        <Text tagName="small" className="tooltip-text">
+          {getTooltipText()}
+        </Text>
       </TooltipNext>
 
       {!customState && (
