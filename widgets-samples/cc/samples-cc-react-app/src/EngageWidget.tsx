@@ -384,7 +384,7 @@ const EngageWidget: React.FC<EngageWidgetProps> = ({accessToken, currentTheme, i
   // Get the icon and title based on task type
   const getTaskIcon = () => {
     if (currentTaskType === 'chat' || currentTaskType === 'social') {
-      return {icon: '💬', title: 'Chat Task'};
+      return {icon: '💬', title: `${currentTaskType} Task`};
     } else if (currentTaskType === 'email') {
       return {icon: '✉️', title: 'Email Task'};
     }
