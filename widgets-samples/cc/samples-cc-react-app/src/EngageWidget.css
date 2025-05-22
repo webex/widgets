@@ -1,18 +1,18 @@
 /* Floating button styles */
 .engage-floating-button {
   position: fixed;
-  bottom: 20px;
-  left: 20px;
-  width: 60px;
-  height: 60px;
+  bottom: 1.25rem;
+  left: 1.25rem;
+  width: 3.75rem;
+  height: 3.75rem;
   border-radius: 50%;
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-  font-size: 24px;
+  box-shadow: 0 0.25rem 0.5rem rgba(0,0,0,0.2);
+  font-size: 1.5rem;
   z-index: 1000;
   transition: all 0.3s ease;
   border: none;
@@ -33,13 +33,13 @@
 /* Floating window styles */
 .engage-floating-window {
   position: fixed;
-  bottom: 90px;
-  left: 20px;
-  width: 350px;
-  height: 500px;
+  bottom: 5.625rem;
+  left: 1.25rem;
+  width: 21.875rem;
+  height: 31.25rem;
   background-color: #fff;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-  border-radius: 8px;
+  box-shadow: 0 0.25rem 1.25rem rgba(0,0,0,0.15);
+  border-radius: 0.5rem;
   z-index: 999;
   overflow: hidden;
   display: flex;
@@ -52,11 +52,11 @@
 
 /* Window header styles */
 .engage-window-header {
-  padding: 10px 15px;
+  padding: 0.625rem 0.9375rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 0.0625rem solid #e0e0e0;
 }
 
 .engage-window-header.dark {
@@ -71,14 +71,14 @@
 
 .engage-window-title {
   margin: 0;
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: bold;
 }
 
 .engage-close-button {
   background: none;
   border: none;
-  font-size: 18px;
+  font-size: 1.125rem;
   cursor: pointer;
 }
 
@@ -99,7 +99,7 @@
 }
 
 .engage-content-placeholder {
-  padding: 20px;
+  padding: 1.25rem;
   text-align: center;
   color: #666;
 }
@@ -107,17 +107,17 @@
 /* Notification badge */
 .engage-notification {
   position: absolute;
-  top: -8px;
-  right: -8px;
-  width: 20px;
-  height: 20px;
+  top: -0.5rem;
+  right: -0.5rem;
+  width: 1.25rem;
+  height: 1.25rem;
   border-radius: 50%;
   background-color: #ff5252;
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: bold;
 }
 

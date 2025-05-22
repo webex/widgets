@@ -436,16 +436,6 @@ const EngageWidget: React.FC<EngageWidgetProps> = ({accessToken, currentTheme, i
           )}
         </div>
       </div>
-
-      {/* Original widget container (hidden) */}
-      <div className="box" style={{display: 'none'}}>
-        <section className="section-box">
-          <fieldset className="fieldset">
-            <legend className="legend-box">IMI Engage Widget</legend>
-            <div style={{height: '0px'}}></div>
-          </fieldset>
-        </section>
-      </div>
     </>
   );
 };
