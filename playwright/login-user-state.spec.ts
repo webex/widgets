@@ -12,11 +12,19 @@ test.describe('Login and User State tests', async () => {
     await page.getByRole('button', {name: 'Login with Webex'}).click();
 
     await page.getByRole('textbox', {name: 'name@example.com'}).click();
-    await page.getByRole('textbox', {name: 'name@example.com'}).fill('user1@ccsdk.wbx.ai');
+    const username = process.env.PLAYWRIGHT_USERNAME;
+    if (!username) {
+      throw new Error('PLAYWRIGHT_USERNAME is not set in environment variables');
+    }
+    await page.getByRole('textbox', {name: 'name@example.com'}).fill(username);
     await page.getByRole('link', {name: 'Sign in'}).click();
 
     await page.getByRole('textbox', {name: 'Password'}).click();
-    await page.getByAltText('Password ').fill('$rrA%Z1zB6');
+    const password = process.env.PLAYWRIGHT_PASSWORD;
+    if (!password) {
+      throw new Error('PLAYWRIGHT_PASSWORD is not set in environment variables');
+    }
+    await page.getByRole('textbox', {name: 'Password'}).fill(password);
     await page.getByRole('button', {name: 'Sign in'}).click();
 
     accessToken = await page.getByRole('textbox').inputValue();

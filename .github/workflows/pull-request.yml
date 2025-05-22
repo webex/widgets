@@ -15,6 +15,8 @@ concurrency:
 
 env:
   rid: ${{ github.run_id }}-${{ github.run_number }}
+  PLAYWRIGHT_USERNAME: ${{ secrets.PLAYWRIGHT_USERNAME }}
+  PLAYWRIGHT_PASSWORD: ${{ secrets.PLAYWRIGHT_PASSWORD }}
 
 jobs:
   validate:
@@ -208,7 +210,8 @@ jobs:
       - name: Write Environment Variables
         run: |
           touch ./.env
-          echo "ACCESS_TOKEN=\"${{ secrets.ACCESS_TOKEN }}\"" >> ./.env
+            echo "PLAYWRIGHT_USERNAME=\"${{ secrets.PLAYWRIGHT_USERNAME }}\"" >> ./.env
+            echo "PLAYWRIGHT_PASSWORD=\"${{ secrets.PLAYWRIGHT_PASSWORD }}\"" >> ./.env
 
       - name: Run Playwright tests
         run: yarn run test:e2e
