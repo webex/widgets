@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.59](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.58...v1.28.0-ccwidgets.59) (2025-05-22)
+
+
+### Features
+
+* **cc-widgets:** Digital channels support ([#456](https://github.com/webex/widgets/issues/456)) ([6da537a](https://github.com/webex/widgets/commit/6da537ae7c63453622d9ac64b477d99e62534e62))
+
 # [1.28.0-ccwidgets.58](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.57...v1.28.0-ccwidgets.58) (2025-05-19)
 
 
