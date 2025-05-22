@@ -1,0 +1,132 @@
+/* Floating button styles */
+.engage-floating-button {
+  position: fixed;
+  bottom: 1.25rem;
+  left: 1.25rem;
+  width: 3.75rem;
+  height: 3.75rem;
+  border-radius: 50%;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 0.25rem 0.5rem rgba(0,0,0,0.2);
+  font-size: 1.5rem;
+  z-index: 1000;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.engage-floating-button.has-new-task {
+  background-color: #ff5252;
+}
+
+.engage-floating-button.has-task {
+  background-color: #2196f3;
+}
+
+.engage-floating-button.no-task {
+  background-color: #e0e0e0;
+}
+
+/* Floating window styles */
+.engage-floating-window {
+  position: fixed;
+  bottom: 5.625rem;
+  left: 1.25rem;
+  width: 21.875rem;
+  height: 31.25rem;
+  background-color: #fff;
+  box-shadow: 0 0.25rem 1.25rem rgba(0,0,0,0.15);
+  border-radius: 0.5rem;
+  z-index: 999;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.engage-floating-window.hidden {
+  display: none;
+}
+
+/* Window header styles */
+.engage-window-header {
+  padding: 0.625rem 0.9375rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 0.0625rem solid #e0e0e0;
+}
+
+.engage-window-header.dark {
+  background-color: #2d2d2d;
+  color: #ffffff;
+}
+
+.engage-window-header.light {
+  background-color: #f5f5f5;
+  color: #333333;
+}
+
+.engage-window-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.engage-close-button {
+  background: none;
+  border: none;
+  font-size: 1.125rem;
+  cursor: pointer;
+}
+
+.engage-close-button.dark {
+  color: #ffffff;
+}
+
+.engage-close-button.light {
+  color: #333333;
+}
+
+/* Content area styles */
+.engage-content-area {
+  flex: 1;
+  overflow: auto;
+  padding: 0;
+  height: 100%;
+}
+
+.engage-content-placeholder {
+  padding: 1.25rem;
+  text-align: center;
+  color: #666;
+}
+
+/* Notification badge */
+.engage-notification {
+  position: absolute;
+  top: -0.5rem;
+  right: -0.5rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  background-color: #ff5252;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+.engage-notification.hidden {
+  display: none;
+}
+
+/* Widget container styles */
+.engage-widget-container {
+  height: 100%;
+  width: 100%;
+}
