@@ -762,6 +762,14 @@ describe('useCallControl', () => {
   });
 
   it('should call wrapupCall ', async () => {
+    store.setCurrentTask = jest.fn();
+    store.setState = jest.fn();
+
+    jest.spyOn(store, 'taskList', 'get').mockReturnValue({
+      anotherInteractionId: mockCurrentTask,
+      [mockCurrentTask.data.interactionId]: mockCurrentTask,
+    });
+
     const {result} = renderHook(() =>
       useCallControl({
         currentTask: mockCurrentTask,
@@ -785,6 +793,11 @@ describe('useCallControl', () => {
     expect(mockOnWrapUp).toHaveBeenCalledWith({
       task: mockCurrentTask,
       wrapUpReason: 'Wrap reason',
+    });
+    expect(store.setCurrentTask).toHaveBeenCalledWith(mockCurrentTask);
+    expect(store.setState).toHaveBeenCalledWith({
+      developerName: 'ENGAGED',
+      name: 'Engaged',
     });
   });
 
