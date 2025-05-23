@@ -60,6 +60,11 @@ class StoreWrapper implements IStoreWrapper {
   get deviceType() {
     return this.store.deviceType;
   }
+
+  get teamId() {
+    return this.store.teamId;
+  }
+
   get dialNumber() {
     return this.store.dialNumber;
   }
@@ -161,6 +166,10 @@ class StoreWrapper implements IStoreWrapper {
 
   setDeviceType = (option: string): void => {
     this.store.deviceType = option;
+  };
+
+  setTeamId = (id: string): void => {
+    this.store.teamId = id;
   };
 
   setDialNumber = (input: string): void => {
@@ -660,6 +669,7 @@ class StoreWrapper implements IStoreWrapper {
       this.setLastIdleCodeChangeTimestamp(undefined);
       this.setShowMultipleLoginAlert(false);
       this.setConsultStartTimeStamp(undefined);
+      this.setTeamId('');
     });
   };
 
@@ -700,6 +710,7 @@ class StoreWrapper implements IStoreWrapper {
         this.setCurrentState(payload.auxCodeId?.trim() !== '' ? payload.auxCodeId : '0');
         this.setLastStateChangeTimestamp(payload.lastStateChangeTimestamp);
         this.setLastIdleCodeChangeTimestamp(payload.lastIdleCodeChangeTimestamp);
+        this.setTeamId(payload.teamId);
       });
     };
 
@@ -710,6 +721,7 @@ class StoreWrapper implements IStoreWrapper {
         runInAction(() => {
           if (event === CC_EVENTS.AGENT_RELOGIN_SUCCESS) {
             this.setAgentProfile(payload);
+            this.setTeamId(payload.teamId);
           }
         });
         if (!listenersAdded) {
