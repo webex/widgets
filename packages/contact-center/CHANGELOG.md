@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.60](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.59...v1.28.0-ccwidgets.60) (2025-05-23)
+
+
+### Bug Fixes
+
+* **contact-center:** fix bugs listed in CAI-6468 ([#458](https://github.com/webex/widgets/issues/458)) ([0873b44](https://github.com/webex/widgets/commit/0873b44919220bc00124ff708811247ba1da05dd))
+
 # [1.28.0-ccwidgets.59](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.58...v1.28.0-ccwidgets.59) (2025-05-22)
 
 
