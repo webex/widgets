@@ -39,18 +39,22 @@ export default defineConfig({
   /* Configure projects for major browsers */
   projects: [
     {
-      name: 'chromium',
+      name: 'OAuth: Get Access Token',
+      testMatch: /global\.setup\.ts/,
+    },
+    {
+      name: 'Test: Chrome',
       use: {...devices['Desktop Chrome']},
     },
     // Once we have stability for playwright tests, we can enable the following browsers
     // {
-    //   name: 'firefox',
+    //   name: 'Test: Firefox',
     //   use: {...devices['Desktop Firefox']},
     //   dependencies: ['chromium'],
     // },
 
     // {
-    //   name: 'webkit',
+    //   name: 'Test: Webkit',
     //   use: {...devices['Desktop Safari']},
     //   dependencies: ['firefox'],
     // },
