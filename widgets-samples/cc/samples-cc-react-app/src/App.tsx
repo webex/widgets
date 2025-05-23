@@ -332,8 +332,8 @@ function App() {
                       setLoginType(selectedType);
                     }}
                   >
-                    <Option key={1} value="token">Access Token</Option>
-                    <Option key={2} value="oauth">Login with Webex</Option>
+                    <Option data-testid='samples:login_option_token' key={1} value="token">Access Token</Option>
+                    <Option data-testid='samples:login_option_oauth' key={2} value="oauth">Login with Webex</Option>
                   </Select>
                 
                   <div className="accessTokenTheme" style={{ marginTop: '15px' }}>

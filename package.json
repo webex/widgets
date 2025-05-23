@@ -12,6 +12,7 @@
   "packageManager": "yarn@4.5.1",
   "devDependencies": {
     "@babel/preset-typescript": "7.25.9",
+    "@playwright/test": "^1.51.1",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/exec": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
@@ -46,6 +47,7 @@
     "clean": "yarn workspaces foreach --all --topological --parallel run clean && rm -rf node_modules",
     "clean:dist": "yarn workspaces foreach --all --topological --parallel run clean:dist",
     "test:unit": "yarn run test:tooling && yarn run test:cc-widgets",
+    "test:e2e": "yarn playwright test",
     "test:styles": "yarn workspaces foreach --all --exclude webex-widgets run test:styles",
     "test:tooling": "jest --coverage",
     "test:cc-widgets": "yarn workspaces foreach --all --exclude webex-widgets --exclude samples-cc-wc-app --exclude samples-cc-react-app run test:unit",
