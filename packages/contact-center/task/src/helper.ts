@@ -5,6 +5,9 @@ import {useOutdialCallProps} from '@webex/cc-components';
 import store, {TASK_EVENTS, BuddyDetails, DestinationType, ContactServiceQueue} from '@webex/cc-store';
 import {getControlsVisibility} from './Utils/task-util';
 
+const ENGAGED_LABEL = 'ENGAGED';
+const ENGAGED_USERNAME = 'Engaged';
+
 // Hook for managing the task list
 export const useTaskList = (props: UseTaskListProps) => {
   const {deviceType, onTaskAccepted, onTaskDeclined, logger, taskList} = props;
@@ -336,9 +339,21 @@ export const useCallControl = (props: useCallControlProps) => {
   };
 
   const wrapupCall = (wrapUpReason: string, auxCodeId: string) => {
-    currentTask.wrapup({wrapUpReason: wrapUpReason, auxCodeId: auxCodeId}).catch((error: Error) => {
-      logError(`Error wrapping up call: ${error}`, 'wrapupCall');
-    });
+    currentTask
+      .wrapup({wrapUpReason: wrapUpReason, auxCodeId: auxCodeId})
+      .then(() => {
+        const taskKeys = Object.keys(store.taskList);
+        if (taskKeys.length > 0) {
+          store.setCurrentTask(store.taskList[taskKeys[0]]);
+          store.setState({
+            developerName: ENGAGED_LABEL,
+            name: ENGAGED_USERNAME,
+          });
+        }
+      })
+      .catch((error: Error) => {
+        logError(`Error wrapping up call: ${error}`, 'wrapupCall');
+      });
   };
 
   const transferCall = async (transferDestination: string, destinationType: DestinationType) => {
