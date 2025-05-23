@@ -17,6 +17,7 @@
     "@semantic-release/git": "^10.0.1",
     "@semantic-release/github": "^11.0.1",
     "@testing-library/react-hooks": "^8.0.1",
+    "babel-jest": "^29.7.0",
     "crypto-browserify": "^3.12.1",
     "css-loader": "^7.1.2",
     "html-webpack-plugin": "^5.6.3",
@@ -60,10 +61,5 @@
     "release:widgets": "semantic-release",
     "postinstall": "husky install",
     "prepare": "husky"
-  },
-  "jest": {
-    "testMatch": [
-      "**/tooling/tests/*.js"
-    ]
   }
 }

@@ -81,9 +81,6 @@
     "testMatch": [
       "**/tests/**/*.ts",
       "**/tests/**/*.tsx"
-    ],
-    "moduleNameMapper": {
-      "^.+\\.(css|less|scss)$": "babel-jest"
-    }
+    ]
   }
 }
