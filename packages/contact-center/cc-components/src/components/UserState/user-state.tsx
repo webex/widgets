@@ -7,6 +7,7 @@ import './user-state.scss';
 import {SelectNext, Text, TooltipNext} from '@momentum-ui/react-collaboration';
 import {Item} from '@react-stately/collections';
 import {Icon} from '@momentum-design/components/dist/react';
+import {userStateLabels} from './constant';
 
 const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
   const {
@@ -81,13 +82,13 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
       const currentStateObj = idleCodes.find((item) => item.id === currentState);
 
       if (currentStateObj.name === AgentUserState.Available) {
-        return `You are currently engaged in an interaction and in the Available state.`;
+        return userStateLabels.customWithAvailableTooltip;
       } else {
-        return `You are currently engaged in an interaction and in the idle state ${currentStateObj.name}.`;
+        return userStateLabels.customWithIdleStateTooltip.replace(/{{.*?}}/g, currentStateObj.name);
       }
     }
 
-    return 'Availability State';
+    return userStateLabels.availableTooltip;
   };
 
   // Sorts the dropdown items by keeping 'Available' at the top and sorting the rest alphabetically by name
