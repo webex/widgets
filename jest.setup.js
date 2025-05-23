@@ -39,12 +39,3 @@ window.HTMLCanvasElement.prototype.getContext = () => {
     clip: () => {},
   };
 };
-
-jest.mock('lottie-web', () => ({
-  loadAnimation: () => ({
-    play: jest.fn(),
-    stop: jest.fn(),
-    destroy: jest.fn(),
-    fillStyle: jest.fn(),
-  }),
-}));
