@@ -119,7 +119,7 @@ export interface IStationLoginProps {
   /**
    * Handler to set team Id
    */
-  setTeamId: (deviceType: string) => void;
+  setTeamId: (teamId: string) => void;
 }
 
 export type StationLoginComponentProps = Pick<
