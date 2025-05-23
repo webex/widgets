@@ -1,5 +1,5 @@
 import {makeAutoObservable, observable} from 'mobx';
-import Webex from 'webex/contact-center';
+import Webex from '@webex/plugin-cc';
 import {
   IContactCenter,
   Profile,
@@ -12,6 +12,7 @@ import {
   IWrapupCode,
   ICustomState,
   TaskMetaData,
+  AgentLoginProfile,
 } from './store.types';
 import {ITask} from '@webex/plugin-cc';
 
@@ -48,6 +49,7 @@ class Store implements IStore {
   featureFlags: {[key: string]: boolean} = {};
   isEndConsultEnabled: boolean = false;
   allowConsultToQueue: boolean = false;
+  agentProfile: AgentLoginProfile = {};
 
   taskMetaData: Record<string, TaskMetaData> = {};
 
@@ -95,6 +97,7 @@ class Store implements IStore {
         this.lastIdleCodeChangeTimestamp = response.lastIdleCodeChangeTimestamp;
         this.isEndConsultEnabled = response.isEndConsultEnabled;
         this.allowConsultToQueue = response.allowConsultToQueue;
+        this.agentProfile.agentName = response.agentName;
       })
       .catch((error) => {
         this.logger.error(`Error registering contact center: ${error}`, {

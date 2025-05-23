@@ -14,6 +14,7 @@ import {ThemeProvider, IconProvider, Icon, Button, Checkbox, Text, Select, Optio
 import {PopoverNext} from '@momentum-ui/react-collaboration';
 import './App.scss';
 import {observer} from 'mobx-react-lite';
+import EngageWidget from './EngageWidget';
 
 // This is not to be included to a production app.
 // Have added here for debugging purposes
@@ -27,6 +28,7 @@ const defaultWidgets = {
   callControlCAD: true,
   outdialCall: true,
 };
+window['AGENTX_SERVICE'] = {}; // Make it available in the window object for global access for engage widgets
 
 function App() {
   const [isSdkReady, setIsSdkReady] = useState(false);
@@ -50,6 +52,7 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [incomingTasks, setIncomingTasks] = useState([]);
   const [loginType, setLoginType] = useState('token');
+  const [showAgentProfile, setShowAgentProfile] = useState(false);
 
   const [collapsedTasks, setCollapsedTasks] = React.useState([]);
 
@@ -419,6 +422,16 @@ function App() {
                         store.setCurrentTheme(currentTheme === 'DARK' ? 'LIGHT' : 'DARK');
                       }}
                     />
+                    <Checkbox
+                      checked={showAgentProfile}
+                      aria-label="theme checkbox"
+                      id="theme-checkbox"
+                      label="Show Agent Profile"
+                      // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
+                      onchange={() => {
+                        setShowAgentProfile(!showAgentProfile);
+                      }}
+                    />
                   </fieldset>
                 </section>
                 <br/>
@@ -472,6 +485,82 @@ function App() {
             </div>
             {isSdkReady && (
               <>
+                {showAgentProfile && store.agentProfile && (
+                  <>
+                    <section className="section-box">
+                      <fieldset className="fieldset" style={{padding: '0 10% 0 10%'}}>
+                        <legend className="legend-box">&nbsp;Agent Profile&nbsp;</legend>
+                        <label style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}></label>
+                        <table style={{borderCollapse: 'collapse', width: '100%'}}>
+                          <tbody>
+                            <tr>
+                              <td className="table-border">
+                                <Text tagname={'span'} type="body-large-bold">
+                                  Agent Name:
+                                </Text>
+                              </td>
+                              <td className="table-border">{store.agentProfile.agentName}</td>
+                            </tr>
+                            <tr>
+                              <td className="table-border">
+                                <Text tagname={'span'} type="body-large-bold">
+                                  Profile Type:
+                                </Text>
+                              </td>
+                              <td className="table-border">{store.agentProfile.profileType}</td>
+                            </tr>
+                            <tr>
+                              <td className="table-border">
+                                <Text tagname={'span'} type="body-large-bold">
+                                  Org ID:
+                                </Text>
+                              </td>
+                              <td className="table-border">{store.agentProfile.orgId}</td>
+                            </tr>
+                            <tr>
+                              <td className="table-border">
+                                <Text tagname={'span'} type="body-large-bold">
+                                  Handle call using:
+                                </Text>
+                              </td>
+                              <td className="table-border">{store.agentProfile.deviceType}</td>
+                            </tr>
+                            <tr>
+                              <td className="table-border">
+                                <Text tagname={'span'} type="body-large-bold">
+                                  Roles:
+                                </Text>
+                              </td>
+                              <td className="table-border">{store.agentProfile.roles}</td>
+                            </tr>
+                            <tr>
+                              <td className="table-border">
+                                <Text tagname={'span'} type="body-large-bold">
+                                  MM Profile:
+                                </Text>
+                              </td>
+                              <td className="table-border">
+                                <table style={{borderCollapse: 'collapse', width: '100%'}}>
+                                  <tbody>
+                                    {store.agentProfile.mmProfile &&
+                                      Object.entries(store.agentProfile.mmProfile).map(([channel, count]) => (
+                                        <tr key={channel}>
+                                          <td className="table-border">
+                                            {channel.charAt(0).toUpperCase() + channel.slice(1)}
+                                          </td>
+                                          <td className="table-border">{count}</td>
+                                        </tr>
+                                      ))}
+                                  </tbody>
+                                </table>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </fieldset>
+                    </section>
+                  </>
+                )}
                 {selectedWidgets.stationLogin && (
                   <div className="box">
                     <section className="section-box">
@@ -586,6 +675,10 @@ function App() {
                   Confirm State Change
                 </Button>
               </div>
+            )}
+
+            {isSdkReady && (store.isAgentLoggedIn || isLoggedIn) && (
+              <EngageWidget accessToken={accessToken} currentTheme={currentTheme} isSdkReady={isSdkReady} />
             )}
           </div>
         </IconProvider>
