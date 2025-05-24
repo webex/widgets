@@ -4,12 +4,6 @@ import * as helper from '../../src/helper';
 import {CallControl} from '../../src';
 import '@testing-library/jest-dom';
 
-jest.mock('@webex/cc-components', () => {
-  return {
-    CallControlComponent: () => <div>CallControlComponent</div>,
-  };
-});
-
 // Mock the store
 jest.mock('@webex/cc-store', () => ({
   cc: {},
@@ -42,7 +36,7 @@ describe('CallControl Component', () => {
   it('renders CallControlPresentational with correct props', () => {
     const useCallControlSpy = jest.spyOn(helper, 'useCallControl').mockReturnValue({
       currentTask: {
-        data: {interactionId: 'mockInteractionId'},
+        data: {interactionId: 'mockInteractionId', interaction: {mediaType: 'voice'}},
         on: jest.fn(),
         off: jest.fn(),
         hold: jest.fn(),
@@ -69,6 +63,20 @@ describe('CallControl Component', () => {
       consultInitiated: undefined,
       featureFlags: undefined,
       deviceType: 'BROWSER',
+      controlVisibility: {
+        accept: false,
+        decline: false,
+        end: false,
+        muteUnmute: false,
+        holdResume: true,
+        consult: false,
+        transfer: false,
+        conference: false,
+        wrapup: false,
+        pauseResumeRecording: false,
+        endConsult: false,
+        recordingIndicator: false,
+      },
     });
 
     render(<CallControl onHoldResume={onHoldResumeCb} onEnd={onEndCb} onWrapUp={onWrapUpCb} />);

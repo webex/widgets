@@ -4,39 +4,6 @@ import {render, screen, fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import CallControlComponent from '../../../../src/components/task/CallControl/call-control';
 
-jest.mock('@momentum-ui/react-collaboration', () => ({
-  ButtonPill: (props) => (
-    <button data-testid="ButtonPill" onClick={props.onPress} className={props.className}>
-      {props.children}
-    </button>
-  ),
-  ButtonCircle: (props) => (
-    <button data-testid="ButtonCircle" onClick={props.onPress} disabled={props.disabled} className={props.className}>
-      {props.children}
-    </button>
-  ),
-  PopoverNext: (props) => (
-    <div data-testid="PopoverNext">
-      {props.triggerComponent}
-      {props.children}
-    </div>
-  ),
-  SelectNext: (props) => (
-    <div data-testid="SelectNext">{props.children && props.items && props.children(props.items[0])}</div>
-  ),
-  TooltipNext: (props) => (
-    <div data-testid="TooltipNext">
-      {props.triggerComponent}
-      {props.children}
-    </div>
-  ),
-}));
-
-jest.mock('@momentum-design/components/dist/react', () => ({
-  Avatar: () => <div data-testid="Avatar" />,
-  Icon: () => <div data-testid="Icon" />,
-}));
-
 jest.mock('@webex/cc-store', () => ({
   DestinationType: {
     AGENT: 'agent',
