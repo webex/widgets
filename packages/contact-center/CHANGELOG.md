@@ -1,3 +1,24 @@
+# [1.28.0-ccwidgets.62](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.61...v1.28.0-ccwidgets.62) (2025-05-26)
+
+
+### Bug Fixes
+
+* **tooling:** fix jest setup for UI testing ([#460](https://github.com/webex/widgets/issues/460)) ([7c4a021](https://github.com/webex/widgets/commit/7c4a02197835b09886b5c566651aa10f38f34cb5))
+
+# [1.28.0-ccwidgets.61](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.60...v1.28.0-ccwidgets.61) (2025-05-26)
+
+
+### Bug Fixes
+
+* **tooling:** add-playwright-tests ([#420](https://github.com/webex/widgets/issues/420)) ([fa52889](https://github.com/webex/widgets/commit/fa5288982c45fba258c715a8a27d501fd8be650c))
+
+# [1.28.0-ccwidgets.60](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.59...v1.28.0-ccwidgets.60) (2025-05-23)
+
+
+### Bug Fixes
+
+* **contact-center:** fix bugs listed in CAI-6468 ([#458](https://github.com/webex/widgets/issues/458)) ([0873b44](https://github.com/webex/widgets/commit/0873b44919220bc00124ff708811247ba1da05dd))
+
 # [1.28.0-ccwidgets.59](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.58...v1.28.0-ccwidgets.59) (2025-05-22)
 
 

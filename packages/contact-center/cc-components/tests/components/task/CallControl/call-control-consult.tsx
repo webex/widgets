@@ -1,40 +1,7 @@
-/* eslint-disable react/prop-types */
 import React from 'react';
 import {render, screen, fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import CallControlConsultComponent from '../../../../src/components/task/CallControl/CallControlCustom/call-control-consult';
-
-jest.mock('@momentum-ui/react-collaboration', () => ({
-  ButtonCircle: (props) => {
-    // Extract non-DOM props
-    const {onPress, ...domProps} = props;
-    return (
-      <button {...domProps} onClick={onPress}>
-        {props.children}
-      </button>
-    );
-  },
-  TooltipNext: (props) => {
-    const {triggerComponent, ...rest} = props;
-    return (
-      <div data-testid="TooltipNext">
-        {triggerComponent}
-        <div {...rest}>{props.children}</div>
-      </div>
-    );
-  },
-  Text: (props) => {
-    // Extract tagName prop to avoid React DOM warnings
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const {tagName, ...domProps} = props;
-    return <p {...domProps}>{props.children}</p>;
-  },
-}));
-
-jest.mock('@momentum-design/components/dist/react', () => ({
-  Icon: (props) => <span data-testid="Icon">{props.name}</span>,
-  Avatar: (props) => <div data-testid="Avatar">{props.iconName}</div>,
-}));
 
 // eslint-disable-next-line react/display-name
 jest.mock('../../../../src/components/task/TaskTimer', () => () => <span data-testid="TaskTimer">00:00</span>);
