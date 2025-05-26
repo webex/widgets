@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.62](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.61...v1.28.0-ccwidgets.62) (2025-05-26)
+
+
+### Bug Fixes
+
+* **tooling:** fix jest setup for UI testing ([#460](https://github.com/webex/widgets/issues/460)) ([7c4a021](https://github.com/webex/widgets/commit/7c4a02197835b09886b5c566651aa10f38f34cb5))
+
 # [1.28.0-ccwidgets.61](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.60...v1.28.0-ccwidgets.61) (2025-05-26)
 
 
