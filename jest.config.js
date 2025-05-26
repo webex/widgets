@@ -7,7 +7,7 @@ module.exports = {
     '^.+\\.(css|less|scss)$': 'babel-jest',
   },
   testEnvironment: 'jsdom',
-  testMatch: ['**/tooling/tests/*.js'],
+  testMatch: ['**/tooling/tests/**/*.js'],
   transformIgnorePatterns: [
     '/node_modules/(?!(@momentum-design/components|@momentum-ui/react-collaboration|@lit|lit|cheerio))',
   ],
