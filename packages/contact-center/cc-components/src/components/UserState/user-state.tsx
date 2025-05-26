@@ -98,7 +98,7 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
   ];
 
   return (
-    <div className="user-state-container">
+    <div className="user-state-container" data-testid="user-state-container">
       <SelectNext
         id="user-state-tooltip"
         label=""
@@ -112,6 +112,7 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
         selectedKey={selectedKey}
         items={sortedItems}
         className={`state-select ${getDropdownClass()}`}
+        data-testid="state-select"
       >
         {(item) => {
           const isRonaOrEngaged = [AgentUserState.RONA, AgentUserState.Engaged].includes(
@@ -120,14 +121,18 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
           const shouldHighlight = currentState === item.id || (isRonaOrEngaged && item.id === previousSelectableState);
 
           return (
-            <Item key={item.id} textValue={item.name}>
-              <div className={`item-container ${shouldHighlight ? `selected ${getIconStyle(item).class}` : ''}`}>
+            <Item key={item.id} textValue={item.name} data-testid={`state-item-${item.name}`}>
+              <div
+                className="item-container"
+                data-testid={`item-container ${shouldHighlight ? `selected ${getIconStyle(item).class}` : ''}`}
+              >
                 <Icon
                   name={getIconStyle(item).iconName}
                   title=""
                   className={`state-icon ${getIconStyle(item).class}`}
+                  data-testid="state-icon"
                 />
-                <Text className={`state-name ${getIconStyle(item).class}`} tagName={'small'}>
+                <Text className={`state-name ${getIconStyle(item).class}`} tagName={'small'} data-testid="state-name">
                   {item.name}
                 </Text>
               </div>
@@ -143,12 +148,15 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
       </Tooltip>
 
       {!customState && (
-        <span className={`elapsedTime ${isSettingAgentStatus ? 'elapsedTime-disabled' : ''}`}>
+        <span
+          className={`elapsedTime ${isSettingAgentStatus ? 'elapsedTime-disabled' : ''}`}
+          data-testid="elapsed-time"
+        >
           {lastIdleStateChangeElapsedTime >= 0 ? formatTime(lastIdleStateChangeElapsedTime) + ' / ' : ''}
           {formatTime(elapsedTime)}
         </span>
       )}
-      <Icon className="select-arrow-icon" name="arrow-down-bold" title="" />
+      <Icon className="select-arrow-icon" name="arrow-down-bold" title="" data-testid="select-arrow-icon" />
     </div>
   );
 };

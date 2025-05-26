@@ -48,3 +48,7 @@ reports/
 node_modules/
 .yarn/*
 !.yarn/releases
+
+# Playwright reports
+**/test-results/
+**/playwright-report

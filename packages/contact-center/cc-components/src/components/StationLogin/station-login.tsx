@@ -125,7 +125,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
           <Button onClick={onCCSignOut}>{StationLoginLabels.SIGN_OUT}</Button>
         </div>
       </dialog>
-      <div className="box station-login">
+      <div className="box station-login" data-testid="station-login-widget">
         <section className="section-box">
           <Text tagname={'span'} type="body-large-bold">
             {StationLoginLabels.INTERACTION_PREFERENCES}
@@ -166,12 +166,18 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
                 className="station-login-select"
                 selectedValue={selectedDeviceType}
                 selectedValueText={LoginOptions[selectedDeviceType]}
+                data-testid="login-option-select"
               >
                 {Object.keys(LoginOptions).map((option: string, index: number) => {
                   // only show loginOptions provided by store
                   if (loginOptions.includes(option)) {
                     return (
-                      <Option selected={option === selectedDeviceType} key={index} value={option}>
+                      <Option
+                        selected={option === selectedDeviceType}
+                        key={index}
+                        value={option}
+                        data-testid={`login-option-${LoginOptions[option]}`}
+                      >
                         {LoginOptions[option]}
                       </Option>
                     );
@@ -203,6 +209,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
               }}
               helpText={showDNError ? dnErrorText : undefined}
               helpTextType={showDNError ? 'error' : undefined}
+              data-testid="dial-number-input"
             />
           )}
 
@@ -216,6 +223,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
               }}
               className="station-login-select"
               placeholder={StationLoginLabels.YOUR_TEAM}
+              data-testid="teams-dropdown-select"
             >
               {teams.map((team: {id: string; name: string}, index: number) => {
                 return (
@@ -234,11 +242,11 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
           )}
           <div className="btn-container">
             {isAgentLoggedIn ? (
-              <Button id="logoutAgent" onClick={logout} color="positive">
+              <Button id="logoutAgent" onClick={logout} color="positive" data-testid="logout-button">
                 {StationLoginLabels.SIGN_OUT}
               </Button>
             ) : (
-              <Button onClick={login} disabled={showDNError}>
+              <Button onClick={login} disabled={showDNError} data-testid="login-button">
                 {StationLoginLabels.SAVE_AND_CONTINUE}
               </Button>
             )}
