@@ -3,11 +3,6 @@ import {render} from '@testing-library/react';
 import {UserState} from '../../src';
 import * as helper from '../../src/helper';
 import '@testing-library/jest-dom';
-jest.mock('@webex/cc-components', () => {
-  return {
-    UserStateComponent: () => <div>UserStateComponent</div>,
-  };
-});
 
 // Mock the store import
 jest.mock('@webex/cc-store', () => {
