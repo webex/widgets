@@ -240,7 +240,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
           )}
           <div className="btn-container">
             {!isAgentLoggedIn && (
-              <Button onClick={login} disabled={showDNError}>
+              <Button onClick={login} disabled={showDNError} data-testid="login-button">
                 {StationLoginLabels.SAVE_AND_CONTINUE}
               </Button>
             )}
