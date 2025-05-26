@@ -9,7 +9,7 @@ const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (prop
     return <></>; // hidden component
   }
   return (
-    <ul className="task-list">
+    <ul className="task-list" data-testid="task-list">
       {Object.values(taskList)?.map((task, index) => {
         const callAssociationDetails = task?.data?.interaction?.callAssociatedDetails;
         const ani = callAssociationDetails?.ani;

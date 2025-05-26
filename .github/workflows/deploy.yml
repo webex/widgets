@@ -74,7 +74,7 @@ jobs:
         run: yarn workspace @webex/widgets run build:src
 
       - name: Build cc widgets
-        run: yarn run build
+        run: yarn run build:prod
 
       - name: Cache Distributables
         uses: actions/cache@v4

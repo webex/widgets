@@ -14,36 +14,6 @@ jest.mock('../../../../src/components/task/CallControl/CallControlCustom/consult
   return MockListItem;
 });
 
-jest.mock('@momentum-design/components/dist/react', () => ({
-  Icon: (props: any) => <div {...props} />,
-}));
-
-jest.mock('@momentum-ui/react-collaboration', () => {
-  return {
-    Text: (props: any) => <div data-testid="Text" {...props} />,
-    TabListNext: (props: any) => {
-      if (props['tab-select-trigger'] && props.onTabSelection) {
-        setTimeout(() => props.onTabSelection(props['tab-select-trigger']), 0);
-      }
-      return (
-        <div data-testid="TabListNext" {...props}>
-          {props.children}
-        </div>
-      );
-    },
-    TabNext: (props: any) => (
-      <div data-testid="TabNext" {...props}>
-        {props.children}
-      </div>
-    ),
-    ListNext: (props: any) => (
-      <div data-testid="ListNext" {...props}>
-        {props.children}
-      </div>
-    ),
-  };
-});
-
 beforeAll(() => {
   jest.spyOn(console, 'error').mockImplementation(() => {});
 });

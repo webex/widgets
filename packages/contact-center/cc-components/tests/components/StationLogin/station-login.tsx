@@ -3,16 +3,6 @@ import {render, screen, fireEvent} from '@testing-library/react';
 import StationLoginComponent from '../../../src/components/StationLogin/station-login';
 import '@testing-library/jest-dom';
 
-jest.mock('@momentum-design/components/dist/react', () => ({
-  Avatar: () => <div data-testid="Avatar" />,
-  Icon: () => <div data-testid="Icon" />,
-  Button: () => <div data-testid="Button" />,
-  Text: () => <div data-testid="Text" />,
-  Select: () => <div data-testid="Select" />,
-  Input: () => <div data-testid="Input" />,
-  Tooltip: () => <div data-testid="Tooltip" />,
-}));
-
 describe('StationLoginComponent', () => {
   const props = {
     name: 'StationLogin',

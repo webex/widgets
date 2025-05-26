@@ -5,12 +5,6 @@ import {IncomingTask} from '../../src';
 import store from '@webex/cc-store';
 import '@testing-library/jest-dom';
 
-jest.mock('@webex/cc-components', () => {
-  return {
-    IncomingTaskComponent: () => <div>IncomingTaskComponent</div>,
-  };
-});
-
 // Mock the store
 jest.mock('@webex/cc-store', () => ({
   cc: {},
@@ -26,7 +20,7 @@ describe('IncomingTask Component', () => {
     const useIncomingTaskSpy = jest.spyOn(helper, 'useIncomingTask');
 
     const mockTask = {
-      data: {interactionId: '12345'},
+      data: {interactionId: '12345', interaction: {mediaType: 'voice'}},
     };
 
     // Mock the return value of the useIncomingTask hook

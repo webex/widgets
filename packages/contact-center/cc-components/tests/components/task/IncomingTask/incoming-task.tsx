@@ -3,17 +3,6 @@ import {render, screen, cleanup} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import IncomingTaskComponent from '../../../../src/components/task/IncomingTask/incoming-task';
 
-jest.mock('@momentum-ui/react-collaboration', () => ({
-  ButtonPill: () => <div data-testid="ButtonPill" />,
-  ListItemBase: () => <div data-testid="ListItemBase" />,
-  ListItemBaseSection: () => <div data-testid="ListItemBaseSection" />,
-  Text: () => <div data-testid="Text" />,
-}));
-
-jest.mock('@momentum-design/components/dist/react', () => ({
-  Avatar: () => <div data-testid="Avatar" />,
-}));
-
 describe('IncomingTaskComponent', () => {
   afterEach(cleanup);
 
