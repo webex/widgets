@@ -1,3 +1,10 @@
+## [1.28.1](https://github.com/webex/widgets/compare/v1.28.0...v1.28.1) (2025-05-28)
+
+
+### Bug Fixes
+
+* **accessibility:** fix wrong mic/camera instructions ([#450](https://github.com/webex/widgets/issues/450)) ([ff88612](https://github.com/webex/widgets/commit/ff88612e563c3ab93be82bda3a05effd68a68e3a))
+
 # [1.28.0](https://github.com/webex/widgets/compare/v1.27.8...v1.28.0) (2024-12-30)
 
 
