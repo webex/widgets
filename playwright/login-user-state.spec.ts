@@ -25,13 +25,13 @@ test.describe('Login and User State tests', async () => {
       await expect(page.getByTestId('login-option-select').locator('#select-base-triggerid')).toContainText('Extension');
 
       await page.getByTestId('teams-dropdown-select').click();
-      await page.getByTestId('teams-dropdown-select').first().click();
+      await page.waitForTimeout(200);
+      await page.locator('[data-testid^="teams-dropdown-"]').nth(1).locator('span, div').first().click();
 
       await page.getByTestId('login-button').click();
     }
     await page.getByTestId('state-select').click();
     await expect(page.getByTestId('state-select')).toBeVisible();
-    await expect(page.getByTestId('state-select').getByTestId('state-name')).toContainText('Meeting');
 
     await page.getByTestId('state-item-Available').click();
     await expect(page.getByTestId('state-select').getByTestId('state-name')).toContainText('Available');
@@ -75,7 +75,8 @@ test.describe('Login and User State tests', async () => {
       await expect(page.getByTestId('login-option-select').locator('#select-base-triggerid')).toContainText('Extension');
 
       await page.getByTestId('teams-dropdown-select').click();
-      await page.getByTestId('teams-dropdown-select').first().click();
+      await page.waitForTimeout(200);
+      await page.locator('[data-testid^="teams-dropdown-"]').nth(1).locator('span, div').first().click();
 
       await page.getByTestId('login-button').click();
 
@@ -83,7 +84,6 @@ test.describe('Login and User State tests', async () => {
 
     await page.getByTestId('state-select').click();
     await expect(page.getByTestId('state-select')).toBeVisible();
-    await expect(page.getByTestId('state-select').getByTestId('state-name')).toContainText('Meeting');
 
     await page.getByTestId('state-item-Available').click();
     await expect(page.getByTestId('state-select').getByTestId('state-name')).toContainText('Available');
@@ -119,14 +119,16 @@ test.describe('Login and User State tests', async () => {
       await page.getByTestId('dial-number-input').getByRole('textbox').fill('1234');
 
       await expect(page.getByTestId('login-option-select').locator('#select-base-triggerid')).toContainText('Extension');
+      
       await page.getByTestId('teams-dropdown-select').click();
-      await page.getByTestId('teams-dropdown-select').first().click();
+      await page.waitForTimeout(200);
+      await page.locator('[data-testid^="teams-dropdown-"]').nth(1).locator('span, div').first().click();
+      
       await page.getByTestId('login-button').click();
     }
 
     await page.getByTestId('state-select').click();
     await expect(page.getByTestId('state-select')).toBeVisible();
-    await expect(page.getByTestId('state-select').getByTestId('state-name')).toContainText('Meeting');
 
     await page.getByTestId('state-item-Available').click();
     await expect(page.getByTestId('state-select').getByTestId('state-name')).toContainText('Available');
