@@ -225,7 +225,12 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
             >
               {teams.map((team: {id: string; name: string}, index: number) => {
                 return (
-                  <Option selected={team.id === selectedTeamId} key={index} value={team.id}>
+                  <Option
+                    selected={team.id === selectedTeamId}
+                    key={index}
+                    value={team.id}
+                    data-testid={`teams-dropdown-${team.name}`}
+                  >
                     {team.name}
                   </Option>
                 );
