@@ -34,7 +34,7 @@
     "@webex/component-adapter-interfaces": "^1.30.5",
     "@webex/sdk-component-adapter": "1.113.0",
     "webex": "2.60.4",
-    "@webex/components": "1.277.0"
+    "@webex/components": "1.277.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.8.4",
