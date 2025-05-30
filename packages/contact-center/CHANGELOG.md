@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.63](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.62...v1.28.0-ccwidgets.63) (2025-05-30)
+
+
+### Bug Fixes
+
+* **station-login:** fix-station-login-bugs ([#459](https://github.com/webex/widgets/issues/459)) ([a203779](https://github.com/webex/widgets/commit/a203779ed81005b216d5658d9033f7d30e115797))
+
 # [1.28.0-ccwidgets.62](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.61...v1.28.0-ccwidgets.62) (2025-05-26)
 
 
