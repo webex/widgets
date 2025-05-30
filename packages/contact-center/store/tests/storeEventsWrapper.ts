@@ -60,6 +60,7 @@ jest.mock('../src/store', () => ({
     isAgentLoggedIn: false,
     deviceType: 'BROWSER',
     dialNumber: '12345',
+    itemId: '1234',
     taskList: 'mockTaskList',
     taskMetaData: {},
     incomingTask: 'mockIncomingTask',
@@ -85,6 +86,7 @@ jest.mock('../src/store', () => ({
     setLastIdleCodeChangeTimestamp: jest.fn(),
     setDeviceType: jest.fn(),
     setDialNumber: jest.fn(),
+    setTeamId: jest.fn(),
     init: jest.fn().mockResolvedValue({}),
     setCurrentTask: jest.fn(),
     refreshTaskList: jest.fn(),
@@ -246,6 +248,10 @@ describe('storeEventsWrapper', () => {
 
     it('should proxy dialNumber', () => {
       expect(storeWrapper.dialNumber).toBe(storeWrapper['store'].dialNumber);
+    });
+
+    it('should proxy teamId', () => {
+      expect(storeWrapper.teamId).toBe(storeWrapper['store'].teamId);
     });
 
     it('should proxy agentProfile', () => {
@@ -714,6 +720,15 @@ describe('storeEventsWrapper', () => {
       storeWrapper.setDeviceType(option);
 
       expect(setDeviceTypeSpy).toHaveBeenCalledWith(option);
+    });
+
+    it('should set selected Id', () => {
+      const setTeamIdSpy = jest.spyOn(storeWrapper, 'setTeamId');
+      const id = '1234';
+
+      storeWrapper.setTeamId(id);
+
+      expect(setTeamIdSpy).toHaveBeenCalledWith(id);
     });
 
     it('should return buddy agents list', async () => {
