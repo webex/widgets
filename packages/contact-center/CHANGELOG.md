@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.64](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.63...v1.28.0-ccwidgets.64) (2025-05-30)
+
+
+### Bug Fixes
+
+* **station-logout:** implement-station-logout-with-sample-toggles ([#461](https://github.com/webex/widgets/issues/461)) ([de47b18](https://github.com/webex/widgets/commit/de47b18c0f37739e7de26ba6f3c70f932d1715f7))
+
 # [1.28.0-ccwidgets.63](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.62...v1.28.0-ccwidgets.63) (2025-05-30)
 
 
