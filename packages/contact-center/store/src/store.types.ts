@@ -61,6 +61,7 @@ interface IStore {
   taskMetaData: Record<string, TaskMetaData>;
   isAgentLoggedIn: boolean;
   deviceType: string;
+  teamId: string;
   dialNumber: string;
   currentState: string;
   lastStateChangeTimestamp?: number;
@@ -102,6 +103,7 @@ interface IStoreWrapper extends IStore {
   setConsultAccepted(value: boolean): void;
   setConsultStartTimeStamp(timestamp: number): void;
   setAgentProfile(profile: Profile): void;
+  setTeamId(id: string): void;
 }
 
 interface IWrapupCode {

@@ -18,6 +18,8 @@ const StationLogin: React.FunctionComponent<StationLoginProps> = observer(({onLo
     dialNumber,
     setDeviceType,
     setDialNumber,
+    teamId,
+    setTeamId,
   } = store;
   const result = useStationLogin({
     cc,
@@ -41,6 +43,8 @@ const StationLogin: React.FunctionComponent<StationLoginProps> = observer(({onLo
     isAgentLoggedIn,
     showMultipleLoginAlert,
     onCCSignOut,
+    teamId,
+    setTeamId,
   };
   return <StationLoginComponent {...props} />;
 });
