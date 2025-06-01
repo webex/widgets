@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.65](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.64...v1.28.0-ccwidgets.65) (2025-06-01)
+
+
+### Bug Fixes
+
+* **samples:** add an unlisted URL for chat client ([#462](https://github.com/webex/widgets/issues/462)) ([3def454](https://github.com/webex/widgets/commit/3def454f541d490d22d6ba10e2c696117cb0951e))
+
 # [1.28.0-ccwidgets.64](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.63...v1.28.0-ccwidgets.64) (2025-05-30)
 
 
