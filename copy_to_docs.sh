@@ -2,6 +2,7 @@
 
 # Copy the index.html file to the docs directory
 cp ./widgets-samples/index.html docs/
+cp ./widgets-samples/chat-client.html docs/
 
 # Copy specific files and directories from samples-cc-wc-app to the docs directory
 mkdir -p docs/samples-cc-wc-app
