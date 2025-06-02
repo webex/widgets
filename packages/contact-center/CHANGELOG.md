@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.66](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.65...v1.28.0-ccwidgets.66) (2025-06-02)
+
+
+### Bug Fixes
+
+* **tooling:** use secrets while running tests ([#463](https://github.com/webex/widgets/issues/463)) ([227bafd](https://github.com/webex/widgets/commit/227bafd8e340ef15a36532d408ef65e6298294ea))
+
 # [1.28.0-ccwidgets.65](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.64...v1.28.0-ccwidgets.65) (2025-06-01)
 
 
