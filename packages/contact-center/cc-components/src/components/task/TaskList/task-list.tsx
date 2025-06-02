@@ -4,7 +4,8 @@ import Task from '../Task';
 import './styles.scss';
 
 const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (props) => {
-  const {currentTask, taskList, acceptTask, declineTask, isBrowser, onTaskSelect} = props;
+  const {currentTask, taskList, acceptTask, declineTask, isBrowser, onTaskSelect, logger} = props;
+
   if (!taskList || Object.keys(taskList).length === 0) {
     return <></>; // hidden component
   }
@@ -30,9 +31,14 @@ const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (prop
             : undefined;
         const declineText =
           isIncomingTask && !task.data.wrapUpRequired && isTelephony && isBrowser ? 'Decline' : undefined;
+        const interactionId = task.data.interactionId;
+        logger.log('TaskList ▶ renderItem', {
+          module: 'task-list.tsx',
+          method: 'renderItem',
+        });
         return (
           <Task
-            interactionId={task.data.interactionId}
+            interactionId={interactionId}
             title={ani}
             state={!isIncomingTask ? taskState : ''}
             startTimeStamp={startTimeStamp}
@@ -44,6 +50,10 @@ const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (prop
             declineTask={() => declineTask(task)}
             ronaTimeout={isIncomingTask ? ronaTimeout : null}
             onTaskSelect={() => {
+              logger.log('TaskList ▶ select clicked', {
+                module: 'task-list.tsx',
+                method: 'onTaskSelect',
+              });
               if (
                 currentTask?.data.interactionId !== task.data.interactionId &&
                 !(isIncomingTask && !task.data.wrapUpRequired)

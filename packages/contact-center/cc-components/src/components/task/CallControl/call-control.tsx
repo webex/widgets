@@ -40,7 +40,15 @@ function CallControlComponent(props: CallControlComponentProps) {
     allowConsultToQueue,
     setLastTargetType,
     controlVisibility,
+    logger,
   } = props;
+
+  useEffect(() => {
+    logger.log('CallControl ▶ component mounted', {
+      module: 'call-control.tsx',
+      method: 'useEffect-mount',
+    });
+  }, []);
 
   useEffect(() => {
     if (!currentTask || !currentTask.data || !currentTask.data.interaction) return;
@@ -57,11 +65,19 @@ function CallControlComponent(props: CallControlComponentProps) {
   }, [currentTask]);
 
   const handletoggleHold = () => {
+    logger.log('CallControl ▶ hold toggle clicked', {
+      module: 'call-control.tsx',
+      method: 'handletoggleHold',
+    });
     toggleHold(!isHeld);
     setIsHeld(!isHeld);
   };
 
   const handleWrapupCall = () => {
+    logger.log('CallControl ▶ wrap-up submitted', {
+      module: 'call-control.tsx',
+      method: 'handleWrapupCall',
+    });
     if (selectedWrapupReason && selectedWrapupId) {
       wrapupCall(selectedWrapupReason, selectedWrapupId);
       setSelectedWrapupReason(null);
@@ -75,6 +91,10 @@ function CallControlComponent(props: CallControlComponentProps) {
   };
 
   const handleTargetSelect = (id: string, name: string, type: DestinationType) => {
+    logger.log('CallControl ▶ target selected', {
+      module: 'call-control.tsx',
+      method: 'handleTargetSelect',
+    });
     if (agentMenuType === 'Consult') {
       try {
         consultCall(id, type);
@@ -94,6 +114,10 @@ function CallControlComponent(props: CallControlComponentProps) {
   };
 
   const handlePopoverOpen = (menuType: CallControlMenuType) => {
+    logger.log('CallControl ▶ popover toggle', {
+      module: 'call-control.tsx',
+      method: 'handlePopoverOpen',
+    });
     if (showAgentMenu && agentMenuType === menuType) {
       setShowAgentMenu(false);
       setAgentMenuType(null);
@@ -241,6 +265,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                         onAgentSelect={(agentId, agentName) => handleTargetSelect(agentId, agentName, 'agent')}
                         onQueueSelect={(queueId, queueName) => handleTargetSelect(queueId, queueName, 'queue')}
                         allowConsultToQueue={allowConsultToQueue}
+                        logger={logger}
                       />
                     ) : null}
                   </PopoverNext>

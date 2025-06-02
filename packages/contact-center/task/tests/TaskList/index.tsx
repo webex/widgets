@@ -20,6 +20,12 @@ jest.mock('@webex/cc-store', () => ({
   taskList: taskListMock,
   setTaskAssigned: jest.fn(),
   setTaskRejected: jest.fn(),
+  logger: {
+    log: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+    info: jest.fn(),
+  },
 }));
 
 describe('TaskList Component', () => {
@@ -39,6 +45,7 @@ describe('TaskList Component', () => {
       {
         currentTask: undefined,
         isBrowser: true,
+        logger: store.logger,
         taskList: taskListMock,
         acceptTask: expect.any(Function),
         declineTask: expect.any(Function),
@@ -51,7 +58,7 @@ describe('TaskList Component', () => {
     expect(helperSpy).toHaveBeenCalledWith({
       cc: store.cc,
       deviceType: 'BROWSER',
-      logger: undefined,
+      logger: store.logger,
       onTaskAccepted: expect.any(Function),
       onTaskDeclined: expect.any(Function),
       taskList: taskListMock,

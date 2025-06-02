@@ -32,6 +32,7 @@ const CallControl: React.FunctionComponent<CallControlProps> = observer(({onHold
     callControlAudio,
     isEndConsultEnabled,
     allowConsultToQueue,
+    logger,
   };
   return <CallControlComponent {...result} />;
 });

@@ -13,6 +13,7 @@ const TaskList: React.FunctionComponent<TaskListProps> = observer(({onTaskAccept
   const props = {
     ...result,
     currentTask,
+    logger,
   };
 
   return <TaskListComponent {...props} />;

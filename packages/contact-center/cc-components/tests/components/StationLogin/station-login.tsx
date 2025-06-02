@@ -3,6 +3,14 @@ import {render, screen, fireEvent} from '@testing-library/react';
 import StationLoginComponent from '../../../src/components/StationLogin/station-login';
 import '@testing-library/jest-dom';
 
+const loggerMock = {
+  log: jest.fn(),
+  info: jest.fn(),
+  warn: jest.fn(),
+  trace: jest.fn(),
+  error: jest.fn(),
+};
+
 describe('StationLoginComponent', () => {
   const props = {
     name: 'StationLogin',
@@ -31,6 +39,7 @@ describe('StationLoginComponent', () => {
     setTeamId: jest.fn(),
     setSelectedTeamId: jest.fn(),
     selectedTeamId: 'team123',
+    logger: loggerMock,
   };
 
   afterEach(() => {

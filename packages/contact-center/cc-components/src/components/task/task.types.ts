@@ -104,11 +104,11 @@ export interface TaskProps {
   logger: ILogger;
 }
 
-export type IncomingTaskComponentProps = Pick<TaskProps, 'incomingTask' | 'isBrowser' | 'accept' | 'reject'>;
+export type IncomingTaskComponentProps = Pick<TaskProps, 'incomingTask' | 'isBrowser' | 'accept' | 'reject' | 'logger'>;
 
 export type TaskListComponentProps = Pick<
   TaskProps,
-  'currentTask' | 'taskList' | 'isBrowser' | 'acceptTask' | 'declineTask' | 'onTaskSelect'
+  'currentTask' | 'taskList' | 'isBrowser' | 'acceptTask' | 'declineTask' | 'onTaskSelect' | 'logger'
 >;
 
 /**
@@ -395,6 +395,7 @@ export type CallControlComponentProps = Pick<
   | 'lastTargetType'
   | 'setLastTargetType'
   | 'controlVisibility'
+  | 'logger'
 >;
 
 /**
@@ -428,6 +429,7 @@ export interface ConsultTransferListComponentProps {
   buttonIcon: string;
   onButtonPress: () => void;
   className?: string;
+  logger: ILogger;
 }
 
 /**
@@ -441,6 +443,7 @@ export interface ConsultTransferPopoverComponentProps {
   onAgentSelect: (agentId: string, agentName: string) => void;
   onQueueSelect: (queueId: string, queueName: string) => void;
   allowConsultToQueue: boolean;
+  logger: ILogger;
 }
 
 /**
@@ -454,6 +457,7 @@ export interface CallControlConsultComponentsProps {
   consultCompleted: boolean;
   isAgentBeingConsulted: boolean;
   isEndConsultEnabled: boolean;
+  logger: ILogger;
 }
 
 /**

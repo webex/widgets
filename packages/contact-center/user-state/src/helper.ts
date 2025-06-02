@@ -20,6 +20,10 @@ export const useUserState = ({
   const prevStateRef = useRef(currentState);
 
   const callOnStateChange = () => {
+    logger.log('useUserState callOnStateChange(): invoking onStateChange', {
+      module: 'useUserState',
+      method: 'callOnStateChange',
+    });
     if (onStateChange) {
       if (customState?.developerName) {
         onStateChange(customState);
@@ -98,6 +102,10 @@ export const useUserState = ({
     workerRef.current.postMessage({type: 'start', startTime: Date.now()});
     workerRef.current.postMessage({type: 'startIdleCode', startTime: Date.now()});
     workerRef.current.onmessage = (event) => {
+      logger.log(`useUserState worker.onmessage: ${event.data.type}`, {
+        module: 'useUserState',
+        method: 'worker.onmessage',
+      });
       if (event.data.type === 'elapsedTime') {
         setElapsedTime(event.data.elapsedTime > 0 ? event.data.elapsedTime : 0);
       } else if (event.data.type === 'lastIdleStateChangeElapsedTime') {
@@ -108,6 +116,10 @@ export const useUserState = ({
     };
 
     return () => {
+      logger.log('useUserState cleanup: terminating worker', {
+        module: 'useUserState',
+        method: 'useEffect - initial cleanup',
+      });
       if (workerRef.current) {
         workerRef.current.postMessage({type: 'stop'});
         workerRef.current.postMessage({type: 'stopIdleCode'});
@@ -145,6 +157,10 @@ export const useUserState = ({
 
   useEffect(() => {
     if (workerRef.current && lastStateChangeTimestamp) {
+      logger.log('useUserState timers reset', {
+        module: 'useUserState',
+        method: 'useEffect - reset timers',
+      });
       workerRef.current.postMessage({type: 'reset', startTime: lastStateChangeTimestamp});
 
       if (lastIdleCodeChangeTimestamp && lastIdleCodeChangeTimestamp !== lastStateChangeTimestamp) {
@@ -157,6 +173,10 @@ export const useUserState = ({
 
   // UI change calls this method and gets the store updated
   const setAgentStatus = (selectedCode) => {
+    logger.log('useUserState setAgentStatus(): updating currentState', {
+      module: 'useUserState',
+      method: 'setAgentStatus',
+    });
     store.setCurrentState(selectedCode);
   };
 
@@ -168,8 +188,6 @@ export const useUserState = ({
     logger.log(`Setting agent status`, {
       module: 'useUserState',
       method: 'setAgentStatus',
-      auxCodeId: selectedCode.auxCodeId,
-      state: selectedCode.state,
     });
 
     const {auxCodeId, state} = {
@@ -185,7 +203,6 @@ export const useUserState = ({
         logger.log(`Agent state set successfully`, {
           module: 'useUserState',
           method: 'updateAgentState',
-          response: response.data,
         });
 
         store.setLastStateChangeTimestamp(response.data.lastStateChangeTimestamp);

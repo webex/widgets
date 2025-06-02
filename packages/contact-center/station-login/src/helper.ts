@@ -69,7 +69,11 @@ export const useStationLogin = (props: UseStationLoginProps) => {
   };
 
   const login = () => {
-    cc.stationLogin({teamId: team, loginOption: deviceType, dialNumber: dialNumber})
+    logger.log('useStationLogin login(): invoking stationLogin', {
+      module: 'station-login/helper.ts',
+      method: 'login',
+    });
+    cc.stationLogin({teamId: team, loginOption: deviceType, dialNumber})
       .then((res: StationLoginSuccess) => {
         setLoginSuccess(res);
         setLoginFailure(undefined);
@@ -85,6 +89,10 @@ export const useStationLogin = (props: UseStationLoginProps) => {
   };
 
   const logout = () => {
+    logger.log('useStationLogin logout(): invoking stationLogout', {
+      module: 'station-login/helper.ts',
+      method: 'logout',
+    });
     cc.stationLogout({logoutReason: 'User requested logout'})
       .then((res: StationLogoutSuccess) => {
         setLogoutSuccess(res);

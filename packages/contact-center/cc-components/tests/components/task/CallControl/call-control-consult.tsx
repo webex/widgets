@@ -3,6 +3,14 @@ import {render, screen, fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import CallControlConsultComponent from '../../../../src/components/task/CallControl/CallControlCustom/call-control-consult';
 
+const loggerMock = {
+  log: jest.fn(),
+  info: jest.fn(),
+  warn: jest.fn(),
+  trace: jest.fn(),
+  error: jest.fn(),
+};
+
 // eslint-disable-next-line react/display-name
 jest.mock('../../../../src/components/task/TaskTimer', () => () => <span data-testid="TaskTimer">00:00</span>);
 
@@ -24,6 +32,7 @@ describe('CallControlConsultComponent', () => {
     endConsultCall: mockEndConsultCall,
     consultCompleted: true,
     isAgentBeingConsulted: true,
+    logger: loggerMock,
   };
 
   beforeEach(() => {

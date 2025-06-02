@@ -13,10 +13,15 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
   consultCompleted,
   isAgentBeingConsulted,
   isEndConsultEnabled,
+  logger,
 }) => {
   const timerKey = `timer-${startTimeStamp}`;
 
   const handleTransfer = () => {
+    logger.log('CallControlConsult ▶ transfer clicked', {
+      module: 'call-control-consult.tsx',
+      method: 'handleTransfer',
+    });
     try {
       if (onTransfer) {
         onTransfer();
@@ -27,6 +32,10 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
   };
 
   const handleEndConsult = () => {
+    logger.log('CallControlConsult ▶ end consult clicked', {
+      module: 'call-control-consult.tsx',
+      method: 'handleEndConsult',
+    });
     try {
       endConsultCall();
     } catch (error) {

@@ -5,7 +5,7 @@ import classnames from 'classnames';
 import {ConsultTransferListComponentProps} from '../../task.types';
 
 const ConsultTransferListComponent: React.FC<ConsultTransferListComponentProps> = (props) => {
-  const {title, subtitle, buttonIcon, onButtonPress, className} = props;
+  const {title, subtitle, buttonIcon, onButtonPress, className, logger} = props;
   const initials = title
     .split(' ')
     .map((word) => word[0])
@@ -40,7 +40,17 @@ const ConsultTransferListComponent: React.FC<ConsultTransferListComponentProps> 
       </ListItemBaseSection>
       <ListItemBaseSection position="end">
         <div className="hover-button">
-          <ButtonCircle onPress={onButtonPress} size={28} color="join">
+          <ButtonCircle
+            onPress={() => {
+              logger.log(`ConsultTransferList ▶ button pressed: ${title}`, {
+                module: 'consult-transfer-list-item.tsx',
+                method: 'onButtonPress',
+              });
+              onButtonPress();
+            }}
+            size={28}
+            color="join"
+          >
             <Icon name={buttonIcon} />
           </ButtonCircle>
         </div>

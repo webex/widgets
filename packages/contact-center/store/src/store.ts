@@ -79,9 +79,19 @@ class Store implements IStore {
     }
 
     this.logger = this.cc.LoggerProxy;
+    this.logger.log('Contact-center registerCC(): starting registration', {
+      module: 'cc-store#store.ts',
+      method: 'registerCC',
+    });
+
     return this.cc
       .register()
       .then((response: Profile) => {
+        this.logger.log('Contact-center registerCC(): registration successful', {
+          module: 'cc-store#store.ts',
+          method: 'registerCC',
+        });
+        // wire up logger into feature‐flag extraction
         this.featureFlags = getFeatureFlags(response);
         this.teams = response.teams;
         this.loginOptions = response.webRtcEnabled
@@ -102,7 +112,7 @@ class Store implements IStore {
         this.agentProfile.agentName = response.agentName;
       })
       .catch((error) => {
-        this.logger.error(`Error registering contact center: ${error}`, {
+        this.logger.error(`Contact-center registerCC(): failed - ${error}`, {
           module: 'cc-store#store.ts',
           method: 'registerCC',
         });
@@ -134,9 +144,17 @@ class Store implements IStore {
         clearTimeout(timer);
         this.registerCC(webex)
           .then(() => {
+            this.logger.log('Store init(): store initialization complete', {
+              module: 'cc-store#store.ts',
+              method: 'init',
+            });
             resolve();
           })
           .catch((error) => {
+            this.logger.error(`Store init(): registration failed - ${error}`, {
+              module: 'cc-store#store.ts',
+              method: 'init',
+            });
             reject(error);
           });
       });

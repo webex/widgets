@@ -3,7 +3,7 @@ import {IncomingTaskComponentProps, MEDIA_CHANNEL} from '../task.types';
 import Task from '../Task';
 
 const IncomingTaskComponent: React.FunctionComponent<IncomingTaskComponentProps> = (props) => {
-  const {incomingTask, isBrowser, accept, reject} = props;
+  const {incomingTask, isBrowser, accept, reject, logger} = props;
   if (!incomingTask) {
     return <></>; // hidden component
   }
@@ -31,8 +31,20 @@ const IncomingTaskComponent: React.FunctionComponent<IncomingTaskComponentProps>
       startTimeStamp={startTimeStamp}
       isIncomingTask={true}
       queue={virtualTeamName}
-      acceptTask={() => accept(incomingTask)}
-      declineTask={() => reject(incomingTask)}
+      acceptTask={() => {
+        logger.log('IncomingTask ▶ accept clicked', {
+          module: 'incoming-task.tsx',
+          method: 'acceptTask',
+        });
+        accept(incomingTask);
+      }}
+      declineTask={() => {
+        logger.log('IncomingTask ▶ decline clicked', {
+          module: 'incoming-task.tsx',
+          method: 'declineTask',
+        });
+        reject(incomingTask);
+      }}
       ronaTimeout={ronaTimeout}
       acceptText={acceptText}
       disableAccept={isTelephony && !isBrowser}

@@ -21,6 +21,10 @@ jest.mock('@webex/plugin-cc', () => ({
       register: jest.fn(),
       LoggerProxy: {
         error: jest.fn(),
+        log: jest.fn(),
+        warn: jest.fn(),
+        info: jest.fn(),
+        trace: jest.fn(),
       },
     },
   })),
@@ -98,7 +102,7 @@ describe('Store', () => {
       } catch (error) {
         expect(error).toEqual(mockError);
         expect(storeInstance.logger.error).toHaveBeenCalledWith(
-          'Error registering contact center: Error: Register failed',
+          'Contact-center registerCC(): failed - Error: Register failed',
           {
             method: 'registerCC',
             module: 'cc-store#store.ts',

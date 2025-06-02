@@ -32,6 +32,14 @@ jest.mock('../../../../src/components/task/CallControl/CallControlCustom/call-co
   );
 });
 
+const loggerMock = {
+  log: jest.fn(),
+  info: jest.fn(),
+  warn: jest.fn(),
+  trace: jest.fn(),
+  error: jest.fn(),
+};
+
 beforeAll(() => {
   jest.spyOn(console, 'error').mockImplementation(() => {});
 });
@@ -96,6 +104,7 @@ describe('CallControlPresentational', () => {
     consultAgentName: null,
     endConsultCall: jest.fn(),
     consultTransfer: jest.fn(),
+    logger: loggerMock,
   };
 
   beforeEach(() => {

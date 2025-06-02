@@ -324,6 +324,10 @@ class StoreWrapper implements IStoreWrapper {
 
   setCCCallback = (event: CC_EVENTS | TASK_EVENTS, callback) => {
     if (!callback) return;
+    this.store.logger.log(`setCCCallback(): registering CC event '${event}'`, {
+      module: 'storeEventsWrapper.ts',
+      method: 'setCCCallback',
+    });
     this.store.cc.on(event, callback);
   };
 
@@ -348,6 +352,10 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   removeCCCallback = (event: CC_EVENTS) => {
+    this.store.logger.log(`removeCCCallback(): removing CC event '${event}'`, {
+      module: 'storeEventsWrapper.ts',
+      method: 'removeCCCallback',
+    });
     this.store.cc.off(event);
   };
 
@@ -549,6 +557,10 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   handleStateChange = (data) => {
+    this.store.logger.log('handleStateChange(): agent state changed', {
+      module: 'storeEventsWrapper.ts',
+      method: 'handleStateChange',
+    });
     if (data && typeof data === 'object' && data.type === 'AgentStateChangeSuccess') {
       const DEFAULT_CODE = '0'; // Default code when no aux code is present
       this.setCurrentState(data.auxCodeId?.trim() !== '' ? data.auxCodeId : DEFAULT_CODE);
@@ -559,6 +571,10 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   handleMultiLoginCloseSession = (data) => {
+    this.store.logger.log('handleMultiLoginCloseSession(): multi-login alert', {
+      module: 'storeEventsWrapper.ts',
+      method: 'handleMultiLoginCloseSession',
+    });
     if (data && typeof data === 'object' && data.type === 'AgentMultiLoginCloseSession') {
       this.setShowMultipleLoginAlert(true);
     }
@@ -662,6 +678,10 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   cleanUpStore = () => {
+    this.store.logger.log('cleanUpStore(): resetting store on logout', {
+      module: 'storeEventsWrapper.ts',
+      method: 'cleanUpStore',
+    });
     runInAction(() => {
       this.setIsAgentLoggedIn(false);
       this.setDeviceType('AGENT_DN');
@@ -680,6 +700,10 @@ class StoreWrapper implements IStoreWrapper {
     let listenersAdded = false;
 
     const handleLogOut = () => {
+      this.store.logger.log('setupIncomingTaskHandler(): AGENT_LOGOUT_SUCCESS received', {
+        module: 'storeEventsWrapper.ts',
+        method: 'setupIncomingTaskHandler#handleLogOut',
+      });
       this.setAgentProfile({});
       this.cleanUpStore();
       removeEventListeners();
@@ -687,6 +711,10 @@ class StoreWrapper implements IStoreWrapper {
     };
 
     const addEventListeners = () => {
+      this.store.logger.log('setupIncomingTaskHandler(): adding CC SDK listeners', {
+        module: 'storeEventsWrapper.ts',
+        method: 'setupIncomingTaskHandler#addEventListeners',
+      });
       ccSDK.on(TASK_EVENTS.TASK_HYDRATE, this.handleTaskHydrate);
       ccSDK.on(CC_EVENTS.AGENT_STATE_CHANGE, this.handleStateChange);
       ccSDK.on(TASK_EVENTS.TASK_INCOMING, this.handleIncomingTask);
@@ -695,6 +723,10 @@ class StoreWrapper implements IStoreWrapper {
     };
 
     const removeEventListeners = () => {
+      this.store.logger.log('setupIncomingTaskHandler(): removing CC SDK listeners', {
+        module: 'storeEventsWrapper.ts',
+        method: 'setupIncomingTaskHandler#removeEventListeners',
+      });
       ccSDK.off(TASK_EVENTS.TASK_HYDRATE, this.handleTaskHydrate);
       ccSDK.off(CC_EVENTS.AGENT_STATE_CHANGE, this.handleStateChange);
       ccSDK.off(TASK_EVENTS.TASK_INCOMING, this.handleIncomingTask);
@@ -705,6 +737,10 @@ class StoreWrapper implements IStoreWrapper {
     // TODO: https://jira-eng-gpk2.cisco.com/jira/browse/SPARK-626777 Implement the de-register method and close the listener there
 
     const handleLogin = (payload: Profile) => {
+      this.store.logger.log('AGENT_STATION_LOGIN_SUCCESS payload', {
+        module: 'storeEventsWrapper.ts',
+        method: 'setupIncomingTaskHandler#handleLogin',
+      });
       runInAction(() => {
         this.setAgentProfile(payload);
         this.setIsAgentLoggedIn(true);
@@ -721,6 +757,10 @@ class StoreWrapper implements IStoreWrapper {
 
     [CC_EVENTS.AGENT_DN_REGISTERED, CC_EVENTS.AGENT_RELOGIN_SUCCESS].forEach((event) => {
       ccSDK.on(`${event}`, (payload) => {
+        this.store.logger.log(`setupIncomingTaskHandler(): event '${event}' received`, {
+          module: 'storeEventsWrapper.ts',
+          method: 'setupIncomingTaskHandler',
+        });
         runInAction(() => {
           if (event === CC_EVENTS.AGENT_RELOGIN_SUCCESS) {
             this.setAgentProfile(payload);

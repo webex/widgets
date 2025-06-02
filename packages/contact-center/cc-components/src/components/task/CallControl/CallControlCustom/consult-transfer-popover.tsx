@@ -11,6 +11,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
   onAgentSelect,
   onQueueSelect,
   allowConsultToQueue,
+  logger,
 }) => {
   const [selectedTab, setSelectedTab] = useState('Agents');
   const filteredAgents = buddyAgents;
@@ -28,6 +29,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
             title={getTitle(item)}
             buttonIcon={buttonIcon}
             onButtonPress={() => handleSelect(getKey(item), getTitle(item))}
+            logger={logger}
           />
         </div>
       ))}
@@ -49,7 +51,13 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
         className="agent-tablist"
         hasBackground={false}
         style={{marginTop: '0'}}
-        onTabSelection={(key) => setSelectedTab(key as string)}
+        onTabSelection={(key) => {
+          logger.log(`ConsultTransferPopover ▶ tab selected: ${key}`, {
+            module: 'consult-transfer-popover.tsx',
+            method: 'onTabSelection',
+          });
+          setSelectedTab(key as string);
+        }}
       >
         <TabNext key="Agents" className="agent-tab" active={selectedTab === 'Agents'}>
           Agents
@@ -70,7 +78,13 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
           filteredAgents,
           (agent) => agent.agentId,
           (agent) => agent.agentName,
-          onAgentSelect
+          (id, name) => {
+            logger.log(`ConsultTransferPopover ▶ agent selected: ${id}`, {
+              module: 'consult-transfer-popover.tsx',
+              method: 'onAgentSelect',
+            });
+            onAgentSelect(id, name);
+          }
         )}
 
       {selectedTab === 'Queues' &&
@@ -79,7 +93,13 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
           filteredQueues,
           (queue) => queue.id,
           (queue) => queue.name,
-          onQueueSelect || (() => {})
+          (id, name) => {
+            logger.log(`ConsultTransferPopover ▶ queue selected: ${id}`, {
+              module: 'consult-transfer-popover.tsx',
+              method: 'onQueueSelect',
+            });
+            (onQueueSelect || (() => {}))(id, name);
+          }
         )}
     </div>
   );

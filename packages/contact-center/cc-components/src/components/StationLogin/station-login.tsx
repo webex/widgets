@@ -22,6 +22,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
     onCCSignOut,
     teamId,
     setTeamId,
+    logger,
   } = props;
 
   const modalRef = useRef<HTMLDialogElement>(null);
@@ -37,6 +38,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
 
   // useEffect to be called on mount
   useEffect(() => {
+    logger.log(`StationLogin ▶ isAgentLoggedIn changed: ${isAgentLoggedIn}`);
     setSelectedDeviceType(deviceType || '');
     setDialNumberValue(dialNumber || '');
     updateDialNumberLabel(deviceType || '');
@@ -45,6 +47,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
 
   // show modals
   useEffect(() => {
+    logger.log('StationLogin ▶ modal visibility');
     if (showMultipleLoginAlert && modalRef.current) {
       modalRef.current.showModal();
     }
@@ -54,6 +57,10 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
   }, [showMultipleLoginAlert, showCCSignOutModal]);
 
   const continueClicked = useCallback(() => {
+    logger.log('StationLogin ▶ Continue clicked', {
+      module: 'cc-components#station-login.tsx',
+      method: 'continueClicked',
+    });
     if (modalRef.current) {
       modalRef.current.close();
       handleContinue();
@@ -66,6 +73,10 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
    * Closes the dialog if it is currently open
    */
   const ccCancelButtonClicked = useCallback(() => {
+    logger.log('StationLogin ▶ CC Sign-out cancel clicked', {
+      module: 'cc-components#station-login.tsx',
+      method: 'ccCancelClicked',
+    });
     if (ccSignOutModalRef?.current?.open) {
       ccSignOutModalRef.current.close();
       setShowCCSignOutModal(false);
@@ -73,6 +84,10 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
   }, []);
 
   const updateDialNumberLabel = (selectedOption: string): void => {
+    logger.log(`StationLogin ▶ updateDialNumberLabel: ${selectedOption}`, {
+      module: 'cc-components#station-login.tsx',
+      method: 'updateDialNumberLabel',
+    });
     if (selectedOption != DESKTOP && Object.keys(LoginOptions).includes(selectedOption)) {
       setDialNumberLabel(LoginOptions[selectedOption]);
       setDialNumberPlaceholder(LoginOptions[selectedOption]);
@@ -85,6 +100,10 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
    * @returns {boolean} whether or not to show a validation error
    */
   const validateDialNumber = (input: string): boolean => {
+    logger.log(`StationLogin ▶ validateDialNumber: ${input}`, {
+      module: 'cc-components#station-login.tsx',
+      method: 'validateDialNumber',
+    });
     const regexForDn = new RegExp(dialNumberRegex ?? '1[0-9]{3}[2-9][0-9]{6}([,]{1,10}[0-9]+){0,1}');
     if (regexForDn.test(input)) {
       return false;
@@ -146,6 +165,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
                 name="login-option"
                 onChange={(event: CustomEvent) => {
                   const selectedOption = event.detail.value;
+                  logger.log(`StationLogin ▶ login option changed: ${selectedOption}`);
                   // TODO: Select component is calling onChange with first label on load
                   // bug ticket: https://jira-eng-gpk2.cisco.com/jira/browse/MOMENTUM-668
                   if (Object.keys(LoginOptions).includes(selectedOption)) {
@@ -188,6 +208,10 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
               value={dialNumberValue}
               onChange={(event) => {
                 const input = (event.target as HTMLInputElement).value.trim();
+                logger.log(`StationLogin ▶ dialNumber input changed: ${input}`, {
+                  module: 'cc-components#station-login.tsx',
+                  method: 'dialNumberInputChanged',
+                });
                 setDialNumberValue(input);
                 setDialNumber(input);
 
@@ -214,7 +238,12 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
               id="teams-dropdown"
               name="teams-dropdown"
               onChange={(event: CustomEvent) => {
-                setTeam(event.detail.value);
+                const value = event.detail.value;
+                logger.log(`StationLogin ▶ team selected: ${value}`, {
+                  module: 'cc-components#station-login.tsx',
+                  method: 'teamSelected',
+                });
+                setTeam(value);
                 setSelectedTeamId(event.detail.value);
                 setTeamId(event.detail.value);
               }}
