@@ -9,11 +9,13 @@ import {
   store,
   OutdialCall,
 } from '@webex/cc-widgets';
+import {StationLogoutSuccess} from '@webex/plugin-cc';
 import Webex from 'webex/contact-center';
 import {ThemeProvider, IconProvider, Icon, Button, Checkbox, Text, Select, Option} from '@momentum-design/components/dist/react';
 import {PopoverNext} from '@momentum-ui/react-collaboration';
 import './App.scss';
 import {observer} from 'mobx-react-lite';
+import EngageWidget from './EngageWidget';
 
 // This is not to be included to a production app.
 // Have added here for debugging purposes
@@ -27,6 +29,7 @@ const defaultWidgets = {
   callControlCAD: true,
   outdialCall: true,
 };
+window['AGENTX_SERVICE'] = {}; // Make it available in the window object for global access for engage widgets
 
 function App() {
   const [isSdkReady, setIsSdkReady] = useState(false);
@@ -308,6 +311,16 @@ function App() {
     console.log('onStateChange invoked', status);
   };
 
+    const stationLogout = () => {
+    store.cc.stationLogout({logoutReason: 'User requested logout'})
+      .then((res: StationLogoutSuccess) => {
+        console.log('Agent logged out successfully', res.data.type);
+      })
+      .catch((error: Error) => {
+        console.log('Agent logout failed', error);
+      });
+  };
+
   return (
     <div className="app mds-typography">
       <ThemeProvider
@@ -330,8 +343,8 @@ function App() {
                       setLoginType(selectedType);
                     }}
                   >
-                    <Option key={1} value="token">Access Token</Option>
-                    <Option key={2} value="oauth">Login with Webex</Option>
+                    <Option data-testid='samples:login_option_token' key={1} value="token">Access Token</Option>
+                    <Option data-testid='samples:login_option_oauth' key={2} value="oauth">Login with Webex</Option>
                   </Select>
                 
                   <div className="accessTokenTheme" style={{ marginTop: '15px' }}>
@@ -407,7 +420,7 @@ function App() {
               <div className="box" style={{ flex: 1 }}>
                 <section className="section-box">
                   <fieldset className="fieldset">
-                    <legend className="legend-box">&nbsp;Sample App Toggles&nbsp;</legend>
+                    <legend className="legend-box">&nbsp;Sample App Toggles and Operations&nbsp;</legend>
                     <Checkbox
                       checked={currentTheme === 'DARK'}
                       aria-label="theme checkbox"
@@ -430,6 +443,11 @@ function App() {
                         setShowAgentProfile(!showAgentProfile);
                       }}
                     />
+                    {store.isAgentLoggedIn && (
+                      <Button id="logoutAgent" onClick={stationLogout} color="positive" className='stationLogoutButtonClass'>
+                        Station Logout
+                      </Button>
+                    )}
                   </fieldset>
                 </section>
                 <br/>
@@ -673,6 +691,10 @@ function App() {
                   Confirm State Change
                 </Button>
               </div>
+            )}
+
+            {isSdkReady && (store.isAgentLoggedIn || isLoggedIn) && (
+              <EngageWidget accessToken={accessToken} currentTheme={currentTheme} isSdkReady={isSdkReady} />
             )}
           </div>
         </IconProvider>

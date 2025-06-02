@@ -1,3 +1,52 @@
+# [1.28.0-ccwidgets.65](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.64...v1.28.0-ccwidgets.65) (2025-06-01)
+
+
+### Bug Fixes
+
+* **samples:** add an unlisted URL for chat client ([#462](https://github.com/webex/widgets/issues/462)) ([3def454](https://github.com/webex/widgets/commit/3def454f541d490d22d6ba10e2c696117cb0951e))
+
+# [1.28.0-ccwidgets.64](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.63...v1.28.0-ccwidgets.64) (2025-05-30)
+
+
+### Bug Fixes
+
+* **station-logout:** implement-station-logout-with-sample-toggles ([#461](https://github.com/webex/widgets/issues/461)) ([de47b18](https://github.com/webex/widgets/commit/de47b18c0f37739e7de26ba6f3c70f932d1715f7))
+
+# [1.28.0-ccwidgets.63](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.62...v1.28.0-ccwidgets.63) (2025-05-30)
+
+
+### Bug Fixes
+
+* **station-login:** fix-station-login-bugs ([#459](https://github.com/webex/widgets/issues/459)) ([a203779](https://github.com/webex/widgets/commit/a203779ed81005b216d5658d9033f7d30e115797))
+
+# [1.28.0-ccwidgets.62](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.61...v1.28.0-ccwidgets.62) (2025-05-26)
+
+
+### Bug Fixes
+
+* **tooling:** fix jest setup for UI testing ([#460](https://github.com/webex/widgets/issues/460)) ([7c4a021](https://github.com/webex/widgets/commit/7c4a02197835b09886b5c566651aa10f38f34cb5))
+
+# [1.28.0-ccwidgets.61](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.60...v1.28.0-ccwidgets.61) (2025-05-26)
+
+
+### Bug Fixes
+
+* **tooling:** add-playwright-tests ([#420](https://github.com/webex/widgets/issues/420)) ([fa52889](https://github.com/webex/widgets/commit/fa5288982c45fba258c715a8a27d501fd8be650c))
+
+# [1.28.0-ccwidgets.60](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.59...v1.28.0-ccwidgets.60) (2025-05-23)
+
+
+### Bug Fixes
+
+* **contact-center:** fix bugs listed in CAI-6468 ([#458](https://github.com/webex/widgets/issues/458)) ([0873b44](https://github.com/webex/widgets/commit/0873b44919220bc00124ff708811247ba1da05dd))
+
+# [1.28.0-ccwidgets.59](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.58...v1.28.0-ccwidgets.59) (2025-05-22)
+
+
+### Features
+
+* **cc-widgets:** Digital channels support ([#456](https://github.com/webex/widgets/issues/456)) ([6da537a](https://github.com/webex/widgets/commit/6da537ae7c63453622d9ac64b477d99e62534e62))
+
 # [1.28.0-ccwidgets.58](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.57...v1.28.0-ccwidgets.58) (2025-05-19)
 
 

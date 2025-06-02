@@ -60,6 +60,11 @@ class StoreWrapper implements IStoreWrapper {
   get deviceType() {
     return this.store.deviceType;
   }
+
+  get teamId() {
+    return this.store.teamId;
+  }
+
   get dialNumber() {
     return this.store.dialNumber;
   }
@@ -163,6 +168,10 @@ class StoreWrapper implements IStoreWrapper {
     this.store.deviceType = option;
   };
 
+  setTeamId = (id: string): void => {
+    this.store.teamId = id;
+  };
+
   setDialNumber = (input: string): void => {
     this.store.dialNumber = input;
   };
@@ -170,7 +179,6 @@ class StoreWrapper implements IStoreWrapper {
   setCurrentState = (state: string): void => {
     runInAction(() => {
       this.store.currentState = state;
-      this.store.customState = null;
     });
   };
 
@@ -294,7 +302,6 @@ class StoreWrapper implements IStoreWrapper {
     if ('id' in state) {
       runInAction(() => {
         this.setCurrentState(state.id);
-        this.store.customState = null;
       });
     } else {
       runInAction(() => {
@@ -594,10 +601,15 @@ class StoreWrapper implements IStoreWrapper {
       this.setConsultCompleted(true);
     }
 
-    this.setState({
-      developerName: ENGAGED_LABEL,
-      name: ENGAGED_USERNAME,
-    });
+    if (
+      (['wrapUp', 'connected'].includes(task.data.interaction.state) && !task.data.isConsulted) ||
+      task.data.wrapUpRequired
+    ) {
+      this.setState({
+        developerName: ENGAGED_LABEL,
+        name: ENGAGED_USERNAME,
+      });
+    }
 
     const {interaction} = task.data;
     const {isTerminated} = interaction;
@@ -660,6 +672,7 @@ class StoreWrapper implements IStoreWrapper {
       this.setLastIdleCodeChangeTimestamp(undefined);
       this.setShowMultipleLoginAlert(false);
       this.setConsultStartTimeStamp(undefined);
+      this.setTeamId('');
     });
   };
 
@@ -700,6 +713,7 @@ class StoreWrapper implements IStoreWrapper {
         this.setCurrentState(payload.auxCodeId?.trim() !== '' ? payload.auxCodeId : '0');
         this.setLastStateChangeTimestamp(payload.lastStateChangeTimestamp);
         this.setLastIdleCodeChangeTimestamp(payload.lastIdleCodeChangeTimestamp);
+        this.setTeamId(payload.teamId);
       });
     };
 
@@ -710,6 +724,7 @@ class StoreWrapper implements IStoreWrapper {
         runInAction(() => {
           if (event === CC_EVENTS.AGENT_RELOGIN_SUCCESS) {
             this.setAgentProfile(payload);
+            this.setTeamId(payload.teamId);
           }
         });
         if (!listenersAdded) {

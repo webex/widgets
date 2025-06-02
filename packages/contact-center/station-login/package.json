@@ -1,7 +1,7 @@
 {
   "name": "@webex/cc-station-login",
   "description": "Webex Contact Center Widgets: Station Login",
-  "version": "1.28.0-ccwidgets.58",
+  "version": "1.28.0-ccwidgets.65",
   "main": "dist/index.js",
   "publishConfig": {
     "access": "public"
@@ -34,6 +34,7 @@
     "@testing-library/jest-dom": "6.6.2",
     "@testing-library/react": "16.0.1",
     "@types/jest": "29.5.14",
+    "@types/node": "^22.13.13",
     "@types/react-test-renderer": "18",
     "babel-jest": "29.7.0",
     "babel-loader": "9.2.1",

@@ -9,7 +9,6 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
     teams,
     loginOptions,
     login,
-    logout,
     loginFailure,
     setDeviceType,
     setDialNumber,
@@ -21,6 +20,8 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
     showMultipleLoginAlert,
     handleContinue,
     onCCSignOut,
+    teamId,
+    setTeamId,
   } = props;
 
   const modalRef = useRef<HTMLDialogElement>(null);
@@ -30,6 +31,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
   const [dialNumberValue, setDialNumberValue] = useState<string>(dialNumber || '');
   const [showCCSignOutModal, setShowCCSignOutModal] = useState<boolean>(false);
   const [selectedDeviceType, setSelectedDeviceType] = useState<string>(deviceType || '');
+  const [selectedTeamId, setSelectedTeamId] = useState<string>(teamId || '');
   const [showDNError, setShowDNError] = useState<boolean>(false);
   const [dnErrorText, setDNErrorText] = useState<string>('');
 
@@ -38,15 +40,8 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
     setSelectedDeviceType(deviceType || '');
     setDialNumberValue(dialNumber || '');
     updateDialNumberLabel(deviceType || '');
+    setSelectedTeamId(teamId || '');
   }, [isAgentLoggedIn]);
-
-  // TODO: should be set from the store
-  useEffect(() => {
-    if (teams.length > 0) {
-      const firstTeam = teams[0].id;
-      setTeam(firstTeam);
-    }
-  }, [teams]);
 
   // show modals
   useEffect(() => {
@@ -125,7 +120,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
           <Button onClick={onCCSignOut}>{StationLoginLabels.SIGN_OUT}</Button>
         </div>
       </dialog>
-      <div className="box station-login">
+      <div className="box station-login" data-testid="station-login-widget">
         <section className="section-box">
           <Text tagname={'span'} type="body-large-bold">
             {StationLoginLabels.INTERACTION_PREFERENCES}
@@ -166,12 +161,18 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
                 className="station-login-select"
                 selectedValue={selectedDeviceType}
                 selectedValueText={LoginOptions[selectedDeviceType]}
+                data-testid="login-option-select"
               >
                 {Object.keys(LoginOptions).map((option: string, index: number) => {
                   // only show loginOptions provided by store
                   if (loginOptions.includes(option)) {
                     return (
-                      <Option selected={option === selectedDeviceType} key={index} value={option}>
+                      <Option
+                        selected={option === selectedDeviceType}
+                        key={index}
+                        value={option}
+                        data-testid={`login-option-${LoginOptions[option]}`}
+                      >
                         {LoginOptions[option]}
                       </Option>
                     );
@@ -203,6 +204,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
               }}
               helpText={showDNError ? dnErrorText : undefined}
               helpTextType={showDNError ? 'error' : undefined}
+              data-testid="dial-number-input"
             />
           )}
 
@@ -213,13 +215,22 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
               name="teams-dropdown"
               onChange={(event: CustomEvent) => {
                 setTeam(event.detail.value);
+                setSelectedTeamId(event.detail.value);
+                setTeamId(event.detail.value);
               }}
               className="station-login-select"
               placeholder={StationLoginLabels.YOUR_TEAM}
+              selectedValueText={teams.find((team) => team.id === selectedTeamId)?.name}
+              data-testid="teams-dropdown-select"
             >
               {teams.map((team: {id: string; name: string}, index: number) => {
                 return (
-                  <Option key={index} value={team.id}>
+                  <Option
+                    selected={team.id === selectedTeamId}
+                    key={index}
+                    value={team.id}
+                    data-testid={`teams-dropdown-${team.name}`}
+                  >
                     {team.name}
                   </Option>
                 );
@@ -233,12 +244,8 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
             </Text>
           )}
           <div className="btn-container">
-            {isAgentLoggedIn ? (
-              <Button id="logoutAgent" onClick={logout} color="positive">
-                {StationLoginLabels.SIGN_OUT}
-              </Button>
-            ) : (
-              <Button onClick={login} disabled={showDNError}>
+            {!isAgentLoggedIn && (
+              <Button onClick={login} disabled={showDNError} data-testid="login-button">
                 {StationLoginLabels.SAVE_AND_CONTINUE}
               </Button>
             )}
