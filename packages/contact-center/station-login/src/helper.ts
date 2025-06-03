@@ -1,7 +1,8 @@
 import {useEffect, useState} from 'react';
-import {StationLoginSuccess, StationLogoutSuccess} from '@webex/plugin-cc';
+import {StationLoginSuccess, StationLogoutSuccess, AgentProfileUpdate, LoginOption} from '@webex/plugin-cc';
 import {UseStationLoginProps} from './station-login/station-login.types';
 import store, {CC_EVENTS} from '@webex/cc-store'; // we need to import as we are losing the context of this in store
+import {LoginOptionsState} from '@webex/cc-components';
 
 export const useStationLogin = (props: UseStationLoginProps) => {
   const cc = props.cc;
@@ -14,6 +15,95 @@ export const useStationLogin = (props: UseStationLoginProps) => {
   const [loginSuccess, setLoginSuccess] = useState<StationLoginSuccess>();
   const [loginFailure, setLoginFailure] = useState<Error>();
   const [logoutSuccess, setLogoutSuccess] = useState<StationLogoutSuccess>();
+
+  // Track original and current login options as a single object
+  const [originalLoginOptions, setOriginalLoginOptions] = useState<LoginOptionsState>({
+    deviceType,
+    dialNumber,
+  });
+  const [currentLoginOptions, setCurrentLoginOptions] = useState<LoginOptionsState>({
+    deviceType,
+    dialNumber,
+  });
+
+  // Error for Save button
+  const [saveError, setSaveError] = useState<string>('');
+
+  // Set original login options after successful login
+  useEffect(() => {
+    if (store.isAgentLoggedIn) {
+      setOriginalLoginOptions({
+        deviceType: store.deviceType,
+        dialNumber: store.dialNumber,
+      });
+      setCurrentLoginOptions({
+        deviceType: store.deviceType,
+        dialNumber: store.dialNumber,
+      });
+    }
+  }, [store.isAgentLoggedIn]);
+
+  // Compare logic for Save button
+  const isLoginOptionsChanged =
+    originalLoginOptions.deviceType !== currentLoginOptions.deviceType ||
+    (currentLoginOptions.deviceType !== 'BROWSER' &&
+      originalLoginOptions.dialNumber !== currentLoginOptions.dialNumber);
+
+  const saveLoginOptions = () => {
+    setSaveError('');
+    if (!isLoginOptionsChanged) {
+      setSaveError('No changes detected in login options.');
+      logger.log('No changes detected in login options.', {
+        module: 'widget-station-login#station-login/helper.ts',
+        method: 'saveLoginOptions',
+      });
+      return;
+    }
+    logger.log('Saving login options:', {
+      module: 'widget-station-login#station-login/helper.ts',
+      method: 'saveLoginOptions',
+      original: originalLoginOptions,
+      updated: currentLoginOptions,
+    });
+
+    // Prepare payload for updateAgentProfile
+    const payload: AgentProfileUpdate = {
+      loginOption: currentLoginOptions.deviceType as LoginOption,
+      teamId: store.teamId || undefined,
+    };
+    if (currentLoginOptions.deviceType !== 'BROWSER') {
+      payload.dialNumber = currentLoginOptions.dialNumber;
+    }
+
+    if (typeof cc.updateAgentProfile === 'function') {
+      cc.updateAgentProfile(payload)
+        .then(() => {
+          setOriginalLoginOptions({...currentLoginOptions});
+          setSaveError('');
+          logger.log('Agent profile updated successfully.', {
+            module: 'widget-station-login#station-login/helper.ts',
+            method: 'saveLoginOptions',
+          });
+        })
+        .catch((error: unknown) => {
+          logger.error('Failed to update agent device type', error, {
+            module: 'widget-station-login#station-login/helper.ts',
+            method: 'saveLoginOptions',
+          });
+          if (error instanceof Error) {
+            setSaveError(error.message || 'Failed to update device type');
+          } else {
+            setSaveError('Failed to update device type');
+          }
+        });
+    } else {
+      setSaveError('Device update function not available on cc object.');
+      logger.error('cc.updateAgentProfile is not a function', cc, {
+        module: 'widget-station-login#station-login/helper.ts',
+        method: 'saveLoginOptions',
+      });
+    }
+  };
 
   useEffect(() => {
     if (loginCb && store.isAgentLoggedIn) {
@@ -106,5 +196,11 @@ export const useStationLogin = (props: UseStationLoginProps) => {
     loginFailure,
     logoutSuccess,
     handleContinue,
+    originalLoginOptions,
+    currentLoginOptions,
+    setCurrentLoginOptions,
+    isLoginOptionsChanged,
+    saveLoginOptions,
+    saveError,
   };
 };

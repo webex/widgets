@@ -22,6 +22,7 @@ import EngageWidget from './EngageWidget';
 window['store'] = store;
 const defaultWidgets = {
   stationLogin: true,
+  stationLoginProfile: false,
   userState: true,
   incomingTask: true,
   taskList: true,
@@ -583,7 +584,19 @@ function App() {
                       <fieldset className="fieldset">
                         <legend className="legend-box">Station Login</legend>
                         <div className="station-login">
-                          <StationLogin onLogin={onLogin} onLogout={onLogout} onCCSignOut={onCCSignOut} />
+                          <StationLogin onLogin={onLogin} onLogout={onLogout} onCCSignOut={onCCSignOut} profileMode={false} />
+                        </div>
+                      </fieldset>
+                    </section>
+                  </div>
+                )}
+                {selectedWidgets.stationLoginProfile && store.isAgentLoggedIn && (
+                  <div className="box">
+                    <section className="section-box">
+                      <fieldset className="fieldset">
+                        <legend className="legend-box">Station Login (Profile Mode)</legend>
+                        <div className="station-login">
+                          <StationLogin onLogin={onLogin} onLogout={onLogout} onCCSignOut={onCCSignOut} profileMode={true} />
                         </div>
                       </fieldset>
                     </section>
