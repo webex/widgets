@@ -26,6 +26,7 @@ class StoreWrapper implements IStoreWrapper {
   onIncomingTask: ({task}: {task: ITask}) => void;
   onTaskRejected?: (task: ITask, reason: string) => void;
   onTaskAssigned?: (task: ITask) => void;
+  onTaskSelected?: (task: ITask) => void;
 
   constructor() {
     this.store = Store.getInstance();
@@ -214,6 +215,12 @@ class StoreWrapper implements IStoreWrapper {
         });
       }
 
+      // Determine if the new task is the same as the current task
+      let isSameTask = false;
+      if (task && this.currentTask) {
+        isSameTask = task.data.interactionId === this.currentTask.data.interactionId;
+      }
+
       // Update the current task
       this.store.currentTask = task ? Object.assign(Object.create(Object.getPrototypeOf(task)), task) : null;
 
@@ -237,6 +244,10 @@ class StoreWrapper implements IStoreWrapper {
         this.setCurrentConsultQueueId(currentConsultQueueId);
         this.setConsultStartTimeStamp(consultStartTimeStamp);
         this.setConsultOfferReceived(consultOfferReceived);
+      }
+
+      if (this.onTaskSelected && !isSameTask) {
+        this.onTaskSelected(task);
       }
     });
   };
@@ -320,6 +331,13 @@ class StoreWrapper implements IStoreWrapper {
 
   setTaskAssigned = (callback: ((task: ITask) => void) | undefined): void => {
     this.onTaskAssigned = callback;
+  };
+
+  setTaskSelected = (callback: ((task: ITask) => void) | undefined): void => {
+    if (callback && this.currentTask) {
+      callback(this.currentTask);
+    }
+    this.onTaskSelected = callback;
   };
 
   setCCCallback = (event: CC_EVENTS | TASK_EVENTS, callback) => {

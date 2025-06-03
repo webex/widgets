@@ -139,6 +139,10 @@ function App() {
     console.log('onTaskDeclined invoked for task:', task);
   };
 
+  const onTaskSelected = (task) => {
+    console.log('onTaskSelected invoked for task:', task);
+  };
+
   const onHoldResume = () => {
     console.log('onHoldResume invoked');
   };
@@ -668,7 +672,7 @@ function App() {
                         <section className="section-box">
                           <fieldset className="fieldset">
                             <legend className="legend-box">Task List</legend>
-                            <TaskList onTaskAccepted={onTaskAccepted} onTaskDeclined={onTaskDeclined} />
+                            <TaskList onTaskAccepted={onTaskAccepted} onTaskDeclined={onTaskDeclined} onTaskSelected={onTaskSelected} />
                           </fieldset>
                         </section>
                       </div>
