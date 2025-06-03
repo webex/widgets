@@ -46,6 +46,11 @@ describe('StationLoginComponent', () => {
     jest.clearAllMocks();
   });
 
+  it('logs isAgentLoggedIn change on mount', () => {
+    render(<StationLoginComponent {...props} />);
+    expect(loggerMock.log).toHaveBeenCalledWith('CC-Widgets: StationLogin: isAgentLoggedIn changed: false');
+  });
+
   it('calls handleContinue function and closes the dialog when Continue button is clicked', () => {
     const handleContinueMock = jest.fn();
     const modalRef = React.createRef<HTMLDialogElement>();
@@ -99,5 +104,29 @@ describe('StationLoginComponent', () => {
 
     const selectedText = screen.getByText('Team A');
     expect(selectedText).toBeInTheDocument();
+  });
+
+  it('logs login option change and label update', () => {
+    render(<StationLoginComponent {...props} />);
+    const loginSelect = screen.getByTestId('login-option-select');
+    fireEvent(loginSelect, new CustomEvent('change', {detail: {value: 'EXTENSION'}}));
+    expect(loggerMock.log).toHaveBeenCalledWith('CC-Widgets: StationLogin: login option changed to: EXTENSION', {
+      module: 'cc-components#station-login.tsx',
+      method: 'loginOptionChanged',
+    });
+    expect(loggerMock.log).toHaveBeenCalledWith('CC-Widgets: StationLogin: updateDialNumberLabel: EXTENSION', {
+      module: 'cc-components#station-login.tsx',
+      method: 'updateDialNumberLabel',
+    });
+  });
+
+  it('logs team selection', () => {
+    render(<StationLoginComponent {...props} />);
+    const teamSelect = screen.getByTestId('teams-dropdown-select');
+    fireEvent(teamSelect, new CustomEvent('change', {detail: {value: 'team456'}}));
+    expect(loggerMock.log).toHaveBeenCalledWith('CC-Widgets: StationLogin: team selected: team456', {
+      module: 'cc-components#station-login.tsx',
+      method: 'teamSelected',
+    });
   });
 });

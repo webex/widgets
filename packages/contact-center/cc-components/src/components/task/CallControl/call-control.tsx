@@ -270,6 +270,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                   triggerComponent={
                     <ButtonCircle
                       className={button.className}
+                      data-testid="ButtonCircle"
                       onPress={button.onClick}
                       disabled={button.disabled || consultInitiated}
                       aria-label={button.tooltip}

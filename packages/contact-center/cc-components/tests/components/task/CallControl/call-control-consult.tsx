@@ -118,4 +118,24 @@ describe('CallControlConsultComponent', () => {
     render(<CallControlConsultComponent {...defaultProps} isEndConsultEnabled={true} isAgentBeingConsulted={false} />);
     expect(screen.getByTestId('cancel-consult-btn')).toBeInTheDocument();
   });
+
+  it('logs transfer button click', () => {
+    render(<CallControlConsultComponent {...defaultProps} />);
+    const transferButton = screen.getByTestId('transfer-consult-btn');
+    fireEvent.click(transferButton);
+    expect(loggerMock.log).toHaveBeenCalledWith('CC-Widgets: CallControlConsult: transfer button clicked', {
+      module: 'call-control-consult.tsx',
+      method: 'handleTransfer',
+    });
+  });
+
+  it('logs end consult button click', () => {
+    render(<CallControlConsultComponent {...defaultProps} />);
+    const cancelButton = screen.getByTestId('cancel-consult-btn');
+    fireEvent.click(cancelButton);
+    expect(loggerMock.log).toHaveBeenCalledWith('CC-Widgets: CallControlConsult: end consult clicked', {
+      module: 'call-control-consult.tsx',
+      method: 'handleEndConsult',
+    });
+  });
 });

@@ -85,6 +85,7 @@ describe('CallControlPresentational', () => {
     wrapupCall: mockWrapupCall,
     wrapupCodes: mockWrapupCodes,
     setIsHeld: setIsHeld,
+    isHeld: false,
     buddyAgents: [],
     loadBuddyAgents: mockLoadBuddyAgents,
     loadQueues: mockLoadQueues,
@@ -105,6 +106,14 @@ describe('CallControlPresentational', () => {
     endConsultCall: jest.fn(),
     consultTransfer: jest.fn(),
     logger: loggerMock,
+    controlVisibility: {
+      holdResume: true,
+      consult: true,
+      transfer: true,
+      pauseResumeRecording: true,
+      end: true,
+      wrapup: false,
+    },
   };
 
   beforeEach(() => {
@@ -151,6 +160,16 @@ describe('CallControlPresentational', () => {
     expect(mockTransferCall).toHaveBeenCalledWith('agent1', 'agent');
     expect(mockLoadQueues).toHaveBeenCalled();
     expect(mockConsultCall).not.toHaveBeenCalled();
+  });
+
+  it('logs hold button click', () => {
+    render(<CallControlComponent {...defaultProps} />);
+    const buttons = screen.getAllByTestId('ButtonCircle');
+    fireEvent.click(buttons[0]);
+    expect(loggerMock.log).toHaveBeenCalledWith('CC-Widgets: CallControl: is Call On Hold status is false', {
+      module: 'call-control.tsx',
+      method: 'handletoggleHold',
+    });
   });
 
   // TODO - We do not have tests for CAD Component. Will move these while writing test cases for it
