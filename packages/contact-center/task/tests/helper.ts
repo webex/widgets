@@ -285,7 +285,7 @@ describe('useIncomingTask Hook', () => {
 
     // Ensure errors are logged in the console
     expect(logger.error).toHaveBeenCalled();
-    expect(logger.error).toHaveBeenCalledWith('Error accepting incoming task: Error', {
+    expect(logger.error).toHaveBeenCalledWith('CC-Widgets: Error accepting incoming task: Error', {
       module: 'widget-cc-task#helper.ts',
       method: 'useIncomingTask#accept',
     });
@@ -312,7 +312,7 @@ describe('useIncomingTask Hook', () => {
 
     // Ensure errors are logged in the console
     expect(logger.error).toHaveBeenCalled();
-    expect(logger.error).toHaveBeenCalledWith('Error rejecting incoming task: Error', {
+    expect(logger.error).toHaveBeenCalledWith('CC-Widgets: Error rejecting incoming task: Error', {
       module: 'widget-cc-task#helper.ts',
       method: 'useIncomingTask#reject',
     });
@@ -423,7 +423,7 @@ describe('useTaskList Hook', () => {
 
     // Ensure errors are logged in the console
     expect(logger.error).toHaveBeenCalled();
-    expect(logger.error).toHaveBeenCalledWith('Error accepting task: Error', {
+    expect(logger.error).toHaveBeenCalledWith('CC-Widgets: Error accepting task: Error', {
       module: 'widget-cc-task#helper.ts',
       method: 'useTaskList#acceptTask',
     });
@@ -450,7 +450,7 @@ describe('useTaskList Hook', () => {
 
     // Ensure errors are logged in the console
     expect(logger.error).toHaveBeenCalled();
-    expect(logger.error).toHaveBeenCalledWith('Error declining task: Error', {
+    expect(logger.error).toHaveBeenCalledWith('CC-Widgets: Error declining task: Error', {
       module: 'widget-cc-task#helper.ts',
       method: 'useTaskList#declineTask',
     });

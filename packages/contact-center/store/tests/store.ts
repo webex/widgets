@@ -102,7 +102,7 @@ describe('Store', () => {
       } catch (error) {
         expect(error).toEqual(mockError);
         expect(storeInstance.logger.error).toHaveBeenCalledWith(
-          'Contact-center registerCC(): failed - Error: Register failed',
+          'CC-Widgets: Contact-center registerCC(): failed - Error: Register failed',
           {
             method: 'registerCC',
             module: 'cc-store#store.ts',

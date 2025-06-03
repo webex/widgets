@@ -18,7 +18,7 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
   const timerKey = `timer-${startTimeStamp}`;
 
   const handleTransfer = () => {
-    logger.log('CallControlConsult ▶ transfer clicked', {
+    logger.log('CC-Widgets: CallControlConsult: transfer button clicked', {
       module: 'call-control-consult.tsx',
       method: 'handleTransfer',
     });
@@ -32,7 +32,7 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
   };
 
   const handleEndConsult = () => {
-    logger.log('CallControlConsult ▶ end consult clicked', {
+    logger.log('CC-Widgets: CallControlConsult: end consult clicked', {
       module: 'call-control-consult.tsx',
       method: 'handleEndConsult',
     });

@@ -46,7 +46,7 @@ describe('ConsultTransferPopoverComponent', () => {
     ],
     onAgentSelect: mockOnAgentSelect,
     onQueueSelect: mockOnQueueSelect,
-    loggerMock,
+    logger: loggerMock,
   };
 
   beforeEach(() => {

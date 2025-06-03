@@ -32,11 +32,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
   } = props;
 
   useEffect(() => {
-    logger.log(`CallControlCAD ▶ mounted with task: ${currentTask?.data?.interactionId}`);
-  }, []);
-
-  useEffect(() => {
-    logger.log(`CallControlCAD ▶ visibility changed: ${JSON.stringify(controlVisibility)}`);
+    logger.log(`CC-Widgets: CallControlCAD: visibility changed: ${JSON.stringify(controlVisibility)}`);
   }, [controlVisibility]);
 
   const formatTime = (time: number): string => {

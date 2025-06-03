@@ -44,13 +44,6 @@ function CallControlComponent(props: CallControlComponentProps) {
   } = props;
 
   useEffect(() => {
-    logger.log('CallControl ▶ component mounted', {
-      module: 'call-control.tsx',
-      method: 'useEffect-mount',
-    });
-  }, []);
-
-  useEffect(() => {
     if (!currentTask || !currentTask.data || !currentTask.data.interaction) return;
 
     const {interaction, mediaResourceId} = currentTask.data;
@@ -65,7 +58,7 @@ function CallControlComponent(props: CallControlComponentProps) {
   }, [currentTask]);
 
   const handletoggleHold = () => {
-    logger.log('CallControl ▶ hold toggle clicked', {
+    logger.log(`CC-Widgets: CallControl: is Call On Hold status is ${isHeld}`, {
       module: 'call-control.tsx',
       method: 'handletoggleHold',
     });
@@ -74,7 +67,7 @@ function CallControlComponent(props: CallControlComponentProps) {
   };
 
   const handleWrapupCall = () => {
-    logger.log('CallControl ▶ wrap-up submitted', {
+    logger.log('CC-Widgets: CallControl: wrap-up submitted', {
       module: 'call-control.tsx',
       method: 'handleWrapupCall',
     });
@@ -91,7 +84,7 @@ function CallControlComponent(props: CallControlComponentProps) {
   };
 
   const handleTargetSelect = (id: string, name: string, type: DestinationType) => {
-    logger.log('CallControl ▶ target selected', {
+    logger.log('CC-Widgets: CallControl: handling target agent selected', {
       module: 'call-control.tsx',
       method: 'handleTargetSelect',
     });
@@ -114,7 +107,7 @@ function CallControlComponent(props: CallControlComponentProps) {
   };
 
   const handlePopoverOpen = (menuType: CallControlMenuType) => {
-    logger.log('CallControl ▶ popover toggle', {
+    logger.log('CC-Widgets: CallControl: opening call control popover', {
       module: 'call-control.tsx',
       method: 'handlePopoverOpen',
     });

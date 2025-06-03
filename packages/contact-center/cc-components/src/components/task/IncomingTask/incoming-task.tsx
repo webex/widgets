@@ -32,17 +32,23 @@ const IncomingTaskComponent: React.FunctionComponent<IncomingTaskComponentProps>
       isIncomingTask={true}
       queue={virtualTeamName}
       acceptTask={() => {
-        logger.log('IncomingTask ▶ accept clicked', {
-          module: 'incoming-task.tsx',
-          method: 'acceptTask',
-        });
+        logger.log(
+          `CC-Widgets: IncomingTask: accept clicked for task with interactionID: ${incomingTask.data.interactionId}`,
+          {
+            module: 'incoming-task.tsx',
+            method: 'acceptTask',
+          }
+        );
         accept(incomingTask);
       }}
       declineTask={() => {
-        logger.log('IncomingTask ▶ decline clicked', {
-          module: 'incoming-task.tsx',
-          method: 'declineTask',
-        });
+        logger.log(
+          `CC-Widgets: IncomingTask: decline clicked for task with interactionID: ${incomingTask.data.interactionId}`,
+          {
+            module: 'incoming-task.tsx',
+            method: 'declineTask',
+          }
+        );
         reject(incomingTask);
       }}
       ronaTimeout={ronaTimeout}

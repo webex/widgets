@@ -52,7 +52,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
         hasBackground={false}
         style={{marginTop: '0'}}
         onTabSelection={(key) => {
-          logger.log(`ConsultTransferPopover ▶ tab selected: ${key}`, {
+          logger.log(`CC-Widgets: ConsultTransferPopover: tab selected: ${key}`, {
             module: 'consult-transfer-popover.tsx',
             method: 'onTabSelection',
           });
@@ -79,7 +79,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
           (agent) => agent.agentId,
           (agent) => agent.agentName,
           (id, name) => {
-            logger.log(`ConsultTransferPopover ▶ agent selected: ${id}`, {
+            logger.log(`CC-Widgets: ConsultTransferPopover: agent selected: ${id}`, {
               module: 'consult-transfer-popover.tsx',
               method: 'onAgentSelect',
             });
@@ -94,7 +94,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
           (queue) => queue.id,
           (queue) => queue.name,
           (id, name) => {
-            logger.log(`ConsultTransferPopover ▶ queue selected: ${id}`, {
+            logger.log(`CC-Widgets: ConsultTransferPopover: queue selected: ${id}`, {
               module: 'consult-transfer-popover.tsx',
               method: 'onQueueSelect',
             });

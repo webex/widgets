@@ -31,14 +31,13 @@ const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (prop
             : undefined;
         const declineText =
           isIncomingTask && !task.data.wrapUpRequired && isTelephony && isBrowser ? 'Decline' : undefined;
-        const interactionId = task.data.interactionId;
-        logger.log('TaskList ▶ renderItem', {
+        logger.log('CC-Widgets: TaskList: rendering task list', {
           module: 'task-list.tsx',
           method: 'renderItem',
         });
         return (
           <Task
-            interactionId={interactionId}
+            interactionId={task.data.interactionId}
             title={ani}
             state={!isIncomingTask ? taskState : ''}
             startTimeStamp={startTimeStamp}
@@ -50,7 +49,7 @@ const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (prop
             declineTask={() => declineTask(task)}
             ronaTimeout={isIncomingTask ? ronaTimeout : null}
             onTaskSelect={() => {
-              logger.log('TaskList ▶ select clicked', {
+              logger.log(`CC-Widgets: TaskList: select task clicked for interactionId: ${task.data.interactionId}`, {
                 module: 'task-list.tsx',
                 method: 'onTaskSelect',
               });

@@ -324,7 +324,7 @@ class StoreWrapper implements IStoreWrapper {
 
   setCCCallback = (event: CC_EVENTS | TASK_EVENTS, callback) => {
     if (!callback) return;
-    this.store.logger.log(`setCCCallback(): registering CC event '${event}'`, {
+    this.store.logger.log(`CC-Widgets: setCCCallback(): registering CC event '${event}'`, {
       module: 'storeEventsWrapper.ts',
       method: 'setCCCallback',
     });
@@ -352,7 +352,7 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   removeCCCallback = (event: CC_EVENTS) => {
-    this.store.logger.log(`removeCCCallback(): removing CC event '${event}'`, {
+    this.store.logger.log(`CC-Widgets: removeCCCallback(): removing CC event '${event}'`, {
       module: 'storeEventsWrapper.ts',
       method: 'removeCCCallback',
     });
@@ -557,7 +557,7 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   handleStateChange = (data) => {
-    this.store.logger.log('handleStateChange(): agent state changed', {
+    this.store.logger.log('CC-Widgets: handleStateChange(): agent state changed', {
       module: 'storeEventsWrapper.ts',
       method: 'handleStateChange',
     });
@@ -571,7 +571,7 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   handleMultiLoginCloseSession = (data) => {
-    this.store.logger.log('handleMultiLoginCloseSession(): multi-login alert', {
+    this.store.logger.log('CC-Widgets: handleMultiLoginCloseSession(): multi-login alert', {
       module: 'storeEventsWrapper.ts',
       method: 'handleMultiLoginCloseSession',
     });
@@ -678,7 +678,7 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   cleanUpStore = () => {
-    this.store.logger.log('cleanUpStore(): resetting store on logout', {
+    this.store.logger.log('CC-Widgets: cleanUpStore(): resetting store on logout', {
       module: 'storeEventsWrapper.ts',
       method: 'cleanUpStore',
     });
@@ -700,7 +700,7 @@ class StoreWrapper implements IStoreWrapper {
     let listenersAdded = false;
 
     const handleLogOut = () => {
-      this.store.logger.log('setupIncomingTaskHandler(): AGENT_LOGOUT_SUCCESS received', {
+      this.store.logger.log('CC-Widgets: setupIncomingTaskHandler(): AGENT_LOGOUT_SUCCESS received', {
         module: 'storeEventsWrapper.ts',
         method: 'setupIncomingTaskHandler#handleLogOut',
       });
@@ -711,7 +711,7 @@ class StoreWrapper implements IStoreWrapper {
     };
 
     const addEventListeners = () => {
-      this.store.logger.log('setupIncomingTaskHandler(): adding CC SDK listeners', {
+      this.store.logger.log('CC-Widgets: setupIncomingTaskHandler(): adding CC SDK listeners', {
         module: 'storeEventsWrapper.ts',
         method: 'setupIncomingTaskHandler#addEventListeners',
       });
@@ -723,7 +723,7 @@ class StoreWrapper implements IStoreWrapper {
     };
 
     const removeEventListeners = () => {
-      this.store.logger.log('setupIncomingTaskHandler(): removing CC SDK listeners', {
+      this.store.logger.log('CC-Widgets: setupIncomingTaskHandler(): removing CC SDK listeners', {
         module: 'storeEventsWrapper.ts',
         method: 'setupIncomingTaskHandler#removeEventListeners',
       });
@@ -737,7 +737,7 @@ class StoreWrapper implements IStoreWrapper {
     // TODO: https://jira-eng-gpk2.cisco.com/jira/browse/SPARK-626777 Implement the de-register method and close the listener there
 
     const handleLogin = (payload: Profile) => {
-      this.store.logger.log('AGENT_STATION_LOGIN_SUCCESS payload', {
+      this.store.logger.log('CC-Widgets: AGENT_STATION_LOGIN_SUCCESS payload', {
         module: 'storeEventsWrapper.ts',
         method: 'setupIncomingTaskHandler#handleLogin',
       });
@@ -757,7 +757,7 @@ class StoreWrapper implements IStoreWrapper {
 
     [CC_EVENTS.AGENT_DN_REGISTERED, CC_EVENTS.AGENT_RELOGIN_SUCCESS].forEach((event) => {
       ccSDK.on(`${event}`, (payload) => {
-        this.store.logger.log(`setupIncomingTaskHandler(): event '${event}' received`, {
+        this.store.logger.log(`CC-Widgets: setupIncomingTaskHandler(): event '${event}' received`, {
           module: 'storeEventsWrapper.ts',
           method: 'setupIncomingTaskHandler',
         });

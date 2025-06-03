@@ -50,7 +50,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
       store.setShowMultipleLoginAlert(false);
       await store.registerCC();
       if (store.isAgentLoggedIn) {
-        logger.log(`Agent Relogin Success`, {
+        logger.log(`CC-Widgets: Agent Relogin Success`, {
           module: 'widget-station-login#station-login/helper.ts',
           method: 'handleContinue',
         });
@@ -61,7 +61,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
         });
       }
     } catch (error) {
-      logger.error(`Error handling agent multi login continue: ${error}`, {
+      logger.error(`CC-Widgets: Error handling agent multi login continue: ${error}`, {
         module: 'widget-station-login#station-login/index.tsx',
         method: 'handleContinue',
       });
@@ -69,7 +69,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
   };
 
   const login = () => {
-    logger.log('useStationLogin login(): invoking stationLogin', {
+    logger.log('CC-Widgets: useStationLogin login(): invoking stationLogin', {
       module: 'station-login/helper.ts',
       method: 'login',
     });
@@ -89,7 +89,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
   };
 
   const logout = () => {
-    logger.log('useStationLogin logout(): invoking stationLogout', {
+    logger.log('CC-Widgets: useStationLogin logout(): invoking stationLogout', {
       module: 'station-login/helper.ts',
       method: 'logout',
     });
@@ -98,7 +98,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
         setLogoutSuccess(res);
       })
       .catch((error: Error) => {
-        logger.error(`Error logging out: ${error}`, {
+        logger.error(`CC-Widgets: Error logging out: ${error}`, {
           module: 'widget-station-login#helper.ts',
           method: 'logout',
         });

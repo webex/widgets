@@ -79,7 +79,7 @@ class Store implements IStore {
     }
 
     this.logger = this.cc.LoggerProxy;
-    this.logger.log('Contact-center registerCC(): starting registration', {
+    this.logger.log('CC-Widgets: Contact-center registerCC(): starting registration', {
       module: 'cc-store#store.ts',
       method: 'registerCC',
     });
@@ -87,7 +87,7 @@ class Store implements IStore {
     return this.cc
       .register()
       .then((response: Profile) => {
-        this.logger.log('Contact-center registerCC(): registration successful', {
+        this.logger.log('CC-Widgets: Contact-center registerCC(): registration successful', {
           module: 'cc-store#store.ts',
           method: 'registerCC',
         });
@@ -112,7 +112,7 @@ class Store implements IStore {
         this.agentProfile.agentName = response.agentName;
       })
       .catch((error) => {
-        this.logger.error(`Contact-center registerCC(): failed - ${error}`, {
+        this.logger.error(`CC-Widgets: Contact-center registerCC(): failed - ${error}`, {
           module: 'cc-store#store.ts',
           method: 'registerCC',
         });
@@ -144,14 +144,14 @@ class Store implements IStore {
         clearTimeout(timer);
         this.registerCC(webex)
           .then(() => {
-            this.logger.log('Store init(): store initialization complete', {
+            this.logger.log('CC-Widgets: Store init(): store initialization complete', {
               module: 'cc-store#store.ts',
               method: 'init',
             });
             resolve();
           })
           .catch((error) => {
-            this.logger.error(`Store init(): registration failed - ${error}`, {
+            this.logger.error(`CC-Widgets: Store init(): registration failed - ${error}`, {
               module: 'cc-store#store.ts',
               method: 'init',
             });

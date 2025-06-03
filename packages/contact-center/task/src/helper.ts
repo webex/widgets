@@ -21,19 +21,19 @@ export const useTaskList = (props: UseTaskListProps) => {
   };
 
   useEffect(() => {
-    logger.log(`useTaskList init: ${Object.keys(taskList).length} tasks`, {
+    logger.log(`CC-Widgets: useTaskList init: ${Object.keys(taskList).length} tasks`, {
       module: 'useTaskList',
       method: 'useEffect',
     });
     store.setTaskAssigned((task) => {
-      logger.log(`taskAssigned event for ${task.data.interactionId}`, {
+      logger.log(`CC-Widgets: taskAssigned event for ${task.data.interactionId}`, {
         module: 'useTaskList',
         method: 'setTaskAssigned',
       });
       if (onTaskAccepted) onTaskAccepted(task);
     });
     store.setTaskRejected((task) => {
-      logger.log(`taskRejected event for ${task.data.interactionId}`, {
+      logger.log(`CC-Widgets: taskRejected event for ${task.data.interactionId}`, {
         module: 'useTaskList',
         method: 'setTaskRejected',
       });
@@ -42,22 +42,22 @@ export const useTaskList = (props: UseTaskListProps) => {
   }, []);
 
   const acceptTask = (task: ITask) => {
-    logger.log(`acceptTask called for ${task.data.interactionId}`, {
+    logger.log(`CC-Widgets: acceptTask called for ${task.data.interactionId}`, {
       module: 'useTaskList',
       method: 'acceptTask',
     });
     task.accept().catch((error) => {
-      logError(`Error accepting task: ${error}`, 'acceptTask');
+      logError(`CC-Widgets: Error accepting task: ${error}`, 'acceptTask');
     });
   };
 
   const declineTask = (task: ITask) => {
-    logger.log(`declineTask called for ${task.data.interactionId}`, {
+    logger.log(`CC-Widgets: declineTask called for ${task.data.interactionId}`, {
       module: 'useTaskList',
       method: 'declineTask',
     });
     task.decline().catch((error) => {
-      logError(`Error declining task: ${error}`, 'declineTask');
+      logError(`CC-Widgets: Error declining task: ${error}`, 'declineTask');
     });
   };
   const onTaskSelect = (task: ITask) => {
@@ -81,14 +81,14 @@ export const useIncomingTask = (props: UseTaskProps) => {
 
   useEffect(() => {
     if (!incomingTask) return;
-    logger.log(`useIncomingTask registering listeners for ${incomingTask.data.interactionId}`, {
+    logger.log(`CC-Widgets: useIncomingTask registering listeners for ${incomingTask.data.interactionId}`, {
       module: 'useIncomingTask',
       method: 'useEffect',
     });
     store.setTaskCallback(
       TASK_EVENTS.TASK_ASSIGNED,
       () => {
-        logger.log(`incoming TASK_ASSIGNED for ${incomingTask.data.interactionId}`, {
+        logger.log(`CC-Widgets: incoming TASK_ASSIGNED for ${incomingTask.data.interactionId}`, {
           module: 'useIncomingTask',
           method: 'TASK_ASSIGNED',
         });
@@ -117,24 +117,24 @@ export const useIncomingTask = (props: UseTaskProps) => {
   };
 
   const accept = () => {
-    logger.log(`incomingTask.accept() called`, {
+    logger.log(`CC-Widgets: incomingTask.accept() called`, {
       module: 'useIncomingTask',
       method: 'accept',
     });
     if (!incomingTask?.data.interactionId) return;
     incomingTask.accept().catch((error) => {
-      logError(`Error accepting incoming task: ${error}`, 'accept');
+      logError(`CC-Widgets: Error accepting incoming task: ${error}`, 'accept');
     });
   };
 
   const reject = () => {
-    logger.log(`incomingTask.reject() called`, {
+    logger.log(`CC-Widgets: incomingTask.reject() called`, {
       module: 'useIncomingTask',
       method: 'reject',
     });
     if (!incomingTask?.data.interactionId) return;
     incomingTask.decline().catch((error) => {
-      logError(`Error rejecting incoming task: ${error}`, 'reject');
+      logError(`CC-Widgets: Error rejecting incoming task: ${error}`, 'reject');
     });
   };
 

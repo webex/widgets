@@ -8,6 +8,14 @@ describe('TaskListPresentational Component', () => {
   afterEach(cleanup);
 
   it('renders a list of tasks when taskList is not empty', () => {
+    const loggerMock = {
+      log: jest.fn(),
+      error: jest.fn(),
+      warn: jest.fn(),
+      info: jest.fn(),
+      trace: jest.fn(),
+    };
+
     const props: TaskListComponentProps = {
       taskList: [
         {
@@ -35,6 +43,7 @@ describe('TaskListPresentational Component', () => {
           },
         },
       ],
+      logger: loggerMock,
     };
 
     render(<TaskListComponent {...props} />);

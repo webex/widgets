@@ -100,7 +100,7 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
 
   const handleSelectionChange = (key: string) => {
     const cleanKey = key.startsWith('hide-') ? key.substring(5) : key;
-    logger.log(`UserState ▶ selection changed from ${currentState} to ${cleanKey}`, {
+    logger.log(`CC-Widgets: UserState: selection changed from ${currentState} to ${cleanKey}`, {
       module: 'user-state.tsx',
       method: 'handleSelectionChange',
     });
