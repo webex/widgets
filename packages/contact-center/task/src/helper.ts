@@ -10,7 +10,7 @@ const ENGAGED_USERNAME = 'Engaged';
 
 // Hook for managing the task list
 export const useTaskList = (props: UseTaskListProps) => {
-  const {deviceType, onTaskAccepted, onTaskDeclined, logger, taskList} = props;
+  const {deviceType, onTaskAccepted, onTaskDeclined, onTaskSelected, logger, taskList} = props;
   const isBrowser = deviceType === 'BROWSER';
 
   const logError = (message: string, method: string) => {
@@ -21,14 +21,23 @@ export const useTaskList = (props: UseTaskListProps) => {
   };
 
   useEffect(() => {
-    store.setTaskAssigned(function (task) {
-      if (onTaskAccepted) onTaskAccepted(task);
-    });
+    if (onTaskAccepted) {
+      store.setTaskAssigned(function (task) {
+        onTaskAccepted(task);
+      });
+    }
 
-    store.setTaskRejected(function (task, reason) {
-      console.log('Task rejected:', task, reason);
-      if (onTaskDeclined) onTaskDeclined(task);
-    });
+    if (onTaskDeclined) {
+      store.setTaskRejected(function (task, reason) {
+        onTaskDeclined(task, reason);
+      });
+    }
+
+    if (onTaskSelected) {
+      store.setTaskSelected(function (task) {
+        onTaskSelected(task);
+      });
+    }
   }, []);
 
   const acceptTask = (task: ITask) => {
