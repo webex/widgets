@@ -3,6 +3,9 @@ const fs = require('fs');
 const path = require('path');
 
 setup('OAuth', async ({browser}) => {
+  if (!process.env.PLAYWRIGHT_USERNAME || !process.env.PLAYWRIGHT_PASSWORD) {
+    throw new Error('PLAYWRIGHT_USERNAME and PLAYWRIGHT_PASSWORD must be set in the environment variables');
+  }
   const page = await browser.newPage();
   await page.goto('http://localhost:3000/');
 
@@ -11,11 +14,11 @@ setup('OAuth', async ({browser}) => {
   await page.getByRole('button', {name: 'Login with Webex'}).click();
 
   await page.getByRole('textbox', {name: 'name@example.com'}).click();
-  await page.getByRole('textbox', {name: 'name@example.com'}).fill('user1@ccsdk.wbx.ai');
+  await page.getByRole('textbox', {name: 'name@example.com'}).fill(process.env.PLAYWRIGHT_USERNAME);
   await page.getByRole('link', {name: 'Sign in'}).click();
 
   await page.getByRole('textbox', {name: 'Password'}).click();
-  await page.getByAltText('Password ').fill('$rrA%Z1zB6');
+  await page.getByAltText('Password ').fill(process.env.PLAYWRIGHT_PASSWORD);
   await page.getByRole('button', {name: 'Sign in'}).click();
 
   await page.getByRole('textbox').click();
