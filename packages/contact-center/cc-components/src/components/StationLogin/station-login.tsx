@@ -100,6 +100,11 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
     }
   }, []);
 
+  const handleSaveConfirm = () => {
+    saveConfirmCancelClicked();
+    saveLoginOptions();
+  };
+
   const updateDialNumberLabel = (selectedOption: string): void => {
     if (selectedOption != DESKTOP && Object.keys(LoginOptions).includes(selectedOption)) {
       setDialNumberLabel(LoginOptions[selectedOption]);
@@ -174,14 +179,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
           <Button onClick={saveConfirmCancelClicked} variant="secondary" className="white-button">
             {StationLoginLabels.CANCEL}
           </Button>
-          <Button
-            onClick={() => {
-              saveConfirmCancelClicked();
-              saveLoginOptions();
-            }}
-          >
-            {StationLoginLabels.CONFIRM}
-          </Button>
+          <Button onClick={handleSaveConfirm}>{StationLoginLabels.CONFIRM}</Button>
         </div>
       </dialog>
       <div className="box station-login" data-testid="station-login-widget">

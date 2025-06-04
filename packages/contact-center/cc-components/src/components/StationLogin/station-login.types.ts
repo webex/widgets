@@ -155,6 +155,14 @@ export interface IStationLoginProps {
    * Error message when saving login options fails.
    */
   saveError: string;
+  /**
+   * Called when save starts (after confirm)
+   */
+  onSaveStart?: () => void;
+  /**
+   * Called when save ends (true=success, false=error)
+   */
+  onSaveEnd?: (isComplete: boolean) => void;
 }
 
 export interface LoginOptionsState {

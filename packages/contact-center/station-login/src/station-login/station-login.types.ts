@@ -2,7 +2,10 @@ import {IStationLoginProps} from '@webex/cc-components';
 
 export type UseStationLoginProps = Pick<
   IStationLoginProps,
-  'cc' | 'onLogin' | 'onLogout' | 'logger' | 'deviceType' | 'dialNumber'
+  'cc' | 'onLogin' | 'onLogout' | 'logger' | 'deviceType' | 'dialNumber' | 'onSaveStart' | 'onSaveEnd'
 >;
 
-export type StationLoginProps = Pick<IStationLoginProps, 'onLogin' | 'onLogout' | 'onCCSignOut' | 'profileMode'>;
+export type StationLoginProps = Pick<
+  IStationLoginProps,
+  'onLogin' | 'onLogout' | 'onCCSignOut' | 'profileMode' | 'onSaveStart' | 'onSaveEnd'
+>;

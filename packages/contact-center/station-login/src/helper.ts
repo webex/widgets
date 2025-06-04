@@ -57,6 +57,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
         module: 'widget-station-login#station-login/helper.ts',
         method: 'saveLoginOptions',
       });
+      if (props.onSaveEnd) props.onSaveEnd(false);
       return;
     }
     logger.log('Saving login options:', {
@@ -66,10 +67,12 @@ export const useStationLogin = (props: UseStationLoginProps) => {
       updated: currentLoginOptions,
     });
 
+    if (props.onSaveStart) props.onSaveStart();
+
     // Prepare payload for updateAgentProfile
     const payload: AgentProfileUpdate = {
       loginOption: currentLoginOptions.deviceType as LoginOption,
-      teamId: store.teamId || undefined,
+      teamId: store.teamId ?? undefined,
     };
     if (currentLoginOptions.deviceType !== 'BROWSER') {
       payload.dialNumber = currentLoginOptions.dialNumber;
@@ -84,6 +87,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
             module: 'widget-station-login#station-login/helper.ts',
             method: 'saveLoginOptions',
           });
+          if (props.onSaveEnd) props.onSaveEnd(true);
         })
         .catch((error: unknown) => {
           logger.error('Failed to update agent device type', error, {
@@ -95,6 +99,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
           } else {
             setSaveError('Failed to update device type');
           }
+          if (props.onSaveEnd) props.onSaveEnd(false);
         });
     } else {
       setSaveError('Device update function not available on cc object.');
@@ -102,6 +107,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
         module: 'widget-station-login#station-login/helper.ts',
         method: 'saveLoginOptions',
       });
+      if (props.onSaveEnd) props.onSaveEnd(false);
     }
   };
 

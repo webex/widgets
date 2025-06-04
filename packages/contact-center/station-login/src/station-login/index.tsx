@@ -7,7 +7,7 @@ import {useStationLogin} from '../helper';
 import {StationLoginProps} from './station-login.types';
 
 const StationLogin: React.FunctionComponent<StationLoginProps> = observer(
-  ({onLogin, onLogout, onCCSignOut, profileMode}) => {
+  ({onLogin, onLogout, onCCSignOut, profileMode, onSaveStart, onSaveEnd}) => {
     const {
       cc,
       teams,
@@ -29,6 +29,8 @@ const StationLogin: React.FunctionComponent<StationLoginProps> = observer(
       logger,
       deviceType,
       dialNumber,
+      onSaveStart,
+      onSaveEnd,
     });
 
     const dialNumberRegex = cc?.agentConfig?.regexUS;

@@ -57,6 +57,22 @@ function App() {
   const [showAgentProfile, setShowAgentProfile] = useState(false);
 
   const [collapsedTasks, setCollapsedTasks] = React.useState([]);
+  const [showLoader, setShowLoader] = useState(false);
+  const [toast, setToast] = useState<{type: 'success' | 'error'}|null>(null);
+
+  const handleSaveStart = () => {
+  setShowLoader(true);
+  setToast(null);
+};
+
+const handleSaveEnd = (isComplete: boolean) => {
+  setShowLoader(false);
+  if (isComplete) {
+    setToast({type: 'success'});
+  } else {
+    setToast({type: 'error'});
+  }
+};
 
   const onIncomingTaskCB = ({task}) => {
     console.log('Incoming task:', task);
@@ -334,6 +350,39 @@ function App() {
         <IconProvider iconSet="momentum-icons">
           <div className="webexTheme">
             <h1>Contact Center widgets in a react app</h1>
+              {showLoader && (
+                <div className="profile-loader-overlay">
+                    <div className="profile-loader-spinner" aria-label="Loading" />
+                </div>
+              )}
+
+              {toast && toast.type === 'success' && (
+                <div className="toast toast-success" role="status" aria-live="polite">
+                  <div className="toast-icon" aria-hidden="true">
+                    <Icon name="check-circle-bold" />
+                  </div>
+                  <div className="toast-content">
+                    <div className="toast-title">
+                      Interaction preferences changes
+                    </div>
+                    <div>
+                      Your interaction preference is updated
+                    </div>
+                  </div>
+                  <Button
+                    size={32}
+                    variant="tertiary"
+                    color="default"
+                    prefix-icon="cancel-bold"
+                    postfix-icon=""
+                    type="button"
+                    role="button"
+                    aria-label="Close"
+                    onClick={() => setToast(null)}
+                    className="toast-close"
+                  />
+                </div>
+            )}
 
             <div className="box">
               <section className="section-box">
@@ -600,7 +649,13 @@ function App() {
                       <fieldset className="fieldset">
                         <legend className="legend-box">Station Login (Profile Mode)</legend>
                         <div className="station-login">
-                          <StationLogin onLogin={onLogin} onLogout={onLogout} onCCSignOut={onCCSignOut} profileMode={true} />
+                          <StationLogin 
+                            onLogin={onLogin} 
+                            onLogout={onLogout} 
+                            onCCSignOut={onCCSignOut} 
+                            profileMode={true} 
+                            onSaveStart={handleSaveStart}
+                            onSaveEnd={handleSaveEnd} />
                         </div>
                       </fieldset>
                     </section>
