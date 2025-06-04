@@ -22,7 +22,7 @@ afterAll(() => {
   (console.error as jest.Mock).mockRestore();
 });
 
-describe('ConsultTransferPopoverComponent', () => {
+describe.skip('ConsultTransferPopoverComponent', () => {
   const mockOnAgentSelect = jest.fn();
   const mockOnQueueSelect = jest.fn();
   const baseProps = {

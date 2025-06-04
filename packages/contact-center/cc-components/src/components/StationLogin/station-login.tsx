@@ -106,7 +106,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
         </div>
       </dialog>
       {/* TODO: Replace dialog with momentum-design modal component once available */}
-      <dialog ref={ccSignOutModalRef} className="cc-logout-modal">
+      <dialog ref={ccSignOutModalRef} className="cc-logout-modal" data-testid="cc-logout-modal">
         <Text tagname="h2" type="body-large-bold" className="modal-text">
           {StationLoginLabels.CC_SIGN_OUT}
         </Text>
@@ -114,28 +114,43 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
           {StationLoginLabels.CC_SIGN_OUT_CONFIRM}
         </Text>
         <div className="cc-logout-modal-content">
-          <Button onClick={ccCancelButtonClicked} variant="secondary" className="white-button">
+          <Button
+            onClick={ccCancelButtonClicked}
+            variant="secondary"
+            className="white-button"
+            data-testId="cc-cancel-button"
+          >
             {StationLoginLabels.CANCEL}
           </Button>
-          <Button onClick={onCCSignOut}>{StationLoginLabels.SIGN_OUT}</Button>
+          <Button data-testId="cc-logout-button" onClick={onCCSignOut}>
+            {StationLoginLabels.SIGN_OUT}
+          </Button>
         </div>
       </dialog>
       <div className="box station-login" data-testid="station-login-widget">
         <section className="section-box">
-          <Text tagname={'span'} type="body-large-bold">
+          <Text tagname={'span'} type="body-large-bold" data-testid="station-login-label">
             {StationLoginLabels.INTERACTION_PREFERENCES}
           </Text>
           <div>
             <div id="agent-login-label">
-              <Text type="body-midsize-regular">{StationLoginLabels.HANDLE_CALLS}</Text>
-              <Icon name="info-badge-filled" id="agent-login-info-badge" />
+              <Text type="body-midsize-regular" data-testid="station-login-label">
+                {StationLoginLabels.HANDLE_CALLS}
+              </Text>
+              <Icon name="info-badge-filled" id="agent-login-info-badge" data-testid="station-login-icon" />
               <Tooltip
+                data-testid="station-login-tooltip"
                 color="contrast"
                 id="agent-login-label-tooltip"
                 showArrow={true}
                 triggerID="agent-login-info-badge"
               >
-                <Text tagname={'div'} type="body-large-regular" className="agent-login-popover">
+                <Text
+                  tagname={'div'}
+                  type="body-large-regular"
+                  className="agent-login-popover"
+                  data-testid="station-login-label"
+                >
                   {StationLoginLabels.HANDLE_CALLS_TOOLTIP}
                 </Text>
               </Tooltip>
@@ -144,6 +159,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
               <Select
                 id="login-option"
                 name="login-option"
+                data-testid="login-option-select"
                 onChange={(event: CustomEvent) => {
                   const selectedOption = event.detail.value;
                   // TODO: Select component is calling onChange with first label on load
@@ -161,7 +177,6 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
                 className="station-login-select"
                 selectedValue={selectedDeviceType}
                 selectedValueText={LoginOptions[selectedDeviceType]}
-                data-testid="login-option-select"
               >
                 {Object.keys(LoginOptions).map((option: string, index: number) => {
                   // only show loginOptions provided by store
@@ -183,6 +198,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
           </div>
           {selectedDeviceType && selectedDeviceType !== DESKTOP && (
             <Input
+              data-testid="dial-number-input"
               label={dialNumberLabel}
               placeholder={dialNumberPlaceholder}
               value={dialNumberValue}
@@ -204,12 +220,12 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
               }}
               helpText={showDNError ? dnErrorText : undefined}
               helpTextType={showDNError ? 'error' : undefined}
-              data-testid="dial-number-input"
             />
           )}
 
           <div className="select-container">
             <Select
+              data-testid="teams-select-dropdown"
               label={StationLoginLabels.YOUR_TEAM}
               id="teams-dropdown"
               name="teams-dropdown"
@@ -221,7 +237,6 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
               className="station-login-select"
               placeholder={StationLoginLabels.YOUR_TEAM}
               selectedValueText={teams.find((team) => team.id === selectedTeamId)?.name}
-              data-testid="teams-dropdown-select"
             >
               {teams.map((team: {id: string; name: string}, index: number) => {
                 return (
@@ -239,7 +254,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
           </div>
 
           {loginFailure && (
-            <Text className="error-text-color" type={'body-midsize-regular'}>
+            <Text className="error-text-color" type={'body-midsize-regular'} data-testid="station-login-failure-label">
               {SignInErrors[loginFailure.message] ?? StationLoginLabels.DEFAULT_ERROR}
             </Text>
           )}
@@ -250,7 +265,12 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
               </Button>
             )}
             {onCCSignOut && (
-              <Button onClick={() => setShowCCSignOutModal(true)} variant="secondary" className="white-button">
+              <Button
+                onClick={() => setShowCCSignOutModal(true)}
+                variant="secondary"
+                className="white-button"
+                data-testid="sign-out-button"
+              >
                 {StationLoginLabels.SIGN_OUT}
               </Button>
             )}
