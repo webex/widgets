@@ -1,4 +1,14 @@
-import {ILogger, ITask, IContactCenter, WrapupCodes, BuddyDetails, DestinationType} from '@webex/cc-store';
+import {
+  ILogger,
+  ITask,
+  IContactCenter,
+  WrapupCodes,
+  BuddyDetails,
+  DestinationType,
+  ContactServiceQueue,
+} from '@webex/cc-store';
+
+type Enum<T extends Record<string, unknown>> = T[keyof T];
 
 /**
  * Interface representing the TaskProps of a user.
@@ -22,12 +32,12 @@ export interface TaskProps {
   /**
    * Handler for task accepted
    */
-  onAccepted?: () => void;
+  onAccepted?: ({task}: {task: ITask}) => void;
 
   /**
    * Handler for task declined
    */
-  onDeclined?: () => void;
+  onRejected?: ({task}: {task: ITask}) => void;
 
   /**
    * Handler for task accepted in TaskList
@@ -40,14 +50,19 @@ export interface TaskProps {
   onTaskDeclined?: (task: ITask) => void;
 
   /**
+   * Handler for task selected in TaskList
+   */
+  onTaskSelected?: (task: ITask) => void;
+
+  /**
    * accept incoming task action
    */
-  accept: () => void;
+  accept: (task: ITask) => void;
 
   /**
    * decline incoming task action
    */
-  decline: () => void;
+  reject: (task: ITask) => void;
 
   /**
    * accept task from task list
@@ -59,6 +74,10 @@ export interface TaskProps {
    */
   declineTask: (task: ITask) => void;
 
+  /**
+   * Function to handle task selection
+   */
+  onTaskSelect: (task: ITask) => void;
   /**
    * Flag to determine if the user is logged in with a browser option
    */
@@ -82,7 +101,7 @@ export interface TaskProps {
   /**
    * List of tasks
    */
-  taskList: ITask[];
+  taskList: Record<string, ITask>;
 
   /**
    * The logger instance from SDK
@@ -90,11 +109,11 @@ export interface TaskProps {
   logger: ILogger;
 }
 
-export type IncomingTaskComponentProps = Pick<TaskProps, 'incomingTask' | 'isBrowser' | 'accept' | 'decline'>;
+export type IncomingTaskComponentProps = Pick<TaskProps, 'incomingTask' | 'isBrowser' | 'accept' | 'reject'>;
 
 export type TaskListComponentProps = Pick<
   TaskProps,
-  'currentTask' | 'taskList' | 'isBrowser' | 'acceptTask' | 'declineTask'
+  'currentTask' | 'taskList' | 'isBrowser' | 'acceptTask' | 'declineTask' | 'onTaskSelect'
 >;
 
 /**
@@ -276,13 +295,77 @@ export interface ControlProps {
    * Time since the task is in held state
    */
   holdTime: number;
+
+  /**
+   * Feature flags for the task.
+   */
+  featureFlags: {[key: string]: boolean};
+
+  /**
+   * Custom CSS ClassName for CallControlCAD component.
+   */
+  callControlClassName?: string;
+
+  /**
+   * Custom CSS ClassName for CallControlConsult component.
+   */
+  callControlConsultClassName?: string;
+
+  /**
+   * Start time of the call.
+   */
+  startTimestamp?: number;
+
+  /**
+   * List of contact queues available for consult
+   */
+  queues: ContactServiceQueue[];
+
+  /**
+   * Function to load contact service queues
+   */
+  loadQueues: () => Promise<void>;
+
+  /**
+   * Flag to determine if the end consult button is enabled
+   */
+  isEndConsultEnabled: boolean;
+
+  /**
+   * Flag to determine if the consulting to queue is enabled for the agent
+   */
+  allowConsultToQueue: boolean;
+
+  /**
+   * Function to set the last target type
+   */
+  lastTargetType: 'queue' | 'agent';
+
+  /**
+   * Function to set the last target type
+   */
+  setLastTargetType: (targetType: 'queue' | 'agent') => void;
+
+  controlVisibility: {
+    accept: boolean;
+    decline: boolean;
+    end: boolean;
+    muteUnmute: boolean;
+    holdResume: boolean;
+    consult: boolean;
+    transfer: boolean;
+    conference: boolean;
+    wrapup: boolean;
+    pauseResumeRecording: boolean;
+    endConsult: boolean;
+    recordingIndicator: boolean;
+  };
 }
 
 export type CallControlComponentProps = Pick<
   ControlProps,
   | 'currentTask'
   | 'wrapupCodes'
-  | 'wrapupRequired'
   | 'toggleHold'
   | 'toggleRecording'
   | 'endCall'
@@ -307,6 +390,16 @@ export type CallControlComponentProps = Pick<
   | 'consultAgentId'
   | 'setConsultAgentId'
   | 'holdTime'
+  | 'callControlClassName'
+  | 'callControlConsultClassName'
+  | 'startTimestamp'
+  | 'queues'
+  | 'loadQueues'
+  | 'isEndConsultEnabled'
+  | 'allowConsultToQueue'
+  | 'lastTargetType'
+  | 'setLastTargetType'
+  | 'controlVisibility'
 >;
 
 /**
@@ -348,8 +441,11 @@ export interface ConsultTransferListComponentProps {
 export interface ConsultTransferPopoverComponentProps {
   heading: string;
   buttonIcon: string;
-  buddyAgents: Array<{agentId: string; agentName: string; dn: string}>;
+  buddyAgents: BuddyDetails[];
+  queues?: ContactServiceQueue[];
   onAgentSelect: (agentId: string, agentName: string) => void;
+  onQueueSelect: (queueId: string, queueName: string) => void;
+  allowConsultToQueue: boolean;
 }
 
 /**
@@ -361,5 +457,33 @@ export interface CallControlConsultComponentsProps {
   onTransfer?: () => void;
   endConsultCall: () => void;
   consultCompleted: boolean;
-  showTransfer: boolean;
+  isAgentBeingConsulted: boolean;
+  isEndConsultEnabled: boolean;
 }
+
+/**
+ * Type representing the possible menu types in call control.
+ */
+export type CallControlMenuType = 'Consult' | 'Transfer';
+
+export {DestinationType};
+
+export const MEDIA_CHANNEL = {
+  EMAIL: 'email',
+  CHAT: 'chat',
+  TELEPHONY: 'telephony',
+  SOCIAL: 'social',
+  SMS: 'sms',
+  FACEBOOK: 'facebook',
+  WHATSAPP: 'whatsapp',
+  APPLE: 'applemessages',
+} as const;
+
+export type MEDIA_CHANNEL = Enum<typeof MEDIA_CHANNEL>;
+
+export type MediaInfo = {
+  iconName: string;
+  className: string;
+  labelName: string;
+  isBrandVisual: boolean;
+};

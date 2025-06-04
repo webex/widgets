@@ -1,9 +1,9 @@
 import React from 'react';
-import {IncomingTaskComponentProps} from '../task.types';
+import {IncomingTaskComponentProps, MEDIA_CHANNEL} from '../task.types';
 import Task from '../Task';
 
 const IncomingTaskComponent: React.FunctionComponent<IncomingTaskComponentProps> = (props) => {
-  const {incomingTask, accept, decline, isBrowser} = props;
+  const {incomingTask, isBrowser, accept, reject} = props;
   if (!incomingTask) {
     return <></>; // hidden component
   }
@@ -11,19 +11,35 @@ const IncomingTaskComponent: React.FunctionComponent<IncomingTaskComponentProps>
   const callAssociationDetails = incomingTask?.data?.interaction?.callAssociatedDetails;
   const ani = callAssociationDetails?.ani;
   const virtualTeamName = callAssociationDetails?.virtualTeamName;
-  // rona timeout is not always available in the callAssociatedDetails object
   const ronaTimeout = callAssociationDetails?.ronaTimeout ? Number(callAssociationDetails?.ronaTimeout) : null;
   const startTimeStamp = incomingTask?.data?.interaction?.createdTimestamp;
+  const mediaType = incomingTask.data.interaction.mediaType;
+  const mediaChannel = incomingTask.data.interaction.mediaChannel;
+  const isTelephony = mediaType === MEDIA_CHANNEL.TELEPHONY;
+  const acceptText = !incomingTask.data.wrapUpRequired
+    ? isTelephony && !isBrowser
+      ? 'Ringing...'
+      : 'Accept'
+    : undefined;
+  const declineText = !incomingTask.data.wrapUpRequired && isTelephony && isBrowser ? 'Decline' : undefined;
+
   return (
     <Task
+      interactionId={incomingTask.data.interactionId}
       title={ani}
-      queue={virtualTeamName}
-      isIncomingTask={true}
-      isBrowser={isBrowser}
-      acceptTask={accept}
-      declineTask={decline}
-      ronaTimeout={ronaTimeout}
+      state=""
       startTimeStamp={startTimeStamp}
+      isIncomingTask={true}
+      queue={virtualTeamName}
+      acceptTask={() => accept(incomingTask)}
+      declineTask={() => reject(incomingTask)}
+      ronaTimeout={ronaTimeout}
+      acceptText={acceptText}
+      disableAccept={isTelephony && !isBrowser}
+      declineText={declineText}
+      styles="task-list-hover"
+      mediaType={mediaType}
+      mediaChannel={mediaChannel}
     />
   );
 };

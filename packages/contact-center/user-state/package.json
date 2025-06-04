@@ -1,7 +1,7 @@
 {
   "name": "@webex/cc-user-state",
   "description": "Webex Contact Center Widgets: User State",
-  "version": "1.28.0-ccwidgets.44",
+  "version": "1.28.0-ccwidgets.67",
   "main": "dist/index.js",
   "publishConfig": {
     "access": "public"
@@ -60,13 +60,5 @@
   "peerDependencies": {
     "react": ">=18.3.1",
     "react-dom": ">=18.3.1"
-  },
-  "jest": {
-    "testEnvironment": "jsdom",
-    "testMatch": [
-      "**/tests/**/*.ts",
-      "**/tests/**/*.tsx"
-    ],
-    "verbose": true
   }
 }

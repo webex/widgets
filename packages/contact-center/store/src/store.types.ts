@@ -1,5 +1,14 @@
-import {AgentLogin, IContactCenter, Profile, Team, LogContext, BuddyDetails, DestinationType} from '@webex/plugin-cc';
-import {ITask} from '@webex/plugin-cc';
+import {
+  AgentLogin,
+  IContactCenter,
+  Profile,
+  Team,
+  LogContext,
+  BuddyDetails,
+  DestinationType,
+  ContactServiceQueue,
+  ITask,
+} from '@webex/plugin-cc';
 
 type ILogger = {
   log: (message: string, context?: LogContext) => void;
@@ -28,7 +37,18 @@ type IdleCode = {
   isDefault: boolean;
 };
 
+type TaskMetaData = {
+  consultCompleted: boolean;
+  consultInitiated: boolean;
+  consultAccepted: boolean;
+  isQueueConsultInProgress: boolean;
+  currentConsultQueueId: string;
+  consultStartTimeStamp: number;
+  consultOfferReceived: boolean;
+};
+
 interface IStore {
+  featureFlags: {[key: string]: boolean};
   teams: Team[];
   loginOptions: string[];
   cc: IContactCenter;
@@ -37,11 +57,12 @@ interface IStore {
   logger: ILogger;
   wrapupCodes: IWrapupCode[];
   currentTask: ITask;
-  incomingTask: ITask;
-  taskList: ITask[];
+  taskList: Record<string, ITask>;
+  taskMetaData: Record<string, TaskMetaData>;
   isAgentLoggedIn: boolean;
   deviceType: string;
-  wrapupRequired: boolean;
+  teamId: string;
+  dialNumber: string;
   currentState: string;
   lastStateChangeTimestamp?: number;
   lastIdleCodeChangeTimestamp?: number;
@@ -51,9 +72,14 @@ interface IStore {
   consultCompleted: boolean;
   consultInitiated: boolean;
   consultAccepted: boolean;
+  isQueueConsultInProgress: boolean;
+  currentConsultQueueId: string;
   consultStartTimeStamp?: number;
   callControlAudio: MediaStream | null;
   consultOfferReceived: boolean;
+  isEndConsultEnabled: boolean;
+  allowConsultToQueue: boolean;
+  agentProfile: AgentLoginProfile;
   init(params: InitParams, callback: (ccSDK: IContactCenter) => void): Promise<void>;
   registerCC(webex?: WithWebex['webex']): Promise<void>;
 }
@@ -61,10 +87,9 @@ interface IStore {
 interface IStoreWrapper extends IStore {
   store: IStore;
   setCurrentTask(task: ITask): void;
-  setWrapupRequired(value: boolean): void;
-  setTaskList(taskList: ITask[]): void;
-  setIncomingTask(task: ITask): void;
+  refreshTaskList(): void;
   setDeviceType(option: string): void;
+  setDialNumber(input: string): void;
   setCurrentState(state: string): void;
   setLastStateChangeTimestamp(timestamp: number): void;
   setLastIdleCodeChangeTimestamp(timestamp: number): void;
@@ -77,6 +102,8 @@ interface IStoreWrapper extends IStore {
   setConsultInitiated(value: boolean): void;
   setConsultAccepted(value: boolean): void;
   setConsultStartTimeStamp(timestamp: number): void;
+  setAgentProfile(profile: Profile): void;
+  setTeamId(id: string): void;
 }
 
 interface IWrapupCode {
@@ -100,22 +127,24 @@ enum TASK_EVENTS {
   TASK_REJECT = 'task:rejected',
   TASK_HYDRATE = 'task:hydrate',
   TASK_CONSULTING = 'task:consulting',
+  TASK_CONSULT_QUEUE_CANCELLED = 'task:consultQueueCancelled',
   AGENT_CONTACT_ASSIGNED = 'AgentContactAssigned',
   CONTACT_RECORDING_PAUSED = 'ContactRecordingPaused',
   CONTACT_RECORDING_RESUMED = 'ContactRecordingResumed',
   AGENT_WRAPPEDUP = 'AgentWrappedUp',
+  AGENT_OFFER_CONTACT = 'AgentOfferContact',
   AGENT_CONSULT_CREATED = 'AgentConsultCreated',
 } // TODO: remove this once cc sdk exports this enum
 
 // Events that are received on the contact center SDK
 // TODO: Export & Import these constants from SDK
 enum CC_EVENTS {
-  AGENT_DN_REGISTERED = 'AgentDNRegistered',
-  AGENT_LOGOUT_SUCCESS = 'AgentLogoutSuccess',
-  AGENT_STATION_LOGIN_SUCCESS = 'AgentStationLoginSuccess',
+  AGENT_DN_REGISTERED = 'agent:dnRegistered',
+  AGENT_LOGOUT_SUCCESS = 'agent:logoutSuccess',
+  AGENT_STATION_LOGIN_SUCCESS = 'agent:stationLoginSuccess',
   AGENT_MULTI_LOGIN = 'agent:multiLogin',
   AGENT_STATE_CHANGE = 'agent:stateChange',
-  AGENT_RELOGIN_SUCCESS = 'AgentReloginSuccess',
+  AGENT_RELOGIN_SUCCESS = 'agent:reloginSuccess',
   AGENT_OFFER_CONSULT = 'AgentOfferConsult',
 }
 
@@ -131,6 +160,20 @@ type ICustomState = ICustomStateSet | ICustomStateReset;
 
 const ENGAGED_LABEL = 'ENGAGED';
 const ENGAGED_USERNAME = 'Engaged';
+
+type AgentLoginProfile = {
+  agentName?: string;
+  orgId?: string;
+  profileType?: string;
+  deviceType?: string;
+  roles?: Array<string>;
+  mmProfile?: {
+    chat: number;
+    email: number;
+    social: number;
+    telephony: number;
+  };
+};
 
 export type {
   IContactCenter,
@@ -148,6 +191,9 @@ export type {
   ICustomState,
   DestinationType,
   BuddyDetails,
+  ContactServiceQueue,
+  TaskMetaData,
+  AgentLoginProfile,
 };
 
 export {CC_EVENTS, TASK_EVENTS, ENGAGED_LABEL, ENGAGED_USERNAME};

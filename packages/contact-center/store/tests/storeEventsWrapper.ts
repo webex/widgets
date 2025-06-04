@@ -14,6 +14,10 @@ global.MediaStream = class MediaStreamMock {
   }
 };
 
+// Mock console.error to prevent output during tests
+console.error = jest.fn();
+console.log = jest.fn();
+
 import {CC_EVENTS, TASK_EVENTS} from '../src/store.types';
 import storeWrapper from '../src/storeEventsWrapper';
 import {ITask} from '@webex/plugin-cc';
@@ -25,6 +29,9 @@ jest.mock('../src/store', () => ({
     cc: {
       on: jest.fn(),
       off: jest.fn(),
+      taskManager: {
+        getAllTasks: jest.fn(),
+      },
     },
     logger: 'mockLogger',
     idleCodes: [
@@ -52,30 +59,64 @@ jest.mock('../src/store', () => ({
     currentTask: 'mockCurrentTask',
     isAgentLoggedIn: false,
     deviceType: 'BROWSER',
+    dialNumber: '12345',
+    itemId: '1234',
     taskList: 'mockTaskList',
+    taskMetaData: {},
     incomingTask: 'mockIncomingTask',
-    wrapupRequired: 'mockWrapupRequired',
     currentState: 'mockCurrentState',
     lastStateChangeTimestamp: 'mockLastStateChangeTimestamp',
     lastIdleCodeChangeTimestamp: 'mockLastIdleCodeChangeTimestamp',
     showMultipleLoginAlert: 'mockShowMultipleLoginAlert',
     currentTheme: 'mockCurrentTheme',
     customState: 'mockCustomState',
+    consultCompleted: false,
+    consultInitiated: false,
+    consultAccepted: false,
+    consultStartTimeStamp: null,
+    callControlAudio: null,
+    consultOfferReceived: false,
+    isQueueConsultInProgress: false,
+    currentConsultQueueId: null,
+    isEndConsultEnabled: true,
+    allowConsultToQueue: false,
     setShowMultipleLoginAlert: jest.fn(),
     setCurrentState: jest.fn(),
     setLastStateChangeTimestamp: jest.fn(),
     setLastIdleCodeChangeTimestamp: jest.fn(),
     setDeviceType: jest.fn(),
+    setDialNumber: jest.fn(),
+    setTeamId: jest.fn(),
     init: jest.fn().mockResolvedValue({}),
-    setIncomingTask: jest.fn(),
     setCurrentTask: jest.fn(),
-    setTaskList: jest.fn(),
-    setWrapupRequired: jest.fn(),
+    refreshTaskList: jest.fn(),
     setCurrentTheme: jest.fn(),
     setIsAgentLoggedIn: jest.fn(),
     registerCC: jest.fn(),
   }),
 }));
+
+const mockAgentProfile = {
+  deviceType: 'EXTENSION',
+  mmProfile: {chat: 4, email: 5, social: 5, telephony: 1},
+  roles: ['agent'],
+  orgId: 'mockOrgId',
+  profileType: 'BLENDED',
+};
+
+const mockAgentProfilePayload = {
+  ...mockAgentProfile,
+  agentId: 'c5198251-b0ec-4a7f-b9dd-c29c86915694',
+  chatCount: 4,
+  deviceId: '1001',
+  dn: '1001',
+  emailCount: 5,
+  eventType: 'AgentDesktopMessage',
+  interactionIds: [],
+  siteId: 'c6a5451f-5ba7-49a1-aee8-fbef70c19ece',
+  type: 'AgentStationLoginSuccess',
+  voiceCount: 1,
+};
 
 describe('storeEventsWrapper', () => {
   describe('storeEventsWrapper Proxies', () => {
@@ -124,14 +165,6 @@ describe('storeEventsWrapper', () => {
       expect(storeWrapper.taskList).toBe('mockTaskList');
     });
 
-    it('should proxy incomingTask', () => {
-      expect(storeWrapper.incomingTask).toBe('mockIncomingTask');
-    });
-
-    it('should proxy wrapupRequired', () => {
-      expect(storeWrapper.wrapupRequired).toBe('mockWrapupRequired');
-    });
-
     it('should proxy currentState', () => {
       expect(storeWrapper.currentState).toBe('mockCurrentState');
     });
@@ -170,6 +203,59 @@ describe('storeEventsWrapper', () => {
 
       storeWrapper.setCurrentState('newState');
       expect(storeWrapper['store'].currentState).toBe('newState');
+      expect(storeWrapper['store'].customState).not.toBeNull();
+    });
+
+    it('should proxy consultCompleted', () => {
+      expect(storeWrapper.consultCompleted).toBe(false);
+    });
+
+    it('should proxy consultInitiated', () => {
+      expect(storeWrapper.consultInitiated).toBe(false);
+    });
+
+    it('should proxy isQueueConsultInProgress', () => {
+      expect(storeWrapper.isQueueConsultInProgress).toBe(false);
+    });
+
+    it('should proxy currentConsultQueueId', () => {
+      expect(storeWrapper.currentConsultQueueId).toBe(null);
+    });
+
+    it('should proxy isEndConsultEnabled', () => {
+      expect(storeWrapper.isEndConsultEnabled).toBe(storeWrapper['store'].isEndConsultEnabled);
+    });
+
+    it('should proxy allowConsultToQueue', () => {
+      expect(storeWrapper.allowConsultToQueue).toBe(storeWrapper['store'].allowConsultToQueue);
+    });
+
+    it('should proxy taskData', () => {
+      expect(storeWrapper.taskData).toBe(storeWrapper['store'].taskData);
+    });
+
+    it('should proxy consultStartTimeStamp', () => {
+      expect(storeWrapper.consultStartTimeStamp).toBe(storeWrapper['store'].consultStartTimeStamp);
+    });
+
+    it('should proxy callControlAudio', () => {
+      expect(storeWrapper.callControlAudio).toBe(storeWrapper['store'].callControlAudio);
+    });
+
+    it('should proxy featureFlags', () => {
+      expect(storeWrapper.featureFlags).toBe(storeWrapper['store'].featureFlags);
+    });
+
+    it('should proxy dialNumber', () => {
+      expect(storeWrapper.dialNumber).toBe(storeWrapper['store'].dialNumber);
+    });
+
+    it('should proxy teamId', () => {
+      expect(storeWrapper.teamId).toBe(storeWrapper['store'].teamId);
+    });
+
+    it('should proxy agentProfile', () => {
+      expect(storeWrapper.agentProfile).toBe(storeWrapper['store'].agentProfile);
     });
 
     describe('setState', () => {
@@ -261,6 +347,20 @@ describe('storeEventsWrapper', () => {
       expect(storeWrapper['store'].wrapupCodes).toBe(mockCodes);
     });
 
+    it('should setIsQueueConsultInProgress', () => {
+      expect(storeWrapper.setIsQueueConsultInProgress).toBeInstanceOf(Function);
+
+      storeWrapper.setIsQueueConsultInProgress(true);
+      expect(storeWrapper['store'].isQueueConsultInProgress).toBe(true);
+    });
+
+    it('should setCurrentConsultQueueId', () => {
+      expect(storeWrapper.setCurrentConsultQueueId).toBeInstanceOf(Function);
+
+      storeWrapper.setCurrentConsultQueueId('queue-123');
+      expect(storeWrapper['store'].currentConsultQueueId).toBe('queue-123');
+    });
+
     describe('setCCCallback/removeCCCallback', () => {
       it('should set cc callback', () => {
         const mockCb = jest.fn();
@@ -296,7 +396,11 @@ describe('storeEventsWrapper', () => {
           on: jest.fn(),
           off: jest.fn(),
         };
-        storeWrapper['store'].taskList = [mockTask];
+        // mock return the task list from cc.taskManager
+        storeWrapper['store'].cc.taskManager.getAllTasks = jest
+          .fn()
+          .mockReturnValue({[mockTask.data.interactionId]: mockTask});
+        storeWrapper.refreshTaskList();
       });
 
       it('should set task callback', () => {
@@ -305,6 +409,23 @@ describe('storeEventsWrapper', () => {
 
         storeWrapper.setTaskCallback(TASK_EVENTS.TASK_ASSIGNED, mockCb, 'mockTaskId');
         expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, mockCb);
+      });
+
+      it('should call setTaskMetaData ', () => {
+        storeWrapper['store'].taskMetaData = {};
+        const mockData = {
+          consultAccepted: true,
+          consultCompleted: false,
+          consultInitiated: false,
+          consultOfferReceived: false,
+          isQueueConsultInProgress: false,
+          currentConsultQueueId: null,
+          consultStartTimeStamp: null,
+        };
+        storeWrapper.setTaskMetaData('mockTaskId', mockData);
+        expect(storeWrapper.taskMetaData).toEqual({
+          mockTaskId: mockData,
+        });
       });
 
       it('should return if callback is not present or task is not found', () => {
@@ -353,6 +474,7 @@ describe('storeEventsWrapper', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
+      // mock return the task list from cc.taskManager
     });
 
     it('should initialize the store and set up incoming task handler', async () => {
@@ -362,21 +484,108 @@ describe('storeEventsWrapper', () => {
       expect(storeWrapper['store'].init).toHaveBeenCalledWith(options, expect.any(Function));
     });
 
-    it('should handle incoming task', () => {
-      const setIncomingTaskSpy = jest.spyOn(storeWrapper, 'setIncomingTask');
+    it('should handle incoming task and call onIncomingTask callback', () => {
+      const mockIncomingTaskCallback = jest.fn();
+      storeWrapper.setIncomingTaskCb(mockIncomingTaskCallback);
+      // Ensure mockTask is properly set up
+      const mockTask: ITask = {
+        data: {
+          interactionId: 'interaction1',
+          interaction: {
+            state: 'connected',
+          },
+        },
+        on: jest.fn(),
+        off: jest.fn(),
+      } as unknown as ITask;
 
-      storeWrapper['store'].taskList = [];
+      // Add the mock task to the task list
+
+      // Call the method under test
       storeWrapper.handleIncomingTask(mockTask);
+      expect(mockIncomingTaskCallback).toHaveBeenCalledWith({task: mockTask});
 
-      expect(setIncomingTaskSpy).toHaveBeenCalledWith(mockTask);
+      // Verify that the correct event handlers were registered
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function));
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.AGENT_CONSULT_CREATED, expect.any(Function));
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_MEDIA, expect.any(Function));
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_CONSULTING, expect.any(Function));
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_CONSULT_ACCEPTED, expect.any(Function));
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_CONSULT_END, expect.any(Function));
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_CONSULT_QUEUE_CANCELLED, expect.any(Function));
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.AGENT_WRAPPEDUP, expect.any(Function));
+    });
+
+    it('should handle consulting i.e handleIncomingTask with the task already present in the taskList', () => {
+      const mockIncomingTaskCallback = jest.fn();
+      storeWrapper.setIncomingTaskCb(mockIncomingTaskCallback);
+      // Ensure mockTask is properly set up
+      const mockTask: ITask = {
+        data: {
+          interactionId: 'interaction1',
+          interaction: {
+            state: 'connected',
+          },
+        },
+        on: jest.fn(),
+        off: jest.fn(),
+      } as unknown as ITask;
+
+      storeWrapper['store'].cc.taskManager.getAllTasks = jest
+        .fn()
+        .mockReturnValue({[mockTask.data.interactionId]: mockTask});
+      storeWrapper.refreshTaskList();
+
+      // Add the mock task to the task list
+      storeWrapper['store'].taskList = {interaction1: mockTask};
+
+      // Call the method under test
+      storeWrapper.handleIncomingTask(mockTask);
+      expect(mockIncomingTaskCallback).not.toHaveBeenCalledWith({task: mockTask});
+
+      // Verify that the correct event handlers were registered
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function));
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.AGENT_CONSULT_CREATED, expect.any(Function));
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_MEDIA, expect.any(Function));
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_CONSULTING, expect.any(Function));
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_CONSULT_ACCEPTED, expect.any(Function));
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_CONSULT_END, expect.any(Function));
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_CONSULT_QUEUE_CANCELLED, expect.any(Function));
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.AGENT_WRAPPEDUP, expect.any(Function));
+    });
+
+    it('should handle incoming call without onIncomingTask callback', () => {
+      const mockIncomingTaskCallback = jest.fn();
+      storeWrapper.setIncomingTaskCb(undefined);
+      // Ensure mockTask is properly set up
+      const mockTask: ITask = {
+        data: {
+          interactionId: 'interaction1',
+          interaction: {
+            state: 'connected',
+          },
+        },
+        on: jest.fn(),
+        off: jest.fn(),
+      } as unknown as ITask;
+
+      // Add the mock task to the task list
+      storeWrapper['store'].taskList = {interaction1: mockTask};
+
+      // Call the method under test
+      storeWrapper.handleIncomingTask(mockTask);
+      expect(mockIncomingTaskCallback).not.toHaveBeenCalledWith(mockTask);
+
+      // Verify that the correct event handlers were registered
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function));
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.AGENT_CONSULT_CREATED, expect.any(Function));
     });
 
     it('should handle task assignment and reset consult flags if consultAccepted is true', () => {
       const setCurrentTaskSpy = jest.spyOn(storeWrapper, 'setCurrentTask');
-      const setIncomingTaskSpy = jest.spyOn(storeWrapper, 'setIncomingTask');
       const consultAcceptedSpy = jest.spyOn(storeWrapper, 'setConsultAccepted');
       const consultInitiatedSpy = jest.spyOn(storeWrapper, 'setConsultInitiated');
       const consultCompletedSpy = jest.spyOn(storeWrapper, 'setConsultCompleted');
@@ -385,22 +594,27 @@ describe('storeEventsWrapper', () => {
 
       storeWrapper.handleTaskAssigned(mockTask);
       expect(setCurrentTaskSpy).toHaveBeenCalledWith(mockTask);
-      expect(setIncomingTaskSpy).toHaveBeenCalledWith(null);
       // new consult-reset checks
       expect(consultAcceptedSpy).toHaveBeenCalledWith(false);
       expect(consultInitiatedSpy).toHaveBeenCalledWith(false);
       expect(consultCompletedSpy).toHaveBeenCalledWith(false);
     });
 
+    it('should handle task assignment and call onTaskAssigned callback', () => {
+      const mockTaskAssignedCallback = jest.fn();
+      storeWrapper.setTaskAssigned(mockTaskAssignedCallback);
+
+      storeWrapper.handleTaskAssigned(mockTask);
+      expect(mockTaskAssignedCallback).toHaveBeenCalledWith(mockTask);
+    });
+
     it('should handle consultAccepted event', () => {
       const setCurrentTaskSpy = jest.spyOn(storeWrapper, 'setCurrentTask');
-      const setIncomingTaskSpy = jest.spyOn(storeWrapper, 'setIncomingTask');
       const consultAcceptedSpy = jest.spyOn(storeWrapper, 'setConsultAccepted');
       const setStateSpy = jest.spyOn(storeWrapper, 'setState');
 
       storeWrapper.handleConsultAccepted(mockTask);
       expect(setCurrentTaskSpy).toHaveBeenCalledWith(mockTask);
-      expect(setIncomingTaskSpy).toHaveBeenCalledWith(null);
       expect(consultAcceptedSpy).toHaveBeenCalledWith(true);
       expect(setStateSpy).toHaveBeenCalledWith({
         developerName: 'ENGAGED',
@@ -424,6 +638,20 @@ describe('storeEventsWrapper', () => {
       expect(handleTaskRemoveSpy).toHaveBeenCalledWith('testId');
     });
 
+    it('should handle consultEnd event when consultAccepted is true', () => {
+      const setConsultOfferReceivedSpy = jest.spyOn(storeWrapper, 'setConsultOfferReceived');
+      const handleTaskRemoveSpy = jest.spyOn(storeWrapper, 'handleTaskRemove');
+      // simulate consultAccepted true
+      storeWrapper['store'].consultAccepted = false;
+      storeWrapper['store'].consultOfferReceived = true;
+      const event = {data: {interactionId: 'testId'}};
+
+      storeWrapper.handleConsultEnd(event);
+
+      expect(setConsultOfferReceivedSpy).toHaveBeenCalledWith(false);
+      expect(handleTaskRemoveSpy).toHaveBeenCalledWith('testId');
+    });
+
     it('should handle consult event', () => {
       const consultCompletedSpy = jest.spyOn(storeWrapper, 'setConsultCompleted');
       const setCurrentTaskSpy = jest.spyOn(storeWrapper, 'setCurrentTask');
@@ -431,6 +659,14 @@ describe('storeEventsWrapper', () => {
       storeWrapper.handleConsulting(mockTask);
       expect(consultCompletedSpy).toHaveBeenCalledWith(true);
       expect(setCurrentTaskSpy).toHaveBeenCalledWith(mockTask);
+    });
+
+    it('handle consult offer method', () => {
+      const setConsultOfferReceivedSpy = jest.spyOn(storeWrapper, 'setConsultOfferReceived');
+
+      storeWrapper.handleConsultOffer();
+
+      expect(setConsultOfferReceivedSpy).toHaveBeenCalledWith(true);
     });
 
     it('should handle task media', () => {
@@ -443,55 +679,38 @@ describe('storeEventsWrapper', () => {
     });
 
     it('should handle task removal', () => {
-      const setTaskListSpy = jest.spyOn(storeWrapper, 'setTaskList');
+      const refreshTaskListSpy = jest.spyOn(storeWrapper, 'refreshTaskList');
       const setCurrentTaskSpy = jest.spyOn(storeWrapper, 'setCurrentTask');
-      const setIncomingTaskSpy = jest.spyOn(storeWrapper, 'setIncomingTask');
-      const setWrapupRequiredSpy = jest.spyOn(storeWrapper, 'setWrapupRequired');
 
-      storeWrapper['store'].taskList = [mockTask];
+      storeWrapper['store'].cc.taskManager.getAllTasks = jest
+        .fn()
+        .mockReturnValue({[mockTask.data.interactionId]: mockTask});
+      storeWrapper.refreshTaskList();
       storeWrapper['store'].currentTask = mockTask;
-      storeWrapper['store'].incomingTask = mockTask;
 
       storeWrapper.handleTaskRemove(mockTask.data.interactionId);
 
       expect(mockTask.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function));
       expect(mockTask.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));
 
-      expect(setTaskListSpy).toHaveBeenCalledWith([]);
+      expect(refreshTaskListSpy).toHaveBeenCalledWith();
       expect(setCurrentTaskSpy).toHaveBeenCalledWith(null);
-      expect(setIncomingTaskSpy).toHaveBeenCalledWith(null);
-      expect(setWrapupRequiredSpy).toHaveBeenCalledWith(false);
     });
 
     it('should handle task removal when no task is present', () => {
-      storeWrapper['store'].taskList = [];
+      storeWrapper['store'].taskList = {};
       storeWrapper['store'].currentTask = null;
-      storeWrapper['store'].incomingTask = null;
       storeWrapper.handleTaskRemove(mockTask.data.interactionId);
 
       expect(mockTask.off).not.toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function));
       expect(mockTask.off).not.toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));
-      const setTaskListSpy = jest.spyOn(storeWrapper, 'setTaskList');
+      const refreshTaskListSpy = jest.spyOn(storeWrapper, 'refreshTaskList');
       const setCurrentTaskSpy = jest.spyOn(storeWrapper, 'setCurrentTask');
-      const setIncomingTaskSpy = jest.spyOn(storeWrapper, 'setIncomingTask');
-      const setWrapupRequiredSpy = jest.spyOn(storeWrapper, 'setWrapupRequired');
 
       storeWrapper.handleTaskRemove(mockTask.data.interactionId);
 
-      expect(setTaskListSpy).toHaveBeenCalledWith([]);
+      expect(refreshTaskListSpy).toHaveBeenCalledWith();
       expect(setCurrentTaskSpy).not.toHaveBeenCalledWith(null);
-      expect(setIncomingTaskSpy).not.toHaveBeenCalledWith(null);
-      expect(setWrapupRequiredSpy).toHaveBeenCalledWith(false);
-    });
-
-    it('should handle task end', () => {
-      const setWrapupRequiredSpy = jest.spyOn(storeWrapper, 'setWrapupRequired');
-
-      storeWrapper.handleTaskEnd(mockTask, true);
-      expect(setWrapupRequiredSpy).toHaveBeenCalledWith(true);
-
-      storeWrapper.handleTaskEnd(mockTask, false);
-      expect(setWrapupRequiredSpy).toHaveBeenCalledWith(true);
     });
 
     it('should set selected login option', () => {
@@ -503,16 +722,62 @@ describe('storeEventsWrapper', () => {
       expect(setDeviceTypeSpy).toHaveBeenCalledWith(option);
     });
 
+    it('should set selected Id', () => {
+      const setTeamIdSpy = jest.spyOn(storeWrapper, 'setTeamId');
+      const id = '1234';
+
+      storeWrapper.setTeamId(id);
+
+      expect(setTeamIdSpy).toHaveBeenCalledWith(id);
+    });
+
     it('should return buddy agents list', async () => {
       const buddyAgents = [{name: 'agent1'}, {name: 'agent2'}];
       storeWrapper['store'].cc.getBuddyAgents = jest.fn().mockResolvedValue({data: {agentList: buddyAgents}});
-      const result = await storeWrapper.getBuddyAgents();
+      const result = await storeWrapper.getBuddyAgents('telephony');
       expect(result).toEqual(buddyAgents);
     });
 
     it('should handle error in getBuddyAgents and throw error', async () => {
       storeWrapper['store'].cc.getBuddyAgents = jest.fn().mockRejectedValue(new Error('error'));
-      await expect(storeWrapper.getBuddyAgents()).rejects.toThrow('error');
+      await expect(storeWrapper.getBuddyAgents('telephony')).rejects.toThrow('error');
+    });
+
+    it('should return contact service queues list', async () => {
+      const queueList = [
+        {id: 'queue1', name: 'Queue 1', channelType: 'TELEPHONY'},
+        {id: 'queue2', name: 'Queue 2', channelType: 'TELEPHONY'},
+        {id: 'queue3', name: 'Queue 3', channelType: 'CHAT'}, // This one should be filtered out
+      ];
+      storeWrapper['store'].cc.getQueues = jest.fn().mockResolvedValue(queueList);
+
+      const result = await storeWrapper.getQueues('telephony');
+
+      expect(result).toEqual([
+        {id: 'queue1', name: 'Queue 1', channelType: 'TELEPHONY'},
+        {id: 'queue2', name: 'Queue 2', channelType: 'TELEPHONY'},
+      ]);
+      expect(storeWrapper['store'].cc.getQueues).toHaveBeenCalled();
+    });
+
+    it('should handle error in getQueues and throw error', async () => {
+      storeWrapper['store'].cc.getQueues = jest.fn().mockRejectedValue(new Error('queue error'));
+
+      await expect(storeWrapper.getQueues('telephony')).rejects.toThrow('queue error');
+    });
+
+    it('should handle consultQueueCancelled event', () => {
+      const consultInitiatedSpy = jest.spyOn(storeWrapper, 'setConsultInitiated');
+      const isQueueConsultInProgressSpy = jest.spyOn(storeWrapper, 'setIsQueueConsultInProgress');
+      const currentConsultQueueIdSpy = jest.spyOn(storeWrapper, 'setCurrentConsultQueueId');
+      const consultStartTimeStampSpy = jest.spyOn(storeWrapper, 'setConsultStartTimeStamp');
+
+      storeWrapper.handleConsultQueueCancelled();
+
+      expect(consultInitiatedSpy).toHaveBeenCalledWith(false);
+      expect(isQueueConsultInProgressSpy).toHaveBeenCalledWith(false);
+      expect(currentConsultQueueIdSpy).toHaveBeenCalledWith(null);
+      expect(consultStartTimeStampSpy).toHaveBeenCalledWith(null);
     });
   });
 
@@ -546,22 +811,45 @@ describe('storeEventsWrapper', () => {
       expect(cc.on).toHaveBeenCalledWith(CC_EVENTS.AGENT_RELOGIN_SUCCESS, expect.any(Function));
     });
 
+    it('should set agentProfile on Relogin and Login', async () => {
+      const cc = storeWrapper['store'].cc;
+      const setAgentProfileSpy = jest.spyOn(storeWrapper, 'setAgentProfile');
+      storeWrapper['store'].init = jest.fn().mockReturnValue(storeWrapper.setupIncomingTaskHandler(cc));
+
+      await storeWrapper.init(options);
+
+      const loginCb = storeWrapper['cc'].on.mock.calls.find(
+        (call) => call[0] === CC_EVENTS.AGENT_STATION_LOGIN_SUCCESS
+      )[1];
+      act(() => {
+        loginCb(mockAgentProfilePayload);
+      });
+
+      expect(setAgentProfileSpy).toHaveBeenCalledWith(mockAgentProfilePayload);
+
+      const reloginCb = storeWrapper['cc'].on.mock.calls.find((call) => call[0] === CC_EVENTS.AGENT_RELOGIN_SUCCESS)[1];
+
+      act(() => {
+        reloginCb(mockAgentProfilePayload);
+      });
+      expect(setAgentProfileSpy).toHaveBeenCalledWith(mockAgentProfilePayload);
+      expect(storeWrapper['store'].agentProfile).toEqual(mockAgentProfile);
+    });
+
     it('should handle task:incoming event ', async () => {
       const cc = storeWrapper['store'].cc;
       storeWrapper['store'].init = jest.fn().mockReturnValue(storeWrapper.setupIncomingTaskHandler(cc));
 
       await storeWrapper.init(options);
-      storeWrapper['store'].taskList = [];
 
       act(() => {
         storeWrapper['store'].cc.on.mock.calls[0][1](mockTask);
       });
 
       waitFor(() => {
-        expect(storeWrapper.setIncomingTask).toHaveBeenCalledWith(mockTask);
         expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));
         expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function));
-        expect(storeWrapper.setTaskList).toHaveBeenCalledWith([mockTask]);
+        expect(storeWrapper.refreshTaskList).toHaveBeenCalledWith();
       });
     });
 
@@ -570,7 +858,6 @@ describe('storeEventsWrapper', () => {
       storeWrapper['store'].init = jest.fn().mockReturnValue(storeWrapper.setupIncomingTaskHandler(cc));
 
       await storeWrapper.init(options);
-      storeWrapper['store'].taskList = [];
 
       // Login event stag: the agent is logged in
       act(() => {
@@ -589,10 +876,9 @@ describe('storeEventsWrapper', () => {
       });
 
       waitFor(() => {
-        expect(storeWrapper.setIncomingTask).toHaveBeenCalledWith(mockTask);
         expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));
         expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function));
-        expect(storeWrapper.setTaskList).toHaveBeenCalledWith([mockTask]);
+        expect(storeWrapper.refreshTaskList).toHaveBeenCalledWith();
       });
 
       //  The call is answered and the task is assigned to the agent
@@ -603,17 +889,14 @@ describe('storeEventsWrapper', () => {
       waitFor(() => {
         // The task is assigned to the agent
         expect(storeWrapper.setCurrentTask).toHaveBeenCalledWith(mockTask);
-        expect(storeWrapper.setIncomingTask).toHaveBeenCalledWith(null);
       });
 
       //  Task end stage: the task is completed
       act(() => {
-        storeWrapper['store'].taskList = [mockTask];
         mockTask.on.mock.calls[0][1]({wrapupRequired: true});
       });
 
       waitFor(() => {
-        expect(storeWrapper.setWrapupRequired).toHaveBeenCalledWith(true);
         expect(mockTask.off).not.toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function));
         expect(mockTask.off).not.toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));
       });
@@ -624,7 +907,6 @@ describe('storeEventsWrapper', () => {
       storeWrapper['store'].init = jest.fn().mockReturnValue(storeWrapper.setupIncomingTaskHandler(cc));
 
       await storeWrapper.init(options);
-      storeWrapper['store'].taskList = [];
 
       // Login event stag: the agent is logged in
       act(() => {
@@ -645,77 +927,46 @@ describe('storeEventsWrapper', () => {
 
       waitFor(() => {
         // The task is assigned to the agent
-        expect(storeWrapper.setWrapupRequired).toHaveBeenCalledWith(null);
         expect(storeWrapper.handleTaskRemove).toHaveBeenCalledWith(mockTask.data.interactionId);
       });
     });
 
-    it('should not add a duplicate task if the same task is present in store', () => {
-      const setIncomingTaskSpy = jest.spyOn(storeWrapper, 'setIncomingTask');
-      storeWrapper['store'].taskList = [mockTask];
-      storeWrapper.handleIncomingTask(mockTask);
-
-      expect(setIncomingTaskSpy).not.toHaveBeenCalledWith(mockTask);
-      expect(mockTask.on).not.toHaveBeenCalledWith();
-    });
-
     it('should handle task assignment', () => {
       jest.spyOn(storeWrapper, 'setCurrentTask');
-      jest.spyOn(storeWrapper, 'setIncomingTask');
 
       storeWrapper.handleTaskAssigned(mockTask);
 
       expect(storeWrapper.setCurrentTask).toHaveBeenCalledWith(mockTask);
-      expect(storeWrapper.setIncomingTask).toHaveBeenCalledWith(null);
     });
 
     it('should handle task removal', () => {
-      const setTaskListSpy = jest.spyOn(storeWrapper, 'setTaskList');
+      const refreshTaskListSpy = jest.spyOn(storeWrapper, 'refreshTaskList');
       const setCurrentTaskSpy = jest.spyOn(storeWrapper, 'setCurrentTask');
-      const setIncomingTaskSpy = jest.spyOn(storeWrapper, 'setIncomingTask');
-      const setWrapupRequiredSpy = jest.spyOn(storeWrapper, 'setWrapupRequired');
 
-      storeWrapper['store'].taskList = [mockTask];
+      storeWrapper['store'].cc.taskManager.getAllTasks = jest
+        .fn()
+        .mockReturnValue({[mockTask.data.interactionId]: mockTask});
+      storeWrapper.refreshTaskList();
       storeWrapper['store'].currentTask = mockTask;
-      storeWrapper['store'].incomingTask = mockTask;
       storeWrapper.handleTaskRemove(mockTask.data.interactionId);
 
       expect(mockTask.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function));
       expect(mockTask.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));
 
-      expect(setTaskListSpy).toHaveBeenCalledWith([]);
+      expect(refreshTaskListSpy).toHaveBeenCalledWith();
       expect(setCurrentTaskSpy).toHaveBeenCalledWith(null);
-      expect(setIncomingTaskSpy).toHaveBeenCalledWith(null);
-      expect(setWrapupRequiredSpy).toHaveBeenCalledWith(false);
-    });
-
-    it('should handle task end', () => {
-      jest.spyOn(storeWrapper, 'setWrapupRequired');
-      storeWrapper.handleTaskEnd(mockTask, true);
-
-      expect(storeWrapper.setWrapupRequired).toHaveBeenCalledWith(true);
-
-      storeWrapper.handleTaskEnd(mockTask, false);
-
-      expect(storeWrapper.setWrapupRequired).toHaveBeenCalledWith(false);
     });
 
     it('should handle task end when call is not connected', () => {
-      jest.spyOn(storeWrapper, 'setWrapupRequired');
-      mockTask.data.interaction.state = 'new';
-      storeWrapper['store'].wrapupRequired = false;
-      storeWrapper.handleTaskEnd(mockTask, true);
-
-      expect(storeWrapper.setWrapupRequired).toHaveBeenCalledWith(true);
-
-      storeWrapper.handleTaskEnd(mockTask, false);
-
-      expect(storeWrapper.setWrapupRequired).toHaveBeenCalledWith(false);
-
-      storeWrapper['store'].wrapupRequired = true;
-      storeWrapper.handleTaskEnd(mockTask, true);
-
-      expect(storeWrapper.setWrapupRequired).toHaveBeenCalledWith(true);
+      const taskNotConnectedNoWrapup = {
+        data: {
+          interactionId: 'task4',
+          interaction: {
+            state: 'new',
+          },
+        },
+      };
+      storeWrapper.handleTaskEnd(taskNotConnectedNoWrapup);
     });
 
     it('should set selected login option', () => {
@@ -832,8 +1083,7 @@ describe('storeEventsWrapper', () => {
 
     it('should handle hydrating the store with correct data', async () => {
       const setCurrentTaskSpy = jest.spyOn(storeWrapper, 'setCurrentTask');
-      const setTaskListSpy = jest.spyOn(storeWrapper, 'setTaskList');
-      const setWrapupRequiredSpy = jest.spyOn(storeWrapper, 'setWrapupRequired');
+      const refreshTaskListSpy = jest.spyOn(storeWrapper, 'refreshTaskList');
       const handleTaskRemoveSpy = jest.spyOn(storeWrapper, 'handleTaskRemove');
 
       const cc = storeWrapper['store'].cc;
@@ -841,10 +1091,11 @@ describe('storeEventsWrapper', () => {
 
       const options = {someOption: 'value'};
       await storeWrapper.init(options);
-      storeWrapper['store'].taskList = [];
+      storeWrapper['store'].taskList = {};
 
       const mockTask = {
         data: {
+          interactionId: 'interaction1',
           interaction: {
             isTerminated: true,
             state: 'wrapUp',
@@ -870,8 +1121,7 @@ describe('storeEventsWrapper', () => {
       });
 
       expect(setCurrentTaskSpy).toHaveBeenCalledWith(mockTask);
-      expect(setTaskListSpy).toHaveBeenCalledWith([mockTask]);
-      expect(setWrapupRequiredSpy).toHaveBeenCalledWith(true);
+      expect(refreshTaskListSpy).toHaveBeenCalled();
 
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function));
@@ -883,7 +1133,6 @@ describe('storeEventsWrapper', () => {
         mockWrapupCb(mockTask);
       });
 
-      expect(storeWrapper.setWrapupRequired).toHaveBeenCalledWith(false);
       expect(handleTaskRemoveSpy).toHaveBeenCalledWith(mockTask.data.interactionId);
     });
 
@@ -980,8 +1229,7 @@ describe('storeEventsWrapper', () => {
 
     it('should handle hydrating the store with correct data', async () => {
       const setCurrentTaskSpy = jest.spyOn(storeWrapper, 'setCurrentTask');
-      const setTaskListSpy = jest.spyOn(storeWrapper, 'setTaskList');
-      const setWrapupRequiredSpy = jest.spyOn(storeWrapper, 'setWrapupRequired');
+      const refreshTaskListSpy = jest.spyOn(storeWrapper, 'refreshTaskList');
 
       const cc = storeWrapper['store'].cc;
       storeWrapper['store'].init = jest.fn().mockReturnValue(storeWrapper.setupIncomingTaskHandler(cc));
@@ -1016,13 +1264,13 @@ describe('storeEventsWrapper', () => {
       });
 
       expect(setCurrentTaskSpy).toHaveBeenCalledWith(mockTask);
-      expect(setTaskListSpy).toHaveBeenCalledWith([mockTask]);
-      expect(setWrapupRequiredSpy).not.toHaveBeenCalledWith();
+      expect(refreshTaskListSpy).toHaveBeenCalled();
     });
 
-    it('should remove event listeners on successful logout', async () => {
+    it('should remove event listeners on successful logout and clear agentProfile', async () => {
       const cc = storeWrapper['store'].cc;
       storeWrapper['store'].init = jest.fn().mockReturnValue(storeWrapper.setupIncomingTaskHandler(cc));
+      const setAgentProfileSpy = jest.spyOn(storeWrapper, 'setAgentProfile');
 
       const options = {someOption: 'value'};
       await storeWrapper.init(options);
@@ -1040,6 +1288,8 @@ describe('storeEventsWrapper', () => {
       expect(storeWrapper['cc'].off).toHaveBeenCalledWith(TASK_EVENTS.TASK_INCOMING, expect.any(Function));
       expect(storeWrapper['cc'].off).toHaveBeenCalledWith(CC_EVENTS.AGENT_STATE_CHANGE, expect.any(Function));
       expect(storeWrapper['cc'].off).toHaveBeenCalledWith(CC_EVENTS.AGENT_MULTI_LOGIN, expect.any(Function));
+      expect(setAgentProfileSpy).toHaveBeenCalledWith({});
+      expect(storeWrapper['store'].agentProfile).toEqual({});
     });
 
     it('should handle task rejection event and call onTaskRejected with the provided reason', () => {
@@ -1052,19 +1302,105 @@ describe('storeEventsWrapper', () => {
       const onTaskRejectedMock = jest.fn();
       storeWrapper.setTaskRejected(onTaskRejectedMock);
       const removeSpy = jest.spyOn(storeWrapper, 'handleTaskRemove');
-      storeWrapper['store'].taskList = [];
-
+      storeWrapper['store'].cc.taskManager.getAllTasks = jest
+        .fn()
+        .mockReturnValue({[rejectTask.data.interactionId]: rejectTask});
+      storeWrapper.refreshTaskList();
       storeWrapper.handleIncomingTask(rejectTask);
+
       const taskRejectCall = rejectTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_REJECT);
       expect(taskRejectCall).toBeDefined();
       const rejectCallback = taskRejectCall[1];
 
-      // Simulate rejection event with a specified reason
       const reason = 'Task Rejected Reason';
-      rejectCallback({reason});
+      rejectCallback(reason);
 
-      expect(onTaskRejectedMock).toHaveBeenCalledWith({reason: reason});
-      expect(removeSpy).toHaveBeenCalledWith('rejectTest');
+      // Ensure the correct arguments are passed to onTaskRejectedMock
+      expect(onTaskRejectedMock).toHaveBeenCalledWith(rejectTask, reason);
+
+      // Ensure handleTaskRemove is called with the correct interactionId
+      expect(removeSpy).toHaveBeenCalledWith(rejectTask.data.interactionId);
+    });
+
+    it('should handle task rejection event and call onTaskRejected with no reason', () => {
+      const rejectTask: ITask = {
+        data: {interactionId: 'rejectTest', interaction: {state: 'connected'}},
+        on: jest.fn(),
+        off: jest.fn(),
+      } as unknown as ITask;
+
+      const onTaskRejectedMock = jest.fn();
+      storeWrapper.setTaskRejected(onTaskRejectedMock);
+      const removeSpy = jest.spyOn(storeWrapper, 'handleTaskRemove');
+      storeWrapper['store'].cc.taskManager.getAllTasks = jest
+        .fn()
+        .mockReturnValue({[rejectTask.data.interactionId]: rejectTask});
+      storeWrapper.refreshTaskList();
+      storeWrapper.handleIncomingTask(rejectTask);
+
+      const taskRejectCall = rejectTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_REJECT);
+      expect(taskRejectCall).toBeDefined();
+      const rejectCallback = taskRejectCall[1];
+
+      rejectCallback();
+
+      // Ensure the correct arguments are passed to onTaskRejectedMock
+      expect(onTaskRejectedMock).toHaveBeenCalledWith(rejectTask, 'No reason provided');
+      onTaskRejectedMock.mockClear();
+
+      expect(removeSpy).toHaveBeenCalledWith(rejectTask.data.interactionId);
+
+      storeWrapper.setTaskRejected(undefined);
+      storeWrapper['store'].cc.taskManager.getAllTasks = jest
+        .fn()
+        .mockReturnValue({[rejectTask.data.interactionId]: rejectTask});
+      storeWrapper.refreshTaskList();
+      storeWrapper.handleIncomingTask(rejectTask);
+
+      expect(taskRejectCall).toBeDefined();
+
+      rejectCallback();
+
+      // Ensure the correct arguments are passed to onTaskRejectedMock
+      expect(onTaskRejectedMock).not.toHaveBeenCalledWith(rejectTask, 'No reason provided');
+
+      // Ensure handleTaskRemove is called with the correct interactionId
+      expect(removeSpy).toHaveBeenCalledWith(rejectTask.data.interactionId);
+    });
+
+    it('should handle consultEnd event and reset queue consult state', () => {
+      const consultInitiatedSpy = jest.spyOn(storeWrapper, 'setConsultInitiated');
+      const isQueueConsultInProgressSpy = jest.spyOn(storeWrapper, 'setIsQueueConsultInProgress');
+      const currentConsultQueueIdSpy = jest.spyOn(storeWrapper, 'setCurrentConsultQueueId');
+      // simulate consultAccepted false
+      storeWrapper['store'].consultAccepted = false;
+      storeWrapper['store'].consultOfferReceived = false;
+      const event = {data: {interactionId: 'testId'}};
+
+      storeWrapper.handleConsultEnd(event);
+
+      expect(consultInitiatedSpy).toHaveBeenCalledWith(false);
+      expect(isQueueConsultInProgressSpy).toHaveBeenCalledWith(false);
+      expect(currentConsultQueueIdSpy).toHaveBeenCalledWith(null);
+    });
+
+    it('should register TASK_CONSULT_QUEUE_CANCELLED handler on incoming task', () => {
+      const mockTask: ITask = {
+        data: {
+          interactionId: 'interaction1',
+          interaction: {
+            state: 'connected',
+          },
+        },
+        on: jest.fn(),
+        off: jest.fn(),
+      } as unknown as ITask;
+
+      storeWrapper['store'].taskList = [];
+      storeWrapper.handleIncomingTask(mockTask);
+
+      // Verify the TASK_CONSULT_QUEUE_CANCELLED handler was registered
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_CONSULT_QUEUE_CANCELLED, expect.any(Function));
     });
   });
 
@@ -1082,7 +1418,11 @@ describe('storeEventsWrapper', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      storeWrapper['store'].taskList = [];
+      storeWrapper['store'].cc.taskManager.getAllTasks = jest
+        .fn()
+        .mockReturnValue({[mockTask.data.interactionId]: mockTask});
+      storeWrapper.refreshTaskList();
+      storeWrapper['store'].taskMetaData = {};
     });
 
     it('should attach TASK_MEDIA handler when deviceType is BROWSER', () => {
@@ -1094,6 +1434,62 @@ describe('storeEventsWrapper', () => {
 
       // Verify TASK_MEDIA handler was attached
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_MEDIA, expect.any(Function));
+    });
+
+    describe('should set consult states when we recieve TASK_HYDRATE event', () => {
+      it('should set states when state is consulting and isConsulting is true', () => {
+        const consultingMockTask = {
+          ...mockTask,
+          data: {
+            ...mockTask.data,
+            interaction: {
+              ...mockTask.data.interaction,
+              state: 'consulting',
+            },
+            isConsulted: true,
+          },
+        };
+        const refreshTaskListSpy = jest.spyOn(storeWrapper, 'refreshTaskList');
+        const setCurrentTaskSpy = jest.spyOn(storeWrapper, 'setCurrentTask');
+
+        storeWrapper['store'].deviceType = 'EXTENSION';
+
+        // Call handleTaskHydrate
+        storeWrapper.handleTaskHydrate(consultingMockTask);
+
+        expect(refreshTaskListSpy).toHaveBeenCalled();
+        expect(setCurrentTaskSpy).toHaveBeenCalledWith(consultingMockTask);
+        expect(storeWrapper['store'].consultAccepted).toBe(true);
+      });
+
+      it('should set states when state is consulting and isConsulting is false', () => {
+        const consultingMockTask = {
+          ...mockTask,
+          data: {
+            ...mockTask.data,
+            interaction: {
+              ...mockTask.data.interaction,
+              state: 'consulting',
+              isTerminated: true,
+            },
+            isConsulted: false,
+            wrapUpRequired: true,
+          },
+        };
+        const refreshTaskListSpy = jest.spyOn(storeWrapper, 'refreshTaskList');
+        const setCurrentTaskSpy = jest.spyOn(storeWrapper, 'setCurrentTask');
+        const setStateSpy = jest.spyOn(storeWrapper, 'setState');
+
+        storeWrapper['store'].deviceType = 'EXTENSION';
+
+        // Call handleTaskHydrate
+        storeWrapper.handleTaskHydrate(consultingMockTask);
+
+        expect(refreshTaskListSpy).toHaveBeenCalled();
+        expect(setCurrentTaskSpy).toHaveBeenCalledWith(consultingMockTask);
+        expect(storeWrapper['store'].consultInitiated).toBe(true);
+        expect(setStateSpy).not.toHaveBeenCalledWith({reset: true});
+      });
     });
 
     it('should attach TASK_MEDIA handler in handleTaskHydrate when deviceType is BROWSER', () => {
@@ -1134,9 +1530,6 @@ describe('storeEventsWrapper', () => {
     it('should remove TASK_MEDIA handler on task removal when deviceType is BROWSER', () => {
       // Set deviceType to BROWSER
       storeWrapper['store'].deviceType = 'BROWSER';
-
-      // Add the task to taskList
-      storeWrapper['store'].taskList = [mockTask];
 
       // Call handleTaskRemove
       storeWrapper.handleTaskRemove(mockTask.data.interactionId);
@@ -1183,6 +1576,139 @@ describe('storeEventsWrapper', () => {
       // Verify TASK_MEDIA handler was not attached
       const taskMediaCall = mockTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_MEDIA);
       expect(taskMediaCall).toBeUndefined();
+    });
+  });
+
+  describe('refreshTaskList', () => {
+    it('should call getAllTasks and setTaskList', () => {
+      jest.clearAllMocks();
+      const setCurrentTaskSpy = jest.spyOn(storeWrapper, 'setCurrentTask');
+      storeWrapper['store'].currentTask = null;
+      const mockTask = {interaction2: {data: {interactionId: 'interaction2'}}};
+      storeWrapper['store'].cc.taskManager.getAllTasks = jest.fn().mockReturnValue([mockTask]);
+
+      storeWrapper.refreshTaskList();
+
+      expect(storeWrapper['store'].cc.taskManager.getAllTasks).toHaveBeenCalled();
+      expect(setCurrentTaskSpy).toHaveBeenCalledTimes(1);
+      expect(setCurrentTaskSpy).toHaveBeenCalledWith(mockTask);
+    });
+  });
+
+  it('set TaskAssigned', () => {
+    const setTaskAssignedSpy = jest.spyOn(storeWrapper, 'setTaskAssigned');
+    const mockTaskAssignedCallback = jest.fn();
+    storeWrapper.setTaskAssigned(mockTaskAssignedCallback);
+
+    expect(setTaskAssignedSpy).toHaveBeenCalledWith(mockTaskAssignedCallback);
+    expect(storeWrapper.onTaskAssigned).toBe(mockTaskAssignedCallback);
+  });
+
+  it('call handleConsultCreated and set states in store', () => {
+    Date.now = jest.fn(() => 1234567890);
+
+    const setConsultStartTimeStampSpy = jest.spyOn(storeWrapper, 'setConsultStartTimeStamp');
+    const setConsultInitiatedSpy = jest.spyOn(storeWrapper, 'setConsultInitiated');
+
+    storeWrapper.handleConsultCreated();
+
+    expect(setConsultInitiatedSpy).toHaveBeenCalledWith(true);
+    expect(setConsultStartTimeStampSpy).toHaveBeenCalledWith(1234567890);
+    jest.clearAllMocks();
+  });
+
+  describe('setCurrentTask', () => {
+    let mockTaskA: ITask;
+    let mockTaskB: ITask;
+
+    beforeEach(() => {
+      mockTaskA = {
+        data: {interactionId: 'taskA'},
+      } as unknown as ITask;
+      mockTaskB = {
+        data: {interactionId: 'taskB'},
+      } as unknown as ITask;
+      storeWrapper['store'].taskMetaData = {};
+      storeWrapper['store'].consultCompleted = true;
+      storeWrapper['store'].consultInitiated = true;
+      storeWrapper['store'].consultAccepted = true;
+      storeWrapper['store'].isQueueConsultInProgress = true;
+      storeWrapper['store'].currentConsultQueueId = 'queue1';
+      storeWrapper['store'].consultStartTimeStamp = 123;
+      storeWrapper['store'].consultOfferReceived = true;
+      storeWrapper['store'].currentTask = null;
+      storeWrapper.onTaskSelected = undefined;
+    });
+
+    it('should set currentTask and save previous task metadata', () => {
+      // Set an initial task
+      storeWrapper.setCurrentTask(mockTaskA);
+      expect(storeWrapper.currentTask).toEqual(mockTaskA);
+
+      // Change to a new task, should save metadata for previous
+      storeWrapper.setCurrentTask(mockTaskB);
+      expect(storeWrapper.currentTask).toEqual(mockTaskB);
+      expect(storeWrapper['store'].taskMetaData['taskA']).toEqual({
+        consultCompleted: true,
+        consultInitiated: true,
+        consultAccepted: true,
+        isQueueConsultInProgress: true,
+        currentConsultQueueId: 'queue1',
+        consultStartTimeStamp: 123,
+        consultOfferReceived: true,
+      });
+    });
+
+    it('should restore metadata for new task if present', () => {
+      storeWrapper['store'].taskMetaData['taskB'] = {
+        consultCompleted: false,
+        consultInitiated: false,
+        consultAccepted: true,
+        isQueueConsultInProgress: false,
+        currentConsultQueueId: 'queueX',
+        consultStartTimeStamp: 456,
+        consultOfferReceived: false,
+      };
+      const setConsultAcceptedSpy = jest.spyOn(storeWrapper, 'setConsultAccepted');
+      const setConsultInitiatedSpy = jest.spyOn(storeWrapper, 'setConsultInitiated');
+      const setConsultCompletedSpy = jest.spyOn(storeWrapper, 'setConsultCompleted');
+      const setIsQueueConsultInProgressSpy = jest.spyOn(storeWrapper, 'setIsQueueConsultInProgress');
+      const setCurrentConsultQueueIdSpy = jest.spyOn(storeWrapper, 'setCurrentConsultQueueId');
+      const setConsultStartTimeStampSpy = jest.spyOn(storeWrapper, 'setConsultStartTimeStamp');
+      const setConsultOfferReceivedSpy = jest.spyOn(storeWrapper, 'setConsultOfferReceived');
+
+      storeWrapper.setCurrentTask(mockTaskB);
+
+      expect(setConsultAcceptedSpy).toHaveBeenCalledWith(true);
+      expect(setConsultInitiatedSpy).toHaveBeenCalledWith(false);
+      expect(setConsultCompletedSpy).toHaveBeenCalledWith(false);
+      expect(setIsQueueConsultInProgressSpy).toHaveBeenCalledWith(false);
+      expect(setCurrentConsultQueueIdSpy).toHaveBeenCalledWith('queueX');
+      expect(setConsultStartTimeStampSpy).toHaveBeenCalledWith(456);
+      expect(setConsultOfferReceivedSpy).toHaveBeenCalledWith(false);
+    });
+
+    it('should call onTaskSelected if task changes', () => {
+      const onTaskSelected = jest.fn();
+      storeWrapper.onTaskSelected = onTaskSelected;
+      storeWrapper.setCurrentTask(mockTaskA);
+      expect(onTaskSelected).toHaveBeenCalledWith(mockTaskA);
+
+      // Should not call again if same task is set
+      onTaskSelected.mockClear();
+      storeWrapper.setCurrentTask(mockTaskA);
+      expect(onTaskSelected).not.toHaveBeenCalled();
+
+      // Should call if task changes
+      storeWrapper.setCurrentTask(mockTaskB);
+      expect(onTaskSelected).toHaveBeenCalledWith(mockTaskB);
+    });
+
+    it('should set currentTask to null if passed null', () => {
+      storeWrapper.setCurrentTask(mockTaskA);
+      expect(storeWrapper.currentTask).toEqual(mockTaskA);
+      storeWrapper.setCurrentTask(null);
+      expect(storeWrapper.currentTask).toBeNull();
     });
   });
 });

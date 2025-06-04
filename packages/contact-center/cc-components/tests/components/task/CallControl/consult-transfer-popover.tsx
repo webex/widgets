@@ -14,17 +14,6 @@ jest.mock('../../../../src/components/task/CallControl/CallControlCustom/consult
   return MockListItem;
 });
 
-jest.mock('@momentum-design/components/dist/react', () => ({
-  Icon: (props: any) => <div {...props} />,
-}));
-
-jest.mock('@momentum-ui/react-collaboration', () => ({
-  Text: (props: any) => <div {...props} />,
-  TabListNext: (props: any) => <div {...props} />,
-  TabNext: (props: any) => <div {...props} />,
-  ListNext: (props: any) => <div {...props} />,
-}));
-
 beforeAll(() => {
   jest.spyOn(console, 'error').mockImplementation(() => {});
 });
@@ -35,6 +24,7 @@ afterAll(() => {
 
 describe('ConsultTransferPopoverComponent', () => {
   const mockOnAgentSelect = jest.fn();
+  const mockOnQueueSelect = jest.fn();
   const baseProps = {
     heading: 'Select an Agent',
     buttonIcon: 'agent-icon',
@@ -42,7 +32,12 @@ describe('ConsultTransferPopoverComponent', () => {
       {agentId: 'agent1', agentName: 'Agent One', dn: '1001'},
       {agentId: 'agent2', agentName: 'Agent Two', dn: '1002'},
     ],
+    queues: [
+      {id: 'queue1', name: 'Queue One'},
+      {id: 'queue2', name: 'Queue Two'},
+    ],
     onAgentSelect: mockOnAgentSelect,
+    onQueueSelect: mockOnQueueSelect,
   };
 
   beforeEach(() => {
@@ -70,5 +65,18 @@ describe('ConsultTransferPopoverComponent', () => {
     render(<ConsultTransferPopoverComponent {...baseProps} />);
     fireEvent.click(screen.getByText('Agent One'));
     expect(mockOnAgentSelect).toHaveBeenCalledWith('agent1', 'Agent One');
+  });
+
+  it('hides queues tab when allowConsultToQueue is false', () => {
+    render(<ConsultTransferPopoverComponent {...baseProps} allowConsultToQueue={false} />);
+    const queuesTab = screen.getByText('Queues').closest('[data-testid="TabNext"]');
+    expect(queuesTab).toHaveStyle('display: none');
+  });
+
+  it('shows queues tab when allowConsultToQueue is true', () => {
+    render(<ConsultTransferPopoverComponent {...baseProps} allowConsultToQueue={true} />);
+    const queuesTab = screen.getByText('Queues').closest('[data-testid="TabNext"]');
+    expect(queuesTab).not.toHaveAttribute('disabled', 'true');
+    expect(queuesTab).not.toHaveStyle('display: none');
   });
 });

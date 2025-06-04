@@ -1,3 +1,164 @@
+# [1.28.0-ccwidgets.67](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.66...v1.28.0-ccwidgets.67) (2025-06-03)
+
+
+### Bug Fixes
+
+* **cc-task:** TaskList onTaskSelected callback ([#466](https://github.com/webex/widgets/issues/466)) ([5d7038f](https://github.com/webex/widgets/commit/5d7038fcfd79b2b71d372ac49b29904c48e106d5))
+
+# [1.28.0-ccwidgets.66](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.65...v1.28.0-ccwidgets.66) (2025-06-02)
+
+
+### Bug Fixes
+
+* **tooling:** use secrets while running tests ([#463](https://github.com/webex/widgets/issues/463)) ([227bafd](https://github.com/webex/widgets/commit/227bafd8e340ef15a36532d408ef65e6298294ea))
+
+# [1.28.0-ccwidgets.65](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.64...v1.28.0-ccwidgets.65) (2025-06-01)
+
+
+### Bug Fixes
+
+* **samples:** add an unlisted URL for chat client ([#462](https://github.com/webex/widgets/issues/462)) ([3def454](https://github.com/webex/widgets/commit/3def454f541d490d22d6ba10e2c696117cb0951e))
+
+# [1.28.0-ccwidgets.64](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.63...v1.28.0-ccwidgets.64) (2025-05-30)
+
+
+### Bug Fixes
+
+* **station-logout:** implement-station-logout-with-sample-toggles ([#461](https://github.com/webex/widgets/issues/461)) ([de47b18](https://github.com/webex/widgets/commit/de47b18c0f37739e7de26ba6f3c70f932d1715f7))
+
+# [1.28.0-ccwidgets.63](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.62...v1.28.0-ccwidgets.63) (2025-05-30)
+
+
+### Bug Fixes
+
+* **station-login:** fix-station-login-bugs ([#459](https://github.com/webex/widgets/issues/459)) ([a203779](https://github.com/webex/widgets/commit/a203779ed81005b216d5658d9033f7d30e115797))
+
+# [1.28.0-ccwidgets.62](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.61...v1.28.0-ccwidgets.62) (2025-05-26)
+
+
+### Bug Fixes
+
+* **tooling:** fix jest setup for UI testing ([#460](https://github.com/webex/widgets/issues/460)) ([7c4a021](https://github.com/webex/widgets/commit/7c4a02197835b09886b5c566651aa10f38f34cb5))
+
+# [1.28.0-ccwidgets.61](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.60...v1.28.0-ccwidgets.61) (2025-05-26)
+
+
+### Bug Fixes
+
+* **tooling:** add-playwright-tests ([#420](https://github.com/webex/widgets/issues/420)) ([fa52889](https://github.com/webex/widgets/commit/fa5288982c45fba258c715a8a27d501fd8be650c))
+
+# [1.28.0-ccwidgets.60](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.59...v1.28.0-ccwidgets.60) (2025-05-23)
+
+
+### Bug Fixes
+
+* **contact-center:** fix bugs listed in CAI-6468 ([#458](https://github.com/webex/widgets/issues/458)) ([0873b44](https://github.com/webex/widgets/commit/0873b44919220bc00124ff708811247ba1da05dd))
+
+# [1.28.0-ccwidgets.59](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.58...v1.28.0-ccwidgets.59) (2025-05-22)
+
+
+### Features
+
+* **cc-widgets:** Digital channels support ([#456](https://github.com/webex/widgets/issues/456)) ([6da537a](https://github.com/webex/widgets/commit/6da537ae7c63453622d9ac64b477d99e62534e62))
+
+# [1.28.0-ccwidgets.58](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.57...v1.28.0-ccwidgets.58) (2025-05-19)
+
+
+### Bug Fixes
+
+* **contact-center:** upgrade SDK version to use @webex/plugin-cc instead of webex ([#457](https://github.com/webex/widgets/issues/457)) ([930f070](https://github.com/webex/widgets/commit/930f0704985c9e2ddbcecc23c083b59be57f1daa))
+
+# [1.28.0-ccwidgets.57](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.56...v1.28.0-ccwidgets.57) (2025-05-19)
+
+
+### Bug Fixes
+
+* **store:** add agent profile in store ([#455](https://github.com/webex/widgets/issues/455)) ([ed10730](https://github.com/webex/widgets/commit/ed10730519d2627fdb8062f25c0de9d565b29abb))
+
+# [1.28.0-ccwidgets.56](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.55...v1.28.0-ccwidgets.56) (2025-05-19)
+
+
+### Bug Fixes
+
+* **task-list:** resolved-ui-gaps-in-task-list-component ([#452](https://github.com/webex/widgets/issues/452)) ([67cbc5c](https://github.com/webex/widgets/commit/67cbc5cd1b081370d516f9371f7d9368d8bd3ecf))
+
+# [1.28.0-ccwidgets.55](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.54...v1.28.0-ccwidgets.55) (2025-05-13)
+
+
+### Bug Fixes
+
+* **samples:** add oauth login to react and wc samples ([#453](https://github.com/webex/widgets/issues/453)) ([08ca036](https://github.com/webex/widgets/commit/08ca036746d6c6ded1ffdd5fe0df63af4a270439))
+
+# [1.28.0-ccwidgets.54](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.53...v1.28.0-ccwidgets.54) (2025-05-09)
+
+
+### Features
+
+* **station-login:** Add Validation to Station Login to Match Diverging Figma ([#449](https://github.com/webex/widgets/issues/449)) ([c256fe7](https://github.com/webex/widgets/commit/c256fe7dd21300081c73d244c2141c9960ccaa52))
+
+# [1.28.0-ccwidgets.53](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.52...v1.28.0-ccwidgets.53) (2025-05-08)
+
+
+### Bug Fixes
+
+* **incoming-task:** support multiple incoming task widgets ([#446](https://github.com/webex/widgets/issues/446)) ([1720ebb](https://github.com/webex/widgets/commit/1720ebb6d77f885ae2c391d92e5f1305328d0114))
+
+# [1.28.0-ccwidgets.52](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.51...v1.28.0-ccwidgets.52) (2025-05-08)
+
+
+### Bug Fixes
+
+* **user-state:** resolved-ui-gaps-in-user-state-dropdown-component ([#445](https://github.com/webex/widgets/issues/445)) ([e98226f](https://github.com/webex/widgets/commit/e98226f2eab16b39274bf2ce0d384055046591a2))
+
+# [1.28.0-ccwidgets.51](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.50...v1.28.0-ccwidgets.51) (2025-05-07)
+
+
+### Features
+
+* **cc-task:** task list to support multiple tasks and digital tasks ([#441](https://github.com/webex/widgets/issues/441)) ([a9f7596](https://github.com/webex/widgets/commit/a9f7596adc05aa31122b6bcbdc3a900c9cb0bbcc))
+
+# [1.28.0-ccwidgets.50](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.49...v1.28.0-ccwidgets.50) (2025-04-30)
+
+
+### Bug Fixes
+
+* **widgets:** fixed-wrapup-issue ([#442](https://github.com/webex/widgets/issues/442)) ([0eab5c3](https://github.com/webex/widgets/commit/0eab5c33e56b420b3a4ee2f9ebd2b92044af721e))
+
+# [1.28.0-ccwidgets.49](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.48...v1.28.0-ccwidgets.49) (2025-04-28)
+
+
+### Bug Fixes
+
+* **profile:** upgrading sdk version to latest to pull multimedia profile changes ([#440](https://github.com/webex/widgets/issues/440)) ([66043c0](https://github.com/webex/widgets/commit/66043c0729a06b5125536867fde034f281aca91e))
+
+# [1.28.0-ccwidgets.48](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.47...v1.28.0-ccwidgets.48) (2025-04-28)
+
+
+### Features
+
+* **station-login:** Update Station Login UI to Match Figma ([#433](https://github.com/webex/widgets/issues/433)) ([da133f4](https://github.com/webex/widgets/commit/da133f49136233f8994900b85ac135f78ffba2c5))
+
+# [1.28.0-ccwidgets.47](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.46...v1.28.0-ccwidgets.47) (2025-04-25)
+
+
+### Bug Fixes
+
+* **cc-components:** move consult control into cad wrapper component ([#435](https://github.com/webex/widgets/issues/435)) ([71214d9](https://github.com/webex/widgets/commit/71214d98b32ba1943b6dcbe027a054da48b7a857))
+
+# [1.28.0-ccwidgets.46](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.45...v1.28.0-ccwidgets.46) (2025-04-24)
+
+
+### Features
+
+* **widgets:** added-consult-to-queue ([#434](https://github.com/webex/widgets/issues/434)) ([9bd3a5c](https://github.com/webex/widgets/commit/9bd3a5cebc49144dee3a56ed147b53e31431de44))
+
+# [1.28.0-ccwidgets.45](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.44...v1.28.0-ccwidgets.45) (2025-04-24)
+
+
+### Bug Fixes
+
+* **task:** accept browser calls on login ([#436](https://github.com/webex/widgets/issues/436)) ([a4035ac](https://github.com/webex/widgets/commit/a4035aca1c837c80391b8daed861a94d98a502ce))
+
 # [1.28.0-ccwidgets.44](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.43...v1.28.0-ccwidgets.44) (2025-04-16)
 
 

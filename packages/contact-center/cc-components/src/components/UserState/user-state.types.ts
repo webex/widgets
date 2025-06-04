@@ -61,3 +61,9 @@ export interface IUserState {
    */
   onStateChange: (state: string) => void;
 }
+
+export enum AgentUserState {
+  Available = 'Available',
+  RONA = 'RONA',
+  Engaged = 'ENGAGED',
+}

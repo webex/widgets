@@ -2,12 +2,34 @@ import React from 'react';
 import CallControlComponent from '../CallControl/call-control';
 import {CallControlComponentProps} from '../task.types';
 import {Text} from '@momentum-ui/react-collaboration';
-import {Icon} from '@momentum-design/components/dist/react';
+import {Brandvisual, Icon} from '@momentum-design/components/dist/react';
 import './call-control-cad.styles.scss';
 import TaskTimer from '../TaskTimer/index';
+import CallControlConsultComponent from '../CallControl/CallControlCustom/call-control-consult';
+import type {MEDIA_CHANNEL as MediaChannelType} from '../task.types';
+import {getMediaTypeInfo} from '../../../utils';
 
 const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => {
-  const {currentTask, isHeld, isRecording, holdTime, wrapupRequired} = props;
+  const {
+    currentTask,
+    isHeld,
+    isRecording,
+    holdTime,
+    consultAccepted,
+    consultInitiated,
+    consultAgentName,
+    consultStartTimeStamp,
+    endConsultCall,
+    consultAgentId,
+    consultCompleted,
+    consultTransfer,
+    callControlClassName,
+    callControlConsultClassName,
+    startTimestamp,
+    isEndConsultEnabled,
+    lastTargetType,
+    controlVisibility,
+  } = props;
 
   // Use the Web Worker-based hold timer
 
@@ -17,57 +39,83 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
 
+  const currentMediaType = getMediaTypeInfo(
+    currentTask.data.interaction.mediaType as MediaChannelType,
+    currentTask.data.interaction.mediaChannel as MediaChannelType
+  );
+
   if (!currentTask) return null;
 
   return (
-    <div className="call-control-container">
-      {/* Caller Information */}
-      <div className="caller-info">
-        <div className="call-icon-background">
-          <Icon name="handset-filled" size={1} className="call-icon" />
-        </div>
+    <>
+      <div className={`call-control-container ${callControlClassName || ''}`}>
+        {/* Caller Information */}
+        <div className="caller-info">
+          <div className="call-icon-background">
+            {currentMediaType.isBrandVisual ? (
+              <Brandvisual name={currentMediaType.iconName} className={`media-icon ${currentMediaType.className}`} />
+            ) : (
+              <Icon name={currentMediaType.iconName} size={1} className={`media-icon ${currentMediaType.className}`} />
+            )}
+          </div>
 
-        <div className="customer-info">
-          <Text className="customer-id" type="body-large-bold" tagName={'small'}>
-            {currentTask?.data?.interaction?.callAssociatedDetails?.ani || 'No Caller ID'}
-          </Text>
-          <div className="call-details">
-            <Text className="call-timer" type="body-secondary" tagName={'small'}>
-              Call - <TaskTimer startTimeStamp={currentTask?.data?.interaction?.startTime} />
+          <div className="customer-info">
+            <Text className="customer-id" type="body-large-bold" tagName={'small'}>
+              {currentTask?.data?.interaction?.callAssociatedDetails?.ani || 'No Caller ID'}
             </Text>
-            <div className="call-status">
-              {!wrapupRequired && isHeld && (
-                <>
-                  <span className="dot">•</span>
-                  <div className="on-hold">
-                    <Icon name="call-hold-filled" size={1} className="call-hold-filled-icon" />
-                    <span className="on-hold-chip-text">On hold - {formatTime(holdTime)}</span>
-                  </div>
-                </>
-              )}
+            <div className="call-details">
+              <Text className="call-timer" type="body-secondary" tagName={'small'}>
+                {currentMediaType.labelName} - <TaskTimer startTimeStamp={startTimestamp} />
+              </Text>
+              <div className="call-status">
+                {!controlVisibility.wrapup && isHeld && (
+                  <>
+                    <span className="dot">•</span>
+                    <div className="on-hold">
+                      <Icon name="call-hold-filled" size={1} className="call-hold-filled-icon" />
+                      <span className="on-hold-chip-text">On hold - {formatTime(holdTime)}</span>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>
+        {!controlVisibility.wrapup && controlVisibility.recordingIndicator && (
+          <div className="recording-indicator">
+            <Icon name={isRecording ? 'record-active-badge-filled' : 'record-paused-badge-filled'} size={1.3} />
+          </div>
+        )}
+        <CallControlComponent {...props} />
+        <div className="cad-variables">
+          <Text className="queue" type="body-secondary" tagName={'small'}>
+            <strong>Queue:</strong>{' '}
+            <span>{currentTask?.data?.interaction?.callAssociatedDetails?.virtualTeamName || 'No Team Name'}</span>
+          </Text>
+          <Text className="phone-number" type="body-secondary" tagName={'small'}>
+            <strong>Phone number:</strong>{' '}
+            <span>{currentTask?.data?.interaction?.callAssociatedDetails?.ani || 'No Phone Number'}</span>
+          </Text>
+          <Text className="rona" type="body-secondary" tagName={'small'}>
+            <strong>RONA:</strong>{' '}
+            <span>{currentTask?.data?.interaction?.callAssociatedDetails?.ronaTimeout || 'No RONA'}</span>
+          </Text>
+        </div>
       </div>
-      <div className="recording-indicator">
-        <Icon name={isRecording ? 'record-active-badge-filled' : 'record-paused-badge-filled'} size={1.3} />
-      </div>
-      <CallControlComponent {...props} />
-      <div className="cad-variables">
-        <Text className="queue" type="body-secondary" tagName={'small'}>
-          <strong>Queue:</strong>{' '}
-          <span>{currentTask?.data?.interaction?.callAssociatedDetails?.virtualTeamName || 'No Team Name'}</span>
-        </Text>
-        <Text className="phone-number" type="body-secondary" tagName={'small'}>
-          <strong>Phone number:</strong>{' '}
-          <span>{currentTask?.data?.interaction?.callAssociatedDetails?.ani || 'No Phone Number'}</span>
-        </Text>
-        <Text className="rona" type="body-secondary" tagName={'small'}>
-          <strong>RONA:</strong>{' '}
-          <span>{currentTask?.data?.interaction?.callAssociatedDetails?.ronaTimeout || 'No RONA'}</span>
-        </Text>
-      </div>
-    </div>
+      {(consultAccepted || consultInitiated) && !controlVisibility.wrapup && (
+        <div className={`call-control-consult-container ${callControlConsultClassName || ''}`}>
+          <CallControlConsultComponent
+            agentName={consultAgentName}
+            startTimeStamp={consultStartTimeStamp}
+            endConsultCall={endConsultCall}
+            onTransfer={() => consultTransfer(consultAgentId || currentTask.data.destAgentId, lastTargetType)}
+            consultCompleted={consultCompleted}
+            isAgentBeingConsulted={!consultAccepted}
+            isEndConsultEnabled={isEndConsultEnabled}
+          />
+        </div>
+      )}
+    </>
   );
 };
 

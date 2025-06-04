@@ -13,19 +13,30 @@ import {
   BuddyDetails,
   ENGAGED_LABEL,
   ENGAGED_USERNAME,
+  ContactServiceQueue,
+  Profile,
+  TaskMetaData,
+  AgentLoginProfile,
 } from './store.types';
 import Store from './store';
 import {runInAction} from 'mobx';
 
 class StoreWrapper implements IStoreWrapper {
   store: IStore;
-  onTaskRejected?: (reason: string) => void;
+  onIncomingTask: ({task}: {task: ITask}) => void;
+  onTaskRejected?: (task: ITask, reason: string) => void;
+  onTaskAssigned?: (task: ITask) => void;
+  onTaskSelected?: (task: ITask) => void;
 
   constructor() {
     this.store = Store.getInstance();
   }
 
   // Proxy all methods and properties of the original store
+  get featureFlags() {
+    return this.store.featureFlags;
+  }
+
   get teams() {
     return this.store.teams;
   }
@@ -50,6 +61,14 @@ class StoreWrapper implements IStoreWrapper {
   get deviceType() {
     return this.store.deviceType;
   }
+
+  get teamId() {
+    return this.store.teamId;
+  }
+
+  get dialNumber() {
+    return this.store.dialNumber;
+  }
   get wrapupCodes() {
     return this.store.wrapupCodes;
   }
@@ -61,14 +80,6 @@ class StoreWrapper implements IStoreWrapper {
   }
   get taskList() {
     return this.store.taskList;
-  }
-
-  get incomingTask() {
-    return this.store.incomingTask;
-  }
-
-  get wrapupRequired() {
-    return this.store.wrapupRequired;
   }
 
   get currentState() {
@@ -119,6 +130,33 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.consultOfferReceived;
   }
 
+  get isQueueConsultInProgress() {
+    return this.store.isQueueConsultInProgress;
+  }
+
+  get currentConsultQueueId() {
+    return this.store.currentConsultQueueId;
+  }
+
+  get isEndConsultEnabled() {
+    return this.store.isEndConsultEnabled;
+  }
+
+  get allowConsultToQueue() {
+    return this.store.allowConsultToQueue;
+  }
+  get taskMetaData() {
+    return this.store.taskMetaData;
+  }
+
+  get agentProfile() {
+    return this.store.agentProfile;
+  }
+
+  setTaskMetaData = (taskId: string, data: TaskMetaData): void => {
+    this.store.taskMetaData[taskId] = data;
+  };
+
   setCurrentTheme = (theme: string): void => {
     this.store.currentTheme = theme;
   };
@@ -131,10 +169,17 @@ class StoreWrapper implements IStoreWrapper {
     this.store.deviceType = option;
   };
 
+  setTeamId = (id: string): void => {
+    this.store.teamId = id;
+  };
+
+  setDialNumber = (input: string): void => {
+    this.store.dialNumber = input;
+  };
+
   setCurrentState = (state: string): void => {
     runInAction(() => {
       this.store.currentState = state;
-      this.store.customState = null;
     });
   };
 
@@ -154,22 +199,68 @@ class StoreWrapper implements IStoreWrapper {
     this.store.isAgentLoggedIn = value;
   };
 
-  setWrapupRequired = (value: boolean): void => {
-    this.store.wrapupRequired = value;
-  };
-
   setCurrentTask = (task: ITask): void => {
     runInAction(() => {
-      this.store.currentTask = task;
+      // Save data from the current task if it exists
+      if (this.currentTask) {
+        const interactionId = this.currentTask?.data?.interactionId;
+        this.setTaskMetaData(interactionId, {
+          consultCompleted: this.store.consultCompleted,
+          consultInitiated: this.store.consultInitiated,
+          consultAccepted: this.store.consultAccepted,
+          isQueueConsultInProgress: this.store.isQueueConsultInProgress,
+          currentConsultQueueId: this.store.currentConsultQueueId,
+          consultStartTimeStamp: this.store.consultStartTimeStamp,
+          consultOfferReceived: this.store.consultOfferReceived,
+        });
+      }
+
+      // Determine if the new task is the same as the current task
+      let isSameTask = false;
+      if (task && this.currentTask) {
+        isSameTask = task.data.interactionId === this.currentTask.data.interactionId;
+      }
+
+      // Update the current task
+      this.store.currentTask = task ? Object.assign(Object.create(Object.getPrototypeOf(task)), task) : null;
+
+      // Restore data for the new task if available
+      const currentTaskMetaData = this.store.taskMetaData[task?.data?.interactionId];
+      if (currentTaskMetaData) {
+        const {
+          consultAccepted = false,
+          consultInitiated = false,
+          consultCompleted = false,
+          isQueueConsultInProgress = false,
+          currentConsultQueueId = null,
+          consultStartTimeStamp = null,
+          consultOfferReceived = false,
+        } = currentTaskMetaData;
+
+        this.setConsultAccepted(consultAccepted);
+        this.setConsultInitiated(consultInitiated);
+        this.setConsultCompleted(consultCompleted);
+        this.setIsQueueConsultInProgress(isQueueConsultInProgress);
+        this.setCurrentConsultQueueId(currentConsultQueueId);
+        this.setConsultStartTimeStamp(consultStartTimeStamp);
+        this.setConsultOfferReceived(consultOfferReceived);
+      }
+
+      if (this.onTaskSelected && !isSameTask) {
+        this.onTaskSelected(task);
+      }
     });
   };
 
-  setIncomingTask = (task: ITask): void => {
-    this.store.incomingTask = task;
-  };
-
-  setTaskList = (taskList: ITask[]): void => {
-    this.store.taskList = taskList;
+  refreshTaskList = (): void => {
+    runInAction(() => {
+      this.store.taskList = this.store.cc.taskManager.getAllTasks();
+    });
+    if (this.currentTask) {
+      this.setCurrentTask(this.taskList[this.currentTask?.data?.interactionId]);
+    } else if (this.store.taskList.length > 0) {
+      this.setCurrentTask(this.store.taskList[Object.keys(this.store.taskList)[0]]);
+    }
   };
 
   setWrapupCodes = (wrapupCodes: IWrapupCode[]): void => {
@@ -200,6 +291,18 @@ class StoreWrapper implements IStoreWrapper {
     this.store.callControlAudio = audio;
   };
 
+  setIsQueueConsultInProgress = (value: boolean): void => {
+    runInAction(() => {
+      this.store.isQueueConsultInProgress = value;
+    });
+  };
+
+  setCurrentConsultQueueId = (queueId: string | null): void => {
+    runInAction(() => {
+      this.store.currentConsultQueueId = queueId;
+    });
+  };
+
   setState = (state: ICustomState | IdleCode): void => {
     if ('reset' in state) {
       runInAction(() => {
@@ -210,7 +313,6 @@ class StoreWrapper implements IStoreWrapper {
     if ('id' in state) {
       runInAction(() => {
         this.setCurrentState(state.id);
-        this.store.customState = null;
       });
     } else {
       runInAction(() => {
@@ -219,8 +321,23 @@ class StoreWrapper implements IStoreWrapper {
     }
   };
 
-  setTaskRejected = (callback: ((reason: string) => void) | undefined): void => {
+  setIncomingTaskCb = (callback: (task: ITask) => void): void => {
+    this.onIncomingTask = callback;
+  };
+
+  setTaskRejected = (callback: ((task: ITask, reason: string) => void) | undefined): void => {
     this.onTaskRejected = callback;
+  };
+
+  setTaskAssigned = (callback: ((task: ITask) => void) | undefined): void => {
+    this.onTaskAssigned = callback;
+  };
+
+  setTaskSelected = (callback: ((task: ITask) => void) | undefined): void => {
+    if (callback && this.currentTask) {
+      callback(this.currentTask);
+    }
+    this.onTaskSelected = callback;
   };
 
   setCCCallback = (event: CC_EVENTS | TASK_EVENTS, callback) => {
@@ -230,9 +347,22 @@ class StoreWrapper implements IStoreWrapper {
 
   setTaskCallback = (event: TASK_EVENTS, callback, taskId: string) => {
     if (!callback) return;
-    const task = this.store.taskList.find((task) => task.data.interactionId === taskId);
+    const task = this.store.taskList[taskId];
     if (!task) return;
     task.on(event, callback);
+  };
+
+  setAgentProfile = (profile: AgentLoginProfile) => {
+    runInAction(() => {
+      this.store.agentProfile = {
+        ...this.store.agentProfile,
+        profileType: profile.profileType || undefined,
+        mmProfile: profile.mmProfile || undefined,
+        orgId: profile.orgId || undefined,
+        roles: profile.roles || undefined,
+        deviceType: profile.deviceType || undefined,
+      };
+    });
   };
 
   removeCCCallback = (event: CC_EVENTS) => {
@@ -241,7 +371,7 @@ class StoreWrapper implements IStoreWrapper {
 
   removeTaskCallback = (event: TASK_EVENTS, callback, taskId: string) => {
     if (!callback) return;
-    const task = this.store.taskList.find((task) => task.data.interactionId === taskId);
+    const task = this.store.taskList[taskId];
     if (!task) return;
     task.off(event, callback);
   };
@@ -254,72 +384,81 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.registerCC(webex);
   };
 
-  handleTaskRemove = (event) => {
-    const taskId = event;
-    // Remove the task from the taskList
-    const taskToRemove = this.store.taskList.find((task) => task.data.interactionId === taskId);
+  handleTaskRemove = (taskId) => {
+    const taskToRemove = this.store.taskList[taskId];
     if (taskToRemove) {
       taskToRemove.off(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
-      taskToRemove.off(TASK_EVENTS.TASK_END, ({wrapupRequired}) => this.handleTaskEnd(taskToRemove, wrapupRequired));
-      taskToRemove.off(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(taskToRemove.interactionId, reason));
+      taskToRemove.off(TASK_EVENTS.TASK_END, this.handleTaskEnd);
+      taskToRemove.off(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(taskToRemove, reason));
       taskToRemove.off(TASK_EVENTS.AGENT_WRAPPEDUP, this.handleTaskWrapUp);
       taskToRemove.off(TASK_EVENTS.TASK_CONSULTING, this.handleConsulting);
       taskToRemove.off(CC_EVENTS.AGENT_OFFER_CONSULT, this.handleConsultOffer);
       taskToRemove.off(TASK_EVENTS.TASK_CONSULT_END, this.handleConsultEnd);
       taskToRemove.off(TASK_EVENTS.TASK_CONSULT_ACCEPTED, this.handleConsultAccepted);
       taskToRemove.off(TASK_EVENTS.AGENT_CONSULT_CREATED, this.handleConsultCreated);
+      taskToRemove.off(TASK_EVENTS.TASK_CONSULT_QUEUE_CANCELLED, this.handleConsultQueueCancelled);
+      taskToRemove.off(TASK_EVENTS.AGENT_OFFER_CONTACT, this.refreshTaskList);
       if (this.deviceType === 'BROWSER') {
         taskToRemove.off(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
         this.setCallControlAudio(null);
       }
     }
-    const updateTaskList = this.store.taskList.filter((task) => task.data.interactionId !== taskId);
 
     runInAction(() => {
-      this.setTaskList(updateTaskList);
-      this.setWrapupRequired(false);
       this.setConsultAccepted(false);
       this.setConsultInitiated(false);
       this.setConsultCompleted(false);
 
-      // Remove the task from currentTask or incomingTask if it is the same task
+      delete this.taskMetaData[taskId];
       if (this.store.currentTask?.data.interactionId === taskId) {
         this.setCurrentTask(null);
       }
 
-      if (this.store.incomingTask?.data.interactionId === taskId) {
-        this.setIncomingTask(null);
-      }
-
-      // reset the custom state
       this.setState({
         reset: true,
       });
+      this.refreshTaskList();
     });
   };
 
-  handleTaskEnd = (event, wrapupRequired) => {
-    // If the call is ended by agent we get the task object in event.data
-    // If the call is ended by customer we get the task object directly
-
-    const task = event.data ? event.data : event;
-    if (wrapupRequired) {
-      this.setWrapupRequired(true);
-    } else {
-      this.handleTaskRemove(task.interactionId);
-    }
+  handleTaskEnd = () => {
+    this.refreshTaskList();
   };
 
   handleTaskAssigned = (event) => {
     const task = event;
+    if (this.onTaskAssigned) {
+      this.onTaskAssigned(task);
+    }
     runInAction(() => {
+      if (this.currentTask) {
+        this.setTaskMetaData(this.currentTask.data.interactionId, {
+          consultCompleted: this.store.consultCompleted,
+          consultInitiated: this.store.consultInitiated,
+          consultAccepted: this.store.consultAccepted,
+          isQueueConsultInProgress: this.store.isQueueConsultInProgress,
+          currentConsultQueueId: this.store.currentConsultQueueId,
+          consultStartTimeStamp: this.store.consultStartTimeStamp,
+          consultOfferReceived: this.store.consultOfferReceived,
+        });
+      } else {
+        this.setTaskMetaData(task?.data?.interactionId, {
+          consultCompleted: false,
+          consultInitiated: false,
+          consultAccepted: false,
+          isQueueConsultInProgress: false,
+          currentConsultQueueId: '',
+          consultStartTimeStamp: null,
+          consultOfferReceived: false,
+        });
+      }
       if (this.consultAccepted) {
         this.setConsultAccepted(false);
         this.setConsultInitiated(false);
         this.setConsultCompleted(false);
+        this.setConsultOfferReceived(false);
       }
       this.setCurrentTask(task);
-      this.setIncomingTask(null);
       this.setState({
         developerName: ENGAGED_LABEL,
         name: ENGAGED_USERNAME,
@@ -327,10 +466,8 @@ class StoreWrapper implements IStoreWrapper {
     });
   };
 
-  handleTaskWrapUp = (event) => {
-    const task = event;
-    this.setWrapupRequired(false);
-    this.handleTaskRemove(task.interactionId);
+  handleTaskWrapUp = (task) => {
+    this.handleTaskRemove(task?.data?.interactionId);
   };
 
   handleTaskMedia = (track) => {
@@ -353,6 +490,8 @@ class StoreWrapper implements IStoreWrapper {
   handleConsultEnd = (event) => {
     const task = event;
     this.setConsultInitiated(false);
+    this.setIsQueueConsultInProgress(false);
+    this.setCurrentConsultQueueId(null);
     if (this.consultAccepted) {
       this.setConsultAccepted(false);
       this.handleTaskRemove(task.data.interactionId);
@@ -372,7 +511,6 @@ class StoreWrapper implements IStoreWrapper {
     const task = event;
     runInAction(() => {
       this.setCurrentTask(task);
-      this.setIncomingTask(null);
       this.setConsultAccepted(true);
       this.setConsultStartTimeStamp(Date.now());
       this.setConsultCompleted(true);
@@ -386,26 +524,30 @@ class StoreWrapper implements IStoreWrapper {
     });
   };
 
+  handleConsultQueueCancelled = () => {
+    this.setConsultInitiated(false);
+    this.setIsQueueConsultInProgress(false);
+    this.setCurrentConsultQueueId(null);
+    this.setConsultStartTimeStamp(null);
+  };
+
   handleIncomingTask = (event) => {
     const task: ITask = event;
-    if (this.store.taskList.some((t) => t.data.interactionId === task.data.interactionId)) {
-      // Task already present in the taskList
-      return;
-    }
-
     // Attach event listeners to the task
-    task.on(TASK_EVENTS.TASK_END, ({wrapupRequired}) => this.handleTaskEnd(task, wrapupRequired));
+    task.on(TASK_EVENTS.TASK_END, this.handleTaskEnd);
 
     // When we receive TASK_ASSIGNED the task was accepted by the agent and we need wrap up
     task.on(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
+    task.on(TASK_EVENTS.AGENT_OFFER_CONTACT, this.refreshTaskList);
     task.on(TASK_EVENTS.AGENT_CONSULT_CREATED, this.handleConsultCreated);
+    task.on(TASK_EVENTS.TASK_CONSULT_QUEUE_CANCELLED, this.handleConsultQueueCancelled);
     if (this.deviceType === 'BROWSER') {
       task.on(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
     }
 
     // When we receive TASK_REJECT sdk changes the agent status
     // When we receive TASK_REJECT that means the task was not accepted by the agent and we wont need wrap up
-    task.on(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(task.data.interactionId, reason));
+    task.on(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(task, reason));
 
     task.on(TASK_EVENTS.AGENT_WRAPPEDUP, this.handleTaskWrapUp);
 
@@ -414,8 +556,14 @@ class StoreWrapper implements IStoreWrapper {
     task.on(CC_EVENTS.AGENT_OFFER_CONSULT, this.handleConsultOffer);
     task.on(TASK_EVENTS.TASK_CONSULT_END, this.handleConsultEnd);
 
-    this.setIncomingTask(task);
-    this.setTaskList([...this.store.taskList, task]);
+    // In case of consulting we check if the task is already in the task list
+    // If it is, we dont have to send the incoming task callback
+    if (this.onIncomingTask && !this.taskList[task.data.interactionId]) {
+      this.onIncomingTask({task});
+    }
+
+    // We should update the task list in the store after sending the incoming task callback
+    this.refreshTaskList();
   };
 
   handleStateChange = (data) => {
@@ -436,32 +584,31 @@ class StoreWrapper implements IStoreWrapper {
 
   handleTaskHydrate = (event) => {
     const task = event;
-    task.on(TASK_EVENTS.TASK_END, ({wrapupRequired}) => this.handleTaskEnd(task, wrapupRequired));
+    task.on(TASK_EVENTS.TASK_END, this.handleTaskEnd);
 
     // When we receive TASK_ASSIGNED the task was accepted by the agent and we need wrap up
     task.on(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
+    task.on(TASK_EVENTS.AGENT_OFFER_CONTACT, this.refreshTaskList);
     task.on(TASK_EVENTS.TASK_CONSULT_ACCEPTED, this.handleConsultAccepted);
     task.on(TASK_EVENTS.AGENT_CONSULT_CREATED, this.handleConsultCreated);
 
     // When we receive TASK_REJECT sdk changes the agent status
     // When we receive TASK_REJECT that means the task was not accepted by the agent and we wont need wrap up
-    task.on(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(task.data.interactionId, reason));
+    task.on(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(task, reason));
 
     task.on(TASK_EVENTS.AGENT_WRAPPEDUP, this.handleTaskWrapUp);
 
     task.on(TASK_EVENTS.TASK_CONSULTING, this.handleConsulting);
     task.on(CC_EVENTS.AGENT_OFFER_CONSULT, this.handleConsultOffer);
     task.on(TASK_EVENTS.TASK_CONSULT_END, this.handleConsultEnd);
+    task.on(TASK_EVENTS.TASK_CONSULT_QUEUE_CANCELLED, this.handleConsultQueueCancelled);
     if (this.deviceType === 'BROWSER') {
       task.on(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
     }
 
-    if (!this.store.taskList.some((t) => t.data.interactionId === task.data.interactionId)) {
-      this.setTaskList([...this.store.taskList, task]);
-    }
+    this.refreshTaskList();
 
     this.setCurrentTask(task);
-    this.setIncomingTask(null);
     if (task.data.interaction.state === 'consulting') {
       if (task.data.isConsulted) {
         this.setConsultAccepted(true);
@@ -472,21 +619,22 @@ class StoreWrapper implements IStoreWrapper {
       this.setConsultCompleted(true);
     }
 
-    this.setState({
-      developerName: ENGAGED_LABEL,
-      name: ENGAGED_USERNAME,
-    });
+    if (
+      (['wrapUp', 'connected'].includes(task.data.interaction.state) && !task.data.isConsulted) ||
+      task.data.wrapUpRequired
+    ) {
+      this.setState({
+        developerName: ENGAGED_LABEL,
+        name: ENGAGED_USERNAME,
+      });
+    }
 
-    const {interaction, agentId} = task.data;
-    const {state, isTerminated, participants} = interaction;
+    const {interaction} = task.data;
+    const {isTerminated} = interaction;
 
     // Update call control states
     if (isTerminated) {
-      // wrapup
-      const wrapupRequired = state === 'wrapUp' && !participants[agentId].isWrappedUp;
-      this.setWrapupRequired(wrapupRequired);
-
-      if (!wrapupRequired) {
+      if (!task.data.wrapUpRequired) {
         this.setState({
           reset: true,
         });
@@ -496,17 +644,19 @@ class StoreWrapper implements IStoreWrapper {
     }
   };
 
-  handleTaskReject = (taskId: string, reason: string) => {
+  handleTaskReject = (task: ITask, reason: string) => {
     if (this.onTaskRejected) {
-      this.onTaskRejected(reason || 'No reason provided');
+      this.onTaskRejected(task, reason || 'No reason provided');
     }
-    this.handleTaskRemove(taskId);
+    this.handleTaskRemove(task.data.interactionId);
   };
 
-  getBuddyAgents = async (): Promise<Array<BuddyDetails>> => {
+  getBuddyAgents = async (
+    mediaType: string = this.currentTask.data.interaction.mediaType
+  ): Promise<Array<BuddyDetails>> => {
     try {
       const response = await this.store.cc.getBuddyAgents({
-        mediaType: 'telephony',
+        mediaType: mediaType ?? 'telephony',
         state: 'Available',
       });
       return response.data.agentList;
@@ -515,18 +665,32 @@ class StoreWrapper implements IStoreWrapper {
     }
   };
 
+  getQueues = async (
+    mediaType: string = this.currentTask.data.interaction.mediaType ?? 'TELEPHONY'
+  ): Promise<Array<ContactServiceQueue>> => {
+    try {
+      const upperMediaType = mediaType.toUpperCase();
+      let queueList = await this.store.cc.getQueues();
+      queueList = queueList.filter((queue) => queue.channelType === upperMediaType);
+      return queueList;
+    } catch (error) {
+      console.error('Error fetching queues:', error);
+      return Promise.reject(error);
+    }
+  };
+
   cleanUpStore = () => {
     runInAction(() => {
       this.setIsAgentLoggedIn(false);
-      this.setDeviceType('');
-      this.setIncomingTask(null);
+      this.setDeviceType('AGENT_DN');
+      this.setDialNumber('');
       this.setCurrentTask(null);
-      this.setTaskList([]);
-      this.setWrapupRequired(false);
+      this.refreshTaskList();
       this.setLastStateChangeTimestamp(undefined);
       this.setLastIdleCodeChangeTimestamp(undefined);
       this.setShowMultipleLoginAlert(false);
       this.setConsultStartTimeStamp(undefined);
+      this.setTeamId('');
     });
   };
 
@@ -534,6 +698,7 @@ class StoreWrapper implements IStoreWrapper {
     let listenersAdded = false;
 
     const handleLogOut = () => {
+      this.setAgentProfile({});
       this.cleanUpStore();
       removeEventListeners();
       listenersAdded = false;
@@ -557,20 +722,29 @@ class StoreWrapper implements IStoreWrapper {
 
     // TODO: https://jira-eng-gpk2.cisco.com/jira/browse/SPARK-626777 Implement the de-register method and close the listener there
 
-    const handleLogin = (payload) => {
+    const handleLogin = (payload: Profile) => {
       runInAction(() => {
+        this.setAgentProfile(payload);
         this.setIsAgentLoggedIn(true);
         this.setDeviceType(payload.deviceType);
+        this.setDialNumber(payload.dn);
         this.setCurrentState(payload.auxCodeId?.trim() !== '' ? payload.auxCodeId : '0');
         this.setLastStateChangeTimestamp(payload.lastStateChangeTimestamp);
         this.setLastIdleCodeChangeTimestamp(payload.lastIdleCodeChangeTimestamp);
+        this.setTeamId(payload.teamId);
       });
     };
 
     ccSDK.on(CC_EVENTS.AGENT_STATION_LOGIN_SUCCESS, handleLogin);
 
     [CC_EVENTS.AGENT_DN_REGISTERED, CC_EVENTS.AGENT_RELOGIN_SUCCESS].forEach((event) => {
-      ccSDK.on(`${event}`, () => {
+      ccSDK.on(`${event}`, (payload) => {
+        runInAction(() => {
+          if (event === CC_EVENTS.AGENT_RELOGIN_SUCCESS) {
+            this.setAgentProfile(payload);
+            this.setTeamId(payload.teamId);
+          }
+        });
         if (!listenersAdded) {
           addEventListeners();
           listenersAdded = true;

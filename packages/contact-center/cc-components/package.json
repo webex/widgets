@@ -1,7 +1,7 @@
 {
   "name": "@webex/cc-components",
   "description": "Webex Contact Center UI Components Library for your custom contact center solutions",
-  "version": "1.28.0-ccwidgets.44",
+  "version": "1.28.0-ccwidgets.67",
   "main": "dist/index.js",
   "publishConfig": {
     "access": "public"
@@ -38,7 +38,6 @@
     "@testing-library/react": "16.0.1",
     "@types/jest": "29.5.14",
     "@types/react-test-renderer": "18",
-    "babel-jest": "29.7.0",
     "babel-loader": "9.2.1",
     "eslint": "^9.20.1",
     "eslint-config-prettier": "^10.0.1",
@@ -59,16 +58,6 @@
     "webpack": "5.94.0",
     "webpack-cli": "5.1.4",
     "webpack-merge": "6.0.1"
-  },
-  "jest": {
-    "testEnvironment": "jsdom",
-    "testMatch": [
-      "**/tests/**/*.ts",
-      "**/tests/**/*.tsx"
-    ],
-    "moduleNameMapper": {
-      "^.+\\.(css|less|scss)$": "babel-jest"
-    }
   },
   "peerDependencies": {
     "@momentum-ui/react-collaboration": ">=26.197.0",

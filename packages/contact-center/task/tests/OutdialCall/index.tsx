@@ -13,12 +13,6 @@ jest.mock('@webex/cc-store', () => ({
   },
 }));
 
-jest.mock('@webex/cc-components', () => {
-  return {
-    OutdialCallComponent: () => <div>OutdialCallComponent</div>,
-  };
-});
-
 describe('OutdialCall Component', () => {
   it('render OutdialCallComponent with correct props', () => {
     const useOutdialCallSpy = jest.spyOn(helper, 'useOutdialCall');

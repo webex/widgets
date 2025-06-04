@@ -1,18 +1,19 @@
 import React, {useEffect, useState} from 'react';
 
-import {CallControlComponentProps} from '../task.types';
+import {CallControlComponentProps, DestinationType, CallControlMenuType} from '../task.types';
 import './call-control.styles.scss';
 import {PopoverNext, SelectNext, TooltipNext, Text, ButtonCircle, ButtonPill} from '@momentum-ui/react-collaboration';
 import {Item} from '@react-stately/collections';
 import {Icon} from '@momentum-design/components/dist/react';
 import ConsultTransferPopoverComponent from './CallControlCustom/consult-transfer-popover';
-import CallControlConsultComponent from './CallControlCustom/call-control-consult';
+import type {MEDIA_CHANNEL as MediaChannelType} from '../task.types';
+import {getMediaTypeInfo} from '../../../utils';
 
 function CallControlComponent(props: CallControlComponentProps) {
   const [selectedWrapupReason, setSelectedWrapupReason] = useState<string | null>(null);
   const [selectedWrapupId, setSelectedWrapupId] = useState<string | null>(null);
   const [showAgentMenu, setShowAgentMenu] = useState(false);
-  const [agentMenuType, setAgentMenuType] = useState<'Consult' | 'Transfer' | null>(null);
+  const [agentMenuType, setAgentMenuType] = useState<CallControlMenuType | null>(null);
 
   const {
     currentTask,
@@ -21,26 +22,24 @@ function CallControlComponent(props: CallControlComponentProps) {
     endCall,
     wrapupCall,
     wrapupCodes,
-    wrapupRequired,
     isHeld,
     setIsHeld,
     isRecording,
     setIsRecording,
     buddyAgents,
     loadBuddyAgents,
+    queues,
+    loadQueues,
     transferCall,
     consultCall,
-    endConsultCall,
-    consultTransfer,
     consultInitiated,
-    consultCompleted,
     consultAccepted,
-    consultStartTimeStamp,
     callControlAudio,
-    consultAgentName,
     setConsultAgentName,
-    consultAgentId,
     setConsultAgentId,
+    allowConsultToQueue,
+    setLastTargetType,
+    controlVisibility,
   } = props;
 
   useEffect(() => {
@@ -75,15 +74,41 @@ function CallControlComponent(props: CallControlComponentProps) {
     setSelectedWrapupId(value);
   };
 
-  const handleAgentSelect = (agentId: string, agentName: string) => {
+  const handleTargetSelect = (id: string, name: string, type: DestinationType) => {
     if (agentMenuType === 'Consult') {
-      consultCall(agentId, 'agent');
-      setConsultAgentId(agentId);
-      setConsultAgentName(agentName);
-    } else {
-      transferCall(agentId, 'agent');
+      try {
+        consultCall(id, type);
+        setConsultAgentId(id);
+        setConsultAgentName(name);
+        setLastTargetType(type);
+      } catch (error) {
+        throw new Error('Error during consult call', error);
+      }
+    } else if (agentMenuType === 'Transfer') {
+      try {
+        transferCall(id, type);
+      } catch (error) {
+        throw new Error('Error during transfer call', error);
+      }
     }
   };
+
+  const handlePopoverOpen = (menuType: CallControlMenuType) => {
+    if (showAgentMenu && agentMenuType === menuType) {
+      setShowAgentMenu(false);
+      setAgentMenuType(null);
+    } else {
+      setAgentMenuType(menuType);
+      setShowAgentMenu(true);
+      loadBuddyAgents();
+      loadQueues();
+    }
+  };
+
+  const currentMediaType = getMediaTypeInfo(
+    currentTask.data.interaction.mediaType as MediaChannelType,
+    currentTask.data.interaction.mediaChannel as MediaChannelType
+  );
 
   const buttons = [
     {
@@ -93,6 +118,7 @@ function CallControlComponent(props: CallControlComponentProps) {
       tooltip: isHeld ? 'Resume the call' : 'Hold the call',
       className: 'call-control-button',
       disabled: false,
+      isVisible: controlVisibility.holdResume,
     },
     {
       id: 'consult',
@@ -101,14 +127,16 @@ function CallControlComponent(props: CallControlComponentProps) {
       className: 'call-control-button',
       disabled: false,
       menuType: 'Consult',
+      isVisible: controlVisibility.consult,
     },
     {
       id: 'transfer',
       icon: 'next-bold',
-      tooltip: 'Transfer call',
+      tooltip: `Transfer ${currentMediaType.labelName}`,
       className: 'call-control-button',
       disabled: false,
       menuType: 'Transfer',
+      isVisible: controlVisibility.transfer,
     },
     {
       id: 'record',
@@ -117,14 +145,16 @@ function CallControlComponent(props: CallControlComponentProps) {
       tooltip: isRecording ? 'Pause Recording' : 'Resume Recording',
       className: 'call-control-button',
       disabled: false,
+      isVisible: controlVisibility.pauseResumeRecording,
     },
     {
       id: 'end',
       icon: 'cancel-regular',
       onClick: endCall,
-      tooltip: 'End call',
+      tooltip: `End ${currentMediaType.labelName}`,
       className: 'call-control-button-cancel',
       disabled: isHeld,
+      isVisible: controlVisibility.end,
     },
   ];
 
@@ -146,9 +176,11 @@ function CallControlComponent(props: CallControlComponentProps) {
         autoPlay
       ></audio>
       <div className="call-control-container" data-testid="call-control-container">
-        {!consultAccepted && !wrapupRequired && (
+        {!consultAccepted && !controlVisibility.wrapup && (
           <div className="button-group">
             {filteredButtons.map((button, index) => {
+              if (!button.isVisible) return null;
+
               if (button.menuType) {
                 return (
                   <PopoverNext
@@ -184,16 +216,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                             aria-label={button.tooltip}
                             disabled={button.disabled || consultInitiated}
                             data-testid="ButtonCircle"
-                            onPress={() => {
-                              if (showAgentMenu && agentMenuType === button.menuType) {
-                                setShowAgentMenu(false);
-                                setAgentMenuType(null);
-                              } else {
-                                setAgentMenuType(button.menuType as 'Consult' | 'Transfer');
-                                setShowAgentMenu(true);
-                                loadBuddyAgents();
-                              }
-                            }}
+                            onPress={() => handlePopoverOpen(button.menuType as CallControlMenuType)}
                           >
                             <Icon className={button.className + '-icon'} name={button.icon} />
                           </ButtonCircle>
@@ -214,7 +237,10 @@ function CallControlComponent(props: CallControlComponentProps) {
                         heading={button.menuType}
                         buttonIcon={button.icon}
                         buddyAgents={buddyAgents}
-                        onAgentSelect={handleAgentSelect}
+                        queues={queues}
+                        onAgentSelect={(agentId, agentName) => handleTargetSelect(agentId, agentName, 'agent')}
+                        onQueueSelect={(queueId, queueName) => handleTargetSelect(queueId, queueName, 'queue')}
+                        allowConsultToQueue={allowConsultToQueue}
                       />
                     ) : null}
                   </PopoverNext>
@@ -246,7 +272,7 @@ function CallControlComponent(props: CallControlComponentProps) {
             })}
           </div>
         )}
-        {wrapupRequired && (
+        {controlVisibility.wrapup && (
           <div className="wrapup-group">
             <PopoverNext
               color="primary"
@@ -300,19 +326,6 @@ function CallControlComponent(props: CallControlComponentProps) {
                 Submit & Wrap up
               </ButtonPill>
             </PopoverNext>
-          </div>
-        )}
-
-        {(consultAccepted || consultInitiated) && !wrapupRequired && (
-          <div className={`call-control-consult-container ${consultAccepted ? 'no-border' : ''}`}>
-            <CallControlConsultComponent
-              agentName={consultAgentName}
-              startTimeStamp={consultStartTimeStamp}
-              endConsultCall={endConsultCall}
-              onTransfer={() => consultTransfer(consultAgentId || currentTask.data.destAgentId, 'agent')}
-              consultCompleted={consultCompleted}
-              showTransfer={!consultAccepted}
-            />
           </div>
         )}
       </div>

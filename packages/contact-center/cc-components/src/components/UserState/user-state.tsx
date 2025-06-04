@@ -1,12 +1,13 @@
-import React from 'react';
+import React, {useMemo} from 'react';
 
-import {IUserState} from './user-state.types';
+import {IUserState, AgentUserState} from './user-state.types';
 import {formatTime} from '../../utils';
 
 import './user-state.scss';
 import {SelectNext, Text} from '@momentum-ui/react-collaboration';
 import {Item} from '@react-stately/collections';
-import {Icon} from '@momentum-design/components/dist/react';
+import {Icon, Tooltip} from '@momentum-design/components/dist/react';
+import {userStateLabels} from './constant';
 
 const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
   const {
@@ -18,6 +19,10 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
     currentState,
     customState,
   } = props;
+
+  const previousSelectableState = useMemo(() => {
+    return idleCodes.find((code) => code.id !== AgentUserState.RONA && code.id !== AgentUserState.Engaged)?.id ?? '0';
+  }, [idleCodes]);
 
   let selectedKey;
   if (customState) {
@@ -31,15 +36,15 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
     : [];
 
   for (const item of idleCodes) {
-    if (item.name === 'RONA' && item.id === currentState) {
+    if (item.name === AgentUserState.RONA && item.id === currentState) {
       selectedKey = `hide-${item.id}`;
     }
-    if (item.name === 'RONA' && item.id !== currentState) {
+    if (item.name === AgentUserState.RONA && item.id !== currentState) {
       continue; // Skip RONA unless it matches the current state
     }
     items.push({
       ...item,
-      id: item.name === 'RONA' ? `hide-${item.id}` : item.id,
+      id: item.name === AgentUserState.RONA ? `hide-${item.id}` : item.id,
     });
   }
 
@@ -51,7 +56,7 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
       return '';
     }
     for (const item of idleCodes) {
-      if (item.id === currentState && item.name === 'RONA') {
+      if (item.id === currentState && item.name === AgentUserState.RONA) {
         return 'rona';
       }
     }
@@ -64,17 +69,38 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
     }
     switch (item.id) {
       case '0':
-        return {class: '', iconName: 'active-presence-small-filled'};
-      case item.name === 'RONA' && item.id:
+        return {class: 'available', iconName: 'active-presence-small-filled'};
+      case item.name === AgentUserState.RONA && item.id:
         return {class: 'rona', iconName: 'dnd-presence-filled'};
       default:
         return {class: 'idle', iconName: 'recents-presence-filled'};
     }
   };
 
+  const getTooltipText = () => {
+    if (customState && customState.developerName === 'ENGAGED') {
+      const currentStateObj = idleCodes.find((item) => item.id === currentState);
+
+      if (currentStateObj.name === AgentUserState.Available) {
+        return userStateLabels.customWithAvailableTooltip;
+      } else {
+        return userStateLabels.customWithIdleStateTooltip.replace(/{{.*?}}/g, currentStateObj.name);
+      }
+    }
+
+    return userStateLabels.availableTooltip;
+  };
+
+  // Sorts the dropdown items by keeping 'Available' at the top and sorting the rest alphabetically by name
+  const sortedItems = [
+    ...items.filter((item) => item.name === AgentUserState.Available),
+    ...items.filter((item) => item.name !== AgentUserState.Available).sort((a, b) => a.name.localeCompare(b.name)),
+  ];
+
   return (
-    <div className="user-state-container">
+    <div className="user-state-container" data-testid="user-state-container">
       <SelectNext
+        id="user-state-tooltip"
         label=""
         aria-label="user-state"
         direction="bottom"
@@ -84,19 +110,29 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
         }}
         showBorder
         selectedKey={selectedKey}
-        items={items}
+        items={sortedItems}
         className={`state-select ${getDropdownClass()}`}
+        data-testid="state-select"
       >
         {(item) => {
+          const isRonaOrEngaged = [AgentUserState.RONA, AgentUserState.Engaged].includes(
+            idleCodes.find((code) => code.id === currentState)?.name || ''
+          );
+          const shouldHighlight = currentState === item.id || (isRonaOrEngaged && item.id === previousSelectableState);
+
           return (
-            <Item key={item.id} textValue={item.name}>
-              <div className="item-container">
+            <Item key={item.id} textValue={item.name} data-testid={`state-item-${item.name}`}>
+              <div
+                className="item-container"
+                data-testid={`item-container ${shouldHighlight ? `selected ${getIconStyle(item).class}` : ''}`}
+              >
                 <Icon
                   name={getIconStyle(item).iconName}
                   title=""
                   className={`state-icon ${getIconStyle(item).class}`}
+                  data-testid="state-icon"
                 />
-                <Text className="state-name" tagName={'small'}>
+                <Text className={`state-name ${getIconStyle(item).class}`} tagName={'small'} data-testid="state-name">
                   {item.name}
                 </Text>
               </div>
@@ -105,13 +141,22 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
         }}
       </SelectNext>
 
+      <Tooltip placement="bottom" color="contrast" delay="0, 0" className="tooltip" triggerID="user-state-tooltip">
+        <Text tagName="small" className="tooltip-text">
+          {getTooltipText()}
+        </Text>
+      </Tooltip>
+
       {!customState && (
-        <span className={`elapsedTime ${isSettingAgentStatus ? 'elapsedTime-disabled' : ''}`}>
+        <span
+          className={`elapsedTime ${isSettingAgentStatus ? 'elapsedTime-disabled' : ''}`}
+          data-testid="elapsed-time"
+        >
           {lastIdleStateChangeElapsedTime >= 0 ? formatTime(lastIdleStateChangeElapsedTime) + ' / ' : ''}
           {formatTime(elapsedTime)}
         </span>
       )}
-      <Icon className="select-arrow-icon" name="arrow-down-bold" title="" />
+      <Icon className="select-arrow-icon" name="arrow-down-bold" title="" data-testid="select-arrow-icon" />
     </div>
   );
 };

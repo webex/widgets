@@ -1,11 +1,14 @@
 import React from 'react';
 import {ButtonPill, ListItemBase, ListItemBaseSection, Text} from '@momentum-ui/react-collaboration';
-import {Avatar} from '@momentum-design/components/dist/react';
+import {Avatar, Brandvisual} from '@momentum-design/components/dist/react';
 import {PressEvent} from '@react-types/shared';
 import TaskTimer from '../TaskTimer';
+import {getMediaTypeInfo} from '../../../utils';
+import type {MEDIA_CHANNEL as MediaChannelType} from '../task.types';
 import './styles.scss';
 
 interface TaskProps {
+  interactionId?: string;
   title?: string;
   state?: string;
   startTimeStamp?: number;
@@ -15,7 +18,13 @@ interface TaskProps {
   queue?: string;
   acceptTask?: (e: PressEvent) => void;
   declineTask?: (e: PressEvent) => void;
-  isBrowser?: boolean;
+  onTaskSelect?: (e: PressEvent) => void;
+  acceptText?: string;
+  declineText?: string;
+  disableAccept?: boolean;
+  styles?: string;
+  mediaType?: MediaChannelType;
+  mediaChannel?: MediaChannelType;
 }
 
 const Task: React.FC<TaskProps> = ({
@@ -24,20 +33,37 @@ const Task: React.FC<TaskProps> = ({
   startTimeStamp,
   ronaTimeout,
   selected = false,
+  styles,
   isIncomingTask = false,
   queue,
   acceptTask,
   declineTask,
-  isBrowser,
+  interactionId,
+  onTaskSelect,
+  acceptText,
+  disableAccept = false,
+  declineText,
+  mediaType,
+  mediaChannel,
 }) => {
   const capitalizeFirstWord = (str: string) => {
     return str.replace(/^\s*(\w)/, (match, firstLetter) => firstLetter.toUpperCase());
   };
-
+  const currentMediaType = getMediaTypeInfo(mediaType, mediaChannel);
   return (
-    <ListItemBase className={`task-list-item ${selected ? 'task-list-item--selected' : ''}`}>
+    <ListItemBase
+      className={`task-list-item ${selected ? 'task-list-item--selected' : ''} ${styles}`}
+      onPress={onTaskSelect ? onTaskSelect : undefined}
+      id={interactionId}
+    >
       <ListItemBaseSection position="start">
-        <Avatar icon-name="handset-filled" />
+        {currentMediaType.isBrandVisual ? (
+          <div className="brand-visual-background">
+            <Brandvisual name={currentMediaType.iconName} className={currentMediaType.className} />
+          </div>
+        ) : (
+          <Avatar icon-name={currentMediaType.iconName} className={currentMediaType.className} />
+        )}
       </ListItemBaseSection>
 
       <ListItemBaseSection position="fill">
@@ -81,15 +107,18 @@ const Task: React.FC<TaskProps> = ({
       </ListItemBaseSection>
 
       <ListItemBaseSection position="end">
-        {isIncomingTask ? (
-          <ButtonPill onPress={acceptTask} color="join" disabled={!isBrowser}>
-            Ringing
-          </ButtonPill>
-        ) : isBrowser ? (
-          <ButtonPill onPress={declineTask} color="cancel">
-            End
-          </ButtonPill>
-        ) : null}
+        <div className="task-button-container">
+          {acceptText ? (
+            <ButtonPill onPress={acceptTask} color="join" disabled={disableAccept}>
+              {acceptText}
+            </ButtonPill>
+          ) : null}
+          {declineText ? (
+            <ButtonPill onPress={declineTask} color="cancel">
+              {declineText}
+            </ButtonPill>
+          ) : null}
+        </div>
       </ListItemBaseSection>
     </ListItemBase>
   );

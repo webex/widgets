@@ -3,53 +3,60 @@ import {render, screen, cleanup} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import {TaskList} from '../../src/TaskList';
 import * as helper from '../../src/helper';
-import {TaskListComponent} from '@webex/cc-components';
+import * as components from '@webex/cc-components';
 import store from '@webex/cc-store';
 
-jest.mock('@webex/cc-components', () => {
-  return {
-    TaskListComponent: jest.fn(() => <div data-testid="task-list-presentational">TaskListComponent</div>),
-  };
-});
-
 // Mock `@webex/cc-store`.
+const taskListMock = [
+  {id: 1, data: {interaction: {callAssociatedDetails: {ani: '1234567890'}}}},
+  {id: 2, data: {interaction: {callAssociatedDetails: {ani: '9876543210'}}}},
+];
 jest.mock('@webex/cc-store', () => ({
   cc: {},
   deviceType: 'BROWSER',
+  dialNumber: '12345',
   onAccepted: jest.fn(),
   onDeclined: jest.fn(),
-}));
-
-// Mock `useTaskList`.
-jest.mock('../../src/helper', () => ({
-  useTaskList: jest.fn(),
+  taskList: taskListMock,
+  setTaskAssigned: jest.fn(),
+  setTaskRejected: jest.fn(),
+  setTaskSelected: jest.fn(),
 }));
 
 describe('TaskList Component', () => {
+  const taskListComponentSpy = jest.spyOn(components, 'TaskListComponent');
+  const helperSpy = jest.spyOn(helper, 'useTaskList');
   afterEach(cleanup);
 
   it('renders TaskListPresentational with the correct props', () => {
-    const taskListMock = [
-      {id: 1, data: {interaction: {callAssociatedDetails: {ani: '1234567890'}}}},
-      {id: 2, data: {interaction: {callAssociatedDetails: {ani: '9876543210'}}}},
-    ];
-
-    // Mock the return value of `useTaskList`.
-    const useTaskListMock = jest.spyOn(helper, 'useTaskList');
-    useTaskListMock.mockReturnValue({
-      taskList: taskListMock,
-    });
-
-    render(<TaskList />);
+    render(<TaskList onTaskAccepted={jest.fn()} onTaskDeclined={jest.fn()} onTaskSelected={jest.fn()} />);
 
     // Assert that `TaskListPresentational` is rendered.
-    const taskListPresentational = screen.getByTestId('task-list-presentational');
+    const taskListPresentational = screen.getByTestId('task-list');
     expect(taskListPresentational).toBeInTheDocument();
 
     // Verify that `TaskListPresentational` is called with the correct props.
-    expect(TaskListComponent).toHaveBeenCalledWith({taskList: taskListMock}, {});
+    expect(taskListComponentSpy).toHaveBeenCalledWith(
+      {
+        currentTask: undefined,
+        isBrowser: true,
+        taskList: taskListMock,
+        acceptTask: expect.any(Function),
+        declineTask: expect.any(Function),
+        onTaskSelect: expect.any(Function),
+      },
+      {}
+    );
 
     // Verify that `useTaskList` is called with the correct arguments.
-    expect(helper.useTaskList).toHaveBeenCalledWith({cc: store.cc, deviceType: 'BROWSER'});
+    expect(helperSpy).toHaveBeenCalledWith({
+      cc: store.cc,
+      deviceType: 'BROWSER',
+      logger: undefined,
+      onTaskAccepted: expect.any(Function),
+      onTaskDeclined: expect.any(Function),
+      onTaskSelected: expect.any(Function),
+      taskList: taskListMock,
+    });
   });
 });

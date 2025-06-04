@@ -4,16 +4,11 @@ import * as helper from '../../src/helper';
 import {CallControl} from '../../src';
 import '@testing-library/jest-dom';
 
-jest.mock('@webex/cc-components', () => {
-  return {
-    CallControlComponent: () => <div>CallControlComponent</div>,
-  };
-});
-
 // Mock the store
 jest.mock('@webex/cc-store', () => ({
   cc: {},
   deviceType: 'BROWSER',
+  dialNumber: '12345',
   wrapupCodes: [],
   logger: {},
   currentTask: {
@@ -40,7 +35,17 @@ const onWrapUpCb = jest.fn();
 describe('CallControl Component', () => {
   it('renders CallControlPresentational with correct props', () => {
     const useCallControlSpy = jest.spyOn(helper, 'useCallControl').mockReturnValue({
-      currentTask: {interactionId: 'mockInteractionId'},
+      currentTask: {
+        data: {interactionId: 'mockInteractionId', interaction: {mediaType: 'voice'}},
+        on: jest.fn(),
+        off: jest.fn(),
+        hold: jest.fn(),
+        resume: jest.fn(),
+        pauseRecording: jest.fn(),
+        resumeRecording: jest.fn(),
+        end: jest.fn(),
+        wrapup: jest.fn(),
+      },
       audioRef: {current: null},
       endCall: jest.fn(),
       toggleHold: jest.fn(),
@@ -55,11 +60,28 @@ describe('CallControl Component', () => {
       transferCall: jest.fn(),
       consultCall: jest.fn(),
       holdTime: 0,
+      consultInitiated: undefined,
+      featureFlags: undefined,
+      deviceType: 'BROWSER',
+      controlVisibility: {
+        accept: false,
+        decline: false,
+        end: false,
+        muteUnmute: false,
+        holdResume: true,
+        consult: false,
+        transfer: false,
+        conference: false,
+        wrapup: false,
+        pauseResumeRecording: false,
+        endConsult: false,
+        recordingIndicator: false,
+      },
     });
 
     render(<CallControl onHoldResume={onHoldResumeCb} onEnd={onEndCb} onWrapUp={onWrapUpCb} />);
 
-    // Assert that the useIncomingTask hook is called with the correct arguments
+    // Assert that the useCallControl hook is called with the correct arguments
     expect(useCallControlSpy).toHaveBeenCalledWith({
       currentTask: {
         data: {interactionId: 'mockInteractionId'},
@@ -76,6 +98,9 @@ describe('CallControl Component', () => {
       onEnd: expect.any(Function),
       onWrapUp: expect.any(Function),
       logger: {},
+      consultInitiated: undefined,
+      featureFlags: undefined,
+      deviceType: 'BROWSER',
     });
   });
 });

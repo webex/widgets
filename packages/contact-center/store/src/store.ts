@@ -1,5 +1,5 @@
 import {makeAutoObservable, observable} from 'mobx';
-import Webex from 'webex/contact-center';
+import Webex from '@webex/plugin-cc';
 import {
   IContactCenter,
   Profile,
@@ -11,8 +11,12 @@ import {
   ILogger,
   IWrapupCode,
   ICustomState,
+  TaskMetaData,
+  AgentLoginProfile,
 } from './store.types';
 import {ITask} from '@webex/plugin-cc';
+
+import {getFeatureFlags} from './util';
 
 class Store implements IStore {
   private static instance: Store;
@@ -24,23 +28,31 @@ class Store implements IStore {
   agentId: string = '';
   currentTheme: string = 'LIGHT';
   wrapupCodes: IWrapupCode[] = [];
-  incomingTask: ITask = null;
   currentTask: ITask = null;
   isAgentLoggedIn = false;
   deviceType: string = '';
-  taskList: ITask[] = [];
-  wrapupRequired: boolean = false;
+  teamId: string = '';
+  taskList: Record<string, ITask> = {};
+  dialNumber: string = '';
   currentState: string = '';
   customState: ICustomState = null;
   consultCompleted = false;
   consultInitiated = false;
   consultAccepted = false;
+  isQueueConsultInProgress = false;
+  currentConsultQueueId: string = '';
   consultStartTimeStamp = undefined;
   lastStateChangeTimestamp?: number;
   lastIdleCodeChangeTimestamp?: number;
   showMultipleLoginAlert: boolean = false;
   callControlAudio: MediaStream | null = null;
   consultOfferReceived: boolean = false;
+  featureFlags: {[key: string]: boolean} = {};
+  isEndConsultEnabled: boolean = false;
+  allowConsultToQueue: boolean = false;
+  agentProfile: AgentLoginProfile = {};
+
+  taskMetaData: Record<string, TaskMetaData> = {};
 
   constructor() {
     makeAutoObservable(this, {
@@ -70,6 +82,7 @@ class Store implements IStore {
     return this.cc
       .register()
       .then((response: Profile) => {
+        this.featureFlags = getFeatureFlags(response);
         this.teams = response.teams;
         this.loginOptions = response.webRtcEnabled
           ? response.loginVoiceOptions
@@ -78,10 +91,15 @@ class Store implements IStore {
         this.agentId = response.agentId;
         this.wrapupCodes = response.wrapupCodes;
         this.isAgentLoggedIn = response.isAgentLoggedIn;
-        this.deviceType = response.deviceType;
+        this.deviceType = response.deviceType ?? 'AGENT_DN';
+        this.dialNumber = response.dn;
+        this.teamId = response.currentTeamId ?? '';
         this.currentState = response.lastStateAuxCodeId;
         this.lastStateChangeTimestamp = response.lastStateChangeTimestamp;
         this.lastIdleCodeChangeTimestamp = response.lastIdleCodeChangeTimestamp;
+        this.isEndConsultEnabled = response.isEndConsultEnabled;
+        this.allowConsultToQueue = response.allowConsultToQueue;
+        this.agentProfile.agentName = response.agentName;
       })
       .catch((error) => {
         this.logger.error(`Error registering contact center: ${error}`, {

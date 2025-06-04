@@ -16,6 +16,7 @@ jest.mock('@webex/cc-store', () => {
     }),
     registerCC: jest.fn(),
     setDeviceType: jest.fn(),
+    setDialNumber: jest.fn(),
     setCurrentState: jest.fn(),
     setLastStateChangeTimestamp: jest.fn(),
     setLastIdleCodeChangeTimestamp: jest.fn(),
@@ -60,7 +61,7 @@ describe('useStationLogin Hook', () => {
     logger.error.mockClear();
   });
 
-  it('should set loginSuccess on successful login', async () => {
+  it('should set loginSuccess on successful login and set loginFailure to undefined', async () => {
     const successResponse = {
       data: {
         agentId: '6b310dff-569e-4ac7-b064-70f834ea56d8',
@@ -94,12 +95,11 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         deviceType: 'BROWSER',
+        dialNumber: '',
       })
     );
 
     act(() => {
-      result.current.setDeviceType(loginParams.loginOption);
-      result.current.setDialNumber(loginParams.dialNumber);
       result.current.setTeam(loginParams.teamId);
     });
 
@@ -110,14 +110,12 @@ describe('useStationLogin Hook', () => {
     await waitFor(async () => {
       expect(ccMock.stationLogin).toHaveBeenCalledWith({
         teamId: loginParams.teamId,
-        loginOption: loginParams.loginOption,
-        dialNumber: loginParams.dialNumber,
+        loginOption: 'BROWSER',
+        dialNumber: '',
       });
 
       expect(result.current).toEqual({
         name: 'StationLogin',
-        setDeviceType: expect.any(Function),
-        setDialNumber: expect.any(Function),
         setTeam: expect.any(Function),
         login: expect.any(Function),
         logout: expect.any(Function),
@@ -151,12 +149,11 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         deviceType: '',
+        dialNumber: '',
       })
     );
 
     act(() => {
-      result.current.setDeviceType(loginParams.loginOption);
-      result.current.setDialNumber(loginParams.dialNumber);
       result.current.setTeam(loginParams.teamId);
     });
 
@@ -190,12 +187,11 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         deviceType: 'EXTENSION',
+        dialNumber: '',
       })
     );
 
     act(() => {
-      result.current.setDeviceType(loginParams.loginOption);
-      result.current.setDialNumber(loginParams.dialNumber);
       result.current.setTeam(loginParams.teamId);
     });
 
@@ -221,12 +217,11 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         deviceType: 'EXTENSION',
+        dialNumber: '',
       })
     );
 
     act(() => {
-      result.current.setDeviceType(loginParams.loginOption);
-      result.current.setDialNumber(loginParams.dialNumber);
       result.current.setTeam(loginParams.teamId);
     });
 
@@ -237,15 +232,13 @@ describe('useStationLogin Hook', () => {
     await waitFor(() => {
       expect(ccMock.stationLogin).toHaveBeenCalledWith({
         teamId: loginParams.teamId,
-        loginOption: loginParams.loginOption,
-        dialNumber: loginParams.dialNumber,
+        loginOption: 'EXTENSION',
+        dialNumber: '',
       });
       expect(loginCb).not.toHaveBeenCalledWith();
 
       expect(result.current).toEqual({
         name: 'StationLogin',
-        setDeviceType: expect.any(Function),
-        setDialNumber: expect.any(Function),
         setTeam: expect.any(Function),
         login: expect.any(Function),
         logout: expect.any(Function),
@@ -268,6 +261,7 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         deviceType: 'EXTENSION',
+        dialNumber: '',
       })
     );
 
@@ -292,12 +286,11 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         deviceType: 'EXTENSION',
+        dialNumber: '',
       })
     );
 
     act(() => {
-      result.current.setDeviceType(loginParams.loginOption);
-      result.current.setDialNumber(loginParams.dialNumber);
       result.current.setTeam(loginParams.teamId);
     });
 
@@ -316,8 +309,6 @@ describe('useStationLogin Hook', () => {
 
       expect(result.current).toEqual({
         name: 'StationLogin',
-        setDeviceType: expect.any(Function),
-        setDialNumber: expect.any(Function),
         setTeam: expect.any(Function),
         login: expect.any(Function),
         logout: expect.any(Function),
@@ -354,6 +345,7 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         deviceType: 'BROWSER',
+        dialNumber: '',
       })
     );
 
@@ -366,8 +358,6 @@ describe('useStationLogin Hook', () => {
 
       expect(result.current).toEqual({
         name: 'StationLogin',
-        setDeviceType: expect.any(Function),
-        setDialNumber: expect.any(Function),
         setTeam: expect.any(Function),
         login: expect.any(Function),
         logout: expect.any(Function),
@@ -389,6 +379,7 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         deviceType: 'EXTENSION',
+        dialNumber: '',
       })
     );
 
@@ -413,6 +404,7 @@ describe('useStationLogin Hook', () => {
         onLogin: loginCb,
         logger,
         deviceType: 'EXTENSION',
+        dialNumber: '',
       })
     );
 
@@ -437,6 +429,7 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         deviceType: 'EXTENSION',
+        dialNumber: '',
       })
     );
 
@@ -466,6 +459,7 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         deviceType: 'EXTENSION',
+        dialNumber: '',
       })
     );
 
@@ -496,6 +490,7 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         deviceType: 'EXTENSION',
+        dialNumber: '',
       })
     );
 
@@ -525,6 +520,7 @@ describe('useStationLogin Hook', () => {
         onLogout: logoutCb,
         logger,
         deviceType: 'EXTENSION',
+        dialNumber: '',
       })
     );
 
@@ -564,6 +560,7 @@ describe('useStationLogin Hook', () => {
         cc: ccMock,
         logger,
         deviceType: 'EXTENSION',
+        dialNumber: '',
       })
     );
 

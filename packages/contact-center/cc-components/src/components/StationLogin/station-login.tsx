@@ -1,65 +1,57 @@
 import React, {useEffect, useState, useRef, useCallback} from 'react';
 import {StationLoginComponentProps} from './station-login.types';
 import './station-login.style.scss';
-import {MULTIPLE_SIGN_IN_ALERT_MESSAGE, MULTIPLE_SIGN_IN_ALERT_TITLE} from './constants';
-import {ButtonPill, Text, SelectNext, TextInput} from '@momentum-ui/react-collaboration';
-import {Item} from '@react-stately/collections';
-import {Icon} from '@momentum-design/components/dist/react';
+import {DESKTOP, DIALNUMBER, LoginOptions, SignInErrors, StationLoginLabels} from './constants';
+import {Button, Icon, Select, Option, Text, Tooltip, Input} from '@momentum-design/components/dist/react';
 
 const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps> = (props) => {
   const {
     teams,
     loginOptions,
     login,
-    logout,
+    loginFailure,
     setDeviceType,
     setDialNumber,
     setTeam,
     isAgentLoggedIn,
     deviceType,
+    dialNumber,
+    dialNumberRegex,
     showMultipleLoginAlert,
     handleContinue,
+    onCCSignOut,
+    teamId,
+    setTeamId,
   } = props;
 
   const modalRef = useRef<HTMLDialogElement>(null);
-  const [dialNumberValue, setDialNumberValue] = useState<string>('');
-  const [agentLoginValue, setAgentLoginValue] = useState<string>('');
-  const [teamsValue, setTeamsValue] = useState<string>('');
-  const [isDialNumberDisabled, setIsDialNumberDisabled] = useState<boolean>(false);
+  const ccSignOutModalRef = useRef<HTMLDialogElement>(null);
+  const [dialNumberLabel, setDialNumberLabel] = useState<string>('');
+  const [dialNumberPlaceholder, setDialNumberPlaceholder] = useState<string>('');
+  const [dialNumberValue, setDialNumberValue] = useState<string>(dialNumber || '');
+  const [showCCSignOutModal, setShowCCSignOutModal] = useState<boolean>(false);
+  const [selectedDeviceType, setSelectedDeviceType] = useState<string>(deviceType || '');
+  const [selectedTeamId, setSelectedTeamId] = useState<string>(teamId || '');
+  const [showDNError, setShowDNError] = useState<boolean>(false);
+  const [dnErrorText, setDNErrorText] = useState<string>('');
 
+  // useEffect to be called on mount
   useEffect(() => {
-    if (loginOptions.length > 0) {
-      const firstOption = loginOptions[0];
-      setAgentLoginValue('0');
-      setDeviceType(firstOption);
-    }
-  }, [teams, loginOptions, deviceType]);
+    setSelectedDeviceType(deviceType || '');
+    setDialNumberValue(dialNumber || '');
+    updateDialNumberLabel(deviceType || '');
+    setSelectedTeamId(teamId || '');
+  }, [isAgentLoggedIn]);
 
-  useEffect(() => {
-    if (teams.length > 0) {
-      const firstTeam = teams[0].id;
-      setTeamsValue(firstTeam);
-      setTeam(firstTeam);
-    }
-  }, [teams, setTeam]);
-
+  // show modals
   useEffect(() => {
     if (showMultipleLoginAlert && modalRef.current) {
       modalRef.current.showModal();
     }
-  }, [showMultipleLoginAlert]);
-
-  const selectLoginOption = useCallback(
-    (key: string) => {
-      const index = parseInt(key, 10);
-      if (!isNaN(index) && loginOptions[index]) {
-        setAgentLoginValue(key);
-        setDeviceType(loginOptions[index]);
-        setIsDialNumberDisabled(!['AGENT_DN', 'EXTENSION'].includes(loginOptions[index]));
-      }
-    },
-    [loginOptions, setDeviceType]
-  );
+    if (showCCSignOutModal && !ccSignOutModalRef?.current?.open) {
+      ccSignOutModalRef.current?.showModal();
+    }
+  }, [showMultipleLoginAlert, showCCSignOutModal]);
 
   const continueClicked = useCallback(() => {
     if (modalRef.current) {
@@ -68,108 +60,199 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
     }
   }, [handleContinue]);
 
-  const updateDN = useCallback(
-    (value: string) => {
-      setDialNumberValue(value);
-      setDialNumber(value);
-    },
-    [setDialNumber]
-  );
+  /**
+   * Handler for the Contact Center logout confirmation modal cancel button
+   *
+   * Closes the dialog if it is currently open
+   */
+  const ccCancelButtonClicked = useCallback(() => {
+    if (ccSignOutModalRef?.current?.open) {
+      ccSignOutModalRef.current.close();
+      setShowCCSignOutModal(false);
+    }
+  }, []);
 
-  const updateTeam = useCallback(
-    (value: string) => {
-      setTeamsValue(value);
-      setTeam(value);
-    },
-    [setTeam]
-  );
+  const updateDialNumberLabel = (selectedOption: string): void => {
+    if (selectedOption != DESKTOP && Object.keys(LoginOptions).includes(selectedOption)) {
+      setDialNumberLabel(LoginOptions[selectedOption]);
+      setDialNumberPlaceholder(LoginOptions[selectedOption]);
+    }
+  };
+
+  /**
+   * Runs validation tests on a string given as a Dial Number
+   * @param {string} input
+   * @returns {boolean} whether or not to show a validation error
+   */
+  const validateDialNumber = (input: string): boolean => {
+    const regexForDn = new RegExp(dialNumberRegex ?? '1[0-9]{3}[2-9][0-9]{6}([,]{1,10}[0-9]+){0,1}');
+    if (regexForDn.test(input)) {
+      return false;
+    }
+    setDNErrorText(StationLoginLabels.DN_FORMAT_ERROR);
+    return true;
+  };
 
   return (
     <>
+      {/* TODO: Replace dialog with momentum-design modal component once available */}
       <dialog ref={modalRef} className="modal" open={showMultipleLoginAlert}>
-        <h2>{MULTIPLE_SIGN_IN_ALERT_TITLE}</h2>
-        <p>{MULTIPLE_SIGN_IN_ALERT_MESSAGE}</p>
+        <h2>{StationLoginLabels.MULTIPLE_SIGN_IN_ALERT_TITLE}</h2>
+        <p>{StationLoginLabels.MULTIPLE_SIGN_IN_ALERT_MESSAGE}</p>
         <div className="modal-content">
           <button id="ContinueButton" data-testid="ContinueButton" onClick={continueClicked}>
-            Continue
+            {StationLoginLabels.CONTINUE}
           </button>
         </div>
       </dialog>
-      <div className="box station-login">
+      {/* TODO: Replace dialog with momentum-design modal component once available */}
+      <dialog ref={ccSignOutModalRef} className="cc-logout-modal">
+        <Text tagname="h2" type="body-large-bold" className="modal-text">
+          {StationLoginLabels.CC_SIGN_OUT}
+        </Text>
+        <Text tagname="p" type="body-midsize-regular" className="modal-text">
+          {StationLoginLabels.CC_SIGN_OUT_CONFIRM}
+        </Text>
+        <div className="cc-logout-modal-content">
+          <Button onClick={ccCancelButtonClicked} variant="secondary" className="white-button">
+            {StationLoginLabels.CANCEL}
+          </Button>
+          <Button onClick={onCCSignOut}>{StationLoginLabels.SIGN_OUT}</Button>
+        </div>
+      </dialog>
+      <div className="box station-login" data-testid="station-login-widget">
         <section className="section-box">
-          <fieldset className="fieldset">
-            <Text tagName={'span'} type="heading-small-bold">
-              Set your interaction preferences
-            </Text>
-          </fieldset>
-          <fieldset className="fieldset">
-            <legend id="agent-login-label">Handle calls using</legend>
-            <div className="select-container">
-              <SelectNext
+          <Text tagname={'span'} type="body-large-bold">
+            {StationLoginLabels.INTERACTION_PREFERENCES}
+          </Text>
+          <div>
+            <div id="agent-login-label">
+              <Text type="body-midsize-regular">{StationLoginLabels.HANDLE_CALLS}</Text>
+              <Icon name="info-badge-filled" id="agent-login-info-badge" />
+              <Tooltip
+                color="contrast"
+                id="agent-login-label-tooltip"
+                showArrow={true}
+                triggerID="agent-login-info-badge"
+              >
+                <Text tagname={'div'} type="body-large-regular" className="agent-login-popover">
+                  {StationLoginLabels.HANDLE_CALLS_TOOLTIP}
+                </Text>
+              </Tooltip>
+            </div>
+            <div>
+              <Select
                 id="login-option"
-                direction="bottom"
-                showBorder
-                aria-labelledby="agent-login-label"
-                items={loginOptions.map((name, id) => ({key: id.toString(), name}))}
-                selectedKey={agentLoginValue}
-                onSelectionChange={selectLoginOption}
+                name="login-option"
+                onChange={(event: CustomEvent) => {
+                  const selectedOption = event.detail.value;
+                  // TODO: Select component is calling onChange with first label on load
+                  // bug ticket: https://jira-eng-gpk2.cisco.com/jira/browse/MOMENTUM-668
+                  if (Object.keys(LoginOptions).includes(selectedOption)) {
+                    setDeviceType(selectedOption);
+                    setSelectedDeviceType(selectedOption);
+                    updateDialNumberLabel(selectedOption);
+                    // clear dial number when switching between DN and Extension
+                    setDialNumber('');
+                    setShowDNError(false);
+                  }
+                }}
+                value={selectedDeviceType}
                 className="station-login-select"
+                selectedValue={selectedDeviceType}
+                selectedValueText={LoginOptions[selectedDeviceType]}
+                data-testid="login-option-select"
               >
-                {(item) => (
-                  <Item textValue={item.name} key={item.key}>
-                    <Text className="state-name" tagName={'small'}>
-                      {item.name}
-                    </Text>
-                  </Item>
-                )}
-              </SelectNext>
-              <Icon className="select-arrow-icon" name="arrow-down-bold" title="" />
+                {Object.keys(LoginOptions).map((option: string, index: number) => {
+                  // only show loginOptions provided by store
+                  if (loginOptions.includes(option)) {
+                    return (
+                      <Option
+                        selected={option === selectedDeviceType}
+                        key={index}
+                        value={option}
+                        data-testid={`login-option-${LoginOptions[option]}`}
+                      >
+                        {LoginOptions[option]}
+                      </Option>
+                    );
+                  }
+                })}
+              </Select>
             </div>
-          </fieldset>
-          <fieldset className="fieldset">
-            <legend id="dial-number-label">Dial number</legend>
-            <TextInput
-              clearAriaLabel="Clear"
-              aria-labelledby="dial-number-label"
-              placeholder="Extension/Dial Number"
-              onChange={updateDN}
+          </div>
+          {selectedDeviceType && selectedDeviceType !== DESKTOP && (
+            <Input
+              label={dialNumberLabel}
+              placeholder={dialNumberPlaceholder}
               value={dialNumberValue}
-              isDisabled={isDialNumberDisabled}
+              onChange={(event) => {
+                const input = (event.target as HTMLInputElement).value.trim();
+                setDialNumberValue(input);
+                setDialNumber(input);
+
+                // validation
+                if (input.length === 0) {
+                  // show error for empty string
+                  setDNErrorText(`${LoginOptions[selectedDeviceType]} ${StationLoginLabels.IS_REQUIRED}`);
+                  setShowDNError(true);
+                } else if (selectedDeviceType === DIALNUMBER) {
+                  setShowDNError(validateDialNumber(input));
+                } else {
+                  setShowDNError(false);
+                }
+              }}
+              helpText={showDNError ? dnErrorText : undefined}
+              helpTextType={showDNError ? 'error' : undefined}
+              data-testid="dial-number-input"
             />
-          </fieldset>
-          <fieldset className="fieldset">
-            <legend id="team-label">Your team</legend>
-            <div className="select-container">
-              <SelectNext
-                id="teams-dropdown"
-                direction="bottom"
-                showBorder
-                aria-labelledby="team-label"
-                items={teams}
-                selectedKey={teamsValue}
-                onSelectionChange={updateTeam}
-                className="station-login-select"
-              >
-                {(item) => (
-                  <Item textValue={item.name} key={item.id}>
-                    <Text className="state-name" tagName={'small'}>
-                      {item.name}
-                    </Text>
-                  </Item>
-                )}
-              </SelectNext>
-              <Icon className="select-arrow-icon" name="arrow-down-bold" title="" />
-            </div>
-          </fieldset>
+          )}
+
+          <div className="select-container">
+            <Select
+              label={StationLoginLabels.YOUR_TEAM}
+              id="teams-dropdown"
+              name="teams-dropdown"
+              onChange={(event: CustomEvent) => {
+                setTeam(event.detail.value);
+                setSelectedTeamId(event.detail.value);
+                setTeamId(event.detail.value);
+              }}
+              className="station-login-select"
+              placeholder={StationLoginLabels.YOUR_TEAM}
+              selectedValueText={teams.find((team) => team.id === selectedTeamId)?.name}
+              data-testid="teams-dropdown-select"
+            >
+              {teams.map((team: {id: string; name: string}, index: number) => {
+                return (
+                  <Option
+                    selected={team.id === selectedTeamId}
+                    key={index}
+                    value={team.id}
+                    data-testid={`teams-dropdown-${team.name}`}
+                  >
+                    {team.name}
+                  </Option>
+                );
+              })}
+            </Select>
+          </div>
+
+          {loginFailure && (
+            <Text className="error-text-color" type={'body-midsize-regular'}>
+              {SignInErrors[loginFailure.message] ?? StationLoginLabels.DEFAULT_ERROR}
+            </Text>
+          )}
           <div className="btn-container">
-            {isAgentLoggedIn ? (
-              <ButtonPill id="logoutAgent" onPress={logout} color="cancel">
-                Logout
-              </ButtonPill>
-            ) : (
-              <ButtonPill id="AgentLogin" onPress={login} color="join">
-                Save & Continue
-              </ButtonPill>
+            {!isAgentLoggedIn && (
+              <Button onClick={login} disabled={showDNError} data-testid="login-button">
+                {StationLoginLabels.SAVE_AND_CONTINUE}
+              </Button>
+            )}
+            {onCCSignOut && (
+              <Button onClick={() => setShowCCSignOutModal(true)} variant="secondary" className="white-button">
+                {StationLoginLabels.SIGN_OUT}
+              </Button>
             )}
           </div>
         </section>

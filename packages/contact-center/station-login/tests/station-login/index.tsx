@@ -11,6 +11,8 @@ const ccMock = {
 };
 const loginOptionsMock = ['EXTENSION', 'AGENT_DN', 'BROWSER'];
 const deviceTypeMock = 'BROWSER';
+const dialNumberMock = '12345';
+const dialNumberRegexMock = '1[0-9]{3}[2-9][0-9]{6}([,]{1,10}[0-9]+){0,1}';
 const loggerMock = {};
 const isAgentLoggedInMock = false;
 
@@ -24,6 +26,8 @@ jest.mock('@webex/cc-store', () => {
     teams: teamsMock,
     loginOptions: loginOptionsMock,
     deviceType: deviceTypeMock,
+    dialNumber: dialNumberMock,
+    dialNumberRegex: dialNumberRegexMock,
     logger: loggerMock,
     isAgentLoggedIn: isAgentLoggedInMock,
     setCCCallback: jest.fn(),
@@ -43,12 +47,13 @@ jest.mock('@webex/cc-components', () => {
 
 const loginCb = jest.fn();
 const logoutCb = jest.fn();
+const ccLogoutCb = jest.fn();
 
 describe('StationLogin Component', () => {
   it('renders StationLoginPresentational with correct props', () => {
     const useStationLoginSpy = jest.spyOn(helper, 'useStationLogin');
 
-    render(<StationLogin onLogin={loginCb} onLogout={logoutCb} />);
+    render(<StationLogin onLogin={loginCb} onLogout={logoutCb} onCCSignOut={ccLogoutCb} />);
 
     expect(useStationLoginSpy).toHaveBeenCalledWith({
       cc: ccMock,
@@ -56,6 +61,7 @@ describe('StationLogin Component', () => {
       onLogout: logoutCb,
       logger: loggerMock,
       deviceType: deviceTypeMock,
+      dialNumber: dialNumberMock,
     });
   });
 });
