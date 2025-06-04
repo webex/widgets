@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.67](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.66...v1.28.0-ccwidgets.67) (2025-06-03)
+
+
+### Bug Fixes
+
+* **cc-task:** TaskList onTaskSelected callback ([#466](https://github.com/webex/widgets/issues/466)) ([5d7038f](https://github.com/webex/widgets/commit/5d7038fcfd79b2b71d372ac49b29904c48e106d5))
+
 # [1.28.0-ccwidgets.66](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.65...v1.28.0-ccwidgets.66) (2025-06-02)
 
 
