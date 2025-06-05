@@ -107,7 +107,7 @@ function CallControlComponent(props: CallControlComponentProps) {
   };
 
   const handlePopoverOpen = (menuType: CallControlMenuType) => {
-    logger.log('CC-Widgets: CallControl: opening call control popover', {
+    logger.info('CC-Widgets: CallControl: opening call control popover', {
       module: 'call-control.tsx',
       method: 'handlePopoverOpen',
     });

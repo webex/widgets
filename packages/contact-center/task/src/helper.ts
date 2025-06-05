@@ -23,7 +23,7 @@ export const useTaskList = (props: UseTaskListProps) => {
   useEffect(() => {
     if (onTaskAccepted) {
       store.setTaskAssigned(function (task) {
-        logger.log(`CC-Widgets: taskAssigned event for ${task.data.interactionId}`, {
+        logger.info(`CC-Widgets: taskAssigned event for ${task.data.interactionId}`, {
           module: 'useTaskList',
           method: 'setTaskAssigned',
         });
@@ -33,7 +33,7 @@ export const useTaskList = (props: UseTaskListProps) => {
 
     if (onTaskDeclined) {
       store.setTaskRejected(function (task, reason) {
-        logger.log(`CC-Widgets: taskRejected event for ${task.data.interactionId}`, {
+        logger.info(`CC-Widgets: taskRejected event for ${task.data.interactionId}`, {
           module: 'useTaskList',
           method: 'setTaskRejected',
         });
@@ -49,7 +49,7 @@ export const useTaskList = (props: UseTaskListProps) => {
   }, []);
 
   const acceptTask = (task: ITask) => {
-    logger.log(`CC-Widgets: acceptTask called for ${task.data.interactionId}`, {
+    logger.info(`CC-Widgets: acceptTask called for ${task.data.interactionId}`, {
       module: 'useTaskList',
       method: 'acceptTask',
     });
@@ -59,7 +59,7 @@ export const useTaskList = (props: UseTaskListProps) => {
   };
 
   const declineTask = (task: ITask) => {
-    logger.log(`CC-Widgets: declineTask called for ${task.data.interactionId}`, {
+    logger.info(`CC-Widgets: declineTask called for ${task.data.interactionId}`, {
       module: 'useTaskList',
       method: 'declineTask',
     });
@@ -88,17 +88,9 @@ export const useIncomingTask = (props: UseTaskProps) => {
 
   useEffect(() => {
     if (!incomingTask) return;
-    logger.log(`CC-Widgets: useIncomingTask registering listeners for ${incomingTask.data.interactionId}`, {
-      module: 'useIncomingTask',
-      method: 'useEffect',
-    });
     store.setTaskCallback(
       TASK_EVENTS.TASK_ASSIGNED,
       () => {
-        logger.log(`CC-Widgets: incoming TASK_ASSIGNED for ${incomingTask.data.interactionId}`, {
-          module: 'useIncomingTask',
-          method: 'TASK_ASSIGNED',
-        });
         if (onAccepted) onAccepted({task: incomingTask});
       },
       incomingTask.data.interactionId
@@ -135,7 +127,7 @@ export const useIncomingTask = (props: UseTaskProps) => {
   };
 
   const reject = () => {
-    logger.log(`CC-Widgets: incomingTask.reject() called`, {
+    logger.info(`CC-Widgets: incomingTask.reject() called`, {
       module: 'useIncomingTask',
       method: 'reject',
     });
@@ -243,7 +235,7 @@ export const useCallControl = (props: useCallControlProps) => {
   const loadBuddyAgents = useCallback(async () => {
     try {
       const agents = await store.getBuddyAgents();
-      logger.log(`Loaded ${agents.length} buddy agents`, {module: 'helper.ts', method: 'loadBuddyAgents'});
+      logger.info(`Loaded ${agents.length} buddy agents`, {module: 'helper.ts', method: 'loadBuddyAgents'});
       setBuddyAgents(agents);
     } catch (error) {
       logger.error(`Error loading buddy agents: ${error}`, {module: 'helper.ts', method: 'loadBuddyAgents'});
@@ -316,7 +308,6 @@ export const useCallControl = (props: useCallControlProps) => {
     store.setTaskCallback(
       TASK_EVENTS.TASK_HOLD,
       () => {
-        logger.log(`TASK_HOLD received`, {module: 'useCallControl', method: 'TASK_HOLD'});
         onHoldResume?.();
         setIsHeld(true);
       },
@@ -363,7 +354,7 @@ export const useCallControl = (props: useCallControlProps) => {
   };
 
   const toggleHold = (hold: boolean) => {
-    logger.log(`toggleHold(${hold}) called`, {module: 'useCallControl', method: 'toggleHold'});
+    logger.info(`toggleHold(${hold}) called`, {module: 'useCallControl', method: 'toggleHold'});
     if (hold) {
       currentTask
         .hold()
@@ -388,7 +379,7 @@ export const useCallControl = (props: useCallControlProps) => {
   };
 
   const endCall = () => {
-    logger.log('endCall() called', {module: 'useCallControl', method: 'endCall'});
+    logger.info('endCall() called', {module: 'useCallControl', method: 'endCall'});
     currentTask.end().catch((e) => logger.error(`endCall failed: ${e}`, {module: 'useCallControl', method: 'endCall'}));
   };
 
@@ -411,10 +402,9 @@ export const useCallControl = (props: useCallControlProps) => {
   };
 
   const transferCall = async (to: string, type: DestinationType) => {
-    logger.log(`transferCall to=${to}, type=${type}`, {module: 'useCallControl', method: 'transferCall'});
     try {
       await currentTask.transfer({to, destinationType: type});
-      logger.log('transferCall success', {module: 'useCallControl', method: 'transferCall'});
+      logger.info('transferCall success', {module: 'useCallControl', method: 'transferCall'});
     } catch (error) {
       logger.error(`Error transferring call: ${error}`, {module: 'useCallControl', method: 'transferCall'});
       throw error;

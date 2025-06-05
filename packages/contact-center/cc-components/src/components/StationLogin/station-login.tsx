@@ -38,7 +38,10 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
 
   // useEffect to be called on mount
   useEffect(() => {
-    logger.log(`CC-Widgets: StationLogin: isAgentLoggedIn changed: ${isAgentLoggedIn}`);
+    logger.info(`CC-Widgets: StationLogin: isAgentLoggedIn changed: ${isAgentLoggedIn}`, {
+      module: 'cc-components#station-login.tsx',
+      method: 'stationLoginMounted',
+    });
     setSelectedDeviceType(deviceType || '');
     setDialNumberValue(dialNumber || '');
     updateDialNumberLabel(deviceType || '');
@@ -79,7 +82,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
   }, []);
 
   const updateDialNumberLabel = (selectedOption: string): void => {
-    logger.log(`CC-Widgets: StationLogin: updateDialNumberLabel: ${selectedOption}`, {
+    logger.info(`CC-Widgets: StationLogin: updateDialNumberLabel: ${selectedOption}`, {
       module: 'cc-components#station-login.tsx',
       method: 'updateDialNumberLabel',
     });
@@ -95,7 +98,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
    * @returns {boolean} whether or not to show a validation error
    */
   const validateDialNumber = (input: string): boolean => {
-    logger.log(`CC-Widgets: StationLogin: validateDialNumber: ${input}`, {
+    logger.info(`CC-Widgets: StationLogin: validateDialNumber: ${input}`, {
       module: 'cc-components#station-login.tsx',
       method: 'validateDialNumber',
     });
@@ -160,7 +163,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
                 name="login-option"
                 onChange={(event: CustomEvent) => {
                   const selectedOption = event.detail.value;
-                  logger.log(`CC-Widgets: StationLogin: login option changed to: ${selectedOption}`, {
+                  logger.info(`CC-Widgets: StationLogin: login option changed to: ${selectedOption}`, {
                     module: 'cc-components#station-login.tsx',
                     method: 'loginOptionChanged',
                   });
@@ -206,7 +209,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
               value={dialNumberValue}
               onChange={(event) => {
                 const input = (event.target as HTMLInputElement).value.trim();
-                logger.log(`CC-Widgets: StationLogin: dialNumber input changed: ${input}`, {
+                logger.info(`CC-Widgets: StationLogin: dialNumber input changed: ${input}`, {
                   module: 'cc-components#station-login.tsx',
                   method: 'dialNumberInputChanged',
                 });
@@ -237,7 +240,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
               name="teams-dropdown"
               onChange={(event: CustomEvent) => {
                 const value = event.detail.value;
-                logger.log(`CC-Widgets: StationLogin: team selected: ${value}`, {
+                logger.info(`CC-Widgets: StationLogin: team selected: ${value}`, {
                   module: 'cc-components#station-login.tsx',
                   method: 'teamSelected',
                 });

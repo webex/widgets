@@ -31,7 +31,7 @@ const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (prop
             : undefined;
         const declineText =
           isIncomingTask && !task.data.wrapUpRequired && isTelephony && isBrowser ? 'Decline' : undefined;
-        logger.log('CC-Widgets: TaskList: rendering task list', {
+        logger.info('CC-Widgets: TaskList: rendering task list', {
           module: 'task-list.tsx',
           method: 'renderItem',
         });

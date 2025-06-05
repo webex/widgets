@@ -15,9 +15,9 @@ const ConsultTransferListComponent: React.FC<ConsultTransferListComponentProps> 
     .toUpperCase();
 
   const handleButtonPress = () => {
-    logger.log(`CC-Widgets: ConsultTransferListComponent: button pressed: ${title}`, {
+    logger.info(`CC-Widgets: ConsultTransferListComponent: button pressed: ${title}`, {
       module: 'consult-transfer-list-item.tsx',
-      method: 'onButtonPress',
+      method: 'handleButtonPress',
     });
     onButtonPress();
   };

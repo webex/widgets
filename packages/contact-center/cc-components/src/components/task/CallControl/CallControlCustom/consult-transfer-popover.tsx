@@ -79,7 +79,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
           (agent) => agent.agentId,
           (agent) => agent.agentName,
           (id, name) => {
-            logger.log(`CC-Widgets: ConsultTransferPopover: agent selected: ${id}`, {
+            logger.info(`CC-Widgets: ConsultTransferPopover: agent selected: ${id}`, {
               module: 'consult-transfer-popover.tsx',
               method: 'onAgentSelect',
             });

@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import CallControlComponent from '../CallControl/call-control';
 import {Text} from '@momentum-ui/react-collaboration';
 import {Brandvisual, Icon} from '@momentum-design/components/dist/react';
@@ -30,10 +30,6 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
     controlVisibility,
     logger,
   } = props;
-
-  useEffect(() => {
-    logger.log(`CC-Widgets: CallControlCAD: visibility changed: ${JSON.stringify(controlVisibility)}`);
-  }, [controlVisibility]);
 
   const formatTime = (time: number): string => {
     const minutes = Math.floor((time % 3600) / 60);
