@@ -20,6 +20,7 @@ const WebUserState = r2wc(UserStateComponent, {
     customState: 'json',
     currentTheme: 'string',
     onStateChange: 'function',
+    logger: 'function',
   },
 });
 if (!customElements.get('component-cc-user-state')) {
@@ -43,6 +44,7 @@ const WebStationLogin = r2wc(StationLoginComponent, {
     deviceType: 'string',
     dialNumber: 'string',
     showMultipleLoginAlert: 'boolean',
+    logger: 'function',
   },
 });
 if (!customElements.get('component-cc-station-login')) {
@@ -96,6 +98,7 @@ const WebTaskList = r2wc(TaskListComponent, {
     isBrowser: 'boolean',
     acceptTask: 'function',
     declineTask: 'function',
+    logger: 'function',
   },
 });
 if (!customElements.get('component-cc-task-list')) {

@@ -18,6 +18,7 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
     lastIdleStateChangeElapsedTime,
     currentState,
     customState,
+    logger,
   } = props;
 
   const previousSelectableState = useMemo(() => {
@@ -97,6 +98,15 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
     ...items.filter((item) => item.name !== AgentUserState.Available).sort((a, b) => a.name.localeCompare(b.name)),
   ];
 
+  const handleSelectionChange = (key: string) => {
+    const cleanKey = key.startsWith('hide-') ? key.substring(5) : key;
+    logger.info(`CC-Widgets: UserState: selection changed from ${currentState} to ${cleanKey}`, {
+      module: 'user-state.tsx',
+      method: 'handleSelectionChange',
+    });
+    setAgentStatus(cleanKey);
+  };
+
   return (
     <div className="user-state-container" data-testid="user-state-container">
       <SelectNext
@@ -104,10 +114,7 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
         label=""
         aria-label="user-state"
         direction="bottom"
-        onSelectionChange={(key: string) => {
-          const cleanKey = key.startsWith('hide-') ? key.substring(5) : key;
-          setAgentStatus(cleanKey);
-        }}
+        onSelectionChange={handleSelectionChange} // replaced direct call
         showBorder
         selectedKey={selectedKey}
         items={sortedItems}

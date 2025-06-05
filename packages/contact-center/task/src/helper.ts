@@ -23,12 +23,20 @@ export const useTaskList = (props: UseTaskListProps) => {
   useEffect(() => {
     if (onTaskAccepted) {
       store.setTaskAssigned(function (task) {
+        logger.log(`CC-Widgets: taskAssigned event for ${task.data.interactionId}`, {
+          module: 'useTaskList',
+          method: 'setTaskAssigned',
+        });
         onTaskAccepted(task);
       });
     }
 
     if (onTaskDeclined) {
       store.setTaskRejected(function (task, reason) {
+        logger.log(`CC-Widgets: taskRejected event for ${task.data.interactionId}`, {
+          module: 'useTaskList',
+          method: 'setTaskRejected',
+        });
         onTaskDeclined(task, reason);
       });
     }
@@ -41,14 +49,26 @@ export const useTaskList = (props: UseTaskListProps) => {
   }, []);
 
   const acceptTask = (task: ITask) => {
-    task.accept().catch((error: Error) => {
-      logError(`Error accepting task: ${error}`, 'acceptTask');
+    logger.info(`CC-Widgets: acceptTask called for ${task.data.interactionId}`, {
+      module: 'useTaskList',
+      method: 'acceptTask',
+    });
+    task.accept().catch((error) => {
+      logError(`CC-Widgets: Error accepting task: ${error}`, 'acceptTask');
     });
   };
 
   const declineTask = (task: ITask) => {
-    task.decline().catch((error: Error) => {
-      logError(`Error declining task: ${error}`, 'declineTask');
+    logger.info(`CC-Widgets: declineTask called for ${task.data.interactionId}`, {
+      module: 'useTaskList',
+      method: 'declineTask',
+    });
+    task.decline().catch((error) => {
+      logError(`CC-Widgets: Error declining task: ${error}`, 'declineTask');
+    });
+    logger.log(`CC-Widgets: incoming task declined for ${task.data.interactionId}`, {
+      module: 'useTaskList',
+      method: 'declineTask',
     });
   };
   const onTaskSelect = (task: ITask) => {
@@ -72,7 +92,13 @@ export const useIncomingTask = (props: UseTaskProps) => {
 
   useEffect(() => {
     if (!incomingTask) return;
-    store.setTaskCallback(TASK_EVENTS.TASK_ASSIGNED, taskAssignCallback, incomingTask?.data.interactionId);
+    store.setTaskCallback(
+      TASK_EVENTS.TASK_ASSIGNED,
+      () => {
+        if (onAccepted) onAccepted({task: incomingTask});
+      },
+      incomingTask.data.interactionId
+    );
     store.setTaskCallback(TASK_EVENTS.TASK_CONSULT_ACCEPTED, taskAssignCallback, incomingTask?.data.interactionId);
     store.setTaskCallback(TASK_EVENTS.TASK_END, taskRejectCallback, incomingTask?.data.interactionId);
     store.setTaskCallback(TASK_EVENTS.TASK_REJECT, taskRejectCallback, incomingTask?.data.interactionId);
@@ -94,20 +120,32 @@ export const useIncomingTask = (props: UseTaskProps) => {
   };
 
   const accept = () => {
-    const taskId = incomingTask?.data.interactionId;
-    if (!taskId) return;
-
-    incomingTask.accept(taskId).catch((error: Error) => {
-      logError(`Error accepting incoming task: ${error}`, 'accept');
+    logger.info(`CC-Widgets: incomingTask.accept() called`, {
+      module: 'useIncomingTask',
+      method: 'accept',
+    });
+    if (!incomingTask?.data.interactionId) return;
+    incomingTask.accept().catch((error) => {
+      logError(`CC-Widgets: Error accepting incoming task: ${error}`, 'accept');
+    });
+    logger.log(`CC-Widgets: incomingTask accepted`, {
+      module: 'useIncomingTask',
+      method: 'accept',
     });
   };
 
   const reject = () => {
-    const taskId = incomingTask?.data.interactionId;
-    if (!taskId) return;
-
-    incomingTask.decline(taskId).catch((error: Error) => {
-      logError(`Error declining incoming task: ${error}`, 'decline');
+    logger.info(`CC-Widgets: incomingTask.reject() called`, {
+      module: 'useIncomingTask',
+      method: 'reject',
+    });
+    if (!incomingTask?.data.interactionId) return;
+    incomingTask.decline().catch((error) => {
+      logError(`CC-Widgets: Error rejecting incoming task: ${error}`, 'reject');
+    });
+    logger.log(`CC-Widgets: incomingTask rejected`, {
+      module: 'useIncomingTask',
+      method: 'reject',
     });
   };
 
@@ -209,6 +247,7 @@ export const useCallControl = (props: useCallControlProps) => {
   const loadBuddyAgents = useCallback(async () => {
     try {
       const agents = await store.getBuddyAgents();
+      logger.info(`Loaded ${agents.length} buddy agents`, {module: 'helper.ts', method: 'loadBuddyAgents'});
       setBuddyAgents(agents);
     } catch (error) {
       logger.error(`Error loading buddy agents: ${error}`, {module: 'helper.ts', method: 'loadBuddyAgents'});
@@ -260,6 +299,10 @@ export const useCallControl = (props: useCallControlProps) => {
 
   useEffect(() => {
     if (!currentTask) return;
+    logger.log(`useCallControl init for task ${currentTask.data.interactionId}`, {
+      module: 'useCallControl',
+      method: 'useEffect-init',
+    });
 
     // Initialize the Web Worker
     const blob = new Blob([workerScript], {type: 'application/javascript'});
@@ -274,7 +317,14 @@ export const useCallControl = (props: useCallControlProps) => {
       }
     };
 
-    store.setTaskCallback(TASK_EVENTS.TASK_HOLD, holdCallback, currentTask.data.interactionId);
+    store.setTaskCallback(
+      TASK_EVENTS.TASK_HOLD,
+      () => {
+        onHoldResume?.();
+        setIsHeld(true);
+      },
+      currentTask.data.interactionId
+    );
     store.setTaskCallback(TASK_EVENTS.TASK_RESUME, resumeCallback, currentTask.data.interactionId);
     store.setTaskCallback(TASK_EVENTS.TASK_END, endCallCallback, currentTask.data.interactionId);
     store.setTaskCallback(TASK_EVENTS.AGENT_WRAPPEDUP, wrapupCallCallback, currentTask.data.interactionId);
@@ -316,17 +366,16 @@ export const useCallControl = (props: useCallControlProps) => {
   };
 
   const toggleHold = (hold: boolean) => {
+    logger.info(`toggleHold(${hold}) called`, {module: 'useCallControl', method: 'toggleHold'});
     if (hold) {
-      currentTask.hold().catch((error: Error) => {
-        logError(`Error holding call: ${error}`, 'toggleHold');
-      });
-
-      return;
+      currentTask
+        .hold()
+        .catch((e) => logger.error(`Hold failed: ${e}`, {module: 'useCallControl', method: 'toggleHold'}));
+    } else {
+      currentTask
+        .resume()
+        .catch((e) => logger.error(`Resume failed: ${e}`, {module: 'useCallControl', method: 'toggleHold'}));
     }
-
-    currentTask.resume().catch((error: Error) => {
-      logError(`Error resuming call: ${error}`, 'toggleHold');
-    });
   };
 
   const toggleRecording = () => {
@@ -342,9 +391,8 @@ export const useCallControl = (props: useCallControlProps) => {
   };
 
   const endCall = () => {
-    currentTask.end().catch((error: Error) => {
-      logError(`Error ending call: ${error}`, 'endCall');
-    });
+    logger.info('endCall() called', {module: 'useCallControl', method: 'endCall'});
+    currentTask.end().catch((e) => logger.error(`endCall failed: ${e}`, {module: 'useCallControl', method: 'endCall'}));
   };
 
   const wrapupCall = (wrapUpReason: string, auxCodeId: string) => {
@@ -365,16 +413,12 @@ export const useCallControl = (props: useCallControlProps) => {
       });
   };
 
-  const transferCall = async (transferDestination: string, destinationType: DestinationType) => {
-    const transferPayload = {
-      to: transferDestination,
-      destinationType: destinationType,
-    };
-
+  const transferCall = async (to: string, type: DestinationType) => {
     try {
-      await currentTask.transfer(transferPayload);
+      await currentTask.transfer({to, destinationType: type});
+      logger.info('transferCall success', {module: 'useCallControl', method: 'transferCall'});
     } catch (error) {
-      logError(`Error transferring call: ${error}`, 'transferCall');
+      logger.error(`Error transferring call: ${error}`, {module: 'useCallControl', method: 'transferCall'});
       throw error;
     }
   };

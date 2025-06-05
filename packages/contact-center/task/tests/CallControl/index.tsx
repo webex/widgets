@@ -2,6 +2,7 @@ import React from 'react';
 import {render} from '@testing-library/react';
 import * as helper from '../../src/helper';
 import {CallControl} from '../../src';
+import store from '@webex/cc-store';
 import '@testing-library/jest-dom';
 
 // Mock the store
@@ -10,7 +11,12 @@ jest.mock('@webex/cc-store', () => ({
   deviceType: 'BROWSER',
   dialNumber: '12345',
   wrapupCodes: [],
-  logger: {},
+  logger: {
+    log: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+    info: jest.fn(),
+  },
   currentTask: {
     data: {interactionId: 'mockInteractionId'},
     on: jest.fn(),
@@ -97,7 +103,7 @@ describe('CallControl Component', () => {
       onHoldResume: expect.any(Function),
       onEnd: expect.any(Function),
       onWrapUp: expect.any(Function),
-      logger: {},
+      logger: store.logger,
       consultInitiated: undefined,
       featureFlags: undefined,
       deviceType: 'BROWSER',

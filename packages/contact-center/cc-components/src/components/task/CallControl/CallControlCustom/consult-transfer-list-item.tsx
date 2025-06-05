@@ -5,13 +5,22 @@ import classnames from 'classnames';
 import {ConsultTransferListComponentProps} from '../../task.types';
 
 const ConsultTransferListComponent: React.FC<ConsultTransferListComponentProps> = (props) => {
-  const {title, subtitle, buttonIcon, onButtonPress, className} = props;
+  const {title, subtitle, buttonIcon, onButtonPress, className, logger} = props;
+
   const initials = title
     .split(' ')
     .map((word) => word[0])
     .join('')
     .slice(0, 2)
     .toUpperCase();
+
+  const handleButtonPress = () => {
+    logger.info(`CC-Widgets: ConsultTransferListComponent: button pressed: ${title}`, {
+      module: 'consult-transfer-list-item.tsx',
+      method: 'handleButtonPress',
+    });
+    onButtonPress();
+  };
 
   return (
     <ListItemBase className={classnames('call-control-list-item', className)} size={50} isPadded aria-label={title}>
@@ -40,7 +49,7 @@ const ConsultTransferListComponent: React.FC<ConsultTransferListComponentProps> 
       </ListItemBaseSection>
       <ListItemBaseSection position="end">
         <div className="hover-button">
-          <ButtonCircle onPress={onButtonPress} size={28} color="join">
+          <ButtonCircle onPress={handleButtonPress} size={28} color="join">
             <Icon name={buttonIcon} />
           </ButtonCircle>
         </div>
