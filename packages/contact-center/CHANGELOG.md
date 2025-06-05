@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.68](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.67...v1.28.0-ccwidgets.68) (2025-06-05)
+
+
+### Features
+
+* **cc-widgets:** added-advanced-logs ([#464](https://github.com/webex/widgets/issues/464)) ([3c0bd2b](https://github.com/webex/widgets/commit/3c0bd2bdbae2ec357e9332f45eb63f79398d37d9))
+
 # [1.28.0-ccwidgets.67](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.66...v1.28.0-ccwidgets.67) (2025-06-03)
 
 
