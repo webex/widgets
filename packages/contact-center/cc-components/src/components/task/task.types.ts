@@ -50,6 +50,11 @@ export interface TaskProps {
   onTaskDeclined?: (task: ITask) => void;
 
   /**
+   * Handler for task selected in TaskList
+   */
+  onTaskSelected?: (task: ITask) => void;
+
+  /**
    * accept incoming task action
    */
   accept: (task: ITask) => void;

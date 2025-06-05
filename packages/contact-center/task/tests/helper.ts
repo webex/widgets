@@ -24,6 +24,7 @@ const onAccepted = jest.fn();
 const onDeclined = jest.fn();
 const onTaskAccepted = jest.fn().mockImplementation(() => {});
 const onTaskDeclined = jest.fn();
+const onTaskSelected = jest.fn().mockImplementation(() => {});
 
 const logger = {
   error: jest.fn(),
@@ -333,14 +334,14 @@ describe('useTaskList Hook', () => {
     // Mock the callback registration
     store.setTaskAssigned = jest.fn((callback) => {
       // Store the callback
-      store.taskAssignedCallback = callback;
+      store.onTaskAssigned = callback;
     });
 
     renderHook(() => useTaskList({cc: ccMock, deviceType: '', onTaskAccepted, logger, taskList: mockTaskList}));
 
     // Manually trigger the stored callback with the task
     act(() => {
-      store.taskAssignedCallback(taskMock);
+      store.onTaskAssigned(taskMock);
     });
 
     expect(onTaskAccepted).toHaveBeenCalledWith(taskMock);
@@ -386,17 +387,40 @@ describe('useTaskList Hook', () => {
     // Mock the callback registration
     store.setTaskRejected = jest.fn((callback) => {
       // Store the callback
-      store.taskRejectedCallback = callback;
+      store.onTaskRejected = callback;
     });
 
     renderHook(() => useTaskList({cc: ccMock, deviceType: '', onTaskDeclined, logger, taskList: mockTaskList}));
 
     // Manually trigger the stored callback with the task
     act(() => {
-      store.taskRejectedCallback(taskMock, 'test-reason');
+      store.onTaskRejected(taskMock, 'test-reason');
     });
 
-    expect(onTaskDeclined).toHaveBeenCalledWith(taskMock);
+    expect(onTaskDeclined).toHaveBeenCalledWith(taskMock, 'test-reason');
+
+    // Ensure no errors are logged
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('should call onTaskSelected callback when provided', async () => {
+    // Reset the mock first
+    onTaskSelected.mockClear();
+
+    // Mock the callback registration
+    store.setTaskSelected = jest.fn((callback) => {
+      // Store the callback
+      store.onTaskSelected = callback;
+    });
+
+    renderHook(() => useTaskList({cc: ccMock, deviceType: '', onTaskSelected, logger, taskList: mockTaskList}));
+
+    // Manually trigger the stored callback with the task
+    act(() => {
+      store.onTaskSelected(taskMock);
+    });
+
+    expect(onTaskSelected).toHaveBeenCalledWith(taskMock);
 
     // Ensure no errors are logged
     expect(logger.error).not.toHaveBeenCalled();

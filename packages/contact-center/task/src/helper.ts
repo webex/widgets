@@ -10,7 +10,7 @@ const ENGAGED_USERNAME = 'Engaged';
 
 // Hook for managing the task list
 export const useTaskList = (props: UseTaskListProps) => {
-  const {deviceType, onTaskAccepted, onTaskDeclined, logger, taskList} = props;
+  const {deviceType, onTaskAccepted, onTaskDeclined, onTaskSelected, logger, taskList} = props;
   const isBrowser = deviceType === 'BROWSER';
 
   const logError = (message: string, method: string) => {
@@ -21,24 +21,31 @@ export const useTaskList = (props: UseTaskListProps) => {
   };
 
   useEffect(() => {
-    logger.log(`CC-Widgets: useTaskList init: ${Object.keys(taskList).length} tasks`, {
-      module: 'useTaskList',
-      method: 'useEffect',
-    });
-    store.setTaskAssigned((task) => {
-      logger.log(`CC-Widgets: taskAssigned event for ${task.data.interactionId}`, {
-        module: 'useTaskList',
-        method: 'setTaskAssigned',
+    if (onTaskAccepted) {
+      store.setTaskAssigned(function (task) {
+        logger.log(`CC-Widgets: taskAssigned event for ${task.data.interactionId}`, {
+          module: 'useTaskList',
+          method: 'setTaskAssigned',
+        });
+        onTaskAccepted(task);
       });
-      if (onTaskAccepted) onTaskAccepted(task);
-    });
-    store.setTaskRejected((task) => {
-      logger.log(`CC-Widgets: taskRejected event for ${task.data.interactionId}`, {
-        module: 'useTaskList',
-        method: 'setTaskRejected',
+    }
+
+    if (onTaskDeclined) {
+      store.setTaskRejected(function (task, reason) {
+        logger.log(`CC-Widgets: taskRejected event for ${task.data.interactionId}`, {
+          module: 'useTaskList',
+          method: 'setTaskRejected',
+        });
+        onTaskDeclined(task, reason);
       });
-      if (onTaskDeclined) onTaskDeclined(task);
-    });
+    }
+
+    if (onTaskSelected) {
+      store.setTaskSelected(function (task) {
+        onTaskSelected(task);
+      });
+    }
   }, []);
 
   const acceptTask = (task: ITask) => {
