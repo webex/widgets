@@ -706,39 +706,6 @@ describe('useStationLogin Hook', () => {
       })
     );
   });
-  it('should handle missing updateAgentProfile function', () => {
-    const cc = {};
-    const {result} = renderHook(() =>
-      useStationLogin({
-        cc,
-        logger,
-        deviceType: 'EXTENSION',
-        dialNumber: '1001',
-      })
-    );
-
-    // Simulate a change
-    act(() => {
-      result.current.setCurrentLoginOptions({
-        deviceType: 'DIALNUMBER',
-        dialNumber: '2002',
-      });
-    });
-
-    act(() => {
-      result.current.saveLoginOptions();
-    });
-
-    expect(result.current.saveError).toBe('Device update function not available on cc object.');
-    expect(logger.error).toHaveBeenCalledWith(
-      'cc.updateAgentProfile is not a function',
-      cc,
-      expect.objectContaining({
-        module: 'widget-station-login#station-login/helper.ts',
-        method: 'saveLoginOptions',
-      })
-    );
-  });
   it('should call updateAgentProfile with no dialNumber when deviceType is BROWSER', async () => {
     const cc = {updateAgentProfile: jest.fn().mockResolvedValue({})};
     const {result} = renderHook(() =>

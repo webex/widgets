@@ -54,24 +54,21 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
 
   // show modals
   useEffect(() => {
-    if (showMultipleLoginAlert && modalRef.current && !modalRef.current.open) {
-      modalRef.current.showModal();
-    }
-    if (!showMultipleLoginAlert && modalRef.current?.open) {
-      modalRef.current.close();
-    }
-    if (showCCSignOutModal && ccSignOutModalRef.current && !ccSignOutModalRef.current.open) {
-      ccSignOutModalRef.current.showModal();
-    }
-    if (!showCCSignOutModal && ccSignOutModalRef.current?.open) {
-      ccSignOutModalRef.current.close();
-    }
-    if (showSaveConfirmDialog && saveConfirmDialogRef.current && !saveConfirmDialogRef.current.open) {
-      saveConfirmDialogRef.current.showModal();
-    }
-    if (!showSaveConfirmDialog && saveConfirmDialogRef.current?.open) {
-      saveConfirmDialogRef.current.close();
-    }
+    const modalStates = [
+      {ref: modalRef, show: showMultipleLoginAlert},
+      {ref: ccSignOutModalRef, show: showCCSignOutModal},
+      {ref: saveConfirmDialogRef, show: showSaveConfirmDialog},
+    ];
+
+    modalStates.forEach(({ref, show}) => {
+      if (ref.current) {
+        if (show && !ref.current.open) {
+          ref.current.showModal();
+        } else if (!show && ref.current.open) {
+          ref.current.close();
+        }
+      }
+    });
   }, [showMultipleLoginAlert, showCCSignOutModal, showSaveConfirmDialog]);
 
   const continueClicked = useCallback(() => {

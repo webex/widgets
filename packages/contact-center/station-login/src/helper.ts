@@ -78,37 +78,24 @@ export const useStationLogin = (props: UseStationLoginProps) => {
       payload.dialNumber = currentLoginOptions.dialNumber;
     }
 
-    if (typeof cc.updateAgentProfile === 'function') {
-      cc.updateAgentProfile(payload)
-        .then(() => {
-          setOriginalLoginOptions({...currentLoginOptions});
-          setSaveError('');
-          logger.log('Agent profile updated successfully.', {
-            module: 'widget-station-login#station-login/helper.ts',
-            method: 'saveLoginOptions',
-          });
-          if (props.onSaveEnd) props.onSaveEnd(true);
-        })
-        .catch((error: unknown) => {
-          logger.error('Failed to update agent device type', error, {
-            module: 'widget-station-login#station-login/helper.ts',
-            method: 'saveLoginOptions',
-          });
-          if (error instanceof Error) {
-            setSaveError(error.message || 'Failed to update device type');
-          } else {
-            setSaveError('Failed to update device type');
-          }
-          if (props.onSaveEnd) props.onSaveEnd(false);
+    cc.updateAgentProfile(payload)
+      .then(() => {
+        setOriginalLoginOptions({...currentLoginOptions});
+        setSaveError('');
+        logger.log('Agent profile updated successfully.', {
+          module: 'widget-station-login#station-login/helper.ts',
+          method: 'saveLoginOptions',
         });
-    } else {
-      setSaveError('Device update function not available on cc object.');
-      logger.error('cc.updateAgentProfile is not a function', cc, {
-        module: 'widget-station-login#station-login/helper.ts',
-        method: 'saveLoginOptions',
+        if (props.onSaveEnd) props.onSaveEnd(true);
+      })
+      .catch((error: Error) => {
+        logger.error('Failed to update agent device type', error, {
+          module: 'widget-station-login#station-login/helper.ts',
+          method: 'saveLoginOptions',
+        });
+        setSaveError(error.message || 'Failed to update device type');
+        if (props.onSaveEnd) props.onSaveEnd(false);
       });
-      if (props.onSaveEnd) props.onSaveEnd(false);
-    }
   };
 
   useEffect(() => {
