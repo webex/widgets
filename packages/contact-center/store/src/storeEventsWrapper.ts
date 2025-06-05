@@ -589,7 +589,7 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   handleMultiLoginCloseSession = (data) => {
-    this.store.logger.log('CC-Widgets: handleMultiLoginCloseSession(): multi-login alert', {
+    this.store.logger.info('CC-Widgets: handleMultiLoginCloseSession(): multi-login alert', {
       module: 'storeEventsWrapper.ts',
       method: 'handleMultiLoginCloseSession',
     });

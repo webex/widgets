@@ -69,12 +69,12 @@ export const useStationLogin = (props: UseStationLoginProps) => {
   };
 
   const login = () => {
-    logger.log('CC-Widgets: useStationLogin login(): invoking stationLogin', {
-      module: 'station-login/helper.ts',
-      method: 'login',
-    });
     cc.stationLogin({teamId: team, loginOption: deviceType, dialNumber})
       .then((res: StationLoginSuccess) => {
+        logger.log('CC-Widgets: useStationLogin login(): stationLogin success', {
+          module: 'station-login/helper.ts',
+          method: 'login',
+        });
         setLoginSuccess(res);
         setLoginFailure(undefined);
       })
@@ -89,12 +89,16 @@ export const useStationLogin = (props: UseStationLoginProps) => {
   };
 
   const logout = () => {
-    logger.log('CC-Widgets: useStationLogin logout(): invoking stationLogout', {
+    logger.info('CC-Widgets: useStationLogin logout(): invoking stationLogout', {
       module: 'station-login/helper.ts',
       method: 'logout',
     });
     cc.stationLogout({logoutReason: 'User requested logout'})
       .then((res: StationLogoutSuccess) => {
+        logger.log('CC-Widgets: useStationLogin logout(): stationLogout success', {
+          module: 'station-login/helper.ts',
+          method: 'logout',
+        });
         setLogoutSuccess(res);
       })
       .catch((error: Error) => {

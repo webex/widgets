@@ -18,13 +18,17 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
   const timerKey = `timer-${startTimeStamp}`;
 
   const handleTransfer = () => {
-    logger.log('CC-Widgets: CallControlConsult: transfer button clicked', {
+    logger.info('CC-Widgets: CallControlConsult: transfer button clicked', {
       module: 'call-control-consult.tsx',
       method: 'handleTransfer',
     });
     try {
       if (onTransfer) {
         onTransfer();
+        logger.log('CC-Widgets: CallControlConsult: transfer completed', {
+          module: 'call-control-consult.tsx',
+          method: 'handleTransfer',
+        });
       }
     } catch (error) {
       throw new Error('Error transferring call:', error);
@@ -32,12 +36,16 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
   };
 
   const handleEndConsult = () => {
-    logger.log('CC-Widgets: CallControlConsult: end consult clicked', {
+    logger.info('CC-Widgets: CallControlConsult: end consult clicked', {
       module: 'call-control-consult.tsx',
       method: 'handleEndConsult',
     });
     try {
       endConsultCall();
+      logger.log('CC-Widgets: CallControlConsult: end consult completed', {
+        module: 'call-control-consult.tsx',
+        method: 'handleEndConsult',
+      });
     } catch (error) {
       throw new Error('Error ending consult call:', error);
     }

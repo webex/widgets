@@ -71,7 +71,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
    * Closes the dialog if it is currently open
    */
   const ccCancelButtonClicked = useCallback(() => {
-    logger.log('CC-Widgets: StationLogin: CC Sign-out cancel clicked', {
+    logger.info('CC-Widgets: StationLogin: CC Sign-out cancel clicked', {
       module: 'cc-components#station-login.tsx',
       method: 'ccCancelClicked',
     });

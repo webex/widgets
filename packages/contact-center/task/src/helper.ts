@@ -23,7 +23,7 @@ export const useTaskList = (props: UseTaskListProps) => {
   useEffect(() => {
     if (onTaskAccepted) {
       store.setTaskAssigned(function (task) {
-        logger.info(`CC-Widgets: taskAssigned event for ${task.data.interactionId}`, {
+        logger.log(`CC-Widgets: taskAssigned event for ${task.data.interactionId}`, {
           module: 'useTaskList',
           method: 'setTaskAssigned',
         });
@@ -33,7 +33,7 @@ export const useTaskList = (props: UseTaskListProps) => {
 
     if (onTaskDeclined) {
       store.setTaskRejected(function (task, reason) {
-        logger.info(`CC-Widgets: taskRejected event for ${task.data.interactionId}`, {
+        logger.log(`CC-Widgets: taskRejected event for ${task.data.interactionId}`, {
           module: 'useTaskList',
           method: 'setTaskRejected',
         });
@@ -65,6 +65,10 @@ export const useTaskList = (props: UseTaskListProps) => {
     });
     task.decline().catch((error) => {
       logError(`CC-Widgets: Error declining task: ${error}`, 'declineTask');
+    });
+    logger.log(`CC-Widgets: incoming task declined for ${task.data.interactionId}`, {
+      module: 'useTaskList',
+      method: 'declineTask',
     });
   };
   const onTaskSelect = (task: ITask) => {
@@ -116,13 +120,17 @@ export const useIncomingTask = (props: UseTaskProps) => {
   };
 
   const accept = () => {
-    logger.log(`CC-Widgets: incomingTask.accept() called`, {
+    logger.info(`CC-Widgets: incomingTask.accept() called`, {
       module: 'useIncomingTask',
       method: 'accept',
     });
     if (!incomingTask?.data.interactionId) return;
     incomingTask.accept().catch((error) => {
       logError(`CC-Widgets: Error accepting incoming task: ${error}`, 'accept');
+    });
+    logger.log(`CC-Widgets: incomingTask accepted`, {
+      module: 'useIncomingTask',
+      method: 'accept',
     });
   };
 
@@ -134,6 +142,10 @@ export const useIncomingTask = (props: UseTaskProps) => {
     if (!incomingTask?.data.interactionId) return;
     incomingTask.decline().catch((error) => {
       logError(`CC-Widgets: Error rejecting incoming task: ${error}`, 'reject');
+    });
+    logger.log(`CC-Widgets: incomingTask rejected`, {
+      module: 'useIncomingTask',
+      method: 'reject',
     });
   };
 

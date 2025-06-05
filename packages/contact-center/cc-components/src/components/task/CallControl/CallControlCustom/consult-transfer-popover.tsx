@@ -52,11 +52,11 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
         hasBackground={false}
         style={{marginTop: '0'}}
         onTabSelection={(key) => {
+          setSelectedTab(key as string);
           logger.log(`CC-Widgets: ConsultTransferPopover: tab selected: ${key}`, {
             module: 'consult-transfer-popover.tsx',
             method: 'onTabSelection',
           });
-          setSelectedTab(key as string);
         }}
       >
         <TabNext key="Agents" className="agent-tab" active={selectedTab === 'Agents'}>

@@ -127,7 +127,7 @@ export const useUserState = ({
 
   useEffect(() => {
     if (prevStateRef.current !== currentState) {
-      logger.log(`CC-Widgets: State change detected: ${prevStateRef.current} -> ${currentState}`, {
+      logger.info(`CC-Widgets: State change action started: ${prevStateRef.current} -> ${currentState}`, {
         module: 'useUserState',
         method: 'useEffect - currentState',
       });
@@ -135,6 +135,10 @@ export const useUserState = ({
       // Call setAgentStatus and update prevStateRef after promise resolves
       updateAgentState(currentState)
         .then(() => {
+          logger.log(`CC-Widgets: State change updated: ${prevStateRef.current} -> ${currentState}`, {
+            module: 'useUserState',
+            method: 'useEffect - currentState',
+          });
           prevStateRef.current = currentState;
           callOnStateChange();
         })

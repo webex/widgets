@@ -58,7 +58,7 @@ function CallControlComponent(props: CallControlComponentProps) {
   }, [currentTask]);
 
   const handletoggleHold = () => {
-    logger.log(`CC-Widgets: CallControl: is Call On Hold status is ${isHeld}`, {
+    logger.info(`CC-Widgets: CallControl: is Call On Hold status is ${isHeld}`, {
       module: 'call-control.tsx',
       method: 'handletoggleHold',
     });
@@ -67,7 +67,7 @@ function CallControlComponent(props: CallControlComponentProps) {
   };
 
   const handleWrapupCall = () => {
-    logger.log('CC-Widgets: CallControl: wrap-up submitted', {
+    logger.info('CC-Widgets: CallControl: wrap-up submitted', {
       module: 'call-control.tsx',
       method: 'handleWrapupCall',
     });
@@ -75,6 +75,10 @@ function CallControlComponent(props: CallControlComponentProps) {
       wrapupCall(selectedWrapupReason, selectedWrapupId);
       setSelectedWrapupReason(null);
       setSelectedWrapupId(null);
+      logger.log('CC-Widgets: CallControl: wrapup completed', {
+        module: 'call-control.tsx',
+        method: 'handleWrapupCall',
+      });
     }
   };
 
@@ -84,7 +88,7 @@ function CallControlComponent(props: CallControlComponentProps) {
   };
 
   const handleTargetSelect = (id: string, name: string, type: DestinationType) => {
-    logger.log('CC-Widgets: CallControl: handling target agent selected', {
+    logger.info('CC-Widgets: CallControl: handling target agent selected', {
       module: 'call-control.tsx',
       method: 'handleTargetSelect',
     });

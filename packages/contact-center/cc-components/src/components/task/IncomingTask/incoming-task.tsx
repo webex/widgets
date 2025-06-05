@@ -32,7 +32,7 @@ const IncomingTaskComponent: React.FunctionComponent<IncomingTaskComponentProps>
       isIncomingTask={true}
       queue={virtualTeamName}
       acceptTask={() => {
-        logger.log(
+        logger.info(
           `CC-Widgets: IncomingTask: accept clicked for task with interactionID: ${incomingTask.data.interactionId}`,
           {
             module: 'incoming-task.tsx',
@@ -42,7 +42,7 @@ const IncomingTaskComponent: React.FunctionComponent<IncomingTaskComponentProps>
         accept(incomingTask);
       }}
       declineTask={() => {
-        logger.log(
+        logger.info(
           `CC-Widgets: IncomingTask: decline clicked for task with interactionID: ${incomingTask.data.interactionId}`,
           {
             module: 'incoming-task.tsx',

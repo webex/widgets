@@ -166,7 +166,7 @@ describe('CallControlPresentational', () => {
     render(<CallControlComponent {...defaultProps} />);
     const buttons = screen.getAllByTestId('ButtonCircle');
     fireEvent.click(buttons[0]);
-    expect(loggerMock.log).toHaveBeenCalledWith('CC-Widgets: CallControl: is Call On Hold status is false', {
+    expect(loggerMock.info).toHaveBeenCalledWith('CC-Widgets: CallControl: is Call On Hold status is false', {
       module: 'call-control.tsx',
       method: 'handletoggleHold',
     });

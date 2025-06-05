@@ -79,7 +79,7 @@ class Store implements IStore {
     }
 
     this.logger = this.cc.LoggerProxy;
-    this.logger.log('CC-Widgets: Contact-center registerCC(): starting registration', {
+    this.logger.info('CC-Widgets: Contact-center registerCC(): starting registration', {
       module: 'cc-store#store.ts',
       method: 'registerCC',
     });

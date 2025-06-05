@@ -49,6 +49,7 @@ const loginCb = jest.fn();
 const logoutCb = jest.fn();
 const logger = {
   log: jest.fn(),
+  info: jest.fn(),
   error: jest.fn(),
 };
 
