@@ -28,6 +28,9 @@ const onTaskSelected = jest.fn().mockImplementation(() => {});
 
 const logger = {
   error: jest.fn(),
+  log: jest.fn(),
+  warn: jest.fn(),
+  info: jest.fn(),
 };
 
 // Override the wrapupCodes property before your tests run
@@ -283,7 +286,7 @@ describe('useIncomingTask Hook', () => {
 
     // Ensure errors are logged in the console
     expect(logger.error).toHaveBeenCalled();
-    expect(logger.error).toHaveBeenCalledWith('Error accepting incoming task: Error', {
+    expect(logger.error).toHaveBeenCalledWith('CC-Widgets: Error accepting incoming task: Error', {
       module: 'widget-cc-task#helper.ts',
       method: 'useIncomingTask#accept',
     });
@@ -310,9 +313,9 @@ describe('useIncomingTask Hook', () => {
 
     // Ensure errors are logged in the console
     expect(logger.error).toHaveBeenCalled();
-    expect(logger.error).toHaveBeenCalledWith('Error declining incoming task: Error', {
+    expect(logger.error).toHaveBeenCalledWith('CC-Widgets: Error rejecting incoming task: Error', {
       module: 'widget-cc-task#helper.ts',
-      method: 'useIncomingTask#decline',
+      method: 'useIncomingTask#reject',
     });
   });
 });
@@ -444,7 +447,7 @@ describe('useTaskList Hook', () => {
 
     // Ensure errors are logged in the console
     expect(logger.error).toHaveBeenCalled();
-    expect(logger.error).toHaveBeenCalledWith('Error accepting task: Error', {
+    expect(logger.error).toHaveBeenCalledWith('CC-Widgets: Error accepting task: Error', {
       module: 'widget-cc-task#helper.ts',
       method: 'useTaskList#acceptTask',
     });
@@ -471,7 +474,7 @@ describe('useTaskList Hook', () => {
 
     // Ensure errors are logged in the console
     expect(logger.error).toHaveBeenCalled();
-    expect(logger.error).toHaveBeenCalledWith('Error declining task: Error', {
+    expect(logger.error).toHaveBeenCalledWith('CC-Widgets: Error declining task: Error', {
       module: 'widget-cc-task#helper.ts',
       method: 'useTaskList#declineTask',
     });
@@ -542,6 +545,8 @@ describe('useCallControl', () => {
   const mockLogger = {
     error: jest.fn(),
     info: jest.fn(),
+    log: jest.fn(),
+    warn: jest.fn(),
   };
 
   const mockOnHoldResume = jest.fn();
@@ -714,7 +719,7 @@ describe('useCallControl', () => {
       mockCurrentTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_HOLD)?.[1]();
     });
 
-    expect(mockLogger.error).toHaveBeenCalledWith('Error holding call: Error: Hold error', expect.any(Object));
+    expect(mockLogger.error).toHaveBeenCalledWith('Hold failed: Error: Hold error', expect.any(Object));
   });
 
   it('should log an error if resume fails', async () => {
@@ -737,7 +742,7 @@ describe('useCallControl', () => {
       mockCurrentTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_RESUME)?.[1]();
     });
 
-    expect(mockLogger.error).toHaveBeenCalledWith('Error resuming call: Error: Resume error', expect.any(Object));
+    expect(mockLogger.error).toHaveBeenCalledWith('Resume failed: Error: Resume error', expect.any(Object));
   });
 
   it('should call endCall and handle success', async () => {
@@ -782,7 +787,7 @@ describe('useCallControl', () => {
 
     expect(mockCurrentTask.end).toHaveBeenCalled();
     expect(mockOnEnd).not.toHaveBeenCalled();
-    expect(mockLogger.error).toHaveBeenCalledWith('Error ending call: Error: End error', expect.any(Object));
+    expect(mockLogger.error).toHaveBeenCalledWith('endCall failed: Error: End error', expect.any(Object));
   });
 
   it('should call wrapupCall ', async () => {
@@ -1073,8 +1078,8 @@ describe('useCallControl', () => {
     await expect(result.current.transferCall('test_transfer', 'agent')).rejects.toThrow(transferError);
     expect(transferSpy).toHaveBeenCalledWith({to: 'test_transfer', destinationType: 'agent'});
     expect(mockLogger.error).toHaveBeenCalledWith('Error transferring call: Error: Transfer failed', {
-      module: 'widget-cc-task#helper.ts',
-      method: 'useCallControl#transferCall',
+      module: 'useCallControl',
+      method: 'transferCall',
     });
   });
 
@@ -1652,6 +1657,7 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
+        logger: logger,
       })
     );
 

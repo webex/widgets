@@ -143,4 +143,5 @@ export type StationLoginComponentProps = Pick<
   | 'onCCSignOut'
   | 'teamId'
   | 'setTeamId'
+  | 'logger'
 >;

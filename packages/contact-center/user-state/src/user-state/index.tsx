@@ -32,6 +32,7 @@ const UserState: React.FunctionComponent<IUserStateProps> = observer(({onStateCh
     }),
     currentTheme,
     customState,
+    logger,
   };
 
   return <UserStateComponent {...props} />;

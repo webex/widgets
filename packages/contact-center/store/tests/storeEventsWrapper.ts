@@ -33,7 +33,13 @@ jest.mock('../src/store', () => ({
         getAllTasks: jest.fn(),
       },
     },
-    logger: 'mockLogger',
+    logger: {
+      log: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+      info: jest.fn(),
+      trace: jest.fn(),
+    },
     idleCodes: [
       {
         id: 'mockId1',
@@ -126,10 +132,6 @@ describe('storeEventsWrapper', () => {
 
     it('should proxy loginOptions', () => {
       expect(storeWrapper.loginOptions).toBe('mockLoginOptions');
-    });
-
-    it('should proxy logger', () => {
-      expect(storeWrapper.logger).toBe('mockLogger');
     });
 
     it('should proxy idleCodes and include RONA', () => {

@@ -4,6 +4,14 @@ import {render, screen, fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ConsultTransferPopoverComponent from '../../../../src/components/task/CallControl/CallControlCustom/consult-transfer-popover';
 
+const loggerMock = {
+  log: jest.fn(),
+  info: jest.fn(),
+  warn: jest.fn(),
+  trace: jest.fn(),
+  error: jest.fn(),
+};
+
 jest.mock('../../../../src/components/task/CallControl/CallControlCustom/consult-transfer-list-item', () => {
   const MockListItem = (props: any) => (
     <div data-testid="ConsultTransferListComponent" onClick={props.onButtonPress}>
@@ -38,6 +46,7 @@ describe('ConsultTransferPopoverComponent', () => {
     ],
     onAgentSelect: mockOnAgentSelect,
     onQueueSelect: mockOnQueueSelect,
+    logger: loggerMock,
   };
 
   beforeEach(() => {

@@ -1,12 +1,11 @@
 import React from 'react';
 import CallControlComponent from '../CallControl/call-control';
-import {CallControlComponentProps} from '../task.types';
 import {Text} from '@momentum-ui/react-collaboration';
 import {Brandvisual, Icon} from '@momentum-design/components/dist/react';
 import './call-control-cad.styles.scss';
 import TaskTimer from '../TaskTimer/index';
 import CallControlConsultComponent from '../CallControl/CallControlCustom/call-control-consult';
-import type {MEDIA_CHANNEL as MediaChannelType} from '../task.types';
+import type {MEDIA_CHANNEL as MediaChannelType, CallControlComponentProps} from '../task.types';
 import {getMediaTypeInfo} from '../../../utils';
 
 const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => {
@@ -29,9 +28,8 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
     isEndConsultEnabled,
     lastTargetType,
     controlVisibility,
+    logger,
   } = props;
-
-  // Use the Web Worker-based hold timer
 
   const formatTime = (time: number): string => {
     const minutes = Math.floor((time % 3600) / 60);
@@ -112,6 +110,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
             consultCompleted={consultCompleted}
             isAgentBeingConsulted={!consultAccepted}
             isEndConsultEnabled={isEndConsultEnabled}
+            logger={logger}
           />
         </div>
       )}

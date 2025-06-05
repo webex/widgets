@@ -3,6 +3,14 @@ import {render, screen, fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ConsultTransferListComponent from '../../../../src/components/task/CallControl/CallControlCustom/consult-transfer-list-item';
 
+const loggerMock = {
+  log: jest.fn(),
+  info: jest.fn(),
+  warn: jest.fn(),
+  trace: jest.fn(),
+  error: jest.fn(),
+};
+
 jest.mock('lottie-web');
 
 beforeAll(() => {
@@ -21,6 +29,7 @@ describe('CallControlListItemPresentational', () => {
     buttonIcon: 'test-icon',
     onButtonPress: mockOnButtonPress,
     className: 'custom-class',
+    logger: loggerMock,
   };
 
   beforeEach(() => {

@@ -43,6 +43,7 @@ const CallControlCAD: React.FunctionComponent<CallControlProps> = observer(
       callControlConsultClassName,
       isEndConsultEnabled,
       allowConsultToQueue,
+      logger,
     };
 
     return <CallControlCADComponent {...result} />;

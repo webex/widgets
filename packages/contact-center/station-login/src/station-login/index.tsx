@@ -45,6 +45,7 @@ const StationLogin: React.FunctionComponent<StationLoginProps> = observer(({onLo
     onCCSignOut,
     teamId,
     setTeamId,
+    logger,
   };
   return <StationLoginComponent {...props} />;
 });
