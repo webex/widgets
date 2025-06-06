@@ -241,14 +241,18 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
                       setCurrentLoginOptions({
                         deviceType: selectedOption,
                         dialNumber: originalLoginOptions.dialNumber || '',
+                        teamId: originalLoginOptions.teamId || '',
                       });
                       setDialNumberValue(originalLoginOptions.dialNumber || '');
                       setDialNumber(originalLoginOptions.dialNumber || '');
+                      setSelectedTeamId(originalLoginOptions.teamId || '');
+                      setTeamId(originalLoginOptions.teamId || '');
                     } else {
                       // If switching to a different device type, clear the input
                       setCurrentLoginOptions({
                         deviceType: selectedOption,
                         dialNumber: '',
+                        teamId: selectedTeamId || '',
                       });
                       setDialNumberValue('');
                       setDialNumber('');
@@ -328,6 +332,10 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
                 setTeam(value);
                 setSelectedTeamId(event.detail.value);
                 setTeamId(event.detail.value);
+                setCurrentLoginOptions((prev) => ({
+                  ...prev,
+                  teamId: value,
+                }));
               }}
               className="station-login-select"
               placeholder={StationLoginLabels.YOUR_TEAM}

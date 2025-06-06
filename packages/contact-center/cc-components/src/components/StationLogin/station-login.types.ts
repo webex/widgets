@@ -168,6 +168,7 @@ export interface IStationLoginProps {
 export interface LoginOptionsState {
   deviceType: string;
   dialNumber: string;
+  teamId: string;
 }
 
 export type StationLoginComponentProps = Pick<

@@ -20,10 +20,12 @@ export const useStationLogin = (props: UseStationLoginProps) => {
   const [originalLoginOptions, setOriginalLoginOptions] = useState<LoginOptionsState>({
     deviceType,
     dialNumber,
+    teamId: props.teamId || '',
   });
   const [currentLoginOptions, setCurrentLoginOptions] = useState<LoginOptionsState>({
     deviceType,
     dialNumber,
+    teamId: props.teamId || '',
   });
 
   // Error for Save button
@@ -35,10 +37,12 @@ export const useStationLogin = (props: UseStationLoginProps) => {
       setOriginalLoginOptions({
         deviceType: store.deviceType,
         dialNumber: store.dialNumber,
+        teamId: store.teamId || '',
       });
       setCurrentLoginOptions({
         deviceType: store.deviceType,
         dialNumber: store.dialNumber,
+        teamId: store.teamId || '',
       });
     }
   }, [store.isAgentLoggedIn]);
@@ -47,7 +51,8 @@ export const useStationLogin = (props: UseStationLoginProps) => {
   const isLoginOptionsChanged =
     originalLoginOptions.deviceType !== currentLoginOptions.deviceType ||
     (currentLoginOptions.deviceType !== 'BROWSER' &&
-      originalLoginOptions.dialNumber !== currentLoginOptions.dialNumber);
+      originalLoginOptions.dialNumber !== currentLoginOptions.dialNumber) ||
+    originalLoginOptions.teamId !== currentLoginOptions.teamId;
 
   const saveLoginOptions = () => {
     setSaveError('');
@@ -72,7 +77,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
     // Prepare payload for updateAgentProfile
     const payload: AgentProfileUpdate = {
       loginOption: currentLoginOptions.deviceType as LoginOption,
-      teamId: store.teamId ?? undefined,
+      teamId: currentLoginOptions.teamId || undefined,
     };
     if (currentLoginOptions.deviceType !== 'BROWSER') {
       payload.dialNumber = currentLoginOptions.dialNumber;
