@@ -19,6 +19,7 @@ describe('useUserState Hook', () => {
   const onStateChange = jest.fn();
   const logger = {
     log: jest.fn(),
+    info: jest.fn(),
     error: jest.fn(),
   };
 
@@ -55,7 +56,7 @@ describe('useUserState Hook', () => {
         cc: mockCC,
         currentState: '0',
         customState: null,
-        logger,
+        logger: logger,
         onStateChange,
         lastStateChangeTimestamp: new Date().getTime(),
         lastIdleCodeChangeTimestamp: undefined,
@@ -80,7 +81,7 @@ describe('useUserState Hook', () => {
         cc: {},
         currentState: '0',
         customState: null,
-        logger: {log: jest.fn(), error: jest.fn()},
+        logger: logger,
         onStateChange: jest.fn(),
         lastStateChangeTimestamp: new Date().getTime(),
         lastIdleCodeChangeTimestamp: undefined,

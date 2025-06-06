@@ -1,4 +1,4 @@
-import {IdleCode, ICustomState} from '@webex/cc-store';
+import {IdleCode, ICustomState, ILogger} from '@webex/cc-store';
 
 /**
  * Interface representing the state of a user.
@@ -60,6 +60,11 @@ export interface IUserState {
    * @returns void
    */
   onStateChange: (state: string) => void;
+
+  /**
+   * Logger instance
+   */
+  logger: ILogger;
 }
 
 export enum AgentUserState {

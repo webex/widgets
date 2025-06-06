@@ -191,6 +191,7 @@ export type StationLoginComponentProps = Pick<
   | 'onCCSignOut'
   | 'teamId'
   | 'setTeamId'
+  | 'logger'
   | 'profileMode'
   | 'originalLoginOptions'
   | 'currentLoginOptions'

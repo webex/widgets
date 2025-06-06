@@ -49,6 +49,7 @@ const loginCb = jest.fn();
 const logoutCb = jest.fn();
 const logger = {
   log: jest.fn(),
+  info: jest.fn(),
   error: jest.fn(),
 };
 
@@ -412,7 +413,7 @@ describe('useStationLogin Hook', () => {
     });
 
     await waitFor(() => {
-      expect(logger.error).toHaveBeenCalledWith('Error logging out: Error: Logout failed', {
+      expect(logger.error).toHaveBeenCalledWith('CC-Widgets: Error logging out: Error: Logout failed', {
         module: 'widget-station-login#helper.ts',
         method: 'logout',
       });
@@ -464,7 +465,7 @@ describe('useStationLogin Hook', () => {
     await waitFor(() => {
       expect(setShowMultipleLoginAlertSpy).toHaveBeenCalledWith(false);
       expect(registerCCSpy).toHaveBeenCalled();
-      expect(logger.log).toHaveBeenCalledWith('Agent Relogin Success', {
+      expect(logger.log).toHaveBeenCalledWith('CC-Widgets: Agent Relogin Success', {
         module: 'widget-station-login#station-login/helper.ts',
         method: 'handleContinue',
       });
@@ -525,10 +526,13 @@ describe('useStationLogin Hook', () => {
     await waitFor(() => {
       expect(setShowMultipleLoginAlertSpy).toHaveBeenCalledWith(false);
       expect(registerCCSpy).toHaveBeenCalled();
-      expect(logger.error).toHaveBeenCalledWith('Error handling agent multi login continue: Error: Relogin failed', {
-        module: 'widget-station-login#station-login/index.tsx',
-        method: 'handleContinue',
-      });
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: Error handling agent multi login continue: Error: Relogin failed',
+        {
+          module: 'widget-station-login#station-login/index.tsx',
+          method: 'handleContinue',
+        }
+      );
     });
   });
 
