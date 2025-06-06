@@ -50,7 +50,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
       store.setShowMultipleLoginAlert(false);
       await store.registerCC();
       if (store.isAgentLoggedIn) {
-        logger.log(`Agent Relogin Success`, {
+        logger.log(`CC-Widgets: Agent Relogin Success`, {
           module: 'widget-station-login#station-login/helper.ts',
           method: 'handleContinue',
         });
@@ -61,7 +61,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
         });
       }
     } catch (error) {
-      logger.error(`Error handling agent multi login continue: ${error}`, {
+      logger.error(`CC-Widgets: Error handling agent multi login continue: ${error}`, {
         module: 'widget-station-login#station-login/index.tsx',
         method: 'handleContinue',
       });
@@ -69,8 +69,12 @@ export const useStationLogin = (props: UseStationLoginProps) => {
   };
 
   const login = () => {
-    cc.stationLogin({teamId: team, loginOption: deviceType, dialNumber: dialNumber})
+    cc.stationLogin({teamId: team, loginOption: deviceType, dialNumber})
       .then((res: StationLoginSuccess) => {
+        logger.log('CC-Widgets: useStationLogin login(): stationLogin success', {
+          module: 'station-login/helper.ts',
+          method: 'login',
+        });
         setLoginSuccess(res);
         setLoginFailure(undefined);
       })
@@ -85,12 +89,20 @@ export const useStationLogin = (props: UseStationLoginProps) => {
   };
 
   const logout = () => {
+    logger.info('CC-Widgets: useStationLogin logout(): invoking stationLogout', {
+      module: 'station-login/helper.ts',
+      method: 'logout',
+    });
     cc.stationLogout({logoutReason: 'User requested logout'})
       .then((res: StationLogoutSuccess) => {
+        logger.log('CC-Widgets: useStationLogin logout(): stationLogout success', {
+          module: 'station-login/helper.ts',
+          method: 'logout',
+        });
         setLogoutSuccess(res);
       })
       .catch((error: Error) => {
-        logger.error(`Error logging out: ${error}`, {
+        logger.error(`CC-Widgets: Error logging out: ${error}`, {
           module: 'widget-station-login#helper.ts',
           method: 'logout',
         });

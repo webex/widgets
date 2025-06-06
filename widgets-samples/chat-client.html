@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>WxCC Widgets - Chat Client</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+    p {
+      font-size: 1.2em;
+      color: #333;
+    }
+    .header {
+      background-color: rgb(7, 24, 45);
+      color: #fff;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      padding: 16px;
+      margin: 0;
+      font-size: 1.5em;
+      font-weight: bold;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .header-subtext {
+      font-size: 0.7em;
+      font-weight: normal;
+      color: #d1d5db;
+      margin-top: 4px;
+      font-style: italic;
+    }
+    .main-container {
+      padding: 16px;
+      background-color: #fff;
+      margin: 16px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .info-social {
+      margin-top: 24px;
+      padding: 16px;
+      background-color: #f0f6ff;
+      border-left: 4px solid #1877f2;
+      border-radius: 6px;
+    }
+    .info-email {
+      margin-top: 24px;
+      padding: 16px;
+      background-color: #fffbe6;
+      border-left: 4px solid #fbbc04;
+      border-radius: 6px;
+    }
+    .info-tasks {
+      margin-top: 24px;
+      padding: 16px;
+      background-color: #e6fff7;
+      border-left: 4px solid #00bfae;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="header">
+    WxCC Widgets
+    <span class="header-subtext">Chat Client Sample - <span style="font-size:0.85em;color:#7dd3fc;">Slide into support's DMs, fr fr fr</span></span>
+  </div>
+  <div class="main-container">
+    <p>Hey there! Welcome to your chat zone. This widget lets you slide into an agent's DMs on <b>ccsdk.wbx.ai</b> sandbox. Just tap the chat icon chillin' at the bottom right.</p>
+    <div class="info-social">
+      <strong>Social:</strong> Wanna start a chat via socials? Log in to Facebook and drop a message to 
+      <a href="https://www.facebook.com/profile.php?id=61576316010450" target="_blank" rel="noopener noreferrer">
+        this page</a>. Easy vibes.
+    </div>
+    <div class="info-email">
+      <strong>Email:</strong> Prefer email? Shoot a message to 
+      <a href="mailto:ccsdk.wbx.ai@gmail.com">ccsdk.wbx.ai@gmail.com</a> and we'll catch it.
+    </div>
+    <div class="info-tasks">
+      <strong>Where's my stuff?</strong> Peep your incoming tasks on the 
+      <a href="https://desktop.wxcc-us1.cisco.com/" target="_blank" rel="noopener noreferrer">Webex Contact Center Agent Desktop</a>
+      or check out the 
+      <a href="https://ccwidgets.d1b38q61t1z947.amplifyapp.com/" target="_blank" rel="noopener noreferrer">WxCC Widget Sample</a>. Stay in the loop!
+    </div>  
+  </div>
+  <div id="divicw" data-bind="EFD3103E-C4EB-44FF-A634-C24162850586" data-org="" data-guid="20cff497-437e-4d2e-a961-0e25e1420c2d"></div>
+  <script>
+    var i = {
+      t: function (t) {
+        var e = "https://media.imi.chat/widget/js/imichatinit.js";
+        try {
+          var o = new XMLHttpRequest;
+          o.onreadystatechange = function () {
+            if (this.readyState == 4) {
+              var t = document.getElementById("divicw");
+              if (this.status == 0) {
+                i.o(t);
+                return
+              }
+              var e = document.createElement("script");
+              e.innerHTML = this.responseText;
+              t.parentNode.insertBefore(e, t.nextSibling)
+            }
+          };
+          o.open("GET", e, true);
+          o.send()
+        } catch (s) {
+          console.error(s)
+        }
+      },
+      o: function (t) {
+        t.insertAdjacentHTML("afterend", '<iframe id="tls_al_frm" frameborder="0" style="overflow: hidden;height: 208px;width: 394px;position: fixed;display: block;right: 48px;bottom: 12px;z-index: 99999; display:none;"></iframe>');
+        var e = document.getElementById("tls_al_frm");
+        var o = e.contentWindow || (e.contentDocument.document || e.contentDocument);
+        o.document.open();
+        o.document.write('<!doctype html><html><head><meta charset="utf-8"><title>Untitled Document</title><style>body{font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;color: #99a0b0;font-size: 14px;}.popover__content{background-color: #fbfbfe; padding: 1.5rem; border-radius: 5px; width: 300px; box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);position: relative;}.popover__message{font-weight: 600;color:#56627c;font-size: 16px;}.pull-left{float:left;}.clearfix{clear: both;}.hdr-txt{width: 218px; margin-top: 3px;}.para-txt a{text-decoration: none;color: #005cde;}.close-btn{position: absolute;right:15px;top:15px;}.close-btn a{text-decoration: none;font-weight: 400; color: #56627c; font-size: 16px;}</style></head><body><div class="popover__content"><div class="close-btn"><a href="#" onclick="closeTLSAlert();">X</a></div><div class="popover__message"><div class="pull-left hdr-txt">This browser version is not supported on LiveChat.</div></div><div class="clearfix"></div><p class="para-txt">Please update your browser to the latest version and re-open the website to access the widget. </p></div><script>function closeTLSAlert(){window.parent.postMessage({key: "close_tls_alert",value: "close_tls_alert",action: "close_tls_alert"}, "*");}<\/script></body></html>');
+        o.document.close();
+        e.style.display = "block";
+        window.addEventListener("message", function (t) {
+          if (t.data.action == "close_tls_alert") {
+            i.s()
+          }
+        })
+      },
+      s: function () {
+        var t = document.getElementById("tls_al_frm");
+        t.remove()
+      }
+    };
+    i.t(function (t) {});
+  </script>
+</body>
+
+</html>

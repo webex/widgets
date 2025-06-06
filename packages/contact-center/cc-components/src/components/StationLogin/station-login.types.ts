@@ -110,6 +110,16 @@ export interface IStationLoginProps {
    * Handler for Contact Center logout
    */
   onCCSignOut?: () => void;
+
+  /**
+   * The team id for agent login
+   */
+  teamId: string;
+
+  /**
+   * Handler to set team Id
+   */
+  setTeamId: (teamId: string) => void;
 }
 
 export type StationLoginComponentProps = Pick<
@@ -131,4 +141,7 @@ export type StationLoginComponentProps = Pick<
   | 'dialNumberRegex'
   | 'showMultipleLoginAlert'
   | 'onCCSignOut'
+  | 'teamId'
+  | 'setTeamId'
+  | 'logger'
 >;

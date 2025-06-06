@@ -9,6 +9,7 @@ import {
   store,
   OutdialCall,
 } from '@webex/cc-widgets';
+import {StationLogoutSuccess} from '@webex/plugin-cc';
 import Webex from 'webex/contact-center';
 import {ThemeProvider, IconProvider, Icon, Button, Checkbox, Text, Select, Option} from '@momentum-design/components/dist/react';
 import {PopoverNext} from '@momentum-ui/react-collaboration';
@@ -136,6 +137,10 @@ function App() {
 
   const onTaskDeclined = (task) => {
     console.log('onTaskDeclined invoked for task:', task);
+  };
+
+  const onTaskSelected = (task) => {
+    console.log('onTaskSelected invoked for task:', task);
   };
 
   const onHoldResume = () => {
@@ -310,6 +315,16 @@ function App() {
     console.log('onStateChange invoked', status);
   };
 
+    const stationLogout = () => {
+    store.cc.stationLogout({logoutReason: 'User requested logout'})
+      .then((res: StationLogoutSuccess) => {
+        console.log('Agent logged out successfully', res.data.type);
+      })
+      .catch((error: Error) => {
+        console.log('Agent logout failed', error);
+      });
+  };
+
   return (
     <div className="app mds-typography">
       <ThemeProvider
@@ -409,7 +424,7 @@ function App() {
               <div className="box" style={{ flex: 1 }}>
                 <section className="section-box">
                   <fieldset className="fieldset">
-                    <legend className="legend-box">&nbsp;Sample App Toggles&nbsp;</legend>
+                    <legend className="legend-box">&nbsp;Sample App Toggles and Operations&nbsp;</legend>
                     <Checkbox
                       checked={currentTheme === 'DARK'}
                       aria-label="theme checkbox"
@@ -432,6 +447,11 @@ function App() {
                         setShowAgentProfile(!showAgentProfile);
                       }}
                     />
+                    {store.isAgentLoggedIn && (
+                      <Button id="logoutAgent" onClick={stationLogout} color="positive" className='stationLogoutButtonClass'>
+                        Station Logout
+                      </Button>
+                    )}
                   </fieldset>
                 </section>
                 <br/>
@@ -652,7 +672,7 @@ function App() {
                         <section className="section-box">
                           <fieldset className="fieldset">
                             <legend className="legend-box">Task List</legend>
-                            <TaskList onTaskAccepted={onTaskAccepted} onTaskDeclined={onTaskDeclined} />
+                            <TaskList onTaskAccepted={onTaskAccepted} onTaskDeclined={onTaskDeclined} onTaskSelected={onTaskSelected} />
                           </fieldset>
                         </section>
                       </div>

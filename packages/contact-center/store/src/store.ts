@@ -31,6 +31,7 @@ class Store implements IStore {
   currentTask: ITask = null;
   isAgentLoggedIn = false;
   deviceType: string = '';
+  teamId: string = '';
   taskList: Record<string, ITask> = {};
   dialNumber: string = '';
   currentState: string = '';
@@ -78,9 +79,19 @@ class Store implements IStore {
     }
 
     this.logger = this.cc.LoggerProxy;
+    this.logger.info('CC-Widgets: Contact-center registerCC(): starting registration', {
+      module: 'cc-store#store.ts',
+      method: 'registerCC',
+    });
+
     return this.cc
       .register()
       .then((response: Profile) => {
+        this.logger.log('CC-Widgets: Contact-center registerCC(): registration successful', {
+          module: 'cc-store#store.ts',
+          method: 'registerCC',
+        });
+        // wire up logger into feature‐flag extraction
         this.featureFlags = getFeatureFlags(response);
         this.teams = response.teams;
         this.loginOptions = response.webRtcEnabled
@@ -91,7 +102,8 @@ class Store implements IStore {
         this.wrapupCodes = response.wrapupCodes;
         this.isAgentLoggedIn = response.isAgentLoggedIn;
         this.deviceType = response.deviceType ?? 'AGENT_DN';
-        this.dialNumber = response.defaultDn;
+        this.dialNumber = response.dn;
+        this.teamId = response.currentTeamId ?? '';
         this.currentState = response.lastStateAuxCodeId;
         this.lastStateChangeTimestamp = response.lastStateChangeTimestamp;
         this.lastIdleCodeChangeTimestamp = response.lastIdleCodeChangeTimestamp;
@@ -100,7 +112,7 @@ class Store implements IStore {
         this.agentProfile.agentName = response.agentName;
       })
       .catch((error) => {
-        this.logger.error(`Error registering contact center: ${error}`, {
+        this.logger.error(`CC-Widgets: Contact-center registerCC(): failed - ${error}`, {
           module: 'cc-store#store.ts',
           method: 'registerCC',
         });
@@ -132,9 +144,17 @@ class Store implements IStore {
         clearTimeout(timer);
         this.registerCC(webex)
           .then(() => {
+            this.logger.log('CC-Widgets: Store init(): store initialization complete', {
+              module: 'cc-store#store.ts',
+              method: 'init',
+            });
             resolve();
           })
           .catch((error) => {
+            this.logger.error(`CC-Widgets: Store init(): registration failed - ${error}`, {
+              module: 'cc-store#store.ts',
+              method: 'init',
+            });
             reject(error);
           });
       });

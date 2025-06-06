@@ -1,32 +1,17 @@
-/* eslint-disable react/prop-types */
 import React from 'react';
 import {render, screen, fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ConsultTransferListComponent from '../../../../src/components/task/CallControl/CallControlCustom/consult-transfer-list-item';
 
-jest.mock('@momentum-ui/react-collaboration', () => ({
-  ListItemBase: (props) => (
-    <div data-testid="ListItemBase" {...props}>
-      {props.children}
-    </div>
-  ),
-  ListItemBaseSection: (props) => (
-    <div data-testid="ListItemBaseSection" {...props}>
-      {props.children}
-    </div>
-  ),
-  AvatarNext: (props) => <div data-testid="AvatarNext">{props.initials}</div>,
-  Text: (props) => <p {...props}>{props.children}</p>,
-  ButtonCircle: (props) => (
-    <button data-testid="ButtonCircle" onClick={props.onPress}>
-      {props.children}
-    </button>
-  ),
-}));
+const loggerMock = {
+  log: jest.fn(),
+  info: jest.fn(),
+  warn: jest.fn(),
+  trace: jest.fn(),
+  error: jest.fn(),
+};
 
-jest.mock('@momentum-design/components/dist/react', () => ({
-  Icon: (props) => <span data-testid="Icon">{props.name}</span>,
-}));
+jest.mock('lottie-web');
 
 beforeAll(() => {
   jest.spyOn(console, 'error').mockImplementation(() => {});
@@ -44,6 +29,7 @@ describe('CallControlListItemPresentational', () => {
     buttonIcon: 'test-icon',
     onButtonPress: mockOnButtonPress,
     className: 'custom-class',
+    logger: loggerMock,
   };
 
   beforeEach(() => {

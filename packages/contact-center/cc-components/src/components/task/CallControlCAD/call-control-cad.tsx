@@ -28,9 +28,8 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
     isEndConsultEnabled,
     lastTargetType,
     controlVisibility,
+    logger,
   } = props;
-
-  // Use the Web Worker-based hold timer
 
   const formatTime = (time: number): string => {
     const minutes = Math.floor((time % 3600) / 60);
@@ -116,6 +115,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
             consultCompleted={consultCompleted}
             isAgentBeingConsulted={!consultAccepted}
             isEndConsultEnabled={isEndConsultEnabled}
+            logger={logger}
           />
         </div>
       )}

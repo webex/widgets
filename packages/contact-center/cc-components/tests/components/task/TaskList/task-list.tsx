@@ -4,21 +4,18 @@ import '@testing-library/jest-dom';
 import TaskListComponent from '../../../../src/components/task/TaskList/task-list';
 import {TaskListComponentProps} from '../../../../src/components/task/task.types';
 
-jest.mock('@momentum-ui/react-collaboration', () => ({
-  ButtonPill: () => <div data-testid="ButtonPill" />,
-  ListItemBase: () => <div data-testid="ListItemBase" />,
-  ListItemBaseSection: () => <div data-testid="ListItemBaseSection" />,
-  Text: () => <div data-testid="Text" />,
-}));
-
-jest.mock('@momentum-design/components/dist/react', () => ({
-  Avatar: () => <div data-testid="Avatar" />,
-}));
-
 describe('TaskListPresentational Component', () => {
   afterEach(cleanup);
 
   it('renders a list of tasks when taskList is not empty', () => {
+    const loggerMock = {
+      log: jest.fn(),
+      error: jest.fn(),
+      warn: jest.fn(),
+      info: jest.fn(),
+      trace: jest.fn(),
+    };
+
     const props: TaskListComponentProps = {
       taskList: [
         {
@@ -46,6 +43,7 @@ describe('TaskListPresentational Component', () => {
           },
         },
       ],
+      logger: loggerMock,
     };
 
     render(<TaskListComponent {...props} />);

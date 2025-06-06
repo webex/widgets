@@ -4,39 +4,6 @@ import {render, screen, fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import CallControlComponent from '../../../../src/components/task/CallControl/call-control';
 
-jest.mock('@momentum-ui/react-collaboration', () => ({
-  ButtonPill: (props) => (
-    <button data-testid="ButtonPill" onClick={props.onPress} className={props.className}>
-      {props.children}
-    </button>
-  ),
-  ButtonCircle: (props) => (
-    <button data-testid="ButtonCircle" onClick={props.onPress} disabled={props.disabled} className={props.className}>
-      {props.children}
-    </button>
-  ),
-  PopoverNext: (props) => (
-    <div data-testid="PopoverNext">
-      {props.triggerComponent}
-      {props.children}
-    </div>
-  ),
-  SelectNext: (props) => (
-    <div data-testid="SelectNext">{props.children && props.items && props.children(props.items[0])}</div>
-  ),
-  TooltipNext: (props) => (
-    <div data-testid="TooltipNext">
-      {props.triggerComponent}
-      {props.children}
-    </div>
-  ),
-}));
-
-jest.mock('@momentum-design/components/dist/react', () => ({
-  Avatar: () => <div data-testid="Avatar" />,
-  Icon: () => <div data-testid="Icon" />,
-}));
-
 jest.mock('@webex/cc-store', () => ({
   DestinationType: {
     AGENT: 'agent',
@@ -64,6 +31,14 @@ jest.mock('../../../../src/components/task/CallControl/CallControlCustom/call-co
     </div>
   );
 });
+
+const loggerMock = {
+  log: jest.fn(),
+  info: jest.fn(),
+  warn: jest.fn(),
+  trace: jest.fn(),
+  error: jest.fn(),
+};
 
 beforeAll(() => {
   jest.spyOn(console, 'error').mockImplementation(() => {});
@@ -110,6 +85,7 @@ describe('CallControlPresentational', () => {
     wrapupCall: mockWrapupCall,
     wrapupCodes: mockWrapupCodes,
     setIsHeld: setIsHeld,
+    isHeld: false,
     buddyAgents: [],
     loadBuddyAgents: mockLoadBuddyAgents,
     loadQueues: mockLoadQueues,
@@ -129,6 +105,15 @@ describe('CallControlPresentational', () => {
     consultAgentName: null,
     endConsultCall: jest.fn(),
     consultTransfer: jest.fn(),
+    logger: loggerMock,
+    controlVisibility: {
+      holdResume: true,
+      consult: true,
+      transfer: true,
+      pauseResumeRecording: true,
+      end: true,
+      wrapup: false,
+    },
   };
 
   beforeEach(() => {
@@ -175,6 +160,16 @@ describe('CallControlPresentational', () => {
     expect(mockTransferCall).toHaveBeenCalledWith('agent1', 'agent');
     expect(mockLoadQueues).toHaveBeenCalled();
     expect(mockConsultCall).not.toHaveBeenCalled();
+  });
+
+  it('logs hold button click', () => {
+    render(<CallControlComponent {...defaultProps} />);
+    const buttons = screen.getAllByTestId('ButtonCircle');
+    fireEvent.click(buttons[0]);
+    expect(loggerMock.info).toHaveBeenCalledWith('CC-Widgets: CallControl: is Call On Hold status is false', {
+      module: 'call-control.tsx',
+      method: 'handletoggleHold',
+    });
   });
 
   // TODO - We do not have tests for CAD Component. Will move these while writing test cases for it

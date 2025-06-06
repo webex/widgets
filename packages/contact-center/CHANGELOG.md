@@ -1,3 +1,52 @@
+# [1.28.0-ccwidgets.68](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.67...v1.28.0-ccwidgets.68) (2025-06-05)
+
+
+### Features
+
+* **cc-widgets:** added-advanced-logs ([#464](https://github.com/webex/widgets/issues/464)) ([3c0bd2b](https://github.com/webex/widgets/commit/3c0bd2bdbae2ec357e9332f45eb63f79398d37d9))
+
+# [1.28.0-ccwidgets.67](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.66...v1.28.0-ccwidgets.67) (2025-06-03)
+
+
+### Bug Fixes
+
+* **cc-task:** TaskList onTaskSelected callback ([#466](https://github.com/webex/widgets/issues/466)) ([5d7038f](https://github.com/webex/widgets/commit/5d7038fcfd79b2b71d372ac49b29904c48e106d5))
+
+# [1.28.0-ccwidgets.66](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.65...v1.28.0-ccwidgets.66) (2025-06-02)
+
+
+### Bug Fixes
+
+* **tooling:** use secrets while running tests ([#463](https://github.com/webex/widgets/issues/463)) ([227bafd](https://github.com/webex/widgets/commit/227bafd8e340ef15a36532d408ef65e6298294ea))
+
+# [1.28.0-ccwidgets.65](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.64...v1.28.0-ccwidgets.65) (2025-06-01)
+
+
+### Bug Fixes
+
+* **samples:** add an unlisted URL for chat client ([#462](https://github.com/webex/widgets/issues/462)) ([3def454](https://github.com/webex/widgets/commit/3def454f541d490d22d6ba10e2c696117cb0951e))
+
+# [1.28.0-ccwidgets.64](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.63...v1.28.0-ccwidgets.64) (2025-05-30)
+
+
+### Bug Fixes
+
+* **station-logout:** implement-station-logout-with-sample-toggles ([#461](https://github.com/webex/widgets/issues/461)) ([de47b18](https://github.com/webex/widgets/commit/de47b18c0f37739e7de26ba6f3c70f932d1715f7))
+
+# [1.28.0-ccwidgets.63](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.62...v1.28.0-ccwidgets.63) (2025-05-30)
+
+
+### Bug Fixes
+
+* **station-login:** fix-station-login-bugs ([#459](https://github.com/webex/widgets/issues/459)) ([a203779](https://github.com/webex/widgets/commit/a203779ed81005b216d5658d9033f7d30e115797))
+
+# [1.28.0-ccwidgets.62](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.61...v1.28.0-ccwidgets.62) (2025-05-26)
+
+
+### Bug Fixes
+
+* **tooling:** fix jest setup for UI testing ([#460](https://github.com/webex/widgets/issues/460)) ([7c4a021](https://github.com/webex/widgets/commit/7c4a02197835b09886b5c566651aa10f38f34cb5))
+
 # [1.28.0-ccwidgets.61](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.60...v1.28.0-ccwidgets.61) (2025-05-26)
 
 
