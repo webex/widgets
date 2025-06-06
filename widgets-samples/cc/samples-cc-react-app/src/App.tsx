@@ -152,8 +152,10 @@ const handleSaveEnd = (isComplete: boolean) => {
     console.log('onTaskAccepted invoked for task:', task);
   };
 
-  const onTaskDeclined = (task) => {
+const onTaskDeclined = (task,reason) => {
     console.log('onTaskDeclined invoked for task:', task);
+    setRejectedReason(reason);
+    setShowRejectedPopup(true);
   };
 
   const onTaskSelected = (task) => {
@@ -315,11 +317,6 @@ const handleSaveEnd = (isComplete: boolean) => {
   }, [currentTheme]);
 
   useEffect(() => {
-    store.setTaskRejected((reason: string) => {
-      setRejectedReason(reason);
-      setShowRejectedPopup(true);
-    });
-
     store.setIncomingTaskCb(onIncomingTaskCB);
 
     return () => {
