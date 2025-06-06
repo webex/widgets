@@ -243,6 +243,11 @@ const onTaskDeclined = (task,reason) => {
     setSelectedState('');
   };
 
+  const handlePopoverClose = () => {
+    setShowRejectedPopup(false);
+    setSelectedState('');
+  };
+
   const doOAuthLogin = () => {
     let redirectUri = `${window.location.protocol}//${window.location.host}`;
 
@@ -749,6 +754,11 @@ const onTaskDeclined = (task,reason) => {
             )}
             {showRejectedPopup && (
               <div className="task-rejected-popup">
+                <button
+                  className="close-btn"
+                  onClick={handlePopoverClose}>
+                  ×
+                </button>
                 <h2>Task Rejected</h2>
                 <p>Reason: {rejectedReason}</p>
                 <select value={selectedState} onChange={(e) => setSelectedState(e.target.value)}>
