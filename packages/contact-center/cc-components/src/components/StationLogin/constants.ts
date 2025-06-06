@@ -18,6 +18,10 @@ export const StationLoginLabels = {
   IS_REQUIRED: ' is required',
   DN_FORMAT_ERROR: 'Enter a valid US dial number. For help, reach out to your administrator or support team.',
   DEFAULT_ERROR: 'Error logging in: ',
+  CONFIRM: 'Confirm',
+  CONFIRM_INTERACTION_PREFERENCE_CHANGES_TITLE: 'Confirm interaction preference changes',
+  CONFIRM_INTERACTION_PREFERENCE_CHANGES_MESSAGE: 'Are you sure you want to save your interaction preferences changes?',
+  SAVE: 'Save',
 };
 
 export const SignInErrors = {
