@@ -13,6 +13,7 @@ const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (prop
       {Object.values(taskList)?.map((task, index) => {
         const callAssociationDetails = task?.data?.interaction?.callAssociatedDetails;
         const ani = callAssociationDetails?.ani;
+        const customerName = callAssociationDetails?.customerName;
         const virtualTeamName = callAssociationDetails?.virtualTeamName;
         // rona timeout is not always available in the callAssociatedDetails object
         const ronaTimeout = callAssociationDetails?.ronaTimeout ? Number(callAssociationDetails?.ronaTimeout) : null;
@@ -22,6 +23,7 @@ const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (prop
         const mediaType = task.data.interaction.mediaType;
         const mediaChannel = task.data.interaction.mediaChannel;
         const isTelephony = mediaType === MEDIA_CHANNEL.TELEPHONY;
+        const isSocial = mediaType === MEDIA_CHANNEL.SOCIAL;
         const acceptText =
           isIncomingTask && !task.data.wrapUpRequired
             ? isTelephony && !isBrowser
@@ -33,7 +35,7 @@ const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (prop
         return (
           <Task
             interactionId={task.data.interactionId}
-            title={ani}
+            title={isSocial ? customerName : ani}
             state={!isIncomingTask ? taskState : ''}
             startTimeStamp={startTimeStamp}
             selected={currentTask?.data.interactionId === task.data.interactionId}
