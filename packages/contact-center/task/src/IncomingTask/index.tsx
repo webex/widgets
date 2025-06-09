@@ -12,6 +12,7 @@ const IncomingTask: React.FunctionComponent<IncomingTaskProps> = observer(({inco
 
   const props = {
     ...result,
+    logger,
   };
 
   return <IncomingTaskComponent {...props} />;

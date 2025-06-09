@@ -49,6 +49,7 @@ const loginCb = jest.fn();
 const logoutCb = jest.fn();
 const logger = {
   log: jest.fn(),
+  info: jest.fn(),
   error: jest.fn(),
 };
 
@@ -123,6 +124,12 @@ describe('useStationLogin Hook', () => {
         loginFailure: undefined,
         logoutSuccess: undefined,
         handleContinue: expect.any(Function),
+        currentLoginOptions: expect.any(Object),
+        originalLoginOptions: expect.any(Object),
+        isLoginOptionsChanged: expect.any(Boolean),
+        saveError: expect.any(String),
+        saveLoginOptions: expect.any(Function),
+        setCurrentLoginOptions: expect.any(Function),
       });
     });
   });
@@ -246,6 +253,12 @@ describe('useStationLogin Hook', () => {
         loginFailure: errorResponse,
         logoutSuccess: undefined,
         handleContinue: expect.any(Function),
+        currentLoginOptions: expect.any(Object),
+        originalLoginOptions: expect.any(Object),
+        isLoginOptionsChanged: expect.any(Boolean),
+        saveError: expect.any(String),
+        saveLoginOptions: expect.any(Function),
+        setCurrentLoginOptions: expect.any(Function),
       });
 
       expect(setDeviceTypeSpy).not.toHaveBeenCalled();
@@ -316,6 +329,12 @@ describe('useStationLogin Hook', () => {
         loginFailure: errorResponse,
         logoutSuccess: undefined,
         handleContinue: expect.any(Function),
+        currentLoginOptions: expect.any(Object),
+        originalLoginOptions: expect.any(Object),
+        isLoginOptionsChanged: expect.any(Boolean),
+        saveError: expect.any(String),
+        saveLoginOptions: expect.any(Function),
+        setCurrentLoginOptions: expect.any(Function),
       });
     });
   });
@@ -365,6 +384,12 @@ describe('useStationLogin Hook', () => {
         loginFailure: undefined,
         logoutSuccess: successResponse,
         handleContinue: expect.any(Function),
+        currentLoginOptions: expect.any(Object),
+        originalLoginOptions: expect.any(Object),
+        isLoginOptionsChanged: expect.any(Boolean),
+        saveError: expect.any(String),
+        saveLoginOptions: expect.any(Function),
+        setCurrentLoginOptions: expect.any(Function),
       });
     });
   });
@@ -388,7 +413,7 @@ describe('useStationLogin Hook', () => {
     });
 
     await waitFor(() => {
-      expect(logger.error).toHaveBeenCalledWith('Error logging out: Error: Logout failed', {
+      expect(logger.error).toHaveBeenCalledWith('CC-Widgets: Error logging out: Error: Logout failed', {
         module: 'widget-station-login#helper.ts',
         method: 'logout',
       });
@@ -440,7 +465,7 @@ describe('useStationLogin Hook', () => {
     await waitFor(() => {
       expect(setShowMultipleLoginAlertSpy).toHaveBeenCalledWith(false);
       expect(registerCCSpy).toHaveBeenCalled();
-      expect(logger.log).toHaveBeenCalledWith('Agent Relogin Success', {
+      expect(logger.log).toHaveBeenCalledWith('CC-Widgets: Agent Relogin Success', {
         module: 'widget-station-login#station-login/helper.ts',
         method: 'handleContinue',
       });
@@ -501,10 +526,13 @@ describe('useStationLogin Hook', () => {
     await waitFor(() => {
       expect(setShowMultipleLoginAlertSpy).toHaveBeenCalledWith(false);
       expect(registerCCSpy).toHaveBeenCalled();
-      expect(logger.error).toHaveBeenCalledWith('Error handling agent multi login continue: Error: Relogin failed', {
-        module: 'widget-station-login#station-login/index.tsx',
-        method: 'handleContinue',
-      });
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: Error handling agent multi login continue: Error: Relogin failed',
+        {
+          module: 'widget-station-login#station-login/index.tsx',
+          method: 'handleContinue',
+        }
+      );
     });
   });
 
@@ -578,5 +606,147 @@ describe('useStationLogin Hook', () => {
     await waitFor(() => {
       expect(loginCb).not.toHaveBeenCalled();
     });
+  });
+  it('should not save if isLoginOptionsChanged is false', () => {
+    const cc = {updateAgentProfile: jest.fn()};
+    const {result} = renderHook(() =>
+      useStationLogin({
+        cc,
+        logger,
+        deviceType: 'EXTENSION',
+        dialNumber: '1001',
+      })
+    );
+
+    // No changes made, so isLoginOptionsChanged should be false
+    act(() => {
+      result.current.saveLoginOptions();
+    });
+
+    expect(result.current.saveError).toBe('No changes detected in login options.');
+    expect(logger.log).toHaveBeenCalledWith(
+      'No changes detected in login options.',
+      expect.objectContaining({
+        module: 'widget-station-login#station-login/helper.ts',
+        method: 'saveLoginOptions',
+      })
+    );
+    expect(cc.updateAgentProfile).not.toHaveBeenCalled();
+  });
+  it('should call updateAgentProfile and update originalLoginOptions on save when changed', async () => {
+    const cc = {updateAgentProfile: jest.fn().mockResolvedValue({})};
+    const {result} = renderHook(() =>
+      useStationLogin({
+        cc,
+        logger,
+        deviceType: 'EXTENSION',
+        dialNumber: '1001',
+      })
+    );
+
+    // Simulate a change
+    act(() => {
+      result.current.setCurrentLoginOptions({
+        deviceType: 'DIALNUMBER',
+        dialNumber: '2002',
+      });
+    });
+
+    expect(result.current.isLoginOptionsChanged).toBe(true);
+
+    await act(async () => {
+      await result.current.saveLoginOptions();
+    });
+
+    expect(cc.updateAgentProfile).toHaveBeenCalledWith({
+      loginOption: 'DIALNUMBER',
+      teamId: undefined,
+      dialNumber: '2002',
+    });
+    expect(logger.log).toHaveBeenCalledWith(
+      'Saving login options:',
+      expect.objectContaining({
+        module: 'widget-station-login#station-login/helper.ts',
+        method: 'saveLoginOptions',
+        original: expect.any(Object),
+        updated: expect.any(Object),
+      })
+    );
+    expect(result.current.saveError).toBe('');
+    // After save, originalLoginOptions should match currentLoginOptions
+    expect(result.current.originalLoginOptions).toEqual(result.current.currentLoginOptions);
+    expect(result.current.isLoginOptionsChanged).toBe(false);
+  });
+  it('should handle updateAgentProfile errors', async () => {
+    const cc = {updateAgentProfile: jest.fn().mockRejectedValue(new Error('fail'))};
+    const {result} = renderHook(() =>
+      useStationLogin({
+        cc,
+        logger,
+        deviceType: 'EXTENSION',
+        dialNumber: '1001',
+      })
+    );
+
+    // Simulate a change
+    act(() => {
+      result.current.setCurrentLoginOptions({
+        deviceType: 'DIALNUMBER',
+        dialNumber: '2002',
+      });
+    });
+
+    await act(async () => {
+      await result.current.saveLoginOptions();
+    });
+
+    expect(result.current.saveError).toBe('fail');
+    expect(logger.error).toHaveBeenCalledWith(
+      'Failed to update agent device type',
+      expect.any(Error),
+      expect.objectContaining({
+        module: 'widget-station-login#station-login/helper.ts',
+        method: 'saveLoginOptions',
+      })
+    );
+  });
+  it('should call updateAgentProfile with no dialNumber when deviceType is BROWSER', async () => {
+    const cc = {updateAgentProfile: jest.fn().mockResolvedValue({})};
+    const {result} = renderHook(() =>
+      useStationLogin({
+        cc,
+        logger,
+        deviceType: 'EXTENSION',
+        dialNumber: '1234',
+      })
+    );
+
+    // Simulate a change to BROWSER (this will make isLoginOptionsChanged true)
+    act(() => {
+      result.current.setCurrentLoginOptions({
+        deviceType: 'BROWSER',
+        dialNumber: 'shouldNotBeSent',
+      });
+    });
+
+    await act(async () => {
+      await result.current.saveLoginOptions();
+    });
+
+    expect(cc.updateAgentProfile).toHaveBeenCalledWith({
+      loginOption: 'BROWSER',
+      teamId: undefined,
+      // dialNumber should NOT be present
+    });
+
+    expect(logger.log).toHaveBeenCalledWith(
+      'Saving login options:',
+      expect.objectContaining({
+        module: 'widget-station-login#station-login/helper.ts',
+        method: 'saveLoginOptions',
+        original: expect.any(Object),
+        updated: expect.any(Object),
+      })
+    );
   });
 });

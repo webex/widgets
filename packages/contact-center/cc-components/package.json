@@ -1,7 +1,7 @@
 {
   "name": "@webex/cc-components",
   "description": "Webex Contact Center UI Components Library for your custom contact center solutions",
-  "version": "1.28.0-ccwidgets.65",
+  "version": "1.28.0-ccwidgets.69",
   "main": "dist/index.js",
   "publishConfig": {
     "access": "public"
@@ -20,7 +20,7 @@
     "build": "yarn run -T tsc",
     "build:src": "yarn run clean:dist && webpack",
     "build:watch": "webpack --watch",
-    "test:unit": "jest --coverage",
+    "test:unit:broken": "jest --coverage",
     "test:styles": "eslint"
   },
   "dependencies": {

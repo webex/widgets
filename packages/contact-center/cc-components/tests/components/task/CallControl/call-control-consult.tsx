@@ -3,6 +3,14 @@ import {render, screen, fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import CallControlConsultComponent from '../../../../src/components/task/CallControl/CallControlCustom/call-control-consult';
 
+const loggerMock = {
+  log: jest.fn(),
+  info: jest.fn(),
+  warn: jest.fn(),
+  trace: jest.fn(),
+  error: jest.fn(),
+};
+
 // eslint-disable-next-line react/display-name
 jest.mock('../../../../src/components/task/TaskTimer', () => () => <span data-testid="TaskTimer">00:00</span>);
 
@@ -24,6 +32,7 @@ describe('CallControlConsultComponent', () => {
     endConsultCall: mockEndConsultCall,
     consultCompleted: true,
     isAgentBeingConsulted: true,
+    logger: loggerMock,
   };
 
   beforeEach(() => {
@@ -108,5 +117,25 @@ describe('CallControlConsultComponent', () => {
   it('renders cancel button when isEndConsultEnabled is true even if isAgentBeingConsulted is false', () => {
     render(<CallControlConsultComponent {...defaultProps} isEndConsultEnabled={true} isAgentBeingConsulted={false} />);
     expect(screen.getByTestId('cancel-consult-btn')).toBeInTheDocument();
+  });
+
+  it('logs transfer button click', () => {
+    render(<CallControlConsultComponent {...defaultProps} />);
+    const transferButton = screen.getByTestId('transfer-consult-btn');
+    fireEvent.click(transferButton);
+    expect(loggerMock.log).toHaveBeenCalledWith('CC-Widgets: CallControlConsult: transfer completed', {
+      module: 'call-control-consult.tsx',
+      method: 'handleTransfer',
+    });
+  });
+
+  it('logs end consult button click', () => {
+    render(<CallControlConsultComponent {...defaultProps} />);
+    const cancelButton = screen.getByTestId('cancel-consult-btn');
+    fireEvent.click(cancelButton);
+    expect(loggerMock.log).toHaveBeenCalledWith('CC-Widgets: CallControlConsult: end consult completed', {
+      module: 'call-control-consult.tsx',
+      method: 'handleEndConsult',
+    });
   });
 });

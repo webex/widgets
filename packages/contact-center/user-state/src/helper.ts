@@ -20,6 +20,10 @@ export const useUserState = ({
   const prevStateRef = useRef(currentState);
 
   const callOnStateChange = () => {
+    logger.info('CC-Widgets: useUserState callOnStateChange(): invoking onStateChange', {
+      module: 'useUserState',
+      method: 'callOnStateChange',
+    });
     if (onStateChange) {
       if (customState?.developerName) {
         onStateChange(customState);
@@ -87,7 +91,7 @@ export const useUserState = ({
   `;
 
   useEffect(() => {
-    logger.log(`Initializing worker`, {
+    logger.info(`CC-Widgets: Initializing worker`, {
       module: 'useUserState',
       method: 'useEffect - initial',
     });
@@ -108,6 +112,10 @@ export const useUserState = ({
     };
 
     return () => {
+      logger.log('CC-Widgets: useUserState cleanup: terminating worker', {
+        module: 'useUserState',
+        method: 'useEffect - initial cleanup',
+      });
       if (workerRef.current) {
         workerRef.current.postMessage({type: 'stop'});
         workerRef.current.postMessage({type: 'stopIdleCode'});
@@ -119,7 +127,7 @@ export const useUserState = ({
 
   useEffect(() => {
     if (prevStateRef.current !== currentState) {
-      logger.log(`State change detected: ${prevStateRef.current} -> ${currentState}`, {
+      logger.info(`CC-Widgets: State change action started: ${prevStateRef.current} -> ${currentState}`, {
         module: 'useUserState',
         method: 'useEffect - currentState',
       });
@@ -127,6 +135,10 @@ export const useUserState = ({
       // Call setAgentStatus and update prevStateRef after promise resolves
       updateAgentState(currentState)
         .then(() => {
+          logger.log(`CC-Widgets: State change updated: ${prevStateRef.current} -> ${currentState}`, {
+            module: 'useUserState',
+            method: 'useEffect - currentState',
+          });
           prevStateRef.current = currentState;
           callOnStateChange();
         })
@@ -145,6 +157,10 @@ export const useUserState = ({
 
   useEffect(() => {
     if (workerRef.current && lastStateChangeTimestamp) {
+      logger.info('CC-Widgets: useUserState timers reset', {
+        module: 'useUserState',
+        method: 'useEffect - reset timers',
+      });
       workerRef.current.postMessage({type: 'reset', startTime: lastStateChangeTimestamp});
 
       if (lastIdleCodeChangeTimestamp && lastIdleCodeChangeTimestamp !== lastStateChangeTimestamp) {
@@ -157,6 +173,10 @@ export const useUserState = ({
 
   // UI change calls this method and gets the store updated
   const setAgentStatus = (selectedCode) => {
+    logger.info('CC-Widgets: useUserState setAgentStatus(): updating currentState', {
+      module: 'useUserState',
+      method: 'setAgentStatus',
+    });
     store.setCurrentState(selectedCode);
   };
 
@@ -164,13 +184,6 @@ export const useUserState = ({
   // This method updates the agent state in the backend
   const updateAgentState = (selectedCode) => {
     selectedCode = idleCodes?.filter((code) => code.id === selectedCode)[0];
-
-    logger.log(`Setting agent status`, {
-      module: 'useUserState',
-      method: 'setAgentStatus',
-      auxCodeId: selectedCode.auxCodeId,
-      state: selectedCode.state,
-    });
 
     const {auxCodeId, state} = {
       auxCodeId: selectedCode.id,
@@ -182,10 +195,9 @@ export const useUserState = ({
     return cc
       .setAgentState({state: chosenState, auxCodeId, agentId, lastStateChangeReason: state})
       .then((response) => {
-        logger.log(`Agent state set successfully`, {
+        logger.log(`CC-Widgets: Agent state set successfully to ${chosenState}`, {
           module: 'useUserState',
           method: 'updateAgentState',
-          response: response.data,
         });
 
         store.setLastStateChangeTimestamp(response.data.lastStateChangeTimestamp);

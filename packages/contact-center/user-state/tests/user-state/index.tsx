@@ -15,6 +15,7 @@ jest.mock('@webex/cc-store', () => {
     agentId: 'testAgentId',
     logger: {
       log: jest.fn(),
+      info: jest.fn(),
     },
     lastStateChangeTimestamp: new Date(),
     customState: null,
@@ -57,6 +58,7 @@ describe('UserState Component', () => {
       lastStateChangeTimestamp: expect.any(Date),
       logger: {
         log: expect.any(Function),
+        info: expect.any(Function),
       },
       onStateChange: expect.any(Function),
     });

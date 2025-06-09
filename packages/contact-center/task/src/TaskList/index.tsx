@@ -6,16 +6,19 @@ import {TaskListComponent} from '@webex/cc-components';
 import {useTaskList} from '../helper';
 import {TaskListProps} from '../task.types';
 
-const TaskList: React.FunctionComponent<TaskListProps> = observer(({onTaskAccepted, onTaskDeclined}) => {
-  const {cc, taskList, currentTask, deviceType, logger} = store;
+const TaskList: React.FunctionComponent<TaskListProps> = observer(
+  ({onTaskAccepted, onTaskDeclined, onTaskSelected}) => {
+    const {cc, taskList, currentTask, deviceType, logger} = store;
 
-  const result = useTaskList({cc, deviceType, logger, taskList, onTaskAccepted, onTaskDeclined});
-  const props = {
-    ...result,
-    currentTask,
-  };
+    const result = useTaskList({cc, deviceType, logger, taskList, onTaskAccepted, onTaskDeclined, onTaskSelected});
+    const props = {
+      ...result,
+      currentTask,
+      logger,
+    };
 
-  return <TaskListComponent {...props} />;
-});
+    return <TaskListComponent {...props} />;
+  }
+);
 
 export {TaskList};

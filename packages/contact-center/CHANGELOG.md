@@ -1,3 +1,31 @@
+# [1.28.0-ccwidgets.69](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.68...v1.28.0-ccwidgets.69) (2025-06-06)
+
+
+### Bug Fixes
+
+* **agent-profile:** agent-save-interaction-preferences ([#467](https://github.com/webex/widgets/issues/467)) ([9458501](https://github.com/webex/widgets/commit/94585011c7ac1f9b6c343814c3a9c3fb7841e46f))
+
+# [1.28.0-ccwidgets.68](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.67...v1.28.0-ccwidgets.68) (2025-06-05)
+
+
+### Features
+
+* **cc-widgets:** added-advanced-logs ([#464](https://github.com/webex/widgets/issues/464)) ([3c0bd2b](https://github.com/webex/widgets/commit/3c0bd2bdbae2ec357e9332f45eb63f79398d37d9))
+
+# [1.28.0-ccwidgets.67](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.66...v1.28.0-ccwidgets.67) (2025-06-03)
+
+
+### Bug Fixes
+
+* **cc-task:** TaskList onTaskSelected callback ([#466](https://github.com/webex/widgets/issues/466)) ([5d7038f](https://github.com/webex/widgets/commit/5d7038fcfd79b2b71d372ac49b29904c48e106d5))
+
+# [1.28.0-ccwidgets.66](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.65...v1.28.0-ccwidgets.66) (2025-06-02)
+
+
+### Bug Fixes
+
+* **tooling:** use secrets while running tests ([#463](https://github.com/webex/widgets/issues/463)) ([227bafd](https://github.com/webex/widgets/commit/227bafd8e340ef15a36532d408ef65e6298294ea))
+
 # [1.28.0-ccwidgets.65](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.64...v1.28.0-ccwidgets.65) (2025-06-01)
 
 

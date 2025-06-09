@@ -120,6 +120,55 @@ export interface IStationLoginProps {
    * Handler to set team Id
    */
   setTeamId: (teamId: string) => void;
+
+  /**
+   * Indicates if the agent login is in profile mode.
+   */
+  profileMode: boolean;
+
+  /**
+   * The original login options state.
+   */
+  originalLoginOptions: LoginOptionsState;
+
+  /**
+   * The current login options state.
+   */
+  currentLoginOptions: LoginOptionsState;
+
+  /**
+   * Handler to set the current login options state.
+   */
+  setCurrentLoginOptions: React.Dispatch<React.SetStateAction<LoginOptionsState>>;
+
+  /**
+   * Flag to indicate if the login options have changed.
+   */
+  isLoginOptionsChanged: boolean;
+
+  /**
+   * Handler to save the login options.
+   */
+  saveLoginOptions: () => void;
+
+  /**
+   * Error message when saving login options fails.
+   */
+  saveError: string;
+  /**
+   * Called when save starts (after confirm)
+   */
+  onSaveStart?: () => void;
+  /**
+   * Called when save ends (true=success, false=error)
+   */
+  onSaveEnd?: (isComplete: boolean) => void;
+}
+
+export interface LoginOptionsState {
+  deviceType: string;
+  dialNumber: string;
+  teamId: string;
 }
 
 export type StationLoginComponentProps = Pick<
@@ -143,4 +192,12 @@ export type StationLoginComponentProps = Pick<
   | 'onCCSignOut'
   | 'teamId'
   | 'setTeamId'
+  | 'logger'
+  | 'profileMode'
+  | 'originalLoginOptions'
+  | 'currentLoginOptions'
+  | 'setCurrentLoginOptions'
+  | 'isLoginOptionsChanged'
+  | 'saveLoginOptions'
+  | 'saveError'
 >;

@@ -20,6 +20,13 @@ jest.mock('@webex/cc-store', () => ({
   taskList: taskListMock,
   setTaskAssigned: jest.fn(),
   setTaskRejected: jest.fn(),
+  setTaskSelected: jest.fn(),
+  logger: {
+    log: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+    info: jest.fn(),
+  },
 }));
 
 describe('TaskList Component', () => {
@@ -28,7 +35,7 @@ describe('TaskList Component', () => {
   afterEach(cleanup);
 
   it('renders TaskListPresentational with the correct props', () => {
-    render(<TaskList onTaskAccepted={jest.fn()} onTaskDeclined={jest.fn()} />);
+    render(<TaskList onTaskAccepted={jest.fn()} onTaskDeclined={jest.fn()} onTaskSelected={jest.fn()} />);
 
     // Assert that `TaskListPresentational` is rendered.
     const taskListPresentational = screen.getByTestId('task-list');
@@ -39,6 +46,7 @@ describe('TaskList Component', () => {
       {
         currentTask: undefined,
         isBrowser: true,
+        logger: store.logger,
         taskList: taskListMock,
         acceptTask: expect.any(Function),
         declineTask: expect.any(Function),
@@ -51,9 +59,10 @@ describe('TaskList Component', () => {
     expect(helperSpy).toHaveBeenCalledWith({
       cc: store.cc,
       deviceType: 'BROWSER',
-      logger: undefined,
+      logger: store.logger,
       onTaskAccepted: expect.any(Function),
       onTaskDeclined: expect.any(Function),
+      onTaskSelected: expect.any(Function),
       taskList: taskListMock,
     });
   });
