@@ -217,8 +217,8 @@ export const useCallControl = (props: useCallControlProps) => {
         (participant: Participant) =>
           participant.pType === 'Agent' &&
           (consultInitiated
-            ? participant.id !== store.cc.agentConfig.agentId
-            : participant.id === store.cc.agentConfig.agentId)
+            ? participant.id !== store.cc.agentConfig?.agentId
+            : participant.id === store.cc.agentConfig?.agentId)
       )
       .map((participant: Participant) => ({id: participant.id, name: participant.name}))[0];
 
