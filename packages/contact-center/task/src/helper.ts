@@ -158,7 +158,17 @@ export const useIncomingTask = (props: UseTaskProps) => {
 };
 
 export const useCallControl = (props: useCallControlProps) => {
-  const {currentTask, onHoldResume, onEnd, onWrapUp, logger, consultInitiated, deviceType, featureFlags} = props;
+  const {
+    currentTask,
+    onHoldResume,
+    onEnd,
+    onWrapUp,
+    onRecordingToggle,
+    logger,
+    consultInitiated,
+    deviceType,
+    featureFlags,
+  } = props;
   const [isHeld, setIsHeld] = useState<boolean | undefined>(undefined);
   const [isRecording, setIsRecording] = useState(true);
   const [buddyAgents, setBuddyAgents] = useState<BuddyDetails[]>([]);
@@ -267,16 +277,30 @@ export const useCallControl = (props: useCallControlProps) => {
 
   const holdCallback = () => {
     setIsHeld(true);
-    if (onHoldResume) onHoldResume();
+    if (onHoldResume) {
+      onHoldResume({
+        isHeld: true,
+        task: currentTask,
+      });
+    }
   };
 
-  const resumeCallback = () => {
+  const unHoldCallback = () => {
     setIsHeld(false);
-    if (onHoldResume) onHoldResume();
+    if (onHoldResume) {
+      onHoldResume({
+        isHeld: false,
+        task: currentTask,
+      });
+    }
   };
 
   const endCallCallback = () => {
-    if (onEnd) onEnd();
+    if (onEnd) {
+      onEnd({
+        task: currentTask,
+      });
+    }
   };
 
   const wrapupCallCallback = ({wrapUpAuxCodeId}) => {
@@ -291,10 +315,20 @@ export const useCallControl = (props: useCallControlProps) => {
 
   const pauseRecordingCallback = () => {
     setIsRecording(false);
+    onRecordingToggle({
+      isRecording: false,
+      task: currentTask,
+    });
+    logger.info('Recording paused', {module: 'useCallControl', method: 'pauseRecordingCallback'});
   };
 
   const resumeRecordingCallback = () => {
     setIsRecording(true);
+    onRecordingToggle({
+      isRecording: true,
+      task: currentTask,
+    });
+    logger.info('Recording resumed', {module: 'useCallControl', method: 'resumeRecordingCallback'});
   };
 
   useEffect(() => {
@@ -318,22 +352,16 @@ export const useCallControl = (props: useCallControlProps) => {
     };
 
     store.setTaskCallback(
+      // Should use holdCallback
       TASK_EVENTS.TASK_HOLD,
-      () => {
-        onHoldResume?.();
-        setIsHeld(true);
-      },
+      holdCallback,
       currentTask.data.interactionId
     );
-    store.setTaskCallback(TASK_EVENTS.TASK_RESUME, resumeCallback, currentTask.data.interactionId);
+    store.setTaskCallback(TASK_EVENTS.TASK_UNHOLD, unHoldCallback, currentTask.data.interactionId);
     store.setTaskCallback(TASK_EVENTS.TASK_END, endCallCallback, currentTask.data.interactionId);
     store.setTaskCallback(TASK_EVENTS.AGENT_WRAPPEDUP, wrapupCallCallback, currentTask.data.interactionId);
-    store.setTaskCallback(TASK_EVENTS.CONTACT_RECORDING_PAUSED, pauseRecordingCallback, currentTask.data.interactionId);
-    store.setTaskCallback(
-      TASK_EVENTS.CONTACT_RECORDING_RESUMED,
-      resumeRecordingCallback,
-      currentTask.data.interactionId
-    );
+    store.setTaskCallback(TASK_EVENTS.TASK_RECORDING_PAUSED, pauseRecordingCallback, currentTask.data.interactionId);
+    store.setTaskCallback(TASK_EVENTS.TASK_RECORDING_RESUMED, resumeRecordingCallback, currentTask.data.interactionId);
 
     return () => {
       if (workerRef.current?.postMessage) {
@@ -342,7 +370,7 @@ export const useCallControl = (props: useCallControlProps) => {
         workerRef.current = null;
       }
       store.removeTaskCallback(TASK_EVENTS.TASK_HOLD, holdCallback, currentTask.data.interactionId);
-      store.removeTaskCallback(TASK_EVENTS.TASK_RESUME, resumeCallback, currentTask.data.interactionId);
+      store.removeTaskCallback(TASK_EVENTS.TASK_UNHOLD, unHoldCallback, currentTask.data.interactionId);
       store.removeTaskCallback(TASK_EVENTS.TASK_END, endCallCallback, currentTask.data.interactionId);
       store.removeTaskCallback(TASK_EVENTS.AGENT_WRAPPEDUP, wrapupCallCallback, currentTask.data.interactionId);
       store.removeTaskCallback(

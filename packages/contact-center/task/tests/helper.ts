@@ -655,7 +655,7 @@ describe('useCallControl', () => {
     expect(mockOnWrapUp).not.toHaveBeenCalled();
   });
 
-  it('should call holdResume with hold=true and handle success', async () => {
+  it('should call onHoldResume with hold=true and handle success', async () => {
     const {result} = renderHook(() =>
       useCallControl({
         currentTask: mockCurrentTask,
@@ -674,10 +674,10 @@ describe('useCallControl', () => {
     });
 
     expect(mockCurrentTask.hold).toHaveBeenCalled();
-    expect(mockOnHoldResume).toHaveBeenCalled();
+    expect(mockOnHoldResume).toHaveBeenCalledWith({isHeld: true, task: mockCurrentTask});
   });
 
-  it('should call holdResume with hold=false and handle success', async () => {
+  it('should call onHoldResume with hold=false and handle success', async () => {
     const {result} = renderHook(() =>
       useCallControl({
         currentTask: mockCurrentTask,
@@ -692,11 +692,11 @@ describe('useCallControl', () => {
 
     await act(async () => {
       await result.current.toggleHold(false);
-      mockCurrentTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_RESUME)?.[1]();
+      mockCurrentTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_UNHOLD)?.[1]();
     });
 
     expect(mockCurrentTask.resume).toHaveBeenCalled();
-    expect(mockOnHoldResume).toHaveBeenCalled();
+    expect(mockOnHoldResume).toHaveBeenCalledWith({isHeld: false, task: mockCurrentTask});
   });
 
   it('should log an error if hold fails', async () => {

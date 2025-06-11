@@ -160,12 +160,16 @@ const handleSaveEnd = (isComplete: boolean) => {
     console.log('onTaskSelected invoked for task:', task);
   };
 
-  const onHoldResume = () => {
-    console.log('onHoldResume invoked');
+  const onHoldResume = ({isHeld, task}) => {
+    console.log('onHoldResume invoked', {isHeld, task});
   };
 
-  const onEnd = () => {
-    console.log('onEnd invoked');
+  const onRecordingToggle = ({isRecording, task}) => {
+    console.log('onRecordingToggle invoked', {isRecording, task});
+  };
+
+  const onEnd = ({task}) => {
+    console.log('onEnd invoked', {task});
   };
 
   const onWrapUp = (params) => {
@@ -678,7 +682,7 @@ const handleSaveEnd = (isComplete: boolean) => {
                         <section className="section-box">
                           <fieldset className="fieldset">
                             <legend className="legend-box">Call Control</legend>
-                            <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapUp={onWrapUp} />
+                            <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapUp={onWrapUp} onRecordingToggle={onRecordingToggle} />
                           </fieldset>
                         </section>
                       </div>
@@ -692,6 +696,7 @@ const handleSaveEnd = (isComplete: boolean) => {
                               onHoldResume={onHoldResume}
                               onEnd={onEnd}
                               onWrapUp={onWrapUp}
+                              onRecordingToggle={onRecordingToggle}
                               callControlClassName={'call-control-outer'}
                               callControlConsultClassName={'call-control-consult-outer'}
                             />

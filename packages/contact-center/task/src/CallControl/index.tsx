@@ -6,35 +6,48 @@ import {useCallControl} from '../helper';
 import {CallControlProps} from '../task.types';
 import {CallControlComponent} from '@webex/cc-components';
 
-const CallControl: React.FunctionComponent<CallControlProps> = observer(({onHoldResume, onEnd, onWrapUp}) => {
-  const {
-    logger,
-    currentTask,
-    wrapupCodes,
-    consultInitiated,
-    consultCompleted,
-    consultAccepted,
-    consultStartTimeStamp,
-    callControlAudio,
-    deviceType,
-    featureFlags,
-    isEndConsultEnabled,
-    allowConsultToQueue,
-  } = store;
+const CallControl: React.FunctionComponent<CallControlProps> = observer(
+  ({onHoldResume, onEnd, onWrapUp, onRecordingToggle}) => {
+    //Needs prop for onRecordingToggle
+    const {
+      logger,
+      currentTask,
+      wrapupCodes,
+      consultInitiated,
+      consultCompleted,
+      consultAccepted,
+      consultStartTimeStamp,
+      callControlAudio,
+      deviceType,
+      featureFlags,
+      isEndConsultEnabled,
+      allowConsultToQueue,
+    } = store;
 
-  const result = {
-    ...useCallControl({currentTask, onHoldResume, onEnd, onWrapUp, logger, consultInitiated, deviceType, featureFlags}),
-    wrapupCodes,
-    consultInitiated,
-    consultCompleted,
-    consultAccepted,
-    consultStartTimeStamp,
-    callControlAudio,
-    isEndConsultEnabled,
-    allowConsultToQueue,
-    logger,
-  };
-  return <CallControlComponent {...result} />;
-});
+    const result = {
+      ...useCallControl({
+        currentTask,
+        onHoldResume,
+        onEnd,
+        onWrapUp,
+        onRecordingToggle,
+        logger,
+        consultInitiated,
+        deviceType,
+        featureFlags,
+      }),
+      wrapupCodes,
+      consultInitiated,
+      consultCompleted,
+      consultAccepted,
+      consultStartTimeStamp,
+      callControlAudio,
+      isEndConsultEnabled,
+      allowConsultToQueue,
+      logger,
+    };
+    return <CallControlComponent {...result} />;
+  }
+);
 
 export {CallControl};
