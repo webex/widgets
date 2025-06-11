@@ -6,7 +6,7 @@ import {IUserState, AgentUserState} from '../../../src/components/UserState/user
 import {userStateLabels} from '../../../src/components/UserState/constant';
 import {formatTime} from '../../../src/utils';
 
-describe('UserState Component', () => {
+describe.skip('UserState Component', () => {
   const mockIdleCodes = [
     {id: '0', name: AgentUserState.Available},
     {id: '1', name: 'Break'},

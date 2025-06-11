@@ -163,6 +163,38 @@ export interface IStationLoginProps {
    * Called when save ends (true=success, false=error)
    */
   onSaveEnd?: (isComplete: boolean) => void;
+
+  /**
+   * Handler to set the selected device type
+   */
+  setSelectedDeviceType: (deviceType: string) => void;
+
+  /**
+   * The selected device type for login
+   */
+  selectedDeviceType: string;
+
+  /**
+   * The entered dial number value
+   */
+  dialNumberValue: string;
+
+  /**
+   * Handler to set the entered dial number value
+   */
+  setDialNumberValue: (value: string) => void;
+
+  /**
+   * Handler to set the selected team ID
+   */
+  setSelectedTeamId: (teamId: string) => void;
+
+  /**
+   * The selected team ID for login
+   */
+  selectedTeamId: string;
+
+  selectedOption: string;
 }
 
 export interface LoginOptionsState {
@@ -186,11 +218,9 @@ export type StationLoginComponentProps = Pick<
   | 'isAgentLoggedIn'
   | 'handleContinue'
   | 'deviceType'
-  | 'dialNumber'
   | 'dialNumberRegex'
   | 'showMultipleLoginAlert'
   | 'onCCSignOut'
-  | 'teamId'
   | 'setTeamId'
   | 'logger'
   | 'profileMode'
@@ -200,4 +230,11 @@ export type StationLoginComponentProps = Pick<
   | 'isLoginOptionsChanged'
   | 'saveLoginOptions'
   | 'saveError'
+  | 'setSelectedDeviceType'
+  | 'selectedDeviceType'
+  | 'dialNumberValue'
+  | 'setDialNumberValue'
+  | 'setSelectedTeamId'
+  | 'selectedTeamId'
+  | 'selectedOption'
 >;

@@ -1,9 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`StationLoginComponent Snapshot Actions Login buttons actions calls login function when Save and Continue button is clicked 1`] = `
+exports[`Station Login Component Actions ProfileMode interaction confirmation Popup it should call handleConfirmCancelClicked when clicked on cancel in popup 1`] = `
 <div>
   <dialog
     class="modal"
+    data-testid="multi-sign-in-modal"
   >
     <h2>
       Multiple Sign In Alert
@@ -28,11 +29,15 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions calls logi
   >
     <mdc-text
       class="modal-text"
+      tagname="h2"
+      type="body-large-bold"
     >
       Sign out of Contact Center
     </mdc-text>
     <mdc-text
       class="modal-text"
+      tagname="p"
+      type="body-midsize-regular"
     >
       Are you sure you want to sign out?
     </mdc-text>
@@ -41,14 +46,72 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions calls logi
     >
       <mdc-button
         class="white-button"
+        color="default"
         data-testid="cc-cancel-button"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="secondary"
       >
         Cancel
       </mdc-button>
       <mdc-button
+        color="default"
         data-testid="cc-logout-button"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="primary"
       >
         Sign Out
+      </mdc-button>
+    </div>
+  </dialog>
+  <dialog
+    class="cc-logout-modal"
+    data-testid="interaction-confirmation-dialog"
+  >
+    <div
+      class="modal-header"
+      style="display: flex; justify-content: space-between; align-items: center;"
+    >
+      <mdc-text
+        class="modal-text"
+        tagname="h2"
+        type="body-large-bold"
+      >
+        Confirm interaction preference changes
+      </mdc-text>
+    </div>
+    <div
+      class="cc-logout-modal-content"
+    >
+      <mdc-button
+        aria-label="Close"
+        class="cancelSaveLoginOptions"
+        color="default"
+        data-btn-type="pill-with-icon"
+        postfix-icon=""
+        prefix-icon="cancel-bold"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="tertiary"
+      >
+        Cancel
+      </mdc-button>
+      <mdc-button
+        color="default"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="primary"
+      >
+        Confirm
       </mdc-button>
     </div>
   </dialog>
@@ -59,30 +122,48 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions calls logi
     <section
       class="section-box"
     >
-      <mdc-text
-        data-testid="station-login-label"
-      >
-        Set your interaction preferences
-      </mdc-text>
       <div>
         <div
           id="agent-login-label"
         >
           <mdc-text
             data-testid="station-login-label"
+            tagname="p"
+            type="body-midsize-regular"
           >
             Handle calls using
           </mdc-text>
           <mdc-icon
+            aria-describedby="agent-login-label-tooltip"
             data-testid="station-login-icon"
             id="agent-login-info-badge"
+            name="info-badge-filled"
           />
           <mdc-tooltip
+            append-to=""
+            color="contrast"
             data-testid="station-login-tooltip"
+            delay="0,0"
+            disable-aria-expanded=""
+            flip=""
+            hide-on-blur=""
+            hide-on-escape=""
+            id="agent-login-label-tooltip"
+            offset="4"
+            placement="top"
+            role="tooltip"
+            show-arrow=""
+            style="z-index: 1000;"
+            tooltip-type="description"
+            trigger="mouseenter focusin"
+            triggerid="agent-login-info-badge"
+            z-index="1000"
           >
             <mdc-text
               class="agent-login-popover"
               data-testid="station-login-label"
+              tagname="div"
+              type="body-large-regular"
             >
               This is your preferred method for receiving and making calls. Choose between your phone number, extension (if available), or your web browser.
             </mdc-text>
@@ -92,18 +173,28 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions calls logi
           <mdc-select
             class="station-login-select"
             data-testid="login-option-select"
+            help-text-type="default"
+            name="login-option"
+            value="EXTENSION"
           >
             <mdc-option
               aria-disabled="false"
               aria-selected="false"
               data-testid="login-option-Dial Number"
+              tabindex="0"
+              value="AGENT_DN"
+              variant="inset-rectangle"
             >
               Dial Number
             </mdc-option>
             <mdc-option
               aria-disabled="false"
-              aria-selected="false"
+              aria-selected="true"
               data-testid="login-option-Extension"
+              selected=""
+              tabindex="-1"
+              value="EXTENSION"
+              variant="inset-rectangle"
             >
               Extension
             </mdc-option>
@@ -111,6 +202,9 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions calls logi
               aria-disabled="false"
               aria-selected="false"
               data-testid="login-option-Desktop"
+              tabindex="-1"
+              value="BROWSER"
+              variant="inset-rectangle"
             >
               Desktop
             </mdc-option>
@@ -119,6 +213,9 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions calls logi
       </div>
       <mdc-input
         data-testid="dial-number-input"
+        label="Extension"
+        name=""
+        value=""
       />
       <div
         class="select-container"
@@ -126,11 +223,18 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions calls logi
         <mdc-select
           class="station-login-select"
           data-testid="teams-select-dropdown"
+          help-text-type="default"
+          label="Your Team"
+          name="teams-dropdown"
         >
           <mdc-option
             aria-disabled="false"
-            aria-selected="false"
+            aria-selected="true"
             data-testid="teams-dropdown-Team A"
+            selected=""
+            tabindex="0"
+            value="team123"
+            variant="inset-rectangle"
           >
             Team A
           </mdc-option>
@@ -138,6 +242,9 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions calls logi
             aria-disabled="false"
             aria-selected="false"
             data-testid="teams-dropdown-Team B"
+            tabindex="0"
+            value="team456"
+            variant="inset-rectangle"
           >
             Team B
           </mdc-option>
@@ -147,15 +254,17 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions calls logi
         class="btn-container"
       >
         <mdc-button
-          data-testid="login-button"
+          aria-disabled="true"
+          color="positive"
+          data-testid="save-login-options-button"
+          disabled=""
+          role="button"
+          size="32"
+          tabindex="0"
+          type="button"
+          variant="primary"
         >
-          Save & Continue
-        </mdc-button>
-        <mdc-button
-          class="white-button"
-          data-testid="sign-out-button"
-        >
-          Sign Out
+          Save
         </mdc-button>
       </div>
     </section>
@@ -163,10 +272,11 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions calls logi
 </div>
 `;
 
-exports[`StationLoginComponent Snapshot Actions Login buttons actions calls setDeviceType and updates state when a new login option is selected 1`] = `
+exports[`Station Login Component Actions ProfileMode interaction confirmation Popup it should call handleConfirmCancelClicked when clicked on cancel in popup 2`] = `
 <div>
   <dialog
     class="modal"
+    data-testid="multi-sign-in-modal"
   >
     <h2>
       Multiple Sign In Alert
@@ -191,11 +301,15 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions calls setD
   >
     <mdc-text
       class="modal-text"
+      tagname="h2"
+      type="body-large-bold"
     >
       Sign out of Contact Center
     </mdc-text>
     <mdc-text
       class="modal-text"
+      tagname="p"
+      type="body-midsize-regular"
     >
       Are you sure you want to sign out?
     </mdc-text>
@@ -204,14 +318,72 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions calls setD
     >
       <mdc-button
         class="white-button"
+        color="default"
         data-testid="cc-cancel-button"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="secondary"
       >
         Cancel
       </mdc-button>
       <mdc-button
+        color="default"
         data-testid="cc-logout-button"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="primary"
       >
         Sign Out
+      </mdc-button>
+    </div>
+  </dialog>
+  <dialog
+    class="cc-logout-modal"
+    data-testid="interaction-confirmation-dialog"
+  >
+    <div
+      class="modal-header"
+      style="display: flex; justify-content: space-between; align-items: center;"
+    >
+      <mdc-text
+        class="modal-text"
+        tagname="h2"
+        type="body-large-bold"
+      >
+        Confirm interaction preference changes
+      </mdc-text>
+    </div>
+    <div
+      class="cc-logout-modal-content"
+    >
+      <mdc-button
+        aria-label="Close"
+        class="cancelSaveLoginOptions"
+        color="default"
+        data-btn-type="pill-with-icon"
+        postfix-icon=""
+        prefix-icon="cancel-bold"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="tertiary"
+      >
+        Cancel
+      </mdc-button>
+      <mdc-button
+        color="default"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="primary"
+      >
+        Confirm
       </mdc-button>
     </div>
   </dialog>
@@ -222,30 +394,48 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions calls setD
     <section
       class="section-box"
     >
-      <mdc-text
-        data-testid="station-login-label"
-      >
-        Set your interaction preferences
-      </mdc-text>
       <div>
         <div
           id="agent-login-label"
         >
           <mdc-text
             data-testid="station-login-label"
+            tagname="p"
+            type="body-midsize-regular"
           >
             Handle calls using
           </mdc-text>
           <mdc-icon
+            aria-describedby="agent-login-label-tooltip"
             data-testid="station-login-icon"
             id="agent-login-info-badge"
+            name="info-badge-filled"
           />
           <mdc-tooltip
+            append-to=""
+            color="contrast"
             data-testid="station-login-tooltip"
+            delay="0,0"
+            disable-aria-expanded=""
+            flip=""
+            hide-on-blur=""
+            hide-on-escape=""
+            id="agent-login-label-tooltip"
+            offset="4"
+            placement="top"
+            role="tooltip"
+            show-arrow=""
+            style="z-index: 1000;"
+            tooltip-type="description"
+            trigger="mouseenter focusin"
+            triggerid="agent-login-info-badge"
+            z-index="1000"
           >
             <mdc-text
               class="agent-login-popover"
               data-testid="station-login-label"
+              tagname="div"
+              type="body-large-regular"
             >
               This is your preferred method for receiving and making calls. Choose between your phone number, extension (if available), or your web browser.
             </mdc-text>
@@ -255,18 +445,28 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions calls setD
           <mdc-select
             class="station-login-select"
             data-testid="login-option-select"
+            help-text-type="default"
+            name="login-option"
+            value="EXTENSION"
           >
             <mdc-option
               aria-disabled="false"
               aria-selected="false"
               data-testid="login-option-Dial Number"
+              tabindex="0"
+              value="AGENT_DN"
+              variant="inset-rectangle"
             >
               Dial Number
             </mdc-option>
             <mdc-option
               aria-disabled="false"
-              aria-selected="false"
+              aria-selected="true"
               data-testid="login-option-Extension"
+              selected=""
+              tabindex="-1"
+              value="EXTENSION"
+              variant="inset-rectangle"
             >
               Extension
             </mdc-option>
@@ -274,6 +474,9 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions calls setD
               aria-disabled="false"
               aria-selected="false"
               data-testid="login-option-Desktop"
+              tabindex="-1"
+              value="BROWSER"
+              variant="inset-rectangle"
             >
               Desktop
             </mdc-option>
@@ -282,6 +485,9 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions calls setD
       </div>
       <mdc-input
         data-testid="dial-number-input"
+        label="Extension"
+        name=""
+        value=""
       />
       <div
         class="select-container"
@@ -289,11 +495,18 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions calls setD
         <mdc-select
           class="station-login-select"
           data-testid="teams-select-dropdown"
+          help-text-type="default"
+          label="Your Team"
+          name="teams-dropdown"
         >
           <mdc-option
             aria-disabled="false"
-            aria-selected="false"
+            aria-selected="true"
             data-testid="teams-dropdown-Team A"
+            selected=""
+            tabindex="0"
+            value="team123"
+            variant="inset-rectangle"
           >
             Team A
           </mdc-option>
@@ -301,6 +514,9 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions calls setD
             aria-disabled="false"
             aria-selected="false"
             data-testid="teams-dropdown-Team B"
+            tabindex="0"
+            value="team456"
+            variant="inset-rectangle"
           >
             Team B
           </mdc-option>
@@ -310,15 +526,17 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions calls setD
         class="btn-container"
       >
         <mdc-button
-          data-testid="login-button"
+          aria-disabled="true"
+          color="positive"
+          data-testid="save-login-options-button"
+          disabled=""
+          role="button"
+          size="32"
+          tabindex="0"
+          type="button"
+          variant="primary"
         >
-          Save & Continue
-        </mdc-button>
-        <mdc-button
-          class="white-button"
-          data-testid="sign-out-button"
-        >
-          Sign Out
+          Save
         </mdc-button>
       </div>
     </section>
@@ -326,10 +544,11 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions calls setD
 </div>
 `;
 
-exports[`StationLoginComponent Snapshot Actions Login buttons actions should close modal and call handleContinue when continueClicked is triggered 1`] = `
+exports[`Station Login Component Actions SignOut Modal Popup should close modal and call continueClicked with correct arguments 1`] = `
 <div>
   <dialog
     class="modal"
+    data-testid="multi-sign-in-modal"
     open=""
   >
     <h2>
@@ -355,11 +574,15 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions should clo
   >
     <mdc-text
       class="modal-text"
+      tagname="h2"
+      type="body-large-bold"
     >
       Sign out of Contact Center
     </mdc-text>
     <mdc-text
       class="modal-text"
+      tagname="p"
+      type="body-midsize-regular"
     >
       Are you sure you want to sign out?
     </mdc-text>
@@ -368,14 +591,72 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions should clo
     >
       <mdc-button
         class="white-button"
+        color="default"
         data-testid="cc-cancel-button"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="secondary"
       >
         Cancel
       </mdc-button>
       <mdc-button
+        color="default"
         data-testid="cc-logout-button"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="primary"
       >
         Sign Out
+      </mdc-button>
+    </div>
+  </dialog>
+  <dialog
+    class="cc-logout-modal"
+    data-testid="interaction-confirmation-dialog"
+  >
+    <div
+      class="modal-header"
+      style="display: flex; justify-content: space-between; align-items: center;"
+    >
+      <mdc-text
+        class="modal-text"
+        tagname="h2"
+        type="body-large-bold"
+      >
+        Confirm interaction preference changes
+      </mdc-text>
+    </div>
+    <div
+      class="cc-logout-modal-content"
+    >
+      <mdc-button
+        aria-label="Close"
+        class="cancelSaveLoginOptions"
+        color="default"
+        data-btn-type="pill-with-icon"
+        postfix-icon=""
+        prefix-icon="cancel-bold"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="tertiary"
+      >
+        Cancel
+      </mdc-button>
+      <mdc-button
+        color="default"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="primary"
+      >
+        Confirm
       </mdc-button>
     </div>
   </dialog>
@@ -388,6 +669,8 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions should clo
     >
       <mdc-text
         data-testid="station-login-label"
+        tagname="span"
+        type="body-large-bold"
       >
         Set your interaction preferences
       </mdc-text>
@@ -397,19 +680,42 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions should clo
         >
           <mdc-text
             data-testid="station-login-label"
+            tagname="p"
+            type="body-midsize-regular"
           >
             Handle calls using
           </mdc-text>
           <mdc-icon
+            aria-describedby="agent-login-label-tooltip"
             data-testid="station-login-icon"
             id="agent-login-info-badge"
+            name="info-badge-filled"
           />
           <mdc-tooltip
+            append-to=""
+            color="contrast"
             data-testid="station-login-tooltip"
+            delay="0,0"
+            disable-aria-expanded=""
+            flip=""
+            hide-on-blur=""
+            hide-on-escape=""
+            id="agent-login-label-tooltip"
+            offset="4"
+            placement="top"
+            role="tooltip"
+            show-arrow=""
+            style="z-index: 1000;"
+            tooltip-type="description"
+            trigger="mouseenter focusin"
+            triggerid="agent-login-info-badge"
+            z-index="1000"
           >
             <mdc-text
               class="agent-login-popover"
               data-testid="station-login-label"
+              tagname="div"
+              type="body-large-regular"
             >
               This is your preferred method for receiving and making calls. Choose between your phone number, extension (if available), or your web browser.
             </mdc-text>
@@ -419,18 +725,28 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions should clo
           <mdc-select
             class="station-login-select"
             data-testid="login-option-select"
+            help-text-type="default"
+            name="login-option"
+            value="EXTENSION"
           >
             <mdc-option
               aria-disabled="false"
               aria-selected="false"
               data-testid="login-option-Dial Number"
+              tabindex="0"
+              value="AGENT_DN"
+              variant="inset-rectangle"
             >
               Dial Number
             </mdc-option>
             <mdc-option
               aria-disabled="false"
-              aria-selected="false"
+              aria-selected="true"
               data-testid="login-option-Extension"
+              selected=""
+              tabindex="-1"
+              value="EXTENSION"
+              variant="inset-rectangle"
             >
               Extension
             </mdc-option>
@@ -438,6 +754,9 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions should clo
               aria-disabled="false"
               aria-selected="false"
               data-testid="login-option-Desktop"
+              tabindex="-1"
+              value="BROWSER"
+              variant="inset-rectangle"
             >
               Desktop
             </mdc-option>
@@ -446,6 +765,9 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions should clo
       </div>
       <mdc-input
         data-testid="dial-number-input"
+        label="Extension"
+        name=""
+        value=""
       />
       <div
         class="select-container"
@@ -453,11 +775,18 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions should clo
         <mdc-select
           class="station-login-select"
           data-testid="teams-select-dropdown"
+          help-text-type="default"
+          label="Your Team"
+          name="teams-dropdown"
         >
           <mdc-option
             aria-disabled="false"
-            aria-selected="false"
+            aria-selected="true"
             data-testid="teams-dropdown-Team A"
+            selected=""
+            tabindex="0"
+            value="team123"
+            variant="inset-rectangle"
           >
             Team A
           </mdc-option>
@@ -465,6 +794,9 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions should clo
             aria-disabled="false"
             aria-selected="false"
             data-testid="teams-dropdown-Team B"
+            tabindex="0"
+            value="team456"
+            variant="inset-rectangle"
           >
             Team B
           </mdc-option>
@@ -474,13 +806,25 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions should clo
         class="btn-container"
       >
         <mdc-button
+          color="default"
           data-testid="login-button"
+          role="button"
+          size="32"
+          tabindex="0"
+          type="button"
+          variant="primary"
         >
           Save & Continue
         </mdc-button>
         <mdc-button
           class="white-button"
+          color="default"
           data-testid="sign-out-button"
+          role="button"
+          size="32"
+          tabindex="0"
+          type="button"
+          variant="secondary"
         >
           Sign Out
         </mdc-button>
@@ -490,10 +834,11 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions should clo
 </div>
 `;
 
-exports[`StationLoginComponent Snapshot Actions Login buttons actions should close sign-out modal and update state on cancel button click 1`] = `
+exports[`Station Login Component Actions SignOut Modal Popup show signOut modal when onCCSignOut is present and cancel is clicked 1`] = `
 <div>
   <dialog
     class="modal"
+    data-testid="multi-sign-in-modal"
   >
     <h2>
       Multiple Sign In Alert
@@ -518,11 +863,15 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions should clo
   >
     <mdc-text
       class="modal-text"
+      tagname="h2"
+      type="body-large-bold"
     >
       Sign out of Contact Center
     </mdc-text>
     <mdc-text
       class="modal-text"
+      tagname="p"
+      type="body-midsize-regular"
     >
       Are you sure you want to sign out?
     </mdc-text>
@@ -531,14 +880,72 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions should clo
     >
       <mdc-button
         class="white-button"
+        color="default"
         data-testid="cc-cancel-button"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="secondary"
       >
         Cancel
       </mdc-button>
       <mdc-button
+        color="default"
         data-testid="cc-logout-button"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="primary"
       >
         Sign Out
+      </mdc-button>
+    </div>
+  </dialog>
+  <dialog
+    class="cc-logout-modal"
+    data-testid="interaction-confirmation-dialog"
+  >
+    <div
+      class="modal-header"
+      style="display: flex; justify-content: space-between; align-items: center;"
+    >
+      <mdc-text
+        class="modal-text"
+        tagname="h2"
+        type="body-large-bold"
+      >
+        Confirm interaction preference changes
+      </mdc-text>
+    </div>
+    <div
+      class="cc-logout-modal-content"
+    >
+      <mdc-button
+        aria-label="Close"
+        class="cancelSaveLoginOptions"
+        color="default"
+        data-btn-type="pill-with-icon"
+        postfix-icon=""
+        prefix-icon="cancel-bold"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="tertiary"
+      >
+        Cancel
+      </mdc-button>
+      <mdc-button
+        color="default"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="primary"
+      >
+        Confirm
       </mdc-button>
     </div>
   </dialog>
@@ -551,6 +958,8 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions should clo
     >
       <mdc-text
         data-testid="station-login-label"
+        tagname="span"
+        type="body-large-bold"
       >
         Set your interaction preferences
       </mdc-text>
@@ -560,19 +969,42 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions should clo
         >
           <mdc-text
             data-testid="station-login-label"
+            tagname="p"
+            type="body-midsize-regular"
           >
             Handle calls using
           </mdc-text>
           <mdc-icon
+            aria-describedby="agent-login-label-tooltip"
             data-testid="station-login-icon"
             id="agent-login-info-badge"
+            name="info-badge-filled"
           />
           <mdc-tooltip
+            append-to=""
+            color="contrast"
             data-testid="station-login-tooltip"
+            delay="0,0"
+            disable-aria-expanded=""
+            flip=""
+            hide-on-blur=""
+            hide-on-escape=""
+            id="agent-login-label-tooltip"
+            offset="4"
+            placement="top"
+            role="tooltip"
+            show-arrow=""
+            style="z-index: 1000;"
+            tooltip-type="description"
+            trigger="mouseenter focusin"
+            triggerid="agent-login-info-badge"
+            z-index="1000"
           >
             <mdc-text
               class="agent-login-popover"
               data-testid="station-login-label"
+              tagname="div"
+              type="body-large-regular"
             >
               This is your preferred method for receiving and making calls. Choose between your phone number, extension (if available), or your web browser.
             </mdc-text>
@@ -582,18 +1014,28 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions should clo
           <mdc-select
             class="station-login-select"
             data-testid="login-option-select"
+            help-text-type="default"
+            name="login-option"
+            value="EXTENSION"
           >
             <mdc-option
               aria-disabled="false"
               aria-selected="false"
               data-testid="login-option-Dial Number"
+              tabindex="0"
+              value="AGENT_DN"
+              variant="inset-rectangle"
             >
               Dial Number
             </mdc-option>
             <mdc-option
               aria-disabled="false"
-              aria-selected="false"
+              aria-selected="true"
               data-testid="login-option-Extension"
+              selected=""
+              tabindex="-1"
+              value="EXTENSION"
+              variant="inset-rectangle"
             >
               Extension
             </mdc-option>
@@ -601,6 +1043,9 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions should clo
               aria-disabled="false"
               aria-selected="false"
               data-testid="login-option-Desktop"
+              tabindex="-1"
+              value="BROWSER"
+              variant="inset-rectangle"
             >
               Desktop
             </mdc-option>
@@ -609,6 +1054,9 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions should clo
       </div>
       <mdc-input
         data-testid="dial-number-input"
+        label="Extension"
+        name=""
+        value=""
       />
       <div
         class="select-container"
@@ -616,11 +1064,18 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions should clo
         <mdc-select
           class="station-login-select"
           data-testid="teams-select-dropdown"
+          help-text-type="default"
+          label="Your Team"
+          name="teams-dropdown"
         >
           <mdc-option
             aria-disabled="false"
-            aria-selected="false"
+            aria-selected="true"
             data-testid="teams-dropdown-Team A"
+            selected=""
+            tabindex="0"
+            value="team123"
+            variant="inset-rectangle"
           >
             Team A
           </mdc-option>
@@ -628,6 +1083,9 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions should clo
             aria-disabled="false"
             aria-selected="false"
             data-testid="teams-dropdown-Team B"
+            tabindex="0"
+            value="team456"
+            variant="inset-rectangle"
           >
             Team B
           </mdc-option>
@@ -637,13 +1095,1137 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions should clo
         class="btn-container"
       >
         <mdc-button
+          class="white-button"
+          color="default"
+          data-testid="sign-out-button"
+          role="button"
+          size="32"
+          tabindex="0"
+          type="button"
+          variant="secondary"
+        >
+          Sign Out
+        </mdc-button>
+      </div>
+    </section>
+  </div>
+</div>
+`;
+
+exports[`Station Login Component Actions SignOut Modal Popup show signOut modal when onCCSignOut is present and cancel is clicked 2`] = `
+<div>
+  <dialog
+    class="modal"
+    data-testid="multi-sign-in-modal"
+  >
+    <h2>
+      Multiple Sign In Alert
+    </h2>
+    <p>
+      You are signed in to the Desktop in multiple application instances. Click Continue to proceed with the Desktop in this application instance. Else, close this window.
+    </p>
+    <div
+      class="modal-content"
+    >
+      <button
+        data-testid="ContinueButton"
+        id="ContinueButton"
+      >
+        Continue
+      </button>
+    </div>
+  </dialog>
+  <dialog
+    class="cc-logout-modal"
+    data-testid="cc-logout-modal"
+  >
+    <mdc-text
+      class="modal-text"
+      tagname="h2"
+      type="body-large-bold"
+    >
+      Sign out of Contact Center
+    </mdc-text>
+    <mdc-text
+      class="modal-text"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      Are you sure you want to sign out?
+    </mdc-text>
+    <div
+      class="cc-logout-modal-content"
+    >
+      <mdc-button
+        class="white-button"
+        color="default"
+        data-testid="cc-cancel-button"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="secondary"
+      >
+        Cancel
+      </mdc-button>
+      <mdc-button
+        color="default"
+        data-testid="cc-logout-button"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="primary"
+      >
+        Sign Out
+      </mdc-button>
+    </div>
+  </dialog>
+  <dialog
+    class="cc-logout-modal"
+    data-testid="interaction-confirmation-dialog"
+  >
+    <div
+      class="modal-header"
+      style="display: flex; justify-content: space-between; align-items: center;"
+    >
+      <mdc-text
+        class="modal-text"
+        tagname="h2"
+        type="body-large-bold"
+      >
+        Confirm interaction preference changes
+      </mdc-text>
+    </div>
+    <div
+      class="cc-logout-modal-content"
+    >
+      <mdc-button
+        aria-label="Close"
+        class="cancelSaveLoginOptions"
+        color="default"
+        data-btn-type="pill-with-icon"
+        postfix-icon=""
+        prefix-icon="cancel-bold"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="tertiary"
+      >
+        Cancel
+      </mdc-button>
+      <mdc-button
+        color="default"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="primary"
+      >
+        Confirm
+      </mdc-button>
+    </div>
+  </dialog>
+  <div
+    class="box station-login"
+    data-testid="station-login-widget"
+  >
+    <section
+      class="section-box"
+    >
+      <mdc-text
+        data-testid="station-login-label"
+        tagname="span"
+        type="body-large-bold"
+      >
+        Set your interaction preferences
+      </mdc-text>
+      <div>
+        <div
+          id="agent-login-label"
+        >
+          <mdc-text
+            data-testid="station-login-label"
+            tagname="p"
+            type="body-midsize-regular"
+          >
+            Handle calls using
+          </mdc-text>
+          <mdc-icon
+            aria-describedby="agent-login-label-tooltip"
+            data-testid="station-login-icon"
+            id="agent-login-info-badge"
+            name="info-badge-filled"
+          />
+          <mdc-tooltip
+            append-to=""
+            color="contrast"
+            data-testid="station-login-tooltip"
+            delay="0,0"
+            disable-aria-expanded=""
+            flip=""
+            hide-on-blur=""
+            hide-on-escape=""
+            id="agent-login-label-tooltip"
+            offset="4"
+            placement="top"
+            role="tooltip"
+            show-arrow=""
+            style="z-index: 1000;"
+            tooltip-type="description"
+            trigger="mouseenter focusin"
+            triggerid="agent-login-info-badge"
+            z-index="1000"
+          >
+            <mdc-text
+              class="agent-login-popover"
+              data-testid="station-login-label"
+              tagname="div"
+              type="body-large-regular"
+            >
+              This is your preferred method for receiving and making calls. Choose between your phone number, extension (if available), or your web browser.
+            </mdc-text>
+          </mdc-tooltip>
+        </div>
+        <div>
+          <mdc-select
+            class="station-login-select"
+            data-testid="login-option-select"
+            help-text-type="default"
+            name="login-option"
+            value="EXTENSION"
+          >
+            <mdc-option
+              aria-disabled="false"
+              aria-selected="false"
+              data-testid="login-option-Dial Number"
+              tabindex="0"
+              value="AGENT_DN"
+              variant="inset-rectangle"
+            >
+              Dial Number
+            </mdc-option>
+            <mdc-option
+              aria-disabled="false"
+              aria-selected="true"
+              data-testid="login-option-Extension"
+              selected=""
+              tabindex="-1"
+              value="EXTENSION"
+              variant="inset-rectangle"
+            >
+              Extension
+            </mdc-option>
+            <mdc-option
+              aria-disabled="false"
+              aria-selected="false"
+              data-testid="login-option-Desktop"
+              tabindex="-1"
+              value="BROWSER"
+              variant="inset-rectangle"
+            >
+              Desktop
+            </mdc-option>
+          </mdc-select>
+        </div>
+      </div>
+      <mdc-input
+        data-testid="dial-number-input"
+        label="Extension"
+        name=""
+        value=""
+      />
+      <div
+        class="select-container"
+      >
+        <mdc-select
+          class="station-login-select"
+          data-testid="teams-select-dropdown"
+          help-text-type="default"
+          label="Your Team"
+          name="teams-dropdown"
+        >
+          <mdc-option
+            aria-disabled="false"
+            aria-selected="true"
+            data-testid="teams-dropdown-Team A"
+            selected=""
+            tabindex="0"
+            value="team123"
+            variant="inset-rectangle"
+          >
+            Team A
+          </mdc-option>
+          <mdc-option
+            aria-disabled="false"
+            aria-selected="false"
+            data-testid="teams-dropdown-Team B"
+            tabindex="0"
+            value="team456"
+            variant="inset-rectangle"
+          >
+            Team B
+          </mdc-option>
+        </mdc-select>
+      </div>
+      <div
+        class="btn-container"
+      >
+        <mdc-button
+          class="white-button"
+          color="default"
+          data-testid="sign-out-button"
+          role="button"
+          size="32"
+          tabindex="0"
+          type="button"
+          variant="secondary"
+        >
+          Sign Out
+        </mdc-button>
+      </div>
+    </section>
+  </div>
+</div>
+`;
+
+exports[`Station Login Component Actions SignOut Modal Popup show signOut modal when onCCSignOut is present and sign out is clicked 1`] = `
+<div>
+  <dialog
+    class="modal"
+    data-testid="multi-sign-in-modal"
+  >
+    <h2>
+      Multiple Sign In Alert
+    </h2>
+    <p>
+      You are signed in to the Desktop in multiple application instances. Click Continue to proceed with the Desktop in this application instance. Else, close this window.
+    </p>
+    <div
+      class="modal-content"
+    >
+      <button
+        data-testid="ContinueButton"
+        id="ContinueButton"
+      >
+        Continue
+      </button>
+    </div>
+  </dialog>
+  <dialog
+    class="cc-logout-modal"
+    data-testid="cc-logout-modal"
+  >
+    <mdc-text
+      class="modal-text"
+      tagname="h2"
+      type="body-large-bold"
+    >
+      Sign out of Contact Center
+    </mdc-text>
+    <mdc-text
+      class="modal-text"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      Are you sure you want to sign out?
+    </mdc-text>
+    <div
+      class="cc-logout-modal-content"
+    >
+      <mdc-button
+        class="white-button"
+        color="default"
+        data-testid="cc-cancel-button"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="secondary"
+      >
+        Cancel
+      </mdc-button>
+      <mdc-button
+        color="default"
+        data-testid="cc-logout-button"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="primary"
+      >
+        Sign Out
+      </mdc-button>
+    </div>
+  </dialog>
+  <dialog
+    class="cc-logout-modal"
+    data-testid="interaction-confirmation-dialog"
+  >
+    <div
+      class="modal-header"
+      style="display: flex; justify-content: space-between; align-items: center;"
+    >
+      <mdc-text
+        class="modal-text"
+        tagname="h2"
+        type="body-large-bold"
+      >
+        Confirm interaction preference changes
+      </mdc-text>
+    </div>
+    <div
+      class="cc-logout-modal-content"
+    >
+      <mdc-button
+        aria-label="Close"
+        class="cancelSaveLoginOptions"
+        color="default"
+        data-btn-type="pill-with-icon"
+        postfix-icon=""
+        prefix-icon="cancel-bold"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="tertiary"
+      >
+        Cancel
+      </mdc-button>
+      <mdc-button
+        color="default"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="primary"
+      >
+        Confirm
+      </mdc-button>
+    </div>
+  </dialog>
+  <div
+    class="box station-login"
+    data-testid="station-login-widget"
+  >
+    <section
+      class="section-box"
+    >
+      <mdc-text
+        data-testid="station-login-label"
+        tagname="span"
+        type="body-large-bold"
+      >
+        Set your interaction preferences
+      </mdc-text>
+      <div>
+        <div
+          id="agent-login-label"
+        >
+          <mdc-text
+            data-testid="station-login-label"
+            tagname="p"
+            type="body-midsize-regular"
+          >
+            Handle calls using
+          </mdc-text>
+          <mdc-icon
+            aria-describedby="agent-login-label-tooltip"
+            data-testid="station-login-icon"
+            id="agent-login-info-badge"
+            name="info-badge-filled"
+          />
+          <mdc-tooltip
+            append-to=""
+            color="contrast"
+            data-testid="station-login-tooltip"
+            delay="0,0"
+            disable-aria-expanded=""
+            flip=""
+            hide-on-blur=""
+            hide-on-escape=""
+            id="agent-login-label-tooltip"
+            offset="4"
+            placement="top"
+            role="tooltip"
+            show-arrow=""
+            style="z-index: 1000;"
+            tooltip-type="description"
+            trigger="mouseenter focusin"
+            triggerid="agent-login-info-badge"
+            z-index="1000"
+          >
+            <mdc-text
+              class="agent-login-popover"
+              data-testid="station-login-label"
+              tagname="div"
+              type="body-large-regular"
+            >
+              This is your preferred method for receiving and making calls. Choose between your phone number, extension (if available), or your web browser.
+            </mdc-text>
+          </mdc-tooltip>
+        </div>
+        <div>
+          <mdc-select
+            class="station-login-select"
+            data-testid="login-option-select"
+            help-text-type="default"
+            name="login-option"
+            value="EXTENSION"
+          >
+            <mdc-option
+              aria-disabled="false"
+              aria-selected="false"
+              data-testid="login-option-Dial Number"
+              tabindex="0"
+              value="AGENT_DN"
+              variant="inset-rectangle"
+            >
+              Dial Number
+            </mdc-option>
+            <mdc-option
+              aria-disabled="false"
+              aria-selected="true"
+              data-testid="login-option-Extension"
+              selected=""
+              tabindex="-1"
+              value="EXTENSION"
+              variant="inset-rectangle"
+            >
+              Extension
+            </mdc-option>
+            <mdc-option
+              aria-disabled="false"
+              aria-selected="false"
+              data-testid="login-option-Desktop"
+              tabindex="-1"
+              value="BROWSER"
+              variant="inset-rectangle"
+            >
+              Desktop
+            </mdc-option>
+          </mdc-select>
+        </div>
+      </div>
+      <mdc-input
+        data-testid="dial-number-input"
+        label="Extension"
+        name=""
+        value=""
+      />
+      <div
+        class="select-container"
+      >
+        <mdc-select
+          class="station-login-select"
+          data-testid="teams-select-dropdown"
+          help-text-type="default"
+          label="Your Team"
+          name="teams-dropdown"
+        >
+          <mdc-option
+            aria-disabled="false"
+            aria-selected="true"
+            data-testid="teams-dropdown-Team A"
+            selected=""
+            tabindex="0"
+            value="team123"
+            variant="inset-rectangle"
+          >
+            Team A
+          </mdc-option>
+          <mdc-option
+            aria-disabled="false"
+            aria-selected="false"
+            data-testid="teams-dropdown-Team B"
+            tabindex="0"
+            value="team456"
+            variant="inset-rectangle"
+          >
+            Team B
+          </mdc-option>
+        </mdc-select>
+      </div>
+      <div
+        class="btn-container"
+      >
+        <mdc-button
+          class="white-button"
+          color="default"
+          data-testid="sign-out-button"
+          role="button"
+          size="32"
+          tabindex="0"
+          type="button"
+          variant="secondary"
+        >
+          Sign Out
+        </mdc-button>
+      </div>
+    </section>
+  </div>
+</div>
+`;
+
+exports[`Station Login Component Actions SignOut Modal Popup show signOut modal when onCCSignOut is present and sign out is clicked 2`] = `
+<div>
+  <dialog
+    class="modal"
+    data-testid="multi-sign-in-modal"
+  >
+    <h2>
+      Multiple Sign In Alert
+    </h2>
+    <p>
+      You are signed in to the Desktop in multiple application instances. Click Continue to proceed with the Desktop in this application instance. Else, close this window.
+    </p>
+    <div
+      class="modal-content"
+    >
+      <button
+        data-testid="ContinueButton"
+        id="ContinueButton"
+      >
+        Continue
+      </button>
+    </div>
+  </dialog>
+  <dialog
+    class="cc-logout-modal"
+    data-testid="cc-logout-modal"
+  >
+    <mdc-text
+      class="modal-text"
+      tagname="h2"
+      type="body-large-bold"
+    >
+      Sign out of Contact Center
+    </mdc-text>
+    <mdc-text
+      class="modal-text"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      Are you sure you want to sign out?
+    </mdc-text>
+    <div
+      class="cc-logout-modal-content"
+    >
+      <mdc-button
+        class="white-button"
+        color="default"
+        data-testid="cc-cancel-button"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="secondary"
+      >
+        Cancel
+      </mdc-button>
+      <mdc-button
+        color="default"
+        data-testid="cc-logout-button"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="primary"
+      >
+        Sign Out
+      </mdc-button>
+    </div>
+  </dialog>
+  <dialog
+    class="cc-logout-modal"
+    data-testid="interaction-confirmation-dialog"
+  >
+    <div
+      class="modal-header"
+      style="display: flex; justify-content: space-between; align-items: center;"
+    >
+      <mdc-text
+        class="modal-text"
+        tagname="h2"
+        type="body-large-bold"
+      >
+        Confirm interaction preference changes
+      </mdc-text>
+    </div>
+    <div
+      class="cc-logout-modal-content"
+    >
+      <mdc-button
+        aria-label="Close"
+        class="cancelSaveLoginOptions"
+        color="default"
+        data-btn-type="pill-with-icon"
+        postfix-icon=""
+        prefix-icon="cancel-bold"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="tertiary"
+      >
+        Cancel
+      </mdc-button>
+      <mdc-button
+        color="default"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="primary"
+      >
+        Confirm
+      </mdc-button>
+    </div>
+  </dialog>
+  <div
+    class="box station-login"
+    data-testid="station-login-widget"
+  >
+    <section
+      class="section-box"
+    >
+      <mdc-text
+        data-testid="station-login-label"
+        tagname="span"
+        type="body-large-bold"
+      >
+        Set your interaction preferences
+      </mdc-text>
+      <div>
+        <div
+          id="agent-login-label"
+        >
+          <mdc-text
+            data-testid="station-login-label"
+            tagname="p"
+            type="body-midsize-regular"
+          >
+            Handle calls using
+          </mdc-text>
+          <mdc-icon
+            aria-describedby="agent-login-label-tooltip"
+            data-testid="station-login-icon"
+            id="agent-login-info-badge"
+            name="info-badge-filled"
+          />
+          <mdc-tooltip
+            append-to=""
+            color="contrast"
+            data-testid="station-login-tooltip"
+            delay="0,0"
+            disable-aria-expanded=""
+            flip=""
+            hide-on-blur=""
+            hide-on-escape=""
+            id="agent-login-label-tooltip"
+            offset="4"
+            placement="top"
+            role="tooltip"
+            show-arrow=""
+            style="z-index: 1000;"
+            tooltip-type="description"
+            trigger="mouseenter focusin"
+            triggerid="agent-login-info-badge"
+            z-index="1000"
+          >
+            <mdc-text
+              class="agent-login-popover"
+              data-testid="station-login-label"
+              tagname="div"
+              type="body-large-regular"
+            >
+              This is your preferred method for receiving and making calls. Choose between your phone number, extension (if available), or your web browser.
+            </mdc-text>
+          </mdc-tooltip>
+        </div>
+        <div>
+          <mdc-select
+            class="station-login-select"
+            data-testid="login-option-select"
+            help-text-type="default"
+            name="login-option"
+            value="EXTENSION"
+          >
+            <mdc-option
+              aria-disabled="false"
+              aria-selected="false"
+              data-testid="login-option-Dial Number"
+              tabindex="0"
+              value="AGENT_DN"
+              variant="inset-rectangle"
+            >
+              Dial Number
+            </mdc-option>
+            <mdc-option
+              aria-disabled="false"
+              aria-selected="true"
+              data-testid="login-option-Extension"
+              selected=""
+              tabindex="-1"
+              value="EXTENSION"
+              variant="inset-rectangle"
+            >
+              Extension
+            </mdc-option>
+            <mdc-option
+              aria-disabled="false"
+              aria-selected="false"
+              data-testid="login-option-Desktop"
+              tabindex="-1"
+              value="BROWSER"
+              variant="inset-rectangle"
+            >
+              Desktop
+            </mdc-option>
+          </mdc-select>
+        </div>
+      </div>
+      <mdc-input
+        data-testid="dial-number-input"
+        label="Extension"
+        name=""
+        value=""
+      />
+      <div
+        class="select-container"
+      >
+        <mdc-select
+          class="station-login-select"
+          data-testid="teams-select-dropdown"
+          help-text-type="default"
+          label="Your Team"
+          name="teams-dropdown"
+        >
+          <mdc-option
+            aria-disabled="false"
+            aria-selected="true"
+            data-testid="teams-dropdown-Team A"
+            selected=""
+            tabindex="0"
+            value="team123"
+            variant="inset-rectangle"
+          >
+            Team A
+          </mdc-option>
+          <mdc-option
+            aria-disabled="false"
+            aria-selected="false"
+            data-testid="teams-dropdown-Team B"
+            tabindex="0"
+            value="team456"
+            variant="inset-rectangle"
+          >
+            Team B
+          </mdc-option>
+        </mdc-select>
+      </div>
+      <div
+        class="btn-container"
+      >
+        <mdc-button
+          class="white-button"
+          color="default"
+          data-testid="sign-out-button"
+          role="button"
+          size="32"
+          tabindex="0"
+          type="button"
+          variant="secondary"
+        >
+          Sign Out
+        </mdc-button>
+      </div>
+    </section>
+  </div>
+</div>
+`;
+
+exports[`Station Login Component Actions calls handleDNInputChanged with correct arguments when number is added 1`] = `
+<div>
+  <dialog
+    class="modal"
+    data-testid="multi-sign-in-modal"
+  >
+    <h2>
+      Multiple Sign In Alert
+    </h2>
+    <p>
+      You are signed in to the Desktop in multiple application instances. Click Continue to proceed with the Desktop in this application instance. Else, close this window.
+    </p>
+    <div
+      class="modal-content"
+    >
+      <button
+        data-testid="ContinueButton"
+        id="ContinueButton"
+      >
+        Continue
+      </button>
+    </div>
+  </dialog>
+  <dialog
+    class="cc-logout-modal"
+    data-testid="cc-logout-modal"
+  >
+    <mdc-text
+      class="modal-text"
+      tagname="h2"
+      type="body-large-bold"
+    >
+      Sign out of Contact Center
+    </mdc-text>
+    <mdc-text
+      class="modal-text"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      Are you sure you want to sign out?
+    </mdc-text>
+    <div
+      class="cc-logout-modal-content"
+    >
+      <mdc-button
+        class="white-button"
+        color="default"
+        data-testid="cc-cancel-button"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="secondary"
+      >
+        Cancel
+      </mdc-button>
+      <mdc-button
+        color="default"
+        data-testid="cc-logout-button"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="primary"
+      >
+        Sign Out
+      </mdc-button>
+    </div>
+  </dialog>
+  <dialog
+    class="cc-logout-modal"
+    data-testid="interaction-confirmation-dialog"
+  >
+    <div
+      class="modal-header"
+      style="display: flex; justify-content: space-between; align-items: center;"
+    >
+      <mdc-text
+        class="modal-text"
+        tagname="h2"
+        type="body-large-bold"
+      >
+        Confirm interaction preference changes
+      </mdc-text>
+    </div>
+    <div
+      class="cc-logout-modal-content"
+    >
+      <mdc-button
+        aria-label="Close"
+        class="cancelSaveLoginOptions"
+        color="default"
+        data-btn-type="pill-with-icon"
+        postfix-icon=""
+        prefix-icon="cancel-bold"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="tertiary"
+      >
+        Cancel
+      </mdc-button>
+      <mdc-button
+        color="default"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="primary"
+      >
+        Confirm
+      </mdc-button>
+    </div>
+  </dialog>
+  <div
+    class="box station-login"
+    data-testid="station-login-widget"
+  >
+    <section
+      class="section-box"
+    >
+      <mdc-text
+        data-testid="station-login-label"
+        tagname="span"
+        type="body-large-bold"
+      >
+        Set your interaction preferences
+      </mdc-text>
+      <div>
+        <div
+          id="agent-login-label"
+        >
+          <mdc-text
+            data-testid="station-login-label"
+            tagname="p"
+            type="body-midsize-regular"
+          >
+            Handle calls using
+          </mdc-text>
+          <mdc-icon
+            aria-describedby="agent-login-label-tooltip"
+            data-testid="station-login-icon"
+            id="agent-login-info-badge"
+            name="info-badge-filled"
+          />
+          <mdc-tooltip
+            append-to=""
+            color="contrast"
+            data-testid="station-login-tooltip"
+            delay="0,0"
+            disable-aria-expanded=""
+            flip=""
+            hide-on-blur=""
+            hide-on-escape=""
+            id="agent-login-label-tooltip"
+            offset="4"
+            placement="top"
+            role="tooltip"
+            show-arrow=""
+            style="z-index: 1000;"
+            tooltip-type="description"
+            trigger="mouseenter focusin"
+            triggerid="agent-login-info-badge"
+            z-index="1000"
+          >
+            <mdc-text
+              class="agent-login-popover"
+              data-testid="station-login-label"
+              tagname="div"
+              type="body-large-regular"
+            >
+              This is your preferred method for receiving and making calls. Choose between your phone number, extension (if available), or your web browser.
+            </mdc-text>
+          </mdc-tooltip>
+        </div>
+        <div>
+          <mdc-select
+            class="station-login-select"
+            data-testid="login-option-select"
+            help-text-type="default"
+            name="login-option"
+            value="EXTENSION"
+          >
+            <mdc-option
+              aria-disabled="false"
+              aria-selected="false"
+              data-testid="login-option-Dial Number"
+              tabindex="0"
+              value="AGENT_DN"
+              variant="inset-rectangle"
+            >
+              Dial Number
+            </mdc-option>
+            <mdc-option
+              aria-disabled="false"
+              aria-selected="true"
+              data-testid="login-option-Extension"
+              selected=""
+              tabindex="-1"
+              value="EXTENSION"
+              variant="inset-rectangle"
+            >
+              Extension
+            </mdc-option>
+            <mdc-option
+              aria-disabled="false"
+              aria-selected="false"
+              data-testid="login-option-Desktop"
+              tabindex="-1"
+              value="BROWSER"
+              variant="inset-rectangle"
+            >
+              Desktop
+            </mdc-option>
+          </mdc-select>
+        </div>
+      </div>
+      <mdc-input
+        data-testid="dial-number-input"
+        label="Extension"
+        name=""
+        value=""
+      />
+      <div
+        class="select-container"
+      >
+        <mdc-select
+          class="station-login-select"
+          data-testid="teams-select-dropdown"
+          help-text-type="default"
+          label="Your Team"
+          name="teams-dropdown"
+        >
+          <mdc-option
+            aria-disabled="false"
+            aria-selected="true"
+            data-testid="teams-dropdown-Team A"
+            selected=""
+            tabindex="0"
+            value="team123"
+            variant="inset-rectangle"
+          >
+            Team A
+          </mdc-option>
+          <mdc-option
+            aria-disabled="false"
+            aria-selected="false"
+            data-testid="teams-dropdown-Team B"
+            tabindex="0"
+            value="team456"
+            variant="inset-rectangle"
+          >
+            Team B
+          </mdc-option>
+        </mdc-select>
+      </div>
+      <div
+        class="btn-container"
+      >
+        <mdc-button
+          color="default"
           data-testid="login-button"
+          role="button"
+          size="32"
+          tabindex="0"
+          type="button"
+          variant="primary"
         >
           Save & Continue
         </mdc-button>
         <mdc-button
           class="white-button"
+          color="default"
           data-testid="sign-out-button"
+          role="button"
+          size="32"
+          tabindex="0"
+          type="button"
+          variant="secondary"
         >
           Sign Out
         </mdc-button>
@@ -653,11 +2235,11 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions should clo
 </div>
 `;
 
-exports[`StationLoginComponent Snapshot Actions Login buttons actions should open modal if showMultipleLoginAlert is true and modalRef is set 1`] = `
+exports[`Station Login Component Actions calls handleTeamSelectChanged utility function when team is changed 1`] = `
 <div>
   <dialog
     class="modal"
-    open=""
+    data-testid="multi-sign-in-modal"
   >
     <h2>
       Multiple Sign In Alert
@@ -682,11 +2264,15 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions should ope
   >
     <mdc-text
       class="modal-text"
+      tagname="h2"
+      type="body-large-bold"
     >
       Sign out of Contact Center
     </mdc-text>
     <mdc-text
       class="modal-text"
+      tagname="p"
+      type="body-midsize-regular"
     >
       Are you sure you want to sign out?
     </mdc-text>
@@ -695,14 +2281,72 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions should ope
     >
       <mdc-button
         class="white-button"
+        color="default"
         data-testid="cc-cancel-button"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="secondary"
       >
         Cancel
       </mdc-button>
       <mdc-button
+        color="default"
         data-testid="cc-logout-button"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="primary"
       >
         Sign Out
+      </mdc-button>
+    </div>
+  </dialog>
+  <dialog
+    class="cc-logout-modal"
+    data-testid="interaction-confirmation-dialog"
+  >
+    <div
+      class="modal-header"
+      style="display: flex; justify-content: space-between; align-items: center;"
+    >
+      <mdc-text
+        class="modal-text"
+        tagname="h2"
+        type="body-large-bold"
+      >
+        Confirm interaction preference changes
+      </mdc-text>
+    </div>
+    <div
+      class="cc-logout-modal-content"
+    >
+      <mdc-button
+        aria-label="Close"
+        class="cancelSaveLoginOptions"
+        color="default"
+        data-btn-type="pill-with-icon"
+        postfix-icon=""
+        prefix-icon="cancel-bold"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="tertiary"
+      >
+        Cancel
+      </mdc-button>
+      <mdc-button
+        color="default"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="primary"
+      >
+        Confirm
       </mdc-button>
     </div>
   </dialog>
@@ -715,6 +2359,8 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions should ope
     >
       <mdc-text
         data-testid="station-login-label"
+        tagname="span"
+        type="body-large-bold"
       >
         Set your interaction preferences
       </mdc-text>
@@ -724,19 +2370,42 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions should ope
         >
           <mdc-text
             data-testid="station-login-label"
+            tagname="p"
+            type="body-midsize-regular"
           >
             Handle calls using
           </mdc-text>
           <mdc-icon
+            aria-describedby="agent-login-label-tooltip"
             data-testid="station-login-icon"
             id="agent-login-info-badge"
+            name="info-badge-filled"
           />
           <mdc-tooltip
+            append-to=""
+            color="contrast"
             data-testid="station-login-tooltip"
+            delay="0,0"
+            disable-aria-expanded=""
+            flip=""
+            hide-on-blur=""
+            hide-on-escape=""
+            id="agent-login-label-tooltip"
+            offset="4"
+            placement="top"
+            role="tooltip"
+            show-arrow=""
+            style="z-index: 1000;"
+            tooltip-type="description"
+            trigger="mouseenter focusin"
+            triggerid="agent-login-info-badge"
+            z-index="1000"
           >
             <mdc-text
               class="agent-login-popover"
               data-testid="station-login-label"
+              tagname="div"
+              type="body-large-regular"
             >
               This is your preferred method for receiving and making calls. Choose between your phone number, extension (if available), or your web browser.
             </mdc-text>
@@ -746,18 +2415,28 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions should ope
           <mdc-select
             class="station-login-select"
             data-testid="login-option-select"
+            help-text-type="default"
+            name="login-option"
+            value="EXTENSION"
           >
             <mdc-option
               aria-disabled="false"
               aria-selected="false"
               data-testid="login-option-Dial Number"
+              tabindex="0"
+              value="AGENT_DN"
+              variant="inset-rectangle"
             >
               Dial Number
             </mdc-option>
             <mdc-option
               aria-disabled="false"
-              aria-selected="false"
+              aria-selected="true"
               data-testid="login-option-Extension"
+              selected=""
+              tabindex="-1"
+              value="EXTENSION"
+              variant="inset-rectangle"
             >
               Extension
             </mdc-option>
@@ -765,6 +2444,9 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions should ope
               aria-disabled="false"
               aria-selected="false"
               data-testid="login-option-Desktop"
+              tabindex="-1"
+              value="BROWSER"
+              variant="inset-rectangle"
             >
               Desktop
             </mdc-option>
@@ -773,6 +2455,9 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions should ope
       </div>
       <mdc-input
         data-testid="dial-number-input"
+        label="Extension"
+        name=""
+        value=""
       />
       <div
         class="select-container"
@@ -780,11 +2465,18 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions should ope
         <mdc-select
           class="station-login-select"
           data-testid="teams-select-dropdown"
+          help-text-type="default"
+          label="Your Team"
+          name="teams-dropdown"
         >
           <mdc-option
             aria-disabled="false"
-            aria-selected="false"
+            aria-selected="true"
             data-testid="teams-dropdown-Team A"
+            selected=""
+            tabindex="0"
+            value="team123"
+            variant="inset-rectangle"
           >
             Team A
           </mdc-option>
@@ -792,6 +2484,9 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions should ope
             aria-disabled="false"
             aria-selected="false"
             data-testid="teams-dropdown-Team B"
+            tabindex="0"
+            value="team456"
+            variant="inset-rectangle"
           >
             Team B
           </mdc-option>
@@ -801,13 +2496,25 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions should ope
         class="btn-container"
       >
         <mdc-button
+          color="default"
           data-testid="login-button"
+          role="button"
+          size="32"
+          tabindex="0"
+          type="button"
+          variant="primary"
         >
           Save & Continue
         </mdc-button>
         <mdc-button
           class="white-button"
+          color="default"
           data-testid="sign-out-button"
+          role="button"
+          size="32"
+          tabindex="0"
+          type="button"
+          variant="secondary"
         >
           Sign Out
         </mdc-button>
@@ -817,10 +2524,11 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions should ope
 </div>
 `;
 
-exports[`StationLoginComponent Snapshot Actions Login buttons actions show signOut modal when onCCSignOut is present and cancel is clicked 1`] = `
+exports[`Station Login Component Rendering renders login failure when passed 1`] = `
 <div>
   <dialog
     class="modal"
+    data-testid="multi-sign-in-modal"
   >
     <h2>
       Multiple Sign In Alert
@@ -845,11 +2553,15 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions show signO
   >
     <mdc-text
       class="modal-text"
+      tagname="h2"
+      type="body-large-bold"
     >
       Sign out of Contact Center
     </mdc-text>
     <mdc-text
       class="modal-text"
+      tagname="p"
+      type="body-midsize-regular"
     >
       Are you sure you want to sign out?
     </mdc-text>
@@ -858,172 +2570,72 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions show signO
     >
       <mdc-button
         class="white-button"
+        color="default"
         data-testid="cc-cancel-button"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="secondary"
       >
         Cancel
       </mdc-button>
       <mdc-button
+        color="default"
         data-testid="cc-logout-button"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="primary"
       >
         Sign Out
       </mdc-button>
-    </div>
-  </dialog>
-  <div
-    class="box station-login"
-    data-testid="station-login-widget"
-  >
-    <section
-      class="section-box"
-    >
-      <mdc-text
-        data-testid="station-login-label"
-      >
-        Set your interaction preferences
-      </mdc-text>
-      <div>
-        <div
-          id="agent-login-label"
-        >
-          <mdc-text
-            data-testid="station-login-label"
-          >
-            Handle calls using
-          </mdc-text>
-          <mdc-icon
-            data-testid="station-login-icon"
-            id="agent-login-info-badge"
-          />
-          <mdc-tooltip
-            data-testid="station-login-tooltip"
-          >
-            <mdc-text
-              class="agent-login-popover"
-              data-testid="station-login-label"
-            >
-              This is your preferred method for receiving and making calls. Choose between your phone number, extension (if available), or your web browser.
-            </mdc-text>
-          </mdc-tooltip>
-        </div>
-        <div>
-          <mdc-select
-            class="station-login-select"
-            data-testid="login-option-select"
-          >
-            <mdc-option
-              aria-disabled="false"
-              aria-selected="false"
-              data-testid="login-option-Dial Number"
-            >
-              Dial Number
-            </mdc-option>
-            <mdc-option
-              aria-disabled="false"
-              aria-selected="false"
-              data-testid="login-option-Extension"
-            >
-              Extension
-            </mdc-option>
-            <mdc-option
-              aria-disabled="false"
-              aria-selected="false"
-              data-testid="login-option-Desktop"
-            >
-              Desktop
-            </mdc-option>
-          </mdc-select>
-        </div>
-      </div>
-      <mdc-input
-        data-testid="dial-number-input"
-      />
-      <div
-        class="select-container"
-      >
-        <mdc-select
-          class="station-login-select"
-          data-testid="teams-select-dropdown"
-        >
-          <mdc-option
-            aria-disabled="false"
-            aria-selected="false"
-            data-testid="teams-dropdown-Team A"
-          >
-            Team A
-          </mdc-option>
-          <mdc-option
-            aria-disabled="false"
-            aria-selected="false"
-            data-testid="teams-dropdown-Team B"
-          >
-            Team B
-          </mdc-option>
-        </mdc-select>
-      </div>
-      <div
-        class="btn-container"
-      >
-        <mdc-button
-          class="white-button"
-          data-testid="sign-out-button"
-        >
-          Sign Out
-        </mdc-button>
-      </div>
-    </section>
-  </div>
-</div>
-`;
-
-exports[`StationLoginComponent Snapshot Actions Login buttons actions show signOut modal when onCCSignOut is present and cancel is clicked 2`] = `
-<div>
-  <dialog
-    class="modal"
-  >
-    <h2>
-      Multiple Sign In Alert
-    </h2>
-    <p>
-      You are signed in to the Desktop in multiple application instances. Click Continue to proceed with the Desktop in this application instance. Else, close this window.
-    </p>
-    <div
-      class="modal-content"
-    >
-      <button
-        data-testid="ContinueButton"
-        id="ContinueButton"
-      >
-        Continue
-      </button>
     </div>
   </dialog>
   <dialog
     class="cc-logout-modal"
-    data-testid="cc-logout-modal"
+    data-testid="interaction-confirmation-dialog"
   >
-    <mdc-text
-      class="modal-text"
+    <div
+      class="modal-header"
+      style="display: flex; justify-content: space-between; align-items: center;"
     >
-      Sign out of Contact Center
-    </mdc-text>
-    <mdc-text
-      class="modal-text"
-    >
-      Are you sure you want to sign out?
-    </mdc-text>
+      <mdc-text
+        class="modal-text"
+        tagname="h2"
+        type="body-large-bold"
+      >
+        Confirm interaction preference changes
+      </mdc-text>
+    </div>
     <div
       class="cc-logout-modal-content"
     >
       <mdc-button
-        class="white-button"
-        data-testid="cc-cancel-button"
+        aria-label="Close"
+        class="cancelSaveLoginOptions"
+        color="default"
+        data-btn-type="pill-with-icon"
+        postfix-icon=""
+        prefix-icon="cancel-bold"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="tertiary"
       >
         Cancel
       </mdc-button>
       <mdc-button
-        data-testid="cc-logout-button"
+        color="default"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="primary"
       >
-        Sign Out
+        Confirm
       </mdc-button>
     </div>
   </dialog>
@@ -1036,6 +2648,8 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions show signO
     >
       <mdc-text
         data-testid="station-login-label"
+        tagname="span"
+        type="body-large-bold"
       >
         Set your interaction preferences
       </mdc-text>
@@ -1045,19 +2659,42 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions show signO
         >
           <mdc-text
             data-testid="station-login-label"
+            tagname="p"
+            type="body-midsize-regular"
           >
             Handle calls using
           </mdc-text>
           <mdc-icon
+            aria-describedby="agent-login-label-tooltip"
             data-testid="station-login-icon"
             id="agent-login-info-badge"
+            name="info-badge-filled"
           />
           <mdc-tooltip
+            append-to=""
+            color="contrast"
             data-testid="station-login-tooltip"
+            delay="0,0"
+            disable-aria-expanded=""
+            flip=""
+            hide-on-blur=""
+            hide-on-escape=""
+            id="agent-login-label-tooltip"
+            offset="4"
+            placement="top"
+            role="tooltip"
+            show-arrow=""
+            style="z-index: 1000;"
+            tooltip-type="description"
+            trigger="mouseenter focusin"
+            triggerid="agent-login-info-badge"
+            z-index="1000"
           >
             <mdc-text
               class="agent-login-popover"
               data-testid="station-login-label"
+              tagname="div"
+              type="body-large-regular"
             >
               This is your preferred method for receiving and making calls. Choose between your phone number, extension (if available), or your web browser.
             </mdc-text>
@@ -1067,18 +2704,28 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions show signO
           <mdc-select
             class="station-login-select"
             data-testid="login-option-select"
+            help-text-type="default"
+            name="login-option"
+            value="EXTENSION"
           >
             <mdc-option
               aria-disabled="false"
               aria-selected="false"
               data-testid="login-option-Dial Number"
+              tabindex="0"
+              value="AGENT_DN"
+              variant="inset-rectangle"
             >
               Dial Number
             </mdc-option>
             <mdc-option
               aria-disabled="false"
-              aria-selected="false"
+              aria-selected="true"
               data-testid="login-option-Extension"
+              selected=""
+              tabindex="-1"
+              value="EXTENSION"
+              variant="inset-rectangle"
             >
               Extension
             </mdc-option>
@@ -1086,6 +2733,9 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions show signO
               aria-disabled="false"
               aria-selected="false"
               data-testid="login-option-Desktop"
+              tabindex="-1"
+              value="BROWSER"
+              variant="inset-rectangle"
             >
               Desktop
             </mdc-option>
@@ -1094,6 +2744,9 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions show signO
       </div>
       <mdc-input
         data-testid="dial-number-input"
+        label="Extension"
+        name=""
+        value=""
       />
       <div
         class="select-container"
@@ -1101,11 +2754,18 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions show signO
         <mdc-select
           class="station-login-select"
           data-testid="teams-select-dropdown"
+          help-text-type="default"
+          label="Your Team"
+          name="teams-dropdown"
         >
           <mdc-option
             aria-disabled="false"
-            aria-selected="false"
+            aria-selected="true"
             data-testid="teams-dropdown-Team A"
+            selected=""
+            tabindex="0"
+            value="team123"
+            variant="inset-rectangle"
           >
             Team A
           </mdc-option>
@@ -1113,1291 +2773,9 @@ exports[`StationLoginComponent Snapshot Actions Login buttons actions show signO
             aria-disabled="false"
             aria-selected="false"
             data-testid="teams-dropdown-Team B"
-          >
-            Team B
-          </mdc-option>
-        </mdc-select>
-      </div>
-      <div
-        class="btn-container"
-      >
-        <mdc-button
-          class="white-button"
-          data-testid="sign-out-button"
-        >
-          Sign Out
-        </mdc-button>
-      </div>
-    </section>
-  </div>
-</div>
-`;
-
-exports[`StationLoginComponent Snapshot Actions Login buttons actions show signOut modal when onCCSignOut is present and sign out is clicked 1`] = `
-<div>
-  <dialog
-    class="modal"
-  >
-    <h2>
-      Multiple Sign In Alert
-    </h2>
-    <p>
-      You are signed in to the Desktop in multiple application instances. Click Continue to proceed with the Desktop in this application instance. Else, close this window.
-    </p>
-    <div
-      class="modal-content"
-    >
-      <button
-        data-testid="ContinueButton"
-        id="ContinueButton"
-      >
-        Continue
-      </button>
-    </div>
-  </dialog>
-  <dialog
-    class="cc-logout-modal"
-    data-testid="cc-logout-modal"
-  >
-    <mdc-text
-      class="modal-text"
-    >
-      Sign out of Contact Center
-    </mdc-text>
-    <mdc-text
-      class="modal-text"
-    >
-      Are you sure you want to sign out?
-    </mdc-text>
-    <div
-      class="cc-logout-modal-content"
-    >
-      <mdc-button
-        class="white-button"
-        data-testid="cc-cancel-button"
-      >
-        Cancel
-      </mdc-button>
-      <mdc-button
-        data-testid="cc-logout-button"
-      >
-        Sign Out
-      </mdc-button>
-    </div>
-  </dialog>
-  <div
-    class="box station-login"
-    data-testid="station-login-widget"
-  >
-    <section
-      class="section-box"
-    >
-      <mdc-text
-        data-testid="station-login-label"
-      >
-        Set your interaction preferences
-      </mdc-text>
-      <div>
-        <div
-          id="agent-login-label"
-        >
-          <mdc-text
-            data-testid="station-login-label"
-          >
-            Handle calls using
-          </mdc-text>
-          <mdc-icon
-            data-testid="station-login-icon"
-            id="agent-login-info-badge"
-          />
-          <mdc-tooltip
-            data-testid="station-login-tooltip"
-          >
-            <mdc-text
-              class="agent-login-popover"
-              data-testid="station-login-label"
-            >
-              This is your preferred method for receiving and making calls. Choose between your phone number, extension (if available), or your web browser.
-            </mdc-text>
-          </mdc-tooltip>
-        </div>
-        <div>
-          <mdc-select
-            class="station-login-select"
-            data-testid="login-option-select"
-          >
-            <mdc-option
-              aria-disabled="false"
-              aria-selected="false"
-              data-testid="login-option-Dial Number"
-            >
-              Dial Number
-            </mdc-option>
-            <mdc-option
-              aria-disabled="false"
-              aria-selected="false"
-              data-testid="login-option-Extension"
-            >
-              Extension
-            </mdc-option>
-            <mdc-option
-              aria-disabled="false"
-              aria-selected="false"
-              data-testid="login-option-Desktop"
-            >
-              Desktop
-            </mdc-option>
-          </mdc-select>
-        </div>
-      </div>
-      <mdc-input
-        data-testid="dial-number-input"
-      />
-      <div
-        class="select-container"
-      >
-        <mdc-select
-          class="station-login-select"
-          data-testid="teams-select-dropdown"
-        >
-          <mdc-option
-            aria-disabled="false"
-            aria-selected="false"
-            data-testid="teams-dropdown-Team A"
-          >
-            Team A
-          </mdc-option>
-          <mdc-option
-            aria-disabled="false"
-            aria-selected="false"
-            data-testid="teams-dropdown-Team B"
-          >
-            Team B
-          </mdc-option>
-        </mdc-select>
-      </div>
-      <div
-        class="btn-container"
-      >
-        <mdc-button
-          class="white-button"
-          data-testid="sign-out-button"
-        >
-          Sign Out
-        </mdc-button>
-      </div>
-    </section>
-  </div>
-</div>
-`;
-
-exports[`StationLoginComponent Snapshot Actions Login buttons actions show signOut modal when onCCSignOut is present and sign out is clicked 2`] = `
-<div>
-  <dialog
-    class="modal"
-  >
-    <h2>
-      Multiple Sign In Alert
-    </h2>
-    <p>
-      You are signed in to the Desktop in multiple application instances. Click Continue to proceed with the Desktop in this application instance. Else, close this window.
-    </p>
-    <div
-      class="modal-content"
-    >
-      <button
-        data-testid="ContinueButton"
-        id="ContinueButton"
-      >
-        Continue
-      </button>
-    </div>
-  </dialog>
-  <dialog
-    class="cc-logout-modal"
-    data-testid="cc-logout-modal"
-  >
-    <mdc-text
-      class="modal-text"
-    >
-      Sign out of Contact Center
-    </mdc-text>
-    <mdc-text
-      class="modal-text"
-    >
-      Are you sure you want to sign out?
-    </mdc-text>
-    <div
-      class="cc-logout-modal-content"
-    >
-      <mdc-button
-        class="white-button"
-        data-testid="cc-cancel-button"
-      >
-        Cancel
-      </mdc-button>
-      <mdc-button
-        data-testid="cc-logout-button"
-      >
-        Sign Out
-      </mdc-button>
-    </div>
-  </dialog>
-  <div
-    class="box station-login"
-    data-testid="station-login-widget"
-  >
-    <section
-      class="section-box"
-    >
-      <mdc-text
-        data-testid="station-login-label"
-      >
-        Set your interaction preferences
-      </mdc-text>
-      <div>
-        <div
-          id="agent-login-label"
-        >
-          <mdc-text
-            data-testid="station-login-label"
-          >
-            Handle calls using
-          </mdc-text>
-          <mdc-icon
-            data-testid="station-login-icon"
-            id="agent-login-info-badge"
-          />
-          <mdc-tooltip
-            data-testid="station-login-tooltip"
-          >
-            <mdc-text
-              class="agent-login-popover"
-              data-testid="station-login-label"
-            >
-              This is your preferred method for receiving and making calls. Choose between your phone number, extension (if available), or your web browser.
-            </mdc-text>
-          </mdc-tooltip>
-        </div>
-        <div>
-          <mdc-select
-            class="station-login-select"
-            data-testid="login-option-select"
-          >
-            <mdc-option
-              aria-disabled="false"
-              aria-selected="false"
-              data-testid="login-option-Dial Number"
-            >
-              Dial Number
-            </mdc-option>
-            <mdc-option
-              aria-disabled="false"
-              aria-selected="false"
-              data-testid="login-option-Extension"
-            >
-              Extension
-            </mdc-option>
-            <mdc-option
-              aria-disabled="false"
-              aria-selected="false"
-              data-testid="login-option-Desktop"
-            >
-              Desktop
-            </mdc-option>
-          </mdc-select>
-        </div>
-      </div>
-      <mdc-input
-        data-testid="dial-number-input"
-      />
-      <div
-        class="select-container"
-      >
-        <mdc-select
-          class="station-login-select"
-          data-testid="teams-select-dropdown"
-        >
-          <mdc-option
-            aria-disabled="false"
-            aria-selected="false"
-            data-testid="teams-dropdown-Team A"
-          >
-            Team A
-          </mdc-option>
-          <mdc-option
-            aria-disabled="false"
-            aria-selected="false"
-            data-testid="teams-dropdown-Team B"
-          >
-            Team B
-          </mdc-option>
-        </mdc-select>
-      </div>
-      <div
-        class="btn-container"
-      >
-        <mdc-button
-          class="white-button"
-          data-testid="sign-out-button"
-        >
-          Sign Out
-        </mdc-button>
-      </div>
-    </section>
-  </div>
-</div>
-`;
-
-exports[`StationLoginComponent Snapshot Actions Teams Dropdown calls setTeam, setSelectedTeamId and setTeamId when team is changed 1`] = `
-<div>
-  <dialog
-    class="modal"
-  >
-    <h2>
-      Multiple Sign In Alert
-    </h2>
-    <p>
-      You are signed in to the Desktop in multiple application instances. Click Continue to proceed with the Desktop in this application instance. Else, close this window.
-    </p>
-    <div
-      class="modal-content"
-    >
-      <button
-        data-testid="ContinueButton"
-        id="ContinueButton"
-      >
-        Continue
-      </button>
-    </div>
-  </dialog>
-  <dialog
-    class="cc-logout-modal"
-    data-testid="cc-logout-modal"
-  >
-    <mdc-text
-      class="modal-text"
-    >
-      Sign out of Contact Center
-    </mdc-text>
-    <mdc-text
-      class="modal-text"
-    >
-      Are you sure you want to sign out?
-    </mdc-text>
-    <div
-      class="cc-logout-modal-content"
-    >
-      <mdc-button
-        class="white-button"
-        data-testid="cc-cancel-button"
-      >
-        Cancel
-      </mdc-button>
-      <mdc-button
-        data-testid="cc-logout-button"
-      >
-        Sign Out
-      </mdc-button>
-    </div>
-  </dialog>
-  <div
-    class="box station-login"
-    data-testid="station-login-widget"
-  >
-    <section
-      class="section-box"
-    >
-      <mdc-text
-        data-testid="station-login-label"
-      >
-        Set your interaction preferences
-      </mdc-text>
-      <div>
-        <div
-          id="agent-login-label"
-        >
-          <mdc-text
-            data-testid="station-login-label"
-          >
-            Handle calls using
-          </mdc-text>
-          <mdc-icon
-            data-testid="station-login-icon"
-            id="agent-login-info-badge"
-          />
-          <mdc-tooltip
-            data-testid="station-login-tooltip"
-          >
-            <mdc-text
-              class="agent-login-popover"
-              data-testid="station-login-label"
-            >
-              This is your preferred method for receiving and making calls. Choose between your phone number, extension (if available), or your web browser.
-            </mdc-text>
-          </mdc-tooltip>
-        </div>
-        <div>
-          <mdc-select
-            class="station-login-select"
-            data-testid="login-option-select"
-          >
-            <mdc-option
-              aria-disabled="false"
-              aria-selected="false"
-              data-testid="login-option-Dial Number"
-            >
-              Dial Number
-            </mdc-option>
-            <mdc-option
-              aria-disabled="false"
-              aria-selected="false"
-              data-testid="login-option-Extension"
-            >
-              Extension
-            </mdc-option>
-            <mdc-option
-              aria-disabled="false"
-              aria-selected="false"
-              data-testid="login-option-Desktop"
-            >
-              Desktop
-            </mdc-option>
-          </mdc-select>
-        </div>
-      </div>
-      <mdc-input
-        data-testid="dial-number-input"
-      />
-      <div
-        class="select-container"
-      >
-        <mdc-select
-          class="station-login-select"
-          data-testid="teams-select-dropdown"
-        >
-          <mdc-option
-            aria-disabled="false"
-            aria-selected="false"
-            data-testid="teams-dropdown-Team A"
-          >
-            Team A
-          </mdc-option>
-          <mdc-option
-            aria-disabled="false"
-            aria-selected="false"
-            data-testid="teams-dropdown-Team B"
-          >
-            Team B
-          </mdc-option>
-        </mdc-select>
-      </div>
-      <div
-        class="btn-container"
-      >
-        <mdc-button
-          data-testid="login-button"
-        >
-          Save & Continue
-        </mdc-button>
-        <mdc-button
-          class="white-button"
-          data-testid="sign-out-button"
-        >
-          Sign Out
-        </mdc-button>
-      </div>
-    </section>
-  </div>
-</div>
-`;
-
-exports[`StationLoginComponent Snapshot Actions Teams Dropdown shows correct selected team name 1`] = `
-<div>
-  <dialog
-    class="modal"
-  >
-    <h2>
-      Multiple Sign In Alert
-    </h2>
-    <p>
-      You are signed in to the Desktop in multiple application instances. Click Continue to proceed with the Desktop in this application instance. Else, close this window.
-    </p>
-    <div
-      class="modal-content"
-    >
-      <button
-        data-testid="ContinueButton"
-        id="ContinueButton"
-      >
-        Continue
-      </button>
-    </div>
-  </dialog>
-  <dialog
-    class="cc-logout-modal"
-    data-testid="cc-logout-modal"
-  >
-    <mdc-text
-      class="modal-text"
-    >
-      Sign out of Contact Center
-    </mdc-text>
-    <mdc-text
-      class="modal-text"
-    >
-      Are you sure you want to sign out?
-    </mdc-text>
-    <div
-      class="cc-logout-modal-content"
-    >
-      <mdc-button
-        class="white-button"
-        data-testid="cc-cancel-button"
-      >
-        Cancel
-      </mdc-button>
-      <mdc-button
-        data-testid="cc-logout-button"
-      >
-        Sign Out
-      </mdc-button>
-    </div>
-  </dialog>
-  <div
-    class="box station-login"
-    data-testid="station-login-widget"
-  >
-    <section
-      class="section-box"
-    >
-      <mdc-text
-        data-testid="station-login-label"
-      >
-        Set your interaction preferences
-      </mdc-text>
-      <div>
-        <div
-          id="agent-login-label"
-        >
-          <mdc-text
-            data-testid="station-login-label"
-          >
-            Handle calls using
-          </mdc-text>
-          <mdc-icon
-            data-testid="station-login-icon"
-            id="agent-login-info-badge"
-          />
-          <mdc-tooltip
-            data-testid="station-login-tooltip"
-          >
-            <mdc-text
-              class="agent-login-popover"
-              data-testid="station-login-label"
-            >
-              This is your preferred method for receiving and making calls. Choose between your phone number, extension (if available), or your web browser.
-            </mdc-text>
-          </mdc-tooltip>
-        </div>
-        <div>
-          <mdc-select
-            class="station-login-select"
-            data-testid="login-option-select"
-          >
-            <mdc-option
-              aria-disabled="false"
-              aria-selected="false"
-              data-testid="login-option-Dial Number"
-            >
-              Dial Number
-            </mdc-option>
-            <mdc-option
-              aria-disabled="false"
-              aria-selected="false"
-              data-testid="login-option-Extension"
-            >
-              Extension
-            </mdc-option>
-            <mdc-option
-              aria-disabled="false"
-              aria-selected="false"
-              data-testid="login-option-Desktop"
-            >
-              Desktop
-            </mdc-option>
-          </mdc-select>
-        </div>
-      </div>
-      <mdc-input
-        data-testid="dial-number-input"
-      />
-      <div
-        class="select-container"
-      >
-        <mdc-select
-          class="station-login-select"
-          data-testid="teams-select-dropdown"
-        >
-          <mdc-option
-            aria-disabled="false"
-            aria-selected="false"
-            data-testid="teams-dropdown-Team A"
-          >
-            Team A
-          </mdc-option>
-          <mdc-option
-            aria-disabled="false"
-            aria-selected="false"
-            data-testid="teams-dropdown-Team B"
-          >
-            Team B
-          </mdc-option>
-        </mdc-select>
-      </div>
-      <div
-        class="btn-container"
-      >
-        <mdc-button
-          data-testid="login-button"
-        >
-          Save & Continue
-        </mdc-button>
-        <mdc-button
-          class="white-button"
-          data-testid="sign-out-button"
-        >
-          Sign Out
-        </mdc-button>
-      </div>
-    </section>
-  </div>
-</div>
-`;
-
-exports[`StationLoginComponent Snapshot Rendering renders correctly and matches snapshot 1`] = `
-<div>
-  <dialog
-    class="modal"
-  >
-    <h2>
-      Multiple Sign In Alert
-    </h2>
-    <p>
-      You are signed in to the Desktop in multiple application instances. Click Continue to proceed with the Desktop in this application instance. Else, close this window.
-    </p>
-    <div
-      class="modal-content"
-    >
-      <button
-        data-testid="ContinueButton"
-        id="ContinueButton"
-      >
-        Continue
-      </button>
-    </div>
-  </dialog>
-  <dialog
-    class="cc-logout-modal"
-    data-testid="cc-logout-modal"
-  >
-    <mdc-text
-      class="modal-text"
-    >
-      Sign out of Contact Center
-    </mdc-text>
-    <mdc-text
-      class="modal-text"
-    >
-      Are you sure you want to sign out?
-    </mdc-text>
-    <div
-      class="cc-logout-modal-content"
-    >
-      <mdc-button
-        class="white-button"
-        data-testid="cc-cancel-button"
-      >
-        Cancel
-      </mdc-button>
-      <mdc-button
-        data-testid="cc-logout-button"
-      >
-        Sign Out
-      </mdc-button>
-    </div>
-  </dialog>
-  <div
-    class="box station-login"
-    data-testid="station-login-widget"
-  >
-    <section
-      class="section-box"
-    >
-      <mdc-text
-        data-testid="station-login-label"
-      >
-        Set your interaction preferences
-      </mdc-text>
-      <div>
-        <div
-          id="agent-login-label"
-        >
-          <mdc-text
-            data-testid="station-login-label"
-          >
-            Handle calls using
-          </mdc-text>
-          <mdc-icon
-            data-testid="station-login-icon"
-            id="agent-login-info-badge"
-          />
-          <mdc-tooltip
-            data-testid="station-login-tooltip"
-          >
-            <mdc-text
-              class="agent-login-popover"
-              data-testid="station-login-label"
-            >
-              This is your preferred method for receiving and making calls. Choose between your phone number, extension (if available), or your web browser.
-            </mdc-text>
-          </mdc-tooltip>
-        </div>
-        <div>
-          <mdc-select
-            class="station-login-select"
-            data-testid="login-option-select"
-          >
-            <mdc-option
-              aria-disabled="false"
-              aria-selected="false"
-              data-testid="login-option-Dial Number"
-            >
-              Dial Number
-            </mdc-option>
-            <mdc-option
-              aria-disabled="false"
-              aria-selected="false"
-              data-testid="login-option-Extension"
-            >
-              Extension
-            </mdc-option>
-            <mdc-option
-              aria-disabled="false"
-              aria-selected="false"
-              data-testid="login-option-Desktop"
-            >
-              Desktop
-            </mdc-option>
-          </mdc-select>
-        </div>
-      </div>
-      <mdc-input
-        data-testid="dial-number-input"
-      />
-      <div
-        class="select-container"
-      >
-        <mdc-select
-          class="station-login-select"
-          data-testid="teams-select-dropdown"
-        >
-          <mdc-option
-            aria-disabled="false"
-            aria-selected="false"
-            data-testid="teams-dropdown-Team A"
-          >
-            Team A
-          </mdc-option>
-          <mdc-option
-            aria-disabled="false"
-            aria-selected="false"
-            data-testid="teams-dropdown-Team B"
-          >
-            Team B
-          </mdc-option>
-        </mdc-select>
-      </div>
-      <div
-        class="btn-container"
-      >
-        <mdc-button
-          data-testid="login-button"
-        >
-          Save & Continue
-        </mdc-button>
-        <mdc-button
-          class="white-button"
-          data-testid="sign-out-button"
-        >
-          Sign Out
-        </mdc-button>
-      </div>
-    </section>
-  </div>
-</div>
-`;
-
-exports[`StationLoginComponent Snapshot Rendering renders correctly with agent logged in 1`] = `
-<div>
-  <dialog
-    class="modal"
-  >
-    <h2>
-      Multiple Sign In Alert
-    </h2>
-    <p>
-      You are signed in to the Desktop in multiple application instances. Click Continue to proceed with the Desktop in this application instance. Else, close this window.
-    </p>
-    <div
-      class="modal-content"
-    >
-      <button
-        data-testid="ContinueButton"
-        id="ContinueButton"
-      >
-        Continue
-      </button>
-    </div>
-  </dialog>
-  <dialog
-    class="cc-logout-modal"
-    data-testid="cc-logout-modal"
-  >
-    <mdc-text
-      class="modal-text"
-    >
-      Sign out of Contact Center
-    </mdc-text>
-    <mdc-text
-      class="modal-text"
-    >
-      Are you sure you want to sign out?
-    </mdc-text>
-    <div
-      class="cc-logout-modal-content"
-    >
-      <mdc-button
-        class="white-button"
-        data-testid="cc-cancel-button"
-      >
-        Cancel
-      </mdc-button>
-      <mdc-button
-        data-testid="cc-logout-button"
-      >
-        Sign Out
-      </mdc-button>
-    </div>
-  </dialog>
-  <div
-    class="box station-login"
-    data-testid="station-login-widget"
-  >
-    <section
-      class="section-box"
-    >
-      <mdc-text
-        data-testid="station-login-label"
-      >
-        Set your interaction preferences
-      </mdc-text>
-      <div>
-        <div
-          id="agent-login-label"
-        >
-          <mdc-text
-            data-testid="station-login-label"
-          >
-            Handle calls using
-          </mdc-text>
-          <mdc-icon
-            data-testid="station-login-icon"
-            id="agent-login-info-badge"
-          />
-          <mdc-tooltip
-            data-testid="station-login-tooltip"
-          >
-            <mdc-text
-              class="agent-login-popover"
-              data-testid="station-login-label"
-            >
-              This is your preferred method for receiving and making calls. Choose between your phone number, extension (if available), or your web browser.
-            </mdc-text>
-          </mdc-tooltip>
-        </div>
-        <div>
-          <mdc-select
-            class="station-login-select"
-            data-testid="login-option-select"
-          >
-            <mdc-option
-              aria-disabled="false"
-              aria-selected="false"
-              data-testid="login-option-Dial Number"
-            >
-              Dial Number
-            </mdc-option>
-            <mdc-option
-              aria-disabled="false"
-              aria-selected="false"
-              data-testid="login-option-Extension"
-            >
-              Extension
-            </mdc-option>
-            <mdc-option
-              aria-disabled="false"
-              aria-selected="false"
-              data-testid="login-option-Desktop"
-            >
-              Desktop
-            </mdc-option>
-          </mdc-select>
-        </div>
-      </div>
-      <mdc-input
-        data-testid="dial-number-input"
-      />
-      <div
-        class="select-container"
-      >
-        <mdc-select
-          class="station-login-select"
-          data-testid="teams-select-dropdown"
-        >
-          <mdc-option
-            aria-disabled="false"
-            aria-selected="false"
-            data-testid="teams-dropdown-Team A"
-          >
-            Team A
-          </mdc-option>
-          <mdc-option
-            aria-disabled="false"
-            aria-selected="false"
-            data-testid="teams-dropdown-Team B"
-          >
-            Team B
-          </mdc-option>
-        </mdc-select>
-      </div>
-      <div
-        class="btn-container"
-      >
-        <mdc-button
-          class="white-button"
-          data-testid="sign-out-button"
-        >
-          Sign Out
-        </mdc-button>
-      </div>
-    </section>
-  </div>
-</div>
-`;
-
-exports[`StationLoginComponent Snapshot Rendering renders correctly with showMultiLoginAlert 1`] = `
-<div>
-  <dialog
-    class="modal"
-    open=""
-  >
-    <h2>
-      Multiple Sign In Alert
-    </h2>
-    <p>
-      You are signed in to the Desktop in multiple application instances. Click Continue to proceed with the Desktop in this application instance. Else, close this window.
-    </p>
-    <div
-      class="modal-content"
-    >
-      <button
-        data-testid="ContinueButton"
-        id="ContinueButton"
-      >
-        Continue
-      </button>
-    </div>
-  </dialog>
-  <dialog
-    class="cc-logout-modal"
-    data-testid="cc-logout-modal"
-  >
-    <mdc-text
-      class="modal-text"
-    >
-      Sign out of Contact Center
-    </mdc-text>
-    <mdc-text
-      class="modal-text"
-    >
-      Are you sure you want to sign out?
-    </mdc-text>
-    <div
-      class="cc-logout-modal-content"
-    >
-      <mdc-button
-        class="white-button"
-        data-testid="cc-cancel-button"
-      >
-        Cancel
-      </mdc-button>
-      <mdc-button
-        data-testid="cc-logout-button"
-      >
-        Sign Out
-      </mdc-button>
-    </div>
-  </dialog>
-  <div
-    class="box station-login"
-    data-testid="station-login-widget"
-  >
-    <section
-      class="section-box"
-    >
-      <mdc-text
-        data-testid="station-login-label"
-      >
-        Set your interaction preferences
-      </mdc-text>
-      <div>
-        <div
-          id="agent-login-label"
-        >
-          <mdc-text
-            data-testid="station-login-label"
-          >
-            Handle calls using
-          </mdc-text>
-          <mdc-icon
-            data-testid="station-login-icon"
-            id="agent-login-info-badge"
-          />
-          <mdc-tooltip
-            data-testid="station-login-tooltip"
-          >
-            <mdc-text
-              class="agent-login-popover"
-              data-testid="station-login-label"
-            >
-              This is your preferred method for receiving and making calls. Choose between your phone number, extension (if available), or your web browser.
-            </mdc-text>
-          </mdc-tooltip>
-        </div>
-        <div>
-          <mdc-select
-            class="station-login-select"
-            data-testid="login-option-select"
-          >
-            <mdc-option
-              aria-disabled="false"
-              aria-selected="false"
-              data-testid="login-option-Dial Number"
-            >
-              Dial Number
-            </mdc-option>
-            <mdc-option
-              aria-disabled="false"
-              aria-selected="false"
-              data-testid="login-option-Extension"
-            >
-              Extension
-            </mdc-option>
-            <mdc-option
-              aria-disabled="false"
-              aria-selected="false"
-              data-testid="login-option-Desktop"
-            >
-              Desktop
-            </mdc-option>
-          </mdc-select>
-        </div>
-      </div>
-      <mdc-input
-        data-testid="dial-number-input"
-      />
-      <div
-        class="select-container"
-      >
-        <mdc-select
-          class="station-login-select"
-          data-testid="teams-select-dropdown"
-        >
-          <mdc-option
-            aria-disabled="false"
-            aria-selected="false"
-            data-testid="teams-dropdown-Team A"
-          >
-            Team A
-          </mdc-option>
-          <mdc-option
-            aria-disabled="false"
-            aria-selected="false"
-            data-testid="teams-dropdown-Team B"
-          >
-            Team B
-          </mdc-option>
-        </mdc-select>
-      </div>
-      <div
-        class="btn-container"
-      >
-        <mdc-button
-          data-testid="login-button"
-        >
-          Save & Continue
-        </mdc-button>
-        <mdc-button
-          class="white-button"
-          data-testid="sign-out-button"
-        >
-          Sign Out
-        </mdc-button>
-      </div>
-    </section>
-  </div>
-</div>
-`;
-
-exports[`StationLoginComponent Snapshot Rendering renders login failure when passed 1`] = `
-<div>
-  <dialog
-    class="modal"
-  >
-    <h2>
-      Multiple Sign In Alert
-    </h2>
-    <p>
-      You are signed in to the Desktop in multiple application instances. Click Continue to proceed with the Desktop in this application instance. Else, close this window.
-    </p>
-    <div
-      class="modal-content"
-    >
-      <button
-        data-testid="ContinueButton"
-        id="ContinueButton"
-      >
-        Continue
-      </button>
-    </div>
-  </dialog>
-  <dialog
-    class="cc-logout-modal"
-    data-testid="cc-logout-modal"
-  >
-    <mdc-text
-      class="modal-text"
-    >
-      Sign out of Contact Center
-    </mdc-text>
-    <mdc-text
-      class="modal-text"
-    >
-      Are you sure you want to sign out?
-    </mdc-text>
-    <div
-      class="cc-logout-modal-content"
-    >
-      <mdc-button
-        class="white-button"
-        data-testid="cc-cancel-button"
-      >
-        Cancel
-      </mdc-button>
-      <mdc-button
-        data-testid="cc-logout-button"
-      >
-        Sign Out
-      </mdc-button>
-    </div>
-  </dialog>
-  <div
-    class="box station-login"
-    data-testid="station-login-widget"
-  >
-    <section
-      class="section-box"
-    >
-      <mdc-text
-        data-testid="station-login-label"
-      >
-        Set your interaction preferences
-      </mdc-text>
-      <div>
-        <div
-          id="agent-login-label"
-        >
-          <mdc-text
-            data-testid="station-login-label"
-          >
-            Handle calls using
-          </mdc-text>
-          <mdc-icon
-            data-testid="station-login-icon"
-            id="agent-login-info-badge"
-          />
-          <mdc-tooltip
-            data-testid="station-login-tooltip"
-          >
-            <mdc-text
-              class="agent-login-popover"
-              data-testid="station-login-label"
-            >
-              This is your preferred method for receiving and making calls. Choose between your phone number, extension (if available), or your web browser.
-            </mdc-text>
-          </mdc-tooltip>
-        </div>
-        <div>
-          <mdc-select
-            class="station-login-select"
-            data-testid="login-option-select"
-          >
-            <mdc-option
-              aria-disabled="false"
-              aria-selected="false"
-              data-testid="login-option-Dial Number"
-            >
-              Dial Number
-            </mdc-option>
-            <mdc-option
-              aria-disabled="false"
-              aria-selected="false"
-              data-testid="login-option-Extension"
-            >
-              Extension
-            </mdc-option>
-            <mdc-option
-              aria-disabled="false"
-              aria-selected="false"
-              data-testid="login-option-Desktop"
-            >
-              Desktop
-            </mdc-option>
-          </mdc-select>
-        </div>
-      </div>
-      <mdc-input
-        data-testid="dial-number-input"
-      />
-      <div
-        class="select-container"
-      >
-        <mdc-select
-          class="station-login-select"
-          data-testid="teams-select-dropdown"
-        >
-          <mdc-option
-            aria-disabled="false"
-            aria-selected="false"
-            data-testid="teams-dropdown-Team A"
-          >
-            Team A
-          </mdc-option>
-          <mdc-option
-            aria-disabled="false"
-            aria-selected="false"
-            data-testid="teams-dropdown-Team B"
+            tabindex="0"
+            value="team456"
+            variant="inset-rectangle"
           >
             Team B
           </mdc-option>
@@ -2406,6 +2784,8 @@ exports[`StationLoginComponent Snapshot Rendering renders login failure when pas
       <mdc-text
         class="error-text-color"
         data-testid="station-login-failure-label"
+        tagname="p"
+        type="body-midsize-regular"
       >
         This extension is already in use.
       </mdc-text>
@@ -2413,15 +2793,885 @@ exports[`StationLoginComponent Snapshot Rendering renders login failure when pas
         class="btn-container"
       >
         <mdc-button
+          color="default"
           data-testid="login-button"
+          role="button"
+          size="32"
+          tabindex="0"
+          type="button"
+          variant="primary"
         >
           Save & Continue
         </mdc-button>
         <mdc-button
           class="white-button"
+          color="default"
           data-testid="sign-out-button"
+          role="button"
+          size="32"
+          tabindex="0"
+          type="button"
+          variant="secondary"
         >
           Sign Out
+        </mdc-button>
+      </div>
+    </section>
+  </div>
+</div>
+`;
+
+exports[`Station Login Component Rendering renders save error when passed 1`] = `
+<div>
+  <dialog
+    class="modal"
+    data-testid="multi-sign-in-modal"
+  >
+    <h2>
+      Multiple Sign In Alert
+    </h2>
+    <p>
+      You are signed in to the Desktop in multiple application instances. Click Continue to proceed with the Desktop in this application instance. Else, close this window.
+    </p>
+    <div
+      class="modal-content"
+    >
+      <button
+        data-testid="ContinueButton"
+        id="ContinueButton"
+      >
+        Continue
+      </button>
+    </div>
+  </dialog>
+  <dialog
+    class="cc-logout-modal"
+    data-testid="cc-logout-modal"
+  >
+    <mdc-text
+      class="modal-text"
+      tagname="h2"
+      type="body-large-bold"
+    >
+      Sign out of Contact Center
+    </mdc-text>
+    <mdc-text
+      class="modal-text"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      Are you sure you want to sign out?
+    </mdc-text>
+    <div
+      class="cc-logout-modal-content"
+    >
+      <mdc-button
+        class="white-button"
+        color="default"
+        data-testid="cc-cancel-button"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="secondary"
+      >
+        Cancel
+      </mdc-button>
+      <mdc-button
+        color="default"
+        data-testid="cc-logout-button"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="primary"
+      >
+        Sign Out
+      </mdc-button>
+    </div>
+  </dialog>
+  <dialog
+    class="cc-logout-modal"
+    data-testid="interaction-confirmation-dialog"
+  >
+    <div
+      class="modal-header"
+      style="display: flex; justify-content: space-between; align-items: center;"
+    >
+      <mdc-text
+        class="modal-text"
+        tagname="h2"
+        type="body-large-bold"
+      >
+        Confirm interaction preference changes
+      </mdc-text>
+    </div>
+    <div
+      class="cc-logout-modal-content"
+    >
+      <mdc-button
+        aria-label="Close"
+        class="cancelSaveLoginOptions"
+        color="default"
+        data-btn-type="pill-with-icon"
+        postfix-icon=""
+        prefix-icon="cancel-bold"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="tertiary"
+      >
+        Cancel
+      </mdc-button>
+      <mdc-button
+        color="default"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="primary"
+      >
+        Confirm
+      </mdc-button>
+    </div>
+  </dialog>
+  <div
+    class="box station-login"
+    data-testid="station-login-widget"
+  >
+    <section
+      class="section-box"
+    >
+      <mdc-text
+        data-testid="station-login-label"
+        tagname="span"
+        type="body-large-bold"
+      >
+        Set your interaction preferences
+      </mdc-text>
+      <div>
+        <div
+          id="agent-login-label"
+        >
+          <mdc-text
+            data-testid="station-login-label"
+            tagname="p"
+            type="body-midsize-regular"
+          >
+            Handle calls using
+          </mdc-text>
+          <mdc-icon
+            aria-describedby="agent-login-label-tooltip"
+            data-testid="station-login-icon"
+            id="agent-login-info-badge"
+            name="info-badge-filled"
+          />
+          <mdc-tooltip
+            append-to=""
+            color="contrast"
+            data-testid="station-login-tooltip"
+            delay="0,0"
+            disable-aria-expanded=""
+            flip=""
+            hide-on-blur=""
+            hide-on-escape=""
+            id="agent-login-label-tooltip"
+            offset="4"
+            placement="top"
+            role="tooltip"
+            show-arrow=""
+            style="z-index: 1000;"
+            tooltip-type="description"
+            trigger="mouseenter focusin"
+            triggerid="agent-login-info-badge"
+            z-index="1000"
+          >
+            <mdc-text
+              class="agent-login-popover"
+              data-testid="station-login-label"
+              tagname="div"
+              type="body-large-regular"
+            >
+              This is your preferred method for receiving and making calls. Choose between your phone number, extension (if available), or your web browser.
+            </mdc-text>
+          </mdc-tooltip>
+        </div>
+        <div>
+          <mdc-select
+            class="station-login-select"
+            data-testid="login-option-select"
+            help-text-type="default"
+            name="login-option"
+            value="EXTENSION"
+          >
+            <mdc-option
+              aria-disabled="false"
+              aria-selected="false"
+              data-testid="login-option-Dial Number"
+              tabindex="0"
+              value="AGENT_DN"
+              variant="inset-rectangle"
+            >
+              Dial Number
+            </mdc-option>
+            <mdc-option
+              aria-disabled="false"
+              aria-selected="true"
+              data-testid="login-option-Extension"
+              selected=""
+              tabindex="-1"
+              value="EXTENSION"
+              variant="inset-rectangle"
+            >
+              Extension
+            </mdc-option>
+            <mdc-option
+              aria-disabled="false"
+              aria-selected="false"
+              data-testid="login-option-Desktop"
+              tabindex="-1"
+              value="BROWSER"
+              variant="inset-rectangle"
+            >
+              Desktop
+            </mdc-option>
+          </mdc-select>
+        </div>
+      </div>
+      <mdc-input
+        data-testid="dial-number-input"
+        label="Extension"
+        name=""
+        value=""
+      />
+      <div
+        class="select-container"
+      >
+        <mdc-select
+          class="station-login-select"
+          data-testid="teams-select-dropdown"
+          help-text-type="default"
+          label="Your Team"
+          name="teams-dropdown"
+        >
+          <mdc-option
+            aria-disabled="false"
+            aria-selected="true"
+            data-testid="teams-dropdown-Team A"
+            selected=""
+            tabindex="0"
+            value="team123"
+            variant="inset-rectangle"
+          >
+            Team A
+          </mdc-option>
+          <mdc-option
+            aria-disabled="false"
+            aria-selected="false"
+            data-testid="teams-dropdown-Team B"
+            tabindex="0"
+            value="team456"
+            variant="inset-rectangle"
+          >
+            Team B
+          </mdc-option>
+        </mdc-select>
+      </div>
+      <mdc-text
+        class="error-text-color"
+        data-testid="save-error"
+        tagname="p"
+        type="body-midsize-regular"
+      >
+        Error in saving login options
+      </mdc-text>
+      <div
+        class="btn-container"
+      >
+        <mdc-button
+          color="default"
+          data-testid="login-button"
+          role="button"
+          size="32"
+          tabindex="0"
+          type="button"
+          variant="primary"
+        >
+          Save & Continue
+        </mdc-button>
+        <mdc-button
+          class="white-button"
+          color="default"
+          data-testid="sign-out-button"
+          role="button"
+          size="32"
+          tabindex="0"
+          type="button"
+          variant="secondary"
+        >
+          Sign Out
+        </mdc-button>
+      </div>
+    </section>
+  </div>
+</div>
+`;
+
+exports[`Station Login Component Rendering renders the component correctly 1`] = `
+<div>
+  <dialog
+    class="modal"
+    data-testid="multi-sign-in-modal"
+  >
+    <h2>
+      Multiple Sign In Alert
+    </h2>
+    <p>
+      You are signed in to the Desktop in multiple application instances. Click Continue to proceed with the Desktop in this application instance. Else, close this window.
+    </p>
+    <div
+      class="modal-content"
+    >
+      <button
+        data-testid="ContinueButton"
+        id="ContinueButton"
+      >
+        Continue
+      </button>
+    </div>
+  </dialog>
+  <dialog
+    class="cc-logout-modal"
+    data-testid="cc-logout-modal"
+  >
+    <mdc-text
+      class="modal-text"
+      tagname="h2"
+      type="body-large-bold"
+    >
+      Sign out of Contact Center
+    </mdc-text>
+    <mdc-text
+      class="modal-text"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      Are you sure you want to sign out?
+    </mdc-text>
+    <div
+      class="cc-logout-modal-content"
+    >
+      <mdc-button
+        class="white-button"
+        color="default"
+        data-testid="cc-cancel-button"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="secondary"
+      >
+        Cancel
+      </mdc-button>
+      <mdc-button
+        color="default"
+        data-testid="cc-logout-button"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="primary"
+      >
+        Sign Out
+      </mdc-button>
+    </div>
+  </dialog>
+  <dialog
+    class="cc-logout-modal"
+    data-testid="interaction-confirmation-dialog"
+  >
+    <div
+      class="modal-header"
+      style="display: flex; justify-content: space-between; align-items: center;"
+    >
+      <mdc-text
+        class="modal-text"
+        tagname="h2"
+        type="body-large-bold"
+      >
+        Confirm interaction preference changes
+      </mdc-text>
+    </div>
+    <div
+      class="cc-logout-modal-content"
+    >
+      <mdc-button
+        aria-label="Close"
+        class="cancelSaveLoginOptions"
+        color="default"
+        data-btn-type="pill-with-icon"
+        postfix-icon=""
+        prefix-icon="cancel-bold"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="tertiary"
+      >
+        Cancel
+      </mdc-button>
+      <mdc-button
+        color="default"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="primary"
+      >
+        Confirm
+      </mdc-button>
+    </div>
+  </dialog>
+  <div
+    class="box station-login"
+    data-testid="station-login-widget"
+  >
+    <section
+      class="section-box"
+    >
+      <mdc-text
+        data-testid="station-login-label"
+        tagname="span"
+        type="body-large-bold"
+      >
+        Set your interaction preferences
+      </mdc-text>
+      <div>
+        <div
+          id="agent-login-label"
+        >
+          <mdc-text
+            data-testid="station-login-label"
+            tagname="p"
+            type="body-midsize-regular"
+          >
+            Handle calls using
+          </mdc-text>
+          <mdc-icon
+            aria-describedby="agent-login-label-tooltip"
+            data-testid="station-login-icon"
+            id="agent-login-info-badge"
+            name="info-badge-filled"
+          />
+          <mdc-tooltip
+            append-to=""
+            color="contrast"
+            data-testid="station-login-tooltip"
+            delay="0,0"
+            disable-aria-expanded=""
+            flip=""
+            hide-on-blur=""
+            hide-on-escape=""
+            id="agent-login-label-tooltip"
+            offset="4"
+            placement="top"
+            role="tooltip"
+            show-arrow=""
+            style="z-index: 1000;"
+            tooltip-type="description"
+            trigger="mouseenter focusin"
+            triggerid="agent-login-info-badge"
+            z-index="1000"
+          >
+            <mdc-text
+              class="agent-login-popover"
+              data-testid="station-login-label"
+              tagname="div"
+              type="body-large-regular"
+            >
+              This is your preferred method for receiving and making calls. Choose between your phone number, extension (if available), or your web browser.
+            </mdc-text>
+          </mdc-tooltip>
+        </div>
+        <div>
+          <mdc-select
+            class="station-login-select"
+            data-testid="login-option-select"
+            help-text-type="default"
+            name="login-option"
+            value="EXTENSION"
+          >
+            <mdc-option
+              aria-disabled="false"
+              aria-selected="false"
+              data-testid="login-option-Dial Number"
+              tabindex="0"
+              value="AGENT_DN"
+              variant="inset-rectangle"
+            >
+              Dial Number
+            </mdc-option>
+            <mdc-option
+              aria-disabled="false"
+              aria-selected="true"
+              data-testid="login-option-Extension"
+              selected=""
+              tabindex="-1"
+              value="EXTENSION"
+              variant="inset-rectangle"
+            >
+              Extension
+            </mdc-option>
+            <mdc-option
+              aria-disabled="false"
+              aria-selected="false"
+              data-testid="login-option-Desktop"
+              tabindex="-1"
+              value="BROWSER"
+              variant="inset-rectangle"
+            >
+              Desktop
+            </mdc-option>
+          </mdc-select>
+        </div>
+      </div>
+      <mdc-input
+        data-testid="dial-number-input"
+        label="Extension"
+        name=""
+        value=""
+      />
+      <div
+        class="select-container"
+      >
+        <mdc-select
+          class="station-login-select"
+          data-testid="teams-select-dropdown"
+          help-text-type="default"
+          label="Your Team"
+          name="teams-dropdown"
+        >
+          <mdc-option
+            aria-disabled="false"
+            aria-selected="true"
+            data-testid="teams-dropdown-Team A"
+            selected=""
+            tabindex="0"
+            value="team123"
+            variant="inset-rectangle"
+          >
+            Team A
+          </mdc-option>
+          <mdc-option
+            aria-disabled="false"
+            aria-selected="false"
+            data-testid="teams-dropdown-Team B"
+            tabindex="0"
+            value="team456"
+            variant="inset-rectangle"
+          >
+            Team B
+          </mdc-option>
+        </mdc-select>
+      </div>
+      <div
+        class="btn-container"
+      >
+        <mdc-button
+          color="default"
+          data-testid="login-button"
+          role="button"
+          size="32"
+          tabindex="0"
+          type="button"
+          variant="primary"
+        >
+          Save & Continue
+        </mdc-button>
+        <mdc-button
+          class="white-button"
+          color="default"
+          data-testid="sign-out-button"
+          role="button"
+          size="32"
+          tabindex="0"
+          type="button"
+          variant="secondary"
+        >
+          Sign Out
+        </mdc-button>
+      </div>
+    </section>
+  </div>
+</div>
+`;
+
+exports[`Station Login Component Rendering renders the component correctly in profileMode 1`] = `
+<div>
+  <dialog
+    class="modal"
+    data-testid="multi-sign-in-modal"
+  >
+    <h2>
+      Multiple Sign In Alert
+    </h2>
+    <p>
+      You are signed in to the Desktop in multiple application instances. Click Continue to proceed with the Desktop in this application instance. Else, close this window.
+    </p>
+    <div
+      class="modal-content"
+    >
+      <button
+        data-testid="ContinueButton"
+        id="ContinueButton"
+      >
+        Continue
+      </button>
+    </div>
+  </dialog>
+  <dialog
+    class="cc-logout-modal"
+    data-testid="cc-logout-modal"
+  >
+    <mdc-text
+      class="modal-text"
+      tagname="h2"
+      type="body-large-bold"
+    >
+      Sign out of Contact Center
+    </mdc-text>
+    <mdc-text
+      class="modal-text"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      Are you sure you want to sign out?
+    </mdc-text>
+    <div
+      class="cc-logout-modal-content"
+    >
+      <mdc-button
+        class="white-button"
+        color="default"
+        data-testid="cc-cancel-button"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="secondary"
+      >
+        Cancel
+      </mdc-button>
+      <mdc-button
+        color="default"
+        data-testid="cc-logout-button"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="primary"
+      >
+        Sign Out
+      </mdc-button>
+    </div>
+  </dialog>
+  <dialog
+    class="cc-logout-modal"
+    data-testid="interaction-confirmation-dialog"
+  >
+    <div
+      class="modal-header"
+      style="display: flex; justify-content: space-between; align-items: center;"
+    >
+      <mdc-text
+        class="modal-text"
+        tagname="h2"
+        type="body-large-bold"
+      >
+        Confirm interaction preference changes
+      </mdc-text>
+    </div>
+    <div
+      class="cc-logout-modal-content"
+    >
+      <mdc-button
+        aria-label="Close"
+        class="cancelSaveLoginOptions"
+        color="default"
+        data-btn-type="pill-with-icon"
+        postfix-icon=""
+        prefix-icon="cancel-bold"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="tertiary"
+      >
+        Cancel
+      </mdc-button>
+      <mdc-button
+        color="default"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="primary"
+      >
+        Confirm
+      </mdc-button>
+    </div>
+  </dialog>
+  <div
+    class="box station-login"
+    data-testid="station-login-widget"
+  >
+    <section
+      class="section-box"
+    >
+      <div>
+        <div
+          id="agent-login-label"
+        >
+          <mdc-text
+            data-testid="station-login-label"
+            tagname="p"
+            type="body-midsize-regular"
+          >
+            Handle calls using
+          </mdc-text>
+          <mdc-icon
+            aria-describedby="agent-login-label-tooltip"
+            data-testid="station-login-icon"
+            id="agent-login-info-badge"
+            name="info-badge-filled"
+          />
+          <mdc-tooltip
+            append-to=""
+            color="contrast"
+            data-testid="station-login-tooltip"
+            delay="0,0"
+            disable-aria-expanded=""
+            flip=""
+            hide-on-blur=""
+            hide-on-escape=""
+            id="agent-login-label-tooltip"
+            offset="4"
+            placement="top"
+            role="tooltip"
+            show-arrow=""
+            style="z-index: 1000;"
+            tooltip-type="description"
+            trigger="mouseenter focusin"
+            triggerid="agent-login-info-badge"
+            z-index="1000"
+          >
+            <mdc-text
+              class="agent-login-popover"
+              data-testid="station-login-label"
+              tagname="div"
+              type="body-large-regular"
+            >
+              This is your preferred method for receiving and making calls. Choose between your phone number, extension (if available), or your web browser.
+            </mdc-text>
+          </mdc-tooltip>
+        </div>
+        <div>
+          <mdc-select
+            class="station-login-select"
+            data-testid="login-option-select"
+            help-text-type="default"
+            name="login-option"
+            value="EXTENSION"
+          >
+            <mdc-option
+              aria-disabled="false"
+              aria-selected="false"
+              data-testid="login-option-Dial Number"
+              tabindex="0"
+              value="AGENT_DN"
+              variant="inset-rectangle"
+            >
+              Dial Number
+            </mdc-option>
+            <mdc-option
+              aria-disabled="false"
+              aria-selected="true"
+              data-testid="login-option-Extension"
+              selected=""
+              tabindex="-1"
+              value="EXTENSION"
+              variant="inset-rectangle"
+            >
+              Extension
+            </mdc-option>
+            <mdc-option
+              aria-disabled="false"
+              aria-selected="false"
+              data-testid="login-option-Desktop"
+              tabindex="-1"
+              value="BROWSER"
+              variant="inset-rectangle"
+            >
+              Desktop
+            </mdc-option>
+          </mdc-select>
+        </div>
+      </div>
+      <mdc-input
+        data-testid="dial-number-input"
+        label="Extension"
+        name=""
+        value=""
+      />
+      <div
+        class="select-container"
+      >
+        <mdc-select
+          class="station-login-select"
+          data-testid="teams-select-dropdown"
+          help-text-type="default"
+          label="Your Team"
+          name="teams-dropdown"
+        >
+          <mdc-option
+            aria-disabled="false"
+            aria-selected="true"
+            data-testid="teams-dropdown-Team A"
+            selected=""
+            tabindex="0"
+            value="team123"
+            variant="inset-rectangle"
+          >
+            Team A
+          </mdc-option>
+          <mdc-option
+            aria-disabled="false"
+            aria-selected="false"
+            data-testid="teams-dropdown-Team B"
+            tabindex="0"
+            value="team456"
+            variant="inset-rectangle"
+          >
+            Team B
+          </mdc-option>
+        </mdc-select>
+      </div>
+      <div
+        class="btn-container"
+      >
+        <mdc-button
+          aria-disabled="true"
+          color="positive"
+          data-testid="save-login-options-button"
+          disabled=""
+          role="button"
+          size="32"
+          tabindex="0"
+          type="button"
+          variant="primary"
+        >
+          Save
         </mdc-button>
       </div>
     </section>

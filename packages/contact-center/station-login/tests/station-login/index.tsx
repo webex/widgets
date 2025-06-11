@@ -48,12 +48,24 @@ jest.mock('@webex/cc-components', () => {
 const loginCb = jest.fn();
 const logoutCb = jest.fn();
 const ccLogoutCb = jest.fn();
+const onSaveStart = jest.fn();
+const onSaveEnd = jest.fn();
 
 describe('StationLogin Component', () => {
   it('renders StationLoginPresentational with correct props', () => {
     const useStationLoginSpy = jest.spyOn(helper, 'useStationLogin');
 
-    render(<StationLogin onLogin={loginCb} onLogout={logoutCb} onCCSignOut={ccLogoutCb} />);
+    render(
+      <StationLogin
+        onLogin={loginCb}
+        onLogout={logoutCb}
+        onCCSignOut={ccLogoutCb}
+        onSaveStart={onSaveStart}
+        onSaveEnd={onSaveEnd}
+        teamId="team123"
+        profileMode="agent"
+      />
+    );
 
     expect(useStationLoginSpy).toHaveBeenCalledWith({
       cc: ccMock,
@@ -62,6 +74,10 @@ describe('StationLogin Component', () => {
       logger: loggerMock,
       deviceType: deviceTypeMock,
       dialNumber: dialNumberMock,
+      isAgentLoggedIn: false,
+      onSaveEnd: onSaveEnd,
+      onSaveStart: onSaveStart,
+      teamId: undefined,
     });
   });
 });

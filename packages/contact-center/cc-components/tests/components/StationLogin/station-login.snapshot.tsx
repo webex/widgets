@@ -3,116 +3,178 @@ import '@testing-library/jest-dom';
 import {render, screen, fireEvent} from '@testing-library/react';
 import StationLoginComponent from '../../../src/components/StationLogin/station-login';
 import {StationLoginComponentProps} from 'packages/contact-center/cc-components/src/components/StationLogin/station-login.types';
+import * as stationLoginUtils from '../../../src/components/StationLogin/station-login.utils';
 
-// Mocks for required props
-const props: StationLoginComponentProps = {
-  loginOptions: ['AGENT_DN', 'EXTENSION', 'BROWSER'],
-  login: jest.fn(),
-  logout: jest.fn(),
-  loginSuccess: undefined,
-  loginFailure: undefined,
-  logoutSuccess: undefined,
-  teams: [
-    {id: 'team123', name: 'Team A'},
-    {id: 'team456', name: 'Team B'},
-  ],
-  setDeviceType: jest.fn(),
-  setDialNumber: jest.fn(),
-  setTeam: jest.fn(),
-  isAgentLoggedIn: false,
-  handleContinue: jest.fn(),
-  deviceType: 'EXTENSION',
-  dialNumber: '',
-  dialNumberRegex: '',
-  showMultipleLoginAlert: false,
-  onCCSignOut: jest.fn(),
-  setTeamId: jest.fn(),
-  teamId: 'team123',
-};
+describe('Station Login Component', () => {
+  const loggerMock = {
+    log: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  };
 
-describe('StationLoginComponent Snapshot', () => {
+  const props: StationLoginComponentProps = {
+    loginOptions: ['AGENT_DN', 'EXTENSION', 'BROWSER'],
+    login: jest.fn(),
+    logout: jest.fn(),
+    loginSuccess: undefined,
+    loginFailure: undefined,
+    logoutSuccess: undefined,
+    teams: [
+      {id: 'team123', name: 'Team A'},
+      {id: 'team456', name: 'Team B'},
+    ],
+    setDeviceType: jest.fn(),
+    setDialNumber: jest.fn(),
+    setTeam: jest.fn(),
+    isAgentLoggedIn: false,
+    handleContinue: jest.fn(),
+    deviceType: 'EXTENSION',
+    dialNumberRegex: '',
+    showMultipleLoginAlert: false,
+    onCCSignOut: jest.fn(),
+    setTeamId: jest.fn(),
+    setSelectedTeamId: jest.fn(),
+    selectedTeamId: 'team123',
+    logger: loggerMock,
+    selectedDeviceType: 'EXTENSION',
+    dialNumberValue: '',
+    setDialNumberValue: jest.fn(),
+    setSelectedDeviceType: jest.fn(),
+    selectedOption: 'EXTENSION',
+    setCurrentLoginOptions: jest.fn(),
+    currentLoginOptions: {
+      deviceType: 'EXTENSION',
+      dialNumber: '',
+      teamId: 'team123',
+    },
+    originalLoginOptions: {
+      deviceType: 'EXTENSION',
+      dialNumber: '',
+      teamId: 'team123',
+    },
+    profileMode: false,
+    isLoginOptionsChanged: false,
+    saveLoginOptions: jest.fn(),
+    saveError: undefined,
+  };
+
+  // Mock all utility functions
+  const mockHandleLoginOptionChanged = jest.fn();
+  const mockHandleDNInputChanged = jest.fn();
+  const mockHandleTeamSelectChanged = jest.fn();
+  const mockHandleModals = jest.fn();
+  const mockContinueClicked = jest.fn();
+  const mockCcCancelButtonClicked = jest.fn();
+  const mockHandleSaveConfirm = jest.fn();
+  const mockSaveConfirmCancelClicked = jest.fn();
+  const mockCreateStationLoginRefs = jest.fn(() => ({
+    multiSignInModalRef: {current: null},
+    ccSignOutModalRef: {current: null},
+    saveConfirmDialogRef: {current: null},
+  }));
+  const mockUpdateDialNumberLabel = jest.fn();
+
+  beforeEach(() => {
+    // Mock all utility functions
+    jest.spyOn(stationLoginUtils, 'handleLoginOptionChanged').mockImplementation(mockHandleLoginOptionChanged);
+    jest.spyOn(stationLoginUtils, 'handleDNInputChanged').mockImplementation(mockHandleDNInputChanged);
+    jest.spyOn(stationLoginUtils, 'handleTeamSelectChanged').mockImplementation(mockHandleTeamSelectChanged);
+    jest.spyOn(stationLoginUtils, 'handleModals').mockImplementation(mockHandleModals);
+    jest.spyOn(stationLoginUtils, 'continueClicked').mockImplementation(mockContinueClicked);
+    jest.spyOn(stationLoginUtils, 'ccCancelButtonClicked').mockImplementation(mockCcCancelButtonClicked);
+    jest.spyOn(stationLoginUtils, 'handleSaveConfirm').mockImplementation(mockHandleSaveConfirm);
+    jest.spyOn(stationLoginUtils, 'saveConfirmCancelClicked').mockImplementation(mockSaveConfirmCancelClicked);
+    jest.spyOn(stationLoginUtils, 'createStationLoginRefs').mockImplementation(mockCreateStationLoginRefs);
+    jest.spyOn(stationLoginUtils, 'updateDialNumberLabel').mockImplementation(mockUpdateDialNumberLabel);
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
+
   describe('Rendering', () => {
-    it('renders correctly and matches snapshot', () => {
-      const {container} = render(<StationLoginComponent {...props} />);
+    it('renders the component correctly', async () => {
+      const {container} = await render(<StationLoginComponent {...props} />);
       // Remove IDs to avoid snapshot issues with dynamic IDs
       container.querySelectorAll('[id^="mdc-input"]').forEach((el) => el.removeAttribute('id'));
       expect(container).toMatchSnapshot();
     });
 
-    it('renders correctly with agent logged in', () => {
-      const loggedInProps = {...props, isAgentLoggedIn: true};
-      const {container} = render(<StationLoginComponent {...loggedInProps} />);
+    it('renders the component correctly in profileMode', async () => {
+      const {container} = await render(<StationLoginComponent {...props} profileMode={true} isAgentLoggedIn={true} />);
       // Remove IDs to avoid snapshot issues with dynamic IDs
       container.querySelectorAll('[id^="mdc-input"]').forEach((el) => el.removeAttribute('id'));
       expect(container).toMatchSnapshot();
     });
 
-    it('renders correctly with showMultiLoginAlert', () => {
-      const mockShowModal = jest.fn();
-      if (typeof HTMLDialogElement !== 'undefined') {
-        HTMLDialogElement.prototype.showModal = mockShowModal;
-        HTMLDialogElement.prototype.close = jest.fn();
-      }
-      const multiLoginProps = {...props, showMultipleLoginAlert: true};
-      const {container} = render(<StationLoginComponent {...multiLoginProps} />);
-      // Remove IDs to avoid snapshot issues with dynamic IDs
-      container.querySelectorAll('[id^="mdc-input"]').forEach((el) => el.removeAttribute('id'));
-      expect(container).toMatchSnapshot();
-    });
-    it('renders login failure when passed', () => {
+    it('renders login failure when passed', async () => {
       const errorMessage = 'DUPLICATE_LOCATION';
-      const {container} = render(<StationLoginComponent {...props} loginFailure={new Error(errorMessage)} />);
+      const {container} = await render(<StationLoginComponent {...props} loginFailure={new Error(errorMessage)} />);
+      // Remove IDs to avoid snapshot issues with dynamic IDs
+      container.querySelectorAll('[id^="mdc-input"]').forEach((el) => el.removeAttribute('id'));
+      expect(container).toMatchSnapshot();
+    });
+
+    it('renders save error when passed', async () => {
+      const errorMessage = 'Error in saving login options';
+      const {container} = await render(<StationLoginComponent {...props} saveError={errorMessage} />);
       // Remove IDs to avoid snapshot issues with dynamic IDs
       container.querySelectorAll('[id^="mdc-input"]').forEach((el) => el.removeAttribute('id'));
       expect(container).toMatchSnapshot();
     });
   });
   describe('Actions', () => {
-    describe('Login buttons actions', () => {
-      it('calls login function when Save and Continue button is clicked', () => {
-        const {container} = render(<StationLoginComponent {...props} />);
-        const loginButton = screen.getByTestId('login-button');
-        fireEvent.click(loginButton);
+    it('calls handleDNInputChanged with correct arguments when number is added', async () => {
+      const {container} = await render(<StationLoginComponent {...props} />);
+      const dialNumberInput = screen.getByTestId('dial-number-input');
 
-        // Remove IDs to avoid snapshot issues with dynamic IDs
-        container.querySelectorAll('[id^="mdc-input"]').forEach((el) => el.removeAttribute('id'));
-        expect(container).toMatchSnapshot();
+      const event = new CustomEvent('input', {detail: {value: 'AGENT_DN'}});
+      fireEvent(dialNumberInput, event);
+
+      // Remove IDs to avoid snapshot issues with dynamic IDs
+      container.querySelectorAll('[id^="mdc-input"]').forEach((el) => el.removeAttribute('id'));
+      expect(container).toMatchSnapshot();
+    });
+
+    it('calls handleTeamSelectChanged utility function when team is changed', async () => {
+      const {container} = await render(<StationLoginComponent {...props} />);
+
+      const teamsSelect = screen.getByTestId('teams-select-dropdown');
+      expect(teamsSelect).toHaveAttribute('class', 'station-login-select');
+      const newTeamId = 'team456';
+
+      const event = new CustomEvent('change', {
+        detail: {
+          value: newTeamId,
+        },
       });
 
-      it('calls setDeviceType and updates state when a new login option is selected', () => {
-        const {container} = render(<StationLoginComponent {...props} />);
-        const loginOptionSelect = screen.getByTestId('login-option-select');
+      fireEvent(teamsSelect, event);
+      // Remove IDs to avoid snapshot issues with dynamic IDs
+      container.querySelectorAll('[id^="mdc-input"]').forEach((el) => el.removeAttribute('id'));
+      expect(container).toMatchSnapshot();
+    });
 
-        const event = new CustomEvent('change', {detail: {value: 'AGENT_DN'}});
-
-        fireEvent(loginOptionSelect, event);
-        // Remove IDs to avoid snapshot issues with dynamic IDs
-        container.querySelectorAll('[id^="mdc-input"]').forEach((el) => el.removeAttribute('id'));
-        expect(container).toMatchSnapshot();
-      });
-
-      it('show signOut modal when onCCSignOut is present and cancel is clicked', () => {
-        const mockShowModal = jest.fn();
-        if (typeof HTMLDialogElement !== 'undefined') {
-          HTMLDialogElement.prototype.showModal = mockShowModal;
-          HTMLDialogElement.prototype.close = jest.fn();
-        }
-
+    describe('SignOut Modal Popup', () => {
+      it('show signOut modal when onCCSignOut is present and cancel is clicked', async () => {
         const mockSignOut = jest.fn();
-        const {container} = render(
-          <StationLoginComponent {...props} isAgentLoggedIn={true} onCCSignOut={mockSignOut} />
+        const {container} = await render(
+          <StationLoginComponent {...props} isAgentLoggedIn={true} onCCSignOut={mockSignOut} profileMode={false} />
         );
-
         const signOutButton = screen.getByTestId('sign-out-button');
         fireEvent.click(signOutButton);
+
+        // Remove IDs to avoid snapshot issues with dynamic IDs
         container.querySelectorAll('[id^="mdc-input"]').forEach((el) => el.removeAttribute('id'));
         expect(container).toMatchSnapshot();
 
+        // Click on the sign out confirmation button
         const confirmSignOutButton = screen.getByTestId('cc-logout-button');
         fireEvent.click(confirmSignOutButton);
+
+        // Remove IDs to avoid snapshot issues with dynamic IDs
         container.querySelectorAll('[id^="mdc-input"]').forEach((el) => el.removeAttribute('id'));
         expect(container).toMatchSnapshot();
       });
@@ -127,81 +189,68 @@ describe('StationLoginComponent Snapshot', () => {
         }));
 
         const mockSignOut = jest.fn();
-        const {container} = render(
-          <StationLoginComponent {...props} isAgentLoggedIn={true} onCCSignOut={mockSignOut} />
+        const {container} = await render(
+          <StationLoginComponent {...props} isAgentLoggedIn={true} onCCSignOut={mockSignOut} profileMode={false} />
         );
 
         // Click on the sign out button to open modal
         const signOutButton = screen.getByTestId('sign-out-button');
         fireEvent.click(signOutButton);
+
+        // Remove IDs to avoid snapshot issues with dynamic IDs
         container.querySelectorAll('[id^="mdc-input"]').forEach((el) => el.removeAttribute('id'));
         expect(container).toMatchSnapshot();
 
         // Click on the sign out cancel button
         const cancelButton = screen.getByTestId('cc-cancel-button');
         fireEvent.click(cancelButton);
-        container.querySelectorAll('[id^="mdc-input"]').forEach((el) => el.removeAttribute('id'));
-        expect(container).toMatchSnapshot();
-      });
-
-      it('should open modal if showMultipleLoginAlert is true and modalRef is set', () => {
-        const {container} = render(<StationLoginComponent {...props} showMultipleLoginAlert={true} />);
 
         container.querySelectorAll('[id^="mdc-input"]').forEach((el) => el.removeAttribute('id'));
         expect(container).toMatchSnapshot();
       });
 
-      it('should close modal and call handleContinue when continueClicked is triggered', () => {
+      it('should close modal and call continueClicked with correct arguments', async () => {
         const handleContinue = jest.fn();
-        const {container} = render(
+        const {container} = await render(
           <StationLoginComponent {...props} handleContinue={handleContinue} showMultipleLoginAlert={true} />
         );
 
         const continueBtn = screen.getByTestId('ContinueButton');
         fireEvent.click(continueBtn);
-        container.querySelectorAll('[id^="mdc-input"]').forEach((el) => el.removeAttribute('id'));
-        expect(container).toMatchSnapshot();
-        expect(handleContinue).toHaveBeenCalled();
-      });
 
-      it('should close sign-out modal and update state on cancel button click', () => {
-        const {container} = render(<StationLoginComponent {...props} />);
-        const cancelButton = screen.getByTestId('cc-cancel-button');
-        fireEvent.click(cancelButton);
+        // Remove IDs to avoid snapshot issues with dynamic IDs
         container.querySelectorAll('[id^="mdc-input"]').forEach((el) => el.removeAttribute('id'));
         expect(container).toMatchSnapshot();
-        const modal = screen.getByTestId('cc-logout-modal') as HTMLDialogElement;
-        expect(modal.open).toBeFalsy();
       });
     });
 
-    describe('Teams Dropdown', () => {
-      it('shows correct selected team name', () => {
-        const selectedTeamId = 'team123';
-        const {container} = render(<StationLoginComponent {...props} teamId={selectedTeamId} />);
+    describe('ProfileMode interaction confirmation Popup', () => {
+      it('it should call handleConfirmCancelClicked when clicked on cancel in popup', async () => {
+        const mockRef = {current: null};
+        jest.spyOn(stationLoginUtils, 'createStationLoginRefs').mockImplementation(() => ({
+          multiSignInModalRef: {current: null},
+          ccSignOutModalRef: {current: null},
+          saveConfirmDialogRef: mockRef,
+        }));
 
-        container.querySelectorAll('[id^="mdc-input"]').forEach((el) => el.removeAttribute('id'));
-        expect(container).toMatchSnapshot();
-      });
+        const {container} = await render(
+          <StationLoginComponent {...props} isAgentLoggedIn={true} profileMode={true} />
+        );
+        const saveButton = screen.getByTestId('save-login-options-button');
+        fireEvent.click(saveButton);
 
-      it('calls setTeam, setSelectedTeamId and setTeamId when team is changed', () => {
-        const {container} = render(<StationLoginComponent {...props} />);
-
-        const teamsSelect = screen.getByTestId('teams-select-dropdown');
-        const newTeamId = 'team456';
-
-        const event = new CustomEvent('change', {
-          detail: {
-            value: newTeamId,
-          },
-        });
-
-        fireEvent(teamsSelect, event);
+        // Remove IDs to avoid snapshot issues with dynamic IDs
         container.querySelectorAll('[id^="mdc-input"]').forEach((el) => el.removeAttribute('id'));
         expect(container).toMatchSnapshot();
 
-        expect(props.setTeam).toHaveBeenCalledWith(newTeamId);
-        expect(props.setTeamId).toHaveBeenCalledWith(newTeamId);
+        const confirmationPopup = screen.getByTestId('interaction-confirmation-dialog');
+        expect(confirmationPopup).toBeInTheDocument();
+        const cancelButton = confirmationPopup.querySelectorAll('mdc-button')[0];
+        fireEvent.click(cancelButton);
+
+        // Remove IDs to avoid snapshot issues with dynamic IDs
+        container.querySelectorAll('[id^="mdc-input"]').forEach((el) => el.removeAttribute('id'));
+        expect(container).toMatchSnapshot();
       });
     });
   });

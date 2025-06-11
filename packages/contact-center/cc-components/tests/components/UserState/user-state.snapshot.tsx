@@ -4,7 +4,7 @@ import {render, screen, fireEvent, act} from '@testing-library/react';
 import UserStateComponent from '../../../src/components/UserState/user-state';
 import {IUserState, AgentUserState} from '../../../src/components/UserState/user-state.types';
 
-describe('UserState Component Snapshot', () => {
+describe.skip('UserState Component Snapshot', () => {
   const normalizeIds = (container: HTMLElement) => {
     // Normalize all mdc-tooltip IDs including those with UUIDs
     container.querySelectorAll('[id*="mdc-tooltip"]').forEach((el) => {

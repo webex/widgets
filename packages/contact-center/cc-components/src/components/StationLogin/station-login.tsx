@@ -1,26 +1,37 @@
-import React, {useEffect, useState, useRef, useCallback} from 'react';
+import React, {useEffect, useState} from 'react';
 import {StationLoginComponentProps} from './station-login.types';
 import './station-login.style.scss';
-import {DESKTOP, DIALNUMBER, LoginOptions, SignInErrors, StationLoginLabels} from './constants';
+import {DESKTOP, LoginOptions, SignInErrors, StationLoginLabels} from './constants';
 import {Button, Icon, Select, Option, Text, Tooltip, Input} from '@momentum-design/components/dist/react';
+import {
+  ccCancelButtonClicked,
+  continueClicked,
+  createStationLoginRefs,
+  handleDNInputChanged,
+  handleLoginOptionChanged,
+  handleModals,
+  handleSaveConfirm,
+  handleTeamSelectChanged,
+  saveConfirmCancelClicked,
+  updateDialNumberLabel,
+} from './station-login.utils';
 
 const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps> = (props) => {
   const {
     teams,
-    loginOptions,
     login,
+    loginOptions,
     loginFailure,
     setDeviceType,
     setDialNumber,
+    setDialNumberValue,
     setTeam,
     isAgentLoggedIn,
     deviceType,
-    dialNumber,
     dialNumberRegex,
     showMultipleLoginAlert,
     handleContinue,
     onCCSignOut,
-    teamId,
     setTeamId,
     logger,
     isLoginOptionsChanged,
@@ -29,125 +40,58 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
     setCurrentLoginOptions,
     originalLoginOptions,
     profileMode,
+    selectedTeamId,
+    setSelectedDeviceType,
+    selectedDeviceType,
+    dialNumberValue,
+    setSelectedTeamId,
   } = props;
 
-  const modalRef = useRef<HTMLDialogElement>(null);
-  const ccSignOutModalRef = useRef<HTMLDialogElement>(null);
-  const saveConfirmDialogRef = useRef<HTMLDialogElement>(null);
-
   const [dialNumberLabel, setDialNumberLabel] = useState<string>('');
+
   const [dialNumberPlaceholder, setDialNumberPlaceholder] = useState<string>('');
-  const [dialNumberValue, setDialNumberValue] = useState<string>(dialNumber || '');
-  const [showCCSignOutModal, setShowCCSignOutModal] = useState<boolean>(false);
-  const [selectedDeviceType, setSelectedDeviceType] = useState<string>(deviceType || '');
   const [showSaveConfirmDialog, setShowSaveConfirmDialog] = useState(false);
-  const [selectedTeamId, setSelectedTeamId] = useState<string>(teamId || '');
+  const [showCCSignOutModal, setShowCCSignOutModal] = useState<boolean>(false);
   const [showDNError, setShowDNError] = useState<boolean>(false);
   const [dnErrorText, setDNErrorText] = useState<string>('');
+  const {multiSignInModalRef, ccSignOutModalRef, saveConfirmDialogRef} = createStationLoginRefs();
 
-  // useEffect to be called on mount
   useEffect(() => {
-    logger.info(`CC-Widgets: StationLogin: isAgentLoggedIn changed: ${isAgentLoggedIn}`, {
-      module: 'cc-components#station-login.tsx',
-      method: 'stationLoginMounted',
-    });
-    setSelectedDeviceType(deviceType || '');
-    setDialNumberValue(dialNumber || '');
-    updateDialNumberLabel(deviceType || '');
-    setSelectedTeamId(teamId || '');
-  }, [isAgentLoggedIn]);
+    if (deviceType !== DESKTOP && Object.keys(LoginOptions).includes(deviceType)) {
+      setDialNumberLabel(LoginOptions[deviceType]);
+      setDialNumberPlaceholder(LoginOptions[deviceType]);
+    }
+  }, [selectedDeviceType, isAgentLoggedIn]);
 
   // show modals
   useEffect(() => {
-    const modalStates = [
-      {ref: modalRef, show: showMultipleLoginAlert},
-      {ref: ccSignOutModalRef, show: showCCSignOutModal},
-      {ref: saveConfirmDialogRef, show: showSaveConfirmDialog},
-    ];
-
-    modalStates.forEach(({ref, show}) => {
-      if (ref.current) {
-        if (show && !ref.current.open) {
-          ref.current.showModal();
-        } else if (!show && ref.current.open) {
-          ref.current.close();
-        }
-      }
-    });
+    handleModals(
+      multiSignInModalRef,
+      ccSignOutModalRef,
+      saveConfirmDialogRef,
+      showMultipleLoginAlert,
+      showCCSignOutModal,
+      showSaveConfirmDialog
+    );
   }, [showMultipleLoginAlert, showCCSignOutModal, showSaveConfirmDialog]);
-
-  const continueClicked = useCallback(() => {
-    if (modalRef.current) {
-      modalRef.current.close();
-      handleContinue();
-    }
-  }, [handleContinue]);
-
-  /**
-   * Handler for the Contact Center logout confirmation modal cancel button
-   *
-   * Closes the dialog if it is currently open
-   */
-  const ccCancelButtonClicked = useCallback(() => {
-    logger.info('CC-Widgets: StationLogin: CC Sign-out cancel clicked', {
-      module: 'cc-components#station-login.tsx',
-      method: 'ccCancelClicked',
-    });
-    if (ccSignOutModalRef?.current?.open) {
-      ccSignOutModalRef.current.close();
-      setShowCCSignOutModal(false);
-    }
-  }, []);
-
-  const saveConfirmCancelClicked = useCallback(() => {
-    if (saveConfirmDialogRef?.current?.open) {
-      saveConfirmDialogRef.current.close();
-      setShowSaveConfirmDialog(false);
-    }
-  }, []);
-
-  const handleSaveConfirm = () => {
-    saveConfirmCancelClicked();
-    saveLoginOptions();
-  };
-
-  const updateDialNumberLabel = (selectedOption: string): void => {
-    logger.info(`CC-Widgets: StationLogin: updateDialNumberLabel: ${selectedOption}`, {
-      module: 'cc-components#station-login.tsx',
-      method: 'updateDialNumberLabel',
-    });
-    if (selectedOption != DESKTOP && Object.keys(LoginOptions).includes(selectedOption)) {
-      setDialNumberLabel(LoginOptions[selectedOption]);
-      setDialNumberPlaceholder(LoginOptions[selectedOption]);
-    }
-  };
-
-  /**
-   * Runs validation tests on a string given as a Dial Number
-   * @param {string} input
-   * @returns {boolean} whether or not to show a validation error
-   */
-  const validateDialNumber = (input: string): boolean => {
-    logger.info(`CC-Widgets: StationLogin: validateDialNumber: ${input}`, {
-      module: 'cc-components#station-login.tsx',
-      method: 'validateDialNumber',
-    });
-    const regexForDn = new RegExp(dialNumberRegex ?? '1[0-9]{3}[2-9][0-9]{6}([,]{1,10}[0-9]+){0,1}');
-    if (regexForDn.test(input)) {
-      return false;
-    }
-    setDNErrorText(StationLoginLabels.DN_FORMAT_ERROR);
-    return true;
-  };
 
   return (
     <>
       {/* TODO: Replace dialog with momentum-design modal component once available */}
-      <dialog ref={modalRef} className="modal" open={showMultipleLoginAlert}>
+      <dialog
+        data-testid="multi-sign-in-modal"
+        ref={multiSignInModalRef}
+        className="modal"
+        open={showMultipleLoginAlert}
+      >
         <h2>{StationLoginLabels.MULTIPLE_SIGN_IN_ALERT_TITLE}</h2>
         <p>{StationLoginLabels.MULTIPLE_SIGN_IN_ALERT_MESSAGE}</p>
         <div className="modal-content">
-          <button id="ContinueButton" data-testid="ContinueButton" onClick={continueClicked}>
+          <button
+            id="ContinueButton"
+            data-testid="ContinueButton"
+            onClick={() => continueClicked(multiSignInModalRef, handleContinue)}
+          >
             {StationLoginLabels.CONTINUE}
           </button>
         </div>
@@ -162,7 +106,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
         </Text>
         <div className="cc-logout-modal-content">
           <Button
-            onClick={ccCancelButtonClicked}
+            onClick={() => ccCancelButtonClicked(ccSignOutModalRef, setShowCCSignOutModal)}
             variant="secondary"
             className="white-button"
             data-testId="cc-cancel-button"
@@ -175,11 +119,13 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
         </div>
       </dialog>
       {/* Save Confirmation Dialog */}
-      <dialog ref={saveConfirmDialogRef} className="cc-logout-modal">
+      <dialog ref={saveConfirmDialogRef} className="cc-logout-modal" data-testid="interaction-confirmation-dialog">
         <div className="modal-header" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
           <Text tagname="h2" type="body-large-bold" className="modal-text">
             {StationLoginLabels.CONFIRM_INTERACTION_PREFERENCE_CHANGES_TITLE}
           </Text>
+        </div>
+        <div className="cc-logout-modal-content">
           <Button
             size={32}
             variant="tertiary"
@@ -189,53 +135,20 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
             type="button"
             role="button"
             aria-label="Close"
-            onClick={saveConfirmCancelClicked}
+            onClick={() => saveConfirmCancelClicked(saveConfirmDialogRef, setShowSaveConfirmDialog)}
             className="cancelSaveLoginOptions"
-          ></Button>
-        </div>
-        <Text tagname="p" type="body-midsize-regular" className="modal-text">
-          {StationLoginLabels.CONFIRM_INTERACTION_PREFERENCE_CHANGES_MESSAGE}
-        </Text>
-        <div className="cc-logout-modal-content">
-          <Button onClick={saveConfirmCancelClicked} variant="secondary" className="white-button">
+          >
             {StationLoginLabels.CANCEL}
           </Button>
-          <Button onClick={handleSaveConfirm}>{StationLoginLabels.CONFIRM}</Button>
-        </div>
-      </dialog>
-      {/* Save Confirmation Dialog */}
-      <dialog ref={saveConfirmDialogRef} className="cc-logout-modal">
-        <div className="modal-header" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-          <Text tagname="h2" type="body-large-bold" className="modal-text">
-            {StationLoginLabels.CONFIRM_INTERACTION_PREFERENCE_CHANGES_TITLE}
-          </Text>
-          <Button
-            size={32}
-            variant="tertiary"
-            color="default"
-            prefix-icon="cancel-bold"
-            postfix-icon=""
-            type="button"
-            role="button"
-            aria-label="Close"
-            onClick={saveConfirmCancelClicked}
-            className="cancelSaveLoginOptions"
-          ></Button>
-        </div>
-        <Text tagname="p" type="body-midsize-regular" className="modal-text">
-          {StationLoginLabels.CONFIRM_INTERACTION_PREFERENCE_CHANGES_MESSAGE}
-        </Text>
-        <div className="cc-logout-modal-content">
-          <Button onClick={saveConfirmCancelClicked} variant="secondary" className="white-button">
-            {StationLoginLabels.CANCEL}
+          <Button onClick={() => handleSaveConfirm(saveConfirmDialogRef, setShowSaveConfirmDialog, saveLoginOptions)}>
+            {StationLoginLabels.CONFIRM}
           </Button>
-          <Button onClick={handleSaveConfirm}>{StationLoginLabels.CONFIRM}</Button>
         </div>
       </dialog>
       <div className="box station-login" data-testid="station-login-widget">
         <section className="section-box">
           {!profileMode && (
-            <Text tagname={'span'} type="body-large-bold">
+            <Text tagname={'span'} type="body-large-bold" data-testid="station-login-label">
               {StationLoginLabels.INTERACTION_PREFERENCES}
             </Text>
           )}
@@ -268,41 +181,23 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
                 name="login-option"
                 data-testid="login-option-select"
                 onChange={(event: CustomEvent) => {
-                  const selectedOption = event.detail.value;
-                  logger.info(`CC-Widgets: StationLogin: login option changed to: ${selectedOption}`, {
-                    module: 'cc-components#station-login.tsx',
-                    method: 'loginOptionChanged',
-                  });
-                  // TODO: Select component is calling onChange with first label on load
-                  // bug ticket: https://jira-eng-gpk2.cisco.com/jira/browse/MOMENTUM-668
-                  if (Object.keys(LoginOptions).includes(selectedOption)) {
-                    setDeviceType(selectedOption);
-                    setSelectedDeviceType(selectedOption);
-                    updateDialNumberLabel(selectedOption);
-                    setShowDNError(false);
-
-                    // If switching to the device type the user logged in with, restore its value
-                    if (selectedOption === originalLoginOptions.deviceType) {
-                      setCurrentLoginOptions({
-                        deviceType: selectedOption,
-                        dialNumber: originalLoginOptions.dialNumber || '',
-                        teamId: originalLoginOptions.teamId || '',
-                      });
-                      setDialNumberValue(originalLoginOptions.dialNumber || '');
-                      setDialNumber(originalLoginOptions.dialNumber || '');
-                      setSelectedTeamId(originalLoginOptions.teamId || '');
-                      setTeamId(originalLoginOptions.teamId || '');
-                    } else {
-                      // If switching to a different device type, clear the input
-                      setCurrentLoginOptions({
-                        deviceType: selectedOption,
-                        dialNumber: '',
-                        teamId: selectedTeamId || '',
-                      });
-                      setDialNumberValue('');
-                      setDialNumber('');
-                    }
-                  }
+                  handleLoginOptionChanged(
+                    event,
+                    setDeviceType,
+                    setSelectedDeviceType,
+                    updateDialNumberLabel,
+                    setDialNumber,
+                    setDialNumberValue,
+                    setCurrentLoginOptions,
+                    originalLoginOptions,
+                    setDialNumberLabel,
+                    setDialNumberPlaceholder,
+                    setShowDNError,
+                    setSelectedTeamId,
+                    setTeamId,
+                    logger,
+                    selectedTeamId
+                  );
                 }}
                 value={selectedDeviceType}
                 className="station-login-select"
@@ -329,33 +224,23 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
           </div>
           {selectedDeviceType && selectedDeviceType !== DESKTOP && (
             <Input
+              id="dial-number-input"
               data-testid="dial-number-input"
               label={dialNumberLabel}
               placeholder={dialNumberPlaceholder}
               value={dialNumberValue}
               onInput={(event) => {
-                const input = (event.target as HTMLInputElement).value.trim();
-                logger.info(`CC-Widgets: StationLogin: dialNumber input changed: ${input}`, {
-                  module: 'cc-components#station-login.tsx',
-                  method: 'dialNumberInputChanged',
-                });
-                setDialNumberValue(input);
-                setDialNumber(input);
-
-                // validation
-                if (input.length === 0) {
-                  // show error for empty string
-                  setDNErrorText(`${LoginOptions[selectedDeviceType]} ${StationLoginLabels.IS_REQUIRED}`);
-                  setShowDNError(true);
-                } else if (selectedDeviceType === DIALNUMBER) {
-                  setShowDNError(validateDialNumber(input));
-                } else {
-                  setShowDNError(false);
-                }
-                setCurrentLoginOptions((prev) => ({
-                  ...prev,
-                  dialNumber: input,
-                }));
+                handleDNInputChanged(
+                  event,
+                  setDialNumberValue,
+                  setDialNumber,
+                  setShowDNError,
+                  setDNErrorText,
+                  dialNumberRegex,
+                  setCurrentLoginOptions,
+                  selectedDeviceType,
+                  logger
+                );
               }}
               helpText={showDNError ? dnErrorText : undefined}
               helpTextType={showDNError ? 'error' : undefined}
@@ -369,18 +254,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
               id="teams-dropdown"
               name="teams-dropdown"
               onChange={(event: CustomEvent) => {
-                const value = event.detail.value;
-                logger.info(`CC-Widgets: StationLogin: team selected: ${value}`, {
-                  module: 'cc-components#station-login.tsx',
-                  method: 'teamSelected',
-                });
-                setTeam(value);
-                setSelectedTeamId(event.detail.value);
-                setTeamId(event.detail.value);
-                setCurrentLoginOptions((prev) => ({
-                  ...prev,
-                  teamId: value,
-                }));
+                handleTeamSelectChanged(event, setSelectedTeamId, setTeamId, setCurrentLoginOptions, setTeam, logger);
               }}
               className="station-login-select"
               placeholder={StationLoginLabels.YOUR_TEAM}
@@ -409,7 +283,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
 
           {/* Show error if Save is clicked with no changes */}
           {saveError && (
-            <Text className="error-text-color" type={'body-midsize-regular'}>
+            <Text data-testId="save-error" className="error-text-color" type={'body-midsize-regular'}>
               {saveError}
             </Text>
           )}
@@ -435,7 +309,12 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
               </Button>
             )}
             {onCCSignOut && !profileMode && (
-              <Button onClick={() => setShowCCSignOutModal(true)} variant="secondary" className="white-button">
+              <Button
+                onClick={() => setShowCCSignOutModal(true)}
+                variant="secondary"
+                className="white-button"
+                data-testid="sign-out-button"
+              >
                 {StationLoginLabels.SIGN_OUT}
               </Button>
             )}
