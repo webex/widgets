@@ -692,7 +692,7 @@ describe('useCallControl', () => {
 
     await act(async () => {
       await result.current.toggleHold(false);
-      mockCurrentTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_UNHOLD)?.[1]();
+      mockCurrentTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_RESUME)?.[1]();
     });
 
     expect(mockCurrentTask.resume).toHaveBeenCalled();

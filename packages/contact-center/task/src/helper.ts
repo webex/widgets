@@ -285,7 +285,7 @@ export const useCallControl = (props: useCallControlProps) => {
     }
   };
 
-  const unHoldCallback = () => {
+  const resumeCallback = () => {
     setIsHeld(false);
     if (onHoldResume) {
       onHoldResume({
@@ -357,7 +357,7 @@ export const useCallControl = (props: useCallControlProps) => {
       holdCallback,
       currentTask.data.interactionId
     );
-    store.setTaskCallback(TASK_EVENTS.TASK_UNHOLD, unHoldCallback, currentTask.data.interactionId);
+    store.setTaskCallback(TASK_EVENTS.TASK_RESUME, resumeCallback, currentTask.data.interactionId);
     store.setTaskCallback(TASK_EVENTS.TASK_END, endCallCallback, currentTask.data.interactionId);
     store.setTaskCallback(TASK_EVENTS.AGENT_WRAPPEDUP, wrapupCallCallback, currentTask.data.interactionId);
     store.setTaskCallback(TASK_EVENTS.TASK_RECORDING_PAUSED, pauseRecordingCallback, currentTask.data.interactionId);
@@ -370,7 +370,7 @@ export const useCallControl = (props: useCallControlProps) => {
         workerRef.current = null;
       }
       store.removeTaskCallback(TASK_EVENTS.TASK_HOLD, holdCallback, currentTask.data.interactionId);
-      store.removeTaskCallback(TASK_EVENTS.TASK_UNHOLD, unHoldCallback, currentTask.data.interactionId);
+      store.removeTaskCallback(TASK_EVENTS.TASK_RESUME, resumeCallback, currentTask.data.interactionId);
       store.removeTaskCallback(TASK_EVENTS.TASK_END, endCallCallback, currentTask.data.interactionId);
       store.removeTaskCallback(TASK_EVENTS.AGENT_WRAPPEDUP, wrapupCallCallback, currentTask.data.interactionId);
       store.removeTaskCallback(
