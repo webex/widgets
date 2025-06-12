@@ -10,7 +10,7 @@ import {
   OutdialCall,
 } from '@webex/cc-widgets';
 import {StationLogoutSuccess} from '@webex/plugin-cc';
-import Webex from 'webex/contact-center';
+import Webex from 'webex';
 import {ThemeProvider, IconProvider, Icon, Button, Checkbox, Text, Select, Option} from '@momentum-design/components/dist/react';
 import {PopoverNext} from '@momentum-ui/react-collaboration';
 import './App.scss';
