@@ -8,7 +8,6 @@ import {CallControlComponent} from '@webex/cc-components';
 
 const CallControl: React.FunctionComponent<CallControlProps> = observer(
   ({onHoldResume, onEnd, onWrapUp, onRecordingToggle}) => {
-    //Needs prop for onRecordingToggle
     const {
       logger,
       currentTask,
