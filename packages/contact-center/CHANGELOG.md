@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.70](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.69...v1.28.0-ccwidgets.70) (2025-06-10)
+
+
+### Bug Fixes
+
+* **cc-widgets:** resolves type error ([#465](https://github.com/webex/widgets/issues/465)) ([b9309bd](https://github.com/webex/widgets/commit/b9309bdbadb6e111ed99ae5b7e16eb99a1538892))
+
 # [1.28.0-ccwidgets.69](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.68...v1.28.0-ccwidgets.69) (2025-06-06)
 
 
