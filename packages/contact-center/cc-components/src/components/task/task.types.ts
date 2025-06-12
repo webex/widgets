@@ -41,18 +41,26 @@ export interface TaskProps {
 
   /**
    * Handler for task accepted in TaskList
+   * @param task - The accepted task
    */
   onTaskAccepted?: (task: ITask) => void;
 
   /**
    * Handler for task declined in TaskList
+   * @param task - The declined task
    */
   onTaskDeclined?: (task: ITask) => void;
 
   /**
    * Handler for task selected in TaskList
+   * @param task - The selected task
+   * @param isClicked - Indicates if the task was clicked
+   * This is used to differentiate between selection via click and programmatic selection.
+   * This is useful for handling selection logic differently based on user interaction.
+   * For example, if the task is selected programmatically, you might not want to trigger
+   * certain UI updates that are only relevant for user-initiated selections.
    */
-  onTaskSelected?: (task: ITask) => void;
+  onTaskSelected?: ({task, isClicked}: {task: ITask; isClicked: boolean}) => void;
 
   /**
    * accept incoming task action

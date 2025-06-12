@@ -417,10 +417,10 @@ describe('useTaskList Hook', () => {
 
     // Manually trigger the stored callback with the task
     act(() => {
-      store.onTaskSelected(taskMock);
+      store.onTaskSelected(taskMock, true);
     });
 
-    expect(onTaskSelected).toHaveBeenCalledWith(taskMock);
+    expect(onTaskSelected).toHaveBeenCalledWith({task: taskMock, isClicked: true});
 
     // Ensure no errors are logged
     expect(logger.error).not.toHaveBeenCalled();

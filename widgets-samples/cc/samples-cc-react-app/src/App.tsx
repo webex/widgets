@@ -156,8 +156,8 @@ const handleSaveEnd = (isComplete: boolean) => {
     console.log('onTaskDeclined invoked for task:', task);
   };
 
-  const onTaskSelected = (task) => {
-    console.log('onTaskSelected invoked for task:', task);
+  const onTaskSelected = ({task, isClicked}) => {
+    console.log('onTaskSelected invoked for task:', task, 'isClicked:', isClicked);
   };
 
   const onHoldResume = ({isHeld, task}) => {

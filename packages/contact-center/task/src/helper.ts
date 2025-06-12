@@ -42,8 +42,8 @@ export const useTaskList = (props: UseTaskListProps) => {
     }
 
     if (onTaskSelected) {
-      store.setTaskSelected(function (task) {
-        onTaskSelected(task);
+      store.setTaskSelected(function (task, isClicked) {
+        onTaskSelected({task, isClicked});
       });
     }
   }, []);
@@ -72,7 +72,7 @@ export const useTaskList = (props: UseTaskListProps) => {
     });
   };
   const onTaskSelect = (task: ITask) => {
-    store.setCurrentTask(task);
+    store.setCurrentTask(task, true);
   };
 
   return {taskList, acceptTask, declineTask, onTaskSelect, isBrowser};
