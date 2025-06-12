@@ -78,33 +78,34 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
   return (
     <>
       {/* TODO: Replace dialog with momentum-design modal component once available */}
-      <dialog
-        data-testid="multi-sign-in-modal"
-        ref={multiSignInModalRef}
-        className="modal"
-        open={showMultipleLoginAlert}
-      >
-        <h2>{StationLoginLabels.MULTIPLE_SIGN_IN_ALERT_TITLE}</h2>
-        <p>{StationLoginLabels.MULTIPLE_SIGN_IN_ALERT_MESSAGE}</p>
-        <div className="modal-content">
-          <button
+      <dialog data-testid="multi-sign-in-modal" ref={multiSignInModalRef} className="dialog-modal">
+        <Text tagname="h2" type="body-large-bold" className="modal-text">
+          {StationLoginLabels.MULTIPLE_SIGN_IN_ALERT_TITLE}
+        </Text>
+        <Text tagname="p" type="body-midsize-regular" className="modal-text">
+          {StationLoginLabels.MULTIPLE_SIGN_IN_ALERT_MESSAGE}
+        </Text>
+        <div className="dialog-modal-content">
+          <Button
             id="ContinueButton"
             data-testid="ContinueButton"
             onClick={() => continueClicked(multiSignInModalRef, handleContinue)}
+            variant="secondary"
+            className="white-button"
           >
             {StationLoginLabels.CONTINUE}
-          </button>
+          </Button>
         </div>
       </dialog>
       {/* TODO: Replace dialog with momentum-design modal component once available */}
-      <dialog ref={ccSignOutModalRef} className="cc-logout-modal" data-testid="cc-logout-modal">
+      <dialog ref={ccSignOutModalRef} className="dialog-modal" data-testid="cc-logout-modal">
         <Text tagname="h2" type="body-large-bold" className="modal-text">
           {StationLoginLabels.CC_SIGN_OUT}
         </Text>
         <Text tagname="p" type="body-midsize-regular" className="modal-text">
           {StationLoginLabels.CC_SIGN_OUT_CONFIRM}
         </Text>
-        <div className="cc-logout-modal-content">
+        <div className="dialog-modal-content">
           <Button
             onClick={() => ccCancelButtonClicked(ccSignOutModalRef, setShowCCSignOutModal)}
             variant="secondary"
@@ -119,13 +120,11 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
         </div>
       </dialog>
       {/* Save Confirmation Dialog */}
-      <dialog ref={saveConfirmDialogRef} className="cc-logout-modal" data-testid="interaction-confirmation-dialog">
+      <dialog ref={saveConfirmDialogRef} className="dialog-modal" data-testid="interaction-confirmation-dialog">
         <div className="modal-header" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
           <Text tagname="h2" type="body-large-bold" className="modal-text">
             {StationLoginLabels.CONFIRM_INTERACTION_PREFERENCE_CHANGES_TITLE}
           </Text>
-        </div>
-        <div className="cc-logout-modal-content">
           <Button
             size={32}
             variant="tertiary"
@@ -137,6 +136,16 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
             aria-label="Close"
             onClick={() => saveConfirmCancelClicked(saveConfirmDialogRef, setShowSaveConfirmDialog)}
             className="cancelSaveLoginOptions"
+          ></Button>
+        </div>
+        <Text tagname="p" type="body-midsize-regular" className="modal-text">
+          {StationLoginLabels.CONFIRM_INTERACTION_PREFERENCE_CHANGES_MESSAGE}
+        </Text>
+        <div className="dialog-modal-content">
+          <Button
+            onClick={() => saveConfirmCancelClicked(saveConfirmDialogRef, setShowSaveConfirmDialog)}
+            variant="secondary"
+            className="white-button"
           >
             {StationLoginLabels.CANCEL}
           </Button>

@@ -3,28 +3,43 @@
 exports[`Station Login Component Actions ProfileMode interaction confirmation Popup it should call handleConfirmCancelClicked when clicked on cancel in popup 1`] = `
 <div>
   <dialog
-    class="modal"
+    class="dialog-modal"
     data-testid="multi-sign-in-modal"
   >
-    <h2>
-      Multiple Sign In Alert
-    </h2>
-    <p>
-      You are signed in to the Desktop in multiple application instances. Click Continue to proceed with the Desktop in this application instance. Else, close this window.
-    </p>
-    <div
-      class="modal-content"
+    <mdc-text
+      class="modal-text"
+      tagname="h2"
+      type="body-large-bold"
     >
-      <button
+      Multiple Sign In Alert
+    </mdc-text>
+    <mdc-text
+      class="modal-text"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      You are signed in to the Desktop in multiple application instances. Click Continue to proceed with the Desktop in this application instance. Else, close this window.
+    </mdc-text>
+    <div
+      class="dialog-modal-content"
+    >
+      <mdc-button
+        class="white-button"
+        color="default"
         data-testid="ContinueButton"
         id="ContinueButton"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="secondary"
       >
         Continue
-      </button>
+      </mdc-button>
     </div>
   </dialog>
   <dialog
-    class="cc-logout-modal"
+    class="dialog-modal"
     data-testid="cc-logout-modal"
   >
     <mdc-text
@@ -42,7 +57,7 @@ exports[`Station Login Component Actions ProfileMode interaction confirmation Po
       Are you sure you want to sign out?
     </mdc-text>
     <div
-      class="cc-logout-modal-content"
+      class="dialog-modal-content"
     >
       <mdc-button
         class="white-button"
@@ -70,7 +85,7 @@ exports[`Station Login Component Actions ProfileMode interaction confirmation Po
     </div>
   </dialog>
   <dialog
-    class="cc-logout-modal"
+    class="dialog-modal"
     data-testid="interaction-confirmation-dialog"
   >
     <div
@@ -84,15 +99,11 @@ exports[`Station Login Component Actions ProfileMode interaction confirmation Po
       >
         Confirm interaction preference changes
       </mdc-text>
-    </div>
-    <div
-      class="cc-logout-modal-content"
-    >
       <mdc-button
         aria-label="Close"
         class="cancelSaveLoginOptions"
         color="default"
-        data-btn-type="pill-with-icon"
+        data-btn-type="icon"
         postfix-icon=""
         prefix-icon="cancel-bold"
         role="button"
@@ -100,6 +111,26 @@ exports[`Station Login Component Actions ProfileMode interaction confirmation Po
         tabindex="0"
         type="button"
         variant="tertiary"
+      />
+    </div>
+    <mdc-text
+      class="modal-text"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      Are you sure you want to save your interaction preferences changes?
+    </mdc-text>
+    <div
+      class="dialog-modal-content"
+    >
+      <mdc-button
+        class="white-button"
+        color="default"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="secondary"
       >
         Cancel
       </mdc-button>
@@ -275,28 +306,43 @@ exports[`Station Login Component Actions ProfileMode interaction confirmation Po
 exports[`Station Login Component Actions ProfileMode interaction confirmation Popup it should call handleConfirmCancelClicked when clicked on cancel in popup 2`] = `
 <div>
   <dialog
-    class="modal"
+    class="dialog-modal"
     data-testid="multi-sign-in-modal"
   >
-    <h2>
-      Multiple Sign In Alert
-    </h2>
-    <p>
-      You are signed in to the Desktop in multiple application instances. Click Continue to proceed with the Desktop in this application instance. Else, close this window.
-    </p>
-    <div
-      class="modal-content"
+    <mdc-text
+      class="modal-text"
+      tagname="h2"
+      type="body-large-bold"
     >
-      <button
+      Multiple Sign In Alert
+    </mdc-text>
+    <mdc-text
+      class="modal-text"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      You are signed in to the Desktop in multiple application instances. Click Continue to proceed with the Desktop in this application instance. Else, close this window.
+    </mdc-text>
+    <div
+      class="dialog-modal-content"
+    >
+      <mdc-button
+        class="white-button"
+        color="default"
         data-testid="ContinueButton"
         id="ContinueButton"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="secondary"
       >
         Continue
-      </button>
+      </mdc-button>
     </div>
   </dialog>
   <dialog
-    class="cc-logout-modal"
+    class="dialog-modal"
     data-testid="cc-logout-modal"
   >
     <mdc-text
@@ -314,7 +360,7 @@ exports[`Station Login Component Actions ProfileMode interaction confirmation Po
       Are you sure you want to sign out?
     </mdc-text>
     <div
-      class="cc-logout-modal-content"
+      class="dialog-modal-content"
     >
       <mdc-button
         class="white-button"
@@ -342,7 +388,7 @@ exports[`Station Login Component Actions ProfileMode interaction confirmation Po
     </div>
   </dialog>
   <dialog
-    class="cc-logout-modal"
+    class="dialog-modal"
     data-testid="interaction-confirmation-dialog"
   >
     <div
@@ -356,15 +402,11 @@ exports[`Station Login Component Actions ProfileMode interaction confirmation Po
       >
         Confirm interaction preference changes
       </mdc-text>
-    </div>
-    <div
-      class="cc-logout-modal-content"
-    >
       <mdc-button
         aria-label="Close"
         class="cancelSaveLoginOptions"
         color="default"
-        data-btn-type="pill-with-icon"
+        data-btn-type="icon"
         postfix-icon=""
         prefix-icon="cancel-bold"
         role="button"
@@ -372,6 +414,26 @@ exports[`Station Login Component Actions ProfileMode interaction confirmation Po
         tabindex="0"
         type="button"
         variant="tertiary"
+      />
+    </div>
+    <mdc-text
+      class="modal-text"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      Are you sure you want to save your interaction preferences changes?
+    </mdc-text>
+    <div
+      class="dialog-modal-content"
+    >
+      <mdc-button
+        class="white-button"
+        color="default"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="secondary"
       >
         Cancel
       </mdc-button>
@@ -547,29 +609,43 @@ exports[`Station Login Component Actions ProfileMode interaction confirmation Po
 exports[`Station Login Component Actions SignOut Modal Popup should close modal and call continueClicked with correct arguments 1`] = `
 <div>
   <dialog
-    class="modal"
+    class="dialog-modal"
     data-testid="multi-sign-in-modal"
-    open=""
   >
-    <h2>
-      Multiple Sign In Alert
-    </h2>
-    <p>
-      You are signed in to the Desktop in multiple application instances. Click Continue to proceed with the Desktop in this application instance. Else, close this window.
-    </p>
-    <div
-      class="modal-content"
+    <mdc-text
+      class="modal-text"
+      tagname="h2"
+      type="body-large-bold"
     >
-      <button
+      Multiple Sign In Alert
+    </mdc-text>
+    <mdc-text
+      class="modal-text"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      You are signed in to the Desktop in multiple application instances. Click Continue to proceed with the Desktop in this application instance. Else, close this window.
+    </mdc-text>
+    <div
+      class="dialog-modal-content"
+    >
+      <mdc-button
+        class="white-button"
+        color="default"
         data-testid="ContinueButton"
         id="ContinueButton"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="secondary"
       >
         Continue
-      </button>
+      </mdc-button>
     </div>
   </dialog>
   <dialog
-    class="cc-logout-modal"
+    class="dialog-modal"
     data-testid="cc-logout-modal"
   >
     <mdc-text
@@ -587,7 +663,7 @@ exports[`Station Login Component Actions SignOut Modal Popup should close modal 
       Are you sure you want to sign out?
     </mdc-text>
     <div
-      class="cc-logout-modal-content"
+      class="dialog-modal-content"
     >
       <mdc-button
         class="white-button"
@@ -615,7 +691,7 @@ exports[`Station Login Component Actions SignOut Modal Popup should close modal 
     </div>
   </dialog>
   <dialog
-    class="cc-logout-modal"
+    class="dialog-modal"
     data-testid="interaction-confirmation-dialog"
   >
     <div
@@ -629,15 +705,11 @@ exports[`Station Login Component Actions SignOut Modal Popup should close modal 
       >
         Confirm interaction preference changes
       </mdc-text>
-    </div>
-    <div
-      class="cc-logout-modal-content"
-    >
       <mdc-button
         aria-label="Close"
         class="cancelSaveLoginOptions"
         color="default"
-        data-btn-type="pill-with-icon"
+        data-btn-type="icon"
         postfix-icon=""
         prefix-icon="cancel-bold"
         role="button"
@@ -645,6 +717,26 @@ exports[`Station Login Component Actions SignOut Modal Popup should close modal 
         tabindex="0"
         type="button"
         variant="tertiary"
+      />
+    </div>
+    <mdc-text
+      class="modal-text"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      Are you sure you want to save your interaction preferences changes?
+    </mdc-text>
+    <div
+      class="dialog-modal-content"
+    >
+      <mdc-button
+        class="white-button"
+        color="default"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="secondary"
       >
         Cancel
       </mdc-button>
@@ -837,28 +929,43 @@ exports[`Station Login Component Actions SignOut Modal Popup should close modal 
 exports[`Station Login Component Actions SignOut Modal Popup show signOut modal when onCCSignOut is present and cancel is clicked 1`] = `
 <div>
   <dialog
-    class="modal"
+    class="dialog-modal"
     data-testid="multi-sign-in-modal"
   >
-    <h2>
-      Multiple Sign In Alert
-    </h2>
-    <p>
-      You are signed in to the Desktop in multiple application instances. Click Continue to proceed with the Desktop in this application instance. Else, close this window.
-    </p>
-    <div
-      class="modal-content"
+    <mdc-text
+      class="modal-text"
+      tagname="h2"
+      type="body-large-bold"
     >
-      <button
+      Multiple Sign In Alert
+    </mdc-text>
+    <mdc-text
+      class="modal-text"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      You are signed in to the Desktop in multiple application instances. Click Continue to proceed with the Desktop in this application instance. Else, close this window.
+    </mdc-text>
+    <div
+      class="dialog-modal-content"
+    >
+      <mdc-button
+        class="white-button"
+        color="default"
         data-testid="ContinueButton"
         id="ContinueButton"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="secondary"
       >
         Continue
-      </button>
+      </mdc-button>
     </div>
   </dialog>
   <dialog
-    class="cc-logout-modal"
+    class="dialog-modal"
     data-testid="cc-logout-modal"
   >
     <mdc-text
@@ -876,7 +983,7 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
       Are you sure you want to sign out?
     </mdc-text>
     <div
-      class="cc-logout-modal-content"
+      class="dialog-modal-content"
     >
       <mdc-button
         class="white-button"
@@ -904,7 +1011,7 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
     </div>
   </dialog>
   <dialog
-    class="cc-logout-modal"
+    class="dialog-modal"
     data-testid="interaction-confirmation-dialog"
   >
     <div
@@ -918,15 +1025,11 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
       >
         Confirm interaction preference changes
       </mdc-text>
-    </div>
-    <div
-      class="cc-logout-modal-content"
-    >
       <mdc-button
         aria-label="Close"
         class="cancelSaveLoginOptions"
         color="default"
-        data-btn-type="pill-with-icon"
+        data-btn-type="icon"
         postfix-icon=""
         prefix-icon="cancel-bold"
         role="button"
@@ -934,6 +1037,26 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
         tabindex="0"
         type="button"
         variant="tertiary"
+      />
+    </div>
+    <mdc-text
+      class="modal-text"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      Are you sure you want to save your interaction preferences changes?
+    </mdc-text>
+    <div
+      class="dialog-modal-content"
+    >
+      <mdc-button
+        class="white-button"
+        color="default"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="secondary"
       >
         Cancel
       </mdc-button>
@@ -1115,28 +1238,43 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
 exports[`Station Login Component Actions SignOut Modal Popup show signOut modal when onCCSignOut is present and cancel is clicked 2`] = `
 <div>
   <dialog
-    class="modal"
+    class="dialog-modal"
     data-testid="multi-sign-in-modal"
   >
-    <h2>
-      Multiple Sign In Alert
-    </h2>
-    <p>
-      You are signed in to the Desktop in multiple application instances. Click Continue to proceed with the Desktop in this application instance. Else, close this window.
-    </p>
-    <div
-      class="modal-content"
+    <mdc-text
+      class="modal-text"
+      tagname="h2"
+      type="body-large-bold"
     >
-      <button
+      Multiple Sign In Alert
+    </mdc-text>
+    <mdc-text
+      class="modal-text"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      You are signed in to the Desktop in multiple application instances. Click Continue to proceed with the Desktop in this application instance. Else, close this window.
+    </mdc-text>
+    <div
+      class="dialog-modal-content"
+    >
+      <mdc-button
+        class="white-button"
+        color="default"
         data-testid="ContinueButton"
         id="ContinueButton"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="secondary"
       >
         Continue
-      </button>
+      </mdc-button>
     </div>
   </dialog>
   <dialog
-    class="cc-logout-modal"
+    class="dialog-modal"
     data-testid="cc-logout-modal"
   >
     <mdc-text
@@ -1154,7 +1292,7 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
       Are you sure you want to sign out?
     </mdc-text>
     <div
-      class="cc-logout-modal-content"
+      class="dialog-modal-content"
     >
       <mdc-button
         class="white-button"
@@ -1182,7 +1320,7 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
     </div>
   </dialog>
   <dialog
-    class="cc-logout-modal"
+    class="dialog-modal"
     data-testid="interaction-confirmation-dialog"
   >
     <div
@@ -1196,15 +1334,11 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
       >
         Confirm interaction preference changes
       </mdc-text>
-    </div>
-    <div
-      class="cc-logout-modal-content"
-    >
       <mdc-button
         aria-label="Close"
         class="cancelSaveLoginOptions"
         color="default"
-        data-btn-type="pill-with-icon"
+        data-btn-type="icon"
         postfix-icon=""
         prefix-icon="cancel-bold"
         role="button"
@@ -1212,6 +1346,26 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
         tabindex="0"
         type="button"
         variant="tertiary"
+      />
+    </div>
+    <mdc-text
+      class="modal-text"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      Are you sure you want to save your interaction preferences changes?
+    </mdc-text>
+    <div
+      class="dialog-modal-content"
+    >
+      <mdc-button
+        class="white-button"
+        color="default"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="secondary"
       >
         Cancel
       </mdc-button>
@@ -1393,28 +1547,43 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
 exports[`Station Login Component Actions SignOut Modal Popup show signOut modal when onCCSignOut is present and sign out is clicked 1`] = `
 <div>
   <dialog
-    class="modal"
+    class="dialog-modal"
     data-testid="multi-sign-in-modal"
   >
-    <h2>
-      Multiple Sign In Alert
-    </h2>
-    <p>
-      You are signed in to the Desktop in multiple application instances. Click Continue to proceed with the Desktop in this application instance. Else, close this window.
-    </p>
-    <div
-      class="modal-content"
+    <mdc-text
+      class="modal-text"
+      tagname="h2"
+      type="body-large-bold"
     >
-      <button
+      Multiple Sign In Alert
+    </mdc-text>
+    <mdc-text
+      class="modal-text"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      You are signed in to the Desktop in multiple application instances. Click Continue to proceed with the Desktop in this application instance. Else, close this window.
+    </mdc-text>
+    <div
+      class="dialog-modal-content"
+    >
+      <mdc-button
+        class="white-button"
+        color="default"
         data-testid="ContinueButton"
         id="ContinueButton"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="secondary"
       >
         Continue
-      </button>
+      </mdc-button>
     </div>
   </dialog>
   <dialog
-    class="cc-logout-modal"
+    class="dialog-modal"
     data-testid="cc-logout-modal"
   >
     <mdc-text
@@ -1432,7 +1601,7 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
       Are you sure you want to sign out?
     </mdc-text>
     <div
-      class="cc-logout-modal-content"
+      class="dialog-modal-content"
     >
       <mdc-button
         class="white-button"
@@ -1460,7 +1629,7 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
     </div>
   </dialog>
   <dialog
-    class="cc-logout-modal"
+    class="dialog-modal"
     data-testid="interaction-confirmation-dialog"
   >
     <div
@@ -1474,15 +1643,11 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
       >
         Confirm interaction preference changes
       </mdc-text>
-    </div>
-    <div
-      class="cc-logout-modal-content"
-    >
       <mdc-button
         aria-label="Close"
         class="cancelSaveLoginOptions"
         color="default"
-        data-btn-type="pill-with-icon"
+        data-btn-type="icon"
         postfix-icon=""
         prefix-icon="cancel-bold"
         role="button"
@@ -1490,6 +1655,26 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
         tabindex="0"
         type="button"
         variant="tertiary"
+      />
+    </div>
+    <mdc-text
+      class="modal-text"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      Are you sure you want to save your interaction preferences changes?
+    </mdc-text>
+    <div
+      class="dialog-modal-content"
+    >
+      <mdc-button
+        class="white-button"
+        color="default"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="secondary"
       >
         Cancel
       </mdc-button>
@@ -1671,28 +1856,43 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
 exports[`Station Login Component Actions SignOut Modal Popup show signOut modal when onCCSignOut is present and sign out is clicked 2`] = `
 <div>
   <dialog
-    class="modal"
+    class="dialog-modal"
     data-testid="multi-sign-in-modal"
   >
-    <h2>
-      Multiple Sign In Alert
-    </h2>
-    <p>
-      You are signed in to the Desktop in multiple application instances. Click Continue to proceed with the Desktop in this application instance. Else, close this window.
-    </p>
-    <div
-      class="modal-content"
+    <mdc-text
+      class="modal-text"
+      tagname="h2"
+      type="body-large-bold"
     >
-      <button
+      Multiple Sign In Alert
+    </mdc-text>
+    <mdc-text
+      class="modal-text"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      You are signed in to the Desktop in multiple application instances. Click Continue to proceed with the Desktop in this application instance. Else, close this window.
+    </mdc-text>
+    <div
+      class="dialog-modal-content"
+    >
+      <mdc-button
+        class="white-button"
+        color="default"
         data-testid="ContinueButton"
         id="ContinueButton"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="secondary"
       >
         Continue
-      </button>
+      </mdc-button>
     </div>
   </dialog>
   <dialog
-    class="cc-logout-modal"
+    class="dialog-modal"
     data-testid="cc-logout-modal"
   >
     <mdc-text
@@ -1710,7 +1910,7 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
       Are you sure you want to sign out?
     </mdc-text>
     <div
-      class="cc-logout-modal-content"
+      class="dialog-modal-content"
     >
       <mdc-button
         class="white-button"
@@ -1738,7 +1938,7 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
     </div>
   </dialog>
   <dialog
-    class="cc-logout-modal"
+    class="dialog-modal"
     data-testid="interaction-confirmation-dialog"
   >
     <div
@@ -1752,15 +1952,11 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
       >
         Confirm interaction preference changes
       </mdc-text>
-    </div>
-    <div
-      class="cc-logout-modal-content"
-    >
       <mdc-button
         aria-label="Close"
         class="cancelSaveLoginOptions"
         color="default"
-        data-btn-type="pill-with-icon"
+        data-btn-type="icon"
         postfix-icon=""
         prefix-icon="cancel-bold"
         role="button"
@@ -1768,6 +1964,26 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
         tabindex="0"
         type="button"
         variant="tertiary"
+      />
+    </div>
+    <mdc-text
+      class="modal-text"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      Are you sure you want to save your interaction preferences changes?
+    </mdc-text>
+    <div
+      class="dialog-modal-content"
+    >
+      <mdc-button
+        class="white-button"
+        color="default"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="secondary"
       >
         Cancel
       </mdc-button>
@@ -1949,28 +2165,43 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
 exports[`Station Login Component Actions calls handleDNInputChanged with correct arguments when number is added 1`] = `
 <div>
   <dialog
-    class="modal"
+    class="dialog-modal"
     data-testid="multi-sign-in-modal"
   >
-    <h2>
-      Multiple Sign In Alert
-    </h2>
-    <p>
-      You are signed in to the Desktop in multiple application instances. Click Continue to proceed with the Desktop in this application instance. Else, close this window.
-    </p>
-    <div
-      class="modal-content"
+    <mdc-text
+      class="modal-text"
+      tagname="h2"
+      type="body-large-bold"
     >
-      <button
+      Multiple Sign In Alert
+    </mdc-text>
+    <mdc-text
+      class="modal-text"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      You are signed in to the Desktop in multiple application instances. Click Continue to proceed with the Desktop in this application instance. Else, close this window.
+    </mdc-text>
+    <div
+      class="dialog-modal-content"
+    >
+      <mdc-button
+        class="white-button"
+        color="default"
         data-testid="ContinueButton"
         id="ContinueButton"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="secondary"
       >
         Continue
-      </button>
+      </mdc-button>
     </div>
   </dialog>
   <dialog
-    class="cc-logout-modal"
+    class="dialog-modal"
     data-testid="cc-logout-modal"
   >
     <mdc-text
@@ -1988,7 +2219,7 @@ exports[`Station Login Component Actions calls handleDNInputChanged with correct
       Are you sure you want to sign out?
     </mdc-text>
     <div
-      class="cc-logout-modal-content"
+      class="dialog-modal-content"
     >
       <mdc-button
         class="white-button"
@@ -2016,7 +2247,7 @@ exports[`Station Login Component Actions calls handleDNInputChanged with correct
     </div>
   </dialog>
   <dialog
-    class="cc-logout-modal"
+    class="dialog-modal"
     data-testid="interaction-confirmation-dialog"
   >
     <div
@@ -2030,15 +2261,11 @@ exports[`Station Login Component Actions calls handleDNInputChanged with correct
       >
         Confirm interaction preference changes
       </mdc-text>
-    </div>
-    <div
-      class="cc-logout-modal-content"
-    >
       <mdc-button
         aria-label="Close"
         class="cancelSaveLoginOptions"
         color="default"
-        data-btn-type="pill-with-icon"
+        data-btn-type="icon"
         postfix-icon=""
         prefix-icon="cancel-bold"
         role="button"
@@ -2046,6 +2273,26 @@ exports[`Station Login Component Actions calls handleDNInputChanged with correct
         tabindex="0"
         type="button"
         variant="tertiary"
+      />
+    </div>
+    <mdc-text
+      class="modal-text"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      Are you sure you want to save your interaction preferences changes?
+    </mdc-text>
+    <div
+      class="dialog-modal-content"
+    >
+      <mdc-button
+        class="white-button"
+        color="default"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="secondary"
       >
         Cancel
       </mdc-button>
@@ -2238,28 +2485,43 @@ exports[`Station Login Component Actions calls handleDNInputChanged with correct
 exports[`Station Login Component Actions calls handleTeamSelectChanged utility function when team is changed 1`] = `
 <div>
   <dialog
-    class="modal"
+    class="dialog-modal"
     data-testid="multi-sign-in-modal"
   >
-    <h2>
-      Multiple Sign In Alert
-    </h2>
-    <p>
-      You are signed in to the Desktop in multiple application instances. Click Continue to proceed with the Desktop in this application instance. Else, close this window.
-    </p>
-    <div
-      class="modal-content"
+    <mdc-text
+      class="modal-text"
+      tagname="h2"
+      type="body-large-bold"
     >
-      <button
+      Multiple Sign In Alert
+    </mdc-text>
+    <mdc-text
+      class="modal-text"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      You are signed in to the Desktop in multiple application instances. Click Continue to proceed with the Desktop in this application instance. Else, close this window.
+    </mdc-text>
+    <div
+      class="dialog-modal-content"
+    >
+      <mdc-button
+        class="white-button"
+        color="default"
         data-testid="ContinueButton"
         id="ContinueButton"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="secondary"
       >
         Continue
-      </button>
+      </mdc-button>
     </div>
   </dialog>
   <dialog
-    class="cc-logout-modal"
+    class="dialog-modal"
     data-testid="cc-logout-modal"
   >
     <mdc-text
@@ -2277,7 +2539,7 @@ exports[`Station Login Component Actions calls handleTeamSelectChanged utility f
       Are you sure you want to sign out?
     </mdc-text>
     <div
-      class="cc-logout-modal-content"
+      class="dialog-modal-content"
     >
       <mdc-button
         class="white-button"
@@ -2305,7 +2567,7 @@ exports[`Station Login Component Actions calls handleTeamSelectChanged utility f
     </div>
   </dialog>
   <dialog
-    class="cc-logout-modal"
+    class="dialog-modal"
     data-testid="interaction-confirmation-dialog"
   >
     <div
@@ -2319,15 +2581,11 @@ exports[`Station Login Component Actions calls handleTeamSelectChanged utility f
       >
         Confirm interaction preference changes
       </mdc-text>
-    </div>
-    <div
-      class="cc-logout-modal-content"
-    >
       <mdc-button
         aria-label="Close"
         class="cancelSaveLoginOptions"
         color="default"
-        data-btn-type="pill-with-icon"
+        data-btn-type="icon"
         postfix-icon=""
         prefix-icon="cancel-bold"
         role="button"
@@ -2335,6 +2593,26 @@ exports[`Station Login Component Actions calls handleTeamSelectChanged utility f
         tabindex="0"
         type="button"
         variant="tertiary"
+      />
+    </div>
+    <mdc-text
+      class="modal-text"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      Are you sure you want to save your interaction preferences changes?
+    </mdc-text>
+    <div
+      class="dialog-modal-content"
+    >
+      <mdc-button
+        class="white-button"
+        color="default"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="secondary"
       >
         Cancel
       </mdc-button>
@@ -2527,28 +2805,43 @@ exports[`Station Login Component Actions calls handleTeamSelectChanged utility f
 exports[`Station Login Component Rendering renders login failure when passed 1`] = `
 <div>
   <dialog
-    class="modal"
+    class="dialog-modal"
     data-testid="multi-sign-in-modal"
   >
-    <h2>
-      Multiple Sign In Alert
-    </h2>
-    <p>
-      You are signed in to the Desktop in multiple application instances. Click Continue to proceed with the Desktop in this application instance. Else, close this window.
-    </p>
-    <div
-      class="modal-content"
+    <mdc-text
+      class="modal-text"
+      tagname="h2"
+      type="body-large-bold"
     >
-      <button
+      Multiple Sign In Alert
+    </mdc-text>
+    <mdc-text
+      class="modal-text"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      You are signed in to the Desktop in multiple application instances. Click Continue to proceed with the Desktop in this application instance. Else, close this window.
+    </mdc-text>
+    <div
+      class="dialog-modal-content"
+    >
+      <mdc-button
+        class="white-button"
+        color="default"
         data-testid="ContinueButton"
         id="ContinueButton"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="secondary"
       >
         Continue
-      </button>
+      </mdc-button>
     </div>
   </dialog>
   <dialog
-    class="cc-logout-modal"
+    class="dialog-modal"
     data-testid="cc-logout-modal"
   >
     <mdc-text
@@ -2566,7 +2859,7 @@ exports[`Station Login Component Rendering renders login failure when passed 1`]
       Are you sure you want to sign out?
     </mdc-text>
     <div
-      class="cc-logout-modal-content"
+      class="dialog-modal-content"
     >
       <mdc-button
         class="white-button"
@@ -2594,7 +2887,7 @@ exports[`Station Login Component Rendering renders login failure when passed 1`]
     </div>
   </dialog>
   <dialog
-    class="cc-logout-modal"
+    class="dialog-modal"
     data-testid="interaction-confirmation-dialog"
   >
     <div
@@ -2608,15 +2901,11 @@ exports[`Station Login Component Rendering renders login failure when passed 1`]
       >
         Confirm interaction preference changes
       </mdc-text>
-    </div>
-    <div
-      class="cc-logout-modal-content"
-    >
       <mdc-button
         aria-label="Close"
         class="cancelSaveLoginOptions"
         color="default"
-        data-btn-type="pill-with-icon"
+        data-btn-type="icon"
         postfix-icon=""
         prefix-icon="cancel-bold"
         role="button"
@@ -2624,6 +2913,26 @@ exports[`Station Login Component Rendering renders login failure when passed 1`]
         tabindex="0"
         type="button"
         variant="tertiary"
+      />
+    </div>
+    <mdc-text
+      class="modal-text"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      Are you sure you want to save your interaction preferences changes?
+    </mdc-text>
+    <div
+      class="dialog-modal-content"
+    >
+      <mdc-button
+        class="white-button"
+        color="default"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="secondary"
       >
         Cancel
       </mdc-button>
@@ -2824,28 +3133,43 @@ exports[`Station Login Component Rendering renders login failure when passed 1`]
 exports[`Station Login Component Rendering renders save error when passed 1`] = `
 <div>
   <dialog
-    class="modal"
+    class="dialog-modal"
     data-testid="multi-sign-in-modal"
   >
-    <h2>
-      Multiple Sign In Alert
-    </h2>
-    <p>
-      You are signed in to the Desktop in multiple application instances. Click Continue to proceed with the Desktop in this application instance. Else, close this window.
-    </p>
-    <div
-      class="modal-content"
+    <mdc-text
+      class="modal-text"
+      tagname="h2"
+      type="body-large-bold"
     >
-      <button
+      Multiple Sign In Alert
+    </mdc-text>
+    <mdc-text
+      class="modal-text"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      You are signed in to the Desktop in multiple application instances. Click Continue to proceed with the Desktop in this application instance. Else, close this window.
+    </mdc-text>
+    <div
+      class="dialog-modal-content"
+    >
+      <mdc-button
+        class="white-button"
+        color="default"
         data-testid="ContinueButton"
         id="ContinueButton"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="secondary"
       >
         Continue
-      </button>
+      </mdc-button>
     </div>
   </dialog>
   <dialog
-    class="cc-logout-modal"
+    class="dialog-modal"
     data-testid="cc-logout-modal"
   >
     <mdc-text
@@ -2863,7 +3187,7 @@ exports[`Station Login Component Rendering renders save error when passed 1`] = 
       Are you sure you want to sign out?
     </mdc-text>
     <div
-      class="cc-logout-modal-content"
+      class="dialog-modal-content"
     >
       <mdc-button
         class="white-button"
@@ -2891,7 +3215,7 @@ exports[`Station Login Component Rendering renders save error when passed 1`] = 
     </div>
   </dialog>
   <dialog
-    class="cc-logout-modal"
+    class="dialog-modal"
     data-testid="interaction-confirmation-dialog"
   >
     <div
@@ -2905,15 +3229,11 @@ exports[`Station Login Component Rendering renders save error when passed 1`] = 
       >
         Confirm interaction preference changes
       </mdc-text>
-    </div>
-    <div
-      class="cc-logout-modal-content"
-    >
       <mdc-button
         aria-label="Close"
         class="cancelSaveLoginOptions"
         color="default"
-        data-btn-type="pill-with-icon"
+        data-btn-type="icon"
         postfix-icon=""
         prefix-icon="cancel-bold"
         role="button"
@@ -2921,6 +3241,26 @@ exports[`Station Login Component Rendering renders save error when passed 1`] = 
         tabindex="0"
         type="button"
         variant="tertiary"
+      />
+    </div>
+    <mdc-text
+      class="modal-text"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      Are you sure you want to save your interaction preferences changes?
+    </mdc-text>
+    <div
+      class="dialog-modal-content"
+    >
+      <mdc-button
+        class="white-button"
+        color="default"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="secondary"
       >
         Cancel
       </mdc-button>
@@ -3121,28 +3461,43 @@ exports[`Station Login Component Rendering renders save error when passed 1`] = 
 exports[`Station Login Component Rendering renders the component correctly 1`] = `
 <div>
   <dialog
-    class="modal"
+    class="dialog-modal"
     data-testid="multi-sign-in-modal"
   >
-    <h2>
-      Multiple Sign In Alert
-    </h2>
-    <p>
-      You are signed in to the Desktop in multiple application instances. Click Continue to proceed with the Desktop in this application instance. Else, close this window.
-    </p>
-    <div
-      class="modal-content"
+    <mdc-text
+      class="modal-text"
+      tagname="h2"
+      type="body-large-bold"
     >
-      <button
+      Multiple Sign In Alert
+    </mdc-text>
+    <mdc-text
+      class="modal-text"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      You are signed in to the Desktop in multiple application instances. Click Continue to proceed with the Desktop in this application instance. Else, close this window.
+    </mdc-text>
+    <div
+      class="dialog-modal-content"
+    >
+      <mdc-button
+        class="white-button"
+        color="default"
         data-testid="ContinueButton"
         id="ContinueButton"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="secondary"
       >
         Continue
-      </button>
+      </mdc-button>
     </div>
   </dialog>
   <dialog
-    class="cc-logout-modal"
+    class="dialog-modal"
     data-testid="cc-logout-modal"
   >
     <mdc-text
@@ -3160,7 +3515,7 @@ exports[`Station Login Component Rendering renders the component correctly 1`] =
       Are you sure you want to sign out?
     </mdc-text>
     <div
-      class="cc-logout-modal-content"
+      class="dialog-modal-content"
     >
       <mdc-button
         class="white-button"
@@ -3188,7 +3543,7 @@ exports[`Station Login Component Rendering renders the component correctly 1`] =
     </div>
   </dialog>
   <dialog
-    class="cc-logout-modal"
+    class="dialog-modal"
     data-testid="interaction-confirmation-dialog"
   >
     <div
@@ -3202,15 +3557,11 @@ exports[`Station Login Component Rendering renders the component correctly 1`] =
       >
         Confirm interaction preference changes
       </mdc-text>
-    </div>
-    <div
-      class="cc-logout-modal-content"
-    >
       <mdc-button
         aria-label="Close"
         class="cancelSaveLoginOptions"
         color="default"
-        data-btn-type="pill-with-icon"
+        data-btn-type="icon"
         postfix-icon=""
         prefix-icon="cancel-bold"
         role="button"
@@ -3218,6 +3569,26 @@ exports[`Station Login Component Rendering renders the component correctly 1`] =
         tabindex="0"
         type="button"
         variant="tertiary"
+      />
+    </div>
+    <mdc-text
+      class="modal-text"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      Are you sure you want to save your interaction preferences changes?
+    </mdc-text>
+    <div
+      class="dialog-modal-content"
+    >
+      <mdc-button
+        class="white-button"
+        color="default"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="secondary"
       >
         Cancel
       </mdc-button>
@@ -3410,28 +3781,43 @@ exports[`Station Login Component Rendering renders the component correctly 1`] =
 exports[`Station Login Component Rendering renders the component correctly in profileMode 1`] = `
 <div>
   <dialog
-    class="modal"
+    class="dialog-modal"
     data-testid="multi-sign-in-modal"
   >
-    <h2>
-      Multiple Sign In Alert
-    </h2>
-    <p>
-      You are signed in to the Desktop in multiple application instances. Click Continue to proceed with the Desktop in this application instance. Else, close this window.
-    </p>
-    <div
-      class="modal-content"
+    <mdc-text
+      class="modal-text"
+      tagname="h2"
+      type="body-large-bold"
     >
-      <button
+      Multiple Sign In Alert
+    </mdc-text>
+    <mdc-text
+      class="modal-text"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      You are signed in to the Desktop in multiple application instances. Click Continue to proceed with the Desktop in this application instance. Else, close this window.
+    </mdc-text>
+    <div
+      class="dialog-modal-content"
+    >
+      <mdc-button
+        class="white-button"
+        color="default"
         data-testid="ContinueButton"
         id="ContinueButton"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="secondary"
       >
         Continue
-      </button>
+      </mdc-button>
     </div>
   </dialog>
   <dialog
-    class="cc-logout-modal"
+    class="dialog-modal"
     data-testid="cc-logout-modal"
   >
     <mdc-text
@@ -3449,7 +3835,7 @@ exports[`Station Login Component Rendering renders the component correctly in pr
       Are you sure you want to sign out?
     </mdc-text>
     <div
-      class="cc-logout-modal-content"
+      class="dialog-modal-content"
     >
       <mdc-button
         class="white-button"
@@ -3477,7 +3863,7 @@ exports[`Station Login Component Rendering renders the component correctly in pr
     </div>
   </dialog>
   <dialog
-    class="cc-logout-modal"
+    class="dialog-modal"
     data-testid="interaction-confirmation-dialog"
   >
     <div
@@ -3491,15 +3877,11 @@ exports[`Station Login Component Rendering renders the component correctly in pr
       >
         Confirm interaction preference changes
       </mdc-text>
-    </div>
-    <div
-      class="cc-logout-modal-content"
-    >
       <mdc-button
         aria-label="Close"
         class="cancelSaveLoginOptions"
         color="default"
-        data-btn-type="pill-with-icon"
+        data-btn-type="icon"
         postfix-icon=""
         prefix-icon="cancel-bold"
         role="button"
@@ -3507,6 +3889,26 @@ exports[`Station Login Component Rendering renders the component correctly in pr
         tabindex="0"
         type="button"
         variant="tertiary"
+      />
+    </div>
+    <mdc-text
+      class="modal-text"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      Are you sure you want to save your interaction preferences changes?
+    </mdc-text>
+    <div
+      class="dialog-modal-content"
+    >
+      <mdc-button
+        class="white-button"
+        color="default"
+        role="button"
+        size="32"
+        tabindex="0"
+        type="button"
+        variant="secondary"
       >
         Cancel
       </mdc-button>

@@ -107,14 +107,14 @@ describe('Station Login Component', () => {
       });
 
       const multiSignInModal = screen.getByTestId('multi-sign-in-modal');
-      expect(multiSignInModal).toHaveAttribute('class', 'modal');
+      expect(multiSignInModal).toHaveAttribute('class', 'dialog-modal');
       expect(multiSignInModal).toHaveAttribute('data-testid', 'multi-sign-in-modal');
 
       expect(multiSignInModal).toHaveTextContent(StationLoginLabels.MULTIPLE_SIGN_IN_ALERT_TITLE);
       expect(multiSignInModal).toHaveTextContent(StationLoginLabels.MULTIPLE_SIGN_IN_ALERT_MESSAGE);
       expect(multiSignInModal).toBeInTheDocument();
 
-      const multiSignInModalButtons = multiSignInModal.querySelectorAll('button');
+      const multiSignInModalButtons = multiSignInModal.querySelectorAll('mdc-button');
       expect(multiSignInModalButtons).toHaveLength(1);
       expect(multiSignInModalButtons[0]).toHaveTextContent(StationLoginLabels.CONTINUE);
 
@@ -159,8 +159,7 @@ describe('Station Login Component', () => {
         StationLoginLabels.CONFIRM_INTERACTION_PREFERENCE_CHANGES_TITLE
       );
       const interactionConfirmDialogButtons = interactionConfirmDialog.querySelectorAll('mdc-button');
-      expect(interactionConfirmDialogButtons).toHaveLength(2);
-      expect(interactionConfirmDialogButtons[0]).toHaveTextContent(StationLoginLabels.CANCEL);
+      expect(interactionConfirmDialogButtons).toHaveLength(3);
       expect(interactionConfirmDialogButtons[0]).toHaveAttribute('class', 'cancelSaveLoginOptions');
       expect(interactionConfirmDialogButtons[0]).toHaveAttribute('size', '32');
       expect(interactionConfirmDialogButtons[0]).toHaveAttribute('variant', 'tertiary');
@@ -170,7 +169,14 @@ describe('Station Login Component', () => {
       expect(interactionConfirmDialogButtons[0]).toHaveAttribute('type', 'button');
       expect(interactionConfirmDialogButtons[0]).toHaveAttribute('role', 'button');
       expect(interactionConfirmDialogButtons[0]).toHaveAttribute('aria-label', 'Close');
-      expect(interactionConfirmDialogButtons[1]).toHaveTextContent(StationLoginLabels.CONFIRM);
+
+      expect(interactionConfirmDialogButtons[1]).toHaveTextContent(StationLoginLabels.CANCEL);
+      expect(interactionConfirmDialogButtons[1]).toHaveAttribute('variant', 'secondary');
+      expect(interactionConfirmDialogButtons[1]).toHaveAttribute('size', '32');
+      expect(interactionConfirmDialogButtons[1]).toHaveAttribute('class', 'white-button');
+
+      expect(interactionConfirmDialogButtons[2]).toHaveTextContent(StationLoginLabels.CONFIRM);
+      expect(interactionConfirmDialogButtons[2]).toHaveAttribute('size', '32');
     });
 
     it('renders the component correctly', async () => {
@@ -342,6 +348,15 @@ describe('Station Login Component', () => {
       const teamsSelect = screen.getByTestId('teams-select-dropdown');
       expect(teamsSelect).toHaveTextContent(selectedTeam.name);
     });
+
+    it('renders save button when agent is logged in and in profile mode in interaction change menu', async () => {
+      const screen = await render(<StationLoginComponent {...props} isAgentLoggedIn={true} profileMode={true} />);
+      const saveButton = screen.getByTestId('save-login-options-button');
+      expect(saveButton).toBeInTheDocument();
+      expect(saveButton).toHaveAttribute('data-testid', 'save-login-options-button');
+      expect(saveButton).toHaveAttribute('color', 'positive');
+      expect(saveButton).toHaveTextContent(StationLoginLabels.SAVE);
+    });
   });
   describe('Actions', () => {
     it('calls login function when Save and Continue button is clicked', async () => {
@@ -494,8 +509,7 @@ describe('Station Login Component', () => {
       it('should open modal if showMultipleLoginAlert is true and modalRef is set', async () => {
         const screen = await render(<StationLoginComponent {...props} showMultipleLoginAlert={true} />);
 
-        // @ts-expect-error getByRole is not accepting open as a valid option
-        const modal = screen.getByRole('dialog', {open: ''});
+        const modal = screen.getAllByTestId('multi-sign-in-modal')[0];
         expect(modal).toHaveTextContent(StationLoginLabels.MULTIPLE_SIGN_IN_ALERT_TITLE);
         expect(modal).toBeInTheDocument();
       });
@@ -566,22 +580,13 @@ describe('Station Login Component', () => {
         const confirmationPopup = screen.getByTestId('interaction-confirmation-dialog');
 
         expect(confirmationPopup).toBeInTheDocument();
-        const confirmButton = confirmationPopup.querySelectorAll('mdc-button')[1];
+        const confirmButton = confirmationPopup.querySelectorAll('mdc-button')[2];
 
         fireEvent.click(confirmButton);
         expect(mockHandleSaveConfirm).toHaveBeenCalledWith(mockRef, expect.any(Function), props.saveLoginOptions);
       });
     });
     describe('Save Login Options', () => {
-      it('renders save button when agent is logged in and in profile mode', async () => {
-        const screen = await render(<StationLoginComponent {...props} isAgentLoggedIn={true} profileMode={true} />);
-        const saveButton = screen.getByTestId('save-login-options-button');
-        expect(saveButton).toBeInTheDocument();
-        expect(saveButton).toHaveAttribute('data-testid', 'save-login-options-button');
-        expect(saveButton).toHaveAttribute('color', 'positive');
-        expect(saveButton).toHaveTextContent(StationLoginLabels.SAVE);
-      });
-
       it('disables save button when no changes are made', async () => {
         const screen = await render(
           <StationLoginComponent {...props} isAgentLoggedIn={true} profileMode={true} isLoginOptionsChanged={false} />

@@ -63,7 +63,7 @@ describe('StationLogin Component', () => {
         onSaveStart={onSaveStart}
         onSaveEnd={onSaveEnd}
         teamId="team123"
-        profileMode="agent"
+        profileMode={false}
       />
     );
 
