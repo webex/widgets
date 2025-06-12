@@ -1,3 +1,17 @@
+# [1.28.0-ccwidgets.70](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.69...v1.28.0-ccwidgets.70) (2025-06-10)
+
+
+### Bug Fixes
+
+* **cc-widgets:** resolves type error ([#465](https://github.com/webex/widgets/issues/465)) ([b9309bd](https://github.com/webex/widgets/commit/b9309bdbadb6e111ed99ae5b7e16eb99a1538892))
+
+# [1.28.0-ccwidgets.69](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.68...v1.28.0-ccwidgets.69) (2025-06-06)
+
+
+### Bug Fixes
+
+* **agent-profile:** agent-save-interaction-preferences ([#467](https://github.com/webex/widgets/issues/467)) ([9458501](https://github.com/webex/widgets/commit/94585011c7ac1f9b6c343814c3a9c3fb7841e46f))
+
 # [1.28.0-ccwidgets.68](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.67...v1.28.0-ccwidgets.68) (2025-06-05)
 
 
