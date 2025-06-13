@@ -319,7 +319,6 @@ export const useCallControl = (props: useCallControlProps) => {
       isRecording: false,
       task: currentTask,
     });
-    logger.info('Recording paused', {module: 'useCallControl', method: 'pauseRecordingCallback'});
   };
 
   const resumeRecordingCallback = () => {
@@ -328,7 +327,6 @@ export const useCallControl = (props: useCallControlProps) => {
       isRecording: true,
       task: currentTask,
     });
-    logger.info('Recording resumed', {module: 'useCallControl', method: 'resumeRecordingCallback'});
   };
 
   useEffect(() => {
