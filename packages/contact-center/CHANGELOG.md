@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.71](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.70...v1.28.0-ccwidgets.71) (2025-06-13)
+
+
+### Bug Fixes
+
+* **cc-task:** add required callbacks ([#471](https://github.com/webex/widgets/issues/471)) ([f78ed67](https://github.com/webex/widgets/commit/f78ed6784b321549d1eca3a3f746ea5bb47ed245))
+
 # [1.28.0-ccwidgets.70](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.69...v1.28.0-ccwidgets.70) (2025-06-10)
 
 
