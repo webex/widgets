@@ -42,7 +42,6 @@ const WebStationLogin = r2wc(StationLoginComponent, {
     isAgentLoggedIn: 'boolean',
     handleContinue: 'function',
     deviceType: 'string',
-    dialNumber: 'string',
     showMultipleLoginAlert: 'boolean',
     logger: 'function',
   },

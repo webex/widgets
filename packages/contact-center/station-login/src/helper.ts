@@ -9,12 +9,25 @@ export const useStationLogin = (props: UseStationLoginProps) => {
   const loginCb = props.onLogin;
   const logoutCb = props.onLogout;
   const logger = props.logger;
+  const isAgentLoggedIn = props.isAgentLoggedIn;
   const dialNumber = props.dialNumber || '';
   const deviceType = props.deviceType || '';
+  const teamId = props.teamId || '';
   const [team, setTeam] = useState('');
   const [loginSuccess, setLoginSuccess] = useState<StationLoginSuccess>();
   const [loginFailure, setLoginFailure] = useState<Error>();
   const [logoutSuccess, setLogoutSuccess] = useState<StationLogoutSuccess>();
+
+  const [dialNumberValue, setDialNumberValue] = useState<string>(dialNumber || '');
+  const [selectedTeamId, setSelectedTeamId] = useState<string>(teamId || '');
+  const [selectedDeviceType, setSelectedDeviceType] = useState<string>(deviceType || '');
+  // useEffect to be called on mount
+
+  useEffect(() => {
+    setSelectedDeviceType(deviceType || '');
+    setDialNumberValue(dialNumber || '');
+    setSelectedTeamId(teamId || '');
+  }, [isAgentLoggedIn]);
 
   // Track original and current login options as a single object
   const [originalLoginOptions, setOriginalLoginOptions] = useState<LoginOptionsState>({
@@ -212,5 +225,11 @@ export const useStationLogin = (props: UseStationLoginProps) => {
     isLoginOptionsChanged,
     saveLoginOptions,
     saveError,
+    setSelectedDeviceType,
+    selectedDeviceType,
+    dialNumberValue,
+    setDialNumberValue,
+    setSelectedTeamId,
+    selectedTeamId,
   };
 };

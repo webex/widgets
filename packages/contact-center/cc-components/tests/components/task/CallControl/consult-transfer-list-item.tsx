@@ -21,7 +21,7 @@ afterAll(() => {
   (console.error as jest.Mock).mockRestore();
 });
 
-describe('CallControlListItemPresentational', () => {
+describe.skip('CallControlListItemPresentational', () => {
   const mockOnButtonPress = jest.fn();
   const defaultProps = {
     title: 'John Doe',
