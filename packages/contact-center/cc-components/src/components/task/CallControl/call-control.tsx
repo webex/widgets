@@ -6,6 +6,7 @@ import {PopoverNext, SelectNext, TooltipNext, Text, ButtonCircle, ButtonPill} fr
 import {Item} from '@react-stately/collections';
 import {Icon} from '@momentum-design/components/dist/react';
 import ConsultTransferPopoverComponent from './CallControlCustom/consult-transfer-popover';
+import WrapupTimer from './WrapupTimer';
 import type {MEDIA_CHANNEL as MediaChannelType} from '../task.types';
 import {getMediaTypeInfo} from '../../../utils';
 
@@ -41,6 +42,7 @@ function CallControlComponent(props: CallControlComponentProps) {
     setLastTargetType,
     controlVisibility,
     logger,
+    secondsUntilAutoWrapup,
   } = props;
 
   useEffect(() => {
@@ -80,6 +82,14 @@ function CallControlComponent(props: CallControlComponentProps) {
         method: 'handleWrapupCall',
       });
     }
+  };
+
+  const handleCancelWrapup = () => {
+    logger.info('CC-Widgets: CallControl: wrap-up cancelled', {
+      module: 'call-control.tsx',
+      method: 'handleCancelWrapup',
+    });
+    currentTask.cancelAutoWrapUpTimer();
   };
 
   const handleWrapupChange = (text, value) => {
@@ -314,6 +324,14 @@ function CallControlComponent(props: CallControlComponentProps) {
               offsetDistance={2}
               className="wrapup-popover"
             >
+              {currentTask.autoWrapup && (
+                <WrapupTimer
+                  secondsUntilAutoWrapup={secondsUntilAutoWrapup}
+                  allowCancelAutoWrapup={currentTask.autoWrapup.allowCancelAutoWrapup}
+                  handleCancelWrapup={handleCancelWrapup}
+                />
+              )}
+
               <Text className="wrapup-header" tagName={'small'} type="body-large-bold">
                 Wrap-up Interaction
               </Text>

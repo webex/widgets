@@ -360,6 +360,8 @@ export interface ControlProps {
     endConsult: boolean;
     recordingIndicator: boolean;
   };
+
+  secondsUntilAutoWrapup?: number;
 }
 
 export type CallControlComponentProps = Pick<
@@ -401,6 +403,7 @@ export type CallControlComponentProps = Pick<
   | 'setLastTargetType'
   | 'controlVisibility'
   | 'logger'
+  | 'secondsUntilAutoWrapup'
 >;
 
 /**

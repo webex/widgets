@@ -1,0 +1,53 @@
+.wrapup-timer-container {
+  background-color: var(--color-theme-background-alert-theme-normal, #DBF0FF);
+  border: 0.0625rem solid var(--color-theme-outline-theme-normal, #1170CF);
+  display: flex;
+  align-items: center;
+  border-radius: 0.5rem;
+}
+
+.wrapup-timer-container.urgent {
+  background-color: var(--color-theme-background-alert-error-normal, #FFE8EA);
+  border: 0.0625rem solid var(--color-theme-outline-cancel-normal, #AB0A15);
+}
+
+.wrapup-timer-icon {
+   --mdc-icon-fill-color: var(--color-theme-text-accent-normal, #0353A8);
+   margin-left: 0.5rem;
+   margin-right: 0.5rem;
+}
+
+.wrapup-timer-icon.urgent {
+   --mdc-icon-fill-color: var(--color-theme-text-error-normal, #AB0A15);
+}
+
+.wrapup-cancel-button {
+  display: inline-flex;
+  justify-content: center;
+  width: 5rem;
+  background-color: var(--mds-color-theme-button-secondary-normal);
+  border: 0.0625rem solid var(--mds-color-theme-outline-button-normal);
+  color: var(--mds-color-theme-text-primary-normal);
+  &:hover,
+  &.hover {
+    background-color: var(--mds-color-theme-button-secondary-normal);
+    color: var(--mds-color-theme-text-primary-normal);
+  }
+  margin-right: 0.5rem;
+}
+
+.wrapup-timer-content {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-right: 0.5rem;
+}
+
+.wrapup-header.wrapup-time {
+  margin-right: 0;
+  line-height: 1;
+}
+
+.wrapup-header.wrapup-text {
+  line-height: 1;
+}

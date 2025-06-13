@@ -167,6 +167,7 @@ export const useCallControl = (props: useCallControlProps) => {
   const [consultAgentId, setConsultAgentId] = useState<string>(null);
   const [holdTime, setHoldTime] = useState(0);
   const [startTimestamp, setStartTimestamp] = useState<number>(0);
+  const [secondsUntilAutoWrapup, setsecondsUntilAutoWrapup] = useState<number | null>(null);
   const workerRef = useRef<Worker | null>(null);
   const [lastTargetType, setLastTargetType] = useState<'agent' | 'queue'>('agent');
 
@@ -488,6 +489,42 @@ export const useCallControl = (props: useCallControlProps) => {
     [deviceType, featureFlags, currentTask]
   );
 
+  // Add useEffect for auto wrap-up timer
+  useEffect(() => {
+    let timerId: NodeJS.Timeout;
+
+    if (currentTask?.autoWrapup && controlVisibility?.wrapup) {
+      try {
+        // Initialize time left from the autoWrapup object
+        const initialTimeLeft = currentTask.autoWrapup.getTimeLeftSeconds();
+        setsecondsUntilAutoWrapup(initialTimeLeft);
+
+        // Update timer every second
+        timerId = setInterval(() => {
+          setsecondsUntilAutoWrapup((prevTime) => {
+            if (prevTime && prevTime > 0) {
+              return prevTime - 1;
+            }
+            return 0;
+          });
+        }, 1000);
+      } catch (error) {
+        logger.error('CC-Widgets: CallControl: Error initializing auto wrap-up timer', {
+          module: 'widget-cc-task#helper.ts',
+          method: 'useCallControl#autoWrapupTimer',
+          error,
+        });
+      }
+    }
+
+    // Clear the interval when component unmounts or when auto wrap-up is no longer active
+    return () => {
+      if (timerId) {
+        clearInterval(timerId);
+      }
+    };
+  }, [currentTask?.autoWrapup, controlVisibility?.wrapup]);
+
   return {
     currentTask,
     endCall,
@@ -515,6 +552,7 @@ export const useCallControl = (props: useCallControlProps) => {
     lastTargetType,
     setLastTargetType,
     controlVisibility,
+    secondsUntilAutoWrapup,
   };
 };
 
