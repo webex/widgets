@@ -10,12 +10,20 @@ export type TaskListProps = Pick<TaskProps, 'onTaskAccepted' | 'onTaskDeclined' 
 
 export type CallControlProps = Pick<
   ControlProps,
-  'onHoldResume' | 'onEnd' | 'onWrapUp' | 'callControlClassName' | 'callControlConsultClassName'
+  'onHoldResume' | 'onEnd' | 'onWrapUp' | 'onRecordingToggle' | 'callControlClassName' | 'callControlConsultClassName'
 >;
 
 export type useCallControlProps = Pick<
   ControlProps,
-  'currentTask' | 'onHoldResume' | 'onEnd' | 'onWrapUp' | 'logger' | 'consultInitiated' | 'deviceType' | 'featureFlags'
+  | 'currentTask'
+  | 'onHoldResume'
+  | 'onEnd'
+  | 'onWrapUp'
+  | 'onRecordingToggle'
+  | 'logger'
+  | 'consultInitiated'
+  | 'deviceType'
+  | 'featureFlags'
 >;
 
 export type Participant = {

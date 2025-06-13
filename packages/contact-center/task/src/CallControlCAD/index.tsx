@@ -7,7 +7,7 @@ import {CallControlProps} from '../task.types';
 import {CallControlCADComponent} from '@webex/cc-components';
 
 const CallControlCAD: React.FunctionComponent<CallControlProps> = observer(
-  ({onHoldResume, onEnd, onWrapUp, callControlClassName, callControlConsultClassName}) => {
+  ({onHoldResume, onEnd, onWrapUp, onRecordingToggle, callControlClassName, callControlConsultClassName}) => {
     const {
       logger,
       currentTask,
@@ -28,6 +28,7 @@ const CallControlCAD: React.FunctionComponent<CallControlProps> = observer(
         onHoldResume,
         onEnd,
         onWrapUp,
+        onRecordingToggle,
         logger,
         consultInitiated,
         deviceType,

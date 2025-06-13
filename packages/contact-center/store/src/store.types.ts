@@ -134,6 +134,8 @@ enum TASK_EVENTS {
   AGENT_WRAPPEDUP = 'AgentWrappedUp',
   AGENT_OFFER_CONTACT = 'AgentOfferContact',
   AGENT_CONSULT_CREATED = 'AgentConsultCreated',
+  TASK_RECORDING_PAUSED = 'task:recordingPaused',
+  TASK_RECORDING_RESUMED = 'task:recordingResumed',
 } // TODO: remove this once cc sdk exports this enum
 
 // Events that are received on the contact center SDK

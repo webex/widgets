@@ -22,6 +22,7 @@ const WebTaskList = r2wc(TaskList, {
   props: {
     onTaskAccepted: 'function',
     onTaskDeclined: 'function',
+    onTaskSelected: 'function',
   },
 });
 
@@ -37,6 +38,7 @@ const WebCallControl = r2wc(CallControl, {
     onHoldResume: 'function',
     onEnd: 'function',
     onWrapup: 'function',
+    onRecordingToggle: 'function',
   },
 });
 
@@ -45,6 +47,7 @@ const WebCallControlCAD = r2wc(CallControlCAD, {
     onHoldResume: 'function',
     onEnd: 'function',
     onWrapup: 'function',
+    onRecordingToggle: 'function',
   },
 });
 

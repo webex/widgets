@@ -26,7 +26,7 @@ class StoreWrapper implements IStoreWrapper {
   onIncomingTask: ({task}: {task: ITask}) => void;
   onTaskRejected?: (task: ITask, reason: string) => void;
   onTaskAssigned?: (task: ITask) => void;
-  onTaskSelected?: (task: ITask) => void;
+  onTaskSelected?: (task: ITask, isClicked: boolean) => void;
 
   constructor() {
     this.store = Store.getInstance();
@@ -199,7 +199,7 @@ class StoreWrapper implements IStoreWrapper {
     this.store.isAgentLoggedIn = value;
   };
 
-  setCurrentTask = (task: ITask): void => {
+  setCurrentTask = (task: ITask, isClicked: boolean = false): void => {
     runInAction(() => {
       // Save data from the current task if it exists
       if (this.currentTask) {
@@ -246,8 +246,8 @@ class StoreWrapper implements IStoreWrapper {
         this.setConsultOfferReceived(consultOfferReceived);
       }
 
-      if (this.onTaskSelected && !isSameTask) {
-        this.onTaskSelected(task);
+      if (this.onTaskSelected && !isSameTask && typeof isClicked !== 'undefined') {
+        this.onTaskSelected(task, isClicked);
       }
     });
   };
