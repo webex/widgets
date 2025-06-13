@@ -124,7 +124,17 @@ describe('Station Login Component', () => {
       container.querySelectorAll('[id^="mdc-input"]').forEach((el) => el.removeAttribute('id'));
       expect(container).toMatchSnapshot();
     });
+
+    it('does not render loginOptions if not in LoginOptions constant i.e only render ext,desktop and dn', async () => {
+      const {container} = await render(
+        <StationLoginComponent {...props} loginOptions={['randomLoginOption1', 'randomLoginOption2', 'AGENT_DN']} />
+      );
+      // Remove IDs to avoid snapshot issues with dynamic IDs
+      container.querySelectorAll('[id^="mdc-input"]').forEach((el) => el.removeAttribute('id'));
+      expect(container).toMatchSnapshot();
+    });
   });
+
   describe('Actions', () => {
     it('calls handleDNInputChanged with correct arguments when number is added', async () => {
       const {container} = await render(<StationLoginComponent {...props} />);

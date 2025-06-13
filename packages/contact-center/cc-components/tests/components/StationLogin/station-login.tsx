@@ -330,6 +330,15 @@ describe('Station Login Component', () => {
       expect(failureLabel).toHaveAttribute('type', 'body-midsize-regular');
     });
 
+    it('renders default error when error is not found', async () => {
+      const errorMessage = 'RANDOM_ERROR_MESSAGE';
+      const screen = await render(<StationLoginComponent {...props} loginFailure={new Error(errorMessage)} />);
+      const failureLabel = screen.getByTestId('station-login-failure-label');
+      expect(failureLabel.textContent).toBe(StationLoginLabels.DEFAULT_ERROR);
+      expect(failureLabel).toHaveAttribute('class', 'error-text-color');
+      expect(failureLabel).toHaveAttribute('type', 'body-midsize-regular');
+    });
+
     it('renders save error when passed', async () => {
       const errorMessage = 'Error in saving login options';
       const screen = await render(<StationLoginComponent {...props} saveError={errorMessage} />);
@@ -357,7 +366,27 @@ describe('Station Login Component', () => {
       expect(saveButton).toHaveAttribute('color', 'positive');
       expect(saveButton).toHaveTextContent(StationLoginLabels.SAVE);
     });
+
+    it('does not render loginOptions if not in LoginOptions constant i.e only render ext,desktop and dn', async () => {
+      const screen = await render(
+        <StationLoginComponent {...props} loginOptions={['randomLoginOption1', 'randomLoginOption2', 'AGENT_DN']} />
+      );
+
+      const loginOptionsSelect = screen.getAllByTestId('login-option-select')[0];
+      const loginOptions = loginOptionsSelect.childNodes;
+
+      expect(loginOptions.length).toBe(1); // Only 'AGENT_DN' should be rendered
+
+      props.loginOptions.forEach((option, idx) => {
+        if (option === 'AGENT_DN') {
+          expect(loginOptions[idx]).toHaveTextContent(LoginOptions[option]);
+          expect(loginOptions[idx]).toHaveValue(option);
+          expect(loginOptions[idx]).toHaveAttribute('data-testid', `login-option-${LoginOptions[option]}`);
+        }
+      });
+    });
   });
+
   describe('Actions', () => {
     it('calls login function when Save and Continue button is clicked', async () => {
       const screen = await render(<StationLoginComponent {...props} />);
@@ -391,6 +420,26 @@ describe('Station Login Component', () => {
         props.logger,
         props.selectedTeamId
       );
+    });
+
+    it('does not rerender when dialNumberValue is changed with deviceType as DESKTOP', async () => {
+      const renderSpy = jest.spyOn(React, 'createElement');
+
+      const screen = await render(<StationLoginComponent {...props} deviceType="DESKTOP" />);
+      const dialNumberInput = screen.getByTestId('dial-number-input');
+
+      const initialRenderCount = renderSpy.mock.calls.length;
+
+      // Fire custom event
+      const event = new CustomEvent('input', {detail: {value: 'AGENT_DN'}});
+      fireEvent(dialNumberInput, event);
+
+      const finalRenderCount = renderSpy.mock.calls.length;
+
+      // Assert that rerender did not happen
+      expect(finalRenderCount).toBe(initialRenderCount);
+
+      renderSpy.mockRestore();
     });
 
     it('calls handleDNInputChanged with correct arguments when number is added', async () => {
@@ -544,7 +593,7 @@ describe('Station Login Component', () => {
     });
 
     describe('ProfileMode interaction confirmation Popup', () => {
-      it('it should call handleConfirmCancelClicked when clicked on cancel in popup', async () => {
+      it('it should call handleConfirmCancelClicked when clicked on "X" in popup', async () => {
         const mockRef = {current: null};
         jest.spyOn(stationLoginUtils, 'createStationLoginRefs').mockImplementation(() => ({
           multiSignInModalRef: {current: null},
@@ -560,6 +609,27 @@ describe('Station Login Component', () => {
 
         expect(confirmationPopup).toBeInTheDocument();
         const cancelButton = confirmationPopup.querySelectorAll('mdc-button')[0];
+
+        fireEvent.click(cancelButton);
+        expect(mockSaveConfirmCancelClicked).toHaveBeenCalledWith(mockRef, expect.any(Function));
+      });
+
+      it('it should call handleConfirmCancelClicked when clicked on cancel in popup', async () => {
+        const mockRef = {current: null};
+        jest.spyOn(stationLoginUtils, 'createStationLoginRefs').mockImplementation(() => ({
+          multiSignInModalRef: {current: null},
+          ccSignOutModalRef: {current: null},
+          saveConfirmDialogRef: mockRef,
+        }));
+
+        const screen = await render(<StationLoginComponent {...props} isAgentLoggedIn={true} profileMode={true} />);
+        const saveButton = screen.getByTestId('save-login-options-button');
+        fireEvent.click(saveButton);
+
+        const confirmationPopup = screen.getByTestId('interaction-confirmation-dialog');
+
+        expect(confirmationPopup).toBeInTheDocument();
+        const cancelButton = confirmationPopup.querySelectorAll('mdc-button')[1];
 
         fireEvent.click(cancelButton);
         expect(mockSaveConfirmCancelClicked).toHaveBeenCalledWith(mockRef, expect.any(Function));
