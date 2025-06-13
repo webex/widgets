@@ -144,8 +144,10 @@ const handleSaveEnd = (isComplete: boolean) => {
     console.log('onTaskAccepted invoked for task:', task);
   };
 
-  const onTaskDeclined = (task) => {
+const onTaskDeclined = (task,reason) => {
     console.log('onTaskDeclined invoked for task:', task);
+    setRejectedReason(reason);
+    setShowRejectedPopup(true);
   };
 
   const onTaskSelected = ({task, isClicked}) => {
@@ -237,6 +239,11 @@ const handleSaveEnd = (isComplete: boolean) => {
     setSelectedState('');
   };
 
+  const handlePopoverClose = () => {
+    setShowRejectedPopup(false);
+    setSelectedState('');
+  };
+
   const doOAuthLogin = () => {
     let redirectUri = `${window.location.protocol}//${window.location.host}`;
 
@@ -313,11 +320,6 @@ const handleSaveEnd = (isComplete: boolean) => {
   }, [currentTheme]);
 
   useEffect(() => {
-    store.setTaskRejected((reason: string) => {
-      setRejectedReason(reason);
-      setShowRejectedPopup(true);
-    });
-
     store.setIncomingTaskCb(onIncomingTaskCB);
 
     return () => {
@@ -751,6 +753,11 @@ const handleSaveEnd = (isComplete: boolean) => {
             )}
             {showRejectedPopup && (
               <div className="task-rejected-popup">
+                <button
+                  className="close-btn"
+                  onClick={handlePopoverClose}>
+                  ×
+                </button>
                 <h2>Task Rejected</h2>
                 <p>Reason: {rejectedReason}</p>
                 <select value={selectedState} onChange={(e) => setSelectedState(e.target.value)}>

@@ -188,3 +188,13 @@ iframe {
   font-size: 1.05em;
   margin-bottom: 0.1em;
 }
+
+.task-rejected-popup .close-btn{
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+}
