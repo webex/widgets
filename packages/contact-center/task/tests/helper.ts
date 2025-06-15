@@ -1150,6 +1150,23 @@ describe('useCallControl', () => {
     });
   });
 
+  it('should initialize secondsUntilAutoWrapup to null when auto wrap-up is not active', () => {
+    mockCurrentTask.endConsult = jest.fn().mockResolvedValue('ConsultEnded');
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
+      })
+    );
+
+    expect(result.current.secondsUntilAutoWrapup).toBeNull();
+  });
+
   it('should handle errors when calling endConsultCall', async () => {
     const endConsultError = new Error('End consult failed');
     mockCurrentTask.endConsult = jest.fn().mockRejectedValue(endConsultError);
