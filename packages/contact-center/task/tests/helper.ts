@@ -3,6 +3,8 @@ import {useIncomingTask, useTaskList, useCallControl, useOutdialCall} from '../s
 import {TASK_EVENTS} from '@webex/cc-store';
 import store from '@webex/cc-store';
 import React from 'react';
+import * as taskUtil from '../src/Utils/task-util';
+import {util} from 'prettier';
 
 // Mock webex instance and task
 const ccMock = {
@@ -1711,6 +1713,140 @@ describe('useCallControl', () => {
 
     expect(result.current.queues).toEqual(dummyQueues);
     getQueuesSpy.mockRestore();
+  });
+
+  it('should initialize secondsUntilAutoWrapup to null when auto wrap-up is not active', () => {
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
+      })
+    );
+
+    expect(result.current.secondsUntilAutoWrapup).toBeNull();
+  });
+
+  it('should initialize and update auto wrap-up timer when available', () => {
+    // Create a task with auto wrap-up functionality
+    jest.useFakeTimers();
+
+    const mockAutoWrapup = {
+      getTimeLeftSeconds: jest.fn().mockReturnValue(30),
+    };
+
+    const taskWithAutoWrapup = {
+      ...mockCurrentTask,
+      autoWrapup: mockAutoWrapup,
+    };
+
+    // Mock the getControlsVisibility function from task-util
+    jest.spyOn(taskUtil, 'getControlsVisibility').mockReturnValue({
+      wrapup: true,
+      accept: false,
+      decline: false,
+      end: false,
+      muteUnmute: false,
+      holdResume: false,
+      consult: false,
+      transfer: false,
+      conference: false,
+      pauseResumeRecording: false,
+      endConsult: false,
+      recordingIndicator: false,
+    });
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: taskWithAutoWrapup,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
+        consultInitiated: false,
+      })
+    );
+
+    // Initial time should be set from getTimeLeftSeconds
+    expect(result.current.secondsUntilAutoWrapup).toBe(30);
+
+    // Advance timer by 5 seconds
+    act(() => {
+      jest.advanceTimersByTime(5000);
+    });
+
+    // Time should be decremented by 5 seconds
+    expect(result.current.secondsUntilAutoWrapup).toBe(25);
+
+    // Advance timer to 0
+    act(() => {
+      jest.advanceTimersByTime(25000);
+    });
+
+    // Time should be 0 and not negative
+    expect(result.current.secondsUntilAutoWrapup).toBe(0);
+
+    jest.useRealTimers();
+  });
+
+  it('should clean up timer when unmounting', () => {
+    jest.useFakeTimers();
+
+    const clearIntervalSpy = jest.spyOn(global, 'clearInterval');
+
+    // Create a task with auto wrap-up functionality
+    const mockAutoWrapup = {
+      getTimeLeftSeconds: jest.fn().mockReturnValue(30),
+    };
+
+    const taskWithAutoWrapup = {
+      ...mockCurrentTask,
+      autoWrapup: mockAutoWrapup,
+    };
+
+    // Mock controlVisibility to enable wrap-up
+    jest.spyOn(taskUtil, 'getControlsVisibility').mockReturnValue({
+      wrapup: true,
+      accept: false,
+      decline: false,
+      end: false,
+      muteUnmute: false,
+      holdResume: false,
+      consult: false,
+      transfer: false,
+      conference: false,
+      pauseResumeRecording: false,
+      endConsult: false,
+      recordingIndicator: false,
+    });
+
+    const {unmount} = renderHook(() =>
+      useCallControl({
+        currentTask: taskWithAutoWrapup,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
+        consultInitiated: false,
+      })
+    );
+
+    // Unmount the component
+    unmount();
+
+    // Should clear the timer
+    expect(clearIntervalSpy).toHaveBeenCalled();
+
+    clearIntervalSpy.mockRestore();
+    jest.useRealTimers();
   });
 });
 
