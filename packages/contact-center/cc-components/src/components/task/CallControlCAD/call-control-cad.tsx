@@ -5,7 +5,7 @@ import {Brandvisual, Icon} from '@momentum-design/components/dist/react';
 import './call-control-cad.styles.scss';
 import TaskTimer from '../TaskTimer/index';
 import CallControlConsultComponent from '../CallControl/CallControlCustom/call-control-consult';
-import type {MEDIA_CHANNEL as MediaChannelType, CallControlComponentProps} from '../task.types';
+import {MEDIA_CHANNEL as MediaChannelType, CallControlComponentProps} from '../task.types';
 import {getMediaTypeInfo} from '../../../utils';
 
 const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => {
@@ -42,6 +42,11 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
     currentTask.data.interaction.mediaChannel as MediaChannelType
   );
 
+  const mediaChannel = currentTask.data.interaction.mediaType as MediaChannelType;
+  const isSocial = mediaChannel === MediaChannelType.SOCIAL;
+  const customerName = currentTask?.data?.interaction?.callAssociatedDetails?.customerName;
+  const ani = currentTask?.data?.interaction?.callAssociatedDetails?.ani;
+
   if (!currentTask) return null;
 
   return (
@@ -59,7 +64,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
 
           <div className="customer-info">
             <Text className="customer-id" type="body-large-bold" tagName={'small'}>
-              {currentTask?.data?.interaction?.callAssociatedDetails?.ani || 'No Caller ID'}
+              {isSocial ? customerName || 'No Customer Name' : ani || 'No Caller ID'}
             </Text>
             <div className="call-details">
               <Text className="call-timer" type="body-secondary" tagName={'small'}>
@@ -91,8 +96,8 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
             <span>{currentTask?.data?.interaction?.callAssociatedDetails?.virtualTeamName || 'No Team Name'}</span>
           </Text>
           <Text className="phone-number" type="body-secondary" tagName={'small'}>
-            <strong>Phone number:</strong>{' '}
-            <span>{currentTask?.data?.interaction?.callAssociatedDetails?.ani || 'No Phone Number'}</span>
+            <strong>{isSocial ? 'Customer Name' : 'Phone Number'}:</strong>{' '}
+            <span> {isSocial ? customerName || 'No Customer Name' : ani || 'No Phone Number'}</span>
           </Text>
           <Text className="rona" type="body-secondary" tagName={'small'}>
             <strong>RONA:</strong>{' '}

@@ -10,12 +10,14 @@ const IncomingTaskComponent: React.FunctionComponent<IncomingTaskComponentProps>
 
   const callAssociationDetails = incomingTask?.data?.interaction?.callAssociatedDetails;
   const ani = callAssociationDetails?.ani;
+  const customerName = callAssociationDetails?.customerName;
   const virtualTeamName = callAssociationDetails?.virtualTeamName;
   const ronaTimeout = callAssociationDetails?.ronaTimeout ? Number(callAssociationDetails?.ronaTimeout) : null;
   const startTimeStamp = incomingTask?.data?.interaction?.createdTimestamp;
   const mediaType = incomingTask.data.interaction.mediaType;
   const mediaChannel = incomingTask.data.interaction.mediaChannel;
   const isTelephony = mediaType === MEDIA_CHANNEL.TELEPHONY;
+  const isSocial = mediaType === MEDIA_CHANNEL.SOCIAL;
   const acceptText = !incomingTask.data.wrapUpRequired
     ? isTelephony && !isBrowser
       ? 'Ringing...'
@@ -26,7 +28,7 @@ const IncomingTaskComponent: React.FunctionComponent<IncomingTaskComponentProps>
   return (
     <Task
       interactionId={incomingTask.data.interactionId}
-      title={ani}
+      title={isSocial ? customerName : ani}
       state=""
       startTimeStamp={startTimeStamp}
       isIncomingTask={true}
