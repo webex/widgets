@@ -31,7 +31,7 @@ test.describe('Login and User State tests', async () => {
 
       await page.getByTestId('teams-select-dropdown').click();
       await page.waitForTimeout(200);
-      await page.locator('[data-testid^="teams-dropdown-"]').nth(1).locator('span, div').first().click();
+      await page.locator('[data-testid^="teams-dropdown-"]').nth(0).locator('span, div').first().click();
 
       await page.getByTestId('login-button').click();
     }
@@ -85,7 +85,7 @@ test.describe('Login and User State tests', async () => {
 
       await page.getByTestId('teams-select-dropdown').click();
       await page.waitForTimeout(200);
-      await page.locator('[data-testid^="teams-dropdown-"]').nth(1).locator('span, div').first().click();
+      await page.locator('[data-testid^="teams-dropdown-"]').nth(0).locator('span, div').first().click();
 
       await page.getByTestId('login-button').click();
     }
@@ -133,7 +133,7 @@ test.describe('Login and User State tests', async () => {
 
       await page.getByTestId('teams-select-dropdown').click();
       await page.waitForTimeout(200);
-      await page.locator('[data-testid^="teams-dropdown-"]').nth(1).locator('span, div').first().click();
+      await page.locator('[data-testid^="teams-dropdown-"]').nth(0).locator('span, div').first().click();
 
       await page.getByTestId('login-button').click();
     }
