@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.72](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.71...v1.28.0-ccwidgets.72) (2025-06-16)
+
+
+### Bug Fixes
+
+* **ui-testing:** add unit and snapshot testing for station-login ([#468](https://github.com/webex/widgets/issues/468)) ([b4baecb](https://github.com/webex/widgets/commit/b4baecbbe0384fe56c3cc01aa677cdc29cb0fba5))
+
 # [1.28.0-ccwidgets.71](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.70...v1.28.0-ccwidgets.71) (2025-06-13)
 
 
