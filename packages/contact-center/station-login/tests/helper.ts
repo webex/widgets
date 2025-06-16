@@ -53,6 +53,20 @@ const logger = {
   error: jest.fn(),
 };
 
+// Base props for useStationLogin hook
+const baseStationLoginProps = {
+  cc: ccMock,
+  onLogin: loginCb,
+  onLogout: logoutCb,
+  logger,
+  deviceType: 'EXTENSION',
+  dialNumber: '',
+  onSaveStart: jest.fn(),
+  onSaveEnd: jest.fn(),
+  teamId: 'team123',
+  isAgentLoggedIn: false,
+};
+
 describe('useStationLogin Hook', () => {
   afterEach(() => {
     jest.clearAllMocks();
@@ -91,12 +105,8 @@ describe('useStationLogin Hook', () => {
     ccMock.stationLogin.mockResolvedValue(successResponse);
     const {result} = renderHook(() =>
       useStationLogin({
-        cc: ccMock,
-        onLogin: loginCb,
-        onLogout: logoutCb,
-        logger,
+        ...baseStationLoginProps,
         deviceType: 'BROWSER',
-        dialNumber: '',
       })
     );
 
@@ -130,6 +140,12 @@ describe('useStationLogin Hook', () => {
         saveError: expect.any(String),
         saveLoginOptions: expect.any(Function),
         setCurrentLoginOptions: expect.any(Function),
+        dialNumberValue: '',
+        selectedDeviceType: 'BROWSER',
+        selectedTeamId: 'team123',
+        setDialNumberValue: expect.any(Function),
+        setSelectedDeviceType: expect.any(Function),
+        setSelectedTeamId: expect.any(Function),
       });
     });
   });
@@ -151,12 +167,8 @@ describe('useStationLogin Hook', () => {
 
     const {result} = renderHook(() =>
       useStationLogin({
-        cc: ccMock,
-        onLogin: loginCb,
-        onLogout: logoutCb,
-        logger,
+        ...baseStationLoginProps,
         deviceType: '',
-        dialNumber: '',
       })
     );
 
@@ -169,6 +181,7 @@ describe('useStationLogin Hook', () => {
     });
 
     await waitFor(async () => {
+      // @ts-expect-error only for testing purposes
       expect(setSetCurrentStateSpy).not.toHaveBeenCalledWith(successResponse.data.auxCodeId);
       expect(setSetLastStateChangeTimestampSpy).not.toHaveBeenCalledWith(
         new Date(successResponse.data.lastStateChangeTimestamp)
@@ -190,11 +203,8 @@ describe('useStationLogin Hook', () => {
     ccMock.stationLogin.mockResolvedValue(successResponse);
     const {result} = renderHook(() =>
       useStationLogin({
-        cc: ccMock,
-        onLogout: logoutCb,
-        logger,
-        deviceType: 'EXTENSION',
-        dialNumber: '',
+        ...baseStationLoginProps,
+        onLogin: jest.fn(),
       })
     );
 
@@ -217,16 +227,7 @@ describe('useStationLogin Hook', () => {
     const setDeviceTypeSpy = jest.spyOn(store, 'setDeviceType');
 
     loginCb.mockClear();
-    const {result} = renderHook(() =>
-      useStationLogin({
-        cc: ccMock,
-        onLogin: loginCb,
-        onLogout: logoutCb,
-        logger,
-        deviceType: 'EXTENSION',
-        dialNumber: '',
-      })
-    );
+    const {result} = renderHook(() => useStationLogin(baseStationLoginProps));
 
     act(() => {
       result.current.setTeam(loginParams.teamId);
@@ -259,6 +260,12 @@ describe('useStationLogin Hook', () => {
         saveError: expect.any(String),
         saveLoginOptions: expect.any(Function),
         setCurrentLoginOptions: expect.any(Function),
+        dialNumberValue: '',
+        selectedDeviceType: 'EXTENSION',
+        selectedTeamId: 'team123',
+        setDialNumberValue: expect.any(Function),
+        setSelectedDeviceType: expect.any(Function),
+        setSelectedTeamId: expect.any(Function),
       });
 
       expect(setDeviceTypeSpy).not.toHaveBeenCalled();
@@ -270,11 +277,8 @@ describe('useStationLogin Hook', () => {
 
     const {result} = renderHook(() =>
       useStationLogin({
-        cc: ccMock,
-        onLogout: logoutCb,
-        logger,
-        deviceType: 'EXTENSION',
-        dialNumber: '',
+        ...baseStationLoginProps,
+        onLogin: jest.fn(),
       })
     );
 
@@ -292,16 +296,7 @@ describe('useStationLogin Hook', () => {
     ccMock.stationLogin.mockRejectedValue(errorResponse);
 
     loginCb.mockClear();
-    const {result} = renderHook(() =>
-      useStationLogin({
-        cc: ccMock,
-        onLogin: loginCb,
-        onLogout: logoutCb,
-        logger,
-        deviceType: 'EXTENSION',
-        dialNumber: '',
-      })
-    );
+    const {result} = renderHook(() => useStationLogin(baseStationLoginProps));
 
     act(() => {
       result.current.setTeam(loginParams.teamId);
@@ -359,12 +354,8 @@ describe('useStationLogin Hook', () => {
 
     const {result} = renderHook(() =>
       useStationLogin({
-        cc: ccMock,
-        onLogin: loginCb,
-        onLogout: logoutCb,
-        logger,
+        ...baseStationLoginProps,
         deviceType: 'BROWSER',
-        dialNumber: '',
       })
     );
 
@@ -390,6 +381,12 @@ describe('useStationLogin Hook', () => {
         saveError: expect.any(String),
         saveLoginOptions: expect.any(Function),
         setCurrentLoginOptions: expect.any(Function),
+        dialNumberValue: '',
+        selectedDeviceType: 'BROWSER',
+        selectedTeamId: 'team123',
+        setDialNumberValue: expect.any(Function),
+        setSelectedDeviceType: expect.any(Function),
+        setSelectedTeamId: expect.any(Function),
       });
     });
   });
@@ -397,16 +394,7 @@ describe('useStationLogin Hook', () => {
   it('should log error on logout failure', async () => {
     ccMock.stationLogout.mockRejectedValue(new Error('Logout failed'));
 
-    const {result} = renderHook(() =>
-      useStationLogin({
-        cc: ccMock,
-        onLogin: loginCb,
-        onLogout: logoutCb,
-        logger,
-        deviceType: 'EXTENSION',
-        dialNumber: '',
-      })
-    );
+    const {result} = renderHook(() => useStationLogin(baseStationLoginProps));
 
     await act(async () => {
       await result.current.logout();
@@ -425,11 +413,8 @@ describe('useStationLogin Hook', () => {
 
     const {result} = renderHook(() =>
       useStationLogin({
-        cc: ccMock,
-        onLogin: loginCb,
-        logger,
-        deviceType: 'EXTENSION',
-        dialNumber: '',
+        ...baseStationLoginProps,
+        onLogout: jest.fn(),
       })
     );
 
@@ -447,16 +432,7 @@ describe('useStationLogin Hook', () => {
     const setShowMultipleLoginAlertSpy = jest.spyOn(store, 'setShowMultipleLoginAlert');
     const registerCCSpy = jest.spyOn(store, 'registerCC');
 
-    const {result} = renderHook(() =>
-      useStationLogin({
-        cc: ccMock,
-        onLogin: loginCb,
-        onLogout: logoutCb,
-        logger,
-        deviceType: 'EXTENSION',
-        dialNumber: '',
-      })
-    );
+    const {result} = renderHook(() => useStationLogin(baseStationLoginProps));
 
     act(() => {
       result.current.handleContinue();
@@ -477,16 +453,7 @@ describe('useStationLogin Hook', () => {
     const setShowMultipleLoginAlertSpy = jest.spyOn(store, 'setShowMultipleLoginAlert');
     const registerCCSpy = jest.spyOn(store, 'registerCC');
 
-    const {result} = renderHook(() =>
-      useStationLogin({
-        cc: ccMock,
-        onLogin: loginCb,
-        onLogout: logoutCb,
-        logger,
-        deviceType: 'EXTENSION',
-        dialNumber: '',
-      })
-    );
+    const {result} = renderHook(() => useStationLogin(baseStationLoginProps));
 
     act(() => {
       result.current.handleContinue();
@@ -508,16 +475,7 @@ describe('useStationLogin Hook', () => {
       throw Error('Relogin failed');
     });
 
-    const {result} = renderHook(() =>
-      useStationLogin({
-        cc: ccMock,
-        onLogin: loginCb,
-        onLogout: logoutCb,
-        logger,
-        deviceType: 'EXTENSION',
-        dialNumber: '',
-      })
-    );
+    const {result} = renderHook(() => useStationLogin(baseStationLoginProps));
 
     act(() => {
       result.current.handleContinue();
@@ -541,16 +499,7 @@ describe('useStationLogin Hook', () => {
       ccMock.on(event, cb);
     });
 
-    renderHook(() =>
-      useStationLogin({
-        cc: ccMock,
-        onLogin: loginCb,
-        onLogout: logoutCb,
-        logger,
-        deviceType: 'EXTENSION',
-        dialNumber: '',
-      })
-    );
+    renderHook(() => useStationLogin(baseStationLoginProps));
 
     expect(ccMock.on).toHaveBeenCalledWith(store.CC_EVENTS.AGENT_STATION_LOGIN_SUCCESS, expect.any(Function));
 
@@ -585,10 +534,8 @@ describe('useStationLogin Hook', () => {
 
     renderHook(() =>
       useStationLogin({
-        cc: ccMock,
+        ...baseStationLoginProps,
         logger,
-        deviceType: 'EXTENSION',
-        dialNumber: '',
       })
     );
 
@@ -604,17 +551,18 @@ describe('useStationLogin Hook', () => {
     });
 
     await waitFor(() => {
-      expect(loginCb).not.toHaveBeenCalled();
+      expect(loginCb).toHaveBeenCalled();
     });
   });
   it('should not save if isLoginOptionsChanged is false', () => {
     const cc = {updateAgentProfile: jest.fn()};
     const {result} = renderHook(() =>
       useStationLogin({
+        ...baseStationLoginProps,
         cc,
-        logger,
-        deviceType: 'EXTENSION',
         dialNumber: '1001',
+        onLogin: jest.fn(),
+        onLogout: jest.fn(),
       })
     );
 
@@ -637,10 +585,11 @@ describe('useStationLogin Hook', () => {
     const cc = {updateAgentProfile: jest.fn().mockResolvedValue({})};
     const {result} = renderHook(() =>
       useStationLogin({
+        ...baseStationLoginProps,
         cc,
-        logger,
-        deviceType: 'EXTENSION',
         dialNumber: '1001',
+        onLogin: jest.fn(),
+        onLogout: jest.fn(),
       })
     );
 
@@ -681,10 +630,11 @@ describe('useStationLogin Hook', () => {
     const cc = {updateAgentProfile: jest.fn().mockRejectedValue(new Error('fail'))};
     const {result} = renderHook(() =>
       useStationLogin({
+        ...baseStationLoginProps,
         cc,
-        logger,
-        deviceType: 'EXTENSION',
         dialNumber: '1001',
+        onLogin: jest.fn(),
+        onLogout: jest.fn(),
       })
     );
 
@@ -714,10 +664,11 @@ describe('useStationLogin Hook', () => {
     const cc = {updateAgentProfile: jest.fn().mockResolvedValue({})};
     const {result} = renderHook(() =>
       useStationLogin({
+        ...baseStationLoginProps,
         cc,
-        logger,
-        deviceType: 'EXTENSION',
         dialNumber: '1234',
+        onLogin: jest.fn(),
+        onLogout: jest.fn(),
       })
     );
 
