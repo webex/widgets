@@ -32,6 +32,7 @@ const StationLogin: React.FunctionComponent<StationLoginProps> = observer(
       onSaveStart,
       onSaveEnd,
       teamId,
+      isAgentLoggedIn,
     });
 
     const dialNumberRegex = cc?.agentConfig?.regexUS;

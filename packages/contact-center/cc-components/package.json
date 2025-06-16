@@ -20,7 +20,7 @@
     "build": "yarn run -T tsc",
     "build:src": "yarn run clean:dist && webpack",
     "build:watch": "webpack --watch",
-    "test:unit:broken": "jest --coverage",
+    "test:unit": "jest --coverage",
     "test:styles": "eslint"
   },
   "dependencies": {
