@@ -89,7 +89,7 @@ function CallControlComponent(props: CallControlComponentProps) {
       module: 'call-control.tsx',
       method: 'handleCancelWrapup',
     });
-    currentTask.cancelAutoAutoWrapupTimer();
+    currentTask.cancelAutoWrapupTimer();
   };
 
   const handleWrapupChange = (text, value) => {
