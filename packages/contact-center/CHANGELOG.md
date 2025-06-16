@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.73](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.72...v1.28.0-ccwidgets.73) (2025-06-16)
+
+
+### Bug Fixes
+
+* **cc-widgets:** use customer name for social channel ([#469](https://github.com/webex/widgets/issues/469)) ([472d743](https://github.com/webex/widgets/commit/472d743ffbb54381fb58224b589e5e0791b23ef3))
+
 # [1.28.0-ccwidgets.72](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.71...v1.28.0-ccwidgets.72) (2025-06-16)
 
 
