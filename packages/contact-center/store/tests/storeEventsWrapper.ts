@@ -1693,8 +1693,8 @@ describe('storeEventsWrapper', () => {
     it('should call onTaskSelected if task changes', () => {
       const onTaskSelected = jest.fn();
       storeWrapper.onTaskSelected = onTaskSelected;
-      storeWrapper.setCurrentTask(mockTaskA);
-      expect(onTaskSelected).toHaveBeenCalledWith(mockTaskA);
+      storeWrapper.setCurrentTask(mockTaskA, false);
+      expect(onTaskSelected).toHaveBeenCalledWith(mockTaskA, false);
 
       // Should not call again if same task is set
       onTaskSelected.mockClear();
@@ -1702,8 +1702,8 @@ describe('storeEventsWrapper', () => {
       expect(onTaskSelected).not.toHaveBeenCalled();
 
       // Should call if task changes
-      storeWrapper.setCurrentTask(mockTaskB);
-      expect(onTaskSelected).toHaveBeenCalledWith(mockTaskB);
+      storeWrapper.setCurrentTask(mockTaskB, true);
+      expect(onTaskSelected).toHaveBeenCalledWith(mockTaskB, true);
     });
 
     it('should set currentTask to null if passed null', () => {

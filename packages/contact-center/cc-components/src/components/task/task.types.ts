@@ -41,18 +41,26 @@ export interface TaskProps {
 
   /**
    * Handler for task accepted in TaskList
+   * @param task - The accepted task
    */
   onTaskAccepted?: (task: ITask) => void;
 
   /**
    * Handler for task declined in TaskList
+   * @param task - The declined task
    */
   onTaskDeclined?: (task: ITask) => void;
 
   /**
    * Handler for task selected in TaskList
+   * @param task - The selected task
+   * @param isClicked - Indicates if the task was clicked
+   * This is used to differentiate between selection via click and programmatic selection.
+   * This is useful for handling selection logic differently based on user interaction.
+   * For example, if the task is selected programmatically, you might not want to trigger
+   * certain UI updates that are only relevant for user-initiated selections.
    */
-  onTaskSelected?: (task: ITask) => void;
+  onTaskSelected?: ({task, isClicked}: {task: ITask; isClicked: boolean}) => void;
 
   /**
    * accept incoming task action
@@ -127,16 +135,32 @@ export interface ControlProps {
 
   /**
    * Function to handle hold/resume actions.
+   * @param isHeld - Boolean indicating whether the task is held.
+   * @param task - The current task being handled.
+   * @returns void
    */
-  onHoldResume?: () => void;
+  onHoldResume?: ({isHeld, task}: {isHeld: boolean; task: ITask}) => void;
+
+  /**
+   * Function to handle recording toggle actions.
+   * @param isRecording - Boolean indicating whether the task is being recorded.
+   * @param task - The current task being handled.
+   * @return void
+   */
+  onRecordingToggle?: ({isRecording, task}: {isRecording: boolean; task: ITask}) => void;
 
   /**
    * Function to handle ending the task.
+   * @param task - The current task being handled.
+   * @returns void
    */
-  onEnd?: () => void;
+  onEnd?: ({task}: {task: ITask}) => void;
 
   /**
    * Function to handle wrapping up the task.
+   * @param task - The current task being handled.
+   * @param wrapUpReason - The reason for wrapping up the task.
+   * @returns void
    */
   onWrapUp?: ({task, wrapUpReason}: {task: ITask; wrapUpReason: string}) => void;
 
