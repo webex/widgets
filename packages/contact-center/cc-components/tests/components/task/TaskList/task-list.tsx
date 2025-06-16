@@ -4,6 +4,8 @@ import '@testing-library/jest-dom';
 import TaskListComponent from '../../../../src/components/task/TaskList/task-list';
 import {TaskListComponentProps} from '../../../../src/components/task/task.types';
 
+// This test suite is skipped because we have removed the :broken from the command
+// line in the package.json scripts to run these tests in pipeline
 describe.skip('TaskListPresentational Component', () => {
   afterEach(cleanup);
 

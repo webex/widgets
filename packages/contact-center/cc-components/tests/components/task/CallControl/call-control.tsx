@@ -48,6 +48,8 @@ afterAll(() => {
   (console.error as jest.Mock).mockRestore();
 });
 
+// This test suite is skipped because we have removed the :broken from the command
+// line in the package.json scripts to run these tests in pipeline
 describe.skip('CallControlPresentational', () => {
   const mockToggleHold = jest.fn();
   const mockToggleRecording = jest.fn();

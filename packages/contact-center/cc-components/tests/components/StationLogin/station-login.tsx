@@ -495,6 +495,12 @@ describe('Station Login Component', () => {
 
     describe('SignOut Modal Popup', () => {
       it('show signOut modal when onCCSignOut is present and cancel is clicked', async () => {
+        const mockSignOutModalRef = {current: null};
+        mockCreateStationLoginRefs.mockImplementation(() => ({
+          multiSignInModalRef: {current: null},
+          ccSignOutModalRef: mockSignOutModalRef,
+          saveConfirmDialogRef: {current: null},
+        }));
         const mockSignOut = jest.fn();
         // Sign out button only renders when profileMode=false
         const screen = await render(
@@ -524,8 +530,7 @@ describe('Station Login Component', () => {
         expect(confirmSignOutButton).toHaveTextContent(StationLoginLabels.SIGN_OUT);
 
         fireEvent.click(confirmSignOutButton);
-
-        expect(mockSignOut).toHaveBeenCalled();
+        expect(mockContinueClicked).toHaveBeenCalledWith(mockSignOutModalRef, mockSignOut);
       });
 
       it('show signOut modal when onCCSignOut is present and sign out is clicked', async () => {

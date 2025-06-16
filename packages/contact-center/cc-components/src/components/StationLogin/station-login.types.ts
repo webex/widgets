@@ -194,6 +194,9 @@ export interface IStationLoginProps {
    */
   selectedTeamId: string;
 
+  /**
+   * The selected option for login type (e.g., 'Extension', 'Agent DN', etc.)
+   */
   selectedOption: string;
 }
 

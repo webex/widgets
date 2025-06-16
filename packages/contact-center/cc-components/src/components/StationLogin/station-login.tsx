@@ -114,7 +114,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
           >
             {StationLoginLabels.CANCEL}
           </Button>
-          <Button data-testId="cc-logout-button" onClick={onCCSignOut}>
+          <Button data-testId="cc-logout-button" onClick={() => continueClicked(ccSignOutModalRef, onCCSignOut)}>
             {StationLoginLabels.SIGN_OUT}
           </Button>
         </div>

@@ -25,11 +25,19 @@ const handleModals = (
     }
   });
 };
+/**
+ * Handler for the Contact Center modal continue button
+ * @param modalRef
+ * @param callback
+ *
+ * Handler for the Contact Center modal continue button
+ * Closes the dialog if it is currently open and calls the provided callback function
+ */
 
-const continueClicked = (modalRef, handleContinue) => {
+const continueClicked = (modalRef, callback) => {
   if (modalRef.current) {
     modalRef.current.close();
-    handleContinue();
+    callback();
   }
 };
 
