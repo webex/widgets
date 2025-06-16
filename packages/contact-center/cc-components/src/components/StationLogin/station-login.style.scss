@@ -23,24 +23,6 @@
     gap: 0.5rem;
   }
 
-  .modal {
-    width: 25rem;
-    border: none;
-    border-radius: 0.625rem;
-    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.2);
-    padding: 1.25rem;
-    text-align: center;
-  }
-
-  .modal-content {
-    display: flex;
-    justify-content: flex-end; // Aligns the button to the right
-  }
-
-  .modal::backdrop {
-    background: rgba(0, 0, 0, 0.5);
-  }
-
   h2 {
     margin-top: 0;
   }
@@ -114,7 +96,7 @@ mdc-select, mdc-input {
   border-color: var(--mdc-button-secondary-border-color) !important;
 }
 
-.cc-logout-modal {
+.dialog-modal {
   width: 25rem;
   border-radius: 0.5rem;
   border-color: transparent;
@@ -123,7 +105,7 @@ mdc-select, mdc-input {
   box-shadow: 0rem 0.25rem 0.5rem 0rem rgba(0, 0, 0, 0.16), 0rem 0rem 0.0625rem 0rem rgba(0, 0, 0, 0.16);
 }
 
-.cc-logout-modal-content {
+.dialog-modal-content {
   display: flex;
   justify-content: flex-end; // Aligns the button to the right
   gap: 0.5rem;
