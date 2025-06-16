@@ -2,13 +2,13 @@ import React from 'react';
 import {Button, Icon, Text, ListItem} from '@momentum-design/components/dist/react';
 import './AutoWrapupTimer.css';
 
-interface WrapupTimerProps {
+interface AutoWrapupTimerProps {
   secondsUntilAutoWrapup: number;
   allowCancelAutoWrapup?: boolean;
   handleCancelWrapup: () => void;
 }
 
-const WrapupTimer: React.FC<WrapupTimerProps> = ({
+const AutoWrapupTimer: React.FC<AutoWrapupTimerProps> = ({
   secondsUntilAutoWrapup,
   allowCancelAutoWrapup,
   handleCancelWrapup,
@@ -44,4 +44,4 @@ const WrapupTimer: React.FC<WrapupTimerProps> = ({
   );
 };
 
-export default WrapupTimer;
+export default AutoWrapupTimer;

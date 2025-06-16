@@ -6,7 +6,7 @@ import {PopoverNext, SelectNext, TooltipNext, Text, ButtonCircle, ButtonPill} fr
 import {Item} from '@react-stately/collections';
 import {Icon} from '@momentum-design/components/dist/react';
 import ConsultTransferPopoverComponent from './CallControlCustom/consult-transfer-popover';
-import WrapupTimer from './WrapupTimer';
+import AutoWrapupTimer from '../AutoWrapup/AutoWrapupTimer';
 import type {MEDIA_CHANNEL as MediaChannelType} from '../task.types';
 import {getMediaTypeInfo} from '../../../utils';
 
@@ -89,7 +89,7 @@ function CallControlComponent(props: CallControlComponentProps) {
       module: 'call-control.tsx',
       method: 'handleCancelWrapup',
     });
-    currentTask.cancelAutoWrapUpTimer();
+    currentTask.cancelAutoAutoWrapupTimer();
   };
 
   const handleWrapupChange = (text, value) => {
@@ -325,7 +325,7 @@ function CallControlComponent(props: CallControlComponentProps) {
               className="wrapup-popover"
             >
               {currentTask.autoWrapup && (
-                <WrapupTimer
+                <AutoWrapupTimer
                   secondsUntilAutoWrapup={secondsUntilAutoWrapup}
                   allowCancelAutoWrapup={currentTask.autoWrapup.allowCancelAutoWrapup}
                   handleCancelWrapup={handleCancelWrapup}
