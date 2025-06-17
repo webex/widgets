@@ -12,7 +12,7 @@ export const oauthLogin = async (page: Page): Promise<void> => {
         await page.goto('http://localhost:3000');
         await page.locator('#select-base-triggerid').getByText('Access Token').click();
         await page.getByTestId('samples:login_option_oauth').getByText('Login with Webex').click();
-        await page.getByRole('button', { name: 'Login with Webex' }).click();
+        await page.getByTestId('login with webex button').click();
         await page.getByRole('textbox', { name: 'name@example.com' }).fill(process.env.PLAYWRIGHT_USERNAME);
         await page.getByRole('link', { name: 'Sign in' }).click();
         await page.waitForTimeout(3000);
@@ -36,9 +36,9 @@ export const multiLoginEnable = async (page: Page): Promise<void> => {
 
 export const initialisePage = async (page: Page): Promise<void> => {
     console.log('Initialising widgets...');
- await page.getByRole('button', { name: 'Init Widgets' }).click(); 
-  await page.getByRole('button', { name: 'Init Widgets' }).click(); 
+ await page.getByTestId('init-widgets-button').click();
+ await page.getByTestId('init-widgets-button').click();
 
-        await page.getByTestId('station-login-widget').waitFor({ state: 'visible' });
+ await page.getByTestId('station-login-widget').waitFor({ state: 'visible' });
     console.log('Widgets initialised successfully!');
 };

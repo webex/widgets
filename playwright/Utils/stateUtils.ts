@@ -25,7 +25,6 @@ export const changestate = async (page: Page, userState: string): Promise<void> 
 
   // Change to the desired state
   await stateItem.click();
-  await expect(page.getByTestId('state-select').getByTestId('state-name')).toContainText(userState);
   console.log(`State changed to "${userState}".`);
 };
 

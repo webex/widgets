@@ -11,9 +11,9 @@ export const desktopLogin = async (page: Page): Promise<void> => {
   console.log('Performing Desktop Login...');
   await page.getByTestId('login-option-select').locator('#select-base-triggerid svg').click();
   await page.getByTestId('login-option-Desktop').click();
-  await page.getByTestId('teams-dropdown-select').locator('#select-base-triggerid div').click();
+  await page.getByTestId('teams-select-dropdown').locator('#select-base-triggerid div').click();
   await page.waitForTimeout(200);
-  await page.locator('[data-testid^="teams-dropdown-"]').nth(1).locator('span, div').first().click();
+  await page.locator('[data-testid^="teams-dropdown-"]').nth(0).locator('span, div').first().click();
   await page.waitForTimeout(200);
 
   await page.getByTestId('login-button').click();
@@ -32,10 +32,10 @@ export const extensionLogin = async (page: Page): Promise<void> => {
   console.log('Performing Extension Login...');
   await page.getByTestId('login-option-select').locator('#select-base-triggerid svg').click();
   await page.getByTestId('login-option-Extension').click();
-  await page.getByRole('textbox', { name: 'Extension' }).fill(extensionNumber);
-  await page.getByTestId('teams-dropdown-select').locator('#select-base-triggerid div').click();
+  await page.getByTestId('dial-number-input').locator('input').fill(extensionNumber);
+  await page.getByTestId('teams-select-dropdown').locator('#select-base-triggerid div').click();
   await page.waitForTimeout(200);
-  await page.locator('[data-testid^="teams-dropdown-"]').nth(1).locator('span, div').first().click();
+  await page.locator('[data-testid^="teams-dropdown-"]').nth(0).locator('span, div').first().click();
   await page.getByTestId('login-button').click();
 };
 
@@ -54,15 +54,15 @@ export const dialLogin = async (page: Page): Promise<void> => {
   await page.getByTestId('login-option-Dial Number').click();
 await page.getByTestId('dial-number-input').locator('div').nth(1).click();
   await page.getByRole('textbox', { name: 'Dial Number' }).fill(dialNumber);
-   await page.getByTestId('teams-dropdown-select').locator('#select-base-triggerid div').click();
+  await page.getByTestId('teams-select-dropdown').locator('#select-base-triggerid div').click();
   await page.waitForTimeout(200);
-  await page.locator('[data-testid^="teams-dropdown-"]').nth(1).locator('span, div').first().click();
+  await page.locator('[data-testid^="teams-dropdown-"]').nth(0).locator('span, div').first().click();
   await page.getByTestId('login-button').click();
 };
 
 export const stationLogout = async (page: Page): Promise<void> => {
   console.log('Logging out...');
-  await page.getByRole('button', { name: 'Station Logout' }).click();
+  await page.getByTestId('station-logout-button').click();
   await page.waitForTimeout(2000); // Wait for logout to complete
   console.log('Logged out successfully.');
 }

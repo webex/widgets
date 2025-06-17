@@ -414,6 +414,7 @@ const handleSaveEnd = (isComplete: boolean) => {
                       <Button
                         onClick={doOAuthLogin}
                         variant="primary"
+                        data-testid='login with webex button'
                       >
                         Login with Webex
                       </Button>
@@ -496,7 +497,7 @@ const handleSaveEnd = (isComplete: boolean) => {
                       }}
                     />
                     {store.isAgentLoggedIn && (
-                      <Button id="logoutAgent" onClick={stationLogout} color="positive" className='stationLogoutButtonClass'>
+                      <Button id="logoutAgent" onClick={stationLogout} color="positive" className='stationLogoutButtonClass' data-testid="station-logout-button"> 
                         Station Logout
                       </Button>
                     )}
@@ -547,6 +548,7 @@ const handleSaveEnd = (isComplete: boolean) => {
                     setIsSdkReady(true);
                   });
                 }}
+                data-testid="init-widgets-button"
               >
                 Init Widgets
               </Button>
