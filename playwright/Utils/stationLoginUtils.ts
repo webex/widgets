@@ -61,8 +61,8 @@ await page.getByTestId('dial-number-input').locator('div').nth(1).click();
 };
 
 export const stationLogout = async (page: Page): Promise<void> => {
-  console.log('Logging out...');
+  //console.log('Logging out...');
   await page.getByTestId('station-logout-button').click();
   await page.waitForTimeout(2000); // Wait for logout to complete
-  console.log('Logged out successfully.');
+ // console.log('Logged out successfully.');
 }

@@ -35,10 +35,10 @@ export const multiLoginEnable = async (page: Page): Promise<void> => {
 }
 
 export const initialisePage = async (page: Page): Promise<void> => {
-    console.log('Initialising widgets...');
+    //console.log('Initialising widgets...');
  await page.getByTestId('init-widgets-button').click();
  await page.getByTestId('init-widgets-button').click();
 
  await page.getByTestId('station-login-widget').waitFor({ state: 'visible' });
-    console.log('Widgets initialised successfully!');
+   //console.log('Widgets initialised successfully!');
 };

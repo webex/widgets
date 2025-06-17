@@ -5,12 +5,12 @@ dotenv.config();
 
 
 export const changestate = async (page: Page, userState: string): Promise<void> => {
-  console.log(`Changing state to "${userState}"...`);
+  //console.log(`Changing state to "${userState}"...`);
 
   // Get the current state name
   const currentState = await page.getByTestId('state-select').getByTestId('state-name').innerText();
   if (currentState.trim() === userState) {
-    console.log(`Already in state "${userState}". No change needed.`);
+    //console.log(`Already in state "${userState}". No change needed.`);
     return;
   }
 
@@ -25,7 +25,7 @@ export const changestate = async (page: Page, userState: string): Promise<void> 
 
   // Change to the desired state
   await stateItem.click();
-  console.log(`State changed to "${userState}".`);
+  //console.log(`State changed to "${userState}".`);
 };
 
 export const getCurrentState = async (page: Page): Promise<string> => {
@@ -38,7 +38,7 @@ export const verifyCurrentState = async (page: Page, expectedState: string): Pro
   if (currentState !== expectedState) {
     throw new Error(`Expected state "${expectedState}" but found "${currentState}".`);
   }
-  console.log(`Current state is verified as "${expectedState}".`);
+  //console.log(`Current state is verified as "${expectedState}".`);
 };
 
 export const getStateElapsedTime = async (page: Page): Promise<string> => {
@@ -49,7 +49,7 @@ export const getStateElapsedTime = async (page: Page): Promise<string> => {
 
 // Check console for onStateChange callback and state detection
 export const checkConsole = async (page: Page, state: string, consoleMessages: string[]): Promise<boolean> => {
-  console.log(`Checking console for onStateChange callback with state: ${state}`);
+  //console.log(`Checking console for onStateChange callback with state: ${state}`);
   
   // Check for onStateChange invoked message
   const onStateChangeInvoked = consoleMessages.some(message => 
@@ -101,23 +101,23 @@ export const checkConsole = async (page: Page, state: string, consoleMessages: s
       return false;
     }, state);
   } catch (error) {
-    console.log('Could not evaluate state from page context');
+    //console.log('Could not evaluate state from page context');
   }
   
   // Result now includes API call success check
   const result = onStateChangeInvoked && (stateFound || stateFoundInExpandedObject) && apiCallSuccess;
   
   if (result) {
-    console.log(`\n✅ SUCCESS: onStateChange invoked, ${state} state detected, and API call successful\n`);
+    //console.log(`\n✅ SUCCESS: onStateChange invoked, ${state} state detected, and API call successful\n`);
   } else {
-    console.log(`\n❌ FAILED: onStateChange with ${state} state verification failed`);
-    console.log(`  - onStateChange invoked: ${onStateChangeInvoked}`);
-    console.log(`  - ${state} state found in messages: ${stateFound}`);
-    console.log(`  - ${state} state found in expanded object: ${stateFoundInExpandedObject}`);
-    console.log(`  - API call success detected: ${apiCallSuccess}`);
+    //console.log(`\n❌ FAILED: onStateChange with ${state} state verification failed`);
+    //console.log(`  - onStateChange invoked: ${onStateChangeInvoked}`);
+    //console.log(`  - ${state} state found in messages: ${stateFound}`);
+    //console.log(`  - ${state} state found in expanded object: ${stateFoundInExpandedObject}`);
+    //console.log(`  - API call success detected: ${apiCallSuccess}`);
     
     // Show only relevant console messages for debugging
-    console.log('\n🔍 Relevant console messages:');
+    //console.log('\n🔍 Relevant console messages:');
     const relevantMessages = consoleMessages.filter(msg => 
       msg.toLowerCase().includes('onstatechange') || 
       msg.toLowerCase().includes(state.toLowerCase()) ||
@@ -127,12 +127,12 @@ export const checkConsole = async (page: Page, state: string, consoleMessages: s
     
     if (relevantMessages.length > 0) {
       relevantMessages.forEach((msg, index) => {
-        console.log(`  ${index + 1}: ${msg}`);
+     //   console.log(`  ${index + 1}: ${msg}`);
       });
     } else {
-      console.log('  No relevant messages found');
+      //console.log('  No relevant messages found');
     }
-    console.log(''); 
+   // console.log(''); 
   }
   
   return result;
@@ -163,11 +163,11 @@ export async function checkCallbackSequence(page: Page, expectedState: string, c
   
   // Verify both events occurred and callback came after API success
   if (apiSuccessIndex !== -1 && callbackIndex !== -1) {
-    console.log(`🔍 API Success at index: ${apiSuccessIndex}, Callback at index: ${callbackIndex}`);
+    //console.log(`🔍 API Success at index: ${apiSuccessIndex}, Callback at index: ${callbackIndex}`);
     return callbackIndex > apiSuccessIndex;
   }
   
-  console.log(`❌ Missing events - API Success: ${apiSuccessIndex !== -1}, Callback: ${callbackIndex !== -1}`);
+ // console.log(`❌ Missing events - API Success: ${apiSuccessIndex !== -1}, Callback: ${callbackIndex !== -1}`);
   return false;
 }
 
