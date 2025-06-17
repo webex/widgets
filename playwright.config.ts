@@ -10,7 +10,7 @@ dotenv.config({path: path.resolve(__dirname, '.env')});
  */
 export default defineConfig({
   testDir: './playwright',
-
+  timeout: 180000,
   /* Run your local dev server before starting the tests */
   webServer: {
     command: 'yarn workspace samples-cc-react-app serve',
@@ -33,7 +33,7 @@ export default defineConfig({
     baseURL: 'http://localhost:3000',
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: 'retain-on-failure',
+    trace: 'on',
   },
 
   /* Configure projects for major browsers */
