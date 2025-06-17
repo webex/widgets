@@ -37,10 +37,10 @@ test.describe('🔐 User State Widget Functionality Suite', () => {
     
     const loginButtonExists = await page.getByTestId('login-button').isVisible().catch(() => false);
     if (loginButtonExists) {
-      await desktopLogin(page);
+      await extensionLogin(page);
     } else {
       await stationLogout(page);
-      await desktopLogin(page);
+      await extensionLogin(page);
     }
 
     await expect(page.getByTestId('state-select')).toBeVisible();
@@ -186,8 +186,8 @@ test.describe('📱 User State retention and timer check on page refresh', () =>
     console.log('\n=== 📱 STATION LOGIN & CALLBACK TEST STARTED ===');
 
     // Initial login
-  /*  await oauthLogin(page);
-    await initialisePage(page);*/
+    await oauthLogin(page);
+    await initialisePage(page);
     
     const loginButtonExists = await page.getByTestId('login-button').isVisible().catch(() => false);
     if (loginButtonExists) {
@@ -361,8 +361,8 @@ test.describe('⏰ Idle Code State Transitions & Dual Timer Suite', () => {
     console.log('\n=== ⏰ IDLE CODE STATE TRANSITIONS & DUAL TIMER TEST STARTED ===');
     
     // Login and ensure SDK init
-   /* await oauthLogin(page);
-    await initialisePage(page);*/
+    await oauthLogin(page);
+    await initialisePage(page);
     
     const loginButtonExists = await page.getByTestId('login-button').isVisible().catch(() => false);
     if (loginButtonExists) {
@@ -441,9 +441,9 @@ test.describe('🔄 Cross-Page State & Timer Synchronization Suite', () => {
     
     // ===== PAGE 1 SETUP =====
     console.log('📱 Setting up Page 1...');
-  /*  await oauthLogin(page);
+    await oauthLogin(page);
     await multiLoginEnable(page);
-    await initialisePage(page);*/
+    await initialisePage(page);
     
     const loginButtonExists = await page.getByTestId('login-button').isVisible().catch(() => false);
     if (loginButtonExists) {
