@@ -55,6 +55,7 @@ function App() {
   const [incomingTasks, setIncomingTasks] = useState([]);
   const [loginType, setLoginType] = useState('token');
   const [showAgentProfile, setShowAgentProfile] = useState(false);
+  const [doStationLogout, setDoStationLogout] = useState(true);
 
   const [collapsedTasks, setCollapsedTasks] = React.useState([]);
   const [showLoader, setShowLoader] = useState(false);
@@ -495,6 +496,16 @@ const handleSaveEnd = (isComplete: boolean) => {
                         setShowAgentProfile(!showAgentProfile);
                       }}
                     />
+                    <Checkbox
+                      checked={doStationLogout}
+                      aria-label="theme checkbox"
+                      id="theme-checkbox"
+                      label="Do Station Logout"
+                      // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
+                      onchange={() => {
+                        setDoStationLogout(!doStationLogout);
+                      }}
+                    />
                     {store.isAgentLoggedIn && (
                       <Button id="logoutAgent" onClick={stationLogout} color="positive" className='stationLogoutButtonClass'>
                         Station Logout
@@ -635,7 +646,7 @@ const handleSaveEnd = (isComplete: boolean) => {
                       <fieldset className="fieldset">
                         <legend className="legend-box">Station Login</legend>
                         <div className="station-login">
-                          <StationLogin onLogin={onLogin} onLogout={onLogout} onCCSignOut={onCCSignOut} profileMode={false} />
+                          <StationLogin onLogin={onLogin} onLogout={onLogout} onCCSignOut={onCCSignOut} profileMode={false} doStationLogout={doStationLogout} />
                         </div>
                       </fieldset>
                     </section>
@@ -648,9 +659,6 @@ const handleSaveEnd = (isComplete: boolean) => {
                         <legend className="legend-box">Station Login (Profile Mode)</legend>
                         <div className="station-login">
                           <StationLogin 
-                            onLogin={onLogin} 
-                            onLogout={onLogout} 
-                            onCCSignOut={onCCSignOut} 
                             profileMode={true} 
                             onSaveStart={handleSaveStart}
                             onSaveEnd={handleSaveEnd} />

@@ -13,6 +13,7 @@ import {
   handleDNInputChanged,
   handleTeamSelectChanged,
   handleOnCCSignOut,
+  handleCCSignoutKeyDown,
 } from '../../../src/components/StationLogin/station-login.utils';
 import {
   DESKTOP,
@@ -32,6 +33,22 @@ const loggerMock = {
 describe('Station Login Utils', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('handleCCSignoutKeyDown', () => {
+    it('should set showCCSignOutModal to false when Escape key is pressed', () => {
+      const mockSetShowCCSignOutModal = jest.fn();
+      const mockEvent = {key: 'Escape'} as React.KeyboardEvent<HTMLDialogElement>;
+      handleCCSignoutKeyDown(mockEvent, mockSetShowCCSignOutModal);
+      expect(mockSetShowCCSignOutModal).toHaveBeenCalledWith(false);
+    });
+
+    it('should not set showCCSignOutModal for other keys', () => {
+      const mockSetShowCCSignOutModal = jest.fn();
+      const mockEvent = {key: 'Enter'} as React.KeyboardEvent<HTMLDialogElement>;
+      handleCCSignoutKeyDown(mockEvent, mockSetShowCCSignOutModal);
+      expect(mockSetShowCCSignOutModal).not.toHaveBeenCalled();
+    });
   });
 
   describe('handleModals', () => {

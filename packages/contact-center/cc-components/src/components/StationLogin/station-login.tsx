@@ -14,6 +14,7 @@ import {
   handleTeamSelectChanged,
   saveConfirmCancelClicked,
   updateDialNumberLabel,
+  handleCCSignoutKeyDown,
 } from './station-login.utils';
 
 const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps> = (props) => {
@@ -98,7 +99,12 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
         </div>
       </dialog>
       {/* TODO: Replace dialog with momentum-design modal component once available */}
-      <dialog ref={ccSignOutModalRef} className="dialog-modal" data-testid="cc-logout-modal">
+      <dialog
+        ref={ccSignOutModalRef}
+        className="dialog-modal"
+        data-testid="cc-logout-modal"
+        onKeyDown={(e) => handleCCSignoutKeyDown(e, setShowCCSignOutModal)}
+      >
         <Text tagname="h2" type="body-large-bold" className="modal-text">
           {StationLoginLabels.CC_SIGN_OUT}
         </Text>
@@ -114,7 +120,13 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
           >
             {StationLoginLabels.CANCEL}
           </Button>
-          <Button data-testId="cc-logout-button" onClick={() => continueClicked(ccSignOutModalRef, onCCSignOut)}>
+          <Button
+            data-testId="cc-logout-button"
+            onClick={() => {
+              setShowCCSignOutModal(false);
+              continueClicked(ccSignOutModalRef, onCCSignOut);
+            }}
+          >
             {StationLoginLabels.SIGN_OUT}
           </Button>
         </div>

@@ -34,6 +34,7 @@ jest.mock('@webex/cc-store', () => {
 const ccMock = {
   stationLogin: jest.fn(),
   stationLogout: jest.fn(),
+  deregister: jest.fn(),
   on: jest.fn(),
   off: jest.fn(),
 };
@@ -554,6 +555,7 @@ describe('useStationLogin Hook', () => {
       expect(loginCb).toHaveBeenCalled();
     });
   });
+
   it('should not save if isLoginOptionsChanged is false', () => {
     const cc = {updateAgentProfile: jest.fn()};
     const {result} = renderHook(() =>
@@ -581,6 +583,7 @@ describe('useStationLogin Hook', () => {
     );
     expect(cc.updateAgentProfile).not.toHaveBeenCalled();
   });
+
   it('should call updateAgentProfile and update originalLoginOptions on save when changed', async () => {
     const cc = {updateAgentProfile: jest.fn().mockResolvedValue({})};
     const {result} = renderHook(() =>
@@ -626,6 +629,7 @@ describe('useStationLogin Hook', () => {
     expect(result.current.originalLoginOptions).toEqual(result.current.currentLoginOptions);
     expect(result.current.isLoginOptionsChanged).toBe(false);
   });
+
   it('should handle updateAgentProfile errors', async () => {
     const cc = {updateAgentProfile: jest.fn().mockRejectedValue(new Error('fail'))};
     const {result} = renderHook(() =>
@@ -660,6 +664,7 @@ describe('useStationLogin Hook', () => {
       })
     );
   });
+
   it('should call updateAgentProfile with no dialNumber when deviceType is BROWSER', async () => {
     const cc = {updateAgentProfile: jest.fn().mockResolvedValue({})};
     const {result} = renderHook(() =>
@@ -699,5 +704,64 @@ describe('useStationLogin Hook', () => {
         updated: expect.any(Object),
       })
     );
+  });
+
+  describe('#onCCSignOut', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      ccMock.stationLogout.mockClear();
+      ccMock.deregister.mockClear();
+    });
+
+    it('should call stationLogout on doStationLogout', async () => {
+      const doStationLogout = true;
+      const onCCSignOut = jest.fn();
+      store.setIsAgentLoggedIn(true);
+      ccMock.stationLogout.mockResolvedValue({});
+      const {result} = renderHook(() =>
+        useStationLogin({
+          ...baseStationLoginProps,
+          doStationLogout,
+          onLogin: jest.fn(),
+          onLogout: jest.fn(),
+          onCCSignOut,
+        })
+      );
+
+      await act(async () => {
+        await result.current.onCCSignOut();
+      });
+
+      await waitFor(() => {
+        expect(ccMock.stationLogout).toHaveBeenCalledWith({logoutReason: 'User requested logout'});
+        expect(ccMock.deregister).toHaveBeenCalled();
+        expect(onCCSignOut).toHaveBeenCalled();
+      });
+    });
+
+    it('should not call stationLogout if doStationLogout is false', async () => {
+      const doStationLogout = false;
+      const onCCSignOut = jest.fn();
+      store.setIsAgentLoggedIn(true);
+      const {result} = renderHook(() =>
+        useStationLogin({
+          ...baseStationLoginProps,
+          doStationLogout,
+          onLogin: jest.fn(),
+          onLogout: jest.fn(),
+          onCCSignOut,
+        })
+      );
+
+      await act(async () => {
+        await result.current.onCCSignOut();
+      });
+
+      await waitFor(() => {
+        expect(ccMock.stationLogout).not.toHaveBeenCalled();
+        expect(ccMock.deregister).not.toHaveBeenCalled();
+        expect(onCCSignOut).toHaveBeenCalled();
+      });
+    });
   });
 });

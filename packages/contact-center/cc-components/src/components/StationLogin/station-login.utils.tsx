@@ -219,6 +219,15 @@ const handleOnCCSignOut = (ccSignOutModalRef: React.RefObject<HTMLDialogElement>
   onCCSignOut();
 };
 
+const handleCCSignoutKeyDown = (
+  event: React.KeyboardEvent<HTMLDialogElement>,
+  setShowCCSignOutModal: (show: boolean) => void
+) => {
+  if (event.key === 'Escape') {
+    setShowCCSignOutModal(false);
+  }
+};
+
 export {
   handleModals,
   continueClicked,
@@ -232,4 +241,5 @@ export {
   handleDNInputChanged,
   handleTeamSelectChanged,
   handleOnCCSignOut,
+  handleCCSignoutKeyDown,
 };
