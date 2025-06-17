@@ -53,7 +53,7 @@ export const dialLogin = async (page: Page): Promise<void> => {
     await page.getByTestId('login-option-select').locator('#select-base-triggerid svg').click();
   await page.getByTestId('login-option-Dial Number').click();
 await page.getByTestId('dial-number-input').locator('div').nth(1).click();
-  await page.getByRole('textbox', { name: 'Dial Number' }).fill(dialNumber);
+  await page.getByTestId('dial-number-input').locator('input').fill(dialNumber);
   await page.getByTestId('teams-select-dropdown').locator('#select-base-triggerid div').click();
   await page.waitForTimeout(200);
   await page.locator('[data-testid^="teams-dropdown-"]').nth(0).locator('span, div').first().click();

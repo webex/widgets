@@ -17,21 +17,21 @@ export const oauthLogin = async (page: Page): Promise<void> => {
         await page.getByRole('link', { name: 'Sign in' }).click();
         await page.waitForTimeout(3000);
         // Check if Init Widgets button is visible after username sign in (Multi session)
-        const initWidgetsButton = page.getByRole('button', { name: 'Init Widgets' });
+        const initWidgetsButton = page.getByTestId('init-widgets-button');
         const isInitWidgetsVisible = await initWidgetsButton.isVisible().catch(() => false);
         
         if (!isInitWidgetsVisible) {
             // If Init Widgets button is not visible, proceed with password entry
-            await page.getByRole('textbox', { name: 'Password' }).fill(process.env.PLAYWRIGHT_PASSWORD);
-            await page.getByRole('button', { name: 'Sign in' }).click();
+        await page.getByRole('textbox', { name: 'Password' }).fill(process.env.PLAYWRIGHT_PASSWORD);
+        await page.getByRole('button', { name: 'Sign in' }).click();
         }
-        
-        await page.getByRole('checkbox', { name: 'Show Agent Profile' }).check(); 
-       
+
+        await page.getByTestId('show-agent-profile-checkbox').click();
+
 }
 
 export const multiLoginEnable = async (page: Page): Promise<void> => {
-            await page.getByText('Enable Multi Login').click();
+    await page.getByTestId('multi-login-enable-checkbox').click();
 }
 
 export const initialisePage = async (page: Page): Promise<void> => {
