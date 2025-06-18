@@ -1,5 +1,6 @@
 import { Page,expect } from '@playwright/test';
 import dotenv from 'dotenv';
+import { BASE_URL } from '../constants';
 
 dotenv.config();
 
@@ -9,7 +10,7 @@ export const oauthLogin = async (page: Page): Promise<void> => {
       throw new Error('PLAYWRIGHT_USERNAME and PLAYWRIGHT_PASSWORD must be set in the environment variables');
     }
 
-        await page.goto('http://localhost:3000');
+        await page.goto(BASE_URL);
         await page.locator('#select-base-triggerid').getByText('Access Token').click();
         await page.getByTestId('samples:login_option_oauth').getByText('Login with Webex').click();
         await page.getByTestId('login with webex button').click();
@@ -35,10 +36,8 @@ export const multiLoginEnable = async (page: Page): Promise<void> => {
 }
 
 export const initialisePage = async (page: Page): Promise<void> => {
-    //console.log('Initialising widgets...');
  await page.getByTestId('init-widgets-button').click();
  await page.getByTestId('init-widgets-button').click();
 
  await page.getByTestId('station-login-widget').waitFor({ state: 'visible' });
-   //console.log('Widgets initialised successfully!');
 };
