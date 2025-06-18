@@ -54,7 +54,7 @@ test.describe('User State Widget Functionality Tests', () => {
   });
 
   test('should change state to Available and verify theme and timer reset', async () => {
-    verifyCurrentState
+    await verifyCurrentState(page, MEETING);
     await page.waitForTimeout(5000);
     const timerBefore = await getStateElapsedTime(page);
     await changestate(page, AVAILABLE);
@@ -74,13 +74,6 @@ test.describe('User State Widget Functionality Tests', () => {
   });
 
   test('should verify existence and order in which callback and API success are logged for Available state', async () => {
-
-    const consoleMessages: string[] = [];
-
-    page.on('console', msg => {
-      const message = msg.text();
-      consoleMessages.push(message);
-    });
     await changestate(page, MEETING);
     await page.waitForTimeout(2000);
     consoleMessages.length = 0;
@@ -91,33 +84,23 @@ test.describe('User State Widget Functionality Tests', () => {
   });
 
   test('should verify state persistence after page reload', async () => {
-       const consoleMessages: string[] = [];
-    page.on('console', msg => {
-      const message = msg.text();
-      consoleMessages.push(message);
-    });   
-  
     await changestate(page, MEETING);
     await page.waitForTimeout(1000);
     await changestate(page, AVAILABLE);
-
-    verifyCurrentState(page, AVAILABLE);
-    
+    await verifyCurrentState(page, AVAILABLE);
     await page.waitForTimeout(5000);
   
     consoleMessages.length = 0;
-
     await page.reload();
     await initialisePage(page);
+    
     const visible = await page.getByTestId('state-select').isVisible();
     if (!visible) throw new Error('State select not visible after reload');
-     page.on('console', msg => {
-      const message = msg.text();
-      consoleMessages.push(message);
-    });   
-    verifyCurrentState(page, AVAILABLE);
+    
+    await verifyCurrentState(page, AVAILABLE);
     const callbackTriggered = await checkConsole(page, AVAILABLE, consoleMessages);
     if (!callbackTriggered) throw new Error('Callback not triggered after reload');
+    
     const state = await getCurrentState(page);
     if (state !== AVAILABLE) throw new Error('State is not Available after reload');
   });
@@ -148,38 +131,39 @@ test.describe('User State Widget Functionality Tests', () => {
   });
 
   test('should test idle state transition and dual timer', async () => {
-        const consoleMessages: string[] = [];
- 
-    page.on('console', msg => {
-      const message = msg.text();
-      consoleMessages.push(message);
-    });
-    
     await changestate(page, MEETING);
     await verifyCurrentState(page, MEETING);
     await page.waitForTimeout(2000);
-        consoleMessages.length = 0;
+    consoleMessages.length = 0;
 
     await changestate(page, LUNCH);
     await verifyCurrentState(page, LUNCH);
     await page.waitForTimeout(2000);
+    
     const found = await checkConsole(page, LUNCH, consoleMessages);
     if (!found) throw new Error('Callback for Lunch state not successful');
+    
     await page.waitForTimeout(5000);
-    const dualTimer=await getStateElapsedTime(page);
+    const dualTimer = await getStateElapsedTime(page);
 
     const timerParts = dualTimer.split(' / ');
     if (timerParts.length !== 2) throw new Error('Dual timer format is incorrect');
+    
     const isValidFormat = timerParts.every(part => /^(\d{1,2}:\d{2}(:\d{2})?)$/.test(part));
     if (!isValidFormat) throw new Error('Dual timer format is not valid');
+    
     const [firstTimer, secondTimer] = timerParts.map(part => part.split(':').map(Number));
-    if (firstTimer.length < 2 || secondTimer.length < 2) throw new Error('Dual timer does not have enough parts');
+    if (firstTimer.length < 2 || secondTimer.length < 2) {
+      throw new Error('Dual timer does not have enough parts');
+    }
+    
     expect(firstTimer[0]).toBeGreaterThanOrEqual(0);
     expect(firstTimer[1]).toBeGreaterThanOrEqual(0);
     expect(secondTimer[0]).toBeGreaterThanOrEqual(0);
     expect(secondTimer[1]).toBeGreaterThanOrEqual(0);
     expect(firstTimer.length === 2 || firstTimer.length === 3).toBe(true);
-    expect(secondTimer.length === 2 || secondTimer.length === 3).toBe(true);  
-    changestate(page, AVAILABLE);
+    expect(secondTimer.length === 2 || secondTimer.length === 3).toBe(true);
+    
+    await changestate(page, AVAILABLE);
   });
 });
