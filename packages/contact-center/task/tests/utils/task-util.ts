@@ -29,6 +29,7 @@ describe('getControlsVisibility', () => {
       pauseResumeRecording: true,
       endConsult: true,
       recordingIndicator: true,
+      isBrowser: true,
     };
 
     expect(getControlsVisibility(deviceType, featureFlags, task)).toEqual(expectedControls);
@@ -63,6 +64,7 @@ describe('getControlsVisibility', () => {
       pauseResumeRecording: false,
       endConsult: false,
       recordingIndicator: true,
+      isBrowser: true,
     };
 
     expect(getControlsVisibility(deviceType, featureFlags, task)).toEqual(expectedControls);
@@ -97,6 +99,7 @@ describe('getControlsVisibility', () => {
       pauseResumeRecording: true,
       endConsult: true,
       recordingIndicator: true,
+      isBrowser: true,
     };
 
     expect(getControlsVisibility(deviceType, featureFlags, task)).toEqual(expectedControls);
@@ -131,6 +134,7 @@ describe('getControlsVisibility', () => {
       pauseResumeRecording: true,
       endConsult: false,
       recordingIndicator: true,
+      isBrowser: true,
     };
 
     expect(getControlsVisibility(deviceType, featureFlags, task)).toEqual(expectedControls);
@@ -165,6 +169,7 @@ describe('getControlsVisibility', () => {
       pauseResumeRecording: true,
       endConsult: true,
       recordingIndicator: true,
+      isBrowser: false,
     };
 
     expect(getControlsVisibility(deviceType, featureFlags, task)).toEqual(expectedControls);
@@ -199,6 +204,7 @@ describe('getControlsVisibility', () => {
       pauseResumeRecording: true,
       endConsult: true,
       recordingIndicator: true,
+      isBrowser: false,
     };
 
     expect(getControlsVisibility(deviceType, featureFlags, task)).toEqual(expectedControls);
@@ -233,6 +239,7 @@ describe('getControlsVisibility', () => {
       pauseResumeRecording: false,
       endConsult: false,
       recordingIndicator: false,
+      isBrowser: false,
     };
 
     expect(getControlsVisibility(deviceType, featureFlags, task)).toEqual(expectedControls);
@@ -266,6 +273,7 @@ describe('getControlsVisibility', () => {
       pauseResumeRecording: false,
       endConsult: false,
       recordingIndicator: false,
+      isBrowser: true,
     };
 
     expect(getControlsVisibility(deviceType, featureFlags, task)).toEqual(expectedControls);

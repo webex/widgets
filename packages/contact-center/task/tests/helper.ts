@@ -1343,11 +1343,11 @@ describe('useCallControl', () => {
 
     // Wait for the consultAgentName to be updated
     await waitFor(() => {
-      expect(result.current.consultAgentName).toBe('Current Agent');
+      expect(result.current.consultAgentName).toBe('Jane Consultant');
     });
 
     // Verify the logger was called with the correct message
-    expect(mockLogger.info).toHaveBeenCalledWith('Consulting agent detected: Current Agent currentAgentId', {
+    expect(mockLogger.info).toHaveBeenCalledWith('Consulting agent detected: Jane Consultant consultAgentId', {
       module: 'widget-cc-task#helper.ts',
       method: 'useCallControl#extractConsultingAgent',
     });

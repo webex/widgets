@@ -4,7 +4,7 @@ import {CallControlComponentProps, DestinationType, CallControlMenuType} from '.
 import './call-control.styles.scss';
 import {PopoverNext, SelectNext, TooltipNext, Text, ButtonCircle, ButtonPill} from '@momentum-ui/react-collaboration';
 import {Item} from '@react-stately/collections';
-import {Icon} from '@momentum-design/components/dist/react';
+import {Icon, Button} from '@momentum-design/components/dist/react';
 import ConsultTransferPopoverComponent from './CallControlCustom/consult-transfer-popover';
 import type {MEDIA_CHANNEL as MediaChannelType} from '../task.types';
 import {getMediaTypeInfo} from '../../../utils';
@@ -174,8 +174,8 @@ function CallControlComponent(props: CallControlComponentProps) {
       onClick: endCall,
       tooltip: `End ${currentMediaType.labelName}`,
       className: 'call-control-button-cancel',
-      disabled: isHeld,
-      isVisible: controlVisibility.end,
+      disabled: controlVisibility.isBrowser ? false : isHeld,
+      isVisible: controlVisibility.isBrowser ? true : controlVisibility.end,
     },
   ];
 
@@ -273,10 +273,17 @@ function CallControlComponent(props: CallControlComponentProps) {
                   key={index}
                   triggerComponent={
                     <ButtonCircle
-                      className={button.className}
+                      className={
+                        button.className +
+                        ((button.disabled || consultInitiated) && !(controlVisibility.isBrowser && button.id === 'end')
+                          ? ` ${button.className}-disabled`
+                          : '')
+                      }
                       data-testid="ButtonCircle"
                       onPress={button.onClick}
-                      disabled={button.disabled || consultInitiated}
+                      disabled={
+                        controlVisibility.isBrowser && button.id === 'end' ? false : button.disabled || consultInitiated
+                      }
                       aria-label={button.tooltip}
                     >
                       <Icon className={button.className + '-icon'} name={button.icon} />
@@ -304,10 +311,16 @@ function CallControlComponent(props: CallControlComponentProps) {
               showArrow
               trigger="click"
               triggerComponent={
-                <ButtonPill className="wrapup-button">
+                <Button
+                  size={28}
+                  color="default"
+                  variant="secondary"
+                  postfix-icon="arrow-down-bold"
+                  type="button"
+                  role="button"
+                >
                   Wrap up
-                  <Icon name="arrow-down-bold" />
-                </ButtonPill>
+                </Button>
               }
               variant="medium"
               interactive
