@@ -147,6 +147,7 @@ const handleSaveEnd = (isComplete: boolean) => {
 const onTaskDeclined = (task,reason) => {
     console.log('onTaskDeclined invoked for task:', task);
     setRejectedReason(reason);
+    setShowRejectedPopup(true);
   };
 
   const onTaskSelected = ({task, isClicked}) => {
@@ -332,8 +333,6 @@ const onTaskDeclined = (task,reason) => {
     if(!status || !status.name)return;
     if(status.name !== 'RONA'){
       setShowRejectedPopup(false);
-    }else{
-      setShowRejectedPopup(true);
     }
   };
 
