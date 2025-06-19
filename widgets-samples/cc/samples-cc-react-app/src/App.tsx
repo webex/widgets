@@ -330,8 +330,8 @@ const onTaskDeclined = (task,reason) => {
 
   const onStateChange = (status) => {
     console.log('onStateChange invoked', status);
-    if(!status || !status.name)return;
-    if(status.name !== 'RONA'){
+    if (!status || !status.name) return;
+    if (status.name !== 'RONA') {
       setShowRejectedPopup(false);
       setRejectedReason('');
     }
@@ -758,24 +758,30 @@ const onTaskDeclined = (task,reason) => {
             )}
             {showRejectedPopup && (
               <div className="task-rejected-popup">
-                <button
-                  className="close-btn"
-                  onClick={handlePopoverClose}>
+                <button className="close-btn" onClick={handlePopoverClose}>
                   ×
                 </button>
                 <Text>
-                  <div style={{ textAlign: 'center', fontSize: '1.25rem', fontWeight: 600}}>
-                    Task Rejected
-                  </div>
+                  <div style={{textAlign: 'center', fontSize: '1.25rem', fontWeight: 600}}>Task Rejected</div>
                 </Text>
                 <Text>
-                  <div style={{ fontSize: '0.875rem', textAlign: 'center', color: 'rgb(171, 10, 21)' }}>
+                  <div style={{fontSize: '0.875rem', textAlign: 'center', color: 'rgb(171, 10, 21)'}}>
                     Reason: {rejectedReason}
                   </div>
                 </Text>
-                <Select value={selectedState} placeholder='Select a state' onChange={(e: CustomEvent) =>{setSelectedState(e.detail.value)}}>
-                  <Option key={1} value="Available">Available</Option>
-                  <Option key={2} value="Idle">Idle</Option>
+                <Select
+                  value={selectedState}
+                  placeholder="Select a state"
+                  onChange={(e: CustomEvent) => {
+                    setSelectedState(e.detail.value);
+                  }}
+                >
+                  <Option key={1} value="Available">
+                    Available
+                  </Option>
+                  <Option key={2} value="Idle">
+                    Idle
+                  </Option>
                 </Select>
                 <Button disabled={selectedState === ''} onClick={handlePopoverSubmit} variant="primary">
                   Confirm State Change
