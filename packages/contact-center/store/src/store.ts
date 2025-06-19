@@ -101,7 +101,7 @@ class Store implements IStore {
         this.agentId = response.agentId;
         this.wrapupCodes = response.wrapupCodes;
         this.isAgentLoggedIn = response.isAgentLoggedIn;
-        this.deviceType = response.deviceType ?? 'AGENT_DN';
+        this.deviceType = response.deviceType ?? this.loginOptions[0];
         this.dialNumber = response.dn;
         this.teamId = response.currentTeamId ?? '';
         this.currentState = response.lastStateAuxCodeId;
