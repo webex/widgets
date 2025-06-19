@@ -333,6 +333,7 @@ const onTaskDeclined = (task,reason) => {
     if(!status || !status.name)return;
     if(status.name !== 'RONA'){
       setShowRejectedPopup(false);
+      setRejectedReason('');
     }
   };
 
