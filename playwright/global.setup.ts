@@ -1,4 +1,5 @@
 import {test as setup} from '@playwright/test';
+import { BASE_URL } from './constants';
 const fs = require('fs');
 const path = require('path');
 
@@ -7,7 +8,7 @@ setup('OAuth', async ({browser}) => {
     throw new Error('PLAYWRIGHT_USERNAME and PLAYWRIGHT_PASSWORD must be set in the environment variables');
   }
   const page = await browser.newPage();
-  await page.goto('http://localhost:3000/');
+  await page.goto(BASE_URL);
 
   await page.locator('#select-base-triggerid').getByText('Access Token').click();
   await page.getByTestId('samples:login_option_oauth').click();
