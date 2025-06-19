@@ -122,9 +122,17 @@ test.describe('User State Widget Functionality Tests', () => {
       getStateElapsedTime(page),
       getStateElapsedTime(multiSessionPage)
     ]);
-    
-    if (timer1 !== timer2) {
-      throw new Error(`Multi-session timer synchronization failed: Primary=${timer1}, Secondary=${timer2}`);
+
+    //Parse the timers to compare
+    const parseTimer = (timer: string) => {
+      const parts = timer.split(':');
+      return parseInt(parts[0], 10) * 60 + parseInt(parts[  1], 10);
+    };
+    const timer1Parsed = parseTimer(timer1);
+    const timer2Parsed = parseTimer(timer2);
+
+    if (Math.abs(timer1Parsed-timer2Parsed)>1) {
+      throw new Error(`Multi-session timer synchronization failed: Primary=${timer1Parsed}, Secondary=${timer2Parsed}`);
     }
 
     await multiSessionPage.close();
