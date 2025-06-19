@@ -327,7 +327,7 @@ function CallControlComponent(props: CallControlComponentProps) {
               {currentTask.autoWrapup && (
                 <AutoWrapupTimer
                   secondsUntilAutoWrapup={secondsUntilAutoWrapup}
-                  allowCancelAutoWrapup={currentTask.autoWrapup.allowCancelAutoWrapup}
+                  allowCancelAutoWrapup={false} // TODO: change to currentTask.autoWrapup.allowCancelAutoWrapup when its made supported in multi session from SDK side
                   handleCancelWrapup={handleCancelWrapup}
                 />
               )}
