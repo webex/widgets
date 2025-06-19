@@ -1,18 +1,14 @@
 import { Page,expect } from '@playwright/test';
 import dotenv from 'dotenv';
 import { 
-  MEETING, 
-  AVAILABLE, 
-  LUNCH, 
-  AVAILABLE_ID, 
-  MEETING_ID, 
-  LUNCH_ID 
+  STATES, 
+  AUX_CODE_IDS 
 } from '../constants';
 
 dotenv.config();
 
 
-export const changestate = async (page: Page, userState: string): Promise<void> => {
+export const changeState = async (page: Page, userState: string): Promise<void> => {
 
   // Get the current state name
   const currentState = await page.getByTestId('state-select').getByTestId('state-name').innerText();
@@ -52,9 +48,9 @@ export const getStateElapsedTime = async (page: Page): Promise<string> => {
 export const checkConsole = async (page: Page, state: string, consoleMessages: string[]): Promise<boolean> => {
   // Map auxCodeId to state name using direct constants
   const auxCodeIdMap: Record<string, string> = {
-    [AVAILABLE_ID]: AVAILABLE,
-    [MEETING_ID]: MEETING,
-    [LUNCH_ID]: LUNCH,
+    [AUX_CODE_IDS.AVAILABLE]: STATES.AVAILABLE,
+    [AUX_CODE_IDS.MEETING]: STATES.MEETING,
+    [AUX_CODE_IDS.LUNCH]: STATES.LUNCH,
   };
 
   // Find the last "Agent state changed successfully to auxCodeId: ..." log
@@ -116,9 +112,9 @@ export async function checkCallbackSequence(page: Page, expectedState: string, c
 
   // Map auxCodeId to state name using direct constants
   const auxCodeIdMap: Record<string, string> = {
-    [AVAILABLE_ID]: AVAILABLE,
-    [MEETING_ID]: MEETING,
-    [LUNCH_ID]: LUNCH,
+    [AUX_CODE_IDS.AVAILABLE]: STATES.AVAILABLE,
+    [AUX_CODE_IDS.MEETING]: STATES.MEETING,
+    [AUX_CODE_IDS.LUNCH]: STATES.LUNCH,
   };
   let lastAuxId: string | null = null;
   for (let i = consoleMessages.length - 1; i >= 0; i--) {

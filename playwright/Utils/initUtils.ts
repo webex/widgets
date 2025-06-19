@@ -16,11 +16,10 @@ export const oauthLogin = async (page: Page): Promise<void> => {
         await page.getByTestId('login with webex button').click();
         await page.getByRole('textbox', { name: 'name@example.com' }).fill(process.env.PLAYWRIGHT_USERNAME);
         await page.getByRole('link', { name: 'Sign in' }).click();
-        await page.waitForTimeout(3000);
         // Check if Init Widgets button is visible after username sign in (Multi session)
-        const initWidgetsButton = page.getByTestId('init-widgets-button');
-        const isInitWidgetsVisible = await initWidgetsButton.isVisible().catch(() => false);
-        
+       const initWidgetsButton = page.getByTestId('init-widgets-button');  
+       const isInitWidgetsVisible = await initWidgetsButton.waitFor({ state: 'visible', timeout: 5000 }).then(() => true).catch(() => false);
+
         if (!isInitWidgetsVisible) {
             // If Init Widgets button is not visible, proceed with password entry
         await page.getByRole('textbox', { name: 'Password' }).fill(process.env.PLAYWRIGHT_PASSWORD);

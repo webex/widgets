@@ -1,8 +1,8 @@
 import { test, expect, Page, BrowserContext } from '@playwright/test';
 import { oauthLogin, multiLoginEnable, initialisePage } from './Utils/initUtils';
-import { extensionLogin, stationLogout } from './Utils/stationLoginUtils';
-import { getCurrentState, changestate, verifyCurrentState, getStateElapsedTime, checkConsole, checkCallbackSequence } from './Utils/stateUtils';
-import { MEETING, AVAILABLE, LUNCH, GREEN, GREY } from './constants';
+import { extensionLogin, stationLogout } from './Utils/stationUtils';
+import { getCurrentState, changeState, verifyCurrentState, getStateElapsedTime, checkConsole, checkCallbackSequence } from './Utils/stateUtils';
+import { STATES, THEME_COLORS } from './constants';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -44,20 +44,20 @@ test.describe('User State Widget Functionality Tests', () => {
 
   test('should verify initial state is Meeting', async () => {
     const state = await getCurrentState(page);
-    if (state !== MEETING) throw new Error('Initial state is not Meeting');
+    if (state !== STATES.MEETING) throw new Error('Initial state is not Meeting');
   });
 
   test('should verify Meeting state theme color', async () => {
     const meetingThemeElement = page.getByTestId('state-select');
     const meetingThemeColor = await meetingThemeElement.evaluate(el => getComputedStyle(el).backgroundColor);
-    expect(meetingThemeColor).toBe(GREY);
+    expect(meetingThemeColor).toBe(THEME_COLORS.MEETING);
   });
 
   test('should change state to Available and verify theme and timer reset', async () => {
-    await verifyCurrentState(page, MEETING);
+    await verifyCurrentState(page, STATES.MEETING);
     await page.waitForTimeout(5000);
     const timerBefore = await getStateElapsedTime(page);
-    await changestate(page, AVAILABLE);
+    await changeState(page, STATES.AVAILABLE);
     await page.waitForTimeout(3000);
     const timerAfter = await getStateElapsedTime(page);
 
@@ -70,24 +70,24 @@ test.describe('User State Widget Functionality Tests', () => {
 
     const themeElement = page.getByTestId('state-select');
     const themeColor = await themeElement.evaluate(el => getComputedStyle(el).backgroundColor);
-    expect(themeColor).toBe(GREEN);
+    expect(themeColor).toBe(THEME_COLORS.AVAILABLE);
   });
 
   test('should verify existence and order in which callback and API success are logged for Available state', async () => {
-    await changestate(page, MEETING);
+    await changeState(page, STATES.MEETING);
     await page.waitForTimeout(2000);
     consoleMessages.length = 0;
-    await changestate(page, AVAILABLE);
+    await changeState(page, STATES.AVAILABLE);
     await page.waitForTimeout(3000);
-    const isCallbackSuccessful = await checkCallbackSequence(page, AVAILABLE, consoleMessages);
+    const isCallbackSuccessful = await checkCallbackSequence(page, STATES.AVAILABLE, consoleMessages);
     if (!isCallbackSuccessful) throw new Error('Callback for Available state not successful');
   });
 
   test('should verify state persistence after page reload', async () => {
-    await changestate(page, MEETING);
+    await changeState(page, STATES.MEETING);
     await page.waitForTimeout(1000);
-    await changestate(page, AVAILABLE);
-    await verifyCurrentState(page, AVAILABLE);
+    await changeState(page, STATES.AVAILABLE);
+    await verifyCurrentState(page, STATES.AVAILABLE);
     await page.waitForTimeout(5000);
   
     consoleMessages.length = 0;
@@ -97,12 +97,12 @@ test.describe('User State Widget Functionality Tests', () => {
     const visible = await page.getByTestId('state-select').isVisible();
     if (!visible) throw new Error('State select not visible after reload');
     
-    await verifyCurrentState(page, AVAILABLE);
-    const callbackTriggered = await checkConsole(page, AVAILABLE, consoleMessages);
+    await verifyCurrentState(page, STATES.AVAILABLE);
+    const callbackTriggered = await checkConsole(page, STATES.AVAILABLE, consoleMessages);
     if (!callbackTriggered) throw new Error('Callback not triggered after reload');
     
     const state = await getCurrentState(page);
-    if (state !== AVAILABLE) throw new Error('State is not Available after reload');
+    if (state !== STATES.AVAILABLE) throw new Error('State is not Available after reload');
   });
 
   test('should test multi-session synchronization', async () => {
@@ -111,11 +111,11 @@ test.describe('User State Widget Functionality Tests', () => {
     await initialisePage(multiSessionPage);
     await multiSessionPage.waitForTimeout(3000);
 
-    await changestate(page, AVAILABLE);
-    await verifyCurrentState(page, AVAILABLE);
+    await changeState(page, STATES.AVAILABLE);
+    await verifyCurrentState(page, STATES.AVAILABLE);
     await multiSessionPage.waitForTimeout(2000);
 
-    await verifyCurrentState(multiSessionPage, AVAILABLE);
+    await verifyCurrentState(multiSessionPage, STATES.AVAILABLE);
     
     await multiSessionPage.waitForTimeout(2000);
     const [timer1, timer2] = await Promise.all([
@@ -131,16 +131,16 @@ test.describe('User State Widget Functionality Tests', () => {
   });
 
   test('should test idle state transition and dual timer', async () => {
-    await changestate(page, MEETING);
-    await verifyCurrentState(page, MEETING);
+    await changeState(page, STATES.MEETING);
+    await verifyCurrentState(page, STATES.MEETING);
     await page.waitForTimeout(2000);
     consoleMessages.length = 0;
 
-    await changestate(page, LUNCH);
-    await verifyCurrentState(page, LUNCH);
+    await changeState(page, STATES.LUNCH);
+    await verifyCurrentState(page, STATES.LUNCH);
     await page.waitForTimeout(2000);
     
-    const found = await checkConsole(page, LUNCH, consoleMessages);
+    const found = await checkConsole(page, STATES.LUNCH, consoleMessages);
     if (!found) throw new Error('Callback for Lunch state not successful');
     
     await page.waitForTimeout(5000);
@@ -163,7 +163,7 @@ test.describe('User State Widget Functionality Tests', () => {
     expect(secondTimer[1]).toBeGreaterThanOrEqual(0);
     expect(firstTimer.length === 2 || firstTimer.length === 3).toBe(true);
     expect(secondTimer.length === 2 || secondTimer.length === 3).toBe(true);
-    
-    await changestate(page, AVAILABLE);
+
+    await changeState(page, STATES.AVAILABLE);
   });
 });
