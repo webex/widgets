@@ -75,7 +75,7 @@ test.describe('User State Widget Functionality Tests', () => {
 
   test('should verify existence and order in which callback and API success are logged for Available state', async () => {
     await changeState(page, STATES.MEETING);
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(3000);
     consoleMessages.length = 0;
     await changeState(page, STATES.AVAILABLE);
     await page.waitForTimeout(3000);
@@ -88,7 +88,7 @@ test.describe('User State Widget Functionality Tests', () => {
     await page.waitForTimeout(1000);
     await changeState(page, STATES.AVAILABLE);
     await verifyCurrentState(page, STATES.AVAILABLE);
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(3000);
   
     consoleMessages.length = 0;
     await page.reload();
@@ -113,11 +113,11 @@ test.describe('User State Widget Functionality Tests', () => {
 
     await changeState(page, STATES.AVAILABLE);
     await verifyCurrentState(page, STATES.AVAILABLE);
-    await multiSessionPage.waitForTimeout(2000);
+    await multiSessionPage.waitForTimeout(3000);
 
     await verifyCurrentState(multiSessionPage, STATES.AVAILABLE);
-    
-    await multiSessionPage.waitForTimeout(2000);
+
+    await multiSessionPage.waitForTimeout(3000);
     const [timer1, timer2] = await Promise.all([
       getStateElapsedTime(page),
       getStateElapsedTime(multiSessionPage)
@@ -138,7 +138,7 @@ test.describe('User State Widget Functionality Tests', () => {
 
     await changeState(page, STATES.LUNCH);
     await verifyCurrentState(page, STATES.LUNCH);
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(3000);
     
     const found = await checkConsole(page, STATES.LUNCH, consoleMessages);
     if (!found) throw new Error('Callback for Lunch state not successful');
