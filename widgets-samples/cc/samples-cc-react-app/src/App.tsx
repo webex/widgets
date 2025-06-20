@@ -421,6 +421,7 @@ const onTaskDeclined = (task,reason) => {
                       <Button
                         onClick={doOAuthLogin}
                         variant="primary"
+                        data-testid='login with webex button'
                       >
                         Login with Webex
                       </Button>
@@ -493,6 +494,7 @@ const onTaskDeclined = (task,reason) => {
                       }}
                     />
                     <Checkbox
+                      data-testid="show-agent-profile-checkbox"
                       checked={showAgentProfile}
                       aria-label="theme checkbox"
                       id="theme-checkbox"
@@ -503,7 +505,7 @@ const onTaskDeclined = (task,reason) => {
                       }}
                     />
                     {store.isAgentLoggedIn && (
-                      <Button id="logoutAgent" onClick={stationLogout} color="positive" className='stationLogoutButtonClass'>
+                      <Button id="logoutAgent" onClick={stationLogout} color="positive" className='stationLogoutButtonClass' data-testid="station-logout-button"> 
                         Station Logout
                       </Button>
                     )}
@@ -515,6 +517,7 @@ const onTaskDeclined = (task,reason) => {
                     <legend className="legend-box">&nbsp;SDK Toggles&nbsp;</legend>
                     <label style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
                       <input
+                        data-testid="multi-login-enable-checkbox"
                         type="checkbox"
                         id="multiLoginFlag"
                         name="multiLoginFlag"
@@ -554,6 +557,7 @@ const onTaskDeclined = (task,reason) => {
                     setIsSdkReady(true);
                   });
                 }}
+                data-testid="init-widgets-button"
               >
                 Init Widgets
               </Button>
