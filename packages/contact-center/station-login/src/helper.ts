@@ -139,8 +139,15 @@ export const useStationLogin = (props: UseStationLoginProps) => {
 
   const handleCCSignOut = async () => {
     if (doStationLogout && store.isAgentLoggedIn) {
-      await cc.stationLogout({logoutReason: 'User requested logout'});
-      await cc.deregister();
+      try {
+        await cc.stationLogout({logoutReason: 'User requested logout'});
+        await cc.deregister();
+      } catch (error) {
+        logger.error(`CC-Widgets: Error during station logout: ${error}`, {
+          module: 'widget-station-login#station-login/helper.ts',
+          method: 'handleCCSignOut',
+        });
+      }
     }
     onCCSignOut();
   };
