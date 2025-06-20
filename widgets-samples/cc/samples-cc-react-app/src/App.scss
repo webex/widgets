@@ -8,9 +8,10 @@
   left: 50%;
   transform: translate(-50%, 0);
   background-color: white;
-  padding: 20px;
+  padding: 10px 20px 20px 20px;
   border: 1px solid #ccc;
   z-index: 1000;
+  border-radius: 0.625rem;
 }
 
 .webexTheme {
@@ -187,4 +188,14 @@ iframe {
   font-weight: 500;
   font-size: 1.05em;
   margin-bottom: 0.1em;
+}
+
+.task-rejected-popup .close-btn{
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
 }

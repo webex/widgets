@@ -49,7 +49,7 @@ export interface TaskProps {
    * Handler for task declined in TaskList
    * @param task - The declined task
    */
-  onTaskDeclined?: (task: ITask) => void;
+  onTaskDeclined?: (task: ITask, reason: string) => void;
 
   /**
    * Handler for task selected in TaskList
