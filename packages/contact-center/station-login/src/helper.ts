@@ -75,14 +75,14 @@ export const useStationLogin = (props: UseStationLoginProps) => {
     if (!isLoginOptionsChanged) {
       setSaveError('No changes detected in login options.');
       logger.log('No changes detected in login options.', {
-        module: 'widget-station-login#station-login/helper.ts',
+        module: 'widget-station-login#helper.ts',
         method: 'saveLoginOptions',
       });
       if (props.onSaveEnd) props.onSaveEnd(false);
       return;
     }
     logger.log('Saving login options:', {
-      module: 'widget-station-login#station-login/helper.ts',
+      module: 'widget-station-login#helper.ts',
       method: 'saveLoginOptions',
       original: originalLoginOptions,
       updated: currentLoginOptions,
@@ -104,14 +104,14 @@ export const useStationLogin = (props: UseStationLoginProps) => {
         setOriginalLoginOptions({...currentLoginOptions});
         setSaveError('');
         logger.log('Agent profile updated successfully.', {
-          module: 'widget-station-login#station-login/helper.ts',
+          module: 'widget-station-login#helper.ts',
           method: 'saveLoginOptions',
         });
         if (props.onSaveEnd) props.onSaveEnd(true);
       })
       .catch((error: Error) => {
         logger.error('Failed to update agent device type', error, {
-          module: 'widget-station-login#station-login/helper.ts',
+          module: 'widget-station-login#helper.ts',
           method: 'saveLoginOptions',
         });
         setSaveError(error.message || 'Failed to update device type');
@@ -144,7 +144,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
         await cc.deregister();
       } catch (error) {
         logger.error(`CC-Widgets: Error during station logout: ${error}`, {
-          module: 'widget-station-login#station-login/helper.ts',
+          module: 'widget-station-login#helper.ts',
           method: 'handleCCSignOut',
         });
       }
@@ -170,18 +170,18 @@ export const useStationLogin = (props: UseStationLoginProps) => {
       await store.registerCC();
       if (store.isAgentLoggedIn) {
         logger.log(`CC-Widgets: Agent Relogin Success`, {
-          module: 'widget-station-login#station-login/helper.ts',
+          module: 'widget-station-login#helper.ts',
           method: 'handleContinue',
         });
       } else {
         logger.error(`Agent Relogin Failed`, {
-          module: 'widget-station-login#station-login/helper.ts',
+          module: 'widget-station-login#helper.ts',
           method: 'handleContinue',
         });
       }
     } catch (error) {
       logger.error(`CC-Widgets: Error handling agent multi login continue: ${error}`, {
-        module: 'widget-station-login#station-login/index.tsx',
+        module: 'widget-station-login#helper.ts',
         method: 'handleContinue',
       });
     }
@@ -191,7 +191,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
     cc.stationLogin({teamId: team, loginOption: deviceType, dialNumber})
       .then((res: StationLoginSuccess) => {
         logger.log('CC-Widgets: useStationLogin login(): stationLogin success', {
-          module: 'station-login/helper.ts',
+          module: 'widget-station-login#helper.ts',
           method: 'login',
         });
         setLoginSuccess(res);
@@ -209,13 +209,13 @@ export const useStationLogin = (props: UseStationLoginProps) => {
 
   const logout = () => {
     logger.info('CC-Widgets: useStationLogin logout(): invoking stationLogout', {
-      module: 'station-login/helper.ts',
+      module: 'widget-station-login#helper.ts',
       method: 'logout',
     });
     cc.stationLogout({logoutReason: 'User requested logout'})
       .then((res: StationLogoutSuccess) => {
         logger.log('CC-Widgets: useStationLogin logout(): stationLogout success', {
-          module: 'station-login/helper.ts',
+          module: 'widget-station-login#helper.ts',
           method: 'logout',
         });
         setLogoutSuccess(res);

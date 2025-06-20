@@ -443,7 +443,7 @@ describe('useStationLogin Hook', () => {
       expect(setShowMultipleLoginAlertSpy).toHaveBeenCalledWith(false);
       expect(registerCCSpy).toHaveBeenCalled();
       expect(logger.log).toHaveBeenCalledWith('CC-Widgets: Agent Relogin Success', {
-        module: 'widget-station-login#station-login/helper.ts',
+        module: 'widget-station-login#helper.ts',
         method: 'handleContinue',
       });
     });
@@ -464,7 +464,7 @@ describe('useStationLogin Hook', () => {
       expect(setShowMultipleLoginAlertSpy).toHaveBeenCalledWith(false);
       expect(registerCCSpy).toHaveBeenCalled();
       expect(logger.error).toHaveBeenCalledWith('Agent Relogin Failed', {
-        module: 'widget-station-login#station-login/helper.ts',
+        module: 'widget-station-login#helper.ts',
         method: 'handleContinue',
       });
     });
@@ -488,7 +488,7 @@ describe('useStationLogin Hook', () => {
       expect(logger.error).toHaveBeenCalledWith(
         'CC-Widgets: Error handling agent multi login continue: Error: Relogin failed',
         {
-          module: 'widget-station-login#station-login/index.tsx',
+          module: 'widget-station-login#helper.ts',
           method: 'handleContinue',
         }
       );
@@ -577,7 +577,7 @@ describe('useStationLogin Hook', () => {
     expect(logger.log).toHaveBeenCalledWith(
       'No changes detected in login options.',
       expect.objectContaining({
-        module: 'widget-station-login#station-login/helper.ts',
+        module: 'widget-station-login#helper.ts',
         method: 'saveLoginOptions',
       })
     );
@@ -618,7 +618,7 @@ describe('useStationLogin Hook', () => {
     expect(logger.log).toHaveBeenCalledWith(
       'Saving login options:',
       expect.objectContaining({
-        module: 'widget-station-login#station-login/helper.ts',
+        module: 'widget-station-login#helper.ts',
         method: 'saveLoginOptions',
         original: expect.any(Object),
         updated: expect.any(Object),
@@ -659,7 +659,7 @@ describe('useStationLogin Hook', () => {
       'Failed to update agent device type',
       expect.any(Error),
       expect.objectContaining({
-        module: 'widget-station-login#station-login/helper.ts',
+        module: 'widget-station-login#helper.ts',
         method: 'saveLoginOptions',
       })
     );
@@ -698,7 +698,7 @@ describe('useStationLogin Hook', () => {
     expect(logger.log).toHaveBeenCalledWith(
       'Saving login options:',
       expect.objectContaining({
-        module: 'widget-station-login#station-login/helper.ts',
+        module: 'widget-station-login#helper.ts',
         method: 'saveLoginOptions',
         original: expect.any(Object),
         updated: expect.any(Object),
@@ -788,7 +788,7 @@ describe('useStationLogin Hook', () => {
         // Only check the error message and direct object equality for context
         expect(logger.error.mock.calls[0][0]).toBe('CC-Widgets: Error during station logout: Error: Logout failed');
         expect(logger.error.mock.calls[0][1]).toEqual({
-          module: 'widget-station-login#station-login/helper.ts',
+          module: 'widget-station-login#helper.ts',
           method: 'handleCCSignOut',
         });
         expect(onCCSignOut).toHaveBeenCalled();
@@ -822,7 +822,7 @@ describe('useStationLogin Hook', () => {
         expect(ccMock.deregister).toHaveBeenCalled();
         expect(logger.error.mock.calls[0][0]).toBe('CC-Widgets: Error during station logout: Error: Deregister failed');
         expect(logger.error.mock.calls[0][1]).toEqual({
-          module: 'widget-station-login#station-login/helper.ts',
+          module: 'widget-station-login#helper.ts',
           method: 'handleCCSignOut',
         });
         expect(onCCSignOut).toHaveBeenCalled();
