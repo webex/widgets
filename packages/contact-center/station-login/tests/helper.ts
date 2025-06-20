@@ -761,5 +761,72 @@ describe('useStationLogin Hook', () => {
         expect(onCCSignOut).toHaveBeenCalled();
       });
     });
+
+    it('should handle error if stationLogout fails in onCCSignOut', async () => {
+      const onCCSignOut = jest.fn();
+      store.setIsAgentLoggedIn(true);
+      const error = new Error('Logout failed');
+      ccMock.stationLogout.mockRejectedValue(error);
+      const {result} = renderHook(() =>
+        useStationLogin({
+          ...baseStationLoginProps,
+          doStationLogout: true,
+          onLogin: jest.fn(),
+          onLogout: jest.fn(),
+          onCCSignOut,
+        })
+      );
+
+      await act(async () => {
+        if (result.current.onCCSignOut) {
+          await result.current.onCCSignOut();
+        }
+      });
+
+      await waitFor(() => {
+        expect(ccMock.stationLogout).toHaveBeenCalledWith({logoutReason: 'User requested logout'});
+        // Only check the error message and direct object equality for context
+        expect(logger.error.mock.calls[0][0]).toBe('CC-Widgets: Error during station logout: Error: Logout failed');
+        expect(logger.error.mock.calls[0][1]).toEqual({
+          module: 'widget-station-login#station-login/helper.ts',
+          method: 'handleCCSignOut',
+        });
+        expect(onCCSignOut).toHaveBeenCalled();
+      });
+    });
+
+    it('should handle error if deregister fails in onCCSignOut', async () => {
+      const onCCSignOut = jest.fn();
+      store.setIsAgentLoggedIn(true);
+      ccMock.stationLogout.mockResolvedValue({});
+      const error = new Error('Deregister failed');
+      ccMock.deregister.mockRejectedValue(error);
+      const {result} = renderHook(() =>
+        useStationLogin({
+          ...baseStationLoginProps,
+          doStationLogout: true,
+          onLogin: jest.fn(),
+          onLogout: jest.fn(),
+          onCCSignOut,
+        })
+      );
+
+      await act(async () => {
+        if (result.current.onCCSignOut) {
+          await result.current.onCCSignOut();
+        }
+      });
+
+      await waitFor(() => {
+        expect(ccMock.stationLogout).toHaveBeenCalledWith({logoutReason: 'User requested logout'});
+        expect(ccMock.deregister).toHaveBeenCalled();
+        expect(logger.error.mock.calls[0][0]).toBe('CC-Widgets: Error during station logout: Error: Deregister failed');
+        expect(logger.error.mock.calls[0][1]).toEqual({
+          module: 'widget-station-login#station-login/helper.ts',
+          method: 'handleCCSignOut',
+        });
+        expect(onCCSignOut).toHaveBeenCalled();
+      });
+    });
   });
 });
