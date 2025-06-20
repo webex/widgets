@@ -713,15 +713,13 @@ describe('useStationLogin Hook', () => {
       ccMock.deregister.mockClear();
     });
 
-    it('should call stationLogout on doStationLogout', async () => {
-      const doStationLogout = true;
+    it('should call stationLogout when doStationLogout is not passed', async () => {
       const onCCSignOut = jest.fn();
       store.setIsAgentLoggedIn(true);
       ccMock.stationLogout.mockResolvedValue({});
       const {result} = renderHook(() =>
         useStationLogin({
           ...baseStationLoginProps,
-          doStationLogout,
           onLogin: jest.fn(),
           onLogout: jest.fn(),
           onCCSignOut,

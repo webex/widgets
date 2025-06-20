@@ -90,7 +90,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
           <Button
             id="ContinueButton"
             data-testid="ContinueButton"
-            onClick={() => continueClicked(multiSignInModalRef, handleContinue)}
+            onClick={() => continueClicked(multiSignInModalRef, handleContinue, setShowCCSignOutModal)}
             variant="secondary"
             className="white-button"
           >
@@ -122,10 +122,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
           </Button>
           <Button
             data-testId="cc-logout-button"
-            onClick={() => {
-              setShowCCSignOutModal(false);
-              continueClicked(ccSignOutModalRef, onCCSignOut);
-            }}
+            onClick={() => continueClicked(ccSignOutModalRef, onCCSignOut, setShowCCSignOutModal)}
           >
             {StationLoginLabels.SIGN_OUT}
           </Button>

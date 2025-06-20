@@ -14,7 +14,8 @@ export const useStationLogin = (props: UseStationLoginProps) => {
   const deviceType = props.deviceType || '';
   const teamId = props.teamId || '';
   const onCCSignOut = props.onCCSignOut;
-  const doStationLogout = props.doStationLogout === undefined ? true : props.doStationLogout;
+  const doStationLogout =
+    props.doStationLogout === undefined || props.doStationLogout === null ? true : props.doStationLogout;
   const [team, setTeam] = useState('');
   const [loginSuccess, setLoginSuccess] = useState<StationLoginSuccess>();
   const [loginFailure, setLoginFailure] = useState<Error>();
@@ -137,13 +138,11 @@ export const useStationLogin = (props: UseStationLoginProps) => {
   };
 
   const handleCCSignOut = async () => {
-    if (onCCSignOut) {
-      if (doStationLogout && store.isAgentLoggedIn) {
-        await cc.stationLogout({logoutReason: 'User requested logout'});
-        await cc.deregister();
-      }
-      onCCSignOut();
+    if (doStationLogout && store.isAgentLoggedIn) {
+      await cc.stationLogout({logoutReason: 'User requested logout'});
+      await cc.deregister();
     }
+    onCCSignOut();
   };
 
   // Make sure to set the callback are same and change the logout  logic

@@ -531,7 +531,7 @@ describe('Station Login Component', () => {
         expect(confirmSignOutButton).toHaveTextContent(StationLoginLabels.SIGN_OUT);
 
         fireEvent.click(confirmSignOutButton);
-        expect(mockContinueClicked).toHaveBeenCalledWith(mockSignOutModalRef, mockSignOut);
+        expect(mockContinueClicked).toHaveBeenCalledWith(mockSignOutModalRef, mockSignOut, expect.any(Function));
       });
 
       it('show signOut modal when onCCSignOut is present and sign out is clicked', async () => {
@@ -586,7 +586,7 @@ describe('Station Login Component', () => {
 
         const continueBtn = screen.getByTestId('ContinueButton');
         fireEvent.click(continueBtn);
-        expect(stationLoginUtils.continueClicked).toHaveBeenCalledWith(mockModal, handleContinue);
+        expect(stationLoginUtils.continueClicked).toHaveBeenCalledWith(mockModal, handleContinue, expect.any(Function));
       });
 
       it('should close sign-out modal and update state on cancel button click', async () => {

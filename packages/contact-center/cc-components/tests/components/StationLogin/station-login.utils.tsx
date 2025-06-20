@@ -119,19 +119,22 @@ describe('Station Login Utils', () => {
         } as unknown as HTMLDialogElement,
       };
       const mockHandleContinue = jest.fn();
+      const mockSetShowCCSignOutModal = jest.fn();
 
-      continueClicked(mockModalRef, mockHandleContinue);
+      continueClicked(mockModalRef, mockHandleContinue, mockSetShowCCSignOutModal);
 
       expect(mockModalRef.current?.close).toHaveBeenCalled();
       expect(mockHandleContinue).toHaveBeenCalled();
+      expect(mockSetShowCCSignOutModal).toHaveBeenCalledWith(false);
     });
 
     it('should handle null ref gracefully', () => {
       const nullRef = {current: null};
       const mockHandleContinue = jest.fn();
+      const mockSetShowCCSignOutModal = jest.fn();
 
       expect(() => {
-        continueClicked(nullRef, mockHandleContinue);
+        continueClicked(nullRef, mockHandleContinue, mockSetShowCCSignOutModal);
       }).not.toThrow();
     });
   });

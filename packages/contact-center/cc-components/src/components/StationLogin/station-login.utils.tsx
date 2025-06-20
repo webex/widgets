@@ -34,7 +34,8 @@ const handleModals = (
  * Closes the dialog if it is currently open and calls the provided callback function
  */
 
-const continueClicked = (modalRef, callback) => {
+const continueClicked = (modalRef, callback, setShowCCSignOutModal) => {
+  setShowCCSignOutModal(false);
   if (modalRef.current) {
     modalRef.current.close();
     callback();
