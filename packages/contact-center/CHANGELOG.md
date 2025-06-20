@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.75](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.74...v1.28.0-ccwidgets.75) (2025-06-20)
+
+
+### Bug Fixes
+
+* **store:** incorporate task hydrate fix from SDK ([#477](https://github.com/webex/widgets/issues/477)) ([8f20022](https://github.com/webex/widgets/commit/8f2002277914afed79dbadf37de7d793210f7d71))
+
 # [1.28.0-ccwidgets.74](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.73...v1.28.0-ccwidgets.74) (2025-06-20)
 
 
