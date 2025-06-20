@@ -383,7 +383,6 @@ export interface ControlProps {
     pauseResumeRecording: boolean;
     endConsult: boolean;
     recordingIndicator: boolean;
-    isBrowser: boolean;
   };
 }
 

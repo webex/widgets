@@ -174,8 +174,8 @@ function CallControlComponent(props: CallControlComponentProps) {
       onClick: endCall,
       tooltip: `End ${currentMediaType.labelName}`,
       className: 'call-control-button-cancel',
-      disabled: controlVisibility.isBrowser ? false : isHeld,
-      isVisible: controlVisibility.isBrowser ? true : controlVisibility.end,
+      disabled: isHeld,
+      isVisible: controlVisibility.end,
     },
   ];
 
@@ -274,16 +274,11 @@ function CallControlComponent(props: CallControlComponentProps) {
                   triggerComponent={
                     <ButtonCircle
                       className={
-                        button.className +
-                        ((button.disabled || consultInitiated) && !(controlVisibility.isBrowser && button.id === 'end')
-                          ? ` ${button.className}-disabled`
-                          : '')
+                        button.className + (button.disabled || consultInitiated ? ` ${button.className}-disabled` : '')
                       }
                       data-testid="ButtonCircle"
                       onPress={button.onClick}
-                      disabled={
-                        controlVisibility.isBrowser && button.id === 'end' ? false : button.disabled || consultInitiated
-                      }
+                      disabled={button.disabled || consultInitiated}
                       aria-label={button.tooltip}
                     >
                       <Icon className={button.className + '-icon'} name={button.icon} />

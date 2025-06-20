@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {Text, TabListNext, TabNext, ListNext} from '@momentum-ui/react-collaboration';
 import ConsultTransferListComponent from './consult-transfer-list-item';
 import {ConsultTransferPopoverComponentProps} from '../../task.types';
-import ConsultEmptyState from './consult-empty-state';
+import ConsultTransferEmptyState from './consult-transfer-empty-state';
 
 const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentProps> = ({
   heading,
@@ -83,16 +83,16 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
       )}
 
       {/* If both are empty, show the big empty state */}
-      {!showTabs && <ConsultEmptyState message="We can’t find any queue or agent available for now." />}
+      {!showTabs && <ConsultTransferEmptyState message="We can’t find any queue or agent available for now." />}
 
       {/* If agents tab is selected and empty */}
       {showTabs && selectedTab === 'Agents' && noAgents && (
-        <ConsultEmptyState message="We can’t find any agent available for now." />
+        <ConsultTransferEmptyState message="We can’t find any agent available for now." />
       )}
 
       {/* If queues tab is selected and empty */}
       {showTabs && selectedTab === 'Queues' && noQueues && (
-        <ConsultEmptyState message="We can’t find any queue available for now." />
+        <ConsultTransferEmptyState message="We can’t find any queue available for now." />
       )}
 
       {/* Render lists if not empty */}

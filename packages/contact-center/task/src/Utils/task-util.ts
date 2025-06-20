@@ -24,7 +24,7 @@ export function getControlsVisibility(deviceType: string, featureFlags: {[key: s
       (isAgentDN && (isChat || isEmail)) ||
       (isExtension && (isChat || isEmail)),
     decline: isBrowser && webRtcEnabled && isCall,
-    end: (isEndCallEnabled && isCall) || !isCall,
+    end: isBrowser || (isEndCallEnabled && isCall) || !isCall,
     muteUnmute: isBrowser && webRtcEnabled && isCall,
 
     holdResume: isCall && ((isBrowser && webRtcEnabled) || isAgentDN || isExtension), // Applicable for all type of station login
@@ -36,7 +36,6 @@ export function getControlsVisibility(deviceType: string, featureFlags: {[key: s
     pauseResumeRecording: isCall && ((isBrowser && webRtcEnabled) || isAgentDN || isExtension), // Getting feature flag (isRecordingManagementEnabled) value as undefined, need further testing
     endConsult: isEndConsultEnabled && isCall && ((isBrowser && webRtcEnabled) || isAgentDN || isExtension),
     recordingIndicator: isCall,
-    isBrowser: isBrowser,
   };
 
   return controls;

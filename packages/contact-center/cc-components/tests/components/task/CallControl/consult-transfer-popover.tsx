@@ -3,7 +3,7 @@ import React from 'react';
 import {render, screen, fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ConsultTransferPopoverComponent from '../../../../src/components/task/CallControl/CallControlCustom/consult-transfer-popover';
-import ConsultEmptyState from '../../../../src/components/task/CallControl/CallControlCustom/consult-empty-state';
+import ConsultTransferEmptyState from '../../../../src/components/task/CallControl/CallControlCustom/consult-transfer-empty-state';
 
 const loggerMock = {
   log: jest.fn(),
@@ -87,17 +87,17 @@ describe.skip('ConsultTransferPopoverComponent', () => {
     expect(mockOnQueueSelect).toHaveBeenCalledWith('queue1', 'Queue One');
   });
 
-  it('shows ConsultEmptyState when both buddyAgents and queues are empty', () => {
+  it('shows ConsultTransferEmptyState when both buddyAgents and queues are empty', () => {
     render(<ConsultTransferPopoverComponent {...baseProps} buddyAgents={[]} queues={[]} />);
     expect(screen.getByText('We can’t find any queue or agent available for now.')).toBeInTheDocument();
   });
 
-  it('shows ConsultEmptyState when only buddyAgents is empty and Agents tab is active', () => {
+  it('shows ConsultTransferEmptyState when only buddyAgents is empty and Agents tab is active', () => {
     render(<ConsultTransferPopoverComponent {...baseProps} buddyAgents={[]} />);
     expect(screen.getByText('We can’t find any agent available for now.')).toBeInTheDocument();
   });
 
-  it('shows ConsultEmptyState when only queues is empty and Queues tab is active', () => {
+  it('shows ConsultTransferEmptyState when only queues is empty and Queues tab is active', () => {
     render(<ConsultTransferPopoverComponent {...baseProps} queues={[]} allowConsultToQueue={true} />);
     // Switch to the Queues tab
     fireEvent.click(screen.getByText('Queues'));
@@ -116,8 +116,8 @@ describe.skip('ConsultTransferPopoverComponent', () => {
     expect(screen.getByText('Queues')).toBeInTheDocument();
   });
 
-  it('renders ConsultEmptyState component with correct message', () => {
-    render(<ConsultEmptyState message="No available agents" />);
+  it('renders ConsultTransferEmptyState component with correct message', () => {
+    render(<ConsultTransferEmptyState message="No available agents" />);
     expect(screen.getByText('No available agents')).toBeInTheDocument();
   });
 
