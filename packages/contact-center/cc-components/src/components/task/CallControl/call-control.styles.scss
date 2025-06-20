@@ -115,6 +115,22 @@
     background-color: var(--mds-color-theme-button-cancel-hover);
   }
 }
+
+.md-button-circle-wrapper.call-control-button-cancel-disabled {
+  background: var(--mds-color-theme-button-primary-disabled, #00000033) !important;
+  cursor: not-allowed;
+  &:hover,
+  &.hover {
+    background: var(--mds-color-theme-button-primary-disabled, #00000033) !important;
+  }
+  .call-control-button-cancel-icon {
+    --mdc-icon-fill-color: var(--mds-color-theme-button-primary-disabled);
+  }
+  .call-control-consult-button-cancel-icon {
+  --mdc-icon-fill-color: var(--mds-color-theme-button-primary-disabled);
+}
+}
+
 .call-control-button-icon {
   --mdc-icon-fill-color: var(--mds--color-theme-button-secondary-normal);
 }
@@ -151,13 +167,19 @@
   .agent-popover-content {
     display: flex;
     flex-direction: column;
-    padding: 1rem 0.5rem 0.5rem 1rem;
-    width: 30rem;
-    height: 25rem;
+    padding: 0.1rem 0.5rem 0.5rem 1rem;
+    width: 100%;
+    max-width: 95vw;
+    min-width: 30rem;
+    height: auto;
+    max-height: 80vh;
+    min-height: 25rem;
     gap: 0.25rem;
+    box-sizing: border-box;
+    overflow-y: auto;
 
     .agent-popover-title {
-      margin: 0 0 0 0;
+      margin: 0;
       margin-bottom: 1rem;
       text-align: left;
     }
@@ -187,6 +209,9 @@
 
   button.md-button-circle-wrapper.md-popover-close-button.md-button-simple-wrapper {
     display: none;
+  }
+  .agent-list {
+    overflow-y: auto;
   }
 }
 
@@ -241,4 +266,34 @@
   border-color: var(--mds-color-theme-button-primary-disabled);
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.consult-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 320px;
+  padding: 2rem 0 1rem 0;
+  text-align: center;
+}
+
+.consult-empty-state-svg {
+  width: 86.67px;
+  height: 79.17px;
+  background: url('~@momentum-ui/illustrations/svg/desert-open-results-192.svg') center center no-repeat;
+  background-size: contain;
+}
+
+.consult-empty-message {
+  color: var(--mds-color-theme-text-secondary-normal, #000000B2);
+  margin-top: 1.5rem;
+}
+
+@media only screen and (max-width: 600px) {
+  .agent-popover {
+  .agent-popover-content {
+    min-width: 20rem;
+  }
+}
 }
