@@ -12,9 +12,11 @@ export type UseStationLoginProps = Pick<
   | 'onSaveEnd'
   | 'teamId'
   | 'isAgentLoggedIn'
+  | 'onCCSignOut'
+  | 'doStationLogout'
 >;
 
 export type StationLoginProps = Pick<
   IStationLoginProps,
-  'onLogin' | 'onLogout' | 'onCCSignOut' | 'profileMode' | 'onSaveStart' | 'onSaveEnd' | 'teamId'
+  'onLogin' | 'onLogout' | 'onCCSignOut' | 'profileMode' | 'onSaveStart' | 'onSaveEnd' | 'teamId' | 'doStationLogout'
 >;
