@@ -4,15 +4,15 @@ const fs = require('fs');
 const path = require('path');
 
 setup('OAuth', async ({browser}) => {
-  if (!process.env.PLAYWRIGHT_USERNAME || !process.env.PLAYWRIGHT_PASSWORD) {
-    throw new Error('PLAYWRIGHT_USERNAME and PLAYWRIGHT_PASSWORD must be set in the environment variables');
+  if (!process.env.PW_USERNAME || !process.env.PW_PASSWORD) {
+    throw new Error('PW_USERNAME and PW_PASSWORD must be set in the environment variables');
   }
   const page = await browser.newPage();
   await page.goto(BASE_URL);
   await page.locator('#select-base-triggerid').getByText('Access Token').click();
   await page.getByTestId('samples:login_option_oauth').getByText('Login with Webex').click();
   await page.getByTestId('login with webex button').click();
-  await page.getByRole('textbox', {name: 'name@example.com'}).fill(process.env.PLAYWRIGHT_USERNAME);
+  await page.getByRole('textbox', {name: 'name@example.com'}).fill(process.env.PW_USERNAME);
   await page.getByRole('link', {name: 'Sign in'}).click();
   // Check if Init Widgets button is visible after username sign in (Multi session)
   const initWidgetsButton = page.getByTestId('init-widgets-button');
@@ -23,7 +23,7 @@ setup('OAuth', async ({browser}) => {
 
   if (!isInitWidgetsVisible) {
     // If Init Widgets button is not visible, proceed with password entry
-    await page.getByRole('textbox', {name: 'Password'}).fill(process.env.PLAYWRIGHT_PASSWORD);
+    await page.getByRole('textbox', {name: 'Password'}).fill(process.env.PW_PASSWORD);
     await page.getByRole('button', {name: 'Sign in'}).click();
   }
 
