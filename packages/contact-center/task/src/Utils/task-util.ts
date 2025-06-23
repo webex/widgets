@@ -24,7 +24,7 @@ export function getControlsVisibility(deviceType: string, featureFlags: {[key: s
       (isAgentDN && (isChat || isEmail)) ||
       (isExtension && (isChat || isEmail)),
     decline: isBrowser && webRtcEnabled && isCall,
-    end: (isEndCallEnabled && isCall) || !isCall,
+    end: isBrowser || (isEndCallEnabled && isCall) || !isCall,
     muteUnmute: isBrowser && webRtcEnabled && isCall,
 
     holdResume: isCall && ((isBrowser && webRtcEnabled) || isAgentDN || isExtension), // Applicable for all type of station login

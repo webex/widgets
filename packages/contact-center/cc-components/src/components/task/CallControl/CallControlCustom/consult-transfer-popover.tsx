@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import {Text, TabListNext, TabNext, ListNext} from '@momentum-ui/react-collaboration';
 import ConsultTransferListComponent from './consult-transfer-list-item';
 import {ConsultTransferPopoverComponentProps} from '../../task.types';
+import ConsultTransferEmptyState from './consult-transfer-empty-state';
 
 const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentProps> = ({
   heading,
@@ -16,6 +17,10 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
   const [selectedTab, setSelectedTab] = useState('Agents');
   const filteredAgents = buddyAgents;
   const filteredQueues = queues;
+
+  const noAgents = !filteredAgents || filteredAgents.length === 0;
+  const noQueues = !filteredQueues || filteredQueues.length === 0;
+  const showTabs = !(noAgents && noQueues);
 
   const renderList = (items, getKey, getTitle, handleSelect) => (
     <ListNext listSize={items.length} className="agent-list">
@@ -43,37 +48,57 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
 
   return (
     <div className="agent-popover-content">
-      <Text tagName="h3" className="agent-popover-title" type="body-large-bold" style={{margin: '0 0 0 0'}}>
+      <Text tagName="h3" className="agent-popover-title" type="body-large-bold" style={{margin: 0}}>
         {heading}
       </Text>
-      <TabListNext
-        aria-label="Tabs"
-        className="agent-tablist"
-        hasBackground={false}
-        style={{marginTop: '0'}}
-        onTabSelection={(key) => {
-          setSelectedTab(key as string);
-          logger.log(`CC-Widgets: ConsultTransferPopover: tab selected: ${key}`, {
-            module: 'consult-transfer-popover.tsx',
-            method: 'onTabSelection',
-          });
-        }}
-      >
-        <TabNext key="Agents" className="agent-tab" active={selectedTab === 'Agents'}>
-          Agents
-        </TabNext>
-        <TabNext
-          key="Queues"
-          className="queue-tab"
-          active={selectedTab === 'Queues'}
-          disabled={!allowConsultToQueue}
-          style={!allowConsultToQueue ? {display: 'none'} : undefined}
-        >
-          Queues
-        </TabNext>
-      </TabListNext>
 
-      {selectedTab === 'Agents' &&
+      {/* Only show tabs if at least one list is available */}
+      {showTabs && (
+        <TabListNext
+          aria-label="Tabs"
+          className="agent-tablist"
+          hasBackground={false}
+          style={{marginTop: '0'}}
+          onTabSelection={(key) => {
+            setSelectedTab(key as string);
+            logger.log(`CC-Widgets: ConsultTransferPopover: tab selected: ${key}`, {
+              module: 'consult-transfer-popover.tsx',
+              method: 'onTabSelection',
+            });
+          }}
+        >
+          <TabNext key="Agents" className="agent-tab" active={selectedTab === 'Agents'}>
+            Agents
+          </TabNext>
+          <TabNext
+            key="Queues"
+            className="queue-tab"
+            active={selectedTab === 'Queues'}
+            disabled={!allowConsultToQueue}
+            style={!allowConsultToQueue ? {display: 'none'} : undefined}
+          >
+            Queues
+          </TabNext>
+        </TabListNext>
+      )}
+
+      {/* If both are empty, show the big empty state */}
+      {!showTabs && <ConsultTransferEmptyState message="We can’t find any queue or agent available for now." />}
+
+      {/* If agents tab is selected and empty */}
+      {showTabs && selectedTab === 'Agents' && noAgents && (
+        <ConsultTransferEmptyState message="We can’t find any agent available for now." />
+      )}
+
+      {/* If queues tab is selected and empty */}
+      {showTabs && selectedTab === 'Queues' && noQueues && (
+        <ConsultTransferEmptyState message="We can’t find any queue available for now." />
+      )}
+
+      {/* Render lists if not empty */}
+      {showTabs &&
+        selectedTab === 'Agents' &&
+        !noAgents &&
         renderList(
           filteredAgents,
           (agent) => agent.agentId,
@@ -87,8 +112,9 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
           }
         )}
 
-      {selectedTab === 'Queues' &&
-        allowConsultToQueue &&
+      {showTabs &&
+        selectedTab === 'Queues' &&
+        !noQueues &&
         renderList(
           filteredQueues,
           (queue) => queue.id,

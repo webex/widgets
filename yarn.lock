@@ -3607,6 +3607,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@momentum-ui/illustrations@npm:^1.24.0":
+  version: 1.24.0
+  resolution: "@momentum-ui/illustrations@npm:1.24.0"
+  checksum: 10c0/f118958e9b3916a407b607f443641ee66147a4b48f6f5c52a9233e7023946b6d428aa6e2761210fc0addb5194e0f67789ad76c836a0737b46d5259a7e831dbaa
+  languageName: node
+  linkType: hard
+
 "@momentum-ui/react-collaboration@npm:26.197.0":
   version: 26.197.0
   resolution: "@momentum-ui/react-collaboration@npm:26.197.0"
@@ -9387,6 +9394,7 @@ __metadata:
     "@babel/preset-react": "npm:7.24.7"
     "@babel/preset-typescript": "npm:7.25.9"
     "@eslint/js": "npm:^9.20.0"
+    "@momentum-ui/illustrations": "npm:^1.24.0"
     "@r2wc/react-to-web-component": "npm:2.0.3"
     "@testing-library/dom": "npm:10.4.0"
     "@testing-library/jest-dom": "npm:6.6.2"
