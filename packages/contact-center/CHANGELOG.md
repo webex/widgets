@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.76](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.75...v1.28.0-ccwidgets.76) (2025-06-23)
+
+
+### Bug Fixes
+
+* **call-control:** address-bug-fixes ([#474](https://github.com/webex/widgets/issues/474)) ([14f961c](https://github.com/webex/widgets/commit/14f961c22156a03101db87fa9e84010a10faf056))
+
 # [1.28.0-ccwidgets.75](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.74...v1.28.0-ccwidgets.75) (2025-06-20)
 
 
