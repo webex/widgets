@@ -1,8 +1,15 @@
-import { test, expect, Page, BrowserContext } from '@playwright/test';
-import { oauthLogin, multiLoginEnable, initialisePage } from './Utils/initUtils';
-import { extensionLogin, stationLogout } from './Utils/stationUtils';
-import { getCurrentState, changeState, verifyCurrentState, getStateElapsedTime, checkConsole, checkCallbackSequence } from './Utils/stateUtils';
-import { STATES, THEME_COLORS } from './constants';
+import {test, expect, Page, BrowserContext} from '@playwright/test';
+import {oauthLogin, enableMultiLogin, initiateWidgets} from './Utils/initUtils';
+import {extensionLogin, stationLogout} from './Utils/stationLoginUtils';
+import {
+  getCurrentState,
+  changeUserState,
+  verifyCurrentState,
+  getStateElapsedTime,
+  validateConsoleStateChange,
+  checkCallbackSequence,
+} from './Utils/userStateUtils';
+import {USER_STATES, THEME_COLORS} from './constants';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -14,16 +21,18 @@ let consoleMessages: string[] = [];
 // Shared login and setup before all tests
 
 test.describe('User State Widget Functionality Tests', () => {
-
-  test.beforeAll(async ({ browser }) => {
+  test.beforeAll(async ({browser}) => {
     context = await browser.newContext();
     page = await context.newPage();
     consoleMessages = [];
-    page.on('console', msg => consoleMessages.push(msg.text()));
+    page.on('console', (msg) => consoleMessages.push(msg.text()));
     await oauthLogin(page);
-    await multiLoginEnable(page);
-    await initialisePage(page);
-    const loginButtonExists = await page.getByTestId('login-button').isVisible().catch(() => false);
+    await enableMultiLogin(page);
+    await initiateWidgets(page);
+    const loginButtonExists = await page
+      .getByTestId('login-button')
+      .isVisible()
+      .catch(() => false);
     if (loginButtonExists) {
       await extensionLogin(page);
     } else {
@@ -44,20 +53,20 @@ test.describe('User State Widget Functionality Tests', () => {
 
   test('should verify initial state is Meeting', async () => {
     const state = await getCurrentState(page);
-    if (state !== STATES.MEETING) throw new Error('Initial state is not Meeting');
+    if (state !== USER_STATES.MEETING) throw new Error('Initial state is not Meeting');
   });
 
   test('should verify Meeting state theme color', async () => {
     const meetingThemeElement = page.getByTestId('state-select');
-    const meetingThemeColor = await meetingThemeElement.evaluate(el => getComputedStyle(el).backgroundColor);
+    const meetingThemeColor = await meetingThemeElement.evaluate((el) => getComputedStyle(el).backgroundColor);
     expect(meetingThemeColor).toBe(THEME_COLORS.MEETING);
   });
 
   test('should change state to Available and verify theme and timer reset', async () => {
-    await verifyCurrentState(page, STATES.MEETING);
+    await verifyCurrentState(page, USER_STATES.MEETING);
     await page.waitForTimeout(5000);
     const timerBefore = await getStateElapsedTime(page);
-    await changeState(page, STATES.AVAILABLE);
+    await changeUserState(page, USER_STATES.AVAILABLE);
     await page.waitForTimeout(3000);
     const timerAfter = await getStateElapsedTime(page);
 
@@ -65,73 +74,70 @@ test.describe('User State Widget Functionality Tests', () => {
       const parts = timer.split(':');
       return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
     };
-    
+
     expect(parseTimer(timerAfter)).toBeLessThan(parseTimer(timerBefore));
 
     const themeElement = page.getByTestId('state-select');
-    const themeColor = await themeElement.evaluate(el => getComputedStyle(el).backgroundColor);
+    const themeColor = await themeElement.evaluate((el) => getComputedStyle(el).backgroundColor);
     expect(themeColor).toBe(THEME_COLORS.AVAILABLE);
   });
 
   test('should verify existence and order in which callback and API success are logged for Available state', async () => {
-    await changeState(page, STATES.MEETING);
+    await changeUserState(page, USER_STATES.MEETING);
     await page.waitForTimeout(3000);
     consoleMessages.length = 0;
-    await changeState(page, STATES.AVAILABLE);
+    await changeUserState(page, USER_STATES.AVAILABLE);
     await page.waitForTimeout(3000);
-    const isCallbackSuccessful = await checkCallbackSequence(page, STATES.AVAILABLE, consoleMessages);
+    const isCallbackSuccessful = await checkCallbackSequence(page, USER_STATES.AVAILABLE, consoleMessages);
     if (!isCallbackSuccessful) throw new Error('Callback for Available state not successful');
   });
 
   test('should verify state persistence after page reload', async () => {
-    await changeState(page, STATES.MEETING);
+    await changeUserState(page, USER_STATES.MEETING);
     await page.waitForTimeout(1000);
-    await changeState(page, STATES.AVAILABLE);
-    await verifyCurrentState(page, STATES.AVAILABLE);
+    await changeUserState(page, USER_STATES.AVAILABLE);
+    await verifyCurrentState(page, USER_STATES.AVAILABLE);
     await page.waitForTimeout(3000);
-  
+
     consoleMessages.length = 0;
     await page.reload();
-    await initialisePage(page);
-    
+    await initiateWidgets(page);
+
     const visible = await page.getByTestId('state-select').isVisible();
     if (!visible) throw new Error('State select not visible after reload');
-    
-    await verifyCurrentState(page, STATES.AVAILABLE);
-    const callbackTriggered = await checkConsole(page, STATES.AVAILABLE, consoleMessages);
+
+    await verifyCurrentState(page, USER_STATES.AVAILABLE);
+    const callbackTriggered = await validateConsoleStateChange(page, USER_STATES.AVAILABLE, consoleMessages);
     if (!callbackTriggered) throw new Error('Callback not triggered after reload');
-    
+
     const state = await getCurrentState(page);
-    if (state !== STATES.AVAILABLE) throw new Error('State is not Available after reload');
+    if (state !== USER_STATES.AVAILABLE) throw new Error('State is not Available after reload');
   });
 
   test('should test multi-session synchronization', async () => {
     const multiSessionPage = await context.newPage();
     await oauthLogin(multiSessionPage);
-    await initialisePage(multiSessionPage);
+    await initiateWidgets(multiSessionPage);
     await multiSessionPage.waitForTimeout(3000);
 
-    await changeState(page, STATES.AVAILABLE);
-    await verifyCurrentState(page, STATES.AVAILABLE);
+    await changeUserState(page, USER_STATES.AVAILABLE);
+    await verifyCurrentState(page, USER_STATES.AVAILABLE);
     await multiSessionPage.waitForTimeout(3000);
 
-    await verifyCurrentState(multiSessionPage, STATES.AVAILABLE);
+    await verifyCurrentState(multiSessionPage, USER_STATES.AVAILABLE);
 
     await multiSessionPage.waitForTimeout(3000);
-    const [timer1, timer2] = await Promise.all([
-      getStateElapsedTime(page),
-      getStateElapsedTime(multiSessionPage)
-    ]);
+    const [timer1, timer2] = await Promise.all([getStateElapsedTime(page), getStateElapsedTime(multiSessionPage)]);
 
     //Parse the timers to compare
     const parseTimer = (timer: string) => {
       const parts = timer.split(':');
-      return parseInt(parts[0], 10) * 60 + parseInt(parts[  1], 10);
+      return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
     };
     const timer1Parsed = parseTimer(timer1);
     const timer2Parsed = parseTimer(timer2);
 
-    if (Math.abs(timer1Parsed-timer2Parsed)>1) {
+    if (Math.abs(timer1Parsed - timer2Parsed) > 1) {
       throw new Error(`Multi-session timer synchronization failed: Primary=${timer1Parsed}, Secondary=${timer2Parsed}`);
     }
 
@@ -139,32 +145,32 @@ test.describe('User State Widget Functionality Tests', () => {
   });
 
   test('should test idle state transition and dual timer', async () => {
-    await changeState(page, STATES.MEETING);
-    await verifyCurrentState(page, STATES.MEETING);
+    await changeUserState(page, USER_STATES.MEETING);
+    await verifyCurrentState(page, USER_STATES.MEETING);
     await page.waitForTimeout(2000);
     consoleMessages.length = 0;
 
-    await changeState(page, STATES.LUNCH);
-    await verifyCurrentState(page, STATES.LUNCH);
+    await changeUserState(page, USER_STATES.LUNCH);
+    await verifyCurrentState(page, USER_STATES.LUNCH);
     await page.waitForTimeout(3000);
-    
-    const found = await checkConsole(page, STATES.LUNCH, consoleMessages);
+
+    const found = await validateConsoleStateChange(page, USER_STATES.LUNCH, consoleMessages);
     if (!found) throw new Error('Callback for Lunch state not successful');
-    
+
     await page.waitForTimeout(5000);
     const dualTimer = await getStateElapsedTime(page);
 
     const timerParts = dualTimer.split(' / ');
     if (timerParts.length !== 2) throw new Error('Dual timer format is incorrect');
-    
-    const isValidFormat = timerParts.every(part => /^(\d{1,2}:\d{2}(:\d{2})?)$/.test(part));
+
+    const isValidFormat = timerParts.every((part) => /^(\d{1,2}:\d{2}(:\d{2})?)$/.test(part));
     if (!isValidFormat) throw new Error('Dual timer format is not valid');
-    
-    const [firstTimer, secondTimer] = timerParts.map(part => part.split(':').map(Number));
+
+    const [firstTimer, secondTimer] = timerParts.map((part) => part.split(':').map(Number));
     if (firstTimer.length < 2 || secondTimer.length < 2) {
       throw new Error('Dual timer does not have enough parts');
     }
-    
+
     expect(firstTimer[0]).toBeGreaterThanOrEqual(0);
     expect(firstTimer[1]).toBeGreaterThanOrEqual(0);
     expect(secondTimer[0]).toBeGreaterThanOrEqual(0);
@@ -172,6 +178,6 @@ test.describe('User State Widget Functionality Tests', () => {
     expect(firstTimer.length === 2 || firstTimer.length === 3).toBe(true);
     expect(secondTimer.length === 2 || secondTimer.length === 3).toBe(true);
 
-    await changeState(page, STATES.AVAILABLE);
+    await changeUserState(page, USER_STATES.AVAILABLE);
   });
 });

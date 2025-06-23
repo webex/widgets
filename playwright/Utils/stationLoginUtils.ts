@@ -1,8 +1,7 @@
-import { Page } from '@playwright/test';
+import {Page} from '@playwright/test';
 import dotenv from 'dotenv';
 
 dotenv.config();
-
 
 export const desktopLogin = async (page: Page): Promise<void> => {
   await page.getByTestId('login-option-select').locator('#select-base-triggerid svg').click();
@@ -15,11 +14,10 @@ export const desktopLogin = async (page: Page): Promise<void> => {
   await page.getByTestId('login-button').click();
 };
 
-
 export const extensionLogin = async (page: Page): Promise<void> => {
-  const extensionNumber = process.env.EXTENSION_NUMBER;
+  const extensionNumber = process.env.PW_EXTENSION_NUMBER;
   if (!extensionNumber) {
-    throw new Error('EXTENSION_NUMBER is not defined in the .env file');
+    throw new Error('PW_EXTENSION_NUMBER is not defined in the .env file');
   }
 
   await page.getByTestId('login-option-select').locator('#select-base-triggerid svg').click();
@@ -31,16 +29,15 @@ export const extensionLogin = async (page: Page): Promise<void> => {
   await page.getByTestId('login-button').click();
 };
 
-
 export const dialLogin = async (page: Page): Promise<void> => {
-  const dialNumber = process.env.DIAL_NUMBER;
+  const dialNumber = process.env.PW_DIAL_NUMBER;
   if (!dialNumber) {
-    throw new Error('DIAL_NUMBER is not defined in the .env file');
+    throw new Error('PW_DIAL_NUMBER is not defined in the .env file');
   }
 
-    await page.getByTestId('login-option-select').locator('#select-base-triggerid svg').click();
+  await page.getByTestId('login-option-select').locator('#select-base-triggerid svg').click();
   await page.getByTestId('login-option-Dial Number').click();
-await page.getByTestId('dial-number-input').locator('div').nth(1).click();
+  await page.getByTestId('dial-number-input').locator('div').nth(1).click();
   await page.getByTestId('dial-number-input').locator('input').fill(dialNumber);
   await page.getByTestId('teams-select-dropdown').locator('#select-base-triggerid div').click();
   await page.waitForTimeout(200);
@@ -51,8 +48,12 @@ await page.getByTestId('dial-number-input').locator('div').nth(1).click();
 export const stationLogout = async (page: Page): Promise<void> => {
   await page.getByTestId('station-logout-button').click();
   //check if the station logout button is hidden after logouts
-  const isLogoutButtonHidden = await page.getByTestId('station-logout-button').waitFor({state:'hidden'}).then(() => true).catch(() => false);
+  const isLogoutButtonHidden = await page
+    .getByTestId('station-logout-button')
+    .waitFor({state: 'hidden'})
+    .then(() => true)
+    .catch(() => false);
   if (!isLogoutButtonHidden) {
     throw new Error('Station logout button is still visible after logout');
   }
-}
+};

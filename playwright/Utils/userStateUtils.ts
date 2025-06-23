@@ -1,15 +1,10 @@
-import { Page,expect } from '@playwright/test';
+import {Page, expect} from '@playwright/test';
 import dotenv from 'dotenv';
-import { 
-  STATES, 
-  AUX_CODE_IDS 
-} from '../constants';
+import {USER_STATES, AUX_CODE_IDS} from '../constants';
 
 dotenv.config();
 
-
-export const changeState = async (page: Page, userState: string): Promise<void> => {
-
+export const changeUserState = async (page: Page, userState: string): Promise<void> => {
   // Get the current state name
   const currentState = await page.getByTestId('state-select').getByTestId('state-name').innerText();
   if (currentState.trim() === userState) {
@@ -45,12 +40,16 @@ export const getStateElapsedTime = async (page: Page): Promise<string> => {
   return timerText.trim();
 };
 
-export const checkConsole = async (page: Page, state: string, consoleMessages: string[]): Promise<boolean> => {
+export const validateConsoleStateChange = async (
+  page: Page,
+  state: string,
+  consoleMessages: string[]
+): Promise<boolean> => {
   // Map auxCodeId to state name using direct constants
   const auxCodeIdMap: Record<string, string> = {
-    [AUX_CODE_IDS.AVAILABLE]: STATES.AVAILABLE,
-    [AUX_CODE_IDS.MEETING]: STATES.MEETING,
-    [AUX_CODE_IDS.LUNCH]: STATES.LUNCH,
+    [AUX_CODE_IDS.AVAILABLE]: USER_STATES.AVAILABLE,
+    [AUX_CODE_IDS.MEETING]: USER_STATES.MEETING,
+    [AUX_CODE_IDS.LUNCH]: USER_STATES.LUNCH,
   };
 
   // Find the last "Agent state changed successfully to auxCodeId: ..." log
@@ -78,8 +77,11 @@ export const checkConsole = async (page: Page, state: string, consoleMessages: s
   return expectedState === actualState;
 };
 
-
-export async function checkCallbackSequence(page: Page, expectedState: string, consoleMessages: string[]): Promise<boolean> {
+export async function checkCallbackSequence(
+  page: Page,
+  expectedState: string,
+  consoleMessages: string[]
+): Promise<boolean> {
   let apiSuccessIndex = -1;
   let callbackIndex = -1;
 
@@ -93,7 +95,10 @@ export async function checkCallbackSequence(page: Page, expectedState: string, c
 
   // Find last index of onStateChange callback
   for (let i = consoleMessages.length - 1; i >= 0; i--) {
-    if (consoleMessages[i].toLowerCase().includes('onstatechange') && consoleMessages[i].toLowerCase().includes('invoked')) {
+    if (
+      consoleMessages[i].toLowerCase().includes('onstatechange') &&
+      consoleMessages[i].toLowerCase().includes('invoked')
+    ) {
       callbackIndex = i;
       break;
     }
@@ -107,14 +112,16 @@ export async function checkCallbackSequence(page: Page, expectedState: string, c
     throw new Error('onStateChange callback not found in console');
   }
   if (callbackIndex <= apiSuccessIndex) {
-    throw new Error(`Callback occurred before API success (callback index: ${callbackIndex}, API index: ${apiSuccessIndex})`);
+    throw new Error(
+      `Callback occurred before API success (callback index: ${callbackIndex}, API index: ${apiSuccessIndex})`
+    );
   }
 
   // Map auxCodeId to state name using direct constants
   const auxCodeIdMap: Record<string, string> = {
-    [AUX_CODE_IDS.AVAILABLE]: STATES.AVAILABLE,
-    [AUX_CODE_IDS.MEETING]: STATES.MEETING,
-    [AUX_CODE_IDS.LUNCH]: STATES.LUNCH,
+    [AUX_CODE_IDS.AVAILABLE]: USER_STATES.AVAILABLE,
+    [AUX_CODE_IDS.MEETING]: USER_STATES.MEETING,
+    [AUX_CODE_IDS.LUNCH]: USER_STATES.LUNCH,
   };
   let lastAuxId: string | null = null;
   for (let i = consoleMessages.length - 1; i >= 0; i--) {
@@ -133,4 +140,3 @@ export async function checkCallbackSequence(page: Page, expectedState: string, c
   }
   return mappedState.trim().toLowerCase() === expectedState.trim().toLowerCase();
 }
-

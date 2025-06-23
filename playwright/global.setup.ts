@@ -1,5 +1,5 @@
 import {test as setup} from '@playwright/test';
-import { BASE_URL } from './constants';
+import {BASE_URL} from './constants';
 const fs = require('fs');
 const path = require('path');
 
@@ -9,18 +9,23 @@ setup('OAuth', async ({browser}) => {
   }
   const page = await browser.newPage();
   await page.goto(BASE_URL);
-
   await page.locator('#select-base-triggerid').getByText('Access Token').click();
-  await page.getByTestId('samples:login_option_oauth').click();
-  await page.getByRole('button', {name: 'Login with Webex'}).click();
-
-  await page.getByRole('textbox', {name: 'name@example.com'}).click();
+  await page.getByTestId('samples:login_option_oauth').getByText('Login with Webex').click();
+  await page.getByTestId('login with webex button').click();
   await page.getByRole('textbox', {name: 'name@example.com'}).fill(process.env.PLAYWRIGHT_USERNAME);
   await page.getByRole('link', {name: 'Sign in'}).click();
+  // Check if Init Widgets button is visible after username sign in (Multi session)
+  const initWidgetsButton = page.getByTestId('init-widgets-button');
+  const isInitWidgetsVisible = await initWidgetsButton
+    .waitFor({state: 'visible', timeout: 5000})
+    .then(() => true)
+    .catch(() => false);
 
-  await page.getByRole('textbox', {name: 'Password'}).click();
-  await page.getByAltText('Password ').fill(process.env.PLAYWRIGHT_PASSWORD);
-  await page.getByRole('button', {name: 'Sign in'}).click();
+  if (!isInitWidgetsVisible) {
+    // If Init Widgets button is not visible, proceed with password entry
+    await page.getByRole('textbox', {name: 'Password'}).fill(process.env.PLAYWRIGHT_PASSWORD);
+    await page.getByRole('button', {name: 'Sign in'}).click();
+  }
 
   await page.getByRole('textbox').click();
   const accessToken = await page.getByRole('textbox').inputValue();
