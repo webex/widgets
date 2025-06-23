@@ -24,6 +24,7 @@
     "test:styles": "eslint"
   },
   "dependencies": {
+    "@momentum-ui/illustrations": "^1.24.0",
     "@r2wc/react-to-web-component": "2.0.3",
     "@webex/cc-store": "workspace:*"
   },

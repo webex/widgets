@@ -87,7 +87,7 @@ describe('getControlsVisibility', () => {
     const expectedControls = {
       accept: true,
       decline: true,
-      end: false,
+      end: true,
       muteUnmute: true,
       holdResume: true,
       consult: true,
