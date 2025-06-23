@@ -10,7 +10,7 @@ import {
   OutdialCall,
 } from '@webex/cc-widgets';
 import {StationLogoutSuccess} from '@webex/plugin-cc';
-import Webex from 'webex/contact-center';
+import Webex from 'webex';
 import {ThemeProvider, IconProvider, Icon, Button, Checkbox, Text, Select, Option} from '@momentum-design/components/dist/react';
 import {PopoverNext} from '@momentum-ui/react-collaboration';
 import './App.scss';
@@ -85,12 +85,9 @@ const handleSaveEnd = (isComplete: boolean) => {
       const urlParams = new URLSearchParams(window.location.hash.replace('#', '?'));
     
       const accessToken = urlParams.get('access_token');
-      const expiresIn = urlParams.get('expires_in') ?? '0';
     
       if (accessToken) {
         window.localStorage.setItem('accessToken', accessToken);
-        // @ts-expect-error: Browser accepts this
-        window.localStorage.setItem('date', new Date().getTime() + parseInt(expiresIn, 10));
         setAccessToken(accessToken);
         // Clear the hash from the URL to remove the token from browser history
         window.history.replaceState(
@@ -101,14 +98,9 @@ const handleSaveEnd = (isComplete: boolean) => {
       }
     }
     else {
-      const storedDate = window.localStorage.getItem('date');
-      if (storedDate && parseInt(storedDate, 10) > new Date().getTime()) {
-        const storedAccessToken = window.localStorage.getItem('accessToken');
-        if (storedAccessToken) {
-          setAccessToken(storedAccessToken);
-        }
-      } else {
-        window.localStorage.removeItem('accessToken');
+      const storedAccessToken = window.localStorage.getItem('accessToken');
+      if (storedAccessToken) {
+        setAccessToken(storedAccessToken);
       }
     }
   }
@@ -152,20 +144,26 @@ const handleSaveEnd = (isComplete: boolean) => {
     console.log('onTaskAccepted invoked for task:', task);
   };
 
-  const onTaskDeclined = (task) => {
+const onTaskDeclined = (task,reason) => {
     console.log('onTaskDeclined invoked for task:', task);
+    setRejectedReason(reason);
+    setShowRejectedPopup(true);
   };
 
-  const onTaskSelected = (task) => {
-    console.log('onTaskSelected invoked for task:', task);
+  const onTaskSelected = ({task, isClicked}) => {
+    console.log('onTaskSelected invoked for task:', task, 'isClicked:', isClicked);
   };
 
-  const onHoldResume = () => {
-    console.log('onHoldResume invoked');
+  const onHoldResume = ({isHeld, task}) => {
+    console.log('onHoldResume invoked', {isHeld, task});
   };
 
-  const onEnd = () => {
-    console.log('onEnd invoked');
+  const onRecordingToggle = ({isRecording, task}) => {
+    console.log('onRecordingToggle invoked', {isRecording, task});
+  };
+
+  const onEnd = ({task}) => {
+    console.log('onEnd invoked', {task});
   };
 
   const onWrapUp = (params) => {
@@ -241,6 +239,11 @@ const handleSaveEnd = (isComplete: boolean) => {
     setSelectedState('');
   };
 
+  const handlePopoverClose = () => {
+    setShowRejectedPopup(false);
+    setSelectedState('');
+  };
+
   const doOAuthLogin = () => {
     let redirectUri = `${window.location.protocol}//${window.location.host}`;
 
@@ -299,7 +302,9 @@ const handleSaveEnd = (isComplete: boolean) => {
 
   // Store accessToken changes in local storage
   useEffect(() => {
-    window.localStorage.setItem('accessToken', accessToken);
+    if(accessToken.trim() !== '') {
+      window.localStorage.setItem('accessToken', accessToken);
+    }
   }, [accessToken]);
 
   useEffect(() => {
@@ -315,11 +320,6 @@ const handleSaveEnd = (isComplete: boolean) => {
   }, [currentTheme]);
 
   useEffect(() => {
-    store.setTaskRejected((reason: string) => {
-      setRejectedReason(reason);
-      setShowRejectedPopup(true);
-    });
-
     store.setIncomingTaskCb(onIncomingTaskCB);
 
     return () => {
@@ -330,6 +330,11 @@ const handleSaveEnd = (isComplete: boolean) => {
 
   const onStateChange = (status) => {
     console.log('onStateChange invoked', status);
+    if (!status || !status.name) return;
+    if (status.name !== 'RONA') {
+      setShowRejectedPopup(false);
+      setRejectedReason('');
+    }
   };
 
     const stationLogout = () => {
@@ -678,7 +683,7 @@ const handleSaveEnd = (isComplete: boolean) => {
                         <section className="section-box">
                           <fieldset className="fieldset">
                             <legend className="legend-box">Call Control</legend>
-                            <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapUp={onWrapUp} />
+                            <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapUp={onWrapUp} onRecordingToggle={onRecordingToggle} />
                           </fieldset>
                         </section>
                       </div>
@@ -692,6 +697,7 @@ const handleSaveEnd = (isComplete: boolean) => {
                               onHoldResume={onHoldResume}
                               onEnd={onEnd}
                               onWrapUp={onWrapUp}
+                              onRecordingToggle={onRecordingToggle}
                               callControlClassName={'call-control-outer'}
                               callControlConsultClassName={'call-control-consult-outer'}
                             />
@@ -752,14 +758,32 @@ const handleSaveEnd = (isComplete: boolean) => {
             )}
             {showRejectedPopup && (
               <div className="task-rejected-popup">
-                <h2>Task Rejected</h2>
-                <p>Reason: {rejectedReason}</p>
-                <select value={selectedState} onChange={(e) => setSelectedState(e.target.value)}>
-                  <option value="">Select a state</option>
-                  <option value="Available">Available</option>
-                  <option value="Idle">Idle</option>
-                </select>
-                <Button onClick={handlePopoverSubmit} variant="primary">
+                <button className="close-btn" onClick={handlePopoverClose}>
+                  ×
+                </button>
+                <Text>
+                  <div style={{textAlign: 'center', fontSize: '1.25rem', fontWeight: 600}}>Task Rejected</div>
+                </Text>
+                <Text>
+                  <div style={{fontSize: '0.875rem', textAlign: 'center', color: 'rgb(171, 10, 21)'}}>
+                    Reason: {rejectedReason}
+                  </div>
+                </Text>
+                <Select
+                  value={selectedState}
+                  placeholder="Select a state"
+                  onChange={(e: CustomEvent) => {
+                    setSelectedState(e.detail.value);
+                  }}
+                >
+                  <Option key={1} value="Available">
+                    Available
+                  </Option>
+                  <Option key={2} value="Idle">
+                    Idle
+                  </Option>
+                </Select>
+                <Button disabled={selectedState === ''} onClick={handlePopoverSubmit} variant="primary">
                   Confirm State Change
                 </Button>
               </div>

@@ -1,3 +1,45 @@
+# [1.28.0-ccwidgets.76](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.75...v1.28.0-ccwidgets.76) (2025-06-23)
+
+
+### Bug Fixes
+
+* **call-control:** address-bug-fixes ([#474](https://github.com/webex/widgets/issues/474)) ([14f961c](https://github.com/webex/widgets/commit/14f961c22156a03101db87fa9e84010a10faf056))
+
+# [1.28.0-ccwidgets.75](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.74...v1.28.0-ccwidgets.75) (2025-06-20)
+
+
+### Bug Fixes
+
+* **store:** incorporate task hydrate fix from SDK ([#477](https://github.com/webex/widgets/issues/477)) ([8f20022](https://github.com/webex/widgets/commit/8f2002277914afed79dbadf37de7d793210f7d71))
+
+# [1.28.0-ccwidgets.74](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.73...v1.28.0-ccwidgets.74) (2025-06-20)
+
+
+### Bug Fixes
+
+* **cc-widgets:** Resolved RONA popup issue and add close button ([#470](https://github.com/webex/widgets/issues/470)) ([1071ca1](https://github.com/webex/widgets/commit/1071ca13195cb01cf1aa2ab6d7c3c1f7282e2b2d))
+
+# [1.28.0-ccwidgets.73](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.72...v1.28.0-ccwidgets.73) (2025-06-16)
+
+
+### Bug Fixes
+
+* **cc-widgets:** use customer name for social channel ([#469](https://github.com/webex/widgets/issues/469)) ([472d743](https://github.com/webex/widgets/commit/472d743ffbb54381fb58224b589e5e0791b23ef3))
+
+# [1.28.0-ccwidgets.72](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.71...v1.28.0-ccwidgets.72) (2025-06-16)
+
+
+### Bug Fixes
+
+* **ui-testing:** add unit and snapshot testing for station-login ([#468](https://github.com/webex/widgets/issues/468)) ([b4baecb](https://github.com/webex/widgets/commit/b4baecbbe0384fe56c3cc01aa677cdc29cb0fba5))
+
+# [1.28.0-ccwidgets.71](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.70...v1.28.0-ccwidgets.71) (2025-06-13)
+
+
+### Bug Fixes
+
+* **cc-task:** add required callbacks ([#471](https://github.com/webex/widgets/issues/471)) ([f78ed67](https://github.com/webex/widgets/commit/f78ed6784b321549d1eca3a3f746ea5bb47ed245))
+
 # [1.28.0-ccwidgets.70](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.69...v1.28.0-ccwidgets.70) (2025-06-10)
 
 

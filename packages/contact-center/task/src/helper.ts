@@ -42,8 +42,8 @@ export const useTaskList = (props: UseTaskListProps) => {
     }
 
     if (onTaskSelected) {
-      store.setTaskSelected(function (task) {
-        onTaskSelected(task);
+      store.setTaskSelected(function (task, isClicked) {
+        onTaskSelected({task, isClicked});
       });
     }
   }, []);
@@ -72,7 +72,7 @@ export const useTaskList = (props: UseTaskListProps) => {
     });
   };
   const onTaskSelect = (task: ITask) => {
-    store.setCurrentTask(task);
+    store.setCurrentTask(task, true);
   };
 
   return {taskList, acceptTask, declineTask, onTaskSelect, isBrowser};
@@ -158,7 +158,17 @@ export const useIncomingTask = (props: UseTaskProps) => {
 };
 
 export const useCallControl = (props: useCallControlProps) => {
-  const {currentTask, onHoldResume, onEnd, onWrapUp, logger, consultInitiated, deviceType, featureFlags} = props;
+  const {
+    currentTask,
+    onHoldResume,
+    onEnd,
+    onWrapUp,
+    onRecordingToggle,
+    logger,
+    consultInitiated,
+    deviceType,
+    featureFlags,
+  } = props;
   const [isHeld, setIsHeld] = useState<boolean | undefined>(undefined);
   const [isRecording, setIsRecording] = useState(true);
   const [buddyAgents, setBuddyAgents] = useState<BuddyDetails[]>([]);
@@ -210,17 +220,16 @@ export const useCallControl = (props: useCallControlProps) => {
     if (!currentTask || !currentTask.data || !currentTask.data.interaction) return;
 
     const {interaction} = currentTask.data;
-    // consultInitiated
-    // Find consulting agent (any agent that is not the current agent)
-    const foundAgent = Object.values(interaction.participants)
-      .filter(
-        (participant: Participant) =>
-          participant.pType === 'Agent' &&
-          (consultInitiated
-            ? participant.id !== store.cc.agentConfig?.agentId
-            : participant.id === store.cc.agentConfig?.agentId)
-      )
-      .map((participant: Participant) => ({id: participant.id, name: participant.name}))[0];
+    const myAgentId = store.cc.agentConfig?.agentId;
+
+    // Find all agent participants except the current agent
+    const otherAgents = Object.values(interaction.participants).filter(
+      (participant): participant is Participant =>
+        (participant as Participant).pType === 'Agent' && (participant as Participant).id !== myAgentId
+    );
+
+    // Pick the first other agent (should only be one in a consult)
+    const foundAgent = otherAgents.length > 0 ? {id: otherAgents[0].id, name: otherAgents[0].name} : null;
 
     if (foundAgent) {
       setConsultAgentName(foundAgent.name);
@@ -230,7 +239,7 @@ export const useCallControl = (props: useCallControlProps) => {
         method: 'useCallControl#extractConsultingAgent',
       });
     }
-  }, [currentTask, consultAgentName, logger, consultInitiated]);
+  }, [currentTask, logger, consultInitiated]);
 
   // Check for consulting agent whenever currentTask changes
   useEffect(() => {
@@ -267,16 +276,30 @@ export const useCallControl = (props: useCallControlProps) => {
 
   const holdCallback = () => {
     setIsHeld(true);
-    if (onHoldResume) onHoldResume();
+    if (onHoldResume) {
+      onHoldResume({
+        isHeld: true,
+        task: currentTask,
+      });
+    }
   };
 
   const resumeCallback = () => {
     setIsHeld(false);
-    if (onHoldResume) onHoldResume();
+    if (onHoldResume) {
+      onHoldResume({
+        isHeld: false,
+        task: currentTask,
+      });
+    }
   };
 
   const endCallCallback = () => {
-    if (onEnd) onEnd();
+    if (onEnd) {
+      onEnd({
+        task: currentTask,
+      });
+    }
   };
 
   const wrapupCallCallback = ({wrapUpAuxCodeId}) => {
@@ -291,10 +314,18 @@ export const useCallControl = (props: useCallControlProps) => {
 
   const pauseRecordingCallback = () => {
     setIsRecording(false);
+    onRecordingToggle({
+      isRecording: false,
+      task: currentTask,
+    });
   };
 
   const resumeRecordingCallback = () => {
     setIsRecording(true);
+    onRecordingToggle({
+      isRecording: true,
+      task: currentTask,
+    });
   };
 
   useEffect(() => {
@@ -318,22 +349,16 @@ export const useCallControl = (props: useCallControlProps) => {
     };
 
     store.setTaskCallback(
+      // Should use holdCallback
       TASK_EVENTS.TASK_HOLD,
-      () => {
-        onHoldResume?.();
-        setIsHeld(true);
-      },
+      holdCallback,
       currentTask.data.interactionId
     );
     store.setTaskCallback(TASK_EVENTS.TASK_RESUME, resumeCallback, currentTask.data.interactionId);
     store.setTaskCallback(TASK_EVENTS.TASK_END, endCallCallback, currentTask.data.interactionId);
     store.setTaskCallback(TASK_EVENTS.AGENT_WRAPPEDUP, wrapupCallCallback, currentTask.data.interactionId);
-    store.setTaskCallback(TASK_EVENTS.CONTACT_RECORDING_PAUSED, pauseRecordingCallback, currentTask.data.interactionId);
-    store.setTaskCallback(
-      TASK_EVENTS.CONTACT_RECORDING_RESUMED,
-      resumeRecordingCallback,
-      currentTask.data.interactionId
-    );
+    store.setTaskCallback(TASK_EVENTS.TASK_RECORDING_PAUSED, pauseRecordingCallback, currentTask.data.interactionId);
+    store.setTaskCallback(TASK_EVENTS.TASK_RECORDING_RESUMED, resumeRecordingCallback, currentTask.data.interactionId);
 
     return () => {
       if (workerRef.current?.postMessage) {

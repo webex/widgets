@@ -124,27 +124,19 @@ window.addEventListener('load', () => {
     const urlParams = new URLSearchParams(window.location.hash.replace('#', '?'));
 
     const accessToken = urlParams.get('access_token');
-    const expiresIn = urlParams.get('expires_in') ?? '0';
 
     if (accessToken) {
       localStorage.setItem('accessToken', accessToken);
-      // @ts-expect-error: Browser accepts this
-      localStorage.setItem('date', new Date().getTime() + parseInt(expiresIn, 10));
       accessTokenElem.value = accessToken;
       updateButtonState();
       // Clear the hash from the URL to remove the token from browser history
       window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
     }
   } else {
-    const storedDate = window.localStorage.getItem('date');
-    if (storedDate && parseInt(storedDate, 10) > new Date().getTime()) {
-      const storedAccessToken = window.localStorage.getItem('accessToken');
-      if (storedAccessToken) {
-        accessTokenElem.value = storedAccessToken;
-        updateButtonState();
-      }
-    } else {
-      window.localStorage.removeItem('accessToken');
+    const storedAccessToken = window.localStorage.getItem('accessToken');
+    if (storedAccessToken) {
+      accessTokenElem.value = storedAccessToken;
+      updateButtonState();
     }
   }
 });

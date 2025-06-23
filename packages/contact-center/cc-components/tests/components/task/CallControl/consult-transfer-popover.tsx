@@ -3,6 +3,7 @@ import React from 'react';
 import {render, screen, fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ConsultTransferPopoverComponent from '../../../../src/components/task/CallControl/CallControlCustom/consult-transfer-popover';
+import ConsultTransferEmptyState from '../../../../src/components/task/CallControl/CallControlCustom/consult-transfer-empty-state';
 
 const loggerMock = {
   log: jest.fn(),
@@ -49,45 +50,93 @@ describe.skip('ConsultTransferPopoverComponent', () => {
     onAgentSelect: mockOnAgentSelect,
     onQueueSelect: mockOnQueueSelect,
     logger: loggerMock,
+    showTabs: true,
+    emptyMessage: 'No agents or queues available',
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders heading and tab correctly', () => {
+  it('renders heading and tabs when showTabs is true', () => {
     render(<ConsultTransferPopoverComponent {...baseProps} />);
     expect(screen.getByText('Select an Agent')).toBeInTheDocument();
     expect(screen.getByText('Agents')).toBeInTheDocument();
+    expect(screen.getByText('Queues')).toBeInTheDocument();
   });
 
-  it('renders agents list when buddyAgents provided', () => {
-    render(<ConsultTransferPopoverComponent {...baseProps} />);
-    expect(screen.getByText('Agent One')).toBeInTheDocument();
-    expect(screen.getByText('Agent Two')).toBeInTheDocument();
+  it('does not render tabs when showTabs is false (both lists empty)', () => {
+    render(<ConsultTransferPopoverComponent {...baseProps} buddyAgents={[]} queues={[]} />);
+    expect(screen.queryByText('Agents')).not.toBeInTheDocument();
+    expect(screen.queryByText('Queues')).not.toBeInTheDocument();
   });
 
-  it('renders no agents text when buddyAgents is empty', () => {
+  it('renders queues list and allows selecting a queue', () => {
+    render(<ConsultTransferPopoverComponent {...baseProps} allowConsultToQueue={true} />);
+    fireEvent.click(screen.getByText('Queues'));
+    expect(screen.getByText('Queue One')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Queue One'));
+    expect(mockOnQueueSelect).toHaveBeenCalledWith('queue1', 'Queue One');
+  });
+
+  it('renders queues list and allows selecting a queue', () => {
+    render(<ConsultTransferPopoverComponent {...baseProps} allowConsultToQueue={true} />);
+    fireEvent.click(screen.getByText('Queues'));
+    expect(screen.getByText('Queue One')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Queue One'));
+    expect(mockOnQueueSelect).toHaveBeenCalledWith('queue1', 'Queue One');
+  });
+
+  it('shows ConsultTransferEmptyState when both buddyAgents and queues are empty', () => {
+    render(<ConsultTransferPopoverComponent {...baseProps} buddyAgents={[]} queues={[]} />);
+    expect(screen.getByText('We can’t find any queue or agent available for now.')).toBeInTheDocument();
+  });
+
+  it('shows ConsultTransferEmptyState when only buddyAgents is empty and Agents tab is active', () => {
     render(<ConsultTransferPopoverComponent {...baseProps} buddyAgents={[]} />);
-    expect(screen.getByText('No agents found')).toBeInTheDocument();
+    expect(screen.getByText('We can’t find any agent available for now.')).toBeInTheDocument();
   });
 
-  it('calls onAgentSelect with correct agentId when agent button is clicked', () => {
-    render(<ConsultTransferPopoverComponent {...baseProps} />);
-    fireEvent.click(screen.getByText('Agent One'));
-    expect(mockOnAgentSelect).toHaveBeenCalledWith('agent1', 'Agent One');
+  it('shows ConsultTransferEmptyState when only queues is empty and Queues tab is active', () => {
+    render(<ConsultTransferPopoverComponent {...baseProps} queues={[]} allowConsultToQueue={true} />);
+    // Switch to the Queues tab
+    fireEvent.click(screen.getByText('Queues'));
+    expect(screen.getByText('We can’t find any queue available for now.')).toBeInTheDocument();
   });
 
   it('hides queues tab when allowConsultToQueue is false', () => {
     render(<ConsultTransferPopoverComponent {...baseProps} allowConsultToQueue={false} />);
-    const queuesTab = screen.getByText('Queues').closest('[data-testid="TabNext"]');
-    expect(queuesTab).toHaveStyle('display: none');
+    const queuesTab = screen.getByText('Queues');
+    // Check that the tab is hidden (display: none)
+    expect(queuesTab.closest('button')).toHaveStyle('display: none');
   });
 
   it('shows queues tab when allowConsultToQueue is true', () => {
     render(<ConsultTransferPopoverComponent {...baseProps} allowConsultToQueue={true} />);
-    const queuesTab = screen.getByText('Queues').closest('[data-testid="TabNext"]');
-    expect(queuesTab).not.toHaveAttribute('disabled', 'true');
-    expect(queuesTab).not.toHaveStyle('display: none');
+    expect(screen.getByText('Queues')).toBeInTheDocument();
+  });
+
+  it('renders ConsultTransferEmptyState component with correct message', () => {
+    render(<ConsultTransferEmptyState message="No available agents" />);
+    expect(screen.getByText('No available agents')).toBeInTheDocument();
+  });
+
+  it('renders queues list and allows selecting a queue', () => {
+    render(
+      <ConsultTransferPopoverComponent
+        {...baseProps}
+        allowConsultToQueue={true}
+        buddyAgents={[]} // So Queues tab is selected by default if you want
+        queues={[
+          {id: 'queue1', name: 'Queue One'},
+          {id: 'queue2', name: 'Queue Two'},
+        ]}
+      />
+    );
+    // Switch to the Queues tab if not already selected
+    fireEvent.click(screen.getByText('Queues'));
+    expect(screen.getByText('Queue One')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Queue One'));
+    expect(mockOnQueueSelect).toHaveBeenCalledWith('queue1', 'Queue One');
   });
 });

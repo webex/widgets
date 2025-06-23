@@ -417,10 +417,10 @@ describe('useTaskList Hook', () => {
 
     // Manually trigger the stored callback with the task
     act(() => {
-      store.onTaskSelected(taskMock);
+      store.onTaskSelected(taskMock, true);
     });
 
-    expect(onTaskSelected).toHaveBeenCalledWith(taskMock);
+    expect(onTaskSelected).toHaveBeenCalledWith({task: taskMock, isClicked: true});
 
     // Ensure no errors are logged
     expect(logger.error).not.toHaveBeenCalled();
@@ -655,7 +655,7 @@ describe('useCallControl', () => {
     expect(mockOnWrapUp).not.toHaveBeenCalled();
   });
 
-  it('should call holdResume with hold=true and handle success', async () => {
+  it('should call onHoldResume with hold=true and handle success', async () => {
     const {result} = renderHook(() =>
       useCallControl({
         currentTask: mockCurrentTask,
@@ -674,10 +674,10 @@ describe('useCallControl', () => {
     });
 
     expect(mockCurrentTask.hold).toHaveBeenCalled();
-    expect(mockOnHoldResume).toHaveBeenCalled();
+    expect(mockOnHoldResume).toHaveBeenCalledWith({isHeld: true, task: mockCurrentTask});
   });
 
-  it('should call holdResume with hold=false and handle success', async () => {
+  it('should call onHoldResume with hold=false and handle success', async () => {
     const {result} = renderHook(() =>
       useCallControl({
         currentTask: mockCurrentTask,
@@ -696,7 +696,7 @@ describe('useCallControl', () => {
     });
 
     expect(mockCurrentTask.resume).toHaveBeenCalled();
-    expect(mockOnHoldResume).toHaveBeenCalled();
+    expect(mockOnHoldResume).toHaveBeenCalledWith({isHeld: false, task: mockCurrentTask});
   });
 
   it('should log an error if hold fails', async () => {
@@ -1343,11 +1343,11 @@ describe('useCallControl', () => {
 
     // Wait for the consultAgentName to be updated
     await waitFor(() => {
-      expect(result.current.consultAgentName).toBe('Current Agent');
+      expect(result.current.consultAgentName).toBe('Jane Consultant');
     });
 
     // Verify the logger was called with the correct message
-    expect(mockLogger.info).toHaveBeenCalledWith('Consulting agent detected: Current Agent currentAgentId', {
+    expect(mockLogger.info).toHaveBeenCalledWith('Consulting agent detected: Jane Consultant consultAgentId', {
       module: 'widget-cc-task#helper.ts',
       method: 'useCallControl#extractConsultingAgent',
     });
