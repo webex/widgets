@@ -40,6 +40,7 @@ test.describe('Login and User State tests', async () => {
 
     await page.getByTestId('state-item-Available').click();
     await expect(page.getByTestId('state-select').getByTestId('state-name')).toContainText('Available');
+    await page.close();
   });
 
   test('Multilogin: should login across tabs', async ({browser}) => {
@@ -98,6 +99,10 @@ test.describe('Login and User State tests', async () => {
 
     // Tab 2 should reflect Available state if login synced
     await expect(page2.getByTestId('state-select').getByTestId('state-name')).toContainText('Available');
+
+    await page.close();
+    await page2.close();
+    await context.close();
   });
 
   test('Relogin: should login after a refresh with same deviceType', async ({browser}) => {
@@ -155,5 +160,7 @@ test.describe('Login and User State tests', async () => {
 
     await expect(page.getByTestId('login-option-select').locator('#select-base-triggerid')).toContainText('Extension');
     await expect(page.getByTestId('state-name')).toContainText('Available');
+    await page.close();
+    await context.close();
   });
 });
