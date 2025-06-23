@@ -220,17 +220,16 @@ export const useCallControl = (props: useCallControlProps) => {
     if (!currentTask || !currentTask.data || !currentTask.data.interaction) return;
 
     const {interaction} = currentTask.data;
-    // consultInitiated
-    // Find consulting agent (any agent that is not the current agent)
-    const foundAgent = Object.values(interaction.participants)
-      .filter(
-        (participant: Participant) =>
-          participant.pType === 'Agent' &&
-          (consultInitiated
-            ? participant.id !== store.cc.agentConfig?.agentId
-            : participant.id === store.cc.agentConfig?.agentId)
-      )
-      .map((participant: Participant) => ({id: participant.id, name: participant.name}))[0];
+    const myAgentId = store.cc.agentConfig?.agentId;
+
+    // Find all agent participants except the current agent
+    const otherAgents = Object.values(interaction.participants).filter(
+      (participant): participant is Participant =>
+        (participant as Participant).pType === 'Agent' && (participant as Participant).id !== myAgentId
+    );
+
+    // Pick the first other agent (should only be one in a consult)
+    const foundAgent = otherAgents.length > 0 ? {id: otherAgents[0].id, name: otherAgents[0].name} : null;
 
     if (foundAgent) {
       setConsultAgentName(foundAgent.name);
@@ -240,7 +239,7 @@ export const useCallControl = (props: useCallControlProps) => {
         method: 'useCallControl#extractConsultingAgent',
       });
     }
-  }, [currentTask, consultAgentName, logger, consultInitiated]);
+  }, [currentTask, logger, consultInitiated]);
 
   // Check for consulting agent whenever currentTask changes
   useEffect(() => {

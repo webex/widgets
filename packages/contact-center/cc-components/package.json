@@ -1,7 +1,7 @@
 {
   "name": "@webex/cc-components",
   "description": "Webex Contact Center UI Components Library for your custom contact center solutions",
-  "version": "1.28.0-ccwidgets.73",
+  "version": "1.28.0-ccwidgets.76",
   "main": "dist/index.js",
   "publishConfig": {
     "access": "public"
@@ -24,6 +24,7 @@
     "test:styles": "eslint"
   },
   "dependencies": {
+    "@momentum-ui/illustrations": "^1.24.0",
     "@r2wc/react-to-web-component": "2.0.3",
     "@webex/cc-store": "workspace:*"
   },

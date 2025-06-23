@@ -1,3 +1,24 @@
+# [1.28.0-ccwidgets.76](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.75...v1.28.0-ccwidgets.76) (2025-06-23)
+
+
+### Bug Fixes
+
+* **call-control:** address-bug-fixes ([#474](https://github.com/webex/widgets/issues/474)) ([14f961c](https://github.com/webex/widgets/commit/14f961c22156a03101db87fa9e84010a10faf056))
+
+# [1.28.0-ccwidgets.75](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.74...v1.28.0-ccwidgets.75) (2025-06-20)
+
+
+### Bug Fixes
+
+* **store:** incorporate task hydrate fix from SDK ([#477](https://github.com/webex/widgets/issues/477)) ([8f20022](https://github.com/webex/widgets/commit/8f2002277914afed79dbadf37de7d793210f7d71))
+
+# [1.28.0-ccwidgets.74](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.73...v1.28.0-ccwidgets.74) (2025-06-20)
+
+
+### Bug Fixes
+
+* **cc-widgets:** Resolved RONA popup issue and add close button ([#470](https://github.com/webex/widgets/issues/470)) ([1071ca1](https://github.com/webex/widgets/commit/1071ca13195cb01cf1aa2ab6d7c3c1f7282e2b2d))
+
 # [1.28.0-ccwidgets.73](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.72...v1.28.0-ccwidgets.73) (2025-06-16)
 
 
