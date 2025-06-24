@@ -17,6 +17,7 @@ import {
 import {ITask} from '@webex/plugin-cc';
 
 import {getFeatureFlags} from './util';
+import {LoginOptions} from '../../cc-components/src/components/StationLogin/constants';
 
 class Store implements IStore {
   private static instance: Store;
@@ -97,6 +98,7 @@ class Store implements IStore {
         this.loginOptions = response.webRtcEnabled
           ? response.loginVoiceOptions
           : response.loginVoiceOptions.filter((option) => option !== 'BROWSER');
+        this.loginOptions.sort((a, b) => Object.keys(LoginOptions).indexOf(a) - Object.keys(LoginOptions).indexOf(b));
         this.idleCodes = response.idleCodes;
         this.agentId = response.agentId;
         this.wrapupCodes = response.wrapupCodes;
