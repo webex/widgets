@@ -4,7 +4,7 @@ import {CallControlComponentProps, DestinationType, CallControlMenuType} from '.
 import './call-control.styles.scss';
 import {PopoverNext, SelectNext, TooltipNext, Text, ButtonCircle, ButtonPill} from '@momentum-ui/react-collaboration';
 import {Item} from '@react-stately/collections';
-import {Icon} from '@momentum-design/components/dist/react';
+import {Icon, Button} from '@momentum-design/components/dist/react';
 import ConsultTransferPopoverComponent from './CallControlCustom/consult-transfer-popover';
 import AutoWrapupTimer from '../AutoWrapup/AutoWrapupTimer';
 import type {MEDIA_CHANNEL as MediaChannelType} from '../task.types';
@@ -283,7 +283,9 @@ function CallControlComponent(props: CallControlComponentProps) {
                   key={index}
                   triggerComponent={
                     <ButtonCircle
-                      className={button.className}
+                      className={
+                        button.className + (button.disabled || consultInitiated ? ` ${button.className}-disabled` : '')
+                      }
                       data-testid="ButtonCircle"
                       onPress={button.onClick}
                       disabled={button.disabled || consultInitiated}
@@ -314,10 +316,16 @@ function CallControlComponent(props: CallControlComponentProps) {
               showArrow
               trigger="click"
               triggerComponent={
-                <ButtonPill className="wrapup-button">
+                <Button
+                  size={28}
+                  color="default"
+                  variant="secondary"
+                  postfix-icon="arrow-down-bold"
+                  type="button"
+                  role="button"
+                >
                   Wrap up
-                  <Icon name="arrow-down-bold" />
-                </ButtonPill>
+                </Button>
               }
               variant="medium"
               interactive
