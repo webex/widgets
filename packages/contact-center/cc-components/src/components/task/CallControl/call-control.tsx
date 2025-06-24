@@ -6,7 +6,7 @@ import {PopoverNext, SelectNext, TooltipNext, Text, ButtonCircle, ButtonPill} fr
 import {Item} from '@react-stately/collections';
 import {Icon, Button} from '@momentum-design/components/dist/react';
 import ConsultTransferPopoverComponent from './CallControlCustom/consult-transfer-popover';
-import AutoWrapupTimer from '../AutoWrapup/AutoWrapupTimer';
+import AutoWrapupTimer from '../AutoWrapupTimer/AutoWrapupTimer';
 import type {MEDIA_CHANNEL as MediaChannelType} from '../task.types';
 import {getMediaTypeInfo} from '../../../utils';
 
