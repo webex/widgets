@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.78](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.77...v1.28.0-ccwidgets.78) (2025-06-24)
+
+
+### Bug Fixes
+
+* set a valid default device type on initial login ([#475](https://github.com/webex/widgets/issues/475)) ([063f1ac](https://github.com/webex/widgets/commit/063f1acdf4944b885216bee6d60f65fbe24f9b91))
+
 # [1.28.0-ccwidgets.77](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.76...v1.28.0-ccwidgets.77) (2025-06-24)
 
 
