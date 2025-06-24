@@ -1,7 +1,7 @@
 {
   "name": "@webex/cc-task",
   "description": "Webex Contact Center Widgets: Task",
-  "version": "1.28.0-ccwidgets.77",
+  "version": "1.28.0-ccwidgets.78",
   "main": "dist/index.js",
   "publishConfig": {
     "access": "public"
