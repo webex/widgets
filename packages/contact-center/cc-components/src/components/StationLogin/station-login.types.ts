@@ -112,6 +112,12 @@ export interface IStationLoginProps {
   onCCSignOut?: () => void;
 
   /**
+   * If this boolean is false, the agent will not be logged out from the station but the onCCSignOut will be called.
+   * By default, it is true which means the agent will be logged out from the station and onCCSignOut will be called.
+   */
+  doStationLogout?: boolean;
+
+  /**
    * The team id for agent login
    */
   teamId: string;

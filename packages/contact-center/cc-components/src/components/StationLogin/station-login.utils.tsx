@@ -34,7 +34,8 @@ const handleModals = (
  * Closes the dialog if it is currently open and calls the provided callback function
  */
 
-const continueClicked = (modalRef, callback) => {
+const continueClicked = (modalRef, callback, setShowCCSignOutModal) => {
+  setShowCCSignOutModal(false);
   if (modalRef.current) {
     modalRef.current.close();
     callback();
@@ -219,6 +220,15 @@ const handleOnCCSignOut = (ccSignOutModalRef: React.RefObject<HTMLDialogElement>
   onCCSignOut();
 };
 
+const handleCCSignoutKeyDown = (
+  event: React.KeyboardEvent<HTMLDialogElement>,
+  setShowCCSignOutModal: (show: boolean) => void
+) => {
+  if (event.key === 'Escape') {
+    setShowCCSignOutModal(false);
+  }
+};
+
 export {
   handleModals,
   continueClicked,
@@ -232,4 +242,5 @@ export {
   handleDNInputChanged,
   handleTeamSelectChanged,
   handleOnCCSignOut,
+  handleCCSignoutKeyDown,
 };

@@ -78,6 +78,8 @@ describe('StationLogin Component', () => {
       onSaveEnd: onSaveEnd,
       onSaveStart: onSaveStart,
       teamId: undefined,
+      onCCSignOut: ccLogoutCb,
+      doStationLogout: undefined,
     });
   });
 });
