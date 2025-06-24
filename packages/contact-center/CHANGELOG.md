@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.77](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.76...v1.28.0-ccwidgets.77) (2025-06-24)
+
+
+### Bug Fixes
+
+* **station-login:** doStationLogout prop to logout on signout confirm ([#473](https://github.com/webex/widgets/issues/473)) ([a38cc5b](https://github.com/webex/widgets/commit/a38cc5b80fdc1833b1f3672bcc674c6b5b8e3ce1))
+
 # [1.28.0-ccwidgets.76](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.75...v1.28.0-ccwidgets.76) (2025-06-23)
 
 
