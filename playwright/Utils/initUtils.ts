@@ -1,4 +1,4 @@
-import {Page, expect} from '@playwright/test';
+import {Page, expect, BrowserContext} from '@playwright/test';
 import dotenv from 'dotenv';
 import {BASE_URL} from '../constants';
 
@@ -35,9 +35,22 @@ export const enableMultiLogin = async (page: Page): Promise<void> => {
   await page.getByTestId('multi-login-enable-checkbox').click();
 };
 
-export const initiateWidgets = async (page: Page): Promise<void> => {
-  await page.getByTestId('init-widgets-button').click();
+export const initialiseWidgets = async (page: Page): Promise<void> => {
   await page.getByTestId('init-widgets-button').click();
 
   await page.getByTestId('station-login-widget').waitFor({state: 'visible'});
+};
+
+// Helper method for page relogin - simulates user login along with page reload
+export const pageRelogin = async (page: Page): Promise<void> => {
+  await page.reload();
+  await initialiseWidgets(page);
+};
+
+// Helper method for multisession - creates new page and initializes widgets in same context
+export const createMultiSession = async (context: BrowserContext): Promise<Page> => {
+  const multiSessionPage = await context.newPage();
+  await oauthLogin(multiSessionPage);
+  await initialiseWidgets(multiSessionPage);
+  return multiSessionPage;
 };
