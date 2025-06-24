@@ -1,5 +1,5 @@
 import {test, expect, Page, BrowserContext} from '@playwright/test';
-import {oauthLogin, enableMultiLogin, initiateWidgets} from './Utils/initUtils';
+import {oauthLogin, enableMultiLogin, initialiseWidgets, agentRelogin, createMultiSession} from './Utils/initUtils';
 import {extensionLogin, stationLogout} from './Utils/stationLoginUtils';
 import {
   getCurrentState,
@@ -28,7 +28,7 @@ test.describe('User State Widget Functionality Tests', () => {
     page.on('console', (msg) => consoleMessages.push(msg.text()));
     await oauthLogin(page);
     await enableMultiLogin(page);
-    await initiateWidgets(page);
+    await initialiseWidgets(page);
     const loginButtonExists = await page
       .getByTestId('login-button')
       .isVisible()
@@ -100,8 +100,7 @@ test.describe('User State Widget Functionality Tests', () => {
     await page.waitForTimeout(3000);
 
     consoleMessages.length = 0;
-    await page.reload();
-    await initiateWidgets(page);
+    await agentRelogin(page);
 
     const visible = await page.getByTestId('state-select').isVisible();
     if (!visible) throw new Error('State select not visible after reload');
@@ -115,10 +114,7 @@ test.describe('User State Widget Functionality Tests', () => {
   });
 
   test('should test multi-session synchronization', async () => {
-    const multiSessionPage = await context.newPage();
-    await oauthLogin(multiSessionPage);
-    await initiateWidgets(multiSessionPage);
-    await multiSessionPage.waitForTimeout(3000);
+    const multiSessionPage = await createMultiSession(context);
 
     await changeUserState(page, USER_STATES.AVAILABLE);
     await verifyCurrentState(page, USER_STATES.AVAILABLE);

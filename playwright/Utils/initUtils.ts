@@ -41,8 +41,8 @@ export const initialiseWidgets = async (page: Page): Promise<void> => {
   await page.getByTestId('station-login-widget').waitFor({state: 'visible'});
 };
 
-// Helper method for page relogin - simulates user login along with page reload
-export const pageRelogin = async (page: Page): Promise<void> => {
+// Helper method for agent relogin - simulates user login along with page reload
+export const agentRelogin = async (page: Page): Promise<void> => {
   await page.reload();
   await initialiseWidgets(page);
 };
