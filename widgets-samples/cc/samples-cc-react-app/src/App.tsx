@@ -446,6 +446,7 @@ const onTaskDeclined = (task,reason) => {
                               name={widget}
                               checked={selectedWidgets[widget]}
                               onChange={handleCheckboxChange}
+                              data-testid={`samples:widget-${widget}`}
                             />
                             &nbsp;
                             {widget.charAt(0).toUpperCase() + widget.slice(1).replace(/([A-Z])/g, ' $1')}&nbsp;
