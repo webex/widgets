@@ -11,7 +11,16 @@ import {
 } from '@webex/cc-widgets';
 import {StationLogoutSuccess} from '@webex/plugin-cc';
 import Webex from 'webex';
-import {ThemeProvider, IconProvider, Icon, Button, Checkbox, Text, Select, Option} from '@momentum-design/components/dist/react';
+import {
+  ThemeProvider,
+  IconProvider,
+  Icon,
+  Button,
+  Checkbox,
+  Text,
+  Select,
+  Option,
+} from '@momentum-design/components/dist/react';
 import {PopoverNext} from '@momentum-ui/react-collaboration';
 import './App.scss';
 import {observer} from 'mobx-react-lite';
@@ -58,21 +67,21 @@ function App() {
 
   const [collapsedTasks, setCollapsedTasks] = React.useState([]);
   const [showLoader, setShowLoader] = useState(false);
-  const [toast, setToast] = useState<{type: 'success' | 'error'}|null>(null);
+  const [toast, setToast] = useState<{type: 'success' | 'error'} | null>(null);
 
   const handleSaveStart = () => {
-  setShowLoader(true);
-  setToast(null);
-};
+    setShowLoader(true);
+    setToast(null);
+  };
 
-const handleSaveEnd = (isComplete: boolean) => {
-  setShowLoader(false);
-  if (isComplete) {
-    setToast({type: 'success'});
-  } else {
-    setToast({type: 'error'});
-  }
-};
+  const handleSaveEnd = (isComplete: boolean) => {
+    setShowLoader(false);
+    if (isComplete) {
+      setToast({type: 'success'});
+    } else {
+      setToast({type: 'error'});
+    }
+  };
 
   const onIncomingTaskCB = ({task}) => {
     console.log('Incoming task:', task);
@@ -83,28 +92,22 @@ const handleSaveEnd = (isComplete: boolean) => {
   useEffect(() => {
     if (window.location.hash) {
       const urlParams = new URLSearchParams(window.location.hash.replace('#', '?'));
-    
+
       const accessToken = urlParams.get('access_token');
-    
+
       if (accessToken) {
         window.localStorage.setItem('accessToken', accessToken);
         setAccessToken(accessToken);
         // Clear the hash from the URL to remove the token from browser history
-        window.history.replaceState(
-          {},
-          document.title,
-          window.location.pathname + window.location.search
-        );
+        window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
       }
-    }
-    else {
+    } else {
       const storedAccessToken = window.localStorage.getItem('accessToken');
       if (storedAccessToken) {
         setAccessToken(storedAccessToken);
       }
     }
-  }
-  , []);
+  }, []);
 
   const webexConfig = {
     fedramp: false,
@@ -245,45 +248,32 @@ const handleSaveEnd = (isComplete: boolean) => {
     }
 
     // Reference: https://developer.webex-cx.com/documentation/integrations
-    const ccMandatoryScopes = [
-      "cjp:config_read",
-      "cjp:config_write",
-      "cjp:config",
-      "cjp:user",
-    ];
+    const ccMandatoryScopes = ['cjp:config_read', 'cjp:config_write', 'cjp:config', 'cjp:user'];
 
-    const webRTCCallingScopes = [
-      "spark:webrtc_calling",
-      "spark:calls_read",
-      "spark:calls_write",
-      "spark:xsi"
-    ];
+    const webRTCCallingScopes = ['spark:webrtc_calling', 'spark:calls_read', 'spark:calls_write', 'spark:xsi'];
 
     const additionalScopes = [
-      "spark:kms", // to avoid token downscope to only spark:kms error on SDK init
+      'spark:kms', // to avoid token downscope to only spark:kms error on SDK init
     ];
 
     const requestedScopes = Array.from(
-      new Set(
-          ccMandatoryScopes
-          .concat(webRTCCallingScopes)
-          .concat(additionalScopes))
-        ).join(' ');
+      new Set(ccMandatoryScopes.concat(webRTCCallingScopes).concat(additionalScopes))
+    ).join(' ');
 
     const webexConfig = {
       config: {
-        "appName": "sdk-samples",
-        "appPlatform": "testClient",
-        "fedramp": false,
-        "logger": {
-          "level": "info"
+        appName: 'sdk-samples',
+        appPlatform: 'testClient',
+        fedramp: false,
+        logger: {
+          level: 'info',
         },
-        "credentials": {
-          "client_id": "C04ef08ffce356c3161bb66b15dbdd98d26b6c683c5ce1a1a89efad545fdadd74",
-          "redirect_uri": redirectUri,
-          "scope": requestedScopes,
-        }
-      }
+        credentials: {
+          client_id: 'C04ef08ffce356c3161bb66b15dbdd98d26b6c683c5ce1a1a89efad545fdadd74',
+          redirect_uri: redirectUri,
+          scope: requestedScopes,
+        },
+      },
     };
 
     const webex = Webex.init(webexConfig);
@@ -295,7 +285,7 @@ const handleSaveEnd = (isComplete: boolean) => {
 
   // Store accessToken changes in local storage
   useEffect(() => {
-    if(accessToken.trim() !== '') {
+    if (accessToken.trim() !== '') {
       window.localStorage.setItem('accessToken', accessToken);
     }
   }, [accessToken]);
@@ -330,8 +320,9 @@ const handleSaveEnd = (isComplete: boolean) => {
     console.log('onStateChange invoked', status);
   };
 
-    const stationLogout = () => {
-    store.cc.stationLogout({logoutReason: 'User requested logout'})
+  const stationLogout = () => {
+    store.cc
+      .stationLogout({logoutReason: 'User requested logout'})
       .then((res: StationLogoutSuccess) => {
         console.log('Agent logged out successfully', res.data.type);
       })
@@ -348,38 +339,34 @@ const handleSaveEnd = (isComplete: boolean) => {
         <IconProvider iconSet="momentum-icons">
           <div className="webexTheme">
             <h1>Contact Center widgets in a react app</h1>
-              {showLoader && (
-                <div className="profile-loader-overlay">
-                    <div className="profile-loader-spinner" aria-label="Loading" />
-                </div>
-              )}
+            {showLoader && (
+              <div className="profile-loader-overlay">
+                <div className="profile-loader-spinner" aria-label="Loading" />
+              </div>
+            )}
 
-              {toast && toast.type === 'success' && (
-                <div className="toast toast-success" role="status" aria-live="polite">
-                  <div className="toast-icon" aria-hidden="true">
-                    <Icon name="check-circle-bold" />
-                  </div>
-                  <div className="toast-content">
-                    <div className="toast-title">
-                      Interaction preferences changes
-                    </div>
-                    <div>
-                      Your interaction preference is updated
-                    </div>
-                  </div>
-                  <Button
-                    size={32}
-                    variant="tertiary"
-                    color="default"
-                    prefix-icon="cancel-bold"
-                    postfix-icon=""
-                    type="button"
-                    role="button"
-                    aria-label="Close"
-                    onClick={() => setToast(null)}
-                    className="toast-close"
-                  />
+            {toast && toast.type === 'success' && (
+              <div className="toast toast-success" role="status" aria-live="polite">
+                <div className="toast-icon" aria-hidden="true">
+                  <Icon name="check-circle-bold" />
                 </div>
+                <div className="toast-content">
+                  <div className="toast-title">Interaction preferences changes</div>
+                  <div>Your interaction preference is updated</div>
+                </div>
+                <Button
+                  size={32}
+                  variant="tertiary"
+                  color="default"
+                  prefix-icon="cancel-bold"
+                  postfix-icon=""
+                  type="button"
+                  role="button"
+                  aria-label="Close"
+                  onClick={() => setToast(null)}
+                  className="toast-close"
+                />
+              </div>
             )}
 
             <div className="box">
@@ -391,31 +378,27 @@ const handleSaveEnd = (isComplete: boolean) => {
                     value={loginType}
                     onChange={(e: CustomEvent) => {
                       const selectedType = e.detail.value;
-                      if(selectedType !== 'token' && selectedType !== 'oauth') return;
+                      if (selectedType !== 'token' && selectedType !== 'oauth') return;
                       setLoginType(selectedType);
                     }}
                   >
-                    <Option data-testid='samples:login_option_token' key={1} value="token">Access Token</Option>
-                    <Option data-testid='samples:login_option_oauth' key={2} value="oauth">Login with Webex</Option>
+                    <Option data-testid="samples:login_option_token" key={1} value="token">
+                      Access Token
+                    </Option>
+                    <Option data-testid="samples:login_option_oauth" key={2} value="oauth">
+                      Login with Webex
+                    </Option>
                   </Select>
-                
-                  <div className="accessTokenTheme" style={{ marginTop: '15px' }}>
+
+                  <div className="accessTokenTheme" style={{marginTop: '15px'}}>
                     {loginType === 'token' && (
                       <div>
                         <span>Your access token: </span>
-                        <input
-                          type="text"
-                          value={accessToken}
-                          onChange={(e) => setAccessToken(e.target.value)}
-                        />
+                        <input type="text" value={accessToken} onChange={(e) => setAccessToken(e.target.value)} />
                       </div>
                     )}
                     {loginType === 'oauth' && (
-                      <Button
-                        onClick={doOAuthLogin}
-                        variant="primary"
-                        data-testid='login with webex button'
-                      >
+                      <Button onClick={doOAuthLogin} variant="primary" data-testid="samples:login_with_webex_button">
                         Login with Webex
                       </Button>
                     )}
@@ -423,9 +406,9 @@ const handleSaveEnd = (isComplete: boolean) => {
                 </fieldset>
               </section>
             </div>
-            <br/>
-            <div className="settings-container" style={{ display: 'flex', gap: '20px' }}>
-              <div className="box" style={{ flex: 1 }}>
+            <br />
+            <div className="settings-container" style={{display: 'flex', gap: '20px'}}>
+              <div className="box" style={{flex: 1}}>
                 <section className="section-box">
                   <fieldset className="fieldset">
                     <legend className="legend-box">&nbsp;Select Widgets to Show&nbsp;</legend>
@@ -469,8 +452,8 @@ const handleSaveEnd = (isComplete: boolean) => {
                   </fieldset>
                 </section>
               </div>
-              
-              <div className="box" style={{ flex: 1 }}>
+
+              <div className="box" style={{flex: 1}}>
                 <section className="section-box">
                   <fieldset className="fieldset">
                     <legend className="legend-box">&nbsp;Sample App Toggles and Operations&nbsp;</legend>
@@ -487,7 +470,7 @@ const handleSaveEnd = (isComplete: boolean) => {
                       }}
                     />
                     <Checkbox
-                      data-testid="show-agent-profile-checkbox"
+                      data-testid="samples:show-agent-profile-checkbox"
                       checked={showAgentProfile}
                       aria-label="theme checkbox"
                       id="theme-checkbox"
@@ -498,19 +481,25 @@ const handleSaveEnd = (isComplete: boolean) => {
                       }}
                     />
                     {store.isAgentLoggedIn && (
-                      <Button id="logoutAgent" onClick={stationLogout} color="positive" className='stationLogoutButtonClass' data-testid="station-logout-button"> 
+                      <Button
+                        id="logoutAgent"
+                        onClick={stationLogout}
+                        color="positive"
+                        className="stationLogoutButtonClass"
+                        data-testid="samples:station-logout-button"
+                      >
                         Station Logout
                       </Button>
                     )}
                   </fieldset>
                 </section>
-                <br/>
+                <br />
                 <section className="section-box">
                   <fieldset className="fieldset">
                     <legend className="legend-box">&nbsp;SDK Toggles&nbsp;</legend>
                     <label style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
                       <input
-                        data-testid="multi-login-enable-checkbox"
+                        data-testid="samples:multi-login-enable-checkbox"
                         type="checkbox"
                         id="multiLoginFlag"
                         name="multiLoginFlag"
@@ -531,8 +520,8 @@ const handleSaveEnd = (isComplete: boolean) => {
                             style={{color: 'var(--mds-color-theme-text-error-normal)', marginBottom: '10px'}}
                           >
                             <strong>Note:</strong> The "Enable Multi Login" option must be set before initializing the
-                            SDK. Changes to this setting after SDK initialization will not take effect. Please ensure you
-                            configure this option before clicking the "Init Widgets" button.
+                            SDK. Changes to this setting after SDK initialization will not take effect. Please ensure
+                            you configure this option before clicking the "Init Widgets" button.
                           </div>
                         </Text>
                       </PopoverNext>
@@ -550,7 +539,7 @@ const handleSaveEnd = (isComplete: boolean) => {
                     setIsSdkReady(true);
                   });
                 }}
-                data-testid="init-widgets-button"
+                data-testid="samples:init-widgets-button"
               >
                 Init Widgets
               </Button>
@@ -639,7 +628,12 @@ const handleSaveEnd = (isComplete: boolean) => {
                       <fieldset className="fieldset">
                         <legend className="legend-box">Station Login</legend>
                         <div className="station-login">
-                          <StationLogin onLogin={onLogin} onLogout={onLogout} onCCSignOut={onCCSignOut} profileMode={false} />
+                          <StationLogin
+                            onLogin={onLogin}
+                            onLogout={onLogout}
+                            onCCSignOut={onCCSignOut}
+                            profileMode={false}
+                          />
                         </div>
                       </fieldset>
                     </section>
@@ -651,13 +645,14 @@ const handleSaveEnd = (isComplete: boolean) => {
                       <fieldset className="fieldset">
                         <legend className="legend-box">Station Login (Profile Mode)</legend>
                         <div className="station-login">
-                          <StationLogin 
-                            onLogin={onLogin} 
-                            onLogout={onLogout} 
-                            onCCSignOut={onCCSignOut} 
-                            profileMode={true} 
+                          <StationLogin
+                            onLogin={onLogin}
+                            onLogout={onLogout}
+                            onCCSignOut={onCCSignOut}
+                            profileMode={true}
                             onSaveStart={handleSaveStart}
-                            onSaveEnd={handleSaveEnd} />
+                            onSaveEnd={handleSaveEnd}
+                          />
                         </div>
                       </fieldset>
                     </section>
@@ -680,7 +675,12 @@ const handleSaveEnd = (isComplete: boolean) => {
                         <section className="section-box">
                           <fieldset className="fieldset">
                             <legend className="legend-box">Call Control</legend>
-                            <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapUp={onWrapUp} onRecordingToggle={onRecordingToggle} />
+                            <CallControl
+                              onHoldResume={onHoldResume}
+                              onEnd={onEnd}
+                              onWrapUp={onWrapUp}
+                              onRecordingToggle={onRecordingToggle}
+                            />
                           </fieldset>
                         </section>
                       </div>
@@ -743,7 +743,11 @@ const handleSaveEnd = (isComplete: boolean) => {
                         <section className="section-box">
                           <fieldset className="fieldset">
                             <legend className="legend-box">Task List</legend>
-                            <TaskList onTaskAccepted={onTaskAccepted} onTaskDeclined={onTaskDeclined} onTaskSelected={onTaskSelected} />
+                            <TaskList
+                              onTaskAccepted={onTaskAccepted}
+                              onTaskDeclined={onTaskDeclined}
+                              onTaskSelected={onTaskSelected}
+                            />
                           </fieldset>
                         </section>
                       </div>

@@ -12,7 +12,7 @@ export const oauthLogin = async (page: Page): Promise<void> => {
   await page.goto(BASE_URL);
   await page.locator('#select-base-triggerid').getByText('Access Token').click();
   await page.getByTestId('samples:login_option_oauth').getByText('Login with Webex').click();
-  await page.getByTestId('login with webex button').click();
+  await page.getByTestId('samples:login_with_webex_button').click();
   await page.getByRole('textbox', {name: 'name@example.com'}).fill(process.env.PW_USERNAME);
   await page.getByRole('link', {name: 'Sign in'}).click();
   // Check if Init Widgets button is visible after username sign in (Multi session)
@@ -28,15 +28,15 @@ export const oauthLogin = async (page: Page): Promise<void> => {
     await page.getByRole('button', {name: 'Sign in'}).click();
   }
 
-  await page.getByTestId('show-agent-profile-checkbox').click();
+  await page.getByTestId('samples:show-agent-profile-checkbox').click();
 };
 
 export const enableMultiLogin = async (page: Page): Promise<void> => {
-  await page.getByTestId('multi-login-enable-checkbox').click();
+  await page.getByTestId('samples:multi-login-enable-checkbox').click();
 };
 
 export const initialiseWidgets = async (page: Page): Promise<void> => {
-  await page.getByTestId('init-widgets-button').click();
+  await page.getByTestId('samples:init-widgets-button').click();
 
   await page.getByTestId('station-login-widget').waitFor({state: 'visible'});
 };

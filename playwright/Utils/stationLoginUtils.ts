@@ -46,10 +46,10 @@ export const dialLogin = async (page: Page): Promise<void> => {
 };
 
 export const stationLogout = async (page: Page): Promise<void> => {
-  await page.getByTestId('station-logout-button').click();
+  await page.getByTestId('samples:station-logout-button').click();
   //check if the station logout button is hidden after logouts
   const isLogoutButtonHidden = await page
-    .getByTestId('station-logout-button')
+    .getByTestId('samples:station-logout-button')
     .waitFor({state: 'hidden'})
     .then(() => true)
     .catch(() => false);
