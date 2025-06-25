@@ -50,7 +50,7 @@ export const agentRelogin = async (page: Page): Promise<void> => {
 // Helper method for multisession - creates new page and initializes widgets in same context
 export const createMultiSession = async (context: BrowserContext): Promise<Page> => {
   const multiSessionPage = await context.newPage();
-  await oauthLogin(multiSessionPage);
+  await multiSessionPage.goto(BASE_URL);
   await initialiseWidgets(multiSessionPage);
   return multiSessionPage;
 };
