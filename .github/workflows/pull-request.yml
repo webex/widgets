@@ -17,6 +17,9 @@ env:
   rid: ${{ github.run_id }}-${{ github.run_number }}
   PW_USERNAME: ${{ secrets.PW_USERNAME }}
   PW_PASSWORD: ${{ secrets.PW_PASSWORD }}
+  PW_EXTENSION_NUMBER: ${{ secrets.PW_EXTENSION_NUMBER }}
+  PW_DIAL_NUMBER: ${{ secrets.PW_DIAL_NUMBER }}
+
 
 jobs:
   validate:
