@@ -9,6 +9,20 @@ import ConsultTransferPopoverComponent from './CallControlCustom/consult-transfe
 import AutoWrapupTimer from '../AutoWrapupTimer/AutoWrapupTimer';
 import type {MEDIA_CHANNEL as MediaChannelType} from '../task.types';
 import {getMediaTypeInfo} from '../../../utils';
+import {
+  RESUME_CALL,
+  HOLD_CALL,
+  CONSULT_AGENT,
+  TRANSFER,
+  PAUSE_RECORDING,
+  RESUME_RECORDING,
+  END,
+  WRAP_UP,
+  WRAP_UP_INTERACTION,
+  WRAP_UP_REASON,
+  SELECT,
+  SUBMIT_WRAP_UP,
+} from '../constants';
 
 function CallControlComponent(props: CallControlComponentProps) {
   const [selectedWrapupReason, setSelectedWrapupReason] = useState<string | null>(null);
@@ -146,7 +160,7 @@ function CallControlComponent(props: CallControlComponentProps) {
       id: 'hold',
       icon: isHeld ? 'play-bold' : 'pause-bold',
       onClick: () => handletoggleHold(),
-      tooltip: isHeld ? 'Resume the call' : 'Hold the call',
+      tooltip: isHeld ? RESUME_CALL : HOLD_CALL,
       className: 'call-control-button',
       disabled: false,
       isVisible: controlVisibility.holdResume,
@@ -154,7 +168,7 @@ function CallControlComponent(props: CallControlComponentProps) {
     {
       id: 'consult',
       icon: 'headset-bold',
-      tooltip: 'Consult with another agent',
+      tooltip: CONSULT_AGENT,
       className: 'call-control-button',
       disabled: false,
       menuType: 'Consult',
@@ -163,7 +177,7 @@ function CallControlComponent(props: CallControlComponentProps) {
     {
       id: 'transfer',
       icon: 'next-bold',
-      tooltip: `Transfer ${currentMediaType.labelName}`,
+      tooltip: `${TRANSFER} ${currentMediaType.labelName}`,
       className: 'call-control-button',
       disabled: false,
       menuType: 'Transfer',
@@ -173,7 +187,7 @@ function CallControlComponent(props: CallControlComponentProps) {
       id: 'record',
       icon: isRecording ? 'record-paused-bold' : 'record-bold',
       onClick: () => toggleRecording(),
-      tooltip: isRecording ? 'Pause Recording' : 'Resume Recording',
+      tooltip: isRecording ? PAUSE_RECORDING : RESUME_RECORDING,
       className: 'call-control-button',
       disabled: false,
       isVisible: controlVisibility.pauseResumeRecording,
@@ -182,7 +196,7 @@ function CallControlComponent(props: CallControlComponentProps) {
       id: 'end',
       icon: 'cancel-regular',
       onClick: endCall,
-      tooltip: `End ${currentMediaType.labelName}`,
+      tooltip: `${END} ${currentMediaType.labelName}`,
       className: 'call-control-button-cancel',
       disabled: isHeld,
       isVisible: controlVisibility.end,
@@ -324,7 +338,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                   type="button"
                   role="button"
                 >
-                  Wrap up
+                  {WRAP_UP}
                 </Button>
               }
               variant="medium"
@@ -341,10 +355,10 @@ function CallControlComponent(props: CallControlComponentProps) {
               )}
 
               <Text className="wrapup-header" tagName={'small'} type="body-large-bold">
-                Wrap-up Interaction
+                {WRAP_UP_INTERACTION}
               </Text>
               <Text className="wrapup-header" tagName={'small'} type="body-secondary">
-                Wrap-up reason
+                {WRAP_UP_REASON}
               </Text>
               <SelectNext
                 aria-label="wrapup-reason"
@@ -355,7 +369,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                 }}
                 items={wrapupCodes}
                 showBorder={false}
-                placeholder="Select"
+                placeholder={SELECT}
               >
                 {(item) => (
                   <Item key={item.id} textValue={item.name}>
@@ -372,7 +386,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                 disabled={selectedWrapupId && selectedWrapupReason ? false : true}
                 aria-label="Submit wrap-up"
               >
-                Submit & Wrap up
+                {SUBMIT_WRAP_UP}
               </ButtonPill>
             </PopoverNext>
           </div>

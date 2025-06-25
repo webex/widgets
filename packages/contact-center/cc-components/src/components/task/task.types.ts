@@ -518,3 +518,9 @@ export type MediaInfo = {
   labelName: string;
   isBrandVisual: boolean;
 };
+
+export interface AutoWrapupTimerProps {
+  secondsUntilAutoWrapup: number;
+  allowCancelAutoWrapup?: boolean;
+  handleCancelWrapup: () => void;
+}

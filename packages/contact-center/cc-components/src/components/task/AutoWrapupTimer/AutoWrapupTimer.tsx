@@ -1,12 +1,8 @@
 import React from 'react';
 import {Button, Icon, Text, ListItem} from '@momentum-design/components/dist/react';
 import './AutoWrapupTimer.css';
-
-interface AutoWrapupTimerProps {
-  secondsUntilAutoWrapup: number;
-  allowCancelAutoWrapup?: boolean;
-  handleCancelWrapup: () => void;
-}
+import {AutoWrapupTimerProps} from '../task.types';
+import {UNTIL_AUTO_WRAPUP, CANCEL} from '../constants';
 
 const AutoWrapupTimer: React.FC<AutoWrapupTimerProps> = ({
   secondsUntilAutoWrapup,
@@ -32,11 +28,11 @@ const AutoWrapupTimer: React.FC<AutoWrapupTimerProps> = ({
             .padStart(2, '0')}:${(secondsUntilAutoWrapup % 60).toString().padStart(2, '0')}`}
         </Text>
         <Text slot="leading-controls" type="body-large-regular">
-          Until auto wrap-up
+          {UNTIL_AUTO_WRAPUP}
         </Text>
         {allowCancelAutoWrapup && (
           <Button slot="trailing-controls" variant="secondary" onClick={handleCancelWrapup}>
-            Cancel
+            {CANCEL}
           </Button>
         )}
       </ListItem>
