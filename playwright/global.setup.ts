@@ -11,7 +11,7 @@ setup('OAuth', async ({browser}) => {
   await page.goto(BASE_URL);
   await page.locator('#select-base-triggerid').getByText('Access Token').click();
   await page.getByTestId('samples:login_option_oauth').getByText('Login with Webex').click();
-  await page.getByTestId('login with webex button').click();
+  await page.getByTestId('samples:login_with_webex_button').click();
   await page.getByRole('textbox', {name: 'name@example.com'}).fill(process.env.PW_USERNAME);
   await page.getByRole('link', {name: 'Sign in'}).click();
   // Check if Init Widgets button is visible after username sign in (Multi session)

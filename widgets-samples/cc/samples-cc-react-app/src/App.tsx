@@ -420,6 +420,7 @@ const onTaskDeclined = (task,reason) => {
                     )}
                     {loginType === 'oauth' && (
                       <Button
+                        data-testid="samples:login_with_webex_button"
                         onClick={doOAuthLogin}
                         variant="primary"
                       >
