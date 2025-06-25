@@ -223,5 +223,6 @@ export const useUserState = ({
     elapsedTime,
     lastIdleStateChangeElapsedTime,
     currentState,
+    onStateChange,
   };
 };

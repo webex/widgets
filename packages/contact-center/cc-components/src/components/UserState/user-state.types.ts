@@ -25,11 +25,6 @@ export interface IUserState {
   isSettingAgentStatus: boolean;
 
   /**
-   * The error message to display
-   */
-  errorMessage: string;
-
-  /**
    * The duration of the current user state
    */
   elapsedTime: number;
@@ -53,13 +48,6 @@ export interface IUserState {
    * The preferred theme
    */
   currentTheme: string;
-
-  /**
-   * Function to handle state change
-   * @param state The state to change to
-   * @returns void
-   */
-  onStateChange: (state: string) => void;
 
   /**
    * Logger instance

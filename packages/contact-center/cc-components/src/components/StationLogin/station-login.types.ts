@@ -199,11 +199,6 @@ export interface IStationLoginProps {
    * The selected team ID for login
    */
   selectedTeamId: string;
-
-  /**
-   * The selected option for login type (e.g., 'Extension', 'Agent DN', etc.)
-   */
-  selectedOption: string;
 }
 
 export interface LoginOptionsState {
@@ -245,5 +240,4 @@ export type StationLoginComponentProps = Pick<
   | 'setDialNumberValue'
   | 'setSelectedTeamId'
   | 'selectedTeamId'
-  | 'selectedOption'
 >;

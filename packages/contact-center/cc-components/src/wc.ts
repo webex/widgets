@@ -13,13 +13,11 @@ const WebUserState = r2wc(UserStateComponent, {
     idleCodes: 'json',
     setAgentStatus: 'function',
     isSettingAgentStatus: 'boolean',
-    errorMessage: 'string',
     elapsedTime: 'number',
     lastIdleStateChangeElapsedTime: 'number',
     currentState: 'string',
     customState: 'json',
     currentTheme: 'string',
-    onStateChange: 'function',
     logger: 'function',
   },
 });

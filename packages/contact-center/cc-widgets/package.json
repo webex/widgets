@@ -3,6 +3,7 @@
   "description": "Webex Contact Center Widgets",
   "version": "1.28.0-ccwidgets.78",
   "main": "dist/index.js",
+  "types": "dist/types/index.d.ts",
   "publishConfig": {
     "access": "public"
   },
