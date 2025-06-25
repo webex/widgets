@@ -2,9 +2,8 @@ import React, {useEffect, useState} from 'react';
 
 import {CallControlComponentProps, DestinationType, CallControlMenuType} from '../task.types';
 import './call-control.styles.scss';
-import {PopoverNext, SelectNext, TooltipNext, Text, ButtonCircle, ButtonPill} from '@momentum-ui/react-collaboration';
-import {Item} from '@react-stately/collections';
-import {Icon, Button} from '@momentum-design/components/dist/react';
+import {PopoverNext, TooltipNext, Text, ButtonCircle} from '@momentum-ui/react-collaboration';
+import {Icon, Button, Select, Option} from '@momentum-design/components/dist/react';
 import ConsultTransferPopoverComponent from './CallControlCustom/consult-transfer-popover';
 import AutoWrapupTimer from '../AutoWrapupTimer/AutoWrapupTimer';
 import type {MEDIA_CHANNEL as MediaChannelType} from '../task.types';
@@ -357,37 +356,47 @@ function CallControlComponent(props: CallControlComponentProps) {
               <Text className="wrapup-header" tagName={'small'} type="body-large-bold">
                 {WRAP_UP_INTERACTION}
               </Text>
-              <Text className="wrapup-header" tagName={'small'} type="body-secondary">
-                {WRAP_UP_REASON}
-              </Text>
-              <SelectNext
-                aria-label="wrapup-reason"
+              <Select
+                label={WRAP_UP_REASON}
+                help-text-type=""
+                height="auto"
+                data-aria-label="wrapup-reason"
+                toggletip-text=""
+                toggletip-placement=""
+                info-icon-aria-label=""
+                name=""
                 className="wrapup-select"
-                onSelectionChange={(key) => {
+                placeholder={SELECT}
+                onChange={(event: CustomEvent) => {
+                  const key = event.detail.value;
                   const selectedItem = wrapupCodes?.find((code) => code.id === key);
                   handleWrapupChange(selectedItem.name, selectedItem.id);
                 }}
-                items={wrapupCodes}
-                showBorder={false}
-                placeholder={SELECT}
               >
-                {(item) => (
-                  <Item key={item.id} textValue={item.name}>
-                    <Text className="wrapup-name" tagName={'small'}>
-                      {item.name}
-                    </Text>
-                  </Item>
-                )}
-              </SelectNext>
-              <Icon className="wrapup-select-arrow-icon" name="arrow-down-bold" title="" />
-              <ButtonPill
+                {wrapupCodes?.map((code) => (
+                  <Option key={code.id} value={code.id}>
+                    {code.name}
+                  </Option>
+                ))}
+              </Select>
+              <Button
+                onClick={handleWrapupCall}
+                variant="primary"
+                className="submit-wrapup-button"
+                data-testid="submit-wrapup-button"
+                aria-label="Submit wrap-up"
+                disabled={selectedWrapupId && selectedWrapupReason ? false : true}
+              >
+                {SUBMIT_WRAP_UP}
+              </Button>
+              {/* <ButtonPill
                 className="submit-wrapup-button"
                 onPress={handleWrapupCall}
                 disabled={selectedWrapupId && selectedWrapupReason ? false : true}
                 aria-label="Submit wrap-up"
               >
                 {SUBMIT_WRAP_UP}
-              </ButtonPill>
+              </ButtonPill> */}
             </PopoverNext>
           </div>
         )}

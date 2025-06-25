@@ -22,14 +22,16 @@ const AutoWrapupTimer: React.FC<AutoWrapupTimerProps> = ({
           name={isUrgent ? 'alert-active-bold' : 'recents-bold'}
           size={1.25}
         ></Icon>
-        <Text slot="leading-controls" type="body-large-bold">
-          {`${Math.floor(secondsUntilAutoWrapup / 60)
-            .toString()
-            .padStart(2, '0')}:${(secondsUntilAutoWrapup % 60).toString().padStart(2, '0')}`}
-        </Text>
-        <Text slot="leading-controls" type="body-large-regular">
-          {UNTIL_AUTO_WRAPUP}
-        </Text>
+        <div slot="leading-controls" className="wrapup-timer-label">
+          <Text slot="leading-controls" type="body-large-bold">
+            {`${Math.floor(secondsUntilAutoWrapup / 60)
+              .toString()
+              .padStart(2, '0')}:${(secondsUntilAutoWrapup % 60).toString().padStart(2, '0')}`}
+          </Text>
+          <Text slot="leading-controls" type="body-large-regular">
+            {UNTIL_AUTO_WRAPUP}
+          </Text>
+        </div>
         {allowCancelAutoWrapup && (
           <Button slot="trailing-controls" variant="secondary" onClick={handleCancelWrapup}>
             {CANCEL}

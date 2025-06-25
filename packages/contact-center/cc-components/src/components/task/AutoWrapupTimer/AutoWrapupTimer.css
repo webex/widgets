@@ -17,3 +17,9 @@
   --mdc-listitem-default-background-color: var(--mds-color-theme-background-alert-error-normal);
   --mdc-listitem-background-color-hover: var(--mds-color-theme-background-alert-error-hover);
 }
+.wrapup-timer-label {
+  display: flex;
+  flex-direction: row;
+  align-items: left;
+  gap: 0.3rem;
+}
