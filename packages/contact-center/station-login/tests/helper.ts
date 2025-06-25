@@ -34,6 +34,7 @@ jest.mock('@webex/cc-store', () => {
 const ccMock = {
   stationLogin: jest.fn(),
   stationLogout: jest.fn(),
+  deregister: jest.fn(),
   on: jest.fn(),
   off: jest.fn(),
 };
@@ -442,7 +443,7 @@ describe('useStationLogin Hook', () => {
       expect(setShowMultipleLoginAlertSpy).toHaveBeenCalledWith(false);
       expect(registerCCSpy).toHaveBeenCalled();
       expect(logger.log).toHaveBeenCalledWith('CC-Widgets: Agent Relogin Success', {
-        module: 'widget-station-login#station-login/helper.ts',
+        module: 'widget-station-login#helper.ts',
         method: 'handleContinue',
       });
     });
@@ -463,7 +464,7 @@ describe('useStationLogin Hook', () => {
       expect(setShowMultipleLoginAlertSpy).toHaveBeenCalledWith(false);
       expect(registerCCSpy).toHaveBeenCalled();
       expect(logger.error).toHaveBeenCalledWith('Agent Relogin Failed', {
-        module: 'widget-station-login#station-login/helper.ts',
+        module: 'widget-station-login#helper.ts',
         method: 'handleContinue',
       });
     });
@@ -487,7 +488,7 @@ describe('useStationLogin Hook', () => {
       expect(logger.error).toHaveBeenCalledWith(
         'CC-Widgets: Error handling agent multi login continue: Error: Relogin failed',
         {
-          module: 'widget-station-login#station-login/index.tsx',
+          module: 'widget-station-login#helper.ts',
           method: 'handleContinue',
         }
       );
@@ -554,6 +555,7 @@ describe('useStationLogin Hook', () => {
       expect(loginCb).toHaveBeenCalled();
     });
   });
+
   it('should not save if isLoginOptionsChanged is false', () => {
     const cc = {updateAgentProfile: jest.fn()};
     const {result} = renderHook(() =>
@@ -575,12 +577,13 @@ describe('useStationLogin Hook', () => {
     expect(logger.log).toHaveBeenCalledWith(
       'No changes detected in login options.',
       expect.objectContaining({
-        module: 'widget-station-login#station-login/helper.ts',
+        module: 'widget-station-login#helper.ts',
         method: 'saveLoginOptions',
       })
     );
     expect(cc.updateAgentProfile).not.toHaveBeenCalled();
   });
+
   it('should call updateAgentProfile and update originalLoginOptions on save when changed', async () => {
     const cc = {updateAgentProfile: jest.fn().mockResolvedValue({})};
     const {result} = renderHook(() =>
@@ -615,7 +618,7 @@ describe('useStationLogin Hook', () => {
     expect(logger.log).toHaveBeenCalledWith(
       'Saving login options:',
       expect.objectContaining({
-        module: 'widget-station-login#station-login/helper.ts',
+        module: 'widget-station-login#helper.ts',
         method: 'saveLoginOptions',
         original: expect.any(Object),
         updated: expect.any(Object),
@@ -626,6 +629,7 @@ describe('useStationLogin Hook', () => {
     expect(result.current.originalLoginOptions).toEqual(result.current.currentLoginOptions);
     expect(result.current.isLoginOptionsChanged).toBe(false);
   });
+
   it('should handle updateAgentProfile errors', async () => {
     const cc = {updateAgentProfile: jest.fn().mockRejectedValue(new Error('fail'))};
     const {result} = renderHook(() =>
@@ -655,11 +659,12 @@ describe('useStationLogin Hook', () => {
       'Failed to update agent device type',
       expect.any(Error),
       expect.objectContaining({
-        module: 'widget-station-login#station-login/helper.ts',
+        module: 'widget-station-login#helper.ts',
         method: 'saveLoginOptions',
       })
     );
   });
+
   it('should call updateAgentProfile with no dialNumber when deviceType is BROWSER', async () => {
     const cc = {updateAgentProfile: jest.fn().mockResolvedValue({})};
     const {result} = renderHook(() =>
@@ -693,11 +698,135 @@ describe('useStationLogin Hook', () => {
     expect(logger.log).toHaveBeenCalledWith(
       'Saving login options:',
       expect.objectContaining({
-        module: 'widget-station-login#station-login/helper.ts',
+        module: 'widget-station-login#helper.ts',
         method: 'saveLoginOptions',
         original: expect.any(Object),
         updated: expect.any(Object),
       })
     );
+  });
+
+  describe('#onCCSignOut', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      ccMock.stationLogout.mockClear();
+      ccMock.deregister.mockClear();
+    });
+
+    it('should call stationLogout when doStationLogout is not passed', async () => {
+      const onCCSignOut = jest.fn();
+      store.setIsAgentLoggedIn(true);
+      ccMock.stationLogout.mockResolvedValue({});
+      const {result} = renderHook(() =>
+        useStationLogin({
+          ...baseStationLoginProps,
+          onLogin: jest.fn(),
+          onLogout: jest.fn(),
+          onCCSignOut,
+        })
+      );
+
+      await act(async () => {
+        await result.current.onCCSignOut();
+      });
+
+      await waitFor(() => {
+        expect(ccMock.stationLogout).toHaveBeenCalledWith({logoutReason: 'User requested logout'});
+        expect(ccMock.deregister).toHaveBeenCalled();
+        expect(onCCSignOut).toHaveBeenCalled();
+      });
+    });
+
+    it('should not call stationLogout if doStationLogout is false', async () => {
+      const doStationLogout = false;
+      const onCCSignOut = jest.fn();
+      store.setIsAgentLoggedIn(true);
+      const {result} = renderHook(() =>
+        useStationLogin({
+          ...baseStationLoginProps,
+          doStationLogout,
+          onLogin: jest.fn(),
+          onLogout: jest.fn(),
+          onCCSignOut,
+        })
+      );
+
+      await act(async () => {
+        await result.current.onCCSignOut();
+      });
+
+      await waitFor(() => {
+        expect(ccMock.stationLogout).not.toHaveBeenCalled();
+        expect(ccMock.deregister).not.toHaveBeenCalled();
+        expect(onCCSignOut).toHaveBeenCalled();
+      });
+    });
+
+    it('should handle error if stationLogout fails in onCCSignOut', async () => {
+      const onCCSignOut = jest.fn();
+      store.setIsAgentLoggedIn(true);
+      const error = new Error('Logout failed');
+      ccMock.stationLogout.mockRejectedValue(error);
+      const {result} = renderHook(() =>
+        useStationLogin({
+          ...baseStationLoginProps,
+          doStationLogout: true,
+          onLogin: jest.fn(),
+          onLogout: jest.fn(),
+          onCCSignOut,
+        })
+      );
+
+      await act(async () => {
+        if (result.current.onCCSignOut) {
+          await result.current.onCCSignOut();
+        }
+      });
+
+      await waitFor(() => {
+        expect(ccMock.stationLogout).toHaveBeenCalledWith({logoutReason: 'User requested logout'});
+        // Only check the error message and direct object equality for context
+        expect(logger.error.mock.calls[0][0]).toBe('CC-Widgets: Error during station logout: Error: Logout failed');
+        expect(logger.error.mock.calls[0][1]).toEqual({
+          module: 'widget-station-login#helper.ts',
+          method: 'handleCCSignOut',
+        });
+        expect(onCCSignOut).toHaveBeenCalled();
+      });
+    });
+
+    it('should handle error if deregister fails in onCCSignOut', async () => {
+      const onCCSignOut = jest.fn();
+      store.setIsAgentLoggedIn(true);
+      ccMock.stationLogout.mockResolvedValue({});
+      const error = new Error('Deregister failed');
+      ccMock.deregister.mockRejectedValue(error);
+      const {result} = renderHook(() =>
+        useStationLogin({
+          ...baseStationLoginProps,
+          doStationLogout: true,
+          onLogin: jest.fn(),
+          onLogout: jest.fn(),
+          onCCSignOut,
+        })
+      );
+
+      await act(async () => {
+        if (result.current.onCCSignOut) {
+          await result.current.onCCSignOut();
+        }
+      });
+
+      await waitFor(() => {
+        expect(ccMock.stationLogout).toHaveBeenCalledWith({logoutReason: 'User requested logout'});
+        expect(ccMock.deregister).toHaveBeenCalled();
+        expect(logger.error.mock.calls[0][0]).toBe('CC-Widgets: Error during station logout: Error: Deregister failed');
+        expect(logger.error.mock.calls[0][1]).toEqual({
+          module: 'widget-station-login#helper.ts',
+          method: 'handleCCSignOut',
+        });
+        expect(onCCSignOut).toHaveBeenCalled();
+      });
+    });
   });
 });

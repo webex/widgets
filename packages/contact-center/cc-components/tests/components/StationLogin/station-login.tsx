@@ -123,6 +123,7 @@ describe('Station Login Component', () => {
       expect(ccSignOutModal).toHaveTextContent(StationLoginLabels.CC_SIGN_OUT);
       expect(ccSignOutModal).toHaveTextContent(StationLoginLabels.CC_SIGN_OUT_CONFIRM);
       expect(ccSignOutModal).toBeInTheDocument();
+      expect(ccSignOutModal).toHaveAttribute('class', 'dialog-modal');
 
       // Check Text components in cc-logout-modal
       const ccSignOutModalTitle = ccSignOutModal.querySelector('mdc-text[tagname="h2"]');
@@ -493,7 +494,7 @@ describe('Station Login Component', () => {
       );
     });
 
-    describe('SignOut Modal Popup', () => {
+    describe('SignOut Modal Popup and handleCCSignoutKeyDown', () => {
       it('show signOut modal when onCCSignOut is present and cancel is clicked', async () => {
         const mockSignOutModalRef = {current: null};
         mockCreateStationLoginRefs.mockImplementation(() => ({
@@ -530,7 +531,7 @@ describe('Station Login Component', () => {
         expect(confirmSignOutButton).toHaveTextContent(StationLoginLabels.SIGN_OUT);
 
         fireEvent.click(confirmSignOutButton);
-        expect(mockContinueClicked).toHaveBeenCalledWith(mockSignOutModalRef, mockSignOut);
+        expect(mockContinueClicked).toHaveBeenCalledWith(mockSignOutModalRef, mockSignOut, expect.any(Function));
       });
 
       it('show signOut modal when onCCSignOut is present and sign out is clicked', async () => {
@@ -585,10 +586,14 @@ describe('Station Login Component', () => {
 
         const continueBtn = screen.getByTestId('ContinueButton');
         fireEvent.click(continueBtn);
-        expect(stationLoginUtils.continueClicked).toHaveBeenCalledWith(mockModal, handleContinue);
+        expect(stationLoginUtils.continueClicked).toHaveBeenCalledWith(mockModal, handleContinue, expect.any(Function));
       });
 
       it('should close sign-out modal and update state on cancel button click', async () => {
+        const mockSetShowCCSignOutModal = jest.fn();
+        const mockEvent = {key: 'Escape'} as React.KeyboardEvent<HTMLDialogElement>;
+        stationLoginUtils.handleCCSignoutKeyDown(mockEvent, mockSetShowCCSignOutModal);
+        expect(mockSetShowCCSignOutModal).toHaveBeenCalledWith(false);
         const screen = await render(<StationLoginComponent {...props} />);
         const cancelButton = screen.getByTestId('cc-cancel-button');
         fireEvent.click(cancelButton);
