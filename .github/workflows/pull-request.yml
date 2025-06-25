@@ -20,7 +20,6 @@ env:
   PW_EXTENSION_NUMBER: ${{ secrets.PW_EXTENSION_NUMBER }}
   PW_DIAL_NUMBER: ${{ secrets.PW_DIAL_NUMBER }}
 
-
 jobs:
   validate:
     name: Validate Pull Request
