@@ -175,11 +175,7 @@ describe('UserStateComponent', () => {
         render(<UserStateComponent {...defaultProps} />);
       });
 
-      expect(mockBuildDropdownItems).toHaveBeenCalledWith(
-        defaultProps.customState,
-        defaultProps.idleCodes,
-        defaultProps.currentState
-      );
+      expect(mockBuildDropdownItems).toHaveBeenCalledWith(defaultProps.customState, defaultProps.idleCodes);
     });
 
     it('should call sortDropdownItems with items from buildDropdownItems', async () => {
@@ -249,11 +245,7 @@ describe('UserStateComponent', () => {
       });
 
       expect(mockGetSelectedKey).toHaveBeenCalledWith(customState, defaultProps.currentState, defaultProps.idleCodes);
-      expect(mockBuildDropdownItems).toHaveBeenCalledWith(
-        customState,
-        defaultProps.idleCodes,
-        defaultProps.currentState
-      );
+      expect(mockBuildDropdownItems).toHaveBeenCalledWith(customState, defaultProps.idleCodes);
     });
   });
 

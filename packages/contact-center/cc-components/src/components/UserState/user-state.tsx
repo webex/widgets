@@ -32,7 +32,7 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
 
   const previousSelectableState = useMemo(() => getPreviousSelectableState(idleCodes), [idleCodes]);
   const selectedKey = getSelectedKey(customState, currentState, idleCodes);
-  const items = buildDropdownItems(customState, idleCodes, currentState);
+  const items = buildDropdownItems(customState, idleCodes);
   const sortedItems = sortDropdownItems(items);
 
   return (
