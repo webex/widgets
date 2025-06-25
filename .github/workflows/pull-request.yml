@@ -15,8 +15,8 @@ concurrency:
 
 env:
   rid: ${{ github.run_id }}-${{ github.run_number }}
-  PLAYWRIGHT_USERNAME: ${{ secrets.PLAYWRIGHT_USERNAME }}
-  PLAYWRIGHT_PASSWORD: ${{ secrets.PLAYWRIGHT_PASSWORD }}
+  PW_USERNAME: ${{ secrets.PW_USERNAME }}
+  PW_PASSWORD: ${{ secrets.PW_PASSWORD }}
 
 jobs:
   validate:
