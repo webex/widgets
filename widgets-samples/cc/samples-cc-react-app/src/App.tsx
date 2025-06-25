@@ -445,7 +445,6 @@ const onTaskDeclined = (task,reason) => {
                               name={widget}
                               checked={selectedWidgets[widget]}
                               onChange={handleCheckboxChange}
-                              data-testid={`samples:widget-checkbox-${widget}`}
                             />
                             &nbsp;
                             {widget.charAt(0).toUpperCase() + widget.slice(1).replace(/([A-Z])/g, ' $1')}&nbsp;
@@ -495,7 +494,6 @@ const onTaskDeclined = (task,reason) => {
                       }}
                     />
                     <Checkbox
-                      data-testid="samples:show-agent-profile-checkbox"
                       checked={showAgentProfile}
                       aria-label="theme checkbox"
                       id="theme-checkbox"
@@ -516,7 +514,7 @@ const onTaskDeclined = (task,reason) => {
                       }}
                     />
                     {store.isAgentLoggedIn && (
-                      <Button id="logoutAgent" onClick={stationLogout} color="positive" className='stationLogoutButtonClass' data-testid="samples:station-logout-button">
+                      <Button id="logoutAgent" onClick={stationLogout} color="positive" className='stationLogoutButtonClass'>
                         Station Logout
                       </Button>
                     )}
@@ -528,7 +526,6 @@ const onTaskDeclined = (task,reason) => {
                     <legend className="legend-box">&nbsp;SDK Toggles&nbsp;</legend>
                     <label style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
                       <input
-                        data-testid="samples:multi-login-enable-checkbox"
                         type="checkbox"
                         id="multiLoginFlag"
                         name="multiLoginFlag"
@@ -568,7 +565,6 @@ const onTaskDeclined = (task,reason) => {
                     setIsSdkReady(true);
                   });
                 }}
-                data-testid="samples:init-widgets-button"
               >
                 Init Widgets
               </Button>
