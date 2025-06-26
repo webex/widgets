@@ -1469,7 +1469,27 @@ describe('useCallControl', () => {
     expect(result.current.holdTime).toEqual(0);
   });
 
-  it('should start the timer when isHeld is true', () => {
+  it('should start the timer when holdTimestamp is present in the correct media object', () => {
+    const now = Date.now();
+    const holdTimestamp = now - 5000; // 5 seconds ago
+
+    // Use the same mediaResourceId as interactionId for realism
+    const mockTaskWithHold = {
+      ...mockCurrentTask,
+      data: {
+        ...mockCurrentTask.data,
+        interaction: {
+          media: {
+            someMockInteractionId: {
+              mType: 'mainCall',
+              holdTimestamp,
+            },
+          },
+          participants: {}, // <-- Add this line
+        },
+      },
+    };
+
     const mockPostMessage = jest.fn();
     (global.Worker as jest.Mock).mockImplementation(() => ({
       postMessage: mockPostMessage,
@@ -1477,9 +1497,9 @@ describe('useCallControl', () => {
       onmessage: null,
     }));
 
-    const {result, rerender} = renderHook(() =>
+    renderHook(() =>
       useCallControl({
-        currentTask: mockCurrentTask,
+        currentTask: mockTaskWithHold,
         onHoldResume: mockOnHoldResume,
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
@@ -1489,20 +1509,30 @@ describe('useCallControl', () => {
       })
     );
 
-    act(() => {
-      // Update isHeld to true
-      result.current.setIsHeld(true);
-    });
-
-    rerender();
-
+    // Should start the worker with the correct eventTime (holdTimestamp)
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'start',
-      startTime: expect.any(Number),
+      eventTime: holdTimestamp,
     });
   });
 
-  it('should stop the timer when isHeld is false', () => {
+  it('should not start the timer when holdTimestamp is missing', () => {
+    const mockTaskNoHold = {
+      ...mockCurrentTask,
+      data: {
+        ...mockCurrentTask.data,
+        interaction: {
+          media: {
+            main: {
+              mType: 'mainCall',
+              // No holdTimestamp
+            },
+          },
+          participants: {},
+        },
+      },
+    };
+
     const mockPostMessage = jest.fn();
     (global.Worker as jest.Mock).mockImplementation(() => ({
       postMessage: mockPostMessage,
@@ -1510,9 +1540,9 @@ describe('useCallControl', () => {
       onmessage: null,
     }));
 
-    const {rerender} = renderHook(() =>
+    renderHook(() =>
       useCallControl({
-        currentTask: mockCurrentTask,
+        currentTask: mockTaskNoHold,
         onHoldResume: mockOnHoldResume,
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
@@ -1522,14 +1552,129 @@ describe('useCallControl', () => {
       })
     );
 
-    // Update isHeld to false
-    rerender();
-
-    expect(mockPostMessage).toHaveBeenCalledWith({type: 'stop'});
+    // Should not start the worker
+    expect(mockPostMessage).not.toHaveBeenCalledWith(expect.objectContaining({type: 'start'}));
   });
 
-  it('should update holdTime when the worker sends elapsedTime', () => {
+  it('should reset holdTime to 0 when holdTimestamp is removed', () => {
+    const now = Date.now();
+    const holdTimestamp = now - 5000; // 5 seconds ago
+
+    const mockTaskWithHold = {
+      ...mockCurrentTask,
+      data: {
+        ...mockCurrentTask.data,
+        interaction: {
+          media: {
+            main: {
+              mType: 'mainCall',
+              holdTimestamp,
+            },
+          },
+          participants: {},
+        },
+      },
+    };
+
+    const {result, rerender} = renderHook(
+      ({task}) =>
+        useCallControl({
+          currentTask: task,
+          onHoldResume: mockOnHoldResume,
+          onEnd: mockOnEnd,
+          onWrapUp: mockOnWrapUp,
+          logger: mockLogger,
+          featureFlags: store.featureFlags,
+          deviceType: store.deviceType,
+        }),
+      {initialProps: {task: mockTaskWithHold}}
+    );
+
+    // Simulate removing holdTimestamp
+    const mockTaskNoHold = {
+      ...mockCurrentTask,
+      data: {
+        ...mockCurrentTask.data,
+        interaction: {
+          media: {
+            main: {
+              mType: 'mainCall',
+              // holdTimestamp removed
+            },
+          },
+          participants: {},
+        },
+      },
+    };
+
+    rerender({task: mockTaskNoHold});
+    expect(result.current.holdTime).toBe(0);
+  });
+
+  it('should calculate holdTime correctly from holdTimestamp', () => {
+    const now = Date.now();
+    const holdTimestamp = now - 7000; // 7 seconds ago
+
+    const mockTaskWithHold = {
+      ...mockCurrentTask,
+      data: {
+        ...mockCurrentTask.data,
+        interaction: {
+          media: {
+            main: {
+              mType: 'mainCall',
+              holdTimestamp,
+            },
+          },
+          participants: {},
+        },
+      },
+    };
+
+    let setHoldTimeValue = 0;
+    jest.spyOn(React, 'useState').mockImplementation((init) => [init, (v) => (setHoldTimeValue = v)]);
+
+    renderHook(() =>
+      useCallControl({
+        currentTask: mockTaskWithHold,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
+      })
+    );
+
+    // The initial holdTime should be about 7 seconds
+    expect(setHoldTimeValue).toBeGreaterThanOrEqual(6);
+    expect(setHoldTimeValue).toBeLessThanOrEqual(7);
+
+    // Restore useState after this test so it doesn't affect others
+    (React.useState as unknown as {mockRestore?: () => void}).mockRestore?.();
+  });
+
+  it('should reset holdTime to 0 when the worker sends stop', async () => {
     let onmessageCallback: ((event: MessageEvent) => void) | null = null;
+
+    // Provide a valid holdTimestamp so the worker is created
+    const now = Date.now();
+    const holdTimestamp = now - 5000;
+    const mockTaskWithHold = {
+      ...mockCurrentTask,
+      data: {
+        ...mockCurrentTask.data,
+        interaction: {
+          media: {
+            someMockInteractionId: {
+              mType: 'mainCall',
+              holdTimestamp,
+            },
+          },
+          participants: {},
+        },
+      },
+    };
 
     (global.Worker as jest.Mock).mockImplementation(() => ({
       postMessage: jest.fn(),
@@ -1541,7 +1686,7 @@ describe('useCallControl', () => {
 
     const {result} = renderHook(() =>
       useCallControl({
-        currentTask: mockCurrentTask,
+        currentTask: mockTaskWithHold,
         onHoldResume: mockOnHoldResume,
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,
@@ -1551,60 +1696,40 @@ describe('useCallControl', () => {
       })
     );
 
-    // Simulate a message from the worker
-    act(() => {
-      onmessageCallback?.({
-        data: {type: 'elapsedTime', elapsedTime: 5},
-      } as MessageEvent);
-    });
-
-    expect(result.current.holdTime).toBe(5);
-  });
-
-  it('should reset holdTime to 0 when the worker sends stop', () => {
-    let onmessageCallback: ((event: MessageEvent) => void) | null = null;
-
-    (global.Worker as jest.Mock).mockImplementation(() => ({
-      postMessage: jest.fn(),
-      terminate: jest.fn(),
-      set onmessage(callback) {
-        onmessageCallback = callback;
-      },
-    }));
-
-    const {result} = renderHook(() =>
-      useCallControl({
-        currentTask: mockCurrentTask,
-        onHoldResume: mockOnHoldResume,
-        onEnd: mockOnEnd,
-        onWrapUp: mockOnWrapUp,
-        logger: mockLogger,
-        featureFlags: store.featureFlags,
-        deviceType: store.deviceType,
-      })
-    );
-
-    // Simulate a message from the worker
-    act(() => {
-      onmessageCallback?.({
-        data: {type: 'elapsedTime', elapsedTime: 5},
-      } as MessageEvent);
-    });
-
-    expect(result.current.holdTime).toBe(5);
-
-    // Simulate a stop message
+    // Simulate a stop message from the worker
     act(() => {
       onmessageCallback?.({
         data: {type: 'stop'},
       } as MessageEvent);
     });
 
-    expect(result.current.holdTime).toBe(0);
+    // Wait for holdTime to be updated to 0
+    await waitFor(() => {
+      expect(result.current.holdTime).toBe(0);
+    });
   });
 
   it('should terminate the worker on unmount', () => {
     const mockTerminate = jest.fn();
+
+    // Provide a valid holdTimestamp so the worker is created
+    const now = Date.now();
+    const holdTimestamp = now - 5000;
+    const mockTaskWithHold = {
+      ...mockCurrentTask,
+      data: {
+        ...mockCurrentTask.data,
+        interaction: {
+          media: {
+            someMockInteractionId: {
+              mType: 'mainCall',
+              holdTimestamp,
+            },
+          },
+          participants: {},
+        },
+      },
+    };
 
     (global.Worker as jest.Mock).mockImplementation(() => ({
       postMessage: jest.fn(),
@@ -1614,7 +1739,7 @@ describe('useCallControl', () => {
 
     const {unmount} = renderHook(() =>
       useCallControl({
-        currentTask: mockCurrentTask,
+        currentTask: mockTaskWithHold,
         onHoldResume: mockOnHoldResume,
         onEnd: mockOnEnd,
         onWrapUp: mockOnWrapUp,

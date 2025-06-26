@@ -11,7 +11,6 @@ import {
   ILogger,
   IWrapupCode,
   ICustomState,
-  TaskMetaData,
   AgentLoginProfile,
 } from './store.types';
 import {ITask} from '@webex/plugin-cc';
@@ -52,8 +51,6 @@ class Store implements IStore {
   isEndConsultEnabled: boolean = false;
   allowConsultToQueue: boolean = false;
   agentProfile: AgentLoginProfile = {};
-
-  taskMetaData: Record<string, TaskMetaData> = {};
 
   constructor() {
     makeAutoObservable(this, {

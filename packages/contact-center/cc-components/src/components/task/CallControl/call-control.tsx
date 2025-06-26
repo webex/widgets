@@ -154,6 +154,9 @@ function CallControlComponent(props: CallControlComponentProps) {
     currentTask.data.interaction.mediaChannel as MediaChannelType
   );
 
+  const mediaType = currentTask.data.interaction.mediaType as MediaChannelType;
+  const isTelephony = mediaType === 'telephony';
+
   const buttons = [
     {
       id: 'hold',
@@ -202,9 +205,8 @@ function CallControlComponent(props: CallControlComponentProps) {
     },
   ];
 
-  const filteredButtons = consultInitiated
-    ? buttons.filter((button) => !['hold', 'consult'].includes(button.id))
-    : buttons;
+  const filteredButtons =
+    consultInitiated && isTelephony ? buttons.filter((button) => !['hold', 'consult'].includes(button.id)) : buttons;
 
   if (!currentTask) return null;
 
@@ -220,7 +222,7 @@ function CallControlComponent(props: CallControlComponentProps) {
         autoPlay
       ></audio>
       <div className="call-control-container" data-testid="call-control-container">
-        {!consultAccepted && !controlVisibility.wrapup && (
+        {!(consultAccepted && isTelephony) && !controlVisibility.wrapup && (
           <div className="button-group">
             {filteredButtons.map((button, index) => {
               if (!button.isVisible) return null;
@@ -258,7 +260,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                           <ButtonCircle
                             className={button.className}
                             aria-label={button.tooltip}
-                            disabled={button.disabled || consultInitiated}
+                            disabled={button.disabled || (consultInitiated && isTelephony)}
                             data-testid="ButtonCircle"
                             onPress={() => handlePopoverOpen(button.menuType as CallControlMenuType)}
                           >
@@ -297,11 +299,12 @@ function CallControlComponent(props: CallControlComponentProps) {
                   triggerComponent={
                     <ButtonCircle
                       className={
-                        button.className + (button.disabled || consultInitiated ? ` ${button.className}-disabled` : '')
+                        button.className +
+                        (button.disabled || (consultInitiated && isTelephony) ? ` ${button.className}-disabled` : '')
                       }
                       data-testid="ButtonCircle"
                       onPress={button.onClick}
-                      disabled={button.disabled || consultInitiated}
+                      disabled={button.disabled || (consultInitiated && isTelephony)}
                       aria-label={button.tooltip}
                     >
                       <Icon className={button.className + '-icon'} name={button.icon} />

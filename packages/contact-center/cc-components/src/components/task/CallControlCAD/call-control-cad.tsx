@@ -56,6 +56,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
 
   const mediaChannel = currentTask.data.interaction.mediaType as MediaChannelType;
   const isSocial = mediaChannel === MediaChannelType.SOCIAL;
+  const isTelephony = mediaChannel === MediaChannelType.TELEPHONY;
   const customerName = currentTask?.data?.interaction?.callAssociatedDetails?.customerName;
   const ani = currentTask?.data?.interaction?.callAssociatedDetails?.ani;
 
@@ -119,7 +120,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
           </Text>
         </div>
       </div>
-      {(consultAccepted || consultInitiated) && !controlVisibility.wrapup && (
+      {(consultAccepted || consultInitiated) && !controlVisibility.wrapup && isTelephony && (
         <div className={`call-control-consult-container ${callControlConsultClassName || ''}`}>
           <CallControlConsultComponent
             agentName={consultAgentName}
