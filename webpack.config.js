@@ -1,5 +1,6 @@
 const webpack = require('webpack');
 const path = require('path');
+const {buffer} = require('stream/consumers');
 
 module.exports = {
   mode: process.env.NODE_ENV || 'development',
@@ -8,6 +9,7 @@ module.exports = {
     extensions: ['.ts', '.tsx', '.js', '.jsx', '.scss'],
     fallback: {
       fs: false,
+      buffer: require.resolve('buffer/'),
       process: require.resolve('process/browser'),
       crypto: require.resolve('crypto-browserify'),
       querystring: require.resolve('querystring-es3'),
@@ -16,11 +18,12 @@ module.exports = {
       vm: require.resolve('vm-browserify'),
       util: require.resolve('util/'),
       url: require.resolve('url/'),
-    }
+    },
   },
   plugins: [
     new webpack.ProvidePlugin({
       process: 'process/browser',
+      Buffer: ['buffer', 'Buffer'],
     }),
   ],
   module: {
@@ -38,12 +41,12 @@ module.exports = {
       {
         test: /\.scss$/,
         use: [
-          "style-loader",  // Injects styles into DOM
-          "css-loader",    // Turns CSS into CommonJS
-          "sass-loader"    // Compiles Sass to CSS
+          'style-loader', // Injects styles into DOM
+          'css-loader', // Turns CSS into CommonJS
+          'sass-loader', // Compiles Sass to CSS
         ],
-        exclude: /node_modules/
-      }
+        exclude: /node_modules/,
+      },
     ],
   },
 };
