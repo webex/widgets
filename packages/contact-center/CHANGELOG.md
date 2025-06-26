@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.80](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.79...v1.28.0-ccwidgets.80) (2025-06-26)
+
+
+### Bug Fixes
+
+* **call-control:** implement-holdtimer-fix ([#479](https://github.com/webex/widgets/issues/479)) ([c53bf3b](https://github.com/webex/widgets/commit/c53bf3bc4c2b3e63bd818335a2e53de783ec8dd5))
+
 # [1.28.0-ccwidgets.79](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.78...v1.28.0-ccwidgets.79) (2025-06-26)
 
 
