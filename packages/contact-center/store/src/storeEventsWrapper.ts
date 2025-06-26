@@ -15,7 +15,6 @@ import {
   ENGAGED_USERNAME,
   ContactServiceQueue,
   Profile,
-  TaskMetaData,
   AgentLoginProfile,
 } from './store.types';
 import Store from './store';
@@ -145,17 +144,10 @@ class StoreWrapper implements IStoreWrapper {
   get allowConsultToQueue() {
     return this.store.allowConsultToQueue;
   }
-  get taskMetaData() {
-    return this.store.taskMetaData;
-  }
 
   get agentProfile() {
     return this.store.agentProfile;
   }
-
-  setTaskMetaData = (taskId: string, data: TaskMetaData): void => {
-    this.store.taskMetaData[taskId] = data;
-  };
 
   setCurrentTheme = (theme: string): void => {
     this.store.currentTheme = theme;
@@ -201,20 +193,6 @@ class StoreWrapper implements IStoreWrapper {
 
   setCurrentTask = (task: ITask, isClicked: boolean = false): void => {
     runInAction(() => {
-      // Save data from the current task if it exists
-      if (this.currentTask) {
-        const interactionId = this.currentTask?.data?.interactionId;
-        this.setTaskMetaData(interactionId, {
-          consultCompleted: this.store.consultCompleted,
-          consultInitiated: this.store.consultInitiated,
-          consultAccepted: this.store.consultAccepted,
-          isQueueConsultInProgress: this.store.isQueueConsultInProgress,
-          currentConsultQueueId: this.store.currentConsultQueueId,
-          consultStartTimeStamp: this.store.consultStartTimeStamp,
-          consultOfferReceived: this.store.consultOfferReceived,
-        });
-      }
-
       // Determine if the new task is the same as the current task
       let isSameTask = false;
       if (task && this.currentTask) {
@@ -223,28 +201,6 @@ class StoreWrapper implements IStoreWrapper {
 
       // Update the current task
       this.store.currentTask = task ? Object.assign(Object.create(Object.getPrototypeOf(task)), task) : null;
-
-      // Restore data for the new task if available
-      const currentTaskMetaData = this.store.taskMetaData[task?.data?.interactionId];
-      if (currentTaskMetaData) {
-        const {
-          consultAccepted = false,
-          consultInitiated = false,
-          consultCompleted = false,
-          isQueueConsultInProgress = false,
-          currentConsultQueueId = null,
-          consultStartTimeStamp = null,
-          consultOfferReceived = false,
-        } = currentTaskMetaData;
-
-        this.setConsultAccepted(consultAccepted);
-        this.setConsultInitiated(consultInitiated);
-        this.setConsultCompleted(consultCompleted);
-        this.setIsQueueConsultInProgress(isQueueConsultInProgress);
-        this.setCurrentConsultQueueId(currentConsultQueueId);
-        this.setConsultStartTimeStamp(consultStartTimeStamp);
-        this.setConsultOfferReceived(consultOfferReceived);
-      }
 
       if (this.onTaskSelected && !isSameTask && typeof isClicked !== 'undefined') {
         this.onTaskSelected(task, isClicked);
@@ -406,6 +362,8 @@ class StoreWrapper implements IStoreWrapper {
       taskToRemove.off(TASK_EVENTS.AGENT_CONSULT_CREATED, this.handleConsultCreated);
       taskToRemove.off(TASK_EVENTS.TASK_CONSULT_QUEUE_CANCELLED, this.handleConsultQueueCancelled);
       taskToRemove.off(TASK_EVENTS.AGENT_OFFER_CONTACT, this.refreshTaskList);
+      taskToRemove.off(TASK_EVENTS.TASK_HOLD, this.refreshTaskList);
+      taskToRemove.off(TASK_EVENTS.TASK_UNHOLD, this.refreshTaskList);
       if (this.deviceType === 'BROWSER') {
         taskToRemove.off(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
         this.setCallControlAudio(null);
@@ -417,7 +375,6 @@ class StoreWrapper implements IStoreWrapper {
       this.setConsultInitiated(false);
       this.setConsultCompleted(false);
 
-      delete this.taskMetaData[taskId];
       if (this.store.currentTask?.data.interactionId === taskId) {
         this.setCurrentTask(null);
       }
@@ -439,27 +396,6 @@ class StoreWrapper implements IStoreWrapper {
       this.onTaskAssigned(task);
     }
     runInAction(() => {
-      if (this.currentTask) {
-        this.setTaskMetaData(this.currentTask.data.interactionId, {
-          consultCompleted: this.store.consultCompleted,
-          consultInitiated: this.store.consultInitiated,
-          consultAccepted: this.store.consultAccepted,
-          isQueueConsultInProgress: this.store.isQueueConsultInProgress,
-          currentConsultQueueId: this.store.currentConsultQueueId,
-          consultStartTimeStamp: this.store.consultStartTimeStamp,
-          consultOfferReceived: this.store.consultOfferReceived,
-        });
-      } else {
-        this.setTaskMetaData(task?.data?.interactionId, {
-          consultCompleted: false,
-          consultInitiated: false,
-          consultAccepted: false,
-          isQueueConsultInProgress: false,
-          currentConsultQueueId: '',
-          consultStartTimeStamp: null,
-          consultOfferReceived: false,
-        });
-      }
       if (this.consultAccepted) {
         this.setConsultAccepted(false);
         this.setConsultInitiated(false);
@@ -563,6 +499,8 @@ class StoreWrapper implements IStoreWrapper {
     task.on(TASK_EVENTS.TASK_CONSULT_ACCEPTED, this.handleConsultAccepted);
     task.on(CC_EVENTS.AGENT_OFFER_CONSULT, this.handleConsultOffer);
     task.on(TASK_EVENTS.TASK_CONSULT_END, this.handleConsultEnd);
+    task.on(TASK_EVENTS.TASK_HOLD, this.refreshTaskList);
+    task.on(TASK_EVENTS.TASK_UNHOLD, this.refreshTaskList);
 
     // In case of consulting we check if the task is already in the task list
     // If it is, we dont have to send the incoming task callback
@@ -607,6 +545,8 @@ class StoreWrapper implements IStoreWrapper {
     task.on(TASK_EVENTS.AGENT_OFFER_CONTACT, this.refreshTaskList);
     task.on(TASK_EVENTS.TASK_CONSULT_ACCEPTED, this.handleConsultAccepted);
     task.on(TASK_EVENTS.AGENT_CONSULT_CREATED, this.handleConsultCreated);
+    task.on(TASK_EVENTS.TASK_HOLD, this.refreshTaskList);
+    task.on(TASK_EVENTS.TASK_UNHOLD, this.refreshTaskList);
 
     // When we receive TASK_REJECT sdk changes the agent status
     // When we receive TASK_REJECT that means the task was not accepted by the agent and we wont need wrap up
