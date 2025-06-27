@@ -4,7 +4,7 @@ import {CallControlComponentProps, DestinationType, CallControlMenuType} from '.
 import './call-control.styles.scss';
 import {PopoverNext, SelectNext, TooltipNext, Text, ButtonCircle, ButtonPill} from '@momentum-ui/react-collaboration';
 import {Item} from '@react-stately/collections';
-import {Icon} from '@momentum-design/components/dist/react';
+import {Icon, Button} from '@momentum-design/components/dist/react';
 import ConsultTransferPopoverComponent from './CallControlCustom/consult-transfer-popover';
 import type {MEDIA_CHANNEL as MediaChannelType} from '../task.types';
 import {getMediaTypeInfo} from '../../../utils';
@@ -131,6 +131,9 @@ function CallControlComponent(props: CallControlComponentProps) {
     currentTask.data.interaction.mediaChannel as MediaChannelType
   );
 
+  const mediaType = currentTask.data.interaction.mediaType as MediaChannelType;
+  const isTelephony = mediaType === 'telephony';
+
   const buttons = [
     {
       id: 'hold',
@@ -179,9 +182,8 @@ function CallControlComponent(props: CallControlComponentProps) {
     },
   ];
 
-  const filteredButtons = consultInitiated
-    ? buttons.filter((button) => !['hold', 'consult'].includes(button.id))
-    : buttons;
+  const filteredButtons =
+    consultInitiated && isTelephony ? buttons.filter((button) => !['hold', 'consult'].includes(button.id)) : buttons;
 
   if (!currentTask) return null;
 
@@ -197,7 +199,7 @@ function CallControlComponent(props: CallControlComponentProps) {
         autoPlay
       ></audio>
       <div className="call-control-container" data-testid="call-control-container">
-        {!consultAccepted && !controlVisibility.wrapup && (
+        {!(consultAccepted && isTelephony) && !controlVisibility.wrapup && (
           <div className="button-group">
             {filteredButtons.map((button, index) => {
               if (!button.isVisible) return null;
@@ -235,7 +237,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                           <ButtonCircle
                             className={button.className}
                             aria-label={button.tooltip}
-                            disabled={button.disabled || consultInitiated}
+                            disabled={button.disabled || (consultInitiated && isTelephony)}
                             data-testid="ButtonCircle"
                             onPress={() => handlePopoverOpen(button.menuType as CallControlMenuType)}
                           >
@@ -273,10 +275,13 @@ function CallControlComponent(props: CallControlComponentProps) {
                   key={index}
                   triggerComponent={
                     <ButtonCircle
-                      className={button.className}
+                      className={
+                        button.className +
+                        (button.disabled || (consultInitiated && isTelephony) ? ` ${button.className}-disabled` : '')
+                      }
                       data-testid="ButtonCircle"
                       onPress={button.onClick}
-                      disabled={button.disabled || consultInitiated}
+                      disabled={button.disabled || (consultInitiated && isTelephony)}
                       aria-label={button.tooltip}
                     >
                       <Icon className={button.className + '-icon'} name={button.icon} />
@@ -304,10 +309,16 @@ function CallControlComponent(props: CallControlComponentProps) {
               showArrow
               trigger="click"
               triggerComponent={
-                <ButtonPill className="wrapup-button">
+                <Button
+                  size={28}
+                  color="default"
+                  variant="secondary"
+                  postfix-icon="arrow-down-bold"
+                  type="button"
+                  role="button"
+                >
                   Wrap up
-                  <Icon name="arrow-down-bold" />
-                </ButtonPill>
+                </Button>
               }
               variant="medium"
               interactive

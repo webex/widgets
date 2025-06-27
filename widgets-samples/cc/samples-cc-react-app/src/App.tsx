@@ -65,6 +65,7 @@ function App() {
   const [incomingTasks, setIncomingTasks] = useState([]);
   const [loginType, setLoginType] = useState('token');
   const [showAgentProfile, setShowAgentProfile] = useState(false);
+  const [doStationLogout, setDoStationLogout] = useState(true);
 
   const [collapsedTasks, setCollapsedTasks] = React.useState([]);
   const [showLoader, setShowLoader] = useState(false);
@@ -148,8 +149,10 @@ function App() {
     console.log('onTaskAccepted invoked for task:', task);
   };
 
-  const onTaskDeclined = (task) => {
+  const onTaskDeclined = (task, reason) => {
     console.log('onTaskDeclined invoked for task:', task);
+    setRejectedReason(reason);
+    setShowRejectedPopup(true);
   };
 
   const onTaskSelected = ({task, isClicked}) => {
@@ -241,6 +244,11 @@ function App() {
     setSelectedState('');
   };
 
+  const handlePopoverClose = () => {
+    setShowRejectedPopup(false);
+    setSelectedState('');
+  };
+
   const doOAuthLogin = () => {
     let redirectUri = `${window.location.protocol}//${window.location.host}`;
 
@@ -304,11 +312,6 @@ function App() {
   }, [currentTheme]);
 
   useEffect(() => {
-    store.setTaskRejected((reason: string) => {
-      setRejectedReason(reason);
-      setShowRejectedPopup(true);
-    });
-
     store.setIncomingTaskCb(onIncomingTaskCB);
 
     return () => {
@@ -319,6 +322,11 @@ function App() {
 
   const onStateChange = (status) => {
     console.log('onStateChange invoked', status);
+    if (!status || !status.name) return;
+    if (status.name !== 'RONA') {
+      setShowRejectedPopup(false);
+      setRejectedReason('');
+    }
   };
 
   const stationLogout = () => {
@@ -480,6 +488,16 @@ function App() {
                         setShowAgentProfile(!showAgentProfile);
                       }}
                     />
+                    <Checkbox
+                      checked={doStationLogout}
+                      aria-label="theme checkbox"
+                      id="theme-checkbox"
+                      label="Do Station Logout"
+                      // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
+                      onchange={() => {
+                        setDoStationLogout(!doStationLogout);
+                      }}
+                    />
                     {store.isAgentLoggedIn && (
                       <Button
                         id="logoutAgent"
@@ -630,6 +648,7 @@ function App() {
                             onLogout={onLogout}
                             onCCSignOut={onCCSignOut}
                             profileMode={false}
+                            doStationLogout={doStationLogout}
                           />
                         </div>
                       </fieldset>
@@ -642,14 +661,7 @@ function App() {
                       <fieldset className="fieldset">
                         <legend className="legend-box">Station Login (Profile Mode)</legend>
                         <div className="station-login">
-                          <StationLogin
-                            onLogin={onLogin}
-                            onLogout={onLogout}
-                            onCCSignOut={onCCSignOut}
-                            profileMode={true}
-                            onSaveStart={handleSaveStart}
-                            onSaveEnd={handleSaveEnd}
-                          />
+                          <StationLogin profileMode={true} onSaveStart={handleSaveStart} onSaveEnd={handleSaveEnd} />
                         </div>
                       </fieldset>
                     </section>
@@ -756,14 +768,32 @@ function App() {
             )}
             {showRejectedPopup && (
               <div className="task-rejected-popup">
-                <h2>Task Rejected</h2>
-                <p>Reason: {rejectedReason}</p>
-                <select value={selectedState} onChange={(e) => setSelectedState(e.target.value)}>
-                  <option value="">Select a state</option>
-                  <option value="Available">Available</option>
-                  <option value="Idle">Idle</option>
-                </select>
-                <Button onClick={handlePopoverSubmit} variant="primary">
+                <button className="close-btn" onClick={handlePopoverClose}>
+                  ×
+                </button>
+                <Text>
+                  <div style={{textAlign: 'center', fontSize: '1.25rem', fontWeight: 600}}>Task Rejected</div>
+                </Text>
+                <Text>
+                  <div style={{fontSize: '0.875rem', textAlign: 'center', color: 'rgb(171, 10, 21)'}}>
+                    Reason: {rejectedReason}
+                  </div>
+                </Text>
+                <Select
+                  value={selectedState}
+                  placeholder="Select a state"
+                  onChange={(e: CustomEvent) => {
+                    setSelectedState(e.detail.value);
+                  }}
+                >
+                  <Option key={1} value="Available">
+                    Available
+                  </Option>
+                  <Option key={2} value="Idle">
+                    Idle
+                  </Option>
+                </Select>
+                <Button disabled={selectedState === ''} onClick={handlePopoverSubmit} variant="primary">
                   Confirm State Change
                 </Button>
               </div>

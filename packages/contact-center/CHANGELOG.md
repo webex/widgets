@@ -1,3 +1,52 @@
+# [1.28.0-ccwidgets.80](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.79...v1.28.0-ccwidgets.80) (2025-06-26)
+
+
+### Bug Fixes
+
+* **call-control:** implement-holdtimer-fix ([#479](https://github.com/webex/widgets/issues/479)) ([c53bf3b](https://github.com/webex/widgets/commit/c53bf3bc4c2b3e63bd818335a2e53de783ec8dd5))
+
+# [1.28.0-ccwidgets.79](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.78...v1.28.0-ccwidgets.79) (2025-06-26)
+
+
+### Bug Fixes
+
+* **cc-widgets:** update the workflow for pull request by adding the required env variables ([#480](https://github.com/webex/widgets/issues/480)) ([247ca45](https://github.com/webex/widgets/commit/247ca45b8d60c8c52c318a0528cfb32c80bc6c1d))
+
+# [1.28.0-ccwidgets.78](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.77...v1.28.0-ccwidgets.78) (2025-06-24)
+
+
+### Bug Fixes
+
+* set a valid default device type on initial login ([#475](https://github.com/webex/widgets/issues/475)) ([063f1ac](https://github.com/webex/widgets/commit/063f1acdf4944b885216bee6d60f65fbe24f9b91))
+
+# [1.28.0-ccwidgets.77](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.76...v1.28.0-ccwidgets.77) (2025-06-24)
+
+
+### Bug Fixes
+
+* **station-login:** doStationLogout prop to logout on signout confirm ([#473](https://github.com/webex/widgets/issues/473)) ([a38cc5b](https://github.com/webex/widgets/commit/a38cc5b80fdc1833b1f3672bcc674c6b5b8e3ce1))
+
+# [1.28.0-ccwidgets.76](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.75...v1.28.0-ccwidgets.76) (2025-06-23)
+
+
+### Bug Fixes
+
+* **call-control:** address-bug-fixes ([#474](https://github.com/webex/widgets/issues/474)) ([14f961c](https://github.com/webex/widgets/commit/14f961c22156a03101db87fa9e84010a10faf056))
+
+# [1.28.0-ccwidgets.75](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.74...v1.28.0-ccwidgets.75) (2025-06-20)
+
+
+### Bug Fixes
+
+* **store:** incorporate task hydrate fix from SDK ([#477](https://github.com/webex/widgets/issues/477)) ([8f20022](https://github.com/webex/widgets/commit/8f2002277914afed79dbadf37de7d793210f7d71))
+
+# [1.28.0-ccwidgets.74](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.73...v1.28.0-ccwidgets.74) (2025-06-20)
+
+
+### Bug Fixes
+
+* **cc-widgets:** Resolved RONA popup issue and add close button ([#470](https://github.com/webex/widgets/issues/470)) ([1071ca1](https://github.com/webex/widgets/commit/1071ca13195cb01cf1aa2ab6d7c3c1f7282e2b2d))
+
 # [1.28.0-ccwidgets.73](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.72...v1.28.0-ccwidgets.73) (2025-06-16)
 
 

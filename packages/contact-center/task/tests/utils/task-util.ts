@@ -1,4 +1,4 @@
-import {getControlsVisibility} from '../../src/Utils/task-util';
+import {findHoldTimestamp, getControlsVisibility} from '../../src/Utils/task-util';
 describe('getControlsVisibility', () => {
   it('should show correct controls when station logis is BROWSER, all flags are enabled and media type is telehphony', () => {
     const deviceType = 'BROWSER';
@@ -87,7 +87,7 @@ describe('getControlsVisibility', () => {
     const expectedControls = {
       accept: true,
       decline: true,
-      end: false,
+      end: true,
       muteUnmute: true,
       holdResume: true,
       consult: true,
@@ -269,5 +269,60 @@ describe('getControlsVisibility', () => {
     };
 
     expect(getControlsVisibility(deviceType, featureFlags, task)).toEqual(expectedControls);
+  });
+});
+
+describe('findHoldTimestamp', () => {
+  it('returns the holdTimestamp for the correct mType', () => {
+    const interaction = {
+      media: {
+        main: {mType: 'mainCall', holdTimestamp: 123456},
+        aux: {mType: 'auxCall', holdTimestamp: 654321},
+      },
+    };
+    expect(findHoldTimestamp(interaction, 'mainCall')).toBe(123456);
+    expect(findHoldTimestamp(interaction, 'auxCall')).toBe(654321);
+  });
+
+  it('returns null if mType is not found', () => {
+    const interaction = {
+      media: {
+        main: {mType: 'mainCall', holdTimestamp: 123456},
+      },
+    };
+    expect(findHoldTimestamp(interaction, 'otherCall')).toBeNull();
+  });
+
+  it('returns null if holdTimestamp is missing', () => {
+    const interaction = {
+      media: {
+        main: {mType: 'mainCall'},
+      },
+    };
+    expect(findHoldTimestamp(interaction, 'mainCall')).toBeNull();
+  });
+
+  it('returns null if media is missing', () => {
+    const interaction = {};
+    expect(findHoldTimestamp(interaction, 'mainCall')).toBeNull();
+  });
+
+  it('returns 0 if holdTimestamp is 0', () => {
+    const interaction = {
+      media: {
+        main: {mType: 'mainCall', holdTimestamp: 0},
+      },
+    };
+    expect(findHoldTimestamp(interaction, 'mainCall')).toBe(0);
+  });
+
+  it('works with extra unknown properties', () => {
+    const interaction = {
+      media: {
+        main: {mType: 'mainCall', holdTimestamp: 42, foo: 'bar'},
+      },
+      extra: 123,
+    };
+    expect(findHoldTimestamp(interaction, 'mainCall')).toBe(42);
   });
 });

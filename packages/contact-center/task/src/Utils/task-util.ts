@@ -1,4 +1,4 @@
-import {ITask} from '@webex/plugin-cc';
+import {ITask, Interaction} from '@webex/plugin-cc';
 
 /**
  * This function determines the visibility of various controls based on the task's data.
@@ -24,7 +24,7 @@ export function getControlsVisibility(deviceType: string, featureFlags: {[key: s
       (isAgentDN && (isChat || isEmail)) ||
       (isExtension && (isChat || isEmail)),
     decline: isBrowser && webRtcEnabled && isCall,
-    end: (isEndCallEnabled && isCall) || !isCall,
+    end: isBrowser || (isEndCallEnabled && isCall) || !isCall,
     muteUnmute: isBrowser && webRtcEnabled && isCall,
 
     holdResume: isCall && ((isBrowser && webRtcEnabled) || isAgentDN || isExtension), // Applicable for all type of station login
@@ -39,4 +39,14 @@ export function getControlsVisibility(deviceType: string, featureFlags: {[key: s
   };
 
   return controls;
+}
+
+export function findHoldTimestamp(interaction: Interaction, mType = 'mainCall'): number | null {
+  if (!interaction?.media) return null;
+  for (const key in interaction.media) {
+    if (interaction.media[key].mType === mType) {
+      return interaction.media[key].holdTimestamp ?? null;
+    }
+  }
+  return null;
 }

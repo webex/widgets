@@ -11,12 +11,12 @@ import {
   ILogger,
   IWrapupCode,
   ICustomState,
-  TaskMetaData,
   AgentLoginProfile,
 } from './store.types';
 import {ITask} from '@webex/plugin-cc';
 
 import {getFeatureFlags} from './util';
+import {LoginOptions} from '../../cc-components/src/components/StationLogin/constants';
 
 class Store implements IStore {
   private static instance: Store;
@@ -51,8 +51,6 @@ class Store implements IStore {
   isEndConsultEnabled: boolean = false;
   allowConsultToQueue: boolean = false;
   agentProfile: AgentLoginProfile = {};
-
-  taskMetaData: Record<string, TaskMetaData> = {};
 
   constructor() {
     makeAutoObservable(this, {
@@ -97,11 +95,12 @@ class Store implements IStore {
         this.loginOptions = response.webRtcEnabled
           ? response.loginVoiceOptions
           : response.loginVoiceOptions.filter((option) => option !== 'BROWSER');
+        this.loginOptions.sort((a, b) => Object.keys(LoginOptions).indexOf(a) - Object.keys(LoginOptions).indexOf(b));
         this.idleCodes = response.idleCodes;
         this.agentId = response.agentId;
         this.wrapupCodes = response.wrapupCodes;
         this.isAgentLoggedIn = response.isAgentLoggedIn;
-        this.deviceType = response.deviceType ?? 'AGENT_DN';
+        this.deviceType = response.deviceType ?? this.loginOptions[0];
         this.dialNumber = response.dn;
         this.teamId = response.currentTeamId ?? '';
         this.currentState = response.lastStateAuxCodeId;

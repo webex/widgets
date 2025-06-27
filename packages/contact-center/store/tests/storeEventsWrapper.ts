@@ -413,23 +413,6 @@ describe('storeEventsWrapper', () => {
         expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, mockCb);
       });
 
-      it('should call setTaskMetaData ', () => {
-        storeWrapper['store'].taskMetaData = {};
-        const mockData = {
-          consultAccepted: true,
-          consultCompleted: false,
-          consultInitiated: false,
-          consultOfferReceived: false,
-          isQueueConsultInProgress: false,
-          currentConsultQueueId: null,
-          consultStartTimeStamp: null,
-        };
-        storeWrapper.setTaskMetaData('mockTaskId', mockData);
-        expect(storeWrapper.taskMetaData).toEqual({
-          mockTaskId: mockData,
-        });
-      });
-
       it('should return if callback is not present or task is not found', () => {
         const mockCb = jest.fn();
         expect(storeWrapper.setTaskCallback).toBeInstanceOf(Function);
@@ -517,6 +500,8 @@ describe('storeEventsWrapper', () => {
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_CONSULT_END, expect.any(Function));
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_CONSULT_QUEUE_CANCELLED, expect.any(Function));
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.AGENT_WRAPPEDUP, expect.any(Function));
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_HOLD, storeWrapper.refreshTaskList);
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_UNHOLD, storeWrapper.refreshTaskList);
     });
 
     it('should handle consulting i.e handleIncomingTask with the task already present in the taskList', () => {
@@ -694,6 +679,8 @@ describe('storeEventsWrapper', () => {
 
       expect(mockTask.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function));
       expect(mockTask.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));
+      expect(mockTask.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_HOLD, storeWrapper.refreshTaskList);
+      expect(mockTask.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_UNHOLD, storeWrapper.refreshTaskList);
 
       expect(refreshTaskListSpy).toHaveBeenCalledWith();
       expect(setCurrentTaskSpy).toHaveBeenCalledWith(null);
@@ -1129,6 +1116,8 @@ describe('storeEventsWrapper', () => {
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function));
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.AGENT_WRAPPEDUP, expect.any(Function));
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_REJECT, expect.any(Function));
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_HOLD, storeWrapper.refreshTaskList);
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_UNHOLD, storeWrapper.refreshTaskList);
 
       act(() => {
         const mockWrapupCb = mockTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.AGENT_WRAPPEDUP)[1];
@@ -1642,7 +1631,7 @@ describe('storeEventsWrapper', () => {
       storeWrapper.onTaskSelected = undefined;
     });
 
-    it('should set currentTask and save previous task metadata', () => {
+    it('should set currentTask', () => {
       // Set an initial task
       storeWrapper.setCurrentTask(mockTaskA);
       expect(storeWrapper.currentTask).toEqual(mockTaskA);
@@ -1650,44 +1639,6 @@ describe('storeEventsWrapper', () => {
       // Change to a new task, should save metadata for previous
       storeWrapper.setCurrentTask(mockTaskB);
       expect(storeWrapper.currentTask).toEqual(mockTaskB);
-      expect(storeWrapper['store'].taskMetaData['taskA']).toEqual({
-        consultCompleted: true,
-        consultInitiated: true,
-        consultAccepted: true,
-        isQueueConsultInProgress: true,
-        currentConsultQueueId: 'queue1',
-        consultStartTimeStamp: 123,
-        consultOfferReceived: true,
-      });
-    });
-
-    it('should restore metadata for new task if present', () => {
-      storeWrapper['store'].taskMetaData['taskB'] = {
-        consultCompleted: false,
-        consultInitiated: false,
-        consultAccepted: true,
-        isQueueConsultInProgress: false,
-        currentConsultQueueId: 'queueX',
-        consultStartTimeStamp: 456,
-        consultOfferReceived: false,
-      };
-      const setConsultAcceptedSpy = jest.spyOn(storeWrapper, 'setConsultAccepted');
-      const setConsultInitiatedSpy = jest.spyOn(storeWrapper, 'setConsultInitiated');
-      const setConsultCompletedSpy = jest.spyOn(storeWrapper, 'setConsultCompleted');
-      const setIsQueueConsultInProgressSpy = jest.spyOn(storeWrapper, 'setIsQueueConsultInProgress');
-      const setCurrentConsultQueueIdSpy = jest.spyOn(storeWrapper, 'setCurrentConsultQueueId');
-      const setConsultStartTimeStampSpy = jest.spyOn(storeWrapper, 'setConsultStartTimeStamp');
-      const setConsultOfferReceivedSpy = jest.spyOn(storeWrapper, 'setConsultOfferReceived');
-
-      storeWrapper.setCurrentTask(mockTaskB);
-
-      expect(setConsultAcceptedSpy).toHaveBeenCalledWith(true);
-      expect(setConsultInitiatedSpy).toHaveBeenCalledWith(false);
-      expect(setConsultCompletedSpy).toHaveBeenCalledWith(false);
-      expect(setIsQueueConsultInProgressSpy).toHaveBeenCalledWith(false);
-      expect(setCurrentConsultQueueIdSpy).toHaveBeenCalledWith('queueX');
-      expect(setConsultStartTimeStampSpy).toHaveBeenCalledWith(456);
-      expect(setConsultOfferReceivedSpy).toHaveBeenCalledWith(false);
     });
 
     it('should call onTaskSelected if task changes', () => {
