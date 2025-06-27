@@ -17,4 +17,10 @@ export const THEME_COLORS = {
   MEETING: 'rgba(0, 0, 0, 0.11)',
 };
 
+export const LOGIN_MODE = {
+  DESKTOP: 'Desktop',
+  EXTENSION: 'Extension',
+  DIAL_NUMBER: 'Dial Number',
+};
+
 export const LONG_WAIT = 40000;
