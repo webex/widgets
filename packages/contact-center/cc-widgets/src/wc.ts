@@ -37,7 +37,7 @@ const WebCallControl = r2wc(CallControl, {
   props: {
     onHoldResume: 'function',
     onEnd: 'function',
-    onWrapup: 'function',
+    onWrapUp: 'function',
     onRecordingToggle: 'function',
   },
 });
@@ -46,7 +46,7 @@ const WebCallControlCAD = r2wc(CallControlCAD, {
   props: {
     onHoldResume: 'function',
     onEnd: 'function',
-    onWrapup: 'function',
+    onWrapUp: 'function',
     onRecordingToggle: 'function',
   },
 });
