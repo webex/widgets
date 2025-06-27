@@ -1,6 +1,13 @@
 import {test, expect, Page, BrowserContext} from '@playwright/test';
-import {oauthLogin, enableMultiLogin, initialiseWidgets, agentRelogin, createMultiSession} from './Utils/initUtils';
-import {extensionLogin, stationLogout} from './Utils/stationLoginUtils';
+import {
+  enableAllWidgets,
+  enableMultiLogin,
+  initialiseWidgets,
+  agentRelogin,
+  setupMultiLoginPage,
+  loginViaAccessToken,
+} from './Utils/initUtils';
+import {stationLogout, telephonyLogin} from './Utils/stationLoginUtils';
 import {
   getCurrentState,
   changeUserState,
@@ -9,7 +16,7 @@ import {
   validateConsoleStateChange,
   checkCallbackSequence,
 } from './Utils/userStateUtils';
-import {USER_STATES, THEME_COLORS} from './constants';
+import {USER_STATES, THEME_COLORS, LOGIN_MODE} from './constants';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -26,18 +33,21 @@ test.describe('User State Widget Functionality Tests', () => {
     page = await context.newPage();
     consoleMessages = [];
     page.on('console', (msg) => consoleMessages.push(msg.text()));
-    await oauthLogin(page);
+    await loginViaAccessToken(page, 'AGENT1');
     await enableMultiLogin(page);
+    await enableAllWidgets(page);
+
     await initialiseWidgets(page);
+
     const loginButtonExists = await page
       .getByTestId('login-button')
       .isVisible()
       .catch(() => false);
     if (loginButtonExists) {
-      await extensionLogin(page);
+      await telephonyLogin(page, LOGIN_MODE.EXTENSION);
     } else {
       await stationLogout(page);
-      await extensionLogin(page);
+      await telephonyLogin(page, LOGIN_MODE.EXTENSION);
     }
     await expect(page.getByTestId('state-select')).toBeVisible();
   });
@@ -93,8 +103,6 @@ test.describe('User State Widget Functionality Tests', () => {
   });
 
   test('should verify state persistence after page reload', async () => {
-    await changeUserState(page, USER_STATES.MEETING);
-    await page.waitForTimeout(1000);
     await changeUserState(page, USER_STATES.AVAILABLE);
     await verifyCurrentState(page, USER_STATES.AVAILABLE);
     await page.waitForTimeout(3000);
@@ -114,13 +122,13 @@ test.describe('User State Widget Functionality Tests', () => {
   });
 
   test('should test multi-session synchronization', async () => {
-    const multiSessionPage = await createMultiSession(context);
+    const multiSessionPage = await setupMultiLoginPage(context);
 
-    await changeUserState(page, USER_STATES.AVAILABLE);
-    await verifyCurrentState(page, USER_STATES.AVAILABLE);
+    await changeUserState(page, USER_STATES.MEETING);
+    await verifyCurrentState(page, USER_STATES.MEETING);
     await multiSessionPage.waitForTimeout(3000);
 
-    await verifyCurrentState(multiSessionPage, USER_STATES.AVAILABLE);
+    await verifyCurrentState(multiSessionPage, USER_STATES.MEETING);
 
     await multiSessionPage.waitForTimeout(3000);
     const [timer1, timer2] = await Promise.all([getStateElapsedTime(page), getStateElapsedTime(multiSessionPage)]);
@@ -141,7 +149,6 @@ test.describe('User State Widget Functionality Tests', () => {
   });
 
   test('should test idle state transition and dual timer', async () => {
-    await changeUserState(page, USER_STATES.MEETING);
     await verifyCurrentState(page, USER_STATES.MEETING);
     await page.waitForTimeout(2000);
     consoleMessages.length = 0;

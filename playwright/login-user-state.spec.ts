@@ -23,7 +23,7 @@ test.describe('Login and User State tests', async () => {
       await expect(page.getByTestId('login-button')).toContainText('Save & Continue');
       await page.getByTestId('login-option-select').click();
       await page.getByTestId('login-option-Extension').click();
-      await page.getByTestId('dial-number-input').getByRole('textbox').fill('1234');
+      await page.getByTestId('dial-number-input').getByRole('textbox').fill('1001');
 
       await expect(page.getByTestId('login-option-select').locator('#select-base-triggerid')).toContainText(
         'Extension'
@@ -78,7 +78,7 @@ test.describe('Login and User State tests', async () => {
 
       await page.getByTestId('login-option-select').click();
       await page.getByTestId('login-option-Extension').click();
-      await page.getByTestId('dial-number-input').getByRole('textbox').fill('1234');
+      await page.getByTestId('dial-number-input').getByRole('textbox').fill('1001');
 
       await expect(page.getByTestId('login-option-select').locator('#select-base-triggerid')).toContainText(
         'Extension'
@@ -130,7 +130,7 @@ test.describe('Login and User State tests', async () => {
       await expect(page.getByTestId('login-button')).toContainText('Save & Continue');
       await page.getByTestId('login-option-select').click();
       await page.getByTestId('login-option-Extension').click();
-      await page.getByTestId('dial-number-input').getByRole('textbox').fill('1234');
+      await page.getByTestId('dial-number-input').getByRole('textbox').fill('1001');
 
       await expect(page.getByTestId('login-option-select').locator('#select-base-triggerid')).toContainText(
         'Extension'
