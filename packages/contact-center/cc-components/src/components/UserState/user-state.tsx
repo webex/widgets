@@ -1,6 +1,6 @@
 import React, {useMemo} from 'react';
 
-import {IUserState, AgentUserState} from './user-state.types';
+import {AgentUserState, UserStateComponentsProps} from './user-state.types';
 import {formatTime} from '../../utils';
 
 import './user-state.scss';
@@ -9,7 +9,7 @@ import {Item} from '@react-stately/collections';
 import {Icon, Tooltip} from '@momentum-design/components/dist/react';
 import {userStateLabels} from './constant';
 
-const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
+const UserStateComponent: React.FunctionComponent<UserStateComponentsProps> = (props) => {
   const {
     idleCodes,
     setAgentStatus,

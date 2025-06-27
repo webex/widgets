@@ -1,5 +1,6 @@
 import {useState, useEffect, useRef} from 'react';
 import store from '@webex/cc-store';
+import {UseUserStateProps} from './user-state.types';
 
 export const useUserState = ({
   idleCodes,
@@ -11,7 +12,7 @@ export const useUserState = ({
   logger,
   onStateChange,
   lastIdleCodeChangeTimestamp,
-}) => {
+}: UseUserStateProps) => {
   const [isSettingAgentStatus, setIsSettingAgentStatus] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [lastIdleStateChangeElapsedTime, setLastIdleStateChangeElapsedTime] = useState(0);

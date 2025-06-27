@@ -1,4 +1,4 @@
-import {IdleCode, ICustomState, ILogger} from '@webex/cc-store';
+import {IdleCode, ICustomState, ILogger, IContactCenter} from '@webex/cc-store';
 
 /**
  * Interface representing the state of a user.
@@ -53,7 +53,45 @@ export interface IUserState {
    * Logger instance
    */
   logger: ILogger;
+
+  /**
+   * Callback function to be called when the state changes.
+   * @param state The new state.
+   */
+  onStateChange?: (state: string) => void;
+
+  /**
+   * The agent ID.
+   */
+  agentId: string;
+
+  /**
+   * CC SDK Instance.
+   */
+  cc: IContactCenter;
+
+  /**
+   * The timestamp of the last state change.
+   */
+  lastStateChangeTimestamp?: number;
+
+  /**
+   * The timestamp of the last idle code change.
+   */
+  lastIdleCodeChangeTimestamp?: number;
 }
+
+export type UserStateComponentsProps = Pick<
+  IUserState,
+  | 'idleCodes'
+  | 'setAgentStatus'
+  | 'isSettingAgentStatus'
+  | 'elapsedTime'
+  | 'lastIdleStateChangeElapsedTime'
+  | 'currentState'
+  | 'customState'
+  | 'logger'
+>;
 
 export enum AgentUserState {
   Available = 'Available',

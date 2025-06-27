@@ -17,7 +17,6 @@ const WebUserState = r2wc(UserStateComponent, {
     lastIdleStateChangeElapsedTime: 'number',
     currentState: 'string',
     customState: 'json',
-    currentTheme: 'string',
     logger: 'function',
   },
 });
