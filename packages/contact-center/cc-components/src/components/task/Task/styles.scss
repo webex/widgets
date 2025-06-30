@@ -14,7 +14,8 @@
   align-items: center;
   align-self: stretch;
   // have to override momentum default height for listitem to match the design
-  height: 5rem !important;
+  min-height: 5rem !important;
+  height: auto !important;
 
   mdc-avatar {
     --mdc-avatar-default-background-color: var(--mds-color-theme-avatar-glass-normal);
@@ -75,4 +76,11 @@
 .task-list-hover:hover{ 
   // To remove the hover effect of ListItemBase when we render an incoming task 
   background: none !important;
+}
+
+.task-details {
+ .task-title::part(text) {
+  white-space: normal !important;
+  word-break: break-all;
+ }
 }

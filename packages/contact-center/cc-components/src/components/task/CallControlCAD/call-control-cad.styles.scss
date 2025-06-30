@@ -117,3 +117,9 @@
     color: var(--mds-color-theme-indicator-secure);
   }
 }
+
+.customer-name::part(text),
+.phone-number::part(text) {
+  white-space: normal !important;
+  word-break: break-all;
+}

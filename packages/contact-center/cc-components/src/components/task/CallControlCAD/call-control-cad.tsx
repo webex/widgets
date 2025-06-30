@@ -64,7 +64,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
           </div>
 
           <div className="customer-info">
-            <Text className="customer-id" type="body-large-bold" tagName={'small'}>
+            <Text className="customer-name" type="body-large-bold" tagName={'small'}>
               {isSocial ? customerName || 'No Customer Name' : ani || 'No Caller ID'}
             </Text>
             <div className="call-details">

@@ -69,7 +69,7 @@ const Task: React.FC<TaskProps> = ({
       <ListItemBaseSection position="fill">
         <section className="task-details">
           {title && (
-            <Text tagName="span" type={selected ? 'body-large-bold' : 'body-large-medium'}>
+            <Text tagName="span" type={selected ? 'body-large-bold' : 'body-large-medium'} className="task-title">
               {title}
             </Text>
           )}
