@@ -17,7 +17,7 @@
     "build:src": "yarn run clean:dist && webpack",
     "build:watch": "webpack --watch",
     "test:unit": "jest --coverage",
-    "test:styles": "npx eslint src/ --ext .js,.ts,.tsx"
+    "test:styles": "eslint"
   },
   "dependencies": {
     "@webex/cc-components": "workspace:*",
