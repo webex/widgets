@@ -384,6 +384,8 @@ export interface ControlProps {
     endConsult: boolean;
     recordingIndicator: boolean;
   };
+
+  secondsUntilAutoWrapup?: number;
 }
 
 export type CallControlComponentProps = Pick<
@@ -425,6 +427,7 @@ export type CallControlComponentProps = Pick<
   | 'setLastTargetType'
   | 'controlVisibility'
   | 'logger'
+  | 'secondsUntilAutoWrapup'
 >;
 
 /**
@@ -515,3 +518,9 @@ export type MediaInfo = {
   labelName: string;
   isBrandVisual: boolean;
 };
+
+export interface AutoWrapupTimerProps {
+  secondsUntilAutoWrapup: number;
+  allowCancelAutoWrapup?: boolean;
+  handleCancelWrapup: () => void;
+}

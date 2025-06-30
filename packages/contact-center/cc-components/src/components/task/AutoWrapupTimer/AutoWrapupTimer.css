@@ -1,0 +1,25 @@
+.wrapup-timer-icon {
+   --mdc-icon-fill-color: var(--mds-color-theme-text-accent-normal);
+}
+
+.wrapup-timer-icon.urgent {
+   --mdc-icon-fill-color: var(--mds-color-theme-text-error-normal);
+}
+
+.wrapup-timer-container {
+  --mdc-listitem-default-background-color: var(--mds-color-theme-background-alert-theme-normal);
+  --mdc-listitem-background-color-hover: var(--mds-color-theme-background-alert-theme-normal);
+  border: 0.0625rem solid var(--mds-color-theme-outline-theme-normal) !important;
+  border-radius: 0.5rem;
+  height: 3rem;
+}
+.wrapup-timer-container.urgent {
+  --mdc-listitem-default-background-color: var(--mds-color-theme-background-alert-error-normal);
+  --mdc-listitem-background-color-hover: var(--mds-color-theme-background-alert-error-hover);
+}
+.wrapup-timer-label {
+  display: flex;
+  flex-direction: row;
+  align-items: left;
+  gap: 0.3rem;
+}

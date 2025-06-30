@@ -7,6 +7,18 @@ import TaskTimer from '../TaskTimer/index';
 import CallControlConsultComponent from '../CallControl/CallControlCustom/call-control-consult';
 import {MEDIA_CHANNEL as MediaChannelType, CallControlComponentProps} from '../task.types';
 import {getMediaTypeInfo} from '../../../utils';
+import {
+  NO_CUSTOMER_NAME,
+  NO_CALLER_ID,
+  NO_PHONE_NUMBER,
+  NO_TEAM_NAME,
+  NO_RONA,
+  ON_HOLD,
+  QUEUE,
+  PHONE_NUMBER,
+  CUSTOMER_NAME,
+  RONA,
+} from '../constants';
 
 const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => {
   const {
@@ -65,7 +77,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
 
           <div className="customer-info">
             <Text className="customer-id" type="body-large-bold" tagName={'small'}>
-              {isSocial ? customerName || 'No Customer Name' : ani || 'No Caller ID'}
+              {isSocial ? customerName || NO_CUSTOMER_NAME : ani || NO_CALLER_ID}
             </Text>
             <div className="call-details">
               <Text className="call-timer" type="body-secondary" tagName={'small'}>
@@ -77,7 +89,9 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
                     <span className="dot">•</span>
                     <div className="on-hold">
                       <Icon name="call-hold-filled" size={1} className="call-hold-filled-icon" />
-                      <span className="on-hold-chip-text">On hold - {formatTime(holdTime)}</span>
+                      <span className="on-hold-chip-text">
+                        {ON_HOLD} {formatTime(holdTime)}
+                      </span>
                     </div>
                   </>
                 )}
@@ -93,16 +107,16 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
         <CallControlComponent {...props} />
         <div className="cad-variables">
           <Text className="queue" type="body-secondary" tagName={'small'}>
-            <strong>Queue:</strong>{' '}
-            <span>{currentTask?.data?.interaction?.callAssociatedDetails?.virtualTeamName || 'No Team Name'}</span>
+            <strong>{QUEUE}</strong>{' '}
+            <span>{currentTask?.data?.interaction?.callAssociatedDetails?.virtualTeamName || NO_TEAM_NAME}</span>
           </Text>
           <Text className="phone-number" type="body-secondary" tagName={'small'}>
-            <strong>{isSocial ? 'Customer Name' : 'Phone Number'}:</strong>{' '}
-            <span> {isSocial ? customerName || 'No Customer Name' : ani || 'No Phone Number'}</span>
+            <strong>{isSocial ? CUSTOMER_NAME : PHONE_NUMBER}</strong>{' '}
+            <span> {isSocial ? customerName || NO_CUSTOMER_NAME : ani || NO_PHONE_NUMBER}</span>
           </Text>
           <Text className="rona" type="body-secondary" tagName={'small'}>
-            <strong>RONA:</strong>{' '}
-            <span>{currentTask?.data?.interaction?.callAssociatedDetails?.ronaTimeout || 'No RONA'}</span>
+            <strong>{RONA}</strong>{' '}
+            <span>{currentTask?.data?.interaction?.callAssociatedDetails?.ronaTimeout || NO_RONA}</span>
           </Text>
         </div>
       </div>
