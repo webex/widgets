@@ -70,6 +70,7 @@ function App() {
   const [collapsedTasks, setCollapsedTasks] = React.useState([]);
   const [showLoader, setShowLoader] = useState(false);
   const [toast, setToast] = useState<{type: 'success' | 'error'} | null>(null);
+  const [integrationEnvironment, setIntegrationEnvironment] = useState(false);
 
   const handleSaveStart = () => {
     setShowLoader(true);
@@ -119,6 +120,13 @@ function App() {
     cc: {
       allowMultiLogin: isMultiLoginEnabled,
     },
+    ...(integrationEnvironment && {
+      services: {
+        discovery: {
+          u2c: 'https://u2c-intb.ciscospark.com/u2c/api/v1',
+        },
+      },
+    }),
   };
 
   const onLogin = () => {
@@ -498,6 +506,16 @@ function App() {
                         setDoStationLogout(!doStationLogout);
                       }}
                     />
+                    <Checkbox
+                      checked={integrationEnvironment}
+                      aria-label="integration environment checkbox"
+                      id="integration-environment-checkbox"
+                      label="Enable Integration Environment"
+                      // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
+                      onchange={() => {
+                        setIntegrationEnvironment(!integrationEnvironment);
+                      }}
+                    />
                     {store.isAgentLoggedIn && (
                       <Button
                         id="logoutAgent"
@@ -801,10 +819,10 @@ function App() {
 
             {isSdkReady && (store.isAgentLoggedIn || isLoggedIn) && (
               <DigitalChannels
-                conversationId="sample-conversation-id"
+                conversationId={store.currentTask?.data?.interaction?.mediaResourceId}
                 jwtToken={accessToken}
-                apiEndpoint={currentTheme}
-                signalREndpoint={currentTheme}
+                apiEndpoint="https://wxcc-component-api.cstg.webexengage.com/api"
+                signalREndpoint="https://wxcc-component-api.cstg.webexengage.com/signalr"
               ></DigitalChannels>
             )}
           </div>
