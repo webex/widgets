@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.81](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.80...v1.28.0-ccwidgets.81) (2025-06-30)
+
+
+### Bug Fixes
+
+* **cc-widgets:** update the workflow for pull request by adding and modifying the required env variables ([#481](https://github.com/webex/widgets/issues/481)) ([fd71837](https://github.com/webex/widgets/commit/fd718375eab379a439f281ed73559637180b6532))
+
 # [1.28.0-ccwidgets.80](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.79...v1.28.0-ccwidgets.80) (2025-06-26)
 
 
