@@ -770,7 +770,7 @@ const onTaskDeclined = (task,reason) => {
               </>
             )}
             {showRejectedPopup && (
-              <div className="task-rejected-popup">
+              <div className="task-rejected-popup" data-testid="samples:rona-popup">
                 <button className="close-btn" onClick={handlePopoverClose}>
                   ×
                 </button>
@@ -788,17 +788,20 @@ const onTaskDeclined = (task,reason) => {
                   onChange={(e: CustomEvent) => {
                     setSelectedState(e.detail.value);
                   }}
+                  data-testid="samples:rona-select-state"
                 >
-                  <Option key={1} value="Available">
+                  <Option key={1} value="Available" data-testid="samples:rona-option-available">
                     Available
                   </Option>
-                  <Option key={2} value="Idle">
+                  <Option key={2} value="Idle" data-testid="samples:rona-option-idle">
                     Idle
                   </Option>
                 </Select>
-                <Button disabled={selectedState === ''} onClick={handlePopoverSubmit} variant="primary">
+               <div style={{ display: 'flex', justifyContent: 'center'}}>
+                 <Button disabled={selectedState === ''} onClick={handlePopoverSubmit} variant="primary" data-testid="samples:rona-button-confirm">
                   Confirm State Change
-                </Button>
+                 </Button>
+               </div>
               </div>
             )}
 
