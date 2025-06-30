@@ -1,6 +1,8 @@
 import {test, expect} from '@playwright/test';
 import fs from 'fs';
+import dotenv from 'dotenv';
 
+dotenv.config();
 test.describe('Login and User State tests', async () => {
   test('Login: should login using Extension login option', async ({page}) => {
     await page.goto('http://localhost:3000/');
@@ -23,7 +25,7 @@ test.describe('Login and User State tests', async () => {
       await expect(page.getByTestId('login-button')).toContainText('Save & Continue');
       await page.getByTestId('login-option-select').click();
       await page.getByTestId('login-option-Extension').click();
-      await page.getByTestId('dial-number-input').getByRole('textbox').fill('1014');
+      await page.getByTestId('dial-number-input').getByRole('textbox').fill('1001');
 
       await expect(page.getByTestId('login-option-select').locator('#select-base-triggerid')).toContainText(
         'Extension'
@@ -78,7 +80,7 @@ test.describe('Login and User State tests', async () => {
 
       await page.getByTestId('login-option-select').click();
       await page.getByTestId('login-option-Extension').click();
-      await page.getByTestId('dial-number-input').getByRole('textbox').fill('1014');
+      await page.getByTestId('dial-number-input').getByRole('textbox').fill('1001');
 
       await expect(page.getByTestId('login-option-select').locator('#select-base-triggerid')).toContainText(
         'Extension'
@@ -130,7 +132,7 @@ test.describe('Login and User State tests', async () => {
       await expect(page.getByTestId('login-button')).toContainText('Save & Continue');
       await page.getByTestId('login-option-select').click();
       await page.getByTestId('login-option-Extension').click();
-      await page.getByTestId('dial-number-input').getByRole('textbox').fill('1014');
+      await page.getByTestId('dial-number-input').getByRole('textbox').fill('1001');
 
       await expect(page.getByTestId('login-option-select').locator('#select-base-triggerid')).toContainText(
         'Extension'
