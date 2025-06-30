@@ -386,6 +386,11 @@ export interface ControlProps {
   };
 
   secondsUntilAutoWrapup?: number;
+
+  /**
+   * Function to cancel the auto wrap-up timer.
+   */
+  cancelAutoWrapup: () => void;
 }
 
 export type CallControlComponentProps = Pick<
@@ -428,6 +433,7 @@ export type CallControlComponentProps = Pick<
   | 'controlVisibility'
   | 'logger'
   | 'secondsUntilAutoWrapup'
+  | 'cancelAutoWrapup'
 >;
 
 /**

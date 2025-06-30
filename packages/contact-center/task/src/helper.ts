@@ -519,6 +519,14 @@ export const useCallControl = (props: useCallControlProps) => {
     }
   };
 
+  const cancelAutoWrapup = () => {
+    logger.info('CC-Widgets: CallControl: wrap-up cancelled', {
+      module: 'widget-cc-task#helper.ts',
+      method: 'useCallControl#cancelAutoWrapup',
+    });
+    currentTask.cancelAutoWrapupTimer();
+  };
+
   const controlVisibility = useMemo(
     () => getControlsVisibility(deviceType, featureFlags, currentTask),
     [deviceType, featureFlags, currentTask]
@@ -588,6 +596,7 @@ export const useCallControl = (props: useCallControlProps) => {
     setLastTargetType,
     controlVisibility,
     secondsUntilAutoWrapup,
+    cancelAutoWrapup,
   };
 };
 

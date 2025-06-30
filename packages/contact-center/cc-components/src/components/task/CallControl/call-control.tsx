@@ -56,6 +56,7 @@ function CallControlComponent(props: CallControlComponentProps) {
     controlVisibility,
     logger,
     secondsUntilAutoWrapup,
+    cancelAutoWrapup,
   } = props;
 
   useEffect(() => {
@@ -95,14 +96,6 @@ function CallControlComponent(props: CallControlComponentProps) {
         method: 'handleWrapupCall',
       });
     }
-  };
-
-  const handleCancelWrapup = () => {
-    logger.info('CC-Widgets: CallControl: wrap-up cancelled', {
-      module: 'call-control.tsx',
-      method: 'handleCancelWrapup',
-    });
-    currentTask.cancelAutoWrapupTimer();
   };
 
   const handleWrapupChange = (text, value) => {
@@ -351,8 +344,8 @@ function CallControlComponent(props: CallControlComponentProps) {
               {currentTask.autoWrapup && (
                 <AutoWrapupTimer
                   secondsUntilAutoWrapup={secondsUntilAutoWrapup}
-                  allowCancelAutoWrapup={false} // TODO: change to currentTask.autoWrapup.allowCancelAutoWrapup when its made supported in multi session from SDK side
-                  handleCancelWrapup={handleCancelWrapup}
+                  allowCancelAutoWrapup={false} // TODO: https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6752 change to currentTask.autoWrapup.allowCancelAutoWrapup when its made supported in multi session from SDK side
+                  handleCancelWrapup={cancelAutoWrapup}
                 />
               )}
 
@@ -392,14 +385,6 @@ function CallControlComponent(props: CallControlComponentProps) {
               >
                 {SUBMIT_WRAP_UP}
               </Button>
-              {/* <ButtonPill
-                className="submit-wrapup-button"
-                onPress={handleWrapupCall}
-                disabled={selectedWrapupId && selectedWrapupReason ? false : true}
-                aria-label="Submit wrap-up"
-              >
-                {SUBMIT_WRAP_UP}
-              </ButtonPill> */}
             </PopoverNext>
           </div>
         )}

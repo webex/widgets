@@ -540,6 +540,7 @@ describe('useCallControl', () => {
     resumeRecording: jest.fn(() => Promise.resolve()),
     end: jest.fn(() => Promise.resolve()),
     wrapup: jest.fn(() => Promise.resolve()),
+    cancelAutoWrapupTimer: jest.fn(),
   };
 
   const mockLogger = {
@@ -1836,6 +1837,34 @@ describe('useCallControl', () => {
 
     expect(result.current.queues).toEqual(dummyQueues);
     getQueuesSpy.mockRestore();
+  });
+
+  it('should call cancelAutoWrapup successfully', async () => {
+    const mockOnRecordingToggle = jest.fn();
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        onRecordingToggle: mockOnRecordingToggle,
+        logger: mockLogger,
+        consultInitiated: false,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
+      })
+    );
+
+    await act(async () => {
+      result.current.cancelAutoWrapup();
+    });
+
+    expect(mockCurrentTask.cancelAutoWrapupTimer).toHaveBeenCalled();
+    expect(mockLogger.info).toHaveBeenCalledWith('CC-Widgets: CallControl: wrap-up cancelled', {
+      module: 'widget-cc-task#helper.ts',
+      method: 'useCallControl#cancelAutoWrapup',
+    });
   });
 });
 

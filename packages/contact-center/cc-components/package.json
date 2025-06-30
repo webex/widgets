@@ -21,7 +21,7 @@
     "build:src": "yarn run clean:dist && webpack",
     "build:watch": "webpack --watch",
     "test:unit": "jest --coverage",
-    "test:styles": "eslint"
+    "test:styles": "npx eslint src/ --ext .js,.ts,.tsx"
   },
   "dependencies": {
     "@momentum-ui/illustrations": "^1.24.0",

@@ -9,7 +9,7 @@
     "build:src": "webpack",
     "build:watch": "webpack --watch",
     "serve": "webpack serve",
-    "test:styles": "eslint"
+    "test:styles": "npx eslint src/ --ext .js,.ts,.tsx"
   },
   "dependencies": {
     "@babel/core": "^7.25.2",

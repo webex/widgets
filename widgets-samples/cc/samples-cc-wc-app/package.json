@@ -31,6 +31,6 @@
     "clean:dist": "rm -rf dist",
     "serve": "webpack serve",
     "build:src": "webpack",
-    "test:styles": "eslint"
+    "test:styles": "npx eslint src/ --ext .js,.ts,.tsx"
   }
 }
