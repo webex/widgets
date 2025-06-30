@@ -74,9 +74,9 @@ export const extensionLogin = async (page: Page, extensionNumber?: string): Prom
  * ```
  */
 export const dialLogin = async (page: Page, dialNumber?: string): Promise<void> => {
-  const number = dialNumber ?? process.env.PW_AGENT1_DIAL_NUMBER;
+  const number = dialNumber ?? process.env.PW_DIAL_NUMBER;
   if (!number) {
-    throw new Error('PW_AGENT1_DIAL_NUMBER is not defined in the .env file');
+    throw new Error('PW_DIAL_NUMBER is not defined in the .env file');
   }
 
   if (number.trim() === '') {

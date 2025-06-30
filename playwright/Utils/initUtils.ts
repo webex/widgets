@@ -57,10 +57,10 @@ export const oauthLogin = async (page: Page, agentId: string): Promise<void> => 
 
   // Check 3: Get credentials from environment variables
   const username = process.env[`PW_${agentId}_USERNAME`];
-  const password = process.env[`PW_${agentId}_PASSWORD`];
+  const password = process.env[`PW_PASSWORD`];
   // Check 4: Validate environment variables are set
   if (!username || !password) {
-    throw new Error(`Environment variables PW_${agentId}_USERNAME and PW_${agentId}_PASSWORD must be set`);
+    throw new Error(`Environment variables PW_${agentId}_USERNAME and PW_PASSWORD must be set`);
   }
 
   await page.goto(BASE_URL);
