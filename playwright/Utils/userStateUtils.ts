@@ -1,6 +1,6 @@
 import {Page, expect} from '@playwright/test';
 import dotenv from 'dotenv';
-import {USER_STATES, AUX_CODE_IDS} from '../constants';
+import {USER_STATES} from '../constants';
 
 dotenv.config();
 
@@ -87,13 +87,13 @@ export const getStateElapsedTime = async (page: Page): Promise<string> => {
 };
 
 /**
- * Validates that the console state change matches the expected state by checking auxCodeId logs
+ * Validates that the console state change matches the expected state by checking onStateChange logs
  * @param page - The Playwright page object
  * @param state - The expected state name to validate against
  * @param consoleMessages - Array of console messages to search through
- * @returns Promise<boolean> - True if the last auxCodeId log matches the expected state
- * @description Searches for the most recent "Agent state changed successfully" log and maps auxCodeId to state name
- * @throws {Error} When no auxCodeId log is found or auxCodeId is not mapped to a known state
+ * @returns Promise<boolean> - True if the last onStateChange log matches the expected state
+ * @description Searches for the most recent "onStateChange invoked with state name:" log and validates the state
+ * @throws {Error} When no onStateChange log is found or state name cannot be extracted
  * @example
  * ```typescript
  * const consoleMessages: string[] = [];
@@ -103,40 +103,33 @@ export const getStateElapsedTime = async (page: Page): Promise<string> => {
  * const isValid = await validateConsoleStateChange(page, USER_STATES.AVAILABLE, consoleMessages);
  * ```
  */
-// Validates that the console state change matches the expected state by checking the last auxCodeId log
+// Validates that the console state change matches the expected state by checking the last onStateChange log
 // and comparing it to the expected state name.
 export const validateConsoleStateChange = async (
   page: Page,
   state: string,
   consoleMessages: string[]
 ): Promise<boolean> => {
-  // Map auxCodeId to state name using direct constants
-  const auxCodeIdMap: Record<string, string> = {
-    [AUX_CODE_IDS.AVAILABLE]: USER_STATES.AVAILABLE,
-    [AUX_CODE_IDS.MEETING]: USER_STATES.MEETING,
-    [AUX_CODE_IDS.LUNCH]: USER_STATES.LUNCH,
-  };
-
-  // Find the last "Agent state changed successfully to auxCodeId: ..." log
-  const lastAuxLogMessage = consoleMessages
+  const lastStateChangeMessage = consoleMessages
     .slice()
     .reverse()
-    .find((msg) => msg.match(/Agent state changed successfully to auxCodeId:\s*([a-f0-9-]+|0)/i));
+    .find((msg) => msg.match(/onStateChange invoked with state name:\s*(.+)/i));
 
-  const lastAuxLog = lastAuxLogMessage?.match(/Agent state changed successfully to auxCodeId:\s*([a-f0-9-]+|0)/i)?.[1];
-
-  if (!lastAuxLog) {
-    throw new Error('No auxCodeId log found in console messages');
+  if (!lastStateChangeMessage) {
+    throw new Error('No onStateChange log found in console messages');
   }
 
-  const mappedState = auxCodeIdMap[lastAuxLog];
-  if (!mappedState) {
-    throw new Error(`auxCodeId ${lastAuxLog} not mapped to a known state`);
+  const stateMatch = lastStateChangeMessage.match(/onStateChange invoked with state name:\s*(.+)/i);
+  const actualState = stateMatch?.[1]?.trim();
+
+  if (!actualState) {
+    throw new Error('Failed to extract state name from onStateChange console message');
   }
 
+  // Simplified comparison logic
   const expectedState = state.trim().toLowerCase();
-  const actualState = mappedState.trim().toLowerCase();
-  return expectedState === actualState;
+  const loggedState = actualState.toLowerCase();
+  return expectedState === loggedState;
 };
 
 /**
@@ -149,8 +142,8 @@ export const validateConsoleStateChange = async (
  * @throws {Error} When API success message is not found
  * @throws {Error} When onStateChange callback is not found
  * @throws {Error} When callback occurs before API success (incorrect sequence)
- * @throws {Error} When no auxCodeId log is found
- * @throws {Error} When auxCodeId is not mapped to a known state
+ * @throws {Error} When no onStateChange log is found
+ * @throws {Error} When state name cannot be extracted from onStateChange log
  * @example
  * ```typescript
  * const consoleMessages: string[] = [];
@@ -168,63 +161,51 @@ export async function checkCallbackSequence(
   expectedState: string,
   consoleMessages: string[]
 ): Promise<boolean> {
-  let apiSuccessIndex = -1;
-  let callbackIndex = -1;
+  const reversedMessages = consoleMessages.slice().reverse();
 
-  // Find last index of API success
-  apiSuccessIndex = consoleMessages
-    .slice()
-    .reverse()
-    .findIndex((msg) => msg.includes('WXCC_SDK_AGENT_STATE_CHANGE_SUCCESS'));
+  // Find last index of API success using reverse().findIndex()
+  const apiSuccessReverseIndex = reversedMessages.findIndex((msg) =>
+    msg.includes('WXCC_SDK_AGENT_STATE_CHANGE_SUCCESS')
+  );
 
-  // Convert reversed index to original index
-  if (apiSuccessIndex !== -1) {
-    apiSuccessIndex = consoleMessages.length - 1 - apiSuccessIndex;
-  }
+  // Find last index of onStateChange callback using reverse().findIndex()
+  const callbackReverseIndex = reversedMessages.findIndex(
+    (msg) => msg.toLowerCase().includes('onstatechange') && msg.toLowerCase().includes('invoked')
+  );
 
-  // Find last index of onStateChange callback
-  callbackIndex = consoleMessages
-    .slice()
-    .reverse()
-    .findIndex((msg) => msg.toLowerCase().includes('onstatechange') && msg.toLowerCase().includes('invoked'));
-
-  // Convert reversed index to original index
-  if (callbackIndex !== -1) {
-    callbackIndex = consoleMessages.length - 1 - callbackIndex;
-  }
-
-  // Both must exist and callback must come after API success
-  if (apiSuccessIndex === -1) {
+  // Validate that both messages exist
+  if (apiSuccessReverseIndex === -1) {
     throw new Error('API success message not found in console');
   }
-  if (callbackIndex === -1) {
+  if (callbackReverseIndex === -1) {
     throw new Error('onStateChange callback not found in console');
   }
+
+  // Convert reversed indices to original indices for comparison
+  const apiSuccessIndex = consoleMessages.length - 1 - apiSuccessReverseIndex;
+  const callbackIndex = consoleMessages.length - 1 - callbackReverseIndex;
+
+  // Validate sequence: callback must come after API success
   if (callbackIndex <= apiSuccessIndex) {
     throw new Error(
       `Callback occurred before API success (callback index: ${callbackIndex}, API index: ${apiSuccessIndex})`
     );
   }
 
-  // Map auxCodeId to state name using direct constants
-  const auxCodeIdMap: Record<string, string> = {
-    [AUX_CODE_IDS.AVAILABLE]: USER_STATES.AVAILABLE,
-    [AUX_CODE_IDS.MEETING]: USER_STATES.MEETING,
-    [AUX_CODE_IDS.LUNCH]: USER_STATES.LUNCH,
-  };
-  let lastAuxId: string | null = null;
-  const lastAuxMessage = consoleMessages
-    .slice()
-    .reverse()
-    .find((msg) => msg.match(/Agent state changed successfully to auxCodeId:\s*([a-f0-9-]+|0)/i));
+  const lastStateChangeMessage = reversedMessages.find((msg) =>
+    msg.match(/onStateChange invoked with state name:\s*(.+)/i)
+  );
 
-  lastAuxId = lastAuxMessage?.match(/Agent state changed successfully to auxCodeId:\s*([a-f0-9-]+|0)/i)?.[1] || null;
-  if (!lastAuxId) {
-    throw new Error('No auxCodeId log found in console messages');
+  if (!lastStateChangeMessage) {
+    throw new Error('No onStateChange log found in console messages');
   }
-  const mappedState = auxCodeIdMap[lastAuxId];
-  if (!mappedState) {
-    throw new Error(`auxCodeId ${lastAuxId} not mapped to a known state`);
+
+  const stateMatch = lastStateChangeMessage.match(/onStateChange invoked with state name:\s*(.+)/i);
+  const actualState = stateMatch?.[1]?.trim();
+
+  if (!actualState) {
+    throw new Error('Failed to extract state name from onStateChange console message');
   }
-  return mappedState.trim().toLowerCase() === expectedState.trim().toLowerCase();
+
+  return actualState.toLowerCase() === expectedState.trim().toLowerCase();
 }
