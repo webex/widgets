@@ -1,7 +1,7 @@
 const {mergeWithCustomize, customizeObject} = require('webpack-merge');
 const path = require('path');
 
-const baseConfig = require('../../../webpack.config');
+const baseConfig = require('../../../tooling/webpack/base.config');
 
 // Helper function to resolve paths relative to the monorepo root
 const resolveMonorepoRoot = (...segments) => path.resolve(__dirname, '../../../', ...segments);
@@ -36,6 +36,11 @@ module.exports = mergeWithCustomize({
   },
   module: {
     rules: [
+      {
+        test: /\.(ts|tsx)$/,
+        exclude: /node_modules/,
+        use: 'ts-loader',
+      },
       {
         test: /\.css$/,
         use: ['style-loader', 'css-loader'],

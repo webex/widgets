@@ -9,7 +9,7 @@ import {
   store,
   OutdialCall,
 } from '@webex/cc-widgets';
-import {DigitalChannels} from '@webex/cc-digital-channels';
+import DigitalChannels from 'minimal-webex-engage-app';
 import {StationLogoutSuccess} from '@webex/plugin-cc';
 import Webex from 'webex';
 import {
@@ -30,6 +30,7 @@ import {observer} from 'mobx-react-lite';
 // This is not to be included to a production app.
 // Have added here for debugging purposes
 window['store'] = store;
+
 const defaultWidgets = {
   stationLogin: true,
   stationLoginProfile: false,
@@ -40,7 +41,6 @@ const defaultWidgets = {
   callControlCAD: true,
   outdialCall: true,
 };
-window['AGENTX_SERVICE'] = {}; // Make it available in the window object for global access for engage widgets
 
 function App() {
   const [isSdkReady, setIsSdkReady] = useState(false);
@@ -624,7 +624,7 @@ function App() {
                                           <td className="table-border">
                                             {channel.charAt(0).toUpperCase() + channel.slice(1)}
                                           </td>
-                                          <td className="table-border">{count}</td>
+                                          <td className="table-border">{String(count)}</td>
                                         </tr>
                                       ))}
                                   </tbody>
@@ -801,6 +801,7 @@ function App() {
 
             {isSdkReady && (store.isAgentLoggedIn || isLoggedIn) && (
               <DigitalChannels
+                conversationId="sample-conversation-id"
                 jwtToken={accessToken}
                 apiEndpoint={currentTheme}
                 signalREndpoint={currentTheme}

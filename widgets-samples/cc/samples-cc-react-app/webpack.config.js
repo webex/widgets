@@ -1,6 +1,7 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const {merge} = require('webpack-merge');
+const webpack = require('webpack');
 
 const baseConfig = require('../../../webpack.config');
 
@@ -17,7 +18,51 @@ module.exports = merge(baseConfig, {
       '@webex/cc-user-state': path.resolve(__dirname, '../../../packages/contact-center/user-state/src'),
       '@webex/cc-task': path.resolve(__dirname, '../../../packages/contact-center/task/src'),
       '@webex/cc-components': path.resolve(__dirname, '../../../packages/contact-center/cc-components/src'),
+      // Add process alias to help with problematic packages
+      'process/browser': require.resolve('process/browser.js'),
     },
+    fallback: {
+      ...baseConfig.resolve?.fallback,
+      process: require.resolve('process/browser.js'),
+      'process/browser': require.resolve('process/browser.js'),
+      buffer: require.resolve('buffer/'),
+      crypto: require.resolve('crypto-browserify'),
+      stream: require.resolve('stream-browserify'),
+      util: require.resolve('util/'),
+      url: require.resolve('url/'),
+      fs: false,
+      path: require.resolve('path-browserify'),
+    },
+    // Add main fields to resolve modules properly
+    mainFields: ['browser', 'module', 'main'],
+    // Add symlinks resolution
+    symlinks: false,
+  },
+  plugins: [
+    new webpack.ProvidePlugin({
+      process: 'process/browser.js',
+      Buffer: ['buffer', 'Buffer'],
+    }),
+    new webpack.DefinePlugin({
+      'process.env': JSON.stringify(process.env),
+      'process.browser': true,
+      'process.version': JSON.stringify(process.version),
+    }),
+    new HtmlWebpackPlugin({
+      template: './public/index.html', // Template HTML file
+      filename: 'index.html',
+    }),
+  ],
+  // Add external configuration for problematic modules
+  externals: {
+    // If process issues persist, we can externalize it
+  },
+  // Ignore certain webpack warnings related to critical dependencies
+  stats: {
+    warningsFilter: [
+      /Critical dependency: the request of a dependency is an expression/,
+      /Module not found: Error: Can't resolve 'process\/browser'/,
+    ],
   },
   module: {
     rules: [
@@ -28,6 +73,7 @@ module.exports = merge(baseConfig, {
           resolveMonorepoRoot('node_modules/@momentum-ui'), // Include specific node module,
           resolveMonorepoRoot('node_modules/react-toastify'), // Include specific node module
           resolveMonorepoRoot('node_modules/@momentum-design'),
+          resolveMonorepoRoot('node_modules/@webex-engage'),
           path.resolve(__dirname, 'widgets-samples/cc'), // Include all CSS from the local package
         ],
       },
@@ -40,8 +86,9 @@ module.exports = merge(baseConfig, {
         ],
         include: [
           resolveMonorepoRoot('node_modules/@momentum-ui'), // Include specific node module
-          path.resolve(__dirname, 'widgets-samples/cc'), // Include all CSS from the local package
           resolveMonorepoRoot('node_modules/@momentum-design'),
+          resolveMonorepoRoot('node_modules/@webex-engage'),
+          path.resolve(__dirname, 'widgets-samples/cc'), // Include all CSS from the local package
         ],
       },
       {
@@ -49,6 +96,7 @@ module.exports = merge(baseConfig, {
         include: [
           resolveMonorepoRoot('node_modules/@momentum-ui'),
           resolveMonorepoRoot('node_modules/@momentum-design'),
+          resolveMonorepoRoot('node_modules/@webex-engage'),
         ],
         type: 'asset/resource',
         generator: {
@@ -60,26 +108,46 @@ module.exports = merge(baseConfig, {
         include: [
           resolveMonorepoRoot('node_modules/@momentum-ui'),
           resolveMonorepoRoot('node_modules/@momentum-design'),
+          resolveMonorepoRoot('node_modules/@webex-engage'),
         ],
-
         type: 'asset/resource',
         generator: {
           filename: 'images/[name][ext][query]',
+        },
+      },
+      // Handle JS files from problematic packages
+      {
+        test: /\.js$/,
+        include: [resolveMonorepoRoot('node_modules/@webex-engage')],
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-env'],
+            plugins: ['@babel/plugin-transform-runtime'],
+          },
         },
       },
     ],
   },
   output: {
     path: path.resolve(__dirname, '../../../docs/samples-cc-react-app'), // Output directory
-    filename: 'bundle.js', // Output bundle file name
+    filename: '[name].[contenthash].js', // Output bundle file name with hashes to avoid conflicts
     clean: true, // Clean dist folder before each build
+    globalObject: 'this', // Ensure compatibility with web workers
   },
-  plugins: [
-    new HtmlWebpackPlugin({
-      template: './public/index.html', // Template HTML file
-      filename: 'index.html',
-    }),
-  ],
+  optimization: {
+    splitChunks: {
+      chunks: 'all',
+      cacheGroups: {
+        webexEngage: {
+          test: /[\\/]node_modules[\\/]@webex-engage[\\/]/,
+          name: 'webex-engage',
+          chunks: 'all',
+          priority: 10,
+        },
+      },
+    },
+  },
   devServer: {
     static: path.join(__dirname, 'public'), // Serve files from public folder
     compress: true, // Enable gzip compression

@@ -26,6 +26,8 @@
   "dependencies": {
     "@momentum-ui/illustrations": "^1.24.0",
     "@r2wc/react-to-web-component": "2.0.3",
+    "@react-stately/collections": "^3.12.5",
+    "@react-types/shared": "^3.30.0",
     "@webex/cc-store": "workspace:*"
   },
   "devDependencies": {
@@ -38,6 +40,8 @@
     "@testing-library/jest-dom": "6.6.2",
     "@testing-library/react": "16.0.1",
     "@types/jest": "29.5.14",
+    "@types/react": "18",
+    "@types/react-dom": "18",
     "@types/react-test-renderer": "18",
     "babel-loader": "9.2.1",
     "eslint": "^9.20.1",

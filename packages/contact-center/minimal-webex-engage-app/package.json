@@ -1,0 +1,44 @@
+{
+  "name": "minimal-webex-engage-app",
+  "version": "1.0.0",
+  "description": "Minimal implementation of Webex Engage Conversations",
+  "main": "dist/index.umd.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vite --port 3241",
+    "build:src": "vite build --mode lib",
+    "build:lib": "vite build --mode lib",
+    "preview": "vite preview",
+    "start": "vite --port 3241"
+  },
+  "dependencies": {
+    "@webex-engage/wxengage-conversations": "^1.0.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.3.23",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^4.3.1",
+    "typescript": "^5.5.3",
+    "vite": "^5.3.4",
+    "vite-plugin-dts": "^4.5.4"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

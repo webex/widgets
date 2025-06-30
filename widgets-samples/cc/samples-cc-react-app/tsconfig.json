@@ -5,9 +5,17 @@
         "declaration": true,
         "declarationDir": "./dist/types",
         "moduleResolution": "NodeNext",
-        "module": "NodeNext"
+        "module": "NodeNext",
+        "jsx": "react-jsx",
+        "jsxImportSource": "react",
+        "skipLibCheck": true,
+        "noImplicitAny": false,
+        "strict": false,
+        "noPropertyAccessFromIndexSignature": false,
+        "exactOptionalPropertyTypes": false
     },
     "include": [
-        "./src"
+        "./src",
+        "./src/react-momentum-ui.d.ts"
     ]
 }
