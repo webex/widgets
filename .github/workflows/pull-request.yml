@@ -16,13 +16,11 @@ concurrency:
 env:
   rid: ${{ github.run_id }}-${{ github.run_number }}
   PW_AGENT1_USERNAME: ${{ secrets.PW_AGENT1_USERNAME }}
-  PW_AGENT1_PASSWORD: ${{ secrets.PW_AGENT1_PASSWORD }}
+  PW_PASSWORD: ${{ secrets.PW_PASSWORD }}
   PW_AGENT1_EXTENSION_NUMBER: ${{ secrets.PW_AGENT1_EXTENSION_NUMBER }}
-  PW_AGENT1_DIAL_NUMBER: ${{ secrets.PW_AGENT1_DIAL_NUMBER }}
-  PW_AGENT2_USERNAME: ${{ secrets.PW_AGENT2_USERNAME }}
-  PW_AGENT2_PASSWORD: ${{ secrets.PW_AGENT2_PASSWORD }}
+  PW_DIAL_NUMBER: ${{ secrets.PW_DIAL_NUMBER }}
+  PW_AGENT2_USERNAME: ${{ secrets.PW_AGENT2_USERNAME }}  
   PW_AGENT2_EXTENSION_NUMBER: ${{ secrets.PW_AGENT2_EXTENSION_NUMBER }}
-  PW_AGENT2_DIAL_NUMBER: ${{ secrets.PW_AGENT2_DIAL_NUMBER }}
 
 jobs:
   validate:
