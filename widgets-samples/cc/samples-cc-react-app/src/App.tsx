@@ -330,6 +330,8 @@ function App() {
 
   const onStateChange = (status) => {
     console.log('onStateChange invoked', status);
+    //adding a log to be used for automation
+    console.log('onStateChange invoked with state name:', status?.name);
     if (!status || !status.name) return;
     if (status.name !== 'RONA') {
       setShowRejectedPopup(false);
@@ -415,7 +417,7 @@ function App() {
                       </div>
                     )}
                     {loginType === 'oauth' && (
-                      <Button onClick={doOAuthLogin} variant="primary">
+                      <Button data-testid="samples:login_with_webex_button" onClick={doOAuthLogin} variant="primary">
                         Login with Webex
                       </Button>
                     )}
@@ -438,6 +440,7 @@ function App() {
                               name={widget}
                               checked={selectedWidgets[widget]}
                               onChange={handleCheckboxChange}
+                              data-testid={`samples:widget-${widget}`}
                             />
                             &nbsp;
                             {widget.charAt(0).toUpperCase() + widget.slice(1).replace(/([A-Z])/g, ' $1')}&nbsp;
@@ -487,6 +490,7 @@ function App() {
                       }}
                     />
                     <Checkbox
+                      data-testid="samples:show-agent-profile-checkbox"
                       checked={showAgentProfile}
                       aria-label="theme checkbox"
                       id="theme-checkbox"
@@ -522,6 +526,7 @@ function App() {
                         onClick={stationLogout}
                         color="positive"
                         className="stationLogoutButtonClass"
+                        data-testid="samples:station-logout-button"
                       >
                         Station Logout
                       </Button>
@@ -534,6 +539,7 @@ function App() {
                     <legend className="legend-box">&nbsp;SDK Toggles&nbsp;</legend>
                     <label style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
                       <input
+                        data-testid="samples:multi-login-enable-checkbox"
                         type="checkbox"
                         id="multiLoginFlag"
                         name="multiLoginFlag"
@@ -573,6 +579,7 @@ function App() {
                     setIsSdkReady(true);
                   });
                 }}
+                data-testid="samples:init-widgets-button"
               >
                 Init Widgets
               </Button>
