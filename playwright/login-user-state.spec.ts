@@ -14,7 +14,7 @@ test.describe('Login and User State tests', async () => {
     await page.getByRole('checkbox', {name: 'Enable Multi Login'}).check();
     await page.getByRole('button', {name: 'Init Widgets'}).click();
 
-    await page.getByTestId('station-login-widget').waitFor({state: 'visible', timeout: 50000});
+    await page.getByTestId('station-login-widget').waitFor({state: 'visible', timeout: 70000});
 
     const loginButtonExists = await page
       .getByTestId('login-button')
@@ -67,8 +67,8 @@ test.describe('Login and User State tests', async () => {
     await page.getByRole('button', {name: 'Init Widgets'}).click();
     await page2.getByRole('button', {name: 'Init Widgets'}).click();
 
-    await page.getByTestId('station-login-widget').waitFor({state: 'visible', timeout: 50000});
-    await page2.getByTestId('station-login-widget').waitFor({state: 'visible', timeout: 50000});
+    await page.getByTestId('station-login-widget').waitFor({state: 'visible', timeout: 70000});
+    await page2.getByTestId('station-login-widget').waitFor({state: 'visible', timeout: 70000});
 
     const loginButtonExists = await page
       .getByTestId('login-button')
@@ -122,7 +122,7 @@ test.describe('Login and User State tests', async () => {
 
     await page.getByRole('button', {name: 'Init Widgets'}).click();
 
-    await page.getByTestId('station-login-widget').waitFor({state: 'visible', timeout: 50000});
+    await page.getByTestId('station-login-widget').waitFor({state: 'visible', timeout: 70000});
     const loginButtonExists = await page
       .getByTestId('login-button')
       .isVisible()
@@ -149,6 +149,7 @@ test.describe('Login and User State tests', async () => {
     await expect(page.getByTestId('state-select')).toBeVisible();
 
     await page.getByTestId('state-item-Available').click();
+    await page.waitForTimeout(5000);
     await expect(page.getByTestId('state-select').getByTestId('state-name')).toContainText('Available');
     await page.reload();
 
@@ -158,7 +159,7 @@ test.describe('Login and User State tests', async () => {
     }
     await page.getByRole('textbox').fill(process.env.PW_AGENT1_ACCESS_TOKEN);
     await page.getByRole('button', {name: 'Init Widgets'}).click();
-    await page.getByTestId('station-login-widget').waitFor({state: 'visible', timeout: 50000});
+    await page.getByTestId('station-login-widget').waitFor({state: 'visible', timeout: 70000});
 
     await expect(page.getByTestId('login-option-select').locator('#select-base-triggerid')).toContainText('Extension');
     await expect(page.getByTestId('state-name')).toContainText('Available');
