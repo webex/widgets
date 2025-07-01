@@ -8,8 +8,8 @@ import {
   CallControlCAD,
   store,
   OutdialCall,
+  DigitalChannels,
 } from '@webex/cc-widgets';
-import DigitalChannels from '@webex/cc-digital-channels';
 import {StationLogoutSuccess} from '@webex/plugin-cc';
 import Webex from 'webex';
 import {
@@ -821,8 +821,10 @@ function App() {
               <DigitalChannels
                 conversationId={store.currentTask?.data?.interaction?.mediaResourceId}
                 jwtToken={accessToken}
+                // signalREndpoint="https://wxcc-component-api.cstg.webexengage.com/signalr"
+                // apiEndpoint="https://wxcc-component-api.cstg.webexengage.com/api"
+                signalREndpoint="https://ciscostaging.imichat.io/ciscosignalrserver/signalr"
                 apiEndpoint="https://wxcc-component-api.cstg.webexengage.com/api"
-                signalREndpoint="https://wxcc-component-api.cstg.webexengage.com/signalr"
               ></DigitalChannels>
             )}
           </div>

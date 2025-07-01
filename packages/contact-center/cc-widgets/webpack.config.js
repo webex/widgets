@@ -1,5 +1,6 @@
 const {merge} = require('webpack-merge');
 const path = require('path');
+const webpack = require('webpack');
 
 const baseConfig = require('../../../webpack.config');
 
@@ -14,6 +15,28 @@ module.exports = merge(baseConfig, {
     index: {
       import: './src/index.ts',
     },
+  },
+  resolve: {
+    alias: {
+      // Add process alias to help with problematic packages
+      'process/browser': require.resolve('process/browser.js'),
+    },
+    fallback: {
+      ...baseConfig.resolve?.fallback,
+      process: require.resolve('process/browser.js'),
+      'process/browser': require.resolve('process/browser.js'),
+      buffer: require.resolve('buffer/'),
+      crypto: require.resolve('crypto-browserify'),
+      stream: require.resolve('stream-browserify'),
+      util: require.resolve('util/'),
+      url: require.resolve('url/'),
+      fs: false,
+      path: require.resolve('path-browserify'),
+    },
+    // Add main fields to resolve modules properly
+    mainFields: ['browser', 'module', 'main'],
+    // Add symlinks resolution
+    symlinks: false,
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -73,6 +96,24 @@ module.exports = merge(baseConfig, {
           filename: 'images/[name][ext][query]',
         },
       },
+    ],
+  },
+  plugins: [
+    new webpack.ProvidePlugin({
+      process: 'process/browser.js',
+      Buffer: ['buffer', 'Buffer'],
+    }),
+    new webpack.DefinePlugin({
+      'process.env': JSON.stringify(process.env),
+      'process.browser': true,
+      'process.version': JSON.stringify(process.version),
+    }),
+  ],
+  // Ignore certain webpack warnings related to critical dependencies
+  stats: {
+    warningsFilter: [
+      /Critical dependency: the request of a dependency is an expression/,
+      /Module not found: Error: Can't resolve 'process\/browser'/,
     ],
   },
 });

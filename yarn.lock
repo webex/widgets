@@ -2894,12 +2894,12 @@ __metadata:
   linkType: hard
 
 "@jridgewell/gen-mapping@npm:^0.3.5":
-  version: 0.3.11
-  resolution: "@jridgewell/gen-mapping@npm:0.3.11"
+  version: 0.3.12
+  resolution: "@jridgewell/gen-mapping@npm:0.3.12"
   dependencies:
     "@jridgewell/sourcemap-codec": "npm:^1.5.0"
     "@jridgewell/trace-mapping": "npm:^0.3.24"
-  checksum: 10c0/c97fbae1ea1cbc5d18a0e53da9b3438f808bc5744b40ef26f670e391f873daa6db7c8ae7ecec2386c9af14811bf3e06c46bf391a67f5dc630ebeefe153765d42
+  checksum: 10c0/32f771ae2467e4d440be609581f7338d786d3d621bac3469e943b9d6d116c23c4becb36f84898a92bbf2f3c0511365c54a945a3b86a83141547a2a360a5ec0c7
   languageName: node
   linkType: hard
 
@@ -2911,29 +2911,29 @@ __metadata:
   linkType: hard
 
 "@jridgewell/source-map@npm:^0.3.3":
-  version: 0.3.9
-  resolution: "@jridgewell/source-map@npm:0.3.9"
+  version: 0.3.10
+  resolution: "@jridgewell/source-map@npm:0.3.10"
   dependencies:
     "@jridgewell/gen-mapping": "npm:^0.3.5"
     "@jridgewell/trace-mapping": "npm:^0.3.25"
-  checksum: 10c0/dde85ead7190940b1597b638de54c0ae20715a21e4488a6f8dc0c7f7fe7299adc22ac046a46ba72989b888fbfdf79607c05788602862c44a699c3538c3f85455
+  checksum: 10c0/cf6a51808bc710eb91a9e6c5e250c1af5714299c8de3db2b74e273a27ba7313f37c198ba332a512b7657fa23fed125c0147bfb1b925cadc9697a89cebecad0d8
   languageName: node
   linkType: hard
 
 "@jridgewell/sourcemap-codec@npm:^1.4.14, @jridgewell/sourcemap-codec@npm:^1.5.0":
-  version: 1.5.3
-  resolution: "@jridgewell/sourcemap-codec@npm:1.5.3"
-  checksum: 10c0/540e6d84f69e54b2569247fa3eb8cf7848689ebb15f67f7e8736c8b0e4e8a90b06e6c38e45a916e92f682efed9e1345b3dd9594bc5eb2633c1e50ad799edd6dc
+  version: 1.5.4
+  resolution: "@jridgewell/sourcemap-codec@npm:1.5.4"
+  checksum: 10c0/c5aab3e6362a8dd94ad80ab90845730c825fc4c8d9cf07ebca7a2eb8a832d155d62558800fc41d42785f989ddbb21db6df004d1786e8ecb65e428ab8dff71309
   languageName: node
   linkType: hard
 
 "@jridgewell/trace-mapping@npm:^0.3.12, @jridgewell/trace-mapping@npm:^0.3.18, @jridgewell/trace-mapping@npm:^0.3.24, @jridgewell/trace-mapping@npm:^0.3.25":
-  version: 0.3.28
-  resolution: "@jridgewell/trace-mapping@npm:0.3.28"
+  version: 0.3.29
+  resolution: "@jridgewell/trace-mapping@npm:0.3.29"
   dependencies:
     "@jridgewell/resolve-uri": "npm:^3.1.0"
     "@jridgewell/sourcemap-codec": "npm:^1.4.14"
-  checksum: 10c0/ca89e30e4f6ac7481d70ecd1d0aee670b566a9965330a1d9fc52af3e522eaa8beb9a322dc759921b4e1a8c5f5de4a998ea99c4251d6320460e96f7f1ce6a0270
+  checksum: 10c0/fb547ba31658c4d74eb17e7389f4908bf7c44cef47acb4c5baa57289daf68e6fe53c639f41f751b3923aca67010501264f70e7b49978ad1f040294b22c37b333
   languageName: node
   linkType: hard
 
@@ -8008,11 +8008,11 @@ __metadata:
   linkType: hard
 
 "@types/node@npm:*, @types/node@npm:>=13.7.0":
-  version: 24.0.8
-  resolution: "@types/node@npm:24.0.8"
+  version: 24.0.9
+  resolution: "@types/node@npm:24.0.9"
   dependencies:
     undici-types: "npm:~7.8.0"
-  checksum: 10c0/afc014193a1a58f545be023bd63a47639f09fddcaaf1ce271ae1b0f700d422aae425f453a8f428d98f772e08cc9bc54815da2b46ace2d1d4362f657c4172065f
+  checksum: 10c0/0a2d47c4b1bf50df46686a2f2f6790ee63e07c6cb96fa94fc3bc73e60530a38a34aa9be7577f3584318f8ddb1ae61685fad01046ca15d1ebb05d852569ccc48f
   languageName: node
   linkType: hard
 
@@ -8024,29 +8024,29 @@ __metadata:
   linkType: hard
 
 "@types/node@npm:^18.0.0":
-  version: 18.19.113
-  resolution: "@types/node@npm:18.19.113"
+  version: 18.19.114
+  resolution: "@types/node@npm:18.19.114"
   dependencies:
     undici-types: "npm:~5.26.4"
-  checksum: 10c0/d96a1849a9b58f24db926cac55fa6ea0bcd5dbc1d0dbd3dcf22e195ed4a47260daec32ffefd0281ee5fc03d621bc36e40cf60406b7473415d74b9db77279e7a1
+  checksum: 10c0/abcef8602c1684276c8cb266b18984f6195426bd58e66472666c55381292d074879b5143515d59a8a095a873ef4deee70b36750349f1a3aab432f93dc2023149
   languageName: node
   linkType: hard
 
 "@types/node@npm:^20.0.0":
-  version: 20.19.2
-  resolution: "@types/node@npm:20.19.2"
+  version: 20.19.3
+  resolution: "@types/node@npm:20.19.3"
   dependencies:
     undici-types: "npm:~6.21.0"
-  checksum: 10c0/85195d2435a215c886b3dabb2a93c557397e2b933a18803c6dd4fb3f87c3de9c8290fe78f08b52ebeb3b14063a00b217f66b4f9c0192581dc7a677c4f8663a9c
+  checksum: 10c0/22a26b8fe788e78951acb7f8503a70eb62f2f9d2a38c6319ea874462ac5db25dbb8255e435a421eee2d4a1090ab0d35b1097b2cbb4e26c1d8bac2d4cace9a876
   languageName: node
   linkType: hard
 
 "@types/node@npm:^22.13.13, @types/node@npm:^22.5.5":
-  version: 22.15.34
-  resolution: "@types/node@npm:22.15.34"
+  version: 22.15.35
+  resolution: "@types/node@npm:22.15.35"
   dependencies:
     undici-types: "npm:~6.21.0"
-  checksum: 10c0/fb6a6b36daaa1b484aaba3d33b4d1e7b37ea993e29f20b7a676affa76ed6ff6acd2ded4d5003469bc8dbc815b3d224533b4560896037ef6d5b5d552721ab7d57
+  checksum: 10c0/6045ef65b651f3f723cbce49fdf9d6cb0934ffa9a39147b6de41d237fc145b3476893a981e3e030d6c5a6fb344ee8c07a8798e298714b7bf387f785d58391388
   languageName: node
   linkType: hard
 
@@ -8675,30 +8675,30 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@volar/language-core@npm:2.4.15, @volar/language-core@npm:~2.4.11":
-  version: 2.4.15
-  resolution: "@volar/language-core@npm:2.4.15"
+"@volar/language-core@npm:2.4.16, @volar/language-core@npm:~2.4.11":
+  version: 2.4.16
+  resolution: "@volar/language-core@npm:2.4.16"
   dependencies:
-    "@volar/source-map": "npm:2.4.15"
-  checksum: 10c0/34ebd2a0f19ff5ee676d990dd3cc63a72867ab39a39071b0699486cf6e1304cad136cace78a55eaba41340720aa60863a4a9646f338bcca4bb9e0e22bd5d431e
+    "@volar/source-map": "npm:2.4.16"
+  checksum: 10c0/3238ece334dd98e135ad027db949c5f52aa815a6e945681700e4293cd72d9d2bf13de4a505ef89d044f61f85ce64e429c256f5826b583967cba7732e38715c26
   languageName: node
   linkType: hard
 
-"@volar/source-map@npm:2.4.15":
-  version: 2.4.15
-  resolution: "@volar/source-map@npm:2.4.15"
-  checksum: 10c0/f1c353774c1e758d99ebadc2fffd416eeba5fa5f461597cef5d201ca4ea5a81ad9d7eb1c418d61b3cadaed1db2fef3fa0a29e85a02f08bba6fab04578736959a
+"@volar/source-map@npm:2.4.16":
+  version: 2.4.16
+  resolution: "@volar/source-map@npm:2.4.16"
+  checksum: 10c0/64ece41a7f51a3bfb9d0a55bfed4b41c4e8d74efa560ea2a14cbbe75005b7be9a094ec49f0743df9f5e258ed4f2b13020509bae373a2bc5433389913b470f4cb
   languageName: node
   linkType: hard
 
 "@volar/typescript@npm:^2.4.11":
-  version: 2.4.15
-  resolution: "@volar/typescript@npm:2.4.15"
+  version: 2.4.16
+  resolution: "@volar/typescript@npm:2.4.16"
   dependencies:
-    "@volar/language-core": "npm:2.4.15"
+    "@volar/language-core": "npm:2.4.16"
     path-browserify: "npm:^1.0.1"
     vscode-uri: "npm:^3.0.8"
-  checksum: 10c0/f8d9e2f34e3d47edd3db51c23a4b14c48098e145c31566e463ec468a472bb3679426652c73a605a501977690749f7330c463a110283ce5d2c221f411b5fd889b
+  checksum: 10c0/c0c60ae3d4b88b044fff4b8ab25a63196c630e5a2ba235b5c9c280fd9f65533b894c578b27e1e762a32211f7d87573c0c3081bc60ba39500797dbb82f7e97c4a
   languageName: node
   linkType: hard
 
@@ -9651,6 +9651,7 @@ __metadata:
     "@testing-library/react": "npm:16.0.1"
     "@types/jest": "npm:29.5.14"
     "@types/react-test-renderer": "npm:18"
+    "@webex/cc-digital-channels": "workspace:*"
     "@webex/cc-station-login": "workspace:*"
     "@webex/cc-store": "workspace:*"
     "@webex/cc-task": "workspace:*"
@@ -9832,15 +9833,15 @@ __metadata:
   linkType: hard
 
 "@webex/event-dictionary-ts@npm:^1.0.1753":
-  version: 1.0.1834
-  resolution: "@webex/event-dictionary-ts@npm:1.0.1834"
+  version: 1.0.1835
+  resolution: "@webex/event-dictionary-ts@npm:1.0.1835"
   dependencies:
     amf-client-js: "npm:^5.2.6"
     json-schema-to-typescript: "npm:^12.0.0"
     minimist: "npm:^1.2.8"
     shelljs: "npm:^0.8.5"
     webapi-parser: "npm:^0.5.0"
-  checksum: 10c0/7e3d8c0453a44b287acfba111cec5bb04eb0db24697ef3f12bb1b43cb9daa534a204e2588fe2ac6f6aacbdbf49f86fa5dcefade16bb72f5bcf954c4afaf14094
+  checksum: 10c0/6b587f020211de0bb7b22291599b8735b7e01616b0ddd27bb96c9834dc9d1d55904dde849b799c9894e4266923f846a8b43054370ef3c5b77c8be38623354182
   languageName: node
   linkType: hard
 
@@ -20597,9 +20598,9 @@ __metadata:
   linkType: hard
 
 "globals@npm:^16.0.0":
-  version: 16.2.0
-  resolution: "globals@npm:16.2.0"
-  checksum: 10c0/c2b3ea163faa6f8a38076b471b12f4bda891f7df7f7d2e8294fb4801d735a51a73431bf4c1696c5bf5dbca5e0a0db894698acfcbd3068730c6b12eef185dea25
+  version: 16.3.0
+  resolution: "globals@npm:16.3.0"
+  checksum: 10c0/c62dc20357d1c0bf2be4545d6c4141265d1a229bf1c3294955efb5b5ef611145391895e3f2729f8603809e81b30b516c33e6c2597573844449978606aad6eb38
   languageName: node
   linkType: hard
 
@@ -31129,7 +31130,6 @@ __metadata:
     "@babel/preset-typescript": "npm:^7.25.9"
     "@eslint/js": "npm:^9.20.0"
     "@momentum-ui/react-collaboration": "npm:26.197.0"
-    "@webex/cc-digital-channels": "workspace:*"
     "@webex/cc-widgets": "workspace:*"
     babel-loader: "npm:^9.2.1"
     eslint: "npm:^9.20.1"
@@ -31832,14 +31832,15 @@ __metadata:
   linkType: hard
 
 "sha.js@npm:^2.4.0, sha.js@npm:^2.4.11, sha.js@npm:^2.4.8":
-  version: 2.4.11
-  resolution: "sha.js@npm:2.4.11"
+  version: 2.4.12
+  resolution: "sha.js@npm:2.4.12"
   dependencies:
-    inherits: "npm:^2.0.1"
-    safe-buffer: "npm:^5.0.1"
+    inherits: "npm:^2.0.4"
+    safe-buffer: "npm:^5.2.1"
+    to-buffer: "npm:^1.2.0"
   bin:
-    sha.js: ./bin.js
-  checksum: 10c0/b7a371bca8821c9cc98a0aeff67444a03d48d745cb103f17228b96793f455f0eb0a691941b89ea1e60f6359207e36081d9be193252b0f128e0daf9cfea2815a5
+    sha.js: bin.js
+  checksum: 10c0/9d36bdd76202c8116abbe152a00055ccd8a0099cb28fc17c01fa7bb2c8cffb9ca60e2ab0fe5f274ed6c45dc2633d8c39cf7ab050306c231904512ba9da4d8ab1
   languageName: node
   linkType: hard
 
