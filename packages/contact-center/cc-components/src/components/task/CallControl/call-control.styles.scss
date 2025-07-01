@@ -40,23 +40,10 @@
 
 .wrapup-select {
   flex-grow: 1;
-  padding: 0.5rem; // 8px to rem
   margin-top: 0.5rem; // 8px to rem
   margin-bottom: 0.75rem; // 12px to rem
-  border: 0.0625rem solid #ccc; // 1px to rem
-  border-radius: 0.25rem; // 4px to rem
   align-self: flex-start; // Align similar to .wrapup-header
-}
-
-.wrapup-select-arrow-icon {
-  position: absolute;
-  right: 1.5rem; /* Adjusted to leave space for the arrow icon */
-  top: 55%;
-  transform: translateY(-50%);
-  display: flex;
-  align-items: center;
-  pointer-events: none;
-  z-index: 1;
+  width: 100%; // Ensure it takes full width of the container
 }
 
 .submit-wrapup-button {
@@ -64,6 +51,7 @@
 }
 
 .wrapup-header {
+  margin-top: 0.7rem;
   margin-bottom: 0.7rem;
   align-self: flex-start;
 }
