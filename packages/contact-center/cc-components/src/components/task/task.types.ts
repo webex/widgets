@@ -384,6 +384,13 @@ export interface ControlProps {
     endConsult: boolean;
     recordingIndicator: boolean;
   };
+
+  secondsUntilAutoWrapup?: number;
+
+  /**
+   * Function to cancel the auto wrap-up timer.
+   */
+  cancelAutoWrapup: () => void;
 }
 
 export type CallControlComponentProps = Pick<
@@ -425,6 +432,8 @@ export type CallControlComponentProps = Pick<
   | 'setLastTargetType'
   | 'controlVisibility'
   | 'logger'
+  | 'secondsUntilAutoWrapup'
+  | 'cancelAutoWrapup'
 >;
 
 /**
@@ -515,3 +524,9 @@ export type MediaInfo = {
   labelName: string;
   isBrandVisual: boolean;
 };
+
+export interface AutoWrapupTimerProps {
+  secondsUntilAutoWrapup: number;
+  allowCancelAutoWrapup?: boolean;
+  handleCancelWrapup: () => void;
+}
