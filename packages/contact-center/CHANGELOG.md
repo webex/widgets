@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.82](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.81...v1.28.0-ccwidgets.82) (2025-07-01)
+
+
+### Features
+
+* **cc-widgets:** autoWrapup implemented ([#472](https://github.com/webex/widgets/issues/472)) ([07c4ef1](https://github.com/webex/widgets/commit/07c4ef18dbe4ddab8b813bb4ef36902903e5b586))
+
 # [1.28.0-ccwidgets.81](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.80...v1.28.0-ccwidgets.81) (2025-06-30)
 
 
