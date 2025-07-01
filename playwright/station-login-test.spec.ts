@@ -7,7 +7,7 @@ import {
   setupMultiLoginPage,
   loginViaAccessToken,
 } from './Utils/initUtils';
-import {stationLogout, telephonyLogin, verifyLoginMode, ensureUserStateVisible} from './Utils/stationLoginUtils';
+import {stationLogout, telephonyLogin} from './Utils/stationLoginUtils';
 import {
   getCurrentState,
   changeUserState,
@@ -16,12 +16,68 @@ import {
   validateConsoleStateChange,
   checkCallbackSequence,
 } from './Utils/userStateUtils';
-import {parseTimeString, waitForWebSocketDisconnection, waitForWebSocketReconnection} from './Utils/helperUtils';
 import {USER_STATES, THEME_COLORS, LOGIN_MODE, LONG_WAIT} from './constants';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 let page: Page;
 let context: BrowserContext;
 let consoleMessages: string[] = [];
+
+function parseTimeString(timeString: string): number {
+  const parts = timeString.split(':');
+  const minutes = parseInt(parts[0], 10) || 0;
+  const seconds = parseInt(parts[1], 10) || 0;
+  return minutes * 60 + seconds;
+}
+
+async function waitForWebSocketDisconnection(consoleMessages: string[], timeoutMs: number = 15000): Promise<boolean> {
+  const startTime = Date.now();
+  while (Date.now() - startTime < timeoutMs) {
+    const webSocketDisconnectLog = consoleMessages.find(
+      (msg) =>
+        msg.includes('Failed to load resource: net::ERR_INTERNET_DISCONNECTED') ||
+        msg.includes('[WebSocketStatus] event=checkOnlineStatus | online status= false')
+    );
+    if (webSocketDisconnectLog) {
+      return true;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  return false;
+}
+
+async function waitForWebSocketReconnection(consoleMessages: string[], timeoutMs: number = 15000): Promise<boolean> {
+  const startTime = Date.now();
+  while (Date.now() - startTime < timeoutMs) {
+    const webSocketReconnectLog = consoleMessages.find((msg) =>
+      msg.includes('[WebSocketStatus] event=checkOnlineStatus | online status= true')
+    );
+    if (webSocketReconnectLog) {
+      return true;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  return false;
+}
+
+// Helper function to verify login mode
+async function verifyLoginMode(page: Page, expectedMode: string): Promise<void> {
+  await expect(page.getByTestId('login-option-select').locator('#select-base-triggerid')).toContainText(expectedMode);
+}
+
+// Helper function to ensure user state widget is visible and login if needed
+async function ensureUserStateVisible(page: Page, loginMode: string): Promise<void> {
+  const isUserStateWidgetVisible = await page
+    .getByTestId('state-select')
+    .isVisible()
+    .catch(() => false);
+  if (!isUserStateWidgetVisible) {
+    await telephonyLogin(page, loginMode);
+    await expect(page.getByTestId('state-select')).toBeVisible({timeout: LONG_WAIT});
+  }
+}
 
 test.describe('Station Login Tests - Dial Number Mode', () => {
   test.beforeAll(async ({browser}) => {
@@ -40,7 +96,7 @@ test.describe('Station Login Tests - Dial Number Mode', () => {
     if (isLogoutButtonVisible) {
       await stationLogout(page);
     }
-    await expect(page.getByTestId('station-login-widget')).toBeVisible({timeout: 2000});
+    await expect(page.getByTestId('station-login-widget')).toBeVisible();
   });
 
   test.afterAll(async () => {
@@ -61,15 +117,15 @@ test.describe('Station Login Tests - Dial Number Mode', () => {
   });
 
   test('should login with Dial Number mode and verify all fields are visible', async () => {
-    await expect(page.getByTestId('station-login-widget')).toBeVisible({timeout: 2000});
+    await expect(page.getByTestId('station-login-widget')).toBeVisible();
     const loginModeSelector = page.getByTestId('login-option-select');
-    await expect(loginModeSelector).toBeVisible({timeout: 2000});
+    await expect(loginModeSelector).toBeVisible();
     const phoneNumberInput = page.getByTestId('dial-number-input');
-    await expect(phoneNumberInput).toBeVisible({timeout: 2000});
+    await expect(phoneNumberInput).toBeVisible();
     const teamSelectionDropdown = page.getByTestId('teams-select-dropdown');
-    await expect(teamSelectionDropdown).toBeVisible({timeout: 2000});
+    await expect(teamSelectionDropdown).toBeVisible();
     const saveAndContinueButton = page.getByTestId('login-button');
-    await expect(saveAndContinueButton).toBeVisible({timeout: 2000});
+    await expect(saveAndContinueButton).toBeVisible();
     await expect(saveAndContinueButton).toContainText('Save & Continue');
     await telephonyLogin(page, LOGIN_MODE.DIAL_NUMBER);
     await expect(page.getByTestId('state-select')).toBeVisible({timeout: LONG_WAIT});
@@ -79,13 +135,13 @@ test.describe('Station Login Tests - Dial Number Mode', () => {
   test('should handle page reload and maintain Dial Number login state', async () => {
     await ensureUserStateVisible(page, LOGIN_MODE.DIAL_NUMBER);
     await agentRelogin(page);
-    await expect(page.getByTestId('station-login-widget')).toBeVisible({timeout: 2000});
+    await expect(page.getByTestId('station-login-widget')).toBeVisible();
     await verifyLoginMode(page, 'Dial Number');
     const dialNumber = process.env.PW_AGENT1_DIAL_NUMBER;
     if (dialNumber) {
       await expect(page.getByTestId('dial-number-input').locator('input')).toHaveValue(dialNumber);
     }
-    await expect(page.getByTestId('state-select')).toBeVisible({timeout: 2000});
+    await expect(page.getByTestId('state-select')).toBeVisible();
   });
 
   test('should retain user state timer and switch to Meeting state after network disconnection with Dial Number mode', async () => {
@@ -94,13 +150,13 @@ test.describe('Station Login Tests - Dial Number Mode', () => {
     await verifyCurrentState(page, USER_STATES.MEETING);
     const timerBeforeDisconnection = await getStateElapsedTime(page);
     const secondsBeforeDisconnection = parseTimeString(timerBeforeDisconnection);
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(15000);
     consoleMessages.length = 0;
     await page.context().setOffline(true);
     await page.waitForTimeout(3000);
     const isWebSocketDisconnected = await waitForWebSocketDisconnection(consoleMessages);
     expect(isWebSocketDisconnected).toBe(true);
-    await expect(page.getByTestId('station-login-widget')).toBeVisible({timeout: 2000});
+    await expect(page.getByTestId('station-login-widget')).toBeVisible();
     await verifyLoginMode(page, 'Dial Number');
     consoleMessages.length = 0;
     await page.context().setOffline(false);
@@ -126,7 +182,7 @@ test.describe('Station Login Tests - Dial Number Mode', () => {
     await page.context().setOffline(true);
     const isWebSocketDisconnected = await waitForWebSocketDisconnection(consoleMessages);
     expect(isWebSocketDisconnected).toBe(true);
-    await expect(page.getByTestId('station-login-widget')).toBeVisible({timeout: 2000});
+    await expect(page.getByTestId('station-login-widget')).toBeVisible();
     await verifyLoginMode(page, 'Dial Number');
     consoleMessages.length = 0;
     await page.context().setOffline(false);
@@ -144,7 +200,7 @@ test.describe('Station Login Tests - Dial Number Mode', () => {
     await verifyLoginMode(page, 'Dial Number');
   });
 
-  test('should support multi-login synchronization for Dial Number Mode ', async () => {
+  test('should support multi-session Dial Number login synchronization', async () => {
     await ensureUserStateVisible(page, LOGIN_MODE.DIAL_NUMBER);
     const multiSessionPage = await setupMultiLoginPage(context);
     await verifyLoginMode(multiSessionPage, 'Dial Number');
@@ -198,15 +254,15 @@ test.describe('Station Login Tests - Extension Mode', () => {
   });
 
   test('should login with Extension mode and verify all fields are visible', async () => {
-    await expect(page.getByTestId('station-login-widget')).toBeVisible({timeout: 2000});
+    await expect(page.getByTestId('station-login-widget')).toBeVisible();
     const loginModeSelector = page.getByTestId('login-option-select');
-    await expect(loginModeSelector).toBeVisible({timeout: 2000});
+    await expect(loginModeSelector).toBeVisible();
     const phoneNumberInput = page.getByTestId('dial-number-input');
-    await expect(phoneNumberInput).toBeVisible({timeout: 2000});
+    await expect(phoneNumberInput).toBeVisible();
     const teamSelectionDropdown = page.getByTestId('teams-select-dropdown');
-    await expect(teamSelectionDropdown).toBeVisible({timeout: 2000});
+    await expect(teamSelectionDropdown).toBeVisible();
     const saveAndContinueButton = page.getByTestId('login-button');
-    await expect(saveAndContinueButton).toBeVisible({timeout: 2000});
+    await expect(saveAndContinueButton).toBeVisible();
     await expect(saveAndContinueButton).toContainText('Save & Continue');
     await telephonyLogin(page, LOGIN_MODE.EXTENSION);
     await expect(page.getByTestId('state-select')).toBeVisible({timeout: LONG_WAIT});
@@ -216,13 +272,13 @@ test.describe('Station Login Tests - Extension Mode', () => {
   test('should handle page reload and maintain Extension login state', async () => {
     await ensureUserStateVisible(page, LOGIN_MODE.EXTENSION);
     await agentRelogin(page);
-    await expect(page.getByTestId('station-login-widget')).toBeVisible({timeout: 2000});
+    await expect(page.getByTestId('station-login-widget')).toBeVisible();
     await verifyLoginMode(page, 'Extension');
     const extensionNumber = process.env.PW_AGENT1_EXTENSION;
     if (extensionNumber) {
       await expect(page.getByTestId('dial-number-input').locator('input')).toHaveValue(extensionNumber);
     }
-    await expect(page.getByTestId('state-select')).toBeVisible({timeout: 2000});
+    await expect(page.getByTestId('state-select')).toBeVisible();
   });
 
   test('should retain user state timer and switch to Meeting state after network disconnection with Extension mode', async () => {
@@ -234,14 +290,12 @@ test.describe('Station Login Tests - Extension Mode', () => {
     await page.waitForTimeout(3000);
     consoleMessages.length = 0;
     await page.context().setOffline(true);
-    await page.waitForTimeout(3000);
     const isWebSocketDisconnected = await waitForWebSocketDisconnection(consoleMessages);
     expect(isWebSocketDisconnected).toBe(true);
-    await expect(page.getByTestId('station-login-widget')).toBeVisible({timeout: 2000});
+    await expect(page.getByTestId('station-login-widget')).toBeVisible();
     await verifyLoginMode(page, 'Extension');
     consoleMessages.length = 0;
     await page.context().setOffline(false);
-    await page.waitForTimeout(3000);
     const isWebSocketReconnected = await waitForWebSocketReconnection(consoleMessages);
     expect(isWebSocketReconnected).toBe(true);
     await verifyCurrentState(page, USER_STATES.MEETING);
@@ -263,7 +317,7 @@ test.describe('Station Login Tests - Extension Mode', () => {
     await page.context().setOffline(true);
     const isWebSocketDisconnected = await waitForWebSocketDisconnection(consoleMessages);
     expect(isWebSocketDisconnected).toBe(true);
-    await expect(page.getByTestId('station-login-widget')).toBeVisible({timeout: 2000});
+    await expect(page.getByTestId('station-login-widget')).toBeVisible();
     await verifyLoginMode(page, 'Extension');
     consoleMessages.length = 0;
     await page.context().setOffline(false);
@@ -281,7 +335,7 @@ test.describe('Station Login Tests - Extension Mode', () => {
     await verifyLoginMode(page, 'Extension');
   });
 
-  test('should support multi-login synchronization for Extension Mode', async () => {
+  test('should support multi-session Extension login synchronization', async () => {
     await ensureUserStateVisible(page, LOGIN_MODE.EXTENSION);
     const multiSessionPage = await setupMultiLoginPage(context);
     await verifyLoginMode(multiSessionPage, 'Extension');
@@ -312,18 +366,12 @@ test.describe('Station Login Tests - Desktop Mode', () => {
     if (isLogoutButtonVisible) {
       await stationLogout(page);
     }
-    await expect(page.getByTestId('station-login-widget')).toBeVisible({timeout: 2000});
+    await expect(page.getByTestId('station-login-widget')).toBeVisible();
   });
 
   test.afterAll(async () => {
     if (page) {
-      const isLogoutButtonVisible = await page
-        .getByTestId('samples:station-logout-button')
-        .isVisible()
-        .catch(() => false);
-      if (isLogoutButtonVisible) {
-        await stationLogout(page);
-      }
+      await stationLogout(page);
       await context.close();
     }
   });
@@ -333,13 +381,13 @@ test.describe('Station Login Tests - Desktop Mode', () => {
   });
 
   test('should login with Desktop mode and verify all fields are visible', async () => {
-    await expect(page.getByTestId('station-login-widget')).toBeVisible({timeout: 2000});
+    await expect(page.getByTestId('station-login-widget')).toBeVisible();
     const loginModeSelector = page.getByTestId('login-option-select');
-    await expect(loginModeSelector).toBeVisible({timeout: 2000});
+    await expect(loginModeSelector).toBeVisible();
     const teamSelectionDropdown = page.getByTestId('teams-select-dropdown');
-    await expect(teamSelectionDropdown).toBeVisible({timeout: 2000});
+    await expect(teamSelectionDropdown).toBeVisible();
     const saveAndContinueButton = page.getByTestId('login-button');
-    await expect(saveAndContinueButton).toBeVisible({timeout: 2000});
+    await expect(saveAndContinueButton).toBeVisible();
     await expect(saveAndContinueButton).toContainText('Save & Continue');
     await telephonyLogin(page, LOGIN_MODE.DESKTOP);
     await expect(page.getByTestId('state-select')).toBeVisible({timeout: 3000});
@@ -349,9 +397,9 @@ test.describe('Station Login Tests - Desktop Mode', () => {
   test('should handle page reload and maintain Desktop login state', async () => {
     await ensureUserStateVisible(page, LOGIN_MODE.DESKTOP);
     await agentRelogin(page);
-    await expect(page.getByTestId('station-login-widget')).toBeVisible({timeout: 2000});
+    await expect(page.getByTestId('station-login-widget')).toBeVisible();
     await verifyLoginMode(page, 'Desktop');
-    await expect(page.getByTestId('state-select')).toBeVisible({timeout: 2000});
+    await expect(page.getByTestId('state-select')).toBeVisible();
   });
 
   test('should retain user state timer and switch to Meeting state after network disconnection with Desktop mode', async () => {
@@ -365,12 +413,10 @@ test.describe('Station Login Tests - Desktop Mode', () => {
     await page.context().setOffline(true);
     const isWebSocketDisconnected = await waitForWebSocketDisconnection(consoleMessages);
     expect(isWebSocketDisconnected).toBe(true);
-    await page.waitForTimeout(3000);
-    await expect(page.getByTestId('station-login-widget')).toBeVisible({timeout: 2000});
+    await expect(page.getByTestId('station-login-widget')).toBeVisible();
     await verifyLoginMode(page, 'Desktop');
     consoleMessages.length = 0;
     await page.context().setOffline(false);
-    await page.waitForTimeout(3000);
     const isWebSocketReconnected = await waitForWebSocketReconnection(consoleMessages);
     expect(isWebSocketReconnected).toBe(true);
     await verifyCurrentState(page, USER_STATES.MEETING);
@@ -392,7 +438,7 @@ test.describe('Station Login Tests - Desktop Mode', () => {
     await page.context().setOffline(true);
     const isWebSocketDisconnected = await waitForWebSocketDisconnection(consoleMessages);
     expect(isWebSocketDisconnected).toBe(true);
-    await expect(page.getByTestId('station-login-widget')).toBeVisible({timeout: 2000});
+    await expect(page.getByTestId('station-login-widget')).toBeVisible();
     await verifyLoginMode(page, 'Desktop');
     consoleMessages.length = 0;
     await page.context().setOffline(false);
