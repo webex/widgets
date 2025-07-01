@@ -9,7 +9,7 @@ import {
   store,
   OutdialCall,
 } from '@webex/cc-widgets';
-import DigitalChannels from 'minimal-webex-engage-app';
+import DigitalChannels from '@webex/cc-digital-channels';
 import {StationLogoutSuccess} from '@webex/plugin-cc';
 import Webex from 'webex';
 import {

@@ -1,5 +1,5 @@
 {
-  "name": "minimal-webex-engage-app",
+  "name": "@webex/cc-digital-channels",
   "version": "1.0.0",
   "description": "Minimal implementation of Webex Engage Conversations",
   "main": "dist/index.umd.js",
