@@ -156,8 +156,8 @@ describe('useStationLogin Hook', () => {
       data: {
         agentId: '6b310dff-569e-4ac7-b064-70f834ea56d8',
         agentSessionId: 'c9c24ace-5170-4a9f-8bc2-2eeeff9d7c11',
-        lastStateChangeTimestamp: '1234',
-        lastIdleCodeChangeTimestamp: '2345',
+        lastStateChangeTimestamp: 1234,
+        lastIdleCodeChangeTimestamp: 2345,
       },
     };
 
@@ -601,6 +601,7 @@ describe('useStationLogin Hook', () => {
       result.current.setCurrentLoginOptions({
         deviceType: 'DIALNUMBER',
         dialNumber: '2002',
+        teamId: 'team123',
       });
     });
 
@@ -612,7 +613,7 @@ describe('useStationLogin Hook', () => {
 
     expect(cc.updateAgentProfile).toHaveBeenCalledWith({
       loginOption: 'DIALNUMBER',
-      teamId: undefined,
+      teamId: 'team123',
       dialNumber: '2002',
     });
     expect(logger.log).toHaveBeenCalledWith(
@@ -647,6 +648,7 @@ describe('useStationLogin Hook', () => {
       result.current.setCurrentLoginOptions({
         deviceType: 'DIALNUMBER',
         dialNumber: '2002',
+        teamId: 'team123',
       });
     });
 
@@ -682,6 +684,7 @@ describe('useStationLogin Hook', () => {
       result.current.setCurrentLoginOptions({
         deviceType: 'BROWSER',
         dialNumber: 'shouldNotBeSent',
+        teamId: 'team123',
       });
     });
 
@@ -691,7 +694,7 @@ describe('useStationLogin Hook', () => {
 
     expect(cc.updateAgentProfile).toHaveBeenCalledWith({
       loginOption: 'BROWSER',
-      teamId: undefined,
+      teamId: 'team123',
       // dialNumber should NOT be present
     });
 

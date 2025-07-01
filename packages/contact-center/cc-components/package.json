@@ -21,7 +21,7 @@
     "build": "yarn run -T tsc",
     "build:src": "yarn run clean:dist && webpack",
     "build:watch": "webpack --watch",
-    "test:unit": "tsc && jest --coverage",
+    "test:unit": "tsc --project tsconfig.test.json && jest --coverage",
     "test:styles": "eslint"
   },
   "dependencies": {
