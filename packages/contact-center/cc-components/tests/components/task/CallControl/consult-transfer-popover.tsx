@@ -49,6 +49,7 @@ describe.skip('ConsultTransferPopoverComponent', () => {
     ],
     onAgentSelect: mockOnAgentSelect,
     onQueueSelect: mockOnQueueSelect,
+    allowConsultToQueue: true,
     logger: loggerMock,
     showTabs: true,
     emptyMessage: 'No agents or queues available',

@@ -24,11 +24,18 @@ describe.skip('IncomingTaskComponent', () => {
     const props = {
       incomingTask: mockTask,
       accept: jest.fn(),
-      decline: jest.fn(),
+      reject: jest.fn(),
       isBrowser: true,
       isAnswered: false,
       isEnded: false,
       isMissed: false,
+      logger: {
+        log: jest.fn(),
+        info: jest.fn(),
+        warn: jest.fn(),
+        error: jest.fn(),
+        trace: jest.fn(),
+      },
     };
 
     render(<IncomingTaskComponent {...props} />);

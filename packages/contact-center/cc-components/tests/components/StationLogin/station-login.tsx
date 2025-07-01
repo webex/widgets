@@ -42,7 +42,6 @@ describe('Station Login Component', () => {
     dialNumberValue: '',
     setDialNumberValue: jest.fn(),
     setSelectedDeviceType: jest.fn(),
-    selectedOption: 'EXTENSION',
     setCurrentLoginOptions: jest.fn(),
     currentLoginOptions: {
       deviceType: 'EXTENSION',

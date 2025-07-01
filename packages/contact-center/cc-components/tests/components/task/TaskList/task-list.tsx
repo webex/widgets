@@ -19,8 +19,20 @@ describe.skip('TaskListPresentational Component', () => {
     };
 
     const props: TaskListComponentProps = {
-      taskList: [
-        {
+      currentTask: {
+        id: '1',
+        data: {
+          interaction: {
+            callAssociatedDetails: {
+              ani: '1234567890',
+              dn: '9876543210',
+              virtualTeamName: 'Sales Team',
+            },
+          },
+        },
+      },
+      taskList: {
+        '1': {
           id: '1',
           data: {
             interaction: {
@@ -32,7 +44,7 @@ describe.skip('TaskListPresentational Component', () => {
             },
           },
         },
-        {
+        '2': {
           id: '2',
           data: {
             interaction: {
@@ -44,7 +56,11 @@ describe.skip('TaskListPresentational Component', () => {
             },
           },
         },
-      ],
+      },
+      isBrowser: true,
+      acceptTask: jest.fn(),
+      declineTask: jest.fn(),
+      onTaskSelect: jest.fn(),
       logger: loggerMock,
     };
 
