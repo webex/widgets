@@ -25,6 +25,17 @@ let page: Page;
 let context: BrowserContext;
 let consoleMessages: string[] = [];
 
+/**
+ * Parses a time string in MM:SS format and converts it to total seconds
+ * @param timeString - Time string in format "MM:SS" (e.g., "01:30" for 1 minute 30 seconds)
+ * @returns Total number of seconds
+ * @example
+ * ```typescript
+ * parseTimeString("01:30"); // Returns 90 (1 minute 30 seconds)
+ * parseTimeString("00:45"); // Returns 45 (45 seconds)
+ * parseTimeString("10:00"); // Returns 600 (10 minutes)
+ * ```
+ */
 function parseTimeString(timeString: string): number {
   const parts = timeString.split(':');
   const minutes = parseInt(parts[0], 10) || 0;
@@ -32,6 +43,20 @@ function parseTimeString(timeString: string): number {
   return minutes * 60 + seconds;
 }
 
+/**
+ * Waits for WebSocket disconnection by monitoring console messages for specific disconnection indicators
+ * @param consoleMessages - Array of console messages to monitor
+ * @param timeoutMs - Maximum time to wait for disconnection in milliseconds (default: 15000)
+ * @returns Promise<boolean> - True if disconnection is detected, false if timeout is reached
+ * @description Monitors for network disconnection messages or WebSocket offline status changes
+ * @example
+ * ```typescript
+ * consoleMessages.length = 0; // Clear existing messages
+ * await page.context().setOffline(true);
+ * const isDisconnected = await waitForWebSocketDisconnection(consoleMessages);
+ * expect(isDisconnected).toBe(true);
+ * ```
+ */
 async function waitForWebSocketDisconnection(consoleMessages: string[], timeoutMs: number = 15000): Promise<boolean> {
   const startTime = Date.now();
   while (Date.now() - startTime < timeoutMs) {
@@ -48,6 +73,20 @@ async function waitForWebSocketDisconnection(consoleMessages: string[], timeoutM
   return false;
 }
 
+/**
+ * Waits for WebSocket reconnection by monitoring console messages for online status changes
+ * @param consoleMessages - Array of console messages to monitor
+ * @param timeoutMs - Maximum time to wait for reconnection in milliseconds (default: 15000)
+ * @returns Promise<boolean> - True if reconnection is detected, false if timeout is reached
+ * @description Monitors for WebSocket online status change messages indicating successful reconnection
+ * @example
+ * ```typescript
+ * consoleMessages.length = 0; // Clear existing messages
+ * await page.context().setOffline(false);
+ * const isReconnected = await waitForWebSocketReconnection(consoleMessages);
+ * expect(isReconnected).toBe(true);
+ * ```
+ */
 async function waitForWebSocketReconnection(consoleMessages: string[], timeoutMs: number = 15000): Promise<boolean> {
   const startTime = Date.now();
   while (Date.now() - startTime < timeoutMs) {
@@ -62,11 +101,37 @@ async function waitForWebSocketReconnection(consoleMessages: string[], timeoutMs
   return false;
 }
 
+/**
+ * Verifies that the login mode selector displays the expected login mode
+ * @param page - The Playwright page object
+ * @param expectedMode - The expected login mode text to verify (e.g., 'Dial Number', 'Extension', 'Desktop')
+ * @description Checks the login option select element's trigger text to ensure it matches the expected mode
+ * @throws {Error} When the login mode doesn't match the expected value
+ * @example
+ * ```typescript
+ * await verifyLoginMode(page, LOGIN_MODE.DIAL_NUMBER);
+ * await verifyLoginMode(page, LOGIN_MODE.EXTENSION);
+ * await verifyLoginMode(page, LOGIN_MODE.DESKTOP);
+ * ```
+ */
 // Helper function to verify login mode
 async function verifyLoginMode(page: Page, expectedMode: string): Promise<void> {
   await expect(page.getByTestId('login-option-select').locator('#select-base-triggerid')).toContainText(expectedMode);
 }
 
+/**
+ * Ensures the user state widget is visible by checking its current state and logging in if necessary
+ * @param page - The Playwright page object
+ * @param loginMode - The login mode to use if login is required (from LOGIN_MODE constants)
+ * @description Checks if the state-select widget is visible; if not, performs telephony login and waits for it to appear
+ * @throws {Error} When telephony login fails or state widget doesn't become visible
+ * @example
+ * ```typescript
+ * await ensureUserStateVisible(page, LOGIN_MODE.DIAL_NUMBER);
+ * await ensureUserStateVisible(page, LOGIN_MODE.EXTENSION);
+ * await ensureUserStateVisible(page, LOGIN_MODE.DESKTOP);
+ * ```
+ */
 // Helper function to ensure user state widget is visible and login if needed
 async function ensureUserStateVisible(page: Page, loginMode: string): Promise<void> {
   const isUserStateWidgetVisible = await page
