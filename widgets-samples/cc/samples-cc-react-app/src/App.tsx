@@ -169,6 +169,8 @@ const onTaskDeclined = (task,reason) => {
 
   const onWrapUp = (params) => {
     console.log('onWrapup invoked', params);
+    //the below log is used by e2e tests
+     if (params && params.wrapUpReason) console.log(`onWrapup invoked with reason : ${params.wrapUpReason}`);
   };
 
   const enableDisableMultiLogin = () => {
@@ -336,6 +338,8 @@ const onTaskDeclined = (task,reason) => {
       setShowRejectedPopup(false);
       setRejectedReason('');
     }
+    //the below log is used by e2e tests
+    console.log(`onStateChange invoked with state : ${status.name}`);
   };
 
     const stationLogout = () => {
@@ -732,6 +736,7 @@ const onTaskDeclined = (task,reason) => {
                                     setCollapsedTasks((prev) => prev.filter((id) => id !== task.data.interactionId));
                                   }
                                 }}
+                                data-testid={`samples:incoming-task-${task.data.mediaType}`}
                               >
                                 <>
                                   <button
