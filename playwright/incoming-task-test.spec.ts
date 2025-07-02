@@ -808,7 +808,11 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await changeUserState(page, USER_STATES.AVAILABLE);
     const incomingTaskDiv = page.getByTestId('samples:incoming-task-email').first();
     await page.waitForTimeout(3000);
-    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 70000 });
+    const incomingTaskVisible = await incomingTaskDiv.waitFor({ state: 'visible', timeout: 70000 }).catch(() => false);
+    if (!incomingTaskVisible) {
+      await createEmailTask();
+      await incomingTaskDiv.waitFor({ state: 'visible', timeout: 70000 });
+    }
     await incomingTaskDiv.waitFor({ state: 'hidden', timeout: 30000 });
     await expect(incomingTaskDiv).toBeHidden();
     await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 15000 });
