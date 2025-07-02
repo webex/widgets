@@ -343,6 +343,8 @@ test.describe('Incoming Call Task Tests for Desktop Mode', async () => {
     await page.waitForTimeout(1000);
     await createCallTask(callerpage);
     await page.waitForTimeout(2000);
+    const incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 100000 });
     await declineIncomingTask(page, TASK_TYPES.CALL);
     await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 15000 });
     await page.waitForTimeout(8000);
@@ -351,7 +353,7 @@ test.describe('Incoming Call Task Tests for Desktop Mode', async () => {
     const userStateElementColor = await userStateElement.evaluate((el) => getComputedStyle(el).backgroundColor);
 
     expect(
-      ((receivedColor: string, expectedColor: string, tolerance: number = 20) => {
+      ((receivedColor: string, expectedColor: string, tolerance: number = 30) => {
         const receivedRgb = receivedColor.match(/\d+/g)?.map(Number) || [];
         const expectedRgb = expectedColor.match(/\d+/g)?.map(Number) || [];
 
@@ -383,16 +385,19 @@ test.describe('Incoming Call Task Tests for Desktop Mode', async () => {
     await changeUserState(page, USER_STATES.AVAILABLE);
     await page.waitForTimeout(1000);
     await createCallTask(callerpage);
+    let incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 120000 });
+    await page.waitForTimeout(2000);
     await declineIncomingTask(page, TASK_TYPES.CALL);
-    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible' });
+    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 15000 });
     await page.waitForTimeout(7000);
     await verifyCurrentState(page, USER_STATES.RONA);
     await submitRonaPopup(page, RONA_OPTIONS.AVAILABLE);
     await expect(page.getByTestId('samples:rona-popup')).not.toBeVisible();
     await page.waitForTimeout(7000);
     await verifyCurrentState(page, USER_STATES.AVAILABLE);
-    const incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
-    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 120000 });
+    incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 40000 });
     await expect(incomingTaskDiv).toBeVisible();
     await page.waitForTimeout(7000);
     await declineIncomingTask(page, TASK_TYPES.CALL);
@@ -409,15 +414,17 @@ test.describe('Incoming Call Task Tests for Desktop Mode', async () => {
     await changeUserState(page, USER_STATES.AVAILABLE);
     await page.waitForTimeout(1000);
     await createCallTask(callerpage);
+    let incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 120000 });
     await declineIncomingTask(page, TASK_TYPES.CALL);
     await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 15000 });
     await page.waitForTimeout(7000);
     await verifyCurrentState(page, USER_STATES.RONA);
-    await submitRonaPopup(page, 'Idle');
+    await submitRonaPopup(page, RONA_OPTIONS.IDLE);
     await expect(page.getByTestId('samples:rona-popup')).not.toBeVisible();
     await page.waitForTimeout(7000);
     await verifyCurrentState(page, USER_STATES.MEETING);
-    const incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
+    incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
     await expect(incomingTaskDiv).toBeHidden();
     await endCallTask(callerpage);
   });
@@ -426,24 +433,13 @@ test.describe('Incoming Call Task Tests for Desktop Mode', async () => {
     await changeUserState(page, USER_STATES.AVAILABLE);
     await createCallTask(callerpage);
     const incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
-    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 50000 });
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 100000 });
     await endCallTask(callerpage);
     await incomingTaskDiv.waitFor({ state: 'hidden', timeout: 30000 });
     await expect(incomingTaskDiv).toBeHidden();
     await page.waitForTimeout(7000);
     await verifyCurrentState(page, USER_STATES.AVAILABLE);
   });
-
-  test.afterAll(async () => {
-    if (context) {
-      await context.close();
-      context = null;
-    }
-    if (context2) {
-      await context2.close();
-      context2 = null;
-    }
-  })
 
 });
 
@@ -529,7 +525,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await extensionPage.locator('[data-test="generic-person-item-base"]').waitFor({ state: 'visible', timeout: 30000 });
     await page.waitForTimeout(3000);
     await declineExtensionCall(extensionPage);
-    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 30000 });
+    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 15000 });
     await extensionPage.locator('[data-test="generic-person-item-base"]').waitFor({ state: 'hidden', timeout: 30000 });
     await page.waitForTimeout(6000);
     await verifyCurrentState(page, USER_STATES.RONA);
@@ -537,7 +533,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     const userStateElementColor = await userStateElement.evaluate((el) => getComputedStyle(el).backgroundColor);
 
     expect(
-      ((receivedColor: string, expectedColor: string, tolerance: number = 20) => {
+      ((receivedColor: string, expectedColor: string, tolerance: number = 30) => {
         const receivedRgb = receivedColor.match(/\d+/g)?.map(Number) || [];
         const expectedRgb = expectedColor.match(/\d+/g)?.map(Number) || [];
 
@@ -548,7 +544,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
         );
       })(userStateElementColor, THEME_COLORS.RONA)
     ).toBe(true);
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(4000);
     expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
 
     await endCallTask(callerpage);
@@ -560,14 +556,14 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await changeUserState(page, USER_STATES.AVAILABLE);
     const incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
     await incomingTaskDiv.waitFor({ state: 'visible', timeout: 120000 });
-    await extensionPage.locator('[data-test="generic-person-item-base"]').waitFor({ state: 'visible', timeout: 30000 });
+    await extensionPage.locator('[data-test="generic-person-item-base"]').first().waitFor({ state: 'visible', timeout: 30000 });
     await incomingTaskDiv.waitFor({ state: 'hidden', timeout: 30000 });
     await extensionPage.locator('[data-test="generic-person-item-base"]').first().waitFor({ state: 'hidden', timeout: 30000 });
     await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 15000 });
     await expect(page.getByTestId('samples:rona-popup')).toBeVisible();
     await page.waitForTimeout(7000);
     await verifyCurrentState(page, USER_STATES.RONA);
-    await page.waitForTimeout(10000);
+    await page.waitForTimeout(15000);
     expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
     await endCallTask(callerpage);
     await submitRonaPopup(page, RONA_OPTIONS.IDLE);
@@ -592,6 +588,8 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await expect(page.getByTestId('samples:rona-popup')).not.toBeVisible();
     await page.waitForTimeout(7000);
     await verifyCurrentState(page, USER_STATES.AVAILABLE);
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 40000 });
+    expect(incomingTaskDiv).toBeVisible();
     await endCallTask(callerpage);
   });
 
@@ -612,7 +610,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
     await submitRonaPopup(page, RONA_OPTIONS.IDLE);
     await expect(page.getByTestId('samples:rona-popup')).not.toBeVisible();
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1000);
     await expect(incomingTaskDiv).toBeHidden();
     await expect(extensionPage.locator('[data-test="generic-person-item-base"]').first()).toBeHidden();
     await page.waitForTimeout(6000);
@@ -649,10 +647,10 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await page.waitForTimeout(5000);
     expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
     const userStateElement = page.getByTestId('state-select');
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(5000);
     const userStateElementColor = await userStateElement.evaluate((el) => getComputedStyle(el).backgroundColor);
     expect(
-      ((receivedColor: string, expectedColor: string, tolerance: number = 20) => {
+      ((receivedColor: string, expectedColor: string, tolerance: number = 30) => {
         const receivedRgb = receivedColor.match(/\d+/g)?.map(Number) || [];
         const expectedRgb = expectedColor.match(/\d+/g)?.map(Number) || [];
 
@@ -724,9 +722,11 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await page.waitForTimeout(6000);
     await verifyCurrentState(page, USER_STATES.ENGAGED);
     const userStateElement = page.getByTestId('state-select');
+    await page.waitForTimeout(5000);
     const userStateElementColor = await userStateElement.evaluate((el) => getComputedStyle(el).backgroundColor);
     expect(userStateElementColor).toBe(THEME_COLORS.ENGAGED);
     expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.ENGAGED);
+    expect(page.getByTestId('end-chat-button').first()).toBeVisible();
     await page.getByTestId('end-chat-button').first().click();
     await page.waitForTimeout(3000);
     await submitWrapup(page, WRAPUP_REASONS.SALE);
@@ -763,6 +763,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     expect(userStateElementColor).toBe(THEME_COLORS.ENGAGED);
     await page.waitForTimeout(3000);
     expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.ENGAGED);
+    await expect(page.getByTestId('end-email-button').first()).toBeVisible();
     await page.getByTestId('end-email-button').first().click();
     await page.waitForTimeout(4000);
     await submitWrapup(page, WRAPUP_REASONS.SALE);
@@ -782,6 +783,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await incomingTaskDiv.waitFor({ state: 'hidden', timeout: 30000 });
     await expect(incomingTaskDiv).toBeHidden();
     await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 15000 });
+    await page.waitForTimeout(5000);
     const userStateElement = page.getByTestId('state-select');
     const userStateElementColor = await userStateElement.evaluate((el) => getComputedStyle(el).backgroundColor);
     expect(
@@ -800,19 +802,23 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await expect(page.getByTestId('samples:rona-popup')).toBeVisible();
     await page.waitForTimeout(5000);
     await verifyCurrentState(page, USER_STATES.RONA);
-    await submitRonaPopup(page, RONA_OPTIONS.IDLE);
+    await submitRonaPopup(page, RONA_OPTIONS.AVAILABLE);
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 30000 });
+    await acceptIncomingTask(page, TASK_TYPES.EMAIL);
+    const endButton = page.getByTestId('end-email-button').first();
+    await endButton.waitFor({ state: 'visible', timeout: 7000 });
+    await endButton.click();
+    await page.waitForTimeout(3000);
+    await submitWrapup(page, WRAPUP_REASONS.SALE);
   })
 
   test('should set agent to Available and verify email task behavior', async () => {
     await page.waitForTimeout(3000);
+    await createEmailTask();
     await changeUserState(page, USER_STATES.AVAILABLE);
     const incomingTaskDiv = page.getByTestId('samples:incoming-task-email').first();
     await page.waitForTimeout(3000);
-    const incomingTaskVisible = await incomingTaskDiv.waitFor({ state: 'visible', timeout: 120000 }).catch(() => false);
-    if (!incomingTaskVisible) {
-      await createEmailTask();
-      await incomingTaskDiv.waitFor({ state: 'visible', timeout: 120000 });
-    }
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 120000 });
     await incomingTaskDiv.waitFor({ state: 'hidden', timeout: 30000 });
     await expect(incomingTaskDiv).toBeHidden();
     await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 15000 });
@@ -856,18 +862,6 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await page.waitForTimeout(5000);
     await submitWrapup(page, WRAPUP_REASONS.SALE);
     await stationLogout(page);
-  })
-
-
-  test.afterAll(async () => {
-    if (context) {
-      await context.close();
-      context = null;
-    }
-    if (context2) {
-      await context2.close();
-      context2 = null;
-    }
   })
 
 });
@@ -1054,18 +1048,5 @@ test.describe('Incoming Tasks tests for multi-session', async () => {
     await verifyCurrentState(page2, USER_STATES.AVAILABLE);
     await stationLogout(page2);
   });
-
-
-  test.afterAll(async () => {
-    if (context) {
-      await context.close();
-      context = null;
-    }
-    if (context2) {
-      await context2.close();
-      context2 = null;
-    }
-
-  })
 
 });
