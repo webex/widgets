@@ -279,7 +279,9 @@ function CallControlComponent(props: CallControlComponentProps) {
                         button.className +
                         (button.disabled || (consultInitiated && isTelephony) ? ` ${button.className}-disabled` : '')
                       }
-                      data-testid="ButtonCircle"
+                      data-testid={
+                        button.id === 'end' ? `end-${currentMediaType.labelName.toLowerCase()}-button` : button.id
+                      }
                       onPress={button.onClick}
                       disabled={button.disabled || (consultInitiated && isTelephony)}
                       aria-label={button.tooltip}
@@ -316,6 +318,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                   postfix-icon="arrow-down-bold"
                   type="button"
                   role="button"
+                  data-testid="wrapup-button"
                 >
                   Wrap up
                 </Button>
@@ -334,6 +337,7 @@ function CallControlComponent(props: CallControlComponentProps) {
               <SelectNext
                 aria-label="wrapup-reason"
                 className="wrapup-select"
+                data-testid="wrapup-reason-select"
                 onSelectionChange={(key) => {
                   const selectedItem = wrapupCodes?.find((code) => code.id === key);
                   handleWrapupChange(selectedItem.name, selectedItem.id);
@@ -344,7 +348,11 @@ function CallControlComponent(props: CallControlComponentProps) {
               >
                 {(item) => (
                   <Item key={item.id} textValue={item.name}>
-                    <Text className="wrapup-name" tagName={'small'}>
+                    <Text
+                      className="wrapup-name"
+                      tagName={'small'}
+                      data-testid={`wrapup-reason-${item.name.toLowerCase()}`}
+                    >
                       {item.name}
                     </Text>
                   </Item>
@@ -353,6 +361,7 @@ function CallControlComponent(props: CallControlComponentProps) {
               <Icon className="wrapup-select-arrow-icon" name="arrow-down-bold" title="" />
               <ButtonPill
                 className="submit-wrapup-button"
+                data-testid="wrapup-submit-button"
                 onPress={handleWrapupCall}
                 disabled={selectedWrapupId && selectedWrapupReason ? false : true}
                 aria-label="Submit wrap-up"
