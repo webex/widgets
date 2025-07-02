@@ -826,11 +826,8 @@ function App() {
 
             {isSdkReady && (store.isAgentLoggedIn || isLoggedIn) && (
               <DigitalChannels
-                conversationId={store.currentTask?.data?.interaction?.mediaResourceId}
                 jwtToken={accessToken}
-                // signalREndpoint="https://wxcc-component-api.cstg.webexengage.com/signalr"
-                // apiEndpoint="https://wxcc-component-api.cstg.webexengage.com/api"
-                signalREndpoint="https://ciscostaging.imichat.io/ciscosignalrserver/signalr"
+                signalREndpoint="https://wxcc-component-api.cstg.webexengage.com/signalr"
                 apiEndpoint="https://wxcc-component-api.cstg.webexengage.com/api"
               ></DigitalChannels>
             )}
