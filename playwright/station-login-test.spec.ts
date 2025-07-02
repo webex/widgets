@@ -200,7 +200,7 @@ test.describe('Station Login Tests - Dial Number Mode', () => {
     await verifyLoginMode(page, 'Dial Number');
   });
 
-  test('should support multi-session Dial Number login synchronization', async () => {
+  test('should support multi-login synchronization for Dial Number Mode ', async () => {
     await ensureUserStateVisible(page, LOGIN_MODE.DIAL_NUMBER);
     const multiSessionPage = await setupMultiLoginPage(context);
     await verifyLoginMode(multiSessionPage, 'Dial Number');
@@ -296,6 +296,7 @@ test.describe('Station Login Tests - Extension Mode', () => {
     await verifyLoginMode(page, 'Extension');
     consoleMessages.length = 0;
     await page.context().setOffline(false);
+    await page.waitForTimeout(3000);
     const isWebSocketReconnected = await waitForWebSocketReconnection(consoleMessages);
     expect(isWebSocketReconnected).toBe(true);
     await verifyCurrentState(page, USER_STATES.MEETING);
@@ -335,7 +336,7 @@ test.describe('Station Login Tests - Extension Mode', () => {
     await verifyLoginMode(page, 'Extension');
   });
 
-  test('should support multi-session Extension login synchronization', async () => {
+  test('should support multi-login synchronization for Extension Mode', async () => {
     await ensureUserStateVisible(page, LOGIN_MODE.EXTENSION);
     const multiSessionPage = await setupMultiLoginPage(context);
     await verifyLoginMode(multiSessionPage, 'Extension');
@@ -417,6 +418,7 @@ test.describe('Station Login Tests - Desktop Mode', () => {
     await verifyLoginMode(page, 'Desktop');
     consoleMessages.length = 0;
     await page.context().setOffline(false);
+    await page.waitForTimeout(3000);
     const isWebSocketReconnected = await waitForWebSocketReconnection(consoleMessages);
     expect(isWebSocketReconnected).toBe(true);
     await verifyCurrentState(page, USER_STATES.MEETING);
