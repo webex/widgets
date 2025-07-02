@@ -79,8 +79,91 @@
 }
 
 .task-details {
- .task-title::part(text) {
+  .task-digital-title {
+    width: auto;
+  }
+  
+  .incoming-digital-task-title {
+    width: 12.5rem;
+  }
+}
+
+.task-tooltip-text::part(text) {
   white-space: normal !important;
   word-break: break-all;
+}
+
+.task-tooltip-text {
+  width: 20rem;
+}
+
+@media (min-width: 64.0625rem) and (max-width: 75rem) {
+  .task-details {
+    .task-digital-title {
+      width: 50rem;
+      max-width: 50rem;
+    }
+  }
+  .task-tooltip-text {
+    width: 17rem;
+  }
+}
+
+@media (min-width: 48.0625rem) and (max-width: 64rem) {
+  .task-details {
+    .task-digital-title {
+      width: 31.25rem;
+      max-width: 31.25rem;
+    }
+    .incoming-digital-task-title {
+      width: 10rem;
+    }
+  }
+  .task-tooltip-text {
+    width: 16rem;
+  }
+}
+
+@media (min-width: 30.0625rem) and (max-width: 48rem) {
+  .task-details {
+    .task-digital-title {
+      width: 15.625rem;
+      max-width: 15.625rem;
+    }
+    .incoming-digital-task-title {
+      width: 8rem;
+    }
+  }
+
+  .task-tooltip-text {
+    width: 15rem;
+  }
+}
+
+@media (min-width: 20rem) and (max-width: 30rem) {
+  .task-details {
+    .task-digital-title {
+      width: 9.375rem;
+      max-width: 9.375rem;
+    }
+    .incoming-digital-task-title {
+      width: 5rem;
+    }
+  }
+  
+  .task-tooltip-text {
+    width: 9rem;
+  }
+ 
+}
+
+@media (min-width: 15.625rem) and (max-width: 20rem){
+  .task-details {
+    .incoming-digital-task-title {
+      width: 4rem;
+    }
  }
+   .task-tooltip-text {
+    width: 7rem;
+  }
 }

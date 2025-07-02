@@ -1,7 +1,7 @@
 import React from 'react';
 import CallControlComponent from '../CallControl/call-control';
 import {Text} from '@momentum-ui/react-collaboration';
-import {Brandvisual, Icon} from '@momentum-design/components/dist/react';
+import {Brandvisual, Icon, Tooltip} from '@momentum-design/components/dist/react';
 import './call-control-cad.styles.scss';
 import TaskTimer from '../TaskTimer/index';
 import CallControlConsultComponent from '../CallControl/CallControlCustom/call-control-consult';
@@ -60,6 +60,91 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
   const customerName = currentTask?.data?.interaction?.callAssociatedDetails?.customerName;
   const ani = currentTask?.data?.interaction?.callAssociatedDetails?.ani;
 
+  // Create unique IDs for tooltips
+  const customerNameTriggerId = `customer-name-trigger-${currentTask.data.interaction.interactionId}`;
+  const customerNameTooltipId = `customer-name-tooltip-${currentTask.data.interaction.interactionId}`;
+  const phoneNumberTriggerId = `phone-number-trigger-${currentTask.data.interaction.interactionId}`;
+  const phoneNumberTooltipId = `phone-number-tooltip-${currentTask.data.interaction.interactionId}`;
+
+  const renderCustomerName = () => {
+    const customerText = isSocial ? customerName || NO_CUSTOMER_NAME : ani || NO_CALLER_ID;
+
+    const textComponent = (
+      <Text
+        className={!isTelephony ? 'digital-customer-name' : 'voice-customer-name'}
+        type="body-large-bold"
+        tagName={'p'}
+        id={!isTelephony ? customerNameTriggerId : undefined}
+      >
+        {customerText}
+      </Text>
+    );
+
+    if (!isTelephony) {
+      return (
+        <>
+          {textComponent}
+          <Tooltip
+            color="contrast"
+            delay="0,0"
+            id={customerNameTooltipId}
+            placement="top-start"
+            offset={4}
+            tooltip-type="description"
+            triggerID={customerNameTriggerId}
+            className="task-tooltip"
+          >
+            <Text tagName="small" className="task-tooltip-text">
+              {customerText}
+            </Text>
+          </Tooltip>
+        </>
+      );
+    }
+
+    return textComponent;
+  };
+
+  const renderPhoneNumber = () => {
+    const phoneText = isSocial ? customerName || NO_CUSTOMER_NAME : ani || NO_PHONE_NUMBER;
+    const labelText = isSocial ? CUSTOMER_NAME : PHONE_NUMBER;
+
+    const textComponent = (
+      <Text
+        className={!isTelephony ? 'digital-phone-number' : 'voice-phone-number'}
+        type="body-secondary"
+        tagName={'p'}
+        id={!isTelephony ? phoneNumberTriggerId : undefined}
+      >
+        <strong>{labelText}</strong> <span>{phoneText}</span>
+      </Text>
+    );
+
+    if (!isTelephony) {
+      return (
+        <>
+          {textComponent}
+          <Tooltip
+            color="contrast"
+            delay="0,0"
+            id={phoneNumberTooltipId}
+            placement="top-start"
+            offset={4}
+            tooltip-type="description"
+            triggerID={phoneNumberTriggerId}
+            className="task-tooltip"
+          >
+            <Text tagName="small" className="task-tooltip-text">
+              {phoneText}
+            </Text>
+          </Tooltip>
+        </>
+      );
+    }
+
+    return textComponent;
+  };
+
   if (!currentTask) return null;
 
   return (
@@ -76,9 +161,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
           </div>
 
           <div className="customer-info">
-            <Text className="customer-name" type="body-large-bold" tagName={'small'}>
-              {isSocial ? customerName || NO_CUSTOMER_NAME : ani || NO_CALLER_ID}
-            </Text>
+            {renderCustomerName()}
             <div className="call-details">
               <Text className="call-timer" type="body-secondary" tagName={'small'}>
                 {currentMediaType.labelName} - <TaskTimer startTimeStamp={startTimestamp} />
@@ -110,10 +193,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
             <strong>{QUEUE}</strong>{' '}
             <span>{currentTask?.data?.interaction?.callAssociatedDetails?.virtualTeamName || NO_TEAM_NAME}</span>
           </Text>
-          <Text className="phone-number" type="body-secondary" tagName={'small'}>
-            <strong>{isSocial ? CUSTOMER_NAME : PHONE_NUMBER}</strong>{' '}
-            <span> {isSocial ? customerName || NO_CUSTOMER_NAME : ani || NO_PHONE_NUMBER}</span>
-          </Text>
+          {renderPhoneNumber()}
           <Text className="rona" type="body-secondary" tagName={'small'}>
             <strong>{RONA}</strong>{' '}
             <span>{currentTask?.data?.interaction?.callAssociatedDetails?.ronaTimeout || NO_RONA}</span>
