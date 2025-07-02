@@ -22,7 +22,7 @@ const maxRetries = 3;
 
 function getLastStateFromLogs(capturedLogs: string[]): string {
   const stateChangeLogs = capturedLogs.filter(log =>
-    log.includes('onStateChange invoked with state :')
+    log.includes('onStateChange invoked with state name:')
   );
 
   if (stateChangeLogs.length === 0) {
@@ -71,7 +71,7 @@ function verifyCallbackLogs(
       log.includes('onWrapup invoked with reason :')
     );
     const stateChangeLogs = capturedLogs.filter(log =>
-      log.includes('onStateChange invoked with state :')
+      log.includes('onStateChange invoked with state name:')
     );
 
     if (wrapupLogs.length === 0 || stateChangeLogs.length === 0) {
