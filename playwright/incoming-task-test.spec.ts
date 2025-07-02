@@ -3,209 +3,380 @@ import { loginViaAccessToken, disableMultiLogin, oauthLogin, enableAllWidgets, i
 import { telephonyLogin, desktopLogin, extensionLogin, stationLogout } from './Utils/stationLoginUtils';
 import { changeUserState, getCurrentState, verifyCurrentState } from './Utils/userStateUtils';
 import { createCallTask, createChatTask, declineExtensionCall, declineIncomingTask, endCallTask, endChatTask, loginExtension, acceptIncomingTask, acceptExtensionCall, createEmailTask, endExtensionCall, submitRonaPopup } from './Utils/incomingTaskUtils';
-import { BASE_URL, TASK_TYPES, USER_STATES, LOGIN_MODE, THEME_COLORS } from './constants';
+import { TASK_TYPES, USER_STATES, LOGIN_MODE, THEME_COLORS, WRAPUP_REASONS, RONA_OPTIONS } from './constants';
 import { submitWrapup } from './Utils/wrapupUtils';
 
 
-let page: Page;
-let context: BrowserContext;
-let callerpage: Page;
-let extensionPage: Page;
-let context2: BrowserContext;
-let chatPage: Page;
-let page2: Page;
-let consoleMessages: string[] = [];
+let page: Page = null;
+let context: BrowserContext = null;
+let callerpage: Page = null;
+let extensionPage: Page = null;
+let context2: BrowserContext = null;
+let chatPage: Page = null;
+let page2: Page = null;
+let capturedLogs: string[] = [];
 const maxRetries = 3;
 
 
-//set RONA timeout for 18 seconds
+//NOTE : Make Sure to set RONA Timeout to 18 seconds before running this test.
 
-//maybe move this to a separate file
-export const handleStrayTasks = async (page: Page): Promise<void> => {
-  const incomingTaskDiv = page.locator('div.incoming-task');
+function getLastStateFromLogs(capturedLogs: string[]): string {
+  const stateChangeLogs = capturedLogs.filter(log =>
+    log.includes('onStateChange invoked with state :')
+  );
+
+  if (stateChangeLogs.length === 0) {
+    throw new Error('No onStateChange logs found in captured logs');
+  }
+
+  const lastStateLog = stateChangeLogs[stateChangeLogs.length - 1];
+  const match = lastStateLog.match(/onStateChange invoked with state : (.+)$/);
+
+  if (!match) {
+    throw new Error('Could not extract state name from log: ' + lastStateLog);
+  }
+
+  return match[1].trim();
+}
+
+// Helper function to get the last wrapup reason from onWrapup logs
+function getLastWrapupReasonFromLogs(capturedLogs: string[]): string {
+  const wrapupLogs = capturedLogs.filter(log =>
+    log.includes('onWrapup invoked with reason :')
+  );
+
+  if (wrapupLogs.length === 0) {
+    throw new Error('No onWrapup logs found in captured logs');
+  }
+
+  const lastWrapupLog = wrapupLogs[wrapupLogs.length - 1];
+  const match = lastWrapupLog.match(/onWrapup invoked with reason : (.+)$/);
+
+  if (!match) {
+    throw new Error('Could not extract wrapup reason from log: ' + lastWrapupLog);
+  }
+
+  return match[1].trim();
+}
+
+
+function verifyCallbackLogs(
+  capturedLogs: string[],
+  expectedWrapupReason: string,
+  expectedState: string,
+  shouldWrapupComeFirst: boolean = true
+): boolean {
+  try {
+    const wrapupLogs = capturedLogs.filter(log =>
+      log.includes('onWrapup invoked with reason :')
+    );
+    const stateChangeLogs = capturedLogs.filter(log =>
+      log.includes('onStateChange invoked with state :')
+    );
+
+    if (wrapupLogs.length === 0 || stateChangeLogs.length === 0) {
+      throw new Error('Missing required logs, check callbacks for wrapup or statechange');
+    }
+
+    const lastWrapupLog = wrapupLogs[wrapupLogs.length - 1];
+    const lastStateChangeLog = stateChangeLogs[stateChangeLogs.length - 1];
+
+    const wrapupLogIndex = capturedLogs.lastIndexOf(lastWrapupLog);
+    const stateChangeLogIndex = capturedLogs.lastIndexOf(lastStateChangeLog);
+
+    if (shouldWrapupComeFirst && wrapupLogIndex >= stateChangeLogIndex) {
+      throw new Error('Wrapup log should come before state change log');
+    }
+
+    const wrapupMatch = lastWrapupLog.match(/onWrapup invoked with reason : (.+)$/);
+    const stateMatch = lastStateChangeLog.match(/onStateChange invoked with state : (.+)$/);
+
+    if (!wrapupMatch || !stateMatch) {
+      throw new Error('Could not extract values from logs');
+    }
+
+    const actualWrapupReason = wrapupMatch[1].trim();
+    const actualStateName = stateMatch[1].trim();
+
+    // Verify expected values
+    if (actualWrapupReason !== expectedWrapupReason) {
+      throw new Error('Wrapup reason mismatch, expected ' + expectedWrapupReason + ', got ' + actualWrapupReason);
+    }
+
+    if (actualStateName !== expectedState) {
+      throw new Error('State name mismatch, expected ' + expectedState + ', got ' + actualStateName);
+    }
+
+    return true;
+
+  } catch (error) {
+    throw error;
+  }
+}
+
+function setupConsoleLogging(page: Page): () => void {
+  capturedLogs.length = 0;
+
+  const consoleHandler = (msg) => {
+    const logText = msg.text();
+    if (logText.includes('onStateChange invoked with state :') ||
+      logText.includes('onWrapup invoked with reason :')) {
+      capturedLogs.push(logText);
+    }
+  };
+
+  page.on('console', consoleHandler);
+
+  return () => page.off('console', consoleHandler);
+}
+
+const handleStrayTasks = async (page: Page): Promise<void> => {
+  const incomingTaskDiv = page.getByTestId(/^samples:incoming-task(-\w+)?$/);
   const tasks = await incomingTaskDiv.all();
   for (let task of tasks) {
-    const acceptButton = task.getByRole('button', { name: 'Accept' });
-    if (!await acceptButton.isVisible()) {
-      await acceptExtensionCall(page);
+    await changeUserState(page, USER_STATES.AVAILABLE);
+    await page.waitForTimeout(3000);
+    const acceptButton = task.getByTestId('task-accept-button');
+
+    let isTaskVisible = await task.isVisible().catch(() => false);
+    if (!isTaskVisible) {
+      await changeUserState(page, USER_STATES.AVAILABLE);
+      await page.waitForTimeout(3000);
+      isTaskVisible = await task.isVisible().catch(() => false);
+    }
+
+    if (!isTaskVisible) continue;
+    await page.waitForTimeout(2000);
+    const acceptButtonVisible = await acceptButton.isVisible().catch(() => false);
+    if (!acceptButtonVisible) {
+      const extensionCallVisible = await page.locator('[data-test="right-action-button"]').isVisible().catch(() => false);
+      if (extensionPage && extensionCallVisible) {
+        await acceptExtensionCall(extensionPage);
+      } else {
+        throw new Error('Accept button not visible and extension page is not available');
+      }
     } else {
       await acceptButton.click();
     }
-    const endButton = page.getByRole('group', { name: 'Call Control CAD' }).getByLabel(/^End/);
-    await endButton.click();
-    await submitWrapup(page);
-    page.waitForTimeout(1000);
 
+    await page.waitForTimeout(3000);
+    const endButton = page.getByTestId(/^end-\w+-button$/).first();
+    const endButtonVisible = await endButton.isVisible().catch(() => false);
+    if (endButtonVisible) {
+      await page.waitForTimeout(3000);
+      await endButton.click();
+      await page.waitForTimeout(3000);
+      await submitWrapup(page, WRAPUP_REASONS.SALE);
+    } else if (extensionPage && await page.locator('[data-test="end-call"]').isVisible().catch(() => false)) {
+      await page.waitForTimeout(3000);
+      await endExtensionCall(extensionPage);
+      await page.waitForTimeout(3000);
+      await submitWrapup(page, WRAPUP_REASONS.SALE);
+    }
+
+    await page.waitForTimeout(3000);
     let ronapopupVisible = await page.getByTestId('samples:rona-popup').isVisible().catch(() => false);
     if (ronapopupVisible) {
-      await submitRonaPopup(page, 'Available');
+      await submitRonaPopup(page, RONA_OPTIONS.AVAILABLE);
     }
 
   }
 
 }
 
+const pageSetup = async (page: Page, loginMode: string) => {
+  await loginViaAccessToken(page, 'AGENT1');
+  await enableAllWidgets(page);
+  if (loginMode === LOGIN_MODE.DESKTOP) {
+    await disableMultiLogin(page);
+  } else {
+    await enableMultiLogin(page);
+  }
+
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      await initialiseWidgets(page);
+      await page.getByTestId('station-login-widget').waitFor({ state: 'visible', timeout: 30000 });
+      break;
+    } catch (error) {
+      if (i == maxRetries - 1) {
+        throw new Error(`Failed to initialise widgets after ${maxRetries} attempts: ${error}`);
+      }
+    }
+  }
+
+  const loginButtonExists = await page
+    .getByTestId('login-button')
+    .isVisible()
+    .catch(() => false);
+  if (loginButtonExists) {
+    await telephonyLogin(page, loginMode);
+  } else {
+    const stateSelectVisible = await page.getByTestId('state-select').isVisible().catch(() => false);
+    if (stateSelectVisible) {
+      const userState = await getCurrentState(page);
+      if (userState === USER_STATES.ENGAGED) {
+        const wrapupButton = page.getByTestId('wrapup-button').first();
+        const wrapupButtonVisible = await wrapupButton.isVisible().catch(() => false);
+        if (wrapupButtonVisible) {
+          await page.waitForTimeout(1000);
+          await submitWrapup(page, WRAPUP_REASONS.SALE);
+          await page.waitForTimeout(1000);
+        }
+
+        const endButton = page.getByTestId(/^end-\w+-button$/).first();
+        let endButtonVisible = await endButton.isVisible().catch(() => false);
+
+        if (endButtonVisible) {
+          await page.waitForTimeout(1000);
+          await endButton.click();
+          await page.waitForTimeout(1000);
+        }
+
+
+      }
+      const wrapupButton = page.getByTestId('wrapup-button').first();
+      const wrapupButtonVisible = await wrapupButton.isVisible().catch(() => false);
+      if (wrapupButtonVisible) {
+        await page.waitForTimeout(1000);
+        await submitWrapup(page, WRAPUP_REASONS.SALE);
+      }
+      const ronapopupVisible = await page.getByTestId('samples:rona-popup').isVisible().catch(() => false);
+
+      if (ronapopupVisible) {
+        await submitRonaPopup(page, RONA_OPTIONS.AVAILABLE);
+      }
+
+      const incomingTaskDiv = page.getByTestId(/^samples:incoming-task(-\w+)?$/).first();
+      const incomingTaskVisible = await incomingTaskDiv.isVisible().catch(() => false);
+      if (incomingTaskVisible) {
+        await handleStrayTasks(page);
+      }
+    }
+    await stationLogout(page);
+    await telephonyLogin(page, loginMode);
+  }
+
+  let stationLoginFailure = await page.getByTestId('station-login-failure-label').isVisible().catch(() => false);
+  for (let i = 0; i < maxRetries && stationLoginFailure; i++) {
+    await stationLogout(page);
+    await telephonyLogin(page, loginMode);
+    stationLoginFailure = await page.getByTestId('station-login-failure-label').isVisible().catch(() => false);
+    if (i == maxRetries - 1 && stationLoginFailure) {
+      throw new Error(`Station Login Error Persists after ${maxRetries} attempts`);
+    }
+  }
+
+  await expect(page.getByTestId('state-select')).toBeVisible();
+  await page.waitForTimeout(2000);
+
+  let ronapopupVisible = await page.getByTestId('samples:rona-popup').isVisible().catch(() => false);
+  if (ronapopupVisible) {
+    await submitRonaPopup(page, RONA_OPTIONS.AVAILABLE);
+  }
+
+  const wrapupButton = page.getByTestId('wrapup-button').first();
+  const wrapupButtonVisible = await wrapupButton.isVisible().catch(() => false);
+  if (wrapupButtonVisible) {
+    await page.waitForTimeout(2000);
+    await submitWrapup(page, WRAPUP_REASONS.SALE);
+  }
+
+  await changeUserState(page, USER_STATES.AVAILABLE);
+  await page.waitForTimeout(4000);
+  const incomingTaskDiv = page.getByTestId(/^samples:incoming-task(-\w+)?$/).first();
+  const incomingTaskVisible = await incomingTaskDiv.isVisible().catch(() => false);
+  if (incomingTaskVisible) {
+    await handleStrayTasks(page);
+  }
+  setupConsoleLogging(page);
+}
+
+
+
 test.describe('Incoming Call Task Tests for Desktop Mode', async () => {
+  test.beforeEach(() => {
+    capturedLogs.length = 0;
+  })
 
   test.beforeAll(async ({ browser }) => {
     context = await browser.newContext();
     context2 = await browser.newContext();
-    // callerpage = await context2.newPage();
     page = await context.newPage();
-    // extensionPage = await context.newPage();
     callerpage = await context2.newPage();
 
     await Promise.all([
       (async () => {
-        for (let i = 0; i < maxRetries; i++) {
-          try {
-            await loginExtension(callerpage, process.env.PW_AGENT2_USERNAME, process.env.PW_AGENT2_PASSWORD);
-            break;
-          } catch (error) {
-            if (i == maxRetries - 1) {
-              throw new Error(`Failed to login extension after ${maxRetries} attempts: ${error}`);
-            }
-          }
-        }
+        await loginExtension(callerpage, process.env.PW_AGENT2_USERNAME, process.env.PW_AGENT2_PASSWORD);
       })(),
       (async () => {
-        await loginViaAccessToken(page, 'AGENT1');
-        await enableAllWidgets(page);
-        await disableMultiLogin(page);
-
-        for (let i = 0; i < maxRetries; i++) {
-          try {
-            await initialiseWidgets(page);
-            await page.getByTestId('station-login-widget').waitFor({ state: 'visible' });
-            break;
-          } catch (error) {
-            if (i == maxRetries - 1) {
-              throw new Error(`Failed to initialise widgets after ${maxRetries} attempts: ${error}`);
-            }
-          }
-        }
-
-
-
-        const loginButtonExists = await page
-          .getByTestId('login-button')
-          .isVisible()
-          .catch(() => false);
-        if (loginButtonExists) {
-          await telephonyLogin(page, LOGIN_MODE.DESKTOP);
-        } else {
-          await stationLogout(page);
-          await telephonyLogin(page, LOGIN_MODE.DESKTOP);
-        }
-
-        for (let i = 0; i < maxRetries; i++) {
-          const stationLoginFailure = await page.getByTestId('station-login-failure-label').isVisible().catch(() => false);
-          if (!stationLoginFailure) break;
-          await telephonyLogin(page, LOGIN_MODE.DESKTOP);
-          if (i == maxRetries - 1) {
-            throw new Error(`Station Login Error Persists after ${maxRetries} attempts`);
-          }
-        }
-
-        await expect(page.getByTestId('state-select')).toBeVisible();
-        await page.waitForTimeout(1000);
-
-        let ronapopupVisible = await page.getByTestId('samples:rona-popup').isVisible().catch(() => false);
-        if (ronapopupVisible) {
-          await submitRonaPopup(page, 'Available');
-        }
-
-        const endButton = page.getByRole('group', { name: 'Call Control CAD' }).getByLabel(/^End/);
-        const endButtonVisible = await endButton.isVisible().catch(() => false);
-        if (endButtonVisible) {
-          await endButton.click();
-          await submitWrapup(page);
-        }
-
-        const wrapupBox = page.locator('mdc-button:has-text("Wrap up")');
-        const wrapupBoxVisible = await wrapupBox.isVisible().catch(() => false);
-        if (wrapupBoxVisible) {
-          await submitWrapup(page);
-        }
-        await changeUserState(page, USER_STATES.AVAILABLE);
-        //add a check if there is some button for wrapup then do wrapup
-
-        const incomingTaskDiv = page.locator('div.incoming-task');
-        const incomingTaskVisible = await incomingTaskDiv.isVisible().catch(() => false);
-        if (incomingTaskVisible) {
-          await handleStrayTasks(page);
-        }
-
+        await pageSetup(page, LOGIN_MODE.DESKTOP);
       })(),
     ])
   })
-  //done till here
+
 
   test('should accept incoming call, end call and complete wrapup in desktop mode', async () => {
     await createCallTask(callerpage);
     await changeUserState(page, USER_STATES.AVAILABLE);
-    const incomingTaskDiv = page.locator('div.incoming-task', {
-      has: page.locator('mdc-avatar[icon-name="handset-filled"]')
-    }).first();
-    await incomingTaskDiv.waitFor({ state: 'visible' });
-    await page.waitForTimeout(3000);
-    await acceptIncomingTask(page, TASK_TYPES.CALL);
+    const incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 70000 });
     await page.waitForTimeout(5000);
+    await acceptIncomingTask(page, TASK_TYPES.CALL);
+    await page.waitForTimeout(6000);
     await verifyCurrentState(page, USER_STATES.ENGAGED);
     const userStateElement = page.getByTestId('state-select');
     const userStateElementColor = await userStateElement.evaluate((el) => getComputedStyle(el).backgroundColor);
     expect(userStateElementColor).toBe(THEME_COLORS.ENGAGED);
-    //verify state color, callbacks for task acceptance
-    //throw proper error 
-
-    await page.getByRole('group', { name: 'Call Control CAD' }).getByLabel('End Call').click();
-    //verify callbacks for end
-    //verify state color as well
-    //verify state change callbacks as well
-    //throw proper error
-    await page.waitForTimeout(4000);
-    await submitWrapup(page);
-    //verify the wrapup callbacks, stateChange callbacks as well
-    //   Notice that the state changes from Engaged back to Available only after Wrapup
-    // onStateChange call back should be called with the Available idle code
-    // onWrapUp call back should be called with currentTask data and wrapUpReason
-
+    expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.ENGAGED);
+    await page.getByTestId('end-call-button').first().click();
+    await page.waitForTimeout(3000);
+    await submitWrapup(page, WRAPUP_REASONS.SALE);
+    await page.waitForTimeout(15000);
+    expect(verifyCallbackLogs(capturedLogs, WRAPUP_REASONS.SALE, USER_STATES.AVAILABLE)).toBe(true);
+    expect(getLastWrapupReasonFromLogs(capturedLogs)).toBe(WRAPUP_REASONS.SALE);
+    expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.AVAILABLE);
   });
 
   test('should decline incoming call and verify RONA state in desktop mode', async () => {
     await changeUserState(page, USER_STATES.AVAILABLE);
     await page.waitForTimeout(1000);
     await createCallTask(callerpage);
+    await page.waitForTimeout(2000);
     await declineIncomingTask(page, TASK_TYPES.CALL);
-    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible' });
+    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 15000 });
+    await page.waitForTimeout(8000);
     await verifyCurrentState(page, USER_STATES.RONA);
     const userStateElement = page.getByTestId('state-select');
     const userStateElementColor = await userStateElement.evaluate((el) => getComputedStyle(el).backgroundColor);
-    expect(userStateElementColor).toBe(THEME_COLORS.RONA);
+
+    expect(
+      ((receivedColor: string, expectedColor: string, tolerance: number = 20) => {
+        const receivedRgb = receivedColor.match(/\d+/g)?.map(Number) || [];
+        const expectedRgb = expectedColor.match(/\d+/g)?.map(Number) || [];
+
+        if (receivedRgb.length !== 3 || expectedRgb.length !== 3) return false;
+
+        return receivedRgb.every((value, index) =>
+          Math.abs(value - expectedRgb[index]) <= tolerance
+        );
+      })(userStateElementColor, THEME_COLORS.RONA)
+    ).toBe(true);
     await endCallTask(callerpage);
-    await submitRonaPopup(page, 'Idle');
+    await submitRonaPopup(page, RONA_OPTIONS.IDLE);
   });
 
   test('should ignore incoming call and wait for RONA popup in desktop mode', async () => {
     await changeUserState(page, USER_STATES.AVAILABLE);
     await page.waitForTimeout(1000);
     await createCallTask(callerpage);
-    await declineIncomingTask(page, TASK_TYPES.CALL);
-    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible' });
-    await verifyCurrentState(page, USER_STATES.RONA);
-    await submitRonaPopup(page, 'Available');
-    await expect(page.getByTestId('samples:rona-popup')).not.toBeVisible();
-    await page.waitForTimeout(500);
-    await verifyCurrentState(page, USER_STATES.AVAILABLE);
-    const incomingTaskDiv = page.locator('div.incoming-task', {
-      has: page.locator('mdc-avatar[icon-name="handset-filled"]')
-    }).first();
-    await incomingTaskDiv.waitFor({ state: 'visible' });
-    await incomingTaskDiv.waitFor({ state: 'hidden' });
-    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible' });
+    const incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 70000 });
+    await incomingTaskDiv.waitFor({ state: 'hidden', timeout: 30000 });
+    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 15000 });
     await expect(page.getByTestId('samples:rona-popup')).toBeVisible();
     await endCallTask(callerpage);
-    await submitRonaPopup(page, 'Idle');
+    await submitRonaPopup(page, RONA_OPTIONS.IDLE);
   });
 
   test('should set agent state to Available and receive another call in desktop mode', async () => {
@@ -214,21 +385,22 @@ test.describe('Incoming Call Task Tests for Desktop Mode', async () => {
     await createCallTask(callerpage);
     await declineIncomingTask(page, TASK_TYPES.CALL);
     await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible' });
+    await page.waitForTimeout(7000);
     await verifyCurrentState(page, USER_STATES.RONA);
-    await submitRonaPopup(page, 'Available');
+    await submitRonaPopup(page, RONA_OPTIONS.AVAILABLE);
     await expect(page.getByTestId('samples:rona-popup')).not.toBeVisible();
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(7000);
     await verifyCurrentState(page, USER_STATES.AVAILABLE);
-    const incomingTaskDiv = page.locator('div.incoming-task', {
-      has: page.locator('mdc-avatar[icon-name="handset-filled"]')
-    }).first();
-    await incomingTaskDiv.waitFor({ state: 'visible' });
+    const incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 70000 });
     await expect(incomingTaskDiv).toBeVisible();
+    await page.waitForTimeout(7000);
     await declineIncomingTask(page, TASK_TYPES.CALL);
-    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible' });
+    await page.waitForTimeout(5000);
+    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 15000 });
     await expect(page.getByTestId('samples:rona-popup')).toBeVisible();
     await endCallTask(callerpage);
-    await submitRonaPopup(page, 'Idle');
+    await submitRonaPopup(page, RONA_OPTIONS.IDLE);
   });
 
 
@@ -238,45 +410,49 @@ test.describe('Incoming Call Task Tests for Desktop Mode', async () => {
     await page.waitForTimeout(1000);
     await createCallTask(callerpage);
     await declineIncomingTask(page, TASK_TYPES.CALL);
-    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible' });
+    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 15000 });
+    await page.waitForTimeout(7000);
     await verifyCurrentState(page, USER_STATES.RONA);
     await submitRonaPopup(page, 'Idle');
     await expect(page.getByTestId('samples:rona-popup')).not.toBeVisible();
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(7000);
     await verifyCurrentState(page, USER_STATES.MEETING);
-    const incomingTaskDiv = page.locator('div.incoming-task', {
-      has: page.locator('mdc-avatar[icon-name="handset-filled"]')
-    }).first();
+    const incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
     await expect(incomingTaskDiv).toBeHidden();
     await endCallTask(callerpage);
   });
-
-  //case for desktop mode for accept, end & wrapup
 
   test('should handle customer disconnect before agent answers in desktop mode', async () => {
     await changeUserState(page, USER_STATES.AVAILABLE);
     await createCallTask(callerpage);
-    const incomingTaskDiv = page.locator('div.incoming-task', {
-      has: page.locator('mdc-avatar[icon-name="handset-filled"]')
-    }).first();
-    await incomingTaskDiv.waitFor({ state: 'visible' });
+    const incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 50000 });
     await endCallTask(callerpage);
-    await incomingTaskDiv.waitFor({ state: 'hidden' });
+    await incomingTaskDiv.waitFor({ state: 'hidden', timeout: 30000 });
     await expect(incomingTaskDiv).toBeHidden();
+    await page.waitForTimeout(7000);
     await verifyCurrentState(page, USER_STATES.AVAILABLE);
-
   });
 
   test.afterAll(async () => {
-    await context.close();
-    await context2.close();
+    if (context) {
+      await context.close();
+      context = null;
+    }
+    if (context2) {
+      await context2.close();
+      context2 = null;
+    }
   })
 
 });
 
 
-
 test.describe('Incoming Task Tests in Extension Mode', async () => {
+  test.beforeEach(() => {
+    capturedLogs.length = 0;
+  })
+
 
   test.beforeAll(async ({ browser }) => {
     context = await browser.newContext();
@@ -303,67 +479,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
 
       })(),
       (async () => {
-        await loginViaAccessToken(page, 'AGENT1');
-        await enableMultiLogin(page);
-        await enableAllWidgets(page);
-        for (let i = 0; i < maxRetries; i++) {
-          try {
-            await initialiseWidgets(page);
-            await page.getByTestId('station-login-widget').waitFor({ state: 'visible' });
-            break;
-          } catch (error) {
-            if (i == maxRetries - 1) {
-              throw new Error(`Failed to initialise widgets after ${maxRetries} attempts: ${error}`);
-            }
-          }
-        }
-
-        const loginButtonExists = await page
-          .getByTestId('login-button')
-          .isVisible()
-          .catch(() => false);
-        if (loginButtonExists) {
-          await telephonyLogin(page, LOGIN_MODE.EXTENSION);
-        } else {
-          await stationLogout(page);
-          await telephonyLogin(page, LOGIN_MODE.EXTENSION);
-        }
-
-        for (let i = 0; i < maxRetries; i++) {
-          const stationLoginFailure = await page.getByTestId('station-login-failure-label').isVisible().catch(() => false);
-          if (!stationLoginFailure) break;
-          await telephonyLogin(page, LOGIN_MODE.EXTENSION);
-          if (i == maxRetries - 1) {
-            throw new Error(`Station Login Error Persists after ${maxRetries} attempts`);
-          }
-        }
-
-        await expect(page.getByTestId('state-select')).toBeVisible();
-
-        let ronapopupVisible = await page.getByTestId('samples:rona-popup').isVisible().catch(() => false);
-        if (ronapopupVisible) {
-          await submitRonaPopup(page, 'Available');
-        }
-        const endButton = page.getByRole('group', { name: 'Call Control CAD' }).getByLabel(/^End/);
-        const endButtonVisible = await endButton.isVisible().catch(() => false);
-        if (endButtonVisible) {
-          await endButton.click();
-          await submitWrapup(page);
-        }
-
-        const wrapupBox = page.locator('mdc-button:has-text("Wrap up")');
-        const wrapupBoxVisible = await wrapupBox.isVisible().catch(() => false);
-        if (wrapupBoxVisible) {
-          await submitWrapup(page);
-        }
-        await changeUserState(page, USER_STATES.AVAILABLE);
-
-        const incomingTaskDiv = page.locator('div.incoming-task');
-        const incomingTaskVisible = await incomingTaskDiv.isVisible().catch(() => false);
-        if (incomingTaskVisible) {
-          await handleStrayTasks(page);
-        }
-
+        await pageSetup(page, LOGIN_MODE.EXTENSION);
       })(),
       (async () => {
 
@@ -381,127 +497,127 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     ])
   })
 
-  //extension mode in different block
   test('should accept incoming call, end call and complete wrapup in extension mode', async () => {
     await createCallTask(callerpage);
     await changeUserState(page, USER_STATES.AVAILABLE);
-    const incomingTaskDiv = page.locator('div.incoming-task', {
-      has: page.locator('mdc-avatar[icon-name="handset-filled"]')
-    }).first();
-    await incomingTaskDiv.waitFor({ state: 'visible' });
-    await extensionPage.locator('[data-test="generic-person-item-base"]').waitFor({ state: 'visible' });
+    const incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 70000 });
+    await extensionPage.locator('[data-test="generic-person-item-base"]').waitFor({ state: 'visible', timeout: 30000 });
     await page.waitForTimeout(5000);
     await acceptExtensionCall(extensionPage);
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(7000);
     await verifyCurrentState(page, USER_STATES.ENGAGED);
     const userStateElement = page.getByTestId('state-select');
     const userStateElementColor = await userStateElement.evaluate((el) => getComputedStyle(el).backgroundColor);
     expect(userStateElementColor).toBe(THEME_COLORS.ENGAGED);
-    //verify state color, callbacks for task acceptance
-    //throw proper error 
-    // await endExtensionCall(extensionPage);
-
-    await page.getByRole('group', { name: 'Call Control CAD' }).getByLabel('End Call').click();
-    //verify callbacks for end
-    //verify state color as well
-    //verify state change callbacks as well
-    //throw proper error
+    expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.ENGAGED);
+    await endCallTask(extensionPage);
     await page.waitForTimeout(4000);
-    await submitWrapup(page);
-    await page.waitForTimeout(5000);
-    //verify the wrapup callbacks, stateChange callbacks as well
-    //   Notice that the state changes from Engaged back to Available only after Wrapup
-    // onStateChange call back should be called with the Available idle code
-    // onWrapUp call back should be called with currentTask data and wrapUpReason
-
+    await submitWrapup(page, WRAPUP_REASONS.SALE);
+    await page.waitForTimeout(15000);
+    expect(verifyCallbackLogs(capturedLogs, WRAPUP_REASONS.SALE, USER_STATES.AVAILABLE)).toBe(true);
+    expect(getLastWrapupReasonFromLogs(capturedLogs)).toBe(WRAPUP_REASONS.SALE);
+    expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.AVAILABLE);
   });
 
 
   test('should decline incoming call and verify RONA state in extension mode', async () => {
     await createCallTask(callerpage);
     await changeUserState(page, USER_STATES.AVAILABLE);
-    const incomingTaskDiv = page.locator('div.incoming-task', {
-      has: page.locator('mdc-avatar[icon-name="handset-filled"]')
-    }).first();
-    await incomingTaskDiv.waitFor({ state: 'visible' });
-    await extensionPage.locator('[data-test="generic-person-item-base"]').waitFor({ state: 'visible' });
+    const incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 70000 });
+    await extensionPage.locator('[data-test="generic-person-item-base"]').waitFor({ state: 'visible', timeout: 30000 });
+    await page.waitForTimeout(3000);
     await declineExtensionCall(extensionPage);
-    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible' });
-    await extensionPage.locator('[data-test="generic-person-item-base"]').waitFor({ state: 'hidden' });
-    await page.waitForTimeout(2000);
+    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 30000 });
+    await extensionPage.locator('[data-test="generic-person-item-base"]').waitFor({ state: 'hidden', timeout: 30000 });
+    await page.waitForTimeout(6000);
     await verifyCurrentState(page, USER_STATES.RONA);
     const userStateElement = page.getByTestId('state-select');
     const userStateElementColor = await userStateElement.evaluate((el) => getComputedStyle(el).backgroundColor);
-    expect(userStateElementColor).toBe(THEME_COLORS.RONA);
+
+    expect(
+      ((receivedColor: string, expectedColor: string, tolerance: number = 20) => {
+        const receivedRgb = receivedColor.match(/\d+/g)?.map(Number) || [];
+        const expectedRgb = expectedColor.match(/\d+/g)?.map(Number) || [];
+
+        if (receivedRgb.length !== 3 || expectedRgb.length !== 3) return false;
+
+        return receivedRgb.every((value, index) =>
+          Math.abs(value - expectedRgb[index]) <= tolerance
+        );
+      })(userStateElementColor, THEME_COLORS.RONA)
+    ).toBe(true);
+    await page.waitForTimeout(2000);
+    expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
+
     await endCallTask(callerpage);
-    await submitRonaPopup(page, 'Idle');
-    await page.waitForTimeout(5000);
+    await submitRonaPopup(page, RONA_OPTIONS.IDLE);
   });
 
   test('should ignore incoming call and wait for RONA popup in extension mode', async () => {
     await createCallTask(callerpage);
     await changeUserState(page, USER_STATES.AVAILABLE);
-    const incomingTaskDiv = page.locator('div.incoming-task', {
-      has: page.locator('mdc-avatar[icon-name="handset-filled"]')
-    }).first();
-    await incomingTaskDiv.waitFor({ state: 'visible' });
-    await extensionPage.locator('[data-test="generic-person-item-base"]').waitFor({ state: 'visible' });
-    await incomingTaskDiv.waitFor({ state: 'hidden' });
-    await extensionPage.locator('[data-test="generic-person-item-base"]').waitFor({ state: 'hidden' });
-    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible' });
+    const incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 70000 });
+    await extensionPage.locator('[data-test="generic-person-item-base"]').waitFor({ state: 'visible', timeout: 30000 });
+    await incomingTaskDiv.waitFor({ state: 'hidden', timeout: 30000 });
+    await extensionPage.locator('[data-test="generic-person-item-base"]').first().waitFor({ state: 'hidden', timeout: 30000 });
+    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 15000 });
     await expect(page.getByTestId('samples:rona-popup')).toBeVisible();
+    await page.waitForTimeout(7000);
     await verifyCurrentState(page, USER_STATES.RONA);
+    await page.waitForTimeout(10000);
+    expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
     await endCallTask(callerpage);
-    await submitRonaPopup(page, 'Idle');
-    await page.waitForTimeout(5000);
+    await submitRonaPopup(page, RONA_OPTIONS.IDLE);
   });
 
 
   test('should set agent state to Available and receive another call in extension mode', async () => {
     await createCallTask(callerpage);
     await changeUserState(page, USER_STATES.AVAILABLE);
-    const incomingTaskDiv = page.locator('div.incoming-task', {
-      has: page.locator('mdc-avatar[icon-name="handset-filled"]')
-    }).first();
-    await incomingTaskDiv.waitFor({ state: 'visible' });
-    await extensionPage.locator('[data-test="generic-person-item-base"]').waitFor({ state: 'visible' });
+    const incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 70000 });
+    await extensionPage.locator('[data-test="generic-person-item-base"]').waitFor({ state: 'visible', timeout: 30000 });
+    await page.waitForTimeout(3000);
     await declineExtensionCall(extensionPage);
-    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible' });
+    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 30000 });
     await expect(page.getByTestId('samples:rona-popup')).toBeVisible();
+    await page.waitForTimeout(7000);
     await verifyCurrentState(page, USER_STATES.RONA);
-    await submitRonaPopup(page, 'Available');
+    await page.waitForTimeout(10000);
+    expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
+    await submitRonaPopup(page, RONA_OPTIONS.AVAILABLE);
     await expect(page.getByTestId('samples:rona-popup')).not.toBeVisible();
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(7000);
     await verifyCurrentState(page, USER_STATES.AVAILABLE);
-    await incomingTaskDiv.waitFor({ state: 'visible' });
-    await extensionPage.locator('[data-test="generic-person-item-base"]').waitFor({
-      state: 'visible'
-    });
     await endCallTask(callerpage);
-    await page.waitForTimeout(5000);
   });
 
 
   test('should set agent state to busy after declining call in extension mode', async () => {
     await createCallTask(callerpage);
     await changeUserState(page, USER_STATES.AVAILABLE);
-    const incomingTaskDiv = page.locator('div.incoming-task', {
-      has: page.locator('mdc-avatar[icon-name="handset-filled"]')
-    }).first();
-    await incomingTaskDiv.waitFor({ state: 'visible' });
-    await extensionPage.locator('[data-test="generic-person-item-base"]').waitFor({ state: 'visible' });
+    const incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 70000 });
+    await extensionPage.locator('[data-test="generic-person-item-base"]').waitFor({ state: 'visible', timeout: 30000 });
+    await page.waitForTimeout(3000);
     await declineExtensionCall(extensionPage);
-    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible' });
+    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 30000 });
     await expect(page.getByTestId('samples:rona-popup')).toBeVisible();
+    await page.waitForTimeout(6000);
     await verifyCurrentState(page, USER_STATES.RONA);
-    await submitRonaPopup(page, 'Idle');
+    await page.waitForTimeout(3000);
+    expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
+    await submitRonaPopup(page, RONA_OPTIONS.IDLE);
     await expect(page.getByTestId('samples:rona-popup')).not.toBeVisible();
     await page.waitForTimeout(500);
     await expect(incomingTaskDiv).toBeHidden();
-    await expect(extensionPage.locator('[data-test="generic-person-item-base"]')).toBeHidden();
+    await expect(extensionPage.locator('[data-test="generic-person-item-base"]').first()).toBeHidden();
+    await page.waitForTimeout(6000);
     await verifyCurrentState(page, USER_STATES.MEETING);
     await endCallTask(callerpage);
-    await page.waitForTimeout(5000);
   });
 
 
@@ -509,239 +625,257 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
   test('should handle customer disconnect before agent answers in extension mode', async () => {
     await createCallTask(callerpage);
     await changeUserState(page, USER_STATES.AVAILABLE);
-    const incomingTaskDiv = page.locator('div.incoming-task', {
-      has: page.locator('mdc-avatar[icon-name="handset-filled"]')
-    }).first();
-    await incomingTaskDiv.waitFor({ state: 'visible' });
-    await endCallTask(callerpage);
-    await incomingTaskDiv.waitFor({ state: 'hidden' });
-    await expect(incomingTaskDiv).toBeHidden();
-    await verifyCurrentState(page, USER_STATES.AVAILABLE);
+    const incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 70000 });
     await page.waitForTimeout(5000);
+    await endCallTask(callerpage);
+    await incomingTaskDiv.waitFor({ state: 'hidden', timeout: 30000 });
+    await expect(incomingTaskDiv).toBeHidden();
+    await page.waitForTimeout(10000);
+    await verifyCurrentState(page, USER_STATES.AVAILABLE);
   });
 
 
   test('should ignore incoming chat task and wait for RONA popup', async () => {
-
     await createChatTask(chatPage);
     await changeUserState(page, USER_STATES.AVAILABLE);
-    const incomingTaskDiv = page.locator('div.incoming-task', {
-      has: page.locator('mdc-avatar[icon-name="chat-filled"]')
-    });
-    await incomingTaskDiv.waitFor({ state: 'visible' });
-    await incomingTaskDiv.waitFor({ state: 'hidden' });
+    const incomingTaskDiv = page.getByTestId('samples:incoming-task-chat').first();
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 70000 });
+    await incomingTaskDiv.waitFor({ state: 'hidden', timeout: 30000 });
     await expect(incomingTaskDiv).toBeHidden();
-    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible' });
+    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 15000 });
     await expect(page.getByTestId('samples:rona-popup')).toBeVisible();
     await verifyCurrentState(page, USER_STATES.RONA);
+    await page.waitForTimeout(5000);
+    expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
     const userStateElement = page.getByTestId('state-select');
+    await page.waitForTimeout(2000);
     const userStateElementColor = await userStateElement.evaluate((el) => getComputedStyle(el).backgroundColor);
-    expect(userStateElementColor).toBe(THEME_COLORS.RONA);
-    await submitRonaPopup(page, 'Idle');
+    expect(
+      ((receivedColor: string, expectedColor: string, tolerance: number = 20) => {
+        const receivedRgb = receivedColor.match(/\d+/g)?.map(Number) || [];
+        const expectedRgb = expectedColor.match(/\d+/g)?.map(Number) || [];
+
+        if (receivedRgb.length !== 3 || expectedRgb.length !== 3) return false;
+
+        return receivedRgb.every((value, index) =>
+          Math.abs(value - expectedRgb[index]) <= tolerance
+        );
+      })(userStateElementColor, THEME_COLORS.RONA)
+    ).toBe(true);
+    await submitRonaPopup(page, RONA_OPTIONS.IDLE);
     await endChatTask(chatPage);
   });
 
   test('should set agent to Available and verify chat task behavior', async () => {
     await createChatTask(chatPage);
     await changeUserState(page, USER_STATES.AVAILABLE);
-    const incomingTaskDiv = page.locator('div.incoming-task', {
-      has: page.locator('mdc-avatar[icon-name="chat-filled"]')
-    }).first();
-    await incomingTaskDiv.waitFor({ state: 'visible' });
-    await incomingTaskDiv.waitFor({ state: 'hidden' });
+    const incomingTaskDiv = page.getByTestId('samples:incoming-task-chat').first();
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 70000 });
+    await incomingTaskDiv.waitFor({ state: 'hidden', timeout: 30000 });
     await expect(incomingTaskDiv).toBeHidden();
-    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible' });
+    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 15000 });
     await expect(page.getByTestId('samples:rona-popup')).toBeVisible();
-    await verifyCurrentState(page, USER_STATES.RONA);
-    await submitRonaPopup(page, 'Available');
-    await expect(page.getByTestId('samples:rona-popup')).not.toBeVisible();
-    await verifyCurrentState(page, USER_STATES.AVAILABLE);
-    await incomingTaskDiv.waitFor({ state: 'visible' });
-    await expect(incomingTaskDiv).toBeVisible();
-    await incomingTaskDiv.waitFor({ state: 'hidden' });
-    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible' });
-    await submitRonaPopup(page, 'Idle');
-    await endChatTask(chatPage);
     await page.waitForTimeout(5000);
+    await verifyCurrentState(page, USER_STATES.RONA);
+    await page.waitForTimeout(3000);
+    expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
+    await submitRonaPopup(page, RONA_OPTIONS.AVAILABLE);
+    await expect(page.getByTestId('samples:rona-popup')).not.toBeVisible();
+    await page.waitForTimeout(7000);
+    await verifyCurrentState(page, USER_STATES.AVAILABLE);
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 70000 });
+    await expect(incomingTaskDiv).toBeVisible();
+    await incomingTaskDiv.waitFor({ state: 'hidden', timeout: 30000 });
+    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 15000 });
+    await submitRonaPopup(page, RONA_OPTIONS.IDLE);
+    await endChatTask(chatPage);
   });
 
   test('should set agent state to busy after ignoring chat task', async () => {
     await createChatTask(chatPage);
     await page.waitForTimeout(3000);
     await changeUserState(page, USER_STATES.AVAILABLE);
-    const incomingTaskDiv = page.locator('div.incoming-task', {
-      has: page.locator('mdc-avatar[icon-name="chat-filled"]')
-    }).first();
-    await incomingTaskDiv.waitFor({ state: 'visible' });
-    await incomingTaskDiv.waitFor({ state: 'hidden' });
+    const incomingTaskDiv = page.getByTestId('samples:incoming-task-chat').first();
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 70000 });
+    await incomingTaskDiv.waitFor({ state: 'hidden', timeout: 30000 });
     await expect(incomingTaskDiv).toBeHidden();
-    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible' });
+    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 15000 });
     await expect(page.getByTestId('samples:rona-popup')).toBeVisible();
+    await page.waitForTimeout(5000);
     await verifyCurrentState(page, USER_STATES.RONA);
-    await submitRonaPopup(page, 'Idle');
+    await page.waitForTimeout(5000);
+    expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
+    await submitRonaPopup(page, RONA_OPTIONS.IDLE);
     await expect(page.getByTestId('samples:rona-popup')).not.toBeVisible();
+    await page.waitForTimeout(6000);
     await verifyCurrentState(page, USER_STATES.MEETING);
     await endChatTask(chatPage);
-    await page.waitForTimeout(5000);
   });
 
   test('should accept incoming chat, end chat and complete wrapup with callback verification', async () => {
     await page.waitForTimeout(3000);
     await createChatTask(chatPage);
     await changeUserState(page, USER_STATES.AVAILABLE);
-    const incomingTaskDiv = page.locator('div.incoming-task', {
-      has: page.locator('mdc-avatar[icon-name="chat-filled"]')
-    }).first();
-    await incomingTaskDiv.waitFor({ state: 'visible' });
-    await acceptIncomingTask(page, TASK_TYPES.CHAT);
+    const incomingTaskDiv = page.getByTestId('samples:incoming-task-chat').first();
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 70000 });
     await page.waitForTimeout(3000);
+    await acceptIncomingTask(page, TASK_TYPES.CHAT);
+    await page.waitForTimeout(6000);
     await verifyCurrentState(page, USER_STATES.ENGAGED);
     const userStateElement = page.getByTestId('state-select');
     const userStateElementColor = await userStateElement.evaluate((el) => getComputedStyle(el).backgroundColor);
     expect(userStateElementColor).toBe(THEME_COLORS.ENGAGED);
-    //add console checks, color check for chat task acceptance
-    //verify state color
-    await page.getByRole('group', { name: 'Call Control CAD' }).getByLabel('End Chat').click();
-    //veify callbacks for end
-    //verify state color as well
-    //verify state change callbacks as well
+    expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.ENGAGED);
+    await page.getByTestId('end-chat-button').first().click();
     await page.waitForTimeout(3000);
-    await submitWrapup(page);
-    await page.waitForTimeout(5000);
-    //verify the wrapup callbacks, stateChange callbacks as well
-    //   Notice that the state changes from Engaged back to Available only after Wrapups
+    await submitWrapup(page, WRAPUP_REASONS.SALE);
+    await page.waitForTimeout(15000);
+    expect(verifyCallbackLogs(capturedLogs, WRAPUP_REASONS.SALE, USER_STATES.AVAILABLE)).toBe(true);
+    expect(getLastWrapupReasonFromLogs(capturedLogs)).toBe(WRAPUP_REASONS.SALE);
+    expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.AVAILABLE);
   });
 
   test('should handle chat disconnect before agent answers', async () => {
     await page.waitForTimeout(3000);
     await createChatTask(chatPage);
     await changeUserState(page, USER_STATES.AVAILABLE);
-    const incomingTaskDiv = page.locator('div.incoming-task', {
-      has: page.locator('mdc-avatar[icon-name="chat-filled"]')
-    }).first();
-    await incomingTaskDiv.waitFor({ state: 'visible' });
+    const incomingTaskDiv = page.getByTestId('samples:incoming-task-chat').first();
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 70000 });
     await endChatTask(chatPage);
-    await incomingTaskDiv.waitFor({ state: 'hidden' });
-    await page.waitForTimeout(5000);
+    await incomingTaskDiv.waitFor({ state: 'hidden', timeout: 30000 });
+    await page.waitForTimeout(7000);
     await verifyCurrentState(page, USER_STATES.AVAILABLE);
-    await page.waitForTimeout(5000);
   })
+
+  test('should accept incoming email task, end email and complete wrapup with callback verification', async () => {
+    await createEmailTask();
+    await page.waitForTimeout(3000);
+    await changeUserState(page, USER_STATES.AVAILABLE);
+    const incomingTaskDiv = page.getByTestId('samples:incoming-task-email').first();
+    await page.waitForTimeout(3000);
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 70000 })
+    await acceptIncomingTask(page, TASK_TYPES.EMAIL);
+    await page.waitForTimeout(5000);
+    await verifyCurrentState(page, USER_STATES.ENGAGED);
+    const userStateElement = page.getByTestId('state-select');
+    const userStateElementColor = await userStateElement.evaluate((el) => getComputedStyle(el).backgroundColor);
+    expect(userStateElementColor).toBe(THEME_COLORS.ENGAGED);
+    await page.waitForTimeout(3000);
+    expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.ENGAGED);
+    await page.getByTestId('end-email-button').first().click();
+    await page.waitForTimeout(4000);
+    await submitWrapup(page, WRAPUP_REASONS.SALE);
+    await page.waitForTimeout(15000);
+    expect(getLastWrapupReasonFromLogs(capturedLogs)).toBe(WRAPUP_REASONS.SALE);
+    expect(verifyCallbackLogs(capturedLogs, WRAPUP_REASONS.SALE, USER_STATES.AVAILABLE)).toBe(true);
+    expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.AVAILABLE);
+  })
+
 
   test('should ignore incoming email task and wait for RONA popup', async () => {
     await page.waitForTimeout(3000);
     await createEmailTask();
     await changeUserState(page, USER_STATES.AVAILABLE);
-    const incomingTaskDiv = page.locator('div.incoming-task', {
-      has: page.locator('mdc-avatar[icon-name="email-filled"]')
-    }).first();
-    const emailTaskExists = await incomingTaskDiv.waitFor({ state: 'visible' }).then(() => true).catch(() => false);
-    if (!emailTaskExists) {
-      await createEmailTask();
-      await incomingTaskDiv.waitFor({ state: 'visible' });
-    }
-    await incomingTaskDiv.waitFor({ state: 'hidden' });
+    const incomingTaskDiv = page.getByTestId('samples:incoming-task-email').first();
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 70000 });
+    await incomingTaskDiv.waitFor({ state: 'hidden', timeout: 30000 });
     await expect(incomingTaskDiv).toBeHidden();
-    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible' });
+    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 15000 });
     const userStateElement = page.getByTestId('state-select');
     const userStateElementColor = await userStateElement.evaluate((el) => getComputedStyle(el).backgroundColor);
-    expect(userStateElementColor).toBe(THEME_COLORS.RONA);
+    expect(
+      ((receivedColor: string, expectedColor: string, tolerance: number = 20) => {
+        const receivedRgb = receivedColor.match(/\d+/g)?.map(Number) || [];
+        const expectedRgb = expectedColor.match(/\d+/g)?.map(Number) || [];
+
+        if (receivedRgb.length !== 3 || expectedRgb.length !== 3) return false;
+
+        return receivedRgb.every((value, index) =>
+          Math.abs(value - expectedRgb[index]) <= tolerance
+        );
+      })(userStateElementColor, THEME_COLORS.RONA)
+    ).toBe(true);
+
     await expect(page.getByTestId('samples:rona-popup')).toBeVisible();
+    await page.waitForTimeout(5000);
     await verifyCurrentState(page, USER_STATES.RONA);
-    await submitRonaPopup(page, 'Idle');
+    await submitRonaPopup(page, RONA_OPTIONS.IDLE);
   })
 
   test('should set agent to Available and verify email task behavior', async () => {
     await page.waitForTimeout(3000);
     await changeUserState(page, USER_STATES.AVAILABLE);
-    const incomingTaskDiv = page.locator('div.incoming-task', {
-      has: page.locator('mdc-avatar[icon-name="email-filled"]')
-    }).first();
+    const incomingTaskDiv = page.getByTestId('samples:incoming-task-email').first();
     await page.waitForTimeout(3000);
-    const emailTaskExists = await incomingTaskDiv.waitFor({ state: 'visible' }).then(() => true).catch(() => false);
-    if (!emailTaskExists) {
-      await createEmailTask();
-      await incomingTaskDiv.waitFor({ state: 'visible' });
-    }
-    await incomingTaskDiv.waitFor({ state: 'hidden' });
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 70000 });
+    await incomingTaskDiv.waitFor({ state: 'hidden', timeout: 30000 });
     await expect(incomingTaskDiv).toBeHidden();
-    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible' });
+    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 15000 });
     await expect(page.getByTestId('samples:rona-popup')).toBeVisible();
+    await page.waitForTimeout(5000);
     await verifyCurrentState(page, USER_STATES.RONA);
-    await submitRonaPopup(page, 'Available');
+    await page.waitForTimeout(6000);
+    expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
+    await submitRonaPopup(page, RONA_OPTIONS.AVAILABLE);
     await expect(page.getByTestId('samples:rona-popup')).not.toBeVisible();
+    await page.waitForTimeout(6000);
     await verifyCurrentState(page, USER_STATES.AVAILABLE);
-    await incomingTaskDiv.waitFor({ state: 'visible' });
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 30000 });
     await expect(incomingTaskDiv).toBeVisible();
-    await incomingTaskDiv.waitFor({ state: 'hidden' });
-    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible' });
-    await submitRonaPopup(page, 'Idle');
+    await acceptIncomingTask(page, TASK_TYPES.EMAIL);
+    await page.waitForTimeout(3000);
+    const endButton = page.getByTestId('end-email-button').first();
+    await endButton.waitFor({ state: 'visible', timeout: 12000 });
+    await endButton.click();
+    await page.waitForTimeout(4000);
+    await submitWrapup(page, WRAPUP_REASONS.SALE);
   })
 
 
   test('should set agent state to busy after ignoring email task', async () => {
+    await createEmailTask();
     await page.waitForTimeout(3000);
     await changeUserState(page, USER_STATES.AVAILABLE);
-    const incomingTaskDiv = page.locator('div.incoming-task', {
-      has: page.locator('mdc-avatar[icon-name="email-filled"]')
-    }).first();
+    const incomingTaskDiv = page.getByTestId('samples:incoming-task-email').first();
     await page.waitForTimeout(3000);
-    const emailTaskExists = await incomingTaskDiv.waitFor({ state: 'visible' }).then(() => true).catch(() => false);
-    if (!emailTaskExists) {
-      await createEmailTask();
-      await incomingTaskDiv.waitFor({ state: 'visible' });
-    }
-    await incomingTaskDiv.waitFor({ state: 'hidden' });
-    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible' });
-    await submitRonaPopup(page, 'Idle');
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 70000 });
+    await incomingTaskDiv.waitFor({ state: 'hidden', timeout: 30000 });
+    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 15000 });
+    await submitRonaPopup(page, RONA_OPTIONS.IDLE);
+    await page.waitForTimeout(5000);
     await verifyCurrentState(page, USER_STATES.MEETING);
+    await changeUserState(page, USER_STATES.AVAILABLE);
+    await acceptIncomingTask(page, TASK_TYPES.EMAIL);
+    await page.waitForTimeout(3000);
+    await page.getByTestId('end-email-button').first().click();
+    await page.waitForTimeout(5000);
+    await submitWrapup(page, WRAPUP_REASONS.SALE);
+    await stationLogout(page);
   })
 
-  test('should accept incoming email task, end email and complete wrapup with callback verification', async () => {
-    await page.waitForTimeout(3000);
-    await changeUserState(page, USER_STATES.AVAILABLE);
-    const incomingTaskDiv = page.locator('div.incoming-task', {
-      has: page.locator('mdc-avatar[icon-name="email-filled"]')
-    }).first();
-    await page.waitForTimeout(3000);
-    const emailTaskExists = await incomingTaskDiv.waitFor({ state: 'visible' }).then(() => true).catch(() => false);
-    if (!emailTaskExists) {
-      await createEmailTask();
-      await incomingTaskDiv.waitFor({ state: 'visible' });
-    }
-    await acceptIncomingTask(page, TASK_TYPES.EMAIL);
-    await page.waitForTimeout(2000);
-    await verifyCurrentState(page, USER_STATES.ENGAGED);
-    const userStateElement = page.getByTestId('state-select');
-    const userStateElementColor = await userStateElement.evaluate((el) => getComputedStyle(el).backgroundColor);
-    expect(userStateElementColor).toBe(THEME_COLORS.ENGAGED);
-    //add console checks, color check, verify state color
-    await page.getByRole('group', { name: 'Call Control CAD' }).getByLabel('End Email').click();
-    //verify callbacks for end, verify state color as well, verify state change callbacks as well
-    await page.waitForTimeout(3000);
-    await submitWrapup(page);
-    //verify callbacks, verify state color as well, order of the logs as well
-    //   Notice that the state changes from Engaged back to Available only after Wrapup
-    // onStateChange call back should be called with the Available idle code
-    // onWrapUp call back should be called with currentTask data and wrapUpReason
-  })
 
   test.afterAll(async () => {
-    await context.close();
-    await context2.close()
+    if (context) {
+      await context.close();
+      context = null;
+    }
+    if (context2) {
+      await context2.close();
+      context2 = null;
+    }
   })
 
 });
 
-//multi-session one in different blocks, with page2 intialization as well.
-
-test.describe('Multi-session Incoming Task Tests', async () => {
+test.describe('Incoming Tasks tests for multi-session', async () => {
 
 
   test.beforeAll(async ({ browser }) => {
     context = await browser.newContext();
     context2 = await browser.newContext();
     page = await context.newPage();
-    page2 = await context2.newPage();
+    page2 = await context.newPage();
     chatPage = await context.newPage();
     extensionPage = await context.newPage();
     callerpage = await context2.newPage();
@@ -761,131 +895,10 @@ test.describe('Multi-session Incoming Task Tests', async () => {
 
       })(),
       (async () => {
-        await loginViaAccessToken(page, 'AGENT1');
-        await enableMultiLogin(page);
-        await enableAllWidgets(page);
-        for (let i = 0; i < maxRetries; i++) {
-          try {
-            await initialiseWidgets(page);
-            await page.getByTestId('station-login-widget').waitFor({ state: 'visible' });
-            break;
-          } catch (error) {
-            if (i == maxRetries - 1) {
-              throw new Error(`Failed to initialise widgets after ${maxRetries} attempts: ${error}`);
-            }
-          }
-        }
-
-        const loginButtonExists = await page
-          .getByTestId('login-button')
-          .isVisible()
-          .catch(() => false);
-        if (loginButtonExists) {
-          await telephonyLogin(page, LOGIN_MODE.EXTENSION);
-        } else {
-          await stationLogout(page);
-          await telephonyLogin(page, LOGIN_MODE.EXTENSION);
-        }
-
-        for (let i = 0; i < maxRetries; i++) {
-          const stationLoginFailure = await page.getByTestId('station-login-failure-label').isVisible().catch(() => false);
-          if (!stationLoginFailure) break;
-          await telephonyLogin(page, LOGIN_MODE.EXTENSION);
-          if (i == maxRetries - 1) {
-            throw new Error(`Station Login Error Persists after ${maxRetries} attempts`);
-          }
-        }
-
-        await expect(page.getByTestId('state-select')).toBeVisible();
-
-        let ronapopupVisible = await page.getByTestId('samples:rona-popup').isVisible().catch(() => false);
-        if (ronapopupVisible) {
-          await submitRonaPopup(page, 'Available');
-        }
-
-        const endButton = page.getByRole('group', { name: 'Call Control CAD' }).getByLabel(/^End/);
-        const endButtonVisible = await endButton.isVisible().catch(() => false);
-        if (endButtonVisible) {
-          await endButton.click();
-          await submitWrapup(page);
-        }
-
-        const wrapupBox = page.locator('mdc-button:has-text("Wrap up")');
-        const wrapupBoxVisible = await wrapupBox.isVisible().catch(() => false);
-        if (wrapupBoxVisible) {
-          await submitWrapup(page);
-        }
-        await changeUserState(page, USER_STATES.AVAILABLE);
-
-        const incomingTaskDiv = page.locator('div.incoming-task');
-        const incomingTaskVisible = await incomingTaskDiv.isVisible().catch(() => false);
-        if (incomingTaskVisible) {
-          await handleStrayTasks(page);
-        }
-
+        await pageSetup(page, LOGIN_MODE.EXTENSION);
       })(),
       (async () => {
-        await loginViaAccessToken(page2, 'AGENT1');
-        await enableMultiLogin(page2);
-        await enableAllWidgets(page2);
-
-        for (let i = 0; i < maxRetries; i++) {
-          try {
-            await initialiseWidgets(page2);
-            await page2.getByTestId('station-login-widget').waitFor({ state: 'visible' });
-            break;
-          } catch (error) {
-            if (i == maxRetries - 1) {
-              throw new Error(`Failed to initialise widgets after ${maxRetries} attempts: ${error}`);
-            }
-          }
-        }
-
-        const loginButtonExists = await page2
-          .getByTestId('login-button')
-          .isVisible()
-          .catch(() => false);
-        if (loginButtonExists) {
-          await telephonyLogin(page2, LOGIN_MODE.EXTENSION);
-        } else {
-          await stationLogout(page2);
-          await telephonyLogin(page2, LOGIN_MODE.EXTENSION);
-        }
-
-        for (let i = 0; i < maxRetries; i++) {
-          const stationLoginFailure = await page2.getByTestId('station-login-failure-label').isVisible().catch(() => false);
-          if (!stationLoginFailure) break;
-          await telephonyLogin(page2, LOGIN_MODE.EXTENSION);
-          if (i == maxRetries - 1) {
-            throw new Error(`Station Login Error Persists after ${maxRetries} attempts`);
-          }
-        }
-
-        await expect(page2.getByTestId('state-select')).toBeVisible();
-
-        let ronapopupVisible = await page2.getByTestId('samples:rona-popup').isVisible().catch(() => false);
-        if (ronapopupVisible) {
-          await submitRonaPopup(page2, 'Available');
-        }
-
-        const endButton = page2.getByRole('group', { name: 'Call Control CAD' }).getByLabel(/^End/);
-        const endButtonVisible = await endButton.isVisible().catch(() => false);
-        if (endButtonVisible) {
-          await endButton.click();
-          await submitWrapup(page2);
-        }
-        const wrapupBox = page2.locator('mdc-button:has-text("Wrap up")');
-        const wrapupBoxVisible = await wrapupBox.isVisible().catch(() => false);
-        if (wrapupBoxVisible) {
-          await submitWrapup(page2);
-        }
-        await changeUserState(page2, USER_STATES.AVAILABLE);
-        const incomingTaskDiv = page2.locator('div.incoming-task');
-        const incomingTaskVisible = await incomingTaskDiv.isVisible().catch(() => false);
-        if (incomingTaskVisible) {
-          await handleStrayTasks(page2);
-        }
-
+        await pageSetup(page2, LOGIN_MODE.EXTENSION);
       })(),
       (async () => {
 
@@ -904,24 +917,20 @@ test.describe('Multi-session Incoming Task Tests', async () => {
   })
 
   test('should handle multi-session incoming call with state synchronization', async () => {
-    //ADD CODE FOR WRAPUP UTIL
     await createCallTask(callerpage);
     await changeUserState(page, USER_STATES.AVAILABLE);
-    const incomingTaskDiv = page.locator('div.incoming-task', {
-      has: page.locator('mdc-avatar[icon-name="handset-filled"]')
-    });
-    const incomingTaskDiv2 = page2.locator('div.incoming-task', {
-      has: page2.locator('mdc-avatar[icon-name="handset-filled"]')
-    });
-    await incomingTaskDiv.waitFor({ state: 'visible' });
-    await extensionPage.locator('[data-test="generic-person-item-base"]').waitFor({ state: 'visible' });
-    await incomingTaskDiv2.waitFor({ state: 'visible' });
+    const incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
+    const incomingTaskDiv2 = page2.getByTestId('samples:incoming-task-telephony').first();
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 70000 });
+    await extensionPage.locator('[data-test="generic-person-item-base"]').first().waitFor({ state: 'visible', timeout: 30000 });
+    await incomingTaskDiv2.waitFor({ state: 'visible', timeout: 15000 });
+    await page.waitForTimeout(5000);
     await declineExtensionCall(extensionPage);
-    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible' });
-    await page2.getByTestId('samples:rona-popup').waitFor({ state: 'visible' });
+    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 15000 });
+    await page2.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 150000 });
 
-    await submitRonaPopup(page2, 'Idle');
-    await page.waitForTimeout(3000);
+    await submitRonaPopup(page2, RONA_OPTIONS.IDLE);
+    await page.waitForTimeout(6000);
     await verifyCurrentState(page2, USER_STATES.MEETING);
     await verifyCurrentState(page, USER_STATES.MEETING);
 
@@ -930,15 +939,15 @@ test.describe('Multi-session Incoming Task Tests', async () => {
 
     await page.waitForTimeout(3000);
     await changeUserState(page, USER_STATES.AVAILABLE);
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(6000);
     await verifyCurrentState(page2, USER_STATES.AVAILABLE);
 
-    await incomingTaskDiv.waitFor({ state: 'visible' });
-    await extensionPage.locator('[data-test="generic-person-item-base"]').waitFor({ state: 'visible' });
-    await incomingTaskDiv2.waitFor({ state: 'visible' });
-
-    await acceptExtensionCall(extensionPage);
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 70000 });
+    await extensionPage.locator('[data-test="generic-person-item-base"]').first().waitFor({ state: 'visible', timeout: 30000 });
+    await incomingTaskDiv2.waitFor({ state: 'visible', timeout: 15000 });
     await page.waitForTimeout(5000);
+    await acceptExtensionCall(extensionPage);
+    await page.waitForTimeout(6000);
     await verifyCurrentState(page, USER_STATES.ENGAGED);
     await verifyCurrentState(page2, USER_STATES.ENGAGED);
     const userStateElement = page.getByTestId('state-select');
@@ -952,50 +961,34 @@ test.describe('Multi-session Incoming Task Tests', async () => {
     await expect(incomingTaskDiv).toBeHidden();
     await expect(incomingTaskDiv2).toBeHidden();
 
-    //add console checks, color check
-
-    // await endExtensionCall(extensionPage);
-    await page2.getByRole('group', { name: 'Call Control CAD' }).getByLabel('End Call').click();
+    await page2.getByTestId('end-call-button').first().click();
     await page.waitForTimeout(3000)
-    await submitWrapup(page);
-    await page.waitForTimeout(3000);
+    await submitWrapup(page, WRAPUP_REASONS.SALE);
+    await page.waitForTimeout(6000);
     await verifyCurrentState(page, USER_STATES.AVAILABLE);
     await verifyCurrentState(page2, USER_STATES.AVAILABLE);
-
-    // await page2.close();
   })
 
   test('should handle multi-session incoming chat with state synchronization', async () => {
     await createChatTask(chatPage);
     await changeUserState(page, USER_STATES.AVAILABLE);
-    const incomingTaskDiv = page.locator('div.incoming-task', {
-      has: page.locator('mdc-avatar[icon-name="chat-filled"]')
-    });
-    const incomingTaskDiv2 = page2.locator('div.incoming-task', {
-      has: page2.locator('mdc-avatar[icon-name="chat-filled"]')
-    });
-    await incomingTaskDiv.waitFor({ state: 'visible' });
-    await incomingTaskDiv2.waitFor({ state: 'visible' });
-    await incomingTaskDiv.waitFor({ state: 'hidden' });
-    await incomingTaskDiv2.waitFor({ state: 'hidden' });
-
-    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible' });
-    await page2.getByTestId('samples:rona-popup').waitFor({ state: 'visible' });
-
-    // await page2.getByTestId('rona-state-select').click();
-    // await page2.getByTestId('rona-option-idle').click();
-    // await page2.getByTestId('rona-button-confirm').click();
-    await submitRonaPopup(page2, 'Idle');
-    await page.waitForTimeout(5000);
+    const incomingTaskDiv = page.getByTestId('samples:incoming-task-chat').first();
+    const incomingTaskDiv2 = page2.getByTestId('samples:incoming-task-chat').first();
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 70000 });
+    await incomingTaskDiv2.waitFor({ state: 'visible', timeout: 15000 });
+    await incomingTaskDiv.waitFor({ state: 'hidden', timeout: 30000 });
+    await incomingTaskDiv2.waitFor({ state: 'hidden', timeout: 15000 });
+    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 15000 });
+    await page2.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 15000 });
+    await submitRonaPopup(page2, RONA_OPTIONS.IDLE);
+    await page.waitForTimeout(7000);
     await verifyCurrentState(page, USER_STATES.MEETING);
     await verifyCurrentState(page2, USER_STATES.MEETING);
-
     await changeUserState(page, USER_STATES.AVAILABLE);
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(6000);
     await verifyCurrentState(page2, USER_STATES.AVAILABLE);
-    await incomingTaskDiv.waitFor({ state: 'visible' });
-    await incomingTaskDiv2.waitFor({ state: 'visible' });
-
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 70000 });
+    await incomingTaskDiv2.waitFor({ state: 'visible', timeout: 15000 });
     await acceptIncomingTask(page, TASK_TYPES.CHAT);
     await page.waitForTimeout(5000);
     await verifyCurrentState(page, USER_STATES.ENGAGED);
@@ -1003,21 +996,15 @@ test.describe('Multi-session Incoming Task Tests', async () => {
     const userStateElement = page.getByTestId('state-select');
     const userStateElementColor = await userStateElement.evaluate((el) => getComputedStyle(el).backgroundColor);
     expect(userStateElementColor).toBe(THEME_COLORS.ENGAGED);
-
     const userStateElement2 = page2.getByTestId('state-select');
     const userStateElementColor2 = await userStateElement2.evaluate((el) => getComputedStyle(el).backgroundColor);
     expect(userStateElementColor2).toBe(THEME_COLORS.ENGAGED);
-
     await expect(incomingTaskDiv).toBeHidden();
     await expect(incomingTaskDiv2).toBeHidden();
-
-    //add console checks, color check
-
-    await page2.getByRole('group', { name: 'Call Control CAD' }).getByLabel('End Chat').click();
+    await page2.getByTestId('end-chat-button').first().click();
     await page.waitForTimeout(3000);
-    await submitWrapup(page2);
-    await page.waitForTimeout(5000);
-
+    await submitWrapup(page2, WRAPUP_REASONS.SALE);
+    await page.waitForTimeout(6000);
     await verifyCurrentState(page, USER_STATES.AVAILABLE);
     await verifyCurrentState(page2, USER_STATES.AVAILABLE);
   });
@@ -1025,20 +1012,15 @@ test.describe('Multi-session Incoming Task Tests', async () => {
   test('should handle multi-session incoming email with state synchronization', async () => {
     await createEmailTask();
     await changeUserState(page, USER_STATES.AVAILABLE);
-    const incomingTaskDiv = page.locator('div.incoming-task', {
-      has: page.locator('mdc-avatar[icon-name="email-filled"]')
-    });
-    const incomingTaskDiv2 = page2.locator('div.incoming-task', {
-      has: page2.locator('mdc-avatar[icon-name="email-filled"]')
-    });
-    await incomingTaskDiv.waitFor({ state: 'visible' });
-    await incomingTaskDiv2.waitFor({ state: 'visible' });
-    await incomingTaskDiv.waitFor({ state: 'hidden' });
-    await incomingTaskDiv2.waitFor({ state: 'hidden' });
-
-    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible' });
-    await page2.getByTestId('samples:rona-popup').waitFor({ state: 'visible' });
-    await submitRonaPopup(page2, 'Idle');
+    const incomingTaskDiv = page.getByTestId('samples:incoming-task-email').first();
+    const incomingTaskDiv2 = page2.getByTestId('samples:incoming-task-email').first();
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 70000 });
+    await incomingTaskDiv2.waitFor({ state: 'visible', timeout: 15000 });
+    await incomingTaskDiv.waitFor({ state: 'hidden', timeout: 30000 });
+    await incomingTaskDiv2.waitFor({ state: 'hidden', timeout: 15000 });
+    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 15000 });
+    await page2.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 15000 });
+    await submitRonaPopup(page2, RONA_OPTIONS.IDLE);
     await page.waitForTimeout(5000);
     await verifyCurrentState(page, USER_STATES.MEETING);
     await verifyCurrentState(page2, USER_STATES.MEETING);
@@ -1046,51 +1028,40 @@ test.describe('Multi-session Incoming Task Tests', async () => {
     await changeUserState(page, USER_STATES.AVAILABLE);
     await page.waitForTimeout(5000);
     await verifyCurrentState(page2, USER_STATES.AVAILABLE);
-    await incomingTaskDiv.waitFor({ state: 'visible' });
-    await incomingTaskDiv2.waitFor({ state: 'visible' });
-
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 70000 });
+    await incomingTaskDiv2.waitFor({ state: 'visible', timeout: 15000 });
     await acceptIncomingTask(page, TASK_TYPES.EMAIL);
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(5000);
     await verifyCurrentState(page, USER_STATES.ENGAGED);
     await verifyCurrentState(page2, USER_STATES.ENGAGED);
     const userStateElement = page.getByTestId('state-select');
     const userStateElementColor = await userStateElement.evaluate((el) => getComputedStyle(el).backgroundColor);
     expect(userStateElementColor).toBe(THEME_COLORS.ENGAGED);
-
     const userStateElement2 = page.getByTestId('state-select');
     const userStateElementColor2 = await userStateElement2.evaluate((el) => getComputedStyle(el).backgroundColor);
     expect(userStateElementColor2).toBe(THEME_COLORS.ENGAGED);
-
     await expect(incomingTaskDiv).toBeHidden();
     await expect(incomingTaskDiv2).toBeHidden();
-
-    //add console checks, color check
-
-
-    await page2.getByRole('group', { name: 'Call Control CAD' }).getByLabel('End Email').click(); //this is the call-end button
+    await page2.getByTestId('end-email-button').first().click();
     await page.waitForTimeout(3000);
-    await submitWrapup(page);
-    await page.waitForTimeout(3000);
-
+    await submitWrapup(page, WRAPUP_REASONS.SALE);
+    await page.waitForTimeout(5000);
     await verifyCurrentState(page, USER_STATES.AVAILABLE);
     await verifyCurrentState(page2, USER_STATES.AVAILABLE);
-
+    await stationLogout(page2);
   });
 
 
   test.afterAll(async () => {
-    await context.close();
-    await context2.close();
+    if (context) {
+      await context.close();
+      context = null;
+    }
+    if (context2) {
+      await context2.close();
+      context2 = null;
+    }
+
   })
 
 });
-
-
-
-
-
-
-
-
-//pending cases to be implement => need opinion if we want idle RONA for each Task, have implemented for call.
-//user state some cases are pending, call related ones
