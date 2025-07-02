@@ -307,7 +307,7 @@ test.describe('Incoming Call Task Tests for Desktop Mode', async () => {
 
     await Promise.all([
       (async () => {
-        await loginExtension(callerpage, process.env.PW_AGENT2_USERNAME, process.env.PW_AGENT2_PASSWORD);
+        await loginExtension(callerpage, process.env.PW_AGENT2_USERNAME, process.env.PW_PASSWORD);
       })(),
       (async () => {
         await pageSetup(page, LOGIN_MODE.DESKTOP);
@@ -467,7 +467,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
 
         for (let i = 0; i < maxRetries; i++) {
           try {
-            await loginExtension(callerpage, process.env.PW_AGENT2_USERNAME, process.env.PW_AGENT2_PASSWORD);
+            await loginExtension(callerpage, process.env.PW_AGENT2_USERNAME, process.env.PW_PASSWORD);
             break;
           } catch (error) {
             if (i == maxRetries - 1) {
@@ -485,7 +485,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
 
         for (let i = 0; i < maxRetries; i++) {
           try {
-            await loginExtension(extensionPage, process.env.PW_AGENT1_USERNAME, process.env.PW_AGENT1_PASSWORD);
+            await loginExtension(extensionPage, process.env.PW_AGENT1_USERNAME, process.env.PW_PASSWORD);
             break;
           } catch (error) {
             if (i == maxRetries - 1) {
@@ -884,7 +884,7 @@ test.describe('Incoming Tasks tests for multi-session', async () => {
       (async () => {
         for (let i = 0; i < maxRetries; i++) {
           try {
-            await loginExtension(callerpage, process.env.PW_AGENT2_USERNAME, process.env.PW_AGENT2_PASSWORD);
+            await loginExtension(callerpage, process.env.PW_AGENT2_USERNAME, process.env.PW_PASSWORD);
             break;
           } catch (error) {
             if (i == maxRetries - 1) {
@@ -904,7 +904,7 @@ test.describe('Incoming Tasks tests for multi-session', async () => {
 
         for (let i = 0; i < maxRetries; i++) {
           try {
-            await loginExtension(extensionPage, process.env.PW_AGENT1_USERNAME, process.env.PW_AGENT1_PASSWORD);
+            await loginExtension(extensionPage, process.env.PW_AGENT1_USERNAME, process.env.PW_PASSWORD);
             break;
           } catch (error) {
             if (i == maxRetries - 1) {
