@@ -331,16 +331,16 @@ const onTaskDeclined = (task,reason) => {
     };
   }, []);
 
-  const onStateChange = (status) => {
-    console.log('onStateChange invoked', status);
-    if (!status || !status.name) return;
-    if (status.name !== 'RONA') {
-      setShowRejectedPopup(false);
-      setRejectedReason('');
-    }
-    //the below log is used by e2e tests
-    console.log(`onStateChange invoked with state : ${status.name}`);
-  };
+ const onStateChange = (status) => {
+  console.log('onStateChange invoked', status);
+  //adding a log to be used for automation
+  console.log('onStateChange invoked with state name:', status?.name);
+  if (!status || !status.name) return;
+  if (status.name !== 'RONA') {
+    setShowRejectedPopup(false);
+    setRejectedReason('');
+  }
+};
 
     const stationLogout = () => {
     store.cc.stationLogout({logoutReason: 'User requested logout'})

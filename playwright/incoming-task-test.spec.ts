@@ -30,7 +30,7 @@ function getLastStateFromLogs(capturedLogs: string[]): string {
   }
 
   const lastStateLog = stateChangeLogs[stateChangeLogs.length - 1];
-  const match = lastStateLog.match(/onStateChange invoked with state : (.+)$/);
+  const match = lastStateLog.match(/onStateChange invoked with state name:\s*(.+)$/);
 
   if (!match) {
     throw new Error('Could not extract state name from log: ' + lastStateLog);
@@ -89,7 +89,7 @@ function verifyCallbackLogs(
     }
 
     const wrapupMatch = lastWrapupLog.match(/onWrapup invoked with reason : (.+)$/);
-    const stateMatch = lastStateChangeLog.match(/onStateChange invoked with state : (.+)$/);
+    const stateMatch = lastStateChangeLog.match(/onStateChange invoked with state name:\s*(.+)$/);
 
     if (!wrapupMatch || !stateMatch) {
       throw new Error('Could not extract values from logs');
@@ -119,7 +119,7 @@ function setupConsoleLogging(page: Page): () => void {
 
   const consoleHandler = (msg) => {
     const logText = msg.text();
-    if (logText.includes('onStateChange invoked with state :') ||
+    if (logText.includes('onStateChange invoked with state name:') ||
       logText.includes('onWrapup invoked with reason :')) {
       capturedLogs.push(logText);
     }

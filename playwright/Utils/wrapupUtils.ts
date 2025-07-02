@@ -24,6 +24,6 @@ export async function submitWrapup(page: Page, reason: String): Promise<void> {
   } catch (error) {
     throw new Error(`Wrapup reason "${reason.toLowerCase()}" not found`);
   }
-  expect(page.getByTestId(`wrapup-submit-button`)).toBeVisible({ timeout: 5000 });
-  await page.getByTestId(`wrapup-submit-button`).first().click();
+  expect(page.getByTestId(`submit-wrapup-button`)).toBeVisible({ timeout: 5000 });
+  await page.getByTestId(`submit-wrapup-button`).first().click();
 }

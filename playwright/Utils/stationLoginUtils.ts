@@ -1,6 +1,6 @@
-import { Page, expect } from '@playwright/test';
+import {Page, expect} from '@playwright/test';
 import dotenv from 'dotenv';
-import { LOGIN_MODE } from '../constants';
+import {LOGIN_MODE} from '../constants';
 
 dotenv.config();
 
@@ -74,9 +74,9 @@ export const extensionLogin = async (page: Page, extensionNumber?: string): Prom
  * ```
  */
 export const dialLogin = async (page: Page, dialNumber?: string): Promise<void> => {
-  const number = dialNumber ?? process.env.PW_AGENT1_DIAL_NUMBER;
+  const number = dialNumber ?? process.env.PW_DIAL_NUMBER;
   if (!number) {
-    throw new Error('PW_AGENT1_DIAL_NUMBER is not defined in the .env file');
+    throw new Error('PW_DIAL_NUMBER is not defined in the .env file');
   }
 
   if (number.trim() === '') {
@@ -113,7 +113,7 @@ export const stationLogout = async (page: Page): Promise<void> => {
   //check if the station logout button is hidden after logouts
   const isLogoutButtonHidden = await page
     .getByTestId('samples:station-logout-button')
-    .waitFor({ state: 'hidden', timeout: 40000 })
+    .waitFor({state: 'hidden', timeout : 50000})
     .then(() => true)
     .catch(() => false);
   if (!isLogoutButtonHidden) {

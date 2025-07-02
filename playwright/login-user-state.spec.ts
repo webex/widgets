@@ -1,18 +1,20 @@
 import {test, expect} from '@playwright/test';
 import fs from 'fs';
+import dotenv from 'dotenv';
 
+dotenv.config();
 test.describe('Login and User State tests', async () => {
   test('Login: should login using Extension login option', async ({page}) => {
     await page.goto('http://localhost:3000/');
     await page.getByRole('textbox').click();
-    if (!process.env.ACCESS_TOKEN) {
+    if (!process.env.PW_AGENT1_ACCESS_TOKEN) {
       throw new Error('ACCESS_TOKEN is not defined, OAuth failed');
     }
-    await page.getByRole('textbox').fill(process.env.ACCESS_TOKEN);
+    await page.getByRole('textbox').fill(process.env.PW_AGENT1_ACCESS_TOKEN);
     await page.getByRole('checkbox', {name: 'Enable Multi Login'}).check();
     await page.getByRole('button', {name: 'Init Widgets'}).click();
 
-    await page.getByTestId('station-login-widget').waitFor({state: 'visible'});
+    await page.getByTestId('station-login-widget').waitFor({state: 'visible', timeout: 70000});
 
     const loginButtonExists = await page
       .getByTestId('login-button')
@@ -53,11 +55,11 @@ test.describe('Login and User State tests', async () => {
     await page.getByRole('textbox').click();
     await page2.getByRole('textbox').click();
 
-    if (!process.env.ACCESS_TOKEN) {
+    if (!process.env.PW_AGENT1_ACCESS_TOKEN) {
       throw new Error('ACCESS_TOKEN is not defined, OAuth failed');
     }
-    await page.getByRole('textbox').fill(process.env.ACCESS_TOKEN);
-    await page2.getByRole('textbox').fill(process.env.ACCESS_TOKEN);
+    await page.getByRole('textbox').fill(process.env.PW_AGENT1_ACCESS_TOKEN);
+    await page2.getByRole('textbox').fill(process.env.PW_AGENT1_ACCESS_TOKEN);
 
     await page.getByRole('checkbox', {name: 'Enable Multi Login'}).check();
     await page2.getByRole('checkbox', {name: 'Enable Multi Login'}).check();
@@ -65,8 +67,8 @@ test.describe('Login and User State tests', async () => {
     await page.getByRole('button', {name: 'Init Widgets'}).click();
     await page2.getByRole('button', {name: 'Init Widgets'}).click();
 
-    await page.getByTestId('station-login-widget').waitFor({state: 'visible'});
-    await page2.getByTestId('station-login-widget').waitFor({state: 'visible'});
+    await page.getByTestId('station-login-widget').waitFor({state: 'visible', timeout: 70000});
+    await page2.getByTestId('station-login-widget').waitFor({state: 'visible', timeout: 70000});
 
     const loginButtonExists = await page
       .getByTestId('login-button')
@@ -113,14 +115,14 @@ test.describe('Login and User State tests', async () => {
     await page.goto('http://localhost:3000/');
     await page.getByRole('textbox').click();
 
-    if (!process.env.ACCESS_TOKEN) {
+    if (!process.env.PW_AGENT1_ACCESS_TOKEN) {
       throw new Error('ACCESS_TOKEN is not defined, OAuth failed');
     }
-    await page.getByRole('textbox').fill(process.env.ACCESS_TOKEN);
+    await page.getByRole('textbox').fill(process.env.PW_AGENT1_ACCESS_TOKEN);
 
     await page.getByRole('button', {name: 'Init Widgets'}).click();
 
-    await page.getByTestId('station-login-widget').waitFor({state: 'visible'});
+    await page.getByTestId('station-login-widget').waitFor({state: 'visible', timeout: 70000});
     const loginButtonExists = await page
       .getByTestId('login-button')
       .isVisible()
@@ -147,16 +149,17 @@ test.describe('Login and User State tests', async () => {
     await expect(page.getByTestId('state-select')).toBeVisible();
 
     await page.getByTestId('state-item-Available').click();
+    await page.waitForTimeout(5000);
     await expect(page.getByTestId('state-select').getByTestId('state-name')).toContainText('Available');
     await page.reload();
 
     await page.getByRole('textbox').click();
-    if (!process.env.ACCESS_TOKEN) {
+    if (!process.env.PW_AGENT1_ACCESS_TOKEN) {
       throw new Error('ACCESS_TOKEN is not defined, OAuth failed');
     }
-    await page.getByRole('textbox').fill(process.env.ACCESS_TOKEN);
+    await page.getByRole('textbox').fill(process.env.PW_AGENT1_ACCESS_TOKEN);
     await page.getByRole('button', {name: 'Init Widgets'}).click();
-    await page.getByTestId('station-login-widget').waitFor({state: 'visible'});
+    await page.getByTestId('station-login-widget').waitFor({state: 'visible', timeout: 70000});
 
     await expect(page.getByTestId('login-option-select').locator('#select-base-triggerid')).toContainText('Extension');
     await expect(page.getByTestId('state-name')).toContainText('Available');

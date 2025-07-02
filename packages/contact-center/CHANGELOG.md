@@ -1,3 +1,24 @@
+# [1.28.0-ccwidgets.83](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.82...v1.28.0-ccwidgets.83) (2025-07-01)
+
+
+### Features
+
+* **cc-widgets:** UI Automation for State Change ([#476](https://github.com/webex/widgets/issues/476)) ([999cb53](https://github.com/webex/widgets/commit/999cb533c83c3e5e8f7045fa89f1b5629e94a041))
+
+# [1.28.0-ccwidgets.82](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.81...v1.28.0-ccwidgets.82) (2025-07-01)
+
+
+### Features
+
+* **cc-widgets:** autoWrapup implemented ([#472](https://github.com/webex/widgets/issues/472)) ([07c4ef1](https://github.com/webex/widgets/commit/07c4ef18dbe4ddab8b813bb4ef36902903e5b586))
+
+# [1.28.0-ccwidgets.81](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.80...v1.28.0-ccwidgets.81) (2025-06-30)
+
+
+### Bug Fixes
+
+* **cc-widgets:** update the workflow for pull request by adding and modifying the required env variables ([#481](https://github.com/webex/widgets/issues/481)) ([fd71837](https://github.com/webex/widgets/commit/fd718375eab379a439f281ed73559637180b6532))
+
 # [1.28.0-ccwidgets.80](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.79...v1.28.0-ccwidgets.80) (2025-06-26)
 
 
