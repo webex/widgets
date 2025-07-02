@@ -438,7 +438,13 @@ test.describe('Station Login Tests - Desktop Mode', () => {
 
   test.afterAll(async () => {
     if (page) {
-      await stationLogout(page);
+      const isLogoutButtonVisible = await page
+        .getByTestId('samples:station-logout-button')
+        .isVisible()
+        .catch(() => false);
+      if (isLogoutButtonVisible) {
+        await stationLogout(page);
+      }
       await context.close();
     }
   });
