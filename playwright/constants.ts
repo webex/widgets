@@ -1,4 +1,4 @@
-export const BASE_URL = 'https://ccwidgets.d1b38q61t1z947.amplifyapp.com/samples-cc-react-app/index.html';
+export const BASE_URL = 'http://localhost:3000/';
 
 export const USER_STATES = {
   MEETING: 'Meeting',
@@ -18,7 +18,7 @@ export const THEME_COLORS = {
   AVAILABLE: 'rgb(206, 245, 235)',
   MEETING: 'rgba(0, 0, 0, 0.11)',
   ENGAGED: 'rgb(255, 235, 194)',
-  RONA: 'rgb(255, 232, 234)'
+  RONA: 'rgb(250, 233, 234)'
 };
 
 export const LOGIN_MODE = {
@@ -39,3 +39,13 @@ export const TASK_TYPES = {
 }
 
 export const CHAT_URL = 'https://widgets.webex.com/chat-client';
+
+export const WRAPUP_REASONS = {
+  SALE: 'Sale',
+  RESOLVED: 'Resolved',
+}
+
+export const RONA_OPTIONS = {
+  AVAILABLE: 'Available',
+  IDLE: 'Idle',
+}
