@@ -21,6 +21,9 @@ env:
   PW_DIAL_NUMBER: ${{ secrets.PW_DIAL_NUMBER }}
   PW_AGENT2_USERNAME: ${{ secrets.PW_AGENT2_USERNAME }}  
   PW_AGENT2_EXTENSION_NUMBER: ${{ secrets.PW_AGENT2_EXTENSION_NUMBER }}
+  PW_EMAIL_FROM: ${{ secrets.PW_EMAIL_FROM }} 
+  PW_EMAIL_TO: ${{ secrets.PW_EMAIL_TO }}
+  PW_APP_PASSWORD: ${{ secrets.PW_APP_PASSWORD }}
 
 jobs:
   validate:
