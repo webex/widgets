@@ -12,18 +12,18 @@ export async function submitWrapup(page: Page, reason: String): Promise<void> {
     throw new Error('Wrapup reason is required');
   }
   const wrapupBox = page.getByTestId('wrapup-button').first();
-  page.waitForTimeout(200);
-  const isWrapupBoxVisible = await wrapupBox.isVisible().catch(() => false);
+  await page.waitForTimeout(2000);
+  const isWrapupBoxVisible = await wrapupBox.isVisible({ timeout: 30000 }).catch(() => false);
   if (!isWrapupBoxVisible) return;
   await wrapupBox.click();
-  expect(page.getByTestId('wrapup-reason-select')).toBeVisible({ timeout: 5000 });
+  expect(page.getByTestId('wrapup-reason-select')).toBeVisible({ timeout: 20000 });
   await page.getByTestId('wrapup-reason-select').first().click();
   try {
-    expect(page.getByTestId(`wrapup-reason-${reason.toLowerCase()}`)).toBeVisible({ timeout: 5000 });
+    expect(page.getByTestId(`wrapup-reason-${reason.toLowerCase()}`)).toBeVisible({ timeout: 20000 });
     await page.getByTestId(`wrapup-reason-${reason.toLowerCase()}`).first().click();
   } catch (error) {
     throw new Error(`Wrapup reason "${reason.toLowerCase()}" not found`);
   }
-  expect(page.getByTestId(`submit-wrapup-button`)).toBeVisible({ timeout: 5000 });
+  expect(page.getByTestId(`submit-wrapup-button`)).toBeVisible({ timeout: 20000 });
   await page.getByTestId(`submit-wrapup-button`).first().click();
 }

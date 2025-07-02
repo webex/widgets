@@ -300,8 +300,8 @@ test.describe('Incoming Call Task Tests for Desktop Mode', async () => {
   })
 
   test.beforeAll(async ({ browser }) => {
-    context = await browser.newContext();
-    context2 = await browser.newContext();
+    const context = await browser.newContext();
+    const context2 = await browser.newContext();
     page = await context.newPage();
     callerpage = await context2.newPage();
 

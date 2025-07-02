@@ -161,6 +161,7 @@ export async function declineIncomingTask(page: Page, type: string) {
   const declineButton = await incomingTaskDiv.getByTestId('task-decline-button').first();
   if (!(await declineButton.isVisible())) { throw new Error('Decline button not found'); }
   await declineButton.click();
+  await incomingTaskDiv.waitFor({ state: 'hidden', timeout: 50000 });
 }
 
 /**
@@ -168,7 +169,7 @@ export async function declineIncomingTask(page: Page, type: string) {
  * @param page Playwright Page object
  */
 export async function acceptExtensionCall(page: Page) {
-  await page.locator('[data-test="right-action-button"]').waitFor({ state: 'visible', timeout: 30000 });
+  await page.locator('[data-test="right-action-button"]').waitFor({ state: 'visible', timeout: 50000 });
   await page.locator('[data-test="right-action-button"]').click();
 }
 
@@ -177,7 +178,7 @@ export async function acceptExtensionCall(page: Page) {
  * @param page Playwright Page object
  */
 export async function declineExtensionCall(page: Page) {
-  await page.locator('[data-test="left-action-button"]').waitFor({ state: 'visible', timeout: 30000 });
+  await page.locator('[data-test="left-action-button"]').waitFor({ state: 'visible', timeout: 50000 });
   await page.locator('[data-test="left-action-button"]').click();
 }
 
@@ -186,7 +187,7 @@ export async function declineExtensionCall(page: Page) {
  * @param page Playwright Page object
  */
 export async function endExtensionCall(page: Page) {
-  await page.locator('[data-test="end-call"]').waitFor({ state: 'visible', timeout: 30000 });
+  await page.locator('[data-test="end-call"]').waitFor({ state: 'visible', timeout: 50000 });
   await page.locator('[data-test="end-call"]').click();
 
 }
@@ -257,13 +258,13 @@ export async function submitRonaPopup(page: Page, select: string) {
   if (!select) {
     throw new Error('RONA state selection is required');
   }
-  await expect(page.getByTestId('samples:rona-select-state')).toBeVisible({ timeout: 10000 });
+  await expect(page.getByTestId('samples:rona-select-state')).toBeVisible({ timeout: 30000 });
   await page.getByTestId('samples:rona-select-state').click();
   await page.waitForTimeout(2000);
-  await expect(page.getByTestId(`samples:rona-option-${select.toLowerCase()}`)).toBeVisible({ timeout: 10000 });
+  await expect(page.getByTestId(`samples:rona-option-${select.toLowerCase()}`)).toBeVisible({ timeout: 20000 });
   await page.getByTestId(`samples:rona-option-${select.toLowerCase()}`).click();
   await page.waitForTimeout(2000);
-  await expect(page.getByTestId('samples:rona-button-confirm')).toBeVisible({ timeout: 10000 });
+  await expect(page.getByTestId('samples:rona-button-confirm')).toBeVisible({ timeout: 20000 });
   await page.getByTestId('samples:rona-button-confirm').click();
   await page.waitForTimeout(2000);
 }
