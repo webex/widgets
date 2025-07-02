@@ -150,7 +150,7 @@ test.describe('Station Login Tests - Dial Number Mode', () => {
     await verifyCurrentState(page, USER_STATES.MEETING);
     const timerBeforeDisconnection = await getStateElapsedTime(page);
     const secondsBeforeDisconnection = parseTimeString(timerBeforeDisconnection);
-    await page.waitForTimeout(15000);
+    await page.waitForTimeout(3000);
     consoleMessages.length = 0;
     await page.context().setOffline(true);
     await page.waitForTimeout(3000);
@@ -290,6 +290,7 @@ test.describe('Station Login Tests - Extension Mode', () => {
     await page.waitForTimeout(3000);
     consoleMessages.length = 0;
     await page.context().setOffline(true);
+    await page.waitForTimeout(3000);
     const isWebSocketDisconnected = await waitForWebSocketDisconnection(consoleMessages);
     expect(isWebSocketDisconnected).toBe(true);
     await expect(page.getByTestId('station-login-widget')).toBeVisible();
@@ -414,6 +415,7 @@ test.describe('Station Login Tests - Desktop Mode', () => {
     await page.context().setOffline(true);
     const isWebSocketDisconnected = await waitForWebSocketDisconnection(consoleMessages);
     expect(isWebSocketDisconnected).toBe(true);
+    await page.waitForTimeout(3000);
     await expect(page.getByTestId('station-login-widget')).toBeVisible();
     await verifyLoginMode(page, 'Desktop');
     consoleMessages.length = 0;
