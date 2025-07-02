@@ -15,6 +15,15 @@ module.exports = merge(baseConfig, {
       import: './src/index.ts',
     },
   },
+  resolve: {
+    alias: {
+      'process/browser': require.resolve('process/browser.js'),
+    },
+    fallback: {
+      ...baseConfig.resolve?.fallback,
+      'process/browser': require.resolve('process/browser.js'),
+    },
+  },
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].js', // Set the output filename to index.js
