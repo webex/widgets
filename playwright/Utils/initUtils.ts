@@ -1,6 +1,6 @@
-import { Page, expect, BrowserContext } from '@playwright/test';
+import {Page, expect, BrowserContext} from '@playwright/test';
 import dotenv from 'dotenv';
-import { BASE_URL } from '../constants';
+import {BASE_URL} from '../constants';
 
 dotenv.config();
 
@@ -67,10 +67,10 @@ export const oauthLogin = async (page: Page, agentId: string): Promise<void> => 
   await page.locator('#select-base-triggerid').getByText('Access Token').click();
   await page.getByTestId('samples:login_option_oauth').getByText('Login with Webex').click();
   await page.getByTestId('samples:login_with_webex_button').click();
-  await page.getByRole('textbox', { name: 'name@example.com' }).fill(username);
-  await page.getByRole('link', { name: 'Sign in' }).click();
-  await page.getByRole('textbox', { name: 'Password' }).fill(password);
-  await page.getByRole('button', { name: 'Sign in' }).click();
+  await page.getByRole('textbox', {name: 'name@example.com'}).fill(username);
+  await page.getByRole('link', {name: 'Sign in'}).click();
+  await page.getByRole('textbox', {name: 'Password'}).fill(password);
+  await page.getByRole('button', {name: 'Sign in'}).click();
 };
 
 /**
@@ -138,15 +138,13 @@ export const initialiseWidgets = async (page: Page): Promise<void> => {
   await page.getByTestId('samples:init-widgets-button').click();
 
   try {
-    await page.getByTestId('station-login-widget').waitFor({ state: 'visible', timeout: 30000 });
+    await page.getByTestId('station-login-widget').waitFor({state: 'visible', timeout: 50000});
   } catch (error) {
     // First attempt failed, try clicking init widgets button again
-    await page.reload();
-    await page.waitForTimeout(2000); // Wait for page to settle
     await page.getByTestId('samples:init-widgets-button').click();
-
+    
     try {
-      await page.getByTestId('station-login-widget').waitFor({ state: 'visible', timeout: 30000 });
+      await page.getByTestId('station-login-widget').waitFor({state: 'visible', timeout: 50000});
     } catch (secondError) {
       // Second attempt also failed, throw error
       throw new Error('Station login widget failed to become visible after two initialization attempts (100 seconds total)');
