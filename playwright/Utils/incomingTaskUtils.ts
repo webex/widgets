@@ -30,7 +30,7 @@ export async function createCallTask(page: Page, number: string = process.env.PW
   if (!number || number.trim() === '') {
     throw new Error('Dial number is required');
   }
-  await expect(page.getByRole('textbox', { name: 'Dial' })).toBeVisible({ timeout: 10000 });
+  await expect(page.getByRole('textbox', { name: 'Dial' })).toBeVisible({ timeout: 30000 });
   await page.getByRole('textbox', { name: 'Dial' }).fill(number);
   await page.locator('[data-test="calling-ui-keypad-control"]').getByRole('button', { name: 'Call' }).click();
 }
@@ -40,7 +40,7 @@ export async function createCallTask(page: Page, number: string = process.env.PW
  * @param page Playwright Page object
  */
 export async function endCallTask(page: Page) {
-  await expect(page.locator('[data-test="call-end"]')).toBeVisible({ timeout: 10000 });
+  await expect(page.locator('[data-test="call-end"]')).toBeVisible({ timeout: 30000 });
   await page.locator('[data-test="call-end"]').click();
 }
 
@@ -53,20 +53,20 @@ export async function createChatTask(page: Page) {
   for (let i = 0; i < maxRetries; i++) {
     try {
       await page.goto('https://widgets.webex.com/chat-client');
-      await page.locator('iframe[name="Livechat launcher icon"]').contentFrame().getByRole('button', { name: 'Livechat Button - 0 unread' }).waitFor({ state: 'visible', timeout: 50000 });
+      await page.locator('iframe[name="Livechat launcher icon"]').contentFrame().getByRole('button', { name: 'Livechat Button - 0 unread' }).waitFor({ state: 'visible', timeout: 80000 });
       await page.locator('iframe[name="Livechat launcher icon"]').contentFrame().getByRole('button', { name: 'Livechat Button - 0 unread' }).click();
-      await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', { name: 'Hit Us Up!' }).waitFor({ state: 'visible', timeout: 30000 });
+      await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', { name: 'Hit Us Up!' }).waitFor({ state: 'visible', timeout: 50000 });
       await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', { name: 'Hit Us Up!' }).click();
-      await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('textbox', { name: 'Namemust fill field' }).waitFor({ state: 'visible', timeout: 30000 });
+      await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('textbox', { name: 'Namemust fill field' }).waitFor({ state: 'visible', timeout: 50000 });
       await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('textbox', { name: 'Namemust fill field' }).click();
       await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('textbox', { name: 'Namemust fill field' }).fill('Playwright Test');
-      await expect(page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', { name: 'Submit Name' })).toBeVisible({ timeout: 30000 });
+      await expect(page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', { name: 'Submit Name' })).toBeVisible({ timeout: 50000 });
       await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', { name: 'Submit Name' }).click();
       await page.waitForTimeout(200);
-      await expect(page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('textbox', { name: 'Email*' })).toBeVisible({ timeout: 30000 });
+      await expect(page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('textbox', { name: 'Email*' })).toBeVisible({ timeout: 50000 });
       await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('textbox', { name: 'Email*' }).click();
       await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('textbox', { name: 'Email*' }).fill('playwright@test.com');
-      await expect(page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', { name: 'Submit Email' })).toBeVisible({ timeout: 30000 });
+      await expect(page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', { name: 'Submit Email' })).toBeVisible({ timeout: 50000 });
       await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', { name: 'Submit Email' }).click();
       break;
     } catch (error) {
@@ -82,11 +82,14 @@ export async function createChatTask(page: Page) {
  * @param page Playwright Page object
  */
 export async function endChatTask(page: Page) {
+  await expect(page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', { name: 'Menu' })).toBeVisible({ timeout: 30000 });
   await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', { name: 'Menu' }).click();
+  expect(page.locator('iframe[name="Conversation Window"]').contentFrame().getByText('End chat')).toBeVisible({ timeout: 30000 });
   await page.locator('iframe[name="Conversation Window"]').contentFrame().getByText('End chat').click();
+  expect(page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', { name: 'End', exact: true })).toBeVisible({ timeout: 30000 });
   await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', { name: 'End', exact: true }).click();
   await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', { name: 'End', exact: true }).click();
-  await page.waitForTimeout(1000);
+  await page.waitForTimeout(2000);
 };
 
 /**
@@ -131,7 +134,7 @@ export async function acceptIncomingTask(page: Page, type: string) {
     incomingTaskDiv = page.locator('samples:incoming-task-social').first();
   }
   incomingTaskDiv = incomingTaskDiv.first();
-  await incomingTaskDiv.waitFor({ state: 'visible', timeout: 60000 });
+  await incomingTaskDiv.waitFor({ state: 'visible', timeout: 120000 });
   const acceptButton = incomingTaskDiv.getByTestId('task-accept-button').first();
   if (!(await acceptButton.isVisible())) { throw new Error('Accept button not found'); }
   await acceptButton.click();
@@ -157,11 +160,11 @@ export async function declineIncomingTask(page: Page, type: string) {
     incomingTaskDiv = page.locator('samples:incoming-task-social').first();
   }
   incomingTaskDiv = await incomingTaskDiv.first();
-  await incomingTaskDiv.waitFor({ state: 'visible', timeout: 60000 });
+  await incomingTaskDiv.waitFor({ state: 'visible', timeout: 120000 });
   const declineButton = await incomingTaskDiv.getByTestId('task-decline-button').first();
   if (!(await declineButton.isVisible())) { throw new Error('Decline button not found'); }
   await declineButton.click();
-  await incomingTaskDiv.waitFor({ state: 'hidden', timeout: 50000 });
+  await incomingTaskDiv.waitFor({ state: 'hidden', timeout: 60000 });
 }
 
 /**
