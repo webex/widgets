@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.85](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.84...v1.28.0-ccwidgets.85) (2025-07-03)
+
+
+### Bug Fixes
+
+* **cc-samples:** add loader on init and expand CAD ([#487](https://github.com/webex/widgets/issues/487)) ([c319657](https://github.com/webex/widgets/commit/c3196576a2e5538a0ef19c3acda12a3b8b1c4d4d))
+
 # [1.28.0-ccwidgets.84](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.83...v1.28.0-ccwidgets.84) (2025-07-03)
 
 
