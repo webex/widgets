@@ -8,7 +8,7 @@ const maxRetries = 3;
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   auth: {
-    user: process.env.PW_EMAIL_ENDPOINT, // Use environment variable for email
+    user: process.env.PW_EMAIL_FROM, // Use environment variable for email
     pass: process.env.PW_APP_PASSWORD
   },
 });
