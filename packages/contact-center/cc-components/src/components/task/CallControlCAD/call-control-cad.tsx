@@ -92,11 +92,9 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
             offset={4}
             tooltip-type="description"
             triggerID={customerNameTriggerId}
-            className="task-tooltip"
+            className="call-control-task-tooltip"
           >
-            <Text tagName="small" className="task-tooltip-text">
-              {customerText}
-            </Text>
+            <Text tagName="small">{customerText}</Text>
           </Tooltip>
         </>
       );
@@ -132,11 +130,9 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
             offset={4}
             tooltip-type="description"
             triggerID={phoneNumberTriggerId}
-            className="task-tooltip"
+            className="call-control-task-tooltip"
           >
-            <Text tagName="small" className="task-tooltip-text">
-              {phoneText}
-            </Text>
+            <Text tagName="small">{phoneText}</Text>
           </Tooltip>
         </>
       );

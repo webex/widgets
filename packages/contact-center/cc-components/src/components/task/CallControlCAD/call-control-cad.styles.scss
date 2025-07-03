@@ -117,6 +117,16 @@
     color: var(--mds-color-theme-indicator-secure);
   }
 }
+.call-control-task-tooltip::part(popover-content) {
+  white-space: normal;
+  word-break: break-all;
+}
+
+.call-control-task-tooltip {
+  min-width: 30%;
+  width: auto;
+  text-align: center;
+}
 
 .digital-customer-name::part(text),
 .voice-customer-name::part(text),
@@ -158,6 +168,10 @@
     width: 15rem;
     max-width: 15rem;
   }
+  .call-control-task-tooltip {
+   width: 50%;
+   text-align: center;
+  }
 }
 
 @media (min-width: 30.0625rem) and (max-width: 48rem) {
@@ -170,6 +184,10 @@
     width: 13rem;
     max-width: 13rem;
   }
+  .call-control-task-tooltip {
+   width: 50%;
+   text-align: center;
+  }
 }
 
 @media (min-width: 20rem) and (max-width: 30.0625rem) {
@@ -181,5 +199,16 @@
   .digital-phone-number {
     width: 12rem;
     max-width: 12rem;
+  }
+  .call-control-task-tooltip {
+   width: 50%;
+   text-align: center;
+  }
+}
+
+@media (min-width: 15.625rem) and (max-width: 20rem){
+  .call-control-task-tooltip {
+    width: 50%;
+    text-align: center;
   }
 }

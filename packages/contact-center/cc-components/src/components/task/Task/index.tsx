@@ -92,9 +92,7 @@ const Task: React.FC<TaskProps> = ({
             triggerID={tooltipTriggerId}
             className="task-tooltip"
           >
-            <Text tagName="small" className="task-tooltip-text">
-              {title}
-            </Text>
+            {title}
           </Tooltip>
         </>
       );
