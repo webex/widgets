@@ -117,3 +117,98 @@
     color: var(--mds-color-theme-indicator-secure);
   }
 }
+.call-control-task-tooltip::part(popover-content) {
+  white-space: normal;
+  word-break: break-all;
+}
+
+.call-control-task-tooltip {
+  min-width: 30%;
+  width: auto;
+  text-align: center;
+}
+
+.digital-customer-name::part(text),
+.voice-customer-name::part(text),
+.digital-phone-number::part(text),
+.voice-phone-number::part(text) {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+}
+
+.digital-customer-name {
+   width: auto; 
+}
+
+.digital-phone-number {
+   width: auto;
+}
+
+@media (min-width: 64.0625rem) and (max-width: 75rem) {
+  .digital-customer-name {
+    width: 50rem;
+    max-width: 50rem;
+  }
+
+  .digital-phone-number {
+    width: 16rem;
+    max-width: 16rem;
+  }
+}
+
+@media (min-width: 48.0625rem) and (max-width: 64rem) {
+  .digital-customer-name {
+    width: 31.25rem;
+    max-width: 31.25rem;
+  }
+
+  .digital-phone-number {
+    width: 15rem;
+    max-width: 15rem;
+  }
+  .call-control-task-tooltip {
+   width: 50%;
+   text-align: center;
+  }
+}
+
+@media (min-width: 30.0625rem) and (max-width: 48rem) {
+  .digital-customer-name {
+    width: 15.625rem;
+    max-width: 15.625rem;
+  }
+
+  .digital-phone-number {
+    width: 13rem;
+    max-width: 13rem;
+  }
+  .call-control-task-tooltip {
+   width: 50%;
+   text-align: center;
+  }
+}
+
+@media (min-width: 20rem) and (max-width: 30.0625rem) {
+  .digital-customer-name {
+    width: 9.375rem;
+    max-width: 9.375rem;
+  }
+
+  .digital-phone-number {
+    width: 12rem;
+    max-width: 12rem;
+  }
+  .call-control-task-tooltip {
+   width: 50%;
+   text-align: center;
+  }
+}
+
+@media (min-width: 15.625rem) and (max-width: 20rem){
+  .call-control-task-tooltip {
+    width: 50%;
+    text-align: center;
+  }
+}
