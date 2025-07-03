@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.83](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.82...v1.28.0-ccwidgets.83) (2025-07-01)
+
+
+### Features
+
+* **cc-widgets:** UI Automation for State Change ([#476](https://github.com/webex/widgets/issues/476)) ([999cb53](https://github.com/webex/widgets/commit/999cb533c83c3e5e8f7045fa89f1b5629e94a041))
+
 # [1.28.0-ccwidgets.82](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.81...v1.28.0-ccwidgets.82) (2025-07-01)
 
 
