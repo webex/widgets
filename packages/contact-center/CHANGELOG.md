@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.84](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.83...v1.28.0-ccwidgets.84) (2025-07-03)
+
+
+### Bug Fixes
+
+* **incoming-task:** fix-incoming-task-overflow-issue ([#482](https://github.com/webex/widgets/issues/482)) ([af70bee](https://github.com/webex/widgets/commit/af70bee48a63d1bc10549e6ba51801d3acf70964))
+
 # [1.28.0-ccwidgets.83](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.82...v1.28.0-ccwidgets.83) (2025-07-01)
 
 
