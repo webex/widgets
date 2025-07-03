@@ -8,7 +8,7 @@ const maxRetries = 3;
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   auth: {
-    user: process.env.PW_EMAIL_FROM, // Use environment variable for email
+    user: process.env.PW_EMAIL_ENDPOINT, // Use environment variable for email
     pass: process.env.PW_APP_PASSWORD
   },
 });
@@ -97,8 +97,8 @@ export async function endChatTask(page: Page) {
  * @throws Error if sending fails
  */
 export async function createEmailTask() {
-  const from = process.env.PW_EMAIL_FROM;
-  const to = process.env.PW_EMAIL_TO;
+  const from = process.env.PW_EMAIL_ENDPOINT;
+  const to = process.env.PW_EMAIL_ENDPOINT;
   const subject = 'Playwright Test Email';
   const text = '--This Email is generated due to playwright automation test for incoming Tasks---'
 
