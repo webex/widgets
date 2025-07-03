@@ -59,7 +59,7 @@ function App() {
 
   const [collapsedTasks, setCollapsedTasks] = React.useState([]);
   const [showLoader, setShowLoader] = useState(false);
-  const [toast, setToast] = useState<{type: 'success' | 'error'}|null>(null);
+  const [integrationEnvironment, setIntegrationEnvironment] = useState(false);
 
   const handleSaveStart = () => {
   setShowLoader(true);
@@ -115,6 +115,13 @@ const handleSaveEnd = (isComplete: boolean) => {
     cc: {
       allowMultiLogin: isMultiLoginEnabled,
     },
+    ...(integrationEnvironment && {
+      services: {
+        discovery: {
+          u2c: 'https://u2c-intb.ciscospark.com/u2c/api/v1',
+        },
+      },
+    }),
   };
 
   const onLogin = () => {
@@ -280,18 +287,21 @@ const onTaskDeclined = (task,reason) => {
 
     const webexConfig = {
       config: {
-        "appName": "sdk-samples",
-        "appPlatform": "testClient",
-        "fedramp": false,
-        "logger": {
-          "level": "info"
+        appName: 'sdk-samples',
+        appPlatform: 'testClient',
+        fedramp: false,
+        logger: {
+          level: 'info',
         },
-        "credentials": {
-          "client_id": "C04ef08ffce356c3161bb66b15dbdd98d26b6c683c5ce1a1a89efad545fdadd74",
-          "redirect_uri": redirectUri,
-          "scope": requestedScopes,
-        }
-      }
+        credentials: {
+          ...(integrationEnvironment && {authorizeUrl: 'https://idbrokerbts.webex.com/idb/oauth2/v1/authorize'}),
+          client_id: integrationEnvironment
+            ? 'Cd0dd53db1f470a5a9941e5eee31575bd0889d7006e3a80a1443ad12a42049da1'
+            : 'C04ef08ffce356c3161bb66b15dbdd98d26b6c683c5ce1a1a89efad545fdadd74',
+          redirect_uri: redirectUri,
+          scope: requestedScopes,
+        },
+      },
     };
 
     const webex = Webex.init(webexConfig);
@@ -525,6 +535,16 @@ const onTaskDeclined = (task,reason) => {
                       // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
                       onchange={() => {
                         setDoStationLogout(!doStationLogout);
+                      }}
+                    />
+                    <Checkbox
+                      checked={integrationEnvironment}
+                      aria-label="integration environment checkbox"
+                      id="integration-environment-checkbox"
+                      label="Enable Integration Environment"
+                      // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
+                      onchange={() => {
+                        setIntegrationEnvironment(!integrationEnvironment);
                       }}
                     />
                     {store.isAgentLoggedIn && (
