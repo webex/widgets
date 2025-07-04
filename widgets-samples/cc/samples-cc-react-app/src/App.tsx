@@ -119,7 +119,7 @@ const handleSaveEnd = (isComplete: boolean) => {
     cc: {
       allowMultiLogin: isMultiLoginEnabled,
     },
-    ...(integrationEnvironment && {
+    ...(integrationEnv && {
       services: {
         discovery: {
           u2c: 'https://u2c-intb.ciscospark.com/u2c/api/v1',
