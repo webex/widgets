@@ -17,9 +17,6 @@ import {
   checkCallbackSequence,
 } from './Utils/userStateUtils';
 import {USER_STATES, THEME_COLORS, LOGIN_MODE, LONG_WAIT} from './constants';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 let page: Page;
 let context: BrowserContext;
