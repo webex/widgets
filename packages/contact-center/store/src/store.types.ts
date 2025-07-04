@@ -77,16 +77,6 @@ type IdleCode = {
   isDefault: boolean;
 };
 
-type TaskMetaData = {
-  consultCompleted: boolean;
-  consultInitiated: boolean;
-  consultAccepted: boolean;
-  isQueueConsultInProgress: boolean;
-  currentConsultQueueId: string;
-  consultStartTimeStamp: number;
-  consultOfferReceived: boolean;
-};
-
 interface IStore {
   featureFlags: {[key: string]: boolean};
   teams: Team[];
@@ -98,7 +88,6 @@ interface IStore {
   wrapupCodes: IWrapupCode[];
   currentTask: ITask;
   taskList: Record<string, ITask>;
-  taskMetaData: Record<string, TaskMetaData>;
   isAgentLoggedIn: boolean;
   deviceType: string;
   teamId: string;
@@ -245,7 +234,6 @@ export type {
   DestinationType,
   BuddyDetails,
   ContactServiceQueue,
-  TaskMetaData,
   AgentLoginProfile,
   IWebex,
 };

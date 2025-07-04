@@ -52,6 +52,8 @@ describe('CallControl Component', () => {
         endConsult: false,
         recordingIndicator: false,
       },
+      secondsUntilAutoWrapup: 0,
+      cancelAutoWrapup: jest.fn(),
     });
 
     render(

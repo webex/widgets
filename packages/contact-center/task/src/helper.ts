@@ -2,7 +2,7 @@ import {useEffect, useCallback, useState, useRef, useMemo} from 'react';
 import {ITask} from '@webex/plugin-cc';
 import {useCallControlProps, UseTaskListProps, UseTaskProps, Participant, useOutdialCallProps} from './task.types';
 import store, {TASK_EVENTS, BuddyDetails, DestinationType, ContactServiceQueue} from '@webex/cc-store';
-import {getControlsVisibility} from './Utils/task-util';
+import {findHoldTimestamp, getControlsVisibility} from './Utils/task-util';
 
 const ENGAGED_LABEL = 'ENGAGED';
 const ENGAGED_USERNAME = 'Engaged';
@@ -176,44 +176,73 @@ export const useCallControl = (props: useCallControlProps) => {
   const [consultAgentId, setConsultAgentId] = useState<string>(null);
   const [holdTime, setHoldTime] = useState(0);
   const [startTimestamp, setStartTimestamp] = useState<number>(0);
+  const [secondsUntilAutoWrapup, setsecondsUntilAutoWrapup] = useState<number | null>(null);
   const workerRef = useRef<Worker | null>(null);
   const [lastTargetType, setLastTargetType] = useState<'agent' | 'queue'>('agent');
 
   const workerScript = `
-    let intervalId;
-    const startTimer = (startTime) => {
-      if (intervalId) clearInterval(intervalId);
-      intervalId = setInterval(() => {
-        const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
-        self.postMessage({type: 'elapsedTime', elapsedTime});
-      }, 1000);
-    };
-    const stopTimer = () => {
-      if (intervalId) clearInterval(intervalId);
-      self.postMessage({type: 'stop'});
-    };
-    self.onmessage = (event) => {
-      if (event.data.type === 'start') {
-        const startTime = event.data.startTime;
-        startTimer(startTime);
+    let intervalId = null;
+    self.onmessage = function(e) {
+      if (e.data.type === 'start') {
+        const eventTime = e.data.eventTime;
+        if (intervalId) clearInterval(intervalId);
+        intervalId = setInterval(() => {
+          const elapsed = Math.floor((Date.now() - eventTime) / 1000);
+          self.postMessage({ type: 'elapsedTime', elapsed });
+        }, 1000);
       }
-      if (event.data.type === 'stop') {
-        stopTimer();
+      if (e.data.type === 'stop') {
+        if (intervalId) clearInterval(intervalId);
+        intervalId = null;
       }
     };
   `;
 
   useEffect(() => {
-    if (!workerRef.current?.postMessage) return;
-    if (isHeld) {
-      // Start the timer when the call is on hold
-      workerRef.current?.postMessage({type: 'start', startTime: Date.now()});
-    } else {
-      // Stop the timer when the call is resumed
-      workerRef.current?.postMessage({type: 'stop'});
+    // Clean up previous worker if any
+    if (workerRef.current) {
+      if (typeof workerRef.current.postMessage === 'function') {
+        workerRef.current.postMessage({type: 'stop'});
+      }
+      if (typeof workerRef.current.terminate === 'function') {
+        workerRef.current.terminate();
+      }
+      workerRef.current = null;
     }
-  }, [isHeld, workerRef.current?.postMessage]);
 
+    // Get holdTimestamp from the interaction object
+    const holdTimestamp = currentTask?.data?.interaction
+      ? findHoldTimestamp(currentTask.data.interaction, 'mainCall')
+      : null;
+
+    if (holdTimestamp) {
+      const holdTimeMs = holdTimestamp < 10000000000 ? holdTimestamp * 1000 : holdTimestamp;
+      const blob = new Blob([workerScript], {type: 'application/javascript'});
+      const workerUrl = URL.createObjectURL(blob);
+      workerRef.current = new Worker(workerUrl);
+
+      // Set initial holdTime immediately for instant UI update
+      setHoldTime(Math.floor((Date.now() - holdTimeMs) / 1000));
+
+      workerRef.current.onmessage = (e) => {
+        if (e.data.type === 'elapsedTime') setHoldTime(e.data.elapsed);
+        if (e.data.type === 'stop') setHoldTime(0);
+      };
+
+      workerRef.current.postMessage({type: 'start', eventTime: holdTimeMs});
+    } else {
+      setHoldTime(0);
+    }
+
+    // Cleanup on unmount or when dependencies change
+    return () => {
+      if (workerRef.current) {
+        workerRef.current.postMessage({type: 'stop'});
+        workerRef.current.terminate();
+        workerRef.current = null;
+      }
+    };
+  }, [currentTask?.data?.interaction]);
   // Function to extract consulting agent information
   const extractConsultingAgent = useCallback(() => {
     if (!currentTask?.data?.interaction?.participants) return;
@@ -334,19 +363,6 @@ export const useCallControl = (props: useCallControlProps) => {
       method: 'useEffect-init',
     });
 
-    // Initialize the Web Worker
-    const blob = new Blob([workerScript], {type: 'application/javascript'});
-    const workerUrl = URL.createObjectURL(blob);
-    workerRef.current = new Worker(workerUrl);
-
-    workerRef.current.onmessage = (event) => {
-      if (event.data.type === 'elapsedTime') {
-        setHoldTime(event.data.elapsedTime);
-      } else if (event.data.type === 'stop') {
-        setHoldTime(0);
-      }
-    };
-
     store.setTaskCallback(
       // Should use holdCallback
       TASK_EVENTS.TASK_HOLD,
@@ -360,11 +376,6 @@ export const useCallControl = (props: useCallControlProps) => {
     store.setTaskCallback(TASK_EVENTS.TASK_RECORDING_RESUMED, resumeRecordingCallback, currentTask.data.interactionId);
 
     return () => {
-      if (workerRef.current?.postMessage) {
-        workerRef.current.postMessage({type: 'stop'});
-        workerRef.current.terminate();
-        workerRef.current = null;
-      }
       store.removeTaskCallback(TASK_EVENTS.TASK_HOLD, holdCallback, currentTask.data.interactionId);
       store.removeTaskCallback(TASK_EVENTS.TASK_RESUME, resumeCallback, currentTask.data.interactionId);
       store.removeTaskCallback(TASK_EVENTS.TASK_END, endCallCallback, currentTask.data.interactionId);
@@ -511,10 +522,55 @@ export const useCallControl = (props: useCallControlProps) => {
     }
   };
 
+  const cancelAutoWrapup = () => {
+    logger.info('CC-Widgets: CallControl: wrap-up cancelled', {
+      module: 'widget-cc-task#helper.ts',
+      method: 'useCallControl#cancelAutoWrapup',
+    });
+    currentTask.cancelAutoWrapupTimer();
+  };
+
   const controlVisibility = useMemo(
     () => getControlsVisibility(deviceType, featureFlags, currentTask),
     [deviceType, featureFlags, currentTask]
   );
+
+  // Add useEffect for auto wrap-up timer
+  useEffect(() => {
+    let timerId: NodeJS.Timeout;
+
+    if (currentTask?.autoWrapup && controlVisibility?.wrapup) {
+      try {
+        // Initialize time left from the autoWrapup object
+        const initialTimeLeft = currentTask.autoWrapup.getTimeLeftSeconds();
+        setsecondsUntilAutoWrapup(initialTimeLeft);
+
+        // Update timer every second
+        timerId = setInterval(() => {
+          setsecondsUntilAutoWrapup((prevTime) => {
+            if (prevTime && prevTime > 0) {
+              return prevTime - 1;
+            }
+            return 0;
+          });
+        }, 1000);
+      } catch (error) {
+        logger.error('CC-Widgets: CallControl: Error initializing auto wrap-up timer', {
+          module: 'widget-cc-task#helper.ts',
+          method: 'useCallControl#autoWrapupTimer',
+          //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+          error,
+        });
+      }
+    }
+
+    // Clear the interval when component unmounts or when auto wrap-up is no longer active
+    return () => {
+      if (timerId) {
+        clearInterval(timerId);
+      }
+    };
+  }, [currentTask?.autoWrapup, controlVisibility?.wrapup]);
 
   return {
     currentTask,
@@ -543,6 +599,8 @@ export const useCallControl = (props: useCallControlProps) => {
     lastTargetType,
     setLastTargetType,
     controlVisibility,
+    secondsUntilAutoWrapup,
+    cancelAutoWrapup,
   };
 };
 

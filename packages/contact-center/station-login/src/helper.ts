@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {StationLoginSuccess, LogoutSuccess, AgentProfileUpdate, LoginOption} from '@webex/plugin-cc';
+import {LogoutSuccess, AgentProfileUpdate, LoginOption, StationLoginSuccessResponse} from '@webex/plugin-cc';
 import {UseStationLoginProps} from './station-login/station-login.types';
 import store, {CC_EVENTS} from '@webex/cc-store'; // we need to import as we are losing the context of this in store
 import {LoginOptionsState} from '@webex/cc-components';
@@ -17,7 +17,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
   const doStationLogout =
     props.doStationLogout === undefined || props.doStationLogout === null ? true : props.doStationLogout;
   const [team, setTeam] = useState('');
-  const [loginSuccess, setLoginSuccess] = useState<StationLoginSuccess>();
+  const [loginSuccess, setLoginSuccess] = useState<StationLoginSuccessResponse>();
   const [loginFailure, setLoginFailure] = useState<Error>();
   const [logoutSuccess, setLogoutSuccess] = useState<LogoutSuccess>();
 
@@ -188,7 +188,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
 
   const login = () => {
     cc.stationLogin({teamId: team, loginOption: deviceType, dialNumber})
-      .then((res: StationLoginSuccess) => {
+      .then((res: StationLoginSuccessResponse) => {
         logger.log('CC-Widgets: useStationLogin login(): stationLogin success', {
           module: 'widget-station-login#helper.ts',
           method: 'login',

@@ -10,7 +10,6 @@ import {
   ILogger,
   IWrapupCode,
   ICustomState,
-  TaskMetaData,
   AgentLoginProfile,
   LoginOptions,
 } from './store.types';
@@ -50,8 +49,6 @@ class Store implements IStore {
   isEndConsultEnabled: boolean = false;
   allowConsultToQueue: boolean = false;
   agentProfile: AgentLoginProfile = {};
-
-  taskMetaData: Record<string, TaskMetaData> = {};
 
   constructor() {
     makeAutoObservable(this, {

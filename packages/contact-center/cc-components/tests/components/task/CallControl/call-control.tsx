@@ -119,6 +119,7 @@ describe.skip('CallControlPresentational', () => {
       recordingIndicator: false,
     },
     logger: loggerMock,
+    cancelAutoWrapup: jest.fn(),
   };
 
   beforeEach(() => {
