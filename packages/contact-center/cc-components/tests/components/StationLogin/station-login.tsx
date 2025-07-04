@@ -1,8 +1,9 @@
 import React from 'react';
 import '@testing-library/jest-dom';
 import {fireEvent, render} from '@testing-library/react';
+import {LoginOptions} from '@webex/cc-store';
 import StationLoginComponent from '../../../src/components/StationLogin/station-login';
-import {StationLoginLabels, LoginOptions, SignInErrors} from '../../../src/components/StationLogin/constants';
+import {StationLoginLabels, SignInErrors} from '../../../src/components/StationLogin/constants';
 import {StationLoginComponentProps} from '../../../src/components/StationLogin/station-login.types';
 import * as stationLoginUtils from '../../../src/components/StationLogin/station-login.utils';
 
@@ -12,7 +13,41 @@ describe('Station Login Component', () => {
     info: jest.fn(),
     warn: jest.fn(),
     error: jest.fn(),
+    trace: jest.fn(),
   };
+
+  const mockTeams = [
+    {
+      id: 'team123',
+      name: 'Team A',
+      teamType: 'AGENT_BASED',
+      teamStatus: 'ACTIVE',
+      active: true,
+      siteId: 'site123',
+      siteName: 'Test Site A',
+      multiMediaProfileId: 'profile123',
+      userIds: ['user1', 'user2'],
+      rankQueuesForTeam: false,
+      queueRankings: [],
+      dbId: 'db123',
+      desktopLayoutId: 'layout123',
+    },
+    {
+      id: 'team456',
+      name: 'Team B',
+      teamType: 'AGENT_BASED',
+      teamStatus: 'ACTIVE',
+      active: true,
+      siteId: 'site456',
+      siteName: 'Test Site B',
+      multiMediaProfileId: 'profile456',
+      userIds: ['user3', 'user4'],
+      rankQueuesForTeam: true,
+      queueRankings: ['queue1', 'queue2'],
+      dbId: 'db456',
+      desktopLayoutId: 'layout456',
+    },
+  ];
 
   const props: StationLoginComponentProps = {
     loginOptions: ['AGENT_DN', 'EXTENSION', 'BROWSER'],
@@ -21,10 +56,7 @@ describe('Station Login Component', () => {
     loginSuccess: undefined,
     loginFailure: undefined,
     logoutSuccess: undefined,
-    teams: [
-      {id: 'team123', name: 'Team A'},
-      {id: 'team456', name: 'Team B'},
-    ],
+    teams: mockTeams,
     setDeviceType: jest.fn(),
     setDialNumber: jest.fn(),
     setTeam: jest.fn(),
@@ -42,7 +74,6 @@ describe('Station Login Component', () => {
     dialNumberValue: '',
     setDialNumberValue: jest.fn(),
     setSelectedDeviceType: jest.fn(),
-    selectedOption: 'EXTENSION',
     setCurrentLoginOptions: jest.fn(),
     currentLoginOptions: {
       deviceType: 'EXTENSION',

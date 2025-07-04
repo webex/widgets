@@ -1,5 +1,6 @@
-import {IContactCenter, StationLoginSuccess, StationLogoutSuccess, Team} from '@webex/plugin-cc';
-import {ILogger} from '@webex/cc-store';
+import {StationLoginSuccessResponse, LogoutSuccess} from '@webex/plugin-cc';
+import {IContactCenter, ILogger} from '@webex/cc-store';
+import {Team} from '@webex/plugin-cc/dist/types/types';
 /**
  * Interface representing the properties for the Station Login component.
  */
@@ -34,7 +35,7 @@ export interface IStationLoginProps {
   /**
    * Response data received on agent login success
    */
-  loginSuccess?: StationLoginSuccess;
+  loginSuccess?: StationLoginSuccessResponse;
 
   /**
    * Error received on agent login failure
@@ -44,7 +45,7 @@ export interface IStationLoginProps {
   /**
    * Response data received on agent login success
    */
-  logoutSuccess?: StationLogoutSuccess;
+  logoutSuccess?: LogoutSuccess;
 
   /**
    * Flag to indicate if the agent is logged in
@@ -199,11 +200,6 @@ export interface IStationLoginProps {
    * The selected team ID for login
    */
   selectedTeamId: string;
-
-  /**
-   * The selected option for login type (e.g., 'Extension', 'Agent DN', etc.)
-   */
-  selectedOption: string;
 }
 
 export interface LoginOptionsState {
@@ -245,5 +241,4 @@ export type StationLoginComponentProps = Pick<
   | 'setDialNumberValue'
   | 'setSelectedTeamId'
   | 'selectedTeamId'
-  | 'selectedOption'
 >;

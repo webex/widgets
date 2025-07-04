@@ -1,37 +1,22 @@
 import {getFeatureFlags} from '../src/util';
+import {mockProfile} from '../src//store.fixtures';
 
 describe('getFeatureFlags', () => {
   it('should return an object with feature flags from agent profile with corresponding values', () => {
     const featureFlags = {
-      isOutboundEnabledForTenant: true,
-      isOutboundEnabledForAgent: true,
       isAdhocDialingEnabled: true,
       isCampaignManagementEnabled: true,
       isEndCallEnabled: true,
-      isEndConsultEnabled: false,
       agentPersonalStatsEnabled: true,
-      isCallMonitoringEnabled: true,
-      isMidCallMonitoringEnabled: false,
-      isBargeInEnabled: true,
-      isManagedTeamsEnabled: true,
-      isManagedQueuesEnabled: false,
-      isSendMessageEnabled: true,
-      isAgentStateChangeEnabled: true,
-      isSignOutAgentsEnabled: true,
-      isTimeoutDesktopInactivityEnabled: true,
-      isAnalyzerEnabled: false,
       webRtcEnabled: true,
-      isRecordingManagementEnabled: true,
       allowConsultToQueue: true,
+      isEndConsultEnabled: true,
+      isOutboundEnabledForAgent: false,
+      isOutboundEnabledForTenant: false,
+      isTimeoutDesktopInactivityEnabled: false,
     };
 
-    const agentProfile = {
-      randomKey1: 'randomValue1',
-      randomKey2: 'randomValue2',
-      ...featureFlags,
-    };
-
-    const result = getFeatureFlags(agentProfile);
+    const result = getFeatureFlags(mockProfile);
 
     expect(result).toEqual(featureFlags);
   });

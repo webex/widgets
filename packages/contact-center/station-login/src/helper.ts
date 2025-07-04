@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {StationLoginSuccess, StationLogoutSuccess, AgentProfileUpdate, LoginOption} from '@webex/plugin-cc';
+import {LogoutSuccess, AgentProfileUpdate, LoginOption, StationLoginSuccessResponse} from '@webex/plugin-cc';
 import {UseStationLoginProps} from './station-login/station-login.types';
 import store, {CC_EVENTS} from '@webex/cc-store'; // we need to import as we are losing the context of this in store
 import {LoginOptionsState} from '@webex/cc-components';
@@ -17,9 +17,9 @@ export const useStationLogin = (props: UseStationLoginProps) => {
   const doStationLogout =
     props.doStationLogout === undefined || props.doStationLogout === null ? true : props.doStationLogout;
   const [team, setTeam] = useState('');
-  const [loginSuccess, setLoginSuccess] = useState<StationLoginSuccess>();
+  const [loginSuccess, setLoginSuccess] = useState<StationLoginSuccessResponse>();
   const [loginFailure, setLoginFailure] = useState<Error>();
-  const [logoutSuccess, setLogoutSuccess] = useState<StationLogoutSuccess>();
+  const [logoutSuccess, setLogoutSuccess] = useState<LogoutSuccess>();
 
   const [dialNumberValue, setDialNumberValue] = useState<string>(dialNumber || '');
   const [selectedTeamId, setSelectedTeamId] = useState<string>(teamId || '');
@@ -81,12 +81,6 @@ export const useStationLogin = (props: UseStationLoginProps) => {
       if (props.onSaveEnd) props.onSaveEnd(false);
       return;
     }
-    logger.log('Saving login options:', {
-      module: 'widget-station-login#helper.ts',
-      method: 'saveLoginOptions',
-      original: originalLoginOptions,
-      updated: currentLoginOptions,
-    });
 
     if (props.onSaveStart) props.onSaveStart();
 
@@ -99,6 +93,11 @@ export const useStationLogin = (props: UseStationLoginProps) => {
       payload.dialNumber = currentLoginOptions.dialNumber;
     }
 
+    logger.log('Saving login options:', {
+      module: 'widget-station-login#helper.ts',
+      method: 'saveLoginOptions',
+    });
+
     cc.updateAgentProfile(payload)
       .then(() => {
         setOriginalLoginOptions({...currentLoginOptions});
@@ -110,7 +109,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
         if (props.onSaveEnd) props.onSaveEnd(true);
       })
       .catch((error: Error) => {
-        logger.error('Failed to update agent device type', error, {
+        logger.error('Failed to update agent device type', {
           module: 'widget-station-login#helper.ts',
           method: 'saveLoginOptions',
         });
@@ -189,7 +188,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
 
   const login = () => {
     cc.stationLogin({teamId: team, loginOption: deviceType, dialNumber})
-      .then((res: StationLoginSuccess) => {
+      .then((res: StationLoginSuccessResponse) => {
         logger.log('CC-Widgets: useStationLogin login(): stationLogin success', {
           module: 'widget-station-login#helper.ts',
           method: 'login',
@@ -213,7 +212,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
       method: 'logout',
     });
     cc.stationLogout({logoutReason: 'User requested logout'})
-      .then((res: StationLogoutSuccess) => {
+      .then((res: LogoutSuccess) => {
         logger.log('CC-Widgets: useStationLogin logout(): stationLogout success', {
           module: 'widget-station-login#helper.ts',
           method: 'logout',
