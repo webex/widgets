@@ -2,9 +2,6 @@ import {test as setup} from '@playwright/test';
 import {oauthLogin} from './Utils/initUtils';
 const fs = require('fs');
 const path = require('path');
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 setup('OAuth', async ({browser}) => {
   const agentId = 'AGENT1'; // Configure which agent to set up

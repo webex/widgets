@@ -124,8 +124,9 @@ export const disableMultiLogin = async (page: Page): Promise<void> => {
 /**
  * Initializes the widgets by clicking the init widgets button and waiting for station-login widget to be visible
  * @param page - The Playwright page object
- * @description The station-login widget should be checked/enabled before using this function
- * @throws {Error} When station-login widget is not visible after initialization
+ * @description The station-login widget should be checked/enabled before using this function.
+ *              If the widget is not visible after 50 seconds, retries once more with another 50-second timeout.
+ * @throws {Error} When station-login widget is not visible after two initialization attempts (100 seconds total)
  * @example
  * ```typescript
  * // Ensure station-login widget is checked first
@@ -136,7 +137,19 @@ export const disableMultiLogin = async (page: Page): Promise<void> => {
 export const initialiseWidgets = async (page: Page): Promise<void> => {
   await page.getByTestId('samples:init-widgets-button').click();
 
-  await page.getByTestId('station-login-widget').waitFor({state: 'visible', timeout: 50000});
+  try {
+    await page.getByTestId('station-login-widget').waitFor({state: 'visible', timeout: 50000});
+  } catch (error) {
+    // First attempt failed, try clicking init widgets button again
+    await page.getByTestId('samples:init-widgets-button').click();
+    
+    try {
+      await page.getByTestId('station-login-widget').waitFor({state: 'visible', timeout: 50000});
+    } catch (secondError) {
+      // Second attempt also failed, throw error
+      throw new Error('Station login widget failed to become visible after two initialization attempts (100 seconds total)');
+    }
+  }
 };
 
 /**
