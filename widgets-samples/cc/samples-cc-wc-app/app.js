@@ -2,6 +2,7 @@ const accessTokenElem = document.getElementById('access_token_elem');
 const oAuthLoginBtn = document.getElementById('oauth_login_btn');
 const loginTypeElem = document.getElementById('loginType');
 const themeElem = document.getElementById('theme');
+const integrationEnvElem = document.getElementById('integrationEnv');
 const widgetsContainer = document.getElementById('widgets-container');
 const popupContainer = document.getElementById('popup-container');
 const taskRejectedSubmitButton = document.getElementById('task-rejected-submit-button');
@@ -25,6 +26,22 @@ const callControlCADCheckbox = document.getElementById('callControlCADCheckbox')
 const outdialCallCheckbox = document.getElementById('outdialCallCheckbox');
 
 let isMultiLoginEnabled = false;
+let integrationEnv = false;
+
+// Load integration environment setting from localStorage on page load
+function loadintegrationEnvSetting() {
+  const savedIntegrationEnv = localStorage.getItem('integrationEnv');
+  if (savedIntegrationEnv) {
+    integrationEnv = JSON.parse(savedIntegrationEnv);
+    integrationEnvElem.checked = integrationEnv;
+  }
+}
+
+function toggleintegrationEnv() {
+  integrationEnv = integrationEnvElem.checked;
+  // Store in localStorage for persistence
+  localStorage.setItem('integrationEnv', JSON.stringify(integrationEnv));
+}
 
 themeElem.addEventListener('change', () => {
   store.setCurrentTheme(themeElem.checked ? 'DARK' : 'LIGHT');
@@ -97,7 +114,10 @@ function doOAuthLogin() {
         level: 'info',
       },
       credentials: {
-        client_id: 'C04ef08ffce356c3161bb66b15dbdd98d26b6c683c5ce1a1a89efad545fdadd74',
+        ...(integrationEnv && {authorizeUrl: 'https://idbrokerbts.webex.com/idb/oauth2/v1/authorize'}),
+        client_id: integrationEnv
+          ? 'Cd0dd53db1f470a5a9941e5eee31575bd0889d7006e3a80a1443ad12a42049da1'
+          : 'C04ef08ffce356c3161bb66b15dbdd98d26b6c683c5ce1a1a89efad545fdadd74',
         redirect_uri: redirectUri,
         scope: requestedScopes,
       },
@@ -120,6 +140,7 @@ accessTokenElem.addEventListener('keyup', updateButtonState);
 
 window.addEventListener('load', () => {
   changeLoginType();
+  loadintegrationEnvSetting(); // Load the setting on page load
   if (window.location.hash) {
     const urlParams = new URLSearchParams(window.location.hash.replace('#', '?'));
 
@@ -150,6 +171,13 @@ function initWidgets() {
     cc: {
       allowMultiLogin: isMultiLoginEnabled,
     },
+    ...(integrationEnv && {
+      services: {
+        discovery: {
+          u2c: 'https://u2c-intb.ciscospark.com/u2c/api/v1',
+        },
+      },
+    }),
   };
   store
     .init({
@@ -322,3 +350,8 @@ function showTaskRejectedPopup(reason) {
   document.getElementById('task-rejected-reason').textContent = 'Reason: ' + (reason || 'No reason provided');
   popupContainer.style.display = 'block';
 }
+
+// Initialize integration environment setting on page load
+document.addEventListener('DOMContentLoaded', function () {
+  loadintegrationEnvSetting();
+});
