@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.86](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.85...v1.28.0-ccwidgets.86) (2025-07-04)
+
+
+### Bug Fixes
+
+* **cc-samples:** refresh page onCCSignout ([#489](https://github.com/webex/widgets/issues/489)) ([22e4ee4](https://github.com/webex/widgets/commit/22e4ee44621228e7f5c1a82ae9bd2b8fee079390))
+
 # [1.28.0-ccwidgets.85](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.84...v1.28.0-ccwidgets.85) (2025-07-03)
 
 
