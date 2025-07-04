@@ -59,6 +59,7 @@ function App() {
 
   const [collapsedTasks, setCollapsedTasks] = React.useState([]);
   const [showLoader, setShowLoader] = useState(false);
+  const [toast, setToast] = useState<{type: 'success' | 'error'} | null>(null);
   const [integrationEnvironment, setIntegrationEnvironment] = useState(false);
 
   const handleSaveStart = () => {
