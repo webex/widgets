@@ -1,6 +1,6 @@
 import React from 'react';
 import '@testing-library/jest-dom';
-import {render, screen, fireEvent, act} from '@testing-library/react';
+import {render, fireEvent, act} from '@testing-library/react';
 import {IUserState} from '../../../src/components/UserState/user-state.types';
 
 import UserStateComponent from '../../../src/components/UserState/user-state';
@@ -142,10 +142,11 @@ describe('UserState Component Snapshots', () => {
     });
 
     it('should handle custom state rendering and interactions', async () => {
+      let screen;
       const customState = {name: 'Custom Engaged', developerName: 'ENGAGED'};
 
       await act(async () => {
-        render(<UserStateComponent {...defaultProps} customState={customState} />);
+        screen = render(<UserStateComponent {...defaultProps} customState={customState} />);
       });
 
       const container = screen.getByTestId('user-state-container');

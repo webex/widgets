@@ -36,30 +36,24 @@ describe('UserStateComponent', () => {
     logger: mockLogger,
   };
 
-  // Mock all utility functions
-  const mockGetDropdownClass = jest.fn(() => 'idle');
-  const mockGetIconStyle = jest.fn(() => ({class: 'idle', iconName: 'recents-presence-filled'}));
-  const mockGetTooltipText = jest.fn(() => 'Availability State');
-  const mockHandleSelectionChange = jest.fn();
-  const mockSortDropdownItems = jest.fn((items) => items);
-  const mockGetPreviousSelectableState = jest.fn(() => '0');
-  const mockGetSelectedKey = jest.fn(() => '1');
-  const mockBuildDropdownItems = jest.fn(() => [
-    {id: '0', name: 'Available'},
-    {id: '1', name: 'Break'},
-    {id: '2', name: 'Training'},
-  ]);
-
+  let mockGetDropdownClass,
+    mockBuildDropdownItems,
+    mockGetIconStyle,
+    mockGetTooltipText,
+    mockHandleSelectionChange,
+    mockSortDropdownItems,
+    mockGetPreviousSelectableState,
+    mockGetSelectedKey;
   beforeEach(() => {
     // Mock all utility functions
-    jest.spyOn(userStateUtils, 'getDropdownClass').mockImplementation(mockGetDropdownClass);
-    jest.spyOn(userStateUtils, 'getIconStyle').mockImplementation(mockGetIconStyle);
-    jest.spyOn(userStateUtils, 'getTooltipText').mockImplementation(mockGetTooltipText);
-    jest.spyOn(userStateUtils, 'handleSelectionChange').mockImplementation(mockHandleSelectionChange);
-    jest.spyOn(userStateUtils, 'sortDropdownItems').mockImplementation(mockSortDropdownItems);
-    jest.spyOn(userStateUtils, 'getPreviousSelectableState').mockImplementation(mockGetPreviousSelectableState);
-    jest.spyOn(userStateUtils, 'getSelectedKey').mockImplementation(mockGetSelectedKey);
-    jest.spyOn(userStateUtils, 'buildDropdownItems').mockImplementation(mockBuildDropdownItems);
+    mockGetDropdownClass = jest.spyOn(userStateUtils, 'getDropdownClass');
+    mockGetIconStyle = jest.spyOn(userStateUtils, 'getIconStyle');
+    mockGetTooltipText = jest.spyOn(userStateUtils, 'getTooltipText');
+    mockHandleSelectionChange = jest.spyOn(userStateUtils, 'handleSelectionChange');
+    mockSortDropdownItems = jest.spyOn(userStateUtils, 'sortDropdownItems');
+    mockGetPreviousSelectableState = jest.spyOn(userStateUtils, 'getPreviousSelectableState');
+    mockGetSelectedKey = jest.spyOn(userStateUtils, 'getSelectedKey');
+    mockBuildDropdownItems = jest.spyOn(userStateUtils, 'buildDropdownItems');
   });
 
   afterEach(() => {
@@ -90,7 +84,6 @@ describe('UserStateComponent', () => {
       expect(userStateIcon).toHaveAttribute('name', 'recents-presence-filled');
 
       const userStateLabel = screen.getByTestId('state-name');
-      screen.debug(userStateLabel);
       expect(userStateLabel).toHaveAttribute('class', 'md-text-wrapper state-name idle');
       expect(userStateLabel).toHaveAttribute('tagname', 'small');
       expect(userStateLabel).toHaveAttribute('type', 'body-large-regular');

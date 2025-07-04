@@ -38,9 +38,9 @@ describe('UserState Utils', () => {
       expect(result).toBe('custom');
     });
 
-    it('should return "available" for Available state', () => {
+    it('should return "" for "0"', () => {
       const result = getDropdownClass(null, '0', mockIdleCodes);
-      expect(result).toBe('available');
+      expect(result).toBe('');
     });
 
     it('should return "rona" for RONA state', () => {
@@ -211,12 +211,12 @@ describe('UserState Utils', () => {
       ];
 
       const result = getPreviousSelectableState(nonSelectableStates);
-      expect(result).toBe('');
+      expect(result).toBe('0');
     });
 
     it('should handle empty idleCodes array', () => {
       const result = getPreviousSelectableState([]);
-      expect(result).toBe('');
+      expect(result).toBe('0');
     });
   });
 
@@ -250,7 +250,7 @@ describe('UserState Utils', () => {
 
   describe('buildDropdownItems', () => {
     it('should filter out RONA and ENGAGED states', () => {
-      const result = buildDropdownItems(null, mockIdleCodes, '1');
+      const result = buildDropdownItems(null, mockIdleCodes);
 
       expect(result).toEqual([
         {id: '0', name: 'Available'},
@@ -261,7 +261,7 @@ describe('UserState Utils', () => {
 
     it('should include custom state when present', () => {
       const customState = {name: 'Custom State', developerName: 'CUSTOM'};
-      const result = buildDropdownItems(customState, mockIdleCodes, '1');
+      const result = buildDropdownItems(customState, mockIdleCodes);
 
       expect(result).toEqual([
         {id: '0', name: 'Available'},
@@ -272,13 +272,13 @@ describe('UserState Utils', () => {
     });
 
     it('should handle empty idleCodes array', () => {
-      const result = buildDropdownItems(null, [], '1');
+      const result = buildDropdownItems(null, []);
       expect(result).toEqual([]);
     });
 
     it('should handle empty idleCodes array with custom state', () => {
       const customState = {name: 'Custom State', developerName: 'CUSTOM'};
-      const result = buildDropdownItems(customState, [], '1');
+      const result = buildDropdownItems(customState, []);
 
       expect(result).toEqual([{id: 'custom-CUSTOM', name: 'Custom State'}]);
     });
@@ -289,7 +289,7 @@ describe('UserState Utils', () => {
         {id: '4', name: 'ENGAGED', isSystem: true},
       ];
 
-      const result = buildDropdownItems(null, ronaEngagedOnly, '3');
+      const result = buildDropdownItems(null, ronaEngagedOnly);
       expect(result).toEqual([]);
     });
   });

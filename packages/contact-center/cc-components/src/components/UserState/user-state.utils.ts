@@ -7,22 +7,17 @@ import {userStateLabels} from './constant';
  */
 export const getDropdownClass = (customState: ICustomState, currentState: string, idleCodes: IdleCode[]): string => {
   if (customState) {
-    return 'custom';
+    return 'custom'; // Custom state class
   }
-
-  const currentIdleCode = idleCodes.find((code) => code.id === currentState);
-  if (!currentIdleCode) {
-    return 'idle';
+  if (currentState === '0') {
+    return '';
   }
-
-  switch (currentIdleCode.name) {
-    case AgentUserState.Available:
-      return 'available';
-    case AgentUserState.RONA:
+  for (const item of idleCodes) {
+    if (item.id === currentState && item.name === AgentUserState.RONA) {
       return 'rona';
-    default:
-      return 'idle';
+    }
   }
+  return 'idle';
 };
 
 /**
@@ -89,7 +84,7 @@ export const getPreviousSelectableState = (idleCodes: IdleCode[]): string => {
   const selectableState = idleCodes.find(
     (code) => ![AgentUserState.RONA, AgentUserState.Engaged].includes(code.name as AgentUserState)
   );
-  return selectableState?.id || '';
+  return selectableState?.id || '0';
 };
 
 /**
