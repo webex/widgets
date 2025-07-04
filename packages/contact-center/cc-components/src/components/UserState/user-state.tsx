@@ -26,15 +26,16 @@ const UserStateComponent: React.FunctionComponent<UserStateComponentsProps> = (p
   }, [idleCodes]);
 
   let selectedKey;
-  if (customState) {
+  if (customState && 'developerName' in customState) {
     selectedKey = `hide-${customState.developerName}`;
   } else {
     selectedKey = currentState;
   }
 
-  const items = customState
-    ? [{name: customState.name, id: `hide-${customState.developerName}`, developerName: customState.developerName}]
-    : [];
+  const items =
+    customState && 'developerName' in customState
+      ? [{name: customState.name, id: `hide-${customState.developerName}`, developerName: customState.developerName}]
+      : [];
 
   for (const item of idleCodes) {
     if (item.name === AgentUserState.RONA && item.id === currentState) {
@@ -43,6 +44,8 @@ const UserStateComponent: React.FunctionComponent<UserStateComponentsProps> = (p
     if (item.name === AgentUserState.RONA && item.id !== currentState) {
       continue; // Skip RONA unless it matches the current state
     }
+
+    //@ts-expect-error:  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
     items.push({
       ...item,
       id: item.name === AgentUserState.RONA ? `hide-${item.id}` : item.id,
@@ -79,7 +82,7 @@ const UserStateComponent: React.FunctionComponent<UserStateComponentsProps> = (p
   };
 
   const getTooltipText = () => {
-    if (customState && customState.developerName === 'ENGAGED') {
+    if (customState && 'developerName' in customState && customState.developerName === 'ENGAGED') {
       const currentStateObj = idleCodes.find((item) => item.id === currentState);
 
       if (currentStateObj.name === AgentUserState.Available) {
@@ -123,6 +126,7 @@ const UserStateComponent: React.FunctionComponent<UserStateComponentsProps> = (p
       >
         {(item) => {
           const isRonaOrEngaged = [AgentUserState.RONA, AgentUserState.Engaged].includes(
+            //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
             idleCodes.find((code) => code.id === currentState)?.name || ''
           );
           const shouldHighlight = currentState === item.id || (isRonaOrEngaged && item.id === previousSelectableState);

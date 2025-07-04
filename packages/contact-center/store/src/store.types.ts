@@ -1,14 +1,54 @@
 import {
   AgentLogin,
-  IContactCenter,
   Profile,
-  Team,
-  LogContext,
   BuddyDetails,
-  DestinationType,
   ContactServiceQueue,
   ITask,
+  BuddyAgents,
+  BuddyAgentsResponse,
+  StateChange,
+  Logout,
 } from '@webex/plugin-cc';
+import {DestinationType} from 'node_modules/@webex/plugin-cc/dist/types/services/task/types';
+import {
+  AgentProfileUpdate,
+  LogContext,
+  SetStateResponse,
+  StationLoginResponse,
+  StationLogoutResponse,
+  Team,
+  UpdateDeviceTypeResponse,
+} from 'node_modules/@webex/plugin-cc/dist/types/types';
+
+//  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+interface IContactCenter {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  on: (event: string, callback: (data: any) => void) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  off: (event: string, callback?: (data: any) => void) => void;
+  updateAgentProfile(data: AgentProfileUpdate): Promise<UpdateDeviceTypeResponse>;
+  stationLogin(data: AgentLogin): Promise<StationLoginResponse>;
+  deregister(): Promise<void>;
+  stationLogout(data: Logout): Promise<StationLogoutResponse>;
+  LoggerProxy: ILogger;
+  register(): Promise<Profile>;
+  taskManager: {
+    getAllTasks: () => Record<string, ITask>;
+  };
+  getBuddyAgents(data: BuddyAgents): Promise<BuddyAgentsResponse>;
+  getQueues(search?: string, filter?: string, page?: number, pageSize?: number): Promise<ContactServiceQueue[]>;
+  agentConfig?: {
+    regexUS: RegExp | string;
+    agentId: string;
+  };
+  setAgentState(data: StateChange): Promise<SetStateResponse>;
+}
+//  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+type IWebex = {
+  cc: IContactCenter;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  once: (event: string, callback: (data: any) => void) => void;
+};
 
 type ILogger = {
   log: (message: string, context?: LogContext) => void;
@@ -18,13 +58,13 @@ type ILogger = {
   error: (message: string, context?: LogContext) => void;
 };
 
-interface WithWebex {
+type WithWebex = {
   webex: {cc: IContactCenter; logger: ILogger};
-}
+};
 
 interface WithWebexConfig {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  webexConfig: any; // TODO: Replace 'any' with the actual type of webexConfig
+  webexConfig: any;
   access_token: string;
 }
 
@@ -177,6 +217,17 @@ type AgentLoginProfile = {
   };
 };
 
+// Utility consts
+const DIALNUMBER: string = 'AGENT_DN';
+const EXTENSION: string = 'EXTENSION';
+const DESKTOP: string = 'BROWSER';
+
+const LoginOptions: {[key: string]: string} = {
+  [DIALNUMBER]: 'Dial Number',
+  [EXTENSION]: 'Extension',
+  [DESKTOP]: 'Desktop',
+};
+
 export type {
   IContactCenter,
   ITask,
@@ -196,6 +247,7 @@ export type {
   ContactServiceQueue,
   TaskMetaData,
   AgentLoginProfile,
+  IWebex,
 };
 
-export {CC_EVENTS, TASK_EVENTS, ENGAGED_LABEL, ENGAGED_USERNAME};
+export {CC_EVENTS, TASK_EVENTS, ENGAGED_LABEL, ENGAGED_USERNAME, DIALNUMBER, EXTENSION, DESKTOP, LoginOptions};

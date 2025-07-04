@@ -8,6 +8,7 @@ const IncomingTaskComponent: React.FunctionComponent<IncomingTaskComponentProps>
     return <></>; // hidden component
   }
 
+  //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
   const callAssociationDetails = incomingTask?.data?.interaction?.callAssociatedDetails;
   const ani = callAssociationDetails?.ani;
   const customerName = callAssociationDetails?.customerName;

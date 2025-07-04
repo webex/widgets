@@ -1,5 +1,6 @@
-import {IContactCenter, StationLoginSuccess, StationLogoutSuccess, Team} from '@webex/plugin-cc';
-import {ILogger} from '@webex/cc-store';
+import {StationLoginSuccess, LogoutSuccess} from '@webex/plugin-cc';
+import {IContactCenter, ILogger} from '@webex/cc-store';
+import {Team} from '@webex/plugin-cc/dist/types/types';
 /**
  * Interface representing the properties for the Station Login component.
  */
@@ -44,7 +45,7 @@ export interface IStationLoginProps {
   /**
    * Response data received on agent login success
    */
-  logoutSuccess?: StationLogoutSuccess;
+  logoutSuccess?: LogoutSuccess;
 
   /**
    * Flag to indicate if the agent is logged in

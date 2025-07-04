@@ -26,7 +26,7 @@ export const useUserState = ({
       method: 'callOnStateChange',
     });
     if (onStateChange) {
-      if (customState?.developerName) {
+      if (customState && 'developerName' in customState && customState?.developerName) {
         onStateChange(customState);
         return;
       }
@@ -200,9 +200,10 @@ export const useUserState = ({
           module: 'useUserState',
           method: 'updateAgentState',
         });
-
-        store.setLastStateChangeTimestamp(response.data.lastStateChangeTimestamp);
-        store.setLastIdleCodeChangeTimestamp(response.data.lastIdleCodeChangeTimestamp);
+        if ('data' in response) {
+          store.setLastStateChangeTimestamp(response.data.lastStateChangeTimestamp);
+          store.setLastIdleCodeChangeTimestamp(response.data.lastIdleCodeChangeTimestamp);
+        }
       })
       .catch((error) => {
         logger.error(`Error setting agent state: ${error.toString()}`, {

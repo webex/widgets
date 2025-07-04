@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 
-import {CallControlComponentProps, DestinationType, CallControlMenuType} from '../task.types';
+import {CallControlComponentProps, CallControlMenuType} from '../task.types';
 import './call-control.styles.scss';
 import {PopoverNext, SelectNext, TooltipNext, Text, ButtonCircle, ButtonPill} from '@momentum-ui/react-collaboration';
 import {Item} from '@react-stately/collections';
@@ -8,6 +8,7 @@ import {Icon, Button} from '@momentum-design/components/dist/react';
 import ConsultTransferPopoverComponent from './CallControlCustom/consult-transfer-popover';
 import type {MEDIA_CHANNEL as MediaChannelType} from '../task.types';
 import {getMediaTypeInfo} from '../../../utils';
+import {DestinationType} from '@webex/cc-store';
 
 function CallControlComponent(props: CallControlComponentProps) {
   const [selectedWrapupReason, setSelectedWrapupReason] = useState<string | null>(null);

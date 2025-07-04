@@ -44,7 +44,11 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
 
   const mediaChannel = currentTask.data.interaction.mediaType as MediaChannelType;
   const isSocial = mediaChannel === MediaChannelType.SOCIAL;
+
+  //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
   const customerName = currentTask?.data?.interaction?.callAssociatedDetails?.customerName;
+
+  //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
   const ani = currentTask?.data?.interaction?.callAssociatedDetails?.ani;
 
   if (!currentTask) return null;
@@ -93,7 +97,12 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
         <div className="cad-variables">
           <Text className="queue" type="body-secondary" tagName={'small'}>
             <strong>Queue:</strong>{' '}
-            <span>{currentTask?.data?.interaction?.callAssociatedDetails?.virtualTeamName || 'No Team Name'}</span>
+            <span>
+              {
+                //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+                currentTask?.data?.interaction?.callAssociatedDetails?.virtualTeamName || 'No Team Name'
+              }
+            </span>
           </Text>
           <Text className="phone-number" type="body-secondary" tagName={'small'}>
             <strong>{isSocial ? 'Customer Name' : 'Phone Number'}:</strong>{' '}
@@ -101,7 +110,12 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
           </Text>
           <Text className="rona" type="body-secondary" tagName={'small'}>
             <strong>RONA:</strong>{' '}
-            <span>{currentTask?.data?.interaction?.callAssociatedDetails?.ronaTimeout || 'No RONA'}</span>
+            <span>
+              {
+                //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+                currentTask?.data?.interaction?.callAssociatedDetails?.ronaTimeout || 'No RONA'
+              }
+            </span>
           </Text>
         </div>
       </div>

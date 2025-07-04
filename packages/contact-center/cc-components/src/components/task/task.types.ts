@@ -2,7 +2,7 @@ import {
   ILogger,
   ITask,
   IContactCenter,
-  WrapupCodes,
+  IWrapupCode,
   BuddyDetails,
   DestinationType,
   ContactServiceQueue,
@@ -173,7 +173,7 @@ export interface ControlProps {
    * Array of wrap-up codes.
    * TODO: Expose this type from SDK.
    */
-  wrapupCodes: WrapupCodes[];
+  wrapupCodes: IWrapupCode[];
 
   /**
    * Indicates if wrap-up is required.
@@ -493,8 +493,6 @@ export interface CallControlConsultComponentsProps {
  * Type representing the possible menu types in call control.
  */
 export type CallControlMenuType = 'Consult' | 'Transfer';
-
-export {DestinationType};
 
 export const MEDIA_CHANNEL = {
   EMAIL: 'email',

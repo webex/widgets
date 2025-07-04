@@ -3,6 +3,7 @@ import {render, screen, cleanup} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import TaskListComponent from '../../../../src/components/task/TaskList/task-list';
 import {TaskListComponentProps} from '../../../../src/components/task/task.types';
+import {mockTask} from '@webex/cc-store';
 
 // This test suite is skipped because we have removed the :broken from the command
 // line in the package.json scripts to run these tests in pipeline
@@ -19,23 +20,14 @@ describe.skip('TaskListPresentational Component', () => {
     };
 
     const props: TaskListComponentProps = {
-      currentTask: {
-        id: '1',
-        data: {
-          interaction: {
-            callAssociatedDetails: {
-              ani: '1234567890',
-              dn: '9876543210',
-              virtualTeamName: 'Sales Team',
-            },
-          },
-        },
-      },
+      currentTask: mockTask,
       taskList: {
         '1': {
+          ...mockTask,
           id: '1',
           data: {
             interaction: {
+              //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
               callAssociatedDetails: {
                 ani: '1234567890',
                 dn: '9876543210',
@@ -45,9 +37,11 @@ describe.skip('TaskListPresentational Component', () => {
           },
         },
         '2': {
+          ...mockTask,
           id: '2',
           data: {
             interaction: {
+              //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
               callAssociatedDetails: {
                 ani: '0987654321',
                 dn: '8765432109',

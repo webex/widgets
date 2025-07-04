@@ -41,7 +41,7 @@ export const useTaskList = (props: UseTaskListProps) => {
     }
 
     if (onTaskSelected) {
-      store.setTaskSelected(function (task, isClicked) {
+      store.setTaskSelected(function (task: ITask, isClicked: boolean) {
         onTaskSelected({task, isClicked});
       });
     }
@@ -216,13 +216,13 @@ export const useCallControl = (props: useCallControlProps) => {
 
   // Function to extract consulting agent information
   const extractConsultingAgent = useCallback(() => {
-    if (!currentTask || !currentTask.data || !currentTask.data.interaction) return;
+    if (!currentTask?.data?.interaction?.participants) return;
 
     const {interaction} = currentTask.data;
     const myAgentId = store.cc.agentConfig?.agentId;
 
     // Find all agent participants except the current agent
-    const otherAgents = Object.values(interaction.participants).filter(
+    const otherAgents = Object.values(interaction.participants || {}).filter(
       (participant): participant is Participant =>
         (participant as Participant).pType === 'Agent' && (participant as Participant).id !== myAgentId
     );
@@ -408,7 +408,7 @@ export const useCallControl = (props: useCallControlProps) => {
         logError(`Error pausing recording: ${error}`, 'toggleRecording');
       });
     } else {
-      currentTask.resumeRecording().catch((error: Error) => {
+      currentTask.resumeRecording({autoResumed: false}).catch((error: Error) => {
         logError(`Error resuming recording: ${error}`, 'toggleRecording');
       });
     }
@@ -439,6 +439,7 @@ export const useCallControl = (props: useCallControlProps) => {
 
   const transferCall = async (to: string, type: DestinationType) => {
     try {
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       await currentTask.transfer({to, destinationType: type});
       logger.info('transferCall success', {module: 'useCallControl', method: 'transferCall'});
     } catch (error) {
@@ -460,6 +461,7 @@ export const useCallControl = (props: useCallControlProps) => {
     }
 
     try {
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       await currentTask.consult(consultPayload);
       store.setIsQueueConsultInProgress(false);
       if (destinationType === 'queue') {
@@ -486,6 +488,7 @@ export const useCallControl = (props: useCallControlProps) => {
     };
 
     try {
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       await currentTask.endConsult(consultEndPayload);
     } catch (error) {
       logError(`Error ending consult call: ${error}`, 'endConsultCall');
@@ -499,6 +502,7 @@ export const useCallControl = (props: useCallControlProps) => {
       destinationType: destinationType,
     };
     try {
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       await currentTask.consultTransfer(consultTransferPayload);
       store.setConsultInitiated(true);
     } catch (error) {
@@ -551,7 +555,7 @@ export const useOutdialCall = (props: useOutdialCallProps) => {
       alert('Destination number is required, it cannot be empty');
       return;
     }
-
+    //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
     cc.startOutdial(destination)
       .then((response) => {
         logger.info('Outdial call started', response);

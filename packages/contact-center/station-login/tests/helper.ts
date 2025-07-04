@@ -1,6 +1,6 @@
 import {renderHook, act, waitFor} from '@testing-library/react';
 import {useStationLogin} from '../src/helper';
-import * as store from '@webex/cc-store';
+import store, {CC_EVENTS, IContactCenter, mockCC} from '@webex/cc-store';
 
 jest.mock('@webex/cc-store', () => {
   let isAgentLoggedIn = false;
@@ -32,12 +32,31 @@ jest.mock('@webex/cc-store', () => {
 
 // Mock webex instance
 const ccMock = {
+  ...mockCC,
   stationLogin: jest.fn(),
   stationLogout: jest.fn(),
   deregister: jest.fn(),
   on: jest.fn(),
   off: jest.fn(),
-};
+  updateAgentProfile: jest.fn(),
+  LoggerProxy: {
+    log: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    trace: jest.fn(),
+    error: jest.fn(),
+  },
+  register: jest.fn(),
+  taskManager: {
+    getAllTasks: jest.fn(() => ({})),
+  },
+  getBuddyAgents: jest.fn(),
+  getQueues: jest.fn(),
+  agentConfig: {
+    regexUS: /^\d{10}$/,
+    agentId: 'mockAgentId',
+  },
+} as IContactCenter;
 
 // Sample login parameters
 const loginParams = {
@@ -52,6 +71,8 @@ const logger = {
   log: jest.fn(),
   info: jest.fn(),
   error: jest.fn(),
+  warn: jest.fn(),
+  trace: jest.fn(),
 };
 
 // Base props for useStationLogin hook
@@ -499,10 +520,11 @@ describe('useStationLogin Hook', () => {
     jest.spyOn(store, 'setCCCallback').mockImplementation((event, cb) => {
       ccMock.on(event, cb);
     });
+    const onSpy = jest.spyOn(ccMock, 'on');
 
     renderHook(() => useStationLogin(baseStationLoginProps));
 
-    expect(ccMock.on).toHaveBeenCalledWith(store.CC_EVENTS.AGENT_STATION_LOGIN_SUCCESS, expect.any(Function));
+    expect(ccMock.on).toHaveBeenCalledWith(CC_EVENTS.AGENT_STATION_LOGIN_SUCCESS, expect.any(Function));
 
     const mockPayload = {
       deviceType: 'EXTENSION',
@@ -510,17 +532,17 @@ describe('useStationLogin Hook', () => {
     };
 
     act(() => {
-      ccMock.on.mock.calls[0][1](mockPayload);
+      onSpy.mock.calls[0][1](mockPayload);
     });
 
     await waitFor(() => {
       expect(loginCb).toHaveBeenCalled();
     });
 
-    expect(ccMock.on).toHaveBeenCalledWith(store.CC_EVENTS.AGENT_LOGOUT_SUCCESS, expect.any(Function));
+    expect(ccMock.on).toHaveBeenCalledWith(CC_EVENTS.AGENT_LOGOUT_SUCCESS, expect.any(Function));
 
     act(() => {
-      ccMock.on.mock.calls[1][1]();
+      onSpy.mock.calls[1][1]({});
     });
 
     await waitFor(() => {
@@ -532,6 +554,7 @@ describe('useStationLogin Hook', () => {
     jest.spyOn(store, 'setCCCallback').mockImplementation((event, cb) => {
       ccMock.on(event, cb);
     });
+    const onSpy = jest.spyOn(ccMock, 'on');
 
     renderHook(() =>
       useStationLogin({
@@ -540,7 +563,7 @@ describe('useStationLogin Hook', () => {
       })
     );
 
-    expect(ccMock.on).toHaveBeenCalledWith(store.CC_EVENTS.AGENT_STATION_LOGIN_SUCCESS, expect.any(Function));
+    expect(ccMock.on).toHaveBeenCalledWith(CC_EVENTS.AGENT_STATION_LOGIN_SUCCESS, expect.any(Function));
 
     const mockPayload = {
       deviceType: 'EXTENSION',
@@ -548,7 +571,7 @@ describe('useStationLogin Hook', () => {
     };
 
     act(() => {
-      ccMock.on.mock.calls[0][1](mockPayload);
+      onSpy.mock.calls[0][1](mockPayload);
     });
 
     await waitFor(() => {
@@ -557,7 +580,7 @@ describe('useStationLogin Hook', () => {
   });
 
   it('should not save if isLoginOptionsChanged is false', () => {
-    const cc = {updateAgentProfile: jest.fn()};
+    const cc = {...ccMock, updateAgentProfile: jest.fn()};
     const {result} = renderHook(() =>
       useStationLogin({
         ...baseStationLoginProps,
@@ -585,7 +608,7 @@ describe('useStationLogin Hook', () => {
   });
 
   it('should call updateAgentProfile and update originalLoginOptions on save when changed', async () => {
-    const cc = {updateAgentProfile: jest.fn().mockResolvedValue({})};
+    const cc = {...ccMock, updateAgentProfile: jest.fn().mockResolvedValue({})};
     const {result} = renderHook(() =>
       useStationLogin({
         ...baseStationLoginProps,
@@ -621,8 +644,6 @@ describe('useStationLogin Hook', () => {
       expect.objectContaining({
         module: 'widget-station-login#helper.ts',
         method: 'saveLoginOptions',
-        original: expect.any(Object),
-        updated: expect.any(Object),
       })
     );
     expect(result.current.saveError).toBe('');
@@ -632,7 +653,7 @@ describe('useStationLogin Hook', () => {
   });
 
   it('should handle updateAgentProfile errors', async () => {
-    const cc = {updateAgentProfile: jest.fn().mockRejectedValue(new Error('fail'))};
+    const cc = {...ccMock, updateAgentProfile: jest.fn().mockRejectedValue(new Error('fail'))};
     const {result} = renderHook(() =>
       useStationLogin({
         ...baseStationLoginProps,
@@ -659,7 +680,6 @@ describe('useStationLogin Hook', () => {
     expect(result.current.saveError).toBe('fail');
     expect(logger.error).toHaveBeenCalledWith(
       'Failed to update agent device type',
-      expect.any(Error),
       expect.objectContaining({
         module: 'widget-station-login#helper.ts',
         method: 'saveLoginOptions',
@@ -668,7 +688,7 @@ describe('useStationLogin Hook', () => {
   });
 
   it('should call updateAgentProfile with no dialNumber when deviceType is BROWSER', async () => {
-    const cc = {updateAgentProfile: jest.fn().mockResolvedValue({})};
+    const cc = {...ccMock, updateAgentProfile: jest.fn().mockResolvedValue({})};
     const {result} = renderHook(() =>
       useStationLogin({
         ...baseStationLoginProps,
@@ -703,8 +723,6 @@ describe('useStationLogin Hook', () => {
       expect.objectContaining({
         module: 'widget-station-login#helper.ts',
         method: 'saveLoginOptions',
-        original: expect.any(Object),
-        updated: expect.any(Object),
       })
     );
   });

@@ -2,23 +2,24 @@ import React from 'react';
 import {render, screen, fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import UserStateComponent from '../../../src/components/UserState/user-state';
+import {UserStateComponentsProps} from 'packages/contact-center/cc-components/src/components/UserState/user-state.types';
 
 // This test suite is skipped because we have removed the :broken from the command
 // line in the package.json scripts to run these tests in pipeline.
 describe.skip('UserStateComponent', () => {
   const mockSetAgentStatus = jest.fn();
-  const defaultProps = {
+  const defaultProps: UserStateComponentsProps = {
     idleCodes: [
-      {id: '1', name: 'Idle Code 1', isSystem: false},
-      {id: '2', name: 'Idle Code 2', isSystem: true},
-      {id: '3', name: 'Idle Code 3', isSystem: false},
+      {id: '1', name: 'Idle Code 1', isSystem: false, isDefault: true},
+      {id: '2', name: 'Idle Code 2', isSystem: true, isDefault: false},
+      {id: '3', name: 'Idle Code 3', isSystem: false, isDefault: false},
     ],
     setAgentStatus: mockSetAgentStatus,
     isSettingAgentStatus: false,
     elapsedTime: 3661, // 1 hour, 1 minute, 1 second
     lastIdleStateChangeElapsedTime: 0,
     currentState: '1',
-    customState: {id: '1', name: 'Custom State'},
+    customState: {name: 'Custom State', developerName: 'custom_state'},
     logger: {
       log: jest.fn(),
       info: jest.fn(),

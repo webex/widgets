@@ -3,6 +3,7 @@ import React from 'react';
 import {render, screen, fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import CallControlComponent from '../../../../src/components/task/CallControl/call-control';
+import {mockTask} from '@webex/cc-store';
 
 jest.mock('@webex/cc-store', () => ({
   DestinationType: {
@@ -68,18 +69,7 @@ describe.skip('CallControlPresentational', () => {
   const setIsHeld = jest.fn();
 
   const defaultProps = {
-    currentTask: {
-      data: {
-        interaction: {
-          mediaResourceId: '1',
-          media: {
-            '1': {isHold: false},
-          },
-          callProcessingDetails: {isPaused: false},
-          mediaType: 'telephony',
-        },
-      },
-    },
+    currentTask: mockTask,
     toggleHold: mockToggleHold,
     toggleRecording: mockToggleRecording,
     endCall: mockEndCall,

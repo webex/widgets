@@ -1,17 +1,11 @@
 import {renderHook, act, waitFor} from '@testing-library/react';
 import {useUserState} from '../src/helper';
-import store from '@webex/cc-store';
+import store, {mockCC} from '@webex/cc-store';
 
 describe('useUserState Hook', () => {
-  const mockCC = {
-    setAgentState: jest.fn(),
-    on: jest.fn(),
-    off: jest.fn(),
-  };
-
   const idleCodes = [
-    {id: '1', name: 'Idle Code 1', isSystem: false},
-    {id: '2', name: 'Available', isSystem: false},
+    {id: '1', name: 'Idle Code 1', isSystem: false, isDefault: false},
+    {id: '2', name: 'Available', isSystem: false, isDefault: false},
   ];
 
   const agentId = 'agent123';
@@ -21,13 +15,89 @@ describe('useUserState Hook', () => {
     log: jest.fn(),
     info: jest.fn(),
     error: jest.fn(),
+    warn: jest.fn(),
+    trace: jest.fn(),
   };
+
+  // Reusable mock response objects
+  const mockAvailableStateResponse = {
+    type: 'AgentStateChangeSuccess' as const,
+    orgId: 'org123',
+    trackingId: 'track456',
+    data: {
+      eventType: 'AgentDesktopMessage' as const,
+      agentId: 'agent123',
+      trackingId: 'track456',
+      auxCodeId: '2',
+      agentSessionId: 'session123',
+      orgId: 'org123',
+      status: 'Available',
+      subStatus: 'Available' as const,
+      lastIdleCodeChangeTimestamp: new Date().getTime(),
+      lastStateChangeTimestamp: new Date().getTime(),
+      lastStateChangeReason: 'Available',
+      type: 'AgentStateChangeSuccess' as const,
+      changedBy: 'AGENT',
+      changedById: 'agent123',
+      changedByName: 'Test Agent',
+    },
+  };
+
+  const mockAvailableStateResponseWithTimestamp = {
+    type: 'AgentStateChangeSuccess' as const,
+    orgId: 'org123',
+    trackingId: 'track456',
+    data: {
+      eventType: 'AgentDesktopMessage' as const,
+      agentId: 'agent123',
+      trackingId: 'track456',
+      auxCodeId: '2',
+      agentSessionId: 'session123',
+      orgId: 'org123',
+      status: 'Available',
+      subStatus: 'Available' as const,
+      lastIdleCodeChangeTimestamp: 1740748111287,
+      lastStateChangeTimestamp: 1740748111287,
+      lastStateChangeReason: 'Available',
+      type: 'AgentStateChangeSuccess' as const,
+      changedBy: 'AGENT',
+      changedById: 'agent123',
+      changedByName: 'Test Agent',
+    },
+  };
+
+  const mockIdleStateResponse = {
+    type: 'AgentStateChangeSuccess' as const,
+    orgId: 'org123',
+    trackingId: 'track456',
+    data: {
+      eventType: 'AgentDesktopMessage' as const,
+      agentId: 'agent123',
+      trackingId: 'track456',
+      auxCodeId: '1',
+      agentSessionId: 'session123',
+      orgId: 'org123',
+      status: 'Idle',
+      subStatus: 'Idle' as const,
+      lastIdleCodeChangeTimestamp: 1740748111287,
+      lastStateChangeTimestamp: 1740748111287,
+      lastStateChangeReason: 'Idle Code 1',
+      type: 'AgentStateChangeSuccess' as const,
+      changedBy: 'AGENT',
+      changedById: 'agent123',
+      changedByName: 'Test Agent',
+    },
+  };
+
+  const ccOnSpy = jest.spyOn(mockCC, 'on');
+  const ccOffSpy = jest.spyOn(mockCC, 'off');
+  const ccSetAgentStateSpy = jest.spyOn(mockCC, 'setAgentState');
 
   beforeEach(() => {
     jest.useFakeTimers();
-    mockCC.setAgentState.mockReset();
-    mockCC.on.mockReset();
-    mockCC.off.mockReset();
+    ccSetAgentStateSpy.mockReset();
+    ccOnSpy.mockReset();
+    ccOffSpy.mockReset();
 
     workerMock = {
       postMessage: jest.fn(),
@@ -71,14 +141,12 @@ describe('useUserState Hook', () => {
   });
 
   it('should clean up on unmount', () => {
-    mockCC.setAgentState.mockResolvedValueOnce({
-      data: {auxCodeId: '2', lastStateChangeTimestamp: new Date().getTime()},
-    });
+    ccSetAgentStateSpy.mockResolvedValueOnce(mockAvailableStateResponse);
     const {unmount} = renderHook(() =>
       useUserState({
         idleCodes: [],
         agentId: 'agent123',
-        cc: {},
+        cc: mockCC,
         currentState: '0',
         customState: null,
         logger: logger,
@@ -151,9 +219,7 @@ describe('useUserState Hook', () => {
   });
 
   it('should handle setAgentStatus correctly and update state', async () => {
-    mockCC.setAgentState.mockResolvedValueOnce({
-      data: {auxCodeId: '2', lastStateChangeTimestamp: new Date().getTime()},
-    });
+    ccSetAgentStateSpy.mockResolvedValueOnce(mockAvailableStateResponse);
     const {result} = renderHook(() =>
       useUserState({
         idleCodes,
@@ -178,8 +244,7 @@ describe('useUserState Hook', () => {
   });
 
   it('should update last state change timestamp from setAgentState', async () => {
-    const resolvingValue = {data: {auxCodeId: '2', lastStateChangeTimestamp: 1740748111287}};
-    mockCC.setAgentState.mockResolvedValueOnce(resolvingValue);
+    ccSetAgentStateSpy.mockResolvedValueOnce(mockAvailableStateResponseWithTimestamp);
     const {rerender} = renderHook(
       ({currentState}) =>
         useUserState({
@@ -208,13 +273,14 @@ describe('useUserState Hook', () => {
         agentId,
         lastStateChangeReason: 'Available',
       });
-      expect(store.lastStateChangeTimestamp).toEqual(resolvingValue.data.lastStateChangeTimestamp);
+      expect(store.lastStateChangeTimestamp).toEqual(
+        mockAvailableStateResponseWithTimestamp.data.lastStateChangeTimestamp
+      );
     });
   });
 
   it('should set idle status if name does not match: Available', async () => {
-    const resolvingValue = {data: {auxCodeId: '1', lastStateChangeTimestamp: 1740748111287}};
-    mockCC.setAgentState.mockResolvedValueOnce(resolvingValue);
+    ccSetAgentStateSpy.mockResolvedValueOnce(mockIdleStateResponse);
     const {rerender} = renderHook(
       ({currentState}) =>
         useUserState({
@@ -243,12 +309,12 @@ describe('useUserState Hook', () => {
         agentId,
         lastStateChangeReason: 'Idle Code 1',
       });
-      expect(store.lastStateChangeTimestamp).toEqual(resolvingValue.data.lastStateChangeTimestamp);
+      expect(store.lastStateChangeTimestamp).toEqual(mockIdleStateResponse.data.lastStateChangeTimestamp);
     });
   });
 
   it('should handle errors from setAgentState and revert state', async () => {
-    mockCC.setAgentState.mockRejectedValueOnce(new Error('Error setting agent status'));
+    ccSetAgentStateSpy.mockRejectedValueOnce(new Error('Error setting agent status'));
     const {rerender} = renderHook(
       ({currentState}) =>
         useUserState({
@@ -257,7 +323,7 @@ describe('useUserState Hook', () => {
           cc: mockCC,
           currentState,
           customState: null,
-          lastStateChangeTimestamp: new Date(),
+          lastStateChangeTimestamp: new Date().getTime(),
           lastIdleCodeChangeTimestamp: undefined,
           logger,
           onStateChange,
@@ -325,7 +391,7 @@ describe('useUserState Hook', () => {
   });
 
   it('should not call onStateChange if not available', () => {
-    const customState = {developerName: 'Custom State'};
+    const customState = {developerName: 'Custom State', name: 'Custom State'};
     renderHook(() =>
       useUserState({
         idleCodes,
@@ -344,7 +410,7 @@ describe('useUserState Hook', () => {
   });
 
   it('should call onStateChange with customState if provided', () => {
-    const customState = {developerName: 'Custom State'};
+    const customState = {developerName: 'Custom State', name: 'Custom State'};
     renderHook(() =>
       useUserState({
         idleCodes,
@@ -352,7 +418,7 @@ describe('useUserState Hook', () => {
         cc: mockCC,
         currentState: '0',
         customState,
-        lastStateChangeTimestamp: new Date(),
+        lastStateChangeTimestamp: new Date().getTime(),
         lastIdleCodeChangeTimestamp: undefined,
         logger,
         onStateChange,
@@ -370,7 +436,7 @@ describe('useUserState Hook', () => {
         cc: mockCC,
         currentState: '1',
         customState: null,
-        lastStateChangeTimestamp: new Date(),
+        lastStateChangeTimestamp: new Date().getTime(),
         lastIdleCodeChangeTimestamp: undefined,
         logger,
         onStateChange,

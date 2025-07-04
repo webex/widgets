@@ -1,10 +1,9 @@
 import {makeAutoObservable, observable} from 'mobx';
-import Webex from '@webex/plugin-cc';
+import Webex, {ITask} from '@webex/plugin-cc';
 import {
   IContactCenter,
   Profile,
   Team,
-  WithWebex,
   IdleCode,
   InitParams,
   IStore,
@@ -13,11 +12,10 @@ import {
   ICustomState,
   TaskMetaData,
   AgentLoginProfile,
+  LoginOptions,
 } from './store.types';
-import {ITask} from '@webex/plugin-cc';
 
 import {getFeatureFlags} from './util';
-import {LoginOptions} from '../../cc-components/src/components/StationLogin/constants';
 
 class Store implements IStore {
   private static instance: Store;
@@ -70,7 +68,8 @@ class Store implements IStore {
     console.log('Returning store instance');
     return Store.instance;
   }
-  registerCC(webex?: WithWebex['webex']): Promise<void> {
+
+  registerCC(webex?: {cc: IContactCenter}): Promise<void> {
     if (webex) {
       this.cc = webex.cc;
     }
@@ -94,6 +93,7 @@ class Store implements IStore {
         });
         // wire up logger into feature‐flag extraction
         this.featureFlags = getFeatureFlags(response);
+        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         this.teams = response.teams;
         this.loginOptions = response.webRtcEnabled
           ? response.loginVoiceOptions
@@ -134,6 +134,7 @@ class Store implements IStore {
         reject(new Error('Webex SDK failed to initialize'));
       }, 6000);
 
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       const webex = Webex.init({
         config: options.webexConfig,
         credentials: {

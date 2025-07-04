@@ -58,7 +58,7 @@ export interface IUserState {
    * Callback function to be called when the state changes.
    * @param state The new state.
    */
-  onStateChange?: (state: string) => void;
+  onStateChange?: (arg: IdleCode | ICustomState) => void;
 
   /**
    * The agent ID.
