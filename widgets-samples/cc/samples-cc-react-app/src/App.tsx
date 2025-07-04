@@ -129,6 +129,7 @@ const handleSaveEnd = (isComplete: boolean) => {
 
   const onCCSignOut = () => {
     console.log('CC Sign out has been successful');
+    window.location.href = window.location.href;
   };
 
   const onAccepted = ({task}) => {
