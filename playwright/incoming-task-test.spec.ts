@@ -7,13 +7,13 @@ import { TASK_TYPES, USER_STATES, LOGIN_MODE, THEME_COLORS, WRAPUP_REASONS, RONA
 import { submitWrapup } from './Utils/wrapupUtils';
 
 
-let page: Page = null;
-let context: BrowserContext = null;
-let callerpage: Page = null;
-let extensionPage: Page = null;
-let context2: BrowserContext = null;
-let chatPage: Page = null;
-let page2: Page = null;
+let page: Page | null = null;
+let context: BrowserContext | null = null;
+let callerpage: Page | null = null;
+let extensionPage: Page | null = null;
+let context2: BrowserContext | null = null;
+let chatPage: Page | null = null;
+let page2: Page | null = null;
 let capturedLogs: string[] = [];
 const maxRetries = 3;
 
@@ -85,52 +85,47 @@ function verifyCallbackLogs(
   expectedState: string,
   shouldWrapupComeFirst: boolean = true
 ): boolean {
-  try {
-    const wrapupLogs = capturedLogs.filter(log =>
-      log.includes('onWrapup invoked with reason :')
-    );
-    const stateChangeLogs = capturedLogs.filter(log =>
-      log.includes('onStateChange invoked with state name:')
-    );
+  const wrapupLogs = capturedLogs.filter(log =>
+    log.includes('onWrapup invoked with reason :')
+  );
+  const stateChangeLogs = capturedLogs.filter(log =>
+    log.includes('onStateChange invoked with state name:')
+  );
 
-    if (wrapupLogs.length === 0 || stateChangeLogs.length === 0) {
-      throw new Error('Missing required logs, check callbacks for wrapup or statechange');
-    }
-
-    const lastWrapupLog = wrapupLogs[wrapupLogs.length - 1];
-    const lastStateChangeLog = stateChangeLogs[stateChangeLogs.length - 1];
-
-    const wrapupLogIndex = capturedLogs.lastIndexOf(lastWrapupLog);
-    const stateChangeLogIndex = capturedLogs.lastIndexOf(lastStateChangeLog);
-
-    if (shouldWrapupComeFirst && wrapupLogIndex >= stateChangeLogIndex) {
-      throw new Error('Wrapup log should come before state change log');
-    }
-
-    const wrapupMatch = lastWrapupLog.match(/onWrapup invoked with reason : (.+)$/);
-    const stateMatch = lastStateChangeLog.match(/onStateChange invoked with state name:\s*(.+)$/);
-
-    if (!wrapupMatch || !stateMatch) {
-      throw new Error('Could not extract values from logs');
-    }
-
-    const actualWrapupReason = wrapupMatch[1].trim();
-    const actualStateName = stateMatch[1].trim();
-
-    // Verify expected values
-    if (actualWrapupReason !== expectedWrapupReason) {
-      throw new Error('Wrapup reason mismatch, expected ' + expectedWrapupReason + ', got ' + actualWrapupReason);
-    }
-
-    if (actualStateName !== expectedState) {
-      throw new Error('State name mismatch, expected ' + expectedState + ', got ' + actualStateName);
-    }
-
-    return true;
-
-  } catch (error) {
-    throw error;
+  if (wrapupLogs.length === 0 || stateChangeLogs.length === 0) {
+    throw new Error('Missing required logs, check callbacks for wrapup or statechange');
   }
+
+  const lastWrapupLog = wrapupLogs[wrapupLogs.length - 1];
+  const lastStateChangeLog = stateChangeLogs[stateChangeLogs.length - 1];
+
+  const wrapupLogIndex = capturedLogs.lastIndexOf(lastWrapupLog);
+  const stateChangeLogIndex = capturedLogs.lastIndexOf(lastStateChangeLog);
+
+  if (shouldWrapupComeFirst && wrapupLogIndex >= stateChangeLogIndex) {
+    throw new Error('Wrapup log should come before state change log');
+  }
+
+  const wrapupMatch = lastWrapupLog.match(/onWrapup invoked with reason : (.+)$/);
+  const stateMatch = lastStateChangeLog.match(/onStateChange invoked with state name:\s*(.+)$/);
+
+  if (!wrapupMatch || !stateMatch) {
+    throw new Error('Could not extract values from logs');
+  }
+
+  const actualWrapupReason = wrapupMatch[1].trim();
+  const actualStateName = stateMatch[1].trim();
+
+  // Verify expected values
+  if (actualWrapupReason !== expectedWrapupReason) {
+    throw new Error('Wrapup reason mismatch, expected ' + expectedWrapupReason + ', got ' + actualWrapupReason);
+  }
+
+  if (actualStateName !== expectedState) {
+    throw new Error('State name mismatch, expected ' + expectedState + ', got ' + actualStateName);
+  }
+
+  return true;
 }
 
 function setupConsoleLogging(page: Page): () => void {
@@ -221,7 +216,7 @@ const handleStrayTasks = async (page: Page): Promise<void> => {
       const task = incomingTaskDiv.first();
       let isTaskVisible = await task.isVisible().catch(() => false);
       if (!isTaskVisible) break;
-      const acceptButton = task.getByTestId('task-accept-button');
+      const acceptButton = task.getByTestId('task-accept-button').first();
       const acceptButtonVisible = await acceptButton.isVisible().catch(() => false);
       if (!acceptButtonVisible) {
         const extensionCallVisible = await extensionPage.locator('[data-test="right-action-button"]').isVisible().catch(() => false);
