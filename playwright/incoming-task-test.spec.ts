@@ -343,6 +343,173 @@ const pageSetup = async (page: Page, loginMode: string) => {
 }
 
 
+test.describe('Incoming Call Task Tests for Desktop Mode', async () => {
+  test.beforeEach(() => {
+    capturedLogs.length = 0;
+  })
+
+  test.beforeAll(async ({ browser }) => {
+    context = await browser.newContext();
+    context2 = await browser.newContext();
+    page = await context.newPage();
+    callerpage = await context2.newPage();
+
+    await Promise.all([
+      (async () => {
+        await loginExtension(callerpage, process.env.PW_AGENT2_USERNAME, process.env.PW_PASSWORD);
+      })(),
+      (async () => {
+        await pageSetup(page, LOGIN_MODE.DESKTOP);
+      })(),
+    ])
+  })
+
+
+  test('should accept incoming call, end call and complete wrapup in desktop mode', async () => {
+    await createCallTask(callerpage);
+    await changeUserState(page, USER_STATES.AVAILABLE);
+    const incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 40000 });
+    await page.waitForTimeout(1000);
+    await acceptIncomingTask(page, TASK_TYPES.CALL);
+    await waitForState(page, USER_STATES.ENGAGED);
+    await verifyCurrentState(page, USER_STATES.ENGAGED);
+    const userStateElement = page.getByTestId('state-select');
+    const userStateElementColor = await userStateElement.evaluate((el) => getComputedStyle(el).backgroundColor);
+    expect(isColorClose(userStateElementColor, THEME_COLORS.ENGAGED)).toBe(true);
+    await waitForStateLogs(capturedLogs, USER_STATES.ENGAGED);
+    expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.ENGAGED);
+    await page.getByTestId('end-call-button').first().click();
+    await page.waitForTimeout(2000);
+    await submitWrapup(page, WRAPUP_REASONS.SALE);
+    await waitForState(page, USER_STATES.AVAILABLE);
+    await page.waitForTimeout(3000);
+    await waitForStateLogs(capturedLogs, USER_STATES.AVAILABLE);
+    expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.AVAILABLE);
+    await waitForWrapupReasonLogs(capturedLogs, WRAPUP_REASONS.SALE);
+    expect(getLastWrapupReasonFromLogs(capturedLogs)).toBe(WRAPUP_REASONS.SALE);
+    expect(verifyCallbackLogs(capturedLogs, WRAPUP_REASONS.SALE, USER_STATES.AVAILABLE)).toBe(true);
+  });
+
+  test('should decline incoming call and verify RONA state in desktop mode', async () => {
+    await changeUserState(page, USER_STATES.AVAILABLE);
+    await createCallTask(callerpage);
+    const incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 40000 });
+    await page.waitForTimeout(3000);
+    await declineIncomingTask(page, TASK_TYPES.CALL);
+    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 15000 });
+    await waitForState(page, USER_STATES.RONA);
+    await verifyCurrentState(page, USER_STATES.RONA);
+    const userStateElement = page.getByTestId('state-select');
+    const userStateElementColor = await userStateElement.evaluate((el) => getComputedStyle(el).backgroundColor);
+    expect(isColorClose(userStateElementColor, THEME_COLORS.RONA)).toBe(true);
+    await endCallTask(callerpage);
+    await submitRonaPopup(page, RONA_OPTIONS.IDLE);
+    await waitForState(page, USER_STATES.MEETING);
+  });
+
+  test('should ignore incoming call and wait for RONA popup in desktop mode', async () => {
+    await page.waitForTimeout(2000);
+    await changeUserState(page, USER_STATES.AVAILABLE);
+    await createCallTask(callerpage);
+    const incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 40000 });
+    await incomingTaskDiv.waitFor({ state: 'hidden', timeout: 30000 });
+    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 15000 });
+    await expect(page.getByTestId('samples:rona-popup')).toBeVisible();
+    await endCallTask(callerpage);
+    await submitRonaPopup(page, RONA_OPTIONS.IDLE);
+    await waitForState(page, USER_STATES.MEETING);
+  });
+
+  test('should set agent state to Available and receive another call in desktop mode', async () => {
+    await page.waitForTimeout(2000);
+    await changeUserState(page, USER_STATES.AVAILABLE);
+    await createCallTask(callerpage);
+    let incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 40000 });
+    await page.waitForTimeout(3000);
+    await declineIncomingTask(page, TASK_TYPES.CALL);
+    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 15000 });
+    await waitForState(page, USER_STATES.RONA);
+    await verifyCurrentState(page, USER_STATES.RONA);
+    await submitRonaPopup(page, RONA_OPTIONS.AVAILABLE);
+    await expect(page.getByTestId('samples:rona-popup')).not.toBeVisible();
+    await page.waitForTimeout(5000);
+    await verifyCurrentState(page, USER_STATES.AVAILABLE);
+    incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 10000 });
+    await expect(incomingTaskDiv).toBeVisible();
+    await page.waitForTimeout(3000);
+    await declineIncomingTask(page, TASK_TYPES.CALL);
+    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 15000 });
+    await expect(page.getByTestId('samples:rona-popup')).toBeVisible();
+    await endCallTask(callerpage);
+    await submitRonaPopup(page, RONA_OPTIONS.IDLE);
+    await waitForState(page, USER_STATES.MEETING);
+  });
+
+
+
+  test('should set agent state to busy after declining call in desktop mode', async () => {
+    await page.waitForTimeout(2000);
+    await createCallTask(callerpage);
+    await changeUserState(page, USER_STATES.AVAILABLE);
+    let incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 40000 });
+    await page.waitForTimeout(3000);
+    await declineIncomingTask(page, TASK_TYPES.CALL);
+    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 15000 });
+    await waitForState(page, USER_STATES.RONA);
+    await verifyCurrentState(page, USER_STATES.RONA);
+    await submitRonaPopup(page, RONA_OPTIONS.IDLE);
+    await waitForState(page, USER_STATES.MEETING);
+    await expect(page.getByTestId('samples:rona-popup')).not.toBeVisible();
+    await waitForState(page, USER_STATES.MEETING);
+    await verifyCurrentState(page, USER_STATES.MEETING);
+    incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
+    await expect(incomingTaskDiv).toBeHidden();
+    await endCallTask(callerpage);
+    await page.waitForTimeout(2000);
+  });
+
+  test('should handle customer disconnect before agent answers in desktop mode', async () => {
+    await changeUserState(page, USER_STATES.AVAILABLE);
+    await createCallTask(callerpage);
+    const incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 40000 });
+    await endCallTask(callerpage);
+    await incomingTaskDiv.waitFor({ state: 'hidden', timeout: 30000 });
+    await expect(incomingTaskDiv).toBeHidden();
+    await waitForState(page, USER_STATES.AVAILABLE);
+    await verifyCurrentState(page, USER_STATES.AVAILABLE);
+  });
+
+  test.afterAll(async () => {
+    if (page) {
+      await page.close();
+      page = null;
+    }
+    if (callerpage) {
+      await callerpage.close();
+      callerpage = null;
+    }
+
+    // if (context) {
+    //   await context.close();
+    //   context = null;
+    // }
+
+    // if (context2) {
+    //   await context2.close();
+    //   context2 = null;
+    // }
+  })
+
+});
+
+
 test.describe('Incoming Task Tests in Extension Mode', async () => {
   test.beforeEach(() => {
     capturedLogs.length = 0;
@@ -778,171 +945,6 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
 
 });
 
-test.describe('Incoming Call Task Tests for Desktop Mode', async () => {
-  test.beforeEach(() => {
-    capturedLogs.length = 0;
-  })
-
-  test.beforeAll(async ({ browser }) => {
-    context = await browser.newContext();
-    context2 = await browser.newContext();
-    page = await context.newPage();
-    callerpage = await context2.newPage();
-
-    await Promise.all([
-      (async () => {
-        await loginExtension(callerpage, process.env.PW_AGENT2_USERNAME, process.env.PW_PASSWORD);
-      })(),
-      (async () => {
-        await pageSetup(page, LOGIN_MODE.DESKTOP);
-      })(),
-    ])
-  })
-
-
-  test('should accept incoming call, end call and complete wrapup in desktop mode', async () => {
-    await createCallTask(callerpage);
-    await changeUserState(page, USER_STATES.AVAILABLE);
-    const incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
-    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 40000 });
-    await page.waitForTimeout(1000);
-    await acceptIncomingTask(page, TASK_TYPES.CALL);
-    await waitForState(page, USER_STATES.ENGAGED);
-    await verifyCurrentState(page, USER_STATES.ENGAGED);
-    const userStateElement = page.getByTestId('state-select');
-    const userStateElementColor = await userStateElement.evaluate((el) => getComputedStyle(el).backgroundColor);
-    expect(isColorClose(userStateElementColor, THEME_COLORS.ENGAGED)).toBe(true);
-    await waitForStateLogs(capturedLogs, USER_STATES.ENGAGED);
-    expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.ENGAGED);
-    await page.getByTestId('end-call-button').first().click();
-    await page.waitForTimeout(2000);
-    await submitWrapup(page, WRAPUP_REASONS.SALE);
-    await waitForState(page, USER_STATES.AVAILABLE);
-    await page.waitForTimeout(3000);
-    await waitForStateLogs(capturedLogs, USER_STATES.AVAILABLE);
-    expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.AVAILABLE);
-    await waitForWrapupReasonLogs(capturedLogs, WRAPUP_REASONS.SALE);
-    expect(getLastWrapupReasonFromLogs(capturedLogs)).toBe(WRAPUP_REASONS.SALE);
-    expect(verifyCallbackLogs(capturedLogs, WRAPUP_REASONS.SALE, USER_STATES.AVAILABLE)).toBe(true);
-  });
-
-  test('should decline incoming call and verify RONA state in desktop mode', async () => {
-    await changeUserState(page, USER_STATES.AVAILABLE);
-    await createCallTask(callerpage);
-    const incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
-    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 40000 });
-    await page.waitForTimeout(3000);
-    await declineIncomingTask(page, TASK_TYPES.CALL);
-    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 15000 });
-    await waitForState(page, USER_STATES.RONA);
-    await verifyCurrentState(page, USER_STATES.RONA);
-    const userStateElement = page.getByTestId('state-select');
-    const userStateElementColor = await userStateElement.evaluate((el) => getComputedStyle(el).backgroundColor);
-    expect(isColorClose(userStateElementColor, THEME_COLORS.RONA)).toBe(true);
-    await endCallTask(callerpage);
-    await submitRonaPopup(page, RONA_OPTIONS.IDLE);
-    await waitForState(page, USER_STATES.MEETING);
-  });
-
-  test('should ignore incoming call and wait for RONA popup in desktop mode', async () => {
-    await page.waitForTimeout(2000);
-    await changeUserState(page, USER_STATES.AVAILABLE);
-    await createCallTask(callerpage);
-    const incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
-    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 40000 });
-    await incomingTaskDiv.waitFor({ state: 'hidden', timeout: 30000 });
-    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 15000 });
-    await expect(page.getByTestId('samples:rona-popup')).toBeVisible();
-    await endCallTask(callerpage);
-    await submitRonaPopup(page, RONA_OPTIONS.IDLE);
-    await waitForState(page, USER_STATES.MEETING);
-  });
-
-  test('should set agent state to Available and receive another call in desktop mode', async () => {
-    await page.waitForTimeout(2000);
-    await changeUserState(page, USER_STATES.AVAILABLE);
-    await createCallTask(callerpage);
-    let incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
-    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 40000 });
-    await page.waitForTimeout(3000);
-    await declineIncomingTask(page, TASK_TYPES.CALL);
-    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 15000 });
-    await waitForState(page, USER_STATES.RONA);
-    await verifyCurrentState(page, USER_STATES.RONA);
-    await submitRonaPopup(page, RONA_OPTIONS.AVAILABLE);
-    await expect(page.getByTestId('samples:rona-popup')).not.toBeVisible();
-    await page.waitForTimeout(5000);
-    await verifyCurrentState(page, USER_STATES.AVAILABLE);
-    incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
-    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 10000 });
-    await expect(incomingTaskDiv).toBeVisible();
-    await page.waitForTimeout(3000);
-    await declineIncomingTask(page, TASK_TYPES.CALL);
-    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 15000 });
-    await expect(page.getByTestId('samples:rona-popup')).toBeVisible();
-    await endCallTask(callerpage);
-    await submitRonaPopup(page, RONA_OPTIONS.IDLE);
-    await waitForState(page, USER_STATES.MEETING);
-  });
-
-
-
-  test('should set agent state to busy after declining call in desktop mode', async () => {
-    await page.waitForTimeout(2000);
-    await createCallTask(callerpage);
-    await changeUserState(page, USER_STATES.AVAILABLE);
-    let incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
-    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 40000 });
-    await page.waitForTimeout(3000);
-    await declineIncomingTask(page, TASK_TYPES.CALL);
-    await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 15000 });
-    await waitForState(page, USER_STATES.RONA);
-    await verifyCurrentState(page, USER_STATES.RONA);
-    await submitRonaPopup(page, RONA_OPTIONS.IDLE);
-    await waitForState(page, USER_STATES.MEETING);
-    await expect(page.getByTestId('samples:rona-popup')).not.toBeVisible();
-    await waitForState(page, USER_STATES.MEETING);
-    await verifyCurrentState(page, USER_STATES.MEETING);
-    incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
-    await expect(incomingTaskDiv).toBeHidden();
-    await endCallTask(callerpage);
-    await page.waitForTimeout(2000);
-  });
-
-  test('should handle customer disconnect before agent answers in desktop mode', async () => {
-    await changeUserState(page, USER_STATES.AVAILABLE);
-    await createCallTask(callerpage);
-    const incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
-    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 40000 });
-    await endCallTask(callerpage);
-    await incomingTaskDiv.waitFor({ state: 'hidden', timeout: 30000 });
-    await expect(incomingTaskDiv).toBeHidden();
-    await waitForState(page, USER_STATES.AVAILABLE);
-    await verifyCurrentState(page, USER_STATES.AVAILABLE);
-  });
-
-  test.afterAll(async () => {
-    if (page) {
-      await page.close();
-      page = null;
-    }
-    if (callerpage) {
-      await callerpage.close();
-      callerpage = null;
-    }
-
-    // if (context) {
-    //   await context.close();
-    //   context = null;
-    // }
-
-    // if (context2) {
-    //   await context2.close();
-    //   context2 = null;
-    // }
-  })
-
-});
 
 
 test.describe('Incoming Tasks tests for multi-session', async () => {
