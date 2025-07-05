@@ -295,7 +295,9 @@ function CallControlComponent(props: CallControlComponentProps) {
                         button.className +
                         (button.disabled || (consultInitiated && isTelephony) ? ` ${button.className}-disabled` : '')
                       }
-                      data-testid="ButtonCircle"
+                      data-testid={
+                        button.id === 'end' ? `end-${currentMediaType.labelName.toLowerCase()}-button` : button.id
+                      }
                       onPress={button.onClick}
                       disabled={button.disabled || (consultInitiated && isTelephony)}
                       aria-label={button.tooltip}
@@ -332,6 +334,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                   postfix-icon="arrow-down-bold"
                   type="button"
                   role="button"
+                  data-testid="wrapup-button"
                 >
                   {WRAP_UP}
                 </Button>
@@ -362,6 +365,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                 info-icon-aria-label=""
                 name=""
                 className="wrapup-select"
+                data-testid="wrapup-reason-select"
                 placeholder={SELECT}
                 onChange={(event: CustomEvent) => {
                   const key = event.detail.value;
@@ -370,7 +374,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                 }}
               >
                 {wrapupCodes?.map((code) => (
-                  <Option key={code.id} value={code.id}>
+                  <Option key={code.id} value={code.id} data-testid={`wrapup-reason-${code.name.toLowerCase()}`}>
                     {code.name}
                   </Option>
                 ))}
