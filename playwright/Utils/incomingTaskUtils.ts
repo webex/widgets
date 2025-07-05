@@ -164,7 +164,7 @@ export async function declineIncomingTask(page: Page, type: string) {
   }
   incomingTaskDiv = await incomingTaskDiv.first();
   await incomingTaskDiv.waitFor({ state: 'visible', timeout: 10000 });
-  const declineButton = await incomingTaskDiv.getByTestId('task-decline-button').first();
+  const declineButton = incomingTaskDiv.getByTestId('task-decline-button').first();
   if (!(await declineButton.isVisible())) { throw new Error('Decline button not found'); }
   await declineButton.click();
   await incomingTaskDiv.waitFor({ state: 'hidden', timeout: 10000 });
