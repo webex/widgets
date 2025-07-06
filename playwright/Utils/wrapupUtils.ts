@@ -15,24 +15,23 @@ export async function submitWrapup(page: Page, reason: string): Promise<void> {
   const isWrapupBoxVisible = await wrapupBox.waitFor({ state: 'visible', timeout: 10000 }).then(() => true).catch(() => false);
   if (!isWrapupBoxVisible) throw new Error('Wrapup box is not visible');
   await wrapupBox.click();
-  await page.waitForTimeout(500);
+  await page.waitForTimeout(1000);
   await expect(page.getByTestId('wrapup-reason-select').first()).toBeVisible();
   await page.getByTestId('wrapup-reason-select').first().click();
-  await page.waitForTimeout(500);
+  await page.waitForTimeout(1000);
   const optionLocator = page.getByTestId(`wrapup-reason-${reason.toLowerCase()}`).filter({ hasText: reason.toString() });
   // const optionLocator = page.getByTestId(`wrapup-reason-${reason.toLowerCase()}`).filter({ hasText: new RegExp(`^${reason}$`, 'i') });
   try {
     await expect(optionLocator.first()).toBeVisible();
   } catch (error) {
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1000);
     await expect(page.getByTestId('wrapup-reason-select').first()).toBeVisible();
     await page.getByTestId('wrapup-reason-select').first().click();
-    await page.waitForTimeout(500);
   }
   await expect(optionLocator.first()).toBeVisible();
   await optionLocator.first().click();
-  await page.waitForTimeout(500);
+  await page.waitForTimeout(1000);
   await expect(page.getByTestId(`submit-wrapup-button`).first()).toBeVisible();
   await page.getByTestId(`submit-wrapup-button`).first().click();
-  await page.waitForTimeout(500);
+  await page.waitForTimeout(1000);
 }
