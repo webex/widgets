@@ -1,3 +1,24 @@
+# [1.28.0-ccwidgets.86](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.85...v1.28.0-ccwidgets.86) (2025-07-04)
+
+
+### Bug Fixes
+
+* **cc-samples:** refresh page onCCSignout ([#489](https://github.com/webex/widgets/issues/489)) ([22e4ee4](https://github.com/webex/widgets/commit/22e4ee44621228e7f5c1a82ae9bd2b8fee079390))
+
+# [1.28.0-ccwidgets.85](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.84...v1.28.0-ccwidgets.85) (2025-07-03)
+
+
+### Bug Fixes
+
+* **cc-samples:** add loader on init and expand CAD ([#487](https://github.com/webex/widgets/issues/487)) ([c319657](https://github.com/webex/widgets/commit/c3196576a2e5538a0ef19c3acda12a3b8b1c4d4d))
+
+# [1.28.0-ccwidgets.84](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.83...v1.28.0-ccwidgets.84) (2025-07-03)
+
+
+### Bug Fixes
+
+* **incoming-task:** fix-incoming-task-overflow-issue ([#482](https://github.com/webex/widgets/issues/482)) ([af70bee](https://github.com/webex/widgets/commit/af70bee48a63d1bc10549e6ba51801d3acf70964))
+
 # [1.28.0-ccwidgets.83](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.82...v1.28.0-ccwidgets.83) (2025-07-01)
 
 

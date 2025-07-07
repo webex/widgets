@@ -129,6 +129,7 @@ const handleSaveEnd = (isComplete: boolean) => {
 
   const onCCSignOut = () => {
     console.log('CC Sign out has been successful');
+    window.location.reload();
   };
 
   const onAccepted = ({task}) => {
@@ -352,6 +353,15 @@ const onTaskDeclined = (task,reason) => {
       });
   };
 
+  const formatWidgetName = (widget: string) => {
+    switch (widget) {
+      case 'callControlCAD':
+        return 'Call Controls with Call Associated Data (CAD)';
+      default:
+        return widget.charAt(0).toUpperCase() + widget.slice(1).replace(/([A-Z])/g, ' $1');
+    }
+  };
+
   return (
     <div className="app mds-typography">
       <ThemeProvider
@@ -359,7 +369,7 @@ const onTaskDeclined = (task,reason) => {
       >
         <IconProvider iconSet="momentum-icons">
           <div className="webexTheme">
-            <h1>Contact Center widgets in a react app</h1>
+            <h1>Contact Center Widgets in a React app</h1>
               {showLoader && (
                 <div className="profile-loader-overlay">
                     <div className="profile-loader-spinner" aria-label="Loading" />
@@ -453,7 +463,7 @@ const onTaskDeclined = (task,reason) => {
                               data-testid={`samples:widget-${widget}`}
                             />
                             &nbsp;
-                            {widget.charAt(0).toUpperCase() + widget.slice(1).replace(/([A-Z])/g, ' $1')}&nbsp;
+                            {formatWidgetName(widget)}&nbsp;
                             {widget === 'outdialCall' && (
                               <span style={{display: 'inline-flex', alignItems: 'center'}}>
                                 <PopoverNext
@@ -569,8 +579,10 @@ const onTaskDeclined = (task,reason) => {
               <Button
                 disabled={accessToken.trim() === ''}
                 onClick={() => {
+                  setShowLoader(true);
                   store.init({webexConfig, access_token: accessToken}).then(() => {
                     setIsSdkReady(true);
+                    setShowLoader(false);
                   });
                 }}
                 data-testid="samples:init-widgets-button"
@@ -709,7 +721,7 @@ const onTaskDeclined = (task,reason) => {
                       <div className="box">
                         <section className="section-box">
                           <fieldset className="fieldset">
-                            <legend className="legend-box">Call Control CAD</legend>
+                            <legend className="legend-box">Call Control with Call Associated Data (CAD)</legend>
                             <CallControlCAD
                               onHoldResume={onHoldResume}
                               onEnd={onEnd}
