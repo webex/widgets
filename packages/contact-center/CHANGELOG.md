@@ -1,3 +1,17 @@
+# [1.28.0-ccwidgets.88](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.87...v1.28.0-ccwidgets.88) (2025-07-07)
+
+
+### Features
+
+* **cc-widgets:** integ env ([#488](https://github.com/webex/widgets/issues/488)) ([aeefbd5](https://github.com/webex/widgets/commit/aeefbd5939a86db6a0e62fe402844e518216f94a))
+
+# [1.28.0-ccwidgets.87](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.86...v1.28.0-ccwidgets.87) (2025-07-07)
+
+
+### Features
+
+* **cc-widgets:** UI Automation for Station Login Tests ([#484](https://github.com/webex/widgets/issues/484)) ([7480fcd](https://github.com/webex/widgets/commit/7480fcdb67f2c13607fdbafc6dde3aef97c95bc0))
+
 # [1.28.0-ccwidgets.86](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.85...v1.28.0-ccwidgets.86) (2025-07-04)
 
 

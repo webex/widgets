@@ -1,6 +1,6 @@
 import { Page, expect } from '@playwright/test';
 import dotenv from 'dotenv';
-import { LOGIN_MODE } from '../constants';
+import {LOGIN_MODE, LONG_WAIT} from '../constants';
 
 dotenv.config();
 
@@ -153,4 +153,45 @@ export const telephonyLogin = async (page: Page, mode: string, number?: string):
   } else {
     throw new Error(`Unsupported login mode: ${mode}. Use one of: ${Object.values(LOGIN_MODE).join(', ')}`);
   }
-};
+}
+
+/**
+ * Verifies that the login mode selector displays the expected login mode
+ * @param page - The Playwright page object
+ * @param expectedMode - The expected login mode text to verify (e.g., 'Dial Number', 'Extension', 'Desktop')
+ * @description Checks the login option select element's trigger text to ensure it matches the expected mode
+ * @throws {Error} When the login mode doesn't match the expected value
+ * @example
+ * ```typescript
+ * await verifyLoginMode(page, LOGIN_MODE.DIAL_NUMBER);
+ * await verifyLoginMode(page, LOGIN_MODE.EXTENSION);
+ * await verifyLoginMode(page, LOGIN_MODE.DESKTOP);
+ * ```
+ */
+export async function verifyLoginMode(page: Page, expectedMode: string): Promise<void> {
+  await expect(page.getByTestId('login-option-select').locator('#select-base-triggerid')).toContainText(expectedMode);
+}
+
+/**
+ * Ensures the user state widget is visible by checking its current state and logging in if necessary
+ * @param page - The Playwright page object
+ * @param loginMode - The login mode to use if login is required (from LOGIN_MODE constants)
+ * @description Checks if the state-select widget is visible; if not, performs telephony login and waits for it to appear
+ * @throws {Error} When telephony login fails or state widget doesn't become visible
+ * @example
+ * ```typescript
+ * await ensureUserStateVisible(page, LOGIN_MODE.DIAL_NUMBER);
+ * await ensureUserStateVisible(page, LOGIN_MODE.EXTENSION);
+ * await ensureUserStateVisible(page, LOGIN_MODE.DESKTOP);
+ * ```
+ */
+export async function ensureUserStateVisible(page: Page, loginMode: string): Promise<void> {
+  const isUserStateWidgetVisible = await page
+    .getByTestId('state-select')
+    .isVisible()
+    .catch(() => false);
+  if (!isUserStateWidgetVisible) {
+    await telephonyLogin(page, loginMode);
+    await expect(page.getByTestId('state-select')).toBeVisible({timeout: LONG_WAIT});
+  }
+}
