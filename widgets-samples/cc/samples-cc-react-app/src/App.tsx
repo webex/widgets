@@ -68,7 +68,10 @@ function App() {
   const [collapsedTasks, setCollapsedTasks] = React.useState([]);
   const [showLoader, setShowLoader] = useState(false);
   const [toast, setToast] = useState<{type: 'success' | 'error'} | null>(null);
-  const [integrationEnvironment, setIntegrationEnvironment] = useState(false);
+  const [integrationEnv, setintegrationEnv] = useState(() => {
+    const savedintegrationEnv = window.localStorage.getItem('integrationEnv');
+    return savedintegrationEnv === 'true';
+  });
 
   const handleSaveStart = () => {
     setShowLoader(true);
@@ -118,7 +121,7 @@ function App() {
     cc: {
       allowMultiLogin: isMultiLoginEnabled,
     },
-    ...(integrationEnvironment && {
+    ...(integrationEnv && {
       services: {
         discovery: {
           u2c: 'https://u2c-intb.ciscospark.com/u2c/api/v1',
@@ -139,6 +142,7 @@ function App() {
 
   const onCCSignOut = () => {
     console.log('CC Sign out has been successful');
+    window.location.reload();
   };
 
   const onAccepted = ({task}) => {
@@ -284,7 +288,10 @@ function App() {
           level: 'info',
         },
         credentials: {
-          client_id: 'C04ef08ffce356c3161bb66b15dbdd98d26b6c683c5ce1a1a89efad545fdadd74',
+          ...(integrationEnv && {authorizeUrl: 'https://idbrokerbts.webex.com/idb/oauth2/v1/authorize'}),
+          client_id: integrationEnv
+            ? 'Cd0dd53db1f470a5a9941e5eee31575bd0889d7006e3a80a1443ad12a42049da1'
+            : 'C04ef08ffce356c3161bb66b15dbdd98d26b6c683c5ce1a1a89efad545fdadd74',
           redirect_uri: redirectUri,
           scope: requestedScopes,
         },
@@ -316,6 +323,9 @@ function App() {
   useEffect(() => {
     window.localStorage.setItem('currentTheme', currentTheme);
   }, [currentTheme]);
+  useEffect(() => {
+    window.localStorage.setItem('integrationEnv', JSON.stringify(integrationEnv));
+  }, [integrationEnv]);
 
   useEffect(() => {
     store.setIncomingTaskCb(onIncomingTaskCB);
@@ -348,6 +358,15 @@ function App() {
       });
   };
 
+  const formatWidgetName = (widget: string) => {
+    switch (widget) {
+      case 'callControlCAD':
+        return 'Call Controls with Call Associated Data (CAD)';
+      default:
+        return widget.charAt(0).toUpperCase() + widget.slice(1).replace(/([A-Z])/g, ' $1');
+    }
+  };
+
   return (
     <div className="app mds-typography">
       <ThemeProvider
@@ -355,7 +374,7 @@ function App() {
       >
         <IconProvider iconSet="momentum-icons">
           <div className="webexTheme">
-            <h1>Contact Center widgets in a react app</h1>
+            <h1>Contact Center Widgets in a React app</h1>
             {showLoader && (
               <div className="profile-loader-overlay">
                 <div className="profile-loader-spinner" aria-label="Loading" />
@@ -441,7 +460,7 @@ function App() {
                               data-testid={`samples:widget-${widget}`}
                             />
                             &nbsp;
-                            {widget.charAt(0).toUpperCase() + widget.slice(1).replace(/([A-Z])/g, ' $1')}&nbsp;
+                            {formatWidgetName(widget)}&nbsp;
                             {widget === 'outdialCall' && (
                               <span style={{display: 'inline-flex', alignItems: 'center'}}>
                                 <PopoverNext
@@ -509,13 +528,13 @@ function App() {
                       }}
                     />
                     <Checkbox
-                      checked={integrationEnvironment}
-                      aria-label="integration environment checkbox"
-                      id="integration-environment-checkbox"
-                      label="Enable Integration Environment"
+                      checked={integrationEnv}
+                      aria-label="integration env checkbox"
+                      id="integration-env-checkbox"
+                      label="Enable Integration Env"
                       // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
                       onchange={() => {
-                        setIntegrationEnvironment(!integrationEnvironment);
+                        setintegrationEnv(!integrationEnv);
                       }}
                     />
                     {store.isAgentLoggedIn && (
@@ -573,8 +592,10 @@ function App() {
               <Button
                 disabled={accessToken.trim() === ''}
                 onClick={() => {
+                  setShowLoader(true);
                   store.init({webexConfig, access_token: accessToken}).then(() => {
                     setIsSdkReady(true);
+                    setShowLoader(false);
                   });
                 }}
                 data-testid="samples:init-widgets-button"
@@ -647,7 +668,7 @@ function App() {
                                           <td className="table-border">
                                             {channel.charAt(0).toUpperCase() + channel.slice(1)}
                                           </td>
-                                          <td className="table-border">{String(count)}</td>
+                                          <td className="table-border">{count}</td>
                                         </tr>
                                       ))}
                                   </tbody>
@@ -721,7 +742,7 @@ function App() {
                       <div className="box">
                         <section className="section-box">
                           <fieldset className="fieldset">
-                            <legend className="legend-box">Call Control CAD</legend>
+                            <legend className="legend-box">Call Control with Call Associated Data (CAD)</legend>
                             <CallControlCAD
                               onHoldResume={onHoldResume}
                               onEnd={onEnd}
