@@ -1,8 +1,6 @@
 import {test, expect} from '@playwright/test';
 import fs from 'fs';
-import dotenv from 'dotenv';
 
-dotenv.config();
 test.describe('Login and User State tests', async () => {
   test('Login: should login using Extension login option', async ({page}) => {
     await page.goto('http://localhost:3000/');
