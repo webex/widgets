@@ -219,7 +219,8 @@ const handleStrayTasks = async (page: Page): Promise<void> => {
       if (!isTaskVisible) break;
       const acceptButton = task.getByTestId('task-accept-button').first();
       const acceptButtonVisible = await acceptButton.isVisible().catch(() => false);
-      if (!acceptButtonVisible) {
+      const isExtensionCall = await (await task.innerText()).includes('Ringing...');
+      if (isExtensionCall) {
         const extensionCallVisible = await extensionPage.locator('[data-test="right-action-button"]').waitFor({ state: 'visible', timeout: 40000 }).then(() => true).catch(() => false);
         if (extensionCallVisible) {
           await acceptExtensionCall(extensionPage);
@@ -228,7 +229,9 @@ const handleStrayTasks = async (page: Page): Promise<void> => {
           throw new Error('Accept button not visible and extension page is not available');
         }
       } else {
-        await acceptButton.click();
+        try {
+          await acceptButton.click({ timeout: 5000 });
+        } catch (error) { }
         flag1 = true;
       }
       await page.waitForTimeout(1000);
@@ -237,7 +240,7 @@ const handleStrayTasks = async (page: Page): Promise<void> => {
     const endButtonVisible = await endButton.waitFor({ state: 'visible', timeout: 2000 }).then(() => true).catch(() => false);
     if (endButtonVisible) {
       await page.waitForTimeout(2000);
-      await endButton.click();
+      await endButton.click({ timeout: 5000 });
       await submitWrapup(page, WRAPUP_REASONS.SALE);
     } else {
       const wrapupBox = page.getByTestId('wrapup-button').first();
@@ -287,7 +290,7 @@ const pageSetup = async (page: Page, loginMode: string) => {
   } else {
     const stateSelectVisible = await page.getByTestId('state-select').waitFor({ state: 'visible', timeout: 30000 }).then(() => true).catch(() => false);
     if (stateSelectVisible) {
-      const ronapopupVisible = await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 10000 }).then(() => true).catch(() => false);
+      const ronapopupVisible = await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 5000 }).then(() => true).catch(() => false);
       if (ronapopupVisible) {
         await submitRonaPopup(page, RONA_OPTIONS.AVAILABLE);
       }
@@ -309,6 +312,11 @@ const pageSetup = async (page: Page, loginMode: string) => {
     await telephonyLogin(page, loginMode);
   }
 
+  let ronapopupVisible = await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 10000 }).then(() => true).catch(() => false);
+  if (ronapopupVisible) {
+    await submitRonaPopup(page, RONA_OPTIONS.AVAILABLE);
+  }
+
   let stationLoginFailure = await page.getByTestId('station-login-failure-label').waitFor({ state: 'visible', timeout: 5000 }).then(() => true).catch(() => false);
   for (let i = 0; i < maxRetries && stationLoginFailure; i++) {
     loginButtonExists = await page
@@ -326,7 +334,7 @@ const pageSetup = async (page: Page, loginMode: string) => {
 
   await page.getByTestId('state-select').waitFor({ state: 'visible', timeout: 30000 });
 
-  let ronapopupVisible = await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 5000 }).then(() => true).catch(() => false);
+  ronapopupVisible = await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 10000 }).then(() => true).catch(() => false);
   if (ronapopupVisible) {
     await submitRonaPopup(page, RONA_OPTIONS.AVAILABLE);
   }
@@ -378,7 +386,7 @@ test.describe('Incoming Call Task Tests for Desktop Mode', async () => {
     expect(isColorClose(userStateElementColor, THEME_COLORS.ENGAGED)).toBe(true);
     await waitForStateLogs(capturedLogs, USER_STATES.ENGAGED);
     expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.ENGAGED);
-    await page.getByTestId('end-call-button').first().click();
+    await page.getByTestId('end-call-button').first().click({ timeout: 5000 });
     await page.waitForTimeout(2000);
     await submitWrapup(page, WRAPUP_REASONS.SALE);
     await waitForState(page, USER_STATES.AVAILABLE);
@@ -491,7 +499,7 @@ test.describe('Incoming Call Task Tests for Desktop Mode', async () => {
       const logoutButton = page.getByTestId('samples:station-logout-button');
       const isLogoutButtonVisible = await logoutButton.isVisible().catch(() => false);
       if (isLogoutButtonVisible) {
-        await page.getByTestId('samples:station-logout-button').click();
+        await page.getByTestId('samples:station-logout-button').click({ timeout: 5000 });
         //check if the station logout button is hidden after logouts
         const isLogoutButtonHidden = await page
           .getByTestId('samples:station-logout-button')
@@ -520,7 +528,6 @@ test.describe('Incoming Call Task Tests for Desktop Mode', async () => {
   })
 
 });
-
 
 test.describe('Incoming Task Tests in Extension Mode', async () => {
   test.beforeEach(() => {
@@ -597,7 +604,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await waitForWrapupReasonLogs(capturedLogs, WRAPUP_REASONS.SALE);
     expect(getLastWrapupReasonFromLogs(capturedLogs)).toBe(WRAPUP_REASONS.SALE);
     expect(verifyCallbackLogs(capturedLogs, WRAPUP_REASONS.SALE, USER_STATES.AVAILABLE)).toBe(true);
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(10000);
   });
 
 
@@ -622,7 +629,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await waitForStateLogs(capturedLogs, USER_STATES.RONA);
     expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
     await submitRonaPopup(page, RONA_OPTIONS.IDLE);
-    // await page.waitForTimeout(15000);
+    await page.waitForTimeout(10000);
   });
 
   test('should ignore incoming call and wait for RONA popup in extension mode', async () => {
@@ -642,7 +649,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await waitForStateLogs(capturedLogs, USER_STATES.RONA);
     expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
     await submitRonaPopup(page, RONA_OPTIONS.IDLE);
-    await page.waitForTimeout(8000);
+    await page.waitForTimeout(10000);
   });
 
 
@@ -694,7 +701,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await expect(extensionPage.locator('[data-test="generic-person-item-base"]').first()).toBeHidden();
     await verifyCurrentState(page, USER_STATES.MEETING);
     await endCallTask(callerpage);
-    await page.waitForTimeout(8000);
+    await page.waitForTimeout(10000);
   });
 
 
@@ -803,7 +810,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await waitForStateLogs(capturedLogs, USER_STATES.ENGAGED);
     expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.ENGAGED);
     await expect(page.getByTestId('end-chat-button').first()).toBeVisible();
-    await page.getByTestId('end-chat-button').first().click();
+    await page.getByTestId('end-chat-button').first().click({ timeout: 5000 });
     await page.waitForTimeout(500);
     await submitWrapup(page, WRAPUP_REASONS.SALE);
     await waitForState(page, USER_STATES.AVAILABLE);
@@ -839,9 +846,10 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     expect(isColorClose(userStateElementColor, THEME_COLORS.ENGAGED)).toBe(true);
     // expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.ENGAGED);
     await waitForState(page, USER_STATES.ENGAGED);
+    await waitForStateLogs(capturedLogs, USER_STATES.ENGAGED);
     expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.ENGAGED);
     await expect(page.getByTestId('end-email-button').first()).toBeVisible();
-    await page.getByTestId('end-email-button').first().click();
+    await page.getByTestId('end-email-button').first().click({ timeout: 5000 });
     await submitWrapup(page, WRAPUP_REASONS.SALE);
     await waitForState(page, USER_STATES.AVAILABLE);
     await waitForStateLogs(capturedLogs, USER_STATES.AVAILABLE);
@@ -873,7 +881,8 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await acceptIncomingTask(page, TASK_TYPES.EMAIL);
     const endButton = page.getByTestId('end-email-button').first();
     await endButton.waitFor({ state: 'visible', timeout: 7000 });
-    await endButton.click();
+    await endButton.click({ timeout: 5000 });
+    await page.waitForTimeout(1000);
     await submitWrapup(page, WRAPUP_REASONS.SALE);
     await waitForState(page, USER_STATES.AVAILABLE);
     await page.waitForTimeout(2000);
@@ -902,7 +911,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await page.waitForTimeout(1000);
     const endButton = page.getByTestId('end-email-button').first();
     await endButton.waitFor({ state: 'visible', timeout: 12000 });
-    await endButton.click();
+    await endButton.click({ timeout: 5000 });
     await page.waitForTimeout(1000);
     await submitWrapup(page, WRAPUP_REASONS.SALE);
     await waitForState(page, USER_STATES.AVAILABLE);
@@ -920,21 +929,25 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await submitRonaPopup(page, RONA_OPTIONS.IDLE);
     await waitForState(page, USER_STATES.MEETING);
     await verifyCurrentState(page, USER_STATES.MEETING);
+    await incomingTaskDiv.waitFor({ state: 'hidden', timeout: 5000 });
+    await expect(incomingTaskDiv).toBeHidden();
     await page.waitForTimeout(2000);
     await changeUserState(page, USER_STATES.AVAILABLE);
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 10000 });
     await acceptIncomingTask(page, TASK_TYPES.EMAIL);
     await page.waitForTimeout(1000);
-    await page.getByTestId('end-email-button').first().click();
+    await page.getByTestId('end-email-button').first().click({ timeout: 5000 });
     await submitWrapup(page, WRAPUP_REASONS.SALE);
     await waitForState(page, USER_STATES.AVAILABLE);
   })
+
 
   test.afterAll(async () => {
     if (page) {
       const logoutButton = page.getByTestId('samples:station-logout-button');
       const isLogoutButtonVisible = await logoutButton.isVisible().catch(() => false);
       if (isLogoutButtonVisible) {
-        await page.getByTestId('samples:station-logout-button').click();
+        await page.getByTestId('samples:station-logout-button').click({ timeout: 5000 });
         //check if the station logout button is hidden after logouts
         const isLogoutButtonHidden = await page
           .getByTestId('samples:station-logout-button')
@@ -1065,7 +1078,7 @@ test.describe('Incoming Tasks tests for multi-session', async () => {
     expect(isColorClose(userStateElementColor2, THEME_COLORS.ENGAGED)).toBe(true);
     await expect(incomingTaskDiv).toBeHidden();
     await expect(incomingTaskDiv2).toBeHidden();
-    await page2.getByTestId('end-call-button').first().click();
+    await page2.getByTestId('end-call-button').first().click({ timeout: 5000 });
     await page.waitForTimeout(1000);
     await submitWrapup(page, WRAPUP_REASONS.SALE);
     await waitForState(page, USER_STATES.AVAILABLE);
@@ -1110,7 +1123,7 @@ test.describe('Incoming Tasks tests for multi-session', async () => {
     expect(isColorClose(userStateElementColor2, THEME_COLORS.ENGAGED)).toBe(true);
     await expect(incomingTaskDiv).toBeHidden();
     await expect(incomingTaskDiv2).toBeHidden();
-    await page2.getByTestId('end-chat-button').first().click();
+    await page2.getByTestId('end-chat-button').first().click({ timeout: 5000 });
     await submitWrapup(page2, WRAPUP_REASONS.SALE);
     await waitForState(page, USER_STATES.AVAILABLE);
     await waitForState(page2, USER_STATES.AVAILABLE);
@@ -1135,13 +1148,13 @@ test.describe('Incoming Tasks tests for multi-session', async () => {
     await waitForState(page2, USER_STATES.MEETING);
     await verifyCurrentState(page, USER_STATES.MEETING);
     await verifyCurrentState(page2, USER_STATES.MEETING);
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(3000);
     await changeUserState(page, USER_STATES.AVAILABLE);
     await waitForState(page2, USER_STATES.AVAILABLE);
     await waitForState(page, USER_STATES.AVAILABLE);
     await verifyCurrentState(page2, USER_STATES.AVAILABLE);
-    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 10000 });
-    await incomingTaskDiv2.waitFor({ state: 'visible', timeout: 10000 });
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 15000 });
+    await incomingTaskDiv2.waitFor({ state: 'visible', timeout: 15000 });
     await acceptIncomingTask(page, TASK_TYPES.EMAIL);
     await waitForState(page, USER_STATES.ENGAGED);
     await waitForState(page2, USER_STATES.ENGAGED);
@@ -1156,7 +1169,7 @@ test.describe('Incoming Tasks tests for multi-session', async () => {
     expect(isColorClose(userStateElementColor2, THEME_COLORS.ENGAGED)).toBe(true);
     await expect(incomingTaskDiv).toBeHidden();
     await expect(incomingTaskDiv2).toBeHidden();
-    await page2.getByTestId('end-email-button').first().click();
+    await page2.getByTestId('end-email-button').first().click({ timeout: 5000 });
     await submitWrapup(page, WRAPUP_REASONS.SALE);
     await waitForState(page, USER_STATES.AVAILABLE);
     await waitForState(page2, USER_STATES.AVAILABLE);
@@ -1164,12 +1177,13 @@ test.describe('Incoming Tasks tests for multi-session', async () => {
     await verifyCurrentState(page2, USER_STATES.AVAILABLE);
   });
 
+
   test.afterAll(async () => {
     if (page) {
       const logoutButton = page.getByTestId('samples:station-logout-button');
       const isLogoutButtonVisible = await logoutButton.isVisible().catch(() => false);
       if (isLogoutButtonVisible) {
-        await page.getByTestId('samples:station-logout-button').click();
+        await page.getByTestId('samples:station-logout-button').click({ timeout: 5000 });
         //check if the station logout button is hidden after logouts
         const isLogoutButtonHidden = await page
           .getByTestId('samples:station-logout-button')

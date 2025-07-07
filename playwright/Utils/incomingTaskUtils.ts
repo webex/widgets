@@ -6,7 +6,7 @@ import nodemailer from 'nodemailer';
 const maxRetries = 3;
 
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
+  service: 'gmail',          // use Gmail SMTP via service shortcut
   auth: {
     user: process.env.PW_EMAIL_FROM, // Use environment variable for email
     pass: process.env.PW_APP_PASSWORD
@@ -33,7 +33,7 @@ export async function createCallTask(page: Page, number: string = process.env.PW
   await page.getByRole('textbox', { name: 'Dial' }).waitFor({ state: 'visible', timeout: 5000 });
   await page.getByRole('textbox', { name: 'Dial' }).fill(number);
   await expect(page.locator('[data-test="calling-ui-keypad-control"]').getByRole('button', { name: 'Call' })).toBeVisible();
-  await page.locator('[data-test="calling-ui-keypad-control"]').getByRole('button', { name: 'Call' }).click();
+  await page.locator('[data-test="calling-ui-keypad-control"]').getByRole('button', { name: 'Call' }).click({ timeout: 5000 });
 }
 
 /**
@@ -42,7 +42,7 @@ export async function createCallTask(page: Page, number: string = process.env.PW
  */
 export async function endCallTask(page: Page) {
   await page.locator('[data-test="call-end"]').waitFor({ state: 'visible', timeout: 4000 });
-  await page.locator('[data-test="call-end"]').click();
+  await page.locator('[data-test="call-end"]').click({ timeout: 5000 });
   await page.waitForTimeout(500);
 }
 
@@ -56,20 +56,20 @@ export async function createChatTask(page: Page) {
     try {
       await page.goto('https://widgets.webex.com/chat-client');
       await page.locator('iframe[name="Livechat launcher icon"]').contentFrame().getByRole('button', { name: 'Livechat Button - 0 unread' }).waitFor({ state: 'visible', timeout: 60000 });
-      await page.locator('iframe[name="Livechat launcher icon"]').contentFrame().getByRole('button', { name: 'Livechat Button - 0 unread' }).click();
+      await page.locator('iframe[name="Livechat launcher icon"]').contentFrame().getByRole('button', { name: 'Livechat Button - 0 unread' }).click({ timeout: 5000 });
       await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', { name: 'Hit Us Up!' }).waitFor({ state: 'visible', timeout: 20000 });
-      await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', { name: 'Hit Us Up!' }).click();
+      await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', { name: 'Hit Us Up!' }).click({ timeout: 5000 });
       await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('textbox', { name: 'Namemust fill field' }).waitFor({ state: 'visible', timeout: 50000 });
-      await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('textbox', { name: 'Namemust fill field' }).click();
+      await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('textbox', { name: 'Namemust fill field' }).click({ timeout: 5000 });
       await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('textbox', { name: 'Namemust fill field' }).fill('Playwright Test');
       await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', { name: 'Submit Name' }).waitFor({ state: 'visible', timeout: 5000 });
-      await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', { name: 'Submit Name' }).click();
+      await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', { name: 'Submit Name' }).click({ timeout: 5000 });
       await page.waitForTimeout(200);
       await expect(page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('textbox', { name: 'Email*' })).toBeVisible();
-      await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('textbox', { name: 'Email*' }).click();
+      await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('textbox', { name: 'Email*' }).click({ timeout: 5000 });
       await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('textbox', { name: 'Email*' }).fill('playwright@test.com');
       await expect(page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', { name: 'Submit Email' })).toBeVisible();
-      await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', { name: 'Submit Email' }).click();
+      await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', { name: 'Submit Email' }).click({ timeout: 5000 });
       break;
     } catch (error) {
       if (i === maxRetries - 1) {
@@ -85,13 +85,13 @@ export async function createChatTask(page: Page) {
  */
 export async function endChatTask(page: Page) {
   await expect(page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', { name: 'Menu' })).toBeVisible();
-  await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', { name: 'Menu' }).click();
+  await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', { name: 'Menu' }).click({ timeout: 5000 });
   await page.waitForTimeout(500);
   await expect(page.locator('iframe[name="Conversation Window"]').contentFrame().getByText('End chat')).toBeVisible();
-  await page.locator('iframe[name="Conversation Window"]').contentFrame().getByText('End chat').click();
+  await page.locator('iframe[name="Conversation Window"]').contentFrame().getByText('End chat').click({ timeout: 5000 });
   await page.waitForTimeout(500);
   await expect(page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', { name: 'End', exact: true })).toBeVisible();
-  await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', { name: 'End', exact: true }).click();
+  await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', { name: 'End', exact: true }).click({ timeout: 5000 });
   await page.waitForTimeout(1000);
 };
 
@@ -100,10 +100,10 @@ export async function endChatTask(page: Page) {
  * @throws Error if sending fails
  */
 export async function createEmailTask() {
-  const from = process.env.PW_EMAIL_ENDPOINT;
+  const from = process.env.PW_EMAIL_FROM;
   const to = process.env.PW_EMAIL_ENDPOINT;
-  const subject = 'Playwright Test Email';
-  const text = '--This Email is generated due to playwright automation test for incoming Tasks---'
+  const subject = `Playwright Test Email - ${new Date().toISOString()}`;
+  const text = '--This Email is generated due to playwright automation test for incoming Tasks---';
 
   try {
     const mailOptions = {
@@ -140,7 +140,7 @@ export async function acceptIncomingTask(page: Page, type: string) {
   await incomingTaskDiv.waitFor({ state: 'visible', timeout: 10000 });
   const acceptButton = incomingTaskDiv.getByTestId('task-accept-button').first();
   if (!(await acceptButton.isVisible())) { throw new Error('Accept button not found'); }
-  await acceptButton.click();
+  await acceptButton.click({ timeout: 5000 });
 }
 
 /**
@@ -166,7 +166,7 @@ export async function declineIncomingTask(page: Page, type: string) {
   await incomingTaskDiv.waitFor({ state: 'visible', timeout: 10000 });
   const declineButton = incomingTaskDiv.getByTestId('task-decline-button').first();
   if (!(await declineButton.isVisible())) { throw new Error('Decline button not found'); }
-  await declineButton.click();
+  await declineButton.click({ timeout: 5000 });
   await incomingTaskDiv.waitFor({ state: 'hidden', timeout: 10000 });
 }
 
@@ -176,7 +176,7 @@ export async function declineIncomingTask(page: Page, type: string) {
  */
 export async function acceptExtensionCall(page: Page) {
   await page.locator('[data-test="right-action-button"]').waitFor({ state: 'visible', timeout: 15000 });
-  await page.locator('[data-test="right-action-button"]').click();
+  await page.locator('[data-test="right-action-button"]').click({ timeout: 5000 });
 }
 
 /**
@@ -185,7 +185,7 @@ export async function acceptExtensionCall(page: Page) {
  */
 export async function declineExtensionCall(page: Page) {
   await page.locator('[data-test="left-action-button"]').waitFor({ state: 'visible', timeout: 15000 });
-  await page.locator('[data-test="left-action-button"]').click();
+  await page.locator('[data-test="left-action-button"]').click({ timeout: 5000 });
 }
 
 /**
@@ -194,7 +194,7 @@ export async function declineExtensionCall(page: Page) {
  */
 export async function endExtensionCall(page: Page) {
   await page.locator('[data-test="end-call"]').waitFor({ state: 'visible', timeout: 15000 });
-  await page.locator('[data-test="end-call"]').click();
+  await page.locator('[data-test="end-call"]').click({ timeout: 5000 });
   await page.waitForTimeout(500);
 }
 
@@ -231,9 +231,9 @@ export async function loginExtension(page: Page, email: string, password: string
   const isLoginPageVisible = await page.getByRole('textbox', { name: 'Email address (required)' }).waitFor({ state: 'visible', timeout: 30000 }).then(() => true).catch(() => false);
   if (!isLoginPageVisible) {
     await expect(page.getByRole('button', { name: 'Back to sign in' })).toBeVisible();
-    await page.getByRole('button', { name: 'Back to sign in' }).click();
+    await page.getByRole('button', { name: 'Back to sign in' }).click({ timeout: 5000 });
     await page.getByRole('button', { name: 'Sign in' }).waitFor({ state: 'visible', timeout: 10000 });
-    await page.getByRole('button', { name: 'Sign in' }).click();
+    await page.getByRole('button', { name: 'Sign in' }).click({ timeout: 5000 });
   }
   await page.getByRole('textbox', { name: 'Email address (required)' }).waitFor({ state: 'visible', timeout: 20000 });
   await page.getByRole('textbox', { name: 'Email address (required)' }).fill(email);
@@ -264,12 +264,12 @@ export async function submitRonaPopup(page: Page, select: string) {
   await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 12000 });
   await page.waitForTimeout(1000);
   await expect(page.getByTestId('samples:rona-select-state')).toBeVisible();
-  await page.getByTestId('samples:rona-select-state').click();
+  await page.getByTestId('samples:rona-select-state').click({ timeout: 5000 });
   await page.waitForTimeout(1000);
   await expect(page.getByTestId(`samples:rona-option-${select.toLowerCase()}`)).toBeVisible();
-  await page.getByTestId(`samples:rona-option-${select.toLowerCase()}`).click();
+  await page.getByTestId(`samples:rona-option-${select.toLowerCase()}`).click({ timeout: 5000 });
   await page.waitForTimeout(1000);
   await expect(page.getByTestId('samples:rona-button-confirm')).toBeVisible();
-  await page.getByTestId('samples:rona-button-confirm').click();
+  await page.getByTestId('samples:rona-button-confirm').click({ timeout: 5000 });
   await page.waitForTimeout(1000);
 }
