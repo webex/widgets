@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.88](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.87...v1.28.0-ccwidgets.88) (2025-07-07)
+
+
+### Features
+
+* **cc-widgets:** integ env ([#488](https://github.com/webex/widgets/issues/488)) ([aeefbd5](https://github.com/webex/widgets/commit/aeefbd5939a86db6a0e62fe402844e518216f94a))
+
 # [1.28.0-ccwidgets.87](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.86...v1.28.0-ccwidgets.87) (2025-07-07)
 
 
