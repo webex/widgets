@@ -217,7 +217,7 @@ const handleStrayTasks = async (page: Page): Promise<void> => {
       const task = incomingTaskDiv.first();
       let isTaskVisible = await task.isVisible().catch(() => false);
       if (!isTaskVisible) break;
-      const acceptButton = task.getByTestId('task-accept-button').first();
+      const acceptButton = task.getByTestId('task:accept-button').first();
       const acceptButtonVisible = await acceptButton.isVisible().catch(() => false);
       const isExtensionCall = await (await task.innerText()).includes('Ringing...');
       if (isExtensionCall) {
@@ -236,7 +236,7 @@ const handleStrayTasks = async (page: Page): Promise<void> => {
       }
       await page.waitForTimeout(1000);
     }
-    const endButton = page.getByTestId(/^end-\w+-button$/).first();
+    const endButton = page.getByTestId(/^call-control:end-\w+$/).first();
     const endButtonVisible = await endButton.waitFor({ state: 'visible', timeout: 2000 }).then(() => true).catch(() => false);
     if (endButtonVisible) {
       await page.waitForTimeout(2000);
@@ -386,7 +386,7 @@ test.describe('Incoming Call Task Tests for Desktop Mode', async () => {
     expect(isColorClose(userStateElementColor, THEME_COLORS.ENGAGED)).toBe(true);
     await waitForStateLogs(capturedLogs, USER_STATES.ENGAGED);
     expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.ENGAGED);
-    await page.getByTestId('end-call-button').first().click({ timeout: 5000 });
+    await page.getByTestId('call-control:end-call').first().click({ timeout: 5000 });
     await page.waitForTimeout(2000);
     await submitWrapup(page, WRAPUP_REASONS.SALE);
     await waitForState(page, USER_STATES.AVAILABLE);
@@ -809,8 +809,8 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     // expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.ENGAGED);
     await waitForStateLogs(capturedLogs, USER_STATES.ENGAGED);
     expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.ENGAGED);
-    await expect(page.getByTestId('end-chat-button').first()).toBeVisible();
-    await page.getByTestId('end-chat-button').first().click({ timeout: 5000 });
+    await expect(page.getByTestId('call-control:end-chat').first()).toBeVisible();
+    await page.getByTestId('call-control:end-chat').first().click({ timeout: 5000 });
     await page.waitForTimeout(500);
     await submitWrapup(page, WRAPUP_REASONS.SALE);
     await waitForState(page, USER_STATES.AVAILABLE);
@@ -848,8 +848,8 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await waitForState(page, USER_STATES.ENGAGED);
     await waitForStateLogs(capturedLogs, USER_STATES.ENGAGED);
     expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.ENGAGED);
-    await expect(page.getByTestId('end-email-button').first()).toBeVisible();
-    await page.getByTestId('end-email-button').first().click({ timeout: 5000 });
+    await expect(page.getByTestId('call-control:end-email').first()).toBeVisible();
+    await page.getByTestId('call-control:end-email').first().click({ timeout: 5000 });
     await submitWrapup(page, WRAPUP_REASONS.SALE);
     await waitForState(page, USER_STATES.AVAILABLE);
     await waitForStateLogs(capturedLogs, USER_STATES.AVAILABLE);
@@ -879,7 +879,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await waitForState(page, USER_STATES.AVAILABLE);
     await incomingTaskDiv.waitFor({ state: 'visible', timeout: 10000 });
     await acceptIncomingTask(page, TASK_TYPES.EMAIL);
-    const endButton = page.getByTestId('end-email-button').first();
+    const endButton = page.getByTestId('call-control:end-email').first();
     await endButton.waitFor({ state: 'visible', timeout: 7000 });
     await endButton.click({ timeout: 5000 });
     await page.waitForTimeout(1000);
@@ -909,7 +909,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await expect(incomingTaskDiv).toBeVisible();
     await acceptIncomingTask(page, TASK_TYPES.EMAIL);
     await page.waitForTimeout(1000);
-    const endButton = page.getByTestId('end-email-button').first();
+    const endButton = page.getByTestId('call-control:end-email').first();
     await endButton.waitFor({ state: 'visible', timeout: 12000 });
     await endButton.click({ timeout: 5000 });
     await page.waitForTimeout(1000);
@@ -936,7 +936,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await incomingTaskDiv.waitFor({ state: 'visible', timeout: 10000 });
     await acceptIncomingTask(page, TASK_TYPES.EMAIL);
     await page.waitForTimeout(1000);
-    await page.getByTestId('end-email-button').first().click({ timeout: 5000 });
+    await page.getByTestId('call-control:end-email').first().click({ timeout: 5000 });
     await submitWrapup(page, WRAPUP_REASONS.SALE);
     await waitForState(page, USER_STATES.AVAILABLE);
   })
@@ -1078,7 +1078,7 @@ test.describe('Incoming Tasks tests for multi-session', async () => {
     expect(isColorClose(userStateElementColor2, THEME_COLORS.ENGAGED)).toBe(true);
     await expect(incomingTaskDiv).toBeHidden();
     await expect(incomingTaskDiv2).toBeHidden();
-    await page2.getByTestId('end-call-button').first().click({ timeout: 5000 });
+    await page2.getByTestId('call-control:end-call').first().click({ timeout: 5000 });
     await page.waitForTimeout(1000);
     await submitWrapup(page, WRAPUP_REASONS.SALE);
     await waitForState(page, USER_STATES.AVAILABLE);
@@ -1123,7 +1123,7 @@ test.describe('Incoming Tasks tests for multi-session', async () => {
     expect(isColorClose(userStateElementColor2, THEME_COLORS.ENGAGED)).toBe(true);
     await expect(incomingTaskDiv).toBeHidden();
     await expect(incomingTaskDiv2).toBeHidden();
-    await page2.getByTestId('end-chat-button').first().click({ timeout: 5000 });
+    await page2.getByTestId('call-control:end-chat').first().click({ timeout: 5000 });
     await submitWrapup(page2, WRAPUP_REASONS.SALE);
     await waitForState(page, USER_STATES.AVAILABLE);
     await waitForState(page2, USER_STATES.AVAILABLE);
@@ -1169,7 +1169,7 @@ test.describe('Incoming Tasks tests for multi-session', async () => {
     expect(isColorClose(userStateElementColor2, THEME_COLORS.ENGAGED)).toBe(true);
     await expect(incomingTaskDiv).toBeHidden();
     await expect(incomingTaskDiv2).toBeHidden();
-    await page2.getByTestId('end-email-button').first().click({ timeout: 5000 });
+    await page2.getByTestId('call-control:end-email').first().click({ timeout: 5000 });
     await submitWrapup(page, WRAPUP_REASONS.SALE);
     await waitForState(page, USER_STATES.AVAILABLE);
     await waitForState(page2, USER_STATES.AVAILABLE);

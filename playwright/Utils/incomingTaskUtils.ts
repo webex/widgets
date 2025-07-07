@@ -138,7 +138,7 @@ export async function acceptIncomingTask(page: Page, type: string) {
   }
   incomingTaskDiv = incomingTaskDiv.first();
   await incomingTaskDiv.waitFor({ state: 'visible', timeout: 10000 });
-  const acceptButton = incomingTaskDiv.getByTestId('task-accept-button').first();
+  const acceptButton = incomingTaskDiv.getByTestId('task:accept-button').first();
   if (!(await acceptButton.isVisible())) { throw new Error('Accept button not found'); }
   await acceptButton.click({ timeout: 5000 });
 }
@@ -164,7 +164,7 @@ export async function declineIncomingTask(page: Page, type: string) {
   }
   incomingTaskDiv = await incomingTaskDiv.first();
   await incomingTaskDiv.waitFor({ state: 'visible', timeout: 10000 });
-  const declineButton = incomingTaskDiv.getByTestId('task-decline-button').first();
+  const declineButton = incomingTaskDiv.getByTestId('task:decline-button').first();
   if (!(await declineButton.isVisible())) { throw new Error('Decline button not found'); }
   await declineButton.click({ timeout: 5000 });
   await incomingTaskDiv.waitFor({ state: 'hidden', timeout: 10000 });

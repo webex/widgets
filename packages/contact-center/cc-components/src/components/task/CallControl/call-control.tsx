@@ -296,7 +296,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                         (button.disabled || (consultInitiated && isTelephony) ? ` ${button.className}-disabled` : '')
                       }
                       data-testid={
-                        button.id === 'end' ? `end-${currentMediaType.labelName.toLowerCase()}-button` : button.id
+                        button.id === 'end' ? `call-control:end-${currentMediaType.labelName.toLowerCase()}` : button.id
                       }
                       onPress={button.onClick}
                       disabled={button.disabled || (consultInitiated && isTelephony)}
@@ -365,7 +365,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                 info-icon-aria-label=""
                 name=""
                 className="wrapup-select"
-                data-testid="wrapup-reason-select"
+                data-testid="wrapup:reason-select"
                 placeholder={SELECT}
                 onChange={(event: CustomEvent) => {
                   const key = event.detail.value;
@@ -374,7 +374,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                 }}
               >
                 {wrapupCodes?.map((code) => (
-                  <Option key={code.id} value={code.id} data-testid={`wrapup-reason-${code.name.toLowerCase()}`}>
+                  <Option key={code.id} value={code.id} data-testid={`wrapup:reason-${code.name.toLowerCase()}`}>
                     {code.name}
                   </Option>
                 ))}
@@ -383,7 +383,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                 onClick={handleWrapupCall}
                 variant="primary"
                 className="submit-wrapup-button"
-                data-testid="submit-wrapup-button"
+                data-testid="wrapup:submit-button"
                 aria-label="Submit wrap-up"
                 disabled={selectedWrapupId && selectedWrapupReason ? false : true}
               >
