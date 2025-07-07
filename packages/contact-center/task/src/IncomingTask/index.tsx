@@ -1,6 +1,7 @@
 import React from 'react';
 import {observer} from 'mobx-react-lite';
 
+import {withMetrics} from '@webex/ui-metrics';
 import store from '@webex/cc-store';
 import {useIncomingTask} from '../helper';
 import {IncomingTaskComponent} from '@webex/cc-components';
@@ -15,7 +16,8 @@ const IncomingTask: React.FunctionComponent<IncomingTaskProps> = observer(({inco
     logger,
   };
 
-  return <IncomingTaskComponent {...props} />;
+  const IncomingTaskWithMetrics = withMetrics(IncomingTaskComponent, 'IncomingTask');
+  return <IncomingTaskWithMetrics {...props} />;
 });
 
 export {IncomingTask};

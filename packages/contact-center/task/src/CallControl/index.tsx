@@ -1,6 +1,7 @@
 import React from 'react';
 import {observer} from 'mobx-react-lite';
 
+import {withMetrics} from '@webex/ui-metrics';
 import store from '@webex/cc-store';
 import {useCallControl} from '../helper';
 import {CallControlProps} from '../task.types';
@@ -45,7 +46,9 @@ const CallControl: React.FunctionComponent<CallControlProps> = observer(
       allowConsultToQueue,
       logger,
     };
-    return <CallControlComponent {...result} />;
+
+    const CallControlWithMetrics = withMetrics(CallControlComponent, 'CallControl');
+    return <CallControlWithMetrics {...result} />;
   }
 );
 

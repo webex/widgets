@@ -1,0 +1,35 @@
+{
+  "name": "@webex/ui-metrics",
+  "version": "1.0.0",
+  "description": "UI metrics tracking for Webex widgets",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build:src": "webpack --mode=development",
+    "clean": "rm -rf dist",
+    "clean:dist": "rm -rf dist",
+    "test:unit": "jest",
+    "test:styles": "echo 'No styles to test'"
+  },
+  "dependencies": {
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/uuid": "^9.0.0",
+    "typescript": "^5.6.3",
+    "webpack": "^5.96.1",
+    "webpack-cli": "^5.1.4"
+  },
+  "peerDependencies": {
+    "react": ">=16.8.0"
+  },
+  "keywords": [
+    "webex",
+    "widgets",
+    "metrics",
+    "analytics",
+    "ui-tracking"
+  ],
+  "author": "devsupport@webex.com",
+  "license": "MIT"
+}
