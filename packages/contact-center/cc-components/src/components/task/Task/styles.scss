@@ -14,7 +14,8 @@
   align-items: center;
   align-self: stretch;
   // have to override momentum default height for listitem to match the design
-  height: 5rem !important;
+  min-height: 5rem;
+  height: auto;
 
   mdc-avatar {
     --mdc-avatar-default-background-color: var(--mds-color-theme-avatar-glass-normal);
@@ -75,4 +76,94 @@
 .task-list-hover:hover{ 
   // To remove the hover effect of ListItemBase when we render an incoming task 
   background: none !important;
+}
+
+.task-details {
+  .task-digital-title {
+    width: auto;
+  }
+  
+  .incoming-digital-task-title {
+    width: 12.5rem;
+  }
+}
+
+.task-tooltip::part(popover-content) {
+  white-space: normal;
+  word-break: break-all;
+}
+
+.task-tooltip {
+  min-width: 25%;
+  width: auto;
+  text-align: center;
+}
+
+@media (min-width: 64.0625rem) and (max-width: 75rem) {
+  .task-details {
+    .task-digital-title {
+      width: 50rem;
+      max-width: 50rem;
+    }
+  }
+}
+
+@media (min-width: 48.0625rem) and (max-width: 64rem) {
+  .task-details {
+    .task-digital-title {
+      width: 31.25rem;
+      max-width: 31.25rem;
+    }
+    .incoming-digital-task-title {
+      width: 10rem;
+    }
+  }
+  .task-tooltip {
+   width: 50%;
+   text-align: center;
+}
+}
+
+@media (min-width: 30.0625rem) and (max-width: 48rem) {
+  .task-details {
+    .task-digital-title {
+      width: 15.625rem;
+      max-width: 15.625rem;
+    }
+    .incoming-digital-task-title {
+      width: 8rem;
+    }
+  }
+  .task-tooltip {
+   width: 50%;
+   text-align: center;
+}
+}
+
+@media (min-width: 20rem) and (max-width: 30rem) {
+  .task-details {
+    .task-digital-title {
+      width: 9.375rem;
+      max-width: 9.375rem;
+    }
+    .incoming-digital-task-title {
+      width: 5rem;
+    }
+  }
+ .task-tooltip {
+   width: 50%;
+   text-align: center;
+}
+}
+
+@media (min-width: 15.625rem) and (max-width: 20rem){
+  .task-details {
+    .incoming-digital-task-title {
+      width: 4rem;
+    }
+}
+.task-tooltip {
+   width: 50%;
+   text-align: center;
+}
 }

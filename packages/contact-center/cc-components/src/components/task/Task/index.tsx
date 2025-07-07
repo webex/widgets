@@ -1,6 +1,6 @@
 import React from 'react';
 import {ButtonPill, ListItemBase, ListItemBaseSection, Text} from '@momentum-ui/react-collaboration';
-import {Avatar, Brandvisual} from '@momentum-design/components/dist/react';
+import {Avatar, Brandvisual, Tooltip} from '@momentum-design/components/dist/react';
 import {PressEvent} from '@react-types/shared';
 import TaskTimer from '../TaskTimer';
 import {getMediaTypeInfo} from '../../../utils';
@@ -50,6 +50,57 @@ const Task: React.FC<TaskProps> = ({
     return str.replace(/^\s*(\w)/, (match, firstLetter) => firstLetter.toUpperCase());
   };
   const currentMediaType = getMediaTypeInfo(mediaType, mediaChannel);
+  const isNonVoiceMedia = currentMediaType.labelName !== 'Call';
+  // Create unique IDs for tooltip trigger and tooltip
+  const tooltipTriggerId = `tooltip-trigger-${interactionId}`;
+  const tooltipId = `tooltip-${interactionId}`;
+  // Helper function to get the correct CSS class
+  const getTitleClassName = () => {
+    if (isNonVoiceMedia && isIncomingTask) {
+      return 'incoming-digital-task-title';
+    }
+    if (isNonVoiceMedia && !isIncomingTask) {
+      return 'task-digital-title';
+    }
+    return 'task-title';
+  };
+  const renderTitle = () => {
+    if (!title) return null;
+
+    const textComponent = (
+      <Text
+        tagName="span"
+        type={selected ? 'body-large-bold' : 'body-large-medium'}
+        className={getTitleClassName()}
+        id={isNonVoiceMedia ? tooltipTriggerId : undefined}
+      >
+        {title}
+      </Text>
+    );
+
+    if (isNonVoiceMedia) {
+      return (
+        <>
+          {textComponent}
+          <Tooltip
+            color="contrast"
+            delay="0,0"
+            id={tooltipId}
+            placement="top-start"
+            offset={4}
+            tooltip-type="description"
+            triggerID={tooltipTriggerId}
+            className="task-tooltip"
+          >
+            {title}
+          </Tooltip>
+        </>
+      );
+    }
+
+    return textComponent;
+  };
+
   return (
     <ListItemBase
       className={`task-list-item ${selected ? 'task-list-item--selected' : ''} ${styles}`}
@@ -68,12 +119,7 @@ const Task: React.FC<TaskProps> = ({
 
       <ListItemBaseSection position="fill">
         <section className="task-details">
-          {title && (
-            <Text tagName="span" type={selected ? 'body-large-bold' : 'body-large-medium'}>
-              {title}
-            </Text>
-          )}
-
+          {renderTitle()}
           {state && !isIncomingTask && (
             <Text tagName="span" type="body-midsize-regular" className="task-text">
               {capitalizeFirstWord(state)}
