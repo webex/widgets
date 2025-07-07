@@ -69,6 +69,7 @@ interface IStore {
   isEndConsultEnabled: boolean;
   allowConsultToQueue: boolean;
   agentProfile: AgentLoginProfile;
+  isMuted: boolean;
   init(params: InitParams, callback: (ccSDK: IContactCenter) => void): Promise<void>;
   registerCC(webex?: WithWebex['webex']): Promise<void>;
 }
@@ -93,6 +94,7 @@ interface IStoreWrapper extends IStore {
   setConsultStartTimeStamp(timestamp: number): void;
   setAgentProfile(profile: Profile): void;
   setTeamId(id: string): void;
+  setIsMuted(value: boolean): void;
 }
 
 interface IWrapupCode {

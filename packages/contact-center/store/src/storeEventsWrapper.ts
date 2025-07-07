@@ -149,6 +149,16 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.agentProfile;
   }
 
+  get isMuted() {
+    return this.store.isMuted;
+  }
+
+  setIsMuted = (value: boolean): void => {
+    runInAction(() => {
+      this.store.isMuted = value;
+    });
+  };
+
   setCurrentTheme = (theme: string): void => {
     this.store.currentTheme = theme;
   };
@@ -386,12 +396,23 @@ class StoreWrapper implements IStoreWrapper {
     });
   };
 
+  handleMuteStateForWebRTCTask = (task: ITask): void => {
+    const isBrowser = this.deviceType === 'BROWSER';
+    const webRtcEnabled = this.featureFlags?.webRtcEnabled;
+    const isTelephony = task?.data?.interaction?.mediaType === 'telephony';
+
+    if (isBrowser && isTelephony && webRtcEnabled) {
+      this.setIsMuted(false);
+    }
+  };
+
   handleTaskEnd = () => {
     this.refreshTaskList();
   };
 
   handleTaskAssigned = (event) => {
     const task = event;
+    this.handleMuteStateForWebRTCTask(task);
     if (this.onTaskAssigned) {
       this.onTaskAssigned(task);
     }

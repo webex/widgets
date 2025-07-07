@@ -150,6 +150,14 @@ export interface ControlProps {
   onRecordingToggle?: ({isRecording, task}: {isRecording: boolean; task: ITask}) => void;
 
   /**
+   * Function to handle mute/unmute toggle actions.
+   * @param isMuted - Boolean indicating whether the task is muted.
+   * @param task - The current task being handled.
+   * @returns void
+   */
+  onToggleMute?: ({isMuted, task}: {isMuted: boolean; task: ITask}) => void;
+
+  /**
    * Function to handle ending the task.
    * @param task - The current task being handled.
    * @returns void
@@ -192,6 +200,11 @@ export interface ControlProps {
   toggleRecording: () => void;
 
   /**
+   * Function to handle mute/unmute actions.
+   */
+  toggleMute: () => void;
+
+  /**
    * Function to handle ending the call.
    */
   endCall: () => void;
@@ -229,6 +242,11 @@ export interface ControlProps {
    * @param isRecording - Boolean indicating whether the task is being recorded.
    */
   setIsRecording: (isRecording: boolean) => void;
+
+  /**
+   * Flag to determine if the task is muted.
+   */
+  isMuted: boolean;
 
   /**
    * List of buddy agents available for consult
@@ -399,6 +417,8 @@ export type CallControlComponentProps = Pick<
   | 'wrapupCodes'
   | 'toggleHold'
   | 'toggleRecording'
+  | 'toggleMute'
+  | 'isMuted'
   | 'endCall'
   | 'wrapupCall'
   | 'isHeld'

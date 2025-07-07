@@ -1,8 +1,19 @@
+jest.mock('../src/Utils/task-util', () => {
+  const actual = jest.requireActual('../src/Utils/task-util');
+  return {
+    ...actual,
+    getControlsVisibility: jest.fn(),
+  };
+});
 import {renderHook, act, waitFor} from '@testing-library/react';
 import {useIncomingTask, useTaskList, useCallControl, useOutdialCall} from '../src/helper';
+import {getControlsVisibility} from '../src/Utils/task-util';
 import {TASK_EVENTS} from '@webex/cc-store';
 import store from '@webex/cc-store';
 import React from 'react';
+
+// Cast it to a mock
+const mockGetControlsVisibility = getControlsVisibility as jest.MockedFunction<typeof getControlsVisibility>;
 
 // Mock webex instance and task
 const ccMock = {
@@ -578,6 +589,27 @@ describe('useCallControl', () => {
     // Mock URL.createObjectURL
     global.URL.createObjectURL = jest.fn().mockImplementation(() => 'mocked-worker-url');
     jest.clearAllMocks();
+
+    // Clear the mock before each test
+    mockGetControlsVisibility.mockClear();
+
+    // Set up the default mock return value
+    const mockControlVisibility = {
+      muteUnmute: true,
+      holdResume: true,
+      transfer: true,
+      consult: true,
+      end: true,
+      accept: true,
+      decline: true,
+      pauseResumeRecording: true,
+      recordingIndicator: true,
+      wrapup: false,
+      endConsult: false,
+      conference: false,
+    };
+    // Mock the function to return the control visibility object
+    mockGetControlsVisibility.mockReturnValue(mockControlVisibility);
   });
 
   afterEach(() => {
@@ -1864,6 +1896,242 @@ describe('useCallControl', () => {
     expect(mockLogger.info).toHaveBeenCalledWith('CC-Widgets: CallControl: wrap-up cancelled', {
       module: 'widget-cc-task#helper.ts',
       method: 'useCallControl#cancelAutoWrapup',
+    });
+  });
+
+  describe('toggleMute functionality', () => {
+    const mockOnToggleMute = jest.fn();
+
+    beforeEach(() => {
+      // Clear all mocks first
+      jest.clearAllMocks();
+
+      // Add toggleMute mock to mockCurrentTask
+      mockCurrentTask.toggleMute = jest.fn(() => Promise.resolve());
+
+      // Mock store methods
+      jest.spyOn(store, 'setIsMuted').mockImplementation(() => {});
+      jest.spyOn(store, 'isMuted', 'get').mockImplementation(() => false);
+
+      // Clear the callback mock
+      mockOnToggleMute.mockClear();
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('should successfully toggle mute from unmuted to muted', async () => {
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: mockCurrentTask,
+          onToggleMute: mockOnToggleMute,
+          logger: mockLogger,
+          featureFlags: store.featureFlags,
+          deviceType: store.deviceType,
+          isMuted: false, // ✅ Add this prop
+        })
+      );
+
+      await act(async () => {
+        await result.current.toggleMute();
+      });
+
+      expect(mockLogger.info).toHaveBeenCalledWith('toggleMute() called', {
+        module: 'useCallControl',
+        method: 'toggleMute',
+      });
+      expect(mockCurrentTask.toggleMute).toHaveBeenCalled();
+      expect(store.setIsMuted).toHaveBeenCalledWith(true);
+      expect(mockOnToggleMute).toHaveBeenCalledWith({
+        isMuted: true,
+        task: mockCurrentTask,
+      });
+      expect(mockLogger.info).toHaveBeenCalledWith('Mute state toggled to: true', {
+        module: 'useCallControl',
+        method: 'toggleMute',
+      });
+    });
+
+    it('should successfully toggle mute from muted to unmuted', async () => {
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: mockCurrentTask,
+          onToggleMute: mockOnToggleMute,
+          logger: mockLogger,
+          featureFlags: store.featureFlags,
+          deviceType: store.deviceType,
+          isMuted: true, // ✅ Set to true for muted state
+        })
+      );
+
+      await act(async () => {
+        await result.current.toggleMute();
+      });
+
+      expect(mockLogger.info).toHaveBeenCalledWith('toggleMute() called', {
+        module: 'useCallControl',
+        method: 'toggleMute',
+      });
+      expect(mockCurrentTask.toggleMute).toHaveBeenCalled();
+      expect(store.setIsMuted).toHaveBeenCalledWith(false); // Should unmute
+      expect(mockOnToggleMute).toHaveBeenCalledWith({
+        isMuted: false,
+        task: mockCurrentTask,
+      });
+      expect(mockLogger.info).toHaveBeenCalledWith('Mute state toggled to: false', {
+        module: 'useCallControl',
+        method: 'toggleMute',
+      });
+    });
+
+    it('should handle multiple rapid toggleMute calls correctly', async () => {
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: mockCurrentTask,
+          onToggleMute: mockOnToggleMute,
+          logger: mockLogger,
+          featureFlags: store.featureFlags,
+          deviceType: store.deviceType,
+          isMuted: false,
+        })
+      );
+
+      // Make multiple rapid calls
+      await act(async () => {
+        await Promise.all([result.current.toggleMute(), result.current.toggleMute(), result.current.toggleMute()]);
+      });
+
+      // Should have been called 3 times
+      expect(mockCurrentTask.toggleMute).toHaveBeenCalledTimes(3);
+      expect(store.setIsMuted).toHaveBeenCalledTimes(3);
+      expect(mockOnToggleMute).toHaveBeenCalledTimes(3);
+    });
+
+    it('should not call onToggleMute callback if not provided', async () => {
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: mockCurrentTask,
+          // onToggleMute not provided
+          logger: mockLogger,
+          featureFlags: store.featureFlags,
+          deviceType: store.deviceType,
+          isMuted: false, // ✅ Add this prop
+        })
+      );
+
+      await act(async () => {
+        await result.current.toggleMute();
+      });
+
+      expect(mockCurrentTask.toggleMute).toHaveBeenCalled();
+      expect(store.setIsMuted).toHaveBeenCalledWith(true);
+      expect(mockOnToggleMute).not.toHaveBeenCalled();
+    });
+
+    it('should not call onToggleMute callback on error if not provided', async () => {
+      const toggleMuteError = new Error('Toggle mute failed');
+      mockCurrentTask.toggleMute = jest.fn().mockRejectedValue(toggleMuteError);
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: mockCurrentTask,
+          // onToggleMute not provided
+          logger: mockLogger,
+          featureFlags: store.featureFlags,
+          deviceType: store.deviceType,
+          isMuted: false, // ✅ Add this prop
+        })
+      );
+
+      await act(async () => {
+        await result.current.toggleMute();
+      });
+
+      expect(mockCurrentTask.toggleMute).toHaveBeenCalled();
+      expect(store.setIsMuted).not.toHaveBeenCalled();
+      expect(mockLogger.error).toHaveBeenCalledWith('toggleMute failed: Error: Toggle mute failed', {
+        module: 'useCallControl',
+        method: 'toggleMute',
+      });
+      expect(mockOnToggleMute).not.toHaveBeenCalled();
+    });
+
+    it('should handle errors when toggleMute SDK call fails and call onToggleMute with current state', async () => {
+      const toggleMuteError = new Error('SDK Toggle mute failed');
+      mockCurrentTask.toggleMute = jest.fn().mockRejectedValue(toggleMuteError);
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: mockCurrentTask,
+          onToggleMute: mockOnToggleMute,
+          logger: mockLogger,
+          featureFlags: store.featureFlags,
+          deviceType: store.deviceType,
+          isMuted: true, // ✅ Current state is muted
+        })
+      );
+
+      await act(async () => {
+        await result.current.toggleMute();
+      });
+
+      expect(mockLogger.info).toHaveBeenCalledWith('toggleMute() called', {
+        module: 'useCallControl',
+        method: 'toggleMute',
+      });
+      expect(mockCurrentTask.toggleMute).toHaveBeenCalled();
+      expect(store.setIsMuted).not.toHaveBeenCalled(); // State should not be updated on error
+      expect(mockLogger.error).toHaveBeenCalledWith('toggleMute failed: Error: SDK Toggle mute failed', {
+        module: 'useCallControl',
+        method: 'toggleMute',
+      });
+      expect(mockOnToggleMute).toHaveBeenCalledWith({
+        isMuted: true, // Current actual state (unchanged)
+        task: mockCurrentTask,
+      });
+    });
+
+    it('should return toggleMute function and isMuted state in hook result', () => {
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: mockCurrentTask,
+          onToggleMute: mockOnToggleMute,
+          logger: mockLogger,
+          featureFlags: store.featureFlags,
+          deviceType: store.deviceType,
+          isMuted: false, // ✅ Add this prop
+        })
+      );
+
+      expect(typeof result.current.toggleMute).toBe('function');
+      expect(typeof result.current.isMuted).toBe('boolean');
+    });
+
+    it('should handle controlVisibility being undefined', async () => {
+      // Mock controlVisibility to return undefined
+      mockGetControlsVisibility.mockReturnValue(undefined);
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: mockCurrentTask,
+          onToggleMute: mockOnToggleMute,
+          logger: mockLogger,
+          featureFlags: store.featureFlags,
+          deviceType: store.deviceType,
+          isMuted: false, // ✅ Add this prop
+        })
+      );
+
+      await act(async () => {
+        await result.current.toggleMute();
+      });
+
+      expect(mockLogger.warn).toHaveBeenCalledWith('Mute only available for voice tasks', {
+        module: 'useCallControl',
+        method: 'toggleMute',
+      });
+      expect(mockCurrentTask.toggleMute).not.toHaveBeenCalled();
     });
   });
 });
