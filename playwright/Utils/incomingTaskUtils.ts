@@ -101,7 +101,7 @@ export async function endChatTask(page: Page) {
  */
 export async function createEmailTask() {
   const from = process.env.PW_SENDER_EMAIL;
-  const to = process.env.PW_EMAIL_ENDPOINT;
+  const to = process.env.PW_EMAIL_ENTRY_POINT;
   const subject = `Playwright Test Email - ${new Date().toISOString()}`;
   const text = '--This Email is generated due to playwright automation test for incoming Tasks---';
 
