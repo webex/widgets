@@ -1,5 +1,6 @@
 import React from 'react';
 import '@testing-library/jest-dom';
+import {DESKTOP, DIALNUMBER, EXTENSION, LoginOptions} from '@webex/cc-store';
 import {
   handleModals,
   continueClicked,
@@ -15,13 +16,7 @@ import {
   handleOnCCSignOut,
   handleCCSignoutKeyDown,
 } from '../../../src/components/StationLogin/station-login.utils';
-import {
-  DESKTOP,
-  DIALNUMBER,
-  EXTENSION,
-  LoginOptions,
-  StationLoginLabels,
-} from '../../../src/components/StationLogin/constants';
+import {StationLoginLabels} from '../../../src/components/StationLogin/constants';
 
 const loggerMock = {
   info: jest.fn(),

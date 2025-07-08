@@ -1,5 +1,6 @@
 import {useRef} from 'react';
-import {DESKTOP, DIALNUMBER, LoginOptions, StationLoginLabels} from './constants';
+import {StationLoginLabels} from './constants';
+import {LoginOptions, DESKTOP, DIALNUMBER} from '@webex/cc-store';
 
 const handleModals = (
   modalRef,

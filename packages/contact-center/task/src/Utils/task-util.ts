@@ -1,4 +1,4 @@
-import {ITask, Interaction} from '@webex/plugin-cc';
+import {ITask} from '@webex/plugin-cc';
 
 /**
  * This function determines the visibility of various controls based on the task's data.
@@ -41,6 +41,7 @@ export function getControlsVisibility(deviceType: string, featureFlags: {[key: s
   return controls;
 }
 
+//@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
 export function findHoldTimestamp(interaction: Interaction, mType = 'mainCall'): number | null {
   if (!interaction?.media) return null;
   for (const key in interaction.media) {

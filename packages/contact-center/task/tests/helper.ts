@@ -1,17 +1,14 @@
 import {renderHook, act, waitFor} from '@testing-library/react';
 import {useIncomingTask, useTaskList, useCallControl, useOutdialCall} from '../src/helper';
 import {TASK_EVENTS} from '@webex/cc-store';
+import {mockAgents, mockCC, mockQueueDetails, mockTask} from '@webex/test-fixtures';
 import store from '@webex/cc-store';
 import React from 'react';
 
-// Mock webex instance and task
-const ccMock = {
-  on: jest.fn(),
-  off: jest.fn(),
-};
-
 const taskMock = {
+  ...mockTask,
   data: {
+    ...mockTask.data,
     interactionId: 'interaction1',
   },
   accept: jest.fn().mockResolvedValue('Accepted'),
@@ -31,6 +28,7 @@ const logger = {
   log: jest.fn(),
   warn: jest.fn(),
   info: jest.fn(),
+  trace: jest.fn(),
 };
 
 // Override the wrapupCodes property before your tests run
@@ -192,7 +190,11 @@ describe('useIncomingTask Hook', () => {
     onTaskDeclined.mockClear();
 
     const noIdTask = {
-      data: {},
+      ...taskMock,
+      data: {
+        ...taskMock.data,
+        interactionId: undefined, // Simulate no taskId
+      },
       accept: jest.fn(),
       reject: jest.fn(),
       on: jest.fn(),
@@ -321,7 +323,10 @@ describe('useIncomingTask Hook', () => {
 });
 
 describe('useTaskList Hook', () => {
-  const mockTaskList = [taskMock, taskMock];
+  const mockTaskList = {
+    mockId1: taskMock,
+    mockId2: taskMock,
+  };
   afterEach(() => {
     jest.clearAllMocks();
     logger.error.mockRestore();
@@ -337,7 +342,7 @@ describe('useTaskList Hook', () => {
       store.onTaskAssigned = callback;
     });
 
-    renderHook(() => useTaskList({cc: ccMock, deviceType: '', onTaskAccepted, logger, taskList: mockTaskList}));
+    renderHook(() => useTaskList({cc: mockCC, deviceType: '', onTaskAccepted, logger, taskList: mockTaskList}));
 
     // Manually trigger the stored callback with the task
     act(() => {
@@ -353,7 +358,7 @@ describe('useTaskList Hook', () => {
   it('should return if not task is passed while calling acceptTask', async () => {
     // This test is purely to improve the coverage report, as the acceptTask function cannot be called without a task
     const {result} = renderHook(() =>
-      useTaskList({cc: ccMock, deviceType: '', onTaskAccepted, logger, taskList: mockTaskList})
+      useTaskList({cc: mockCC, deviceType: '', onTaskAccepted, logger, taskList: mockTaskList})
     );
 
     act(() => {
@@ -368,7 +373,7 @@ describe('useTaskList Hook', () => {
   it('should return if not task is passed while calling acceptTask', async () => {
     // This test is purely to improve the coverage report, as the acceptTask function cannot be called without a task
     const {result} = renderHook(() =>
-      useTaskList({cc: ccMock, deviceType: '', onTaskDeclined, logger, taskList: mockTaskList})
+      useTaskList({cc: mockCC, deviceType: '', onTaskDeclined, logger, taskList: mockTaskList})
     );
 
     act(() => {
@@ -390,7 +395,7 @@ describe('useTaskList Hook', () => {
       store.onTaskRejected = callback;
     });
 
-    renderHook(() => useTaskList({cc: ccMock, deviceType: '', onTaskDeclined, logger, taskList: mockTaskList}));
+    renderHook(() => useTaskList({cc: mockCC, deviceType: '', onTaskDeclined, logger, taskList: mockTaskList}));
 
     // Manually trigger the stored callback with the task
     act(() => {
@@ -413,7 +418,7 @@ describe('useTaskList Hook', () => {
       store.onTaskSelected = callback;
     });
 
-    renderHook(() => useTaskList({cc: ccMock, deviceType: '', onTaskSelected, logger, taskList: mockTaskList}));
+    renderHook(() => useTaskList({cc: mockCC, deviceType: '', onTaskSelected, logger, taskList: mockTaskList}));
 
     // Manually trigger the stored callback with the task
     act(() => {
@@ -434,7 +439,7 @@ describe('useTaskList Hook', () => {
     };
 
     const {result} = renderHook(() =>
-      useTaskList({cc: ccMock, onTaskAccepted, deviceType: 'BROWSER', logger, taskList: mockTaskList})
+      useTaskList({cc: mockCC, onTaskAccepted, deviceType: 'BROWSER', logger, taskList: mockTaskList})
     );
 
     act(() => {
@@ -461,7 +466,7 @@ describe('useTaskList Hook', () => {
     };
 
     const {result} = renderHook(() =>
-      useTaskList({cc: ccMock, onTaskDeclined, deviceType: 'BROWSER', logger, taskList: mockTaskList})
+      useTaskList({cc: mockCC, onTaskDeclined, deviceType: 'BROWSER', logger, taskList: mockTaskList})
     );
 
     act(() => {
@@ -483,7 +488,7 @@ describe('useTaskList Hook', () => {
   it('should not call onTaskAccepted if it is not provided', async () => {
     const {result} = renderHook(() =>
       useTaskList({
-        cc: ccMock,
+        cc: mockCC,
         logger,
         deviceType: 'BROWSER',
         taskList: mockTaskList,
@@ -505,7 +510,7 @@ describe('useTaskList Hook', () => {
   it('should not call onTaskDeclined if it is not provided', async () => {
     const {result} = renderHook(() =>
       useTaskList({
-        cc: ccMock,
+        cc: mockCC,
         logger,
         deviceType: '',
         taskList: mockTaskList,
@@ -529,7 +534,9 @@ describe('useCallControl', () => {
   let originalWorker: typeof Worker;
 
   const mockCurrentTask = {
+    ...mockTask,
     data: {
+      ...mockTask.data,
       interactionId: 'someMockInteractionId',
     },
     on: jest.fn(),
@@ -541,6 +548,9 @@ describe('useCallControl', () => {
     end: jest.fn(() => Promise.resolve()),
     wrapup: jest.fn(() => Promise.resolve()),
     cancelAutoWrapupTimer: jest.fn(),
+    consultTransfer: jest.fn(() => Promise.resolve()),
+    consult: jest.fn(() => Promise.resolve()),
+    endConsult: jest.fn(() => Promise.resolve()),
   };
 
   const mockLogger = {
@@ -548,6 +558,7 @@ describe('useCallControl', () => {
     info: jest.fn(),
     log: jest.fn(),
     warn: jest.fn(),
+    trace: jest.fn(),
   };
 
   const mockOnHoldResume = jest.fn();
@@ -608,6 +619,7 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
+        consultInitiated: false,
       })
     );
 
@@ -632,6 +644,7 @@ describe('useCallControl', () => {
         onWrapUp: jest.fn(),
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
+        consultInitiated: false,
       })
     );
 
@@ -666,6 +679,7 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
+        consultInitiated: false,
       })
     );
 
@@ -688,6 +702,7 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
+        consultInitiated: false,
       })
     );
 
@@ -712,6 +727,7 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
+        consultInitiated: false,
       })
     );
 
@@ -735,6 +751,7 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
+        consultInitiated: false,
       })
     );
 
@@ -756,6 +773,7 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
+        consultInitiated: false,
       })
     );
 
@@ -779,6 +797,7 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
+        consultInitiated: false,
       })
     );
 
@@ -809,6 +828,7 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
+        consultInitiated: false,
       })
     );
 
@@ -843,6 +863,7 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
+        consultInitiated: false,
       })
     );
 
@@ -863,6 +884,7 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
+        consultInitiated: false,
       })
     );
     await waitFor(() => {
@@ -887,6 +909,7 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
+        consultInitiated: false,
       })
     );
 
@@ -912,6 +935,7 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
+        consultInitiated: false,
       })
     );
 
@@ -924,7 +948,7 @@ describe('useCallControl', () => {
       mockCurrentTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.CONTACT_RECORDING_RESUMED)?.[1]();
     });
 
-    expect(mockCurrentTask.resumeRecording).toHaveBeenCalledWith();
+    expect(mockCurrentTask.resumeRecording).toHaveBeenCalledWith({autoResumed: false});
   });
 
   it('should fail and log if resume failed', async () => {
@@ -938,6 +962,7 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
+        consultInitiated: false,
       })
     );
     await waitFor(() => {
@@ -948,7 +973,7 @@ describe('useCallControl', () => {
       await result.current.toggleRecording();
     });
 
-    expect(mockCurrentTask.resumeRecording).toHaveBeenCalledWith();
+    expect(mockCurrentTask.resumeRecording).toHaveBeenCalledWith({autoResumed: false});
     expect(mockLogger.error).toHaveBeenCalledWith('Error resuming recording: Error: Resume error', expect.any(Object));
   });
 
@@ -962,6 +987,7 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
+        consultInitiated: false,
       })
     );
     // Ensure no event handler is set
@@ -981,6 +1007,7 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
+        consultInitiated: false,
       })
     );
     // Ensure no event handler is set
@@ -988,11 +1015,7 @@ describe('useCallControl', () => {
   });
 
   it('should load buddy agents successfully', async () => {
-    const dummyAgents = [
-      {id: 'a1', name: 'Agent1'},
-      {id: 'a2', name: 'Agent2'},
-    ];
-    const getBuddyAgentsSpy = jest.spyOn(store, 'getBuddyAgents').mockResolvedValue(dummyAgents);
+    const getBuddyAgentsSpy = jest.spyOn(store, 'getBuddyAgents').mockResolvedValue(mockAgents);
     const {result} = renderHook(() =>
       useCallControl({
         currentTask: mockCurrentTask,
@@ -1002,12 +1025,13 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
+        consultInitiated: false,
       })
     );
     await act(async () => {
       await result.current.loadBuddyAgents();
     });
-    expect(result.current.buddyAgents).toEqual(dummyAgents);
+    expect(result.current.buddyAgents).toEqual(mockAgents);
     getBuddyAgentsSpy.mockRestore();
   });
 
@@ -1023,6 +1047,7 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
+        consultInitiated: false,
       })
     );
     await act(async () => {
@@ -1047,6 +1072,7 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
+        consultInitiated: false,
       })
     );
     await act(async () => {
@@ -1073,6 +1099,7 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
+        consultInitiated: false,
       })
     );
 
@@ -1096,6 +1123,7 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
+        consultInitiated: false,
       })
     );
     await act(async () => {
@@ -1118,6 +1146,7 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
+        consultInitiated: false,
       })
     );
 
@@ -1140,6 +1169,7 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
+        consultInitiated: true,
       })
     );
     await act(async () => {
@@ -1162,6 +1192,7 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
+        consultInitiated: false,
       })
     );
 
@@ -1180,6 +1211,7 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
+        consultInitiated: true,
       })
     );
 
@@ -1206,6 +1238,7 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
+        consultInitiated: true,
       })
     );
     await act(async () => {
@@ -1231,6 +1264,7 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
+        consultInitiated: false,
       })
     );
 
@@ -1248,7 +1282,9 @@ describe('useCallControl', () => {
   it('should extract consulting agent information correctly when initiating consult', async () => {
     // Mock store.cc.agentConfig.agentId for comparison
     const mockStoreCC = {
+      ...mockCC,
       agentConfig: {
+        ...mockCC.agentConfig,
         agentId: 'currentAgentId',
       },
     };
@@ -1258,8 +1294,10 @@ describe('useCallControl', () => {
     const taskWithParticipants = {
       ...mockCurrentTask,
       data: {
+        ...mockCurrentTask.data,
         interactionId: 'someMockInteractionId',
         interaction: {
+          ...mockCurrentTask.data.interaction,
           participants: {
             currentAgentId: {
               id: 'currentAgentId',
@@ -1311,7 +1349,9 @@ describe('useCallControl', () => {
   it('should extract consulting agent information correctly when receiving consult', async () => {
     // Mock store.cc.agentConfig.agentId for comparison
     const mockStoreCC = {
+      ...mockCC,
       agentConfig: {
+        ...mockCC.agentConfig,
         agentId: 'currentAgentId',
       },
     };
@@ -1321,8 +1361,10 @@ describe('useCallControl', () => {
     const taskWithParticipants = {
       ...mockCurrentTask,
       data: {
+        ...mockCurrentTask.data,
         interactionId: 'someMockInteractionId',
         interaction: {
+          ...mockCurrentTask.data.interaction,
           participants: {
             currentAgentId: {
               id: 'currentAgentId',
@@ -1374,7 +1416,9 @@ describe('useCallControl', () => {
   it('should not update consultAgentName when no consulting agent is found', async () => {
     // Mock store.cc.agentConfig.agentId for comparison
     const mockStoreCC = {
+      ...mockCC,
       agentConfig: {
+        ...mockCC.agentConfig,
         agentId: 'currentAgentId',
       },
     };
@@ -1384,8 +1428,10 @@ describe('useCallControl', () => {
     const taskWithoutConsultAgent = {
       ...mockCurrentTask,
       data: {
+        ...mockTask.data,
         interactionId: 'someMockInteractionId',
         interaction: {
+          ...mockTask.data.interaction,
           participants: {
             currentAgentId: {
               id: 'currentAgentId',
@@ -1431,6 +1477,7 @@ describe('useCallControl', () => {
     const taskWithNoInteraction = {
       ...mockCurrentTask,
       data: {
+        ...mockCurrentTask.data,
         interactionId: 'someMockInteractionId',
         // No interaction property
       },
@@ -1445,6 +1492,7 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
+        consultInitiated: false,
       });
       // Set initial value
       return hook;
@@ -1464,6 +1512,7 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
+        consultInitiated: false,
       })
     );
 
@@ -1480,13 +1529,18 @@ describe('useCallControl', () => {
       data: {
         ...mockCurrentTask.data,
         interaction: {
+          ...mockCurrentTask.data.interaction,
           media: {
             someMockInteractionId: {
               mType: 'mainCall',
-              holdTimestamp,
+              mediaResourceId: 'some-resource-id',
+              mediaType: 'telephony', // or one of: email, chat, telephony, social, sms, facebook, whatsapp
+              mediaMgr: 'some-media-manager',
+              participants: [],
+              isHold: false,
+              holdTimestamp: holdTimestamp,
             },
           },
-          participants: {}, // <-- Add this line
         },
       },
     };
@@ -1507,6 +1561,7 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
+        consultInitiated: false,
       })
     );
 
@@ -1523,13 +1578,19 @@ describe('useCallControl', () => {
       data: {
         ...mockCurrentTask.data,
         interaction: {
+          ...mockCurrentTask.data.interaction,
           media: {
-            main: {
-              mType: 'mainCall',
+            someMockInteractionId: {
+              mType: 'call',
+              mediaResourceId: 'some-resource-id',
+              mediaType: 'telephony', // or one of: email, chat, telephony, social, sms, facebook, whatsapp
+              mediaMgr: 'some-media-manager',
+              participants: [],
+              isHold: false,
               // No holdTimestamp
+              holdTimestamp: undefined,
             },
           },
-          participants: {},
         },
       },
     };
@@ -1550,6 +1611,7 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
+        consultInitiated: false,
       })
     );
 
@@ -1566,10 +1628,16 @@ describe('useCallControl', () => {
       data: {
         ...mockCurrentTask.data,
         interaction: {
+          ...mockCurrentTask.data.interaction,
           media: {
             main: {
               mType: 'mainCall',
               holdTimestamp,
+              mediaResourceId: 'some-resource-id',
+              mediaMgr: 'some-media-manager',
+              participants: [],
+              isHold: false,
+              mediaType: 'telephony', // or one of: email, chat, telephony, social, sms, facebook, whatsapp
             },
           },
           participants: {},
@@ -1587,6 +1655,7 @@ describe('useCallControl', () => {
           logger: mockLogger,
           featureFlags: store.featureFlags,
           deviceType: store.deviceType,
+          consultInitiated: false,
         }),
       {initialProps: {task: mockTaskWithHold}}
     );
@@ -1597,10 +1666,17 @@ describe('useCallControl', () => {
       data: {
         ...mockCurrentTask.data,
         interaction: {
+          ...mockCurrentTask.data.interaction,
           media: {
             main: {
-              mType: 'mainCall',
-              // holdTimestamp removed
+              mType: 'call',
+              mediaResourceId: 'some-resource-id',
+              mediaType: 'telephony', // or one of: email, chat, telephony, social, sms, facebook, whatsapp
+              mediaMgr: 'some-media-manager',
+              participants: [],
+              isHold: false,
+              // holdTimestamp undefined
+              holdTimestamp: undefined,
             },
           },
           participants: {},
@@ -1621,8 +1697,14 @@ describe('useCallControl', () => {
       data: {
         ...mockCurrentTask.data,
         interaction: {
+          ...mockCurrentTask.data.interaction,
           media: {
             main: {
+              mediaResourceId: 'some-resource-id',
+              mediaType: 'telephony', // or one of: email, chat, telephony, social, sms, facebook, whatsapp
+              mediaMgr: 'some-media-manager',
+              participants: [],
+              isHold: false,
               mType: 'mainCall',
               holdTimestamp,
             },
@@ -1633,6 +1715,7 @@ describe('useCallControl', () => {
     };
 
     let setHoldTimeValue = 0;
+    // @ts-expect-error Mock useState to capture the holdTime value
     jest.spyOn(React, 'useState').mockImplementation((init) => [init, (v) => (setHoldTimeValue = v)]);
 
     renderHook(() =>
@@ -1644,6 +1727,7 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
+        consultInitiated: false,
       })
     );
 
@@ -1666,8 +1750,14 @@ describe('useCallControl', () => {
       data: {
         ...mockCurrentTask.data,
         interaction: {
+          ...mockCurrentTask.data.interaction,
           media: {
             someMockInteractionId: {
+              mediaResourceId: 'some-resource-id',
+              mediaType: 'telephony', // or one of: email, chat, telephony, social, sms, facebook, whatsapp
+              mediaMgr: 'some-media-manager',
+              participants: [],
+              isHold: false,
               mType: 'mainCall',
               holdTimestamp,
             },
@@ -1694,6 +1784,7 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
+        consultInitiated: false,
       })
     );
 
@@ -1721,10 +1812,16 @@ describe('useCallControl', () => {
       data: {
         ...mockCurrentTask.data,
         interaction: {
+          ...mockCurrentTask.data.interaction,
           media: {
             someMockInteractionId: {
               mType: 'mainCall',
               holdTimestamp,
+              isHold: false,
+              mediaResourceId: 'some-resource-id',
+              mediaType: 'telephony', // or one of: email, chat, telephony, social, sms, facebook, whatsapp
+              mediaMgr: 'some-media-manager',
+              participants: [],
             },
           },
           participants: {},
@@ -1747,6 +1844,7 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
+        consultInitiated: false,
       })
     );
 
@@ -1771,6 +1869,7 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
+        consultInitiated: false,
       })
     );
 
@@ -1800,7 +1899,7 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        logger: logger,
+        consultInitiated: true,
       })
     );
 
@@ -1816,11 +1915,7 @@ describe('useCallControl', () => {
   });
 
   it('should load queues successfully', async () => {
-    const dummyQueues = [
-      {id: 'q1', name: 'Queue1'},
-      {id: 'q2', name: 'Queue2'},
-    ];
-    const getQueuesSpy = jest.spyOn(store, 'getQueues').mockResolvedValue(dummyQueues);
+    const getQueuesSpy = jest.spyOn(store, 'getQueues').mockResolvedValue(mockQueueDetails);
 
     const {result} = renderHook(() =>
       useCallControl({
@@ -1828,6 +1923,7 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
+        consultInitiated: false,
       })
     );
 
@@ -1835,7 +1931,7 @@ describe('useCallControl', () => {
       await result.current.loadQueues();
     });
 
-    expect(result.current.queues).toEqual(dummyQueues);
+    expect(result.current.queues).toEqual(mockQueueDetails);
     getQueuesSpy.mockRestore();
   });
 
@@ -1870,12 +1966,17 @@ describe('useCallControl', () => {
 
 describe('useOutdialCall', () => {
   const ccMock = {
+    ...mockCC,
     startOutdial: jest.fn().mockResolvedValue('Success'),
   };
 
   const logger = {
     info: jest.fn(),
     error: jest.fn(),
+    trace: jest.fn(),
+    debug: jest.fn(),
+    warn: jest.fn(),
+    log: jest.fn(),
   };
 
   const destination = '123456789';
@@ -1923,13 +2024,14 @@ describe('useOutdialCall', () => {
   });
 
   it('should handle errors when starting outdial call fails', async () => {
-    const errorCcMock = {
+    const errormockCC = {
+      ...mockCC,
       startOutdial: jest.fn().mockRejectedValue(new Error('Outdial call failed')),
     };
 
     const {result} = renderHook(() =>
       useOutdialCall({
-        cc: errorCcMock,
+        cc: errormockCC,
         logger,
       })
     );
@@ -1938,7 +2040,7 @@ describe('useOutdialCall', () => {
       await result.current.startOutdial(destination);
     });
 
-    expect(errorCcMock.startOutdial).toHaveBeenCalledWith(destination);
+    expect(errormockCC.startOutdial).toHaveBeenCalledWith(destination);
     expect(logger.error).toHaveBeenCalledWith('Error: Outdial call failed', {
       module: 'widget-OutdialCall#helper.ts',
       method: 'startOutdial',
