@@ -62,11 +62,11 @@ type WithWebex = {
   webex: {cc: IContactCenter; logger: ILogger};
 };
 
-interface WithWebexConfig {
+type WithWebexConfig = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   webexConfig: any;
   access_token: string;
-}
+};
 
 type InitParams = WithWebex | WithWebexConfig;
 

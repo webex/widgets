@@ -12,7 +12,10 @@
     "package.json"
   ],
   "exports": {
-    ".": "./dist/index.js",
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/types/index.d.ts"
+    },
     "./wc": "./dist/wc.js"
   },
   "scripts": {

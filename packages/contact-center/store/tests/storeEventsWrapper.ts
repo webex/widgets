@@ -20,7 +20,7 @@ global.MediaStream = class MediaStreamMock {
 
 // Mock console.error to prevent output during tests
 console.error = jest.fn();
-// console.log = jest.fn();
+console.log = jest.fn();
 
 import {CC_EVENTS, TASK_EVENTS} from '../src/store.types';
 import storeWrapper from '../src/storeEventsWrapper';

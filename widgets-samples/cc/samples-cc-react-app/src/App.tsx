@@ -222,10 +222,12 @@ const onTaskDeclined = (task,reason) => {
         lastStateChangeReason: newState,
       })
       .then((response) => {
-        store.setCurrentState(response.data.auxCodeId);
-        store.setLastStateChangeTimestamp(response.data.lastStateChangeTimestamp);
-        store.setLastIdleCodeChangeTimestamp(response.data.lastIdleCodeChangeTimestamp);
-        console.log('Agent state updated to', newState);
+        if('data'in response){
+          store.setCurrentState(response.data.auxCodeId);
+          store.setLastStateChangeTimestamp(response.data.lastStateChangeTimestamp);
+          store.setLastIdleCodeChangeTimestamp(response.data.lastIdleCodeChangeTimestamp);
+          console.log('Agent state updated to', newState);
+        }
       })
       .catch((error) => {
         console.error('Error updating agent state:', error);

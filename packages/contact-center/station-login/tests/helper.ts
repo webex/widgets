@@ -1,6 +1,6 @@
 import {renderHook, act, waitFor} from '@testing-library/react';
 import {useStationLogin} from '../src/helper';
-import store, {CC_EVENTS, IContactCenter, mockCC} from '@webex/cc-store';
+import store, {CC_EVENTS, mockCC} from '@webex/cc-store';
 import {LogoutSuccess, StationLoginSuccessResponse} from '@webex/plugin-cc';
 
 jest.mock('@webex/cc-store', () => {
@@ -57,7 +57,7 @@ const ccMock = {
     regexUS: /^\d{10}$/,
     agentId: 'mockAgentId',
   },
-} as IContactCenter;
+};
 
 // Sample login parameters
 const loginParams = {
@@ -121,9 +121,7 @@ describe('useStationLogin Hook', () => {
   });
 
   it('should set loginSuccess on successful login and set loginFailure to undefined', async () => {
-    const stationLoginSpy = jest.spyOn(ccMock, 'stationLogin');
-
-    stationLoginSpy.mockResolvedValue(successResponse);
+    ccMock.stationLogin.mockResolvedValue(successResponse);
     const {result} = renderHook(() =>
       useStationLogin({
         ...baseStationLoginProps,
@@ -172,9 +170,7 @@ describe('useStationLogin Hook', () => {
   });
 
   it('should set loginSuccess on successful login without auxCode and last state timestamp', async () => {
-    const stationLoginSpy = jest.spyOn(ccMock, 'stationLogin');
-
-    stationLoginSpy.mockResolvedValue(successResponse);
+    ccMock.stationLogin.mockResolvedValue(successResponse);
     const setSetCurrentStateSpy = jest.spyOn(store, 'setCurrentState');
     const setSetLastStateChangeTimestampSpy = jest.spyOn(store, 'setLastStateChangeTimestamp');
     const setSetLastIdleCodeChangeTimestampSpy = jest.spyOn(store, 'setLastIdleCodeChangeTimestamp');
@@ -206,9 +202,7 @@ describe('useStationLogin Hook', () => {
   });
 
   it('should set loginSuccess on successful login without onLogin callback', async () => {
-    const stationLoginSpy = jest.spyOn(ccMock, 'stationLogin');
-
-    stationLoginSpy.mockResolvedValue(successResponse);
+    ccMock.stationLogin.mockResolvedValue(successResponse);
     const {result} = renderHook(() =>
       useStationLogin({
         ...baseStationLoginProps,
@@ -231,9 +225,7 @@ describe('useStationLogin Hook', () => {
 
   it('should not call setDeviceType if login fails', async () => {
     const errorResponse = new Error('Login failed');
-    const stationLoginSpy = jest.spyOn(ccMock, 'stationLogin');
-
-    stationLoginSpy.mockRejectedValue(errorResponse);
+    ccMock.stationLogin.mockRejectedValue(errorResponse);
     const setDeviceTypeSpy = jest.spyOn(store, 'setDeviceType');
 
     loginCb.mockClear();
@@ -283,9 +275,7 @@ describe('useStationLogin Hook', () => {
   });
 
   it('should not call login callback if not present', async () => {
-    const stationLoginSpy = jest.spyOn(ccMock, 'stationLogin');
-
-    stationLoginSpy.mockResolvedValue({} as StationLoginSuccessResponse);
+    ccMock.stationLogin.mockResolvedValue({});
 
     const {result} = renderHook(() =>
       useStationLogin({
@@ -305,9 +295,7 @@ describe('useStationLogin Hook', () => {
 
   it('should set loginFailure on failed login', async () => {
     const errorResponse = new Error('Login failed');
-    const stationLoginSpy = jest.spyOn(ccMock, 'stationLogin');
-    stationLoginSpy.mockRejectedValue(errorResponse);
-
+    ccMock.stationLogin.mockRejectedValue(errorResponse);
     loginCb.mockClear();
     const {result} = renderHook(() => useStationLogin(baseStationLoginProps));
 
@@ -365,9 +353,7 @@ describe('useStationLogin Hook', () => {
       orgId: '6ecef209-9a34-4ed1-a07a-7ddd1dbe925a',
       trackingId: '77170ae4-fd8d-4bf5-bfaa-5f9d8975265c',
     };
-
-    const stationLogoutSpy = jest.spyOn(ccMock, 'stationLogout');
-    stationLogoutSpy.mockResolvedValue(successResponse);
+    ccMock.stationLogout.mockResolvedValue(successResponse);
 
     const {result} = renderHook(() =>
       useStationLogin({
@@ -409,8 +395,7 @@ describe('useStationLogin Hook', () => {
   });
 
   it('should log error on logout failure', async () => {
-    const stationLogoutSpy = jest.spyOn(ccMock, 'stationLogout');
-    stationLogoutSpy.mockRejectedValue(new Error('Logout failed'));
+    ccMock.stationLogout.mockRejectedValue(new Error('Logout failed'));
 
     const {result} = renderHook(() => useStationLogin(baseStationLoginProps));
     await act(async () => {
@@ -426,9 +411,7 @@ describe('useStationLogin Hook', () => {
   });
 
   it('should not call logout callback if not present', async () => {
-    const stationLogoutSpy = jest.spyOn(ccMock, 'stationLogout');
-
-    stationLogoutSpy.mockResolvedValue({} as LogoutSuccess);
+    ccMock.stationLogout.mockResolvedValue({} as LogoutSuccess);
 
     const {result} = renderHook(() =>
       useStationLogin({

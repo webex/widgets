@@ -12,6 +12,7 @@ import {
   ICustomState,
   AgentLoginProfile,
   LoginOptions,
+  WithWebex,
 } from './store.types';
 
 import {getFeatureFlags} from './util';
@@ -66,7 +67,7 @@ class Store implements IStore {
     return Store.instance;
   }
 
-  registerCC(webex?: {cc: IContactCenter}): Promise<void> {
+  registerCC(webex?: WithWebex['webex']): Promise<void> {
     if (webex) {
       this.cc = webex.cc;
     }
