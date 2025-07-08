@@ -36,24 +36,24 @@ describe('UserStateComponent', () => {
     logger: mockLogger,
   };
 
-  let mockGetDropdownClass,
-    mockBuildDropdownItems,
-    mockGetIconStyle,
-    mockGetTooltipText,
-    mockHandleSelectionChange,
-    mockSortDropdownItems,
-    mockGetPreviousSelectableState,
-    mockGetSelectedKey;
+  let getDropdownClassSpy,
+    buildDropdownItemsSpy,
+    getIconStyleSpy,
+    getTooltipTextSpy,
+    handleSelectionChangeSpy,
+    sortDropdownItemsSpy,
+    getPreviousSelectableStateSpy,
+    getSelectedKeySpy;
   beforeEach(() => {
     // Mock all utility functions
-    mockGetDropdownClass = jest.spyOn(userStateUtils, 'getDropdownClass');
-    mockGetIconStyle = jest.spyOn(userStateUtils, 'getIconStyle');
-    mockGetTooltipText = jest.spyOn(userStateUtils, 'getTooltipText');
-    mockHandleSelectionChange = jest.spyOn(userStateUtils, 'handleSelectionChange');
-    mockSortDropdownItems = jest.spyOn(userStateUtils, 'sortDropdownItems');
-    mockGetPreviousSelectableState = jest.spyOn(userStateUtils, 'getPreviousSelectableState');
-    mockGetSelectedKey = jest.spyOn(userStateUtils, 'getSelectedKey');
-    mockBuildDropdownItems = jest.spyOn(userStateUtils, 'buildDropdownItems');
+    getDropdownClassSpy = jest.spyOn(userStateUtils, 'getDropdownClass');
+    getIconStyleSpy = jest.spyOn(userStateUtils, 'getIconStyle');
+    getTooltipTextSpy = jest.spyOn(userStateUtils, 'getTooltipText');
+    handleSelectionChangeSpy = jest.spyOn(userStateUtils, 'handleSelectionChange');
+    sortDropdownItemsSpy = jest.spyOn(userStateUtils, 'sortDropdownItems');
+    getPreviousSelectableStateSpy = jest.spyOn(userStateUtils, 'getPreviousSelectableState');
+    getSelectedKeySpy = jest.spyOn(userStateUtils, 'getSelectedKey');
+    buildDropdownItemsSpy = jest.spyOn(userStateUtils, 'buildDropdownItems');
   });
 
   afterEach(() => {
@@ -148,7 +148,7 @@ describe('UserStateComponent', () => {
         render(<UserStateComponent {...defaultProps} />);
       });
 
-      expect(mockGetPreviousSelectableState).toHaveBeenCalledWith(defaultProps.idleCodes);
+      expect(getPreviousSelectableStateSpy).toHaveBeenCalledWith(defaultProps.idleCodes);
     });
 
     it('should call getSelectedKey with correct parameters', async () => {
@@ -156,7 +156,7 @@ describe('UserStateComponent', () => {
         render(<UserStateComponent {...defaultProps} />);
       });
 
-      expect(mockGetSelectedKey).toHaveBeenCalledWith(
+      expect(getSelectedKeySpy).toHaveBeenCalledWith(
         defaultProps.customState,
         defaultProps.currentState,
         defaultProps.idleCodes
@@ -168,7 +168,7 @@ describe('UserStateComponent', () => {
         render(<UserStateComponent {...defaultProps} />);
       });
 
-      expect(mockBuildDropdownItems).toHaveBeenCalledWith(defaultProps.customState, defaultProps.idleCodes);
+      expect(buildDropdownItemsSpy).toHaveBeenCalledWith(defaultProps.customState, defaultProps.idleCodes);
     });
 
     it('should call sortDropdownItems with items from buildDropdownItems', async () => {
@@ -176,7 +176,7 @@ describe('UserStateComponent', () => {
         render(<UserStateComponent {...defaultProps} />);
       });
 
-      expect(mockSortDropdownItems).toHaveBeenCalledWith(mockBuildDropdownItems.mock.results[0].value);
+      expect(sortDropdownItemsSpy).toHaveBeenCalledWith(buildDropdownItemsSpy.mock.results[0].value);
     });
 
     it('should call getDropdownClass with correct parameters', async () => {
@@ -184,7 +184,7 @@ describe('UserStateComponent', () => {
         render(<UserStateComponent {...defaultProps} />);
       });
 
-      expect(mockGetDropdownClass).toHaveBeenCalledWith(
+      expect(getDropdownClassSpy).toHaveBeenCalledWith(
         defaultProps.customState,
         defaultProps.currentState,
         defaultProps.idleCodes
@@ -196,7 +196,7 @@ describe('UserStateComponent', () => {
         render(<UserStateComponent {...defaultProps} />);
       });
 
-      expect(mockGetTooltipText).toHaveBeenCalledWith(
+      expect(getTooltipTextSpy).toHaveBeenCalledWith(
         defaultProps.customState,
         defaultProps.currentState,
         defaultProps.idleCodes
@@ -209,7 +209,7 @@ describe('UserStateComponent', () => {
       });
 
       // getIconStyle should be called for the items being rendered
-      expect(mockGetIconStyle).toHaveBeenCalled();
+      expect(getIconStyleSpy).toHaveBeenCalledWith({id: '0', name: 'Available'});
     });
   });
 
@@ -222,7 +222,7 @@ describe('UserStateComponent', () => {
       const select = screen.getByTestId('state-select').parentElement?.querySelector('select');
       fireEvent.change(select, {target: {value: '0'}});
 
-      expect(mockHandleSelectionChange).toHaveBeenCalledWith(
+      expect(handleSelectionChangeSpy).toHaveBeenCalledWith(
         '0',
         defaultProps.currentState,
         defaultProps.setAgentStatus,
@@ -237,8 +237,8 @@ describe('UserStateComponent', () => {
         render(<UserStateComponent {...defaultProps} customState={customState} />);
       });
 
-      expect(mockGetSelectedKey).toHaveBeenCalledWith(customState, defaultProps.currentState, defaultProps.idleCodes);
-      expect(mockBuildDropdownItems).toHaveBeenCalledWith(customState, defaultProps.idleCodes);
+      expect(getSelectedKeySpy).toHaveBeenCalledWith(customState, defaultProps.currentState, defaultProps.idleCodes);
+      expect(buildDropdownItemsSpy).toHaveBeenCalledWith(customState, defaultProps.idleCodes);
     });
   });
 
@@ -253,7 +253,7 @@ describe('UserStateComponent', () => {
 
       screen.rerender(<UserStateComponent {...defaultProps} customState={customState} />);
 
-      expect(mockGetSelectedKey).toHaveBeenLastCalledWith(
+      expect(getSelectedKeySpy).toHaveBeenLastCalledWith(
         customState,
         defaultProps.currentState,
         defaultProps.idleCodes
@@ -268,11 +268,11 @@ describe('UserStateComponent', () => {
 
       screen.rerender(<UserStateComponent {...defaultProps} />);
 
-      expect(mockGetSelectedKey).toHaveBeenCalledWith(defaultProps.customState, '3', defaultProps.idleCodes);
+      expect(getSelectedKeySpy).toHaveBeenCalledWith(defaultProps.customState, '3', defaultProps.idleCodes);
 
       screen.rerender(<UserStateComponent {...defaultProps} currentState="4" />);
 
-      expect(mockGetSelectedKey).toHaveBeenCalledWith(defaultProps.customState, '4', defaultProps.idleCodes);
+      expect(getSelectedKeySpy).toHaveBeenCalledWith(defaultProps.customState, '4', defaultProps.idleCodes);
     });
 
     it('should handle elapsed time formatting correctly', async () => {
@@ -309,7 +309,7 @@ describe('UserStateComponent', () => {
 
       // The getIconStyle should have been called with the item that has an empty name
       // due to the || '' fallback when currentState is not found in idleCodes
-      expect(mockGetIconStyle).toHaveBeenCalled();
+      expect(getIconStyleSpy).toHaveBeenCalledWith({id: '0', name: 'Available'});
     });
   });
 });
