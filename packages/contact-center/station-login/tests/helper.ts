@@ -708,18 +708,17 @@ describe('useStationLogin Hook', () => {
   });
 
   describe('#onCCSignOut', () => {
-    const stationLogoutSpy = jest.spyOn(ccMock, 'stationLogout');
-    const deregisterSpy = jest.spyOn(ccMock, 'deregister');
     beforeEach(() => {
       jest.clearAllMocks();
-      stationLogoutSpy.mockClear();
-      deregisterSpy.mockClear();
+      ccMock.stationLogout.mockClear();
+      ccMock.deregister.mockClear();
     });
 
     it('should call stationLogout when doStationLogout is not passed', async () => {
       const onCCSignOut = jest.fn();
       store.setIsAgentLoggedIn(true);
-      stationLogoutSpy.mockResolvedValue({} as LogoutSuccess);
+      ccMock.stationLogout.mockResolvedValue({} as LogoutSuccess);
+
       const {result} = renderHook(() =>
         useStationLogin({
           ...baseStationLoginProps,
@@ -769,7 +768,7 @@ describe('useStationLogin Hook', () => {
       const onCCSignOut = jest.fn();
       store.setIsAgentLoggedIn(true);
       const error = new Error('Logout failed');
-      stationLogoutSpy.mockRejectedValue(error);
+      ccMock.stationLogout.mockRejectedValue(error);
       const {result} = renderHook(() =>
         useStationLogin({
           ...baseStationLoginProps,
@@ -801,9 +800,9 @@ describe('useStationLogin Hook', () => {
     it('should handle error if deregister fails in onCCSignOut', async () => {
       const onCCSignOut = jest.fn();
       store.setIsAgentLoggedIn(true);
-      stationLogoutSpy.mockResolvedValue({} as LogoutSuccess);
+      ccMock.stationLogout.mockResolvedValue({} as LogoutSuccess);
       const error = new Error('Deregister failed');
-      deregisterSpy.mockRejectedValue(error);
+      ccMock.deregister.mockRejectedValue(error);
       const {result} = renderHook(() =>
         useStationLogin({
           ...baseStationLoginProps,
