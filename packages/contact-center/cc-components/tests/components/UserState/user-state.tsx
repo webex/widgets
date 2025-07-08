@@ -61,7 +61,7 @@ describe('UserStateComponent', () => {
     jest.restoreAllMocks();
   });
 
-  describe('Rendering', () => {
+  describe('Rendering - Tests for UI elements and visual states of UserState component', () => {
     it('should render the component with correct elements', async () => {
       let screen;
       await act(async () => {
