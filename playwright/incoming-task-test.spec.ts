@@ -312,7 +312,7 @@ const pageSetup = async (page: Page, loginMode: string) => {
     await telephonyLogin(page, loginMode);
   }
 
-  let ronapopupVisible = await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 10000 }).then(() => true).catch(() => false);
+  let ronapopupVisible = await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 5000 }).then(() => true).catch(() => false);
   if (ronapopupVisible) {
     await submitRonaPopup(page, RONA_OPTIONS.AVAILABLE);
   }
@@ -334,7 +334,7 @@ const pageSetup = async (page: Page, loginMode: string) => {
 
   await page.getByTestId('state-select').waitFor({ state: 'visible', timeout: 30000 });
 
-  ronapopupVisible = await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 10000 }).then(() => true).catch(() => false);
+  ronapopupVisible = await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 3000 }).then(() => true).catch(() => false);
   if (ronapopupVisible) {
     await submitRonaPopup(page, RONA_OPTIONS.AVAILABLE);
   }
@@ -503,7 +503,7 @@ test.describe('Incoming Call Task Tests for Desktop Mode', async () => {
         //check if the station logout button is hidden after logouts
         const isLogoutButtonHidden = await page
           .getByTestId('samples:station-logout-button')
-          .waitFor({ state: 'hidden', timeout: 30000 })
+          .waitFor({ state: 'hidden', timeout: 20000 })
           .then(() => true)
           .catch(() => false);
       }
@@ -942,6 +942,99 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
   })
 
 
+  test('should handle multiple incoming tasks with callback verifications', async () => {
+
+    await changeUserState(page, USER_STATES.MEETING);
+    await page.waitForTimeout(1000);
+
+    await Promise.all([
+      createCallTask(callerpage),
+      createChatTask(chatPage),
+      createEmailTask()
+    ]);
+
+
+    await page.waitForTimeout(50000);
+
+    await changeUserState(page, USER_STATES.AVAILABLE);
+
+    const incomingCallTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
+    const incomingChatTaskDiv = page.getByTestId('samples:incoming-task-chat').first();
+    const incomingEmailTaskDiv = page.getByTestId('samples:incoming-task-email').first();
+
+
+    await incomingCallTaskDiv.waitFor({ state: 'visible', timeout: 5000 });
+    await extensionPage.locator('[data-test="generic-person-item-base"]').first().waitFor({ state: 'visible', timeout: 5000 });
+    await page.waitForTimeout(3000);
+    await acceptExtensionCall(extensionPage);
+
+    await waitForState(page, USER_STATES.ENGAGED);
+    await verifyCurrentState(page, USER_STATES.ENGAGED);
+    await waitForStateLogs(capturedLogs, USER_STATES.ENGAGED);
+    expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.ENGAGED);
+
+    capturedLogs.length = 0;
+
+    await incomingChatTaskDiv.waitFor({ state: 'visible', timeout: 5000 });
+    await page.waitForTimeout(3000);
+    await acceptIncomingTask(page, TASK_TYPES.CHAT);
+
+
+    await waitForState(page, USER_STATES.ENGAGED);
+    await verifyCurrentState(page, USER_STATES.ENGAGED);
+    await waitForStateLogs(capturedLogs, USER_STATES.ENGAGED);
+    expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.ENGAGED);
+
+    capturedLogs.length = 0;
+
+
+    await incomingEmailTaskDiv.waitFor({ state: 'visible', timeout: 5000 });
+    await page.waitForTimeout(3000);
+    await acceptIncomingTask(page, TASK_TYPES.EMAIL);
+
+
+    await waitForState(page, USER_STATES.ENGAGED);
+    await verifyCurrentState(page, USER_STATES.ENGAGED);
+    await waitForStateLogs(capturedLogs, USER_STATES.ENGAGED);
+    expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.ENGAGED);
+
+    let count = 3;
+
+
+    while (count > 0) {
+      capturedLogs.length = 0;
+      await page.waitForTimeout(2000);
+      const endButton = page.getByTestId(/^call-control:end-\w+$/).first();
+      const endButtonVisible = await endButton.waitFor({ state: 'visible', timeout: 2000 }).then(() => true).catch(() => false);
+      if (endButtonVisible) {
+        await endButton.click({ timeout: 5000 });
+        await submitWrapup(page, WRAPUP_REASONS.SALE);
+      } else {
+
+        const wrapupBox = page.getByTestId('wrapup-button').first();
+        const isWrapupBoxVisible = await wrapupBox.waitFor({ state: 'visible', timeout: 2000 }).then(() => true).catch(() => false);
+        if (isWrapupBoxVisible) {
+          await submitWrapup(page, WRAPUP_REASONS.SALE);
+          await page.waitForTimeout(2000)
+        } else {
+          break;
+        }
+
+      }
+
+
+      await waitForState(page, count === 1 ? USER_STATES.AVAILABLE : USER_STATES.ENGAGED);
+      await verifyCurrentState(page, count === 1 ? USER_STATES.AVAILABLE : USER_STATES.ENGAGED);
+      await waitForStateLogs(capturedLogs, count === 1 ? USER_STATES.AVAILABLE : USER_STATES.ENGAGED);
+      expect(getLastStateFromLogs(capturedLogs)).toBe(count === 1 ? USER_STATES.AVAILABLE : USER_STATES.ENGAGED);
+      await waitForWrapupReasonLogs(capturedLogs, WRAPUP_REASONS.SALE);
+      expect(getLastWrapupReasonFromLogs(capturedLogs)).toBe(WRAPUP_REASONS.SALE);
+      expect(verifyCallbackLogs(capturedLogs, WRAPUP_REASONS.SALE, count === 1 ? USER_STATES.AVAILABLE : USER_STATES.ENGAGED)).toBe(true);
+      count--;
+    }
+  })
+
+
   test.afterAll(async () => {
     if (page) {
       const logoutButton = page.getByTestId('samples:station-logout-button');
@@ -951,7 +1044,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
         //check if the station logout button is hidden after logouts
         const isLogoutButtonHidden = await page
           .getByTestId('samples:station-logout-button')
-          .waitFor({ state: 'hidden', timeout: 30000 })
+          .waitFor({ state: 'hidden', timeout: 20000 })
           .then(() => true)
           .catch(() => false);
       }
@@ -986,7 +1079,6 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
   })
 
 });
-
 
 
 test.describe('Incoming Tasks tests for multi-session', async () => {
@@ -1187,7 +1279,7 @@ test.describe('Incoming Tasks tests for multi-session', async () => {
         //check if the station logout button is hidden after logouts
         const isLogoutButtonHidden = await page
           .getByTestId('samples:station-logout-button')
-          .waitFor({ state: 'hidden', timeout: 30000 })
+          .waitFor({ state: 'hidden', timeout: 20000 })
           .then(() => true)
           .catch(() => false);
       }
