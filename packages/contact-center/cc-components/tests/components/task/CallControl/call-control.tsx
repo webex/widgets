@@ -3,7 +3,7 @@ import React from 'react';
 import {render, screen, fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import CallControlComponent from '../../../../src/components/task/CallControl/call-control';
-import {mockTask} from '@webex/cc-store';
+import {mockTask} from '@webex/test-fixtures';
 
 jest.mock('@webex/cc-store', () => ({
   DestinationType: {

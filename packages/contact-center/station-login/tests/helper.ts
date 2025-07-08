@@ -1,6 +1,7 @@
 import {renderHook, act, waitFor} from '@testing-library/react';
 import {useStationLogin} from '../src/helper';
-import store, {CC_EVENTS, mockCC} from '@webex/cc-store';
+import store, {CC_EVENTS} from '@webex/cc-store';
+import {mockCC} from '@webex/test-fixtures';
 import {LogoutSuccess, StationLoginSuccessResponse} from '@webex/plugin-cc';
 
 jest.mock('@webex/cc-store', () => {

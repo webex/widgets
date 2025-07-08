@@ -1,5 +1,5 @@
 import {ITask, Profile, TaskData, TaskResponse} from '@webex/plugin-cc';
-import {IContactCenter} from './store.types';
+import {IContactCenter} from '@webex/cc-store';
 
 const mockProfile: Profile = {
   teams: [{teamId: 'team1', teamName: 'Team 1'}],

@@ -1,5 +1,5 @@
 import {getFeatureFlags} from '../src/util';
-import {mockProfile} from '../src//store.fixtures';
+import {mockProfile} from '@webex/test-fixtures';
 
 describe('getFeatureFlags', () => {
   it('should return an object with feature flags from agent profile with corresponding values', () => {

@@ -1,4 +1,4 @@
-import {mockTask} from '@webex/cc-store';
+import {mockTask} from '@webex/test-fixtures';
 import {findHoldTimestamp, getControlsVisibility} from '../../src/Utils/task-util';
 describe('getControlsVisibility', () => {
   it('should show correct controls when station logis is BROWSER, all flags are enabled and media type is telehphony', () => {

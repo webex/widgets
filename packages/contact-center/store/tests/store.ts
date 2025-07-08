@@ -2,7 +2,7 @@ import {makeAutoObservable} from 'mobx';
 import Webex from '@webex/plugin-cc';
 import store from '../src/store'; // Adjust the import path as necessary
 import {IStore} from '../src/store.types';
-import {mockProfile} from '../src/store.fixtures';
+import {mockProfile} from '@webex/test-fixtures';
 
 let mockShouldCallback = true;
 let webexInitSpy;

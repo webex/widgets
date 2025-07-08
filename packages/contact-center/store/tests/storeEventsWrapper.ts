@@ -25,7 +25,7 @@ console.log = jest.fn();
 import {CC_EVENTS, TASK_EVENTS} from '../src/store.types';
 import storeWrapper from '../src/storeEventsWrapper';
 import {ITask} from '@webex/plugin-cc';
-import {mockCC, mockTask as mockTaskFixture} from '../src/store.fixtures';
+import {mockCC, mockTask as mockTaskFixture} from '@webex/test-fixtures';
 
 jest.mock('../src/store', () => ({
   getInstance: jest.fn().mockReturnValue({

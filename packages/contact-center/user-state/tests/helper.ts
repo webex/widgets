@@ -1,6 +1,7 @@
 import {renderHook, act, waitFor} from '@testing-library/react';
 import {useUserState} from '../src/helper';
-import store, {mockCC} from '@webex/cc-store';
+import store from '@webex/cc-store';
+import {mockCC} from '@webex/test-fixtures';
 
 describe('useUserState Hook', () => {
   const idleCodes = [

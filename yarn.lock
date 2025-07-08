@@ -9402,6 +9402,7 @@ __metadata:
     "@types/jest": "npm:29.5.14"
     "@types/react-test-renderer": "npm:18"
     "@webex/cc-store": "workspace:*"
+    "@webex/test-fixtures": "workspace:*"
     babel-loader: "npm:9.2.1"
     eslint: "npm:^9.20.1"
     eslint-config-prettier: "npm:^10.0.1"
@@ -9446,6 +9447,7 @@ __metadata:
     "@types/react-test-renderer": "npm:18"
     "@webex/cc-components": "workspace:*"
     "@webex/cc-store": "workspace:*"
+    "@webex/test-fixtures": "workspace:*"
     babel-jest: "npm:29.7.0"
     babel-loader: "npm:9.2.1"
     eslint: "npm:^9.20.1"
@@ -9490,6 +9492,7 @@ __metadata:
     "@types/jest": "npm:29.5.14"
     "@types/react-test-renderer": "npm:18"
     "@webex/plugin-cc": "npm:3.8.1-next.12"
+    "@webex/test-fixtures": "workspace:*"
     babel-jest: "npm:29.7.0"
     babel-loader: "npm:9.2.1"
     eslint: "npm:^9.20.1"
@@ -9531,6 +9534,7 @@ __metadata:
     "@types/react-test-renderer": "npm:18"
     "@webex/cc-components": "workspace:*"
     "@webex/cc-store": "workspace:*"
+    "@webex/test-fixtures": "workspace:*"
     babel-jest: "npm:29.7.0"
     babel-loader: "npm:9.2.1"
     eslint: "npm:^9.20.1"
@@ -11869,6 +11873,37 @@ __metadata:
   checksum: 10c0/74bd9539a229aaf2cd52701fd234f6da7b2de69c6a0be086a277ed37b9b7e7a5719d8e54537290bb2d99d5f93bd3624028bd7804798606da6a04c777b71d1ee0
   languageName: node
   linkType: hard
+
+"@webex/test-fixtures@workspace:*, @webex/test-fixtures@workspace:packages/contact-center/test-fixtures":
+  version: 0.0.0-use.local
+  resolution: "@webex/test-fixtures@workspace:packages/contact-center/test-fixtures"
+  dependencies:
+    "@babel/core": "npm:7.25.2"
+    "@babel/preset-env": "npm:7.25.4"
+    "@babel/preset-react": "npm:7.24.7"
+    "@babel/preset-typescript": "npm:7.25.9"
+    "@eslint/js": "npm:^9.20.0"
+    "@webex/cc-store": "workspace:*"
+    babel-loader: "npm:9.2.1"
+    eslint: "npm:^9.20.1"
+    eslint-config-prettier: "npm:^10.0.1"
+    eslint-config-standard: "npm:^17.1.0"
+    eslint-plugin-import: "npm:^2.25.2"
+    eslint-plugin-n: "npm:^15.0.0 || ^16.0.0 "
+    eslint-plugin-prettier: "npm:^5.2.3"
+    eslint-plugin-promise: "npm:^6.0.0"
+    eslint-plugin-react: "npm:^7.37.4"
+    file-loader: "npm:6.2.0"
+    globals: "npm:^16.0.0"
+    prettier: "npm:^3.5.1"
+    ts-loader: "npm:9.5.1"
+    typescript: "npm:5.6.3"
+    typescript-eslint: "npm:^8.24.1"
+    webpack: "npm:5.94.0"
+    webpack-cli: "npm:5.1.4"
+    webpack-merge: "npm:6.0.1"
+  languageName: unknown
+  linkType: soft
 
 "@webex/test-helper-chai@npm:2.60.2":
   version: 2.60.2

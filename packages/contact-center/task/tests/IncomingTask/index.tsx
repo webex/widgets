@@ -2,7 +2,8 @@ import React from 'react';
 import {render} from '@testing-library/react';
 import * as helper from '../../src/helper';
 import {IncomingTask} from '../../src';
-import store, {mockTask} from '@webex/cc-store';
+import store from '@webex/cc-store';
+import {mockTask} from '@webex/test-fixtures';
 import '@testing-library/jest-dom';
 
 // Mock the store

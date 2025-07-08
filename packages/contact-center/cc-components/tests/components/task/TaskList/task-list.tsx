@@ -3,7 +3,7 @@ import {render, screen, cleanup} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import TaskListComponent from '../../../../src/components/task/TaskList/task-list';
 import {TaskListComponentProps} from '../../../../src/components/task/task.types';
-import {mockTask} from '@webex/cc-store';
+import {mockTask} from '@webex/test-fixtures';
 
 // This test suite is skipped because we have removed the :broken from the command
 // line in the package.json scripts to run these tests in pipeline
