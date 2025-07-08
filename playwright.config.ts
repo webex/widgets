@@ -10,7 +10,8 @@ dotenv.config({path: path.resolve(__dirname, '.env')});
  */
 export default defineConfig({
   testDir: './playwright',
-
+  /* Maximum time one test can run for. */
+  timeout: 180000,
   /* Run your local dev server before starting the tests */
   webServer: {
     command: 'yarn workspace samples-cc-react-app serve',

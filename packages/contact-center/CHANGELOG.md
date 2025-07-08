@@ -1,3 +1,87 @@
+# [1.28.0-ccwidgets.88](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.87...v1.28.0-ccwidgets.88) (2025-07-07)
+
+
+### Features
+
+* **cc-widgets:** integ env ([#488](https://github.com/webex/widgets/issues/488)) ([aeefbd5](https://github.com/webex/widgets/commit/aeefbd5939a86db6a0e62fe402844e518216f94a))
+
+# [1.28.0-ccwidgets.87](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.86...v1.28.0-ccwidgets.87) (2025-07-07)
+
+
+### Features
+
+* **cc-widgets:** UI Automation for Station Login Tests ([#484](https://github.com/webex/widgets/issues/484)) ([7480fcd](https://github.com/webex/widgets/commit/7480fcdb67f2c13607fdbafc6dde3aef97c95bc0))
+
+# [1.28.0-ccwidgets.86](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.85...v1.28.0-ccwidgets.86) (2025-07-04)
+
+
+### Bug Fixes
+
+* **cc-samples:** refresh page onCCSignout ([#489](https://github.com/webex/widgets/issues/489)) ([22e4ee4](https://github.com/webex/widgets/commit/22e4ee44621228e7f5c1a82ae9bd2b8fee079390))
+
+# [1.28.0-ccwidgets.85](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.84...v1.28.0-ccwidgets.85) (2025-07-03)
+
+
+### Bug Fixes
+
+* **cc-samples:** add loader on init and expand CAD ([#487](https://github.com/webex/widgets/issues/487)) ([c319657](https://github.com/webex/widgets/commit/c3196576a2e5538a0ef19c3acda12a3b8b1c4d4d))
+
+# [1.28.0-ccwidgets.84](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.83...v1.28.0-ccwidgets.84) (2025-07-03)
+
+
+### Bug Fixes
+
+* **incoming-task:** fix-incoming-task-overflow-issue ([#482](https://github.com/webex/widgets/issues/482)) ([af70bee](https://github.com/webex/widgets/commit/af70bee48a63d1bc10549e6ba51801d3acf70964))
+
+# [1.28.0-ccwidgets.83](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.82...v1.28.0-ccwidgets.83) (2025-07-01)
+
+
+### Features
+
+* **cc-widgets:** UI Automation for State Change ([#476](https://github.com/webex/widgets/issues/476)) ([999cb53](https://github.com/webex/widgets/commit/999cb533c83c3e5e8f7045fa89f1b5629e94a041))
+
+# [1.28.0-ccwidgets.82](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.81...v1.28.0-ccwidgets.82) (2025-07-01)
+
+
+### Features
+
+* **cc-widgets:** autoWrapup implemented ([#472](https://github.com/webex/widgets/issues/472)) ([07c4ef1](https://github.com/webex/widgets/commit/07c4ef18dbe4ddab8b813bb4ef36902903e5b586))
+
+# [1.28.0-ccwidgets.81](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.80...v1.28.0-ccwidgets.81) (2025-06-30)
+
+
+### Bug Fixes
+
+* **cc-widgets:** update the workflow for pull request by adding and modifying the required env variables ([#481](https://github.com/webex/widgets/issues/481)) ([fd71837](https://github.com/webex/widgets/commit/fd718375eab379a439f281ed73559637180b6532))
+
+# [1.28.0-ccwidgets.80](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.79...v1.28.0-ccwidgets.80) (2025-06-26)
+
+
+### Bug Fixes
+
+* **call-control:** implement-holdtimer-fix ([#479](https://github.com/webex/widgets/issues/479)) ([c53bf3b](https://github.com/webex/widgets/commit/c53bf3bc4c2b3e63bd818335a2e53de783ec8dd5))
+
+# [1.28.0-ccwidgets.79](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.78...v1.28.0-ccwidgets.79) (2025-06-26)
+
+
+### Bug Fixes
+
+* **cc-widgets:** update the workflow for pull request by adding the required env variables ([#480](https://github.com/webex/widgets/issues/480)) ([247ca45](https://github.com/webex/widgets/commit/247ca45b8d60c8c52c318a0528cfb32c80bc6c1d))
+
+# [1.28.0-ccwidgets.78](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.77...v1.28.0-ccwidgets.78) (2025-06-24)
+
+
+### Bug Fixes
+
+* set a valid default device type on initial login ([#475](https://github.com/webex/widgets/issues/475)) ([063f1ac](https://github.com/webex/widgets/commit/063f1acdf4944b885216bee6d60f65fbe24f9b91))
+
+# [1.28.0-ccwidgets.77](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.76...v1.28.0-ccwidgets.77) (2025-06-24)
+
+
+### Bug Fixes
+
+* **station-login:** doStationLogout prop to logout on signout confirm ([#473](https://github.com/webex/widgets/issues/473)) ([a38cc5b](https://github.com/webex/widgets/commit/a38cc5b80fdc1833b1f3672bcc674c6b5b8e3ce1))
+
 # [1.28.0-ccwidgets.76](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.75...v1.28.0-ccwidgets.76) (2025-06-23)
 
 

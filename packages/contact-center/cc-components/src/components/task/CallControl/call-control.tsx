@@ -2,12 +2,26 @@ import React, {useEffect, useState} from 'react';
 
 import {CallControlComponentProps, DestinationType, CallControlMenuType} from '../task.types';
 import './call-control.styles.scss';
-import {PopoverNext, SelectNext, TooltipNext, Text, ButtonCircle, ButtonPill} from '@momentum-ui/react-collaboration';
-import {Item} from '@react-stately/collections';
-import {Icon, Button} from '@momentum-design/components/dist/react';
+import {PopoverNext, TooltipNext, Text, ButtonCircle} from '@momentum-ui/react-collaboration';
+import {Icon, Button, Select, Option} from '@momentum-design/components/dist/react';
 import ConsultTransferPopoverComponent from './CallControlCustom/consult-transfer-popover';
+import AutoWrapupTimer from '../AutoWrapupTimer/AutoWrapupTimer';
 import type {MEDIA_CHANNEL as MediaChannelType} from '../task.types';
 import {getMediaTypeInfo} from '../../../utils';
+import {
+  RESUME_CALL,
+  HOLD_CALL,
+  CONSULT_AGENT,
+  TRANSFER,
+  PAUSE_RECORDING,
+  RESUME_RECORDING,
+  END,
+  WRAP_UP,
+  WRAP_UP_INTERACTION,
+  WRAP_UP_REASON,
+  SELECT,
+  SUBMIT_WRAP_UP,
+} from '../constants';
 
 function CallControlComponent(props: CallControlComponentProps) {
   const [selectedWrapupReason, setSelectedWrapupReason] = useState<string | null>(null);
@@ -41,6 +55,8 @@ function CallControlComponent(props: CallControlComponentProps) {
     setLastTargetType,
     controlVisibility,
     logger,
+    secondsUntilAutoWrapup,
+    cancelAutoWrapup,
   } = props;
 
   useEffect(() => {
@@ -131,12 +147,15 @@ function CallControlComponent(props: CallControlComponentProps) {
     currentTask.data.interaction.mediaChannel as MediaChannelType
   );
 
+  const mediaType = currentTask.data.interaction.mediaType as MediaChannelType;
+  const isTelephony = mediaType === 'telephony';
+
   const buttons = [
     {
       id: 'hold',
       icon: isHeld ? 'play-bold' : 'pause-bold',
       onClick: () => handletoggleHold(),
-      tooltip: isHeld ? 'Resume the call' : 'Hold the call',
+      tooltip: isHeld ? RESUME_CALL : HOLD_CALL,
       className: 'call-control-button',
       disabled: false,
       isVisible: controlVisibility.holdResume,
@@ -144,7 +163,7 @@ function CallControlComponent(props: CallControlComponentProps) {
     {
       id: 'consult',
       icon: 'headset-bold',
-      tooltip: 'Consult with another agent',
+      tooltip: CONSULT_AGENT,
       className: 'call-control-button',
       disabled: false,
       menuType: 'Consult',
@@ -153,7 +172,7 @@ function CallControlComponent(props: CallControlComponentProps) {
     {
       id: 'transfer',
       icon: 'next-bold',
-      tooltip: `Transfer ${currentMediaType.labelName}`,
+      tooltip: `${TRANSFER} ${currentMediaType.labelName}`,
       className: 'call-control-button',
       disabled: false,
       menuType: 'Transfer',
@@ -163,7 +182,7 @@ function CallControlComponent(props: CallControlComponentProps) {
       id: 'record',
       icon: isRecording ? 'record-paused-bold' : 'record-bold',
       onClick: () => toggleRecording(),
-      tooltip: isRecording ? 'Pause Recording' : 'Resume Recording',
+      tooltip: isRecording ? PAUSE_RECORDING : RESUME_RECORDING,
       className: 'call-control-button',
       disabled: false,
       isVisible: controlVisibility.pauseResumeRecording,
@@ -172,16 +191,15 @@ function CallControlComponent(props: CallControlComponentProps) {
       id: 'end',
       icon: 'cancel-regular',
       onClick: endCall,
-      tooltip: `End ${currentMediaType.labelName}`,
+      tooltip: `${END} ${currentMediaType.labelName}`,
       className: 'call-control-button-cancel',
       disabled: isHeld,
       isVisible: controlVisibility.end,
     },
   ];
 
-  const filteredButtons = consultInitiated
-    ? buttons.filter((button) => !['hold', 'consult'].includes(button.id))
-    : buttons;
+  const filteredButtons =
+    consultInitiated && isTelephony ? buttons.filter((button) => !['hold', 'consult'].includes(button.id)) : buttons;
 
   if (!currentTask) return null;
 
@@ -197,7 +215,7 @@ function CallControlComponent(props: CallControlComponentProps) {
         autoPlay
       ></audio>
       <div className="call-control-container" data-testid="call-control-container">
-        {!consultAccepted && !controlVisibility.wrapup && (
+        {!(consultAccepted && isTelephony) && !controlVisibility.wrapup && (
           <div className="button-group">
             {filteredButtons.map((button, index) => {
               if (!button.isVisible) return null;
@@ -235,7 +253,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                           <ButtonCircle
                             className={button.className}
                             aria-label={button.tooltip}
-                            disabled={button.disabled || consultInitiated}
+                            disabled={button.disabled || (consultInitiated && isTelephony)}
                             data-testid="ButtonCircle"
                             onPress={() => handlePopoverOpen(button.menuType as CallControlMenuType)}
                           >
@@ -274,11 +292,12 @@ function CallControlComponent(props: CallControlComponentProps) {
                   triggerComponent={
                     <ButtonCircle
                       className={
-                        button.className + (button.disabled || consultInitiated ? ` ${button.className}-disabled` : '')
+                        button.className +
+                        (button.disabled || (consultInitiated && isTelephony) ? ` ${button.className}-disabled` : '')
                       }
                       data-testid="ButtonCircle"
                       onPress={button.onClick}
-                      disabled={button.disabled || consultInitiated}
+                      disabled={button.disabled || (consultInitiated && isTelephony)}
                       aria-label={button.tooltip}
                     >
                       <Icon className={button.className + '-icon'} name={button.icon} />
@@ -314,7 +333,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                   type="button"
                   role="button"
                 >
-                  Wrap up
+                  {WRAP_UP}
                 </Button>
               }
               variant="medium"
@@ -322,40 +341,50 @@ function CallControlComponent(props: CallControlComponentProps) {
               offsetDistance={2}
               className="wrapup-popover"
             >
+              {currentTask.autoWrapup && (
+                <AutoWrapupTimer
+                  secondsUntilAutoWrapup={secondsUntilAutoWrapup}
+                  allowCancelAutoWrapup={false} // TODO: https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6752 change to currentTask.autoWrapup.allowCancelAutoWrapup when its made supported in multi session from SDK side
+                  handleCancelWrapup={cancelAutoWrapup}
+                />
+              )}
+
               <Text className="wrapup-header" tagName={'small'} type="body-large-bold">
-                Wrap-up Interaction
+                {WRAP_UP_INTERACTION}
               </Text>
-              <Text className="wrapup-header" tagName={'small'} type="body-secondary">
-                Wrap-up reason
-              </Text>
-              <SelectNext
-                aria-label="wrapup-reason"
+              <Select
+                label={WRAP_UP_REASON}
+                help-text-type=""
+                height="auto"
+                data-aria-label="wrapup-reason"
+                toggletip-text=""
+                toggletip-placement=""
+                info-icon-aria-label=""
+                name=""
                 className="wrapup-select"
-                onSelectionChange={(key) => {
+                placeholder={SELECT}
+                onChange={(event: CustomEvent) => {
+                  const key = event.detail.value;
                   const selectedItem = wrapupCodes?.find((code) => code.id === key);
                   handleWrapupChange(selectedItem.name, selectedItem.id);
                 }}
-                items={wrapupCodes}
-                showBorder={false}
-                placeholder="Select"
               >
-                {(item) => (
-                  <Item key={item.id} textValue={item.name}>
-                    <Text className="wrapup-name" tagName={'small'}>
-                      {item.name}
-                    </Text>
-                  </Item>
-                )}
-              </SelectNext>
-              <Icon className="wrapup-select-arrow-icon" name="arrow-down-bold" title="" />
-              <ButtonPill
+                {wrapupCodes?.map((code) => (
+                  <Option key={code.id} value={code.id}>
+                    {code.name}
+                  </Option>
+                ))}
+              </Select>
+              <Button
+                onClick={handleWrapupCall}
+                variant="primary"
                 className="submit-wrapup-button"
-                onPress={handleWrapupCall}
-                disabled={selectedWrapupId && selectedWrapupReason ? false : true}
+                data-testid="submit-wrapup-button"
                 aria-label="Submit wrap-up"
+                disabled={selectedWrapupId && selectedWrapupReason ? false : true}
               >
-                Submit & Wrap up
-              </ButtonPill>
+                {SUBMIT_WRAP_UP}
+              </Button>
             </PopoverNext>
           </div>
         )}

@@ -55,10 +55,15 @@ function App() {
   const [incomingTasks, setIncomingTasks] = useState([]);
   const [loginType, setLoginType] = useState('token');
   const [showAgentProfile, setShowAgentProfile] = useState(false);
+  const [doStationLogout, setDoStationLogout] = useState(true);
 
   const [collapsedTasks, setCollapsedTasks] = React.useState([]);
   const [showLoader, setShowLoader] = useState(false);
-  const [toast, setToast] = useState<{type: 'success' | 'error'}|null>(null);
+  const [toast, setToast] = useState<{type: 'success' | 'error'} | null>(null);
+  const [integrationEnv, setintegrationEnv] = useState(() => {
+    const savedintegrationEnv = window.localStorage.getItem('integrationEnv');
+    return savedintegrationEnv === 'true';
+  });
 
   const handleSaveStart = () => {
   setShowLoader(true);
@@ -114,6 +119,13 @@ const handleSaveEnd = (isComplete: boolean) => {
     cc: {
       allowMultiLogin: isMultiLoginEnabled,
     },
+    ...(integrationEnv && {
+      services: {
+        discovery: {
+          u2c: 'https://u2c-intb.ciscospark.com/u2c/api/v1',
+        },
+      },
+    }),
   };
 
   const onLogin = () => {
@@ -128,6 +140,7 @@ const handleSaveEnd = (isComplete: boolean) => {
 
   const onCCSignOut = () => {
     console.log('CC Sign out has been successful');
+    window.location.reload();
   };
 
   const onAccepted = ({task}) => {
@@ -279,18 +292,21 @@ const onTaskDeclined = (task,reason) => {
 
     const webexConfig = {
       config: {
-        "appName": "sdk-samples",
-        "appPlatform": "testClient",
-        "fedramp": false,
-        "logger": {
-          "level": "info"
+        appName: 'sdk-samples',
+        appPlatform: 'testClient',
+        fedramp: false,
+        logger: {
+          level: 'info',
         },
-        "credentials": {
-          "client_id": "C04ef08ffce356c3161bb66b15dbdd98d26b6c683c5ce1a1a89efad545fdadd74",
-          "redirect_uri": redirectUri,
-          "scope": requestedScopes,
-        }
-      }
+        credentials: {
+          ...(integrationEnv && {authorizeUrl: 'https://idbrokerbts.webex.com/idb/oauth2/v1/authorize'}),
+          client_id: integrationEnv
+            ? 'Cd0dd53db1f470a5a9941e5eee31575bd0889d7006e3a80a1443ad12a42049da1'
+            : 'C04ef08ffce356c3161bb66b15dbdd98d26b6c683c5ce1a1a89efad545fdadd74',
+          redirect_uri: redirectUri,
+          scope: requestedScopes,
+        },
+      },
     };
 
     const webex = Webex.init(webexConfig);
@@ -318,6 +334,9 @@ const onTaskDeclined = (task,reason) => {
   useEffect(() => {
     window.localStorage.setItem('currentTheme', currentTheme);
   }, [currentTheme]);
+  useEffect(() => {
+    window.localStorage.setItem('integrationEnv', JSON.stringify(integrationEnv));
+  }, [integrationEnv]);
 
   useEffect(() => {
     store.setIncomingTaskCb(onIncomingTaskCB);
@@ -328,14 +347,16 @@ const onTaskDeclined = (task,reason) => {
     };
   }, []);
 
-  const onStateChange = (status) => {
-    console.log('onStateChange invoked', status);
-    if (!status || !status.name) return;
-    if (status.name !== 'RONA') {
-      setShowRejectedPopup(false);
-      setRejectedReason('');
-    }
-  };
+ const onStateChange = (status) => {
+  console.log('onStateChange invoked', status);
+  //adding a log to be used for automation
+  console.log('onStateChange invoked with state name:', status?.name);
+  if (!status || !status.name) return;
+  if (status.name !== 'RONA') {
+    setShowRejectedPopup(false);
+    setRejectedReason('');
+  }
+};
 
     const stationLogout = () => {
     store.cc.stationLogout({logoutReason: 'User requested logout'})
@@ -347,6 +368,15 @@ const onTaskDeclined = (task,reason) => {
       });
   };
 
+  const formatWidgetName = (widget: string) => {
+    switch (widget) {
+      case 'callControlCAD':
+        return 'Call Controls with Call Associated Data (CAD)';
+      default:
+        return widget.charAt(0).toUpperCase() + widget.slice(1).replace(/([A-Z])/g, ' $1');
+    }
+  };
+
   return (
     <div className="app mds-typography">
       <ThemeProvider
@@ -354,7 +384,7 @@ const onTaskDeclined = (task,reason) => {
       >
         <IconProvider iconSet="momentum-icons">
           <div className="webexTheme">
-            <h1>Contact Center widgets in a react app</h1>
+            <h1>Contact Center Widgets in a React app</h1>
               {showLoader && (
                 <div className="profile-loader-overlay">
                     <div className="profile-loader-spinner" aria-label="Loading" />
@@ -419,6 +449,7 @@ const onTaskDeclined = (task,reason) => {
                     )}
                     {loginType === 'oauth' && (
                       <Button
+                        data-testid="samples:login_with_webex_button"
                         onClick={doOAuthLogin}
                         variant="primary"
                       >
@@ -444,9 +475,10 @@ const onTaskDeclined = (task,reason) => {
                               name={widget}
                               checked={selectedWidgets[widget]}
                               onChange={handleCheckboxChange}
+                              data-testid={`samples:widget-${widget}`}
                             />
                             &nbsp;
-                            {widget.charAt(0).toUpperCase() + widget.slice(1).replace(/([A-Z])/g, ' $1')}&nbsp;
+                            {formatWidgetName(widget)}&nbsp;
                             {widget === 'outdialCall' && (
                               <span style={{display: 'inline-flex', alignItems: 'center'}}>
                                 <PopoverNext
@@ -493,6 +525,7 @@ const onTaskDeclined = (task,reason) => {
                       }}
                     />
                     <Checkbox
+                      data-testid="samples:show-agent-profile-checkbox"
                       checked={showAgentProfile}
                       aria-label="theme checkbox"
                       id="theme-checkbox"
@@ -502,8 +535,28 @@ const onTaskDeclined = (task,reason) => {
                         setShowAgentProfile(!showAgentProfile);
                       }}
                     />
+                    <Checkbox
+                      checked={doStationLogout}
+                      aria-label="theme checkbox"
+                      id="theme-checkbox"
+                      label="Do Station Logout"
+                      // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
+                      onchange={() => {
+                        setDoStationLogout(!doStationLogout);
+                      }}
+                    />
+                    <Checkbox
+                      checked={integrationEnv}
+                      aria-label="integration env checkbox"
+                      id="integration-env-checkbox"
+                      label="Enable Integration Env"
+                      // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
+                      onchange={() => {
+                        setintegrationEnv(!integrationEnv);
+                      }}
+                    />
                     {store.isAgentLoggedIn && (
-                      <Button id="logoutAgent" onClick={stationLogout} color="positive" className='stationLogoutButtonClass'>
+                      <Button id="logoutAgent" onClick={stationLogout} color="positive" className='stationLogoutButtonClass' data-testid="samples:station-logout-button">
                         Station Logout
                       </Button>
                     )}
@@ -515,6 +568,7 @@ const onTaskDeclined = (task,reason) => {
                     <legend className="legend-box">&nbsp;SDK Toggles&nbsp;</legend>
                     <label style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
                       <input
+                        data-testid="samples:multi-login-enable-checkbox"
                         type="checkbox"
                         id="multiLoginFlag"
                         name="multiLoginFlag"
@@ -550,10 +604,13 @@ const onTaskDeclined = (task,reason) => {
               <Button
                 disabled={accessToken.trim() === ''}
                 onClick={() => {
+                  setShowLoader(true);
                   store.init({webexConfig, access_token: accessToken}).then(() => {
                     setIsSdkReady(true);
+                    setShowLoader(false);
                   });
                 }}
+                data-testid="samples:init-widgets-button"
               >
                 Init Widgets
               </Button>
@@ -642,7 +699,7 @@ const onTaskDeclined = (task,reason) => {
                       <fieldset className="fieldset">
                         <legend className="legend-box">Station Login</legend>
                         <div className="station-login">
-                          <StationLogin onLogin={onLogin} onLogout={onLogout} onCCSignOut={onCCSignOut} profileMode={false} />
+                          <StationLogin onLogin={onLogin} onLogout={onLogout} onCCSignOut={onCCSignOut} profileMode={false} doStationLogout={doStationLogout} />
                         </div>
                       </fieldset>
                     </section>
@@ -655,9 +712,6 @@ const onTaskDeclined = (task,reason) => {
                         <legend className="legend-box">Station Login (Profile Mode)</legend>
                         <div className="station-login">
                           <StationLogin 
-                            onLogin={onLogin} 
-                            onLogout={onLogout} 
-                            onCCSignOut={onCCSignOut} 
                             profileMode={true} 
                             onSaveStart={handleSaveStart}
                             onSaveEnd={handleSaveEnd} />
@@ -692,7 +746,7 @@ const onTaskDeclined = (task,reason) => {
                       <div className="box">
                         <section className="section-box">
                           <fieldset className="fieldset">
-                            <legend className="legend-box">Call Control CAD</legend>
+                            <legend className="legend-box">Call Control with Call Associated Data (CAD)</legend>
                             <CallControlCAD
                               onHoldResume={onHoldResume}
                               onEnd={onEnd}
