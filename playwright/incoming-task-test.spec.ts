@@ -5,6 +5,7 @@ import { changeUserState, getCurrentState, verifyCurrentState } from './Utils/us
 import { createCallTask, createChatTask, declineExtensionCall, declineIncomingTask, endCallTask, endChatTask, loginExtension, acceptIncomingTask, acceptExtensionCall, createEmailTask, endExtensionCall, submitRonaPopup } from './Utils/incomingTaskUtils';
 import { TASK_TYPES, USER_STATES, LOGIN_MODE, THEME_COLORS, WRAPUP_REASONS, RONA_OPTIONS } from './constants';
 import { submitWrapup } from './Utils/wrapupUtils';
+import { waitForState, waitForStateLogs, getLastStateFromLogs, waitForWrapupReasonLogs, verifyCallbackLogs, getLastWrapupReasonFromLogs, isColorClose, pageSetup } from './Utils/helperUtils';
 
 
 let page: Page | null = null;
@@ -20,113 +21,6 @@ const maxRetries = 3;
 
 //NOTE : Make Sure to set RONA Timeout to 18 seconds before running this test.
 
-function getLastStateFromLogs(capturedLogs: string[]): string {
-  const stateChangeLogs = capturedLogs.filter(log =>
-    log.includes('onStateChange invoked with state name:')
-  );
-
-  if (stateChangeLogs.length === 0) {
-    return 'No state change logs found';
-  }
-
-  const lastStateLog = stateChangeLogs[stateChangeLogs.length - 1];
-  const match = lastStateLog.match(/onStateChange invoked with state name:\s*(.+)$/);
-
-  if (!match) {
-    return 'No State change log found';
-  }
-
-  return match[1].trim();
-}
-
-// Helper function to get the last wrapup reason from onWrapup logs
-function getLastWrapupReasonFromLogs(capturedLogs: string[]): string {
-  const wrapupLogs = capturedLogs.filter(log =>
-    log.includes('onWrapup invoked with reason :')
-  );
-
-  if (wrapupLogs.length === 0) {
-    return 'No wrapup reason found';
-  }
-
-  const lastWrapupLog = wrapupLogs[wrapupLogs.length - 1];
-  const match = lastWrapupLog.match(/onWrapup invoked with reason : (.+)$/);
-
-  if (!match) {
-    return 'No wrapup reason found';
-  }
-
-  return match[1].trim();
-}
-
-export const waitForWrapupReasonLogs = async (
-  capturedLogs: string[],
-  expectedReason: string,
-  timeoutMs: number = 10000
-): Promise<void> => {
-  const start = Date.now();
-  while (true) {
-    try {
-      const lastReason = getLastWrapupReasonFromLogs(capturedLogs);
-      if (lastReason === expectedReason) return;
-    } catch {
-      // Ignore error if no wrapup log yet
-    }
-    if (Date.now() - start > timeoutMs) {
-      throw new Error(`Timed out waiting for wrapup reason "${expectedReason}" in logs`);
-    }
-    await new Promise(res => setTimeout(res, 300)); // Poll every 300ms
-  }
-};
-
-function verifyCallbackLogs(
-  capturedLogs: string[],
-  expectedWrapupReason: string,
-  expectedState: string,
-  shouldWrapupComeFirst: boolean = true
-): boolean {
-  const wrapupLogs = capturedLogs.filter(log =>
-    log.includes('onWrapup invoked with reason :')
-  );
-  const stateChangeLogs = capturedLogs.filter(log =>
-    log.includes('onStateChange invoked with state name:')
-  );
-
-  if (wrapupLogs.length === 0 || stateChangeLogs.length === 0) {
-    throw new Error('Missing required logs, check callbacks for wrapup or statechange');
-  }
-
-  const lastWrapupLog = wrapupLogs[wrapupLogs.length - 1];
-  const lastStateChangeLog = stateChangeLogs[stateChangeLogs.length - 1];
-
-  const wrapupLogIndex = capturedLogs.lastIndexOf(lastWrapupLog);
-  const stateChangeLogIndex = capturedLogs.lastIndexOf(lastStateChangeLog);
-
-  if (shouldWrapupComeFirst && wrapupLogIndex >= stateChangeLogIndex) {
-    throw new Error('Wrapup log should come before state change log');
-  }
-
-  const wrapupMatch = lastWrapupLog.match(/onWrapup invoked with reason : (.+)$/);
-  const stateMatch = lastStateChangeLog.match(/onStateChange invoked with state name:\s*(.+)$/);
-
-  if (!wrapupMatch || !stateMatch) {
-    throw new Error('Could not extract values from logs');
-  }
-
-  const actualWrapupReason = wrapupMatch[1].trim();
-  const actualStateName = stateMatch[1].trim();
-
-  // Verify expected values
-  if (actualWrapupReason !== expectedWrapupReason) {
-    throw new Error('Wrapup reason mismatch, expected ' + expectedWrapupReason + ', got ' + actualWrapupReason);
-  }
-
-  if (actualStateName !== expectedState) {
-    throw new Error('State name mismatch, expected ' + expectedState + ', got ' + actualStateName);
-  }
-
-  return true;
-}
 
 function setupConsoleLogging(page: Page): () => void {
   capturedLogs.length = 0;
@@ -145,208 +39,6 @@ function setupConsoleLogging(page: Page): () => void {
 }
 
 
-export const waitForState = async (
-  page: Page,
-  expectedState: string,
-): Promise<void> => {
-  const start = Date.now();
-  const timeoutMs: number = 10000
-  while (true) {
-    const currentState = await getCurrentState(page);
-    if (currentState === expectedState) return;
-    if (Date.now() - start > timeoutMs) {
-      throw new Error(`Timed out waiting for state "${expectedState}", last state was "${currentState}"`);
-    }
-    await page.waitForTimeout(500); // Poll every 500ms
-  }
-};
-
-export const waitForStateLogs = async (
-  capturedLogs: string[],
-  expectedState: string,
-  timeoutMs: number = 10000
-): Promise<void> => {
-  const start = Date.now();
-  while (true) {
-    // Check if the latest state in logs matches expectedState
-    try {
-      const lastState = getLastStateFromLogs(capturedLogs);
-      if (lastState === expectedState) return;
-    } catch {
-      // Ignore error if no state log yet
-    }
-    if (Date.now() - start > timeoutMs) {
-      throw new Error(`Timed out waiting for state "${expectedState}" in logs`);
-    }
-    await new Promise(res => setTimeout(res, 300)); // Poll every 300ms
-  }
-};
-
-function isColorClose(
-  receivedColor: string,
-  expectedColor: string,
-  tolerance: number = 20
-): boolean {
-  console.log(`Comparing colors: received=${receivedColor}, expected=${expectedColor}, tolerance=${tolerance}`);
-  const receivedRgb = receivedColor.match(/\d+/g)?.map(Number) || [];
-  const expectedRgb = expectedColor.match(/\d+/g)?.map(Number) || [];
-
-  for (let i = 0; i < 3; i++) {
-    if (
-      typeof receivedRgb[i] !== 'number' ||
-      typeof expectedRgb[i] !== 'number'
-    ) {
-      continue; // skip if not present
-    }
-    if (Math.abs(receivedRgb[i] - expectedRgb[i]) > tolerance) {
-      return false;
-    }
-  }
-  return true;
-}
-
-
-const handleStrayTasks = async (page: Page): Promise<void> => {
-  await page.waitForTimeout(1000);
-  const incomingTaskDiv = page.getByTestId(/^samples:incoming-task(-\w+)?$/);
-
-  while (true) {
-    let flag1 = false;
-    let flag2 = true;
-    while (true) {
-      const task = incomingTaskDiv.first();
-      let isTaskVisible = await task.isVisible().catch(() => false);
-      if (!isTaskVisible) break;
-      const acceptButton = task.getByTestId('task:accept-button').first();
-      const acceptButtonVisible = await acceptButton.isVisible().catch(() => false);
-      const isExtensionCall = await (await task.innerText()).includes('Ringing...');
-      if (isExtensionCall) {
-        const extensionCallVisible = await extensionPage.locator('[data-test="right-action-button"]').waitFor({ state: 'visible', timeout: 40000 }).then(() => true).catch(() => false);
-        if (extensionCallVisible) {
-          await acceptExtensionCall(extensionPage);
-          flag1 = true
-        } else {
-          throw new Error('Accept button not visible and extension page is not available');
-        }
-      } else {
-        try {
-          await acceptButton.click({ timeout: 5000 });
-        } catch (error) { }
-        flag1 = true;
-      }
-      await page.waitForTimeout(1000);
-    }
-    const endButton = page.getByTestId(/^call-control:end-\w+$/).first();
-    const endButtonVisible = await endButton.waitFor({ state: 'visible', timeout: 2000 }).then(() => true).catch(() => false);
-    if (endButtonVisible) {
-      await page.waitForTimeout(2000);
-      await endButton.click({ timeout: 5000 });
-      await submitWrapup(page, WRAPUP_REASONS.SALE);
-    } else {
-      const wrapupBox = page.getByTestId('wrapup-button').first();
-      const isWrapupBoxVisible = await wrapupBox.waitFor({ state: 'visible', timeout: 2000 }).then(() => true).catch(() => false);
-      if (isWrapupBoxVisible) {
-        await page.waitForTimeout(2000);
-        await submitWrapup(page, WRAPUP_REASONS.SALE);
-        await page.waitForTimeout(2000)
-      } else {
-        flag2 = false;
-      }
-    }
-
-    if (!flag1 && !flag2) {
-      break;
-    }
-  }
-
-}
-
-const pageSetup = async (page: Page, loginMode: string) => {
-  await loginViaAccessToken(page, 'AGENT1');
-  await enableAllWidgets(page);
-  if (loginMode === LOGIN_MODE.DESKTOP) {
-    await disableMultiLogin(page);
-  } else {
-    await enableMultiLogin(page);
-  }
-
-  for (let i = 0; i < maxRetries; i++) {
-    try {
-      await initialiseWidgets(page);
-      break;
-    } catch (error) {
-      if (i == maxRetries - 1) {
-        throw new Error(`Failed to initialise widgets after ${maxRetries} attempts: ${error}`);
-      }
-    }
-  }
-
-  let loginButtonExists = await page
-    .getByTestId('login-button')
-    .isVisible()
-    .catch(() => false);
-  if (loginButtonExists) {
-    await telephonyLogin(page, loginMode);
-  } else {
-    const stateSelectVisible = await page.getByTestId('state-select').waitFor({ state: 'visible', timeout: 30000 }).then(() => true).catch(() => false);
-    if (stateSelectVisible) {
-      const ronapopupVisible = await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 5000 }).then(() => true).catch(() => false);
-      if (ronapopupVisible) {
-        await submitRonaPopup(page, RONA_OPTIONS.AVAILABLE);
-      }
-      const userState = await getCurrentState(page);
-      await changeUserState(page, USER_STATES.AVAILABLE);
-      await page.waitForTimeout(5000);
-
-      const incomingTaskDiv = page.getByTestId(/^samples:incoming-task(-\w+)?$/).first();
-      await incomingTaskDiv.waitFor({ state: 'visible', timeout: 5000 }).catch(() => false);
-      await handleStrayTasks(page);
-    }
-    loginButtonExists = await page
-      .getByTestId('login-button')
-      .isVisible()
-      .catch(() => false);
-
-
-    if (!loginButtonExists) await stationLogout(page);
-    await telephonyLogin(page, loginMode);
-  }
-
-  let ronapopupVisible = await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 5000 }).then(() => true).catch(() => false);
-  if (ronapopupVisible) {
-    await submitRonaPopup(page, RONA_OPTIONS.AVAILABLE);
-  }
-
-  let stationLoginFailure = await page.getByTestId('station-login-failure-label').waitFor({ state: 'visible', timeout: 5000 }).then(() => true).catch(() => false);
-  for (let i = 0; i < maxRetries && stationLoginFailure; i++) {
-    loginButtonExists = await page
-      .getByTestId('login-button')
-      .isVisible()
-      .catch(() => false);
-    if (!loginButtonExists) await stationLogout(page);
-    await telephonyLogin(page, loginMode);
-    await page.getByTestId('state-select').waitFor({ state: 'visible', timeout: 30000 });
-    stationLoginFailure = await page.getByTestId('station-login-failure-label').waitFor({ state: 'visible', timeout: 5000 }).then(() => true).catch(() => false);
-    if (i == maxRetries - 1 && stationLoginFailure) {
-      throw new Error(`Station Login Error Persists after ${maxRetries} attempts`);
-    }
-  }
-
-  await page.getByTestId('state-select').waitFor({ state: 'visible', timeout: 30000 });
-
-  ronapopupVisible = await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 3000 }).then(() => true).catch(() => false);
-  if (ronapopupVisible) {
-    await submitRonaPopup(page, RONA_OPTIONS.AVAILABLE);
-  }
-
-  await changeUserState(page, USER_STATES.AVAILABLE);
-  await page.waitForTimeout(3000);
-  const incomingTaskDiv = page.getByTestId(/^samples:incoming-task(-\w+)?$/).first();
-  await incomingTaskDiv.waitFor({ state: 'visible', timeout: 5000 }).catch(() => false);
-  await handleStrayTasks(page);
-
-  setupConsoleLogging(page);
-}
 
 
 test.describe('Incoming Call Task Tests for Desktop Mode', async () => {
@@ -359,6 +51,8 @@ test.describe('Incoming Call Task Tests for Desktop Mode', async () => {
     context2 = await browser.newContext();
     page = await context.newPage();
     callerpage = await context2.newPage();
+
+    setupConsoleLogging(page);
 
     await Promise.all([
       (async () => {
@@ -500,7 +194,6 @@ test.describe('Incoming Call Task Tests for Desktop Mode', async () => {
       const isLogoutButtonVisible = await logoutButton.isVisible().catch(() => false);
       if (isLogoutButtonVisible) {
         await page.getByTestId('samples:station-logout-button').click({ timeout: 5000 });
-        //check if the station logout button is hidden after logouts
         const isLogoutButtonHidden = await page
           .getByTestId('samples:station-logout-button')
           .waitFor({ state: 'hidden', timeout: 20000 })
@@ -542,6 +235,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     chatPage = await context.newPage();
     extensionPage = await context.newPage();
     callerpage = await context2.newPage();
+    setupConsoleLogging(page);
 
     await Promise.all([
       (async () => {
@@ -625,7 +319,6 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     const userStateElement = page.getByTestId('state-select');
     const userStateElementColor = await userStateElement.evaluate((el) => getComputedStyle(el).backgroundColor);
     expect(isColorClose(userStateElementColor, THEME_COLORS.RONA)).toBe(true);
-    // expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
     await waitForStateLogs(capturedLogs, USER_STATES.RONA);
     expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
     await submitRonaPopup(page, RONA_OPTIONS.IDLE);
@@ -645,7 +338,6 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await endCallTask(callerpage);
     await waitForState(page, USER_STATES.RONA);
     await verifyCurrentState(page, USER_STATES.RONA);
-    // expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
     await waitForStateLogs(capturedLogs, USER_STATES.RONA);
     expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
     await submitRonaPopup(page, RONA_OPTIONS.IDLE);
@@ -665,7 +357,6 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await expect(page.getByTestId('samples:rona-popup')).toBeVisible();
     await waitForState(page, USER_STATES.RONA);
     await verifyCurrentState(page, USER_STATES.RONA);
-    // expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
     await waitForStateLogs(capturedLogs, USER_STATES.RONA);
     expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
     await submitRonaPopup(page, RONA_OPTIONS.AVAILABLE);
@@ -691,7 +382,6 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await expect(page.getByTestId('samples:rona-popup')).toBeVisible();
     await waitForState(page, USER_STATES.RONA);
     await verifyCurrentState(page, USER_STATES.RONA);
-    // expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
     await waitForStateLogs(capturedLogs, USER_STATES.RONA);
     expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
     await submitRonaPopup(page, RONA_OPTIONS.IDLE);
@@ -731,7 +421,6 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 15000 });
     await expect(page.getByTestId('samples:rona-popup')).toBeVisible();
     await verifyCurrentState(page, USER_STATES.RONA);
-    // expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
     await waitForStateLogs(capturedLogs, USER_STATES.RONA);
     expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
     await page.waitForTimeout(3000);
@@ -755,7 +444,6 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await expect(page.getByTestId('samples:rona-popup')).toBeVisible();
     await waitForState(page, USER_STATES.RONA);
     await verifyCurrentState(page, USER_STATES.RONA);
-    // expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
     await waitForStateLogs(capturedLogs, USER_STATES.RONA);
     expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
     await submitRonaPopup(page, RONA_OPTIONS.AVAILABLE);
@@ -782,7 +470,6 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 15000 });
     await expect(page.getByTestId('samples:rona-popup')).toBeVisible();
     await verifyCurrentState(page, USER_STATES.RONA);
-    // expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
     await waitForStateLogs(capturedLogs, USER_STATES.RONA);
     expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
     await submitRonaPopup(page, RONA_OPTIONS.IDLE);
@@ -806,7 +493,6 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     const userStateElement = page.getByTestId('state-select');
     const userStateElementColor = await userStateElement.evaluate((el) => getComputedStyle(el).backgroundColor);
     expect(isColorClose(userStateElementColor, THEME_COLORS.ENGAGED)).toBe(true);
-    // expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.ENGAGED);
     await waitForStateLogs(capturedLogs, USER_STATES.ENGAGED);
     expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.ENGAGED);
     await expect(page.getByTestId('call-control:end-chat').first()).toBeVisible();
@@ -844,7 +530,6 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     const userStateElement = page.getByTestId('state-select');
     const userStateElementColor = await userStateElement.evaluate((el) => getComputedStyle(el).backgroundColor);
     expect(isColorClose(userStateElementColor, THEME_COLORS.ENGAGED)).toBe(true);
-    // expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.ENGAGED);
     await waitForState(page, USER_STATES.ENGAGED);
     await waitForStateLogs(capturedLogs, USER_STATES.ENGAGED);
     expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.ENGAGED);
@@ -898,7 +583,6 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 15000 });
     await expect(page.getByTestId('samples:rona-popup')).toBeVisible();
     await verifyCurrentState(page, USER_STATES.RONA);
-    // expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
     await waitForStateLogs(capturedLogs, USER_STATES.RONA);
     expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
     await submitRonaPopup(page, RONA_OPTIONS.AVAILABLE);
@@ -1041,7 +725,6 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
       const isLogoutButtonVisible = await logoutButton.isVisible().catch(() => false);
       if (isLogoutButtonVisible) {
         await page.getByTestId('samples:station-logout-button').click({ timeout: 5000 });
-        //check if the station logout button is hidden after logouts
         const isLogoutButtonHidden = await page
           .getByTestId('samples:station-logout-button')
           .waitFor({ state: 'hidden', timeout: 20000 })
@@ -1092,6 +775,7 @@ test.describe('Incoming Tasks tests for multi-session', async () => {
     chatPage = await context.newPage();
     extensionPage = await context.newPage();
     callerpage = await context2.newPage();
+    setupConsoleLogging(page);
 
     await Promise.all([
       (async () => {
@@ -1276,7 +960,6 @@ test.describe('Incoming Tasks tests for multi-session', async () => {
       const isLogoutButtonVisible = await logoutButton.isVisible().catch(() => false);
       if (isLogoutButtonVisible) {
         await page.getByTestId('samples:station-logout-button').click({ timeout: 5000 });
-        //check if the station logout button is hidden after logouts
         const isLogoutButtonHidden = await page
           .getByTestId('samples:station-logout-button')
           .waitFor({ state: 'hidden', timeout: 20000 })
