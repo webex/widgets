@@ -11,7 +11,8 @@ import {
 } from '@webex/cc-widgets';
 import {StationLogoutSuccess} from '@webex/plugin-cc';
 import Webex from 'webex';
-import {ThemeProvider, IconProvider, Icon, Button, Checkbox, Text, Select, Option} from '@momentum-design/components/dist/react';
+import {Icon, Button, Checkbox, Text, Select, Option} from '@momentum-design/components/dist/react';
+import {WidgetsProvider} from '@webex/cc-widgets-provider';
 import {PopoverNext} from '@momentum-ui/react-collaboration';
 import './App.scss';
 import {observer} from 'mobx-react-lite';
@@ -66,18 +67,18 @@ function App() {
   });
 
   const handleSaveStart = () => {
-  setShowLoader(true);
-  setToast(null);
-};
+    setShowLoader(true);
+    setToast(null);
+  };
 
-const handleSaveEnd = (isComplete: boolean) => {
-  setShowLoader(false);
-  if (isComplete) {
-    setToast({type: 'success'});
-  } else {
-    setToast({type: 'error'});
-  }
-};
+  const handleSaveEnd = (isComplete: boolean) => {
+    setShowLoader(false);
+    if (isComplete) {
+      setToast({type: 'success'});
+    } else {
+      setToast({type: 'error'});
+    }
+  };
 
   const onIncomingTaskCB = ({task}) => {
     console.log('Incoming task:', task);
@@ -88,28 +89,22 @@ const handleSaveEnd = (isComplete: boolean) => {
   useEffect(() => {
     if (window.location.hash) {
       const urlParams = new URLSearchParams(window.location.hash.replace('#', '?'));
-    
+
       const accessToken = urlParams.get('access_token');
-    
+
       if (accessToken) {
         window.localStorage.setItem('accessToken', accessToken);
         setAccessToken(accessToken);
         // Clear the hash from the URL to remove the token from browser history
-        window.history.replaceState(
-          {},
-          document.title,
-          window.location.pathname + window.location.search
-        );
+        window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
       }
-    }
-    else {
+    } else {
       const storedAccessToken = window.localStorage.getItem('accessToken');
       if (storedAccessToken) {
         setAccessToken(storedAccessToken);
       }
     }
-  }
-  , []);
+  }, []);
 
   const webexConfig = {
     fedramp: false,
@@ -157,7 +152,7 @@ const handleSaveEnd = (isComplete: boolean) => {
     console.log('onTaskAccepted invoked for task:', task);
   };
 
-const onTaskDeclined = (task,reason) => {
+  const onTaskDeclined = (task, reason) => {
     console.log('onTaskDeclined invoked for task:', task);
     setRejectedReason(reason);
     setShowRejectedPopup(true);
@@ -265,30 +260,17 @@ const onTaskDeclined = (task,reason) => {
     }
 
     // Reference: https://developer.webex-cx.com/documentation/integrations
-    const ccMandatoryScopes = [
-      "cjp:config_read",
-      "cjp:config_write",
-      "cjp:config",
-      "cjp:user",
-    ];
+    const ccMandatoryScopes = ['cjp:config_read', 'cjp:config_write', 'cjp:config', 'cjp:user'];
 
-    const webRTCCallingScopes = [
-      "spark:webrtc_calling",
-      "spark:calls_read",
-      "spark:calls_write",
-      "spark:xsi"
-    ];
+    const webRTCCallingScopes = ['spark:webrtc_calling', 'spark:calls_read', 'spark:calls_write', 'spark:xsi'];
 
     const additionalScopes = [
-      "spark:kms", // to avoid token downscope to only spark:kms error on SDK init
+      'spark:kms', // to avoid token downscope to only spark:kms error on SDK init
     ];
 
     const requestedScopes = Array.from(
-      new Set(
-          ccMandatoryScopes
-          .concat(webRTCCallingScopes)
-          .concat(additionalScopes))
-        ).join(' ');
+      new Set(ccMandatoryScopes.concat(webRTCCallingScopes).concat(additionalScopes))
+    ).join(' ');
 
     const webexConfig = {
       config: {
@@ -318,7 +300,7 @@ const onTaskDeclined = (task,reason) => {
 
   // Store accessToken changes in local storage
   useEffect(() => {
-    if(accessToken.trim() !== '') {
+    if (accessToken.trim() !== '') {
       window.localStorage.setItem('accessToken', accessToken);
     }
   }, [accessToken]);
@@ -347,19 +329,20 @@ const onTaskDeclined = (task,reason) => {
     };
   }, []);
 
- const onStateChange = (status) => {
-  console.log('onStateChange invoked', status);
-  //adding a log to be used for automation
-  console.log('onStateChange invoked with state name:', status?.name);
-  if (!status || !status.name) return;
-  if (status.name !== 'RONA') {
-    setShowRejectedPopup(false);
-    setRejectedReason('');
-  }
-};
+  const onStateChange = (status) => {
+    console.log('onStateChange invoked', status);
+    //adding a log to be used for automation
+    console.log('onStateChange invoked with state name:', status?.name);
+    if (!status || !status.name) return;
+    if (status.name !== 'RONA') {
+      setShowRejectedPopup(false);
+      setRejectedReason('');
+    }
+  };
 
-    const stationLogout = () => {
-    store.cc.stationLogout({logoutReason: 'User requested logout'})
+  const stationLogout = () => {
+    store.cc
+      .stationLogout({logoutReason: 'User requested logout'})
       .then((res: StationLogoutSuccess) => {
         console.log('Agent logged out successfully', res.data.type);
       })
@@ -379,374 +362,386 @@ const onTaskDeclined = (task,reason) => {
 
   return (
     <div className="app mds-typography">
-      <ThemeProvider
+      <WidgetsProvider
         themeclass={currentTheme === 'LIGHT' ? 'mds-theme-stable-lightWebex' : 'mds-theme-stable-darkWebex'}
+        iconSet="momentum-icons"
+        enableMetrics={true}
       >
-        <IconProvider iconSet="momentum-icons">
-          <div className="webexTheme">
-            <h1>Contact Center Widgets in a React app</h1>
-              {showLoader && (
-                <div className="profile-loader-overlay">
-                    <div className="profile-loader-spinner" aria-label="Loading" />
-                </div>
-              )}
+        <div className="webexTheme">
+          <h1>Contact Center Widgets in a React app</h1>
+          {showLoader && (
+            <div className="profile-loader-overlay">
+              <div className="profile-loader-spinner" aria-label="Loading" />
+            </div>
+          )}
 
-              {toast && toast.type === 'success' && (
-                <div className="toast toast-success" role="status" aria-live="polite">
-                  <div className="toast-icon" aria-hidden="true">
-                    <Icon name="check-circle-bold" />
-                  </div>
-                  <div className="toast-content">
-                    <div className="toast-title">
-                      Interaction preferences changes
-                    </div>
+          {toast && toast.type === 'success' && (
+            <div className="toast toast-success" role="status" aria-live="polite">
+              <div className="toast-icon" aria-hidden="true">
+                <Icon name="check-circle-bold" />
+              </div>
+              <div className="toast-content">
+                <div className="toast-title">Interaction preferences changes</div>
+                <div>Your interaction preference is updated</div>
+              </div>
+              <Button
+                size={32}
+                variant="tertiary"
+                color="default"
+                prefix-icon="cancel-bold"
+                postfix-icon=""
+                type="button"
+                role="button"
+                aria-label="Close"
+                onClick={() => setToast(null)}
+                className="toast-close"
+              />
+            </div>
+          )}
+
+          <div className="box">
+            <section className="section-box">
+              <fieldset className="fieldset">
+                <legend className="legend-box">&nbsp;Authentication&nbsp;</legend>
+                <Select
+                  label="Select Login Method"
+                  value={loginType}
+                  onChange={(e: CustomEvent) => {
+                    const selectedType = e.detail.value;
+                    if (selectedType !== 'token' && selectedType !== 'oauth') return;
+                    setLoginType(selectedType);
+                  }}
+                >
+                  <Option data-testid="samples:login_option_token" key={1} value="token">
+                    Access Token
+                  </Option>
+                  <Option data-testid="samples:login_option_oauth" key={2} value="oauth">
+                    Login with Webex
+                  </Option>
+                </Select>
+
+                <div className="accessTokenTheme" style={{marginTop: '15px'}}>
+                  {loginType === 'token' && (
                     <div>
-                      Your interaction preference is updated
+                      <span>Your access token: </span>
+                      <input type="text" value={accessToken} onChange={(e) => setAccessToken(e.target.value)} />
                     </div>
-                  </div>
-                  <Button
-                    size={32}
-                    variant="tertiary"
-                    color="default"
-                    prefix-icon="cancel-bold"
-                    postfix-icon=""
-                    type="button"
-                    role="button"
-                    aria-label="Close"
-                    onClick={() => setToast(null)}
-                    className="toast-close"
-                  />
+                  )}
+                  {loginType === 'oauth' && (
+                    <Button data-testid="samples:login_with_webex_button" onClick={doOAuthLogin} variant="primary">
+                      Login with Webex
+                    </Button>
+                  )}
                 </div>
-            )}
-
-            <div className="box">
+              </fieldset>
+            </section>
+          </div>
+          <br />
+          <div className="settings-container" style={{display: 'flex', gap: '20px'}}>
+            <div className="box" style={{flex: 1}}>
               <section className="section-box">
                 <fieldset className="fieldset">
-                  <legend className="legend-box">&nbsp;Authentication&nbsp;</legend>
-                  <Select
-                    label="Select Login Method"
-                    value={loginType}
-                    onChange={(e: CustomEvent) => {
-                      const selectedType = e.detail.value;
-                      if(selectedType !== 'token' && selectedType !== 'oauth') return;
-                      setLoginType(selectedType);
-                    }}
-                  >
-                    <Option data-testid='samples:login_option_token' key={1} value="token">Access Token</Option>
-                    <Option data-testid='samples:login_option_oauth' key={2} value="oauth">Login with Webex</Option>
-                  </Select>
-                
-                  <div className="accessTokenTheme" style={{ marginTop: '15px' }}>
-                    {loginType === 'token' && (
-                      <div>
-                        <span>Your access token: </span>
-                        <input
-                          type="text"
-                          value={accessToken}
-                          onChange={(e) => setAccessToken(e.target.value)}
-                        />
-                      </div>
-                    )}
-                    {loginType === 'oauth' && (
-                      <Button
-                        data-testid="samples:login_with_webex_button"
-                        onClick={doOAuthLogin}
-                        variant="primary"
-                      >
-                        Login with Webex
-                      </Button>
-                    )}
+                  <legend className="legend-box">&nbsp;Select Widgets to Show&nbsp;</legend>
+                  <div className="widget-checkboxes">
+                    {Object.keys(defaultWidgets).map((widget) => (
+                      <>
+                        <label key={widget}>
+                          <input
+                            type="checkbox"
+                            name={widget}
+                            checked={selectedWidgets[widget]}
+                            onChange={handleCheckboxChange}
+                            data-testid={`samples:widget-${widget}`}
+                          />
+                          &nbsp;
+                          {formatWidgetName(widget)}&nbsp;
+                          {widget === 'outdialCall' && (
+                            <span style={{display: 'inline-flex', alignItems: 'center'}}>
+                              <PopoverNext
+                                trigger="mouseenter"
+                                triggerComponent={<Icon name="info-badge-filled" />}
+                                placement="auto-end"
+                                closeButtonPlacement="top-left"
+                                closeButtonProps={{'aria-label': 'Close'}}
+                              >
+                                <Text>
+                                  <div
+                                    style={{color: 'var(--mds-color-theme-text-error-normal)', marginBottom: '10px'}}
+                                  >
+                                    <strong>Note:</strong> When a number is dialed, the agent gets an incoming task to
+                                    accept via an Extension, Dial Number, or Browser. It's recommended to have the
+                                    incoming task/task list widget and call controls widget according to your needs.
+                                  </div>
+                                </Text>
+                              </PopoverNext>
+                            </span>
+                          )}
+                        </label>
+                      </>
+                    ))}
                   </div>
                 </fieldset>
               </section>
             </div>
-            <br/>
-            <div className="settings-container" style={{ display: 'flex', gap: '20px' }}>
-              <div className="box" style={{ flex: 1 }}>
-                <section className="section-box">
-                  <fieldset className="fieldset">
-                    <legend className="legend-box">&nbsp;Select Widgets to Show&nbsp;</legend>
-                    <div className="widget-checkboxes">
-                      {Object.keys(defaultWidgets).map((widget) => (
-                        <>
-                          <label key={widget}>
-                            <input
-                              type="checkbox"
-                              name={widget}
-                              checked={selectedWidgets[widget]}
-                              onChange={handleCheckboxChange}
-                              data-testid={`samples:widget-${widget}`}
-                            />
-                            &nbsp;
-                            {formatWidgetName(widget)}&nbsp;
-                            {widget === 'outdialCall' && (
-                              <span style={{display: 'inline-flex', alignItems: 'center'}}>
-                                <PopoverNext
-                                  trigger="mouseenter"
-                                  triggerComponent={<Icon name="info-badge-filled" />}
-                                  placement="auto-end"
-                                  closeButtonPlacement="top-left"
-                                  closeButtonProps={{'aria-label': 'Close'}}
-                                >
-                                  <Text>
-                                    <div
-                                      style={{color: 'var(--mds-color-theme-text-error-normal)', marginBottom: '10px'}}
-                                    >
-                                      <strong>Note:</strong> When a number is dialed, the agent gets an incoming task to
-                                      accept via an Extension, Dial Number, or Browser. It's recommended to have the
-                                      incoming task/task list widget and call controls widget according to your needs.
-                                    </div>
-                                  </Text>
-                                </PopoverNext>
-                              </span>
-                            )}
-                          </label>
-                        </>
-                      ))}
-                    </div>
-                  </fieldset>
-                </section>
-              </div>
-              
-              <div className="box" style={{ flex: 1 }}>
-                <section className="section-box">
-                  <fieldset className="fieldset">
-                    <legend className="legend-box">&nbsp;Sample App Toggles and Operations&nbsp;</legend>
-                    <Checkbox
-                      checked={currentTheme === 'DARK'}
-                      aria-label="theme checkbox"
-                      id="theme-checkbox"
-                      value={currentTheme}
-                      label="Dark Theme"
-                      // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
-                      onchange={() => {
-                        setCurrentTheme(currentTheme === 'DARK' ? 'LIGHT' : 'DARK');
-                        store.setCurrentTheme(currentTheme === 'DARK' ? 'LIGHT' : 'DARK');
-                      }}
-                    />
-                    <Checkbox
-                      data-testid="samples:show-agent-profile-checkbox"
-                      checked={showAgentProfile}
-                      aria-label="theme checkbox"
-                      id="theme-checkbox"
-                      label="Show Agent Profile"
-                      // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
-                      onchange={() => {
-                        setShowAgentProfile(!showAgentProfile);
-                      }}
-                    />
-                    <Checkbox
-                      checked={doStationLogout}
-                      aria-label="theme checkbox"
-                      id="theme-checkbox"
-                      label="Do Station Logout"
-                      // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
-                      onchange={() => {
-                        setDoStationLogout(!doStationLogout);
-                      }}
-                    />
-                    <Checkbox
-                      checked={integrationEnv}
-                      aria-label="integration env checkbox"
-                      id="integration-env-checkbox"
-                      label="Enable Integration Env"
-                      // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
-                      onchange={() => {
-                        setintegrationEnv(!integrationEnv);
-                      }}
-                    />
-                    {store.isAgentLoggedIn && (
-                      <Button id="logoutAgent" onClick={stationLogout} color="positive" className='stationLogoutButtonClass' data-testid="samples:station-logout-button">
-                        Station Logout
-                      </Button>
-                    )}
-                  </fieldset>
-                </section>
-                <br/>
-                <section className="section-box">
-                  <fieldset className="fieldset">
-                    <legend className="legend-box">&nbsp;SDK Toggles&nbsp;</legend>
-                    <label style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
-                      <input
-                        data-testid="samples:multi-login-enable-checkbox"
-                        type="checkbox"
-                        id="multiLoginFlag"
-                        name="multiLoginFlag"
-                        onChange={enableDisableMultiLogin}
-                        checked={isMultiLoginEnabled}
-                      />{' '}
-                      &nbsp; Enable Multi Login
-                      <PopoverNext
-                        trigger="mouseenter"
-                        triggerComponent={<Icon name="info-badge-filled" />}
-                        placement="auto-end"
-                        closeButtonPlacement="top-left"
-                        closeButtonProps={{'aria-label': 'Close'}}
-                      >
-                        <Text>
-                          <div
-                            className="warning-note"
-                            style={{color: 'var(--mds-color-theme-text-error-normal)', marginBottom: '10px'}}
-                          >
-                            <strong>Note:</strong> The "Enable Multi Login" option must be set before initializing the
-                            SDK. Changes to this setting after SDK initialization will not take effect. Please ensure you
-                            configure this option before clicking the "Init Widgets" button.
-                          </div>
-                        </Text>
-                      </PopoverNext>
-                    </label>
-                  </fieldset>
-                </section>
-              </div>
-            </div>
-            <br />
-            <div>
-              <Button
-                disabled={accessToken.trim() === ''}
-                onClick={() => {
-                  setShowLoader(true);
-                  store.init({webexConfig, access_token: accessToken}).then(() => {
-                    setIsSdkReady(true);
-                    setShowLoader(false);
-                  });
-                }}
-                data-testid="samples:init-widgets-button"
-              >
-                Init Widgets
-              </Button>
-            </div>
-            {isSdkReady && (
-              <>
-                {showAgentProfile && store.agentProfile && (
-                  <>
-                    <section className="section-box">
-                      <fieldset className="fieldset" style={{padding: '0 10% 0 10%'}}>
-                        <legend className="legend-box">&nbsp;Agent Profile&nbsp;</legend>
-                        <label style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}></label>
-                        <table style={{borderCollapse: 'collapse', width: '100%'}}>
-                          <tbody>
-                            <tr>
-                              <td className="table-border">
-                                <Text tagname={'span'} type="body-large-bold">
-                                  Agent Name:
-                                </Text>
-                              </td>
-                              <td className="table-border">{store.agentProfile.agentName}</td>
-                            </tr>
-                            <tr>
-                              <td className="table-border">
-                                <Text tagname={'span'} type="body-large-bold">
-                                  Profile Type:
-                                </Text>
-                              </td>
-                              <td className="table-border">{store.agentProfile.profileType}</td>
-                            </tr>
-                            <tr>
-                              <td className="table-border">
-                                <Text tagname={'span'} type="body-large-bold">
-                                  Org ID:
-                                </Text>
-                              </td>
-                              <td className="table-border">{store.agentProfile.orgId}</td>
-                            </tr>
-                            <tr>
-                              <td className="table-border">
-                                <Text tagname={'span'} type="body-large-bold">
-                                  Handle call using:
-                                </Text>
-                              </td>
-                              <td className="table-border">{store.agentProfile.deviceType}</td>
-                            </tr>
-                            <tr>
-                              <td className="table-border">
-                                <Text tagname={'span'} type="body-large-bold">
-                                  Roles:
-                                </Text>
-                              </td>
-                              <td className="table-border">{store.agentProfile.roles}</td>
-                            </tr>
-                            <tr>
-                              <td className="table-border">
-                                <Text tagname={'span'} type="body-large-bold">
-                                  MM Profile:
-                                </Text>
-                              </td>
-                              <td className="table-border">
-                                <table style={{borderCollapse: 'collapse', width: '100%'}}>
-                                  <tbody>
-                                    {store.agentProfile.mmProfile &&
-                                      Object.entries(store.agentProfile.mmProfile).map(([channel, count]) => (
-                                        <tr key={channel}>
-                                          <td className="table-border">
-                                            {channel.charAt(0).toUpperCase() + channel.slice(1)}
-                                          </td>
-                                          <td className="table-border">{count}</td>
-                                        </tr>
-                                      ))}
-                                  </tbody>
-                                </table>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </fieldset>
-                    </section>
-                  </>
-                )}
-                {selectedWidgets.stationLogin && (
-                  <div className="box">
-                    <section className="section-box">
-                      <fieldset className="fieldset">
-                        <legend className="legend-box">Station Login</legend>
-                        <div className="station-login">
-                          <StationLogin onLogin={onLogin} onLogout={onLogout} onCCSignOut={onCCSignOut} profileMode={false} doStationLogout={doStationLogout} />
+
+            <div className="box" style={{flex: 1}}>
+              <section className="section-box">
+                <fieldset className="fieldset">
+                  <legend className="legend-box">&nbsp;Sample App Toggles and Operations&nbsp;</legend>
+                  <Checkbox
+                    checked={currentTheme === 'DARK'}
+                    aria-label="theme checkbox"
+                    id="theme-checkbox"
+                    value={currentTheme}
+                    label="Dark Theme"
+                    // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
+                    onchange={() => {
+                      setCurrentTheme(currentTheme === 'DARK' ? 'LIGHT' : 'DARK');
+                      store.setCurrentTheme(currentTheme === 'DARK' ? 'LIGHT' : 'DARK');
+                    }}
+                  />
+                  <Checkbox
+                    data-testid="samples:show-agent-profile-checkbox"
+                    checked={showAgentProfile}
+                    aria-label="theme checkbox"
+                    id="theme-checkbox"
+                    label="Show Agent Profile"
+                    // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
+                    onchange={() => {
+                      setShowAgentProfile(!showAgentProfile);
+                    }}
+                  />
+                  <Checkbox
+                    checked={doStationLogout}
+                    aria-label="theme checkbox"
+                    id="theme-checkbox"
+                    label="Do Station Logout"
+                    // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
+                    onchange={() => {
+                      setDoStationLogout(!doStationLogout);
+                    }}
+                  />
+                  <Checkbox
+                    checked={integrationEnv}
+                    aria-label="integration env checkbox"
+                    id="integration-env-checkbox"
+                    label="Enable Integration Env"
+                    // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
+                    onchange={() => {
+                      setintegrationEnv(!integrationEnv);
+                    }}
+                  />
+                  {store.isAgentLoggedIn && (
+                    <Button
+                      id="logoutAgent"
+                      onClick={stationLogout}
+                      color="positive"
+                      className="stationLogoutButtonClass"
+                      data-testid="samples:station-logout-button"
+                    >
+                      Station Logout
+                    </Button>
+                  )}
+                </fieldset>
+              </section>
+              <br />
+              <section className="section-box">
+                <fieldset className="fieldset">
+                  <legend className="legend-box">&nbsp;SDK Toggles&nbsp;</legend>
+                  <label style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+                    <input
+                      data-testid="samples:multi-login-enable-checkbox"
+                      type="checkbox"
+                      id="multiLoginFlag"
+                      name="multiLoginFlag"
+                      onChange={enableDisableMultiLogin}
+                      checked={isMultiLoginEnabled}
+                    />{' '}
+                    &nbsp; Enable Multi Login
+                    <PopoverNext
+                      trigger="mouseenter"
+                      triggerComponent={<Icon name="info-badge-filled" />}
+                      placement="auto-end"
+                      closeButtonPlacement="top-left"
+                      closeButtonProps={{'aria-label': 'Close'}}
+                    >
+                      <Text>
+                        <div
+                          className="warning-note"
+                          style={{color: 'var(--mds-color-theme-text-error-normal)', marginBottom: '10px'}}
+                        >
+                          <strong>Note:</strong> The "Enable Multi Login" option must be set before initializing the
+                          SDK. Changes to this setting after SDK initialization will not take effect. Please ensure you
+                          configure this option before clicking the "Init Widgets" button.
                         </div>
-                      </fieldset>
-                    </section>
-                  </div>
-                )}
-                {selectedWidgets.stationLoginProfile && store.isAgentLoggedIn && (
-                  <div className="box">
-                    <section className="section-box">
-                      <fieldset className="fieldset">
-                        <legend className="legend-box">Station Login (Profile Mode)</legend>
-                        <div className="station-login">
-                          <StationLogin 
-                            profileMode={true} 
-                            onSaveStart={handleSaveStart}
-                            onSaveEnd={handleSaveEnd} />
-                        </div>
-                      </fieldset>
-                    </section>
-                  </div>
-                )}
-                {(store.isAgentLoggedIn || isLoggedIn) && (
-                  <>
-                    {selectedWidgets.userState && (
-                      <div className="box">
-                        <section className="section-box">
-                          <fieldset className="fieldset">
-                            <legend className="legend-box">User State</legend>
+                      </Text>
+                    </PopoverNext>
+                  </label>
+                </fieldset>
+              </section>
+            </div>
+          </div>
+          <br />
+          <div>
+            <Button
+              disabled={accessToken.trim() === ''}
+              onClick={() => {
+                setShowLoader(true);
+                store.init({webexConfig, access_token: accessToken}).then(() => {
+                  setIsSdkReady(true);
+                  setShowLoader(false);
+                });
+              }}
+              data-testid="samples:init-widgets-button"
+            >
+              Init Widgets
+            </Button>
+          </div>
+          {isSdkReady && (
+            <>
+              {showAgentProfile && store.agentProfile && (
+                <>
+                  <section className="section-box">
+                    <fieldset className="fieldset" style={{padding: '0 10% 0 10%'}}>
+                      <legend className="legend-box">&nbsp;Agent Profile&nbsp;</legend>
+                      <label style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}></label>
+                      <table style={{borderCollapse: 'collapse', width: '100%'}}>
+                        <tbody>
+                          <tr>
+                            <td className="table-border">
+                              <Text tagname={'span'} type="body-large-bold">
+                                Agent Name:
+                              </Text>
+                            </td>
+                            <td className="table-border">{store.agentProfile.agentName}</td>
+                          </tr>
+                          <tr>
+                            <td className="table-border">
+                              <Text tagname={'span'} type="body-large-bold">
+                                Profile Type:
+                              </Text>
+                            </td>
+                            <td className="table-border">{store.agentProfile.profileType}</td>
+                          </tr>
+                          <tr>
+                            <td className="table-border">
+                              <Text tagname={'span'} type="body-large-bold">
+                                Org ID:
+                              </Text>
+                            </td>
+                            <td className="table-border">{store.agentProfile.orgId}</td>
+                          </tr>
+                          <tr>
+                            <td className="table-border">
+                              <Text tagname={'span'} type="body-large-bold">
+                                Handle call using:
+                              </Text>
+                            </td>
+                            <td className="table-border">{store.agentProfile.deviceType}</td>
+                          </tr>
+                          <tr>
+                            <td className="table-border">
+                              <Text tagname={'span'} type="body-large-bold">
+                                Roles:
+                              </Text>
+                            </td>
+                            <td className="table-border">{store.agentProfile.roles}</td>
+                          </tr>
+                          <tr>
+                            <td className="table-border">
+                              <Text tagname={'span'} type="body-large-bold">
+                                MM Profile:
+                              </Text>
+                            </td>
+                            <td className="table-border">
+                              <table style={{borderCollapse: 'collapse', width: '100%'}}>
+                                <tbody>
+                                  {store.agentProfile.mmProfile &&
+                                    Object.entries(store.agentProfile.mmProfile).map(([channel, count]) => (
+                                      <tr key={channel}>
+                                        <td className="table-border">
+                                          {channel.charAt(0).toUpperCase() + channel.slice(1)}
+                                        </td>
+                                        <td className="table-border">{count}</td>
+                                      </tr>
+                                    ))}
+                                </tbody>
+                              </table>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </fieldset>
+                  </section>
+                </>
+              )}
+              {selectedWidgets.stationLogin && (
+                <div className="box">
+                  <section className="section-box">
+                    <fieldset className="fieldset">
+                      <legend className="legend-box">Station Login</legend>
+                      <div className="station-login" data-widget-id="station-login">
+                        <StationLogin
+                          onLogin={onLogin}
+                          onLogout={onLogout}
+                          onCCSignOut={onCCSignOut}
+                          profileMode={false}
+                          doStationLogout={doStationLogout}
+                        />
+                      </div>
+                    </fieldset>
+                  </section>
+                </div>
+              )}
+              {selectedWidgets.stationLoginProfile && store.isAgentLoggedIn && (
+                <div className="box">
+                  <section className="section-box">
+                    <fieldset className="fieldset">
+                      <legend className="legend-box">Station Login (Profile Mode)</legend>
+                      <div className="station-login" data-widget-id="station-login-profile">
+                        <StationLogin profileMode={true} onSaveStart={handleSaveStart} onSaveEnd={handleSaveEnd} />
+                      </div>
+                    </fieldset>
+                  </section>
+                </div>
+              )}
+              {(store.isAgentLoggedIn || isLoggedIn) && (
+                <>
+                  {selectedWidgets.userState && (
+                    <div className="box">
+                      <section className="section-box">
+                        <fieldset className="fieldset">
+                          <legend className="legend-box">User State</legend>
+                          <div data-widget-id="user-state">
                             <UserState onStateChange={onStateChange} />
-                          </fieldset>
-                        </section>
-                      </div>
-                    )}
-                    {selectedWidgets.callControl && store.currentTask && (
-                      <div className="box">
-                        <section className="section-box">
-                          <fieldset className="fieldset">
-                            <legend className="legend-box">Call Control</legend>
-                            <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapUp={onWrapUp} onRecordingToggle={onRecordingToggle} />
-                          </fieldset>
-                        </section>
-                      </div>
-                    )}
-                    {selectedWidgets.callControlCAD && store.currentTask && (
-                      <div className="box">
-                        <section className="section-box">
-                          <fieldset className="fieldset">
-                            <legend className="legend-box">Call Control with Call Associated Data (CAD)</legend>
+                          </div>
+                        </fieldset>
+                      </section>
+                    </div>
+                  )}
+                  {selectedWidgets.callControl && store.currentTask && (
+                    <div className="box">
+                      <section className="section-box">
+                        <fieldset className="fieldset">
+                          <legend className="legend-box">Call Control</legend>
+                          <div data-widget-id="call-control">
+                            <CallControl
+                              onHoldResume={onHoldResume}
+                              onEnd={onEnd}
+                              onWrapUp={onWrapUp}
+                              onRecordingToggle={onRecordingToggle}
+                            />
+                          </div>
+                        </fieldset>
+                      </section>
+                    </div>
+                  )}
+                  {selectedWidgets.callControlCAD && store.currentTask && (
+                    <div className="box">
+                      <section className="section-box">
+                        <fieldset className="fieldset">
+                          <legend className="legend-box">Call Control with Call Associated Data (CAD)</legend>
+                          <div data-widget-id="call-control-cad">
                             <CallControlCAD
                               onHoldResume={onHoldResume}
                               onEnd={onEnd}
@@ -755,100 +750,113 @@ const onTaskDeclined = (task,reason) => {
                               callControlClassName={'call-control-outer'}
                               callControlConsultClassName={'call-control-consult-outer'}
                             />
-                          </fieldset>
-                        </section>
-                      </div>
-                    )}
+                          </div>
+                        </fieldset>
+                      </section>
+                    </div>
+                  )}
 
-                    {selectedWidgets.incomingTask && (
-                      <>
-                        <div className="incoming-tasks-container">
-                          <section className="section-box">
-                            {incomingTasks.map((task) => (
-                              <div
-                                key={task.data.interactionId}
-                                className={`incoming-task ${collapsedTasks.includes(task.data.interactionId) ? 'collapsed' : ''}`}
-                                onClick={() => {
-                                  if (collapsedTasks.includes(task.data.interactionId)) {
-                                    setCollapsedTasks((prev) => prev.filter((id) => id !== task.data.interactionId));
-                                  }
-                                }}
-                              >
-                                <>
-                                  <button
-                                    className="close-btn"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setIncomingTasks((prevTasks) =>
-                                        prevTasks.filter((t) => t.data.interactionId !== task.data.interactionId)
-                                      );
-                                    }}
-                                  >
-                                    ×
-                                  </button>
-                                  <IncomingTask incomingTask={task} onAccepted={onAccepted} onRejected={onRejected} />
-                                </>
-                              </div>
-                            ))}
-                          </section>
-                        </div>
-                      </>
-                    )}
-
-                    {selectedWidgets.taskList && (
-                      <div className="box">
+                  {selectedWidgets.incomingTask && (
+                    <>
+                      <div className="incoming-tasks-container">
                         <section className="section-box">
-                          <fieldset className="fieldset">
-                            <legend className="legend-box">Task List</legend>
-                            <TaskList onTaskAccepted={onTaskAccepted} onTaskDeclined={onTaskDeclined} onTaskSelected={onTaskSelected} />
-                          </fieldset>
+                          {incomingTasks.map((task) => (
+                            <div
+                              key={task.data.interactionId}
+                              className={`incoming-task ${collapsedTasks.includes(task.data.interactionId) ? 'collapsed' : ''}`}
+                              onClick={() => {
+                                if (collapsedTasks.includes(task.data.interactionId)) {
+                                  setCollapsedTasks((prev) => prev.filter((id) => id !== task.data.interactionId));
+                                }
+                              }}
+                              data-widget-id={`incoming-task-${task.data.interactionId}`}
+                            >
+                              <>
+                                <button
+                                  className="close-btn"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setIncomingTasks((prevTasks) =>
+                                      prevTasks.filter((t) => t.data.interactionId !== task.data.interactionId)
+                                    );
+                                  }}
+                                >
+                                  ×
+                                </button>
+                                <IncomingTask incomingTask={task} onAccepted={onAccepted} onRejected={onRejected} />
+                              </>
+                            </div>
+                          ))}
                         </section>
                       </div>
-                    )}
-                    {selectedWidgets.outdialCall && <OutdialCall />}
-                  </>
-                )}
-              </>
-            )}
-            {showRejectedPopup && (
-              <div className="task-rejected-popup">
-                <button className="close-btn" onClick={handlePopoverClose}>
-                  ×
-                </button>
-                <Text>
-                  <div style={{textAlign: 'center', fontSize: '1.25rem', fontWeight: 600}}>Task Rejected</div>
-                </Text>
-                <Text>
-                  <div style={{fontSize: '0.875rem', textAlign: 'center', color: 'rgb(171, 10, 21)'}}>
-                    Reason: {rejectedReason}
-                  </div>
-                </Text>
-                <Select
-                  value={selectedState}
-                  placeholder="Select a state"
-                  onChange={(e: CustomEvent) => {
-                    setSelectedState(e.detail.value);
-                  }}
-                >
-                  <Option key={1} value="Available">
-                    Available
-                  </Option>
-                  <Option key={2} value="Idle">
-                    Idle
-                  </Option>
-                </Select>
-                <Button disabled={selectedState === ''} onClick={handlePopoverSubmit} variant="primary">
-                  Confirm State Change
-                </Button>
-              </div>
-            )}
+                    </>
+                  )}
 
-            {isSdkReady && (store.isAgentLoggedIn || isLoggedIn) && (
+                  {selectedWidgets.taskList && (
+                    <div className="box">
+                      <section className="section-box">
+                        <fieldset className="fieldset">
+                          <legend className="legend-box">Task List</legend>
+                          <div data-widget-id="task-list">
+                            <TaskList
+                              onTaskAccepted={onTaskAccepted}
+                              onTaskDeclined={onTaskDeclined}
+                              onTaskSelected={onTaskSelected}
+                            />
+                          </div>
+                        </fieldset>
+                      </section>
+                    </div>
+                  )}
+                  {selectedWidgets.outdialCall && (
+                    <div data-widget-id="outdial-call">
+                      <OutdialCall />
+                    </div>
+                  )}
+                </>
+              )}
+            </>
+          )}
+          {showRejectedPopup && (
+            <div className="task-rejected-popup">
+              <button className="close-btn" onClick={handlePopoverClose}>
+                ×
+              </button>
+              <Text>
+                <div style={{textAlign: 'center', fontSize: '1.25rem', fontWeight: 600}}>Task Rejected</div>
+              </Text>
+              <Text>
+                <div style={{fontSize: '0.875rem', textAlign: 'center', color: 'rgb(171, 10, 21)'}}>
+                  Reason: {rejectedReason}
+                </div>
+              </Text>
+              <Select
+                value={selectedState}
+                placeholder="Select a state"
+                onChange={(e: CustomEvent) => {
+                  setSelectedState(e.detail.value);
+                }}
+              >
+                <Option key={1} value="Available">
+                  Available
+                </Option>
+                <Option key={2} value="Idle">
+                  Idle
+                </Option>
+              </Select>
+              <Button disabled={selectedState === ''} onClick={handlePopoverSubmit} variant="primary">
+                Confirm State Change
+              </Button>
+            </div>
+          )}
+
+          {isSdkReady && (store.isAgentLoggedIn || isLoggedIn) && (
+            <div data-widget-id="engage-widget">
               <EngageWidget accessToken={accessToken} currentTheme={currentTheme} isSdkReady={isSdkReady} />
-            )}
-          </div>
-        </IconProvider>
-      </ThemeProvider>
+            </div>
+          )}
+        </div>
+      </WidgetsProvider>
     </div>
   );
 }
