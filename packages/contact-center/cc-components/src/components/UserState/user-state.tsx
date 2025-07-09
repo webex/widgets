@@ -7,7 +7,16 @@ import './user-state.scss';
 import {SelectNext, Text} from '@momentum-ui/react-collaboration';
 import {Item} from '@react-stately/collections';
 import {Icon, Tooltip} from '@momentum-design/components/dist/react';
-import {userStateLabels} from './constant';
+import {
+  getDropdownClass,
+  getIconStyle,
+  getTooltipText,
+  handleSelectionChange,
+  sortDropdownItems,
+  getPreviousSelectableState,
+  getSelectedKey,
+  buildDropdownItems,
+} from './user-state.utils';
 
 const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
   const {
@@ -21,91 +30,10 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
     logger,
   } = props;
 
-  const previousSelectableState = useMemo(() => {
-    return idleCodes.find((code) => code.id !== AgentUserState.RONA && code.id !== AgentUserState.Engaged)?.id ?? '0';
-  }, [idleCodes]);
-
-  let selectedKey;
-  if (customState) {
-    selectedKey = `hide-${customState.developerName}`;
-  } else {
-    selectedKey = currentState;
-  }
-
-  const items = customState
-    ? [{name: customState.name, id: `hide-${customState.developerName}`, developerName: customState.developerName}]
-    : [];
-
-  for (const item of idleCodes) {
-    if (item.name === AgentUserState.RONA && item.id === currentState) {
-      selectedKey = `hide-${item.id}`;
-    }
-    if (item.name === AgentUserState.RONA && item.id !== currentState) {
-      continue; // Skip RONA unless it matches the current state
-    }
-    items.push({
-      ...item,
-      id: item.name === AgentUserState.RONA ? `hide-${item.id}` : item.id,
-    });
-  }
-
-  const getDropdownClass = () => {
-    if (customState) {
-      return 'custom'; // Custom state class
-    }
-    if (currentState === '0') {
-      return '';
-    }
-    for (const item of idleCodes) {
-      if (item.id === currentState && item.name === AgentUserState.RONA) {
-        return 'rona';
-      }
-    }
-    return 'idle';
-  };
-
-  const getIconStyle = (item) => {
-    if (item.developerName) {
-      return {class: 'custom', iconName: 'busy-presence-light'};
-    }
-    switch (item.id) {
-      case '0':
-        return {class: 'available', iconName: 'active-presence-small-filled'};
-      case item.name === AgentUserState.RONA && item.id:
-        return {class: 'rona', iconName: 'dnd-presence-filled'};
-      default:
-        return {class: 'idle', iconName: 'recents-presence-filled'};
-    }
-  };
-
-  const getTooltipText = () => {
-    if (customState && customState.developerName === 'ENGAGED') {
-      const currentStateObj = idleCodes.find((item) => item.id === currentState);
-
-      if (currentStateObj.name === AgentUserState.Available) {
-        return userStateLabels.customWithAvailableTooltip;
-      } else {
-        return userStateLabels.customWithIdleStateTooltip.replace(/{{.*?}}/g, currentStateObj.name);
-      }
-    }
-
-    return userStateLabels.availableTooltip;
-  };
-
-  // Sorts the dropdown items by keeping 'Available' at the top and sorting the rest alphabetically by name
-  const sortedItems = [
-    ...items.filter((item) => item.name === AgentUserState.Available),
-    ...items.filter((item) => item.name !== AgentUserState.Available).sort((a, b) => a.name.localeCompare(b.name)),
-  ];
-
-  const handleSelectionChange = (key: string) => {
-    const cleanKey = key.startsWith('hide-') ? key.substring(5) : key;
-    logger.info(`CC-Widgets: UserState: selection changed from ${currentState} to ${cleanKey}`, {
-      module: 'user-state.tsx',
-      method: 'handleSelectionChange',
-    });
-    setAgentStatus(cleanKey);
-  };
+  const previousSelectableState = useMemo(() => getPreviousSelectableState(idleCodes), [idleCodes]);
+  const selectedKey = getSelectedKey(customState, currentState, idleCodes);
+  const items = buildDropdownItems(customState, idleCodes);
+  const sortedItems = sortDropdownItems(items);
 
   return (
     <div className="user-state-container" data-testid="user-state-container">
@@ -114,11 +42,11 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
         label=""
         aria-label="user-state"
         direction="bottom"
-        onSelectionChange={handleSelectionChange} // replaced direct call
+        onSelectionChange={(key: string) => handleSelectionChange(key, currentState, setAgentStatus, logger)}
         showBorder
         selectedKey={selectedKey}
         items={sortedItems}
-        className={`state-select ${getDropdownClass()}`}
+        className={`state-select ${getDropdownClass(customState, currentState, idleCodes)}`}
         data-testid="state-select"
       >
         {(item) => {
@@ -148,9 +76,16 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
         }}
       </SelectNext>
 
-      <Tooltip placement="bottom" color="contrast" delay="0, 0" className="tooltip" triggerID="user-state-tooltip">
+      <Tooltip
+        data-testid="user-state-tooltip"
+        placement="bottom"
+        color="contrast"
+        delay="0, 0"
+        className="tooltip"
+        triggerID="user-state-tooltip"
+      >
         <Text tagName="small" className="tooltip-text">
-          {getTooltipText()}
+          {getTooltipText(customState, currentState, idleCodes)}
         </Text>
       </Tooltip>
 
