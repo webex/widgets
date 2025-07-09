@@ -680,7 +680,7 @@ function App() {
                   <section className="section-box">
                     <fieldset className="fieldset">
                       <legend className="legend-box">Station Login</legend>
-                      <div className="station-login" data-widget-id="station-login">
+                      <div className="station-login">
                         <StationLogin
                           onLogin={onLogin}
                           onLogout={onLogout}
@@ -698,7 +698,7 @@ function App() {
                   <section className="section-box">
                     <fieldset className="fieldset">
                       <legend className="legend-box">Station Login (Profile Mode)</legend>
-                      <div className="station-login" data-widget-id="station-login-profile">
+                      <div className="station-login">
                         <StationLogin profileMode={true} onSaveStart={handleSaveStart} onSaveEnd={handleSaveEnd} />
                       </div>
                     </fieldset>
@@ -712,7 +712,7 @@ function App() {
                       <section className="section-box">
                         <fieldset className="fieldset">
                           <legend className="legend-box">User State</legend>
-                          <div data-widget-id="user-state">
+                          <div>
                             <UserState onStateChange={onStateChange} />
                           </div>
                         </fieldset>
@@ -724,7 +724,7 @@ function App() {
                       <section className="section-box">
                         <fieldset className="fieldset">
                           <legend className="legend-box">Call Control</legend>
-                          <div data-widget-id="call-control">
+                          <div>
                             <CallControl
                               onHoldResume={onHoldResume}
                               onEnd={onEnd}
@@ -741,7 +741,7 @@ function App() {
                       <section className="section-box">
                         <fieldset className="fieldset">
                           <legend className="legend-box">Call Control with Call Associated Data (CAD)</legend>
-                          <div data-widget-id="call-control-cad">
+                          <div>
                             <CallControlCAD
                               onHoldResume={onHoldResume}
                               onEnd={onEnd}
@@ -769,7 +769,6 @@ function App() {
                                   setCollapsedTasks((prev) => prev.filter((id) => id !== task.data.interactionId));
                                 }
                               }}
-                              data-widget-id={`incoming-task-${task.data.interactionId}`}
                             >
                               <>
                                 <button
@@ -797,7 +796,7 @@ function App() {
                       <section className="section-box">
                         <fieldset className="fieldset">
                           <legend className="legend-box">Task List</legend>
-                          <div data-widget-id="task-list">
+                          <div>
                             <TaskList
                               onTaskAccepted={onTaskAccepted}
                               onTaskDeclined={onTaskDeclined}
@@ -809,7 +808,7 @@ function App() {
                     </div>
                   )}
                   {selectedWidgets.outdialCall && (
-                    <div data-widget-id="outdial-call">
+                    <div>
                       <OutdialCall />
                     </div>
                   )}
@@ -851,7 +850,7 @@ function App() {
           )}
 
           {isSdkReady && (store.isAgentLoggedIn || isLoggedIn) && (
-            <div data-widget-id="engage-widget">
+            <div>
               <EngageWidget accessToken={accessToken} currentTheme={currentTheme} isSdkReady={isSdkReady} />
             </div>
           )}

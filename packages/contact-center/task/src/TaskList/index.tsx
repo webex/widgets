@@ -17,7 +17,11 @@ const TaskList: React.FunctionComponent<TaskListProps> = observer(
       logger,
     };
 
-    return <TaskListComponent {...props} />;
+    return (
+      <div data-widget-id="task-list">
+        <TaskListComponent {...props} />
+      </div>
+    );
   }
 );
 

@@ -35,7 +35,11 @@ const UserState: React.FunctionComponent<IUserStateProps> = observer(({onStateCh
     logger,
   };
 
-  return <UserStateComponent {...props} />;
+  return (
+    <div data-widget-id="user-state">
+      <UserStateComponent {...props} />
+    </div>
+  );
 });
 
 export {UserState};

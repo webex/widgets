@@ -47,7 +47,11 @@ const CallControlCAD: React.FunctionComponent<CallControlProps> = observer(
       logger,
     };
 
-    return <CallControlCADComponent {...result} />;
+    return (
+      <div data-widget-id="call-control-cad">
+        <CallControlCADComponent {...result} />
+      </div>
+    );
   }
 );
 

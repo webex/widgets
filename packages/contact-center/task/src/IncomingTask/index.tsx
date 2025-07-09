@@ -15,7 +15,11 @@ const IncomingTask: React.FunctionComponent<IncomingTaskProps> = observer(({inco
     logger,
   };
 
-  return <IncomingTaskComponent {...props} />;
+  return (
+    <div data-widget-id={`incoming-task-${incomingTask.data.interactionId}`}>
+      <IncomingTaskComponent {...props} />
+    </div>
+  );
 });
 
 export {IncomingTask};

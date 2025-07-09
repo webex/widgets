@@ -12,7 +12,11 @@ const OutdialCall: React.FunctionComponent = observer(() => {
     ...result,
   };
 
-  return <OutdialCallComponent {...props} />;
+  return (
+    <div data-widget-id="outdial-call">
+      <OutdialCallComponent {...props} />
+    </div>
+  );
 });
 
 export {OutdialCall};
