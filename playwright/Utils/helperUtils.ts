@@ -1,6 +1,6 @@
 import { Page } from '@playwright/test';
 import { getCurrentState, changeUserState } from './userStateUtils';
-import { WRAPUP_REASONS, USER_STATES, RONA_OPTIONS, LOGIN_MODE, LoginMode } from 'playwright/constants';
+import { WRAPUP_REASONS, USER_STATES, RONA_OPTIONS, LOGIN_MODE, LoginMode, ThemeColor } from 'playwright/constants';
 import { submitWrapup } from './wrapupUtils';
 import { acceptExtensionCall, submitRonaPopup } from './incomingTaskUtils';
 import { loginViaAccessToken, disableMultiLogin, enableMultiLogin, initialiseWidgets, enableAllWidgets, } from './initUtils';
@@ -268,7 +268,7 @@ export async function getLastWrapupReasonFromLogs(capturedLogs: string[]): Promi
 
 export function isColorClose(
   receivedColor: string,
-  expectedColor: string,
+  expectedColor: ThemeColor,
   tolerance: number = 10
 ): boolean {
   const receivedRgb = receivedColor.match(/\d+/g)?.map(Number) || [];
