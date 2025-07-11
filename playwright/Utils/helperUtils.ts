@@ -260,7 +260,6 @@ export async function getLastWrapupReasonFromLogs(capturedLogs: string[]): Promi
  * @param tolerance - The maximum allowed difference for each RGB component (default: 10)
  * @returns boolean - True if colors are close enough, false otherwise
  * @description Compares each RGB component of the two colors and checks if the absolute difference is within the specified tolerance
- * Uses the manual logs for that, such as "onWrapup invoked with reason : Sale"
  * @example
  * ```typescript
  * const isClose = isColorClose("rgb(255, 0, 0)", "rgb(250, 5, 0)");
@@ -363,6 +362,7 @@ export const handleStrayTasks = async (page: Page, extensionPage: Page | null = 
  * @param page - Playwright Page object
  * @param loginMode - The login mode to use (e.g., LOGIN_MODE.DESKTOP or LOGIN_MODE.EXTENSION)
  * @param extensionPage - Optional extension page for handling calls in extension mode (default: null)
+ * The extension Page should have the webex calling web-client logged in
  * @returns Promise<void>
  * @description Logs in via access token, enables all widgets, handles multi-login settings, initializes widgets, and manages user states
  * @example
