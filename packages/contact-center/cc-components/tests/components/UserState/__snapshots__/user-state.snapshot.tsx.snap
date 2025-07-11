@@ -279,7 +279,7 @@ exports[`UserState Component Snapshots Interactions should handle custom state r
 </div>
 `;
 
-exports[`UserState Component Snapshots Rendering should not render elapsed time when customState is present 1`] = `
+exports[`UserState Component Snapshots Rendering - Tests for UI elements and visual states of UserState component should not render elapsed time when customState is present 1`] = `
 <div
   class="user-state-container"
   data-testid="user-state-container"
@@ -415,7 +415,7 @@ exports[`UserState Component Snapshots Rendering should not render elapsed time 
 </div>
 `;
 
-exports[`UserState Component Snapshots Rendering should render elapsed time with disabled class when isSettingAgentStatus is true 1`] = `
+exports[`UserState Component Snapshots Rendering - Tests for UI elements and visual states of UserState component should render elapsed time with disabled class when isSettingAgentStatus is true 1`] = `
 <div
   class="user-state-container"
   data-testid="user-state-container"
@@ -558,7 +558,7 @@ exports[`UserState Component Snapshots Rendering should render elapsed time with
 </div>
 `;
 
-exports[`UserState Component Snapshots Rendering should render elapsed time without lastIdleStateChangeElapsedTime when negative 1`] = `
+exports[`UserState Component Snapshots Rendering - Tests for UI elements and visual states of UserState component should render elapsed time without lastIdleStateChangeElapsedTime when negative 1`] = `
 <div
   class="user-state-container"
   data-testid="user-state-container"
@@ -700,7 +700,7 @@ exports[`UserState Component Snapshots Rendering should render elapsed time with
 </div>
 `;
 
-exports[`UserState Component Snapshots Rendering should render the component with correct elements 1`] = `
+exports[`UserState Component Snapshots Rendering - Tests for UI elements and visual states of UserState component should render the component with correct elements 1`] = `
 <div
   class="user-state-container"
   data-testid="user-state-container"

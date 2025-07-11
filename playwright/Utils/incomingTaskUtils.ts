@@ -14,7 +14,7 @@ const transporter = nodemailer.createTransport({
 });
 
 /**
- * Utility functions for Playwright incoming task automation.
+ * Utility functions for dealing with creating, ending, and handling tasks in tests
  * Includes helpers for creating and ending call/chat/email tasks, handling extension calls,
  * and interacting with RONA popups and login flows.
  *
@@ -22,13 +22,19 @@ const transporter = nodemailer.createTransport({
  */
 
 /**
- * Creates a call task by dialing the provided number.
+ * Creates a call task by dialing the provided number, in the extension.
+ * Prerequisite: The calling webclient must be logged in.
  * @param page Playwright Page object
  * @param number Phone number to dial (defaults to PW_DIAL_NUMBER env variable)
  */
 export async function createCallTask(page: Page, number: string = process.env.PW_DIAL_NUMBER) {
   if (!number || number.trim() === '') {
     throw new Error('Dial number is required');
+  }
+   try{
+    await expect(page).toHaveURL(/.*\.webex\.com\/calling.*/);
+  }catch(error){
+    throw new Error('The Input Page should be logged into calling web-client.');
   }
   await page.getByRole('textbox', { name: 'Dial' }).waitFor({ state: 'visible', timeout: 5000 });
   await page.getByRole('textbox', { name: 'Dial' }).fill(number);
@@ -37,17 +43,23 @@ export async function createCallTask(page: Page, number: string = process.env.PW
 }
 
 /**
- * Ends the current call task.
+ * Ends the current ongoing call in calling webclient.
+ * Prerequisite: The calling webclient must be logged in.
  * @param page Playwright Page object
  */
 export async function endCallTask(page: Page) {
+   try{
+    await expect(page).toHaveURL(/.*\.webex\.com\/calling.*/);
+  }catch(error){
+    throw new Error('The Input Page should be logged into calling web-client.');
+  }
   await page.locator('[data-test="call-end"]').waitFor({ state: 'visible', timeout: 4000 });
   await page.locator('[data-test="call-end"]').click({ timeout: 5000 });
   await page.waitForTimeout(500);
 }
 
 /**
- * Creates a chat task by launching the chat client and submitting required info.
+ * Creates a chat task by going to the chat client and submitting required info.
  * Retries up to maxRetries on failure.
  * @param page Playwright Page object
  */
@@ -81,6 +93,7 @@ export async function createChatTask(page: Page) {
 
 /**
  * Ends the current chat task by navigating the chat UI.
+  * The Input page should have the chat client with the chat open.
  * @param page Playwright Page object
  */
 export async function endChatTask(page: Page) {
@@ -120,7 +133,7 @@ export async function createEmailTask() {
 
 /**
  * Accepts an incoming task of the given type (call, chat, email, social).
- * Waits for the accept button to be visible(only for short span, make sure the task is there before you call this method)and clicks it.
+ * Expects the incoming task to be already there.
  * @param page Playwright Page object
  * @param type Task type (see TASK_TYPES)
  * @throws Error if accept button is not found
@@ -129,15 +142,19 @@ export async function acceptIncomingTask(page: Page, type: string) {
   let incomingTaskDiv;
   if (type === TASK_TYPES.CALL) {
     incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
+    const isExtensionCall = await (await incomingTaskDiv.innerText()).includes('Ringing...');
+    if(isExtensionCall){
+      throw new Error('This is an extension call, use acceptExtensionCall instead');
+    }
   } else if (type === TASK_TYPES.CHAT) {
     incomingTaskDiv = page.getByTestId('samples:incoming-task-chat').first();
-  } else if (type == TASK_TYPES.EMAIL) {
+  } else if (type === TASK_TYPES.EMAIL) {
     incomingTaskDiv = page.getByTestId('samples:incoming-task-email').first();
   } else if (type === TASK_TYPES.SOCIAL) {
     incomingTaskDiv = page.locator('samples:incoming-task-social').first();
   }
   incomingTaskDiv = incomingTaskDiv.first();
-  await incomingTaskDiv.waitFor({ state: 'visible', timeout: 10000 });
+  await expect(incomingTaskDiv).toBeVisible();
   const acceptButton = incomingTaskDiv.getByTestId('task:accept-button').first();
   if (!(await acceptButton.isVisible())) { throw new Error('Accept button not found'); }
   await acceptButton.click({ timeout: 5000 });
@@ -145,7 +162,7 @@ export async function acceptIncomingTask(page: Page, type: string) {
 
 /**
  * Declines an incoming task of the given type (call, chat, email, social).
- * Waits for the decline button to be visible (only for short span, make sure the task is there before you call this method) and clicks it.
+ * Expects the incoming task to be already there.
  * @param page Playwright Page object
  * @param type Task type (see TASK_TYPES)
  * @throws Error if decline button is not found
@@ -154,7 +171,10 @@ export async function declineIncomingTask(page: Page, type: string) {
   let incomingTaskDiv;
   if (type === TASK_TYPES.CALL) {
     incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
-
+    const isExtensionCall = await (await incomingTaskDiv.innerText()).includes('Ringing...');
+    if(isExtensionCall){
+      throw new Error('This is an extension call, use acceptExtensionCall instead');
+    }
   } else if (type === TASK_TYPES.CHAT) {
     incomingTaskDiv = page.getByTestId('samples:incoming-task-chat').first();
   } else if (type === TASK_TYPES.EMAIL) {
@@ -163,7 +183,7 @@ export async function declineIncomingTask(page: Page, type: string) {
     incomingTaskDiv = page.locator('samples:incoming-task-social').first();
   }
   incomingTaskDiv = await incomingTaskDiv.first();
-  await incomingTaskDiv.waitFor({ state: 'visible', timeout: 10000 });
+  await expect(incomingTaskDiv).toBeVisible();
   const declineButton = incomingTaskDiv.getByTestId('task:decline-button').first();
   if (!(await declineButton.isVisible())) { throw new Error('Decline button not found'); }
   await declineButton.click({ timeout: 5000 });
@@ -171,11 +191,17 @@ export async function declineIncomingTask(page: Page, type: string) {
 }
 
 /**
- * Accepts an incoming extension call by clicking the right action button.
+ * Accepts an incoming extension call by clicking the right action button
+ * Prerequisite: The calling webclient must be logged in, and an incoming call must be present.
  * @param page Playwright Page object
  */
 export async function acceptExtensionCall(page: Page) {
-  await page.locator('[data-test="right-action-button"]').waitFor({ state: 'visible', timeout: 15000 });
+  try{
+    await expect(page).toHaveURL(/.*\.webex\.com\/calling.*/);
+  }catch(error){
+    throw new Error('The Input Page should be logged into calling web-client.');
+  }
+  await page.locator('[data-test="right-action-button"]').waitFor({ state: 'visible', timeout: 5000 });
   await page.locator('[data-test="right-action-button"]').click({ timeout: 5000 });
 }
 
@@ -184,22 +210,32 @@ export async function acceptExtensionCall(page: Page) {
  * @param page Playwright Page object
  */
 export async function declineExtensionCall(page: Page) {
-  await page.locator('[data-test="left-action-button"]').waitFor({ state: 'visible', timeout: 15000 });
+   try{
+    await expect(page).toHaveURL(/.*\.webex\.com\/calling.*/);
+  }catch(error){
+    throw new Error('The Input Page should be logged into calling web-client.');
+  }
+  await page.locator('[data-test="left-action-button"]').waitFor({ state: 'visible', timeout: 5000 });
   await page.locator('[data-test="left-action-button"]').click({ timeout: 5000 });
 }
 
 /**
- * Ends an ongoing extension call by clicking the end call button.
+ * Ends an ongoing extension call in the webex calling web-client by clicking the end call button.
  * @param page Playwright Page object
  */
 export async function endExtensionCall(page: Page) {
-  await page.locator('[data-test="end-call"]').waitFor({ state: 'visible', timeout: 15000 });
+   try{
+    await expect(page).toHaveURL(/.*\.webex\.com\/calling.*/);
+  }catch(error){
+    throw new Error('The Input Page should be logged into calling web-client.');
+  }
+  await page.locator('[data-test="end-call"]').waitFor({ state: 'visible', timeout: 5000 });
   await page.locator('[data-test="end-call"]').click({ timeout: 5000 });
   await page.waitForTimeout(500);
 }
 
 /**
- * Logs into the extension using the provided email and password.
+ * Logs into the web client for webex calling using the provided email and password.
  * Retries up to maxRetries on failure.
  * @param page Playwright Page object
  * @param email User email
@@ -256,18 +292,18 @@ export async function loginExtension(page: Page, email: string, password: string
  * @param select State to select (e.g., 'Available', 'Idle')
  * @throws Error if the RONA state selection is not provided  
  */
-export async function submitRonaPopup(page: Page, select: string) {
-  if (!select) {
-    throw new Error('RONA state selection is required');
+export async function submitRonaPopup(page: Page, nextState : string) {
+  if (!nextState) {
+    throw new Error('RONA next state selection is required');
   }
   await page.waitForTimeout(1000);
-  await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 12000 });
+  await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 5000 });
   await page.waitForTimeout(1000);
   await expect(page.getByTestId('samples:rona-select-state')).toBeVisible();
   await page.getByTestId('samples:rona-select-state').click({ timeout: 5000 });
   await page.waitForTimeout(1000);
-  await expect(page.getByTestId(`samples:rona-option-${select.toLowerCase()}`)).toBeVisible();
-  await page.getByTestId(`samples:rona-option-${select.toLowerCase()}`).click({ timeout: 5000 });
+  await expect(page.getByTestId(`samples:rona-option-${nextState.toLowerCase()}`)).toBeVisible();
+  await page.getByTestId(`samples:rona-option-${nextState.toLowerCase()}`).click({ timeout: 5000 });
   await page.waitForTimeout(1000);
   await expect(page.getByTestId('samples:rona-button-confirm')).toBeVisible();
   await page.getByTestId('samples:rona-button-confirm').click({ timeout: 5000 });

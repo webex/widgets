@@ -77,17 +77,17 @@ test.describe('Incoming Call Task Tests for Desktop Mode', async () => {
     const userStateElementColor = await userStateElement.evaluate((el) => getComputedStyle(el).backgroundColor);
     expect(isColorClose(userStateElementColor, THEME_COLORS.ENGAGED)).toBe(true);
     await waitForStateLogs(capturedLogs, USER_STATES.ENGAGED);
-    expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.ENGAGED);
+    expect(await getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.ENGAGED);
     await page.getByTestId('call-control:end-call').first().click({ timeout: 5000 });
     await page.waitForTimeout(2000);
     await submitWrapup(page, WRAPUP_REASONS.SALE);
     await waitForState(page, USER_STATES.AVAILABLE);
     await page.waitForTimeout(3000);
     await waitForStateLogs(capturedLogs, USER_STATES.AVAILABLE);
-    expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.AVAILABLE);
+    expect(await getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.AVAILABLE);
     await waitForWrapupReasonLogs(capturedLogs, WRAPUP_REASONS.SALE);
-    expect(getLastWrapupReasonFromLogs(capturedLogs)).toBe(WRAPUP_REASONS.SALE);
-    expect(verifyCallbackLogs(capturedLogs, WRAPUP_REASONS.SALE, USER_STATES.AVAILABLE)).toBe(true);
+    expect(await getLastWrapupReasonFromLogs(capturedLogs)).toBe(WRAPUP_REASONS.SALE);
+    expect(await verifyCallbackLogs(capturedLogs, WRAPUP_REASONS.SALE, USER_STATES.AVAILABLE)).toBe(true);
   });
 
   test('should decline incoming call and verify RONA state in desktop mode', async () => {
@@ -188,17 +188,6 @@ test.describe('Incoming Call Task Tests for Desktop Mode', async () => {
 
   test.afterAll(async () => {
     if (page) {
-      const logoutButton = page.getByTestId('samples:station-logout-button');
-      const isLogoutButtonVisible = await logoutButton.isVisible().catch(() => false);
-      if (isLogoutButtonVisible) {
-        await page.getByTestId('samples:station-logout-button').click({ timeout: 5000 });
-        const isLogoutButtonHidden = await page
-          .getByTestId('samples:station-logout-button')
-          .waitFor({ state: 'hidden', timeout: 20000 })
-          .then(() => true)
-          .catch(() => false);
-      }
-
       await page.close();
       page = null;
     }
@@ -252,7 +241,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
 
       })(),
       (async () => {
-        await pageSetup(page, LOGIN_MODE.EXTENSION);
+        await pageSetup(page, LOGIN_MODE.EXTENSION, extensionPage);
       })(),
       (async () => {
 
@@ -286,16 +275,16 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     const userStateElementColor = await userStateElement.evaluate((el) => getComputedStyle(el).backgroundColor);
     expect(isColorClose(userStateElementColor, THEME_COLORS.ENGAGED)).toBe(true);
     await waitForStateLogs(capturedLogs, USER_STATES.ENGAGED);
-    expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.ENGAGED);
+    expect(await getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.ENGAGED);
     await endCallTask(extensionPage);
     await page.waitForTimeout(5000);
     await submitWrapup(page, WRAPUP_REASONS.SALE);
     await waitForState(page, USER_STATES.AVAILABLE);
     await waitForStateLogs(capturedLogs, USER_STATES.AVAILABLE);
-    expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.AVAILABLE);
+    expect(await getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.AVAILABLE);
     await waitForWrapupReasonLogs(capturedLogs, WRAPUP_REASONS.SALE);
-    expect(getLastWrapupReasonFromLogs(capturedLogs)).toBe(WRAPUP_REASONS.SALE);
-    expect(verifyCallbackLogs(capturedLogs, WRAPUP_REASONS.SALE, USER_STATES.AVAILABLE)).toBe(true);
+    expect(await getLastWrapupReasonFromLogs(capturedLogs)).toBe(WRAPUP_REASONS.SALE);
+    expect(await verifyCallbackLogs(capturedLogs, WRAPUP_REASONS.SALE, USER_STATES.AVAILABLE)).toBe(true);
     await page.waitForTimeout(10000);
   });
 
@@ -318,7 +307,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     const userStateElementColor = await userStateElement.evaluate((el) => getComputedStyle(el).backgroundColor);
     expect(isColorClose(userStateElementColor, THEME_COLORS.RONA)).toBe(true);
     await waitForStateLogs(capturedLogs, USER_STATES.RONA);
-    expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
+    expect(await getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
     await submitRonaPopup(page, RONA_OPTIONS.IDLE);
     await page.waitForTimeout(10000);
   });
@@ -337,7 +326,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await waitForState(page, USER_STATES.RONA);
     await verifyCurrentState(page, USER_STATES.RONA);
     await waitForStateLogs(capturedLogs, USER_STATES.RONA);
-    expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
+    expect(await getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
     await submitRonaPopup(page, RONA_OPTIONS.IDLE);
     await page.waitForTimeout(10000);
   });
@@ -356,7 +345,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await waitForState(page, USER_STATES.RONA);
     await verifyCurrentState(page, USER_STATES.RONA);
     await waitForStateLogs(capturedLogs, USER_STATES.RONA);
-    expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
+    expect(await getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
     await submitRonaPopup(page, RONA_OPTIONS.AVAILABLE);
     await expect(page.getByTestId('samples:rona-popup')).not.toBeVisible();
     await waitForState(page, USER_STATES.AVAILABLE);
@@ -381,7 +370,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await waitForState(page, USER_STATES.RONA);
     await verifyCurrentState(page, USER_STATES.RONA);
     await waitForStateLogs(capturedLogs, USER_STATES.RONA);
-    expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
+    expect(await getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
     await submitRonaPopup(page, RONA_OPTIONS.IDLE);
     await waitForState(page, USER_STATES.MEETING);
     await expect(page.getByTestId('samples:rona-popup')).not.toBeVisible();
@@ -420,7 +409,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await expect(page.getByTestId('samples:rona-popup')).toBeVisible();
     await verifyCurrentState(page, USER_STATES.RONA);
     await waitForStateLogs(capturedLogs, USER_STATES.RONA);
-    expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
+    expect(await getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
     await page.waitForTimeout(3000);
     const userStateElement = page.getByTestId('state-select');
     const userStateElementColor = await userStateElement.evaluate((el) => getComputedStyle(el).backgroundColor);
@@ -443,7 +432,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await waitForState(page, USER_STATES.RONA);
     await verifyCurrentState(page, USER_STATES.RONA);
     await waitForStateLogs(capturedLogs, USER_STATES.RONA);
-    expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
+    expect(await getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
     await submitRonaPopup(page, RONA_OPTIONS.AVAILABLE);
     await waitForState(page, USER_STATES.AVAILABLE);
     await expect(page.getByTestId('samples:rona-popup')).not.toBeVisible();
@@ -469,7 +458,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await expect(page.getByTestId('samples:rona-popup')).toBeVisible();
     await verifyCurrentState(page, USER_STATES.RONA);
     await waitForStateLogs(capturedLogs, USER_STATES.RONA);
-    expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
+    expect(await getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
     await submitRonaPopup(page, RONA_OPTIONS.IDLE);
     await waitForState(page, USER_STATES.MEETING);
     await expect(page.getByTestId('samples:rona-popup')).not.toBeVisible();
@@ -492,17 +481,17 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     const userStateElementColor = await userStateElement.evaluate((el) => getComputedStyle(el).backgroundColor);
     expect(isColorClose(userStateElementColor, THEME_COLORS.ENGAGED)).toBe(true);
     await waitForStateLogs(capturedLogs, USER_STATES.ENGAGED);
-    expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.ENGAGED);
-    await expect(page.getByTestId('call-control:end-chat').first()).toBeVisible();
-    await page.getByTestId('call-control:end-chat').first().click({ timeout: 5000 });
+    expect(await getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.ENGAGED);
+    await expect(page.getByTestId('call-control:end-call').first()).toBeVisible();
+    await page.getByTestId('call-control:end-call').first().click({ timeout: 5000 });
     await page.waitForTimeout(500);
     await submitWrapup(page, WRAPUP_REASONS.SALE);
     await waitForState(page, USER_STATES.AVAILABLE);
     await waitForStateLogs(capturedLogs, USER_STATES.AVAILABLE);
-    expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.AVAILABLE);
+    expect(await getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.AVAILABLE);
     await waitForWrapupReasonLogs(capturedLogs, WRAPUP_REASONS.SALE);
-    expect(getLastWrapupReasonFromLogs(capturedLogs)).toBe(WRAPUP_REASONS.SALE);
-    expect(verifyCallbackLogs(capturedLogs, WRAPUP_REASONS.SALE, USER_STATES.AVAILABLE)).toBe(true);
+    expect(await getLastWrapupReasonFromLogs(capturedLogs)).toBe(WRAPUP_REASONS.SALE);
+    expect(await verifyCallbackLogs(capturedLogs, WRAPUP_REASONS.SALE, USER_STATES.AVAILABLE)).toBe(true);
   });
 
   test('should handle chat disconnect before agent answers', async () => {
@@ -530,16 +519,16 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     expect(isColorClose(userStateElementColor, THEME_COLORS.ENGAGED)).toBe(true);
     await waitForState(page, USER_STATES.ENGAGED);
     await waitForStateLogs(capturedLogs, USER_STATES.ENGAGED);
-    expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.ENGAGED);
-    await expect(page.getByTestId('call-control:end-email').first()).toBeVisible();
-    await page.getByTestId('call-control:end-email').first().click({ timeout: 5000 });
+    expect(await getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.ENGAGED);
+    await expect(page.getByTestId('call-control:end-call').first()).toBeVisible();
+    await page.getByTestId('call-control:end-call').first().click({ timeout: 5000 });
     await submitWrapup(page, WRAPUP_REASONS.SALE);
     await waitForState(page, USER_STATES.AVAILABLE);
     await waitForStateLogs(capturedLogs, USER_STATES.AVAILABLE);
-    expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.AVAILABLE);
+    expect(await getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.AVAILABLE);
     await waitForWrapupReasonLogs(capturedLogs, WRAPUP_REASONS.SALE);
-    expect(getLastWrapupReasonFromLogs(capturedLogs)).toBe(WRAPUP_REASONS.SALE);
-    expect(verifyCallbackLogs(capturedLogs, WRAPUP_REASONS.SALE, USER_STATES.AVAILABLE)).toBe(true);
+    expect(await getLastWrapupReasonFromLogs(capturedLogs)).toBe(WRAPUP_REASONS.SALE);
+    expect(await verifyCallbackLogs(capturedLogs, WRAPUP_REASONS.SALE, USER_STATES.AVAILABLE)).toBe(true);
   })
 
 
@@ -562,7 +551,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await waitForState(page, USER_STATES.AVAILABLE);
     await incomingTaskDiv.waitFor({ state: 'visible', timeout: 10000 });
     await acceptIncomingTask(page, TASK_TYPES.EMAIL);
-    const endButton = page.getByTestId('call-control:end-email').first();
+    const endButton = page.getByTestId('call-control:end-call').first();
     await endButton.waitFor({ state: 'visible', timeout: 7000 });
     await endButton.click({ timeout: 5000 });
     await page.waitForTimeout(1000);
@@ -582,7 +571,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await expect(page.getByTestId('samples:rona-popup')).toBeVisible();
     await verifyCurrentState(page, USER_STATES.RONA);
     await waitForStateLogs(capturedLogs, USER_STATES.RONA);
-    expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
+    expect(await getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
     await submitRonaPopup(page, RONA_OPTIONS.AVAILABLE);
     await waitForState(page, USER_STATES.AVAILABLE);
     await expect(page.getByTestId('samples:rona-popup')).not.toBeVisible();
@@ -591,7 +580,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await expect(incomingTaskDiv).toBeVisible();
     await acceptIncomingTask(page, TASK_TYPES.EMAIL);
     await page.waitForTimeout(1000);
-    const endButton = page.getByTestId('call-control:end-email').first();
+    const endButton = page.getByTestId('call-control:end-call').first();
     await endButton.waitFor({ state: 'visible', timeout: 12000 });
     await endButton.click({ timeout: 5000 });
     await page.waitForTimeout(1000);
@@ -618,7 +607,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await incomingTaskDiv.waitFor({ state: 'visible', timeout: 10000 });
     await acceptIncomingTask(page, TASK_TYPES.EMAIL);
     await page.waitForTimeout(1000);
-    await page.getByTestId('call-control:end-email').first().click({ timeout: 5000 });
+    await page.getByTestId('call-control:end-call').first().click({ timeout: 5000 });
     await submitWrapup(page, WRAPUP_REASONS.SALE);
     await waitForState(page, USER_STATES.AVAILABLE);
   })
@@ -653,7 +642,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await waitForState(page, USER_STATES.ENGAGED);
     await verifyCurrentState(page, USER_STATES.ENGAGED);
     await waitForStateLogs(capturedLogs, USER_STATES.ENGAGED);
-    expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.ENGAGED);
+    expect(await getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.ENGAGED);
 
     capturedLogs.length = 0;
 
@@ -665,7 +654,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await waitForState(page, USER_STATES.ENGAGED);
     await verifyCurrentState(page, USER_STATES.ENGAGED);
     await waitForStateLogs(capturedLogs, USER_STATES.ENGAGED);
-    expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.ENGAGED);
+    expect(await getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.ENGAGED);
 
     capturedLogs.length = 0;
 
@@ -678,7 +667,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await waitForState(page, USER_STATES.ENGAGED);
     await verifyCurrentState(page, USER_STATES.ENGAGED);
     await waitForStateLogs(capturedLogs, USER_STATES.ENGAGED);
-    expect(getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.ENGAGED);
+    expect(await getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.ENGAGED);
 
     let count = 3;
 
@@ -686,7 +675,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     while (count > 0) {
       capturedLogs.length = 0;
       await page.waitForTimeout(2000);
-      const endButton = page.getByTestId(/^call-control:end-\w+$/).first();
+      const endButton = page.getByTestId('call-control:end-call').first();
       const endButtonVisible = await endButton.waitFor({ state: 'visible', timeout: 2000 }).then(() => true).catch(() => false);
       if (endButtonVisible) {
         await endButton.click({ timeout: 5000 });
@@ -708,10 +697,10 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
       await waitForState(page, count === 1 ? USER_STATES.AVAILABLE : USER_STATES.ENGAGED);
       await verifyCurrentState(page, count === 1 ? USER_STATES.AVAILABLE : USER_STATES.ENGAGED);
       await waitForStateLogs(capturedLogs, count === 1 ? USER_STATES.AVAILABLE : USER_STATES.ENGAGED);
-      expect(getLastStateFromLogs(capturedLogs)).toBe(count === 1 ? USER_STATES.AVAILABLE : USER_STATES.ENGAGED);
+      expect(await getLastStateFromLogs(capturedLogs)).toBe(count === 1 ? USER_STATES.AVAILABLE : USER_STATES.ENGAGED);
       await waitForWrapupReasonLogs(capturedLogs, WRAPUP_REASONS.SALE);
-      expect(getLastWrapupReasonFromLogs(capturedLogs)).toBe(WRAPUP_REASONS.SALE);
-      expect(verifyCallbackLogs(capturedLogs, WRAPUP_REASONS.SALE, count === 1 ? USER_STATES.AVAILABLE : USER_STATES.ENGAGED)).toBe(true);
+      expect(await getLastWrapupReasonFromLogs(capturedLogs)).toBe(WRAPUP_REASONS.SALE);
+      expect(await verifyCallbackLogs(capturedLogs, WRAPUP_REASONS.SALE, count === 1 ? USER_STATES.AVAILABLE : USER_STATES.ENGAGED)).toBe(true);
       count--;
     }
   })
@@ -790,10 +779,10 @@ test.describe('Incoming Tasks tests for multi-session', async () => {
 
       })(),
       (async () => {
-        await pageSetup(page, LOGIN_MODE.EXTENSION);
+        await pageSetup(page, LOGIN_MODE.EXTENSION, extensionPage);
       })(),
       (async () => {
-        await pageSetup(page2, LOGIN_MODE.EXTENSION);
+        await pageSetup(page2, LOGIN_MODE.EXTENSION, extensionPage);
       })(),
       (async () => {
 
@@ -897,7 +886,7 @@ test.describe('Incoming Tasks tests for multi-session', async () => {
     expect(isColorClose(userStateElementColor2, THEME_COLORS.ENGAGED)).toBe(true);
     await expect(incomingTaskDiv).toBeHidden();
     await expect(incomingTaskDiv2).toBeHidden();
-    await page2.getByTestId('call-control:end-chat').first().click({ timeout: 5000 });
+    await page2.getByTestId('call-control:end-call').first().click({ timeout: 5000 });
     await submitWrapup(page2, WRAPUP_REASONS.SALE);
     await waitForState(page, USER_STATES.AVAILABLE);
     await waitForState(page2, USER_STATES.AVAILABLE);
@@ -943,7 +932,7 @@ test.describe('Incoming Tasks tests for multi-session', async () => {
     expect(isColorClose(userStateElementColor2, THEME_COLORS.ENGAGED)).toBe(true);
     await expect(incomingTaskDiv).toBeHidden();
     await expect(incomingTaskDiv2).toBeHidden();
-    await page2.getByTestId('call-control:end-email').first().click({ timeout: 5000 });
+    await page2.getByTestId('call-control:end-call').first().click({ timeout: 5000 });
     await submitWrapup(page, WRAPUP_REASONS.SALE);
     await waitForState(page, USER_STATES.AVAILABLE);
     await waitForState(page2, USER_STATES.AVAILABLE);
@@ -954,17 +943,6 @@ test.describe('Incoming Tasks tests for multi-session', async () => {
 
   test.afterAll(async () => {
     if (page) {
-      const logoutButton = page.getByTestId('samples:station-logout-button');
-      const isLogoutButtonVisible = await logoutButton.isVisible().catch(() => false);
-      if (isLogoutButtonVisible) {
-        await page.getByTestId('samples:station-logout-button').click({ timeout: 5000 });
-        const isLogoutButtonHidden = await page
-          .getByTestId('samples:station-logout-button')
-          .waitFor({ state: 'hidden', timeout: 20000 })
-          .then(() => true)
-          .catch(() => false);
-      }
-
       await page.close();
       page = null;
     }

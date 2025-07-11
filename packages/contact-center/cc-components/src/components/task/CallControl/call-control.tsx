@@ -295,9 +295,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                         button.className +
                         (button.disabled || (consultInitiated && isTelephony) ? ` ${button.className}-disabled` : '')
                       }
-                      data-testid={
-                        button.id === 'end' ? `call-control:end-${currentMediaType.labelName.toLowerCase()}` : button.id
-                      }
+                      data-testid={button.id === 'end' ? 'call-control:end-call' : button.id}
                       onPress={button.onClick}
                       disabled={button.disabled || (consultInitiated && isTelephony)}
                       aria-label={button.tooltip}
@@ -334,7 +332,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                   postfix-icon="arrow-down-bold"
                   type="button"
                   role="button"
-                  data-testid="wrapup-button"
+                  data-testid="call-control:wrapup-button"
                 >
                   {WRAP_UP}
                 </Button>
@@ -365,7 +363,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                 info-icon-aria-label=""
                 name=""
                 className="wrapup-select"
-                data-testid="wrapup:reason-select"
+                data-testid="call-control:wrapup-select"
                 placeholder={SELECT}
                 onChange={(event: CustomEvent) => {
                   const key = event.detail.value;
@@ -374,7 +372,11 @@ function CallControlComponent(props: CallControlComponentProps) {
                 }}
               >
                 {wrapupCodes?.map((code) => (
-                  <Option key={code.id} value={code.id} data-testid={`wrapup:reason-${code.name.toLowerCase()}`}>
+                  <Option
+                    key={code.id}
+                    value={code.id}
+                    data-testid={`call-control:wrapup-reason-${code.name.toLowerCase()}`}
+                  >
                     {code.name}
                   </Option>
                 ))}
@@ -383,7 +385,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                 onClick={handleWrapupCall}
                 variant="primary"
                 className="submit-wrapup-button"
-                data-testid="wrapup:submit-button"
+                data-testid="call-control:wrapup-submit"
                 aria-label="Submit wrap-up"
                 disabled={selectedWrapupId && selectedWrapupReason ? false : true}
               >

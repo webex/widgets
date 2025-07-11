@@ -391,14 +391,14 @@ export const handleStrayTasks = async (page: Page, extensionPage: Page | null = 
       }
       await page.waitForTimeout(1000);
     }
-    const endButton = page.getByTestId(/^call-control:end-\w+$/).first();
+    const endButton = page.getByTestId('call-control:end-call').first();
     const endButtonVisible = await endButton.waitFor({ state: 'visible', timeout: 2000 }).then(() => true).catch(() => false);
     if (endButtonVisible) {
       await page.waitForTimeout(2000);
       await endButton.click({ timeout: 5000 });
       await submitWrapup(page, WRAPUP_REASONS.SALE);
     } else {
-      const wrapupBox = page.getByTestId('wrapup-button').first();
+      const wrapupBox = page.getByTestId('call-control:wrapup-button').first();
       const isWrapupBoxVisible = await wrapupBox.waitFor({ state: 'visible', timeout: 2000 }).then(() => true).catch(() => false);
       if (isWrapupBoxVisible) {
         await page.waitForTimeout(2000);
