@@ -8,7 +8,6 @@ import {
   CallControlCAD,
   store,
   OutdialCall,
-  DigitalChannels,
 } from '@webex/cc-widgets';
 import {StationLogoutSuccess} from '@webex/plugin-cc';
 import Webex from 'webex';
@@ -25,6 +24,7 @@ import {
 import {PopoverNext} from '@momentum-ui/react-collaboration';
 import './App.scss';
 import {observer} from 'mobx-react-lite';
+import EngageWidget from './EngageWidget';
 
 // This is not to be included to a production app.
 // Have added here for debugging purposes
@@ -668,7 +668,7 @@ function App() {
                                           <td className="table-border">
                                             {channel.charAt(0).toUpperCase() + channel.slice(1)}
                                           </td>
-                                          <td className="table-border">{count}</td>
+                                          <td className="table-border">{String(count)}</td>
                                         </tr>
                                       ))}
                                   </tbody>
@@ -844,11 +844,13 @@ function App() {
             )}
 
             {isSdkReady && (store.isAgentLoggedIn || isLoggedIn) && (
-              <DigitalChannels
-                jwtToken={accessToken}
+              <EngageWidget
+                accessToken={accessToken}
+                currentTheme={currentTheme}
+                isSdkReady={isSdkReady}
                 signalREndpoint="https://wxcc-component-api.cstg.webexengage.com/signalr"
                 apiEndpoint="https://wxcc-component-api.cstg.webexengage.com/api"
-              ></DigitalChannels>
+              />
             )}
           </div>
         </IconProvider>
