@@ -516,6 +516,9 @@ export interface CallControlConsultComponentsProps {
   isAgentBeingConsulted: boolean;
   isEndConsultEnabled: boolean;
   logger: ILogger;
+  muteUnmute: boolean;
+  isMuted: boolean;
+  onToggleConsultMute: () => void;
 }
 
 /**

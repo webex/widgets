@@ -1,7 +1,7 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {ButtonCircle, TooltipNext, Text} from '@momentum-ui/react-collaboration';
 import {Avatar, Icon} from '@momentum-design/components/dist/react';
-
+import {MUTE_CALL, UNMUTE_CALL} from '../../constants';
 import TaskTimer from '../../TaskTimer';
 import {CallControlConsultComponentsProps} from '../../task.types';
 
@@ -14,7 +14,12 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
   isAgentBeingConsulted,
   isEndConsultEnabled,
   logger,
+  muteUnmute,
+  isMuted,
+  onToggleConsultMute,
 }) => {
+  const [isMuteDisabled, setIsMuteDisabled] = useState(false);
+
   const timerKey = `timer-${startTimeStamp}`;
 
   const handleTransfer = () => {
@@ -51,7 +56,35 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
     }
   };
 
+  const handleConsultMuteToggle = () => {
+    setIsMuteDisabled(true);
+
+    try {
+      onToggleConsultMute();
+    } catch (error) {
+      logger.error('Mute toggle failed:', {
+        error,
+        module: 'call-control.tsx',
+        method: 'handleMuteToggle',
+      });
+    } finally {
+      // Re-enable button after operation
+      setTimeout(() => {
+        setIsMuteDisabled(false);
+      }, 500);
+    }
+  };
+
   const buttons = [
+    {
+      key: 'mute',
+      icon: isMuted ? 'microphone-muted-bold' : 'microphone-bold',
+      onClick: handleConsultMuteToggle,
+      tooltip: isMuted ? UNMUTE_CALL : MUTE_CALL,
+      className: `${isMuted ? 'call-control-button-muted' : 'call-control-button'}`,
+      disabled: isMuteDisabled,
+      shouldShow: muteUnmute,
+    },
     {
       key: 'transfer',
       icon: 'next-bold',

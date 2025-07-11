@@ -155,6 +155,19 @@
   }
 }
 
+.md-button-circle-wrapper.call-control-button-muted[disabled],
+.md-button-circle-wrapper.call-control-button-muted.shallowDisabled,
+.md-button-circle-wrapper.call-control-button-muted:disabled {
+  outline-color: var(--mds-color-theme-button-primary-disabled);
+  border-color: var(--mds-color-theme-button-primary-disabled);
+  opacity: 0.5;
+  cursor: not-allowed;
+  .call-control-button-muted-icon {
+    --mdc-icon-fill-color: var(--mds--color-theme-button-secondary-normal);
+  }
+}
+
+
 .wrapup-button {
   display: inline-flex;
   justify-content: center;

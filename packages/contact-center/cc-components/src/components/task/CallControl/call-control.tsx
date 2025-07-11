@@ -326,13 +326,11 @@ function CallControlComponent(props: CallControlComponentProps) {
                     <ButtonCircle
                       className={
                         button.className +
-                        (button.disabled || (consultInitiated && isTelephony && button.id !== 'mute')
-                          ? ` ${button.className}-disabled`
-                          : '')
+                        (button.disabled || (consultInitiated && isTelephony) ? ` ${button.className}-disabled` : '')
                       }
                       data-testid="ButtonCircle"
                       onPress={button.onClick}
-                      disabled={button.disabled || (consultInitiated && isTelephony && button.id !== 'mute')}
+                      disabled={button.disabled || (consultInitiated && isTelephony)}
                       aria-label={button.tooltip}
                     >
                       <Icon className={button.className + '-icon'} name={button.icon} />
