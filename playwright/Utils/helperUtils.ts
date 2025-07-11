@@ -90,7 +90,8 @@ export async function waitForWebSocketReconnection(consoleMessages: string[], ti
  * @description Continuously checks the current user state until it matches the expected state or times out
  * @example
  * ```typescript
- * await waitForState(page, USER_STATES.READY);
+ * await waitForState(page, USER_STATES.AVAILABLE);
+ * // Waits until the user state changes to 'Available'
  * ```
  */
 
@@ -185,12 +186,13 @@ export const waitForStateLogs = async (
  * @param capturedLogs - Array of log messages
  * @param expectedReason - The expected wrapup reason to wait for
  * @param timeoutMs - Maximum time to wait for the wrapup reason in milliseconds (default: 10000)
+ * Uses the manual logs for that, such as "onWrapup invoked with reason : Sale"
  * @returns Promise<void>
  * @throws Error if the expected wrapup reason is not found within the timeout
  * @description Continuously checks the last wrapup reason in logs until it matches the expected reason or times out
  * @example
  * ```typescript
- * await waitForWrapupReasonLogs(capturedLogs, 'Task Completed');
+ * await waitForWrapupReasonLogs(capturedLogs, WRAPUP_REASONS.SALE);
  * ```
  */
 
@@ -220,6 +222,7 @@ export const waitForWrapupReasonLogs = async (
  * @param capturedLogs - Array of log messages
  * @returns Promise<string> - The last wrapup reason found in the logs, or a message if not found
  * @description Filters logs for wrapup messages and extracts the last wrapup reason
+ * Uses the manual logs for that, such as "onWrapup invoked with reason : Sale"
  * @example
  * ```typescript
  * const lastWrapupReason = await getLastWrapupReasonFromLogs(capturedLogs);
@@ -255,6 +258,7 @@ export async function getLastWrapupReasonFromLogs(capturedLogs: string[]): Promi
  * @param tolerance - The maximum allowed difference for each RGB component (default: 5)
  * @returns boolean - True if colors are close enough, false otherwise
  * @description Compares each RGB component of the two colors and checks if the absolute difference is within the specified tolerance
+ * Uses the manual logs for that, such as "onWrapup invoked with reason : Sale"
  * @example
  * ```typescript
  * const isClose = isColorClose("rgb(255, 0, 0)", "rgb(250, 5, 0)");
