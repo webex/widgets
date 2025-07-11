@@ -150,12 +150,14 @@ export async function getLastStateFromLogs(capturedLogs: string[]) {
  * @param capturedLogs - Array of log messages
  * @param expectedState - The expected state to wait for
  * @param timeoutMs - Maximum time to wait for the state in milliseconds (default: 10000)
+ * uses the manual logs for that, such as "onStateChange invoked with state name: AVAILABLE"
  * @returns Promise<void>
  * @throws Error if the expected state is not found within the timeout
  * @description Continuously checks the last state in logs until it matches the expected state or times out
  * @example
  * ```typescript
- * await waitForStateLogs(capturedLogs, 'READY');
+ * await waitForStateLogs(capturedLogs,  AVAILABLE);
+ * // Waits until the last state in logs changes to 'Available'
  * ```
  */
 
