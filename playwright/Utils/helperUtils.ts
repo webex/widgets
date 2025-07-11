@@ -255,7 +255,7 @@ export async function getLastWrapupReasonFromLogs(capturedLogs: string[]): Promi
  * Compares two RGB color strings to check if they are within a specified tolerance
  * @param receivedColor - The color received from the UI (e.g., "rgb(255, 0, 0)")
  * @param expectedColor - The expected color to compare against (e.g., "rgb(250, 5, 0)")
- * @param tolerance - The maximum allowed difference for each RGB component (default: 5)
+ * @param tolerance - The maximum allowed difference for each RGB component (default: 10)
  * @returns boolean - True if colors are close enough, false otherwise
  * @description Compares each RGB component of the two colors and checks if the absolute difference is within the specified tolerance
  * Uses the manual logs for that, such as "onWrapup invoked with reason : Sale"
