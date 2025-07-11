@@ -3,7 +3,7 @@ import { changeUserState, verifyCurrentState } from './Utils/userStateUtils';
 import { createCallTask, createChatTask, declineExtensionCall, declineIncomingTask, endCallTask, endChatTask, loginExtension, acceptIncomingTask, acceptExtensionCall, createEmailTask, endExtensionCall, submitRonaPopup } from './Utils/incomingTaskUtils';
 import { TASK_TYPES, USER_STATES, LOGIN_MODE, THEME_COLORS, WRAPUP_REASONS, RONA_OPTIONS } from './constants';
 import { submitWrapup } from './Utils/wrapupUtils';
-import { waitForState, waitForStateLogs, getLastStateFromLogs, waitForWrapupReasonLogs, verifyCallbackLogs, getLastWrapupReasonFromLogs, isColorClose, pageSetup } from './Utils/helperUtils';
+import { waitForState, waitForStateLogs, getLastStateFromLogs, waitForWrapupReasonLogs, getLastWrapupReasonFromLogs, isColorClose, pageSetup } from './Utils/helperUtils';
 
 
 let page: Page | null = null;
@@ -19,6 +19,69 @@ const maxRetries = 3;
 
 //NOTE : Make Sure to set RONA Timeout to 18 seconds before running this test.
 
+/**
+ * Verifies the captured logs for wrapup and state change events
+ * @param capturedLogs - Array of log messages
+ * @param expectedWrapupReason - The expected wrapup reason to verify
+ * @param expectedState - The expected state name to verify
+ * @param shouldWrapupComeFirst - Whether the wrapup log should come before the state change log (default: true)
+ * @returns Promise<boolean> - True if verification is successful, otherwise throws an error
+ * @throws Error if logs do not match expected values or order
+ * @description Checks the last wrapup reason and state name in logs against expected values, ensuring correct order if specified
+ * @example
+ * ```typescript
+ * await verifyCallbackLogs(capturedLogs, WRAPUP_REASONS.SALE, USER_STATES.AVAILABLE);
+ * ```
+ */
+
+export async function verifyCallbackLogs(
+  capturedLogs: string[],
+  expectedWrapupReason: string,
+  expectedState: string,
+  shouldWrapupComeFirst: boolean = true
+): Promise<boolean> {
+  const wrapupLogs = capturedLogs.filter(log =>
+    log.includes('onWrapup invoked with reason :')
+  );
+  const stateChangeLogs = capturedLogs.filter(log =>
+    log.includes('onStateChange invoked with state name:')
+  );
+
+  if (wrapupLogs.length === 0 || stateChangeLogs.length === 0) {
+    throw new Error('Missing required logs, check callbacks for wrapup or statechange');
+  }
+
+  const lastWrapupLog = wrapupLogs[wrapupLogs.length - 1];
+  const lastStateChangeLog = stateChangeLogs[stateChangeLogs.length - 1];
+
+  const wrapupLogIndex = capturedLogs.lastIndexOf(lastWrapupLog);
+  const stateChangeLogIndex = capturedLogs.lastIndexOf(lastStateChangeLog);
+
+  if (shouldWrapupComeFirst && wrapupLogIndex >= stateChangeLogIndex) {
+    throw new Error('Wrapup log should come before state change log');
+  }
+
+  const wrapupMatch = lastWrapupLog.match(/onWrapup invoked with reason : (.+)$/);
+  const stateMatch = lastStateChangeLog.match(/onStateChange invoked with state name:\s*(.+)$/);
+
+  if (!wrapupMatch || !stateMatch) {
+    throw new Error('Could not extract values from logs');
+  }
+
+  const actualWrapupReason = wrapupMatch[1].trim();
+  const actualStateName = stateMatch[1].trim();
+
+  // Verify expected values
+  if (actualWrapupReason !== expectedWrapupReason) {
+    throw new Error('Wrapup reason mismatch, expected ' + expectedWrapupReason + ', got ' + actualWrapupReason);
+  }
+
+  if (actualStateName !== expectedState) {
+    throw new Error('State name mismatch, expected ' + expectedState + ', got ' + actualStateName);
+  }
+
+  return true;
+}
 
 function setupConsoleLogging(page: Page): () => void {
   capturedLogs.length = 0;

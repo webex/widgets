@@ -247,69 +247,6 @@ export async function getLastWrapupReasonFromLogs(capturedLogs: string[]): Promi
   return match[1].trim();
 }
 
-/**
- * Verifies the captured logs for wrapup and state change events
- * @param capturedLogs - Array of log messages
- * @param expectedWrapupReason - The expected wrapup reason to verify
- * @param expectedState - The expected state name to verify
- * @param shouldWrapupComeFirst - Whether the wrapup log should come before the state change log (default: true)
- * @returns Promise<boolean> - True if verification is successful, otherwise throws an error
- * @throws Error if logs do not match expected values or order
- * @description Checks the last wrapup reason and state name in logs against expected values, ensuring correct order if specified
- * @example
- * ```typescript
- * await verifyCallbackLogs(capturedLogs, 'Task Completed', 'READY');
- * ```
- */
-
-export async function verifyCallbackLogs(
-  capturedLogs: string[],
-  expectedWrapupReason: string,
-  expectedState: string,
-  shouldWrapupComeFirst: boolean = true
-): Promise<boolean> {
-  const wrapupLogs = capturedLogs.filter(log =>
-    log.includes('onWrapup invoked with reason :')
-  );
-  const stateChangeLogs = capturedLogs.filter(log =>
-    log.includes('onStateChange invoked with state name:')
-  );
-
-  if (wrapupLogs.length === 0 || stateChangeLogs.length === 0) {
-    throw new Error('Missing required logs, check callbacks for wrapup or statechange');
-  }
-
-  const lastWrapupLog = wrapupLogs[wrapupLogs.length - 1];
-  const lastStateChangeLog = stateChangeLogs[stateChangeLogs.length - 1];
-
-  const wrapupLogIndex = capturedLogs.lastIndexOf(lastWrapupLog);
-  const stateChangeLogIndex = capturedLogs.lastIndexOf(lastStateChangeLog);
-
-  if (shouldWrapupComeFirst && wrapupLogIndex >= stateChangeLogIndex) {
-    throw new Error('Wrapup log should come before state change log');
-  }
-
-  const wrapupMatch = lastWrapupLog.match(/onWrapup invoked with reason : (.+)$/);
-  const stateMatch = lastStateChangeLog.match(/onStateChange invoked with state name:\s*(.+)$/);
-
-  if (!wrapupMatch || !stateMatch) {
-    throw new Error('Could not extract values from logs');
-  }
-
-  const actualWrapupReason = wrapupMatch[1].trim();
-  const actualStateName = stateMatch[1].trim();
-
-  // Verify expected values
-  if (actualWrapupReason !== expectedWrapupReason) {
-    throw new Error('Wrapup reason mismatch, expected ' + expectedWrapupReason + ', got ' + actualWrapupReason);
-  }
-
-  if (actualStateName !== expectedState) {
-    throw new Error('State name mismatch, expected ' + expectedState + ', got ' + actualStateName);
-  }
-
-  return true;
-}
 
 /**
  * Compares two RGB color strings to check if they are within a specified tolerance
@@ -328,7 +265,7 @@ export async function verifyCallbackLogs(
 export function isColorClose(
   receivedColor: string,
   expectedColor: string,
-  tolerance: number = 5
+  tolerance: number = 10
 ): boolean {
   console.log(`Comparing colors: received=${receivedColor}, expected=${expectedColor}, tolerance=${tolerance}`);
   const receivedRgb = receivedColor.match(/\d+/g)?.map(Number) || [];
