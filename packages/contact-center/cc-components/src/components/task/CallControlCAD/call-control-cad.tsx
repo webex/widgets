@@ -41,6 +41,8 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
     lastTargetType,
     controlVisibility,
     logger,
+    isMuted,
+    toggleMute,
   } = props;
 
   const formatTime = (time: number): string => {
@@ -207,6 +209,9 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
             isAgentBeingConsulted={!consultAccepted}
             isEndConsultEnabled={isEndConsultEnabled}
             logger={logger}
+            muteUnmute={controlVisibility.muteUnmute}
+            isMuted={isMuted}
+            onToggleConsultMute={toggleMute}
           />
         </div>
       )}
