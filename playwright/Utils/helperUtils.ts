@@ -258,7 +258,7 @@ export async function getLastWrapupReasonFromLogs(capturedLogs: string[]): Promi
  * @example
  * ```typescript
  * const isClose = isColorClose("rgb(255, 0, 0)", "rgb(250, 5, 0)");
- * console.log(isClose); // Outputs true or false based on comparison
+ * expect(isClose).toBe(true); // Returns true if the colors are close enough
  * ```
  */
 
@@ -267,7 +267,6 @@ export function isColorClose(
   expectedColor: string,
   tolerance: number = 10
 ): boolean {
-  console.log(`Comparing colors: received=${receivedColor}, expected=${expectedColor}, tolerance=${tolerance}`);
   const receivedRgb = receivedColor.match(/\d+/g)?.map(Number) || [];
   const expectedRgb = expectedColor.match(/\d+/g)?.map(Number) || [];
 
