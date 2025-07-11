@@ -54,7 +54,11 @@ const StationLogin: React.FunctionComponent<StationLoginProps> = observer(
       logger,
       profileMode,
     };
-    return <StationLoginComponent {...props} />;
+    return (
+      <div data-widget-id="station-login">
+        <StationLoginComponent {...props} />
+      </div>
+    );
   }
 );
 
