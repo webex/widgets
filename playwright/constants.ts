@@ -8,6 +8,8 @@ export const USER_STATES = {
   ENGAGED: 'Engaged',
 };
 
+export type userState = typeof USER_STATES[keyof typeof USER_STATES];
+
 export const THEME_COLORS = {
   AVAILABLE: 'rgb(206, 245, 235)',
   MEETING: 'rgba(0, 0, 0, 0.11)',
@@ -15,11 +17,15 @@ export const THEME_COLORS = {
   RONA: 'rgb(250, 233, 234)'
 };
 
+export type ThemeColor = typeof THEME_COLORS[keyof typeof THEME_COLORS];
+
 export const LOGIN_MODE = {
   DESKTOP: 'Desktop',
   EXTENSION: 'Extension',
   DIAL_NUMBER: 'Dial Number',
 };
+
+export type LoginMode = typeof LOGIN_MODE[keyof typeof LOGIN_MODE];
 
 export const LONG_WAIT = 40000;
 
@@ -32,6 +38,8 @@ export const TASK_TYPES = {
   SOCIAL: 'Social'
 }
 
+export type TaskType = typeof TASK_TYPES[keyof typeof TASK_TYPES];
+
 export const CHAT_URL = 'https://widgets.webex.com/chat-client';
 
 export const WRAPUP_REASONS = {
@@ -39,7 +47,11 @@ export const WRAPUP_REASONS = {
   RESOLVED: 'Resolved',
 }
 
+export type WrapupReason = typeof WRAPUP_REASONS[keyof typeof WRAPUP_REASONS];
+
 export const RONA_OPTIONS = {
   AVAILABLE: 'Available',
   IDLE: 'Idle',
 }
+
+export type RonaOption = typeof RONA_OPTIONS[keyof typeof RONA_OPTIONS];

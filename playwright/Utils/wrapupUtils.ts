@@ -1,4 +1,5 @@
 import { Page, expect } from '@playwright/test';
+import { WrapupReason } from 'playwright/constants';
 
 /**
  * Submits the wrap-up popup for a task in the UI.
@@ -7,7 +8,7 @@ import { Page, expect } from '@playwright/test';
  * @param reason The wrap-up reason to select (string, case-insensitive)
  * @throws Error if the wrap-up reason is not found or not provided
  */
-export async function submitWrapup(page: Page, reason: string): Promise<void> {
+export async function submitWrapup(page: Page, reason: WrapupReason): Promise<void> {
   if (!reason || reason.trim() === '') {
     throw new Error('Wrapup reason is required');
   }

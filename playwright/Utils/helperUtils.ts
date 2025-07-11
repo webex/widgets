@@ -1,6 +1,6 @@
 import { Page } from '@playwright/test';
 import { getCurrentState, changeUserState } from './userStateUtils';
-import { WRAPUP_REASONS, USER_STATES, RONA_OPTIONS, LOGIN_MODE } from 'playwright/constants';
+import { WRAPUP_REASONS, USER_STATES, RONA_OPTIONS, LOGIN_MODE, LoginMode } from 'playwright/constants';
 import { submitWrapup } from './wrapupUtils';
 import { acceptExtensionCall, submitRonaPopup } from './incomingTaskUtils';
 import { loginViaAccessToken, disableMultiLogin, enableMultiLogin, initialiseWidgets, enableAllWidgets, } from './initUtils';
@@ -429,7 +429,7 @@ export const handleStrayTasks = async (page: Page, extensionPage: Page | null = 
  * ```
  */
 
-export const pageSetup = async (page: Page, loginMode: string, extensionPage: Page | null = null) => {
+export const pageSetup = async (page: Page, loginMode: LoginMode, extensionPage: Page | null = null) => {
   const maxRetries = 3;
   await loginViaAccessToken(page, 'AGENT1');
   await enableAllWidgets(page);

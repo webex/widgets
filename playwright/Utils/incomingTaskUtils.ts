@@ -1,6 +1,6 @@
 import { Page, expect } from '@playwright/test';
-import { CALL_URL, RONA_OPTIONS } from '../constants';
-import { TASK_TYPES } from '../constants';
+import { CALL_URL, RONA_OPTIONS, RonaOption } from '../constants';
+import { TASK_TYPES, TaskType } from '../constants';
 import nodemailer from 'nodemailer';
 
 const maxRetries = 3;
@@ -22,7 +22,7 @@ const transporter = nodemailer.createTransport({
  */
 
 /**
- * Creates a call task by dialing the provided number, in the extension.
+ * Creates a call task by dialing the provided number, in the webex calling web-client.
  * Prerequisite: The calling webclient must be logged in.
  * @param page Playwright Page object
  * @param number Phone number to dial (defaults to PW_DIAL_NUMBER env variable)
@@ -43,7 +43,7 @@ export async function createCallTask(page: Page, number: string = process.env.PW
 }
 
 /**
- * Ends the current ongoing call in calling webclient.
+ * Ends the current ongoing call in webex calling webclient.
  * Prerequisite: The calling webclient must be logged in.
  * @param page Playwright Page object
  */
@@ -138,7 +138,7 @@ export async function createEmailTask() {
  * @param type Task type (see TASK_TYPES)
  * @throws Error if accept button is not found
  */
-export async function acceptIncomingTask(page: Page, type: string) {
+export async function acceptIncomingTask(page: Page, type: TaskType) {
   let incomingTaskDiv;
   if (type === TASK_TYPES.CALL) {
     incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
@@ -167,13 +167,13 @@ export async function acceptIncomingTask(page: Page, type: string) {
  * @param type Task type (see TASK_TYPES)
  * @throws Error if decline button is not found
  */
-export async function declineIncomingTask(page: Page, type: string) {
+export async function declineIncomingTask(page: Page, type: TaskType) {
   let incomingTaskDiv;
   if (type === TASK_TYPES.CALL) {
     incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
     const isExtensionCall = await (await incomingTaskDiv.innerText()).includes('Ringing...');
     if(isExtensionCall){
-      throw new Error('This is an extension call, use acceptExtensionCall instead');
+      throw new Error('This is an extension call, use declineExtensionCall instead');
     }
   } else if (type === TASK_TYPES.CHAT) {
     incomingTaskDiv = page.getByTestId('samples:incoming-task-chat').first();
@@ -281,7 +281,7 @@ export async function loginExtension(page: Page, email: string, password: string
   try {
     await page.locator('[data-test="statusMessage"]').waitFor({ state: 'hidden', timeout: 30000 });
   } catch (e) {
-    throw new Error('Phone service is not able to connect. Please check if there are multiple sessions with the same account.');
+    throw new Error('Unable to Login to the webex calling web-client');
   }
 
 }
@@ -292,7 +292,7 @@ export async function loginExtension(page: Page, email: string, password: string
  * @param select State to select (e.g., 'Available', 'Idle')
  * @throws Error if the RONA state selection is not provided  
  */
-export async function submitRonaPopup(page: Page, nextState : string) {
+export async function submitRonaPopup(page: Page, nextState : RonaOption) {
   if (!nextState) {
     throw new Error('RONA next state selection is required');
   }
