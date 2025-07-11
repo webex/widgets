@@ -1,3 +1,11 @@
+# [1.28.0-ccwidgets.89](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.88...v1.28.0-ccwidgets.89) (2025-07-11)
+
+
+### Bug Fixes
+
+* **cc-components:** Add unit and snapshot testing for user state ([#478](https://github.com/webex/widgets/issues/478)) ([f9efbf0](https://github.com/webex/widgets/commit/f9efbf02180c12c08a3be520abc20e87aa67e2ae))
+* **cc-widgets:** add email credentials to the workflow ([#493](https://github.com/webex/widgets/issues/493)) ([49b017a](https://github.com/webex/widgets/commit/49b017abd5895f407771a4a10d736085cf29f1d1))
+
 # [1.28.0-ccwidgets.88](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.87...v1.28.0-ccwidgets.88) (2025-07-07)
 
 
