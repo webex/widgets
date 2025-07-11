@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.90](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.89...v1.28.0-ccwidgets.90) (2025-07-11)
+
+
+### Bug Fixes
+
+* **cc-widgets:** update the workflow for pull request by increasing the timeout for  e2e_test_cc_widgets ([#495](https://github.com/webex/widgets/issues/495)) ([094b9b1](https://github.com/webex/widgets/commit/094b9b19f2a8a1f753c3b38dd4175e3f2e4ffa14))
+
 # [1.28.0-ccwidgets.89](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.88...v1.28.0-ccwidgets.89) (2025-07-11)
 
 
