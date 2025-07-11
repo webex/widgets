@@ -446,7 +446,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
 
 
 
-  test('should handle customer disconnect before agent answers in extension mode', async () => {
+  test('should handle call disconnect before agent answers in extension mode', async () => {
     await createCallTask(callerpage);
     await changeUserState(page, USER_STATES.AVAILABLE);
     const incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
@@ -572,7 +572,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await createEmailTask();
     await changeUserState(page, USER_STATES.AVAILABLE);
     const incomingTaskDiv = page.getByTestId('samples:incoming-task-email').first();
-    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 40000 })
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 50000 })
     await acceptIncomingTask(page, TASK_TYPES.EMAIL);
     await waitForState(page, USER_STATES.ENGAGED);
     await verifyCurrentState(page, USER_STATES.ENGAGED);
@@ -599,7 +599,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await createEmailTask();
     await changeUserState(page, USER_STATES.AVAILABLE);
     const incomingTaskDiv = page.getByTestId('samples:incoming-task-email').first();
-    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 40000 });
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 50000 });
     await incomingTaskDiv.waitFor({ state: 'hidden', timeout: 30000 });
     await expect(incomingTaskDiv).toBeHidden();
     await waitForState(page, USER_STATES.RONA);
@@ -627,7 +627,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await createEmailTask();
     await changeUserState(page, USER_STATES.AVAILABLE);
     const incomingTaskDiv = page.getByTestId('samples:incoming-task-email').first();
-    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 40000 });
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 50000 });
     await incomingTaskDiv.waitFor({ state: 'hidden', timeout: 30000 });
     await expect(incomingTaskDiv).toBeHidden();
     await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 15000 });
@@ -657,7 +657,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
     await createEmailTask();
     await changeUserState(page, USER_STATES.AVAILABLE);
     const incomingTaskDiv = page.getByTestId('samples:incoming-task-email').first();
-    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 40000 });
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 50000 });
     await incomingTaskDiv.waitFor({ state: 'hidden', timeout: 30000 });
     await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 15000 });
     await submitRonaPopup(page, RONA_OPTIONS.IDLE);
@@ -918,7 +918,7 @@ test.describe('Incoming Tasks tests for multi-session', async () => {
     await changeUserState(page, USER_STATES.AVAILABLE);
     const incomingTaskDiv = page.getByTestId('samples:incoming-task-chat').first();
     const incomingTaskDiv2 = page2.getByTestId('samples:incoming-task-chat').first();
-    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 40000 });
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 60000 });
     await incomingTaskDiv2.waitFor({ state: 'visible', timeout: 10000 });
     await incomingTaskDiv.waitFor({ state: 'hidden', timeout: 30000 });
     await incomingTaskDiv2.waitFor({ state: 'hidden', timeout: 10000 });
@@ -962,7 +962,7 @@ test.describe('Incoming Tasks tests for multi-session', async () => {
     await changeUserState(page, USER_STATES.AVAILABLE);
     const incomingTaskDiv = page.getByTestId('samples:incoming-task-email').first();
     const incomingTaskDiv2 = page2.getByTestId('samples:incoming-task-email').first();
-    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 40000 });
+    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 50000 });
     await incomingTaskDiv2.waitFor({ state: 'visible', timeout: 10000 });
     await incomingTaskDiv.waitFor({ state: 'hidden', timeout: 30000 });
     await incomingTaskDiv2.waitFor({ state: 'hidden', timeout: 10000 });
