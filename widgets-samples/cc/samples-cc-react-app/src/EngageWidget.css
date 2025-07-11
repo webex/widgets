@@ -35,8 +35,8 @@
   position: fixed;
   bottom: 5.625rem;
   left: 1.25rem;
-  width: 21.875rem;
-  height: 31.25rem;
+  width: 35rem;
+  height: 50rem;
   background-color: #fff;
   box-shadow: 0 0.25rem 1.25rem rgba(0,0,0,0.15);
   border-radius: 0.5rem;
@@ -123,10 +123,4 @@
 
 .engage-notification.hidden {
   display: none;
-}
-
-/* Widget container styles */
-.engage-widget-container {
-  height: 100%;
-  width: 100%;
 }
