@@ -1,6 +1,7 @@
 import React from 'react';
 import store from '@webex/cc-store';
 import {observer} from 'mobx-react-lite';
+import {withMetrics} from '@webex/ui-metrics';
 
 import {TaskListComponent} from '@webex/cc-components';
 import {useTaskList} from '../helper';
@@ -17,7 +18,8 @@ const TaskList: React.FunctionComponent<TaskListProps> = observer(
       logger,
     };
 
-    return <TaskListComponent {...props} />;
+    const TaskListWithMetrics = withMetrics(TaskListComponent, 'TaskList');
+    return <TaskListWithMetrics {...props} />;
   }
 );
 
