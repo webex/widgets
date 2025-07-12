@@ -33,7 +33,7 @@ export const createViteConfig = (options: ViteConfigOptions = {}) => {
     const isLib = mode === 'lib';
 
     return {
-      plugins: [react(), ...(isLib ? [dts({tsconfigPath: './tsconfig.lib.json'})] : [])],
+      plugins: [react(), ...(isLib ? [dts({tsconfigPath: './tsconfig.json'})] : [])],
       define: {
         global: 'globalThis',
       },

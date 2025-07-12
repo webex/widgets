@@ -8,7 +8,7 @@ import {DigitalChannelsProps} from './digital-channels.types';
 
 const DigitalChannels: React.FunctionComponent<DigitalChannelsProps> = observer(
   ({jwtToken, apiEndpoint, signalREndpoint, onError}) => {
-    const {logger, currentTask} = store;
+    const {logger, currentTask} = store.default;
 
     if (!currentTask) {
       return null;
