@@ -7,5 +7,5 @@
       "outDir": "./dist",
       "declaration": true,
       "declarationDir": "./dist/types"
-  },
+  }
 }
