@@ -430,7 +430,7 @@ export const useCallControl = (props: useCallControlProps) => {
 
   const toggleMute = async () => {
     if (!controlVisibility?.muteUnmute) {
-      logger.warn('Mute only available for voice tasks', {module: 'useCallControl', method: 'toggleMute'});
+      logger.warn('Mute control not available', {module: 'useCallControl', method: 'toggleMute'});
       return;
     }
 
@@ -456,13 +456,9 @@ export const useCallControl = (props: useCallControlProps) => {
     } catch (error) {
       logger.error(`toggleMute failed: ${error}`, {module: 'useCallControl', method: 'toggleMute'});
 
-      // State remains unchanged (isMuted stays the same)
-      // UI will continue to show the actual current state
-
-      // Optional: Show error feedback to user
       if (onToggleMute) {
         onToggleMute({
-          isMuted: isMuted, // Current actual state
+          isMuted: isMuted,
           task: currentTask,
         });
       }

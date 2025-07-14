@@ -1,3 +1,10 @@
+import {renderHook, act, waitFor} from '@testing-library/react';
+import {useIncomingTask, useTaskList, useCallControl, useOutdialCall} from '../src/helper';
+import {getControlsVisibility} from '../src/Utils/task-util';
+import {TASK_EVENTS} from '@webex/cc-store';
+import store from '@webex/cc-store';
+import React from 'react';
+
 jest.mock('../src/Utils/task-util', () => {
   const actual = jest.requireActual('../src/Utils/task-util');
   return {
@@ -5,12 +12,6 @@ jest.mock('../src/Utils/task-util', () => {
     getControlsVisibility: jest.fn(),
   };
 });
-import {renderHook, act, waitFor} from '@testing-library/react';
-import {useIncomingTask, useTaskList, useCallControl, useOutdialCall} from '../src/helper';
-import {getControlsVisibility} from '../src/Utils/task-util';
-import {TASK_EVENTS} from '@webex/cc-store';
-import store from '@webex/cc-store';
-import React from 'react';
 
 // Cast it to a mock
 const mockGetControlsVisibility = getControlsVisibility as jest.MockedFunction<typeof getControlsVisibility>;
@@ -2127,7 +2128,7 @@ describe('useCallControl', () => {
         await result.current.toggleMute();
       });
 
-      expect(mockLogger.warn).toHaveBeenCalledWith('Mute only available for voice tasks', {
+      expect(mockLogger.warn).toHaveBeenCalledWith('Mute control not available', {
         module: 'useCallControl',
         method: 'toggleMute',
       });

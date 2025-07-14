@@ -396,7 +396,7 @@ class StoreWrapper implements IStoreWrapper {
     });
   };
 
-  handleMuteStateForWebRTCTask = (task: ITask): void => {
+  handleTaskMuteState = (task: ITask): void => {
     const isBrowser = this.deviceType === 'BROWSER';
     const webRtcEnabled = this.featureFlags?.webRtcEnabled;
     const isTelephony = task?.data?.interaction?.mediaType === 'telephony';
@@ -526,7 +526,7 @@ class StoreWrapper implements IStoreWrapper {
     // If it is, we dont have to send the incoming task callback
     if (this.onIncomingTask && !this.taskList[task.data.interactionId]) {
       this.onIncomingTask({task});
-      this.handleMuteStateForWebRTCTask(task);
+      this.handleTaskMuteState(task);
     }
 
     // We should update the task list in the store after sending the incoming task callback

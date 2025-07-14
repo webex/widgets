@@ -185,7 +185,6 @@ const onTaskDeclined = (task,reason) => {
 
 const onToggleMute = ({isMuted, task}) => {
   console.log('onToggleMute invoked', {isMuted, task});
-  
 };
 
   const enableDisableMultiLogin = () => {

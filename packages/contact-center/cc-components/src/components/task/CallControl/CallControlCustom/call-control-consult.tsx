@@ -64,8 +64,8 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
     } catch (error) {
       logger.error('Mute toggle failed:', {
         error,
-        module: 'call-control.tsx',
-        method: 'handleMuteToggle',
+        module: 'call-control-consult.tsx',
+        method: 'handleConsultMuteToggle',
       });
     } finally {
       // Re-enable button after operation
