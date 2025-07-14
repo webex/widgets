@@ -387,9 +387,12 @@ export const pageSetup = async (page: Page, loginMode: LoginMode, agentName: str
       await initialiseWidgets(page);
       break;
     } catch (error) {
+
       if (i == maxRetries - 1) {
         throw new Error(`Failed to initialise widgets after ${maxRetries} attempts: ${error}`);
       }
+      await page.reload();
+      await page.waitForTimeout(2000); // Wait for page to settle
     }
   }
 
