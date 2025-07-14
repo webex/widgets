@@ -1,6 +1,6 @@
 import { Page } from '@playwright/test';
 import { getCurrentState, changeUserState } from './userStateUtils';
-import { WRAPUP_REASONS, USER_STATES, RONA_OPTIONS, LOGIN_MODE, LoginMode, ThemeColor, userState } from 'playwright/constants';
+import { WRAPUP_REASONS, USER_STATES, RONA_OPTIONS, LOGIN_MODE, LoginMode, ThemeColor, userState, WrapupReason } from 'playwright/constants';
 import { submitWrapup } from './wrapupUtils';
 import { acceptExtensionCall, submitRonaPopup } from './incomingTaskUtils';
 import { loginViaAccessToken, disableMultiLogin, enableMultiLogin, initialiseWidgets, enableAllWidgets, } from './initUtils';
@@ -163,7 +163,7 @@ export async function getLastStateFromLogs(capturedLogs: string[]) {
 
 export const waitForStateLogs = async (
   capturedLogs: string[],
-  expectedState: string,
+  expectedState: userState,
   timeoutMs: number = 10000
 ): Promise<void> => {
   const start = Date.now();
@@ -200,7 +200,7 @@ export const waitForStateLogs = async (
 
 export const waitForWrapupReasonLogs = async (
   capturedLogs: string[],
-  expectedReason: string,
+  expectedReason: WrapupReason,
   timeoutMs: number = 10000
 ): Promise<void> => {
   const start = Date.now();
