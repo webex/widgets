@@ -209,7 +209,7 @@ describe('UserStateComponent', () => {
       });
 
       // getIconStyle should be called for the items being rendered
-      expect(getIconStyleSpy).toHaveBeenCalledWith({id: '0', name: 'Available'});
+      expect(getIconStyleSpy).toHaveBeenCalledWith({id: '0', name: 'Available', isSystem: true});
     });
   });
 
@@ -309,7 +309,7 @@ describe('UserStateComponent', () => {
 
       // The getIconStyle should have been called with the item that has an empty name
       // due to the || '' fallback when currentState is not found in idleCodes
-      expect(getIconStyleSpy).toHaveBeenCalledWith({id: '0', name: 'Available'});
+      expect(getIconStyleSpy).toHaveBeenCalledWith({id: '0', name: 'Available', isSystem: true});
     });
   });
 });

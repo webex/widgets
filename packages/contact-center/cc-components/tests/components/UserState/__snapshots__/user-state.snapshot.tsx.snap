@@ -62,8 +62,7 @@ exports[`UserState Component Snapshots Interactions should call handleSelectionC
         title="Break"
       >
         <div
-          class="item-container"
-          data-testid="item-container selected idle"
+          class="item-container selected idle"
         >
           <mdc-icon
             class="state-icon idle"
@@ -205,8 +204,7 @@ exports[`UserState Component Snapshots Interactions should handle custom state r
         title="Break"
       >
         <div
-          class="item-container"
-          data-testid="item-container selected idle"
+          class="item-container selected idle"
         >
           <mdc-icon
             class="state-icon idle"
@@ -341,8 +339,7 @@ exports[`UserState Component Snapshots Rendering - Tests for UI elements and vis
         title="Break"
       >
         <div
-          class="item-container"
-          data-testid="item-container selected idle"
+          class="item-container selected idle"
         >
           <mdc-icon
             class="state-icon idle"
@@ -477,8 +474,7 @@ exports[`UserState Component Snapshots Rendering - Tests for UI elements and vis
         title="Break"
       >
         <div
-          class="item-container"
-          data-testid="item-container selected idle"
+          class="item-container selected idle"
         >
           <mdc-icon
             class="state-icon idle"
@@ -620,8 +616,7 @@ exports[`UserState Component Snapshots Rendering - Tests for UI elements and vis
         title="Break"
       >
         <div
-          class="item-container"
-          data-testid="item-container selected idle"
+          class="item-container selected idle"
         >
           <mdc-icon
             class="state-icon idle"
@@ -762,8 +757,7 @@ exports[`UserState Component Snapshots Rendering - Tests for UI elements and vis
         title="Break"
       >
         <div
-          class="item-container"
-          data-testid="item-container selected idle"
+          class="item-container selected idle"
         >
           <mdc-icon
             class="state-icon idle"
@@ -905,8 +899,7 @@ exports[`UserState Component Snapshots State Management should handle RONA and E
         title="Break"
       >
         <div
-          class="item-container"
-          data-testid="item-container selected idle"
+          class="item-container selected idle"
         >
           <mdc-icon
             class="state-icon idle"
@@ -1048,8 +1041,7 @@ exports[`UserState Component Snapshots State Management should handle RONA and E
         title="Break"
       >
         <div
-          class="item-container"
-          data-testid="item-container "
+          class="item-container "
         >
           <mdc-icon
             class="state-icon idle"
@@ -1191,8 +1183,7 @@ exports[`UserState Component Snapshots State Management should handle currentSta
         title="Break"
       >
         <div
-          class="item-container"
-          data-testid="item-container "
+          class="item-container "
         >
           <mdc-icon
             class="state-icon idle"
@@ -1334,8 +1325,7 @@ exports[`UserState Component Snapshots State Management should handle elapsed ti
         title="Break"
       >
         <div
-          class="item-container"
-          data-testid="item-container selected idle"
+          class="item-container selected idle"
         >
           <mdc-icon
             class="state-icon idle"
@@ -1477,8 +1467,7 @@ exports[`UserState Component Snapshots State Management should handle elapsed ti
         title="Break"
       >
         <div
-          class="item-container"
-          data-testid="item-container selected idle"
+          class="item-container selected idle"
         >
           <mdc-icon
             class="state-icon idle"
@@ -1620,8 +1609,7 @@ exports[`UserState Component Snapshots State Management should update when custo
         title="Break"
       >
         <div
-          class="item-container"
-          data-testid="item-container selected idle"
+          class="item-container selected idle"
         >
           <mdc-icon
             class="state-icon idle"
