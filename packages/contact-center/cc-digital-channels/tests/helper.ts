@@ -1,8 +1,20 @@
 import {renderHook} from '@testing-library/react';
+import '@testing-library/jest-dom';
 import {useDigitalChannels} from '../src/helper';
 
+// Mock the current task object
+const mockCurrentTask = {
+  data: {
+    interaction: {
+      callAssociatedDetails: {
+        mediaResourceId: 'test-conversation-id',
+      },
+    },
+  },
+};
+
 const mockProps = {
-  conversationId: 'test-conversation-id',
+  currentTask: mockCurrentTask,
   jwtToken: 'test-jwt-token',
   apiEndpoint: 'https://test-api.example.com',
   signalREndpoint: 'https://test-signalr.example.com',
@@ -17,49 +29,18 @@ describe('useDigitalChannels', () => {
     jest.clearAllMocks();
   });
 
-  it('should initialize with connected state when all required props are provided', () => {
+  it('should return correct configuration when all required props are provided', () => {
     const {result} = renderHook(() => useDigitalChannels(mockProps));
 
     expect(result.current.name).toBe('DigitalChannels');
-    expect(result.current.isConnected).toBe(true);
-    expect(result.current.connectionError).toBe(null);
-    expect(result.current.conversationId).toBe(mockProps.conversationId);
+    expect(result.current.conversationId).toBe('test-conversation-id');
+    expect(result.current.jwtToken).toBe('test-jwt-token');
+    expect(result.current.apiEndpoint).toBe('https://test-api.example.com');
+    expect(result.current.signalREndpoint).toBe('https://test-signalr.example.com');
+    expect(typeof result.current.handleError).toBe('function');
   });
 
-  it('should set connection error when required props are missing', () => {
-    const incompleteProps = {
-      ...mockProps,
-      jwtToken: '',
-    };
-
-    const {result} = renderHook(() => useDigitalChannels(incompleteProps));
-
-    expect(result.current.isConnected).toBe(false);
-    expect(result.current.connectionError).toBe(
-      'Missing required configuration: jwtToken, apiEndpoint, or signalREndpoint'
-    );
-  });
-
-  it('should handle message sending', () => {
-    const onMessageSent = jest.fn();
-    const props = {
-      ...mockProps,
-      onMessageSent,
-    };
-
-    const {result} = renderHook(() => useDigitalChannels(props));
-
-    result.current.sendMessage('Test message');
-
-    expect(onMessageSent).toHaveBeenCalledWith(
-      expect.objectContaining({
-        content: 'Test message',
-        conversationId: mockProps.conversationId,
-      })
-    );
-  });
-
-  it('should handle errors correctly', () => {
+  it('should handle errors correctly with onError callback', () => {
     const onError = jest.fn().mockReturnValue(true);
     const props = {
       ...mockProps,
@@ -73,31 +54,51 @@ describe('useDigitalChannels', () => {
 
     expect(onError).toHaveBeenCalledWith(testError);
     expect(handled).toBe(true);
-    expect(result.current.connectionError).toBe('Test error');
+    expect(mockProps.logger.error).toHaveBeenCalledWith(
+      'Digital channels error',
+      'Test error',
+      expect.objectContaining({
+        module: 'widget-cc-digital-channels#helper.ts',
+        method: 'handleError',
+      })
+    );
   });
 
-  it('should refresh conversation correctly', () => {
-    const onConversationLoad = jest.fn();
-    const props = {
-      ...mockProps,
-      onConversationLoad,
-    };
+  it('should handle errors correctly without onError callback', () => {
+    const consoleSpy = jest.spyOn(console, 'debug').mockImplementation(() => {});
 
-    const {result} = renderHook(() => useDigitalChannels(props));
+    const {result} = renderHook(() => useDigitalChannels(mockProps));
 
-    // Clear the initial call
-    onConversationLoad.mockClear();
+    const testError = new Error('Test error');
+    const handled = result.current.handleError(testError);
 
-    result.current.refreshConversation();
+    expect(handled).toBe(false);
+    expect(consoleSpy).toHaveBeenCalledWith('Webex Engage component error:', 'Test error');
+    expect(mockProps.logger.error).toHaveBeenCalledWith(
+      'Digital channels error',
+      'Test error',
+      expect.objectContaining({
+        module: 'widget-cc-digital-channels#helper.ts',
+        method: 'handleError',
+      })
+    );
 
-    // Wait for the timeout in refreshConversation
-    setTimeout(() => {
-      expect(onConversationLoad).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: mockProps.conversationId,
-          status: 'active',
-        })
-      );
-    }, 150);
+    consoleSpy.mockRestore();
+  });
+
+  it('should handle unknown errors', () => {
+    const {result} = renderHook(() => useDigitalChannels(mockProps));
+
+    const handled = result.current.handleError('string error');
+
+    expect(handled).toBe(false);
+    expect(mockProps.logger.error).toHaveBeenCalledWith(
+      'Digital channels error',
+      'Unknown error',
+      expect.objectContaining({
+        module: 'widget-cc-digital-channels#helper.ts',
+        method: 'handleError',
+      })
+    );
   });
 });
