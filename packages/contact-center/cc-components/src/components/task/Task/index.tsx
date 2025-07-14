@@ -155,12 +155,12 @@ const Task: React.FC<TaskProps> = ({
       <ListItemBaseSection position="end">
         <div className="task-button-container">
           {acceptText ? (
-            <ButtonPill onPress={acceptTask} color="join" disabled={disableAccept}>
+            <ButtonPill onPress={acceptTask} color="join" disabled={disableAccept} data-testid="task:accept-button">
               {acceptText}
             </ButtonPill>
           ) : null}
           {declineText ? (
-            <ButtonPill onPress={declineTask} color="cancel">
+            <ButtonPill onPress={declineTask} color="cancel" data-testid="task:decline-button">
               {declineText}
             </ButtonPill>
           ) : null}
