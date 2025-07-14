@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.91](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.90...v1.28.0-ccwidgets.91) (2025-07-14)
+
+
+### Features
+
+* **cc-widgets:** UI Automation for Incoming Task ([#485](https://github.com/webex/widgets/issues/485)) ([64134db](https://github.com/webex/widgets/commit/64134db1018f262620f488b739ea48ecab0890e4))
+
 # [1.28.0-ccwidgets.90](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.89...v1.28.0-ccwidgets.90) (2025-07-11)
 
 
