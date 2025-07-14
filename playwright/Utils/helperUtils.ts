@@ -1,6 +1,6 @@
 import { Page } from '@playwright/test';
 import { getCurrentState, changeUserState } from './userStateUtils';
-import { WRAPUP_REASONS, USER_STATES, RONA_OPTIONS, LOGIN_MODE, LoginMode, ThemeColor } from 'playwright/constants';
+import { WRAPUP_REASONS, USER_STATES, RONA_OPTIONS, LOGIN_MODE, LoginMode, ThemeColor, userState } from 'playwright/constants';
 import { submitWrapup } from './wrapupUtils';
 import { acceptExtensionCall, submitRonaPopup } from './incomingTaskUtils';
 import { loginViaAccessToken, disableMultiLogin, enableMultiLogin, initialiseWidgets, enableAllWidgets, } from './initUtils';
@@ -97,7 +97,7 @@ export async function waitForWebSocketReconnection(consoleMessages: string[], ti
 
 export const waitForState = async (
   page: Page,
-  expectedState: string,
+  expectedState: userState,
 ): Promise<void> => {
   const start = Date.now();
   const timeoutMs: number = 10000
