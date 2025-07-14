@@ -16,8 +16,8 @@
     "start": "vite --port 3241"
   },
   "dependencies": {
-    "@webex/cc-store": "workspace:*",
-    "process": "^0.11.10"
+    "@webex-engage/wxengage-conversations": "^1.0.2",
+    "@webex/cc-store": "workspace:*"
   },
   "peerDependencies": {
     "react": "^18.3.1",
@@ -28,7 +28,7 @@
     "@types/react": "^18.3.23",
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "^4.3.1",
-    "@webex-engage/wxengage-conversations": "^1.0.2",
+    "process": "^0.11.10",
     "typescript": "^5.5.3",
     "vite": "^5.3.4",
     "vite-plugin-dts": "^4.5.4"
