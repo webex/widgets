@@ -361,6 +361,7 @@ export const handleStrayTasks = async (page: Page, extensionPage: Page | null = 
 / * Sets up the page for testing by logging in, enabling widgets, and handling user states, cleaning up stray tasks, submitting RONA popups
  * @param page - Playwright Page object
  * @param loginMode - The login mode to use (e.g., LOGIN_MODE.DESKTOP or LOGIN_MODE.EXTENSION)
+ * @param agentName - Name of the agent to be logged in, example: 'AGENT1'
  * @param extensionPage - Optional extension page for handling calls in extension mode (default: null)
  * The extension Page should have the webex calling web-client logged in
  * @returns Promise<void>
@@ -371,9 +372,9 @@ export const handleStrayTasks = async (page: Page, extensionPage: Page | null = 
  * ```
  */
 
-export const pageSetup = async (page: Page, loginMode: LoginMode, extensionPage: Page | null = null) => {
+export const pageSetup = async (page: Page, loginMode: LoginMode, agentName: string, extensionPage: Page | null = null) => {
   const maxRetries = 3;
-  await loginViaAccessToken(page, 'AGENT1');
+  await loginViaAccessToken(page, agentName);
   await enableAllWidgets(page);
   if (loginMode === LOGIN_MODE.DESKTOP) {
     await disableMultiLogin(page);

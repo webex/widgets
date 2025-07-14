@@ -102,7 +102,7 @@ function setupConsoleLogging(page: Page): () => void {
 
 
 
-test.describe('Incoming Call Task Tests for Desktop Mode', async () => {
+test.describe('Incoming Call Task Tests for Desktop Mode', () => {
   test.beforeEach(() => {
     capturedLogs.length = 0;
   })
@@ -120,7 +120,7 @@ test.describe('Incoming Call Task Tests for Desktop Mode', async () => {
         await loginExtension(callerpage, process.env.PW_AGENT2_USERNAME, process.env.PW_PASSWORD);
       })(),
       (async () => {
-        await pageSetup(page, LOGIN_MODE.DESKTOP);
+        await pageSetup(page, LOGIN_MODE.DESKTOP, 'AGENT1');
       })(),
     ])
   })
@@ -272,7 +272,7 @@ test.describe('Incoming Call Task Tests for Desktop Mode', async () => {
 
 });
 
-test.describe('Incoming Task Tests in Extension Mode', async () => {
+test.describe('Incoming Task Tests in Extension Mode', () => {
   test.beforeEach(() => {
     capturedLogs.length = 0;
   })
@@ -304,7 +304,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
 
       })(),
       (async () => {
-        await pageSetup(page, LOGIN_MODE.EXTENSION, extensionPage);
+        await pageSetup(page, LOGIN_MODE.EXTENSION, 'AGENT1', extensionPage);
       })(),
       (async () => {
 
@@ -814,7 +814,7 @@ test.describe('Incoming Task Tests in Extension Mode', async () => {
 });
 
 
-test.describe('Incoming Tasks tests for multi-session', async () => {
+test.describe('Incoming Tasks tests for multi-session', () => {
 
 
   test.beforeAll(async ({ browser }) => {
@@ -842,10 +842,10 @@ test.describe('Incoming Tasks tests for multi-session', async () => {
 
       })(),
       (async () => {
-        await pageSetup(page, LOGIN_MODE.EXTENSION, extensionPage);
+        await pageSetup(page, LOGIN_MODE.EXTENSION, 'AGENT1', extensionPage);
       })(),
       (async () => {
-        await pageSetup(page2, LOGIN_MODE.EXTENSION, extensionPage);
+        await pageSetup(page2, LOGIN_MODE.EXTENSION, 'AGENT1', extensionPage);
       })(),
       (async () => {
 
