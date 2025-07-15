@@ -1,3 +1,25 @@
+# [1.28.0-ccwidgets.91](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.90...v1.28.0-ccwidgets.91) (2025-07-14)
+
+
+### Features
+
+* **cc-widgets:** UI Automation for Incoming Task ([#485](https://github.com/webex/widgets/issues/485)) ([64134db](https://github.com/webex/widgets/commit/64134db1018f262620f488b739ea48ecab0890e4))
+
+# [1.28.0-ccwidgets.90](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.89...v1.28.0-ccwidgets.90) (2025-07-11)
+
+
+### Bug Fixes
+
+* **cc-widgets:** update the workflow for pull request by increasing the timeout for  e2e_test_cc_widgets ([#495](https://github.com/webex/widgets/issues/495)) ([094b9b1](https://github.com/webex/widgets/commit/094b9b19f2a8a1f753c3b38dd4175e3f2e4ffa14))
+
+# [1.28.0-ccwidgets.89](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.88...v1.28.0-ccwidgets.89) (2025-07-11)
+
+
+### Bug Fixes
+
+* **cc-components:** Add unit and snapshot testing for user state ([#478](https://github.com/webex/widgets/issues/478)) ([f9efbf0](https://github.com/webex/widgets/commit/f9efbf02180c12c08a3be520abc20e87aa67e2ae))
+* **cc-widgets:** add email credentials to the workflow ([#493](https://github.com/webex/widgets/issues/493)) ([49b017a](https://github.com/webex/widgets/commit/49b017abd5895f407771a4a10d736085cf29f1d1))
+
 # [1.28.0-ccwidgets.88](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.87...v1.28.0-ccwidgets.88) (2025-07-07)
 
 

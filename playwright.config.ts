@@ -1,13 +1,14 @@
-import {defineConfig, devices} from '@playwright/test';
+import { defineConfig, devices } from '@playwright/test';
 import dotenv from 'dotenv';
 import path from 'path';
 
 // Alternatively, read from "../my.env" file.
-dotenv.config({path: path.resolve(__dirname, '.env')});
+dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
+const dummyAudioPath = path.resolve(__dirname, './playwright/wav/dummyAudio.wav');
 export default defineConfig({
   testDir: './playwright',
   /* Maximum time one test can run for. */
@@ -45,7 +46,22 @@ export default defineConfig({
     },
     {
       name: 'Test: Chrome',
-      use: {...devices['Desktop Chrome']},
+      use: {
+        ...devices['Desktop Chrome'],
+        launchOptions: {
+          args: [
+            `--disable-site-isolation-trials`,
+            `--disable-web-security`,
+            `--no-sandbox`,
+            `--disable-features=WebRtcHideLocalIpsWithMdns`,
+            `--allow-file-access-from-files`,
+            `--use-fake-ui-for-media-stream`,
+            `--use-fake-device-for-media-stream`,
+            `--use-file-for-fake-audio-capture=${dummyAudioPath}`,
+          ],
+        }
+      },
+
     },
     // Once we have stability for playwright tests, we can enable the following browsers
     // {
