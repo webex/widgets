@@ -8516,6 +8516,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/uuid@npm:^9.0.0":
+  version: 9.0.8
+  resolution: "@types/uuid@npm:9.0.8"
+  checksum: 10c0/b411b93054cb1d4361919579ef3508a1f12bf15b5fdd97337d3d351bece6c921b52b6daeef89b62340fd73fd60da407878432a1af777f40648cbe53a01723489
+  languageName: node
+  linkType: hard
+
 "@types/validator@npm:^13.1.3":
   version: 13.12.2
   resolution: "@types/validator@npm:13.12.2"
@@ -9446,6 +9453,7 @@ __metadata:
     "@types/react-test-renderer": "npm:18"
     "@webex/cc-components": "workspace:*"
     "@webex/cc-store": "workspace:*"
+    "@webex/ui-metrics": "workspace:*"
     babel-jest: "npm:29.7.0"
     babel-loader: "npm:9.2.1"
     eslint: "npm:^9.20.1"
@@ -9531,6 +9539,7 @@ __metadata:
     "@types/react-test-renderer": "npm:18"
     "@webex/cc-components": "workspace:*"
     "@webex/cc-store": "workspace:*"
+    "@webex/ui-metrics": "workspace:*"
     babel-jest: "npm:29.7.0"
     babel-loader: "npm:9.2.1"
     eslint: "npm:^9.20.1"
@@ -9576,6 +9585,7 @@ __metadata:
     "@types/react-test-renderer": "npm:18"
     "@webex/cc-components": "workspace:*"
     "@webex/cc-store": "workspace:*"
+    "@webex/ui-metrics": "workspace:*"
     babel-jest: "npm:29.7.0"
     babel-loader: "npm:9.2.1"
     eslint: "npm:^9.20.1"
@@ -12294,6 +12304,20 @@ __metadata:
   checksum: 10c0/9dc7c63d3274cdbf1cf42c17a2d7bc5afef640bf8200e7c812732c9a19f97d3a84df5bfecba9abc349c19c199ede22c9b7d0db32c1cf802af3d5eb56fda3fefa
   languageName: node
   linkType: hard
+
+"@webex/ui-metrics@workspace:*, @webex/ui-metrics@workspace:packages/contact-center/ui-metrics":
+  version: 0.0.0-use.local
+  resolution: "@webex/ui-metrics@workspace:packages/contact-center/ui-metrics"
+  dependencies:
+    "@types/uuid": "npm:^9.0.0"
+    typescript: "npm:^5.6.3"
+    uuid: "npm:^9.0.0"
+    webpack: "npm:^5.96.1"
+    webpack-cli: "npm:^5.1.4"
+  peerDependencies:
+    react: ">=16.8.0"
+  languageName: unknown
+  linkType: soft
 
 "@webex/web-capabilities@npm:^1.1.0, @webex/web-capabilities@npm:^1.4.0, @webex/web-capabilities@npm:^1.4.1":
   version: 1.4.1
