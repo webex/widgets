@@ -10,7 +10,13 @@ export type TaskListProps = Pick<TaskProps, 'onTaskAccepted' | 'onTaskDeclined' 
 
 export type CallControlProps = Pick<
   ControlProps,
-  'onHoldResume' | 'onEnd' | 'onWrapUp' | 'onRecordingToggle' | 'callControlClassName' | 'callControlConsultClassName'
+  | 'onHoldResume'
+  | 'onEnd'
+  | 'onWrapUp'
+  | 'onRecordingToggle'
+  | 'callControlClassName'
+  | 'callControlConsultClassName'
+  | 'onToggleMute'
 >;
 
 export type useCallControlProps = Pick<
@@ -20,10 +26,12 @@ export type useCallControlProps = Pick<
   | 'onEnd'
   | 'onWrapUp'
   | 'onRecordingToggle'
+  | 'onToggleMute'
   | 'logger'
   | 'consultInitiated'
   | 'deviceType'
   | 'featureFlags'
+  | 'isMuted'
 >;
 
 export type Participant = {

@@ -164,10 +164,12 @@ export const useCallControl = (props: useCallControlProps) => {
     onEnd,
     onWrapUp,
     onRecordingToggle,
+    onToggleMute,
     logger,
     consultInitiated,
     deviceType,
     featureFlags,
+    isMuted,
   } = props;
   const [isHeld, setIsHeld] = useState<boolean | undefined>(undefined);
   const [isRecording, setIsRecording] = useState(true);
@@ -426,6 +428,43 @@ export const useCallControl = (props: useCallControlProps) => {
     }
   };
 
+  const toggleMute = async () => {
+    if (!controlVisibility?.muteUnmute) {
+      logger.warn('Mute control not available', {module: 'useCallControl', method: 'toggleMute'});
+      return;
+    }
+
+    logger.info('toggleMute() called', {module: 'useCallControl', method: 'toggleMute'});
+
+    // Store the intended new state
+    const intendedMuteState = !isMuted;
+
+    try {
+      await currentTask.toggleMute();
+
+      // Only update state after successful SDK call
+      store.setIsMuted(intendedMuteState);
+
+      if (onToggleMute) {
+        onToggleMute({
+          isMuted: intendedMuteState,
+          task: currentTask,
+        });
+      }
+
+      logger.info(`Mute state toggled to: ${intendedMuteState}`, {module: 'useCallControl', method: 'toggleMute'});
+    } catch (error) {
+      logger.error(`toggleMute failed: ${error}`, {module: 'useCallControl', method: 'toggleMute'});
+
+      if (onToggleMute) {
+        onToggleMute({
+          isMuted: isMuted,
+          task: currentTask,
+        });
+      }
+    }
+  };
+
   const endCall = () => {
     logger.info('endCall() called', {module: 'useCallControl', method: 'endCall'});
     currentTask.end().catch((e) => logger.error(`endCall failed: ${e}`, {module: 'useCallControl', method: 'endCall'}));
@@ -573,6 +612,8 @@ export const useCallControl = (props: useCallControlProps) => {
     endCall,
     toggleHold,
     toggleRecording,
+    toggleMute,
+    isMuted,
     wrapupCall,
     isHeld,
     setIsHeld,

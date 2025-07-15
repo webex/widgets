@@ -21,6 +21,8 @@ import {
   WRAP_UP_REASON,
   SELECT,
   SUBMIT_WRAP_UP,
+  MUTE_CALL,
+  UNMUTE_CALL,
 } from '../constants';
 
 function CallControlComponent(props: CallControlComponentProps) {
@@ -28,11 +30,14 @@ function CallControlComponent(props: CallControlComponentProps) {
   const [selectedWrapupId, setSelectedWrapupId] = useState<string | null>(null);
   const [showAgentMenu, setShowAgentMenu] = useState(false);
   const [agentMenuType, setAgentMenuType] = useState<CallControlMenuType | null>(null);
+  const [isMuteButtonDisabled, setIsMuteButtonDisabled] = useState(false);
 
   const {
     currentTask,
     toggleHold,
     toggleRecording,
+    toggleMute,
+    isMuted,
     endCall,
     wrapupCall,
     wrapupCodes,
@@ -80,6 +85,25 @@ function CallControlComponent(props: CallControlComponentProps) {
     });
     toggleHold(!isHeld);
     setIsHeld(!isHeld);
+  };
+
+  const handleMuteToggle = () => {
+    setIsMuteButtonDisabled(true);
+
+    try {
+      toggleMute();
+    } catch (error) {
+      logger.error('Mute toggle failed:', {
+        error,
+        module: 'call-control.tsx',
+        method: 'handleMuteToggle',
+      });
+    } finally {
+      // Re-enable button after operation
+      setTimeout(() => {
+        setIsMuteButtonDisabled(false);
+      }, 500);
+    }
   };
 
   const handleWrapupCall = () => {
@@ -151,6 +175,15 @@ function CallControlComponent(props: CallControlComponentProps) {
   const isTelephony = mediaType === 'telephony';
 
   const buttons = [
+    {
+      id: 'mute',
+      icon: isMuted ? 'microphone-muted-bold' : 'microphone-bold',
+      onClick: handleMuteToggle,
+      tooltip: isMuted ? UNMUTE_CALL : MUTE_CALL,
+      className: `${isMuted ? 'call-control-button-muted' : 'call-control-button'}`,
+      disabled: isMuteButtonDisabled,
+      isVisible: controlVisibility.muteUnmute,
+    },
     {
       id: 'hold',
       icon: isHeld ? 'play-bold' : 'pause-bold',
