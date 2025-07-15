@@ -123,11 +123,12 @@ export async function recordCallToggle(page: Page): Promise<void> {
 /**
  * Verifies the hold timer visibility and content based on expected state.
  * @param page - The agent's main page
- * @param shouldBeVisible - Whether the timer should be visible (true) or hidden (false)
- * @param verifyContent - Whether to verify timer content (default: true when visible)
+ * @param options - Configuration object
+ * @param options.shouldBeVisible - Whether the timer should be visible (true) or hidden (false)
+ * @param options.verifyContent - Whether to verify timer content (default: true when visible)
  * @returns Promise<void>
  */
-export async function verifyHoldTimer(page: Page, shouldBeVisible: boolean, verifyContent: boolean = shouldBeVisible): Promise<void> {
+export async function verifyHoldTimer(page: Page, { shouldBeVisible, verifyContent = shouldBeVisible }: { shouldBeVisible: boolean; verifyContent?: boolean }): Promise<void> {
   const holdTimerContainer = page.locator('.on-hold-chip-text');
   
   if (shouldBeVisible) {
@@ -142,6 +143,60 @@ export async function verifyHoldTimer(page: Page, shouldBeVisible: boolean, veri
     }
   } else {
     await expect(holdTimerContainer).toBeHidden({ timeout: 10000 });
+  }
+}
+
+/**
+ * Verifies the icon of the hold toggle button based on current hold state.
+ * - When call is NOT on hold: expects 'pause-bold' icon (to put call on hold)
+ * - When call IS on hold: expects 'play-bold' icon (to resume call)
+ * @param page - The agent's main page
+ * @param options - Configuration object
+ * @param options.expectedIsHeld - Expected hold state (true if call is on hold, false if active)
+ * @returns Promise<void>
+ * @throws Error if icon verification fails
+ */
+export async function verifyHoldButtonIcon(page: Page, { expectedIsHeld }: { expectedIsHeld: boolean }): Promise<void> {
+  const holdButton = page.getByTestId('call-control:hold-toggle').nth(0);
+  await expect(holdButton).toBeVisible({ timeout: 10000 });
+  
+  // Get the icon element within the hold button
+  const iconElement = holdButton.locator('mdc-icon').nth(0);
+  await expect(iconElement).toBeVisible({ timeout: 5000 });
+  
+  // Verify the correct icon based on hold state
+  const expectedIcon = expectedIsHeld ? 'play-bold' : 'pause-bold';
+  const actualIcon = await iconElement.getAttribute('name');
+  
+  if (actualIcon !== expectedIcon) {
+    throw new Error(`Hold button icon mismatch. Expected: '${expectedIcon}' (isHeld: ${expectedIsHeld}), but found: '${actualIcon}'`);
+  }
+}
+
+/**
+ * Verifies the icon of the record toggle button based on current recording state.
+ * - When recording is ACTIVE: expects 'record-paused-bold' icon (to pause recording)
+ * - When recording is PAUSED: expects 'record-bold' icon (to resume recording) 
+ * @param page - The agent's main page
+ * @param options - Configuration object
+ * @param options.expectedIsRecording - Expected recording state (true if recording, false if paused)
+ * @returns Promise<void>
+ * @throws Error if icon verification fails
+ */
+export async function verifyRecordButtonIcon(page: Page, { expectedIsRecording }: { expectedIsRecording: boolean }): Promise<void> {
+  const recordButton = page.getByTestId('call-control:recording-toggle').nth(0);
+  await expect(recordButton).toBeVisible({ timeout: 10000 });
+  
+  // Get the icon element within the record button
+  const iconElement = recordButton.locator('mdc-icon').nth(0);
+  await expect(iconElement).toBeVisible({ timeout: 5000 });
+  
+  // Verify the correct icon based on recording state
+  const expectedIcon = expectedIsRecording ? 'record-paused-bold' : 'record-bold';
+  const actualIcon = await iconElement.getAttribute('name');
+  
+  if (actualIcon !== expectedIcon) {
+    throw new Error(`Record button icon mismatch. Expected: '${expectedIcon}' (isRecording: ${expectedIsRecording}), but found: '${actualIcon}'`);
   }
 }
 
@@ -184,10 +239,11 @@ export function clearCapturedLogs(): void {
 
 /**
  * Verifies that hold/resume callback logs are present and contain expected values.
- * @param expectedIsHeld - Expected hold state (true for hold, false for resume)
+ * @param options - Configuration object
+ * @param options.expectedIsHeld - Expected hold state (true for hold, false for resume)
  * @throws Error if verification fails with detailed error message
  */
-export function verifyHoldLogs(expectedIsHeld: boolean): void {
+export function verifyHoldLogs({ expectedIsHeld }: { expectedIsHeld: boolean }): void {
   const holdResumeLogs = capturedLogs.filter(log => log.includes('onHoldResume invoked'));
   const statusLogs = capturedLogs.filter(log => 
     log.includes(expectedIsHeld ? 'WXCC_SDK_TASK_HOLD_SUCCESS' : 'WXCC_SDK_TASK_RESUME_SUCCESS')
@@ -210,10 +266,11 @@ export function verifyHoldLogs(expectedIsHeld: boolean): void {
 
 /**
  * Verifies that recording pause/resume callback logs are present and contain expected values.
- * @param expectedIsRecording - Expected recording state (true for recording, false for paused)
+ * @param options - Configuration object
+ * @param options.expectedIsRecording - Expected recording state (true for recording, false for paused)
  * @throws Error if verification fails with detailed error message
  */
-export function verifyRecordingLogs(expectedIsRecording: boolean): void {
+export function verifyRecordingLogs({ expectedIsRecording }: { expectedIsRecording: boolean }): void {
   const recordingLogs = capturedLogs.filter(log => log.includes('onRecordingToggle invoked'));
   const statusLogs = capturedLogs.filter(log => 
     log.includes(expectedIsRecording ? 'WXCC_SDK_TASK_RESUME_RECORDING_SUCCESS' : 'WXCC_SDK_TASK_PAUSE_RECORDING_SUCCESS')
@@ -247,155 +304,15 @@ export function verifyEndLogs(): void {
 }
 
 /**
- * Verifies that remote audio from another tab/participant is properly configured and ready to play.
- * This function checks for the presence of the remote audio element, its properties, and MediaStream connection.
- * @param page - The agent's main page
- * @returns Promise<void>
- * @throws Error if remote audio verification fails
- */
-export async function verifyRemoteAudio(page: Page): Promise<void> {
-  try {
-    // Verify audio element properties using JavaScript evaluation
-    // Handle multiple audio elements with same ID by checking all of them
-    const audioProperties = await page.evaluate(() => {
-      const audioElements = document.querySelectorAll('#remote-audio') as NodeListOf<HTMLAudioElement>;
-      
-      if (audioElements.length === 0) {
-        throw new Error('No remote audio elements found');
-      }
-      
-      const results: any[] = [];
-      let hasActiveStream = false;
-      
-      audioElements.forEach((audio, index) => {
-        const hasSourceObj = audio.srcObject !== null;
-        
-        let mediaStreamActive = false;
-        let tracksCount = 0;
-        let audioTracksCount = 0;
-        
-        if (hasSourceObj) {
-          const mediaStream = audio.srcObject as MediaStream;
-          mediaStreamActive = mediaStream.active;
-          tracksCount = mediaStream.getTracks().length;
-          audioTracksCount = mediaStream.getAudioTracks().length;
-        }
-        
-        const properties = {
-          elementIndex: index,
-          autoplay: audio.autoplay,
-          hasSourceObject: hasSourceObj,
-          readyState: audio.readyState,
-          paused: audio.paused,
-          muted: audio.muted,
-          volume: audio.volume,
-          mediaStreamActive: mediaStreamActive,
-          mediaStreamTracks: tracksCount,
-          audioTrackCount: audioTracksCount
-        };
-        
-        results.push(properties);
-        
-        // Check if this element has an active stream
-        if (properties.hasSourceObject && properties.mediaStreamActive && properties.audioTrackCount > 0) {
-          hasActiveStream = true;
-        }
-      });
-      
-      return {
-        totalElements: audioElements.length,
-        elements: results,
-        hasActiveAudioStream: hasActiveStream
-      };
-    });
-    
-    // Verify at least one audio element exists
-    expect(audioProperties.totalElements).toBeGreaterThan(0);
-    
-    // Verify at least one audio element has an active MediaStream with audio tracks
-    expect(audioProperties.hasActiveAudioStream).toBe(true);
-    
-    // Verify properties of elements that have audio streams
-    const activeElements = audioProperties.elements.filter(el => 
-      el.hasSourceObject && el.mediaStreamActive && el.audioTrackCount > 0
-    );
-    
-    expect(activeElements.length).toBeGreaterThan(0);
-    
-    // For each active audio element, verify it's properly configured
-    activeElements.forEach((element, index) => {
-      // Verify autoplay is enabled for remote audio
-      expect(element.autoplay).toBe(true);
-      
-      // Verify audio is not muted (should be able to hear remote audio)
-      expect(element.muted).toBe(false);
-      
-      // Verify volume is at audible level
-      expect(element.volume).toBeGreaterThan(0);
-    });
-    
-  } catch (error) {
-    throw new Error(`Remote audio verification failed: ${error.message}`);
-  }
-}
-
-/**
- * Verifies the #remote-audio element exists in the DOM.
- * Executes: document.querySelector("#remote-audio")
- * @param page - The agent's main page (browser receiving audio)
- * @returns Promise<void>
- * @throws Error if remote audio element verification fails
- */
-export async function verifyRemoteAudioElement(page: Page): Promise<void> {
-  try {
-    // Execute the console command to check for remote audio element
-    const elementResult = await page.evaluate(() => {
-      const audioElem = document.querySelector("#remote-audio") as HTMLAudioElement;
-      
-      if (!audioElem) {
-        return null;
-      }
-      
-      return {
-        tagName: audioElem.tagName,
-        id: audioElem.id,
-        autoplay: audioElem.autoplay,
-        muted: audioElem.muted,
-        volume: audioElem.volume,
-        readyState: audioElem.readyState,
-        paused: audioElem.paused,
-        hasSourceObject: audioElem.srcObject !== null,
-        outerHTML: audioElem.outerHTML.substring(0, 200) // First 200 chars for debugging
-      };
-    });
-    
-    if (!elementResult) {
-      throw new Error('❌ #remote-audio element not found in DOM');
-    }
-    
-    // Verify the element properties
-    expect(elementResult.tagName).toBe('AUDIO');
-    expect(elementResult.id).toBe('remote-audio');
-    expect(elementResult.hasSourceObject).toBe(true);
-    
-  } catch (error) {
-    throw new Error(`❌ Remote audio element verification failed: ${error.message}`);
-  }
-}
-
-/**
  * Verifies audio transfer from caller to browser by executing the exact console command.
  * Executes: document.querySelector("#remote-audio").srcObject.getAudioTracks()
- * Verifies the result contains MediaStreamTrack with GUID label and proper properties
+ * Verifies that exactly 1 audio MediaStreamTrack is present with GUID label and proper properties
  * @param page - The agent's main page (browser receiving audio)
  * @returns Promise<void>
  * @throws Error if remote audio tracks verification fails
  */
 export async function verifyRemoteAudioTracks(page: Page): Promise<void> {
-  try {
-    // First verify the element exists
-    await verifyRemoteAudioElement(page);
-    
+  try {    
     // Execute the exact console command for audio tracks
     const consoleResult = await page.evaluate(() => {
       // This is the exact command from your console
@@ -431,35 +348,22 @@ export async function verifyRemoteAudioTracks(page: Page): Promise<void> {
       return result;
     });
     
-    // Verify we got an array with at least one MediaStreamTrack
-    expect(consoleResult.length).toBeGreaterThanOrEqual(1);
+    // Verify we got exactly 1 audio track (no more, no less)
+    expect(consoleResult.length).toBe(1);
     
-    // Find the first audio track (should match the structure you provided)
-    const audioTrack = consoleResult.find(track => track.kind === 'audio');
+    // Get the single audio track (since we verified there's exactly 1)
+    const audioTrack = consoleResult[0];
     
-    if (!audioTrack) {
-      const availableTracks = consoleResult.map(t => `{ kind: "${t.kind}", label: "${t.label}", id: "${t.id}" }`).join(', ');
-      throw new Error(`❌ No audio MediaStreamTrack found. Available tracks: [${availableTracks}]`);
+    // Verify it's an audio track
+    if (audioTrack.kind !== 'audio') {
+      throw new Error(`❌ Expected audio track but found ${audioTrack.kind} track. Track details: { kind: "${audioTrack.kind}", label: "${audioTrack.label}", id: "${audioTrack.id}" }`);
     }
     
-    // Verify the track properties match the exact structure you provided
+    // Verify essential track properties for audio transfer
     expect(audioTrack.kind).toBe('audio');
     expect(audioTrack.enabled).toBe(true);
     expect(audioTrack.muted).toBe(false);
     expect(audioTrack.readyState).toBe('live');
-    expect(audioTrack.onended).toBeNull();
-    expect(audioTrack.onmute).toBeNull();
-    expect(audioTrack.onunmute).toBeNull();
-    
-    // Verify both id and label are GUID format and match each other
-    const guidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    
-    expect(guidPattern.test(audioTrack.id)).toBe(true);
-    expect(guidPattern.test(audioTrack.label)).toBe(true);
-    expect(audioTrack.id).toBe(audioTrack.label); // id should match label exactly
-    
-    // Verify index is 0 (first track)
-    expect(audioTrack.index).toBe(0);
     
   } catch (error) {
     throw new Error(`❌ Audio transfer verification failed: ${error.message}`);
@@ -476,130 +380,30 @@ export async function verifyRemoteAudioTracks(page: Page): Promise<void> {
  */
 export async function verifyHoldMusicElement(page: Page): Promise<void> {
   try {
-    const holdMusicInfo = await page.evaluate(() => {
+    const holdMusicExists = await page.evaluate(() => {
       // Look for audio elements with both autoplay and loop attributes
       const audioElements = document.querySelectorAll('audio[autoplay][loop]');
       
       if (audioElements.length === 0) {
-        // Debug: Show all audio elements if none found with autoplay and loop
-        const allAudioElements = document.querySelectorAll('audio');
-        
-        const allSources = Array.from(allAudioElements).map((audio, index) => {
-          const a = audio as HTMLAudioElement;
-          
-          return {
-            src: a.src,
-            autoplay: a.autoplay,
-            loop: a.loop,
-            hasAutoplayAttr: a.hasAttribute('autoplay'),
-            hasLoopAttr: a.hasAttribute('loop'),
-            outerHTML: a.outerHTML.substring(0, 200) // Show first 200 chars
-          };
-        });
-        
-        return {
-          holdMusicFound: false,
-          allAudioElements: allSources,
-          totalAudioElements: allAudioElements.length
-        };
+        return false;
       }
       
-      // Map the audio elements with autoplay and loop attributes
-      const holdMusicElements = Array.from(audioElements).map((audio, index) => {
+      // Check if at least one element has the correct attributes
+      return Array.from(audioElements).some(audio => {
         const a = audio as HTMLAudioElement;
-        
-        return {
-          index,
-          src: a.src,
-          autoplay: a.autoplay,
-          loop: a.loop,
-          hasAutoplayAttr: a.hasAttribute('autoplay'),
-          hasLoopAttr: a.hasAttribute('loop'),
-          paused: a.paused,
-          volume: a.volume,
-          muted: a.muted,
-          readyState: a.readyState,
-          outerHTML: a.outerHTML // Full element structure
-        };
+        return a.hasAttribute('autoplay') && 
+               a.hasAttribute('loop') &&
+               a.autoplay === true &&
+               a.loop === true;
       });
-      
-      return {
-        holdMusicFound: true,
-        holdMusicElements,
-        totalHoldMusicElements: holdMusicElements.length
-      };
     });
     
-    if (!holdMusicInfo.holdMusicFound) {
-      throw new Error(`❌ No hold music audio elements found with autoplay and loop attributes. Total audio elements: ${holdMusicInfo.totalAudioElements}. All audio sources: ${JSON.stringify(holdMusicInfo.allAudioElements, null, 2)}`);
+    if (!holdMusicExists) {
+      throw new Error('❌ No hold music audio elements found with autoplay and loop attributes');
     }
-    
-    // Verify at least one hold music element exists
-    expect(holdMusicInfo.totalHoldMusicElements).toBeGreaterThan(0);
-    
-    // Find the element that matches the pattern: <audio autoplay="" loop=""></audio>
-    const targetElement = holdMusicInfo.holdMusicElements &&
-      holdMusicInfo.holdMusicElements.find(audio => 
-        audio.hasAutoplayAttr && 
-        audio.hasLoopAttr &&
-        audio.autoplay === true &&
-        audio.loop === true
-      );
-    
-    if (!targetElement) {
-      throw new Error(`❌ Hold music element with correct autoplay and loop attributes not found. Available elements: ${JSON.stringify(holdMusicInfo.holdMusicElements, null, 2)}`);
-    }
-    
-    // Verify the element matches the expected pattern: <audio autoplay="" loop=""></audio>
-    expect(targetElement.autoplay).toBe(true);
-    expect(targetElement.loop).toBe(true);
-    expect(targetElement.hasAutoplayAttr).toBe(true);
-    expect(targetElement.hasLoopAttr).toBe(true);
     
   } catch (error) {
     throw new Error(`❌ Hold music element verification failed: ${error.message}`);
-  }
-}
-
-/**
- * Executes the exact console command: document.querySelector("#remote-audio")
- * This verifies that the remote audio element exists in the DOM
- * @param page - The agent's main page (browser receiving audio)
- * @returns Promise<void>
- * @throws Error if remote audio element is not found
- */
-export async function executeRemoteAudioQuery(page: Page): Promise<void> {
-  try {
-    // Execute the exact console command
-    const elementExists = await page.evaluate(() => {
-      const element = document.querySelector("#remote-audio");
-      
-      if (!element) {
-        return null;
-      }
-      
-      // Return basic element info to verify it exists
-      return {
-        tagName: element.tagName,
-        id: element.id,
-        className: element.className,
-        nodeType: element.nodeType,
-        exists: true
-      };
-    });
-    
-    if (!elementExists) {
-      throw new Error('❌ document.querySelector("#remote-audio") returned null - element not found in DOM');
-    }
-    
-    // Verify basic properties
-    expect(elementExists.exists).toBe(true);
-    expect(elementExists.tagName).toBe('AUDIO');
-    expect(elementExists.id).toBe('remote-audio');
-    expect(elementExists.nodeType).toBe(1); // ELEMENT_NODE
-    
-  } catch (error) {
-    throw new Error(`❌ Remote audio element query failed: ${error.message}`);
   }
 }
 

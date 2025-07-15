@@ -17,10 +17,13 @@ import {
   acceptExtensionCall,
   endCallTask
 } from './Utils/incomingTaskUtils';
-import { verifyTaskControls, holdCallToggle, recordCallToggle, setupConsoleLogging, clearCapturedLogs, verifyHoldLogs, verifyRecordingLogs, verifyEndLogs, verifyHoldTimer, verifyRemoteAudioTracks, verifyHoldMusicElement, executeRemoteAudioQuery, endTask } from './Utils/taskControlUtils';
+import { verifyTaskControls, holdCallToggle, recordCallToggle, setupConsoleLogging, clearCapturedLogs, verifyHoldLogs, verifyRecordingLogs, verifyEndLogs, verifyHoldTimer, verifyRemoteAudioTracks, verifyHoldMusicElement, endTask, verifyHoldButtonIcon, verifyRecordButtonIcon } from './Utils/taskControlUtils';
 import { submitWrapup } from './Utils/wrapupUtils';
 import { pageSetup } from './Utils/helperUtils';
 import { USER_STATES, LOGIN_MODE, TASK_TYPES, WRAPUP_REASONS } from './constants';
+
+// Extract test functions for cleaner syntax
+const { describe, beforeAll, afterAll, beforeEach } = test;
 
 let page: Page;
 let context: BrowserContext;
@@ -29,12 +32,12 @@ let chatPage: Page;
 let context2: BrowserContext;
 const maxRetries = 3;
 
-test.describe('Basic Task Controls Tests', () => {
-  test.beforeEach(() => {
+describe('Basic Task Controls Tests', () => {
+  beforeEach(() => {
     clearCapturedLogs();
   });
 
-  test.beforeAll(async ({ browser }) => {
+  beforeAll(async ({ browser }) => {
     context = await browser.newContext();
     context2 = await browser.newContext();
     page = await context.newPage();
@@ -61,7 +64,7 @@ test.describe('Basic Task Controls Tests', () => {
     ]);
   });
 
-  test.afterAll(async () => {
+  afterAll(async () => {
     if(await getCurrentState(page) === USER_STATES.ENGAGED) {
       // If still engaged, end the call to clean up
       await endTask(page);
@@ -105,9 +108,7 @@ test.describe('Basic Task Controls Tests', () => {
     await verifyCurrentState(page, USER_STATES.ENGAGED);
     
     try {
-      // First execute the basic console query to verify element exists
-      await executeRemoteAudioQuery(page);
-      
+
       // Then verify the audio tracks with the exact structure you provided
       await verifyRemoteAudioTracks(page);
       
@@ -124,19 +125,25 @@ test.describe('Basic Task Controls Tests', () => {
       // Clear logs first to ensure clean state
       clearCapturedLogs();
       
+      // Verify initial hold button icon (should show pause icon when call is active)
+      await verifyHoldButtonIcon(page, { expectedIsHeld: false });
+      
       // Put call on hold from agent side
       await holdCallToggle(page);
       await page.waitForTimeout(3000); // Allow time for hold to take effect
       
       // Verify hold callback logs
-      verifyHoldLogs(true);
+      verifyHoldLogs({ expectedIsHeld: true });
+      
+      // Verify hold button icon changed to play icon (when call is on hold)
+      await verifyHoldButtonIcon(page, { expectedIsHeld: true });
       
       // Verify hold music element is present on the CALLER page (where hold music plays)
       // The hold music plays on the caller's side when agent puts call on hold
       await verifyHoldMusicElement(callerPage);
       
       // Verify hold timer is visible and functioning
-      await verifyHoldTimer(page, true);
+      await verifyHoldTimer(page, { shouldBeVisible: true });
       
       clearCapturedLogs(); // Clear logs for next verification
       
@@ -145,10 +152,12 @@ test.describe('Basic Task Controls Tests', () => {
       await page.waitForTimeout(2000);
       
       // Verify resume callback logs
-      verifyHoldLogs(false);
-      verifyHoldTimer(page, false);
+      verifyHoldLogs({ expectedIsHeld: false });
       
-      clearCapturedLogs(); // Clear logs for next verification
+      // Verify hold button icon changed back to pause icon (when call is active)
+      await verifyHoldButtonIcon(page, { expectedIsHeld: false });
+      
+      verifyHoldTimer(page, { shouldBeVisible: false });
       
     } catch (error) {
       throw new Error(`Hold/Resume functionality with callbacks, timer, and hold music verification failed: ${error.message}`);
@@ -160,12 +169,19 @@ test.describe('Basic Task Controls Tests', () => {
     await verifyCurrentState(page, USER_STATES.ENGAGED);
     
     try {
+      // Verify initial record button icon (should show pause icon when recording is active)
+      await verifyRecordButtonIcon(page, { expectedIsRecording: true });
+      
       // Pause the call recording
       await recordCallToggle(page);
       await page.waitForTimeout(2000);
       
       // Verify pause recording callback logs
-      verifyRecordingLogs(false);
+      verifyRecordingLogs({ expectedIsRecording: false });
+      
+      // Verify record button icon changed to record icon (when recording is paused)
+      await verifyRecordButtonIcon(page, { expectedIsRecording: false });
+      
       clearCapturedLogs(); // Clear logs for next verification
       
       // Resume the call recording
@@ -173,8 +189,10 @@ test.describe('Basic Task Controls Tests', () => {
       await page.waitForTimeout(2000);
       
       // Verify resume recording callback logs
-      verifyRecordingLogs(true);
-      clearCapturedLogs(); // Clear logs for next verification
+      verifyRecordingLogs({ expectedIsRecording: true });
+      
+      // Verify record button icon changed back to pause icon (when recording is active)
+      await verifyRecordButtonIcon(page, { expectedIsRecording: true });
       
     } catch (error) {
       throw new Error(`Recording pause/resume functionality verification failed: ${error.message}`);
@@ -192,7 +210,6 @@ test.describe('Basic Task Controls Tests', () => {
       
       // Verify onEnd callback logs
       verifyEndLogs();
-      clearCapturedLogs(); // Clear logs for next verification
       
       // Submit wrapup
       await submitWrapup(page, WRAPUP_REASONS.RESOLVED);
@@ -230,7 +247,6 @@ test.describe('Basic Task Controls Tests', () => {
       
       // Verify onEnd callback logs
       verifyEndLogs();
-      clearCapturedLogs(); // Clear logs for next verification
       
       // Submit wrapup
       await submitWrapup(page, WRAPUP_REASONS.RESOLVED);
@@ -267,7 +283,6 @@ test.describe('Basic Task Controls Tests', () => {
       
       // Verify onEnd callback logs
       verifyEndLogs();
-      clearCapturedLogs(); // Clear logs for next verification
       
       // Submit wrapup
       await submitWrapup(page, WRAPUP_REASONS.RESOLVED);
@@ -278,7 +293,7 @@ test.describe('Basic Task Controls Tests', () => {
   });
 });
 
-test.describe('Multi-Login Task Controls Tests', () => {
+describe('Multi-Login Task Controls Tests', () => {
   let session1Page: Page;
   let session2Page: Page;
   let session1Context: BrowserContext;
@@ -288,11 +303,11 @@ test.describe('Multi-Login Task Controls Tests', () => {
   let extensionPage: Page;
   let extensionContext: BrowserContext;
 
-  test.beforeEach(() => {
+  beforeEach(() => {
     clearCapturedLogs();
   });
 
-  test.beforeAll(async ({ browser }) => {
+  beforeAll(async ({ browser }) => {
     // Create separate browser contexts for multi-session testing
     session1Context = await browser.newContext();
     session2Context = await browser.newContext();
@@ -341,7 +356,7 @@ test.describe('Multi-Login Task Controls Tests', () => {
     ]);
   });
 
-  test.afterAll(async () => {
+  afterAll(async () => {
     // If still engaged, end the call to clean up
     if (await getCurrentState(session1Page) === USER_STATES.ENGAGED) {
       await endTask(session1Page);
@@ -401,33 +416,69 @@ test.describe('Multi-Login Task Controls Tests', () => {
       setupConsoleLogging(session1Page);
       setupConsoleLogging(session2Page);
       
+      // Verify initial hold button icons on both sessions (should show pause icon when call is active)
+      await Promise.all([
+        verifyHoldButtonIcon(session1Page, { expectedIsHeld: false }),
+        verifyHoldButtonIcon(session2Page, { expectedIsHeld: false }),
+      ]);
+      
       // Put call on hold from session 1 (AGENT1)
       await holdCallToggle(session1Page);
       await session1Page.waitForTimeout(3000);
       
+      // Verify hold button icons changed to play icon on both sessions (when call is on hold)
+      await Promise.all([
+        verifyHoldButtonIcon(session1Page, { expectedIsHeld: true }),
+        verifyHoldButtonIcon(session2Page, { expectedIsHeld: true }),
+      ]);
+      
       // Verify hold timer is visible on both AGENT1 sessions
       await Promise.all([
-        verifyHoldTimer(session1Page, true),
-        verifyHoldTimer(session2Page, true),
+        verifyHoldTimer(session1Page, { shouldBeVisible: true }),
+        verifyHoldTimer(session2Page, { shouldBeVisible: true }),
       ]);
       
       // Resume call from session 2 (AGENT1)
       await holdCallToggle(session2Page);
       await session2Page.waitForTimeout(3000);
       
+      // Verify hold button icons changed back to pause icon on both sessions (when call is active)
+      await Promise.all([
+        verifyHoldButtonIcon(session1Page, { expectedIsHeld: false }),
+        verifyHoldButtonIcon(session2Page, { expectedIsHeld: false }),
+      ]);
+      
       // Verify hold timer disappears on both AGENT1 sessions
       await Promise.all([
-        verifyHoldTimer(session1Page, false),
-        verifyHoldTimer(session2Page, false),
+        verifyHoldTimer(session1Page, { shouldBeVisible: false }),
+        verifyHoldTimer(session2Page, { shouldBeVisible: false }),
+      ]);
+      
+      // Verify initial record button icons on both sessions (should show pause icon when recording is active)
+      await Promise.all([
+        verifyRecordButtonIcon(session1Page, { expectedIsRecording: true }),
+        verifyRecordButtonIcon(session2Page, { expectedIsRecording: true }),
       ]);
       
       // Pause recording from session 1 (AGENT1)
       await recordCallToggle(session1Page);
       await session1Page.waitForTimeout(2000);
       
+      // Verify record button icons changed to record icon on both sessions (when recording is paused)
+      await Promise.all([
+        verifyRecordButtonIcon(session1Page, { expectedIsRecording: false }),
+        verifyRecordButtonIcon(session2Page, { expectedIsRecording: false }),
+      ]);
+      
       // Resume recording from session 2 (AGENT1)
       await recordCallToggle(session2Page);
       await session2Page.waitForTimeout(2000);
+      
+      // Verify record button icons changed back to pause icon on both sessions (when recording is active)
+      await Promise.all([
+        verifyRecordButtonIcon(session1Page, { expectedIsRecording: true }),
+        verifyRecordButtonIcon(session2Page, { expectedIsRecording: true }),
+      ]);
       
       // End call from extension page
       await endCallTask(extensionPage);
