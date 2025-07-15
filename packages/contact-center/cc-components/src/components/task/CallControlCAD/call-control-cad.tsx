@@ -159,7 +159,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
           <div className="customer-info">
             {renderCustomerName()}
             <div className="call-details">
-              <Text className="call-timer" type="body-secondary" tagName={'small'}>
+              <Text className="call-timer" type="body-secondary" tagName={'small'} data-testid="cc-cad:call-timer">
                 {currentMediaType.labelName} - <TaskTimer startTimeStamp={startTimestamp} />
               </Text>
               <div className="call-status">
