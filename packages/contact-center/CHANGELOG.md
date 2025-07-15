@@ -1,3 +1,46 @@
+# [1.28.0-ccwidgets.91](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.90...v1.28.0-ccwidgets.91) (2025-07-14)
+
+
+### Features
+
+* **cc-widgets:** UI Automation for Incoming Task ([#485](https://github.com/webex/widgets/issues/485)) ([64134db](https://github.com/webex/widgets/commit/64134db1018f262620f488b739ea48ecab0890e4))
+
+# [1.28.0-ccwidgets.90](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.89...v1.28.0-ccwidgets.90) (2025-07-11)
+
+
+### Bug Fixes
+
+* **cc-widgets:** update the workflow for pull request by increasing the timeout for  e2e_test_cc_widgets ([#495](https://github.com/webex/widgets/issues/495)) ([094b9b1](https://github.com/webex/widgets/commit/094b9b19f2a8a1f753c3b38dd4175e3f2e4ffa14))
+
+# [1.28.0-ccwidgets.89](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.88...v1.28.0-ccwidgets.89) (2025-07-11)
+
+
+### Bug Fixes
+
+* **cc-components:** Add unit and snapshot testing for user state ([#478](https://github.com/webex/widgets/issues/478)) ([f9efbf0](https://github.com/webex/widgets/commit/f9efbf02180c12c08a3be520abc20e87aa67e2ae))
+* **cc-widgets:** add email credentials to the workflow ([#493](https://github.com/webex/widgets/issues/493)) ([49b017a](https://github.com/webex/widgets/commit/49b017abd5895f407771a4a10d736085cf29f1d1))
+
+# [1.28.0-ccwidgets.88](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.87...v1.28.0-ccwidgets.88) (2025-07-07)
+
+
+### Features
+
+* **cc-widgets:** integ env ([#488](https://github.com/webex/widgets/issues/488)) ([aeefbd5](https://github.com/webex/widgets/commit/aeefbd5939a86db6a0e62fe402844e518216f94a))
+
+# [1.28.0-ccwidgets.87](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.86...v1.28.0-ccwidgets.87) (2025-07-07)
+
+
+### Features
+
+* **cc-widgets:** UI Automation for Station Login Tests ([#484](https://github.com/webex/widgets/issues/484)) ([7480fcd](https://github.com/webex/widgets/commit/7480fcdb67f2c13607fdbafc6dde3aef97c95bc0))
+
+# [1.28.0-ccwidgets.86](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.85...v1.28.0-ccwidgets.86) (2025-07-04)
+
+
+### Bug Fixes
+
+* **cc-samples:** refresh page onCCSignout ([#489](https://github.com/webex/widgets/issues/489)) ([22e4ee4](https://github.com/webex/widgets/commit/22e4ee44621228e7f5c1a82ae9bd2b8fee079390))
+
 # [1.28.0-ccwidgets.85](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.84...v1.28.0-ccwidgets.85) (2025-07-03)
 
 

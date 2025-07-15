@@ -59,7 +59,11 @@ function App() {
 
   const [collapsedTasks, setCollapsedTasks] = React.useState([]);
   const [showLoader, setShowLoader] = useState(false);
-  const [toast, setToast] = useState<{type: 'success' | 'error'}|null>(null);
+  const [toast, setToast] = useState<{type: 'success' | 'error'} | null>(null);
+  const [integrationEnv, setintegrationEnv] = useState(() => {
+    const savedintegrationEnv = window.localStorage.getItem('integrationEnv');
+    return savedintegrationEnv === 'true';
+  });
 
   const handleSaveStart = () => {
   setShowLoader(true);
@@ -115,6 +119,13 @@ const handleSaveEnd = (isComplete: boolean) => {
     cc: {
       allowMultiLogin: isMultiLoginEnabled,
     },
+    ...(integrationEnv && {
+      services: {
+        discovery: {
+          u2c: 'https://u2c-intb.ciscospark.com/u2c/api/v1',
+        },
+      },
+    }),
   };
 
   const onLogin = () => {
@@ -129,6 +140,7 @@ const handleSaveEnd = (isComplete: boolean) => {
 
   const onCCSignOut = () => {
     console.log('CC Sign out has been successful');
+    window.location.reload();
   };
 
   const onAccepted = ({task}) => {
@@ -169,6 +181,8 @@ const onTaskDeclined = (task,reason) => {
 
   const onWrapUp = (params) => {
     console.log('onWrapup invoked', params);
+    //the below log is used by e2e tests
+     if (params && params.wrapUpReason) console.log(`onWrapup invoked with reason : ${params.wrapUpReason}`);
   };
 
   const enableDisableMultiLogin = () => {
@@ -280,18 +294,21 @@ const onTaskDeclined = (task,reason) => {
 
     const webexConfig = {
       config: {
-        "appName": "sdk-samples",
-        "appPlatform": "testClient",
-        "fedramp": false,
-        "logger": {
-          "level": "info"
+        appName: 'sdk-samples',
+        appPlatform: 'testClient',
+        fedramp: false,
+        logger: {
+          level: 'info',
         },
-        "credentials": {
-          "client_id": "C04ef08ffce356c3161bb66b15dbdd98d26b6c683c5ce1a1a89efad545fdadd74",
-          "redirect_uri": redirectUri,
-          "scope": requestedScopes,
-        }
-      }
+        credentials: {
+          ...(integrationEnv && {authorizeUrl: 'https://idbrokerbts.webex.com/idb/oauth2/v1/authorize'}),
+          client_id: integrationEnv
+            ? 'Cd0dd53db1f470a5a9941e5eee31575bd0889d7006e3a80a1443ad12a42049da1'
+            : 'C04ef08ffce356c3161bb66b15dbdd98d26b6c683c5ce1a1a89efad545fdadd74',
+          redirect_uri: redirectUri,
+          scope: requestedScopes,
+        },
+      },
     };
 
     const webex = Webex.init(webexConfig);
@@ -319,6 +336,9 @@ const onTaskDeclined = (task,reason) => {
   useEffect(() => {
     window.localStorage.setItem('currentTheme', currentTheme);
   }, [currentTheme]);
+  useEffect(() => {
+    window.localStorage.setItem('integrationEnv', JSON.stringify(integrationEnv));
+  }, [integrationEnv]);
 
   useEffect(() => {
     store.setIncomingTaskCb(onIncomingTaskCB);
@@ -525,6 +545,16 @@ const onTaskDeclined = (task,reason) => {
                       // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
                       onchange={() => {
                         setDoStationLogout(!doStationLogout);
+                      }}
+                    />
+                    <Checkbox
+                      checked={integrationEnv}
+                      aria-label="integration env checkbox"
+                      id="integration-env-checkbox"
+                      label="Enable Integration Env"
+                      // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
+                      onchange={() => {
+                        setintegrationEnv(!integrationEnv);
                       }}
                     />
                     {store.isAgentLoggedIn && (
@@ -745,6 +775,7 @@ const onTaskDeclined = (task,reason) => {
                                     setCollapsedTasks((prev) => prev.filter((id) => id !== task.data.interactionId));
                                   }
                                 }}
+                                data-testid={`samples:incoming-task-${task.data.mediaType}`}
                               >
                                 <>
                                   <button
@@ -783,7 +814,7 @@ const onTaskDeclined = (task,reason) => {
               </>
             )}
             {showRejectedPopup && (
-              <div className="task-rejected-popup">
+              <div className="task-rejected-popup" data-testid="samples:rona-popup">
                 <button className="close-btn" onClick={handlePopoverClose}>
                   ×
                 </button>
@@ -801,17 +832,20 @@ const onTaskDeclined = (task,reason) => {
                   onChange={(e: CustomEvent) => {
                     setSelectedState(e.detail.value);
                   }}
+                  data-testid="samples:rona-select-state"
                 >
-                  <Option key={1} value="Available">
+                  <Option key={1} value="Available" data-testid="samples:rona-option-available">
                     Available
                   </Option>
-                  <Option key={2} value="Idle">
+                  <Option key={2} value="Idle" data-testid="samples:rona-option-idle">
                     Idle
                   </Option>
                 </Select>
-                <Button disabled={selectedState === ''} onClick={handlePopoverSubmit} variant="primary">
+               <div style={{ display: 'flex', justifyContent: 'center'}}>
+                 <Button disabled={selectedState === ''} onClick={handlePopoverSubmit} variant="primary" data-testid="samples:rona-button-confirm">
                   Confirm State Change
-                </Button>
+                 </Button>
+               </div>
               </div>
             )}
 
