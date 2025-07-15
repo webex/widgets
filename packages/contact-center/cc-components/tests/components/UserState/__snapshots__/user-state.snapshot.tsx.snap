@@ -51,9 +51,11 @@ exports[`UserState Component Snapshots Interactions should call handleSelectionC
       aria-label="user-state"
       aria-labelledby="user-state-tooltip react-aria-:rt:"
       class="md-select-dropdown-input md-select-selected"
+      data-react-aria-pressable="true"
       data-testid="state-select"
       id="user-state-tooltip"
       role="combobox"
+      tabindex="0"
       type="button"
     >
       <span
@@ -194,9 +196,11 @@ exports[`UserState Component Snapshots Interactions should handle custom state r
       aria-label="user-state"
       aria-labelledby="user-state-tooltip react-aria-:r13:"
       class="md-select-dropdown-input md-select-selected"
+      data-react-aria-pressable="true"
       data-testid="state-select"
       id="user-state-tooltip"
       role="combobox"
+      tabindex="0"
       type="button"
     >
       <span
@@ -330,9 +334,11 @@ exports[`UserState Component Snapshots Rendering - Tests for UI elements and vis
       aria-label="user-state"
       aria-labelledby="user-state-tooltip react-aria-:rh:"
       class="md-select-dropdown-input md-select-selected"
+      data-react-aria-pressable="true"
       data-testid="state-select"
       id="user-state-tooltip"
       role="combobox"
+      tabindex="0"
       type="button"
     >
       <span
@@ -466,9 +472,11 @@ exports[`UserState Component Snapshots Rendering - Tests for UI elements and vis
       aria-label="user-state"
       aria-labelledby="user-state-tooltip react-aria-:rn:"
       class="md-select-dropdown-input md-select-selected"
+      data-react-aria-pressable="true"
       data-testid="state-select"
       id="user-state-tooltip"
       role="combobox"
+      tabindex="0"
       type="button"
     >
       <span
@@ -609,9 +617,11 @@ exports[`UserState Component Snapshots Rendering - Tests for UI elements and vis
       aria-label="user-state"
       aria-labelledby="user-state-tooltip react-aria-:rb:"
       class="md-select-dropdown-input md-select-selected"
+      data-react-aria-pressable="true"
       data-testid="state-select"
       id="user-state-tooltip"
       role="combobox"
+      tabindex="0"
       type="button"
     >
       <span
@@ -751,9 +761,11 @@ exports[`UserState Component Snapshots Rendering - Tests for UI elements and vis
       aria-label="user-state"
       aria-labelledby="user-state-tooltip react-aria-:r5:"
       class="md-select-dropdown-input md-select-selected"
+      data-react-aria-pressable="true"
       data-testid="state-select"
       id="user-state-tooltip"
       role="combobox"
+      tabindex="0"
       type="button"
     >
       <span
@@ -894,9 +906,11 @@ exports[`UserState Component Snapshots State Management should handle RONA and E
       aria-label="user-state"
       aria-labelledby="user-state-tooltip react-aria-:r1f:"
       class="md-select-dropdown-input md-select-selected"
+      data-react-aria-pressable="true"
       data-testid="state-select"
       id="user-state-tooltip"
       role="combobox"
+      tabindex="0"
       type="button"
     >
       <span
@@ -1037,9 +1051,11 @@ exports[`UserState Component Snapshots State Management should handle RONA and E
       aria-label="user-state"
       aria-labelledby="user-state-tooltip react-aria-:r1f:"
       class="md-select-dropdown-input md-select-selected"
+      data-react-aria-pressable="true"
       data-testid="state-select"
       id="user-state-tooltip"
       role="combobox"
+      tabindex="0"
       type="button"
     >
       <span
@@ -1180,9 +1196,11 @@ exports[`UserState Component Snapshots State Management should handle currentSta
       aria-label="user-state"
       aria-labelledby="user-state-tooltip react-aria-:r1r:"
       class="md-select-dropdown-input md-select-selected"
+      data-react-aria-pressable="true"
       data-testid="state-select"
       id="user-state-tooltip"
       role="combobox"
+      tabindex="0"
       type="button"
     >
       <span
@@ -1323,9 +1341,11 @@ exports[`UserState Component Snapshots State Management should handle elapsed ti
       aria-label="user-state"
       aria-labelledby="user-state-tooltip react-aria-:r1l:"
       class="md-select-dropdown-input md-select-selected"
+      data-react-aria-pressable="true"
       data-testid="state-select"
       id="user-state-tooltip"
       role="combobox"
+      tabindex="0"
       type="button"
     >
       <span
@@ -1466,9 +1486,11 @@ exports[`UserState Component Snapshots State Management should handle elapsed ti
       aria-label="user-state"
       aria-labelledby="user-state-tooltip react-aria-:r1l:"
       class="md-select-dropdown-input md-select-selected"
+      data-react-aria-pressable="true"
       data-testid="state-select"
       id="user-state-tooltip"
       role="combobox"
+      tabindex="0"
       type="button"
     >
       <span
@@ -1609,9 +1631,11 @@ exports[`UserState Component Snapshots State Management should update when custo
       aria-label="user-state"
       aria-labelledby="user-state-tooltip react-aria-:r19:"
       class="md-select-dropdown-input md-select-selected"
+      data-react-aria-pressable="true"
       data-testid="state-select"
       id="user-state-tooltip"
       role="combobox"
+      tabindex="0"
       type="button"
     >
       <span

@@ -17,6 +17,11 @@ module.exports = merge(baseConfig, {
       '@webex/cc-user-state': path.resolve(__dirname, '../../../packages/contact-center/user-state/src'),
       '@webex/cc-task': path.resolve(__dirname, '../../../packages/contact-center/task/src'),
       '@webex/cc-components': path.resolve(__dirname, '../../../packages/contact-center/cc-components/src'),
+      'process/browser': require.resolve('process/browser.js'),
+    },
+    fallback: {
+      ...baseConfig.resolve?.fallback,
+      'process/browser': require.resolve('process/browser.js'),
     },
   },
   module: {
