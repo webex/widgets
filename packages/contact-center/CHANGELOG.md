@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.92](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.91...v1.28.0-ccwidgets.92) (2025-07-15)
+
+
+### Bug Fixes
+
+* **call-control:** implement-mute-unmute-actions ([#492](https://github.com/webex/widgets/issues/492)) ([ba70164](https://github.com/webex/widgets/commit/ba701648d8341e72a0dbaae2070ddeb0459cb588))
+
 # [1.28.0-ccwidgets.91](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.90...v1.28.0-ccwidgets.91) (2025-07-14)
 
 
