@@ -4,7 +4,7 @@ import { createCallTask, createChatTask, loginExtension, acceptExtensionCall, cr
 import { TASK_TYPES, USER_STATES, LOGIN_MODE, THEME_COLORS, WRAPUP_REASONS, RONA_OPTIONS } from './constants';
 import { verifyTaskControls } from './Utils/taskControlUtils';
 import { submitWrapup } from './Utils/wrapupUtils';
-import { pageSetup, handleStrayTasks } from './Utils/helperUtils';
+import { pageSetup, handleStrayTasks, waitForState } from './Utils/helperUtils';
 
 
 let page: Page | null = null;
@@ -59,31 +59,14 @@ async function waitForAndAcceptSpecificTask(page: Page, testId: string): Promise
         if (isVisible) {
             const acceptButton = taskDiv.getByTestId('task:accept-button').first();
             await expect(acceptButton).toBeVisible({ timeout: 5000 });
-            await acceptButton.click({timeout:3000});
-            
+            await acceptButton.click({ timeout: 3000 });
+
             return;
         }
         await page.waitForTimeout(pollInterval);
     }
     throw new Error(`No incoming task found for ${testId} after ${timeoutMs / 1000} seconds`);
 }
-
-export const waitForState = async (
-    page: Page,
-    expectedState: string,
-): Promise<void> => {
-    const start = Date.now();
-    const timeoutMs: number = 10000
-    while (true) {
-        const currentState = await getCurrentState(page);
-        if (currentState === expectedState) return;
-        if (Date.now() - start > timeoutMs) {
-            throw new Error(`Timed out waiting for state "${expectedState}", last state was "${currentState}"`);
-        }
-        await page.waitForTimeout(500); 
-    }
-};
-
 
 
 async function getTaskType(): Promise<string> {
@@ -139,7 +122,6 @@ async function waitForConsoleLogs(
 
     const start = Date.now();
     while (Date.now() - start < timeoutMs) {
-        // check if any captured log matches the pattern
         if (logs.some(log => pattern.test(log))) return;
         await new Promise(r => setTimeout(r, intervalMs));
     }
