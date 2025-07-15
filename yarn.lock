@@ -9804,15 +9804,15 @@ __metadata:
   linkType: hard
 
 "@webex/event-dictionary-ts@npm:^1.0.1753":
-  version: 1.0.1757
-  resolution: "@webex/event-dictionary-ts@npm:1.0.1757"
+  version: 1.0.1848
+  resolution: "@webex/event-dictionary-ts@npm:1.0.1848"
   dependencies:
     amf-client-js: "npm:^5.2.6"
     json-schema-to-typescript: "npm:^12.0.0"
     minimist: "npm:^1.2.8"
     shelljs: "npm:^0.8.5"
     webapi-parser: "npm:^0.5.0"
-  checksum: 10c0/e941c694a6389a6d91dc6018b3d84fc759dce96dce5d7cf8aa10a065b2f2575358c81bfec5869e9dd34ebeaba6ab185282ce76a5dc75495afdc1c907c8403662
+  checksum: 10c0/2bcbdabe6d2bff9459422161be51462e718d663412437b16a86577a9e39cfd97d1118c465a89fb3c47c13706ba09329c413c5fa43a5c9f03ef1cca984a39cc65
   languageName: node
   linkType: hard
 

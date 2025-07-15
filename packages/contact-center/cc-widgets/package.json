@@ -14,9 +14,14 @@
   "exports": {
     ".": {
       "import": "./dist/index.js",
+      "require": "./dist/index.js",
       "types": "./dist/types/index.d.ts"
     },
-    "./wc": "./dist/wc.js"
+    "./wc": {
+      "import": "./dist/wc.js",
+      "require": "./dist/wc.js",
+      "types": "./dist/types/wc.d.ts"
+    }
   },
   "scripts": {
     "clean": "rm -rf dist && rm -rf node_modules",
