@@ -1,4 +1,4 @@
-import {Page, expect} from '@playwright/test';
+import { Page, expect } from '@playwright/test';
 import dotenv from 'dotenv';
 import {LOGIN_MODE, LONG_WAIT} from '../constants';
 
@@ -113,7 +113,7 @@ export const stationLogout = async (page: Page): Promise<void> => {
   //check if the station logout button is hidden after logouts
   const isLogoutButtonHidden = await page
     .getByTestId('samples:station-logout-button')
-    .waitFor({state: 'hidden'})
+    .waitFor({ state: 'hidden', timeout: 30000 })
     .then(() => true)
     .catch(() => false);
   if (!isLogoutButtonHidden) {
