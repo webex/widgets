@@ -1,0 +1,761 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`IncomingTaskComponent handles social media task correctly 1`] = `
+<li
+  class="task-list-item  task-list-hover md-list-item-base-wrapper"
+  data-allow-text-select="false"
+  data-disabled="false"
+  data-interactive="true"
+  data-padded="false"
+  data-shape="rectangle"
+  data-size="40"
+  id="test-interaction-123"
+  role="listitem"
+  tabindex="0"
+>
+  <div
+    data-position="start"
+  >
+    <div
+      class="brand-visual-background"
+    >
+      <mdc-brandvisual
+        class="facebook"
+      />
+    </div>
+  </div>
+  <div
+    data-position="fill"
+  >
+    <section
+      class="task-details"
+    >
+      <mdc-text
+        class="md-text-wrapper incoming-digital-task-title"
+        id="tooltip-trigger-test-interaction-123"
+      >
+        Alice Johnson
+      </mdc-text>
+      <mdc-tooltip
+        class="task-tooltip"
+        tooltip-type="description"
+      >
+        Alice Johnson
+      </mdc-tooltip>
+      <mdc-text
+        class="md-text-wrapper task-text"
+      >
+        Social Media Team
+      </mdc-text>
+      <mdc-text
+        class="md-text-wrapper task-text"
+      >
+        Time Left: 
+          
+        <div
+          data-testid="mock-timer"
+        >
+          Timer
+        </div>
+      </mdc-text>
+    </section>
+  </div>
+  <div
+    data-position="end"
+  >
+    <div
+      class="task-button-container"
+    >
+      <button
+        class="md-button-pill-wrapper md-button-simple-wrapper"
+        data-color="join"
+        data-disabled="false"
+        data-disabled-outline="false"
+        data-ghost="false"
+        data-grown="false"
+        data-inverted="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="40"
+        data-testid="task:accept-button"
+        tabindex="-1"
+        type="button"
+      >
+        <span>
+          Accept
+        </span>
+      </button>
+    </div>
+  </div>
+</li>
+`;
+
+exports[`IncomingTaskComponent renders browser telephony task with wrap up required 1`] = `
+<li
+  class="task-list-item  task-list-hover md-list-item-base-wrapper"
+  data-allow-text-select="false"
+  data-disabled="false"
+  data-interactive="true"
+  data-padded="false"
+  data-shape="rectangle"
+  data-size="40"
+  id="test-interaction-123"
+  role="listitem"
+  tabindex="0"
+>
+  <div
+    data-position="start"
+  >
+    <mdc-avatar
+      class="telephony"
+      icon-name="handset-filled"
+    />
+  </div>
+  <div
+    data-position="fill"
+  >
+    <section
+      class="task-details"
+    >
+      <mdc-text
+        class="md-text-wrapper task-title"
+      >
+        1234567890
+      </mdc-text>
+      <mdc-text
+        class="md-text-wrapper task-text"
+      >
+        Support Team
+      </mdc-text>
+      <mdc-text
+        class="md-text-wrapper task-text"
+      >
+        Time Left: 
+          
+        <div
+          data-testid="mock-timer"
+        >
+          Timer
+        </div>
+      </mdc-text>
+    </section>
+  </div>
+  <div
+    data-position="end"
+  >
+    <div
+      class="task-button-container"
+    />
+  </div>
+</li>
+`;
+
+exports[`IncomingTaskComponent renders chat task without wrap up 1`] = `
+<li
+  class="task-list-item  task-list-hover md-list-item-base-wrapper"
+  data-allow-text-select="false"
+  data-disabled="false"
+  data-interactive="true"
+  data-padded="false"
+  data-shape="rectangle"
+  data-size="40"
+  id="test-interaction-123"
+  role="listitem"
+  tabindex="0"
+>
+  <div
+    data-position="start"
+  >
+    <mdc-avatar
+      class="chat"
+      icon-name="chat-filled"
+    />
+  </div>
+  <div
+    data-position="fill"
+  >
+    <section
+      class="task-details"
+    >
+      <mdc-text
+        class="md-text-wrapper incoming-digital-task-title"
+        id="tooltip-trigger-test-interaction-123"
+      >
+        chat-user-123
+      </mdc-text>
+      <mdc-tooltip
+        class="task-tooltip"
+        tooltip-type="description"
+      >
+        chat-user-123
+      </mdc-tooltip>
+      <mdc-text
+        class="md-text-wrapper task-text"
+      >
+        Chat Support
+      </mdc-text>
+      <mdc-text
+        class="md-text-wrapper task-text"
+      >
+        Handle Time: 
+          
+        <div
+          data-testid="mock-timer"
+        >
+          Timer
+        </div>
+      </mdc-text>
+    </section>
+  </div>
+  <div
+    data-position="end"
+  >
+    <div
+      class="task-button-container"
+    >
+      <button
+        class="md-button-pill-wrapper md-button-simple-wrapper"
+        data-color="join"
+        data-disabled="false"
+        data-disabled-outline="false"
+        data-ghost="false"
+        data-grown="false"
+        data-inverted="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="40"
+        data-testid="task:accept-button"
+        tabindex="-1"
+        type="button"
+      >
+        <span>
+          Accept
+        </span>
+      </button>
+    </div>
+  </div>
+</li>
+`;
+
+exports[`IncomingTaskComponent renders email task without wrap up 1`] = `
+<li
+  class="task-list-item  task-list-hover md-list-item-base-wrapper"
+  data-allow-text-select="false"
+  data-disabled="false"
+  data-interactive="true"
+  data-padded="false"
+  data-shape="rectangle"
+  data-size="40"
+  id="test-interaction-123"
+  role="listitem"
+  tabindex="0"
+>
+  <div
+    data-position="start"
+  >
+    <mdc-avatar
+      class="email"
+      icon-name="email-filled"
+    />
+  </div>
+  <div
+    data-position="fill"
+  >
+    <section
+      class="task-details"
+    >
+      <mdc-text
+        class="md-text-wrapper incoming-digital-task-title"
+        id="tooltip-trigger-test-interaction-123"
+      >
+        customer@example.com
+      </mdc-text>
+      <mdc-tooltip
+        class="task-tooltip"
+        tooltip-type="description"
+      >
+        customer@example.com
+      </mdc-tooltip>
+      <mdc-text
+        class="md-text-wrapper task-text"
+      >
+        Email Support
+      </mdc-text>
+      <mdc-text
+        class="md-text-wrapper task-text"
+      >
+        Handle Time: 
+          
+        <div
+          data-testid="mock-timer"
+        >
+          Timer
+        </div>
+      </mdc-text>
+    </section>
+  </div>
+  <div
+    data-position="end"
+  >
+    <div
+      class="task-button-container"
+    >
+      <button
+        class="md-button-pill-wrapper md-button-simple-wrapper"
+        data-color="join"
+        data-disabled="false"
+        data-disabled-outline="false"
+        data-ghost="false"
+        data-grown="false"
+        data-inverted="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="40"
+        data-testid="task:accept-button"
+        tabindex="-1"
+        type="button"
+      >
+        <span>
+          Accept
+        </span>
+      </button>
+    </div>
+  </div>
+</li>
+`;
+
+exports[`IncomingTaskComponent renders empty component when incomingTask is null 1`] = `null`;
+
+exports[`IncomingTaskComponent renders incoming call and handles accept/decline for browser telephony task 1`] = `
+<li
+  class="task-list-item  task-list-hover md-list-item-base-wrapper"
+  data-allow-text-select="false"
+  data-disabled="false"
+  data-interactive="true"
+  data-padded="false"
+  data-shape="rectangle"
+  data-size="40"
+  id="test-interaction-123"
+  role="listitem"
+  tabindex="0"
+>
+  <div
+    data-position="start"
+  >
+    <mdc-avatar
+      class="telephony"
+      icon-name="handset-filled"
+    />
+  </div>
+  <div
+    data-position="fill"
+  >
+    <section
+      class="task-details"
+    >
+      <mdc-text
+        class="md-text-wrapper task-title"
+      >
+        1234567890
+      </mdc-text>
+      <mdc-text
+        class="md-text-wrapper task-text"
+      >
+        Support Team
+      </mdc-text>
+      <mdc-text
+        class="md-text-wrapper task-text"
+      >
+        Time Left: 
+          
+        <div
+          data-testid="mock-timer"
+        >
+          Timer
+        </div>
+      </mdc-text>
+    </section>
+  </div>
+  <div
+    data-position="end"
+  >
+    <div
+      class="task-button-container"
+    >
+      <button
+        class="md-button-pill-wrapper md-button-simple-wrapper"
+        data-color="join"
+        data-disabled="false"
+        data-disabled-outline="false"
+        data-ghost="false"
+        data-grown="false"
+        data-inverted="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="40"
+        data-testid="task:accept-button"
+        tabindex="-1"
+        type="button"
+      >
+        <span>
+          Accept
+        </span>
+      </button>
+      <button
+        class="md-button-pill-wrapper md-button-simple-wrapper"
+        data-color="cancel"
+        data-disabled="false"
+        data-disabled-outline="false"
+        data-ghost="false"
+        data-grown="false"
+        data-inverted="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="40"
+        data-testid="task:decline-button"
+        tabindex="-1"
+        type="button"
+      >
+        <span>
+          Decline
+        </span>
+      </button>
+    </div>
+  </div>
+</li>
+`;
+
+exports[`IncomingTaskComponent renders social media task with wrap up required 1`] = `
+<li
+  class="task-list-item  task-list-hover md-list-item-base-wrapper"
+  data-allow-text-select="false"
+  data-disabled="false"
+  data-interactive="true"
+  data-padded="false"
+  data-shape="rectangle"
+  data-size="40"
+  id="test-interaction-123"
+  role="listitem"
+  tabindex="0"
+>
+  <div
+    data-position="start"
+  >
+    <mdc-avatar
+      class="social"
+      icon-name="chat-filled"
+    />
+  </div>
+  <div
+    data-position="fill"
+  >
+    <section
+      class="task-details"
+    >
+      <mdc-text
+        class="md-text-wrapper incoming-digital-task-title"
+        id="tooltip-trigger-test-interaction-123"
+      >
+        Bob Wilson
+      </mdc-text>
+      <mdc-tooltip
+        class="task-tooltip"
+        tooltip-type="description"
+      >
+        Bob Wilson
+      </mdc-tooltip>
+      <mdc-text
+        class="md-text-wrapper task-text"
+      >
+        Social Support
+      </mdc-text>
+      <mdc-text
+        class="md-text-wrapper task-text"
+      >
+        Handle Time: 
+          
+        <div
+          data-testid="mock-timer"
+        >
+          Timer
+        </div>
+      </mdc-text>
+    </section>
+  </div>
+  <div
+    data-position="end"
+  >
+    <div
+      class="task-button-container"
+    />
+  </div>
+</li>
+`;
+
+exports[`IncomingTaskComponent renders task with missing call association details 1`] = `
+<li
+  class="task-list-item  task-list-hover md-list-item-base-wrapper"
+  data-allow-text-select="false"
+  data-disabled="false"
+  data-interactive="true"
+  data-padded="false"
+  data-shape="rectangle"
+  data-size="40"
+  id="test-interaction-123"
+  role="listitem"
+  tabindex="0"
+>
+  <div
+    data-position="start"
+  >
+    <mdc-avatar
+      class="telephony"
+      icon-name="handset-filled"
+    />
+  </div>
+  <div
+    data-position="fill"
+  >
+    <section
+      class="task-details"
+    >
+      <mdc-text
+        class="md-text-wrapper task-text"
+      >
+        Handle Time: 
+          
+        <div
+          data-testid="mock-timer"
+        >
+          Timer
+        </div>
+      </mdc-text>
+    </section>
+  </div>
+  <div
+    data-position="end"
+  >
+    <div
+      class="task-button-container"
+    >
+      <button
+        class="md-button-pill-wrapper md-button-simple-wrapper"
+        data-color="join"
+        data-disabled="false"
+        data-disabled-outline="false"
+        data-ghost="false"
+        data-grown="false"
+        data-inverted="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="40"
+        data-testid="task:accept-button"
+        tabindex="-1"
+        type="button"
+      >
+        <span>
+          Accept
+        </span>
+      </button>
+      <button
+        class="md-button-pill-wrapper md-button-simple-wrapper"
+        data-color="cancel"
+        data-disabled="false"
+        data-disabled-outline="false"
+        data-ghost="false"
+        data-grown="false"
+        data-inverted="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="40"
+        data-testid="task:decline-button"
+        tabindex="-1"
+        type="button"
+      >
+        <span>
+          Decline
+        </span>
+      </button>
+    </div>
+  </div>
+</li>
+`;
+
+exports[`IncomingTaskComponent renders task with special characters in ANI 1`] = `
+<li
+  class="task-list-item  task-list-hover md-list-item-base-wrapper"
+  data-allow-text-select="false"
+  data-disabled="false"
+  data-interactive="true"
+  data-padded="false"
+  data-shape="rectangle"
+  data-size="40"
+  id="test-interaction-123"
+  role="listitem"
+  tabindex="0"
+>
+  <div
+    data-position="start"
+  >
+    <mdc-avatar
+      class="telephony"
+      icon-name="handset-filled"
+    />
+  </div>
+  <div
+    data-position="fill"
+  >
+    <section
+      class="task-details"
+    >
+      <mdc-text
+        class="md-text-wrapper task-title"
+      >
+        +1 (555) 123-4567 ext. 123
+      </mdc-text>
+      <mdc-text
+        class="md-text-wrapper task-text"
+      >
+        Special Support & Services
+      </mdc-text>
+      <mdc-text
+        class="md-text-wrapper task-text"
+      >
+        Handle Time: 
+          
+        <div
+          data-testid="mock-timer"
+        >
+          Timer
+        </div>
+      </mdc-text>
+    </section>
+  </div>
+  <div
+    data-position="end"
+  >
+    <div
+      class="task-button-container"
+    >
+      <button
+        class="md-button-pill-wrapper md-button-simple-wrapper"
+        data-color="join"
+        data-disabled="false"
+        data-disabled-outline="false"
+        data-ghost="false"
+        data-grown="false"
+        data-inverted="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="40"
+        data-testid="task:accept-button"
+        tabindex="-1"
+        type="button"
+      >
+        <span>
+          Accept
+        </span>
+      </button>
+      <button
+        class="md-button-pill-wrapper md-button-simple-wrapper"
+        data-color="cancel"
+        data-disabled="false"
+        data-disabled-outline="false"
+        data-ghost="false"
+        data-grown="false"
+        data-inverted="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="40"
+        data-testid="task:decline-button"
+        tabindex="-1"
+        type="button"
+      >
+        <span>
+          Decline
+        </span>
+      </button>
+    </div>
+  </div>
+</li>
+`;
+
+exports[`IncomingTaskComponent shows correct button text for non-browser telephony task 1`] = `
+<li
+  class="task-list-item  task-list-hover md-list-item-base-wrapper"
+  data-allow-text-select="false"
+  data-disabled="false"
+  data-interactive="true"
+  data-padded="false"
+  data-shape="rectangle"
+  data-size="40"
+  id="test-interaction-123"
+  role="listitem"
+  tabindex="0"
+>
+  <div
+    data-position="start"
+  >
+    <mdc-avatar
+      class="telephony"
+      icon-name="handset-filled"
+    />
+  </div>
+  <div
+    data-position="fill"
+  >
+    <section
+      class="task-details"
+    >
+      <mdc-text
+        class="md-text-wrapper task-title"
+      >
+        1234567890
+      </mdc-text>
+      <mdc-text
+        class="md-text-wrapper task-text"
+      >
+        Support Team
+      </mdc-text>
+      <mdc-text
+        class="md-text-wrapper task-text"
+      >
+        Time Left: 
+          
+        <div
+          data-testid="mock-timer"
+        >
+          Timer
+        </div>
+      </mdc-text>
+    </section>
+  </div>
+  <div
+    data-position="end"
+  >
+    <div
+      class="task-button-container"
+    >
+      <button
+        class="md-button-pill-wrapper md-button-simple-wrapper"
+        data-color="join"
+        data-disabled="true"
+        data-disabled-outline="false"
+        data-ghost="false"
+        data-grown="false"
+        data-inverted="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="40"
+        data-testid="task:accept-button"
+        disabled=""
+        type="button"
+      >
+        <span>
+          Ringing...
+        </span>
+      </button>
+    </div>
+  </div>
+</li>
+`;
