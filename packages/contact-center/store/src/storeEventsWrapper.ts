@@ -149,6 +149,16 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.agentProfile;
   }
 
+  get isMuted() {
+    return this.store.isMuted;
+  }
+
+  setIsMuted = (value: boolean): void => {
+    runInAction(() => {
+      this.store.isMuted = value;
+    });
+  };
+
   setCurrentTheme = (theme: string): void => {
     this.store.currentTheme = theme;
   };
@@ -356,7 +366,7 @@ class StoreWrapper implements IStoreWrapper {
       taskToRemove.off(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(taskToRemove, reason));
       taskToRemove.off(TASK_EVENTS.AGENT_WRAPPEDUP, this.handleTaskWrapUp);
       taskToRemove.off(TASK_EVENTS.TASK_CONSULTING, this.handleConsulting);
-      taskToRemove.off(CC_EVENTS.AGENT_OFFER_CONSULT, this.handleConsultOffer);
+      taskToRemove.off(TASK_EVENTS.TASK_OFFER_CONSULT, this.handleConsultOffer);
       taskToRemove.off(TASK_EVENTS.TASK_CONSULT_END, this.handleConsultEnd);
       taskToRemove.off(TASK_EVENTS.TASK_CONSULT_ACCEPTED, this.handleConsultAccepted);
       taskToRemove.off(TASK_EVENTS.AGENT_CONSULT_CREATED, this.handleConsultCreated);
@@ -384,6 +394,16 @@ class StoreWrapper implements IStoreWrapper {
       });
       this.refreshTaskList();
     });
+  };
+
+  handleTaskMuteState = (task: ITask): void => {
+    const isBrowser = this.deviceType === 'BROWSER';
+    const webRtcEnabled = this.featureFlags?.webRtcEnabled;
+    const isTelephony = task?.data?.interaction?.mediaType === 'telephony';
+
+    if (isBrowser && isTelephony && webRtcEnabled) {
+      this.setIsMuted(false);
+    }
   };
 
   handleTaskEnd = () => {
@@ -497,7 +517,7 @@ class StoreWrapper implements IStoreWrapper {
 
     task.on(TASK_EVENTS.TASK_CONSULTING, this.handleConsulting);
     task.on(TASK_EVENTS.TASK_CONSULT_ACCEPTED, this.handleConsultAccepted);
-    task.on(CC_EVENTS.AGENT_OFFER_CONSULT, this.handleConsultOffer);
+    task.on(TASK_EVENTS.TASK_OFFER_CONSULT, this.handleConsultOffer);
     task.on(TASK_EVENTS.TASK_CONSULT_END, this.handleConsultEnd);
     task.on(TASK_EVENTS.TASK_HOLD, this.refreshTaskList);
     task.on(TASK_EVENTS.TASK_UNHOLD, this.refreshTaskList);
@@ -506,6 +526,7 @@ class StoreWrapper implements IStoreWrapper {
     // If it is, we dont have to send the incoming task callback
     if (this.onIncomingTask && !this.taskList[task.data.interactionId]) {
       this.onIncomingTask({task});
+      this.handleTaskMuteState(task);
     }
 
     // We should update the task list in the store after sending the incoming task callback
@@ -555,7 +576,7 @@ class StoreWrapper implements IStoreWrapper {
     task.on(TASK_EVENTS.AGENT_WRAPPEDUP, this.handleTaskWrapUp);
 
     task.on(TASK_EVENTS.TASK_CONSULTING, this.handleConsulting);
-    task.on(CC_EVENTS.AGENT_OFFER_CONSULT, this.handleConsultOffer);
+    task.on(TASK_EVENTS.TASK_OFFER_CONSULT, this.handleConsultOffer);
     task.on(TASK_EVENTS.TASK_CONSULT_END, this.handleConsultEnd);
     task.on(TASK_EVENTS.TASK_CONSULT_QUEUE_CANCELLED, this.handleConsultQueueCancelled);
     if (this.deviceType === 'BROWSER') {
