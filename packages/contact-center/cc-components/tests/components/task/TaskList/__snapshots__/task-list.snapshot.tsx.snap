@@ -6,7 +6,7 @@ exports[`TaskListComponent Additional scenarios should render email task correct
   data-testid="task-list"
 >
   <li
-    class="task-list-item task-list-item--selected undefined md-list-item-base-wrapper"
+    class="task-list-item task-list-item--selected md-list-item-base-wrapper"
     data-allow-text-select="false"
     data-disabled="false"
     data-interactive="true"
@@ -66,7 +66,7 @@ exports[`TaskListComponent Additional scenarios should render social media task 
   data-testid="task-list"
 >
   <li
-    class="task-list-item task-list-item--selected undefined md-list-item-base-wrapper"
+    class="task-list-item task-list-item--selected md-list-item-base-wrapper"
     data-allow-text-select="false"
     data-disabled="false"
     data-interactive="true"
@@ -126,7 +126,7 @@ exports[`TaskListComponent Additional scenarios should render task with special 
   data-testid="task-list"
 >
   <li
-    class="task-list-item task-list-item--selected undefined md-list-item-base-wrapper"
+    class="task-list-item task-list-item--selected md-list-item-base-wrapper"
     data-allow-text-select="false"
     data-disabled="false"
     data-interactive="true"
@@ -179,7 +179,7 @@ exports[`TaskListComponent Browser vs Non-browser behavior should handle non-bro
   data-testid="task-list"
 >
   <li
-    class="task-list-item task-list-item--selected undefined md-list-item-base-wrapper"
+    class="task-list-item task-list-item--selected md-list-item-base-wrapper"
     data-allow-text-select="false"
     data-disabled="false"
     data-interactive="true"
@@ -252,7 +252,7 @@ exports[`TaskListComponent Different media types should render chat task correct
   data-testid="task-list"
 >
   <li
-    class="task-list-item task-list-item--selected undefined md-list-item-base-wrapper"
+    class="task-list-item task-list-item--selected md-list-item-base-wrapper"
     data-allow-text-select="false"
     data-disabled="false"
     data-interactive="true"
@@ -312,7 +312,7 @@ exports[`TaskListComponent Different media types should render social media task
   data-testid="task-list"
 >
   <li
-    class="task-list-item task-list-item--selected undefined md-list-item-base-wrapper"
+    class="task-list-item task-list-item--selected md-list-item-base-wrapper"
     data-allow-text-select="false"
     data-disabled="false"
     data-interactive="true"
@@ -375,7 +375,7 @@ exports[`TaskListComponent Different media types should render telephony task co
   data-testid="task-list"
 >
   <li
-    class="task-list-item task-list-item--selected undefined md-list-item-base-wrapper"
+    class="task-list-item task-list-item--selected md-list-item-base-wrapper"
     data-allow-text-select="false"
     data-disabled="false"
     data-interactive="true"
@@ -428,7 +428,7 @@ exports[`TaskListComponent Edge cases should handle task with missing call assoc
   data-testid="task-list"
 >
   <li
-    class="task-list-item task-list-item--selected undefined md-list-item-base-wrapper"
+    class="task-list-item task-list-item--selected md-list-item-base-wrapper"
     data-allow-text-select="false"
     data-disabled="false"
     data-interactive="true"
@@ -487,7 +487,7 @@ exports[`TaskListComponent Edge cases should handle task with wrap up required 1
   data-testid="task-list"
 >
   <li
-    class="task-list-item task-list-item--selected undefined md-list-item-base-wrapper"
+    class="task-list-item task-list-item--selected md-list-item-base-wrapper"
     data-allow-text-select="false"
     data-disabled="false"
     data-interactive="true"
@@ -546,7 +546,7 @@ exports[`TaskListComponent Incoming vs Active tasks should render active task co
   data-testid="task-list"
 >
   <li
-    class="task-list-item task-list-item--selected undefined md-list-item-base-wrapper"
+    class="task-list-item task-list-item--selected md-list-item-base-wrapper"
     data-allow-text-select="false"
     data-disabled="false"
     data-interactive="true"
@@ -599,7 +599,7 @@ exports[`TaskListComponent Incoming vs Active tasks should render consult task c
   data-testid="task-list"
 >
   <li
-    class="task-list-item task-list-item--selected undefined md-list-item-base-wrapper"
+    class="task-list-item task-list-item--selected md-list-item-base-wrapper"
     data-allow-text-select="false"
     data-disabled="false"
     data-interactive="true"
@@ -691,7 +691,7 @@ exports[`TaskListComponent Incoming vs Active tasks should render incoming task 
   data-testid="task-list"
 >
   <li
-    class="task-list-item task-list-item--selected undefined md-list-item-base-wrapper"
+    class="task-list-item task-list-item--selected md-list-item-base-wrapper"
     data-allow-text-select="false"
     data-disabled="false"
     data-interactive="true"
@@ -794,7 +794,7 @@ exports[`TaskListComponent Logger calls should log for each task when multiple t
   data-testid="task-list"
 >
   <li
-    class="task-list-item  undefined md-list-item-base-wrapper"
+    class="task-list-item md-list-item-base-wrapper"
     data-allow-text-select="false"
     data-disabled="false"
     data-interactive="true"
@@ -851,7 +851,7 @@ exports[`TaskListComponent Logger calls should log for each task when multiple t
     </div>
   </li>
   <li
-    class="task-list-item  undefined md-list-item-base-wrapper"
+    class="task-list-item md-list-item-base-wrapper"
     data-allow-text-select="false"
     data-disabled="false"
     data-interactive="true"
@@ -916,7 +916,7 @@ exports[`TaskListComponent Logger calls should log task rendering 1`] = `
   data-testid="task-list"
 >
   <li
-    class="task-list-item  undefined md-list-item-base-wrapper"
+    class="task-list-item md-list-item-base-wrapper"
     data-allow-text-select="false"
     data-disabled="false"
     data-interactive="true"
@@ -981,7 +981,7 @@ exports[`TaskListComponent Task interactions should call acceptTask when accept 
   data-testid="task-list"
 >
   <li
-    class="task-list-item  undefined md-list-item-base-wrapper"
+    class="task-list-item md-list-item-base-wrapper"
     data-allow-text-select="false"
     data-disabled="false"
     data-interactive="true"
@@ -1074,7 +1074,7 @@ exports[`TaskListComponent Task interactions should call declineTask when declin
   data-testid="task-list"
 >
   <li
-    class="task-list-item  undefined md-list-item-base-wrapper"
+    class="task-list-item md-list-item-base-wrapper"
     data-allow-text-select="false"
     data-disabled="false"
     data-interactive="true"
@@ -1167,7 +1167,7 @@ exports[`TaskListComponent Task interactions should call onTaskSelect when selec
   data-testid="task-list"
 >
   <li
-    class="task-list-item  undefined md-list-item-base-wrapper"
+    class="task-list-item md-list-item-base-wrapper"
     data-allow-text-select="false"
     data-disabled="false"
     data-interactive="true"
@@ -1221,7 +1221,7 @@ exports[`TaskListComponent Task list with tasks should render task list with mul
   data-testid="task-list"
 >
   <li
-    class="task-list-item  undefined md-list-item-base-wrapper"
+    class="task-list-item md-list-item-base-wrapper"
     data-allow-text-select="false"
     data-disabled="false"
     data-interactive="true"
@@ -1278,7 +1278,7 @@ exports[`TaskListComponent Task list with tasks should render task list with mul
     </div>
   </li>
   <li
-    class="task-list-item  undefined md-list-item-base-wrapper"
+    class="task-list-item md-list-item-base-wrapper"
     data-allow-text-select="false"
     data-disabled="false"
     data-interactive="true"
@@ -1373,7 +1373,7 @@ exports[`TaskListComponent Task list with tasks should render task list with sin
   data-testid="task-list"
 >
   <li
-    class="task-list-item  undefined md-list-item-base-wrapper"
+    class="task-list-item md-list-item-base-wrapper"
     data-allow-text-select="false"
     data-disabled="false"
     data-interactive="true"
@@ -1438,7 +1438,7 @@ exports[`TaskListComponent Task list with tasks should show selected task correc
   data-testid="task-list"
 >
   <li
-    class="task-list-item task-list-item--selected undefined md-list-item-base-wrapper"
+    class="task-list-item task-list-item--selected md-list-item-base-wrapper"
     data-allow-text-select="false"
     data-disabled="false"
     data-interactive="true"
