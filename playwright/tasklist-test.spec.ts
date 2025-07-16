@@ -333,26 +333,7 @@ test.describe('Task List Tests for different types of Task', () => {
     })
 
     test.afterAll(async () => {
-        if (context) {
-            await context.close();
-            context = null;
-        }
-        if (context2) {
-            await context2.close();
-            context2 = null;
-        }
-        if (page) {
-            await page.close();
-            page = null;
-        }
-        if (callerpage) {
-            await callerpage.close();
-            callerpage = null;
-        }
-        if (chatPage) {
-            await chatPage.close();
-            chatPage = null;
-        }
-
+        await context.close();
+        await context2.close();
     })
 })
