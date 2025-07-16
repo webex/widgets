@@ -169,6 +169,9 @@ describe('storeEventsWrapper', () => {
       const mockCurrentTask = {
         data: {
           interactionId: 'mockInteractionId',
+          interaction: {
+            state: 'connected',
+          },
         },
       } as ITask;
       storeWrapper.setCurrentTask(mockCurrentTask);
@@ -497,6 +500,7 @@ describe('storeEventsWrapper', () => {
     });
 
     it('should handle incoming task and call onIncomingTask callback', () => {
+      storeWrapper.setCurrentTask(null);
       const mockIncomingTaskCallback = jest.fn();
       storeWrapper.setIncomingTaskCb(mockIncomingTaskCallback);
       // Ensure mockTask is properly set up
@@ -504,7 +508,7 @@ describe('storeEventsWrapper', () => {
         data: {
           interactionId: 'interaction1',
           interaction: {
-            state: 'connected',
+            state: 'new',
           },
         },
         on: jest.fn(),
@@ -519,6 +523,7 @@ describe('storeEventsWrapper', () => {
       expect(mockIncomingTaskCallback).toHaveBeenCalledWith({task: mockTask2});
 
       // Verify that the correct event handlers were registered
+      expect(storeWrapper.currentTask).toBe(null);
       expect(mockTask2.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));
       expect(mockTask2.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function));
       expect(mockTask2.on).toHaveBeenCalledWith(TASK_EVENTS.AGENT_CONSULT_CREATED, expect.any(Function));
@@ -1603,7 +1608,7 @@ describe('storeEventsWrapper', () => {
       jest.clearAllMocks();
       const setCurrentTaskSpy = jest.spyOn(storeWrapper, 'setCurrentTask');
       storeWrapper['store'].currentTask = null;
-      const mockTask = {interaction2: {data: {interactionId: 'interaction2'}}};
+      const mockTask = {data: {interactionId: 'interaction2', interaction: {state: 'connected'}}};
       storeWrapper['store'].cc.taskManager.getAllTasks = jest.fn().mockReturnValue([mockTask]);
 
       storeWrapper.refreshTaskList();
@@ -1642,11 +1647,11 @@ describe('storeEventsWrapper', () => {
 
     beforeEach(() => {
       mockTaskA = {
-        data: {interactionId: 'taskA'},
-      } as unknown as ITask;
+        data: {interactionId: 'taskA', interaction: {state: 'connected'}},
+      } as ITask;
       mockTaskB = {
-        data: {interactionId: 'taskB'},
-      } as unknown as ITask;
+        data: {interactionId: 'taskB', interaction: {state: 'connected'}},
+      } as ITask;
       storeWrapper['store'].consultCompleted = true;
       storeWrapper['store'].consultInitiated = true;
       storeWrapper['store'].consultAccepted = true;

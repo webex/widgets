@@ -202,6 +202,9 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   setCurrentTask = (task: ITask | null, isClicked: boolean = false): void => {
+    // Don't assign the task as current task if the interaction state is 'new' or 'consult'
+    if (task?.data.interaction.state === 'new' || task?.data.interaction.state === 'consult') return;
+
     runInAction(() => {
       // Determine if the new task is the same as the current task
       let isSameTask = false;
@@ -226,6 +229,8 @@ class StoreWrapper implements IStoreWrapper {
       this.setCurrentTask(this.store.taskList[this.currentTask?.data?.interactionId]);
     } else if (Object.keys(this.store.taskList).length > 0) {
       this.setCurrentTask(this.store.taskList[Object.keys(this.store.taskList)[0]]);
+    } else if (Object.keys(this.store.taskList).length === 0) {
+      this.setCurrentTask(null);
     }
   };
 
