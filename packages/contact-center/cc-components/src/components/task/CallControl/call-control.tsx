@@ -192,6 +192,7 @@ function CallControlComponent(props: CallControlComponentProps) {
       className: 'call-control-button',
       disabled: false,
       isVisible: controlVisibility.holdResume,
+      dataTestId: 'call-control:hold-toggle',
     },
     {
       id: 'consult',
@@ -201,6 +202,7 @@ function CallControlComponent(props: CallControlComponentProps) {
       disabled: false,
       menuType: 'Consult',
       isVisible: controlVisibility.consult,
+      dataTestId: 'call-control:consult',
     },
     {
       id: 'transfer',
@@ -210,6 +212,7 @@ function CallControlComponent(props: CallControlComponentProps) {
       disabled: false,
       menuType: 'Transfer',
       isVisible: controlVisibility.transfer,
+      dataTestId: 'call-control:transfer',
     },
     {
       id: 'record',
@@ -219,6 +222,7 @@ function CallControlComponent(props: CallControlComponentProps) {
       className: 'call-control-button',
       disabled: false,
       isVisible: controlVisibility.pauseResumeRecording,
+      dataTestId: 'call-control:recording-toggle',
     },
     {
       id: 'end',
@@ -228,6 +232,7 @@ function CallControlComponent(props: CallControlComponentProps) {
       className: 'call-control-button-cancel',
       disabled: isHeld,
       isVisible: controlVisibility.end,
+      dataTestId: 'call-control:end-call',
     },
   ];
 
@@ -287,7 +292,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                             className={button.className}
                             aria-label={button.tooltip}
                             disabled={button.disabled || (consultInitiated && isTelephony)}
-                            data-testid="ButtonCircle"
+                            data-testid={button.dataTestId}
                             onPress={() => handlePopoverOpen(button.menuType as CallControlMenuType)}
                           >
                             <Icon className={button.className + '-icon'} name={button.icon} />
@@ -328,7 +333,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                         button.className +
                         (button.disabled || (consultInitiated && isTelephony) ? ` ${button.className}-disabled` : '')
                       }
-                      data-testid={button.id === 'end' ? 'call-control:end-call' : button.id}
+                      data-testid={button.dataTestId}
                       onPress={button.onClick}
                       disabled={button.disabled || (consultInitiated && isTelephony)}
                       aria-label={button.tooltip}

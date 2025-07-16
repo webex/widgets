@@ -1,6 +1,6 @@
 import { Page } from '@playwright/test';
 import { getCurrentState, changeUserState } from './userStateUtils';
-import { WRAPUP_REASONS, USER_STATES, RONA_OPTIONS, LOGIN_MODE, LoginMode, ThemeColor, userState, WrapupReason } from 'playwright/constants';
+import { WRAPUP_REASONS, USER_STATES, RONA_OPTIONS, LOGIN_MODE, LoginMode, ThemeColor, userState, WrapupReason } from '../constants';
 import { submitWrapup } from './wrapupUtils';
 import { acceptExtensionCall, submitRonaPopup } from './incomingTaskUtils';
 import { loginViaAccessToken, disableMultiLogin, enableMultiLogin, initialiseWidgets, enableAllWidgets, } from './initUtils';
@@ -317,6 +317,9 @@ export const handleStrayTasks = async (page: Page, extensionPage: Page | null = 
       const acceptButtonVisible = await acceptButton.isVisible().catch(() => false);
       const isExtensionCall = await (await task.innerText()).includes('Ringing...');
       if (isExtensionCall) {
+        if (!extensionPage) {
+          throw new Error('Extension page is not available for handling extension call');
+        }
         const extensionCallVisible = await extensionPage.locator('[data-test="right-action-button"]').waitFor({ state: 'visible', timeout: 40000 }).then(() => true).catch(() => false);
         if (extensionCallVisible) {
           await acceptExtensionCall(extensionPage);
