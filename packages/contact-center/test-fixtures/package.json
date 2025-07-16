@@ -1,9 +1,9 @@
 {
-  "name": "@webex/cc-user-state",
-  "description": "Webex Contact Center Widgets: User State",
-  "version": "1.28.0-ccwidgets.93",
+  "name": "@webex/test-fixtures",
+  "description": "Webex Contact Center Widgets: Test Fixtures",
   "main": "dist/index.js",
   "types": "dist/types/index.d.ts",
+  "license": "MIT",
   "publishConfig": {
     "access": "public"
   },
@@ -17,13 +17,10 @@
     "build": "yarn run -T tsc",
     "build:src": "yarn run clean:dist && webpack",
     "build:watch": "webpack --watch",
-    "test:unit": "tsc --project tsconfig.test.json && jest --coverage",
     "test:styles": "eslint"
   },
   "dependencies": {
-    "@webex/cc-components": "workspace:*",
     "@webex/cc-store": "workspace:*",
-    "mobx-react-lite": "^4.1.0",
     "typescript": "5.6.3"
   },
   "devDependencies": {
@@ -32,12 +29,6 @@
     "@babel/preset-react": "7.24.7",
     "@babel/preset-typescript": "7.25.9",
     "@eslint/js": "^9.20.0",
-    "@testing-library/dom": "10.4.0",
-    "@testing-library/jest-dom": "6.6.2",
-    "@testing-library/react": "16.0.1",
-    "@types/jest": "29.5.14",
-    "@types/react-test-renderer": "18",
-    "babel-jest": "29.7.0",
     "babel-loader": "9.2.1",
     "eslint": "^9.20.1",
     "eslint-config-prettier": "^10.0.1",
@@ -49,17 +40,11 @@
     "eslint-plugin-react": "^7.37.4",
     "file-loader": "6.2.0",
     "globals": "^16.0.0",
-    "jest": "29.7.0",
-    "jest-environment-jsdom": "29.7.0",
     "prettier": "^3.5.1",
     "ts-loader": "9.5.1",
     "typescript-eslint": "^8.24.1",
     "webpack": "5.94.0",
     "webpack-cli": "5.1.4",
     "webpack-merge": "6.0.1"
-  },
-  "peerDependencies": {
-    "react": ">=18.3.1",
-    "react-dom": ">=18.3.1"
   }
 }

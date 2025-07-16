@@ -3,6 +3,7 @@
   "description": "Webex Contact Center Widgets",
   "version": "1.28.0-ccwidgets.93",
   "main": "dist/index.js",
+  "types": "dist/types/index.d.ts",
   "publishConfig": {
     "access": "public"
   },
@@ -11,8 +12,16 @@
     "package.json"
   ],
   "exports": {
-    ".": "./dist/index.js",
-    "./wc": "./dist/wc.js"
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/types/index.d.ts"
+    },
+    "./wc": {
+      "import": "./dist/wc.js",
+      "require": "./dist/wc.js",
+      "types": "./dist/types/wc.d.ts"
+    }
   },
   "scripts": {
     "clean": "rm -rf dist && rm -rf node_modules",

@@ -5,6 +5,7 @@ import {IUserState} from '../../../src/components/UserState/user-state.types';
 
 import UserStateComponent from '../../../src/components/UserState/user-state';
 import * as userStateUtils from '../../../src/components/UserState/user-state.utils';
+import {mockCC} from '@webex/test-fixtures';
 
 const mockUIDProps = (container) => {
   container
@@ -24,22 +25,25 @@ describe('UserState Component Snapshots', () => {
     info: jest.fn(),
     warn: jest.fn(),
     error: jest.fn(),
+    debug: jest.fn(),
+    trace: jest.fn(),
   };
 
   const mockSetAgentStatus = jest.fn();
   const mockOnStateChange = jest.fn();
 
   const defaultProps: IUserState = {
+    cc: mockCC,
+    agentId: 'agent123',
     idleCodes: [
-      {id: '0', name: 'Available', isSystem: true},
-      {id: '1', name: 'Break', isSystem: false},
-      {id: '2', name: 'Training', isSystem: false},
-      {id: '3', name: 'RONA', isSystem: true},
-      {id: '4', name: 'ENGAGED', isSystem: true},
+      {id: '0', name: 'Available', isSystem: true, isDefault: true},
+      {id: '1', name: 'Break', isSystem: false, isDefault: false},
+      {id: '2', name: 'Training', isSystem: false, isDefault: false},
+      {id: '3', name: 'RONA', isSystem: true, isDefault: false},
+      {id: '4', name: 'ENGAGED', isSystem: true, isDefault: false},
     ],
     setAgentStatus: mockSetAgentStatus,
     isSettingAgentStatus: false,
-    errorMessage: '',
     elapsedTime: 3661, // 1 hour, 1 minute, 1 second
     lastIdleStateChangeElapsedTime: 1800, // 30 minutes
     currentState: '1',
@@ -207,8 +211,8 @@ describe('UserState Component Snapshots', () => {
         ...defaultProps,
         currentState: 'nonexistent-id', // This ID doesn't exist in idleCodes
         idleCodes: [
-          {id: '0', name: 'Available', isSystem: true},
-          {id: '1', name: 'Break', isSystem: false},
+          {id: '0', name: 'Available', isSystem: true, isDefault: true},
+          {id: '1', name: 'Break', isSystem: false, isDefault: false},
         ],
       };
 
