@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.94](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.93...v1.28.0-ccwidgets.94) (2025-07-16)
+
+
+### Bug Fixes
+
+* **tooling:** add type checking in ccwidgets ([#444](https://github.com/webex/widgets/issues/444)) ([cdc58e6](https://github.com/webex/widgets/commit/cdc58e610a9356b872d9093bb6a89c89cdc73d07))
+
 # [1.28.0-ccwidgets.93](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.92...v1.28.0-ccwidgets.93) (2025-07-16)
 
 
