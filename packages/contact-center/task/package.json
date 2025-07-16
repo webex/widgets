@@ -1,8 +1,9 @@
 {
   "name": "@webex/cc-task",
   "description": "Webex Contact Center Widgets: Task",
-  "version": "1.28.0-ccwidgets.93",
+  "version": "1.28.0-ccwidgets.94",
   "main": "dist/index.js",
+  "types": "dist/types/index.d.ts",
   "publishConfig": {
     "access": "public"
   },
@@ -16,7 +17,7 @@
     "build": "yarn run -T tsc",
     "build:src": "yarn run clean:dist && webpack",
     "build:watch": "webpack --watch",
-    "test:unit": "jest --coverage",
+    "test:unit": "tsc --project tsconfig.test.json && jest --coverage",
     "test:styles": "eslint"
   },
   "dependencies": {
@@ -35,6 +36,7 @@
     "@testing-library/react": "16.0.1",
     "@types/jest": "29.5.14",
     "@types/react-test-renderer": "18",
+    "@webex/test-fixtures": "workspace:*",
     "babel-jest": "29.7.0",
     "babel-loader": "9.2.1",
     "eslint": "^9.20.1",

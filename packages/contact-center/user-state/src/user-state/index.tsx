@@ -3,7 +3,7 @@ import store from '@webex/cc-store';
 import {observer} from 'mobx-react-lite';
 
 import {useUserState} from '../helper';
-import {UserStateComponent, IUserState} from '@webex/cc-components';
+import {UserStateComponent, UserStateComponentsProps} from '@webex/cc-components';
 import {IUserStateProps} from '../user-state.types';
 
 const UserState: React.FunctionComponent<IUserStateProps> = observer(({onStateChange}) => {
@@ -11,14 +11,13 @@ const UserState: React.FunctionComponent<IUserStateProps> = observer(({onStateCh
     cc,
     idleCodes,
     agentId,
-    currentTheme,
     currentState,
     lastStateChangeTimestamp,
     lastIdleCodeChangeTimestamp,
     customState,
     logger,
   } = store;
-  const props: IUserState = {
+  const props: UserStateComponentsProps = {
     ...useUserState({
       idleCodes,
       agentId,
@@ -30,7 +29,6 @@ const UserState: React.FunctionComponent<IUserStateProps> = observer(({onStateCh
       onStateChange,
       lastIdleCodeChangeTimestamp,
     }),
-    currentTheme,
     customState,
     logger,
   };

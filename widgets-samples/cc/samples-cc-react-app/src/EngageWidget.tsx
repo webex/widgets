@@ -107,11 +107,11 @@ const EngageWidget: React.FC<EngageWidgetProps> = ({accessToken, currentTheme, i
 
   // Initialize agent info from store when available
   useEffect(() => {
-    if (store.agent) {
-      agentName.current = store.agent.firstName + ' ' + store.agent.lastName;
+    if (store.agentProfile) {
+      agentName.current = store.agentProfile.agentName || '';
       agentId.current = store.agentId || '';
     }
-  }, [store.agent, store.agentId]);
+  }, [store.agentProfile, store.agentId]);
 
   const attachImiEventListener = (name: string, data: any) => {
     switch (name) {
@@ -336,6 +336,7 @@ const EngageWidget: React.FC<EngageWidgetProps> = ({accessToken, currentTheme, i
           if (mediaType && chatAndSocial.includes(mediaType) && !store.currentTask.data.wrapUpRequired) {
             // Re-load the chat widget content
             if (engageElmRef.current) {
+              //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
               const mediaId = store.currentTask.data.interaction.callAssociatedDetails.mediaResourceId;
               engageElmRef.current.innerHTML = `
                 <imi-engage 
@@ -355,6 +356,7 @@ const EngageWidget: React.FC<EngageWidgetProps> = ({accessToken, currentTheme, i
           } else if (mediaType === 'email' && !store.currentTask.data.wrapUpRequired) {
             // Re-load the email widget content
             if (engageElmRef.current) {
+              //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
               const mediaId = store.currentTask.data.interaction.callAssociatedDetails.mediaResourceId;
               engageElmRef.current.innerHTML = `
                 <imi-email-composer

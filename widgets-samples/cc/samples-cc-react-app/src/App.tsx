@@ -9,7 +9,7 @@ import {
   store,
   OutdialCall,
 } from '@webex/cc-widgets';
-import {StationLogoutSuccess} from '@webex/plugin-cc';
+import {StationLogoutResponse} from '@webex/plugin-cc';
 import Webex from 'webex';
 import {ThemeProvider, IconProvider, Icon, Button, Checkbox, Text, Select, Option} from '@momentum-design/components/dist/react';
 import {PopoverNext} from '@momentum-ui/react-collaboration';
@@ -240,10 +240,12 @@ const onToggleMute = ({isMuted, task}) => {
         lastStateChangeReason: newState,
       })
       .then((response) => {
-        store.setCurrentState(response.data.auxCodeId);
-        store.setLastStateChangeTimestamp(response.data.lastStateChangeTimestamp);
-        store.setLastIdleCodeChangeTimestamp(response.data.lastIdleCodeChangeTimestamp);
-        console.log('Agent state updated to', newState);
+        if('data'in response){
+          store.setCurrentState(response.data.auxCodeId);
+          store.setLastStateChangeTimestamp(response.data.lastStateChangeTimestamp);
+          store.setLastIdleCodeChangeTimestamp(response.data.lastIdleCodeChangeTimestamp);
+          console.log('Agent state updated to', newState);
+        }
       })
       .catch((error) => {
         console.error('Error updating agent state:', error);
@@ -366,8 +368,8 @@ const onToggleMute = ({isMuted, task}) => {
 
     const stationLogout = () => {
     store.cc.stationLogout({logoutReason: 'User requested logout'})
-      .then((res: StationLogoutSuccess) => {
-        console.log('Agent logged out successfully', res.data.type);
+      .then((res: StationLogoutResponse) => {
+        if('data' in res) console.log('Agent logged out successfully', res.data);
       })
       .catch((error: Error) => {
         console.log('Agent logout failed', error);

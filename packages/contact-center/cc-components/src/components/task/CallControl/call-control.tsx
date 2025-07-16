@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 
-import {CallControlComponentProps, DestinationType, CallControlMenuType} from '../task.types';
+import {CallControlComponentProps, CallControlMenuType} from '../task.types';
 import './call-control.styles.scss';
 import {PopoverNext, TooltipNext, Text, ButtonCircle} from '@momentum-ui/react-collaboration';
 import {Icon, Button, Select, Option} from '@momentum-design/components/dist/react';
@@ -8,6 +8,7 @@ import ConsultTransferPopoverComponent from './CallControlCustom/consult-transfe
 import AutoWrapupTimer from '../AutoWrapupTimer/AutoWrapupTimer';
 import type {MEDIA_CHANNEL as MediaChannelType} from '../task.types';
 import {getMediaTypeInfo} from '../../../utils';
+import {DestinationType} from '@webex/cc-store';
 import {
   RESUME_CALL,
   HOLD_CALL,
@@ -93,8 +94,7 @@ function CallControlComponent(props: CallControlComponentProps) {
     try {
       toggleMute();
     } catch (error) {
-      logger.error('Mute toggle failed:', {
-        error,
+      logger.error(`Mute toggle failed: ${error}`, {
         module: 'call-control.tsx',
         method: 'handleMuteToggle',
       });
