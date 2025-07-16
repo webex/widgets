@@ -3,6 +3,7 @@ import React from 'react';
 import {render, screen, fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import CallControlComponent from '../../../../src/components/task/CallControl/call-control';
+import {mockTask} from '@webex/test-fixtures';
 
 jest.mock('@webex/cc-store', () => ({
   DestinationType: {
@@ -68,54 +69,60 @@ describe.skip('CallControlPresentational', () => {
   const setIsHeld = jest.fn();
 
   const defaultProps = {
-    currentTask: {
-      data: {
-        interaction: {
-          mediaResourceId: '1',
-          media: {
-            '1': {isHold: false},
-          },
-          callProcessingDetails: {isPaused: false},
-          mediaType: 'telephony',
-        },
-      },
-    },
-    audioRef: React.createRef(),
+    currentTask: mockTask,
     toggleHold: mockToggleHold,
     toggleRecording: mockToggleRecording,
     endCall: mockEndCall,
     wrapupCall: mockWrapupCall,
     wrapupCodes: mockWrapupCodes,
-    setIsHeld: setIsHeld,
     isHeld: false,
+    setIsHeld: setIsHeld,
+    isRecording: false,
+    setIsRecording: jest.fn(),
     buddyAgents: [],
     loadBuddyAgents: mockLoadBuddyAgents,
-    loadQueues: mockLoadQueues,
     transferCall: mockTransferCall,
     consultCall: mockConsultCall,
-    setIsRecording: jest.fn(),
-    deviceType: 'BROWSER',
-    featureFlags: {
-      isEndCallEnabled: true,
-      isEndConsultEnabled: true,
-      webRtcEnabled: true,
-    },
-    queues: [],
-    setConsultAgentId: mockSetConsultAgentId,
-    setConsultAgentName: mockSetConsultAgentName,
-    consultAgentId: null,
-    consultAgentName: null,
     endConsultCall: jest.fn(),
+    consultInitiated: false,
     consultTransfer: jest.fn(),
-    logger: loggerMock,
+    consultCompleted: false,
+    consultAccepted: false,
+    consultStartTimeStamp: 0,
+    callControlAudio: null,
+    consultAgentName: '',
+    setConsultAgentName: mockSetConsultAgentName,
+    consultAgentId: '',
+    setConsultAgentId: mockSetConsultAgentId,
+    holdTime: 0,
+    callControlClassName: '',
+    callControlConsultClassName: '',
+    startTimestamp: 0,
+    queues: [],
+    loadQueues: mockLoadQueues,
+    isEndConsultEnabled: true,
+    allowConsultToQueue: true,
+    lastTargetType: 'agent' as 'agent' | 'queue',
+    setLastTargetType: jest.fn(),
     controlVisibility: {
+      accept: false,
+      decline: false,
+      end: true,
+      muteUnmute: false,
       holdResume: true,
       consult: true,
       transfer: true,
-      pauseResumeRecording: true,
-      end: true,
+      conference: false,
       wrapup: false,
+      pauseResumeRecording: true,
+      endConsult: false,
+      recordingIndicator: false,
     },
+    logger: loggerMock,
+    cancelAutoWrapup: jest.fn(),
+    isMuted: false,
+    muteUnmute: false,
+    toggleMute: jest.fn(),
   };
 
   beforeEach(() => {

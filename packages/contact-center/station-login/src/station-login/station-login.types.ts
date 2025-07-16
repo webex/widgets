@@ -16,7 +16,10 @@ export type UseStationLoginProps = Pick<
   | 'doStationLogout'
 >;
 
-export type StationLoginProps = Pick<
-  IStationLoginProps,
-  'onLogin' | 'onLogout' | 'onCCSignOut' | 'profileMode' | 'onSaveStart' | 'onSaveEnd' | 'teamId' | 'doStationLogout'
->;
+export type StationLoginProps = Pick<IStationLoginProps, 'profileMode'> &
+  Partial<
+    Pick<
+      IStationLoginProps,
+      'onLogin' | 'onLogout' | 'onCCSignOut' | 'onSaveStart' | 'onSaveEnd' | 'teamId' | 'doStationLogout'
+    >
+  >;

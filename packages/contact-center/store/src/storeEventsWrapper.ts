@@ -201,7 +201,10 @@ class StoreWrapper implements IStoreWrapper {
     this.store.isAgentLoggedIn = value;
   };
 
-  setCurrentTask = (task: ITask, isClicked: boolean = false): void => {
+  setCurrentTask = (task: ITask | null, isClicked: boolean = false): void => {
+    // Don't assign the task as current task if the interaction state is 'new' or 'consult'
+    if (task?.data.interaction.state === 'new' || task?.data.interaction.state === 'consult') return;
+
     runInAction(() => {
       // Determine if the new task is the same as the current task
       let isSameTask = false;
@@ -223,9 +226,11 @@ class StoreWrapper implements IStoreWrapper {
       this.store.taskList = this.store.cc.taskManager.getAllTasks();
     });
     if (this.currentTask) {
-      this.setCurrentTask(this.taskList[this.currentTask?.data?.interactionId]);
-    } else if (this.store.taskList.length > 0) {
+      this.setCurrentTask(this.store.taskList[this.currentTask?.data?.interactionId]);
+    } else if (Object.keys(this.store.taskList).length > 0) {
       this.setCurrentTask(this.store.taskList[Object.keys(this.store.taskList)[0]]);
+    } else if (Object.keys(this.store.taskList).length === 0) {
+      this.setCurrentTask(null);
     }
   };
 
@@ -287,7 +292,7 @@ class StoreWrapper implements IStoreWrapper {
     }
   };
 
-  setIncomingTaskCb = (callback: (task: ITask) => void): void => {
+  setIncomingTaskCb = (callback: ({task}: {task: ITask}) => void): void => {
     this.onIncomingTask = callback;
   };
 
@@ -299,7 +304,7 @@ class StoreWrapper implements IStoreWrapper {
     this.onTaskAssigned = callback;
   };
 
-  setTaskSelected = (callback: ((task: ITask) => void) | undefined): void => {
+  setTaskSelected = (callback: ((task: ITask, isClicked?: boolean) => void) | undefined): void => {
     if (callback && this.currentTask) {
       callback(this.currentTask);
     }
@@ -633,10 +638,11 @@ class StoreWrapper implements IStoreWrapper {
   ): Promise<Array<BuddyDetails>> => {
     try {
       const response = await this.store.cc.getBuddyAgents({
+        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         mediaType: mediaType ?? 'telephony',
         state: 'Available',
       });
-      return response.data.agentList;
+      return 'data' in response ? response.data.agentList : [];
     } catch (error) {
       return Promise.reject(error);
     }
@@ -725,9 +731,11 @@ class StoreWrapper implements IStoreWrapper {
         this.setIsAgentLoggedIn(true);
         this.setDeviceType(payload.deviceType);
         this.setDialNumber(payload.dn);
+        // @ts-expect-error To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         this.setCurrentState(payload.auxCodeId?.trim() !== '' ? payload.auxCodeId : '0');
         this.setLastStateChangeTimestamp(payload.lastStateChangeTimestamp);
         this.setLastIdleCodeChangeTimestamp(payload.lastIdleCodeChangeTimestamp);
+        // @ts-expect-error To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         this.setTeamId(payload.teamId);
       });
     };

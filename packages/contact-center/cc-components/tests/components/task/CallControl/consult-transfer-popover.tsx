@@ -4,6 +4,7 @@ import {render, screen, fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ConsultTransferPopoverComponent from '../../../../src/components/task/CallControl/CallControlCustom/consult-transfer-popover';
 import ConsultTransferEmptyState from '../../../../src/components/task/CallControl/CallControlCustom/consult-transfer-empty-state';
+import {ContactServiceQueue} from '@webex/cc-store';
 
 const loggerMock = {
   log: jest.fn(),
@@ -40,15 +41,30 @@ describe.skip('ConsultTransferPopoverComponent', () => {
     heading: 'Select an Agent',
     buttonIcon: 'agent-icon',
     buddyAgents: [
-      {agentId: 'agent1', agentName: 'Agent One', dn: '1001'},
-      {agentId: 'agent2', agentName: 'Agent Two', dn: '1002'},
+      {
+        agentId: 'agent1',
+        agentName: 'Agent One',
+        dn: '1001',
+        state: 'Available',
+        teamId: 'team1',
+        siteId: 'site1',
+      },
+      {
+        agentId: 'agent2',
+        agentName: 'Agent Two',
+        dn: '1002',
+        state: 'Available',
+        teamId: 'team1',
+        siteId: 'site1',
+      },
     ],
     queues: [
-      {id: 'queue1', name: 'Queue One'},
-      {id: 'queue2', name: 'Queue Two'},
+      {id: 'queue1', name: 'Queue One'} as ContactServiceQueue,
+      {id: 'queue2', name: 'Queue Two'} as ContactServiceQueue,
     ],
     onAgentSelect: mockOnAgentSelect,
     onQueueSelect: mockOnQueueSelect,
+    allowConsultToQueue: true,
     logger: loggerMock,
     showTabs: true,
     emptyMessage: 'No agents or queues available',
@@ -128,8 +144,8 @@ describe.skip('ConsultTransferPopoverComponent', () => {
         allowConsultToQueue={true}
         buddyAgents={[]} // So Queues tab is selected by default if you want
         queues={[
-          {id: 'queue1', name: 'Queue One'},
-          {id: 'queue2', name: 'Queue Two'},
+          {id: 'queue1', name: 'Queue One'} as ContactServiceQueue,
+          {id: 'queue2', name: 'Queue Two'} as ContactServiceQueue,
         ]}
       />
     );

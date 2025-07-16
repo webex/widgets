@@ -62,8 +62,7 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
     try {
       onToggleConsultMute();
     } catch (error) {
-      logger.error('Mute toggle failed:', {
-        error,
+      logger.error(`Mute toggle failed: ${error}`, {
         module: 'call-control-consult.tsx',
         method: 'handleConsultMuteToggle',
       });

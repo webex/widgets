@@ -24,11 +24,11 @@ describe('UserState Utils', () => {
   });
 
   const mockIdleCodes = [
-    {id: '0', name: 'Available', isSystem: true},
-    {id: '1', name: 'Break', isSystem: false},
-    {id: '2', name: 'Training', isSystem: false},
-    {id: '3', name: 'RONA', isSystem: true},
-    {id: '4', name: 'ENGAGED', isSystem: true},
+    {id: '0', name: 'Available', isSystem: true, isDefault: true},
+    {id: '1', name: 'Break', isSystem: false, isDefault: false},
+    {id: '2', name: 'Training', isSystem: false, isDefault: false},
+    {id: '3', name: 'RONA', isSystem: true, isDefault: false},
+    {id: '4', name: 'ENGAGED', isSystem: true, isDefault: false},
   ];
 
   describe('getDropdownClass', () => {
@@ -206,8 +206,8 @@ describe('UserState Utils', () => {
 
     it('should return empty string when no selectable states', () => {
       const nonSelectableStates = [
-        {id: '3', name: 'RONA', isSystem: true},
-        {id: '4', name: 'ENGAGED', isSystem: true},
+        {id: '3', name: 'RONA', isSystem: true, isDefault: false},
+        {id: '4', name: 'ENGAGED', isSystem: true, isDefault: false},
       ];
 
       const result = getPreviousSelectableState(nonSelectableStates);
@@ -285,8 +285,8 @@ describe('UserState Utils', () => {
 
     it('should handle idleCodes with only RONA and ENGAGED', () => {
       const ronaEngagedOnly = [
-        {id: '3', name: 'RONA', isSystem: true},
-        {id: '4', name: 'ENGAGED', isSystem: true},
+        {id: '3', name: 'RONA', isSystem: true, isDefault: false},
+        {id: '4', name: 'ENGAGED', isSystem: true, isDefault: false},
       ];
 
       const result = buildDropdownItems(null, ronaEngagedOnly);

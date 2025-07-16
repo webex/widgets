@@ -1,5 +1,6 @@
 import {useState, useEffect, useRef} from 'react';
 import store from '@webex/cc-store';
+import {UseUserStateProps} from './user-state.types';
 
 export const useUserState = ({
   idleCodes,
@@ -11,7 +12,7 @@ export const useUserState = ({
   logger,
   onStateChange,
   lastIdleCodeChangeTimestamp,
-}) => {
+}: UseUserStateProps) => {
   const [isSettingAgentStatus, setIsSettingAgentStatus] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [lastIdleStateChangeElapsedTime, setLastIdleStateChangeElapsedTime] = useState(0);
@@ -25,7 +26,7 @@ export const useUserState = ({
       method: 'callOnStateChange',
     });
     if (onStateChange) {
-      if (customState?.developerName) {
+      if (customState && 'developerName' in customState && customState?.developerName) {
         onStateChange(customState);
         return;
       }
@@ -199,9 +200,10 @@ export const useUserState = ({
           module: 'useUserState',
           method: 'updateAgentState',
         });
-
-        store.setLastStateChangeTimestamp(response.data.lastStateChangeTimestamp);
-        store.setLastIdleCodeChangeTimestamp(response.data.lastIdleCodeChangeTimestamp);
+        if ('data' in response) {
+          store.setLastStateChangeTimestamp(response.data.lastStateChangeTimestamp);
+          store.setLastIdleCodeChangeTimestamp(response.data.lastIdleCodeChangeTimestamp);
+        }
       })
       .catch((error) => {
         logger.error(`Error setting agent state: ${error.toString()}`, {
@@ -223,5 +225,6 @@ export const useUserState = ({
     elapsedTime,
     lastIdleStateChangeElapsedTime,
     currentState,
+    onStateChange,
   };
 };

@@ -1,0 +1,10 @@
+// This config is to do type checking in our files while running tests.
+{
+  "extends": "./tsconfig.json",
+  "include": ["./tests"],
+  "exclude": ["node_modules"],
+  "compilerOptions": {
+    "noEmit": true ,// Don't output any files
+    "types": ["jest"],  
+  }
+}

@@ -3,6 +3,7 @@ import {render} from '@testing-library/react';
 import * as helper from '../../src/helper';
 import {IncomingTask} from '../../src';
 import store from '@webex/cc-store';
+import {mockTask} from '@webex/test-fixtures';
 import '@testing-library/jest-dom';
 
 // Mock the store
@@ -18,10 +19,6 @@ const onRejectedCb = jest.fn();
 describe('IncomingTask Component', () => {
   it('renders IncomingTaskPresentational with correct props', () => {
     const useIncomingTaskSpy = jest.spyOn(helper, 'useIncomingTask');
-
-    const mockTask = {
-      data: {interactionId: '12345', interaction: {mediaType: 'voice'}},
-    };
 
     // Mock the return value of the useIncomingTask hook
     useIncomingTaskSpy.mockReturnValue({
