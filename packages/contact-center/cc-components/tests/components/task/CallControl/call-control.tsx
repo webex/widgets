@@ -120,6 +120,9 @@ describe.skip('CallControlPresentational', () => {
     },
     logger: loggerMock,
     cancelAutoWrapup: jest.fn(),
+    isMuted: false,
+    muteUnmute: false,
+    toggleMute: jest.fn(),
   };
 
   beforeEach(() => {

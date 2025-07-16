@@ -185,6 +185,10 @@ const onTaskDeclined = (task,reason) => {
      if (params && params.wrapUpReason) console.log(`onWrapup invoked with reason : ${params.wrapUpReason}`);
   };
 
+const onToggleMute = ({isMuted, task}) => {
+  console.log('onToggleMute invoked', {isMuted, task});
+};
+
   const enableDisableMultiLogin = () => {
     if (isMultiLoginEnabled) {
       setIsMultiLoginEnabled(false);
@@ -741,7 +745,7 @@ const onTaskDeclined = (task,reason) => {
                         <section className="section-box">
                           <fieldset className="fieldset">
                             <legend className="legend-box">Call Control</legend>
-                            <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapUp={onWrapUp} onRecordingToggle={onRecordingToggle} />
+                            <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapUp={onWrapUp} onRecordingToggle={onRecordingToggle} onToggleMute={onToggleMute} />
                           </fieldset>
                         </section>
                       </div>
@@ -758,6 +762,7 @@ const onTaskDeclined = (task,reason) => {
                               onRecordingToggle={onRecordingToggle}
                               callControlClassName={'call-control-outer'}
                               callControlConsultClassName={'call-control-consult-outer'}
+                              onToggleMute={onToggleMute}
                             />
                           </fieldset>
                         </section>

@@ -50,6 +50,7 @@ class Store implements IStore {
   isEndConsultEnabled: boolean = false;
   allowConsultToQueue: boolean = false;
   agentProfile: AgentLoginProfile = {};
+  isMuted: boolean = false;
 
   constructor() {
     makeAutoObservable(this, {

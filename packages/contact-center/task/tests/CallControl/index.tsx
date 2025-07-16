@@ -55,6 +55,8 @@ describe('CallControl Component', () => {
       },
       secondsUntilAutoWrapup: 0,
       cancelAutoWrapup: jest.fn(),
+      toggleMute: jest.fn(),
+      isMuted: false,
     });
 
     render(
@@ -77,6 +79,8 @@ describe('CallControl Component', () => {
       consultInitiated: false,
       featureFlags: store.featureFlags,
       deviceType: '',
+      isMuted: false,
+      onToggleMute: undefined,
     });
   });
 });

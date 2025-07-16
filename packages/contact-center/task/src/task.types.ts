@@ -13,15 +13,21 @@ export type TaskListProps = Partial<Pick<TaskProps, 'onTaskAccepted' | 'onTaskDe
 export type CallControlProps = Partial<
   Pick<
     ControlProps,
-    'onHoldResume' | 'onEnd' | 'onWrapUp' | 'onRecordingToggle' | 'callControlClassName' | 'callControlConsultClassName'
+    | 'onHoldResume'
+    | 'onEnd'
+    | 'onWrapUp'
+    | 'onRecordingToggle'
+    | 'callControlClassName'
+    | 'callControlConsultClassName'
+    | 'onToggleMute'
   >
 >;
 
 export type useCallControlProps = Pick<
   ControlProps,
-  'currentTask' | 'logger' | 'consultInitiated' | 'deviceType' | 'featureFlags'
+  'currentTask' | 'logger' | 'consultInitiated' | 'deviceType' | 'featureFlags' | 'isMuted'
 > &
-  Partial<Pick<ControlProps, 'onHoldResume' | 'onEnd' | 'onWrapUp' | 'onRecordingToggle'>>;
+  Partial<Pick<ControlProps, 'onHoldResume' | 'onEnd' | 'onWrapUp' | 'onRecordingToggle' | 'onToggleMute'>>;
 
 export type Participant = {
   id: string;
