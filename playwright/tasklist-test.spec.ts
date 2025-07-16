@@ -7,11 +7,11 @@ import { submitWrapup } from './Utils/wrapupUtils';
 import { pageSetup, handleStrayTasks, waitForState } from './Utils/helperUtils';
 
 
-let page: Page | null = null;
-let context: BrowserContext | null = null;
-let callerpage: Page | null = null;
-let context2: BrowserContext | null = null;
-let chatPage: Page | null = null;
+let page: Page;
+let context: BrowserContext
+let callerpage: Page
+let context2: BrowserContext;
+let chatPage: Page;
 let capturedLogs: string[] = [];
 
 const labelToMediaType: Record<string, string> = {
