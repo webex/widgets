@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.93](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.92...v1.28.0-ccwidgets.93) (2025-07-16)
+
+
+### Bug Fixes
+
+* **contact-center:** created callbacks.md ([#501](https://github.com/webex/widgets/issues/501)) ([6336212](https://github.com/webex/widgets/commit/63362129a0f9c81e6850688cbcf87684a62a53da))
+
 # [1.28.0-ccwidgets.92](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.91...v1.28.0-ccwidgets.92) (2025-07-15)
 
 
