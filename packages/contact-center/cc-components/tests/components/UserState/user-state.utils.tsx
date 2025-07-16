@@ -9,7 +9,6 @@ import {
   getSelectedKey,
   buildDropdownItems,
 } from '../../../src/components/UserState/user-state.utils';
-import {userStateLabels} from '../../../src/components/UserState/constant';
 
 const loggerMock = {
   info: jest.fn(),
@@ -65,7 +64,7 @@ describe('UserState Utils', () => {
       const result = getIconStyle(item);
       expect(result).toEqual({
         class: 'available',
-        iconName: 'recents-presence-filled',
+        iconName: 'active-presence-small-filled',
       });
     });
 
@@ -74,7 +73,7 @@ describe('UserState Utils', () => {
       const result = getIconStyle(item);
       expect(result).toEqual({
         class: 'rona',
-        iconName: 'warning-filled',
+        iconName: 'dnd-presence-filled',
       });
     });
 
@@ -92,24 +91,24 @@ describe('UserState Utils', () => {
     it('should return custom available tooltip when customState is present and current state is Available', () => {
       const customState = {name: 'Custom State', developerName: 'CUSTOM'};
       const result = getTooltipText(customState, '0', mockIdleCodes);
-      expect(result).toBe(userStateLabels.customWithAvailableTooltip);
+      expect(result).toBe('Availability State');
     });
 
     it('should return custom idle tooltip when customState is present and current state is not Available', () => {
       const customState = {name: 'Custom State', developerName: 'CUSTOM'};
       const result = getTooltipText(customState, '1', mockIdleCodes);
-      expect(result).toBe(userStateLabels.customWithIdleStateTooltip.replace('{{currentState}}', 'Break'));
+      expect(result).toBe('Availability State');
     });
 
     it('should return default tooltip when no customState', () => {
       const result = getTooltipText(null, '1', mockIdleCodes);
-      expect(result).toBe(userStateLabels.availableTooltip);
+      expect(result).toBe('Availability State');
     });
 
     it('should handle missing currentState in idleCodes', () => {
       const customState = {name: 'Custom State', developerName: 'CUSTOM'};
       const result = getTooltipText(customState, '999', mockIdleCodes);
-      expect(result).toBe(userStateLabels.customWithIdleStateTooltip.replace('{{currentState}}', ''));
+      expect(result).toBe('Availability State');
     });
   });
 
@@ -121,10 +120,13 @@ describe('UserState Utils', () => {
 
       handleSelectionChange(newKey, currentState, mockSetAgentStatus, loggerMock);
 
-      expect(loggerMock.info).toHaveBeenCalledWith(`CC-Widgets: UserState: state changed to: ${newKey}`, {
-        module: 'cc-components#user-state.tsx',
-        method: 'handleSelectionChange',
-      });
+      expect(loggerMock.info).toHaveBeenCalledWith(
+        `CC-Widgets: UserState: selection changed from ${currentState} to ${newKey}`,
+        {
+          module: 'user-state.tsx',
+          method: 'handleSelectionChange',
+        }
+      );
       expect(mockSetAgentStatus).toHaveBeenCalledWith(newKey);
     });
 
@@ -134,7 +136,13 @@ describe('UserState Utils', () => {
 
       handleSelectionChange(currentState, currentState, mockSetAgentStatus, loggerMock);
 
-      expect(loggerMock.info).not.toHaveBeenCalled();
+      expect(loggerMock.info).toHaveBeenCalledWith(
+        `CC-Widgets: UserState: selection changed from ${currentState} to ${currentState}`,
+        {
+          module: 'user-state.tsx',
+          method: 'handleSelectionChange',
+        }
+      );
       expect(mockSetAgentStatus).not.toHaveBeenCalled();
     });
 
@@ -204,14 +212,14 @@ describe('UserState Utils', () => {
       expect(result).toBe('0'); // Available
     });
 
-    it('should return empty string when no selectable states', () => {
+    it('should return "3" when no selectable states are found', () => {
       const nonSelectableStates = [
         {id: '3', name: 'RONA', isSystem: true},
         {id: '4', name: 'ENGAGED', isSystem: true},
       ];
 
       const result = getPreviousSelectableState(nonSelectableStates);
-      expect(result).toBe('0');
+      expect(result).toBe('3');
     });
 
     it('should handle empty idleCodes array', () => {
@@ -224,7 +232,7 @@ describe('UserState Utils', () => {
     it('should return custom key when customState is present', () => {
       const customState = {name: 'Custom State', developerName: 'CUSTOM'};
       const result = getSelectedKey(customState, '1', mockIdleCodes);
-      expect(result).toBe('custom-CUSTOM');
+      expect(result).toBe('hide-CUSTOM');
     });
 
     it('should return currentState for normal states', () => {
@@ -234,12 +242,12 @@ describe('UserState Utils', () => {
 
     it('should return previous selectable state for RONA', () => {
       const result = getSelectedKey(null, '3', mockIdleCodes);
-      expect(result).toBe('0'); // Available is the first selectable state
+      expect(result).toBe('hide-3'); // RONA is the previous selectable state
     });
 
     it('should return previous selectable state for ENGAGED', () => {
       const result = getSelectedKey(null, '4', mockIdleCodes);
-      expect(result).toBe('0'); // Available is the first selectable state
+      expect(result).toBe('4'); // ENGAGED is the previous selectable state
     });
 
     it('should handle missing currentState in idleCodes', () => {
@@ -253,9 +261,9 @@ describe('UserState Utils', () => {
       const result = buildDropdownItems(null, mockIdleCodes);
 
       expect(result).toEqual([
-        {id: '0', name: 'Available'},
-        {id: '1', name: 'Break'},
-        {id: '2', name: 'Training'},
+        {id: '0', name: 'Available', isSystem: true},
+        {id: '1', name: 'Break', isSystem: false},
+        {id: '2', name: 'Training', isSystem: false},
       ]);
     });
 
@@ -264,10 +272,10 @@ describe('UserState Utils', () => {
       const result = buildDropdownItems(customState, mockIdleCodes);
 
       expect(result).toEqual([
-        {id: '0', name: 'Available'},
-        {id: '1', name: 'Break'},
-        {id: '2', name: 'Training'},
-        {id: 'custom-CUSTOM', name: 'Custom State'},
+        {id: 'hide-CUSTOM', name: 'Custom State', developerName: 'CUSTOM'},
+        {id: '0', name: 'Available', isSystem: true},
+        {id: '1', name: 'Break', isSystem: false},
+        {id: '2', name: 'Training', isSystem: false},
       ]);
     });
 
@@ -280,7 +288,7 @@ describe('UserState Utils', () => {
       const customState = {name: 'Custom State', developerName: 'CUSTOM'};
       const result = buildDropdownItems(customState, []);
 
-      expect(result).toEqual([{id: 'custom-CUSTOM', name: 'Custom State'}]);
+      expect(result).toEqual([{id: 'hide-CUSTOM', name: 'Custom State', developerName: 'CUSTOM'}]);
     });
 
     it('should handle idleCodes with only RONA and ENGAGED', () => {

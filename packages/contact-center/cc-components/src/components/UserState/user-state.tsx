@@ -57,10 +57,7 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
 
           return (
             <Item key={item.id} textValue={item.name} data-testid={`state-item-${item.name}`}>
-              <div
-                className="item-container"
-                data-testid={`item-container ${shouldHighlight ? `selected ${getIconStyle(item).class}` : ''}`}
-              >
+              <div className={`item-container ${shouldHighlight ? `selected ${getIconStyle(item).class}` : ''}`}>
                 <Icon
                   name={getIconStyle(item).iconName}
                   title=""

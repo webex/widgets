@@ -23,12 +23,15 @@ export const getDropdownClass = (customState: ICustomState, currentState: string
 /**
  * Gets the icon style configuration for a given item
  */
-export const getIconStyle = (item: {id: string; name: string}): {class: string; iconName: string} => {
-  switch (item.name) {
-    case AgentUserState.Available:
-      return {class: 'available', iconName: 'recents-presence-filled'};
-    case AgentUserState.RONA:
-      return {class: 'rona', iconName: 'warning-filled'};
+export const getIconStyle = (item): {class: string; iconName: string} => {
+  if (item.developerName) {
+    return {class: 'custom', iconName: 'busy-presence-light'};
+  }
+  switch (item.id) {
+    case '0':
+      return {class: 'available', iconName: 'active-presence-small-filled'};
+    case item.name === AgentUserState.RONA && item.id:
+      return {class: 'rona', iconName: 'dnd-presence-filled'};
     default:
       return {class: 'idle', iconName: 'recents-presence-filled'};
   }
@@ -38,13 +41,16 @@ export const getIconStyle = (item: {id: string; name: string}): {class: string; 
  * Gets the tooltip text based on current state
  */
 export const getTooltipText = (customState: ICustomState, currentState: string, idleCodes: IdleCode[]): string => {
-  if (customState) {
-    const currentIdleCode = idleCodes.find((code) => code.id === currentState);
-    if (currentIdleCode?.name === AgentUserState.Available) {
+  if (customState && customState.developerName === 'ENGAGED') {
+    const currentStateObj = idleCodes.find((item) => item.id === currentState);
+
+    if (currentStateObj.name === AgentUserState.Available) {
       return userStateLabels.customWithAvailableTooltip;
+    } else {
+      return userStateLabels.customWithIdleStateTooltip.replace(/{{.*?}}/g, currentStateObj.name);
     }
-    return userStateLabels.customWithIdleStateTooltip.replace('{{currentState}}', currentIdleCode?.name || '');
   }
+
   return userStateLabels.availableTooltip;
 };
 
@@ -57,12 +63,15 @@ export const handleSelectionChange = (
   setAgentStatus: (auxCodeId: string) => void,
   logger
 ): void => {
-  if (key !== currentState) {
-    logger?.info(`CC-Widgets: UserState: state changed to: ${key}`, {
-      module: 'cc-components#user-state.tsx',
+  const cleanKey = key.startsWith('hide-') ? key.substring(5) : key;
+  if (logger) {
+    logger.info(`CC-Widgets: UserState: selection changed from ${currentState} to ${cleanKey}`, {
+      module: 'user-state.tsx',
       method: 'handleSelectionChange',
     });
-    setAgentStatus(key);
+  }
+  if (cleanKey !== currentState) {
+    setAgentStatus(cleanKey);
   }
 };
 
@@ -70,41 +79,40 @@ export const handleSelectionChange = (
  * Sorts dropdown items with Available first, then others
  */
 export const sortDropdownItems = (items: Array<{id: string; name: string}>): Array<{id: string; name: string}> => {
-  return [...items].sort((a, b) => {
-    if (a.name === AgentUserState.Available) return -1;
-    if (b.name === AgentUserState.Available) return 1;
-    return a.name.localeCompare(b.name);
-  });
+  return [
+    ...items.filter((item) => item.name === AgentUserState.Available),
+    ...items.filter((item) => item.name !== AgentUserState.Available).sort((a, b) => a.name.localeCompare(b.name)),
+  ];
 };
 
 /**
  * Gets the previous selectable state (first non-RONA/Engaged state)
  */
 export const getPreviousSelectableState = (idleCodes: IdleCode[]): string => {
-  const selectableState = idleCodes.find(
-    (code) => ![AgentUserState.RONA, AgentUserState.Engaged].includes(code.name as AgentUserState)
-  );
-  return selectableState?.id || '0';
+  return idleCodes.find((code) => code.id !== AgentUserState.RONA && code.id !== AgentUserState.Engaged)?.id ?? '0';
 };
 
 /**
  * Gets the selected key for the dropdown
  */
 export const getSelectedKey = (customState: ICustomState, currentState: string, idleCodes: IdleCode[]): string => {
+  let selectedKey;
   if (customState) {
-    return `custom-${customState.developerName}`;
+    selectedKey = `hide-${customState.developerName}`;
+  } else {
+    selectedKey = currentState;
   }
 
-  const currentIdleCode = idleCodes.find((code) => code.id === currentState);
-  const isRonaOrEngaged = [AgentUserState.RONA, AgentUserState.Engaged].includes(
-    currentIdleCode?.name as AgentUserState
-  );
-
-  if (isRonaOrEngaged) {
-    return getPreviousSelectableState(idleCodes);
+  for (const item of idleCodes) {
+    if (item.name === AgentUserState.RONA && item.id === currentState) {
+      selectedKey = `hide-${item.id}`;
+    }
+    if (item.name === AgentUserState.RONA && item.id !== currentState) {
+      continue; // Skip RONA unless it matches the current state
+    }
   }
 
-  return currentState;
+  return selectedKey;
 };
 
 /**
@@ -114,17 +122,17 @@ export const buildDropdownItems = (
   customState: ICustomState,
   idleCodes: IdleCode[]
 ): Array<{id: string; name: string}> => {
-  const items = idleCodes
-    .filter((code) => ![AgentUserState.RONA, AgentUserState.Engaged].includes(code.name as AgentUserState))
-    .map((code) => ({
-      id: code.id,
-      name: code.name,
-    }));
+  const items = customState
+    ? [{name: customState.name, id: `hide-${customState.developerName}`, developerName: customState.developerName}]
+    : [];
 
-  if (customState) {
+  for (const item of idleCodes) {
+    if (item.name === AgentUserState.RONA || item.name === AgentUserState.Engaged) {
+      continue; // Skip RONA and ENGAGED states
+    }
     items.push({
-      id: `custom-${customState.developerName}`,
-      name: customState.name,
+      ...item,
+      id: item.name === AgentUserState.RONA ? `hide-${item.id}` : item.id,
     });
   }
 
