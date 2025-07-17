@@ -42,11 +42,6 @@ exports[`TaskListComponent Additional scenarios should render email task correct
         >
           user@email.com
         </mdc-tooltip>
-        <mdc-text
-          class="md-text-wrapper task-text"
-        >
-          Active
-        </mdc-text>
       </section>
     </div>
     <div
@@ -91,7 +86,7 @@ exports[`TaskListComponent Additional scenarios should render social media task 
         class="task-details"
       >
         <mdc-text
-          class="md-text-wrapper incoming-digital-task-title"
+          class="md-text-wrapper task-digital-title"
           id="tooltip-trigger-undefined"
         >
           Social Wrap Up Customer
@@ -102,11 +97,6 @@ exports[`TaskListComponent Additional scenarios should render social media task 
         >
           Social Wrap Up Customer
         </mdc-tooltip>
-        <mdc-text
-          class="md-text-wrapper task-text"
-        >
-          Social Team
-        </mdc-text>
       </section>
     </div>
     <div
@@ -154,11 +144,6 @@ exports[`TaskListComponent Additional scenarios should render task with special 
           class="md-text-wrapper task-title"
         >
           +1 (555) 123-4567 ext. 123
-        </mdc-text>
-        <mdc-text
-          class="md-text-wrapper task-text"
-        >
-          Active
         </mdc-text>
       </section>
     </div>
@@ -288,11 +273,6 @@ exports[`TaskListComponent Different media types should render chat task correct
         >
           chat-user-123
         </mdc-tooltip>
-        <mdc-text
-          class="md-text-wrapper task-text"
-        >
-          Active
-        </mdc-text>
       </section>
     </div>
     <div
@@ -325,13 +305,10 @@ exports[`TaskListComponent Different media types should render social media task
     <div
       data-position="start"
     >
-      <div
-        class="brand-visual-background"
-      >
-        <mdc-brandvisual
-          class="facebook"
-        />
-      </div>
+      <mdc-avatar
+        class="social"
+        icon-name="chat-filled"
+      />
     </div>
     <div
       data-position="fill"
@@ -351,11 +328,6 @@ exports[`TaskListComponent Different media types should render social media task
         >
           Social Customer
         </mdc-tooltip>
-        <mdc-text
-          class="md-text-wrapper task-text"
-        >
-          Active
-        </mdc-text>
       </section>
     </div>
     <div
@@ -404,11 +376,6 @@ exports[`TaskListComponent Different media types should render telephony task co
         >
           1234567890
         </mdc-text>
-        <mdc-text
-          class="md-text-wrapper task-text"
-        >
-          Active
-        </mdc-text>
       </section>
     </div>
     <div
@@ -451,24 +418,7 @@ exports[`TaskListComponent Edge cases should handle task with missing call assoc
     >
       <section
         class="task-details"
-      >
-        <mdc-text
-          class="md-text-wrapper task-text"
-        >
-          Active
-        </mdc-text>
-        <mdc-text
-          class="md-text-wrapper task-text"
-        >
-          Handle Time: 
-            
-          <div
-            data-testid="mock-timer"
-          >
-            Timer
-          </div>
-        </mdc-text>
-      </section>
+      />
     </div>
     <div
       data-position="end"
@@ -818,29 +768,7 @@ exports[`TaskListComponent Logger calls should log for each task when multiple t
     >
       <section
         class="task-details"
-      >
-        <mdc-text
-          class="md-text-wrapper task-title"
-        >
-          1234567890
-        </mdc-text>
-        <mdc-text
-          class="md-text-wrapper task-text"
-        >
-          Active
-        </mdc-text>
-        <mdc-text
-          class="md-text-wrapper task-text"
-        >
-          Handle Time: 
-            
-          <div
-            data-testid="mock-timer"
-          >
-            Timer
-          </div>
-        </mdc-text>
-      </section>
+      />
     </div>
     <div
       data-position="end"
@@ -875,29 +803,7 @@ exports[`TaskListComponent Logger calls should log for each task when multiple t
     >
       <section
         class="task-details"
-      >
-        <mdc-text
-          class="md-text-wrapper task-title"
-        >
-          1234567890
-        </mdc-text>
-        <mdc-text
-          class="md-text-wrapper task-text"
-        >
-          Active
-        </mdc-text>
-        <mdc-text
-          class="md-text-wrapper task-text"
-        >
-          Handle Time: 
-            
-          <div
-            data-testid="mock-timer"
-          >
-            Timer
-          </div>
-        </mdc-text>
-      </section>
+      />
     </div>
     <div
       data-position="end"
@@ -916,14 +822,13 @@ exports[`TaskListComponent Logger calls should log task rendering 1`] = `
   data-testid="task-list"
 >
   <li
-    class="task-list-item md-list-item-base-wrapper"
+    class="task-list-item task-list-item--selected md-list-item-base-wrapper"
     data-allow-text-select="false"
     data-disabled="false"
     data-interactive="true"
     data-padded="false"
     data-shape="rectangle"
     data-size="40"
-    id="test-interaction-123"
     role="listitem"
     tabindex="0"
   >
@@ -940,29 +845,7 @@ exports[`TaskListComponent Logger calls should log task rendering 1`] = `
     >
       <section
         class="task-details"
-      >
-        <mdc-text
-          class="md-text-wrapper task-title"
-        >
-          1234567890
-        </mdc-text>
-        <mdc-text
-          class="md-text-wrapper task-text"
-        >
-          Active
-        </mdc-text>
-        <mdc-text
-          class="md-text-wrapper task-text"
-        >
-          Handle Time: 
-            
-          <div
-            data-testid="mock-timer"
-          >
-            Timer
-          </div>
-        </mdc-text>
-      </section>
+      />
     </div>
     <div
       data-position="end"
@@ -1256,17 +1139,6 @@ exports[`TaskListComponent Task list with tasks should render task list with mul
         >
           Active
         </mdc-text>
-        <mdc-text
-          class="md-text-wrapper task-text"
-        >
-          Handle Time: 
-            
-          <div
-            data-testid="mock-timer"
-          >
-            Timer
-          </div>
-        </mdc-text>
       </section>
     </div>
     <div
@@ -1322,17 +1194,6 @@ exports[`TaskListComponent Task list with tasks should render task list with mul
           class="md-text-wrapper task-text"
         >
           Sales Team
-        </mdc-text>
-        <mdc-text
-          class="md-text-wrapper task-text"
-        >
-          Handle Time: 
-            
-          <div
-            data-testid="mock-timer"
-          >
-            Timer
-          </div>
         </mdc-text>
       </section>
     </div>
@@ -1403,22 +1264,6 @@ exports[`TaskListComponent Task list with tasks should render task list with sin
         >
           1234567890
         </mdc-text>
-        <mdc-text
-          class="md-text-wrapper task-text"
-        >
-          Active
-        </mdc-text>
-        <mdc-text
-          class="md-text-wrapper task-text"
-        >
-          Handle Time: 
-            
-          <div
-            data-testid="mock-timer"
-          >
-            Timer
-          </div>
-        </mdc-text>
       </section>
     </div>
     <div
@@ -1462,29 +1307,7 @@ exports[`TaskListComponent Task list with tasks should show selected task correc
     >
       <section
         class="task-details"
-      >
-        <mdc-text
-          class="md-text-wrapper task-title"
-        >
-          1234567890
-        </mdc-text>
-        <mdc-text
-          class="md-text-wrapper task-text"
-        >
-          Active
-        </mdc-text>
-        <mdc-text
-          class="md-text-wrapper task-text"
-        >
-          Handle Time: 
-            
-          <div
-            data-testid="mock-timer"
-          >
-            Timer
-          </div>
-        </mdc-text>
-      </section>
+      />
     </div>
     <div
       data-position="end"

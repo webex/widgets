@@ -1,9 +1,9 @@
 import React from 'react';
 import {render, screen, fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom';
+import {mockTask} from '@webex/test-fixtures';
 import TaskListComponent from '../../../../src/components/task/TaskList/task-list';
-import {TaskListComponentProps, MEDIA_CHANNEL} from '../../../../src/components/task/task.types';
-import {ITask} from '@webex/cc-store';
+import {MEDIA_CHANNEL, TaskListComponentProps} from '../../../../src/components/task/task.types';
 
 // ✅ Define proper interface for MockTask props
 interface MockTaskProps {
@@ -75,29 +75,6 @@ describe('TaskListComponent', () => {
   const mockDeclineTask = jest.fn();
   const mockOnTaskSelect = jest.fn();
 
-  // Helper function to create mock tasks
-  const createMockTask = (overrides = {}): ITask =>
-    ({
-      data: {
-        interactionId: 'test-interaction-123',
-        wrapUpRequired: false,
-        interaction: {
-          callAssociatedDetails: {
-            ani: '1234567890',
-            customerName: 'John Doe',
-            virtualTeamName: 'Support Team',
-            ronaTimeout: '30',
-          },
-          createdTimestamp: 1641234567890,
-          mediaType: MEDIA_CHANNEL.TELEPHONY,
-          mediaChannel: 'voice',
-          state: 'active',
-        },
-        ...overrides,
-      },
-      ...overrides,
-    }) as ITask;
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -151,26 +128,22 @@ describe('TaskListComponent', () => {
 
   describe('Task list with tasks', () => {
     it('should render task list with single task', () => {
-      const task = createMockTask({
-        data: {
-          interactionId: 'task-1',
-          interaction: {
-            callAssociatedDetails: {
-              ani: '1234567890',
-              customerName: 'John Doe',
-              virtualTeamName: 'Support Team',
-              ronaTimeout: '30',
-            },
-            createdTimestamp: 1641234567890,
-            mediaType: MEDIA_CHANNEL.TELEPHONY,
-            mediaChannel: 'voice',
-            state: 'active',
-          },
-        },
-      });
+      // Temporarily modify mockTask for this test
+      const originalInteractionId = mockTask.data.interactionId;
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+
+      mockTask.data.interactionId = 'task-1';
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      mockTask.data.interaction.callAssociatedDetails = {
+        ani: '1234567890',
+        customerName: 'John Doe',
+        virtualTeamName: 'Support Team',
+        ronaTimeout: '30',
+      };
 
       const props: TaskListComponentProps = {
-        taskList: {'task-1': task},
+        taskList: {'task-1': mockTask},
         currentTask: null,
         acceptTask: mockAcceptTask,
         declineTask: mockDeclineTask,
@@ -187,42 +160,52 @@ describe('TaskListComponent', () => {
       expect(screen.getByTestId('task-queue')).toHaveTextContent('Support Team');
       expect(screen.getByTestId('task-incoming')).toHaveTextContent('active');
       expect(screen.getByTestId('task-selected')).toHaveTextContent('not-selected');
+
+      // Restore original values
+      mockTask.data.interactionId = originalInteractionId;
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
     });
 
     it('should render task list with multiple tasks', () => {
-      const task1 = createMockTask({
+      // Create task copies for multiple tasks
+      const task1 = {
+        ...mockTask,
         data: {
+          ...mockTask.data,
           interactionId: 'task-1',
           interaction: {
+            ...mockTask.data.interaction,
             callAssociatedDetails: {
               ani: '1234567890',
               customerName: 'John Doe',
               virtualTeamName: 'Support Team',
             },
-            createdTimestamp: 1641234567890,
             mediaType: MEDIA_CHANNEL.TELEPHONY,
             mediaChannel: 'voice',
             state: 'active',
           },
         },
-      });
+      };
 
-      const task2 = createMockTask({
+      const task2 = {
+        ...mockTask,
         data: {
+          ...mockTask.data,
           interactionId: 'task-2',
           interaction: {
+            ...mockTask.data.interaction,
             callAssociatedDetails: {
               ani: '0987654321',
               customerName: 'Jane Smith',
               virtualTeamName: 'Sales Team',
             },
-            createdTimestamp: 1641234567890,
             mediaType: MEDIA_CHANNEL.SOCIAL,
             mediaChannel: 'facebook',
             state: 'new',
           },
         },
-      });
+      };
 
       const props: TaskListComponentProps = {
         taskList: {'task-1': task1, 'task-2': task2},
@@ -242,13 +225,22 @@ describe('TaskListComponent', () => {
     });
 
     it('should show selected task correctly', () => {
-      // ✅ Create default mock tasks first
-      const task = createMockTask();
-      const currentTask = createMockTask();
+      // Create task copies for selected task test
+      const task = {
+        ...mockTask,
+        data: {
+          ...mockTask.data,
+          interactionId: 'selected-task',
+        },
+      };
 
-      // ✅ Then safely update just the interactionId
-      task.data.interactionId = 'selected-task';
-      currentTask.data.interactionId = 'selected-task';
+      const currentTask = {
+        ...mockTask,
+        data: {
+          ...mockTask.data,
+          interactionId: 'selected-task',
+        },
+      };
 
       const props: TaskListComponentProps = {
         taskList: {'selected-task': task},
@@ -268,23 +260,21 @@ describe('TaskListComponent', () => {
 
   describe('Different media types', () => {
     it('should render telephony task correctly', () => {
-      const task = createMockTask({
-        data: {
-          interaction: {
-            callAssociatedDetails: {
-              ani: '1234567890',
-              customerName: 'Phone Customer',
-              virtualTeamName: 'Phone Team',
-            },
-            mediaType: MEDIA_CHANNEL.TELEPHONY,
-            mediaChannel: 'voice',
-            state: 'active',
-          },
-        },
-      });
+      // Temporarily modify mockTask for telephony test
+      const originalMediaType = mockTask.data.interaction.mediaType;
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+
+      mockTask.data.interaction.mediaType = MEDIA_CHANNEL.TELEPHONY;
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      mockTask.data.interaction.callAssociatedDetails = {
+        ani: '1234567890',
+        customerName: 'Phone Customer',
+        virtualTeamName: 'Phone Team',
+      };
 
       const props: TaskListComponentProps = {
-        taskList: {'task-1': task},
+        taskList: {'task-1': mockTask},
         currentTask: null,
         acceptTask: mockAcceptTask,
         declineTask: mockDeclineTask,
@@ -297,26 +287,29 @@ describe('TaskListComponent', () => {
 
       expect(screen.getByTestId('task-media-type')).toHaveTextContent(MEDIA_CHANNEL.TELEPHONY);
       expect(screen.getByTestId('task-title')).toHaveTextContent('1234567890'); // ANI for telephony
+
+      // Restore original values
+      mockTask.data.interaction.mediaType = originalMediaType;
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
     });
 
     it('should render social media task correctly', () => {
-      const task = createMockTask({
-        data: {
-          interaction: {
-            callAssociatedDetails: {
-              ani: '1234567890',
-              customerName: 'Social Customer',
-              virtualTeamName: 'Social Team',
-            },
-            mediaType: MEDIA_CHANNEL.SOCIAL,
-            mediaChannel: 'facebook',
-            state: 'active',
-          },
-        },
-      });
+      // Temporarily modify mockTask for social test
+      const originalMediaType = mockTask.data.interaction.mediaType;
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+
+      mockTask.data.interaction.mediaType = MEDIA_CHANNEL.SOCIAL;
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      mockTask.data.interaction.callAssociatedDetails = {
+        ani: '1234567890',
+        customerName: 'Social Customer',
+        virtualTeamName: 'Social Team',
+      };
 
       const props: TaskListComponentProps = {
-        taskList: {'task-1': task},
+        taskList: {'task-1': mockTask},
         currentTask: null,
         acceptTask: mockAcceptTask,
         declineTask: mockDeclineTask,
@@ -329,26 +322,29 @@ describe('TaskListComponent', () => {
 
       expect(screen.getByTestId('task-media-type')).toHaveTextContent(MEDIA_CHANNEL.SOCIAL);
       expect(screen.getByTestId('task-title')).toHaveTextContent('Social Customer'); // Customer name for social
+
+      // Restore original values
+      mockTask.data.interaction.mediaType = originalMediaType;
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
     });
 
     it('should render chat task correctly', () => {
-      const task = createMockTask({
-        data: {
-          interaction: {
-            callAssociatedDetails: {
-              ani: 'chat-user-123',
-              customerName: 'Chat Customer',
-              virtualTeamName: 'Chat Team',
-            },
-            mediaType: MEDIA_CHANNEL.CHAT,
-            mediaChannel: 'webchat',
-            state: 'active',
-          },
-        },
-      });
+      // Temporarily modify mockTask for chat test
+      const originalMediaType = mockTask.data.interaction.mediaType;
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+
+      mockTask.data.interaction.mediaType = MEDIA_CHANNEL.CHAT;
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      mockTask.data.interaction.callAssociatedDetails = {
+        ani: 'chat-user-123',
+        customerName: 'Chat Customer',
+        virtualTeamName: 'Chat Team',
+      };
 
       const props: TaskListComponentProps = {
-        taskList: {'task-1': task},
+        taskList: {'task-1': mockTask},
         currentTask: null,
         acceptTask: mockAcceptTask,
         declineTask: mockDeclineTask,
@@ -361,30 +357,34 @@ describe('TaskListComponent', () => {
 
       expect(screen.getByTestId('task-media-type')).toHaveTextContent(MEDIA_CHANNEL.CHAT);
       expect(screen.getByTestId('task-title')).toHaveTextContent('chat-user-123'); // ANI for chat
+
+      // Restore original values
+      mockTask.data.interaction.mediaType = originalMediaType;
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
     });
   });
 
   describe('Incoming vs Active tasks', () => {
     it('should render incoming task (state: new) correctly', () => {
-      const task = createMockTask({
-        data: {
-          interaction: {
-            callAssociatedDetails: {
-              ani: '1234567890',
-              customerName: 'Incoming Customer',
-              virtualTeamName: 'Incoming Team',
-              ronaTimeout: '45',
-            },
-            mediaType: MEDIA_CHANNEL.TELEPHONY,
-            mediaChannel: 'voice',
-            state: 'new',
-          },
-          wrapUpRequired: false,
-        },
-      });
+      // Temporarily modify mockTask for incoming task test
+      const originalState = mockTask.data.interaction.state;
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+      const originalWrapUpRequired = mockTask.data.wrapUpRequired;
+
+      mockTask.data.interaction.state = 'new';
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      mockTask.data.interaction.callAssociatedDetails = {
+        ani: '1234567890',
+        customerName: 'Incoming Customer',
+        virtualTeamName: 'Incoming Team',
+        ronaTimeout: '45',
+      };
+      mockTask.data.wrapUpRequired = false;
 
       const props: TaskListComponentProps = {
-        taskList: {'task-1': task},
+        taskList: {'task-1': mockTask},
         currentTask: null,
         acceptTask: mockAcceptTask,
         declineTask: mockDeclineTask,
@@ -401,27 +401,32 @@ describe('TaskListComponent', () => {
       expect(screen.getByTestId('task-accept-text')).toHaveTextContent('Accept');
       expect(screen.getByTestId('task-decline-text')).toHaveTextContent('Decline');
       expect(screen.getByTestId('task-disable-accept')).toHaveTextContent('enabled');
+
+      // Restore original values
+      mockTask.data.interaction.state = originalState;
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
+      mockTask.data.wrapUpRequired = originalWrapUpRequired;
     });
 
     it('should render consult task correctly', () => {
-      const task = createMockTask({
-        data: {
-          interaction: {
-            callAssociatedDetails: {
-              ani: '1234567890',
-              customerName: 'Consult Customer',
-              virtualTeamName: 'Expert Team',
-            },
-            mediaType: MEDIA_CHANNEL.TELEPHONY,
-            mediaChannel: 'voice',
-            state: 'consult',
-          },
-          wrapUpRequired: false,
-        },
-      });
+      // Temporarily modify mockTask for consult task test
+      const originalState = mockTask.data.interaction.state;
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+      const originalWrapUpRequired = mockTask.data.wrapUpRequired;
+
+      mockTask.data.interaction.state = 'consult';
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      mockTask.data.interaction.callAssociatedDetails = {
+        ani: '1234567890',
+        customerName: 'Consult Customer',
+        virtualTeamName: 'Expert Team',
+      };
+      mockTask.data.wrapUpRequired = false;
 
       const props: TaskListComponentProps = {
-        taskList: {'task-1': task},
+        taskList: {'task-1': mockTask},
         currentTask: null,
         acceptTask: mockAcceptTask,
         declineTask: mockDeclineTask,
@@ -434,26 +439,30 @@ describe('TaskListComponent', () => {
 
       expect(screen.getByTestId('task-incoming')).toHaveTextContent('incoming');
       expect(screen.getByTestId('task-state')).toHaveTextContent(''); // Empty for incoming
+
+      // Restore original values
+      mockTask.data.interaction.state = originalState;
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
+      mockTask.data.wrapUpRequired = originalWrapUpRequired;
     });
 
     it('should render active task correctly', () => {
-      const task = createMockTask({
-        data: {
-          interaction: {
-            callAssociatedDetails: {
-              ani: '1234567890',
-              customerName: 'Active Customer',
-              virtualTeamName: 'Active Team',
-            },
-            mediaType: MEDIA_CHANNEL.TELEPHONY,
-            mediaChannel: 'voice',
-            state: 'connected',
-          },
-        },
-      });
+      // Temporarily modify mockTask for active task test
+      const originalState = mockTask.data.interaction.state;
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+
+      mockTask.data.interaction.state = 'connected';
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      mockTask.data.interaction.callAssociatedDetails = {
+        ani: '1234567890',
+        customerName: 'Active Customer',
+        virtualTeamName: 'Active Team',
+      };
 
       const props: TaskListComponentProps = {
-        taskList: {'task-1': task},
+        taskList: {'task-1': mockTask},
         currentTask: null,
         acceptTask: mockAcceptTask,
         declineTask: mockDeclineTask,
@@ -467,29 +476,33 @@ describe('TaskListComponent', () => {
       expect(screen.getByTestId('task-incoming')).toHaveTextContent('active');
       expect(screen.getByTestId('task-state')).toHaveTextContent('connected');
       expect(screen.getByTestId('task-rona-timeout')).toHaveTextContent(''); // No RONA for active
+
+      // Restore original values
+      mockTask.data.interaction.state = originalState;
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
     });
   });
 
   describe('Browser vs Non-browser behavior', () => {
     it('should handle non-browser telephony incoming task', () => {
-      const task = createMockTask({
-        data: {
-          interaction: {
-            callAssociatedDetails: {
-              ani: '1234567890',
-              customerName: 'Mobile Customer',
-              virtualTeamName: 'Mobile Team',
-            },
-            mediaType: MEDIA_CHANNEL.TELEPHONY,
-            mediaChannel: 'voice',
-            state: 'new',
-          },
-          wrapUpRequired: false,
-        },
-      });
+      // Temporarily modify mockTask for non-browser test
+      const originalState = mockTask.data.interaction.state;
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+      const originalWrapUpRequired = mockTask.data.wrapUpRequired;
+
+      mockTask.data.interaction.state = 'new';
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      mockTask.data.interaction.callAssociatedDetails = {
+        ani: '1234567890',
+        customerName: 'Mobile Customer',
+        virtualTeamName: 'Mobile Team',
+      };
+      mockTask.data.wrapUpRequired = false;
 
       const props: TaskListComponentProps = {
-        taskList: {'task-1': task},
+        taskList: {'task-1': mockTask},
         currentTask: null,
         acceptTask: mockAcceptTask,
         declineTask: mockDeclineTask,
@@ -503,30 +516,36 @@ describe('TaskListComponent', () => {
       expect(screen.getByTestId('task-accept-text')).toHaveTextContent('Ringing...');
       expect(screen.getByTestId('task-decline-text')).toHaveTextContent(''); // No decline for non-browser
       expect(screen.getByTestId('task-disable-accept')).toHaveTextContent('disabled');
+
+      // Restore original values
+      mockTask.data.interaction.state = originalState;
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
+      mockTask.data.wrapUpRequired = originalWrapUpRequired;
     });
   });
 
   describe('Task interactions', () => {
     it('should call acceptTask when accept button is clicked', () => {
-      const task = createMockTask({
-        data: {
-          interactionId: 'accept-task',
-          interaction: {
-            callAssociatedDetails: {
-              ani: '1234567890',
-              customerName: 'Accept Customer',
-              virtualTeamName: 'Accept Team',
-            },
-            mediaType: MEDIA_CHANNEL.TELEPHONY,
-            mediaChannel: 'voice',
-            state: 'new',
-          },
-          wrapUpRequired: false,
-        },
-      });
+      // Temporarily modify mockTask for accept test
+      const originalInteractionId = mockTask.data.interactionId;
+      const originalState = mockTask.data.interaction.state;
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+      const originalWrapUpRequired = mockTask.data.wrapUpRequired;
+
+      mockTask.data.interactionId = 'accept-task';
+      mockTask.data.interaction.state = 'new';
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      mockTask.data.interaction.callAssociatedDetails = {
+        ani: '1234567890',
+        customerName: 'Accept Customer',
+        virtualTeamName: 'Accept Team',
+      };
+      mockTask.data.wrapUpRequired = false;
 
       const props: TaskListComponentProps = {
-        taskList: {'accept-task': task},
+        taskList: {'accept-task': mockTask},
         currentTask: null,
         acceptTask: mockAcceptTask,
         declineTask: mockDeclineTask,
@@ -540,29 +559,36 @@ describe('TaskListComponent', () => {
       const acceptButton = screen.getByTestId('accept-button');
       fireEvent.click(acceptButton);
 
-      expect(mockAcceptTask).toHaveBeenCalledWith(task);
+      expect(mockAcceptTask).toHaveBeenCalledWith(mockTask);
+
+      // Restore original values
+      mockTask.data.interactionId = originalInteractionId;
+      mockTask.data.interaction.state = originalState;
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
+      mockTask.data.wrapUpRequired = originalWrapUpRequired;
     });
 
     it('should call declineTask when decline button is clicked', () => {
-      const task = createMockTask({
-        data: {
-          interactionId: 'decline-task',
-          interaction: {
-            callAssociatedDetails: {
-              ani: '1234567890',
-              customerName: 'Decline Customer',
-              virtualTeamName: 'Decline Team',
-            },
-            mediaType: MEDIA_CHANNEL.TELEPHONY,
-            mediaChannel: 'voice',
-            state: 'new',
-          },
-          wrapUpRequired: false,
-        },
-      });
+      // Temporarily modify mockTask for decline test
+      const originalInteractionId = mockTask.data.interactionId;
+      const originalState = mockTask.data.interaction.state;
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+      const originalWrapUpRequired = mockTask.data.wrapUpRequired;
+
+      mockTask.data.interactionId = 'decline-task';
+      mockTask.data.interaction.state = 'new';
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      mockTask.data.interaction.callAssociatedDetails = {
+        ani: '1234567890',
+        customerName: 'Decline Customer',
+        virtualTeamName: 'Decline Team',
+      };
+      mockTask.data.wrapUpRequired = false;
 
       const props: TaskListComponentProps = {
-        taskList: {'decline-task': task},
+        taskList: {'decline-task': mockTask},
         currentTask: null,
         acceptTask: mockAcceptTask,
         declineTask: mockDeclineTask,
@@ -576,28 +602,34 @@ describe('TaskListComponent', () => {
       const declineButton = screen.getByTestId('decline-button');
       fireEvent.click(declineButton);
 
-      expect(mockDeclineTask).toHaveBeenCalledWith(task);
+      expect(mockDeclineTask).toHaveBeenCalledWith(mockTask);
+
+      // Restore original values
+      mockTask.data.interactionId = originalInteractionId;
+      mockTask.data.interaction.state = originalState;
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
+      mockTask.data.wrapUpRequired = originalWrapUpRequired;
     });
 
     it('should call onTaskSelect when select button is clicked for selectable task', () => {
-      const task = createMockTask({
-        data: {
-          interactionId: 'select-task',
-          interaction: {
-            callAssociatedDetails: {
-              ani: '1234567890',
-              customerName: 'Select Customer',
-              virtualTeamName: 'Select Team',
-            },
-            mediaType: MEDIA_CHANNEL.TELEPHONY,
-            mediaChannel: 'voice',
-            state: 'active', // Active task should be selectable
-          },
-        },
-      });
+      // Temporarily modify mockTask for select test
+      const originalInteractionId = mockTask.data.interactionId;
+      const originalState = mockTask.data.interaction.state;
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+
+      mockTask.data.interactionId = 'select-task';
+      mockTask.data.interaction.state = 'active'; // Active task should be selectable
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      mockTask.data.interaction.callAssociatedDetails = {
+        ani: '1234567890',
+        customerName: 'Select Customer',
+        virtualTeamName: 'Select Team',
+      };
 
       const props: TaskListComponentProps = {
-        taskList: {'select-task': task},
+        taskList: {'select-task': mockTask},
         currentTask: null,
         acceptTask: mockAcceptTask,
         declineTask: mockDeclineTask,
@@ -611,15 +643,20 @@ describe('TaskListComponent', () => {
       const selectButton = screen.getByTestId('select-button');
       fireEvent.click(selectButton);
 
-      expect(mockOnTaskSelect).toHaveBeenCalledWith(task);
+      expect(mockOnTaskSelect).toHaveBeenCalledWith(mockTask);
+
+      // Restore original values
+      mockTask.data.interactionId = originalInteractionId;
+      mockTask.data.interaction.state = originalState;
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
     });
   });
 
   describe('Logger calls', () => {
     it('should log task rendering', () => {
-      const task = createMockTask();
       const props: TaskListComponentProps = {
-        taskList: {'task-1': task},
+        taskList: {'task-1': mockTask},
         currentTask: null,
         acceptTask: mockAcceptTask,
         declineTask: mockDeclineTask,
@@ -637,13 +674,21 @@ describe('TaskListComponent', () => {
     });
 
     it('should log for each task when multiple tasks are rendered', () => {
-      // ✅ Use default mock tasks without breaking the structure
-      const task1 = createMockTask(); // Uses default values
-      const task2 = createMockTask(); // Uses default values
-
-      // Update only the interactionId after creation
-      task1.data.interactionId = 'task-1';
-      task2.data.interactionId = 'task-2';
+      // Create task copies for multiple tasks
+      const task1 = {
+        ...mockTask,
+        data: {
+          ...mockTask.data,
+          interactionId: 'task-1',
+        },
+      };
+      const task2 = {
+        ...mockTask,
+        data: {
+          ...mockTask.data,
+          interactionId: 'task-2',
+        },
+      };
 
       const props: TaskListComponentProps = {
         taskList: {'task-1': task1, 'task-2': task2},
@@ -663,20 +708,14 @@ describe('TaskListComponent', () => {
 
   describe('Edge cases', () => {
     it('should handle task with missing call association details', () => {
-      const task = createMockTask({
-        data: {
-          interaction: {
-            callAssociatedDetails: undefined,
-            createdTimestamp: 1641234567890,
-            mediaType: MEDIA_CHANNEL.TELEPHONY,
-            mediaChannel: 'voice',
-            state: 'active',
-          },
-        },
-      });
+      // Temporarily modify mockTask for missing details test
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      mockTask.data.interaction.callAssociatedDetails = undefined;
 
       const props: TaskListComponentProps = {
-        taskList: {'task-1': task},
+        taskList: {'task-1': mockTask},
         currentTask: null,
         acceptTask: mockAcceptTask,
         declineTask: mockDeclineTask,
@@ -689,27 +728,30 @@ describe('TaskListComponent', () => {
 
       expect(screen.getByTestId('mock-task')).toBeInTheDocument();
       expect(screen.getByTestId('task-title')).toHaveTextContent(''); // undefined becomes empty
+
+      // Restore original values
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
     });
 
     it('should handle task with wrap up required', () => {
-      const task = createMockTask({
-        data: {
-          interaction: {
-            callAssociatedDetails: {
-              ani: '1234567890',
-              customerName: 'Wrap Up Customer',
-              virtualTeamName: 'Wrap Up Team',
-            },
-            mediaType: MEDIA_CHANNEL.TELEPHONY,
-            mediaChannel: 'voice',
-            state: 'new',
-          },
-          wrapUpRequired: true, // Wrap up required
-        },
-      });
+      // Temporarily modify mockTask for wrap up test
+      const originalState = mockTask.data.interaction.state;
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+      const originalWrapUpRequired = mockTask.data.wrapUpRequired;
+
+      mockTask.data.interaction.state = 'new';
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      mockTask.data.interaction.callAssociatedDetails = {
+        ani: '1234567890',
+        customerName: 'Wrap Up Customer',
+        virtualTeamName: 'Wrap Up Team',
+      };
+      mockTask.data.wrapUpRequired = true; // Wrap up required
 
       const props: TaskListComponentProps = {
-        taskList: {'task-1': task},
+        taskList: {'task-1': mockTask},
         currentTask: null,
         acceptTask: mockAcceptTask,
         declineTask: mockDeclineTask,
@@ -722,6 +764,12 @@ describe('TaskListComponent', () => {
 
       expect(screen.getByTestId('task-accept-text')).toHaveTextContent(''); // No accept text
       expect(screen.getByTestId('task-decline-text')).toHaveTextContent(''); // No decline text
+
+      // Restore original values
+      mockTask.data.interaction.state = originalState;
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
+      mockTask.data.wrapUpRequired = originalWrapUpRequired;
     });
   });
 });

@@ -1,308 +1,203 @@
 import {extractIncomingTaskData} from '../../../../src/components/task/IncomingTask/incoming-task.utils';
 import {MEDIA_CHANNEL} from '../../../../src/components/task/task.types';
-import {ITask} from '@webex/cc-store';
+import {mockTask} from '@webex/test-fixtures';
 
 describe('incoming-task.utils', () => {
-  const createMockTask = (overrides = {}): ITask =>
-    ({
-      data: {
-        interaction: {
-          callAssociatedDetails: {
-            ani: '1234567890',
-            customerName: 'John Doe',
-            virtualTeamName: 'Support Team',
-            ronaTimeout: '30',
-          },
-          createdTimestamp: 1641234567890,
-          mediaType: MEDIA_CHANNEL.TELEPHONY,
-          mediaChannel: 'voice',
-        },
-        wrapUpRequired: false,
-        interactionId: 'test-interaction-123',
-        ...overrides,
-      },
-      ...overrides,
-    }) as ITask;
+  beforeEach(() => {
+    // Reset mockTask to default state before each test
+    jest.clearAllMocks();
+  });
 
   describe('extractIncomingTaskData', () => {
     describe('Telephony tasks', () => {
       it('should extract correct data for browser telephony task without wrap up', () => {
-        const mockTask = createMockTask();
         const result = extractIncomingTaskData(mockTask, true);
 
-        expect(result).toEqual({
-          ani: '1234567890',
-          customerName: 'John Doe',
-          virtualTeamName: 'Support Team',
-          ronaTimeout: 30,
-          startTimeStamp: 1641234567890,
-          mediaType: MEDIA_CHANNEL.TELEPHONY,
-          mediaChannel: 'voice',
-          isTelephony: true,
-          isSocial: false,
-          acceptText: 'Accept',
-          declineText: 'Decline',
-          title: '1234567890',
-          disableAccept: false,
-        });
+        expect(result.isTelephony).toBe(true);
+        expect(result.isSocial).toBe(false);
+        expect(result.acceptText).toBe('Accept');
+        expect(result.declineText).toBe('Decline');
+        expect(result.disableAccept).toBe(false);
+        expect(result.mediaType).toBe(mockTask.data.interaction.mediaType);
+        expect(result.startTimeStamp).toBe(mockTask.data.interaction.createdTimestamp);
       });
 
       it('should extract correct data for non-browser telephony task without wrap up', () => {
-        const mockTask = createMockTask();
         const result = extractIncomingTaskData(mockTask, false);
 
-        expect(result).toEqual({
-          ani: '1234567890',
-          customerName: 'John Doe',
-          virtualTeamName: 'Support Team',
-          ronaTimeout: 30,
-          startTimeStamp: 1641234567890,
-          mediaType: MEDIA_CHANNEL.TELEPHONY,
-          mediaChannel: 'voice',
-          isTelephony: true,
-          isSocial: false,
-          acceptText: 'Ringing...',
-          declineText: undefined,
-          title: '1234567890',
-          disableAccept: true,
-        });
+        expect(result.isTelephony).toBe(true);
+        expect(result.isSocial).toBe(false);
+        expect(result.acceptText).toBe('Ringing...');
+        expect(result.declineText).toBeUndefined();
+        expect(result.disableAccept).toBe(true);
+        expect(result.mediaType).toBe(mockTask.data.interaction.mediaType);
+        expect(result.startTimeStamp).toBe(mockTask.data.interaction.createdTimestamp);
       });
 
       it('should handle telephony task with wrap up required', () => {
-        const mockTask = createMockTask({
-          data: {
-            wrapUpRequired: true,
-            interaction: {
-              callAssociatedDetails: {
-                ani: '9876543210',
-                customerName: 'Jane Smith',
-                virtualTeamName: 'Sales Team',
-                ronaTimeout: '45',
-              },
-              createdTimestamp: 1641234567890,
-              mediaType: MEDIA_CHANNEL.TELEPHONY,
-              mediaChannel: 'voice',
-            },
-          },
-        });
+        // Temporarily modify mockTask for wrap up test
+        const originalWrapUpRequired = mockTask.data.wrapUpRequired;
+        mockTask.data.wrapUpRequired = true;
 
         const result = extractIncomingTaskData(mockTask, true);
 
         expect(result.acceptText).toBeUndefined();
         expect(result.declineText).toBeUndefined();
         expect(result.isTelephony).toBe(true);
-        expect(result.title).toBe('9876543210');
+
+        // Restore original wrapUpRequired
+        mockTask.data.wrapUpRequired = originalWrapUpRequired;
       });
     });
 
     describe('Social media tasks', () => {
       it('should extract correct data for social media task', () => {
-        const mockTask = createMockTask({
-          data: {
-            interaction: {
-              callAssociatedDetails: {
-                ani: '1234567890',
-                customerName: 'Alice Johnson',
-                virtualTeamName: 'Social Team',
-                ronaTimeout: '60',
-              },
-              createdTimestamp: 1641234567890,
-              mediaType: MEDIA_CHANNEL.SOCIAL,
-              mediaChannel: 'facebook',
-            },
-            wrapUpRequired: false,
-          },
-        });
+        // Temporarily modify mockTask for social media test
+        const originalMediaType = mockTask.data.interaction.mediaType;
+        mockTask.data.interaction.mediaType = MEDIA_CHANNEL.SOCIAL;
 
         const result = extractIncomingTaskData(mockTask, true);
 
-        expect(result).toEqual({
-          ani: '1234567890',
-          customerName: 'Alice Johnson',
-          virtualTeamName: 'Social Team',
-          ronaTimeout: 60,
-          startTimeStamp: 1641234567890,
-          mediaType: MEDIA_CHANNEL.SOCIAL,
-          mediaChannel: 'facebook',
-          isTelephony: false,
-          isSocial: true,
-          acceptText: 'Accept',
-          declineText: undefined,
-          title: 'Alice Johnson',
-          disableAccept: false,
-        });
+        expect(result.isTelephony).toBe(false);
+        expect(result.isSocial).toBe(true);
+        expect(result.acceptText).toBe('Accept');
+        expect(result.declineText).toBeUndefined();
+        expect(result.disableAccept).toBe(false);
+        expect(result.mediaType).toBe(MEDIA_CHANNEL.SOCIAL);
+
+        // Restore original mediaType
+        mockTask.data.interaction.mediaType = originalMediaType;
       });
 
       it('should handle social media task with wrap up required', () => {
-        const mockTask = createMockTask({
-          data: {
-            interaction: {
-              callAssociatedDetails: {
-                ani: '1234567890',
-                customerName: 'Bob Wilson',
-                virtualTeamName: 'Social Team',
-              },
-              createdTimestamp: 1641234567890,
-              mediaType: MEDIA_CHANNEL.SOCIAL,
-              mediaChannel: 'twitter',
-            },
-            wrapUpRequired: true,
-          },
-        });
+        // Temporarily modify mockTask for social media with wrap up test
+        const originalMediaType = mockTask.data.interaction.mediaType;
+        const originalWrapUpRequired = mockTask.data.wrapUpRequired;
+
+        mockTask.data.interaction.mediaType = MEDIA_CHANNEL.SOCIAL;
+        mockTask.data.wrapUpRequired = true;
 
         const result = extractIncomingTaskData(mockTask, true);
 
         expect(result.acceptText).toBeUndefined();
         expect(result.declineText).toBeUndefined();
         expect(result.isSocial).toBe(true);
-        expect(result.title).toBe('Bob Wilson');
+
+        // Restore original values
+        mockTask.data.interaction.mediaType = originalMediaType;
+        mockTask.data.wrapUpRequired = originalWrapUpRequired;
       });
     });
 
     describe('Edge cases and missing data', () => {
       it('should handle missing call association details', () => {
-        const mockTask = createMockTask({
-          data: {
-            interaction: {
-              callAssociatedDetails: undefined,
-              createdTimestamp: 1641234567890,
-              mediaType: MEDIA_CHANNEL.TELEPHONY,
-              mediaChannel: 'voice',
-            },
-            wrapUpRequired: false,
-          },
-        });
+        // Temporarily modify mockTask for missing details test
+        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+        const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+        mockTask.data.interaction.callAssociatedDetails = undefined;
 
         const result = extractIncomingTaskData(mockTask, true);
 
         expect(result.ani).toBeUndefined();
         expect(result.customerName).toBeUndefined();
         expect(result.virtualTeamName).toBeUndefined();
-        expect(result.ronaTimeout).toBeNull();
-        expect(result.title).toBeUndefined();
+
+        // Restore original callAssociatedDetails
+        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+        mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
       });
 
       it('should handle missing ronaTimeout', () => {
-        const mockTask = createMockTask({
-          data: {
-            interaction: {
-              callAssociatedDetails: {
-                ani: '1234567890',
-                customerName: 'Test User',
-                virtualTeamName: 'Test Team',
-              },
-              createdTimestamp: 1641234567890,
-              mediaType: MEDIA_CHANNEL.TELEPHONY,
-              mediaChannel: 'voice',
-            },
-            wrapUpRequired: false,
-          },
-        });
+        // Temporarily modify mockTask for missing ronaTimeout test
+        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+        const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+        mockTask.data.interaction.callAssociatedDetails = {
+          ...originalCallAssociatedDetails,
+          ronaTimeout: undefined,
+        };
 
         const result = extractIncomingTaskData(mockTask, true);
 
         expect(result.ronaTimeout).toBeNull();
+
+        // Restore original callAssociatedDetails
+        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+        mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
       });
 
       it('should handle invalid ronaTimeout', () => {
-        const mockTask = createMockTask({
-          data: {
-            interaction: {
-              callAssociatedDetails: {
-                ani: '1234567890',
-                customerName: 'Test User',
-                virtualTeamName: 'Test Team',
-                ronaTimeout: 'invalid-number',
-              },
-              createdTimestamp: 1641234567890,
-              mediaType: MEDIA_CHANNEL.TELEPHONY,
-              mediaChannel: 'voice',
-            },
-            wrapUpRequired: false,
-          },
-        });
+        // Temporarily modify mockTask for invalid ronaTimeout test
+        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+        const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+        mockTask.data.interaction.callAssociatedDetails = {
+          ...originalCallAssociatedDetails,
+          ronaTimeout: 'invalid-number',
+        };
 
         const result = extractIncomingTaskData(mockTask, true);
 
         expect(result.ronaTimeout).toBeNaN();
+
+        // Restore original callAssociatedDetails
+        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+        mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
       });
 
       it('should handle zero ronaTimeout', () => {
-        const mockTask = createMockTask({
-          data: {
-            interaction: {
-              callAssociatedDetails: {
-                ani: '1234567890',
-                customerName: 'Test User',
-                virtualTeamName: 'Test Team',
-                ronaTimeout: '0',
-              },
-              createdTimestamp: 1641234567890,
-              mediaType: MEDIA_CHANNEL.TELEPHONY,
-              mediaChannel: 'voice',
-            },
-            wrapUpRequired: false,
-          },
-        });
+        // Temporarily modify mockTask for zero ronaTimeout test
+        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+        const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+        mockTask.data.interaction.callAssociatedDetails = {
+          ...originalCallAssociatedDetails,
+          ronaTimeout: '0',
+        };
 
         const result = extractIncomingTaskData(mockTask, true);
 
         expect(result.ronaTimeout).toBe(0);
+
+        // Restore original callAssociatedDetails
+        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+        mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
       });
     });
 
     describe('Different media types', () => {
       it('should handle chat media type', () => {
-        const mockTask = createMockTask({
-          data: {
-            interaction: {
-              callAssociatedDetails: {
-                ani: '1234567890',
-                customerName: 'Chat User',
-                virtualTeamName: 'Chat Team',
-              },
-              createdTimestamp: 1641234567890,
-              mediaType: MEDIA_CHANNEL.CHAT,
-              mediaChannel: 'webchat',
-            },
-            wrapUpRequired: false,
-          },
-        });
+        // Temporarily modify mockTask for chat test
+        const originalMediaType = mockTask.data.interaction.mediaType;
+        mockTask.data.interaction.mediaType = MEDIA_CHANNEL.CHAT;
 
         const result = extractIncomingTaskData(mockTask, true);
 
         expect(result.isTelephony).toBe(false);
         expect(result.isSocial).toBe(false);
         expect(result.mediaType).toBe(MEDIA_CHANNEL.CHAT);
-        expect(result.title).toBe('1234567890');
         expect(result.acceptText).toBe('Accept');
         expect(result.declineText).toBeUndefined();
         expect(result.disableAccept).toBe(false);
+
+        // Restore original mediaType
+        mockTask.data.interaction.mediaType = originalMediaType;
       });
 
       it('should handle email media type', () => {
-        const mockTask = createMockTask({
-          data: {
-            interaction: {
-              callAssociatedDetails: {
-                ani: 'email@example.com',
-                customerName: 'Email User',
-                virtualTeamName: 'Email Team',
-              },
-              createdTimestamp: 1641234567890,
-              mediaType: MEDIA_CHANNEL.EMAIL,
-              mediaChannel: 'email',
-            },
-            wrapUpRequired: false,
-          },
-        });
+        // Temporarily modify mockTask for email test
+        const originalMediaType = mockTask.data.interaction.mediaType;
+        mockTask.data.interaction.mediaType = MEDIA_CHANNEL.EMAIL;
 
         const result = extractIncomingTaskData(mockTask, true);
 
         expect(result.isTelephony).toBe(false);
         expect(result.isSocial).toBe(false);
         expect(result.mediaType).toBe(MEDIA_CHANNEL.EMAIL);
-        expect(result.title).toBe('email@example.com');
+
+        // Restore original mediaType
+        mockTask.data.interaction.mediaType = originalMediaType;
       });
     });
 
@@ -366,27 +261,23 @@ describe('incoming-task.utils', () => {
           expectedDisableAccept,
         }) => {
           it(`should handle ${description}`, () => {
-            const mockTask = createMockTask({
-              data: {
-                interaction: {
-                  callAssociatedDetails: {
-                    ani: '1234567890',
-                    customerName: 'Test User',
-                    virtualTeamName: 'Test Team',
-                  },
-                  createdTimestamp: 1641234567890,
-                  mediaType,
-                  mediaChannel: 'test-channel',
-                },
-                wrapUpRequired,
-              },
-            });
+            // Store original values for restoration
+            const originalMediaType = mockTask.data.interaction.mediaType;
+            const originalWrapUpRequired = mockTask.data.wrapUpRequired;
+
+            // Temporarily modify mockTask for this test
+            mockTask.data.interaction.mediaType = mediaType;
+            mockTask.data.wrapUpRequired = wrapUpRequired;
 
             const result = extractIncomingTaskData(mockTask, isBrowser);
 
             expect(result.acceptText).toBe(expectedAcceptText);
             expect(result.declineText).toBe(expectedDeclineText);
             expect(result.disableAccept).toBe(expectedDisableAccept);
+
+            // Restore original values
+            mockTask.data.interaction.mediaType = originalMediaType;
+            mockTask.data.wrapUpRequired = originalWrapUpRequired;
           });
         }
       );

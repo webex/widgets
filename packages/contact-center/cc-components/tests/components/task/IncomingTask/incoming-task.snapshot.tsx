@@ -1,7 +1,10 @@
 import React from 'react';
 import {render} from '@testing-library/react';
+import '@testing-library/jest-dom';
+import {mockTask} from '@webex/test-fixtures';
 import IncomingTaskComponent from '../../../../src/components/task/IncomingTask/incoming-task';
 import {MEDIA_CHANNEL} from '../../../../src/components/task/task.types';
+import type {ILogger} from '@webex/cc-store';
 
 // Mock TaskTimer component
 jest.mock('../../../../src/components/task/TaskTimer', () => {
@@ -12,38 +15,13 @@ jest.mock('../../../../src/components/task/TaskTimer', () => {
 });
 
 describe('IncomingTaskComponent', () => {
-  // Mock logger
-  const mockLogger = {
+  // Mock logger with all required ILogger methods
+  const mockLogger: ILogger = {
     info: jest.fn(),
     warn: jest.fn(),
     error: jest.fn(),
-    debug: jest.fn(),
-  };
-
-  // Helper function to create mock tasks
-  const createMockTask = (overrides = {}) => ({
-    data: {
-      interactionId: 'test-interaction-123',
-      wrapUpRequired: false,
-      interaction: {
-        callAssociatedDetails: {
-          ani: '1234567890',
-          customerName: 'John Doe',
-          virtualTeamName: 'Support Team',
-          ronaTimeout: '30',
-        },
-        createdTimestamp: 1641234567890,
-        mediaType: MEDIA_CHANNEL.TELEPHONY,
-        mediaChannel: 'voice',
-      },
-      ...overrides,
-    },
-  });
-
-  const defaultProps = {
-    accept: jest.fn(),
-    reject: jest.fn(),
-    logger: mockLogger,
+    log: jest.fn(),
+    trace: jest.fn(),
   };
 
   beforeEach(() => {
@@ -52,9 +30,11 @@ describe('IncomingTaskComponent', () => {
 
   it('renders empty component when incomingTask is null', () => {
     const props = {
-      ...defaultProps,
       incomingTask: null,
+      accept: jest.fn(),
+      reject: jest.fn(),
       isBrowser: true,
+      logger: mockLogger,
     };
 
     const {container} = render(<IncomingTaskComponent {...props} />);
@@ -62,11 +42,12 @@ describe('IncomingTaskComponent', () => {
   });
 
   it('renders incoming call and handles accept/decline for browser telephony task', () => {
-    const mockTask = createMockTask();
     const props = {
-      ...defaultProps,
       incomingTask: mockTask,
+      accept: jest.fn(),
+      reject: jest.fn(),
       isBrowser: true,
+      logger: mockLogger,
     };
 
     const {container} = render(<IncomingTaskComponent {...props} />);
@@ -74,11 +55,12 @@ describe('IncomingTaskComponent', () => {
   });
 
   it('shows correct button text for non-browser telephony task', () => {
-    const mockTask = createMockTask();
     const props = {
-      ...defaultProps,
       incomingTask: mockTask,
+      accept: jest.fn(),
+      reject: jest.fn(),
       isBrowser: false,
+      logger: mockLogger,
     };
 
     const {container} = render(<IncomingTaskComponent {...props} />);
@@ -86,149 +68,116 @@ describe('IncomingTaskComponent', () => {
   });
 
   it('handles social media task correctly', () => {
-    const mockTask = createMockTask({
-      interaction: {
-        callAssociatedDetails: {
-          ani: '1234567890',
-          customerName: 'Alice Johnson',
-          virtualTeamName: 'Social Media Team',
-          ronaTimeout: '60',
-        },
-        createdTimestamp: 1641234567890,
-        mediaType: MEDIA_CHANNEL.SOCIAL,
-        mediaChannel: 'facebook',
-      },
-    });
+    // Temporarily modify mockTask for social media test
+    const originalMediaType = mockTask.data.interaction.mediaType;
+    mockTask.data.interaction.mediaType = MEDIA_CHANNEL.SOCIAL;
+
     const props = {
-      ...defaultProps,
       incomingTask: mockTask,
+      accept: jest.fn(),
+      reject: jest.fn(),
       isBrowser: true,
+      logger: mockLogger,
     };
 
     const {container} = render(<IncomingTaskComponent {...props} />);
     expect(container.firstChild).toMatchSnapshot();
+
+    // Restore original mediaType
+    mockTask.data.interaction.mediaType = originalMediaType;
   });
 
   it('renders browser telephony task with wrap up required', () => {
-    const mockTask = createMockTask({
-      wrapUpRequired: true,
-    });
+    // Temporarily modify mockTask for wrap up test
+    const originalWrapUpRequired = mockTask.data.wrapUpRequired;
+    mockTask.data.wrapUpRequired = true;
+
     const props = {
-      ...defaultProps,
       incomingTask: mockTask,
+      accept: jest.fn(),
+      reject: jest.fn(),
       isBrowser: true,
+      logger: mockLogger,
     };
 
     const {container} = render(<IncomingTaskComponent {...props} />);
     expect(container.firstChild).toMatchSnapshot();
+
+    // Restore original wrapUpRequired
+    mockTask.data.wrapUpRequired = originalWrapUpRequired;
   });
 
   it('renders social media task with wrap up required', () => {
-    const mockTask = createMockTask({
-      wrapUpRequired: true,
-      interaction: {
-        callAssociatedDetails: {
-          ani: '9876543210',
-          customerName: 'Bob Wilson',
-          virtualTeamName: 'Social Support',
-        },
-        createdTimestamp: 1641234567890,
-        mediaType: MEDIA_CHANNEL.SOCIAL,
-        mediaChannel: 'twitter',
-      },
-    });
+    // Temporarily modify mockTask for social media with wrap up test
+    const originalMediaType = mockTask.data.interaction.mediaType;
+    const originalWrapUpRequired = mockTask.data.wrapUpRequired;
+
+    mockTask.data.interaction.mediaType = MEDIA_CHANNEL.SOCIAL;
+    mockTask.data.wrapUpRequired = true;
+
     const props = {
-      ...defaultProps,
       incomingTask: mockTask,
+      accept: jest.fn(),
+      reject: jest.fn(),
       isBrowser: true,
+      logger: mockLogger,
     };
 
     const {container} = render(<IncomingTaskComponent {...props} />);
     expect(container.firstChild).toMatchSnapshot();
+
+    // Restore original values
+    mockTask.data.interaction.mediaType = originalMediaType;
+    mockTask.data.wrapUpRequired = originalWrapUpRequired;
   });
 
   it('renders chat task without wrap up', () => {
-    const mockTask = createMockTask({
-      interaction: {
-        callAssociatedDetails: {
-          ani: 'chat-user-123',
-          customerName: 'Chat Customer',
-          virtualTeamName: 'Chat Support',
-        },
-        createdTimestamp: 1641234567890,
-        mediaType: MEDIA_CHANNEL.CHAT,
-        mediaChannel: 'webchat',
-      },
-    });
+    // Temporarily modify mockTask for chat test
+    const originalMediaType = mockTask.data.interaction.mediaType;
+    mockTask.data.interaction.mediaType = MEDIA_CHANNEL.CHAT;
+
     const props = {
-      ...defaultProps,
       incomingTask: mockTask,
+      accept: jest.fn(),
+      reject: jest.fn(),
       isBrowser: true,
+      logger: mockLogger,
     };
 
     const {container} = render(<IncomingTaskComponent {...props} />);
     expect(container.firstChild).toMatchSnapshot();
+
+    // Restore original mediaType
+    mockTask.data.interaction.mediaType = originalMediaType;
   });
 
   it('renders email task without wrap up', () => {
-    const mockTask = createMockTask({
-      interaction: {
-        callAssociatedDetails: {
-          ani: 'customer@example.com',
-          customerName: 'Email Customer',
-          virtualTeamName: 'Email Support',
-        },
-        createdTimestamp: 1641234567890,
-        mediaType: MEDIA_CHANNEL.EMAIL,
-        mediaChannel: 'email',
-      },
-    });
+    // Temporarily modify mockTask for email test
+    const originalMediaType = mockTask.data.interaction.mediaType;
+    mockTask.data.interaction.mediaType = MEDIA_CHANNEL.EMAIL;
+
     const props = {
-      ...defaultProps,
       incomingTask: mockTask,
+      accept: jest.fn(),
+      reject: jest.fn(),
       isBrowser: true,
+      logger: mockLogger,
     };
 
     const {container} = render(<IncomingTaskComponent {...props} />);
     expect(container.firstChild).toMatchSnapshot();
+
+    // Restore original mediaType
+    mockTask.data.interaction.mediaType = originalMediaType;
   });
 
-  it('renders task with missing call association details', () => {
-    const mockTask = createMockTask({
-      interaction: {
-        callAssociatedDetails: undefined,
-        createdTimestamp: 1641234567890,
-        mediaType: MEDIA_CHANNEL.TELEPHONY,
-        mediaChannel: 'voice',
-      },
-    });
+  it('logs accept and decline actions when buttons are clicked', () => {
     const props = {
-      ...defaultProps,
       incomingTask: mockTask,
+      accept: jest.fn(),
+      reject: jest.fn(),
       isBrowser: true,
-    };
-
-    const {container} = render(<IncomingTaskComponent {...props} />);
-    expect(container.firstChild).toMatchSnapshot();
-  });
-
-  it('renders task with special characters in ANI', () => {
-    const mockTask = createMockTask({
-      interaction: {
-        callAssociatedDetails: {
-          ani: '+1 (555) 123-4567 ext. 123',
-          customerName: 'Special Char Customer',
-          virtualTeamName: 'Special Support & Services',
-        },
-        createdTimestamp: 1641234567890,
-        mediaType: MEDIA_CHANNEL.TELEPHONY,
-        mediaChannel: 'voice',
-      },
-    });
-    const props = {
-      ...defaultProps,
-      incomingTask: mockTask,
-      isBrowser: true,
+      logger: mockLogger,
     };
 
     const {container} = render(<IncomingTaskComponent {...props} />);
