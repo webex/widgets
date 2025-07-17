@@ -1,0 +1,457 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`IncomingTaskComponent handles social media task correctly 1`] = `
+<li
+  class="task-list-item  task-list-hover md-list-item-base-wrapper"
+  data-allow-text-select="false"
+  data-disabled="false"
+  data-interactive="true"
+  data-padded="false"
+  data-shape="rectangle"
+  data-size="40"
+  role="listitem"
+  tabindex="0"
+>
+  <div
+    data-position="start"
+  >
+    <mdc-avatar
+      class="social"
+      icon-name="chat-filled"
+    />
+  </div>
+  <div
+    data-position="fill"
+  >
+    <section
+      class="task-details"
+    />
+  </div>
+  <div
+    data-position="end"
+  >
+    <div
+      class="task-button-container"
+    >
+      <button
+        class="md-button-pill-wrapper md-button-simple-wrapper"
+        data-color="join"
+        data-disabled="false"
+        data-disabled-outline="false"
+        data-ghost="false"
+        data-grown="false"
+        data-inverted="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="40"
+        data-testid="task:accept-button"
+        tabindex="-1"
+        type="button"
+      >
+        <span>
+          Accept
+        </span>
+      </button>
+    </div>
+  </div>
+</li>
+`;
+
+exports[`IncomingTaskComponent logs accept and decline actions when buttons are clicked 1`] = `
+<li
+  class="task-list-item  task-list-hover md-list-item-base-wrapper"
+  data-allow-text-select="false"
+  data-disabled="false"
+  data-interactive="true"
+  data-padded="false"
+  data-shape="rectangle"
+  data-size="40"
+  role="listitem"
+  tabindex="0"
+>
+  <div
+    data-position="start"
+  >
+    <mdc-avatar
+      class="telephony"
+      icon-name="handset-filled"
+    />
+  </div>
+  <div
+    data-position="fill"
+  >
+    <section
+      class="task-details"
+    />
+  </div>
+  <div
+    data-position="end"
+  >
+    <div
+      class="task-button-container"
+    >
+      <button
+        class="md-button-pill-wrapper md-button-simple-wrapper"
+        data-color="join"
+        data-disabled="false"
+        data-disabled-outline="false"
+        data-ghost="false"
+        data-grown="false"
+        data-inverted="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="40"
+        data-testid="task:accept-button"
+        tabindex="-1"
+        type="button"
+      >
+        <span>
+          Accept
+        </span>
+      </button>
+      <button
+        class="md-button-pill-wrapper md-button-simple-wrapper"
+        data-color="cancel"
+        data-disabled="false"
+        data-disabled-outline="false"
+        data-ghost="false"
+        data-grown="false"
+        data-inverted="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="40"
+        data-testid="task:decline-button"
+        tabindex="-1"
+        type="button"
+      >
+        <span>
+          Decline
+        </span>
+      </button>
+    </div>
+  </div>
+</li>
+`;
+
+exports[`IncomingTaskComponent renders browser telephony task with wrap up required 1`] = `
+<li
+  class="task-list-item  task-list-hover md-list-item-base-wrapper"
+  data-allow-text-select="false"
+  data-disabled="false"
+  data-interactive="true"
+  data-padded="false"
+  data-shape="rectangle"
+  data-size="40"
+  role="listitem"
+  tabindex="0"
+>
+  <div
+    data-position="start"
+  >
+    <mdc-avatar
+      class="telephony"
+      icon-name="handset-filled"
+    />
+  </div>
+  <div
+    data-position="fill"
+  >
+    <section
+      class="task-details"
+    />
+  </div>
+  <div
+    data-position="end"
+  >
+    <div
+      class="task-button-container"
+    />
+  </div>
+</li>
+`;
+
+exports[`IncomingTaskComponent renders chat task without wrap up 1`] = `
+<li
+  class="task-list-item  task-list-hover md-list-item-base-wrapper"
+  data-allow-text-select="false"
+  data-disabled="false"
+  data-interactive="true"
+  data-padded="false"
+  data-shape="rectangle"
+  data-size="40"
+  role="listitem"
+  tabindex="0"
+>
+  <div
+    data-position="start"
+  >
+    <mdc-avatar
+      class="chat"
+      icon-name="chat-filled"
+    />
+  </div>
+  <div
+    data-position="fill"
+  >
+    <section
+      class="task-details"
+    />
+  </div>
+  <div
+    data-position="end"
+  >
+    <div
+      class="task-button-container"
+    >
+      <button
+        class="md-button-pill-wrapper md-button-simple-wrapper"
+        data-color="join"
+        data-disabled="false"
+        data-disabled-outline="false"
+        data-ghost="false"
+        data-grown="false"
+        data-inverted="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="40"
+        data-testid="task:accept-button"
+        tabindex="-1"
+        type="button"
+      >
+        <span>
+          Accept
+        </span>
+      </button>
+    </div>
+  </div>
+</li>
+`;
+
+exports[`IncomingTaskComponent renders email task without wrap up 1`] = `
+<li
+  class="task-list-item  task-list-hover md-list-item-base-wrapper"
+  data-allow-text-select="false"
+  data-disabled="false"
+  data-interactive="true"
+  data-padded="false"
+  data-shape="rectangle"
+  data-size="40"
+  role="listitem"
+  tabindex="0"
+>
+  <div
+    data-position="start"
+  >
+    <mdc-avatar
+      class="email"
+      icon-name="email-filled"
+    />
+  </div>
+  <div
+    data-position="fill"
+  >
+    <section
+      class="task-details"
+    />
+  </div>
+  <div
+    data-position="end"
+  >
+    <div
+      class="task-button-container"
+    >
+      <button
+        class="md-button-pill-wrapper md-button-simple-wrapper"
+        data-color="join"
+        data-disabled="false"
+        data-disabled-outline="false"
+        data-ghost="false"
+        data-grown="false"
+        data-inverted="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="40"
+        data-testid="task:accept-button"
+        tabindex="-1"
+        type="button"
+      >
+        <span>
+          Accept
+        </span>
+      </button>
+    </div>
+  </div>
+</li>
+`;
+
+exports[`IncomingTaskComponent renders empty component when incomingTask is null 1`] = `null`;
+
+exports[`IncomingTaskComponent renders incoming call and handles accept/decline for browser telephony task 1`] = `
+<li
+  class="task-list-item  task-list-hover md-list-item-base-wrapper"
+  data-allow-text-select="false"
+  data-disabled="false"
+  data-interactive="true"
+  data-padded="false"
+  data-shape="rectangle"
+  data-size="40"
+  role="listitem"
+  tabindex="0"
+>
+  <div
+    data-position="start"
+  >
+    <mdc-avatar
+      class="telephony"
+      icon-name="handset-filled"
+    />
+  </div>
+  <div
+    data-position="fill"
+  >
+    <section
+      class="task-details"
+    />
+  </div>
+  <div
+    data-position="end"
+  >
+    <div
+      class="task-button-container"
+    >
+      <button
+        class="md-button-pill-wrapper md-button-simple-wrapper"
+        data-color="join"
+        data-disabled="false"
+        data-disabled-outline="false"
+        data-ghost="false"
+        data-grown="false"
+        data-inverted="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="40"
+        data-testid="task:accept-button"
+        tabindex="-1"
+        type="button"
+      >
+        <span>
+          Accept
+        </span>
+      </button>
+      <button
+        class="md-button-pill-wrapper md-button-simple-wrapper"
+        data-color="cancel"
+        data-disabled="false"
+        data-disabled-outline="false"
+        data-ghost="false"
+        data-grown="false"
+        data-inverted="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="40"
+        data-testid="task:decline-button"
+        tabindex="-1"
+        type="button"
+      >
+        <span>
+          Decline
+        </span>
+      </button>
+    </div>
+  </div>
+</li>
+`;
+
+exports[`IncomingTaskComponent renders social media task with wrap up required 1`] = `
+<li
+  class="task-list-item  task-list-hover md-list-item-base-wrapper"
+  data-allow-text-select="false"
+  data-disabled="false"
+  data-interactive="true"
+  data-padded="false"
+  data-shape="rectangle"
+  data-size="40"
+  role="listitem"
+  tabindex="0"
+>
+  <div
+    data-position="start"
+  >
+    <mdc-avatar
+      class="social"
+      icon-name="chat-filled"
+    />
+  </div>
+  <div
+    data-position="fill"
+  >
+    <section
+      class="task-details"
+    />
+  </div>
+  <div
+    data-position="end"
+  >
+    <div
+      class="task-button-container"
+    />
+  </div>
+</li>
+`;
+
+exports[`IncomingTaskComponent shows correct button text for non-browser telephony task 1`] = `
+<li
+  class="task-list-item  task-list-hover md-list-item-base-wrapper"
+  data-allow-text-select="false"
+  data-disabled="false"
+  data-interactive="true"
+  data-padded="false"
+  data-shape="rectangle"
+  data-size="40"
+  role="listitem"
+  tabindex="0"
+>
+  <div
+    data-position="start"
+  >
+    <mdc-avatar
+      class="telephony"
+      icon-name="handset-filled"
+    />
+  </div>
+  <div
+    data-position="fill"
+  >
+    <section
+      class="task-details"
+    />
+  </div>
+  <div
+    data-position="end"
+  >
+    <div
+      class="task-button-container"
+    >
+      <button
+        class="md-button-pill-wrapper md-button-simple-wrapper"
+        data-color="join"
+        data-disabled="true"
+        data-disabled-outline="false"
+        data-ghost="false"
+        data-grown="false"
+        data-inverted="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="40"
+        data-testid="task:accept-button"
+        disabled=""
+        type="button"
+      >
+        <span>
+          Ringing...
+        </span>
+      </button>
+    </div>
+  </div>
+</li>
+`;

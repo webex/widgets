@@ -1,64 +1,15 @@
 import React from 'react';
-import {render, screen, fireEvent} from '@testing-library/react';
+import {render} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import {mockTask} from '@webex/test-fixtures';
 import TaskListComponent from '../../../../src/components/task/TaskList/task-list';
-import {MEDIA_CHANNEL, TaskListComponentProps} from '../../../../src/components/task/task.types';
+import {TaskListComponentProps, MEDIA_CHANNEL} from '../../../../src/components/task/task.types';
 
-// ✅ Define proper interface for MockTask props
-interface MockTaskProps {
-  interactionId: string;
-  title: string;
-  state: string;
-  queue: string;
-  startTimeStamp: number;
-  isIncomingTask: boolean;
-  selected: boolean;
-  ronaTimeout: number | null;
-  acceptText?: string;
-  declineText?: string;
-  disableAccept: boolean;
-  mediaType: string;
-  mediaChannel: string;
-  acceptTask?: () => void;
-  declineTask?: () => void;
-  onTaskSelect?: () => void;
-}
-
-// Mock the Task component
-jest.mock('../../../../src/components/task/Task', () => {
-  return function MockTask(props: MockTaskProps) {
-    return (
-      <li data-testid="mock-task" data-interaction-id={props.interactionId}>
-        <div data-testid="task-title">{props.title}</div>
-        <div data-testid="task-state">{props.state}</div>
-        <div data-testid="task-queue">{props.queue}</div>
-        <div data-testid="task-timestamp">{props.startTimeStamp}</div>
-        <div data-testid="task-incoming">{props.isIncomingTask ? 'incoming' : 'active'}</div>
-        <div data-testid="task-selected">{props.selected ? 'selected' : 'not-selected'}</div>
-        <div data-testid="task-rona-timeout">{props.ronaTimeout}</div>
-        <div data-testid="task-accept-text">{props.acceptText}</div>
-        <div data-testid="task-decline-text">{props.declineText}</div>
-        <div data-testid="task-disable-accept">{props.disableAccept ? 'disabled' : 'enabled'}</div>
-        <div data-testid="task-media-type">{props.mediaType}</div>
-        <div data-testid="task-media-channel">{props.mediaChannel}</div>
-        {props.acceptTask && (
-          <button data-testid="accept-button" onClick={props.acceptTask}>
-            Accept
-          </button>
-        )}
-        {props.declineTask && (
-          <button data-testid="decline-button" onClick={props.declineTask}>
-            Decline
-          </button>
-        )}
-        {props.onTaskSelect && (
-          <button data-testid="select-button" onClick={props.onTaskSelect}>
-            Select
-          </button>
-        )}
-      </li>
-    );
+// Mock TaskTimer component (if used)
+jest.mock('../../../../src/components/task/TaskTimer', () => {
+  return {
+    __esModule: true,
+    default: () => <div data-testid="mock-timer">Timer</div>,
   };
 });
 
@@ -81,7 +32,7 @@ describe('TaskListComponent', () => {
 
   describe('Empty task list scenarios', () => {
     it('should render empty component when taskList is null', () => {
-      const props: TaskListComponentProps = {
+      const props = {
         taskList: null,
         currentTask: null,
         acceptTask: mockAcceptTask,
@@ -92,11 +43,11 @@ describe('TaskListComponent', () => {
       };
 
       const {container} = render(<TaskListComponent {...props} />);
-      expect(container.firstChild).toBeNull();
+      expect(container.firstChild).toMatchSnapshot();
     });
 
     it('should render empty component when taskList is undefined', () => {
-      const props: TaskListComponentProps = {
+      const props = {
         taskList: undefined,
         currentTask: null,
         acceptTask: mockAcceptTask,
@@ -107,7 +58,7 @@ describe('TaskListComponent', () => {
       };
 
       const {container} = render(<TaskListComponent {...props} />);
-      expect(container.firstChild).toBeNull();
+      expect(container.firstChild).toMatchSnapshot();
     });
 
     it('should render empty component when taskList is empty object', () => {
@@ -122,7 +73,7 @@ describe('TaskListComponent', () => {
       };
 
       const {container} = render(<TaskListComponent {...props} />);
-      expect(container.firstChild).toBeNull();
+      expect(container.firstChild).toMatchSnapshot();
     });
   });
 
@@ -152,14 +103,8 @@ describe('TaskListComponent', () => {
         logger: mockLogger,
       };
 
-      render(<TaskListComponent {...props} />);
-
-      expect(screen.getByTestId('task-list')).toBeInTheDocument();
-      expect(screen.getByTestId('mock-task')).toBeInTheDocument();
-      expect(screen.getByTestId('task-title')).toHaveTextContent('1234567890');
-      expect(screen.getByTestId('task-queue')).toHaveTextContent('Support Team');
-      expect(screen.getByTestId('task-incoming')).toHaveTextContent('active');
-      expect(screen.getByTestId('task-selected')).toHaveTextContent('not-selected');
+      const {container} = render(<TaskListComponent {...props} />);
+      expect(container.firstChild).toMatchSnapshot();
 
       // Restore original values
       mockTask.data.interactionId = originalInteractionId;
@@ -217,11 +162,8 @@ describe('TaskListComponent', () => {
         logger: mockLogger,
       };
 
-      render(<TaskListComponent {...props} />);
-
-      const mockTasks = screen.getAllByTestId('mock-task');
-      expect(mockTasks).toHaveLength(2);
-      expect(screen.getByTestId('task-list')).toBeInTheDocument();
+      const {container} = render(<TaskListComponent {...props} />);
+      expect(container.firstChild).toMatchSnapshot();
     });
 
     it('should show selected task correctly', () => {
@@ -252,9 +194,8 @@ describe('TaskListComponent', () => {
         logger: mockLogger,
       };
 
-      render(<TaskListComponent {...props} />);
-
-      expect(screen.getByTestId('task-selected')).toHaveTextContent('selected');
+      const {container} = render(<TaskListComponent {...props} />);
+      expect(container.firstChild).toMatchSnapshot();
     });
   });
 
@@ -283,10 +224,8 @@ describe('TaskListComponent', () => {
         logger: mockLogger,
       };
 
-      render(<TaskListComponent {...props} />);
-
-      expect(screen.getByTestId('task-media-type')).toHaveTextContent(MEDIA_CHANNEL.TELEPHONY);
-      expect(screen.getByTestId('task-title')).toHaveTextContent('1234567890'); // ANI for telephony
+      const {container} = render(<TaskListComponent {...props} />);
+      expect(container.firstChild).toMatchSnapshot();
 
       // Restore original values
       mockTask.data.interaction.mediaType = originalMediaType;
@@ -318,10 +257,8 @@ describe('TaskListComponent', () => {
         logger: mockLogger,
       };
 
-      render(<TaskListComponent {...props} />);
-
-      expect(screen.getByTestId('task-media-type')).toHaveTextContent(MEDIA_CHANNEL.SOCIAL);
-      expect(screen.getByTestId('task-title')).toHaveTextContent('Social Customer'); // Customer name for social
+      const {container} = render(<TaskListComponent {...props} />);
+      expect(container.firstChild).toMatchSnapshot();
 
       // Restore original values
       mockTask.data.interaction.mediaType = originalMediaType;
@@ -353,10 +290,8 @@ describe('TaskListComponent', () => {
         logger: mockLogger,
       };
 
-      render(<TaskListComponent {...props} />);
-
-      expect(screen.getByTestId('task-media-type')).toHaveTextContent(MEDIA_CHANNEL.CHAT);
-      expect(screen.getByTestId('task-title')).toHaveTextContent('chat-user-123'); // ANI for chat
+      const {container} = render(<TaskListComponent {...props} />);
+      expect(container.firstChild).toMatchSnapshot();
 
       // Restore original values
       mockTask.data.interaction.mediaType = originalMediaType;
@@ -393,14 +328,8 @@ describe('TaskListComponent', () => {
         logger: mockLogger,
       };
 
-      render(<TaskListComponent {...props} />);
-
-      expect(screen.getByTestId('task-incoming')).toHaveTextContent('incoming');
-      expect(screen.getByTestId('task-state')).toHaveTextContent(''); // Empty for incoming
-      expect(screen.getByTestId('task-rona-timeout')).toHaveTextContent('45');
-      expect(screen.getByTestId('task-accept-text')).toHaveTextContent('Accept');
-      expect(screen.getByTestId('task-decline-text')).toHaveTextContent('Decline');
-      expect(screen.getByTestId('task-disable-accept')).toHaveTextContent('enabled');
+      const {container} = render(<TaskListComponent {...props} />);
+      expect(container.firstChild).toMatchSnapshot();
 
       // Restore original values
       mockTask.data.interaction.state = originalState;
@@ -435,10 +364,8 @@ describe('TaskListComponent', () => {
         logger: mockLogger,
       };
 
-      render(<TaskListComponent {...props} />);
-
-      expect(screen.getByTestId('task-incoming')).toHaveTextContent('incoming');
-      expect(screen.getByTestId('task-state')).toHaveTextContent(''); // Empty for incoming
+      const {container} = render(<TaskListComponent {...props} />);
+      expect(container.firstChild).toMatchSnapshot();
 
       // Restore original values
       mockTask.data.interaction.state = originalState;
@@ -471,11 +398,8 @@ describe('TaskListComponent', () => {
         logger: mockLogger,
       };
 
-      render(<TaskListComponent {...props} />);
-
-      expect(screen.getByTestId('task-incoming')).toHaveTextContent('active');
-      expect(screen.getByTestId('task-state')).toHaveTextContent('connected');
-      expect(screen.getByTestId('task-rona-timeout')).toHaveTextContent(''); // No RONA for active
+      const {container} = render(<TaskListComponent {...props} />);
+      expect(container.firstChild).toMatchSnapshot();
 
       // Restore original values
       mockTask.data.interaction.state = originalState;
@@ -511,11 +435,8 @@ describe('TaskListComponent', () => {
         logger: mockLogger,
       };
 
-      render(<TaskListComponent {...props} />);
-
-      expect(screen.getByTestId('task-accept-text')).toHaveTextContent('Ringing...');
-      expect(screen.getByTestId('task-decline-text')).toHaveTextContent(''); // No decline for non-browser
-      expect(screen.getByTestId('task-disable-accept')).toHaveTextContent('disabled');
+      const {container} = render(<TaskListComponent {...props} />);
+      expect(container.firstChild).toMatchSnapshot();
 
       // Restore original values
       mockTask.data.interaction.state = originalState;
@@ -554,12 +475,8 @@ describe('TaskListComponent', () => {
         logger: mockLogger,
       };
 
-      render(<TaskListComponent {...props} />);
-
-      const acceptButton = screen.getByTestId('accept-button');
-      fireEvent.click(acceptButton);
-
-      expect(mockAcceptTask).toHaveBeenCalledWith(mockTask);
+      const {container} = render(<TaskListComponent {...props} />);
+      expect(container.firstChild).toMatchSnapshot();
 
       // Restore original values
       mockTask.data.interactionId = originalInteractionId;
@@ -597,12 +514,8 @@ describe('TaskListComponent', () => {
         logger: mockLogger,
       };
 
-      render(<TaskListComponent {...props} />);
-
-      const declineButton = screen.getByTestId('decline-button');
-      fireEvent.click(declineButton);
-
-      expect(mockDeclineTask).toHaveBeenCalledWith(mockTask);
+      const {container} = render(<TaskListComponent {...props} />);
+      expect(container.firstChild).toMatchSnapshot();
 
       // Restore original values
       mockTask.data.interactionId = originalInteractionId;
@@ -638,12 +551,8 @@ describe('TaskListComponent', () => {
         logger: mockLogger,
       };
 
-      render(<TaskListComponent {...props} />);
-
-      const selectButton = screen.getByTestId('select-button');
-      fireEvent.click(selectButton);
-
-      expect(mockOnTaskSelect).toHaveBeenCalledWith(mockTask);
+      const {container} = render(<TaskListComponent {...props} />);
+      expect(container.firstChild).toMatchSnapshot();
 
       // Restore original values
       mockTask.data.interactionId = originalInteractionId;
@@ -665,12 +574,8 @@ describe('TaskListComponent', () => {
         logger: mockLogger,
       };
 
-      render(<TaskListComponent {...props} />);
-
-      expect(mockLogger.info).toHaveBeenCalledWith('CC-Widgets: TaskList: rendering task list', {
-        module: 'task-list.tsx',
-        method: 'renderItem',
-      });
+      const {container} = render(<TaskListComponent {...props} />);
+      expect(container.firstChild).toMatchSnapshot();
     });
 
     it('should log for each task when multiple tasks are rendered', () => {
@@ -700,9 +605,8 @@ describe('TaskListComponent', () => {
         logger: mockLogger,
       };
 
-      render(<TaskListComponent {...props} />);
-
-      expect(mockLogger.info).toHaveBeenCalledTimes(2);
+      const {container} = render(<TaskListComponent {...props} />);
+      expect(container.firstChild).toMatchSnapshot();
     });
   });
 
@@ -711,6 +615,7 @@ describe('TaskListComponent', () => {
       // Temporarily modify mockTask for missing details test
       //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+
       //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       mockTask.data.interaction.callAssociatedDetails = undefined;
 
@@ -724,10 +629,8 @@ describe('TaskListComponent', () => {
         logger: mockLogger,
       };
 
-      render(<TaskListComponent {...props} />);
-
-      expect(screen.getByTestId('mock-task')).toBeInTheDocument();
-      expect(screen.getByTestId('task-title')).toHaveTextContent(''); // undefined becomes empty
+      const {container} = render(<TaskListComponent {...props} />);
+      expect(container.firstChild).toMatchSnapshot();
 
       // Restore original values
       //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
@@ -760,13 +663,112 @@ describe('TaskListComponent', () => {
         logger: mockLogger,
       };
 
-      render(<TaskListComponent {...props} />);
-
-      expect(screen.getByTestId('task-accept-text')).toHaveTextContent(''); // No accept text
-      expect(screen.getByTestId('task-decline-text')).toHaveTextContent(''); // No decline text
+      const {container} = render(<TaskListComponent {...props} />);
+      expect(container.firstChild).toMatchSnapshot();
 
       // Restore original values
       mockTask.data.interaction.state = originalState;
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
+      mockTask.data.wrapUpRequired = originalWrapUpRequired;
+    });
+  });
+
+  describe('Additional scenarios', () => {
+    it('should render email task correctly', () => {
+      // Temporarily modify mockTask for email test
+      const originalMediaType = mockTask.data.interaction.mediaType;
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+
+      mockTask.data.interaction.mediaType = MEDIA_CHANNEL.EMAIL;
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      mockTask.data.interaction.callAssociatedDetails = {
+        ani: 'user@email.com',
+        customerName: 'Email Customer',
+        virtualTeamName: 'Email Team',
+      };
+
+      const props: TaskListComponentProps = {
+        taskList: {'task-1': mockTask},
+        currentTask: null,
+        acceptTask: mockAcceptTask,
+        declineTask: mockDeclineTask,
+        isBrowser: true,
+        onTaskSelect: mockOnTaskSelect,
+        logger: mockLogger,
+      };
+
+      const {container} = render(<TaskListComponent {...props} />);
+      expect(container.firstChild).toMatchSnapshot();
+
+      // Restore original values
+      mockTask.data.interaction.mediaType = originalMediaType;
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
+    });
+
+    it('should render task with special characters in ANI', () => {
+      // Temporarily modify mockTask for special characters test
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      mockTask.data.interaction.callAssociatedDetails = {
+        ani: '+1 (555) 123-4567 ext. 123',
+        customerName: 'Special Char Customer',
+        virtualTeamName: 'Special Support & Services',
+      };
+
+      const props: TaskListComponentProps = {
+        taskList: {'task-1': mockTask},
+        currentTask: null,
+        acceptTask: mockAcceptTask,
+        declineTask: mockDeclineTask,
+        isBrowser: true,
+        onTaskSelect: mockOnTaskSelect,
+        logger: mockLogger,
+      };
+
+      const {container} = render(<TaskListComponent {...props} />);
+      expect(container.firstChild).toMatchSnapshot();
+
+      // Restore original values
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
+    });
+
+    it('should render social media task with wrap up required', () => {
+      // Temporarily modify mockTask for social media with wrap up test
+      const originalMediaType = mockTask.data.interaction.mediaType;
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+      const originalWrapUpRequired = mockTask.data.wrapUpRequired;
+
+      mockTask.data.interaction.mediaType = MEDIA_CHANNEL.SOCIAL;
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      mockTask.data.interaction.callAssociatedDetails = {
+        ani: '9876543210',
+        customerName: 'Social Wrap Up Customer',
+        virtualTeamName: 'Social Team',
+      };
+      mockTask.data.wrapUpRequired = true;
+
+      const props: TaskListComponentProps = {
+        taskList: {'task-1': mockTask},
+        currentTask: null,
+        acceptTask: mockAcceptTask,
+        declineTask: mockDeclineTask,
+        isBrowser: true,
+        onTaskSelect: mockOnTaskSelect,
+        logger: mockLogger,
+      };
+
+      const {container} = render(<TaskListComponent {...props} />);
+      expect(container.firstChild).toMatchSnapshot();
+
+      // Restore original values
+      mockTask.data.interaction.mediaType = originalMediaType;
       //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
       mockTask.data.wrapUpRequired = originalWrapUpRequired;

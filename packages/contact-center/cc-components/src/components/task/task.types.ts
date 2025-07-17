@@ -17,12 +17,12 @@ export interface TaskProps {
   /**
    * currentTask of the agent.
    */
-  currentTask: ITask;
+  currentTask: ITask | null;
 
   /**
    * Incoming task on the incoming task widget
    */
-  incomingTask: ITask;
+  incomingTask: ITask | null;
 
   /**
    * CC SDK Instance.
@@ -109,7 +109,7 @@ export interface TaskProps {
   /**
    * List of tasks
    */
-  taskList: Record<string, ITask>;
+  taskList: Record<string, ITask> | null | undefined;
 
   /**
    * The logger instance from SDK
@@ -131,7 +131,7 @@ export interface ControlProps {
   /**
    * The current task being handled.
    */
-  currentTask: ITask;
+  currentTask: ITask | null;
 
   /**
    * Function to handle hold/resume actions.
