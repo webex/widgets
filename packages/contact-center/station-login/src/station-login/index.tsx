@@ -5,7 +5,6 @@ import {observer} from 'mobx-react-lite';
 import {StationLoginComponent} from '@webex/cc-components';
 import {useStationLogin} from '../helper';
 import {StationLoginProps} from './station-login.types';
-import {withMetrics} from '@webex/ui-metrics';
 
 const StationLogin: React.FunctionComponent<StationLoginProps> = observer(
   ({onLogin, onLogout, onCCSignOut, profileMode, onSaveStart, onSaveEnd, doStationLogout}) => {
@@ -58,8 +57,7 @@ const StationLogin: React.FunctionComponent<StationLoginProps> = observer(
       profileMode,
     };
 
-    const StationLoginWithMetrics = withMetrics(StationLoginComponent, 'StationLogin');
-    return <StationLoginWithMetrics {...props} />;
+    return <StationLoginComponent {...props} />;
   }
 );
 

@@ -5,7 +5,6 @@ import {observer} from 'mobx-react-lite';
 import {useUserState} from '../helper';
 import {UserStateComponent, IUserState} from '@webex/cc-components';
 import {IUserStateProps} from '../user-state.types';
-import {withMetrics} from '@webex/ui-metrics';
 
 const UserState: React.FunctionComponent<IUserStateProps> = observer(({onStateChange}) => {
   const {
@@ -36,8 +35,7 @@ const UserState: React.FunctionComponent<IUserStateProps> = observer(({onStateCh
     logger,
   };
 
-  const UserStateWithMetrics = withMetrics(UserStateComponent, 'UserState');
-  return <UserStateWithMetrics {...props} />;
+  return <UserStateComponent {...props} />;
 });
 
 export {UserState};

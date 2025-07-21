@@ -26,7 +26,8 @@
   "dependencies": {
     "@momentum-ui/illustrations": "^1.24.0",
     "@r2wc/react-to-web-component": "2.0.3",
-    "@webex/cc-store": "workspace:*"
+    "@webex/cc-store": "workspace:*",
+    "@webex/ui-metrics": "workspace:*"
   },
   "devDependencies": {
     "@babel/core": "7.25.2",

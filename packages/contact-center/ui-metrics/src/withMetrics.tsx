@@ -6,12 +6,10 @@ export default function withMetrics<P extends object>(Component: any, widgetName
     (props: P) => {
       const previousProps = useRef<P>();
 
-      // Handle mount and unmount events
       useEffect(() => {
         logMetrics({
           widgetName,
-          event: 'WIDGET_INITIALIZED',
-          props,
+          event: 'WIDGET_MOUNTED',
           timestamp: Date.now(),
         });
 
@@ -24,24 +22,8 @@ export default function withMetrics<P extends object>(Component: any, widgetName
         };
       }, []);
 
-      // Handle prop updates
-      useEffect(() => {
-        if (previousProps.current && havePropsChanged(previousProps.current, props)) {
-          logMetrics({
-            widgetName,
-            event: 'WIDGET_PROP_UPDATED',
-            props,
-            timestamp: Date.now(),
-          });
-        }
-        previousProps.current = props;
-      });
-
       return <Component {...props} />;
     },
-    (prevProps, nextProps) => {
-      const hasChanged = havePropsChanged(prevProps, nextProps);
-      return !hasChanged;
-    }
+    (prevProps, nextProps) => !havePropsChanged(prevProps, nextProps)
   );
 }

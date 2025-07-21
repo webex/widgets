@@ -22,7 +22,6 @@
   "dependencies": {
     "@webex/cc-components": "workspace:*",
     "@webex/cc-store": "workspace:*",
-    "@webex/ui-metrics": "workspace:*",
     "mobx-react-lite": "^4.1.0",
     "typescript": "5.6.3"
   },

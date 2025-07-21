@@ -12,6 +12,7 @@
     "test:styles": "echo 'No styles to test'"
   },
   "dependencies": {
+    "@webex/cc-store": "workspace:*",
     "uuid": "^9.0.0"
   },
   "devDependencies": {

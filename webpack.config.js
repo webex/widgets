@@ -16,7 +16,7 @@ module.exports = {
       vm: require.resolve('vm-browserify'),
       util: require.resolve('util/'),
       url: require.resolve('url/'),
-    }
+    },
   },
   plugins: [
     new webpack.ProvidePlugin({
@@ -38,12 +38,15 @@ module.exports = {
       {
         test: /\.scss$/,
         use: [
-          "style-loader",  // Injects styles into DOM
-          "css-loader",    // Turns CSS into CommonJS
-          "sass-loader"    // Compiles Sass to CSS
+          'style-loader', // Injects styles into DOM
+          'css-loader', // Turns CSS into CommonJS
+          'sass-loader', // Compiles Sass to CSS
         ],
-        exclude: /node_modules/
-      }
+        exclude: /node_modules/,
+      },
     ],
+  },
+  stats: {
+    warningsFilter: [/sass-loader/],
   },
 };

@@ -1,23 +1,18 @@
+import store from '@webex/cc-store';
+
 export type WidgetMetrics = {
   widgetName: string;
-  event:
-    | 'WIDGET_LOADED'
-    | 'PROP_RECEIVED'
-    | 'INTERACTION'
-    | 'ERROR'
-    | 'WIDGET_INITIALIZED'
-    | 'WIDGET_PROPS_RECEIVED'
-    | 'WIDGET_RENDER_START'
-    | 'WIDGET_RENDER_COMPLETE'
-    | 'WIDGET_UNMOUNTED'
-    | 'WIDGET_PROP_UPDATED';
+  event: 'WIDGET_MOUNTED' | 'ERROR' | 'WIDGET_UNMOUNTED';
   props?: Record<string, any>;
   timestamp: number;
   additionalContext?: Record<string, any>;
 };
 
 export const logMetrics = (metric: WidgetMetrics) => {
-  console.log('[WIDGET_METRICS]', metric, null, 2);
+  store.logger.log(`CC-Widgets: UI Metrics: ${JSON.stringify(metric, null, 2)}`, {
+    module: 'metricsLogger.tsx',
+    method: 'logMetrics',
+  });
   // Optional: send to Amplitude or a log endpoint
 };
 
@@ -49,24 +44,4 @@ export function havePropsChanged(prev: any, next: any): boolean {
   } catch {
     return true; // fallback to log if circular structure
   }
-}
-
-export function sanitizePropsForLogging(obj: Record<string, any>, depth = 0): Record<string, any> {
-  if (depth > 2) return {}; // prevent deep nesting issues
-
-  const result: Record<string, any> = {};
-
-  for (const key in obj) {
-    const value = obj[key];
-
-    if (typeof value === 'function') {
-      result[key] = '[Function]';
-    } else if (value && typeof value === 'object') {
-      result[key] = sanitizePropsForLogging(value, depth + 1);
-    } else {
-      result[key] = value;
-    }
-  }
-
-  return result;
 }
