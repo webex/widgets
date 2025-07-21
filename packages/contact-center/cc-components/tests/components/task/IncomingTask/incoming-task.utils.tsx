@@ -35,7 +35,6 @@ describe('incoming-task.utils', () => {
       });
 
       it('should handle telephony task with wrap up required', () => {
-        // Temporarily modify mockTask for wrap up test
         const originalWrapUpRequired = mockTask.data.wrapUpRequired;
         mockTask.data.wrapUpRequired = true;
 
@@ -52,7 +51,6 @@ describe('incoming-task.utils', () => {
 
     describe('Social media tasks', () => {
       it('should extract correct data for social media task', () => {
-        // Temporarily modify mockTask for social media test
         const originalMediaType = mockTask.data.interaction.mediaType;
         mockTask.data.interaction.mediaType = MEDIA_CHANNEL.SOCIAL;
 
@@ -70,7 +68,6 @@ describe('incoming-task.utils', () => {
       });
 
       it('should handle social media task with wrap up required', () => {
-        // Temporarily modify mockTask for social media with wrap up test
         const originalMediaType = mockTask.data.interaction.mediaType;
         const originalWrapUpRequired = mockTask.data.wrapUpRequired;
 
@@ -91,7 +88,6 @@ describe('incoming-task.utils', () => {
 
     describe('Edge cases and missing data', () => {
       it('should handle missing call association details', () => {
-        // Temporarily modify mockTask for missing details test
         //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
         //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
@@ -103,13 +99,11 @@ describe('incoming-task.utils', () => {
         expect(result.customerName).toBeUndefined();
         expect(result.virtualTeamName).toBeUndefined();
 
-        // Restore original callAssociatedDetails
         //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
       });
 
       it('should handle missing ronaTimeout', () => {
-        // Temporarily modify mockTask for missing ronaTimeout test
         //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
         //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
@@ -122,13 +116,11 @@ describe('incoming-task.utils', () => {
 
         expect(result.ronaTimeout).toBeNull();
 
-        // Restore original callAssociatedDetails
         //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
       });
 
       it('should handle invalid ronaTimeout', () => {
-        // Temporarily modify mockTask for invalid ronaTimeout test
         //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
         //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
@@ -141,13 +133,11 @@ describe('incoming-task.utils', () => {
 
         expect(result.ronaTimeout).toBeNaN();
 
-        // Restore original callAssociatedDetails
         //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
       });
 
       it('should handle zero ronaTimeout', () => {
-        // Temporarily modify mockTask for zero ronaTimeout test
         //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
         //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
@@ -160,7 +150,6 @@ describe('incoming-task.utils', () => {
 
         expect(result.ronaTimeout).toBe(0);
 
-        // Restore original callAssociatedDetails
         //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
       });
@@ -168,7 +157,6 @@ describe('incoming-task.utils', () => {
 
     describe('Different media types', () => {
       it('should handle chat media type', () => {
-        // Temporarily modify mockTask for chat test
         const originalMediaType = mockTask.data.interaction.mediaType;
         mockTask.data.interaction.mediaType = MEDIA_CHANNEL.CHAT;
 
@@ -186,7 +174,6 @@ describe('incoming-task.utils', () => {
       });
 
       it('should handle email media type', () => {
-        // Temporarily modify mockTask for email test
         const originalMediaType = mockTask.data.interaction.mediaType;
         mockTask.data.interaction.mediaType = MEDIA_CHANNEL.EMAIL;
 

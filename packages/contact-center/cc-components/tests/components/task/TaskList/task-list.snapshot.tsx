@@ -79,7 +79,6 @@ describe('TaskListComponent', () => {
 
   describe('Task list with tasks', () => {
     it('should render task list with single task', () => {
-      // Temporarily modify mockTask for this test
       const originalInteractionId = mockTask.data.interactionId;
       //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
@@ -113,7 +112,6 @@ describe('TaskListComponent', () => {
     });
 
     it('should render task list with multiple tasks', () => {
-      // Create task copies for multiple tasks
       const task1 = {
         ...mockTask,
         data: {
@@ -167,7 +165,6 @@ describe('TaskListComponent', () => {
     });
 
     it('should show selected task correctly', () => {
-      // Create task copies for selected task test
       const task = {
         ...mockTask,
         data: {
@@ -201,7 +198,6 @@ describe('TaskListComponent', () => {
 
   describe('Different media types', () => {
     it('should render telephony task correctly', () => {
-      // Temporarily modify mockTask for telephony test
       const originalMediaType = mockTask.data.interaction.mediaType;
       //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
@@ -234,7 +230,6 @@ describe('TaskListComponent', () => {
     });
 
     it('should render social media task correctly', () => {
-      // Temporarily modify mockTask for social test
       const originalMediaType = mockTask.data.interaction.mediaType;
       //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
@@ -267,7 +262,6 @@ describe('TaskListComponent', () => {
     });
 
     it('should render chat task correctly', () => {
-      // Temporarily modify mockTask for chat test
       const originalMediaType = mockTask.data.interaction.mediaType;
       //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
@@ -302,7 +296,6 @@ describe('TaskListComponent', () => {
 
   describe('Incoming vs Active tasks', () => {
     it('should render incoming task (state: new) correctly', () => {
-      // Temporarily modify mockTask for incoming task test
       const originalState = mockTask.data.interaction.state;
       //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
@@ -339,7 +332,6 @@ describe('TaskListComponent', () => {
     });
 
     it('should render consult task correctly', () => {
-      // Temporarily modify mockTask for consult task test
       const originalState = mockTask.data.interaction.state;
       //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
@@ -375,7 +367,6 @@ describe('TaskListComponent', () => {
     });
 
     it('should render active task correctly', () => {
-      // Temporarily modify mockTask for active task test
       const originalState = mockTask.data.interaction.state;
       //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
@@ -410,7 +401,6 @@ describe('TaskListComponent', () => {
 
   describe('Browser vs Non-browser behavior', () => {
     it('should handle non-browser telephony incoming task', () => {
-      // Temporarily modify mockTask for non-browser test
       const originalState = mockTask.data.interaction.state;
       //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
@@ -448,7 +438,6 @@ describe('TaskListComponent', () => {
 
   describe('Task interactions', () => {
     it('should call acceptTask when accept button is clicked', () => {
-      // Temporarily modify mockTask for accept test
       const originalInteractionId = mockTask.data.interactionId;
       const originalState = mockTask.data.interaction.state;
       //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
@@ -487,7 +476,6 @@ describe('TaskListComponent', () => {
     });
 
     it('should call declineTask when decline button is clicked', () => {
-      // Temporarily modify mockTask for decline test
       const originalInteractionId = mockTask.data.interactionId;
       const originalState = mockTask.data.interaction.state;
       //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
@@ -526,7 +514,6 @@ describe('TaskListComponent', () => {
     });
 
     it('should call onTaskSelect when select button is clicked for selectable task', () => {
-      // Temporarily modify mockTask for select test
       const originalInteractionId = mockTask.data.interactionId;
       const originalState = mockTask.data.interaction.state;
       //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
@@ -579,7 +566,6 @@ describe('TaskListComponent', () => {
     });
 
     it('should log for each task when multiple tasks are rendered', () => {
-      // Create task copies for multiple tasks
       const task1 = {
         ...mockTask,
         data: {
@@ -612,7 +598,6 @@ describe('TaskListComponent', () => {
 
   describe('Edge cases', () => {
     it('should handle task with missing call association details', () => {
-      // Temporarily modify mockTask for missing details test
       //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
 
@@ -638,7 +623,6 @@ describe('TaskListComponent', () => {
     });
 
     it('should handle task with wrap up required', () => {
-      // Temporarily modify mockTask for wrap up test
       const originalState = mockTask.data.interaction.state;
       //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
@@ -676,7 +660,6 @@ describe('TaskListComponent', () => {
 
   describe('Additional scenarios', () => {
     it('should render email task correctly', () => {
-      // Temporarily modify mockTask for email test
       const originalMediaType = mockTask.data.interaction.mediaType;
       //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
@@ -709,7 +692,6 @@ describe('TaskListComponent', () => {
     });
 
     it('should render task with special characters in ANI', () => {
-      // Temporarily modify mockTask for special characters test
       //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
 
@@ -739,7 +721,6 @@ describe('TaskListComponent', () => {
     });
 
     it('should render social media task with wrap up required', () => {
-      // Temporarily modify mockTask for social media with wrap up test
       const originalMediaType = mockTask.data.interaction.mediaType;
       //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;

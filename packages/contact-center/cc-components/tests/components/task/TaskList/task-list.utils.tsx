@@ -18,7 +18,6 @@ describe('task-list.utils', () => {
   describe('extractTaskListItemData', () => {
     describe('Active tasks (non-incoming)', () => {
       it('should extract correct data for active telephony task on browser', () => {
-        // Temporarily modify mockTask for active telephony test
         const originalState = mockTask.data.interaction.state;
         //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
@@ -66,7 +65,6 @@ describe('task-list.utils', () => {
       });
 
       it('should extract correct data for active social media task', () => {
-        // Temporarily modify mockTask for active social test
         const originalState = mockTask.data.interaction.state;
         //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
@@ -106,7 +104,6 @@ describe('task-list.utils', () => {
 
     describe('Incoming tasks (new/consult)', () => {
       it('should extract correct data for incoming telephony task on browser', () => {
-        // Temporarily modify mockTask for incoming telephony test
         const originalState = mockTask.data.interaction.state;
         //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
@@ -157,7 +154,6 @@ describe('task-list.utils', () => {
       });
 
       it('should extract correct data for incoming telephony task on non-browser', () => {
-        // Temporarily modify mockTask for non-browser test
         const originalState = mockTask.data.interaction.state;
         //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
@@ -194,7 +190,6 @@ describe('task-list.utils', () => {
       });
 
       it('should extract correct data for consult task', () => {
-        // Temporarily modify mockTask for consult test
         const originalState = mockTask.data.interaction.state;
         //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
@@ -232,7 +227,6 @@ describe('task-list.utils', () => {
       });
 
       it('should handle incoming task with wrap up required', () => {
-        // Temporarily modify mockTask for wrap up test
         const originalState = mockTask.data.interaction.state;
         //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
@@ -269,7 +263,6 @@ describe('task-list.utils', () => {
 
     describe('Different media types', () => {
       it('should handle chat tasks', () => {
-        // Temporarily modify mockTask for chat test
         const originalState = mockTask.data.interaction.state;
         //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
@@ -306,7 +299,6 @@ describe('task-list.utils', () => {
       });
 
       it('should handle email tasks', () => {
-        // Temporarily modify mockTask for email test
         const originalState = mockTask.data.interaction.state;
         //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
@@ -344,7 +336,6 @@ describe('task-list.utils', () => {
 
     describe('Edge cases', () => {
       it('should handle missing call association details', () => {
-        // Temporarily modify mockTask for missing details test
         const originalState = mockTask.data.interaction.state;
         //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
@@ -377,7 +368,6 @@ describe('task-list.utils', () => {
       });
 
       it('should handle missing ronaTimeout', () => {
-        // Temporarily modify mockTask for missing ronaTimeout test
         const originalState = mockTask.data.interaction.state;
         //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
@@ -411,7 +401,6 @@ describe('task-list.utils', () => {
       });
 
       it('should handle invalid ronaTimeout', () => {
-        // Temporarily modify mockTask for invalid ronaTimeout test
         const originalState = mockTask.data.interaction.state;
         //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
@@ -454,7 +443,6 @@ describe('task-list.utils', () => {
     });
 
     it('should return true for different non-incoming task', () => {
-      // Create proper different task objects
       const differentTask = {
         ...mockTask,
         data: {
@@ -477,7 +465,6 @@ describe('task-list.utils', () => {
     });
 
     it('should return false for incoming task without wrap up', () => {
-      // Create proper task objects
       const incomingTask = {
         ...mockTask,
         data: {
@@ -501,7 +488,6 @@ describe('task-list.utils', () => {
     });
 
     it('should return true for incoming task with wrap up required', () => {
-      // Create proper task objects
       const incomingTask = {
         ...mockTask,
         data: {
@@ -610,7 +596,6 @@ describe('task-list.utils', () => {
     });
 
     it('should return false for task list with tasks', () => {
-      // Create task copies for this test
       const task1 = {
         ...mockTask,
         data: {
@@ -636,7 +621,6 @@ describe('task-list.utils', () => {
 
   describe('getTasksArray', () => {
     it('should convert task list object to array', () => {
-      // Create task copies for this test
       const task1 = {
         ...mockTask,
         data: {
@@ -687,7 +671,6 @@ describe('task-list.utils', () => {
     });
 
     it('should call onTaskSelect for selectable task', () => {
-      // Create proper task objects
       const task = {
         ...mockTask,
         data: {
@@ -715,7 +698,6 @@ describe('task-list.utils', () => {
     });
 
     it('should not call onTaskSelect for non-selectable task', () => {
-      // Create proper task objects
       const task = {
         ...mockTask,
         data: {
@@ -744,7 +726,6 @@ describe('task-list.utils', () => {
     });
 
     it('should not call onTaskSelect for same task', () => {
-      // Create proper task objects
       const task = {
         ...mockTask,
         data: {
@@ -820,7 +801,6 @@ describe('task-list.utils', () => {
         expectedDisableAccept,
       }) => {
         it(`should handle ${description}`, () => {
-          // Temporarily modify mockTask for this test case
           const originalState = mockTask.data.interaction.state;
           //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
           const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
@@ -860,7 +840,6 @@ describe('task-list.utils', () => {
   // Additional test cases for 100% coverage
   describe('Additional coverage tests', () => {
     it('should handle task with zero ronaTimeout', () => {
-      // Temporarily modify mockTask for zero ronaTimeout test
       const originalState = mockTask.data.interaction.state;
       //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
@@ -894,7 +873,6 @@ describe('task-list.utils', () => {
     });
 
     it('should handle social media task with wrap up required', () => {
-      // Temporarily modify mockTask for social media with wrap up test
       const originalState = mockTask.data.interaction.state;
       //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
@@ -929,7 +907,6 @@ describe('task-list.utils', () => {
     });
 
     it('should handle task with empty string ronaTimeout', () => {
-      // Temporarily modify mockTask for empty string ronaTimeout test
       const originalState = mockTask.data.interaction.state;
       //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
@@ -964,7 +941,6 @@ describe('task-list.utils', () => {
     });
 
     it('should handle task with null ronaTimeout', () => {
-      // Temporarily modify mockTask for null ronaTimeout test
       const originalState = mockTask.data.interaction.state;
       //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
@@ -998,7 +974,6 @@ describe('task-list.utils', () => {
     });
 
     it('should handle consult task with wrap up required', () => {
-      // Temporarily modify mockTask for consult with wrap up test
       const originalState = mockTask.data.interaction.state;
       //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
@@ -1033,7 +1008,6 @@ describe('task-list.utils', () => {
     });
 
     it('should handle task with empty customerName and fallback to ANI', () => {
-      // Temporarily modify mockTask for empty customer name test
       const originalState = mockTask.data.interaction.state;
       //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;

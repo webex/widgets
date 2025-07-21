@@ -61,13 +61,11 @@ describe('IncomingTaskComponent', () => {
     // Alternative: Check for the task-list-item class
     // expect(document.querySelector('.task-list-item')).toBeInTheDocument();
 
-    // Test accept button
     const acceptButton = screen.getByTestId('task:accept-button');
     expect(acceptButton).toHaveTextContent('Accept');
     fireEvent.click(acceptButton);
     expect(acceptMock).toHaveBeenCalledWith(mockTask);
 
-    // Test decline button
     const declineButton = screen.getByTestId('task:decline-button');
     expect(declineButton).toHaveTextContent('Decline');
     fireEvent.click(declineButton);
@@ -95,7 +93,6 @@ describe('IncomingTaskComponent', () => {
   });
 
   it('handles social media task correctly', () => {
-    // Temporarily modify mockTask for social media test
     const originalMediaType = mockTask.data.interaction.mediaType;
     mockTask.data.interaction.mediaType = MEDIA_CHANNEL.SOCIAL;
 

@@ -31,7 +31,6 @@ describe('task.utils', () => {
     });
 
     it('should handle strings with leading whitespace', () => {
-      // ✅ Fix: The regex removes leading whitespace and capitalizes first word character
       expect(capitalizeFirstWord('  hello')).toBe('Hello');
       expect(capitalizeFirstWord('\tworld')).toBe('World');
     });
@@ -53,7 +52,6 @@ describe('task.utils', () => {
     it('should handle strings with numbers and special characters', () => {
       expect(capitalizeFirstWord('123abc')).toBe('123abc');
       expect(capitalizeFirstWord('!hello')).toBe('!hello');
-      // ✅ Fix: Leading space is removed by the regex
       expect(capitalizeFirstWord(' hello world')).toBe('Hello world');
     });
   });
@@ -241,7 +239,6 @@ describe('task.utils', () => {
 
     it('should add custom styles', () => {
       const result = getTaskListItemClasses(false, 'custom-class');
-      // ✅ Fix: There's an extra space in the implementation
       expect(result).toBe('task-list-item  custom-class');
     });
 
@@ -257,7 +254,6 @@ describe('task.utils', () => {
 
     it('should handle styles with extra whitespace', () => {
       const result = getTaskListItemClasses(false, '  extra-spaces  ');
-      // ✅ Fix: The implementation trims trailing whitespace with .trim()
       expect(result).toBe('task-list-item    extra-spaces');
     });
   });
@@ -304,7 +300,6 @@ describe('task.utils', () => {
         shouldShowHandleTime: true,
         shouldShowTimeLeft: false,
         capitalizedState: 'Active',
-        // ✅ Fix: Queue is capitalized when present
         capitalizedQueue: 'Support team',
       });
     });
@@ -387,7 +382,6 @@ describe('task.utils', () => {
         shouldShowHandleTime: true,
         shouldShowTimeLeft: false,
         capitalizedState: 'Connected',
-        // ✅ Fix: Queue is capitalized when present
         capitalizedQueue: 'Chat team',
       });
     });
@@ -477,7 +471,6 @@ describe('task.utils', () => {
 
       const result = extractTaskComponentData(input);
 
-      // Fix: capitalizeFirstWord removes leading whitespace but preserves trailing
       expect(result.capitalizedState).toBe('Active  ');
       expect(result.capitalizedQueue).toBe('Support team  ');
     });

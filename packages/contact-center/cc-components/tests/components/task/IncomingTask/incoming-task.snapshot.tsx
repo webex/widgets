@@ -15,7 +15,6 @@ jest.mock('../../../../src/components/task/TaskTimer', () => {
 });
 
 describe('IncomingTaskComponent', () => {
-  // Mock logger with all required ILogger methods
   const mockLogger: ILogger = {
     info: jest.fn(),
     warn: jest.fn(),
@@ -68,7 +67,6 @@ describe('IncomingTaskComponent', () => {
   });
 
   it('handles social media task correctly', () => {
-    // Temporarily modify mockTask for social media test
     const originalMediaType = mockTask.data.interaction.mediaType;
     mockTask.data.interaction.mediaType = MEDIA_CHANNEL.SOCIAL;
 
@@ -88,7 +86,6 @@ describe('IncomingTaskComponent', () => {
   });
 
   it('renders browser telephony task with wrap up required', () => {
-    // Temporarily modify mockTask for wrap up test
     const originalWrapUpRequired = mockTask.data.wrapUpRequired;
     mockTask.data.wrapUpRequired = true;
 
@@ -108,7 +105,6 @@ describe('IncomingTaskComponent', () => {
   });
 
   it('renders social media task with wrap up required', () => {
-    // Temporarily modify mockTask for social media with wrap up test
     const originalMediaType = mockTask.data.interaction.mediaType;
     const originalWrapUpRequired = mockTask.data.wrapUpRequired;
 
@@ -132,7 +128,6 @@ describe('IncomingTaskComponent', () => {
   });
 
   it('renders chat task without wrap up', () => {
-    // Temporarily modify mockTask for chat test
     const originalMediaType = mockTask.data.interaction.mediaType;
     mockTask.data.interaction.mediaType = MEDIA_CHANNEL.CHAT;
 
@@ -152,7 +147,6 @@ describe('IncomingTaskComponent', () => {
   });
 
   it('renders email task without wrap up', () => {
-    // Temporarily modify mockTask for email test
     const originalMediaType = mockTask.data.interaction.mediaType;
     mockTask.data.interaction.mediaType = MEDIA_CHANNEL.EMAIL;
 
