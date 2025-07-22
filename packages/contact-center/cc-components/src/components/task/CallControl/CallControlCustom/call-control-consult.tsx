@@ -1,9 +1,17 @@
 import React, {useState} from 'react';
 import {ButtonCircle, TooltipNext, Text} from '@momentum-ui/react-collaboration';
 import {Avatar, Icon} from '@momentum-design/components/dist/react';
-import {MUTE_CALL, UNMUTE_CALL} from '../../constants';
 import TaskTimer from '../../TaskTimer';
 import {CallControlConsultComponentsProps} from '../../task.types';
+import {
+  createConsultButtons,
+  getVisibleButtons,
+  handleTransferPress,
+  handleEndConsultPress,
+  handleMuteToggle,
+  getConsultStatusText,
+  createTimerKey,
+} from './call-control-custom.utils';
 
 const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> = ({
   agentName,
@@ -20,91 +28,34 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
 }) => {
   const [isMuteDisabled, setIsMuteDisabled] = useState(false);
 
-  const timerKey = `timer-${startTimeStamp}`;
+  const timerKey = createTimerKey(startTimeStamp);
 
   const handleTransfer = () => {
-    logger.info('CC-Widgets: CallControlConsult: transfer button clicked', {
-      module: 'call-control-consult.tsx',
-      method: 'handleTransfer',
-    });
-    try {
-      if (onTransfer) {
-        onTransfer();
-        logger.log('CC-Widgets: CallControlConsult: transfer completed', {
-          module: 'call-control-consult.tsx',
-          method: 'handleTransfer',
-        });
-      }
-    } catch (error) {
-      throw new Error('Error transferring call:', error);
-    }
+    handleTransferPress(onTransfer, logger);
   };
 
   const handleEndConsult = () => {
-    logger.info('CC-Widgets: CallControlConsult: end consult clicked', {
-      module: 'call-control-consult.tsx',
-      method: 'handleEndConsult',
-    });
-    try {
-      endConsultCall();
-      logger.log('CC-Widgets: CallControlConsult: end consult completed', {
-        module: 'call-control-consult.tsx',
-        method: 'handleEndConsult',
-      });
-    } catch (error) {
-      throw new Error('Error ending consult call:', error);
-    }
+    handleEndConsultPress(endConsultCall, logger);
   };
 
   const handleConsultMuteToggle = () => {
-    setIsMuteDisabled(true);
-
-    try {
-      onToggleConsultMute();
-    } catch (error) {
-      logger.error(`Mute toggle failed: ${error}`, {
-        module: 'call-control-consult.tsx',
-        method: 'handleConsultMuteToggle',
-      });
-    } finally {
-      // Re-enable button after operation
-      setTimeout(() => {
-        setIsMuteDisabled(false);
-      }, 500);
-    }
+    handleMuteToggle(onToggleConsultMute, setIsMuteDisabled, logger);
   };
 
-  const buttons = [
-    {
-      key: 'mute',
-      icon: isMuted ? 'microphone-muted-bold' : 'microphone-bold',
-      onClick: handleConsultMuteToggle,
-      tooltip: isMuted ? UNMUTE_CALL : MUTE_CALL,
-      className: `${isMuted ? 'call-control-button-muted' : 'call-control-button'}`,
-      disabled: isMuteDisabled,
-      shouldShow: muteUnmute,
-    },
-    {
-      key: 'transfer',
-      icon: 'next-bold',
-      tooltip: 'Transfer Consult',
-      onClick: handleTransfer,
-      className: 'call-control-button',
-      disabled: !consultCompleted,
-      shouldShow: isAgentBeingConsulted && !!onTransfer,
-    },
-    {
-      key: 'cancel',
-      icon: 'headset-muted-bold',
-      tooltip: 'End Consult',
-      onClick: handleEndConsult,
-      className: 'call-control-consult-button-cancel',
-      shouldShow: isEndConsultEnabled || isAgentBeingConsulted,
-    },
-  ];
+  const buttons = createConsultButtons(
+    isMuted,
+    isMuteDisabled,
+    consultCompleted,
+    isAgentBeingConsulted,
+    isEndConsultEnabled,
+    muteUnmute,
+    onTransfer ? handleTransfer : undefined,
+    handleConsultMuteToggle,
+    handleEndConsult
+  );
 
   // Filter buttons that should be shown, then map them
-  const visibleButtons = buttons.filter((button) => button.shouldShow);
+  const visibleButtons = getVisibleButtons(buttons);
 
   return (
     <div className="call-control-consult">
@@ -115,7 +66,7 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
             {agentName}
           </Text>
           <Text tagName="p" type="body-secondary" className="consult-sub-text">
-            {consultCompleted ? 'Consulting' : 'Consult requested'}&nbsp;&bull;&nbsp;
+            {getConsultStatusText(consultCompleted)}&nbsp;&bull;&nbsp;
             <TaskTimer key={timerKey} startTimeStamp={startTimeStamp} />
           </Text>
         </div>

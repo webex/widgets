@@ -1,5 +1,5 @@
 import React from 'react';
-import {render, screen, fireEvent} from '@testing-library/react';
+import {render, screen, fireEvent, act, waitFor} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import CallControlConsultComponent from '../../../../src/components/task/CallControl/CallControlCustom/call-control-consult';
 
@@ -9,34 +9,31 @@ const loggerMock = {
   warn: jest.fn(),
   trace: jest.fn(),
   error: jest.fn(),
+  debug: jest.fn(),
 };
 
 // eslint-disable-next-line react/display-name
 jest.mock('../../../../src/components/task/TaskTimer', () => () => <span data-testid="TaskTimer">00:00</span>);
 
-beforeAll(() => {
-  jest.spyOn(console, 'error').mockImplementation(() => {});
-});
+// Mock setTimeout for mute toggle tests
+jest.useFakeTimers();
 
-afterAll(() => {
-  (console.error as jest.Mock).mockRestore();
-});
-
-// This test suite is skipped because we have removed the :broken from the command
-// line in the package.json scripts to run these tests in pipeline
-describe.skip('CallControlConsultComponent', () => {
+describe('CallControlConsultComponent', () => {
   const mockOnTransfer = jest.fn();
   const mockEndConsultCall = jest.fn();
+  const mockOnToggleConsultMute = jest.fn();
+
   const defaultProps = {
     agentName: 'Alice',
     startTimeStamp: Date.now(),
     onTransfer: mockOnTransfer,
     endConsultCall: mockEndConsultCall,
+    onToggleConsultMute: mockOnToggleConsultMute,
     consultCompleted: true,
     isAgentBeingConsulted: true,
     isEndConsultEnabled: true,
     logger: loggerMock,
-    muteUnmute: false,
+    muteUnmute: true,
     isMuted: false,
   };
 
@@ -44,103 +41,254 @@ describe.skip('CallControlConsultComponent', () => {
     jest.clearAllMocks();
   });
 
-  it('renders agent name, consult label and task timer', () => {
-    render(<CallControlConsultComponent {...defaultProps} />);
-    expect(screen.getByText('Alice')).toBeInTheDocument();
-    const consultText = screen.getByText(
-      (content, element) => element?.className.includes('consult-sub-text') && content.includes('Consult')
-    );
-    expect(consultText).toBeInTheDocument();
+  afterEach(() => {
+    jest.clearAllTimers();
   });
 
-  it('calls onTransfer when transfer button is clicked', () => {
-    render(<CallControlConsultComponent {...defaultProps} />);
-    const transferButton = screen.getByTestId('transfer-consult-btn');
-    fireEvent.click(transferButton);
-    expect(mockOnTransfer).toHaveBeenCalled();
-  });
+  describe('Component Rendering and Basic Functionality', () => {
+    it('should render with basic props and handle various configurations', async () => {
+      // Test basic rendering
+      const {unmount} = render(<CallControlConsultComponent {...defaultProps} />);
+      await act(async () => {
+        expect(screen.getByText('Alice')).toBeInTheDocument();
+        expect(screen.getByTestId('TaskTimer')).toBeInTheDocument();
+        expect(screen.getByText(/Consulting/)).toBeInTheDocument();
+      });
+      unmount();
 
-  it('calls endConsultCall when cancel button is clicked', () => {
-    render(<CallControlConsultComponent {...defaultProps} />);
-    const cancelButton = screen.getByTestId('cancel-consult-btn');
-    fireEvent.click(cancelButton);
-    expect(mockEndConsultCall).toHaveBeenCalled();
-  });
+      // Test consult not completed
+      const {unmount: unmount2} = render(
+        <CallControlConsultComponent {...{...defaultProps, consultCompleted: false}} />
+      );
+      expect(screen.getByText(/Consult requested/)).toBeInTheDocument();
+      const transferBtn = screen.getByTestId('transfer-consult-btn');
+      expect(transferBtn).toBeDisabled();
+      unmount2();
 
-  it('displays correct state when consult is not completed', () => {
-    render(<CallControlConsultComponent {...defaultProps} consultCompleted={false} />);
-    const transferButton = screen.getByTestId('transfer-consult-btn');
+      // Test muted state
+      const {unmount: unmount3} = render(<CallControlConsultComponent {...{...defaultProps, isMuted: true}} />);
+      const muteBtn = screen.getByTestId('mute-consult-btn');
+      expect(muteBtn).toHaveClass('call-control-button-muted');
+      unmount3();
 
-    // Check the disabled attribute directly
-    expect(transferButton).toHaveAttribute('disabled', '');
-
-    const consultText = screen.getByText(
-      (content, element) => element?.className.includes('consult-sub-text') && content.includes('Consult requested')
-    );
-    expect(consultText).toBeInTheDocument();
-  });
-
-  it('handles error when transfer button click fails', () => {
-    const errorMockOnTransfer = jest.fn().mockImplementation(() => {
-      throw new Error('Transfer failed');
+      // Test without muteUnmute - component will be re-rendered so test separately
+      render(<CallControlConsultComponent {...{...defaultProps, muteUnmute: false}} />);
+      expect(screen.queryByTestId('mute-consult-btn')).not.toBeInTheDocument();
     });
 
-    const errorHandler = jest.fn();
-    window.addEventListener('error', errorHandler);
+    it('should handle timer key generation and agent display', () => {
+      const timestamp = 1234567890;
+      render(<CallControlConsultComponent {...{...defaultProps, startTimeStamp: timestamp}} />);
 
-    render(<CallControlConsultComponent {...defaultProps} onTransfer={errorMockOnTransfer} />);
-    const transferButton = screen.getByTestId('transfer-consult-btn');
-
-    fireEvent.click(transferButton);
-    expect(errorMockOnTransfer).toHaveBeenCalled();
-  });
-
-  it('handles error when end consult button click fails', () => {
-    const errorMockEndConsultCall = jest.fn().mockImplementation(() => {
-      throw new Error('End consult failed');
-    });
-
-    const errorHandler = jest.fn();
-    window.addEventListener('error', errorHandler);
-
-    render(<CallControlConsultComponent {...defaultProps} endConsultCall={errorMockEndConsultCall} />);
-    const cancelButton = screen.getByTestId('cancel-consult-btn');
-    fireEvent.click(cancelButton);
-    expect(errorMockEndConsultCall).toHaveBeenCalled();
-  });
-
-  it('does not render transfer button when isAgentBeingConsulted is false', () => {
-    render(<CallControlConsultComponent {...defaultProps} isAgentBeingConsulted={false} />);
-    expect(screen.queryByTestId('transfer-consult-btn')).not.toBeInTheDocument();
-  });
-
-  it('does not render cancel button when both isEndConsultEnabled and isAgentBeingConsulted are false', () => {
-    render(<CallControlConsultComponent {...defaultProps} isEndConsultEnabled={false} isAgentBeingConsulted={false} />);
-    expect(screen.queryByTestId('cancel-consult-btn')).not.toBeInTheDocument();
-  });
-
-  it('renders cancel button when isEndConsultEnabled is true even if isAgentBeingConsulted is false', () => {
-    render(<CallControlConsultComponent {...defaultProps} isEndConsultEnabled={true} isAgentBeingConsulted={false} />);
-    expect(screen.getByTestId('cancel-consult-btn')).toBeInTheDocument();
-  });
-
-  it('logs transfer button click', () => {
-    render(<CallControlConsultComponent {...defaultProps} />);
-    const transferButton = screen.getByTestId('transfer-consult-btn');
-    fireEvent.click(transferButton);
-    expect(loggerMock.log).toHaveBeenCalledWith('CC-Widgets: CallControlConsult: transfer completed', {
-      module: 'call-control-consult.tsx',
-      method: 'handleTransfer',
+      expect(screen.getByTestId('TaskTimer')).toBeInTheDocument();
+      expect(screen.getByText('Alice')).toBeInTheDocument();
     });
   });
 
-  it('logs end consult button click', () => {
-    render(<CallControlConsultComponent {...defaultProps} />);
-    const cancelButton = screen.getByTestId('cancel-consult-btn');
-    fireEvent.click(cancelButton);
-    expect(loggerMock.log).toHaveBeenCalledWith('CC-Widgets: CallControlConsult: end consult completed', {
-      module: 'call-control-consult.tsx',
-      method: 'handleEndConsult',
+  describe('Button Interactions and State Management', () => {
+    it('should handle transfer button click and logging', async () => {
+      const {unmount} = render(<CallControlConsultComponent {...defaultProps} />);
+
+      const transferButton = screen.getByTestId('transfer-consult-btn');
+
+      await act(async () => {
+        fireEvent.click(transferButton);
+      });
+
+      expect(loggerMock.info).toHaveBeenCalledWith(
+        'CC-Widgets: CallControlConsult: transfer button clicked',
+        expect.any(Object)
+      );
+      expect(mockOnTransfer).toHaveBeenCalled();
+      expect(loggerMock.log).toHaveBeenCalledWith(
+        'CC-Widgets: CallControlConsult: transfer completed',
+        expect.any(Object)
+      );
+      unmount();
+    });
+
+    it('should handle end consult button click and logging', async () => {
+      const {unmount} = render(<CallControlConsultComponent {...defaultProps} />);
+
+      const cancelButton = screen.getByTestId('cancel-consult-btn');
+
+      await act(async () => {
+        fireEvent.click(cancelButton);
+      });
+
+      expect(loggerMock.info).toHaveBeenCalledWith(
+        'CC-Widgets: CallControlConsult: end consult clicked',
+        expect.any(Object)
+      );
+      expect(mockEndConsultCall).toHaveBeenCalled();
+      expect(loggerMock.log).toHaveBeenCalledWith(
+        'CC-Widgets: CallControlConsult: end consult completed',
+        expect.any(Object)
+      );
+      unmount();
+    });
+
+    it('should handle mute toggle with disabled state and timeout', async () => {
+      const {unmount} = render(<CallControlConsultComponent {...defaultProps} />);
+
+      const muteButton = screen.getByTestId('mute-consult-btn');
+
+      await act(async () => {
+        fireEvent.click(muteButton);
+      });
+
+      expect(mockOnToggleConsultMute).toHaveBeenCalled();
+      expect(muteButton).toBeDisabled();
+
+      // Fast-forward timer to re-enable button
+      await act(async () => {
+        jest.advanceTimersByTime(500);
+      });
+
+      await waitFor(() => {
+        expect(muteButton).not.toBeDisabled();
+      });
+      unmount();
+    });
+  });
+
+  describe('Button Visibility and Configuration', () => {
+    it('should handle different button visibility configurations', () => {
+      // Test no transfer button when not agent being consulted
+      const {rerender, unmount} = render(
+        <CallControlConsultComponent {...{...defaultProps, isAgentBeingConsulted: false}} />
+      );
+      expect(screen.queryByTestId('transfer-consult-btn')).not.toBeInTheDocument();
+
+      // Test no cancel button when both flags are false
+      rerender(
+        <CallControlConsultComponent {...{...defaultProps, isEndConsultEnabled: false, isAgentBeingConsulted: false}} />
+      );
+      expect(screen.queryByTestId('cancel-consult-btn')).not.toBeInTheDocument();
+
+      // Test cancel button when isEndConsultEnabled is true
+      rerender(
+        <CallControlConsultComponent {...{...defaultProps, isEndConsultEnabled: true, isAgentBeingConsulted: false}} />
+      );
+      expect(screen.getByTestId('cancel-consult-btn')).toBeInTheDocument();
+
+      // Test no transfer button when onTransfer is null
+      rerender(<CallControlConsultComponent {...{...defaultProps, onTransfer: undefined}} />);
+      expect(screen.queryByTestId('transfer-consult-btn')).not.toBeInTheDocument();
+
+      // Test mute button presence based on muteUnmute flag
+      rerender(<CallControlConsultComponent {...{...defaultProps, muteUnmute: false}} />);
+      expect(screen.queryByTestId('mute-consult-btn')).not.toBeInTheDocument();
+
+      rerender(<CallControlConsultComponent {...{...defaultProps, muteUnmute: true}} />);
+      expect(screen.getByTestId('mute-consult-btn')).toBeInTheDocument();
+      unmount();
+    });
+
+    it('should apply correct CSS classes and states', () => {
+      const {rerender, unmount} = render(<CallControlConsultComponent {...defaultProps} />);
+
+      // Test muted state CSS
+      const muteBtn = screen.getByTestId('mute-consult-btn');
+      expect(muteBtn).toHaveClass('call-control-button');
+
+      rerender(<CallControlConsultComponent {...{...defaultProps, isMuted: true}} />);
+      const mutedBtn = screen.getByTestId('mute-consult-btn');
+      expect(mutedBtn).toHaveClass('call-control-button-muted');
+
+      // Test transfer button CSS
+      const transferBtn = screen.getByTestId('transfer-consult-btn');
+      expect(transferBtn).toHaveClass('call-control-button');
+
+      // Test cancel button CSS
+      const cancelBtn = screen.getByTestId('cancel-consult-btn');
+      expect(cancelBtn).toHaveClass('call-control-consult-button-cancel');
+      unmount();
+    });
+  });
+
+  describe('Edge Cases and Conditional Logic', () => {
+    it('should handle missing onTransfer prop gracefully', () => {
+      const {unmount} = render(<CallControlConsultComponent {...{...defaultProps, onTransfer: undefined}} />);
+
+      // Transfer button should not be visible
+      expect(screen.queryByTestId('transfer-consult-btn')).not.toBeInTheDocument();
+      unmount();
+    });
+
+    it('should handle button tooltip content correctly', () => {
+      const {rerender, unmount} = render(<CallControlConsultComponent {...defaultProps} />);
+
+      // Check tooltips are rendered (content is in TooltipNext)
+      expect(screen.getByText('Transfer Consult')).toBeInTheDocument();
+      expect(screen.getByText('End Consult')).toBeInTheDocument();
+      expect(screen.getByText('Mute')).toBeInTheDocument(); // Actual tooltip text from constants
+
+      // Test muted tooltip
+      rerender(<CallControlConsultComponent {...{...defaultProps, isMuted: true}} />);
+      expect(screen.getByText('Unmute')).toBeInTheDocument(); // Actual tooltip text from constants
+      unmount();
+    });
+
+    it('should handle all button states combinations', () => {
+      // Test all buttons visible
+      const {unmount} = render(<CallControlConsultComponent {...defaultProps} />);
+      expect(screen.getByTestId('mute-consult-btn')).toBeInTheDocument();
+      expect(screen.getByTestId('transfer-consult-btn')).toBeInTheDocument();
+      expect(screen.getByTestId('cancel-consult-btn')).toBeInTheDocument();
+      unmount();
+
+      // Test only cancel button (minimal config)
+      const {unmount: unmount2} = render(
+        <CallControlConsultComponent
+          {...{
+            ...defaultProps,
+            muteUnmute: false,
+            isAgentBeingConsulted: false,
+            onTransfer: undefined,
+          }}
+        />
+      );
+      expect(screen.queryByTestId('mute-consult-btn')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('transfer-consult-btn')).not.toBeInTheDocument();
+      expect(screen.getByTestId('cancel-consult-btn')).toBeInTheDocument();
+      unmount2();
+    });
+  });
+
+  describe('Error Handling', () => {
+    it('should handle button error scenarios and log appropriately', async () => {
+      // Test mute toggle error with logging (this one doesn't throw, just logs)
+      const errorMuteToggle = jest.fn().mockImplementation(() => {
+        throw new Error('Mute failed');
+      });
+
+      const {unmount} = render(
+        <CallControlConsultComponent {...{...defaultProps, onToggleConsultMute: errorMuteToggle}} />
+      );
+      const muteBtn = screen.getByTestId('mute-consult-btn');
+
+      await act(async () => {
+        fireEvent.click(muteBtn);
+      });
+
+      expect(loggerMock.error).toHaveBeenCalledWith(
+        expect.stringContaining('Mute toggle failed:'),
+        expect.objectContaining({
+          module: 'call-control-consult.tsx',
+          method: 'handleConsultMuteToggle',
+        })
+      );
+
+      // Button should still be re-enabled after timeout even with error
+      await act(async () => {
+        jest.advanceTimersByTime(500);
+      });
+
+      await waitFor(() => {
+        expect(muteBtn).not.toBeDisabled();
+      });
+      unmount();
     });
   });
 });
