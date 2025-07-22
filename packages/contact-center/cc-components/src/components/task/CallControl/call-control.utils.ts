@@ -1,5 +1,10 @@
 import {CallControlMenuType} from '../task.types';
-import type {MEDIA_CHANNEL as MediaChannelType} from '../task.types';
+import type {
+  CallControlButton,
+  ControlVisibility,
+  MEDIA_CHANNEL as MediaChannelType,
+  MediaTypeInfo,
+} from '../task.types';
 import {getMediaTypeInfo} from '../../../utils';
 import {DestinationType, ILogger, ITask} from '@webex/cc-store';
 import {
@@ -13,36 +18,6 @@ import {
   MUTE_CALL,
   UNMUTE_CALL,
 } from '../constants';
-
-export interface CallControlButton {
-  id: string;
-  icon: string;
-  onClick?: () => void;
-  tooltip: string;
-  className: string;
-  disabled: boolean;
-  isVisible: boolean;
-  menuType?: CallControlMenuType;
-}
-
-export interface ControlVisibility {
-  accept: boolean;
-  decline: boolean;
-  end: boolean;
-  muteUnmute: boolean;
-  holdResume: boolean;
-  consult: boolean;
-  transfer: boolean;
-  conference: boolean;
-  wrapup: boolean;
-  pauseResumeRecording: boolean;
-  endConsult: boolean;
-  recordingIndicator: boolean;
-}
-
-export interface MediaTypeInfo {
-  labelName: string;
-}
 
 /**
  * Handles toggle hold functionality

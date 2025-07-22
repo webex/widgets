@@ -143,6 +143,15 @@ describe('CallControlComponent', () => {
         disabled: false,
         isVisible: true,
       },
+      {
+        id: 'transfer',
+        icon: 'next-bold',
+        tooltip: 'Transfer',
+        className: 'call-control-button',
+        disabled: false,
+        menuType: 'Transfer',
+        isVisible: true,
+      },
     ]);
     filterButtonsForConsultationSpy = jest
       .spyOn(callControlUtils, 'filterButtonsForConsultation')
