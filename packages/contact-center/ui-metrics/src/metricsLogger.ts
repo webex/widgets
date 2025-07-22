@@ -9,11 +9,14 @@ export type WidgetMetrics = {
 };
 
 export const logMetrics = (metric: WidgetMetrics) => {
+  if (!store.logger) {
+    console.log('CC-Widgets: UI Metrics: No logger found');
+    return;
+  }
   store.logger.log(`CC-Widgets: UI Metrics: ${JSON.stringify(metric, null, 2)}`, {
     module: 'metricsLogger.tsx',
     method: 'logMetrics',
   });
-  // Optional: send to Amplitude or a log endpoint
 };
 
 export function havePropsChanged(prev: any, next: any): boolean {

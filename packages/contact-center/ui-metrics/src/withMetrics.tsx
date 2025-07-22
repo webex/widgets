@@ -4,8 +4,6 @@ import {havePropsChanged, logMetrics} from './metricsLogger';
 export default function withMetrics<P extends object>(Component: any, widgetName: string) {
   return React.memo(
     (props: P) => {
-      const previousProps = useRef<P>();
-
       useEffect(() => {
         logMetrics({
           widgetName,
