@@ -1,14 +1,14 @@
 import store from '@webex/cc-store';
 import {logMetrics, havePropsChanged, WidgetMetrics} from '../src/metricsLogger';
 
-// Mock the store
-jest.mock('@webex/cc-store', () => ({
-  logger: {
-    log: jest.fn(),
-  },
-}));
-
 describe('metricsLogger', () => {
+  store.store.logger = {
+    log: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    trace: jest.fn(),
+  };
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -33,7 +33,7 @@ describe('metricsLogger', () => {
 
     it('should handle case when logger is not available', () => {
       const consoleSpy = jest.spyOn(console, 'log');
-      (store as any).logger = null;
+      store.store.logger = undefined;
 
       const metric: WidgetMetrics = {
         widgetName: 'TestWidget',

@@ -9575,6 +9575,7 @@ __metadata:
     "@types/jest": "npm:29.5.14"
     "@types/react-test-renderer": "npm:18"
     "@webex/cc-store": "workspace:*"
+    "@webex/test-fixtures": "workspace:*"
     babel-jest: "npm:29.7.0"
     jest: "npm:29.7.0"
     jest-environment-jsdom: "npm:29.7.0"

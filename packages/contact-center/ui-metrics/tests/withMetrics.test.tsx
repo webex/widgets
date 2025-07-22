@@ -2,6 +2,7 @@ import React from 'react';
 import {render} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import withMetrics from '../src/withMetrics';
+import store from '@webex/cc-store';
 import * as metricsLogger from '../src/metricsLogger';
 
 interface TestComponentProps {
@@ -10,6 +11,13 @@ interface TestComponentProps {
 }
 
 describe('withMetrics HOC', () => {
+  store.store.logger = {
+    log: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    trace: jest.fn(),
+  };
   const logMetricsSpy = jest.spyOn(metricsLogger, 'logMetrics');
 
   const TestComponent: React.FC<TestComponentProps> = (props) => <div>Test Component {props.name}</div>;
