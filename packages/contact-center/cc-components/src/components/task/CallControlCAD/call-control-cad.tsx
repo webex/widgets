@@ -42,6 +42,8 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
     lastTargetType,
     controlVisibility,
     logger,
+    isMuted,
+    toggleMute,
   } = props;
 
   const formatTime = (time: number): string => {
@@ -58,7 +60,11 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
   const mediaChannel = currentTask.data.interaction.mediaType as MediaChannelType;
   const isSocial = mediaChannel === MediaChannelType.SOCIAL;
   const isTelephony = mediaChannel === MediaChannelType.TELEPHONY;
+
+  //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
   const customerName = currentTask?.data?.interaction?.callAssociatedDetails?.customerName;
+
+  //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
   const ani = currentTask?.data?.interaction?.callAssociatedDetails?.ani;
 
   // Create unique IDs for tooltips
@@ -188,12 +194,24 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
         <div className="cad-variables">
           <Text className="queue" type="body-secondary" tagName={'small'}>
             <strong>{QUEUE}</strong>{' '}
-            <span>{currentTask?.data?.interaction?.callAssociatedDetails?.virtualTeamName || NO_TEAM_NAME}</span>
+            <span>
+              {
+                //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+
+                currentTask?.data?.interaction?.callAssociatedDetails?.virtualTeamName || NO_TEAM_NAME
+              }
+            </span>
           </Text>
           {renderPhoneNumber()}
           <Text className="rona" type="body-secondary" tagName={'small'}>
             <strong>{RONA}</strong>{' '}
-            <span>{currentTask?.data?.interaction?.callAssociatedDetails?.ronaTimeout || NO_RONA}</span>
+            <span>
+              {
+                //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+
+                currentTask?.data?.interaction?.callAssociatedDetails?.ronaTimeout || NO_RONA
+              }
+            </span>
           </Text>
         </div>
       </div>
@@ -208,6 +226,9 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
             isAgentBeingConsulted={!consultAccepted}
             isEndConsultEnabled={isEndConsultEnabled}
             logger={logger}
+            muteUnmute={controlVisibility.muteUnmute}
+            isMuted={isMuted}
+            onToggleConsultMute={toggleMute}
           />
         </div>
       )}

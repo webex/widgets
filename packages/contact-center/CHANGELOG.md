@@ -1,3 +1,24 @@
+# [1.28.0-ccwidgets.94](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.93...v1.28.0-ccwidgets.94) (2025-07-16)
+
+
+### Bug Fixes
+
+* **tooling:** add type checking in ccwidgets ([#444](https://github.com/webex/widgets/issues/444)) ([cdc58e6](https://github.com/webex/widgets/commit/cdc58e610a9356b872d9093bb6a89c89cdc73d07))
+
+# [1.28.0-ccwidgets.93](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.92...v1.28.0-ccwidgets.93) (2025-07-16)
+
+
+### Bug Fixes
+
+* **contact-center:** created callbacks.md ([#501](https://github.com/webex/widgets/issues/501)) ([6336212](https://github.com/webex/widgets/commit/63362129a0f9c81e6850688cbcf87684a62a53da))
+
+# [1.28.0-ccwidgets.92](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.91...v1.28.0-ccwidgets.92) (2025-07-15)
+
+
+### Bug Fixes
+
+* **call-control:** implement-mute-unmute-actions ([#492](https://github.com/webex/widgets/issues/492)) ([ba70164](https://github.com/webex/widgets/commit/ba701648d8341e72a0dbaae2070ddeb0459cb588))
+
 # [1.28.0-ccwidgets.91](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.90...v1.28.0-ccwidgets.91) (2025-07-14)
 
 

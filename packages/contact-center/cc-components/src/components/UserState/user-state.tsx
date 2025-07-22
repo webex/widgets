@@ -1,6 +1,6 @@
 import React, {useMemo} from 'react';
 
-import {IUserState, AgentUserState} from './user-state.types';
+import {AgentUserState, UserStateComponentsProps} from './user-state.types';
 import {formatTime} from '../../utils';
 
 import './user-state.scss';
@@ -19,7 +19,7 @@ import {
 } from './user-state.utils';
 import {withMetrics} from '@webex/cc-ui-metrics';
 
-const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
+const UserStateComponent: React.FunctionComponent<UserStateComponentsProps> = (props) => {
   const {
     idleCodes,
     setAgentStatus,
@@ -52,6 +52,7 @@ const UserStateComponent: React.FunctionComponent<IUserState> = (props) => {
       >
         {(item) => {
           const isRonaOrEngaged = [AgentUserState.RONA, AgentUserState.Engaged].includes(
+            //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
             idleCodes.find((code) => code.id === currentState)?.name || ''
           );
           const shouldHighlight = currentState === item.id || (isRonaOrEngaged && item.id === previousSelectableState);

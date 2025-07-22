@@ -13,6 +13,7 @@ const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (prop
   return (
     <ul className="task-list" data-testid="task-list">
       {Object.values(taskList)?.map((task, index) => {
+        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762IT
         const callAssociationDetails = task?.data?.interaction?.callAssociatedDetails;
         const ani = callAssociationDetails?.ani;
         const customerName = callAssociationDetails?.customerName;

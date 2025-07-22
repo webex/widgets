@@ -2,7 +2,7 @@ import React from 'react';
 import store from '@webex/cc-store';
 import {observer} from 'mobx-react-lite';
 
-import {StationLoginComponent} from '@webex/cc-components';
+import {StationLoginComponent, StationLoginComponentProps} from '@webex/cc-components';
 import {useStationLogin} from '../helper';
 import {StationLoginProps} from './station-login.types';
 
@@ -39,19 +39,16 @@ const StationLogin: React.FunctionComponent<StationLoginProps> = observer(
     });
 
     const dialNumberRegex = cc?.agentConfig?.regexUS;
-
-    const props = {
+    const props: StationLoginComponentProps = {
       ...result,
       setDeviceType,
       setDialNumber,
       teams,
       loginOptions,
       deviceType,
-      dialNumber,
       dialNumberRegex,
       isAgentLoggedIn,
       showMultipleLoginAlert,
-      teamId,
       setTeamId,
       logger,
       profileMode,
