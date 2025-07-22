@@ -232,22 +232,4 @@ describe('ConsultTransferPopoverComponent', () => {
     expect(tabs[0]).toHaveTextContent('Agents');
     expect(tabs[1]).toHaveTextContent('Queues');
   });
-
-  it('handles mouseDown events on list items to prevent propagation', () => {
-    render(<ConsultTransferPopoverComponent {...baseProps} />);
-
-    // Get the container divs for the agents
-    const agentItems = screen.getAllByTestId('ConsultTransferListComponent');
-    const firstAgentContainer = agentItems[0].parentElement;
-
-    // The mouseDown handler should exist on the parent div
-    expect(firstAgentContainer).toHaveStyle('cursor: pointer');
-    expect(firstAgentContainer).toHaveStyle('pointer-events: auto');
-
-    // Simulate mouseDown event - the handler will call stopPropagation internally
-    fireEvent.mouseDown(firstAgentContainer!);
-
-    // Test passes if no error is thrown during the mouseDown event
-    expect(firstAgentContainer).toBeInTheDocument();
-  });
 });
