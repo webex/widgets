@@ -1,24 +1,5 @@
-import {MEDIA_CHANNEL} from '../task.types';
+import {MEDIA_CHANNEL, TaskListItemData} from '../task.types';
 import {ITask} from '@webex/cc-store';
-
-export interface TaskListItemData {
-  ani: string;
-  customerName: string;
-  virtualTeamName: string;
-  ronaTimeout: number | null;
-  taskState: string;
-  startTimeStamp: number;
-  isIncomingTask: boolean;
-  mediaType: string;
-  mediaChannel: string;
-  isTelephony: boolean;
-  isSocial: boolean;
-  acceptText: string | undefined;
-  declineText: string | undefined;
-  title: string;
-  disableAccept: boolean;
-  displayState: string; // ✅ Added displayState to interface
-}
 
 /**
  * Extracts and processes data from a task for rendering in the task list

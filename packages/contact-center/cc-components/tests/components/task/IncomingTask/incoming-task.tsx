@@ -4,18 +4,13 @@ import '@testing-library/jest-dom';
 import {mockTask} from '@webex/test-fixtures';
 import IncomingTaskComponent from '../../../../src/components/task/IncomingTask/incoming-task';
 import {MEDIA_CHANNEL} from '../../../../src/components/task/task.types';
+import {setupTaskTimerMocks} from '../../../utils/browser-api-mocks';
 import type {ILogger} from '@webex/cc-store';
 
-// Mock TaskTimer component
-jest.mock('../../../../src/components/task/TaskTimer', () => {
-  return {
-    __esModule: true,
-    default: () => <div data-testid="mock-timer">Timer</div>,
-  };
-});
+// Enhanced Worker mock that matches the real Worker interface
+setupTaskTimerMocks();
 
 describe('IncomingTaskComponent', () => {
-  // Mock logger with all required ILogger methods
   const mockLogger: ILogger = {
     info: jest.fn(),
     warn: jest.fn(),
@@ -59,7 +54,7 @@ describe('IncomingTaskComponent', () => {
     expect(screen.getByRole('listitem')).toBeInTheDocument();
 
     // Alternative: Check for the task-list-item class
-    // expect(document.querySelector('.task-list-item')).toBeInTheDocument();
+    expect(document.querySelector('.task-list-item')).toBeInTheDocument();
 
     const acceptButton = screen.getByTestId('task:accept-button');
     expect(acceptButton).toHaveTextContent('Accept');
@@ -111,7 +106,6 @@ describe('IncomingTaskComponent', () => {
     expect(acceptButton).toHaveTextContent('Accept');
     expect(screen.queryByTestId('task:decline-button')).not.toBeInTheDocument();
 
-    // Restore original mediaType
     mockTask.data.interaction.mediaType = originalMediaType;
   });
 });

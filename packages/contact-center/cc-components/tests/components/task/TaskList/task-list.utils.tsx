@@ -5,9 +5,8 @@ import {
   isTaskListEmpty,
   getTasksArray,
   createTaskSelectHandler,
-  TaskListItemData,
 } from '../../../../src/components/task/TaskList/task-list.utils';
-import {MEDIA_CHANNEL} from '../../../../src/components/task/task.types';
+import {MEDIA_CHANNEL, TaskListItemData} from '../../../../src/components/task/task.types';
 import {mockTask} from '@webex/test-fixtures';
 
 describe('task-list.utils', () => {

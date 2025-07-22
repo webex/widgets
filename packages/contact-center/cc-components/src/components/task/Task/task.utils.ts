@@ -1,24 +1,5 @@
-import type {MEDIA_CHANNEL as MediaChannelType} from '../task.types';
+import type {MEDIA_CHANNEL as MediaChannelType, TaskComponentData} from '../task.types';
 import {getMediaTypeInfo} from '../../../utils';
-
-export interface TaskComponentData {
-  currentMediaType: {
-    labelName: string;
-    iconName: string;
-    className: string;
-    isBrandVisual: boolean;
-  };
-  isNonVoiceMedia: boolean;
-  tooltipTriggerId: string;
-  tooltipId: string;
-  titleClassName: string;
-  shouldShowState: boolean;
-  shouldShowQueue: boolean;
-  shouldShowHandleTime: boolean;
-  shouldShowTimeLeft: boolean;
-  capitalizedState: string;
-  capitalizedQueue: string;
-}
 
 /**
  * Capitalizes the first word of a string

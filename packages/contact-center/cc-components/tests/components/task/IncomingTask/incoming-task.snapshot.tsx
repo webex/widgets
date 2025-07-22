@@ -5,14 +5,10 @@ import {mockTask} from '@webex/test-fixtures';
 import IncomingTaskComponent from '../../../../src/components/task/IncomingTask/incoming-task';
 import {MEDIA_CHANNEL} from '../../../../src/components/task/task.types';
 import type {ILogger} from '@webex/cc-store';
+import {setupTaskTimerMocks} from '../../../utils/browser-api-mocks';
 
-// Mock TaskTimer component
-jest.mock('../../../../src/components/task/TaskTimer', () => {
-  return {
-    __esModule: true,
-    default: () => <div data-testid="mock-timer">Timer</div>,
-  };
-});
+// Enhanced Worker mock that matches the real Worker interface
+setupTaskTimerMocks();
 
 describe('IncomingTaskComponent', () => {
   const mockLogger: ILogger = {
@@ -100,7 +96,6 @@ describe('IncomingTaskComponent', () => {
     const {container} = render(<IncomingTaskComponent {...props} />);
     expect(container.firstChild).toMatchSnapshot();
 
-    // Restore original wrapUpRequired
     mockTask.data.wrapUpRequired = originalWrapUpRequired;
   });
 
@@ -122,7 +117,6 @@ describe('IncomingTaskComponent', () => {
     const {container} = render(<IncomingTaskComponent {...props} />);
     expect(container.firstChild).toMatchSnapshot();
 
-    // Restore original values
     mockTask.data.interaction.mediaType = originalMediaType;
     mockTask.data.wrapUpRequired = originalWrapUpRequired;
   });
@@ -161,7 +155,6 @@ describe('IncomingTaskComponent', () => {
     const {container} = render(<IncomingTaskComponent {...props} />);
     expect(container.firstChild).toMatchSnapshot();
 
-    // Restore original mediaType
     mockTask.data.interaction.mediaType = originalMediaType;
   });
 
