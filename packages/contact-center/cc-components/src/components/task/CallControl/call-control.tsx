@@ -22,7 +22,7 @@ import {
   SELECT,
   SUBMIT_WRAP_UP,
 } from '../constants';
-import {withMetrics} from '@webex/ui-metrics';
+import {withMetrics} from '@webex/cc-ui-metrics';
 
 function CallControlComponent(props: CallControlComponentProps) {
   const [selectedWrapupReason, setSelectedWrapupReason] = useState<string | null>(null);
