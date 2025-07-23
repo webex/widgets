@@ -12,6 +12,10 @@ import {
   buildCallControlButtons,
   filterButtonsForConsultation,
   updateCallStateFromTask,
+  handleCloseButtonPress,
+  handlePopoverHide,
+  handleWrapupReasonChange,
+  handleAudioRef,
 } from '../../../../src/components/task/CallControl/call-control.utils';
 import * as utils from '../../../../src/utils';
 
@@ -787,6 +791,136 @@ describe('CallControl Utils', () => {
 
       expect(mockSetIsHeld).toHaveBeenCalledWith(false);
       expect(mockSetIsRecording).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('handleCloseButtonPress', () => {
+    it('should set showAgentMenu to false and agentMenuType to null', () => {
+      const mockSetShowAgentMenu = jest.fn();
+      const mockSetAgentMenuType = jest.fn();
+
+      handleCloseButtonPress(mockSetShowAgentMenu, mockSetAgentMenuType);
+
+      expect(mockSetShowAgentMenu).toHaveBeenCalledWith(false);
+      expect(mockSetAgentMenuType).toHaveBeenCalledWith(null);
+    });
+  });
+
+  describe('handlePopoverHide', () => {
+    it('should set showAgentMenu to false and agentMenuType to null', () => {
+      const mockSetShowAgentMenu = jest.fn();
+      const mockSetAgentMenuType = jest.fn();
+
+      handlePopoverHide(mockSetShowAgentMenu, mockSetAgentMenuType);
+
+      expect(mockSetShowAgentMenu).toHaveBeenCalledWith(false);
+      expect(mockSetAgentMenuType).toHaveBeenCalledWith(null);
+    });
+  });
+
+  describe('handleWrapupReasonChange', () => {
+    const mockHandleWrapupChange = jest.fn();
+
+    beforeEach(() => {
+      mockHandleWrapupChange.mockClear();
+    });
+
+    it('should handle wrapup reason change with valid selection', () => {
+      const mockEvent = {
+        detail: {
+          value: 'code-1',
+        },
+      } as CustomEvent;
+
+      const mockWrapupCodes = [
+        {id: 'code-1', name: 'Technical Issue'},
+        {id: 'code-2', name: 'Customer Inquiry'},
+      ];
+
+      handleWrapupReasonChange(mockEvent, mockWrapupCodes, mockHandleWrapupChange);
+
+      expect(mockHandleWrapupChange).toHaveBeenCalledWith('Technical Issue', 'code-1');
+    });
+
+    it('should handle wrapup reason change with unknown selection', () => {
+      const mockEvent = {
+        detail: {
+          value: 'unknown-code',
+        },
+      } as CustomEvent;
+
+      const mockWrapupCodes = [
+        {id: 'code-1', name: 'Technical Issue'},
+        {id: 'code-2', name: 'Customer Inquiry'},
+      ];
+
+      handleWrapupReasonChange(mockEvent, mockWrapupCodes, mockHandleWrapupChange);
+
+      expect(mockHandleWrapupChange).not.toHaveBeenCalled();
+    });
+
+    it('should handle wrapup reason change with undefined wrapupCodes', () => {
+      const mockEvent = {
+        detail: {
+          value: 'code-1',
+        },
+      } as CustomEvent;
+
+      handleWrapupReasonChange(mockEvent, undefined, mockHandleWrapupChange);
+
+      expect(mockHandleWrapupChange).not.toHaveBeenCalled();
+    });
+
+    it('should handle wrapup reason change with empty wrapupCodes array', () => {
+      const mockEvent = {
+        detail: {
+          value: 'code-1',
+        },
+      } as CustomEvent;
+
+      const mockWrapupCodes: Array<{id: string; name: string}> = [];
+
+      handleWrapupReasonChange(mockEvent, mockWrapupCodes, mockHandleWrapupChange);
+
+      expect(mockHandleWrapupChange).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('handleAudioRef', () => {
+    it('should set srcObject when both audioElement and callControlAudio are provided', () => {
+      const mockAudioElement = {
+        srcObject: null,
+      } as HTMLAudioElement;
+
+      const mockCallControlAudio = {} as MediaStream;
+
+      handleAudioRef(mockAudioElement, mockCallControlAudio);
+
+      expect(mockAudioElement.srcObject).toBe(mockCallControlAudio);
+    });
+
+    it('should not set srcObject when audioElement is null', () => {
+      const mockCallControlAudio = {} as MediaStream;
+
+      handleAudioRef(null, mockCallControlAudio);
+
+      // No assertion needed as the function should not throw and do nothing
+    });
+
+    it('should not set srcObject when callControlAudio is null', () => {
+      const mockAudioElement = {
+        srcObject: null,
+      } as HTMLAudioElement;
+
+      handleAudioRef(mockAudioElement, null);
+
+      expect(mockAudioElement.srcObject).toBe(null);
+    });
+
+    it('should not set srcObject when both audioElement and callControlAudio are null', () => {
+      handleAudioRef(null, null);
+
+      // No assertion needed as the function should not throw and do nothing
     });
   });
 });

@@ -16,6 +16,10 @@ import {
   handleWrapupChange as handleWrapupChangeUtil,
   handleTargetSelect as handleTargetSelectUtil,
   handlePopoverOpen as handlePopoverOpenUtil,
+  handleCloseButtonPress,
+  handlePopoverHide,
+  handleWrapupReasonChange,
+  handleAudioRef,
   getMediaType,
   isTelephonyMediaType,
   buildCallControlButtons,
@@ -144,15 +148,7 @@ function CallControlComponent(props: CallControlComponentProps) {
 
   return (
     <>
-      <audio
-        ref={(audioElement) => {
-          if (audioElement && callControlAudio) {
-            audioElement.srcObject = callControlAudio;
-          }
-        }}
-        id="remote-audio"
-        autoPlay
-      ></audio>
+      <audio ref={(audioElement) => handleAudioRef(audioElement, callControlAudio)} id="remote-audio" autoPlay></audio>
       <div className="call-control-container" data-testid="call-control-container">
         {!(consultAccepted && isTelephony) && !controlVisibility.wrapup && (
           <div className="button-group">
@@ -163,10 +159,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                 return (
                   <PopoverNext
                     key={index}
-                    onHide={() => {
-                      setShowAgentMenu(false);
-                      setAgentMenuType(null);
-                    }}
+                    onHide={() => handlePopoverHide(setShowAgentMenu, setAgentMenuType)}
                     color="primary"
                     delay={[0, 0]}
                     placement="bottom"
@@ -179,10 +172,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                     closeButtonPlacement="top-right"
                     closeButtonProps={{
                       'aria-label': 'Close popover',
-                      onPress: () => {
-                        setShowAgentMenu(false);
-                        setAgentMenuType(null);
-                      },
+                      onPress: () => handleCloseButtonPress(setShowAgentMenu, setAgentMenuType),
                       outline: true,
                     }}
                     triggerComponent={
@@ -304,11 +294,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                 className="wrapup-select"
                 data-testid="call-control:wrapup-select"
                 placeholder={SELECT}
-                onChange={(event: CustomEvent) => {
-                  const key = event.detail.value;
-                  const selectedItem = wrapupCodes?.find((code) => code.id === key);
-                  handleWrapupChange(selectedItem.name, selectedItem.id);
-                }}
+                onChange={(event: CustomEvent) => handleWrapupReasonChange(event, wrapupCodes, handleWrapupChange)}
               >
                 {wrapupCodes?.map((code) => (
                   <Option

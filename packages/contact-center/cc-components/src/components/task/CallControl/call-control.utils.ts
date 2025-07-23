@@ -293,3 +293,49 @@ export const updateCallStateFromTask = (
     setIsRecording(!isPaused);
   }
 };
+
+/**
+ * Handles close button press for popover components
+ */
+export const handleCloseButtonPress = (
+  setShowAgentMenu: (show: boolean) => void,
+  setAgentMenuType: (type: CallControlMenuType | null) => void
+): void => {
+  setShowAgentMenu(false);
+  setAgentMenuType(null);
+};
+
+/**
+ * Handles popover hide event
+ */
+export const handlePopoverHide = (
+  setShowAgentMenu: (show: boolean) => void,
+  setAgentMenuType: (type: CallControlMenuType | null) => void
+): void => {
+  setShowAgentMenu(false);
+  setAgentMenuType(null);
+};
+
+/**
+ * Handles wrapup reason selection change event
+ */
+export const handleWrapupReasonChange = (
+  event: CustomEvent,
+  wrapupCodes: Array<{id: string; name: string}> | undefined,
+  handleWrapupChange: (text: string, value: string) => void
+): void => {
+  const key = event.detail.value;
+  const selectedItem = wrapupCodes?.find((code) => code.id === key);
+  if (selectedItem) {
+    handleWrapupChange(selectedItem.name, selectedItem.id);
+  }
+};
+
+/**
+ * Handles audio element ref assignment
+ */
+export const handleAudioRef = (audioElement: HTMLAudioElement | null, callControlAudio: MediaStream | null): void => {
+  if (audioElement && callControlAudio) {
+    audioElement.srcObject = callControlAudio;
+  }
+};
