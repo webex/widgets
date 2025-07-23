@@ -3,30 +3,21 @@ import {Button, Icon, Text, ListItem} from '@momentum-design/components/dist/rea
 import './AutoWrapupTimer.css';
 import {AutoWrapupTimerProps} from '../task.types';
 import {UNTIL_AUTO_WRAPUP, CANCEL} from '../constants';
+import {getTimerUIState} from './AutoWrapupTimer.utils';
 
 const AutoWrapupTimer: React.FC<AutoWrapupTimerProps> = ({
   secondsUntilAutoWrapup,
   allowCancelAutoWrapup,
   handleCancelWrapup,
 }) => {
-  const isUrgent = secondsUntilAutoWrapup <= 10;
-  const containerClassName = isUrgent ? 'wrapup-timer-container urgent' : 'wrapup-timer-container';
-  const iconClassName = isUrgent ? 'wrapup-timer-icon urgent' : 'wrapup-timer-icon';
+  const {containerClassName, iconClassName, iconName, formattedTime} = getTimerUIState(secondsUntilAutoWrapup);
   return (
     <>
       <ListItem className={containerClassName}>
-        <Icon
-          length-unit="rem"
-          slot="leading-controls"
-          className={iconClassName}
-          name={isUrgent ? 'alert-active-bold' : 'recents-bold'}
-          size={1.25}
-        ></Icon>
+        <Icon length-unit="rem" slot="leading-controls" className={iconClassName} name={iconName} size={1.25}></Icon>
         <div slot="leading-controls" className="wrapup-timer-label">
           <Text slot="leading-controls" type="body-large-bold">
-            {`${Math.floor(secondsUntilAutoWrapup / 60)
-              .toString()
-              .padStart(2, '0')}:${(secondsUntilAutoWrapup % 60).toString().padStart(2, '0')}`}
+            {formattedTime}
           </Text>
           <Text slot="leading-controls" type="body-large-regular">
             {UNTIL_AUTO_WRAPUP}
