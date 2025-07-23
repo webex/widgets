@@ -7,7 +7,7 @@ import type {MEDIA_CHANNEL as MediaChannelType} from '../task.types';
 import {extractTaskComponentData, getTaskListItemClasses} from './task.utils';
 import './styles.scss';
 
-interface TaskProps {
+export interface TaskProps {
   interactionId?: string;
   title?: string;
   state?: string;
