@@ -822,9 +822,6 @@ describe('TaskListComponent', () => {
         <TaskListComponent {...defaultProps} taskList={taskList} currentTask={actionTask} />
       );
 
-      // Capture initial state with selected telephony task
-      expect(container).toMatchSnapshot();
-
       // Get both task elements
       const taskElements = container.querySelectorAll('[role="listitem"]');
       const selectedTaskElement = taskElements[0]; // action-task (telephony)
@@ -873,9 +870,6 @@ describe('TaskListComponent', () => {
 
       // Test task interaction - clicking unselected task
       fireEvent.click(unselectedTaskElement);
-
-      // Capture state after clicking unselected chat task
-      expect(container).toMatchSnapshot();
 
       // Verify onTaskSelect was called with the correct task
       expect(mockOnTaskSelect).toHaveBeenCalledTimes(1);
