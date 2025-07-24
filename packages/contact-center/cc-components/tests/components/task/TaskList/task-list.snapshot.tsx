@@ -1,265 +1,347 @@
 import React from 'react';
-import {render} from '@testing-library/react';
+import {render, fireEvent} from '@testing-library/react';
+import '@testing-library/jest-dom';
 import {mockTask} from '@webex/test-fixtures';
 import TaskListComponent from '../../../../src/components/task/TaskList/task-list';
-import {MEDIA_CHANNEL, TaskListComponentProps} from '../../../../src/components/task/task.types';
-import {setupTaskTimerMocks} from '../../../utils/browser-api-mocks';
+import {TaskListComponentProps, MEDIA_CHANNEL} from '../../../../src/components/task/task.types';
+import type {ILogger} from '@webex/cc-store';
+import * as taskListUtils from '../../../../src/components/task/TaskList/task-list.utils';
 
-setupTaskTimerMocks();
+// Simple Worker mock
+Object.defineProperty(global, 'Worker', {
+  writable: true,
+  value: class MockWorker {
+    constructor() {}
+    postMessage = jest.fn();
+    addEventListener = jest.fn();
+    removeEventListener = jest.fn();
+    terminate = jest.fn();
+  },
+});
 
-describe('TaskListComponent Snapshots', () => {
-  const mockLogger = {
-    log: jest.fn(),
-    error: jest.fn(),
-    warn: jest.fn(),
-    info: jest.fn(),
-    trace: jest.fn(),
-  };
+Object.defineProperty(global, 'URL', {
+  writable: true,
+  value: {
+    createObjectURL: jest.fn(() => 'blob:mock-url'),
+    revokeObjectURL: jest.fn(),
+  },
+});
 
+describe('TaskListComponent', () => {
+  // Mock functions
   const mockAcceptTask = jest.fn();
   const mockDeclineTask = jest.fn();
   const mockOnTaskSelect = jest.fn();
+  const mockLogger: ILogger = {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    log: jest.fn(),
+    trace: jest.fn(),
+  };
+
+  // Default props using TaskListComponentProps interface
+  const defaultProps: TaskListComponentProps = {
+    currentTask: null,
+    taskList: null,
+    acceptTask: mockAcceptTask,
+    declineTask: mockDeclineTask,
+    isBrowser: true,
+    onTaskSelect: mockOnTaskSelect,
+    logger: mockLogger,
+  };
+
+  // Common mock data objects
+  const mockTaskData = {
+    active: {
+      telephony: {
+        ani: '1234567890',
+        customerName: 'John Doe',
+        virtualTeamName: 'Support Team',
+        ronaTimeout: null,
+        taskState: 'active',
+        startTimeStamp: 1641234567890,
+        isIncomingTask: false,
+        mediaType: MEDIA_CHANNEL.TELEPHONY,
+        mediaChannel: MEDIA_CHANNEL.TELEPHONY,
+        isTelephony: true,
+        isSocial: false,
+        acceptText: undefined,
+        declineText: undefined,
+        title: '1234567890',
+        disableAccept: false,
+        displayState: 'active',
+      },
+      chat: {
+        ani: 'chat-user-123',
+        customerName: 'Chat Customer',
+        virtualTeamName: 'Chat Team',
+        ronaTimeout: null,
+        taskState: 'active',
+        startTimeStamp: 1641234567890,
+        isIncomingTask: false,
+        mediaType: MEDIA_CHANNEL.CHAT,
+        mediaChannel: MEDIA_CHANNEL.CHAT,
+        isTelephony: false,
+        isSocial: false,
+        acceptText: undefined,
+        declineText: undefined,
+        title: 'Chat Customer',
+        disableAccept: false,
+        displayState: 'active',
+      },
+      facebook: {
+        ani: 'facebook-user-456',
+        customerName: 'Facebook Customer',
+        virtualTeamName: 'Social Team',
+        ronaTimeout: null,
+        taskState: 'active',
+        startTimeStamp: 1641234567890,
+        isIncomingTask: false,
+        mediaType: MEDIA_CHANNEL.SOCIAL,
+        mediaChannel: MEDIA_CHANNEL.FACEBOOK,
+        isTelephony: false,
+        isSocial: true,
+        acceptText: undefined,
+        declineText: undefined,
+        title: 'Facebook Customer',
+        disableAccept: false,
+        displayState: 'active',
+      },
+    },
+    incoming: {
+      webrtcTelephony: {
+        ani: '1234567890',
+        customerName: 'WebRTC Customer',
+        virtualTeamName: 'Support',
+        ronaTimeout: 30,
+        taskState: 'new',
+        startTimeStamp: undefined,
+        isIncomingTask: true,
+        mediaType: MEDIA_CHANNEL.TELEPHONY,
+        mediaChannel: MEDIA_CHANNEL.TELEPHONY,
+        isTelephony: true,
+        isSocial: false,
+        acceptText: 'Accept',
+        declineText: 'Decline',
+        title: '1234567890',
+        disableAccept: false,
+        displayState: '',
+      },
+      extensionTelephony: {
+        ani: '1234567890',
+        customerName: 'Extension Customer',
+        virtualTeamName: 'Support',
+        ronaTimeout: 30,
+        taskState: 'new',
+        startTimeStamp: undefined,
+        isIncomingTask: true,
+        mediaType: MEDIA_CHANNEL.TELEPHONY,
+        mediaChannel: MEDIA_CHANNEL.TELEPHONY,
+        isTelephony: true,
+        isSocial: false,
+        acceptText: 'Ringing...',
+        declineText: undefined,
+        title: '1234567890',
+        disableAccept: true,
+        displayState: '',
+      },
+      chat: {
+        ani: 'chat-user-123',
+        customerName: 'Chat Customer',
+        virtualTeamName: 'Chat Support',
+        ronaTimeout: 30,
+        taskState: 'new',
+        startTimeStamp: undefined,
+        isIncomingTask: true,
+        mediaType: MEDIA_CHANNEL.CHAT,
+        mediaChannel: MEDIA_CHANNEL.CHAT,
+        isTelephony: false,
+        isSocial: false,
+        acceptText: 'Accept',
+        declineText: undefined,
+        title: 'Chat Customer',
+        disableAccept: false,
+        displayState: '',
+      },
+    },
+    action: {
+      telephony: {
+        ani: '1111111111',
+        customerName: 'Action Customer',
+        virtualTeamName: 'Action Team',
+        ronaTimeout: 30,
+        taskState: 'new',
+        startTimeStamp: undefined,
+        isIncomingTask: true,
+        mediaType: MEDIA_CHANNEL.TELEPHONY,
+        mediaChannel: MEDIA_CHANNEL.TELEPHONY,
+        isTelephony: true,
+        isSocial: false,
+        acceptText: 'Accept',
+        declineText: 'Decline',
+        title: '1111111111',
+        disableAccept: false,
+        displayState: '',
+      },
+      activeTask: {
+        ani: '1111111111',
+        customerName: 'Active Customer',
+        virtualTeamName: 'Active Team',
+        ronaTimeout: null,
+        taskState: 'active',
+        startTimeStamp: 1641234567890,
+        isIncomingTask: false,
+        mediaType: MEDIA_CHANNEL.TELEPHONY,
+        mediaChannel: MEDIA_CHANNEL.TELEPHONY,
+        isTelephony: true,
+        isSocial: false,
+        acceptText: undefined,
+        declineText: undefined,
+        title: '1111111111',
+        disableAccept: false,
+        displayState: 'active',
+      },
+    },
+    selection: {
+      selectedTelephony: {
+        ani: '1111111111',
+        customerName: 'Selected Customer',
+        virtualTeamName: 'Selected Team',
+        ronaTimeout: 30,
+        taskState: 'new',
+        startTimeStamp: undefined,
+        isIncomingTask: true,
+        mediaType: MEDIA_CHANNEL.TELEPHONY,
+        mediaChannel: MEDIA_CHANNEL.TELEPHONY,
+        isTelephony: true,
+        isSocial: false,
+        acceptText: 'Accept',
+        declineText: 'Decline',
+        title: '1111111111',
+        disableAccept: false,
+        displayState: '',
+      },
+      unselectedChat: {
+        ani: 'chat-user-456',
+        customerName: 'Unselected Chat Customer',
+        virtualTeamName: 'Chat Support Team',
+        ronaTimeout: null,
+        taskState: 'active',
+        startTimeStamp: 1641234567890,
+        isIncomingTask: false,
+        mediaType: MEDIA_CHANNEL.CHAT,
+        mediaChannel: MEDIA_CHANNEL.CHAT,
+        isTelephony: false,
+        isSocial: false,
+        acceptText: undefined,
+        declineText: undefined,
+        title: 'Unselected Chat Customer',
+        disableAccept: false,
+        displayState: 'active',
+      },
+    },
+  };
+
+  // Utility function spies
+  const isTaskListEmptySpy = jest.spyOn(taskListUtils, 'isTaskListEmpty');
+  const getTasksArraySpy = jest.spyOn(taskListUtils, 'getTasksArray');
+  const extractTaskListItemDataSpy = jest.spyOn(taskListUtils, 'extractTaskListItemData');
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  describe('Empty task list scenarios', () => {
-    it('should render empty component when taskList is null', () => {
-      const props: TaskListComponentProps = {
+  afterAll(() => {
+    isTaskListEmptySpy.mockRestore();
+    getTasksArraySpy.mockRestore();
+    extractTaskListItemDataSpy.mockRestore();
+  });
+
+  describe('Empty TaskList Scenarios', () => {
+    it('should return empty component when taskList is null or undefined', async () => {
+      // Test with null
+      const propsWithNull: TaskListComponentProps = {
+        ...defaultProps,
         taskList: null,
-        currentTask: null,
-        acceptTask: mockAcceptTask,
-        declineTask: mockDeclineTask,
-        isBrowser: true,
-        onTaskSelect: mockOnTaskSelect,
-        logger: mockLogger,
       };
 
-      const {container} = render(<TaskListComponent {...props} />);
-      expect(container).toMatchSnapshot();
-    });
+      const {container: containerNull} = await render(<TaskListComponent {...propsWithNull} />);
+      expect(containerNull).toMatchSnapshot();
 
-    it('should render empty component when taskList is undefined', () => {
-      const props: TaskListComponentProps = {
+      // Test with undefined
+      const propsWithUndefined: TaskListComponentProps = {
+        ...defaultProps,
         taskList: undefined,
-        currentTask: null,
-        acceptTask: mockAcceptTask,
-        declineTask: mockDeclineTask,
-        isBrowser: true,
-        onTaskSelect: mockOnTaskSelect,
-        logger: mockLogger,
       };
 
-      const {container} = render(<TaskListComponent {...props} />);
-      expect(container).toMatchSnapshot();
+      const {container: containerUndefined} = await render(<TaskListComponent {...propsWithUndefined} />);
+      expect(containerUndefined).toMatchSnapshot();
     });
 
-    it('should render empty component when taskList is empty object', () => {
-      const props: TaskListComponentProps = {
-        taskList: {},
-        currentTask: null,
-        acceptTask: mockAcceptTask,
-        declineTask: mockDeclineTask,
-        isBrowser: true,
-        onTaskSelect: mockOnTaskSelect,
-        logger: mockLogger,
+    it('should return empty component when taskList is empty object', async () => {
+      const propsWithEmptyObject: TaskListComponentProps = {
+        ...defaultProps,
+        taskList: {}, // Empty object
       };
 
-      const {container} = render(<TaskListComponent {...props} />);
+      const {container} = await render(<TaskListComponent {...propsWithEmptyObject} />);
       expect(container).toMatchSnapshot();
     });
   });
 
-  describe('Task list with tasks', () => {
-    it('should render task list with single task', () => {
-      const task = {
-        ...mockTask,
-        data: {
-          ...mockTask.data,
-          interactionId: 'task-1',
-          interaction: {
-            ...mockTask.data.interaction,
-            callAssociatedDetails: {
-              ani: '1234567890',
-              customerName: 'John Doe',
-              virtualTeamName: 'Support Team',
-              ronaTimeout: '30',
-            },
+  describe('Rendering with Tasks', () => {
+    const sampleTask = {
+      ...mockTask,
+      data: {
+        ...mockTask.data,
+        interactionId: 'test-task-123',
+        interaction: {
+          ...mockTask.data.interaction,
+          state: 'active',
+          mediaType: MEDIA_CHANNEL.TELEPHONY,
+          callAssociatedDetails: {
+            ani: '1234567890',
+            customerName: 'John Doe',
+            virtualTeamName: 'Support Team',
           },
         },
-      };
+      },
+    };
 
-      const props: TaskListComponentProps = {
-        taskList: {'task-1': task},
-        currentTask: null,
-        acceptTask: mockAcceptTask,
-        declineTask: mockDeclineTask,
-        isBrowser: true,
-        onTaskSelect: mockOnTaskSelect,
-        logger: mockLogger,
-      };
-
-      const {container} = render(<TaskListComponent {...props} />);
-      expect(container).toMatchSnapshot();
+    beforeEach(() => {
+      extractTaskListItemDataSpy.mockReturnValue(mockTaskData.active.telephony);
     });
 
-    it('should render task list with multiple tasks', () => {
-      const task1 = {
-        ...mockTask,
+    it('should render multiple tasks with different media types and their corresponding icons and labels', async () => {
+      // Create telephony task
+      const telephonyTask = {
+        ...sampleTask,
         data: {
-          ...mockTask.data,
-          interactionId: 'task-1',
-          interaction: {
-            ...mockTask.data.interaction,
-            callAssociatedDetails: {
-              ani: '1234567890',
-              customerName: 'John Doe',
-              virtualTeamName: 'Support Team',
-            },
-            mediaType: MEDIA_CHANNEL.TELEPHONY,
-            state: 'active',
-          },
-        },
-      };
-
-      const task2 = {
-        ...mockTask,
-        data: {
-          ...mockTask.data,
-          interactionId: 'task-2',
-          interaction: {
-            ...mockTask.data.interaction,
-            callAssociatedDetails: {
-              ani: '0987654321',
-              customerName: 'Jane Smith',
-              virtualTeamName: 'Sales Team',
-            },
-            mediaType: MEDIA_CHANNEL.SOCIAL,
-            state: 'new',
-          },
-        },
-      };
-
-      const props: TaskListComponentProps = {
-        taskList: {'task-1': task1, 'task-2': task2},
-        currentTask: null,
-        acceptTask: mockAcceptTask,
-        declineTask: mockDeclineTask,
-        isBrowser: true,
-        onTaskSelect: mockOnTaskSelect,
-        logger: mockLogger,
-      };
-
-      const {container} = render(<TaskListComponent {...props} />);
-      expect(container).toMatchSnapshot();
-    });
-
-    it('should show selected task correctly', () => {
-      const task = {
-        ...mockTask,
-        data: {
-          ...mockTask.data,
-          interactionId: 'selected-task',
-        },
-      };
-
-      const currentTask = {
-        ...mockTask,
-        data: {
-          ...mockTask.data,
-          interactionId: 'selected-task',
-        },
-      };
-
-      const props: TaskListComponentProps = {
-        taskList: {'selected-task': task},
-        currentTask,
-        acceptTask: mockAcceptTask,
-        declineTask: mockDeclineTask,
-        isBrowser: true,
-        onTaskSelect: mockOnTaskSelect,
-        logger: mockLogger,
-      };
-
-      const {container} = render(<TaskListComponent {...props} />);
-      expect(container).toMatchSnapshot();
-    });
-  });
-
-  describe('Different media types', () => {
-    it('should render telephony task correctly', () => {
-      const task = {
-        ...mockTask,
-        data: {
-          ...mockTask.data,
+          ...sampleTask.data,
           interactionId: 'telephony-task',
           interaction: {
-            ...mockTask.data.interaction,
+            ...sampleTask.data.interaction,
+            state: 'active',
             mediaType: MEDIA_CHANNEL.TELEPHONY,
             callAssociatedDetails: {
               ani: '1234567890',
-              customerName: 'Phone Customer',
-              virtualTeamName: 'Phone Team',
+              customerName: 'Telephony Customer',
+              virtualTeamName: 'Telephony Team',
             },
           },
         },
       };
 
-      const props: TaskListComponentProps = {
-        taskList: {'telephony-task': task},
-        currentTask: null,
-        acceptTask: mockAcceptTask,
-        declineTask: mockDeclineTask,
-        isBrowser: true,
-        onTaskSelect: mockOnTaskSelect,
-        logger: mockLogger,
-      };
-
-      const {container} = render(<TaskListComponent {...props} />);
-      expect(container).toMatchSnapshot();
-    });
-
-    it('should render social media task correctly', () => {
-      const task = {
-        ...mockTask,
+      // Create chat task
+      const chatTask = {
+        ...sampleTask,
         data: {
-          ...mockTask.data,
-          interactionId: 'social-task',
-          interaction: {
-            ...mockTask.data.interaction,
-            mediaType: MEDIA_CHANNEL.SOCIAL,
-            callAssociatedDetails: {
-              ani: '1234567890',
-              customerName: 'Social Customer',
-              virtualTeamName: 'Social Team',
-            },
-          },
-        },
-      };
-
-      const props: TaskListComponentProps = {
-        taskList: {'social-task': task},
-        currentTask: null,
-        acceptTask: mockAcceptTask,
-        declineTask: mockDeclineTask,
-        isBrowser: true,
-        onTaskSelect: mockOnTaskSelect,
-        logger: mockLogger,
-      };
-
-      const {container} = render(<TaskListComponent {...props} />);
-      expect(container).toMatchSnapshot();
-    });
-
-    it('should render chat task correctly', () => {
-      const task = {
-        ...mockTask,
-        data: {
-          ...mockTask.data,
+          ...sampleTask.data,
           interactionId: 'chat-task',
           interaction: {
-            ...mockTask.data.interaction,
+            ...sampleTask.data.interaction,
+            state: 'active',
             mediaType: MEDIA_CHANNEL.CHAT,
             callAssociatedDetails: {
               ani: 'chat-user-123',
@@ -270,407 +352,227 @@ describe('TaskListComponent Snapshots', () => {
         },
       };
 
-      const props: TaskListComponentProps = {
-        taskList: {'chat-task': task},
-        currentTask: null,
-        acceptTask: mockAcceptTask,
-        declineTask: mockDeclineTask,
-        isBrowser: true,
-        onTaskSelect: mockOnTaskSelect,
-        logger: mockLogger,
+      // Create social (Facebook) task
+      const socialTask = {
+        ...sampleTask,
+        data: {
+          ...sampleTask.data,
+          interactionId: 'social-task',
+          interaction: {
+            ...sampleTask.data.interaction,
+            state: 'active',
+            mediaType: MEDIA_CHANNEL.SOCIAL,
+            mediaChannel: MEDIA_CHANNEL.FACEBOOK,
+            callAssociatedDetails: {
+              ani: 'facebook-user-456',
+              customerName: 'Facebook Customer',
+              virtualTeamName: 'Social Team',
+            },
+          },
+        },
       };
 
-      const {container} = render(<TaskListComponent {...props} />);
+      // Mock different return values for each media type using common data
+      extractTaskListItemDataSpy
+        .mockReturnValueOnce(mockTaskData.active.telephony)
+        .mockReturnValueOnce(mockTaskData.active.chat)
+        .mockReturnValueOnce(mockTaskData.active.facebook);
+
+      const taskList = {
+        'telephony-task': telephonyTask,
+        'chat-task': chatTask,
+        'social-task': socialTask,
+      };
+
+      const {container} = await render(<TaskListComponent {...defaultProps} taskList={taskList} />);
       expect(container).toMatchSnapshot();
     });
-  });
 
-  describe('Incoming vs Active tasks - Tests task state-based rendering and button availability', () => {
-    it('should render incoming task correctly', () => {
-      const task = {
-        ...mockTask,
+    it('should show selected state with bold title', async () => {
+      const taskList = {'test-task-123': sampleTask};
+      const {container} = await render(
+        <TaskListComponent {...defaultProps} taskList={taskList} currentTask={sampleTask} />
+      );
+      expect(container).toMatchSnapshot();
+    });
+
+    it('should render telephony incoming task with Accept/Decline buttons in WebRTC mode', async () => {
+      extractTaskListItemDataSpy.mockReturnValue(mockTaskData.incoming.webrtcTelephony);
+
+      const incomingTask = {
+        ...sampleTask,
         data: {
-          ...mockTask.data,
-          interactionId: 'incoming-task',
+          ...sampleTask.data,
+          interactionId: 'webrtc-telephony-task',
           interaction: {
-            ...mockTask.data.interaction,
+            ...sampleTask.data.interaction,
             state: 'new',
-            callAssociatedDetails: {
-              ani: '1234567890',
-              customerName: 'Incoming Customer',
-              virtualTeamName: 'Incoming Team',
-              ronaTimeout: '45',
-            },
+            mediaType: MEDIA_CHANNEL.TELEPHONY,
           },
           wrapUpRequired: false,
         },
       };
 
-      const props: TaskListComponentProps = {
-        taskList: {'incoming-task': task},
-        currentTask: null,
-        acceptTask: mockAcceptTask,
-        declineTask: mockDeclineTask,
-        isBrowser: true,
-        onTaskSelect: mockOnTaskSelect,
-        logger: mockLogger,
-      };
-
-      const {container} = render(<TaskListComponent {...props} />);
+      const {container} = await render(
+        <TaskListComponent {...defaultProps} taskList={{'webrtc-telephony-task': incomingTask}} isBrowser={true} />
+      );
       expect(container).toMatchSnapshot();
     });
 
-    it('should render active task correctly', () => {
-      const task = {
+    it('should render telephony incoming task with disabled Accept button in Extension mode', async () => {
+      extractTaskListItemDataSpy.mockReturnValue(mockTaskData.incoming.extensionTelephony);
+
+      const incomingTask = {
+        ...sampleTask,
+        data: {
+          ...sampleTask.data,
+          interactionId: 'extension-telephony-task',
+          interaction: {
+            ...sampleTask.data.interaction,
+            state: 'new',
+            mediaType: MEDIA_CHANNEL.TELEPHONY,
+          },
+          wrapUpRequired: false,
+        },
+      };
+
+      const {container} = await render(
+        <TaskListComponent {...defaultProps} taskList={{'extension-telephony-task': incomingTask}} isBrowser={false} />
+      );
+      expect(container).toMatchSnapshot();
+    });
+
+    it('should render digital incoming task with Accept button only', async () => {
+      extractTaskListItemDataSpy.mockReturnValue(mockTaskData.incoming.chat);
+
+      const incomingChatTask = {
+        ...sampleTask,
+        data: {
+          ...sampleTask.data,
+          interactionId: 'incoming-chat-task',
+          interaction: {
+            ...sampleTask.data.interaction,
+            state: 'new',
+            mediaType: MEDIA_CHANNEL.CHAT,
+          },
+          wrapUpRequired: false,
+        },
+      };
+
+      const {container} = await render(
+        <TaskListComponent {...defaultProps} taskList={{'incoming-chat-task': incomingChatTask}} isBrowser={true} />
+      );
+      expect(container).toMatchSnapshot();
+    });
+  });
+
+  describe('Actions', () => {
+    const actionTask = {
+      ...mockTask,
+      data: {
+        ...mockTask.data,
+        interactionId: 'action-task',
+        interaction: {
+          ...mockTask.data.interaction,
+          state: 'new',
+          mediaType: MEDIA_CHANNEL.TELEPHONY,
+        },
+        wrapUpRequired: false,
+      },
+    };
+
+    beforeEach(() => {
+      extractTaskListItemDataSpy.mockReturnValue(mockTaskData.action.telephony);
+    });
+
+    it('should call acceptTask when accept button is clicked', async () => {
+      const taskList = {'action-task': actionTask};
+      const {container} = await render(<TaskListComponent {...defaultProps} taskList={taskList} />);
+
+      expect(container).toMatchSnapshot();
+
+      const acceptButton = container.querySelector('[data-testid="task:accept-button"]') as HTMLElement;
+      fireEvent.click(acceptButton);
+
+      expect(container).toMatchSnapshot();
+    });
+
+    it('should call declineTask when decline button is clicked', async () => {
+      const taskList = {'action-task': actionTask};
+      const {container} = await render(<TaskListComponent {...defaultProps} taskList={taskList} />);
+
+      expect(container).toMatchSnapshot();
+
+      const declineButton = container.querySelector('[data-testid="task:decline-button"]') as HTMLElement;
+      fireEvent.click(declineButton);
+
+      expect(container).toMatchSnapshot();
+    });
+
+    it('should call onTaskSelect when task is clicked', async () => {
+      extractTaskListItemDataSpy.mockReturnValue(mockTaskData.action.activeTask);
+
+      const activeTask = {
         ...mockTask,
         data: {
           ...mockTask.data,
           interactionId: 'active-task',
           interaction: {
             ...mockTask.data.interaction,
-            state: 'connected',
-            callAssociatedDetails: {
-              ani: '1234567890',
-              customerName: 'Active Customer',
-              virtualTeamName: 'Active Team',
-            },
-          },
-        },
-      };
-
-      const props: TaskListComponentProps = {
-        taskList: {'active-task': task},
-        currentTask: null,
-        acceptTask: mockAcceptTask,
-        declineTask: mockDeclineTask,
-        isBrowser: true,
-        onTaskSelect: mockOnTaskSelect,
-        logger: mockLogger,
-      };
-
-      const {container} = render(<TaskListComponent {...props} />);
-      expect(container).toMatchSnapshot();
-    });
-  });
-
-  describe('WebRTC vs Extension/DialNumber behavior - Tests platform-specific UI differences and button states', () => {
-    // Tests platform-specific rendering differences:
-    // - WebRTC: Full functionality with accept/decline buttons enabled
-    // - Extension/DialNumber: Limited functionality, shows "Ringing..." state
-    // - Different interaction patterns based on platform capabilities
-    it('should handle WebRTC telephony incoming task with full functionality', () => {
-      const task = {
-        ...mockTask,
-        data: {
-          ...mockTask.data,
-          interactionId: 'webrtc-task',
-          interaction: {
-            ...mockTask.data.interaction,
-            state: 'new',
+            state: 'active',
             mediaType: MEDIA_CHANNEL.TELEPHONY,
-            callAssociatedDetails: {
-              ani: '1234567890',
-              customerName: 'WebRTC Customer',
-              virtualTeamName: 'WebRTC Team',
-            },
           },
-          wrapUpRequired: false,
         },
       };
 
-      const props: TaskListComponentProps = {
-        taskList: {'webrtc-task': task},
-        currentTask: null,
-        acceptTask: mockAcceptTask,
-        declineTask: mockDeclineTask,
-        isBrowser: true, // WebRTC enabled
-        onTaskSelect: mockOnTaskSelect,
-        logger: mockLogger,
-      };
+      const taskList = {'active-task': activeTask};
+      const {container} = await render(<TaskListComponent {...defaultProps} taskList={taskList} currentTask={null} />);
 
-      const {container} = render(<TaskListComponent {...props} />);
+      expect(container).toMatchSnapshot();
+
+      const taskElement = container.querySelector('[role="listitem"]') as HTMLElement;
+      fireEvent.click(taskElement);
+
       expect(container).toMatchSnapshot();
     });
 
-    it('should handle Extension/DialNumber telephony incoming task with limited functionality', () => {
-      const task = {
+    it('should handle task selection between multiple tasks', async () => {
+      // Create second task as CHAT task with different mock data
+      const secondTask = {
         ...mockTask,
         data: {
           ...mockTask.data,
-          interactionId: 'extension-task',
-          interaction: {
-            ...mockTask.data.interaction,
-            state: 'new',
-            mediaType: MEDIA_CHANNEL.TELEPHONY,
-            callAssociatedDetails: {
-              ani: '1234567890',
-              customerName: 'Extension Customer',
-              virtualTeamName: 'Extension Team',
-            },
-          },
-          wrapUpRequired: false,
-        },
-      };
-
-      const props: TaskListComponentProps = {
-        taskList: {'extension-task': task},
-        currentTask: null,
-        acceptTask: mockAcceptTask,
-        declineTask: mockDeclineTask,
-        isBrowser: false, // Extension/DialNumber mode
-        onTaskSelect: mockOnTaskSelect,
-        logger: mockLogger,
-      };
-
-      const {container} = render(<TaskListComponent {...props} />);
-      expect(container).toMatchSnapshot();
-    });
-
-    it('should handle DialNumber mode telephony task', () => {
-      const task = {
-        ...mockTask,
-        data: {
-          ...mockTask.data,
-          interactionId: 'dial-number-task',
-          interaction: {
-            ...mockTask.data.interaction,
-            state: 'new',
-            mediaType: MEDIA_CHANNEL.TELEPHONY,
-            callAssociatedDetails: {
-              ani: '1234567890',
-              customerName: 'DialNumber Customer',
-              virtualTeamName: 'DialNumber Team',
-            },
-          },
-          wrapUpRequired: false,
-        },
-      };
-
-      const props: TaskListComponentProps = {
-        taskList: {'dial-number-task': task},
-        currentTask: null,
-        acceptTask: mockAcceptTask,
-        declineTask: mockDeclineTask,
-        isBrowser: false, // DialNumber mode
-        onTaskSelect: mockOnTaskSelect,
-        logger: mockLogger,
-      };
-
-      const {container} = render(<TaskListComponent {...props} />);
-      expect(container).toMatchSnapshot();
-    });
-  });
-
-  describe('Task interactions', () => {
-    it('should call acceptTask when accept button is clicked', () => {
-      const task = {
-        ...mockTask,
-        data: {
-          ...mockTask.data,
-          interactionId: 'accept-task',
-          interaction: {
-            ...mockTask.data.interaction,
-            state: 'new',
-            callAssociatedDetails: {
-              ani: '1234567890',
-              customerName: 'Accept Customer',
-              virtualTeamName: 'Accept Team',
-            },
-          },
-          wrapUpRequired: false,
-        },
-      };
-
-      const props: TaskListComponentProps = {
-        taskList: {'accept-task': task},
-        currentTask: null,
-        acceptTask: mockAcceptTask,
-        declineTask: mockDeclineTask,
-        isBrowser: true,
-        onTaskSelect: mockOnTaskSelect,
-        logger: mockLogger,
-      };
-
-      const {container} = render(<TaskListComponent {...props} />);
-      expect(container).toMatchSnapshot();
-    });
-
-    it('should call declineTask when decline button is clicked', () => {
-      const task = {
-        ...mockTask,
-        data: {
-          ...mockTask.data,
-          interactionId: 'decline-task',
-          interaction: {
-            ...mockTask.data.interaction,
-            state: 'new',
-            callAssociatedDetails: {
-              ani: '1234567890',
-              customerName: 'Decline Customer',
-              virtualTeamName: 'Decline Team',
-            },
-          },
-          wrapUpRequired: false,
-        },
-      };
-
-      const props: TaskListComponentProps = {
-        taskList: {'decline-task': task},
-        currentTask: null,
-        acceptTask: mockAcceptTask,
-        declineTask: mockDeclineTask,
-        isBrowser: true,
-        onTaskSelect: mockOnTaskSelect,
-        logger: mockLogger,
-      };
-
-      const {container} = render(<TaskListComponent {...props} />);
-      expect(container).toMatchSnapshot();
-    });
-
-    it('should call onTaskSelect when task is clicked for selectable task', () => {
-      const task = {
-        ...mockTask,
-        data: {
-          ...mockTask.data,
-          interactionId: 'selectable-task',
+          interactionId: 'unselected-chat-task',
           interaction: {
             ...mockTask.data.interaction,
             state: 'active',
-            callAssociatedDetails: {
-              ani: '1234567890',
-              customerName: 'Select Customer',
-              virtualTeamName: 'Select Team',
-            },
+            mediaType: MEDIA_CHANNEL.CHAT,
           },
         },
       };
 
-      const props: TaskListComponentProps = {
-        taskList: {'selectable-task': task},
-        currentTask: null,
-        acceptTask: mockAcceptTask,
-        declineTask: mockDeclineTask,
-        isBrowser: true,
-        onTaskSelect: mockOnTaskSelect,
-        logger: mockLogger,
+      // Mock different return values for each task using common data
+      extractTaskListItemDataSpy
+        .mockReturnValueOnce(mockTaskData.selection.selectedTelephony)
+        .mockReturnValueOnce(mockTaskData.selection.unselectedChat);
+
+      const taskList = {
+        'action-task': actionTask,
+        'unselected-chat-task': secondTask,
       };
 
-      const {container} = render(<TaskListComponent {...props} />);
+      const {container} = await render(
+        <TaskListComponent {...defaultProps} taskList={taskList} currentTask={actionTask} />
+      );
+
+      // Capture initial state with selected telephony task
       expect(container).toMatchSnapshot();
-    });
-  });
 
-  describe('Logger calls', () => {
-    it('should log task rendering', () => {
-      const props: TaskListComponentProps = {
-        taskList: {'task-1': mockTask},
-        currentTask: null,
-        acceptTask: mockAcceptTask,
-        declineTask: mockDeclineTask,
-        isBrowser: true,
-        onTaskSelect: mockOnTaskSelect,
-        logger: mockLogger,
-      };
+      const taskElements = container.querySelectorAll('[role="listitem"]');
+      const unselectedTaskElement = taskElements[1] as HTMLElement;
+      fireEvent.click(unselectedTaskElement);
 
-      const {container} = render(<TaskListComponent {...props} />);
-      expect(container).toMatchSnapshot();
-    });
-
-    it('should log for each task when multiple tasks are rendered', () => {
-      const task1 = {
-        ...mockTask,
-        data: {
-          ...mockTask.data,
-          interactionId: 'task-1',
-        },
-      };
-      const task2 = {
-        ...mockTask,
-        data: {
-          ...mockTask.data,
-          interactionId: 'task-2',
-        },
-      };
-
-      const props: TaskListComponentProps = {
-        taskList: {'task-1': task1, 'task-2': task2},
-        currentTask: null,
-        acceptTask: mockAcceptTask,
-        declineTask: mockDeclineTask,
-        isBrowser: true,
-        onTaskSelect: mockOnTaskSelect,
-        logger: mockLogger,
-      };
-
-      const {container} = render(<TaskListComponent {...props} />);
-      expect(container).toMatchSnapshot();
-    });
-  });
-
-  describe('Component integration', () => {
-    it('should render actual Task components with proper integration', () => {
-      const task = {
-        ...mockTask,
-        data: {
-          ...mockTask.data,
-          interactionId: 'integration-task',
-          interaction: {
-            ...mockTask.data.interaction,
-            callAssociatedDetails: {
-              ani: '1234567890',
-              customerName: 'Integration Test',
-              virtualTeamName: 'Test Team',
-            },
-          },
-        },
-      };
-
-      const props: TaskListComponentProps = {
-        taskList: {'integration-task': task},
-        currentTask: null,
-        acceptTask: mockAcceptTask,
-        declineTask: mockDeclineTask,
-        isBrowser: true,
-        onTaskSelect: mockOnTaskSelect,
-        logger: mockLogger,
-      };
-
-      const {container} = render(<TaskListComponent {...props} />);
-      expect(container).toMatchSnapshot();
-    });
-
-    it('should pass props correctly to Task components', () => {
-      const task = {
-        ...mockTask,
-        data: {
-          ...mockTask.data,
-          interactionId: 'props-test-task',
-          interaction: {
-            ...mockTask.data.interaction,
-            state: 'new',
-            callAssociatedDetails: {
-              ani: '1234567890',
-              customerName: 'Props Test',
-              virtualTeamName: 'Props Team',
-              ronaTimeout: '60',
-            },
-          },
-          wrapUpRequired: false,
-        },
-      };
-
-      const props: TaskListComponentProps = {
-        taskList: {'props-test-task': task},
-        currentTask: null,
-        acceptTask: mockAcceptTask,
-        declineTask: mockDeclineTask,
-        isBrowser: true,
-        onTaskSelect: mockOnTaskSelect,
-        logger: mockLogger,
-      };
-
-      const {container} = render(<TaskListComponent {...props} />);
+      // Capture state after clicking unselected chat task
       expect(container).toMatchSnapshot();
     });
   });

@@ -3,10 +3,26 @@ import {render, screen, fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import Task, {TaskProps} from '../../../../src/components/task/Task';
 import {MEDIA_CHANNEL, TaskState, TaskQueue} from '../../../../src/components/task/task.types';
-import {setupTaskTimerMocks} from '../../../utils/browser-api-mocks';
 import * as taskUtils from '../../../../src/components/task/Task/task.utils';
 
-setupTaskTimerMocks();
+Object.defineProperty(global, 'Worker', {
+  writable: true,
+  value: class MockWorker {
+    constructor() {}
+    postMessage = jest.fn();
+    addEventListener = jest.fn();
+    removeEventListener = jest.fn();
+    terminate = jest.fn();
+  },
+});
+
+Object.defineProperty(global, 'URL', {
+  writable: true,
+  value: {
+    createObjectURL: jest.fn(() => 'blob:mock-url'),
+    revokeObjectURL: jest.fn(),
+  },
+});
 
 describe('Task Component', () => {
   const mockAcceptTask = jest.fn();

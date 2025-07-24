@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`TaskListComponent Snapshots Component integration should pass props correctly to Task components 1`] = `
+exports[`TaskListComponent Actions should call acceptTask when accept button is clicked 1`] = `
 <div>
   <ul
     class="task-list"
@@ -14,7 +14,7 @@ exports[`TaskListComponent Snapshots Component integration should pass props cor
       data-padded="false"
       data-shape="rectangle"
       data-size="40"
-      id="props-test-task"
+      id="action-task"
       role="listitem"
       tabindex="0"
     >
@@ -24,6 +24,7 @@ exports[`TaskListComponent Snapshots Component integration should pass props cor
         <mdc-avatar
           class="telephony"
           icon-name="handset-filled"
+          size="32"
         />
       </div>
       <div
@@ -34,16 +35,22 @@ exports[`TaskListComponent Snapshots Component integration should pass props cor
         >
           <mdc-text
             class="md-text-wrapper task-title"
+            tagname="span"
+            type="body-large-medium"
           >
-            1234567890
+            1111111111
           </mdc-text>
           <mdc-text
             class="md-text-wrapper task-text"
+            tagname="span"
+            type="body-midsize-regular"
           >
-            Props Team
+            Action Team
           </mdc-text>
           <mdc-text
             class="md-text-wrapper task-text"
+            tagname="span"
+            type="body-midsize-regular"
           >
             Time Left: 
               
@@ -107,7 +114,7 @@ exports[`TaskListComponent Snapshots Component integration should pass props cor
 </div>
 `;
 
-exports[`TaskListComponent Snapshots Component integration should render actual Task components with proper integration 1`] = `
+exports[`TaskListComponent Actions should call acceptTask when accept button is clicked 2`] = `
 <div>
   <ul
     class="task-list"
@@ -121,7 +128,7 @@ exports[`TaskListComponent Snapshots Component integration should render actual 
       data-padded="false"
       data-shape="rectangle"
       data-size="40"
-      id="integration-task"
+      id="action-task"
       role="listitem"
       tabindex="0"
     >
@@ -131,6 +138,7 @@ exports[`TaskListComponent Snapshots Component integration should render actual 
         <mdc-avatar
           class="telephony"
           icon-name="handset-filled"
+          size="32"
         />
       </div>
       <div
@@ -141,125 +149,32 @@ exports[`TaskListComponent Snapshots Component integration should render actual 
         >
           <mdc-text
             class="md-text-wrapper task-title"
+            tagname="span"
+            type="body-large-medium"
           >
-            1234567890
+            1111111111
           </mdc-text>
-        </section>
-      </div>
-      <div
-        data-position="end"
-      >
-        <div
-          class="task-button-container"
-        />
-      </div>
-    </li>
-  </ul>
-</div>
-`;
-
-exports[`TaskListComponent Snapshots Different media types should render chat task correctly 1`] = `
-<div>
-  <ul
-    class="task-list"
-    data-testid="task-list"
-  >
-    <li
-      class="task-list-item md-list-item-base-wrapper"
-      data-allow-text-select="false"
-      data-disabled="false"
-      data-interactive="true"
-      data-padded="false"
-      data-shape="rectangle"
-      data-size="40"
-      id="chat-task"
-      role="listitem"
-      tabindex="0"
-    >
-      <div
-        data-position="start"
-      >
-        <mdc-avatar
-          class="chat"
-          icon-name="chat-filled"
-        />
-      </div>
-      <div
-        data-position="fill"
-      >
-        <section
-          class="task-details"
-        >
           <mdc-text
-            class="md-text-wrapper task-digital-title"
-            id="tooltip-trigger-chat-task"
+            class="md-text-wrapper task-text"
+            tagname="span"
+            type="body-midsize-regular"
           >
-            chat-user-123
+            Action Team
           </mdc-text>
-          <mdc-tooltip
-            class="task-tooltip"
-            tooltip-type="description"
-          >
-            chat-user-123
-          </mdc-tooltip>
-        </section>
-      </div>
-      <div
-        data-position="end"
-      >
-        <div
-          class="task-button-container"
-        />
-      </div>
-    </li>
-  </ul>
-</div>
-`;
-
-exports[`TaskListComponent Snapshots Different media types should render social media task correctly 1`] = `
-<div>
-  <ul
-    class="task-list"
-    data-testid="task-list"
-  >
-    <li
-      class="task-list-item md-list-item-base-wrapper"
-      data-allow-text-select="false"
-      data-disabled="false"
-      data-interactive="true"
-      data-padded="false"
-      data-shape="rectangle"
-      data-size="40"
-      id="social-task"
-      role="listitem"
-      tabindex="0"
-    >
-      <div
-        data-position="start"
-      >
-        <mdc-avatar
-          class="social"
-          icon-name="chat-filled"
-        />
-      </div>
-      <div
-        data-position="fill"
-      >
-        <section
-          class="task-details"
-        >
           <mdc-text
-            class="md-text-wrapper task-digital-title"
-            id="tooltip-trigger-social-task"
+            class="md-text-wrapper task-text"
+            tagname="span"
+            type="body-midsize-regular"
           >
-            Social Customer
+            Time Left: 
+              
+            <time
+              class="task-text task-text--secondary"
+              datetime="00:00"
+            >
+              00:00
+            </time>
           </mdc-text>
-          <mdc-tooltip
-            class="task-tooltip"
-            tooltip-type="description"
-          >
-            Social Customer
-          </mdc-tooltip>
         </section>
       </div>
       <div
@@ -267,14 +182,53 @@ exports[`TaskListComponent Snapshots Different media types should render social 
       >
         <div
           class="task-button-container"
-        />
+        >
+          <button
+            class="md-button-pill-wrapper md-button-simple-wrapper md-focus-ring-wrapper children"
+            data-color="join"
+            data-disabled="false"
+            data-disabled-outline="false"
+            data-ghost="false"
+            data-grown="false"
+            data-inverted="false"
+            data-outline="false"
+            data-shallow-disabled="false"
+            data-size="40"
+            data-testid="task:accept-button"
+            tabindex="0"
+            type="button"
+          >
+            <span>
+              Accept
+            </span>
+          </button>
+          <button
+            class="md-button-pill-wrapper md-button-simple-wrapper"
+            data-color="cancel"
+            data-disabled="false"
+            data-disabled-outline="false"
+            data-ghost="false"
+            data-grown="false"
+            data-inverted="false"
+            data-outline="false"
+            data-shallow-disabled="false"
+            data-size="40"
+            data-testid="task:decline-button"
+            tabindex="0"
+            type="button"
+          >
+            <span>
+              Decline
+            </span>
+          </button>
+        </div>
       </div>
     </li>
   </ul>
 </div>
 `;
 
-exports[`TaskListComponent Snapshots Different media types should render telephony task correctly 1`] = `
+exports[`TaskListComponent Actions should call declineTask when decline button is clicked 1`] = `
 <div>
   <ul
     class="task-list"
@@ -288,7 +242,7 @@ exports[`TaskListComponent Snapshots Different media types should render telepho
       data-padded="false"
       data-shape="rectangle"
       data-size="40"
-      id="telephony-task"
+      id="action-task"
       role="listitem"
       tabindex="0"
     >
@@ -298,6 +252,7 @@ exports[`TaskListComponent Snapshots Different media types should render telepho
         <mdc-avatar
           class="telephony"
           icon-name="handset-filled"
+          size="32"
         />
       </div>
       <div
@@ -308,8 +263,31 @@ exports[`TaskListComponent Snapshots Different media types should render telepho
         >
           <mdc-text
             class="md-text-wrapper task-title"
+            tagname="span"
+            type="body-large-medium"
           >
-            1234567890
+            1111111111
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Action Team
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Time Left: 
+              
+            <time
+              class="task-text task-text--secondary"
+              datetime="00:00"
+            >
+              00:00
+            </time>
           </mdc-text>
         </section>
       </div>
@@ -318,20 +296,167 @@ exports[`TaskListComponent Snapshots Different media types should render telepho
       >
         <div
           class="task-button-container"
-        />
+        >
+          <button
+            class="md-button-pill-wrapper md-button-simple-wrapper"
+            data-color="join"
+            data-disabled="false"
+            data-disabled-outline="false"
+            data-ghost="false"
+            data-grown="false"
+            data-inverted="false"
+            data-outline="false"
+            data-shallow-disabled="false"
+            data-size="40"
+            data-testid="task:accept-button"
+            tabindex="-1"
+            type="button"
+          >
+            <span>
+              Accept
+            </span>
+          </button>
+          <button
+            class="md-button-pill-wrapper md-button-simple-wrapper"
+            data-color="cancel"
+            data-disabled="false"
+            data-disabled-outline="false"
+            data-ghost="false"
+            data-grown="false"
+            data-inverted="false"
+            data-outline="false"
+            data-shallow-disabled="false"
+            data-size="40"
+            data-testid="task:decline-button"
+            tabindex="-1"
+            type="button"
+          >
+            <span>
+              Decline
+            </span>
+          </button>
+        </div>
       </div>
     </li>
   </ul>
 </div>
 `;
 
-exports[`TaskListComponent Snapshots Empty task list scenarios should render empty component when taskList is empty object 1`] = `<div />`;
+exports[`TaskListComponent Actions should call declineTask when decline button is clicked 2`] = `
+<div>
+  <ul
+    class="task-list"
+    data-testid="task-list"
+  >
+    <li
+      class="task-list-item md-list-item-base-wrapper"
+      data-allow-text-select="false"
+      data-disabled="false"
+      data-interactive="true"
+      data-padded="false"
+      data-shape="rectangle"
+      data-size="40"
+      id="action-task"
+      role="listitem"
+      tabindex="0"
+    >
+      <div
+        data-position="start"
+      >
+        <mdc-avatar
+          class="telephony"
+          icon-name="handset-filled"
+          size="32"
+        />
+      </div>
+      <div
+        data-position="fill"
+      >
+        <section
+          class="task-details"
+        >
+          <mdc-text
+            class="md-text-wrapper task-title"
+            tagname="span"
+            type="body-large-medium"
+          >
+            1111111111
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Action Team
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Time Left: 
+              
+            <time
+              class="task-text task-text--secondary"
+              datetime="00:00"
+            >
+              00:00
+            </time>
+          </mdc-text>
+        </section>
+      </div>
+      <div
+        data-position="end"
+      >
+        <div
+          class="task-button-container"
+        >
+          <button
+            class="md-button-pill-wrapper md-button-simple-wrapper"
+            data-color="join"
+            data-disabled="false"
+            data-disabled-outline="false"
+            data-ghost="false"
+            data-grown="false"
+            data-inverted="false"
+            data-outline="false"
+            data-shallow-disabled="false"
+            data-size="40"
+            data-testid="task:accept-button"
+            tabindex="0"
+            type="button"
+          >
+            <span>
+              Accept
+            </span>
+          </button>
+          <button
+            class="md-button-pill-wrapper md-button-simple-wrapper md-focus-ring-wrapper children"
+            data-color="cancel"
+            data-disabled="false"
+            data-disabled-outline="false"
+            data-ghost="false"
+            data-grown="false"
+            data-inverted="false"
+            data-outline="false"
+            data-shallow-disabled="false"
+            data-size="40"
+            data-testid="task:decline-button"
+            tabindex="0"
+            type="button"
+          >
+            <span>
+              Decline
+            </span>
+          </button>
+        </div>
+      </div>
+    </li>
+  </ul>
+</div>
+`;
 
-exports[`TaskListComponent Snapshots Empty task list scenarios should render empty component when taskList is null 1`] = `<div />`;
-
-exports[`TaskListComponent Snapshots Empty task list scenarios should render empty component when taskList is undefined 1`] = `<div />`;
-
-exports[`TaskListComponent Snapshots Incoming vs Active tasks - Tests task state-based rendering and button availability should render active task correctly 1`] = `
+exports[`TaskListComponent Actions should call onTaskSelect when task is clicked 1`] = `
 <div>
   <ul
     class="task-list"
@@ -355,6 +480,7 @@ exports[`TaskListComponent Snapshots Incoming vs Active tasks - Tests task state
         <mdc-avatar
           class="telephony"
           icon-name="handset-filled"
+          size="32"
         />
       </div>
       <div
@@ -365,13 +491,31 @@ exports[`TaskListComponent Snapshots Incoming vs Active tasks - Tests task state
         >
           <mdc-text
             class="md-text-wrapper task-title"
+            tagname="span"
+            type="body-large-medium"
           >
-            1234567890
+            1111111111
           </mdc-text>
           <mdc-text
             class="md-text-wrapper task-text"
+            tagname="span"
+            type="body-midsize-regular"
           >
-            Connected
+            Active
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Handle Time: 
+              
+            <time
+              class="task-text task-text--secondary"
+              datetime="00:00"
+            >
+              00:00
+            </time>
           </mdc-text>
         </section>
       </div>
@@ -387,7 +531,7 @@ exports[`TaskListComponent Snapshots Incoming vs Active tasks - Tests task state
 </div>
 `;
 
-exports[`TaskListComponent Snapshots Incoming vs Active tasks - Tests task state-based rendering and button availability should render incoming task correctly 1`] = `
+exports[`TaskListComponent Actions should call onTaskSelect when task is clicked 2`] = `
 <div>
   <ul
     class="task-list"
@@ -401,7 +545,7 @@ exports[`TaskListComponent Snapshots Incoming vs Active tasks - Tests task state
       data-padded="false"
       data-shape="rectangle"
       data-size="40"
-      id="incoming-task"
+      id="active-task"
       role="listitem"
       tabindex="0"
     >
@@ -411,6 +555,7 @@ exports[`TaskListComponent Snapshots Incoming vs Active tasks - Tests task state
         <mdc-avatar
           class="telephony"
           icon-name="handset-filled"
+          size="32"
         />
       </div>
       <div
@@ -421,16 +566,879 @@ exports[`TaskListComponent Snapshots Incoming vs Active tasks - Tests task state
         >
           <mdc-text
             class="md-text-wrapper task-title"
+            tagname="span"
+            type="body-large-medium"
+          >
+            1111111111
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Active
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Handle Time: 
+              
+            <time
+              class="task-text task-text--secondary"
+              datetime="00:00"
+            >
+              00:00
+            </time>
+          </mdc-text>
+        </section>
+      </div>
+      <div
+        data-position="end"
+      >
+        <div
+          class="task-button-container"
+        />
+      </div>
+    </li>
+  </ul>
+</div>
+`;
+
+exports[`TaskListComponent Actions should handle task selection between multiple tasks 1`] = `
+<div>
+  <ul
+    class="task-list"
+    data-testid="task-list"
+  >
+    <li
+      class="task-list-item task-list-item--selected md-list-item-base-wrapper"
+      data-allow-text-select="false"
+      data-disabled="false"
+      data-interactive="true"
+      data-padded="false"
+      data-shape="rectangle"
+      data-size="40"
+      id="action-task"
+      role="listitem"
+      tabindex="0"
+    >
+      <div
+        data-position="start"
+      >
+        <mdc-avatar
+          class="telephony"
+          icon-name="handset-filled"
+          size="32"
+        />
+      </div>
+      <div
+        data-position="fill"
+      >
+        <section
+          class="task-details"
+        >
+          <mdc-text
+            class="md-text-wrapper task-title"
+            tagname="span"
+            type="body-large-bold"
+          >
+            1111111111
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Selected Team
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Time Left: 
+              
+            <time
+              class="task-text task-text--secondary"
+              datetime="00:00"
+            >
+              00:00
+            </time>
+          </mdc-text>
+        </section>
+      </div>
+      <div
+        data-position="end"
+      >
+        <div
+          class="task-button-container"
+        >
+          <button
+            class="md-button-pill-wrapper md-button-simple-wrapper"
+            data-color="join"
+            data-disabled="false"
+            data-disabled-outline="false"
+            data-ghost="false"
+            data-grown="false"
+            data-inverted="false"
+            data-outline="false"
+            data-shallow-disabled="false"
+            data-size="40"
+            data-testid="task:accept-button"
+            tabindex="-1"
+            type="button"
+          >
+            <span>
+              Accept
+            </span>
+          </button>
+          <button
+            class="md-button-pill-wrapper md-button-simple-wrapper"
+            data-color="cancel"
+            data-disabled="false"
+            data-disabled-outline="false"
+            data-ghost="false"
+            data-grown="false"
+            data-inverted="false"
+            data-outline="false"
+            data-shallow-disabled="false"
+            data-size="40"
+            data-testid="task:decline-button"
+            tabindex="-1"
+            type="button"
+          >
+            <span>
+              Decline
+            </span>
+          </button>
+        </div>
+      </div>
+    </li>
+    <li
+      class="task-list-item md-list-item-base-wrapper"
+      data-allow-text-select="false"
+      data-disabled="false"
+      data-interactive="true"
+      data-padded="false"
+      data-shape="rectangle"
+      data-size="40"
+      id="unselected-chat-task"
+      role="listitem"
+      tabindex="0"
+    >
+      <div
+        data-position="start"
+      >
+        <mdc-avatar
+          class="chat"
+          icon-name="chat-filled"
+          size="32"
+        />
+      </div>
+      <div
+        data-position="fill"
+      >
+        <section
+          class="task-details"
+        >
+          <mdc-text
+            aria-describedby="tooltip-unselected-chat-task"
+            class="md-text-wrapper task-digital-title"
+            id="tooltip-trigger-unselected-chat-task"
+            tagname="span"
+            type="body-large-medium"
+          >
+            Unselected Chat Customer
+          </mdc-text>
+          <mdc-tooltip
+            append-to=""
+            class="task-tooltip"
+            color="contrast"
+            delay="0,0"
+            disable-aria-expanded=""
+            flip=""
+            hide-on-blur=""
+            hide-on-escape=""
+            id="tooltip-unselected-chat-task"
+            offset="4"
+            placement="top-start"
+            role="tooltip"
+            style="z-index: 1000;"
+            tooltip-type="description"
+            trigger="mouseenter focusin"
+            triggerid="tooltip-trigger-unselected-chat-task"
+            z-index="1000"
+          >
+            Unselected Chat Customer
+          </mdc-tooltip>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Active
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Handle Time: 
+              
+            <time
+              class="task-text task-text--secondary"
+              datetime="00:00"
+            >
+              00:00
+            </time>
+          </mdc-text>
+        </section>
+      </div>
+      <div
+        data-position="end"
+      >
+        <div
+          class="task-button-container"
+        />
+      </div>
+    </li>
+  </ul>
+</div>
+`;
+
+exports[`TaskListComponent Actions should handle task selection between multiple tasks 2`] = `
+<div>
+  <ul
+    class="task-list"
+    data-testid="task-list"
+  >
+    <li
+      class="task-list-item task-list-item--selected md-list-item-base-wrapper"
+      data-allow-text-select="false"
+      data-disabled="false"
+      data-interactive="true"
+      data-padded="false"
+      data-shape="rectangle"
+      data-size="40"
+      id="action-task"
+      role="listitem"
+      tabindex="0"
+    >
+      <div
+        data-position="start"
+      >
+        <mdc-avatar
+          class="telephony"
+          icon-name="handset-filled"
+          size="32"
+        />
+      </div>
+      <div
+        data-position="fill"
+      >
+        <section
+          class="task-details"
+        >
+          <mdc-text
+            class="md-text-wrapper task-title"
+            tagname="span"
+            type="body-large-bold"
+          >
+            1111111111
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Selected Team
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Time Left: 
+              
+            <time
+              class="task-text task-text--secondary"
+              datetime="00:00"
+            >
+              00:00
+            </time>
+          </mdc-text>
+        </section>
+      </div>
+      <div
+        data-position="end"
+      >
+        <div
+          class="task-button-container"
+        >
+          <button
+            class="md-button-pill-wrapper md-button-simple-wrapper"
+            data-color="join"
+            data-disabled="false"
+            data-disabled-outline="false"
+            data-ghost="false"
+            data-grown="false"
+            data-inverted="false"
+            data-outline="false"
+            data-shallow-disabled="false"
+            data-size="40"
+            data-testid="task:accept-button"
+            tabindex="-1"
+            type="button"
+          >
+            <span>
+              Accept
+            </span>
+          </button>
+          <button
+            class="md-button-pill-wrapper md-button-simple-wrapper"
+            data-color="cancel"
+            data-disabled="false"
+            data-disabled-outline="false"
+            data-ghost="false"
+            data-grown="false"
+            data-inverted="false"
+            data-outline="false"
+            data-shallow-disabled="false"
+            data-size="40"
+            data-testid="task:decline-button"
+            tabindex="-1"
+            type="button"
+          >
+            <span>
+              Decline
+            </span>
+          </button>
+        </div>
+      </div>
+    </li>
+    <li
+      class="task-list-item md-list-item-base-wrapper"
+      data-allow-text-select="false"
+      data-disabled="false"
+      data-interactive="true"
+      data-padded="false"
+      data-shape="rectangle"
+      data-size="40"
+      id="unselected-chat-task"
+      role="listitem"
+      tabindex="0"
+    >
+      <div
+        data-position="start"
+      >
+        <mdc-avatar
+          class="chat"
+          icon-name="chat-filled"
+          size="32"
+        />
+      </div>
+      <div
+        data-position="fill"
+      >
+        <section
+          class="task-details"
+        >
+          <mdc-text
+            aria-describedby="tooltip-unselected-chat-task"
+            class="md-text-wrapper task-digital-title"
+            id="tooltip-trigger-unselected-chat-task"
+            tagname="span"
+            type="body-large-medium"
+          >
+            Unselected Chat Customer
+          </mdc-text>
+          <mdc-tooltip
+            append-to=""
+            class="task-tooltip"
+            color="contrast"
+            delay="0,0"
+            disable-aria-expanded=""
+            flip=""
+            hide-on-blur=""
+            hide-on-escape=""
+            id="tooltip-unselected-chat-task"
+            offset="4"
+            placement="top-start"
+            role="tooltip"
+            style="z-index: 1000;"
+            tooltip-type="description"
+            trigger="mouseenter focusin"
+            triggerid="tooltip-trigger-unselected-chat-task"
+            z-index="1000"
+          >
+            Unselected Chat Customer
+          </mdc-tooltip>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Active
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Handle Time: 
+              
+            <time
+              class="task-text task-text--secondary"
+              datetime="00:00"
+            >
+              00:00
+            </time>
+          </mdc-text>
+        </section>
+      </div>
+      <div
+        data-position="end"
+      >
+        <div
+          class="task-button-container"
+        />
+      </div>
+    </li>
+  </ul>
+</div>
+`;
+
+exports[`TaskListComponent Empty TaskList Scenarios should return empty component when taskList is empty object 1`] = `<div />`;
+
+exports[`TaskListComponent Empty TaskList Scenarios should return empty component when taskList is null or undefined 1`] = `<div />`;
+
+exports[`TaskListComponent Empty TaskList Scenarios should return empty component when taskList is null or undefined 2`] = `<div />`;
+
+exports[`TaskListComponent Rendering with Tasks should render digital incoming task with Accept button only 1`] = `
+<div>
+  <ul
+    class="task-list"
+    data-testid="task-list"
+  >
+    <li
+      class="task-list-item md-list-item-base-wrapper"
+      data-allow-text-select="false"
+      data-disabled="false"
+      data-interactive="true"
+      data-padded="false"
+      data-shape="rectangle"
+      data-size="40"
+      id="incoming-chat-task"
+      role="listitem"
+      tabindex="0"
+    >
+      <div
+        data-position="start"
+      >
+        <mdc-avatar
+          class="chat"
+          icon-name="chat-filled"
+          size="32"
+        />
+      </div>
+      <div
+        data-position="fill"
+      >
+        <section
+          class="task-details"
+        >
+          <mdc-text
+            aria-describedby="tooltip-incoming-chat-task"
+            class="md-text-wrapper incoming-digital-task-title"
+            id="tooltip-trigger-incoming-chat-task"
+            tagname="span"
+            type="body-large-medium"
+          >
+            Chat Customer
+          </mdc-text>
+          <mdc-tooltip
+            append-to=""
+            class="task-tooltip"
+            color="contrast"
+            delay="0,0"
+            disable-aria-expanded=""
+            flip=""
+            hide-on-blur=""
+            hide-on-escape=""
+            id="tooltip-incoming-chat-task"
+            offset="4"
+            placement="top-start"
+            role="tooltip"
+            style="z-index: 1000;"
+            tooltip-type="description"
+            trigger="mouseenter focusin"
+            triggerid="tooltip-trigger-incoming-chat-task"
+            z-index="1000"
+          >
+            Chat Customer
+          </mdc-tooltip>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Chat Support
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Time Left: 
+              
+            <time
+              class="task-text task-text--secondary"
+              datetime="00:00"
+            >
+              00:00
+            </time>
+          </mdc-text>
+        </section>
+      </div>
+      <div
+        data-position="end"
+      >
+        <div
+          class="task-button-container"
+        >
+          <button
+            class="md-button-pill-wrapper md-button-simple-wrapper"
+            data-color="join"
+            data-disabled="false"
+            data-disabled-outline="false"
+            data-ghost="false"
+            data-grown="false"
+            data-inverted="false"
+            data-outline="false"
+            data-shallow-disabled="false"
+            data-size="40"
+            data-testid="task:accept-button"
+            tabindex="-1"
+            type="button"
+          >
+            <span>
+              Accept
+            </span>
+          </button>
+        </div>
+      </div>
+    </li>
+  </ul>
+</div>
+`;
+
+exports[`TaskListComponent Rendering with Tasks should render multiple tasks with different media types and their corresponding icons and labels 1`] = `
+<div>
+  <ul
+    class="task-list"
+    data-testid="task-list"
+  >
+    <li
+      class="task-list-item md-list-item-base-wrapper"
+      data-allow-text-select="false"
+      data-disabled="false"
+      data-interactive="true"
+      data-padded="false"
+      data-shape="rectangle"
+      data-size="40"
+      id="telephony-task"
+      role="listitem"
+      tabindex="0"
+    >
+      <div
+        data-position="start"
+      >
+        <mdc-avatar
+          class="telephony"
+          icon-name="handset-filled"
+          size="32"
+        />
+      </div>
+      <div
+        data-position="fill"
+      >
+        <section
+          class="task-details"
+        >
+          <mdc-text
+            class="md-text-wrapper task-title"
+            tagname="span"
+            type="body-large-medium"
           >
             1234567890
           </mdc-text>
           <mdc-text
             class="md-text-wrapper task-text"
+            tagname="span"
+            type="body-midsize-regular"
           >
-            Incoming Team
+            Active
           </mdc-text>
           <mdc-text
             class="md-text-wrapper task-text"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Handle Time: 
+              
+            <time
+              class="task-text task-text--secondary"
+              datetime="00:00"
+            >
+              00:00
+            </time>
+          </mdc-text>
+        </section>
+      </div>
+      <div
+        data-position="end"
+      >
+        <div
+          class="task-button-container"
+        />
+      </div>
+    </li>
+    <li
+      class="task-list-item md-list-item-base-wrapper"
+      data-allow-text-select="false"
+      data-disabled="false"
+      data-interactive="true"
+      data-padded="false"
+      data-shape="rectangle"
+      data-size="40"
+      id="chat-task"
+      role="listitem"
+      tabindex="0"
+    >
+      <div
+        data-position="start"
+      >
+        <mdc-avatar
+          class="chat"
+          icon-name="chat-filled"
+          size="32"
+        />
+      </div>
+      <div
+        data-position="fill"
+      >
+        <section
+          class="task-details"
+        >
+          <mdc-text
+            aria-describedby="tooltip-chat-task"
+            class="md-text-wrapper task-digital-title"
+            id="tooltip-trigger-chat-task"
+            tagname="span"
+            type="body-large-medium"
+          >
+            Chat Customer
+          </mdc-text>
+          <mdc-tooltip
+            append-to=""
+            class="task-tooltip"
+            color="contrast"
+            delay="0,0"
+            disable-aria-expanded=""
+            flip=""
+            hide-on-blur=""
+            hide-on-escape=""
+            id="tooltip-chat-task"
+            offset="4"
+            placement="top-start"
+            role="tooltip"
+            style="z-index: 1000;"
+            tooltip-type="description"
+            trigger="mouseenter focusin"
+            triggerid="tooltip-trigger-chat-task"
+            z-index="1000"
+          >
+            Chat Customer
+          </mdc-tooltip>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Active
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Handle Time: 
+              
+            <time
+              class="task-text task-text--secondary"
+              datetime="00:00"
+            >
+              00:00
+            </time>
+          </mdc-text>
+        </section>
+      </div>
+      <div
+        data-position="end"
+      >
+        <div
+          class="task-button-container"
+        />
+      </div>
+    </li>
+    <li
+      class="task-list-item md-list-item-base-wrapper"
+      data-allow-text-select="false"
+      data-disabled="false"
+      data-interactive="true"
+      data-padded="false"
+      data-shape="rectangle"
+      data-size="40"
+      id="social-task"
+      role="listitem"
+      tabindex="0"
+    >
+      <div
+        data-position="start"
+      >
+        <div
+          class="brand-visual-background"
+        >
+          <mdc-brandvisual
+            class="facebook"
+            name="social-facebook-color"
+          />
+        </div>
+      </div>
+      <div
+        data-position="fill"
+      >
+        <section
+          class="task-details"
+        >
+          <mdc-text
+            aria-describedby="tooltip-social-task"
+            class="md-text-wrapper task-digital-title"
+            id="tooltip-trigger-social-task"
+            tagname="span"
+            type="body-large-medium"
+          >
+            Facebook Customer
+          </mdc-text>
+          <mdc-tooltip
+            append-to=""
+            class="task-tooltip"
+            color="contrast"
+            delay="0,0"
+            disable-aria-expanded=""
+            flip=""
+            hide-on-blur=""
+            hide-on-escape=""
+            id="tooltip-social-task"
+            offset="4"
+            placement="top-start"
+            role="tooltip"
+            style="z-index: 1000;"
+            tooltip-type="description"
+            trigger="mouseenter focusin"
+            triggerid="tooltip-trigger-social-task"
+            z-index="1000"
+          >
+            Facebook Customer
+          </mdc-tooltip>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Active
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Handle Time: 
+              
+            <time
+              class="task-text task-text--secondary"
+              datetime="00:00"
+            >
+              00:00
+            </time>
+          </mdc-text>
+        </section>
+      </div>
+      <div
+        data-position="end"
+      >
+        <div
+          class="task-button-container"
+        />
+      </div>
+    </li>
+  </ul>
+</div>
+`;
+
+exports[`TaskListComponent Rendering with Tasks should render telephony incoming task with Accept/Decline buttons in WebRTC mode 1`] = `
+<div>
+  <ul
+    class="task-list"
+    data-testid="task-list"
+  >
+    <li
+      class="task-list-item md-list-item-base-wrapper"
+      data-allow-text-select="false"
+      data-disabled="false"
+      data-interactive="true"
+      data-padded="false"
+      data-shape="rectangle"
+      data-size="40"
+      id="webrtc-telephony-task"
+      role="listitem"
+      tabindex="0"
+    >
+      <div
+        data-position="start"
+      >
+        <mdc-avatar
+          class="telephony"
+          icon-name="handset-filled"
+          size="32"
+        />
+      </div>
+      <div
+        data-position="fill"
+      >
+        <section
+          class="task-details"
+        >
+          <mdc-text
+            class="md-text-wrapper task-title"
+            tagname="span"
+            type="body-large-medium"
+          >
+            1234567890
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Support
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            tagname="span"
+            type="body-midsize-regular"
           >
             Time Left: 
               
@@ -494,7 +1502,7 @@ exports[`TaskListComponent Snapshots Incoming vs Active tasks - Tests task state
 </div>
 `;
 
-exports[`TaskListComponent Snapshots Logger calls should log for each task when multiple tasks are rendered 1`] = `
+exports[`TaskListComponent Rendering with Tasks should render telephony incoming task with disabled Accept button in Extension mode 1`] = `
 <div>
   <ul
     class="task-list"
@@ -508,7 +1516,7 @@ exports[`TaskListComponent Snapshots Logger calls should log for each task when 
       data-padded="false"
       data-shape="rectangle"
       data-size="40"
-      id="task-1"
+      id="extension-telephony-task"
       role="listitem"
       tabindex="0"
     >
@@ -518,130 +1526,7 @@ exports[`TaskListComponent Snapshots Logger calls should log for each task when 
         <mdc-avatar
           class="telephony"
           icon-name="handset-filled"
-        />
-      </div>
-      <div
-        data-position="fill"
-      >
-        <section
-          class="task-details"
-        />
-      </div>
-      <div
-        data-position="end"
-      >
-        <div
-          class="task-button-container"
-        />
-      </div>
-    </li>
-    <li
-      class="task-list-item md-list-item-base-wrapper"
-      data-allow-text-select="false"
-      data-disabled="false"
-      data-interactive="true"
-      data-padded="false"
-      data-shape="rectangle"
-      data-size="40"
-      id="task-2"
-      role="listitem"
-      tabindex="0"
-    >
-      <div
-        data-position="start"
-      >
-        <mdc-avatar
-          class="telephony"
-          icon-name="handset-filled"
-        />
-      </div>
-      <div
-        data-position="fill"
-      >
-        <section
-          class="task-details"
-        />
-      </div>
-      <div
-        data-position="end"
-      >
-        <div
-          class="task-button-container"
-        />
-      </div>
-    </li>
-  </ul>
-</div>
-`;
-
-exports[`TaskListComponent Snapshots Logger calls should log task rendering 1`] = `
-<div>
-  <ul
-    class="task-list"
-    data-testid="task-list"
-  >
-    <li
-      class="task-list-item task-list-item--selected md-list-item-base-wrapper"
-      data-allow-text-select="false"
-      data-disabled="false"
-      data-interactive="true"
-      data-padded="false"
-      data-shape="rectangle"
-      data-size="40"
-      role="listitem"
-      tabindex="0"
-    >
-      <div
-        data-position="start"
-      >
-        <mdc-avatar
-          class="telephony"
-          icon-name="handset-filled"
-        />
-      </div>
-      <div
-        data-position="fill"
-      >
-        <section
-          class="task-details"
-        />
-      </div>
-      <div
-        data-position="end"
-      >
-        <div
-          class="task-button-container"
-        />
-      </div>
-    </li>
-  </ul>
-</div>
-`;
-
-exports[`TaskListComponent Snapshots Task interactions should call acceptTask when accept button is clicked 1`] = `
-<div>
-  <ul
-    class="task-list"
-    data-testid="task-list"
-  >
-    <li
-      class="task-list-item md-list-item-base-wrapper"
-      data-allow-text-select="false"
-      data-disabled="false"
-      data-interactive="true"
-      data-padded="false"
-      data-shape="rectangle"
-      data-size="40"
-      id="accept-task"
-      role="listitem"
-      tabindex="0"
-    >
-      <div
-        data-position="start"
-      >
-        <mdc-avatar
-          class="telephony"
-          icon-name="handset-filled"
+          size="32"
         />
       </div>
       <div
@@ -652,484 +1537,31 @@ exports[`TaskListComponent Snapshots Task interactions should call acceptTask wh
         >
           <mdc-text
             class="md-text-wrapper task-title"
+            tagname="span"
+            type="body-large-medium"
           >
             1234567890
           </mdc-text>
           <mdc-text
             class="md-text-wrapper task-text"
+            tagname="span"
+            type="body-midsize-regular"
           >
-            Accept Team
-          </mdc-text>
-        </section>
-      </div>
-      <div
-        data-position="end"
-      >
-        <div
-          class="task-button-container"
-        >
-          <button
-            class="md-button-pill-wrapper md-button-simple-wrapper"
-            data-color="join"
-            data-disabled="false"
-            data-disabled-outline="false"
-            data-ghost="false"
-            data-grown="false"
-            data-inverted="false"
-            data-outline="false"
-            data-shallow-disabled="false"
-            data-size="40"
-            data-testid="task:accept-button"
-            tabindex="-1"
-            type="button"
-          >
-            <span>
-              Accept
-            </span>
-          </button>
-          <button
-            class="md-button-pill-wrapper md-button-simple-wrapper"
-            data-color="cancel"
-            data-disabled="false"
-            data-disabled-outline="false"
-            data-ghost="false"
-            data-grown="false"
-            data-inverted="false"
-            data-outline="false"
-            data-shallow-disabled="false"
-            data-size="40"
-            data-testid="task:decline-button"
-            tabindex="-1"
-            type="button"
-          >
-            <span>
-              Decline
-            </span>
-          </button>
-        </div>
-      </div>
-    </li>
-  </ul>
-</div>
-`;
-
-exports[`TaskListComponent Snapshots Task interactions should call declineTask when decline button is clicked 1`] = `
-<div>
-  <ul
-    class="task-list"
-    data-testid="task-list"
-  >
-    <li
-      class="task-list-item md-list-item-base-wrapper"
-      data-allow-text-select="false"
-      data-disabled="false"
-      data-interactive="true"
-      data-padded="false"
-      data-shape="rectangle"
-      data-size="40"
-      id="decline-task"
-      role="listitem"
-      tabindex="0"
-    >
-      <div
-        data-position="start"
-      >
-        <mdc-avatar
-          class="telephony"
-          icon-name="handset-filled"
-        />
-      </div>
-      <div
-        data-position="fill"
-      >
-        <section
-          class="task-details"
-        >
-          <mdc-text
-            class="md-text-wrapper task-title"
-          >
-            1234567890
+            Support
           </mdc-text>
           <mdc-text
             class="md-text-wrapper task-text"
+            tagname="span"
+            type="body-midsize-regular"
           >
-            Decline Team
-          </mdc-text>
-        </section>
-      </div>
-      <div
-        data-position="end"
-      >
-        <div
-          class="task-button-container"
-        >
-          <button
-            class="md-button-pill-wrapper md-button-simple-wrapper"
-            data-color="join"
-            data-disabled="false"
-            data-disabled-outline="false"
-            data-ghost="false"
-            data-grown="false"
-            data-inverted="false"
-            data-outline="false"
-            data-shallow-disabled="false"
-            data-size="40"
-            data-testid="task:accept-button"
-            tabindex="-1"
-            type="button"
-          >
-            <span>
-              Accept
-            </span>
-          </button>
-          <button
-            class="md-button-pill-wrapper md-button-simple-wrapper"
-            data-color="cancel"
-            data-disabled="false"
-            data-disabled-outline="false"
-            data-ghost="false"
-            data-grown="false"
-            data-inverted="false"
-            data-outline="false"
-            data-shallow-disabled="false"
-            data-size="40"
-            data-testid="task:decline-button"
-            tabindex="-1"
-            type="button"
-          >
-            <span>
-              Decline
-            </span>
-          </button>
-        </div>
-      </div>
-    </li>
-  </ul>
-</div>
-`;
-
-exports[`TaskListComponent Snapshots Task interactions should call onTaskSelect when task is clicked for selectable task 1`] = `
-<div>
-  <ul
-    class="task-list"
-    data-testid="task-list"
-  >
-    <li
-      class="task-list-item md-list-item-base-wrapper"
-      data-allow-text-select="false"
-      data-disabled="false"
-      data-interactive="true"
-      data-padded="false"
-      data-shape="rectangle"
-      data-size="40"
-      id="selectable-task"
-      role="listitem"
-      tabindex="0"
-    >
-      <div
-        data-position="start"
-      >
-        <mdc-avatar
-          class="telephony"
-          icon-name="handset-filled"
-        />
-      </div>
-      <div
-        data-position="fill"
-      >
-        <section
-          class="task-details"
-        >
-          <mdc-text
-            class="md-text-wrapper task-title"
-          >
-            1234567890
-          </mdc-text>
-          <mdc-text
-            class="md-text-wrapper task-text"
-          >
-            Active
-          </mdc-text>
-        </section>
-      </div>
-      <div
-        data-position="end"
-      >
-        <div
-          class="task-button-container"
-        />
-      </div>
-    </li>
-  </ul>
-</div>
-`;
-
-exports[`TaskListComponent Snapshots Task list with tasks should render task list with multiple tasks 1`] = `
-<div>
-  <ul
-    class="task-list"
-    data-testid="task-list"
-  >
-    <li
-      class="task-list-item md-list-item-base-wrapper"
-      data-allow-text-select="false"
-      data-disabled="false"
-      data-interactive="true"
-      data-padded="false"
-      data-shape="rectangle"
-      data-size="40"
-      id="task-1"
-      role="listitem"
-      tabindex="0"
-    >
-      <div
-        data-position="start"
-      >
-        <mdc-avatar
-          class="telephony"
-          icon-name="handset-filled"
-        />
-      </div>
-      <div
-        data-position="fill"
-      >
-        <section
-          class="task-details"
-        >
-          <mdc-text
-            class="md-text-wrapper task-title"
-          >
-            1234567890
-          </mdc-text>
-          <mdc-text
-            class="md-text-wrapper task-text"
-          >
-            Active
-          </mdc-text>
-        </section>
-      </div>
-      <div
-        data-position="end"
-      >
-        <div
-          class="task-button-container"
-        />
-      </div>
-    </li>
-    <li
-      class="task-list-item md-list-item-base-wrapper"
-      data-allow-text-select="false"
-      data-disabled="false"
-      data-interactive="true"
-      data-padded="false"
-      data-shape="rectangle"
-      data-size="40"
-      id="task-2"
-      role="listitem"
-      tabindex="0"
-    >
-      <div
-        data-position="start"
-      >
-        <mdc-avatar
-          class="social"
-          icon-name="chat-filled"
-        />
-      </div>
-      <div
-        data-position="fill"
-      >
-        <section
-          class="task-details"
-        >
-          <mdc-text
-            class="md-text-wrapper incoming-digital-task-title"
-            id="tooltip-trigger-task-2"
-          >
-            Jane Smith
-          </mdc-text>
-          <mdc-tooltip
-            class="task-tooltip"
-            tooltip-type="description"
-          >
-            Jane Smith
-          </mdc-tooltip>
-          <mdc-text
-            class="md-text-wrapper task-text"
-          >
-            Sales Team
-          </mdc-text>
-        </section>
-      </div>
-      <div
-        data-position="end"
-      >
-        <div
-          class="task-button-container"
-        >
-          <button
-            class="md-button-pill-wrapper md-button-simple-wrapper"
-            data-color="join"
-            data-disabled="false"
-            data-disabled-outline="false"
-            data-ghost="false"
-            data-grown="false"
-            data-inverted="false"
-            data-outline="false"
-            data-shallow-disabled="false"
-            data-size="40"
-            data-testid="task:accept-button"
-            tabindex="-1"
-            type="button"
-          >
-            <span>
-              Accept
-            </span>
-          </button>
-        </div>
-      </div>
-    </li>
-  </ul>
-</div>
-`;
-
-exports[`TaskListComponent Snapshots Task list with tasks should render task list with single task 1`] = `
-<div>
-  <ul
-    class="task-list"
-    data-testid="task-list"
-  >
-    <li
-      class="task-list-item md-list-item-base-wrapper"
-      data-allow-text-select="false"
-      data-disabled="false"
-      data-interactive="true"
-      data-padded="false"
-      data-shape="rectangle"
-      data-size="40"
-      id="task-1"
-      role="listitem"
-      tabindex="0"
-    >
-      <div
-        data-position="start"
-      >
-        <mdc-avatar
-          class="telephony"
-          icon-name="handset-filled"
-        />
-      </div>
-      <div
-        data-position="fill"
-      >
-        <section
-          class="task-details"
-        >
-          <mdc-text
-            class="md-text-wrapper task-title"
-          >
-            1234567890
-          </mdc-text>
-        </section>
-      </div>
-      <div
-        data-position="end"
-      >
-        <div
-          class="task-button-container"
-        />
-      </div>
-    </li>
-  </ul>
-</div>
-`;
-
-exports[`TaskListComponent Snapshots Task list with tasks should show selected task correctly 1`] = `
-<div>
-  <ul
-    class="task-list"
-    data-testid="task-list"
-  >
-    <li
-      class="task-list-item task-list-item--selected md-list-item-base-wrapper"
-      data-allow-text-select="false"
-      data-disabled="false"
-      data-interactive="true"
-      data-padded="false"
-      data-shape="rectangle"
-      data-size="40"
-      id="selected-task"
-      role="listitem"
-      tabindex="0"
-    >
-      <div
-        data-position="start"
-      >
-        <mdc-avatar
-          class="telephony"
-          icon-name="handset-filled"
-        />
-      </div>
-      <div
-        data-position="fill"
-      >
-        <section
-          class="task-details"
-        />
-      </div>
-      <div
-        data-position="end"
-      >
-        <div
-          class="task-button-container"
-        />
-      </div>
-    </li>
-  </ul>
-</div>
-`;
-
-exports[`TaskListComponent Snapshots WebRTC vs Extension/DialNumber behavior - Tests platform-specific UI differences and button states should handle DialNumber mode telephony task 1`] = `
-<div>
-  <ul
-    class="task-list"
-    data-testid="task-list"
-  >
-    <li
-      class="task-list-item md-list-item-base-wrapper"
-      data-allow-text-select="false"
-      data-disabled="false"
-      data-interactive="true"
-      data-padded="false"
-      data-shape="rectangle"
-      data-size="40"
-      id="dial-number-task"
-      role="listitem"
-      tabindex="0"
-    >
-      <div
-        data-position="start"
-      >
-        <mdc-avatar
-          class="telephony"
-          icon-name="handset-filled"
-        />
-      </div>
-      <div
-        data-position="fill"
-      >
-        <section
-          class="task-details"
-        >
-          <mdc-text
-            class="md-text-wrapper task-title"
-          >
-            1234567890
-          </mdc-text>
-          <mdc-text
-            class="md-text-wrapper task-text"
-          >
-            DialNumber Team
+            Time Left: 
+              
+            <time
+              class="task-text task-text--secondary"
+              datetime="00:00"
+            >
+              00:00
+            </time>
           </mdc-text>
         </section>
       </div>
@@ -1165,21 +1597,21 @@ exports[`TaskListComponent Snapshots WebRTC vs Extension/DialNumber behavior - T
 </div>
 `;
 
-exports[`TaskListComponent Snapshots WebRTC vs Extension/DialNumber behavior - Tests platform-specific UI differences and button states should handle Extension/DialNumber telephony incoming task with limited functionality 1`] = `
+exports[`TaskListComponent Rendering with Tasks should show selected state with bold title 1`] = `
 <div>
   <ul
     class="task-list"
     data-testid="task-list"
   >
     <li
-      class="task-list-item md-list-item-base-wrapper"
+      class="task-list-item task-list-item--selected md-list-item-base-wrapper"
       data-allow-text-select="false"
       data-disabled="false"
       data-interactive="true"
       data-padded="false"
       data-shape="rectangle"
       data-size="40"
-      id="extension-task"
+      id="test-task-123"
       role="listitem"
       tabindex="0"
     >
@@ -1189,6 +1621,7 @@ exports[`TaskListComponent Snapshots WebRTC vs Extension/DialNumber behavior - T
         <mdc-avatar
           class="telephony"
           icon-name="handset-filled"
+          size="32"
         />
       </div>
       <div
@@ -1199,13 +1632,31 @@ exports[`TaskListComponent Snapshots WebRTC vs Extension/DialNumber behavior - T
         >
           <mdc-text
             class="md-text-wrapper task-title"
+            tagname="span"
+            type="body-large-bold"
           >
             1234567890
           </mdc-text>
           <mdc-text
             class="md-text-wrapper task-text"
+            tagname="span"
+            type="body-midsize-regular"
           >
-            Extension Team
+            Active
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Handle Time: 
+              
+            <time
+              class="task-text task-text--secondary"
+              datetime="00:00"
+            >
+              00:00
+            </time>
           </mdc-text>
         </section>
       </div>
@@ -1214,122 +1665,7 @@ exports[`TaskListComponent Snapshots WebRTC vs Extension/DialNumber behavior - T
       >
         <div
           class="task-button-container"
-        >
-          <button
-            class="md-button-pill-wrapper md-button-simple-wrapper"
-            data-color="join"
-            data-disabled="true"
-            data-disabled-outline="false"
-            data-ghost="false"
-            data-grown="false"
-            data-inverted="false"
-            data-outline="false"
-            data-shallow-disabled="false"
-            data-size="40"
-            data-testid="task:accept-button"
-            disabled=""
-            type="button"
-          >
-            <span>
-              Ringing...
-            </span>
-          </button>
-        </div>
-      </div>
-    </li>
-  </ul>
-</div>
-`;
-
-exports[`TaskListComponent Snapshots WebRTC vs Extension/DialNumber behavior - Tests platform-specific UI differences and button states should handle WebRTC telephony incoming task with full functionality 1`] = `
-<div>
-  <ul
-    class="task-list"
-    data-testid="task-list"
-  >
-    <li
-      class="task-list-item md-list-item-base-wrapper"
-      data-allow-text-select="false"
-      data-disabled="false"
-      data-interactive="true"
-      data-padded="false"
-      data-shape="rectangle"
-      data-size="40"
-      id="webrtc-task"
-      role="listitem"
-      tabindex="0"
-    >
-      <div
-        data-position="start"
-      >
-        <mdc-avatar
-          class="telephony"
-          icon-name="handset-filled"
         />
-      </div>
-      <div
-        data-position="fill"
-      >
-        <section
-          class="task-details"
-        >
-          <mdc-text
-            class="md-text-wrapper task-title"
-          >
-            1234567890
-          </mdc-text>
-          <mdc-text
-            class="md-text-wrapper task-text"
-          >
-            WebRTC Team
-          </mdc-text>
-        </section>
-      </div>
-      <div
-        data-position="end"
-      >
-        <div
-          class="task-button-container"
-        >
-          <button
-            class="md-button-pill-wrapper md-button-simple-wrapper"
-            data-color="join"
-            data-disabled="false"
-            data-disabled-outline="false"
-            data-ghost="false"
-            data-grown="false"
-            data-inverted="false"
-            data-outline="false"
-            data-shallow-disabled="false"
-            data-size="40"
-            data-testid="task:accept-button"
-            tabindex="-1"
-            type="button"
-          >
-            <span>
-              Accept
-            </span>
-          </button>
-          <button
-            class="md-button-pill-wrapper md-button-simple-wrapper"
-            data-color="cancel"
-            data-disabled="false"
-            data-disabled-outline="false"
-            data-ghost="false"
-            data-grown="false"
-            data-inverted="false"
-            data-outline="false"
-            data-shallow-disabled="false"
-            data-size="40"
-            data-testid="task:decline-button"
-            tabindex="-1"
-            type="button"
-          >
-            <span>
-              Decline
-            </span>
-          </button>
-        </div>
       </div>
     </li>
   </ul>

@@ -5,10 +5,25 @@ import {mockTask} from '@webex/test-fixtures';
 import IncomingTaskComponent from '../../../../src/components/task/IncomingTask/incoming-task';
 import {MEDIA_CHANNEL} from '../../../../src/components/task/task.types';
 import type {ILogger} from '@webex/cc-store';
-import {setupTaskTimerMocks} from '../../../utils/browser-api-mocks';
 
-// Enhanced Worker mock that matches the real Worker interface
-setupTaskTimerMocks();
+Object.defineProperty(global, 'Worker', {
+  writable: true,
+  value: class MockWorker {
+    constructor() {}
+    postMessage = jest.fn();
+    addEventListener = jest.fn();
+    removeEventListener = jest.fn();
+    terminate = jest.fn();
+  },
+});
+
+Object.defineProperty(global, 'URL', {
+  writable: true,
+  value: {
+    createObjectURL: jest.fn(() => 'blob:mock-url'),
+    revokeObjectURL: jest.fn(),
+  },
+});
 
 describe('IncomingTaskComponent', () => {
   const mockLogger: ILogger = {
