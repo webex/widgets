@@ -46,6 +46,8 @@ export default defineConfig({
     },
     {
       name: 'Test: Chrome',
+      // Run all tests except advanced tests and transfer/consult tests on Chrome
+      testIgnore: [/advanced-task-controls-test\.spec\.ts/],
       use: {
         ...devices['Desktop Chrome'],
         launchOptions: {
@@ -61,14 +63,35 @@ export default defineConfig({
           ],
         }
       },
-
+      // dependencies: ['OAuth: Get Access Token'],
     },
-    // Once we have stability for playwright tests, we can enable the following browsers
-    // {
-    //   name: 'Test: Firefox',
-    //   use: {...devices['Desktop Firefox']},
-    //   dependencies: ['chromium'],
-    // },
+    {
+      name: 'Test: Firefox - Advanced Tests',
+      // Run only advanced tests and transfer/consult tests on Firefox
+      testMatch: [/advanced-task-controls-test\.spec\.ts/],
+      use: {
+        ...devices['Desktop Firefox'],
+        launchOptions: {
+          // Firefox-specific preferences for fake media
+          firefoxUserPrefs: {
+            // Essential media preferences for testing
+            'media.navigator.streams.fake': true,
+            'media.navigator.permission.disabled': true,
+            'media.getusermedia.insecure.enabled': true,
+            'media.peerconnection.enabled': true,
+            'permissions.default.microphone': 1,
+            'permissions.default.camera': 1,
+            
+            // Automation-friendly settings
+            'media.autoplay.default': 0,
+            'media.autoplay.blocking_policy': 0,
+            'privacy.webrtc.legacyGlobalIndicator': false,
+          }
+        },
+        // Remove permissions - Firefox handles this differently
+      },
+      // dependencies: ['OAuth: Get Access Token'],
+    },
 
     // {
     //   name: 'Test: Webkit',
