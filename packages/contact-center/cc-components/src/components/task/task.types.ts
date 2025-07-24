@@ -561,6 +561,7 @@ export interface CallControlButton {
   disabled: boolean;
   isVisible: boolean;
   menuType?: CallControlMenuType;
+  dataTestId?: string;
 }
 
 export interface ControlVisibility {

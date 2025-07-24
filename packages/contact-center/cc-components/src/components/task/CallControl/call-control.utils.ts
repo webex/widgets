@@ -211,6 +211,7 @@ export const buildCallControlButtons = (
       className: `${isMuted ? 'call-control-button-muted' : 'call-control-button'}`,
       disabled: isMuteButtonDisabled,
       isVisible: controlVisibility.muteUnmute,
+      dataTestId: 'call-control:mute-toggle',
     },
     {
       id: 'hold',
@@ -220,6 +221,7 @@ export const buildCallControlButtons = (
       className: 'call-control-button',
       disabled: false,
       isVisible: controlVisibility.holdResume,
+      dataTestId: 'call-control:hold-toggle',
     },
     {
       id: 'consult',
@@ -229,6 +231,7 @@ export const buildCallControlButtons = (
       disabled: false,
       menuType: 'Consult',
       isVisible: controlVisibility.consult,
+      dataTestId: 'call-control:consult',
     },
     {
       id: 'transfer',
@@ -238,6 +241,7 @@ export const buildCallControlButtons = (
       disabled: false,
       menuType: 'Transfer',
       isVisible: controlVisibility.transfer,
+      dataTestId: 'call-control:transfer',
     },
     {
       id: 'record',
@@ -247,6 +251,7 @@ export const buildCallControlButtons = (
       className: 'call-control-button',
       disabled: false,
       isVisible: controlVisibility.pauseResumeRecording,
+      dataTestId: 'call-control:recording-toggle',
     },
     {
       id: 'end',
@@ -256,6 +261,7 @@ export const buildCallControlButtons = (
       className: 'call-control-button-cancel',
       disabled: isHeld,
       isVisible: controlVisibility.end,
+      dataTestId: 'call-control:end-call',
     },
   ];
 };

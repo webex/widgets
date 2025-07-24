@@ -183,7 +183,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                             className={button.className}
                             aria-label={button.tooltip}
                             disabled={button.disabled || (consultInitiated && isTelephony)}
-                            data-testid="ButtonCircle"
+                            data-testid={button.dataTestId}
                             onPress={() => handlePopoverOpen(button.menuType as CallControlMenuType)}
                           >
                             <Icon className={button.className + '-icon'} name={button.icon} />
@@ -224,7 +224,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                         button.className +
                         (button.disabled || (consultInitiated && isTelephony) ? ` ${button.className}-disabled` : '')
                       }
-                      data-testid={button.id === 'end' ? 'call-control:end-call' : button.id}
+                      data-testid={button.dataTestId}
                       onPress={button.onClick}
                       disabled={button.disabled || (consultInitiated && isTelephony)}
                       aria-label={button.tooltip}

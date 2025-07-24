@@ -500,6 +500,7 @@ describe('CallControl Utils', () => {
         className: 'call-control-button-muted',
         disabled: false,
         isVisible: true,
+        dataTestId: 'call-control:mute-toggle',
       });
 
       // Check hold button
@@ -512,6 +513,7 @@ describe('CallControl Utils', () => {
         className: 'call-control-button',
         disabled: false,
         isVisible: true,
+        dataTestId: 'call-control:hold-toggle',
       });
     });
 
@@ -539,6 +541,7 @@ describe('CallControl Utils', () => {
         className: 'call-control-button',
         disabled: true,
         isVisible: true,
+        dataTestId: 'call-control:mute-toggle',
       });
 
       // Check hold button
@@ -551,6 +554,7 @@ describe('CallControl Utils', () => {
         className: 'call-control-button',
         disabled: false,
         isVisible: true,
+        dataTestId: 'call-control:hold-toggle',
       });
 
       // Check end button - should be disabled when held
@@ -581,6 +585,7 @@ describe('CallControl Utils', () => {
         disabled: false,
         menuType: 'Consult',
         isVisible: true,
+        dataTestId: 'call-control:consult',
       });
 
       const transferButton = buttons.find((b) => b.id === 'transfer');
@@ -592,6 +597,7 @@ describe('CallControl Utils', () => {
         disabled: false,
         menuType: 'Transfer',
         isVisible: true,
+        dataTestId: 'call-control:transfer',
       });
     });
 

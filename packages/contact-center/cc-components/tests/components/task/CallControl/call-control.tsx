@@ -248,16 +248,50 @@ describe('CallControlComponent', () => {
 
   describe('Button Interactions and State Management', () => {
     it('should handle various button states and interactions', async () => {
+      // Mock buttons with dataTestId before rendering
+      buildCallControlButtonsSpy.mockReturnValue([
+        {
+          id: 'mute',
+          icon: 'microphone-bold',
+          onClick: jest.fn(),
+          tooltip: 'Mute',
+          className: 'mute-btn',
+          disabled: false,
+          isVisible: true,
+          dataTestId: 'call-control:mute-toggle',
+        },
+        {
+          id: 'hold',
+          icon: 'pause-bold',
+          onClick: jest.fn(),
+          tooltip: 'Hold',
+          className: 'hold-btn',
+          disabled: false,
+          isVisible: true,
+          dataTestId: 'call-control:hold-toggle',
+        },
+        {
+          id: 'transfer',
+          icon: 'next-bold',
+          tooltip: 'Transfer',
+          className: 'call-control-button',
+          disabled: false,
+          isVisible: true,
+          menuType: 'Transfer',
+          dataTestId: 'call-control:transfer',
+        },
+      ]);
+
       // Test regular button rendering
       await act(async () => {
         render(<CallControlComponent {...defaultProps} />);
       });
 
-      expect(screen.getByTestId('mute')).toBeInTheDocument();
-      expect(screen.getByTestId('hold')).toBeInTheDocument();
+      expect(screen.getByTestId('call-control:mute-toggle')).toBeInTheDocument();
+      expect(screen.getByTestId('call-control:hold-toggle')).toBeInTheDocument();
 
       // Test that transfer button exists (but may not trigger popover in test environment)
-      const buttons = screen.getAllByTestId('ButtonCircle');
+      const buttons = screen.getAllByTestId('call-control:transfer');
       expect(buttons.length).toBeGreaterThan(0);
 
       // Test click on first button
@@ -307,11 +341,12 @@ describe('CallControlComponent', () => {
           className: 'mute-btn',
           disabled: false,
           isVisible: true,
+          dataTestId: 'call-control:mute-toggle',
         },
       ]);
 
       rerender(<CallControlComponent {...{...defaultProps, consultInitiated: true}} />);
-      const muteButton = screen.getByTestId('mute');
+      const muteButton = screen.getByTestId('call-control:mute-toggle');
       expect(muteButton).toBeDisabled();
     });
 
@@ -447,6 +482,7 @@ describe('CallControlComponent', () => {
           className: 'end-call-btn',
           disabled: false,
           isVisible: true,
+          dataTestId: 'call-control:end-call',
         },
       ]);
 
@@ -490,6 +526,7 @@ describe('CallControlComponent', () => {
           disabled: false,
           isVisible: true,
           menuType: 'Transfer',
+          dataTestId: 'call-control:transfer',
         },
       ]);
 
@@ -504,7 +541,7 @@ describe('CallControlComponent', () => {
 
       render(<CallControlComponent {...popoverProps} />);
 
-      const transferButton = screen.getByTestId('ButtonCircle');
+      const transferButton = screen.getByTestId('call-control:transfer');
       expect(transferButton).toHaveClass('transfer-button');
       expect(transferButton).toHaveAttribute('aria-label', 'Transfer Call');
       expect(transferButton).not.toBeDisabled();
@@ -661,6 +698,7 @@ describe('CallControlComponent', () => {
           disabled: false,
           isVisible: true,
           menuType: 'Transfer', // This triggers PopoverNext rendering
+          dataTestId: 'call-control:transfer',
         },
       ]);
 
@@ -678,7 +716,7 @@ describe('CallControlComponent', () => {
       // Part 1: Test PopoverNext callbacks (lines 97, 112, 175-210)
 
       // Get the component instance to access its internal methods
-      const transferButton = screen.getByTestId('ButtonCircle');
+      const transferButton = screen.getByTestId('call-control:transfer');
       expect(transferButton).toBeInTheDocument();
 
       // Simulate the exact callback scenarios that would be triggered by PopoverNext
