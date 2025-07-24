@@ -42,6 +42,7 @@ exports[`TaskListComponent Actions should call acceptTask when accept button is 
           </mdc-text>
           <mdc-text
             class="md-text-wrapper task-text"
+            data-testid="action-task-queue"
             tagname="span"
             type="body-midsize-regular"
           >
@@ -49,6 +50,7 @@ exports[`TaskListComponent Actions should call acceptTask when accept button is 
           </mdc-text>
           <mdc-text
             class="md-text-wrapper task-text"
+            data-testid="action-task-time-left"
             tagname="span"
             type="body-midsize-regular"
           >
@@ -156,6 +158,7 @@ exports[`TaskListComponent Actions should call acceptTask when accept button is 
           </mdc-text>
           <mdc-text
             class="md-text-wrapper task-text"
+            data-testid="action-task-queue"
             tagname="span"
             type="body-midsize-regular"
           >
@@ -163,6 +166,7 @@ exports[`TaskListComponent Actions should call acceptTask when accept button is 
           </mdc-text>
           <mdc-text
             class="md-text-wrapper task-text"
+            data-testid="action-task-time-left"
             tagname="span"
             type="body-midsize-regular"
           >
@@ -270,6 +274,7 @@ exports[`TaskListComponent Actions should call declineTask when decline button i
           </mdc-text>
           <mdc-text
             class="md-text-wrapper task-text"
+            data-testid="action-task-queue"
             tagname="span"
             type="body-midsize-regular"
           >
@@ -277,6 +282,7 @@ exports[`TaskListComponent Actions should call declineTask when decline button i
           </mdc-text>
           <mdc-text
             class="md-text-wrapper task-text"
+            data-testid="action-task-time-left"
             tagname="span"
             type="body-midsize-regular"
           >
@@ -384,6 +390,7 @@ exports[`TaskListComponent Actions should call declineTask when decline button i
           </mdc-text>
           <mdc-text
             class="md-text-wrapper task-text"
+            data-testid="action-task-queue"
             tagname="span"
             type="body-midsize-regular"
           >
@@ -391,6 +398,7 @@ exports[`TaskListComponent Actions should call declineTask when decline button i
           </mdc-text>
           <mdc-text
             class="md-text-wrapper task-text"
+            data-testid="action-task-time-left"
             tagname="span"
             type="body-midsize-regular"
           >
@@ -498,6 +506,7 @@ exports[`TaskListComponent Actions should call onTaskSelect when task is clicked
           </mdc-text>
           <mdc-text
             class="md-text-wrapper task-text"
+            data-testid="active-task-state"
             tagname="span"
             type="body-midsize-regular"
           >
@@ -505,6 +514,7 @@ exports[`TaskListComponent Actions should call onTaskSelect when task is clicked
           </mdc-text>
           <mdc-text
             class="md-text-wrapper task-text"
+            data-testid="active-task-handle-time"
             tagname="span"
             type="body-midsize-regular"
           >
@@ -573,6 +583,7 @@ exports[`TaskListComponent Actions should call onTaskSelect when task is clicked
           </mdc-text>
           <mdc-text
             class="md-text-wrapper task-text"
+            data-testid="active-task-state"
             tagname="span"
             type="body-midsize-regular"
           >
@@ -580,6 +591,7 @@ exports[`TaskListComponent Actions should call onTaskSelect when task is clicked
           </mdc-text>
           <mdc-text
             class="md-text-wrapper task-text"
+            data-testid="active-task-handle-time"
             tagname="span"
             type="body-midsize-regular"
           >
@@ -648,6 +660,7 @@ exports[`TaskListComponent Actions should handle task selection between multiple
           </mdc-text>
           <mdc-text
             class="md-text-wrapper task-text"
+            data-testid="action-task-queue"
             tagname="span"
             type="body-midsize-regular"
           >
@@ -655,6 +668,7 @@ exports[`TaskListComponent Actions should handle task selection between multiple
           </mdc-text>
           <mdc-text
             class="md-text-wrapper task-text"
+            data-testid="action-task-time-left"
             tagname="span"
             type="body-midsize-regular"
           >
@@ -775,6 +789,7 @@ exports[`TaskListComponent Actions should handle task selection between multiple
           </mdc-tooltip>
           <mdc-text
             class="md-text-wrapper task-text"
+            data-testid="unselected-chat-task-state"
             tagname="span"
             type="body-midsize-regular"
           >
@@ -782,6 +797,7 @@ exports[`TaskListComponent Actions should handle task selection between multiple
           </mdc-text>
           <mdc-text
             class="md-text-wrapper task-text"
+            data-testid="unselected-chat-task-handle-time"
             tagname="span"
             type="body-midsize-regular"
           >
@@ -850,6 +866,7 @@ exports[`TaskListComponent Actions should handle task selection between multiple
           </mdc-text>
           <mdc-text
             class="md-text-wrapper task-text"
+            data-testid="action-task-queue"
             tagname="span"
             type="body-midsize-regular"
           >
@@ -857,6 +874,7 @@ exports[`TaskListComponent Actions should handle task selection between multiple
           </mdc-text>
           <mdc-text
             class="md-text-wrapper task-text"
+            data-testid="action-task-time-left"
             tagname="span"
             type="body-midsize-regular"
           >
@@ -977,6 +995,7 @@ exports[`TaskListComponent Actions should handle task selection between multiple
           </mdc-tooltip>
           <mdc-text
             class="md-text-wrapper task-text"
+            data-testid="unselected-chat-task-state"
             tagname="span"
             type="body-midsize-regular"
           >
@@ -984,6 +1003,7 @@ exports[`TaskListComponent Actions should handle task selection between multiple
           </mdc-text>
           <mdc-text
             class="md-text-wrapper task-text"
+            data-testid="unselected-chat-task-handle-time"
             tagname="span"
             type="body-midsize-regular"
           >
@@ -1081,6 +1101,7 @@ exports[`TaskListComponent Rendering with Tasks should render digital incoming t
           </mdc-tooltip>
           <mdc-text
             class="md-text-wrapper task-text"
+            data-testid="incoming-chat-task-queue"
             tagname="span"
             type="body-midsize-regular"
           >
@@ -1088,6 +1109,7 @@ exports[`TaskListComponent Rendering with Tasks should render digital incoming t
           </mdc-text>
           <mdc-text
             class="md-text-wrapper task-text"
+            data-testid="incoming-chat-task-time-left"
             tagname="span"
             type="body-midsize-regular"
           >
@@ -1176,6 +1198,7 @@ exports[`TaskListComponent Rendering with Tasks should render multiple tasks wit
           </mdc-text>
           <mdc-text
             class="md-text-wrapper task-text"
+            data-testid="telephony-task-state"
             tagname="span"
             type="body-midsize-regular"
           >
@@ -1183,6 +1206,7 @@ exports[`TaskListComponent Rendering with Tasks should render multiple tasks wit
           </mdc-text>
           <mdc-text
             class="md-text-wrapper task-text"
+            data-testid="telephony-task-handle-time"
             tagname="span"
             type="body-midsize-regular"
           >
@@ -1264,6 +1288,7 @@ exports[`TaskListComponent Rendering with Tasks should render multiple tasks wit
           </mdc-tooltip>
           <mdc-text
             class="md-text-wrapper task-text"
+            data-testid="chat-task-state"
             tagname="span"
             type="body-midsize-regular"
           >
@@ -1271,6 +1296,7 @@ exports[`TaskListComponent Rendering with Tasks should render multiple tasks wit
           </mdc-text>
           <mdc-text
             class="md-text-wrapper task-text"
+            data-testid="chat-task-handle-time"
             tagname="span"
             type="body-midsize-regular"
           >
@@ -1355,6 +1381,7 @@ exports[`TaskListComponent Rendering with Tasks should render multiple tasks wit
           </mdc-tooltip>
           <mdc-text
             class="md-text-wrapper task-text"
+            data-testid="social-task-state"
             tagname="span"
             type="body-midsize-regular"
           >
@@ -1362,6 +1389,7 @@ exports[`TaskListComponent Rendering with Tasks should render multiple tasks wit
           </mdc-text>
           <mdc-text
             class="md-text-wrapper task-text"
+            data-testid="social-task-handle-time"
             tagname="span"
             type="body-midsize-regular"
           >
@@ -1430,6 +1458,7 @@ exports[`TaskListComponent Rendering with Tasks should render telephony incoming
           </mdc-text>
           <mdc-text
             class="md-text-wrapper task-text"
+            data-testid="webrtc-telephony-task-queue"
             tagname="span"
             type="body-midsize-regular"
           >
@@ -1437,6 +1466,7 @@ exports[`TaskListComponent Rendering with Tasks should render telephony incoming
           </mdc-text>
           <mdc-text
             class="md-text-wrapper task-text"
+            data-testid="webrtc-telephony-task-time-left"
             tagname="span"
             type="body-midsize-regular"
           >
@@ -1544,6 +1574,7 @@ exports[`TaskListComponent Rendering with Tasks should render telephony incoming
           </mdc-text>
           <mdc-text
             class="md-text-wrapper task-text"
+            data-testid="extension-telephony-task-queue"
             tagname="span"
             type="body-midsize-regular"
           >
@@ -1551,6 +1582,7 @@ exports[`TaskListComponent Rendering with Tasks should render telephony incoming
           </mdc-text>
           <mdc-text
             class="md-text-wrapper task-text"
+            data-testid="extension-telephony-task-time-left"
             tagname="span"
             type="body-midsize-regular"
           >
@@ -1639,6 +1671,7 @@ exports[`TaskListComponent Rendering with Tasks should show selected state with 
           </mdc-text>
           <mdc-text
             class="md-text-wrapper task-text"
+            data-testid="test-task-123-state"
             tagname="span"
             type="body-midsize-regular"
           >
@@ -1646,6 +1679,7 @@ exports[`TaskListComponent Rendering with Tasks should show selected state with 
           </mdc-text>
           <mdc-text
             class="md-text-wrapper task-text"
+            data-testid="test-task-123-handle-time"
             tagname="span"
             type="body-midsize-regular"
           >

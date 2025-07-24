@@ -35,11 +35,13 @@ exports[`Task Component Snapshots Actions disables accept button when disableAcc
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
         >
           Active
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -118,11 +120,13 @@ exports[`Task Component Snapshots Actions does not render buttons when no text p
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
         >
           Active
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -181,11 +185,13 @@ exports[`Task Component Snapshots Actions renders accept button and handles clic
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
         >
           Active
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -264,11 +270,13 @@ exports[`Task Component Snapshots Actions renders both accept and decline button
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
         >
           Active
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -366,11 +374,13 @@ exports[`Task Component Snapshots Actions renders decline button and handles cli
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
         >
           Active
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -449,11 +459,13 @@ exports[`Task Component Snapshots Actions verifies button properties and behavio
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
         >
           Active
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -551,11 +563,13 @@ exports[`Task Component Snapshots Button State Variations renders task with disa
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
         >
           Active
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -653,11 +667,13 @@ exports[`Task Component Snapshots Button State Variations renders task with no b
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
         >
           Active
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -716,11 +732,13 @@ exports[`Task Component Snapshots Button State Variations renders task with only
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
         >
           Active
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -799,11 +817,13 @@ exports[`Task Component Snapshots Button State Variations renders task with only
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
         >
           Active
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -889,11 +909,13 @@ exports[`Task Component Snapshots Complex Scenarios renders complex task with al
         </mdc-tooltip>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="complex-task-123-state"
         >
           Connected
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="complex-task-123-handle-time"
         >
           Handle Time: 
             
@@ -998,11 +1020,13 @@ exports[`Task Component Snapshots Complex Scenarios renders digital media task w
         </mdc-tooltip>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-queue"
         >
           Support
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -1100,11 +1124,13 @@ exports[`Task Component Snapshots Complex Scenarios renders incoming task with c
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="incoming-vip-call-queue"
         >
           Support
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="incoming-vip-call-time-left"
         >
           Time Left: 
             
@@ -1202,11 +1228,13 @@ exports[`Task Component Snapshots Component Integration integrates properly with
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
         >
           Active
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -1311,11 +1339,13 @@ exports[`Task Component Snapshots Component Integration maintains consistent beh
         </mdc-tooltip>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-queue"
         >
           Support
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -1374,6 +1404,7 @@ exports[`Task Component Snapshots Component Integration maintains consistent beh
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-time-left"
         >
           Time Left: 
             
@@ -1432,11 +1463,13 @@ exports[`Task Component Snapshots Component Integration maintains consistent beh
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
         >
           Connected
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -1502,11 +1535,13 @@ exports[`Task Component Snapshots Edge Cases handles all media channel combinati
         </mdc-tooltip>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
         >
           Active
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -1575,11 +1610,13 @@ exports[`Task Component Snapshots Edge Cases handles all media channel combinati
         </mdc-tooltip>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
         >
           Active
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -1638,11 +1675,13 @@ exports[`Task Component Snapshots Edge Cases handles all media channel combinati
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
         >
           Active
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -1711,11 +1750,13 @@ exports[`Task Component Snapshots Edge Cases handles all media channel combinati
         </mdc-tooltip>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
         >
           Active
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -1769,6 +1810,7 @@ exports[`Task Component Snapshots Edge Cases handles empty string values 1`] = `
       >
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -1826,11 +1868,13 @@ exports[`Task Component Snapshots Edge Cases handles undefined interactionId gra
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="undefined-state"
         >
           Active
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="undefined-handle-time"
         >
           Handle Time: 
             
@@ -1889,6 +1933,7 @@ exports[`Task Component Snapshots Edge Cases handles zero values correctly 1`] =
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
         >
           Active
         </mdc-text>
@@ -1940,11 +1985,13 @@ exports[`Task Component Snapshots Media Type Rendering does not render tooltip f
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
         >
           Active
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -2010,11 +2057,13 @@ exports[`Task Component Snapshots Media Type Rendering renders Avatar for non-br
         </mdc-tooltip>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
         >
           Active
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -2080,11 +2129,13 @@ exports[`Task Component Snapshots Media Type Rendering renders Avatar for non-br
         </mdc-tooltip>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
         >
           Active
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -2143,11 +2194,13 @@ exports[`Task Component Snapshots Media Type Rendering renders Avatar for non-br
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
         >
           Active
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -2213,11 +2266,13 @@ exports[`Task Component Snapshots Media Type Rendering renders Avatar for non-br
         </mdc-tooltip>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
         >
           Active
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -2276,11 +2331,13 @@ exports[`Task Component Snapshots Media Type Rendering renders Avatar for voice 
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
         >
           Active
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -2349,11 +2406,13 @@ exports[`Task Component Snapshots Media Type Rendering renders Brandvisual for s
         </mdc-tooltip>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
         >
           Active
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -2422,11 +2481,13 @@ exports[`Task Component Snapshots Media Type Rendering renders Brandvisual for s
         </mdc-tooltip>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
         >
           Active
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -2492,11 +2553,13 @@ exports[`Task Component Snapshots Media Type Rendering renders tooltip for digit
         </mdc-tooltip>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
         >
           Active
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -2555,6 +2618,7 @@ exports[`Task Component Snapshots Props Validation handles boolean props correct
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -2633,11 +2697,13 @@ exports[`Task Component Snapshots Props Validation handles boolean props correct
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
         >
           Active
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -2716,11 +2782,13 @@ exports[`Task Component Snapshots Props Validation handles function props correc
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
         >
           Active
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -2813,11 +2881,13 @@ exports[`Task Component Snapshots Rendering does not render title when not provi
       >
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
         >
           Active
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -2876,11 +2946,13 @@ exports[`Task Component Snapshots Rendering renders queue information for incomi
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-queue"
         >
           Support
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -2939,11 +3011,13 @@ exports[`Task Component Snapshots Rendering renders task state for non-incoming 
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
         >
           Connected
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -3002,11 +3076,13 @@ exports[`Task Component Snapshots Rendering renders the component correctly with
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
         >
           Active
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -3104,11 +3180,13 @@ exports[`Task Component Snapshots Rendering renders with selected state and cust
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
         >
           Active
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -3167,11 +3245,13 @@ exports[`Task Component Snapshots State and Queue Variations displays different 
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-queue"
         >
           Sales
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -3230,11 +3310,13 @@ exports[`Task Component Snapshots State and Queue Variations displays different 
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-queue"
         >
           Support
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -3293,11 +3375,13 @@ exports[`Task Component Snapshots State and Queue Variations displays different 
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-queue"
         >
           Technical
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -3356,11 +3440,13 @@ exports[`Task Component Snapshots State and Queue Variations displays different 
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
         >
           Active
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -3419,11 +3505,13 @@ exports[`Task Component Snapshots State and Queue Variations displays different 
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
         >
           Connected
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -3482,11 +3570,13 @@ exports[`Task Component Snapshots State and Queue Variations displays different 
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
         >
           Hold
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -3545,11 +3635,13 @@ exports[`Task Component Snapshots State and Queue Variations displays different 
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
         >
           New
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -3654,6 +3746,7 @@ exports[`Task Component Snapshots TaskTimer Integration renders handle time for 
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -3712,11 +3805,13 @@ exports[`Task Component Snapshots TaskTimer Integration renders handle time time
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
         >
           Connected
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
         >
           Handle Time: 
             
@@ -3775,6 +3870,7 @@ exports[`Task Component Snapshots TaskTimer Integration renders time left timer 
         </mdc-text>
         <mdc-text
           class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-time-left"
         >
           Time Left: 
             

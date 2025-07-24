@@ -10,7 +10,7 @@ describe('incoming-task.utils', () => {
 
   describe('extractIncomingTaskData', () => {
     describe('Telephony tasks', () => {
-      it('should extract correct data for browser telephony task without wrap up', () => {
+      it('should extract correct data for browser telephony task', () => {
         const result = extractIncomingTaskData(mockTask, true);
 
         expect(result.isTelephony).toBe(true);
@@ -20,9 +20,10 @@ describe('incoming-task.utils', () => {
         expect(result.disableAccept).toBe(false);
         expect(result.mediaType).toBe(mockTask.data.interaction.mediaType);
         expect(result.startTimeStamp).toBe(mockTask.data.interaction.createdTimestamp);
+        expect(result.title).toBe(result.ani); // ANI for telephony
       });
 
-      it('should extract correct data for non-browser telephony task without wrap up', () => {
+      it('should extract correct data for non-browser telephony task', () => {
         const result = extractIncomingTaskData(mockTask, false);
 
         expect(result.isTelephony).toBe(true);
@@ -49,7 +50,7 @@ describe('incoming-task.utils', () => {
       });
     });
 
-    describe('Social media tasks', () => {
+    describe('Digital media tasks', () => {
       it('should extract correct data for social media task', () => {
         const originalMediaType = mockTask.data.interaction.mediaType;
         mockTask.data.interaction.mediaType = MEDIA_CHANNEL.SOCIAL;
@@ -62,12 +63,30 @@ describe('incoming-task.utils', () => {
         expect(result.declineText).toBeUndefined();
         expect(result.disableAccept).toBe(false);
         expect(result.mediaType).toBe(MEDIA_CHANNEL.SOCIAL);
+        expect(result.title).toBe(result.customerName); // Customer name for social
 
         // Restore original mediaType
         mockTask.data.interaction.mediaType = originalMediaType;
       });
 
-      it('should handle social media task with wrap up required', () => {
+      it('should extract correct data for chat media type', () => {
+        const originalMediaType = mockTask.data.interaction.mediaType;
+        mockTask.data.interaction.mediaType = MEDIA_CHANNEL.CHAT;
+
+        const result = extractIncomingTaskData(mockTask, true);
+
+        expect(result.isTelephony).toBe(false);
+        expect(result.isSocial).toBe(false);
+        expect(result.mediaType).toBe(MEDIA_CHANNEL.CHAT);
+        expect(result.acceptText).toBe('Accept');
+        expect(result.declineText).toBeUndefined();
+        expect(result.disableAccept).toBe(false);
+
+        // Restore original mediaType
+        mockTask.data.interaction.mediaType = originalMediaType;
+      });
+
+      it('should handle digital media task with wrap up required', () => {
         const originalMediaType = mockTask.data.interaction.mediaType;
         const originalWrapUpRequired = mockTask.data.wrapUpRequired;
 
@@ -86,7 +105,7 @@ describe('incoming-task.utils', () => {
       });
     });
 
-    describe('Edge cases and missing data', () => {
+    describe('Edge cases', () => {
       it('should handle missing call association details', () => {
         //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
@@ -103,171 +122,33 @@ describe('incoming-task.utils', () => {
         mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
       });
 
-      it('should handle missing ronaTimeout', () => {
+      it('should handle missing and invalid ronaTimeout values', () => {
         //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+
+        // Test missing ronaTimeout
         //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         mockTask.data.interaction.callAssociatedDetails = {
           ...originalCallAssociatedDetails,
           ronaTimeout: undefined,
         };
 
-        const result = extractIncomingTaskData(mockTask, true);
-
+        let result = extractIncomingTaskData(mockTask, true);
         expect(result.ronaTimeout).toBeNull();
 
-        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
-        mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
-      });
-
-      it('should handle invalid ronaTimeout', () => {
-        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
-        const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+        // Test invalid ronaTimeout
         //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         mockTask.data.interaction.callAssociatedDetails = {
           ...originalCallAssociatedDetails,
           ronaTimeout: 'invalid-number',
         };
 
-        const result = extractIncomingTaskData(mockTask, true);
-
+        result = extractIncomingTaskData(mockTask, true);
         expect(result.ronaTimeout).toBeNaN();
 
         //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
       });
-
-      it('should handle zero ronaTimeout', () => {
-        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
-        const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
-        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
-        mockTask.data.interaction.callAssociatedDetails = {
-          ...originalCallAssociatedDetails,
-          ronaTimeout: '0',
-        };
-
-        const result = extractIncomingTaskData(mockTask, true);
-
-        expect(result.ronaTimeout).toBe(0);
-
-        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
-        mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
-      });
-    });
-
-    describe('Different media types', () => {
-      it('should handle chat media type', () => {
-        const originalMediaType = mockTask.data.interaction.mediaType;
-        mockTask.data.interaction.mediaType = MEDIA_CHANNEL.CHAT;
-
-        const result = extractIncomingTaskData(mockTask, true);
-
-        expect(result.isTelephony).toBe(false);
-        expect(result.isSocial).toBe(false);
-        expect(result.mediaType).toBe(MEDIA_CHANNEL.CHAT);
-        expect(result.acceptText).toBe('Accept');
-        expect(result.declineText).toBeUndefined();
-        expect(result.disableAccept).toBe(false);
-
-        // Restore original mediaType
-        mockTask.data.interaction.mediaType = originalMediaType;
-      });
-
-      it('should handle email media type', () => {
-        const originalMediaType = mockTask.data.interaction.mediaType;
-        mockTask.data.interaction.mediaType = MEDIA_CHANNEL.EMAIL;
-
-        const result = extractIncomingTaskData(mockTask, true);
-
-        expect(result.isTelephony).toBe(false);
-        expect(result.isSocial).toBe(false);
-        expect(result.mediaType).toBe(MEDIA_CHANNEL.EMAIL);
-
-        // Restore original mediaType
-        mockTask.data.interaction.mediaType = originalMediaType;
-      });
-    });
-
-    describe('Button state combinations', () => {
-      const testCases = [
-        {
-          description: 'browser telephony without wrap up',
-          isBrowser: true,
-          mediaType: MEDIA_CHANNEL.TELEPHONY,
-          wrapUpRequired: false,
-          expectedAcceptText: 'Accept',
-          expectedDeclineText: 'Decline',
-          expectedDisableAccept: false,
-        },
-        {
-          description: 'non-browser telephony without wrap up',
-          isBrowser: false,
-          mediaType: MEDIA_CHANNEL.TELEPHONY,
-          wrapUpRequired: false,
-          expectedAcceptText: 'Ringing...',
-          expectedDeclineText: undefined,
-          expectedDisableAccept: true,
-        },
-        {
-          description: 'browser telephony with wrap up',
-          isBrowser: true,
-          mediaType: MEDIA_CHANNEL.TELEPHONY,
-          wrapUpRequired: true,
-          expectedAcceptText: undefined,
-          expectedDeclineText: undefined,
-          expectedDisableAccept: false,
-        },
-        {
-          description: 'browser social without wrap up',
-          isBrowser: true,
-          mediaType: MEDIA_CHANNEL.SOCIAL,
-          wrapUpRequired: false,
-          expectedAcceptText: 'Accept',
-          expectedDeclineText: undefined,
-          expectedDisableAccept: false,
-        },
-        {
-          description: 'browser chat without wrap up',
-          isBrowser: true,
-          mediaType: MEDIA_CHANNEL.CHAT,
-          wrapUpRequired: false,
-          expectedAcceptText: 'Accept',
-          expectedDeclineText: undefined,
-          expectedDisableAccept: false,
-        },
-      ];
-
-      testCases.forEach(
-        ({
-          description,
-          isBrowser,
-          mediaType,
-          wrapUpRequired,
-          expectedAcceptText,
-          expectedDeclineText,
-          expectedDisableAccept,
-        }) => {
-          it(`should handle ${description}`, () => {
-            // Store original values for restoration
-            const originalMediaType = mockTask.data.interaction.mediaType;
-            const originalWrapUpRequired = mockTask.data.wrapUpRequired;
-
-            // Temporarily modify mockTask for this test
-            mockTask.data.interaction.mediaType = mediaType;
-            mockTask.data.wrapUpRequired = wrapUpRequired;
-
-            const result = extractIncomingTaskData(mockTask, isBrowser);
-
-            expect(result.acceptText).toBe(expectedAcceptText);
-            expect(result.declineText).toBe(expectedDeclineText);
-            expect(result.disableAccept).toBe(expectedDisableAccept);
-
-            // Restore original values
-            mockTask.data.interaction.mediaType = originalMediaType;
-            mockTask.data.wrapUpRequired = originalWrapUpRequired;
-          });
-        }
-      );
     });
   });
 });

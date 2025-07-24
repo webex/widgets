@@ -117,7 +117,7 @@ export interface TaskProps {
   logger: ILogger;
 }
 
-export type IncomingTaskComponentProps = Pick<TaskProps, 'isBrowser' | 'accept' | 'reject' | 'logger'> &
+export type IncomingTaskComponentProps = Pick<TaskProps, 'isBrowser' | 'accept' | 'reject'> &
   Partial<Pick<TaskProps, 'incomingTask'>>;
 
 export type TaskListComponentProps = Pick<

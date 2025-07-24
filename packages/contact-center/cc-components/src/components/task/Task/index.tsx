@@ -115,20 +115,35 @@ const Task: React.FC<TaskProps> = ({
         <section className="task-details">
           {renderTitle()}
           {taskData.shouldShowState && (
-            <Text tagName="span" type="body-midsize-regular" className="task-text">
+            <Text
+              tagName="span"
+              type="body-midsize-regular"
+              className="task-text"
+              data-testid={`${interactionId}-state`}
+            >
               {taskData.capitalizedState}
             </Text>
           )}
 
           {taskData.shouldShowQueue && (
-            <Text tagName="span" type="body-midsize-regular" className="task-text">
+            <Text
+              tagName="span"
+              type="body-midsize-regular"
+              className="task-text"
+              data-testid={`${interactionId}-queue`}
+            >
               {taskData.capitalizedQueue}
             </Text>
           )}
 
           {/* Handle Time should render if it's an incoming call without ronaTimeout OR if it's not an incoming call */}
           {taskData.shouldShowHandleTime && (
-            <Text tagName="span" type="body-midsize-regular" className="task-text">
+            <Text
+              tagName="span"
+              type="body-midsize-regular"
+              className="task-text"
+              data-testid={`${interactionId}-handle-time`}
+            >
               Handle Time: {'  '}
               <TaskTimer startTimeStamp={startTimeStamp} />
             </Text>
@@ -136,7 +151,12 @@ const Task: React.FC<TaskProps> = ({
 
           {/* Time Left should render if it's an incoming call with ronaTimeout */}
           {taskData.shouldShowTimeLeft && (
-            <Text tagName="span" type="body-midsize-regular" className="task-text">
+            <Text
+              tagName="span"
+              type="body-midsize-regular"
+              className="task-text"
+              data-testid={`${interactionId}-time-left`}
+            >
               Time Left: {'  '}
               <TaskTimer countdown={true} ronaTimeout={ronaTimeout} />
             </Text>
