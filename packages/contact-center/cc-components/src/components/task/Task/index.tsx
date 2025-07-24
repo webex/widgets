@@ -73,6 +73,7 @@ const Task: React.FC<TaskProps> = ({
         type={selected ? 'body-large-bold' : 'body-large-medium'}
         className={getTitleClassName()}
         id={isNonVoiceMedia ? tooltipTriggerId : undefined}
+        data-testid="task:title"
       >
         {title}
       </Text>
@@ -121,7 +122,7 @@ const Task: React.FC<TaskProps> = ({
         <section className="task-details">
           {renderTitle()}
           {state && !isIncomingTask && (
-            <Text tagName="span" type="body-midsize-regular" className="task-text">
+            <Text tagName="span" type="body-midsize-regular" className="task-text" data-testid="task:item-state">
               {capitalizeFirstWord(state)}
             </Text>
           )}
@@ -135,9 +136,9 @@ const Task: React.FC<TaskProps> = ({
           {/* Handle Time should render if it's an incoming call without ronaTimeout OR if it's not an incoming call */}
           {(isIncomingTask && !ronaTimeout) || !isIncomingTask
             ? startTimeStamp && (
-                <Text tagName="span" type="body-midsize-regular" className="task-text">
+                <Text tagName="span" type="body-midsize-regular" className="task-text" data-testid="task:handle-time">
                   Handle Time: {'  '}
-                  <TaskTimer startTimeStamp={startTimeStamp} />
+                  <TaskTimer startTimeStamp={startTimeStamp} data-testid="task-list:timer" />
                 </Text>
               )
             : null}
