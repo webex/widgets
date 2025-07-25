@@ -1,232 +1,18 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`AutoWrapupTimer Snapshots Cancel Button calls handleCancelWrapup when cancel button is clicked 1`] = `
-<div>
-  <mdc-listitem
-    class="wrapup-timer-container"
-  >
-    <mdc-icon
-      class="wrapup-timer-icon"
-      length-unit="rem"
-      slot="leading-controls"
-    />
-    <div
-      class="wrapup-timer-label"
-      slot="leading-controls"
-    >
-      <mdc-text
-        slot="leading-controls"
-      >
-        00:30
-      </mdc-text>
-      <mdc-text
-        slot="leading-controls"
-      >
-        Until auto wrap-up
-      </mdc-text>
-    </div>
-    <mdc-button
-      slot="trailing-controls"
-    >
-      Cancel
-    </mdc-button>
-  </mdc-listitem>
-</div>
-`;
-
-exports[`AutoWrapupTimer Snapshots Cancel Button does not render cancel button when allowCancelAutoWrapup is false 1`] = `
-<div>
-  <mdc-listitem
-    class="wrapup-timer-container"
-  >
-    <mdc-icon
-      class="wrapup-timer-icon"
-      length-unit="rem"
-      slot="leading-controls"
-    />
-    <div
-      class="wrapup-timer-label"
-      slot="leading-controls"
-    >
-      <mdc-text
-        slot="leading-controls"
-      >
-        00:30
-      </mdc-text>
-      <mdc-text
-        slot="leading-controls"
-      >
-        Until auto wrap-up
-      </mdc-text>
-    </div>
-  </mdc-listitem>
-</div>
-`;
-
-exports[`AutoWrapupTimer Snapshots Cancel Button does not render cancel button when allowCancelAutoWrapup is undefined 1`] = `
-<div>
-  <mdc-listitem
-    class="wrapup-timer-container"
-  >
-    <mdc-icon
-      class="wrapup-timer-icon"
-      length-unit="rem"
-      slot="leading-controls"
-    />
-    <div
-      class="wrapup-timer-label"
-      slot="leading-controls"
-    >
-      <mdc-text
-        slot="leading-controls"
-      >
-        00:30
-      </mdc-text>
-      <mdc-text
-        slot="leading-controls"
-      >
-        Until auto wrap-up
-      </mdc-text>
-    </div>
-  </mdc-listitem>
-</div>
-`;
-
-exports[`AutoWrapupTimer Snapshots Cancel Button renders cancel button when allowCancelAutoWrapup is true 1`] = `
-<div>
-  <mdc-listitem
-    class="wrapup-timer-container"
-  >
-    <mdc-icon
-      class="wrapup-timer-icon"
-      length-unit="rem"
-      slot="leading-controls"
-    />
-    <div
-      class="wrapup-timer-label"
-      slot="leading-controls"
-    >
-      <mdc-text
-        slot="leading-controls"
-      >
-        00:30
-      </mdc-text>
-      <mdc-text
-        slot="leading-controls"
-      >
-        Until auto wrap-up
-      </mdc-text>
-    </div>
-    <mdc-button
-      slot="trailing-controls"
-    >
-      Cancel
-    </mdc-button>
-  </mdc-listitem>
-</div>
-`;
-
-exports[`AutoWrapupTimer Snapshots Component Integration integrates with getTimerUIState utility function 1`] = `
-<div>
-  <mdc-listitem
-    class="wrapup-timer-container"
-  >
-    <mdc-icon
-      class="wrapup-timer-icon"
-      length-unit="rem"
-      slot="leading-controls"
-    />
-    <div
-      class="wrapup-timer-label"
-      slot="leading-controls"
-    >
-      <mdc-text
-        slot="leading-controls"
-      >
-        00:15
-      </mdc-text>
-      <mdc-text
-        slot="leading-controls"
-      >
-        Until auto wrap-up
-      </mdc-text>
-    </div>
-  </mdc-listitem>
-</div>
-`;
-
-exports[`AutoWrapupTimer Snapshots Component Integration renders complete component with cancel button enabled 1`] = `
-<div>
-  <mdc-listitem
-    class="wrapup-timer-container"
-  >
-    <mdc-icon
-      class="wrapup-timer-icon"
-      length-unit="rem"
-      slot="leading-controls"
-    />
-    <div
-      class="wrapup-timer-label"
-      slot="leading-controls"
-    >
-      <mdc-text
-        slot="leading-controls"
-      >
-        00:25
-      </mdc-text>
-      <mdc-text
-        slot="leading-controls"
-      >
-        Until auto wrap-up
-      </mdc-text>
-    </div>
-    <mdc-button
-      slot="trailing-controls"
-    >
-      Cancel
-    </mdc-button>
-  </mdc-listitem>
-</div>
-`;
-
-exports[`AutoWrapupTimer Snapshots Component Integration renders complete component without cancel button 1`] = `
-<div>
-  <mdc-listitem
-    class="wrapup-timer-container"
-  >
-    <mdc-icon
-      class="wrapup-timer-icon"
-      length-unit="rem"
-      slot="leading-controls"
-    />
-    <div
-      class="wrapup-timer-label"
-      slot="leading-controls"
-    >
-      <mdc-text
-        slot="leading-controls"
-      >
-        00:30
-      </mdc-text>
-      <mdc-text
-        slot="leading-controls"
-      >
-        Until auto wrap-up
-      </mdc-text>
-    </div>
-  </mdc-listitem>
-</div>
-`;
-
-exports[`AutoWrapupTimer Snapshots Edge Cases handles component state with different prop combinations: combination-0 1`] = `
+exports[`AutoWrapupTimer Snapshots Actions should trigger callback and maintain component stability on cancel button interactions 1`] = `
 <div>
   <mdc-listitem
     class="wrapup-timer-container urgent"
+    tabindex="0"
+    variant="full-width"
   >
     <mdc-icon
       class="wrapup-timer-icon urgent"
       length-unit="rem"
+      name="alert-active-bold"
       slot="leading-controls"
+      style="--computed-icon-size: 1.25rem;"
     />
     <div
       class="wrapup-timer-label"
@@ -234,17 +20,208 @@ exports[`AutoWrapupTimer Snapshots Edge Cases handles component state with diffe
     >
       <mdc-text
         slot="leading-controls"
+        tagname="p"
+        type="body-large-bold"
+      >
+        00:03
+      </mdc-text>
+      <mdc-text
+        slot="leading-controls"
+        tagname="p"
+        type="body-large-regular"
+      >
+        Until auto wrap-up
+      </mdc-text>
+    </div>
+    <mdc-button
+      color="default"
+      role="button"
+      size="32"
+      slot="trailing-controls"
+      tabindex="0"
+      type="button"
+      variant="secondary"
+    >
+      Cancel
+    </mdc-button>
+  </mdc-listitem>
+</div>
+`;
+
+exports[`AutoWrapupTimer Snapshots Actions should trigger callback and maintain component stability on cancel button interactions 2`] = `
+<div>
+  <mdc-listitem
+    class="wrapup-timer-container urgent"
+    tabindex="0"
+    variant="full-width"
+  >
+    <mdc-icon
+      class="wrapup-timer-icon urgent"
+      length-unit="rem"
+      name="alert-active-bold"
+      slot="leading-controls"
+      style="--computed-icon-size: 1.25rem;"
+    />
+    <div
+      class="wrapup-timer-label"
+      slot="leading-controls"
+    >
+      <mdc-text
+        slot="leading-controls"
+        tagname="p"
+        type="body-large-bold"
+      >
+        00:03
+      </mdc-text>
+      <mdc-text
+        slot="leading-controls"
+        tagname="p"
+        type="body-large-regular"
+      >
+        Until auto wrap-up
+      </mdc-text>
+    </div>
+    <mdc-button
+      color="default"
+      role="button"
+      size="32"
+      slot="trailing-controls"
+      tabindex="0"
+      type="button"
+      variant="secondary"
+    >
+      Cancel
+    </mdc-button>
+  </mdc-listitem>
+</div>
+`;
+
+exports[`AutoWrapupTimer Snapshots Actions should trigger callback and maintain component stability on cancel button interactions 3`] = `
+<div>
+  <mdc-listitem
+    class="wrapup-timer-container urgent"
+    tabindex="0"
+    variant="full-width"
+  >
+    <mdc-icon
+      class="wrapup-timer-icon urgent"
+      length-unit="rem"
+      name="alert-active-bold"
+      slot="leading-controls"
+      style="--computed-icon-size: 1.25rem;"
+    />
+    <div
+      class="wrapup-timer-label"
+      slot="leading-controls"
+    >
+      <mdc-text
+        slot="leading-controls"
+        tagname="p"
+        type="body-large-bold"
+      >
+        00:03
+      </mdc-text>
+      <mdc-text
+        slot="leading-controls"
+        tagname="p"
+        type="body-large-regular"
+      >
+        Until auto wrap-up
+      </mdc-text>
+    </div>
+    <mdc-button
+      color="default"
+      role="button"
+      size="32"
+      slot="trailing-controls"
+      tabindex="0"
+      type="button"
+      variant="secondary"
+    >
+      Cancel
+    </mdc-button>
+  </mdc-listitem>
+</div>
+`;
+
+exports[`AutoWrapupTimer Snapshots Rendering should display timer states and elements correctly across normal, urgent, and zero second scenarios 1`] = `
+<div>
+  <mdc-listitem
+    class="wrapup-timer-container"
+    tabindex="0"
+    variant="full-width"
+  >
+    <mdc-icon
+      class="wrapup-timer-icon"
+      length-unit="rem"
+      name="recents-bold"
+      slot="leading-controls"
+      style="--computed-icon-size: 1.25rem;"
+    />
+    <div
+      class="wrapup-timer-label"
+      slot="leading-controls"
+    >
+      <mdc-text
+        slot="leading-controls"
+        tagname="p"
+        type="body-large-bold"
+      >
+        00:30
+      </mdc-text>
+      <mdc-text
+        slot="leading-controls"
+        tagname="p"
+        type="body-large-regular"
+      >
+        Until auto wrap-up
+      </mdc-text>
+    </div>
+  </mdc-listitem>
+</div>
+`;
+
+exports[`AutoWrapupTimer Snapshots Rendering should display timer states and elements correctly across normal, urgent, and zero second scenarios 2`] = `
+<div>
+  <mdc-listitem
+    class="wrapup-timer-container urgent"
+    tabindex="0"
+    variant="full-width"
+  >
+    <mdc-icon
+      class="wrapup-timer-icon urgent"
+      length-unit="rem"
+      name="alert-active-bold"
+      slot="leading-controls"
+      style="--computed-icon-size: 1.25rem;"
+    />
+    <div
+      class="wrapup-timer-label"
+      slot="leading-controls"
+    >
+      <mdc-text
+        slot="leading-controls"
+        tagname="p"
+        type="body-large-bold"
       >
         00:05
       </mdc-text>
       <mdc-text
         slot="leading-controls"
+        tagname="p"
+        type="body-large-regular"
       >
         Until auto wrap-up
       </mdc-text>
     </div>
     <mdc-button
+      color="default"
+      role="button"
+      size="32"
       slot="trailing-controls"
+      tabindex="0"
+      type="button"
+      variant="secondary"
     >
       Cancel
     </mdc-button>
@@ -252,44 +229,19 @@ exports[`AutoWrapupTimer Snapshots Edge Cases handles component state with diffe
 </div>
 `;
 
-exports[`AutoWrapupTimer Snapshots Edge Cases handles component state with different prop combinations: combination-1 1`] = `
-<div>
-  <mdc-listitem
-    class="wrapup-timer-container"
-  >
-    <mdc-icon
-      class="wrapup-timer-icon"
-      length-unit="rem"
-      slot="leading-controls"
-    />
-    <div
-      class="wrapup-timer-label"
-      slot="leading-controls"
-    >
-      <mdc-text
-        slot="leading-controls"
-      >
-        00:30
-      </mdc-text>
-      <mdc-text
-        slot="leading-controls"
-      >
-        Until auto wrap-up
-      </mdc-text>
-    </div>
-  </mdc-listitem>
-</div>
-`;
-
-exports[`AutoWrapupTimer Snapshots Edge Cases handles component state with different prop combinations: combination-2 1`] = `
+exports[`AutoWrapupTimer Snapshots Rendering should display timer states and elements correctly across normal, urgent, and zero second scenarios 3`] = `
 <div>
   <mdc-listitem
     class="wrapup-timer-container urgent"
+    tabindex="0"
+    variant="full-width"
   >
     <mdc-icon
       class="wrapup-timer-icon urgent"
       length-unit="rem"
+      name="alert-active-bold"
       slot="leading-controls"
+      style="--computed-icon-size: 1.25rem;"
     />
     <div
       class="wrapup-timer-label"
@@ -297,939 +249,30 @@ exports[`AutoWrapupTimer Snapshots Edge Cases handles component state with diffe
     >
       <mdc-text
         slot="leading-controls"
+        tagname="p"
+        type="body-large-bold"
       >
         00:00
       </mdc-text>
       <mdc-text
         slot="leading-controls"
-      >
-        Until auto wrap-up
-      </mdc-text>
-    </div>
-  </mdc-listitem>
-</div>
-`;
-
-exports[`AutoWrapupTimer Snapshots Edge Cases handles large timer values 1`] = `
-<div>
-  <mdc-listitem
-    class="wrapup-timer-container"
-  >
-    <mdc-icon
-      class="wrapup-timer-icon"
-      length-unit="rem"
-      slot="leading-controls"
-    />
-    <div
-      class="wrapup-timer-label"
-      slot="leading-controls"
-    >
-      <mdc-text
-        slot="leading-controls"
-      >
-        60:00
-      </mdc-text>
-      <mdc-text
-        slot="leading-controls"
-      >
-        Until auto wrap-up
-      </mdc-text>
-    </div>
-  </mdc-listitem>
-</div>
-`;
-
-exports[`AutoWrapupTimer Snapshots Edge Cases handles minimum timer value 1`] = `
-<div>
-  <mdc-listitem
-    class="wrapup-timer-container urgent"
-  >
-    <mdc-icon
-      class="wrapup-timer-icon urgent"
-      length-unit="rem"
-      slot="leading-controls"
-    />
-    <div
-      class="wrapup-timer-label"
-      slot="leading-controls"
-    >
-      <mdc-text
-        slot="leading-controls"
-      >
-        00:00
-      </mdc-text>
-      <mdc-text
-        slot="leading-controls"
-      >
-        Until auto wrap-up
-      </mdc-text>
-    </div>
-  </mdc-listitem>
-</div>
-`;
-
-exports[`AutoWrapupTimer Snapshots Edge Cases handles timer state boundaries: boundary-9 1`] = `
-<div>
-  <mdc-listitem
-    class="wrapup-timer-container urgent"
-  >
-    <mdc-icon
-      class="wrapup-timer-icon urgent"
-      length-unit="rem"
-      slot="leading-controls"
-    />
-    <div
-      class="wrapup-timer-label"
-      slot="leading-controls"
-    >
-      <mdc-text
-        slot="leading-controls"
-      >
-        00:09
-      </mdc-text>
-      <mdc-text
-        slot="leading-controls"
-      >
-        Until auto wrap-up
-      </mdc-text>
-    </div>
-  </mdc-listitem>
-</div>
-`;
-
-exports[`AutoWrapupTimer Snapshots Edge Cases handles timer state boundaries: boundary-10 1`] = `
-<div>
-  <mdc-listitem
-    class="wrapup-timer-container urgent"
-  >
-    <mdc-icon
-      class="wrapup-timer-icon urgent"
-      length-unit="rem"
-      slot="leading-controls"
-    />
-    <div
-      class="wrapup-timer-label"
-      slot="leading-controls"
-    >
-      <mdc-text
-        slot="leading-controls"
-      >
-        00:10
-      </mdc-text>
-      <mdc-text
-        slot="leading-controls"
-      >
-        Until auto wrap-up
-      </mdc-text>
-    </div>
-  </mdc-listitem>
-</div>
-`;
-
-exports[`AutoWrapupTimer Snapshots Edge Cases handles timer state boundaries: boundary-11 1`] = `
-<div>
-  <mdc-listitem
-    class="wrapup-timer-container"
-  >
-    <mdc-icon
-      class="wrapup-timer-icon"
-      length-unit="rem"
-      slot="leading-controls"
-    />
-    <div
-      class="wrapup-timer-label"
-      slot="leading-controls"
-    >
-      <mdc-text
-        slot="leading-controls"
-      >
-        00:11
-      </mdc-text>
-      <mdc-text
-        slot="leading-controls"
-      >
-        Until auto wrap-up
-      </mdc-text>
-    </div>
-  </mdc-listitem>
-</div>
-`;
-
-exports[`AutoWrapupTimer Snapshots Icon Display renders icon for different timer states: icon-timer-5 1`] = `
-<div>
-  <mdc-listitem
-    class="wrapup-timer-container urgent"
-  >
-    <mdc-icon
-      class="wrapup-timer-icon urgent"
-      length-unit="rem"
-      slot="leading-controls"
-    />
-    <div
-      class="wrapup-timer-label"
-      slot="leading-controls"
-    >
-      <mdc-text
-        slot="leading-controls"
-      >
-        00:05
-      </mdc-text>
-      <mdc-text
-        slot="leading-controls"
-      >
-        Until auto wrap-up
-      </mdc-text>
-    </div>
-  </mdc-listitem>
-</div>
-`;
-
-exports[`AutoWrapupTimer Snapshots Icon Display renders icon for different timer states: icon-timer-30 1`] = `
-<div>
-  <mdc-listitem
-    class="wrapup-timer-container"
-  >
-    <mdc-icon
-      class="wrapup-timer-icon"
-      length-unit="rem"
-      slot="leading-controls"
-    />
-    <div
-      class="wrapup-timer-label"
-      slot="leading-controls"
-    >
-      <mdc-text
-        slot="leading-controls"
-      >
-        00:30
-      </mdc-text>
-      <mdc-text
-        slot="leading-controls"
-      >
-        Until auto wrap-up
-      </mdc-text>
-    </div>
-  </mdc-listitem>
-</div>
-`;
-
-exports[`AutoWrapupTimer Snapshots Icon Display renders icon for different timer states: icon-timer-120 1`] = `
-<div>
-  <mdc-listitem
-    class="wrapup-timer-container"
-  >
-    <mdc-icon
-      class="wrapup-timer-icon"
-      length-unit="rem"
-      slot="leading-controls"
-    />
-    <div
-      class="wrapup-timer-label"
-      slot="leading-controls"
-    >
-      <mdc-text
-        slot="leading-controls"
-      >
-        02:00
-      </mdc-text>
-      <mdc-text
-        slot="leading-controls"
-      >
-        Until auto wrap-up
-      </mdc-text>
-    </div>
-  </mdc-listitem>
-</div>
-`;
-
-exports[`AutoWrapupTimer Snapshots Icon Display renders icon with correct slot attribute 1`] = `
-<div>
-  <mdc-listitem
-    class="wrapup-timer-container"
-  >
-    <mdc-icon
-      class="wrapup-timer-icon"
-      length-unit="rem"
-      slot="leading-controls"
-    />
-    <div
-      class="wrapup-timer-label"
-      slot="leading-controls"
-    >
-      <mdc-text
-        slot="leading-controls"
-      >
-        00:30
-      </mdc-text>
-      <mdc-text
-        slot="leading-controls"
-      >
-        Until auto wrap-up
-      </mdc-text>
-    </div>
-  </mdc-listitem>
-</div>
-`;
-
-exports[`AutoWrapupTimer Snapshots Interaction Tests verifies cancel button interaction flow 1`] = `
-<div>
-  <mdc-listitem
-    class="wrapup-timer-container"
-  >
-    <mdc-icon
-      class="wrapup-timer-icon"
-      length-unit="rem"
-      slot="leading-controls"
-    />
-    <div
-      class="wrapup-timer-label"
-      slot="leading-controls"
-    >
-      <mdc-text
-        slot="leading-controls"
-      >
-        00:20
-      </mdc-text>
-      <mdc-text
-        slot="leading-controls"
+        tagname="p"
+        type="body-large-regular"
       >
         Until auto wrap-up
       </mdc-text>
     </div>
     <mdc-button
+      color="default"
+      role="button"
+      size="32"
       slot="trailing-controls"
+      tabindex="0"
+      type="button"
+      variant="secondary"
     >
       Cancel
     </mdc-button>
-  </mdc-listitem>
-</div>
-`;
-
-exports[`AutoWrapupTimer Snapshots Interaction Tests verifies component renders consistently across multiple renders 1`] = `
-<div>
-  <mdc-listitem
-    class="wrapup-timer-container"
-  >
-    <mdc-icon
-      class="wrapup-timer-icon"
-      length-unit="rem"
-      slot="leading-controls"
-    />
-    <div
-      class="wrapup-timer-label"
-      slot="leading-controls"
-    >
-      <mdc-text
-        slot="leading-controls"
-      >
-        00:45
-      </mdc-text>
-      <mdc-text
-        slot="leading-controls"
-      >
-        Until auto wrap-up
-      </mdc-text>
-    </div>
-    <mdc-button
-      slot="trailing-controls"
-    >
-      Cancel
-    </mdc-button>
-  </mdc-listitem>
-</div>
-`;
-
-exports[`AutoWrapupTimer Snapshots Props Validation handles boolean props correctly: boolean-props-disabled 1`] = `
-<div>
-  <mdc-listitem
-    class="wrapup-timer-container"
-  >
-    <mdc-icon
-      class="wrapup-timer-icon"
-      length-unit="rem"
-      slot="leading-controls"
-    />
-    <div
-      class="wrapup-timer-label"
-      slot="leading-controls"
-    >
-      <mdc-text
-        slot="leading-controls"
-      >
-        00:30
-      </mdc-text>
-      <mdc-text
-        slot="leading-controls"
-      >
-        Until auto wrap-up
-      </mdc-text>
-    </div>
-  </mdc-listitem>
-</div>
-`;
-
-exports[`AutoWrapupTimer Snapshots Props Validation handles boolean props correctly: boolean-props-enabled 1`] = `
-<div>
-  <mdc-listitem
-    class="wrapup-timer-container"
-  >
-    <mdc-icon
-      class="wrapup-timer-icon"
-      length-unit="rem"
-      slot="leading-controls"
-    />
-    <div
-      class="wrapup-timer-label"
-      slot="leading-controls"
-    >
-      <mdc-text
-        slot="leading-controls"
-      >
-        00:30
-      </mdc-text>
-      <mdc-text
-        slot="leading-controls"
-      >
-        Until auto wrap-up
-      </mdc-text>
-    </div>
-    <mdc-button
-      slot="trailing-controls"
-    >
-      Cancel
-    </mdc-button>
-  </mdc-listitem>
-</div>
-`;
-
-exports[`AutoWrapupTimer Snapshots Props Validation handles function props correctly 1`] = `
-<div>
-  <mdc-listitem
-    class="wrapup-timer-container"
-  >
-    <mdc-icon
-      class="wrapup-timer-icon"
-      length-unit="rem"
-      slot="leading-controls"
-    />
-    <div
-      class="wrapup-timer-label"
-      slot="leading-controls"
-    >
-      <mdc-text
-        slot="leading-controls"
-      >
-        00:30
-      </mdc-text>
-      <mdc-text
-        slot="leading-controls"
-      >
-        Until auto wrap-up
-      </mdc-text>
-    </div>
-    <mdc-button
-      slot="trailing-controls"
-    >
-      Cancel
-    </mdc-button>
-  </mdc-listitem>
-</div>
-`;
-
-exports[`AutoWrapupTimer Snapshots Props Validation handles number props correctly: number-props-0 1`] = `
-<div>
-  <mdc-listitem
-    class="wrapup-timer-container urgent"
-  >
-    <mdc-icon
-      class="wrapup-timer-icon urgent"
-      length-unit="rem"
-      slot="leading-controls"
-    />
-    <div
-      class="wrapup-timer-label"
-      slot="leading-controls"
-    >
-      <mdc-text
-        slot="leading-controls"
-      >
-        00:00
-      </mdc-text>
-      <mdc-text
-        slot="leading-controls"
-      >
-        Until auto wrap-up
-      </mdc-text>
-    </div>
-  </mdc-listitem>
-</div>
-`;
-
-exports[`AutoWrapupTimer Snapshots Props Validation handles number props correctly: number-props-1 1`] = `
-<div>
-  <mdc-listitem
-    class="wrapup-timer-container urgent"
-  >
-    <mdc-icon
-      class="wrapup-timer-icon urgent"
-      length-unit="rem"
-      slot="leading-controls"
-    />
-    <div
-      class="wrapup-timer-label"
-      slot="leading-controls"
-    >
-      <mdc-text
-        slot="leading-controls"
-      >
-        00:01
-      </mdc-text>
-      <mdc-text
-        slot="leading-controls"
-      >
-        Until auto wrap-up
-      </mdc-text>
-    </div>
-  </mdc-listitem>
-</div>
-`;
-
-exports[`AutoWrapupTimer Snapshots Props Validation handles number props correctly: number-props-10 1`] = `
-<div>
-  <mdc-listitem
-    class="wrapup-timer-container urgent"
-  >
-    <mdc-icon
-      class="wrapup-timer-icon urgent"
-      length-unit="rem"
-      slot="leading-controls"
-    />
-    <div
-      class="wrapup-timer-label"
-      slot="leading-controls"
-    >
-      <mdc-text
-        slot="leading-controls"
-      >
-        00:10
-      </mdc-text>
-      <mdc-text
-        slot="leading-controls"
-      >
-        Until auto wrap-up
-      </mdc-text>
-    </div>
-  </mdc-listitem>
-</div>
-`;
-
-exports[`AutoWrapupTimer Snapshots Props Validation handles number props correctly: number-props-30 1`] = `
-<div>
-  <mdc-listitem
-    class="wrapup-timer-container"
-  >
-    <mdc-icon
-      class="wrapup-timer-icon"
-      length-unit="rem"
-      slot="leading-controls"
-    />
-    <div
-      class="wrapup-timer-label"
-      slot="leading-controls"
-    >
-      <mdc-text
-        slot="leading-controls"
-      >
-        00:30
-      </mdc-text>
-      <mdc-text
-        slot="leading-controls"
-      >
-        Until auto wrap-up
-      </mdc-text>
-    </div>
-  </mdc-listitem>
-</div>
-`;
-
-exports[`AutoWrapupTimer Snapshots Props Validation handles number props correctly: number-props-60 1`] = `
-<div>
-  <mdc-listitem
-    class="wrapup-timer-container"
-  >
-    <mdc-icon
-      class="wrapup-timer-icon"
-      length-unit="rem"
-      slot="leading-controls"
-    />
-    <div
-      class="wrapup-timer-label"
-      slot="leading-controls"
-    >
-      <mdc-text
-        slot="leading-controls"
-      >
-        01:00
-      </mdc-text>
-      <mdc-text
-        slot="leading-controls"
-      >
-        Until auto wrap-up
-      </mdc-text>
-    </div>
-  </mdc-listitem>
-</div>
-`;
-
-exports[`AutoWrapupTimer Snapshots Props Validation handles number props correctly: number-props-120 1`] = `
-<div>
-  <mdc-listitem
-    class="wrapup-timer-container"
-  >
-    <mdc-icon
-      class="wrapup-timer-icon"
-      length-unit="rem"
-      slot="leading-controls"
-    />
-    <div
-      class="wrapup-timer-label"
-      slot="leading-controls"
-    >
-      <mdc-text
-        slot="leading-controls"
-      >
-        02:00
-      </mdc-text>
-      <mdc-text
-        slot="leading-controls"
-      >
-        Until auto wrap-up
-      </mdc-text>
-    </div>
-  </mdc-listitem>
-</div>
-`;
-
-exports[`AutoWrapupTimer Snapshots Rendering renders timer with default props 1`] = `
-<div>
-  <mdc-listitem
-    class="wrapup-timer-container"
-  >
-    <mdc-icon
-      class="wrapup-timer-icon"
-      length-unit="rem"
-      slot="leading-controls"
-    />
-    <div
-      class="wrapup-timer-label"
-      slot="leading-controls"
-    >
-      <mdc-text
-        slot="leading-controls"
-      >
-        00:30
-      </mdc-text>
-      <mdc-text
-        slot="leading-controls"
-      >
-        Until auto wrap-up
-      </mdc-text>
-    </div>
-  </mdc-listitem>
-</div>
-`;
-
-exports[`AutoWrapupTimer Snapshots Rendering renders timer with various seconds values: timer-seconds-0 1`] = `
-<div>
-  <mdc-listitem
-    class="wrapup-timer-container urgent"
-  >
-    <mdc-icon
-      class="wrapup-timer-icon urgent"
-      length-unit="rem"
-      slot="leading-controls"
-    />
-    <div
-      class="wrapup-timer-label"
-      slot="leading-controls"
-    >
-      <mdc-text
-        slot="leading-controls"
-      >
-        00:00
-      </mdc-text>
-      <mdc-text
-        slot="leading-controls"
-      >
-        Until auto wrap-up
-      </mdc-text>
-    </div>
-  </mdc-listitem>
-</div>
-`;
-
-exports[`AutoWrapupTimer Snapshots Rendering renders timer with various seconds values: timer-seconds-5 1`] = `
-<div>
-  <mdc-listitem
-    class="wrapup-timer-container urgent"
-  >
-    <mdc-icon
-      class="wrapup-timer-icon urgent"
-      length-unit="rem"
-      slot="leading-controls"
-    />
-    <div
-      class="wrapup-timer-label"
-      slot="leading-controls"
-    >
-      <mdc-text
-        slot="leading-controls"
-      >
-        00:05
-      </mdc-text>
-      <mdc-text
-        slot="leading-controls"
-      >
-        Until auto wrap-up
-      </mdc-text>
-    </div>
-  </mdc-listitem>
-</div>
-`;
-
-exports[`AutoWrapupTimer Snapshots Rendering renders timer with various seconds values: timer-seconds-15 1`] = `
-<div>
-  <mdc-listitem
-    class="wrapup-timer-container"
-  >
-    <mdc-icon
-      class="wrapup-timer-icon"
-      length-unit="rem"
-      slot="leading-controls"
-    />
-    <div
-      class="wrapup-timer-label"
-      slot="leading-controls"
-    >
-      <mdc-text
-        slot="leading-controls"
-      >
-        00:15
-      </mdc-text>
-      <mdc-text
-        slot="leading-controls"
-      >
-        Until auto wrap-up
-      </mdc-text>
-    </div>
-  </mdc-listitem>
-</div>
-`;
-
-exports[`AutoWrapupTimer Snapshots Rendering renders timer with various seconds values: timer-seconds-45 1`] = `
-<div>
-  <mdc-listitem
-    class="wrapup-timer-container"
-  >
-    <mdc-icon
-      class="wrapup-timer-icon"
-      length-unit="rem"
-      slot="leading-controls"
-    />
-    <div
-      class="wrapup-timer-label"
-      slot="leading-controls"
-    >
-      <mdc-text
-        slot="leading-controls"
-      >
-        00:45
-      </mdc-text>
-      <mdc-text
-        slot="leading-controls"
-      >
-        Until auto wrap-up
-      </mdc-text>
-    </div>
-  </mdc-listitem>
-</div>
-`;
-
-exports[`AutoWrapupTimer Snapshots Rendering renders timer with various seconds values: timer-seconds-120 1`] = `
-<div>
-  <mdc-listitem
-    class="wrapup-timer-container"
-  >
-    <mdc-icon
-      class="wrapup-timer-icon"
-      length-unit="rem"
-      slot="leading-controls"
-    />
-    <div
-      class="wrapup-timer-label"
-      slot="leading-controls"
-    >
-      <mdc-text
-        slot="leading-controls"
-      >
-        02:00
-      </mdc-text>
-      <mdc-text
-        slot="leading-controls"
-      >
-        Until auto wrap-up
-      </mdc-text>
-    </div>
-  </mdc-listitem>
-</div>
-`;
-
-exports[`AutoWrapupTimer Snapshots Rendering renders with correct DOM structure 1`] = `
-<div>
-  <mdc-listitem
-    class="wrapup-timer-container"
-  >
-    <mdc-icon
-      class="wrapup-timer-icon"
-      length-unit="rem"
-      slot="leading-controls"
-    />
-    <div
-      class="wrapup-timer-label"
-      slot="leading-controls"
-    >
-      <mdc-text
-        slot="leading-controls"
-      >
-        00:30
-      </mdc-text>
-      <mdc-text
-        slot="leading-controls"
-      >
-        Until auto wrap-up
-      </mdc-text>
-    </div>
-  </mdc-listitem>
-</div>
-`;
-
-exports[`AutoWrapupTimer Snapshots Slot Attributes applies correct slot attributes to elements 1`] = `
-<div>
-  <mdc-listitem
-    class="wrapup-timer-container"
-  >
-    <mdc-icon
-      class="wrapup-timer-icon"
-      length-unit="rem"
-      slot="leading-controls"
-    />
-    <div
-      class="wrapup-timer-label"
-      slot="leading-controls"
-    >
-      <mdc-text
-        slot="leading-controls"
-      >
-        00:30
-      </mdc-text>
-      <mdc-text
-        slot="leading-controls"
-      >
-        Until auto wrap-up
-      </mdc-text>
-    </div>
-    <mdc-button
-      slot="trailing-controls"
-    >
-      Cancel
-    </mdc-button>
-  </mdc-listitem>
-</div>
-`;
-
-exports[`AutoWrapupTimer Snapshots Slot Attributes applies correct slot attributes without cancel button 1`] = `
-<div>
-  <mdc-listitem
-    class="wrapup-timer-container"
-  >
-    <mdc-icon
-      class="wrapup-timer-icon"
-      length-unit="rem"
-      slot="leading-controls"
-    />
-    <div
-      class="wrapup-timer-label"
-      slot="leading-controls"
-    >
-      <mdc-text
-        slot="leading-controls"
-      >
-        00:30
-      </mdc-text>
-      <mdc-text
-        slot="leading-controls"
-      >
-        Until auto wrap-up
-      </mdc-text>
-    </div>
-  </mdc-listitem>
-</div>
-`;
-
-exports[`AutoWrapupTimer Snapshots Timer Display calls getTimerUIState with correct parameters 1`] = `
-<div>
-  <mdc-listitem
-    class="wrapup-timer-container urgent"
-  >
-    <mdc-icon
-      class="wrapup-timer-icon urgent"
-      length-unit="rem"
-      slot="leading-controls"
-    />
-    <div
-      class="wrapup-timer-label"
-      slot="leading-controls"
-    >
-      <mdc-text
-        slot="leading-controls"
-      >
-        00:10
-      </mdc-text>
-      <mdc-text
-        slot="leading-controls"
-      >
-        Until auto wrap-up
-      </mdc-text>
-    </div>
-  </mdc-listitem>
-</div>
-`;
-
-exports[`AutoWrapupTimer Snapshots Timer Display displays until auto wrapup text 1`] = `
-<div>
-  <mdc-listitem
-    class="wrapup-timer-container"
-  >
-    <mdc-icon
-      class="wrapup-timer-icon"
-      length-unit="rem"
-      slot="leading-controls"
-    />
-    <div
-      class="wrapup-timer-label"
-      slot="leading-controls"
-    >
-      <mdc-text
-        slot="leading-controls"
-      >
-        00:30
-      </mdc-text>
-      <mdc-text
-        slot="leading-controls"
-      >
-        Until auto wrap-up
-      </mdc-text>
-    </div>
   </mdc-listitem>
 </div>
 `;

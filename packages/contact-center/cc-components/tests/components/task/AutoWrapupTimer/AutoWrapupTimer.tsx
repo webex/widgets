@@ -26,346 +26,136 @@ describe('AutoWrapupTimer', () => {
   });
 
   describe('Rendering', () => {
-    it('renders timer with default props', () => {
-      render(<AutoWrapupTimer {...defaultProps} />);
+    it('should display timer states and elements correctly across normal, urgent, and zero second scenarios', async () => {
+      // Normal state (30 seconds, no cancel button)
+      const {container: normalContainer, unmount: unmountNormal} = await render(<AutoWrapupTimer {...defaultProps} />);
 
       expect(screen.getByText(UNTIL_AUTO_WRAPUP)).toBeInTheDocument();
+      expect(screen.getByText('00:30')).toBeInTheDocument();
       expect(getTimerUIStateSpy).toHaveBeenCalledWith(30);
-    });
 
-    it('renders with correct DOM structure', () => {
-      const {container} = render(<AutoWrapupTimer {...defaultProps} />);
+      const normalListItem = normalContainer.querySelector('mdc-listitem');
+      const normalIcon = normalContainer.querySelector('mdc-icon');
+      const normalTimerLabel = normalContainer.querySelector('.wrapup-timer-label');
+      const normalTexts = normalContainer.querySelectorAll('mdc-text');
 
-      expect(container.querySelector('mdc-listitem')).toBeInTheDocument();
-      expect(container.querySelector('.wrapup-timer-label')).toBeInTheDocument();
-      expect(container.querySelector('mdc-icon')).toBeInTheDocument();
-      expect(container.querySelectorAll('mdc-text')).toHaveLength(2);
-    });
+      expect(normalListItem).toHaveClass('wrapup-timer-container');
+      expect(normalListItem).not.toHaveClass('urgent');
+      expect(normalIcon).toHaveClass('wrapup-timer-icon');
+      expect(normalIcon).not.toHaveClass('urgent');
+      expect(normalIcon).toHaveAttribute('name', 'recents-bold');
+      expect(normalIcon).toHaveAttribute('slot', 'leading-controls');
+      expect(normalTimerLabel).toHaveAttribute('slot', 'leading-controls');
+      expect(normalTexts).toHaveLength(2);
+      expect(normalTexts[0]).toHaveAttribute('type', 'body-large-bold');
+      expect(normalTexts[1]).toHaveAttribute('type', 'body-large-regular');
+      expect(normalContainer.querySelector('mdc-button')).not.toBeInTheDocument();
 
-    it('renders timer with various seconds values', () => {
-      const testCases = [0, 5, 15, 45, 120];
+      unmountNormal();
 
-      testCases.forEach((seconds) => {
-        getTimerUIStateSpy.mockClear();
+      // Urgent state (5 seconds, with cancel button)
+      const urgentProps = {
+        ...defaultProps,
+        secondsUntilAutoWrapup: 5,
+        allowCancelAutoWrapup: true,
+      };
 
-        const {unmount} = render(<AutoWrapupTimer {...defaultProps} secondsUntilAutoWrapup={seconds} />);
+      const {container: urgentContainer, unmount: unmountUrgent} = await render(<AutoWrapupTimer {...urgentProps} />);
 
-        expect(getTimerUIStateSpy).toHaveBeenCalledWith(seconds);
-        expect(screen.getByText(UNTIL_AUTO_WRAPUP)).toBeInTheDocument();
+      expect(screen.getByText('00:05')).toBeInTheDocument();
+      expect(screen.getByText(CANCEL)).toBeInTheDocument();
+      expect(getTimerUIStateSpy).toHaveBeenCalledWith(5);
 
-        unmount();
-      });
+      const urgentListItem = urgentContainer.querySelector('mdc-listitem');
+      const urgentIcon = urgentContainer.querySelector('mdc-icon');
+      const urgentButton = urgentContainer.querySelector('mdc-button');
+
+      expect(urgentListItem).toHaveClass('wrapup-timer-container', 'urgent');
+      expect(urgentIcon).toHaveClass('wrapup-timer-icon', 'urgent');
+      expect(urgentIcon).toHaveAttribute('name', 'alert-active-bold');
+      expect(urgentButton).toBeInTheDocument();
+      expect(urgentButton).toHaveAttribute('slot', 'trailing-controls');
+      expect(urgentButton).toHaveAttribute('variant', 'secondary');
+      expect(urgentButton).toHaveAttribute('role', 'button');
+      expect(urgentButton).toHaveAttribute('size', '32');
+      expect(urgentButton).toHaveAttribute('color', 'default');
+      expect(urgentButton).toHaveAttribute('type', 'button');
+      expect(urgentButton).toHaveAttribute('tabindex', '0');
+
+      unmountUrgent();
+
+      // Edge case: Zero seconds with cancel button
+      const zeroProps = {
+        ...defaultProps,
+        secondsUntilAutoWrapup: 0,
+        allowCancelAutoWrapup: true,
+      };
+
+      const {container: zeroContainer} = await render(<AutoWrapupTimer {...zeroProps} />);
+
+      expect(screen.getByText('00:00')).toBeInTheDocument();
+      expect(getTimerUIStateSpy).toHaveBeenCalledWith(0);
+
+      const zeroListItem = zeroContainer.querySelector('mdc-listitem');
+      const zeroIcon = zeroContainer.querySelector('mdc-icon');
+      const zeroButton = zeroContainer.querySelector('mdc-button');
+
+      expect(zeroListItem).toHaveClass('wrapup-timer-container', 'urgent');
+      expect(zeroIcon).toHaveAttribute('name', 'alert-active-bold');
+      expect(zeroButton).toBeInTheDocument();
+      expect(zeroButton).toHaveAttribute('variant', 'secondary');
+      expect(zeroButton).toHaveAttribute('color', 'default');
+      expect(zeroButton).toHaveAttribute('size', '32');
+      expect(zeroButton).toHaveAttribute('tabindex', '0');
     });
   });
 
-  describe('Timer Display', () => {
-    it('displays until auto wrapup text', () => {
-      render(<AutoWrapupTimer {...defaultProps} />);
+  describe('Actions', () => {
+    it('should trigger callback and maintain component stability on cancel button interactions', async () => {
+      const interactionProps = {
+        ...defaultProps,
+        secondsUntilAutoWrapup: 3,
+        allowCancelAutoWrapup: true,
+      };
 
-      expect(screen.getByText(UNTIL_AUTO_WRAPUP)).toBeInTheDocument();
-    });
+      const {container} = await render(<AutoWrapupTimer {...interactionProps} />);
 
-    it('calls getTimerUIState with correct parameters', () => {
-      render(<AutoWrapupTimer {...defaultProps} secondsUntilAutoWrapup={10} />);
-
-      expect(getTimerUIStateSpy).toHaveBeenCalledWith(10);
-      expect(getTimerUIStateSpy).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('Icon Display', () => {
-    it('renders icon with correct slot attribute', () => {
-      const {container} = render(<AutoWrapupTimer {...defaultProps} />);
-
-      const icon = container.querySelector('mdc-icon');
-      expect(icon).toBeInTheDocument();
-      expect(icon).toHaveAttribute('slot', 'leading-controls');
-    });
-
-    it('renders icon for different timer states', () => {
-      const timerValues = [5, 30, 120];
-
-      timerValues.forEach((seconds) => {
-        const {container, unmount} = render(<AutoWrapupTimer {...defaultProps} secondsUntilAutoWrapup={seconds} />);
-
-        const icon = container.querySelector('mdc-icon');
-        expect(icon).toBeInTheDocument();
-        expect(icon).toHaveAttribute('slot', 'leading-controls');
-
-        unmount();
-      });
-    });
-  });
-
-  describe('Cancel Button', () => {
-    it('renders cancel button when allowCancelAutoWrapup is true', () => {
-      const {container} = render(<AutoWrapupTimer {...defaultProps} allowCancelAutoWrapup={true} />);
+      expect(screen.getByText('00:03')).toBeInTheDocument();
+      expect(screen.getByText(CANCEL)).toBeInTheDocument();
+      expect(mockHandleCancelWrapup).toHaveBeenCalledTimes(0);
 
       const cancelButton = container.querySelector('mdc-button');
       expect(cancelButton).toBeInTheDocument();
+      expect(cancelButton).toHaveAttribute('variant', 'secondary');
       expect(cancelButton).toHaveAttribute('slot', 'trailing-controls');
-      expect(cancelButton).toHaveTextContent(CANCEL);
-    });
 
-    it('does not render cancel button when allowCancelAutoWrapup is false', () => {
-      const {container} = render(<AutoWrapupTimer {...defaultProps} allowCancelAutoWrapup={false} />);
-
-      const cancelButton = container.querySelector('mdc-button');
-      expect(cancelButton).not.toBeInTheDocument();
-    });
-
-    it('does not render cancel button when allowCancelAutoWrapup is undefined', () => {
-      const propsWithoutCancel: AutoWrapupTimerProps = {
-        secondsUntilAutoWrapup: 30,
-        handleCancelWrapup: mockHandleCancelWrapup,
-      };
-
-      const {container} = render(<AutoWrapupTimer {...propsWithoutCancel} />);
-
-      const cancelButton = container.querySelector('mdc-button');
-      expect(cancelButton).not.toBeInTheDocument();
-    });
-
-    it('calls handleCancelWrapup when cancel button is clicked', () => {
-      const {container} = render(<AutoWrapupTimer {...defaultProps} allowCancelAutoWrapup={true} />);
-
-      const cancelButton = container.querySelector('mdc-button');
+      // Single click interaction
       fireEvent.click(cancelButton!);
 
       expect(mockHandleCancelWrapup).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('Component Integration', () => {
-    it('integrates with getTimerUIState utility function', () => {
-      render(<AutoWrapupTimer {...defaultProps} secondsUntilAutoWrapup={15} />);
-
-      expect(getTimerUIStateSpy).toHaveBeenCalledWith(15);
-      expect(getTimerUIStateSpy).toHaveBeenCalledTimes(1);
-    });
-
-    it('renders complete component with cancel button enabled', () => {
-      const completeProps: AutoWrapupTimerProps = {
-        ...defaultProps,
-        secondsUntilAutoWrapup: 25,
-        allowCancelAutoWrapup: true,
-      };
-
-      const {container} = render(<AutoWrapupTimer {...completeProps} />);
-
-      expect(container.querySelector('mdc-listitem')).toBeInTheDocument();
-      expect(container.querySelector('mdc-icon')).toBeInTheDocument();
-      expect(container.querySelector('.wrapup-timer-label')).toBeInTheDocument();
-      expect(container.querySelector('mdc-button')).toBeInTheDocument();
-      expect(screen.getByText(UNTIL_AUTO_WRAPUP)).toBeInTheDocument();
+      expect(screen.getByText('00:03')).toBeInTheDocument();
       expect(screen.getByText(CANCEL)).toBeInTheDocument();
-    });
 
-    it('renders complete component without cancel button', () => {
-      const {container} = render(<AutoWrapupTimer {...defaultProps} />);
+      const listItemAfterClick = container.querySelector('mdc-listitem');
+      const iconAfterClick = container.querySelector('mdc-icon');
+      const buttonAfterClick = container.querySelector('mdc-button');
 
+      expect(listItemAfterClick).toHaveClass('wrapup-timer-container', 'urgent');
+      expect(iconAfterClick).toHaveAttribute('name', 'alert-active-bold');
+      expect(buttonAfterClick).toBeInTheDocument();
+
+      // Multiple clicks to test stability
+      fireEvent.click(buttonAfterClick!);
+      fireEvent.click(buttonAfterClick!);
+
+      expect(mockHandleCancelWrapup).toHaveBeenCalledTimes(3);
+
+      // Verify DOM stability after interactions
       expect(container.querySelector('mdc-listitem')).toBeInTheDocument();
       expect(container.querySelector('mdc-icon')).toBeInTheDocument();
+      expect(container.querySelector('mdc-button')).toBeInTheDocument();
       expect(container.querySelector('.wrapup-timer-label')).toBeInTheDocument();
-      expect(container.querySelector('mdc-button')).not.toBeInTheDocument();
-      expect(screen.getByText(UNTIL_AUTO_WRAPUP)).toBeInTheDocument();
-    });
-  });
-
-  describe('Slot Attributes', () => {
-    it('applies correct slot attributes to elements', () => {
-      const {container} = render(<AutoWrapupTimer {...defaultProps} allowCancelAutoWrapup={true} />);
-
-      const icon = container.querySelector('mdc-icon');
-      const timerLabel = container.querySelector('.wrapup-timer-label');
-      const texts = container.querySelectorAll('mdc-text');
-      const button = container.querySelector('mdc-button');
-
-      expect(icon).toHaveAttribute('slot', 'leading-controls');
-      expect(timerLabel).toHaveAttribute('slot', 'leading-controls');
-      expect(texts[0]).toHaveAttribute('slot', 'leading-controls');
-      expect(texts[1]).toHaveAttribute('slot', 'leading-controls');
-      expect(button).toHaveAttribute('slot', 'trailing-controls');
-    });
-
-    it('applies correct slot attributes without cancel button', () => {
-      const {container} = render(<AutoWrapupTimer {...defaultProps} allowCancelAutoWrapup={false} />);
-
-      const icon = container.querySelector('mdc-icon');
-      const timerLabel = container.querySelector('.wrapup-timer-label');
-      const texts = container.querySelectorAll('mdc-text');
-
-      expect(icon).toHaveAttribute('slot', 'leading-controls');
-      expect(timerLabel).toHaveAttribute('slot', 'leading-controls');
-      expect(texts[0]).toHaveAttribute('slot', 'leading-controls');
-      expect(texts[1]).toHaveAttribute('slot', 'leading-controls');
-    });
-  });
-
-  describe('Props Validation', () => {
-    it('handles function props correctly', () => {
-      const customCancelHandler = jest.fn();
-      const propsWithCustomHandler: AutoWrapupTimerProps = {
-        ...defaultProps,
-        handleCancelWrapup: customCancelHandler,
-        allowCancelAutoWrapup: true,
-      };
-
-      const {container} = render(<AutoWrapupTimer {...propsWithCustomHandler} />);
-
-      const cancelButton = container.querySelector('mdc-button');
-      fireEvent.click(cancelButton!);
-
-      expect(customCancelHandler).toHaveBeenCalledTimes(1);
-    });
-
-    it('handles boolean props correctly', () => {
-      const booleanTestCases: Array<{allowCancel: boolean; name: string}> = [
-        {allowCancel: true, name: 'enabled'},
-        {allowCancel: false, name: 'disabled'},
-      ];
-
-      booleanTestCases.forEach(({allowCancel}) => {
-        const testProps: AutoWrapupTimerProps = {
-          ...defaultProps,
-          allowCancelAutoWrapup: allowCancel,
-        };
-
-        const {container, unmount} = render(<AutoWrapupTimer {...testProps} />);
-
-        const cancelButton = container.querySelector('mdc-button');
-
-        if (allowCancel) {
-          expect(cancelButton).toBeInTheDocument();
-        } else {
-          expect(cancelButton).not.toBeInTheDocument();
-        }
-
-        unmount();
-      });
-    });
-
-    it('handles number props correctly', () => {
-      const numberTestCases = [0, 1, 10, 30, 60, 120];
-
-      numberTestCases.forEach((seconds) => {
-        getTimerUIStateSpy.mockClear();
-
-        const testProps: AutoWrapupTimerProps = {
-          ...defaultProps,
-          secondsUntilAutoWrapup: seconds,
-        };
-
-        const {unmount} = render(<AutoWrapupTimer {...testProps} />);
-
-        expect(getTimerUIStateSpy).toHaveBeenCalledWith(seconds);
-        expect(getTimerUIStateSpy).toHaveBeenCalledTimes(1);
-
-        unmount();
-      });
-    });
-  });
-
-  describe('Edge Cases', () => {
-    it('handles minimum timer value', () => {
-      render(<AutoWrapupTimer {...defaultProps} secondsUntilAutoWrapup={0} />);
-
-      expect(getTimerUIStateSpy).toHaveBeenCalledWith(0);
-      expect(screen.getByText(UNTIL_AUTO_WRAPUP)).toBeInTheDocument();
-    });
-
-    it('handles large timer values', () => {
-      render(<AutoWrapupTimer {...defaultProps} secondsUntilAutoWrapup={3600} />);
-
-      expect(getTimerUIStateSpy).toHaveBeenCalledWith(3600);
-      expect(screen.getByText(UNTIL_AUTO_WRAPUP)).toBeInTheDocument();
-    });
-
-    it('handles timer state boundaries', () => {
-      const boundaryValues = [9, 10, 11];
-
-      boundaryValues.forEach((seconds) => {
-        getTimerUIStateSpy.mockClear();
-
-        const {unmount} = render(<AutoWrapupTimer {...defaultProps} secondsUntilAutoWrapup={seconds} />);
-
-        expect(getTimerUIStateSpy).toHaveBeenCalledWith(seconds);
-
-        unmount();
-      });
-    });
-
-    it('handles component state with different prop combinations', () => {
-      const combinations: Array<AutoWrapupTimerProps> = [
-        {
-          secondsUntilAutoWrapup: 5,
-          allowCancelAutoWrapup: true,
-          handleCancelWrapup: mockHandleCancelWrapup,
-        },
-        {
-          secondsUntilAutoWrapup: 30,
-          allowCancelAutoWrapup: false,
-          handleCancelWrapup: mockHandleCancelWrapup,
-        },
-        {
-          secondsUntilAutoWrapup: 0,
-          handleCancelWrapup: mockHandleCancelWrapup,
-        },
-      ];
-
-      combinations.forEach((props) => {
-        getTimerUIStateSpy.mockClear();
-
-        const {container, unmount} = render(<AutoWrapupTimer {...props} />);
-
-        expect(getTimerUIStateSpy).toHaveBeenCalledWith(props.secondsUntilAutoWrapup);
-        expect(screen.getByText(UNTIL_AUTO_WRAPUP)).toBeInTheDocument();
-
-        const cancelButton = container.querySelector('mdc-button');
-        if (props.allowCancelAutoWrapup) {
-          expect(cancelButton).toBeInTheDocument();
-        } else {
-          expect(cancelButton).not.toBeInTheDocument();
-        }
-
-        unmount();
-      });
-    });
-  });
-
-  describe('Interaction Tests', () => {
-    it('verifies cancel button interaction flow', () => {
-      const customHandler = jest.fn();
-      const {container} = render(
-        <AutoWrapupTimer secondsUntilAutoWrapup={20} allowCancelAutoWrapup={true} handleCancelWrapup={customHandler} />
-      );
-
-      const cancelButton = container.querySelector('mdc-button');
-      expect(cancelButton).toBeInTheDocument();
-      expect(cancelButton).toHaveTextContent(CANCEL);
-
-      fireEvent.click(cancelButton!);
-      fireEvent.click(cancelButton!);
-
-      expect(customHandler).toHaveBeenCalledTimes(2);
-    });
-
-    it('verifies component renders consistently across multiple renders', () => {
-      const props: AutoWrapupTimerProps = {
-        secondsUntilAutoWrapup: 45,
-        allowCancelAutoWrapup: true,
-        handleCancelWrapup: mockHandleCancelWrapup,
-      };
-
-      const {container: container1, unmount: unmount1} = render(<AutoWrapupTimer {...props} />);
-      expect(container1.querySelector('mdc-listitem')).toBeInTheDocument();
-      expect(container1.querySelector('mdc-button')).toBeInTheDocument();
-      unmount1();
-
-      const {container: container2, unmount: unmount2} = render(<AutoWrapupTimer {...props} />);
-      expect(container2.querySelector('mdc-listitem')).toBeInTheDocument();
-      expect(container2.querySelector('mdc-button')).toBeInTheDocument();
-      unmount2();
+      expect(container.querySelectorAll('mdc-text')).toHaveLength(2);
     });
   });
 });
