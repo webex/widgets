@@ -1,0 +1,2961 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ConsultTransferPopoverComponent Snapshots Interactions should render component after agent selection 1`] = `
+<div
+  class="agent-popover-content"
+>
+  <mdc-text
+    class="md-text-wrapper agent-popover-title"
+    style="margin: 0px;"
+    tagname="h3"
+    type="body-large-bold"
+  >
+    Select an Agent
+  </mdc-text>
+  <div
+    aria-label="Tabs"
+    class="md-button-group-wrapper md-tab-list-wrapper agent-tablist"
+    data-compressed="false"
+    data-has-background="false"
+    data-orientation="horizontal"
+    data-round="true"
+    data-separator="false"
+    data-spaced="true"
+    role="tablist"
+    style="margin-top: 0px;"
+  >
+    <button
+      class="md-tab-wrapper agent-tab md-button-simple-wrapper"
+      data-active="true"
+      data-disabled="false"
+      role="tab"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Agents
+      </mdc-text>
+    </button>
+    <button
+      class="md-tab-wrapper queue-tab md-button-simple-wrapper"
+      data-active="false"
+      data-disabled="false"
+      role="tab"
+      tabindex="-1"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Queues
+      </mdc-text>
+    </button>
+  </div>
+  <ul
+    class="agent-list md-list-wrapper"
+  >
+    <div
+      style="cursor: pointer; pointer-events: auto;"
+    >
+      <li
+        aria-label="Agent One"
+        class="call-control-list-item md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
+      >
+        <div
+          data-position="start"
+        >
+          <div
+            aria-hidden="false"
+            aria-label=""
+            class="md-avatar-wrapper"
+            data-color="default"
+            data-size="32"
+            role="img"
+          >
+            <span
+              aria-hidden="true"
+              class="md-avatar-wrapper-children"
+            >
+              AO
+            </span>
+          </div>
+        </div>
+        <div
+          data-position="middle"
+          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
+        >
+          <mdc-text
+            class="md-text-wrapper"
+            style="margin: 0px; line-height: 1.2;"
+            tagname="p"
+            type="body-large-regular"
+          >
+            Agent One
+          </mdc-text>
+        </div>
+        <div
+          data-position="end"
+        >
+          <div
+            class="hover-button"
+          >
+            <button
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="28"
+              tabindex="-1"
+              type="button"
+            >
+              <mdc-icon
+                name="agent-icon"
+              />
+            </button>
+          </div>
+        </div>
+      </li>
+    </div>
+    <div
+      style="cursor: pointer; pointer-events: auto;"
+    >
+      <li
+        aria-label="Agent Two"
+        class="call-control-list-item md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
+      >
+        <div
+          data-position="start"
+        >
+          <div
+            aria-hidden="false"
+            aria-label=""
+            class="md-avatar-wrapper"
+            data-color="default"
+            data-size="32"
+            role="img"
+          >
+            <span
+              aria-hidden="true"
+              class="md-avatar-wrapper-children"
+            >
+              AT
+            </span>
+          </div>
+        </div>
+        <div
+          data-position="middle"
+          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
+        >
+          <mdc-text
+            class="md-text-wrapper"
+            style="margin: 0px; line-height: 1.2;"
+            tagname="p"
+            type="body-large-regular"
+          >
+            Agent Two
+          </mdc-text>
+        </div>
+        <div
+          data-position="end"
+        >
+          <div
+            class="hover-button"
+          >
+            <button
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="28"
+              tabindex="-1"
+              type="button"
+            >
+              <mdc-icon
+                name="agent-icon"
+              />
+            </button>
+          </div>
+        </div>
+      </li>
+    </div>
+  </ul>
+</div>
+`;
+
+exports[`ConsultTransferPopoverComponent Snapshots Interactions should render component after queue selection 1`] = `
+<div
+  class="agent-popover-content"
+>
+  <mdc-text
+    class="md-text-wrapper agent-popover-title"
+    style="margin: 0px;"
+    tagname="h3"
+    type="body-large-bold"
+  >
+    Select an Agent
+  </mdc-text>
+  <div
+    aria-label="Tabs"
+    class="md-button-group-wrapper md-tab-list-wrapper agent-tablist"
+    data-compressed="false"
+    data-has-background="false"
+    data-orientation="horizontal"
+    data-round="true"
+    data-separator="false"
+    data-spaced="true"
+    role="tablist"
+    style="margin-top: 0px;"
+  >
+    <button
+      class="md-tab-wrapper agent-tab md-button-simple-wrapper"
+      data-active="false"
+      data-disabled="false"
+      role="tab"
+      tabindex="-1"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Agents
+      </mdc-text>
+    </button>
+    <button
+      class="md-tab-wrapper queue-tab md-button-simple-wrapper md-focus-ring-wrapper children"
+      data-active="true"
+      data-disabled="false"
+      role="tab"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Queues
+      </mdc-text>
+    </button>
+  </div>
+  <ul
+    class="agent-list md-list-wrapper"
+  >
+    <div
+      style="cursor: pointer; pointer-events: auto;"
+    >
+      <li
+        aria-label="Queue One"
+        class="call-control-list-item md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
+      >
+        <div
+          data-position="start"
+        >
+          <div
+            aria-hidden="false"
+            aria-label=""
+            class="md-avatar-wrapper"
+            data-color="default"
+            data-size="32"
+            role="img"
+          >
+            <span
+              aria-hidden="true"
+              class="md-avatar-wrapper-children"
+            >
+              QO
+            </span>
+          </div>
+        </div>
+        <div
+          data-position="middle"
+          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
+        >
+          <mdc-text
+            class="md-text-wrapper"
+            style="margin: 0px; line-height: 1.2;"
+          >
+            Queue One
+          </mdc-text>
+        </div>
+        <div
+          data-position="end"
+        >
+          <div
+            class="hover-button"
+          >
+            <button
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="28"
+              tabindex="-1"
+              type="button"
+            >
+              <mdc-icon />
+            </button>
+          </div>
+        </div>
+      </li>
+    </div>
+    <div
+      style="cursor: pointer; pointer-events: auto;"
+    >
+      <li
+        aria-label="Queue Two"
+        class="call-control-list-item md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
+      >
+        <div
+          data-position="start"
+        >
+          <div
+            aria-hidden="false"
+            aria-label=""
+            class="md-avatar-wrapper"
+            data-color="default"
+            data-size="32"
+            role="img"
+          >
+            <span
+              aria-hidden="true"
+              class="md-avatar-wrapper-children"
+            >
+              QT
+            </span>
+          </div>
+        </div>
+        <div
+          data-position="middle"
+          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
+        >
+          <mdc-text
+            class="md-text-wrapper"
+            style="margin: 0px; line-height: 1.2;"
+          >
+            Queue Two
+          </mdc-text>
+        </div>
+        <div
+          data-position="end"
+        >
+          <div
+            class="hover-button"
+          >
+            <button
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="28"
+              tabindex="-1"
+              type="button"
+            >
+              <mdc-icon />
+            </button>
+          </div>
+        </div>
+      </li>
+    </div>
+  </ul>
+</div>
+`;
+
+exports[`ConsultTransferPopoverComponent Snapshots Interactions should render component after switching to queues tab 1`] = `
+<div
+  class="agent-popover-content"
+>
+  <mdc-text
+    class="md-text-wrapper agent-popover-title"
+    style="margin: 0px;"
+    tagname="h3"
+    type="body-large-bold"
+  >
+    Select an Agent
+  </mdc-text>
+  <div
+    aria-label="Tabs"
+    class="md-button-group-wrapper md-tab-list-wrapper agent-tablist"
+    data-compressed="false"
+    data-has-background="false"
+    data-orientation="horizontal"
+    data-round="true"
+    data-separator="false"
+    data-spaced="true"
+    role="tablist"
+    style="margin-top: 0px;"
+  >
+    <button
+      class="md-tab-wrapper agent-tab md-button-simple-wrapper"
+      data-active="false"
+      data-disabled="false"
+      role="tab"
+      tabindex="-1"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Agents
+      </mdc-text>
+    </button>
+    <button
+      class="md-tab-wrapper queue-tab md-button-simple-wrapper md-focus-ring-wrapper children"
+      data-active="true"
+      data-disabled="false"
+      role="tab"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Queues
+      </mdc-text>
+    </button>
+  </div>
+  <ul
+    class="agent-list md-list-wrapper"
+  >
+    <div
+      style="cursor: pointer; pointer-events: auto;"
+    >
+      <li
+        aria-label="Queue One"
+        class="call-control-list-item md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
+      >
+        <div
+          data-position="start"
+        >
+          <div
+            aria-hidden="false"
+            aria-label=""
+            class="md-avatar-wrapper"
+            data-color="default"
+            data-size="32"
+            role="img"
+          >
+            <span
+              aria-hidden="true"
+              class="md-avatar-wrapper-children"
+            >
+              QO
+            </span>
+          </div>
+        </div>
+        <div
+          data-position="middle"
+          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
+        >
+          <mdc-text
+            class="md-text-wrapper"
+            style="margin: 0px; line-height: 1.2;"
+          >
+            Queue One
+          </mdc-text>
+        </div>
+        <div
+          data-position="end"
+        >
+          <div
+            class="hover-button"
+          >
+            <button
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="28"
+              tabindex="-1"
+              type="button"
+            >
+              <mdc-icon />
+            </button>
+          </div>
+        </div>
+      </li>
+    </div>
+    <div
+      style="cursor: pointer; pointer-events: auto;"
+    >
+      <li
+        aria-label="Queue Two"
+        class="call-control-list-item md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
+      >
+        <div
+          data-position="start"
+        >
+          <div
+            aria-hidden="false"
+            aria-label=""
+            class="md-avatar-wrapper"
+            data-color="default"
+            data-size="32"
+            role="img"
+          >
+            <span
+              aria-hidden="true"
+              class="md-avatar-wrapper-children"
+            >
+              QT
+            </span>
+          </div>
+        </div>
+        <div
+          data-position="middle"
+          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
+        >
+          <mdc-text
+            class="md-text-wrapper"
+            style="margin: 0px; line-height: 1.2;"
+          >
+            Queue Two
+          </mdc-text>
+        </div>
+        <div
+          data-position="end"
+        >
+          <div
+            class="hover-button"
+          >
+            <button
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="28"
+              tabindex="-1"
+              type="button"
+            >
+              <mdc-icon />
+            </button>
+          </div>
+        </div>
+      </li>
+    </div>
+  </ul>
+</div>
+`;
+
+exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elements and visual states of ConsultTransferPopoverComponent component should render the component with tabs and agents 1`] = `
+<div
+  class="agent-popover-content"
+>
+  <mdc-text
+    class="md-text-wrapper agent-popover-title"
+    style="margin: 0px;"
+    tagname="h3"
+    type="body-large-bold"
+  >
+    Select an Agent
+  </mdc-text>
+  <div
+    aria-label="Tabs"
+    class="md-button-group-wrapper md-tab-list-wrapper agent-tablist"
+    data-compressed="false"
+    data-has-background="false"
+    data-orientation="horizontal"
+    data-round="true"
+    data-separator="false"
+    data-spaced="true"
+    role="tablist"
+    style="margin-top: 0px;"
+  >
+    <button
+      class="md-tab-wrapper agent-tab md-button-simple-wrapper"
+      data-active="true"
+      data-disabled="false"
+      role="tab"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Agents
+      </mdc-text>
+    </button>
+    <button
+      class="md-tab-wrapper queue-tab md-button-simple-wrapper"
+      data-active="false"
+      data-disabled="false"
+      role="tab"
+      tabindex="-1"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Queues
+      </mdc-text>
+    </button>
+  </div>
+  <ul
+    class="agent-list md-list-wrapper"
+  >
+    <div
+      style="cursor: pointer; pointer-events: auto;"
+    >
+      <li
+        aria-label="Agent One"
+        class="call-control-list-item md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
+      >
+        <div
+          data-position="start"
+        >
+          <div
+            aria-hidden="false"
+            aria-label=""
+            class="md-avatar-wrapper"
+            data-color="default"
+            data-size="32"
+            role="img"
+          >
+            <span
+              aria-hidden="true"
+              class="md-avatar-wrapper-children"
+            >
+              AO
+            </span>
+          </div>
+        </div>
+        <div
+          data-position="middle"
+          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
+        >
+          <mdc-text
+            class="md-text-wrapper"
+            style="margin: 0px; line-height: 1.2;"
+            tagname="p"
+            type="body-large-regular"
+          >
+            Agent One
+          </mdc-text>
+        </div>
+        <div
+          data-position="end"
+        >
+          <div
+            class="hover-button"
+          >
+            <button
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="28"
+              tabindex="-1"
+              type="button"
+            >
+              <mdc-icon
+                name="agent-icon"
+              />
+            </button>
+          </div>
+        </div>
+      </li>
+    </div>
+    <div
+      style="cursor: pointer; pointer-events: auto;"
+    >
+      <li
+        aria-label="Agent Two"
+        class="call-control-list-item md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
+      >
+        <div
+          data-position="start"
+        >
+          <div
+            aria-hidden="false"
+            aria-label=""
+            class="md-avatar-wrapper"
+            data-color="default"
+            data-size="32"
+            role="img"
+          >
+            <span
+              aria-hidden="true"
+              class="md-avatar-wrapper-children"
+            >
+              AT
+            </span>
+          </div>
+        </div>
+        <div
+          data-position="middle"
+          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
+        >
+          <mdc-text
+            class="md-text-wrapper"
+            style="margin: 0px; line-height: 1.2;"
+            tagname="p"
+            type="body-large-regular"
+          >
+            Agent Two
+          </mdc-text>
+        </div>
+        <div
+          data-position="end"
+        >
+          <div
+            class="hover-button"
+          >
+            <button
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="28"
+              tabindex="-1"
+              type="button"
+            >
+              <mdc-icon
+                name="agent-icon"
+              />
+            </button>
+          </div>
+        </div>
+      </li>
+    </div>
+  </ul>
+</div>
+`;
+
+exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elements and visual states of ConsultTransferPopoverComponent component should render with agents having different states 1`] = `
+<div
+  class="agent-popover-content"
+>
+  <mdc-text
+    class="md-text-wrapper agent-popover-title"
+    style="margin: 0px;"
+    tagname="h3"
+    type="body-large-bold"
+  >
+    Select an Agent
+  </mdc-text>
+  <div
+    aria-label="Tabs"
+    class="md-button-group-wrapper md-tab-list-wrapper agent-tablist"
+    data-compressed="false"
+    data-has-background="false"
+    data-orientation="horizontal"
+    data-round="true"
+    data-separator="false"
+    data-spaced="true"
+    role="tablist"
+    style="margin-top: 0px;"
+  >
+    <button
+      class="md-tab-wrapper agent-tab md-button-simple-wrapper"
+      data-active="true"
+      data-disabled="false"
+      role="tab"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Agents
+      </mdc-text>
+    </button>
+    <button
+      class="md-tab-wrapper queue-tab md-button-simple-wrapper"
+      data-active="false"
+      data-disabled="false"
+      role="tab"
+      tabindex="-1"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Queues
+      </mdc-text>
+    </button>
+  </div>
+  <ul
+    class="agent-list md-list-wrapper"
+  >
+    <div
+      style="cursor: pointer; pointer-events: auto;"
+    >
+      <li
+        aria-label="Available Agent"
+        class="call-control-list-item md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
+      >
+        <div
+          data-position="start"
+        >
+          <div
+            aria-hidden="false"
+            aria-label=""
+            class="md-avatar-wrapper"
+            data-color="default"
+            data-size="32"
+            role="img"
+          >
+            <span
+              aria-hidden="true"
+              class="md-avatar-wrapper-children"
+            >
+              AA
+            </span>
+          </div>
+        </div>
+        <div
+          data-position="middle"
+          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
+        >
+          <mdc-text
+            class="md-text-wrapper"
+            style="margin: 0px; line-height: 1.2;"
+            tagname="p"
+            type="body-large-regular"
+          >
+            Available Agent
+          </mdc-text>
+        </div>
+        <div
+          data-position="end"
+        >
+          <div
+            class="hover-button"
+          >
+            <button
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="28"
+              tabindex="-1"
+              type="button"
+            >
+              <mdc-icon
+                name="agent-icon"
+              />
+            </button>
+          </div>
+        </div>
+      </li>
+    </div>
+    <div
+      style="cursor: pointer; pointer-events: auto;"
+    >
+      <li
+        aria-label="Busy Agent"
+        class="call-control-list-item md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
+      >
+        <div
+          data-position="start"
+        >
+          <div
+            aria-hidden="false"
+            aria-label=""
+            class="md-avatar-wrapper"
+            data-color="default"
+            data-size="32"
+            role="img"
+          >
+            <span
+              aria-hidden="true"
+              class="md-avatar-wrapper-children"
+            >
+              BA
+            </span>
+          </div>
+        </div>
+        <div
+          data-position="middle"
+          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
+        >
+          <mdc-text
+            class="md-text-wrapper"
+            style="margin: 0px; line-height: 1.2;"
+            tagname="p"
+            type="body-large-regular"
+          >
+            Busy Agent
+          </mdc-text>
+        </div>
+        <div
+          data-position="end"
+        >
+          <div
+            class="hover-button"
+          >
+            <button
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="28"
+              tabindex="-1"
+              type="button"
+            >
+              <mdc-icon
+                name="agent-icon"
+              />
+            </button>
+          </div>
+        </div>
+      </li>
+    </div>
+    <div
+      style="cursor: pointer; pointer-events: auto;"
+    >
+      <li
+        aria-label="Idle Agent"
+        class="call-control-list-item md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
+      >
+        <div
+          data-position="start"
+        >
+          <div
+            aria-hidden="false"
+            aria-label=""
+            class="md-avatar-wrapper"
+            data-color="default"
+            data-size="32"
+            role="img"
+          >
+            <span
+              aria-hidden="true"
+              class="md-avatar-wrapper-children"
+            >
+              IA
+            </span>
+          </div>
+        </div>
+        <div
+          data-position="middle"
+          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
+        >
+          <mdc-text
+            class="md-text-wrapper"
+            style="margin: 0px; line-height: 1.2;"
+            tagname="p"
+            type="body-large-regular"
+          >
+            Idle Agent
+          </mdc-text>
+        </div>
+        <div
+          data-position="end"
+        >
+          <div
+            class="hover-button"
+          >
+            <button
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="28"
+              tabindex="-1"
+              type="button"
+            >
+              <mdc-icon
+                name="agent-icon"
+              />
+            </button>
+          </div>
+        </div>
+      </li>
+    </div>
+  </ul>
+</div>
+`;
+
+exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elements and visual states of ConsultTransferPopoverComponent component should render with allowConsultToQueue false 1`] = `
+<div
+  class="agent-popover-content"
+>
+  <mdc-text
+    class="md-text-wrapper agent-popover-title"
+    style="margin: 0px;"
+    tagname="h3"
+    type="body-large-bold"
+  >
+    Select an Agent
+  </mdc-text>
+  <div
+    aria-label="Tabs"
+    class="md-button-group-wrapper md-tab-list-wrapper agent-tablist"
+    data-compressed="false"
+    data-has-background="false"
+    data-orientation="horizontal"
+    data-round="true"
+    data-separator="false"
+    data-spaced="true"
+    role="tablist"
+    style="margin-top: 0px;"
+  >
+    <button
+      class="md-tab-wrapper agent-tab md-button-simple-wrapper"
+      data-active="true"
+      data-disabled="false"
+      role="tab"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Agents
+      </mdc-text>
+    </button>
+    <button
+      class="md-tab-wrapper queue-tab md-button-simple-wrapper"
+      data-active="false"
+      data-disabled="true"
+      disabled=""
+      role="tab"
+      style="display: none;"
+      tabindex="-1"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Queues
+      </mdc-text>
+    </button>
+  </div>
+  <ul
+    class="agent-list md-list-wrapper"
+  >
+    <div
+      style="cursor: pointer; pointer-events: auto;"
+    >
+      <li
+        aria-label="Agent One"
+        class="call-control-list-item md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
+      >
+        <div
+          data-position="start"
+        >
+          <div
+            aria-hidden="false"
+            aria-label=""
+            class="md-avatar-wrapper"
+            data-color="default"
+            data-size="32"
+            role="img"
+          >
+            <span
+              aria-hidden="true"
+              class="md-avatar-wrapper-children"
+            >
+              AO
+            </span>
+          </div>
+        </div>
+        <div
+          data-position="middle"
+          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
+        >
+          <mdc-text
+            class="md-text-wrapper"
+            style="margin: 0px; line-height: 1.2;"
+            tagname="p"
+            type="body-large-regular"
+          >
+            Agent One
+          </mdc-text>
+        </div>
+        <div
+          data-position="end"
+        >
+          <div
+            class="hover-button"
+          >
+            <button
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="28"
+              tabindex="-1"
+              type="button"
+            >
+              <mdc-icon
+                name="agent-icon"
+              />
+            </button>
+          </div>
+        </div>
+      </li>
+    </div>
+    <div
+      style="cursor: pointer; pointer-events: auto;"
+    >
+      <li
+        aria-label="Agent Two"
+        class="call-control-list-item md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
+      >
+        <div
+          data-position="start"
+        >
+          <div
+            aria-hidden="false"
+            aria-label=""
+            class="md-avatar-wrapper"
+            data-color="default"
+            data-size="32"
+            role="img"
+          >
+            <span
+              aria-hidden="true"
+              class="md-avatar-wrapper-children"
+            >
+              AT
+            </span>
+          </div>
+        </div>
+        <div
+          data-position="middle"
+          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
+        >
+          <mdc-text
+            class="md-text-wrapper"
+            style="margin: 0px; line-height: 1.2;"
+            tagname="p"
+            type="body-large-regular"
+          >
+            Agent Two
+          </mdc-text>
+        </div>
+        <div
+          data-position="end"
+        >
+          <div
+            class="hover-button"
+          >
+            <button
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="28"
+              tabindex="-1"
+              type="button"
+            >
+              <mdc-icon
+                name="agent-icon"
+              />
+            </button>
+          </div>
+        </div>
+      </li>
+    </div>
+  </ul>
+</div>
+`;
+
+exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elements and visual states of ConsultTransferPopoverComponent component should render with custom empty message 1`] = `
+<div
+  class="agent-popover-content"
+>
+  <mdc-text
+    class="md-text-wrapper agent-popover-title"
+    style="margin: 0px;"
+    tagname="h3"
+    type="body-large-bold"
+  >
+    Select an Agent
+  </mdc-text>
+  <div
+    class="consult-empty-state"
+  >
+    <div
+      class="consult-empty-state-svg"
+    />
+    <div
+      class="consult-empty-message"
+    >
+      We can't find any queue or agent available for now.
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elements and visual states of ConsultTransferPopoverComponent component should render with different heading 1`] = `
+<div
+  class="agent-popover-content"
+>
+  <mdc-text
+    class="md-text-wrapper agent-popover-title"
+    style="margin: 0px;"
+    tagname="h3"
+    type="body-large-bold"
+  >
+    Choose Transfer Target
+  </mdc-text>
+  <div
+    aria-label="Tabs"
+    class="md-button-group-wrapper md-tab-list-wrapper agent-tablist"
+    data-compressed="false"
+    data-has-background="false"
+    data-orientation="horizontal"
+    data-round="true"
+    data-separator="false"
+    data-spaced="true"
+    role="tablist"
+    style="margin-top: 0px;"
+  >
+    <button
+      class="md-tab-wrapper agent-tab md-button-simple-wrapper"
+      data-active="true"
+      data-disabled="false"
+      role="tab"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Agents
+      </mdc-text>
+    </button>
+    <button
+      class="md-tab-wrapper queue-tab md-button-simple-wrapper"
+      data-active="false"
+      data-disabled="false"
+      role="tab"
+      tabindex="-1"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Queues
+      </mdc-text>
+    </button>
+  </div>
+  <ul
+    class="agent-list md-list-wrapper"
+  >
+    <div
+      style="cursor: pointer; pointer-events: auto;"
+    >
+      <li
+        aria-label="Agent One"
+        class="call-control-list-item md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
+      >
+        <div
+          data-position="start"
+        >
+          <div
+            aria-hidden="false"
+            aria-label=""
+            class="md-avatar-wrapper"
+            data-color="default"
+            data-size="32"
+            role="img"
+          >
+            <span
+              aria-hidden="true"
+              class="md-avatar-wrapper-children"
+            >
+              AO
+            </span>
+          </div>
+        </div>
+        <div
+          data-position="middle"
+          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
+        >
+          <mdc-text
+            class="md-text-wrapper"
+            style="margin: 0px; line-height: 1.2;"
+            tagname="p"
+            type="body-large-regular"
+          >
+            Agent One
+          </mdc-text>
+        </div>
+        <div
+          data-position="end"
+        >
+          <div
+            class="hover-button"
+          >
+            <button
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="28"
+              tabindex="-1"
+              type="button"
+            >
+              <mdc-icon
+                name="agent-icon"
+              />
+            </button>
+          </div>
+        </div>
+      </li>
+    </div>
+    <div
+      style="cursor: pointer; pointer-events: auto;"
+    >
+      <li
+        aria-label="Agent Two"
+        class="call-control-list-item md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
+      >
+        <div
+          data-position="start"
+        >
+          <div
+            aria-hidden="false"
+            aria-label=""
+            class="md-avatar-wrapper"
+            data-color="default"
+            data-size="32"
+            role="img"
+          >
+            <span
+              aria-hidden="true"
+              class="md-avatar-wrapper-children"
+            >
+              AT
+            </span>
+          </div>
+        </div>
+        <div
+          data-position="middle"
+          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
+        >
+          <mdc-text
+            class="md-text-wrapper"
+            style="margin: 0px; line-height: 1.2;"
+            tagname="p"
+            type="body-large-regular"
+          >
+            Agent Two
+          </mdc-text>
+        </div>
+        <div
+          data-position="end"
+        >
+          <div
+            class="hover-button"
+          >
+            <button
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="28"
+              tabindex="-1"
+              type="button"
+            >
+              <mdc-icon
+                name="agent-icon"
+              />
+            </button>
+          </div>
+        </div>
+      </li>
+    </div>
+  </ul>
+</div>
+`;
+
+exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elements and visual states of ConsultTransferPopoverComponent component should render with empty agents list 1`] = `
+<div
+  class="agent-popover-content"
+>
+  <mdc-text
+    class="md-text-wrapper agent-popover-title"
+    style="margin: 0px;"
+    tagname="h3"
+    type="body-large-bold"
+  >
+    Select an Agent
+  </mdc-text>
+  <div
+    aria-label="Tabs"
+    class="md-button-group-wrapper md-tab-list-wrapper agent-tablist"
+    data-compressed="false"
+    data-has-background="false"
+    data-orientation="horizontal"
+    data-round="true"
+    data-separator="false"
+    data-spaced="true"
+    role="tablist"
+    style="margin-top: 0px;"
+  >
+    <button
+      class="md-tab-wrapper agent-tab md-button-simple-wrapper"
+      data-active="true"
+      data-disabled="false"
+      role="tab"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Agents
+      </mdc-text>
+    </button>
+    <button
+      class="md-tab-wrapper queue-tab md-button-simple-wrapper"
+      data-active="false"
+      data-disabled="false"
+      role="tab"
+      tabindex="-1"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Queues
+      </mdc-text>
+    </button>
+  </div>
+  <div
+    class="consult-empty-state"
+  >
+    <div
+      class="consult-empty-state-svg"
+    />
+    <div
+      class="consult-empty-message"
+    >
+      We can't find any agent available for now.
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elements and visual states of ConsultTransferPopoverComponent component should render with empty queues list 1`] = `
+<div
+  class="agent-popover-content"
+>
+  <mdc-text
+    class="md-text-wrapper agent-popover-title"
+    style="margin: 0px;"
+    tagname="h3"
+    type="body-large-bold"
+  >
+    Select an Agent
+  </mdc-text>
+  <div
+    aria-label="Tabs"
+    class="md-button-group-wrapper md-tab-list-wrapper agent-tablist"
+    data-compressed="false"
+    data-has-background="false"
+    data-orientation="horizontal"
+    data-round="true"
+    data-separator="false"
+    data-spaced="true"
+    role="tablist"
+    style="margin-top: 0px;"
+  >
+    <button
+      class="md-tab-wrapper agent-tab md-button-simple-wrapper"
+      data-active="true"
+      data-disabled="false"
+      role="tab"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Agents
+      </mdc-text>
+    </button>
+    <button
+      class="md-tab-wrapper queue-tab md-button-simple-wrapper"
+      data-active="false"
+      data-disabled="false"
+      role="tab"
+      tabindex="-1"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Queues
+      </mdc-text>
+    </button>
+  </div>
+  <ul
+    class="agent-list md-list-wrapper"
+  >
+    <div
+      style="cursor: pointer; pointer-events: auto;"
+    >
+      <li
+        aria-label="Agent One"
+        class="call-control-list-item md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
+      >
+        <div
+          data-position="start"
+        >
+          <div
+            aria-hidden="false"
+            aria-label=""
+            class="md-avatar-wrapper"
+            data-color="default"
+            data-size="32"
+            role="img"
+          >
+            <span
+              aria-hidden="true"
+              class="md-avatar-wrapper-children"
+            >
+              AO
+            </span>
+          </div>
+        </div>
+        <div
+          data-position="middle"
+          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
+        >
+          <mdc-text
+            class="md-text-wrapper"
+            style="margin: 0px; line-height: 1.2;"
+            tagname="p"
+            type="body-large-regular"
+          >
+            Agent One
+          </mdc-text>
+        </div>
+        <div
+          data-position="end"
+        >
+          <div
+            class="hover-button"
+          >
+            <button
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="28"
+              tabindex="-1"
+              type="button"
+            >
+              <mdc-icon
+                name="agent-icon"
+              />
+            </button>
+          </div>
+        </div>
+      </li>
+    </div>
+    <div
+      style="cursor: pointer; pointer-events: auto;"
+    >
+      <li
+        aria-label="Agent Two"
+        class="call-control-list-item md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
+      >
+        <div
+          data-position="start"
+        >
+          <div
+            aria-hidden="false"
+            aria-label=""
+            class="md-avatar-wrapper"
+            data-color="default"
+            data-size="32"
+            role="img"
+          >
+            <span
+              aria-hidden="true"
+              class="md-avatar-wrapper-children"
+            >
+              AT
+            </span>
+          </div>
+        </div>
+        <div
+          data-position="middle"
+          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
+        >
+          <mdc-text
+            class="md-text-wrapper"
+            style="margin: 0px; line-height: 1.2;"
+            tagname="p"
+            type="body-large-regular"
+          >
+            Agent Two
+          </mdc-text>
+        </div>
+        <div
+          data-position="end"
+        >
+          <div
+            class="hover-button"
+          >
+            <button
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="28"
+              tabindex="-1"
+              type="button"
+            >
+              <mdc-icon
+                name="agent-icon"
+              />
+            </button>
+          </div>
+        </div>
+      </li>
+    </div>
+  </ul>
+</div>
+`;
+
+exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elements and visual states of ConsultTransferPopoverComponent component should render with single agent 1`] = `
+<div
+  class="agent-popover-content"
+>
+  <mdc-text
+    class="md-text-wrapper agent-popover-title"
+    style="margin: 0px;"
+    tagname="h3"
+    type="body-large-bold"
+  >
+    Select an Agent
+  </mdc-text>
+  <div
+    aria-label="Tabs"
+    class="md-button-group-wrapper md-tab-list-wrapper agent-tablist"
+    data-compressed="false"
+    data-has-background="false"
+    data-orientation="horizontal"
+    data-round="true"
+    data-separator="false"
+    data-spaced="true"
+    role="tablist"
+    style="margin-top: 0px;"
+  >
+    <button
+      class="md-tab-wrapper agent-tab md-button-simple-wrapper"
+      data-active="true"
+      data-disabled="false"
+      role="tab"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Agents
+      </mdc-text>
+    </button>
+    <button
+      class="md-tab-wrapper queue-tab md-button-simple-wrapper"
+      data-active="false"
+      data-disabled="false"
+      role="tab"
+      tabindex="-1"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Queues
+      </mdc-text>
+    </button>
+  </div>
+  <ul
+    class="agent-list md-list-wrapper"
+  >
+    <div
+      style="cursor: pointer; pointer-events: auto;"
+    >
+      <li
+        aria-label="Single Agent"
+        class="call-control-list-item md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
+      >
+        <div
+          data-position="start"
+        >
+          <div
+            aria-hidden="false"
+            aria-label=""
+            class="md-avatar-wrapper"
+            data-color="default"
+            data-size="32"
+            role="img"
+          >
+            <span
+              aria-hidden="true"
+              class="md-avatar-wrapper-children"
+            >
+              SA
+            </span>
+          </div>
+        </div>
+        <div
+          data-position="middle"
+          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
+        >
+          <mdc-text
+            class="md-text-wrapper"
+            style="margin: 0px; line-height: 1.2;"
+            tagname="p"
+            type="body-large-regular"
+          >
+            Single Agent
+          </mdc-text>
+        </div>
+        <div
+          data-position="end"
+        >
+          <div
+            class="hover-button"
+          >
+            <button
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="28"
+              tabindex="-1"
+              type="button"
+            >
+              <mdc-icon
+                name="agent-icon"
+              />
+            </button>
+          </div>
+        </div>
+      </li>
+    </div>
+  </ul>
+</div>
+`;
+
+exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elements and visual states of ConsultTransferPopoverComponent component should render with single queue 1`] = `
+<div
+  class="agent-popover-content"
+>
+  <mdc-text
+    class="md-text-wrapper agent-popover-title"
+    style="margin: 0px;"
+    tagname="h3"
+    type="body-large-bold"
+  >
+    Select an Agent
+  </mdc-text>
+  <div
+    aria-label="Tabs"
+    class="md-button-group-wrapper md-tab-list-wrapper agent-tablist"
+    data-compressed="false"
+    data-has-background="false"
+    data-orientation="horizontal"
+    data-round="true"
+    data-separator="false"
+    data-spaced="true"
+    role="tablist"
+    style="margin-top: 0px;"
+  >
+    <button
+      class="md-tab-wrapper agent-tab md-button-simple-wrapper"
+      data-active="true"
+      data-disabled="false"
+      role="tab"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Agents
+      </mdc-text>
+    </button>
+    <button
+      class="md-tab-wrapper queue-tab md-button-simple-wrapper"
+      data-active="false"
+      data-disabled="false"
+      role="tab"
+      tabindex="-1"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Queues
+      </mdc-text>
+    </button>
+  </div>
+  <ul
+    class="agent-list md-list-wrapper"
+  >
+    <div
+      style="cursor: pointer; pointer-events: auto;"
+    >
+      <li
+        aria-label="Agent One"
+        class="call-control-list-item md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
+      >
+        <div
+          data-position="start"
+        >
+          <div
+            aria-hidden="false"
+            aria-label=""
+            class="md-avatar-wrapper"
+            data-color="default"
+            data-size="32"
+            role="img"
+          >
+            <span
+              aria-hidden="true"
+              class="md-avatar-wrapper-children"
+            >
+              AO
+            </span>
+          </div>
+        </div>
+        <div
+          data-position="middle"
+          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
+        >
+          <mdc-text
+            class="md-text-wrapper"
+            style="margin: 0px; line-height: 1.2;"
+            tagname="p"
+            type="body-large-regular"
+          >
+            Agent One
+          </mdc-text>
+        </div>
+        <div
+          data-position="end"
+        >
+          <div
+            class="hover-button"
+          >
+            <button
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="28"
+              tabindex="-1"
+              type="button"
+            >
+              <mdc-icon
+                name="agent-icon"
+              />
+            </button>
+          </div>
+        </div>
+      </li>
+    </div>
+    <div
+      style="cursor: pointer; pointer-events: auto;"
+    >
+      <li
+        aria-label="Agent Two"
+        class="call-control-list-item md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
+      >
+        <div
+          data-position="start"
+        >
+          <div
+            aria-hidden="false"
+            aria-label=""
+            class="md-avatar-wrapper"
+            data-color="default"
+            data-size="32"
+            role="img"
+          >
+            <span
+              aria-hidden="true"
+              class="md-avatar-wrapper-children"
+            >
+              AT
+            </span>
+          </div>
+        </div>
+        <div
+          data-position="middle"
+          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
+        >
+          <mdc-text
+            class="md-text-wrapper"
+            style="margin: 0px; line-height: 1.2;"
+            tagname="p"
+            type="body-large-regular"
+          >
+            Agent Two
+          </mdc-text>
+        </div>
+        <div
+          data-position="end"
+        >
+          <div
+            class="hover-button"
+          >
+            <button
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="28"
+              tabindex="-1"
+              type="button"
+            >
+              <mdc-icon
+                name="agent-icon"
+              />
+            </button>
+          </div>
+        </div>
+      </li>
+    </div>
+  </ul>
+</div>
+`;
+
+exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elements and visual states of ConsultTransferPopoverComponent component should render without tabs when showTabs is false 1`] = `
+<div
+  class="agent-popover-content"
+>
+  <mdc-text
+    class="md-text-wrapper agent-popover-title"
+    style="margin: 0px;"
+    tagname="h3"
+    type="body-large-bold"
+  >
+    Select an Agent
+  </mdc-text>
+  <div
+    aria-label="Tabs"
+    class="md-button-group-wrapper md-tab-list-wrapper agent-tablist"
+    data-compressed="false"
+    data-has-background="false"
+    data-orientation="horizontal"
+    data-round="true"
+    data-separator="false"
+    data-spaced="true"
+    role="tablist"
+    style="margin-top: 0px;"
+  >
+    <button
+      class="md-tab-wrapper agent-tab md-button-simple-wrapper"
+      data-active="true"
+      data-disabled="false"
+      role="tab"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Agents
+      </mdc-text>
+    </button>
+    <button
+      class="md-tab-wrapper queue-tab md-button-simple-wrapper"
+      data-active="false"
+      data-disabled="false"
+      role="tab"
+      tabindex="-1"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Queues
+      </mdc-text>
+    </button>
+  </div>
+  <ul
+    class="agent-list md-list-wrapper"
+  >
+    <div
+      style="cursor: pointer; pointer-events: auto;"
+    >
+      <li
+        aria-label="Agent One"
+        class="call-control-list-item md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
+      >
+        <div
+          data-position="start"
+        >
+          <div
+            aria-hidden="false"
+            aria-label=""
+            class="md-avatar-wrapper"
+            data-color="default"
+            data-size="32"
+            role="img"
+          >
+            <span
+              aria-hidden="true"
+              class="md-avatar-wrapper-children"
+            >
+              AO
+            </span>
+          </div>
+        </div>
+        <div
+          data-position="middle"
+          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
+        >
+          <mdc-text
+            class="md-text-wrapper"
+            style="margin: 0px; line-height: 1.2;"
+            tagname="p"
+            type="body-large-regular"
+          >
+            Agent One
+          </mdc-text>
+        </div>
+        <div
+          data-position="end"
+        >
+          <div
+            class="hover-button"
+          >
+            <button
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="28"
+              tabindex="-1"
+              type="button"
+            >
+              <mdc-icon
+                name="agent-icon"
+              />
+            </button>
+          </div>
+        </div>
+      </li>
+    </div>
+    <div
+      style="cursor: pointer; pointer-events: auto;"
+    >
+      <li
+        aria-label="Agent Two"
+        class="call-control-list-item md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
+      >
+        <div
+          data-position="start"
+        >
+          <div
+            aria-hidden="false"
+            aria-label=""
+            class="md-avatar-wrapper"
+            data-color="default"
+            data-size="32"
+            role="img"
+          >
+            <span
+              aria-hidden="true"
+              class="md-avatar-wrapper-children"
+            >
+              AT
+            </span>
+          </div>
+        </div>
+        <div
+          data-position="middle"
+          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
+        >
+          <mdc-text
+            class="md-text-wrapper"
+            style="margin: 0px; line-height: 1.2;"
+            tagname="p"
+            type="body-large-regular"
+          >
+            Agent Two
+          </mdc-text>
+        </div>
+        <div
+          data-position="end"
+        >
+          <div
+            class="hover-button"
+          >
+            <button
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="28"
+              tabindex="-1"
+              type="button"
+            >
+              <mdc-icon
+                name="agent-icon"
+              />
+            </button>
+          </div>
+        </div>
+      </li>
+    </div>
+  </ul>
+</div>
+`;
+
+exports[`ConsultTransferPopoverComponent Snapshots State Management should update when agents list changes 1`] = `
+<div
+  class="agent-popover-content"
+>
+  <mdc-text
+    class="md-text-wrapper agent-popover-title"
+    style="margin: 0px;"
+    tagname="h3"
+    type="body-large-bold"
+  >
+    Select an Agent
+  </mdc-text>
+  <div
+    aria-label="Tabs"
+    class="md-button-group-wrapper md-tab-list-wrapper agent-tablist"
+    data-compressed="false"
+    data-has-background="false"
+    data-orientation="horizontal"
+    data-round="true"
+    data-separator="false"
+    data-spaced="true"
+    role="tablist"
+    style="margin-top: 0px;"
+  >
+    <button
+      class="md-tab-wrapper agent-tab md-button-simple-wrapper"
+      data-active="true"
+      data-disabled="false"
+      role="tab"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Agents
+      </mdc-text>
+    </button>
+    <button
+      class="md-tab-wrapper queue-tab md-button-simple-wrapper"
+      data-active="false"
+      data-disabled="false"
+      role="tab"
+      tabindex="-1"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Queues
+      </mdc-text>
+    </button>
+  </div>
+  <ul
+    class="agent-list md-list-wrapper"
+  >
+    <div
+      style="cursor: pointer; pointer-events: auto;"
+    >
+      <li
+        aria-label="New Agent One"
+        class="call-control-list-item md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
+      >
+        <div
+          data-position="start"
+        >
+          <div
+            aria-hidden="false"
+            aria-label=""
+            class="md-avatar-wrapper"
+            data-color="default"
+            data-size="32"
+            role="img"
+          >
+            <span
+              aria-hidden="true"
+              class="md-avatar-wrapper-children"
+            >
+              NA
+            </span>
+          </div>
+        </div>
+        <div
+          data-position="middle"
+          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
+        >
+          <mdc-text
+            class="md-text-wrapper"
+            style="margin: 0px; line-height: 1.2;"
+          >
+            New Agent One
+          </mdc-text>
+        </div>
+        <div
+          data-position="end"
+        >
+          <div
+            class="hover-button"
+          >
+            <button
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="28"
+              tabindex="-1"
+              type="button"
+            >
+              <mdc-icon />
+            </button>
+          </div>
+        </div>
+      </li>
+    </div>
+  </ul>
+</div>
+`;
+
+exports[`ConsultTransferPopoverComponent Snapshots State Management should update when heading changes 1`] = `
+<div
+  class="agent-popover-content"
+>
+  <mdc-text
+    class="md-text-wrapper agent-popover-title"
+    style="margin: 0px;"
+    tagname="h3"
+    type="body-large-bold"
+  >
+    New Heading
+  </mdc-text>
+  <div
+    aria-label="Tabs"
+    class="md-button-group-wrapper md-tab-list-wrapper agent-tablist"
+    data-compressed="false"
+    data-has-background="false"
+    data-orientation="horizontal"
+    data-round="true"
+    data-separator="false"
+    data-spaced="true"
+    role="tablist"
+    style="margin-top: 0px;"
+  >
+    <button
+      class="md-tab-wrapper agent-tab md-button-simple-wrapper"
+      data-active="true"
+      data-disabled="false"
+      role="tab"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Agents
+      </mdc-text>
+    </button>
+    <button
+      class="md-tab-wrapper queue-tab md-button-simple-wrapper"
+      data-active="false"
+      data-disabled="false"
+      role="tab"
+      tabindex="-1"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Queues
+      </mdc-text>
+    </button>
+  </div>
+  <ul
+    class="agent-list md-list-wrapper"
+  >
+    <div
+      style="cursor: pointer; pointer-events: auto;"
+    >
+      <li
+        aria-label="Agent One"
+        class="call-control-list-item md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
+      >
+        <div
+          data-position="start"
+        >
+          <div
+            aria-hidden="false"
+            aria-label=""
+            class="md-avatar-wrapper"
+            data-color="default"
+            data-size="32"
+            role="img"
+          >
+            <span
+              aria-hidden="true"
+              class="md-avatar-wrapper-children"
+            >
+              AO
+            </span>
+          </div>
+        </div>
+        <div
+          data-position="middle"
+          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
+        >
+          <mdc-text
+            class="md-text-wrapper"
+            style="margin: 0px; line-height: 1.2;"
+            tagname="p"
+            type="body-large-regular"
+          >
+            Agent One
+          </mdc-text>
+        </div>
+        <div
+          data-position="end"
+        >
+          <div
+            class="hover-button"
+          >
+            <button
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="28"
+              tabindex="-1"
+              type="button"
+            >
+              <mdc-icon
+                name="agent-icon"
+              />
+            </button>
+          </div>
+        </div>
+      </li>
+    </div>
+    <div
+      style="cursor: pointer; pointer-events: auto;"
+    >
+      <li
+        aria-label="Agent Two"
+        class="call-control-list-item md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
+      >
+        <div
+          data-position="start"
+        >
+          <div
+            aria-hidden="false"
+            aria-label=""
+            class="md-avatar-wrapper"
+            data-color="default"
+            data-size="32"
+            role="img"
+          >
+            <span
+              aria-hidden="true"
+              class="md-avatar-wrapper-children"
+            >
+              AT
+            </span>
+          </div>
+        </div>
+        <div
+          data-position="middle"
+          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
+        >
+          <mdc-text
+            class="md-text-wrapper"
+            style="margin: 0px; line-height: 1.2;"
+            tagname="p"
+            type="body-large-regular"
+          >
+            Agent Two
+          </mdc-text>
+        </div>
+        <div
+          data-position="end"
+        >
+          <div
+            class="hover-button"
+          >
+            <button
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="28"
+              tabindex="-1"
+              type="button"
+            >
+              <mdc-icon
+                name="agent-icon"
+              />
+            </button>
+          </div>
+        </div>
+      </li>
+    </div>
+  </ul>
+</div>
+`;
+
+exports[`ConsultTransferPopoverComponent Snapshots State Management should update when queues list changes 1`] = `
+<div
+  class="agent-popover-content"
+>
+  <mdc-text
+    class="md-text-wrapper agent-popover-title"
+    style="margin: 0px;"
+    tagname="h3"
+    type="body-large-bold"
+  >
+    Select an Agent
+  </mdc-text>
+  <div
+    aria-label="Tabs"
+    class="md-button-group-wrapper md-tab-list-wrapper agent-tablist"
+    data-compressed="false"
+    data-has-background="false"
+    data-orientation="horizontal"
+    data-round="true"
+    data-separator="false"
+    data-spaced="true"
+    role="tablist"
+    style="margin-top: 0px;"
+  >
+    <button
+      class="md-tab-wrapper agent-tab md-button-simple-wrapper"
+      data-active="true"
+      data-disabled="false"
+      role="tab"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Agents
+      </mdc-text>
+    </button>
+    <button
+      class="md-tab-wrapper queue-tab md-button-simple-wrapper"
+      data-active="false"
+      data-disabled="false"
+      role="tab"
+      tabindex="-1"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Queues
+      </mdc-text>
+    </button>
+  </div>
+  <ul
+    class="agent-list md-list-wrapper"
+  >
+    <div
+      style="cursor: pointer; pointer-events: auto;"
+    >
+      <li
+        aria-label="Agent One"
+        class="call-control-list-item md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
+      >
+        <div
+          data-position="start"
+        >
+          <div
+            aria-hidden="false"
+            aria-label=""
+            class="md-avatar-wrapper"
+            data-color="default"
+            data-size="32"
+            role="img"
+          >
+            <span
+              aria-hidden="true"
+              class="md-avatar-wrapper-children"
+            >
+              AO
+            </span>
+          </div>
+        </div>
+        <div
+          data-position="middle"
+          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
+        >
+          <mdc-text
+            class="md-text-wrapper"
+            style="margin: 0px; line-height: 1.2;"
+            tagname="p"
+            type="body-large-regular"
+          >
+            Agent One
+          </mdc-text>
+        </div>
+        <div
+          data-position="end"
+        >
+          <div
+            class="hover-button"
+          >
+            <button
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="28"
+              tabindex="-1"
+              type="button"
+            >
+              <mdc-icon
+                name="agent-icon"
+              />
+            </button>
+          </div>
+        </div>
+      </li>
+    </div>
+    <div
+      style="cursor: pointer; pointer-events: auto;"
+    >
+      <li
+        aria-label="Agent Two"
+        class="call-control-list-item md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
+      >
+        <div
+          data-position="start"
+        >
+          <div
+            aria-hidden="false"
+            aria-label=""
+            class="md-avatar-wrapper"
+            data-color="default"
+            data-size="32"
+            role="img"
+          >
+            <span
+              aria-hidden="true"
+              class="md-avatar-wrapper-children"
+            >
+              AT
+            </span>
+          </div>
+        </div>
+        <div
+          data-position="middle"
+          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
+        >
+          <mdc-text
+            class="md-text-wrapper"
+            style="margin: 0px; line-height: 1.2;"
+            tagname="p"
+            type="body-large-regular"
+          >
+            Agent Two
+          </mdc-text>
+        </div>
+        <div
+          data-position="end"
+        >
+          <div
+            class="hover-button"
+          >
+            <button
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="28"
+              tabindex="-1"
+              type="button"
+            >
+              <mdc-icon
+                name="agent-icon"
+              />
+            </button>
+          </div>
+        </div>
+      </li>
+    </div>
+  </ul>
+</div>
+`;
