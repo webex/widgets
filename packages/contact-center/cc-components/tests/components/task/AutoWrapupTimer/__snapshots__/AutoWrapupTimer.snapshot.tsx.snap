@@ -1,0 +1,278 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AutoWrapupTimer Snapshots Actions should trigger callback and maintain component stability on cancel button interactions 1`] = `
+<div>
+  <mdc-listitem
+    class="wrapup-timer-container urgent"
+    tabindex="0"
+    variant="full-width"
+  >
+    <mdc-icon
+      class="wrapup-timer-icon urgent"
+      length-unit="rem"
+      name="alert-active-bold"
+      slot="leading-controls"
+      style="--computed-icon-size: 1.25rem;"
+    />
+    <div
+      class="wrapup-timer-label"
+      slot="leading-controls"
+    >
+      <mdc-text
+        slot="leading-controls"
+        tagname="p"
+        type="body-large-bold"
+      >
+        00:03
+      </mdc-text>
+      <mdc-text
+        slot="leading-controls"
+        tagname="p"
+        type="body-large-regular"
+      >
+        Until auto wrap-up
+      </mdc-text>
+    </div>
+    <mdc-button
+      color="default"
+      role="button"
+      size="32"
+      slot="trailing-controls"
+      tabindex="0"
+      type="button"
+      variant="secondary"
+    >
+      Cancel
+    </mdc-button>
+  </mdc-listitem>
+</div>
+`;
+
+exports[`AutoWrapupTimer Snapshots Actions should trigger callback and maintain component stability on cancel button interactions 2`] = `
+<div>
+  <mdc-listitem
+    class="wrapup-timer-container urgent"
+    tabindex="0"
+    variant="full-width"
+  >
+    <mdc-icon
+      class="wrapup-timer-icon urgent"
+      length-unit="rem"
+      name="alert-active-bold"
+      slot="leading-controls"
+      style="--computed-icon-size: 1.25rem;"
+    />
+    <div
+      class="wrapup-timer-label"
+      slot="leading-controls"
+    >
+      <mdc-text
+        slot="leading-controls"
+        tagname="p"
+        type="body-large-bold"
+      >
+        00:03
+      </mdc-text>
+      <mdc-text
+        slot="leading-controls"
+        tagname="p"
+        type="body-large-regular"
+      >
+        Until auto wrap-up
+      </mdc-text>
+    </div>
+    <mdc-button
+      color="default"
+      role="button"
+      size="32"
+      slot="trailing-controls"
+      tabindex="0"
+      type="button"
+      variant="secondary"
+    >
+      Cancel
+    </mdc-button>
+  </mdc-listitem>
+</div>
+`;
+
+exports[`AutoWrapupTimer Snapshots Actions should trigger callback and maintain component stability on cancel button interactions 3`] = `
+<div>
+  <mdc-listitem
+    class="wrapup-timer-container urgent"
+    tabindex="0"
+    variant="full-width"
+  >
+    <mdc-icon
+      class="wrapup-timer-icon urgent"
+      length-unit="rem"
+      name="alert-active-bold"
+      slot="leading-controls"
+      style="--computed-icon-size: 1.25rem;"
+    />
+    <div
+      class="wrapup-timer-label"
+      slot="leading-controls"
+    >
+      <mdc-text
+        slot="leading-controls"
+        tagname="p"
+        type="body-large-bold"
+      >
+        00:03
+      </mdc-text>
+      <mdc-text
+        slot="leading-controls"
+        tagname="p"
+        type="body-large-regular"
+      >
+        Until auto wrap-up
+      </mdc-text>
+    </div>
+    <mdc-button
+      color="default"
+      role="button"
+      size="32"
+      slot="trailing-controls"
+      tabindex="0"
+      type="button"
+      variant="secondary"
+    >
+      Cancel
+    </mdc-button>
+  </mdc-listitem>
+</div>
+`;
+
+exports[`AutoWrapupTimer Snapshots Rendering should display timer states and elements correctly across normal, urgent, and zero second scenarios 1`] = `
+<div>
+  <mdc-listitem
+    class="wrapup-timer-container"
+    tabindex="0"
+    variant="full-width"
+  >
+    <mdc-icon
+      class="wrapup-timer-icon"
+      length-unit="rem"
+      name="recents-bold"
+      slot="leading-controls"
+      style="--computed-icon-size: 1.25rem;"
+    />
+    <div
+      class="wrapup-timer-label"
+      slot="leading-controls"
+    >
+      <mdc-text
+        slot="leading-controls"
+        tagname="p"
+        type="body-large-bold"
+      >
+        00:30
+      </mdc-text>
+      <mdc-text
+        slot="leading-controls"
+        tagname="p"
+        type="body-large-regular"
+      >
+        Until auto wrap-up
+      </mdc-text>
+    </div>
+  </mdc-listitem>
+</div>
+`;
+
+exports[`AutoWrapupTimer Snapshots Rendering should display timer states and elements correctly across normal, urgent, and zero second scenarios 2`] = `
+<div>
+  <mdc-listitem
+    class="wrapup-timer-container urgent"
+    tabindex="0"
+    variant="full-width"
+  >
+    <mdc-icon
+      class="wrapup-timer-icon urgent"
+      length-unit="rem"
+      name="alert-active-bold"
+      slot="leading-controls"
+      style="--computed-icon-size: 1.25rem;"
+    />
+    <div
+      class="wrapup-timer-label"
+      slot="leading-controls"
+    >
+      <mdc-text
+        slot="leading-controls"
+        tagname="p"
+        type="body-large-bold"
+      >
+        00:05
+      </mdc-text>
+      <mdc-text
+        slot="leading-controls"
+        tagname="p"
+        type="body-large-regular"
+      >
+        Until auto wrap-up
+      </mdc-text>
+    </div>
+    <mdc-button
+      color="default"
+      role="button"
+      size="32"
+      slot="trailing-controls"
+      tabindex="0"
+      type="button"
+      variant="secondary"
+    >
+      Cancel
+    </mdc-button>
+  </mdc-listitem>
+</div>
+`;
+
+exports[`AutoWrapupTimer Snapshots Rendering should display timer states and elements correctly across normal, urgent, and zero second scenarios 3`] = `
+<div>
+  <mdc-listitem
+    class="wrapup-timer-container urgent"
+    tabindex="0"
+    variant="full-width"
+  >
+    <mdc-icon
+      class="wrapup-timer-icon urgent"
+      length-unit="rem"
+      name="alert-active-bold"
+      slot="leading-controls"
+      style="--computed-icon-size: 1.25rem;"
+    />
+    <div
+      class="wrapup-timer-label"
+      slot="leading-controls"
+    >
+      <mdc-text
+        slot="leading-controls"
+        tagname="p"
+        type="body-large-bold"
+      >
+        00:00
+      </mdc-text>
+      <mdc-text
+        slot="leading-controls"
+        tagname="p"
+        type="body-large-regular"
+      >
+        Until auto wrap-up
+      </mdc-text>
+    </div>
+    <mdc-button
+      color="default"
+      role="button"
+      size="32"
+      slot="trailing-controls"
+      tabindex="0"
+      type="button"
+      variant="secondary"
+    >
+      Cancel
+    </mdc-button>
+  </mdc-listitem>
+</div>
+`;
