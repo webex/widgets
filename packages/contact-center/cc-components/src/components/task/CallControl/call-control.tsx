@@ -126,22 +126,6 @@ function CallControlComponent(props: CallControlComponentProps) {
     }
   };
 
-  const handlePopoverOpen = (menuType: CallControlMenuType) => {
-    logger.info('CC-Widgets: CallControl: opening call control popover', {
-      module: 'call-control.tsx',
-      method: 'handlePopoverOpen',
-    });
-    if (showAgentMenu && agentMenuType === menuType) {
-      setShowAgentMenu(false);
-      setAgentMenuType(null);
-    } else {
-      setAgentMenuType(menuType);
-      setShowAgentMenu(true);
-      loadBuddyAgents();
-      loadQueues();
-    }
-  };
-
   const currentMediaType = getMediaTypeInfo(
     currentTask.data.interaction.mediaType as MediaChannelType,
     currentTask.data.interaction.mediaChannel as MediaChannelType
@@ -224,6 +208,16 @@ function CallControlComponent(props: CallControlComponentProps) {
                 return (
                   <PopoverNext
                     key={index}
+                    onShow={() => {
+                      logger.info(`CC-Widgets: CallControl: showing consult-transfer popover`, {
+                        module: 'call-control.tsx',
+                        method: 'onShowPopover',
+                      });
+                      setShowAgentMenu(true);
+                      setAgentMenuType(button.menuType as CallControlMenuType);
+                      loadBuddyAgents();
+                      loadQueues();
+                    }}
                     onHide={() => {
                       setShowAgentMenu(false);
                       setAgentMenuType(null);
@@ -255,7 +249,6 @@ function CallControlComponent(props: CallControlComponentProps) {
                             aria-label={button.tooltip}
                             disabled={button.disabled || (consultInitiated && isTelephony)}
                             data-testid="ButtonCircle"
-                            onPress={() => handlePopoverOpen(button.menuType as CallControlMenuType)}
                           >
                             <Icon className={button.className + '-icon'} name={button.icon} />
                           </ButtonCircle>
