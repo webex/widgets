@@ -3,11 +3,11 @@ import {ButtonPill, ListItemBase, ListItemBaseSection, Text} from '@momentum-ui/
 import {Avatar, Brandvisual, Tooltip} from '@momentum-design/components/dist/react';
 import {PressEvent} from '@react-types/shared';
 import TaskTimer from '../TaskTimer';
-import {getMediaTypeInfo} from '../../../utils';
 import type {MEDIA_CHANNEL as MediaChannelType} from '../task.types';
+import {extractTaskComponentData, getTaskListItemClasses} from './task.utils';
 import './styles.scss';
 
-interface TaskProps {
+export interface TaskProps {
   interactionId?: string;
   title?: string;
   state?: string;
@@ -46,24 +46,18 @@ const Task: React.FC<TaskProps> = ({
   mediaType,
   mediaChannel,
 }) => {
-  const capitalizeFirstWord = (str: string) => {
-    return str.replace(/^\s*(\w)/, (match, firstLetter) => firstLetter.toUpperCase());
-  };
-  const currentMediaType = getMediaTypeInfo(mediaType, mediaChannel);
-  const isNonVoiceMedia = currentMediaType.labelName !== 'Call';
-  // Create unique IDs for tooltip trigger and tooltip
-  const tooltipTriggerId = `tooltip-trigger-${interactionId}`;
-  const tooltipId = `tooltip-${interactionId}`;
-  // Helper function to get the correct CSS class
-  const getTitleClassName = () => {
-    if (isNonVoiceMedia && isIncomingTask) {
-      return 'incoming-digital-task-title';
-    }
-    if (isNonVoiceMedia && !isIncomingTask) {
-      return 'task-digital-title';
-    }
-    return 'task-title';
-  };
+  // Extract all computed data using the utility function
+  const taskData = extractTaskComponentData({
+    mediaType,
+    mediaChannel,
+    isIncomingTask,
+    interactionId,
+    state,
+    queue,
+    ronaTimeout,
+    startTimeStamp,
+  });
+
   const renderTitle = () => {
     if (!title) return null;
 
@@ -71,25 +65,25 @@ const Task: React.FC<TaskProps> = ({
       <Text
         tagName="span"
         type={selected ? 'body-large-bold' : 'body-large-medium'}
-        className={getTitleClassName()}
-        id={isNonVoiceMedia ? tooltipTriggerId : undefined}
+        className={taskData.titleClassName}
+        id={taskData.isNonVoiceMedia ? taskData.tooltipTriggerId : undefined}
       >
         {title}
       </Text>
     );
 
-    if (isNonVoiceMedia) {
+    if (taskData.isNonVoiceMedia) {
       return (
         <>
           {textComponent}
           <Tooltip
             color="contrast"
             delay="0,0"
-            id={tooltipId}
+            id={taskData.tooltipId}
             placement="top-start"
             offset={4}
             tooltip-type="description"
-            triggerID={tooltipTriggerId}
+            triggerID={taskData.tooltipTriggerId}
             className="task-tooltip"
           >
             {title}
@@ -103,48 +97,66 @@ const Task: React.FC<TaskProps> = ({
 
   return (
     <ListItemBase
-      className={`task-list-item ${selected ? 'task-list-item--selected' : ''} ${styles}`}
+      className={getTaskListItemClasses(selected, styles)}
       onPress={onTaskSelect ? onTaskSelect : undefined}
       id={interactionId}
     >
       <ListItemBaseSection position="start">
-        {currentMediaType.isBrandVisual ? (
+        {taskData.currentMediaType.isBrandVisual ? (
           <div className="brand-visual-background">
-            <Brandvisual name={currentMediaType.iconName} className={currentMediaType.className} />
+            <Brandvisual name={taskData.currentMediaType.iconName} className={taskData.currentMediaType.className} />
           </div>
         ) : (
-          <Avatar icon-name={currentMediaType.iconName} className={currentMediaType.className} />
+          <Avatar icon-name={taskData.currentMediaType.iconName} className={taskData.currentMediaType.className} />
         )}
       </ListItemBaseSection>
 
       <ListItemBaseSection position="fill">
         <section className="task-details">
           {renderTitle()}
-          {state && !isIncomingTask && (
-            <Text tagName="span" type="body-midsize-regular" className="task-text">
-              {capitalizeFirstWord(state)}
+          {taskData.shouldShowState && (
+            <Text
+              tagName="span"
+              type="body-midsize-regular"
+              className="task-text"
+              data-testid={`${interactionId}-state`}
+            >
+              {taskData.capitalizedState}
             </Text>
           )}
 
-          {queue && isIncomingTask && (
-            <Text tagName="span" type="body-midsize-regular" className="task-text">
-              {capitalizeFirstWord(queue)}
+          {taskData.shouldShowQueue && (
+            <Text
+              tagName="span"
+              type="body-midsize-regular"
+              className="task-text"
+              data-testid={`${interactionId}-queue`}
+            >
+              {taskData.capitalizedQueue}
             </Text>
           )}
 
           {/* Handle Time should render if it's an incoming call without ronaTimeout OR if it's not an incoming call */}
-          {(isIncomingTask && !ronaTimeout) || !isIncomingTask
-            ? startTimeStamp && (
-                <Text tagName="span" type="body-midsize-regular" className="task-text">
-                  Handle Time: {'  '}
-                  <TaskTimer startTimeStamp={startTimeStamp} />
-                </Text>
-              )
-            : null}
+          {taskData.shouldShowHandleTime && (
+            <Text
+              tagName="span"
+              type="body-midsize-regular"
+              className="task-text"
+              data-testid={`${interactionId}-handle-time`}
+            >
+              Handle Time: {'  '}
+              <TaskTimer startTimeStamp={startTimeStamp} />
+            </Text>
+          )}
 
           {/* Time Left should render if it's an incoming call with ronaTimeout */}
-          {isIncomingTask && ronaTimeout && (
-            <Text tagName="span" type="body-midsize-regular" className="task-text">
+          {taskData.shouldShowTimeLeft && (
+            <Text
+              tagName="span"
+              type="body-midsize-regular"
+              className="task-text"
+              data-testid={`${interactionId}-time-left`}
+            >
               Time Left: {'  '}
               <TaskTimer countdown={true} ronaTimeout={ronaTimeout} />
             </Text>
