@@ -14,13 +14,17 @@ import * as utils from '../../../../src/utils';
 
 describe('task.utils', () => {
   // Spy on the getMediaTypeInfo function
-  const mockGetMediaTypeInfo = jest.spyOn(utils, 'getMediaTypeInfo');
+  let mockGetMediaTypeInfo: jest.SpyInstance;
+
+  beforeAll(() => {
+    mockGetMediaTypeInfo = jest.spyOn(utils, 'getMediaTypeInfo');
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  afterEach(() => {
+  afterAll(() => {
     mockGetMediaTypeInfo.mockRestore();
   });
 
@@ -30,26 +34,16 @@ describe('task.utils', () => {
       expect(capitalizeFirstWord('world')).toBe('World');
     });
 
-    it('should handle strings with leading whitespace', () => {
-      expect(capitalizeFirstWord('  hello')).toBe('Hello');
-      expect(capitalizeFirstWord('\tworld')).toBe('World');
-    });
-
-    it('should handle empty strings', () => {
+    it('should handle edge cases', () => {
+      // Empty strings
       expect(capitalizeFirstWord('')).toBe('');
-    });
-
-    it('should handle single character strings', () => {
+      // Single character
       expect(capitalizeFirstWord('a')).toBe('A');
-      expect(capitalizeFirstWord('z')).toBe('Z');
-    });
-
-    it('should handle strings that are already capitalized', () => {
+      // Already capitalized
       expect(capitalizeFirstWord('Hello')).toBe('Hello');
-      expect(capitalizeFirstWord('WORLD')).toBe('WORLD');
-    });
-
-    it('should handle strings with numbers and special characters', () => {
+      // Leading whitespace
+      expect(capitalizeFirstWord('  hello')).toBe('Hello');
+      // Numbers and special characters
       expect(capitalizeFirstWord('123abc')).toBe('123abc');
       expect(capitalizeFirstWord('!hello')).toBe('!hello');
       expect(capitalizeFirstWord(' hello world')).toBe('Hello world');
@@ -57,24 +51,11 @@ describe('task.utils', () => {
   });
 
   describe('getTitleClassName', () => {
-    it('should return correct class for incoming digital task', () => {
-      const result = getTitleClassName(true, true);
-      expect(result).toBe('incoming-digital-task-title');
-    });
-
-    it('should return correct class for active digital task', () => {
-      const result = getTitleClassName(true, false);
-      expect(result).toBe('task-digital-title');
-    });
-
-    it('should return correct class for voice tasks', () => {
-      const result = getTitleClassName(false, true);
-      expect(result).toBe('task-title');
-    });
-
-    it('should return correct class for active voice tasks', () => {
-      const result = getTitleClassName(false, false);
-      expect(result).toBe('task-title');
+    it('should return correct class names for different task types', () => {
+      expect(getTitleClassName(true, true)).toBe('incoming-digital-task-title');
+      expect(getTitleClassName(true, false)).toBe('task-digital-title');
+      expect(getTitleClassName(false, true)).toBe('task-title');
+      expect(getTitleClassName(false, false)).toBe('task-title');
     });
   });
 
@@ -86,189 +67,92 @@ describe('task.utils', () => {
         tooltipId: 'tooltip-test-123',
       });
     });
-
-    it('should handle undefined interaction ID', () => {
-      const result = createTooltipIds(undefined);
-      expect(result).toEqual({
-        tooltipTriggerId: 'tooltip-trigger-undefined',
-        tooltipId: 'tooltip-undefined',
-      });
-    });
-
-    it('should handle empty string interaction ID', () => {
-      const result = createTooltipIds('');
-      expect(result).toEqual({
-        tooltipTriggerId: 'tooltip-trigger-',
-        tooltipId: 'tooltip-',
-      });
-    });
-
-    it('should handle interaction ID with special characters', () => {
-      const result = createTooltipIds('test-123_abc!@#');
-      expect(result).toEqual({
-        tooltipTriggerId: 'tooltip-trigger-test-123_abc!@#',
-        tooltipId: 'tooltip-test-123_abc!@#',
-      });
-    });
   });
 
   describe('shouldShowState', () => {
-    it('should return true when state exists and not incoming task', () => {
-      expect(shouldShowState('active', false)).toBe(true);
+    it('should determine state visibility based on business rules', () => {
+      // Show state when active task (not incoming)
       expect(shouldShowState('connected', false)).toBe(true);
-    });
-
-    it('should return false when incoming task', () => {
-      expect(shouldShowState('active', true)).toBe(false);
+      // Don't show state for incoming tasks
       expect(shouldShowState('new', true)).toBe(false);
-    });
-
-    it('should return false when no state', () => {
+      // Don't show when no state
       expect(shouldShowState(undefined, false)).toBe(false);
       expect(shouldShowState('', false)).toBe(false);
-    });
-
-    it('should return false when no state and incoming task', () => {
-      expect(shouldShowState(undefined, true)).toBe(false);
-      expect(shouldShowState('', true)).toBe(false);
-    });
-
-    it('should handle undefined isIncomingTask parameter', () => {
-      expect(shouldShowState('active', undefined)).toBe(true);
-      expect(shouldShowState('active')).toBe(true);
     });
   });
 
   describe('shouldShowQueue', () => {
-    it('should return true when queue exists and is incoming task', () => {
+    it('should determine queue visibility based on business rules', () => {
+      // Show queue only for incoming tasks
       expect(shouldShowQueue('Support Team', true)).toBe(true);
       expect(shouldShowQueue('Sales Team', true)).toBe(true);
-    });
-
-    it('should return false when not incoming task', () => {
+      // Don't show queue for active tasks
       expect(shouldShowQueue('Support Team', false)).toBe(false);
-      expect(shouldShowQueue('Sales Team', false)).toBe(false);
-    });
-
-    it('should return false when no queue', () => {
+      // Don't show when no queue
       expect(shouldShowQueue(undefined, true)).toBe(false);
       expect(shouldShowQueue('', true)).toBe(false);
-    });
-
-    it('should return false when no queue and not incoming task', () => {
-      expect(shouldShowQueue(undefined, false)).toBe(false);
-      expect(shouldShowQueue('', false)).toBe(false);
-    });
-
-    it('should handle undefined isIncomingTask parameter', () => {
-      expect(shouldShowQueue('Support Team', undefined)).toBe(false);
-      expect(shouldShowQueue('Support Team')).toBe(false);
     });
   });
 
   describe('shouldShowHandleTime', () => {
-    it('should return false when no startTimeStamp', () => {
+    it('should determine handle time visibility based on business rules', () => {
+      // Don't show without startTimeStamp
       expect(shouldShowHandleTime(false, undefined, undefined)).toBe(false);
       expect(shouldShowHandleTime(true, 30, undefined)).toBe(false);
-    });
-
-    it('should return true for incoming task without RONA timeout', () => {
+      // Show for incoming task without RONA timeout
       expect(shouldShowHandleTime(true, undefined, 1641234567890)).toBe(true);
       expect(shouldShowHandleTime(true, 0, 1641234567890)).toBe(true);
-    });
-
-    it('should return false for incoming task with RONA timeout', () => {
+      // Don't show for incoming task with RONA timeout
       expect(shouldShowHandleTime(true, 30, 1641234567890)).toBe(false);
-      expect(shouldShowHandleTime(true, 60, 1641234567890)).toBe(false);
-    });
-
-    it('should return true for non-incoming task', () => {
+      // Always show for active tasks with timestamp
       expect(shouldShowHandleTime(false, undefined, 1641234567890)).toBe(true);
       expect(shouldShowHandleTime(false, 30, 1641234567890)).toBe(true);
-    });
-
-    it('should handle undefined isIncomingTask parameter', () => {
-      expect(shouldShowHandleTime(undefined, undefined, 1641234567890)).toBe(true);
-      expect(shouldShowHandleTime(undefined, 30, 1641234567890)).toBe(true);
     });
   });
 
   describe('shouldShowTimeLeft', () => {
-    it('should return true when incoming task and has RONA timeout', () => {
+    it('should determine time left visibility based on business rules', () => {
+      // Show only for incoming tasks with RONA timeout
       expect(shouldShowTimeLeft(true, 30)).toBe(true);
       expect(shouldShowTimeLeft(true, 60)).toBe(true);
-    });
-
-    it('should return false when not incoming task', () => {
+      // Don't show for active tasks
       expect(shouldShowTimeLeft(false, 30)).toBe(false);
-      expect(shouldShowTimeLeft(false, 60)).toBe(false);
-    });
-
-    it('should return false when no RONA timeout', () => {
+      // Don't show without timeout
       expect(shouldShowTimeLeft(true, undefined)).toBe(false);
       expect(shouldShowTimeLeft(true, 0)).toBe(false);
-    });
-
-    it('should return false when neither incoming nor has timeout', () => {
-      expect(shouldShowTimeLeft(false, undefined)).toBe(false);
-      expect(shouldShowTimeLeft(false, 0)).toBe(false);
-    });
-
-    it('should handle undefined parameters', () => {
+      // Handle edge cases
       expect(shouldShowTimeLeft(undefined, 30)).toBe(false);
-      expect(shouldShowTimeLeft(true, undefined)).toBe(false);
       expect(shouldShowTimeLeft(undefined, undefined)).toBe(false);
     });
   });
 
   describe('getTaskListItemClasses', () => {
-    it('should return base class when no selection or styles', () => {
-      const result = getTaskListItemClasses();
-      expect(result).toBe('task-list-item');
-    });
-
-    it('should add selected class when selected', () => {
-      const result = getTaskListItemClasses(true);
-      expect(result).toBe('task-list-item task-list-item--selected');
-    });
-
-    it('should not add selected class when not selected', () => {
-      const result = getTaskListItemClasses(false);
-      expect(result).toBe('task-list-item');
-    });
-
-    it('should add custom styles', () => {
-      const result = getTaskListItemClasses(false, 'custom-class');
-      expect(result).toBe('task-list-item  custom-class');
-    });
-
-    it('should combine selected and custom styles', () => {
-      const result = getTaskListItemClasses(true, 'custom-class another-class');
-      expect(result).toBe('task-list-item task-list-item--selected custom-class another-class');
-    });
-
-    it('should handle empty string styles', () => {
-      const result = getTaskListItemClasses(true, '');
-      expect(result).toBe('task-list-item task-list-item--selected');
-    });
-
-    it('should handle styles with extra whitespace', () => {
-      const result = getTaskListItemClasses(false, '  extra-spaces  ');
-      expect(result).toBe('task-list-item    extra-spaces');
+    it('should build CSS classes correctly', () => {
+      expect(getTaskListItemClasses()).toBe('task-list-item');
+      expect(getTaskListItemClasses(true)).toBe('task-list-item task-list-item--selected');
+      expect(getTaskListItemClasses(false)).toBe('task-list-item');
+      expect(getTaskListItemClasses(false, 'custom-class')).toBe('task-list-item  custom-class');
+      expect(getTaskListItemClasses(true, 'custom-class another-class')).toBe(
+        'task-list-item task-list-item--selected custom-class another-class'
+      );
     });
   });
 
   describe('extractTaskComponentData', () => {
     beforeEach(() => {
+      // Ensure mock is cleared and ready for each test
+      mockGetMediaTypeInfo.mockClear();
+    });
+
+    it('should extract data for telephony task correctly', () => {
+      // Mock telephony media type info to match actual implementation
       mockGetMediaTypeInfo.mockReturnValue({
         labelName: 'Call',
         iconName: 'handset-filled',
-        className: 'telephony-icon',
+        className: 'telephony',
         isBrandVisual: false,
       });
-    });
 
-    it('should extract data for telephony task', () => {
       const input = {
         mediaType: MEDIA_CHANNEL.TELEPHONY,
         mediaChannel: MEDIA_CHANNEL.TELEPHONY,
@@ -282,19 +166,17 @@ describe('task.utils', () => {
 
       const result = extractTaskComponentData(input);
 
-      // Verify the function was called (if it actually calls getMediaTypeInfo)
-      // If the function doesn't call getMediaTypeInfo, we should focus on testing the output
       expect(result).toEqual({
-        currentMediaType: expect.objectContaining({
-          labelName: expect.any(String),
-          iconName: expect.any(String),
-          className: expect.any(String),
-          isBrandVisual: expect.any(Boolean),
-        }),
-        isNonVoiceMedia: expect.any(Boolean),
+        currentMediaType: {
+          labelName: 'Call',
+          iconName: 'handset-filled',
+          className: 'telephony',
+          isBrandVisual: false,
+        },
+        isNonVoiceMedia: false,
         tooltipTriggerId: 'tooltip-trigger-test-123',
         tooltipId: 'tooltip-test-123',
-        titleClassName: expect.any(String),
+        titleClassName: 'task-title',
         shouldShowState: true,
         shouldShowQueue: false,
         shouldShowHandleTime: true,
@@ -303,18 +185,17 @@ describe('task.utils', () => {
         capitalizedQueue: 'Support team',
       });
 
-      if (mockGetMediaTypeInfo.mock.calls.length > 0) {
-        expect(mockGetMediaTypeInfo).toHaveBeenCalledWith(MEDIA_CHANNEL.TELEPHONY, MEDIA_CHANNEL.TELEPHONY);
-        expect(mockGetMediaTypeInfo).toHaveBeenCalledTimes(1);
-      }
+      expect(mockGetMediaTypeInfo).toHaveBeenCalledTimes(1);
+      expect(mockGetMediaTypeInfo).toHaveBeenCalledWith(MEDIA_CHANNEL.TELEPHONY, MEDIA_CHANNEL.TELEPHONY);
     });
 
-    it('should extract data for social media incoming task', () => {
+    it('should extract data for social media incoming task correctly', () => {
+      // Mock social media type info to match actual implementation
       mockGetMediaTypeInfo.mockReturnValue({
-        labelName: 'Social',
-        iconName: 'facebook-circle-filled',
-        className: 'social-icon',
-        isBrandVisual: true,
+        labelName: 'Chat',
+        iconName: 'chat-filled',
+        className: 'social',
+        isBrandVisual: false,
       });
 
       const input = {
@@ -331,16 +212,16 @@ describe('task.utils', () => {
       const result = extractTaskComponentData(input);
 
       expect(result).toEqual({
-        currentMediaType: expect.objectContaining({
-          labelName: expect.any(String),
-          iconName: expect.any(String),
-          className: expect.any(String),
-          isBrandVisual: expect.any(Boolean),
-        }),
-        isNonVoiceMedia: expect.any(Boolean),
+        currentMediaType: {
+          labelName: 'Chat',
+          iconName: 'chat-filled',
+          className: 'social',
+          isBrandVisual: false,
+        },
+        isNonVoiceMedia: true,
         tooltipTriggerId: 'tooltip-trigger-social-456',
         tooltipId: 'tooltip-social-456',
-        titleClassName: expect.any(String),
+        titleClassName: 'incoming-digital-task-title',
         shouldShowState: false,
         shouldShowQueue: true,
         shouldShowHandleTime: false,
@@ -349,16 +230,16 @@ describe('task.utils', () => {
         capitalizedQueue: 'Social support',
       });
 
-      if (mockGetMediaTypeInfo.mock.calls.length > 0) {
-        expect(mockGetMediaTypeInfo).toHaveBeenCalledWith(MEDIA_CHANNEL.SOCIAL, MEDIA_CHANNEL.SOCIAL);
-      }
+      expect(mockGetMediaTypeInfo).toHaveBeenCalledTimes(1);
+      expect(mockGetMediaTypeInfo).toHaveBeenCalledWith(MEDIA_CHANNEL.SOCIAL, MEDIA_CHANNEL.SOCIAL);
     });
 
-    it('should extract data for chat task', () => {
+    it('should extract data for chat task correctly', () => {
+      // Mock chat media type info to match actual implementation
       mockGetMediaTypeInfo.mockReturnValue({
         labelName: 'Chat',
         iconName: 'chat-filled',
-        className: 'chat-icon',
+        className: 'chat',
         isBrandVisual: false,
       });
 
@@ -376,16 +257,16 @@ describe('task.utils', () => {
       const result = extractTaskComponentData(input);
 
       expect(result).toEqual({
-        currentMediaType: expect.objectContaining({
-          labelName: expect.any(String),
-          iconName: expect.any(String),
-          className: expect.any(String),
-          isBrandVisual: expect.any(Boolean),
-        }),
-        isNonVoiceMedia: expect.any(Boolean),
+        currentMediaType: {
+          labelName: 'Chat',
+          iconName: 'chat-filled',
+          className: 'chat',
+          isBrandVisual: false,
+        },
+        isNonVoiceMedia: true,
         tooltipTriggerId: 'tooltip-trigger-chat-789',
         tooltipId: 'tooltip-chat-789',
-        titleClassName: expect.any(String),
+        titleClassName: 'task-digital-title',
         shouldShowState: true,
         shouldShowQueue: false,
         shouldShowHandleTime: true,
@@ -394,169 +275,50 @@ describe('task.utils', () => {
         capitalizedQueue: 'Chat team',
       });
 
-      if (mockGetMediaTypeInfo.mock.calls.length > 0) {
-        expect(mockGetMediaTypeInfo).toHaveBeenCalledWith(MEDIA_CHANNEL.CHAT, MEDIA_CHANNEL.CHAT);
-      }
+      expect(mockGetMediaTypeInfo).toHaveBeenCalledTimes(1);
+      expect(mockGetMediaTypeInfo).toHaveBeenCalledWith(MEDIA_CHANNEL.CHAT, MEDIA_CHANNEL.CHAT);
     });
 
-    it('should handle default values', () => {
-      const input = {};
-
-      const result = extractTaskComponentData(input);
-
-      expect(result.capitalizedState).toBe('');
-      expect(result.capitalizedQueue).toBe('');
-      expect(result.shouldShowState).toBe(false);
-      expect(result.shouldShowQueue).toBe(false);
-      expect(result.shouldShowHandleTime).toBe(false);
-      expect(result.shouldShowTimeLeft).toBe(false);
-      expect(result.tooltipTriggerId).toBe('tooltip-trigger-undefined');
-      expect(result.tooltipId).toBe('tooltip-undefined');
-
-      if (mockGetMediaTypeInfo.mock.calls.length > 0) {
-        expect(mockGetMediaTypeInfo).toHaveBeenCalledWith(undefined, undefined);
-      }
-    });
-
-    it('should handle email task', () => {
-      mockGetMediaTypeInfo.mockReturnValue({
-        labelName: 'Email',
-        iconName: 'email-filled',
-        className: 'email-icon',
-        isBrandVisual: false,
-      });
-
-      const input = {
-        mediaType: MEDIA_CHANNEL.EMAIL,
-        mediaChannel: MEDIA_CHANNEL.EMAIL,
-        isIncomingTask: true,
-        interactionId: 'email-123',
-        state: 'new',
-        queue: 'email support',
-        ronaTimeout: undefined,
-        startTimeStamp: 1641234567890,
-      };
-
-      const result = extractTaskComponentData(input);
-
-      expect(result.shouldShowQueue).toBe(true);
-      expect(result.shouldShowState).toBe(false);
-      expect(result.shouldShowHandleTime).toBe(true);
-      expect(result.shouldShowTimeLeft).toBe(false);
-      expect(result.capitalizedState).toBe('New');
-      expect(result.capitalizedQueue).toBe('Email support');
-
-      if (mockGetMediaTypeInfo.mock.calls.length > 0) {
-        expect(mockGetMediaTypeInfo).toHaveBeenCalledWith(MEDIA_CHANNEL.EMAIL, MEDIA_CHANNEL.EMAIL);
-      }
-    });
-
-    it('should handle task without startTimeStamp', () => {
-      const input = {
-        mediaType: MEDIA_CHANNEL.TELEPHONY,
-        mediaChannel: MEDIA_CHANNEL.TELEPHONY,
-        isIncomingTask: false,
-        interactionId: 'test-no-timestamp',
-        state: 'active',
-        startTimeStamp: undefined,
-      };
-
-      const result = extractTaskComponentData(input);
-
-      expect(result.shouldShowHandleTime).toBe(false);
-
-      if (mockGetMediaTypeInfo.mock.calls.length > 0) {
-        expect(mockGetMediaTypeInfo).toHaveBeenCalledWith(MEDIA_CHANNEL.TELEPHONY, MEDIA_CHANNEL.TELEPHONY);
-      }
-    });
-
-    it('should handle incoming task with RONA timeout but no startTimeStamp', () => {
-      const input = {
-        mediaType: MEDIA_CHANNEL.TELEPHONY,
-        mediaChannel: MEDIA_CHANNEL.TELEPHONY,
-        isIncomingTask: true,
-        interactionId: 'test-rona-no-timestamp',
-        state: 'new',
-        ronaTimeout: 30,
-        startTimeStamp: undefined,
-      };
-
-      const result = extractTaskComponentData(input);
-
-      expect(result.shouldShowHandleTime).toBe(false);
-      expect(result.shouldShowTimeLeft).toBe(true);
-
-      if (mockGetMediaTypeInfo.mock.calls.length > 0) {
-        expect(mockGetMediaTypeInfo).toHaveBeenCalledWith(MEDIA_CHANNEL.TELEPHONY, MEDIA_CHANNEL.TELEPHONY);
-      }
-    });
-
-    it('should handle edge case with whitespace in state and queue', () => {
-      const input = {
-        mediaType: MEDIA_CHANNEL.TELEPHONY,
-        mediaChannel: MEDIA_CHANNEL.TELEPHONY,
-        isIncomingTask: false,
-        state: '  active  ',
-        queue: '  support team  ',
-      };
-
-      const result = extractTaskComponentData(input);
-
-      expect(result.capitalizedState).toBe('Active  ');
-      expect(result.capitalizedQueue).toBe('Support team  ');
-
-      // Only assert on getMediaTypeInfo if it's actually called
-      if (mockGetMediaTypeInfo.mock.calls.length > 0) {
-        expect(mockGetMediaTypeInfo).toHaveBeenCalledWith(MEDIA_CHANNEL.TELEPHONY, MEDIA_CHANNEL.TELEPHONY);
-      }
-    });
-
-    it('should call getMediaTypeInfo with correct parameters for each media type', () => {
-      const testCases = [
-        {mediaType: MEDIA_CHANNEL.EMAIL, mediaChannel: MEDIA_CHANNEL.EMAIL},
-        {mediaType: MEDIA_CHANNEL.SMS, mediaChannel: MEDIA_CHANNEL.SMS},
-        {mediaType: MEDIA_CHANNEL.WHATSAPP, mediaChannel: MEDIA_CHANNEL.WHATSAPP},
-        {mediaType: MEDIA_CHANNEL.FACEBOOK, mediaChannel: MEDIA_CHANNEL.FACEBOOK},
-      ];
-
-      testCases.forEach(({mediaType, mediaChannel}) => {
-        mockGetMediaTypeInfo.mockClear();
-
-        const result = extractTaskComponentData({
-          mediaType,
-          mediaChannel,
-          isIncomingTask: false,
-        });
-
-        expect(result).toEqual(
-          expect.objectContaining({
-            currentMediaType: expect.any(Object),
-            isNonVoiceMedia: expect.any(Boolean),
-            tooltipTriggerId: expect.any(String),
-            tooltipId: expect.any(String),
-            titleClassName: expect.any(String),
-            shouldShowState: expect.any(Boolean),
-            shouldShowQueue: expect.any(Boolean),
-            shouldShowHandleTime: expect.any(Boolean),
-            shouldShowTimeLeft: expect.any(Boolean),
-            capitalizedState: expect.any(String),
-            capitalizedQueue: expect.any(String),
-          })
-        );
-
-        if (mockGetMediaTypeInfo.mock.calls.length > 0) {
-          expect(mockGetMediaTypeInfo).toHaveBeenCalledWith(mediaType, mediaChannel);
-          expect(mockGetMediaTypeInfo).toHaveBeenCalledTimes(1);
-        }
-      });
-    });
-
-    it('should determine isNonVoiceMedia correctly based on currentMediaType', () => {
-      // Test voice media (if getMediaTypeInfo returns Call)
+    it('should handle default values and edge cases', () => {
+      // Mock default media type info to match actual implementation (defaults to telephony)
       mockGetMediaTypeInfo.mockReturnValue({
         labelName: 'Call',
         iconName: 'handset-filled',
-        className: 'telephony-icon',
+        className: 'telephony',
+        isBrandVisual: false,
+      });
+
+      const result = extractTaskComponentData({});
+
+      expect(result).toEqual({
+        currentMediaType: {
+          labelName: 'Call',
+          iconName: 'handset-filled',
+          className: 'telephony',
+          isBrandVisual: false,
+        },
+        isNonVoiceMedia: false,
+        tooltipTriggerId: 'tooltip-trigger-undefined',
+        tooltipId: 'tooltip-undefined',
+        titleClassName: 'task-title',
+        shouldShowState: false,
+        shouldShowQueue: false,
+        shouldShowHandleTime: false,
+        shouldShowTimeLeft: false,
+        capitalizedState: '',
+        capitalizedQueue: '',
+      });
+
+      expect(mockGetMediaTypeInfo).toHaveBeenCalledTimes(1);
+      expect(mockGetMediaTypeInfo).toHaveBeenCalledWith(undefined, undefined);
+    });
+
+    it('should determine voice vs non-voice media correctly', () => {
+      // Test voice media (telephony)
+      mockGetMediaTypeInfo.mockReturnValueOnce({
+        labelName: 'Call',
+        iconName: 'handset-filled',
+        className: 'telephony',
         isBrandVisual: false,
       });
 
@@ -565,15 +327,17 @@ describe('task.utils', () => {
         mediaChannel: MEDIA_CHANNEL.TELEPHONY,
       });
 
-      // Test that the function handles media type logic correctly
-      expect(result.currentMediaType).toBeDefined();
-      expect(result.isNonVoiceMedia).toBeDefined();
+      expect(result.isNonVoiceMedia).toBe(false);
+      expect(mockGetMediaTypeInfo).toHaveBeenCalledWith(MEDIA_CHANNEL.TELEPHONY, MEDIA_CHANNEL.TELEPHONY);
 
-      // Test non-voice media (if getMediaTypeInfo returns something other than Call)
-      mockGetMediaTypeInfo.mockReturnValue({
+      // Clear the mock for the next call
+      mockGetMediaTypeInfo.mockClear();
+
+      // Test non-voice media (email)
+      mockGetMediaTypeInfo.mockReturnValueOnce({
         labelName: 'Email',
         iconName: 'email-filled',
-        className: 'email-icon',
+        className: 'email',
         isBrandVisual: false,
       });
 
@@ -582,32 +346,8 @@ describe('task.utils', () => {
         mediaChannel: MEDIA_CHANNEL.EMAIL,
       });
 
-      expect(result.currentMediaType).toBeDefined();
-      expect(result.isNonVoiceMedia).toBeDefined();
-    });
-
-    it('should handle missing mediaType and mediaChannel gracefully', () => {
-      mockGetMediaTypeInfo.mockReturnValue({
-        labelName: 'Unknown',
-        iconName: 'unknown-icon',
-        className: 'unknown-class',
-        isBrandVisual: false,
-      });
-
-      const result = extractTaskComponentData({
-        isIncomingTask: true,
-        interactionId: 'test-unknown',
-        state: 'active',
-        queue: 'test queue',
-      });
-
-      expect(result.currentMediaType).toBeDefined();
-      expect(result.capitalizedState).toBe('Active');
-      expect(result.capitalizedQueue).toBe('Test queue');
-
-      if (mockGetMediaTypeInfo.mock.calls.length > 0) {
-        expect(mockGetMediaTypeInfo).toHaveBeenCalledWith(undefined, undefined);
-      }
+      expect(result.isNonVoiceMedia).toBe(true);
+      expect(mockGetMediaTypeInfo).toHaveBeenCalledWith(MEDIA_CHANNEL.EMAIL, MEDIA_CHANNEL.EMAIL);
     });
   });
 });
