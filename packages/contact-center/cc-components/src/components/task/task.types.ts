@@ -2,7 +2,7 @@ import {
   ILogger,
   ITask,
   IContactCenter,
-  WrapupCodes,
+  IWrapupCode,
   BuddyDetails,
   DestinationType,
   ContactServiceQueue,
@@ -150,6 +150,14 @@ export interface ControlProps {
   onRecordingToggle?: ({isRecording, task}: {isRecording: boolean; task: ITask}) => void;
 
   /**
+   * Function to handle mute/unmute toggle actions.
+   * @param isMuted - Boolean indicating whether the task is muted.
+   * @param task - The current task being handled.
+   * @returns void
+   */
+  onToggleMute?: ({isMuted, task}: {isMuted: boolean; task: ITask}) => void;
+
+  /**
    * Function to handle ending the task.
    * @param task - The current task being handled.
    * @returns void
@@ -173,7 +181,7 @@ export interface ControlProps {
    * Array of wrap-up codes.
    * TODO: Expose this type from SDK.
    */
-  wrapupCodes: WrapupCodes[];
+  wrapupCodes: IWrapupCode[];
 
   /**
    * Indicates if wrap-up is required.
@@ -190,6 +198,11 @@ export interface ControlProps {
    * Function to handle pause/resume recording actions.
    */
   toggleRecording: () => void;
+
+  /**
+   * Function to handle mute/unmute actions.
+   */
+  toggleMute: () => void;
 
   /**
    * Function to handle ending the call.
@@ -229,6 +242,11 @@ export interface ControlProps {
    * @param isRecording - Boolean indicating whether the task is being recorded.
    */
   setIsRecording: (isRecording: boolean) => void;
+
+  /**
+   * Flag to determine if the task is muted.
+   */
+  isMuted: boolean;
 
   /**
    * List of buddy agents available for consult
@@ -399,6 +417,8 @@ export type CallControlComponentProps = Pick<
   | 'wrapupCodes'
   | 'toggleHold'
   | 'toggleRecording'
+  | 'toggleMute'
+  | 'isMuted'
   | 'endCall'
   | 'wrapupCall'
   | 'isHeld'
@@ -478,8 +498,8 @@ export interface ConsultTransferPopoverComponentProps {
   buttonIcon: string;
   buddyAgents: BuddyDetails[];
   queues?: ContactServiceQueue[];
-  onAgentSelect: (agentId: string, agentName: string) => void;
-  onQueueSelect: (queueId: string, queueName: string) => void;
+  onAgentSelect?: (agentId: string, agentName: string) => void;
+  onQueueSelect?: (queueId: string, queueName: string) => void;
   allowConsultToQueue: boolean;
   logger: ILogger;
 }
@@ -491,19 +511,20 @@ export interface CallControlConsultComponentsProps {
   agentName: string;
   startTimeStamp: number;
   onTransfer?: () => void;
-  endConsultCall: () => void;
+  endConsultCall?: () => void;
   consultCompleted: boolean;
   isAgentBeingConsulted: boolean;
   isEndConsultEnabled: boolean;
   logger: ILogger;
+  muteUnmute: boolean;
+  isMuted: boolean;
+  onToggleConsultMute?: () => void;
 }
 
 /**
  * Type representing the possible menu types in call control.
  */
 export type CallControlMenuType = 'Consult' | 'Transfer';
-
-export {DestinationType};
 
 export const MEDIA_CHANNEL = {
   EMAIL: 'email',

@@ -17,7 +17,7 @@ jest.mock('@webex/cc-store', () => {
       log: jest.fn(),
       info: jest.fn(),
     },
-    lastStateChangeTimestamp: new Date(),
+    lastStateChangeTimestamp: new Date().getTime(),
     customState: null,
     currentState: '0',
   };
@@ -33,6 +33,7 @@ describe('UserState Component', () => {
       terminate: jest.fn(),
       onmessage: null,
     };
+
     global.Worker = jest.fn(() => workerMock);
     global.URL.createObjectURL = jest.fn(() => 'blob:http://localhost:3000/12345');
 
@@ -55,7 +56,7 @@ describe('UserState Component', () => {
       agentId: 'testAgentId',
       currentState: '0',
       customState: null,
-      lastStateChangeTimestamp: expect.any(Date),
+      lastStateChangeTimestamp: expect.any(Number),
       logger: {
         log: expect.any(Function),
         info: expect.any(Function),

@@ -1,7 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import {StationLoginComponentProps} from './station-login.types';
 import './station-login.style.scss';
-import {DESKTOP, LoginOptions, SignInErrors, StationLoginLabels} from './constants';
+import {SignInErrors, StationLoginLabels} from './constants';
+import {LoginOptions, DESKTOP} from '@webex/cc-store';
 import {Button, Icon, Select, Option, Text, Tooltip, Input} from '@momentum-design/components/dist/react';
 import {
   ccCancelButtonClicked,

@@ -137,6 +137,37 @@
   --mdc-icon-fill-color: var(--mds-color-theme-button-cancel-normal);
 }
 
+.md-button-circle-wrapper.call-control-button-muted {
+  width: 1rem;
+  height: 1rem; 
+  min-width: 2rem;
+  min-height: 2rem;
+  padding: 0.5rem;
+  border-radius: 50%;
+  background-color: var(--mds-color-theme-button-secondary-normal);
+  border: 1px solid var(--mds-color-theme-outline-cancel-normal);
+  &:hover,
+  &.hover {
+    background-color: var(--mds-color-theme-button-secondary-hover);
+  }
+  .call-control-button-muted-icon {
+    --mdc-icon-fill-color: var(--mds-color-theme-text-error-normal);
+  }
+}
+
+.md-button-circle-wrapper.call-control-button-muted[disabled],
+.md-button-circle-wrapper.call-control-button-muted.shallowDisabled,
+.md-button-circle-wrapper.call-control-button-muted:disabled {
+  outline-color: var(--mds-color-theme-button-primary-disabled);
+  border-color: var(--mds-color-theme-button-primary-disabled);
+  opacity: 0.5;
+  cursor: not-allowed;
+  .call-control-button-muted-icon {
+    --mdc-icon-fill-color: var(--mds--color-theme-button-secondary-normal);
+  }
+}
+
+
 .wrapup-button {
   display: inline-flex;
   justify-content: center;
