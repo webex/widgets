@@ -1,3 +1,17 @@
+# [1.28.0-ccwidgets.96](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.95...v1.28.0-ccwidgets.96) (2025-07-24)
+
+
+### Features
+
+* **cc-widgets:** UI Automation for Basic Task Controls ([#497](https://github.com/webex/widgets/issues/497)) ([6aa1c90](https://github.com/webex/widgets/commit/6aa1c906340aa03ff6f2d43f8e57d3064e327c9e))
+
+# [1.28.0-ccwidgets.95](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.94...v1.28.0-ccwidgets.95) (2025-07-24)
+
+
+### Bug Fixes
+
+* **playwright:** add-logic-to-read-agent2-token ([#504](https://github.com/webex/widgets/issues/504)) ([82866fa](https://github.com/webex/widgets/commit/82866fa77f54113370d7499d19418c310a53aa71))
+
 # [1.28.0-ccwidgets.94](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.93...v1.28.0-ccwidgets.94) (2025-07-16)
 
 
