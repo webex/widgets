@@ -262,6 +262,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                   type="button"
                   role="button"
                   data-testid="call-control:wrapup-button"
+                  id="call-control-wrapup-button"
                 >
                   {WRAP_UP}
                 </Button>
