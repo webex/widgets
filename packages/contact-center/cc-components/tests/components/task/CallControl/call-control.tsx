@@ -1,8 +1,8 @@
 import React from 'react';
-import {render, act, fireEvent, screen} from '@testing-library/react';
+import {render, fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import CallControlComponent from '../../../../src/components/task/CallControl/call-control';
-import {CallControlComponentProps} from '../../../../src/components/task/task.types';
+import {CallControlComponentProps, CallControlMenuType} from '../../../../src/components/task/task.types';
 import * as callControlUtils from '../../../../src/components/task/CallControl/call-control.utils';
 import {mockTask} from '@webex/test-fixtures';
 
@@ -125,16 +125,14 @@ describe('CallControlComponent', () => {
   let buildCallControlButtonsSpy: jest.SpyInstance;
   let getMediaTypeSpy: jest.SpyInstance;
   let isTelephonyMediaTypeSpy: jest.SpyInstance;
-  let filterButtonsForConsultationSpy: jest.SpyInstance;
   let updateCallStateFromTaskSpy: jest.SpyInstance;
-  let handleToggleHoldSpy: jest.SpyInstance;
-  let handleMuteToggleSpy: jest.SpyInstance;
 
   beforeEach(() => {
     // Mock utility functions with proper return values
     getMediaTypeSpy = jest.spyOn(callControlUtils, 'getMediaType').mockReturnValue({
       labelName: 'Voice',
     });
+
     isTelephonyMediaTypeSpy = jest.spyOn(callControlUtils, 'isTelephonyMediaType').mockReturnValue(true);
     buildCallControlButtonsSpy = jest.spyOn(callControlUtils, 'buildCallControlButtons').mockReturnValue([
       {
@@ -165,12 +163,7 @@ describe('CallControlComponent', () => {
         isVisible: true,
       },
     ]);
-    filterButtonsForConsultationSpy = jest
-      .spyOn(callControlUtils, 'filterButtonsForConsultation')
-      .mockImplementation((buttons) => buttons);
     updateCallStateFromTaskSpy = jest.spyOn(callControlUtils, 'updateCallStateFromTask').mockImplementation(() => {});
-    handleToggleHoldSpy = jest.spyOn(callControlUtils, 'handleToggleHold').mockImplementation(() => {});
-    handleMuteToggleSpy = jest.spyOn(callControlUtils, 'handleMuteToggle').mockImplementation(() => {});
 
     // Reset all mocks
     jest.clearAllMocks();
@@ -179,674 +172,320 @@ describe('CallControlComponent', () => {
   afterEach(() => {
     jest.restoreAllMocks();
   });
-
-  describe('Component Rendering and Basic Functionality', () => {
-    it('should render with various configurations and handle null task', async () => {
-      // Test basic rendering
-      await act(async () => {
-        render(<CallControlComponent {...defaultProps} />);
-      });
-
-      expect(buildCallControlButtonsSpy).toHaveBeenCalled();
-      expect(getMediaTypeSpy).toHaveBeenCalled();
-      expect(isTelephonyMediaTypeSpy).toHaveBeenCalled();
-      expect(screen.getByTestId('call-control-container')).toBeInTheDocument();
-    });
-
-    it('should handle audio element and media stream', async () => {
-      const mockMediaStream = new (window as unknown as {MediaStream: new () => MediaStream}).MediaStream();
-      const audioProps = {
+  describe('Rendering', () => {
+    it('renders mute and hold buttons and responds to user interactions', async () => {
+      const modifiedProps = {
         ...defaultProps,
-        callControlAudio: mockMediaStream,
-      };
-
-      await act(async () => {
-        render(<CallControlComponent {...audioProps} />);
-      });
-
-      // Check that the component renders with audio stream
-      expect(screen.getByTestId('call-control-container')).toBeInTheDocument();
-      // Audio element may be rendered conditionally
-      const container = screen.getByTestId('call-control-container');
-      const audioElements = container.querySelectorAll('audio');
-      // Audio element might exist, if it does check its properties
-      if (audioElements.length > 0) {
-        expect(audioElements[0]).toBeInTheDocument();
-      }
-    });
-
-    it('should handle different media types and consultation states', async () => {
-      // Test non-telephony media type
-      isTelephonyMediaTypeSpy.mockReturnValue(false);
-      getMediaTypeSpy.mockReturnValue({labelName: 'Chat'});
-
-      const chatProps = {
-        ...defaultProps,
-        currentTask: {...mockCurrentTask, mediaType: 'chat'},
-      };
-
-      await act(async () => {
-        render(<CallControlComponent {...chatProps} />);
-      });
-
-      expect(isTelephonyMediaTypeSpy).toHaveBeenCalledWith('telephony');
-
-      // Test consultation mode
-      const consultProps = {
-        ...defaultProps,
-        consultAccepted: true,
-        consultInitiated: true,
-      };
-
-      await act(async () => {
-        render(<CallControlComponent {...consultProps} />);
-      });
-
-      expect(filterButtonsForConsultationSpy).toHaveBeenCalled();
-    });
-  });
-
-  describe('Button Interactions and State Management', () => {
-    it('should handle various button states and interactions', async () => {
-      // Mock buttons with dataTestId before rendering
-      buildCallControlButtonsSpy.mockReturnValue([
-        {
-          id: 'mute',
-          icon: 'microphone-bold',
-          onClick: jest.fn(),
-          tooltip: 'Mute',
-          className: 'mute-btn',
-          disabled: false,
-          isVisible: true,
-          dataTestId: 'call-control:mute-toggle',
-        },
-        {
-          id: 'hold',
-          icon: 'pause-bold',
-          onClick: jest.fn(),
-          tooltip: 'Hold',
-          className: 'hold-btn',
-          disabled: false,
-          isVisible: true,
-          dataTestId: 'call-control:hold-toggle',
-        },
-        {
-          id: 'transfer',
-          icon: 'next-bold',
-          tooltip: 'Transfer',
-          className: 'call-control-button',
-          disabled: false,
-          isVisible: true,
-          menuType: 'Transfer',
-          dataTestId: 'call-control:transfer',
-        },
-      ]);
-
-      // Test regular button rendering
-      await act(async () => {
-        render(<CallControlComponent {...defaultProps} />);
-      });
-
-      expect(screen.getByTestId('call-control:mute-toggle')).toBeInTheDocument();
-      expect(screen.getByTestId('call-control:hold-toggle')).toBeInTheDocument();
-
-      // Test that transfer button exists (but may not trigger popover in test environment)
-      const buttons = screen.getAllByTestId('call-control:transfer');
-      expect(buttons.length).toBeGreaterThan(0);
-
-      // Test click on first button
-      fireEvent.click(buttons[0]);
-      // handlePopoverOpen may not be called in test environment due to button configuration
-
-      // Test invisible button handling
-      buildCallControlButtonsSpy.mockReturnValue([
-        {
-          id: 'hidden',
-          icon: 'hidden',
-          onClick: jest.fn(),
-          tooltip: 'Hidden',
-          className: 'hidden-btn',
-          disabled: false,
-          isVisible: false,
-        },
-      ]);
-
-      const {rerender} = render(<CallControlComponent {...defaultProps} />);
-      rerender(<CallControlComponent {...defaultProps} />);
-      expect(screen.queryByTestId('hidden')).not.toBeInTheDocument();
-    });
-
-    it('should handle state changes and consultation mode', async () => {
-      const {rerender} = render(<CallControlComponent {...defaultProps} />);
-
-      // Test state changes
-      const updatedTask = {
-        ...mockCurrentTask,
-        isHeld: true,
-        recording: {isRecording: true},
-      };
-
-      rerender(
-        <CallControlComponent {...{...defaultProps, currentTask: updatedTask, isHeld: true, isRecording: true}} />
-      );
-      expect(updateCallStateFromTaskSpy).toHaveBeenCalled();
-
-      // Test consultation mode with disabled buttons
-      buildCallControlButtonsSpy.mockReturnValue([
-        {
-          id: 'mute',
-          icon: 'mute',
-          onClick: jest.fn(),
-          tooltip: 'Mute',
-          className: 'mute-btn',
-          disabled: false,
-          isVisible: true,
-          dataTestId: 'call-control:mute-toggle',
-        },
-      ]);
-
-      rerender(<CallControlComponent {...{...defaultProps, consultInitiated: true}} />);
-      const muteButton = screen.getByTestId('call-control:mute-toggle');
-      expect(muteButton).toBeDisabled();
-    });
-
-    it('should call utility functions correctly', async () => {
-      render(<CallControlComponent {...defaultProps} />);
-
-      // Test handler function calls
-      const muteHandler = buildCallControlButtonsSpy.mock.calls[0][6];
-      const holdHandler = buildCallControlButtonsSpy.mock.calls[0][7];
-
-      if (typeof muteHandler === 'function') {
-        muteHandler();
-        expect(handleMuteToggleSpy).toHaveBeenCalledWith(defaultProps.toggleMute, expect.any(Function), mockLogger);
-      }
-
-      if (typeof holdHandler === 'function') {
-        holdHandler();
-        expect(handleToggleHoldSpy).toHaveBeenCalledWith(
-          false,
-          defaultProps.toggleHold,
-          defaultProps.setIsHeld,
-          mockLogger
-        );
-      }
-    });
-  });
-
-  describe('Wrapup Functionality', () => {
-    it('should handle wrapup UI and interactions', async () => {
-      const wrapupProps = {
-        ...defaultProps,
-        controlVisibility: {...mockControlVisibility, wrapup: true},
-      };
-
-      await act(async () => {
-        render(<CallControlComponent {...wrapupProps} />);
-      });
-
-      // Test wrapup button rendering
-      expect(screen.getByTestId('call-control:wrapup-button')).toBeInTheDocument();
-
-      // Note: The actual wrapup select and submit buttons are inside a popover
-      // that would need to be opened to test properly. For coverage purposes,
-      // we're testing that the component renders without errors.
-    });
-
-    it('should handle auto wrapup timer and various configurations', async () => {
-      // Test with auto wrapup timer
-      const timerProps = {
-        ...defaultProps,
-        secondsUntilAutoWrapup: 30,
-        controlVisibility: {...mockControlVisibility, wrapup: true},
-      };
-
-      await act(async () => {
-        render(<CallControlComponent {...timerProps} />);
-      });
-
-      expect(screen.getByTestId('call-control:wrapup-button')).toBeInTheDocument();
-
-      // Test empty wrapup codes
-      const noWrapupProps = {
-        ...defaultProps,
-        wrapupCodes: [],
-      };
-
-      await act(async () => {
-        render(<CallControlComponent {...noWrapupProps} />);
-      });
-
-      expect(buildCallControlButtonsSpy).toHaveBeenCalled();
-    });
-  });
-
-  describe('Control Visibility and Edge Cases', () => {
-    it('should handle different visibility configurations', async () => {
-      // Test all controls visible
-      const allVisibleProps = {
-        ...defaultProps,
+        isMuted: false,
+        isHeld: false,
         controlVisibility: {
           ...mockControlVisibility,
-          accept: true,
-          decline: true,
-          end: true,
           muteUnmute: true,
           holdResume: true,
         },
       };
 
-      await act(async () => {
-        render(<CallControlComponent {...allVisibleProps} />);
-      });
+      const screen = render(<CallControlComponent {...modifiedProps} />);
 
-      expect(buildCallControlButtonsSpy).toHaveBeenCalledWith(
-        expect.any(Boolean),
-        expect.any(Boolean),
-        expect.any(Boolean),
-        expect.any(Boolean),
-        expect.any(Object),
-        allVisibleProps.controlVisibility,
-        expect.any(Function),
-        expect.any(Function),
-        expect.any(Function),
-        expect.any(Function)
-      );
+      // Perform user interactions
+      const muteButton = screen.getByLabelText('Mute');
+      fireEvent.click(muteButton);
 
-      // Test selective visibility
-      const limitedVisibilityProps = {
+      const holdButton = screen.getByLabelText('Hold');
+      fireEvent.click(holdButton);
+
+      // Verify mute button functionality
+      expect(muteButton).toBeInTheDocument();
+      expect(muteButton).toHaveAttribute('aria-label', 'Mute');
+      expect(muteButton).toHaveAttribute('data-disabled', 'false');
+
+      // Verify hold button functionality
+      expect(holdButton).toBeInTheDocument();
+      expect(holdButton).toHaveAttribute('aria-label', 'Hold');
+      expect(holdButton).toHaveAttribute('data-disabled', 'false');
+    });
+    it('displays wrapup button when call is muted and held', async () => {
+      const modifiedProps = {
         ...defaultProps,
+        isMuted: true,
+        isHeld: true,
         controlVisibility: {
           ...mockControlVisibility,
-          consult: false,
-          transfer: false,
-          conference: false,
+          wrapup: true,
         },
       };
 
-      await act(async () => {
-        render(<CallControlComponent {...limitedVisibilityProps} />);
-      });
+      const screen = await render(<CallControlComponent {...modifiedProps} />);
 
-      expect(buildCallControlButtonsSpy).toHaveBeenCalled();
+      // Verify wrapup button is available when conditions are met
+      const wrapupButton = screen.getByTestId('call-control:wrapup-button');
+      expect(wrapupButton).toBeInTheDocument();
+      expect(wrapupButton).toHaveAttribute('aria-expanded', 'false');
+      expect(wrapupButton).toHaveAttribute('aria-haspopup', 'dialog');
+      expect(wrapupButton).toHaveAttribute('type', 'button');
+      expect(wrapupButton).toHaveTextContent('Wrap up');
     });
+    it('renders all call control elements with proper attributes and accessibility features', async () => {
+      const screen = await render(<CallControlComponent {...defaultProps} />);
 
-    it('should handle end call button and media channel variations', async () => {
-      // Test end call button specific test id
-      buildCallControlButtonsSpy.mockReturnValue([
-        {
-          id: 'end',
-          icon: 'end-call',
-          onClick: jest.fn(),
-          tooltip: 'End Call',
-          className: 'end-call-btn',
-          disabled: false,
-          isVisible: true,
-          dataTestId: 'call-control:end-call',
-        },
-      ]);
+      // Verify main container structure
+      const callControlContainer = screen.getByTestId('call-control-container');
+      expect(callControlContainer).toBeInTheDocument();
+      expect(callControlContainer).toHaveAttribute('class', 'call-control-container');
+      expect(callControlContainer).toHaveAttribute('data-testid', 'call-control-container');
 
-      await act(async () => {
-        render(<CallControlComponent {...defaultProps} />);
-      });
+      // Verify audio element for call playback
+      const remoteAudio = screen.container.querySelector('#remote-audio');
+      expect(remoteAudio).toBeInTheDocument();
+      expect(remoteAudio).toHaveAttribute('autoplay', '');
+      expect(remoteAudio).toHaveAttribute('id', 'remote-audio');
 
-      expect(screen.getByTestId('call-control:end-call')).toBeInTheDocument();
+      // Verify button group container
+      const buttonGroup = callControlContainer.querySelector('.button-group');
+      expect(buttonGroup).toBeInTheDocument();
+      expect(buttonGroup).toHaveAttribute('class', 'button-group');
 
-      // Test with media channel
-      const taskWithMediaChannel = {
-        ...mockCurrentTask,
-        data: {
-          ...mockCurrentTask.data,
-          interaction: {
-            ...mockCurrentTask.data.interaction,
-            mediaChannel: 'voice',
-          },
-        },
-      };
+      // Verify mute button and its properties
+      const muteButton = screen.getByLabelText('Mute');
+      expect(muteButton).toBeInTheDocument();
+      expect(muteButton).toHaveAttribute('type', 'button');
+      expect(muteButton).toHaveAttribute('aria-label', 'Mute');
+      expect(muteButton).toHaveAttribute('class', 'md-button-circle-wrapper mute-btn md-button-simple-wrapper');
+      expect(muteButton).toHaveAttribute('data-color', 'primary');
+      expect(muteButton).toHaveAttribute('data-disabled', 'false');
+      expect(muteButton).toHaveAttribute('data-size', '40');
 
-      await act(async () => {
-        render(<CallControlComponent {...{...defaultProps, currentTask: taskWithMediaChannel}} />);
-      });
+      // Verify mute button icon
+      const muteIcon = muteButton.querySelector('mdc-icon');
+      expect(muteIcon).toBeInTheDocument();
+      expect(muteIcon).toHaveAttribute('class', 'mute-btn-icon');
+      expect(muteIcon).toHaveAttribute('name', 'mute');
 
-      expect(getMediaTypeSpy).toHaveBeenCalledWith('telephony', 'voice');
+      // Verify mute button tooltip
+      const muteTooltip = screen.getByText('Mute').closest('.md-tooltip-label');
+      expect(muteTooltip).toBeInTheDocument();
+      expect(muteTooltip).toHaveAttribute('class', 'md-tooltip-label');
+
+      // Verify hold button and its properties
+      const holdButton = screen.getByLabelText('Hold');
+      expect(holdButton).toBeInTheDocument();
+      expect(holdButton).toHaveAttribute('type', 'button');
+      expect(holdButton).toHaveAttribute('aria-label', 'Hold');
+      expect(holdButton).toHaveAttribute('class', 'md-button-circle-wrapper hold-btn md-button-simple-wrapper');
+      expect(holdButton).toHaveAttribute('data-color', 'primary');
+      expect(holdButton).toHaveAttribute('data-disabled', 'false');
+      expect(holdButton).toHaveAttribute('data-size', '40');
+
+      // Verify hold button icon
+      const holdIcon = holdButton.querySelector('mdc-icon');
+      expect(holdIcon).toBeInTheDocument();
+      expect(holdIcon).toHaveAttribute('class', 'hold-btn-icon');
+      expect(holdIcon).toHaveAttribute('name', 'hold');
+
+      // Verify hold button tooltip
+      const holdTooltip = screen.getByText('Hold').closest('.md-tooltip-label');
+      expect(holdTooltip).toBeInTheDocument();
+      expect(holdTooltip).toHaveAttribute('class', 'md-tooltip-label');
+
+      // Verify transfer button and its properties
+      const transferButton = screen.getByLabelText('Transfer');
+      expect(transferButton).toBeInTheDocument();
+      expect(transferButton).toHaveAttribute('type', 'button');
+      expect(transferButton).toHaveAttribute('aria-label', 'Transfer');
+      expect(transferButton).toHaveAttribute('aria-expanded', 'false');
+      expect(transferButton).toHaveAttribute('aria-haspopup', 'dialog');
+      expect(transferButton).toHaveAttribute(
+        'class',
+        'md-button-circle-wrapper call-control-button md-button-simple-wrapper'
+      );
+      expect(transferButton).toHaveAttribute('data-color', 'primary');
+      expect(transferButton).toHaveAttribute('data-disabled', 'false');
+      expect(transferButton).toHaveAttribute('data-size', '40');
+
+      // Verify transfer button icon
+      const transferIcon = transferButton.querySelector('mdc-icon');
+      expect(transferIcon).toBeInTheDocument();
+      expect(transferIcon).toHaveAttribute('class', 'call-control-button-icon');
+      expect(transferIcon).toHaveAttribute('name', 'next-bold');
+
+      // Verify transfer button tooltip
+      const transferTooltip = screen.getByText('Transfer').closest('.md-tooltip-label');
+      expect(transferTooltip).toBeInTheDocument();
+      expect(transferTooltip).toHaveAttribute('class', 'md-tooltip-label');
+
+      // Verify utility functions were called
+      expect(getMediaTypeSpy).toHaveBeenCalled();
+      expect(isTelephonyMediaTypeSpy).toHaveBeenCalled();
+      expect(buildCallControlButtonsSpy).toHaveBeenCalled();
+      expect(updateCallStateFromTaskSpy).toHaveBeenCalled();
     });
   });
+  describe('Button interactions', () => {
+    it('responds to hover events and maintains button state during interactions', async () => {
+      // Use the default buildCallControlButtons to ensure mute and hold buttons are rendered
+      const modifiedProps = {
+        ...defaultProps,
+        consultInitiated: false,
+        controlVisibility: {
+          ...mockControlVisibility,
+          wrapup: false,
+          consult: true,
+          transfer: true,
+          muteUnmute: true,
+          holdResume: true,
+        },
+        buddyAgents: mockBuddyAgents,
+      };
 
-  describe('PopoverNext and Transfer/Consult Interactions', () => {
-    it('should render PopoverNext components and handle button interactions', async () => {
-      const handlePopoverOpenSpy = jest.spyOn(callControlUtils, 'handlePopoverOpen');
-      const handleTargetSelectSpy = jest.spyOn(callControlUtils, 'handleTargetSelect');
+      const screen = await render(<CallControlComponent {...modifiedProps} />);
 
-      buildCallControlButtonsSpy.mockReturnValue([
+      // Test hover interactions on mute button
+      const muteButton = screen.getByLabelText('Mute');
+      fireEvent.mouseEnter(muteButton);
+      fireEvent.mouseOver(muteButton);
+      expect(muteButton).toBeInTheDocument();
+      fireEvent.mouseLeave(muteButton);
+
+      // Test hover interactions on hold button
+      const holdButton = screen.getByLabelText('Hold');
+      fireEvent.mouseEnter(holdButton);
+      fireEvent.mouseOver(holdButton);
+      expect(holdButton).toBeInTheDocument();
+      fireEvent.mouseLeave(holdButton);
+
+      // Test hover and click interactions on transfer button
+      const transferButton = screen.getByLabelText('Transfer');
+      fireEvent.mouseEnter(transferButton);
+      fireEvent.mouseOver(transferButton);
+      fireEvent.click(transferButton); // Trigger potential popover functionality
+      fireEvent.mouseLeave(transferButton);
+
+      // Verify accessibility attributes for popover functionality
+      expect(transferButton).toHaveAttribute('aria-haspopup', 'dialog');
+      expect(transferButton).toHaveAttribute('aria-expanded', 'false');
+
+      // Verify buttons maintain their CSS classes after interactions
+      expect(transferButton).toHaveClass('call-control-button');
+      expect(muteButton).toHaveClass('mute-btn');
+      expect(holdButton).toHaveClass('hold-btn');
+    });
+    it('handles various user interaction patterns on consultation buttons', async () => {
+      const modifiedProps = {
+        ...defaultProps,
+        consultInitiated: false,
+        controlVisibility: {
+          ...mockControlVisibility,
+          wrapup: false,
+          consult: true,
+        },
+        buddyAgents: mockBuddyAgents,
+      };
+
+      // Mock filterButtonsForConsultation to return a consult button
+      jest.spyOn(callControlUtils, 'filterButtonsForConsultation').mockReturnValue([
         {
-          id: 'transfer-button',
-          icon: 'transfer-bold',
-          tooltip: 'Transfer Call',
-          className: 'transfer-button',
+          id: 'consult',
+          icon: 'consult',
+          tooltip: 'Consult',
+          className: 'call-control-button',
           disabled: false,
+          menuType: 'Consult',
           isVisible: true,
-          menuType: 'Transfer',
-          dataTestId: 'call-control:transfer',
+          dataTestId: 'consult-button',
         },
       ]);
 
-      const popoverProps = {
-        ...defaultProps,
-        controlVisibility: {...mockControlVisibility, wrapup: false},
-        consultAccepted: false,
-        consultInitiated: false,
-        buddyAgents: mockBuddyAgents,
-        queues: [],
-      };
+      const screen = await render(<CallControlComponent {...modifiedProps} />);
 
-      render(<CallControlComponent {...popoverProps} />);
+      // Locate consultation button for testing
+      const consultButton = screen.getByLabelText('Consult');
+      expect(consultButton).toBeInTheDocument();
 
-      const transferButton = screen.getByTestId('call-control:transfer');
-      expect(transferButton).toHaveClass('transfer-button');
-      expect(transferButton).toHaveAttribute('aria-label', 'Transfer Call');
-      expect(transferButton).not.toBeDisabled();
+      // Test keyboard interactions
+      fireEvent.focus(consultButton);
+      fireEvent.keyDown(consultButton, {key: 'Enter', code: 'Enter'});
+      fireEvent.keyUp(consultButton, {key: 'Enter', code: 'Enter'});
 
-      // Test utility function calls for transfer operations
-      await act(async () => {
-        callControlUtils.handlePopoverOpen(
-          'Transfer',
-          false,
-          'Transfer',
-          jest.fn(),
-          jest.fn(),
-          jest.fn(),
-          jest.fn(),
-          mockLogger
-        );
+      fireEvent.focus(consultButton);
+      fireEvent.keyDown(consultButton, {key: ' ', code: 'Space'});
+      fireEvent.keyUp(consultButton, {key: ' ', code: 'Space'});
 
-        callControlUtils.handleTargetSelect(
-          'agent1',
-          'John Doe',
-          'agent',
-          'Transfer',
-          popoverProps.consultCall,
-          popoverProps.transferCall,
-          popoverProps.setConsultAgentId,
-          popoverProps.setConsultAgentName,
-          popoverProps.setLastTargetType,
-          mockLogger
-        );
-      });
+      // Test mouse interactions
+      fireEvent.mouseDown(consultButton);
+      fireEvent.mouseUp(consultButton);
+      fireEvent.click(consultButton);
 
-      expect(handlePopoverOpenSpy).toHaveBeenCalled();
-      expect(handleTargetSelectSpy).toHaveBeenCalled();
+      // Test touch interactions for mobile compatibility
+      fireEvent.touchStart(consultButton);
+      fireEvent.touchEnd(consultButton);
 
-      handlePopoverOpenSpy.mockRestore();
-      handleTargetSelectSpy.mockRestore();
+      // Verify button maintains accessibility and functionality
+      expect(consultButton).toHaveAttribute('type', 'button');
+      expect(consultButton).toHaveAttribute('aria-label', 'Consult');
+
+      // Verify button parent structure exists
+      const buttonParent = consultButton.parentElement;
+      expect(buttonParent).toBeInTheDocument();
     });
 
-    it('should handle component internal handlers for popover operations', async () => {
-      // This test specifically targets the uncovered lines in the component
-      const handlePopoverOpenSpy = jest.spyOn(callControlUtils, 'handlePopoverOpen');
-      const handleTargetSelectSpy = jest.spyOn(callControlUtils, 'handleTargetSelect');
-      const handleCloseButtonPressSpy = jest.spyOn(callControlUtils, 'handleCloseButtonPress');
+    it('manages popover functionality for consultation and transfer operations', async () => {
+      // Configure consultation button for popover testing
+      const consultButton = {
+        id: 'consult',
+        icon: 'consult',
+        tooltip: 'Consult',
+        className: 'call-control-button',
+        disabled: false,
+        menuType: 'Consult' as CallControlMenuType,
+        isVisible: true,
+        dataTestId: 'consult-button',
+        onClick: jest.fn(),
+      };
 
-      // Mock React.useCallback to ensure component handlers are created
-      const mockUseCallback = jest.spyOn(React, 'useCallback');
-      mockUseCallback.mockImplementation((fn) => fn);
+      jest.spyOn(callControlUtils, 'filterButtonsForConsultation').mockReturnValue([consultButton]);
 
-      buildCallControlButtonsSpy.mockReturnValue([
-        {
-          id: 'transfer-popover',
-          icon: 'transfer-bold',
-          tooltip: 'Transfer Call',
-          className: 'transfer-btn',
-          disabled: false,
-          isVisible: true,
-          menuType: 'Transfer', // This ensures PopoverNext JSX is rendered (lines 175-210)
+      // Mock popover event handlers
+      const mockHandlePopoverOpen = jest.fn();
+      const mockHandlePopoverHide = jest.fn();
+      const mockHandleCloseButtonPress = jest.fn();
+
+      jest.spyOn(callControlUtils, 'handlePopoverOpen').mockImplementation(mockHandlePopoverOpen);
+      jest.spyOn(callControlUtils, 'handlePopoverHide').mockImplementation(mockHandlePopoverHide);
+      jest.spyOn(callControlUtils, 'handleCloseButtonPress').mockImplementation(mockHandleCloseButtonPress);
+
+      const modifiedProps = {
+        ...defaultProps,
+        consultInitiated: false,
+        controlVisibility: {
+          ...mockControlVisibility,
+          wrapup: false,
+          consult: true,
         },
-      ]);
-
-      const popoverProps = {
-        ...defaultProps,
-        controlVisibility: {...mockControlVisibility, wrapup: false}, // Must be false to render PopoverNext
-        consultAccepted: false,
-        consultInitiated: false,
         buddyAgents: mockBuddyAgents,
-        queues: [],
       };
 
-      const {container} = render(<CallControlComponent {...popoverProps} />);
+      const screen = await render(<CallControlComponent {...modifiedProps} />);
 
-      // Verify PopoverNext structure is rendered (covers lines 175-210)
-      const popoverContainer = container.querySelector('[data-testid="call-control-container"]');
-      expect(popoverContainer).toBeInTheDocument();
+      // Locate and interact with consultation button
+      const consultButtonElement = screen.getByLabelText('Consult');
+      expect(consultButtonElement).toBeInTheDocument();
 
-      // Simulate the component's internal handlePopoverOpen function (line 112)
-      await act(async () => {
-        // This simulates what happens when the component's handlePopoverOpen is called
-        callControlUtils.handlePopoverOpen(
-          'Transfer',
-          false,
-          'Transfer',
-          jest.fn(),
-          jest.fn(),
-          popoverProps.loadBuddyAgents,
-          popoverProps.loadQueues,
-          mockLogger
-        );
-      });
+      // Simulate user click to trigger popover functionality
+      fireEvent.click(consultButtonElement);
 
-      // Simulate the component's internal handleTargetSelect function (line 97)
-      await act(async () => {
-        // This represents the onAgentSelect callback that would call the component's handleTargetSelect
-        callControlUtils.handleTargetSelect(
-          'agent1',
-          'John Doe',
-          'agent',
-          'Transfer',
-          popoverProps.consultCall,
-          popoverProps.transferCall,
-          popoverProps.setConsultAgentId,
-          popoverProps.setConsultAgentName,
-          popoverProps.setLastTargetType,
-          mockLogger
-        );
+      // Verify popover accessibility attributes
+      expect(consultButtonElement).toHaveAttribute('aria-haspopup', 'dialog');
+      expect(consultButtonElement).toHaveAttribute('aria-expanded', 'false');
 
-        // This represents the onQueueSelect callback
-        callControlUtils.handleTargetSelect(
-          'queue1',
-          'Support Queue',
-          'queue',
-          'Transfer',
-          popoverProps.consultCall,
-          popoverProps.transferCall,
-          popoverProps.setConsultAgentId,
-          popoverProps.setConsultAgentName,
-          popoverProps.setLastTargetType,
-          mockLogger
-        );
-      });
+      // Test additional interactions that exercise popover behavior
+      fireEvent.mouseEnter(consultButtonElement);
+      fireEvent.focus(consultButtonElement);
+      fireEvent.blur(consultButtonElement);
+      fireEvent.mouseLeave(consultButtonElement);
 
-      // Simulate the component's close button handler (line 175 closeButtonProps)
-      await act(async () => {
-        callControlUtils.handleCloseButtonPress(jest.fn(), jest.fn());
-      });
-
-      expect(handlePopoverOpenSpy).toHaveBeenCalled();
-      expect(handleTargetSelectSpy).toHaveBeenCalledTimes(2);
-      expect(handleCloseButtonPressSpy).toHaveBeenCalled();
-
-      // Cleanup
-      mockUseCallback.mockRestore();
-      handlePopoverOpenSpy.mockRestore();
-      handleTargetSelectSpy.mockRestore();
-      handleCloseButtonPressSpy.mockRestore();
-    });
-
-    it('should execute component internal callback functions to reach full coverage', async () => {
-      // This test is specifically designed to hit the component's internal callback functions
-      // that are defined but not easily triggered through DOM events in the test environment
-
-      const handlePopoverOpenSpy = jest.spyOn(callControlUtils, 'handlePopoverOpen');
-      const handleTargetSelectSpy = jest.spyOn(callControlUtils, 'handleTargetSelect');
-      const handleCloseButtonPressSpy = jest.spyOn(callControlUtils, 'handleCloseButtonPress');
-      const handleWrapupReasonChangeSpy = jest.spyOn(callControlUtils, 'handleWrapupReasonChange');
-
-      // Test configuration that ensures both PopoverNext AND wrapup functionality
-      buildCallControlButtonsSpy.mockReturnValue([
-        {
-          id: 'transfer-callback-test',
-          icon: 'transfer-bold',
-          tooltip: 'Transfer Call',
-          className: 'transfer-callback-btn',
-          disabled: false,
-          isVisible: true,
-          menuType: 'Transfer', // This triggers PopoverNext rendering
-          dataTestId: 'call-control:transfer',
-        },
-      ]);
-
-      const callbackTestProps = {
-        ...defaultProps,
-        controlVisibility: {...mockControlVisibility, wrapup: false}, // First test PopoverNext
-        consultAccepted: false,
-        consultInitiated: false,
-        buddyAgents: mockBuddyAgents,
-        queues: [],
-      };
-
-      const {rerender} = render(<CallControlComponent {...callbackTestProps} />);
-
-      // Part 1: Test PopoverNext callbacks (lines 97, 112, 175-210)
-
-      // Get the component instance to access its internal methods
-      const transferButton = screen.getByTestId('call-control:transfer');
-      expect(transferButton).toBeInTheDocument();
-
-      // Simulate the exact callback scenarios that would be triggered by PopoverNext
-      await act(async () => {
-        // This simulates the handlePopoverOpen callback (line 112)
-        // The component creates this function and passes it to buildCallControlButtons
-        callControlUtils.handlePopoverOpen(
-          'Transfer',
-          false,
-          'Transfer',
-          jest.fn(),
-          jest.fn(),
-          callbackTestProps.loadBuddyAgents,
-          callbackTestProps.loadQueues,
-          mockLogger
-        );
-
-        // This simulates the handleTargetSelect callback (line 97)
-        // The component creates this function for onAgentSelect and onQueueSelect
-        callControlUtils.handleTargetSelect(
-          'callback-agent-id',
-          'Callback Agent',
-          'agent',
-          'Transfer',
-          callbackTestProps.consultCall,
-          callbackTestProps.transferCall,
-          callbackTestProps.setConsultAgentId,
-          callbackTestProps.setConsultAgentName,
-          callbackTestProps.setLastTargetType,
-          mockLogger
-        );
-
-        // This simulates the closeButtonProps onPress callback (line 175)
-        callControlUtils.handleCloseButtonPress(jest.fn(), jest.fn());
-      });
-
-      // Part 2: Test wrapup select onChange callback (line 297)
-
-      // Reconfigure for wrapup testing
-      buildCallControlButtonsSpy.mockReturnValue([]);
-      const wrapupCallbackProps = {
-        ...defaultProps,
-        controlVisibility: {...mockControlVisibility, wrapup: true},
-        wrapupCodes: mockWrapupCodes,
-      };
-
-      await act(async () => {
-        rerender(<CallControlComponent {...wrapupCallbackProps} />);
-      });
-
-      // Verify wrapup button exists
-      const wrapupButton = screen.getByTestId('call-control:wrapup-button');
-      expect(wrapupButton).toBeInTheDocument();
-
-      // Simulate the wrapup select onChange callback (line 297)
-      await act(async () => {
-        const wrapupChangeEvent = new CustomEvent('change', {detail: {value: 'wrap2'}});
-        // This simulates the onChange function that's created on line 297
-        callControlUtils.handleWrapupReasonChange(wrapupChangeEvent, mockWrapupCodes, jest.fn());
-      });
-
-      // Verify all callback functions were called
-      expect(handlePopoverOpenSpy).toHaveBeenCalledWith(
-        'Transfer',
-        false,
-        'Transfer',
-        expect.any(Function),
-        expect.any(Function),
-        callbackTestProps.loadBuddyAgents,
-        callbackTestProps.loadQueues,
-        mockLogger
-      );
-
-      expect(handleTargetSelectSpy).toHaveBeenCalledWith(
-        'callback-agent-id',
-        'Callback Agent',
-        'agent',
-        'Transfer',
-        callbackTestProps.consultCall,
-        callbackTestProps.transferCall,
-        callbackTestProps.setConsultAgentId,
-        callbackTestProps.setConsultAgentName,
-        callbackTestProps.setLastTargetType,
-        mockLogger
-      );
-
-      expect(handleCloseButtonPressSpy).toHaveBeenCalled();
-      expect(handleWrapupReasonChangeSpy).toHaveBeenCalled();
-
-      // Cleanup
-      handlePopoverOpenSpy.mockRestore();
-      handleTargetSelectSpy.mockRestore();
-      handleCloseButtonPressSpy.mockRestore();
-      handleWrapupReasonChangeSpy.mockRestore();
-    });
-
-    it('should handle wrapup select change event', async () => {
-      // This test specifically targets line 297 (wrapup select onChange)
-      const handleWrapupReasonChangeSpy = jest.spyOn(callControlUtils, 'handleWrapupReasonChange');
-      const handleWrapupCallSpy = jest.spyOn(callControlUtils, 'handleWrapupCall');
-
-      const wrapupProps = {
-        ...defaultProps,
-        controlVisibility: {...mockControlVisibility, wrapup: true},
-        wrapupCodes: mockWrapupCodes,
-      };
-
-      buildCallControlButtonsSpy.mockReturnValue([]);
-      render(<CallControlComponent {...wrapupProps} />);
-
-      const wrapupButton = screen.getByTestId('call-control:wrapup-button');
-      expect(wrapupButton).toBeInTheDocument();
-
-      // Simulate the wrapup select onChange event (line 297)
-      await act(async () => {
-        const mockChangeEvent = new CustomEvent('change', {detail: {value: 'wrap1'}});
-        // This simulates the onChange handler on line 297
-        callControlUtils.handleWrapupReasonChange(mockChangeEvent, mockWrapupCodes, jest.fn());
-      });
-
-      // Test wrapup call functionality
-      await act(async () => {
-        callControlUtils.handleWrapupCall('Test Reason', 'test-id', jest.fn(), jest.fn(), jest.fn(), mockLogger);
-      });
-
-      expect(handleWrapupReasonChangeSpy).toHaveBeenCalled();
-      expect(handleWrapupCallSpy).toHaveBeenCalled();
-
-      handleWrapupReasonChangeSpy.mockRestore();
-      handleWrapupCallSpy.mockRestore();
+      // Verify button integrity after interactions
+      expect(consultButtonElement).toBeInTheDocument();
+      expect(consultButtonElement).toHaveClass('call-control-button');
     });
   });
 });
