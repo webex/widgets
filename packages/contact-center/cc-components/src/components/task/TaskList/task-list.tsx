@@ -2,6 +2,7 @@ import React from 'react';
 import {TaskListComponentProps, MEDIA_CHANNEL} from '../task.types';
 import Task from '../Task';
 import './styles.scss';
+import {withMetrics} from '@webex/cc-ui-metrics';
 
 const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (props) => {
   const {currentTask, taskList, acceptTask, declineTask, isBrowser, onTaskSelect, logger} = props;
@@ -75,4 +76,5 @@ const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (prop
   );
 };
 
-export default TaskListComponent;
+const TaskListComponentWithMetrics = withMetrics(TaskListComponent, 'TaskList');
+export default TaskListComponentWithMetrics;
