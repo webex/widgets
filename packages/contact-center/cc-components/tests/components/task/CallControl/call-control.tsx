@@ -355,14 +355,18 @@ describe('CallControlComponent', () => {
 
       // Test hover and click interactions on transfer button
       const transferButton = screen.getByLabelText('Transfer');
+
+      // Verify accessibility attributes before interaction
+      expect(transferButton).toHaveAttribute('aria-haspopup', 'dialog');
+      expect(transferButton).toHaveAttribute('aria-expanded', 'false');
+
       fireEvent.mouseEnter(transferButton);
       fireEvent.mouseOver(transferButton);
       fireEvent.click(transferButton); // Trigger potential popover functionality
       fireEvent.mouseLeave(transferButton);
 
-      // Verify accessibility attributes for popover functionality
-      expect(transferButton).toHaveAttribute('aria-haspopup', 'dialog');
-      expect(transferButton).toHaveAttribute('aria-expanded', 'false');
+      // After clicking, the popover should be expanded
+      expect(transferButton).toHaveAttribute('aria-expanded', 'true');
 
       // Verify buttons maintain their CSS classes after interactions
       expect(transferButton).toHaveClass('call-control-button');
@@ -445,11 +449,9 @@ describe('CallControlComponent', () => {
       jest.spyOn(callControlUtils, 'filterButtonsForConsultation').mockReturnValue([consultButton]);
 
       // Mock popover event handlers
-      const mockHandlePopoverOpen = jest.fn();
       const mockHandlePopoverHide = jest.fn();
       const mockHandleCloseButtonPress = jest.fn();
 
-      jest.spyOn(callControlUtils, 'handlePopoverOpen').mockImplementation(mockHandlePopoverOpen);
       jest.spyOn(callControlUtils, 'handlePopoverHide').mockImplementation(mockHandlePopoverHide);
       jest.spyOn(callControlUtils, 'handleCloseButtonPress').mockImplementation(mockHandleCloseButtonPress);
 
@@ -470,12 +472,15 @@ describe('CallControlComponent', () => {
       const consultButtonElement = screen.getByLabelText('Consult');
       expect(consultButtonElement).toBeInTheDocument();
 
+      // Verify popover accessibility attributes before interaction
+      expect(consultButtonElement).toHaveAttribute('aria-haspopup', 'dialog');
+      expect(consultButtonElement).toHaveAttribute('aria-expanded', 'false');
+
       // Simulate user click to trigger popover functionality
       fireEvent.click(consultButtonElement);
 
-      // Verify popover accessibility attributes
-      expect(consultButtonElement).toHaveAttribute('aria-haspopup', 'dialog');
-      expect(consultButtonElement).toHaveAttribute('aria-expanded', 'false');
+      // After clicking, the popover should be expanded
+      expect(consultButtonElement).toHaveAttribute('aria-expanded', 'true');
 
       // Test additional interactions that exercise popover behavior
       fireEvent.mouseEnter(consultButtonElement);

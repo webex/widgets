@@ -15,9 +15,7 @@ import {
   handleWrapupCall as handleWrapupCallUtil,
   handleWrapupChange as handleWrapupChangeUtil,
   handleTargetSelect as handleTargetSelectUtil,
-  handlePopoverOpen as handlePopoverOpenUtil,
   handleCloseButtonPress,
-  handlePopoverHide,
   handleWrapupReasonChange,
   handleAudioRef,
   getMediaType,
@@ -108,19 +106,6 @@ function CallControlComponent(props: CallControlComponentProps) {
     );
   };
 
-  const handlePopoverOpen = (menuType: CallControlMenuType) => {
-    handlePopoverOpenUtil(
-      menuType,
-      showAgentMenu,
-      agentMenuType,
-      setShowAgentMenu,
-      setAgentMenuType,
-      loadBuddyAgents,
-      loadQueues,
-      logger
-    );
-  };
-
   const currentMediaType = getMediaType(
     currentTask.data.interaction.mediaType as MediaChannelType,
     currentTask.data.interaction.mediaChannel as MediaChannelType
@@ -159,7 +144,20 @@ function CallControlComponent(props: CallControlComponentProps) {
                 return (
                   <PopoverNext
                     key={index}
-                    onHide={() => handlePopoverHide(setShowAgentMenu, setAgentMenuType)}
+                    onShow={() => {
+                      logger.info(`CC-Widgets: CallControl: showing consult-transfer popover`, {
+                        module: 'call-control.tsx',
+                        method: 'onShowPopover',
+                      });
+                      setShowAgentMenu(true);
+                      setAgentMenuType(button.menuType as CallControlMenuType);
+                      loadBuddyAgents();
+                      loadQueues();
+                    }}
+                    onHide={() => {
+                      setShowAgentMenu(false);
+                      setAgentMenuType(null);
+                    }}
                     color="primary"
                     delay={[0, 0]}
                     placement="bottom"
@@ -184,7 +182,6 @@ function CallControlComponent(props: CallControlComponentProps) {
                             aria-label={button.tooltip}
                             disabled={button.disabled || (consultInitiated && isTelephony)}
                             data-testid={button.dataTestId}
-                            onPress={() => handlePopoverOpen(button.menuType as CallControlMenuType)}
                           >
                             <Icon className={button.className + '-icon'} name={button.icon} />
                           </ButtonCircle>

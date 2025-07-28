@@ -146,34 +146,6 @@ export const handleTargetSelect = (
 };
 
 /**
- * Handles popover open/close logic
- */
-export const handlePopoverOpen = (
-  menuType: CallControlMenuType,
-  showAgentMenu: boolean,
-  agentMenuType: CallControlMenuType | null,
-  setShowAgentMenu: (show: boolean) => void,
-  setAgentMenuType: (type: CallControlMenuType | null) => void,
-  loadBuddyAgents: () => void,
-  loadQueues: () => void,
-  logger: ILogger
-): void => {
-  logger.info('CC-Widgets: CallControl: opening call control popover', {
-    module: 'call-control.tsx',
-    method: 'handlePopoverOpen',
-  });
-  if (showAgentMenu && agentMenuType === menuType) {
-    setShowAgentMenu(false);
-    setAgentMenuType(null);
-  } else {
-    setAgentMenuType(menuType);
-    setShowAgentMenu(true);
-    loadBuddyAgents();
-    loadQueues();
-  }
-};
-
-/**
  * Gets the media type information
  */
 export const getMediaType = (mediaType: MediaChannelType, mediaChannel: MediaChannelType): MediaTypeInfo => {
