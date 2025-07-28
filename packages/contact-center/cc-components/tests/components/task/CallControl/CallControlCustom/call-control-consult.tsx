@@ -12,8 +12,43 @@ const loggerMock = {
   debug: jest.fn(),
 };
 
-// eslint-disable-next-line react/display-name
-jest.mock('../../../../../src/components/task/TaskTimer', () => () => <span data-testid="TaskTimer">00:00</span>);
+// Mock Worker for TaskTimer component
+class MockWorker {
+  public url: string;
+  public onmessage: ((event: MessageEvent) => void) | null;
+
+  constructor(stringUrl: string) {
+    this.url = stringUrl;
+    this.onmessage = null;
+  }
+
+  postMessage(msg: unknown) {
+    // Simulate worker timer behavior
+    if (this.onmessage) {
+      setTimeout(() => {
+        this.onmessage!({data: msg} as MessageEvent);
+      }, 0);
+    }
+  }
+
+  addEventListener(type: string, listener: (event: MessageEvent) => void) {
+    if (type === 'message') {
+      this.onmessage = listener;
+    }
+  }
+
+  removeEventListener() {
+    this.onmessage = null;
+  }
+
+  terminate() {
+    // Mock terminate
+  }
+}
+
+// Mock Worker and URL.createObjectURL for TaskTimer
+(global as typeof globalThis).Worker = MockWorker as unknown as typeof Worker;
+(global as typeof globalThis).URL.createObjectURL = jest.fn(() => 'blob:mock-url');
 
 // Mock setTimeout for mute toggle tests
 jest.useFakeTimers();
@@ -51,7 +86,7 @@ describe('CallControlConsultComponent', () => {
     // Verify main structure
     expect(screen.container.querySelector('.call-control-consult')).toBeInTheDocument();
     expect(screen.container.querySelector('.consult-agent-name')).toHaveTextContent('Alice');
-    expect(screen.getByTestId('TaskTimer')).toBeInTheDocument();
+    expect(screen.container.querySelector('.task-text.task-text--secondary')).toBeInTheDocument();
 
     // Verify all buttons are present
     expect(screen.getByTestId('mute-consult-btn')).toBeInTheDocument();

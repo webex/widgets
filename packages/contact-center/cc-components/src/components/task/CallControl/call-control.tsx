@@ -10,7 +10,7 @@ import type {MEDIA_CHANNEL as MediaChannelType} from '../task.types';
 import {DestinationType} from '@webex/cc-store';
 import {WRAP_UP, WRAP_UP_INTERACTION, WRAP_UP_REASON, SELECT, SUBMIT_WRAP_UP} from '../constants';
 import {
-  handleToggleHold,
+  handleToggleHold as handleToggleHoldUtil,
   handleMuteToggle as handleMuteToggleUtil,
   handleWrapupCall as handleWrapupCallUtil,
   handleWrapupChange as handleWrapupChangeUtil,
@@ -69,7 +69,7 @@ function CallControlComponent(props: CallControlComponentProps) {
   }, [currentTask]);
 
   const handletoggleHold = () => {
-    handleToggleHold(isHeld, toggleHold, setIsHeld, logger);
+    handleToggleHoldUtil(isHeld, toggleHold, setIsHeld, logger);
   };
 
   const handleMuteToggle = () => {

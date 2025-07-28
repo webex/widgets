@@ -3,7 +3,7 @@ import '@testing-library/jest-dom';
 import {render, fireEvent, act} from '@testing-library/react';
 import CallControlComponent from '../../../../src/components/task/CallControl/call-control';
 import {CallControlComponentProps} from '../../../../src/components/task/task.types';
-import {mockTask} from '@webex/test-fixtures';
+import {mockTask, mockQueueDetails, mockAgents, mockProfile} from '@webex/test-fixtures';
 import {BuddyDetails, ContactServiceQueue, IWrapupCode} from '@webex/cc-store';
 
 const mockUIDProps = (container) => {
@@ -34,18 +34,6 @@ Object.defineProperty(window, 'MediaStream', {
   })),
 });
 
-// Mock AutoWrapupTimer component
-jest.mock('../../../../src/components/task/AutoWrapupTimer/AutoWrapupTimer', () =>
-  // eslint-disable-next-line react/display-name
-  () => <div data-testid="AutoWrapupTimer">Auto Wrapup Timer</div>
-);
-
-// Mock ConsultTransferPopoverComponent
-jest.mock('../../../../src/components/task/CallControl/CallControlCustom/consult-transfer-popover', () =>
-  // eslint-disable-next-line react/display-name
-  () => <div data-testid="ConsultTransferPopoverComponent">Consult Transfer Popover</div>
-);
-
 describe('CallControlComponent Snapshots', () => {
   const mockLogger = {
     log: jest.fn(),
@@ -74,48 +62,29 @@ describe('CallControlComponent Snapshots', () => {
     autoWrapup: undefined,
   };
 
-  const mockWrapupCodes: IWrapupCode[] = [
-    {id: 'wrap1', name: 'Customer Issue'},
-    {id: 'wrap2', name: 'Technical Support'},
-  ];
+  const mockWrapupCodes: IWrapupCode[] = mockProfile.wrapupCodes;
 
-  const mockBuddyAgents: BuddyDetails[] = [
-    {
-      agentId: 'agent1',
-      agentName: 'John Doe',
-      state: 'Available',
-      teamId: 'team1',
-      dn: '1001',
-      siteId: 'site1',
-    } as BuddyDetails,
-    {
-      agentId: 'agent2',
-      agentName: 'Jane Smith',
-      state: 'Available',
-      teamId: 'team1',
-      dn: '1002',
-      siteId: 'site1',
-    } as BuddyDetails,
-  ];
+  const mockBuddyAgents: BuddyDetails[] = mockAgents.map((agent) => ({
+    ...agent,
+    firstName: agent.name.split(' ')[0] || agent.name,
+    lastName: agent.name.split(' ')[1] || '',
+    teamName: 'Team 1',
+    siteName: 'Main Site',
+    profileId: 'profile1',
+    agentSessionId: 'session1',
+    stateChangeTime: 1234567890,
+    auxiliaryCodeId: null,
+    teamIds: ['team1'],
+  })) as BuddyDetails[];
 
-  const mockQueues: ContactServiceQueue[] = [
-    {
-      id: 'queue1',
-      name: 'Support Queue',
-      description: 'Support Queue Description',
-      queueType: 'inbound',
-      checkAgentAvailability: true,
-      channelType: 'telephony',
-    } as ContactServiceQueue,
-    {
-      id: 'queue2',
-      name: 'Sales Queue',
-      description: 'Sales Queue Description',
-      queueType: 'inbound',
-      checkAgentAvailability: true,
-      channelType: 'telephony',
-    } as ContactServiceQueue,
-  ];
+  const mockQueues: ContactServiceQueue[] = mockQueueDetails.map((queue) => ({
+    id: queue.id,
+    name: queue.name,
+    description: queue.description,
+    queueType: queue.queueType,
+    checkAgentAvailability: queue.checkAgentAvailability,
+    channelType: queue.channelType,
+  })) as ContactServiceQueue[];
 
   const defaultProps: CallControlComponentProps = {
     currentTask: mockCurrentTask,

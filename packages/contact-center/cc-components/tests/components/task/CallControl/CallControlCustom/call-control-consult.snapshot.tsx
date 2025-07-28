@@ -15,9 +15,49 @@ const mockUIDProps = (container) => {
     .forEach((el: HTMLBaseElement) => el.setAttribute('aria-describedby', 'mock-aria-describedby'));
 };
 
-// Mock the TaskTimer component to provide consistent snapshots
-// eslint-disable-next-line react/display-name
-jest.mock('../../../../../src/components/task/TaskTimer', () => () => <span data-testid="TaskTimer">00:00</span>);
+// Mock Worker for TaskTimer component
+global.Worker = class MockWorker {
+  onmessage: ((event: MessageEvent) => void) | null = null;
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  constructor(_scriptURL: string | URL, _options?: WorkerOptions) {
+    // Mock worker constructor
+  }
+
+  postMessage(message: {name: string; type: string}): void {
+    // Mock postMessage - simulate timer updates
+    setTimeout(() => {
+      if (this.onmessage) {
+        this.onmessage({data: {name: message.name, time: '00:00'}} as MessageEvent);
+      }
+    }, 0);
+  }
+
+  terminate(): void {
+    // Mock terminate
+  }
+
+  addEventListener(type: string, listener: EventListenerOrEventListenerObject): void {
+    if (type === 'message' && typeof listener === 'function') {
+      this.onmessage = listener as (event: MessageEvent) => void;
+    }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  removeEventListener(type: string, _listener: EventListenerOrEventListenerObject): void {
+    if (type === 'message') {
+      this.onmessage = null;
+    }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  dispatchEvent(_event: Event): boolean {
+    return true;
+  }
+} as unknown as typeof Worker;
+
+// Mock URL.createObjectURL
+global.URL.createObjectURL = jest.fn(() => 'mock-url');
 
 describe('CallControlConsultComponent Snapshots', () => {
   const mockLogger = {

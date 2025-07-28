@@ -26,11 +26,12 @@ exports[`CallControlConsultComponent Snapshots Interactions should call mockEndC
       >
         Consulting
          • 
-        <span
-          data-testid="TaskTimer"
+        <time
+          class="task-text task-text--secondary"
+          datetime="00:00"
         >
           00:00
-        </span>
+        </time>
       </mdc-text>
     </div>
   </div>
@@ -153,11 +154,12 @@ exports[`CallControlConsultComponent Snapshots Interactions should call mockOnTo
       >
         Consulting
          • 
-        <span
-          data-testid="TaskTimer"
+        <time
+          class="task-text task-text--secondary"
+          datetime="00:00"
         >
           00:00
-        </span>
+        </time>
       </mdc-text>
     </div>
   </div>
@@ -281,11 +283,12 @@ exports[`CallControlConsultComponent Snapshots Interactions should call mockOnTr
       >
         Consulting
          • 
-        <span
-          data-testid="TaskTimer"
+        <time
+          class="task-text task-text--secondary"
+          datetime="00:00"
         >
           00:00
-        </span>
+        </time>
       </mdc-text>
     </div>
   </div>
@@ -408,11 +411,12 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
       >
         Consulting
          • 
-        <span
-          data-testid="TaskTimer"
+        <time
+          class="task-text task-text--secondary"
+          datetime="00:00"
         >
           00:00
-        </span>
+        </time>
       </mdc-text>
     </div>
   </div>
@@ -530,11 +534,12 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
       >
         Consult requested
          • 
-        <span
-          data-testid="TaskTimer"
+        <time
+          class="task-text task-text--secondary"
+          datetime="00:00"
         >
           00:00
-        </span>
+        </time>
       </mdc-text>
     </div>
   </div>
@@ -653,11 +658,12 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
       >
         Consulting
          • 
-        <span
-          data-testid="TaskTimer"
+        <time
+          class="task-text task-text--secondary"
+          datetime="00:00"
         >
           00:00
-        </span>
+        </time>
       </mdc-text>
     </div>
   </div>
@@ -748,11 +754,12 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
       >
         Consulting
          • 
-        <span
-          data-testid="TaskTimer"
+        <time
+          class="task-text task-text--secondary"
+          datetime="00:00"
         >
           00:00
-        </span>
+        </time>
       </mdc-text>
     </div>
   </div>
@@ -870,11 +877,12 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
       >
         Consulting
          • 
-        <span
-          data-testid="TaskTimer"
+        <time
+          class="task-text task-text--secondary"
+          datetime="00:00"
         >
           00:00
-        </span>
+        </time>
       </mdc-text>
     </div>
   </div>
@@ -992,11 +1000,12 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
       >
         Consulting
          • 
-        <span
-          data-testid="TaskTimer"
+        <time
+          class="task-text task-text--secondary"
+          datetime="00:00"
         >
           00:00
-        </span>
+        </time>
       </mdc-text>
     </div>
   </div>
@@ -1114,11 +1123,12 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
       >
         Consulting
          • 
-        <span
-          data-testid="TaskTimer"
+        <time
+          class="task-text task-text--secondary"
+          datetime="00:00"
         >
           00:00
-        </span>
+        </time>
       </mdc-text>
     </div>
   </div>
@@ -1209,11 +1219,12 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
       >
         Consulting
          • 
-        <span
-          data-testid="TaskTimer"
+        <time
+          class="task-text task-text--secondary"
+          datetime="00:00"
         >
           00:00
-        </span>
+        </time>
       </mdc-text>
     </div>
   </div>
@@ -1304,11 +1315,12 @@ exports[`CallControlConsultComponent Snapshots State Management should handle co
       >
         Consulting
          • 
-        <span
-          data-testid="TaskTimer"
+        <time
+          class="task-text task-text--secondary"
+          datetime="00:00"
         >
           00:00
-        </span>
+        </time>
       </mdc-text>
     </div>
   </div>
@@ -1370,11 +1382,12 @@ exports[`CallControlConsultComponent Snapshots State Management should handle ed
       >
         Consulting
          • 
-        <span
-          data-testid="TaskTimer"
+        <time
+          class="task-text task-text--secondary"
+          datetime="00:00"
         >
           00:00
-        </span>
+        </time>
       </mdc-text>
     </div>
   </div>
@@ -1492,11 +1505,12 @@ exports[`CallControlConsultComponent Snapshots State Management should update wh
       >
         Consulting
          • 
-        <span
-          data-testid="TaskTimer"
+        <time
+          class="task-text task-text--secondary"
+          datetime="00:00"
         >
           00:00
-        </span>
+        </time>
       </mdc-text>
     </div>
   </div>
@@ -1614,11 +1628,12 @@ exports[`CallControlConsultComponent Snapshots State Management should update wh
       >
         Consulting
          • 
-        <span
-          data-testid="TaskTimer"
+        <time
+          class="task-text task-text--secondary"
+          datetime="00:00"
         >
           00:00
-        </span>
+        </time>
       </mdc-text>
     </div>
   </div>
