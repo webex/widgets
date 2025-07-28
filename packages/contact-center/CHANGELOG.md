@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.97](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.96...v1.28.0-ccwidgets.97) (2025-07-28)
+
+
+### Bug Fixes
+
+* **widgets:** fixed-consult-transfer-popover-transient-issue ([#506](https://github.com/webex/widgets/issues/506)) ([ae646bd](https://github.com/webex/widgets/commit/ae646bde44ee4fbc5383cfc456c22d2f91b47d20))
+
 # [1.28.0-ccwidgets.96](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.95...v1.28.0-ccwidgets.96) (2025-07-24)
 
 
