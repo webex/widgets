@@ -67,7 +67,13 @@ function versionAndPublish() {
       execSync(`yarn workspace ${workspace} npm publish --tag ${branchName}`, {stdio: 'inherit'});
     };
 
+    const denyList = ['@webex/test-fixtures']; // Add workspace names to exclude from publishing
+
     for (const workspace of workspaceData) {
+      if (denyList.includes(workspace)) {
+        console.log(`Skipping ${workspace} - workspace is in deny list`);
+        continue;
+      }
       publishWorkspace(workspace);
     }
   } catch (error) {

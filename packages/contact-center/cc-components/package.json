@@ -1,8 +1,9 @@
 {
   "name": "@webex/cc-components",
   "description": "Webex Contact Center UI Components Library for your custom contact center solutions",
-  "version": "1.28.0-ccwidgets.91",
+  "version": "1.28.0-ccwidgets.98",
   "main": "dist/index.js",
+  "types": "dist/types/index.d.ts",
   "publishConfig": {
     "access": "public"
   },
@@ -11,8 +12,16 @@
     "package.json"
   ],
   "exports": {
-    ".": "./dist/index.js",
-    "./wc": "./dist/wc.js"
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/types/index.d.ts"
+    },
+    "./wc": {
+      "import": "./dist/wc.js",
+      "require": "./dist/wc.js",
+      "types": "./dist/types/wc.d.ts"
+    }
   },
   "scripts": {
     "clean": "rm -rf dist && rm -rf node_modules",
@@ -20,7 +29,7 @@
     "build": "yarn run -T tsc",
     "build:src": "yarn run clean:dist && webpack",
     "build:watch": "webpack --watch",
-    "test:unit": "jest --coverage",
+    "test:unit": "tsc --project tsconfig.test.json && jest --coverage",
     "test:styles": "eslint"
   },
   "dependencies": {
@@ -39,6 +48,7 @@
     "@testing-library/react": "16.0.1",
     "@types/jest": "29.5.14",
     "@types/react-test-renderer": "18",
+    "@webex/test-fixtures": "workspace:*",
     "babel-loader": "9.2.1",
     "eslint": "^9.20.1",
     "eslint-config-prettier": "^10.0.1",

@@ -23,6 +23,7 @@
         "ESNext",
         "DOM"
       ],
-      "jsx": "react"
+      "jsx": "react",
+      "types": ["jest"],  
     },
   }
