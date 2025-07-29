@@ -4,8 +4,7 @@ import {ITask} from '@webex/plugin-cc';
 export interface UseDigitalChannelsProps {
   currentTask: ITask;
   jwtToken: string;
-  apiEndpoint: string;
-  signalREndpoint: string;
+  dataCenter: string;
   onError?: (error: unknown) => boolean;
   logger?: {
     log: (message: string, meta?: any) => void;
@@ -15,7 +14,6 @@ export interface UseDigitalChannelsProps {
 
 export interface DigitalChannelsProps {
   jwtToken: string;
-  apiEndpoint: string;
-  signalREndpoint: string;
+  dataCenter: string;
   onError?: (error: unknown) => boolean;
 }

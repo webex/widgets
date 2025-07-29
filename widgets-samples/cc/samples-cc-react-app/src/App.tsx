@@ -854,8 +854,7 @@ function App() {
                 accessToken={accessToken}
                 currentTheme={currentTheme}
                 isSdkReady={isSdkReady}
-                signalREndpoint="https://wxcc-component-api.cstg.webexengage.com/signalr"
-                apiEndpoint="https://wxcc-component-api.cstg.webexengage.com/api"
+                dataCenter={'' + (integrationEnv ? 'intgus1' : 'produs1') /* Default to US1 for non-integration envs */} // Use dataCenter prop
               />
             )}
           </div>

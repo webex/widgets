@@ -87,7 +87,7 @@ export default createViteConfig({
   entry: 'src/index.ts',
   libName: 'MinimalWebexEngageApp',
   port: 3241,
-  external: ['react', 'react-dom', 'react/jsx-runtime', '@webex/cc-store'],
+  external: ['react', 'react-dom', 'react/jsx-runtime', '@webex/cc-store', '@momentum-ui/web-components'],
   globals: {
     react: 'React',
     'react-dom': 'ReactDOM',

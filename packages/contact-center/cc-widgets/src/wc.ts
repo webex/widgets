@@ -56,8 +56,7 @@ const WebOutdialCall = r2wc(OutdialCall, {});
 const WebDigitalChannels = r2wc(DigitalChannels, {
   props: {
     jwtToken: 'string',
-    apiEndpoint: 'string',
-    signalREndpoint: 'string',
+    dataCenter: 'string',
     onError: 'function',
   },
 });

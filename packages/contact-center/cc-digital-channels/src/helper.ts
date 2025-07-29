@@ -1,7 +1,7 @@
 import {UseDigitalChannelsProps} from './digital-channels/digital-channels.types';
 
 export const useDigitalChannels = (props: UseDigitalChannelsProps) => {
-  const {jwtToken, apiEndpoint, signalREndpoint, onError, logger, currentTask} = props;
+  const {jwtToken, dataCenter, onError, logger, currentTask} = props;
 
   const handleError = (error: unknown): boolean => {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -25,7 +25,6 @@ export const useDigitalChannels = (props: UseDigitalChannelsProps) => {
     handleError,
     conversationId: currentTask.data.interaction.callAssociatedDetails.mediaResourceId,
     jwtToken,
-    apiEndpoint,
-    signalREndpoint,
+    dataCenter,
   };
 };
