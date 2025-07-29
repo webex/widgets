@@ -3,7 +3,7 @@ import '@testing-library/jest-dom';
 import {render, fireEvent, act} from '@testing-library/react';
 import CallControlComponent from '../../../../src/components/task/CallControl/call-control';
 import {CallControlComponentProps} from '../../../../src/components/task/task.types';
-import {mockTask, mockQueueDetails, mockAgents, mockProfile} from '@webex/test-fixtures';
+import {mockTask, mockQueueDetails, mockAgents, mockProfile, mockCC} from '@webex/test-fixtures';
 import {BuddyDetails, ContactServiceQueue, IWrapupCode} from '@webex/cc-store';
 
 const mockUIDProps = (container) => {
@@ -35,18 +35,11 @@ Object.defineProperty(window, 'MediaStream', {
 });
 
 describe('CallControlComponent Snapshots', () => {
-  const mockLogger = {
-    log: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-    debug: jest.fn(),
-    trace: jest.fn(),
-  };
+  const mockLogger = mockCC.LoggerProxy;
 
   const mockCurrentTask = {
     ...mockTask,
-    id: 'task-123',
+    id: `task-${mockProfile.agentId}`,
     data: {
       ...mockTask.data,
       interaction: {
@@ -68,13 +61,13 @@ describe('CallControlComponent Snapshots', () => {
     ...agent,
     firstName: agent.name.split(' ')[0] || agent.name,
     lastName: agent.name.split(' ')[1] || '',
-    teamName: 'Team 1',
-    siteName: 'Main Site',
-    profileId: 'profile1',
-    agentSessionId: 'session1',
-    stateChangeTime: 1234567890,
-    auxiliaryCodeId: null,
-    teamIds: ['team1'],
+    teamName: mockProfile.teams[0]?.teamName || 'Team 1',
+    siteName: `Site-${mockProfile.siteId}`,
+    profileId: mockProfile.agentProfileID,
+    agentSessionId: `session-${mockProfile.agentId}`,
+    stateChangeTime: mockProfile.lastStateChangeTimestamp,
+    auxiliaryCodeId: mockProfile.lastStateAuxCodeId,
+    teamIds: [mockProfile.teams[0]?.teamId || 'team1'],
   })) as BuddyDetails[];
 
   const mockQueues: ContactServiceQueue[] = mockQueueDetails.map((queue) => ({
@@ -120,8 +113,8 @@ describe('CallControlComponent Snapshots', () => {
     startTimestamp: Date.now(),
     queues: mockQueues,
     loadQueues: jest.fn(),
-    isEndConsultEnabled: true,
-    allowConsultToQueue: true,
+    isEndConsultEnabled: mockProfile.isEndConsultEnabled,
+    allowConsultToQueue: mockProfile.allowConsultToQueue,
     lastTargetType: 'agent',
     setLastTargetType: jest.fn(),
     controlVisibility: {
