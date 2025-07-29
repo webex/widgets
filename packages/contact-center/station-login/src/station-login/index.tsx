@@ -22,6 +22,7 @@ const StationLogin: React.FunctionComponent<StationLoginProps> = observer(
       teamId,
       setTeamId,
     } = store;
+
     const result = useStationLogin({
       cc,
       onLogin,
@@ -52,6 +53,7 @@ const StationLogin: React.FunctionComponent<StationLoginProps> = observer(
       logger,
       profileMode,
     };
+
     return <StationLoginComponent {...props} />;
   }
 );

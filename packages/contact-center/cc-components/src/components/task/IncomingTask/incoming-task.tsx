@@ -1,6 +1,7 @@
 import React from 'react';
 import {IncomingTaskComponentProps, MEDIA_CHANNEL} from '../task.types';
 import Task from '../Task';
+import {withMetrics} from '@webex/cc-ui-metrics';
 
 const IncomingTaskComponent: React.FunctionComponent<IncomingTaskComponentProps> = (props) => {
   const {incomingTask, isBrowser, accept, reject, logger} = props;
@@ -65,4 +66,5 @@ const IncomingTaskComponent: React.FunctionComponent<IncomingTaskComponentProps>
   );
 };
 
-export default IncomingTaskComponent;
+const IncomingTaskComponentWithMetrics = withMetrics(IncomingTaskComponent, 'IncomingTask');
+export default IncomingTaskComponentWithMetrics;

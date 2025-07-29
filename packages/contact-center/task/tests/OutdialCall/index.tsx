@@ -7,9 +7,10 @@ import {OutdialCall} from '../../src/OutdialCall';
 jest.mock('@webex/cc-store', () => ({
   cc: {},
   logger: {
-    // Adding mock logger methods
     info: jest.fn(),
+    log: jest.fn(),
     error: jest.fn(),
+    warn: jest.fn(),
   },
 }));
 
@@ -23,6 +24,8 @@ describe('OutdialCall Component', () => {
       logger: {
         info: expect.any(Function),
         error: expect.any(Function),
+        log: expect.any(Function),
+        warn: expect.any(Function),
       },
     });
   });
