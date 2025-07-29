@@ -104,15 +104,25 @@ describe('CallControlConsultComponent', () => {
     const muteButton = screen.getByTestId('mute-consult-btn');
     expect(muteButton).toBeInTheDocument();
     expect(muteButton).toHaveAttribute('data-disabled', 'false');
+    expect(muteButton).toHaveAttribute('type', 'button');
+    expect(muteButton).toHaveAttribute('data-color', 'primary');
+    expect(muteButton).toHaveAttribute('data-size', '40');
     expect(muteButton).toHaveClass('call-control-button');
 
     const transferButton = screen.getByTestId('transfer-consult-btn');
     expect(transferButton).toBeInTheDocument();
     expect(transferButton).toHaveAttribute('data-disabled', 'false'); // enabled when consultCompleted is true
+    expect(transferButton).toHaveAttribute('type', 'button');
+    expect(transferButton).toHaveAttribute('data-color', 'primary');
+    expect(transferButton).toHaveAttribute('data-size', '40');
     expect(transferButton).toHaveClass('call-control-button');
 
     const cancelButton = screen.getByTestId('cancel-consult-btn');
     expect(cancelButton).toBeInTheDocument();
+    expect(cancelButton).toHaveAttribute('data-disabled', 'false');
+    expect(cancelButton).toHaveAttribute('type', 'button');
+    expect(cancelButton).toHaveAttribute('data-color', 'primary');
+    expect(cancelButton).toHaveAttribute('data-size', '40');
     expect(cancelButton).toHaveClass('call-control-consult-button-cancel');
 
     // Verify button container
@@ -130,18 +140,24 @@ describe('CallControlConsultComponent', () => {
     // Test mute button
     const muteButton = screen.getByTestId('mute-consult-btn');
     expect(muteButton).toHaveAttribute('data-disabled', 'false');
+    expect(muteButton).toHaveAttribute('type', 'button');
+    expect(muteButton).toHaveAttribute('data-color', 'primary');
     fireEvent.click(muteButton);
     expect(mockOnToggleConsultMute).toHaveBeenCalledTimes(1);
 
     // Test transfer button
     const transferButton = screen.getByTestId('transfer-consult-btn');
     expect(transferButton).toHaveAttribute('data-disabled', 'false'); // Should be enabled when consultCompleted is true
+    expect(transferButton).toHaveAttribute('type', 'button');
+    expect(transferButton).toHaveAttribute('data-color', 'primary');
     fireEvent.click(transferButton);
     expect(mockOnTransfer).toHaveBeenCalledTimes(1);
 
     // Test end consult button
     const cancelButton = screen.getByTestId('cancel-consult-btn');
     expect(cancelButton).toBeInTheDocument();
+    expect(cancelButton).toHaveAttribute('data-disabled', 'false');
+    expect(cancelButton).toHaveAttribute('type', 'button');
     fireEvent.click(cancelButton);
     expect(mockEndConsultCall).toHaveBeenCalledTimes(1);
   });
@@ -156,10 +172,14 @@ describe('CallControlConsultComponent', () => {
     // Verify remaining buttons and their attributes
     const transferButton = screen.getByTestId('transfer-consult-btn');
     expect(transferButton).toBeInTheDocument();
+    expect(transferButton).toHaveAttribute('data-disabled', 'false');
+    expect(transferButton).toHaveAttribute('type', 'button');
     expect(transferButton).toHaveClass('call-control-button');
 
     const cancelButton = screen.getByTestId('cancel-consult-btn');
     expect(cancelButton).toBeInTheDocument();
+    expect(cancelButton).toHaveAttribute('data-disabled', 'false');
+    expect(cancelButton).toHaveAttribute('type', 'button');
     expect(cancelButton).toHaveClass('call-control-consult-button-cancel');
   });
 
@@ -173,10 +193,14 @@ describe('CallControlConsultComponent', () => {
     // Verify remaining buttons and their attributes
     const muteButton = screen.getByTestId('mute-consult-btn');
     expect(muteButton).toBeInTheDocument();
+    expect(muteButton).toHaveAttribute('data-disabled', 'false');
+    expect(muteButton).toHaveAttribute('type', 'button');
     expect(muteButton).toHaveClass('call-control-button');
 
     const cancelButton = screen.getByTestId('cancel-consult-btn');
     expect(cancelButton).toBeInTheDocument();
+    expect(cancelButton).toHaveAttribute('data-disabled', 'false');
+    expect(cancelButton).toHaveAttribute('type', 'button');
     expect(cancelButton).toHaveClass('call-control-consult-button-cancel');
 
     // Transfer button should NOT be present when onTransfer is undefined
@@ -190,6 +214,9 @@ describe('CallControlConsultComponent', () => {
     const muteButton = screen.getByTestId('mute-consult-btn');
     expect(muteButton).toBeInTheDocument();
     expect(muteButton).toHaveAttribute('data-disabled', 'false');
+    expect(muteButton).toHaveAttribute('type', 'button');
+    expect(muteButton).toHaveAttribute('data-color', 'primary');
+    expect(muteButton).toHaveAttribute('data-size', '40');
     expect(muteButton).toHaveClass('call-control-button-muted');
 
     // Verify the muted icon is present
@@ -204,6 +231,9 @@ describe('CallControlConsultComponent', () => {
     // Transfer button should be disabled when consultCompleted is false
     const transferButton = screen.getByTestId('transfer-consult-btn');
     expect(transferButton).toHaveAttribute('data-disabled', 'true');
+    expect(transferButton).toHaveAttribute('disabled', '');
+    expect(transferButton).toHaveAttribute('type', 'button');
+    expect(transferButton).toHaveAttribute('data-color', 'primary');
 
     // Verify tooltip containers are present
     const tooltips = screen.container.querySelectorAll('.md-tooltip-label');
@@ -224,5 +254,28 @@ describe('CallControlConsultComponent', () => {
     // Verify cancel/end consult icon
     const cancelIcon = screen.container.querySelector('.call-control-consult-button-cancel-icon');
     expect(cancelIcon).toBeInTheDocument();
+  });
+
+  it('verifies accessibility attributes for all buttons', async () => {
+    const screen = await render(<CallControlConsultComponent {...defaultProps} />);
+
+    // Check mute button accessibility
+    const muteButton = screen.getByTestId('mute-consult-btn');
+    expect(muteButton).toHaveAttribute('aria-describedby');
+
+    // Check transfer button accessibility
+    const transferButton = screen.getByTestId('transfer-consult-btn');
+    expect(transferButton).toHaveAttribute('aria-describedby');
+
+    // Check cancel button accessibility
+    const cancelButton = screen.getByTestId('cancel-consult-btn');
+    expect(cancelButton).toHaveAttribute('aria-describedby');
+
+    // Verify tooltip labels exist and have content
+    const tooltipLabels = screen.container.querySelectorAll('.md-tooltip-label p');
+    expect(tooltipLabels.length).toBe(3);
+    expect(tooltipLabels[0]).toHaveTextContent('Mute');
+    expect(tooltipLabels[1]).toHaveTextContent('Transfer Consult');
+    expect(tooltipLabels[2]).toHaveTextContent('End Consult');
   });
 });
