@@ -107,9 +107,7 @@ describe('incoming-task.utils', () => {
 
     describe('Edge cases', () => {
       it('should handle missing call association details', () => {
-        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
-        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         mockTask.data.interaction.callAssociatedDetails = undefined;
 
         const result = extractIncomingTaskData(mockTask, true);
@@ -118,16 +116,13 @@ describe('incoming-task.utils', () => {
         expect(result.customerName).toBeUndefined();
         expect(result.virtualTeamName).toBeUndefined();
 
-        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
       });
 
       it('should handle missing and invalid ronaTimeout values', () => {
-        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
 
         // Test missing ronaTimeout
-        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         mockTask.data.interaction.callAssociatedDetails = {
           ...originalCallAssociatedDetails,
           ronaTimeout: undefined,
@@ -137,7 +132,6 @@ describe('incoming-task.utils', () => {
         expect(result.ronaTimeout).toBeNull();
 
         // Test invalid ronaTimeout
-        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         mockTask.data.interaction.callAssociatedDetails = {
           ...originalCallAssociatedDetails,
           ronaTimeout: 'invalid-number',
@@ -146,7 +140,7 @@ describe('incoming-task.utils', () => {
         result = extractIncomingTaskData(mockTask, true);
         expect(result.ronaTimeout).toBeNaN();
 
-        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+        // Restore original values
         mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
       });
     });

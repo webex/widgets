@@ -37,7 +37,7 @@ describe('TaskTimer Component', () => {
 
   describe('Rendering', () => {
     it('should render with proper semantic HTML structure and accessibility attributes', async () => {
-      render(<TaskTimer />);
+      const screen = await render(<TaskTimer />);
 
       await waitFor(() => {
         const timeElement = screen.getByRole('time');
@@ -57,7 +57,7 @@ describe('TaskTimer Component', () => {
 
     it('should handle prop combinations with correct DOM attributes and initial state', async () => {
       const oneMinuteAgo = 1640995200000 - 60000;
-      const {rerender} = render(<TaskTimer startTimeStamp={oneMinuteAgo} />);
+      const {rerender} = await render(<TaskTimer startTimeStamp={oneMinuteAgo} />);
 
       await waitFor(() => {
         const timeElement = screen.getByRole('time');

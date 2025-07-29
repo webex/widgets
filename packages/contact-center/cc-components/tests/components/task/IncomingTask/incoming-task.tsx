@@ -1,7 +1,7 @@
 import React from 'react';
-import {render, fireEvent} from '@testing-library/react';
+import {render, fireEvent, getByTestId} from '@testing-library/react';
 import '@testing-library/jest-dom';
-import {mockTask} from '@webex/test-fixtures';
+import {mockTask, mockIncomingTaskData} from '@webex/test-fixtures';
 import IncomingTaskComponent from '../../../../src/components/task/IncomingTask/incoming-task';
 import {IncomingTaskComponentProps, MEDIA_CHANNEL} from '../../../../src/components/task/task.types';
 import * as incomingTaskUtils from '../../../../src/components/task/IncomingTask/incoming-task.utils';
@@ -37,70 +37,6 @@ describe('IncomingTaskComponent', () => {
     isBrowser: true,
     accept: mockAccept,
     reject: mockReject,
-  };
-
-  // Common mock data for different scenarios
-  const mockIncomingTaskData = {
-    webRTC: {
-      ani: '1234567890',
-      customerName: 'John Doe',
-      virtualTeamName: 'Support Team',
-      ronaTimeout: 30,
-      startTimeStamp: 1641234567890,
-      mediaType: MEDIA_CHANNEL.TELEPHONY,
-      mediaChannel: MEDIA_CHANNEL.TELEPHONY,
-      isTelephony: true,
-      isSocial: false,
-      acceptText: 'Accept',
-      declineText: 'Decline',
-      title: '1234567890',
-      disableAccept: false,
-    },
-    extension: {
-      ani: '1234567890',
-      customerName: 'Mobile User',
-      virtualTeamName: 'Mobile Support',
-      ronaTimeout: 30,
-      startTimeStamp: 1641234567890,
-      mediaType: MEDIA_CHANNEL.TELEPHONY,
-      mediaChannel: MEDIA_CHANNEL.TELEPHONY,
-      isTelephony: true,
-      isSocial: false,
-      acceptText: 'Ringing...',
-      declineText: undefined,
-      title: '1234567890',
-      disableAccept: true,
-    },
-    social: {
-      ani: 'social-user-123',
-      customerName: 'Social Customer',
-      virtualTeamName: 'Social Team',
-      ronaTimeout: 45,
-      startTimeStamp: 1641234567890,
-      mediaType: MEDIA_CHANNEL.SOCIAL,
-      mediaChannel: MEDIA_CHANNEL.FACEBOOK,
-      isTelephony: false,
-      isSocial: true,
-      acceptText: 'Accept',
-      declineText: undefined,
-      title: 'Social Customer',
-      disableAccept: false,
-    },
-    chat: {
-      ani: 'chat-user-456',
-      customerName: 'Chat Customer',
-      virtualTeamName: 'Chat Support',
-      ronaTimeout: 60,
-      startTimeStamp: 1641234567890,
-      mediaType: MEDIA_CHANNEL.CHAT,
-      mediaChannel: MEDIA_CHANNEL.CHAT,
-      isTelephony: false,
-      isSocial: false,
-      acceptText: 'Accept',
-      declineText: undefined,
-      title: 'Chat Customer',
-      disableAccept: false,
-    },
   };
 
   // Utility function spies
@@ -280,9 +216,17 @@ describe('IncomingTaskComponent', () => {
       // === WebRTC Telephony Task Assertions ===
       const webRTCListItem = webRTCContainer.querySelector('li.task-list-item');
       expect(webRTCListItem).toBeInTheDocument();
+      expect(webRTCListItem).toHaveClass('task-list-item');
       expect(webRTCListItem).toHaveClass('task-list-hover');
+      expect(webRTCListItem).toHaveAttribute('data-allow-text-select', 'false');
+      expect(webRTCListItem).toHaveAttribute('data-disabled', 'false');
+      expect(webRTCListItem).toHaveAttribute('data-interactive', 'true');
+      expect(webRTCListItem).toHaveAttribute('data-padded', 'false');
+      expect(webRTCListItem).toHaveAttribute('data-shape', 'rectangle');
+      expect(webRTCListItem).toHaveAttribute('data-size', '40');
       expect(webRTCListItem).toHaveAttribute('id', 'telephony-webrtc-task');
       expect(webRTCListItem).toHaveAttribute('role', 'listitem');
+      expect(webRTCListItem).toHaveAttribute('tabindex', '0');
 
       // WebRTC avatar and icon
       const webRTCAvatar = webRTCContainer.querySelector('mdc-avatar');
@@ -311,17 +255,39 @@ describe('IncomingTaskComponent', () => {
       const webRTCDeclineButton = webRTCContainer.querySelector('[data-testid="task:decline-button"]');
       expect(webRTCAcceptButton).toBeInTheDocument();
       expect(webRTCDeclineButton).toBeInTheDocument();
-      expect(webRTCAcceptButton).toHaveAttribute('data-disabled', 'false');
-      expect(webRTCDeclineButton).toHaveAttribute('data-disabled', 'false');
-      expect(webRTCAcceptButton).toHaveAttribute('data-color', 'join');
+      expect(webRTCAcceptButton).toHaveClass('md-button-pill-wrapper');
+      expect(webRTCAcceptButton).toHaveClass('md-button-simple-wrapper');
       expect(webRTCAcceptButton).toHaveTextContent('Accept');
+      expect(webRTCAcceptButton).toHaveAttribute('data-color', 'join');
+      expect(webRTCAcceptButton).toHaveAttribute('data-disabled', 'false');
+      expect(webRTCAcceptButton).toHaveAttribute('data-disabled-outline', 'false');
+      expect(webRTCAcceptButton).toHaveAttribute('data-ghost', 'false');
+      expect(webRTCAcceptButton).toHaveAttribute('data-grown', 'false');
+      expect(webRTCAcceptButton).toHaveAttribute('data-inverted', 'false');
+      expect(webRTCAcceptButton).toHaveAttribute('data-outline', 'false');
+      expect(webRTCAcceptButton).toHaveAttribute('data-shallow-disabled', 'false');
+      expect(webRTCAcceptButton).toHaveAttribute('data-size', '40');
+      expect(webRTCAcceptButton).toHaveAttribute('data-testid', 'task:accept-button');
+      expect(webRTCAcceptButton).toHaveAttribute('tabindex', '-1');
+      expect(webRTCAcceptButton).toHaveAttribute('type', 'button');
+
       expect(webRTCDeclineButton).toHaveAttribute('data-color', 'cancel');
       expect(webRTCDeclineButton).toHaveTextContent('Decline');
+      expect(webRTCDeclineButton).toHaveAttribute('data-testid', 'task:decline-button');
 
       // === Extension Telephony Task Assertions ===
       const extensionListItem = extensionContainer.querySelector('li.task-list-item');
       expect(extensionListItem).toBeInTheDocument();
+      expect(extensionListItem).toHaveClass('task-list-item');
+      expect(extensionListItem).toHaveClass('task-list-hover');
+      expect(extensionListItem).toHaveAttribute('data-allow-text-select', 'false');
+      expect(extensionListItem).toHaveAttribute('data-disabled', 'false');
+      expect(extensionListItem).toHaveAttribute('data-interactive', 'true');
+      expect(extensionListItem).toHaveAttribute('data-padded', 'false');
+      expect(extensionListItem).toHaveAttribute('data-shape', 'rectangle');
+      expect(extensionListItem).toHaveAttribute('data-size', '40');
       expect(extensionListItem).toHaveAttribute('id', 'telephony-extension-task');
+      expect(extensionListItem).toHaveAttribute('role', 'listitem');
 
       // Extension avatar and icon (same as WebRTC)
       const extensionAvatar = extensionContainer.querySelector('mdc-avatar');
@@ -490,7 +456,7 @@ describe('IncomingTaskComponent', () => {
       );
 
       // Verify accept button exists
-      const acceptButton = container.querySelector('[data-testid="task:accept-button"]');
+      const acceptButton = getByTestId(container, 'task:accept-button');
       expect(acceptButton).toBeInTheDocument();
       expect(acceptButton).toHaveTextContent('Accept');
       expect(acceptButton).not.toHaveAttribute('disabled');
@@ -512,7 +478,7 @@ describe('IncomingTaskComponent', () => {
       );
 
       // Verify decline button exists
-      const declineButton = container.querySelector('[data-testid="task:decline-button"]');
+      const declineButton = getByTestId(container, 'task:decline-button');
       expect(declineButton).toBeInTheDocument();
       expect(declineButton).toHaveTextContent('Decline');
       expect(declineButton).not.toHaveAttribute('disabled');

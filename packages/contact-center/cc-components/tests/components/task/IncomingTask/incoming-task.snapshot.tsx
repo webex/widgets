@@ -1,7 +1,7 @@
 import React from 'react';
 import {render, fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom';
-import {mockTask} from '@webex/test-fixtures';
+import {mockTask, mockIncomingTaskData} from '@webex/test-fixtures';
 import IncomingTaskComponent from '../../../../src/components/task/IncomingTask/incoming-task';
 import {IncomingTaskComponentProps, MEDIA_CHANNEL} from '../../../../src/components/task/task.types';
 import * as incomingTaskUtils from '../../../../src/components/task/IncomingTask/incoming-task.utils';
@@ -37,70 +37,6 @@ describe('IncomingTaskComponent', () => {
     isBrowser: true,
     accept: mockAccept,
     reject: mockReject,
-  };
-
-  // Common mock data for different scenarios
-  const mockIncomingTaskData = {
-    webRTC: {
-      ani: '1234567890',
-      customerName: 'John Doe',
-      virtualTeamName: 'Support Team',
-      ronaTimeout: 30,
-      startTimeStamp: 1641234567890,
-      mediaType: MEDIA_CHANNEL.TELEPHONY,
-      mediaChannel: MEDIA_CHANNEL.TELEPHONY,
-      isTelephony: true,
-      isSocial: false,
-      acceptText: 'Accept',
-      declineText: 'Decline',
-      title: '1234567890',
-      disableAccept: false,
-    },
-    extension: {
-      ani: '1234567890',
-      customerName: 'Mobile User',
-      virtualTeamName: 'Mobile Support',
-      ronaTimeout: 30,
-      startTimeStamp: 1641234567890,
-      mediaType: MEDIA_CHANNEL.TELEPHONY,
-      mediaChannel: MEDIA_CHANNEL.TELEPHONY,
-      isTelephony: true,
-      isSocial: false,
-      acceptText: 'Ringing...',
-      declineText: undefined,
-      title: '1234567890',
-      disableAccept: true,
-    },
-    social: {
-      ani: 'social-user-123',
-      customerName: 'Social Customer',
-      virtualTeamName: 'Social Team',
-      ronaTimeout: 45,
-      startTimeStamp: 1641234567890,
-      mediaType: MEDIA_CHANNEL.SOCIAL,
-      mediaChannel: MEDIA_CHANNEL.FACEBOOK,
-      isTelephony: false,
-      isSocial: true,
-      acceptText: 'Accept',
-      declineText: undefined,
-      title: 'Social Customer',
-      disableAccept: false,
-    },
-    chat: {
-      ani: 'chat-user-456',
-      customerName: 'Chat Customer',
-      virtualTeamName: 'Chat Support',
-      ronaTimeout: 60,
-      startTimeStamp: 1641234567890,
-      mediaType: MEDIA_CHANNEL.CHAT,
-      mediaChannel: MEDIA_CHANNEL.CHAT,
-      isTelephony: false,
-      isSocial: false,
-      acceptText: 'Accept',
-      declineText: undefined,
-      title: 'Chat Customer',
-      disableAccept: false,
-    },
   };
 
   // Utility function spies

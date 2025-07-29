@@ -18,13 +18,11 @@ describe('task-list.utils', () => {
     describe('Active tasks', () => {
       it('should extract correct data for active telephony task', () => {
         const originalState = mockTask.data.interaction.state;
-        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
         const originalWrapUpRequired = mockTask.data.wrapUpRequired;
         const originalMediaType = mockTask.data.interaction.mediaType;
 
         mockTask.data.interaction.state = 'active';
-        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         mockTask.data.interaction.callAssociatedDetails = {
           ani: '1234567890',
           customerName: 'John Doe',
@@ -53,7 +51,6 @@ describe('task-list.utils', () => {
 
         // Restore original values
         mockTask.data.interaction.state = originalState;
-        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
         mockTask.data.wrapUpRequired = originalWrapUpRequired;
         mockTask.data.interaction.mediaType = originalMediaType;
@@ -61,14 +58,12 @@ describe('task-list.utils', () => {
 
       it('should extract correct data for active social media task', () => {
         const originalState = mockTask.data.interaction.state;
-        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
         const originalWrapUpRequired = mockTask.data.wrapUpRequired;
         const originalMediaType = mockTask.data.interaction.mediaType;
         const originalMediaChannel = mockTask.data.interaction.mediaChannel;
 
         mockTask.data.interaction.state = 'connected';
-        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         mockTask.data.interaction.callAssociatedDetails = {
           ani: '1234567890',
           customerName: 'Alice Johnson',
@@ -89,7 +84,6 @@ describe('task-list.utils', () => {
 
         // Restore original values
         mockTask.data.interaction.state = originalState;
-        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
         mockTask.data.wrapUpRequired = originalWrapUpRequired;
         mockTask.data.interaction.mediaType = originalMediaType;
@@ -100,13 +94,11 @@ describe('task-list.utils', () => {
     describe('Incoming tasks', () => {
       it('should extract correct data for incoming telephony task on browser', () => {
         const originalState = mockTask.data.interaction.state;
-        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
         const originalWrapUpRequired = mockTask.data.wrapUpRequired;
         const originalMediaType = mockTask.data.interaction.mediaType;
 
         mockTask.data.interaction.state = 'new';
-        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         mockTask.data.interaction.callAssociatedDetails = {
           ani: '9876543210',
           customerName: 'Jane Smith',
@@ -129,7 +121,6 @@ describe('task-list.utils', () => {
 
         // Restore original values
         mockTask.data.interaction.state = originalState;
-        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
         mockTask.data.wrapUpRequired = originalWrapUpRequired;
         mockTask.data.interaction.mediaType = originalMediaType;
@@ -137,13 +128,11 @@ describe('task-list.utils', () => {
 
       it('should extract correct data for incoming telephony task on non-browser', () => {
         const originalState = mockTask.data.interaction.state;
-        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
         const originalWrapUpRequired = mockTask.data.wrapUpRequired;
         const originalMediaType = mockTask.data.interaction.mediaType;
 
         mockTask.data.interaction.state = 'new';
-        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         mockTask.data.interaction.callAssociatedDetails = {
           ani: '5555555555',
           customerName: 'Mobile User',
@@ -161,7 +150,6 @@ describe('task-list.utils', () => {
 
         // Restore original values
         mockTask.data.interaction.state = originalState;
-        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
         mockTask.data.wrapUpRequired = originalWrapUpRequired;
         mockTask.data.interaction.mediaType = originalMediaType;
@@ -169,13 +157,11 @@ describe('task-list.utils', () => {
 
       it('should extract correct data for incoming social media task', () => {
         const originalState = mockTask.data.interaction.state;
-        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
         const originalWrapUpRequired = mockTask.data.wrapUpRequired;
         const originalMediaType = mockTask.data.interaction.mediaType;
 
         mockTask.data.interaction.state = 'new';
-        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         mockTask.data.interaction.callAssociatedDetails = {
           ani: '1234567890',
           customerName: 'Social Customer',
@@ -193,7 +179,6 @@ describe('task-list.utils', () => {
 
         // Restore original values
         mockTask.data.interaction.state = originalState;
-        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
         mockTask.data.wrapUpRequired = originalWrapUpRequired;
         mockTask.data.interaction.mediaType = originalMediaType;

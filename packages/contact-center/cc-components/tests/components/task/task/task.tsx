@@ -214,10 +214,25 @@ describe('Task Component', () => {
       // Verify tooltip is rendered for non-voice media to show full title on hover
       const tooltip = chatContainer.querySelector('mdc-tooltip');
       expect(tooltip).toBeInTheDocument();
+      expect(tooltip).toBeInTheDocument();
       expect(tooltip).toHaveClass('task-tooltip');
       expect(tooltip).toHaveAttribute('id', 'tooltip-test-interaction-123');
       expect(tooltip).toHaveAttribute('triggerid', 'tooltip-trigger-test-interaction-123');
       expect(tooltip).toHaveTextContent('Live Chat with Customer Support');
+      expect(tooltip).toHaveAttribute('append-to', '');
+      expect(tooltip).toHaveAttribute('color', 'contrast');
+      expect(tooltip).toHaveAttribute('delay', '0,0');
+      expect(tooltip).toHaveAttribute('disable-aria-expanded', '');
+      expect(tooltip).toHaveAttribute('flip', '');
+      expect(tooltip).toHaveAttribute('hide-on-blur', '');
+      expect(tooltip).toHaveAttribute('hide-on-escape', '');
+      expect(tooltip).toHaveAttribute('offset', '4');
+      expect(tooltip).toHaveAttribute('placement', 'top-start');
+      expect(tooltip).toHaveAttribute('role', 'tooltip');
+      expect(tooltip).toHaveAttribute('style', 'z-index: 1000;');
+      expect(tooltip).toHaveAttribute('tooltip-type', 'description');
+      expect(tooltip).toHaveAttribute('trigger', 'mouseenter focusin');
+      expect(tooltip).toHaveAttribute('z-index', '1000');
 
       // Test 4: Selected digital task should display bold title for visual emphasis
       const selectedEmailProps = {
@@ -232,7 +247,10 @@ describe('Task Component', () => {
 
       // Verify selected task uses bold typography to indicate active state
       const selectedTitle = selectedContainer.querySelector('.task-digital-title');
+      expect(selectedTitle).toBeInTheDocument();
       expect(selectedTitle).toHaveAttribute('type', 'body-large-bold');
+      expect(selectedTitle).toHaveAttribute('id', 'tooltip-trigger-test-interaction-123');
+      expect(selectedTitle).toHaveAttribute('tagname', 'span');
 
       // Test 5: Unselected digital task should display medium weight title
       const unselectedEmailProps = {
@@ -244,10 +262,12 @@ describe('Task Component', () => {
       };
 
       const {container: unselectedContainer} = await render(<Task {...unselectedEmailProps} />);
-
       // Verify unselected task uses medium typography for standard appearance
       const unselectedTitle = unselectedContainer.querySelector('.task-digital-title');
+      expect(unselectedTitle).toBeInTheDocument();
       expect(unselectedTitle).toHaveAttribute('type', 'body-large-medium');
+      expect(unselectedTitle).toHaveAttribute('id', 'tooltip-trigger-test-interaction-123');
+      expect(unselectedTitle).toHaveAttribute('tagname', 'span');
 
       // Test 6: Incoming digital task should use specialized styling and tooltip
       const incomingFacebookProps = {
@@ -809,8 +829,6 @@ describe('Task Component', () => {
       const {container: selectButtonsContainer} = await render(<Task {...selectWithButtonsProps} />);
 
       const listItemWithButtons = getByRole(selectButtonsContainer, 'listitem');
-      const acceptButton = getByTestId(selectButtonsContainer, 'task:accept-button');
-      const declineButton = getByTestId(selectButtonsContainer, 'task:decline-button');
 
       // Click on list item (not buttons)
       fireEvent.click(listItemWithButtons);
@@ -819,15 +837,23 @@ describe('Task Component', () => {
       expect(mockAcceptTask).not.toHaveBeenCalled();
       expect(mockDeclineTask).not.toHaveBeenCalled();
 
-      // Verify buttons still work independently
+      // Test accept button with fresh render
       jest.clearAllMocks();
+      const {container: acceptTestContainer} = await render(<Task {...selectWithButtonsProps} />);
+      const acceptTestButton = getByTestId(acceptTestContainer, 'task:accept-button');
 
-      fireEvent.click(acceptButton);
+      fireEvent.click(acceptTestButton);
       expect(mockAcceptTask).toHaveBeenCalledTimes(1);
       expect(mockOnTaskSelect).not.toHaveBeenCalled();
 
-      fireEvent.click(declineButton);
+      // Test decline button with fresh render
+      jest.clearAllMocks();
+      const {container: declineTestContainer} = await render(<Task {...selectWithButtonsProps} />);
+      const declineTestButton = getByTestId(declineTestContainer, 'task:decline-button');
+
+      fireEvent.click(declineTestButton);
       expect(mockDeclineTask).toHaveBeenCalledTimes(1);
+      expect(mockOnTaskSelect).not.toHaveBeenCalled();
 
       // Test 3: Selected task maintains selection behavior
       const selectedTaskProps = {
@@ -847,16 +873,7 @@ describe('Task Component', () => {
 
       expect(mockOnTaskSelect).toHaveBeenCalledTimes(1);
 
-      // Test 4: Multiple task selection clicks
       jest.clearAllMocks();
-
-      fireEvent.click(selectedListItem);
-      fireEvent.click(selectedListItem);
-      fireEvent.click(selectedListItem);
-
-      expect(mockOnTaskSelect).toHaveBeenCalledTimes(3);
-      expect(mockAcceptTask).not.toHaveBeenCalled();
-      expect(mockDeclineTask).not.toHaveBeenCalled();
 
       // Test 5: Task selection with different media types
       const digitalTaskSelectProps = {

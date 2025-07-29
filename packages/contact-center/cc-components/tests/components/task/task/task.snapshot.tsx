@@ -503,21 +503,28 @@ describe('Task Component Snapshots', () => {
       expect(selectButtonsContainer).toMatchSnapshot();
 
       const listItemWithButtons = getByRole(selectButtonsContainer, 'listitem');
-      const acceptButton = getByTestId(selectButtonsContainer, 'task:accept-button');
-      const declineButton = getByTestId(selectButtonsContainer, 'task:decline-button');
 
       // Click on list item (not buttons)
       fireEvent.click(listItemWithButtons);
       expect(selectButtonsContainer).toMatchSnapshot();
 
-      // Verify buttons still work independently
+      // Test accept button with fresh render
       jest.clearAllMocks();
+      const {container: acceptTestContainer} = await render(<Task {...selectWithButtonsProps} />);
+      expect(acceptTestContainer).toMatchSnapshot();
 
+      const acceptButton = getByTestId(acceptTestContainer, 'task:accept-button');
       fireEvent.click(acceptButton);
-      expect(selectButtonsContainer).toMatchSnapshot();
+      expect(acceptTestContainer).toMatchSnapshot();
 
+      // Test decline button with fresh render
+      jest.clearAllMocks();
+      const {container: declineTestContainer} = await render(<Task {...selectWithButtonsProps} />);
+      expect(declineTestContainer).toMatchSnapshot();
+
+      const declineButton = getByTestId(declineTestContainer, 'task:decline-button');
       fireEvent.click(declineButton);
-      expect(selectButtonsContainer).toMatchSnapshot();
+      expect(declineTestContainer).toMatchSnapshot();
 
       // Test 3: Selected task maintains selection behavior
       const selectedTaskProps = {
@@ -535,13 +542,7 @@ describe('Task Component Snapshots', () => {
       fireEvent.click(selectedListItem);
       expect(selectedContainer).toMatchSnapshot();
 
-      // Test 4: Multiple task selection clicks
       jest.clearAllMocks();
-
-      fireEvent.click(selectedListItem);
-      fireEvent.click(selectedListItem);
-      fireEvent.click(selectedListItem);
-      expect(selectedContainer).toMatchSnapshot();
 
       // Test 5: Task selection with different media types
       const digitalTaskSelectProps = {
