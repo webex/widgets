@@ -1,11 +1,10 @@
 declare module '@webex-engage/wxengage-conversations' {
-  import { ComponentType } from 'react';
+  import {ComponentType} from 'react';
 
   interface EngageProps {
     conversationId: string;
     jwtToken: string;
-    apiEndpoint: string;
-    signalREndpoint: string;
+    dataCenter: string;
     onError?: (error: unknown) => boolean;
   }
 

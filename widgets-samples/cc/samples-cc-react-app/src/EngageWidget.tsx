@@ -8,17 +8,10 @@ interface EngageWidgetProps {
   accessToken: string;
   currentTheme: string;
   isSdkReady: boolean;
-  apiEndpoint?: string;
-  signalREndpoint?: string;
+  dataCenter?: string;
 }
 
-const EngageWidget: React.FC<EngageWidgetProps> = ({
-  accessToken,
-  currentTheme,
-  isSdkReady,
-  apiEndpoint = 'https://api.wxcc-us1.cisco.com/v1',
-  signalREndpoint = 'https://signalr.wxcc-us1.cisco.com',
-}) => {
+const EngageWidget: React.FC<EngageWidgetProps> = ({accessToken, currentTheme, isSdkReady, dataCenter = 'intgus1'}) => {
   const [isFloatingWindowOpen, setIsFloatingWindowOpen] = useState(false);
   const [hasNewTask, setHasNewTask] = useState(false);
 
@@ -100,12 +93,7 @@ const EngageWidget: React.FC<EngageWidgetProps> = ({
         </div>
         <div className="engage-content-area">
           {isSupportedTask && isSdkReady ? (
-            <DigitalChannels
-              jwtToken={accessToken}
-              apiEndpoint={apiEndpoint}
-              signalREndpoint={signalREndpoint}
-              onError={handleError}
-            />
+            <DigitalChannels jwtToken={accessToken} dataCenter={dataCenter} onError={handleError} />
           ) : (
             <div className="engage-content-placeholder">
               {!isSdkReady

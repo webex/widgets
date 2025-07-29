@@ -2381,7 +2381,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@floating-ui/dom@npm:^1.6.12":
+"@floating-ui/dom@npm:^1.6.12, @floating-ui/dom@npm:^1.7.0":
   version: 1.7.2
   resolution: "@floating-ui/dom@npm:1.7.2"
   dependencies:
@@ -2500,6 +2500,95 @@ __metadata:
   version: 0.4.3
   resolution: "@humanwhocodes/retry@npm:0.4.3"
   checksum: 10c0/3775bb30087d4440b3f7406d5a057777d90e4b9f435af488a4923ef249e93615fb78565a85f173a186a076c7706a81d0d57d563a2624e4de2c5c9c66c486ce42
+  languageName: node
+  linkType: hard
+
+"@interactjs/actions@npm:1.10.3":
+  version: 1.10.3
+  resolution: "@interactjs/actions@npm:1.10.3"
+  dependencies:
+    "@interactjs/interact": "npm:1.10.3"
+  peerDependencies:
+    "@interactjs/core": 1.10.3
+    "@interactjs/utils": 1.10.3
+  dependenciesMeta:
+    "@interactjs/interact":
+      optional: true
+  checksum: 10c0/a143dfa822366cf9de24d20a9440d4079cc6718874460a63f1446e0d522c10746d6a5e585cab33420b9fd043b0334edc91795dd6c2d39126e31a18a3e2e72a46
+  languageName: node
+  linkType: hard
+
+"@interactjs/auto-start@npm:1.10.3":
+  version: 1.10.3
+  resolution: "@interactjs/auto-start@npm:1.10.3"
+  dependencies:
+    "@interactjs/interact": "npm:1.10.3"
+  peerDependencies:
+    "@interactjs/core": 1.10.3
+    "@interactjs/utils": 1.10.3
+  dependenciesMeta:
+    "@interactjs/interact":
+      optional: true
+  checksum: 10c0/aab348ec0aaa0a8080634c7fa3b98283af9bcb27ef418f3094b9cfd0f74c84aeae980f455167f6aba6eafffe15f4f3c3f81a7a8dd85f6cf3f042c40db48bc3b4
+  languageName: node
+  linkType: hard
+
+"@interactjs/core@npm:1.10.3":
+  version: 1.10.3
+  resolution: "@interactjs/core@npm:1.10.3"
+  peerDependencies:
+    "@interactjs/utils": 1.10.3
+  checksum: 10c0/92b9e908de5fc7de0f64e5dc9b63d2a489104e43cc4033b1fc84a98264a00217df306dc1b73d52017bcba2efb1f53cc3c6fa86b984919a08527bc80c34c65c99
+  languageName: node
+  linkType: hard
+
+"@interactjs/interact@npm:1.10.3":
+  version: 1.10.3
+  resolution: "@interactjs/interact@npm:1.10.3"
+  dependencies:
+    "@interactjs/core": "npm:1.10.3"
+    "@interactjs/types": "npm:1.10.3"
+    "@interactjs/utils": "npm:1.10.3"
+  checksum: 10c0/dccdde8f08bac34bde430783849f26f3560a8967bbaa9eaecfba35dd61b014f6c768fe8ecd4c39c51b26d80dd14f573899cf1256bf63c6518a6c059c39e6f885
+  languageName: node
+  linkType: hard
+
+"@interactjs/modifiers@npm:1.10.3":
+  version: 1.10.3
+  resolution: "@interactjs/modifiers@npm:1.10.3"
+  dependencies:
+    "@interactjs/interact": "npm:1.10.3"
+    "@interactjs/snappers": "npm:1.10.3"
+  peerDependencies:
+    "@interactjs/core": 1.10.3
+    "@interactjs/utils": 1.10.3
+  dependenciesMeta:
+    "@interactjs/interact":
+      optional: true
+  checksum: 10c0/8cc96d920e6ede6459261893efe2ea19f0da9759eb45b3dd87752b267da47042ccf1215f6f7dfa5dbeafbce5edd87e7ba13df9d2aa295bf4963b1135280accf7
+  languageName: node
+  linkType: hard
+
+"@interactjs/snappers@npm:1.10.3":
+  version: 1.10.3
+  resolution: "@interactjs/snappers@npm:1.10.3"
+  peerDependencies:
+    "@interactjs/utils": 1.10.3
+  checksum: 10c0/2c0a5f2d0c4996525de67647ec4cec651e1807ff40b24d6766f3546910f7dfaee79144b5621ec42a48fe3a9002a00b39ca82bab2f9e8cb6e7bf75baa3eb376d0
+  languageName: node
+  linkType: hard
+
+"@interactjs/types@npm:1.10.3":
+  version: 1.10.3
+  resolution: "@interactjs/types@npm:1.10.3"
+  checksum: 10c0/f2e6b9a867b433b466b48f99100fb88a9e3d3da82a720875eb549ac80851f724823e382b0c51c96980f10d361de419cc458b9efb283fb1ab246ac972bda96101
+  languageName: node
+  linkType: hard
+
+"@interactjs/utils@npm:1.10.3":
+  version: 1.10.3
+  resolution: "@interactjs/utils@npm:1.10.3"
+  checksum: 10c0/ad4965781b741aa7d212c322bf808128dd2ce57b8328d7ea47e79b2d0b500cdb3850bd1be477bba86881a3cdb7a803d32d14aff04697aa52fa3c54b56818d8d0
   languageName: node
   linkType: hard
 
@@ -3229,6 +3318,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@momentum-ui/core@npm:19.16.0":
+  version: 19.16.0
+  resolution: "@momentum-ui/core@npm:19.16.0"
+  dependencies:
+    "@momentum-ui/icons": "npm:^8.32.0"
+  checksum: 10c0/dae8486d1cc995e51a5b2175efdbb5758fa3cd9e84e68b1023e3dc15824a8d89cd190112047b1deb0d5918b1c3bbf979104af62170285d10c469f67484dc979f
+  languageName: node
+  linkType: hard
+
 "@momentum-ui/core@npm:^19.15.31":
   version: 19.16.1
   resolution: "@momentum-ui/core@npm:19.16.1"
@@ -3254,7 +3352,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@momentum-ui/icons@npm:^8.33.0":
+"@momentum-ui/icons@npm:8.28.5":
+  version: 8.28.5
+  resolution: "@momentum-ui/icons@npm:8.28.5"
+  checksum: 10c0/beb5e8bf97b8b87380f8421215ce30c74d9d312912f5cda7a54b82031a8e433057525daf18935e6731e7e70261b3100eba83a0be266d157911e547eefc03a60d
+  languageName: node
+  linkType: hard
+
+"@momentum-ui/icons@npm:^8.32.0, @momentum-ui/icons@npm:^8.33.0":
   version: 8.33.0
   resolution: "@momentum-ui/icons@npm:8.33.0"
   checksum: 10c0/b29654530e3bc0a9ebf12a03317dac41b84d823272e0f94235697caede12a0ada6118f25b3777ff453127640aa418d1e8439960a3f58399f864f6a1d1f5b634d
@@ -3356,14 +3461,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@momentum-ui/tokens@npm:^1.7.1":
+"@momentum-ui/tokens@npm:1.7.1, @momentum-ui/tokens@npm:^1.7.1":
   version: 1.7.1
   resolution: "@momentum-ui/tokens@npm:1.7.1"
   checksum: 10c0/75ce860638c7d322bb7cf97b350b0e3f7d6f1d377f65a44dab8c537cb7b2e0962342d0a1ec7e29e13fbc3660dc7b995e29faa074203ef7870ced4230ce308b65
   languageName: node
   linkType: hard
 
-"@momentum-ui/utils@npm:^6.2.15":
+"@momentum-ui/utils@npm:6.2.15, @momentum-ui/utils@npm:^6.2.15":
   version: 6.2.15
   resolution: "@momentum-ui/utils@npm:6.2.15"
   dependencies:
@@ -3377,6 +3482,41 @@ __metadata:
     jsonfile: "npm:^5.0.0"
     lodash: "npm:^4.17.11"
   checksum: 10c0/272196392df01fe0f75587cdcf341ce8fef3b4b306ac5a51d5219fba042b1eb091e8d82ea62626f8e35aaf435056d7691e88b44f8ea9c308f3dedc0e0435a1f9
+  languageName: node
+  linkType: hard
+
+"@momentum-ui/web-components@npm:^2.23.35":
+  version: 2.23.43
+  resolution: "@momentum-ui/web-components@npm:2.23.43"
+  dependencies:
+    "@floating-ui/dom": "npm:^1.7.0"
+    "@interactjs/actions": "npm:1.10.3"
+    "@interactjs/auto-start": "npm:1.10.3"
+    "@interactjs/core": "npm:1.10.3"
+    "@interactjs/interact": "npm:1.10.3"
+    "@interactjs/modifiers": "npm:1.10.3"
+    "@interactjs/utils": "npm:1.10.3"
+    "@momentum-design/icons": "npm:0.29.0"
+    "@popperjs/core": "npm:^2.11.8"
+    country-codes-list: "npm:1.6.8"
+    country-flags-svg: "npm:1.1.4"
+    dompurify: "npm:^3.2.4"
+    highlight.js: "npm:^10.5.0"
+    json: "npm:^11.0.0"
+    libphonenumber-js: "npm:^1.7.57"
+    lit-virtualizer: "npm:0.4.2"
+    luxon: "npm:^3.6.1"
+    papaparse: "npm:^5.5.2"
+    sortablejs: "npm:^1.15.6"
+  peerDependencies:
+    "@momentum-ui/core": 19.16.0
+    "@momentum-ui/icons": 8.28.5
+    "@momentum-ui/tokens": 1.7.1
+    "@momentum-ui/utils": 6.2.15
+    lit-element: 2.3.1
+    lit-html: ^1.2.1
+    mobx: ^6.0.0
+  checksum: 10c0/5ccadfffb8b60359f4552c961989ec98f0702d4b430882f63ad7a7b65fd8f65a076357bb753560bb9aa31d3a2844830f9b57e0bea3ef42a01c9a3a53add890a9
   languageName: node
   linkType: hard
 
@@ -4251,7 +4391,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@popperjs/core@npm:^2.9.0":
+"@popperjs/core@npm:^2.11.8, @popperjs/core@npm:^2.9.0":
   version: 2.11.8
   resolution: "@popperjs/core@npm:2.11.8"
   checksum: 10c0/4681e682abc006d25eb380d0cf3efc7557043f53b6aea7a5057d0d1e7df849a00e281cd8ea79c902a35a414d7919621fc2ba293ecec05f413598e0b23d5a1e63
@@ -9376,9 +9516,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex-engage/wxengage-conversations@npm:^1.0.2":
-  version: 1.0.2
-  resolution: "@webex-engage/wxengage-conversations@npm:1.0.2::__archiveUrl=https%3A%2F%2Fengci-maven-master.cisco.com%2Fartifactory%2Fapi%2Fnpm%2Fwebex-release-npm%2F%40webex-engage%2Fwxengage-conversations%2F-%2F%40webex-engage%2Fwxengage-conversations-1.0.2.tgz"
+"@webex-engage/wxengage-conversations@npm:^1.0.11":
+  version: 1.0.11
+  resolution: "@webex-engage/wxengage-conversations@npm:1.0.11::__archiveUrl=https%3A%2F%2Fengci-maven-master.cisco.com%2Fartifactory%2Fapi%2Fnpm%2Fwebex-release-npm%2F%40webex-engage%2Fwxengage-conversations%2F-%2F%40webex-engage%2Fwxengage-conversations-1.0.11.tgz"
   dependencies:
     "@microsoft/signalr": "npm:^8.0.7"
     "@wxcc-desktop/sdk": "npm:^2.0.3"
@@ -9392,10 +9532,10 @@ __metadata:
     react-i18next: "npm:^15.4.0"
     showdown: "npm:2.1.0"
   peerDependencies:
-    "@momentum-ui/web-components": ^2.23.9
+    "@momentum-ui/web-components": ^2.23.35
     react: ^18.3.1
     react-dom: ^18.3.1
-  checksum: 10c0/ebff872e426c2139b23d240e8d2bb849ebae6a622ff2069051613dab86358e4a47ccce71e88d9b7dad65343bf9988937214f40f7a5c24bf5ab6f18344dd6f84b
+  checksum: 10c0/245511b4207f65409c6d4a1cc1fb8c721cbee37820915b8ff5933ef0e45f69ee22587c6561a6038f8bf0376ca4656d631767197ba7ef67b745343e80e186ab75
   languageName: node
   linkType: hard
 
@@ -9490,7 +9630,7 @@ __metadata:
     "@types/react": "npm:^18.3.23"
     "@types/react-dom": "npm:^18.3.7"
     "@vitejs/plugin-react": "npm:^4.3.1"
-    "@webex-engage/wxengage-conversations": "npm:^1.0.2"
+    "@webex-engage/wxengage-conversations": "npm:^1.0.11"
     "@webex/cc-store": "workspace:*"
     jest: "npm:^29.7.0"
     jest-environment-jsdom: "npm:^29.7.0"
@@ -9500,6 +9640,7 @@ __metadata:
     vite: "npm:^5.3.4"
     vite-plugin-dts: "npm:^4.5.4"
   peerDependencies:
+    "@momentum-ui/web-components": ^2.23.35
     react: ^18.3.1
     react-dom: ^18.3.1
   languageName: unknown
@@ -9731,6 +9872,7 @@ __metadata:
     webpack-merge: "npm:6.0.1"
   peerDependencies:
     "@momentum-ui/react-collaboration": ">=26.197.0"
+    "@momentum-ui/web-components": ^2.23.35
     react: ^18.3.1
     react-dom: ^18.3.1
   languageName: unknown
@@ -16291,6 +16433,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"country-codes-list@npm:1.6.8":
+  version: 1.6.8
+  resolution: "country-codes-list@npm:1.6.8"
+  checksum: 10c0/2acbb80b89c1c31fb6e4b179da8323eaf4b3649e3719bd93f79fdf8e2665829185182567b080d20b40fd354eb391e3b1806701d3d1e7264ace11c66cbc16222c
+  languageName: node
+  linkType: hard
+
+"country-flags-svg@npm:1.1.4":
+  version: 1.1.4
+  resolution: "country-flags-svg@npm:1.1.4"
+  checksum: 10c0/4a45700f3407e682e816ee691c60e4b60373ddddcec44f1d84e6aa4685d0d644115b119ba5a5f1e612f935b5a01ad330a3008a9f30e815c86743dc0d7793caee
+  languageName: node
+  linkType: hard
+
 "crc-32@npm:^1.2.0":
   version: 1.2.2
   resolution: "crc-32@npm:1.2.2"
@@ -17519,7 +17675,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dompurify@npm:^3.2.3":
+"dompurify@npm:^3.2.3, dompurify@npm:^3.2.4":
   version: 3.2.6
   resolution: "dompurify@npm:3.2.6"
   dependencies:
@@ -18930,7 +19086,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"event-target-shim@npm:^5.0.0":
+"event-target-shim@npm:^5.0.0, event-target-shim@npm:^5.0.1":
   version: 5.0.1
   resolution: "event-target-shim@npm:5.0.1"
   checksum: 10c0/0255d9f936215fd206156fd4caa9e8d35e62075d720dc7d847e89b417e5e62cf1ce6c9b4e0a1633a9256de0efefaf9f8d26924b1f3c8620cffb9db78e7d3076b
@@ -21142,7 +21298,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"highlight.js@npm:^10.7.1":
+"highlight.js@npm:^10.5.0, highlight.js@npm:^10.7.1":
   version: 10.7.3
   resolution: "highlight.js@npm:10.7.3"
   checksum: 10c0/073837eaf816922427a9005c56c42ad8786473dc042332dfe7901aa065e92bc3d94ebf704975257526482066abb2c8677cc0326559bb8621e046c21c5991c434
@@ -24084,6 +24240,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"json@npm:^11.0.0":
+  version: 11.0.0
+  resolution: "json@npm:11.0.0"
+  bin:
+    json: lib/json.js
+  checksum: 10c0/330eea4d69902f775b5babd65848383e066765a9d9d9536e80dd369af89bfe3728408f1287c0ba40f5d90ead391542836ed010a8ed0c8169396b4aac3847a5bf
+  languageName: node
+  linkType: hard
+
 "jsonfile@npm:^4.0.0":
   version: 4.0.0
   resolution: "jsonfile@npm:4.0.0"
@@ -24652,6 +24817,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"libphonenumber-js@npm:^1.7.57":
+  version: 1.12.10
+  resolution: "libphonenumber-js@npm:1.12.10"
+  checksum: 10c0/c348aee275c4161e289b14f2ffd0c00f2923dcd5b2cfd99415b2f5ea15fa0632adffb78c51373b3a2839416223b65452bee11cc5386d2352782e1b064aaaf0ce
+  languageName: node
+  linkType: hard
+
 "lighthouse-logger@npm:^1.0.0":
   version: 1.4.2
   resolution: "lighthouse-logger@npm:1.4.2"
@@ -24685,6 +24857,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lit-element@npm:2.3.1":
+  version: 2.3.1
+  resolution: "lit-element@npm:2.3.1"
+  dependencies:
+    lit-html: "npm:^1.1.1"
+  checksum: 10c0/689d9c3e0301f2444ea018b482ed3a5b30e4fdd9938b262953c3608a998a9a1b7d5f03a8bfb30f1960dc369c2d13c6c8db2d3c55e100e2311c2fd8f1fcc15871
+  languageName: node
+  linkType: hard
+
+"lit-element@npm:^2.0.0":
+  version: 2.5.1
+  resolution: "lit-element@npm:2.5.1"
+  dependencies:
+    lit-html: "npm:^1.1.1"
+  checksum: 10c0/fe83a2fe1657950c3b79b9d30363c9aaad2e84ef761c3eaef4720d2059109f8fa2230e8b722f0c48057fa709c0cbc9574ac50a08a2bf888bf6ff8687aef15039
+  languageName: node
+  linkType: hard
+
 "lit-element@npm:^4.2.0":
   version: 4.2.1
   resolution: "lit-element@npm:4.2.1"
@@ -24696,12 +24886,32 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lit-html@npm:^1.0.0, lit-html@npm:^1.1.1, lit-html@npm:^1.2.1":
+  version: 1.4.1
+  resolution: "lit-html@npm:1.4.1"
+  checksum: 10c0/abbb16a56c143db4f113205af6620ece791fce10169a91fd0c9c52d10638ee2096bbe44f11f00c91deec58393f5aff166926961ba3d5ab7a5fb91218f908f98a
+  languageName: node
+  linkType: hard
+
 "lit-html@npm:^3.3.0":
   version: 3.3.1
   resolution: "lit-html@npm:3.3.1"
   dependencies:
     "@types/trusted-types": "npm:^2.0.2"
   checksum: 10c0/0dfb645f35c2ae129a40c09550b4d0e60617b715af7f2e0b825cdfd0624118fc4bf16e9cfaabdfbe43469522e145057d3cc46c64ca1019681480e4b9ae8f52cd
+  languageName: node
+  linkType: hard
+
+"lit-virtualizer@npm:0.4.2":
+  version: 0.4.2
+  resolution: "lit-virtualizer@npm:0.4.2"
+  dependencies:
+    event-target-shim: "npm:^5.0.1"
+    lit-element: "npm:^2.0.0"
+    lit-html: "npm:^1.0.0"
+    resize-observer-polyfill: "npm:^1.5.1"
+    tslib: "npm:^1.10.0"
+  checksum: 10c0/59f1e617a5443bd60f70ec30e178a9683a176a827bba8de7b21b2c4a53c36e4f53dfb0cfbd0c9e3eddf16e0bb07c750ede345e325faf50f2489fdcc9e440e1ca
   languageName: node
   linkType: hard
 
@@ -25315,6 +25525,13 @@ __metadata:
   version: 1.28.1
   resolution: "luxon@npm:1.28.1"
   checksum: 10c0/5c561ce4364bb2301ca5811c74d11a9e087f82164109c7997dc8f0959e64d51259d8e630914dca2edc6702525ce5ab066a4b85caa19d04be71f10e79ffe2bc84
+  languageName: node
+  linkType: hard
+
+"luxon@npm:^3.6.1":
+  version: 3.7.1
+  resolution: "luxon@npm:3.7.1"
+  checksum: 10c0/f83bc23a4c09da9111bc2510d2f5346e1ced4938379ebff13e308fece2ea852eb6e8b9ed8053b8d82e0fce05d5dd46e4cd64d8831ca04cfe32c0954b6f087258
   languageName: node
   linkType: hard
 
@@ -26370,6 +26587,13 @@ __metadata:
   version: 6.13.5
   resolution: "mobx@npm:6.13.5"
   checksum: 10c0/43691c836363aa1f13c44e43c86ab89fc8f4b83ef408bc6c68d799260e74b4ff08ebba2ef16bda447c6b7bca3558768e15927c0b21ffbb10e99b610783f28859
+  languageName: node
+  linkType: hard
+
+"mobx@npm:^6.0.0":
+  version: 6.13.7
+  resolution: "mobx@npm:6.13.7"
+  checksum: 10c0/3ae7f8c586a48a0a2b9b4900871455bc93d3878bdff70b6820ba830c6b883d7f8a0222aa2a0fec7201d25f38a19cb340e62a18a3939182a676dc35d857f35dd6
   languageName: node
   linkType: hard
 
@@ -28059,6 +28283,13 @@ __metadata:
   version: 1.0.11
   resolution: "pako@npm:1.0.11"
   checksum: 10c0/86dd99d8b34c3930345b8bbeb5e1cd8a05f608eeb40967b293f72fe469d0e9c88b783a8777e4cc7dc7c91ce54c5e93d88ff4b4f060e6ff18408fd21030d9ffbe
+  languageName: node
+  linkType: hard
+
+"papaparse@npm:^5.5.2":
+  version: 5.5.3
+  resolution: "papaparse@npm:5.5.3"
+  checksum: 10c0/623aae6a35703308fd5a39d616fb3837231ebc70697346355ea508154d3f24df75b6554b736afc1924192205518a5db14e75f5e1cf35d154326050a37cdd9447
   languageName: node
   linkType: hard
 
@@ -30720,6 +30951,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"resize-observer-polyfill@npm:^1.5.1":
+  version: 1.5.1
+  resolution: "resize-observer-polyfill@npm:1.5.1"
+  checksum: 10c0/5e882475067f0b97dc07e0f37c3e335ac5bc3520d463f777cec7e894bb273eddbfecb857ae668e6fb6881fd6f6bb7148246967172139302da50fa12ea3a15d95
+  languageName: node
+  linkType: hard
+
 "resolve-alpn@npm:^1.0.0":
   version: 1.2.1
   resolution: "resolve-alpn@npm:1.2.1"
@@ -31252,7 +31490,12 @@ __metadata:
     "@babel/preset-react": "npm:^7.24.7"
     "@babel/preset-typescript": "npm:^7.25.9"
     "@eslint/js": "npm:^9.20.0"
+    "@momentum-ui/core": "npm:19.16.0"
+    "@momentum-ui/icons": "npm:8.28.5"
     "@momentum-ui/react-collaboration": "npm:26.197.0"
+    "@momentum-ui/tokens": "npm:1.7.1"
+    "@momentum-ui/utils": "npm:6.2.15"
+    "@momentum-ui/web-components": "npm:^2.23.35"
     "@webex/cc-widgets": "workspace:*"
     babel-loader: "npm:^9.2.1"
     eslint: "npm:^9.20.1"
@@ -31266,6 +31509,9 @@ __metadata:
     file-loader: "npm:^6.2.0"
     globals: "npm:^16.0.0"
     html-webpack-plugin: "npm:^5.6.3"
+    lit-element: "npm:2.3.1"
+    lit-html: "npm:^1.2.1"
+    mobx: "npm:^6.0.0"
     prettier: "npm:^3.5.1"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
@@ -32277,6 +32523,13 @@ __metadata:
     ip-address: "npm:^9.0.5"
     smart-buffer: "npm:^4.2.0"
   checksum: 10c0/15b95db4caa359c80bfa880ff3e58f3191b9ffa4313570e501a60ee7575f51e4be664a296f4ee5c2c40544da179db6140be53433ce41ec745f9d51f342557514
+  languageName: node
+  linkType: hard
+
+"sortablejs@npm:^1.15.6":
+  version: 1.15.6
+  resolution: "sortablejs@npm:1.15.6"
+  checksum: 10c0/a75dcf53e5613b4106d46434e40114830f9c6449b3b439bc1925c1fbf0a0c1f044727a8f3d4ae1759fa7beaa33e7eb0c4a413e6aa88d6026577b59f3658ff727
   languageName: node
   linkType: hard
 
@@ -33997,7 +34250,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:^1.8.1, tslib@npm:^1.9.0":
+"tslib@npm:^1.10.0, tslib@npm:^1.8.1, tslib@npm:^1.9.0":
   version: 1.14.1
   resolution: "tslib@npm:1.14.1"
   checksum: 10c0/69ae09c49eea644bc5ebe1bca4fa4cc2c82b7b3e02f43b84bd891504edf66dbc6b2ec0eef31a957042de2269139e4acff911e6d186a258fb14069cd7f6febce2

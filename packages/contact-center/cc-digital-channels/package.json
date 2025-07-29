@@ -17,10 +17,11 @@
     "test:unit": "jest"
   },
   "dependencies": {
-    "@webex-engage/wxengage-conversations": "^1.0.2",
+    "@webex-engage/wxengage-conversations": "^1.0.11",
     "@webex/cc-store": "workspace:*"
   },
   "peerDependencies": {
+    "@momentum-ui/web-components": "^2.23.35",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

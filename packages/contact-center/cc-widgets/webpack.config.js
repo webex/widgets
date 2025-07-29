@@ -34,6 +34,7 @@ module.exports = merge(baseConfig, {
     'react-dom': 'react-dom',
     '@webex/cc-store': '@webex/cc-store',
     '@momentum-ui/react-collaboration': '@momentum-ui/react-collaboration',
+    '@momentum-ui/web-components': '@momentum-ui/web-components',
   },
   module: {
     rules: [
