@@ -54,7 +54,7 @@ global.Worker = class MockWorker {
   dispatchEvent(_event: Event): boolean {
     return true;
   }
-} as unknown as typeof Worker;
+} as typeof Worker;
 
 // Mock URL.createObjectURL
 global.URL.createObjectURL = jest.fn(() => 'mock-url');

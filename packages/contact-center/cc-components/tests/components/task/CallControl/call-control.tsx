@@ -449,10 +449,8 @@ describe('CallControlComponent', () => {
       jest.spyOn(callControlUtils, 'filterButtonsForConsultation').mockReturnValue([consultButton]);
 
       // Mock popover event handlers
-      const mockHandlePopoverHide = jest.fn();
       const mockHandleCloseButtonPress = jest.fn();
 
-      jest.spyOn(callControlUtils, 'handlePopoverHide').mockImplementation(mockHandlePopoverHide);
       jest.spyOn(callControlUtils, 'handleCloseButtonPress').mockImplementation(mockHandleCloseButtonPress);
 
       const modifiedProps = {

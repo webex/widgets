@@ -12,7 +12,6 @@ import {
   filterButtonsForConsultation,
   updateCallStateFromTask,
   handleCloseButtonPress,
-  handlePopoverHide,
   handleWrapupReasonChange,
   handleAudioRef,
 } from '../../../../src/components/task/CallControl/call-control.utils';
@@ -752,18 +751,6 @@ describe('CallControl Utils', () => {
       const mockSetAgentMenuType = jest.fn();
 
       handleCloseButtonPress(mockSetShowAgentMenu, mockSetAgentMenuType);
-
-      expect(mockSetShowAgentMenu).toHaveBeenCalledWith(false);
-      expect(mockSetAgentMenuType).toHaveBeenCalledWith(null);
-    });
-  });
-
-  describe('handlePopoverHide', () => {
-    it('should set showAgentMenu to false and agentMenuType to null', () => {
-      const mockSetShowAgentMenu = jest.fn();
-      const mockSetAgentMenuType = jest.fn();
-
-      handlePopoverHide(mockSetShowAgentMenu, mockSetAgentMenuType);
 
       expect(mockSetShowAgentMenu).toHaveBeenCalledWith(false);
       expect(mockSetAgentMenuType).toHaveBeenCalledWith(null);

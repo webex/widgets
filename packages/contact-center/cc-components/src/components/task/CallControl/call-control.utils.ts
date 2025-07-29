@@ -284,17 +284,6 @@ export const handleCloseButtonPress = (
 };
 
 /**
- * Handles popover hide event
- */
-export const handlePopoverHide = (
-  setShowAgentMenu: (show: boolean) => void,
-  setAgentMenuType: (type: CallControlMenuType | null) => void
-): void => {
-  setShowAgentMenu(false);
-  setAgentMenuType(null);
-};
-
-/**
  * Handles wrapup reason selection change event
  */
 export const handleWrapupReasonChange = (
