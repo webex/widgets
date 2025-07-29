@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.98](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.97...v1.28.0-ccwidgets.98) (2025-07-29)
+
+
+### Bug Fixes
+
+* **incoming-task:** add-uts-for-incoming-task ([#499](https://github.com/webex/widgets/issues/499)) ([b9e6c7c](https://github.com/webex/widgets/commit/b9e6c7c1c9126d8d014e0b1aa1bca3f81c697ac6))
+
 # [1.28.0-ccwidgets.97](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.96...v1.28.0-ccwidgets.97) (2025-07-28)
 
 
