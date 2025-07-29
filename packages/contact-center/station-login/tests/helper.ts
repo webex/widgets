@@ -513,7 +513,7 @@ describe('useStationLogin Hook', () => {
     };
 
     act(() => {
-      onSpy.mock.calls[0][1](mockPayload);
+      (onSpy.mock.calls[0][1] as (payload: unknown) => void)(mockPayload);
     });
 
     await waitFor(() => {
@@ -523,7 +523,7 @@ describe('useStationLogin Hook', () => {
     expect(ccMock.on).toHaveBeenCalledWith(CC_EVENTS.AGENT_LOGOUT_SUCCESS, expect.any(Function));
 
     act(() => {
-      onSpy.mock.calls[1][1]({});
+      (onSpy.mock.calls[1][1] as (payload: unknown) => void)({});
     });
 
     await waitFor(() => {
@@ -552,7 +552,7 @@ describe('useStationLogin Hook', () => {
     };
 
     act(() => {
-      onSpy.mock.calls[0][1](mockPayload);
+      (onSpy.mock.calls[0][1] as (payload: unknown) => void)(mockPayload);
     });
 
     await waitFor(() => {
