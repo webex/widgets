@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 
-import {CallControlComponentProps, DestinationType, CallControlMenuType} from '../task.types';
+import {CallControlComponentProps, CallControlMenuType} from '../task.types';
 import './call-control.styles.scss';
 import {PopoverNext, TooltipNext, Text, ButtonCircle} from '@momentum-ui/react-collaboration';
 import {Icon, Button, Select, Option} from '@momentum-design/components/dist/react';
@@ -8,6 +8,7 @@ import ConsultTransferPopoverComponent from './CallControlCustom/consult-transfe
 import AutoWrapupTimer from '../AutoWrapupTimer/AutoWrapupTimer';
 import type {MEDIA_CHANNEL as MediaChannelType} from '../task.types';
 import {getMediaTypeInfo} from '../../../utils';
+import {DestinationType} from '@webex/cc-store';
 import {
   RESUME_CALL,
   HOLD_CALL,
@@ -21,6 +22,8 @@ import {
   WRAP_UP_REASON,
   SELECT,
   SUBMIT_WRAP_UP,
+  MUTE_CALL,
+  UNMUTE_CALL,
 } from '../constants';
 
 function CallControlComponent(props: CallControlComponentProps) {
@@ -28,11 +31,14 @@ function CallControlComponent(props: CallControlComponentProps) {
   const [selectedWrapupId, setSelectedWrapupId] = useState<string | null>(null);
   const [showAgentMenu, setShowAgentMenu] = useState(false);
   const [agentMenuType, setAgentMenuType] = useState<CallControlMenuType | null>(null);
+  const [isMuteButtonDisabled, setIsMuteButtonDisabled] = useState(false);
 
   const {
     currentTask,
     toggleHold,
     toggleRecording,
+    toggleMute,
+    isMuted,
     endCall,
     wrapupCall,
     wrapupCodes,
@@ -82,6 +88,24 @@ function CallControlComponent(props: CallControlComponentProps) {
     setIsHeld(!isHeld);
   };
 
+  const handleMuteToggle = () => {
+    setIsMuteButtonDisabled(true);
+
+    try {
+      toggleMute();
+    } catch (error) {
+      logger.error(`Mute toggle failed: ${error}`, {
+        module: 'call-control.tsx',
+        method: 'handleMuteToggle',
+      });
+    } finally {
+      // Re-enable button after operation
+      setTimeout(() => {
+        setIsMuteButtonDisabled(false);
+      }, 500);
+    }
+  };
+
   const handleWrapupCall = () => {
     logger.info('CC-Widgets: CallControl: wrap-up submitted', {
       module: 'call-control.tsx',
@@ -126,22 +150,6 @@ function CallControlComponent(props: CallControlComponentProps) {
     }
   };
 
-  const handlePopoverOpen = (menuType: CallControlMenuType) => {
-    logger.info('CC-Widgets: CallControl: opening call control popover', {
-      module: 'call-control.tsx',
-      method: 'handlePopoverOpen',
-    });
-    if (showAgentMenu && agentMenuType === menuType) {
-      setShowAgentMenu(false);
-      setAgentMenuType(null);
-    } else {
-      setAgentMenuType(menuType);
-      setShowAgentMenu(true);
-      loadBuddyAgents();
-      loadQueues();
-    }
-  };
-
   const currentMediaType = getMediaTypeInfo(
     currentTask.data.interaction.mediaType as MediaChannelType,
     currentTask.data.interaction.mediaChannel as MediaChannelType
@@ -151,6 +159,15 @@ function CallControlComponent(props: CallControlComponentProps) {
   const isTelephony = mediaType === 'telephony';
 
   const buttons = [
+    {
+      id: 'mute',
+      icon: isMuted ? 'microphone-muted-bold' : 'microphone-bold',
+      onClick: handleMuteToggle,
+      tooltip: isMuted ? UNMUTE_CALL : MUTE_CALL,
+      className: `${isMuted ? 'call-control-button-muted' : 'call-control-button'}`,
+      disabled: isMuteButtonDisabled,
+      isVisible: controlVisibility.muteUnmute,
+    },
     {
       id: 'hold',
       icon: isHeld ? 'play-bold' : 'pause-bold',
@@ -229,6 +246,16 @@ function CallControlComponent(props: CallControlComponentProps) {
                 return (
                   <PopoverNext
                     key={index}
+                    onShow={() => {
+                      logger.info(`CC-Widgets: CallControl: showing consult-transfer popover`, {
+                        module: 'call-control.tsx',
+                        method: 'onShowPopover',
+                      });
+                      setShowAgentMenu(true);
+                      setAgentMenuType(button.menuType as CallControlMenuType);
+                      loadBuddyAgents();
+                      loadQueues();
+                    }}
                     onHide={() => {
                       setShowAgentMenu(false);
                       setAgentMenuType(null);
@@ -260,7 +287,6 @@ function CallControlComponent(props: CallControlComponentProps) {
                             aria-label={button.tooltip}
                             disabled={button.disabled || (consultInitiated && isTelephony)}
                             data-testid={button.dataTestId}
-                            onPress={() => handlePopoverOpen(button.menuType as CallControlMenuType)}
                           >
                             <Icon className={button.className + '-icon'} name={button.icon} />
                           </ButtonCircle>
