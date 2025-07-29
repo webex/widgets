@@ -15,8 +15,6 @@ import { USER_STATES, LOGIN_MODE, TASK_TYPES, WRAPUP_REASONS } from './constants
 import { pageSetup, waitForState } from "./Utils/helperUtils";
 import { endTask } from "./Utils/taskControlUtils";
 
-test.use({ headless: false });
-
 let agent1Page: Page;
 let agent2Page: Page;
 let callerPage: Page;
