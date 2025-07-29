@@ -117,12 +117,14 @@ export interface TaskProps {
   logger: ILogger;
 }
 
-export type IncomingTaskComponentProps = Pick<TaskProps, 'incomingTask' | 'isBrowser' | 'accept' | 'reject' | 'logger'>;
+export type IncomingTaskComponentProps = Pick<TaskProps, 'isBrowser' | 'accept' | 'reject'> &
+  Partial<Pick<TaskProps, 'incomingTask'>>;
 
 export type TaskListComponentProps = Pick<
   TaskProps,
-  'currentTask' | 'taskList' | 'isBrowser' | 'acceptTask' | 'declineTask' | 'onTaskSelect' | 'logger'
->;
+  'isBrowser' | 'acceptTask' | 'declineTask' | 'onTaskSelect' | 'logger'
+> &
+  Partial<Pick<TaskProps, 'currentTask' | 'taskList'>>;
 
 /**
  * Interface representing the properties for control actions on a task.
@@ -581,4 +583,64 @@ export interface ControlVisibility {
 
 export interface MediaTypeInfo {
   labelName: string;
+}
+export interface TaskComponentData {
+  currentMediaType: {
+    labelName: string;
+    iconName: string;
+    className: string;
+    isBrandVisual: boolean;
+  };
+  isNonVoiceMedia: boolean;
+  tooltipTriggerId: string;
+  tooltipId: string;
+  titleClassName: string;
+  shouldShowState: boolean;
+  shouldShowQueue: boolean;
+  shouldShowHandleTime: boolean;
+  shouldShowTimeLeft: boolean;
+  capitalizedState: string;
+  capitalizedQueue: string;
+}
+
+export interface TaskListItemData {
+  ani: string;
+  customerName: string;
+  virtualTeamName: string;
+  ronaTimeout: number | null;
+  taskState: string;
+  startTimeStamp: number;
+  isIncomingTask: boolean;
+  mediaType: string;
+  mediaChannel: string;
+  isTelephony: boolean;
+  isSocial: boolean;
+  acceptText: string | undefined;
+  declineText: string | undefined;
+  title: string;
+  disableAccept: boolean;
+  displayState: string;
+}
+
+export enum TaskState {
+  NEW = 'new',
+  ACTIVE = 'active',
+  CONNECTED = 'connected',
+  HOLD = 'hold',
+  CONSULT = 'consult',
+  CONFERENCE = 'conference',
+  WRAP_UP = 'wrap_up',
+  ENDED = 'ended',
+  TRANSFERRED = 'transferred',
+  DECLINED = 'declined',
+}
+
+export enum TaskQueue {
+  SUPPORT = 'support',
+  SALES = 'sales',
+  TECHNICAL = 'technical',
+  BILLING = 'billing',
+  GENERAL = 'general',
+  VIP = 'vip',
+  ESCALATION = 'escalation',
 }
