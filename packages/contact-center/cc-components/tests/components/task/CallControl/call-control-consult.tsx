@@ -34,7 +34,10 @@ describe.skip('CallControlConsultComponent', () => {
     endConsultCall: mockEndConsultCall,
     consultCompleted: true,
     isAgentBeingConsulted: true,
+    isEndConsultEnabled: true,
     logger: loggerMock,
+    muteUnmute: false,
+    isMuted: false,
   };
 
   beforeEach(() => {

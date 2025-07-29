@@ -1,8 +1,11 @@
 import {makeAutoObservable} from 'mobx';
 import Webex from '@webex/plugin-cc';
 import store from '../src/store'; // Adjust the import path as necessary
+import {IStore} from '../src/store.types';
+import {mockProfile} from '@webex/test-fixtures';
 
 let mockShouldCallback = true;
+let webexInitSpy;
 console.log = jest.fn(); // Mock console.log
 
 jest.mock('mobx', () => ({
@@ -18,7 +21,7 @@ jest.mock('@webex/plugin-cc', () => ({
       }
     }),
     cc: {
-      register: jest.fn(),
+      register: jest.fn().mockResolvedValue(mockProfile),
       LoggerProxy: {
         error: jest.fn(),
         log: jest.fn(),
@@ -32,12 +35,21 @@ jest.mock('@webex/plugin-cc', () => ({
 
 describe('Store', () => {
   let mockWebex;
-  let storeInstance;
+  let storeInstance: IStore;
 
   beforeEach(() => {
     // Reset store values before each test since store is a singleton
     storeInstance = store.getInstance();
-    mockWebex = Webex.init();
+    //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+    mockWebex = Webex.init({
+      config: {anyConfig: true},
+      credentials: {
+        access_token: 'fake_token',
+      },
+    });
+
+    //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+    webexInitSpy = jest.spyOn(Webex, 'init');
     jest.useFakeTimers(); // Use fake timers for testing setTimeout
   });
 
@@ -65,7 +77,7 @@ describe('Store', () => {
   describe('registerCC', () => {
     it('should initialise store values on successful register', async () => {
       const mockAgentName = 'John Doe';
-      const date = new Date();
+      const date = new Date().getTime();
       const mockResponse = {
         teams: [{id: 'team1', name: 'Team 1'}],
         loginVoiceOptions: ['option1', 'option2'],
@@ -127,40 +139,44 @@ describe('Store', () => {
       const initParams = {webex: mockWebex};
 
       jest.spyOn(storeInstance, 'registerCC').mockResolvedValue();
-      Webex.init.mockClear();
+      webexInitSpy.mockClear();
 
       await storeInstance.init(initParams, eventListenerCallback);
 
       expect(eventListenerCallback).toHaveBeenCalled();
       expect(storeInstance.registerCC).toHaveBeenCalledWith(mockWebex);
-      expect(Webex.init).not.toHaveBeenCalled();
+      expect(webexInitSpy).not.toHaveBeenCalled();
     });
 
     it('should call registerCC if webex is in options', async () => {
       const initParams = {webex: mockWebex};
       jest.spyOn(storeInstance, 'registerCC').mockResolvedValue();
-      Webex.init.mockClear();
+      webexInitSpy.mockClear();
 
       await storeInstance.init(initParams, jest.fn());
 
       expect(storeInstance.registerCC).toHaveBeenCalledWith(mockWebex);
-      expect(Webex.init).not.toHaveBeenCalled();
+      expect(webexInitSpy).not.toHaveBeenCalled();
     });
 
     it('should initialize webex and call registerCC on ready event', async () => {
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      webexInitSpy = jest.spyOn(Webex, 'init').mockReturnValue(mockWebex);
+      jest.spyOn(storeInstance, 'registerCC').mockClear();
+
       const initParams = {
         webexConfig: {anyConfig: true},
         access_token: 'fake_token',
       };
-      jest.spyOn(storeInstance, 'registerCC').mockResolvedValue();
 
       await storeInstance.init(initParams, jest.fn());
 
-      expect(Webex.init).toHaveBeenCalledWith({
+      expect(webexInitSpy).toHaveBeenCalledWith({
         config: initParams.webexConfig,
         credentials: {access_token: initParams.access_token},
       });
-      expect(storeInstance.registerCC).toHaveBeenCalledWith(expect.any(Object));
+
+      expect(storeInstance.registerCC).toHaveBeenCalledWith(mockWebex);
     });
 
     it('should reject the promise if registerCC fails in init method', async () => {
@@ -184,7 +200,7 @@ describe('Store', () => {
 
       jest.spyOn(storeInstance, 'registerCC').mockResolvedValue();
 
-      const initPromise = storeInstance.init(initParams);
+      const initPromise = storeInstance.init(initParams, jest.fn());
 
       jest.runAllTimers(); // Fast-forward the timers to simulate timeout
 

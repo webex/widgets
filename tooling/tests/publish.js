@@ -203,6 +203,54 @@ describe('versionAndPublish', () => {
     });
   });
 
+  it('should not publish packages in deny list P.S we only have test-fixtures in deny list right now', () => {
+    const packageJsonContent = JSON.stringify({
+      name: '@webex/test-fixtures',
+      version: '1.0.0',
+    });
+    const packageJsonContent2 = JSON.stringify({
+      name: '@webex/cc-station-login',
+      version: '1.0.0',
+    });
+
+    mockFs.readdirSync.mockReturnValue([
+      {name: 'test-fixtures', isDirectory: () => true},
+      {name: 'station-login', isDirectory: () => true},
+    ]);
+
+    mockFs.readFileSync.mockReturnValueOnce(packageJsonContent).mockReturnValueOnce(packageJsonContent2);
+    mockFs.writeFileSync.mockImplementation(() => {});
+
+    const mockExecSync = require('child_process').execSync;
+    mockExecSync.mockImplementation(() => {});
+
+    const processArgvMock = ['node', 'script.js', 'main', '1.0.1'];
+    process.argv = processArgvMock;
+
+    versionAndPublish();
+
+    // Ensures that first 2 calls were to update version and next 2 calls were to publish the package.
+    expect(mockFs.writeFileSync).toHaveBeenNthCalledWith(
+      1,
+      'packages/contact-center/test-fixtures/package.json',
+      expect.any(String),
+      'utf-8'
+    );
+    expect(mockFs.writeFileSync).toHaveBeenNthCalledWith(
+      2,
+      'packages/contact-center/station-login/package.json',
+      expect.any(String),
+      'utf-8'
+    );
+
+    expect(mockExecSync).not.toHaveBeenCalledWith('yarn workspace @webex/test-fixtures npm publish --tag main', {
+      stdio: 'inherit',
+    });
+    expect(mockExecSync).toHaveBeenNthCalledWith(1, 'yarn workspace @webex/cc-station-login npm publish --tag main', {
+      stdio: 'inherit',
+    });
+  });
+
   it('error occurred while reading package.json data', () => {
     mockFs.readdirSync.mockReturnValue([
       {name: 'store', isDirectory: () => true},

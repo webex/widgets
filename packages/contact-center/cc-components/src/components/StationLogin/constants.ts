@@ -27,16 +27,3 @@ export const StationLoginLabels = {
 export const SignInErrors = {
   ['DUPLICATE_LOCATION']: 'This extension is already in use.',
 };
-
-// Utility consts
-const DIALNUMBER: string = 'AGENT_DN';
-const EXTENSION: string = 'EXTENSION';
-const DESKTOP: string = 'BROWSER';
-
-const LoginOptions: {[key: string]: string} = {
-  [DIALNUMBER]: 'Dial Number',
-  [EXTENSION]: 'Extension',
-  [DESKTOP]: 'Desktop',
-};
-
-export {DIALNUMBER, EXTENSION, DESKTOP, LoginOptions};

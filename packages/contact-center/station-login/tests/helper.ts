@@ -1,6 +1,8 @@
 import {renderHook, act, waitFor} from '@testing-library/react';
 import {useStationLogin} from '../src/helper';
-import * as store from '@webex/cc-store';
+import store, {CC_EVENTS} from '@webex/cc-store';
+import {mockCC} from '@webex/test-fixtures';
+import {LogoutSuccess, StationLoginSuccessResponse} from '@webex/plugin-cc';
 
 jest.mock('@webex/cc-store', () => {
   let isAgentLoggedIn = false;
@@ -32,11 +34,30 @@ jest.mock('@webex/cc-store', () => {
 
 // Mock webex instance
 const ccMock = {
+  ...mockCC,
   stationLogin: jest.fn(),
   stationLogout: jest.fn(),
   deregister: jest.fn(),
   on: jest.fn(),
   off: jest.fn(),
+  updateAgentProfile: jest.fn(),
+  LoggerProxy: {
+    log: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    trace: jest.fn(),
+    error: jest.fn(),
+  },
+  register: jest.fn(),
+  taskManager: {
+    getAllTasks: jest.fn(() => ({})),
+  },
+  getBuddyAgents: jest.fn(),
+  getQueues: jest.fn(),
+  agentConfig: {
+    regexUS: /^\d{10}$/,
+    agentId: 'mockAgentId',
+  },
 };
 
 // Sample login parameters
@@ -52,6 +73,8 @@ const logger = {
   log: jest.fn(),
   info: jest.fn(),
   error: jest.fn(),
+  warn: jest.fn(),
+  trace: jest.fn(),
 };
 
 // Base props for useStationLogin hook
@@ -68,6 +91,27 @@ const baseStationLoginProps = {
   isAgentLoggedIn: false,
 };
 
+const successResponse: StationLoginSuccessResponse = {
+  agentId: '6b310dff-569e-4ac7-b064-70f834ea56d8',
+  agentSessionId: 'c9c24ace-5170-4a9f-8bc2-2eeeff9d7c11',
+  auxCodeId: '00b4e8df-f7b0-460f-aacf-f1e635c87d4d',
+  eventType: 'AgentDesktopMessage',
+  interactionIds: [],
+  lastIdleCodeChangeTimestamp: 1731997914706,
+  lastStateChangeTimestamp: 1731997914706,
+  orgId: '6ecef209-9a34-4ed1-a07a-7ddd1dbe925a',
+  profileType: 'BLENDED',
+  roles: ['agent'],
+  siteId: 'd64e19c0-53a2-4ae0-ab7e-3ebc778b3dcd',
+  status: 'LoggedIn',
+  subStatus: 'Idle',
+  teamId: 'c789288e-39e3-40c9-8e66-62c6276f73de',
+  trackingId: 'f40915b9-07ed-4b6c-832d-e7f5e7af3b72',
+  type: 'AgentStationLoginSuccess',
+  mmProfile: {chat: 1, email: 1, social: 1, telephony: 1},
+  notifsTrackingId: 'f40915b9-07ed-4b6c-832d-e7f5e7af3b72',
+};
+
 describe('useStationLogin Hook', () => {
   afterEach(() => {
     jest.clearAllMocks();
@@ -78,31 +122,6 @@ describe('useStationLogin Hook', () => {
   });
 
   it('should set loginSuccess on successful login and set loginFailure to undefined', async () => {
-    const successResponse = {
-      data: {
-        agentId: '6b310dff-569e-4ac7-b064-70f834ea56d8',
-        agentSessionId: 'c9c24ace-5170-4a9f-8bc2-2eeeff9d7c11',
-        auxCodeId: '00b4e8df-f7b0-460f-aacf-f1e635c87d4d',
-        deviceId: '1001',
-        deviceType: 'EXTENSION',
-        dn: '1001',
-        eventType: 'AgentDesktopMessage',
-        interactionIds: [],
-        lastIdleCodeChangeTimestamp: 1731997914706,
-        lastStateChangeTimestamp: 1731997914706,
-        orgId: '6ecef209-9a34-4ed1-a07a-7ddd1dbe925a',
-        profileType: 'BLENDED',
-        roles: ['agent'],
-        siteId: 'd64e19c0-53a2-4ae0-ab7e-3ebc778b3dcd',
-        status: 'LoggedIn',
-        subStatus: 'Idle',
-        teamId: 'c789288e-39e3-40c9-8e66-62c6276f73de',
-        trackingId: 'f40915b9-07ed-4b6c-832d-e7f5e7af3b72',
-        type: 'AgentStationLoginSuccess',
-        voiceCount: 1,
-      },
-    };
-
     ccMock.stationLogin.mockResolvedValue(successResponse);
     const {result} = renderHook(() =>
       useStationLogin({
@@ -152,15 +171,6 @@ describe('useStationLogin Hook', () => {
   });
 
   it('should set loginSuccess on successful login without auxCode and last state timestamp', async () => {
-    const successResponse = {
-      data: {
-        agentId: '6b310dff-569e-4ac7-b064-70f834ea56d8',
-        agentSessionId: 'c9c24ace-5170-4a9f-8bc2-2eeeff9d7c11',
-        lastStateChangeTimestamp: '1234',
-        lastIdleCodeChangeTimestamp: '2345',
-      },
-    };
-
     ccMock.stationLogin.mockResolvedValue(successResponse);
     const setSetCurrentStateSpy = jest.spyOn(store, 'setCurrentState');
     const setSetLastStateChangeTimestampSpy = jest.spyOn(store, 'setLastStateChangeTimestamp');
@@ -182,25 +192,17 @@ describe('useStationLogin Hook', () => {
     });
 
     await waitFor(async () => {
-      // @ts-expect-error only for testing purposes
-      expect(setSetCurrentStateSpy).not.toHaveBeenCalledWith(successResponse.data.auxCodeId);
+      expect(setSetCurrentStateSpy).not.toHaveBeenCalledWith(successResponse.auxCodeId);
       expect(setSetLastStateChangeTimestampSpy).not.toHaveBeenCalledWith(
-        new Date(successResponse.data.lastStateChangeTimestamp)
+        new Date(successResponse.lastStateChangeTimestamp)
       );
       expect(setSetLastIdleCodeChangeTimestampSpy).not.toHaveBeenCalledWith(
-        new Date(successResponse.data.lastIdleCodeChangeTimestamp)
+        new Date(successResponse.lastIdleCodeChangeTimestamp)
       );
     });
   });
 
   it('should set loginSuccess on successful login without onLogin callback', async () => {
-    const successResponse = {
-      data: {
-        agentId: '6b310dff-569e-4ac7-b064-70f834ea56d8',
-        agentSessionId: 'c9c24ace-5170-4a9f-8bc2-2eeeff9d7c11',
-      },
-    };
-
     ccMock.stationLogin.mockResolvedValue(successResponse);
     const {result} = renderHook(() =>
       useStationLogin({
@@ -295,7 +297,6 @@ describe('useStationLogin Hook', () => {
   it('should set loginFailure on failed login', async () => {
     const errorResponse = new Error('Login failed');
     ccMock.stationLogin.mockRejectedValue(errorResponse);
-
     loginCb.mockClear();
     const {result} = renderHook(() => useStationLogin(baseStationLoginProps));
 
@@ -336,21 +337,23 @@ describe('useStationLogin Hook', () => {
   });
 
   it('should set logoutSuccess on successful logout', async () => {
-    const successResponse = {
-      agentId: '6b310dff-569e-4ac7-b064-70f834ea56d8',
-      agentSessionId: '701ba0dc-2075-4867-a753-226ad8e2197a',
-      eventTime: 1731998475193,
-      eventType: 'AgentDesktopMessage',
-      loggedOutBy: 'SELF',
-      logoutReason: 'Agent Logged Out',
-      orgId: '6ecef209-9a34-4ed1-a07a-7ddd1dbe925a',
-      roles: ['agent'],
-      status: 'LoggedOut',
-      subStatus: 'Idle',
-      trackingId: '77170ae4-fd8d-4bf5-bfaa-5f9d8975265c',
+    const successResponse: LogoutSuccess = {
+      data: {
+        agentId: '6b310dff-569e-4ac7-b064-70f834ea56d8',
+        agentSessionId: '701ba0dc-2075-4867-a753-226ad8e2197a',
+        eventType: 'AgentDesktopMessage',
+        loggedOutBy: 'SELF',
+        orgId: '6ecef209-9a34-4ed1-a07a-7ddd1dbe925a',
+        roles: ['agent'],
+        status: 'LoggedOut',
+        subStatus: 'Idle',
+        trackingId: '77170ae4-fd8d-4bf5-bfaa-5f9d8975265c',
+        type: 'AgentLogoutSuccess',
+      },
       type: 'AgentLogoutSuccess',
+      orgId: '6ecef209-9a34-4ed1-a07a-7ddd1dbe925a',
+      trackingId: '77170ae4-fd8d-4bf5-bfaa-5f9d8975265c',
     };
-
     ccMock.stationLogout.mockResolvedValue(successResponse);
 
     const {result} = renderHook(() =>
@@ -396,7 +399,6 @@ describe('useStationLogin Hook', () => {
     ccMock.stationLogout.mockRejectedValue(new Error('Logout failed'));
 
     const {result} = renderHook(() => useStationLogin(baseStationLoginProps));
-
     await act(async () => {
       await result.current.logout();
     });
@@ -410,7 +412,7 @@ describe('useStationLogin Hook', () => {
   });
 
   it('should not call logout callback if not present', async () => {
-    ccMock.stationLogout.mockResolvedValue({});
+    ccMock.stationLogout.mockResolvedValue({} as LogoutSuccess);
 
     const {result} = renderHook(() =>
       useStationLogin({
@@ -499,10 +501,11 @@ describe('useStationLogin Hook', () => {
     jest.spyOn(store, 'setCCCallback').mockImplementation((event, cb) => {
       ccMock.on(event, cb);
     });
+    const onSpy = jest.spyOn(ccMock, 'on');
 
     renderHook(() => useStationLogin(baseStationLoginProps));
 
-    expect(ccMock.on).toHaveBeenCalledWith(store.CC_EVENTS.AGENT_STATION_LOGIN_SUCCESS, expect.any(Function));
+    expect(ccMock.on).toHaveBeenCalledWith(CC_EVENTS.AGENT_STATION_LOGIN_SUCCESS, expect.any(Function));
 
     const mockPayload = {
       deviceType: 'EXTENSION',
@@ -510,17 +513,17 @@ describe('useStationLogin Hook', () => {
     };
 
     act(() => {
-      ccMock.on.mock.calls[0][1](mockPayload);
+      (onSpy.mock.calls[0][1] as (payload: unknown) => void)(mockPayload);
     });
 
     await waitFor(() => {
       expect(loginCb).toHaveBeenCalled();
     });
 
-    expect(ccMock.on).toHaveBeenCalledWith(store.CC_EVENTS.AGENT_LOGOUT_SUCCESS, expect.any(Function));
+    expect(ccMock.on).toHaveBeenCalledWith(CC_EVENTS.AGENT_LOGOUT_SUCCESS, expect.any(Function));
 
     act(() => {
-      ccMock.on.mock.calls[1][1]();
+      (onSpy.mock.calls[1][1] as (payload: unknown) => void)({});
     });
 
     await waitFor(() => {
@@ -532,6 +535,7 @@ describe('useStationLogin Hook', () => {
     jest.spyOn(store, 'setCCCallback').mockImplementation((event, cb) => {
       ccMock.on(event, cb);
     });
+    const onSpy = jest.spyOn(ccMock, 'on');
 
     renderHook(() =>
       useStationLogin({
@@ -540,7 +544,7 @@ describe('useStationLogin Hook', () => {
       })
     );
 
-    expect(ccMock.on).toHaveBeenCalledWith(store.CC_EVENTS.AGENT_STATION_LOGIN_SUCCESS, expect.any(Function));
+    expect(ccMock.on).toHaveBeenCalledWith(CC_EVENTS.AGENT_STATION_LOGIN_SUCCESS, expect.any(Function));
 
     const mockPayload = {
       deviceType: 'EXTENSION',
@@ -548,7 +552,7 @@ describe('useStationLogin Hook', () => {
     };
 
     act(() => {
-      ccMock.on.mock.calls[0][1](mockPayload);
+      (onSpy.mock.calls[0][1] as (payload: unknown) => void)(mockPayload);
     });
 
     await waitFor(() => {
@@ -557,7 +561,7 @@ describe('useStationLogin Hook', () => {
   });
 
   it('should not save if isLoginOptionsChanged is false', () => {
-    const cc = {updateAgentProfile: jest.fn()};
+    const cc = {...ccMock, updateAgentProfile: jest.fn()};
     const {result} = renderHook(() =>
       useStationLogin({
         ...baseStationLoginProps,
@@ -585,7 +589,7 @@ describe('useStationLogin Hook', () => {
   });
 
   it('should call updateAgentProfile and update originalLoginOptions on save when changed', async () => {
-    const cc = {updateAgentProfile: jest.fn().mockResolvedValue({})};
+    const cc = {...ccMock, updateAgentProfile: jest.fn().mockResolvedValue({})};
     const {result} = renderHook(() =>
       useStationLogin({
         ...baseStationLoginProps,
@@ -601,6 +605,7 @@ describe('useStationLogin Hook', () => {
       result.current.setCurrentLoginOptions({
         deviceType: 'DIALNUMBER',
         dialNumber: '2002',
+        teamId: 'team123',
       });
     });
 
@@ -612,7 +617,7 @@ describe('useStationLogin Hook', () => {
 
     expect(cc.updateAgentProfile).toHaveBeenCalledWith({
       loginOption: 'DIALNUMBER',
-      teamId: undefined,
+      teamId: 'team123',
       dialNumber: '2002',
     });
     expect(logger.log).toHaveBeenCalledWith(
@@ -620,8 +625,6 @@ describe('useStationLogin Hook', () => {
       expect.objectContaining({
         module: 'widget-station-login#helper.ts',
         method: 'saveLoginOptions',
-        original: expect.any(Object),
-        updated: expect.any(Object),
       })
     );
     expect(result.current.saveError).toBe('');
@@ -631,7 +634,7 @@ describe('useStationLogin Hook', () => {
   });
 
   it('should handle updateAgentProfile errors', async () => {
-    const cc = {updateAgentProfile: jest.fn().mockRejectedValue(new Error('fail'))};
+    const cc = {...ccMock, updateAgentProfile: jest.fn().mockRejectedValue(new Error('fail'))};
     const {result} = renderHook(() =>
       useStationLogin({
         ...baseStationLoginProps,
@@ -647,6 +650,7 @@ describe('useStationLogin Hook', () => {
       result.current.setCurrentLoginOptions({
         deviceType: 'DIALNUMBER',
         dialNumber: '2002',
+        teamId: 'team123',
       });
     });
 
@@ -657,7 +661,6 @@ describe('useStationLogin Hook', () => {
     expect(result.current.saveError).toBe('fail');
     expect(logger.error).toHaveBeenCalledWith(
       'Failed to update agent device type',
-      expect.any(Error),
       expect.objectContaining({
         module: 'widget-station-login#helper.ts',
         method: 'saveLoginOptions',
@@ -666,7 +669,7 @@ describe('useStationLogin Hook', () => {
   });
 
   it('should call updateAgentProfile with no dialNumber when deviceType is BROWSER', async () => {
-    const cc = {updateAgentProfile: jest.fn().mockResolvedValue({})};
+    const cc = {...ccMock, updateAgentProfile: jest.fn().mockResolvedValue({})};
     const {result} = renderHook(() =>
       useStationLogin({
         ...baseStationLoginProps,
@@ -682,6 +685,7 @@ describe('useStationLogin Hook', () => {
       result.current.setCurrentLoginOptions({
         deviceType: 'BROWSER',
         dialNumber: 'shouldNotBeSent',
+        teamId: 'team123',
       });
     });
 
@@ -691,7 +695,7 @@ describe('useStationLogin Hook', () => {
 
     expect(cc.updateAgentProfile).toHaveBeenCalledWith({
       loginOption: 'BROWSER',
-      teamId: undefined,
+      teamId: 'team123',
       // dialNumber should NOT be present
     });
 
@@ -700,8 +704,6 @@ describe('useStationLogin Hook', () => {
       expect.objectContaining({
         module: 'widget-station-login#helper.ts',
         method: 'saveLoginOptions',
-        original: expect.any(Object),
-        updated: expect.any(Object),
       })
     );
   });
@@ -716,7 +718,8 @@ describe('useStationLogin Hook', () => {
     it('should call stationLogout when doStationLogout is not passed', async () => {
       const onCCSignOut = jest.fn();
       store.setIsAgentLoggedIn(true);
-      ccMock.stationLogout.mockResolvedValue({});
+      ccMock.stationLogout.mockResolvedValue({} as LogoutSuccess);
+
       const {result} = renderHook(() =>
         useStationLogin({
           ...baseStationLoginProps,
@@ -798,7 +801,7 @@ describe('useStationLogin Hook', () => {
     it('should handle error if deregister fails in onCCSignOut', async () => {
       const onCCSignOut = jest.fn();
       store.setIsAgentLoggedIn(true);
-      ccMock.stationLogout.mockResolvedValue({});
+      ccMock.stationLogout.mockResolvedValue({} as LogoutSuccess);
       const error = new Error('Deregister failed');
       ccMock.deregister.mockRejectedValue(error);
       const {result} = renderHook(() =>

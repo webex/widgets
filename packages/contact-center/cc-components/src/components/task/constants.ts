@@ -13,6 +13,8 @@ export const WRAP_UP_INTERACTION = 'Wrap up interaction';
 export const WRAP_UP_REASON = 'Wrap-up reason';
 export const SELECT = 'Select';
 export const SUBMIT_WRAP_UP = 'Submit & Wrap up';
+export const MUTE_CALL = 'Mute';
+export const UNMUTE_CALL = 'Unmute';
 
 // CallControlCAD constants
 export const NO_CUSTOMER_NAME = 'No Customer Name';

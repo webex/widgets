@@ -1,30 +1,33 @@
 import {TaskProps, ControlProps, OutdialCallProps} from '@webex/cc-components';
 
-export type UseTaskProps = Pick<TaskProps, 'incomingTask' | 'onAccepted' | 'onRejected' | 'deviceType' | 'logger'>;
-export type UseTaskListProps = Pick<
-  TaskProps,
-  'cc' | 'taskList' | 'deviceType' | 'onTaskAccepted' | 'onTaskDeclined' | 'onTaskSelected' | 'logger'
->;
-export type IncomingTaskProps = Pick<TaskProps, 'incomingTask' | 'onAccepted' | 'onRejected'>;
-export type TaskListProps = Pick<TaskProps, 'onTaskAccepted' | 'onTaskDeclined' | 'onTaskSelected'>;
+export type UseTaskProps = Pick<TaskProps, 'incomingTask' | 'deviceType' | 'logger'> &
+  Partial<Pick<TaskProps, 'onAccepted' | 'onRejected'>>;
 
-export type CallControlProps = Pick<
-  ControlProps,
-  'onHoldResume' | 'onEnd' | 'onWrapUp' | 'onRecordingToggle' | 'callControlClassName' | 'callControlConsultClassName'
+export type UseTaskListProps = Pick<TaskProps, 'cc' | 'taskList' | 'deviceType' | 'logger'> &
+  Partial<Pick<TaskProps, 'onTaskAccepted' | 'onTaskDeclined' | 'onTaskSelected'>>;
+
+export type IncomingTaskProps = Pick<TaskProps, 'incomingTask'> & Partial<Pick<TaskProps, 'onAccepted' | 'onRejected'>>;
+
+export type TaskListProps = Partial<Pick<TaskProps, 'onTaskAccepted' | 'onTaskDeclined' | 'onTaskSelected'>>;
+
+export type CallControlProps = Partial<
+  Pick<
+    ControlProps,
+    | 'onHoldResume'
+    | 'onEnd'
+    | 'onWrapUp'
+    | 'onRecordingToggle'
+    | 'callControlClassName'
+    | 'callControlConsultClassName'
+    | 'onToggleMute'
+  >
 >;
 
 export type useCallControlProps = Pick<
   ControlProps,
-  | 'currentTask'
-  | 'onHoldResume'
-  | 'onEnd'
-  | 'onWrapUp'
-  | 'onRecordingToggle'
-  | 'logger'
-  | 'consultInitiated'
-  | 'deviceType'
-  | 'featureFlags'
->;
+  'currentTask' | 'logger' | 'consultInitiated' | 'deviceType' | 'featureFlags' | 'isMuted'
+> &
+  Partial<Pick<ControlProps, 'onHoldResume' | 'onEnd' | 'onWrapUp' | 'onRecordingToggle' | 'onToggleMute'>>;
 
 export type Participant = {
   id: string;

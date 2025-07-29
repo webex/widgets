@@ -91,7 +91,7 @@ export const getPreviousSelectableState = (idleCodes: IdleCode[]): string => {
  * Gets the selected key for the dropdown
  */
 export const getSelectedKey = (customState: ICustomState, currentState: string, idleCodes: IdleCode[]): string => {
-  if (customState) {
+  if (customState && 'developerName' in customState) {
     return `custom-${customState.developerName}`;
   }
 
@@ -121,7 +121,7 @@ export const buildDropdownItems = (
       name: code.name,
     }));
 
-  if (customState) {
+  if (customState && 'developerName' in customState) {
     items.push({
       id: `custom-${customState.developerName}`,
       name: customState.name,

@@ -9,7 +9,7 @@ import {
   store,
   OutdialCall,
 } from '@webex/cc-widgets';
-import {StationLogoutSuccess} from '@webex/plugin-cc';
+import {StationLogoutResponse} from '@webex/plugin-cc';
 import Webex from 'webex';
 import {
   ThemeProvider,
@@ -184,7 +184,11 @@ function App() {
   const onWrapUp = (params) => {
     console.log('onWrapup invoked', params);
     //the below log is used by e2e tests
-     if (params && params.wrapUpReason) console.log(`onWrapup invoked with reason : ${params.wrapUpReason}`);
+    if (params && params.wrapUpReason) console.log(`onWrapup invoked with reason : ${params.wrapUpReason}`);
+  };
+
+  const onToggleMute = ({isMuted, task}) => {
+    console.log('onToggleMute invoked', {isMuted, task});
   };
 
   const enableDisableMultiLogin = () => {
@@ -238,10 +242,12 @@ function App() {
         lastStateChangeReason: newState,
       })
       .then((response) => {
-        store.setCurrentState(response.data.auxCodeId);
-        store.setLastStateChangeTimestamp(response.data.lastStateChangeTimestamp);
-        store.setLastIdleCodeChangeTimestamp(response.data.lastIdleCodeChangeTimestamp);
-        console.log('Agent state updated to', newState);
+        if ('data' in response) {
+          store.setCurrentState(response.data.auxCodeId);
+          store.setLastStateChangeTimestamp(response.data.lastStateChangeTimestamp);
+          store.setLastIdleCodeChangeTimestamp(response.data.lastIdleCodeChangeTimestamp);
+          console.log('Agent state updated to', newState);
+        }
       })
       .catch((error) => {
         console.error('Error updating agent state:', error);
@@ -352,8 +358,8 @@ function App() {
   const stationLogout = () => {
     store.cc
       .stationLogout({logoutReason: 'User requested logout'})
-      .then((res: StationLogoutSuccess) => {
-        console.log('Agent logged out successfully', res.data.type);
+      .then((res: StationLogoutResponse) => {
+        if ('data' in res) console.log('Agent logged out successfully', res.data);
       })
       .catch((error: Error) => {
         console.log('Agent logout failed', error);
@@ -735,6 +741,7 @@ function App() {
                               onEnd={onEnd}
                               onWrapUp={onWrapUp}
                               onRecordingToggle={onRecordingToggle}
+                              onToggleMute={onToggleMute}
                             />
                           </fieldset>
                         </section>
@@ -752,6 +759,7 @@ function App() {
                               onRecordingToggle={onRecordingToggle}
                               callControlClassName={'call-control-outer'}
                               callControlConsultClassName={'call-control-consult-outer'}
+                              onToggleMute={onToggleMute}
                             />
                           </fieldset>
                         </section>
@@ -841,11 +849,16 @@ function App() {
                     Idle
                   </Option>
                 </Select>
-               <div style={{ display: 'flex', justifyContent: 'center'}}>
-                 <Button disabled={selectedState === ''} onClick={handlePopoverSubmit} variant="primary" data-testid="samples:rona-button-confirm">
-                  Confirm State Change
-                 </Button>
-               </div>
+                <div style={{display: 'flex', justifyContent: 'center'}}>
+                  <Button
+                    disabled={selectedState === ''}
+                    onClick={handlePopoverSubmit}
+                    variant="primary"
+                    data-testid="samples:rona-button-confirm"
+                  >
+                    Confirm State Change
+                  </Button>
+                </div>
               </div>
             )}
 
