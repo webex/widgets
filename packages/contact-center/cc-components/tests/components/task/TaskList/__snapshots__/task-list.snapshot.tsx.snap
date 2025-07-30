@@ -1,0 +1,1724 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TaskListComponent Actions should call acceptTask when accept button is clicked 1`] = `
+<div>
+  <ul
+    class="task-list"
+    data-testid="task-list"
+  >
+    <li
+      class="task-list-item md-list-item-base-wrapper"
+      data-allow-text-select="false"
+      data-disabled="false"
+      data-interactive="true"
+      data-padded="false"
+      data-shape="rectangle"
+      data-size="40"
+      id="action-task"
+      role="listitem"
+      tabindex="0"
+    >
+      <div
+        data-position="start"
+      >
+        <mdc-avatar
+          class="telephony"
+          icon-name="handset-filled"
+          size="32"
+        />
+      </div>
+      <div
+        data-position="fill"
+      >
+        <section
+          class="task-details"
+        >
+          <mdc-text
+            class="md-text-wrapper task-title"
+            data-testid="task:title"
+            tagname="span"
+            type="body-large-medium"
+          >
+            1111111111
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            data-testid="action-task-queue"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Action Team
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            data-testid="action-task-time-left"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Time Left: 
+              
+            <time
+              class="task-text task-text--secondary"
+              datetime="00:00"
+            >
+              00:00
+            </time>
+          </mdc-text>
+        </section>
+      </div>
+      <div
+        data-position="end"
+      >
+        <div
+          class="task-button-container"
+        >
+          <button
+            class="md-button-pill-wrapper md-button-simple-wrapper"
+            data-color="join"
+            data-disabled="false"
+            data-disabled-outline="false"
+            data-ghost="false"
+            data-grown="false"
+            data-inverted="false"
+            data-outline="false"
+            data-shallow-disabled="false"
+            data-size="40"
+            data-testid="task:accept-button"
+            tabindex="-1"
+            type="button"
+          >
+            <span>
+              Accept
+            </span>
+          </button>
+          <button
+            class="md-button-pill-wrapper md-button-simple-wrapper"
+            data-color="cancel"
+            data-disabled="false"
+            data-disabled-outline="false"
+            data-ghost="false"
+            data-grown="false"
+            data-inverted="false"
+            data-outline="false"
+            data-shallow-disabled="false"
+            data-size="40"
+            data-testid="task:decline-button"
+            tabindex="-1"
+            type="button"
+          >
+            <span>
+              Decline
+            </span>
+          </button>
+        </div>
+      </div>
+    </li>
+  </ul>
+</div>
+`;
+
+exports[`TaskListComponent Actions should call acceptTask when accept button is clicked 2`] = `
+<div>
+  <ul
+    class="task-list"
+    data-testid="task-list"
+  >
+    <li
+      class="task-list-item md-list-item-base-wrapper"
+      data-allow-text-select="false"
+      data-disabled="false"
+      data-interactive="true"
+      data-padded="false"
+      data-shape="rectangle"
+      data-size="40"
+      id="action-task"
+      role="listitem"
+      tabindex="0"
+    >
+      <div
+        data-position="start"
+      >
+        <mdc-avatar
+          class="telephony"
+          icon-name="handset-filled"
+          size="32"
+        />
+      </div>
+      <div
+        data-position="fill"
+      >
+        <section
+          class="task-details"
+        >
+          <mdc-text
+            class="md-text-wrapper task-title"
+            data-testid="task:title"
+            tagname="span"
+            type="body-large-medium"
+          >
+            1111111111
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            data-testid="action-task-queue"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Action Team
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            data-testid="action-task-time-left"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Time Left: 
+              
+            <time
+              class="task-text task-text--secondary"
+              datetime="00:00"
+            >
+              00:00
+            </time>
+          </mdc-text>
+        </section>
+      </div>
+      <div
+        data-position="end"
+      >
+        <div
+          class="task-button-container"
+        >
+          <button
+            class="md-button-pill-wrapper md-button-simple-wrapper md-focus-ring-wrapper children"
+            data-color="join"
+            data-disabled="false"
+            data-disabled-outline="false"
+            data-ghost="false"
+            data-grown="false"
+            data-inverted="false"
+            data-outline="false"
+            data-shallow-disabled="false"
+            data-size="40"
+            data-testid="task:accept-button"
+            tabindex="0"
+            type="button"
+          >
+            <span>
+              Accept
+            </span>
+          </button>
+          <button
+            class="md-button-pill-wrapper md-button-simple-wrapper"
+            data-color="cancel"
+            data-disabled="false"
+            data-disabled-outline="false"
+            data-ghost="false"
+            data-grown="false"
+            data-inverted="false"
+            data-outline="false"
+            data-shallow-disabled="false"
+            data-size="40"
+            data-testid="task:decline-button"
+            tabindex="0"
+            type="button"
+          >
+            <span>
+              Decline
+            </span>
+          </button>
+        </div>
+      </div>
+    </li>
+  </ul>
+</div>
+`;
+
+exports[`TaskListComponent Actions should call declineTask when decline button is clicked 1`] = `
+<div>
+  <ul
+    class="task-list"
+    data-testid="task-list"
+  >
+    <li
+      class="task-list-item md-list-item-base-wrapper"
+      data-allow-text-select="false"
+      data-disabled="false"
+      data-interactive="true"
+      data-padded="false"
+      data-shape="rectangle"
+      data-size="40"
+      id="action-task"
+      role="listitem"
+      tabindex="0"
+    >
+      <div
+        data-position="start"
+      >
+        <mdc-avatar
+          class="telephony"
+          icon-name="handset-filled"
+          size="32"
+        />
+      </div>
+      <div
+        data-position="fill"
+      >
+        <section
+          class="task-details"
+        >
+          <mdc-text
+            class="md-text-wrapper task-title"
+            data-testid="task:title"
+            tagname="span"
+            type="body-large-medium"
+          >
+            1111111111
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            data-testid="action-task-queue"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Action Team
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            data-testid="action-task-time-left"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Time Left: 
+              
+            <time
+              class="task-text task-text--secondary"
+              datetime="00:00"
+            >
+              00:00
+            </time>
+          </mdc-text>
+        </section>
+      </div>
+      <div
+        data-position="end"
+      >
+        <div
+          class="task-button-container"
+        >
+          <button
+            class="md-button-pill-wrapper md-button-simple-wrapper"
+            data-color="join"
+            data-disabled="false"
+            data-disabled-outline="false"
+            data-ghost="false"
+            data-grown="false"
+            data-inverted="false"
+            data-outline="false"
+            data-shallow-disabled="false"
+            data-size="40"
+            data-testid="task:accept-button"
+            tabindex="-1"
+            type="button"
+          >
+            <span>
+              Accept
+            </span>
+          </button>
+          <button
+            class="md-button-pill-wrapper md-button-simple-wrapper"
+            data-color="cancel"
+            data-disabled="false"
+            data-disabled-outline="false"
+            data-ghost="false"
+            data-grown="false"
+            data-inverted="false"
+            data-outline="false"
+            data-shallow-disabled="false"
+            data-size="40"
+            data-testid="task:decline-button"
+            tabindex="-1"
+            type="button"
+          >
+            <span>
+              Decline
+            </span>
+          </button>
+        </div>
+      </div>
+    </li>
+  </ul>
+</div>
+`;
+
+exports[`TaskListComponent Actions should call declineTask when decline button is clicked 2`] = `
+<div>
+  <ul
+    class="task-list"
+    data-testid="task-list"
+  >
+    <li
+      class="task-list-item md-list-item-base-wrapper"
+      data-allow-text-select="false"
+      data-disabled="false"
+      data-interactive="true"
+      data-padded="false"
+      data-shape="rectangle"
+      data-size="40"
+      id="action-task"
+      role="listitem"
+      tabindex="0"
+    >
+      <div
+        data-position="start"
+      >
+        <mdc-avatar
+          class="telephony"
+          icon-name="handset-filled"
+          size="32"
+        />
+      </div>
+      <div
+        data-position="fill"
+      >
+        <section
+          class="task-details"
+        >
+          <mdc-text
+            class="md-text-wrapper task-title"
+            data-testid="task:title"
+            tagname="span"
+            type="body-large-medium"
+          >
+            1111111111
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            data-testid="action-task-queue"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Action Team
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            data-testid="action-task-time-left"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Time Left: 
+              
+            <time
+              class="task-text task-text--secondary"
+              datetime="00:00"
+            >
+              00:00
+            </time>
+          </mdc-text>
+        </section>
+      </div>
+      <div
+        data-position="end"
+      >
+        <div
+          class="task-button-container"
+        >
+          <button
+            class="md-button-pill-wrapper md-button-simple-wrapper"
+            data-color="join"
+            data-disabled="false"
+            data-disabled-outline="false"
+            data-ghost="false"
+            data-grown="false"
+            data-inverted="false"
+            data-outline="false"
+            data-shallow-disabled="false"
+            data-size="40"
+            data-testid="task:accept-button"
+            tabindex="0"
+            type="button"
+          >
+            <span>
+              Accept
+            </span>
+          </button>
+          <button
+            class="md-button-pill-wrapper md-button-simple-wrapper md-focus-ring-wrapper children"
+            data-color="cancel"
+            data-disabled="false"
+            data-disabled-outline="false"
+            data-ghost="false"
+            data-grown="false"
+            data-inverted="false"
+            data-outline="false"
+            data-shallow-disabled="false"
+            data-size="40"
+            data-testid="task:decline-button"
+            tabindex="0"
+            type="button"
+          >
+            <span>
+              Decline
+            </span>
+          </button>
+        </div>
+      </div>
+    </li>
+  </ul>
+</div>
+`;
+
+exports[`TaskListComponent Actions should call onTaskSelect when task is clicked 1`] = `
+<div>
+  <ul
+    class="task-list"
+    data-testid="task-list"
+  >
+    <li
+      class="task-list-item md-list-item-base-wrapper"
+      data-allow-text-select="false"
+      data-disabled="false"
+      data-interactive="true"
+      data-padded="false"
+      data-shape="rectangle"
+      data-size="40"
+      id="active-task"
+      role="listitem"
+      tabindex="0"
+    >
+      <div
+        data-position="start"
+      >
+        <mdc-avatar
+          class="telephony"
+          icon-name="handset-filled"
+          size="32"
+        />
+      </div>
+      <div
+        data-position="fill"
+      >
+        <section
+          class="task-details"
+        >
+          <mdc-text
+            class="md-text-wrapper task-title"
+            data-testid="task:title"
+            tagname="span"
+            type="body-large-medium"
+          >
+            1111111111
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            data-testid="active-task-state"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Active
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            data-testid="active-task-handle-time"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Handle Time: 
+              
+            <time
+              class="task-text task-text--secondary"
+              datetime="00:00"
+            >
+              00:00
+            </time>
+          </mdc-text>
+        </section>
+      </div>
+      <div
+        data-position="end"
+      >
+        <div
+          class="task-button-container"
+        />
+      </div>
+    </li>
+  </ul>
+</div>
+`;
+
+exports[`TaskListComponent Actions should call onTaskSelect when task is clicked 2`] = `
+<div>
+  <ul
+    class="task-list"
+    data-testid="task-list"
+  >
+    <li
+      class="task-list-item md-list-item-base-wrapper"
+      data-allow-text-select="false"
+      data-disabled="false"
+      data-interactive="true"
+      data-padded="false"
+      data-shape="rectangle"
+      data-size="40"
+      id="active-task"
+      role="listitem"
+      tabindex="0"
+    >
+      <div
+        data-position="start"
+      >
+        <mdc-avatar
+          class="telephony"
+          icon-name="handset-filled"
+          size="32"
+        />
+      </div>
+      <div
+        data-position="fill"
+      >
+        <section
+          class="task-details"
+        >
+          <mdc-text
+            class="md-text-wrapper task-title"
+            data-testid="task:title"
+            tagname="span"
+            type="body-large-medium"
+          >
+            1111111111
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            data-testid="active-task-state"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Active
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            data-testid="active-task-handle-time"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Handle Time: 
+              
+            <time
+              class="task-text task-text--secondary"
+              datetime="00:00"
+            >
+              00:00
+            </time>
+          </mdc-text>
+        </section>
+      </div>
+      <div
+        data-position="end"
+      >
+        <div
+          class="task-button-container"
+        />
+      </div>
+    </li>
+  </ul>
+</div>
+`;
+
+exports[`TaskListComponent Actions should handle task selection between multiple tasks 1`] = `
+<div>
+  <ul
+    class="task-list"
+    data-testid="task-list"
+  >
+    <li
+      class="task-list-item task-list-item--selected md-list-item-base-wrapper"
+      data-allow-text-select="false"
+      data-disabled="false"
+      data-interactive="true"
+      data-padded="false"
+      data-shape="rectangle"
+      data-size="40"
+      id="action-task"
+      role="listitem"
+      tabindex="0"
+    >
+      <div
+        data-position="start"
+      >
+        <mdc-avatar
+          class="telephony"
+          icon-name="handset-filled"
+          size="32"
+        />
+      </div>
+      <div
+        data-position="fill"
+      >
+        <section
+          class="task-details"
+        >
+          <mdc-text
+            class="md-text-wrapper task-title"
+            data-testid="task:title"
+            tagname="span"
+            type="body-large-bold"
+          >
+            1111111111
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            data-testid="action-task-queue"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Selected Team
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            data-testid="action-task-time-left"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Time Left: 
+              
+            <time
+              class="task-text task-text--secondary"
+              datetime="00:00"
+            >
+              00:00
+            </time>
+          </mdc-text>
+        </section>
+      </div>
+      <div
+        data-position="end"
+      >
+        <div
+          class="task-button-container"
+        >
+          <button
+            class="md-button-pill-wrapper md-button-simple-wrapper"
+            data-color="join"
+            data-disabled="false"
+            data-disabled-outline="false"
+            data-ghost="false"
+            data-grown="false"
+            data-inverted="false"
+            data-outline="false"
+            data-shallow-disabled="false"
+            data-size="40"
+            data-testid="task:accept-button"
+            tabindex="-1"
+            type="button"
+          >
+            <span>
+              Accept
+            </span>
+          </button>
+          <button
+            class="md-button-pill-wrapper md-button-simple-wrapper"
+            data-color="cancel"
+            data-disabled="false"
+            data-disabled-outline="false"
+            data-ghost="false"
+            data-grown="false"
+            data-inverted="false"
+            data-outline="false"
+            data-shallow-disabled="false"
+            data-size="40"
+            data-testid="task:decline-button"
+            tabindex="-1"
+            type="button"
+          >
+            <span>
+              Decline
+            </span>
+          </button>
+        </div>
+      </div>
+    </li>
+    <li
+      class="task-list-item md-list-item-base-wrapper"
+      data-allow-text-select="false"
+      data-disabled="false"
+      data-interactive="true"
+      data-padded="false"
+      data-shape="rectangle"
+      data-size="40"
+      id="unselected-chat-task"
+      role="listitem"
+      tabindex="0"
+    >
+      <div
+        data-position="start"
+      >
+        <mdc-avatar
+          class="chat"
+          icon-name="chat-filled"
+          size="32"
+        />
+      </div>
+      <div
+        data-position="fill"
+      >
+        <section
+          class="task-details"
+        >
+          <mdc-text
+            aria-describedby="tooltip-unselected-chat-task"
+            class="md-text-wrapper task-digital-title"
+            data-testid="task:title"
+            id="tooltip-trigger-unselected-chat-task"
+            tagname="span"
+            type="body-large-medium"
+          >
+            Unselected Chat Customer
+          </mdc-text>
+          <mdc-tooltip
+            append-to=""
+            class="task-tooltip"
+            color="contrast"
+            delay="0,0"
+            disable-aria-expanded=""
+            flip=""
+            hide-on-blur=""
+            hide-on-escape=""
+            id="tooltip-unselected-chat-task"
+            offset="4"
+            placement="top-start"
+            role="tooltip"
+            style="z-index: 1000;"
+            tooltip-type="description"
+            trigger="mouseenter focusin"
+            triggerid="tooltip-trigger-unselected-chat-task"
+            z-index="1000"
+          >
+            Unselected Chat Customer
+          </mdc-tooltip>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            data-testid="unselected-chat-task-state"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Active
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            data-testid="unselected-chat-task-handle-time"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Handle Time: 
+              
+            <time
+              class="task-text task-text--secondary"
+              datetime="00:00"
+            >
+              00:00
+            </time>
+          </mdc-text>
+        </section>
+      </div>
+      <div
+        data-position="end"
+      >
+        <div
+          class="task-button-container"
+        />
+      </div>
+    </li>
+  </ul>
+</div>
+`;
+
+exports[`TaskListComponent Actions should handle task selection between multiple tasks 2`] = `
+<div>
+  <ul
+    class="task-list"
+    data-testid="task-list"
+  >
+    <li
+      class="task-list-item task-list-item--selected md-list-item-base-wrapper"
+      data-allow-text-select="false"
+      data-disabled="false"
+      data-interactive="true"
+      data-padded="false"
+      data-shape="rectangle"
+      data-size="40"
+      id="action-task"
+      role="listitem"
+      tabindex="0"
+    >
+      <div
+        data-position="start"
+      >
+        <mdc-avatar
+          class="telephony"
+          icon-name="handset-filled"
+          size="32"
+        />
+      </div>
+      <div
+        data-position="fill"
+      >
+        <section
+          class="task-details"
+        >
+          <mdc-text
+            class="md-text-wrapper task-title"
+            data-testid="task:title"
+            tagname="span"
+            type="body-large-bold"
+          >
+            1111111111
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            data-testid="action-task-queue"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Selected Team
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            data-testid="action-task-time-left"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Time Left: 
+              
+            <time
+              class="task-text task-text--secondary"
+              datetime="00:00"
+            >
+              00:00
+            </time>
+          </mdc-text>
+        </section>
+      </div>
+      <div
+        data-position="end"
+      >
+        <div
+          class="task-button-container"
+        >
+          <button
+            class="md-button-pill-wrapper md-button-simple-wrapper"
+            data-color="join"
+            data-disabled="false"
+            data-disabled-outline="false"
+            data-ghost="false"
+            data-grown="false"
+            data-inverted="false"
+            data-outline="false"
+            data-shallow-disabled="false"
+            data-size="40"
+            data-testid="task:accept-button"
+            tabindex="-1"
+            type="button"
+          >
+            <span>
+              Accept
+            </span>
+          </button>
+          <button
+            class="md-button-pill-wrapper md-button-simple-wrapper"
+            data-color="cancel"
+            data-disabled="false"
+            data-disabled-outline="false"
+            data-ghost="false"
+            data-grown="false"
+            data-inverted="false"
+            data-outline="false"
+            data-shallow-disabled="false"
+            data-size="40"
+            data-testid="task:decline-button"
+            tabindex="-1"
+            type="button"
+          >
+            <span>
+              Decline
+            </span>
+          </button>
+        </div>
+      </div>
+    </li>
+    <li
+      class="task-list-item md-list-item-base-wrapper"
+      data-allow-text-select="false"
+      data-disabled="false"
+      data-interactive="true"
+      data-padded="false"
+      data-shape="rectangle"
+      data-size="40"
+      id="unselected-chat-task"
+      role="listitem"
+      tabindex="0"
+    >
+      <div
+        data-position="start"
+      >
+        <mdc-avatar
+          class="chat"
+          icon-name="chat-filled"
+          size="32"
+        />
+      </div>
+      <div
+        data-position="fill"
+      >
+        <section
+          class="task-details"
+        >
+          <mdc-text
+            aria-describedby="tooltip-unselected-chat-task"
+            class="md-text-wrapper task-digital-title"
+            data-testid="task:title"
+            id="tooltip-trigger-unselected-chat-task"
+            tagname="span"
+            type="body-large-medium"
+          >
+            Unselected Chat Customer
+          </mdc-text>
+          <mdc-tooltip
+            append-to=""
+            class="task-tooltip"
+            color="contrast"
+            delay="0,0"
+            disable-aria-expanded=""
+            flip=""
+            hide-on-blur=""
+            hide-on-escape=""
+            id="tooltip-unselected-chat-task"
+            offset="4"
+            placement="top-start"
+            role="tooltip"
+            style="z-index: 1000;"
+            tooltip-type="description"
+            trigger="mouseenter focusin"
+            triggerid="tooltip-trigger-unselected-chat-task"
+            z-index="1000"
+          >
+            Unselected Chat Customer
+          </mdc-tooltip>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            data-testid="unselected-chat-task-state"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Active
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            data-testid="unselected-chat-task-handle-time"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Handle Time: 
+              
+            <time
+              class="task-text task-text--secondary"
+              datetime="00:00"
+            >
+              00:00
+            </time>
+          </mdc-text>
+        </section>
+      </div>
+      <div
+        data-position="end"
+      >
+        <div
+          class="task-button-container"
+        />
+      </div>
+    </li>
+  </ul>
+</div>
+`;
+
+exports[`TaskListComponent Empty TaskList Scenarios should return empty component when taskList is empty object 1`] = `<div />`;
+
+exports[`TaskListComponent Empty TaskList Scenarios should return empty component when taskList is null or undefined 1`] = `<div />`;
+
+exports[`TaskListComponent Empty TaskList Scenarios should return empty component when taskList is null or undefined 2`] = `<div />`;
+
+exports[`TaskListComponent Rendering with Tasks should render digital incoming task with Accept button only 1`] = `
+<div>
+  <ul
+    class="task-list"
+    data-testid="task-list"
+  >
+    <li
+      class="task-list-item md-list-item-base-wrapper"
+      data-allow-text-select="false"
+      data-disabled="false"
+      data-interactive="true"
+      data-padded="false"
+      data-shape="rectangle"
+      data-size="40"
+      id="incoming-chat-task"
+      role="listitem"
+      tabindex="0"
+    >
+      <div
+        data-position="start"
+      >
+        <mdc-avatar
+          class="chat"
+          icon-name="chat-filled"
+          size="32"
+        />
+      </div>
+      <div
+        data-position="fill"
+      >
+        <section
+          class="task-details"
+        >
+          <mdc-text
+            aria-describedby="tooltip-incoming-chat-task"
+            class="md-text-wrapper incoming-digital-task-title"
+            data-testid="task:title"
+            id="tooltip-trigger-incoming-chat-task"
+            tagname="span"
+            type="body-large-medium"
+          >
+            Chat Customer
+          </mdc-text>
+          <mdc-tooltip
+            append-to=""
+            class="task-tooltip"
+            color="contrast"
+            delay="0,0"
+            disable-aria-expanded=""
+            flip=""
+            hide-on-blur=""
+            hide-on-escape=""
+            id="tooltip-incoming-chat-task"
+            offset="4"
+            placement="top-start"
+            role="tooltip"
+            style="z-index: 1000;"
+            tooltip-type="description"
+            trigger="mouseenter focusin"
+            triggerid="tooltip-trigger-incoming-chat-task"
+            z-index="1000"
+          >
+            Chat Customer
+          </mdc-tooltip>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            data-testid="incoming-chat-task-queue"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Chat Support
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            data-testid="incoming-chat-task-time-left"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Time Left: 
+              
+            <time
+              class="task-text task-text--secondary"
+              datetime="00:00"
+            >
+              00:00
+            </time>
+          </mdc-text>
+        </section>
+      </div>
+      <div
+        data-position="end"
+      >
+        <div
+          class="task-button-container"
+        >
+          <button
+            class="md-button-pill-wrapper md-button-simple-wrapper"
+            data-color="join"
+            data-disabled="false"
+            data-disabled-outline="false"
+            data-ghost="false"
+            data-grown="false"
+            data-inverted="false"
+            data-outline="false"
+            data-shallow-disabled="false"
+            data-size="40"
+            data-testid="task:accept-button"
+            tabindex="-1"
+            type="button"
+          >
+            <span>
+              Accept
+            </span>
+          </button>
+        </div>
+      </div>
+    </li>
+  </ul>
+</div>
+`;
+
+exports[`TaskListComponent Rendering with Tasks should render multiple tasks with different media types and their corresponding icons and labels 1`] = `
+<div>
+  <ul
+    class="task-list"
+    data-testid="task-list"
+  >
+    <li
+      class="task-list-item md-list-item-base-wrapper"
+      data-allow-text-select="false"
+      data-disabled="false"
+      data-interactive="true"
+      data-padded="false"
+      data-shape="rectangle"
+      data-size="40"
+      id="telephony-task"
+      role="listitem"
+      tabindex="0"
+    >
+      <div
+        data-position="start"
+      >
+        <mdc-avatar
+          class="telephony"
+          icon-name="handset-filled"
+          size="32"
+        />
+      </div>
+      <div
+        data-position="fill"
+      >
+        <section
+          class="task-details"
+        >
+          <mdc-text
+            class="md-text-wrapper task-title"
+            data-testid="task:title"
+            tagname="span"
+            type="body-large-medium"
+          >
+            1234567890
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            data-testid="telephony-task-state"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Active
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            data-testid="telephony-task-handle-time"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Handle Time: 
+              
+            <time
+              class="task-text task-text--secondary"
+              datetime="00:00"
+            >
+              00:00
+            </time>
+          </mdc-text>
+        </section>
+      </div>
+      <div
+        data-position="end"
+      >
+        <div
+          class="task-button-container"
+        />
+      </div>
+    </li>
+    <li
+      class="task-list-item md-list-item-base-wrapper"
+      data-allow-text-select="false"
+      data-disabled="false"
+      data-interactive="true"
+      data-padded="false"
+      data-shape="rectangle"
+      data-size="40"
+      id="chat-task"
+      role="listitem"
+      tabindex="0"
+    >
+      <div
+        data-position="start"
+      >
+        <mdc-avatar
+          class="chat"
+          icon-name="chat-filled"
+          size="32"
+        />
+      </div>
+      <div
+        data-position="fill"
+      >
+        <section
+          class="task-details"
+        >
+          <mdc-text
+            aria-describedby="tooltip-chat-task"
+            class="md-text-wrapper task-digital-title"
+            data-testid="task:title"
+            id="tooltip-trigger-chat-task"
+            tagname="span"
+            type="body-large-medium"
+          >
+            Chat Customer
+          </mdc-text>
+          <mdc-tooltip
+            append-to=""
+            class="task-tooltip"
+            color="contrast"
+            delay="0,0"
+            disable-aria-expanded=""
+            flip=""
+            hide-on-blur=""
+            hide-on-escape=""
+            id="tooltip-chat-task"
+            offset="4"
+            placement="top-start"
+            role="tooltip"
+            style="z-index: 1000;"
+            tooltip-type="description"
+            trigger="mouseenter focusin"
+            triggerid="tooltip-trigger-chat-task"
+            z-index="1000"
+          >
+            Chat Customer
+          </mdc-tooltip>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            data-testid="chat-task-state"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Active
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            data-testid="chat-task-handle-time"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Handle Time: 
+              
+            <time
+              class="task-text task-text--secondary"
+              datetime="00:00"
+            >
+              00:00
+            </time>
+          </mdc-text>
+        </section>
+      </div>
+      <div
+        data-position="end"
+      >
+        <div
+          class="task-button-container"
+        />
+      </div>
+    </li>
+    <li
+      class="task-list-item md-list-item-base-wrapper"
+      data-allow-text-select="false"
+      data-disabled="false"
+      data-interactive="true"
+      data-padded="false"
+      data-shape="rectangle"
+      data-size="40"
+      id="social-task"
+      role="listitem"
+      tabindex="0"
+    >
+      <div
+        data-position="start"
+      >
+        <div
+          class="brand-visual-background"
+        >
+          <mdc-brandvisual
+            class="facebook"
+            name="social-facebook-color"
+          />
+        </div>
+      </div>
+      <div
+        data-position="fill"
+      >
+        <section
+          class="task-details"
+        >
+          <mdc-text
+            aria-describedby="tooltip-social-task"
+            class="md-text-wrapper task-digital-title"
+            data-testid="task:title"
+            id="tooltip-trigger-social-task"
+            tagname="span"
+            type="body-large-medium"
+          >
+            Facebook Customer
+          </mdc-text>
+          <mdc-tooltip
+            append-to=""
+            class="task-tooltip"
+            color="contrast"
+            delay="0,0"
+            disable-aria-expanded=""
+            flip=""
+            hide-on-blur=""
+            hide-on-escape=""
+            id="tooltip-social-task"
+            offset="4"
+            placement="top-start"
+            role="tooltip"
+            style="z-index: 1000;"
+            tooltip-type="description"
+            trigger="mouseenter focusin"
+            triggerid="tooltip-trigger-social-task"
+            z-index="1000"
+          >
+            Facebook Customer
+          </mdc-tooltip>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            data-testid="social-task-state"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Active
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            data-testid="social-task-handle-time"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Handle Time: 
+              
+            <time
+              class="task-text task-text--secondary"
+              datetime="00:00"
+            >
+              00:00
+            </time>
+          </mdc-text>
+        </section>
+      </div>
+      <div
+        data-position="end"
+      >
+        <div
+          class="task-button-container"
+        />
+      </div>
+    </li>
+  </ul>
+</div>
+`;
+
+exports[`TaskListComponent Rendering with Tasks should render telephony incoming task with Accept/Decline buttons in WebRTC mode 1`] = `
+<div>
+  <ul
+    class="task-list"
+    data-testid="task-list"
+  >
+    <li
+      class="task-list-item md-list-item-base-wrapper"
+      data-allow-text-select="false"
+      data-disabled="false"
+      data-interactive="true"
+      data-padded="false"
+      data-shape="rectangle"
+      data-size="40"
+      id="webrtc-telephony-task"
+      role="listitem"
+      tabindex="0"
+    >
+      <div
+        data-position="start"
+      >
+        <mdc-avatar
+          class="telephony"
+          icon-name="handset-filled"
+          size="32"
+        />
+      </div>
+      <div
+        data-position="fill"
+      >
+        <section
+          class="task-details"
+        >
+          <mdc-text
+            class="md-text-wrapper task-title"
+            data-testid="task:title"
+            tagname="span"
+            type="body-large-medium"
+          >
+            1234567890
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            data-testid="webrtc-telephony-task-queue"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Support
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            data-testid="webrtc-telephony-task-time-left"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Time Left: 
+              
+            <time
+              class="task-text task-text--secondary"
+              datetime="00:00"
+            >
+              00:00
+            </time>
+          </mdc-text>
+        </section>
+      </div>
+      <div
+        data-position="end"
+      >
+        <div
+          class="task-button-container"
+        >
+          <button
+            class="md-button-pill-wrapper md-button-simple-wrapper"
+            data-color="join"
+            data-disabled="false"
+            data-disabled-outline="false"
+            data-ghost="false"
+            data-grown="false"
+            data-inverted="false"
+            data-outline="false"
+            data-shallow-disabled="false"
+            data-size="40"
+            data-testid="task:accept-button"
+            tabindex="-1"
+            type="button"
+          >
+            <span>
+              Accept
+            </span>
+          </button>
+          <button
+            class="md-button-pill-wrapper md-button-simple-wrapper"
+            data-color="cancel"
+            data-disabled="false"
+            data-disabled-outline="false"
+            data-ghost="false"
+            data-grown="false"
+            data-inverted="false"
+            data-outline="false"
+            data-shallow-disabled="false"
+            data-size="40"
+            data-testid="task:decline-button"
+            tabindex="-1"
+            type="button"
+          >
+            <span>
+              Decline
+            </span>
+          </button>
+        </div>
+      </div>
+    </li>
+  </ul>
+</div>
+`;
+
+exports[`TaskListComponent Rendering with Tasks should render telephony incoming task with disabled Accept button in Extension mode 1`] = `
+<div>
+  <ul
+    class="task-list"
+    data-testid="task-list"
+  >
+    <li
+      class="task-list-item md-list-item-base-wrapper"
+      data-allow-text-select="false"
+      data-disabled="false"
+      data-interactive="true"
+      data-padded="false"
+      data-shape="rectangle"
+      data-size="40"
+      id="extension-telephony-task"
+      role="listitem"
+      tabindex="0"
+    >
+      <div
+        data-position="start"
+      >
+        <mdc-avatar
+          class="telephony"
+          icon-name="handset-filled"
+          size="32"
+        />
+      </div>
+      <div
+        data-position="fill"
+      >
+        <section
+          class="task-details"
+        >
+          <mdc-text
+            class="md-text-wrapper task-title"
+            data-testid="task:title"
+            tagname="span"
+            type="body-large-medium"
+          >
+            1234567890
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            data-testid="extension-telephony-task-queue"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Support
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            data-testid="extension-telephony-task-time-left"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Time Left: 
+              
+            <time
+              class="task-text task-text--secondary"
+              datetime="00:00"
+            >
+              00:00
+            </time>
+          </mdc-text>
+        </section>
+      </div>
+      <div
+        data-position="end"
+      >
+        <div
+          class="task-button-container"
+        >
+          <button
+            class="md-button-pill-wrapper md-button-simple-wrapper"
+            data-color="join"
+            data-disabled="true"
+            data-disabled-outline="false"
+            data-ghost="false"
+            data-grown="false"
+            data-inverted="false"
+            data-outline="false"
+            data-shallow-disabled="false"
+            data-size="40"
+            data-testid="task:accept-button"
+            disabled=""
+            type="button"
+          >
+            <span>
+              Ringing...
+            </span>
+          </button>
+        </div>
+      </div>
+    </li>
+  </ul>
+</div>
+`;
+
+exports[`TaskListComponent Rendering with Tasks should show selected state with bold title 1`] = `
+<div>
+  <ul
+    class="task-list"
+    data-testid="task-list"
+  >
+    <li
+      class="task-list-item task-list-item--selected md-list-item-base-wrapper"
+      data-allow-text-select="false"
+      data-disabled="false"
+      data-interactive="true"
+      data-padded="false"
+      data-shape="rectangle"
+      data-size="40"
+      id="test-task-123"
+      role="listitem"
+      tabindex="0"
+    >
+      <div
+        data-position="start"
+      >
+        <mdc-avatar
+          class="telephony"
+          icon-name="handset-filled"
+          size="32"
+        />
+      </div>
+      <div
+        data-position="fill"
+      >
+        <section
+          class="task-details"
+        >
+          <mdc-text
+            class="md-text-wrapper task-title"
+            data-testid="task:title"
+            tagname="span"
+            type="body-large-bold"
+          >
+            1234567890
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            data-testid="test-task-123-state"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Active
+          </mdc-text>
+          <mdc-text
+            class="md-text-wrapper task-text"
+            data-testid="test-task-123-handle-time"
+            tagname="span"
+            type="body-midsize-regular"
+          >
+            Handle Time: 
+              
+            <time
+              class="task-text task-text--secondary"
+              datetime="00:00"
+            >
+              00:00
+            </time>
+          </mdc-text>
+        </section>
+      </div>
+      <div
+        data-position="end"
+      >
+        <div
+          class="task-button-container"
+        />
+      </div>
+    </li>
+  </ul>
+</div>
+`;

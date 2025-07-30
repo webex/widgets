@@ -1,0 +1,4741 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Task Component Snapshots Actions should handle accept task action correctly 1`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-title"
+          data-testid="task:title"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Test Task
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      >
+        <button
+          class="md-button-pill-wrapper md-button-simple-wrapper"
+          data-color="join"
+          data-disabled="false"
+          data-disabled-outline="false"
+          data-ghost="false"
+          data-grown="false"
+          data-inverted="false"
+          data-outline="false"
+          data-shallow-disabled="false"
+          data-size="40"
+          data-testid="task:accept-button"
+          tabindex="-1"
+          type="button"
+        >
+          <span>
+            Accept
+          </span>
+        </button>
+      </div>
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Actions should handle accept task action correctly 2`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-title"
+          data-testid="task:title"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Test Task
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      >
+        <button
+          class="md-button-pill-wrapper md-button-simple-wrapper md-focus-ring-wrapper children"
+          data-color="join"
+          data-disabled="false"
+          data-disabled-outline="false"
+          data-ghost="false"
+          data-grown="false"
+          data-inverted="false"
+          data-outline="false"
+          data-shallow-disabled="false"
+          data-size="40"
+          data-testid="task:accept-button"
+          tabindex="0"
+          type="button"
+        >
+          <span>
+            Accept
+          </span>
+        </button>
+      </div>
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Actions should handle accept task action correctly 3`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-title"
+          data-testid="task:title"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Test Task
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      >
+        <button
+          class="md-button-pill-wrapper md-button-simple-wrapper"
+          data-color="join"
+          data-disabled="true"
+          data-disabled-outline="false"
+          data-ghost="false"
+          data-grown="false"
+          data-inverted="false"
+          data-outline="false"
+          data-shallow-disabled="false"
+          data-size="40"
+          data-testid="task:accept-button"
+          disabled=""
+          type="button"
+        >
+          <span>
+            Ringing...
+          </span>
+        </button>
+      </div>
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Actions should handle accept task action correctly 4`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-title"
+          data-testid="task:title"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Test Task
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      >
+        <button
+          class="md-button-pill-wrapper md-button-simple-wrapper"
+          data-color="join"
+          data-disabled="true"
+          data-disabled-outline="false"
+          data-ghost="false"
+          data-grown="false"
+          data-inverted="false"
+          data-outline="false"
+          data-shallow-disabled="false"
+          data-size="40"
+          data-testid="task:accept-button"
+          disabled=""
+          type="button"
+        >
+          <span>
+            Ringing...
+          </span>
+        </button>
+      </div>
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Actions should handle accept task action correctly 5`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-title"
+          data-testid="task:title"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Test Task
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      >
+        <button
+          class="md-button-pill-wrapper md-button-simple-wrapper"
+          data-color="join"
+          data-disabled="false"
+          data-disabled-outline="false"
+          data-ghost="false"
+          data-grown="false"
+          data-inverted="false"
+          data-outline="false"
+          data-shallow-disabled="false"
+          data-size="40"
+          data-testid="task:accept-button"
+          tabindex="-1"
+          type="button"
+        >
+          <span>
+            Accept Call
+          </span>
+        </button>
+        <button
+          class="md-button-pill-wrapper md-button-simple-wrapper"
+          data-color="cancel"
+          data-disabled="false"
+          data-disabled-outline="false"
+          data-ghost="false"
+          data-grown="false"
+          data-inverted="false"
+          data-outline="false"
+          data-shallow-disabled="false"
+          data-size="40"
+          data-testid="task:decline-button"
+          tabindex="-1"
+          type="button"
+        >
+          <span>
+            Decline
+          </span>
+        </button>
+      </div>
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Actions should handle accept task action correctly 6`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-title"
+          data-testid="task:title"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Test Task
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      >
+        <button
+          class="md-button-pill-wrapper md-button-simple-wrapper md-focus-ring-wrapper children"
+          data-color="join"
+          data-disabled="false"
+          data-disabled-outline="false"
+          data-ghost="false"
+          data-grown="false"
+          data-inverted="false"
+          data-outline="false"
+          data-shallow-disabled="false"
+          data-size="40"
+          data-testid="task:accept-button"
+          tabindex="0"
+          type="button"
+        >
+          <span>
+            Accept Call
+          </span>
+        </button>
+        <button
+          class="md-button-pill-wrapper md-button-simple-wrapper"
+          data-color="cancel"
+          data-disabled="false"
+          data-disabled-outline="false"
+          data-ghost="false"
+          data-grown="false"
+          data-inverted="false"
+          data-outline="false"
+          data-shallow-disabled="false"
+          data-size="40"
+          data-testid="task:decline-button"
+          tabindex="0"
+          type="button"
+        >
+          <span>
+            Decline
+          </span>
+        </button>
+      </div>
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Actions should handle decline task action correctly 1`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-title"
+          data-testid="task:title"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Test Task
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      >
+        <button
+          class="md-button-pill-wrapper md-button-simple-wrapper"
+          data-color="cancel"
+          data-disabled="false"
+          data-disabled-outline="false"
+          data-ghost="false"
+          data-grown="false"
+          data-inverted="false"
+          data-outline="false"
+          data-shallow-disabled="false"
+          data-size="40"
+          data-testid="task:decline-button"
+          tabindex="-1"
+          type="button"
+        >
+          <span>
+            Decline
+          </span>
+        </button>
+      </div>
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Actions should handle decline task action correctly 2`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-title"
+          data-testid="task:title"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Test Task
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      >
+        <button
+          class="md-button-pill-wrapper md-button-simple-wrapper md-focus-ring-wrapper children"
+          data-color="cancel"
+          data-disabled="false"
+          data-disabled-outline="false"
+          data-ghost="false"
+          data-grown="false"
+          data-inverted="false"
+          data-outline="false"
+          data-shallow-disabled="false"
+          data-size="40"
+          data-testid="task:decline-button"
+          tabindex="0"
+          type="button"
+        >
+          <span>
+            Decline
+          </span>
+        </button>
+      </div>
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Actions should handle decline task action correctly 3`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-title"
+          data-testid="task:title"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Test Task
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      >
+        <button
+          class="md-button-pill-wrapper md-button-simple-wrapper"
+          data-color="join"
+          data-disabled="false"
+          data-disabled-outline="false"
+          data-ghost="false"
+          data-grown="false"
+          data-inverted="false"
+          data-outline="false"
+          data-shallow-disabled="false"
+          data-size="40"
+          data-testid="task:accept-button"
+          tabindex="-1"
+          type="button"
+        >
+          <span>
+            Accept
+          </span>
+        </button>
+        <button
+          class="md-button-pill-wrapper md-button-simple-wrapper"
+          data-color="cancel"
+          data-disabled="false"
+          data-disabled-outline="false"
+          data-ghost="false"
+          data-grown="false"
+          data-inverted="false"
+          data-outline="false"
+          data-shallow-disabled="false"
+          data-size="40"
+          data-testid="task:decline-button"
+          tabindex="-1"
+          type="button"
+        >
+          <span>
+            Decline Call
+          </span>
+        </button>
+      </div>
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Actions should handle decline task action correctly 4`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-title"
+          data-testid="task:title"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Test Task
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      >
+        <button
+          class="md-button-pill-wrapper md-button-simple-wrapper"
+          data-color="join"
+          data-disabled="false"
+          data-disabled-outline="false"
+          data-ghost="false"
+          data-grown="false"
+          data-inverted="false"
+          data-outline="false"
+          data-shallow-disabled="false"
+          data-size="40"
+          data-testid="task:accept-button"
+          tabindex="0"
+          type="button"
+        >
+          <span>
+            Accept
+          </span>
+        </button>
+        <button
+          class="md-button-pill-wrapper md-button-simple-wrapper md-focus-ring-wrapper children"
+          data-color="cancel"
+          data-disabled="false"
+          data-disabled-outline="false"
+          data-ghost="false"
+          data-grown="false"
+          data-inverted="false"
+          data-outline="false"
+          data-shallow-disabled="false"
+          data-size="40"
+          data-testid="task:decline-button"
+          tabindex="0"
+          type="button"
+        >
+          <span>
+            Decline Call
+          </span>
+        </button>
+      </div>
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Actions should handle decline task action correctly 5`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-title"
+          data-testid="task:title"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Test Task
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      >
+        <button
+          class="md-button-pill-wrapper md-button-simple-wrapper"
+          data-color="join"
+          data-disabled="false"
+          data-disabled-outline="false"
+          data-ghost="false"
+          data-grown="false"
+          data-inverted="false"
+          data-outline="false"
+          data-shallow-disabled="false"
+          data-size="40"
+          data-testid="task:accept-button"
+          tabindex="0"
+          type="button"
+        >
+          <span>
+            Accept
+          </span>
+        </button>
+        <button
+          class="md-button-pill-wrapper md-button-simple-wrapper md-focus-ring-wrapper children"
+          data-color="cancel"
+          data-disabled="false"
+          data-disabled-outline="false"
+          data-ghost="false"
+          data-grown="false"
+          data-inverted="false"
+          data-outline="false"
+          data-shallow-disabled="false"
+          data-size="40"
+          data-testid="task:decline-button"
+          tabindex="0"
+          type="button"
+        >
+          <span>
+            Decline Call
+          </span>
+        </button>
+      </div>
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Actions should handle task selection action correctly 1`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-title"
+          data-testid="task:title"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Test Task
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      />
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Actions should handle task selection action correctly 2`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-title"
+          data-testid="task:title"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Test Task
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      />
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Actions should handle task selection action correctly 3`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-title"
+          data-testid="task:title"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Test Task
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      >
+        <button
+          class="md-button-pill-wrapper md-button-simple-wrapper"
+          data-color="join"
+          data-disabled="false"
+          data-disabled-outline="false"
+          data-ghost="false"
+          data-grown="false"
+          data-inverted="false"
+          data-outline="false"
+          data-shallow-disabled="false"
+          data-size="40"
+          data-testid="task:accept-button"
+          tabindex="-1"
+          type="button"
+        >
+          <span>
+            Accept
+          </span>
+        </button>
+        <button
+          class="md-button-pill-wrapper md-button-simple-wrapper"
+          data-color="cancel"
+          data-disabled="false"
+          data-disabled-outline="false"
+          data-ghost="false"
+          data-grown="false"
+          data-inverted="false"
+          data-outline="false"
+          data-shallow-disabled="false"
+          data-size="40"
+          data-testid="task:decline-button"
+          tabindex="-1"
+          type="button"
+        >
+          <span>
+            Decline
+          </span>
+        </button>
+      </div>
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Actions should handle task selection action correctly 4`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-title"
+          data-testid="task:title"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Test Task
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      >
+        <button
+          class="md-button-pill-wrapper md-button-simple-wrapper"
+          data-color="join"
+          data-disabled="false"
+          data-disabled-outline="false"
+          data-ghost="false"
+          data-grown="false"
+          data-inverted="false"
+          data-outline="false"
+          data-shallow-disabled="false"
+          data-size="40"
+          data-testid="task:accept-button"
+          tabindex="-1"
+          type="button"
+        >
+          <span>
+            Accept
+          </span>
+        </button>
+        <button
+          class="md-button-pill-wrapper md-button-simple-wrapper"
+          data-color="cancel"
+          data-disabled="false"
+          data-disabled-outline="false"
+          data-ghost="false"
+          data-grown="false"
+          data-inverted="false"
+          data-outline="false"
+          data-shallow-disabled="false"
+          data-size="40"
+          data-testid="task:decline-button"
+          tabindex="-1"
+          type="button"
+        >
+          <span>
+            Decline
+          </span>
+        </button>
+      </div>
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Actions should handle task selection action correctly 5`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-title"
+          data-testid="task:title"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Test Task
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      >
+        <button
+          class="md-button-pill-wrapper md-button-simple-wrapper"
+          data-color="join"
+          data-disabled="false"
+          data-disabled-outline="false"
+          data-ghost="false"
+          data-grown="false"
+          data-inverted="false"
+          data-outline="false"
+          data-shallow-disabled="false"
+          data-size="40"
+          data-testid="task:accept-button"
+          tabindex="-1"
+          type="button"
+        >
+          <span>
+            Accept
+          </span>
+        </button>
+        <button
+          class="md-button-pill-wrapper md-button-simple-wrapper"
+          data-color="cancel"
+          data-disabled="false"
+          data-disabled-outline="false"
+          data-ghost="false"
+          data-grown="false"
+          data-inverted="false"
+          data-outline="false"
+          data-shallow-disabled="false"
+          data-size="40"
+          data-testid="task:decline-button"
+          tabindex="-1"
+          type="button"
+        >
+          <span>
+            Decline
+          </span>
+        </button>
+      </div>
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Actions should handle task selection action correctly 6`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-title"
+          data-testid="task:title"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Test Task
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      >
+        <button
+          class="md-button-pill-wrapper md-button-simple-wrapper md-focus-ring-wrapper children"
+          data-color="join"
+          data-disabled="false"
+          data-disabled-outline="false"
+          data-ghost="false"
+          data-grown="false"
+          data-inverted="false"
+          data-outline="false"
+          data-shallow-disabled="false"
+          data-size="40"
+          data-testid="task:accept-button"
+          tabindex="0"
+          type="button"
+        >
+          <span>
+            Accept
+          </span>
+        </button>
+        <button
+          class="md-button-pill-wrapper md-button-simple-wrapper"
+          data-color="cancel"
+          data-disabled="false"
+          data-disabled-outline="false"
+          data-ghost="false"
+          data-grown="false"
+          data-inverted="false"
+          data-outline="false"
+          data-shallow-disabled="false"
+          data-size="40"
+          data-testid="task:decline-button"
+          tabindex="0"
+          type="button"
+        >
+          <span>
+            Decline
+          </span>
+        </button>
+      </div>
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Actions should handle task selection action correctly 7`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-title"
+          data-testid="task:title"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Test Task
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      >
+        <button
+          class="md-button-pill-wrapper md-button-simple-wrapper"
+          data-color="join"
+          data-disabled="false"
+          data-disabled-outline="false"
+          data-ghost="false"
+          data-grown="false"
+          data-inverted="false"
+          data-outline="false"
+          data-shallow-disabled="false"
+          data-size="40"
+          data-testid="task:accept-button"
+          tabindex="-1"
+          type="button"
+        >
+          <span>
+            Accept
+          </span>
+        </button>
+        <button
+          class="md-button-pill-wrapper md-button-simple-wrapper"
+          data-color="cancel"
+          data-disabled="false"
+          data-disabled-outline="false"
+          data-ghost="false"
+          data-grown="false"
+          data-inverted="false"
+          data-outline="false"
+          data-shallow-disabled="false"
+          data-size="40"
+          data-testid="task:decline-button"
+          tabindex="-1"
+          type="button"
+        >
+          <span>
+            Decline
+          </span>
+        </button>
+      </div>
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Actions should handle task selection action correctly 8`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-title"
+          data-testid="task:title"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Test Task
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      >
+        <button
+          class="md-button-pill-wrapper md-button-simple-wrapper"
+          data-color="join"
+          data-disabled="false"
+          data-disabled-outline="false"
+          data-ghost="false"
+          data-grown="false"
+          data-inverted="false"
+          data-outline="false"
+          data-shallow-disabled="false"
+          data-size="40"
+          data-testid="task:accept-button"
+          tabindex="0"
+          type="button"
+        >
+          <span>
+            Accept
+          </span>
+        </button>
+        <button
+          class="md-button-pill-wrapper md-button-simple-wrapper md-focus-ring-wrapper children"
+          data-color="cancel"
+          data-disabled="false"
+          data-disabled-outline="false"
+          data-ghost="false"
+          data-grown="false"
+          data-inverted="false"
+          data-outline="false"
+          data-shallow-disabled="false"
+          data-size="40"
+          data-testid="task:decline-button"
+          tabindex="0"
+          type="button"
+        >
+          <span>
+            Decline
+          </span>
+        </button>
+      </div>
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Actions should handle task selection action correctly 9`] = `
+<div>
+  <li
+    class="task-list-item task-list-item--selected md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-title"
+          data-testid="task:title"
+          tagname="span"
+          type="body-large-bold"
+        >
+          Test Task
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      />
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Actions should handle task selection action correctly 10`] = `
+<div>
+  <li
+    class="task-list-item task-list-item--selected md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-title"
+          data-testid="task:title"
+          tagname="span"
+          type="body-large-bold"
+        >
+          Test Task
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      />
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Actions should handle task selection action correctly 11`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="chat"
+        icon-name="chat-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          aria-describedby="tooltip-test-interaction-123"
+          class="md-text-wrapper task-digital-title"
+          data-testid="task:title"
+          id="tooltip-trigger-test-interaction-123"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Chat Customer
+        </mdc-text>
+        <mdc-tooltip
+          append-to=""
+          class="task-tooltip"
+          color="contrast"
+          delay="0,0"
+          disable-aria-expanded=""
+          flip=""
+          hide-on-blur=""
+          hide-on-escape=""
+          id="tooltip-test-interaction-123"
+          offset="4"
+          placement="top-start"
+          role="tooltip"
+          style="z-index: 1000;"
+          tooltip-type="description"
+          trigger="mouseenter focusin"
+          triggerid="tooltip-trigger-test-interaction-123"
+          z-index="1000"
+        >
+          Chat Customer
+        </mdc-tooltip>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      />
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Actions should handle task selection action correctly 12`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="chat"
+        icon-name="chat-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          aria-describedby="tooltip-test-interaction-123"
+          class="md-text-wrapper task-digital-title"
+          data-testid="task:title"
+          id="tooltip-trigger-test-interaction-123"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Chat Customer
+        </mdc-text>
+        <mdc-tooltip
+          append-to=""
+          class="task-tooltip"
+          color="contrast"
+          delay="0,0"
+          disable-aria-expanded=""
+          flip=""
+          hide-on-blur=""
+          hide-on-escape=""
+          id="tooltip-test-interaction-123"
+          offset="4"
+          placement="top-start"
+          role="tooltip"
+          style="z-index: 1000;"
+          tooltip-type="description"
+          trigger="mouseenter focusin"
+          triggerid="tooltip-trigger-test-interaction-123"
+          z-index="1000"
+        >
+          Chat Customer
+        </mdc-tooltip>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      />
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Actions should handle task selection action correctly 13`] = `
+<div>
+  <li
+    class="task-list-item  custom-task-style md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-title"
+          data-testid="task:title"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Test Task
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      />
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Actions should handle task selection action correctly 14`] = `
+<div>
+  <li
+    class="task-list-item  custom-task-style md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-title"
+          data-testid="task:title"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Test Task
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      />
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Actions should handle task selection action correctly 15`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-title"
+          data-testid="task:title"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Test Task
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      />
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Actions should handle task selection action correctly 16`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-title"
+          data-testid="task:title"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Test Task
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      />
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Rendering should handle default prop values and edge cases correctly: all-explicit-default-values 1`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="all-defaults-explicit"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-title"
+          data-testid="task:title"
+          tagname="span"
+          type="body-large-medium"
+        >
+          All Defaults Explicit
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      >
+        <button
+          class="md-button-pill-wrapper md-button-simple-wrapper"
+          data-color="join"
+          data-disabled="false"
+          data-disabled-outline="false"
+          data-ghost="false"
+          data-grown="false"
+          data-inverted="false"
+          data-outline="false"
+          data-shallow-disabled="false"
+          data-size="40"
+          data-testid="task:accept-button"
+          tabindex="-1"
+          type="button"
+        >
+          <span>
+            Accept
+          </span>
+        </button>
+      </div>
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Rendering should handle default prop values and edge cases correctly: explicitly-enabled-accept-button 1`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-title"
+          data-testid="task:title"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Test Task
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      >
+        <button
+          class="md-button-pill-wrapper md-button-simple-wrapper"
+          data-color="join"
+          data-disabled="false"
+          data-disabled-outline="false"
+          data-ghost="false"
+          data-grown="false"
+          data-inverted="false"
+          data-outline="false"
+          data-shallow-disabled="false"
+          data-size="40"
+          data-testid="task:accept-button"
+          tabindex="-1"
+          type="button"
+        >
+          <span>
+            Join Meeting
+          </span>
+        </button>
+      </div>
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Rendering should handle default prop values and edge cases correctly: explicitly-not-incoming-task 1`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-title"
+          data-testid="task:title"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Test Task
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      />
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Rendering should handle default prop values and edge cases correctly: explicitly-unselected-task 1`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-title"
+          data-testid="task:title"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Explicitly Unselected Task
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      />
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Rendering should handle default prop values and edge cases correctly: minimal-task-with-default-values 1`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-minimal-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-title"
+          data-testid="task:title"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Minimal Task
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      />
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Rendering should handle default prop values and edge cases correctly: pure-minimal-task-props 1`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="pure-minimal-789"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      />
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      />
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Rendering should handle default prop values and edge cases correctly: task-with-enabled-accept-button 1`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-enabled-456"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-title"
+          data-testid="task:title"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Enabled Accept Task
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      >
+        <button
+          class="md-button-pill-wrapper md-button-simple-wrapper"
+          data-color="join"
+          data-disabled="false"
+          data-disabled-outline="false"
+          data-ghost="false"
+          data-grown="false"
+          data-inverted="false"
+          data-outline="false"
+          data-shallow-disabled="false"
+          data-size="40"
+          data-testid="task:accept-button"
+          tabindex="-1"
+          type="button"
+        >
+          <span>
+            Accept Now
+          </span>
+        </button>
+      </div>
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Rendering should render accept and decline buttons with correct states and properties 1`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-title"
+          data-testid="task:title"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Test Task
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      >
+        <button
+          class="md-button-pill-wrapper md-button-simple-wrapper"
+          data-color="join"
+          data-disabled="false"
+          data-disabled-outline="false"
+          data-ghost="false"
+          data-grown="false"
+          data-inverted="false"
+          data-outline="false"
+          data-shallow-disabled="false"
+          data-size="40"
+          data-testid="task:accept-button"
+          tabindex="-1"
+          type="button"
+        >
+          <span>
+            Accept
+          </span>
+        </button>
+        <button
+          class="md-button-pill-wrapper md-button-simple-wrapper"
+          data-color="cancel"
+          data-disabled="false"
+          data-disabled-outline="false"
+          data-ghost="false"
+          data-grown="false"
+          data-inverted="false"
+          data-outline="false"
+          data-shallow-disabled="false"
+          data-size="40"
+          data-testid="task:decline-button"
+          tabindex="-1"
+          type="button"
+        >
+          <span>
+            Decline
+          </span>
+        </button>
+      </div>
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Rendering should render accept and decline buttons with correct states and properties 2`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-title"
+          data-testid="task:title"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Test Task
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      >
+        <button
+          class="md-button-pill-wrapper md-button-simple-wrapper"
+          data-color="join"
+          data-disabled="true"
+          data-disabled-outline="false"
+          data-ghost="false"
+          data-grown="false"
+          data-inverted="false"
+          data-outline="false"
+          data-shallow-disabled="false"
+          data-size="40"
+          data-testid="task:accept-button"
+          disabled=""
+          type="button"
+        >
+          <span>
+            Ringing...
+          </span>
+        </button>
+      </div>
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Rendering should render accept and decline buttons with correct states and properties 3`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-title"
+          data-testid="task:title"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Test Task
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      >
+        <button
+          class="md-button-pill-wrapper md-button-simple-wrapper"
+          data-color="join"
+          data-disabled="false"
+          data-disabled-outline="false"
+          data-ghost="false"
+          data-grown="false"
+          data-inverted="false"
+          data-outline="false"
+          data-shallow-disabled="false"
+          data-size="40"
+          data-testid="task:accept-button"
+          tabindex="-1"
+          type="button"
+        >
+          <span>
+            Accept Call
+          </span>
+        </button>
+      </div>
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Rendering should render media type icons and brand visuals correctly for different channels: chat-task-with-avatar 1`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="chat"
+        icon-name="chat-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-digital-title"
+          data-testid="task:title"
+          id="tooltip-trigger-test-interaction-123"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Chat Customer Name
+        </mdc-text>
+        <mdc-tooltip
+          append-to=""
+          class="task-tooltip"
+          color="contrast"
+          delay="0,0"
+          disable-aria-expanded=""
+          flip=""
+          hide-on-blur=""
+          hide-on-escape=""
+          id="tooltip-test-interaction-123"
+          offset="4"
+          placement="top-start"
+          role="tooltip"
+          style="z-index: 1000;"
+          tooltip-type="description"
+          trigger="mouseenter focusin"
+          triggerid="tooltip-trigger-test-interaction-123"
+          z-index="1000"
+        >
+          Chat Customer Name
+        </mdc-tooltip>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      />
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Rendering should render media type icons and brand visuals correctly for different channels: email-task-with-avatar 1`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="email"
+        icon-name="email-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-digital-title"
+          data-testid="task:title"
+          id="tooltip-trigger-test-interaction-123"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Email Subject Line
+        </mdc-text>
+        <mdc-tooltip
+          append-to=""
+          class="task-tooltip"
+          color="contrast"
+          delay="0,0"
+          disable-aria-expanded=""
+          flip=""
+          hide-on-blur=""
+          hide-on-escape=""
+          id="tooltip-test-interaction-123"
+          offset="4"
+          placement="top-start"
+          role="tooltip"
+          style="z-index: 1000;"
+          tooltip-type="description"
+          trigger="mouseenter focusin"
+          triggerid="tooltip-trigger-test-interaction-123"
+          z-index="1000"
+        >
+          Email Subject Line
+        </mdc-tooltip>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Active
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      />
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Rendering should render media type icons and brand visuals correctly for different channels: facebook-task-with-brand-visual 1`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <div
+        class="brand-visual-background"
+      >
+        <mdc-brandvisual
+          class="facebook"
+          name="social-facebook-color"
+        />
+      </div>
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          aria-describedby="tooltip-test-interaction-123"
+          class="md-text-wrapper task-digital-title"
+          data-testid="task:title"
+          id="tooltip-trigger-test-interaction-123"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Facebook Customer
+        </mdc-text>
+        <mdc-tooltip
+          append-to=""
+          class="task-tooltip"
+          color="contrast"
+          delay="0,0"
+          disable-aria-expanded=""
+          flip=""
+          hide-on-blur=""
+          hide-on-escape=""
+          id="tooltip-test-interaction-123"
+          offset="4"
+          placement="top-start"
+          role="tooltip"
+          style="z-index: 1000;"
+          tooltip-type="description"
+          trigger="mouseenter focusin"
+          triggerid="tooltip-trigger-test-interaction-123"
+          z-index="1000"
+        >
+          Facebook Customer
+        </mdc-tooltip>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      />
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Rendering should render media type icons and brand visuals correctly for different channels: telephony-task-with-avatar 1`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-title"
+          data-testid="task:title"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Test Task
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      />
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Rendering should render media type icons and brand visuals correctly for different channels: whatsapp-incoming-task-with-brand-visual 1`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <div
+        class="brand-visual-background"
+      >
+        <mdc-brandvisual
+          class="whatsapp"
+          name="social-whatsapp-color"
+        />
+      </div>
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper incoming-digital-task-title"
+          data-testid="task:title"
+          id="tooltip-trigger-test-interaction-123"
+          tagname="span"
+          type="body-large-medium"
+        >
+          WhatsApp Contact
+        </mdc-text>
+        <mdc-tooltip
+          append-to=""
+          class="task-tooltip"
+          color="contrast"
+          delay="0,0"
+          disable-aria-expanded=""
+          flip=""
+          hide-on-blur=""
+          hide-on-escape=""
+          id="tooltip-test-interaction-123"
+          offset="4"
+          placement="top-start"
+          role="tooltip"
+          style="z-index: 1000;"
+          tooltip-type="description"
+          trigger="mouseenter focusin"
+          triggerid="tooltip-trigger-test-interaction-123"
+          z-index="1000"
+        >
+          WhatsApp Contact
+        </mdc-tooltip>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      />
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Rendering should render state, queue, and time information correctly for different task scenarios 1`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-title"
+          data-testid="task:title"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Test Task
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      />
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Rendering should render state, queue, and time information correctly for different task scenarios 2`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-title"
+          data-testid="task:title"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Test Task
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-queue"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Support Team
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-time-left"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Time Left: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      />
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Rendering should render state, queue, and time information correctly for different task scenarios 3`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <div
+        class="brand-visual-background"
+      >
+        <mdc-brandvisual
+          class="whatsapp"
+          name="social-whatsapp-color"
+        />
+      </div>
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          aria-describedby="tooltip-test-interaction-123"
+          class="md-text-wrapper incoming-digital-task-title"
+          data-testid="task:title"
+          id="tooltip-trigger-test-interaction-123"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Test Task
+        </mdc-text>
+        <mdc-tooltip
+          append-to=""
+          class="task-tooltip"
+          color="contrast"
+          delay="0,0"
+          disable-aria-expanded=""
+          flip=""
+          hide-on-blur=""
+          hide-on-escape=""
+          id="tooltip-test-interaction-123"
+          offset="4"
+          placement="top-start"
+          role="tooltip"
+          style="z-index: 1000;"
+          tooltip-type="description"
+          trigger="mouseenter focusin"
+          triggerid="tooltip-trigger-test-interaction-123"
+          z-index="1000"
+        >
+          Test Task
+        </mdc-tooltip>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-queue"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          WhatsApp Support
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      />
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Rendering should render titles and tooltips correctly based on media type and selection state: chat-task-with-title-and-tooltip 1`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="chat"
+        icon-name="chat-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          aria-describedby="tooltip-test-interaction-123"
+          class="md-text-wrapper task-digital-title"
+          data-testid="task:title"
+          id="tooltip-trigger-test-interaction-123"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Live Chat with Customer Support
+        </mdc-text>
+        <mdc-tooltip
+          append-to=""
+          class="task-tooltip"
+          color="contrast"
+          delay="0,0"
+          disable-aria-expanded=""
+          flip=""
+          hide-on-blur=""
+          hide-on-escape=""
+          id="tooltip-test-interaction-123"
+          offset="4"
+          placement="top-start"
+          role="tooltip"
+          style="z-index: 1000;"
+          tooltip-type="description"
+          trigger="mouseenter focusin"
+          triggerid="tooltip-trigger-test-interaction-123"
+          z-index="1000"
+        >
+          Live Chat with Customer Support
+        </mdc-tooltip>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      />
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Rendering should render titles and tooltips correctly based on media type and selection state: incoming-facebook-task-with-special-styling 1`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <div
+        class="brand-visual-background"
+      >
+        <mdc-brandvisual
+          class="facebook"
+          name="social-facebook-color"
+        />
+      </div>
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper incoming-digital-task-title"
+          data-testid="task:title"
+          id="tooltip-trigger-test-interaction-123"
+          tagname="span"
+          type="body-large-medium"
+        >
+          New Facebook Message from Customer
+        </mdc-text>
+        <mdc-tooltip
+          append-to=""
+          class="task-tooltip"
+          color="contrast"
+          delay="0,0"
+          disable-aria-expanded=""
+          flip=""
+          hide-on-blur=""
+          hide-on-escape=""
+          id="tooltip-test-interaction-123"
+          offset="4"
+          placement="top-start"
+          role="tooltip"
+          style="z-index: 1000;"
+          tooltip-type="description"
+          trigger="mouseenter focusin"
+          triggerid="tooltip-trigger-test-interaction-123"
+          z-index="1000"
+        >
+          New Facebook Message from Customer
+        </mdc-tooltip>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      />
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Rendering should render titles and tooltips correctly based on media type and selection state: selected-email-task-with-bold-title 1`] = `
+<div>
+  <li
+    class="task-list-item task-list-item--selected md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="email"
+        icon-name="email-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-digital-title"
+          data-testid="task:title"
+          id="tooltip-trigger-test-interaction-123"
+          tagname="span"
+          type="body-large-bold"
+        >
+          Urgent: Customer Complaint Email
+        </mdc-text>
+        <mdc-tooltip
+          append-to=""
+          class="task-tooltip"
+          color="contrast"
+          delay="0,0"
+          disable-aria-expanded=""
+          flip=""
+          hide-on-blur=""
+          hide-on-escape=""
+          id="tooltip-test-interaction-123"
+          offset="4"
+          placement="top-start"
+          role="tooltip"
+          style="z-index: 1000;"
+          tooltip-type="description"
+          trigger="mouseenter focusin"
+          triggerid="tooltip-trigger-test-interaction-123"
+          z-index="1000"
+        >
+          Urgent: Customer Complaint Email
+        </mdc-tooltip>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      />
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Rendering should render titles and tooltips correctly based on media type and selection state: selected-task-with-custom-styles 1`] = `
+<div>
+  <li
+    class="task-list-item task-list-item--selected custom-task-style task-highlight md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-title"
+          data-testid="task:title"
+          tagname="span"
+          type="body-large-bold"
+        >
+          Test Task
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      />
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Rendering should render titles and tooltips correctly based on media type and selection state: selected-voice-task-with-bold-title 1`] = `
+<div>
+  <li
+    class="task-list-item task-list-item--selected md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-title"
+          data-testid="task:title"
+          tagname="span"
+          type="body-large-bold"
+        >
+          Important Customer Call
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      />
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Rendering should render titles and tooltips correctly based on media type and selection state: task-with-empty-string-title 1`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      />
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Rendering should render titles and tooltips correctly based on media type and selection state: task-without-title 1`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      />
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Rendering should render titles and tooltips correctly based on media type and selection state: telephony-task-with-simple-title 1`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-title"
+          data-testid="task:title"
+          tagname="span"
+          type="body-large-medium"
+        >
+          John Doe - Customer Call
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      />
+    </div>
+  </li>
+</div>
+`;
+
+exports[`Task Component Snapshots Rendering should render titles and tooltips correctly based on media type and selection state: unselected-email-task-with-medium-title 1`] = `
+<div>
+  <li
+    class="task-list-item md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="40"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        class="email"
+        icon-name="email-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-digital-title"
+          data-testid="task:title"
+          id="tooltip-trigger-test-interaction-123"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Standard Customer Inquiry Email
+        </mdc-text>
+        <mdc-tooltip
+          append-to=""
+          class="task-tooltip"
+          color="contrast"
+          delay="0,0"
+          disable-aria-expanded=""
+          flip=""
+          hide-on-blur=""
+          hide-on-escape=""
+          id="tooltip-test-interaction-123"
+          offset="4"
+          placement="top-start"
+          role="tooltip"
+          style="z-index: 1000;"
+          tooltip-type="description"
+          trigger="mouseenter focusin"
+          triggerid="tooltip-trigger-test-interaction-123"
+          z-index="1000"
+        >
+          Standard Customer Inquiry Email
+        </mdc-tooltip>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-state"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Connected
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      />
+    </div>
+  </li>
+</div>
+`;

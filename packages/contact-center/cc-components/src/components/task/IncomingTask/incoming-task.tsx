@@ -1,66 +1,38 @@
 import React from 'react';
 import {IncomingTaskComponentProps, MEDIA_CHANNEL} from '../task.types';
 import Task from '../Task';
+import {extractIncomingTaskData} from './incoming-task.utils';
 
 const IncomingTaskComponent: React.FunctionComponent<IncomingTaskComponentProps> = (props) => {
-  const {incomingTask, isBrowser, accept, reject, logger} = props;
+  const {incomingTask, isBrowser, accept, reject} = props;
   if (!incomingTask) {
     return <></>; // hidden component
   }
 
-  //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
-  const callAssociationDetails = incomingTask?.data?.interaction?.callAssociatedDetails;
-  const ani = callAssociationDetails?.ani;
-  const customerName = callAssociationDetails?.customerName;
-  const virtualTeamName = callAssociationDetails?.virtualTeamName;
-  const ronaTimeout = callAssociationDetails?.ronaTimeout ? Number(callAssociationDetails?.ronaTimeout) : null;
-  const startTimeStamp = incomingTask?.data?.interaction?.createdTimestamp;
-  const mediaType = incomingTask.data.interaction.mediaType;
-  const mediaChannel = incomingTask.data.interaction.mediaChannel;
-  const isTelephony = mediaType === MEDIA_CHANNEL.TELEPHONY;
-  const isSocial = mediaType === MEDIA_CHANNEL.SOCIAL;
-  const acceptText = !incomingTask.data.wrapUpRequired
-    ? isTelephony && !isBrowser
-      ? 'Ringing...'
-      : 'Accept'
-    : undefined;
-  const declineText = !incomingTask.data.wrapUpRequired && isTelephony && isBrowser ? 'Decline' : undefined;
+  // Extract all task data using the utility function
+  const taskData = extractIncomingTaskData(incomingTask, isBrowser);
 
   return (
     <Task
       interactionId={incomingTask.data.interactionId}
-      title={isSocial ? customerName : ani}
+      title={taskData.title}
       state=""
-      startTimeStamp={startTimeStamp}
+      startTimeStamp={taskData.startTimeStamp}
       isIncomingTask={true}
-      queue={virtualTeamName}
+      queue={taskData.virtualTeamName}
       acceptTask={() => {
-        logger.info(
-          `CC-Widgets: IncomingTask: accept clicked for task with interactionID: ${incomingTask.data.interactionId}`,
-          {
-            module: 'incoming-task.tsx',
-            method: 'acceptTask',
-          }
-        );
         accept(incomingTask);
       }}
       declineTask={() => {
-        logger.info(
-          `CC-Widgets: IncomingTask: decline clicked for task with interactionID: ${incomingTask.data.interactionId}`,
-          {
-            module: 'incoming-task.tsx',
-            method: 'declineTask',
-          }
-        );
         reject(incomingTask);
       }}
-      ronaTimeout={ronaTimeout}
-      acceptText={acceptText}
-      disableAccept={isTelephony && !isBrowser}
-      declineText={declineText}
+      ronaTimeout={taskData.ronaTimeout}
+      acceptText={taskData.acceptText}
+      disableAccept={taskData.disableAccept}
+      declineText={taskData.declineText}
       styles="task-list-hover"
-      mediaType={mediaType}
-      mediaChannel={mediaChannel}
+      mediaType={taskData.mediaType as MEDIA_CHANNEL}
+      mediaChannel={taskData.mediaChannel as MEDIA_CHANNEL}
     />
   );
 };
