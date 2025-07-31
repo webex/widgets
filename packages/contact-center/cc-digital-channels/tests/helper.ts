@@ -1,11 +1,15 @@
 import {renderHook} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import {useDigitalChannels} from '../src/helper';
+import {mockTask, mockCC} from '@webex/test-fixtures';
 
-// Mock the current task object
+// Use fixtures for mock objects
 const mockCurrentTask = {
+  ...mockTask,
   data: {
+    ...mockTask.data,
     interaction: {
+      ...mockTask.data.interaction,
       callAssociatedDetails: {
         mediaResourceId: 'test-conversation-id',
       },
@@ -16,12 +20,8 @@ const mockCurrentTask = {
 const mockProps = {
   currentTask: mockCurrentTask,
   jwtToken: 'test-jwt-token',
-  apiEndpoint: 'https://test-api.example.com',
-  signalREndpoint: 'https://test-signalr.example.com',
-  logger: {
-    log: jest.fn(),
-    error: jest.fn(),
-  },
+  dataCenter: 'https://test-api.example.com',
+  logger: mockCC.LoggerProxy,
 };
 
 describe('useDigitalChannels', () => {
@@ -35,70 +35,59 @@ describe('useDigitalChannels', () => {
     expect(result.current.name).toBe('DigitalChannels');
     expect(result.current.conversationId).toBe('test-conversation-id');
     expect(result.current.jwtToken).toBe('test-jwt-token');
-    expect(result.current.apiEndpoint).toBe('https://test-api.example.com');
-    expect(result.current.signalREndpoint).toBe('https://test-signalr.example.com');
+    expect(result.current.dataCenter).toBe('https://test-api.example.com');
     expect(typeof result.current.handleError).toBe('function');
   });
 
-  it('should handle errors correctly with onError callback', () => {
-    const onError = jest.fn().mockReturnValue(true);
+  it('should call onError when provided and return its result', () => {
+    const mockOnError = jest.fn().mockReturnValue(true);
     const props = {
       ...mockProps,
-      onError,
+      onError: mockOnError,
     };
 
     const {result} = renderHook(() => useDigitalChannels(props));
-
     const testError = new Error('Test error');
-    const handled = result.current.handleError(testError);
 
-    expect(onError).toHaveBeenCalledWith(testError);
-    expect(handled).toBe(true);
-    expect(mockProps.logger.error).toHaveBeenCalledWith(
-      'Digital channels error',
-      'Test error',
-      expect.objectContaining({
-        module: 'widget-cc-digital-channels#helper.ts',
-        method: 'handleError',
-      })
-    );
+    const handleErrorResult = result.current.handleError(testError);
+
+    expect(mockOnError).toHaveBeenCalledWith(testError);
+    expect(handleErrorResult).toBe(true);
   });
 
-  it('should handle errors correctly without onError callback', () => {
-    const consoleSpy = jest.spyOn(console, 'debug').mockImplementation(() => {});
+  it('should handle error without onError callback', () => {
+    const consoleSpy = jest.spyOn(console, 'debug').mockImplementation();
 
     const {result} = renderHook(() => useDigitalChannels(mockProps));
-
     const testError = new Error('Test error');
-    const handled = result.current.handleError(testError);
 
-    expect(handled).toBe(false);
+    const handleErrorResult = result.current.handleError(testError);
+
+    expect(mockProps.logger.error).toHaveBeenCalledWith('Digital channels error', 'Test error', {
+      module: 'widget-cc-digital-channels#helper.ts',
+      method: 'handleError',
+    });
     expect(consoleSpy).toHaveBeenCalledWith('Webex Engage component error:', 'Test error');
-    expect(mockProps.logger.error).toHaveBeenCalledWith(
-      'Digital channels error',
-      'Test error',
-      expect.objectContaining({
-        module: 'widget-cc-digital-channels#helper.ts',
-        method: 'handleError',
-      })
-    );
+    expect(handleErrorResult).toBe(false);
 
     consoleSpy.mockRestore();
   });
 
-  it('should handle unknown errors', () => {
+  it('should handle unknown error types', () => {
+    const consoleSpy = jest.spyOn(console, 'debug').mockImplementation();
+
     const {result} = renderHook(() => useDigitalChannels(mockProps));
+    const unknownError = 'String error';
 
-    const handled = result.current.handleError('string error');
+    const handleErrorResult = result.current.handleError(unknownError);
 
-    expect(handled).toBe(false);
-    expect(mockProps.logger.error).toHaveBeenCalledWith(
-      'Digital channels error',
-      'Unknown error',
-      expect.objectContaining({
-        module: 'widget-cc-digital-channels#helper.ts',
-        method: 'handleError',
-      })
-    );
+    expect(mockProps.logger.error).toHaveBeenCalledWith('Digital channels error', 'Unknown error', {
+      module: 'widget-cc-digital-channels#helper.ts',
+      method: 'handleError',
+    });
+    expect(consoleSpy).toHaveBeenCalledWith('Webex Engage component error:', 'Unknown error');
+    expect(handleErrorResult).toBe(false);
+
+    consoleSpy.mockRestore();
   });
 });
