@@ -1,0 +1,3074 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CallControlComponent Snapshots Interactions should handle end call button click 1`] = `
+<div
+  class="call-control-container"
+  data-testid="call-control-container"
+>
+  <div
+    class="button-group"
+  >
+    <button
+      aria-describedby="react-aria-:r1m:"
+      aria-label="Mute"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:mute-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="microphone-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r1m:"
+    >
+      <p>
+        Mute
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r1n:"
+      aria-label="Hold the call"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:hold-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="pause-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r1n:"
+    >
+      <p>
+        Hold the call
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r1o:"
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      aria-label="Consult with another agent"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:consult"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="headset-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r1o:"
+    >
+      <p>
+        Consult with another agent
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r1p:"
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      aria-label="Transfer Call"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:transfer"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="next-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r1p:"
+    >
+      <p>
+        Transfer Call
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r1q:"
+      aria-label="Resume Recording"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:recording-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="record-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r1q:"
+    >
+      <p>
+        Resume Recording
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r1r:"
+      aria-label="End Call"
+      class="md-button-circle-wrapper call-control-button-cancel md-button-simple-wrapper md-focus-ring-wrapper children"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:end-call"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-cancel-icon"
+        name="cancel-regular"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r1r:"
+    >
+      <p>
+        End Call
+      </p>
+    </div>
+    <div
+      data-tippy-root=""
+      id="tippy-80"
+      style="pointer-events: none; z-index: 9999; transition: none; position: absolute; left: 0px; top: 0px; margin: 0px;"
+    />
+  </div>
+</div>
+`;
+
+exports[`CallControlComponent Snapshots Interactions should handle hold button click 1`] = `
+<div
+  class="call-control-container"
+  data-testid="call-control-container"
+>
+  <div
+    class="button-group"
+  >
+    <button
+      aria-describedby="react-aria-:r1a:"
+      aria-label="Mute"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:mute-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="microphone-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r1a:"
+    >
+      <p>
+        Mute
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r1b:"
+      aria-label="Hold the call"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper md-focus-ring-wrapper children"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:hold-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="pause-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r1b:"
+    >
+      <p>
+        Hold the call
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r1c:"
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      aria-label="Consult with another agent"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:consult"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="headset-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r1c:"
+    >
+      <p>
+        Consult with another agent
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r1d:"
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      aria-label="Transfer Call"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:transfer"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="next-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r1d:"
+    >
+      <p>
+        Transfer Call
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r1e:"
+      aria-label="Resume Recording"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:recording-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="record-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r1e:"
+    >
+      <p>
+        Resume Recording
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r1f:"
+      aria-label="End Call"
+      class="md-button-circle-wrapper call-control-button-cancel md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:end-call"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-cancel-icon"
+        name="cancel-regular"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r1f:"
+    >
+      <p>
+        End Call
+      </p>
+    </div>
+    <div
+      data-tippy-root=""
+      id="tippy-58"
+      style="pointer-events: none; z-index: 9999; transition: none; position: absolute; left: 0px; top: 0px; margin: 0px;"
+    />
+  </div>
+</div>
+`;
+
+exports[`CallControlComponent Snapshots Interactions should handle mute button click 1`] = `
+<div
+  class="call-control-container"
+  data-testid="call-control-container"
+>
+  <div
+    class="button-group"
+  >
+    <button
+      aria-describedby="react-aria-:r14:"
+      aria-label="Mute"
+      class="md-button-circle-wrapper call-control-button call-control-button-disabled md-button-simple-wrapper md-focus-ring-wrapper-disabled"
+      data-color="primary"
+      data-disabled="true"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:mute-toggle"
+      disabled=""
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="microphone-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r14:"
+    >
+      <p>
+        Mute
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r15:"
+      aria-label="Hold the call"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:hold-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="pause-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r15:"
+    >
+      <p>
+        Hold the call
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r16:"
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      aria-label="Consult with another agent"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:consult"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="headset-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r16:"
+    >
+      <p>
+        Consult with another agent
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r17:"
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      aria-label="Transfer Call"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:transfer"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="next-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r17:"
+    >
+      <p>
+        Transfer Call
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r18:"
+      aria-label="Resume Recording"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:recording-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="record-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r18:"
+    >
+      <p>
+        Resume Recording
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r19:"
+      aria-label="End Call"
+      class="md-button-circle-wrapper call-control-button-cancel md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:end-call"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-cancel-icon"
+        name="cancel-regular"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r19:"
+    >
+      <p>
+        End Call
+      </p>
+    </div>
+    <div
+      data-tippy-root=""
+      id="tippy-49"
+      style="pointer-events: none; z-index: 9999; transition: none; position: absolute; left: 0px; top: 0px; margin: 0px; transform: translate(0px, 0px);"
+    />
+  </div>
+</div>
+`;
+
+exports[`CallControlComponent Snapshots Interactions should handle record button click 1`] = `
+<div
+  class="call-control-container"
+  data-testid="call-control-container"
+>
+  <div
+    class="button-group"
+  >
+    <button
+      aria-describedby="react-aria-:r1g:"
+      aria-label="Mute"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:mute-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="microphone-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r1g:"
+    >
+      <p>
+        Mute
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r1h:"
+      aria-label="Hold the call"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:hold-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="pause-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r1h:"
+    >
+      <p>
+        Hold the call
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r1i:"
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      aria-label="Consult with another agent"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:consult"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="headset-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r1i:"
+    >
+      <p>
+        Consult with another agent
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r1j:"
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      aria-label="Transfer Call"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:transfer"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="next-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r1j:"
+    >
+      <p>
+        Transfer Call
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r1k:"
+      aria-label="Resume Recording"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper md-focus-ring-wrapper children"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:recording-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="record-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r1k:"
+    >
+      <p>
+        Resume Recording
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r1l:"
+      aria-label="End Call"
+      class="md-button-circle-wrapper call-control-button-cancel md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:end-call"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-cancel-icon"
+        name="cancel-regular"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r1l:"
+    >
+      <p>
+        End Call
+      </p>
+    </div>
+    <div
+      data-tippy-root=""
+      id="tippy-71"
+      style="pointer-events: none; z-index: 9999; transition: none; position: absolute; left: 0px; top: 0px; margin: 0px;"
+    />
+  </div>
+</div>
+`;
+
+exports[`CallControlComponent Snapshots Interactions should render wrapup button in wrapup mode 1`] = `
+<div
+  class="call-control-container"
+  data-testid="call-control-container"
+>
+  <div
+    class="wrapup-group"
+  >
+    <mdc-button
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      color="default"
+      data-btn-type="pill-with-icon"
+      data-testid="call-control:wrapup-button"
+      id="call-control-wrapup-button"
+      postfix-icon="arrow-down-bold"
+      role="button"
+      size="28"
+      tabindex="0"
+      type="button"
+      variant="secondary"
+    >
+      Wrap up
+    </mdc-button>
+  </div>
+</div>
+`;
+
+exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and visual states of CallControl component should render the component with default call control buttons 1`] = `
+<div
+  class="call-control-container"
+  data-testid="call-control-container"
+>
+  <div
+    class="button-group"
+  >
+    <button
+      aria-describedby="react-aria-:r0:"
+      aria-label="Mute"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:mute-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="microphone-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r0:"
+    >
+      <p>
+        Mute
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r1:"
+      aria-label="Hold the call"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:hold-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="pause-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r1:"
+    >
+      <p>
+        Hold the call
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r2:"
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      aria-label="Consult with another agent"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:consult"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="headset-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r2:"
+    >
+      <p>
+        Consult with another agent
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r3:"
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      aria-label="Transfer Call"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:transfer"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="next-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r3:"
+    >
+      <p>
+        Transfer Call
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r4:"
+      aria-label="Resume Recording"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:recording-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="record-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r4:"
+    >
+      <p>
+        Resume Recording
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r5:"
+      aria-label="End Call"
+      class="md-button-circle-wrapper call-control-button-cancel md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:end-call"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-cancel-icon"
+        name="cancel-regular"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r5:"
+    >
+      <p>
+        End Call
+      </p>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and visual states of CallControl component should render with chat media type 1`] = `
+<div
+  class="call-control-container"
+  data-testid="call-control-container"
+>
+  <div
+    class="button-group"
+  >
+    <button
+      aria-describedby="react-aria-:ru:"
+      aria-label="Mute"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:mute-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="microphone-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:ru:"
+    >
+      <p>
+        Mute
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:rv:"
+      aria-label="Hold the call"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:hold-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="pause-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:rv:"
+    >
+      <p>
+        Hold the call
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r10:"
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      aria-label="Consult with another agent"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:consult"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="headset-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r10:"
+    >
+      <p>
+        Consult with another agent
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r11:"
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      aria-label="Transfer Chat"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:transfer"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="next-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r11:"
+    >
+      <p>
+        Transfer Chat
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r12:"
+      aria-label="Resume Recording"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:recording-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="record-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r12:"
+    >
+      <p>
+        Resume Recording
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r13:"
+      aria-label="End Chat"
+      class="md-button-circle-wrapper call-control-button-cancel md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:end-call"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-cancel-icon"
+        name="cancel-regular"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r13:"
+    >
+      <p>
+        End Chat
+      </p>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and visual states of CallControl component should render with consultation accepted 1`] = `
+<div
+  class="call-control-container"
+  data-testid="call-control-container"
+/>
+`;
+
+exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and visual states of CallControl component should render with consultation initiated 1`] = `
+<div
+  class="call-control-container"
+  data-testid="call-control-container"
+>
+  <div
+    class="button-group"
+  >
+    <button
+      aria-describedby="react-aria-:ro:"
+      aria-label="Mute"
+      class="md-button-circle-wrapper call-control-button call-control-button-disabled md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="true"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:mute-toggle"
+      disabled=""
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="microphone-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:ro:"
+    >
+      <p>
+        Mute
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:rp:"
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      aria-label="Transfer Call"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="true"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:transfer"
+      disabled=""
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="next-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:rp:"
+    >
+      <p>
+        Transfer Call
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:rq:"
+      aria-label="Resume Recording"
+      class="md-button-circle-wrapper call-control-button call-control-button-disabled md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="true"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:recording-toggle"
+      disabled=""
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="record-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:rq:"
+    >
+      <p>
+        Resume Recording
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:rr:"
+      aria-label="End Call"
+      class="md-button-circle-wrapper call-control-button-cancel call-control-button-cancel-disabled md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="true"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:end-call"
+      disabled=""
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-cancel-icon"
+        name="cancel-regular"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:rr:"
+    >
+      <p>
+        End Call
+      </p>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and visual states of CallControl component should render with held state 1`] = `
+<div
+  class="call-control-container"
+  data-testid="call-control-container"
+>
+  <div
+    class="button-group"
+  >
+    <button
+      aria-describedby="react-aria-:rc:"
+      aria-label="Mute"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:mute-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="microphone-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:rc:"
+    >
+      <p>
+        Mute
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:rd:"
+      aria-label="Resume the call"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:hold-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="play-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:rd:"
+    >
+      <p>
+        Resume the call
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:re:"
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      aria-label="Consult with another agent"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:consult"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="headset-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:re:"
+    >
+      <p>
+        Consult with another agent
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:rf:"
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      aria-label="Transfer Call"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:transfer"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="next-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:rf:"
+    >
+      <p>
+        Transfer Call
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:rg:"
+      aria-label="Resume Recording"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:recording-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="record-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:rg:"
+    >
+      <p>
+        Resume Recording
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:rh:"
+      aria-label="End Call"
+      class="md-button-circle-wrapper call-control-button-cancel call-control-button-cancel-disabled md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="true"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:end-call"
+      disabled=""
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-cancel-icon"
+        name="cancel-regular"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:rh:"
+    >
+      <p>
+        End Call
+      </p>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and visual states of CallControl component should render with limited control visibility 1`] = `
+<div
+  class="call-control-container"
+  data-testid="call-control-container"
+>
+  <div
+    class="button-group"
+  >
+    <button
+      aria-describedby="react-aria-:rs:"
+      aria-label="Mute"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:mute-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="microphone-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:rs:"
+    >
+      <p>
+        Mute
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:rt:"
+      aria-label="End Call"
+      class="md-button-circle-wrapper call-control-button-cancel md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:end-call"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-cancel-icon"
+        name="cancel-regular"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:rt:"
+    >
+      <p>
+        End Call
+      </p>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and visual states of CallControl component should render with muted state 1`] = `
+<div
+  class="call-control-container"
+  data-testid="call-control-container"
+>
+  <div
+    class="button-group"
+  >
+    <button
+      aria-describedby="react-aria-:r6:"
+      aria-label="Unmute"
+      class="md-button-circle-wrapper call-control-button-muted md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:mute-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-muted-icon"
+        name="microphone-muted-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r6:"
+    >
+      <p>
+        Unmute
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r7:"
+      aria-label="Hold the call"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:hold-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="pause-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r7:"
+    >
+      <p>
+        Hold the call
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r8:"
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      aria-label="Consult with another agent"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:consult"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="headset-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r8:"
+    >
+      <p>
+        Consult with another agent
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r9:"
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      aria-label="Transfer Call"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:transfer"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="next-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r9:"
+    >
+      <p>
+        Transfer Call
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:ra:"
+      aria-label="Resume Recording"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:recording-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="record-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:ra:"
+    >
+      <p>
+        Resume Recording
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:rb:"
+      aria-label="End Call"
+      class="md-button-circle-wrapper call-control-button-cancel md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:end-call"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-cancel-icon"
+        name="cancel-regular"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:rb:"
+    >
+      <p>
+        End Call
+      </p>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and visual states of CallControl component should render with recording state 1`] = `
+<div
+  class="call-control-container"
+  data-testid="call-control-container"
+>
+  <div
+    class="button-group"
+  >
+    <button
+      aria-describedby="react-aria-:ri:"
+      aria-label="Mute"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:mute-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="microphone-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:ri:"
+    >
+      <p>
+        Mute
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:rj:"
+      aria-label="Hold the call"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:hold-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="pause-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:rj:"
+    >
+      <p>
+        Hold the call
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:rk:"
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      aria-label="Consult with another agent"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:consult"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="headset-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:rk:"
+    >
+      <p>
+        Consult with another agent
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:rl:"
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      aria-label="Transfer Call"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:transfer"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="next-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:rl:"
+    >
+      <p>
+        Transfer Call
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:rm:"
+      aria-label="Pause Recording"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:recording-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="record-paused-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:rm:"
+    >
+      <p>
+        Pause Recording
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:rn:"
+      aria-label="End Call"
+      class="md-button-circle-wrapper call-control-button-cancel md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:end-call"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-cancel-icon"
+        name="cancel-regular"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:rn:"
+    >
+      <p>
+        End Call
+      </p>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and visual states of CallControl component should render with wrapup mode 1`] = `
+<div
+  class="call-control-container"
+  data-testid="call-control-container"
+>
+  <div
+    class="wrapup-group"
+  >
+    <mdc-button
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      color="default"
+      data-btn-type="pill-with-icon"
+      data-testid="call-control:wrapup-button"
+      id="call-control-wrapup-button"
+      postfix-icon="arrow-down-bold"
+      role="button"
+      size="28"
+      tabindex="0"
+      type="button"
+      variant="secondary"
+    >
+      Wrap up
+    </mdc-button>
+  </div>
+</div>
+`;
+
+exports[`CallControlComponent Snapshots State Management should handle combination of states: muted, held, and recording 1`] = `
+<div
+  class="call-control-container"
+  data-testid="call-control-container"
+>
+  <div
+    class="button-group"
+  >
+    <button
+      aria-describedby="react-aria-:r2e:"
+      aria-label="Unmute"
+      class="md-button-circle-wrapper call-control-button-muted md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:mute-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-muted-icon"
+        name="microphone-muted-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r2e:"
+    >
+      <p>
+        Unmute
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r2f:"
+      aria-label="Resume the call"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:hold-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="play-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r2f:"
+    >
+      <p>
+        Resume the call
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r2g:"
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      aria-label="Consult with another agent"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:consult"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="headset-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r2g:"
+    >
+      <p>
+        Consult with another agent
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r2h:"
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      aria-label="Transfer Call"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:transfer"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="next-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r2h:"
+    >
+      <p>
+        Transfer Call
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r2i:"
+      aria-label="Pause Recording"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:recording-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="record-paused-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r2i:"
+    >
+      <p>
+        Pause Recording
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r2j:"
+      aria-label="End Call"
+      class="md-button-circle-wrapper call-control-button-cancel call-control-button-cancel-disabled md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="true"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:end-call"
+      disabled=""
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-cancel-icon"
+        name="cancel-regular"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r2j:"
+    >
+      <p>
+        End Call
+      </p>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`CallControlComponent Snapshots State Management should handle edge case with no buddy agents 1`] = `
+<div
+  class="call-control-container"
+  data-testid="call-control-container"
+>
+  <div
+    class="button-group"
+  >
+    <button
+      aria-describedby="react-aria-:r2k:"
+      aria-label="Mute"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:mute-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="microphone-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r2k:"
+    >
+      <p>
+        Mute
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r2l:"
+      aria-label="Hold the call"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:hold-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="pause-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r2l:"
+    >
+      <p>
+        Hold the call
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r2m:"
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      aria-label="Consult with another agent"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:consult"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="headset-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r2m:"
+    >
+      <p>
+        Consult with another agent
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r2n:"
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      aria-label="Transfer Call"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:transfer"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="next-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r2n:"
+    >
+      <p>
+        Transfer Call
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r2o:"
+      aria-label="Resume Recording"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:recording-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="record-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r2o:"
+    >
+      <p>
+        Resume Recording
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r2p:"
+      aria-label="End Call"
+      class="md-button-circle-wrapper call-control-button-cancel md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:end-call"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-cancel-icon"
+        name="cancel-regular"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r2p:"
+    >
+      <p>
+        End Call
+      </p>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`CallControlComponent Snapshots State Management should handle edge case with no queues 1`] = `
+<div
+  class="call-control-container"
+  data-testid="call-control-container"
+>
+  <div
+    class="button-group"
+  >
+    <button
+      aria-describedby="react-aria-:r2q:"
+      aria-label="Mute"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:mute-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="microphone-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r2q:"
+    >
+      <p>
+        Mute
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r2r:"
+      aria-label="Hold the call"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:hold-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="pause-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r2r:"
+    >
+      <p>
+        Hold the call
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r2s:"
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      aria-label="Consult with another agent"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:consult"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="headset-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r2s:"
+    >
+      <p>
+        Consult with another agent
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r2t:"
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      aria-label="Transfer Call"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:transfer"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="next-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r2t:"
+    >
+      <p>
+        Transfer Call
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r2u:"
+      aria-label="Resume Recording"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:recording-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="record-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r2u:"
+    >
+      <p>
+        Resume Recording
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r2v:"
+      aria-label="End Call"
+      class="md-button-circle-wrapper call-control-button-cancel md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:end-call"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-cancel-icon"
+        name="cancel-regular"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r2v:"
+    >
+      <p>
+        End Call
+      </p>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`CallControlComponent Snapshots State Management should handle edge case with no wrapup codes 1`] = `
+<div
+  class="call-control-container"
+  data-testid="call-control-container"
+>
+  <div
+    class="wrapup-group"
+  >
+    <mdc-button
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      color="default"
+      data-btn-type="pill-with-icon"
+      data-testid="call-control:wrapup-button"
+      id="call-control-wrapup-button"
+      postfix-icon="arrow-down-bold"
+      role="button"
+      size="28"
+      tabindex="0"
+      type="button"
+      variant="secondary"
+    >
+      Wrap up
+    </mdc-button>
+  </div>
+</div>
+`;
+
+exports[`CallControlComponent Snapshots State Management should update when hold state changes 1`] = `
+<div
+  class="call-control-container"
+  data-testid="call-control-container"
+>
+  <div
+    class="button-group"
+  >
+    <button
+      aria-describedby="react-aria-:r1s:"
+      aria-label="Mute"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:mute-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="microphone-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r1s:"
+    >
+      <p>
+        Mute
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r1t:"
+      aria-label="Resume the call"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:hold-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="pause-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r1t:"
+    >
+      <p>
+        Resume the call
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r1u:"
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      aria-label="Consult with another agent"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:consult"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="headset-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r1u:"
+    >
+      <p>
+        Consult with another agent
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r1v:"
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      aria-label="Transfer Call"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:transfer"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="next-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r1v:"
+    >
+      <p>
+        Transfer Call
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r20:"
+      aria-label="Resume Recording"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:recording-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="record-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r20:"
+    >
+      <p>
+        Resume Recording
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r21:"
+      aria-label="End Call"
+      class="md-button-circle-wrapper call-control-button-cancel call-control-button-cancel-disabled md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="true"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:end-call"
+      disabled=""
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-cancel-icon"
+        name="cancel-regular"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r21:"
+    >
+      <p>
+        End Call
+      </p>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`CallControlComponent Snapshots State Management should update when mute state changes 1`] = `
+<div
+  class="call-control-container"
+  data-testid="call-control-container"
+>
+  <div
+    class="button-group"
+  >
+    <button
+      aria-describedby="react-aria-:r22:"
+      aria-label="Unmute"
+      class="md-button-circle-wrapper call-control-button-muted md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:mute-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-muted-icon"
+        name="microphone-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r22:"
+    >
+      <p>
+        Unmute
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r23:"
+      aria-label="Hold the call"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:hold-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="pause-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r23:"
+    >
+      <p>
+        Hold the call
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r24:"
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      aria-label="Consult with another agent"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:consult"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="headset-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r24:"
+    >
+      <p>
+        Consult with another agent
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r25:"
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      aria-label="Transfer Call"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:transfer"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="next-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r25:"
+    >
+      <p>
+        Transfer Call
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r26:"
+      aria-label="Resume Recording"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:recording-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="record-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r26:"
+    >
+      <p>
+        Resume Recording
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r27:"
+      aria-label="End Call"
+      class="md-button-circle-wrapper call-control-button-cancel md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:end-call"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-cancel-icon"
+        name="cancel-regular"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r27:"
+    >
+      <p>
+        End Call
+      </p>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`CallControlComponent Snapshots State Management should update when recording state changes 1`] = `
+<div
+  class="call-control-container"
+  data-testid="call-control-container"
+>
+  <div
+    class="button-group"
+  >
+    <button
+      aria-describedby="react-aria-:r28:"
+      aria-label="Mute"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:mute-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="microphone-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r28:"
+    >
+      <p>
+        Mute
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r29:"
+      aria-label="Hold the call"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:hold-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="pause-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r29:"
+    >
+      <p>
+        Hold the call
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r2a:"
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      aria-label="Consult with another agent"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:consult"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="headset-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r2a:"
+    >
+      <p>
+        Consult with another agent
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r2b:"
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      aria-label="Transfer Call"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:transfer"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="next-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r2b:"
+    >
+      <p>
+        Transfer Call
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r2c:"
+      aria-label="Pause Recording"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:recording-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="record-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r2c:"
+    >
+      <p>
+        Pause Recording
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r2d:"
+      aria-label="End Call"
+      class="md-button-circle-wrapper call-control-button-cancel md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:end-call"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-cancel-icon"
+        name="cancel-regular"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r2d:"
+    >
+      <p>
+        End Call
+      </p>
+    </div>
+  </div>
+</div>
+`;

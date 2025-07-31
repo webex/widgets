@@ -1,0 +1,89 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ConsultTransferEmptyState Snapshots Rendering - Tests for UI elements and visual states of ConsultTransferEmptyState component should render the component with default message 1`] = `
+<div
+  class="consult-empty-state"
+>
+  <div
+    class="consult-empty-state-svg"
+  />
+  <div
+    class="consult-empty-message"
+  >
+    No agents or queues available
+  </div>
+</div>
+`;
+
+exports[`ConsultTransferEmptyState Snapshots Rendering - Tests for UI elements and visual states of ConsultTransferEmptyState component should render with HTML characters in message 1`] = `
+<div
+  class="consult-empty-state"
+>
+  <div
+    class="consult-empty-state-svg"
+  />
+  <div
+    class="consult-empty-message"
+  >
+    No agents & queues &lt;available&gt;
+  </div>
+</div>
+`;
+
+exports[`ConsultTransferEmptyState Snapshots Rendering - Tests for UI elements and visual states of ConsultTransferEmptyState component should render with custom message 1`] = `
+<div
+  class="consult-empty-state"
+>
+  <div
+    class="consult-empty-state-svg"
+  />
+  <div
+    class="consult-empty-message"
+  >
+    No items found
+  </div>
+</div>
+`;
+
+exports[`ConsultTransferEmptyState Snapshots Rendering - Tests for UI elements and visual states of ConsultTransferEmptyState component should render with empty message 1`] = `
+<div
+  class="consult-empty-state"
+>
+  <div
+    class="consult-empty-state-svg"
+  />
+  <div
+    class="consult-empty-message"
+  />
+</div>
+`;
+
+exports[`ConsultTransferEmptyState Snapshots Rendering - Tests for UI elements and visual states of ConsultTransferEmptyState component should render with long message 1`] = `
+<div
+  class="consult-empty-state"
+>
+  <div
+    class="consult-empty-state-svg"
+  />
+  <div
+    class="consult-empty-message"
+  >
+    This is a very long message that might wrap to multiple lines to test how the component handles extended text content
+  </div>
+</div>
+`;
+
+exports[`ConsultTransferEmptyState Snapshots Rendering - Tests for UI elements and visual states of ConsultTransferEmptyState component should render with special characters in message 1`] = `
+<div
+  class="consult-empty-state"
+>
+  <div
+    class="consult-empty-state-svg"
+  />
+  <div
+    class="consult-empty-message"
+  >
+    No agents/queues! @#$%^&*()
+  </div>
+</div>
+`;
