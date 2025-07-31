@@ -33,7 +33,28 @@ export const createViteConfig = (options: ViteConfigOptions = {}) => {
     const isLib = mode === 'lib';
 
     return {
-      plugins: [react(), ...(isLib ? [dts({tsconfigPath: './tsconfig.json'})] : [])],
+      plugins: [
+        react(),
+        ...(isLib ? [dts({tsconfigPath: './tsconfig.json'})] : []),
+        // Custom plugin to handle @webex/cc-store CommonJS/ES module interop
+        {
+          name: 'fix-cc-store-import',
+          generateBundle(options, bundle) {
+            if (isLib) {
+              Object.keys(bundle).forEach((fileName) => {
+                const chunk = bundle[fileName];
+                if (chunk.type === 'chunk') {
+                  // Replace destructuring from store with destructuring from store.default || store
+                  chunk.code = chunk.code.replace(
+                    /const\s*\{\s*([^}]+)\s*\}\s*=\s*store;/g,
+                    'const actualStore = store.default || store; const { $1 } = actualStore;'
+                  );
+                }
+              });
+            }
+          },
+        },
+      ],
       define: {
         global: 'globalThis',
       },
@@ -92,5 +113,6 @@ export default createViteConfig({
     react: 'React',
     'react-dom': 'ReactDOM',
     'react/jsx-runtime': 'React',
+    '@webex/cc-store': '@webex/cc-store',
   },
 });

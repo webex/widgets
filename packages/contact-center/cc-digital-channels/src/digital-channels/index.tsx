@@ -7,7 +7,7 @@ import {useDigitalChannels} from '../helper';
 import {DigitalChannelsProps} from './digital-channels.types';
 import '@momentum-ui/web-components';
 const DigitalChannels: React.FunctionComponent<DigitalChannelsProps> = observer(({jwtToken, dataCenter, onError}) => {
-  const {logger, currentTask} = store.default;
+  const {logger, currentTask} = store;
 
   if (!currentTask) {
     return null;

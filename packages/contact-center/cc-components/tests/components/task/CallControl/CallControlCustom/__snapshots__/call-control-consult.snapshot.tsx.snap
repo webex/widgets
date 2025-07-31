@@ -47,9 +47,11 @@ exports[`CallControlConsultComponent Snapshots Interactions should call mockEndC
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="mute-consult-btn"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -74,9 +76,11 @@ exports[`CallControlConsultComponent Snapshots Interactions should call mockEndC
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="transfer-consult-btn"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -94,16 +98,18 @@ exports[`CallControlConsultComponent Snapshots Interactions should call mockEndC
     </div>
     <button
       aria-describedby="react-aria-:rt:"
-      class="md-button-circle-wrapper call-control-consult-button-cancel md-button-simple-wrapper md-focus-ring-wrapper children"
+      class="md-button-circle-wrapper call-control-consult-button-cancel md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
       data-ghost="false"
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="cancel-consult-btn"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -119,11 +125,6 @@ exports[`CallControlConsultComponent Snapshots Interactions should call mockEndC
         End Consult
       </p>
     </div>
-    <div
-      data-tippy-root=""
-      id="tippy-30"
-      style="pointer-events: none; z-index: 9999; transition: none; position: absolute; left: 0px; top: 0px; margin: 0px;"
-    />
   </div>
 </div>
 `;
@@ -168,13 +169,14 @@ exports[`CallControlConsultComponent Snapshots Interactions should call mockOnTo
   >
     <button
       aria-describedby="react-aria-:rl:"
-      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper md-focus-ring-wrapper-disabled"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="true"
       data-ghost="false"
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="mute-consult-btn"
@@ -203,9 +205,11 @@ exports[`CallControlConsultComponent Snapshots Interactions should call mockOnTo
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="transfer-consult-btn"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -230,9 +234,11 @@ exports[`CallControlConsultComponent Snapshots Interactions should call mockOnTo
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="cancel-consult-btn"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -248,11 +254,6 @@ exports[`CallControlConsultComponent Snapshots Interactions should call mockOnTo
         End Consult
       </p>
     </div>
-    <div
-      data-tippy-root=""
-      id="tippy-22"
-      style="pointer-events: none; z-index: 9999; transition: none; position: absolute; left: 0px; top: 0px; margin: 0px; transform: translate(0px, 0px);"
-    />
   </div>
 </div>
 `;
@@ -304,9 +305,11 @@ exports[`CallControlConsultComponent Snapshots Interactions should call mockOnTr
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="mute-consult-btn"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -324,16 +327,18 @@ exports[`CallControlConsultComponent Snapshots Interactions should call mockOnTr
     </div>
     <button
       aria-describedby="react-aria-:rp:"
-      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper md-focus-ring-wrapper children"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
       data-ghost="false"
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="transfer-consult-btn"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -358,9 +363,11 @@ exports[`CallControlConsultComponent Snapshots Interactions should call mockOnTr
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="cancel-consult-btn"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -376,11 +383,6 @@ exports[`CallControlConsultComponent Snapshots Interactions should call mockOnTr
         End Consult
       </p>
     </div>
-    <div
-      data-tippy-root=""
-      id="tippy-26"
-      style="pointer-events: none; z-index: 9999; transition: none; position: absolute; left: 0px; top: 0px; margin: 0px;"
-    />
   </div>
 </div>
 `;
@@ -432,9 +434,11 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="mute-consult-btn"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -459,9 +463,11 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="transfer-consult-btn"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -486,9 +492,11 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="cancel-consult-btn"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -555,9 +563,11 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="mute-consult-btn"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -582,6 +592,7 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="transfer-consult-btn"
@@ -610,9 +621,11 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="cancel-consult-btn"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -679,9 +692,11 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="mute-consult-btn"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -706,9 +721,11 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="cancel-consult-btn"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -775,9 +792,11 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="mute-consult-btn"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -802,9 +821,11 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="transfer-consult-btn"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -829,9 +850,11 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="cancel-consult-btn"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -898,9 +921,11 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="mute-consult-btn"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -925,9 +950,11 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="transfer-consult-btn"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -952,9 +979,11 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="cancel-consult-btn"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -1021,9 +1050,11 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="mute-consult-btn"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -1048,9 +1079,11 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="transfer-consult-btn"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -1075,9 +1108,11 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="cancel-consult-btn"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -1144,9 +1179,11 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="transfer-consult-btn"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -1171,9 +1208,11 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="cancel-consult-btn"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -1240,9 +1279,11 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="mute-consult-btn"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -1267,9 +1308,11 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="cancel-consult-btn"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -1336,9 +1379,11 @@ exports[`CallControlConsultComponent Snapshots State Management should handle co
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="cancel-consult-btn"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -1403,9 +1448,11 @@ exports[`CallControlConsultComponent Snapshots State Management should handle ed
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="mute-consult-btn"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -1430,9 +1477,11 @@ exports[`CallControlConsultComponent Snapshots State Management should handle ed
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="transfer-consult-btn"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -1457,9 +1506,11 @@ exports[`CallControlConsultComponent Snapshots State Management should handle ed
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="cancel-consult-btn"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -1526,9 +1577,11 @@ exports[`CallControlConsultComponent Snapshots State Management should update wh
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="mute-consult-btn"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -1553,9 +1606,11 @@ exports[`CallControlConsultComponent Snapshots State Management should update wh
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="transfer-consult-btn"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -1580,9 +1635,11 @@ exports[`CallControlConsultComponent Snapshots State Management should update wh
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="cancel-consult-btn"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -1649,9 +1706,11 @@ exports[`CallControlConsultComponent Snapshots State Management should update wh
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="transfer-consult-btn"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -1676,9 +1735,11 @@ exports[`CallControlConsultComponent Snapshots State Management should update wh
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="cancel-consult-btn"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
