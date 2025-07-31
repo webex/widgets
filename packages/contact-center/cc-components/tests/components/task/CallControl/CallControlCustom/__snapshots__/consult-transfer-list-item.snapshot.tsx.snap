@@ -1,0 +1,1208 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ConsultTransferListComponent Snapshots Interactions should render component after button click 1`] = `
+<li
+  aria-label="John Doe"
+  class="call-control-list-item custom-class md-list-item-base-wrapper"
+  data-allow-text-select="false"
+  data-disabled="false"
+  data-interactive="true"
+  data-padded="true"
+  data-shape="rectangle"
+  data-size="50"
+  role="listitem"
+  tabindex="0"
+>
+  <div
+    data-position="start"
+  >
+    <div
+      aria-hidden="false"
+      aria-label=""
+      class="md-avatar-wrapper"
+      data-color="default"
+      data-size="32"
+      role="img"
+    >
+      <span
+        aria-hidden="true"
+        class="md-avatar-wrapper-children"
+      >
+        JD
+      </span>
+    </div>
+  </div>
+  <div
+    data-position="middle"
+    style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
+  >
+    <mdc-text
+      class="md-text-wrapper"
+      style="margin: 0px; line-height: 1.2;"
+      tagname="p"
+      type="body-large-regular"
+    >
+      John Doe
+    </mdc-text>
+    <mdc-text
+      class="md-text-wrapper"
+      style="margin: 0px; line-height: 1.2;"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      Manager
+    </mdc-text>
+  </div>
+  <div
+    data-position="end"
+  >
+    <div
+      class="hover-button"
+    >
+      <button
+        class="md-button-circle-wrapper md-button-simple-wrapper md-focus-ring-wrapper children"
+        data-color="join"
+        data-disabled="false"
+        data-ghost="false"
+        data-inverted="false"
+        data-multiple-children="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="28"
+        tabindex="0"
+        type="button"
+      >
+        <mdc-icon
+          name="test-icon"
+        />
+      </button>
+    </div>
+  </div>
+</li>
+`;
+
+exports[`ConsultTransferListComponent Snapshots Interactions should render component after keyboard interaction 1`] = `
+<li
+  aria-label="John Doe"
+  class="call-control-list-item custom-class md-list-item-base-wrapper"
+  data-allow-text-select="false"
+  data-disabled="false"
+  data-interactive="true"
+  data-padded="true"
+  data-shape="rectangle"
+  data-size="50"
+  role="listitem"
+  tabindex="0"
+>
+  <div
+    data-position="start"
+  >
+    <div
+      aria-hidden="false"
+      aria-label=""
+      class="md-avatar-wrapper"
+      data-color="default"
+      data-size="32"
+      role="img"
+    >
+      <span
+        aria-hidden="true"
+        class="md-avatar-wrapper-children"
+      >
+        JD
+      </span>
+    </div>
+  </div>
+  <div
+    data-position="middle"
+    style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
+  >
+    <mdc-text
+      class="md-text-wrapper"
+      style="margin: 0px; line-height: 1.2;"
+      tagname="p"
+      type="body-large-regular"
+    >
+      John Doe
+    </mdc-text>
+    <mdc-text
+      class="md-text-wrapper"
+      style="margin: 0px; line-height: 1.2;"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      Manager
+    </mdc-text>
+  </div>
+  <div
+    data-position="end"
+  >
+    <div
+      class="hover-button"
+    >
+      <button
+        class="md-button-circle-wrapper md-button-simple-wrapper"
+        data-color="join"
+        data-disabled="false"
+        data-ghost="false"
+        data-inverted="false"
+        data-multiple-children="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="28"
+        tabindex="-1"
+        type="button"
+      >
+        <mdc-icon
+          name="test-icon"
+        />
+      </button>
+    </div>
+  </div>
+</li>
+`;
+
+exports[`ConsultTransferListComponent Snapshots Interactions should render component after list item click 1`] = `
+<li
+  aria-label="John Doe"
+  class="call-control-list-item custom-class md-list-item-base-wrapper"
+  data-allow-text-select="false"
+  data-disabled="false"
+  data-interactive="true"
+  data-padded="true"
+  data-shape="rectangle"
+  data-size="50"
+  role="listitem"
+  tabindex="0"
+>
+  <div
+    data-position="start"
+  >
+    <div
+      aria-hidden="false"
+      aria-label=""
+      class="md-avatar-wrapper"
+      data-color="default"
+      data-size="32"
+      role="img"
+    >
+      <span
+        aria-hidden="true"
+        class="md-avatar-wrapper-children"
+      >
+        JD
+      </span>
+    </div>
+  </div>
+  <div
+    data-position="middle"
+    style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
+  >
+    <mdc-text
+      class="md-text-wrapper"
+      style="margin: 0px; line-height: 1.2;"
+      tagname="p"
+      type="body-large-regular"
+    >
+      John Doe
+    </mdc-text>
+    <mdc-text
+      class="md-text-wrapper"
+      style="margin: 0px; line-height: 1.2;"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      Manager
+    </mdc-text>
+  </div>
+  <div
+    data-position="end"
+  >
+    <div
+      class="hover-button"
+    >
+      <button
+        class="md-button-circle-wrapper md-button-simple-wrapper"
+        data-color="join"
+        data-disabled="false"
+        data-ghost="false"
+        data-inverted="false"
+        data-multiple-children="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="28"
+        tabindex="-1"
+        type="button"
+      >
+        <mdc-icon
+          name="test-icon"
+        />
+      </button>
+    </div>
+  </div>
+</li>
+`;
+
+exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI elements and visual states of ConsultTransferListComponent component should render the component with title and subtitle 1`] = `
+<li
+  aria-label="John Doe"
+  class="call-control-list-item custom-class md-list-item-base-wrapper"
+  data-allow-text-select="false"
+  data-disabled="false"
+  data-interactive="true"
+  data-padded="true"
+  data-shape="rectangle"
+  data-size="50"
+  role="listitem"
+  tabindex="0"
+>
+  <div
+    data-position="start"
+  >
+    <div
+      aria-hidden="false"
+      aria-label=""
+      class="md-avatar-wrapper"
+      data-color="default"
+      data-size="32"
+      role="img"
+    >
+      <span
+        aria-hidden="true"
+        class="md-avatar-wrapper-children"
+      >
+        JD
+      </span>
+    </div>
+  </div>
+  <div
+    data-position="middle"
+    style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
+  >
+    <mdc-text
+      class="md-text-wrapper"
+      style="margin: 0px; line-height: 1.2;"
+      tagname="p"
+      type="body-large-regular"
+    >
+      John Doe
+    </mdc-text>
+    <mdc-text
+      class="md-text-wrapper"
+      style="margin: 0px; line-height: 1.2;"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      Manager
+    </mdc-text>
+  </div>
+  <div
+    data-position="end"
+  >
+    <div
+      class="hover-button"
+    >
+      <button
+        class="md-button-circle-wrapper md-button-simple-wrapper"
+        data-color="join"
+        data-disabled="false"
+        data-ghost="false"
+        data-inverted="false"
+        data-multiple-children="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="28"
+        tabindex="-1"
+        type="button"
+      >
+        <mdc-icon
+          name="test-icon"
+        />
+      </button>
+    </div>
+  </div>
+</li>
+`;
+
+exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI elements and visual states of ConsultTransferListComponent component should render with different button icon 1`] = `
+<li
+  aria-label="John Doe"
+  class="call-control-list-item custom-class md-list-item-base-wrapper"
+  data-allow-text-select="false"
+  data-disabled="false"
+  data-interactive="true"
+  data-padded="true"
+  data-shape="rectangle"
+  data-size="50"
+  role="listitem"
+  tabindex="0"
+>
+  <div
+    data-position="start"
+  >
+    <div
+      aria-hidden="false"
+      aria-label=""
+      class="md-avatar-wrapper"
+      data-color="default"
+      data-size="32"
+      role="img"
+    >
+      <span
+        aria-hidden="true"
+        class="md-avatar-wrapper-children"
+      >
+        JD
+      </span>
+    </div>
+  </div>
+  <div
+    data-position="middle"
+    style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
+  >
+    <mdc-text
+      class="md-text-wrapper"
+      style="margin: 0px; line-height: 1.2;"
+      tagname="p"
+      type="body-large-regular"
+    >
+      John Doe
+    </mdc-text>
+    <mdc-text
+      class="md-text-wrapper"
+      style="margin: 0px; line-height: 1.2;"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      Manager
+    </mdc-text>
+  </div>
+  <div
+    data-position="end"
+  >
+    <div
+      class="hover-button"
+    >
+      <button
+        class="md-button-circle-wrapper md-button-simple-wrapper"
+        data-color="join"
+        data-disabled="false"
+        data-ghost="false"
+        data-inverted="false"
+        data-multiple-children="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="28"
+        tabindex="-1"
+        type="button"
+      >
+        <mdc-icon
+          name="different-icon"
+        />
+      </button>
+    </div>
+  </div>
+</li>
+`;
+
+exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI elements and visual states of ConsultTransferListComponent component should render with different className 1`] = `
+<li
+  aria-label="John Doe"
+  class="call-control-list-item different-custom-class md-list-item-base-wrapper"
+  data-allow-text-select="false"
+  data-disabled="false"
+  data-interactive="true"
+  data-padded="true"
+  data-shape="rectangle"
+  data-size="50"
+  role="listitem"
+  tabindex="0"
+>
+  <div
+    data-position="start"
+  >
+    <div
+      aria-hidden="false"
+      aria-label=""
+      class="md-avatar-wrapper"
+      data-color="default"
+      data-size="32"
+      role="img"
+    >
+      <span
+        aria-hidden="true"
+        class="md-avatar-wrapper-children"
+      >
+        JD
+      </span>
+    </div>
+  </div>
+  <div
+    data-position="middle"
+    style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
+  >
+    <mdc-text
+      class="md-text-wrapper"
+      style="margin: 0px; line-height: 1.2;"
+      tagname="p"
+      type="body-large-regular"
+    >
+      John Doe
+    </mdc-text>
+    <mdc-text
+      class="md-text-wrapper"
+      style="margin: 0px; line-height: 1.2;"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      Manager
+    </mdc-text>
+  </div>
+  <div
+    data-position="end"
+  >
+    <div
+      class="hover-button"
+    >
+      <button
+        class="md-button-circle-wrapper md-button-simple-wrapper"
+        data-color="join"
+        data-disabled="false"
+        data-ghost="false"
+        data-inverted="false"
+        data-multiple-children="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="28"
+        tabindex="-1"
+        type="button"
+      >
+        <mdc-icon
+          name="test-icon"
+        />
+      </button>
+    </div>
+  </div>
+</li>
+`;
+
+exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI elements and visual states of ConsultTransferListComponent component should render with long name generating different initials 1`] = `
+<li
+  aria-label="Alexander Benjamin Christopher"
+  class="call-control-list-item custom-class md-list-item-base-wrapper"
+  data-allow-text-select="false"
+  data-disabled="false"
+  data-interactive="true"
+  data-padded="true"
+  data-shape="rectangle"
+  data-size="50"
+  role="listitem"
+  tabindex="0"
+>
+  <div
+    data-position="start"
+  >
+    <div
+      aria-hidden="false"
+      aria-label=""
+      class="md-avatar-wrapper"
+      data-color="default"
+      data-size="32"
+      role="img"
+    >
+      <span
+        aria-hidden="true"
+        class="md-avatar-wrapper-children"
+      >
+        AB
+      </span>
+    </div>
+  </div>
+  <div
+    data-position="middle"
+    style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
+  >
+    <mdc-text
+      class="md-text-wrapper"
+      style="margin: 0px; line-height: 1.2;"
+      tagname="p"
+      type="body-large-regular"
+    >
+      Alexander Benjamin Christopher
+    </mdc-text>
+    <mdc-text
+      class="md-text-wrapper"
+      style="margin: 0px; line-height: 1.2;"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      Manager
+    </mdc-text>
+  </div>
+  <div
+    data-position="end"
+  >
+    <div
+      class="hover-button"
+    >
+      <button
+        class="md-button-circle-wrapper md-button-simple-wrapper"
+        data-color="join"
+        data-disabled="false"
+        data-ghost="false"
+        data-inverted="false"
+        data-multiple-children="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="28"
+        tabindex="-1"
+        type="button"
+      >
+        <mdc-icon
+          name="test-icon"
+        />
+      </button>
+    </div>
+  </div>
+</li>
+`;
+
+exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI elements and visual states of ConsultTransferListComponent component should render with long subtitle 1`] = `
+<li
+  aria-label="John Doe"
+  class="call-control-list-item custom-class md-list-item-base-wrapper"
+  data-allow-text-select="false"
+  data-disabled="false"
+  data-interactive="true"
+  data-padded="true"
+  data-shape="rectangle"
+  data-size="50"
+  role="listitem"
+  tabindex="0"
+>
+  <div
+    data-position="start"
+  >
+    <div
+      aria-hidden="false"
+      aria-label=""
+      class="md-avatar-wrapper"
+      data-color="default"
+      data-size="32"
+      role="img"
+    >
+      <span
+        aria-hidden="true"
+        class="md-avatar-wrapper-children"
+      >
+        JD
+      </span>
+    </div>
+  </div>
+  <div
+    data-position="middle"
+    style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
+  >
+    <mdc-text
+      class="md-text-wrapper"
+      style="margin: 0px; line-height: 1.2;"
+      tagname="p"
+      type="body-large-regular"
+    >
+      John Doe
+    </mdc-text>
+    <mdc-text
+      class="md-text-wrapper"
+      style="margin: 0px; line-height: 1.2;"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      Senior Manager of Customer Relations and Business Development
+    </mdc-text>
+  </div>
+  <div
+    data-position="end"
+  >
+    <div
+      class="hover-button"
+    >
+      <button
+        class="md-button-circle-wrapper md-button-simple-wrapper"
+        data-color="join"
+        data-disabled="false"
+        data-ghost="false"
+        data-inverted="false"
+        data-multiple-children="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="28"
+        tabindex="-1"
+        type="button"
+      >
+        <mdc-icon
+          name="test-icon"
+        />
+      </button>
+    </div>
+  </div>
+</li>
+`;
+
+exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI elements and visual states of ConsultTransferListComponent component should render with single name 1`] = `
+<li
+  aria-label="John"
+  class="call-control-list-item custom-class md-list-item-base-wrapper"
+  data-allow-text-select="false"
+  data-disabled="false"
+  data-interactive="true"
+  data-padded="true"
+  data-shape="rectangle"
+  data-size="50"
+  role="listitem"
+  tabindex="0"
+>
+  <div
+    data-position="start"
+  >
+    <div
+      aria-hidden="false"
+      aria-label=""
+      class="md-avatar-wrapper"
+      data-color="default"
+      data-size="32"
+      role="img"
+    >
+      <span
+        aria-hidden="true"
+        class="md-avatar-wrapper-children"
+      >
+        J
+      </span>
+    </div>
+  </div>
+  <div
+    data-position="middle"
+    style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
+  >
+    <mdc-text
+      class="md-text-wrapper"
+      style="margin: 0px; line-height: 1.2;"
+      tagname="p"
+      type="body-large-regular"
+    >
+      John
+    </mdc-text>
+    <mdc-text
+      class="md-text-wrapper"
+      style="margin: 0px; line-height: 1.2;"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      Manager
+    </mdc-text>
+  </div>
+  <div
+    data-position="end"
+  >
+    <div
+      class="hover-button"
+    >
+      <button
+        class="md-button-circle-wrapper md-button-simple-wrapper"
+        data-color="join"
+        data-disabled="false"
+        data-ghost="false"
+        data-inverted="false"
+        data-multiple-children="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="28"
+        tabindex="-1"
+        type="button"
+      >
+        <mdc-icon
+          name="test-icon"
+        />
+      </button>
+    </div>
+  </div>
+</li>
+`;
+
+exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI elements and visual states of ConsultTransferListComponent component should render with special characters in title 1`] = `
+<li
+  aria-label="John O'Connor & Jane"
+  class="call-control-list-item custom-class md-list-item-base-wrapper"
+  data-allow-text-select="false"
+  data-disabled="false"
+  data-interactive="true"
+  data-padded="true"
+  data-shape="rectangle"
+  data-size="50"
+  role="listitem"
+  tabindex="0"
+>
+  <div
+    data-position="start"
+  >
+    <div
+      aria-hidden="false"
+      aria-label=""
+      class="md-avatar-wrapper"
+      data-color="default"
+      data-size="32"
+      role="img"
+    >
+      <span
+        aria-hidden="true"
+        class="md-avatar-wrapper-children"
+      >
+        JO
+      </span>
+    </div>
+  </div>
+  <div
+    data-position="middle"
+    style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
+  >
+    <mdc-text
+      class="md-text-wrapper"
+      style="margin: 0px; line-height: 1.2;"
+      tagname="p"
+      type="body-large-regular"
+    >
+      John O'Connor & Jane
+    </mdc-text>
+    <mdc-text
+      class="md-text-wrapper"
+      style="margin: 0px; line-height: 1.2;"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      Manager
+    </mdc-text>
+  </div>
+  <div
+    data-position="end"
+  >
+    <div
+      class="hover-button"
+    >
+      <button
+        class="md-button-circle-wrapper md-button-simple-wrapper"
+        data-color="join"
+        data-disabled="false"
+        data-ghost="false"
+        data-inverted="false"
+        data-multiple-children="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="28"
+        tabindex="-1"
+        type="button"
+      >
+        <mdc-icon
+          name="test-icon"
+        />
+      </button>
+    </div>
+  </div>
+</li>
+`;
+
+exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI elements and visual states of ConsultTransferListComponent component should render without className 1`] = `
+<li
+  aria-label="John Doe"
+  class="call-control-list-item md-list-item-base-wrapper"
+  data-allow-text-select="false"
+  data-disabled="false"
+  data-interactive="true"
+  data-padded="true"
+  data-shape="rectangle"
+  data-size="50"
+  role="listitem"
+  tabindex="0"
+>
+  <div
+    data-position="start"
+  >
+    <div
+      aria-hidden="false"
+      aria-label=""
+      class="md-avatar-wrapper"
+      data-color="default"
+      data-size="32"
+      role="img"
+    >
+      <span
+        aria-hidden="true"
+        class="md-avatar-wrapper-children"
+      >
+        JD
+      </span>
+    </div>
+  </div>
+  <div
+    data-position="middle"
+    style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
+  >
+    <mdc-text
+      class="md-text-wrapper"
+      style="margin: 0px; line-height: 1.2;"
+      tagname="p"
+      type="body-large-regular"
+    >
+      John Doe
+    </mdc-text>
+    <mdc-text
+      class="md-text-wrapper"
+      style="margin: 0px; line-height: 1.2;"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      Manager
+    </mdc-text>
+  </div>
+  <div
+    data-position="end"
+  >
+    <div
+      class="hover-button"
+    >
+      <button
+        class="md-button-circle-wrapper md-button-simple-wrapper"
+        data-color="join"
+        data-disabled="false"
+        data-ghost="false"
+        data-inverted="false"
+        data-multiple-children="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="28"
+        tabindex="-1"
+        type="button"
+      >
+        <mdc-icon
+          name="test-icon"
+        />
+      </button>
+    </div>
+  </div>
+</li>
+`;
+
+exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI elements and visual states of ConsultTransferListComponent component should render without subtitle 1`] = `
+<li
+  aria-label="John Doe"
+  class="call-control-list-item custom-class md-list-item-base-wrapper"
+  data-allow-text-select="false"
+  data-disabled="false"
+  data-interactive="true"
+  data-padded="true"
+  data-shape="rectangle"
+  data-size="50"
+  role="listitem"
+  tabindex="0"
+>
+  <div
+    data-position="start"
+  >
+    <div
+      aria-hidden="false"
+      aria-label=""
+      class="md-avatar-wrapper"
+      data-color="default"
+      data-size="32"
+      role="img"
+    >
+      <span
+        aria-hidden="true"
+        class="md-avatar-wrapper-children"
+      >
+        JD
+      </span>
+    </div>
+  </div>
+  <div
+    data-position="middle"
+    style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
+  >
+    <mdc-text
+      class="md-text-wrapper"
+      style="margin: 0px; line-height: 1.2;"
+      tagname="p"
+      type="body-large-regular"
+    >
+      John Doe
+    </mdc-text>
+  </div>
+  <div
+    data-position="end"
+  >
+    <div
+      class="hover-button"
+    >
+      <button
+        class="md-button-circle-wrapper md-button-simple-wrapper"
+        data-color="join"
+        data-disabled="false"
+        data-ghost="false"
+        data-inverted="false"
+        data-multiple-children="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="28"
+        tabindex="-1"
+        type="button"
+      >
+        <mdc-icon
+          name="test-icon"
+        />
+      </button>
+    </div>
+  </div>
+</li>
+`;
+
+exports[`ConsultTransferListComponent Snapshots State Management should update when buttonIcon changes 1`] = `
+<li
+  aria-label="John Doe"
+  class="call-control-list-item custom-class md-list-item-base-wrapper"
+  data-allow-text-select="false"
+  data-disabled="false"
+  data-interactive="true"
+  data-padded="true"
+  data-shape="rectangle"
+  data-size="50"
+  role="listitem"
+  tabindex="0"
+>
+  <div
+    data-position="start"
+  >
+    <div
+      aria-hidden="false"
+      aria-label=""
+      class="md-avatar-wrapper"
+      data-color="default"
+      data-size="32"
+      role="img"
+    >
+      <span
+        aria-hidden="true"
+        class="md-avatar-wrapper-children"
+      >
+        JD
+      </span>
+    </div>
+  </div>
+  <div
+    data-position="middle"
+    style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
+  >
+    <mdc-text
+      class="md-text-wrapper"
+      style="margin: 0px; line-height: 1.2;"
+      tagname="p"
+      type="body-large-regular"
+    >
+      John Doe
+    </mdc-text>
+    <mdc-text
+      class="md-text-wrapper"
+      style="margin: 0px; line-height: 1.2;"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      Manager
+    </mdc-text>
+  </div>
+  <div
+    data-position="end"
+  >
+    <div
+      class="hover-button"
+    >
+      <button
+        class="md-button-circle-wrapper md-button-simple-wrapper"
+        data-color="join"
+        data-disabled="false"
+        data-ghost="false"
+        data-inverted="false"
+        data-multiple-children="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="28"
+        tabindex="-1"
+        type="button"
+      >
+        <mdc-icon
+          name="test-icon"
+        />
+      </button>
+    </div>
+  </div>
+</li>
+`;
+
+exports[`ConsultTransferListComponent Snapshots State Management should update when subtitle changes 1`] = `
+<li
+  aria-label="John Doe"
+  class="call-control-list-item custom-class md-list-item-base-wrapper"
+  data-allow-text-select="false"
+  data-disabled="false"
+  data-interactive="true"
+  data-padded="true"
+  data-shape="rectangle"
+  data-size="50"
+  role="listitem"
+  tabindex="0"
+>
+  <div
+    data-position="start"
+  >
+    <div
+      aria-hidden="false"
+      aria-label=""
+      class="md-avatar-wrapper"
+      data-color="default"
+      data-size="32"
+      role="img"
+    >
+      <span
+        aria-hidden="true"
+        class="md-avatar-wrapper-children"
+      >
+        JD
+      </span>
+    </div>
+  </div>
+  <div
+    data-position="middle"
+    style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
+  >
+    <mdc-text
+      class="md-text-wrapper"
+      style="margin: 0px; line-height: 1.2;"
+      tagname="p"
+      type="body-large-regular"
+    >
+      John Doe
+    </mdc-text>
+    <mdc-text
+      class="md-text-wrapper"
+      style="margin: 0px; line-height: 1.2;"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      Senior Manager
+    </mdc-text>
+  </div>
+  <div
+    data-position="end"
+  >
+    <div
+      class="hover-button"
+    >
+      <button
+        class="md-button-circle-wrapper md-button-simple-wrapper"
+        data-color="join"
+        data-disabled="false"
+        data-ghost="false"
+        data-inverted="false"
+        data-multiple-children="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="28"
+        tabindex="-1"
+        type="button"
+      >
+        <mdc-icon
+          name="test-icon"
+        />
+      </button>
+    </div>
+  </div>
+</li>
+`;
+
+exports[`ConsultTransferListComponent Snapshots State Management should update when title changes 1`] = `
+<li
+  aria-label="Jane Smith"
+  class="call-control-list-item custom-class md-list-item-base-wrapper"
+  data-allow-text-select="false"
+  data-disabled="false"
+  data-interactive="true"
+  data-padded="true"
+  data-shape="rectangle"
+  data-size="50"
+  role="listitem"
+  tabindex="0"
+>
+  <div
+    data-position="start"
+  >
+    <div
+      aria-hidden="false"
+      aria-label=""
+      class="md-avatar-wrapper"
+      data-color="default"
+      data-size="32"
+      role="img"
+    >
+      <span
+        aria-hidden="true"
+        class="md-avatar-wrapper-children"
+      >
+        JS
+      </span>
+    </div>
+  </div>
+  <div
+    data-position="middle"
+    style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
+  >
+    <mdc-text
+      class="md-text-wrapper"
+      style="margin: 0px; line-height: 1.2;"
+      tagname="p"
+      type="body-large-regular"
+    >
+      Jane Smith
+    </mdc-text>
+    <mdc-text
+      class="md-text-wrapper"
+      style="margin: 0px; line-height: 1.2;"
+      tagname="p"
+      type="body-midsize-regular"
+    >
+      Manager
+    </mdc-text>
+  </div>
+  <div
+    data-position="end"
+  >
+    <div
+      class="hover-button"
+    >
+      <button
+        class="md-button-circle-wrapper md-button-simple-wrapper"
+        data-color="join"
+        data-disabled="false"
+        data-ghost="false"
+        data-inverted="false"
+        data-multiple-children="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="28"
+        tabindex="-1"
+        type="button"
+      >
+        <mdc-icon
+          name="test-icon"
+        />
+      </button>
+    </div>
+  </div>
+</li>
+`;

@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.99](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.98...v1.28.0-ccwidgets.99) (2025-07-31)
+
+
+### Bug Fixes
+
+* **task-controls:** add-uts-for-task-controls ([#502](https://github.com/webex/widgets/issues/502)) ([2a4595b](https://github.com/webex/widgets/commit/2a4595b0d561fe1dbbdd0b0d49cec59c6332c281))
+
 # [1.28.0-ccwidgets.98](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.97...v1.28.0-ccwidgets.98) (2025-07-29)
 
 

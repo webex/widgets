@@ -3,23 +3,15 @@ import {ListItemBase, ListItemBaseSection, AvatarNext, Text, ButtonCircle} from 
 import {Icon} from '@momentum-design/components/dist/react';
 import classnames from 'classnames';
 import {ConsultTransferListComponentProps} from '../../task.types';
+import {createInitials, handleListItemPress} from './call-control-custom.utils';
 
 const ConsultTransferListComponent: React.FC<ConsultTransferListComponentProps> = (props) => {
   const {title, subtitle, buttonIcon, onButtonPress, className, logger} = props;
 
-  const initials = title
-    .split(' ')
-    .map((word) => word[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase();
+  const initials = createInitials(title);
 
   const handleButtonPress = () => {
-    logger.info(`CC-Widgets: ConsultTransferListComponent: button pressed: ${title}`, {
-      module: 'consult-transfer-list-item.tsx',
-      method: 'handleButtonPress',
-    });
-    onButtonPress();
+    handleListItemPress(title, onButtonPress, logger);
   };
 
   return (
