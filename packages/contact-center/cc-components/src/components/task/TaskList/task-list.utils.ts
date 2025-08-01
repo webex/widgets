@@ -20,7 +20,7 @@ export const extractTaskListItemData = (task: ITask, isBrowser: boolean): TaskLi
 
   const taskState = task.data.interaction.state;
   const startTimeStamp = task.data.interaction.createdTimestamp;
-  const isIncomingTask = taskState === 'new' || taskState === 'consult';
+  const isIncomingTask = !task?.data.wrapUpRequired && (taskState === 'new' || taskState === 'consult');
   const mediaType = task.data.interaction.mediaType;
   const mediaChannel = task.data.interaction.mediaChannel;
 
