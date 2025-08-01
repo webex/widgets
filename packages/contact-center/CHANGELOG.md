@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.100](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.99...v1.28.0-ccwidgets.100) (2025-08-01)
+
+
+### Bug Fixes
+
+* **auto-wrapup-timer:** added-uts-for-auto-wrapup-timer ([#505](https://github.com/webex/widgets/issues/505)) ([83de01b](https://github.com/webex/widgets/commit/83de01b0fbde77a5dfe40c6ef2f36c647e4076f3))
+
 # [1.28.0-ccwidgets.99](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.98...v1.28.0-ccwidgets.99) (2025-07-31)
 
 
