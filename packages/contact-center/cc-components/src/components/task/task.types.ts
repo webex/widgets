@@ -644,3 +644,11 @@ export enum TaskQueue {
   VIP = 'vip',
   ESCALATION = 'escalation',
 }
+
+export interface TimerUIState {
+  isUrgent: boolean;
+  containerClassName: string;
+  iconClassName: string;
+  iconName: string;
+  formattedTime: string;
+}
