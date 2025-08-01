@@ -1,3 +1,5 @@
+import {TimerUIState} from '../task.types';
+
 /**
  * Determines if the timer is in urgent state (10 seconds or less)
  */
@@ -39,13 +41,6 @@ export const formatTimerDisplay = (secondsUntilAutoWrapup: number): string => {
 /**
  * Gets all timer-related UI state in one object
  */
-export interface TimerUIState {
-  isUrgent: boolean;
-  containerClassName: string;
-  iconClassName: string;
-  iconName: string;
-  formattedTime: string;
-}
 
 export const getTimerUIState = (secondsUntilAutoWrapup: number): TimerUIState => {
   const isUrgent = isTimerUrgent(secondsUntilAutoWrapup);
