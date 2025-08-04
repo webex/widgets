@@ -13,7 +13,7 @@ import {
 import { submitWrapup } from './Utils/wrapupUtils';
 import { USER_STATES, LOGIN_MODE, TASK_TYPES, WRAPUP_REASONS } from './constants';
 import { pageSetup, waitForState } from "./Utils/helperUtils";
-import { endTask } from "./Utils/taskControlUtils";
+import { endTask, holdCallToggle } from "./Utils/taskControlUtils";
 
 let agent1Page: Page;
 let agent2Page: Page;
@@ -112,10 +112,7 @@ test.describe("Advanced Combinations Tests ", () => {
     await acceptIncomingTask(agent2Page, TASK_TYPES.CALL);
     await waitForState(agent2Page, USER_STATES.ENGAGED);
     await agent1Page.getByTestId('transfer-consult-btn').click();
-    await agent1Page.waitForTimeout(5000);
-
-    await agent1Page.getByTestId('wrapup-button').first().waitFor({ state: 'visible', timeout: 5000 });
-    await agent1Page.waitForTimeout(2000);
+    await agent1Page.waitForTimeout(3000);
     await submitWrapup(agent1Page, WRAPUP_REASONS.SALE);
     await waitForState(agent1Page, USER_STATES.AVAILABLE);
     await consultViaAgent(agent2Page, 'User1 Agent1');
@@ -125,8 +122,6 @@ test.describe("Advanced Combinations Tests ", () => {
     await waitForState(agent1Page, USER_STATES.ENGAGED);
     await agent2Page.getByTestId('transfer-consult-btn').click();
     await agent2Page.waitForTimeout(3000);
-    await agent2Page.getByTestId('wrapup-button').first().waitFor({ state: 'visible', timeout: 5000 });
-    await agent2Page.waitForTimeout(2000);
     await submitWrapup(agent2Page, WRAPUP_REASONS.SALE);
     await waitForState(agent2Page, USER_STATES.AVAILABLE);
     await agent1Page.getByTestId('call-control:end-call').first().click();
@@ -154,8 +149,6 @@ test.describe("Advanced Combinations Tests ", () => {
     await waitForState(agent2Page, USER_STATES.ENGAGED);
     await agent1Page.getByTestId('transfer-consult-btn').click();
     await agent1Page.waitForTimeout(2000);
-    await agent1Page.getByTestId('wrapup-button').first().waitFor({ state: 'visible', timeout: 5000 });
-    await agent1Page.waitForTimeout(2000);
     await submitWrapup(agent1Page, WRAPUP_REASONS.SALE);
     await waitForState(agent1Page, USER_STATES.AVAILABLE);
 
@@ -167,8 +160,6 @@ test.describe("Advanced Combinations Tests ", () => {
     await agent1Page.waitForTimeout(2000);
     await acceptIncomingTask(agent1Page, TASK_TYPES.CALL);
     await waitForState(agent1Page, USER_STATES.ENGAGED);
-    await agent2Page.waitForTimeout(2000);
-    await agent2Page.getByTestId('wrapup-button').first().waitFor({ state: 'visible', timeout: 5000 });
     await agent2Page.waitForTimeout(2000);
     await submitWrapup(agent2Page, WRAPUP_REASONS.SALE);
     await waitForState(agent2Page, USER_STATES.AVAILABLE);
@@ -196,8 +187,6 @@ test.describe("Advanced Combinations Tests ", () => {
     await acceptIncomingTask(agent2Page, TASK_TYPES.CALL);
     await waitForState(agent2Page, USER_STATES.ENGAGED);
     await agent1Page.waitForTimeout(2000);
-    await agent1Page.getByTestId('wrapup-button').first().waitFor({ state: 'visible', timeout: 5000 });
-    await agent1Page.waitForTimeout(2000);
     await submitWrapup(agent1Page, WRAPUP_REASONS.SALE);
     await waitForState(agent1Page, USER_STATES.AVAILABLE);
     await consultViaAgent(agent2Page, 'User1 Agent1');
@@ -209,7 +198,6 @@ test.describe("Advanced Combinations Tests ", () => {
     await acceptIncomingTask(agent1Page, TASK_TYPES.CALL);
     await waitForState(agent1Page, USER_STATES.ENGAGED);
     await agent2Page.getByTestId('transfer-consult-btn').click();
-    await agent2Page.getByTestId('wrapup-button').first().waitFor({ state: 'visible', timeout: 5000 });
     await agent2Page.waitForTimeout(2000);
     await submitWrapup(agent2Page, WRAPUP_REASONS.SALE);
     await waitForState(agent2Page, USER_STATES.AVAILABLE);
@@ -257,6 +245,7 @@ test.describe("Advanced Combinations Tests ", () => {
     await cancelConsult(agent1Page);
     await expect(agent1Page.getByRole('group', { name: 'Call Control with Call' })).toBeVisible();
     await verifyCurrentState(agent1Page, USER_STATES.ENGAGED);
+     await holdCallToggle(agent1Page);
     await endTask(agent1Page);
     await agent1Page.waitForTimeout(3000);
     await submitWrapup(agent1Page, WRAPUP_REASONS.RESOLVED);
