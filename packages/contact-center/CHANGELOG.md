@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.101](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.100...v1.28.0-ccwidgets.101) (2025-08-04)
+
+
+### Bug Fixes
+
+* **cc-widgets:** Transfer issue fix ([#509](https://github.com/webex/widgets/issues/509)) ([038e6fc](https://github.com/webex/widgets/commit/038e6fcc8f81f3a55628c74689961a6281273ce3))
+
 # [1.28.0-ccwidgets.100](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.99...v1.28.0-ccwidgets.100) (2025-08-01)
 
 
