@@ -20,6 +20,8 @@ export default function withMetrics<P extends object>(Component: any, widgetName
         };
       }, []);
 
+      // TODO: https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6890 PROPS_UPDATED event
+
       return <Component {...props} />;
     },
     (prevProps, nextProps) => !havePropsChanged(prevProps, nextProps)

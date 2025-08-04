@@ -25,7 +25,7 @@ import {
   MUTE_CALL,
   UNMUTE_CALL,
 } from '../constants';
-import {withMetrics} from '@webex/cc-ui-metrics';
+import {withMetrics} from '@webex/cc-ui-logging';
 
 function CallControlComponent(props: CallControlComponentProps) {
   const [selectedWrapupReason, setSelectedWrapupReason] = useState<string | null>(null);

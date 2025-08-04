@@ -9402,7 +9402,7 @@ __metadata:
     "@types/jest": "npm:29.5.14"
     "@types/react-test-renderer": "npm:18"
     "@webex/cc-store": "workspace:*"
-    "@webex/cc-ui-metrics": "workspace:*"
+    "@webex/cc-ui-logging": "workspace:*"
     "@webex/test-fixtures": "workspace:*"
     babel-loader: "npm:9.2.1"
     eslint: "npm:^9.20.1"
@@ -9565,9 +9565,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@webex/cc-ui-metrics@workspace:*, @webex/cc-ui-metrics@workspace:packages/contact-center/ui-metrics":
+"@webex/cc-ui-logging@workspace:*, @webex/cc-ui-logging@workspace:packages/contact-center/ui-metrics":
   version: 0.0.0-use.local
-  resolution: "@webex/cc-ui-metrics@workspace:packages/contact-center/ui-metrics"
+  resolution: "@webex/cc-ui-logging@workspace:packages/contact-center/ui-metrics"
   dependencies:
     "@testing-library/dom": "npm:10.4.0"
     "@testing-library/jest-dom": "npm:6.6.2"

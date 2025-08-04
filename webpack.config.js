@@ -47,6 +47,8 @@ module.exports = {
     ],
   },
   stats: {
+    // While building and running the sample app when sass-loader is used we get a lot of deprecation warnings
+    // This is a workaround to suppress them untill we move away from sass-loader
     warningsFilter: [/sass-loader/],
   },
 };

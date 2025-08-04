@@ -19,7 +19,7 @@ import {
   CUSTOMER_NAME,
   RONA,
 } from '../constants';
-import {withMetrics} from '@webex/cc-ui-metrics';
+import {withMetrics} from '@webex/cc-ui-logging';
 
 const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => {
   const {

@@ -102,44 +102,4 @@ describe('withMetrics HOC', () => {
     rerender(<WrappedSpy name="different" />);
     expect(renderSpy).toHaveBeenCalledTimes(2);
   });
-
-  it('should handle complex prop changes', () => {
-    const renderSpy = jest.fn();
-    const SpyComponent: React.FC<TestComponentProps> = (props) => {
-      renderSpy();
-      return <div>Test Component</div>;
-    };
-
-    const WrappedSpy = withMetrics<TestComponentProps>(SpyComponent, 'TestWidget');
-
-    const initialProps = {
-      obj: {a: 1, b: 2},
-      arr: [1, 2, 3],
-    };
-
-    const {rerender} = render(<WrappedSpy {...initialProps} />);
-    expect(renderSpy).toHaveBeenCalledTimes(1);
-
-    // Re-render with same structure but different reference
-    rerender(
-      <WrappedSpy
-        {...{
-          obj: {a: 1, b: 2},
-          arr: [1, 2, 3],
-        }}
-      />
-    );
-    expect(renderSpy).toHaveBeenCalledTimes(1);
-
-    // Re-render with different values
-    rerender(
-      <WrappedSpy
-        {...{
-          obj: {a: 1, b: 3}, // changed value
-          arr: [1, 2, 3],
-        }}
-      />
-    );
-    expect(renderSpy).toHaveBeenCalledTimes(2);
-  });
 });

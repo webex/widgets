@@ -17,7 +17,7 @@ import {
   getSelectedKey,
   buildDropdownItems,
 } from './user-state.utils';
-import {withMetrics} from '@webex/cc-ui-metrics';
+import {withMetrics} from '@webex/cc-ui-logging';
 
 const UserStateComponent: React.FunctionComponent<UserStateComponentsProps> = (props) => {
   const {

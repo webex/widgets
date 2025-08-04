@@ -17,7 +17,7 @@ module.exports = merge(baseConfig, {
       '@webex/cc-user-state': path.resolve(__dirname, '../../../packages/contact-center/user-state/src'),
       '@webex/cc-task': path.resolve(__dirname, '../../../packages/contact-center/task/src'),
       '@webex/cc-components': path.resolve(__dirname, '../../../packages/contact-center/cc-components/src'),
-      '@webex/cc-ui-metrics': path.resolve(__dirname, '../../../packages/contact-center/ui-metrics/src'),
+      '@webex/cc-ui-logging': path.resolve(__dirname, '../../../packages/contact-center/ui-metrics/src'),
     },
   },
   module: {
