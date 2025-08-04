@@ -1,3 +1,24 @@
+# [1.28.0-ccwidgets.100](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.99...v1.28.0-ccwidgets.100) (2025-08-01)
+
+
+### Bug Fixes
+
+* **auto-wrapup-timer:** added-uts-for-auto-wrapup-timer ([#505](https://github.com/webex/widgets/issues/505)) ([83de01b](https://github.com/webex/widgets/commit/83de01b0fbde77a5dfe40c6ef2f36c647e4076f3))
+
+# [1.28.0-ccwidgets.99](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.98...v1.28.0-ccwidgets.99) (2025-07-31)
+
+
+### Bug Fixes
+
+* **task-controls:** add-uts-for-task-controls ([#502](https://github.com/webex/widgets/issues/502)) ([2a4595b](https://github.com/webex/widgets/commit/2a4595b0d561fe1dbbdd0b0d49cec59c6332c281))
+
+# [1.28.0-ccwidgets.98](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.97...v1.28.0-ccwidgets.98) (2025-07-29)
+
+
+### Bug Fixes
+
+* **incoming-task:** add-uts-for-incoming-task ([#499](https://github.com/webex/widgets/issues/499)) ([b9e6c7c](https://github.com/webex/widgets/commit/b9e6c7c1c9126d8d014e0b1aa1bca3f81c697ac6))
+
 # [1.28.0-ccwidgets.97](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.96...v1.28.0-ccwidgets.97) (2025-07-28)
 
 
