@@ -137,9 +137,11 @@ exports[`CallControlCADComponent Snapshots should handle edge cases and control 
           data-inverted="false"
           data-multiple-children="false"
           data-outline="false"
+          data-react-aria-pressable="true"
           data-shallow-disabled="false"
           data-size="40"
           data-testid="mute-consult-btn"
+          tabindex="0"
           type="button"
         >
           <mdc-icon
@@ -163,9 +165,11 @@ exports[`CallControlCADComponent Snapshots should handle edge cases and control 
           data-inverted="false"
           data-multiple-children="false"
           data-outline="false"
+          data-react-aria-pressable="true"
           data-shallow-disabled="false"
           data-size="40"
           data-testid="cancel-consult-btn"
+          tabindex="0"
           type="button"
         >
           <mdc-icon
@@ -249,9 +253,11 @@ exports[`CallControlCADComponent Snapshots should handle edge cases and control 
         data-inverted="false"
         data-multiple-children="false"
         data-outline="false"
+        data-react-aria-pressable="true"
         data-shallow-disabled="false"
         data-size="40"
         data-testid="call-control:mute-toggle"
+        tabindex="0"
         type="button"
       >
         <mdc-icon
@@ -276,9 +282,11 @@ exports[`CallControlCADComponent Snapshots should handle edge cases and control 
         data-inverted="false"
         data-multiple-children="false"
         data-outline="false"
+        data-react-aria-pressable="true"
         data-shallow-disabled="false"
         data-size="40"
         data-testid="call-control:end-call"
+        tabindex="0"
         type="button"
       >
         <mdc-icon
@@ -403,9 +411,11 @@ exports[`CallControlCADComponent Snapshots should handle edge cases and control 
         data-inverted="false"
         data-multiple-children="false"
         data-outline="false"
+        data-react-aria-pressable="true"
         data-shallow-disabled="false"
         data-size="40"
         data-testid="call-control:mute-toggle"
+        tabindex="0"
         type="button"
       >
         <mdc-icon
@@ -430,9 +440,11 @@ exports[`CallControlCADComponent Snapshots should handle edge cases and control 
         data-inverted="false"
         data-multiple-children="false"
         data-outline="false"
+        data-react-aria-pressable="true"
         data-shallow-disabled="false"
         data-size="40"
         data-testid="call-control:hold-toggle"
+        tabindex="0"
         type="button"
       >
         <mdc-icon
@@ -459,9 +471,11 @@ exports[`CallControlCADComponent Snapshots should handle edge cases and control 
         data-inverted="false"
         data-multiple-children="false"
         data-outline="false"
+        data-react-aria-pressable="true"
         data-shallow-disabled="false"
         data-size="40"
         data-testid="call-control:consult"
+        tabindex="0"
         type="button"
       >
         <mdc-icon
@@ -488,9 +502,11 @@ exports[`CallControlCADComponent Snapshots should handle edge cases and control 
         data-inverted="false"
         data-multiple-children="false"
         data-outline="false"
+        data-react-aria-pressable="true"
         data-shallow-disabled="false"
         data-size="40"
         data-testid="call-control:transfer"
+        tabindex="0"
         type="button"
       >
         <mdc-icon
@@ -515,9 +531,11 @@ exports[`CallControlCADComponent Snapshots should handle edge cases and control 
         data-inverted="false"
         data-multiple-children="false"
         data-outline="false"
+        data-react-aria-pressable="true"
         data-shallow-disabled="false"
         data-size="40"
         data-testid="call-control:recording-toggle"
+        tabindex="0"
         type="button"
       >
         <mdc-icon
@@ -542,9 +560,11 @@ exports[`CallControlCADComponent Snapshots should handle edge cases and control 
         data-inverted="false"
         data-multiple-children="false"
         data-outline="false"
+        data-react-aria-pressable="true"
         data-shallow-disabled="false"
         data-size="40"
         data-testid="call-control:end-call"
+        tabindex="0"
         type="button"
       >
         <mdc-icon
@@ -680,9 +700,11 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
         data-inverted="false"
         data-multiple-children="false"
         data-outline="false"
+        data-react-aria-pressable="true"
         data-shallow-disabled="false"
         data-size="40"
         data-testid="call-control:mute-toggle"
+        tabindex="0"
         type="button"
       >
         <mdc-icon
@@ -707,9 +729,11 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
         data-inverted="false"
         data-multiple-children="false"
         data-outline="false"
+        data-react-aria-pressable="true"
         data-shallow-disabled="false"
         data-size="40"
         data-testid="call-control:hold-toggle"
+        tabindex="0"
         type="button"
       >
         <mdc-icon
@@ -736,9 +760,11 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
         data-inverted="false"
         data-multiple-children="false"
         data-outline="false"
+        data-react-aria-pressable="true"
         data-shallow-disabled="false"
         data-size="40"
         data-testid="call-control:consult"
+        tabindex="0"
         type="button"
       >
         <mdc-icon
@@ -765,9 +791,11 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
         data-inverted="false"
         data-multiple-children="false"
         data-outline="false"
+        data-react-aria-pressable="true"
         data-shallow-disabled="false"
         data-size="40"
         data-testid="call-control:transfer"
+        tabindex="0"
         type="button"
       >
         <mdc-icon
@@ -792,9 +820,11 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
         data-inverted="false"
         data-multiple-children="false"
         data-outline="false"
+        data-react-aria-pressable="true"
         data-shallow-disabled="false"
         data-size="40"
         data-testid="call-control:recording-toggle"
+        tabindex="0"
         type="button"
       >
         <mdc-icon
@@ -819,9 +849,11 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
         data-inverted="false"
         data-multiple-children="false"
         data-outline="false"
+        data-react-aria-pressable="true"
         data-shallow-disabled="false"
         data-size="40"
         data-testid="call-control:end-call"
+        tabindex="0"
         type="button"
       >
         <mdc-icon
@@ -977,9 +1009,11 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
         data-inverted="false"
         data-multiple-children="false"
         data-outline="false"
+        data-react-aria-pressable="true"
         data-shallow-disabled="false"
         data-size="40"
         data-testid="call-control:mute-toggle"
+        tabindex="0"
         type="button"
       >
         <mdc-icon
@@ -1004,9 +1038,11 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
         data-inverted="false"
         data-multiple-children="false"
         data-outline="false"
+        data-react-aria-pressable="true"
         data-shallow-disabled="false"
         data-size="40"
         data-testid="call-control:hold-toggle"
+        tabindex="0"
         type="button"
       >
         <mdc-icon
@@ -1033,9 +1069,11 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
         data-inverted="false"
         data-multiple-children="false"
         data-outline="false"
+        data-react-aria-pressable="true"
         data-shallow-disabled="false"
         data-size="40"
         data-testid="call-control:consult"
+        tabindex="0"
         type="button"
       >
         <mdc-icon
@@ -1062,9 +1100,11 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
         data-inverted="false"
         data-multiple-children="false"
         data-outline="false"
+        data-react-aria-pressable="true"
         data-shallow-disabled="false"
         data-size="40"
         data-testid="call-control:transfer"
+        tabindex="0"
         type="button"
       >
         <mdc-icon
@@ -1089,9 +1129,11 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
         data-inverted="false"
         data-multiple-children="false"
         data-outline="false"
+        data-react-aria-pressable="true"
         data-shallow-disabled="false"
         data-size="40"
         data-testid="call-control:recording-toggle"
+        tabindex="0"
         type="button"
       >
         <mdc-icon
@@ -1116,6 +1158,7 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
         data-inverted="false"
         data-multiple-children="false"
         data-outline="false"
+        data-react-aria-pressable="true"
         data-shallow-disabled="false"
         data-size="40"
         data-testid="call-control:end-call"
@@ -1244,9 +1287,11 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
         data-inverted="false"
         data-multiple-children="false"
         data-outline="false"
+        data-react-aria-pressable="true"
         data-shallow-disabled="false"
         data-size="40"
         data-testid="call-control:mute-toggle"
+        tabindex="0"
         type="button"
       >
         <mdc-icon
@@ -1271,9 +1316,11 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
         data-inverted="false"
         data-multiple-children="false"
         data-outline="false"
+        data-react-aria-pressable="true"
         data-shallow-disabled="false"
         data-size="40"
         data-testid="call-control:hold-toggle"
+        tabindex="0"
         type="button"
       >
         <mdc-icon
@@ -1300,9 +1347,11 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
         data-inverted="false"
         data-multiple-children="false"
         data-outline="false"
+        data-react-aria-pressable="true"
         data-shallow-disabled="false"
         data-size="40"
         data-testid="call-control:consult"
+        tabindex="0"
         type="button"
       >
         <mdc-icon
@@ -1329,9 +1378,11 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
         data-inverted="false"
         data-multiple-children="false"
         data-outline="false"
+        data-react-aria-pressable="true"
         data-shallow-disabled="false"
         data-size="40"
         data-testid="call-control:transfer"
+        tabindex="0"
         type="button"
       >
         <mdc-icon
@@ -1356,9 +1407,11 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
         data-inverted="false"
         data-multiple-children="false"
         data-outline="false"
+        data-react-aria-pressable="true"
         data-shallow-disabled="false"
         data-size="40"
         data-testid="call-control:recording-toggle"
+        tabindex="0"
         type="button"
       >
         <mdc-icon
@@ -1383,9 +1436,11 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
         data-inverted="false"
         data-multiple-children="false"
         data-outline="false"
+        data-react-aria-pressable="true"
         data-shallow-disabled="false"
         data-size="40"
         data-testid="call-control:end-call"
+        tabindex="0"
         type="button"
       >
         <mdc-icon
@@ -1521,9 +1576,11 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
         data-inverted="false"
         data-multiple-children="false"
         data-outline="false"
+        data-react-aria-pressable="true"
         data-shallow-disabled="false"
         data-size="40"
         data-testid="call-control:mute-toggle"
+        tabindex="0"
         type="button"
       >
         <mdc-icon
@@ -1548,9 +1605,11 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
         data-inverted="false"
         data-multiple-children="false"
         data-outline="false"
+        data-react-aria-pressable="true"
         data-shallow-disabled="false"
         data-size="40"
         data-testid="call-control:hold-toggle"
+        tabindex="0"
         type="button"
       >
         <mdc-icon
@@ -1577,9 +1636,11 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
         data-inverted="false"
         data-multiple-children="false"
         data-outline="false"
+        data-react-aria-pressable="true"
         data-shallow-disabled="false"
         data-size="40"
         data-testid="call-control:consult"
+        tabindex="0"
         type="button"
       >
         <mdc-icon
@@ -1606,9 +1667,11 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
         data-inverted="false"
         data-multiple-children="false"
         data-outline="false"
+        data-react-aria-pressable="true"
         data-shallow-disabled="false"
         data-size="40"
         data-testid="call-control:transfer"
+        tabindex="0"
         type="button"
       >
         <mdc-icon
@@ -1633,9 +1696,11 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
         data-inverted="false"
         data-multiple-children="false"
         data-outline="false"
+        data-react-aria-pressable="true"
         data-shallow-disabled="false"
         data-size="40"
         data-testid="call-control:recording-toggle"
+        tabindex="0"
         type="button"
       >
         <mdc-icon
@@ -1660,9 +1725,11 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
         data-inverted="false"
         data-multiple-children="false"
         data-outline="false"
+        data-react-aria-pressable="true"
         data-shallow-disabled="false"
         data-size="40"
         data-testid="call-control:end-call"
+        tabindex="0"
         type="button"
       >
         <mdc-icon
@@ -1867,9 +1934,11 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
           data-inverted="false"
           data-multiple-children="false"
           data-outline="false"
+          data-react-aria-pressable="true"
           data-shallow-disabled="false"
           data-size="40"
           data-testid="mute-consult-btn"
+          tabindex="0"
           type="button"
         >
           <mdc-icon
@@ -1893,9 +1962,11 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
           data-inverted="false"
           data-multiple-children="false"
           data-outline="false"
+          data-react-aria-pressable="true"
           data-shallow-disabled="false"
           data-size="40"
           data-testid="cancel-consult-btn"
+          tabindex="0"
           type="button"
         >
           <mdc-icon
@@ -2089,6 +2160,7 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
           data-inverted="false"
           data-multiple-children="false"
           data-outline="false"
+          data-react-aria-pressable="true"
           data-shallow-disabled="false"
           data-size="40"
           data-testid="call-control:mute-toggle"
@@ -2119,6 +2191,7 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
           data-inverted="false"
           data-multiple-children="false"
           data-outline="false"
+          data-react-aria-pressable="true"
           data-shallow-disabled="false"
           data-size="40"
           data-testid="call-control:transfer"
@@ -2147,6 +2220,7 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
           data-inverted="false"
           data-multiple-children="false"
           data-outline="false"
+          data-react-aria-pressable="true"
           data-shallow-disabled="false"
           data-size="40"
           data-testid="call-control:recording-toggle"
@@ -2175,6 +2249,7 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
           data-inverted="false"
           data-multiple-children="false"
           data-outline="false"
+          data-react-aria-pressable="true"
           data-shallow-disabled="false"
           data-size="40"
           data-testid="call-control:end-call"
@@ -2276,9 +2351,11 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
           data-inverted="false"
           data-multiple-children="false"
           data-outline="false"
+          data-react-aria-pressable="true"
           data-shallow-disabled="false"
           data-size="40"
           data-testid="mute-consult-btn"
+          tabindex="0"
           type="button"
         >
           <mdc-icon
@@ -2302,6 +2379,7 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
           data-inverted="false"
           data-multiple-children="false"
           data-outline="false"
+          data-react-aria-pressable="true"
           data-shallow-disabled="false"
           data-size="40"
           data-testid="transfer-consult-btn"
@@ -2329,9 +2407,11 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
           data-inverted="false"
           data-multiple-children="false"
           data-outline="false"
+          data-react-aria-pressable="true"
           data-shallow-disabled="false"
           data-size="40"
           data-testid="cancel-consult-btn"
+          tabindex="0"
           type="button"
         >
           <mdc-icon

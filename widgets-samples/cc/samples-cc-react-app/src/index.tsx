@@ -1,5 +1,7 @@
 import React from 'react';
 import {createRoot} from 'react-dom/client';
+window['AGENTX_SERVICE'] = {};
+
 import App from './App';
 
 const rootElement = document.getElementById('root');

@@ -18,9 +18,11 @@ exports[`CallControlComponent Snapshots Interactions should handle end call butt
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:mute-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -46,9 +48,11 @@ exports[`CallControlComponent Snapshots Interactions should handle end call butt
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:hold-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -76,9 +80,11 @@ exports[`CallControlComponent Snapshots Interactions should handle end call butt
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:consult"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -106,9 +112,11 @@ exports[`CallControlComponent Snapshots Interactions should handle end call butt
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:transfer"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -134,9 +142,11 @@ exports[`CallControlComponent Snapshots Interactions should handle end call butt
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:recording-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -155,16 +165,18 @@ exports[`CallControlComponent Snapshots Interactions should handle end call butt
     <button
       aria-describedby="react-aria-:r1r:"
       aria-label="End Call"
-      class="md-button-circle-wrapper call-control-button-cancel md-button-simple-wrapper md-focus-ring-wrapper children"
+      class="md-button-circle-wrapper call-control-button-cancel md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
       data-ghost="false"
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:end-call"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -180,11 +192,6 @@ exports[`CallControlComponent Snapshots Interactions should handle end call butt
         End Call
       </p>
     </div>
-    <div
-      data-tippy-root=""
-      id="tippy-80"
-      style="pointer-events: none; z-index: 9999; transition: none; position: absolute; left: 0px; top: 0px; margin: 0px;"
-    />
   </div>
 </div>
 `;
@@ -207,9 +214,11 @@ exports[`CallControlComponent Snapshots Interactions should handle hold button c
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:mute-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -228,16 +237,18 @@ exports[`CallControlComponent Snapshots Interactions should handle hold button c
     <button
       aria-describedby="react-aria-:r1b:"
       aria-label="Hold the call"
-      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper md-focus-ring-wrapper children"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
       data-ghost="false"
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:hold-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -265,9 +276,11 @@ exports[`CallControlComponent Snapshots Interactions should handle hold button c
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:consult"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -295,9 +308,11 @@ exports[`CallControlComponent Snapshots Interactions should handle hold button c
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:transfer"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -323,9 +338,11 @@ exports[`CallControlComponent Snapshots Interactions should handle hold button c
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:recording-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -351,9 +368,11 @@ exports[`CallControlComponent Snapshots Interactions should handle hold button c
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:end-call"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -369,11 +388,6 @@ exports[`CallControlComponent Snapshots Interactions should handle hold button c
         End Call
       </p>
     </div>
-    <div
-      data-tippy-root=""
-      id="tippy-58"
-      style="pointer-events: none; z-index: 9999; transition: none; position: absolute; left: 0px; top: 0px; margin: 0px;"
-    />
   </div>
 </div>
 `;
@@ -389,13 +403,14 @@ exports[`CallControlComponent Snapshots Interactions should handle mute button c
     <button
       aria-describedby="react-aria-:r14:"
       aria-label="Mute"
-      class="md-button-circle-wrapper call-control-button call-control-button-disabled md-button-simple-wrapper md-focus-ring-wrapper-disabled"
+      class="md-button-circle-wrapper call-control-button call-control-button-disabled md-button-simple-wrapper"
       data-color="primary"
       data-disabled="true"
       data-ghost="false"
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:mute-toggle"
@@ -425,9 +440,11 @@ exports[`CallControlComponent Snapshots Interactions should handle mute button c
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:hold-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -455,9 +472,11 @@ exports[`CallControlComponent Snapshots Interactions should handle mute button c
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:consult"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -485,9 +504,11 @@ exports[`CallControlComponent Snapshots Interactions should handle mute button c
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:transfer"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -513,9 +534,11 @@ exports[`CallControlComponent Snapshots Interactions should handle mute button c
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:recording-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -541,9 +564,11 @@ exports[`CallControlComponent Snapshots Interactions should handle mute button c
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:end-call"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -559,11 +584,6 @@ exports[`CallControlComponent Snapshots Interactions should handle mute button c
         End Call
       </p>
     </div>
-    <div
-      data-tippy-root=""
-      id="tippy-49"
-      style="pointer-events: none; z-index: 9999; transition: none; position: absolute; left: 0px; top: 0px; margin: 0px; transform: translate(0px, 0px);"
-    />
   </div>
 </div>
 `;
@@ -586,9 +606,11 @@ exports[`CallControlComponent Snapshots Interactions should handle record button
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:mute-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -614,9 +636,11 @@ exports[`CallControlComponent Snapshots Interactions should handle record button
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:hold-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -644,9 +668,11 @@ exports[`CallControlComponent Snapshots Interactions should handle record button
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:consult"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -674,9 +700,11 @@ exports[`CallControlComponent Snapshots Interactions should handle record button
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:transfer"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -695,16 +723,18 @@ exports[`CallControlComponent Snapshots Interactions should handle record button
     <button
       aria-describedby="react-aria-:r1k:"
       aria-label="Resume Recording"
-      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper md-focus-ring-wrapper children"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
       data-ghost="false"
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:recording-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -730,9 +760,11 @@ exports[`CallControlComponent Snapshots Interactions should handle record button
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:end-call"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -748,11 +780,6 @@ exports[`CallControlComponent Snapshots Interactions should handle record button
         End Call
       </p>
     </div>
-    <div
-      data-tippy-root=""
-      id="tippy-71"
-      style="pointer-events: none; z-index: 9999; transition: none; position: absolute; left: 0px; top: 0px; margin: 0px;"
-    />
   </div>
 </div>
 `;
@@ -803,9 +830,11 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:mute-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -831,9 +860,11 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:hold-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -861,9 +892,11 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:consult"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -891,9 +924,11 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:transfer"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -919,9 +954,11 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:recording-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -947,9 +984,11 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:end-call"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -987,9 +1026,11 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:mute-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -1015,9 +1056,11 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:hold-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -1045,9 +1088,11 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:consult"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -1075,9 +1120,11 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:transfer"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -1103,9 +1150,11 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:recording-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -1131,9 +1180,11 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:end-call"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -1178,6 +1229,7 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:mute-toggle"
@@ -1209,6 +1261,7 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:transfer"
@@ -1238,6 +1291,7 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:recording-toggle"
@@ -1267,6 +1321,7 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:end-call"
@@ -1308,9 +1363,11 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:mute-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -1336,9 +1393,11 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:hold-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -1366,9 +1425,11 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:consult"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -1396,9 +1457,11 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:transfer"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -1424,9 +1487,11 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:recording-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -1452,6 +1517,7 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:end-call"
@@ -1493,9 +1559,11 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:mute-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -1521,9 +1589,11 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:end-call"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -1561,9 +1631,11 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:mute-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -1589,9 +1661,11 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:hold-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -1619,9 +1693,11 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:consult"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -1649,9 +1725,11 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:transfer"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -1677,9 +1755,11 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:recording-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -1705,9 +1785,11 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:end-call"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -1745,9 +1827,11 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:mute-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -1773,9 +1857,11 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:hold-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -1803,9 +1889,11 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:consult"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -1833,9 +1921,11 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:transfer"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -1861,9 +1951,11 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:recording-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -1889,9 +1981,11 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:end-call"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -1957,9 +2051,11 @@ exports[`CallControlComponent Snapshots State Management should handle combinati
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:mute-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -1985,9 +2081,11 @@ exports[`CallControlComponent Snapshots State Management should handle combinati
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:hold-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -2015,9 +2113,11 @@ exports[`CallControlComponent Snapshots State Management should handle combinati
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:consult"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -2045,9 +2145,11 @@ exports[`CallControlComponent Snapshots State Management should handle combinati
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:transfer"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -2073,9 +2175,11 @@ exports[`CallControlComponent Snapshots State Management should handle combinati
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:recording-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -2101,6 +2205,7 @@ exports[`CallControlComponent Snapshots State Management should handle combinati
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:end-call"
@@ -2142,9 +2247,11 @@ exports[`CallControlComponent Snapshots State Management should handle edge case
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:mute-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -2170,9 +2277,11 @@ exports[`CallControlComponent Snapshots State Management should handle edge case
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:hold-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -2200,9 +2309,11 @@ exports[`CallControlComponent Snapshots State Management should handle edge case
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:consult"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -2230,9 +2341,11 @@ exports[`CallControlComponent Snapshots State Management should handle edge case
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:transfer"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -2258,9 +2371,11 @@ exports[`CallControlComponent Snapshots State Management should handle edge case
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:recording-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -2286,9 +2401,11 @@ exports[`CallControlComponent Snapshots State Management should handle edge case
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:end-call"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -2326,9 +2443,11 @@ exports[`CallControlComponent Snapshots State Management should handle edge case
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:mute-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -2354,9 +2473,11 @@ exports[`CallControlComponent Snapshots State Management should handle edge case
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:hold-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -2384,9 +2505,11 @@ exports[`CallControlComponent Snapshots State Management should handle edge case
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:consult"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -2414,9 +2537,11 @@ exports[`CallControlComponent Snapshots State Management should handle edge case
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:transfer"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -2442,9 +2567,11 @@ exports[`CallControlComponent Snapshots State Management should handle edge case
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:recording-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -2470,9 +2597,11 @@ exports[`CallControlComponent Snapshots State Management should handle edge case
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:end-call"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -2538,9 +2667,11 @@ exports[`CallControlComponent Snapshots State Management should update when hold
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:mute-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -2566,9 +2697,11 @@ exports[`CallControlComponent Snapshots State Management should update when hold
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:hold-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -2596,9 +2729,11 @@ exports[`CallControlComponent Snapshots State Management should update when hold
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:consult"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -2626,9 +2761,11 @@ exports[`CallControlComponent Snapshots State Management should update when hold
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:transfer"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -2654,9 +2791,11 @@ exports[`CallControlComponent Snapshots State Management should update when hold
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:recording-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -2682,6 +2821,7 @@ exports[`CallControlComponent Snapshots State Management should update when hold
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:end-call"
@@ -2723,9 +2863,11 @@ exports[`CallControlComponent Snapshots State Management should update when mute
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:mute-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -2751,9 +2893,11 @@ exports[`CallControlComponent Snapshots State Management should update when mute
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:hold-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -2781,9 +2925,11 @@ exports[`CallControlComponent Snapshots State Management should update when mute
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:consult"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -2811,9 +2957,11 @@ exports[`CallControlComponent Snapshots State Management should update when mute
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:transfer"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -2839,9 +2987,11 @@ exports[`CallControlComponent Snapshots State Management should update when mute
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:recording-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -2867,9 +3017,11 @@ exports[`CallControlComponent Snapshots State Management should update when mute
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:end-call"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -2907,9 +3059,11 @@ exports[`CallControlComponent Snapshots State Management should update when reco
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:mute-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -2935,9 +3089,11 @@ exports[`CallControlComponent Snapshots State Management should update when reco
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:hold-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -2965,9 +3121,11 @@ exports[`CallControlComponent Snapshots State Management should update when reco
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:consult"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -2995,9 +3153,11 @@ exports[`CallControlComponent Snapshots State Management should update when reco
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:transfer"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -3023,9 +3183,11 @@ exports[`CallControlComponent Snapshots State Management should update when reco
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:recording-toggle"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
@@ -3051,9 +3213,11 @@ exports[`CallControlComponent Snapshots State Management should update when reco
       data-inverted="false"
       data-multiple-children="false"
       data-outline="false"
+      data-react-aria-pressable="true"
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:end-call"
+      tabindex="0"
       type="button"
     >
       <mdc-icon
