@@ -16,6 +16,7 @@ import {
   ContactServiceQueue,
   Profile,
   AgentLoginProfile,
+  ERROR_TRIGGERING_IDLE_CODES,
 } from './store.types';
 import Store from './store';
 import {runInAction} from 'mobx';
@@ -50,7 +51,7 @@ class StoreWrapper implements IStoreWrapper {
   }
   get idleCodes() {
     return this.store.idleCodes.filter((code) => {
-      return code.name === 'RONA' || !code.isSystem;
+      return Object.values(ERROR_TRIGGERING_IDLE_CODES).includes(code.name) || !code.isSystem;
     });
   }
   get agentId() {

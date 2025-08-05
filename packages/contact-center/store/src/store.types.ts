@@ -220,6 +220,15 @@ const LoginOptions: {[key: string]: string} = {
   [DESKTOP]: 'Desktop',
 };
 
+const ERROR_TRIGGERING_IDLE_CODES = {
+  INVALID_NUMBER: 'Invalid_Number',
+  UNAVAILABLE: 'Agent_Unavailable',
+  DECLINED: 'Agent_Declined',
+  BUSY: 'Agent_Busy',
+  CHANNEL_FAILURE: 'Channel_Failure',
+  RONA: 'RONA',
+};
+
 export type {
   IContactCenter,
   ITask,
@@ -241,4 +250,14 @@ export type {
   IWebex,
 };
 
-export {CC_EVENTS, TASK_EVENTS, ENGAGED_LABEL, ENGAGED_USERNAME, DIALNUMBER, EXTENSION, DESKTOP, LoginOptions};
+export {
+  CC_EVENTS,
+  TASK_EVENTS,
+  ENGAGED_LABEL,
+  ENGAGED_USERNAME,
+  DIALNUMBER,
+  EXTENSION,
+  DESKTOP,
+  LoginOptions,
+  ERROR_TRIGGERING_IDLE_CODES,
+};

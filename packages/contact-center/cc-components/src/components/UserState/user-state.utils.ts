@@ -1,4 +1,4 @@
-import {ICustomState, IdleCode} from '@webex/cc-store';
+import {ICustomState, IdleCode, ERROR_TRIGGERING_IDLE_CODES} from '@webex/cc-store';
 import {AgentUserState} from './user-state.types';
 import {userStateLabels} from './constant';
 
@@ -13,7 +13,7 @@ export const getDropdownClass = (customState: ICustomState, currentState: string
     return '';
   }
   for (const item of idleCodes) {
-    if (item.id === currentState && item.name === AgentUserState.RONA) {
+    if (item.id === currentState && Object.values(ERROR_TRIGGERING_IDLE_CODES).includes(item.name)) {
       return 'rona';
     }
   }
@@ -35,7 +35,12 @@ export const getIconStyle = (item: {
   switch (item.name) {
     case AgentUserState.Available:
       return {class: 'available', iconName: 'active-presence-small-filled'};
-    case AgentUserState.RONA:
+    case ERROR_TRIGGERING_IDLE_CODES.RONA:
+    case ERROR_TRIGGERING_IDLE_CODES.INVALID_NUMBER:
+    case ERROR_TRIGGERING_IDLE_CODES.UNAVAILABLE:
+    case ERROR_TRIGGERING_IDLE_CODES.DECLINED:
+    case ERROR_TRIGGERING_IDLE_CODES.BUSY:
+    case ERROR_TRIGGERING_IDLE_CODES.CHANNEL_FAILURE:
       return {class: 'rona', iconName: 'dnd-presence-filled'};
     default:
       return {class: 'idle', iconName: 'recents-presence-filled'};
@@ -93,7 +98,8 @@ export const sortDropdownItems = (items: Array<{id: string; name: string}>): Arr
  */
 export const getPreviousSelectableState = (idleCodes: IdleCode[]): string => {
   const selectableState = idleCodes.find(
-    (code) => ![AgentUserState.RONA, AgentUserState.Engaged].includes(code.name as AgentUserState)
+    (code) =>
+      ![...Object.values(ERROR_TRIGGERING_IDLE_CODES), AgentUserState.Engaged].includes(code.name as AgentUserState)
   );
   return selectableState?.id || '0';
 };
@@ -106,14 +112,21 @@ export const getSelectedKey = (customState: ICustomState, currentState: string, 
     return `hide-${customState.developerName}`;
   }
 
-  // Check if current state is RONA
+  // Check if current state exists in idleCodes first
   const currentIdleCode = idleCodes.find((code) => code.id === currentState);
-  if (currentIdleCode?.name === AgentUserState.RONA) {
+
+  // If currentIdleCode is not found, return currentState as-is
+  if (!currentIdleCode) {
+    return currentState;
+  }
+
+  // Check if current state is an error-triggering idle code (like RONA)
+  if (Object.values(ERROR_TRIGGERING_IDLE_CODES).includes(currentIdleCode.name)) {
     return `hide-${currentState}`;
   }
 
   // Check if current state is Engaged
-  const isEngaged = currentIdleCode?.name === AgentUserState.Engaged;
+  const isEngaged = currentIdleCode.name === AgentUserState.Engaged;
   if (isEngaged) {
     return getPreviousSelectableState(idleCodes);
   }
@@ -148,7 +161,7 @@ export const buildDropdownItems = (
     }
 
     // For RONA: only include if it's the current state
-    if (code.name === AgentUserState.RONA) {
+    if (Object.values(ERROR_TRIGGERING_IDLE_CODES).includes(code.name)) {
       if (code.id === currentState) {
         items.push({
           ...code,
