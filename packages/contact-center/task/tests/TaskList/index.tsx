@@ -21,6 +21,7 @@ jest.mock('@webex/cc-store', () => ({
   setTaskAssigned: jest.fn(),
   setTaskRejected: jest.fn(),
   setTaskSelected: jest.fn(),
+  isIncomingTask: jest.fn(() => false), // Mock the isIncomingTask method
   logger: {
     log: jest.fn(),
     error: jest.fn(),
@@ -65,5 +66,39 @@ describe('TaskList Component', () => {
       onTaskSelected: expect.any(Function),
       taskList: taskListMock,
     });
+  });
+
+  it('renders TaskListPresentational with incoming task behavior when isIncomingTask returns true', () => {
+    // Mock isIncomingTask to return true for this test
+    const mockIsIncomingTask = jest.fn(() => true);
+    store.isIncomingTask = mockIsIncomingTask;
+
+    render(<TaskList onTaskAccepted={jest.fn()} onTaskDeclined={jest.fn()} onTaskSelected={jest.fn()} />);
+
+    // Assert that `TaskListPresentational` is rendered.
+    const taskListPresentational = screen.getByTestId('task-list');
+    expect(taskListPresentational).toBeInTheDocument();
+
+    // Verify that isIncomingTask was called for each task in the taskList
+    expect(mockIsIncomingTask).toHaveBeenCalledTimes(taskListMock.length);
+
+    // Verify that isIncomingTask was called with the correct task objects
+    taskListMock.forEach((task, index) => {
+      expect(mockIsIncomingTask).toHaveBeenNthCalledWith(index + 1, task);
+    });
+
+    // Verify that `TaskListPresentational` is called with the correct props
+    expect(taskListComponentSpy).toHaveBeenCalledWith(
+      {
+        currentTask: undefined,
+        isBrowser: true,
+        logger: store.logger,
+        taskList: taskListMock,
+        acceptTask: expect.any(Function),
+        declineTask: expect.any(Function),
+        onTaskSelect: expect.any(Function),
+      },
+      {}
+    );
   });
 });

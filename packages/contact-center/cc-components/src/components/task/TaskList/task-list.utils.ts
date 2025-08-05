@@ -1,6 +1,6 @@
 import {MEDIA_CHANNEL, TaskListItemData} from '../task.types';
 import {ITask} from '@webex/cc-store';
-
+import store from '@webex/cc-store';
 /**
  * Extracts and processes data from a task for rendering in the task list
  * @param task - The task object
@@ -20,7 +20,7 @@ export const extractTaskListItemData = (task: ITask, isBrowser: boolean): TaskLi
 
   const taskState = task.data.interaction.state;
   const startTimeStamp = task.data.interaction.createdTimestamp;
-  const isIncomingTask = !task?.data.wrapUpRequired && (taskState === 'new' || taskState === 'consult');
+  const isIncomingTask = store.isIncomingTask(task);
   const mediaType = task.data.interaction.mediaType;
   const mediaChannel = task.data.interaction.mediaChannel;
 
@@ -29,10 +29,9 @@ export const extractTaskListItemData = (task: ITask, isBrowser: boolean): TaskLi
   const isSocial = mediaType === MEDIA_CHANNEL.SOCIAL;
 
   // Compute button text based on conditions
-  const acceptText =
-    isIncomingTask && !task.data.wrapUpRequired ? (isTelephony && !isBrowser ? 'Ringing...' : 'Accept') : undefined;
+  const acceptText = isIncomingTask ? (isTelephony && !isBrowser ? 'Ringing...' : 'Accept') : undefined;
 
-  const declineText = isIncomingTask && !task.data.wrapUpRequired && isTelephony && isBrowser ? 'Decline' : undefined;
+  const declineText = isIncomingTask && isTelephony && isBrowser ? 'Decline' : undefined;
 
   // Compute title based on media type
   const title = isSocial ? customerName : ani;

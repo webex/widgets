@@ -88,7 +88,17 @@ const mockCC: IContactCenter = {
 };
 
 const mockTask: ITask = {
-  data: {interaction: {mediaType: 'telephony'}} as TaskData,
+  data: {
+    interaction: {
+      mediaType: 'telephony',
+      participants: {
+        agent1: {
+          hasJoined: true,
+        },
+      },
+    },
+    agentId: 'agent1',
+  } as TaskData,
   webCallMap: {},
   autoWrapup: undefined,
   on: jest.fn(),

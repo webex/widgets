@@ -201,13 +201,28 @@ class StoreWrapper implements IStoreWrapper {
     this.store.isAgentLoggedIn = value;
   };
 
+  /**
+   * Determines if a task is an incoming task
+   * @param task - The task object
+   * @returns Whether the task is incoming
+   */
+  isIncomingTask = (task: ITask): boolean => {
+    const taskData = task?.data;
+    const taskState = taskData?.interaction?.state;
+    const agentId = taskData?.agentId;
+    const participants = taskData?.interaction?.participants;
+    const hasJoined = agentId && participants?.[agentId]?.hasJoined;
+
+    return (
+      !taskData?.wrapUpRequired &&
+      !hasJoined &&
+      (taskState === 'new' || taskState === 'consult' || taskState === 'connected')
+    );
+  };
+
   setCurrentTask = (task: ITask | null, isClicked: boolean = false): void => {
-    // Don't assign the task as current task if the interaction state is 'new' or 'consult'
-    if (
-      !task?.data.wrapUpRequired &&
-      (task?.data.interaction.state === 'new' || task?.data.interaction.state === 'consult')
-    )
-      return;
+    // Don't assign the task as current task is incoming
+    if (this.isIncomingTask(task)) return;
 
     runInAction(() => {
       // Determine if the new task is the same as the current task
