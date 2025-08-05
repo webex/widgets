@@ -13,7 +13,7 @@ export const getDropdownClass = (customState: ICustomState, currentState: string
     return '';
   }
   for (const item of idleCodes) {
-    if (item.id === currentState && Object.values(ERROR_TRIGGERING_IDLE_CODES).includes(item.name)) {
+    if (item.id === currentState && item.name === ERROR_TRIGGERING_IDLE_CODES.RONA) {
       return 'rona';
     }
   }
@@ -36,12 +36,13 @@ export const getIconStyle = (item: {
     case AgentUserState.Available:
       return {class: 'available', iconName: 'active-presence-small-filled'};
     case ERROR_TRIGGERING_IDLE_CODES.RONA:
+      return {class: 'rona', iconName: 'dnd-presence-filled'};
     case ERROR_TRIGGERING_IDLE_CODES.INVALID_NUMBER:
     case ERROR_TRIGGERING_IDLE_CODES.UNAVAILABLE:
     case ERROR_TRIGGERING_IDLE_CODES.DECLINED:
     case ERROR_TRIGGERING_IDLE_CODES.BUSY:
     case ERROR_TRIGGERING_IDLE_CODES.CHANNEL_FAILURE:
-      return {class: 'rona', iconName: 'dnd-presence-filled'};
+      return {class: 'idle', iconName: 'dnd-presence-filled'};
     default:
       return {class: 'idle', iconName: 'recents-presence-filled'};
   }
