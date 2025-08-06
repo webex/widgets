@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.102](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.101...v1.28.0-ccwidgets.102) (2025-08-06)
+
+
+### Bug Fixes
+
+* **cc-widgets:** multi-stage consult flows ([#507](https://github.com/webex/widgets/issues/507)) ([5bb48ac](https://github.com/webex/widgets/commit/5bb48acbc2398604bc7250024dcf7c2ce2adbea6))
+
 # [1.28.0-ccwidgets.101](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.100...v1.28.0-ccwidgets.101) (2025-08-04)
 
 
