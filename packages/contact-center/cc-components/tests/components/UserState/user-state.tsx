@@ -172,7 +172,11 @@ describe('UserStateComponent', () => {
         render(<UserStateComponent {...defaultProps} />);
       });
 
-      expect(buildDropdownItemsSpy).toHaveBeenCalledWith(defaultProps.customState, defaultProps.idleCodes);
+      expect(buildDropdownItemsSpy).toHaveBeenCalledWith(
+        defaultProps.customState,
+        defaultProps.idleCodes,
+        defaultProps.currentState
+      );
     });
 
     it('should call sortDropdownItems with items from buildDropdownItems', async () => {
@@ -242,7 +246,11 @@ describe('UserStateComponent', () => {
       });
 
       expect(getSelectedKeySpy).toHaveBeenCalledWith(customState, defaultProps.currentState, defaultProps.idleCodes);
-      expect(buildDropdownItemsSpy).toHaveBeenCalledWith(customState, defaultProps.idleCodes);
+      expect(buildDropdownItemsSpy).toHaveBeenCalledWith(
+        customState,
+        defaultProps.idleCodes,
+        defaultProps.currentState
+      );
     });
   });
 
