@@ -1,4 +1,4 @@
-import {ICustomState, IdleCode} from '@webex/cc-store';
+import {ICustomState, IdleCode, ERROR_TRIGGERING_IDLE_CODES} from '@webex/cc-store';
 import {AgentUserState} from './user-state.types';
 import {userStateLabels} from './constant';
 
@@ -13,7 +13,7 @@ export const getDropdownClass = (customState: ICustomState, currentState: string
     return '';
   }
   for (const item of idleCodes) {
-    if (item.id === currentState && item.name === AgentUserState.RONA) {
+    if (item.id === currentState && item.name === ERROR_TRIGGERING_IDLE_CODES.RONA) {
       return 'rona';
     }
   }
@@ -23,12 +23,26 @@ export const getDropdownClass = (customState: ICustomState, currentState: string
 /**
  * Gets the icon style configuration for a given item
  */
-export const getIconStyle = (item: {id: string; name: string}): {class: string; iconName: string} => {
+export const getIconStyle = (item: {
+  id: string;
+  name: string;
+  developerName?: string;
+}): {class: string; iconName: string} => {
+  if (item.developerName) {
+    return {class: 'custom', iconName: 'busy-presence-light'};
+  }
+
   switch (item.name) {
     case AgentUserState.Available:
-      return {class: 'available', iconName: 'recents-presence-filled'};
-    case AgentUserState.RONA:
-      return {class: 'rona', iconName: 'warning-filled'};
+      return {class: 'available', iconName: 'active-presence-small-filled'};
+    case ERROR_TRIGGERING_IDLE_CODES.RONA:
+      return {class: 'rona', iconName: 'dnd-presence-filled'};
+    case ERROR_TRIGGERING_IDLE_CODES.INVALID_NUMBER:
+    case ERROR_TRIGGERING_IDLE_CODES.UNAVAILABLE:
+    case ERROR_TRIGGERING_IDLE_CODES.DECLINED:
+    case ERROR_TRIGGERING_IDLE_CODES.BUSY:
+    case ERROR_TRIGGERING_IDLE_CODES.CHANNEL_FAILURE:
+      return {class: 'idle', iconName: 'dnd-presence-filled'};
     default:
       return {class: 'idle', iconName: 'recents-presence-filled'};
   }
@@ -57,12 +71,15 @@ export const handleSelectionChange = (
   setAgentStatus: (auxCodeId: string) => void,
   logger
 ): void => {
-  if (key !== currentState) {
-    logger?.info(`CC-Widgets: UserState: state changed to: ${key}`, {
+  // Remove 'hide-' prefix if present (for RONA states)
+  const cleanKey = key.startsWith('hide-') ? key.substring(5) : key;
+
+  if (cleanKey !== currentState) {
+    logger?.info(`CC-Widgets: UserState: state changed to: ${cleanKey}`, {
       module: 'cc-components#user-state.tsx',
       method: 'handleSelectionChange',
     });
-    setAgentStatus(key);
+    setAgentStatus(cleanKey);
   }
 };
 
@@ -70,11 +87,11 @@ export const handleSelectionChange = (
  * Sorts dropdown items with Available first, then others
  */
 export const sortDropdownItems = (items: Array<{id: string; name: string}>): Array<{id: string; name: string}> => {
-  return [...items].sort((a, b) => {
-    if (a.name === AgentUserState.Available) return -1;
-    if (b.name === AgentUserState.Available) return 1;
-    return a.name.localeCompare(b.name);
-  });
+  // Keep Available at the top, sort the rest alphabetically
+  return [
+    ...items.filter((item) => item.name === AgentUserState.Available),
+    ...items.filter((item) => item.name !== AgentUserState.Available).sort((a, b) => a.name.localeCompare(b.name)),
+  ];
 };
 
 /**
@@ -82,7 +99,8 @@ export const sortDropdownItems = (items: Array<{id: string; name: string}>): Arr
  */
 export const getPreviousSelectableState = (idleCodes: IdleCode[]): string => {
   const selectableState = idleCodes.find(
-    (code) => ![AgentUserState.RONA, AgentUserState.Engaged].includes(code.name as AgentUserState)
+    (code) =>
+      ![...Object.values(ERROR_TRIGGERING_IDLE_CODES), AgentUserState.Engaged].includes(code.name as AgentUserState)
   );
   return selectableState?.id || '0';
 };
@@ -92,15 +110,25 @@ export const getPreviousSelectableState = (idleCodes: IdleCode[]): string => {
  */
 export const getSelectedKey = (customState: ICustomState, currentState: string, idleCodes: IdleCode[]): string => {
   if (customState && 'developerName' in customState) {
-    return `custom-${customState.developerName}`;
+    return `hide-${customState.developerName}`;
   }
 
+  // Check if current state exists in idleCodes first
   const currentIdleCode = idleCodes.find((code) => code.id === currentState);
-  const isRonaOrEngaged = [AgentUserState.RONA, AgentUserState.Engaged].includes(
-    currentIdleCode?.name as AgentUserState
-  );
 
-  if (isRonaOrEngaged) {
+  // If currentIdleCode is not found, return currentState as-is
+  if (!currentIdleCode) {
+    return currentState;
+  }
+
+  // Check if current state is an error-triggering idle code (like RONA)
+  if (Object.values(ERROR_TRIGGERING_IDLE_CODES).includes(currentIdleCode.name)) {
+    return `hide-${currentState}`;
+  }
+
+  // Check if current state is Engaged
+  const isEngaged = currentIdleCode.name === AgentUserState.Engaged;
+  if (isEngaged) {
     return getPreviousSelectableState(idleCodes);
   }
 
@@ -108,23 +136,46 @@ export const getSelectedKey = (customState: ICustomState, currentState: string, 
 };
 
 /**
- * Builds the dropdown items including custom state if present
+ * Builds the dropdown items including custom state and conditional RONA
  */
 export const buildDropdownItems = (
   customState: ICustomState,
-  idleCodes: IdleCode[]
-): Array<{id: string; name: string}> => {
-  const items = idleCodes
-    .filter((code) => ![AgentUserState.RONA, AgentUserState.Engaged].includes(code.name as AgentUserState))
-    .map((code) => ({
-      id: code.id,
-      name: code.name,
-    }));
+  idleCodes: IdleCode[],
+  currentState: string
+): Array<{id: string; name: string; developerName?: string}> => {
+  const items: Array<{id: string; name: string; developerName?: string}> = [];
 
+  // Add custom state if present
   if (customState && 'developerName' in customState) {
     items.push({
-      id: `custom-${customState.developerName}`,
       name: customState.name,
+      id: `hide-${customState.developerName}`,
+      developerName: customState.developerName,
+    });
+  }
+
+  // Add regular idle codes, but handle RONA specially
+  for (const code of idleCodes) {
+    // Skip Engaged states entirely
+    if (code.name === AgentUserState.Engaged) {
+      continue;
+    }
+
+    // For RONA: only include if it's the current state
+    if (Object.values(ERROR_TRIGGERING_IDLE_CODES).includes(code.name)) {
+      if (code.id === currentState) {
+        items.push({
+          ...code,
+          id: `hide-${code.id}`, // Use hide- prefix for RONA
+        });
+      }
+      continue;
+    }
+
+    // Add all other states normally
+    items.push({
+      id: code.id,
+      name: code.name,
     });
   }
 
