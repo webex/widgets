@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.103](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.102...v1.28.0-ccwidgets.103) (2025-08-06)
+
+
+### Bug Fixes
+
+* **user-state:** fix-rona-state ([#511](https://github.com/webex/widgets/issues/511)) ([0022bd5](https://github.com/webex/widgets/commit/0022bd5c26b1d9bbc7bc8491b6c7d9013448e6e0))
+
 # [1.28.0-ccwidgets.102](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.101...v1.28.0-ccwidgets.102) (2025-08-06)
 
 
