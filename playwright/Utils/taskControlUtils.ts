@@ -1,5 +1,5 @@
 import {Page, expect} from '@playwright/test';
-import {TASK_TYPES} from '../constants';
+import {TASK_TYPES, AWAIT_TIMEOUT} from '../constants';
 
 /**
  * Utility functions for task controls testing.
@@ -99,10 +99,10 @@ export async function verifyTaskControls(page: Page, taskType: string): Promise<
 export async function holdCallToggle(page: Page): Promise<void> {
   // Wait for hold toggle button to be visible and clickable
   const holdButton = page.getByTestId('call-control:hold-toggle').nth(0);
-  await expect(holdButton).toBeVisible({timeout: 10000});
+  await expect(holdButton).toBeVisible({timeout: AWAIT_TIMEOUT});
 
   // Click the hold toggle button
-  await holdButton.click({timeout: 10000});
+  await holdButton.click({timeout: AWAIT_TIMEOUT});
 }
 
 /**
@@ -114,10 +114,10 @@ export async function holdCallToggle(page: Page): Promise<void> {
 export async function recordCallToggle(page: Page): Promise<void> {
   // Wait for recording toggle button to be visible and clickable
   const recordButton = page.getByTestId('call-control:recording-toggle').nth(0);
-  await expect(recordButton).toBeVisible({timeout: 10000});
+  await expect(recordButton).toBeVisible({timeout: AWAIT_TIMEOUT});
 
   // Click the recording toggle button
-  await recordButton.click({timeout: 10000});
+  await recordButton.click({timeout: AWAIT_TIMEOUT});
 }
 
 /**
@@ -135,7 +135,7 @@ export async function verifyHoldTimer(
   const holdTimerContainer = page.locator('.on-hold-chip-text');
 
   if (shouldBeVisible) {
-    await expect(holdTimerContainer).toBeVisible({timeout: 10000});
+    await expect(holdTimerContainer).toBeVisible({timeout: AWAIT_TIMEOUT});
 
     if (verifyContent) {
       // Verify "On hold" text is present
@@ -145,7 +145,7 @@ export async function verifyHoldTimer(
       await expect(holdTimerContainer).toContainText(/\d{2}:\d{2}/);
     }
   } else {
-    await expect(holdTimerContainer).toBeHidden({timeout: 10000});
+    await expect(holdTimerContainer).toBeHidden({timeout: AWAIT_TIMEOUT});
   }
 }
 
@@ -161,11 +161,11 @@ export async function verifyHoldTimer(
  */
 export async function verifyHoldButtonIcon(page: Page, {expectedIsHeld}: {expectedIsHeld: boolean}): Promise<void> {
   const holdButton = page.getByTestId('call-control:hold-toggle').nth(0);
-  await expect(holdButton).toBeVisible({timeout: 10000});
+  await expect(holdButton).toBeVisible({timeout: AWAIT_TIMEOUT});
 
   // Get the icon element within the hold button
   const iconElement = holdButton.locator('mdc-icon').nth(0);
-  await expect(iconElement).toBeVisible({timeout: 5000});
+  await expect(iconElement).toBeVisible({timeout: AWAIT_TIMEOUT});
 
   // Verify the correct icon based on hold state
   const expectedIcon = expectedIsHeld ? 'play-bold' : 'pause-bold';
@@ -193,11 +193,11 @@ export async function verifyRecordButtonIcon(
   {expectedIsRecording}: {expectedIsRecording: boolean}
 ): Promise<void> {
   const recordButton = page.getByTestId('call-control:recording-toggle').nth(0);
-  await expect(recordButton).toBeVisible({timeout: 10000});
+  await expect(recordButton).toBeVisible({timeout: AWAIT_TIMEOUT});
 
   // Get the icon element within the record button
   const iconElement = recordButton.locator('mdc-icon').nth(0);
-  await expect(iconElement).toBeVisible({timeout: 5000});
+  await expect(iconElement).toBeVisible({timeout: AWAIT_TIMEOUT});
 
   // Verify the correct icon based on recording state
   const expectedIcon = expectedIsRecording ? 'record-paused-bold' : 'record-bold';
@@ -433,5 +433,5 @@ export async function verifyHoldMusicElement(page: Page): Promise<void> {
 export async function endTask(page: Page): Promise<void> {
   const endButton = page.getByTestId('call-control:end-call').nth(0);
   await endButton.waitFor({state: 'visible', timeout: 30000});
-  await endButton.click({timeout: 10000});
+  await endButton.click({timeout: AWAIT_TIMEOUT});
 }

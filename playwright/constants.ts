@@ -30,6 +30,9 @@ export type LoginMode = (typeof LOGIN_MODE)[keyof typeof LOGIN_MODE];
 
 export const LONG_WAIT = 40000;
 
+// Universal timeout for all await operations in Playwright tests
+export const AWAIT_TIMEOUT = 10000;
+
 export const CALL_URL = 'https://web.webex.com/calling?calling';
 
 export const TASK_TYPES = {

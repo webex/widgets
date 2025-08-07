@@ -1,6 +1,6 @@
 import {Page, expect} from '@playwright/test';
 import dotenv from 'dotenv';
-import {USER_STATES} from '../constants';
+import {USER_STATES, AWAIT_TIMEOUT} from '../constants';
 
 dotenv.config();
 
@@ -23,7 +23,7 @@ export const changeUserState = async (page: Page, userState: string): Promise<vo
     return;
   }
 
-  await page.getByTestId('state-select').click({timeout: 10000});
+  await page.getByTestId('state-select').click({timeout: AWAIT_TIMEOUT});
   const stateItem = page.getByTestId(`state-item-${userState}`);
   const isValidState = await stateItem.isVisible().catch(() => false);
 
@@ -31,7 +31,7 @@ export const changeUserState = async (page: Page, userState: string): Promise<vo
     throw new Error(`State "${userState}" is not a valid state option.`);
   }
 
-  await stateItem.click({timeout: 10000});
+  await stateItem.click({timeout: AWAIT_TIMEOUT});
 };
 
 /**
