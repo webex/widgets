@@ -11,9 +11,9 @@ import {mockTask} from '@webex/test-fixtures';
 
 // Mock the store with a mockable isIncomingTask function
 jest.mock('@webex/cc-store', () => ({
+  isIncomingTask: jest.fn(() => false),
   cc: {},
   deviceType: 'BROWSER',
-  isIncomingTask: jest.fn(() => false),
   logger: {
     debug: jest.fn(),
     error: jest.fn(),
@@ -22,8 +22,8 @@ jest.mock('@webex/cc-store', () => ({
   },
 }));
 
-// Import the mocked store to access the mock functions
-import store from '@webex/cc-store';
+// Import the mocked functions
+import {isIncomingTask} from '@webex/cc-store';
 
 describe('task-list.utils', () => {
   beforeEach(() => {
@@ -110,7 +110,7 @@ describe('task-list.utils', () => {
     describe('Incoming tasks', () => {
       it('should extract correct data for incoming telephony task on browser', () => {
         // Mock isIncomingTask to return true for this test
-        (store.isIncomingTask as jest.Mock).mockReturnValueOnce(true);
+        (isIncomingTask as jest.Mock).mockReturnValueOnce(true);
 
         const originalState = mockTask.data.interaction.state;
         const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
@@ -181,7 +181,7 @@ describe('task-list.utils', () => {
 
       it('should extract correct data for incoming telephony task on non-browser', () => {
         // Mock isIncomingTask to return true for this test
-        (store.isIncomingTask as jest.Mock).mockReturnValueOnce(true);
+        (isIncomingTask as jest.Mock).mockReturnValueOnce(true);
 
         const originalState = mockTask.data.interaction.state;
         const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
@@ -213,7 +213,7 @@ describe('task-list.utils', () => {
 
       it('should extract correct data for incoming social media task', () => {
         // Mock isIncomingTask to return true for this test
-        (store.isIncomingTask as jest.Mock).mockReturnValueOnce(true);
+        (isIncomingTask as jest.Mock).mockReturnValueOnce(true);
 
         const originalState = mockTask.data.interaction.state;
         const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
@@ -454,7 +454,7 @@ describe('task-list.utils', () => {
 
     it('should not call onTaskSelect for non-selectable task', () => {
       // Mock isIncomingTask to return true so this task is non-selectable
-      (store.isIncomingTask as jest.Mock).mockReturnValueOnce(true);
+      (isIncomingTask as jest.Mock).mockReturnValueOnce(true);
 
       const task = {
         ...mockTask,

@@ -1775,7 +1775,7 @@ describe('storeEventsWrapper', () => {
     });
 
     it('should not change currentTask when task has hasJoined false', () => {
-      // Set an initial task
+      // This is the case where we transfer the call but agent has not accepted it yet.
       storeWrapper.setCurrentTask(mockTaskA);
       expect(storeWrapper.currentTask).toEqual(mockTaskA);
 
