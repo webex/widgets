@@ -1,5 +1,5 @@
-import { Page, expect } from '@playwright/test';
-import { TASK_TYPES } from '../constants';
+import {Page, expect} from '@playwright/test';
+import {TASK_TYPES} from '../constants';
 
 /**
  * Utility functions for task controls testing.
@@ -16,20 +16,20 @@ import { TASK_TYPES } from '../constants';
  */
 export async function callTaskControlCheck(page: Page): Promise<void> {
   // Verify call control container is visible
-  await expect(page.getByTestId('call-control-container').nth(0)).toBeVisible({ timeout: 30000 });
-  
+  await expect(page.getByTestId('call-control-container').nth(0)).toBeVisible({timeout: 30000});
+
   // Verify hold/resume toggle button is visible
   await expect(page.getByTestId('call-control:hold-toggle').nth(0)).toBeVisible();
-  
+
   // Verify recording toggle button is visible
   await expect(page.getByTestId('call-control:recording-toggle').nth(0)).toBeVisible();
-  
+
   // Verify transfer button is visible
   await expect(page.getByTestId('call-control:transfer').nth(0)).toBeVisible();
-  
+
   // Verify consult button is visible
   await expect(page.getByTestId('call-control:consult').nth(0)).toBeVisible();
-  
+
   // Verify end call button is visible
   await expect(page.getByTestId('call-control:end-call').nth(0)).toBeVisible();
 }
@@ -42,11 +42,11 @@ export async function callTaskControlCheck(page: Page): Promise<void> {
  */
 export async function chatTaskControlCheck(page: Page): Promise<void> {
   // Verify chat control container or equivalent is visible
-  await expect(page.getByTestId('call-control-container').nth(0)).toBeVisible({ timeout: 30000 });
-  
+  await expect(page.getByTestId('call-control-container').nth(0)).toBeVisible({timeout: 30000});
+
   // Verify transfer button is visible
   await expect(page.getByTestId('call-control:transfer').nth(0)).toBeVisible();
-  
+
   // Verify end button is visible (for chat tasks)
   await expect(page.getByTestId('call-control:end-call').nth(0)).toBeVisible();
 }
@@ -59,11 +59,11 @@ export async function chatTaskControlCheck(page: Page): Promise<void> {
  */
 export async function emailTaskControlCheck(page: Page): Promise<void> {
   // Verify email control container or equivalent is visible
-  await expect(page.getByTestId('call-control-container').nth(0)).toBeVisible({ timeout: 30000 });
-  
+  await expect(page.getByTestId('call-control-container').nth(0)).toBeVisible({timeout: 30000});
+
   // Verify transfer button is visible
   await expect(page.getByTestId('call-control:transfer').nth(0)).toBeVisible();
-  
+
   // Verify end button is visible (for email tasks)
   await expect(page.getByTestId('call-control:end-call').nth(0)).toBeVisible();
 }
@@ -99,10 +99,10 @@ export async function verifyTaskControls(page: Page, taskType: string): Promise<
 export async function holdCallToggle(page: Page): Promise<void> {
   // Wait for hold toggle button to be visible and clickable
   const holdButton = page.getByTestId('call-control:hold-toggle').nth(0);
-  await expect(holdButton).toBeVisible({ timeout: 10000 });
-  
+  await expect(holdButton).toBeVisible({timeout: 10000});
+
   // Click the hold toggle button
-  await holdButton.click();
+  await holdButton.click({timeout: 10000});
 }
 
 /**
@@ -114,10 +114,10 @@ export async function holdCallToggle(page: Page): Promise<void> {
 export async function recordCallToggle(page: Page): Promise<void> {
   // Wait for recording toggle button to be visible and clickable
   const recordButton = page.getByTestId('call-control:recording-toggle').nth(0);
-  await expect(recordButton).toBeVisible({ timeout: 10000 });
-  
+  await expect(recordButton).toBeVisible({timeout: 10000});
+
   // Click the recording toggle button
-  await recordButton.click();
+  await recordButton.click({timeout: 10000});
 }
 
 /**
@@ -128,21 +128,24 @@ export async function recordCallToggle(page: Page): Promise<void> {
  * @param options.verifyContent - Whether to verify timer content (default: true when visible)
  * @returns Promise<void>
  */
-export async function verifyHoldTimer(page: Page, { shouldBeVisible, verifyContent = shouldBeVisible }: { shouldBeVisible: boolean; verifyContent?: boolean }): Promise<void> {
+export async function verifyHoldTimer(
+  page: Page,
+  {shouldBeVisible, verifyContent = shouldBeVisible}: {shouldBeVisible: boolean; verifyContent?: boolean}
+): Promise<void> {
   const holdTimerContainer = page.locator('.on-hold-chip-text');
-  
+
   if (shouldBeVisible) {
-    await expect(holdTimerContainer).toBeVisible({ timeout: 10000 });
-    
+    await expect(holdTimerContainer).toBeVisible({timeout: 10000});
+
     if (verifyContent) {
       // Verify "On hold" text is present
       await expect(holdTimerContainer).toContainText('On hold');
-      
+
       // Verify timer format (should contain time like 00:XX)
       await expect(holdTimerContainer).toContainText(/\d{2}:\d{2}/);
     }
   } else {
-    await expect(holdTimerContainer).toBeHidden({ timeout: 10000 });
+    await expect(holdTimerContainer).toBeHidden({timeout: 10000});
   }
 }
 
@@ -156,47 +159,54 @@ export async function verifyHoldTimer(page: Page, { shouldBeVisible, verifyConte
  * @returns Promise<void>
  * @throws Error if icon verification fails
  */
-export async function verifyHoldButtonIcon(page: Page, { expectedIsHeld }: { expectedIsHeld: boolean }): Promise<void> {
+export async function verifyHoldButtonIcon(page: Page, {expectedIsHeld}: {expectedIsHeld: boolean}): Promise<void> {
   const holdButton = page.getByTestId('call-control:hold-toggle').nth(0);
-  await expect(holdButton).toBeVisible({ timeout: 10000 });
-  
+  await expect(holdButton).toBeVisible({timeout: 10000});
+
   // Get the icon element within the hold button
   const iconElement = holdButton.locator('mdc-icon').nth(0);
-  await expect(iconElement).toBeVisible({ timeout: 5000 });
-  
+  await expect(iconElement).toBeVisible({timeout: 5000});
+
   // Verify the correct icon based on hold state
   const expectedIcon = expectedIsHeld ? 'play-bold' : 'pause-bold';
   const actualIcon = await iconElement.getAttribute('name');
-  
+
   if (actualIcon !== expectedIcon) {
-    throw new Error(`Hold button icon mismatch. Expected: '${expectedIcon}' (isHeld: ${expectedIsHeld}), but found: '${actualIcon}'`);
+    throw new Error(
+      `Hold button icon mismatch. Expected: '${expectedIcon}' (isHeld: ${expectedIsHeld}), but found: '${actualIcon}'`
+    );
   }
 }
 
 /**
  * Verifies the icon of the record toggle button based on current recording state.
  * - When recording is ACTIVE: expects 'record-paused-bold' icon (to pause recording)
- * - When recording is PAUSED: expects 'record-bold' icon (to resume recording) 
+ * - When recording is PAUSED: expects 'record-bold' icon (to resume recording)
  * @param page - The agent's main page
  * @param options - Configuration object
  * @param options.expectedIsRecording - Expected recording state (true if recording, false if paused)
  * @returns Promise<void>
  * @throws Error if icon verification fails
  */
-export async function verifyRecordButtonIcon(page: Page, { expectedIsRecording }: { expectedIsRecording: boolean }): Promise<void> {
+export async function verifyRecordButtonIcon(
+  page: Page,
+  {expectedIsRecording}: {expectedIsRecording: boolean}
+): Promise<void> {
   const recordButton = page.getByTestId('call-control:recording-toggle').nth(0);
-  await expect(recordButton).toBeVisible({ timeout: 10000 });
-  
+  await expect(recordButton).toBeVisible({timeout: 10000});
+
   // Get the icon element within the record button
   const iconElement = recordButton.locator('mdc-icon').nth(0);
-  await expect(iconElement).toBeVisible({ timeout: 5000 });
-  
+  await expect(iconElement).toBeVisible({timeout: 5000});
+
   // Verify the correct icon based on recording state
   const expectedIcon = expectedIsRecording ? 'record-paused-bold' : 'record-bold';
   const actualIcon = await iconElement.getAttribute('name');
-  
+
   if (actualIcon !== expectedIcon) {
-    throw new Error(`Record button icon mismatch. Expected: '${expectedIcon}' (isRecording: ${expectedIsRecording}), but found: '${actualIcon}'`);
+    throw new Error(
+      `Record button icon mismatch. Expected: '${expectedIcon}' (isRecording: ${expectedIsRecording}), but found: '${actualIcon}'`
+    );
   }
 }
 
@@ -214,13 +224,15 @@ export function setupConsoleLogging(page: Page): () => void {
 
   const consoleHandler = (msg) => {
     const logText = msg.text();
-    if (logText.includes('onHoldResume invoked') ||
-        logText.includes('onRecordingToggle invoked') ||
-        logText.includes('onEnd invoked') ||
-        logText.includes('WXCC_SDK_TASK_HOLD_SUCCESS') ||
-        logText.includes('WXCC_SDK_TASK_RESUME_SUCCESS') ||
-        logText.includes('WXCC_SDK_TASK_PAUSE_RECORDING_SUCCESS') ||
-        logText.includes('WXCC_SDK_TASK_RESUME_RECORDING_SUCCESS')) {
+    if (
+      logText.includes('onHoldResume invoked') ||
+      logText.includes('onRecordingToggle invoked') ||
+      logText.includes('onEnd invoked') ||
+      logText.includes('WXCC_SDK_TASK_HOLD_SUCCESS') ||
+      logText.includes('WXCC_SDK_TASK_RESUME_SUCCESS') ||
+      logText.includes('WXCC_SDK_TASK_PAUSE_RECORDING_SUCCESS') ||
+      logText.includes('WXCC_SDK_TASK_RESUME_RECORDING_SUCCESS')
+    ) {
       capturedLogs.push(logText);
     }
   };
@@ -243,21 +255,23 @@ export function clearCapturedLogs(): void {
  * @param options.expectedIsHeld - Expected hold state (true for hold, false for resume)
  * @throws Error if verification fails with detailed error message
  */
-export function verifyHoldLogs({ expectedIsHeld }: { expectedIsHeld: boolean }): void {
-  const holdResumeLogs = capturedLogs.filter(log => log.includes('onHoldResume invoked'));
-  const statusLogs = capturedLogs.filter(log => 
+export function verifyHoldLogs({expectedIsHeld}: {expectedIsHeld: boolean}): void {
+  const holdResumeLogs = capturedLogs.filter((log) => log.includes('onHoldResume invoked'));
+  const statusLogs = capturedLogs.filter((log) =>
     log.includes(expectedIsHeld ? 'WXCC_SDK_TASK_HOLD_SUCCESS' : 'WXCC_SDK_TASK_RESUME_SUCCESS')
   );
-  
+
   if (holdResumeLogs.length === 0) {
-    throw new Error(`No 'onHoldResume invoked' logs found. Expected logs for isHeld: ${expectedIsHeld}. Captured logs: ${JSON.stringify(capturedLogs)}`);
+    throw new Error(
+      `No 'onHoldResume invoked' logs found. Expected logs for isHeld: ${expectedIsHeld}. Captured logs: ${JSON.stringify(capturedLogs)}`
+    );
   }
-  
+
   if (statusLogs.length === 0) {
     const expectedStatus = expectedIsHeld ? 'WXCC_SDK_TASK_HOLD_SUCCESS' : 'WXCC_SDK_TASK_RESUME_SUCCESS';
     throw new Error(`No '${expectedStatus}' logs found. Captured logs: ${JSON.stringify(capturedLogs)}`);
   }
-  
+
   const lastHoldLog = holdResumeLogs[holdResumeLogs.length - 1];
   if (!lastHoldLog.includes(`isHeld: ${expectedIsHeld}`)) {
     throw new Error(`Expected 'isHeld: ${expectedIsHeld}' in log but found: ${lastHoldLog}`);
@@ -270,21 +284,27 @@ export function verifyHoldLogs({ expectedIsHeld }: { expectedIsHeld: boolean }):
  * @param options.expectedIsRecording - Expected recording state (true for recording, false for paused)
  * @throws Error if verification fails with detailed error message
  */
-export function verifyRecordingLogs({ expectedIsRecording }: { expectedIsRecording: boolean }): void {
-  const recordingLogs = capturedLogs.filter(log => log.includes('onRecordingToggle invoked'));
-  const statusLogs = capturedLogs.filter(log => 
-    log.includes(expectedIsRecording ? 'WXCC_SDK_TASK_RESUME_RECORDING_SUCCESS' : 'WXCC_SDK_TASK_PAUSE_RECORDING_SUCCESS')
+export function verifyRecordingLogs({expectedIsRecording}: {expectedIsRecording: boolean}): void {
+  const recordingLogs = capturedLogs.filter((log) => log.includes('onRecordingToggle invoked'));
+  const statusLogs = capturedLogs.filter((log) =>
+    log.includes(
+      expectedIsRecording ? 'WXCC_SDK_TASK_RESUME_RECORDING_SUCCESS' : 'WXCC_SDK_TASK_PAUSE_RECORDING_SUCCESS'
+    )
   );
-  
+
   if (recordingLogs.length === 0) {
-    throw new Error(`No 'onRecordingToggle invoked' logs found. Expected logs for isRecording: ${expectedIsRecording}. Captured logs: ${JSON.stringify(capturedLogs)}`);
+    throw new Error(
+      `No 'onRecordingToggle invoked' logs found. Expected logs for isRecording: ${expectedIsRecording}. Captured logs: ${JSON.stringify(capturedLogs)}`
+    );
   }
-  
+
   if (statusLogs.length === 0) {
-    const expectedStatus = expectedIsRecording ? 'WXCC_SDK_TASK_RESUME_RECORDING_SUCCESS' : 'WXCC_SDK_TASK_PAUSE_RECORDING_SUCCESS';
+    const expectedStatus = expectedIsRecording
+      ? 'WXCC_SDK_TASK_RESUME_RECORDING_SUCCESS'
+      : 'WXCC_SDK_TASK_PAUSE_RECORDING_SUCCESS';
     throw new Error(`No '${expectedStatus}' logs found. Captured logs: ${JSON.stringify(capturedLogs)}`);
   }
-  
+
   const lastRecordingLog = recordingLogs[recordingLogs.length - 1];
   if (!lastRecordingLog.includes(`isRecording: ${expectedIsRecording}`)) {
     throw new Error(`Expected 'isRecording: ${expectedIsRecording}' in log but found: ${lastRecordingLog}`);
@@ -296,8 +316,8 @@ export function verifyRecordingLogs({ expectedIsRecording }: { expectedIsRecordi
  * @throws Error if verification fails with detailed error message
  */
 export function verifyEndLogs(): void {
-  const endLogs = capturedLogs.filter(log => log.includes('onEnd invoked'));
-  
+  const endLogs = capturedLogs.filter((log) => log.includes('onEnd invoked'));
+
   if (endLogs.length === 0) {
     throw new Error(`No 'onEnd invoked' logs found. Captured logs: ${JSON.stringify(capturedLogs)}`);
   }
@@ -312,23 +332,23 @@ export function verifyEndLogs(): void {
  * @throws Error if remote audio tracks verification fails
  */
 export async function verifyRemoteAudioTracks(page: Page): Promise<void> {
-  try {    
+  try {
     // Execute the exact console command for audio tracks
     const consoleResult = await page.evaluate(() => {
       // This is the exact command from your console
-      const audioElem = document.querySelector("#remote-audio") as HTMLAudioElement;
-      
+      const audioElem = document.querySelector('#remote-audio') as HTMLAudioElement;
+
       if (!audioElem) {
         return [];
       }
-      
+
       if (!audioElem.srcObject) {
         return [];
       }
-      
+
       const mediaStream = audioElem.srcObject as MediaStream;
       const audioTracks = mediaStream.getAudioTracks();
-      
+
       // Convert MediaStreamTrack objects to serializable format (like console shows)
       const result = audioTracks.map((track, index) => {
         return {
@@ -341,30 +361,31 @@ export async function verifyRemoteAudioTracks(page: Page): Promise<void> {
           readyState: track.readyState,
           onended: track.onended,
           onmute: track.onmute,
-          onunmute: track.onunmute
+          onunmute: track.onunmute,
         };
       });
-      
+
       return result;
     });
-    
+
     // Verify we got exactly 1 audio track (no more, no less)
     expect(consoleResult.length).toBe(1);
-    
+
     // Get the single audio track (since we verified there's exactly 1)
     const audioTrack = consoleResult[0];
-    
+
     // Verify it's an audio track
     if (audioTrack.kind !== 'audio') {
-      throw new Error(`❌ Expected audio track but found ${audioTrack.kind} track. Track details: { kind: "${audioTrack.kind}", label: "${audioTrack.label}", id: "${audioTrack.id}" }`);
+      throw new Error(
+        `❌ Expected audio track but found ${audioTrack.kind} track. Track details: { kind: "${audioTrack.kind}", label: "${audioTrack.label}", id: "${audioTrack.id}" }`
+      );
     }
-    
+
     // Verify essential track properties for audio transfer
     expect(audioTrack.kind).toBe('audio');
     expect(audioTrack.enabled).toBe(true);
     expect(audioTrack.muted).toBe(false);
     expect(audioTrack.readyState).toBe('live');
-    
   } catch (error) {
     throw new Error(`❌ Audio transfer verification failed: ${error.message}`);
   }
@@ -383,25 +404,21 @@ export async function verifyHoldMusicElement(page: Page): Promise<void> {
     const holdMusicExists = await page.evaluate(() => {
       // Look for audio elements with both autoplay and loop attributes
       const audioElements = document.querySelectorAll('audio[autoplay][loop]');
-      
+
       if (audioElements.length === 0) {
         return false;
       }
-      
+
       // Check if at least one element has the correct attributes
-      return Array.from(audioElements).some(audio => {
+      return Array.from(audioElements).some((audio) => {
         const a = audio as HTMLAudioElement;
-        return a.hasAttribute('autoplay') && 
-               a.hasAttribute('loop') &&
-               a.autoplay === true &&
-               a.loop === true;
+        return a.hasAttribute('autoplay') && a.hasAttribute('loop') && a.autoplay === true && a.loop === true;
       });
     });
-    
+
     if (!holdMusicExists) {
       throw new Error('❌ No hold music audio elements found with autoplay and loop attributes');
     }
-    
   } catch (error) {
     throw new Error(`❌ Hold music element verification failed: ${error.message}`);
   }
@@ -415,6 +432,6 @@ export async function verifyHoldMusicElement(page: Page): Promise<void> {
  */
 export async function endTask(page: Page): Promise<void> {
   const endButton = page.getByTestId('call-control:end-call').nth(0);
-  await endButton.waitFor({ state: 'visible', timeout: 30000 });
-  await endButton.click();
+  await endButton.waitFor({state: 'visible', timeout: 30000});
+  await endButton.click({timeout: 10000});
 }

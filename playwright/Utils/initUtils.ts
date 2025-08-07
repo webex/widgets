@@ -1,6 +1,6 @@
-import { Page, expect, BrowserContext } from '@playwright/test';
+import {Page, expect, BrowserContext} from '@playwright/test';
 import dotenv from 'dotenv';
-import { BASE_URL } from '../constants';
+import {BASE_URL} from '../constants';
 
 dotenv.config();
 
@@ -23,11 +23,11 @@ dotenv.config();
 export const loginViaAccessToken = async (page: Page, agentId: string): Promise<void> => {
   await page.goto(BASE_URL);
   const accessToken = process.env[`PW_${agentId}_ACCESS_TOKEN`];
-  await page.getByRole('textbox').click();
+  await page.getByRole('textbox').click({timeout: 10000});
   if (!accessToken) {
     throw new Error(`PW_${agentId}_ACCESS_TOKEN is not defined, OAuth failed`);
   }
-  await page.getByRole('textbox').fill(accessToken);
+  await page.getByRole('textbox').fill(accessToken, {timeout: 10000});
 };
 
 /**
@@ -64,13 +64,13 @@ export const oauthLogin = async (page: Page, agentId: string): Promise<void> => 
   }
 
   await page.goto(BASE_URL);
-  await page.locator('#select-base-triggerid').getByText('Access Token').click();
-  await page.getByTestId('samples:login_option_oauth').getByText('Login with Webex').click();
-  await page.getByTestId('samples:login_with_webex_button').click();
-  await page.getByRole('textbox', { name: 'name@example.com' }).fill(username);
-  await page.getByRole('link', { name: 'Sign in' }).click();
-  await page.getByRole('textbox', { name: 'Password' }).fill(password);
-  await page.getByRole('button', { name: 'Sign in' }).click();
+  await page.locator('#select-base-triggerid').getByText('Access Token').click({timeout: 10000});
+  await page.getByTestId('samples:login_option_oauth').getByText('Login with Webex').click({timeout: 10000});
+  await page.getByTestId('samples:login_with_webex_button').click({timeout: 10000});
+  await page.getByRole('textbox', {name: 'name@example.com'}).fill(username, {timeout: 10000});
+  await page.getByRole('link', {name: 'Sign in'}).click({timeout: 10000});
+  await page.getByRole('textbox', {name: 'Password'}).fill(password, {timeout: 10000});
+  await page.getByRole('button', {name: 'Sign in'}).click({timeout: 10000});
 };
 
 /**
@@ -84,13 +84,13 @@ export const oauthLogin = async (page: Page, agentId: string): Promise<void> => 
  * ```
  */
 export const enableAllWidgets = async (page: Page): Promise<void> => {
-  await page.getByTestId('samples:widget-stationLogin').check();
-  await page.getByTestId('samples:widget-userState').check();
-  await page.getByTestId('samples:widget-incomingTask').check();
-  await page.getByTestId('samples:widget-taskList').check();
-  await page.getByTestId('samples:widget-callControl').check();
-  await page.getByTestId('samples:widget-callControlCAD').check();
-  await page.getByTestId('samples:widget-outdialCall').check();
+  await page.getByTestId('samples:widget-stationLogin').check({timeout: 10000});
+  await page.getByTestId('samples:widget-userState').check({timeout: 10000});
+  await page.getByTestId('samples:widget-incomingTask').check({timeout: 10000});
+  await page.getByTestId('samples:widget-taskList').check({timeout: 10000});
+  await page.getByTestId('samples:widget-callControl').check({timeout: 10000});
+  await page.getByTestId('samples:widget-callControlCAD').check({timeout: 10000});
+  await page.getByTestId('samples:widget-outdialCall').check({timeout: 10000});
 };
 
 /**
@@ -104,7 +104,7 @@ export const enableAllWidgets = async (page: Page): Promise<void> => {
  * ```
  */
 export const enableMultiLogin = async (page: Page): Promise<void> => {
-  await page.getByTestId('samples:multi-login-enable-checkbox').check();
+  await page.getByTestId('samples:multi-login-enable-checkbox').check({timeout: 10000});
 };
 
 /**
@@ -118,7 +118,7 @@ export const enableMultiLogin = async (page: Page): Promise<void> => {
  * ```
  */
 export const disableMultiLogin = async (page: Page): Promise<void> => {
-  await page.getByTestId('samples:multi-login-enable-checkbox').uncheck();
+  await page.getByTestId('samples:multi-login-enable-checkbox').uncheck({timeout: 10000});
 };
 
 /**
@@ -135,21 +135,23 @@ export const disableMultiLogin = async (page: Page): Promise<void> => {
  * ```
  */
 export const initialiseWidgets = async (page: Page): Promise<void> => {
-  await page.getByTestId('samples:init-widgets-button').click();
+  await page.getByTestId('samples:init-widgets-button').click({timeout: 10000});
 
   try {
-    await page.getByTestId('station-login-widget').waitFor({ state: 'visible', timeout: 30000 });
+    await page.getByTestId('station-login-widget').waitFor({state: 'visible', timeout: 30000});
   } catch (error) {
     // First attempt failed, try clicking init widgets button again
     await page.reload();
     await page.waitForTimeout(2000); // Wait for page to settle
-    await page.getByTestId('samples:init-widgets-button').click();
+    await page.getByTestId('samples:init-widgets-button').click({timeout: 10000});
 
     try {
-      await page.getByTestId('station-login-widget').waitFor({ state: 'visible', timeout: 30000 });
+      await page.getByTestId('station-login-widget').waitFor({state: 'visible', timeout: 30000});
     } catch (secondError) {
       // Second attempt also failed, throw error
-      throw new Error('Station login widget failed to become visible after two initialization attempts (100 seconds total)');
+      throw new Error(
+        'Station login widget failed to become visible after two initialization attempts (100 seconds total)'
+      );
     }
   }
 };

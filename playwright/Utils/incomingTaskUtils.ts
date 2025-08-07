@@ -1,15 +1,15 @@
-import { Page, expect } from '@playwright/test';
-import { CALL_URL, RONA_OPTIONS, RonaOption } from '../constants';
-import { TASK_TYPES, TaskType } from '../constants';
+import {Page, expect} from '@playwright/test';
+import {CALL_URL, RONA_OPTIONS, RonaOption} from '../constants';
+import {TASK_TYPES, TaskType} from '../constants';
 import nodemailer from 'nodemailer';
 
 const maxRetries = 3;
 
 const transporter = nodemailer.createTransport({
-  service: 'gmail',          // Make sure to use Secure Port for Gmail SMTP
+  service: 'gmail', // Make sure to use Secure Port for Gmail SMTP
   auth: {
     user: process.env.PW_SENDER_EMAIL,
-    pass: process.env.PW_APP_PASSWORD
+    pass: process.env.PW_APP_PASSWORD,
   },
 });
 
@@ -31,15 +31,20 @@ export async function createCallTask(page: Page, number: string = process.env.PW
   if (!number || number.trim() === '') {
     throw new Error('Dial number is required');
   }
-   try{
+  try {
     await expect(page).toHaveURL(/.*\.webex\.com\/calling.*/);
-  }catch(error){
+  } catch (error) {
     throw new Error('The Input Page should be logged into calling web-client.');
   }
-  await page.getByRole('textbox', { name: 'Dial' }).waitFor({ state: 'visible', timeout: 5000 });
-  await page.getByRole('textbox', { name: 'Dial' }).fill(number);
-  await expect(page.locator('[data-test="calling-ui-keypad-control"]').getByRole('button', { name: 'Call' })).toBeVisible();
-  await page.locator('[data-test="calling-ui-keypad-control"]').getByRole('button', { name: 'Call' }).click({ timeout: 5000 });
+  await page.getByRole('textbox', {name: 'Dial'}).waitFor({state: 'visible', timeout: 5000});
+  await page.getByRole('textbox', {name: 'Dial'}).fill(number, {timeout: 10000});
+  await expect(
+    page.locator('[data-test="calling-ui-keypad-control"]').getByRole('button', {name: 'Call'})
+  ).toBeVisible();
+  await page
+    .locator('[data-test="calling-ui-keypad-control"]')
+    .getByRole('button', {name: 'Call'})
+    .click({timeout: 5000});
 }
 
 /**
@@ -48,13 +53,13 @@ export async function createCallTask(page: Page, number: string = process.env.PW
  * @param page Playwright Page object
  */
 export async function endCallTask(page: Page) {
-   try{
+  try {
     await expect(page).toHaveURL(/.*\.webex\.com\/calling.*/);
-  }catch(error){
+  } catch (error) {
     throw new Error('The Input Page should be logged into calling web-client.');
   }
-  await page.locator('[data-test="call-end"]').waitFor({ state: 'visible', timeout: 4000 });
-  await page.locator('[data-test="call-end"]').click({ timeout: 5000 });
+  await page.locator('[data-test="call-end"]').waitFor({state: 'visible', timeout: 4000});
+  await page.locator('[data-test="call-end"]').click({timeout: 5000});
   await page.waitForTimeout(500);
 }
 
@@ -67,21 +72,73 @@ export async function createChatTask(page: Page) {
   for (let i = 0; i < maxRetries; i++) {
     try {
       await page.goto('https://widgets.webex.com/chat-client');
-      await page.locator('iframe[name="Livechat launcher icon"]').contentFrame().getByRole('button', { name: 'Livechat Button - 0 unread' }).waitFor({ state: 'visible', timeout: 60000 });
-      await page.locator('iframe[name="Livechat launcher icon"]').contentFrame().getByRole('button', { name: 'Livechat Button - 0 unread' }).click({ timeout: 5000 });
-      await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', { name: 'Hit Us Up!' }).waitFor({ state: 'visible', timeout: 20000 });
-      await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', { name: 'Hit Us Up!' }).click({ timeout: 5000 });
-      await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('textbox', { name: 'Namemust fill field' }).waitFor({ state: 'visible', timeout: 50000 });
-      await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('textbox', { name: 'Namemust fill field' }).click({ timeout: 5000 });
-      await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('textbox', { name: 'Namemust fill field' }).fill('Playwright Test');
-      await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', { name: 'Submit Name' }).waitFor({ state: 'visible', timeout: 5000 });
-      await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', { name: 'Submit Name' }).click({ timeout: 5000 });
+      await page
+        .locator('iframe[name="Livechat launcher icon"]')
+        .contentFrame()
+        .getByRole('button', {name: 'Livechat Button - 0 unread'})
+        .waitFor({state: 'visible', timeout: 60000});
+      await page
+        .locator('iframe[name="Livechat launcher icon"]')
+        .contentFrame()
+        .getByRole('button', {name: 'Livechat Button - 0 unread'})
+        .click({timeout: 5000});
+      await page
+        .locator('iframe[name="Conversation Window"]')
+        .contentFrame()
+        .getByRole('button', {name: 'Hit Us Up!'})
+        .waitFor({state: 'visible', timeout: 20000});
+      await page
+        .locator('iframe[name="Conversation Window"]')
+        .contentFrame()
+        .getByRole('button', {name: 'Hit Us Up!'})
+        .click({timeout: 5000});
+      await page
+        .locator('iframe[name="Conversation Window"]')
+        .contentFrame()
+        .getByRole('textbox', {name: 'Namemust fill field'})
+        .waitFor({state: 'visible', timeout: 50000});
+      await page
+        .locator('iframe[name="Conversation Window"]')
+        .contentFrame()
+        .getByRole('textbox', {name: 'Namemust fill field'})
+        .click({timeout: 5000});
+      await page
+        .locator('iframe[name="Conversation Window"]')
+        .contentFrame()
+        .getByRole('textbox', {name: 'Namemust fill field'})
+        .fill('Playwright Test', {timeout: 10000});
+      await page
+        .locator('iframe[name="Conversation Window"]')
+        .contentFrame()
+        .getByRole('button', {name: 'Submit Name'})
+        .waitFor({state: 'visible', timeout: 5000});
+      await page
+        .locator('iframe[name="Conversation Window"]')
+        .contentFrame()
+        .getByRole('button', {name: 'Submit Name'})
+        .click({timeout: 5000});
       await page.waitForTimeout(200);
-      await expect(page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('textbox', { name: 'Email*' })).toBeVisible();
-      await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('textbox', { name: 'Email*' }).click({ timeout: 5000 });
-      await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('textbox', { name: 'Email*' }).fill('playwright@test.com');
-      await expect(page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', { name: 'Submit Email' })).toBeVisible();
-      await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', { name: 'Submit Email' }).click({ timeout: 5000 });
+      await expect(
+        page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('textbox', {name: 'Email*'})
+      ).toBeVisible();
+      await page
+        .locator('iframe[name="Conversation Window"]')
+        .contentFrame()
+        .getByRole('textbox', {name: 'Email*'})
+        .click({timeout: 5000});
+      await page
+        .locator('iframe[name="Conversation Window"]')
+        .contentFrame()
+        .getByRole('textbox', {name: 'Email*'})
+        .fill('playwright@test.com', {timeout: 10000});
+      await expect(
+        page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', {name: 'Submit Email'})
+      ).toBeVisible();
+      await page
+        .locator('iframe[name="Conversation Window"]')
+        .contentFrame()
+        .getByRole('button', {name: 'Submit Email'})
+        .click({timeout: 5000});
       break;
     } catch (error) {
       if (i === maxRetries - 1) {
@@ -89,24 +146,36 @@ export async function createChatTask(page: Page) {
       }
     }
   }
-};
+}
 
 /**
  * Ends the current chat task by navigating the chat UI.
-  * The Input page should have the chat client with the chat open.
+ * The Input page should have the chat client with the chat open.
  * @param page Playwright Page object
  */
 export async function endChatTask(page: Page) {
-  await expect(page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', { name: 'Menu' })).toBeVisible();
-  await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', { name: 'Menu' }).click({ timeout: 5000 });
+  await expect(
+    page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', {name: 'Menu'})
+  ).toBeVisible();
+  await page
+    .locator('iframe[name="Conversation Window"]')
+    .contentFrame()
+    .getByRole('button', {name: 'Menu'})
+    .click({timeout: 5000});
   await page.waitForTimeout(500);
   await expect(page.locator('iframe[name="Conversation Window"]').contentFrame().getByText('End chat')).toBeVisible();
-  await page.locator('iframe[name="Conversation Window"]').contentFrame().getByText('End chat').click({ timeout: 5000 });
+  await page.locator('iframe[name="Conversation Window"]').contentFrame().getByText('End chat').click({timeout: 5000});
   await page.waitForTimeout(500);
-  await expect(page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', { name: 'End', exact: true })).toBeVisible();
-  await page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', { name: 'End', exact: true }).click({ timeout: 5000 });
+  await expect(
+    page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', {name: 'End', exact: true})
+  ).toBeVisible();
+  await page
+    .locator('iframe[name="Conversation Window"]')
+    .contentFrame()
+    .getByRole('button', {name: 'End', exact: true})
+    .click({timeout: 5000});
   await page.waitForTimeout(1000);
-};
+}
 
 /**
  * Sends a test email to trigger an incoming email task.
@@ -143,7 +212,7 @@ export async function acceptIncomingTask(page: Page, type: TaskType) {
   if (type === TASK_TYPES.CALL) {
     incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
     const isExtensionCall = await (await incomingTaskDiv.innerText()).includes('Ringing...');
-    if(isExtensionCall){
+    if (isExtensionCall) {
       throw new Error('This is an extension call, use acceptExtensionCall instead');
     }
   } else if (type === TASK_TYPES.CHAT) {
@@ -156,8 +225,10 @@ export async function acceptIncomingTask(page: Page, type: TaskType) {
   incomingTaskDiv = incomingTaskDiv.first();
   await expect(incomingTaskDiv).toBeVisible();
   const acceptButton = incomingTaskDiv.getByTestId('task:accept-button').first();
-  if (!(await acceptButton.isVisible())) { throw new Error('Accept button not found'); }
-  await acceptButton.click({ timeout: 5000 });
+  if (!(await acceptButton.isVisible())) {
+    throw new Error('Accept button not found');
+  }
+  await acceptButton.click({timeout: 5000});
 }
 
 /**
@@ -172,7 +243,7 @@ export async function declineIncomingTask(page: Page, type: TaskType) {
   if (type === TASK_TYPES.CALL) {
     incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
     const isExtensionCall = await (await incomingTaskDiv.innerText()).includes('Ringing...');
-    if(isExtensionCall){
+    if (isExtensionCall) {
       throw new Error('This is an extension call, use declineExtensionCall instead');
     }
   } else if (type === TASK_TYPES.CHAT) {
@@ -185,9 +256,11 @@ export async function declineIncomingTask(page: Page, type: TaskType) {
   incomingTaskDiv = await incomingTaskDiv.first();
   await expect(incomingTaskDiv).toBeVisible();
   const declineButton = incomingTaskDiv.getByTestId('task:decline-button').first();
-  if (!(await declineButton.isVisible())) { throw new Error('Decline button not found'); }
-  await declineButton.click({ timeout: 5000 });
-  await incomingTaskDiv.waitFor({ state: 'hidden', timeout: 10000 });
+  if (!(await declineButton.isVisible())) {
+    throw new Error('Decline button not found');
+  }
+  await declineButton.click({timeout: 5000});
+  await incomingTaskDiv.waitFor({state: 'hidden', timeout: 10000});
 }
 
 /**
@@ -196,13 +269,13 @@ export async function declineIncomingTask(page: Page, type: TaskType) {
  * @param page Playwright Page object
  */
 export async function acceptExtensionCall(page: Page) {
-  try{
+  try {
     await expect(page).toHaveURL(/.*\.webex\.com\/calling.*/);
-  }catch(error){
+  } catch (error) {
     throw new Error('The Input Page should be logged into calling web-client.');
   }
-  await page.locator('[data-test="right-action-button"]').waitFor({ state: 'visible', timeout: 5000 });
-  await page.locator('[data-test="right-action-button"]').click({ timeout: 5000 });
+  await page.locator('[data-test="right-action-button"]').waitFor({state: 'visible', timeout: 5000});
+  await page.locator('[data-test="right-action-button"]').click({timeout: 5000});
 }
 
 /**
@@ -210,13 +283,13 @@ export async function acceptExtensionCall(page: Page) {
  * @param page Playwright Page object
  */
 export async function declineExtensionCall(page: Page) {
-   try{
+  try {
     await expect(page).toHaveURL(/.*\.webex\.com\/calling.*/);
-  }catch(error){
+  } catch (error) {
     throw new Error('The Input Page should be logged into calling web-client.');
   }
-  await page.locator('[data-test="left-action-button"]').waitFor({ state: 'visible', timeout: 5000 });
-  await page.locator('[data-test="left-action-button"]').click({ timeout: 5000 });
+  await page.locator('[data-test="left-action-button"]').waitFor({state: 'visible', timeout: 5000});
+  await page.locator('[data-test="left-action-button"]').click({timeout: 5000});
 }
 
 /**
@@ -224,13 +297,13 @@ export async function declineExtensionCall(page: Page) {
  * @param page Playwright Page object
  */
 export async function endExtensionCall(page: Page) {
-   try{
+  try {
     await expect(page).toHaveURL(/.*\.webex\.com\/calling.*/);
-  }catch(error){
+  } catch (error) {
     throw new Error('The Input Page should be logged into calling web-client.');
   }
-  await page.locator('[data-test="end-call"]').waitFor({ state: 'visible', timeout: 5000 });
-  await page.locator('[data-test="end-call"]').click({ timeout: 5000 });
+  await page.locator('[data-test="end-call"]').waitFor({state: 'visible', timeout: 5000});
+  await page.locator('[data-test="end-call"]').click({timeout: 5000});
   await page.waitForTimeout(500);
 }
 
@@ -264,48 +337,51 @@ export async function loginExtension(page: Page, email: string, password: string
       }
     }
   }
-  const isLoginPageVisible = await page.getByRole('textbox', { name: 'Email address (required)' }).waitFor({ state: 'visible', timeout: 30000 }).then(() => true).catch(() => false);
+  const isLoginPageVisible = await page
+    .getByRole('textbox', {name: 'Email address (required)'})
+    .waitFor({state: 'visible', timeout: 30000})
+    .then(() => true)
+    .catch(() => false);
   if (!isLoginPageVisible) {
-    await expect(page.getByRole('button', { name: 'Back to sign in' })).toBeVisible();
-    await page.getByRole('button', { name: 'Back to sign in' }).click({ timeout: 5000 });
-    await page.getByRole('button', { name: 'Sign in' }).waitFor({ state: 'visible', timeout: 10000 });
-    await page.getByRole('button', { name: 'Sign in' }).click({ timeout: 5000 });
+    await expect(page.getByRole('button', {name: 'Back to sign in'})).toBeVisible();
+    await page.getByRole('button', {name: 'Back to sign in'}).click({timeout: 5000});
+    await page.getByRole('button', {name: 'Sign in'}).waitFor({state: 'visible', timeout: 10000});
+    await page.getByRole('button', {name: 'Sign in'}).click({timeout: 5000});
   }
-  await page.getByRole('textbox', { name: 'Email address (required)' }).waitFor({ state: 'visible', timeout: 20000 });
-  await page.getByRole('textbox', { name: 'Email address (required)' }).fill(email);
-  await page.getByRole('textbox', { name: 'Email address (required)' }).press('Enter');
-  await page.getByRole('textbox', { name: 'Password' }).waitFor({ state: 'visible', timeout: 20000 });
-  await page.getByRole('textbox', { name: 'Password' }).fill(password);
-  await page.getByRole('textbox', { name: 'Password' }).press('Enter');
-  await page.getByRole('textbox', { name: 'Dial' }).waitFor({ state: 'visible', timeout: 32000 });
+  await page.getByRole('textbox', {name: 'Email address (required)'}).waitFor({state: 'visible', timeout: 20000});
+  await page.getByRole('textbox', {name: 'Email address (required)'}).fill(email, {timeout: 10000});
+  await page.getByRole('textbox', {name: 'Email address (required)'}).press('Enter', {timeout: 10000});
+  await page.getByRole('textbox', {name: 'Password'}).waitFor({state: 'visible', timeout: 20000});
+  await page.getByRole('textbox', {name: 'Password'}).fill(password, {timeout: 10000});
+  await page.getByRole('textbox', {name: 'Password'}).press('Enter', {timeout: 10000});
+  await page.getByRole('textbox', {name: 'Dial'}).waitFor({state: 'visible', timeout: 32000});
   try {
-    await page.locator('[data-test="statusMessage"]').waitFor({ state: 'hidden', timeout: 30000 });
+    await page.locator('[data-test="statusMessage"]').waitFor({state: 'hidden', timeout: 30000});
   } catch (e) {
     throw new Error('Unable to Login to the webex calling web-client');
   }
-
 }
 
 /**
  * Submits the RONA popup by selecting the given state and confirming.
  * @param page Playwright Page object
  * @param select State to select (e.g., 'Available', 'Idle')
- * @throws Error if the RONA state selection is not provided  
+ * @throws Error if the RONA state selection is not provided
  */
-export async function submitRonaPopup(page: Page, nextState : RonaOption) {
+export async function submitRonaPopup(page: Page, nextState: RonaOption) {
   if (!nextState) {
     throw new Error('RONA next state selection is required');
   }
   await page.waitForTimeout(1000);
-  await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 5000 });
+  await page.getByTestId('samples:rona-popup').waitFor({state: 'visible', timeout: 5000});
   await page.waitForTimeout(1000);
   await expect(page.getByTestId('samples:rona-select-state')).toBeVisible();
-  await page.getByTestId('samples:rona-select-state').click({ timeout: 5000 });
+  await page.getByTestId('samples:rona-select-state').click({timeout: 5000});
   await page.waitForTimeout(1000);
   await expect(page.getByTestId(`samples:rona-option-${nextState.toLowerCase()}`)).toBeVisible();
-  await page.getByTestId(`samples:rona-option-${nextState.toLowerCase()}`).click({ timeout: 5000 });
+  await page.getByTestId(`samples:rona-option-${nextState.toLowerCase()}`).click({timeout: 5000});
   await page.waitForTimeout(1000);
   await expect(page.getByTestId('samples:rona-button-confirm')).toBeVisible();
-  await page.getByTestId('samples:rona-button-confirm').click({ timeout: 5000 });
+  await page.getByTestId('samples:rona-button-confirm').click({timeout: 5000});
   await page.waitForTimeout(1000);
 }

@@ -1,4 +1,4 @@
-import { Page, expect } from '@playwright/test';
+import {Page, expect} from '@playwright/test';
 import dotenv from 'dotenv';
 import {LOGIN_MODE, LONG_WAIT} from '../constants';
 
@@ -14,14 +14,14 @@ dotenv.config();
  * ```
  */
 export const desktopLogin = async (page: Page): Promise<void> => {
-  await page.getByTestId('login-option-select').locator('#select-base-triggerid svg').click();
-  await page.getByTestId('login-option-Desktop').click();
-  await page.getByTestId('teams-select-dropdown').locator('#select-base-triggerid div').click();
+  await page.getByTestId('login-option-select').locator('#select-base-triggerid svg').click({timeout: 10000});
+  await page.getByTestId('login-option-Desktop').click({timeout: 10000});
+  await page.getByTestId('teams-select-dropdown').locator('#select-base-triggerid div').click({timeout: 10000});
   await page.waitForTimeout(200);
-  await page.locator('[data-testid^="teams-dropdown-"]').nth(0).locator('span, div').first().click();
+  await page.locator('[data-testid^="teams-dropdown-"]').nth(0).locator('span, div').first().click({timeout: 10000});
   await page.waitForTimeout(200);
 
-  await page.getByTestId('login-button').click();
+  await page.getByTestId('login-button').click({timeout: 10000});
 };
 
 /**
@@ -49,13 +49,13 @@ export const extensionLogin = async (page: Page, extensionNumber?: string): Prom
     throw new Error('Extension number is empty. Please provide a valid extension number.');
   }
 
-  await page.getByTestId('login-option-select').locator('#select-base-triggerid svg').click();
-  await page.getByTestId('login-option-Extension').click();
-  await page.getByTestId('dial-number-input').locator('input').fill(number);
-  await page.getByTestId('teams-select-dropdown').locator('#select-base-triggerid div').click();
+  await page.getByTestId('login-option-select').locator('#select-base-triggerid svg').click({timeout: 10000});
+  await page.getByTestId('login-option-Extension').click({timeout: 10000});
+  await page.getByTestId('dial-number-input').locator('input').fill(number, {timeout: 10000});
+  await page.getByTestId('teams-select-dropdown').locator('#select-base-triggerid div').click({timeout: 10000});
   await page.waitForTimeout(200);
-  await page.locator('[data-testid^="teams-dropdown-"]').nth(0).locator('span, div').first().click();
-  await page.getByTestId('login-button').click();
+  await page.locator('[data-testid^="teams-dropdown-"]').nth(0).locator('span, div').first().click({timeout: 10000});
+  await page.getByTestId('login-button').click({timeout: 10000});
 };
 
 /**
@@ -83,14 +83,14 @@ export const dialLogin = async (page: Page, dialNumber?: string): Promise<void> 
     throw new Error('Dial number is empty. Please provide a valid dial number.');
   }
 
-  await page.getByTestId('login-option-select').locator('#select-base-triggerid svg').click();
-  await page.getByTestId('login-option-Dial Number').click();
-  await page.getByTestId('dial-number-input').locator('div').nth(1).click();
-  await page.getByTestId('dial-number-input').locator('input').fill(number);
-  await page.getByTestId('teams-select-dropdown').locator('#select-base-triggerid div').click();
+  await page.getByTestId('login-option-select').locator('#select-base-triggerid svg').click({timeout: 10000});
+  await page.getByTestId('login-option-Dial Number').click({timeout: 10000});
+  await page.getByTestId('dial-number-input').locator('div').nth(1).click({timeout: 10000});
+  await page.getByTestId('dial-number-input').locator('input').fill(number, {timeout: 10000});
+  await page.getByTestId('teams-select-dropdown').locator('#select-base-triggerid div').click({timeout: 10000});
   await page.waitForTimeout(200);
-  await page.locator('[data-testid^="teams-dropdown-"]').nth(0).locator('span, div').first().click();
-  await page.getByTestId('login-button').click();
+  await page.locator('[data-testid^="teams-dropdown-"]').nth(0).locator('span, div').first().click({timeout: 10000});
+  await page.getByTestId('login-button').click({timeout: 10000});
 };
 
 /**
@@ -109,11 +109,11 @@ export const stationLogout = async (page: Page): Promise<void> => {
   if (!isLogoutButtonVisible) {
     throw new Error('Station logout button is not visible. Cannot perform logout.');
   }
-  await page.getByTestId('samples:station-logout-button').click();
+  await page.getByTestId('samples:station-logout-button').click({timeout: 10000});
   //check if the station logout button is hidden after logouts
   const isLogoutButtonHidden = await page
     .getByTestId('samples:station-logout-button')
-    .waitFor({ state: 'hidden', timeout: 30000 })
+    .waitFor({state: 'hidden', timeout: 30000})
     .then(() => true)
     .catch(() => false);
   if (!isLogoutButtonHidden) {
@@ -153,7 +153,7 @@ export const telephonyLogin = async (page: Page, mode: string, number?: string):
   } else {
     throw new Error(`Unsupported login mode: ${mode}. Use one of: ${Object.values(LOGIN_MODE).join(', ')}`);
   }
-}
+};
 
 /**
  * Verifies that the login mode selector displays the expected login mode
@@ -169,7 +169,9 @@ export const telephonyLogin = async (page: Page, mode: string, number?: string):
  * ```
  */
 export async function verifyLoginMode(page: Page, expectedMode: string): Promise<void> {
-  await expect(page.getByTestId('login-option-select').locator('#select-base-triggerid')).toContainText(expectedMode);
+  await expect(page.getByTestId('login-option-select').locator('#select-base-triggerid')).toContainText(expectedMode, {
+    timeout: 10000,
+  });
 }
 
 /**

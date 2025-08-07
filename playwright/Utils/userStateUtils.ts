@@ -23,7 +23,7 @@ export const changeUserState = async (page: Page, userState: string): Promise<vo
     return;
   }
 
-  await page.getByTestId('state-select').click();
+  await page.getByTestId('state-select').click({timeout: 10000});
   const stateItem = page.getByTestId(`state-item-${userState}`);
   const isValidState = await stateItem.isVisible().catch(() => false);
 
@@ -31,7 +31,7 @@ export const changeUserState = async (page: Page, userState: string): Promise<vo
     throw new Error(`State "${userState}" is not a valid state option.`);
   }
 
-  await stateItem.click();
+  await stateItem.click({timeout: 10000});
 };
 
 /**
