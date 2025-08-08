@@ -1,5 +1,5 @@
-import { Page, expect } from '@playwright/test';
-import { WrapupReason } from 'playwright/constants';
+import {Page, expect} from '@playwright/test';
+import {WrapupReason, AWAIT_TIMEOUT} from '../constants';
 
 /**
  * Submits the wrap-up popup for a task in the UI.
@@ -13,25 +13,30 @@ export async function submitWrapup(page: Page, reason: WrapupReason): Promise<vo
     throw new Error('Wrapup reason is required');
   }
   const wrapupBox = page.getByTestId('call-control:wrapup-button').first();
-  const isWrapupBoxVisible = await wrapupBox.waitFor({ state: 'visible', timeout: 10000 }).then(() => true).catch(() => false);
+  const isWrapupBoxVisible = await wrapupBox
+    .waitFor({state: 'visible', timeout: AWAIT_TIMEOUT})
+    .then(() => true)
+    .catch(() => false);
   if (!isWrapupBoxVisible) throw new Error('Wrapup box is not visible');
-  await wrapupBox.click({ timeout: 5000 });
+  await wrapupBox.click({timeout: AWAIT_TIMEOUT});
   await page.waitForTimeout(1000);
   await expect(page.getByTestId('call-control:wrapup-select').first()).toBeVisible();
-  await page.getByTestId('call-control:wrapup-select').first().click({ timeout: 5000 });
+  await page.getByTestId('call-control:wrapup-select').first().click({timeout: AWAIT_TIMEOUT});
   await page.waitForTimeout(1000);
-  const optionLocator = page.getByTestId(`call-control:wrapup-reason-${reason.toLowerCase()}`).filter({ hasText: reason.toString() });
+  const optionLocator = page
+    .getByTestId(`call-control:wrapup-reason-${reason.toLowerCase()}`)
+    .filter({hasText: reason.toString()});
   try {
     await expect(optionLocator.first()).toBeVisible();
   } catch (error) {
     await page.waitForTimeout(1000);
     await expect(page.getByTestId('call-control:wrapup-select').first()).toBeVisible();
-    await page.getByTestId('call-control:wrapup-select').first().click({ timeout: 5000 });
+    await page.getByTestId('call-control:wrapup-select').first().click({timeout: AWAIT_TIMEOUT});
   }
   await expect(optionLocator.first()).toBeVisible();
-  await optionLocator.first().click({ timeout: 5000 });
+  await optionLocator.first().click({timeout: AWAIT_TIMEOUT});
   await page.waitForTimeout(1000);
   await expect(page.getByTestId(`call-control:wrapup-submit`).first()).toBeVisible();
-  await page.getByTestId(`call-control:wrapup-submit`).first().click({ timeout: 5000 });
+  await page.getByTestId(`call-control:wrapup-submit`).first().click({timeout: AWAIT_TIMEOUT});
   await page.waitForTimeout(1000);
 }

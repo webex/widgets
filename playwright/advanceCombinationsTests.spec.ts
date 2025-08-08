@@ -1,19 +1,11 @@
-import { Page, test, expect, BrowserContext } from "@playwright/test";
-import {
-  consultViaAgent,
-  transferViaAgent,
-  cancelConsult,
-} from './Utils/advancedTaskControlUtils';
-import { changeUserState, getCurrentState, verifyCurrentState } from './Utils/userStateUtils';
-import {
-  createCallTask,
-  acceptIncomingTask,
-  loginExtension
-} from './Utils/incomingTaskUtils';
-import { submitWrapup } from './Utils/wrapupUtils';
-import { USER_STATES, LOGIN_MODE, TASK_TYPES, WRAPUP_REASONS } from './constants';
-import { pageSetup, waitForState } from "./Utils/helperUtils";
-import { endTask, holdCallToggle } from "./Utils/taskControlUtils";
+import {Page, test, expect, BrowserContext} from '@playwright/test';
+import {consultViaAgent, transferViaAgent, cancelConsult} from './Utils/advancedTaskControlUtils';
+import {changeUserState, verifyCurrentState} from './Utils/userStateUtils';
+import {createCallTask, acceptIncomingTask, loginExtension} from './Utils/incomingTaskUtils';
+import {submitWrapup} from './Utils/wrapupUtils';
+import {USER_STATES, LOGIN_MODE, TASK_TYPES, WRAPUP_REASONS, AGENT_NAMES} from './constants';
+import {pageSetup, waitForState} from './Utils/helperUtils';
+import {endTask, holdCallToggle} from './Utils/taskControlUtils';
 
 let agent1Page: Page;
 let agent2Page: Page;
@@ -23,10 +15,8 @@ let agent2Context: BrowserContext;
 let callerContext: BrowserContext;
 const maxRetries = 3;
 
-
-test.describe("Advanced Combinations Tests ", () => {
-
-  test.beforeAll(async ({ browser }) => {
+test.describe('Advanced Combinations Tests ', () => {
+  test.beforeAll(async ({browser}) => {
     agent1Context = await browser.newContext();
     agent2Context = await browser.newContext();
     callerContext = await browser.newContext();
@@ -57,32 +47,30 @@ test.describe("Advanced Combinations Tests ", () => {
     ]);
   });
 
-
-
   test('Transfer from one agent to another, then transfer back to the first agent', async () => {
     await changeUserState(agent2Page, USER_STATES.MEETING);
     await changeUserState(agent1Page, USER_STATES.AVAILABLE);
     await createCallTask(callerPage, process.env.PW_DIAL_NUMBER);
     let incomingTaskDiv = agent1Page.getByTestId('samples:incoming-task-telephony').first();
-    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 40000 });
+    await incomingTaskDiv.waitFor({state: 'visible', timeout: 40000});
     await agent1Page.waitForTimeout(2000);
     await acceptIncomingTask(agent1Page, TASK_TYPES.CALL);
     await waitForState(agent1Page, USER_STATES.ENGAGED);
     await changeUserState(agent2Page, USER_STATES.AVAILABLE);
     await agent1Page.waitForTimeout(2000);
     await waitForState(agent2Page, USER_STATES.AVAILABLE);
-    await transferViaAgent(agent1Page, 'User2 Agent2');
+    await transferViaAgent(agent1Page, AGENT_NAMES.AGENT2);
     incomingTaskDiv = agent2Page.getByTestId('samples:incoming-task-telephony').first();
-    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 20000 });
+    await incomingTaskDiv.waitFor({state: 'visible', timeout: 20000});
     await agent2Page.waitForTimeout(2000);
     await acceptIncomingTask(agent2Page, TASK_TYPES.CALL);
     await waitForState(agent2Page, USER_STATES.ENGAGED);
     await agent1Page.waitForTimeout(2000);
     await submitWrapup(agent1Page, WRAPUP_REASONS.SALE);
     await agent1Page.waitForTimeout(2000);
-    await transferViaAgent(agent2Page, 'User1 Agent1');
+    await transferViaAgent(agent2Page, AGENT_NAMES.AGENT1);
     incomingTaskDiv = agent1Page.getByTestId('samples:incoming-task-telephony').first();
-    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 20000 });
+    await incomingTaskDiv.waitFor({state: 'visible', timeout: 20000});
     await agent1Page.waitForTimeout(2000);
     await acceptIncomingTask(agent1Page, TASK_TYPES.CALL);
     await waitForState(agent1Page, USER_STATES.ENGAGED);
@@ -99,15 +87,15 @@ test.describe("Advanced Combinations Tests ", () => {
     await changeUserState(agent2Page, USER_STATES.MEETING);
     await createCallTask(callerPage);
     let incomingTaskDiv = agent1Page.getByTestId('samples:incoming-task-telephony').first();
-    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 40000 });
+    await incomingTaskDiv.waitFor({state: 'visible', timeout: 40000});
     await agent1Page.waitForTimeout(2000);
     await acceptIncomingTask(agent1Page, TASK_TYPES.CALL);
     await changeUserState(agent2Page, USER_STATES.AVAILABLE);
     await waitForState(agent1Page, USER_STATES.ENGAGED);
     await waitForState(agent2Page, USER_STATES.AVAILABLE);
-    await consultViaAgent(agent1Page, 'User2 Agent2');
+    await consultViaAgent(agent1Page, AGENT_NAMES.AGENT2);
     incomingTaskDiv = agent2Page.getByTestId('samples:incoming-task-telephony').first();
-    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 20000 });
+    await incomingTaskDiv.waitFor({state: 'visible', timeout: 20000});
     await agent2Page.waitForTimeout(2000);
     await acceptIncomingTask(agent2Page, TASK_TYPES.CALL);
     await waitForState(agent2Page, USER_STATES.ENGAGED);
@@ -115,8 +103,8 @@ test.describe("Advanced Combinations Tests ", () => {
     await agent1Page.waitForTimeout(3000);
     await submitWrapup(agent1Page, WRAPUP_REASONS.SALE);
     await waitForState(agent1Page, USER_STATES.AVAILABLE);
-    await consultViaAgent(agent2Page, 'User1 Agent1');
-    await agent1Page.getByTestId('samples:incoming-task-telephony').first().waitFor({ state: 'visible', timeout: 20000 });
+    await consultViaAgent(agent2Page, AGENT_NAMES.AGENT1);
+    await agent1Page.getByTestId('samples:incoming-task-telephony').first().waitFor({state: 'visible', timeout: 20000});
     await agent1Page.waitForTimeout(2000);
     await acceptIncomingTask(agent1Page, TASK_TYPES.CALL);
     await waitForState(agent1Page, USER_STATES.ENGAGED);
@@ -128,22 +116,22 @@ test.describe("Advanced Combinations Tests ", () => {
     await agent1Page.waitForTimeout(2000);
     await submitWrapup(agent1Page, WRAPUP_REASONS.SALE);
     await agent1Page.waitForTimeout(2000);
-  })
+  });
 
   test('Consult with another agent, transfer the call and transfer the call back to the agent', async () => {
     await changeUserState(agent1Page, USER_STATES.AVAILABLE);
     await changeUserState(agent2Page, USER_STATES.MEETING);
     await createCallTask(callerPage);
     let incomingTaskDiv = agent1Page.getByTestId('samples:incoming-task-telephony').first();
-    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 40000 });
+    await incomingTaskDiv.waitFor({state: 'visible', timeout: 40000});
     await agent1Page.waitForTimeout(2000);
     await acceptIncomingTask(agent1Page, TASK_TYPES.CALL);
     await changeUserState(agent2Page, USER_STATES.AVAILABLE);
     await waitForState(agent1Page, USER_STATES.ENGAGED);
     await waitForState(agent2Page, USER_STATES.AVAILABLE);
-    await consultViaAgent(agent1Page, 'User2 Agent2');
+    await consultViaAgent(agent1Page, AGENT_NAMES.AGENT2);
     incomingTaskDiv = agent2Page.getByTestId('samples:incoming-task-telephony').first();
-    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 20000 });
+    await incomingTaskDiv.waitFor({state: 'visible', timeout: 20000});
     await agent2Page.waitForTimeout(2000);
     await acceptIncomingTask(agent2Page, TASK_TYPES.CALL);
     await waitForState(agent2Page, USER_STATES.ENGAGED);
@@ -152,10 +140,11 @@ test.describe("Advanced Combinations Tests ", () => {
     await submitWrapup(agent1Page, WRAPUP_REASONS.SALE);
     await waitForState(agent1Page, USER_STATES.AVAILABLE);
 
-    await transferViaAgent(agent2Page, 'User1 Agent1');
+    await transferViaAgent(agent2Page, AGENT_NAMES.AGENT1);
     incomingTaskDiv = agent1Page.getByTestId('samples:incoming-task-telephony').first();
     await incomingTaskDiv.waitFor({
-      state: 'visible', timeout: 20000
+      state: 'visible',
+      timeout: 20000,
     });
     await agent1Page.waitForTimeout(2000);
     await acceptIncomingTask(agent1Page, TASK_TYPES.CALL);
@@ -167,32 +156,32 @@ test.describe("Advanced Combinations Tests ", () => {
     await agent1Page.waitForTimeout(2000);
     await submitWrapup(agent1Page, WRAPUP_REASONS.SALE);
     await agent1Page.waitForTimeout(2000);
-  })
-
+  });
 
   test('Transfer the call to another agent & then consult from the other agent', async () => {
     await changeUserState(agent2Page, USER_STATES.MEETING);
     await changeUserState(agent1Page, USER_STATES.AVAILABLE);
     await createCallTask(callerPage, process.env.PW_DIAL_NUMBER);
     let incomingTaskDiv = agent1Page.getByTestId('samples:incoming-task-telephony').first();
-    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 40000 });
+    await incomingTaskDiv.waitFor({state: 'visible', timeout: 40000});
     await agent1Page.waitForTimeout(2000);
     await acceptIncomingTask(agent1Page, TASK_TYPES.CALL);
     await waitForState(agent1Page, USER_STATES.ENGAGED);
     await changeUserState(agent2Page, USER_STATES.AVAILABLE);
     await agent1Page.waitForTimeout(2000);
-    await transferViaAgent(agent1Page, 'User2 Agent2');
-    await agent2Page.getByTestId('samples:incoming-task-telephony').first().waitFor({ state: 'visible', timeout: 20000 });
+    await transferViaAgent(agent1Page, AGENT_NAMES.AGENT2);
+    await agent2Page.getByTestId('samples:incoming-task-telephony').first().waitFor({state: 'visible', timeout: 20000});
     await agent2Page.waitForTimeout(2000);
     await acceptIncomingTask(agent2Page, TASK_TYPES.CALL);
     await waitForState(agent2Page, USER_STATES.ENGAGED);
     await agent1Page.waitForTimeout(2000);
     await submitWrapup(agent1Page, WRAPUP_REASONS.SALE);
     await waitForState(agent1Page, USER_STATES.AVAILABLE);
-    await consultViaAgent(agent2Page, 'User1 Agent1');
+    await consultViaAgent(agent2Page, AGENT_NAMES.AGENT1);
     incomingTaskDiv = agent1Page.getByTestId('samples:incoming-task-telephony').first();
     await incomingTaskDiv.waitFor({
-      state: 'visible', timeout: 20000
+      state: 'visible',
+      timeout: 20000,
     });
     await agent1Page.waitForTimeout(2000);
     await acceptIncomingTask(agent1Page, TASK_TYPES.CALL);
@@ -211,15 +200,15 @@ test.describe("Advanced Combinations Tests ", () => {
     await changeUserState(agent2Page, USER_STATES.MEETING);
     await createCallTask(callerPage);
     const incomingTaskDiv = agent1Page.getByTestId('samples:incoming-task-telephony').first();
-    await incomingTaskDiv.waitFor({ state: 'visible', timeout: 120000 });
+    await incomingTaskDiv.waitFor({state: 'visible', timeout: 120000});
     await agent1Page.waitForTimeout(3000);
     await acceptIncomingTask(agent1Page, TASK_TYPES.CALL);
     await changeUserState(agent2Page, USER_STATES.AVAILABLE);
     await agent1Page.waitForTimeout(5000);
     await verifyCurrentState(agent1Page, USER_STATES.ENGAGED);
-    await consultViaAgent(agent1Page, 'User2 Agent2');
+    await consultViaAgent(agent1Page, AGENT_NAMES.AGENT2);
     const consultRequestDiv = agent2Page.getByTestId('samples:incoming-task-telephony').first();
-    await consultRequestDiv.waitFor({ state: 'visible', timeout: 60000 });
+    await consultRequestDiv.waitFor({state: 'visible', timeout: 60000});
     await agent2Page.waitForTimeout(3000);
     await acceptIncomingTask(agent2Page, TASK_TYPES.CALL);
     await agent2Page.waitForTimeout(3000);
@@ -229,9 +218,9 @@ test.describe("Advanced Combinations Tests ", () => {
     await submitWrapup(agent1Page, WRAPUP_REASONS.SALE);
     await agent2Page.waitForTimeout(3000);
     await verifyCurrentState(agent2Page, USER_STATES.ENGAGED);
-    await consultViaAgent(agent2Page, 'User1 Agent1');
+    await consultViaAgent(agent2Page, AGENT_NAMES.AGENT1);
     const returnConsultDiv = agent1Page.getByTestId('samples:incoming-task-telephony').first();
-    await returnConsultDiv.waitFor({ state: 'visible', timeout: 60000 });
+    await returnConsultDiv.waitFor({state: 'visible', timeout: 60000});
     await agent1Page.waitForTimeout(3000);
     await acceptIncomingTask(agent1Page, TASK_TYPES.CALL);
     await agent1Page.waitForTimeout(3000);
@@ -239,17 +228,16 @@ test.describe("Advanced Combinations Tests ", () => {
     await agent2Page.waitForTimeout(2000);
     await submitWrapup(agent2Page, WRAPUP_REASONS.RESOLVED);
     await verifyCurrentState(agent1Page, USER_STATES.ENGAGED);
-    await consultViaAgent(agent1Page, 'User2 Agent2');
+    await consultViaAgent(agent1Page, AGENT_NAMES.AGENT2);
     await expect(agent1Page.getByTestId('cancel-consult-btn')).toBeVisible();
     await expect(agent1Page.getByTestId('transfer-consult-btn')).toBeVisible();
     await cancelConsult(agent1Page);
-    await expect(agent1Page.getByRole('group', { name: 'Call Control with Call' })).toBeVisible();
+    await expect(agent1Page.getByRole('group', {name: 'Call Control with Call'})).toBeVisible();
     await verifyCurrentState(agent1Page, USER_STATES.ENGAGED);
-     await holdCallToggle(agent1Page);
+    await holdCallToggle(agent1Page);
     await endTask(agent1Page);
     await agent1Page.waitForTimeout(3000);
     await submitWrapup(agent1Page, WRAPUP_REASONS.RESOLVED);
     await agent1Page.waitForTimeout(2000);
   });
-
 });

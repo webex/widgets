@@ -20,6 +20,7 @@ import {
 } from './store.types';
 import Store from './store';
 import {runInAction} from 'mobx';
+import {isIncomingTask} from './task-utils';
 
 class StoreWrapper implements IStoreWrapper {
   store: IStore;
@@ -203,12 +204,8 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   setCurrentTask = (task: ITask | null, isClicked: boolean = false): void => {
-    // Don't assign the task as current task if the interaction state is 'new' or 'consult'
-    if (
-      !task?.data.wrapUpRequired &&
-      (task?.data.interaction.state === 'new' || task?.data.interaction.state === 'consult')
-    )
-      return;
+    // Don't assign the task as current task is incoming
+    if (isIncomingTask(task)) return;
 
     runInAction(() => {
       // Determine if the new task is the same as the current task
