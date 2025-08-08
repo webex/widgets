@@ -1,5 +1,5 @@
 import {Page, expect} from '@playwright/test';
-import {WRAPUP_REASONS, AWAIT_TIMEOUT} from '../constants';
+import {WRAPUP_REASONS, AWAIT_TIMEOUT, AGENT_NAMES} from '../constants';
 
 /**
  * Utility functions for advanced task controls testing.
@@ -113,10 +113,10 @@ export function getAllCapturedLogs(): string[] {
 /**
  * Initiates a consult with another agent via the agents tab.
  * @param page - The agent's main page
- * @param agentName - Name of the agent to consult with (e.g., 'User2 Agent2')
+ * @param agentName - Name of the agent to consult with (e.g., AGENT_NAMES.AGENT2)
  * @returns Promise<void>
  */
-export async function consultViaAgent(page: Page, agentName: string = 'User2 Agent2'): Promise<void> {
+export async function consultViaAgent(page: Page, agentName: string = AGENT_NAMES.AGENT2): Promise<void> {
   // Click consult with another agent button
   await page.getByTestId('call-control:consult').nth(1).click({timeout: AWAIT_TIMEOUT});
   // Navigate to Agents tab
@@ -168,10 +168,10 @@ export async function cancelConsult(page: Page): Promise<void> {
 /**
  * Initiates a transfer via the agents tab (without prior consult).
  * @param page - The agent's main page
- * @param agentName - Name of the agent to transfer to (e.g., 'User2 Agent2')
+ * @param agentName - Name of the agent to transfer to (e.g., AGENT_NAMES.AGENT2)
  * @returns Promise<void>
  */
-export async function transferViaAgent(page: Page, agentName: string = 'User2 Agent2'): Promise<void> {
+export async function transferViaAgent(page: Page, agentName: string = AGENT_NAMES.AGENT2): Promise<void> {
   // Click transfer call button
   await page
     .getByRole('group', {name: 'Call Control with Call'})

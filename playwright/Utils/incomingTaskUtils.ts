@@ -1,5 +1,5 @@
 import {Page, expect} from '@playwright/test';
-import {CALL_URL, RONA_OPTIONS, RonaOption, AWAIT_TIMEOUT, TASK_TYPES, TaskType} from '../constants';
+import {CALL_URL, RonaOption, AWAIT_TIMEOUT, TASK_TYPES, TaskType, CHAT_URL} from '../constants';
 import nodemailer from 'nodemailer';
 
 const maxRetries = 3;
@@ -70,7 +70,7 @@ export async function endCallTask(page: Page) {
 export async function createChatTask(page: Page) {
   for (let i = 0; i < maxRetries; i++) {
     try {
-      await page.goto('https://widgets.webex.com/chat-client');
+      await page.goto(CHAT_URL);
       await page
         .locator('iframe[name="Livechat launcher icon"]')
         .contentFrame()
