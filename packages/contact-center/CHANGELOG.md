@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.104](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.103...v1.28.0-ccwidgets.104) (2025-08-08)
+
+
+### Bug Fixes
+
+* **cc-widgets:** Incoming Transfer showing Call control fix  ([#510](https://github.com/webex/widgets/issues/510)) ([25b3025](https://github.com/webex/widgets/commit/25b302592cc0bbf9feb6134cbce0c34088b44761))
+
 # [1.28.0-ccwidgets.103](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.102...v1.28.0-ccwidgets.103) (2025-08-06)
 
 
