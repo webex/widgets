@@ -1,6 +1,6 @@
 import {Page, test, expect, BrowserContext} from '@playwright/test';
 import {consultViaAgent, transferViaAgent, cancelConsult} from './Utils/advancedTaskControlUtils';
-import {changeUserState, getCurrentState, verifyCurrentState} from './Utils/userStateUtils';
+import {changeUserState, verifyCurrentState} from './Utils/userStateUtils';
 import {createCallTask, acceptIncomingTask, loginExtension} from './Utils/incomingTaskUtils';
 import {submitWrapup} from './Utils/wrapupUtils';
 import {USER_STATES, LOGIN_MODE, TASK_TYPES, WRAPUP_REASONS, AGENT_NAMES} from './constants';

@@ -13,7 +13,7 @@ import {
   verifyConsultTransferredLogs,
 } from './Utils/advancedTaskControlUtils';
 
-import {stationLogout, telephonyLogin} from './Utils/stationLoginUtils';
+import {stationLogout} from './Utils/stationLoginUtils';
 import {changeUserState, getCurrentState, verifyCurrentState} from './Utils/userStateUtils';
 import {createCallTask, acceptIncomingTask, loginExtension, declineIncomingTask} from './Utils/incomingTaskUtils';
 import {submitWrapup} from './Utils/wrapupUtils';

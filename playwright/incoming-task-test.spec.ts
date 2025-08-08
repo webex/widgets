@@ -11,7 +11,6 @@ import {
   acceptIncomingTask,
   acceptExtensionCall,
   createEmailTask,
-  endExtensionCall,
   submitRonaPopup,
 } from './Utils/incomingTaskUtils';
 import {TASK_TYPES, USER_STATES, LOGIN_MODE, THEME_COLORS, WRAPUP_REASONS, RONA_OPTIONS} from './constants';
@@ -26,13 +25,13 @@ import {
   pageSetup,
 } from './Utils/helperUtils';
 
-let page: Page | null = null;
-let context: BrowserContext | null = null;
-let callerpage: Page | null = null;
-let extensionPage: Page | null = null;
-let context2: BrowserContext | null = null;
-let chatPage: Page | null = null;
-let page2: Page | null = null;
+let page: Page;
+let context: BrowserContext;
+let callerpage: Page;
+let extensionPage: Page;
+let context2: BrowserContext;
+let chatPage: Page;
+let page2: Page;
 let capturedLogs: string[] = [];
 const maxRetries = 3;
 
@@ -131,7 +130,7 @@ test.describe('Incoming Call Task Tests for Desktop Mode', () => {
 
     await Promise.all([
       (async () => {
-        await loginExtension(callerpage, process.env.PW_AGENT2_USERNAME, process.env.PW_PASSWORD);
+        await loginExtension(callerpage, process.env.PW_AGENT2_USERNAME ?? '', process.env.PW_PASSWORD ?? '');
       })(),
       (async () => {
         await pageSetup(page, LOGIN_MODE.DESKTOP, 'AGENT1');
@@ -315,7 +314,7 @@ test.describe('Incoming Task Tests in Extension Mode', () => {
       (async () => {
         for (let i = 0; i < maxRetries; i++) {
           try {
-            await loginExtension(extensionPage, process.env.PW_AGENT1_USERNAME, process.env.PW_PASSWORD);
+            await loginExtension(extensionPage, process.env.PW_AGENT1_USERNAME ?? '', process.env.PW_PASSWORD ?? '');
             break;
           } catch (error) {
             if (i == maxRetries - 1) {
@@ -852,7 +851,7 @@ test.describe('Incoming Tasks tests for multi-session', () => {
       (async () => {
         for (let i = 0; i < maxRetries; i++) {
           try {
-            await loginExtension(extensionPage, process.env.PW_AGENT1_USERNAME, process.env.PW_PASSWORD);
+            await loginExtension(extensionPage, process.env.PW_AGENT1_USERNAME ?? '', process.env.PW_PASSWORD ?? '');
             break;
           } catch (error) {
             if (i == maxRetries - 1) {
