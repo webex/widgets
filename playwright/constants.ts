@@ -44,7 +44,7 @@ export const TASK_TYPES = {
 
 export type TaskType = (typeof TASK_TYPES)[keyof typeof TASK_TYPES];
 
-export const CHAT_URL = 'https://v0-host-web-page.vercel.app';
+export const CHAT_URL = 'https://widgets.webex.com/chat-client-e2e';
 
 export const WRAPUP_REASONS = {
   SALE: 'Sale',
