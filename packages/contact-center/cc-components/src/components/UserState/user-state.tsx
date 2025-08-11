@@ -2,7 +2,7 @@ import React, {useMemo} from 'react';
 
 import {AgentUserState, UserStateComponentsProps} from './user-state.types';
 import {formatTime} from '../../utils';
-
+import {ERROR_TRIGGERING_IDLE_CODES} from '@webex/cc-store';
 import './user-state.scss';
 import {SelectNext, Text} from '@momentum-ui/react-collaboration';
 import {Item} from '@react-stately/collections';
@@ -33,7 +33,7 @@ const UserStateComponent: React.FunctionComponent<UserStateComponentsProps> = (p
 
   const previousSelectableState = useMemo(() => getPreviousSelectableState(idleCodes), [idleCodes]);
   const selectedKey = getSelectedKey(customState, currentState, idleCodes);
-  const items = buildDropdownItems(customState, idleCodes);
+  const items = buildDropdownItems(customState, idleCodes, currentState);
   const sortedItems = sortDropdownItems(items);
 
   return (
@@ -51,8 +51,7 @@ const UserStateComponent: React.FunctionComponent<UserStateComponentsProps> = (p
         data-testid="state-select"
       >
         {(item) => {
-          const isRonaOrEngaged = [AgentUserState.RONA, AgentUserState.Engaged].includes(
-            //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+          const isRonaOrEngaged = [...Object.values(ERROR_TRIGGERING_IDLE_CODES), AgentUserState.Engaged].includes(
             idleCodes.find((code) => code.id === currentState)?.name || ''
           );
           const shouldHighlight = currentState === item.id || (isRonaOrEngaged && item.id === previousSelectableState);

@@ -1,40 +1,33 @@
 import React from 'react';
 import {TaskListComponentProps, MEDIA_CHANNEL} from '../task.types';
 import Task from '../Task';
+import {
+  extractTaskListItemData,
+  isTaskListEmpty,
+  getTasksArray,
+  createTaskSelectHandler,
+  isCurrentTaskSelected,
+} from './task-list.utils';
 import './styles.scss';
 import {withMetrics} from '@webex/cc-ui-logging';
 
 const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (props) => {
   const {currentTask, taskList, acceptTask, declineTask, isBrowser, onTaskSelect, logger} = props;
 
-  if (!taskList || Object.keys(taskList).length === 0) {
+  // Early return for empty task list
+  if (isTaskListEmpty(taskList)) {
     return <></>; // hidden component
   }
+
+  // Get tasks as array for mapping
+  const tasks = getTasksArray(taskList!);
   return (
     <ul className="task-list" data-testid="task-list">
-      {Object.values(taskList)?.map((task, index) => {
-        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762IT
-        const callAssociationDetails = task?.data?.interaction?.callAssociatedDetails;
-        const ani = callAssociationDetails?.ani;
-        const customerName = callAssociationDetails?.customerName;
-        const virtualTeamName = callAssociationDetails?.virtualTeamName;
-        // rona timeout is not always available in the callAssociatedDetails object
-        const ronaTimeout = callAssociationDetails?.ronaTimeout ? Number(callAssociationDetails?.ronaTimeout) : null;
-        const taskState = task.data.interaction.state;
-        const startTimeStamp = task.data.interaction.createdTimestamp;
-        const isIncomingTask = taskState === 'new' || taskState === 'consult';
-        const mediaType = task.data.interaction.mediaType;
-        const mediaChannel = task.data.interaction.mediaChannel;
-        const isTelephony = mediaType === MEDIA_CHANNEL.TELEPHONY;
-        const isSocial = mediaType === MEDIA_CHANNEL.SOCIAL;
-        const acceptText =
-          isIncomingTask && !task.data.wrapUpRequired
-            ? isTelephony && !isBrowser
-              ? 'Ringing...'
-              : 'Accept'
-            : undefined;
-        const declineText =
-          isIncomingTask && !task.data.wrapUpRequired && isTelephony && isBrowser ? 'Decline' : undefined;
+      {tasks.map((task, index) => {
+        // Extract all task data using the utility function
+        const taskData = extractTaskListItemData(task, isBrowser);
+
+        // Log task rendering
         logger.info('CC-Widgets: TaskList: rendering task list', {
           module: 'task-list.tsx',
           method: 'renderItem',
@@ -42,33 +35,22 @@ const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (prop
         return (
           <Task
             interactionId={task.data.interactionId}
-            title={isSocial ? customerName : ani}
-            state={!isIncomingTask ? taskState : ''}
-            startTimeStamp={startTimeStamp}
-            selected={currentTask?.data.interactionId === task.data.interactionId}
+            title={taskData.title}
+            state={taskData.displayState}
+            startTimeStamp={taskData.startTimeStamp}
+            selected={isCurrentTaskSelected(task, currentTask)}
             key={index}
-            isIncomingTask={isIncomingTask}
-            queue={virtualTeamName}
+            isIncomingTask={taskData.isIncomingTask}
+            queue={taskData.virtualTeamName}
             acceptTask={() => acceptTask(task)}
             declineTask={() => declineTask(task)}
-            ronaTimeout={isIncomingTask ? ronaTimeout : null}
-            onTaskSelect={() => {
-              logger.log(`CC-Widgets: TaskList: select task clicked for interactionId: ${task.data.interactionId}`, {
-                module: 'task-list.tsx',
-                method: 'onTaskSelect',
-              });
-              if (
-                currentTask?.data.interactionId !== task.data.interactionId &&
-                !(isIncomingTask && !task.data.wrapUpRequired)
-              ) {
-                onTaskSelect(task);
-              }
-            }}
-            acceptText={acceptText}
-            disableAccept={isIncomingTask && isTelephony && !isBrowser}
-            declineText={declineText}
-            mediaType={mediaType}
-            mediaChannel={mediaChannel}
+            ronaTimeout={taskData.ronaTimeout}
+            onTaskSelect={createTaskSelectHandler(task, currentTask, onTaskSelect)}
+            acceptText={taskData.acceptText}
+            disableAccept={taskData.disableAccept}
+            declineText={taskData.declineText}
+            mediaType={taskData.mediaType as MEDIA_CHANNEL}
+            mediaChannel={taskData.mediaChannel as MEDIA_CHANNEL}
           />
         );
       })}

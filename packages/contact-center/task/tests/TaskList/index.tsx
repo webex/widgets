@@ -20,6 +20,7 @@ jest.mock('@webex/cc-store', () => ({
   setTaskAssigned: jest.fn(),
   setTaskRejected: jest.fn(),
   setTaskSelected: jest.fn(),
+  isIncomingTask: jest.fn(),
   logger: {
     log: jest.fn(),
     error: jest.fn(),

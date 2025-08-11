@@ -65,7 +65,7 @@ describe('UserState Utils', () => {
       const result = getIconStyle(item);
       expect(result).toEqual({
         class: 'available',
-        iconName: 'recents-presence-filled',
+        iconName: 'active-presence-small-filled',
       });
     });
 
@@ -74,7 +74,7 @@ describe('UserState Utils', () => {
       const result = getIconStyle(item);
       expect(result).toEqual({
         class: 'rona',
-        iconName: 'warning-filled',
+        iconName: 'dnd-presence-filled',
       });
     });
 
@@ -84,6 +84,15 @@ describe('UserState Utils', () => {
       expect(result).toEqual({
         class: 'idle',
         iconName: 'recents-presence-filled',
+      });
+    });
+
+    it('should return custom style for items with developerName', () => {
+      const item = {id: '1', name: 'Custom State', developerName: 'CUSTOM'};
+      const result = getIconStyle(item);
+      expect(result).toEqual({
+        class: 'custom',
+        iconName: 'busy-presence-light',
       });
     });
   });
@@ -224,7 +233,7 @@ describe('UserState Utils', () => {
     it('should return custom key when customState is present', () => {
       const customState = {name: 'Custom State', developerName: 'CUSTOM'};
       const result = getSelectedKey(customState, '1', mockIdleCodes);
-      expect(result).toBe('custom-CUSTOM');
+      expect(result).toBe('hide-CUSTOM');
     });
 
     it('should return currentState for normal states', () => {
@@ -232,14 +241,14 @@ describe('UserState Utils', () => {
       expect(result).toBe('1');
     });
 
-    it('should return previous selectable state for RONA', () => {
+    it('should return hide-prefixed key for RONA when it is current state', () => {
       const result = getSelectedKey(null, '3', mockIdleCodes);
-      expect(result).toBe('0'); // Available is the first selectable state
+      expect(result).toBe('hide-3');
     });
 
     it('should return previous selectable state for ENGAGED', () => {
       const result = getSelectedKey(null, '4', mockIdleCodes);
-      expect(result).toBe('0'); // Available is the first selectable state
+      expect(result).toBe('0');
     });
 
     it('should handle missing currentState in idleCodes', () => {
@@ -250,7 +259,7 @@ describe('UserState Utils', () => {
 
   describe('buildDropdownItems', () => {
     it('should filter out RONA and ENGAGED states', () => {
-      const result = buildDropdownItems(null, mockIdleCodes);
+      const result = buildDropdownItems(null, mockIdleCodes, '1');
 
       expect(result).toEqual([
         {id: '0', name: 'Available'},
@@ -261,26 +270,26 @@ describe('UserState Utils', () => {
 
     it('should include custom state when present', () => {
       const customState = {name: 'Custom State', developerName: 'CUSTOM'};
-      const result = buildDropdownItems(customState, mockIdleCodes);
+      const result = buildDropdownItems(customState, mockIdleCodes, '1');
 
       expect(result).toEqual([
+        {id: 'hide-CUSTOM', name: 'Custom State', developerName: 'CUSTOM'},
         {id: '0', name: 'Available'},
         {id: '1', name: 'Break'},
         {id: '2', name: 'Training'},
-        {id: 'custom-CUSTOM', name: 'Custom State'},
       ]);
     });
 
     it('should handle empty idleCodes array', () => {
-      const result = buildDropdownItems(null, []);
+      const result = buildDropdownItems(null, [], '1');
       expect(result).toEqual([]);
     });
 
     it('should handle empty idleCodes array with custom state', () => {
       const customState = {name: 'Custom State', developerName: 'CUSTOM'};
-      const result = buildDropdownItems(customState, []);
+      const result = buildDropdownItems(customState, [], '1');
 
-      expect(result).toEqual([{id: 'custom-CUSTOM', name: 'Custom State'}]);
+      expect(result).toEqual([{id: 'hide-CUSTOM', name: 'Custom State', developerName: 'CUSTOM'}]);
     });
 
     it('should handle idleCodes with only RONA and ENGAGED', () => {
@@ -289,8 +298,30 @@ describe('UserState Utils', () => {
         {id: '4', name: 'ENGAGED', isSystem: true, isDefault: false},
       ];
 
-      const result = buildDropdownItems(null, ronaEngagedOnly);
+      const result = buildDropdownItems(null, ronaEngagedOnly, '1');
       expect(result).toEqual([]);
+    });
+
+    it('should include RONA when it is the current state', () => {
+      const result = buildDropdownItems(null, mockIdleCodes, '3');
+
+      expect(result).toEqual([
+        {id: '0', name: 'Available'},
+        {id: '1', name: 'Break'},
+        {id: '2', name: 'Training'},
+        {id: 'hide-3', name: 'RONA', isSystem: true, isDefault: false},
+      ]);
+    });
+
+    it('should use correct prefix for custom state', () => {
+      const customState = {name: 'Custom State', developerName: 'CUSTOM'};
+      const result = buildDropdownItems(customState, mockIdleCodes, '1');
+
+      expect(result[0]).toEqual({
+        id: 'hide-CUSTOM',
+        name: 'Custom State',
+        developerName: 'CUSTOM',
+      });
     });
   });
 });

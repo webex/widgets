@@ -7,24 +7,23 @@ import {Icon, Button, Select, Option} from '@momentum-design/components/dist/rea
 import ConsultTransferPopoverComponent from './CallControlCustom/consult-transfer-popover';
 import AutoWrapupTimer from '../AutoWrapupTimer/AutoWrapupTimer';
 import type {MEDIA_CHANNEL as MediaChannelType} from '../task.types';
-import {getMediaTypeInfo} from '../../../utils';
 import {DestinationType} from '@webex/cc-store';
+import {WRAP_UP, WRAP_UP_INTERACTION, WRAP_UP_REASON, SELECT, SUBMIT_WRAP_UP} from '../constants';
 import {
-  RESUME_CALL,
-  HOLD_CALL,
-  CONSULT_AGENT,
-  TRANSFER,
-  PAUSE_RECORDING,
-  RESUME_RECORDING,
-  END,
-  WRAP_UP,
-  WRAP_UP_INTERACTION,
-  WRAP_UP_REASON,
-  SELECT,
-  SUBMIT_WRAP_UP,
-  MUTE_CALL,
-  UNMUTE_CALL,
-} from '../constants';
+  handleToggleHold as handleToggleHoldUtil,
+  handleMuteToggle as handleMuteToggleUtil,
+  handleWrapupCall as handleWrapupCallUtil,
+  handleWrapupChange as handleWrapupChangeUtil,
+  handleTargetSelect as handleTargetSelectUtil,
+  handleCloseButtonPress,
+  handleWrapupReasonChange,
+  handleAudioRef,
+  getMediaType,
+  isTelephonyMediaType,
+  buildCallControlButtons,
+  filterButtonsForConsultation,
+  updateCallStateFromTask,
+} from './call-control.utils';
 import {withMetrics} from '@webex/cc-ui-logging';
 
 function CallControlComponent(props: CallControlComponentProps) {
@@ -67,187 +66,75 @@ function CallControlComponent(props: CallControlComponentProps) {
   } = props;
 
   useEffect(() => {
-    if (!currentTask || !currentTask.data || !currentTask.data.interaction) return;
-
-    const {interaction, mediaResourceId} = currentTask.data;
-    const {media, callProcessingDetails} = interaction;
-    const isHold = media && media[mediaResourceId] && media[mediaResourceId].isHold;
-    setIsHeld(isHold);
-
-    if (callProcessingDetails) {
-      const {isPaused} = callProcessingDetails;
-      setIsRecording(!isPaused);
-    }
+    updateCallStateFromTask(currentTask, setIsHeld, setIsRecording);
   }, [currentTask]);
 
   const handletoggleHold = () => {
-    logger.info(`CC-Widgets: CallControl: is Call On Hold status is ${isHeld}`, {
-      module: 'call-control.tsx',
-      method: 'handletoggleHold',
-    });
-    toggleHold(!isHeld);
-    setIsHeld(!isHeld);
+    handleToggleHoldUtil(isHeld, toggleHold, setIsHeld, logger);
   };
 
   const handleMuteToggle = () => {
-    setIsMuteButtonDisabled(true);
-
-    try {
-      toggleMute();
-    } catch (error) {
-      logger.error(`Mute toggle failed: ${error}`, {
-        module: 'call-control.tsx',
-        method: 'handleMuteToggle',
-      });
-    } finally {
-      // Re-enable button after operation
-      setTimeout(() => {
-        setIsMuteButtonDisabled(false);
-      }, 500);
-    }
+    handleMuteToggleUtil(toggleMute, setIsMuteButtonDisabled, logger);
   };
 
-  const handleWrapupCall = () => {
-    logger.info('CC-Widgets: CallControl: wrap-up submitted', {
-      module: 'call-control.tsx',
-      method: 'handleWrapupCall',
-    });
-    if (selectedWrapupReason && selectedWrapupId) {
-      wrapupCall(selectedWrapupReason, selectedWrapupId);
-      setSelectedWrapupReason(null);
-      setSelectedWrapupId(null);
-      logger.log('CC-Widgets: CallControl: wrapup completed', {
-        module: 'call-control.tsx',
-        method: 'handleWrapupCall',
-      });
-    }
+  const handleWrapupCallLocal = () => {
+    handleWrapupCallUtil(
+      selectedWrapupReason,
+      selectedWrapupId,
+      wrapupCall,
+      setSelectedWrapupReason,
+      setSelectedWrapupId,
+      logger
+    );
   };
 
   const handleWrapupChange = (text, value) => {
-    setSelectedWrapupReason(text);
-    setSelectedWrapupId(value);
+    handleWrapupChangeUtil(text, value, setSelectedWrapupReason, setSelectedWrapupId);
   };
 
   const handleTargetSelect = (id: string, name: string, type: DestinationType) => {
-    logger.info('CC-Widgets: CallControl: handling target agent selected', {
-      module: 'call-control.tsx',
-      method: 'handleTargetSelect',
-    });
-    if (agentMenuType === 'Consult') {
-      try {
-        consultCall(id, type);
-        setConsultAgentId(id);
-        setConsultAgentName(name);
-        setLastTargetType(type);
-      } catch (error) {
-        throw new Error('Error during consult call', error);
-      }
-    } else if (agentMenuType === 'Transfer') {
-      try {
-        transferCall(id, type);
-      } catch (error) {
-        throw new Error('Error during transfer call', error);
-      }
-    }
+    handleTargetSelectUtil(
+      id,
+      name,
+      type,
+      agentMenuType,
+      consultCall,
+      transferCall,
+      setConsultAgentId,
+      setConsultAgentName,
+      setLastTargetType,
+      logger
+    );
   };
 
-  const handlePopoverOpen = (menuType: CallControlMenuType) => {
-    logger.info('CC-Widgets: CallControl: opening call control popover', {
-      module: 'call-control.tsx',
-      method: 'handlePopoverOpen',
-    });
-    if (showAgentMenu && agentMenuType === menuType) {
-      setShowAgentMenu(false);
-      setAgentMenuType(null);
-    } else {
-      setAgentMenuType(menuType);
-      setShowAgentMenu(true);
-      loadBuddyAgents();
-      loadQueues();
-    }
-  };
-
-  const currentMediaType = getMediaTypeInfo(
+  const currentMediaType = getMediaType(
     currentTask.data.interaction.mediaType as MediaChannelType,
     currentTask.data.interaction.mediaChannel as MediaChannelType
   );
 
   const mediaType = currentTask.data.interaction.mediaType as MediaChannelType;
-  const isTelephony = mediaType === 'telephony';
+  const isTelephony = isTelephonyMediaType(mediaType);
 
-  const buttons = [
-    {
-      id: 'mute',
-      icon: isMuted ? 'microphone-muted-bold' : 'microphone-bold',
-      onClick: handleMuteToggle,
-      tooltip: isMuted ? UNMUTE_CALL : MUTE_CALL,
-      className: `${isMuted ? 'call-control-button-muted' : 'call-control-button'}`,
-      disabled: isMuteButtonDisabled,
-      isVisible: controlVisibility.muteUnmute,
-    },
-    {
-      id: 'hold',
-      icon: isHeld ? 'play-bold' : 'pause-bold',
-      onClick: () => handletoggleHold(),
-      tooltip: isHeld ? RESUME_CALL : HOLD_CALL,
-      className: 'call-control-button',
-      disabled: false,
-      isVisible: controlVisibility.holdResume,
-    },
-    {
-      id: 'consult',
-      icon: 'headset-bold',
-      tooltip: CONSULT_AGENT,
-      className: 'call-control-button',
-      disabled: false,
-      menuType: 'Consult',
-      isVisible: controlVisibility.consult,
-    },
-    {
-      id: 'transfer',
-      icon: 'next-bold',
-      tooltip: `${TRANSFER} ${currentMediaType.labelName}`,
-      className: 'call-control-button',
-      disabled: false,
-      menuType: 'Transfer',
-      isVisible: controlVisibility.transfer,
-    },
-    {
-      id: 'record',
-      icon: isRecording ? 'record-paused-bold' : 'record-bold',
-      onClick: () => toggleRecording(),
-      tooltip: isRecording ? PAUSE_RECORDING : RESUME_RECORDING,
-      className: 'call-control-button',
-      disabled: false,
-      isVisible: controlVisibility.pauseResumeRecording,
-    },
-    {
-      id: 'end',
-      icon: 'cancel-regular',
-      onClick: endCall,
-      tooltip: `${END} ${currentMediaType.labelName}`,
-      className: 'call-control-button-cancel',
-      disabled: isHeld,
-      isVisible: controlVisibility.end,
-    },
-  ];
+  const buttons = buildCallControlButtons(
+    isMuted,
+    isHeld,
+    isRecording,
+    isMuteButtonDisabled,
+    currentMediaType,
+    controlVisibility,
+    handleMuteToggle,
+    handletoggleHold,
+    toggleRecording,
+    endCall
+  );
 
-  const filteredButtons =
-    consultInitiated && isTelephony ? buttons.filter((button) => !['hold', 'consult'].includes(button.id)) : buttons;
+  const filteredButtons = filterButtonsForConsultation(buttons, consultInitiated, isTelephony);
 
   if (!currentTask) return null;
 
   return (
     <>
-      <audio
-        ref={(audioElement) => {
-          if (audioElement && callControlAudio) {
-            audioElement.srcObject = callControlAudio;
-          }
-        }}
-        id="remote-audio"
-        autoPlay
-      ></audio>
+      <audio ref={(audioElement) => handleAudioRef(audioElement, callControlAudio)} id="remote-audio" autoPlay></audio>
       <div className="call-control-container" data-testid="call-control-container">
         {!(consultAccepted && isTelephony) && !controlVisibility.wrapup && (
           <div className="button-group">
@@ -258,6 +145,16 @@ function CallControlComponent(props: CallControlComponentProps) {
                 return (
                   <PopoverNext
                     key={index}
+                    onShow={() => {
+                      logger.info(`CC-Widgets: CallControl: showing consult-transfer popover`, {
+                        module: 'call-control.tsx',
+                        method: 'onShowPopover',
+                      });
+                      setShowAgentMenu(true);
+                      setAgentMenuType(button.menuType as CallControlMenuType);
+                      loadBuddyAgents();
+                      loadQueues();
+                    }}
                     onHide={() => {
                       setShowAgentMenu(false);
                       setAgentMenuType(null);
@@ -274,10 +171,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                     closeButtonPlacement="top-right"
                     closeButtonProps={{
                       'aria-label': 'Close popover',
-                      onPress: () => {
-                        setShowAgentMenu(false);
-                        setAgentMenuType(null);
-                      },
+                      onPress: () => handleCloseButtonPress(setShowAgentMenu, setAgentMenuType),
                       outline: true,
                     }}
                     triggerComponent={
@@ -288,8 +182,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                             className={button.className}
                             aria-label={button.tooltip}
                             disabled={button.disabled || (consultInitiated && isTelephony)}
-                            data-testid="ButtonCircle"
-                            onPress={() => handlePopoverOpen(button.menuType as CallControlMenuType)}
+                            data-testid={button.dataTestId}
                           >
                             <Icon className={button.className + '-icon'} name={button.icon} />
                           </ButtonCircle>
@@ -329,7 +222,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                         button.className +
                         (button.disabled || (consultInitiated && isTelephony) ? ` ${button.className}-disabled` : '')
                       }
-                      data-testid={button.id === 'end' ? 'call-control:end-call' : button.id}
+                      data-testid={button.dataTestId}
                       onPress={button.onClick}
                       disabled={button.disabled || (consultInitiated && isTelephony)}
                       aria-label={button.tooltip}
@@ -367,6 +260,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                   type="button"
                   role="button"
                   data-testid="call-control:wrapup-button"
+                  id="call-control-wrapup-button"
                 >
                   {WRAP_UP}
                 </Button>
@@ -399,11 +293,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                 className="wrapup-select"
                 data-testid="call-control:wrapup-select"
                 placeholder={SELECT}
-                onChange={(event: CustomEvent) => {
-                  const key = event.detail.value;
-                  const selectedItem = wrapupCodes?.find((code) => code.id === key);
-                  handleWrapupChange(selectedItem.name, selectedItem.id);
-                }}
+                onChange={(event: CustomEvent) => handleWrapupReasonChange(event, wrapupCodes, handleWrapupChange)}
               >
                 {wrapupCodes?.map((code) => (
                   <Option
@@ -416,7 +306,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                 ))}
               </Select>
               <Button
-                onClick={handleWrapupCall}
+                onClick={handleWrapupCallLocal}
                 variant="primary"
                 className="submit-wrapup-button"
                 data-testid="call-control:wrapup-submit"

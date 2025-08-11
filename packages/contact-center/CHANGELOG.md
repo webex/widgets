@@ -1,3 +1,73 @@
+# [1.28.0-ccwidgets.104](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.103...v1.28.0-ccwidgets.104) (2025-08-08)
+
+
+### Bug Fixes
+
+* **cc-widgets:** Incoming Transfer showing Call control fix  ([#510](https://github.com/webex/widgets/issues/510)) ([25b3025](https://github.com/webex/widgets/commit/25b302592cc0bbf9feb6134cbce0c34088b44761))
+
+# [1.28.0-ccwidgets.103](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.102...v1.28.0-ccwidgets.103) (2025-08-06)
+
+
+### Bug Fixes
+
+* **user-state:** fix-rona-state ([#511](https://github.com/webex/widgets/issues/511)) ([0022bd5](https://github.com/webex/widgets/commit/0022bd5c26b1d9bbc7bc8491b6c7d9013448e6e0))
+
+# [1.28.0-ccwidgets.102](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.101...v1.28.0-ccwidgets.102) (2025-08-06)
+
+
+### Bug Fixes
+
+* **cc-widgets:** multi-stage consult flows ([#507](https://github.com/webex/widgets/issues/507)) ([5bb48ac](https://github.com/webex/widgets/commit/5bb48acbc2398604bc7250024dcf7c2ce2adbea6))
+
+# [1.28.0-ccwidgets.101](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.100...v1.28.0-ccwidgets.101) (2025-08-04)
+
+
+### Bug Fixes
+
+* **cc-widgets:** Transfer issue fix ([#509](https://github.com/webex/widgets/issues/509)) ([038e6fc](https://github.com/webex/widgets/commit/038e6fcc8f81f3a55628c74689961a6281273ce3))
+
+# [1.28.0-ccwidgets.100](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.99...v1.28.0-ccwidgets.100) (2025-08-01)
+
+
+### Bug Fixes
+
+* **auto-wrapup-timer:** added-uts-for-auto-wrapup-timer ([#505](https://github.com/webex/widgets/issues/505)) ([83de01b](https://github.com/webex/widgets/commit/83de01b0fbde77a5dfe40c6ef2f36c647e4076f3))
+
+# [1.28.0-ccwidgets.99](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.98...v1.28.0-ccwidgets.99) (2025-07-31)
+
+
+### Bug Fixes
+
+* **task-controls:** add-uts-for-task-controls ([#502](https://github.com/webex/widgets/issues/502)) ([2a4595b](https://github.com/webex/widgets/commit/2a4595b0d561fe1dbbdd0b0d49cec59c6332c281))
+
+# [1.28.0-ccwidgets.98](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.97...v1.28.0-ccwidgets.98) (2025-07-29)
+
+
+### Bug Fixes
+
+* **incoming-task:** add-uts-for-incoming-task ([#499](https://github.com/webex/widgets/issues/499)) ([b9e6c7c](https://github.com/webex/widgets/commit/b9e6c7c1c9126d8d014e0b1aa1bca3f81c697ac6))
+
+# [1.28.0-ccwidgets.97](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.96...v1.28.0-ccwidgets.97) (2025-07-28)
+
+
+### Bug Fixes
+
+* **widgets:** fixed-consult-transfer-popover-transient-issue ([#506](https://github.com/webex/widgets/issues/506)) ([ae646bd](https://github.com/webex/widgets/commit/ae646bde44ee4fbc5383cfc456c22d2f91b47d20))
+
+# [1.28.0-ccwidgets.96](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.95...v1.28.0-ccwidgets.96) (2025-07-24)
+
+
+### Features
+
+* **cc-widgets:** UI Automation for Basic Task Controls ([#497](https://github.com/webex/widgets/issues/497)) ([6aa1c90](https://github.com/webex/widgets/commit/6aa1c906340aa03ff6f2d43f8e57d3064e327c9e))
+
+# [1.28.0-ccwidgets.95](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.94...v1.28.0-ccwidgets.95) (2025-07-24)
+
+
+### Bug Fixes
+
+* **playwright:** add-logic-to-read-agent2-token ([#504](https://github.com/webex/widgets/issues/504)) ([82866fa](https://github.com/webex/widgets/commit/82866fa77f54113370d7499d19418c310a53aa71))
+
 # [1.28.0-ccwidgets.94](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.93...v1.28.0-ccwidgets.94) (2025-07-16)
 
 
