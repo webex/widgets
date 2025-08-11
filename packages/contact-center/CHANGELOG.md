@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.105](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.104...v1.28.0-ccwidgets.105) (2025-08-11)
+
+
+### Bug Fixes
+
+* **cc-widgets:** E2e tests config updated with new dedicated chat url ([#513](https://github.com/webex/widgets/issues/513)) ([9504d2b](https://github.com/webex/widgets/commit/9504d2b5229082cac0333ae2b7a91b8dc8a42be2))
+
 # [1.28.0-ccwidgets.104](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.103...v1.28.0-ccwidgets.104) (2025-08-08)
 
 
