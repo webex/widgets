@@ -9565,9 +9565,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@webex/cc-ui-logging@workspace:*, @webex/cc-ui-logging@workspace:packages/contact-center/ui-metrics":
+"@webex/cc-ui-logging@workspace:*, @webex/cc-ui-logging@workspace:packages/contact-center/ui-logging":
   version: 0.0.0-use.local
-  resolution: "@webex/cc-ui-logging@workspace:packages/contact-center/ui-metrics"
+  resolution: "@webex/cc-ui-logging@workspace:packages/contact-center/ui-logging"
   dependencies:
     "@testing-library/dom": "npm:10.4.0"
     "@testing-library/jest-dom": "npm:6.6.2"
