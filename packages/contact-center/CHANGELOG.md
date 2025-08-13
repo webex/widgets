@@ -1,3 +1,52 @@
+# [1.28.0-ccwidgets.105](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.104...v1.28.0-ccwidgets.105) (2025-08-11)
+
+
+### Bug Fixes
+
+* **cc-widgets:** E2e tests config updated with new dedicated chat url ([#513](https://github.com/webex/widgets/issues/513)) ([9504d2b](https://github.com/webex/widgets/commit/9504d2b5229082cac0333ae2b7a91b8dc8a42be2))
+
+# [1.28.0-ccwidgets.104](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.103...v1.28.0-ccwidgets.104) (2025-08-08)
+
+
+### Bug Fixes
+
+* **cc-widgets:** Incoming Transfer showing Call control fix  ([#510](https://github.com/webex/widgets/issues/510)) ([25b3025](https://github.com/webex/widgets/commit/25b302592cc0bbf9feb6134cbce0c34088b44761))
+
+# [1.28.0-ccwidgets.103](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.102...v1.28.0-ccwidgets.103) (2025-08-06)
+
+
+### Bug Fixes
+
+* **user-state:** fix-rona-state ([#511](https://github.com/webex/widgets/issues/511)) ([0022bd5](https://github.com/webex/widgets/commit/0022bd5c26b1d9bbc7bc8491b6c7d9013448e6e0))
+
+# [1.28.0-ccwidgets.102](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.101...v1.28.0-ccwidgets.102) (2025-08-06)
+
+
+### Bug Fixes
+
+* **cc-widgets:** multi-stage consult flows ([#507](https://github.com/webex/widgets/issues/507)) ([5bb48ac](https://github.com/webex/widgets/commit/5bb48acbc2398604bc7250024dcf7c2ce2adbea6))
+
+# [1.28.0-ccwidgets.101](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.100...v1.28.0-ccwidgets.101) (2025-08-04)
+
+
+### Bug Fixes
+
+* **cc-widgets:** Transfer issue fix ([#509](https://github.com/webex/widgets/issues/509)) ([038e6fc](https://github.com/webex/widgets/commit/038e6fcc8f81f3a55628c74689961a6281273ce3))
+
+# [1.28.0-ccwidgets.100](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.99...v1.28.0-ccwidgets.100) (2025-08-01)
+
+
+### Bug Fixes
+
+* **auto-wrapup-timer:** added-uts-for-auto-wrapup-timer ([#505](https://github.com/webex/widgets/issues/505)) ([83de01b](https://github.com/webex/widgets/commit/83de01b0fbde77a5dfe40c6ef2f36c647e4076f3))
+
+# [1.28.0-ccwidgets.99](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.98...v1.28.0-ccwidgets.99) (2025-07-31)
+
+
+### Bug Fixes
+
+* **task-controls:** add-uts-for-task-controls ([#502](https://github.com/webex/widgets/issues/502)) ([2a4595b](https://github.com/webex/widgets/commit/2a4595b0d561fe1dbbdd0b0d49cec59c6332c281))
+
 # [1.28.0-ccwidgets.98](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.97...v1.28.0-ccwidgets.98) (2025-07-29)
 
 

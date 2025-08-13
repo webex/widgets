@@ -10,6 +10,7 @@ import {
   OutdialCall,
 } from '@webex/cc-widgets';
 import {StationLogoutResponse} from '@webex/plugin-cc';
+import {ERROR_TRIGGERING_IDLE_CODES} from '@webex/cc-store';
 import Webex from 'webex';
 import {ThemeProvider, IconProvider, Icon, Button, Checkbox, Text, Select, Option} from '@momentum-design/components/dist/react';
 import {PopoverNext} from '@momentum-ui/react-collaboration';
@@ -361,7 +362,7 @@ const onToggleMute = ({isMuted, task}) => {
   //adding a log to be used for automation
   console.log('onStateChange invoked with state name:', status?.name);
   if (!status || !status.name) return;
-  if (status.name !== 'RONA') {
+  if (!Object.values(ERROR_TRIGGERING_IDLE_CODES).includes(status.name)) {
     setShowRejectedPopup(false);
     setRejectedReason('');
   }

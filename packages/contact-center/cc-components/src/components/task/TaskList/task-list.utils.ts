@@ -1,6 +1,6 @@
 import {MEDIA_CHANNEL, TaskListItemData} from '../task.types';
 import {ITask} from '@webex/cc-store';
-
+import {isIncomingTask} from '@webex/cc-store';
 /**
  * Extracts and processes data from a task for rendering in the task list
  * @param task - The task object
@@ -20,7 +20,7 @@ export const extractTaskListItemData = (task: ITask, isBrowser: boolean): TaskLi
 
   const taskState = task.data.interaction.state;
   const startTimeStamp = task.data.interaction.createdTimestamp;
-  const isIncomingTask = taskState === 'new' || taskState === 'consult';
+  const isTaskIncoming = isIncomingTask(task);
   const mediaType = task.data.interaction.mediaType;
   const mediaChannel = task.data.interaction.mediaChannel;
 
@@ -29,21 +29,20 @@ export const extractTaskListItemData = (task: ITask, isBrowser: boolean): TaskLi
   const isSocial = mediaType === MEDIA_CHANNEL.SOCIAL;
 
   // Compute button text based on conditions
-  const acceptText =
-    isIncomingTask && !task.data.wrapUpRequired ? (isTelephony && !isBrowser ? 'Ringing...' : 'Accept') : undefined;
+  const acceptText = isTaskIncoming ? (isTelephony && !isBrowser ? 'Ringing...' : 'Accept') : undefined;
 
-  const declineText = isIncomingTask && !task.data.wrapUpRequired && isTelephony && isBrowser ? 'Decline' : undefined;
+  const declineText = isTaskIncoming && isTelephony && isBrowser ? 'Decline' : undefined;
 
   // Compute title based on media type
   const title = isSocial ? customerName : ani;
 
   // Compute disable state for accept button
-  const disableAccept = isIncomingTask && isTelephony && !isBrowser;
+  const disableAccept = isTaskIncoming && isTelephony && !isBrowser;
 
-  const ronaTimeout = isIncomingTask ? rawRonaTimeout : null;
+  const ronaTimeout = isTaskIncoming ? rawRonaTimeout : null;
 
   // Compute display state
-  const displayState = !isIncomingTask ? taskState : '';
+  const displayState = !isTaskIncoming ? taskState : '';
 
   return {
     ani,
@@ -52,7 +51,7 @@ export const extractTaskListItemData = (task: ITask, isBrowser: boolean): TaskLi
     ronaTimeout,
     taskState,
     startTimeStamp,
-    isIncomingTask,
+    isIncomingTask: isTaskIncoming,
     mediaType,
     mediaChannel,
     isTelephony,

@@ -171,7 +171,13 @@ describe('storeEventsWrapper', () => {
           interactionId: 'mockInteractionId',
           interaction: {
             state: 'connected',
+            participants: {
+              agent1: {
+                hasJoined: true,
+              },
+            },
           },
+          agentId: 'agent1',
         },
       } as ITask;
       storeWrapper.setCurrentTask(mockCurrentTask);
@@ -470,7 +476,13 @@ describe('storeEventsWrapper', () => {
         interactionId: 'interaction1',
         interaction: {
           state: 'connected',
+          participants: {
+            agent1: {
+              hasJoined: true,
+            },
+          },
         },
+        agentId: 'agent1',
       },
       on: jest.fn(),
       off: jest.fn(),
@@ -510,13 +522,32 @@ describe('storeEventsWrapper', () => {
           interaction: {
             state: 'new',
           },
+          agentId: 'agent1',
+          // Note: mockTask2 doesn't have hasJoined: true to simulate an incoming task
         },
         on: jest.fn(),
         off: jest.fn(),
       } as unknown as ITask;
 
-      storeWrapper['store'].taskList = {interaction2: mockTask};
-      storeWrapper.setCurrentTask(mockTask);
+      // Set up mockTask with hasJoined: true so it can be set as current task
+      const mockTaskWithJoined = {
+        ...mockTask,
+        data: {
+          ...mockTask.data,
+          interaction: {
+            ...mockTask.data.interaction,
+            participants: {
+              agent1: {
+                hasJoined: true,
+              },
+            },
+          },
+          agentId: 'agent1',
+        },
+      };
+
+      storeWrapper['store'].taskList = {interaction2: mockTaskWithJoined};
+      storeWrapper.setCurrentTask(mockTaskWithJoined);
 
       // Call the method under test
       storeWrapper.handleIncomingTask(mockTask2);
@@ -1647,10 +1678,32 @@ describe('storeEventsWrapper', () => {
 
     beforeEach(() => {
       mockTaskA = {
-        data: {interactionId: 'taskA', interaction: {state: 'connected'}},
+        data: {
+          interactionId: 'taskA',
+          interaction: {
+            state: 'connected',
+            participants: {
+              agent1: {
+                hasJoined: true,
+              },
+            },
+          },
+          agentId: 'agent1',
+        },
       } as ITask;
       mockTaskB = {
-        data: {interactionId: 'taskB', interaction: {state: 'connected'}},
+        data: {
+          interactionId: 'taskB',
+          interaction: {
+            state: 'connected',
+            participants: {
+              agent1: {
+                hasJoined: true,
+              },
+            },
+          },
+          agentId: 'agent1',
+        },
       } as ITask;
       storeWrapper['store'].consultCompleted = true;
       storeWrapper['store'].consultInitiated = true;
@@ -1694,6 +1747,60 @@ describe('storeEventsWrapper', () => {
       expect(storeWrapper.currentTask).toEqual(mockTaskA);
       storeWrapper.setCurrentTask(null);
       expect(storeWrapper.currentTask).toBeNull();
+    });
+
+    it('should not change currentTask when task is incoming (hasJoined is false)', () => {
+      // Set an initial task that can be set as current task
+      storeWrapper.setCurrentTask(mockTaskA);
+      expect(storeWrapper.currentTask).toEqual(mockTaskA);
+
+      // Create an incoming task (without hasJoined: true)
+      const incomingTask: ITask = {
+        data: {
+          interactionId: 'incomingTask',
+          interaction: {
+            state: 'new',
+            // Note: no participants or hasJoined property to simulate incoming task
+          },
+          agentId: 'agent1',
+        },
+      } as ITask;
+
+      // Try to set the incoming task as current task
+      storeWrapper.setCurrentTask(incomingTask);
+
+      // Current task should remain unchanged (still mockTaskA)
+      expect(storeWrapper.currentTask).toEqual(mockTaskA);
+      expect(storeWrapper.currentTask).not.toEqual(incomingTask);
+    });
+
+    it('should not change currentTask when task has hasJoined false', () => {
+      // This is the case where we transfer the call but agent has not accepted it yet.
+      storeWrapper.setCurrentTask(mockTaskA);
+      expect(storeWrapper.currentTask).toEqual(mockTaskA);
+
+      // Create a task with explicitly hasJoined: false
+      const taskWithoutJoined: ITask = {
+        data: {
+          interactionId: 'taskWithoutJoined',
+          interaction: {
+            state: 'connected',
+            participants: {
+              agent1: {
+                hasJoined: false,
+              },
+            },
+          },
+          agentId: 'agent1',
+        },
+      } as ITask;
+
+      // Try to set the task without joined as current task
+      storeWrapper.setCurrentTask(taskWithoutJoined);
+
+      // Current task should remain unchanged (still mockTaskA)
+      expect(storeWrapper.currentTask).toEqual(mockTaskA);
+      expect(storeWrapper.currentTask).not.toEqual(taskWithoutJoined);
     });
   });
 });

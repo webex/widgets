@@ -9,6 +9,22 @@ import {
 import {MEDIA_CHANNEL, TaskListItemData} from '../../../../src/components/task/task.types';
 import {mockTask} from '@webex/test-fixtures';
 
+// Mock the store with a mockable isIncomingTask function
+jest.mock('@webex/cc-store', () => ({
+  isIncomingTask: jest.fn(() => false),
+  cc: {},
+  deviceType: 'BROWSER',
+  logger: {
+    debug: jest.fn(),
+    error: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+  },
+}));
+
+// Import the mocked functions
+import {isIncomingTask} from '@webex/cc-store';
+
 describe('task-list.utils', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -93,6 +109,9 @@ describe('task-list.utils', () => {
 
     describe('Incoming tasks', () => {
       it('should extract correct data for incoming telephony task on browser', () => {
+        // Mock isIncomingTask to return true for this test
+        (isIncomingTask as jest.Mock).mockReturnValueOnce(true);
+
         const originalState = mockTask.data.interaction.state;
         const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
         const originalWrapUpRequired = mockTask.data.wrapUpRequired;
@@ -126,7 +145,44 @@ describe('task-list.utils', () => {
         mockTask.data.interaction.mediaType = originalMediaType;
       });
 
+      it('should extract correct data for incoming telephony task on browser if wrapUpRequired', () => {
+        const originalState = mockTask.data.interaction.state;
+        const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+        const originalWrapUpRequired = mockTask.data.wrapUpRequired;
+        const originalMediaType = mockTask.data.interaction.mediaType;
+
+        mockTask.data.interaction.state = 'new';
+        mockTask.data.interaction.callAssociatedDetails = {
+          ani: '9876543210',
+          customerName: 'Jane Smith',
+          virtualTeamName: 'Sales Team',
+          ronaTimeout: '60',
+        };
+        mockTask.data.wrapUpRequired = true;
+        mockTask.data.interaction.mediaType = MEDIA_CHANNEL.TELEPHONY;
+
+        const result = extractTaskListItemData(mockTask, true);
+
+        expect(result.ani).toBe('9876543210');
+        expect(result.ronaTimeout).toBeNull(); // Active tasks don't show RONA timeout
+        expect(result.taskState).toBe('new');
+        expect(result.isIncomingTask).toBe(false);
+        expect(result.acceptText).toBeUndefined();
+        expect(result.declineText).toBeUndefined();
+        expect(result.disableAccept).toBe(false);
+        expect(result.displayState).toBe('new');
+
+        // Restore original values
+        mockTask.data.interaction.state = originalState;
+        mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
+        mockTask.data.wrapUpRequired = originalWrapUpRequired;
+        mockTask.data.interaction.mediaType = originalMediaType;
+      });
+
       it('should extract correct data for incoming telephony task on non-browser', () => {
+        // Mock isIncomingTask to return true for this test
+        (isIncomingTask as jest.Mock).mockReturnValueOnce(true);
+
         const originalState = mockTask.data.interaction.state;
         const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
         const originalWrapUpRequired = mockTask.data.wrapUpRequired;
@@ -156,6 +212,9 @@ describe('task-list.utils', () => {
       });
 
       it('should extract correct data for incoming social media task', () => {
+        // Mock isIncomingTask to return true for this test
+        (isIncomingTask as jest.Mock).mockReturnValueOnce(true);
+
         const originalState = mockTask.data.interaction.state;
         const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
         const originalWrapUpRequired = mockTask.data.wrapUpRequired;
@@ -394,6 +453,9 @@ describe('task-list.utils', () => {
     });
 
     it('should not call onTaskSelect for non-selectable task', () => {
+      // Mock isIncomingTask to return true so this task is non-selectable
+      (isIncomingTask as jest.Mock).mockReturnValueOnce(true);
+
       const task = {
         ...mockTask,
         data: {

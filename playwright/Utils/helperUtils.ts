@@ -1,10 +1,26 @@
-import { Page } from '@playwright/test';
-import { getCurrentState, changeUserState } from './userStateUtils';
-import { WRAPUP_REASONS, USER_STATES, RONA_OPTIONS, LOGIN_MODE, LoginMode, ThemeColor, userState, WrapupReason } from '../constants';
-import { submitWrapup } from './wrapupUtils';
-import { acceptExtensionCall, submitRonaPopup } from './incomingTaskUtils';
-import { loginViaAccessToken, disableMultiLogin, enableMultiLogin, initialiseWidgets, enableAllWidgets, } from './initUtils';
-import { stationLogout, telephonyLogin } from './stationLoginUtils';
+import {Page} from '@playwright/test';
+import {getCurrentState, changeUserState} from './userStateUtils';
+import {
+  WRAPUP_REASONS,
+  USER_STATES,
+  RONA_OPTIONS,
+  LOGIN_MODE,
+  LoginMode,
+  ThemeColor,
+  userState,
+  WrapupReason,
+  AWAIT_TIMEOUT,
+} from '../constants';
+import {submitWrapup} from './wrapupUtils';
+import {acceptExtensionCall, submitRonaPopup} from './incomingTaskUtils';
+import {
+  loginViaAccessToken,
+  disableMultiLogin,
+  enableMultiLogin,
+  initialiseWidgets,
+  enableAllWidgets,
+} from './initUtils';
+import {stationLogout, telephonyLogin} from './stationLoginUtils';
 /**
  * Parses a time string in MM:SS format and converts it to total seconds
  * @param timeString - Time string in format "MM:SS" (e.g., "01:30" for 1 minute 30 seconds)
@@ -37,7 +53,10 @@ export function parseTimeString(timeString: string): number {
  * expect(isDisconnected).toBe(true);
  * ```
  */
-export async function waitForWebSocketDisconnection(consoleMessages: string[], timeoutMs: number = 15000): Promise<boolean> {
+export async function waitForWebSocketDisconnection(
+  consoleMessages: string[],
+  timeoutMs: number = 15000
+): Promise<boolean> {
   const startTime = Date.now();
   while (Date.now() - startTime < timeoutMs) {
     const webSocketDisconnectLog = consoleMessages.find(
@@ -67,7 +86,10 @@ export async function waitForWebSocketDisconnection(consoleMessages: string[], t
  * expect(isReconnected).toBe(true);
  * ```
  */
-export async function waitForWebSocketReconnection(consoleMessages: string[], timeoutMs: number = 15000): Promise<boolean> {
+export async function waitForWebSocketReconnection(
+  consoleMessages: string[],
+  timeoutMs: number = 15000
+): Promise<boolean> {
   const startTime = Date.now();
   while (Date.now() - startTime < timeoutMs) {
     const webSocketReconnectLog = consoleMessages.find((msg) =>
@@ -95,12 +117,9 @@ export async function waitForWebSocketReconnection(consoleMessages: string[], ti
  * ```
  */
 
-export const waitForState = async (
-  page: Page,
-  expectedState: userState,
-): Promise<void> => {
+export const waitForState = async (page: Page, expectedState: userState): Promise<void> => {
   const start = Date.now();
-  const timeoutMs: number = 10000
+  const timeoutMs: number = 10000;
   while (true) {
     const currentState = await getCurrentState(page);
     if (currentState === expectedState) return;
@@ -110,7 +129,6 @@ export const waitForState = async (
     await page.waitForTimeout(500); // Poll every 500ms
   }
 };
-
 
 /**
  * Retrieves the last state from captured logs
@@ -124,11 +142,8 @@ export const waitForState = async (
  * ```
  */
 
-
 export async function getLastStateFromLogs(capturedLogs: string[]) {
-  const stateChangeLogs = capturedLogs.filter(log =>
-    log.includes('onStateChange invoked with state name:')
-  );
+  const stateChangeLogs = capturedLogs.filter((log) => log.includes('onStateChange invoked with state name:'));
 
   if (stateChangeLogs.length === 0) {
     return 'No state change logs found';
@@ -143,7 +158,6 @@ export async function getLastStateFromLogs(capturedLogs: string[]) {
 
   return match[1].trim();
 }
-
 
 /**
  * Waits for a specific state to appear in the captured logs
@@ -178,10 +192,9 @@ export const waitForStateLogs = async (
     if (Date.now() - start > timeoutMs) {
       throw new Error(`Timed out waiting for state "${expectedState}" in logs`);
     }
-    await new Promise(res => setTimeout(res, 300)); // Poll every 300ms
+    await new Promise((res) => setTimeout(res, 300)); // Poll every 300ms
   }
 };
-
 
 /**
  * Waits for a specific wrapup reason to appear in the captured logs
@@ -214,10 +227,9 @@ export const waitForWrapupReasonLogs = async (
     if (Date.now() - start > timeoutMs) {
       throw new Error(`Timed out waiting for wrapup reason "${expectedReason}" in logs`);
     }
-    await new Promise(res => setTimeout(res, 300)); // Poll every 300ms
+    await new Promise((res) => setTimeout(res, 300)); // Poll every 300ms
   }
 };
-
 
 /**
  * Retrieves the last wrapup reason from captured logs
@@ -232,11 +244,8 @@ export const waitForWrapupReasonLogs = async (
  * ```
  */
 
-
 export async function getLastWrapupReasonFromLogs(capturedLogs: string[]): Promise<string> {
-  const wrapupLogs = capturedLogs.filter(log =>
-    log.includes('onWrapup invoked with reason :')
-  );
+  const wrapupLogs = capturedLogs.filter((log) => log.includes('onWrapup invoked with reason :'));
 
   if (wrapupLogs.length === 0) {
     return 'No wrapup reason found';
@@ -252,7 +261,6 @@ export async function getLastWrapupReasonFromLogs(capturedLogs: string[]): Promi
   return match[1].trim();
 }
 
-
 /**
  * Compares two RGB color strings to check if they are within a specified tolerance
  * @param receivedColor - The color received from the UI (e.g., "rgb(255, 0, 0)")
@@ -267,19 +275,12 @@ export async function getLastWrapupReasonFromLogs(capturedLogs: string[]): Promi
  * ```
  */
 
-export function isColorClose(
-  receivedColor: string,
-  expectedColor: ThemeColor,
-  tolerance: number = 10
-): boolean {
+export function isColorClose(receivedColor: string, expectedColor: ThemeColor, tolerance: number = 10): boolean {
   const receivedRgb = receivedColor.match(/\d+/g)?.map(Number) || [];
   const expectedRgb = expectedColor.match(/\d+/g)?.map(Number) || [];
 
   for (let i = 0; i < 3; i++) {
-    if (
-      typeof receivedRgb[i] !== 'number' ||
-      typeof expectedRgb[i] !== 'number'
-    ) {
+    if (typeof receivedRgb[i] !== 'number' || typeof expectedRgb[i] !== 'number') {
       continue; // skip if not present
     }
     if (Math.abs(receivedRgb[i] - expectedRgb[i]) > tolerance) {
@@ -288,7 +289,6 @@ export function isColorClose(
   }
   return true;
 }
-
 
 /**
  * Handles stray incoming tasks by accepting them and performing wrap-up actions, to be used for clean up before tests
@@ -320,34 +320,44 @@ export const handleStrayTasks = async (page: Page, extensionPage: Page | null = 
         if (!extensionPage) {
           throw new Error('Extension page is not available for handling extension call');
         }
-        const extensionCallVisible = await extensionPage.locator('[data-test="right-action-button"]').waitFor({ state: 'visible', timeout: 40000 }).then(() => true).catch(() => false);
+        const extensionCallVisible = await extensionPage
+          .locator('[data-test="right-action-button"]')
+          .waitFor({state: 'visible', timeout: 40000})
+          .then(() => true)
+          .catch(() => false);
         if (extensionCallVisible) {
           await acceptExtensionCall(extensionPage);
-          flag1 = true
+          flag1 = true;
         } else {
           throw new Error('Accept button not visible and extension page is not available');
         }
       } else {
         try {
-          await acceptButton.click({ timeout: 5000 });
-        } catch (error) { }
+          await acceptButton.click({timeout: AWAIT_TIMEOUT});
+        } catch (error) {}
         flag1 = true;
       }
       await page.waitForTimeout(1000);
     }
     const endButton = page.getByTestId('call-control:end-call').first();
-    const endButtonVisible = await endButton.waitFor({ state: 'visible', timeout: 2000 }).then(() => true).catch(() => false);
+    const endButtonVisible = await endButton
+      .waitFor({state: 'visible', timeout: 2000})
+      .then(() => true)
+      .catch(() => false);
     if (endButtonVisible) {
       await page.waitForTimeout(2000);
-      await endButton.click({ timeout: 5000 });
+      await endButton.click({timeout: AWAIT_TIMEOUT});
       await submitWrapup(page, WRAPUP_REASONS.SALE);
     } else {
       const wrapupBox = page.getByTestId('call-control:wrapup-button').first();
-      const isWrapupBoxVisible = await wrapupBox.waitFor({ state: 'visible', timeout: 2000 }).then(() => true).catch(() => false);
+      const isWrapupBoxVisible = await wrapupBox
+        .waitFor({state: 'visible', timeout: 2000})
+        .then(() => true)
+        .catch(() => false);
       if (isWrapupBoxVisible) {
         await page.waitForTimeout(2000);
         await submitWrapup(page, WRAPUP_REASONS.SALE);
-        await page.waitForTimeout(2000)
+        await page.waitForTimeout(2000);
       } else {
         flag2 = false;
       }
@@ -357,8 +367,7 @@ export const handleStrayTasks = async (page: Page, extensionPage: Page | null = 
       break;
     }
   }
-
-}
+};
 
 /*
 / * Sets up the page for testing by logging in, enabling widgets, and handling user states, cleaning up stray tasks, submitting RONA popups
@@ -375,7 +384,12 @@ export const handleStrayTasks = async (page: Page, extensionPage: Page | null = 
  * ```
  */
 
-export const pageSetup = async (page: Page, loginMode: LoginMode, agentName: string, extensionPage: Page | null = null) => {
+export const pageSetup = async (
+  page: Page,
+  loginMode: LoginMode,
+  agentName: string,
+  extensionPage: Page | null = null
+) => {
   const maxRetries = 3;
   await loginViaAccessToken(page, agentName);
   await enableAllWidgets(page);
@@ -390,7 +404,6 @@ export const pageSetup = async (page: Page, loginMode: LoginMode, agentName: str
       await initialiseWidgets(page);
       break;
     } catch (error) {
-
       if (i == maxRetries - 1) {
         throw new Error(`Failed to initialise widgets after ${maxRetries} attempts: ${error}`);
       }
@@ -406,9 +419,17 @@ export const pageSetup = async (page: Page, loginMode: LoginMode, agentName: str
   if (loginButtonExists) {
     await telephonyLogin(page, loginMode);
   } else {
-    const stateSelectVisible = await page.getByTestId('state-select').waitFor({ state: 'visible', timeout: 30000 }).then(() => true).catch(() => false);
+    const stateSelectVisible = await page
+      .getByTestId('state-select')
+      .waitFor({state: 'visible', timeout: 30000})
+      .then(() => true)
+      .catch(() => false);
     if (stateSelectVisible) {
-      const ronapopupVisible = await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 5000 }).then(() => true).catch(() => false);
+      const ronapopupVisible = await page
+        .getByTestId('samples:rona-popup')
+        .waitFor({state: 'visible', timeout: AWAIT_TIMEOUT})
+        .then(() => true)
+        .catch(() => false);
       if (ronapopupVisible) {
         await submitRonaPopup(page, RONA_OPTIONS.AVAILABLE);
       }
@@ -417,7 +438,7 @@ export const pageSetup = async (page: Page, loginMode: LoginMode, agentName: str
       await page.waitForTimeout(5000);
 
       const incomingTaskDiv = page.getByTestId(/^samples:incoming-task(-\w+)?$/).first();
-      await incomingTaskDiv.waitFor({ state: 'visible', timeout: 5000 }).catch(() => false);
+      await incomingTaskDiv.waitFor({state: 'visible', timeout: AWAIT_TIMEOUT}).catch(() => false);
       await handleStrayTasks(page, extensionPage);
     }
     loginButtonExists = await page
@@ -425,17 +446,24 @@ export const pageSetup = async (page: Page, loginMode: LoginMode, agentName: str
       .isVisible()
       .catch(() => false);
 
-
     if (!loginButtonExists) await stationLogout(page);
     await telephonyLogin(page, loginMode);
   }
 
-  let ronapopupVisible = await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 5000 }).then(() => true).catch(() => false);
+  let ronapopupVisible = await page
+    .getByTestId('samples:rona-popup')
+    .waitFor({state: 'visible', timeout: AWAIT_TIMEOUT})
+    .then(() => true)
+    .catch(() => false);
   if (ronapopupVisible) {
     await submitRonaPopup(page, RONA_OPTIONS.AVAILABLE);
   }
 
-  let stationLoginFailure = await page.getByTestId('station-login-failure-label').waitFor({ state: 'visible', timeout: 5000 }).then(() => true).catch(() => false);
+  let stationLoginFailure = await page
+    .getByTestId('station-login-failure-label')
+    .waitFor({state: 'visible', timeout: AWAIT_TIMEOUT})
+    .then(() => true)
+    .catch(() => false);
   for (let i = 0; i < maxRetries && stationLoginFailure; i++) {
     loginButtonExists = await page
       .getByTestId('login-button')
@@ -443,16 +471,24 @@ export const pageSetup = async (page: Page, loginMode: LoginMode, agentName: str
       .catch(() => false);
     if (!loginButtonExists) await stationLogout(page);
     await telephonyLogin(page, loginMode);
-    await page.getByTestId('state-select').waitFor({ state: 'visible', timeout: 30000 });
-    stationLoginFailure = await page.getByTestId('station-login-failure-label').waitFor({ state: 'visible', timeout: 5000 }).then(() => true).catch(() => false);
+    await page.getByTestId('state-select').waitFor({state: 'visible', timeout: 30000});
+    stationLoginFailure = await page
+      .getByTestId('station-login-failure-label')
+      .waitFor({state: 'visible', timeout: AWAIT_TIMEOUT})
+      .then(() => true)
+      .catch(() => false);
     if (i == maxRetries - 1 && stationLoginFailure) {
       throw new Error(`Station Login Error Persists after ${maxRetries} attempts`);
     }
   }
 
-  await page.getByTestId('state-select').waitFor({ state: 'visible', timeout: 30000 });
+  await page.getByTestId('state-select').waitFor({state: 'visible', timeout: 30000});
 
-  ronapopupVisible = await page.getByTestId('samples:rona-popup').waitFor({ state: 'visible', timeout: 3000 }).then(() => true).catch(() => false);
+  ronapopupVisible = await page
+    .getByTestId('samples:rona-popup')
+    .waitFor({state: 'visible', timeout: 3000})
+    .then(() => true)
+    .catch(() => false);
   if (ronapopupVisible) {
     await submitRonaPopup(page, RONA_OPTIONS.AVAILABLE);
   }
@@ -460,7 +496,6 @@ export const pageSetup = async (page: Page, loginMode: LoginMode, agentName: str
   await changeUserState(page, USER_STATES.AVAILABLE);
   await page.waitForTimeout(3000);
   const incomingTaskDiv = page.getByTestId(/^samples:incoming-task(-\w+)?$/).first();
-  await incomingTaskDiv.waitFor({ state: 'visible', timeout: 5000 }).catch(() => false);
+  await incomingTaskDiv.waitFor({state: 'visible', timeout: AWAIT_TIMEOUT}).catch(() => false);
   await handleStrayTasks(page, extensionPage);
-
-}
+};

@@ -554,6 +554,36 @@ export interface AutoWrapupTimerProps {
   handleCancelWrapup: () => void;
 }
 
+export interface CallControlButton {
+  id: string;
+  icon: string;
+  onClick?: () => void;
+  tooltip: string;
+  className: string;
+  disabled: boolean;
+  isVisible: boolean;
+  menuType?: CallControlMenuType;
+  dataTestId?: string;
+}
+
+export interface ControlVisibility {
+  accept: boolean;
+  decline: boolean;
+  end: boolean;
+  muteUnmute: boolean;
+  holdResume: boolean;
+  consult: boolean;
+  transfer: boolean;
+  conference: boolean;
+  wrapup: boolean;
+  pauseResumeRecording: boolean;
+  endConsult: boolean;
+  recordingIndicator: boolean;
+}
+
+export interface MediaTypeInfo {
+  labelName: string;
+}
 export interface TaskComponentData {
   currentMediaType: {
     labelName: string;
@@ -613,4 +643,12 @@ export enum TaskQueue {
   GENERAL = 'general',
   VIP = 'vip',
   ESCALATION = 'escalation',
+}
+
+export interface TimerUIState {
+  isUrgent: boolean;
+  containerClassName: string;
+  iconClassName: string;
+  iconName: string;
+  formattedTime: string;
 }
