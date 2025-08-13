@@ -28,6 +28,7 @@ exports[`CallControlCADComponent Snapshots should handle edge cases and control 
         >
           <mdc-text
             class="md-text-wrapper call-timer"
+            data-testid="cc-cad:call-timer"
           >
             Voice
              - 
@@ -213,6 +214,7 @@ exports[`CallControlCADComponent Snapshots should handle edge cases and control 
       >
         <mdc-text
           class="md-text-wrapper call-timer"
+          data-testid="cc-cad:call-timer"
         >
           Voice
            - 
@@ -362,6 +364,7 @@ exports[`CallControlCADComponent Snapshots should handle edge cases and control 
       >
         <mdc-text
           class="md-text-wrapper call-timer"
+          data-testid="cc-cad:call-timer"
         >
           Voice
            - 
@@ -639,6 +642,7 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
       >
         <mdc-text
           class="md-text-wrapper call-timer"
+          data-testid="cc-cad:call-timer"
         >
           Chat
            - 
@@ -916,6 +920,7 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
       >
         <mdc-text
           class="md-text-wrapper call-timer"
+          data-testid="cc-cad:call-timer"
         >
           Voice
            - 
@@ -1203,6 +1208,7 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
       >
         <mdc-text
           class="md-text-wrapper call-timer"
+          data-testid="cc-cad:call-timer"
         >
           Voice
            - 
@@ -1480,6 +1486,7 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
       >
         <mdc-text
           class="md-text-wrapper call-timer"
+          data-testid="cc-cad:call-timer"
         >
           Social
            - 
@@ -1758,6 +1765,7 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
         >
           <mdc-text
             class="md-text-wrapper call-timer"
+            data-testid="cc-cad:call-timer"
           >
             Voice
              - 
@@ -1943,6 +1951,7 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
       >
         <mdc-text
           class="md-text-wrapper call-timer"
+          data-testid="cc-cad:call-timer"
         >
           Voice
            - 
@@ -2048,6 +2057,7 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
         >
           <mdc-text
             class="md-text-wrapper call-timer"
+            data-testid="cc-cad:call-timer"
           >
             Voice
              - 
@@ -2379,6 +2389,7 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
       >
         <mdc-text
           class="md-text-wrapper call-timer"
+          data-testid="cc-cad:call-timer"
         >
           Voice
            - 
