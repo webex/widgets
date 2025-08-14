@@ -24,6 +24,7 @@ import {
   filterButtonsForConsultation,
   updateCallStateFromTask,
 } from './call-control.utils';
+import {withMetrics} from '@webex/cc-ui-logging';
 
 function CallControlComponent(props: CallControlComponentProps) {
   const [selectedWrapupReason, setSelectedWrapupReason] = useState<string | null>(null);
@@ -322,4 +323,5 @@ function CallControlComponent(props: CallControlComponentProps) {
   );
 }
 
-export default CallControlComponent;
+const CallControlComponentWithMetrics = withMetrics(CallControlComponent, 'CallControl');
+export default CallControlComponentWithMetrics;

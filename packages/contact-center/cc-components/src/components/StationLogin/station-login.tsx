@@ -17,6 +17,7 @@ import {
   updateDialNumberLabel,
   handleCCSignoutKeyDown,
 } from './station-login.utils';
+import {withMetrics} from '@webex/cc-ui-logging';
 
 const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps> = (props) => {
   const {
@@ -344,4 +345,5 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
   );
 };
 
-export default StationLoginComponent;
+const StationLoginComponentWithMetrics = withMetrics(StationLoginComponent, 'StationLogin');
+export default StationLoginComponentWithMetrics;
