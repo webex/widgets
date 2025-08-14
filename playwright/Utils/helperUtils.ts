@@ -118,15 +118,23 @@ export async function waitForWebSocketReconnection(
  */
 
 export const waitForState = async (page: Page, expectedState: userState): Promise<void> => {
-  const start = Date.now();
-  const timeoutMs: number = 10000;
-  while (true) {
+  try {
+    await page.waitForFunction(
+      async (expectedStateArg) => {
+        // Re-import getCurrentState in the browser context
+        const stateSelect = document.querySelector('[data-test="state-select"]') as HTMLSelectElement;
+        if (!stateSelect) return false;
+
+        const currentState = stateSelect.value?.trim();
+        return currentState === expectedStateArg;
+      },
+      expectedState,
+      {timeout: 10000, polling: 'raf'} // Use requestAnimationFrame for optimal performance
+    );
+  } catch (error) {
+    // Get current state for better error message
     const currentState = await getCurrentState(page);
-    if (currentState === expectedState) return;
-    if (Date.now() - start > timeoutMs) {
-      throw new Error(`Timed out waiting for state "${expectedState}", last state was "${currentState}"`);
-    }
-    await page.waitForTimeout(500); // Poll every 500ms
+    throw new Error(`Timed out waiting for state "${expectedState}", last state was "${currentState}"`);
   }
 };
 
@@ -387,11 +395,12 @@ export const handleStrayTasks = async (page: Page, extensionPage: Page | null = 
 export const pageSetup = async (
   page: Page,
   loginMode: LoginMode,
-  agentName: string,
-  extensionPage: Page | null = null
+  accessToken: string,
+  extensionPage: Page | null = null,
+  extensionNumber?: string
 ) => {
   const maxRetries = 3;
-  await loginViaAccessToken(page, agentName);
+  await loginViaAccessToken(page, accessToken);
   await enableAllWidgets(page);
   if (loginMode === LOGIN_MODE.DESKTOP) {
     await disableMultiLogin(page);
@@ -417,7 +426,7 @@ export const pageSetup = async (
     .isVisible()
     .catch(() => false);
   if (loginButtonExists) {
-    await telephonyLogin(page, loginMode);
+    await telephonyLogin(page, loginMode, extensionNumber);
   } else {
     const stateSelectVisible = await page
       .getByTestId('state-select')
@@ -447,7 +456,7 @@ export const pageSetup = async (
       .catch(() => false);
 
     if (!loginButtonExists) await stationLogout(page);
-    await telephonyLogin(page, loginMode);
+    await telephonyLogin(page, loginMode, extensionNumber);
   }
 
   let ronapopupVisible = await page
@@ -456,7 +465,10 @@ export const pageSetup = async (
     .then(() => true)
     .catch(() => false);
   if (ronapopupVisible) {
-    await submitRonaPopup(page, RONA_OPTIONS.AVAILABLE);
+    await Promise.race([
+      submitRonaPopup(page, RONA_OPTIONS.AVAILABLE),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('submitRonaPopup timeout')), AWAIT_TIMEOUT)),
+    ]);
   }
 
   let stationLoginFailure = await page
@@ -467,10 +479,19 @@ export const pageSetup = async (
   for (let i = 0; i < maxRetries && stationLoginFailure; i++) {
     loginButtonExists = await page
       .getByTestId('login-button')
-      .isVisible()
+      .waitFor({state: 'visible', timeout: 5000})
+      .then(() => true)
       .catch(() => false);
-    if (!loginButtonExists) await stationLogout(page);
-    await telephonyLogin(page, loginMode);
+    if (!loginButtonExists) {
+      await Promise.race([
+        stationLogout(page),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('stationLogout timeout')), AWAIT_TIMEOUT)),
+      ]);
+    }
+    await Promise.race([
+      telephonyLogin(page, loginMode, extensionNumber),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('telephonyLogin timeout')), AWAIT_TIMEOUT)),
+    ]);
     await page.getByTestId('state-select').waitFor({state: 'visible', timeout: 30000});
     stationLoginFailure = await page
       .getByTestId('station-login-failure-label')
@@ -483,19 +504,4 @@ export const pageSetup = async (
   }
 
   await page.getByTestId('state-select').waitFor({state: 'visible', timeout: 30000});
-
-  ronapopupVisible = await page
-    .getByTestId('samples:rona-popup')
-    .waitFor({state: 'visible', timeout: 3000})
-    .then(() => true)
-    .catch(() => false);
-  if (ronapopupVisible) {
-    await submitRonaPopup(page, RONA_OPTIONS.AVAILABLE);
-  }
-
-  await changeUserState(page, USER_STATES.AVAILABLE);
-  await page.waitForTimeout(3000);
-  const incomingTaskDiv = page.getByTestId(/^samples:incoming-task(-\w+)?$/).first();
-  await incomingTaskDiv.waitFor({state: 'visible', timeout: AWAIT_TIMEOUT}).catch(() => false);
-  await handleStrayTasks(page, extensionPage);
 };

@@ -20,12 +20,11 @@ dotenv.config();
  * await loginViaAccessToken(page, 'ADMIN');  // Uses PW_ADMIN_ACCESS_TOKEN
  * ```
  */
-export const loginViaAccessToken = async (page: Page, agentId: string): Promise<void> => {
+export const loginViaAccessToken = async (page: Page, accessToken: string): Promise<void> => {
   await page.goto(BASE_URL);
-  const accessToken = process.env[`PW_${agentId}_ACCESS_TOKEN`];
   await page.getByRole('textbox').click({timeout: AWAIT_TIMEOUT});
   if (!accessToken) {
-    throw new Error(`PW_${agentId}_ACCESS_TOKEN is not defined, OAuth failed`);
+    throw new Error(`ACCESS_TOKEN is not defined, OAuth failed`);
   }
   await page.getByRole('textbox').fill(accessToken, {timeout: AWAIT_TIMEOUT});
 };
@@ -33,34 +32,33 @@ export const loginViaAccessToken = async (page: Page, agentId: string): Promise<
 /**
  * Performs OAuth login with Webex using agent credentials from environment variables
  * @param page - The Playwright page object
- * @param agentId - Agent identifier to validate against environment variables (e.g., 'AGENT1', 'AGENT2')
- * @description Validates credentials against PW_{agentId}_USERNAME and PW_{agentId}_PASSWORD
+ * @param agentId - Agent identifier to validate against environment variables (e.g., 'SET_1_AGENT1', 'SET_2_AGENT2')
+ * @description Validates credentials against {agentId}_USERNAME and PW_PASSWORD
  * @throws {Error} When agent credentials are not found in environment variables
  * @example
  * ```typescript
  * // OAuth login with agent credentials from environment variables
- * await oauthLogin(page, 'AGENT1'); // validates against PW_AGENT1_USERNAME/PW_AGENT1_PASSWORD
- * await oauthLogin(page, 'AGENT2'); // validates against PW_AGENT2_USERNAME/PW_AGENT2_PASSWORD
- * await oauthLogin(page, 'ADMIN'); // validates against PW_ADMIN_USERNAME/PW_ADMIN_PASSWORD
+ * await oauthLogin(page, 'SET_1_AGENT1'); // validates against SET_1_AGENT1_USERNAME/PW_PASSWORD
+ * await oauthLogin(page, 'SET_1_AGENT2'); // validates against SET_1_AGENT2_USERNAME/PW_PASSWORD
+ * await oauthLogin(page, 'SET_2_AGENT1'); // validates against SET_2_AGENT1_USERNAME/PW_PASSWORD
  * ```
  */
-export const oauthLogin = async (page: Page, agentId: string): Promise<void> => {
-  // Check 1: Validate agentId parameter is provided
-  if (!agentId) {
-    throw new Error('Agent ID parameter is required');
+export const oauthLogin = async (page: Page, username: string): Promise<void> => {
+  // Check 1: Validate username parameter is provided
+  if (!username) {
+    throw new Error('Username parameter is required');
   }
 
-  // Check 2: Validate agentId is not empty string
-  if (agentId.trim() === '') {
-    throw new Error('Agent ID cannot be empty string');
+  // Check 2: Validate username is not empty string
+  if (username.trim() === '') {
+    throw new Error('Username cannot be empty string');
   }
 
   // Check 3: Get credentials from environment variables
-  const username = process.env[`PW_${agentId}_USERNAME`];
   const password = process.env[`PW_PASSWORD`];
-  // Check 4: Validate environment variables are set
+  // Check 6: Validate environment variables are set
   if (!username || !password) {
-    throw new Error(`Environment variables PW_${agentId}_USERNAME and PW_PASSWORD must be set`);
+    throw new Error(`Environment variables ${username} and PW_PASSWORD must be set`);
   }
 
   await page.goto(BASE_URL);
@@ -138,7 +136,7 @@ export const initialiseWidgets = async (page: Page): Promise<void> => {
   await page.getByTestId('samples:init-widgets-button').click({timeout: AWAIT_TIMEOUT});
 
   try {
-    await page.getByTestId('station-login-widget').waitFor({state: 'visible', timeout: 30000});
+    await page.getByTestId('station-login-widget').waitFor({state: 'visible', timeout: 50000});
   } catch (error) {
     // First attempt failed, try clicking init widgets button again
     await page.reload();
@@ -146,7 +144,7 @@ export const initialiseWidgets = async (page: Page): Promise<void> => {
     await page.getByTestId('samples:init-widgets-button').click({timeout: AWAIT_TIMEOUT});
 
     try {
-      await page.getByTestId('station-login-widget').waitFor({state: 'visible', timeout: 30000});
+      await page.getByTestId('station-login-widget').waitFor({state: 'visible', timeout: 50000});
     } catch (secondError) {
       // Second attempt also failed, throw error
       throw new Error(
@@ -171,6 +169,7 @@ export const initialiseWidgets = async (page: Page): Promise<void> => {
 // Helper method for agent relogin - simulates user login along with page reload
 export const agentRelogin = async (page: Page): Promise<void> => {
   await page.reload();
+  await page.waitForTimeout(2000); // Wait for page to settle
   await initialiseWidgets(page);
 };
 

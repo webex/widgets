@@ -1,6 +1,7 @@
 import {Page, expect} from '@playwright/test';
 import dotenv from 'dotenv';
 import {LOGIN_MODE, LONG_WAIT, AWAIT_TIMEOUT} from '../constants';
+import {handleStrayTasks} from './helperUtils';
 
 dotenv.config();
 
@@ -45,9 +46,9 @@ export const desktopLogin = async (page: Page): Promise<void> => {
  * ```
  */
 export const extensionLogin = async (page: Page, extensionNumber?: string): Promise<void> => {
-  const number = extensionNumber ?? process.env.PW_AGENT1_EXTENSION_NUMBER;
+  const number = extensionNumber;
   if (!number) {
-    throw new Error('PW_AGENT1_EXTENSION_NUMBER must be provided');
+    throw new Error('extensionNumber must be provided');
   }
 
   if (number.trim() === '') {
@@ -84,19 +85,18 @@ export const extensionLogin = async (page: Page, extensionNumber?: string): Prom
  * ```
  */
 export const dialLogin = async (page: Page, dialNumber?: string): Promise<void> => {
-  const number = dialNumber ?? process.env.PW_DIAL_NUMBER;
-  if (!number) {
-    throw new Error('PW_DIAL_NUMBER is not defined in the .env file');
+  if (!dialNumber) {
+    throw new Error('Dial number is required but not provided');
   }
 
-  if (number.trim() === '') {
+  if (dialNumber.trim() === '') {
     throw new Error('Dial number is empty. Please provide a valid dial number.');
   }
 
   await page.getByTestId('login-option-select').locator('#select-base-triggerid svg').click({timeout: AWAIT_TIMEOUT});
   await page.getByTestId('login-option-Dial Number').click({timeout: AWAIT_TIMEOUT});
   await page.getByTestId('dial-number-input').locator('div').nth(1).click({timeout: AWAIT_TIMEOUT});
-  await page.getByTestId('dial-number-input').locator('input').fill(number, {timeout: AWAIT_TIMEOUT});
+  await page.getByTestId('dial-number-input').locator('input').fill(dialNumber, {timeout: AWAIT_TIMEOUT});
   await page.getByTestId('teams-select-dropdown').locator('#select-base-triggerid div').click({timeout: AWAIT_TIMEOUT});
   await page.waitForTimeout(200);
   await page
@@ -132,7 +132,12 @@ export const stationLogout = async (page: Page): Promise<void> => {
     .then(() => true)
     .catch(() => false);
   if (!isLogoutButtonHidden) {
-    throw new Error('Station logout button is still visible after logout');
+    try {
+      await handleStrayTasks(page);
+      await page.getByTestId('samples:station-logout-button').click({timeout: AWAIT_TIMEOUT});
+    } catch (e) {
+      throw new Error('Station logout button is still visible after logout');
+    }
   }
 };
 
@@ -193,22 +198,23 @@ export async function verifyLoginMode(page: Page, expectedMode: string): Promise
  * Ensures the user state widget is visible by checking its current state and logging in if necessary
  * @param page - The Playwright page object
  * @param loginMode - The login mode to use if login is required (from LOGIN_MODE constants)
+ * @param number - Optional number for Extension or Dial Number modes
  * @description Checks if the state-select widget is visible; if not, performs telephony login and waits for it to appear
  * @throws {Error} When telephony login fails or state widget doesn't become visible
  * @example
  * ```typescript
- * await ensureUserStateVisible(page, LOGIN_MODE.DIAL_NUMBER);
- * await ensureUserStateVisible(page, LOGIN_MODE.EXTENSION);
+ * await ensureUserStateVisible(page, LOGIN_MODE.DIAL_NUMBER, dialNumber);
+ * await ensureUserStateVisible(page, LOGIN_MODE.EXTENSION, extensionNumber);
  * await ensureUserStateVisible(page, LOGIN_MODE.DESKTOP);
  * ```
  */
-export async function ensureUserStateVisible(page: Page, loginMode: string): Promise<void> {
+export async function ensureUserStateVisible(page: Page, loginMode: string, number?: string): Promise<void> {
   const isUserStateWidgetVisible = await page
     .getByTestId('state-select')
     .isVisible()
     .catch(() => false);
   if (!isUserStateWidgetVisible) {
-    await telephonyLogin(page, loginMode);
+    await telephonyLogin(page, loginMode, number);
     await expect(page.getByTestId('state-select')).toBeVisible({timeout: LONG_WAIT});
   }
 }

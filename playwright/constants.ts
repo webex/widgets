@@ -44,8 +44,6 @@ export const TASK_TYPES = {
 
 export type TaskType = (typeof TASK_TYPES)[keyof typeof TASK_TYPES];
 
-export const CHAT_URL = 'https://widgets.webex.com/chat-client-e2e';
-
 export const WRAPUP_REASONS = {
   SALE: 'Sale',
   RESOLVED: 'Resolved',
@@ -59,16 +57,3 @@ export const RONA_OPTIONS = {
 };
 
 export type RonaOption = (typeof RONA_OPTIONS)[keyof typeof RONA_OPTIONS];
-
-export const AGENT_NAMES = {
-  AGENT1: 'User11 Agent11',
-  AGENT2: 'User13 Agent13',
-};
-
-export type AgentName = (typeof AGENT_NAMES)[keyof typeof AGENT_NAMES];
-
-export const QUEUE_NAMES = {
-  QUEUE_4: 'Queue 4',
-};
-
-export type QueueName = (typeof QUEUE_NAMES)[keyof typeof QUEUE_NAMES];

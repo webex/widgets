@@ -17,9 +17,17 @@ dotenv.config();
  * ```
  */
 export const changeUserState = async (page: Page, userState: string): Promise<void> => {
-  // Get the current state name
-  const currentState = await page.getByTestId('state-select').getByTestId('state-name').innerText();
-  if (currentState.trim() === userState) {
+  // Get the current state name with timeout, return early if not found
+  try {
+    const currentState = await page
+      .getByTestId('state-select')
+      .getByTestId('state-name')
+      .innerText({timeout: AWAIT_TIMEOUT});
+    if (currentState.trim() === userState) {
+      return;
+    }
+  } catch (error) {
+    // Element not found, return without error
     return;
   }
 

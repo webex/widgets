@@ -433,5 +433,13 @@ export async function verifyHoldMusicElement(page: Page): Promise<void> {
 export async function endTask(page: Page): Promise<void> {
   const endButton = page.getByTestId('call-control:end-call').nth(0);
   await endButton.waitFor({state: 'visible', timeout: 30000});
+
+  // Check if button is disabled and wait for it to be enabled
+  const isDisabled = await endButton.isDisabled();
+  if (isDisabled) {
+    await holdCallToggle(page);
+    await expect(endButton).toBeEnabled({timeout: AWAIT_TIMEOUT});
+  }
+
   await endButton.click({timeout: AWAIT_TIMEOUT});
 }

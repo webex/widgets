@@ -12,13 +12,14 @@ export async function submitWrapup(page: Page, reason: WrapupReason): Promise<vo
   if (!reason || reason.trim() === '') {
     throw new Error('Wrapup reason is required');
   }
-  const wrapupBox = page.getByTestId('call-control:wrapup-button').first();
+  const wrapupBox = page.getByTestId('call-control:wrapup-button');
   const isWrapupBoxVisible = await wrapupBox
+    .first()
     .waitFor({state: 'visible', timeout: AWAIT_TIMEOUT})
     .then(() => true)
     .catch(() => false);
   if (!isWrapupBoxVisible) throw new Error('Wrapup box is not visible');
-  await wrapupBox.click({timeout: AWAIT_TIMEOUT});
+  await wrapupBox.first().click({timeout: AWAIT_TIMEOUT});
   await page.waitForTimeout(1000);
   await expect(page.getByTestId('call-control:wrapup-select').first()).toBeVisible();
   await page.getByTestId('call-control:wrapup-select').first().click({timeout: AWAIT_TIMEOUT});

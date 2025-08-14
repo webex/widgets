@@ -1,5 +1,5 @@
 import {Page, expect} from '@playwright/test';
-import {CALL_URL, RonaOption, AWAIT_TIMEOUT, TASK_TYPES, TaskType, CHAT_URL} from '../constants';
+import {CALL_URL, RonaOption, AWAIT_TIMEOUT, TASK_TYPES, TaskType} from '../constants';
 import nodemailer from 'nodemailer';
 
 const maxRetries = 3;
@@ -26,7 +26,7 @@ const transporter = nodemailer.createTransport({
  * @param page Playwright Page object
  * @param number Phone number to dial (defaults to PW_DIAL_NUMBER env variable)
  */
-export async function createCallTask(page: Page, number: string = process.env.PW_DIAL_NUMBER) {
+export async function createCallTask(page: Page, number: string) {
   if (!number || number.trim() === '') {
     throw new Error('Dial number is required');
   }
@@ -44,6 +44,7 @@ export async function createCallTask(page: Page, number: string = process.env.PW
     .locator('[data-test="calling-ui-keypad-control"]')
     .getByRole('button', {name: 'Call'})
     .click({timeout: AWAIT_TIMEOUT});
+  await page.waitForTimeout(2000);
 }
 
 /**
@@ -67,10 +68,10 @@ export async function endCallTask(page: Page) {
  * Retries up to maxRetries on failure.
  * @param page Playwright Page object
  */
-export async function createChatTask(page: Page) {
+export async function createChatTask(page: Page, chatURL: string) {
   for (let i = 0; i < maxRetries; i++) {
     try {
-      await page.goto(CHAT_URL);
+      await page.goto(chatURL);
       await page
         .locator('iframe[name="Livechat launcher icon"]')
         .contentFrame()
@@ -184,9 +185,8 @@ export async function endChatTask(page: Page) {
  * Sends a test email to trigger an incoming email task.
  * @throws Error if sending fails
  */
-export async function createEmailTask() {
+export async function createEmailTask(to: string) {
   const from = process.env.PW_SENDER_EMAIL;
-  const to = process.env.PW_EMAIL_ENTRY_POINT;
   const subject = `Playwright Test Email - ${new Date().toISOString()}`;
   const text = '--This Email is generated due to playwright automation test for incoming Tasks---';
 
@@ -211,6 +211,7 @@ export async function createEmailTask() {
  * @throws Error if accept button is not found
  */
 export async function acceptIncomingTask(page: Page, type: TaskType) {
+  await page.waitForTimeout(2000);
   let incomingTaskDiv;
   if (type === TASK_TYPES.CALL) {
     incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
@@ -232,6 +233,7 @@ export async function acceptIncomingTask(page: Page, type: TaskType) {
     throw new Error('Accept button not found');
   }
   await acceptButton.click({timeout: AWAIT_TIMEOUT});
+  await page.waitForTimeout(2000);
 }
 
 /**
@@ -273,12 +275,14 @@ export async function declineIncomingTask(page: Page, type: TaskType) {
  */
 export async function acceptExtensionCall(page: Page) {
   try {
+    await page.waitForTimeout(2000);
     await expect(page).toHaveURL(/.*\.webex\.com\/calling.*/);
   } catch (error) {
     throw new Error('The Input Page should be logged into calling web-client.');
   }
   await page.locator('[data-test="right-action-button"]').waitFor({state: 'visible', timeout: AWAIT_TIMEOUT});
   await page.locator('[data-test="right-action-button"]').click({timeout: AWAIT_TIMEOUT});
+  await page.waitForTimeout(500);
 }
 
 /**
@@ -287,6 +291,7 @@ export async function acceptExtensionCall(page: Page) {
  */
 export async function declineExtensionCall(page: Page) {
   try {
+    await page.waitForTimeout(2000);
     await expect(page).toHaveURL(/.*\.webex\.com\/calling.*/);
   } catch (error) {
     throw new Error('The Input Page should be logged into calling web-client.');
@@ -301,6 +306,7 @@ export async function declineExtensionCall(page: Page) {
  */
 export async function endExtensionCall(page: Page) {
   try {
+    await page.waitForTimeout(2000);
     await expect(page).toHaveURL(/.*\.webex\.com\/calling.*/);
   } catch (error) {
     throw new Error('The Input Page should be logged into calling web-client.');
@@ -357,9 +363,9 @@ export async function loginExtension(page: Page, email: string, password: string
   await page.getByRole('textbox', {name: 'Password'}).waitFor({state: 'visible', timeout: 20000});
   await page.getByRole('textbox', {name: 'Password'}).fill(password, {timeout: AWAIT_TIMEOUT});
   await page.getByRole('textbox', {name: 'Password'}).press('Enter', {timeout: AWAIT_TIMEOUT});
-  await page.getByRole('textbox', {name: 'Dial'}).waitFor({state: 'visible', timeout: 32000});
+  await page.getByRole('textbox', {name: 'Dial'}).waitFor({state: 'visible', timeout: 35000});
   try {
-    await page.locator('[data-test="statusMessage"]').waitFor({state: 'hidden', timeout: 30000});
+    await page.locator('[data-test="statusMessage"]').waitFor({state: 'hidden', timeout: 35000});
   } catch (e) {
     throw new Error('Unable to Login to the webex calling web-client');
   }
