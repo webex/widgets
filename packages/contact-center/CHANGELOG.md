@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.106](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.105...v1.28.0-ccwidgets.106) (2025-08-13)
+
+
+### Bug Fixes
+
+* **agent-invite-failed-events:** show-agent-invite-failed-reasons ([#514](https://github.com/webex/widgets/issues/514)) ([50626dc](https://github.com/webex/widgets/commit/50626dcede1fb19ac6c3bd3a8a9c3a29b5124122))
+
 # [1.28.0-ccwidgets.105](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.104...v1.28.0-ccwidgets.105) (2025-08-11)
 
 
