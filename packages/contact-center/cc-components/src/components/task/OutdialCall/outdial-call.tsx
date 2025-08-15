@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import {OutdialCallComponentProps} from '../task.types';
 import './outdial-call.style.scss';
+import {withMetrics} from '@webex/cc-ui-logging';
 
 const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> = (props) => {
   const {startOutdial} = props;
@@ -49,4 +50,5 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
   );
 };
 
-export default OutdialCallComponent;
+const OutdialCallComponentWithMetrics = withMetrics(OutdialCallComponent, 'OutdialCall');
+export default OutdialCallComponentWithMetrics;

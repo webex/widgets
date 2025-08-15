@@ -48,6 +48,7 @@ const CallControl: React.FunctionComponent<CallControlProps> = observer(
       allowConsultToQueue,
       logger,
     };
+
     return <CallControlComponent {...result} />;
   }
 );

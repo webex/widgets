@@ -4,7 +4,7 @@
 cp ./widgets-samples/index.html docs/
 cp ./widgets-samples/chat-client.html docs/
 cp ./widgets-samples/chat-client-e2e.html docs/
-
+cp ./widgets-samples/chat-client-e2e-2.html docs/
 # Copy specific files and directories from samples-cc-wc-app to the docs directory
 mkdir -p docs/samples-cc-wc-app
 cp -r ./widgets-samples/cc/samples-cc-wc-app/dist docs/samples-cc-wc-app/
