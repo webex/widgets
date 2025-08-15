@@ -23,9 +23,9 @@ function UpdateENVWithUserSets() {
       const agent = userSet.AGENTS[agentKey];
 
       // Remove existing lines for this agent if they exist
-      const usernamePattern = new RegExp(`^${setKey}_${agentKey}_USERNAME=.*$`, 'm');
-      const extensionPattern = new RegExp(`^${setKey}_${agentKey}_EXTENSION_NUMBER=.*$`, 'm');
-      const namePattern = new RegExp(`^${setKey}_${agentKey}_NAME=.*$`, 'm');
+      const usernamePattern = new RegExp(`^${setKey}_${agentKey}_USERNAME=.*$\\n?`, 'm');
+      const extensionPattern = new RegExp(`^${setKey}_${agentKey}_EXTENSION_NUMBER=.*$\\n?`, 'm');
+      const namePattern = new RegExp(`^${setKey}_${agentKey}_NAME=.*$\\n?`, 'm');
 
       envContent = envContent.replace(usernamePattern, '');
       envContent = envContent.replace(extensionPattern, '');
@@ -39,10 +39,10 @@ function UpdateENVWithUserSets() {
     });
 
     // Map to corresponding SET environment variables
-    const dialPattern = new RegExp(`^${setKey}_DIAL_NUMBER=.*$`, 'm');
-    const emailPattern = new RegExp(`^${setKey}_EMAIL_ENTRY_POINT=.*$`, 'm');
-    const queuePattern = new RegExp(`^${setKey}_QUEUE_NAME=.*$`, 'm');
-    const chatPattern = new RegExp(`^${setKey}_CHAT_URL=.*$`, 'm');
+    const dialPattern = new RegExp(`^${setKey}_DIAL_NUMBER=.*$\\n?`, 'm');
+    const emailPattern = new RegExp(`^${setKey}_EMAIL_ENTRY_POINT=.*$\\n?`, 'm');
+    const queuePattern = new RegExp(`^${setKey}_QUEUE_NAME=.*$\\n?`, 'm');
+    const chatPattern = new RegExp(`^${setKey}_CHAT_URL=.*$\\n?`, 'm');
 
     envContent = envContent.replace(dialPattern, '');
     envContent = envContent.replace(emailPattern, '');
@@ -57,6 +57,8 @@ function UpdateENVWithUserSets() {
   });
 
   // Write the updated content back to .env file
+  // Clean up multiple consecutive empty lines
+  envContent = envContent.replace(/\n{3,}/g, '\n\n');
   fs.writeFileSync(envPath, envContent, 'utf8');
 }
 
@@ -83,13 +85,15 @@ setup('OAuth', async ({browser}) => {
       if (fs.existsSync(envPath)) {
         envContent = fs.readFileSync(envPath, 'utf8');
         // Remove any existing ACCESS_TOKEN line for this set-agent combination
-        const accessTokenPattern = new RegExp(`^${setKey}_${agentKey}_ACCESS_TOKEN=.*$`, 'm');
+        const accessTokenPattern = new RegExp(`^${setKey}_${agentKey}_ACCESS_TOKEN=.*$\\n?`, 'm');
         envContent = envContent.replace(accessTokenPattern, '');
 
         // Ensure trailing newline
         if (!envContent.endsWith('\n')) envContent += '\n';
       }
       envContent += `${setKey}_${agentKey}_ACCESS_TOKEN=${accessToken}\n`;
+      // Clean up multiple consecutive empty lines
+      envContent = envContent.replace(/\n{3,}/g, '\n\n');
       fs.writeFileSync(envPath, envContent, 'utf8');
 
       await page.close();
