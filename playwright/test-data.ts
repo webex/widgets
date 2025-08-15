@@ -29,8 +29,8 @@ export const USER_SETS = {
       AGENT2: {username: 'user20', extension: '1020', agentName: 'User20 Agent20'},
     },
     QUEUE_NAME: 'Queue e2e 3',
-    CHAT_URL: '',
-    EMAIL_ENTRY_POINT: '',
+    CHAT_URL: `${env.PW_CHAT_URL}-e2e-3.html`,
+    EMAIL_ENTRY_POINT: `${env.PW_SANDBOX}.e2e-3@gmail.com`,
     DIAL_NUMBER: env.PW_DIAL_NUMBER3,
   },
   SET_4: {
@@ -39,8 +39,8 @@ export const USER_SETS = {
       AGENT2: {username: 'user22', extension: '1022', agentName: 'User22 Agent22'},
     },
     QUEUE_NAME: 'Queue e2e 4',
-    CHAT_URL: '',
-    EMAIL_ENTRY_POINT: '',
+    CHAT_URL: `${env.PW_CHAT_URL}-e2e-4.html`,
+    EMAIL_ENTRY_POINT: `${env.PW_SANDBOX}.e2e-4@gmail.com`,
     DIAL_NUMBER: env.PW_DIAL_NUMBER4,
   },
   SET_5: {
@@ -49,8 +49,8 @@ export const USER_SETS = {
       AGENT2: {username: 'user24', extension: '1024', agentName: 'User24 Agent24'},
     },
     QUEUE_NAME: 'Queue e2e 5',
-    CHAT_URL: '',
-    EMAIL_ENTRY_POINT: '',
+    CHAT_URL: `${env.PW_CHAT_URL}-e2e-5.html`,
+    EMAIL_ENTRY_POINT: `${env.PW_SANDBOX}.e2e-5@gmail.com`,
     DIAL_NUMBER: env.PW_DIAL_NUMBER5,
   },
 };

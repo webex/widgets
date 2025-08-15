@@ -15,15 +15,17 @@ concurrency:
 
 env:
   rid: ${{ github.run_id }}-${{ github.run_number }}
-  PW_AGENT1_USERNAME: ${{ secrets.PW_AGENT1_USERNAME }}
   PW_PASSWORD: ${{ secrets.PW_PASSWORD }}
-  PW_AGENT1_EXTENSION_NUMBER: ${{ secrets.PW_AGENT1_EXTENSION_NUMBER }}
-  PW_DIAL_NUMBER: ${{ secrets.PW_DIAL_NUMBER }}
-  PW_AGENT2_USERNAME: ${{ secrets.PW_AGENT2_USERNAME }}
-  PW_AGENT2_EXTENSION_NUMBER: ${{ secrets.PW_AGENT2_EXTENSION_NUMBER }}
-  PW_SENDER_EMAIL: ${{ secrets.PW_SENDER_EMAIL }}
-  PW_EMAIL_ENTRY_POINT: ${{ secrets.PW_EMAIL_ENTRY_POINT }}
   PW_APP_PASSWORD: ${{ secrets.PW_APP_PASSWORD }}
+  PW_SANDBOX: ${{ secrets.PW_SANDBOX }}
+  PW_DIAL_NUMBER1: ${{ secrets.PW_DIAL_NUMBER1 }}
+  PW_DIAL_NUMBER2: ${{ secrets.PW_DIAL_NUMBER2 }}
+  PW_DIAL_NUMBER3: ${{ secrets.PW_DIAL_NUMBER3 }}
+  PW_DIAL_NUMBER4: ${{ secrets.PW_DIAL_NUMBER4 }}
+  PW_DIAL_NUMBER5: ${{ secrets.PW_DIAL_NUMBER5 }}
+  PW_DIAL_NUMBER6: ${{ secrets.PW_DIAL_NUMBER6 }}
+  PW_SENDER_EMAIL: ${{ secrets.PW_SENDER_EMAIL }}
+  PW_CHAT_URL: ${{ secrets.PW_CHAT_URL }}
 
 jobs:
   validate:
