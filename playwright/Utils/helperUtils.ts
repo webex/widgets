@@ -398,7 +398,8 @@ export const pageSetup = async (
   loginMode: LoginMode,
   accessToken: string,
   extensionPage: Page | null = null,
-  extensionNumber?: string
+  extensionNumber?: string,
+  isMultiSession: boolean = false
 ) => {
   const maxRetries = 3;
   await loginViaAccessToken(page, accessToken);
@@ -420,6 +421,10 @@ export const pageSetup = async (
       await page.reload();
       await page.waitForTimeout(2000); // Wait for page to settle
     }
+  }
+
+  if (isMultiSession) {
+    return; // Skip further setup for multi-session tests
   }
 
   let loginButtonExists = await page

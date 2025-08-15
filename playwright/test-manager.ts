@@ -214,28 +214,24 @@ export class TestManager {
         })()
       );
     }
-
-    // Multi-session setup - Remove dependency wait, make it truly parallel
-    if (finalConfig.needsMultiSession && this.multiSessionAgent1Page) {
-      setupPromises.push(
-        (async () => {
-          if (finalConfig.agent1LoginMode === 'Extension') {
-            // Don't wait for agent1ExtensionPage, it should be ready from context creation
-            await pageSetup(
-              this.multiSessionAgent1Page!,
-              LOGIN_MODE.EXTENSION,
-              process.env[`${this.projectName}_AGENT1_ACCESS_TOKEN`] ?? '',
-              this.agent1ExtensionPage,
-              process.env[`${this.projectName}_AGENT1_EXTENSION_NUMBER`] ?? ''
-            );
-          }
-        })()
-      );
-    }
-
     // Wait for all setup operations to complete
     await Promise.all(setupPromises);
-
+    // Multi-session setup - Remove dependency wait, make it truly parallel
+    if (finalConfig.needsMultiSession && this.multiSessionAgent1Page) {
+      await (async () => {
+        if (finalConfig.agent1LoginMode === 'Extension') {
+          // Don't wait for agent1ExtensionPage, it should be ready from context creation
+          await pageSetup(
+            this.multiSessionAgent1Page!,
+            LOGIN_MODE.EXTENSION,
+            process.env[`${this.projectName}_AGENT1_ACCESS_TOKEN`] ?? '',
+            this.agent1ExtensionPage,
+            process.env[`${this.projectName}_AGENT1_EXTENSION_NUMBER`] ?? '',
+            true // Enable multi-session mode
+          );
+        }
+      })();
+    }
     // 🚀 Step 3: Setup console logging (can be done in parallel too)
     const loggingPromises: Promise<any>[] = [];
 
