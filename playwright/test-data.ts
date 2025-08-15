@@ -9,8 +9,8 @@ export const USER_SETS = {
       AGENT2: {username: 'user16', extension: '1016', agentName: 'User16 Agent16'},
     },
     QUEUE_NAME: 'Queue e2e 1',
-    CHAT_URL: 'https://widgets.webex.com/chat-client-e2e.html',
-    EMAIL_ENTRY_POINT: 'ccsdk.wbx.ai.e2e@gmail.com',
+    CHAT_URL: `${env.PW_CHAT_URL}-e2e.html`,
+    EMAIL_ENTRY_POINT: `${env.PW_SANDBOX}.e2e@gmail.com`,
     DIAL_NUMBER: env.PW_DIAL_NUMBER1,
   },
   SET_2: {
@@ -19,8 +19,8 @@ export const USER_SETS = {
       AGENT2: {username: 'user18', extension: '1018', agentName: 'User18 Agent18'},
     },
     QUEUE_NAME: 'Queue e2e 2',
-    CHAT_URL: 'https://widgets.webex.com/chat-client-e2e-2.html',
-    EMAIL_ENTRY_POINT: '',
+    CHAT_URL: `${env.PW_CHAT_URL}-e2e-2.html`,
+    EMAIL_ENTRY_POINT: `${env.PW_SANDBOX}.e2e-2@gmail.com`,
     DIAL_NUMBER: env.PW_DIAL_NUMBER2,
   },
   SET_3: {
