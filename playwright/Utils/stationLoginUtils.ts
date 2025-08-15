@@ -1,6 +1,6 @@
 import {Page, expect} from '@playwright/test';
 import dotenv from 'dotenv';
-import {LOGIN_MODE, LONG_WAIT, AWAIT_TIMEOUT} from '../constants';
+import {LOGIN_MODE, LONG_WAIT, AWAIT_TIMEOUT, DROPDOWN_SETTLE_TIMEOUT, OPERATION_TIMEOUT} from '../constants';
 import {handleStrayTasks} from './helperUtils';
 
 dotenv.config();
@@ -18,14 +18,14 @@ export const desktopLogin = async (page: Page): Promise<void> => {
   await page.getByTestId('login-option-select').locator('#select-base-triggerid svg').click({timeout: AWAIT_TIMEOUT});
   await page.getByTestId('login-option-Desktop').click({timeout: AWAIT_TIMEOUT});
   await page.getByTestId('teams-select-dropdown').locator('#select-base-triggerid div').click({timeout: AWAIT_TIMEOUT});
-  await page.waitForTimeout(200);
+  await page.waitForTimeout(DROPDOWN_SETTLE_TIMEOUT);
   await page
     .locator('[data-testid^="teams-dropdown-"]')
     .nth(0)
     .locator('span, div')
     .first()
     .click({timeout: AWAIT_TIMEOUT});
-  await page.waitForTimeout(200);
+  await page.waitForTimeout(DROPDOWN_SETTLE_TIMEOUT);
 
   await page.getByTestId('login-button').click({timeout: AWAIT_TIMEOUT});
 };
@@ -59,7 +59,7 @@ export const extensionLogin = async (page: Page, extensionNumber?: string): Prom
   await page.getByTestId('login-option-Extension').click({timeout: AWAIT_TIMEOUT});
   await page.getByTestId('dial-number-input').locator('input').fill(number, {timeout: AWAIT_TIMEOUT});
   await page.getByTestId('teams-select-dropdown').locator('#select-base-triggerid div').click({timeout: AWAIT_TIMEOUT});
-  await page.waitForTimeout(200);
+  await page.waitForTimeout(DROPDOWN_SETTLE_TIMEOUT);
   await page
     .locator('[data-testid^="teams-dropdown-"]')
     .nth(0)
@@ -98,7 +98,7 @@ export const dialLogin = async (page: Page, dialNumber?: string): Promise<void> 
   await page.getByTestId('dial-number-input').locator('div').nth(1).click({timeout: AWAIT_TIMEOUT});
   await page.getByTestId('dial-number-input').locator('input').fill(dialNumber, {timeout: AWAIT_TIMEOUT});
   await page.getByTestId('teams-select-dropdown').locator('#select-base-triggerid div').click({timeout: AWAIT_TIMEOUT});
-  await page.waitForTimeout(200);
+  await page.waitForTimeout(DROPDOWN_SETTLE_TIMEOUT);
   await page
     .locator('[data-testid^="teams-dropdown-"]')
     .nth(0)
@@ -128,15 +128,24 @@ export const stationLogout = async (page: Page): Promise<void> => {
   //check if the station logout button is hidden after logouts
   const isLogoutButtonHidden = await page
     .getByTestId('samples:station-logout-button')
-    .waitFor({state: 'hidden', timeout: 30000})
+    .waitFor({state: 'hidden', timeout: OPERATION_TIMEOUT})
     .then(() => true)
     .catch(() => false);
   if (!isLogoutButtonHidden) {
     try {
       await handleStrayTasks(page);
       await page.getByTestId('samples:station-logout-button').click({timeout: AWAIT_TIMEOUT});
+      // Verify logout was successful after retry
+      const isLogoutSuccessfulAfterRetry = await page
+        .getByTestId('samples:station-logout-button')
+        .waitFor({state: 'hidden', timeout: OPERATION_TIMEOUT})
+        .then(() => true)
+        .catch(() => false);
+      if (!isLogoutSuccessfulAfterRetry) {
+        throw new Error('Station logout button is still visible after retry attempt');
+      }
     } catch (e) {
-      throw new Error('Station logout button is still visible after logout');
+      throw new Error(`Station logout failed: ${e instanceof Error ? e.message : 'Unknown error'}`);
     }
   }
 };

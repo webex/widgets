@@ -1,8 +1,18 @@
 import {Page, expect} from '@playwright/test';
-import {CALL_URL, RonaOption, AWAIT_TIMEOUT, TASK_TYPES, TaskType} from '../constants';
+import {
+  CALL_URL,
+  RonaOption,
+  AWAIT_TIMEOUT,
+  TASK_TYPES,
+  TaskType,
+  DEFAULT_MAX_RETRIES,
+  CHAT_LAUNCHER_TIMEOUT,
+  FORM_FIELD_TIMEOUT,
+  OPERATION_TIMEOUT,
+  NETWORK_OPERATION_TIMEOUT,
+  TEST_DATA,
+} from '../constants';
 import nodemailer from 'nodemailer';
-
-const maxRetries = 3;
 
 const transporter = nodemailer.createTransport({
   service: 'gmail', // Make sure to use Secure Port for Gmail SMTP
@@ -69,14 +79,14 @@ export async function endCallTask(page: Page) {
  * @param page Playwright Page object
  */
 export async function createChatTask(page: Page, chatURL: string) {
-  for (let i = 0; i < maxRetries; i++) {
+  for (let i = 0; i < DEFAULT_MAX_RETRIES; i++) {
     try {
       await page.goto(chatURL);
       await page
         .locator('iframe[name="Livechat launcher icon"]')
         .contentFrame()
         .getByRole('button', {name: 'Livechat Button - 0 unread'})
-        .waitFor({state: 'visible', timeout: 60000});
+        .waitFor({state: 'visible', timeout: CHAT_LAUNCHER_TIMEOUT});
       await page
         .locator('iframe[name="Livechat launcher icon"]')
         .contentFrame()
@@ -86,7 +96,7 @@ export async function createChatTask(page: Page, chatURL: string) {
         .locator('iframe[name="Conversation Window"]')
         .contentFrame()
         .getByRole('button', {name: 'Hit Us Up!'})
-        .waitFor({state: 'visible', timeout: 20000});
+        .waitFor({state: 'visible', timeout: FORM_FIELD_TIMEOUT});
       await page
         .locator('iframe[name="Conversation Window"]')
         .contentFrame()
@@ -106,12 +116,12 @@ export async function createChatTask(page: Page, chatURL: string) {
         .locator('iframe[name="Conversation Window"]')
         .contentFrame()
         .getByRole('textbox', {name: 'Name'})
-        .fill('Playwright Test', {timeout: AWAIT_TIMEOUT});
+        .fill(TEST_DATA.CHAT_NAME, {timeout: AWAIT_TIMEOUT});
       await page
         .locator('iframe[name="Conversation Window"]')
         .contentFrame()
         .getByRole('textbox', {name: 'Name'})
-        .fill('Playwright Test', {timeout: AWAIT_TIMEOUT});
+        .fill(TEST_DATA.CHAT_NAME, {timeout: AWAIT_TIMEOUT});
       await page
         .locator('iframe[name="Conversation Window"]')
         .contentFrame()
@@ -135,7 +145,7 @@ export async function createChatTask(page: Page, chatURL: string) {
         .locator('iframe[name="Conversation Window"]')
         .contentFrame()
         .getByRole('textbox', {name: 'Email*'})
-        .fill('playwright@test.com', {timeout: AWAIT_TIMEOUT});
+        .fill(TEST_DATA.CHAT_EMAIL, {timeout: AWAIT_TIMEOUT});
       await expect(
         page.locator('iframe[name="Conversation Window"]').contentFrame().getByRole('button', {name: 'Submit Email'})
       ).toBeVisible();
@@ -146,8 +156,8 @@ export async function createChatTask(page: Page, chatURL: string) {
         .click({timeout: AWAIT_TIMEOUT});
       break;
     } catch (error) {
-      if (i === maxRetries - 1) {
-        throw new Error(`Failed to load chat client after ${maxRetries} attempts: ${error}`);
+      if (i === DEFAULT_MAX_RETRIES - 1) {
+        throw new Error(`Failed to load chat client after ${DEFAULT_MAX_RETRIES} attempts: ${error}`);
       }
     }
   }
@@ -168,7 +178,9 @@ export async function endChatTask(page: Page) {
     .getByRole('button', {name: 'Menu'})
     .click({timeout: AWAIT_TIMEOUT});
   await page.waitForTimeout(500);
-  await expect(page.locator('iframe[name="Conversation Window"]').contentFrame().getByText('End chat')).toBeVisible();
+  await expect(page.locator('iframe[name="Conversation Window"]').contentFrame().getByText('End chat')).toBeVisible({
+    timeout: AWAIT_TIMEOUT,
+  });
   await page
     .locator('iframe[name="Conversation Window"]')
     .contentFrame()
@@ -193,7 +205,7 @@ export async function endChatTask(page: Page) {
 export async function createEmailTask(to: string) {
   const from = process.env.PW_SENDER_EMAIL;
   const subject = `Playwright Test Email - ${new Date().toISOString()}`;
-  const text = '--This Email is generated due to playwright automation test for incoming Tasks---';
+  const text = TEST_DATA.EMAIL_TEXT;
 
   try {
     const mailOptions = {
@@ -220,7 +232,7 @@ export async function acceptIncomingTask(page: Page, type: TaskType) {
   let incomingTaskDiv;
   if (type === TASK_TYPES.CALL) {
     incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
-    const isExtensionCall = await (await incomingTaskDiv.innerText()).includes('Ringing...');
+    const isExtensionCall = await (await incomingTaskDiv.innerText()).includes(TEST_DATA.EXTENSION_CALL_INDICATOR);
     if (isExtensionCall) {
       throw new Error('This is an extension call, use acceptExtensionCall instead');
     }
@@ -232,7 +244,7 @@ export async function acceptIncomingTask(page: Page, type: TaskType) {
     incomingTaskDiv = page.locator('samples:incoming-task-social').first();
   }
   incomingTaskDiv = incomingTaskDiv.first();
-  await expect(incomingTaskDiv).toBeVisible();
+  await expect(incomingTaskDiv).toBeVisible({timeout: AWAIT_TIMEOUT});
   const acceptButton = incomingTaskDiv.getByTestId('task:accept-button').first();
   if (!(await acceptButton.isVisible())) {
     throw new Error('Accept button not found');
@@ -252,7 +264,7 @@ export async function declineIncomingTask(page: Page, type: TaskType) {
   let incomingTaskDiv;
   if (type === TASK_TYPES.CALL) {
     incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
-    const isExtensionCall = await (await incomingTaskDiv.innerText()).includes('Ringing...');
+    const isExtensionCall = await (await incomingTaskDiv.innerText()).includes(TEST_DATA.EXTENSION_CALL_INDICATOR);
     if (isExtensionCall) {
       throw new Error('This is an extension call, use declineExtensionCall instead');
     }
@@ -264,7 +276,7 @@ export async function declineIncomingTask(page: Page, type: TaskType) {
     incomingTaskDiv = page.locator('samples:incoming-task-social').first();
   }
   incomingTaskDiv = await incomingTaskDiv.first();
-  await expect(incomingTaskDiv).toBeVisible();
+  await expect(incomingTaskDiv).toBeVisible({timeout: AWAIT_TIMEOUT});
   const declineButton = incomingTaskDiv.getByTestId('task:decline-button').first();
   if (!(await declineButton.isVisible())) {
     throw new Error('Decline button not found');
@@ -341,36 +353,38 @@ export async function loginExtension(page: Page, email: string, password: string
     throw new Error('CALL_URL is not defined. Please check your constants file.');
   }
 
-  for (let i = 0; i < maxRetries; i++) {
+  for (let i = 0; i < DEFAULT_MAX_RETRIES; i++) {
     try {
       await page.goto(CALL_URL);
       break;
     } catch (error) {
-      if (i === maxRetries - 1) {
-        throw new Error(`Failed to login via extension after ${maxRetries} attempts: ${error}`);
+      if (i === DEFAULT_MAX_RETRIES - 1) {
+        throw new Error(`Failed to login via extension after ${DEFAULT_MAX_RETRIES} attempts: ${error}`);
       }
     }
   }
   const isLoginPageVisible = await page
     .getByRole('textbox', {name: 'Email address (required)'})
-    .waitFor({state: 'visible', timeout: 30000})
+    .waitFor({state: 'visible', timeout: OPERATION_TIMEOUT})
     .then(() => true)
     .catch(() => false);
   if (!isLoginPageVisible) {
-    await expect(page.getByRole('button', {name: 'Back to sign in'})).toBeVisible();
+    await expect(page.getByRole('button', {name: 'Back to sign in'})).toBeVisible({timeout: AWAIT_TIMEOUT});
     await page.getByRole('button', {name: 'Back to sign in'}).click({timeout: AWAIT_TIMEOUT});
     await page.getByRole('button', {name: 'Sign in'}).waitFor({state: 'visible', timeout: AWAIT_TIMEOUT});
     await page.getByRole('button', {name: 'Sign in'}).click({timeout: AWAIT_TIMEOUT});
   }
-  await page.getByRole('textbox', {name: 'Email address (required)'}).waitFor({state: 'visible', timeout: 20000});
+  await page
+    .getByRole('textbox', {name: 'Email address (required)'})
+    .waitFor({state: 'visible', timeout: FORM_FIELD_TIMEOUT});
   await page.getByRole('textbox', {name: 'Email address (required)'}).fill(email, {timeout: AWAIT_TIMEOUT});
   await page.getByRole('textbox', {name: 'Email address (required)'}).press('Enter', {timeout: AWAIT_TIMEOUT});
-  await page.getByRole('textbox', {name: 'Password'}).waitFor({state: 'visible', timeout: 20000});
+  await page.getByRole('textbox', {name: 'Password'}).waitFor({state: 'visible', timeout: FORM_FIELD_TIMEOUT});
   await page.getByRole('textbox', {name: 'Password'}).fill(password, {timeout: AWAIT_TIMEOUT});
   await page.getByRole('textbox', {name: 'Password'}).press('Enter', {timeout: AWAIT_TIMEOUT});
-  await page.getByRole('textbox', {name: 'Dial'}).waitFor({state: 'visible', timeout: 35000});
+  await page.getByRole('textbox', {name: 'Dial'}).waitFor({state: 'visible', timeout: NETWORK_OPERATION_TIMEOUT});
   try {
-    await page.locator('[data-test="statusMessage"]').waitFor({state: 'hidden', timeout: 35000});
+    await page.locator('[data-test="statusMessage"]').waitFor({state: 'hidden', timeout: NETWORK_OPERATION_TIMEOUT});
   } catch (e) {
     throw new Error('Unable to Login to the webex calling web-client');
   }
@@ -389,13 +403,15 @@ export async function submitRonaPopup(page: Page, nextState: RonaOption) {
   await page.waitForTimeout(1000);
   await page.getByTestId('samples:rona-popup').waitFor({state: 'visible', timeout: AWAIT_TIMEOUT});
   await page.waitForTimeout(1000);
-  await expect(page.getByTestId('samples:rona-select-state')).toBeVisible();
+  await expect(page.getByTestId('samples:rona-select-state')).toBeVisible({timeout: AWAIT_TIMEOUT});
   await page.getByTestId('samples:rona-select-state').click({timeout: AWAIT_TIMEOUT});
   await page.waitForTimeout(1000);
-  await expect(page.getByTestId(`samples:rona-option-${nextState.toLowerCase()}`)).toBeVisible();
+  await expect(page.getByTestId(`samples:rona-option-${nextState.toLowerCase()}`)).toBeVisible({
+    timeout: AWAIT_TIMEOUT,
+  });
   await page.getByTestId(`samples:rona-option-${nextState.toLowerCase()}`).click({timeout: AWAIT_TIMEOUT});
   await page.waitForTimeout(1000);
-  await expect(page.getByTestId('samples:rona-button-confirm')).toBeVisible();
+  await expect(page.getByTestId('samples:rona-button-confirm')).toBeVisible({timeout: AWAIT_TIMEOUT});
   await page.getByTestId('samples:rona-button-confirm').click({timeout: AWAIT_TIMEOUT});
   await page.waitForTimeout(1000);
 }

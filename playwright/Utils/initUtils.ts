@@ -1,6 +1,6 @@
 import {Page, expect, BrowserContext} from '@playwright/test';
 import dotenv from 'dotenv';
-import {BASE_URL, AWAIT_TIMEOUT} from '../constants';
+import {BASE_URL, AWAIT_TIMEOUT, WIDGET_INIT_TIMEOUT, UI_SETTLE_TIMEOUT} from '../constants';
 
 dotenv.config();
 
@@ -123,8 +123,8 @@ export const disableMultiLogin = async (page: Page): Promise<void> => {
  * Initializes the widgets by clicking the init widgets button and waiting for station-login widget to be visible
  * @param page - The Playwright page object
  * @description The station-login widget should be checked/enabled before using this function.
- *              If the widget is not visible after 50 seconds, retries once more with another 50-second timeout.
- * @throws {Error} When station-login widget is not visible after two initialization attempts (100 seconds total)
+ *              If the widget is not visible after the initial timeout, retries once more with another attempt.
+ * @throws {Error} When station-login widget is not visible after two initialization attempts
  * @example
  * ```typescript
  * // Ensure station-login widget is checked first
@@ -136,19 +136,20 @@ export const initialiseWidgets = async (page: Page): Promise<void> => {
   await page.getByTestId('samples:init-widgets-button').click({timeout: AWAIT_TIMEOUT});
 
   try {
-    await page.getByTestId('station-login-widget').waitFor({state: 'visible', timeout: 50000});
+    await page.getByTestId('station-login-widget').waitFor({state: 'visible', timeout: WIDGET_INIT_TIMEOUT});
   } catch (error) {
     // First attempt failed, try clicking init widgets button again
     await page.reload();
-    await page.waitForTimeout(2000); // Wait for page to settle
+    await page.waitForTimeout(UI_SETTLE_TIMEOUT); // Wait for page to settle
     await page.getByTestId('samples:init-widgets-button').click({timeout: AWAIT_TIMEOUT});
 
     try {
-      await page.getByTestId('station-login-widget').waitFor({state: 'visible', timeout: 50000});
+      await page.getByTestId('station-login-widget').waitFor({state: 'visible', timeout: WIDGET_INIT_TIMEOUT});
     } catch (secondError) {
       // Second attempt also failed, throw error
+      const totalTimeout = (WIDGET_INIT_TIMEOUT * 2) / 1000;
       throw new Error(
-        'Station login widget failed to become visible after two initialization attempts (100 seconds total)'
+        `Station login widget failed to become visible after two initialization attempts (${totalTimeout} seconds total)`
       );
     }
   }
@@ -169,7 +170,7 @@ export const initialiseWidgets = async (page: Page): Promise<void> => {
 // Helper method for agent relogin - simulates user login along with page reload
 export const agentRelogin = async (page: Page): Promise<void> => {
   await page.reload();
-  await page.waitForTimeout(2000); // Wait for page to settle
+  await page.waitForTimeout(UI_SETTLE_TIMEOUT); // Wait for page to settle
   await initialiseWidgets(page);
 };
 

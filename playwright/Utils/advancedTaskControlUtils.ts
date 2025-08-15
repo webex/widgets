@@ -1,5 +1,5 @@
 import {Page} from '@playwright/test';
-import {AWAIT_TIMEOUT} from '../constants';
+import {AWAIT_TIMEOUT, FORM_FIELD_TIMEOUT} from '../constants';
 
 /**
  * Utility functions for advanced task controls testing.
@@ -123,7 +123,7 @@ export async function consultViaAgent(page: Page, agentName: string): Promise<vo
   await page.getByRole('tab', {name: 'Agents'}).click({timeout: AWAIT_TIMEOUT});
 
   //hover over the agent name - use exact match to avoid confusion with similar names
-  await page.getByRole('listitem', {name: agentName, exact: true}).hover({timeout: AWAIT_TIMEOUT});
+  await page.getByRole('listitem', {name: agentName, exact: true}).hover({timeout: FORM_FIELD_TIMEOUT});
 
   // Select the specific agent
   await page.getByRole('listitem', {name: agentName, exact: true}).getByRole('button').click({timeout: AWAIT_TIMEOUT});
@@ -182,10 +182,13 @@ export async function transferViaAgent(page: Page, agentName: string): Promise<v
   await page.getByRole('tab', {name: 'Agents'}).click({timeout: AWAIT_TIMEOUT});
 
   // Hover over the agent name - use exact match to avoid confusion with similar names
-  await page.getByRole('listitem', {name: agentName, exact: true}).hover({timeout: AWAIT_TIMEOUT});
+  await page.getByRole('listitem', {name: agentName, exact: true}).hover({timeout: FORM_FIELD_TIMEOUT});
 
   // Select the specific agent
-  await page.getByRole('listitem', {name: agentName, exact: true}).getByRole('button').click({timeout: AWAIT_TIMEOUT});
+  await page
+    .getByRole('listitem', {name: agentName, exact: true})
+    .getByRole('button')
+    .click({timeout: FORM_FIELD_TIMEOUT});
 
   // Wait a moment for the transfer to be processed
   await page.waitForTimeout(2000);

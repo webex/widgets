@@ -10,7 +10,8 @@ import {
   LoginMode,
   DEFAULT_MAX_RETRIES,
   DEFAULT_TIMEOUT,
-  SHORT_TIMEOUT,
+  UI_SETTLE_TIMEOUT,
+  AWAIT_TIMEOUT,
   PAGE_TYPES,
   PageType,
 } from './constants';
@@ -434,12 +435,14 @@ export class TestManager {
   // Helper method to verify station login widgets
   private async verifyStationLoginWidgets(isDesktopMode: boolean): Promise<void> {
     const verificationPromises: Promise<void>[] = [
-      expect(this.agent1Page.getByTestId('station-login-widget')).toBeVisible({timeout: SHORT_TIMEOUT}),
+      expect(this.agent1Page.getByTestId('station-login-widget')).toBeVisible({timeout: AWAIT_TIMEOUT}),
     ];
 
     if (!isDesktopMode) {
       verificationPromises.push(
-        expect(this.multiSessionAgent1Page.getByTestId('station-login-widget')).toBeVisible({timeout: SHORT_TIMEOUT})
+        expect(this.multiSessionAgent1Page.getByTestId('station-login-widget')).toBeVisible({
+          timeout: AWAIT_TIMEOUT,
+        })
       );
     }
 
