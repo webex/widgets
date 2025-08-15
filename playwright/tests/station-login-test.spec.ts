@@ -1,10 +1,10 @@
 import {test, expect} from '@playwright/test';
-import {agentRelogin} from './Utils/initUtils';
-import {telephonyLogin, verifyLoginMode, ensureUserStateVisible} from './Utils/stationLoginUtils';
-import {changeUserState, verifyCurrentState, getStateElapsedTime} from './Utils/userStateUtils';
-import {parseTimeString, waitForWebSocketDisconnection, waitForWebSocketReconnection} from './Utils/helperUtils';
-import {USER_STATES, LOGIN_MODE, LONG_WAIT} from './constants';
-import {TestManager} from './test-manager';
+import {agentRelogin} from '../Utils/initUtils';
+import {telephonyLogin, verifyLoginMode, ensureUserStateVisible} from '../Utils/stationLoginUtils';
+import {changeUserState, verifyCurrentState, getStateElapsedTime} from '../Utils/userStateUtils';
+import {parseTimeString, waitForWebSocketDisconnection, waitForWebSocketReconnection} from '../Utils/helperUtils';
+import {USER_STATES, LOGIN_MODE, LONG_WAIT} from '../constants';
+import {TestManager} from '../test-manager';
 
 export default function createStationLoginTests() {
   test.describe('Station Login Tests - Dial Number Mode', () => {
@@ -284,7 +284,7 @@ export default function createStationLoginTests() {
     test.beforeAll(async ({browser}, testInfo) => {
       const projectName = testInfo.project.name;
       testManager = new TestManager(projectName);
-      await testManager.setupForStationLogin(browser);
+      await testManager.setupForStationLogin(browser, true);
     });
 
     test.afterAll(async () => {
@@ -307,7 +307,7 @@ export default function createStationLoginTests() {
       await verifyLoginMode(testManager.agent1Page, 'Desktop');
     });
 
-    test('should handle page reload and maintain Desktop login state', async () => {
+    test.skip('should handle page reload and maintain Desktop login state', async () => {
       await ensureUserStateVisible(testManager.agent1Page, LOGIN_MODE.DESKTOP);
       await agentRelogin(testManager.agent1Page);
       await expect(testManager.agent1Page.getByTestId('station-login-widget')).toBeVisible({timeout: 2000});

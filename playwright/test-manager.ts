@@ -56,7 +56,6 @@ export class TestManager {
   public projectName: string;
   constructor(projectName: string) {
     this.projectName = projectName;
-    console.log(`[${new Date().toISOString()}] 🏗️ TestManager initialized for project: ${projectName}`);
   }
 
   // 🎯 Universal Setup Method - Handles all test scenarios (Parallelized)
@@ -291,7 +290,7 @@ export class TestManager {
     });
   }
 
-  async setupForStationLogin(browser: Browser) {
+  async setupForStationLogin(browser: Browser, isDesktopMode: boolean = false) {
     // Create browser context and page
     this.agent1Context = await browser.newContext();
     this.agent1Page = await this.agent1Context.newPage();
@@ -312,38 +311,46 @@ export class TestManager {
         await initialiseWidgets(this.agent1Page);
       })(),
       // Multi-session page setup
-      (async () => {
-        await loginViaAccessToken(
-          this.multiSessionAgent1Page,
-          process.env[`${this.projectName}_AGENT1_ACCESS_TOKEN`] ?? ''
-        );
-        await enableMultiLogin(this.multiSessionAgent1Page);
-        await enableAllWidgets(this.multiSessionAgent1Page);
-        await initialiseWidgets(this.multiSessionAgent1Page);
-      })(),
+      ...(!isDesktopMode
+        ? [
+            (async () => {
+              await loginViaAccessToken(
+                this.multiSessionAgent1Page,
+                process.env[`${this.projectName}_AGENT1_ACCESS_TOKEN`] ?? ''
+              );
+              await enableMultiLogin(this.multiSessionAgent1Page);
+              await enableAllWidgets(this.multiSessionAgent1Page);
+              await initialiseWidgets(this.multiSessionAgent1Page);
+            })(),
+          ]
+        : []),
     ]);
 
     // Logout from station if already logged in on main page
     const isLogoutButtonVisible = await this.agent1Page
       .getByTestId('samples:station-logout-button')
-      .isVisible()
+      .isVisible({timeout: 5000})
       .catch(() => false);
     if (isLogoutButtonVisible) {
       await stationLogout(this.agent1Page);
     }
 
     // Logout from station if already logged in on multi-session page
-    const isMultiSessionLogoutButtonVisible = await this.multiSessionAgent1Page
-      .getByTestId('samples:station-logout-button')
-      .isVisible()
-      .catch(() => false);
-    if (isMultiSessionLogoutButtonVisible) {
-      await stationLogout(this.multiSessionAgent1Page);
+    if (!isDesktopMode) {
+      const isMultiSessionLogoutButtonVisible = await this.multiSessionAgent1Page
+        .getByTestId('samples:station-logout-button')
+        .isVisible({timeout: 5000})
+        .catch(() => false);
+      if (isMultiSessionLogoutButtonVisible) {
+        await stationLogout(this.multiSessionAgent1Page);
+      }
     }
 
     // Ensure station login widget is visible on both pages
     await expect(this.agent1Page.getByTestId('station-login-widget')).toBeVisible({timeout: 2000});
-    await expect(this.multiSessionAgent1Page.getByTestId('station-login-widget')).toBeVisible({timeout: 2000});
+    if (!isDesktopMode) {
+      await expect(this.multiSessionAgent1Page.getByTestId('station-login-widget')).toBeVisible({timeout: 2000});
+    }
   }
 
   async setupMultiSessionPage() {
@@ -411,7 +418,7 @@ export class TestManager {
       // Check if already logged in to station, if so logout first
       const logoutButtonExists = await this.agent1Page
         .getByTestId('samples:station-logout-button')
-        .isVisible()
+        .isVisible({timeout: 5000})
         .catch(() => false);
 
       if (logoutButtonExists) {
@@ -470,12 +477,12 @@ export class TestManager {
   async cleanup() {
     const isLogoutVisible = await this.agent1Page
       ?.getByTestId('samples:station-logout-button')
-      .isVisible()
+      .isVisible({timeout: 5000})
       .catch(() => false);
     if (isLogoutVisible) await stationLogout(this.agent1Page);
     const isLogout2Visible = await this.agent2Page
       ?.getByTestId('samples:station-logout-button')
-      .isVisible()
+      .isVisible({timeout: 5000})
       .catch(() => false);
     if (isLogout2Visible) await stationLogout(this.agent2Page);
 

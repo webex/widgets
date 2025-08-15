@@ -10,14 +10,14 @@ import {
   verifyConsultStartSuccessLogs,
   verifyConsultEndSuccessLogs,
   verifyConsultTransferredLogs,
-} from './Utils/advancedTaskControlUtils';
+} from '../Utils/advancedTaskControlUtils';
 
-import {changeUserState, verifyCurrentState} from './Utils/userStateUtils';
-import {createCallTask, acceptIncomingTask, declineIncomingTask} from './Utils/incomingTaskUtils';
-import {submitWrapup} from './Utils/wrapupUtils';
-import {USER_STATES, TASK_TYPES, WRAPUP_REASONS} from './constants';
-import {holdCallToggle, endTask, verifyHoldButtonIcon, verifyTaskControls} from './Utils/taskControlUtils';
-import {TestManager} from './test-manager';
+import {changeUserState, verifyCurrentState} from '../Utils/userStateUtils';
+import {createCallTask, acceptIncomingTask, declineIncomingTask} from '../Utils/incomingTaskUtils';
+import {submitWrapup} from '../Utils/wrapupUtils';
+import {USER_STATES, TASK_TYPES, WRAPUP_REASONS} from '../constants';
+import {holdCallToggle, endTask, verifyHoldButtonIcon, verifyTaskControls} from '../Utils/taskControlUtils';
+import {TestManager} from '../test-manager';
 
 // Extract test functions for cleaner syntax
 const {describe, beforeAll, afterAll, beforeEach} = test;

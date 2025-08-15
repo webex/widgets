@@ -1,12 +1,12 @@
 import {test, expect} from '@playwright/test';
-import {consultViaAgent, transferViaAgent, cancelConsult} from './Utils/advancedTaskControlUtils';
-import {changeUserState, verifyCurrentState} from './Utils/userStateUtils';
-import {createCallTask, acceptIncomingTask} from './Utils/incomingTaskUtils';
-import {submitWrapup} from './Utils/wrapupUtils';
-import {USER_STATES, TASK_TYPES, WRAPUP_REASONS} from './constants';
-import {waitForState} from './Utils/helperUtils';
-import {endTask, holdCallToggle} from './Utils/taskControlUtils';
-import {TestManager} from './test-manager';
+import {consultViaAgent, transferViaAgent, cancelConsult} from '../Utils/advancedTaskControlUtils';
+import {changeUserState, verifyCurrentState} from '../Utils/userStateUtils';
+import {createCallTask, acceptIncomingTask} from '../Utils/incomingTaskUtils';
+import {submitWrapup} from '../Utils/wrapupUtils';
+import {USER_STATES, TASK_TYPES, WRAPUP_REASONS} from '../constants';
+import {waitForState} from '../Utils/helperUtils';
+import {endTask, holdCallToggle} from '../Utils/taskControlUtils';
+import {TestManager} from '../test-manager';
 
 export default function createAdvanceCombinationsTests() {
   test.describe('Advanced Combinations Tests ', () => {

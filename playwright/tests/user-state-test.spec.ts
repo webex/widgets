@@ -1,6 +1,6 @@
 import {test, expect} from '@playwright/test';
-import {agentRelogin} from './Utils/initUtils';
-import {stationLogout, telephonyLogin} from './Utils/stationLoginUtils';
+import {agentRelogin} from '../Utils/initUtils';
+import {stationLogout, telephonyLogin} from '../Utils/stationLoginUtils';
 import {
   getCurrentState,
   changeUserState,
@@ -8,9 +8,9 @@ import {
   getStateElapsedTime,
   validateConsoleStateChange,
   checkCallbackSequence,
-} from './Utils/userStateUtils';
-import {USER_STATES, THEME_COLORS, LOGIN_MODE} from './constants';
-import {TestManager} from './test-manager';
+} from '../Utils/userStateUtils';
+import {USER_STATES, THEME_COLORS, LOGIN_MODE} from '../constants';
+import {TestManager} from '../test-manager';
 
 // Shared login and setup before all tests
 

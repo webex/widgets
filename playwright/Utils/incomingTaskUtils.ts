@@ -95,17 +95,22 @@ export async function createChatTask(page: Page, chatURL: string) {
       await page
         .locator('iframe[name="Conversation Window"]')
         .contentFrame()
-        .getByRole('textbox', {name: 'Namemust fill field'})
+        .getByRole('textbox', {name: 'Name'})
         .waitFor({state: 'visible', timeout: AWAIT_TIMEOUT});
       await page
         .locator('iframe[name="Conversation Window"]')
         .contentFrame()
-        .getByRole('textbox', {name: 'Namemust fill field'})
+        .getByRole('textbox', {name: 'Name'})
         .click({timeout: AWAIT_TIMEOUT});
       await page
         .locator('iframe[name="Conversation Window"]')
         .contentFrame()
-        .getByRole('textbox', {name: 'Namemust fill field'})
+        .getByRole('textbox', {name: 'Name'})
+        .fill('Playwright Test', {timeout: AWAIT_TIMEOUT});
+      await page
+        .locator('iframe[name="Conversation Window"]')
+        .contentFrame()
+        .getByRole('textbox', {name: 'Name'})
         .fill('Playwright Test', {timeout: AWAIT_TIMEOUT});
       await page
         .locator('iframe[name="Conversation Window"]')

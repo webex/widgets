@@ -312,6 +312,7 @@ export function isColorClose(receivedColor: string, expectedColor: ThemeColor, t
 
 export const handleStrayTasks = async (page: Page, extensionPage: Page | null = null): Promise<void> => {
   await page.waitForTimeout(1000);
+  await changeUserState(page, USER_STATES.AVAILABLE);
   const incomingTaskDiv = page.getByTestId(/^samples:incoming-task(-\w+)?$/);
 
   while (true) {

@@ -18,11 +18,12 @@ export default defineConfig({
   },
   retries: 0,
   fullyParallel: true,
-  workers: 4,
+  workers: 5,
   reporter: 'html',
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'retain-on-failure',
+    headless: false,
   },
   projects: [
     {
@@ -136,6 +137,34 @@ export default defineConfig({
             `--disable-extensions`,
             `--disable-plugins`,
             `--window-position=3900,0`,
+            `--window-size=1280,720`,
+          ],
+        },
+      },
+    },
+    {
+      name: 'SET_5',
+      fullyParallel: false,
+      dependencies: ['OAuth: Get Access Token'],
+      testMatch: ['**/set5-tests.spec.ts'],
+      use: {
+        ...devices['Desktop Chrome'],
+        channel: 'chrome',
+        storageState: undefined,
+        launchOptions: {
+          args: [
+            `--disable-site-isolation-trials`,
+            `--disable-web-security`,
+            `--no-sandbox`,
+            `--disable-features=WebRtcHideLocalIpsWithMdns`,
+            `--allow-file-access-from-files`,
+            `--use-fake-ui-for-media-stream`,
+            `--use-fake-device-for-media-stream`,
+            `--use-file-for-fake-audio-capture=${dummyAudioPath}`,
+            `--remote-debugging-port=9225`,
+            `--disable-extensions`,
+            `--disable-plugins`,
+            `--window-position=5200,0`,
             `--window-size=1280,720`,
           ],
         },
