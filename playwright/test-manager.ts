@@ -5,7 +5,15 @@ import {loginExtension} from './Utils/incomingTaskUtils';
 import {setupConsoleLogging} from './Utils/taskControlUtils';
 import {setupAdvancedConsoleLogging} from './Utils/advancedTaskControlUtils';
 import {pageSetup} from './Utils/helperUtils';
-import {LOGIN_MODE} from './constants';
+import {
+  LOGIN_MODE,
+  LoginMode,
+  DEFAULT_MAX_RETRIES,
+  DEFAULT_TIMEOUT,
+  SHORT_TIMEOUT,
+  PAGE_TYPES,
+  PageType,
+} from './constants';
 
 // Configuration interfaces for setup options
 interface SetupConfig {
@@ -18,11 +26,28 @@ interface SetupConfig {
   needsMultiSession?: boolean;
 
   // Login modes
-  agent1LoginMode?: 'Desktop' | 'Extension';
+  agent1LoginMode?: LoginMode;
 
   // Console logging
   enableConsoleLogging?: boolean;
   enableAdvancedLogging?: boolean;
+}
+
+// Environment variable helper interface
+interface EnvTokens {
+  agent1AccessToken: string;
+  agent2AccessToken: string;
+  agent1Username: string;
+  agent2Username: string;
+  agent1ExtensionNumber: string;
+  password: string;
+}
+
+// Context creation result interface
+interface ContextCreationResult {
+  context: BrowserContext;
+  page: Page;
+  type: PageType;
 }
 
 // 🏗️ Simple Test Context Manager
@@ -52,14 +77,76 @@ export class TestManager {
   public chatContext: BrowserContext;
 
   public consoleMessages: string[] = [];
-  public maxRetries = 3;
-  public projectName: string;
-  constructor(projectName: string) {
+  public readonly maxRetries: number;
+  public readonly projectName: string;
+
+  constructor(projectName: string, maxRetries: number = DEFAULT_MAX_RETRIES) {
     this.projectName = projectName;
+    this.maxRetries = maxRetries;
+  }
+
+  // Helper method to get environment tokens
+  private getEnvTokens(): EnvTokens {
+    return {
+      agent1AccessToken: process.env[`${this.projectName}_AGENT1_ACCESS_TOKEN`] ?? '',
+      agent2AccessToken: process.env[`${this.projectName}_AGENT2_ACCESS_TOKEN`] ?? '',
+      agent1Username: process.env[`${this.projectName}_AGENT1_USERNAME`] ?? '',
+      agent2Username: process.env[`${this.projectName}_AGENT2_USERNAME`] ?? '',
+      agent1ExtensionNumber: process.env[`${this.projectName}_AGENT1_EXTENSION_NUMBER`] ?? '',
+      password: process.env.PW_PASSWORD ?? '',
+    };
+  }
+
+  // Helper method to create context with error handling
+  private async createContextWithPage(browser: Browser, type: PageType): Promise<ContextCreationResult> {
+    try {
+      const context = await browser.newContext();
+      const page = await context.newPage();
+      return {context, page, type};
+    } catch (error) {
+      throw new Error(`Failed to create context for ${type}: ${error}`);
+    }
+  }
+
+  // Helper method to setup console logging for a page
+  private setupPageConsoleLogging(page: Page, enableLogging: boolean = true): void {
+    if (enableLogging) {
+      page.on('console', (msg) => this.consoleMessages.push(msg.text()));
+    }
+  }
+
+  // Helper method to retry operations with exponential backoff
+  private async retryOperation<T>(
+    operation: () => Promise<T>,
+    operationName: string,
+    maxRetries: number = this.maxRetries
+  ): Promise<T> {
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        return await operation();
+      } catch (error) {
+        if (attempt === maxRetries - 1) {
+          throw new Error(`Failed ${operationName} after ${maxRetries} attempts: ${error}`);
+        }
+        console.warn(`${operationName} attempt ${attempt + 1} failed, retrying...`);
+        // Simple exponential backoff
+        await new Promise((resolve) => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+      }
+    }
+    throw new Error(`Retry operation failed unexpectedly for ${operationName}`);
+  }
+
+  // Helper method to check if logout button is visible
+  private async isLogoutButtonVisible(page: Page, timeout: number = DEFAULT_TIMEOUT): Promise<boolean> {
+    try {
+      return await page.getByTestId('samples:station-logout-button').isVisible({timeout});
+    } catch {
+      return false;
+    }
   }
 
   // 🎯 Universal Setup Method - Handles all test scenarios (Parallelized)
-  async setup(browser: Browser, config: SetupConfig = {}) {
+  async setup(browser: Browser, config: SetupConfig = {}): Promise<void> {
     // Default configuration
     const defaults: SetupConfig = {
       needsAgent1: true,
@@ -68,197 +155,196 @@ export class TestManager {
       needsExtension: false,
       needsChat: false,
       needsMultiSession: false,
-      agent1LoginMode: 'Desktop',
+      agent1LoginMode: LOGIN_MODE.DESKTOP,
       enableConsoleLogging: true,
       enableAdvancedLogging: false,
     };
 
-    const finalConfig = {...defaults, ...config};
+    const finalConfig: Required<SetupConfig> = {...defaults, ...config} as Required<SetupConfig>;
+    const envTokens = this.getEnvTokens();
 
     // 🚀 Step 1: Create all required browser contexts in parallel
-    const contextPromises: Promise<any>[] = [];
-
-    if (finalConfig.needsAgent1) {
-      contextPromises.push(
-        browser.newContext().then(async (context) => {
-          this.agent1Context = context;
-          this.agent1Page = await this.agent1Context.newPage();
-          this.consoleMessages = [];
-          this.agent1Page.on('console', (msg) => this.consoleMessages.push(msg.text()));
-        })
-      );
-    }
-
-    if (finalConfig.needsAgent2) {
-      contextPromises.push(
-        browser.newContext().then(async (context) => {
-          this.agent2Context = context;
-          this.agent2Page = await this.agent2Context.newPage();
-          if (finalConfig.enableConsoleLogging) {
-            this.agent2Page.on('console', (msg) => this.consoleMessages.push(msg.text()));
-          }
-        })
-      );
-    }
-
-    if (finalConfig.needsCaller) {
-      contextPromises.push(
-        browser.newContext().then(async (context) => {
-          this.callerExtensionContext = context;
-          this.callerPage = await this.callerExtensionContext.newPage();
-        })
-      );
-    }
-
-    if (finalConfig.needsExtension) {
-      contextPromises.push(
-        browser.newContext().then(async (context) => {
-          this.extensionContext = context;
-          this.agent1ExtensionPage = await this.extensionContext.newPage();
-        })
-      );
-    }
-
-    if (finalConfig.needsChat) {
-      contextPromises.push(
-        browser.newContext().then(async (context) => {
-          this.chatContext = context;
-          this.chatPage = await this.chatContext.newPage();
-        })
-      );
-    }
-
-    if (finalConfig.needsMultiSession) {
-      contextPromises.push(
-        browser.newContext().then(async (context) => {
-          this.multiSessionContext = context;
-          this.multiSessionAgent1Page = await this.multiSessionContext.newPage();
-        })
-      );
-    }
-
-    // Wait for all contexts to be created
-    await Promise.all(contextPromises);
+    const contextCreationPromises = this.createContextsForConfig(browser, finalConfig);
+    await this.processContextCreations(contextCreationPromises, finalConfig);
 
     // 🚀 Step 2: Setup login and widgets in parallel for independent pages
-    const setupPromises: Promise<any>[] = [];
+    const setupPromises = this.createSetupPromises(finalConfig, envTokens);
+    await Promise.all(setupPromises);
 
-    // Agent1 setup
-    if (finalConfig.needsAgent1) {
-      setupPromises.push(
-        (async () => {
-          if (finalConfig.agent1LoginMode === 'Desktop') {
-            await pageSetup(this.agent1Page, 'Desktop', process.env[`${this.projectName}_AGENT1_ACCESS_TOKEN`] ?? '');
-          } else if (finalConfig.agent1LoginMode === 'Extension' && this.agent1ExtensionPage) {
-            // Parallelize pageSetup and extension login
-            const [,] = await Promise.all([
-              pageSetup(
-                this.agent1Page,
-                LOGIN_MODE.EXTENSION,
-                process.env[`${this.projectName}_AGENT1_ACCESS_TOKEN`] ?? '',
-                this.agent1ExtensionPage,
-                process.env[`${this.projectName}_AGENT1_EXTENSION_NUMBER`] ?? ''
-              ),
-              // Extension login in parallel
-              (async () => {
-                for (let i = 0; i < this.maxRetries; i++) {
-                  try {
-                    await loginExtension(
-                      this.agent1ExtensionPage,
-                      process.env[`${this.projectName}_AGENT1_USERNAME`] ?? '',
-                      process.env.PW_PASSWORD ?? ''
-                    );
-                    break;
-                  } catch (error) {
-                    if (i === this.maxRetries - 1) {
-                      throw new Error(`Failed to login agent1 extension after ${this.maxRetries} attempts: ${error}`);
-                    }
-                  }
-                }
-              })(),
-            ]);
-          }
-        })()
-      );
+    // Multi-session setup - Remove dependency wait, make it truly parallel
+    if (finalConfig.needsMultiSession && this.multiSessionAgent1Page) {
+      await this.setupMultiSessionFlow(finalConfig, envTokens);
     }
 
-    // Agent2 setup - Parallelize internal operations
-    if (finalConfig.needsAgent2) {
-      setupPromises.push(
-        (async () => {
-          await pageSetup(
-            this.agent2Page,
-            LOGIN_MODE.DESKTOP,
-            process.env[`${this.projectName}_AGENT2_ACCESS_TOKEN`] ?? ''
-          );
-        })()
-      );
+    // 🚀 Step 3: Setup console logging (can be done in parallel too)
+    await this.setupConsoleLogging(finalConfig);
+  }
+
+  // Helper method to create context creation promises
+  private createContextsForConfig(browser: Browser, config: Required<SetupConfig>): Promise<ContextCreationResult>[] {
+    const promises: Promise<ContextCreationResult>[] = [];
+
+    if (config.needsAgent1) {
+      promises.push(this.createContextWithPage(browser, PAGE_TYPES.AGENT1));
+    }
+    if (config.needsAgent2) {
+      promises.push(this.createContextWithPage(browser, PAGE_TYPES.AGENT2));
+    }
+    if (config.needsCaller) {
+      promises.push(this.createContextWithPage(browser, PAGE_TYPES.CALLER));
+    }
+    if (config.needsExtension) {
+      promises.push(this.createContextWithPage(browser, PAGE_TYPES.EXTENSION));
+    }
+    if (config.needsChat) {
+      promises.push(this.createContextWithPage(browser, PAGE_TYPES.CHAT));
+    }
+    if (config.needsMultiSession) {
+      promises.push(this.createContextWithPage(browser, PAGE_TYPES.MULTI_SESSION));
+    }
+
+    return promises;
+  }
+
+  // Helper method to process context creations
+  private async processContextCreations(
+    promises: Promise<ContextCreationResult>[],
+    config: Required<SetupConfig>
+  ): Promise<void> {
+    const results = await Promise.all(promises);
+
+    for (const result of results) {
+      switch (result.type) {
+        case PAGE_TYPES.AGENT1:
+          this.agent1Context = result.context;
+          this.agent1Page = result.page;
+          this.consoleMessages = [];
+          this.setupPageConsoleLogging(this.agent1Page, true);
+          break;
+        case PAGE_TYPES.AGENT2:
+          this.agent2Context = result.context;
+          this.agent2Page = result.page;
+          this.setupPageConsoleLogging(this.agent2Page, config.enableConsoleLogging);
+          break;
+        case PAGE_TYPES.CALLER:
+          this.callerExtensionContext = result.context;
+          this.callerPage = result.page;
+          break;
+        case PAGE_TYPES.EXTENSION:
+          this.extensionContext = result.context;
+          this.agent1ExtensionPage = result.page;
+          break;
+        case PAGE_TYPES.CHAT:
+          this.chatContext = result.context;
+          this.chatPage = result.page;
+          break;
+        case PAGE_TYPES.MULTI_SESSION:
+          this.multiSessionContext = result.context;
+          this.multiSessionAgent1Page = result.page;
+          break;
+      }
+    }
+  }
+
+  // Helper method to create setup promises
+  private createSetupPromises(config: Required<SetupConfig>, envTokens: EnvTokens): Promise<void>[] {
+    const setupPromises: Promise<void>[] = [];
+
+    // Agent1 setup
+    if (config.needsAgent1) {
+      setupPromises.push(this.setupAgent1(config, envTokens));
+    }
+
+    // Agent2 setup
+    if (config.needsAgent2) {
+      setupPromises.push(this.setupAgent2(envTokens));
     }
 
     // Caller extension setup
-    if (finalConfig.needsCaller && this.callerPage) {
-      setupPromises.push(
-        (async () => {
-          const callerUsername = process.env[`${this.projectName}_AGENT2_USERNAME`] ?? '';
-          for (let i = 0; i < this.maxRetries; i++) {
-            try {
-              await loginExtension(this.callerPage!, callerUsername, process.env.PW_PASSWORD ?? '');
-              break;
-            } catch (error) {
-              if (i === this.maxRetries - 1) {
-                throw new Error(`Failed to login caller extension after ${this.maxRetries} attempts: ${error}`);
-              }
-              console.warn(`Caller extension login attempt ${i + 1} failed, retrying...`);
-            }
-          }
-        })()
+    if (config.needsCaller && this.callerPage) {
+      setupPromises.push(this.setupCaller(envTokens));
+    }
+
+    return setupPromises;
+  }
+
+  // Helper method for Agent1 setup
+  private async setupAgent1(config: Required<SetupConfig>, envTokens: EnvTokens): Promise<void> {
+    if (config.agent1LoginMode === LOGIN_MODE.DESKTOP) {
+      await pageSetup(this.agent1Page, LOGIN_MODE.DESKTOP, envTokens.agent1AccessToken);
+    } else if (config.agent1LoginMode === LOGIN_MODE.EXTENSION && this.agent1ExtensionPage) {
+      await Promise.all([
+        pageSetup(
+          this.agent1Page,
+          LOGIN_MODE.EXTENSION,
+          envTokens.agent1AccessToken,
+          this.agent1ExtensionPage,
+          envTokens.agent1ExtensionNumber
+        ),
+        this.retryOperation(
+          () => loginExtension(this.agent1ExtensionPage, envTokens.agent1Username, envTokens.password),
+          'agent1 extension login'
+        ),
+      ]);
+    }
+  }
+
+  // Helper method for Agent2 setup
+  private async setupAgent2(envTokens: EnvTokens): Promise<void> {
+    await pageSetup(this.agent2Page, LOGIN_MODE.DESKTOP, envTokens.agent2AccessToken);
+  }
+
+  // Helper method for Caller setup
+  private async setupCaller(envTokens: EnvTokens): Promise<void> {
+    await this.retryOperation(
+      () => loginExtension(this.callerPage!, envTokens.agent2Username, envTokens.password),
+      'caller extension login'
+    );
+  }
+
+  // Helper method for multi-session setup
+  private async setupMultiSessionFlow(config: Required<SetupConfig>, envTokens: EnvTokens): Promise<void> {
+    if (config.agent1LoginMode === LOGIN_MODE.EXTENSION) {
+      await pageSetup(
+        this.multiSessionAgent1Page!,
+        LOGIN_MODE.EXTENSION,
+        envTokens.agent1AccessToken,
+        this.agent1ExtensionPage,
+        envTokens.agent1ExtensionNumber,
+        true // Enable multi-session mode
       );
     }
-    // Wait for all setup operations to complete
-    await Promise.all(setupPromises);
-    // Multi-session setup - Remove dependency wait, make it truly parallel
-    if (finalConfig.needsMultiSession && this.multiSessionAgent1Page) {
-      await (async () => {
-        if (finalConfig.agent1LoginMode === 'Extension') {
-          // Don't wait for agent1ExtensionPage, it should be ready from context creation
-          await pageSetup(
-            this.multiSessionAgent1Page!,
-            LOGIN_MODE.EXTENSION,
-            process.env[`${this.projectName}_AGENT1_ACCESS_TOKEN`] ?? '',
-            this.agent1ExtensionPage,
-            process.env[`${this.projectName}_AGENT1_EXTENSION_NUMBER`] ?? '',
-            true // Enable multi-session mode
-          );
-        }
-      })();
-    }
-    // 🚀 Step 3: Setup console logging (can be done in parallel too)
-    const loggingPromises: Promise<any>[] = [];
+  }
 
-    if (finalConfig.enableConsoleLogging && finalConfig.needsAgent1) {
-      loggingPromises.push(Promise.resolve(setupConsoleLogging(this.agent1Page)));
+  // Helper method for console logging setup
+  private async setupConsoleLogging(config: Required<SetupConfig>): Promise<void> {
+    const setupOperations: (() => void)[] = [];
+
+    if (config.enableConsoleLogging && config.needsAgent1) {
+      setupOperations.push(() => setupConsoleLogging(this.agent1Page));
     }
 
-    if (finalConfig.enableAdvancedLogging && finalConfig.needsAgent1) {
-      loggingPromises.push(Promise.resolve(setupAdvancedConsoleLogging(this.agent1Page)));
+    if (config.enableAdvancedLogging && config.needsAgent1) {
+      setupOperations.push(() => setupAdvancedConsoleLogging(this.agent1Page));
     }
 
-    if (finalConfig.enableConsoleLogging && finalConfig.needsAgent2) {
-      loggingPromises.push(Promise.resolve(setupConsoleLogging(this.agent2Page)));
+    if (config.enableConsoleLogging && config.needsAgent2) {
+      setupOperations.push(() => setupConsoleLogging(this.agent2Page));
     }
 
-    if (finalConfig.enableAdvancedLogging && finalConfig.needsAgent2) {
-      loggingPromises.push(Promise.resolve(setupAdvancedConsoleLogging(this.agent2Page)));
+    if (config.enableAdvancedLogging && config.needsAgent2) {
+      setupOperations.push(() => setupAdvancedConsoleLogging(this.agent2Page));
     }
 
-    await Promise.all(loggingPromises);
+    // Execute all setup operations synchronously since they don't return promises
+    setupOperations.forEach((operation) => operation());
   }
 
   async basicSetup(browser: Browser) {
     await this.setup(browser, {
       needsAgent1: true,
       needsAgent2: false,
-      agent1LoginMode: 'Desktop',
+      agent1LoginMode: LOGIN_MODE.DESKTOP,
       enableConsoleLogging: true,
       enableAdvancedLogging: false,
     });
@@ -269,7 +355,7 @@ export class TestManager {
       needsAgent1: true,
       needsAgent2: true,
       needsCaller: true,
-      agent1LoginMode: 'Desktop',
+      agent1LoginMode: LOGIN_MODE.DESKTOP,
       enableConsoleLogging: true,
       enableAdvancedLogging: true,
     });
@@ -280,85 +366,99 @@ export class TestManager {
       needsAgent1: true,
       needsAgent2: true,
       needsCaller: true,
-      agent1LoginMode: 'Desktop',
+      agent1LoginMode: LOGIN_MODE.DESKTOP,
       enableConsoleLogging: true,
       enableAdvancedLogging: true,
     });
   }
 
-  async setupForStationLogin(browser: Browser, isDesktopMode: boolean = false) {
+  async setupForStationLogin(browser: Browser, isDesktopMode: boolean = false): Promise<void> {
+    const envTokens = this.getEnvTokens();
+
     // Create browser context and page
     this.agent1Context = await browser.newContext();
     this.agent1Page = await this.agent1Context.newPage();
     this.consoleMessages = [];
-    this.agent1Page.on('console', (msg) => this.consoleMessages.push(msg.text()));
+    this.setupPageConsoleLogging(this.agent1Page, true);
 
     // Create multi-session context and page for multi-login tests
     this.multiSessionContext = await browser.newContext();
     this.multiSessionAgent1Page = await this.multiSessionContext.newPage();
 
-    // Login and initialize widgets without station login for both pages in parallel
-    await Promise.all([
+    // Define page setup operations
+    const pageSetupOperations: Promise<void>[] = [
       // Main page setup
-      (async () => {
-        await loginViaAccessToken(this.agent1Page, process.env[`${this.projectName}_AGENT1_ACCESS_TOKEN`] ?? '');
-        await enableMultiLogin(this.agent1Page);
-        await enableAllWidgets(this.agent1Page);
-        await initialiseWidgets(this.agent1Page);
-      })(),
-      // Multi-session page setup
-      ...(!isDesktopMode
-        ? [
-            (async () => {
-              await loginViaAccessToken(
-                this.multiSessionAgent1Page,
-                process.env[`${this.projectName}_AGENT1_ACCESS_TOKEN`] ?? ''
-              );
-              await enableMultiLogin(this.multiSessionAgent1Page);
-              await enableAllWidgets(this.multiSessionAgent1Page);
-              await initialiseWidgets(this.multiSessionAgent1Page);
-            })(),
-          ]
-        : []),
-    ]);
+      this.setupPageWithWidgets(this.agent1Page, envTokens.agent1AccessToken),
+    ];
+
+    // Add multi-session page setup only if not in desktop mode
+    if (!isDesktopMode) {
+      pageSetupOperations.push(this.setupPageWithWidgets(this.multiSessionAgent1Page, envTokens.agent1AccessToken));
+    }
+
+    // Execute page setups in parallel
+    await Promise.all(pageSetupOperations);
+
+    // Handle station logout for both pages
+    await this.handleStationLogouts(isDesktopMode);
+
+    // Ensure station login widget is visible on both pages
+    await this.verifyStationLoginWidgets(isDesktopMode);
+  }
+
+  // Helper method to setup page with widgets
+  private async setupPageWithWidgets(page: Page, accessToken: string): Promise<void> {
+    await loginViaAccessToken(page, accessToken);
+    await enableMultiLogin(page);
+    await enableAllWidgets(page);
+    await initialiseWidgets(page);
+  }
+
+  // Helper method to handle station logouts
+  private async handleStationLogouts(isDesktopMode: boolean): Promise<void> {
+    const logoutOperations: Promise<void>[] = [];
 
     // Logout from station if already logged in on main page
-    const isLogoutButtonVisible = await this.agent1Page
-      .getByTestId('samples:station-logout-button')
-      .isVisible({timeout: 5000})
-      .catch(() => false);
-    if (isLogoutButtonVisible) {
-      await stationLogout(this.agent1Page);
+    if (await this.isLogoutButtonVisible(this.agent1Page)) {
+      logoutOperations.push(stationLogout(this.agent1Page));
     }
 
     // Logout from station if already logged in on multi-session page
-    if (!isDesktopMode) {
-      const isMultiSessionLogoutButtonVisible = await this.multiSessionAgent1Page
-        .getByTestId('samples:station-logout-button')
-        .isVisible({timeout: 5000})
-        .catch(() => false);
-      if (isMultiSessionLogoutButtonVisible) {
-        await stationLogout(this.multiSessionAgent1Page);
-      }
+    if (!isDesktopMode && (await this.isLogoutButtonVisible(this.multiSessionAgent1Page))) {
+      logoutOperations.push(stationLogout(this.multiSessionAgent1Page));
     }
 
-    // Ensure station login widget is visible on both pages
-    await expect(this.agent1Page.getByTestId('station-login-widget')).toBeVisible({timeout: 2000});
-    if (!isDesktopMode) {
-      await expect(this.multiSessionAgent1Page.getByTestId('station-login-widget')).toBeVisible({timeout: 2000});
-    }
+    await Promise.all(logoutOperations);
   }
 
-  async setupMultiSessionPage() {
-    // Setup multi-session page with widgets - only called when needed for multi-session tests
-    if (this.multiSessionAgent1Page) {
-      await loginViaAccessToken(
-        this.multiSessionAgent1Page,
-        process.env[`${this.projectName}_AGENT1_ACCESS_TOKEN`] ?? ''
+  // Helper method to verify station login widgets
+  private async verifyStationLoginWidgets(isDesktopMode: boolean): Promise<void> {
+    const verificationPromises: Promise<void>[] = [
+      expect(this.agent1Page.getByTestId('station-login-widget')).toBeVisible({timeout: SHORT_TIMEOUT}),
+    ];
+
+    if (!isDesktopMode) {
+      verificationPromises.push(
+        expect(this.multiSessionAgent1Page.getByTestId('station-login-widget')).toBeVisible({timeout: SHORT_TIMEOUT})
       );
-      await Promise.all([enableMultiLogin(this.multiSessionAgent1Page), enableAllWidgets(this.multiSessionAgent1Page)]);
-      await initialiseWidgets(this.multiSessionAgent1Page);
     }
+
+    await Promise.all(verificationPromises);
+  }
+
+  async setupMultiSessionPage(): Promise<void> {
+    if (!this.multiSessionAgent1Page) {
+      return;
+    }
+
+    const envTokens = this.getEnvTokens();
+
+    // Setup multi-session page with widgets - only called when needed for multi-session tests
+    await loginViaAccessToken(this.multiSessionAgent1Page, envTokens.agent1AccessToken);
+
+    await Promise.all([enableMultiLogin(this.multiSessionAgent1Page), enableAllWidgets(this.multiSessionAgent1Page)]);
+
+    await initialiseWidgets(this.multiSessionAgent1Page);
   }
 
   // Specific setup methods that use the universal setup
@@ -366,7 +466,7 @@ export class TestManager {
     await this.setup(browser, {
       needsAgent1: true,
       needsCaller: true,
-      agent1LoginMode: 'Desktop',
+      agent1LoginMode: LOGIN_MODE.DESKTOP,
       needsChat: true,
       enableConsoleLogging: true,
     });
@@ -378,7 +478,7 @@ export class TestManager {
       needsCaller: true,
       needsExtension: true,
       needsChat: true,
-      agent1LoginMode: 'Extension',
+      agent1LoginMode: LOGIN_MODE.EXTENSION,
       enableConsoleLogging: true,
     });
   }
@@ -390,115 +490,60 @@ export class TestManager {
       needsExtension: true,
       needsChat: true,
       needsMultiSession: true,
-      agent1LoginMode: 'Extension',
+      agent1LoginMode: LOGIN_MODE.EXTENSION,
       enableConsoleLogging: true,
     });
   }
 
-  async setupForUserState(browser: Browser) {
-    await this.setupForStationLogin(browser);
+  async cleanup(): Promise<void> {
+    // Logout operations - can be done in parallel
+    const logoutOperations: Promise<void>[] = [];
 
-    // Login with extension mode and verify state widget is visible
-    const loginButtonExists = await this.agent1Page
-      .getByTestId('login-button')
-      .isVisible()
-      .catch(() => false);
-
-    if (loginButtonExists) {
-      await telephonyLogin(
-        this.agent1Page,
-        LOGIN_MODE.EXTENSION,
-        process.env[`${this.projectName}_AGENT1_EXTENSION_NUMBER`]
-      );
-    } else {
-      // Check if already logged in to station, if so logout first
-      const logoutButtonExists = await this.agent1Page
-        .getByTestId('samples:station-logout-button')
-        .isVisible({timeout: 5000})
-        .catch(() => false);
-
-      if (logoutButtonExists) {
-        await stationLogout(this.agent1Page);
-      }
-      await telephonyLogin(
-        this.agent1Page,
-        LOGIN_MODE.EXTENSION,
-        process.env[`${this.projectName}_AGENT1_EXTENSION_NUMBER`]
-      );
+    if (this.agent1Page && (await this.isLogoutButtonVisible(this.agent1Page))) {
+      logoutOperations.push(stationLogout(this.agent1Page));
     }
 
-    await expect(this.agent1Page.getByTestId('state-select')).toBeVisible();
-  }
+    if (this.agent2Page && (await this.isLogoutButtonVisible(this.agent2Page))) {
+      logoutOperations.push(stationLogout(this.agent2Page));
+    }
 
-  async setupAllPages(browser: Browser) {
-    // Use universal setup for comprehensive all-pages setup
-    await this.setup(browser, {
-      needsAgent1: true,
-      needsAgent2: true,
-      needsCaller: true,
-      needsExtension: true,
-      needsChat: true,
-      needsMultiSession: true,
-      agent1LoginMode: 'Desktop', // Default for basic task controls
-      enableConsoleLogging: true,
-      enableAdvancedLogging: true,
+    await Promise.all(logoutOperations);
+
+    // Close pages and contexts in parallel
+    const cleanupOperations: Promise<void>[] = [];
+
+    // Close pages
+    const pagesToClose = [
+      this.agent1Page,
+      this.multiSessionAgent1Page,
+      this.agent2Page,
+      this.callerPage,
+      this.agent1ExtensionPage,
+      this.chatPage,
+    ].filter(Boolean);
+
+    pagesToClose.forEach((page) => {
+      if (page) {
+        cleanupOperations.push(page.close().catch(() => {})); // Ignore errors during cleanup
+      }
     });
-  }
 
-  async setupForTaskControlsMultiLogin(browser: Browser) {
-    // Use universal setup for comprehensive all-pages setup
-    await this.setup(browser, {
-      needsAgent1: true,
-      needsAgent2: true,
-      needsCaller: true,
-      needsExtension: true,
-      needsChat: false,
-      needsMultiSession: true,
-      agent1LoginMode: 'Extension',
-      enableConsoleLogging: true,
-      enableAdvancedLogging: true,
+    // Close contexts
+    const contextsToClose = [
+      this.agent1Context,
+      this.multiSessionContext,
+      this.agent2Context,
+      this.callerExtensionContext,
+      this.extensionContext,
+      this.chatContext,
+    ].filter(Boolean);
+
+    contextsToClose.forEach((context) => {
+      if (context) {
+        cleanupOperations.push(context.close().catch(() => {})); // Ignore errors during cleanup
+      }
     });
-  }
 
-  async setupForBasicTaskControlsDesktop(browser: Browser) {
-    await this.setup(browser, {
-      needsAgent1: true,
-      needsCaller: true,
-      needsChat: true,
-      agent1LoginMode: 'Desktop',
-      enableConsoleLogging: true,
-    });
-  }
-
-  async cleanup() {
-    const isLogoutVisible = await this.agent1Page
-      ?.getByTestId('samples:station-logout-button')
-      .isVisible({timeout: 5000})
-      .catch(() => false);
-    if (isLogoutVisible) await stationLogout(this.agent1Page);
-    const isLogout2Visible = await this.agent2Page
-      ?.getByTestId('samples:station-logout-button')
-      .isVisible({timeout: 5000})
-      .catch(() => false);
-    if (isLogout2Visible) await stationLogout(this.agent2Page);
-
-    // Close all pages and contexts
-    if (this.agent1Page) await this.agent1Page.close();
-    if (this.multiSessionAgent1Page) await this.multiSessionAgent1Page.close();
-    if (this.agent2Page) await this.agent2Page.close();
-    if (this.callerPage) await this.callerPage.close();
-    if (this.agent1ExtensionPage) await this.agent1ExtensionPage.close();
-    if (this.chatPage) await this.chatPage.close();
-
-    await this.agent1Context?.close();
-    await this.multiSessionContext?.close();
-    await this.agent2Context?.close();
-    await this.callerExtensionContext?.close();
-    await this.extensionContext?.close();
-    await this.chatContext?.close();
-  }
-
-  async reset() {
-    this.consoleMessages.length = 0;
+    await Promise.all(cleanupOperations);
   }
 }

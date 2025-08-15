@@ -33,6 +33,23 @@ export const LONG_WAIT = 40000;
 // Universal timeout for all await operations in Playwright tests
 export const AWAIT_TIMEOUT = 10000;
 
+// Test Manager Constants
+export const DEFAULT_MAX_RETRIES = 3;
+export const DEFAULT_TIMEOUT = 5000;
+export const SHORT_TIMEOUT = 2000;
+
+// Page Types for Test Manager
+export const PAGE_TYPES = {
+  AGENT1: 'agent1',
+  AGENT2: 'agent2',
+  CALLER: 'caller',
+  EXTENSION: 'extension',
+  CHAT: 'chat',
+  MULTI_SESSION: 'multiSession',
+} as const;
+
+export type PageType = (typeof PAGE_TYPES)[keyof typeof PAGE_TYPES];
+
 export const CALL_URL = 'https://web.webex.com/calling?calling';
 
 export const TASK_TYPES = {

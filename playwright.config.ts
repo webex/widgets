@@ -33,6 +33,7 @@ export default defineConfig({
       name: 'SET_1',
       dependencies: ['OAuth: Get Access Token'],
       fullyParallel: false,
+      retries: 1,
       testMatch: ['**/set1-tests.spec.ts'],
       use: {
         ...devices['Desktop Chrome'],
@@ -60,6 +61,7 @@ export default defineConfig({
     {
       name: 'SET_2',
       fullyParallel: false,
+      retries: 1,
       dependencies: ['OAuth: Get Access Token'],
       testMatch: ['**/set2-tests.spec.ts'],
       use: {
@@ -88,6 +90,7 @@ export default defineConfig({
     {
       name: 'SET_3',
       fullyParallel: false,
+      retries: 1,
       dependencies: ['OAuth: Get Access Token'],
       testMatch: ['**/set3-tests.spec.ts'],
       use: {
@@ -116,6 +119,7 @@ export default defineConfig({
     {
       name: 'SET_4',
       fullyParallel: false,
+      retries: 1,
       dependencies: ['OAuth: Get Access Token'],
       testMatch: ['**/set4-tests.spec.ts'],
       use: {
@@ -144,6 +148,7 @@ export default defineConfig({
     {
       name: 'SET_5',
       fullyParallel: false,
+      retries: 1,
       dependencies: ['OAuth: Get Access Token'],
       testMatch: ['**/set5-tests.spec.ts'],
       use: {
