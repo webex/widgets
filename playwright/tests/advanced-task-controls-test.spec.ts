@@ -58,7 +58,6 @@ export default function createAdvancedTaskControlsTests() {
 
       const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 80000});
-      await testManager.agent1Page.waitForTimeout(3000);
 
       await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CALL);
       await changeUserState(testManager.agent2Page, USER_STATES.AVAILABLE);
@@ -83,7 +82,6 @@ export default function createAdvancedTaskControlsTests() {
       // Agent 2 should receive the transfer and accept it
       const incomingTransferDiv = testManager.agent2Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTransferDiv.waitFor({state: 'visible', timeout: 60000});
-      await testManager.agent2Page.waitForTimeout(3000);
 
       await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL);
       await testManager.agent2Page.waitForTimeout(3000);
@@ -139,7 +137,6 @@ export default function createAdvancedTaskControlsTests() {
 
       const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 80000});
-      await testManager.agent1Page.waitForTimeout(3000);
 
       await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CALL);
       await changeUserState(testManager.agent2Page, USER_STATES.AVAILABLE);
@@ -162,7 +159,6 @@ export default function createAdvancedTaskControlsTests() {
       // Agent 2 receives and accepts the consult
       const consultRequestDiv = testManager.agent2Page.getByTestId('samples:incoming-task-telephony').first();
       await consultRequestDiv.waitFor({state: 'visible', timeout: 60000});
-      await testManager.agent2Page.waitForTimeout(3000);
 
       await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL);
       await testManager.agent2Page.waitForTimeout(3000);
@@ -255,7 +251,6 @@ export default function createAdvancedTaskControlsTests() {
       // Agent 2 accepts the consult first
       const consultRequestDiv = testManager.agent2Page.getByTestId('samples:incoming-task-telephony').first();
       await consultRequestDiv.waitFor({state: 'visible', timeout: 60000});
-      await testManager.agent2Page.waitForTimeout(3000);
 
       await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL);
       await testManager.agent2Page.waitForTimeout(3000);
@@ -297,7 +292,6 @@ export default function createAdvancedTaskControlsTests() {
 
       const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 80000});
-      await testManager.agent1Page.waitForTimeout(3000);
 
       await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CALL);
       await testManager.agent1Page.waitForTimeout(5000);
@@ -335,7 +329,6 @@ export default function createAdvancedTaskControlsTests() {
 
       const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 80000});
-      await testManager.agent1Page.waitForTimeout(3000);
 
       await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CALL);
       await changeUserState(testManager.agent2Page, USER_STATES.AVAILABLE);
@@ -356,7 +349,6 @@ export default function createAdvancedTaskControlsTests() {
       // Agent 2 accepts the consult
       const consultRequestDiv = testManager.agent2Page.getByTestId('samples:incoming-task-telephony').first();
       await consultRequestDiv.waitFor({state: 'visible', timeout: 60000});
-      await testManager.agent2Page.waitForTimeout(3000);
 
       await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL);
       await testManager.agent2Page.waitForTimeout(3000);
@@ -391,7 +383,6 @@ export default function createAdvancedTaskControlsTests() {
 
       const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 80000});
-      await testManager.agent1Page.waitForTimeout(3000);
 
       await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CALL);
       await changeUserState(testManager.agent2Page, USER_STATES.AVAILABLE);
@@ -408,7 +399,6 @@ export default function createAdvancedTaskControlsTests() {
       // Agent 2 accepts the consult
       const consultRequestDiv = testManager.agent2Page.getByTestId('samples:incoming-task-telephony').first();
       await consultRequestDiv.waitFor({state: 'visible', timeout: 60000});
-      await testManager.agent2Page.waitForTimeout(3000);
 
       await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL);
       await testManager.agent2Page.waitForTimeout(3000);
@@ -438,7 +428,6 @@ export default function createAdvancedTaskControlsTests() {
 
       const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 80000});
-      await testManager.agent1Page.waitForTimeout(3000);
 
       await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CALL);
       await changeUserState(testManager.agent2Page, USER_STATES.AVAILABLE);
@@ -455,7 +444,6 @@ export default function createAdvancedTaskControlsTests() {
       // Agent 2 accepts the consultation
       const consultRequestDiv = testManager.agent2Page.getByTestId('samples:incoming-task-telephony').first();
       await consultRequestDiv.waitFor({state: 'visible', timeout: 60000});
-      await testManager.agent2Page.waitForTimeout(3000);
 
       await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL);
       await testManager.agent2Page.waitForTimeout(3000);
