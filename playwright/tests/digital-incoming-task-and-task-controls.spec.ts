@@ -390,7 +390,6 @@ export default function createDigitalIncomingTaskAndTaskControlsTests() {
     // Wait for incoming chat notification
     const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-chat').first();
     await incomingTaskDiv.waitFor({state: 'visible', timeout: 120000});
-    await testManager.agent1Page.waitForTimeout(3000);
 
     // Accept the incoming chat
     await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CHAT);
@@ -426,7 +425,6 @@ export default function createDigitalIncomingTaskAndTaskControlsTests() {
     // Wait for incoming email notification (emails may take longer)
     const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-email').first();
     await incomingTaskDiv.waitFor({state: 'visible', timeout: 180000}); // 3 minutes for email
-    await testManager.agent1Page.waitForTimeout(3000);
 
     // Accept the incoming email
     await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.EMAIL);

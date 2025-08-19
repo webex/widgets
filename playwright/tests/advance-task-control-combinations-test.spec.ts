@@ -24,7 +24,6 @@ export default function createAdvanceCombinationsTests() {
       await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       let incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 40000});
-      await testManager.agent1Page.waitForTimeout(2000);
       await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CALL);
       await waitForState(testManager.agent1Page, USER_STATES.ENGAGED);
       await changeUserState(testManager.agent2Page, USER_STATES.AVAILABLE);
@@ -33,7 +32,6 @@ export default function createAdvanceCombinationsTests() {
       await transferViaAgent(testManager.agent1Page, process.env[`${testManager.projectName}_AGENT2_NAME`]!);
       incomingTaskDiv = testManager.agent2Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 20000});
-      await testManager.agent2Page.waitForTimeout(2000);
       await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL);
       await waitForState(testManager.agent2Page, USER_STATES.ENGAGED);
       await testManager.agent1Page.waitForTimeout(2000);
@@ -42,7 +40,6 @@ export default function createAdvanceCombinationsTests() {
       await transferViaAgent(testManager.agent2Page, process.env[`${testManager.projectName}_AGENT1_NAME`]!);
       incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 20000});
-      await testManager.agent1Page.waitForTimeout(2000);
       await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CALL);
       await testManager.agent1Page.waitForTimeout(2000);
       await waitForState(testManager.agent1Page, USER_STATES.ENGAGED);
@@ -60,7 +57,6 @@ export default function createAdvanceCombinationsTests() {
       await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       let incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 40000});
-      await testManager.agent1Page.waitForTimeout(2000);
       await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CALL);
       await changeUserState(testManager.agent2Page, USER_STATES.AVAILABLE);
       await waitForState(testManager.agent1Page, USER_STATES.ENGAGED);
@@ -70,7 +66,6 @@ export default function createAdvanceCombinationsTests() {
       await consultViaAgent(testManager.agent1Page, process.env[`${testManager.projectName}_AGENT2_NAME`]!);
       incomingTaskDiv = testManager.agent2Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 20000});
-      await testManager.agent2Page.waitForTimeout(2000);
       await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL);
       await waitForState(testManager.agent2Page, USER_STATES.ENGAGED);
       await testManager.agent1Page.getByTestId('transfer-consult-btn').click();
@@ -82,7 +77,6 @@ export default function createAdvanceCombinationsTests() {
         .getByTestId('samples:incoming-task-telephony')
         .first()
         .waitFor({state: 'visible', timeout: 20000});
-      await testManager.agent1Page.waitForTimeout(2000);
       await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CALL);
       await waitForState(testManager.agent1Page, USER_STATES.ENGAGED);
       await testManager.agent2Page.getByTestId('transfer-consult-btn').click();
@@ -101,7 +95,6 @@ export default function createAdvanceCombinationsTests() {
       await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       let incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 40000});
-      await testManager.agent1Page.waitForTimeout(2000);
       await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CALL);
       await changeUserState(testManager.agent2Page, USER_STATES.AVAILABLE);
       await waitForState(testManager.agent1Page, USER_STATES.ENGAGED);
@@ -109,7 +102,6 @@ export default function createAdvanceCombinationsTests() {
       await consultViaAgent(testManager.agent1Page, process.env[`${testManager.projectName}_AGENT2_NAME`]!);
       incomingTaskDiv = testManager.agent2Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 20000});
-      await testManager.agent2Page.waitForTimeout(2000);
       await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL);
       await waitForState(testManager.agent2Page, USER_STATES.ENGAGED);
       await testManager.agent1Page.getByTestId('transfer-consult-btn').click();
@@ -141,7 +133,6 @@ export default function createAdvanceCombinationsTests() {
       await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       let incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 40000});
-      await testManager.agent1Page.waitForTimeout(2000);
       await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CALL);
       await waitForState(testManager.agent1Page, USER_STATES.ENGAGED);
       await changeUserState(testManager.agent2Page, USER_STATES.AVAILABLE);
@@ -151,7 +142,6 @@ export default function createAdvanceCombinationsTests() {
         .getByTestId('samples:incoming-task-telephony')
         .first()
         .waitFor({state: 'visible', timeout: 20000});
-      await testManager.agent2Page.waitForTimeout(2000);
       await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL);
       await waitForState(testManager.agent2Page, USER_STATES.ENGAGED);
       await testManager.agent1Page.waitForTimeout(2000);
@@ -163,7 +153,6 @@ export default function createAdvanceCombinationsTests() {
         state: 'visible',
         timeout: 20000,
       });
-      await testManager.agent1Page.waitForTimeout(2000);
       await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CALL);
       await waitForState(testManager.agent1Page, USER_STATES.ENGAGED);
       await testManager.agent2Page.getByTestId('transfer-consult-btn').click();
@@ -183,7 +172,6 @@ export default function createAdvanceCombinationsTests() {
       await testManager.agent1Page.waitForTimeout(5000);
       const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 80000});
-      await testManager.agent1Page.waitForTimeout(3000);
       await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CALL);
       await changeUserState(testManager.agent2Page, USER_STATES.AVAILABLE);
       await testManager.agent1Page.waitForTimeout(5000);
@@ -191,7 +179,6 @@ export default function createAdvanceCombinationsTests() {
       await consultViaAgent(testManager.agent1Page, process.env[`${testManager.projectName}_AGENT2_NAME`]!);
       const consultRequestDiv = testManager.agent2Page.getByTestId('samples:incoming-task-telephony').first();
       await consultRequestDiv.waitFor({state: 'visible', timeout: 60000});
-      await testManager.agent2Page.waitForTimeout(3000);
       await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL);
       await testManager.agent2Page.waitForTimeout(3000);
       await verifyCurrentState(testManager.agent2Page, USER_STATES.ENGAGED);
@@ -203,7 +190,6 @@ export default function createAdvanceCombinationsTests() {
       await consultViaAgent(testManager.agent2Page, process.env[`${testManager.projectName}_AGENT1_NAME`]!);
       const returnConsultDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await returnConsultDiv.waitFor({state: 'visible', timeout: 60000});
-      await testManager.agent1Page.waitForTimeout(3000);
       await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CALL);
       await testManager.agent1Page.waitForTimeout(3000);
       await testManager.agent2Page.getByTestId('transfer-consult-btn').click();

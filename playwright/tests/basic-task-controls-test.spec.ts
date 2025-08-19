@@ -57,7 +57,6 @@ export default function createCallTaskControlsTests() {
     // Wait for incoming call notification
     const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
     await incomingTaskDiv.waitFor({state: 'visible', timeout: 80000});
-    await testManager.agent1Page.waitForTimeout(3000);
 
     // Accept the incoming call
     await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CALL);

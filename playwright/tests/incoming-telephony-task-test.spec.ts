@@ -124,7 +124,6 @@ export default function createIncomingTelephonyTaskTests() {
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 40000});
-      await testManager.agent1Page.waitForTimeout(3000);
       await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CALL);
       await waitForState(testManager.agent1Page, USER_STATES.ENGAGED);
       await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
