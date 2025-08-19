@@ -67,6 +67,7 @@ const Task: React.FC<TaskProps> = ({
         type={selected ? 'body-large-bold' : 'body-large-medium'}
         className={taskData.titleClassName}
         id={taskData.isNonVoiceMedia ? taskData.tooltipTriggerId : undefined}
+        data-testid="task:title"
       >
         {title}
       </Text>
@@ -145,7 +146,7 @@ const Task: React.FC<TaskProps> = ({
               data-testid={`${interactionId}-handle-time`}
             >
               Handle Time: {'  '}
-              <TaskTimer startTimeStamp={startTimeStamp} />
+              <TaskTimer startTimeStamp={startTimeStamp} data-testid="task-list:timer" />
             </Text>
           )}
 
