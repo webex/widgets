@@ -5,7 +5,7 @@ import {createCallTask, createChatTask, createEmailTask} from '../Utils/incoming
 import {TASK_TYPES, USER_STATES, WRAPUP_REASONS} from '../constants';
 import {verifyTaskControls} from '../Utils/taskControlUtils';
 import {submitWrapup} from '../Utils/wrapupUtils';
-import {handleStrayTasks, waitForState} from '../Utils/helperUtils';
+import {waitForState} from '../Utils/helperUtils';
 
 let capturedLogs: string[] = [];
 
@@ -324,8 +324,6 @@ export default function createTaskListTests() {
         );
         capturedLogs.length = 0;
       }
-
-      await handleStrayTasks(testManager.agent1Page);
     });
 
     test.afterAll(async () => {

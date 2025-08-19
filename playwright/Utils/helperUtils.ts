@@ -317,7 +317,27 @@ export const handleStrayTasks = async (
   maxIterations: number = 10
 ): Promise<void> => {
   await page.waitForTimeout(1000);
-  await changeUserState(page, USER_STATES.AVAILABLE);
+
+  const stateSelectVisible = await page
+    .getByTestId('state-select')
+    .waitFor({state: 'visible', timeout: 30000})
+    .then(() => true)
+    .catch(() => false);
+
+  if (stateSelectVisible) {
+    const ronapopupVisible = await page
+      .getByTestId('samples:rona-popup')
+      .waitFor({state: 'visible', timeout: AWAIT_TIMEOUT})
+      .then(() => true)
+      .catch(() => false);
+
+    if (ronapopupVisible) {
+      await submitRonaPopup(page, RONA_OPTIONS.AVAILABLE);
+    }
+
+    await changeUserState(page, USER_STATES.AVAILABLE);
+    await page.waitForTimeout(4000);
+  }
   const incomingTaskDiv = page.getByTestId(/^samples:incoming-task(-\w+)?$/);
 
   let iterations = 0;
@@ -479,92 +499,8 @@ export const pageSetup = async (
   if (loginButtonExists) {
     await telephonyLogin(page, loginMode, extensionNumber);
   } else {
-    const stateSelectVisible = await page
-      .getByTestId('state-select')
-      .waitFor({state: 'visible', timeout: 30000})
-      .then(() => true)
-      .catch(() => false);
-
-    if (stateSelectVisible) {
-      const ronapopupVisible = await page
-        .getByTestId('samples:rona-popup')
-        .waitFor({state: 'visible', timeout: AWAIT_TIMEOUT})
-        .then(() => true)
-        .catch(() => false);
-
-      if (ronapopupVisible) {
-        await submitRonaPopup(page, RONA_OPTIONS.AVAILABLE);
-      }
-
-      const userState = await getCurrentState(page);
-      await changeUserState(page, USER_STATES.AVAILABLE);
-      await page.waitForTimeout(5000);
-
-      const incomingTaskDiv = page.getByTestId(/^samples:incoming-task(-\w+)?$/).first();
-      await incomingTaskDiv.waitFor({state: 'visible', timeout: AWAIT_TIMEOUT}).catch(() => false);
-
-      // Use improved handleStrayTasks with iteration limit (keeping existing timeout logic)
-      await handleStrayTasks(page, extensionPage, 5); // Limit to 5 iterations for cleanup
-    }
-
-    loginButtonExists = await page
-      .getByTestId('login-button')
-      .isVisible()
-      .catch(() => false);
-
-    if (!loginButtonExists) await stationLogout(page);
+    await stationLogout(page);
     await telephonyLogin(page, loginMode, extensionNumber);
-  }
-
-  let ronapopupVisible = await page
-    .getByTestId('samples:rona-popup')
-    .waitFor({state: 'visible', timeout: AWAIT_TIMEOUT})
-    .then(() => true)
-    .catch(() => false);
-
-  if (ronapopupVisible) {
-    await Promise.race([
-      submitRonaPopup(page, RONA_OPTIONS.AVAILABLE),
-      new Promise((_, reject) => setTimeout(() => reject(new Error('submitRonaPopup timeout')), AWAIT_TIMEOUT)),
-    ]);
-  }
-
-  let stationLoginFailure = await page
-    .getByTestId('station-login-failure-label')
-    .waitFor({state: 'visible', timeout: AWAIT_TIMEOUT})
-    .then(() => true)
-    .catch(() => false);
-
-  for (let i = 0; i < maxRetries && stationLoginFailure; i++) {
-    loginButtonExists = await page
-      .getByTestId('login-button')
-      .waitFor({state: 'visible', timeout: 5000})
-      .then(() => true)
-      .catch(() => false);
-
-    if (!loginButtonExists) {
-      await Promise.race([
-        stationLogout(page),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('stationLogout timeout')), AWAIT_TIMEOUT)),
-      ]);
-    }
-
-    await Promise.race([
-      telephonyLogin(page, loginMode, extensionNumber),
-      new Promise((_, reject) => setTimeout(() => reject(new Error('telephonyLogin timeout')), AWAIT_TIMEOUT)),
-    ]);
-
-    await page.getByTestId('state-select').waitFor({state: 'visible', timeout: 30000});
-
-    stationLoginFailure = await page
-      .getByTestId('station-login-failure-label')
-      .waitFor({state: 'visible', timeout: AWAIT_TIMEOUT})
-      .then(() => true)
-      .catch(() => false);
-
-    if (i == maxRetries - 1 && stationLoginFailure) {
-      throw new Error(`Station Login Error Persists after ${maxRetries} attempts`);
-    }
   }
 
   await page.getByTestId('state-select').waitFor({state: 'visible', timeout: 30000});
