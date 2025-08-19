@@ -52,7 +52,7 @@ export default function createCallTaskControlsTests() {
 
     test('Call task - create call and verify all control buttons are visible', async () => {
       // Create call task
-      await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_DIAL_NUMBER`]!);
+      await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
 
       // Wait for incoming call notification

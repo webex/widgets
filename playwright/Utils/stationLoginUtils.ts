@@ -72,7 +72,7 @@ export const extensionLogin = async (page: Page, extensionNumber?: string): Prom
 /**
  * Performs dial number-based login for contact center agents
  * @param page - The Playwright page object
- * @param dialNumber - Optional dial number. Falls back to PW_DIAL_NUMBER env variable
+ * @param dialNumber - Optional dial number. Falls back to PW_ENTRY_POINT env variable
  * @throws {Error} When dial number is not provided or empty
  * @throws {Error} When login fails or required elements are not found
  * @example

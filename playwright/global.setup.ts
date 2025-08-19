@@ -39,7 +39,7 @@ function UpdateENVWithUserSets() {
     });
 
     // Map to corresponding SET environment variables
-    const dialPattern = new RegExp(`^${setKey}_DIAL_NUMBER=.*$\\n?`, 'm');
+    const dialPattern = new RegExp(`^${setKey}_ENTRY_POINT=.*$\\n?`, 'm');
     const emailPattern = new RegExp(`^${setKey}_EMAIL_ENTRY_POINT=.*$\\n?`, 'm');
     const queuePattern = new RegExp(`^${setKey}_QUEUE_NAME=.*$\\n?`, 'm');
     const chatPattern = new RegExp(`^${setKey}_CHAT_URL=.*$\\n?`, 'm');
@@ -50,7 +50,7 @@ function UpdateENVWithUserSets() {
     envContent = envContent.replace(chatPattern, '');
 
     if (!envContent.endsWith('\n') && envContent.length > 0) envContent += '\n';
-    envContent += `${setKey}_DIAL_NUMBER=${userSet.DIAL_NUMBER || ''}\n`;
+    envContent += `${setKey}_ENTRY_POINT=${userSet.ENTRY_POINT || ''}\n`;
     envContent += `${setKey}_EMAIL_ENTRY_POINT=${userSet.EMAIL_ENTRY_POINT || ''}\n`;
     envContent += `${setKey}_QUEUE_NAME=${userSet.QUEUE_NAME || ''}\n`;
     envContent += `${setKey}_CHAT_URL=${userSet.CHAT_URL || ''}\n`;

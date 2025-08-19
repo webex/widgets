@@ -18,7 +18,7 @@ const transporter = nodemailer.createTransport({
   service: 'gmail', // Make sure to use Secure Port for Gmail SMTP
   auth: {
     user: process.env.PW_SENDER_EMAIL,
-    pass: process.env.PW_APP_PASSWORD,
+    pass: process.env.PW_SENDER_EMAIL_PASSWORD,
   },
 });
 
@@ -34,7 +34,7 @@ const transporter = nodemailer.createTransport({
  * Creates a call task by dialing the provided number, in the webex calling web-client.
  * Prerequisite: The calling webclient must be logged in.
  * @param page Playwright Page object
- * @param number Phone number to dial (defaults to PW_DIAL_NUMBER env variable)
+ * @param number Phone number to dial (defaults to PW_ENTRY_POINT env variable)
  */
 export async function createCallTask(page: Page, number: string) {
   if (!number || number.trim() === '') {

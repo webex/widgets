@@ -54,7 +54,7 @@ export default function createAdvancedTaskControlsTests() {
       beforeEach(async () => {
         await changeUserState(testManager.agent2Page, USER_STATES.MEETING);
         // Create call task and agent 1 accepts it
-        await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_DIAL_NUMBER`]!);
+        await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
         await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
 
         const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
@@ -137,7 +137,7 @@ export default function createAdvancedTaskControlsTests() {
       beforeEach(async () => {
         await changeUserState(testManager.agent2Page, USER_STATES.MEETING);
         // Create call task and agent 1 accepts it
-        await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_DIAL_NUMBER`]!);
+        await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
 
         const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
         await incomingTaskDiv.waitFor({state: 'visible', timeout: 80000});
@@ -295,7 +295,7 @@ export default function createAdvancedTaskControlsTests() {
       test('Agent 1 Consults via Queue When Agent 2 is Idle, Then Cancels the Consultation', async () => {
         await changeUserState(testManager.agent2Page, USER_STATES.MEETING);
         // Create call task and agent 1 accepts it
-        await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_DIAL_NUMBER`]!);
+        await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
 
         const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
         await incomingTaskDiv.waitFor({state: 'visible', timeout: 80000});
@@ -333,7 +333,7 @@ export default function createAdvancedTaskControlsTests() {
       test('Agent 1 Consults via Queue with Available Agent 2, Then Ends Consultation', async () => {
         await changeUserState(testManager.agent2Page, USER_STATES.MEETING);
         // Create new call for this test
-        await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_DIAL_NUMBER`]!);
+        await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
 
         const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
         await incomingTaskDiv.waitFor({state: 'visible', timeout: 80000});
@@ -389,7 +389,7 @@ export default function createAdvancedTaskControlsTests() {
       test('Agent 2 Ends the Consultation Initiated by Agent 1 via Queue', async () => {
         await changeUserState(testManager.agent2Page, USER_STATES.MEETING);
         // Create new call for this test
-        await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_DIAL_NUMBER`]!);
+        await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
 
         const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
         await incomingTaskDiv.waitFor({state: 'visible', timeout: 80000});
@@ -436,7 +436,7 @@ export default function createAdvancedTaskControlsTests() {
       test('Agent 1 Consults via Queue with Agent 2, Then Transfers Call to Agent 2', async () => {
         await changeUserState(testManager.agent2Page, USER_STATES.MEETING);
         // Create new call for this test
-        await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_DIAL_NUMBER`]!);
+        await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
 
         const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
         await incomingTaskDiv.waitFor({state: 'visible', timeout: 80000});

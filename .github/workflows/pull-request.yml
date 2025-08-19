@@ -15,15 +15,15 @@ concurrency:
 
 env:
   rid: ${{ github.run_id }}-${{ github.run_number }}
-  PW_PASSWORD: ${{ secrets.PW_PASSWORD }}
-  PW_APP_PASSWORD: ${{ secrets.PW_APP_PASSWORD }}
+  PW_SANDBOX_PASSWORD: ${{ secrets.PW_SANDBOX_PASSWORD }}
+  PW_SENDER_EMAIL_PASSWORD: ${{ secrets.PW_SENDER_EMAIL_PASSWORD }}
   PW_SANDBOX: ${{ secrets.PW_SANDBOX }}
-  PW_DIAL_NUMBER1: ${{ secrets.PW_DIAL_NUMBER1 }}
-  PW_DIAL_NUMBER2: ${{ secrets.PW_DIAL_NUMBER2 }}
-  PW_DIAL_NUMBER3: ${{ secrets.PW_DIAL_NUMBER3 }}
-  PW_DIAL_NUMBER4: ${{ secrets.PW_DIAL_NUMBER4 }}
-  PW_DIAL_NUMBER5: ${{ secrets.PW_DIAL_NUMBER5 }}
-  PW_DIAL_NUMBER6: ${{ secrets.PW_DIAL_NUMBER6 }}
+  PW_ENTRY_POINT1: ${{ secrets.PW_ENTRY_POINT1 }}
+  PW_ENTRY_POINT2: ${{ secrets.PW_ENTRY_POINT2 }}
+  PW_ENTRY_POINT3: ${{ secrets.PW_ENTRY_POINT3 }}
+  PW_ENTRY_POINT4: ${{ secrets.PW_ENTRY_POINT4 }}
+  PW_ENTRY_POINT5: ${{ secrets.PW_ENTRY_POINT5 }}
+  PW_ENTRY_POINT6: ${{ secrets.PW_ENTRY_POINT6 }}
   PW_SENDER_EMAIL: ${{ secrets.PW_SENDER_EMAIL }}
   PW_CHAT_URL: ${{ secrets.PW_CHAT_URL }}
 

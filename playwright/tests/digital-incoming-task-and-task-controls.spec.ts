@@ -310,7 +310,7 @@ export default function createDigitalIncomingTaskAndTaskControlsTests() {
       await testManager.agent1Page.waitForTimeout(1000);
 
       await Promise.all([
-        createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_DIAL_NUMBER`]!),
+        createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!),
         createChatTask(testManager.chatPage, process.env[`${testManager.projectName}_CHAT_URL`]!),
         createEmailTask(process.env[`${testManager.projectName}_EMAIL_ENTRY_POINT`]!),
       ]);

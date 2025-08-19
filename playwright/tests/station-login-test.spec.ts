@@ -36,7 +36,7 @@ export default function createStationLoginTests() {
       await telephonyLogin(
         testManager.agent1Page,
         LOGIN_MODE.DIAL_NUMBER,
-        process.env[`${testManager.projectName}_DIAL_NUMBER`]
+        process.env[`${testManager.projectName}_ENTRY_POINT`]
       );
       await expect(testManager.agent1Page.getByTestId('state-select')).toBeVisible({timeout: LONG_WAIT});
       await verifyLoginMode(testManager.agent1Page, 'Dial Number');
@@ -46,12 +46,12 @@ export default function createStationLoginTests() {
       await ensureUserStateVisible(
         testManager.agent1Page,
         LOGIN_MODE.DIAL_NUMBER,
-        process.env[`${testManager.projectName}_DIAL_NUMBER`]
+        process.env[`${testManager.projectName}_ENTRY_POINT`]
       );
       await agentRelogin(testManager.agent1Page);
       await expect(testManager.agent1Page.getByTestId('station-login-widget')).toBeVisible({timeout: 2000});
       await verifyLoginMode(testManager.agent1Page, 'Dial Number');
-      const dialNumber = process.env[`${testManager.projectName}_DIAL_NUMBER`];
+      const dialNumber = process.env[`${testManager.projectName}_ENTRY_POINT`];
       if (dialNumber) {
         await expect(testManager.agent1Page.getByTestId('dial-number-input').locator('input')).toHaveValue(dialNumber);
       }
@@ -62,7 +62,7 @@ export default function createStationLoginTests() {
       await ensureUserStateVisible(
         testManager.agent1Page,
         LOGIN_MODE.DIAL_NUMBER,
-        process.env[`${testManager.projectName}_DIAL_NUMBER`]
+        process.env[`${testManager.projectName}_ENTRY_POINT`]
       );
       await changeUserState(testManager.agent1Page, USER_STATES.MEETING);
       await verifyCurrentState(testManager.agent1Page, USER_STATES.MEETING);
@@ -93,7 +93,7 @@ export default function createStationLoginTests() {
       await ensureUserStateVisible(
         testManager.agent1Page,
         LOGIN_MODE.DIAL_NUMBER,
-        process.env[`${testManager.projectName}_DIAL_NUMBER`]
+        process.env[`${testManager.projectName}_ENTRY_POINT`]
       );
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       await verifyCurrentState(testManager.agent1Page, USER_STATES.AVAILABLE);
@@ -126,7 +126,7 @@ export default function createStationLoginTests() {
       await ensureUserStateVisible(
         testManager.agent1Page,
         LOGIN_MODE.DIAL_NUMBER,
-        process.env[`${testManager.projectName}_DIAL_NUMBER`]
+        process.env[`${testManager.projectName}_ENTRY_POINT`]
       );
 
       const multiSessionPage = testManager.multiSessionAgent1Page!;

@@ -21,7 +21,7 @@ export default function createAdvanceCombinationsTests() {
     test('Transfer from one agent to another, then transfer back to the first agent', async () => {
       await changeUserState(testManager.agent2Page, USER_STATES.MEETING);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
-      await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_DIAL_NUMBER`]!);
+      await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       let incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 40000});
       await testManager.agent1Page.waitForTimeout(2000);
@@ -57,7 +57,7 @@ export default function createAdvanceCombinationsTests() {
     test('Consult with another agent then transfer the call', async () => {
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       await changeUserState(testManager.agent2Page, USER_STATES.MEETING);
-      await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_DIAL_NUMBER`]!);
+      await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       let incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 40000});
       await testManager.agent1Page.waitForTimeout(2000);
@@ -98,7 +98,7 @@ export default function createAdvanceCombinationsTests() {
     test('Consult with another agent, transfer the call and transfer the call back to the agent', async () => {
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       await changeUserState(testManager.agent2Page, USER_STATES.MEETING);
-      await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_DIAL_NUMBER`]!);
+      await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       let incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 40000});
       await testManager.agent1Page.waitForTimeout(2000);
@@ -138,7 +138,7 @@ export default function createAdvanceCombinationsTests() {
     test('Transfer the call to another agent & then consult from the other agent', async () => {
       await changeUserState(testManager.agent2Page, USER_STATES.MEETING);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
-      await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_DIAL_NUMBER`]!);
+      await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       let incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 40000});
       await testManager.agent1Page.waitForTimeout(2000);
@@ -179,7 +179,7 @@ export default function createAdvanceCombinationsTests() {
     test('Multi-Stage Consult and Transfer Between A1 and A2', async () => {
       await changeUserState(testManager.agent2Page, USER_STATES.MEETING);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
-      await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_DIAL_NUMBER`]!);
+      await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       await testManager.agent1Page.waitForTimeout(5000);
       const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 80000});

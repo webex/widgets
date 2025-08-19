@@ -136,7 +136,7 @@ export default function createTaskListTests() {
     });
 
     test('Verify Task List for incoming Call', async () => {
-      await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_DIAL_NUMBER`]!);
+      await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       let incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 40000});
@@ -285,7 +285,7 @@ export default function createTaskListTests() {
       await changeUserState(testManager.agent1Page, USER_STATES.MEETING);
       await waitForState(testManager.agent1Page, USER_STATES.MEETING);
       await Promise.all([
-        createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_DIAL_NUMBER`]!),
+        createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!),
         createChatTask(testManager.chatPage, process.env[`${testManager.projectName}_CHAT_URL`]!),
         createEmailTask(process.env[`${testManager.projectName}_EMAIL_ENTRY_POINT`]!),
       ]);

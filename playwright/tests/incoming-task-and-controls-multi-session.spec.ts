@@ -34,7 +34,7 @@ export default function createIncomingTaskAndControlsMultiSessionTests() {
     });
 
     test('should handle multi-session incoming call with state synchronization', async () => {
-      await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_DIAL_NUMBER`]!);
+      await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       const incomingTaskDiv2 = testManager.multiSessionAgent1Page
@@ -104,7 +104,7 @@ export default function createIncomingTaskAndControlsMultiSessionTests() {
       await testManager.agent1Page.waitForTimeout(2000);
 
       // Caller page creates call to extension page
-      await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_DIAL_NUMBER`]!);
+      await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
 
       // Wait for incoming call notification on both AGENT1 sessions
       const incomingTaskSession1 = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();

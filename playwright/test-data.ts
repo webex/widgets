@@ -11,7 +11,7 @@ export const USER_SETS = {
     QUEUE_NAME: 'Queue e2e 1',
     CHAT_URL: `${env.PW_CHAT_URL}-e2e.html`,
     EMAIL_ENTRY_POINT: `${env.PW_SANDBOX}.e2e@gmail.com`,
-    DIAL_NUMBER: env.PW_DIAL_NUMBER1,
+    ENTRY_POINT: env.PW_ENTRY_POINT1,
   },
   SET_2: {
     AGENTS: {
@@ -21,7 +21,7 @@ export const USER_SETS = {
     QUEUE_NAME: 'Queue e2e 2',
     CHAT_URL: `${env.PW_CHAT_URL}-e2e-2.html`,
     EMAIL_ENTRY_POINT: `${env.PW_SANDBOX}.e2e2@gmail.com`,
-    DIAL_NUMBER: env.PW_DIAL_NUMBER2,
+    ENTRY_POINT: env.PW_ENTRY_POINT2,
   },
   SET_3: {
     AGENTS: {
@@ -31,7 +31,7 @@ export const USER_SETS = {
     QUEUE_NAME: 'Queue e2e 3',
     CHAT_URL: `${env.PW_CHAT_URL}-e2e-3.html`,
     EMAIL_ENTRY_POINT: `${env.PW_SANDBOX}.e2e3@gmail.com`,
-    DIAL_NUMBER: env.PW_DIAL_NUMBER3,
+    ENTRY_POINT: env.PW_ENTRY_POINT3,
   },
   SET_4: {
     AGENTS: {
@@ -41,7 +41,7 @@ export const USER_SETS = {
     QUEUE_NAME: 'Queue e2e 4',
     CHAT_URL: `${env.PW_CHAT_URL}-e2e-4.html`,
     EMAIL_ENTRY_POINT: `${env.PW_SANDBOX}.e2e4@gmail.com`,
-    DIAL_NUMBER: env.PW_DIAL_NUMBER4,
+    ENTRY_POINT: env.PW_ENTRY_POINT4,
   },
   SET_5: {
     AGENTS: {
@@ -51,6 +51,6 @@ export const USER_SETS = {
     QUEUE_NAME: 'Queue e2e 5',
     CHAT_URL: `${env.PW_CHAT_URL}-e2e-5.html`,
     EMAIL_ENTRY_POINT: `${env.PW_SANDBOX}.e2e5@gmail.com`,
-    DIAL_NUMBER: env.PW_DIAL_NUMBER5,
+    ENTRY_POINT: env.PW_ENTRY_POINT5,
   },
 };

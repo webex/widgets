@@ -94,7 +94,7 @@ export class TestManager {
       agent1Username: process.env[`${this.projectName}_AGENT1_USERNAME`] ?? '',
       agent2Username: process.env[`${this.projectName}_AGENT2_USERNAME`] ?? '',
       agent1ExtensionNumber: process.env[`${this.projectName}_AGENT1_EXTENSION_NUMBER`] ?? '',
-      password: process.env.PW_PASSWORD ?? '',
+      password: process.env.PW_SANDBOX_PASSWORD ?? '',
     };
   }
 

@@ -33,14 +33,14 @@ export const loginViaAccessToken = async (page: Page, accessToken: string): Prom
  * Performs OAuth login with Webex using agent credentials from environment variables
  * @param page - The Playwright page object
  * @param agentId - Agent identifier to validate against environment variables (e.g., 'SET_1_AGENT1', 'SET_2_AGENT2')
- * @description Validates credentials against {agentId}_USERNAME and PW_PASSWORD
+ * @description Validates credentials against {agentId}_USERNAME and PW_SANDBOX_PASSWORD
  * @throws {Error} When agent credentials are not found in environment variables
  * @example
  * ```typescript
  * // OAuth login with agent credentials from environment variables
- * await oauthLogin(page, 'SET_1_AGENT1'); // validates against SET_1_AGENT1_USERNAME/PW_PASSWORD
- * await oauthLogin(page, 'SET_1_AGENT2'); // validates against SET_1_AGENT2_USERNAME/PW_PASSWORD
- * await oauthLogin(page, 'SET_2_AGENT1'); // validates against SET_2_AGENT1_USERNAME/PW_PASSWORD
+ * await oauthLogin(page, 'SET_1_AGENT1'); // validates against SET_1_AGENT1_USERNAME/PW_SANDBOX_PASSWORD
+ * await oauthLogin(page, 'SET_1_AGENT2'); // validates against SET_1_AGENT2_USERNAME/PW_SANDBOX_PASSWORD
+ * await oauthLogin(page, 'SET_2_AGENT1'); // validates against SET_2_AGENT1_USERNAME/PW_SANDBOX_PASSWORD
  * ```
  */
 export const oauthLogin = async (page: Page, username: string): Promise<void> => {
@@ -55,10 +55,10 @@ export const oauthLogin = async (page: Page, username: string): Promise<void> =>
   }
 
   // Check 3: Get credentials from environment variables
-  const password = process.env[`PW_PASSWORD`];
+  const password = process.env[`PW_SANDBOX_PASSWORD`];
   // Check 6: Validate environment variables are set
   if (!username || !password) {
-    throw new Error(`Environment variables ${username} and PW_PASSWORD must be set`);
+    throw new Error(`Environment variables ${username} and PW_SANDBOX_PASSWORD must be set`);
   }
 
   await page.goto(BASE_URL);

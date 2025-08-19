@@ -120,7 +120,7 @@ export default function createIncomingTelephonyTaskTests() {
     });
 
     test('should accept incoming call, end call and complete wrapup in desktop mode', async () => {
-      await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_DIAL_NUMBER`]!);
+      await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 40000});
@@ -148,7 +148,7 @@ export default function createIncomingTelephonyTaskTests() {
 
     test('should decline incoming call and verify RONA state in desktop mode', async () => {
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
-      await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_DIAL_NUMBER`]!);
+      await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 40000});
       await testManager.agent1Page.waitForTimeout(3000);
@@ -168,7 +168,7 @@ export default function createIncomingTelephonyTaskTests() {
     test('should ignore incoming call and wait for RONA popup in desktop mode', async () => {
       await testManager.agent1Page.waitForTimeout(2000);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
-      await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_DIAL_NUMBER`]!);
+      await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 40000});
       await incomingTaskDiv.waitFor({state: 'hidden', timeout: 30000});
@@ -182,7 +182,7 @@ export default function createIncomingTelephonyTaskTests() {
     test('should set agent state to Available and receive another call in desktop mode', async () => {
       await testManager.agent1Page.waitForTimeout(2000);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
-      await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_DIAL_NUMBER`]!);
+      await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       let incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 40000});
       await testManager.agent1Page.waitForTimeout(3000);
@@ -208,7 +208,7 @@ export default function createIncomingTelephonyTaskTests() {
 
     test('should set agent state to busy after declining call in desktop mode', async () => {
       await testManager.agent1Page.waitForTimeout(2000);
-      await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_DIAL_NUMBER`]!);
+      await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       let incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 40000});
@@ -230,7 +230,7 @@ export default function createIncomingTelephonyTaskTests() {
 
     test('should handle customer disconnect before agent answers in desktop mode', async () => {
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
-      await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_DIAL_NUMBER`]!);
+      await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 40000});
       await endCallTask(testManager.callerPage!);
@@ -261,7 +261,7 @@ export default function createIncomingTelephonyTaskTests() {
 
     test('should accept incoming call, end call and complete wrapup in extension mode', async () => {
       await testManager.agent1Page.waitForTimeout(2000);
-      await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_DIAL_NUMBER`]!);
+      await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 40000});
@@ -292,7 +292,7 @@ export default function createIncomingTelephonyTaskTests() {
     });
 
     test('should decline incoming call and verify RONA state in extension mode', async () => {
-      await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_DIAL_NUMBER`]!);
+      await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 40000});
@@ -320,7 +320,7 @@ export default function createIncomingTelephonyTaskTests() {
     });
 
     test('should ignore incoming call and wait for RONA popup in extension mode', async () => {
-      await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_DIAL_NUMBER`]!);
+      await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 40000});
@@ -345,7 +345,7 @@ export default function createIncomingTelephonyTaskTests() {
     });
 
     test('should set agent state to Available and receive another call in extension mode', async () => {
-      await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_DIAL_NUMBER`]!);
+      await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 40000});
@@ -371,7 +371,7 @@ export default function createIncomingTelephonyTaskTests() {
     });
 
     test('should set agent state to busy after declining call in extension mode', async () => {
-      await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_DIAL_NUMBER`]!);
+      await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 40000});
@@ -400,7 +400,7 @@ export default function createIncomingTelephonyTaskTests() {
     });
 
     test('should handle call disconnect before agent answers in extension mode', async () => {
-      await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_DIAL_NUMBER`]!);
+      await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 40000});
