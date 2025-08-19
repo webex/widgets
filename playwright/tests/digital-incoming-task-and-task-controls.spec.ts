@@ -105,360 +105,356 @@ function setupConsoleLogging(page: Page): () => void {
 }
 
 export default function createDigitalIncomingTaskAndTaskControlsTests() {
-  test.describe('Digital Incoming Task and Task Controls Tests in Extension Mode', () => {
-    let testManager: TestManager;
+  let testManager: TestManager;
 
-    test.beforeEach(() => {
+  test.beforeEach(() => {
+    capturedLogs.length = 0;
+  });
+
+  test.beforeAll(async ({browser}, testInfo) => {
+    const projectName = testInfo.project.name;
+    testManager = new TestManager(projectName);
+    await testManager.setupForIncomingTaskExtension(browser);
+    setupConsoleLogging(testManager.agent1Page);
+  });
+
+  test('should ignore incoming chat task and wait for RONA popup', async () => {
+    await createChatTask(testManager.chatPage, process.env[`${testManager.projectName}_CHAT_URL`]!);
+    await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
+    const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-chat').first();
+    await incomingTaskDiv.waitFor({state: 'visible', timeout: 60000});
+    await incomingTaskDiv.waitFor({state: 'hidden', timeout: 20000});
+    await expect(incomingTaskDiv).toBeHidden();
+    await testManager.agent1Page.getByTestId('samples:rona-popup').waitFor({state: 'visible', timeout: 15000});
+    await expect(testManager.agent1Page.getByTestId('samples:rona-popup')).toBeVisible();
+    await verifyCurrentState(testManager.agent1Page, USER_STATES.RONA);
+    await waitForStateLogs(capturedLogs, USER_STATES.RONA);
+    expect(await getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
+    await testManager.agent1Page.waitForTimeout(3000);
+    const userStateElement = testManager.agent1Page.getByTestId('state-select');
+    const userStateElementColor = await userStateElement.evaluate((el) => getComputedStyle(el).backgroundColor);
+    expect(isColorClose(userStateElementColor, THEME_COLORS.RONA)).toBe(true);
+    await submitRonaPopup(testManager.agent1Page, RONA_OPTIONS.IDLE);
+    await waitForState(testManager.agent1Page, USER_STATES.MEETING);
+  });
+
+  test('should set agent to Available and verify chat task behavior', async () => {
+    await testManager.agent1Page.waitForTimeout(2000);
+    await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
+    const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-chat').first();
+    await incomingTaskDiv.waitFor({state: 'visible', timeout: 60000});
+    await incomingTaskDiv.waitFor({state: 'hidden', timeout: 30000});
+    await expect(incomingTaskDiv).toBeHidden();
+    await testManager.agent1Page.getByTestId('samples:rona-popup').waitFor({state: 'visible', timeout: 15000});
+    await expect(testManager.agent1Page.getByTestId('samples:rona-popup')).toBeVisible();
+    await waitForState(testManager.agent1Page, USER_STATES.RONA);
+    await verifyCurrentState(testManager.agent1Page, USER_STATES.RONA);
+    await waitForStateLogs(capturedLogs, USER_STATES.RONA);
+    expect(await getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
+    await submitRonaPopup(testManager.agent1Page, RONA_OPTIONS.AVAILABLE);
+    await testManager.agent1Page.waitForTimeout(2000);
+    await waitForState(testManager.agent1Page, USER_STATES.AVAILABLE);
+    await expect(testManager.agent1Page.getByTestId('samples:rona-popup')).not.toBeVisible();
+    await verifyCurrentState(testManager.agent1Page, USER_STATES.AVAILABLE);
+    await incomingTaskDiv.waitFor({state: 'visible', timeout: 10000});
+    await expect(incomingTaskDiv).toBeVisible();
+    await incomingTaskDiv.waitFor({state: 'hidden', timeout: 30000});
+    await testManager.agent1Page.getByTestId('samples:rona-popup').waitFor({state: 'visible', timeout: 15000});
+    await submitRonaPopup(testManager.agent1Page, RONA_OPTIONS.IDLE);
+    await waitForState(testManager.agent1Page, USER_STATES.MEETING);
+  });
+
+  test('should set agent state to busy after ignoring chat task', async () => {
+    await testManager.agent1Page.waitForTimeout(2000);
+    await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
+    const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-chat').first();
+    await incomingTaskDiv.waitFor({state: 'visible', timeout: 60000});
+    await incomingTaskDiv.waitFor({state: 'hidden', timeout: 30000});
+    await expect(incomingTaskDiv).toBeHidden();
+    await testManager.agent1Page.getByTestId('samples:rona-popup').waitFor({state: 'visible', timeout: 15000});
+    await expect(testManager.agent1Page.getByTestId('samples:rona-popup')).toBeVisible();
+    await verifyCurrentState(testManager.agent1Page, USER_STATES.RONA);
+    await waitForStateLogs(capturedLogs, USER_STATES.RONA);
+    expect(await getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
+    await submitRonaPopup(testManager.agent1Page, RONA_OPTIONS.IDLE);
+    await waitForState(testManager.agent1Page, USER_STATES.MEETING);
+    await expect(testManager.agent1Page.getByTestId('samples:rona-popup')).not.toBeVisible();
+    await testManager.agent1Page.waitForTimeout(3000);
+    await verifyCurrentState(testManager.agent1Page, USER_STATES.MEETING);
+  });
+
+  test('should accept incoming chat, end chat and complete wrapup with callback verification', async () => {
+    await testManager.agent1Page.waitForTimeout(2000);
+    await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
+    const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-chat').first();
+    await incomingTaskDiv.waitFor({state: 'visible', timeout: 60000});
+    await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CHAT);
+    await waitForState(testManager.agent1Page, USER_STATES.ENGAGED);
+    await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
+    await testManager.agent1Page.waitForTimeout(3000);
+    const userStateElement = testManager.agent1Page.getByTestId('state-select');
+    const userStateElementColor = await userStateElement.evaluate((el) => getComputedStyle(el).backgroundColor);
+    expect(isColorClose(userStateElementColor, THEME_COLORS.ENGAGED)).toBe(true);
+    await waitForStateLogs(capturedLogs, USER_STATES.ENGAGED);
+    expect(await getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.ENGAGED);
+    await expect(testManager.agent1Page.getByTestId('call-control:end-call').first()).toBeVisible();
+    await testManager.agent1Page.getByTestId('call-control:end-call').first().click({timeout: 5000});
+    await testManager.agent1Page.waitForTimeout(500);
+    await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
+    await waitForState(testManager.agent1Page, USER_STATES.AVAILABLE);
+    await waitForStateLogs(capturedLogs, USER_STATES.AVAILABLE);
+    expect(await getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.AVAILABLE);
+    await waitForWrapupReasonLogs(capturedLogs, WRAPUP_REASONS.SALE);
+    expect(await getLastWrapupReasonFromLogs(capturedLogs)).toBe(WRAPUP_REASONS.SALE);
+    expect(await verifyCallbackLogs(capturedLogs, WRAPUP_REASONS.SALE, USER_STATES.AVAILABLE)).toBe(true);
+  });
+
+  test('should handle chat disconnect before agent answers', async () => {
+    await createChatTask(testManager.chatPage, process.env[`${testManager.projectName}_CHAT_URL`]!);
+    await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
+    const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-chat').first();
+    await incomingTaskDiv.waitFor({state: 'visible', timeout: 60000});
+    await endChatTask(testManager.chatPage);
+    await incomingTaskDiv.waitFor({state: 'hidden', timeout: 30000});
+    await waitForState(testManager.agent1Page, USER_STATES.AVAILABLE);
+    await verifyCurrentState(testManager.agent1Page, USER_STATES.AVAILABLE);
+  });
+
+  test('should ignore incoming email task and wait for RONA popup and accept and wrapup', async () => {
+    await createEmailTask(process.env[`${testManager.projectName}_EMAIL_ENTRY_POINT`]!);
+    await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
+    const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-email').first();
+    await incomingTaskDiv.waitFor({state: 'visible', timeout: 50000});
+    await incomingTaskDiv.waitFor({state: 'hidden', timeout: 30000});
+    await expect(incomingTaskDiv).toBeHidden();
+    await waitForState(testManager.agent1Page, USER_STATES.RONA);
+    await testManager.agent1Page.getByTestId('samples:rona-popup').waitFor({state: 'visible', timeout: 15000});
+    await testManager.agent1Page.waitForTimeout(3000);
+    const userStateElement = testManager.agent1Page.getByTestId('state-select');
+    const userStateElementColor = await userStateElement.evaluate((el) => getComputedStyle(el).backgroundColor);
+    expect(isColorClose(userStateElementColor, THEME_COLORS.RONA)).toBe(true);
+    await expect(testManager.agent1Page.getByTestId('samples:rona-popup')).toBeVisible();
+    await verifyCurrentState(testManager.agent1Page, USER_STATES.RONA);
+    await submitRonaPopup(testManager.agent1Page, RONA_OPTIONS.AVAILABLE);
+    await waitForState(testManager.agent1Page, USER_STATES.AVAILABLE);
+    await incomingTaskDiv.waitFor({state: 'visible', timeout: 10000});
+    await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.EMAIL);
+    const endButton = testManager.agent1Page.getByTestId('call-control:end-call').first();
+    await endButton.waitFor({state: 'visible', timeout: 7000});
+    await endButton.click({timeout: 5000});
+    await testManager.agent1Page.waitForTimeout(1000);
+    await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
+    await waitForState(testManager.agent1Page, USER_STATES.AVAILABLE);
+    await waitForStateLogs(capturedLogs, USER_STATES.AVAILABLE);
+    expect(await getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.AVAILABLE);
+    await waitForWrapupReasonLogs(capturedLogs, WRAPUP_REASONS.SALE);
+    expect(await getLastWrapupReasonFromLogs(capturedLogs)).toBe(WRAPUP_REASONS.SALE);
+    expect(await verifyCallbackLogs(capturedLogs, WRAPUP_REASONS.SALE, USER_STATES.AVAILABLE)).toBe(true);
+    await testManager.agent1Page.waitForTimeout(2000);
+  });
+
+  test('should set agent to Available and verify email task behavior', async () => {
+    await createEmailTask(process.env[`${testManager.projectName}_EMAIL_ENTRY_POINT`]!);
+    await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
+    const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-email').first();
+    await incomingTaskDiv.waitFor({state: 'visible', timeout: 50000});
+    await incomingTaskDiv.waitFor({state: 'hidden', timeout: 30000});
+    await expect(incomingTaskDiv).toBeHidden();
+    await testManager.agent1Page.getByTestId('samples:rona-popup').waitFor({state: 'visible', timeout: 15000});
+    await expect(testManager.agent1Page.getByTestId('samples:rona-popup')).toBeVisible();
+    await verifyCurrentState(testManager.agent1Page, USER_STATES.RONA);
+    await waitForStateLogs(capturedLogs, USER_STATES.RONA);
+    expect(await getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
+    await submitRonaPopup(testManager.agent1Page, RONA_OPTIONS.AVAILABLE);
+    await waitForState(testManager.agent1Page, USER_STATES.AVAILABLE);
+    await expect(testManager.agent1Page.getByTestId('samples:rona-popup')).not.toBeVisible();
+    await verifyCurrentState(testManager.agent1Page, USER_STATES.AVAILABLE);
+    await incomingTaskDiv.waitFor({state: 'visible', timeout: 10000});
+    await expect(incomingTaskDiv).toBeVisible();
+    await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.EMAIL);
+    await testManager.agent1Page.waitForTimeout(1000);
+    const endButton = testManager.agent1Page.getByTestId('call-control:end-call').first();
+    await endButton.waitFor({state: 'visible', timeout: 12000});
+    await endButton.click({timeout: 5000});
+    await testManager.agent1Page.waitForTimeout(1000);
+    await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
+    await waitForState(testManager.agent1Page, USER_STATES.AVAILABLE);
+    await testManager.agent1Page.waitForTimeout(2000);
+  });
+
+  test('should set agent state to busy after ignoring email task', async () => {
+    await createEmailTask(process.env[`${testManager.projectName}_EMAIL_ENTRY_POINT`]!);
+    await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
+    const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-email').first();
+    await incomingTaskDiv.waitFor({state: 'visible', timeout: 50000});
+    await incomingTaskDiv.waitFor({state: 'hidden', timeout: 30000});
+    await testManager.agent1Page.getByTestId('samples:rona-popup').waitFor({state: 'visible', timeout: 15000});
+    await submitRonaPopup(testManager.agent1Page, RONA_OPTIONS.IDLE);
+    await waitForState(testManager.agent1Page, USER_STATES.MEETING);
+    await verifyCurrentState(testManager.agent1Page, USER_STATES.MEETING);
+    await incomingTaskDiv.waitFor({state: 'hidden', timeout: 5000});
+    await expect(incomingTaskDiv).toBeHidden();
+    await testManager.agent1Page.waitForTimeout(2000);
+    await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
+    await incomingTaskDiv.waitFor({state: 'visible', timeout: 10000});
+    await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.EMAIL);
+    await testManager.agent1Page.waitForTimeout(1000);
+    await testManager.agent1Page.getByTestId('call-control:end-call').first().click({timeout: 5000});
+    await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
+    await waitForState(testManager.agent1Page, USER_STATES.AVAILABLE);
+  });
+
+  test('should handle multiple incoming tasks with callback verifications', async () => {
+    await changeUserState(testManager.agent1Page, USER_STATES.MEETING);
+    await testManager.agent1Page.waitForTimeout(1000);
+
+    await Promise.all([
+      createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!),
+      createChatTask(testManager.chatPage, process.env[`${testManager.projectName}_CHAT_URL`]!),
+      createEmailTask(process.env[`${testManager.projectName}_EMAIL_ENTRY_POINT`]!),
+    ]);
+
+    await testManager.agent1Page.waitForTimeout(50000);
+
+    await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
+
+    const incomingCallTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
+    const incomingChatTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-chat').first();
+    const incomingEmailTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-email').first();
+
+    await incomingCallTaskDiv.waitFor({state: 'visible', timeout: 5000});
+    await testManager.agent1ExtensionPage
+      .locator('[data-test="generic-person-item-base"]')
+      .first()
+      .waitFor({state: 'visible', timeout: 5000});
+    await acceptExtensionCall(testManager.agent1ExtensionPage);
+    await testManager.agent1Page.waitForTimeout(3000);
+    await incomingChatTaskDiv.waitFor({state: 'visible', timeout: 3000});
+    await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CHAT);
+    await incomingEmailTaskDiv.waitFor({state: 'visible', timeout: 3000});
+    await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.EMAIL);
+    await waitForState(testManager.agent1Page, USER_STATES.ENGAGED);
+    await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
+    await waitForStateLogs(capturedLogs, USER_STATES.ENGAGED);
+    expect(await getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.ENGAGED);
+
+    let count = 3;
+
+    while (count > 0) {
       capturedLogs.length = 0;
-    });
-
-    test.beforeAll(async ({browser}, testInfo) => {
-      const projectName = testInfo.project.name;
-      testManager = new TestManager(projectName);
-      await testManager.setupForIncomingTaskExtension(browser);
-      setupConsoleLogging(testManager.agent1Page);
-    });
-
-    test('should ignore incoming chat task and wait for RONA popup', async () => {
-      await createChatTask(testManager.chatPage, process.env[`${testManager.projectName}_CHAT_URL`]!);
-      await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
-      const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-chat').first();
-      await incomingTaskDiv.waitFor({state: 'visible', timeout: 60000});
-      await incomingTaskDiv.waitFor({state: 'hidden', timeout: 20000});
-      await expect(incomingTaskDiv).toBeHidden();
-      await testManager.agent1Page.getByTestId('samples:rona-popup').waitFor({state: 'visible', timeout: 15000});
-      await expect(testManager.agent1Page.getByTestId('samples:rona-popup')).toBeVisible();
-      await verifyCurrentState(testManager.agent1Page, USER_STATES.RONA);
-      await waitForStateLogs(capturedLogs, USER_STATES.RONA);
-      expect(await getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
-      await testManager.agent1Page.waitForTimeout(3000);
-      const userStateElement = testManager.agent1Page.getByTestId('state-select');
-      const userStateElementColor = await userStateElement.evaluate((el) => getComputedStyle(el).backgroundColor);
-      expect(isColorClose(userStateElementColor, THEME_COLORS.RONA)).toBe(true);
-      await submitRonaPopup(testManager.agent1Page, RONA_OPTIONS.IDLE);
-      await waitForState(testManager.agent1Page, USER_STATES.MEETING);
-    });
-
-    test('should set agent to Available and verify chat task behavior', async () => {
       await testManager.agent1Page.waitForTimeout(2000);
-      await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
-      const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-chat').first();
-      await incomingTaskDiv.waitFor({state: 'visible', timeout: 60000});
-      await incomingTaskDiv.waitFor({state: 'hidden', timeout: 30000});
-      await expect(incomingTaskDiv).toBeHidden();
-      await testManager.agent1Page.getByTestId('samples:rona-popup').waitFor({state: 'visible', timeout: 15000});
-      await expect(testManager.agent1Page.getByTestId('samples:rona-popup')).toBeVisible();
-      await waitForState(testManager.agent1Page, USER_STATES.RONA);
-      await verifyCurrentState(testManager.agent1Page, USER_STATES.RONA);
-      await waitForStateLogs(capturedLogs, USER_STATES.RONA);
-      expect(await getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
-      await submitRonaPopup(testManager.agent1Page, RONA_OPTIONS.AVAILABLE);
-      await testManager.agent1Page.waitForTimeout(2000);
-      await waitForState(testManager.agent1Page, USER_STATES.AVAILABLE);
-      await expect(testManager.agent1Page.getByTestId('samples:rona-popup')).not.toBeVisible();
-      await verifyCurrentState(testManager.agent1Page, USER_STATES.AVAILABLE);
-      await incomingTaskDiv.waitFor({state: 'visible', timeout: 10000});
-      await expect(incomingTaskDiv).toBeVisible();
-      await incomingTaskDiv.waitFor({state: 'hidden', timeout: 30000});
-      await testManager.agent1Page.getByTestId('samples:rona-popup').waitFor({state: 'visible', timeout: 15000});
-      await submitRonaPopup(testManager.agent1Page, RONA_OPTIONS.IDLE);
-      await waitForState(testManager.agent1Page, USER_STATES.MEETING);
-    });
-
-    test('should set agent state to busy after ignoring chat task', async () => {
-      await testManager.agent1Page.waitForTimeout(2000);
-      await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
-      const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-chat').first();
-      await incomingTaskDiv.waitFor({state: 'visible', timeout: 60000});
-      await incomingTaskDiv.waitFor({state: 'hidden', timeout: 30000});
-      await expect(incomingTaskDiv).toBeHidden();
-      await testManager.agent1Page.getByTestId('samples:rona-popup').waitFor({state: 'visible', timeout: 15000});
-      await expect(testManager.agent1Page.getByTestId('samples:rona-popup')).toBeVisible();
-      await verifyCurrentState(testManager.agent1Page, USER_STATES.RONA);
-      await waitForStateLogs(capturedLogs, USER_STATES.RONA);
-      expect(await getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
-      await submitRonaPopup(testManager.agent1Page, RONA_OPTIONS.IDLE);
-      await waitForState(testManager.agent1Page, USER_STATES.MEETING);
-      await expect(testManager.agent1Page.getByTestId('samples:rona-popup')).not.toBeVisible();
-      await testManager.agent1Page.waitForTimeout(3000);
-      await verifyCurrentState(testManager.agent1Page, USER_STATES.MEETING);
-    });
-
-    test('should accept incoming chat, end chat and complete wrapup with callback verification', async () => {
-      await testManager.agent1Page.waitForTimeout(2000);
-      await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
-      const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-chat').first();
-      await incomingTaskDiv.waitFor({state: 'visible', timeout: 60000});
-      await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CHAT);
-      await waitForState(testManager.agent1Page, USER_STATES.ENGAGED);
-      await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
-      await testManager.agent1Page.waitForTimeout(3000);
-      const userStateElement = testManager.agent1Page.getByTestId('state-select');
-      const userStateElementColor = await userStateElement.evaluate((el) => getComputedStyle(el).backgroundColor);
-      expect(isColorClose(userStateElementColor, THEME_COLORS.ENGAGED)).toBe(true);
-      await waitForStateLogs(capturedLogs, USER_STATES.ENGAGED);
-      expect(await getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.ENGAGED);
-      await expect(testManager.agent1Page.getByTestId('call-control:end-call').first()).toBeVisible();
-      await testManager.agent1Page.getByTestId('call-control:end-call').first().click({timeout: 5000});
-      await testManager.agent1Page.waitForTimeout(500);
-      await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
-      await waitForState(testManager.agent1Page, USER_STATES.AVAILABLE);
-      await waitForStateLogs(capturedLogs, USER_STATES.AVAILABLE);
-      expect(await getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.AVAILABLE);
-      await waitForWrapupReasonLogs(capturedLogs, WRAPUP_REASONS.SALE);
-      expect(await getLastWrapupReasonFromLogs(capturedLogs)).toBe(WRAPUP_REASONS.SALE);
-      expect(await verifyCallbackLogs(capturedLogs, WRAPUP_REASONS.SALE, USER_STATES.AVAILABLE)).toBe(true);
-    });
-
-    test('should handle chat disconnect before agent answers', async () => {
-      await createChatTask(testManager.chatPage, process.env[`${testManager.projectName}_CHAT_URL`]!);
-      await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
-      const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-chat').first();
-      await incomingTaskDiv.waitFor({state: 'visible', timeout: 60000});
-      await endChatTask(testManager.chatPage);
-      await incomingTaskDiv.waitFor({state: 'hidden', timeout: 30000});
-      await waitForState(testManager.agent1Page, USER_STATES.AVAILABLE);
-      await verifyCurrentState(testManager.agent1Page, USER_STATES.AVAILABLE);
-    });
-
-    test('should ignore incoming email task and wait for RONA popup and accept and wrapup', async () => {
-      await createEmailTask(process.env[`${testManager.projectName}_EMAIL_ENTRY_POINT`]!);
-      await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
-      const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-email').first();
-      await incomingTaskDiv.waitFor({state: 'visible', timeout: 50000});
-      await incomingTaskDiv.waitFor({state: 'hidden', timeout: 30000});
-      await expect(incomingTaskDiv).toBeHidden();
-      await waitForState(testManager.agent1Page, USER_STATES.RONA);
-      await testManager.agent1Page.getByTestId('samples:rona-popup').waitFor({state: 'visible', timeout: 15000});
-      await testManager.agent1Page.waitForTimeout(3000);
-      const userStateElement = testManager.agent1Page.getByTestId('state-select');
-      const userStateElementColor = await userStateElement.evaluate((el) => getComputedStyle(el).backgroundColor);
-      expect(isColorClose(userStateElementColor, THEME_COLORS.RONA)).toBe(true);
-      await expect(testManager.agent1Page.getByTestId('samples:rona-popup')).toBeVisible();
-      await verifyCurrentState(testManager.agent1Page, USER_STATES.RONA);
-      await submitRonaPopup(testManager.agent1Page, RONA_OPTIONS.AVAILABLE);
-      await waitForState(testManager.agent1Page, USER_STATES.AVAILABLE);
-      await incomingTaskDiv.waitFor({state: 'visible', timeout: 10000});
-      await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.EMAIL);
       const endButton = testManager.agent1Page.getByTestId('call-control:end-call').first();
-      await endButton.waitFor({state: 'visible', timeout: 7000});
-      await endButton.click({timeout: 5000});
-      await testManager.agent1Page.waitForTimeout(1000);
-      await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
-      await waitForState(testManager.agent1Page, USER_STATES.AVAILABLE);
-      await waitForStateLogs(capturedLogs, USER_STATES.AVAILABLE);
-      expect(await getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.AVAILABLE);
-      await waitForWrapupReasonLogs(capturedLogs, WRAPUP_REASONS.SALE);
-      expect(await getLastWrapupReasonFromLogs(capturedLogs)).toBe(WRAPUP_REASONS.SALE);
-      expect(await verifyCallbackLogs(capturedLogs, WRAPUP_REASONS.SALE, USER_STATES.AVAILABLE)).toBe(true);
-      await testManager.agent1Page.waitForTimeout(2000);
-    });
-
-    test('should set agent to Available and verify email task behavior', async () => {
-      await createEmailTask(process.env[`${testManager.projectName}_EMAIL_ENTRY_POINT`]!);
-      await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
-      const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-email').first();
-      await incomingTaskDiv.waitFor({state: 'visible', timeout: 50000});
-      await incomingTaskDiv.waitFor({state: 'hidden', timeout: 30000});
-      await expect(incomingTaskDiv).toBeHidden();
-      await testManager.agent1Page.getByTestId('samples:rona-popup').waitFor({state: 'visible', timeout: 15000});
-      await expect(testManager.agent1Page.getByTestId('samples:rona-popup')).toBeVisible();
-      await verifyCurrentState(testManager.agent1Page, USER_STATES.RONA);
-      await waitForStateLogs(capturedLogs, USER_STATES.RONA);
-      expect(await getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
-      await submitRonaPopup(testManager.agent1Page, RONA_OPTIONS.AVAILABLE);
-      await waitForState(testManager.agent1Page, USER_STATES.AVAILABLE);
-      await expect(testManager.agent1Page.getByTestId('samples:rona-popup')).not.toBeVisible();
-      await verifyCurrentState(testManager.agent1Page, USER_STATES.AVAILABLE);
-      await incomingTaskDiv.waitFor({state: 'visible', timeout: 10000});
-      await expect(incomingTaskDiv).toBeVisible();
-      await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.EMAIL);
-      await testManager.agent1Page.waitForTimeout(1000);
-      const endButton = testManager.agent1Page.getByTestId('call-control:end-call').first();
-      await endButton.waitFor({state: 'visible', timeout: 12000});
-      await endButton.click({timeout: 5000});
-      await testManager.agent1Page.waitForTimeout(1000);
-      await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
-      await waitForState(testManager.agent1Page, USER_STATES.AVAILABLE);
-      await testManager.agent1Page.waitForTimeout(2000);
-    });
-
-    test('should set agent state to busy after ignoring email task', async () => {
-      await createEmailTask(process.env[`${testManager.projectName}_EMAIL_ENTRY_POINT`]!);
-      await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
-      const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-email').first();
-      await incomingTaskDiv.waitFor({state: 'visible', timeout: 50000});
-      await incomingTaskDiv.waitFor({state: 'hidden', timeout: 30000});
-      await testManager.agent1Page.getByTestId('samples:rona-popup').waitFor({state: 'visible', timeout: 15000});
-      await submitRonaPopup(testManager.agent1Page, RONA_OPTIONS.IDLE);
-      await waitForState(testManager.agent1Page, USER_STATES.MEETING);
-      await verifyCurrentState(testManager.agent1Page, USER_STATES.MEETING);
-      await incomingTaskDiv.waitFor({state: 'hidden', timeout: 5000});
-      await expect(incomingTaskDiv).toBeHidden();
-      await testManager.agent1Page.waitForTimeout(2000);
-      await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
-      await incomingTaskDiv.waitFor({state: 'visible', timeout: 10000});
-      await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.EMAIL);
-      await testManager.agent1Page.waitForTimeout(1000);
-      await testManager.agent1Page.getByTestId('call-control:end-call').first().click({timeout: 5000});
-      await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
-      await waitForState(testManager.agent1Page, USER_STATES.AVAILABLE);
-    });
-
-    test('should handle multiple incoming tasks with callback verifications', async () => {
-      await changeUserState(testManager.agent1Page, USER_STATES.MEETING);
-      await testManager.agent1Page.waitForTimeout(1000);
-
-      await Promise.all([
-        createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!),
-        createChatTask(testManager.chatPage, process.env[`${testManager.projectName}_CHAT_URL`]!),
-        createEmailTask(process.env[`${testManager.projectName}_EMAIL_ENTRY_POINT`]!),
-      ]);
-
-      await testManager.agent1Page.waitForTimeout(50000);
-
-      await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
-
-      const incomingCallTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
-      const incomingChatTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-chat').first();
-      const incomingEmailTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-email').first();
-
-      await incomingCallTaskDiv.waitFor({state: 'visible', timeout: 5000});
-      await testManager.agent1ExtensionPage
-        .locator('[data-test="generic-person-item-base"]')
-        .first()
-        .waitFor({state: 'visible', timeout: 5000});
-      await acceptExtensionCall(testManager.agent1ExtensionPage);
-      await testManager.agent1Page.waitForTimeout(3000);
-      await incomingChatTaskDiv.waitFor({state: 'visible', timeout: 3000});
-      await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CHAT);
-      await incomingEmailTaskDiv.waitFor({state: 'visible', timeout: 3000});
-      await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.EMAIL);
-      await waitForState(testManager.agent1Page, USER_STATES.ENGAGED);
-      await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
-      await waitForStateLogs(capturedLogs, USER_STATES.ENGAGED);
-      expect(await getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.ENGAGED);
-
-      let count = 3;
-
-      while (count > 0) {
-        capturedLogs.length = 0;
-        await testManager.agent1Page.waitForTimeout(2000);
-        const endButton = testManager.agent1Page.getByTestId('call-control:end-call').first();
-        const endButtonVisible = await endButton
+      const endButtonVisible = await endButton
+        .waitFor({state: 'visible', timeout: 2000})
+        .then(() => true)
+        .catch(() => false);
+      if (endButtonVisible) {
+        await endButton.click({timeout: 5000});
+        await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
+      } else {
+        const wrapupBox = testManager.agent1Page.getByTestId('wrapup-button').first();
+        const isWrapupBoxVisible = await wrapupBox
           .waitFor({state: 'visible', timeout: 2000})
           .then(() => true)
           .catch(() => false);
-        if (endButtonVisible) {
-          await endButton.click({timeout: 5000});
+        if (isWrapupBoxVisible) {
           await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
+          await testManager.agent1Page.waitForTimeout(2000);
         } else {
-          const wrapupBox = testManager.agent1Page.getByTestId('wrapup-button').first();
-          const isWrapupBoxVisible = await wrapupBox
-            .waitFor({state: 'visible', timeout: 2000})
-            .then(() => true)
-            .catch(() => false);
-          if (isWrapupBoxVisible) {
-            await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
-            await testManager.agent1Page.waitForTimeout(2000);
-          } else {
-            break;
-          }
+          break;
         }
+      }
 
-        await waitForState(testManager.agent1Page, count === 1 ? USER_STATES.AVAILABLE : USER_STATES.ENGAGED);
-        await verifyCurrentState(testManager.agent1Page, count === 1 ? USER_STATES.AVAILABLE : USER_STATES.ENGAGED);
-        await waitForStateLogs(capturedLogs, count === 1 ? USER_STATES.AVAILABLE : USER_STATES.ENGAGED);
-        expect(await getLastStateFromLogs(capturedLogs)).toBe(
+      await waitForState(testManager.agent1Page, count === 1 ? USER_STATES.AVAILABLE : USER_STATES.ENGAGED);
+      await verifyCurrentState(testManager.agent1Page, count === 1 ? USER_STATES.AVAILABLE : USER_STATES.ENGAGED);
+      await waitForStateLogs(capturedLogs, count === 1 ? USER_STATES.AVAILABLE : USER_STATES.ENGAGED);
+      expect(await getLastStateFromLogs(capturedLogs)).toBe(count === 1 ? USER_STATES.AVAILABLE : USER_STATES.ENGAGED);
+      await waitForWrapupReasonLogs(capturedLogs, WRAPUP_REASONS.SALE);
+      expect(await getLastWrapupReasonFromLogs(capturedLogs)).toBe(WRAPUP_REASONS.SALE);
+      expect(
+        await verifyCallbackLogs(
+          capturedLogs,
+          WRAPUP_REASONS.SALE,
           count === 1 ? USER_STATES.AVAILABLE : USER_STATES.ENGAGED
-        );
-        await waitForWrapupReasonLogs(capturedLogs, WRAPUP_REASONS.SALE);
-        expect(await getLastWrapupReasonFromLogs(capturedLogs)).toBe(WRAPUP_REASONS.SALE);
-        expect(
-          await verifyCallbackLogs(
-            capturedLogs,
-            WRAPUP_REASONS.SALE,
-            count === 1 ? USER_STATES.AVAILABLE : USER_STATES.ENGAGED
-          )
-        ).toBe(true);
-        count--;
-      }
-    });
+        )
+      ).toBe(true);
+      count--;
+    }
+  });
 
-    test('Chat task - verify transfer and end buttons are visible, end chat, and wrap up', async () => {
-      // Create chat task
-      await createChatTask(testManager.chatPage, process.env[`${testManager.projectName}_CHAT_URL`]!);
-      await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
+  test('Chat task - verify transfer and end buttons are visible, end chat, and wrap up', async () => {
+    // Create chat task
+    await createChatTask(testManager.chatPage, process.env[`${testManager.projectName}_CHAT_URL`]!);
+    await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
 
-      // Wait for incoming chat notification
-      const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-chat').first();
-      await incomingTaskDiv.waitFor({state: 'visible', timeout: 120000});
+    // Wait for incoming chat notification
+    const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-chat').first();
+    await incomingTaskDiv.waitFor({state: 'visible', timeout: 120000});
+    await testManager.agent1Page.waitForTimeout(3000);
+
+    // Accept the incoming chat
+    await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CHAT);
+    await testManager.agent1Page.waitForTimeout(5000);
+
+    // Verify agent state changed to engaged
+    await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
+
+    try {
+      // Use utility to check chat control buttons are visible
+      await verifyTaskControls(testManager.agent1Page, TASK_TYPES.CHAT);
+
+      // End the chat by clicking the end button
+      await endTask(testManager.agent1Page);
       await testManager.agent1Page.waitForTimeout(3000);
 
-      // Accept the incoming chat
-      await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CHAT);
-      await testManager.agent1Page.waitForTimeout(5000);
+      // Verify onEnd callback logs
+      verifyEndLogs();
 
-      // Verify agent state changed to engaged
-      await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
+      // Submit wrapup
+      await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.RESOLVED);
+      await testManager.agent1Page.waitForTimeout(2000);
+    } catch (error) {
+      throw new Error(`Chat task control test failed: ${error.message}`);
+    }
+  });
 
-      try {
-        // Use utility to check chat control buttons are visible
-        await verifyTaskControls(testManager.agent1Page, TASK_TYPES.CHAT);
+  test('Email task - verify transfer and end buttons are visible, end email, and wrap up', async () => {
+    // Create email task
+    await createEmailTask(process.env[`${testManager.projectName}_EMAIL_ENTRY_POINT`]!);
+    await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
 
-        // End the chat by clicking the end button
-        await endTask(testManager.agent1Page);
-        await testManager.agent1Page.waitForTimeout(3000);
+    // Wait for incoming email notification (emails may take longer)
+    const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-email').first();
+    await incomingTaskDiv.waitFor({state: 'visible', timeout: 180000}); // 3 minutes for email
+    await testManager.agent1Page.waitForTimeout(3000);
 
-        // Verify onEnd callback logs
-        verifyEndLogs();
+    // Accept the incoming email
+    await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.EMAIL);
+    await testManager.agent1Page.waitForTimeout(5000);
 
-        // Submit wrapup
-        await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.RESOLVED);
-        await testManager.agent1Page.waitForTimeout(2000);
-      } catch (error) {
-        throw new Error(`Chat task control test failed: ${error.message}`);
-      }
-    });
+    // Verify agent state changed to engaged
+    await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
 
-    test('Email task - verify transfer and end buttons are visible, end email, and wrap up', async () => {
-      // Create email task
-      await createEmailTask(process.env[`${testManager.projectName}_EMAIL_ENTRY_POINT`]!);
-      await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
+    try {
+      // Use utility to check email control buttons are visible
+      await verifyTaskControls(testManager.agent1Page, TASK_TYPES.EMAIL);
 
-      // Wait for incoming email notification (emails may take longer)
-      const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-email').first();
-      await incomingTaskDiv.waitFor({state: 'visible', timeout: 180000}); // 3 minutes for email
+      // End the email by clicking the end button
+      await endTask(testManager.agent1Page);
       await testManager.agent1Page.waitForTimeout(3000);
 
-      // Accept the incoming email
-      await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.EMAIL);
-      await testManager.agent1Page.waitForTimeout(5000);
+      // Verify onEnd callback logs
+      verifyEndLogs();
 
-      // Verify agent state changed to engaged
-      await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
+      // Submit wrapup
+      await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.RESOLVED);
+      await testManager.agent1Page.waitForTimeout(2000);
+    } catch (error) {
+      throw new Error(`Email task control test failed: ${error.message}`);
+    }
+  });
 
-      try {
-        // Use utility to check email control buttons are visible
-        await verifyTaskControls(testManager.agent1Page, TASK_TYPES.EMAIL);
-
-        // End the email by clicking the end button
-        await endTask(testManager.agent1Page);
-        await testManager.agent1Page.waitForTimeout(3000);
-
-        // Verify onEnd callback logs
-        verifyEndLogs();
-
-        // Submit wrapup
-        await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.RESOLVED);
-        await testManager.agent1Page.waitForTimeout(2000);
-      } catch (error) {
-        throw new Error(`Email task control test failed: ${error.message}`);
-      }
-    });
-
-    test.afterAll(async () => {
-      await testManager.cleanup();
-    });
+  test.afterAll(async () => {
+    await testManager.cleanup();
   });
 }

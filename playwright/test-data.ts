@@ -5,7 +5,7 @@ require('dotenv').config();
 export const USER_SETS = {
   SET_1: {
     AGENTS: {
-      AGENT1: {username: 'User15', extension: '1015', agentName: 'User15 Agent15'},
+      AGENT1: {username: 'user15', extension: '1015', agentName: 'User15 Agent15'},
       AGENT2: {username: 'user16', extension: '1016', agentName: 'User16 Agent16'},
     },
     QUEUE_NAME: 'Queue e2e 1',

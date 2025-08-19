@@ -116,218 +116,216 @@ async function waitForConsoleLogs(
 }
 
 export default function createTaskListTests() {
-  test.describe('Task List Tests for different types of Task', () => {
-    let testManager: TestManager;
+  let testManager: TestManager;
 
-    test.beforeEach(() => {
-      capturedLogs.length = 0;
+  test.beforeEach(() => {
+    capturedLogs.length = 0;
+  });
+
+  test.beforeAll(async ({browser}, testInfo) => {
+    const projectName = testInfo.project.name;
+    testManager = new TestManager(projectName);
+    await testManager.setup(browser, {
+      needsAgent1: true,
+      needsCaller: true,
+      needsChat: true,
+      enableConsoleLogging: true,
     });
+    setupConsoleLogging(testManager.agent1Page);
+  });
 
-    test.beforeAll(async ({browser}, testInfo) => {
-      const projectName = testInfo.project.name;
-      testManager = new TestManager(projectName);
-      await testManager.setup(browser, {
-        needsAgent1: true,
-        needsCaller: true,
-        needsChat: true,
-        enableConsoleLogging: true,
-      });
-      setupConsoleLogging(testManager.agent1Page);
-    });
+  test('Verify Task List for incoming Call', async () => {
+    await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
+    await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
+    let incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
+    await incomingTaskDiv.waitFor({state: 'visible', timeout: 40000});
+    await testManager.agent1Page.waitForTimeout(1000);
+    const taskListItem = testManager.agent1Page.getByTestId('task-list').getByRole('listitem').first();
+    expect(taskListItem).toBeVisible();
+    const taskListAcceptButton = taskListItem.getByTestId('task:accept-button').first();
+    const taskListDeclineButton = taskListItem.getByTestId('task:decline-button').first();
+    const title = await incomingTaskDiv.getByTestId('task:title').first().textContent();
+    expect(await taskListItem.getByTestId('task:title').textContent()).toBe(title);
+    await expect(incomingTaskDiv.getByTestId('task:accept-button')).toBeVisible();
+    await expect(incomingTaskDiv.getByTestId('task:decline-button')).toBeVisible();
+    await expect(taskListAcceptButton).toBeVisible();
+    await expect(taskListDeclineButton).toBeVisible();
+    await taskListAcceptButton.click();
+    await testManager.agent1Page.waitForTimeout(1000);
+    await expect(taskListAcceptButton).not.toBeVisible();
+    await expect(taskListDeclineButton).not.toBeVisible();
+    await testManager.agent1Page.waitForTimeout(5000);
+    try {
+      await verifyTaskControls(testManager.agent1Page, TASK_TYPES.CALL);
+    } catch (error) {
+      throw new Error(`Call control buttons verification failed: ${error.message}`);
+    }
+    await waitForState(testManager.agent1Page, USER_STATES.ENGAGED);
+    await taskListItem.click();
+    await waitForConsoleLogs(capturedLogs, title!, 'telephony');
 
-    test('Verify Task List for incoming Call', async () => {
-      await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
-      await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
-      let incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
-      await incomingTaskDiv.waitFor({state: 'visible', timeout: 40000});
-      await testManager.agent1Page.waitForTimeout(1000);
-      const taskListItem = testManager.agent1Page.getByTestId('task-list').getByRole('listitem').first();
+    // now use interactionId for dynamic assertions
+    const interactionId = await taskListItem.getAttribute('id');
+    await expect(taskListItem.locator('[icon-name="handset-filled"]')).toBeVisible();
+    await expect(testManager.agent1Page.getByTestId(`${interactionId}-state`)).toHaveText('Connected');
+    await expect(testManager.agent1Page.getByTestId(`${interactionId}-handle-time`)).toBeVisible();
+    await testManager.agent1Page
+      .getByTestId('call-control:end-call')
+      .first()
+      .waitFor({state: 'visible', timeout: 5000});
+    await testManager.agent1Page.getByTestId('call-control:end-call').first().click();
+    await testManager.agent1Page.waitForTimeout(500);
+    await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
+    await waitForState(testManager.agent1Page, USER_STATES.AVAILABLE);
+  });
+
+  test('Verify Task List for incoming Chat Task', async () => {
+    await createChatTask(testManager.chatPage, process.env[`${testManager.projectName}_CHAT_URL`]!);
+    await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
+    const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-chat').first();
+    await incomingTaskDiv.waitFor({state: 'visible', timeout: 60000});
+    await testManager.agent1Page.waitForTimeout(1000);
+    const taskListItem = testManager.agent1Page.getByTestId('task-list').getByRole('listitem').first();
+    expect(taskListItem).toBeVisible();
+    const taskListAcceptButton = taskListItem.getByTestId('task:accept-button').first();
+    const taskListDeclineButton = taskListItem.getByTestId('task:decline-button').first();
+    const title = await incomingTaskDiv.getByTestId('task:title').textContent();
+    expect(await taskListItem.getByTestId('task:title').textContent()).toBe(title);
+    await expect(incomingTaskDiv.getByTestId('task:accept-button')).toBeVisible();
+    await expect(incomingTaskDiv.getByTestId('task:decline-button')).not.toBeVisible();
+    await expect(taskListAcceptButton).toBeVisible();
+    await expect(taskListDeclineButton).not.toBeVisible();
+    await taskListAcceptButton.click();
+    await testManager.agent1Page.waitForTimeout(1000);
+    await waitForState(testManager.agent1Page, USER_STATES.ENGAGED);
+    const prevtimer = await getCurrentHandleTime(testManager.agent1Page);
+    await testManager.agent1Page.waitForTimeout(5000);
+    const currentTimer = await getCurrentHandleTime(testManager.agent1Page);
+    expect(currentTimer).toBeGreaterThan(prevtimer);
+    expect(Math.abs(currentTimer - prevtimer + 1)).toBeGreaterThanOrEqual(5);
+    try {
+      await verifyTaskControls(testManager.agent1Page, TASK_TYPES.CHAT);
+    } catch (error) {
+      throw new Error(`Call control buttons verification failed: ${error.message}`);
+    }
+    await waitForConsoleLogs(capturedLogs, title!, 'chat');
+    await expect(taskListAcceptButton).not.toBeVisible();
+    await expect(taskListDeclineButton).not.toBeVisible();
+    expect(await taskListItem.getByTestId('task:title').textContent()).toBe(title);
+    await expect(taskListItem.locator('[icon-name="chat-filled"]')).toBeVisible();
+
+    // Get interactionId for dynamic test IDs
+    const interactionId = await taskListItem.getAttribute('id');
+    await expect(testManager.agent1Page.getByTestId(`${interactionId}-state`)).toHaveText('Connected');
+    await expect(testManager.agent1Page.getByTestId(`${interactionId}-handle-time`)).toBeVisible();
+    await testManager.agent1Page
+      .getByTestId('call-control:end-call')
+      .first()
+      .waitFor({state: 'visible', timeout: 5000});
+    await testManager.agent1Page.getByTestId('call-control:end-call').first().click();
+    await testManager.agent1Page.waitForTimeout(2000);
+    await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
+    await waitForState(testManager.agent1Page, USER_STATES.AVAILABLE);
+  });
+
+  test('Verify Task List for incoming Email Task', async () => {
+    await createEmailTask(process.env[`${testManager.projectName}_EMAIL_ENTRY_POINT`]!);
+    await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
+    const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-email').first();
+    await incomingTaskDiv.waitFor({state: 'visible', timeout: 60000});
+    await testManager.agent1Page.waitForTimeout(1000);
+    const taskListItem = testManager.agent1Page.getByTestId('task-list').getByRole('listitem').first();
+    expect(taskListItem).toBeVisible();
+    const taskListAcceptButton = taskListItem.getByTestId('task:accept-button').first();
+    const taskListDeclineButton = taskListItem.getByTestId('task:decline-button').first();
+    const title = await incomingTaskDiv.getByTestId('task:title').textContent();
+    expect(await taskListItem.getByTestId('task:title').textContent()).toBe(title);
+    await expect(incomingTaskDiv.getByTestId('task:accept-button')).toBeVisible();
+    await expect(incomingTaskDiv.getByTestId('task:decline-button')).not.toBeVisible();
+    await expect(taskListAcceptButton).toBeVisible();
+    await expect(taskListDeclineButton).not.toBeVisible();
+    await taskListAcceptButton.click();
+    await testManager.agent1Page.waitForTimeout(1000);
+    const prevtimer = await getCurrentHandleTime(testManager.agent1Page);
+    await testManager.agent1Page.waitForTimeout(5000);
+
+    const currentTimer = await getCurrentHandleTime(testManager.agent1Page);
+    expect(currentTimer).toBeGreaterThan(prevtimer);
+    expect(Math.abs(currentTimer - prevtimer + 1)).toBeGreaterThanOrEqual(5);
+
+    try {
+      await verifyTaskControls(testManager.agent1Page, TASK_TYPES.EMAIL);
+    } catch (error) {
+      throw new Error(`Call control buttons verification failed: ${error.message}`);
+    }
+
+    await expect(taskListAcceptButton).not.toBeVisible();
+    await expect(taskListDeclineButton).not.toBeVisible();
+    await waitForState(testManager.agent1Page, USER_STATES.ENGAGED);
+    await waitForConsoleLogs(capturedLogs, title!, 'email');
+    expect(await taskListItem.getByTestId('task:title').textContent()).toBe(title);
+    await expect(taskListItem.locator('[icon-name="email-filled"]')).toBeVisible();
+
+    // Get interactionId for dynamic test IDs
+    const interactionId = await taskListItem.getAttribute('id');
+    await expect(testManager.agent1Page.getByTestId(`${interactionId}-state`)).toHaveText('Connected');
+    await expect(testManager.agent1Page.getByTestId(`${interactionId}-handle-time`)).toBeVisible();
+    await testManager.agent1Page
+      .getByTestId('call-control:end-call')
+      .first()
+      .waitFor({state: 'visible', timeout: 5000});
+    await testManager.agent1Page.getByTestId('call-control:end-call').first().click();
+    await testManager.agent1Page.waitForTimeout(2000);
+    await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
+    await waitForState(testManager.agent1Page, USER_STATES.AVAILABLE);
+  });
+
+  test('Task List Test with Multiple Taks', async () => {
+    await changeUserState(testManager.agent1Page, USER_STATES.MEETING);
+    await waitForState(testManager.agent1Page, USER_STATES.MEETING);
+    await Promise.all([
+      createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!),
+      createChatTask(testManager.chatPage, process.env[`${testManager.projectName}_CHAT_URL`]!),
+      createEmailTask(process.env[`${testManager.projectName}_EMAIL_ENTRY_POINT`]!),
+    ]);
+
+    await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
+
+    await Promise.all([
+      waitForAndAcceptSpecificTask(testManager, 'samples:incoming-task-telephony'),
+      waitForAndAcceptSpecificTask(testManager, 'samples:incoming-task-chat'),
+      waitForAndAcceptSpecificTask(testManager, 'samples:incoming-task-email'),
+    ]);
+    await testManager.agent1Page.waitForTimeout(3000);
+
+    for (let i = 0; i < 3; i++) {
+      const taskListItem = testManager.agent1Page.getByTestId('task-list').getByRole('listitem').nth(i);
+
+      await taskListItem.waitFor({state: 'visible', timeout: 5000});
       expect(taskListItem).toBeVisible();
-      const taskListAcceptButton = taskListItem.getByTestId('task:accept-button').first();
-      const taskListDeclineButton = taskListItem.getByTestId('task:decline-button').first();
-      const title = await incomingTaskDiv.getByTestId('task:title').first().textContent();
-      expect(await taskListItem.getByTestId('task:title').textContent()).toBe(title);
-      await expect(incomingTaskDiv.getByTestId('task:accept-button')).toBeVisible();
-      await expect(incomingTaskDiv.getByTestId('task:decline-button')).toBeVisible();
-      await expect(taskListAcceptButton).toBeVisible();
-      await expect(taskListDeclineButton).toBeVisible();
-      await taskListAcceptButton.click();
-      await testManager.agent1Page.waitForTimeout(1000);
-      await expect(taskListAcceptButton).not.toBeVisible();
-      await expect(taskListDeclineButton).not.toBeVisible();
-      await testManager.agent1Page.waitForTimeout(5000);
-      try {
-        await verifyTaskControls(testManager.agent1Page, TASK_TYPES.CALL);
-      } catch (error) {
-        throw new Error(`Call control buttons verification failed: ${error.message}`);
-      }
-      await waitForState(testManager.agent1Page, USER_STATES.ENGAGED);
       await taskListItem.click();
-      await waitForConsoleLogs(capturedLogs, title!, 'telephony');
-
-      // now use interactionId for dynamic assertions
-      const interactionId = await taskListItem.getAttribute('id');
-      await expect(taskListItem.locator('[icon-name="handset-filled"]')).toBeVisible();
-      await expect(testManager.agent1Page.getByTestId(`${interactionId}-state`)).toHaveText('Connected');
-      await expect(testManager.agent1Page.getByTestId(`${interactionId}-handle-time`)).toBeVisible();
-      await testManager.agent1Page
-        .getByTestId('call-control:end-call')
-        .first()
-        .waitFor({state: 'visible', timeout: 5000});
-      await testManager.agent1Page.getByTestId('call-control:end-call').first().click();
-      await testManager.agent1Page.waitForTimeout(500);
-      await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
-      await waitForState(testManager.agent1Page, USER_STATES.AVAILABLE);
-    });
-
-    test('Verify Task List for incoming Chat Task', async () => {
-      await createChatTask(testManager.chatPage, process.env[`${testManager.projectName}_CHAT_URL`]!);
-      await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
-      const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-chat').first();
-      await incomingTaskDiv.waitFor({state: 'visible', timeout: 60000});
-      await testManager.agent1Page.waitForTimeout(1000);
-      const taskListItem = testManager.agent1Page.getByTestId('task-list').getByRole('listitem').first();
-      expect(taskListItem).toBeVisible();
-      const taskListAcceptButton = taskListItem.getByTestId('task:accept-button').first();
-      const taskListDeclineButton = taskListItem.getByTestId('task:decline-button').first();
-      const title = await incomingTaskDiv.getByTestId('task:title').textContent();
-      expect(await taskListItem.getByTestId('task:title').textContent()).toBe(title);
-      await expect(incomingTaskDiv.getByTestId('task:accept-button')).toBeVisible();
-      await expect(incomingTaskDiv.getByTestId('task:decline-button')).not.toBeVisible();
-      await expect(taskListAcceptButton).toBeVisible();
-      await expect(taskListDeclineButton).not.toBeVisible();
-      await taskListAcceptButton.click();
-      await testManager.agent1Page.waitForTimeout(1000);
-      await waitForState(testManager.agent1Page, USER_STATES.ENGAGED);
-      const prevtimer = await getCurrentHandleTime(testManager.agent1Page);
+      const prevtimer = await getCurrentHandleTime(testManager.agent1Page, i);
       await testManager.agent1Page.waitForTimeout(5000);
-      const currentTimer = await getCurrentHandleTime(testManager.agent1Page);
+      const currentTimer = await getCurrentHandleTime(testManager.agent1Page, i);
       expect(currentTimer).toBeGreaterThan(prevtimer);
       expect(Math.abs(currentTimer - prevtimer + 1)).toBeGreaterThanOrEqual(5);
+      const inferredType = await getTaskType(testManager);
       try {
-        await verifyTaskControls(testManager.agent1Page, TASK_TYPES.CHAT);
-      } catch (error) {
-        throw new Error(`Call control buttons verification failed: ${error.message}`);
-      }
-      await waitForConsoleLogs(capturedLogs, title!, 'chat');
-      await expect(taskListAcceptButton).not.toBeVisible();
-      await expect(taskListDeclineButton).not.toBeVisible();
-      expect(await taskListItem.getByTestId('task:title').textContent()).toBe(title);
-      await expect(taskListItem.locator('[icon-name="chat-filled"]')).toBeVisible();
-
-      // Get interactionId for dynamic test IDs
-      const interactionId = await taskListItem.getAttribute('id');
-      await expect(testManager.agent1Page.getByTestId(`${interactionId}-state`)).toHaveText('Connected');
-      await expect(testManager.agent1Page.getByTestId(`${interactionId}-handle-time`)).toBeVisible();
-      await testManager.agent1Page
-        .getByTestId('call-control:end-call')
-        .first()
-        .waitFor({state: 'visible', timeout: 5000});
-      await testManager.agent1Page.getByTestId('call-control:end-call').first().click();
-      await testManager.agent1Page.waitForTimeout(2000);
-      await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
-      await waitForState(testManager.agent1Page, USER_STATES.AVAILABLE);
-    });
-
-    test('Verify Task List for incoming Email Task', async () => {
-      await createEmailTask(process.env[`${testManager.projectName}_EMAIL_ENTRY_POINT`]!);
-      await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
-      const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-email').first();
-      await incomingTaskDiv.waitFor({state: 'visible', timeout: 60000});
-      await testManager.agent1Page.waitForTimeout(1000);
-      const taskListItem = testManager.agent1Page.getByTestId('task-list').getByRole('listitem').first();
-      expect(taskListItem).toBeVisible();
-      const taskListAcceptButton = taskListItem.getByTestId('task:accept-button').first();
-      const taskListDeclineButton = taskListItem.getByTestId('task:decline-button').first();
-      const title = await incomingTaskDiv.getByTestId('task:title').textContent();
-      expect(await taskListItem.getByTestId('task:title').textContent()).toBe(title);
-      await expect(incomingTaskDiv.getByTestId('task:accept-button')).toBeVisible();
-      await expect(incomingTaskDiv.getByTestId('task:decline-button')).not.toBeVisible();
-      await expect(taskListAcceptButton).toBeVisible();
-      await expect(taskListDeclineButton).not.toBeVisible();
-      await taskListAcceptButton.click();
-      await testManager.agent1Page.waitForTimeout(1000);
-      const prevtimer = await getCurrentHandleTime(testManager.agent1Page);
-      await testManager.agent1Page.waitForTimeout(5000);
-
-      const currentTimer = await getCurrentHandleTime(testManager.agent1Page);
-      expect(currentTimer).toBeGreaterThan(prevtimer);
-      expect(Math.abs(currentTimer - prevtimer + 1)).toBeGreaterThanOrEqual(5);
-
-      try {
-        await verifyTaskControls(testManager.agent1Page, TASK_TYPES.EMAIL);
+        await verifyTaskControls(testManager.agent1Page, inferredType);
       } catch (error) {
         throw new Error(`Call control buttons verification failed: ${error.message}`);
       }
 
-      await expect(taskListAcceptButton).not.toBeVisible();
-      await expect(taskListDeclineButton).not.toBeVisible();
-      await waitForState(testManager.agent1Page, USER_STATES.ENGAGED);
-      await waitForConsoleLogs(capturedLogs, title!, 'email');
-      expect(await taskListItem.getByTestId('task:title').textContent()).toBe(title);
-      await expect(taskListItem.locator('[icon-name="email-filled"]')).toBeVisible();
+      await waitForConsoleLogs(
+        capturedLogs,
+        (await taskListItem.getByTestId('task:title').textContent())!,
+        labelToMediaType[inferredType]
+      );
+      capturedLogs.length = 0;
+    }
+  });
 
-      // Get interactionId for dynamic test IDs
-      const interactionId = await taskListItem.getAttribute('id');
-      await expect(testManager.agent1Page.getByTestId(`${interactionId}-state`)).toHaveText('Connected');
-      await expect(testManager.agent1Page.getByTestId(`${interactionId}-handle-time`)).toBeVisible();
-      await testManager.agent1Page
-        .getByTestId('call-control:end-call')
-        .first()
-        .waitFor({state: 'visible', timeout: 5000});
-      await testManager.agent1Page.getByTestId('call-control:end-call').first().click();
-      await testManager.agent1Page.waitForTimeout(2000);
-      await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
-      await waitForState(testManager.agent1Page, USER_STATES.AVAILABLE);
-    });
-
-    test('Task List Test with Multiple Taks', async () => {
-      await changeUserState(testManager.agent1Page, USER_STATES.MEETING);
-      await waitForState(testManager.agent1Page, USER_STATES.MEETING);
-      await Promise.all([
-        createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!),
-        createChatTask(testManager.chatPage, process.env[`${testManager.projectName}_CHAT_URL`]!),
-        createEmailTask(process.env[`${testManager.projectName}_EMAIL_ENTRY_POINT`]!),
-      ]);
-
-      await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
-
-      await Promise.all([
-        waitForAndAcceptSpecificTask(testManager, 'samples:incoming-task-telephony'),
-        waitForAndAcceptSpecificTask(testManager, 'samples:incoming-task-chat'),
-        waitForAndAcceptSpecificTask(testManager, 'samples:incoming-task-email'),
-      ]);
-      await testManager.agent1Page.waitForTimeout(3000);
-
-      for (let i = 0; i < 3; i++) {
-        const taskListItem = testManager.agent1Page.getByTestId('task-list').getByRole('listitem').nth(i);
-
-        await taskListItem.waitFor({state: 'visible', timeout: 5000});
-        expect(taskListItem).toBeVisible();
-        await taskListItem.click();
-        const prevtimer = await getCurrentHandleTime(testManager.agent1Page, i);
-        await testManager.agent1Page.waitForTimeout(5000);
-        const currentTimer = await getCurrentHandleTime(testManager.agent1Page, i);
-        expect(currentTimer).toBeGreaterThan(prevtimer);
-        expect(Math.abs(currentTimer - prevtimer + 1)).toBeGreaterThanOrEqual(5);
-        const inferredType = await getTaskType(testManager);
-        try {
-          await verifyTaskControls(testManager.agent1Page, inferredType);
-        } catch (error) {
-          throw new Error(`Call control buttons verification failed: ${error.message}`);
-        }
-
-        await waitForConsoleLogs(
-          capturedLogs,
-          (await taskListItem.getByTestId('task:title').textContent())!,
-          labelToMediaType[inferredType]
-        );
-        capturedLogs.length = 0;
-      }
-    });
-
-    test.afterAll(async () => {
-      await testManager.cleanup();
-    });
+  test.afterAll(async () => {
+    await testManager.cleanup();
   });
 }
