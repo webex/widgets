@@ -1,12 +1,13 @@
 import React from 'react';
 import {observer} from 'mobx-react-lite';
+import {ErrorBoundary} from 'react-error-boundary';
 
 import store from '@webex/cc-store';
 import {useCallControl} from '../helper';
 import {CallControlProps} from '../task.types';
 import {CallControlCADComponent} from '@webex/cc-components';
 
-const CallControlCAD: React.FunctionComponent<CallControlProps> = observer(
+const CallControlCADInternal: React.FunctionComponent<CallControlProps> = observer(
   ({
     onHoldResume,
     onEnd,
@@ -61,5 +62,18 @@ const CallControlCAD: React.FunctionComponent<CallControlProps> = observer(
     return <CallControlCADComponent {...result} />;
   }
 );
+
+const CallControlCAD: React.FunctionComponent<CallControlProps> = (props) => {
+  return (
+    <ErrorBoundary
+      fallbackRender={() => <></>}
+      onError={(error: Error) => {
+        if (store.onErrorCallback) store.onErrorCallback('CallControlCAD', error);
+      }}
+    >
+      <CallControlCADInternal {...props} />
+    </ErrorBoundary>
+  );
+};
 
 export {CallControlCAD};

@@ -349,12 +349,18 @@ const onToggleMute = ({isMuted, task}) => {
 
   useEffect(() => {
     store.setIncomingTaskCb(onIncomingTaskCB);
+    store.setOnError(onError);
 
     return () => {
+      store.setOnError(undefined);
       store.setTaskRejected(undefined);
       store.setIncomingTaskCb(undefined);
     };
   }, []);
+
+  const onError = (widgetName: string, error: Error) => {
+    console.log('Error in widgets:', widgetName, error);
+  };
 
  const onStateChange = (status) => {
   console.log('onStateChange invoked', status);

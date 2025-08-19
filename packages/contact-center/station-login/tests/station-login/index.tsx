@@ -13,7 +13,6 @@ const loginOptionsMock = ['EXTENSION', 'AGENT_DN', 'BROWSER'];
 const deviceTypeMock = 'BROWSER';
 const dialNumberMock = '12345';
 const dialNumberRegexMock = '1[0-9]{3}[2-9][0-9]{6}([,]{1,10}[0-9]+){0,1}';
-const loggerMock = {};
 const isAgentLoggedInMock = false;
 
 // Mock the store import
@@ -28,7 +27,12 @@ jest.mock('@webex/cc-store', () => {
     deviceType: deviceTypeMock,
     dialNumber: dialNumberMock,
     dialNumberRegex: dialNumberRegexMock,
-    logger: loggerMock,
+    logger: {
+      log: jest.fn(),
+      error: jest.fn(),
+      warn: jest.fn(),
+      info: jest.fn(),
+    },
     isAgentLoggedIn: isAgentLoggedInMock,
     setCCCallback: jest.fn(),
     setLogoutCallback: jest.fn(),
@@ -36,12 +40,6 @@ jest.mock('@webex/cc-store', () => {
     CC_EVENTS: {
       AGENT_STATION_LOGIN_SUCCESS: 'AgentStationLoginSuccess',
     },
-  };
-});
-
-jest.mock('@webex/cc-components', () => {
-  return {
-    StationLoginComponent: () => <div>StationLoginComponent</div>,
   };
 });
 
@@ -71,7 +69,7 @@ describe('StationLogin Component', () => {
       cc: ccMock,
       onLogin: loginCb,
       onLogout: logoutCb,
-      logger: loggerMock,
+      logger: expect.any(Object),
       deviceType: deviceTypeMock,
       dialNumber: dialNumberMock,
       isAgentLoggedIn: false,
