@@ -166,6 +166,7 @@ const onTaskDeclined = (task,reason) => {
 
   const onTaskSelected = ({task, isClicked}) => {
     console.log('onTaskSelected invoked for task:', task, 'isClicked:', isClicked);
+    console.log(`onTaskSelected invoked for task with title : ${task?.data?.interaction?.callAssociatedDetails?.ani}, and mediaType : ${task?.data?.mediaType}`);
   };
 
   const onHoldResume = ({isHeld, task}) => {
