@@ -214,8 +214,11 @@ export default function createTaskListTests() {
       await expect(taskListDeclineButton).not.toBeVisible();
       expect(await taskListItem.getByTestId('task:title').textContent()).toBe(title);
       await expect(taskListItem.locator('[icon-name="chat-filled"]')).toBeVisible();
-      await expect(taskListItem.getByTestId('task:item-state')).toHaveText('Connected');
-      await expect(taskListItem.getByTestId('task:handle-time')).toBeVisible();
+
+      // Get interactionId for dynamic test IDs
+      const interactionId = await taskListItem.getAttribute('id');
+      await expect(testManager.agent1Page.getByTestId(`${interactionId}-state`)).toHaveText('Connected');
+      await expect(testManager.agent1Page.getByTestId(`${interactionId}-handle-time`)).toBeVisible();
       await testManager.agent1Page
         .getByTestId('call-control:end-call')
         .first()
@@ -263,8 +266,11 @@ export default function createTaskListTests() {
       await waitForConsoleLogs(capturedLogs, title!, 'email');
       expect(await taskListItem.getByTestId('task:title').textContent()).toBe(title);
       await expect(taskListItem.locator('[icon-name="email-filled"]')).toBeVisible();
-      await expect(taskListItem.getByTestId('task:item-state')).toHaveText('Connected');
-      await expect(taskListItem.getByTestId('task:handle-time')).toBeVisible();
+
+      // Get interactionId for dynamic test IDs
+      const interactionId = await taskListItem.getAttribute('id');
+      await expect(testManager.agent1Page.getByTestId(`${interactionId}-state`)).toHaveText('Connected');
+      await expect(testManager.agent1Page.getByTestId(`${interactionId}-handle-time`)).toBeVisible();
       await testManager.agent1Page
         .getByTestId('call-control:end-call')
         .first()
