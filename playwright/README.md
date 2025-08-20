@@ -6,7 +6,11 @@ E2E testing framework for CC Widgets with parallel test execution across 5 test 
 
 ```
 playwright/
-├── set1-tests.spec.ts to set5-tests.spec.ts  # Test set orchestration
+├── digital-incoming-task-tests.spec.ts       # Digital incoming task orchestration
+├── task-list-multi-session-tests.spec.ts     # Task list and multi-session orchestration
+├── station-login-user-state-tests.spec.ts    # Station login and user state orchestration
+├── basic-advanced-task-controls-tests.spec.ts # Basic and advanced task controls orchestration
+├── advanced-task-controls-tests.spec.ts      # Advanced task controls orchestration
 ├── tests/                                     # Individual test implementations
 ├── Utils/                                     # Utility functions
 ├── test-data.ts                              # Test data per set
@@ -16,23 +20,23 @@ playwright/
 
 ## 🎯 Test Sets
 
-| Set       | Focus                            | Port | Tests                                      |
-| --------- | -------------------------------- | ---- | ------------------------------------------ |
-| **SET_1** | Digital channels & multi-session | 9221 | Digital incoming, Multi-session, Task list |
-| **SET_2** | Advanced task operations         | 9222 | Advanced combinations, Complex controls    |
-| **SET_3** | Basic operations & telephony     | 9223 | Basic controls, Telephony tasks            |
-| **SET_4** | User management & authentication | 9224 | User states, Station login                 |
-| **SET_5** | Extended scenarios               | 9225 | Available for new tests                    |
+| Set       | Focus                             | Port | Tests                                 |
+| --------- | --------------------------------- | ---- | ------------------------------------- |
+| **SET_1** | Digital incoming tasks & controls | 9221 | Digital incoming, Task controls       |
+| **SET_2** | Task lists & multi-session        | 9222 | Task list tests, Multi-session        |
+| **SET_3** | Authentication & user management  | 9223 | Station login, User states, Telephony |
+| **SET_4** | Task controls & combinations      | 9224 | Basic controls, Advanced combinations |
+| **SET_5** | Advanced task operations          | 9225 | Advanced task controls                |
 
 ### Where to Add New Tests?
 
-| Test Type                     | Use Set | Why                         |
-| ----------------------------- | ------- | --------------------------- |
-| Chat/Email tasks              | SET_1   | Digital channels configured |
-| Voice/Phone calls             | SET_3   | Telephony focus             |
-| Complex transfers/conferences | SET_2   | Advanced operations         |
-| Agent state changes           | SET_4   | User management             |
-| New features                  | SET_5   | Available capacity          |
+| Test Type                    | Use Set | Why                         |
+| ---------------------------- | ------- | --------------------------- |
+| Digital channels tasks       | SET_1   | Digital channels configured |
+| Task list operations         | SET_2   | Task list focus             |
+| Authentication/User states   | SET_3   | User management             |
+| Basic/Advanced task controls | SET_4   | Task control operations     |
+| Complex advanced scenarios   | SET_5   | Advanced operations         |
 
 ## 🧪 Adding New Tests
 
@@ -71,7 +75,7 @@ export default function createMyTests() {
 ### 2. Add to Test Set
 
 ```typescript
-// set5-tests.spec.ts (choose appropriate set)
+// advanced-task-controls-tests.spec.ts (choose appropriate set)
 import createMyTests from './tests/my-feature-test.spec';
 
 test.describe('My Feature Tests', createMyTests());

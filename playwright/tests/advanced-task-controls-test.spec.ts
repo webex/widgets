@@ -425,7 +425,7 @@ export default function createAdvancedTaskControlsTests() {
       await changeUserState(testManager.agent2Page, USER_STATES.MEETING);
       // Create new call for this test
       await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
-
+      await testManager.agent1Page.waitForTimeout(2000);
       const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 80000});
 
