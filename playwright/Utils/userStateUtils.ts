@@ -40,6 +40,7 @@ export const changeUserState = async (page: Page, userState: string): Promise<vo
   }
 
   await stateItem.click({timeout: AWAIT_TIMEOUT});
+  await page.waitForTimeout(1000);
 };
 
 /**

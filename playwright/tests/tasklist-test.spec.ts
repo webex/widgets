@@ -280,7 +280,7 @@ export default function createTaskListTests() {
     await waitForState(testManager.agent1Page, USER_STATES.AVAILABLE);
   });
 
-  test('Task List Test with Multiple Taks', async () => {
+  test('Task List Test with Multiple Tasks', async () => {
     await changeUserState(testManager.agent1Page, USER_STATES.MEETING);
     await waitForState(testManager.agent1Page, USER_STATES.MEETING);
     await Promise.all([

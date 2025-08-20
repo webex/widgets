@@ -11,6 +11,7 @@ import {
   OPERATION_TIMEOUT,
   NETWORK_OPERATION_TIMEOUT,
   TEST_DATA,
+  UI_SETTLE_TIMEOUT,
 } from '../constants';
 import nodemailer from 'nodemailer';
 
@@ -82,6 +83,7 @@ export async function createChatTask(page: Page, chatURL: string) {
   for (let i = 0; i < DEFAULT_MAX_RETRIES; i++) {
     try {
       await page.goto(chatURL);
+      await page.waitForTimeout(UI_SETTLE_TIMEOUT);
       await page
         .locator('iframe[name="Livechat launcher icon"]')
         .contentFrame()
@@ -249,7 +251,18 @@ export async function acceptIncomingTask(page: Page, type: TaskType) {
   if (!(await acceptButton.isVisible())) {
     throw new Error('Accept button not found');
   }
-  await acceptButton.click({timeout: AWAIT_TIMEOUT});
+
+  // Wait for button to be enabled and clickable
+  await acceptButton.waitFor({state: 'visible', timeout: AWAIT_TIMEOUT});
+  await expect(acceptButton).toBeEnabled({timeout: AWAIT_TIMEOUT});
+
+  // Use force click as backup or add retry logic
+  try {
+    await acceptButton.click({timeout: AWAIT_TIMEOUT});
+  } catch (error) {
+    // Retry with force click if normal click fails
+    await acceptButton.click({force: true, timeout: AWAIT_TIMEOUT});
+  }
   await page.waitForTimeout(2000);
 }
 

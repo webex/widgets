@@ -15,8 +15,8 @@ export const USER_SETS = {
   },
   SET_2: {
     AGENTS: {
-      AGENT1: {username: 'user17', extension: '1017', agentName: 'User17 Agent17'},
-      AGENT2: {username: 'user18', extension: '1018', agentName: 'User18 Agent18'},
+      AGENT1: {username: 'user13', extension: '1013', agentName: 'User13 Agent13'},
+      AGENT2: {username: 'user14', extension: '1014', agentName: 'User14 Agent14'},
     },
     QUEUE_NAME: 'Queue e2e 2',
     CHAT_URL: `${env.PW_CHAT_URL}-e2e-2.html`,
