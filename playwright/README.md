@@ -6,11 +6,12 @@ E2E testing framework for CC Widgets with parallel test execution across 5 test 
 
 ```
 playwright/
-├── digital-incoming-task-tests.spec.ts       # Digital incoming task orchestration
-├── task-list-multi-session-tests.spec.ts     # Task list and multi-session orchestration
-├── station-login-user-state-tests.spec.ts    # Station login and user state orchestration
-├── basic-advanced-task-controls-tests.spec.ts # Basic and advanced task controls orchestration
-├── advanced-task-controls-tests.spec.ts      # Advanced task controls orchestration
+├── suites/                                    # Test suite orchestration files
+│   ├── digital-incoming-task-tests.spec.ts   # Digital incoming task orchestration
+│   ├── task-list-multi-session-tests.spec.ts # Task list and multi-session orchestration
+│   ├── station-login-user-state-tests.spec.ts # Station login and user state orchestration
+│   ├── basic-advanced-task-controls-tests.spec.ts # Basic and advanced task controls orchestration
+│   └── advanced-task-controls-tests.spec.ts  # Advanced task controls orchestration
 ├── tests/                                     # Individual test implementations
 ├── Utils/                                     # Utility functions
 ├── test-data.ts                              # Test data per set
@@ -75,8 +76,8 @@ export default function createMyTests() {
 ### 2. Add to Test Set
 
 ```typescript
-// advanced-task-controls-tests.spec.ts (choose appropriate set)
-import createMyTests from './tests/my-feature-test.spec';
+// suites/advanced-task-controls-tests.spec.ts (choose appropriate set)
+import createMyTests from '../tests/my-feature-test.spec';
 
 test.describe('My Feature Tests', createMyTests());
 ```

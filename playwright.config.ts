@@ -34,7 +34,7 @@ export default defineConfig({
       dependencies: ['OAuth: Get Access Token'],
       fullyParallel: false,
       retries: 1,
-      testMatch: ['**/digital-incoming-task-tests.spec.ts'],
+      testMatch: ['**/suites/digital-incoming-task-tests.spec.ts'],
       use: {
         ...devices['Desktop Chrome'],
         channel: 'chrome',
@@ -63,7 +63,7 @@ export default defineConfig({
       fullyParallel: false,
       retries: 1,
       dependencies: ['OAuth: Get Access Token'],
-      testMatch: ['**/task-list-multi-session-tests.spec.ts'],
+      testMatch: ['**/suites/task-list-multi-session-tests.spec.ts'],
       use: {
         ...devices['Desktop Chrome'],
         channel: 'chrome',
@@ -92,7 +92,7 @@ export default defineConfig({
       fullyParallel: false,
       retries: 1,
       dependencies: ['OAuth: Get Access Token'],
-      testMatch: ['**/station-login-user-state-tests.spec.ts'],
+      testMatch: ['**/suites/station-login-user-state-tests.spec.ts'],
       use: {
         ...devices['Desktop Chrome'],
         channel: 'chrome',
@@ -121,7 +121,7 @@ export default defineConfig({
       fullyParallel: false,
       retries: 1,
       dependencies: ['OAuth: Get Access Token'],
-      testMatch: ['**/basic-advanced-task-controls-tests.spec.ts'],
+      testMatch: ['**/suites/basic-advanced-task-controls-tests.spec.ts'],
       use: {
         ...devices['Desktop Chrome'],
         channel: 'chrome',
@@ -150,7 +150,7 @@ export default defineConfig({
       fullyParallel: false,
       retries: 1,
       dependencies: ['OAuth: Get Access Token'],
-      testMatch: ['**/advanced-task-controls-tests.spec.ts'],
+      testMatch: ['**/suites/advanced-task-controls-tests.spec.ts'],
       use: {
         ...devices['Desktop Chrome'],
         channel: 'chrome',
