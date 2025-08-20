@@ -9614,6 +9614,7 @@ __metadata:
     "@types/react-test-renderer": "npm:18"
     "@webex/cc-components": "workspace:*"
     "@webex/cc-store": "workspace:*"
+    "@webex/test-fixtures": "workspace:*"
     babel-jest: "npm:29.7.0"
     babel-loader: "npm:9.2.1"
     eslint: "npm:^9.20.1"

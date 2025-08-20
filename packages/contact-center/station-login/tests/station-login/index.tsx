@@ -3,6 +3,7 @@ import {render} from '@testing-library/react';
 import {StationLogin} from '../../src';
 import * as helper from '../../src/helper';
 import '@testing-library/jest-dom';
+import store from '@webex/cc-store';
 
 const teamsMock = ['team123', 'team456'];
 const ccMock = {
@@ -40,6 +41,7 @@ jest.mock('@webex/cc-store', () => {
     CC_EVENTS: {
       AGENT_STATION_LOGIN_SUCCESS: 'AgentStationLoginSuccess',
     },
+    onErrorCallback: jest.fn(),
   };
 });
 
@@ -50,6 +52,16 @@ const onSaveStart = jest.fn();
 const onSaveEnd = jest.fn();
 
 describe('StationLogin Component', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    // Suppress console.error for error boundary tests
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('renders StationLoginPresentational with correct props', () => {
     const useStationLoginSpy = jest.spyOn(helper, 'useStationLogin');
 
@@ -78,6 +90,23 @@ describe('StationLogin Component', () => {
       teamId: undefined,
       onCCSignOut: ccLogoutCb,
       doStationLogout: undefined,
+    });
+  });
+
+  describe('ErrorBoundary Tests', () => {
+    const mockOnErrorCallback = jest.fn();
+    store.onErrorCallback = mockOnErrorCallback;
+    it('should render empty fragment when ErrorBoundary catches an error', () => {
+      // Mock the StationLoginInternal to throw an error by overriding the helper
+      jest.spyOn(helper, 'useStationLogin').mockImplementation(() => {
+        throw new Error('Test error in useStationLogin');
+      });
+
+      const {container} = render(<StationLogin profileMode={false} />);
+
+      // The fallback should render an empty fragment (no content)
+      expect(container.firstChild).toBeNull();
+      expect(store.onErrorCallback).toHaveBeenCalledWith('StationLogin', Error('Test error in useStationLogin'));
     });
   });
 });

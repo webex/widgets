@@ -24,8 +24,8 @@
     "@webex/cc-components": "workspace:*",
     "@webex/cc-store": "workspace:*",
     "mobx-react-lite": "^4.1.0",
-    "typescript": "5.6.3",
-    "react-error-boundary": "^6.0.0"
+    "react-error-boundary": "^6.0.0",
+    "typescript": "5.6.3"
   },
   "devDependencies": {
     "@babel/core": "7.25.2",

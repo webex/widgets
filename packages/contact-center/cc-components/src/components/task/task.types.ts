@@ -117,7 +117,7 @@ export interface TaskProps {
   logger: ILogger;
 }
 
-export type IncomingTaskComponentProps = Pick<TaskProps, 'isBrowser' | 'accept' | 'reject'> &
+export type IncomingTaskComponentProps = Pick<TaskProps, 'isBrowser' | 'accept' | 'reject' | 'logger'> &
   Partial<Pick<TaskProps, 'incomingTask'>>;
 
 export type TaskListComponentProps = Pick<
@@ -552,6 +552,7 @@ export interface AutoWrapupTimerProps {
   secondsUntilAutoWrapup: number;
   allowCancelAutoWrapup?: boolean;
   handleCancelWrapup: () => void;
+  logger?: ILogger;
 }
 
 export interface CallControlButton {

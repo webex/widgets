@@ -708,6 +708,198 @@ describe('useStationLogin Hook', () => {
     );
   });
 
+  describe('Error Handling', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should handle errors in saveLoginOptions main logic', () => {
+      const mockOnSaveEnd = jest.fn();
+      const mockCC = {
+        ...ccMock,
+        updateAgentProfile: jest.fn().mockImplementation(() => {
+          throw new Error('Test error in saveLoginOptions');
+        }),
+      };
+
+      const {result} = renderHook(() =>
+        useStationLogin({
+          ...baseStationLoginProps,
+          cc: mockCC,
+          onSaveEnd: mockOnSaveEnd,
+        })
+      );
+
+      act(() => {
+        result.current.setCurrentLoginOptions({
+          deviceType: 'EXTENSION',
+          dialNumber: '999999999',
+          teamId: 'team123',
+        });
+      });
+
+      act(() => {
+        result.current.saveLoginOptions();
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: Error in saveLoginOptions - Test error in saveLoginOptions',
+        {
+          module: 'widget-station-login#helper.ts',
+          method: 'saveLoginOptions',
+        }
+      );
+      expect(mockOnSaveEnd).toHaveBeenCalledWith(false);
+    });
+
+    it('should handle errors in main logout method', () => {
+      const mockCC = {
+        ...ccMock,
+        stationLogout: jest.fn().mockImplementation(() => {
+          throw new Error('Test error in logout method');
+        }),
+      };
+
+      const {result} = renderHook(() =>
+        useStationLogin({
+          ...baseStationLoginProps,
+          cc: mockCC,
+        })
+      );
+
+      act(() => {
+        result.current.logout();
+      });
+
+      expect(logger.error).toHaveBeenCalledWith('CC-Widgets: Error in logout - Test error in logout method', {
+        module: 'widget-station-login#helper.ts',
+        method: 'logout',
+      });
+    });
+
+    it('should handle errors in main login method', () => {
+      const mockCC = {
+        ...ccMock,
+        stationLogin: jest.fn().mockImplementation(() => {
+          throw new Error('Test error in login method');
+        }),
+      };
+
+      const {result} = renderHook(() =>
+        useStationLogin({
+          ...baseStationLoginProps,
+          cc: mockCC,
+        })
+      );
+
+      act(() => {
+        result.current.setTeam('team123');
+      });
+
+      act(() => {
+        result.current.login();
+      });
+
+      expect(logger.error).toHaveBeenCalledWith('CC-Widgets: Error in login - Test error in login method', {
+        module: 'widget-station-login#helper.ts',
+        method: 'login',
+      });
+    });
+
+    it('should handle errors when stationLogout is unavailable', () => {
+      const mockCC = {
+        ...ccMock,
+        stationLogout: undefined, // This will cause an error when trying to call it
+      };
+
+      const {result} = renderHook(() =>
+        useStationLogin({
+          ...baseStationLoginProps,
+          cc: mockCC,
+        })
+      );
+
+      act(() => {
+        result.current.logout();
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(expect.stringMatching(/^CC-Widgets: Error in logout/), {
+        module: 'widget-station-login#helper.ts',
+        method: 'logout',
+      });
+    });
+
+    it('should handle errors in setTeam gracefully', () => {
+      const {result} = renderHook(() => useStationLogin(baseStationLoginProps));
+
+      // Test that setTeam works without errors for normal case
+      act(() => {
+        result.current.setTeam('test-team');
+      });
+
+      // The actual error handling in setTeam is internal to React state management
+      // So we verify it doesn't throw and handles gracefully
+      expect(() => {
+        act(() => {
+          result.current.setTeam('another-team');
+        });
+      }).not.toThrow();
+
+      // We can't easily test internal try-catch of useState, but we ensure
+      // the wrapper function works correctly
+      expect(result.current.setTeam).toBeDefined();
+      expect(typeof result.current.setTeam).toBe('function');
+    });
+
+    it('should handle errors in useEffect initialization gracefully', () => {
+      // Test that useEffect error handling doesn't break the hook
+      const {result} = renderHook(() =>
+        useStationLogin({
+          ...baseStationLoginProps,
+          deviceType: 'BROWSER',
+          dialNumber: '12345',
+          teamId: 'testTeam',
+        })
+      );
+
+      // Verify the hook still works correctly even with potential internal errors
+      expect(result.current.selectedDeviceType).toBe('BROWSER');
+      expect(result.current.dialNumberValue).toBe('12345');
+      expect(result.current.selectedTeamId).toBe('testTeam');
+    });
+
+    it('should handle callback errors in login/logout handlers', () => {
+      const mockLoginCallback = jest.fn(() => {
+        throw new Error('Login callback error');
+      });
+
+      const mockLogoutCallback = jest.fn(() => {
+        throw new Error('Logout callback error');
+      });
+
+      const {result} = renderHook(() =>
+        useStationLogin({
+          ...baseStationLoginProps,
+          onLogin: mockLoginCallback,
+          onLogout: mockLogoutCallback,
+        })
+      );
+
+      // These should not throw errors due to our try-catch wrappers
+      expect(() => {
+        act(() => {
+          result.current.login();
+        });
+      }).not.toThrow();
+
+      expect(() => {
+        act(() => {
+          result.current.logout();
+        });
+      }).not.toThrow();
+    });
+  });
+
   describe('#onCCSignOut', () => {
     beforeEach(() => {
       jest.clearAllMocks();

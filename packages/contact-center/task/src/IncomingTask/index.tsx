@@ -21,15 +21,7 @@ const IncomingTaskInternal: React.FunctionComponent<IncomingTaskProps> = observe
   }
 );
 
-const IncomingTask: React.FunctionComponent<IncomingTaskProps> = observer(({incomingTask, onAccepted, onRejected}) => {
-  const {deviceType, logger} = store;
-  const result = useIncomingTask({incomingTask, onAccepted, onRejected, deviceType, logger});
-
-  const props = {
-    ...result,
-    logger,
-  };
-
+const IncomingTask: React.FunctionComponent<IncomingTaskProps> = (props) => {
   return (
     <ErrorBoundary
       fallbackRender={() => <></>}
@@ -40,6 +32,6 @@ const IncomingTask: React.FunctionComponent<IncomingTaskProps> = observer(({inco
       <IncomingTaskInternal {...props} />
     </ErrorBoundary>
   );
-});
+};
 
 export {IncomingTask};
