@@ -35,6 +35,7 @@ exports[`TaskListComponent Actions should call acceptTask when accept button is 
         >
           <mdc-text
             class="md-text-wrapper task-title"
+            data-testid="task:title"
             tagname="span"
             type="body-large-medium"
           >
@@ -151,6 +152,7 @@ exports[`TaskListComponent Actions should call acceptTask when accept button is 
         >
           <mdc-text
             class="md-text-wrapper task-title"
+            data-testid="task:title"
             tagname="span"
             type="body-large-medium"
           >
@@ -267,6 +269,7 @@ exports[`TaskListComponent Actions should call declineTask when decline button i
         >
           <mdc-text
             class="md-text-wrapper task-title"
+            data-testid="task:title"
             tagname="span"
             type="body-large-medium"
           >
@@ -383,6 +386,7 @@ exports[`TaskListComponent Actions should call declineTask when decline button i
         >
           <mdc-text
             class="md-text-wrapper task-title"
+            data-testid="task:title"
             tagname="span"
             type="body-large-medium"
           >
@@ -499,6 +503,7 @@ exports[`TaskListComponent Actions should call onTaskSelect when task is clicked
         >
           <mdc-text
             class="md-text-wrapper task-title"
+            data-testid="task:title"
             tagname="span"
             type="body-large-medium"
           >
@@ -576,6 +581,7 @@ exports[`TaskListComponent Actions should call onTaskSelect when task is clicked
         >
           <mdc-text
             class="md-text-wrapper task-title"
+            data-testid="task:title"
             tagname="span"
             type="body-large-medium"
           >
@@ -653,6 +659,7 @@ exports[`TaskListComponent Actions should handle task selection between multiple
         >
           <mdc-text
             class="md-text-wrapper task-title"
+            data-testid="task:title"
             tagname="span"
             type="body-large-bold"
           >
@@ -760,6 +767,7 @@ exports[`TaskListComponent Actions should handle task selection between multiple
           <mdc-text
             aria-describedby="tooltip-unselected-chat-task"
             class="md-text-wrapper task-digital-title"
+            data-testid="task:title"
             id="tooltip-trigger-unselected-chat-task"
             tagname="span"
             type="body-large-medium"
@@ -859,6 +867,7 @@ exports[`TaskListComponent Actions should handle task selection between multiple
         >
           <mdc-text
             class="md-text-wrapper task-title"
+            data-testid="task:title"
             tagname="span"
             type="body-large-bold"
           >
@@ -966,6 +975,7 @@ exports[`TaskListComponent Actions should handle task selection between multiple
           <mdc-text
             aria-describedby="tooltip-unselected-chat-task"
             class="md-text-wrapper task-digital-title"
+            data-testid="task:title"
             id="tooltip-trigger-unselected-chat-task"
             tagname="span"
             type="body-large-medium"
@@ -1072,6 +1082,7 @@ exports[`TaskListComponent Rendering with Tasks should render digital incoming t
           <mdc-text
             aria-describedby="tooltip-incoming-chat-task"
             class="md-text-wrapper incoming-digital-task-title"
+            data-testid="task:title"
             id="tooltip-trigger-incoming-chat-task"
             tagname="span"
             type="body-large-medium"
@@ -1191,6 +1202,7 @@ exports[`TaskListComponent Rendering with Tasks should render multiple tasks wit
         >
           <mdc-text
             class="md-text-wrapper task-title"
+            data-testid="task:title"
             tagname="span"
             type="body-large-medium"
           >
@@ -1259,6 +1271,7 @@ exports[`TaskListComponent Rendering with Tasks should render multiple tasks wit
           <mdc-text
             aria-describedby="tooltip-chat-task"
             class="md-text-wrapper task-digital-title"
+            data-testid="task:title"
             id="tooltip-trigger-chat-task"
             tagname="span"
             type="body-large-medium"
@@ -1352,6 +1365,7 @@ exports[`TaskListComponent Rendering with Tasks should render multiple tasks wit
           <mdc-text
             aria-describedby="tooltip-social-task"
             class="md-text-wrapper task-digital-title"
+            data-testid="task:title"
             id="tooltip-trigger-social-task"
             tagname="span"
             type="body-large-medium"
@@ -1451,6 +1465,7 @@ exports[`TaskListComponent Rendering with Tasks should render telephony incoming
         >
           <mdc-text
             class="md-text-wrapper task-title"
+            data-testid="task:title"
             tagname="span"
             type="body-large-medium"
           >
@@ -1567,6 +1582,7 @@ exports[`TaskListComponent Rendering with Tasks should render telephony incoming
         >
           <mdc-text
             class="md-text-wrapper task-title"
+            data-testid="task:title"
             tagname="span"
             type="body-large-medium"
           >
@@ -1664,6 +1680,7 @@ exports[`TaskListComponent Rendering with Tasks should show selected state with 
         >
           <mdc-text
             class="md-text-wrapper task-title"
+            data-testid="task:title"
             tagname="span"
             type="body-large-bold"
           >

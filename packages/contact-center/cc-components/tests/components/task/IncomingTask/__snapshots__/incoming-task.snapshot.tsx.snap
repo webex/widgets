@@ -31,6 +31,7 @@ exports[`IncomingTaskComponent Actions should call acceptTask when accept button
       >
         <mdc-text
           class="md-text-wrapper task-title"
+          data-testid="task:title"
           tagname="span"
           type="body-large-medium"
         >
@@ -142,6 +143,7 @@ exports[`IncomingTaskComponent Actions should call acceptTask when accept button
       >
         <mdc-text
           class="md-text-wrapper task-title"
+          data-testid="task:title"
           tagname="span"
           type="body-large-medium"
         >
@@ -253,6 +255,7 @@ exports[`IncomingTaskComponent Actions should call declineTask when decline butt
       >
         <mdc-text
           class="md-text-wrapper task-title"
+          data-testid="task:title"
           tagname="span"
           type="body-large-medium"
         >
@@ -364,6 +367,7 @@ exports[`IncomingTaskComponent Actions should call declineTask when decline butt
       >
         <mdc-text
           class="md-text-wrapper task-title"
+          data-testid="task:title"
           tagname="span"
           type="body-large-medium"
         >
@@ -480,6 +484,7 @@ exports[`IncomingTaskComponent Rendering with Incoming Tasks should render digit
         <mdc-text
           aria-describedby="tooltip-incoming-chat-task"
           class="md-text-wrapper incoming-digital-task-title"
+          data-testid="task:title"
           id="tooltip-trigger-incoming-chat-task"
           tagname="span"
           type="body-large-medium"
@@ -594,6 +599,7 @@ exports[`IncomingTaskComponent Rendering with Incoming Tasks should render multi
       >
         <mdc-text
           class="md-text-wrapper task-title"
+          data-testid="task:title"
           tagname="span"
           type="body-large-medium"
         >
@@ -705,6 +711,7 @@ exports[`IncomingTaskComponent Rendering with Incoming Tasks should render multi
       >
         <mdc-text
           class="md-text-wrapper task-title"
+          data-testid="task:title"
           tagname="span"
           type="body-large-medium"
         >
@@ -798,6 +805,7 @@ exports[`IncomingTaskComponent Rendering with Incoming Tasks should render multi
         <mdc-text
           aria-describedby="tooltip-chat-task"
           class="md-text-wrapper incoming-digital-task-title"
+          data-testid="task:title"
           id="tooltip-trigger-chat-task"
           tagname="span"
           type="body-large-medium"
@@ -916,6 +924,7 @@ exports[`IncomingTaskComponent Rendering with Incoming Tasks should render multi
         <mdc-text
           aria-describedby="tooltip-social-task"
           class="md-text-wrapper incoming-digital-task-title"
+          data-testid="task:title"
           id="tooltip-trigger-social-task"
           tagname="span"
           type="body-large-medium"
@@ -1030,6 +1039,7 @@ exports[`IncomingTaskComponent Rendering with Incoming Tasks should render telep
       >
         <mdc-text
           class="md-text-wrapper task-title"
+          data-testid="task:title"
           tagname="span"
           type="body-large-medium"
         >
@@ -1141,6 +1151,7 @@ exports[`IncomingTaskComponent Rendering with Incoming Tasks should render telep
       >
         <mdc-text
           class="md-text-wrapper task-title"
+          data-testid="task:title"
           tagname="span"
           type="body-large-medium"
         >
