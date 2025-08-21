@@ -60,7 +60,7 @@ export const CONSOLE_PATTERNS = {
   SDK_STATE_CHANGE_SUCCESS: 'WXCC_SDK_AGENT_STATE_CHANGE_SUCCESS',
   ON_STATE_CHANGE_REGEX: /onStateChange invoked with state name:\s*(.+)/i,
   ON_STATE_CHANGE_KEYWORDS: ['onstatechange', 'invoked'],
-} as const;
+};
 
 // Page Types for Test Manager
 export const PAGE_TYPES = {
@@ -70,7 +70,7 @@ export const PAGE_TYPES = {
   EXTENSION: 'extension',
   CHAT: 'chat',
   MULTI_SESSION: 'multiSession',
-} as const;
+};
 
 export type PageType = (typeof PAGE_TYPES)[keyof typeof PAGE_TYPES];
 
@@ -105,4 +105,4 @@ export const TEST_DATA = {
   CHAT_EMAIL: 'playwright@test.com',
   EMAIL_TEXT: '--This Email is generated due to playwright automation test for incoming Tasks---',
   EXTENSION_CALL_INDICATOR: 'Ringing...',
-} as const;
+};

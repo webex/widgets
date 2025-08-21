@@ -4,7 +4,7 @@ import {USER_SETS} from './test-data';
 const fs = require('fs');
 const path = require('path');
 
-function UpdateENVWithUserSets() {
+export const UpdateENVWithUserSets = () => {
   // Constants
   const DOMAIN = process.env.PW_SANDBOX;
   const envPath = path.resolve(__dirname, '../.env');
@@ -60,11 +60,12 @@ function UpdateENVWithUserSets() {
   // Clean up multiple consecutive empty lines
   envContent = envContent.replace(/\n{3,}/g, '\n\n');
   fs.writeFileSync(envPath, envContent, 'utf8');
-}
-
-module.exports = {UpdateENVWithUserSets};
+};
 
 setup('OAuth', async ({browser}) => {
+  // Update environment variables with user sets before starting OAuth
+  UpdateENVWithUserSets();
+
   // Directly iterate through USER_SETS and their agents
   for (const setKey of Object.keys(USER_SETS)) {
     const userSet = USER_SETS[setKey];
@@ -100,5 +101,3 @@ setup('OAuth', async ({browser}) => {
     }
   }
 });
-
-UpdateENVWithUserSets();

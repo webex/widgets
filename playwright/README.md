@@ -161,17 +161,29 @@ Test data is automatically handled by TestManager based on the running test set.
 
 ## 🚀 Running Tests
 
-```bash
-# Basic commands
-npx playwright test                    # All tests
-npx playwright test --project=SET_1   # Specific set
-npx playwright test --ui               # UI mode
-npx playwright test --debug            # Debug mode
+````bash
+# Run all tests
+yarn test:e2e
 
-# Filter by tags
-npx playwright test --grep "@chat"     # Chat tests only
-npx playwright test --grep "@telephony" # Voice tests only
-```
+# Run specific test suites
+yarn test:e2e suites/digital-incoming-task-tests.spec.ts
+yarn test:e2e suites/task-list-multi-session-tests.spec.ts
+yarn test:e2e suites/station-login-user-state-tests.spec.ts
+yarn test:e2e suites/basic-advanced-task-controls-tests.spec.ts
+yarn test:e2e suites/advanced-task-controls-tests.spec.ts
+
+# Run specific test sets (projects)
+yarn test:e2e --project=SET_1         # Digital incoming tasks
+yarn test:e2e --project=SET_2         # Task list & multi-session
+yarn test:e2e --project=SET_3         # Station login & user state
+yarn test:e2e --project=SET_4         # Basic & advanced task controls
+yarn test:e2e --project=SET_5         # Advanced task controls
+
+# Development & debugging
+yarn test:e2e --ui                    # UI mode
+yarn test:e2e --debug                 # Debug mode
+yarn test:e2e --headed                # Run with browser visible
+
 
 ## 🔍 Troubleshooting
 
@@ -188,4 +200,4 @@ npx playwright test --grep "@telephony" # Voice tests only
 // Add to test setup
 capturedLogs = [];
 page.on('console', (msg) => capturedLogs.push(msg.text()));
-```
+````
