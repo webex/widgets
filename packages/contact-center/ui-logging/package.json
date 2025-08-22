@@ -4,6 +4,9 @@
   "description": "UI metrics tracking for Webex widgets",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build:src": "webpack --mode=development",
     "clean": "rm -rf dist",
