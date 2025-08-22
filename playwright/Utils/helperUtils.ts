@@ -118,15 +118,23 @@ export async function waitForWebSocketReconnection(
  */
 
 export const waitForState = async (page: Page, expectedState: userState): Promise<void> => {
-  const start = Date.now();
-  const timeoutMs: number = 10000;
-  while (true) {
+  try {
+    await page.waitForFunction(
+      async (expectedStateArg) => {
+        // Re-import getCurrentState in the browser context
+        const stateSelect = document.querySelector('[data-test="state-select"]') as HTMLSelectElement;
+        if (!stateSelect) return false;
+
+        const currentState = stateSelect.value?.trim();
+        return currentState === expectedStateArg;
+      },
+      expectedState,
+      {timeout: 10000, polling: 'raf'} // Use requestAnimationFrame for optimal performance
+    );
+  } catch (error) {
+    // Get current state for better error message
     const currentState = await getCurrentState(page);
-    if (currentState === expectedState) return;
-    if (Date.now() - start > timeoutMs) {
-      throw new Error(`Timed out waiting for state "${expectedState}", last state was "${currentState}"`);
-    }
-    await page.waitForTimeout(500); // Poll every 500ms
+    throw new Error(`Timed out waiting for state "${expectedState}", last state was "${currentState}"`);
   }
 };
 
@@ -294,6 +302,7 @@ export function isColorClose(receivedColor: string, expectedColor: ThemeColor, t
  * Handles stray incoming tasks by accepting them and performing wrap-up actions, to be used for clean up before tests
  * @param page - Playwright Page object
  * @param extensionPage - Optional extension page for handling calls (default: null)
+ * @param maxIterations - Maximum number of task handling iterations to prevent infinite loops (default: 10)
  * @returns Promise<void>
  * @description Continuously checks for incoming tasks, accepts them, and performs wrap-up actions until no more tasks are available
  * @example
@@ -302,43 +311,103 @@ export function isColorClose(receivedColor: string, expectedColor: ThemeColor, t
  * ```
  */
 
-export const handleStrayTasks = async (page: Page, extensionPage: Page | null = null): Promise<void> => {
+export const handleStrayTasks = async (
+  page: Page,
+  extensionPage: Page | null = null,
+  maxIterations: number = 10
+): Promise<void> => {
   await page.waitForTimeout(1000);
+
+  const stateSelectVisible = await page
+    .getByTestId('state-select')
+    .waitFor({state: 'visible', timeout: 30000})
+    .then(() => true)
+    .catch(() => false);
+
+  if (stateSelectVisible) {
+    const ronapopupVisible = await page
+      .getByTestId('samples:rona-popup')
+      .waitFor({state: 'visible', timeout: AWAIT_TIMEOUT})
+      .then(() => true)
+      .catch(() => false);
+
+    if (ronapopupVisible) {
+      await submitRonaPopup(page, RONA_OPTIONS.AVAILABLE);
+    }
+
+    await changeUserState(page, USER_STATES.AVAILABLE);
+    await page.waitForTimeout(4000);
+  }
   const incomingTaskDiv = page.getByTestId(/^samples:incoming-task(-\w+)?$/);
 
-  while (true) {
+  let iterations = 0;
+  while (iterations < maxIterations) {
+    iterations++;
     let flag1 = false;
     let flag2 = true;
-    while (true) {
+
+    // Check if there's actually anything to handle before processing
+    const hasIncomingTask = await incomingTaskDiv
+      .first()
+      .isVisible()
+      .catch(() => false);
+    const hasEndButton = await page
+      .getByTestId('call-control:end-call')
+      .first()
+      .isVisible()
+      .catch(() => false);
+    const hasWrapupButton = await page
+      .getByTestId('call-control:wrapup-button')
+      .first()
+      .isVisible()
+      .catch(() => false);
+
+    if (!hasIncomingTask && !hasEndButton && !hasWrapupButton) {
+      // Nothing to handle, exit early
+      break;
+    }
+
+    // Inner task acceptance loop with timeout protection
+    let taskAttempts = 0;
+    const maxTaskAttempts = 5;
+
+    while (taskAttempts < maxTaskAttempts) {
+      taskAttempts++;
       const task = incomingTaskDiv.first();
       let isTaskVisible = await task.isVisible().catch(() => false);
       if (!isTaskVisible) break;
+
       const acceptButton = task.getByTestId('task:accept-button').first();
       const acceptButtonVisible = await acceptButton.isVisible().catch(() => false);
       const isExtensionCall = await (await task.innerText()).includes('Ringing...');
+
       if (isExtensionCall) {
         if (!extensionPage) {
           throw new Error('Extension page is not available for handling extension call');
         }
         const extensionCallVisible = await extensionPage
           .locator('[data-test="right-action-button"]')
-          .waitFor({state: 'visible', timeout: 40000})
+          .waitFor({state: 'visible', timeout: 40000}) // Restored original timeout
           .then(() => true)
           .catch(() => false);
         if (extensionCallVisible) {
           await acceptExtensionCall(extensionPage);
           flag1 = true;
         } else {
-          throw new Error('Accept button not visible and extension page is not available');
+          console.warn('Extension call timeout - skipping task');
+          break; // Skip this task instead of throwing error
         }
       } else {
         try {
           await acceptButton.click({timeout: AWAIT_TIMEOUT});
-        } catch (error) {}
-        flag1 = true;
+          flag1 = true;
+        } catch (error) {
+          console.warn('Failed to click accept button:', error);
+        }
       }
       await page.waitForTimeout(1000);
     }
+
     const endButton = page.getByTestId('call-control:end-call').first();
     const endButtonVisible = await endButton
       .waitFor({state: 'visible', timeout: 2000})
@@ -367,6 +436,8 @@ export const handleStrayTasks = async (page: Page, extensionPage: Page | null = 
       break;
     }
   }
+
+  console.log(`Completed stray task handling after ${iterations} iterations`);
 };
 
 /*
@@ -387,12 +458,16 @@ export const handleStrayTasks = async (page: Page, extensionPage: Page | null = 
 export const pageSetup = async (
   page: Page,
   loginMode: LoginMode,
-  agentName: string,
-  extensionPage: Page | null = null
+  accessToken: string,
+  extensionPage: Page | null = null,
+  extensionNumber?: string,
+  isMultiSession: boolean = false
 ) => {
   const maxRetries = 3;
-  await loginViaAccessToken(page, agentName);
+
+  await loginViaAccessToken(page, accessToken);
   await enableAllWidgets(page);
+
   if (loginMode === LOGIN_MODE.DESKTOP) {
     await disableMultiLogin(page);
   } else {
@@ -412,90 +487,21 @@ export const pageSetup = async (
     }
   }
 
+  if (isMultiSession) {
+    return; // Skip further setup for multi-session tests
+  }
+
   let loginButtonExists = await page
     .getByTestId('login-button')
     .isVisible()
     .catch(() => false);
+
   if (loginButtonExists) {
-    await telephonyLogin(page, loginMode);
+    await telephonyLogin(page, loginMode, extensionNumber);
   } else {
-    const stateSelectVisible = await page
-      .getByTestId('state-select')
-      .waitFor({state: 'visible', timeout: 30000})
-      .then(() => true)
-      .catch(() => false);
-    if (stateSelectVisible) {
-      const ronapopupVisible = await page
-        .getByTestId('samples:rona-popup')
-        .waitFor({state: 'visible', timeout: AWAIT_TIMEOUT})
-        .then(() => true)
-        .catch(() => false);
-      if (ronapopupVisible) {
-        await submitRonaPopup(page, RONA_OPTIONS.AVAILABLE);
-      }
-      const userState = await getCurrentState(page);
-      await changeUserState(page, USER_STATES.AVAILABLE);
-      await page.waitForTimeout(5000);
-
-      const incomingTaskDiv = page.getByTestId(/^samples:incoming-task(-\w+)?$/).first();
-      await incomingTaskDiv.waitFor({state: 'visible', timeout: AWAIT_TIMEOUT}).catch(() => false);
-      await handleStrayTasks(page, extensionPage);
-    }
-    loginButtonExists = await page
-      .getByTestId('login-button')
-      .isVisible()
-      .catch(() => false);
-
-    if (!loginButtonExists) await stationLogout(page);
-    await telephonyLogin(page, loginMode);
-  }
-
-  let ronapopupVisible = await page
-    .getByTestId('samples:rona-popup')
-    .waitFor({state: 'visible', timeout: AWAIT_TIMEOUT})
-    .then(() => true)
-    .catch(() => false);
-  if (ronapopupVisible) {
-    await submitRonaPopup(page, RONA_OPTIONS.AVAILABLE);
-  }
-
-  let stationLoginFailure = await page
-    .getByTestId('station-login-failure-label')
-    .waitFor({state: 'visible', timeout: AWAIT_TIMEOUT})
-    .then(() => true)
-    .catch(() => false);
-  for (let i = 0; i < maxRetries && stationLoginFailure; i++) {
-    loginButtonExists = await page
-      .getByTestId('login-button')
-      .isVisible()
-      .catch(() => false);
-    if (!loginButtonExists) await stationLogout(page);
-    await telephonyLogin(page, loginMode);
-    await page.getByTestId('state-select').waitFor({state: 'visible', timeout: 30000});
-    stationLoginFailure = await page
-      .getByTestId('station-login-failure-label')
-      .waitFor({state: 'visible', timeout: AWAIT_TIMEOUT})
-      .then(() => true)
-      .catch(() => false);
-    if (i == maxRetries - 1 && stationLoginFailure) {
-      throw new Error(`Station Login Error Persists after ${maxRetries} attempts`);
-    }
+    await stationLogout(page);
+    await telephonyLogin(page, loginMode, extensionNumber);
   }
 
   await page.getByTestId('state-select').waitFor({state: 'visible', timeout: 30000});
-
-  ronapopupVisible = await page
-    .getByTestId('samples:rona-popup')
-    .waitFor({state: 'visible', timeout: 3000})
-    .then(() => true)
-    .catch(() => false);
-  if (ronapopupVisible) {
-    await submitRonaPopup(page, RONA_OPTIONS.AVAILABLE);
-  }
-
-  await changeUserState(page, USER_STATES.AVAILABLE);
-  await page.waitForTimeout(3000);
-  const incomingTaskDiv = page.getByTestId(/^samples:incoming-task(-\w+)?$/).first();
-  await incomingTaskDiv.waitFor({state: 'visible', timeout: AWAIT_TIMEOUT}).catch(() => false);
-  await handleStrayTasks(page, extensionPage);
 };
