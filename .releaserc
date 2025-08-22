@@ -18,7 +18,7 @@
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "node ./tooling/src/publish.js ${nextRelease.channel} 1.28.0-ccwidgets.108 "
+        "prepareCmd": "node ./tooling/src/publish.js ${nextRelease.channel} ${nextRelease.version} "
       }
     ],
     [
@@ -27,11 +27,10 @@
         "assets": [
           "packages/contact-center/CHANGELOG.md",
           "package.json",
-          "packages/contact-center/CHANGELOG.md",
-          "package.json",
           "packages/contact-center/*/package.json"
         ],
-        "message": "chore(release): 1.28.0-ccwidgets.108 [skip ci]\n\n${nextRelease.notes}"
+        "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}",
+        "tagFormat": "$v{nextRelease.version}"
       }
     ],
     "@semantic-release/github"
