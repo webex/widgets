@@ -1,5 +1,5 @@
-import {Page, expect} from '@playwright/test';
-import {WRAPUP_REASONS, AWAIT_TIMEOUT, AGENT_NAMES} from '../constants';
+import {Page} from '@playwright/test';
+import {AWAIT_TIMEOUT, FORM_FIELD_TIMEOUT} from '../constants';
 
 /**
  * Utility functions for advanced task controls testing.
@@ -113,17 +113,17 @@ export function getAllCapturedLogs(): string[] {
 /**
  * Initiates a consult with another agent via the agents tab.
  * @param page - The agent's main page
- * @param agentName - Name of the agent to consult with (e.g., AGENT_NAMES.AGENT2)
+ * @param agentName - Name of the agent to consult with (e.g., 'User1 Agent1')
  * @returns Promise<void>
  */
-export async function consultViaAgent(page: Page, agentName: string = AGENT_NAMES.AGENT2): Promise<void> {
+export async function consultViaAgent(page: Page, agentName: string): Promise<void> {
   // Click consult with another agent button
   await page.getByTestId('call-control:consult').nth(1).click({timeout: AWAIT_TIMEOUT});
   // Navigate to Agents tab
   await page.getByRole('tab', {name: 'Agents'}).click({timeout: AWAIT_TIMEOUT});
 
   //hover over the agent name - use exact match to avoid confusion with similar names
-  await page.getByRole('listitem', {name: agentName, exact: true}).hover({timeout: AWAIT_TIMEOUT});
+  await page.getByRole('listitem', {name: agentName, exact: true}).hover({timeout: FORM_FIELD_TIMEOUT});
 
   // Select the specific agent
   await page.getByRole('listitem', {name: agentName, exact: true}).getByRole('button').click({timeout: AWAIT_TIMEOUT});
@@ -168,10 +168,10 @@ export async function cancelConsult(page: Page): Promise<void> {
 /**
  * Initiates a transfer via the agents tab (without prior consult).
  * @param page - The agent's main page
- * @param agentName - Name of the agent to transfer to (e.g., AGENT_NAMES.AGENT2)
+ * @param agentName - Name of the agent to transfer to (e.g., 'User1 Agent1')
  * @returns Promise<void>
  */
-export async function transferViaAgent(page: Page, agentName: string = AGENT_NAMES.AGENT2): Promise<void> {
+export async function transferViaAgent(page: Page, agentName: string): Promise<void> {
   // Click transfer call button
   await page
     .getByRole('group', {name: 'Call Control with Call'})
@@ -182,10 +182,13 @@ export async function transferViaAgent(page: Page, agentName: string = AGENT_NAM
   await page.getByRole('tab', {name: 'Agents'}).click({timeout: AWAIT_TIMEOUT});
 
   // Hover over the agent name - use exact match to avoid confusion with similar names
-  await page.getByRole('listitem', {name: agentName, exact: true}).hover({timeout: AWAIT_TIMEOUT});
+  await page.getByRole('listitem', {name: agentName, exact: true}).hover({timeout: FORM_FIELD_TIMEOUT});
 
   // Select the specific agent
-  await page.getByRole('listitem', {name: agentName, exact: true}).getByRole('button').click({timeout: AWAIT_TIMEOUT});
+  await page
+    .getByRole('listitem', {name: agentName, exact: true})
+    .getByRole('button')
+    .click({timeout: FORM_FIELD_TIMEOUT});
 
   // Wait a moment for the transfer to be processed
   await page.waitForTimeout(2000);
