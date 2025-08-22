@@ -1,3 +1,11 @@
+# [1.28.0-ccwidgets.108](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.107...v1.28.0-ccwidgets.108) (2025-08-22)
+
+
+### Bug Fixes
+
+* **tooling:** force publish tag ([#527](https://github.com/webex/widgets/issues/527)) ([97a2c6e](https://github.com/webex/widgets/commit/97a2c6eb5deb20a84787ca22d2ae69b8125b587f))
+* **tooling:** remove changes for force publishing v108 ([#526](https://github.com/webex/widgets/issues/526)) ([9e535c6](https://github.com/webex/widgets/commit/9e535c68fe9667c14a4ccb64a2d856a3cec03bb1))
+
 # [1.28.0-ccwidgets.107](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.106...v1.28.0-ccwidgets.107) (2025-08-22)
 
 
