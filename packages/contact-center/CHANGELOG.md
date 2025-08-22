@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.110](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.109...v1.28.0-ccwidgets.110) (2025-08-22)
+
+
+### Bug Fixes
+
+* **cc-widgets:** End 2 End Tests stabilised  ([#517](https://github.com/webex/widgets/issues/517)) ([4dd2f74](https://github.com/webex/widgets/commit/4dd2f74452580a64ca4dc2a60fcd5128eefe19dd))
+
 # [1.28.0-ccwidgets.109](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.108...v1.28.0-ccwidgets.109) (2025-08-22)
 
 
