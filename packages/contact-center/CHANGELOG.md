@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.109](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.108...v1.28.0-ccwidgets.109) (2025-08-22)
+
+
+### Bug Fixes
+
+* **tooling:** revert removed code for publishing tag ([#528](https://github.com/webex/widgets/issues/528)) ([f6dba92](https://github.com/webex/widgets/commit/f6dba927a07d6d74ed67715d8bb33f1b16de76fe))
+
 # [1.28.0-ccwidgets.108](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.107...v1.28.0-ccwidgets.108) (2025-08-22)
 
 
