@@ -36,5 +36,5 @@
     ],
     "@semantic-release/github"
   ],
-  "tagFormat": "v${version}"
+  "tagFormat": "v1.28.0-ccwidgets.108"
 }
