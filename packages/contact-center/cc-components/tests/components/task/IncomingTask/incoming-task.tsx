@@ -30,6 +30,13 @@ describe('IncomingTaskComponent', () => {
   // Mock functions
   const mockAccept = jest.fn();
   const mockReject = jest.fn();
+  const loggerMock = {
+    error: jest.fn(),
+    info: jest.fn(),
+    log: jest.fn(),
+    warn: jest.fn(),
+    trace: jest.fn(),
+  };
 
   // Default props using IncomingTaskComponentProps interface
   const defaultProps: IncomingTaskComponentProps = {
@@ -37,6 +44,7 @@ describe('IncomingTaskComponent', () => {
     isBrowser: true,
     accept: mockAccept,
     reject: mockReject,
+    logger: loggerMock,
   };
 
   // Utility function spies
@@ -208,10 +216,10 @@ describe('IncomingTaskComponent', () => {
 
       // Verify utility function was called correctly for each task
       expect(extractIncomingTaskDataSpy).toHaveBeenCalledTimes(4);
-      expect(extractIncomingTaskDataSpy).toHaveBeenNthCalledWith(1, telephonyWebRTCTask, true);
-      expect(extractIncomingTaskDataSpy).toHaveBeenNthCalledWith(2, telephonyExtensionTask, false);
-      expect(extractIncomingTaskDataSpy).toHaveBeenNthCalledWith(3, chatTask, true);
-      expect(extractIncomingTaskDataSpy).toHaveBeenNthCalledWith(4, socialTask, true);
+      expect(extractIncomingTaskDataSpy).toHaveBeenNthCalledWith(1, telephonyWebRTCTask, true, loggerMock);
+      expect(extractIncomingTaskDataSpy).toHaveBeenNthCalledWith(2, telephonyExtensionTask, false, loggerMock);
+      expect(extractIncomingTaskDataSpy).toHaveBeenNthCalledWith(3, chatTask, true, loggerMock);
+      expect(extractIncomingTaskDataSpy).toHaveBeenNthCalledWith(4, socialTask, true, loggerMock);
 
       // === WebRTC Telephony Task Assertions ===
       const webRTCListItem = webRTCContainer.querySelector('li.task-list-item');

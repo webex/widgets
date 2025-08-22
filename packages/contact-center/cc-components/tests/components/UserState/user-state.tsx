@@ -152,7 +152,7 @@ describe('UserStateComponent', () => {
         render(<UserStateComponent {...defaultProps} />);
       });
 
-      expect(getPreviousSelectableStateSpy).toHaveBeenCalledWith(defaultProps.idleCodes);
+      expect(getPreviousSelectableStateSpy).toHaveBeenCalledWith(defaultProps.idleCodes, defaultProps.logger);
     });
 
     it('should call getSelectedKey with correct parameters', async () => {
@@ -163,7 +163,8 @@ describe('UserStateComponent', () => {
       expect(getSelectedKeySpy).toHaveBeenCalledWith(
         defaultProps.customState,
         defaultProps.currentState,
-        defaultProps.idleCodes
+        defaultProps.idleCodes,
+        defaultProps.logger
       );
     });
 
@@ -175,7 +176,8 @@ describe('UserStateComponent', () => {
       expect(buildDropdownItemsSpy).toHaveBeenCalledWith(
         defaultProps.customState,
         defaultProps.idleCodes,
-        defaultProps.currentState
+        defaultProps.currentState,
+        defaultProps.logger
       );
     });
 
@@ -184,7 +186,10 @@ describe('UserStateComponent', () => {
         render(<UserStateComponent {...defaultProps} />);
       });
 
-      expect(sortDropdownItemsSpy).toHaveBeenCalledWith(buildDropdownItemsSpy.mock.results[0].value);
+      expect(sortDropdownItemsSpy).toHaveBeenCalledWith(
+        buildDropdownItemsSpy.mock.results[0].value,
+        defaultProps.logger
+      );
     });
 
     it('should call getDropdownClass with correct parameters', async () => {
@@ -195,7 +200,8 @@ describe('UserStateComponent', () => {
       expect(getDropdownClassSpy).toHaveBeenCalledWith(
         defaultProps.customState,
         defaultProps.currentState,
-        defaultProps.idleCodes
+        defaultProps.idleCodes,
+        defaultProps.logger
       );
     });
 
@@ -207,7 +213,8 @@ describe('UserStateComponent', () => {
       expect(getTooltipTextSpy).toHaveBeenCalledWith(
         defaultProps.customState,
         defaultProps.currentState,
-        defaultProps.idleCodes
+        defaultProps.idleCodes,
+        defaultProps.logger
       );
     });
 
@@ -217,7 +224,7 @@ describe('UserStateComponent', () => {
       });
 
       // getIconStyle should be called for the items being rendered
-      expect(getIconStyleSpy).toHaveBeenCalledWith({id: '0', name: 'Available'});
+      expect(getIconStyleSpy).toHaveBeenCalledWith({id: '0', name: 'Available'}, defaultProps.logger);
     });
   });
 
@@ -245,11 +252,17 @@ describe('UserStateComponent', () => {
         render(<UserStateComponent {...defaultProps} customState={customState} />);
       });
 
-      expect(getSelectedKeySpy).toHaveBeenCalledWith(customState, defaultProps.currentState, defaultProps.idleCodes);
+      expect(getSelectedKeySpy).toHaveBeenCalledWith(
+        customState,
+        defaultProps.currentState,
+        defaultProps.idleCodes,
+        defaultProps.logger
+      );
       expect(buildDropdownItemsSpy).toHaveBeenCalledWith(
         customState,
         defaultProps.idleCodes,
-        defaultProps.currentState
+        defaultProps.currentState,
+        defaultProps.logger
       );
     });
   });
@@ -268,7 +281,8 @@ describe('UserStateComponent', () => {
       expect(getSelectedKeySpy).toHaveBeenLastCalledWith(
         customState,
         defaultProps.currentState,
-        defaultProps.idleCodes
+        defaultProps.idleCodes,
+        defaultProps.logger
       );
     });
 
@@ -280,11 +294,21 @@ describe('UserStateComponent', () => {
 
       screen.rerender(<UserStateComponent {...defaultProps} />);
 
-      expect(getSelectedKeySpy).toHaveBeenCalledWith(defaultProps.customState, '3', defaultProps.idleCodes);
+      expect(getSelectedKeySpy).toHaveBeenCalledWith(
+        defaultProps.customState,
+        '3',
+        defaultProps.idleCodes,
+        defaultProps.logger
+      );
 
       screen.rerender(<UserStateComponent {...defaultProps} currentState="4" />);
 
-      expect(getSelectedKeySpy).toHaveBeenCalledWith(defaultProps.customState, '4', defaultProps.idleCodes);
+      expect(getSelectedKeySpy).toHaveBeenCalledWith(
+        defaultProps.customState,
+        '4',
+        defaultProps.idleCodes,
+        defaultProps.logger
+      );
     });
 
     it('should handle elapsed time formatting correctly', async () => {
@@ -321,7 +345,7 @@ describe('UserStateComponent', () => {
 
       // The getIconStyle should have been called with the item that has an empty name
       // due to the || '' fallback when currentState is not found in idleCodes
-      expect(getIconStyleSpy).toHaveBeenCalledWith({id: '0', name: 'Available'});
+      expect(getIconStyleSpy).toHaveBeenCalledWith({id: '0', name: 'Available'}, defaultProps.logger);
     });
   });
 });

@@ -34,14 +34,14 @@ describe('Station Login Utils', () => {
     it('should set showCCSignOutModal to false when Escape key is pressed', () => {
       const mockSetShowCCSignOutModal = jest.fn();
       const mockEvent = {key: 'Escape'} as React.KeyboardEvent<HTMLDialogElement>;
-      handleCCSignoutKeyDown(mockEvent, mockSetShowCCSignOutModal);
+      handleCCSignoutKeyDown(mockEvent, mockSetShowCCSignOutModal, loggerMock);
       expect(mockSetShowCCSignOutModal).toHaveBeenCalledWith(false);
     });
 
     it('should not set showCCSignOutModal for other keys', () => {
       const mockSetShowCCSignOutModal = jest.fn();
       const mockEvent = {key: 'Enter'} as React.KeyboardEvent<HTMLDialogElement>;
-      handleCCSignoutKeyDown(mockEvent, mockSetShowCCSignOutModal);
+      handleCCSignoutKeyDown(mockEvent, mockSetShowCCSignOutModal, loggerMock);
       expect(mockSetShowCCSignOutModal).not.toHaveBeenCalled();
     });
   });
@@ -76,7 +76,7 @@ describe('Station Login Utils', () => {
     });
 
     it('should show modal when showMultipleLoginAlert is true and modal is not open', () => {
-      handleModals(mockModalRef, mockCCSignOutModalRef, mockSaveConfirmDialogRef, true, false, false);
+      handleModals(mockModalRef, mockCCSignOutModalRef, mockSaveConfirmDialogRef, true, false, false, loggerMock);
       expect(mockModalRef.current?.showModal).toHaveBeenCalled();
     });
 
@@ -84,24 +84,24 @@ describe('Station Login Utils', () => {
       if (mockModalRef.current) {
         mockModalRef.current.open = true;
       }
-      handleModals(mockModalRef, mockCCSignOutModalRef, mockSaveConfirmDialogRef, false, false, false);
+      handleModals(mockModalRef, mockCCSignOutModalRef, mockSaveConfirmDialogRef, false, false, false, loggerMock);
       expect(mockModalRef.current?.close).toHaveBeenCalled();
     });
 
     it('should show CC sign out modal when showCCSignOutModal is true', () => {
-      handleModals(mockModalRef, mockCCSignOutModalRef, mockSaveConfirmDialogRef, false, true, false);
+      handleModals(mockModalRef, mockCCSignOutModalRef, mockSaveConfirmDialogRef, false, true, false, loggerMock);
       expect(mockCCSignOutModalRef.current?.showModal).toHaveBeenCalled();
     });
 
     it('should show save confirm dialog when showSaveConfirmDialog is true', () => {
-      handleModals(mockModalRef, mockCCSignOutModalRef, mockSaveConfirmDialogRef, false, false, true);
+      handleModals(mockModalRef, mockCCSignOutModalRef, mockSaveConfirmDialogRef, false, false, true, loggerMock);
       expect(mockSaveConfirmDialogRef.current?.showModal).toHaveBeenCalled();
     });
 
     it('should handle null refs gracefully', () => {
       const nullRef = {current: null};
       expect(() => {
-        handleModals(nullRef, nullRef, nullRef, true, true, true);
+        handleModals(nullRef, nullRef, nullRef, true, true, true, loggerMock);
       }).not.toThrow();
     });
   });
@@ -116,7 +116,7 @@ describe('Station Login Utils', () => {
       const mockHandleContinue = jest.fn();
       const mockSetShowCCSignOutModal = jest.fn();
 
-      continueClicked(mockModalRef, mockHandleContinue, mockSetShowCCSignOutModal);
+      continueClicked(mockModalRef, mockHandleContinue, mockSetShowCCSignOutModal, loggerMock);
 
       expect(mockModalRef.current?.close).toHaveBeenCalled();
       expect(mockHandleContinue).toHaveBeenCalled();
@@ -129,7 +129,7 @@ describe('Station Login Utils', () => {
       const mockSetShowCCSignOutModal = jest.fn();
 
       expect(() => {
-        continueClicked(nullRef, mockHandleContinue, mockSetShowCCSignOutModal);
+        continueClicked(nullRef, mockHandleContinue, mockSetShowCCSignOutModal, loggerMock);
       }).not.toThrow();
     });
   });
@@ -144,7 +144,7 @@ describe('Station Login Utils', () => {
       };
       const mockSetShowCCSignOutModal = jest.fn();
 
-      ccCancelButtonClicked(mockRef, mockSetShowCCSignOutModal);
+      ccCancelButtonClicked(mockRef, mockSetShowCCSignOutModal, loggerMock);
 
       expect(mockRef.current?.close).toHaveBeenCalled();
       expect(mockSetShowCCSignOutModal).toHaveBeenCalledWith(false);
@@ -159,7 +159,7 @@ describe('Station Login Utils', () => {
       };
       const mockSetShowCCSignOutModal = jest.fn();
 
-      ccCancelButtonClicked(mockRef, mockSetShowCCSignOutModal);
+      ccCancelButtonClicked(mockRef, mockSetShowCCSignOutModal, loggerMock);
 
       expect(mockRef.current?.close).not.toHaveBeenCalled();
       expect(mockSetShowCCSignOutModal).not.toHaveBeenCalled();
@@ -170,7 +170,7 @@ describe('Station Login Utils', () => {
       const mockSetShowCCSignOutModal = jest.fn();
 
       expect(() => {
-        ccCancelButtonClicked(nullRef, mockSetShowCCSignOutModal);
+        ccCancelButtonClicked(nullRef, mockSetShowCCSignOutModal, loggerMock);
       }).not.toThrow();
     });
   });
@@ -180,7 +180,7 @@ describe('Station Login Utils', () => {
       const mockSetDialNumberLabel = jest.fn();
       const mockSetDialNumberPlaceholder = jest.fn();
 
-      updateDialNumberLabel(DIALNUMBER, mockSetDialNumberLabel, mockSetDialNumberPlaceholder);
+      updateDialNumberLabel(DIALNUMBER, mockSetDialNumberLabel, mockSetDialNumberPlaceholder, loggerMock);
 
       expect(mockSetDialNumberLabel).toHaveBeenCalledWith(LoginOptions[DIALNUMBER]);
       expect(mockSetDialNumberPlaceholder).toHaveBeenCalledWith(LoginOptions[DIALNUMBER]);
@@ -190,7 +190,7 @@ describe('Station Login Utils', () => {
       const mockSetDialNumberLabel = jest.fn();
       const mockSetDialNumberPlaceholder = jest.fn();
 
-      updateDialNumberLabel(EXTENSION, mockSetDialNumberLabel, mockSetDialNumberPlaceholder);
+      updateDialNumberLabel(EXTENSION, mockSetDialNumberLabel, mockSetDialNumberPlaceholder, loggerMock);
 
       expect(mockSetDialNumberLabel).toHaveBeenCalledWith(LoginOptions[EXTENSION]);
       expect(mockSetDialNumberPlaceholder).toHaveBeenCalledWith(LoginOptions[EXTENSION]);
@@ -200,7 +200,7 @@ describe('Station Login Utils', () => {
       const mockSetDialNumberLabel = jest.fn();
       const mockSetDialNumberPlaceholder = jest.fn();
 
-      updateDialNumberLabel(DESKTOP, mockSetDialNumberLabel, mockSetDialNumberPlaceholder);
+      updateDialNumberLabel(DESKTOP, mockSetDialNumberLabel, mockSetDialNumberPlaceholder, loggerMock);
 
       expect(mockSetDialNumberLabel).not.toHaveBeenCalled();
       expect(mockSetDialNumberPlaceholder).not.toHaveBeenCalled();
@@ -210,7 +210,7 @@ describe('Station Login Utils', () => {
       const mockSetDialNumberLabel = jest.fn();
       const mockSetDialNumberPlaceholder = jest.fn();
 
-      updateDialNumberLabel('INVALID_OPTION', mockSetDialNumberLabel, mockSetDialNumberPlaceholder);
+      updateDialNumberLabel('INVALID_OPTION', mockSetDialNumberLabel, mockSetDialNumberPlaceholder, loggerMock);
 
       expect(mockSetDialNumberLabel).not.toHaveBeenCalled();
       expect(mockSetDialNumberPlaceholder).not.toHaveBeenCalled();
@@ -226,21 +226,21 @@ describe('Station Login Utils', () => {
 
     it('should return false for valid dial number with default regex', () => {
       const validNumber = '15552234567'; // Changed 4th digit from 1 to 2 to match [2-9] pattern
-      const result = validateDialNumber(validNumber, null, mockSetDNErrorText);
+      const result = validateDialNumber(validNumber, null, mockSetDNErrorText, loggerMock);
       expect(result).toBe(false);
       expect(mockSetDNErrorText).not.toHaveBeenCalled();
     });
 
     it('should return true for invalid dial number and set error text', () => {
       const invalidNumber = '911'; // This should be invalid for the default regex (too short and doesn't match pattern)
-      const result = validateDialNumber(invalidNumber, null, mockSetDNErrorText);
+      const result = validateDialNumber(invalidNumber, null, mockSetDNErrorText, loggerMock);
       expect(result).toBe(true);
       expect(mockSetDNErrorText).toHaveBeenCalledWith(StationLoginLabels.DN_FORMAT_ERROR);
     });
 
     it('should accept any input when empty string regex is provided', () => {
       const anyNumber = '911'; // With empty string regex, this becomes /(?:)/ which matches everything
-      const result = validateDialNumber(anyNumber, '', mockSetDNErrorText);
+      const result = validateDialNumber(anyNumber, '', mockSetDNErrorText, loggerMock);
       expect(result).toBe(false); // Should return false (no error) because empty regex matches everything
       expect(mockSetDNErrorText).not.toHaveBeenCalled();
     });
@@ -248,7 +248,7 @@ describe('Station Login Utils', () => {
     it('should use custom regex when provided', () => {
       const customRegex = '^\\d{10}$';
       const validNumber = '1234567890';
-      const result = validateDialNumber(validNumber, customRegex, mockSetDNErrorText);
+      const result = validateDialNumber(validNumber, customRegex, mockSetDNErrorText, loggerMock);
       expect(result).toBe(false);
       expect(mockSetDNErrorText).not.toHaveBeenCalled();
     });
@@ -256,7 +256,7 @@ describe('Station Login Utils', () => {
     it('should return true for invalid number with custom regex', () => {
       const customRegex = '^\\d{10}$';
       const invalidNumber = '123';
-      const result = validateDialNumber(invalidNumber, customRegex, mockSetDNErrorText);
+      const result = validateDialNumber(invalidNumber, customRegex, mockSetDNErrorText, loggerMock);
       expect(result).toBe(true);
       expect(mockSetDNErrorText).toHaveBeenCalledWith(StationLoginLabels.DN_FORMAT_ERROR);
     });
@@ -279,7 +279,7 @@ describe('Station Login Utils', () => {
       };
       const mockSetShowSaveConfirmDialog = jest.fn();
 
-      saveConfirmCancelClicked(mockRef, mockSetShowSaveConfirmDialog);
+      saveConfirmCancelClicked(mockRef, mockSetShowSaveConfirmDialog, loggerMock);
 
       expect(mockRef.current?.close).toHaveBeenCalled();
       expect(mockSetShowSaveConfirmDialog).toHaveBeenCalledWith(false);
@@ -290,7 +290,7 @@ describe('Station Login Utils', () => {
       const mockSetShowSaveConfirmDialog = jest.fn();
 
       expect(() => {
-        saveConfirmCancelClicked(nullRef, mockSetShowSaveConfirmDialog);
+        saveConfirmCancelClicked(nullRef, mockSetShowSaveConfirmDialog, loggerMock);
       }).not.toThrow();
     });
   });
@@ -306,7 +306,7 @@ describe('Station Login Utils', () => {
       const mockSetShowSaveConfirmDialog = jest.fn();
       const mockSaveLoginOptions = jest.fn();
 
-      handleSaveConfirm(mockRef, mockSetShowSaveConfirmDialog, mockSaveLoginOptions);
+      handleSaveConfirm(mockRef, mockSetShowSaveConfirmDialog, mockSaveLoginOptions, loggerMock);
 
       expect(mockRef.current?.close).toHaveBeenCalled();
       expect(mockSetShowSaveConfirmDialog).toHaveBeenCalledWith(false);
@@ -726,7 +726,7 @@ describe('Station Login Utils', () => {
       };
       const mockOnCCSignOut = jest.fn();
 
-      handleOnCCSignOut(mockRef, mockOnCCSignOut);
+      handleOnCCSignOut(mockRef, mockOnCCSignOut, loggerMock);
 
       expect(mockRef.current?.close).toHaveBeenCalled();
       expect(mockOnCCSignOut).toHaveBeenCalled();
@@ -741,7 +741,7 @@ describe('Station Login Utils', () => {
       };
       const mockOnCCSignOut = jest.fn();
 
-      handleOnCCSignOut(mockRef, mockOnCCSignOut);
+      handleOnCCSignOut(mockRef, mockOnCCSignOut, loggerMock);
 
       expect(mockOnCCSignOut).toHaveBeenCalled();
     });
@@ -751,7 +751,7 @@ describe('Station Login Utils', () => {
       const mockOnCCSignOut = jest.fn();
 
       expect(() => {
-        handleOnCCSignOut(nullRef, mockOnCCSignOut);
+        handleOnCCSignOut(nullRef, mockOnCCSignOut, loggerMock);
       }).not.toThrow();
 
       expect(mockOnCCSignOut).toHaveBeenCalled();
@@ -764,7 +764,7 @@ describe('Station Login Utils', () => {
         current: document.createElement('dialog'),
       } as React.RefObject<HTMLDialogElement>);
 
-      const refs = createStationLoginRefs();
+      const refs = createStationLoginRefs(loggerMock);
 
       expect(useRefMock).toHaveBeenCalledTimes(3);
       expect(refs).toHaveProperty('multiSignInModalRef');
@@ -773,6 +773,155 @@ describe('Station Login Utils', () => {
       expect(refs.multiSignInModalRef.current).toBeInstanceOf(HTMLDialogElement);
       expect(refs.ccSignOutModalRef.current).toBeInstanceOf(HTMLDialogElement);
       expect(refs.saveConfirmDialogRef.current).toBeInstanceOf(HTMLDialogElement);
+    });
+  });
+
+  describe('Error Handling', () => {
+    beforeEach(() => {
+      loggerMock.error.mockClear();
+    });
+
+    it('should log error when handleModals throws exception', () => {
+      const mockRef = {
+        current: {
+          open: false,
+          showModal: jest.fn(() => {
+            throw new Error('Test showModal error');
+          }),
+        },
+      } as unknown as HTMLDialogElement;
+
+      handleModals(mockRef, null, null, true, false, false, loggerMock);
+
+      expect(loggerMock.error).toHaveBeenCalledWith('CC-Widgets: StationLogin: Error in handleModals', {
+        module: 'cc-components#station-login.utils.tsx',
+        method: 'handleModals',
+        error: 'Test showModal error',
+      });
+    });
+
+    it('should log error when continueClicked throws exception', () => {
+      const mockCallback = jest.fn(() => {
+        throw new Error('Test callback error');
+      });
+      const mockRef = {current: {close: jest.fn()}};
+      const mockSetShowModal = jest.fn();
+
+      continueClicked(mockRef, mockCallback, mockSetShowModal, loggerMock);
+
+      expect(loggerMock.error).toHaveBeenCalledWith('CC-Widgets: StationLogin: Error in continueClicked', {
+        module: 'cc-components#station-login.utils.tsx',
+        method: 'continueClicked',
+        error: 'Test callback error',
+      });
+    });
+
+    it('should log error when validateDialNumber throws exception and return true', () => {
+      // Mock RegExp constructor to throw an error
+      const originalRegExp = global.RegExp;
+      global.RegExp = jest.fn(() => {
+        throw new Error('Test validation error');
+      }) as unknown as typeof RegExp;
+
+      const mockSetError = jest.fn();
+      const result = validateDialNumber('15551234567', null, mockSetError, loggerMock);
+
+      expect(loggerMock.error).toHaveBeenCalledWith('CC-Widgets: StationLogin: Error in validateDialNumber', {
+        module: 'cc-components#station-login.utils.tsx',
+        method: 'validateDialNumber',
+        error: 'Test validation error',
+      });
+      expect(result).toBe(true); // Should return true to indicate error state
+
+      // Restore original RegExp
+      global.RegExp = originalRegExp;
+    });
+
+    it('should log error when updateDialNumberLabel throws exception', () => {
+      const mockSetLabel = jest.fn(() => {
+        throw new Error('Test label error');
+      });
+
+      updateDialNumberLabel(EXTENSION, mockSetLabel, jest.fn(), loggerMock);
+
+      expect(loggerMock.error).toHaveBeenCalledWith('CC-Widgets: StationLogin: Error in updateDialNumberLabel', {
+        module: 'cc-components#station-login.utils.tsx',
+        method: 'updateDialNumberLabel',
+        error: 'Test label error',
+      });
+    });
+
+    it('should log error when handleLoginOptionChanged throws exception', () => {
+      const event = {detail: {value: EXTENSION}};
+      const mockSetters = {
+        setDeviceType: jest.fn(() => {
+          throw new Error('Test setter error');
+        }),
+        setSelectedDeviceType: jest.fn(),
+        setDialNumber: jest.fn(),
+        setDialNumberValue: jest.fn(),
+        setCurrentLoginOptions: jest.fn(),
+        setDialNumberLabel: jest.fn(),
+        setDialNumberPlaceholder: jest.fn(),
+        setShowDNError: jest.fn(),
+        setSelectedTeamId: jest.fn(),
+        setTeamId: jest.fn(),
+      };
+
+      handleLoginOptionChanged(
+        event,
+        mockSetters.setDeviceType,
+        mockSetters.setSelectedDeviceType,
+        jest.fn(),
+        mockSetters.setDialNumber,
+        mockSetters.setDialNumberValue,
+        mockSetters.setCurrentLoginOptions,
+        {},
+        mockSetters.setDialNumberLabel,
+        mockSetters.setDialNumberPlaceholder,
+        mockSetters.setShowDNError,
+        mockSetters.setSelectedTeamId,
+        mockSetters.setTeamId,
+        loggerMock,
+        'team123'
+      );
+
+      expect(loggerMock.error).toHaveBeenCalledWith('CC-Widgets: StationLogin: Error in handleLoginOptionChanged', {
+        module: 'cc-components#station-login.utils.tsx',
+        method: 'handleLoginOptionChanged',
+        error: 'Test setter error',
+      });
+    });
+
+    it('should log error when handleDNInputChanged throws exception', () => {
+      const event = {target: {value: 'test'}};
+      const mockSetters = {
+        setDialNumberValue: jest.fn(() => {
+          throw new Error('Test input error');
+        }),
+        setDialNumber: jest.fn(),
+        setShowDNError: jest.fn(),
+        setDNErrorText: jest.fn(),
+        setCurrentLoginOptions: jest.fn(),
+      };
+
+      handleDNInputChanged(
+        event,
+        mockSetters.setDialNumberValue,
+        mockSetters.setDialNumber,
+        mockSetters.setShowDNError,
+        mockSetters.setDNErrorText,
+        null,
+        mockSetters.setCurrentLoginOptions,
+        EXTENSION,
+        loggerMock
+      );
+
+      expect(loggerMock.error).toHaveBeenCalledWith('CC-Widgets: StationLogin: Error in handleDNInputChanged', {
+        module: 'cc-components#station-login.utils.tsx',
+        method: 'handleDNInputChanged',
+        error: 'Test input error',
+      });
     });
   });
 });

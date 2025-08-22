@@ -1,3 +1,4 @@
+import React from 'react';
 import {renderHook, act, waitFor} from '@testing-library/react';
 import {useUserState} from '../src/helper';
 import store from '@webex/cc-store';
@@ -106,7 +107,8 @@ describe('useUserState Hook', () => {
       onmessage: null,
     };
 
-    global.Worker = jest.fn(() => workerMock);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (global as any).Worker = jest.fn(() => workerMock);
     blobMock = jest.fn(() => 'blob:http://localhost:3000/12345');
     global.URL.createObjectURL = blobMock;
     jest.spyOn(store, 'setCurrentState');
@@ -445,5 +447,339 @@ describe('useUserState Hook', () => {
     );
 
     expect(onStateChange).toHaveBeenCalledWith(idleCodes[0]);
+  });
+
+  describe('Error Handling', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should handle errors in callOnStateChange', () => {
+      const errorOnStateChange = jest.fn().mockImplementation(() => {
+        throw new Error('Test error in onStateChange callback');
+      });
+
+      renderHook(() =>
+        useUserState({
+          idleCodes,
+          agentId,
+          cc: mockCC,
+          currentState: '1',
+          customState: null,
+          lastStateChangeTimestamp: new Date().getTime(),
+          lastIdleCodeChangeTimestamp: undefined,
+          logger,
+          onStateChange: errorOnStateChange,
+        })
+      );
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: UserState: Error in callOnStateChange - Test error in onStateChange callback',
+        {
+          module: 'useUserState',
+          method: 'callOnStateChange',
+        }
+      );
+    });
+
+    it('should handle errors in worker initialization', () => {
+      const originalWorker = global.Worker;
+
+      global.Worker = jest.fn().mockImplementation(() => {
+        throw new Error('Worker initialization failed');
+      });
+
+      renderHook(() =>
+        useUserState({
+          idleCodes,
+          agentId,
+          cc: mockCC,
+          currentState: '0',
+          customState: null,
+          lastStateChangeTimestamp: new Date().getTime(),
+          lastIdleCodeChangeTimestamp: undefined,
+          logger,
+          onStateChange,
+        })
+      );
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: UserState: Error initializing worker - Worker initialization failed',
+        {
+          module: 'useUserState',
+          method: 'useEffect - initial',
+        }
+      );
+
+      global.Worker = originalWorker;
+    });
+
+    it('should handle errors in worker onmessage handler', () => {
+      const mockSetElapsedTime = jest.fn().mockImplementation(() => {
+        throw new Error('Error in setElapsedTime');
+      });
+
+      const originalUseState = React.useState;
+      // @ts-expect-error: only for testing
+      jest.spyOn(React, 'useState').mockImplementation((initial: unknown) => {
+        if (initial === 0) {
+          // Mock setElapsedTime to throw error
+          return [0, mockSetElapsedTime];
+        }
+        // Return normal mock for other useState calls
+        return originalUseState(initial);
+      });
+
+      renderHook(() =>
+        useUserState({
+          idleCodes,
+          agentId,
+          cc: mockCC,
+          currentState: '0',
+          customState: null,
+          lastStateChangeTimestamp: new Date().getTime(),
+          lastIdleCodeChangeTimestamp: undefined,
+          logger,
+          onStateChange,
+        })
+      );
+
+      act(() => {
+        workerMock.onmessage({data: {type: 'elapsedTime', elapsedTime: 1}});
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: UserState: Error in worker onmessage - Error in setElapsedTime',
+        {
+          module: 'useUserState',
+          method: 'useEffect - initial - onmessage',
+        }
+      );
+    });
+
+    it('should handle errors in currentState useEffect', () => {
+      // Mock updateAgentState to be called directly, which might throw
+      const errorCC = {
+        ...mockCC,
+        setAgentState: jest.fn().mockImplementation(() => {
+          throw new Error('setAgentState synchronous error');
+        }),
+      };
+
+      const {rerender} = renderHook(
+        ({currentState}) =>
+          useUserState({
+            idleCodes,
+            agentId,
+            cc: errorCC,
+            currentState,
+            customState: null,
+            lastStateChangeTimestamp: new Date().getTime(),
+            lastIdleCodeChangeTimestamp: undefined,
+            logger,
+            onStateChange,
+          }),
+        {initialProps: {currentState: '0'}}
+      );
+
+      act(() => {
+        rerender({currentState: '1'});
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: UserState: Error in currentState useEffect - setAgentState synchronous error',
+        {
+          module: 'useUserState',
+          method: 'useEffect - currentState',
+        }
+      );
+    });
+
+    it('should handle errors in customState useEffect', () => {
+      // Mock onStateChange to throw error
+      const errorOnStateChange = jest.fn().mockImplementation(() => {
+        throw new Error('customState callback error');
+      });
+
+      const {rerender} = renderHook(
+        ({customState}) =>
+          useUserState({
+            idleCodes,
+            agentId,
+            cc: mockCC,
+            currentState: '0',
+            customState,
+            lastStateChangeTimestamp: new Date().getTime(),
+            lastIdleCodeChangeTimestamp: undefined,
+            logger,
+            onStateChange: errorOnStateChange,
+          }),
+        {initialProps: {customState: null}}
+      );
+
+      act(() => {
+        rerender({customState: {developerName: 'Custom State', name: 'Custom State'}});
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: UserState: Error in callOnStateChange - customState callback error',
+        {
+          module: 'useUserState',
+          method: 'callOnStateChange',
+        }
+      );
+    });
+
+    it('should handle errors in timestamp useEffect', () => {
+      // Mock the worker to throw error when postMessage is called
+      const mockWorkerWithError = {
+        postMessage: jest.fn().mockImplementation(() => {
+          throw new Error('Worker postMessage error');
+        }),
+        terminate: jest.fn(),
+        onmessage: null,
+      };
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (global as any).Worker = jest.fn(() => mockWorkerWithError);
+
+      const {rerender} = renderHook(
+        ({lastStateChangeTimestamp}) =>
+          useUserState({
+            idleCodes,
+            agentId,
+            cc: mockCC,
+            currentState: '0',
+            customState: null,
+            lastStateChangeTimestamp,
+            lastIdleCodeChangeTimestamp: undefined,
+            logger,
+            onStateChange,
+          }),
+        {initialProps: {lastStateChangeTimestamp: new Date().getTime()}}
+      );
+
+      act(() => {
+        rerender({lastStateChangeTimestamp: new Date().getTime() + 1000});
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: UserState: Error in timestamp useEffect - Worker postMessage error',
+        {
+          module: 'useUserState',
+          method: 'useEffect - reset timers',
+        }
+      );
+    });
+
+    it('should handle errors in setAgentStatus', () => {
+      // Mock store.setCurrentState to throw error
+      const originalSetCurrentState = store.setCurrentState;
+      store.setCurrentState = jest.fn().mockImplementation(() => {
+        throw new Error('setCurrentState error');
+      });
+
+      const {result} = renderHook(() =>
+        useUserState({
+          idleCodes,
+          agentId,
+          cc: mockCC,
+          currentState: '0',
+          customState: null,
+          lastStateChangeTimestamp: new Date().getTime(),
+          lastIdleCodeChangeTimestamp: undefined,
+          logger,
+          onStateChange,
+        })
+      );
+
+      act(() => {
+        result.current.setAgentStatus('1');
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: UserState: Error in setAgentStatus - setCurrentState error',
+        {
+          module: 'useUserState',
+          method: 'setAgentStatus',
+        }
+      );
+
+      store.setCurrentState = originalSetCurrentState;
+    });
+
+    it('should handle errors in updateAgentState', () => {
+      // Mock idleCodes.filter to throw error
+      const errorIdleCodes = new Proxy([], {
+        get: (target, prop) => {
+          if (prop === 'filter') {
+            throw new Error('idleCodes filter error');
+          }
+          return target[prop];
+        },
+      });
+
+      const {rerender} = renderHook(
+        ({currentState}) =>
+          useUserState({
+            idleCodes: errorIdleCodes,
+            agentId,
+            cc: mockCC,
+            currentState,
+            customState: null,
+            lastStateChangeTimestamp: new Date().getTime(),
+            lastIdleCodeChangeTimestamp: undefined,
+            logger,
+            onStateChange,
+          }),
+        {initialProps: {currentState: '0'}}
+      );
+
+      act(() => {
+        rerender({currentState: '1'});
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: UserState: Error in updateAgentState - idleCodes filter error',
+        {
+          module: 'useUserState',
+          method: 'updateAgentState',
+        }
+      );
+    });
+
+    it('should handle errors in cleanup function', () => {
+      const mockWorkerWithCleanupError = {
+        postMessage: jest.fn(),
+        terminate: jest.fn().mockImplementation(() => {
+          throw new Error('Worker terminate error');
+        }),
+        onmessage: null,
+      };
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (global as any).Worker = jest.fn(() => mockWorkerWithCleanupError);
+
+      const {unmount} = renderHook(() =>
+        useUserState({
+          idleCodes,
+          agentId,
+          cc: mockCC,
+          currentState: '0',
+          customState: null,
+          lastStateChangeTimestamp: new Date().getTime(),
+          lastIdleCodeChangeTimestamp: undefined,
+          logger,
+          onStateChange,
+        })
+      );
+
+      unmount();
+
+      expect(logger.error).toHaveBeenCalledWith('CC-Widgets: UserState: Error in cleanup - Worker terminate error', {
+        module: 'useUserState',
+        method: 'useEffect - initial cleanup',
+      });
+    });
   });
 });

@@ -57,12 +57,11 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
   const [showCCSignOutModal, setShowCCSignOutModal] = useState<boolean>(false);
   const [showDNError, setShowDNError] = useState<boolean>(false);
   const [dnErrorText, setDNErrorText] = useState<string>('');
-  const {multiSignInModalRef, ccSignOutModalRef, saveConfirmDialogRef} = createStationLoginRefs();
+  const {multiSignInModalRef, ccSignOutModalRef, saveConfirmDialogRef} = createStationLoginRefs(logger);
 
   useEffect(() => {
     if (deviceType !== DESKTOP && Object.keys(LoginOptions).includes(deviceType)) {
-      setDialNumberLabel(LoginOptions[deviceType]);
-      setDialNumberPlaceholder(LoginOptions[deviceType]);
+      updateDialNumberLabel(deviceType, setDialNumberLabel, setDialNumberPlaceholder, logger);
     }
   }, [selectedDeviceType, isAgentLoggedIn]);
 
@@ -74,7 +73,8 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
       saveConfirmDialogRef,
       showMultipleLoginAlert,
       showCCSignOutModal,
-      showSaveConfirmDialog
+      showSaveConfirmDialog,
+      logger
     );
   }, [showMultipleLoginAlert, showCCSignOutModal, showSaveConfirmDialog]);
 
@@ -92,7 +92,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
           <Button
             id="ContinueButton"
             data-testid="ContinueButton"
-            onClick={() => continueClicked(multiSignInModalRef, handleContinue, setShowCCSignOutModal)}
+            onClick={() => continueClicked(multiSignInModalRef, handleContinue, setShowCCSignOutModal, logger)}
             variant="secondary"
             className="white-button"
           >
@@ -105,7 +105,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
         ref={ccSignOutModalRef}
         className="dialog-modal"
         data-testid="cc-logout-modal"
-        onKeyDown={(e) => handleCCSignoutKeyDown(e, setShowCCSignOutModal)}
+        onKeyDown={(e) => handleCCSignoutKeyDown(e, setShowCCSignOutModal, logger)}
       >
         <Text tagname="h2" type="body-large-bold" className="modal-text">
           {StationLoginLabels.CC_SIGN_OUT}
@@ -115,7 +115,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
         </Text>
         <div className="dialog-modal-content">
           <Button
-            onClick={() => ccCancelButtonClicked(ccSignOutModalRef, setShowCCSignOutModal)}
+            onClick={() => ccCancelButtonClicked(ccSignOutModalRef, setShowCCSignOutModal, logger)}
             variant="secondary"
             className="white-button"
             data-testId="cc-cancel-button"
@@ -124,7 +124,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
           </Button>
           <Button
             data-testId="cc-logout-button"
-            onClick={() => continueClicked(ccSignOutModalRef, onCCSignOut, setShowCCSignOutModal)}
+            onClick={() => continueClicked(ccSignOutModalRef, onCCSignOut, setShowCCSignOutModal, logger)}
           >
             {StationLoginLabels.SIGN_OUT}
           </Button>
@@ -145,7 +145,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
             type="button"
             role="button"
             aria-label="Close"
-            onClick={() => saveConfirmCancelClicked(saveConfirmDialogRef, setShowSaveConfirmDialog)}
+            onClick={() => saveConfirmCancelClicked(saveConfirmDialogRef, setShowSaveConfirmDialog, logger)}
             className="cancelSaveLoginOptions"
           ></Button>
         </div>
@@ -154,13 +154,15 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
         </Text>
         <div className="dialog-modal-content">
           <Button
-            onClick={() => saveConfirmCancelClicked(saveConfirmDialogRef, setShowSaveConfirmDialog)}
+            onClick={() => saveConfirmCancelClicked(saveConfirmDialogRef, setShowSaveConfirmDialog, logger)}
             variant="secondary"
             className="white-button"
           >
             {StationLoginLabels.CANCEL}
           </Button>
-          <Button onClick={() => handleSaveConfirm(saveConfirmDialogRef, setShowSaveConfirmDialog, saveLoginOptions)}>
+          <Button
+            onClick={() => handleSaveConfirm(saveConfirmDialogRef, setShowSaveConfirmDialog, saveLoginOptions, logger)}
+          >
             {StationLoginLabels.CONFIRM}
           </Button>
         </div>

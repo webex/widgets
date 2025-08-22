@@ -17,6 +17,15 @@ const onAcceptedCb = jest.fn();
 const onRejectedCb = jest.fn();
 
 describe('IncomingTask Component', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    // Suppress console.error for error boundary tests
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('renders IncomingTaskPresentational with correct props', () => {
     const useIncomingTaskSpy = jest.spyOn(helper, 'useIncomingTask');
 
@@ -36,6 +45,23 @@ describe('IncomingTask Component', () => {
       deviceType: store.deviceType,
       onAccepted: onAcceptedCb,
       onRejected: onRejectedCb,
+    });
+  });
+
+  describe('ErrorBoundary Tests', () => {
+    it('should render empty fragment when ErrorBoundary catches an error', () => {
+      jest.spyOn(helper, 'useIncomingTask').mockImplementation(() => {
+        throw new Error('Test error in useIncomingTask');
+      });
+      const mockOnErrorCallback = jest.fn();
+      store.onErrorCallback = mockOnErrorCallback;
+      const {container} = render(
+        <IncomingTask incomingTask={mockTask} onAccepted={onAcceptedCb} onRejected={onRejectedCb} />
+      );
+
+      expect(container.firstChild).toBeNull();
+      expect(mockOnErrorCallback).toHaveBeenCalledWith('IncomingTask', Error('Test error in useIncomingTask'));
+      expect(mockOnErrorCallback).toHaveBeenCalledTimes(1);
     });
   });
 });

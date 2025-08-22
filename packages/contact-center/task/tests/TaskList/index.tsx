@@ -31,7 +31,17 @@ jest.mock('@webex/cc-store', () => ({
 
 describe('TaskList Component', () => {
   const helperSpy = jest.spyOn(helper, 'useTaskList');
-  afterEach(cleanup);
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    // Suppress console.error for error boundary tests
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    cleanup();
+    jest.restoreAllMocks();
+  });
 
   it('renders TaskListPresentational with the correct props', () => {
     render(<TaskList onTaskAccepted={jest.fn()} onTaskDeclined={jest.fn()} onTaskSelected={jest.fn()} />);
@@ -49,6 +59,26 @@ describe('TaskList Component', () => {
       onTaskDeclined: expect.any(Function),
       onTaskSelected: expect.any(Function),
       taskList: taskListMock,
+    });
+  });
+
+  describe('ErrorBoundary Tests', () => {
+    it('should render empty fragment when ErrorBoundary catches an error', () => {
+      const mockOnErrorCallback = jest.fn();
+      store.onErrorCallback = mockOnErrorCallback;
+      // Mock the useTaskList to throw an error
+      jest.spyOn(helper, 'useTaskList').mockImplementation(() => {
+        throw new Error('Test error in useTaskList');
+      });
+
+      const {container} = render(
+        <TaskList onTaskAccepted={jest.fn()} onTaskDeclined={jest.fn()} onTaskSelected={jest.fn()} />
+      );
+
+      // The fallback should render an empty fragment (no content)
+      expect(container.firstChild).toBeNull();
+      expect(mockOnErrorCallback).toHaveBeenCalledWith('TaskList', expect.any(Error));
+      expect(mockOnErrorCallback).toHaveBeenCalledTimes(1);
     });
   });
 });

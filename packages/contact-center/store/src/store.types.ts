@@ -116,6 +116,7 @@ interface IStore {
 
 interface IStoreWrapper extends IStore {
   store: IStore;
+  onErrorCallback?: (widgetName: string, error: Error) => void;
   setCurrentTask(task: ITask): void;
   refreshTaskList(): void;
   setDeviceType(option: string): void;
@@ -135,6 +136,7 @@ interface IStoreWrapper extends IStore {
   setAgentProfile(profile: Profile): void;
   setTeamId(id: string): void;
   setIsMuted(value: boolean): void;
+  setOnError(callback: (widgetName: string, error: Error) => void): void;
 }
 
 interface IWrapupCode {

@@ -106,6 +106,13 @@ describe('Station Login Component', () => {
     saveConfirmDialogRef: {current: null},
   }));
   const mockUpdateDialNumberLabel = jest.fn();
+  const mockHandleCCSignoutKeyDown = jest.fn((event, setShowCCSignOutModal) => {
+    if (event.key === 'Escape') {
+      setShowCCSignOutModal(false);
+    }
+  });
+  const mockValidateDialNumber = jest.fn();
+  const mockHandleOnCCSignOut = jest.fn();
 
   beforeEach(() => {
     // Mock all utility functions
@@ -119,6 +126,9 @@ describe('Station Login Component', () => {
     jest.spyOn(stationLoginUtils, 'saveConfirmCancelClicked').mockImplementation(mockSaveConfirmCancelClicked);
     jest.spyOn(stationLoginUtils, 'createStationLoginRefs').mockImplementation(mockCreateStationLoginRefs);
     jest.spyOn(stationLoginUtils, 'updateDialNumberLabel').mockImplementation(mockUpdateDialNumberLabel);
+    jest.spyOn(stationLoginUtils, 'handleCCSignoutKeyDown').mockImplementation(mockHandleCCSignoutKeyDown);
+    jest.spyOn(stationLoginUtils, 'validateDialNumber').mockImplementation(mockValidateDialNumber);
+    jest.spyOn(stationLoginUtils, 'handleOnCCSignOut').mockImplementation(mockHandleOnCCSignOut);
   });
 
   afterEach(() => {
@@ -562,7 +572,12 @@ describe('Station Login Component', () => {
         expect(confirmSignOutButton).toHaveTextContent(StationLoginLabels.SIGN_OUT);
 
         fireEvent.click(confirmSignOutButton);
-        expect(mockContinueClicked).toHaveBeenCalledWith(mockSignOutModalRef, mockSignOut, expect.any(Function));
+        expect(mockContinueClicked).toHaveBeenCalledWith(
+          mockSignOutModalRef,
+          mockSignOut,
+          expect.any(Function),
+          loggerMock
+        );
       });
 
       it('show signOut modal when onCCSignOut is present and sign out is clicked', async () => {
@@ -617,13 +632,18 @@ describe('Station Login Component', () => {
 
         const continueBtn = screen.getByTestId('ContinueButton');
         fireEvent.click(continueBtn);
-        expect(stationLoginUtils.continueClicked).toHaveBeenCalledWith(mockModal, handleContinue, expect.any(Function));
+        expect(stationLoginUtils.continueClicked).toHaveBeenCalledWith(
+          mockModal,
+          handleContinue,
+          expect.any(Function),
+          loggerMock
+        );
       });
 
       it('should close sign-out modal and update state on cancel button click', async () => {
         const mockSetShowCCSignOutModal = jest.fn();
         const mockEvent = {key: 'Escape'} as React.KeyboardEvent<HTMLDialogElement>;
-        stationLoginUtils.handleCCSignoutKeyDown(mockEvent, mockSetShowCCSignOutModal);
+        stationLoginUtils.handleCCSignoutKeyDown(mockEvent, mockSetShowCCSignOutModal, loggerMock);
         expect(mockSetShowCCSignOutModal).toHaveBeenCalledWith(false);
         const screen = await render(<StationLoginComponent {...props} />);
         const cancelButton = screen.getByTestId('cc-cancel-button');
@@ -652,7 +672,7 @@ describe('Station Login Component', () => {
         const cancelButton = confirmationPopup.querySelectorAll('mdc-button')[0];
 
         fireEvent.click(cancelButton);
-        expect(mockSaveConfirmCancelClicked).toHaveBeenCalledWith(mockRef, expect.any(Function));
+        expect(mockSaveConfirmCancelClicked).toHaveBeenCalledWith(mockRef, expect.any(Function), loggerMock);
       });
 
       it('it should call handleConfirmCancelClicked when clicked on cancel in popup', async () => {
@@ -673,7 +693,7 @@ describe('Station Login Component', () => {
         const cancelButton = confirmationPopup.querySelectorAll('mdc-button')[1];
 
         fireEvent.click(cancelButton);
-        expect(mockSaveConfirmCancelClicked).toHaveBeenCalledWith(mockRef, expect.any(Function));
+        expect(mockSaveConfirmCancelClicked).toHaveBeenCalledWith(mockRef, expect.any(Function), loggerMock);
       });
 
       it('it should call handleSaveConfirm when clicked on confirm in popup', async () => {
@@ -694,7 +714,12 @@ describe('Station Login Component', () => {
         const confirmButton = confirmationPopup.querySelectorAll('mdc-button')[2];
 
         fireEvent.click(confirmButton);
-        expect(mockHandleSaveConfirm).toHaveBeenCalledWith(mockRef, expect.any(Function), props.saveLoginOptions);
+        expect(mockHandleSaveConfirm).toHaveBeenCalledWith(
+          mockRef,
+          expect.any(Function),
+          props.saveLoginOptions,
+          loggerMock
+        );
       });
     });
     describe('Save Login Options', () => {
@@ -720,6 +745,87 @@ describe('Station Login Component', () => {
         const saveButton = screen.getByTestId('save-login-options-button');
         expect(saveButton).not.toHaveAttribute('disabled', '');
       });
+    });
+  });
+
+  describe('Error Handling ', () => {
+    // Clear all mocks before these tests to call actual implementations
+    beforeEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    // Restore mocks after these tests
+    afterEach(() => {
+      jest.spyOn(stationLoginUtils, 'handleLoginOptionChanged').mockImplementation(mockHandleLoginOptionChanged);
+      jest.spyOn(stationLoginUtils, 'handleDNInputChanged').mockImplementation(mockHandleDNInputChanged);
+      jest.spyOn(stationLoginUtils, 'handleTeamSelectChanged').mockImplementation(mockHandleTeamSelectChanged);
+      jest.spyOn(stationLoginUtils, 'handleModals').mockImplementation(mockHandleModals);
+      jest.spyOn(stationLoginUtils, 'continueClicked').mockImplementation(mockContinueClicked);
+      jest.spyOn(stationLoginUtils, 'ccCancelButtonClicked').mockImplementation(mockCcCancelButtonClicked);
+      jest.spyOn(stationLoginUtils, 'handleSaveConfirm').mockImplementation(mockHandleSaveConfirm);
+      jest.spyOn(stationLoginUtils, 'saveConfirmCancelClicked').mockImplementation(mockSaveConfirmCancelClicked);
+      jest.spyOn(stationLoginUtils, 'createStationLoginRefs').mockImplementation(mockCreateStationLoginRefs);
+      jest.spyOn(stationLoginUtils, 'updateDialNumberLabel').mockImplementation(mockUpdateDialNumberLabel);
+      jest.spyOn(stationLoginUtils, 'handleCCSignoutKeyDown').mockImplementation(mockHandleCCSignoutKeyDown);
+      jest.spyOn(stationLoginUtils, 'validateDialNumber').mockImplementation(mockValidateDialNumber);
+      jest.spyOn(stationLoginUtils, 'handleOnCCSignOut').mockImplementation(mockHandleOnCCSignOut);
+    });
+
+    it('should log errors when handleModals throws an exception', () => {
+      const mockError = new Error('Test error in handleModals');
+      const mockRef = {
+        current: {
+          showModal: jest.fn(() => {
+            throw mockError;
+          }),
+        },
+      };
+
+      stationLoginUtils.handleModals(mockRef, null, null, true, false, false, loggerMock);
+
+      expect(loggerMock.error).toHaveBeenCalledWith('CC-Widgets: StationLogin: Error in handleModals', {
+        module: 'cc-components#station-login.utils.tsx',
+        method: 'handleModals',
+        error: 'Test error in handleModals',
+      });
+    });
+
+    it('should log errors when continueClicked throws an exception', () => {
+      const mockError = new Error('Test error in continueClicked');
+      const mockCallback = jest.fn(() => {
+        throw mockError;
+      });
+      const mockRef = {current: {close: jest.fn()}};
+      const mockSetShowModal = jest.fn();
+
+      stationLoginUtils.continueClicked(mockRef, mockCallback, mockSetShowModal, loggerMock);
+
+      expect(loggerMock.error).toHaveBeenCalledWith('CC-Widgets: StationLogin: Error in continueClicked', {
+        module: 'cc-components#station-login.utils.tsx',
+        method: 'continueClicked',
+        error: 'Test error in continueClicked',
+      });
+    });
+
+    it('should log errors when validateDialNumber throws an exception', () => {
+      // Mock RegExp constructor to throw an error
+      const originalRegExp = global.RegExp;
+      global.RegExp = jest.fn(() => {
+        throw new Error('Test error in validateDialNumber');
+      }) as unknown as typeof RegExp;
+
+      const mockSetError = jest.fn();
+      const result = stationLoginUtils.validateDialNumber('invalid', null, mockSetError, loggerMock);
+
+      expect(loggerMock.error).toHaveBeenCalledWith('CC-Widgets: StationLogin: Error in validateDialNumber', {
+        module: 'cc-components#station-login.utils.tsx',
+        method: 'validateDialNumber',
+        error: 'Test error in validateDialNumber',
+      });
+      expect(result).toBe(true); // Should return true (error state) when exception occurs
+
+      // Restore original RegExp
+      global.RegExp = originalRegExp;
     });
   });
 });

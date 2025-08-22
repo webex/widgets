@@ -21,21 +21,28 @@ export const useUserState = ({
   const prevStateRef = useRef(currentState);
 
   const callOnStateChange = () => {
-    logger.info('CC-Widgets: useUserState callOnStateChange(): invoking onStateChange', {
-      module: 'useUserState',
-      method: 'callOnStateChange',
-    });
-    if (onStateChange) {
-      if (customState && 'developerName' in customState && customState?.developerName) {
-        onStateChange(customState);
-        return;
-      }
-      for (const code of idleCodes) {
-        if (code.id === currentState) {
-          onStateChange(code);
-          break;
+    try {
+      logger.info('CC-Widgets: useUserState callOnStateChange(): invoking onStateChange', {
+        module: 'useUserState',
+        method: 'callOnStateChange',
+      });
+      if (onStateChange) {
+        if (customState && 'developerName' in customState && customState?.developerName) {
+          onStateChange(customState);
+          return;
+        }
+        for (const code of idleCodes) {
+          if (code.id === currentState) {
+            onStateChange(code);
+            break;
+          }
         }
       }
+    } catch (error) {
+      logger?.error(`CC-Widgets: UserState: Error in callOnStateChange - ${error.message}`, {
+        module: 'useUserState',
+        method: 'callOnStateChange',
+      });
     }
   };
 
@@ -92,130 +99,188 @@ export const useUserState = ({
   `;
 
   useEffect(() => {
-    logger.info(`CC-Widgets: Initializing worker`, {
-      module: 'useUserState',
-      method: 'useEffect - initial',
-    });
+    try {
+      logger.info(`CC-Widgets: Initializing worker`, {
+        module: 'useUserState',
+        method: 'useEffect - initial',
+      });
 
-    const blob = new Blob([workerScript], {type: 'application/javascript'});
-    const workerUrl = URL.createObjectURL(blob);
-    workerRef.current = new Worker(workerUrl);
-    workerRef.current.postMessage({type: 'start', startTime: Date.now()});
-    workerRef.current.postMessage({type: 'startIdleCode', startTime: Date.now()});
-    workerRef.current.onmessage = (event) => {
-      if (event.data.type === 'elapsedTime') {
-        setElapsedTime(event.data.elapsedTime > 0 ? event.data.elapsedTime : 0);
-      } else if (event.data.type === 'lastIdleStateChangeElapsedTime') {
-        setLastIdleStateChangeElapsedTime(event.data.elapsedTime > 0 ? event.data.elapsedTime : 0);
-      } else if (event.data.type === 'stopIdleCodeTimer') {
-        setLastIdleStateChangeElapsedTime(-1);
-      }
-    };
+      const blob = new Blob([workerScript], {type: 'application/javascript'});
+      const workerUrl = URL.createObjectURL(blob);
+      workerRef.current = new Worker(workerUrl);
+      workerRef.current.postMessage({type: 'start', startTime: Date.now()});
+      workerRef.current.postMessage({type: 'startIdleCode', startTime: Date.now()});
+      workerRef.current.onmessage = (event) => {
+        try {
+          if (event.data.type === 'elapsedTime') {
+            setElapsedTime(event.data.elapsedTime > 0 ? event.data.elapsedTime : 0);
+          } else if (event.data.type === 'lastIdleStateChangeElapsedTime') {
+            setLastIdleStateChangeElapsedTime(event.data.elapsedTime > 0 ? event.data.elapsedTime : 0);
+          } else if (event.data.type === 'stopIdleCodeTimer') {
+            setLastIdleStateChangeElapsedTime(-1);
+          }
+        } catch (error) {
+          logger?.error(`CC-Widgets: UserState: Error in worker onmessage - ${error.message}`, {
+            module: 'useUserState',
+            method: 'useEffect - initial - onmessage',
+          });
+        }
+      };
+    } catch (error) {
+      logger?.error(`CC-Widgets: UserState: Error initializing worker - ${error.message}`, {
+        module: 'useUserState',
+        method: 'useEffect - initial',
+      });
+    }
 
     return () => {
-      logger.log('CC-Widgets: useUserState cleanup: terminating worker', {
-        module: 'useUserState',
-        method: 'useEffect - initial cleanup',
-      });
-      if (workerRef.current) {
-        workerRef.current.postMessage({type: 'stop'});
-        workerRef.current.postMessage({type: 'stopIdleCode'});
-        workerRef.current.terminate();
-        workerRef.current = null;
+      try {
+        logger.log('CC-Widgets: useUserState cleanup: terminating worker', {
+          module: 'useUserState',
+          method: 'useEffect - initial cleanup',
+        });
+        if (workerRef.current) {
+          workerRef.current.postMessage({type: 'stop'});
+          workerRef.current.postMessage({type: 'stopIdleCode'});
+          workerRef.current.terminate();
+          workerRef.current = null;
+        }
+      } catch (error) {
+        logger?.error(`CC-Widgets: UserState: Error in cleanup - ${error.message}`, {
+          module: 'useUserState',
+          method: 'useEffect - initial cleanup',
+        });
       }
     };
   }, []);
 
   useEffect(() => {
-    if (prevStateRef.current !== currentState) {
-      logger.info(`CC-Widgets: State change action started: ${prevStateRef.current} -> ${currentState}`, {
+    try {
+      if (prevStateRef.current !== currentState) {
+        logger.info(`CC-Widgets: State change action started: ${prevStateRef.current} -> ${currentState}`, {
+          module: 'useUserState',
+          method: 'useEffect - currentState',
+        });
+
+        // Call setAgentStatus and update prevStateRef after promise resolves
+        updateAgentState(currentState)
+          .then(() => {
+            logger.log(`CC-Widgets: State change updated: ${prevStateRef.current} -> ${currentState}`, {
+              module: 'useUserState',
+              method: 'useEffect - currentState',
+            });
+            prevStateRef.current = currentState;
+            callOnStateChange();
+          })
+          .catch((error) => {
+            logger.error(`Failed to update state: ${error.toString()}`, {
+              module: 'useUserState',
+              method: 'useEffect - currentState',
+            });
+          });
+      }
+    } catch (error) {
+      logger?.error(`CC-Widgets: UserState: Error in currentState useEffect - ${error.message}`, {
         module: 'useUserState',
         method: 'useEffect - currentState',
       });
-
-      // Call setAgentStatus and update prevStateRef after promise resolves
-      updateAgentState(currentState)
-        .then(() => {
-          logger.log(`CC-Widgets: State change updated: ${prevStateRef.current} -> ${currentState}`, {
-            module: 'useUserState',
-            method: 'useEffect - currentState',
-          });
-          prevStateRef.current = currentState;
-          callOnStateChange();
-        })
-        .catch((error) => {
-          logger.error(`Failed to update state: ${error.toString()}`, {
-            module: 'useUserState',
-            method: 'useEffect - currentState',
-          });
-        });
     }
   }, [currentState]);
 
   useEffect(() => {
-    callOnStateChange();
+    try {
+      callOnStateChange();
+    } catch (error) {
+      logger?.error(`CC-Widgets: UserState: Error in customState useEffect - ${error.message}`, {
+        module: 'useUserState',
+        method: 'useEffect - customState',
+      });
+    }
   }, [customState]);
 
   useEffect(() => {
-    if (workerRef.current && lastStateChangeTimestamp) {
-      logger.info('CC-Widgets: useUserState timers reset', {
+    try {
+      if (workerRef.current && lastStateChangeTimestamp) {
+        logger.info('CC-Widgets: useUserState timers reset', {
+          module: 'useUserState',
+          method: 'useEffect - reset timers',
+        });
+        workerRef.current.postMessage({type: 'reset', startTime: lastStateChangeTimestamp});
+
+        if (lastIdleCodeChangeTimestamp && lastIdleCodeChangeTimestamp !== lastStateChangeTimestamp) {
+          workerRef.current.postMessage({type: 'resetIdleCode', startTime: lastIdleCodeChangeTimestamp});
+        } else {
+          workerRef.current.postMessage({type: 'stopIdleCode', startTime: lastIdleCodeChangeTimestamp});
+        }
+      }
+    } catch (error) {
+      logger?.error(`CC-Widgets: UserState: Error in timestamp useEffect - ${error.message}`, {
         module: 'useUserState',
         method: 'useEffect - reset timers',
       });
-      workerRef.current.postMessage({type: 'reset', startTime: lastStateChangeTimestamp});
-
-      if (lastIdleCodeChangeTimestamp && lastIdleCodeChangeTimestamp !== lastStateChangeTimestamp) {
-        workerRef.current.postMessage({type: 'resetIdleCode', startTime: lastIdleCodeChangeTimestamp});
-      } else {
-        workerRef.current.postMessage({type: 'stopIdleCode', startTime: lastIdleCodeChangeTimestamp});
-      }
     }
   }, [lastStateChangeTimestamp, lastIdleCodeChangeTimestamp]);
 
   // UI change calls this method and gets the store updated
   const setAgentStatus = (selectedCode) => {
-    logger.info('CC-Widgets: useUserState setAgentStatus(): updating currentState', {
-      module: 'useUserState',
-      method: 'setAgentStatus',
-    });
-    store.setCurrentState(selectedCode);
+    try {
+      logger.info('CC-Widgets: useUserState setAgentStatus(): updating currentState', {
+        module: 'useUserState',
+        method: 'setAgentStatus',
+      });
+      store.setCurrentState(selectedCode);
+    } catch (error) {
+      logger?.error(`CC-Widgets: UserState: Error in setAgentStatus - ${error.message}`, {
+        module: 'useUserState',
+        method: 'setAgentStatus',
+      });
+    }
   };
 
   // Store change calls the useEffect above which calls this method
   // This method updates the agent state in the backend
   const updateAgentState = (selectedCode) => {
-    selectedCode = idleCodes?.filter((code) => code.id === selectedCode)[0];
+    try {
+      selectedCode = idleCodes?.filter((code) => code.id === selectedCode)[0];
 
-    const {auxCodeId, state} = {
-      auxCodeId: selectedCode.id,
-      state: selectedCode.name,
-    };
-    setIsSettingAgentStatus(true);
-    const chosenState = state === 'Available' ? 'Available' : 'Idle';
+      const {auxCodeId, state} = {
+        auxCodeId: selectedCode.id,
+        state: selectedCode.name,
+      };
+      setIsSettingAgentStatus(true);
+      const chosenState = state === 'Available' ? 'Available' : 'Idle';
 
-    return cc
-      .setAgentState({state: chosenState, auxCodeId, agentId, lastStateChangeReason: state})
-      .then((response) => {
-        logger.log(`CC-Widgets: Agent state set successfully to ${chosenState}`, {
-          module: 'useUserState',
-          method: 'updateAgentState',
+      return cc
+        .setAgentState({state: chosenState, auxCodeId, agentId, lastStateChangeReason: state})
+        .then((response) => {
+          logger.log(`CC-Widgets: Agent state set successfully to ${chosenState}`, {
+            module: 'useUserState',
+            method: 'updateAgentState',
+          });
+          if ('data' in response) {
+            store.setLastStateChangeTimestamp(response.data.lastStateChangeTimestamp);
+            store.setLastIdleCodeChangeTimestamp(response.data.lastIdleCodeChangeTimestamp);
+          }
+        })
+        .catch((error) => {
+          logger.error(`Error setting agent state: ${error.toString()}`, {
+            module: 'useUserState',
+            method: 'updateAgentState',
+          });
+          store.setCurrentState(prevStateRef.current);
+          throw error;
+        })
+        .finally(() => {
+          setIsSettingAgentStatus(false);
         });
-        if ('data' in response) {
-          store.setLastStateChangeTimestamp(response.data.lastStateChangeTimestamp);
-          store.setLastIdleCodeChangeTimestamp(response.data.lastIdleCodeChangeTimestamp);
-        }
-      })
-      .catch((error) => {
-        logger.error(`Error setting agent state: ${error.toString()}`, {
-          module: 'useUserState',
-          method: 'updateAgentState',
-        });
-        store.setCurrentState(prevStateRef.current);
-        throw error;
-      })
-      .finally(() => {
-        setIsSettingAgentStatus(false);
+    } catch (error) {
+      logger?.error(`CC-Widgets: UserState: Error in updateAgentState - ${error.message}`, {
+        module: 'useUserState',
+        method: 'updateAgentState',
       });
+      setIsSettingAgentStatus(false);
+      throw error;
+    }
   };
 
   return {

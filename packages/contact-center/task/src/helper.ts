@@ -20,58 +20,107 @@ export const useTaskList = (props: UseTaskListProps) => {
   };
 
   useEffect(() => {
-    if (onTaskAccepted) {
-      store.setTaskAssigned(function (task) {
-        logger.log(`CC-Widgets: taskAssigned event for ${task.data.interactionId}`, {
-          module: 'useTaskList',
-          method: 'setTaskAssigned',
+    try {
+      if (onTaskAccepted) {
+        store.setTaskAssigned(function (task) {
+          try {
+            logger.log(`CC-Widgets: taskAssigned event for ${task.data.interactionId}`, {
+              module: 'useTaskList',
+              method: 'setTaskAssigned',
+            });
+            onTaskAccepted(task);
+          } catch (error) {
+            logger?.error(`CC-Widgets: Task: Error in taskAssigned callback - ${error.message}`, {
+              module: 'useTaskList',
+              method: 'setTaskAssigned',
+            });
+          }
         });
-        onTaskAccepted(task);
-      });
-    }
+      }
 
-    if (onTaskDeclined) {
-      store.setTaskRejected(function (task, reason) {
-        logger.log(`CC-Widgets: taskRejected event for ${task.data.interactionId}`, {
-          module: 'useTaskList',
-          method: 'setTaskRejected',
+      if (onTaskDeclined) {
+        store.setTaskRejected(function (task, reason) {
+          try {
+            logger.log(`CC-Widgets: taskRejected event for ${task.data.interactionId}`, {
+              module: 'useTaskList',
+              method: 'setTaskRejected',
+            });
+            onTaskDeclined(task, reason);
+          } catch (error) {
+            logger?.error(`CC-Widgets: Task: Error in taskRejected callback - ${error.message}`, {
+              module: 'useTaskList',
+              method: 'setTaskRejected',
+            });
+          }
         });
-        onTaskDeclined(task, reason);
-      });
-    }
+      }
 
-    if (onTaskSelected) {
-      store.setTaskSelected(function (task: ITask, isClicked: boolean) {
-        onTaskSelected({task, isClicked});
+      if (onTaskSelected) {
+        store.setTaskSelected(function (task: ITask, isClicked: boolean) {
+          try {
+            onTaskSelected({task, isClicked});
+          } catch (error) {
+            logger?.error(`CC-Widgets: Task: Error in taskSelected callback - ${error.message}`, {
+              module: 'useTaskList',
+              method: 'setTaskSelected',
+            });
+          }
+        });
+      }
+    } catch (error) {
+      logger?.error(`CC-Widgets: Task: Error in useTaskList useEffect - ${error.message}`, {
+        module: 'useTaskList',
+        method: 'useEffect',
       });
     }
   }, []);
 
   const acceptTask = (task: ITask) => {
-    logger.info(`CC-Widgets: acceptTask called for ${task.data.interactionId}`, {
-      module: 'useTaskList',
-      method: 'acceptTask',
-    });
-    task.accept().catch((error) => {
-      logError(`CC-Widgets: Error accepting task: ${error}`, 'acceptTask');
-    });
+    try {
+      logger.info(`CC-Widgets: acceptTask called for ${task.data.interactionId}`, {
+        module: 'useTaskList',
+        method: 'acceptTask',
+      });
+      task.accept().catch((error) => {
+        logError(`CC-Widgets: Error accepting task: ${error}`, 'acceptTask');
+      });
+    } catch (error) {
+      logger?.error(`CC-Widgets: Task: Error in acceptTask - ${error.message}`, {
+        module: 'useTaskList',
+        method: 'acceptTask',
+      });
+    }
   };
 
   const declineTask = (task: ITask) => {
-    logger.info(`CC-Widgets: declineTask called for ${task.data.interactionId}`, {
-      module: 'useTaskList',
-      method: 'declineTask',
-    });
-    task.decline().catch((error) => {
-      logError(`CC-Widgets: Error declining task: ${error}`, 'declineTask');
-    });
-    logger.log(`CC-Widgets: incoming task declined for ${task.data.interactionId}`, {
-      module: 'useTaskList',
-      method: 'declineTask',
-    });
+    try {
+      logger.info(`CC-Widgets: declineTask called for ${task.data.interactionId}`, {
+        module: 'useTaskList',
+        method: 'declineTask',
+      });
+      task.decline().catch((error) => {
+        logError(`CC-Widgets: Error declining task: ${error}`, 'declineTask');
+      });
+      logger.log(`CC-Widgets: incoming task declined for ${task.data.interactionId}`, {
+        module: 'useTaskList',
+        method: 'declineTask',
+      });
+    } catch (error) {
+      logger?.error(`CC-Widgets: Task: Error in declineTask - ${error.message}`, {
+        module: 'useTaskList',
+        method: 'declineTask',
+      });
+    }
   };
   const onTaskSelect = (task: ITask) => {
-    store.setCurrentTask(task, true);
+    try {
+      store.setCurrentTask(task, true);
+    } catch (error) {
+      logger?.error(`CC-Widgets: Task: Error in onTaskSelect - ${error.message}`, {
+        module: 'useTaskList',
+        method: 'onTaskSelect',
+      });
+    }
   };
 
   return {taskList, acceptTask, declineTask, onTaskSelect, isBrowser};
@@ -82,33 +131,73 @@ export const useIncomingTask = (props: UseTaskProps) => {
   const isBrowser = deviceType === 'BROWSER';
 
   const taskAssignCallback = () => {
-    if (onAccepted) onAccepted({task: incomingTask});
+    try {
+      if (onAccepted) onAccepted({task: incomingTask});
+    } catch (error) {
+      logger?.error(`CC-Widgets: Task: Error in taskAssignCallback - ${error.message}`, {
+        module: 'useIncomingTask',
+        method: 'taskAssignCallback',
+      });
+    }
   };
 
   const taskRejectCallback = () => {
-    if (onRejected) onRejected({task: incomingTask});
+    try {
+      if (onRejected) onRejected({task: incomingTask});
+    } catch (error) {
+      logger?.error(`CC-Widgets: Task: Error in taskRejectCallback - ${error.message}`, {
+        module: 'useIncomingTask',
+        method: 'taskRejectCallback',
+      });
+    }
   };
 
   useEffect(() => {
-    if (!incomingTask) return;
-    store.setTaskCallback(
-      TASK_EVENTS.TASK_ASSIGNED,
-      () => {
-        if (onAccepted) onAccepted({task: incomingTask});
-      },
-      incomingTask.data.interactionId
-    );
-    store.setTaskCallback(TASK_EVENTS.TASK_CONSULT_ACCEPTED, taskAssignCallback, incomingTask?.data.interactionId);
-    store.setTaskCallback(TASK_EVENTS.TASK_END, taskRejectCallback, incomingTask?.data.interactionId);
-    store.setTaskCallback(TASK_EVENTS.TASK_REJECT, taskRejectCallback, incomingTask?.data.interactionId);
-    store.setTaskCallback(TASK_EVENTS.TASK_CONSULT_END, taskRejectCallback, incomingTask?.data.interactionId);
-    return () => {
-      store.removeTaskCallback(TASK_EVENTS.TASK_ASSIGNED, taskAssignCallback, incomingTask?.data.interactionId);
-      store.removeTaskCallback(TASK_EVENTS.TASK_CONSULT_ACCEPTED, taskAssignCallback, incomingTask?.data.interactionId);
-      store.removeTaskCallback(TASK_EVENTS.TASK_END, taskRejectCallback, incomingTask?.data.interactionId);
-      store.removeTaskCallback(TASK_EVENTS.TASK_REJECT, taskRejectCallback, incomingTask?.data.interactionId);
-      store.removeTaskCallback(TASK_EVENTS.TASK_CONSULT_END, taskRejectCallback, incomingTask?.data.interactionId);
-    };
+    try {
+      if (!incomingTask) return;
+      store.setTaskCallback(
+        TASK_EVENTS.TASK_ASSIGNED,
+        () => {
+          try {
+            if (onAccepted) onAccepted({task: incomingTask});
+          } catch (error) {
+            logger?.error(`CC-Widgets: Task: Error in TASK_ASSIGNED callback - ${error.message}`, {
+              module: 'useIncomingTask',
+              method: 'TASK_ASSIGNED_callback',
+            });
+          }
+        },
+        incomingTask.data.interactionId
+      );
+      store.setTaskCallback(TASK_EVENTS.TASK_CONSULT_ACCEPTED, taskAssignCallback, incomingTask?.data.interactionId);
+      store.setTaskCallback(TASK_EVENTS.TASK_END, taskRejectCallback, incomingTask?.data.interactionId);
+      store.setTaskCallback(TASK_EVENTS.TASK_REJECT, taskRejectCallback, incomingTask?.data.interactionId);
+      store.setTaskCallback(TASK_EVENTS.TASK_CONSULT_END, taskRejectCallback, incomingTask?.data.interactionId);
+
+      return () => {
+        try {
+          store.removeTaskCallback(TASK_EVENTS.TASK_ASSIGNED, taskAssignCallback, incomingTask?.data.interactionId);
+          store.removeTaskCallback(
+            TASK_EVENTS.TASK_CONSULT_ACCEPTED,
+            taskAssignCallback,
+            incomingTask?.data.interactionId
+          );
+          store.removeTaskCallback(TASK_EVENTS.TASK_END, taskRejectCallback, incomingTask?.data.interactionId);
+          store.removeTaskCallback(TASK_EVENTS.TASK_REJECT, taskRejectCallback, incomingTask?.data.interactionId);
+          store.removeTaskCallback(TASK_EVENTS.TASK_CONSULT_END, taskRejectCallback, incomingTask?.data.interactionId);
+        } catch (error) {
+          logger?.error(`CC-Widgets: Task: Error in useIncomingTask cleanup - ${error.message}`, {
+            module: 'useIncomingTask',
+            method: 'useEffect_cleanup',
+          });
+        }
+      };
+    } catch (error) {
+      logger?.error(`CC-Widgets: Task: Error in useIncomingTask useEffect - ${error.message}`, {
+        module: 'useIncomingTask',
+        method: 'useEffect',
+      });
+    }
   }, [incomingTask]);
 
   const logError = (message: string, method: string) => {
@@ -119,33 +208,47 @@ export const useIncomingTask = (props: UseTaskProps) => {
   };
 
   const accept = () => {
-    logger.info(`CC-Widgets: incomingTask.accept() called`, {
-      module: 'useIncomingTask',
-      method: 'accept',
-    });
-    if (!incomingTask?.data.interactionId) return;
-    incomingTask.accept().catch((error) => {
-      logError(`CC-Widgets: Error accepting incoming task: ${error}`, 'accept');
-    });
-    logger.log(`CC-Widgets: incomingTask accepted`, {
-      module: 'useIncomingTask',
-      method: 'accept',
-    });
+    try {
+      logger.info(`CC-Widgets: incomingTask.accept() called`, {
+        module: 'useIncomingTask',
+        method: 'accept',
+      });
+      if (!incomingTask?.data.interactionId) return;
+      incomingTask.accept().catch((error) => {
+        logError(`CC-Widgets: Error accepting incoming task: ${error}`, 'accept');
+      });
+      logger.log(`CC-Widgets: incomingTask accepted`, {
+        module: 'useIncomingTask',
+        method: 'accept',
+      });
+    } catch (error) {
+      logger?.error(`CC-Widgets: Task: Error in accept - ${error.message}`, {
+        module: 'useIncomingTask',
+        method: 'accept',
+      });
+    }
   };
 
   const reject = () => {
-    logger.info(`CC-Widgets: incomingTask.reject() called`, {
-      module: 'useIncomingTask',
-      method: 'reject',
-    });
-    if (!incomingTask?.data.interactionId) return;
-    incomingTask.decline().catch((error) => {
-      logError(`CC-Widgets: Error rejecting incoming task: ${error}`, 'reject');
-    });
-    logger.log(`CC-Widgets: incomingTask rejected`, {
-      module: 'useIncomingTask',
-      method: 'reject',
-    });
+    try {
+      logger.info(`CC-Widgets: incomingTask.reject() called`, {
+        module: 'useIncomingTask',
+        method: 'reject',
+      });
+      if (!incomingTask?.data.interactionId) return;
+      incomingTask.decline().catch((error) => {
+        logError(`CC-Widgets: Error rejecting incoming task: ${error}`, 'reject');
+      });
+      logger.log(`CC-Widgets: incomingTask rejected`, {
+        module: 'useIncomingTask',
+        method: 'reject',
+      });
+    } catch (error) {
+      logger?.error(`CC-Widgets: Task: Error in reject - ${error.message}`, {
+        module: 'useIncomingTask',
+        method: 'reject',
+      });
+    }
   };
 
   return {
@@ -214,7 +317,7 @@ export const useCallControl = (props: useCallControlProps) => {
 
     // Get holdTimestamp from the interaction object
     const holdTimestamp = currentTask?.data?.interaction
-      ? findHoldTimestamp(currentTask.data.interaction, 'mainCall')
+      ? findHoldTimestamp(currentTask.data.interaction, 'mainCall', logger)
       : null;
 
     if (holdTimestamp) {
@@ -247,26 +350,34 @@ export const useCallControl = (props: useCallControlProps) => {
   }, [currentTask?.data?.interaction]);
   // Function to extract consulting agent information
   const extractConsultingAgent = useCallback(() => {
-    if (!currentTask?.data?.interaction?.participants) return;
+    try {
+      if (!currentTask?.data?.interaction?.participants) return;
 
-    const {interaction} = currentTask.data;
-    const myAgentId = store.cc.agentConfig?.agentId;
+      const {interaction} = currentTask.data;
+      const myAgentId = store.cc.agentConfig?.agentId;
 
-    // Find all agent participants except the current agent
-    const otherAgents = Object.values(interaction.participants || {}).filter(
-      (participant): participant is Participant =>
-        (participant as Participant).pType === 'Agent' && (participant as Participant).id !== myAgentId
-    );
+      // Find all agent participants except the current agent
+      const otherAgents = Object.values(interaction.participants || {}).filter(
+        (participant): participant is Participant =>
+          (participant as Participant).pType === 'Agent' && (participant as Participant).id !== myAgentId
+      );
 
-    // Pick the first other agent (should only be one in a consult)
-    const foundAgent = otherAgents.length > 0 ? {id: otherAgents[0].id, name: otherAgents[0].name} : null;
+      // Pick the first other agent (should only be one in a consult)
+      const foundAgent = otherAgents.length > 0 ? {id: otherAgents[0].id, name: otherAgents[0].name} : null;
 
-    if (foundAgent) {
-      setConsultAgentName(foundAgent.name);
-      setConsultAgentId(foundAgent.id);
-      logger.info(`Consulting agent detected: ${foundAgent.name} ${foundAgent.id}`, {
-        module: 'widget-cc-task#helper.ts',
-        method: 'useCallControl#extractConsultingAgent',
+      if (foundAgent) {
+        setConsultAgentName(foundAgent.name);
+        setConsultAgentId(foundAgent.id);
+        logger.info(`Consulting agent detected: ${foundAgent.name} ${foundAgent.id}`, {
+          module: 'widget-cc-task#helper.ts',
+          method: 'useCallControl#extractConsultingAgent',
+        });
+      }
+    } catch (error) {
+      console.log('error', error);
+      logger.error(`CC-Widgets: Task: Error in extractConsultingAgent - ${error.message}`, {
+        module: 'useCallControl',
+        method: 'extractConsultingAgent',
       });
     }
   }, [currentTask, logger, consultInitiated]);
@@ -289,7 +400,10 @@ export const useCallControl = (props: useCallControlProps) => {
       logger.info(`Loaded ${agents.length} buddy agents`, {module: 'helper.ts', method: 'loadBuddyAgents'});
       setBuddyAgents(agents);
     } catch (error) {
-      logger.error(`Error loading buddy agents: ${error}`, {module: 'helper.ts', method: 'loadBuddyAgents'});
+      logger?.error(`CC-Widgets: Task: Error loading buddy agents - ${error.message || error}`, {
+        module: 'useCallControl',
+        method: 'loadBuddyAgents',
+      });
       setBuddyAgents([]);
     }
   }, [logger]);
@@ -299,63 +413,108 @@ export const useCallControl = (props: useCallControlProps) => {
       const queues = await store.getQueues();
       setQueues(queues);
     } catch (error) {
-      logError(`Error loading queues: ${error}`, 'loadQueues');
+      logger?.error(`CC-Widgets: Task: Error loading queues - ${error.message || error}`, {
+        module: 'useCallControl',
+        method: 'loadQueues',
+      });
       setQueues([]);
     }
   }, [logger]);
 
   const holdCallback = () => {
-    setIsHeld(true);
-    if (onHoldResume) {
-      onHoldResume({
-        isHeld: true,
-        task: currentTask,
+    try {
+      setIsHeld(true);
+      if (onHoldResume) {
+        onHoldResume({
+          isHeld: true,
+          task: currentTask,
+        });
+      }
+    } catch (error) {
+      logger?.error(`CC-Widgets: Task: Error in holdCallback - ${error.message}`, {
+        module: 'useCallControl',
+        method: 'holdCallback',
       });
     }
   };
 
   const resumeCallback = () => {
-    setIsHeld(false);
-    if (onHoldResume) {
-      onHoldResume({
-        isHeld: false,
-        task: currentTask,
+    try {
+      setIsHeld(false);
+      if (onHoldResume) {
+        onHoldResume({
+          isHeld: false,
+          task: currentTask,
+        });
+      }
+    } catch (error) {
+      logger?.error(`CC-Widgets: Task: Error in resumeCallback - ${error.message}`, {
+        module: 'useCallControl',
+        method: 'resumeCallback',
       });
     }
   };
 
   const endCallCallback = () => {
-    if (onEnd) {
-      onEnd({
-        task: currentTask,
+    try {
+      if (onEnd) {
+        onEnd({
+          task: currentTask,
+        });
+      }
+    } catch (error) {
+      logger?.error(`CC-Widgets: Task: Error in endCallCallback - ${error.message}`, {
+        module: 'useCallControl',
+        method: 'endCallCallback',
       });
     }
   };
 
   const wrapupCallCallback = ({wrapUpAuxCodeId}) => {
-    const wrapUpReason = store.wrapupCodes.find((code) => code.id === wrapUpAuxCodeId)?.name;
-    if (onWrapUp) {
-      onWrapUp({
-        task: currentTask,
-        wrapUpReason: wrapUpReason,
+    try {
+      const wrapUpReason = store.wrapupCodes.find((code) => code.id === wrapUpAuxCodeId)?.name;
+      if (onWrapUp) {
+        onWrapUp({
+          task: currentTask,
+          wrapUpReason: wrapUpReason,
+        });
+      }
+    } catch (error) {
+      logger?.error(`CC-Widgets: Task: Error in wrapupCallCallback - ${error.message}`, {
+        module: 'useCallControl',
+        method: 'wrapupCallCallback',
       });
     }
   };
 
   const pauseRecordingCallback = () => {
-    setIsRecording(false);
-    onRecordingToggle({
-      isRecording: false,
-      task: currentTask,
-    });
+    try {
+      setIsRecording(false);
+      onRecordingToggle({
+        isRecording: false,
+        task: currentTask,
+      });
+    } catch (error) {
+      logger?.error(`CC-Widgets: Task: Error in pauseRecordingCallback - ${error.message}`, {
+        module: 'useCallControl',
+        method: 'pauseRecordingCallback',
+      });
+    }
   };
 
   const resumeRecordingCallback = () => {
-    setIsRecording(true);
-    onRecordingToggle({
-      isRecording: true,
-      task: currentTask,
-    });
+    try {
+      setIsRecording(true);
+      onRecordingToggle({
+        isRecording: true,
+        task: currentTask,
+      });
+    } catch (error) {
+      logger?.error(`CC-Widgets: Task: Error in resumeRecordingCallback - ${error.message}`, {
+        module: 'useCallControl',
+        method: 'resumeRecordingCallback',
+      });
+    }
   };
 
   useEffect(() => {
@@ -403,90 +562,127 @@ export const useCallControl = (props: useCallControlProps) => {
   };
 
   const toggleHold = (hold: boolean) => {
-    logger.info(`toggleHold(${hold}) called`, {module: 'useCallControl', method: 'toggleHold'});
-    if (hold) {
-      currentTask
-        .hold()
-        .catch((e) => logger.error(`Hold failed: ${e}`, {module: 'useCallControl', method: 'toggleHold'}));
-    } else {
-      currentTask
-        .resume()
-        .catch((e) => logger.error(`Resume failed: ${e}`, {module: 'useCallControl', method: 'toggleHold'}));
+    try {
+      logger.info(`toggleHold(${hold}) called`, {module: 'useCallControl', method: 'toggleHold'});
+      if (hold) {
+        currentTask
+          .hold()
+          .catch((e) => logger.error(`Hold failed: ${e}`, {module: 'useCallControl', method: 'toggleHold'}));
+      } else {
+        currentTask
+          .resume()
+          .catch((e) => logger.error(`Resume failed: ${e}`, {module: 'useCallControl', method: 'toggleHold'}));
+      }
+    } catch (error) {
+      logger?.error(`CC-Widgets: Task: Error in toggleHold - ${error.message}`, {
+        module: 'useCallControl',
+        method: 'toggleHold',
+      });
     }
   };
 
   const toggleRecording = () => {
-    if (isRecording) {
-      currentTask.pauseRecording().catch((error: Error) => {
-        logError(`Error pausing recording: ${error}`, 'toggleRecording');
-      });
-    } else {
-      currentTask.resumeRecording({autoResumed: false}).catch((error: Error) => {
-        logError(`Error resuming recording: ${error}`, 'toggleRecording');
+    try {
+      if (isRecording) {
+        currentTask.pauseRecording().catch((error: Error) => {
+          logError(`Error pausing recording: ${error}`, 'toggleRecording');
+        });
+      } else {
+        currentTask.resumeRecording({autoResumed: false}).catch((error: Error) => {
+          logError(`Error resuming recording: ${error}`, 'toggleRecording');
+        });
+      }
+    } catch (error) {
+      logger?.error(`CC-Widgets: Task: Error in toggleRecording - ${error.message}`, {
+        module: 'useCallControl',
+        method: 'toggleRecording',
       });
     }
   };
 
   const toggleMute = async () => {
-    console.log('Mute control not available', controlVisibility);
-    if (!controlVisibility?.muteUnmute) {
-      logger.warn('Mute control not available', {module: 'useCallControl', method: 'toggleMute'});
-      return;
-    }
-
-    logger.info('toggleMute() called', {module: 'useCallControl', method: 'toggleMute'});
-
-    // Store the intended new state
-    const intendedMuteState = !isMuted;
-
     try {
-      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
-      await currentTask.toggleMute();
-
-      // Only update state after successful SDK call
-      store.setIsMuted(intendedMuteState);
-
-      if (onToggleMute) {
-        onToggleMute({
-          isMuted: intendedMuteState,
-          task: currentTask,
-        });
+      console.log('Mute control not available', controlVisibility);
+      if (!controlVisibility?.muteUnmute) {
+        logger.warn('Mute control not available', {module: 'useCallControl', method: 'toggleMute'});
+        return;
       }
 
-      logger.info(`Mute state toggled to: ${intendedMuteState}`, {module: 'useCallControl', method: 'toggleMute'});
+      logger.info('toggleMute() called', {module: 'useCallControl', method: 'toggleMute'});
+
+      // Store the intended new state
+      const intendedMuteState = !isMuted;
+
+      try {
+        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+        await currentTask.toggleMute();
+
+        // Only update state after successful SDK call
+        store.setIsMuted(intendedMuteState);
+
+        if (onToggleMute) {
+          onToggleMute({
+            isMuted: intendedMuteState,
+            task: currentTask,
+          });
+        }
+
+        logger.info(`Mute state toggled to: ${intendedMuteState}`, {module: 'useCallControl', method: 'toggleMute'});
+      } catch (error) {
+        logger.error(`toggleMute failed: ${error}`, {module: 'useCallControl', method: 'toggleMute'});
+
+        if (onToggleMute) {
+          onToggleMute({
+            isMuted: isMuted,
+            task: currentTask,
+          });
+        }
+      }
     } catch (error) {
-      logger.error(`toggleMute failed: ${error}`, {module: 'useCallControl', method: 'toggleMute'});
-
-      if (onToggleMute) {
-        onToggleMute({
-          isMuted: isMuted,
-          task: currentTask,
-        });
-      }
+      logger?.error(`CC-Widgets: Task: Error in toggleMute - ${error.message}`, {
+        module: 'useCallControl',
+        method: 'toggleMute',
+      });
     }
   };
 
   const endCall = () => {
-    logger.info('endCall() called', {module: 'useCallControl', method: 'endCall'});
-    currentTask.end().catch((e) => logger.error(`endCall failed: ${e}`, {module: 'useCallControl', method: 'endCall'}));
+    try {
+      logger.info('endCall() called', {module: 'useCallControl', method: 'endCall'});
+      currentTask
+        .end()
+        .catch((e) => logger.error(`endCall failed: ${e}`, {module: 'useCallControl', method: 'endCall'}));
+    } catch (error) {
+      logger?.error(`CC-Widgets: Task: Error in endCall - ${error.message}`, {
+        module: 'useCallControl',
+        method: 'endCall',
+      });
+    }
   };
 
   const wrapupCall = (wrapUpReason: string, auxCodeId: string) => {
-    currentTask
-      .wrapup({wrapUpReason: wrapUpReason, auxCodeId: auxCodeId})
-      .then(() => {
-        const taskKeys = Object.keys(store.taskList);
-        if (taskKeys.length > 0) {
-          store.setCurrentTask(store.taskList[taskKeys[0]]);
-          store.setState({
-            developerName: ENGAGED_LABEL,
-            name: ENGAGED_USERNAME,
-          });
-        }
-      })
-      .catch((error: Error) => {
-        logError(`Error wrapping up call: ${error}`, 'wrapupCall');
+    try {
+      currentTask
+        .wrapup({wrapUpReason: wrapUpReason, auxCodeId: auxCodeId})
+        .then(() => {
+          const taskKeys = Object.keys(store.taskList);
+          if (taskKeys.length > 0) {
+            store.setCurrentTask(store.taskList[taskKeys[0]]);
+            store.setState({
+              developerName: ENGAGED_LABEL,
+              name: ENGAGED_USERNAME,
+            });
+          }
+        })
+        .catch((error: Error) => {
+          logError(`Error wrapping up call: ${error}`, 'wrapupCall');
+        });
+    } catch (error) {
+      logger?.error(`CC-Widgets: Task: Error in wrapupCall - ${error.message}`, {
+        module: 'useCallControl',
+        method: 'wrapupCall',
       });
+    }
   };
 
   const transferCall = async (to: string, type: DestinationType) => {
@@ -572,8 +768,8 @@ export const useCallControl = (props: useCallControlProps) => {
   };
 
   const controlVisibility = useMemo(
-    () => getControlsVisibility(deviceType, featureFlags, currentTask),
-    [deviceType, featureFlags, currentTask]
+    () => getControlsVisibility(deviceType, featureFlags, currentTask, logger),
+    [deviceType, featureFlags, currentTask, logger]
   );
 
   // Add useEffect for auto wrap-up timer
@@ -651,22 +847,29 @@ export const useOutdialCall = (props: useOutdialCallProps) => {
   const {cc, logger} = props;
 
   const startOutdial = (destination: string) => {
-    // Perform validation on destination number.
-    if (!destination || !destination.trim()) {
-      alert('Destination number is required, it cannot be empty');
-      return;
-    }
-    //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
-    cc.startOutdial(destination)
-      .then((response) => {
-        logger.info('Outdial call started', response);
-      })
-      .catch((error: Error) => {
-        logger.error(`${error}`, {
-          module: 'widget-OutdialCall#helper.ts',
-          method: 'startOutdial',
+    try {
+      // Perform validation on destination number.
+      if (!destination || !destination.trim()) {
+        alert('Destination number is required, it cannot be empty');
+        return;
+      }
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      cc.startOutdial(destination)
+        .then((response) => {
+          logger.info('Outdial call started', response);
+        })
+        .catch((error: Error) => {
+          logger.error(`${error}`, {
+            module: 'widget-OutdialCall#helper.ts',
+            method: 'startOutdial',
+          });
         });
+    } catch (error) {
+      logger?.error(`CC-Widgets: Task: Error in startOutdial - ${error.message}`, {
+        module: 'useOutdialCall',
+        method: 'startOutdial',
       });
+    }
   };
 
   return {

@@ -3,6 +3,7 @@ import {render} from '@testing-library/react';
 import {StationLogin} from '../../src';
 import * as helper from '../../src/helper';
 import '@testing-library/jest-dom';
+import store from '@webex/cc-store';
 
 const teamsMock = ['team123', 'team456'];
 const ccMock = {
@@ -13,7 +14,6 @@ const loginOptionsMock = ['EXTENSION', 'AGENT_DN', 'BROWSER'];
 const deviceTypeMock = 'BROWSER';
 const dialNumberMock = '12345';
 const dialNumberRegexMock = '1[0-9]{3}[2-9][0-9]{6}([,]{1,10}[0-9]+){0,1}';
-const loggerMock = {};
 const isAgentLoggedInMock = false;
 
 // Mock the store import
@@ -28,7 +28,12 @@ jest.mock('@webex/cc-store', () => {
     deviceType: deviceTypeMock,
     dialNumber: dialNumberMock,
     dialNumberRegex: dialNumberRegexMock,
-    logger: loggerMock,
+    logger: {
+      log: jest.fn(),
+      error: jest.fn(),
+      warn: jest.fn(),
+      info: jest.fn(),
+    },
     isAgentLoggedIn: isAgentLoggedInMock,
     setCCCallback: jest.fn(),
     setLogoutCallback: jest.fn(),
@@ -36,12 +41,7 @@ jest.mock('@webex/cc-store', () => {
     CC_EVENTS: {
       AGENT_STATION_LOGIN_SUCCESS: 'AgentStationLoginSuccess',
     },
-  };
-});
-
-jest.mock('@webex/cc-components', () => {
-  return {
-    StationLoginComponent: () => <div>StationLoginComponent</div>,
+    onErrorCallback: jest.fn(),
   };
 });
 
@@ -52,6 +52,16 @@ const onSaveStart = jest.fn();
 const onSaveEnd = jest.fn();
 
 describe('StationLogin Component', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    // Suppress console.error for error boundary tests
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('renders StationLoginPresentational with correct props', () => {
     const useStationLoginSpy = jest.spyOn(helper, 'useStationLogin');
 
@@ -71,7 +81,7 @@ describe('StationLogin Component', () => {
       cc: ccMock,
       onLogin: loginCb,
       onLogout: logoutCb,
-      logger: loggerMock,
+      logger: expect.any(Object),
       deviceType: deviceTypeMock,
       dialNumber: dialNumberMock,
       isAgentLoggedIn: false,
@@ -80,6 +90,23 @@ describe('StationLogin Component', () => {
       teamId: undefined,
       onCCSignOut: ccLogoutCb,
       doStationLogout: undefined,
+    });
+  });
+
+  describe('ErrorBoundary Tests', () => {
+    const mockOnErrorCallback = jest.fn();
+    store.onErrorCallback = mockOnErrorCallback;
+    it('should render empty fragment when ErrorBoundary catches an error', () => {
+      // Mock the StationLoginInternal to throw an error by overriding the helper
+      jest.spyOn(helper, 'useStationLogin').mockImplementation(() => {
+        throw new Error('Test error in useStationLogin');
+      });
+
+      const {container} = render(<StationLogin profileMode={false} />);
+
+      // The fallback should render an empty fragment (no content)
+      expect(container.firstChild).toBeNull();
+      expect(store.onErrorCallback).toHaveBeenCalledWith('StationLogin', Error('Test error in useStationLogin'));
     });
   });
 });

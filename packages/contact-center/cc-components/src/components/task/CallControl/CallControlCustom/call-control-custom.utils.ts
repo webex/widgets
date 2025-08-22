@@ -34,55 +34,86 @@ export const createConsultButtons = (
   muteUnmute: boolean,
   onTransfer?: () => void,
   handleConsultMuteToggle?: () => void,
-  handleEndConsult?: () => void
+  handleEndConsult?: () => void,
+  logger?
 ): ButtonConfig[] => {
-  return [
-    {
-      key: 'mute',
-      icon: isMuted ? 'microphone-muted-bold' : 'microphone-bold',
-      onClick: handleConsultMuteToggle || (() => {}),
-      tooltip: isMuted ? UNMUTE_CALL : MUTE_CALL,
-      className: `${isMuted ? 'call-control-button-muted' : 'call-control-button'}`,
-      disabled: isMuteDisabled,
-      shouldShow: muteUnmute,
-    },
-    {
-      key: 'transfer',
-      icon: 'next-bold',
-      tooltip: 'Transfer Consult',
-      onClick: onTransfer || (() => {}),
-      className: 'call-control-button',
-      disabled: !consultCompleted,
-      shouldShow: isAgentBeingConsulted && !!onTransfer,
-    },
-    {
-      key: 'cancel',
-      icon: 'headset-muted-bold',
-      tooltip: 'End Consult',
-      onClick: handleEndConsult || (() => {}),
-      className: 'call-control-consult-button-cancel',
-      shouldShow: isEndConsultEnabled || isAgentBeingConsulted,
-    },
-  ];
+  try {
+    return [
+      {
+        key: 'mute',
+        icon: isMuted ? 'microphone-muted-bold' : 'microphone-bold',
+        onClick: handleConsultMuteToggle || (() => {}),
+        tooltip: isMuted ? UNMUTE_CALL : MUTE_CALL,
+        className: `${isMuted ? 'call-control-button-muted' : 'call-control-button'}`,
+        disabled: isMuteDisabled,
+        shouldShow: muteUnmute,
+      },
+      {
+        key: 'transfer',
+        icon: 'next-bold',
+        tooltip: 'Transfer Consult',
+        onClick: onTransfer || (() => {}),
+        className: 'call-control-button',
+        disabled: !consultCompleted,
+        shouldShow: isAgentBeingConsulted && !!onTransfer,
+      },
+      {
+        key: 'cancel',
+        icon: 'headset-muted-bold',
+        tooltip: 'End Consult',
+        onClick: handleEndConsult || (() => {}),
+        className: 'call-control-consult-button-cancel',
+        shouldShow: isEndConsultEnabled || isAgentBeingConsulted,
+      },
+    ];
+  } catch (error) {
+    logger?.error('CC-Widgets: CallControlCustom: Error in createConsultButtons', {
+      module: 'cc-components#call-control-custom.utils.ts',
+      method: 'createConsultButtons',
+      error: error.message,
+    });
+    // Return empty safe fallback
+    return [];
+  }
 };
 
 /**
  * Filters buttons that should be visible
  */
-export const getVisibleButtons = (buttons: ButtonConfig[]): ButtonConfig[] => {
-  return buttons.filter((button) => button.shouldShow);
+export const getVisibleButtons = (buttons: ButtonConfig[], logger?): ButtonConfig[] => {
+  try {
+    return buttons.filter((button) => button.shouldShow);
+  } catch (error) {
+    logger?.error('CC-Widgets: CallControlCustom: Error in getVisibleButtons', {
+      module: 'cc-components#call-control-custom.utils.ts',
+      method: 'getVisibleButtons',
+      error: error.message,
+    });
+    // Return empty safe fallback
+    return [];
+  }
 };
 
 /**
  * Creates initials from a name string
  */
-export const createInitials = (name: string): string => {
-  return name
-    .split(' ')
-    .map((word) => word[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase();
+export const createInitials = (name: string, logger?): string => {
+  try {
+    return name
+      .split(' ')
+      .map((word) => word[0])
+      .join('')
+      .slice(0, 2)
+      .toUpperCase();
+  } catch (error) {
+    logger?.error('CC-Widgets: CallControlCustom: Error in createInitials', {
+      module: 'cc-components#call-control-custom.utils.ts',
+      method: 'createInitials',
+      error: error.message,
+    });
+    // Return safe default
+    return '??';
+  }
 };
 
 /**
@@ -159,8 +190,18 @@ export const handleMuteToggle = (
 /**
  * Gets the consult status text based on completion state
  */
-export const getConsultStatusText = (consultCompleted: boolean): string => {
-  return consultCompleted ? 'Consulting' : 'Consult requested';
+export const getConsultStatusText = (consultCompleted: boolean, logger?): string => {
+  try {
+    return consultCompleted ? 'Consulting' : 'Consult requested';
+  } catch (error) {
+    logger?.error('CC-Widgets: CallControlCustom: Error in getConsultStatusText', {
+      module: 'cc-components#call-control-custom.utils.ts',
+      method: 'getConsultStatusText',
+      error: error.message,
+    });
+    // Return safe default
+    return 'Consulting';
+  }
 };
 
 /**
@@ -177,35 +218,72 @@ export const handleListItemPress = (title: string, onButtonPress: () => void, lo
 /**
  * Determines if tabs should be shown based on available data
  */
-export const shouldShowTabs = (buddyAgents: BuddyDetails[], queues: ContactServiceQueue[]): boolean => {
-  const noAgents = !buddyAgents || buddyAgents.length === 0;
-  const noQueues = !queues || queues.length === 0;
-  return !(noAgents && noQueues);
+export const shouldShowTabs = (buddyAgents: BuddyDetails[], queues: ContactServiceQueue[], logger?): boolean => {
+  try {
+    const noAgents = !buddyAgents || buddyAgents.length === 0;
+    const noQueues = !queues || queues.length === 0;
+    return !(noAgents && noQueues);
+  } catch (error) {
+    logger?.error('CC-Widgets: CallControlCustom: Error in shouldShowTabs', {
+      module: 'cc-components#call-control-custom.utils.ts',
+      method: 'shouldShowTabs',
+      error: error.message,
+    });
+    // Return safe default
+    return false;
+  }
 };
 
 /**
  * Checks if agents list is empty
  */
-export const isAgentsEmpty = (buddyAgents: BuddyDetails[]): boolean => {
-  return !buddyAgents || buddyAgents.length === 0;
+export const isAgentsEmpty = (buddyAgents: BuddyDetails[], logger?): boolean => {
+  try {
+    return !buddyAgents || buddyAgents.length === 0;
+  } catch (error) {
+    logger?.error('CC-Widgets: CallControlCustom: Error in isAgentsEmpty', {
+      module: 'cc-components#call-control-custom.utils.ts',
+      method: 'isAgentsEmpty',
+      error: error.message,
+    });
+    // Return safe default
+    return true;
+  }
 };
 
 /**
  * Checks if queues list is empty
  */
-export const isQueuesEmpty = (queues: ContactServiceQueue[]): boolean => {
-  return !queues || queues.length === 0;
+export const isQueuesEmpty = (queues: ContactServiceQueue[], logger?): boolean => {
+  try {
+    return !queues || queues.length === 0;
+  } catch (error) {
+    logger?.error('CC-Widgets: CallControlCustom: Error in isQueuesEmpty', {
+      module: 'cc-components#call-control-custom.utils.ts',
+      method: 'isQueuesEmpty',
+      error: error.message,
+    });
+    // Return safe default
+    return true;
+  }
 };
 
 /**
  * Handles tab selection with logging
  */
 export const handleTabSelection = (key: string, setSelectedTab: (tab: string) => void, logger: ILogger): void => {
-  setSelectedTab(key);
-  logger.log(`CC-Widgets: ConsultTransferPopover: tab selected: ${key}`, {
-    module: 'consult-transfer-popover.tsx',
-    method: 'onTabSelection',
-  });
+  try {
+    setSelectedTab(key);
+    logger.log(`CC-Widgets: ConsultTransferPopover: tab selected: ${key}`, {
+      module: 'consult-transfer-popover.tsx',
+      method: 'onTabSelection',
+    });
+  } catch (error) {
+    logger.error(`CC-Widgets: CallControlCustom: Error in handleTabSelection: ${error.message}`, {
+      module: 'cc-components#call-control-custom.utils.ts',
+      method: 'handleTabSelection',
+    });
+  }
 };
 
 /**
@@ -217,12 +295,19 @@ export const handleAgentSelection = (
   onAgentSelect: ((agentId: string, agentName: string) => void) | undefined,
   logger: ILogger
 ): void => {
-  logger.info(`CC-Widgets: ConsultTransferPopover: agent selected: ${agentId}`, {
-    module: 'consult-transfer-popover.tsx',
-    method: 'onAgentSelect',
-  });
-  if (onAgentSelect) {
-    onAgentSelect(agentId, agentName);
+  try {
+    logger.info(`CC-Widgets: ConsultTransferPopover: agent selected: ${agentId}`, {
+      module: 'consult-transfer-popover.tsx',
+      method: 'onAgentSelect',
+    });
+    if (onAgentSelect) {
+      onAgentSelect(agentId, agentName);
+    }
+  } catch (error) {
+    logger.error(`CC-Widgets: CallControlCustom: Error in handleAgentSelection: ${error.message}`, {
+      module: 'cc-components#call-control-custom.utils.ts',
+      method: 'handleAgentSelection',
+    });
   }
 };
 
@@ -235,89 +320,153 @@ export const handleQueueSelection = (
   onQueueSelect: ((queueId: string, queueName: string) => void) | undefined,
   logger: ILogger
 ): void => {
-  logger.log(`CC-Widgets: ConsultTransferPopover: queue selected: ${queueId}`, {
-    module: 'consult-transfer-popover.tsx',
-    method: 'onQueueSelect',
-  });
-  if (onQueueSelect) {
-    onQueueSelect(queueId, queueName);
+  try {
+    logger.log(`CC-Widgets: ConsultTransferPopover: queue selected: ${queueId}`, {
+      module: 'consult-transfer-popover.tsx',
+      method: 'onQueueSelect',
+    });
+    if (onQueueSelect) {
+      onQueueSelect(queueId, queueName);
+    }
+  } catch (error) {
+    logger.error(`CC-Widgets: CallControlCustom: Error in handleQueueSelection: ${error.message}`, {
+      module: 'cc-components#call-control-custom.utils.ts',
+      method: 'handleQueueSelection',
+    });
   }
 };
 
 /**
  * Gets the appropriate empty state message based on context
  */
-export const getEmptyStateMessage = (selectedTab: string, showTabs: boolean): string => {
-  if (!showTabs) {
+export const getEmptyStateMessage = (selectedTab: string, showTabs: boolean, logger?): string => {
+  try {
+    if (!showTabs) {
+      return "We can't find any queue or agent available for now.";
+    }
+
+    if (selectedTab === 'Agents') {
+      return "We can't find any agent available for now.";
+    }
+
+    return "We can't find any queue available for now.";
+  } catch (error) {
+    logger.error(`CC-Widgets: CallControlCustom: Error in getEmptyStateMessage: ${error.message}`, {
+      module: 'cc-components#call-control-custom.utils.ts',
+      method: 'getEmptyStateMessage',
+    });
+    // Return safe default
     return "We can't find any queue or agent available for now.";
   }
-
-  if (selectedTab === 'Agents') {
-    return "We can't find any agent available for now.";
-  }
-
-  return "We can't find any queue available for now.";
 };
 
 /**
  * Creates list item data from buddy agents
  */
-export const createAgentListData = (buddyAgents: BuddyDetails[]): ListItemData[] => {
-  return buddyAgents.map((agent) => ({
-    id: agent.agentId,
-    name: agent.agentName,
-  }));
+export const createAgentListData = (buddyAgents: BuddyDetails[], logger?): ListItemData[] => {
+  try {
+    return buddyAgents.map((agent) => ({
+      id: agent.agentId,
+      name: agent.agentName,
+    }));
+  } catch (error) {
+    logger.error(`CC-Widgets: CallControlCustom: Error in createAgentListData: ${error.message}`, {
+      module: 'cc-components#call-control-custom.utils.ts',
+      method: 'createAgentListData',
+    });
+    // Return empty safe fallback
+    return [];
+  }
 };
 
 /**
  * Creates list item data from queues
  */
-export const createQueueListData = (queues: ContactServiceQueue[]): ListItemData[] => {
-  return queues.map((queue) => ({
-    id: queue.id,
-    name: queue.name,
-  }));
+export const createQueueListData = (queues: ContactServiceQueue[], logger?): ListItemData[] => {
+  try {
+    return queues.map((queue) => ({
+      id: queue.id,
+      name: queue.name,
+    }));
+  } catch (error) {
+    logger.error(`CC-Widgets: CallControlCustom: Error in createQueueListData: ${error.message}`, {
+      module: 'cc-components#call-control-custom.utils.ts',
+      method: 'createQueueListData',
+    });
+    // Return empty safe fallback
+    return [];
+  }
 };
 
 /**
  * Creates a timer key based on timestamp
  */
-export const createTimerKey = (startTimeStamp: number): string => {
-  return `timer-${startTimeStamp}`;
+export const createTimerKey = (startTimeStamp: number, logger?): string => {
+  try {
+    return `timer-${startTimeStamp}`;
+  } catch (error) {
+    logger.error(`CC-Widgets: CallControlCustom: Error in createTimerKey: ${error.message}`, {
+      module: 'cc-components#call-control-custom.utils.ts',
+      method: 'createTimerKey',
+    });
+    // Return safe default
+    return 'timer-0';
+  }
 };
 
 /**
  * Handles popover open with logging
  */
 export const handlePopoverOpen = (menuType: string, setActiveMenu: (menu: string) => void, logger: ILogger): void => {
-  logger.info(`CC-Widgets: CallControl: opening ${menuType} popover`, {
-    module: 'call-control.tsx',
-    method: 'handlePopoverOpen',
-  });
-  setActiveMenu(menuType);
+  try {
+    logger.info(`CC-Widgets: CallControl: opening ${menuType} popover`, {
+      module: 'call-control.tsx',
+      method: 'handlePopoverOpen',
+    });
+    setActiveMenu(menuType);
+  } catch (error) {
+    logger.error(`CC-Widgets: CallControlCustom: Error in handlePopoverOpen: ${error.message}`, {
+      module: 'cc-components#call-control-custom.utils.ts',
+      method: 'handlePopoverOpen',
+    });
+  }
 };
 
 /**
  * Handles popover close with logging
  */
 export const handlePopoverClose = (setActiveMenu: (menu: string | null) => void, logger: ILogger): void => {
-  logger.info('CC-Widgets: CallControl: closing popover', {
-    module: 'call-control.tsx',
-    method: 'handlePopoverClose',
-  });
-  setActiveMenu(null);
+  try {
+    logger.info('CC-Widgets: CallControl: closing popover', {
+      module: 'call-control.tsx',
+      method: 'handlePopoverClose',
+    });
+    setActiveMenu(null);
+  } catch (error) {
+    logger.error(`CC-Widgets: CallControlCustom: Error in handlePopoverClose: ${error.message}`, {
+      module: 'cc-components#call-control-custom.utils.ts',
+      method: 'handlePopoverClose',
+    });
+  }
 };
 
 /**
  * Handles hold toggle with logging
  */
 export const handleHoldToggle = (toggleHold: (() => void) | undefined, logger: ILogger): void => {
-  logger.info('CC-Widgets: CallControl: hold toggle clicked', {
-    module: 'call-control.tsx',
-    method: 'handleHoldToggle',
-  });
-  if (toggleHold) {
-    toggleHold();
+  try {
+    logger.info('CC-Widgets: CallControl: hold toggle clicked', {
+      module: 'call-control.tsx',
+      method: 'handleHoldToggle',
+    });
+    if (toggleHold) {
+      toggleHold();
+    }
+  } catch (error) {
+    logger.error(`CC-Widgets: CallControlCustom: Error in handleHoldToggle: ${error.message}`, {
+      module: 'cc-components#call-control-custom.utils.ts',
+      method: 'handleHoldToggle',
+    });
   }
 };
 
@@ -325,21 +474,38 @@ export const handleHoldToggle = (toggleHold: (() => void) | undefined, logger: I
  * Handles wrapup call with logging
  */
 export const handleWrapupCall = (onWrapupCall: (() => void) | undefined, logger: ILogger): void => {
-  logger.info('CC-Widgets: CallControl: wrapup call clicked', {
-    module: 'call-control.tsx',
-    method: 'handleWrapupCall',
-  });
-  if (onWrapupCall) {
-    onWrapupCall();
+  try {
+    logger.info('CC-Widgets: CallControl: wrapup call clicked', {
+      module: 'call-control.tsx',
+      method: 'handleWrapupCall',
+    });
+    if (onWrapupCall) {
+      onWrapupCall();
+    }
+  } catch (error) {
+    logger.error(`CC-Widgets: CallControlCustom: Error in handleWrapupCall: ${error.message}`, {
+      module: 'cc-components#call-control-custom.utils.ts',
+      method: 'handleWrapupCall',
+    });
   }
 };
 
 /**
  * Validates if a menu type is supported
  */
-export const isValidMenuType = (menuType: string): boolean => {
-  const validMenuTypes = ['Consult', 'Transfer'];
-  return validMenuTypes.includes(menuType);
+export const isValidMenuType = (menuType: string, logger?): boolean => {
+  try {
+    const validMenuTypes = ['Consult', 'Transfer'];
+    return validMenuTypes.includes(menuType);
+  } catch (error) {
+    logger?.error('CC-Widgets: CallControlCustom: Error in isValidMenuType', {
+      module: 'cc-components#call-control-custom.utils.ts',
+      method: 'isValidMenuType',
+      error: error.message,
+    });
+    // Return safe default
+    return false;
+  }
 };
 
 /**
@@ -348,58 +514,119 @@ export const isValidMenuType = (menuType: string): boolean => {
 export const getButtonStyleClass = (
   isActive: boolean,
   isDisabled: boolean,
-  baseClass = 'call-control-button'
+  baseClass = 'call-control-button',
+  logger?
 ): string => {
-  if (isDisabled) {
-    return `${baseClass}-disabled`;
+  try {
+    if (isDisabled) {
+      return `${baseClass}-disabled`;
+    }
+    if (isActive) {
+      return `${baseClass}-active`;
+    }
+    return baseClass;
+  } catch (error) {
+    logger?.error('CC-Widgets: CallControlCustom: Error in getButtonStyleClass', {
+      module: 'cc-components#call-control-custom.utils.ts',
+      method: 'getButtonStyleClass',
+      error: error.message,
+    });
+    // Return safe default
+    return 'call-control-button';
   }
-  if (isActive) {
-    return `${baseClass}-active`;
-  }
-  return baseClass;
 };
 
 /**
  * Formats elapsed time for display
  */
-export const formatElapsedTime = (startTime: number): string => {
-  const elapsed = Date.now() - startTime;
-  const seconds = Math.floor(elapsed / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
+export const formatElapsedTime = (startTime: number, logger?): string => {
+  try {
+    const elapsed = Date.now() - startTime;
+    const seconds = Math.floor(elapsed / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
 
-  if (hours > 0) {
-    return `${hours}:${(minutes % 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}`;
+    if (hours > 0) {
+      return `${hours}:${(minutes % 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}`;
+    }
+    return `${minutes}:${(seconds % 60).toString().padStart(2, '0')}`;
+  } catch (error) {
+    logger?.error('CC-Widgets: CallControlCustom: Error in formatElapsedTime', {
+      module: 'cc-components#call-control-custom.utils.ts',
+      method: 'formatElapsedTime',
+      error: error.message,
+    });
+    // Return safe default
+    return '0:00';
   }
-  return `${minutes}:${(seconds % 60).toString().padStart(2, '0')}`;
 };
 
 /**
  * Checks if an agent is available for selection
  */
-export const isAgentAvailable = (agent: BuddyDetails): boolean => {
-  return agent && agent.agentId && agent.agentName && agent.agentName.trim().length > 0;
+export const isAgentAvailable = (agent: BuddyDetails, logger?): boolean => {
+  try {
+    return agent && agent.agentId && agent.agentName && agent.agentName.trim().length > 0;
+  } catch (error) {
+    logger?.error('CC-Widgets: CallControlCustom: Error in isAgentAvailable', {
+      module: 'cc-components#call-control-custom.utils.ts',
+      method: 'isAgentAvailable',
+      error: error.message,
+    });
+    // Return safe default
+    return false;
+  }
 };
 
 /**
  * Checks if a queue is available for selection
  */
-export const isQueueAvailable = (queue: ContactServiceQueue): boolean => {
-  return queue && queue.id && queue.name && queue.name.trim().length > 0;
+export const isQueueAvailable = (queue: ContactServiceQueue, logger?): boolean => {
+  try {
+    return queue && queue.id && queue.name && queue.name.trim().length > 0;
+  } catch (error) {
+    logger?.error('CC-Widgets: CallControlCustom: Error in isQueueAvailable', {
+      module: 'cc-components#call-control-custom.utils.ts',
+      method: 'isQueueAvailable',
+      error: error.message,
+    });
+    // Return safe default
+    return false;
+  }
 };
 
 /**
  * Filters available agents
  */
-export const filterAvailableAgents = (agents: BuddyDetails[]): BuddyDetails[] => {
-  return agents ? agents.filter(isAgentAvailable) : [];
+export const filterAvailableAgents = (agents: BuddyDetails[], logger?): BuddyDetails[] => {
+  try {
+    return agents ? agents.filter((agent) => isAgentAvailable(agent, logger)) : [];
+  } catch (error) {
+    logger?.error('CC-Widgets: CallControlCustom: Error in filterAvailableAgents', {
+      module: 'cc-components#call-control-custom.utils.ts',
+      method: 'filterAvailableAgents',
+      error: error.message,
+    });
+    // Return empty safe fallback
+    return [];
+  }
 };
 
 /**
  * Filters available queues
  */
-export const filterAvailableQueues = (queues: ContactServiceQueue[]): ContactServiceQueue[] => {
-  return queues ? queues.filter(isQueueAvailable) : [];
+export const filterAvailableQueues = (queues: ContactServiceQueue[], logger?): ContactServiceQueue[] => {
+  try {
+    return queues ? queues.filter((queue) => isQueueAvailable(queue, logger)) : [];
+  } catch (error) {
+    logger?.error('CC-Widgets: CallControlCustom: Error in filterAvailableQueues', {
+      module: 'cc-components#call-control-custom.utils.ts',
+      method: 'filterAvailableQueues',
+      error: error.message,
+    });
+    // Return empty safe fallback
+    return [];
+  }
 };
 
 /**
@@ -407,11 +634,24 @@ export const filterAvailableQueues = (queues: ContactServiceQueue[]): ContactSer
  */
 export const debounce = <T extends (...args: unknown[]) => unknown>(
   func: T,
-  wait: number
+  wait: number,
+  logger?
 ): ((...args: Parameters<T>) => void) => {
-  let timeout: NodeJS.Timeout;
-  return (...args: Parameters<T>) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
-  };
+  try {
+    let timeout: NodeJS.Timeout;
+    return (...args: Parameters<T>) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func(...args), wait);
+    };
+  } catch (error) {
+    logger?.error('CC-Widgets: CallControlCustom: Error in debounce', {
+      module: 'cc-components#call-control-custom.utils.ts',
+      method: 'debounce',
+      error: error.message,
+    });
+    // Return safe fallback function
+    return (...args: Parameters<T>) => {
+      func(...args);
+    };
+  }
 };

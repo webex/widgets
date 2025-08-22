@@ -1,15 +1,44 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const {merge} = require('webpack-merge');
-
-const baseConfig = require('../../../webpack.config');
-
+const {HotModuleReplacementPlugin, ProvidePlugin} = require('webpack');
 // Helper function to resolve paths relative to the monorepo root
 const resolveMonorepoRoot = (...segments) => path.resolve(__dirname, '../../../', ...segments);
 
-module.exports = merge(baseConfig, {
+// Workspaces we want to alias/include
+const PKG_SRC = [
+  'packages/contact-center/store/src',
+  'packages/contact-center/cc-widgets/src',
+  'packages/contact-center/station-login/src',
+  'packages/contact-center/user-state/src',
+  'packages/contact-center/task/src',
+  'packages/contact-center/cc-components/src',
+  'packages/contact-center/ui-logging/src',
+].map((p) => resolveMonorepoRoot(p));
+
+module.exports = {
+  mode: process.env.NODE_ENV || 'development',
+
   entry: './src/index.tsx', // Entry file for bundling
+
+  output: {
+    path: path.resolve(__dirname, '../../../docs/samples-cc-react-app'),
+    filename: 'bundle.js',
+    clean: true,
+  },
+
   resolve: {
+    fallback: {
+      fs: false,
+      process: require.resolve('process/browser'),
+      crypto: require.resolve('crypto-browserify'),
+      querystring: require.resolve('querystring-es3'),
+      os: require.resolve('os-browserify/browser'),
+      stream: require.resolve('stream-browserify'),
+      vm: require.resolve('vm-browserify'),
+      util: require.resolve('util/'),
+      url: require.resolve('url/'),
+    },
+    extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
     alias: {
       '@webex/cc-store': path.resolve(__dirname, '../../../packages/contact-center/store/src'),
       '@webex/cc-widgets': path.resolve(__dirname, '../../../packages/contact-center/cc-widgets/src'),
@@ -19,9 +48,19 @@ module.exports = merge(baseConfig, {
       '@webex/cc-components': path.resolve(__dirname, '../../../packages/contact-center/cc-components/src'),
       '@webex/cc-ui-logging': path.resolve(__dirname, '../../../packages/contact-center/ui-logging/src'),
     },
+    symlinks: true,
   },
   module: {
     rules: [
+      // TS/TSX → transpile only (skip type-checking)
+      {
+        test: /\.[jt]sx?$/,
+        include: [path.resolve(__dirname, 'src'), ...PKG_SRC],
+        loader: 'ts-loader',
+        options: {
+          transpileOnly: true, // ✅ disables type-checking
+        },
+      },
       {
         test: /\.css$/,
         use: ['style-loader', 'css-loader'],
@@ -29,20 +68,23 @@ module.exports = merge(baseConfig, {
           resolveMonorepoRoot('node_modules/@momentum-ui'), // Include specific node module,
           resolveMonorepoRoot('node_modules/react-toastify'), // Include specific node module
           resolveMonorepoRoot('node_modules/@momentum-design'),
-          path.resolve(__dirname, 'widgets-samples/cc'), // Include all CSS from the local package
+          path.resolve(__dirname, 'src'),
+          ...PKG_SRC,
         ],
       },
       {
         test: /\.scss$/,
         use: [
-          'style-loader', // Injects styles into DOM
-          'css-loader', // Turns CSS into CommonJS
-          'sass-loader', // Compiles Sass to CSS
+          'style-loader',
+          {loader: 'css-loader', options: {importLoaders: 1}},
+          {loader: 'sass-loader', options: {implementation: require('sass')}},
         ],
         include: [
           resolveMonorepoRoot('node_modules/@momentum-ui'), // Include specific node module
           path.resolve(__dirname, 'widgets-samples/cc'), // Include all CSS from the local package
           resolveMonorepoRoot('node_modules/@momentum-design'),
+          path.resolve(__dirname, 'src'), // your app
+          ...PKG_SRC, // all workspace packages
         ],
       },
       {
@@ -80,7 +122,12 @@ module.exports = merge(baseConfig, {
       template: './public/index.html', // Template HTML file
       filename: 'index.html',
     }),
+    new ProvidePlugin({
+      process: 'process/browser',
+    }),
+    new HotModuleReplacementPlugin(),
   ],
+
   devServer: {
     static: path.join(__dirname, 'public'), // Serve files from public folder
     compress: true, // Enable gzip compression
@@ -88,5 +135,18 @@ module.exports = merge(baseConfig, {
     hot: true, // Enable hot module replacement
     open: false, // Open the app in browser on start
     liveReload: true, // Reload page on changes
+    watchFiles: {
+      paths: [path.resolve(__dirname, 'src'), ...PKG_SRC],
+    },
   },
-});
+
+  watchOptions: {
+    followSymlinks: true,
+    ignored: /node_modules\/(?!@webex)/,
+  },
+  stats: {
+    // While building and running the sample app when sass-loader is used we get a lot of deprecation warnings
+    // This is a workaround to suppress them untill we move away from sass-loader
+    warningsFilter: [/sass-loader/],
+  },
+};

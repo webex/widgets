@@ -9,8 +9,9 @@ const AutoWrapupTimer: React.FC<AutoWrapupTimerProps> = ({
   secondsUntilAutoWrapup,
   allowCancelAutoWrapup,
   handleCancelWrapup,
+  logger,
 }) => {
-  const {containerClassName, iconClassName, iconName, formattedTime} = getTimerUIState(secondsUntilAutoWrapup);
+  const {containerClassName, iconClassName, iconName, formattedTime} = getTimerUIState(secondsUntilAutoWrapup, logger);
   return (
     <>
       <ListItem className={containerClassName}>

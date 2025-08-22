@@ -244,7 +244,7 @@ exports[`Station Login Component Actions ProfileMode interaction confirmation Po
       </div>
       <mdc-input
         data-testid="dial-number-input"
-        label="Extension"
+        label=""
         name=""
         value=""
       />
@@ -547,7 +547,7 @@ exports[`Station Login Component Actions ProfileMode interaction confirmation Po
       </div>
       <mdc-input
         data-testid="dial-number-input"
-        label="Extension"
+        label=""
         name=""
         value=""
       />
@@ -857,7 +857,7 @@ exports[`Station Login Component Actions SignOut Modal Popup should close modal 
       </div>
       <mdc-input
         data-testid="dial-number-input"
-        label="Extension"
+        label=""
         name=""
         value=""
       />
@@ -1177,7 +1177,7 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
       </div>
       <mdc-input
         data-testid="dial-number-input"
-        label="Extension"
+        label=""
         name=""
         value=""
       />
@@ -1486,7 +1486,7 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
       </div>
       <mdc-input
         data-testid="dial-number-input"
-        label="Extension"
+        label=""
         name=""
         value=""
       />
@@ -1795,7 +1795,7 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
       </div>
       <mdc-input
         data-testid="dial-number-input"
-        label="Extension"
+        label=""
         name=""
         value=""
       />
@@ -2104,7 +2104,7 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
       </div>
       <mdc-input
         data-testid="dial-number-input"
-        label="Extension"
+        label=""
         name=""
         value=""
       />
@@ -2413,7 +2413,7 @@ exports[`Station Login Component Actions calls handleDNInputChanged with correct
       </div>
       <mdc-input
         data-testid="dial-number-input"
-        label="Extension"
+        label=""
         name=""
         value=""
       />
@@ -2733,7 +2733,7 @@ exports[`Station Login Component Actions calls handleTeamSelectChanged utility f
       </div>
       <mdc-input
         data-testid="dial-number-input"
-        label="Extension"
+        label=""
         name=""
         value=""
       />
@@ -3032,7 +3032,7 @@ exports[`Station Login Component Rendering does not render loginOptions if not i
       </div>
       <mdc-input
         data-testid="dial-number-input"
-        label="Extension"
+        label=""
         name=""
         value=""
       />
@@ -3352,7 +3352,7 @@ exports[`Station Login Component Rendering renders login failure when passed 1`]
       </div>
       <mdc-input
         data-testid="dial-number-input"
-        label="Extension"
+        label=""
         name=""
         value=""
       />
@@ -3680,7 +3680,7 @@ exports[`Station Login Component Rendering renders save error when passed 1`] = 
       </div>
       <mdc-input
         data-testid="dial-number-input"
-        label="Extension"
+        label=""
         name=""
         value=""
       />
@@ -4008,7 +4008,7 @@ exports[`Station Login Component Rendering renders the component correctly 1`] =
       </div>
       <mdc-input
         data-testid="dial-number-input"
-        label="Extension"
+        label=""
         name=""
         value=""
       />
@@ -4321,7 +4321,7 @@ exports[`Station Login Component Rendering renders the component correctly in pr
       </div>
       <mdc-input
         data-testid="dial-number-input"
-        label="Extension"
+        label=""
         name=""
         value=""
       />
