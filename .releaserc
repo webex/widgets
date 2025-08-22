@@ -16,6 +16,12 @@
       }
     ],
     [
+      "@semantic-release/exec",
+      {
+        "prepareCmd": "node ./tooling/src/publish.js ${nextRelease.channel} ${nextRelease.version} "
+      }
+    ],
+    [
       "@semantic-release/git",
       {
         "assets": [
