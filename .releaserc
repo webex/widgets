@@ -27,6 +27,8 @@
         "assets": [
           "packages/contact-center/CHANGELOG.md",
           "package.json",
+          "packages/contact-center/CHANGELOG.md",
+          "package.json",
           "packages/contact-center/*/package.json"
         ],
         "message": "chore(release): 1.28.0-ccwidgets.108 [skip ci]\n\n${nextRelease.notes}"
