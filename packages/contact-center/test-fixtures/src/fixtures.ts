@@ -1,4 +1,4 @@
-import {ITask, Profile, TaskData, TaskResponse} from '@webex/plugin-cc';
+import {ITask, Profile, TaskData, TaskResponse} from '@webex/contact-center';
 import {IContactCenter} from '@webex/cc-store';
 
 const mockProfile: Profile = {
