@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.111](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.110...v1.28.0-ccwidgets.111) (2025-08-22)
+
+
+### Bug Fixes
+
+* **contact-center:** update sdk package from plugin-cc to contact-center ([#529](https://github.com/webex/widgets/issues/529)) ([25fe6e7](https://github.com/webex/widgets/commit/25fe6e78a034d51652df70f6f2adf641daa7a094))
+
 # [1.28.0-ccwidgets.110](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.109...v1.28.0-ccwidgets.110) (2025-08-22)
 
 
