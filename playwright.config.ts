@@ -1,6 +1,7 @@
 import {defineConfig, devices} from '@playwright/test';
 import dotenv from 'dotenv';
 import path from 'path';
+import {USER_SETS} from './playwright/test-data';
 
 dotenv.config({path: path.resolve(__dirname, '.env')});
 
@@ -18,7 +19,7 @@ export default defineConfig({
   },
   retries: 0,
   fullyParallel: true,
-  workers: 5,
+  workers: Object.keys(USER_SETS).length, // Dynamic worker count based on USER_SETS
   reporter: 'html',
   use: {
     baseURL: 'http://localhost:3000',
@@ -29,150 +30,37 @@ export default defineConfig({
       name: 'OAuth: Get Access Token',
       testMatch: /global\.setup\.ts/,
     },
-    {
-      name: 'SET_1',
-      dependencies: ['OAuth: Get Access Token'],
-      fullyParallel: false,
-      retries: 1,
-      testMatch: ['**/suites/digital-incoming-task-tests.spec.ts'],
-      use: {
-        ...devices['Desktop Chrome'],
-        channel: 'chrome',
-        storageState: undefined,
-        launchOptions: {
-          args: [
-            `--disable-site-isolation-trials`,
-            `--disable-web-security`,
-            `--no-sandbox`,
-            `--disable-features=WebRtcHideLocalIpsWithMdns`,
-            `--allow-file-access-from-files`,
-            `--use-fake-ui-for-media-stream`,
-            `--use-fake-device-for-media-stream`,
-            `--use-file-for-fake-audio-capture=${dummyAudioPath}`,
-            `--remote-debugging-port=9221`,
-            `--disable-extensions`,
-            `--disable-plugins`,
-            `--window-position=0,0`,
-            `--window-size=1280,720`,
-          ],
+    // Dynamically generate test projects from USER_SETS
+    ...Object.entries(USER_SETS).map(([setName, setData], index) => {
+      return {
+        name: setName,
+        dependencies: ['OAuth: Get Access Token'],
+        fullyParallel: false,
+        retries: 1,
+        testMatch: [`**/suites/${setData.TEST_SUITE}`],
+        use: {
+          ...devices['Desktop Chrome'],
+          channel: 'chrome',
+          storageState: undefined,
+          launchOptions: {
+            args: [
+              `--disable-site-isolation-trials`,
+              `--disable-web-security`,
+              `--no-sandbox`,
+              `--disable-features=WebRtcHideLocalIpsWithMdns`,
+              `--allow-file-access-from-files`,
+              `--use-fake-ui-for-media-stream`,
+              `--use-fake-device-for-media-stream`,
+              `--use-file-for-fake-audio-capture=${dummyAudioPath}`,
+              `--remote-debugging-port=${9221 + index}`,
+              `--disable-extensions`,
+              `--disable-plugins`,
+              `--window-position=${index * 1300},0`,
+              `--window-size=1280,720`,
+            ],
+          },
         },
-      },
-    },
-    {
-      name: 'SET_2',
-      fullyParallel: false,
-      retries: 1,
-      dependencies: ['OAuth: Get Access Token'],
-      testMatch: ['**/suites/task-list-multi-session-tests.spec.ts'],
-      use: {
-        ...devices['Desktop Chrome'],
-        channel: 'chrome',
-        storageState: undefined,
-        launchOptions: {
-          args: [
-            `--disable-site-isolation-trials`,
-            `--disable-web-security`,
-            `--no-sandbox`,
-            `--disable-features=WebRtcHideLocalIpsWithMdns`,
-            `--allow-file-access-from-files`,
-            `--use-fake-ui-for-media-stream`,
-            `--use-fake-device-for-media-stream`,
-            `--use-file-for-fake-audio-capture=${dummyAudioPath}`,
-            `--remote-debugging-port=9222`,
-            `--disable-extensions`,
-            `--disable-plugins`,
-            `--window-position=1300,0`,
-            `--window-size=1280,720`,
-          ],
-        },
-      },
-    },
-    {
-      name: 'SET_3',
-      fullyParallel: false,
-      retries: 1,
-      dependencies: ['OAuth: Get Access Token'],
-      testMatch: ['**/suites/station-login-user-state-tests.spec.ts'],
-      use: {
-        ...devices['Desktop Chrome'],
-        channel: 'chrome',
-        storageState: undefined,
-        launchOptions: {
-          args: [
-            `--disable-site-isolation-trials`,
-            `--disable-web-security`,
-            `--no-sandbox`,
-            `--disable-features=WebRtcHideLocalIpsWithMdns`,
-            `--allow-file-access-from-files`,
-            `--use-fake-ui-for-media-stream`,
-            `--use-fake-device-for-media-stream`,
-            `--use-file-for-fake-audio-capture=${dummyAudioPath}`,
-            `--remote-debugging-port=9223`,
-            `--disable-extensions`,
-            `--disable-plugins`,
-            `--window-position=2600,0`,
-            `--window-size=1280,720`,
-          ],
-        },
-      },
-    },
-    {
-      name: 'SET_4',
-      fullyParallel: false,
-      retries: 1,
-      dependencies: ['OAuth: Get Access Token'],
-      testMatch: ['**/suites/basic-advanced-task-controls-tests.spec.ts'],
-      use: {
-        ...devices['Desktop Chrome'],
-        channel: 'chrome',
-        storageState: undefined,
-        launchOptions: {
-          args: [
-            `--disable-site-isolation-trials`,
-            `--disable-web-security`,
-            `--no-sandbox`,
-            `--disable-features=WebRtcHideLocalIpsWithMdns`,
-            `--allow-file-access-from-files`,
-            `--use-fake-ui-for-media-stream`,
-            `--use-fake-device-for-media-stream`,
-            `--use-file-for-fake-audio-capture=${dummyAudioPath}`,
-            `--remote-debugging-port=9224`,
-            `--disable-extensions`,
-            `--disable-plugins`,
-            `--window-position=3900,0`,
-            `--window-size=1280,720`,
-          ],
-        },
-      },
-    },
-    {
-      name: 'SET_5',
-      fullyParallel: false,
-      retries: 1,
-      dependencies: ['OAuth: Get Access Token'],
-      testMatch: ['**/suites/advanced-task-controls-tests.spec.ts'],
-      use: {
-        ...devices['Desktop Chrome'],
-        channel: 'chrome',
-        storageState: undefined,
-        launchOptions: {
-          args: [
-            `--disable-site-isolation-trials`,
-            `--disable-web-security`,
-            `--no-sandbox`,
-            `--disable-features=WebRtcHideLocalIpsWithMdns`,
-            `--allow-file-access-from-files`,
-            `--use-fake-ui-for-media-stream`,
-            `--use-fake-device-for-media-stream`,
-            `--use-file-for-fake-audio-capture=${dummyAudioPath}`,
-            `--remote-debugging-port=9225`,
-            `--disable-extensions`,
-            `--disable-plugins`,
-            `--window-position=5200,0`,
-            `--window-size=1280,720`,
-          ],
-        },
-      },
-    },
+      };
+    }),
   ],
 });
