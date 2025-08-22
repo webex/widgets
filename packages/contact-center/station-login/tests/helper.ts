@@ -2,7 +2,7 @@ import {renderHook, act, waitFor} from '@testing-library/react';
 import {useStationLogin} from '../src/helper';
 import store, {CC_EVENTS} from '@webex/cc-store';
 import {mockCC} from '@webex/test-fixtures';
-import {LogoutSuccess, StationLoginSuccessResponse} from '@webex/plugin-cc';
+import {LogoutSuccess, StationLoginSuccessResponse} from '@webex/contact-center';
 
 jest.mock('@webex/cc-store', () => {
   let isAgentLoggedIn = false;

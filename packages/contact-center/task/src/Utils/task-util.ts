@@ -1,4 +1,4 @@
-import {ITask} from '@webex/plugin-cc';
+import {ITask} from '@webex/contact-center';
 
 /**
  * This function determines the visibility of various controls based on the task's data.

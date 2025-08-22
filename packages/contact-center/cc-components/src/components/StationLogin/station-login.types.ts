@@ -1,8 +1,8 @@
-import {StationLoginSuccessResponse, LogoutSuccess} from '@webex/plugin-cc';
+import {StationLoginSuccessResponse, LogoutSuccess} from '@webex/contact-center';
 import {IContactCenter, ILogger} from '@webex/cc-store';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 //@ts-ignore  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
-import {Team} from '@webex/plugin-cc/dist/types/types';
+import {Team} from '@webex/contact-center/dist/types/types';
 /**
  * Interface representing the properties for the Station Login component.
  */
