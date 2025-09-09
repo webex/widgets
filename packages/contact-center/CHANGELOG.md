@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.112](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.111...v1.28.0-ccwidgets.112) (2025-09-09)
+
+
+### Bug Fixes
+
+* **submit-metricst:** fix-for-the-product-undefined-issue ([#530](https://github.com/webex/widgets/issues/530)) ([03db2f7](https://github.com/webex/widgets/commit/03db2f7cae4a425069b096c5922cc91bd9881092))
+
 # [1.28.0-ccwidgets.111](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.110...v1.28.0-ccwidgets.111) (2025-08-22)
 
 

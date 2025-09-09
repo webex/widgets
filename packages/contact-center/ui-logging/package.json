@@ -1,6 +1,6 @@
 {
   "name": "@webex/cc-ui-logging",
-  "version": "1.28.0-ccwidgets.111",
+  "version": "1.28.0-ccwidgets.112",
   "description": "UI metrics tracking for Webex widgets",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
