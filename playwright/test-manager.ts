@@ -355,8 +355,9 @@ export class TestManager {
     await this.setup(browser, {
       needsAgent1: true,
       needsAgent2: true,
+      needsExtension: true,
       needsCaller: true,
-      agent1LoginMode: LOGIN_MODE.DESKTOP,
+      agent1LoginMode: LOGIN_MODE.EXTENSION,
       enableConsoleLogging: true,
       enableAdvancedLogging: true,
     });

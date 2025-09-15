@@ -13,7 +13,7 @@ import {
 } from '../Utils/advancedTaskControlUtils';
 
 import {changeUserState, verifyCurrentState} from '../Utils/userStateUtils';
-import {createCallTask, acceptIncomingTask, declineIncomingTask} from '../Utils/incomingTaskUtils';
+import {createCallTask, acceptIncomingTask, declineIncomingTask, acceptExtensionCall} from '../Utils/incomingTaskUtils';
 import {submitWrapup} from '../Utils/wrapupUtils';
 import {USER_STATES, TASK_TYPES, WRAPUP_REASONS} from '../constants';
 import {holdCallToggle, endTask, verifyHoldButtonIcon, verifyTaskControls} from '../Utils/taskControlUtils';
@@ -59,7 +59,7 @@ export default function createAdvancedTaskControlsTests() {
       const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 80000});
 
-      await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CALL);
+      await acceptExtensionCall(testManager.agent1ExtensionPage);
       await changeUserState(testManager.agent2Page, USER_STATES.AVAILABLE);
       await testManager.agent1Page.waitForTimeout(5000);
 
@@ -69,7 +69,7 @@ export default function createAdvancedTaskControlsTests() {
       clearAdvancedCapturedLogs();
     });
 
-    test('Normal Call Blind Transferred by Agent to Another Agent', async () => {
+    test('Call Blind Transferred by Agent to Another Agent', async () => {
       // Agent 1 performs blind transfer to Agent 2
       await transferViaAgent(testManager.agent1Page, process.env[`${testManager.projectName}_AGENT2_NAME`]!);
 
@@ -101,7 +101,7 @@ export default function createAdvancedTaskControlsTests() {
       await testManager.agent2Page.waitForTimeout(2000);
     });
 
-    test('Normal Call Blind Transferred to Queue', async () => {
+    test('Call Blind Transferred to Queue', async () => {
       // First transfer from Agent 1 to Agent 2
       await transferViaQueue(testManager.agent1Page, process.env[`${testManager.projectName}_QUEUE_NAME`]!);
 
@@ -137,8 +137,10 @@ export default function createAdvancedTaskControlsTests() {
 
       const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 80000});
-
-      await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CALL);
+      await testManager.agent1ExtensionPage
+        .locator('[data-test="generic-person-item-base"]')
+        .waitFor({state: 'visible', timeout: 20000});
+      await acceptExtensionCall(testManager.agent1ExtensionPage);
       await changeUserState(testManager.agent2Page, USER_STATES.AVAILABLE);
       await testManager.agent1Page.waitForTimeout(5000);
 
@@ -148,7 +150,7 @@ export default function createAdvancedTaskControlsTests() {
       clearAdvancedCapturedLogs();
     });
 
-    test('Normal Call Consulted via Agent and Accepted (A1 → A2)', async () => {
+    test('Call Consulted via Agent and Accepted (A1 → A2)', async () => {
       // Agent 1 initiates consult with Agent 2
       await consultViaAgent(testManager.agent1Page, process.env[`${testManager.projectName}_AGENT2_NAME`]!);
 
@@ -190,7 +192,7 @@ export default function createAdvancedTaskControlsTests() {
       await verifyCurrentState(testManager.agent1Page, USER_STATES.AVAILABLE);
     });
 
-    test('Normal Call Consulted via Agent and Declined (A1 → A2)', async () => {
+    test('Call Consulted via Agent and Declined (A1 → A2)', async () => {
       // Agent 1 initiates another consult with Agent 2
       await consultViaAgent(testManager.agent1Page, process.env[`${testManager.projectName}_AGENT2_NAME`]!);
 
@@ -221,7 +223,7 @@ export default function createAdvancedTaskControlsTests() {
       await testManager.agent1Page.waitForTimeout(2000);
     });
 
-    test('Normal Call Consulted via Agent and Not Picked Up by Agent 2', async () => {
+    test('Call Consulted via Agent and Not Picked Up by Agent 2', async () => {
       // Agent 1 initiates consult with Agent 2
       await consultViaAgent(testManager.agent1Page, process.env[`${testManager.projectName}_AGENT2_NAME`]!);
 
@@ -245,7 +247,7 @@ export default function createAdvancedTaskControlsTests() {
       await testManager.agent1Page.waitForTimeout(2000);
     });
 
-    test('Consult Transfer - Normal Call to Agent 2', async () => {
+    test('Consult Transfer - Call to Agent 2', async () => {
       await consultViaAgent(testManager.agent1Page, process.env[`${testManager.projectName}_AGENT2_NAME`]!);
 
       // Agent 2 accepts the consult first
@@ -292,8 +294,10 @@ export default function createAdvancedTaskControlsTests() {
 
       const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 80000});
-
-      await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CALL);
+      await testManager.agent1ExtensionPage
+        .locator('[data-test="generic-person-item-base"]')
+        .waitFor({state: 'visible', timeout: 20000});
+      await acceptExtensionCall(testManager.agent1ExtensionPage);
       await testManager.agent1Page.waitForTimeout(5000);
 
       await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
@@ -329,8 +333,10 @@ export default function createAdvancedTaskControlsTests() {
 
       const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 80000});
-
-      await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CALL);
+      await testManager.agent1ExtensionPage
+        .locator('[data-test="generic-person-item-base"]')
+        .waitFor({state: 'visible', timeout: 20000});
+      await acceptExtensionCall(testManager.agent1ExtensionPage);
       await changeUserState(testManager.agent2Page, USER_STATES.AVAILABLE);
       await testManager.agent1Page.waitForTimeout(5000);
 
@@ -383,8 +389,10 @@ export default function createAdvancedTaskControlsTests() {
 
       const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 80000});
-
-      await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CALL);
+      await testManager.agent1ExtensionPage
+        .locator('[data-test="generic-person-item-base"]')
+        .waitFor({state: 'visible', timeout: 20000});
+      await acceptExtensionCall(testManager.agent1ExtensionPage);
       await changeUserState(testManager.agent2Page, USER_STATES.AVAILABLE);
       await testManager.agent1Page.waitForTimeout(5000);
 
@@ -428,8 +436,10 @@ export default function createAdvancedTaskControlsTests() {
       await testManager.agent1Page.waitForTimeout(2000);
       const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 80000});
-
-      await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CALL);
+      await testManager.agent1ExtensionPage
+        .locator('[data-test="generic-person-item-base"]')
+        .waitFor({state: 'visible', timeout: 20000});
+      await acceptExtensionCall(testManager.agent1ExtensionPage);
       await changeUserState(testManager.agent2Page, USER_STATES.AVAILABLE);
       await testManager.agent1Page.waitForTimeout(5000);
 
