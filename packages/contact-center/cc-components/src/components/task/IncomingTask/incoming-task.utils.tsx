@@ -26,6 +26,7 @@ export interface IncomingTaskData {
 export const extractIncomingTaskData = (incomingTask: ITask, isBrowser: boolean, logger?): IncomingTaskData => {
   try {
     // Extract basic data from task
+    //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
     const callAssociationDetails = incomingTask?.data?.interaction?.callAssociatedDetails;
     const ani = callAssociationDetails?.ani;
     const customerName = callAssociationDetails?.customerName;

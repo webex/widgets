@@ -614,6 +614,7 @@ export const useCallControl = (props: useCallControlProps) => {
       const intendedMuteState = !isMuted;
 
       try {
+        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         await currentTask.toggleMute();
 
         // Only update state after successful SDK call
@@ -686,6 +687,7 @@ export const useCallControl = (props: useCallControlProps) => {
 
   const transferCall = async (to: string, type: DestinationType) => {
     try {
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       await currentTask.transfer({to, destinationType: type});
       logger.info('transferCall success', {module: 'useCallControl', method: 'transferCall'});
     } catch (error) {
@@ -707,6 +709,7 @@ export const useCallControl = (props: useCallControlProps) => {
     }
 
     try {
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       await currentTask.consult(consultPayload);
       store.setIsQueueConsultInProgress(false);
       if (destinationType === 'queue') {
@@ -733,6 +736,7 @@ export const useCallControl = (props: useCallControlProps) => {
     };
 
     try {
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       await currentTask.endConsult(consultEndPayload);
     } catch (error) {
       logError(`Error ending consult call: ${error}`, 'endConsultCall');
@@ -746,6 +750,7 @@ export const useCallControl = (props: useCallControlProps) => {
       destinationType: destinationType,
     };
     try {
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       await currentTask.consultTransfer(consultTransferPayload);
       store.setConsultInitiated(true);
     } catch (error) {
