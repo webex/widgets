@@ -12,6 +12,7 @@ import {
   handleQueueSelection,
   getEmptyStateMessage,
 } from './call-control-custom.utils';
+import DialNumberUI from './consult-transfer-dial-number';
 
 const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentProps> = ({
   heading,
@@ -20,6 +21,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
   queues,
   onAgentSelect,
   onQueueSelect,
+  onDialNumberSelect,
   allowConsultToQueue,
   logger,
 }) => {
@@ -29,7 +31,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
 
   const noAgents = isAgentsEmpty(filteredAgents);
   const noQueues = isQueuesEmpty(filteredQueues);
-  const showTabs = shouldShowTabs(filteredAgents, filteredQueues);
+  const showTabs = true; //shouldShowTabs(filteredAgents, filteredQueues);
 
   const renderList = (items, getKey, getTitle, handleSelect) => (
     <ListNext listSize={items.length} className="agent-list">
@@ -84,6 +86,9 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
           >
             Queues
           </TabNext>
+          <TabNext key="DialNumber" className="dial-number-tab" active={selectedTab === 'DialNumber'}>
+            Dial Number
+          </TabNext>
         </TabListNext>
       )}
 
@@ -124,6 +129,16 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
             handleQueueSelection(id, name, onQueueSelect, logger);
           }
         )}
+      {showTabs && selectedTab === 'DialNumber' && (
+        <DialNumberUI
+          title="Dial Number"
+          buttonIcon={buttonIcon}
+          onButtonPress={(dialNumber) => {
+            onDialNumberSelect(dialNumber);
+          }}
+          logger={logger}
+        />
+      )}
     </div>
   );
 };

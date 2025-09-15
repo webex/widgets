@@ -144,7 +144,7 @@ describe('ConsultTransferPopoverComponent', () => {
     };
 
     let screen = await render(<ConsultTransferPopoverComponent {...emptyProps} />);
-    expect(screen.container.querySelector('.agent-tablist')).not.toBeInTheDocument();
+    expect(screen.container.querySelector('.agent-tablist')).toBeInTheDocument();
     expect(screen.container.querySelector('.consult-empty-state')).toBeInTheDocument();
     expect(screen.container.querySelector('.consult-empty-message')).toBeInTheDocument();
 

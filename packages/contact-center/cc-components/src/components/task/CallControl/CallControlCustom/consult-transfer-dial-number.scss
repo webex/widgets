@@ -1,0 +1,19 @@
+.consult-transfer-dial-number-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 40px;
+}
+
+.consult-transfer-dial-number-input {
+  flex: 1;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.consult-transfer-dial-number-btn {
+  align-self: center;
+}

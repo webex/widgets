@@ -493,6 +493,18 @@ export interface ConsultTransferListComponentProps {
 }
 
 /**
+ * Interface representing the properties for CallControlDialNumber component.
+ */
+export interface ConsultTransferDialNumberComponentProps {
+  title: string;
+  subtitle?: string;
+  buttonIcon: string;
+  onButtonPress: (dialNumber: string) => void;
+  className?: string;
+  logger: ILogger;
+}
+
+/**
  * Interface representing the properties for ConsultTransferPopover component.
  */
 export interface ConsultTransferPopoverComponentProps {
@@ -502,6 +514,7 @@ export interface ConsultTransferPopoverComponentProps {
   queues?: ContactServiceQueue[];
   onAgentSelect?: (agentId: string, agentName: string) => void;
   onQueueSelect?: (queueId: string, queueName: string) => void;
+  onDialNumberSelect?: (dialNumber: string) => void;
   allowConsultToQueue: boolean;
   logger: ILogger;
 }
