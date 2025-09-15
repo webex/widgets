@@ -4,7 +4,6 @@ import ConsultTransferListComponent from './consult-transfer-list-item';
 import {ConsultTransferPopoverComponentProps} from '../../task.types';
 import ConsultTransferEmptyState from './consult-transfer-empty-state';
 import {
-  shouldShowTabs,
   isAgentsEmpty,
   isQueuesEmpty,
   handleTabSelection,
