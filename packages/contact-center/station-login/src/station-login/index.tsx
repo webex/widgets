@@ -1,12 +1,13 @@
 import React from 'react';
 import store from '@webex/cc-store';
 import {observer} from 'mobx-react-lite';
+import {ErrorBoundary} from 'react-error-boundary';
 
 import {StationLoginComponent, StationLoginComponentProps} from '@webex/cc-components';
 import {useStationLogin} from '../helper';
 import {StationLoginProps} from './station-login.types';
 
-const StationLogin: React.FunctionComponent<StationLoginProps> = observer(
+const StationLoginInternal: React.FunctionComponent<StationLoginProps> = observer(
   ({onLogin, onLogout, onCCSignOut, profileMode, onSaveStart, onSaveEnd, doStationLogout}) => {
     const {
       cc,
@@ -57,5 +58,19 @@ const StationLogin: React.FunctionComponent<StationLoginProps> = observer(
     return <StationLoginComponent {...props} />;
   }
 );
+
+// Main component wrapped with ErrorBoundary
+const StationLogin: React.FunctionComponent<StationLoginProps> = (props) => {
+  return (
+    <ErrorBoundary
+      fallbackRender={() => <></>}
+      onError={(error: Error) => {
+        if (store.onErrorCallback) store.onErrorCallback('StationLogin', error);
+      }}
+    >
+      <StationLoginInternal {...props} />
+    </ErrorBoundary>
+  );
+};
 
 export {StationLogin};

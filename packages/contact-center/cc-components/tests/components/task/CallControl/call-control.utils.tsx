@@ -776,9 +776,9 @@ describe('CallControl Utils', () => {
         {id: 'code-2', name: 'Customer Inquiry'},
       ];
 
-      handleWrapupReasonChange(mockEvent, mockWrapupCodes, mockHandleWrapupChange);
+      handleWrapupReasonChange(mockEvent, mockWrapupCodes, mockHandleWrapupChange, loggerMock);
 
-      expect(mockHandleWrapupChange).toHaveBeenCalledWith('Technical Issue', 'code-1');
+      expect(mockHandleWrapupChange).toHaveBeenCalledWith('Technical Issue', 'code-1', loggerMock);
     });
 
     it('should handle wrapup reason change with unknown selection', () => {

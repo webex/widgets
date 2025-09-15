@@ -9472,6 +9472,7 @@ __metadata:
     jest-environment-jsdom: "npm:29.7.0"
     mobx-react-lite: "npm:^4.1.0"
     prettier: "npm:^3.5.1"
+    react-error-boundary: "npm:^6.0.0"
     ts-loader: "npm:9.5.1"
     typescript: "npm:5.6.3"
     typescript-eslint: "npm:^8.24.1"
@@ -9559,6 +9560,7 @@ __metadata:
     jest-environment-jsdom: "npm:29.7.0"
     mobx-react-lite: "npm:^4.1.0"
     prettier: "npm:^3.5.1"
+    react-error-boundary: "npm:^6.0.0"
     ts-loader: "npm:9.5.1"
     typescript: "npm:5.6.3"
     typescript-eslint: "npm:^8.24.1"
@@ -9612,6 +9614,7 @@ __metadata:
     "@types/react-test-renderer": "npm:18"
     "@webex/cc-components": "workspace:*"
     "@webex/cc-store": "workspace:*"
+    "@webex/test-fixtures": "workspace:*"
     babel-jest: "npm:29.7.0"
     babel-loader: "npm:9.2.1"
     eslint: "npm:^9.20.1"
@@ -9628,6 +9631,7 @@ __metadata:
     jest-environment-jsdom: "npm:29.7.0"
     mobx-react-lite: "npm:^4.1.0"
     prettier: "npm:^3.5.1"
+    react-error-boundary: "npm:^6.0.0"
     ts-loader: "npm:9.5.1"
     typescript: "npm:5.6.3"
     typescript-eslint: "npm:^8.24.1"
@@ -30001,6 +30005,17 @@ __metadata:
   peerDependencies:
     react: ">=16.13.1"
   checksum: 10c0/f977ca61823e43de2381d53dd7aa8b4d79ff6a984c9afdc88dc44f9973b99de7fd382d2f0f91f2688e24bb987c0185bf45d0b004f22afaaab0f990a830253bfb
+  languageName: node
+  linkType: hard
+
+"react-error-boundary@npm:^6.0.0":
+  version: 6.0.0
+  resolution: "react-error-boundary@npm:6.0.0"
+  dependencies:
+    "@babel/runtime": "npm:^7.12.5"
+  peerDependencies:
+    react: ">=16.13.1"
+  checksum: 10c0/1914d600dee95a14f14af4afe9867b0d35c26c4f7826d23208800ba2a99728659029aad60a6ef95e13430b4d79c2c4c9b3585f50bf508450478760d2e4e732d8
   languageName: node
   linkType: hard
 
