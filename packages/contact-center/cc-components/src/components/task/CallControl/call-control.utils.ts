@@ -401,3 +401,16 @@ export const handleAudioRef = (
     });
   }
 };
+
+// Utility for consult-transfer-dial-number
+export const onInputDialNumber = (e, setValue) => {
+  setValue(e.currentTarget.value);
+};
+
+export const handleButtonPress = (logger, onButtonPress, value) => {
+  logger.info('Dial Number button pressed', {
+    module: 'consult-transfer-dial-number.tsx',
+    method: 'handleButtonPress',
+  });
+  onButtonPress(value);
+};
