@@ -1,5 +1,5 @@
 import {Page, expect} from '@playwright/test';
-import {TASK_TYPES, AWAIT_TIMEOUT} from '../constants';
+import {TASK_TYPES, AWAIT_TIMEOUT, OPERATION_TIMEOUT} from '../constants';
 
 /**
  * Utility functions for task controls testing.
@@ -16,22 +16,22 @@ import {TASK_TYPES, AWAIT_TIMEOUT} from '../constants';
  */
 export async function callTaskControlCheck(page: Page): Promise<void> {
   // Verify call control container is visible
-  await expect(page.getByTestId('call-control-container').nth(0)).toBeVisible({timeout: 30000});
+  await expect(page.getByTestId('call-control-container').nth(0)).toBeVisible({timeout: OPERATION_TIMEOUT});
 
   // Verify hold/resume toggle button is visible
-  await expect(page.getByTestId('call-control:hold-toggle').nth(0)).toBeVisible();
+  await expect(page.getByTestId('call-control:hold-toggle').nth(0)).toBeVisible({timeout: AWAIT_TIMEOUT});
 
   // Verify recording toggle button is visible
-  await expect(page.getByTestId('call-control:recording-toggle').nth(0)).toBeVisible();
+  await expect(page.getByTestId('call-control:recording-toggle').nth(0)).toBeVisible({timeout: AWAIT_TIMEOUT});
 
   // Verify transfer button is visible
-  await expect(page.getByTestId('call-control:transfer').nth(0)).toBeVisible();
+  await expect(page.getByTestId('call-control:transfer').nth(0)).toBeVisible({timeout: AWAIT_TIMEOUT});
 
   // Verify consult button is visible
-  await expect(page.getByTestId('call-control:consult').nth(0)).toBeVisible();
+  await expect(page.getByTestId('call-control:consult').nth(0)).toBeVisible({timeout: AWAIT_TIMEOUT});
 
   // Verify end call button is visible
-  await expect(page.getByTestId('call-control:end-call').nth(0)).toBeVisible();
+  await expect(page.getByTestId('call-control:end-call').nth(0)).toBeVisible({timeout: AWAIT_TIMEOUT});
 }
 
 /**
@@ -42,13 +42,13 @@ export async function callTaskControlCheck(page: Page): Promise<void> {
  */
 export async function chatTaskControlCheck(page: Page): Promise<void> {
   // Verify chat control container or equivalent is visible
-  await expect(page.getByTestId('call-control-container').nth(0)).toBeVisible({timeout: 30000});
+  await expect(page.getByTestId('call-control-container').nth(0)).toBeVisible({timeout: OPERATION_TIMEOUT});
 
   // Verify transfer button is visible
-  await expect(page.getByTestId('call-control:transfer').nth(0)).toBeVisible();
+  await expect(page.getByTestId('call-control:transfer').nth(0)).toBeVisible({timeout: AWAIT_TIMEOUT});
 
   // Verify end button is visible (for chat tasks)
-  await expect(page.getByTestId('call-control:end-call').nth(0)).toBeVisible();
+  await expect(page.getByTestId('call-control:end-call').nth(0)).toBeVisible({timeout: AWAIT_TIMEOUT});
 }
 
 /**
@@ -59,13 +59,13 @@ export async function chatTaskControlCheck(page: Page): Promise<void> {
  */
 export async function emailTaskControlCheck(page: Page): Promise<void> {
   // Verify email control container or equivalent is visible
-  await expect(page.getByTestId('call-control-container').nth(0)).toBeVisible({timeout: 30000});
+  await expect(page.getByTestId('call-control-container').nth(0)).toBeVisible({timeout: OPERATION_TIMEOUT});
 
   // Verify transfer button is visible
-  await expect(page.getByTestId('call-control:transfer').nth(0)).toBeVisible();
+  await expect(page.getByTestId('call-control:transfer').nth(0)).toBeVisible({timeout: AWAIT_TIMEOUT});
 
   // Verify end button is visible (for email tasks)
-  await expect(page.getByTestId('call-control:end-call').nth(0)).toBeVisible();
+  await expect(page.getByTestId('call-control:end-call').nth(0)).toBeVisible({timeout: AWAIT_TIMEOUT});
 }
 
 /**
@@ -139,10 +139,10 @@ export async function verifyHoldTimer(
 
     if (verifyContent) {
       // Verify "On hold" text is present
-      await expect(holdTimerContainer).toContainText('On hold');
+      await expect(holdTimerContainer).toContainText('On hold', {timeout: AWAIT_TIMEOUT});
 
       // Verify timer format (should contain time like 00:XX)
-      await expect(holdTimerContainer).toContainText(/\d{2}:\d{2}/);
+      await expect(holdTimerContainer).toContainText(/\d{2}:\d{2}/, {timeout: AWAIT_TIMEOUT});
     }
   } else {
     await expect(holdTimerContainer).toBeHidden({timeout: AWAIT_TIMEOUT});
@@ -432,6 +432,14 @@ export async function verifyHoldMusicElement(page: Page): Promise<void> {
  */
 export async function endTask(page: Page): Promise<void> {
   const endButton = page.getByTestId('call-control:end-call').nth(0);
-  await endButton.waitFor({state: 'visible', timeout: 30000});
+  await endButton.waitFor({state: 'visible', timeout: OPERATION_TIMEOUT});
+
+  // Check if button is disabled and wait for it to be enabled
+  const isDisabled = await endButton.isDisabled();
+  if (isDisabled) {
+    await holdCallToggle(page);
+    await expect(endButton).toBeEnabled({timeout: AWAIT_TIMEOUT});
+  }
+
   await endButton.click({timeout: AWAIT_TIMEOUT});
 }

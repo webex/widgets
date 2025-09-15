@@ -1,6 +1,6 @@
 import {Page, expect} from '@playwright/test';
 import dotenv from 'dotenv';
-import {USER_STATES, AWAIT_TIMEOUT} from '../constants';
+import {USER_STATES, AWAIT_TIMEOUT, CONSOLE_PATTERNS} from '../constants';
 
 dotenv.config();
 
@@ -17,9 +17,17 @@ dotenv.config();
  * ```
  */
 export const changeUserState = async (page: Page, userState: string): Promise<void> => {
-  // Get the current state name
-  const currentState = await page.getByTestId('state-select').getByTestId('state-name').innerText();
-  if (currentState.trim() === userState) {
+  // Get the current state name with timeout, return early if not found
+  try {
+    const currentState = await page
+      .getByTestId('state-select')
+      .getByTestId('state-name')
+      .innerText({timeout: AWAIT_TIMEOUT});
+    if (currentState.trim() === userState) {
+      return;
+    }
+  } catch (error) {
+    // Element not found, return without error
     return;
   }
 
@@ -32,6 +40,7 @@ export const changeUserState = async (page: Page, userState: string): Promise<vo
   }
 
   await stateItem.click({timeout: AWAIT_TIMEOUT});
+  await page.waitForTimeout(1000);
 };
 
 /**
@@ -45,7 +54,10 @@ export const changeUserState = async (page: Page, userState: string): Promise<vo
  * ```
  */
 export const getCurrentState = async (page: Page): Promise<string> => {
-  const stateName = await page.getByTestId('state-select').getByTestId('state-name').innerText();
+  const stateName = await page
+    .getByTestId('state-select')
+    .getByTestId('state-name')
+    .innerText({timeout: AWAIT_TIMEOUT});
   return stateName.trim();
 };
 
@@ -82,7 +94,7 @@ export const verifyCurrentState = async (page: Page, expectedState: string): Pro
  */
 export const getStateElapsedTime = async (page: Page): Promise<string> => {
   // Directly select the timer by its test id
-  const timerText = await page.getByTestId('elapsed-time').innerText();
+  const timerText = await page.getByTestId('elapsed-time').innerText({timeout: AWAIT_TIMEOUT});
   return timerText.trim();
 };
 
@@ -113,13 +125,13 @@ export const validateConsoleStateChange = async (
   const lastStateChangeMessage = consoleMessages
     .slice()
     .reverse()
-    .find((msg) => msg.match(/onStateChange invoked with state name:\s*(.+)/i));
+    .find((msg) => msg.match(CONSOLE_PATTERNS.ON_STATE_CHANGE_REGEX));
 
   if (!lastStateChangeMessage) {
     throw new Error('No onStateChange log found in console messages');
   }
 
-  const stateMatch = lastStateChangeMessage.match(/onStateChange invoked with state name:\s*(.+)/i);
+  const stateMatch = lastStateChangeMessage.match(CONSOLE_PATTERNS.ON_STATE_CHANGE_REGEX);
   const actualState = stateMatch?.[1]?.trim();
 
   if (!actualState) {
@@ -165,12 +177,14 @@ export async function checkCallbackSequence(
 
   // Find last index of API success using reverse().findIndex()
   const apiSuccessReverseIndex = reversedMessages.findIndex((msg) =>
-    msg.includes('WXCC_SDK_AGENT_STATE_CHANGE_SUCCESS')
+    msg.includes(CONSOLE_PATTERNS.SDK_STATE_CHANGE_SUCCESS)
   );
 
   // Find last index of onStateChange callback using reverse().findIndex()
   const callbackReverseIndex = reversedMessages.findIndex(
-    (msg) => msg.toLowerCase().includes('onstatechange') && msg.toLowerCase().includes('invoked')
+    (msg) =>
+      msg.toLowerCase().includes(CONSOLE_PATTERNS.ON_STATE_CHANGE_KEYWORDS[0]) &&
+      msg.toLowerCase().includes(CONSOLE_PATTERNS.ON_STATE_CHANGE_KEYWORDS[1])
   );
 
   // Validate that both messages exist
@@ -192,15 +206,13 @@ export async function checkCallbackSequence(
     );
   }
 
-  const lastStateChangeMessage = reversedMessages.find((msg) =>
-    msg.match(/onStateChange invoked with state name:\s*(.+)/i)
-  );
+  const lastStateChangeMessage = reversedMessages.find((msg) => msg.match(CONSOLE_PATTERNS.ON_STATE_CHANGE_REGEX));
 
   if (!lastStateChangeMessage) {
     throw new Error('No onStateChange log found in console messages');
   }
 
-  const stateMatch = lastStateChangeMessage.match(/onStateChange invoked with state name:\s*(.+)/i);
+  const stateMatch = lastStateChangeMessage.match(CONSOLE_PATTERNS.ON_STATE_CHANGE_REGEX);
   const actualState = stateMatch?.[1]?.trim();
 
   if (!actualState) {

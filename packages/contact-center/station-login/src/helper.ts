@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {LogoutSuccess, AgentProfileUpdate, LoginOption, StationLoginSuccessResponse} from '@webex/plugin-cc';
+import {LogoutSuccess, AgentProfileUpdate, LoginOption, StationLoginSuccessResponse} from '@webex/contact-center';
 import {UseStationLoginProps} from './station-login/station-login.types';
 import store, {CC_EVENTS} from '@webex/cc-store'; // we need to import as we are losing the context of this in store
 import {LoginOptionsState} from '@webex/cc-components';

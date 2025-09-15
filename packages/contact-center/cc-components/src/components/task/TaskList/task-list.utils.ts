@@ -10,7 +10,6 @@ import {isIncomingTask} from '@webex/cc-store';
 export const extractTaskListItemData = (task: ITask, isBrowser: boolean, logger?): TaskListItemData => {
   try {
     // Extract basic data from task
-    //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
     const callAssociationDetails = task?.data?.interaction?.callAssociatedDetails;
     const ani = callAssociationDetails?.ani;
     const customerName = callAssociationDetails?.customerName;

@@ -8,8 +8,8 @@ import {
   BuddyAgentsResponse,
   StateChange,
   Logout,
-} from '@webex/plugin-cc';
-import {DestinationType} from 'node_modules/@webex/plugin-cc/dist/types/services/task/types';
+} from '@webex/contact-center';
+import {DestinationType} from 'node_modules/@webex/contact-center/dist/types/services/task/types';
 import {
   AgentProfileUpdate,
   LogContext,
@@ -18,7 +18,7 @@ import {
   StationLogoutResponse,
   Team,
   UpdateDeviceTypeResponse,
-} from 'node_modules/@webex/plugin-cc/dist/types/types';
+} from 'node_modules/@webex/contact-center/dist/types/types';
 
 //  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
 interface IContactCenter {

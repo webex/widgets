@@ -1,3 +1,57 @@
+# [1.28.0-ccwidgets.112](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.111...v1.28.0-ccwidgets.112) (2025-09-09)
+
+
+### Bug Fixes
+
+* **submit-metricst:** fix-for-the-product-undefined-issue ([#530](https://github.com/webex/widgets/issues/530)) ([03db2f7](https://github.com/webex/widgets/commit/03db2f7cae4a425069b096c5922cc91bd9881092))
+
+# [1.28.0-ccwidgets.111](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.110...v1.28.0-ccwidgets.111) (2025-08-22)
+
+
+### Bug Fixes
+
+* **contact-center:** update sdk package from plugin-cc to contact-center ([#529](https://github.com/webex/widgets/issues/529)) ([25fe6e7](https://github.com/webex/widgets/commit/25fe6e78a034d51652df70f6f2adf641daa7a094))
+
+# [1.28.0-ccwidgets.110](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.109...v1.28.0-ccwidgets.110) (2025-08-22)
+
+
+### Bug Fixes
+
+* **cc-widgets:** End 2 End Tests stabilised  ([#517](https://github.com/webex/widgets/issues/517)) ([4dd2f74](https://github.com/webex/widgets/commit/4dd2f74452580a64ca4dc2a60fcd5128eefe19dd))
+
+# [1.28.0-ccwidgets.109](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.108...v1.28.0-ccwidgets.109) (2025-08-22)
+
+
+### Bug Fixes
+
+* **tooling:** revert removed code for publishing tag ([#528](https://github.com/webex/widgets/issues/528)) ([f6dba92](https://github.com/webex/widgets/commit/f6dba927a07d6d74ed67715d8bb33f1b16de76fe))
+
+# [1.28.0-ccwidgets.108](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.107...v1.28.0-ccwidgets.108) (2025-08-22)
+
+
+### Bug Fixes
+
+* **tooling:** force publish tag ([#527](https://github.com/webex/widgets/issues/527)) ([97a2c6e](https://github.com/webex/widgets/commit/97a2c6eb5deb20a84787ca22d2ae69b8125b587f))
+* **tooling:** remove changes for force publishing v108 ([#526](https://github.com/webex/widgets/issues/526)) ([9e535c6](https://github.com/webex/widgets/commit/9e535c68fe9667c14a4ccb64a2d856a3cec03bb1))
+
+# [1.28.0-ccwidgets.107](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.106...v1.28.0-ccwidgets.107) (2025-08-22)
+
+
+### Bug Fixes
+
+* **cc-ui-logging:** @webex/ui-logging package ([#491](https://github.com/webex/widgets/issues/491)) ([b647448](https://github.com/webex/widgets/commit/b647448a22991bb42c1f4f0400f6bb4d6c0568e6))
+* **cc-widgets:** added new chat client for cc widgets e2e testing ([#516](https://github.com/webex/widgets/issues/516)) ([1b34046](https://github.com/webex/widgets/commit/1b34046406ba4acaf4835e258d47d12b59da39cd))
+* **cc-widgets:** Updated chat client with new asset ([#515](https://github.com/webex/widgets/issues/515)) ([ea99d28](https://github.com/webex/widgets/commit/ea99d2873a89be3e3ba84426ee120dc4c15aaa33))
+* **publish:** force-publish-version-108 ([#522](https://github.com/webex/widgets/issues/522)) ([125fd27](https://github.com/webex/widgets/commit/125fd271d82565ac23ff86ee2d971caad855e999))
+* **tooling:** force publish version 108 - 2 ([#523](https://github.com/webex/widgets/issues/523)) ([ae9b70e](https://github.com/webex/widgets/commit/ae9b70ea54e7a04843db8c23697366cb38ce7849))
+* **tooling:** force publish version 108 - 4 ([#525](https://github.com/webex/widgets/issues/525)) ([010e10e](https://github.com/webex/widgets/commit/010e10e4a13fa82776ea21d285c1b4d76c9ef5ae))
+* **ui-logging:** add public access config in cc-ui-logging ([#521](https://github.com/webex/widgets/issues/521)) ([3ab033b](https://github.com/webex/widgets/commit/3ab033b66c5a959928ca9b7a2e15b7605ad3b549))
+
+
+### Features
+
+* **widgets:** addd e2e tests for task list ([#508](https://github.com/webex/widgets/issues/508)) ([549dafd](https://github.com/webex/widgets/commit/549dafd074f98d395fd721cebb3ada94f42a1403))
+
 # [1.28.0-ccwidgets.106](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.105...v1.28.0-ccwidgets.106) (2025-08-13)
 
 
