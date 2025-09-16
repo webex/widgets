@@ -15,5 +15,5 @@
 }
 
 .wxc-meeting-control-bar .wxc-meeting-control-bar__controls--control-refs[aria-hidden="true"] {
-    visibility: hidden;
+  visibility: hidden;
 }
