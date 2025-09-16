@@ -281,7 +281,7 @@ export interface ControlProps {
   endConsultCall: () => void;
 
   /**
-   * Function to transfer the consult call to a destination.
+   * Function to transfer the consult call to a already established consult.
    */
   consultTransfer: () => void;
 

@@ -1,5 +1,3 @@
-// EmptyState.tsx
-
 import React, {useState} from 'react';
 import './consult-transfer-dial-number.scss';
 import {ButtonCircle} from '@momentum-ui/react-collaboration';

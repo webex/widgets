@@ -219,7 +219,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
             agentName={consultAgentName}
             startTimeStamp={consultStartTimeStamp}
             endConsultCall={endConsultCall}
-            onTransfer={() => consultTransfer()}
+            onTransfer={consultTransfer}
             consultCompleted={consultCompleted}
             isAgentBeingConsulted={!consultAccepted}
             isEndConsultEnabled={isEndConsultEnabled}
