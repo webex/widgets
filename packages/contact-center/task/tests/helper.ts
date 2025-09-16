@@ -1487,12 +1487,9 @@ describe('useCallControl', () => {
       })
     );
     await act(async () => {
-      await result.current.consultTransfer('dest456', 'queue');
+      await result.current.consultTransfer();
     });
-    expect(mockCurrentTask.consultTransfer).toHaveBeenCalledWith({
-      to: 'dest456',
-      destinationType: 'queue',
-    });
+    expect(mockCurrentTask.consultTransfer).toHaveBeenCalled();
     expect(setConsultInitiatedSpy).toHaveBeenCalledWith(true);
     setConsultInitiatedSpy.mockRestore();
   });
@@ -1514,11 +1511,8 @@ describe('useCallControl', () => {
       })
     );
 
-    await expect(result.current.consultTransfer('dest456', 'queue')).rejects.toThrow(transferError);
-    expect(mockCurrentTask.consultTransfer).toHaveBeenCalledWith({
-      to: 'dest456',
-      destinationType: 'queue',
-    });
+    await expect(result.current.consultTransfer()).rejects.toThrow(transferError);
+    expect(mockCurrentTask.consultTransfer).toHaveBeenCalled();
     expect(mockLogger.error).toHaveBeenCalledWith('Error transferring consult call: Error: Consult transfer failed', {
       module: 'widget-cc-task#helper.ts',
       method: 'useCallControl#consultTransfer',

@@ -282,10 +282,8 @@ export interface ControlProps {
 
   /**
    * Function to transfer the consult call to a destination.
-   * @param destination - The destination to transfer the consult call to.
-   * @param destinationType - The type of destination.
    */
-  consultTransfer: (destination: string, destinationType: DestinationType) => void;
+  consultTransfer: () => void;
 
   /**
    * Flag to determine if the consult call is connecting.
