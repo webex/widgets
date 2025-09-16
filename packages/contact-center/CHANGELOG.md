@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.114](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.113...v1.28.0-ccwidgets.114) (2025-09-16)
+
+
+### Features
+
+* **cc-widgets:** Transfer to dial number feature added ([#531](https://github.com/webex/widgets/issues/531)) ([f7b1773](https://github.com/webex/widgets/commit/f7b1773501a4bd7f40a24fa83f24d4175317be3e))
+
 # [1.28.0-ccwidgets.113](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.112...v1.28.0-ccwidgets.113) (2025-09-15)
 
 
