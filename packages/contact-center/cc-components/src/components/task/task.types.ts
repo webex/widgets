@@ -281,11 +281,9 @@ export interface ControlProps {
   endConsultCall: () => void;
 
   /**
-   * Function to transfer the consult call to a destination.
-   * @param destination - The destination to transfer the consult call to.
-   * @param destinationType - The type of destination.
+   * Function to transfer the consult call to a already established consult.
    */
-  consultTransfer: (destination: string, destinationType: DestinationType) => void;
+  consultTransfer: () => void;
 
   /**
    * Flag to determine if the consult call is connecting.
@@ -493,6 +491,18 @@ export interface ConsultTransferListComponentProps {
 }
 
 /**
+ * Interface representing the properties for CallControlDialNumber component.
+ */
+export interface ConsultTransferDialNumberComponentProps {
+  title: string;
+  subtitle?: string;
+  buttonIcon: string;
+  onButtonPress: (dialNumber: string) => void;
+  className?: string;
+  logger: ILogger;
+}
+
+/**
  * Interface representing the properties for ConsultTransferPopover component.
  */
 export interface ConsultTransferPopoverComponentProps {
@@ -502,6 +512,7 @@ export interface ConsultTransferPopoverComponentProps {
   queues?: ContactServiceQueue[];
   onAgentSelect?: (agentId: string, agentName: string) => void;
   onQueueSelect?: (queueId: string, queueName: string) => void;
+  onDialNumberSelect?: (dialNumber: string) => void;
   allowConsultToQueue: boolean;
   logger: ILogger;
 }

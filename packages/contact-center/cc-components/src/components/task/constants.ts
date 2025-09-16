@@ -15,7 +15,9 @@ export const SELECT = 'Select';
 export const SUBMIT_WRAP_UP = 'Submit & Wrap up';
 export const MUTE_CALL = 'Mute';
 export const UNMUTE_CALL = 'Unmute';
-
+export const DIAL_NUMBER = 'DialNumber';
+export const AGENTS = 'Agents';
+export const QUEUES = 'Queues';
 // CallControlCAD constants
 export const NO_CUSTOMER_NAME = 'No Customer Name';
 export const NO_CALLER_ID = 'No Caller ID';

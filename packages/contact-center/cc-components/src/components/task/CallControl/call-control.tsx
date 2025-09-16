@@ -212,6 +212,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                         queues={queues}
                         onAgentSelect={(agentId, agentName) => handleTargetSelect(agentId, agentName, 'agent')}
                         onQueueSelect={(queueId, queueName) => handleTargetSelect(queueId, queueName, 'queue')}
+                        onDialNumberSelect={(dialNumber) => handleTargetSelect(dialNumber, dialNumber, 'dialNumber')}
                         allowConsultToQueue={allowConsultToQueue}
                         logger={logger}
                       />

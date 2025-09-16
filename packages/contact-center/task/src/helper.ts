@@ -744,14 +744,10 @@ export const useCallControl = (props: useCallControlProps) => {
     }
   };
 
-  const consultTransfer = async (transferDestination: string, destinationType: DestinationType) => {
-    const consultTransferPayload = {
-      to: transferDestination,
-      destinationType: destinationType,
-    };
+  const consultTransfer = async () => {
     try {
       //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
-      await currentTask.consultTransfer(consultTransferPayload);
+      await currentTask.consultTransfer();
       store.setConsultInitiated(true);
     } catch (error) {
       logError(`Error transferring consult call: ${error}`, 'consultTransfer');
