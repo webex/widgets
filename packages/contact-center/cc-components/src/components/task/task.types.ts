@@ -502,8 +502,14 @@ export interface ConsultTransferPopoverComponentProps {
   queues?: ContactServiceQueue[];
   onAgentSelect?: (agentId: string, agentName: string) => void;
   onQueueSelect?: (queueId: string, queueName: string) => void;
+  onDialNumberSelect?: (id: string, name: string, number: string) => void;
+  onEntryPointSelect?: (id: string, name: string, number: string) => void;
   allowConsultToQueue: boolean;
   logger: ILogger;
+  getAddressBookEntries: (params?: AddressBookEntrySearchParams) => Promise<AddressBookEntriesResponse>;
+  getEntryPoints: () => Promise<any[]>;
+  getBuddyAgents?: (searchTerm?: string) => Promise<BuddyDetails[]>;
+  getQueues?: (searchTerm?: string) => Promise<ContactServiceQueue[]>;
 }
 
 /**
@@ -652,4 +658,77 @@ export interface TimerUIState {
   iconClassName: string;
   iconName: string;
   formattedTime: string;
+}
+
+/**
+ * AddressBook API Types
+ */
+
+export interface AddressBookEntrySearchParams {
+  /** Address book ID (optional, uses agent's address book if not provided) */
+  addressBookId?: string;
+
+  /** Filter criteria using RSQL syntax */
+  filter?: string;
+
+  /** Attributes to be returned */
+  attributes?: string;
+
+  /** Search keyword for name and number fields */
+  search?: string;
+
+  /** Page number (starts from 0) */
+  page?: number;
+
+  /** Number of items per page (default: 100) */
+  pageSize?: number;
+}
+
+export interface AddressBookEntry {
+  /** Unique identifier for the entry */
+  id: string;
+
+  /** Organization ID this entry belongs to */
+  organizationId?: string;
+
+  /** Version of the entry */
+  version?: number;
+
+  /** Name of the entry */
+  name: string;
+
+  /** Phone number for the entry */
+  number: string;
+
+  /** Creation timestamp in epoch millis */
+  createdTime?: number;
+
+  /** Last updated timestamp in epoch millis */
+  lastUpdatedTime?: number;
+}
+
+export interface AddressBookEntriesResponse {
+  /** Array of address book entries */
+  data: AddressBookEntry[];
+
+  /** Pagination metadata */
+  meta: {
+    /** Organization ID */
+    orgid?: string;
+
+    /** Current page number */
+    page?: number;
+
+    /** Page size for current data set */
+    pageSize?: number;
+
+    /** Number of pages */
+    totalPages?: number;
+
+    /** Total number of items */
+    totalRecords?: number;
+
+    /** Map of pagination links */
+    links?: Record<string, string>;
+  };
 }

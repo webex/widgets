@@ -9,7 +9,7 @@ import {
   store,
   OutdialCall,
 } from '@webex/cc-widgets';
-import {StationLogoutResponse} from '@webex/contact-center';
+import {StationLogoutResponse, BuddyAgents, BuddyDetails} from '@webex/contact-center';
 import {ERROR_TRIGGERING_IDLE_CODES} from '@webex/cc-store';
 import Webex from 'webex';
 import {
@@ -26,6 +26,8 @@ import {PopoverNext} from '@momentum-ui/react-collaboration';
 import './App.scss';
 import {observer} from 'mobx-react-lite';
 import EngageWidget from './EngageWidget';
+// Direct import of the ConsultTransferPopoverComponent
+import ConsultTransferPopoverComponent from '../../../../packages/contact-center/cc-components/src/components/task/CallControl/CallControlCustom/consult-transfer-popover';
 
 // This is not to be included to a production app.
 // Have added here for debugging purposes
@@ -39,6 +41,7 @@ const defaultWidgets = {
   callControl: true,
   callControlCAD: true,
   outdialCall: true,
+  consultTransferPopover: true,
 };
 window['AGENTX_SERVICE'] = {}; // Make it available in the window object for global access for engage widgets
 
@@ -381,6 +384,8 @@ function App() {
     switch (widget) {
       case 'callControlCAD':
         return 'Call Controls with Call Associated Data (CAD)';
+      case 'consultTransferPopover':
+        return 'Consult Transfer Popover';
       default:
         return widget.charAt(0).toUpperCase() + widget.slice(1).replace(/([A-Z])/g, ' $1');
     }
@@ -828,6 +833,60 @@ function App() {
                       </div>
                     )}
                     {selectedWidgets.outdialCall && <OutdialCall />}
+                    {selectedWidgets.consultTransferPopover && (
+                      <div className="box">
+                        <section className="section-box">
+                          <fieldset className="fieldset">
+                            <legend className="legend-box">Consult Transfer Popover</legend>
+                            <ConsultTransferPopoverComponent
+                              heading="Consult / Transfer"
+                              buttonIcon="handset-bold"
+                              onAgentSelect={(agentId, agentName) => {
+                                console.log('Agent selected:', agentId, agentName);
+                              }}
+                              onQueueSelect={(queueId, queueName) => {
+                                console.log('Queue selected:', queueId, queueName);
+                              }}
+                              onDialNumberSelect={(id, name, number) => {
+                                console.log('Dial number selected:', id, name, number);
+                              }}
+                              onEntryPointSelect={(id, name, number) => {
+                                console.log('Entry point selected:', id, name, number);
+                              }}
+                              allowConsultToQueue={true}
+                              logger={store.logger}
+                              getAddressBookEntries={async (params) => {
+                                return await store.cc.addressBook.getEntries(params);
+                              }}
+                              getEntryPoints={async () => {
+                                return await store.cc.entryPoints.getEntryPoints();
+                              }}
+                              getBuddyAgents={async (searchTerm?: string): Promise<BuddyDetails[]> => {
+                                try {
+                                  // Create the BuddyAgents data object with required mediaType
+                                  const buddyAgentsData: BuddyAgents = {
+                                    mediaType: 'telephony', // Required field
+                                    ...(searchTerm && {state: 'Available'}), // Use state filter when search term is provided
+                                  };
+                                  const response = await store.cc.getBuddyAgents(buddyAgentsData);
+                                  // Return the buddy agents array from the response
+                                  if (response && typeof response === 'object' && 'agentList' in response) {
+                                    return response.agentList || [];
+                                  }
+                                  return [];
+                                } catch (error) {
+                                  console.error('Error fetching buddy agents:', error);
+                                  return [];
+                                }
+                              }}
+                              getQueues={async (searchTerm?: string) => {
+                                return await store.cc.getQueues(searchTerm);
+                              }}
+                            />
+                          </fieldset>
+                        </section>
+                      </div>
+                    )}
                   </>
                 )}
               </>

@@ -42,6 +42,12 @@ interface IContactCenter {
     agentId: string;
   };
   setAgentState(data: StateChange): Promise<SetStateResponse>;
+  addressBook: {
+    getEntries: () => Promise<any[]>;
+  };
+  entryPoints: {
+    getEntryPoints: () => Promise<any[]>;
+  };
 }
 //  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
 type IWebex = {

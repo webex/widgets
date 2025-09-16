@@ -16,6 +16,7 @@
 
 .webexTheme {
   padding: 1rem;
+  padding-bottom: 4rem; /* Add extra bottom padding to prevent last component from being hidden */
   height: 100%;
   color: var(--mds-color-theme-button-primary-normal);
   background-color: var(--mds-color-theme-inverted-text-primary-normal);

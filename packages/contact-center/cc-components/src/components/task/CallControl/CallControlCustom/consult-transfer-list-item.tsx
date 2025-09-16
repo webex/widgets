@@ -15,8 +15,26 @@ const ConsultTransferListComponent: React.FC<ConsultTransferListComponentProps> 
   };
 
   return (
-    <ListItemBase className={classnames('call-control-list-item', className)} size={50} isPadded aria-label={title}>
-      <ListItemBaseSection position="start">
+    <ListItemBase
+      className={classnames('call-control-list-item', className)}
+      size={50}
+      isPadded
+      aria-label={title}
+      style={{
+        padding: '12px 16px',
+        margin: '2px 0',
+        borderRadius: '8px',
+        transition: 'background-color 0.2s ease',
+      }}
+    >
+      <ListItemBaseSection
+        position="start"
+        style={{
+          marginRight: '12px',
+          display: 'flex',
+          alignItems: 'center',
+        }}
+      >
         <AvatarNext size={32} initials={initials} title={title} />
       </ListItemBaseSection>
       <ListItemBaseSection
@@ -25,23 +43,71 @@ const ConsultTransferListComponent: React.FC<ConsultTransferListComponentProps> 
           flex: 1,
           display: 'flex',
           flexDirection: 'column',
-          marginLeft: '8px',
+          justifyContent: 'center',
           minWidth: 0,
           overflow: 'hidden',
+          paddingRight: '8px',
         }}
       >
-        <Text tagName="p" type="body-primary" style={{margin: 0, lineHeight: '1.2'}}>
+        <Text
+          tagName="div"
+          type="body-primary"
+          style={{
+            margin: 0,
+            marginBottom: '2px',
+            lineHeight: '1.3',
+            fontWeight: '500',
+            fontSize: '14px',
+            color: '#323130',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+        >
           {title}
         </Text>
         {subtitle && (
-          <Text tagName="p" type="body-secondary" style={{margin: 0, lineHeight: '1.2'}}>
+          <Text
+            tagName="div"
+            type="body-secondary"
+            style={{
+              margin: 0,
+              lineHeight: '1.2',
+              fontSize: '12px',
+              color: '#605e5c',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+          >
             {subtitle}
           </Text>
         )}
       </ListItemBaseSection>
-      <ListItemBaseSection position="end">
-        <div className="hover-button">
-          <ButtonCircle onPress={handleButtonPress} size={28} color="join">
+      <ListItemBaseSection
+        position="end"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          marginLeft: '8px',
+        }}
+      >
+        <div
+          className="hover-button"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <ButtonCircle
+            onPress={handleButtonPress}
+            size={32}
+            color="join"
+            style={{
+              flexShrink: 0,
+            }}
+          >
             <Icon name={buttonIcon} />
           </ButtonCircle>
         </div>
