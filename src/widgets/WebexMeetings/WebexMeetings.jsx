@@ -27,7 +27,17 @@ class WebexMeetingsWidget extends Component {
   constructor(props) {
     super(props);
   }
-
+/**
+ * Temporary custom accessibility fix:
+ * - Redirects focus to the first actionable control inside the meeting
+ * - Makes video layout focusable and supports left/right arrow navigation
+ * - Prevents focus from escaping to the browser URL bar
+ *
+ * NOTE: This is a workaround because the base @webex/components WebexMeeting
+ * does not yet support these accessibility features.
+ * Once the upstream component is fixed, we must remove this custom code
+ * from our repo to avoid duplication and ensure long-term maintainability.
+ */
   componentDidMount() {
     // When focus comes to the widget container, move to the correct media container before and after joining
     if (this.widgetDiv) {
