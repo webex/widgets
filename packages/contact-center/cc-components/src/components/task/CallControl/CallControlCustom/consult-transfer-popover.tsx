@@ -4,7 +4,6 @@ import ConsultTransferListComponent from './consult-transfer-list-item';
 import {ConsultTransferPopoverComponentProps} from '../../task.types';
 import ConsultTransferEmptyState from './consult-transfer-empty-state';
 import {
-  shouldShowTabs,
   isAgentsEmpty,
   isQueuesEmpty,
   handleTabSelection,
@@ -12,6 +11,8 @@ import {
   handleQueueSelection,
   getEmptyStateMessage,
 } from './call-control-custom.utils';
+import DialNumberUI from './consult-transfer-dial-number';
+import {AGENTS, DIAL_NUMBER, QUEUES} from '../../constants';
 
 const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentProps> = ({
   heading,
@@ -20,16 +21,17 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
   queues,
   onAgentSelect,
   onQueueSelect,
+  onDialNumberSelect,
   allowConsultToQueue,
   logger,
 }) => {
-  const [selectedTab, setSelectedTab] = useState('Agents');
+  const [selectedTab, setSelectedTab] = useState(AGENTS);
   const filteredAgents = buddyAgents;
   const filteredQueues = queues;
 
   const noAgents = isAgentsEmpty(filteredAgents);
   const noQueues = isQueuesEmpty(filteredQueues);
-  const showTabs = shouldShowTabs(filteredAgents, filteredQueues);
+  const showTabs = true; // Always show tabs to allow dial number option
 
   const renderList = (items, getKey, getTitle, handleSelect) => (
     <ListNext listSize={items.length} className="agent-list">
@@ -72,17 +74,20 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
             handleTabSelection(key as string, setSelectedTab, logger);
           }}
         >
-          <TabNext key="Agents" className="agent-tab" active={selectedTab === 'Agents'}>
+          <TabNext key={AGENTS} className="agent-tab" active={selectedTab === AGENTS}>
             Agents
           </TabNext>
           <TabNext
-            key="Queues"
+            key={QUEUES}
             className="queue-tab"
-            active={selectedTab === 'Queues'}
+            active={selectedTab === QUEUES}
             disabled={!allowConsultToQueue}
             style={!allowConsultToQueue ? {display: 'none'} : undefined}
           >
             Queues
+          </TabNext>
+          <TabNext key={DIAL_NUMBER} className="dial-number-tab" active={selectedTab === DIAL_NUMBER}>
+            Dial Number
           </TabNext>
         </TabListNext>
       )}
@@ -91,18 +96,18 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
       {!showTabs && <ConsultTransferEmptyState message={getEmptyStateMessage(selectedTab, showTabs)} />}
 
       {/* If agents tab is selected and empty */}
-      {showTabs && selectedTab === 'Agents' && noAgents && (
+      {showTabs && selectedTab === AGENTS && noAgents && (
         <ConsultTransferEmptyState message={getEmptyStateMessage(selectedTab, showTabs)} />
       )}
 
       {/* If queues tab is selected and empty */}
-      {showTabs && selectedTab === 'Queues' && noQueues && (
+      {showTabs && selectedTab === QUEUES && noQueues && (
         <ConsultTransferEmptyState message={getEmptyStateMessage(selectedTab, showTabs)} />
       )}
 
       {/* Render lists if not empty */}
       {showTabs &&
-        selectedTab === 'Agents' &&
+        selectedTab === AGENTS &&
         !noAgents &&
         renderList(
           filteredAgents,
@@ -114,7 +119,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
         )}
 
       {showTabs &&
-        selectedTab === 'Queues' &&
+        selectedTab === QUEUES &&
         !noQueues &&
         renderList(
           filteredQueues,
@@ -124,6 +129,16 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
             handleQueueSelection(id, name, onQueueSelect, logger);
           }
         )}
+      {showTabs && selectedTab === DIAL_NUMBER && (
+        <DialNumberUI
+          title="Dial Number"
+          buttonIcon={buttonIcon}
+          onButtonPress={(dialNumber) => {
+            onDialNumberSelect(dialNumber);
+          }}
+          logger={logger}
+        />
+      )}
     </div>
   );
 };

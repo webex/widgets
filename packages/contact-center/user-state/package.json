@@ -1,7 +1,7 @@
 {
   "name": "@webex/cc-user-state",
   "description": "Webex Contact Center Widgets: User State",
-  "version": "1.28.0-ccwidgets.106",
+  "version": "1.28.0-ccwidgets.114",
   "main": "dist/index.js",
   "types": "dist/types/index.d.ts",
   "publishConfig": {
@@ -24,6 +24,7 @@
     "@webex/cc-components": "workspace:*",
     "@webex/cc-store": "workspace:*",
     "mobx-react-lite": "^4.1.0",
+    "react-error-boundary": "^6.0.0",
     "typescript": "5.6.3"
   },
   "devDependencies": {
@@ -37,6 +38,7 @@
     "@testing-library/react": "16.0.1",
     "@types/jest": "29.5.14",
     "@types/react-test-renderer": "18",
+    "@webex/test-fixtures": "workspace:*",
     "babel-jest": "29.7.0",
     "babel-loader": "9.2.1",
     "eslint": "^9.20.1",

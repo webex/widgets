@@ -1,9 +1,12 @@
 {
   "name": "@webex/cc-ui-logging",
-  "version": "1.0.0",
+  "version": "1.28.0-ccwidgets.114",
   "description": "UI metrics tracking for Webex widgets",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build:src": "webpack --mode=development",
     "clean": "rm -rf dist",

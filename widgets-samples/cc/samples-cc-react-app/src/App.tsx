@@ -9,10 +9,19 @@ import {
   store,
   OutdialCall,
 } from '@webex/cc-widgets';
-import {StationLogoutResponse} from '@webex/plugin-cc';
+import {StationLogoutResponse} from '@webex/contact-center';
 import {ERROR_TRIGGERING_IDLE_CODES} from '@webex/cc-store';
 import Webex from 'webex';
-import {ThemeProvider, IconProvider, Icon, Button, Checkbox, Text, Select, Option} from '@momentum-design/components/dist/react';
+import {
+  ThemeProvider,
+  IconProvider,
+  Icon,
+  Button,
+  Checkbox,
+  Text,
+  Select,
+  Option,
+} from '@momentum-design/components/dist/react';
 import {PopoverNext} from '@momentum-ui/react-collaboration';
 import './App.scss';
 import {observer} from 'mobx-react-lite';
@@ -67,18 +76,18 @@ function App() {
   });
 
   const handleSaveStart = () => {
-  setShowLoader(true);
-  setToast(null);
-};
+    setShowLoader(true);
+    setToast(null);
+  };
 
-const handleSaveEnd = (isComplete: boolean) => {
-  setShowLoader(false);
-  if (isComplete) {
-    setToast({type: 'success'});
-  } else {
-    setToast({type: 'error'});
-  }
-};
+  const handleSaveEnd = (isComplete: boolean) => {
+    setShowLoader(false);
+    if (isComplete) {
+      setToast({type: 'success'});
+    } else {
+      setToast({type: 'error'});
+    }
+  };
 
   const onIncomingTaskCB = ({task}) => {
     console.log('Incoming task:', task);
@@ -89,28 +98,22 @@ const handleSaveEnd = (isComplete: boolean) => {
   useEffect(() => {
     if (window.location.hash) {
       const urlParams = new URLSearchParams(window.location.hash.replace('#', '?'));
-    
+
       const accessToken = urlParams.get('access_token');
-    
+
       if (accessToken) {
         window.localStorage.setItem('accessToken', accessToken);
         setAccessToken(accessToken);
         // Clear the hash from the URL to remove the token from browser history
-        window.history.replaceState(
-          {},
-          document.title,
-          window.location.pathname + window.location.search
-        );
+        window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
       }
-    }
-    else {
+    } else {
       const storedAccessToken = window.localStorage.getItem('accessToken');
       if (storedAccessToken) {
         setAccessToken(storedAccessToken);
       }
     }
-  }
-  , []);
+  }, []);
 
   const webexConfig = {
     fedramp: false,
@@ -158,7 +161,7 @@ const handleSaveEnd = (isComplete: boolean) => {
     console.log('onTaskAccepted invoked for task:', task);
   };
 
-const onTaskDeclined = (task,reason) => {
+  const onTaskDeclined = (task, reason) => {
     console.log('onTaskDeclined invoked for task:', task);
     setRejectedReason(reason);
     setShowRejectedPopup(true);
@@ -166,7 +169,9 @@ const onTaskDeclined = (task,reason) => {
 
   const onTaskSelected = ({task, isClicked}) => {
     console.log('onTaskSelected invoked for task:', task, 'isClicked:', isClicked);
-    console.log(`onTaskSelected invoked for task with title : ${task?.data?.interaction?.callAssociatedDetails?.ani}, and mediaType : ${task?.data?.mediaType}`);
+    console.log(
+      `onTaskSelected invoked for task with title : ${task?.data?.interaction?.callAssociatedDetails?.ani}, and mediaType : ${task?.data?.mediaType}`
+    );
   };
 
   const onHoldResume = ({isHeld, task}) => {
@@ -184,12 +189,12 @@ const onTaskDeclined = (task,reason) => {
   const onWrapUp = (params) => {
     console.log('onWrapup invoked', params);
     //the below log is used by e2e tests
-     if (params && params.wrapUpReason) console.log(`onWrapup invoked with reason : ${params.wrapUpReason}`);
+    if (params && params.wrapUpReason) console.log(`onWrapup invoked with reason : ${params.wrapUpReason}`);
   };
 
-const onToggleMute = ({isMuted, task}) => {
-  console.log('onToggleMute invoked', {isMuted, task});
-};
+  const onToggleMute = ({isMuted, task}) => {
+    console.log('onToggleMute invoked', {isMuted, task});
+  };
 
   const enableDisableMultiLogin = () => {
     if (isMultiLoginEnabled) {
@@ -242,7 +247,7 @@ const onToggleMute = ({isMuted, task}) => {
         lastStateChangeReason: newState,
       })
       .then((response) => {
-        if('data'in response){
+        if ('data' in response) {
           store.setCurrentState(response.data.auxCodeId);
           store.setLastStateChangeTimestamp(response.data.lastStateChangeTimestamp);
           store.setLastIdleCodeChangeTimestamp(response.data.lastIdleCodeChangeTimestamp);
@@ -275,30 +280,17 @@ const onToggleMute = ({isMuted, task}) => {
     }
 
     // Reference: https://developer.webex-cx.com/documentation/integrations
-    const ccMandatoryScopes = [
-      "cjp:config_read",
-      "cjp:config_write",
-      "cjp:config",
-      "cjp:user",
-    ];
+    const ccMandatoryScopes = ['cjp:config_read', 'cjp:config_write', 'cjp:config', 'cjp:user'];
 
-    const webRTCCallingScopes = [
-      "spark:webrtc_calling",
-      "spark:calls_read",
-      "spark:calls_write",
-      "spark:xsi"
-    ];
+    const webRTCCallingScopes = ['spark:webrtc_calling', 'spark:calls_read', 'spark:calls_write', 'spark:xsi'];
 
     const additionalScopes = [
-      "spark:kms", // to avoid token downscope to only spark:kms error on SDK init
+      'spark:kms', // to avoid token downscope to only spark:kms error on SDK init
     ];
 
     const requestedScopes = Array.from(
-      new Set(
-          ccMandatoryScopes
-          .concat(webRTCCallingScopes)
-          .concat(additionalScopes))
-        ).join(' ');
+      new Set(ccMandatoryScopes.concat(webRTCCallingScopes).concat(additionalScopes))
+    ).join(' ');
 
     const webexConfig = {
       config: {
@@ -328,7 +320,7 @@ const onToggleMute = ({isMuted, task}) => {
 
   // Store accessToken changes in local storage
   useEffect(() => {
-    if(accessToken.trim() !== '') {
+    if (accessToken.trim() !== '') {
       window.localStorage.setItem('accessToken', accessToken);
     }
   }, [accessToken]);
@@ -350,28 +342,35 @@ const onToggleMute = ({isMuted, task}) => {
 
   useEffect(() => {
     store.setIncomingTaskCb(onIncomingTaskCB);
+    store.setOnError(onError);
 
     return () => {
+      store.setOnError(undefined);
       store.setTaskRejected(undefined);
       store.setIncomingTaskCb(undefined);
     };
   }, []);
 
- const onStateChange = (status) => {
-  console.log('onStateChange invoked', status);
-  //adding a log to be used for automation
-  console.log('onStateChange invoked with state name:', status?.name);
-  if (!status || !status.name) return;
-  if (!Object.values(ERROR_TRIGGERING_IDLE_CODES).includes(status.name)) {
-    setShowRejectedPopup(false);
-    setRejectedReason('');
-  }
-};
+  const onError = (widgetName: string, error: Error) => {
+    console.log('Error in widgets:', widgetName, error);
+  };
 
-    const stationLogout = () => {
-    store.cc.stationLogout({logoutReason: 'User requested logout'})
+  const onStateChange = (status) => {
+    console.log('onStateChange invoked', status);
+    //adding a log to be used for automation
+    console.log('onStateChange invoked with state name:', status?.name);
+    if (!status || !status.name) return;
+    if (!Object.values(ERROR_TRIGGERING_IDLE_CODES).includes(status.name)) {
+      setShowRejectedPopup(false);
+      setRejectedReason('');
+    }
+  };
+
+  const stationLogout = () => {
+    store.cc
+      .stationLogout({logoutReason: 'User requested logout'})
       .then((res: StationLogoutResponse) => {
-        if('data' in res) console.log('Agent logged out successfully', res.data);
+        if ('data' in res) console.log('Agent logged out successfully', res.data);
       })
       .catch((error: Error) => {
         console.log('Agent logout failed', error);
@@ -395,38 +394,34 @@ const onToggleMute = ({isMuted, task}) => {
         <IconProvider iconSet="momentum-icons">
           <div className="webexTheme">
             <h1>Contact Center Widgets in a React app</h1>
-              {showLoader && (
-                <div className="profile-loader-overlay">
-                    <div className="profile-loader-spinner" aria-label="Loading" />
-                </div>
-              )}
+            {showLoader && (
+              <div className="profile-loader-overlay">
+                <div className="profile-loader-spinner" aria-label="Loading" />
+              </div>
+            )}
 
-              {toast && toast.type === 'success' && (
-                <div className="toast toast-success" role="status" aria-live="polite">
-                  <div className="toast-icon" aria-hidden="true">
-                    <Icon name="check-circle-bold" />
-                  </div>
-                  <div className="toast-content">
-                    <div className="toast-title">
-                      Interaction preferences changes
-                    </div>
-                    <div>
-                      Your interaction preference is updated
-                    </div>
-                  </div>
-                  <Button
-                    size={32}
-                    variant="tertiary"
-                    color="default"
-                    prefix-icon="cancel-bold"
-                    postfix-icon=""
-                    type="button"
-                    role="button"
-                    aria-label="Close"
-                    onClick={() => setToast(null)}
-                    className="toast-close"
-                  />
+            {toast && toast.type === 'success' && (
+              <div className="toast toast-success" role="status" aria-live="polite">
+                <div className="toast-icon" aria-hidden="true">
+                  <Icon name="check-circle-bold" />
                 </div>
+                <div className="toast-content">
+                  <div className="toast-title">Interaction preferences changes</div>
+                  <div>Your interaction preference is updated</div>
+                </div>
+                <Button
+                  size={32}
+                  variant="tertiary"
+                  color="default"
+                  prefix-icon="cancel-bold"
+                  postfix-icon=""
+                  type="button"
+                  role="button"
+                  aria-label="Close"
+                  onClick={() => setToast(null)}
+                  className="toast-close"
+                />
+              </div>
             )}
 
             <div className="box">
@@ -438,31 +433,27 @@ const onToggleMute = ({isMuted, task}) => {
                     value={loginType}
                     onChange={(e: CustomEvent) => {
                       const selectedType = e.detail.value;
-                      if(selectedType !== 'token' && selectedType !== 'oauth') return;
+                      if (selectedType !== 'token' && selectedType !== 'oauth') return;
                       setLoginType(selectedType);
                     }}
                   >
-                    <Option data-testid='samples:login_option_token' key={1} value="token">Access Token</Option>
-                    <Option data-testid='samples:login_option_oauth' key={2} value="oauth">Login with Webex</Option>
+                    <Option data-testid="samples:login_option_token" key={1} value="token">
+                      Access Token
+                    </Option>
+                    <Option data-testid="samples:login_option_oauth" key={2} value="oauth">
+                      Login with Webex
+                    </Option>
                   </Select>
-                
-                  <div className="accessTokenTheme" style={{ marginTop: '15px' }}>
+
+                  <div className="accessTokenTheme" style={{marginTop: '15px'}}>
                     {loginType === 'token' && (
                       <div>
                         <span>Your access token: </span>
-                        <input
-                          type="text"
-                          value={accessToken}
-                          onChange={(e) => setAccessToken(e.target.value)}
-                        />
+                        <input type="text" value={accessToken} onChange={(e) => setAccessToken(e.target.value)} />
                       </div>
                     )}
                     {loginType === 'oauth' && (
-                      <Button
-                        data-testid="samples:login_with_webex_button"
-                        onClick={doOAuthLogin}
-                        variant="primary"
-                      >
+                      <Button data-testid="samples:login_with_webex_button" onClick={doOAuthLogin} variant="primary">
                         Login with Webex
                       </Button>
                     )}
@@ -470,9 +461,9 @@ const onToggleMute = ({isMuted, task}) => {
                 </fieldset>
               </section>
             </div>
-            <br/>
-            <div className="settings-container" style={{ display: 'flex', gap: '20px' }}>
-              <div className="box" style={{ flex: 1 }}>
+            <br />
+            <div className="settings-container" style={{display: 'flex', gap: '20px'}}>
+              <div className="box" style={{flex: 1}}>
                 <section className="section-box">
                   <fieldset className="fieldset">
                     <legend className="legend-box">&nbsp;Select Widgets to Show&nbsp;</legend>
@@ -517,8 +508,8 @@ const onToggleMute = ({isMuted, task}) => {
                   </fieldset>
                 </section>
               </div>
-              
-              <div className="box" style={{ flex: 1 }}>
+
+              <div className="box" style={{flex: 1}}>
                 <section className="section-box">
                   <fieldset className="fieldset">
                     <legend className="legend-box">&nbsp;Sample App Toggles and Operations&nbsp;</legend>
@@ -566,13 +557,19 @@ const onToggleMute = ({isMuted, task}) => {
                       }}
                     />
                     {store.isAgentLoggedIn && (
-                      <Button id="logoutAgent" onClick={stationLogout} color="positive" className='stationLogoutButtonClass' data-testid="samples:station-logout-button">
+                      <Button
+                        id="logoutAgent"
+                        onClick={stationLogout}
+                        color="positive"
+                        className="stationLogoutButtonClass"
+                        data-testid="samples:station-logout-button"
+                      >
                         Station Logout
                       </Button>
                     )}
                   </fieldset>
                 </section>
-                <br/>
+                <br />
                 <section className="section-box">
                   <fieldset className="fieldset">
                     <legend className="legend-box">&nbsp;SDK Toggles&nbsp;</legend>
@@ -599,8 +596,8 @@ const onToggleMute = ({isMuted, task}) => {
                             style={{color: 'var(--mds-color-theme-text-error-normal)', marginBottom: '10px'}}
                           >
                             <strong>Note:</strong> The "Enable Multi Login" option must be set before initializing the
-                            SDK. Changes to this setting after SDK initialization will not take effect. Please ensure you
-                            configure this option before clicking the "Init Widgets" button.
+                            SDK. Changes to this setting after SDK initialization will not take effect. Please ensure
+                            you configure this option before clicking the "Init Widgets" button.
                           </div>
                         </Text>
                       </PopoverNext>
@@ -709,7 +706,13 @@ const onToggleMute = ({isMuted, task}) => {
                       <fieldset className="fieldset">
                         <legend className="legend-box">Station Login</legend>
                         <div className="station-login">
-                          <StationLogin onLogin={onLogin} onLogout={onLogout} onCCSignOut={onCCSignOut} profileMode={false} doStationLogout={doStationLogout} />
+                          <StationLogin
+                            onLogin={onLogin}
+                            onLogout={onLogout}
+                            onCCSignOut={onCCSignOut}
+                            profileMode={false}
+                            doStationLogout={doStationLogout}
+                          />
                         </div>
                       </fieldset>
                     </section>
@@ -721,10 +724,7 @@ const onToggleMute = ({isMuted, task}) => {
                       <fieldset className="fieldset">
                         <legend className="legend-box">Station Login (Profile Mode)</legend>
                         <div className="station-login">
-                          <StationLogin 
-                            profileMode={true} 
-                            onSaveStart={handleSaveStart}
-                            onSaveEnd={handleSaveEnd} />
+                          <StationLogin profileMode={true} onSaveStart={handleSaveStart} onSaveEnd={handleSaveEnd} />
                         </div>
                       </fieldset>
                     </section>
@@ -747,7 +747,13 @@ const onToggleMute = ({isMuted, task}) => {
                         <section className="section-box">
                           <fieldset className="fieldset">
                             <legend className="legend-box">Call Control</legend>
-                            <CallControl onHoldResume={onHoldResume} onEnd={onEnd} onWrapUp={onWrapUp} onRecordingToggle={onRecordingToggle} onToggleMute={onToggleMute} />
+                            <CallControl
+                              onHoldResume={onHoldResume}
+                              onEnd={onEnd}
+                              onWrapUp={onWrapUp}
+                              onRecordingToggle={onRecordingToggle}
+                              onToggleMute={onToggleMute}
+                            />
                           </fieldset>
                         </section>
                       </div>
@@ -812,7 +818,11 @@ const onToggleMute = ({isMuted, task}) => {
                         <section className="section-box">
                           <fieldset className="fieldset">
                             <legend className="legend-box">Task List</legend>
-                            <TaskList onTaskAccepted={onTaskAccepted} onTaskDeclined={onTaskDeclined} onTaskSelected={onTaskSelected} />
+                            <TaskList
+                              onTaskAccepted={onTaskAccepted}
+                              onTaskDeclined={onTaskDeclined}
+                              onTaskSelected={onTaskSelected}
+                            />
                           </fieldset>
                         </section>
                       </div>
@@ -850,11 +860,16 @@ const onToggleMute = ({isMuted, task}) => {
                     Idle
                   </Option>
                 </Select>
-               <div style={{ display: 'flex', justifyContent: 'center'}}>
-                 <Button disabled={selectedState === ''} onClick={handlePopoverSubmit} variant="primary" data-testid="samples:rona-button-confirm">
-                  Confirm State Change
-                 </Button>
-               </div>
+                <div style={{display: 'flex', justifyContent: 'center'}}>
+                  <Button
+                    disabled={selectedState === ''}
+                    onClick={handlePopoverSubmit}
+                    variant="primary"
+                    data-testid="samples:rona-button-confirm"
+                  >
+                    Confirm State Change
+                  </Button>
+                </div>
               </div>
             )}
 

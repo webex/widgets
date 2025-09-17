@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {LogoutSuccess, AgentProfileUpdate, LoginOption, StationLoginSuccessResponse} from '@webex/plugin-cc';
+import {LogoutSuccess, AgentProfileUpdate, LoginOption, StationLoginSuccessResponse} from '@webex/contact-center';
 import {UseStationLoginProps} from './station-login/station-login.types';
 import store, {CC_EVENTS} from '@webex/cc-store'; // we need to import as we are losing the context of this in store
 import {LoginOptionsState} from '@webex/cc-components';
@@ -27,9 +27,16 @@ export const useStationLogin = (props: UseStationLoginProps) => {
   // useEffect to be called on mount
 
   useEffect(() => {
-    setSelectedDeviceType(deviceType || '');
-    setDialNumberValue(dialNumber || '');
-    setSelectedTeamId(teamId || '');
+    try {
+      setSelectedDeviceType(deviceType || '');
+      setDialNumberValue(dialNumber || '');
+      setSelectedTeamId(teamId || '');
+    } catch (error) {
+      logger.error(`CC-Widgets: Error in useEffect (mount) - ${error.message}`, {
+        module: 'widget-station-login#helper.ts',
+        method: 'useEffect',
+      });
+    }
   }, [isAgentLoggedIn]);
 
   // Track original and current login options as a single object
@@ -49,16 +56,23 @@ export const useStationLogin = (props: UseStationLoginProps) => {
 
   // Set original login options after successful login
   useEffect(() => {
-    if (store.isAgentLoggedIn) {
-      setOriginalLoginOptions({
-        deviceType: store.deviceType,
-        dialNumber: store.dialNumber,
-        teamId: store.teamId || '',
-      });
-      setCurrentLoginOptions({
-        deviceType: store.deviceType,
-        dialNumber: store.dialNumber,
-        teamId: store.teamId || '',
+    try {
+      if (store.isAgentLoggedIn) {
+        setOriginalLoginOptions({
+          deviceType: store.deviceType,
+          dialNumber: store.dialNumber,
+          teamId: store.teamId || '',
+        });
+        setCurrentLoginOptions({
+          deviceType: store.deviceType,
+          dialNumber: store.dialNumber,
+          teamId: store.teamId || '',
+        });
+      }
+    } catch (error) {
+      logger.error(`CC-Widgets: Error in useEffect (setOriginalLoginOptions) - ${error.message}`, {
+        module: 'widget-station-login#helper.ts',
+        method: 'useEffect',
       });
     }
   }, [store.isAgentLoggedIn]);
@@ -71,68 +85,98 @@ export const useStationLogin = (props: UseStationLoginProps) => {
     originalLoginOptions.teamId !== currentLoginOptions.teamId;
 
   const saveLoginOptions = () => {
-    setSaveError('');
-    if (!isLoginOptionsChanged) {
-      setSaveError('No changes detected in login options.');
-      logger.log('No changes detected in login options.', {
+    try {
+      setSaveError('');
+      if (!isLoginOptionsChanged) {
+        setSaveError('No changes detected in login options.');
+        logger.log('No changes detected in login options.', {
+          module: 'widget-station-login#helper.ts',
+          method: 'saveLoginOptions',
+        });
+        if (props.onSaveEnd) props.onSaveEnd(false);
+        return;
+      }
+
+      if (props.onSaveStart) props.onSaveStart();
+
+      // Prepare payload for updateAgentProfile
+      const payload: AgentProfileUpdate = {
+        loginOption: currentLoginOptions.deviceType as LoginOption,
+        teamId: currentLoginOptions.teamId || undefined,
+      };
+      if (currentLoginOptions.deviceType !== 'BROWSER') {
+        payload.dialNumber = currentLoginOptions.dialNumber;
+      }
+
+      logger.log('Saving login options:', {
         module: 'widget-station-login#helper.ts',
         method: 'saveLoginOptions',
       });
-      if (props.onSaveEnd) props.onSaveEnd(false);
-      return;
-    }
 
-    if (props.onSaveStart) props.onSaveStart();
-
-    // Prepare payload for updateAgentProfile
-    const payload: AgentProfileUpdate = {
-      loginOption: currentLoginOptions.deviceType as LoginOption,
-      teamId: currentLoginOptions.teamId || undefined,
-    };
-    if (currentLoginOptions.deviceType !== 'BROWSER') {
-      payload.dialNumber = currentLoginOptions.dialNumber;
-    }
-
-    logger.log('Saving login options:', {
-      module: 'widget-station-login#helper.ts',
-      method: 'saveLoginOptions',
-    });
-
-    cc.updateAgentProfile(payload)
-      .then(() => {
-        setOriginalLoginOptions({...currentLoginOptions});
-        setSaveError('');
-        logger.log('Agent profile updated successfully.', {
-          module: 'widget-station-login#helper.ts',
-          method: 'saveLoginOptions',
+      cc.updateAgentProfile(payload)
+        .then(() => {
+          setOriginalLoginOptions({...currentLoginOptions});
+          setSaveError('');
+          logger.log('Agent profile updated successfully.', {
+            module: 'widget-station-login#helper.ts',
+            method: 'saveLoginOptions',
+          });
+          if (props.onSaveEnd) props.onSaveEnd(true);
+        })
+        .catch((error: Error) => {
+          logger.error('Failed to update agent device type', {
+            module: 'widget-station-login#helper.ts',
+            method: 'saveLoginOptions',
+          });
+          setSaveError(error.message || 'Failed to update device type');
+          if (props.onSaveEnd) props.onSaveEnd(false);
         });
-        if (props.onSaveEnd) props.onSaveEnd(true);
-      })
-      .catch((error: Error) => {
-        logger.error('Failed to update agent device type', {
-          module: 'widget-station-login#helper.ts',
-          method: 'saveLoginOptions',
-        });
-        setSaveError(error.message || 'Failed to update device type');
-        if (props.onSaveEnd) props.onSaveEnd(false);
+    } catch (error) {
+      logger.error(`CC-Widgets: Error in saveLoginOptions - ${error.message}`, {
+        module: 'widget-station-login#helper.ts',
+        method: 'saveLoginOptions',
       });
+      setSaveError('Failed to save login options');
+      if (props.onSaveEnd) props.onSaveEnd(false);
+    }
   };
 
   useEffect(() => {
-    if (loginCb && store.isAgentLoggedIn) {
-      loginCb();
+    try {
+      if (loginCb && store.isAgentLoggedIn) {
+        loginCb();
+      }
+    } catch (error) {
+      logger.error(`CC-Widgets: Error in useEffect (loginCb) - ${error.message}`, {
+        module: 'widget-station-login#helper.ts',
+        method: 'useEffect',
+      });
     }
   }, []);
 
   const handleLogout = () => {
-    if (logoutCb) {
-      logoutCb();
+    try {
+      if (logoutCb) {
+        logoutCb();
+      }
+    } catch (error) {
+      logger.error(`CC-Widgets: Error in handleLogout - ${error.message}`, {
+        module: 'widget-station-login#helper.ts',
+        method: 'handleLogout',
+      });
     }
   };
 
   const handleLogin = () => {
-    if (loginCb) {
-      loginCb();
+    try {
+      if (loginCb) {
+        loginCb();
+      }
+    } catch (error) {
+      logger.error(`CC-Widgets: Error in handleLogin - ${error.message}`, {
+        module: 'widget-station-login#helper.ts',
+        method: 'handleLogin',
+      });
     }
   };
 
@@ -153,14 +197,21 @@ export const useStationLogin = (props: UseStationLoginProps) => {
 
   // Make sure to set the callback are same and change the logout  logic
   useEffect(() => {
-    store.setCCCallback(CC_EVENTS.AGENT_STATION_LOGIN_SUCCESS, handleLogin);
-    store.setCCCallback(CC_EVENTS.AGENT_LOGOUT_SUCCESS, handleLogout);
+    try {
+      store.setCCCallback(CC_EVENTS.AGENT_STATION_LOGIN_SUCCESS, handleLogin);
+      store.setCCCallback(CC_EVENTS.AGENT_LOGOUT_SUCCESS, handleLogout);
 
-    // TODO: WHen we close this event listener it closes the event listener from storeEventWrapper
-    // return () => {
-    //   store.removeCCCallback(CC_EVENTS.AGENT_STATION_LOGIN_SUCCESS, handleLogin);
-    //   store.removeCCCallback(CC_EVENTS.AGENT_LOGOUT_SUCCESS, handleLogout);
-    // };
+      // TODO: WHen we close this event listener it closes the event listener from storeEventWrapper
+      // return () => {
+      //   store.removeCCCallback(CC_EVENTS.AGENT_STATION_LOGIN_SUCCESS, handleLogin);
+      //   store.removeCCCallback(CC_EVENTS.AGENT_LOGOUT_SUCCESS, handleLogout);
+      // };
+    } catch (error) {
+      logger.error(`CC-Widgets: Error in useEffect (setCCCallback) - ${error.message}`, {
+        module: 'widget-station-login#helper.ts',
+        method: 'useEffect',
+      });
+    }
   }, [store.isAgentLoggedIn]);
 
   const handleContinue = async () => {
@@ -187,49 +238,76 @@ export const useStationLogin = (props: UseStationLoginProps) => {
   };
 
   const login = () => {
-    cc.stationLogin({teamId: team, loginOption: deviceType, dialNumber})
-      .then((res: StationLoginSuccessResponse) => {
-        logger.log('CC-Widgets: useStationLogin login(): stationLogin success', {
-          module: 'widget-station-login#helper.ts',
-          method: 'login',
+    try {
+      cc.stationLogin({teamId: team, loginOption: deviceType, dialNumber})
+        .then((res: StationLoginSuccessResponse) => {
+          logger.log('CC-Widgets: useStationLogin login(): stationLogin success', {
+            module: 'widget-station-login#helper.ts',
+            method: 'login',
+          });
+          setLoginSuccess(res);
+          setLoginFailure(undefined);
+        })
+        .catch((error: Error) => {
+          logger.error(`Error logging in: ${error}`, {
+            module: 'widget-station-login#helper.ts',
+            method: 'login',
+          });
+          setLoginSuccess(undefined);
+          setLoginFailure(error);
         });
-        setLoginSuccess(res);
-        setLoginFailure(undefined);
-      })
-      .catch((error: Error) => {
-        logger.error(`Error logging in: ${error}`, {
-          module: 'widget-station-login#helper.ts',
-          method: 'login',
-        });
-        setLoginSuccess(undefined);
-        setLoginFailure(error);
+    } catch (error) {
+      logger.error(`CC-Widgets: Error in login - ${error.message}`, {
+        module: 'widget-station-login#helper.ts',
+        method: 'login',
       });
+      setLoginSuccess(undefined);
+      setLoginFailure(error);
+    }
   };
 
   const logout = () => {
-    logger.info('CC-Widgets: useStationLogin logout(): invoking stationLogout', {
-      module: 'widget-station-login#helper.ts',
-      method: 'logout',
-    });
-    cc.stationLogout({logoutReason: 'User requested logout'})
-      .then((res: LogoutSuccess) => {
-        logger.log('CC-Widgets: useStationLogin logout(): stationLogout success', {
-          module: 'widget-station-login#helper.ts',
-          method: 'logout',
-        });
-        setLogoutSuccess(res);
-      })
-      .catch((error: Error) => {
-        logger.error(`CC-Widgets: Error logging out: ${error}`, {
-          module: 'widget-station-login#helper.ts',
-          method: 'logout',
-        });
+    try {
+      logger.info('CC-Widgets: useStationLogin logout(): invoking stationLogout', {
+        module: 'widget-station-login#helper.ts',
+        method: 'logout',
       });
+      cc.stationLogout({logoutReason: 'User requested logout'})
+        .then((res: LogoutSuccess) => {
+          logger.log('CC-Widgets: useStationLogin logout(): stationLogout success', {
+            module: 'widget-station-login#helper.ts',
+            method: 'logout',
+          });
+          setLogoutSuccess(res);
+        })
+        .catch((error: Error) => {
+          logger.error(`CC-Widgets: Error logging out: ${error}`, {
+            module: 'widget-station-login#helper.ts',
+            method: 'logout',
+          });
+        });
+    } catch (error) {
+      logger.error(`CC-Widgets: Error in logout - ${error.message}`, {
+        module: 'widget-station-login#helper.ts',
+        method: 'logout',
+      });
+    }
+  };
+
+  const handleSetTeam = (teamValue: string) => {
+    try {
+      setTeam(teamValue);
+    } catch (error) {
+      logger.error(`CC-Widgets: Error in setTeam - ${error.message}`, {
+        module: 'widget-station-login#helper.ts',
+        method: 'setTeam',
+      });
+    }
   };
 
   return {
     name: 'StationLogin',
-    setTeam,
+    setTeam: handleSetTeam,
     login,
     logout,
     loginSuccess,

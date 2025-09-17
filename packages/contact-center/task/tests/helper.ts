@@ -323,6 +323,71 @@ describe('useIncomingTask Hook', () => {
       method: 'useIncomingTask#reject',
     });
   });
+  describe('useIncomingTask Error Handling', () => {
+    const onRejected = jest.fn();
+    it('should handle errors in taskAssignCallback', () => {
+      const errorOnAccepted = jest.fn().mockImplementation(() => {
+        throw new Error('Test error in onAccepted');
+      });
+
+      const setTaskCallbackSpy = jest.spyOn(store, 'setTaskCallback');
+
+      renderHook(() =>
+        useIncomingTask({
+          onAccepted: errorOnAccepted,
+          onRejected,
+          deviceType: 'BROWSER',
+          incomingTask: taskMock,
+          logger,
+        })
+      );
+
+      // Find the taskAssignCallback
+      const taskAssignCallback = setTaskCallbackSpy.mock.calls.find(
+        (call) => call[0] === TASK_EVENTS.TASK_ASSIGNED
+      )?.[1];
+
+      act(() => {
+        taskAssignCallback();
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: Task: Error in TASK_ASSIGNED callback - Test error in onAccepted',
+        {
+          module: 'useIncomingTask',
+          method: 'TASK_ASSIGNED_callback',
+        }
+      );
+    });
+
+    it('should handle errors in accept method', () => {
+      const mockErrorTask = {
+        ...taskMock,
+        accept: jest.fn().mockImplementation(() => {
+          throw new Error('Accept synchronous error');
+        }),
+      };
+
+      const {result} = renderHook(() =>
+        useIncomingTask({
+          onAccepted,
+          onRejected,
+          deviceType: 'BROWSER',
+          incomingTask: mockErrorTask,
+          logger,
+        })
+      );
+
+      act(() => {
+        result.current.accept();
+      });
+
+      expect(logger.error).toHaveBeenCalledWith('CC-Widgets: Task: Error in accept - Accept synchronous error', {
+        module: 'useIncomingTask',
+        method: 'accept',
+      });
+    });
+  });
 });
 
 describe('useTaskList Hook', () => {
@@ -530,6 +595,135 @@ describe('useTaskList Hook', () => {
 
     // Ensure no errors are logged
     expect(logger.error).not.toHaveBeenCalled();
+  });
+  describe('useTaskList Error Handling', () => {
+    it('should handle errors in taskAssigned callback', () => {
+      const errorOnTaskAccepted = jest.fn().mockImplementation(() => {
+        throw new Error('Test error in onTaskAccepted');
+      });
+
+      const setTaskAssignedSpy = jest.spyOn(store, 'setTaskAssigned');
+
+      renderHook(() =>
+        useTaskList({
+          onTaskAccepted: errorOnTaskAccepted,
+          onTaskDeclined,
+          onTaskSelected,
+          logger,
+          taskList: {},
+          deviceType: 'BROWSER',
+          cc: mockCC,
+        })
+      );
+
+      // Trigger the callback
+      const taskAssignedCallback = setTaskAssignedSpy.mock.calls[0][0];
+      act(() => {
+        taskAssignedCallback(taskMock);
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: Task: Error in taskAssigned callback - Test error in onTaskAccepted',
+        {
+          module: 'useTaskList',
+          method: 'setTaskAssigned',
+        }
+      );
+    });
+
+    it('should handle errors in taskSelected callback', () => {
+      const errorOnTaskSelected = jest.fn().mockImplementation(() => {
+        throw new Error('Test error in onTaskSelected');
+      });
+
+      const setTaskSelectedSpy = jest.spyOn(store, 'setTaskSelected');
+
+      renderHook(() =>
+        useTaskList({
+          onTaskAccepted: onTaskAccepted,
+          onTaskDeclined,
+          onTaskSelected: errorOnTaskSelected,
+          logger,
+          taskList: {},
+          deviceType: 'BROWSER',
+          cc: mockCC,
+        })
+      );
+
+      // Trigger the callback
+      const taskSelectedCallback = setTaskSelectedSpy.mock.calls[0][0];
+      act(() => {
+        taskSelectedCallback(taskMock, true);
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: Task: Error in taskSelected callback - Test error in onTaskSelected',
+        {
+          module: 'useTaskList',
+          method: 'setTaskSelected',
+        }
+      );
+    });
+
+    it('should handle errors in acceptTask', () => {
+      const mockErrorTask = {
+        ...taskMock,
+        accept: jest.fn().mockImplementation(() => {
+          throw new Error('Task accept error');
+        }),
+      };
+
+      const {result} = renderHook(() =>
+        useTaskList({
+          onTaskAccepted,
+          onTaskDeclined,
+          onTaskSelected,
+          logger,
+          taskList: {},
+          deviceType: 'BROWSER',
+          cc: mockCC,
+        })
+      );
+
+      act(() => {
+        result.current.acceptTask(mockErrorTask);
+      });
+
+      expect(logger.error).toHaveBeenCalledWith('CC-Widgets: Task: Error in acceptTask - Task accept error', {
+        module: 'useTaskList',
+        method: 'acceptTask',
+      });
+    });
+
+    it('should handle errors in onTaskSelect', () => {
+      const originalSetCurrentTask = store.setCurrentTask;
+      store.setCurrentTask = jest.fn().mockImplementation(() => {
+        throw new Error('setCurrentTask error');
+      });
+
+      const {result} = renderHook(() =>
+        useTaskList({
+          onTaskAccepted,
+          onTaskDeclined,
+          onTaskSelected,
+          logger,
+          taskList: {},
+          deviceType: 'BROWSER',
+          cc: mockCC,
+        })
+      );
+
+      act(() => {
+        result.current.onTaskSelect(taskMock);
+      });
+
+      expect(logger.error).toHaveBeenCalledWith('CC-Widgets: Task: Error in onTaskSelect - setCurrentTask error', {
+        module: 'useTaskList',
+        method: 'onTaskSelect',
+      });
+
+      store.setCurrentTask = originalSetCurrentTask;
+    });
   });
 });
 
@@ -1120,10 +1314,13 @@ describe('useCallControl', () => {
       await result.current.loadBuddyAgents();
     });
     expect(result.current.buddyAgents).toEqual([]);
-    expect(mockLogger.error).toHaveBeenCalledWith('Error loading buddy agents: Error: Buddy agents loading failed', {
-      module: 'helper.ts',
-      method: 'loadBuddyAgents',
-    });
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'CC-Widgets: Task: Error loading buddy agents - Buddy agents loading failed',
+      {
+        module: 'useCallControl',
+        method: 'loadBuddyAgents',
+      }
+    );
     getBuddyAgentsSpy.mockRestore();
   });
 
@@ -1290,12 +1487,9 @@ describe('useCallControl', () => {
       })
     );
     await act(async () => {
-      await result.current.consultTransfer('dest456', 'queue');
+      await result.current.consultTransfer();
     });
-    expect(mockCurrentTask.consultTransfer).toHaveBeenCalledWith({
-      to: 'dest456',
-      destinationType: 'queue',
-    });
+    expect(mockCurrentTask.consultTransfer).toHaveBeenCalled();
     expect(setConsultInitiatedSpy).toHaveBeenCalledWith(true);
     setConsultInitiatedSpy.mockRestore();
   });
@@ -1317,11 +1511,8 @@ describe('useCallControl', () => {
       })
     );
 
-    await expect(result.current.consultTransfer('dest456', 'queue')).rejects.toThrow(transferError);
-    expect(mockCurrentTask.consultTransfer).toHaveBeenCalledWith({
-      to: 'dest456',
-      destinationType: 'queue',
-    });
+    await expect(result.current.consultTransfer()).rejects.toThrow(transferError);
+    expect(mockCurrentTask.consultTransfer).toHaveBeenCalled();
     expect(mockLogger.error).toHaveBeenCalledWith('Error transferring consult call: Error: Consult transfer failed', {
       module: 'widget-cc-task#helper.ts',
       method: 'useCallControl#consultTransfer',
@@ -2261,6 +2452,174 @@ describe('useCallControl', () => {
       expect(mockCurrentTask.toggleMute).not.toHaveBeenCalled();
     });
   });
+
+  describe('useCallControl Error Handling', () => {
+    const onHoldResume = jest.fn();
+    const onEnd = jest.fn();
+    const onWrapUp = jest.fn();
+    const onRecordingToggle = jest.fn();
+    const onToggleMute = jest.fn();
+    const logger = {
+      error: jest.fn(),
+      info: jest.fn(),
+      warn: jest.fn(),
+      log: jest.fn(),
+      trace: jest.fn(),
+    };
+
+    it('should handle errors in extractConsultingAgent', () => {
+      // Mock currentTask with problematic participants structure
+      jest.spyOn(logger, 'info').mockImplementation(() => {
+        throw new Error('Participants access error');
+      });
+      const problematicTask = {
+        ...taskMock,
+        data: {
+          ...taskMock.data,
+          interaction: {
+            participants: {
+              '123': {
+                pType: 'Agent',
+                id: '123',
+                name: 'Agent 1',
+              },
+            },
+          },
+        },
+      };
+
+      renderHook(() =>
+        useCallControl({
+          currentTask: problematicTask,
+          onHoldResume,
+          onEnd,
+          onWrapUp,
+          onRecordingToggle,
+          onToggleMute,
+          logger,
+          consultInitiated: false,
+          deviceType: 'BROWSER',
+          featureFlags: {webRtcEnabled: true},
+          isMuted: false,
+        })
+      );
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: Task: Error in extractConsultingAgent - Participants access error',
+        {
+          module: 'useCallControl',
+          method: 'extractConsultingAgent',
+        }
+      );
+    });
+
+    it('should handle errors in holdCallback', () => {
+      const errorOnHoldResume = jest.fn().mockImplementation(() => {
+        throw new Error('Hold resume callback error');
+      });
+
+      const setTaskCallbackSpy = jest.spyOn(store, 'setTaskCallback');
+
+      renderHook(() =>
+        useCallControl({
+          currentTask: taskMock,
+          onHoldResume: errorOnHoldResume,
+          onEnd,
+          onWrapUp,
+          onRecordingToggle,
+          onToggleMute,
+          logger,
+          consultInitiated: false,
+          deviceType: 'BROWSER',
+          featureFlags: {webRtcEnabled: true},
+          isMuted: false,
+        })
+      );
+
+      // Find the hold callback
+      const holdCallback = setTaskCallbackSpy.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_HOLD)?.[1];
+
+      act(() => {
+        holdCallback();
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: Task: Error in holdCallback - Hold resume callback error',
+        {
+          module: 'useCallControl',
+          method: 'holdCallback',
+        }
+      );
+    });
+
+    it('should handle errors in toggleHold', () => {
+      const mockErrorTask = {
+        ...taskMock,
+        hold: jest.fn().mockImplementation(() => {
+          throw new Error('Hold method error');
+        }),
+      };
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: mockErrorTask,
+          onHoldResume,
+          onEnd,
+          onWrapUp,
+          onRecordingToggle,
+          onToggleMute,
+          logger,
+          consultInitiated: false,
+          deviceType: 'BROWSER',
+          featureFlags: {webRtcEnabled: true},
+          isMuted: false,
+        })
+      );
+
+      act(() => {
+        result.current.toggleHold(true);
+      });
+
+      expect(logger.error).toHaveBeenCalledWith('CC-Widgets: Task: Error in toggleHold - Participants access error', {
+        module: 'useCallControl',
+        method: 'toggleHold',
+      });
+    });
+
+    it('should handle errors in loadBuddyAgents', async () => {
+      const originalGetBuddyAgents = store.getBuddyAgents;
+      store.getBuddyAgents = jest.fn().mockImplementation(() => {
+        throw new Error('getBuddyAgents error');
+      });
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: taskMock,
+          onHoldResume,
+          onEnd,
+          onWrapUp,
+          onRecordingToggle,
+          onToggleMute,
+          logger,
+          consultInitiated: false,
+          deviceType: 'BROWSER',
+          featureFlags: {webRtcEnabled: true},
+          isMuted: false,
+        })
+      );
+
+      await act(async () => {
+        await result.current.loadBuddyAgents();
+      });
+
+      expect(logger.error).toHaveBeenCalledWith('CC-Widgets: Task: Error loading buddy agents - getBuddyAgents error', {
+        module: 'useCallControl',
+        method: 'loadBuddyAgents',
+      });
+
+      store.getBuddyAgents = originalGetBuddyAgents;
+    });
+  });
 });
 
 describe('useOutdialCall', () => {
@@ -2362,5 +2721,34 @@ describe('useOutdialCall', () => {
 
     expect(ccMock.startOutdial).not.toHaveBeenCalled();
     expect(logger.info).not.toHaveBeenCalled();
+  });
+  describe('useOutdialCall Error Handling', () => {
+    it('should handle errors in startOutdial', () => {
+      const mockErrorCC = {
+        ...mockCC,
+        startOutdial: jest.fn().mockImplementation(() => {
+          throw new Error('startOutdial synchronous error');
+        }),
+      };
+
+      const {result} = renderHook(() =>
+        useOutdialCall({
+          cc: mockErrorCC,
+          logger,
+        })
+      );
+
+      act(() => {
+        result.current.startOutdial('1234567890');
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: Task: Error in startOutdial - startOutdial synchronous error',
+        {
+          module: 'useOutdialCall',
+          method: 'startOutdial',
+        }
+      );
+    });
   });
 });

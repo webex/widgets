@@ -9,7 +9,7 @@ module.exports = {
   testEnvironment: 'jsdom',
   testMatch: ['**/tooling/tests/**/*.js'],
   transformIgnorePatterns: [
-    '/node_modules/(?!(@momentum-design/components|@momentum-ui/react-collaboration|@lit|lit|cheerio))',
+    '/node_modules/(?!(@momentum-design/components|@momentum-ui/react-collaboration|@lit|lit|cheerio|react-error-boundary))',
   ],
   // Use babel-jest or ts-jest depending on your setup
   transform: {

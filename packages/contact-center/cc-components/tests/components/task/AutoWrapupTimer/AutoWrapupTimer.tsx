@@ -8,11 +8,19 @@ import {UNTIL_AUTO_WRAPUP, CANCEL} from '../../../../src/components/task/constan
 
 describe('AutoWrapupTimer', () => {
   const mockHandleCancelWrapup = jest.fn();
+  const loggerMock = {
+    error: jest.fn(),
+    info: jest.fn(),
+    log: jest.fn(),
+    warn: jest.fn(),
+    trace: jest.fn(),
+  };
 
   const defaultProps: AutoWrapupTimerProps = {
     secondsUntilAutoWrapup: 30,
     allowCancelAutoWrapup: false,
     handleCancelWrapup: mockHandleCancelWrapup,
+    logger: loggerMock,
   };
 
   const getTimerUIStateSpy = jest.spyOn(autoWrapupUtils, 'getTimerUIState');
@@ -32,7 +40,7 @@ describe('AutoWrapupTimer', () => {
 
       expect(screen.getByText(UNTIL_AUTO_WRAPUP)).toBeInTheDocument();
       expect(screen.getByText('00:30')).toBeInTheDocument();
-      expect(getTimerUIStateSpy).toHaveBeenCalledWith(30);
+      expect(getTimerUIStateSpy).toHaveBeenCalledWith(30, loggerMock);
 
       const normalListItem = normalContainer.querySelector('mdc-listitem');
       const normalIcon = normalContainer.querySelector('mdc-icon');
@@ -64,7 +72,7 @@ describe('AutoWrapupTimer', () => {
 
       expect(screen.getByText('00:05')).toBeInTheDocument();
       expect(screen.getByText(CANCEL)).toBeInTheDocument();
-      expect(getTimerUIStateSpy).toHaveBeenCalledWith(5);
+      expect(getTimerUIStateSpy).toHaveBeenCalledWith(5, loggerMock);
 
       const urgentListItem = urgentContainer.querySelector('mdc-listitem');
       const urgentIcon = urgentContainer.querySelector('mdc-icon');
@@ -94,7 +102,7 @@ describe('AutoWrapupTimer', () => {
       const {container: zeroContainer} = await render(<AutoWrapupTimer {...zeroProps} />);
 
       expect(screen.getByText('00:00')).toBeInTheDocument();
-      expect(getTimerUIStateSpy).toHaveBeenCalledWith(0);
+      expect(getTimerUIStateSpy).toHaveBeenCalledWith(0, loggerMock);
 
       const zeroListItem = zeroContainer.querySelector('mdc-listitem');
       const zeroIcon = zeroContainer.querySelector('mdc-icon');
