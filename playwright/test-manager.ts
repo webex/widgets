@@ -32,6 +32,7 @@ interface SetupConfig {
   // Console logging
   enableConsoleLogging?: boolean;
   enableAdvancedLogging?: boolean;
+  needDialNumberLogin?: boolean;
 }
 
 // Environment variable helper interface
@@ -42,6 +43,8 @@ interface EnvTokens {
   agent2Username: string;
   agent1ExtensionNumber: string;
   password: string;
+  dialNumberUsername?: string;
+  dialNumberPassword?: string;
 }
 
 // Context creation result interface
@@ -77,6 +80,12 @@ export class TestManager {
   public chatPage: Page;
   public chatContext: BrowserContext;
 
+  // Dial Number page
+  public dialNumberPage: Page;
+  public dialNumberContext: BrowserContext;
+
+  // Console messages collected from pages
+
   public consoleMessages: string[] = [];
   public readonly maxRetries: number;
   public readonly projectName: string;
@@ -95,6 +104,8 @@ export class TestManager {
       agent2Username: process.env[`${this.projectName}_AGENT2_USERNAME`] ?? '',
       agent1ExtensionNumber: process.env[`${this.projectName}_AGENT1_EXTENSION_NUMBER`] ?? '',
       password: process.env.PW_SANDBOX_PASSWORD ?? '',
+      dialNumberUsername: process.env.PW_DIAL_NUMBER_LOGIN_USERNAME ?? '',
+      dialNumberPassword: process.env.PW_DIAL_NUMBER_LOGIN_PASSWORD ?? '',
     };
   }
 
@@ -159,6 +170,7 @@ export class TestManager {
       agent1LoginMode: LOGIN_MODE.DESKTOP,
       enableConsoleLogging: true,
       enableAdvancedLogging: false,
+      needDialNumberLogin: false,
     };
 
     const finalConfig: Required<SetupConfig> = {...defaults, ...config} as Required<SetupConfig>;
@@ -196,6 +208,9 @@ export class TestManager {
     }
     if (config.needsExtension) {
       promises.push(this.createContextWithPage(browser, PAGE_TYPES.EXTENSION));
+    }
+    if (config.needDialNumberLogin) {
+      promises.push(this.createContextWithPage(browser, PAGE_TYPES.DIAL_NUMBER));
     }
     if (config.needsChat) {
       promises.push(this.createContextWithPage(browser, PAGE_TYPES.CHAT));
@@ -243,6 +258,12 @@ export class TestManager {
           this.multiSessionContext = result.context;
           this.multiSessionAgent1Page = result.page;
           break;
+        case PAGE_TYPES.DIAL_NUMBER:
+          this.dialNumberContext = result.context;
+          this.dialNumberPage = result.page;
+          break;
+        default:
+          throw new Error(`Unknown page type: ${result.type}`);
       }
     }
   }
@@ -266,6 +287,10 @@ export class TestManager {
       setupPromises.push(this.setupCaller(envTokens));
     }
 
+    // Dial Number setup
+    if (config.needDialNumberLogin && this.dialNumberPage) {
+      setupPromises.push(this.setupDialNumber(envTokens));
+    }
     return setupPromises;
   }
 
@@ -293,6 +318,14 @@ export class TestManager {
   // Helper method for Agent2 setup
   private async setupAgent2(envTokens: EnvTokens): Promise<void> {
     await pageSetup(this.agent2Page, LOGIN_MODE.DESKTOP, envTokens.agent2AccessToken);
+  }
+
+  // Helper method for Dial Number setup
+  private async setupDialNumber(envTokens: EnvTokens): Promise<void> {
+    await this.retryOperation(
+      () => loginExtension(this.dialNumberPage, envTokens.dialNumberUsername, envTokens.dialNumberPassword),
+      'dial number login'
+    );
   }
 
   // Helper method for Caller setup
@@ -360,6 +393,7 @@ export class TestManager {
       agent1LoginMode: LOGIN_MODE.EXTENSION,
       enableConsoleLogging: true,
       enableAdvancedLogging: true,
+      needDialNumberLogin: true,
     });
   }
 

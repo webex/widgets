@@ -10,10 +10,19 @@ import {
   verifyConsultStartSuccessLogs,
   verifyConsultEndSuccessLogs,
   verifyConsultTransferredLogs,
+  transferViaDialNumber,
+  consultViaDialNumber,
 } from '../Utils/advancedTaskControlUtils';
 
 import {changeUserState, verifyCurrentState} from '../Utils/userStateUtils';
-import {createCallTask, acceptIncomingTask, declineIncomingTask, acceptExtensionCall} from '../Utils/incomingTaskUtils';
+import {
+  createCallTask,
+  acceptIncomingTask,
+  declineIncomingTask,
+  acceptExtensionCall,
+  endCallTask,
+  declineExtensionCall,
+} from '../Utils/incomingTaskUtils';
 import {submitWrapup} from '../Utils/wrapupUtils';
 import {USER_STATES, TASK_TYPES, WRAPUP_REASONS} from '../constants';
 import {holdCallToggle, endTask, verifyHoldButtonIcon, verifyTaskControls} from '../Utils/taskControlUtils';
@@ -123,18 +132,35 @@ export default function createAdvancedTaskControlsTests() {
       // Verify Agent 2 is no longer engaged
       await verifyCurrentState(testManager.agent2Page, USER_STATES.AVAILABLE);
     });
+
+    test('Call Blind Transferred to DialNumber', async () => {
+      // First transfer from Agent 1 to Agent 2
+      await transferViaDialNumber(testManager.agent1Page, process.env.PW_DIAL_NUMBER!);
+
+      //DialNumber accepts the transfer
+      await acceptExtensionCall(testManager.dialNumberPage);
+      verifyTransferSuccessLogs();
+      await endCallTask(testManager.callerPage!);
+
+      // Verify Agent 1 goes to wrapup after transfer
+      await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.RESOLVED);
+      await testManager.agent1Page.waitForTimeout(2000);
+
+      // Verify Agent 1 is no longer engaged
+      await verifyCurrentState(testManager.agent1Page, USER_STATES.AVAILABLE);
+    });
   });
 
   // =============================================================================
-  // CONSULT TRANSFER TESTS
+  // CONSULT TRANSFER AND CONSULT SCENARIOS
   // =============================================================================
 
-  describe('Consult Transfer Tests', () => {
-    beforeEach(async () => {
+  describe('Consult and Consult Transfer Scenarios', () => {
+    test('Agent Consult Transfer: cancel, decline, timeout, and transfer scenarios are handled correctly in sequence', async () => {
+      // ...existing code for Agent Consult Transfer test...
       await changeUserState(testManager.agent2Page, USER_STATES.MEETING);
-      // Create call task and agent 1 accepts it
+      await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
-
       const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 80000});
       await testManager.agent1ExtensionPage
@@ -143,155 +169,79 @@ export default function createAdvancedTaskControlsTests() {
       await acceptExtensionCall(testManager.agent1ExtensionPage);
       await changeUserState(testManager.agent2Page, USER_STATES.AVAILABLE);
       await testManager.agent1Page.waitForTimeout(5000);
-
       await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
 
-      // Clear console logs to track consult events
+      // 1. Accept consult and end
       clearAdvancedCapturedLogs();
-    });
-
-    test('Call Consulted via Agent and Accepted (A1 → A2)', async () => {
-      // Agent 1 initiates consult with Agent 2
       await consultViaAgent(testManager.agent1Page, process.env[`${testManager.projectName}_AGENT2_NAME`]!);
-
-      // Verify consult UI elements are visible
       await expect(testManager.agent1Page.getByTestId('cancel-consult-btn')).toBeVisible();
       await expect(testManager.agent1Page.getByTestId('transfer-consult-btn')).toBeVisible();
-
-      // Agent 2 receives and accepts the consult
-      const consultRequestDiv = testManager.agent2Page.getByTestId('samples:incoming-task-telephony').first();
-      await consultRequestDiv.waitFor({state: 'visible', timeout: 60000});
-
+      const consultRequestDiv1 = testManager.agent2Page.getByTestId('samples:incoming-task-telephony').first();
+      await consultRequestDiv1.waitFor({state: 'visible', timeout: 60000});
       await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL);
       await testManager.agent2Page.waitForTimeout(3000);
-
-      // Verify both agents are in consult state
       await expect(testManager.agent1Page.getByTestId('transfer-consult-btn')).toBeVisible();
-
-      // Verify consult start success was logged
       await testManager.agent1Page.waitForTimeout(2000);
       verifyConsultStartSuccessLogs();
-
-      // End the consult and verify state
       await cancelConsult(testManager.agent2Page);
-
-      // Verify consult end success was logged
       await testManager.agent1Page.waitForTimeout(2000);
       verifyConsultEndSuccessLogs();
-
-      // Verify call is on hold after consult ends
       await verifyHoldButtonIcon(testManager.agent1Page, {expectedIsHeld: true});
-
       await verifyCurrentState(testManager.agent2Page, USER_STATES.AVAILABLE);
       await holdCallToggle(testManager.agent1Page);
-      // End the call and complete wrapup to clean up for next test
-      await endTask(testManager.agent1Page);
-      await testManager.agent1Page.waitForTimeout(3000);
-      await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.RESOLVED);
-      await testManager.agent1Page.waitForTimeout(2000);
-      await verifyCurrentState(testManager.agent1Page, USER_STATES.AVAILABLE);
-    });
 
-    test('Call Consulted via Agent and Declined (A1 → A2)', async () => {
-      // Agent 1 initiates another consult with Agent 2
+      // 2. Decline consult
+      clearAdvancedCapturedLogs();
       await consultViaAgent(testManager.agent1Page, process.env[`${testManager.projectName}_AGENT2_NAME`]!);
-
-      // Agent 2 receives and declines the consult
-      const consultRequestDiv = testManager.agent2Page.getByTestId('samples:incoming-task-telephony').first();
-      await consultRequestDiv.waitFor({state: 'visible', timeout: 60000});
+      const consultRequestDiv2 = testManager.agent2Page.getByTestId('samples:incoming-task-telephony').first();
+      await consultRequestDiv2.waitFor({state: 'visible', timeout: 60000});
       await testManager.agent2Page.waitForTimeout(3000);
-
       await declineIncomingTask(testManager.agent2Page, TASK_TYPES.CALL);
-
-      // Verify Agent 1 returns to normal call state
       await verifyTaskControls(testManager.agent1Page, TASK_TYPES.CALL);
-
-      // Verify call is on hold after consult decline
       await verifyHoldButtonIcon(testManager.agent1Page, {expectedIsHeld: true});
-
       await holdCallToggle(testManager.agent1Page);
       await testManager.agent1Page.waitForTimeout(2000);
       await expect(testManager.agent1Page.getByTestId('cancel-consult-btn')).not.toBeVisible();
-
-      // Agent 1 should still be engaged with customer call
       await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
 
-      // End the call and complete wrapup to clean up for next test
-      await endTask(testManager.agent1Page);
-      await testManager.agent1Page.waitForTimeout(3000);
-      await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.RESOLVED);
-      await testManager.agent1Page.waitForTimeout(2000);
-    });
-
-    test('Call Consulted via Agent and Not Picked Up by Agent 2', async () => {
-      // Agent 1 initiates consult with Agent 2
+      // 3. Not picked up (timeout)
+      clearAdvancedCapturedLogs();
+      await changeUserState(testManager.agent2Page, USER_STATES.AVAILABLE);
       await consultViaAgent(testManager.agent1Page, process.env[`${testManager.projectName}_AGENT2_NAME`]!);
-
-      // Wait for consult to timeout (Agent 2 doesn't respond)
-      // This should timeout after some time and return to normal state
       await testManager.agent1Page.waitForTimeout(20000); // Wait for timeout
-
-      // Verify Agent 1 returns to call state (call should still be on hold)
       await verifyTaskControls(testManager.agent1Page, TASK_TYPES.CALL);
-
-      // Verify call is on hold after consult timeout
       await verifyHoldButtonIcon(testManager.agent1Page, {expectedIsHeld: true});
-
       await holdCallToggle(testManager.agent1Page);
       await testManager.agent1Page.waitForTimeout(2000);
 
-      // End the call and complete wrapup to clean up for next test
-      await endTask(testManager.agent1Page);
-      await testManager.agent1Page.waitForTimeout(3000);
-      await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.RESOLVED);
-      await testManager.agent1Page.waitForTimeout(2000);
-    });
-
-    test('Consult Transfer - Call to Agent 2', async () => {
+      // 4. Consult transfer
+      clearAdvancedCapturedLogs();
+      await changeUserState(testManager.agent2Page, USER_STATES.AVAILABLE);
       await consultViaAgent(testManager.agent1Page, process.env[`${testManager.projectName}_AGENT2_NAME`]!);
-
-      // Agent 2 accepts the consult first
-      const consultRequestDiv = testManager.agent2Page.getByTestId('samples:incoming-task-telephony').first();
-      await consultRequestDiv.waitFor({state: 'visible', timeout: 60000});
-
+      const consultRequestDiv3 = testManager.agent2Page.getByTestId('samples:incoming-task-telephony').first();
+      await consultRequestDiv3.waitFor({state: 'visible', timeout: 60000});
       await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL);
       await testManager.agent2Page.waitForTimeout(3000);
       await testManager.agent1Page.getByTestId('transfer-consult-btn').click();
-
-      // Agent 1 completes the transfer and goes to wrapup
       await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
-      // Verify Agent 2 has the transferred call
       await verifyCurrentState(testManager.agent2Page, USER_STATES.ENGAGED);
       await verifyTaskControls(testManager.agent2Page, TASK_TYPES.CALL);
-
-      // Verify consult start and transfer success were logged
       await testManager.agent2Page.waitForTimeout(2000);
       verifyConsultStartSuccessLogs();
       verifyTransferSuccessLogs();
-
-      // End the call and complete wrapup to clean up for next test
       await endTask(testManager.agent2Page);
       await testManager.agent2Page.waitForTimeout(3000);
       await submitWrapup(testManager.agent2Page, WRAPUP_REASONS.RESOLVED);
       await testManager.agent2Page.waitForTimeout(2000);
     });
-  });
 
-  // =============================================================================
-  // QUEUE CONSULT TESTS
-  // =============================================================================
+    test('Queue Consult: cancel, accept/end, agent-end, and transfer scenarios are handled correctly in sequence', async () => {
+      // ...existing code for Queue Consult test...
+      await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
 
-  describe('Queue Consult Tests', () => {
-    beforeAll(async () => {
-      // Set Agent 2 to available for queue consult tests
-      await changeUserState(testManager.agent2Page, USER_STATES.AVAILABLE);
-    });
-
-    test('Agent 1 Consults via Queue When Agent 2 is Idle, Then Cancels the Consultation', async () => {
+      // Setup: create call and get to engaged state
       await changeUserState(testManager.agent2Page, USER_STATES.MEETING);
-      // Create call task and agent 1 accepts it
       await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
-
       const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 80000});
       await testManager.agent1ExtensionPage
@@ -299,186 +249,137 @@ export default function createAdvancedTaskControlsTests() {
         .waitFor({state: 'visible', timeout: 20000});
       await acceptExtensionCall(testManager.agent1ExtensionPage);
       await testManager.agent1Page.waitForTimeout(5000);
-
       await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
 
-      // Clear logs before consult
+      // 1. Cancel consult
       clearAdvancedCapturedLogs();
-
-      // Agent 1 initiates queue consult
       await consultViaQueue(testManager.agent1Page, process.env[`${testManager.projectName}_QUEUE_NAME`]!);
-
-      // Verify consult UI elements are visible
       await expect(testManager.agent1Page.getByTestId('cancel-consult-btn')).toBeVisible();
       await testManager.agent1Page.waitForTimeout(2000);
-
-      // Agent 1 cancels consult before Agent 2 responds
       await cancelConsult(testManager.agent1Page);
-
-      // Verify customer call returns to regular connected state
       await verifyTaskControls(testManager.agent1Page, TASK_TYPES.CALL);
       await expect(testManager.agent1Page.getByTestId('cancel-consult-btn')).not.toBeVisible();
 
-      // End the call and complete wrapup to clean up for next test
-      await endTask(testManager.agent1Page);
-      await testManager.agent1Page.waitForTimeout(3000);
-      await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.RESOLVED);
-      await testManager.agent1Page.waitForTimeout(2000);
-    });
-
-    test('Agent 1 Consults via Queue with Available Agent 2, Then Ends Consultation', async () => {
-      await changeUserState(testManager.agent2Page, USER_STATES.MEETING);
-      // Create new call for this test
-      await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
-
-      const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
-      await incomingTaskDiv.waitFor({state: 'visible', timeout: 80000});
-      await testManager.agent1ExtensionPage
-        .locator('[data-test="generic-person-item-base"]')
-        .waitFor({state: 'visible', timeout: 20000});
-      await acceptExtensionCall(testManager.agent1ExtensionPage);
+      // 2. Accept consult and end (Agent 2 accepts, Agent 1 ends)
       await changeUserState(testManager.agent2Page, USER_STATES.AVAILABLE);
-      await testManager.agent1Page.waitForTimeout(5000);
-
-      await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
-
-      // Clear logs before consult
       clearAdvancedCapturedLogs();
-
-      // Agent 1 initiates queue consult
       await consultViaQueue(testManager.agent1Page, process.env[`${testManager.projectName}_QUEUE_NAME`]!);
-
-      // Verify consult start success was logged
-      await testManager.agent1Page.waitForTimeout(2000);
+      await testManager.agent1Page.waitForTimeout(3000);
       verifyConsultStartSuccessLogs();
-
-      // Agent 2 accepts the consult
-      const consultRequestDiv = testManager.agent2Page.getByTestId('samples:incoming-task-telephony').first();
-      await consultRequestDiv.waitFor({state: 'visible', timeout: 60000});
-
+      const consultRequestDiv1 = testManager.agent2Page.getByTestId('samples:incoming-task-telephony').first();
+      await consultRequestDiv1.waitFor({state: 'visible', timeout: 60000});
       await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL);
       await testManager.agent2Page.waitForTimeout(3000);
-
-      // Agent 1 ends the consultation
       await cancelConsult(testManager.agent1Page);
       await testManager.agent1Page.waitForTimeout(3000);
       await verifyCurrentState(testManager.agent2Page, USER_STATES.AVAILABLE);
-      // Verify call returns to Agent 1
       await verifyTaskControls(testManager.agent1Page, TASK_TYPES.CALL);
-
-      // Verify consult end success was logged
       await testManager.agent1Page.waitForTimeout(2000);
       verifyConsultEndSuccessLogs();
-
-      // Verify call is on hold after consult ends
       await verifyHoldButtonIcon(testManager.agent1Page, {expectedIsHeld: true});
-
       await holdCallToggle(testManager.agent1Page);
 
-      // End the call and complete wrapup to clean up for next test
-      await endTask(testManager.agent1Page);
-      await testManager.agent1Page.waitForTimeout(3000);
-      await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.RESOLVED);
-      await testManager.agent1Page.waitForTimeout(2000);
-    });
-
-    test('Agent 2 Ends the Consultation Initiated by Agent 1 via Queue', async () => {
-      await changeUserState(testManager.agent2Page, USER_STATES.MEETING);
-      // Create new call for this test
-      await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
-
-      const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
-      await incomingTaskDiv.waitFor({state: 'visible', timeout: 80000});
-      await testManager.agent1ExtensionPage
-        .locator('[data-test="generic-person-item-base"]')
-        .waitFor({state: 'visible', timeout: 20000});
-      await acceptExtensionCall(testManager.agent1ExtensionPage);
+      // 3. Accept consult and Agent 2 ends
       await changeUserState(testManager.agent2Page, USER_STATES.AVAILABLE);
-      await testManager.agent1Page.waitForTimeout(5000);
-
-      await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
-
-      // Clear logs before consult
       clearAdvancedCapturedLogs();
-
-      // Agent 1 initiates queue consult
       await consultViaQueue(testManager.agent1Page, process.env[`${testManager.projectName}_QUEUE_NAME`]!);
-
-      // Agent 2 accepts the consult
-      const consultRequestDiv = testManager.agent2Page.getByTestId('samples:incoming-task-telephony').first();
-      await consultRequestDiv.waitFor({state: 'visible', timeout: 60000});
-
+      const consultRequestDiv2 = testManager.agent2Page.getByTestId('samples:incoming-task-telephony').first();
+      await consultRequestDiv2.waitFor({state: 'visible', timeout: 60000});
       await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL);
       await testManager.agent2Page.waitForTimeout(3000);
-
-      // Agent 2 ends the consultation from their side
       await cancelConsult(testManager.agent2Page);
       await testManager.agent2Page.waitForTimeout(3000);
       await verifyCurrentState(testManager.agent2Page, USER_STATES.AVAILABLE);
-      // Customer call should return to Agent 1
       await verifyTaskControls(testManager.agent1Page, TASK_TYPES.CALL);
-
-      // Verify call is on hold after consult ends
       await verifyHoldButtonIcon(testManager.agent1Page, {expectedIsHeld: true});
-
       await holdCallToggle(testManager.agent1Page);
-      // End the call and complete wrapup to clean up for next test
-      await endTask(testManager.agent1Page);
-      await testManager.agent1Page.waitForTimeout(3000);
-      await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.RESOLVED);
-      await testManager.agent1Page.waitForTimeout(2000);
-    });
 
-    test('Agent 1 Consults via Queue with Agent 2, Then Transfers Call to Agent 2', async () => {
-      await changeUserState(testManager.agent2Page, USER_STATES.MEETING);
-      // Create new call for this test
-      await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
-      await testManager.agent1Page.waitForTimeout(2000);
-      const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
-      await incomingTaskDiv.waitFor({state: 'visible', timeout: 80000});
-      await testManager.agent1ExtensionPage
-        .locator('[data-test="generic-person-item-base"]')
-        .waitFor({state: 'visible', timeout: 20000});
-      await acceptExtensionCall(testManager.agent1ExtensionPage);
+      // 4. Consult transfer
       await changeUserState(testManager.agent2Page, USER_STATES.AVAILABLE);
-      await testManager.agent1Page.waitForTimeout(5000);
-
-      await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
-
-      // Clear logs before consult
       clearAdvancedCapturedLogs();
-
-      // Agent 1 initiates queue consult
       await consultViaQueue(testManager.agent1Page, process.env[`${testManager.projectName}_QUEUE_NAME`]!);
-
-      // Agent 2 accepts the consultation
-      const consultRequestDiv = testManager.agent2Page.getByTestId('samples:incoming-task-telephony').first();
-      await consultRequestDiv.waitFor({state: 'visible', timeout: 60000});
-
+      await testManager.agent1Page.waitForTimeout(2000);
+      const consultRequestDiv3 = testManager.agent2Page.getByTestId('samples:incoming-task-telephony').first();
+      await consultRequestDiv3.waitFor({state: 'visible', timeout: 60000});
       await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL);
       await testManager.agent2Page.waitForTimeout(3000);
-
-      // Agent 1 transfers the call to Agent 2
       await testManager.agent1Page.getByTestId('transfer-consult-btn').click();
       await testManager.agent1Page.waitForTimeout(2000);
-
-      // Agent 1 enters wrap-up state
       await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
-
-      // Verify ownership shifts to Agent 2
       await verifyCurrentState(testManager.agent2Page, USER_STATES.ENGAGED);
       await verifyTaskControls(testManager.agent2Page, TASK_TYPES.CALL);
-
-      // Verify consult start and transfer success were logged
       await testManager.agent2Page.waitForTimeout(2000);
       verifyConsultStartSuccessLogs();
       verifyConsultTransferredLogs();
-
-      // End the call and complete wrapup to clean up for next test
       await endTask(testManager.agent2Page);
       await testManager.agent2Page.waitForTimeout(3000);
       await submitWrapup(testManager.agent2Page, WRAPUP_REASONS.RESOLVED);
       await testManager.agent2Page.waitForTimeout(2000);
+    });
+
+    test('Dial Number Consult: cancel, decline, accept/end, and transfer scenarios are handled correctly in sequence', async () => {
+      // ...existing code for Dial Number Consult test...
+      await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
+
+      // Setup: create call and get to engaged state
+      await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
+      const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
+      await incomingTaskDiv.waitFor({state: 'visible', timeout: 80000});
+      await testManager.agent1ExtensionPage
+        .locator('[data-test="generic-person-item-base"]')
+        .waitFor({state: 'visible', timeout: 20000});
+      await acceptExtensionCall(testManager.agent1ExtensionPage);
+      await testManager.agent1Page.waitForTimeout(5000);
+      await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
+
+      // 1. Cancel consult
+      clearAdvancedCapturedLogs();
+      await consultViaDialNumber(testManager.agent1Page, process.env.PW_DIAL_NUMBER!);
+      await expect(testManager.agent1Page.getByTestId('cancel-consult-btn')).toBeVisible();
+      await testManager.agent1Page.waitForTimeout(2000);
+      await cancelConsult(testManager.agent1Page);
+      await verifyTaskControls(testManager.agent1Page, TASK_TYPES.CALL);
+      await expect(testManager.agent1Page.getByTestId('cancel-consult-btn')).not.toBeVisible();
+
+      // 2. Decline consult
+      clearAdvancedCapturedLogs();
+      await consultViaDialNumber(testManager.agent1Page, process.env.PW_DIAL_NUMBER!);
+      await declineExtensionCall(testManager.dialNumberPage);
+      await testManager.agent1Page.waitForTimeout(2000);
+      await cancelConsult(testManager.agent1Page); // still needs to cancel even if declined
+      await verifyTaskControls(testManager.agent1Page, TASK_TYPES.CALL);
+      await verifyHoldButtonIcon(testManager.agent1Page, {expectedIsHeld: true});
+      await holdCallToggle(testManager.agent1Page);
+      await testManager.agent1Page.waitForTimeout(2000);
+      await expect(testManager.agent1Page.getByTestId('cancel-consult-btn')).not.toBeVisible();
+      await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
+
+      // 3. Accept consult and end
+      clearAdvancedCapturedLogs();
+      await consultViaDialNumber(testManager.agent1Page, process.env.PW_DIAL_NUMBER!);
+      await testManager.agent1Page.waitForTimeout(2000);
+      verifyConsultStartSuccessLogs();
+      await acceptExtensionCall(testManager.dialNumberPage);
+      await testManager.agent1Page.waitForTimeout(2000);
+      await cancelConsult(testManager.agent1Page);
+      await verifyTaskControls(testManager.agent1Page, TASK_TYPES.CALL);
+      await testManager.agent1Page.waitForTimeout(2000);
+      verifyConsultEndSuccessLogs();
+      await verifyHoldButtonIcon(testManager.agent1Page, {expectedIsHeld: true});
+      await holdCallToggle(testManager.agent1Page);
+
+      // 4. Consult transfer
+      clearAdvancedCapturedLogs();
+      await consultViaDialNumber(testManager.agent1Page, process.env.PW_DIAL_NUMBER!);
+      await acceptExtensionCall(testManager.dialNumberPage);
+      await testManager.agent1Page.waitForTimeout(3000);
+      await testManager.agent1Page.getByTestId('transfer-consult-btn').click();
+      await testManager.agent1Page.waitForTimeout(2000);
+      await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
+      await testManager.dialNumberPage.waitForTimeout(2000);
+      verifyConsultStartSuccessLogs();
+      verifyConsultTransferredLogs();
+      await endCallTask(testManager.dialNumberPage);
     });
   });
 }

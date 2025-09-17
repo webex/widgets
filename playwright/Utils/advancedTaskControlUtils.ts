@@ -145,11 +145,64 @@ export async function consultViaQueue(page: Page, queueName: string): Promise<vo
   // Navigate to Queues tab
   await page.getByRole('tab', {name: 'Queues'}).click({timeout: AWAIT_TIMEOUT});
 
-  // Hover over the queue name - use exact match to avoid confusion with similar names
-  await page.getByRole('listitem', {name: queueName, exact: true}).hover({timeout: AWAIT_TIMEOUT});
+  // Find the queue list item and ensure it's visible
+  const queueListItem = page.getByRole('listitem', {name: queueName, exact: true});
+  await queueListItem.waitFor({state: 'visible', timeout: AWAIT_TIMEOUT});
+  await queueListItem.scrollIntoViewIfNeeded();
 
-  // Select the specific queue
-  await page.getByRole('listitem', {name: queueName, exact: true}).getByRole('button').click({timeout: AWAIT_TIMEOUT});
+  // Wait a short time for UI updates/animations after scroll
+  await page.waitForTimeout(300);
+
+  // Get the button inside the listitem and click it if visible and enabled
+  const queueButton = queueListItem.getByRole('button');
+  await queueButton.waitFor({state: 'visible', timeout: AWAIT_TIMEOUT});
+  await queueButton.scrollIntoViewIfNeeded();
+  // Wait for the button to be enabled (not disabled)
+  await queueButton.evaluate((el) => {
+    if (el.hasAttribute('disabled')) {
+      throw new Error('Queue button is disabled');
+    }
+  });
+  // Retry click up to 3 times, using force: true
+  let lastError;
+  for (let i = 0; i < 3; i++) {
+    try {
+      await queueButton.click({timeout: AWAIT_TIMEOUT, force: true});
+      lastError = undefined;
+      break;
+    } catch (e) {
+      lastError = e;
+      await page.waitForTimeout(400);
+    }
+  }
+  if (lastError) {
+    throw lastError;
+  }
+
+  // Wait a moment for the consult to be initiated
+  await page.waitForTimeout(2000);
+}
+
+/* Initiates a consult with a dialed number via text input.
+ * @param page - The agent's main page
+ * @param phoneNumber - Phone number to consult with (e.g., '+1234567890')
+ * @returns Promise<void>
+ */
+export async function consultViaDialNumber(page: Page, phoneNumber: string): Promise<void> {
+  // Click consult with another agent button
+  await page.getByTestId('call-control:consult').nth(1).click({timeout: AWAIT_TIMEOUT});
+
+  // Navigate to Dial Number tab
+  await page.getByRole('tab', {name: 'Dial Number'}).click({timeout: AWAIT_TIMEOUT});
+
+  // Input the phone number robustly: wait for input to be visible and click it directly
+  const inputLocator = page.getByTestId('consult-transfer-dial-number-input').locator('input');
+  await inputLocator.waitFor({state: 'visible', timeout: AWAIT_TIMEOUT});
+  await inputLocator.click({timeout: AWAIT_TIMEOUT});
+  await inputLocator.fill(phoneNumber, {timeout: AWAIT_TIMEOUT});
+
+  // Click the dial number button to initiate the consult
+  await page.getByTestId('dial-number-btn').click({timeout: AWAIT_TIMEOUT});
 
   // Wait a moment for the consult to be initiated
   await page.waitForTimeout(2000);
@@ -215,6 +268,34 @@ export async function transferViaQueue(page: Page, queueName: string): Promise<v
 
   // Select the specific queue
   await page.getByRole('listitem', {name: queueName, exact: true}).getByRole('button').click({timeout: AWAIT_TIMEOUT});
+
+  // Wait a moment for the transfer to be processed
+  await page.waitForTimeout(2000);
+}
+
+/**
+ * Initiates a transfer to a dialed number via text input.
+ * @param page - The agent's main page
+ * @param phoneNumber - Phone number to transfer the call to (e.g., '+1234567890')
+ * @returns Promise<void>
+ */
+export async function transferViaDialNumber(page: Page, phoneNumber: string): Promise<void> {
+  // Click transfer call button
+  await page
+    .getByRole('group', {name: 'Call Control with Call'})
+    .getByLabel('Transfer Call')
+    .click({timeout: AWAIT_TIMEOUT});
+
+  // Navigate to Dial Number tab
+  await page.getByRole('tab', {name: 'Dial Number'}).click({timeout: AWAIT_TIMEOUT});
+
+  // Input the phone number robustly: wait for input to be visible and click it directly
+  const inputLocator = page.getByTestId('consult-transfer-dial-number-input').locator('input');
+  await inputLocator.waitFor({state: 'visible', timeout: AWAIT_TIMEOUT});
+  await inputLocator.click({timeout: AWAIT_TIMEOUT});
+  await inputLocator.fill(phoneNumber, {timeout: AWAIT_TIMEOUT});
+  // Click the dial number button to initiate the transfer
+  await page.getByTestId('dial-number-btn').click({timeout: AWAIT_TIMEOUT});
 
   // Wait a moment for the transfer to be processed
   await page.waitForTimeout(2000);

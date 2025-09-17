@@ -7,7 +7,7 @@ exports[`DialNumberUI snapshot matches snapshot 1`] = `
   >
     <mdc-input
       class="consult-transfer-dial-number-input"
-      data-testid="dial-number-input"
+      data-testid="consult-transfer-dial-number-input"
     />
     <button
       class="md-button-circle-wrapper consult-transfer-dial-number-btn md-button-simple-wrapper"
