@@ -149,6 +149,23 @@ export default function createAdvancedTaskControlsTests() {
       // Verify Agent 1 is no longer engaged
       await verifyCurrentState(testManager.agent1Page, USER_STATES.AVAILABLE);
     });
+
+    test('Call Blind Transferred to Queue with DialNumber', async () => {
+      // First transfer from Agent 1 to Agent 2
+      await transferViaQueue(testManager.agent1Page, 'queue with dn');
+
+      //DialNumber accepts the transfer
+      await acceptExtensionCall(testManager.dialNumberPage);
+      verifyTransferSuccessLogs();
+      await endCallTask(testManager.callerPage!);
+
+      // Verify Agent 1 goes to wrapup after transfer
+      await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.RESOLVED);
+      await testManager.agent1Page.waitForTimeout(2000);
+
+      // Verify Agent 1 is no longer engaged
+      await verifyCurrentState(testManager.agent1Page, USER_STATES.AVAILABLE);
+    });
   });
 
   // =============================================================================
