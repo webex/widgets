@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.115](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.114...v1.28.0-ccwidgets.115) (2025-09-17)
+
+
+### Bug Fixes
+
+* **cc-widgets:** Update pullrequest.yml to get new secrets ([#534](https://github.com/webex/widgets/issues/534)) ([3aae1ae](https://github.com/webex/widgets/commit/3aae1ae4ecb6cd2eb26aeac6d2a9e4d8f81cd2de))
+
 # [1.28.0-ccwidgets.114](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.113...v1.28.0-ccwidgets.114) (2025-09-16)
 
 
