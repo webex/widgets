@@ -12,6 +12,16 @@ const onWrapUpCb = jest.fn();
 const onRecordingToggleCb = jest.fn();
 
 describe('CallControl Component', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    // Suppress console.error for error boundary tests
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('renders CallControlPresentational with correct props', () => {
     const useCallControlSpy = jest.spyOn(helper, 'useCallControl').mockReturnValue({
       currentTask: mockTask,
@@ -81,6 +91,31 @@ describe('CallControl Component', () => {
       deviceType: '',
       isMuted: false,
       onToggleMute: undefined,
+    });
+  });
+
+  describe('ErrorBoundary Tests', () => {
+    it('should render empty fragment when ErrorBoundary catches an error', () => {
+      const mockOnErrorCallback = jest.fn();
+      store.onErrorCallback = mockOnErrorCallback;
+
+      // Mock the useCallControl to throw an error
+      jest.spyOn(helper, 'useCallControl').mockImplementation(() => {
+        throw new Error('Test error in useCallControl');
+      });
+
+      const {container} = render(
+        <CallControl
+          onHoldResume={onHoldResumeCb}
+          onEnd={onEndCb}
+          onWrapUp={onWrapUpCb}
+          onRecordingToggle={onRecordingToggleCb}
+        />
+      );
+
+      // The fallback should render an empty fragment (no content)
+      expect(container.firstChild).toBeNull();
+      expect(mockOnErrorCallback).toHaveBeenCalledWith('CallControl', Error('Test error in useCallControl'));
     });
   });
 });

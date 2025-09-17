@@ -223,6 +223,51 @@ describe('getControlsVisibility', () => {
 
     expect(getControlsVisibility(deviceType, featureFlags, task)).toEqual(expectedControls);
   });
+
+  it('should handle errors when accessing featureFlags and return safe defaults', () => {
+    const logger = {
+      error: jest.fn(),
+      log: jest.fn(),
+      warn: jest.fn(),
+      info: jest.fn(),
+      trace: jest.fn(),
+    };
+    const deviceType = 'BROWSER';
+    // Create problematic featureFlags that throw when accessing properties
+    const problematicFeatureFlags = new Proxy(
+      {},
+      {
+        get: () => {
+          throw new Error('FeatureFlags access error');
+        },
+      }
+    );
+
+    const result = getControlsVisibility(deviceType, problematicFeatureFlags, mockTask, logger);
+
+    expect(logger.error).toHaveBeenCalledWith(
+      'CC-Widgets: Task: Error in getControlsVisibility - FeatureFlags access error',
+      {
+        module: 'task-util',
+        method: 'getControlsVisibility',
+      }
+    );
+
+    expect(result).toEqual({
+      accept: false,
+      decline: false,
+      end: false,
+      muteUnmute: false,
+      holdResume: false,
+      consult: false,
+      transfer: false,
+      conference: false,
+      wrapup: false,
+      pauseResumeRecording: false,
+      endConsult: false,
+      recordingIndicator: false,
+    });
+  });
 });
 
 describe('findHoldTimestamp', () => {
@@ -277,5 +322,36 @@ describe('findHoldTimestamp', () => {
       extra: 123,
     };
     expect(findHoldTimestamp(interaction, 'mainCall')).toBe(42);
+  });
+
+  it('should handle errors when accessing interaction media and return null', () => {
+    const logger = {
+      error: jest.fn(),
+      log: jest.fn(),
+      warn: jest.fn(),
+      info: jest.fn(),
+      trace: jest.fn(),
+    };
+    // Create a problematic interaction that throws when accessing media
+    const problematicInteraction = new Proxy(
+      {},
+      {
+        get: (target, prop) => {
+          if (prop === 'media') {
+            throw new Error('Media access error');
+          }
+          return target[prop];
+        },
+      }
+    );
+
+    const result = findHoldTimestamp(problematicInteraction, 'mainCall', logger);
+
+    expect(logger.error).toHaveBeenCalledWith('CC-Widgets: Task: Error in findHoldTimestamp - Media access error', {
+      module: 'task-util',
+      method: 'findHoldTimestamp',
+    });
+
+    expect(result).toBeNull();
   });
 });

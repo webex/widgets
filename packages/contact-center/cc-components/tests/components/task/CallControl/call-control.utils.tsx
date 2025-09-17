@@ -14,6 +14,8 @@ import {
   handleCloseButtonPress,
   handleWrapupReasonChange,
   handleAudioRef,
+  onInputDialNumber,
+  handleButtonPress,
 } from '../../../../src/components/task/CallControl/call-control.utils';
 import * as utils from '../../../../src/utils';
 
@@ -76,6 +78,29 @@ describe('CallControl Utils', () => {
   const mockMediaTypeInfo = {
     labelName: 'Call',
   };
+
+  describe('onInputDialNumber', () => {
+    it('should set value from event currentTarget.value', () => {
+      const setValue = jest.fn();
+      const event = {currentTarget: {value: '12345'}};
+      onInputDialNumber(event, setValue);
+      expect(setValue).toHaveBeenCalledWith('12345');
+    });
+  });
+
+  describe('handleButtonPress', () => {
+    it('should log info and call onButtonPress with value', () => {
+      const logger = {info: jest.fn()};
+      const onButtonPress = jest.fn();
+      const value = '67890';
+      handleButtonPress(logger, onButtonPress, value);
+      expect(logger.info).toHaveBeenCalledWith(
+        'Dial Number button pressed',
+        expect.objectContaining({module: 'consult-transfer-dial-number.tsx', method: 'handleButtonPress'})
+      );
+      expect(onButtonPress).toHaveBeenCalledWith('67890');
+    });
+  });
 
   describe('handleToggleHold', () => {
     it('should toggle hold from false to true', () => {
@@ -776,9 +801,9 @@ describe('CallControl Utils', () => {
         {id: 'code-2', name: 'Customer Inquiry'},
       ];
 
-      handleWrapupReasonChange(mockEvent, mockWrapupCodes, mockHandleWrapupChange);
+      handleWrapupReasonChange(mockEvent, mockWrapupCodes, mockHandleWrapupChange, loggerMock);
 
-      expect(mockHandleWrapupChange).toHaveBeenCalledWith('Technical Issue', 'code-1');
+      expect(mockHandleWrapupChange).toHaveBeenCalledWith('Technical Issue', 'code-1', loggerMock);
     });
 
     it('should handle wrapup reason change with unknown selection', () => {

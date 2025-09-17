@@ -31,10 +31,10 @@ const UserStateComponent: React.FunctionComponent<UserStateComponentsProps> = (p
     logger,
   } = props;
 
-  const previousSelectableState = useMemo(() => getPreviousSelectableState(idleCodes), [idleCodes]);
-  const selectedKey = getSelectedKey(customState, currentState, idleCodes);
-  const items = buildDropdownItems(customState, idleCodes, currentState);
-  const sortedItems = sortDropdownItems(items);
+  const previousSelectableState = useMemo(() => getPreviousSelectableState(idleCodes, logger), [idleCodes, logger]);
+  const selectedKey = getSelectedKey(customState, currentState, idleCodes, logger);
+  const items = buildDropdownItems(customState, idleCodes, currentState, logger);
+  const sortedItems = sortDropdownItems(items, logger);
 
   return (
     <div className="user-state-container" data-testid="user-state-container">
@@ -47,7 +47,7 @@ const UserStateComponent: React.FunctionComponent<UserStateComponentsProps> = (p
         showBorder
         selectedKey={selectedKey}
         items={sortedItems}
-        className={`state-select ${getDropdownClass(customState, currentState, idleCodes)}`}
+        className={`state-select ${getDropdownClass(customState, currentState, idleCodes, logger)}`}
         data-testid="state-select"
       >
         {(item) => {
@@ -60,15 +60,19 @@ const UserStateComponent: React.FunctionComponent<UserStateComponentsProps> = (p
             <Item key={item.id} textValue={item.name} data-testid={`state-item-${item.name}`}>
               <div
                 className="item-container"
-                data-testid={`item-container ${shouldHighlight ? `selected ${getIconStyle(item).class}` : ''}`}
+                data-testid={`item-container ${shouldHighlight ? `selected ${getIconStyle(item, logger).class}` : ''}`}
               >
                 <Icon
-                  name={getIconStyle(item).iconName}
+                  name={getIconStyle(item, logger).iconName}
                   title=""
-                  className={`state-icon ${getIconStyle(item).class}`}
+                  className={`state-icon ${getIconStyle(item, logger).class}`}
                   data-testid="state-icon"
                 />
-                <Text className={`state-name ${getIconStyle(item).class}`} tagName={'small'} data-testid="state-name">
+                <Text
+                  className={`state-name ${getIconStyle(item, logger).class}`}
+                  tagName={'small'}
+                  data-testid="state-name"
+                >
                   {item.name}
                 </Text>
               </div>
@@ -86,7 +90,7 @@ const UserStateComponent: React.FunctionComponent<UserStateComponentsProps> = (p
         triggerID="user-state-tooltip"
       >
         <Text tagName="small" className="tooltip-text">
-          {getTooltipText(customState, currentState, idleCodes)}
+          {getTooltipText(customState, currentState, idleCodes, logger)}
         </Text>
       </Tooltip>
 

@@ -28,6 +28,7 @@ class StoreWrapper implements IStoreWrapper {
   onTaskRejected?: (task: ITask, reason: string) => void;
   onTaskAssigned?: (task: ITask) => void;
   onTaskSelected?: (task: ITask, isClicked: boolean) => void;
+  onErrorCallback?: (widgetName: string, error: Error) => void;
 
   constructor() {
     this.store = Store.getInstance();
@@ -221,6 +222,24 @@ class StoreWrapper implements IStoreWrapper {
         this.onTaskSelected(task, isClicked);
       }
     });
+  };
+
+  setOnError = (callback: (widgetName: string, error: Error) => void) => {
+    this.onErrorCallback = (widgetName: string, error: Error) => {
+      // @ts-expect-error - test error boundary
+      this.store.cc.webex.internal.newMetrics.submitBehavioralEvent({
+        product: 'wxcc-widgets',
+        agent: 'browser',
+        target: 'browser',
+        verb: 'error',
+        payload: {
+          widgets: widgetName,
+          name: error.name,
+          message: error.message,
+        },
+      });
+      callback(widgetName, error);
+    };
   };
 
   refreshTaskList = (): void => {

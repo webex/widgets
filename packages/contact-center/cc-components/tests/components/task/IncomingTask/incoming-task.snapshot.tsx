@@ -30,6 +30,13 @@ describe('IncomingTaskComponent', () => {
   // Mock functions
   const mockAccept = jest.fn();
   const mockReject = jest.fn();
+  const loggerMock = {
+    error: jest.fn(),
+    info: jest.fn(),
+    log: jest.fn(),
+    warn: jest.fn(),
+    trace: jest.fn(),
+  };
 
   // Default props using IncomingTaskComponentProps interface
   const defaultProps: IncomingTaskComponentProps = {
@@ -37,6 +44,7 @@ describe('IncomingTaskComponent', () => {
     isBrowser: true,
     accept: mockAccept,
     reject: mockReject,
+    logger: loggerMock,
   };
 
   // Utility function spies

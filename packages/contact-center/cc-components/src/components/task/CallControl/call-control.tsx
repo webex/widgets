@@ -66,8 +66,8 @@ function CallControlComponent(props: CallControlComponentProps) {
   } = props;
 
   useEffect(() => {
-    updateCallStateFromTask(currentTask, setIsHeld, setIsRecording);
-  }, [currentTask]);
+    updateCallStateFromTask(currentTask, setIsHeld, setIsRecording, logger);
+  }, [currentTask, logger]);
 
   const handletoggleHold = () => {
     handleToggleHoldUtil(isHeld, toggleHold, setIsHeld, logger);
@@ -89,7 +89,7 @@ function CallControlComponent(props: CallControlComponentProps) {
   };
 
   const handleWrapupChange = (text, value) => {
-    handleWrapupChangeUtil(text, value, setSelectedWrapupReason, setSelectedWrapupId);
+    handleWrapupChangeUtil(text, value, setSelectedWrapupReason, setSelectedWrapupId, logger);
   };
 
   const handleTargetSelect = (id: string, name: string, type: DestinationType) => {
@@ -109,11 +109,12 @@ function CallControlComponent(props: CallControlComponentProps) {
 
   const currentMediaType = getMediaType(
     currentTask.data.interaction.mediaType as MediaChannelType,
-    currentTask.data.interaction.mediaChannel as MediaChannelType
+    currentTask.data.interaction.mediaChannel as MediaChannelType,
+    logger
   );
 
   const mediaType = currentTask.data.interaction.mediaType as MediaChannelType;
-  const isTelephony = isTelephonyMediaType(mediaType);
+  const isTelephony = isTelephonyMediaType(mediaType, logger);
 
   const buttons = buildCallControlButtons(
     isMuted,
@@ -125,16 +126,21 @@ function CallControlComponent(props: CallControlComponentProps) {
     handleMuteToggle,
     handletoggleHold,
     toggleRecording,
-    endCall
+    endCall,
+    logger
   );
 
-  const filteredButtons = filterButtonsForConsultation(buttons, consultInitiated, isTelephony);
+  const filteredButtons = filterButtonsForConsultation(buttons, consultInitiated, isTelephony, logger);
 
   if (!currentTask) return null;
 
   return (
     <>
-      <audio ref={(audioElement) => handleAudioRef(audioElement, callControlAudio)} id="remote-audio" autoPlay></audio>
+      <audio
+        ref={(audioElement) => handleAudioRef(audioElement, callControlAudio, logger)}
+        id="remote-audio"
+        autoPlay
+      ></audio>
       <div className="call-control-container" data-testid="call-control-container">
         {!(consultAccepted && isTelephony) && !controlVisibility.wrapup && (
           <div className="button-group">
@@ -171,7 +177,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                     closeButtonPlacement="top-right"
                     closeButtonProps={{
                       'aria-label': 'Close popover',
-                      onPress: () => handleCloseButtonPress(setShowAgentMenu, setAgentMenuType),
+                      onPress: () => handleCloseButtonPress(setShowAgentMenu, setAgentMenuType, logger),
                       outline: true,
                     }}
                     triggerComponent={
@@ -206,6 +212,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                         queues={queues}
                         onAgentSelect={(agentId, agentName) => handleTargetSelect(agentId, agentName, 'agent')}
                         onQueueSelect={(queueId, queueName) => handleTargetSelect(queueId, queueName, 'queue')}
+                        onDialNumberSelect={(dialNumber) => handleTargetSelect(dialNumber, dialNumber, 'dialNumber')}
                         allowConsultToQueue={allowConsultToQueue}
                         logger={logger}
                       />
@@ -293,7 +300,9 @@ function CallControlComponent(props: CallControlComponentProps) {
                 className="wrapup-select"
                 data-testid="call-control:wrapup-select"
                 placeholder={SELECT}
-                onChange={(event: CustomEvent) => handleWrapupReasonChange(event, wrapupCodes, handleWrapupChange)}
+                onChange={(event: CustomEvent) =>
+                  handleWrapupReasonChange(event, wrapupCodes, handleWrapupChange, logger)
+                }
               >
                 {wrapupCodes?.map((code) => (
                   <Option

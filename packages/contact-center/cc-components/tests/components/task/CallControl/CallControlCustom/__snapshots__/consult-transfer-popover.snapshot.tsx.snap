@@ -55,6 +55,22 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
         Queues
       </mdc-text>
     </button>
+    <button
+      class="md-tab-wrapper dial-number-tab md-button-simple-wrapper"
+      data-active="false"
+      data-disabled="false"
+      role="tab"
+      tabindex="-1"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Dial Number
+      </mdc-text>
+    </button>
   </div>
   <ul
     class="agent-list md-list-wrapper"
@@ -266,6 +282,22 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
         Queues
       </mdc-text>
     </button>
+    <button
+      class="md-tab-wrapper dial-number-tab md-button-simple-wrapper"
+      data-active="false"
+      data-disabled="false"
+      role="tab"
+      tabindex="-1"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Dial Number
+      </mdc-text>
+    </button>
   </div>
   <ul
     class="agent-list md-list-wrapper"
@@ -469,6 +501,22 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
         Queues
       </mdc-text>
     </button>
+    <button
+      class="md-tab-wrapper dial-number-tab md-button-simple-wrapper"
+      data-active="false"
+      data-disabled="false"
+      role="tab"
+      tabindex="-1"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Dial Number
+      </mdc-text>
+    </button>
   </div>
   <ul
     class="agent-list md-list-wrapper"
@@ -670,6 +718,22 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         type="body-midsize-medium"
       >
         Queues
+      </mdc-text>
+    </button>
+    <button
+      class="md-tab-wrapper dial-number-tab md-button-simple-wrapper"
+      data-active="false"
+      data-disabled="false"
+      role="tab"
+      tabindex="-1"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Dial Number
       </mdc-text>
     </button>
   </div>
@@ -881,6 +945,22 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         type="body-midsize-medium"
       >
         Queues
+      </mdc-text>
+    </button>
+    <button
+      class="md-tab-wrapper dial-number-tab md-button-simple-wrapper"
+      data-active="false"
+      data-disabled="false"
+      role="tab"
+      tabindex="-1"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Dial Number
       </mdc-text>
     </button>
   </div>
@@ -1170,6 +1250,22 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         Queues
       </mdc-text>
     </button>
+    <button
+      class="md-tab-wrapper dial-number-tab md-button-simple-wrapper"
+      data-active="false"
+      data-disabled="false"
+      role="tab"
+      tabindex="-1"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Dial Number
+      </mdc-text>
+    </button>
   </div>
   <ul
     class="agent-list md-list-wrapper"
@@ -1339,6 +1435,66 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     Select an Agent
   </mdc-text>
   <div
+    aria-label="Tabs"
+    class="md-button-group-wrapper md-tab-list-wrapper agent-tablist"
+    data-compressed="false"
+    data-has-background="false"
+    data-orientation="horizontal"
+    data-round="true"
+    data-separator="false"
+    data-spaced="true"
+    role="tablist"
+    style="margin-top: 0px;"
+  >
+    <button
+      class="md-tab-wrapper agent-tab md-button-simple-wrapper"
+      data-active="true"
+      data-disabled="false"
+      role="tab"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Agents
+      </mdc-text>
+    </button>
+    <button
+      class="md-tab-wrapper queue-tab md-button-simple-wrapper"
+      data-active="false"
+      data-disabled="false"
+      role="tab"
+      tabindex="-1"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Queues
+      </mdc-text>
+    </button>
+    <button
+      class="md-tab-wrapper dial-number-tab md-button-simple-wrapper"
+      data-active="false"
+      data-disabled="false"
+      role="tab"
+      tabindex="-1"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Dial Number
+      </mdc-text>
+    </button>
+  </div>
+  <div
     class="consult-empty-state"
   >
     <div
@@ -1347,7 +1503,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     <div
       class="consult-empty-message"
     >
-      We can't find any queue or agent available for now.
+      We can't find any agent available for now.
     </div>
   </div>
 </div>
@@ -1406,6 +1562,22 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         type="body-midsize-medium"
       >
         Queues
+      </mdc-text>
+    </button>
+    <button
+      class="md-tab-wrapper dial-number-tab md-button-simple-wrapper"
+      data-active="false"
+      data-disabled="false"
+      role="tab"
+      tabindex="-1"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Dial Number
       </mdc-text>
     </button>
   </div>
@@ -1619,6 +1791,22 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         Queues
       </mdc-text>
     </button>
+    <button
+      class="md-tab-wrapper dial-number-tab md-button-simple-wrapper"
+      data-active="false"
+      data-disabled="false"
+      role="tab"
+      tabindex="-1"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Dial Number
+      </mdc-text>
+    </button>
   </div>
   <div
     class="consult-empty-state"
@@ -1688,6 +1876,22 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         type="body-midsize-medium"
       >
         Queues
+      </mdc-text>
+    </button>
+    <button
+      class="md-tab-wrapper dial-number-tab md-button-simple-wrapper"
+      data-active="false"
+      data-disabled="false"
+      role="tab"
+      tabindex="-1"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Dial Number
       </mdc-text>
     </button>
   </div>
@@ -1901,6 +2105,22 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         Queues
       </mdc-text>
     </button>
+    <button
+      class="md-tab-wrapper dial-number-tab md-button-simple-wrapper"
+      data-active="false"
+      data-disabled="false"
+      role="tab"
+      tabindex="-1"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Dial Number
+      </mdc-text>
+    </button>
   </div>
   <ul
     class="agent-list md-list-wrapper"
@@ -2036,6 +2256,22 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         type="body-midsize-medium"
       >
         Queues
+      </mdc-text>
+    </button>
+    <button
+      class="md-tab-wrapper dial-number-tab md-button-simple-wrapper"
+      data-active="false"
+      data-disabled="false"
+      role="tab"
+      tabindex="-1"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Dial Number
       </mdc-text>
     </button>
   </div>
@@ -2249,6 +2485,22 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         Queues
       </mdc-text>
     </button>
+    <button
+      class="md-tab-wrapper dial-number-tab md-button-simple-wrapper"
+      data-active="false"
+      data-disabled="false"
+      role="tab"
+      tabindex="-1"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Dial Number
+      </mdc-text>
+    </button>
   </div>
   <ul
     class="agent-list md-list-wrapper"
@@ -2460,6 +2712,22 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
         Queues
       </mdc-text>
     </button>
+    <button
+      class="md-tab-wrapper dial-number-tab md-button-simple-wrapper"
+      data-active="false"
+      data-disabled="false"
+      role="tab"
+      tabindex="-1"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Dial Number
+      </mdc-text>
+    </button>
   </div>
   <ul
     class="agent-list md-list-wrapper"
@@ -2591,6 +2859,22 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
         type="body-midsize-medium"
       >
         Queues
+      </mdc-text>
+    </button>
+    <button
+      class="md-tab-wrapper dial-number-tab md-button-simple-wrapper"
+      data-active="false"
+      data-disabled="false"
+      role="tab"
+      tabindex="-1"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Dial Number
       </mdc-text>
     </button>
   </div>
@@ -2802,6 +3086,22 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
         type="body-midsize-medium"
       >
         Queues
+      </mdc-text>
+    </button>
+    <button
+      class="md-tab-wrapper dial-number-tab md-button-simple-wrapper"
+      data-active="false"
+      data-disabled="false"
+      role="tab"
+      tabindex="-1"
+      type="button"
+    >
+      <mdc-text
+        class="md-text-wrapper"
+        tagname="span"
+        type="body-midsize-medium"
+      >
+        Dial Number
       </mdc-text>
     </button>
   </div>
