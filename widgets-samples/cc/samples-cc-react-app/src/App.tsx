@@ -865,7 +865,7 @@ function App() {
                                 try {
                                   // Create the BuddyAgents data object with required mediaType
                                   const buddyAgentsData: BuddyAgents = {
-                                    mediaType: 'telephony', // Required field
+                                    mediaType: store.currentTask?.data?.interaction?.mediaType || 'telephony', // Use dynamic mediaType from current task
                                     ...(searchTerm && {state: 'Available'}), // Use state filter when search term is provided
                                   };
                                   const response = await store.cc.getBuddyAgents(buddyAgentsData);
