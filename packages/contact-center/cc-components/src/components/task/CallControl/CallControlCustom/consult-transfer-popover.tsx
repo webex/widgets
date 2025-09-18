@@ -171,7 +171,11 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
   const handleSearchChange = useCallback(
     (value: string) => {
       setSearchQuery(value);
-      debouncedSearchRef.current?.(value, selectedCategory);
+      // Only trigger server search for non-agent categories
+      // Agents use local search via filteredAgents useMemo
+      if (selectedCategory !== 'Agents') {
+        debouncedSearchRef.current?.(value, selectedCategory);
+      }
     },
     [selectedCategory]
   );
@@ -255,10 +259,32 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
 
   // Filter agents based on search (client-side)
   const filteredAgents = useMemo(() => {
-    if (!searchQuery) return buddyAgents;
-    const query = searchQuery.toLowerCase();
-    return buddyAgents.filter((agent) => agent.agentName.toLowerCase().includes(query));
-  }, [buddyAgents, searchQuery]);
+    logger?.info(
+      `CC-Components: filteredAgents useMemo triggered - searchQuery: "${searchQuery}", selectedCategory: "${selectedCategory}", buddyAgents.length: ${buddyAgents.length}`
+    );
+
+    if (!searchQuery || searchQuery.trim() === '') {
+      logger?.info(`CC-Components: No search query, returning all ${buddyAgents.length} agents`);
+      return buddyAgents;
+    }
+
+    const query = searchQuery.toLowerCase().trim();
+    logger?.info(`CC-Components: Filtering agents with query: "${query}", total agents: ${buddyAgents.length}`);
+
+    const filtered = buddyAgents.filter((agent) => {
+      const agentName = (agent.agentName || '').toLowerCase();
+      const matches = agentName.includes(query);
+
+      if (matches) {
+        logger?.info(`CC-Components: Agent matched - ID: ${agent.agentId}, Name: ${agent.agentName}`);
+      }
+
+      return matches;
+    });
+
+    logger?.info(`CC-Components: Filtered agents count: ${filtered.length}`);
+    return filtered;
+  }, [buddyAgents, searchQuery, logger]);
 
   const noAgents = isAgentsEmpty(filteredAgents);
   const noQueues = queues.length === 0;
@@ -389,15 +415,26 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
       {/* Render lists if not empty */}
       {selectedCategory === 'Agents' &&
         !loadingBuddyAgents &&
-        !noAgents &&
-        renderList(
-          filteredAgents,
-          (agent) => agent.agentId,
-          (agent) => agent.agentName,
-          (id, name) => {
-            handleAgentSelection(id, name, onAgentSelect, logger);
+        (() => {
+          logger?.info(
+            `CC-Components: Rendering agents - noAgents: ${noAgents}, filteredAgents.length: ${filteredAgents.length}, selectedCategory: ${selectedCategory}`
+          );
+
+          if (noAgents) {
+            logger?.info(`CC-Components: No agents to render - showing empty state`);
+            return null; // This will be handled by the empty state above
           }
-        )}
+
+          logger?.info(`CC-Components: Rendering ${filteredAgents.length} agents`);
+          return renderList(
+            filteredAgents,
+            (agent) => agent.agentId,
+            (agent) => agent.agentName,
+            (id, name) => {
+              handleAgentSelection(id, name, onAgentSelect, logger);
+            }
+          );
+        })()}
 
       {selectedCategory === 'Dial Number' && !noDialNumbers && (
         <div>

@@ -869,11 +869,8 @@ function App() {
                                     ...(searchTerm && {state: 'Available'}), // Use state filter when search term is provided
                                   };
                                   const response = await store.cc.getBuddyAgents(buddyAgentsData);
-                                  // Return the buddy agents array from the response
-                                  if (response && typeof response === 'object' && 'agentList' in response) {
-                                    return response.agentList || [];
-                                  }
-                                  return [];
+
+                                  return 'data' in response ? response.data.agentList : [];
                                 } catch (error) {
                                   console.error('Error fetching buddy agents:', error);
                                   return [];
