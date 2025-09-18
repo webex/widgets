@@ -1,24 +1,27 @@
 import React, {useState, useCallback, useMemo, useRef, useEffect} from 'react';
 import {Text, ListNext, TextInput, Button} from '@momentum-ui/react-collaboration';
 import ConsultTransferListComponent from './consult-transfer-list-item';
-import {ConsultTransferPopoverComponentProps, AddressBookEntry} from '../../task.types';
+import {
+  ConsultTransferPopoverComponentProps,
+  AddressBookEntry,
+  EntryPointEntry,
+  QueueEntry,
+  BuddyDetails,
+} from '../../task.types';
 import ConsultTransferEmptyState from './consult-transfer-empty-state';
-import {isAgentsEmpty, isQueuesEmpty, handleAgentSelection, handleQueueSelection} from './call-control-custom.utils';
-
-// Types for entry point entries
-interface EntryPointEntry {
-  id: string;
-  name: string;
-  number: string;
-}
+import {isAgentsEmpty, handleAgentSelection, handleQueueSelection} from './call-control-custom.utils';
+import {usePaginatedData} from './usePaginatedData';
 
 // Debounce utility function
-const debounce = <T extends (...args: any[]) => any>(func: T, delay: number): T => {
+const debounce = <T extends (...args: unknown[]) => void>(
+  func: T,
+  delay: number
+): ((...args: Parameters<T>) => void) => {
   let timeoutId: NodeJS.Timeout;
-  return ((...args: any[]) => {
+  return (...args: Parameters<T>) => {
     clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => func.apply(null, args), delay);
-  }) as T;
+    timeoutId = setTimeout(() => func(...args), delay);
+  };
 };
 
 type CategoryType = 'Agents' | 'Queues' | 'Dial Number' | 'Entry Point';
@@ -26,8 +29,6 @@ type CategoryType = 'Agents' | 'Queues' | 'Dial Number' | 'Entry Point';
 const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentProps> = ({
   heading,
   buttonIcon,
-  buddyAgents,
-  queues,
   onAgentSelect,
   onQueueSelect,
   onDialNumberSelect,
@@ -43,228 +44,181 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
   const [searchQuery, setSearchQuery] = useState('');
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
-  // State for Dial Numbers infinite scroll
-  const [dialNumbers, setDialNumbers] = useState<AddressBookEntry[]>([]);
-  const [dialNumbersPage, setDialNumbersPage] = useState(0);
-  const [hasMoreDialNumbers, setHasMoreDialNumbers] = useState(true);
-  const [loadingDialNumbers, setLoadingDialNumbers] = useState(false);
+  // State for Buddy Agents
+  const [buddyAgents, setBuddyAgents] = useState<BuddyDetails[]>([]);
+  const [loadingBuddyAgents, setLoadingBuddyAgents] = useState(false);
 
-  // State for Entry Points infinite scroll
-  const [entryPoints, setEntryPoints] = useState<EntryPointEntry[]>([]);
-  const [entryPointsPage, setEntryPointsPage] = useState(0);
-  const [hasMoreEntryPoints, setHasMoreEntryPoints] = useState(true);
-  const [loadingEntryPoints, setLoadingEntryPoints] = useState(false);
-
-  // Load initial data for Dial Numbers with proper pagination and search
-  const loadDialNumbers = useCallback(
-    async (page = 0, search = '', reset = false) => {
-      setLoadingDialNumbers(true);
-      try {
-        // Build API parameters for pagination and search
-        const apiParams = {
-          page,
-          pageSize: 25, // Use smaller page size for better UX
-          ...(search && {search}), // Only include search if provided
-        };
-
-        logger?.info(`CC-Components: Loading address book entries - page: ${page}, search: "${search}"`);
-        const response = await getAddressBookEntries(apiParams);
-
-        // Ensure response has expected structure
-        if (!response || !response.data) {
-          logger?.error('CC-Components: Invalid response from getAddressBookEntries');
-          setDialNumbers([]);
-          setHasMoreDialNumbers(false);
-          return;
-        }
-
-        logger?.info(`CC-Components: Loaded ${response.data.length} address book entries for page ${page}`);
-
-        // Transform the entries to match our expected format
-        const transformedEntries: AddressBookEntry[] = response.data.map((entry, index) => ({
-          id: entry.id || `address-${page}-${index}`,
-          name: entry.name || 'Unknown',
-          number: entry.number || '',
-          organizationId: entry.organizationId,
-          version: entry.version,
-          createdTime: entry.createdTime,
-          lastUpdatedTime: entry.lastUpdatedTime,
-        }));
-
-        // Update state based on whether this is a reset (new search/category) or append (pagination)
-        if (reset || page === 0) {
-          setDialNumbers(transformedEntries);
-        } else {
-          setDialNumbers((prev) => [...prev, ...transformedEntries]);
-        }
-
-        // Update pagination state based on API response
-        const currentPage = response.meta?.page ?? page;
-        const totalPages = response.meta?.totalPages ?? 1;
-
-        setDialNumbersPage(currentPage);
-        setHasMoreDialNumbers(currentPage < totalPages - 1);
-
-        logger?.info(
-          `CC-Components: Pagination state - current: ${currentPage}, total: ${totalPages}, hasMore: ${currentPage < totalPages - 1}`
-        );
-      } catch (error) {
-        logger?.error('CC-Components: Error loading dial numbers:', error);
-        if (reset || page === 0) {
-          setDialNumbers([]);
-        }
-        setHasMoreDialNumbers(false);
-      } finally {
-        setLoadingDialNumbers(false);
-      }
-    },
-    [getAddressBookEntries, logger]
+  const {
+    data: dialNumbers,
+    page: dialNumbersPage,
+    hasMore: hasMoreDialNumbers,
+    loading: loadingDialNumbers,
+    loadData: loadDialNumbers,
+    reset: resetDialNumbers,
+  } = usePaginatedData<AddressBookEntry, AddressBookEntry>(
+    getAddressBookEntries,
+    (entry, page, index) => ({
+      id: entry.id || `address-${page}-${index}`,
+      name: entry.name || 'Unknown',
+      number: entry.number || '',
+      organizationId: entry.organizationId,
+      version: entry.version,
+      createdTime: entry.createdTime,
+      lastUpdatedTime: entry.lastUpdatedTime,
+    }),
+    logger,
+    'Dial Numbers'
   );
 
-  // Load initial data for Entry Points
-  const loadEntryPoints = useCallback(
-    async (page = 0, search = '', reset = false) => {
-      setLoadingEntryPoints(true);
-      try {
-        const entries = await getEntryPoints();
+  const {
+    data: entryPoints,
+    page: entryPointsPage,
+    hasMore: hasMoreEntryPoints,
+    loading: loadingEntryPoints,
+    loadData: loadEntryPoints,
+    reset: resetEntryPoints,
+  } = usePaginatedData<EntryPointEntry, EntryPointEntry>(
+    getEntryPoints,
+    (entry, page, index) => ({
+      id: entry.id || `entry-${page}-${index}`,
+      name: entry.name || entry.displayName || 'Unknown',
+      number: entry.number || entry.phoneNumber || entry.extension || '',
+      organizationId: entry.organizationId,
+    }),
+    logger,
+    'Entry Points'
+  );
 
-        // Ensure entries is an array before proceeding
-        const entriesArray = Array.isArray(entries) ? entries : [];
-        logger?.info(`CC-Components: Loaded ${entriesArray.length} entry points`);
-
-        // Transform the entries to match our expected format
-        const transformedEntries: EntryPointEntry[] = entriesArray.map((entry: any, index: number) => ({
-          id: entry.id || `entry-${index}`,
-          name: entry.name || entry.displayName || 'Unknown',
-          number: entry.number || entry.phoneNumber || entry.extension || '',
-        }));
-
-        // Apply search filter if provided
-        let filteredEntries = transformedEntries;
-        if (search) {
-          const query = search.toLowerCase();
-          filteredEntries = transformedEntries.filter(
-            (entry) => entry.name.toLowerCase().includes(query) || entry.number.includes(query)
-          );
-        }
-
-        // For now, we'll load all entries since the API doesn't support pagination
-        // In a real implementation, you might want to implement client-side pagination
-        setEntryPoints(filteredEntries);
-        setHasMoreEntryPoints(false); // No pagination for now
-        setEntryPointsPage(page);
-      } catch (error) {
-        logger?.error('Error loading entry points:', error);
-        setEntryPoints([]);
-        setHasMoreEntryPoints(false);
-      } finally {
-        setLoadingEntryPoints(false);
-      }
-    },
-    [getEntryPoints, logger]
+  const {
+    data: queues,
+    page: queuesPage,
+    hasMore: hasMoreQueues,
+    loading: loadingQueues,
+    loadData: loadQueues,
+    reset: resetQueues,
+  } = usePaginatedData<QueueEntry, QueueEntry>(
+    getQueues,
+    (entry, page, index) => ({
+      id: entry.id || `queue-${page}-${index}`,
+      name: entry.name || 'Unknown Queue',
+      description: entry.description,
+      organizationId: entry.organizationId,
+      type: entry.type,
+      status: entry.status,
+    }),
+    logger,
+    'Queues'
   );
 
   // Load next page for current category
   const loadNextPage = useCallback(() => {
     if (selectedCategory === 'Dial Number' && hasMoreDialNumbers && !loadingDialNumbers) {
-      loadDialNumbers(dialNumbersPage + 1, searchQuery, false);
+      loadDialNumbers(dialNumbersPage + 1, searchQuery);
     } else if (selectedCategory === 'Entry Point' && hasMoreEntryPoints && !loadingEntryPoints) {
-      loadEntryPoints(entryPointsPage + 1, searchQuery, false);
+      loadEntryPoints(entryPointsPage + 1, searchQuery);
+    } else if (selectedCategory === 'Queues' && hasMoreQueues && !loadingQueues) {
+      loadQueues(queuesPage + 1, searchQuery);
     }
   }, [
     selectedCategory,
     hasMoreDialNumbers,
     hasMoreEntryPoints,
+    hasMoreQueues,
     loadingDialNumbers,
     loadingEntryPoints,
+    loadingQueues,
     dialNumbersPage,
     entryPointsPage,
+    queuesPage,
     searchQuery,
     loadDialNumbers,
     loadEntryPoints,
+    loadQueues,
   ]);
 
-  // Debounced search function
-  const debouncedSearch = useCallback(
-    debounce((query: string, category: CategoryType) => {
-      if (category === 'Dial Number') {
-        setDialNumbersPage(0); // Reset pagination
-        setHasMoreDialNumbers(true); // Reset pagination state
-        loadDialNumbers(0, query, true);
-      } else if (category === 'Entry Point') {
-        setEntryPointsPage(0); // Reset pagination
-        setHasMoreEntryPoints(true); // Reset pagination state
-        loadEntryPoints(0, query, true);
+  // Create a stable debounced search function
+  const debouncedSearchRef = useRef<ReturnType<typeof debounce>>();
+
+  // Initialize debounced function once
+  if (!debouncedSearchRef.current) {
+    debouncedSearchRef.current = debounce((query: string, category: CategoryType) => {
+      // Only search if query is empty (to show all results) or has at least 2 characters
+      if (query.length === 0 || query.length >= 2) {
+        if (category === 'Dial Number') {
+          loadDialNumbers(0, query, true);
+        } else if (category === 'Entry Point') {
+          loadEntryPoints(0, query, true);
+        } else if (category === 'Queues') {
+          loadQueues(0, query, true);
+        }
       }
-    }, 300),
-    [loadDialNumbers, loadEntryPoints]
-  );
+    }, 500);
+  }
+
+  // Cleanup debounced function on unmount
+  useEffect(() => {
+    return () => {
+      // Clear any pending timeouts when component unmounts
+      if (debouncedSearchRef.current) {
+        // The debounce function should have a cancel method, but since our implementation doesn't,
+        // we'll just clear the ref
+        debouncedSearchRef.current = undefined;
+      }
+    };
+  }, []);
 
   // Handle search input change
   const handleSearchChange = useCallback(
     (value: string) => {
       setSearchQuery(value);
-
-      // For categories that support API search, use debounced search
-      if (selectedCategory === 'Dial Number' || selectedCategory === 'Entry Point') {
-        debouncedSearch(value, selectedCategory);
-      }
-      // For Agents and Queues, trigger fresh API calls if search functions are available
-      else if (selectedCategory === 'Agents' && getBuddyAgents) {
-        // Reset search query and let the filtered memoized result handle client-side filtering
-        // In future, this could be enhanced to use getBuddyAgents(value) for server-side search
-      } else if (selectedCategory === 'Queues' && getQueues) {
-        // Reset search query and let the filtered memoized result handle client-side filtering
-        // In future, this could be enhanced to use getQueues(value) for server-side search
-      }
+      debouncedSearchRef.current?.(value, selectedCategory);
     },
-    [selectedCategory, debouncedSearch, getBuddyAgents, getQueues]
+    [selectedCategory]
   );
 
   // Handle category change
   const handleCategoryChange = useCallback(
     (category: CategoryType) => {
-      console.log(`Category change attempted: ${category}`); // Console log for immediate debugging
       logger?.info(`CC-Components: Category changed to: ${category}`);
       setSelectedCategory(category);
       setSearchQuery('');
 
-      // Reset pagination state for all categories
-      setDialNumbersPage(0);
-      setHasMoreDialNumbers(true);
-      setEntryPointsPage(0);
-      setHasMoreEntryPoints(true);
-
-      // Clear existing data and let useEffect handle loading
-      if (category === 'Dial Number') {
-        setDialNumbers([]); // Clear existing data
-      } else if (category === 'Entry Point') {
-        setEntryPoints([]); // Clear existing data
-      }
+      // Reset all data sources
+      resetDialNumbers();
+      resetEntryPoints();
+      resetQueues();
     },
-    [logger]
+    [logger, resetDialNumbers, resetEntryPoints, resetQueues]
   );
 
-  // Alternative click handlers for individual radio buttons
-  const handleAgentsClick = useCallback(() => {
-    console.log('Agents clicked directly');
-    handleCategoryChange('Agents');
-  }, [handleCategoryChange]);
+  // Click handlers for category buttons
+  const createCategoryClickHandler = (category: CategoryType) => () => handleCategoryChange(category);
+  const handleAgentsClick = createCategoryClickHandler('Agents');
+  const handleQueuesClick = createCategoryClickHandler('Queues');
+  const handleDialNumberClick = createCategoryClickHandler('Dial Number');
+  const handleEntryPointClick = createCategoryClickHandler('Entry Point');
 
-  const handleQueuesClick = useCallback(() => {
-    console.log('Queues clicked directly');
-    handleCategoryChange('Queues');
-  }, [handleCategoryChange]);
+  // Fetch buddy agents once on component mount
+  useEffect(() => {
+    const loadBuddyAgents = async () => {
+      if (!getBuddyAgents) return;
 
-  const handleDialNumberClick = useCallback(() => {
-    console.log('Dial Number clicked directly');
-    handleCategoryChange('Dial Number');
-  }, [handleCategoryChange]);
+      setLoadingBuddyAgents(true);
+      try {
+        logger?.info('CC-Components: Loading buddy agents');
+        const agents = await getBuddyAgents();
+        setBuddyAgents(agents || []);
+        logger?.info(`CC-Components: Loaded ${agents?.length || 0} buddy agents`);
+      } catch (error) {
+        logger?.error('CC-Components: Error loading buddy agents:', error);
+        setBuddyAgents([]);
+      } finally {
+        setLoadingBuddyAgents(false);
+      }
+    };
 
-  const handleEntryPointClick = useCallback(() => {
-    console.log('Entry Point clicked directly');
-    handleCategoryChange('Entry Point');
-  }, [handleCategoryChange]);
+    loadBuddyAgents();
+  }, [getBuddyAgents, logger]);
 
   // Intersection Observer for infinite scroll
   useEffect(() => {
@@ -288,52 +242,26 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
     };
   }, [loadNextPage]);
 
-  // Load initial data when component mounts or category changes
+  // Load data based on the selected category
   useEffect(() => {
-    if (selectedCategory === 'Dial Number' && !loadingDialNumbers) {
-      // Always load if we don't have data OR if we just switched to this category
-      if (dialNumbers.length === 0) {
-        logger?.info('CC-Components: Loading dial numbers for first time or after category switch');
-        loadDialNumbers(0, '', true);
-      }
-    } else if (selectedCategory === 'Entry Point' && !loadingEntryPoints) {
-      // Always load if we don't have data OR if we just switched to this category
-      if (entryPoints.length === 0) {
-        logger?.info('CC-Components: Loading entry points for first time or after category switch');
-        loadEntryPoints(0, '', true);
-      }
+    if (selectedCategory === 'Dial Number' && dialNumbers.length === 0) {
+      loadDialNumbers(0, '', true);
+    } else if (selectedCategory === 'Entry Point' && entryPoints.length === 0) {
+      loadEntryPoints(0, '', true);
+    } else if (selectedCategory === 'Queues' && queues.length === 0) {
+      loadQueues(0, '', true);
     }
-  }, [
-    selectedCategory,
-    dialNumbers.length,
-    entryPoints.length,
-    loadDialNumbers,
-    loadEntryPoints,
-    loadingDialNumbers,
-    loadingEntryPoints,
-    logger,
-  ]);
+  }, [selectedCategory]);
 
   // Filter agents based on search (client-side)
   const filteredAgents = useMemo(() => {
-    if (selectedCategory !== 'Agents' || !searchQuery) {
-      return buddyAgents;
-    }
+    if (!searchQuery) return buddyAgents;
     const query = searchQuery.toLowerCase();
     return buddyAgents.filter((agent) => agent.agentName.toLowerCase().includes(query));
-  }, [buddyAgents, searchQuery, selectedCategory]);
-
-  // Filter queues based on search (client-side for now)
-  const filteredQueues = useMemo(() => {
-    if (selectedCategory !== 'Queues' || !searchQuery || !queues) {
-      return queues || [];
-    }
-    const query = searchQuery.toLowerCase();
-    return queues.filter((queue) => queue.name.toLowerCase().includes(query));
-  }, [queues, searchQuery, selectedCategory]);
+  }, [buddyAgents, searchQuery]);
 
   const noAgents = isAgentsEmpty(filteredAgents);
-  const noQueues = isQueuesEmpty(filteredQueues);
+  const noQueues = queues.length === 0;
   const noDialNumbers = dialNumbers.length === 0;
   const noEntryPoints = entryPoints.length === 0;
 
@@ -373,16 +301,6 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
   );
 
   const hasAnyData = !noAgents || !noQueues || !noDialNumbers || !noEntryPoints;
-
-  // Debug logging
-  useEffect(() => {
-    logger?.info(`CC-Components: Debug - selectedCategory: ${selectedCategory}`);
-    logger?.info(`CC-Components: Debug - buddyAgents: ${JSON.stringify(buddyAgents?.slice(0, 2) || [])}`);
-    logger?.info(`CC-Components: Debug - queues: ${JSON.stringify(queues?.slice(0, 2) || [])}`);
-    logger?.info(`CC-Components: Debug - dialNumbers: ${JSON.stringify(dialNumbers.slice(0, 2))}`);
-    logger?.info(`CC-Components: Debug - entryPoints: ${JSON.stringify(entryPoints.slice(0, 2))}`);
-    logger?.info(`CC-Components: Debug - hasAnyData: ${hasAnyData}`);
-  }, [selectedCategory, buddyAgents, queues, dialNumbers, entryPoints, hasAnyData, logger]);
 
   return (
     <div className="agent-popover-content">
@@ -444,7 +362,15 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
       {!hasAnyData && <ConsultTransferEmptyState message="No data available for consult transfer." />}
 
       {/* Render content based on selected category */}
-      {selectedCategory === 'Agents' && noAgents && (
+      {selectedCategory === 'Agents' && loadingBuddyAgents && (
+        <div style={{padding: '8px', textAlign: 'center'}}>
+          <Text tagName="small" type="body-secondary">
+            Loading agents...
+          </Text>
+        </div>
+      )}
+
+      {selectedCategory === 'Agents' && !loadingBuddyAgents && noAgents && (
         <ConsultTransferEmptyState message="We can't find any agent available for now." />
       )}
 
@@ -462,6 +388,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
 
       {/* Render lists if not empty */}
       {selectedCategory === 'Agents' &&
+        !loadingBuddyAgents &&
         !noAgents &&
         renderList(
           filteredAgents,
@@ -469,17 +396,6 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
           (agent) => agent.agentName,
           (id, name) => {
             handleAgentSelection(id, name, onAgentSelect, logger);
-          }
-        )}
-
-      {selectedCategory === 'Queues' &&
-        !noQueues &&
-        renderList(
-          filteredQueues,
-          (queue) => queue.id,
-          (queue) => queue.name,
-          (id, name) => {
-            handleQueueSelection(id, name, onQueueSelect, logger);
           }
         )}
 
@@ -548,6 +464,42 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
               {loadingEntryPoints ? (
                 <Text tagName="small" type="body-secondary">
                   Loading more entry points...
+                </Text>
+              ) : (
+                <Text tagName="small" type="body-secondary">
+                  Scroll to load more
+                </Text>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {selectedCategory === 'Queues' && !noQueues && (
+        <div>
+          {renderList(
+            queues,
+            (queue) => queue.id,
+            (queue) => queue.name,
+            (id, name) => {
+              handleQueueSelection(id, name, onQueueSelect, logger);
+            }
+          )}
+          {/* Infinite scroll trigger */}
+          {hasMoreQueues && (
+            <div
+              ref={loadMoreRef}
+              style={{
+                padding: '8px',
+                textAlign: 'center',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              {loadingQueues ? (
+                <Text tagName="small" type="body-secondary">
+                  Loading more queues...
                 </Text>
               ) : (
                 <Text tagName="small" type="body-secondary">

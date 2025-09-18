@@ -654,35 +654,6 @@ class StoreWrapper implements IStoreWrapper {
     this.handleTaskRemove(task.data.interactionId);
   };
 
-  getBuddyAgents = async (
-    mediaType: string = this.currentTask.data.interaction.mediaType
-  ): Promise<Array<BuddyDetails>> => {
-    try {
-      const response = await this.store.cc.getBuddyAgents({
-        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
-        mediaType: mediaType ?? 'telephony',
-        state: 'Available',
-      });
-      return 'data' in response ? response.data.agentList : [];
-    } catch (error) {
-      return Promise.reject(error);
-    }
-  };
-
-  getQueues = async (
-    mediaType: string = this.currentTask.data.interaction.mediaType ?? 'TELEPHONY'
-  ): Promise<Array<ContactServiceQueue>> => {
-    try {
-      const upperMediaType = mediaType.toUpperCase();
-      let queueList = await this.store.cc.getQueues();
-      queueList = queueList.filter((queue) => queue.channelType === upperMediaType);
-      return queueList;
-    } catch (error) {
-      console.error('Error fetching queues:', error);
-      return Promise.reject(error);
-    }
-  };
-
   cleanUpStore = () => {
     this.store.logger.info('CC-Widgets: cleanUpStore(): resetting store on logout', {
       module: 'storeEventsWrapper.ts',

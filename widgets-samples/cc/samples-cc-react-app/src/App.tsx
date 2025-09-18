@@ -858,8 +858,8 @@ function App() {
                               getAddressBookEntries={async (params) => {
                                 return await store.cc.addressBook.getEntries(params);
                               }}
-                              getEntryPoints={async () => {
-                                return await store.cc.entryPoints.getEntryPoints();
+                              getEntryPoints={async (params) => {
+                                return await store.cc.entryPoints.getEntryPoints(params);
                               }}
                               getBuddyAgents={async (searchTerm?: string): Promise<BuddyDetails[]> => {
                                 try {
@@ -879,8 +879,8 @@ function App() {
                                   return [];
                                 }
                               }}
-                              getQueues={async (searchTerm?: string) => {
-                                return await store.cc.getQueues(searchTerm);
+                              getQueues={async (params) => {
+                                return await store.cc.queue.getQueues(params);
                               }}
                             />
                           </fieldset>

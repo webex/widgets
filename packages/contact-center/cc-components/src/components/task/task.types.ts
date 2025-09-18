@@ -8,6 +8,8 @@ import {
   ContactServiceQueue,
 } from '@webex/cc-store';
 
+export type {BuddyDetails};
+
 type Enum<T extends Record<string, unknown>> = T[keyof T];
 
 /**
@@ -498,8 +500,6 @@ export interface ConsultTransferListComponentProps {
 export interface ConsultTransferPopoverComponentProps {
   heading: string;
   buttonIcon: string;
-  buddyAgents: BuddyDetails[];
-  queues?: ContactServiceQueue[];
   onAgentSelect?: (agentId: string, agentName: string) => void;
   onQueueSelect?: (queueId: string, queueName: string) => void;
   onDialNumberSelect?: (id: string, name: string, number: string) => void;
@@ -507,9 +507,9 @@ export interface ConsultTransferPopoverComponentProps {
   allowConsultToQueue: boolean;
   logger: ILogger;
   getAddressBookEntries: (params?: AddressBookEntrySearchParams) => Promise<AddressBookEntriesResponse>;
-  getEntryPoints: () => Promise<any[]>;
+  getEntryPoints: (params?: EntryPointSearchParams) => Promise<EntryPointEntriesResponse>;
   getBuddyAgents?: (searchTerm?: string) => Promise<BuddyDetails[]>;
-  getQueues?: (searchTerm?: string) => Promise<ContactServiceQueue[]>;
+  getQueues?: (params?: QueueSearchParams) => Promise<QueueEntriesResponse>;
 }
 
 /**
@@ -710,6 +710,137 @@ export interface AddressBookEntry {
 export interface AddressBookEntriesResponse {
   /** Array of address book entries */
   data: AddressBookEntry[];
+
+  /** Pagination metadata */
+  meta: {
+    /** Organization ID */
+    orgid?: string;
+
+    /** Current page number */
+    page?: number;
+
+    /** Page size for current data set */
+    pageSize?: number;
+
+    /** Number of pages */
+    totalPages?: number;
+
+    /** Total number of items */
+    totalRecords?: number;
+
+    /** Map of pagination links */
+    links?: Record<string, string>;
+  };
+}
+
+/**
+ * Entry Point Search Parameters
+ */
+export interface EntryPointSearchParams {
+  /** Search keyword for name and number fields */
+  search?: string;
+
+  /** Page number (starts from 0) */
+  page?: number;
+
+  /** Number of items per page (default: 100) */
+  pageSize?: number;
+
+  /** Filter criteria */
+  filter?: string;
+
+  /** Additional attributes to be returned */
+  attributes?: string;
+}
+
+export interface EntryPointEntry {
+  /** Unique identifier for the entry */
+  id: string;
+
+  /** Name of the entry point */
+  name: string;
+
+  /** Phone number for the entry point */
+  number: string;
+
+  /** Organization ID this entry belongs to */
+  organizationId?: string;
+
+  /** Additional entry point specific fields */
+  displayName?: string;
+  phoneNumber?: string;
+  extension?: string;
+}
+
+export interface EntryPointEntriesResponse {
+  /** Array of entry point entries */
+  data: EntryPointEntry[];
+
+  /** Pagination metadata */
+  meta: {
+    /** Organization ID */
+    orgid?: string;
+
+    /** Current page number */
+    page?: number;
+
+    /** Page size for current data set */
+    pageSize?: number;
+
+    /** Number of pages */
+    totalPages?: number;
+
+    /** Total number of items */
+    totalRecords?: number;
+
+    /** Map of pagination links */
+    links?: Record<string, string>;
+  };
+}
+
+/**
+ * Queue Search Parameters
+ */
+export interface QueueSearchParams {
+  /** Search keyword for name and other fields */
+  search?: string;
+
+  /** Page number (starts from 0) */
+  page?: number;
+
+  /** Number of items per page (default: 100) */
+  pageSize?: number;
+
+  /** Filter criteria */
+  filter?: string;
+
+  /** Additional attributes to be returned */
+  attributes?: string;
+}
+
+export interface QueueEntry {
+  /** Unique identifier for the queue */
+  id: string;
+
+  /** Name of the queue */
+  name: string;
+
+  /** Description of the queue */
+  description?: string;
+
+  /** Organization ID this queue belongs to */
+  organizationId?: string;
+
+  /** Queue type */
+  type?: string;
+
+  /** Queue status */
+  status?: string;
+}
+
+export interface QueueEntriesResponse {
+  /** Array of queue entries */
+  data: QueueEntry[];
 
   /** Pagination metadata */
   meta: {

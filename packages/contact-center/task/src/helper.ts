@@ -394,33 +394,6 @@ export const useCallControl = (props: useCallControlProps) => {
     }
   }, [currentTask, extractConsultingAgent, consultInitiated]);
 
-  const loadBuddyAgents = useCallback(async () => {
-    try {
-      const agents = await store.getBuddyAgents();
-      logger.info(`Loaded ${agents.length} buddy agents`, {module: 'helper.ts', method: 'loadBuddyAgents'});
-      setBuddyAgents(agents);
-    } catch (error) {
-      logger?.error(`CC-Widgets: Task: Error loading buddy agents - ${error.message || error}`, {
-        module: 'useCallControl',
-        method: 'loadBuddyAgents',
-      });
-      setBuddyAgents([]);
-    }
-  }, [logger]);
-
-  const loadQueues = useCallback(async () => {
-    try {
-      const queues = await store.getQueues();
-      setQueues(queues);
-    } catch (error) {
-      logger?.error(`CC-Widgets: Task: Error loading queues - ${error.message || error}`, {
-        module: 'useCallControl',
-        method: 'loadQueues',
-      });
-      setQueues([]);
-    }
-  }, [logger]);
-
   const holdCallback = () => {
     try {
       setIsHeld(true);
