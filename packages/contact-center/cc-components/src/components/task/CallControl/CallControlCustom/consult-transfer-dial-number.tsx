@@ -12,8 +12,8 @@ const DialNumberUI: React.FC<ConsultTransferDialNumberComponentProps> = (props) 
   return (
     <div className="consult-transfer-dial-number-container">
       <Input
-        id="dial-number-input"
-        data-testid="dial-number-input"
+        id="consult-transfer-dial-number-input"
+        data-testid="consult-transfer-dial-number-input"
         value={value}
         onInput={(e) => onInputDialNumber(e, setValue)}
         placeholder="Enter Dial Number"

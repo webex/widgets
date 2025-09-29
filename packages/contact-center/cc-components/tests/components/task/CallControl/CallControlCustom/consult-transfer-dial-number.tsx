@@ -32,7 +32,7 @@ describe('DialNumberUI', () => {
 
   it('renders input and button', () => {
     const {getByTestId} = render(<DialNumberUI {...defaultProps} />);
-    const input = getByTestId('dial-number-input');
+    const input = getByTestId('consult-transfer-dial-number-input');
     expect(input).toBeInTheDocument();
     const button = getByTestId('dial-number-btn');
     expect(button).toBeInTheDocument();
@@ -40,7 +40,7 @@ describe('DialNumberUI', () => {
 
   it('calls onInputDialNumber utility when input event is fired', () => {
     const {getByTestId} = render(<DialNumberUI {...defaultProps} />);
-    const numberInput = getByTestId('dial-number-input');
+    const numberInput = getByTestId('consult-transfer-dial-number-input');
     const event = new CustomEvent('input', {detail: {value: '12345'}});
     fireEvent(numberInput, event);
     expect(mockOnInputDialNumber).toHaveBeenCalled();
@@ -48,7 +48,7 @@ describe('DialNumberUI', () => {
 
   it('calls handleButtonPress utility when button is pressed', () => {
     const {getByTestId} = render(<DialNumberUI {...defaultProps} />);
-    const numberInput = getByTestId('dial-number-input');
+    const numberInput = getByTestId('consult-transfer-dial-number-input');
     // Simulate entering a value before clicking the button
     const inputValue = '98765';
     const event = new CustomEvent('input', {detail: {value: inputValue}});

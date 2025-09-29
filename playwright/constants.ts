@@ -70,6 +70,7 @@ export const PAGE_TYPES = {
   EXTENSION: 'extension',
   CHAT: 'chat',
   MULTI_SESSION: 'multiSession',
+  DIAL_NUMBER: 'dialNumber',
 };
 
 export type PageType = (typeof PAGE_TYPES)[keyof typeof PAGE_TYPES];
