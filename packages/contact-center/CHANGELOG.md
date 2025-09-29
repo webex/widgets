@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.116](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.115...v1.28.0-ccwidgets.116) (2025-09-29)
+
+
+### Bug Fixes
+
+* **cc-widgets:** E2e peding comments and new Dial number tests ([#535](https://github.com/webex/widgets/issues/535)) ([f02eeed](https://github.com/webex/widgets/commit/f02eeedc43dc4911c8aec1edba3203e220023972))
+
 # [1.28.0-ccwidgets.115](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.114...v1.28.0-ccwidgets.115) (2025-09-17)
 
 
