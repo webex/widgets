@@ -7,10 +7,12 @@ import {useOutdialCall} from '../helper';
 
 const OutdialCallInternal: React.FunctionComponent = observer(() => {
   const {cc, logger} = store;
+  const dialNumberRegex = cc?.agentConfig?.regexUS;
 
   const result = useOutdialCall({cc, logger});
   const props = {
     ...result,
+    dialNumberRegex,
   };
 
   return <OutdialCallComponent {...props} />;

@@ -474,9 +474,14 @@ export interface OutdialCallProps {
    * Logger instance for logging purpose.
    */
   logger: ILogger;
+
+  /**
+   * Regex pattern for validating the a phone number.
+   */
+  dialNumberRegex?: string;
 }
 
-export type OutdialCallComponentProps = Pick<OutdialCallProps, 'startOutdial'>;
+export type OutdialCallComponentProps = Pick<OutdialCallProps, 'startOutdial' | 'dialNumberRegex'>;
 
 /**
  * Interface representing the properties for CallControlListItem component.

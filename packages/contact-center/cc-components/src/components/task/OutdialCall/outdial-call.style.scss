@@ -1,67 +1,41 @@
-.out-dial-call-box {
-  position: relative;
-  width: 100%;
-  background-color: var(--mds-color-theme-background-primary-normal);
-  border-radius: 0.5rem;
-  box-shadow: var(--mds-shadow-2);
-  padding: 1.25rem;
-  max-width: 50rem;
-}
-
-.out-dial-call-section-box {
-  padding: 0.625rem;
-}
-
-.out-dial-call-fieldset {
-  border: 1px solid var(--mds-color-theme-outline-secondary-normal);
-  border-radius: 0.325rem;
-  padding: 0.625rem;
-  margin-bottom: 1.25rem;
-}
-
-.out-dial-call-legend-box {
-  font-weight: bold;
-  color: var(--mds-color-theme-text-primary-normal);
-}
-
 .keypad {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: var(--mds-color-theme-background-secondary-normal);
-  padding: 1.25rem;
   border-radius: 0.625rem;
   width: 15.625rem;
-
-  input {
-    width: 100%;
-    padding: 0.625rem;
-    text-align: center;
-    font-size: 1.125rem;
-    margin-bottom: 0.625rem;
-    background: var(--mds-color-theme-background-primary-normal);
-    border: 1px solid var(--mds-color-theme-outline-secondary-normal);
-    border-radius: 0.25rem;
-    color: var(--mds-color-theme-text-primary-normal);
+  padding: 1rem;
+  
+  mdc-input {
+    padding-bottom: 0; // default is 1 rem, 1.5 rem needed but provided by .keys
+  }
+  
+  #outdial-tablist {
+    margin-bottom: 1rem;
   }
 
+  .input {
+    width: 100%;
+  }
+
+  .button {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+  
   .keys {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 0.625rem;
+    row-gap: 1rem;
+    column-gap: 1.5rem;
+    padding: 1.5rem 0;
   }
 
   .key {
-    width: 3.75rem;
-    height: 3.75rem;
-    display: flex;
-    align-items: center;
     justify-content: center;
-    background: var(--mds-color-theme-background-primary-normal);
+    background: var(--mds-color-theme-background-alert-default-normal);
     color: var(--mds-color-theme-text-primary-normal);
-    font-size: 1.25rem;
-    border-radius: 50%;
-    cursor: pointer;
+    
     transition: background-color 0.2s ease;
 
     &:hover {
@@ -71,23 +45,5 @@
     &:active {
       background: var(--mds-color-theme-background-primary-active);
     }
-  }
-}
-
-.out-dial-call-btn {
-  margin-top: 0.625rem;
-  background: var(--mds-color-theme-background-alert-success-normal);
-  color: var(--mds-color-theme-text-primary-normal);
-  padding: 0.625rem 1.25rem;
-  border-radius: 50%;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-
-  &:hover {
-    background: var(--mds-color-theme-background-alert-success-hover);
-  }
-
-  &:active {
-    background: var(--mds-color-theme-background-alert-success-active);
   }
 }
