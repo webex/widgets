@@ -41,6 +41,33 @@ const loggerMock = {
   trace: jest.fn(),
 };
 
+// Build a fully typed ContactServiceQueue with explicit required inputs
+const buildQueue = (id: string, name: string, description: string = 'Queue'): ContactServiceQueue => ({
+  organizationId: 'org-1',
+  id,
+  version: 1,
+  name,
+  description,
+  queueType: 'INBOUND',
+  checkAgentAvailability: true,
+  channelType: 'TELEPHONY',
+  serviceLevelThreshold: 20,
+  maxActiveContacts: 25,
+  maxTimeInQueue: 600,
+  defaultMusicInQueueMediaFileId: 'media-1',
+  active: true,
+  monitoringPermitted: true,
+  parkingPermitted: true,
+  recordingPermitted: true,
+  recordingAllCallsPermitted: true,
+  pauseRecordingPermitted: true,
+  controlFlowScriptUrl: 'https://example.com/control-flow',
+  ivrRequeueUrl: 'https://example.com/requeue',
+  routingType: 'LONGEST_AVAILABLE_AGENT',
+  queueRoutingType: 'TEAM_BASED',
+  callDistributionGroups: [],
+});
+
 const mockBuddyAgents: BuddyDetails[] = [
   {
     agentId: 'agent1',
@@ -77,38 +104,10 @@ const mockBuddyAgents: BuddyDetails[] = [
 ];
 
 const mockQueues: ContactServiceQueue[] = [
-  {
-    id: 'queue1',
-    name: 'Support Queue',
-    description: 'Support Queue Description',
-    queueType: 'inbound',
-    checkAgentAvailability: true,
-    channelType: 'telephony',
-  } as ContactServiceQueue,
-  {
-    id: 'queue2',
-    name: 'Sales Queue',
-    description: 'Sales Queue Description',
-    queueType: 'inbound',
-    checkAgentAvailability: true,
-    channelType: 'telephony',
-  } as ContactServiceQueue,
-  {
-    id: 'queue3',
-    name: '',
-    description: 'Empty Name Queue',
-    queueType: 'inbound',
-    checkAgentAvailability: true,
-    channelType: 'telephony',
-  } as ContactServiceQueue,
-  {
-    id: '',
-    name: 'Invalid Queue',
-    description: 'Invalid Queue Description',
-    queueType: 'inbound',
-    checkAgentAvailability: true,
-    channelType: 'telephony',
-  } as ContactServiceQueue,
+  buildQueue('queue1', 'Support Queue', 'Support Queue Description'),
+  buildQueue('queue2', 'Sales Queue', 'Sales Queue Description'),
+  buildQueue('queue3', '', 'Empty Name Queue'),
+  buildQueue('', 'Invalid Queue', 'Invalid Queue Description'),
 ];
 
 describe('Call Control Custom Utils', () => {
@@ -800,55 +799,19 @@ describe('Call Control Custom Utils', () => {
 
   describe('isQueueAvailable', () => {
     it('should return true for valid queue', () => {
-      expect(
-        isQueueAvailable({
-          id: 'queue1',
-          name: 'Support Queue',
-          description: 'Support Queue Description',
-          queueType: 'inbound',
-          checkAgentAvailability: true,
-          channelType: 'telephony',
-        } as ContactServiceQueue)
-      ).toBe(true);
+      expect(isQueueAvailable(buildQueue('queue1', 'Support Queue'))).toBe(true);
     });
 
     it('should return false for missing id', () => {
-      expect(
-        isQueueAvailable({
-          id: '',
-          name: 'Support Queue',
-          description: 'Support Queue Description',
-          queueType: 'inbound',
-          checkAgentAvailability: true,
-          channelType: 'telephony',
-        } as ContactServiceQueue)
-      ).toBeFalsy();
+      expect(isQueueAvailable(buildQueue('', 'Support Queue'))).toBeFalsy();
     });
 
     it('should return false for missing name', () => {
-      expect(
-        isQueueAvailable({
-          id: 'queue1',
-          name: '',
-          description: 'Support Queue Description',
-          queueType: 'inbound',
-          checkAgentAvailability: true,
-          channelType: 'telephony',
-        } as ContactServiceQueue)
-      ).toBeFalsy();
+      expect(isQueueAvailable(buildQueue('queue1', ''))).toBeFalsy();
     });
 
     it('should return false for whitespace-only name', () => {
-      expect(
-        isQueueAvailable({
-          id: 'queue1',
-          name: '   ',
-          description: 'Support Queue Description',
-          queueType: 'inbound',
-          checkAgentAvailability: true,
-          channelType: 'telephony',
-        } as ContactServiceQueue)
-      ).toBeFalsy();
+      expect(isQueueAvailable(buildQueue('queue1', '   '))).toBeFalsy();
     });
 
     it('should return false for null queue', () => {

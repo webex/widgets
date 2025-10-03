@@ -67,6 +67,9 @@ describe('CallControl Component', () => {
       cancelAutoWrapup: jest.fn(),
       toggleMute: jest.fn(),
       isMuted: false,
+      getAddressBookEntries: jest.fn().mockResolvedValue({data: [], meta: {page: 0, totalPages: 0}}),
+      getEntryPoints: jest.fn().mockResolvedValue({data: [], meta: {page: 0, totalPages: 0}}),
+      getQueuesFetcher: jest.fn().mockResolvedValue({data: [], meta: {page: 0, totalPages: 0}}),
     });
 
     render(

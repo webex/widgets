@@ -6,6 +6,8 @@ import {
   BuddyDetails,
   DestinationType,
   ContactServiceQueue,
+  AddressBookEntry,
+  EntryPointRecord,
 } from '@webex/cc-store';
 
 type Enum<T extends Record<string, unknown>> = T[keyof T];
@@ -409,6 +411,13 @@ export interface ControlProps {
    * Function to cancel the auto wrap-up timer.
    */
   cancelAutoWrapup: () => void;
+
+  /** Fetch paginated address book entries for dial numbers */
+  getAddressBookEntries?: FetchFunction<AddressBookEntry>;
+  /** Fetch paginated entry points */
+  getEntryPoints?: FetchFunction<EntryPointRecord>;
+  /** Fetch paginated queues (filtered by media type in store) */
+  getQueuesFetcher?: FetchFunction<ContactServiceQueue>;
 }
 
 export type CallControlComponentProps = Pick<
@@ -454,6 +463,9 @@ export type CallControlComponentProps = Pick<
   | 'logger'
   | 'secondsUntilAutoWrapup'
   | 'cancelAutoWrapup'
+  | 'getAddressBookEntries'
+  | 'getEntryPoints'
+  | 'getQueuesFetcher'
 >;
 
 /**
@@ -509,9 +521,12 @@ export interface ConsultTransferPopoverComponentProps {
   heading: string;
   buttonIcon: string;
   buddyAgents: BuddyDetails[];
-  queues?: ContactServiceQueue[];
+  getAddressBookEntries?: FetchFunction<AddressBookEntry>;
+  getEntryPoints?: FetchFunction<EntryPointRecord>;
+  getQueues?: FetchFunction<ContactServiceQueue>;
   onAgentSelect?: (agentId: string, agentName: string) => void;
   onQueueSelect?: (queueId: string, queueName: string) => void;
+  onEntryPointSelect?: (entryPointId: string, entryPointName: string) => void;
   onDialNumberSelect?: (dialNumber: string) => void;
   allowConsultToQueue: boolean;
   logger: ILogger;
@@ -664,3 +679,17 @@ export interface TimerUIState {
   iconName: string;
   formattedTime: string;
 }
+
+/**
+ * Type for fetch function
+ */
+export type FetchFunction<T> = (params: {
+  page: number;
+  pageSize: number;
+  search?: string;
+}) => Promise<{data: T[]; meta?: {page?: number; totalPages?: number}}>;
+
+/**
+ * Type for transform function
+ */
+export type TransformFunction<T, U> = (item: T, page: number, index: number) => U;

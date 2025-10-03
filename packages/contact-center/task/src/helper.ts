@@ -421,6 +421,51 @@ export const useCallControl = (props: useCallControlProps) => {
     }
   }, [logger]);
 
+  const getAddressBookEntries = useCallback(
+    async ({page, pageSize, search}: {page: number; pageSize: number; search?: string}) => {
+      try {
+        return await store.getAddressBookEntries({page, pageSize, search});
+      } catch (error) {
+        logger?.error(`CC-Widgets: Task: Error fetching address book entries - ${error.message || error}`, {
+          module: 'useCallControl',
+          method: 'getAddressBookEntries',
+        });
+        return {data: [], meta: {page: 0, totalPages: 0}};
+      }
+    },
+    [logger]
+  );
+
+  const getEntryPoints = useCallback(
+    async ({page, pageSize, search}: {page: number; pageSize: number; search?: string}) => {
+      try {
+        return await store.getEntryPoints({page, pageSize, search});
+      } catch (error) {
+        logger?.error(`CC-Widgets: Task: Error fetching entry points - ${error.message || error}`, {
+          module: 'useCallControl',
+          method: 'getEntryPoints',
+        });
+        return {data: [], meta: {page: 0, totalPages: 0}};
+      }
+    },
+    [logger]
+  );
+
+  const getQueuesFetcher = useCallback(
+    async ({page, pageSize, search}: {page: number; pageSize: number; search?: string}) => {
+      try {
+        return await store.getQueuesPaginated('TELEPHONY', {page, pageSize, search});
+      } catch (error) {
+        logger?.error(`CC-Widgets: Task: Error fetching queues (paginated) - ${error.message || error}`, {
+          module: 'useCallControl',
+          method: 'getQueuesFetcher',
+        });
+        return {data: [], meta: {page: 0, totalPages: 0}};
+      }
+    },
+    [logger]
+  );
+
   const holdCallback = () => {
     try {
       setIsHeld(true);
@@ -791,7 +836,6 @@ export const useCallControl = (props: useCallControlProps) => {
         logger.error('CC-Widgets: CallControl: Error initializing auto wrap-up timer', {
           module: 'widget-cc-task#helper.ts',
           method: 'useCallControl#autoWrapupTimer',
-          //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
           error,
         });
       }
@@ -836,6 +880,9 @@ export const useCallControl = (props: useCallControlProps) => {
     controlVisibility,
     secondsUntilAutoWrapup,
     cancelAutoWrapup,
+    getAddressBookEntries,
+    getEntryPoints,
+    getQueuesFetcher,
   };
 };
 

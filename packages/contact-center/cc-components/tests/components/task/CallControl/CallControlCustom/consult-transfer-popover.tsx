@@ -1,5 +1,5 @@
 import React from 'react';
-import {render, fireEvent} from '@testing-library/react';
+import {render, fireEvent, waitFor} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ConsultTransferPopoverComponent from '../../../../../src/components/task/CallControl/CallControlCustom/consult-transfer-popover';
 import {ContactServiceQueue} from '@webex/cc-store';
@@ -46,16 +46,17 @@ describe('ConsultTransferPopoverComponent', () => {
         siteId: 'site1',
       },
     ],
-    queues: [
-      {id: 'queue1', name: 'Queue One'} as ContactServiceQueue,
-      {id: 'queue2', name: 'Queue Two'} as ContactServiceQueue,
-    ],
+    getQueues: async () => ({
+      data: [
+        {id: 'queue1', name: 'Queue One'} as ContactServiceQueue,
+        {id: 'queue2', name: 'Queue Two'} as ContactServiceQueue,
+      ],
+      meta: {page: 0, totalPages: 1},
+    }),
     onAgentSelect: mockOnAgentSelect,
     onQueueSelect: mockOnQueueSelect,
     allowConsultToQueue: true,
     logger: loggerMock,
-    showTabs: true,
-    emptyMessage: 'No agents or queues available',
   };
 
   beforeEach(() => {
@@ -77,26 +78,16 @@ describe('ConsultTransferPopoverComponent', () => {
     expect(heading).toHaveAttribute('type', 'body-large-bold');
 
     // Verify tabs container
-    const tabList = screen.container.querySelector('.agent-tablist');
-    expect(tabList).toBeInTheDocument();
-    expect(tabList).toHaveAttribute('role', 'tablist');
-    expect(tabList).toHaveAttribute('aria-label', 'Tabs');
-    expect(tabList).toHaveAttribute('data-orientation', 'horizontal');
+    const buttons = Array.from(screen.container.querySelectorAll('button')).map(
+      (b) => (b as HTMLButtonElement).textContent
+    );
+    expect(buttons).toEqual(expect.arrayContaining(['Agents', 'Queues', 'Dial Number', 'Entry Point']));
 
     // Verify Agents tab (active by default)
-    const agentTab = screen.container.querySelector('.agent-tab');
-    expect(agentTab).toBeInTheDocument();
-    expect(agentTab).toHaveAttribute('role', 'tab');
-    expect(agentTab).toHaveAttribute('data-active', 'true');
-    expect(agentTab).toHaveTextContent('Agents');
+    expect(screen.getByText('Agents')).toBeInTheDocument();
 
     // Verify Queues tab (inactive by default)
-    const queueTab = screen.container.querySelector('.queue-tab');
-    expect(queueTab).toBeInTheDocument();
-    expect(queueTab).toHaveAttribute('role', 'tab');
-    expect(queueTab).toHaveAttribute('data-active', 'false');
-    expect(queueTab).toHaveAttribute('tabindex', '-1');
-    expect(queueTab).toHaveTextContent('Queues');
+    expect(screen.getByText('Queues')).toBeInTheDocument();
 
     // Verify agent list
     const agentList = screen.container.querySelector('.agent-list');
@@ -126,10 +117,12 @@ describe('ConsultTransferPopoverComponent', () => {
     fireEvent.mouseDown(listItemContainer!);
 
     // Test tab switching
-    const queueTab = screen.container.querySelector('.queue-tab');
-    fireEvent.click(queueTab!);
+    fireEvent.click(screen.getByText('Queues'));
 
     // Test queue selection after switching tabs - click on the button inside the first queue item
+    await waitFor(() =>
+      expect(screen.container.querySelectorAll('.call-control-list-item button').length).toBeGreaterThan(0)
+    );
     const firstQueueButton = screen.container.querySelectorAll('.call-control-list-item button')[0];
     fireEvent.click(firstQueueButton);
     expect(mockOnQueueSelect).toHaveBeenCalledWith('queue1', 'Queue One');
@@ -140,13 +133,12 @@ describe('ConsultTransferPopoverComponent', () => {
     const emptyProps = {
       ...baseProps,
       buddyAgents: [],
-      queues: [],
+      getQueues: async () => ({data: [], meta: {page: 0, totalPages: 0}}),
     };
 
     let screen = await render(<ConsultTransferPopoverComponent {...emptyProps} />);
-    expect(screen.container.querySelector('.agent-tablist')).toBeInTheDocument();
-    expect(screen.container.querySelector('.consult-empty-state')).toBeInTheDocument();
-    expect(screen.container.querySelector('.consult-empty-message')).toBeInTheDocument();
+    expect(screen.getByText('No data available for consult transfer.')).toBeInTheDocument();
+    screen.unmount();
 
     // Test empty agents tab with tabs showing (covers lines 94-96)
     const emptyAgentsProps = {
@@ -155,23 +147,29 @@ describe('ConsultTransferPopoverComponent', () => {
     };
 
     screen = await render(<ConsultTransferPopoverComponent {...emptyAgentsProps} />);
-    expect(screen.container.querySelector('.agent-tablist')).toBeInTheDocument();
+    const buttons = Array.from(screen.container.querySelectorAll('button')).map(
+      (b) => (b as HTMLButtonElement).textContent
+    );
+    expect(buttons).toEqual(expect.arrayContaining(['Agents', 'Queues', 'Dial Number', 'Entry Point']));
     expect(screen.container.querySelector('.consult-empty-state')).toBeInTheDocument();
+    expect(screen.getByText('No data available for consult transfer.')).toBeInTheDocument();
+    screen.unmount();
 
     // Test empty queues tab when switched to queues (covers lines 98-100)
     const emptyQueuesProps = {
       ...baseProps,
-      queues: [],
+      getQueues: async () => ({data: [], meta: {page: 0, totalPages: 0}}),
     };
 
     screen = await render(<ConsultTransferPopoverComponent {...emptyQueuesProps} />);
 
     // Switch to queues tab
-    const queueTab = screen.container.querySelector('.queue-tab');
-    fireEvent.click(queueTab!);
+    fireEvent.click(screen.getByText('Queues'));
 
-    // Should show empty state for queues (covers lines 98-100)
-    expect(screen.container.querySelector('.consult-empty-state')).toBeInTheDocument();
+    // With empty queues, the list should not render and no items should be present
+    expect(screen.container.querySelector('.agent-list')).toBeNull();
+    expect(screen.container.querySelectorAll('.call-control-list-item').length).toBe(0);
+    screen.unmount();
 
     // Test hidden queue tab when allowConsultToQueue is false
     const propsWithoutQueue = {
@@ -180,14 +178,15 @@ describe('ConsultTransferPopoverComponent', () => {
     };
 
     screen = await render(<ConsultTransferPopoverComponent {...propsWithoutQueue} />);
-    const hiddenQueueTab = screen.container.querySelector('.queue-tab');
-    expect(hiddenQueueTab).toHaveStyle('display: none');
+    const queuesButton = Array.from(screen.container.querySelectorAll('button')).find(
+      (btn) => (btn as HTMLButtonElement).textContent === 'Queues'
+    ) as HTMLButtonElement | undefined;
+    expect(queuesButton?.disabled).toBe(true);
   });
 
   it('covers edge case for empty items in renderList (line 50)', async () => {
     // Mock isAgentsEmpty to return false even with empty array to force renderList call
     const mockIsAgentsEmpty = jest.spyOn(utils, 'isAgentsEmpty').mockReturnValue(false);
-    const mockShouldShowTabs = jest.spyOn(utils, 'shouldShowTabs').mockReturnValue(true);
 
     try {
       const propsWithEmptyAgents = {
@@ -197,12 +196,11 @@ describe('ConsultTransferPopoverComponent', () => {
 
       const screen = await render(<ConsultTransferPopoverComponent {...propsWithEmptyAgents} />);
 
-      // Should render the "No agents found" text (line 50)
+      // Should render the "No agents found" text via empty list state
       expect(screen.getByText('No agents found')).toBeInTheDocument();
     } finally {
       // Restore original functions
       mockIsAgentsEmpty.mockRestore();
-      mockShouldShowTabs.mockRestore();
     }
   });
 });

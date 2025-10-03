@@ -14,6 +14,11 @@ import {
   ENGAGED_LABEL,
   ENGAGED_USERNAME,
   ContactServiceQueue,
+  ContactServiceQueueSearchParams,
+  EntryPointListResponse,
+  EntryPointSearchParams,
+  AddressBookEntriesResponse,
+  AddressBookEntrySearchParams,
   Profile,
   AgentLoginProfile,
   ERROR_TRIGGERING_IDLE_CODES,
@@ -670,15 +675,59 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   getQueues = async (
-    mediaType: string = this.currentTask.data.interaction.mediaType ?? 'TELEPHONY'
+    mediaType: string = this.currentTask.data.interaction.mediaType ?? 'TELEPHONY',
+    params?: ContactServiceQueueSearchParams
   ): Promise<Array<ContactServiceQueue>> => {
     try {
       const upperMediaType = mediaType.toUpperCase();
-      let queueList = await this.store.cc.getQueues();
-      queueList = queueList.filter((queue) => queue.channelType === upperMediaType);
-      return queueList;
+      const response = await this.store.cc.getQueues(params);
+
+      const toQueueArray = (value: {data: ContactServiceQueue[]}): ContactServiceQueue[] => value.data;
+
+      const queues: ContactServiceQueue[] = Array.isArray(response) ? response : toQueueArray(response);
+
+      const filteredQueues = queues.filter((queue) => queue.channelType === upperMediaType);
+      return filteredQueues;
     } catch (error) {
       console.error('Error fetching queues:', error);
+      return Promise.reject(error);
+    }
+  };
+
+  getQueuesPaginated = async (
+    mediaType: string = this.currentTask.data.interaction.mediaType ?? 'TELEPHONY',
+    params?: ContactServiceQueueSearchParams
+  ) => {
+    try {
+      const upperMediaType = mediaType.toUpperCase();
+      const response = await this.store.cc.getQueues(params);
+      const data = Array.isArray(response) ? response : response.data;
+      const filtered = data.filter((queue) => queue.channelType === upperMediaType);
+      return Array.isArray(response)
+        ? {data: filtered, meta: {page: 0, pageSize: filtered.length, total: filtered.length, totalPages: 1}}
+        : {...response, data: filtered};
+    } catch (error) {
+      console.error('Error fetching paginated queues:', error);
+      return Promise.reject(error);
+    }
+  };
+
+  getEntryPoints = async (params?: EntryPointSearchParams): Promise<EntryPointListResponse> => {
+    try {
+      const response: EntryPointListResponse = await this.store.cc.getEntryPoints(params);
+      return response;
+    } catch (error) {
+      console.error('Error fetching entry points:', error);
+      return Promise.reject(error);
+    }
+  };
+
+  getAddressBookEntries = async (params?: AddressBookEntrySearchParams): Promise<AddressBookEntriesResponse> => {
+    try {
+      const response: AddressBookEntriesResponse = await this.store.cc.addressBook.getEntries(params ?? {});
+      return response;
+    } catch (error) {
+      console.error('Error fetching address book entries:', error);
       return Promise.reject(error);
     }
   };
