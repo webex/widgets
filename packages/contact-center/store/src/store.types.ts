@@ -131,11 +131,7 @@ interface IStoreWrapper extends IStore {
   setCurrentTask(task: ITask): void;
   refreshTaskList(): void;
   getBuddyAgents(mediaType?: string): Promise<BuddyDetails[]>;
-  getQueues(mediaType?: string, params?: ContactServiceQueueSearchParams): Promise<ContactServiceQueue[]>;
-  getQueuesPaginated(
-    mediaType?: string,
-    params?: ContactServiceQueueSearchParams
-  ): Promise<ContactServiceQueuesResponse>;
+  getQueues(mediaType?: string, params?: ContactServiceQueueSearchParams): Promise<ContactServiceQueuesResponse>;
   getEntryPoints(params?: EntryPointSearchParams): Promise<EntryPointListResponse>;
   getAddressBookEntries(params?: AddressBookEntrySearchParams): Promise<AddressBookEntriesResponse>;
   setDeviceType(option: string): void;

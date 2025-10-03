@@ -677,39 +677,34 @@ class StoreWrapper implements IStoreWrapper {
   getQueues = async (
     mediaType: string = this.currentTask.data.interaction.mediaType ?? 'TELEPHONY',
     params?: ContactServiceQueueSearchParams
-  ): Promise<Array<ContactServiceQueue>> => {
+  ): Promise<{
+    data: ContactServiceQueue[];
+    meta: {page: number; pageSize: number; total: number; totalPages: number};
+  }> => {
     try {
       const upperMediaType = mediaType.toUpperCase();
       const response = await this.store.cc.getQueues(params);
-
-      const toQueueArray = (value: {data: ContactServiceQueue[]}): ContactServiceQueue[] => value.data;
-
-      const queues: ContactServiceQueue[] = Array.isArray(response) ? response : toQueueArray(response);
-
-      const filteredQueues = queues.filter((queue) => queue.channelType === upperMediaType);
-      return filteredQueues;
+      const data = Array.isArray(response) ? response : response.data;
+      const filtered = data.filter((queue) => queue.channelType === upperMediaType);
+      const page = Array.isArray(response) ? 0 : (response.meta?.page ?? 0);
+      const totalPages = Array.isArray(response) ? 1 : (response.meta?.totalPages ?? 1);
+      const pageSize = Array.isArray(response) ? filtered.length : (response.meta?.pageSize ?? filtered.length);
+      const total = Array.isArray(response)
+        ? filtered.length
+        : ((response as {meta?: {total?: number}}).meta?.total ?? filtered.length);
+      return {data: filtered, meta: {page, pageSize, total, totalPages}};
     } catch (error) {
       console.error('Error fetching queues:', error);
       return Promise.reject(error);
     }
   };
 
+  // Deprecated: Use getQueues (paginated) instead
   getQueuesPaginated = async (
     mediaType: string = this.currentTask.data.interaction.mediaType ?? 'TELEPHONY',
     params?: ContactServiceQueueSearchParams
   ) => {
-    try {
-      const upperMediaType = mediaType.toUpperCase();
-      const response = await this.store.cc.getQueues(params);
-      const data = Array.isArray(response) ? response : response.data;
-      const filtered = data.filter((queue) => queue.channelType === upperMediaType);
-      return Array.isArray(response)
-        ? {data: filtered, meta: {page: 0, pageSize: filtered.length, total: filtered.length, totalPages: 1}}
-        : {...response, data: filtered};
-    } catch (error) {
-      console.error('Error fetching paginated queues:', error);
-      return Promise.reject(error);
-    }
+    return this.getQueues(mediaType, params);
   };
 
   getEntryPoints = async (params?: EntryPointSearchParams): Promise<EntryPointListResponse> => {

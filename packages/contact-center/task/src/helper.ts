@@ -410,8 +410,13 @@ export const useCallControl = (props: useCallControlProps) => {
 
   const loadQueues = useCallback(async () => {
     try {
-      const queues = await store.getQueues();
-      setQueues(queues);
+      const response = (await store.getQueues()) as unknown as
+        | ContactServiceQueue[]
+        | {
+            data: ContactServiceQueue[];
+          };
+      const data = Array.isArray(response) ? response : (response as {data: ContactServiceQueue[]}).data;
+      setQueues(data);
     } catch (error) {
       logger?.error(`CC-Widgets: Task: Error loading queues - ${error.message || error}`, {
         module: 'useCallControl',
@@ -454,7 +459,7 @@ export const useCallControl = (props: useCallControlProps) => {
   const getQueuesFetcher = useCallback(
     async ({page, pageSize, search}: {page: number; pageSize: number; search?: string}) => {
       try {
-        return await store.getQueuesPaginated('TELEPHONY', {page, pageSize, search});
+        return await store.getQueues('TELEPHONY', {page, pageSize, search});
       } catch (error) {
         logger?.error(`CC-Widgets: Task: Error fetching queues (paginated) - ${error.message || error}`, {
           module: 'useCallControl',

@@ -1,12 +1,7 @@
 import {renderHook, act, waitFor} from '@testing-library/react';
 import {useIncomingTask, useTaskList, useCallControl, useOutdialCall} from '../src/helper';
 import * as taskUtils from '../src/Utils/task-util';
-import {
-  AddressBookEntriesResponse,
-  EntryPointListResponse,
-  ContactServiceQueuesResponse,
-  TASK_EVENTS,
-} from '@webex/cc-store';
+import {AddressBookEntriesResponse, EntryPointListResponse, TASK_EVENTS, IContactCenter} from '@webex/cc-store';
 import {mockAgents, mockCC, mockQueueDetails, mockTask} from '@webex/test-fixtures';
 import store from '@webex/cc-store';
 import React from 'react';
@@ -48,13 +43,13 @@ beforeAll(() => {
     webRtcEnabled: true,
   };
   store.store.cc = {
-    ...store.store.cc, // Keep other properties if they exist
+    ...mockCC,
     taskManager: {
       getAllTasks: jest.fn().mockReturnValue({
         [taskMock.data.interactionId]: taskMock,
       }),
     },
-  };
+  } as IContactCenter;
 });
 
 describe('useIncomingTask Hook', () => {
@@ -2235,9 +2230,10 @@ describe('useCallControl', () => {
   it('should get queues via getQueuesFetcher (paginated)', async () => {
     const mockResponse = {
       data: [{id: 'q1', name: 'Queue 1', channelType: 'TELEPHONY'}],
-      meta: {page: 0, totalPages: 1},
+      meta: {page: 0, pageSize: 25, total: 1, totalPages: 1},
     };
-    jest.spyOn(store, 'getQueuesPaginated').mockResolvedValue(mockResponse as ContactServiceQueuesResponse);
+    // Use a broad cast to satisfy the spy return type regardless of meta shape
+    jest.spyOn(store, 'getQueues').mockResolvedValue(mockResponse as unknown as ReturnType<typeof store.getQueues>);
 
     const {result} = renderHook(() =>
       useCallControl({

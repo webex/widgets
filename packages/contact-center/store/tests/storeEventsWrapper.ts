@@ -806,7 +806,7 @@ describe('storeEventsWrapper', () => {
 
       const result = await storeWrapper.getQueues('telephony');
 
-      expect(result).toEqual([
+      expect(result.data).toEqual([
         {id: 'queue1', name: 'Queue 1', channelType: 'TELEPHONY'},
         {id: 'queue2', name: 'Queue 2', channelType: 'TELEPHONY'},
       ]);
@@ -830,7 +830,7 @@ describe('storeEventsWrapper', () => {
 
       const result = await storeWrapper.getQueues('telephony');
 
-      expect(result).toEqual([{id: 'queue1', name: 'Queue 1', channelType: 'TELEPHONY'}]);
+      expect(result.data).toEqual([{id: 'queue1', name: 'Queue 1', channelType: 'TELEPHONY'}]);
       expect(storeWrapper['store'].cc.getQueues).toHaveBeenCalled();
     });
 
