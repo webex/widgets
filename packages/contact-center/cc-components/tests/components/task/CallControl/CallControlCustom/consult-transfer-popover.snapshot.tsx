@@ -98,6 +98,9 @@ describe('ConsultTransferPopoverComponent Snapshots', () => {
         (b) => (b as HTMLButtonElement).textContent
       );
       expect(btns).toEqual(expect.arrayContaining(['Agents', 'Queues', 'Dial Number', 'Entry Point']));
+      const container = screen.container.querySelector('.agent-popover-content');
+      mockUIDProps(container);
+      expect(container).toMatchSnapshot();
     });
 
     it('should render without errors when rendered with minimal props', async () => {
@@ -108,6 +111,7 @@ describe('ConsultTransferPopoverComponent Snapshots', () => {
       const container = screen.container.querySelector('.agent-popover-content');
       mockUIDProps(container);
       expect(container).toBeInTheDocument();
+      expect(container).toMatchSnapshot();
     });
 
     it('should render with different heading', async () => {
@@ -117,6 +121,9 @@ describe('ConsultTransferPopoverComponent Snapshots', () => {
         screen = render(<ConsultTransferPopoverComponent {...customHeadingProps} />);
       });
       expect(screen.getByText('Choose Transfer Target')).toBeInTheDocument();
+      const container = screen.container.querySelector('.agent-popover-content');
+      mockUIDProps(container);
+      expect(container).toMatchSnapshot();
     });
 
     it('should render with empty agents list', async () => {
@@ -127,6 +134,9 @@ describe('ConsultTransferPopoverComponent Snapshots', () => {
       });
       const emptyState = screen.container.querySelector('.consult-empty-message');
       expect(emptyState?.textContent).toBe('No data available for consult transfer.');
+      const container = screen.container.querySelector('.agent-popover-content');
+      mockUIDProps(container);
+      expect(container).toMatchSnapshot();
     });
 
     it('should render with empty queues list', async () => {
@@ -146,6 +156,9 @@ describe('ConsultTransferPopoverComponent Snapshots', () => {
       const list = screen.container.querySelector('.agent-list');
       expect(list).toBeNull();
       expect(screen.container.querySelectorAll('.call-control-list-item').length).toBe(0);
+      const container = screen.container.querySelector('.agent-popover-content');
+      mockUIDProps(container);
+      expect(container).toMatchSnapshot();
     });
 
     it('should render with allowConsultToQueue false', async () => {
@@ -161,6 +174,9 @@ describe('ConsultTransferPopoverComponent Snapshots', () => {
       }) as HTMLButtonElement | undefined;
       expect(queuesButton).toBeDefined();
       expect(queuesButton?.disabled).toBe(true);
+      const container = screen.container.querySelector('.agent-popover-content');
+      mockUIDProps(container);
+      expect(container).toMatchSnapshot();
     });
 
     it('should render with custom empty message', async () => {
@@ -177,6 +193,9 @@ describe('ConsultTransferPopoverComponent Snapshots', () => {
       const emptyState = screen.container.querySelector('.consult-empty-state');
       expect(emptyState).toBeInTheDocument();
       expect(screen.getByText('No data available for consult transfer.')).toBeInTheDocument();
+      const container = screen.container.querySelector('.agent-popover-content');
+      mockUIDProps(container);
+      expect(container).toMatchSnapshot();
     });
 
     it('should render with single agent', async () => {
@@ -200,6 +219,9 @@ describe('ConsultTransferPopoverComponent Snapshots', () => {
 
       const singleAgentItem = screen.container.querySelector('[aria-label="Single Agent"]');
       expect(singleAgentItem).toBeInTheDocument();
+      const container = screen.container.querySelector('.agent-popover-content');
+      mockUIDProps(container);
+      expect(container).toMatchSnapshot();
     });
 
     it('should render with single queue', async () => {
@@ -221,6 +243,9 @@ describe('ConsultTransferPopoverComponent Snapshots', () => {
       }) as HTMLButtonElement | undefined;
       if (queuesButton) fireEvent.click(queuesButton);
       await waitFor(() => expect(screen.container.querySelector('[aria-label="Single Queue"]')).toBeInTheDocument());
+      const container = screen.container.querySelector('.agent-popover-content');
+      mockUIDProps(container);
+      expect(container).toMatchSnapshot();
     });
 
     it('should render with agents having different states', async () => {
@@ -280,6 +305,9 @@ describe('ConsultTransferPopoverComponent Snapshots', () => {
       }
 
       await waitFor(() => expect(renderResult.container.querySelector('[aria-label="Queue One"]')).toBeInTheDocument());
+      const container = renderResult.container.querySelector('.agent-popover-content');
+      mockUIDProps(container);
+      expect(container).toMatchSnapshot();
     });
 
     it('should render component after agent selection', async () => {
@@ -291,6 +319,9 @@ describe('ConsultTransferPopoverComponent Snapshots', () => {
       const firstAgentButton = renderResult.container.querySelectorAll('.call-control-list-item button')[0];
       if (firstAgentButton) fireEvent.click(firstAgentButton);
       expect(mockOnAgentSelect).toHaveBeenCalled();
+      const container = renderResult.container.querySelector('.agent-popover-content');
+      mockUIDProps(container);
+      expect(container).toMatchSnapshot();
     });
 
     it('should render component after queue selection', async () => {
@@ -315,6 +346,9 @@ describe('ConsultTransferPopoverComponent Snapshots', () => {
       const firstQueueButton = renderResult.container.querySelectorAll('.call-control-list-item button')[0];
       if (firstQueueButton) fireEvent.click(firstQueueButton);
       expect(mockOnQueueSelect).toHaveBeenCalled();
+      const container = renderResult.container.querySelector('.agent-popover-content');
+      mockUIDProps(container);
+      expect(container).toMatchSnapshot();
     });
   });
 
@@ -327,6 +361,9 @@ describe('ConsultTransferPopoverComponent Snapshots', () => {
 
       renderResult.rerender(<ConsultTransferPopoverComponent {...defaultProps} heading="New Heading" />);
       expect(renderResult.getByText('New Heading')).toBeInTheDocument();
+      const container = renderResult.container.querySelector('.agent-popover-content');
+      mockUIDProps(container);
+      expect(container).toMatchSnapshot();
     });
 
     it('should update when agents list changes', async () => {
@@ -348,6 +385,9 @@ describe('ConsultTransferPopoverComponent Snapshots', () => {
       renderResult.rerender(<ConsultTransferPopoverComponent {...defaultProps} buddyAgents={newAgents} />);
       const updated = renderResult.container.querySelector('[aria-label="New Agent One"]');
       expect(updated).toBeInTheDocument();
+      const container = renderResult.container.querySelector('.agent-popover-content');
+      mockUIDProps(container);
+      expect(container).toMatchSnapshot();
     });
 
     it('should update when queues list changes', async () => {
@@ -373,6 +413,9 @@ describe('ConsultTransferPopoverComponent Snapshots', () => {
       );
       const newQueue = renderResult.container.querySelector('[aria-label="New Queue One"]');
       expect(newQueue).toBeInTheDocument();
+      const container = renderResult.container.querySelector('.agent-popover-content');
+      mockUIDProps(container);
+      expect(container).toMatchSnapshot();
     });
   });
 });
