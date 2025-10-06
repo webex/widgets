@@ -20,6 +20,7 @@ export type CallControlProps = Partial<
     | 'callControlClassName'
     | 'callControlConsultClassName'
     | 'onToggleMute'
+    | 'consultTransferOptions'
   >
 >;
 

@@ -64,6 +64,7 @@ function CallControlComponent(props: CallControlComponentProps) {
     getAddressBookEntries,
     getEntryPoints,
     getQueuesFetcher,
+    consultTransferOptions,
   } = props;
 
   useEffect(() => {
@@ -219,6 +220,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                         }
                         onDialNumberSelect={(dialNumber) => handleTargetSelect(dialNumber, dialNumber, 'dialNumber')}
                         allowConsultToQueue={allowConsultToQueue}
+                        consultTransferOptions={consultTransferOptions}
                         logger={logger}
                       />
                     ) : null}

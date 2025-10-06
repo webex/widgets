@@ -490,5 +490,38 @@ describe('CallControlComponent', () => {
       expect(consultButtonElement).toBeInTheDocument();
       expect(consultButtonElement).toHaveClass('call-control-button');
     });
+
+    it('passes consultTransferOptions to popover and hides tabs accordingly', async () => {
+      jest.spyOn(callControlUtils, 'filterButtonsForConsultation').mockReturnValue([
+        {
+          id: 'consult',
+          icon: 'consult',
+          tooltip: 'Consult',
+          className: 'call-control-button',
+          disabled: false,
+          menuType: 'Consult',
+          isVisible: true,
+          dataTestId: 'consult-button',
+        },
+      ]);
+
+      const screen = await render(
+        <CallControlComponent
+          {...defaultProps}
+          controlVisibility={{...mockControlVisibility, consult: true, transfer: false}}
+          consultTransferOptions={{showDialNumberTab: false}}
+        />
+      );
+
+      // Act: open the consult popover
+      const consultButton = screen.getByLabelText('Consult');
+      fireEvent.click(consultButton);
+
+      // Assert: popover content should not include Dial Number tab
+      const buttons = Array.from(screen.container.querySelectorAll('button')).map(
+        (b) => (b as HTMLButtonElement).textContent
+      );
+      expect(buttons).not.toEqual(expect.arrayContaining(['Dial Number']));
+    });
   });
 });

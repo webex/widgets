@@ -128,6 +128,54 @@ describe('ConsultTransferPopoverComponent', () => {
     expect(mockOnQueueSelect).toHaveBeenCalledWith('queue1', 'Queue One');
   });
 
+  it('hides Dial Number tab when consultTransferOptions.showDialNumberTab is false', async () => {
+    const screen = await render(
+      <ConsultTransferPopoverComponent {...baseProps} consultTransferOptions={{showDialNumberTab: false}} />
+    );
+
+    const buttons = Array.from(screen.container.querySelectorAll('button')).map(
+      (b) => (b as HTMLButtonElement).textContent
+    );
+
+    expect(buttons).toEqual(expect.arrayContaining(['Agents', 'Queues']));
+    expect(buttons).not.toEqual(expect.arrayContaining(['Dial Number']));
+  });
+
+  it('hides Entry Point tab when consultTransferOptions.showEntryPointTab is false', async () => {
+    const screen = await render(
+      <ConsultTransferPopoverComponent {...baseProps} consultTransferOptions={{showEntryPointTab: false}} />
+    );
+
+    const buttons = Array.from(screen.container.querySelectorAll('button')).map(
+      (b) => (b as HTMLButtonElement).textContent
+    );
+
+    expect(buttons).toEqual(expect.arrayContaining(['Agents', 'Queues', 'Dial Number']));
+    expect(buttons).not.toEqual(expect.arrayContaining(['Entry Point']));
+  });
+
+  it('hides both tabs when both flags are false and shows empty state if no other data', async () => {
+    const screen = await render(
+      <ConsultTransferPopoverComponent
+        {...baseProps}
+        buddyAgents={[]}
+        getQueues={async () => ({data: [], meta: {page: 0, totalPages: 0}})}
+        consultTransferOptions={{showDialNumberTab: false, showEntryPointTab: false}}
+      />
+    );
+
+    const buttons = Array.from(screen.container.querySelectorAll('button')).map(
+      (b) => (b as HTMLButtonElement).textContent
+    );
+
+    expect(buttons).toEqual(expect.arrayContaining(['Agents', 'Queues']));
+    expect(buttons).not.toEqual(expect.arrayContaining(['Dial Number']));
+    expect(buttons).not.toEqual(expect.arrayContaining(['Entry Point']));
+
+    // With no agents/queues and both tabs hidden, should show the empty state
+    expect(screen.getByText('No data available for consult transfer.')).toBeInTheDocument();
+  });
+
   it('handles edge cases and conditional rendering', async () => {
     // Test empty state when both lists are completely empty
     const emptyProps = {

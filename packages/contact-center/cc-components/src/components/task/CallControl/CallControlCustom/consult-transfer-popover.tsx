@@ -25,8 +25,10 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
   onDialNumberSelect,
   onEntryPointSelect,
   allowConsultToQueue,
+  consultTransferOptions,
   logger,
 }) => {
+  const {showDialNumberTab = true, showEntryPointTab = true} = consultTransferOptions || {};
   const [selectedCategory, setSelectedCategory] = useState<CategoryType>('Agents');
   const [searchQuery, setSearchQuery] = useState('');
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -199,9 +201,9 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
   }, [loadNextPage]);
 
   useEffect(() => {
-    if (selectedCategory === 'Dial Number' && dialNumbers.length === 0) {
+    if (selectedCategory === 'Dial Number' && showDialNumberTab && dialNumbers.length === 0) {
       loadDialNumbers(0, '', true);
-    } else if (selectedCategory === 'Entry Point' && entryPoints.length === 0) {
+    } else if (selectedCategory === 'Entry Point' && showEntryPointTab && entryPoints.length === 0) {
       loadEntryPoints(0, '', true);
     } else if (selectedCategory === 'Queues' && queuesData.length === 0) {
       loadQueues(0, '', true);
@@ -209,8 +211,8 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
   }, [selectedCategory]);
 
   const noQueues = queuesData.length === 0;
-  const noDialNumbers = dialNumbers.length === 0;
-  const noEntryPoints = entryPoints.length === 0;
+  const noDialNumbers = !showDialNumberTab || dialNumbers.length === 0;
+  const noEntryPoints = !showEntryPointTab || entryPoints.length === 0;
 
   const hasAnyData = !noAgents || !noQueues || !noDialNumbers || !noEntryPoints;
 
@@ -250,22 +252,26 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
         >
           Queues
         </Button>
-        <Button
-          variant={selectedCategory === 'Dial Number' ? 'primary' : 'secondary'}
-          size="small"
-          onClick={handleDialNumberClick}
-          style={{minWidth: '100px'}}
-        >
-          Dial Number
-        </Button>
-        <Button
-          variant={selectedCategory === 'Entry Point' ? 'primary' : 'secondary'}
-          size="small"
-          onClick={handleEntryPointClick}
-          style={{minWidth: '100px'}}
-        >
-          Entry Point
-        </Button>
+        {showDialNumberTab && (
+          <Button
+            variant={selectedCategory === 'Dial Number' ? 'primary' : 'secondary'}
+            size="small"
+            onClick={handleDialNumberClick}
+            style={{minWidth: '100px'}}
+          >
+            Dial Number
+          </Button>
+        )}
+        {showEntryPointTab && (
+          <Button
+            variant={selectedCategory === 'Entry Point' ? 'primary' : 'secondary'}
+            size="small"
+            onClick={handleEntryPointClick}
+            style={{minWidth: '100px'}}
+          >
+            Entry Point
+          </Button>
+        )}
       </div>
 
       {!hasAnyData && <ConsultTransferEmptyState message="No data available for consult transfer." />}
@@ -308,7 +314,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
         </div>
       )}
 
-      {selectedCategory === 'Dial Number' && !noDialNumbers && (
+      {showDialNumberTab && selectedCategory === 'Dial Number' && !noDialNumbers && (
         <div>
           {renderList(
             dialNumbers.map((d) => ({id: d.id, name: d.name, number: d.number})),
@@ -345,7 +351,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
         </div>
       )}
 
-      {selectedCategory === 'Entry Point' && !noEntryPoints && (
+      {showEntryPointTab && selectedCategory === 'Entry Point' && !noEntryPoints && (
         <div>
           {renderList(
             entryPoints.map((e) => ({id: e.id, name: e.name})),

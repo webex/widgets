@@ -418,6 +418,11 @@ export interface ControlProps {
   getEntryPoints?: FetchFunction<EntryPointRecord>;
   /** Fetch paginated queues (filtered by media type in store) */
   getQueuesFetcher?: FetchFunction<ContactServiceQueue>;
+
+  /**
+   * Options to configure consult/transfer popover behavior.
+   */
+  consultTransferOptions?: ConsultTransferOptions;
 }
 
 export type CallControlComponentProps = Pick<
@@ -466,6 +471,7 @@ export type CallControlComponentProps = Pick<
   | 'getAddressBookEntries'
   | 'getEntryPoints'
   | 'getQueuesFetcher'
+  | 'consultTransferOptions'
 >;
 
 /**
@@ -529,6 +535,8 @@ export interface ConsultTransferPopoverComponentProps {
   onEntryPointSelect?: (entryPointId: string, entryPointName: string) => void;
   onDialNumberSelect?: (dialNumber: string) => void;
   allowConsultToQueue: boolean;
+  /** Options governing popover visibility/behavior */
+  consultTransferOptions?: ConsultTransferOptions;
   logger: ILogger;
 }
 
@@ -693,3 +701,13 @@ export type FetchFunction<T> = (params: {
  * Type for transform function
  */
 export type TransformFunction<T, U> = (item: T, page: number, index: number) => U;
+
+/**
+ * Options to configure Consult/Transfer popover behavior and visibility.
+ */
+export interface ConsultTransferOptions {
+  /** Show the Dial Number tab. Defaults to true. */
+  showDialNumberTab?: boolean;
+  /** Show the Entry Point tab. Defaults to true. */
+  showEntryPointTab?: boolean;
+}
