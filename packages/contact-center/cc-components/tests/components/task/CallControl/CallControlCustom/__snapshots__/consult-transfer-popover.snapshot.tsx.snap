@@ -134,6 +134,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
         tabindex="-1"
       >
         <div
+          class="call-control-list-item-start"
           data-position="start"
         >
           <div
@@ -153,19 +154,19 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
           </div>
         </div>
         <div
+          class="call-control-list-item-middle"
           data-position="middle"
-          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
         >
           <mdc-text
-            class="md-text-wrapper"
-            style="margin: 0px; line-height: 1.2;"
-            tagname="p"
+            class="md-text-wrapper call-control-list-item-title"
+            tagname="div"
             type="body-large-regular"
           >
             Agent One
           </mdc-text>
         </div>
         <div
+          class="call-control-list-item-end"
           data-position="end"
         >
           <div
@@ -180,7 +181,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
               data-multiple-children="false"
               data-outline="false"
               data-shallow-disabled="false"
-              data-size="28"
+              data-size="32"
               tabindex="-1"
               type="button"
             >
@@ -208,6 +209,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
         tabindex="-1"
       >
         <div
+          class="call-control-list-item-start"
           data-position="start"
         >
           <div
@@ -227,19 +229,19 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
           </div>
         </div>
         <div
+          class="call-control-list-item-middle"
           data-position="middle"
-          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
         >
           <mdc-text
-            class="md-text-wrapper"
-            style="margin: 0px; line-height: 1.2;"
-            tagname="p"
+            class="md-text-wrapper call-control-list-item-title"
+            tagname="div"
             type="body-large-regular"
           >
             Agent Two
           </mdc-text>
         </div>
         <div
+          class="call-control-list-item-end"
           data-position="end"
         >
           <div
@@ -254,7 +256,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
               data-multiple-children="false"
               data-outline="false"
               data-shallow-disabled="false"
-              data-size="28"
+              data-size="32"
               tabindex="-1"
               type="button"
             >
@@ -405,6 +407,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
           tabindex="-1"
         >
           <div
+            class="call-control-list-item-start"
             data-position="start"
           >
             <div
@@ -424,19 +427,19 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
             </div>
           </div>
           <div
+            class="call-control-list-item-middle"
             data-position="middle"
-            style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
           >
             <mdc-text
-              class="md-text-wrapper"
-              style="margin: 0px; line-height: 1.2;"
-              tagname="p"
+              class="md-text-wrapper call-control-list-item-title"
+              tagname="div"
               type="body-large-regular"
             >
               Queue One
             </mdc-text>
           </div>
           <div
+            class="call-control-list-item-end"
             data-position="end"
           >
             <div
@@ -451,7 +454,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
                 data-multiple-children="false"
                 data-outline="false"
                 data-shallow-disabled="false"
-                data-size="28"
+                data-size="32"
                 tabindex="-1"
                 type="button"
               >
@@ -603,6 +606,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
           tabindex="-1"
         >
           <div
+            class="call-control-list-item-start"
             data-position="start"
           >
             <div
@@ -622,19 +626,19 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
             </div>
           </div>
           <div
+            class="call-control-list-item-middle"
             data-position="middle"
-            style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
           >
             <mdc-text
-              class="md-text-wrapper"
-              style="margin: 0px; line-height: 1.2;"
-              tagname="p"
+              class="md-text-wrapper call-control-list-item-title"
+              tagname="div"
               type="body-large-regular"
             >
               Queue One
             </mdc-text>
           </div>
           <div
+            class="call-control-list-item-end"
             data-position="end"
           >
             <div
@@ -649,7 +653,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
                 data-multiple-children="false"
                 data-outline="false"
                 data-shallow-disabled="false"
-                data-size="28"
+                data-size="32"
                 tabindex="-1"
                 type="button"
               >
@@ -800,6 +804,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         tabindex="-1"
       >
         <div
+          class="call-control-list-item-start"
           data-position="start"
         >
           <div
@@ -819,19 +824,19 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
           </div>
         </div>
         <div
+          class="call-control-list-item-middle"
           data-position="middle"
-          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
         >
           <mdc-text
-            class="md-text-wrapper"
-            style="margin: 0px; line-height: 1.2;"
-            tagname="p"
+            class="md-text-wrapper call-control-list-item-title"
+            tagname="div"
             type="body-large-regular"
           >
             Agent One
           </mdc-text>
         </div>
         <div
+          class="call-control-list-item-end"
           data-position="end"
         >
           <div
@@ -846,7 +851,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
               data-multiple-children="false"
               data-outline="false"
               data-shallow-disabled="false"
-              data-size="28"
+              data-size="32"
               tabindex="-1"
               type="button"
             >
@@ -874,6 +879,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         tabindex="-1"
       >
         <div
+          class="call-control-list-item-start"
           data-position="start"
         >
           <div
@@ -893,19 +899,19 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
           </div>
         </div>
         <div
+          class="call-control-list-item-middle"
           data-position="middle"
-          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
         >
           <mdc-text
-            class="md-text-wrapper"
-            style="margin: 0px; line-height: 1.2;"
-            tagname="p"
+            class="md-text-wrapper call-control-list-item-title"
+            tagname="div"
             type="body-large-regular"
           >
             Agent Two
           </mdc-text>
         </div>
         <div
+          class="call-control-list-item-end"
           data-position="end"
         >
           <div
@@ -920,7 +926,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
               data-multiple-children="false"
               data-outline="false"
               data-shallow-disabled="false"
-              data-size="28"
+              data-size="32"
               tabindex="-1"
               type="button"
             >
@@ -1070,6 +1076,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         tabindex="-1"
       >
         <div
+          class="call-control-list-item-start"
           data-position="start"
         >
           <div
@@ -1089,19 +1096,19 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
           </div>
         </div>
         <div
+          class="call-control-list-item-middle"
           data-position="middle"
-          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
         >
           <mdc-text
-            class="md-text-wrapper"
-            style="margin: 0px; line-height: 1.2;"
-            tagname="p"
+            class="md-text-wrapper call-control-list-item-title"
+            tagname="div"
             type="body-large-regular"
           >
             Available Agent
           </mdc-text>
         </div>
         <div
+          class="call-control-list-item-end"
           data-position="end"
         >
           <div
@@ -1116,7 +1123,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
               data-multiple-children="false"
               data-outline="false"
               data-shallow-disabled="false"
-              data-size="28"
+              data-size="32"
               tabindex="-1"
               type="button"
             >
@@ -1144,6 +1151,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         tabindex="-1"
       >
         <div
+          class="call-control-list-item-start"
           data-position="start"
         >
           <div
@@ -1163,19 +1171,19 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
           </div>
         </div>
         <div
+          class="call-control-list-item-middle"
           data-position="middle"
-          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
         >
           <mdc-text
-            class="md-text-wrapper"
-            style="margin: 0px; line-height: 1.2;"
-            tagname="p"
+            class="md-text-wrapper call-control-list-item-title"
+            tagname="div"
             type="body-large-regular"
           >
             Busy Agent
           </mdc-text>
         </div>
         <div
+          class="call-control-list-item-end"
           data-position="end"
         >
           <div
@@ -1190,7 +1198,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
               data-multiple-children="false"
               data-outline="false"
               data-shallow-disabled="false"
-              data-size="28"
+              data-size="32"
               tabindex="-1"
               type="button"
             >
@@ -1218,6 +1226,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         tabindex="-1"
       >
         <div
+          class="call-control-list-item-start"
           data-position="start"
         >
           <div
@@ -1237,19 +1246,19 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
           </div>
         </div>
         <div
+          class="call-control-list-item-middle"
           data-position="middle"
-          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
         >
           <mdc-text
-            class="md-text-wrapper"
-            style="margin: 0px; line-height: 1.2;"
-            tagname="p"
+            class="md-text-wrapper call-control-list-item-title"
+            tagname="div"
             type="body-large-regular"
           >
             Idle Agent
           </mdc-text>
         </div>
         <div
+          class="call-control-list-item-end"
           data-position="end"
         >
           <div
@@ -1264,7 +1273,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
               data-multiple-children="false"
               data-outline="false"
               data-shallow-disabled="false"
-              data-size="28"
+              data-size="32"
               tabindex="-1"
               type="button"
             >
@@ -1414,6 +1423,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         tabindex="-1"
       >
         <div
+          class="call-control-list-item-start"
           data-position="start"
         >
           <div
@@ -1433,19 +1443,19 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
           </div>
         </div>
         <div
+          class="call-control-list-item-middle"
           data-position="middle"
-          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
         >
           <mdc-text
-            class="md-text-wrapper"
-            style="margin: 0px; line-height: 1.2;"
-            tagname="p"
+            class="md-text-wrapper call-control-list-item-title"
+            tagname="div"
             type="body-large-regular"
           >
             Agent One
           </mdc-text>
         </div>
         <div
+          class="call-control-list-item-end"
           data-position="end"
         >
           <div
@@ -1460,7 +1470,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
               data-multiple-children="false"
               data-outline="false"
               data-shallow-disabled="false"
-              data-size="28"
+              data-size="32"
               tabindex="-1"
               type="button"
             >
@@ -1488,6 +1498,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         tabindex="-1"
       >
         <div
+          class="call-control-list-item-start"
           data-position="start"
         >
           <div
@@ -1507,19 +1518,19 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
           </div>
         </div>
         <div
+          class="call-control-list-item-middle"
           data-position="middle"
-          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
         >
           <mdc-text
-            class="md-text-wrapper"
-            style="margin: 0px; line-height: 1.2;"
-            tagname="p"
+            class="md-text-wrapper call-control-list-item-title"
+            tagname="div"
             type="body-large-regular"
           >
             Agent Two
           </mdc-text>
         </div>
         <div
+          class="call-control-list-item-end"
           data-position="end"
         >
           <div
@@ -1534,7 +1545,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
               data-multiple-children="false"
               data-outline="false"
               data-shallow-disabled="false"
-              data-size="28"
+              data-size="32"
               tabindex="-1"
               type="button"
             >
@@ -1814,6 +1825,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         tabindex="-1"
       >
         <div
+          class="call-control-list-item-start"
           data-position="start"
         >
           <div
@@ -1833,19 +1845,19 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
           </div>
         </div>
         <div
+          class="call-control-list-item-middle"
           data-position="middle"
-          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
         >
           <mdc-text
-            class="md-text-wrapper"
-            style="margin: 0px; line-height: 1.2;"
-            tagname="p"
+            class="md-text-wrapper call-control-list-item-title"
+            tagname="div"
             type="body-large-regular"
           >
             Agent One
           </mdc-text>
         </div>
         <div
+          class="call-control-list-item-end"
           data-position="end"
         >
           <div
@@ -1860,7 +1872,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
               data-multiple-children="false"
               data-outline="false"
               data-shallow-disabled="false"
-              data-size="28"
+              data-size="32"
               tabindex="-1"
               type="button"
             >
@@ -1888,6 +1900,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         tabindex="-1"
       >
         <div
+          class="call-control-list-item-start"
           data-position="start"
         >
           <div
@@ -1907,19 +1920,19 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
           </div>
         </div>
         <div
+          class="call-control-list-item-middle"
           data-position="middle"
-          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
         >
           <mdc-text
-            class="md-text-wrapper"
-            style="margin: 0px; line-height: 1.2;"
-            tagname="p"
+            class="md-text-wrapper call-control-list-item-title"
+            tagname="div"
             type="body-large-regular"
           >
             Agent Two
           </mdc-text>
         </div>
         <div
+          class="call-control-list-item-end"
           data-position="end"
         >
           <div
@@ -1934,7 +1947,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
               data-multiple-children="false"
               data-outline="false"
               data-shallow-disabled="false"
-              data-size="28"
+              data-size="32"
               tabindex="-1"
               type="button"
             >
@@ -2332,6 +2345,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         tabindex="-1"
       >
         <div
+          class="call-control-list-item-start"
           data-position="start"
         >
           <div
@@ -2351,19 +2365,19 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
           </div>
         </div>
         <div
+          class="call-control-list-item-middle"
           data-position="middle"
-          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
         >
           <mdc-text
-            class="md-text-wrapper"
-            style="margin: 0px; line-height: 1.2;"
-            tagname="p"
+            class="md-text-wrapper call-control-list-item-title"
+            tagname="div"
             type="body-large-regular"
           >
             Single Agent
           </mdc-text>
         </div>
         <div
+          class="call-control-list-item-end"
           data-position="end"
         >
           <div
@@ -2378,7 +2392,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
               data-multiple-children="false"
               data-outline="false"
               data-shallow-disabled="false"
-              data-size="28"
+              data-size="32"
               tabindex="-1"
               type="button"
             >
@@ -2529,6 +2543,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
           tabindex="-1"
         >
           <div
+            class="call-control-list-item-start"
             data-position="start"
           >
             <div
@@ -2548,19 +2563,19 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
             </div>
           </div>
           <div
+            class="call-control-list-item-middle"
             data-position="middle"
-            style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
           >
             <mdc-text
-              class="md-text-wrapper"
-              style="margin: 0px; line-height: 1.2;"
-              tagname="p"
+              class="md-text-wrapper call-control-list-item-title"
+              tagname="div"
               type="body-large-regular"
             >
               Single Queue
             </mdc-text>
           </div>
           <div
+            class="call-control-list-item-end"
             data-position="end"
           >
             <div
@@ -2575,7 +2590,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
                 data-multiple-children="false"
                 data-outline="false"
                 data-shallow-disabled="false"
-                data-size="28"
+                data-size="32"
                 tabindex="-1"
                 type="button"
               >
@@ -2726,6 +2741,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         tabindex="-1"
       >
         <div
+          class="call-control-list-item-start"
           data-position="start"
         >
           <div
@@ -2745,19 +2761,19 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
           </div>
         </div>
         <div
+          class="call-control-list-item-middle"
           data-position="middle"
-          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
         >
           <mdc-text
-            class="md-text-wrapper"
-            style="margin: 0px; line-height: 1.2;"
-            tagname="p"
+            class="md-text-wrapper call-control-list-item-title"
+            tagname="div"
             type="body-large-regular"
           >
             Agent One
           </mdc-text>
         </div>
         <div
+          class="call-control-list-item-end"
           data-position="end"
         >
           <div
@@ -2772,7 +2788,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
               data-multiple-children="false"
               data-outline="false"
               data-shallow-disabled="false"
-              data-size="28"
+              data-size="32"
               tabindex="-1"
               type="button"
             >
@@ -2800,6 +2816,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         tabindex="-1"
       >
         <div
+          class="call-control-list-item-start"
           data-position="start"
         >
           <div
@@ -2819,19 +2836,19 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
           </div>
         </div>
         <div
+          class="call-control-list-item-middle"
           data-position="middle"
-          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
         >
           <mdc-text
-            class="md-text-wrapper"
-            style="margin: 0px; line-height: 1.2;"
-            tagname="p"
+            class="md-text-wrapper call-control-list-item-title"
+            tagname="div"
             type="body-large-regular"
           >
             Agent Two
           </mdc-text>
         </div>
         <div
+          class="call-control-list-item-end"
           data-position="end"
         >
           <div
@@ -2846,7 +2863,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
               data-multiple-children="false"
               data-outline="false"
               data-shallow-disabled="false"
-              data-size="28"
+              data-size="32"
               tabindex="-1"
               type="button"
             >
@@ -2996,6 +3013,7 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
         tabindex="-1"
       >
         <div
+          class="call-control-list-item-start"
           data-position="start"
         >
           <div
@@ -3015,17 +3033,17 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
           </div>
         </div>
         <div
+          class="call-control-list-item-middle"
           data-position="middle"
-          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
         >
           <mdc-text
-            class="md-text-wrapper"
-            style="margin: 0px; line-height: 1.2;"
+            class="md-text-wrapper call-control-list-item-title"
           >
             New Agent One
           </mdc-text>
         </div>
         <div
+          class="call-control-list-item-end"
           data-position="end"
         >
           <div
@@ -3040,7 +3058,7 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
               data-multiple-children="false"
               data-outline="false"
               data-shallow-disabled="false"
-              data-size="28"
+              data-size="32"
               tabindex="-1"
               type="button"
             >
@@ -3188,6 +3206,7 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
         tabindex="-1"
       >
         <div
+          class="call-control-list-item-start"
           data-position="start"
         >
           <div
@@ -3207,19 +3226,19 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
           </div>
         </div>
         <div
+          class="call-control-list-item-middle"
           data-position="middle"
-          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
         >
           <mdc-text
-            class="md-text-wrapper"
-            style="margin: 0px; line-height: 1.2;"
-            tagname="p"
+            class="md-text-wrapper call-control-list-item-title"
+            tagname="div"
             type="body-large-regular"
           >
             Agent One
           </mdc-text>
         </div>
         <div
+          class="call-control-list-item-end"
           data-position="end"
         >
           <div
@@ -3234,7 +3253,7 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
               data-multiple-children="false"
               data-outline="false"
               data-shallow-disabled="false"
-              data-size="28"
+              data-size="32"
               tabindex="-1"
               type="button"
             >
@@ -3262,6 +3281,7 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
         tabindex="-1"
       >
         <div
+          class="call-control-list-item-start"
           data-position="start"
         >
           <div
@@ -3281,19 +3301,19 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
           </div>
         </div>
         <div
+          class="call-control-list-item-middle"
           data-position="middle"
-          style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
         >
           <mdc-text
-            class="md-text-wrapper"
-            style="margin: 0px; line-height: 1.2;"
-            tagname="p"
+            class="md-text-wrapper call-control-list-item-title"
+            tagname="div"
             type="body-large-regular"
           >
             Agent Two
           </mdc-text>
         </div>
         <div
+          class="call-control-list-item-end"
           data-position="end"
         >
           <div
@@ -3308,7 +3328,7 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
               data-multiple-children="false"
               data-outline="false"
               data-shallow-disabled="false"
-              data-size="28"
+              data-size="32"
               tabindex="-1"
               type="button"
             >
@@ -3459,6 +3479,7 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
           tabindex="-1"
         >
           <div
+            class="call-control-list-item-start"
             data-position="start"
           >
             <div
@@ -3478,19 +3499,19 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
             </div>
           </div>
           <div
+            class="call-control-list-item-middle"
             data-position="middle"
-            style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
           >
             <mdc-text
-              class="md-text-wrapper"
-              style="margin: 0px; line-height: 1.2;"
-              tagname="p"
+              class="md-text-wrapper call-control-list-item-title"
+              tagname="div"
               type="body-large-regular"
             >
               New Queue One
             </mdc-text>
           </div>
           <div
+            class="call-control-list-item-end"
             data-position="end"
           >
             <div
@@ -3505,7 +3526,7 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
                 data-multiple-children="false"
                 data-outline="false"
                 data-shallow-disabled="false"
-                data-size="28"
+                data-size="32"
                 tabindex="-1"
                 type="button"
               >

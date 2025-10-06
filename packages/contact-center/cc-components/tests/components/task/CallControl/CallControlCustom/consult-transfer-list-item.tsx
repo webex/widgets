@@ -67,36 +67,23 @@ describe('CallControlListItemPresentational', () => {
     expect(initialsSpan).toHaveTextContent('JD');
     expect(initialsSpan).toHaveAttribute('aria-hidden', 'true');
 
-    // Verify middle section with title and subtitle
+    // Verify middle section with title and subtitle (class-based layout)
     const middleSection = screen.container.querySelector('[data-position="middle"]');
     expect(middleSection).toBeInTheDocument();
-    expect(middleSection).toHaveStyle({
-      flex: '1',
-      display: 'flex',
-      flexDirection: 'column',
-      marginLeft: '8px',
-      minWidth: '0',
-      overflow: 'hidden',
-    });
+    expect(middleSection).toHaveClass('call-control-list-item-middle');
 
     // Verify title text
-    const titleElements = screen.container.querySelectorAll('mdc-text');
-    expect(titleElements[0]).toHaveTextContent('John Doe');
-    expect(titleElements[0]).toHaveAttribute('tagname', 'p');
-    expect(titleElements[0]).toHaveAttribute('type', 'body-large-regular');
-    expect(titleElements[0]).toHaveStyle({
-      margin: '0px',
-      lineHeight: '1.2',
-    });
+    const textElements = screen.container.querySelectorAll('mdc-text');
+    expect(textElements[0]).toHaveTextContent('John Doe');
+    expect(textElements[0]).toHaveAttribute('tagname', 'div');
+    expect(textElements[0]).toHaveAttribute('type', 'body-large-regular');
+    expect(textElements[0]).toHaveClass('call-control-list-item-title');
 
     // Verify subtitle text
-    expect(titleElements[1]).toHaveTextContent('Manager');
-    expect(titleElements[1]).toHaveAttribute('tagname', 'p');
-    expect(titleElements[1]).toHaveAttribute('type', 'body-midsize-regular');
-    expect(titleElements[1]).toHaveStyle({
-      margin: '0px',
-      lineHeight: '1.2',
-    });
+    expect(textElements[1]).toHaveTextContent('Manager');
+    expect(textElements[1]).toHaveAttribute('tagname', 'div');
+    expect(textElements[1]).toHaveAttribute('type', 'body-midsize-regular');
+    expect(textElements[1]).toHaveClass('call-control-list-item-subtitle');
 
     // Verify end section with button
     const endSection = screen.container.querySelector('[data-position="end"]');
@@ -110,7 +97,7 @@ describe('CallControlListItemPresentational', () => {
     const button = screen.container.querySelector('button');
     expect(button).toBeInTheDocument();
     expect(button).toHaveAttribute('data-color', 'join');
-    expect(button).toHaveAttribute('data-size', '28');
+    expect(button).toHaveAttribute('data-size', '32');
     expect(button).toHaveAttribute('data-disabled', 'false');
     expect(button).toHaveAttribute('tabindex', '-1');
     expect(button).toHaveAttribute('type', 'button');
@@ -141,8 +128,8 @@ describe('CallControlListItemPresentational', () => {
     const screen = await render(<ConsultTransferListComponent {...propsWithoutSubtitle} />);
 
     // Should only have one mdc-text element (title only)
-    const textElements = screen.container.querySelectorAll('mdc-text');
-    expect(textElements).toHaveLength(1);
-    expect(textElements[0]).toHaveTextContent('John Doe');
+    const titleOnlyElements = screen.container.querySelectorAll('mdc-text');
+    expect(titleOnlyElements).toHaveLength(1);
+    expect(titleOnlyElements[0]).toHaveTextContent('John Doe');
   });
 });
