@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useMemo, useState} from 'react';
 import {OutdialCallComponentProps} from '../task.types';
 import './outdial-call.style.scss';
 import {withMetrics} from '@webex/cc-ui-logging';
@@ -15,8 +15,8 @@ import {OutdialStrings, KEY_LIST} from './constants';
  * @property {number} version - The version number of the ANI entry.
  * @property {string} name - The name assigned to the ANI entry.
  * @property {string} number - The phone number associated with the ANI entry.
- * @property {number} createdTime - The timestamp(in epoch millis) when the ANI entry was created.
- * @property {number} lastUpdatedTime - The timestamp(in epoch millis) when the ANI entry was last updated.
+ * @property {number} createdTime - The timestamp(in epoch milliseconds) when the ANI entry was created.
+ * @property {number} lastUpdatedTime - The timestamp(in epoch milliseconds) when the ANI entry was last updated.
  */
 interface OutdialANIEntry {
   organizationId?: string;
@@ -38,15 +38,20 @@ interface OutdialANIEntry {
  *
  * @param props - Properties for the OutdialCallComponent.
  * @property startOutdial - Function to initiate the outdial call with the entered destination number.
- * @property dialNumberRegex - Optional regular expression provided by the CC Store for validating destination number format.
  */
 const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> = (props) => {
-  const {startOutdial, dialNumberRegex} = props;
+  const {startOutdial} = props;
 
   // State Hooks
   const [destination, setDestination] = useState('');
-  const [error, setError] = useState('');
+  const [isValidNumber, setIsValidNumber] = useState('');
   const [selectedANI, setSelectedANI] = useState('');
+
+  // Validate the input format using regex from agent desktop
+  const regExForDnSpecialChars = useMemo(
+    () => new RegExp('^[+1][0-9]{3,18}$|^[*#][+1][0-9*#:]{3,18}$|^[0-9*#]{3,18}$'),
+    []
+  );
 
   const outdialANIEntries: OutdialANIEntry[] = [
     {number: '+1(234)567-8910', name: 'name 1'},
@@ -65,25 +70,15 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
   ];
 
   /**
-   * updateOutboundNumber
+   * validateOutboundNumber
    * @param e The input change event
-   * Updates the destination state with validated input
-   * If the input is invalid, sets an error message
+   * If the input is invalid, sets an error message on dialnumber input
    */
-  const updateOutboundNumber = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Allow only valid input that is digits, #, *, and +
-    const VALID_KEYPAD_CHARS = /[\d#*+]/g;
-    const inputValue = e.target.value;
-    const filteredValue = inputValue.match(VALID_KEYPAD_CHARS)?.join('') || '';
-    setDestination(inputValue);
-
-    // Validate the input format
-    const regexForDn = new RegExp(dialNumberRegex ?? '1[0-9]{3}[2-9][0-9]{6}([,]{1,10}[0-9]+){0,1}');
-
-    if (inputValue !== filteredValue || (inputValue && !regexForDn.test(inputValue))) {
-      setError(OutdialStrings.INCORRECT_DN_FORMAT);
+  const validateOutboundNumber = (value: string) => {
+    if (value && !regExForDnSpecialChars.test(value)) {
+      setIsValidNumber(OutdialStrings.INCORRECT_DN_FORMAT);
     } else {
-      setError('');
+      setIsValidNumber('');
     }
   };
 
@@ -93,12 +88,13 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
    * Appends the pressed key to the destination input field
    */
   const handleKeyPress = (value: string) => {
-    updateOutboundNumber({target: {value: destination + value}} as React.ChangeEvent<HTMLInputElement>);
+    setDestination(destination + value);
+    validateOutboundNumber(destination + value);
   };
 
   return (
-    <div className="keypad">
-      <div role="tablist" id="outdial-tablist">
+    <article className="keypad">
+      <header role="tablist" id="outdial-tablist">
         <Tab
           active={true}
           text={OutdialStrings.DIALPAD_LABEL}
@@ -107,25 +103,29 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
           variant="pill"
           aria-controls="dialpad-panel"
         ></Tab>
-      </div>
+      </header>
       <Input
         className="input"
         id="outdial-number-input"
-        helpText={error}
-        helpTextType={error ? 'error' : 'default'}
+        helpText={isValidNumber}
+        helpTextType={isValidNumber ? 'error' : 'default'}
         placeholder={OutdialStrings.DN_PLACEHOLDER}
         value={destination}
         onChange={(e: unknown) => {
-          updateOutboundNumber(e as React.ChangeEvent<HTMLInputElement>);
+          const inputValue = (e as React.ChangeEvent<HTMLInputElement>).target.value;
+          setDestination(inputValue);
+          validateOutboundNumber(inputValue);
         }}
       />
-      <div className="keys">
+      <ul className="keys">
         {KEY_LIST.map((key) => (
-          <Button key={key} className="key button" onClick={() => handleKeyPress(key)}>
-            {key}
-          </Button>
+          <li key={key}>
+            <Button className="key button" onClick={() => handleKeyPress(key)}>
+              {key}
+            </Button>
+          </li>
         ))}
-      </div>
+      </ul>
       <Select
         className="input"
         label={OutdialStrings.ANI_SELECT_LABEL}
@@ -154,9 +154,9 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
         className="button"
         prefixIcon={'handset-regular'}
         onClick={() => startOutdial(destination)}
-        disabled={!!error || !destination}
+        disabled={!!isValidNumber || !destination}
       />
-    </div>
+    </article>
   );
 };
 
