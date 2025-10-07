@@ -108,7 +108,16 @@ async function waitForConsoleLogs(
 
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
-    if (logs.some((log) => pattern.test(log))) return;
+    // Allow partial match in case of trailing debug suffixes
+    if (
+      logs.some(
+        (log) =>
+          log.includes(`onTaskSelected invoked for task with title : ${title}`) &&
+          log.includes(`, and mediaType : ${mediaType}`)
+      )
+    ) {
+      return;
+    }
     await new Promise((r) => setTimeout(r, intervalMs));
   }
 

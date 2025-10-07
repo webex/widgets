@@ -1,4 +1,5 @@
-import {Page} from '@playwright/test';
+import {Page, expect} from '@playwright/test';
+import {dismissOverlays} from './helperUtils';
 import {AWAIT_TIMEOUT, FORM_FIELD_TIMEOUT} from '../constants';
 
 /**
@@ -112,12 +113,14 @@ export function verifyConsultTransferredLogs(): void {
  */
 export async function consultOrTransfer(
   page: Page,
-  type: 'agent' | 'queue' | 'dialNumber',
+  type: 'agent' | 'queue' | 'dialNumber' | 'entryPoint',
   action: 'consult' | 'transfer',
   value: string
 ): Promise<void> {
   // Determine which button to click for consult or transfer
   if (action === 'consult') {
+    // Close any backdrops that might intercept clicks
+    await dismissOverlays(page);
     await page.getByTestId('call-control:consult').nth(1).click({timeout: AWAIT_TIMEOUT});
   } else {
     await page
@@ -126,47 +129,96 @@ export async function consultOrTransfer(
       .click({timeout: AWAIT_TIMEOUT});
   }
 
-  // Navigate to the correct tab and perform the action
-  if (type === 'agent' || type === 'queue') {
-    const tabName = type === 'agent' ? 'Agents' : 'Queues';
-    await page.getByRole('tab', {name: tabName}).click({timeout: AWAIT_TIMEOUT});
-    const listItem = page.getByRole('listitem', {name: value, exact: true});
+  // Popover universal search should be visible (inside popover container)
+  const popover = page.locator('.agent-popover-content');
+  await expect(popover.locator('#consult-search')).toBeVisible({timeout: FORM_FIELD_TIMEOUT});
+
+  // Navigate to the correct category and perform the action
+  const clickCategory = async (name: 'Agents' | 'Queues' | 'Dial Number' | 'Entry Point') => {
+    // New UI uses buttons instead of tabs
+    const button = popover.getByRole('button', {name});
+    await button.click({timeout: AWAIT_TIMEOUT});
+    await page.waitForTimeout(200);
+  };
+
+  const clickListItemPrimaryButton = async (categoryLabel: string) => {
+    // Prefer exact aria-label match within the consult/transfer popover to avoid strict-mode collisions
+    const listItem = popover.locator(`[role="listitem"][aria-label="${value}"]`).first();
     await listItem.waitFor({state: 'visible', timeout: AWAIT_TIMEOUT});
+    // Some UIs reveal the action button on hover; hover to ensure visibility
+    await listItem.hover();
     await listItem.scrollIntoViewIfNeeded();
-    await page.waitForTimeout(300);
-    const button = listItem.getByRole('button');
-    await button.waitFor({state: 'visible', timeout: AWAIT_TIMEOUT});
-    await button.scrollIntoViewIfNeeded();
-    await button.evaluate((el) => {
+    await page.waitForTimeout(200);
+    const primaryButton = listItem.getByRole('button');
+    await primaryButton.waitFor({state: 'visible', timeout: AWAIT_TIMEOUT});
+    await primaryButton.scrollIntoViewIfNeeded();
+    await primaryButton.evaluate((el) => {
       if (el.hasAttribute('disabled')) {
-        throw new Error(`${tabName.slice(0, -1)} button is disabled`);
+        throw new Error(`${categoryLabel} button is disabled`);
       }
     });
     let lastError;
     for (let i = 0; i < 3; i++) {
       try {
-        await button.click({timeout: AWAIT_TIMEOUT, force: true});
+        await primaryButton.click({timeout: AWAIT_TIMEOUT, force: true});
         lastError = undefined;
         break;
-      } catch (e) {
-        lastError = e;
-        await page.waitForTimeout(400);
+      } catch (err) {
+        lastError = err;
+        await page.waitForTimeout(300);
       }
     }
     if (lastError) {
       throw lastError;
     }
+    await page
+      .locator('.md-popover-backdrop')
+      .waitFor({state: 'hidden', timeout: 3000})
+      .catch(() => {});
+  };
+
+  if (type === 'agent') {
+    await clickCategory('Agents');
+    await clickListItemPrimaryButton('Agent');
+  } else if (type === 'queue') {
+    await clickCategory('Queues');
+    await clickListItemPrimaryButton('Queue');
   } else if (type === 'dialNumber') {
-    await page.getByRole('tab', {name: 'Dial Number'}).click({timeout: AWAIT_TIMEOUT});
-    const inputLocator = page.getByTestId('consult-transfer-dial-number-input').locator('input');
-    await inputLocator.waitFor({state: 'visible', timeout: AWAIT_TIMEOUT});
-    await inputLocator.click({timeout: AWAIT_TIMEOUT});
-    await inputLocator.fill(value, {timeout: AWAIT_TIMEOUT});
-    await page.getByTestId('dial-number-btn').click({timeout: AWAIT_TIMEOUT});
+    await clickCategory('Dial Number');
+    // Require a valid name to avoid strict-mode ambiguous matches
+    if (!value || value.trim() === '') {
+      throw new Error(
+        'PW_DIAL_NUMBER_NAME is not set. Please provide the Dial Number list item name (e.g., cypher_pstn).'
+      );
+    }
+    // List-based selection only (no legacy input fallback)
+    const search = popover.locator('#consult-search');
+    if (value && (await search.isVisible({timeout: 500}).catch(() => false))) {
+      await search.fill(value, {timeout: AWAIT_TIMEOUT});
+      await page.waitForTimeout(300);
+    }
+    const listItem = popover.getByRole('listitem', {name: value, exact: true});
+    await listItem.waitFor({state: 'visible', timeout: FORM_FIELD_TIMEOUT});
+    await clickListItemPrimaryButton('Dial Number');
+  } else if (type === 'entryPoint') {
+    await clickCategory('Entry Point');
+    // Optional: filter via universal search (only if value provided)
+    if (value) {
+      const search = popover.locator('#consult-search');
+      if (await search.isVisible({timeout: 500}).catch(() => false)) {
+        await search.fill(value, {timeout: AWAIT_TIMEOUT});
+        await page.waitForTimeout(300);
+      }
+    }
+    await clickListItemPrimaryButton('Entry Point');
   }
 
   // Wait a moment for the action to be processed
   await page.waitForTimeout(2000);
+  if (action === 'consult') {
+    // Confirm consult UI is present
+    await expect(page.getByTestId('cancel-consult-btn')).toBeVisible({timeout: FORM_FIELD_TIMEOUT});
+  }
 }
 
 /**

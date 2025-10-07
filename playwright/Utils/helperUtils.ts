@@ -505,3 +505,31 @@ export const pageSetup = async (
 
   await page.getByTestId('state-select').waitFor({state: 'visible', timeout: 30000});
 };
+
+/**
+ * Dismisses any visible popover/tooltips/backdrops that might intercept pointer events.
+ * Attempts ESC presses and quick background clicks.
+ */
+export async function dismissOverlays(page: Page): Promise<void> {
+  for (let i = 0; i < 3; i++) {
+    // If a Momentum popover backdrop is visible, try ESC to close
+    const backdropVisible = await page
+      .locator('.md-popover-backdrop')
+      .isVisible()
+      .catch(() => false);
+    const tippyVisible = await page
+      .locator('[id^="tippy-"]')
+      .first()
+      .isVisible()
+      .catch(() => false);
+    if (!backdropVisible && !tippyVisible) return;
+    try {
+      await page.keyboard.press('Escape');
+    } catch {}
+    // Small click near top-left to blur active elements
+    try {
+      await page.mouse.click(5, 5);
+    } catch {}
+    await page.waitForTimeout(200);
+  }
+}
