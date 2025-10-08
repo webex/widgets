@@ -511,17 +511,19 @@ export const pageSetup = async (
  * Attempts ESC presses and quick background clicks.
  */
 export async function dismissOverlays(page: Page): Promise<void> {
+  const isVisibleWithin = async (locator: any, timeoutMs: number = 500): Promise<boolean> => {
+    try {
+      await locator.waitFor({state: 'visible', timeout: timeoutMs});
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   for (let i = 0; i < 3; i++) {
-    // If a Momentum popover backdrop is visible, try ESC to close
-    const backdropVisible = await page
-      .locator('.md-popover-backdrop')
-      .isVisible()
-      .catch(() => false);
-    const tippyVisible = await page
-      .locator('[id^="tippy-"]')
-      .first()
-      .isVisible()
-      .catch(() => false);
+    // If a Momentum popover backdrop is visible, try ESC to close (with bounded timeout)
+    const backdropVisible = await isVisibleWithin(page.locator('.md-popover-backdrop'), 500);
+    const tippyVisible = await isVisibleWithin(page.locator('[id^="tippy-"]').first(), 500);
     if (!backdropVisible && !tippyVisible) return;
     try {
       await page.keyboard.press('Escape');

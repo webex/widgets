@@ -178,12 +178,7 @@ export default function createAdvancedTaskControlsTests() {
 
   describe('Consult and Consult Transfer Scenarios', () => {
     test('Entry Point Consult: visible and functional only for supported users (no blind transfer)', async ({}, testInfo) => {
-      if (testManager.projectName !== 'SET_5') {
-        test.skip(true, 'Entrypoint consult is only enabled for SET_5 (user23/user24).');
-      }
-
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
-      await changeUserState(testManager.agent2Page, USER_STATES.MEETING);
       await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTaskDiv.waitFor({state: 'visible', timeout: 80000});
@@ -196,7 +191,6 @@ export default function createAdvancedTaskControlsTests() {
       await expect(testManager.agent1Page.locator('#consult-search')).toBeVisible();
       await testManager.agent1Page.getByRole('button', {name: 'Entry Point'}).click();
 
-      console.log('PW_ENTRYPOINT_NAME:', process.env.PW_ENTRYPOINT_NAME);
       await consultOrTransfer(testManager.agent1Page, 'entryPoint', 'consult', process.env.PW_ENTRYPOINT_NAME!);
       await expect(testManager.agent1Page.getByTestId('cancel-consult-btn')).toBeVisible();
       await testManager.agent1Page.waitForTimeout(1000);
