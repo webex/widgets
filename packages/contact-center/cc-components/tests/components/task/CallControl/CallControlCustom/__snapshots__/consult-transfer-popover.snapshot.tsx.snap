@@ -6,20 +6,16 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
 >
   <mdc-text
     class="md-text-wrapper agent-popover-title"
-    style="margin: 0px;"
     tagname="h3"
     type="body-large-bold"
   >
     Select an Agent
   </mdc-text>
-  <div
-    style="margin: 8px 0px;"
-  >
+  <div>
     <div
-      class="md-text-input-wrapper"
+      class="md-text-input-wrapper consult-search-input"
       data-focus="false"
       data-level="none"
-      style="width: 100%;"
     >
       <div
         class="md-text-input-container"
@@ -40,12 +36,12 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
     </div>
   </div>
   <div
-    style="margin: 8px 0px; display: flex; flex-direction: row; gap: 8px; flex-wrap: wrap;"
+    class="consult-category-buttons"
   >
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-standard"
       data-md-event-key="md-button-45"
       data-md-keyboard-key="agents"
       id="md-button-45"
@@ -63,7 +59,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-standard"
       data-md-event-key="md-button-46"
       data-md-keyboard-key="queues"
       id="md-button-46"
@@ -81,7 +77,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-wide"
       data-md-event-key="md-button-47"
       data-md-keyboard-key="dial-number"
       id="md-button-47"
@@ -99,7 +95,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-wide"
       data-md-event-key="md-button-48"
       data-md-keyboard-key="entry-point"
       id="md-button-48"
@@ -119,7 +115,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
     class="agent-list md-list-wrapper"
   >
     <div
-      style="cursor: pointer; pointer-events: auto;"
+      class="consult-list-item-wrapper"
     >
       <li
         aria-label="Agent One"
@@ -194,7 +190,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
       </li>
     </div>
     <div
-      style="cursor: pointer; pointer-events: auto;"
+      class="consult-list-item-wrapper"
     >
       <li
         aria-label="Agent Two"
@@ -278,20 +274,16 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
 >
   <mdc-text
     class="md-text-wrapper agent-popover-title"
-    style="margin: 0px;"
     tagname="h3"
     type="body-large-bold"
   >
     Select an Agent
   </mdc-text>
-  <div
-    style="margin: 8px 0px;"
-  >
+  <div>
     <div
-      class="md-text-input-wrapper"
+      class="md-text-input-wrapper consult-search-input"
       data-focus="false"
       data-level="none"
-      style="width: 100%;"
     >
       <div
         class="md-text-input-container"
@@ -312,12 +304,12 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
     </div>
   </div>
   <div
-    style="margin: 8px 0px; display: flex; flex-direction: row; gap: 8px; flex-wrap: wrap;"
+    class="consult-category-buttons"
   >
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-standard"
       data-md-event-key="md-button-49"
       data-md-keyboard-key="agents"
       id="md-button-49"
@@ -335,7 +327,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-standard"
       data-md-event-key="md-button-50"
       data-md-keyboard-key="queues"
       id="md-button-50"
@@ -353,7 +345,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-wide"
       data-md-event-key="md-button-51"
       data-md-keyboard-key="dial-number"
       id="md-button-51"
@@ -371,7 +363,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-wide"
       data-md-event-key="md-button-52"
       data-md-keyboard-key="entry-point"
       id="md-button-52"
@@ -392,7 +384,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
       class="agent-list md-list-wrapper"
     >
       <div
-        style="cursor: pointer; pointer-events: auto;"
+        class="consult-list-item-wrapper"
       >
         <li
           aria-label="Queue One"
@@ -477,20 +469,16 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
 >
   <mdc-text
     class="md-text-wrapper agent-popover-title"
-    style="margin: 0px;"
     tagname="h3"
     type="body-large-bold"
   >
     Select an Agent
   </mdc-text>
-  <div
-    style="margin: 8px 0px;"
-  >
+  <div>
     <div
-      class="md-text-input-wrapper"
+      class="md-text-input-wrapper consult-search-input"
       data-focus="false"
       data-level="none"
-      style="width: 100%;"
     >
       <div
         class="md-text-input-container"
@@ -511,12 +499,12 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
     </div>
   </div>
   <div
-    style="margin: 8px 0px; display: flex; flex-direction: row; gap: 8px; flex-wrap: wrap;"
+    class="consult-category-buttons"
   >
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-standard"
       data-md-event-key="md-button-41"
       data-md-keyboard-key="agents"
       id="md-button-41"
@@ -534,7 +522,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-standard"
       data-md-event-key="md-button-42"
       data-md-keyboard-key="queues"
       id="md-button-42"
@@ -552,7 +540,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-wide"
       data-md-event-key="md-button-43"
       data-md-keyboard-key="dial-number"
       id="md-button-43"
@@ -570,7 +558,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-wide"
       data-md-event-key="md-button-44"
       data-md-keyboard-key="entry-point"
       id="md-button-44"
@@ -591,7 +579,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
       class="agent-list md-list-wrapper"
     >
       <div
-        style="cursor: pointer; pointer-events: auto;"
+        class="consult-list-item-wrapper"
       >
         <li
           aria-label="Queue One"
@@ -676,20 +664,16 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
 >
   <mdc-text
     class="md-text-wrapper agent-popover-title"
-    style="margin: 0px;"
     tagname="h3"
     type="body-large-bold"
   >
     Select an Agent
   </mdc-text>
-  <div
-    style="margin: 8px 0px;"
-  >
+  <div>
     <div
-      class="md-text-input-wrapper"
+      class="md-text-input-wrapper consult-search-input"
       data-focus="false"
       data-level="none"
-      style="width: 100%;"
     >
       <div
         class="md-text-input-container"
@@ -710,12 +694,12 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     </div>
   </div>
   <div
-    style="margin: 8px 0px; display: flex; flex-direction: row; gap: 8px; flex-wrap: wrap;"
+    class="consult-category-buttons"
   >
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-standard"
       data-md-event-key="md-button-1"
       data-md-keyboard-key="agents"
       id="md-button-1"
@@ -733,7 +717,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-standard"
       data-md-event-key="md-button-2"
       data-md-keyboard-key="queues"
       id="md-button-2"
@@ -751,7 +735,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-wide"
       data-md-event-key="md-button-3"
       data-md-keyboard-key="dial-number"
       id="md-button-3"
@@ -769,7 +753,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-wide"
       data-md-event-key="md-button-4"
       data-md-keyboard-key="entry-point"
       id="md-button-4"
@@ -789,7 +773,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     class="agent-list md-list-wrapper"
   >
     <div
-      style="cursor: pointer; pointer-events: auto;"
+      class="consult-list-item-wrapper"
     >
       <li
         aria-label="Agent One"
@@ -864,7 +848,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
       </li>
     </div>
     <div
-      style="cursor: pointer; pointer-events: auto;"
+      class="consult-list-item-wrapper"
     >
       <li
         aria-label="Agent Two"
@@ -948,20 +932,16 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
 >
   <mdc-text
     class="md-text-wrapper agent-popover-title"
-    style="margin: 0px;"
     tagname="h3"
     type="body-large-bold"
   >
     Select an Agent
   </mdc-text>
-  <div
-    style="margin: 8px 0px;"
-  >
+  <div>
     <div
-      class="md-text-input-wrapper"
+      class="md-text-input-wrapper consult-search-input"
       data-focus="false"
       data-level="none"
-      style="width: 100%;"
     >
       <div
         class="md-text-input-container"
@@ -982,12 +962,12 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     </div>
   </div>
   <div
-    style="margin: 8px 0px; display: flex; flex-direction: row; gap: 8px; flex-wrap: wrap;"
+    class="consult-category-buttons"
   >
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-standard"
       data-md-event-key="md-button-37"
       data-md-keyboard-key="agents"
       id="md-button-37"
@@ -1005,7 +985,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-standard"
       data-md-event-key="md-button-38"
       data-md-keyboard-key="queues"
       id="md-button-38"
@@ -1023,7 +1003,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-wide"
       data-md-event-key="md-button-39"
       data-md-keyboard-key="dial-number"
       id="md-button-39"
@@ -1041,7 +1021,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-wide"
       data-md-event-key="md-button-40"
       data-md-keyboard-key="entry-point"
       id="md-button-40"
@@ -1061,7 +1041,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     class="agent-list md-list-wrapper"
   >
     <div
-      style="cursor: pointer; pointer-events: auto;"
+      class="consult-list-item-wrapper"
     >
       <li
         aria-label="Available Agent"
@@ -1136,7 +1116,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
       </li>
     </div>
     <div
-      style="cursor: pointer; pointer-events: auto;"
+      class="consult-list-item-wrapper"
     >
       <li
         aria-label="Busy Agent"
@@ -1211,7 +1191,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
       </li>
     </div>
     <div
-      style="cursor: pointer; pointer-events: auto;"
+      class="consult-list-item-wrapper"
     >
       <li
         aria-label="Idle Agent"
@@ -1295,20 +1275,16 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
 >
   <mdc-text
     class="md-text-wrapper agent-popover-title"
-    style="margin: 0px;"
     tagname="h3"
     type="body-large-bold"
   >
     Select an Agent
   </mdc-text>
-  <div
-    style="margin: 8px 0px;"
-  >
+  <div>
     <div
-      class="md-text-input-wrapper"
+      class="md-text-input-wrapper consult-search-input"
       data-focus="false"
       data-level="none"
-      style="width: 100%;"
     >
       <div
         class="md-text-input-container"
@@ -1329,12 +1305,12 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     </div>
   </div>
   <div
-    style="margin: 8px 0px; display: flex; flex-direction: row; gap: 8px; flex-wrap: wrap;"
+    class="consult-category-buttons"
   >
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-standard"
       data-md-event-key="md-button-21"
       data-md-keyboard-key="agents"
       id="md-button-21"
@@ -1352,7 +1328,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-standard"
       data-md-event-key="md-button-22"
       data-md-keyboard-key="queues"
       disabled=""
@@ -1370,7 +1346,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-wide"
       data-md-event-key="md-button-23"
       data-md-keyboard-key="dial-number"
       id="md-button-23"
@@ -1388,7 +1364,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-wide"
       data-md-event-key="md-button-24"
       data-md-keyboard-key="entry-point"
       id="md-button-24"
@@ -1408,7 +1384,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     class="agent-list md-list-wrapper"
   >
     <div
-      style="cursor: pointer; pointer-events: auto;"
+      class="consult-list-item-wrapper"
     >
       <li
         aria-label="Agent One"
@@ -1483,7 +1459,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
       </li>
     </div>
     <div
-      style="cursor: pointer; pointer-events: auto;"
+      class="consult-list-item-wrapper"
     >
       <li
         aria-label="Agent Two"
@@ -1567,20 +1543,16 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
 >
   <mdc-text
     class="md-text-wrapper agent-popover-title"
-    style="margin: 0px;"
     tagname="h3"
     type="body-large-bold"
   >
     Select an Agent
   </mdc-text>
-  <div
-    style="margin: 8px 0px;"
-  >
+  <div>
     <div
-      class="md-text-input-wrapper"
+      class="md-text-input-wrapper consult-search-input"
       data-focus="false"
       data-level="none"
-      style="width: 100%;"
     >
       <div
         class="md-text-input-container"
@@ -1601,12 +1573,12 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     </div>
   </div>
   <div
-    style="margin: 8px 0px; display: flex; flex-direction: row; gap: 8px; flex-wrap: wrap;"
+    class="consult-category-buttons"
   >
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-standard"
       data-md-event-key="md-button-25"
       data-md-keyboard-key="agents"
       id="md-button-25"
@@ -1624,7 +1596,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-standard"
       data-md-event-key="md-button-26"
       data-md-keyboard-key="queues"
       id="md-button-26"
@@ -1642,7 +1614,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-wide"
       data-md-event-key="md-button-27"
       data-md-keyboard-key="dial-number"
       id="md-button-27"
@@ -1660,7 +1632,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-wide"
       data-md-event-key="md-button-28"
       data-md-keyboard-key="entry-point"
       id="md-button-28"
@@ -1697,20 +1669,16 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
 >
   <mdc-text
     class="md-text-wrapper agent-popover-title"
-    style="margin: 0px;"
     tagname="h3"
     type="body-large-bold"
   >
     Choose Transfer Target
   </mdc-text>
-  <div
-    style="margin: 8px 0px;"
-  >
+  <div>
     <div
-      class="md-text-input-wrapper"
+      class="md-text-input-wrapper consult-search-input"
       data-focus="false"
       data-level="none"
-      style="width: 100%;"
     >
       <div
         class="md-text-input-container"
@@ -1731,12 +1699,12 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     </div>
   </div>
   <div
-    style="margin: 8px 0px; display: flex; flex-direction: row; gap: 8px; flex-wrap: wrap;"
+    class="consult-category-buttons"
   >
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-standard"
       data-md-event-key="md-button-9"
       data-md-keyboard-key="agents"
       id="md-button-9"
@@ -1754,7 +1722,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-standard"
       data-md-event-key="md-button-10"
       data-md-keyboard-key="queues"
       id="md-button-10"
@@ -1772,7 +1740,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-wide"
       data-md-event-key="md-button-11"
       data-md-keyboard-key="dial-number"
       id="md-button-11"
@@ -1790,7 +1758,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-wide"
       data-md-event-key="md-button-12"
       data-md-keyboard-key="entry-point"
       id="md-button-12"
@@ -1810,7 +1778,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     class="agent-list md-list-wrapper"
   >
     <div
-      style="cursor: pointer; pointer-events: auto;"
+      class="consult-list-item-wrapper"
     >
       <li
         aria-label="Agent One"
@@ -1885,7 +1853,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
       </li>
     </div>
     <div
-      style="cursor: pointer; pointer-events: auto;"
+      class="consult-list-item-wrapper"
     >
       <li
         aria-label="Agent Two"
@@ -1969,20 +1937,16 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
 >
   <mdc-text
     class="md-text-wrapper agent-popover-title"
-    style="margin: 0px;"
     tagname="h3"
     type="body-large-bold"
   >
     Select an Agent
   </mdc-text>
-  <div
-    style="margin: 8px 0px;"
-  >
+  <div>
     <div
-      class="md-text-input-wrapper"
+      class="md-text-input-wrapper consult-search-input"
       data-focus="false"
       data-level="none"
-      style="width: 100%;"
     >
       <div
         class="md-text-input-container"
@@ -2003,12 +1967,12 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     </div>
   </div>
   <div
-    style="margin: 8px 0px; display: flex; flex-direction: row; gap: 8px; flex-wrap: wrap;"
+    class="consult-category-buttons"
   >
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-standard"
       data-md-event-key="md-button-13"
       data-md-keyboard-key="agents"
       id="md-button-13"
@@ -2026,7 +1990,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-standard"
       data-md-event-key="md-button-14"
       data-md-keyboard-key="queues"
       id="md-button-14"
@@ -2044,7 +2008,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-wide"
       data-md-event-key="md-button-15"
       data-md-keyboard-key="dial-number"
       id="md-button-15"
@@ -2062,7 +2026,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-wide"
       data-md-event-key="md-button-16"
       data-md-keyboard-key="entry-point"
       id="md-button-16"
@@ -2099,20 +2063,16 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
 >
   <mdc-text
     class="md-text-wrapper agent-popover-title"
-    style="margin: 0px;"
     tagname="h3"
     type="body-large-bold"
   >
     Select an Agent
   </mdc-text>
-  <div
-    style="margin: 8px 0px;"
-  >
+  <div>
     <div
-      class="md-text-input-wrapper"
+      class="md-text-input-wrapper consult-search-input"
       data-focus="false"
       data-level="none"
-      style="width: 100%;"
     >
       <div
         class="md-text-input-container"
@@ -2133,12 +2093,12 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     </div>
   </div>
   <div
-    style="margin: 8px 0px; display: flex; flex-direction: row; gap: 8px; flex-wrap: wrap;"
+    class="consult-category-buttons"
   >
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-standard"
       data-md-event-key="md-button-17"
       data-md-keyboard-key="agents"
       id="md-button-17"
@@ -2156,7 +2116,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-standard"
       data-md-event-key="md-button-18"
       data-md-keyboard-key="queues"
       id="md-button-18"
@@ -2174,7 +2134,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-wide"
       data-md-event-key="md-button-19"
       data-md-keyboard-key="dial-number"
       id="md-button-19"
@@ -2192,7 +2152,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-wide"
       data-md-event-key="md-button-20"
       data-md-keyboard-key="entry-point"
       id="md-button-20"
@@ -2217,20 +2177,16 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
 >
   <mdc-text
     class="md-text-wrapper agent-popover-title"
-    style="margin: 0px;"
     tagname="h3"
     type="body-large-bold"
   >
     Select an Agent
   </mdc-text>
-  <div
-    style="margin: 8px 0px;"
-  >
+  <div>
     <div
-      class="md-text-input-wrapper"
+      class="md-text-input-wrapper consult-search-input"
       data-focus="false"
       data-level="none"
-      style="width: 100%;"
     >
       <div
         class="md-text-input-container"
@@ -2251,12 +2207,12 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     </div>
   </div>
   <div
-    style="margin: 8px 0px; display: flex; flex-direction: row; gap: 8px; flex-wrap: wrap;"
+    class="consult-category-buttons"
   >
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-standard"
       data-md-event-key="md-button-29"
       data-md-keyboard-key="agents"
       id="md-button-29"
@@ -2274,7 +2230,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-standard"
       data-md-event-key="md-button-30"
       data-md-keyboard-key="queues"
       id="md-button-30"
@@ -2292,7 +2248,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-wide"
       data-md-event-key="md-button-31"
       data-md-keyboard-key="dial-number"
       id="md-button-31"
@@ -2310,7 +2266,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-wide"
       data-md-event-key="md-button-32"
       data-md-keyboard-key="entry-point"
       id="md-button-32"
@@ -2330,7 +2286,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     class="agent-list md-list-wrapper"
   >
     <div
-      style="cursor: pointer; pointer-events: auto;"
+      class="consult-list-item-wrapper"
     >
       <li
         aria-label="Single Agent"
@@ -2414,20 +2370,16 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
 >
   <mdc-text
     class="md-text-wrapper agent-popover-title"
-    style="margin: 0px;"
     tagname="h3"
     type="body-large-bold"
   >
     Select an Agent
   </mdc-text>
-  <div
-    style="margin: 8px 0px;"
-  >
+  <div>
     <div
-      class="md-text-input-wrapper"
+      class="md-text-input-wrapper consult-search-input"
       data-focus="false"
       data-level="none"
-      style="width: 100%;"
     >
       <div
         class="md-text-input-container"
@@ -2448,12 +2400,12 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     </div>
   </div>
   <div
-    style="margin: 8px 0px; display: flex; flex-direction: row; gap: 8px; flex-wrap: wrap;"
+    class="consult-category-buttons"
   >
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-standard"
       data-md-event-key="md-button-33"
       data-md-keyboard-key="agents"
       id="md-button-33"
@@ -2471,7 +2423,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-standard"
       data-md-event-key="md-button-34"
       data-md-keyboard-key="queues"
       id="md-button-34"
@@ -2489,7 +2441,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-wide"
       data-md-event-key="md-button-35"
       data-md-keyboard-key="dial-number"
       id="md-button-35"
@@ -2507,7 +2459,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-wide"
       data-md-event-key="md-button-36"
       data-md-keyboard-key="entry-point"
       id="md-button-36"
@@ -2528,7 +2480,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
       class="agent-list md-list-wrapper"
     >
       <div
-        style="cursor: pointer; pointer-events: auto;"
+        class="consult-list-item-wrapper"
       >
         <li
           aria-label="Single Queue"
@@ -2613,20 +2565,16 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
 >
   <mdc-text
     class="md-text-wrapper agent-popover-title"
-    style="margin: 0px;"
     tagname="h3"
     type="body-large-bold"
   >
     Select an Agent
   </mdc-text>
-  <div
-    style="margin: 8px 0px;"
-  >
+  <div>
     <div
-      class="md-text-input-wrapper"
+      class="md-text-input-wrapper consult-search-input"
       data-focus="false"
       data-level="none"
-      style="width: 100%;"
     >
       <div
         class="md-text-input-container"
@@ -2647,12 +2595,12 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     </div>
   </div>
   <div
-    style="margin: 8px 0px; display: flex; flex-direction: row; gap: 8px; flex-wrap: wrap;"
+    class="consult-category-buttons"
   >
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-standard"
       data-md-event-key="md-button-5"
       data-md-keyboard-key="agents"
       id="md-button-5"
@@ -2670,7 +2618,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-standard"
       data-md-event-key="md-button-6"
       data-md-keyboard-key="queues"
       id="md-button-6"
@@ -2688,7 +2636,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-wide"
       data-md-event-key="md-button-7"
       data-md-keyboard-key="dial-number"
       id="md-button-7"
@@ -2706,7 +2654,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-wide"
       data-md-event-key="md-button-8"
       data-md-keyboard-key="entry-point"
       id="md-button-8"
@@ -2726,7 +2674,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     class="agent-list md-list-wrapper"
   >
     <div
-      style="cursor: pointer; pointer-events: auto;"
+      class="consult-list-item-wrapper"
     >
       <li
         aria-label="Agent One"
@@ -2801,7 +2749,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
       </li>
     </div>
     <div
-      style="cursor: pointer; pointer-events: auto;"
+      class="consult-list-item-wrapper"
     >
       <li
         aria-label="Agent Two"
@@ -2885,20 +2833,16 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
 >
   <mdc-text
     class="md-text-wrapper agent-popover-title"
-    style="margin: 0px;"
     tagname="h3"
     type="body-large-bold"
   >
     Select an Agent
   </mdc-text>
-  <div
-    style="margin: 8px 0px;"
-  >
+  <div>
     <div
-      class="md-text-input-wrapper"
+      class="md-text-input-wrapper consult-search-input"
       data-focus="false"
       data-level="none"
-      style="width: 100%;"
     >
       <div
         class="md-text-input-container"
@@ -2919,12 +2863,12 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
     </div>
   </div>
   <div
-    style="margin: 8px 0px; display: flex; flex-direction: row; gap: 8px; flex-wrap: wrap;"
+    class="consult-category-buttons"
   >
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-standard"
       data-md-event-key="md-button-57"
       data-md-keyboard-key="agents"
       id="md-button-57"
@@ -2942,7 +2886,7 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-standard"
       data-md-event-key="md-button-58"
       data-md-keyboard-key="queues"
       id="md-button-58"
@@ -2960,7 +2904,7 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-wide"
       data-md-event-key="md-button-59"
       data-md-keyboard-key="dial-number"
       id="md-button-59"
@@ -2978,7 +2922,7 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-wide"
       data-md-event-key="md-button-60"
       data-md-keyboard-key="entry-point"
       id="md-button-60"
@@ -2998,7 +2942,7 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
     class="agent-list md-list-wrapper"
   >
     <div
-      style="cursor: pointer; pointer-events: auto;"
+      class="consult-list-item-wrapper"
     >
       <li
         aria-label="New Agent One"
@@ -3078,20 +3022,16 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
 >
   <mdc-text
     class="md-text-wrapper agent-popover-title"
-    style="margin: 0px;"
     tagname="h3"
     type="body-large-bold"
   >
     New Heading
   </mdc-text>
-  <div
-    style="margin: 8px 0px;"
-  >
+  <div>
     <div
-      class="md-text-input-wrapper"
+      class="md-text-input-wrapper consult-search-input"
       data-focus="false"
       data-level="none"
-      style="width: 100%;"
     >
       <div
         class="md-text-input-container"
@@ -3112,12 +3052,12 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
     </div>
   </div>
   <div
-    style="margin: 8px 0px; display: flex; flex-direction: row; gap: 8px; flex-wrap: wrap;"
+    class="consult-category-buttons"
   >
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-standard"
       data-md-event-key="md-button-53"
       data-md-keyboard-key="agents"
       id="md-button-53"
@@ -3135,7 +3075,7 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-standard"
       data-md-event-key="md-button-54"
       data-md-keyboard-key="queues"
       id="md-button-54"
@@ -3153,7 +3093,7 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-wide"
       data-md-event-key="md-button-55"
       data-md-keyboard-key="dial-number"
       id="md-button-55"
@@ -3171,7 +3111,7 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-wide"
       data-md-event-key="md-button-56"
       data-md-keyboard-key="entry-point"
       id="md-button-56"
@@ -3191,7 +3131,7 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
     class="agent-list md-list-wrapper"
   >
     <div
-      style="cursor: pointer; pointer-events: auto;"
+      class="consult-list-item-wrapper"
     >
       <li
         aria-label="Agent One"
@@ -3266,7 +3206,7 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
       </li>
     </div>
     <div
-      style="cursor: pointer; pointer-events: auto;"
+      class="consult-list-item-wrapper"
     >
       <li
         aria-label="Agent Two"
@@ -3350,20 +3290,16 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
 >
   <mdc-text
     class="md-text-wrapper agent-popover-title"
-    style="margin: 0px;"
     tagname="h3"
     type="body-large-bold"
   >
     Select an Agent
   </mdc-text>
-  <div
-    style="margin: 8px 0px;"
-  >
+  <div>
     <div
-      class="md-text-input-wrapper"
+      class="md-text-input-wrapper consult-search-input"
       data-focus="false"
       data-level="none"
-      style="width: 100%;"
     >
       <div
         class="md-text-input-container"
@@ -3384,12 +3320,12 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
     </div>
   </div>
   <div
-    style="margin: 8px 0px; display: flex; flex-direction: row; gap: 8px; flex-wrap: wrap;"
+    class="consult-category-buttons"
   >
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-standard"
       data-md-event-key="md-button-61"
       data-md-keyboard-key="agents"
       id="md-button-61"
@@ -3407,7 +3343,7 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-standard"
       data-md-event-key="md-button-62"
       data-md-keyboard-key="queues"
       id="md-button-62"
@@ -3425,7 +3361,7 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-wide"
       data-md-event-key="md-button-63"
       data-md-keyboard-key="dial-number"
       id="md-button-63"
@@ -3443,7 +3379,7 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
     <button
       alt=""
       aria-labelledby=""
-      class="md-button md-button--36"
+      class="md-button md-button--36 consult-category-button-wide"
       data-md-event-key="md-button-64"
       data-md-keyboard-key="entry-point"
       id="md-button-64"
@@ -3464,7 +3400,7 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
       class="agent-list md-list-wrapper"
     >
       <div
-        style="cursor: pointer; pointer-events: auto;"
+        class="consult-list-item-wrapper"
       >
         <li
           aria-label="New Queue One"

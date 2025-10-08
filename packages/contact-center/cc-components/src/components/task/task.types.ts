@@ -413,11 +413,11 @@ export interface ControlProps {
   cancelAutoWrapup: () => void;
 
   /** Fetch paginated address book entries for dial numbers */
-  getAddressBookEntries?: FetchFunction<AddressBookEntry>;
+  getAddressBookEntries?: FetchPaginatedList<AddressBookEntry>;
   /** Fetch paginated entry points */
-  getEntryPoints?: FetchFunction<EntryPointRecord>;
+  getEntryPoints?: FetchPaginatedList<EntryPointRecord>;
   /** Fetch paginated queues (filtered by media type in store) */
-  getQueuesFetcher?: FetchFunction<ContactServiceQueue>;
+  getQueuesFetcher?: FetchPaginatedList<ContactServiceQueue>;
 
   /**
    * Options to configure consult/transfer popover behavior.
@@ -527,9 +527,9 @@ export interface ConsultTransferPopoverComponentProps {
   heading: string;
   buttonIcon: string;
   buddyAgents: BuddyDetails[];
-  getAddressBookEntries?: FetchFunction<AddressBookEntry>;
-  getEntryPoints?: FetchFunction<EntryPointRecord>;
-  getQueues?: FetchFunction<ContactServiceQueue>;
+  getAddressBookEntries?: FetchPaginatedList<AddressBookEntry>;
+  getEntryPoints?: FetchPaginatedList<EntryPointRecord>;
+  getQueues?: FetchPaginatedList<ContactServiceQueue>;
   onAgentSelect?: (agentId: string, agentName: string) => void;
   onQueueSelect?: (queueId: string, queueName: string) => void;
   onEntryPointSelect?: (entryPointId: string, entryPointName: string) => void;
@@ -691,7 +691,7 @@ export interface TimerUIState {
 /**
  * Type for fetch function
  */
-export type FetchFunction<T> = (params: {
+export type FetchPaginatedList<T> = (params: {
   page: number;
   pageSize: number;
   search?: string;
@@ -700,7 +700,7 @@ export type FetchFunction<T> = (params: {
 /**
  * Type for transform function
  */
-export type TransformFunction<T, U> = (item: T, page: number, index: number) => U;
+export type TransformPaginatedData<T, U> = (item: T, page: number, index: number) => U;
 
 /**
  * Options to configure Consult/Transfer popover behavior and visibility.

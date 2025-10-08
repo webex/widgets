@@ -699,14 +699,6 @@ class StoreWrapper implements IStoreWrapper {
     }
   };
 
-  // Deprecated: Use getQueues (paginated) instead
-  getQueuesPaginated = async (
-    mediaType: string = this.currentTask.data.interaction.mediaType ?? 'TELEPHONY',
-    params?: ContactServiceQueueSearchParams
-  ) => {
-    return this.getQueues(mediaType, params);
-  };
-
   getEntryPoints = async (params?: EntryPointSearchParams): Promise<EntryPointListResponse> => {
     try {
       const response: EntryPointListResponse = await this.store.cc.getEntryPoints(params);

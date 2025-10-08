@@ -1,17 +1,10 @@
-import React, {useState, useRef, useEffect, useCallback} from 'react';
+import React from 'react';
 import {Text, ListNext, TextInput, Button} from '@momentum-ui/react-collaboration';
 import ConsultTransferListComponent from './consult-transfer-list-item';
 import {ConsultTransferPopoverComponentProps} from '../../task.types';
-import {AddressBookEntry, EntryPointRecord, ContactServiceQueue} from '@webex/cc-store';
 import ConsultTransferEmptyState from './consult-transfer-empty-state';
-import {
-  isAgentsEmpty,
-  handleAgentSelection,
-  handleQueueSelection,
-  debounce,
-  usePaginatedData,
-} from './call-control-custom.utils';
-type CategoryType = 'Agents' | 'Queues' | 'Dial Number' | 'Entry Point';
+import {isAgentsEmpty, handleAgentSelection, handleQueueSelection} from './call-control-custom.utils';
+import {useConsultTransferPopover} from './consult-transfer-popover-hooks';
 
 const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentProps> = ({
   heading,
@@ -29,9 +22,32 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
   logger,
 }) => {
   const {showDialNumberTab = true, showEntryPointTab = true} = consultTransferOptions || {};
-  const [selectedCategory, setSelectedCategory] = useState<CategoryType>('Agents');
-  const [searchQuery, setSearchQuery] = useState('');
-  const loadMoreRef = useRef<HTMLDivElement>(null);
+  const {
+    selectedCategory,
+    searchQuery,
+    loadMoreRef,
+    dialNumbers,
+    hasMoreDialNumbers,
+    loadingDialNumbers,
+    entryPoints,
+    hasMoreEntryPoints,
+    loadingEntryPoints,
+    queuesData,
+    hasMoreQueues,
+    loadingQueues,
+    handleSearchChange,
+    handleAgentsClick,
+    handleQueuesClick,
+    handleDialNumberClick,
+    handleEntryPointClick,
+  } = useConsultTransferPopover({
+    showDialNumberTab,
+    showEntryPointTab,
+    getAddressBookEntries,
+    getEntryPoints,
+    getQueues,
+    logger,
+  });
 
   const noAgents = isAgentsEmpty(buddyAgents, logger);
 
@@ -41,7 +57,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
   ) => (
     <ListNext listSize={items.length} className="agent-list">
       {items.map((item) => (
-        <div key={item.id} onMouseDown={(e) => e.stopPropagation()} style={{cursor: 'pointer', pointerEvents: 'auto'}}>
+        <div key={item.id} onMouseDown={(e) => e.stopPropagation()} className="consult-list-item-wrapper">
           <ConsultTransferListComponent
             title={item.name}
             subtitle={item.number}
@@ -59,157 +75,6 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
     </ListNext>
   );
 
-  const {
-    data: dialNumbers,
-    page: dialNumbersPage,
-    hasMore: hasMoreDialNumbers,
-    loading: loadingDialNumbers,
-    loadData: loadDialNumbers,
-    reset: resetDialNumbers,
-  } = usePaginatedData<AddressBookEntry, AddressBookEntry>(
-    getAddressBookEntries,
-    (entry) => ({
-      id: entry.id,
-      name: entry.name,
-      number: entry.number,
-      organizationId: entry.organizationId,
-      version: entry.version,
-      createdTime: entry.createdTime,
-      lastUpdatedTime: entry.lastUpdatedTime,
-    }),
-    'Dial Numbers',
-    logger
-  );
-
-  const {
-    data: entryPoints,
-    page: entryPointsPage,
-    hasMore: hasMoreEntryPoints,
-    loading: loadingEntryPoints,
-    loadData: loadEntryPoints,
-    reset: resetEntryPoints,
-  } = usePaginatedData<EntryPointRecord, {id: string; name: string}>(
-    getEntryPoints,
-    (entry) => ({id: entry.id, name: entry.name}),
-    'Entry Points',
-    logger
-  );
-
-  const {
-    data: queuesData,
-    page: queuesPage,
-    hasMore: hasMoreQueues,
-    loading: loadingQueues,
-    loadData: loadQueues,
-    reset: resetQueues,
-  } = usePaginatedData<ContactServiceQueue, {id: string; name: string; description?: string}>(
-    getQueues,
-    (entry) => ({id: entry.id, name: entry.name, description: entry.description}),
-    'Queues',
-    logger
-  );
-
-  const loadNextPage = useCallback(() => {
-    if (selectedCategory === 'Dial Number' && hasMoreDialNumbers && !loadingDialNumbers) {
-      loadDialNumbers(dialNumbersPage + 1, searchQuery);
-    } else if (selectedCategory === 'Entry Point' && hasMoreEntryPoints && !loadingEntryPoints) {
-      loadEntryPoints(entryPointsPage + 1, searchQuery);
-    } else if (selectedCategory === 'Queues' && hasMoreQueues && !loadingQueues) {
-      loadQueues(queuesPage + 1, searchQuery);
-    }
-  }, [
-    selectedCategory,
-    hasMoreDialNumbers,
-    hasMoreEntryPoints,
-    hasMoreQueues,
-    loadingDialNumbers,
-    loadingEntryPoints,
-    loadingQueues,
-    dialNumbersPage,
-    entryPointsPage,
-    queuesPage,
-    searchQuery,
-    loadDialNumbers,
-    loadEntryPoints,
-    loadQueues,
-  ]);
-
-  const debouncedSearchRef = useRef<ReturnType<typeof debounce>>();
-  if (!debouncedSearchRef.current) {
-    debouncedSearchRef.current = debounce((query: string, category: CategoryType) => {
-      if (query.length === 0 || query.length >= 2) {
-        if (category === 'Dial Number') {
-          loadDialNumbers(0, query, true);
-        } else if (category === 'Entry Point') {
-          loadEntryPoints(0, query, true);
-        } else if (category === 'Queues') {
-          loadQueues(0, query, true);
-        }
-      }
-    }, 500);
-  }
-
-  useEffect(() => {
-    return () => {
-      debouncedSearchRef.current = undefined;
-    };
-  }, []);
-
-  const handleSearchChange = useCallback(
-    (value: string) => {
-      setSearchQuery(value);
-      if (selectedCategory !== 'Agents') {
-        debouncedSearchRef.current?.(value, selectedCategory);
-      }
-    },
-    [selectedCategory]
-  );
-
-  const handleCategoryChange = useCallback(
-    (category: CategoryType) => {
-      setSelectedCategory(category);
-      setSearchQuery('');
-      resetDialNumbers();
-      resetEntryPoints();
-      resetQueues();
-    },
-    [resetDialNumbers, resetEntryPoints, resetQueues]
-  );
-
-  const createCategoryClickHandler = (category: CategoryType) => () => handleCategoryChange(category);
-  const handleAgentsClick = createCategoryClickHandler('Agents');
-  const handleQueuesClick = createCategoryClickHandler('Queues');
-  const handleDialNumberClick = createCategoryClickHandler('Dial Number');
-  const handleEntryPointClick = createCategoryClickHandler('Entry Point');
-
-  useEffect(() => {
-    const loadMoreElement = loadMoreRef.current;
-    if (!loadMoreElement) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const [entry] = entries;
-        if (entry.isIntersecting) {
-          loadNextPage();
-        }
-      },
-      {threshold: 1.0}
-    );
-    observer.observe(loadMoreElement);
-    return () => {
-      observer.unobserve(loadMoreElement);
-    };
-  }, [loadNextPage]);
-
-  useEffect(() => {
-    if (selectedCategory === 'Dial Number' && showDialNumberTab && dialNumbers.length === 0) {
-      loadDialNumbers(0, '', true);
-    } else if (selectedCategory === 'Entry Point' && showEntryPointTab && entryPoints.length === 0) {
-      loadEntryPoints(0, '', true);
-    } else if (selectedCategory === 'Queues' && queuesData.length === 0) {
-      loadQueues(0, '', true);
-    }
-  }, [selectedCategory]);
-
   const noQueues = queuesData.length === 0;
   const noDialNumbers = !showDialNumberTab || dialNumbers.length === 0;
   const noEntryPoints = !showEntryPointTab || entryPoints.length === 0;
@@ -218,11 +83,11 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
 
   return (
     <div className="agent-popover-content">
-      <Text tagName="h3" className="agent-popover-title" type="body-large-bold" style={{margin: 0}}>
+      <Text tagName="h3" className="agent-popover-title" type="body-large-bold">
         {heading}
       </Text>
 
-      <div style={{margin: '8px 0'}}>
+      <div>
         <TextInput
           id="consult-search"
           placeholder="Search..."
@@ -230,16 +95,16 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
           onChange={(value: string) => handleSearchChange(value)}
           clearAriaLabel="Clear search"
           aria-labelledby="consult-search-label"
-          style={{width: '100%'}}
+          className="consult-search-input"
         />
       </div>
 
-      <div style={{margin: '8px 0', display: 'flex', flexDirection: 'row', gap: '8px', flexWrap: 'wrap'}}>
+      <div className="consult-category-buttons">
         <Button
           variant={selectedCategory === 'Agents' ? 'primary' : 'secondary'}
           size="small"
           onClick={handleAgentsClick}
-          style={{minWidth: '80px'}}
+          className="consult-category-button-standard"
         >
           Agents
         </Button>
@@ -248,7 +113,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
           size="small"
           onClick={handleQueuesClick}
           disabled={!allowConsultToQueue}
-          style={{minWidth: '80px'}}
+          className="consult-category-button-standard"
         >
           Queues
         </Button>
@@ -257,7 +122,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
             variant={selectedCategory === 'Dial Number' ? 'primary' : 'secondary'}
             size="small"
             onClick={handleDialNumberClick}
-            style={{minWidth: '100px'}}
+            className="consult-category-button-wide"
           >
             Dial Number
           </Button>
@@ -267,7 +132,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
             variant={selectedCategory === 'Entry Point' ? 'primary' : 'secondary'}
             size="small"
             onClick={handleEntryPointClick}
-            style={{minWidth: '100px'}}
+            className="consult-category-button-wide"
           >
             Entry Point
           </Button>
@@ -290,16 +155,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
             (item) => handleQueueSelection(item.id, item.name, onQueueSelect, logger)
           )}
           {hasMoreQueues && (
-            <div
-              ref={loadMoreRef}
-              style={{
-                padding: '8px',
-                textAlign: 'center',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
+            <div ref={loadMoreRef} className="consult-load-more">
               {loadingQueues ? (
                 <Text tagName="small" type="body-secondary">
                   Loading more queues...
@@ -327,16 +183,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
             }
           )}
           {hasMoreDialNumbers && (
-            <div
-              ref={loadMoreRef}
-              style={{
-                padding: '8px',
-                textAlign: 'center',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
+            <div ref={loadMoreRef} className="consult-load-more">
               {loadingDialNumbers ? (
                 <Text tagName="small" type="body-secondary">
                   Loading more dial numbers...
@@ -362,16 +209,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
             }
           )}
           {hasMoreEntryPoints && (
-            <div
-              ref={loadMoreRef}
-              style={{
-                padding: '8px',
-                textAlign: 'center',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
+            <div ref={loadMoreRef} className="consult-load-more">
               {loadingEntryPoints ? (
                 <Text tagName="small" type="body-secondary">
                   Loading more entry points...

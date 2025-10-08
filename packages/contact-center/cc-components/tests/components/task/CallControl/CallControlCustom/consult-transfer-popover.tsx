@@ -1,5 +1,5 @@
 import React from 'react';
-import {render, fireEvent, waitFor} from '@testing-library/react';
+import {render, fireEvent, waitFor, act} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ConsultTransferPopoverComponent from '../../../../../src/components/task/CallControl/CallControlCustom/consult-transfer-popover';
 import {ContactServiceQueue} from '@webex/cc-store';
@@ -13,12 +13,14 @@ const loggerMock = {
   error: jest.fn(),
 };
 
+let consoleErrorSpy: jest.SpyInstance;
+
 beforeAll(() => {
-  jest.spyOn(console, 'error').mockImplementation(() => {});
+  consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 });
 
 afterAll(() => {
-  (console.error as jest.Mock).mockRestore();
+  consoleErrorSpy.mockRestore();
 });
 
 // This test suite was previously skipped but is now enabled for 100% coverage
@@ -99,8 +101,8 @@ describe('ConsultTransferPopoverComponent', () => {
     expect(listItems[0]).toHaveTextContent('Agent One');
     expect(listItems[1]).toHaveTextContent('Agent Two');
 
-    // Verify list item containers have correct styling
-    const listItemContainers = screen.container.querySelectorAll('[style*="cursor: pointer"]');
+    // Verify list item wrappers render
+    const listItemContainers = screen.container.querySelectorAll('.consult-list-item-wrapper');
     expect(listItemContainers).toHaveLength(2);
   });
 
@@ -113,7 +115,7 @@ describe('ConsultTransferPopoverComponent', () => {
     expect(mockOnAgentSelect).toHaveBeenCalledWith('agent1', 'Agent One');
 
     // Test onMouseDown event handler (covers line 39) - just trigger the event
-    const listItemContainer = screen.container.querySelector('[style*="cursor: pointer"]');
+    const listItemContainer = screen.container.querySelector('.consult-list-item-wrapper');
     fireEvent.mouseDown(listItemContainer!);
 
     // Test tab switching
@@ -250,5 +252,109 @@ describe('ConsultTransferPopoverComponent', () => {
       // Restore original functions
       mockIsAgentsEmpty.mockRestore();
     }
+  });
+
+  describe('Search behavior', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('debounces and triggers queue search on 2+ chars and on clear', async () => {
+      const queuesLoadData = jest.fn();
+      const dialLoadData = jest.fn();
+      const epLoadData = jest.fn();
+
+      const mockUsePaginated = jest
+        .spyOn(utils, 'usePaginatedData')
+        .mockImplementation((_getFn: unknown, _mapper: unknown, label: string) => {
+          const base = {
+            data: [],
+            page: 0,
+            hasMore: false,
+            loading: false,
+            reset: jest.fn(),
+          } as {
+            data: unknown[];
+            page: number;
+            hasMore: boolean;
+            loading: boolean;
+            reset: jest.Mock;
+          } & {loadData?: jest.Mock};
+          if (label === 'Queues') return {...base, loadData: queuesLoadData};
+          if (label === 'Dial Numbers') return {...base, loadData: dialLoadData};
+          if (label === 'Entry Points') return {...base, loadData: epLoadData};
+          return {...base, loadData: jest.fn()};
+        });
+
+      const screen = await render(<ConsultTransferPopoverComponent {...baseProps} />);
+
+      // Switch to Queues category
+      fireEvent.click(screen.getByText('Queues'));
+
+      const input = screen.getByPlaceholderText('Search...') as HTMLInputElement;
+
+      fireEvent.change(input, {target: {value: 'q'}});
+      await act(async () => {
+        jest.advanceTimersByTime(500);
+      });
+      const initialCalls = queuesLoadData.mock.calls.length;
+      expect(initialCalls).toBeGreaterThanOrEqual(1);
+
+      fireEvent.change(input, {target: {value: 'qu'}});
+      await act(async () => {
+        jest.advanceTimersByTime(500);
+      });
+      const afterTwoChars = queuesLoadData.mock.calls.length;
+      expect(queuesLoadData).toHaveBeenCalledWith(0, 'qu', true);
+      expect(afterTwoChars).toBe(initialCalls + 1);
+
+      fireEvent.change(input, {target: {value: ''}});
+      await act(async () => {
+        jest.advanceTimersByTime(500);
+      });
+      expect(queuesLoadData).toHaveBeenCalledWith(0, '', true);
+      expect(queuesLoadData.mock.calls.length).toBe(afterTwoChars + 1);
+
+      // Ensure only queues loader was used
+      expect(dialLoadData).not.toHaveBeenCalled();
+      expect(epLoadData).not.toHaveBeenCalled();
+
+      mockUsePaginated.mockRestore();
+    });
+
+    it('does not trigger search when category is Agents', async () => {
+      const queuesLoadData = jest.fn();
+      const mockUsePaginated = jest
+        .spyOn(utils, 'usePaginatedData')
+        .mockImplementation((_getFn: unknown, _mapper: unknown, label: string) => {
+          const base = {
+            data: [] as unknown[],
+            page: 0,
+            hasMore: false,
+            loading: false,
+            reset: jest.fn(),
+          } as {data: unknown[]; page: number; hasMore: boolean; loading: boolean; reset: jest.Mock} & {
+            loadData?: jest.Mock;
+          };
+          if (label === 'Queues') return {...base, loadData: queuesLoadData};
+          return {...base, loadData: jest.fn()};
+        });
+
+      const screen = await render(<ConsultTransferPopoverComponent {...baseProps} />);
+
+      // Default category is Agents
+      const input = screen.getByPlaceholderText('Search...') as HTMLInputElement;
+      fireEvent.change(input, {target: {value: 'ab'}});
+      await act(async () => {
+        jest.advanceTimersByTime(500);
+      });
+      expect(queuesLoadData).not.toHaveBeenCalled();
+
+      mockUsePaginated.mockRestore();
+    });
   });
 });

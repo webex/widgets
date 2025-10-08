@@ -1,7 +1,7 @@
 import {BuddyDetails, ContactServiceQueue, ILogger} from '@webex/cc-store';
 import {useState, useCallback} from 'react';
 import {MUTE_CALL, UNMUTE_CALL} from '../../constants';
-import {FetchFunction, TransformFunction} from '../../task.types';
+import {FetchPaginatedList, TransformPaginatedData} from '../../task.types';
 
 /**
  * Interface for button configuration
@@ -659,8 +659,8 @@ export const debounce = <T extends (...args: unknown[]) => unknown>(
 };
 
 export const usePaginatedData = <T, U>(
-  fetchFunction: FetchFunction<T> | undefined,
-  transformFunction: TransformFunction<T, U>,
+  fetchFunction: FetchPaginatedList<T> | undefined,
+  transformFunction: TransformPaginatedData<T, U>,
   categoryName: string,
   logger?
 ) => {
