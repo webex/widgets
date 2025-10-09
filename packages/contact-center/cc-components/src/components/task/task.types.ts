@@ -10,6 +10,12 @@ import {
 
 type Enum<T extends Record<string, unknown>> = T[keyof T];
 
+export type Participant = {
+  id: string;
+  pType: 'Customer' | 'Agent' | string;
+  name?: string;
+};
+
 /**
  * Interface representing the TaskProps of a user.
  */
@@ -425,6 +431,11 @@ export interface ControlProps {
    * Function to cancel the auto wrap-up timer.
    */
   cancelAutoWrapup: () => void;
+
+  /**
+   * List of participants in the conference excluding the agent themselves.
+   */
+  conferenceParticipants: Participant[];
 }
 
 export type CallControlComponentProps = Pick<
@@ -472,6 +483,7 @@ export type CallControlComponentProps = Pick<
   | 'logger'
   | 'secondsUntilAutoWrapup'
   | 'cancelAutoWrapup'
+  | 'conferenceParticipants'
 >;
 
 /**

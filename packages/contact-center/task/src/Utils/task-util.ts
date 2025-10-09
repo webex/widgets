@@ -1,6 +1,7 @@
 import {ILogger} from '@webex/cc-store';
 import {ITask} from '@webex/contact-center';
 import {CUSTOMER, SUPERVISOR, VVA} from './constants';
+import {Participant} from '@webex/cc-components';
 
 /**
  * This function determines the visibility of various controls based on the task's data.
@@ -114,4 +115,33 @@ export const getIsConferenceInProgress = (task: ITask): boolean => {
   }
 
   return agentParticipants.size >= 2;
+};
+
+export const getConferenceParticipants = (task: ITask, agentId: string): Participant[] => {
+  const participantsList: Participant[] = [];
+  const mediaMainCall = task?.data?.interaction?.media[task?.data?.interactionId];
+  const participantsInMainCall = new Set(mediaMainCall?.participants);
+  const participants = task?.data?.interaction?.participants;
+
+  if (participantsInMainCall.size > 0) {
+    participantsInMainCall.forEach((participantId: string) => {
+      const participant = participants[participantId];
+      if (
+        participant &&
+        participant.pType !== CUSTOMER &&
+        participant.pType !== SUPERVISOR &&
+        !participant.hasLeft &&
+        participant.pType !== VVA &&
+        participant.id !== agentId
+      ) {
+        participantsList.push({
+          id: participant.id,
+          pType: participant.pType,
+          name: participant.name,
+        });
+      }
+    });
+  }
+
+  return participantsList;
 };

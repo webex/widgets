@@ -1,8 +1,9 @@
 import {useEffect, useCallback, useState, useRef, useMemo} from 'react';
 import {ITask} from '@webex/contact-center';
-import {useCallControlProps, UseTaskListProps, UseTaskProps, Participant, useOutdialCallProps} from './task.types';
+import {useCallControlProps, UseTaskListProps, UseTaskProps, useOutdialCallProps} from './task.types';
 import store, {TASK_EVENTS, BuddyDetails, DestinationType, ContactServiceQueue} from '@webex/cc-store';
-import {findHoldTimestamp, getControlsVisibility} from './Utils/task-util';
+import {findHoldTimestamp, getConferenceParticipants, getControlsVisibility} from './Utils/task-util';
+import {Participant} from '@webex/cc-components';
 
 const ENGAGED_LABEL = 'ENGAGED';
 const ENGAGED_USERNAME = 'Engaged';
@@ -284,6 +285,7 @@ export const useCallControl = (props: useCallControlProps) => {
   const [secondsUntilAutoWrapup, setsecondsUntilAutoWrapup] = useState<number | null>(null);
   const workerRef = useRef<Worker | null>(null);
   const [lastTargetType, setLastTargetType] = useState<'agent' | 'queue'>('agent');
+  const [conferenceParticipants, setConferenceParticipants] = useState<Participant[]>([]);
 
   const workerScript = `
     let intervalId = null;
@@ -348,6 +350,13 @@ export const useCallControl = (props: useCallControlProps) => {
       }
     };
   }, [currentTask?.data?.interaction]);
+
+  useEffect(() => {
+    if (currentTask && store?.cc?.agentConfig?.agentId) {
+      const participants = getConferenceParticipants(currentTask, store.cc.agentConfig.agentId);
+      setConferenceParticipants(participants);
+    }
+  }, [currentTask]);
   // Function to extract consulting agent information
   const extractConsultingAgent = useCallback(() => {
     try {
@@ -861,6 +870,7 @@ export const useCallControl = (props: useCallControlProps) => {
     controlVisibility,
     secondsUntilAutoWrapup,
     cancelAutoWrapup,
+    conferenceParticipants,
   };
 };
 

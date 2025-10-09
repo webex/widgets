@@ -44,6 +44,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
     logger,
     isMuted,
     toggleMute,
+    conferenceParticipants,
   } = props;
 
   const formatTime = (time: number): string => {
@@ -66,9 +67,6 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
 
   //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
   const ani = currentTask?.data?.interaction?.callAssociatedDetails?.ani;
-
-  const participants = currentTask?.data?.interaction?.participants || {};
-  const participantsList = Object.values(participants) as {id: string; name: string}[];
 
   // Create unique IDs for tooltips
   const customerNameTriggerId = `customer-name-trigger-${currentTask.data.interaction.interactionId}`;
@@ -179,7 +177,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
                     <div className="participants-section">
                       <div className="participants-indicator">
                         <Text type="body-secondary" tagName={'small'} className="participants-count">
-                          +{Object.keys(participants).length || 1}
+                          +{Object.keys(conferenceParticipants).length || 1}
                         </Text>
                         <Icon name="participant-list-regular" size={0.875} className="participants-icon" />
                       </div>
@@ -207,7 +205,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
                         }
                       >
                         <div className="participants-menu">
-                          {participantsList?.map((participant) => (
+                          {conferenceParticipants?.map((participant) => (
                             <div
                               key={participant.id}
                               className="participant-menu-item"
