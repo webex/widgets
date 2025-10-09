@@ -1,4 +1,5 @@
-import {Page} from '@playwright/test';
+import {Page, expect} from '@playwright/test';
+import {dismissOverlays} from './helperUtils';
 import {AWAIT_TIMEOUT, FORM_FIELD_TIMEOUT} from '../constants';
 
 /**
@@ -112,12 +113,33 @@ export function verifyConsultTransferredLogs(): void {
  */
 export async function consultOrTransfer(
   page: Page,
-  type: 'agent' | 'queue' | 'dialNumber',
+  type: 'agent' | 'queue' | 'dialNumber' | 'entryPoint',
   action: 'consult' | 'transfer',
   value: string
 ): Promise<void> {
-  // Determine which button to click for consult or transfer
+  await openConsultOrTransferMenu(page, action);
+  const popover = await getPopover(page);
+
+  if (type === 'agent') {
+    await performAgentSelection(page, popover, value);
+  } else if (type === 'queue') {
+    await performQueueSelection(page, popover, value);
+  } else if (type === 'dialNumber') {
+    await performDialNumberSelection(page, popover, value);
+  } else if (type === 'entryPoint') {
+    await performEntryPointSelection(page, popover, value);
+  }
+
+  await page.waitForTimeout(2000);
   if (action === 'consult') {
+    await expect(page.getByTestId('cancel-consult-btn')).toBeVisible({timeout: FORM_FIELD_TIMEOUT});
+  }
+}
+
+// ===== Internal helper functions =====
+async function openConsultOrTransferMenu(page: Page, action: 'consult' | 'transfer'): Promise<void> {
+  if (action === 'consult') {
+    await dismissOverlays(page);
     await page.getByTestId('call-control:consult').nth(1).click({timeout: AWAIT_TIMEOUT});
   } else {
     await page
@@ -125,48 +147,109 @@ export async function consultOrTransfer(
       .getByLabel('Transfer Call')
       .click({timeout: AWAIT_TIMEOUT});
   }
+}
 
-  // Navigate to the correct tab and perform the action
-  if (type === 'agent' || type === 'queue') {
-    const tabName = type === 'agent' ? 'Agents' : 'Queues';
-    await page.getByRole('tab', {name: tabName}).click({timeout: AWAIT_TIMEOUT});
-    const listItem = page.getByRole('listitem', {name: value, exact: true});
-    await listItem.waitFor({state: 'visible', timeout: AWAIT_TIMEOUT});
-    await listItem.scrollIntoViewIfNeeded();
-    await page.waitForTimeout(300);
-    const button = listItem.getByRole('button');
-    await button.waitFor({state: 'visible', timeout: AWAIT_TIMEOUT});
-    await button.scrollIntoViewIfNeeded();
-    await button.evaluate((el) => {
-      if (el.hasAttribute('disabled')) {
-        throw new Error(`${tabName.slice(0, -1)} button is disabled`);
-      }
-    });
-    let lastError;
-    for (let i = 0; i < 3; i++) {
-      try {
-        await button.click({timeout: AWAIT_TIMEOUT, force: true});
-        lastError = undefined;
-        break;
-      } catch (e) {
-        lastError = e;
-        await page.waitForTimeout(400);
-      }
+async function getPopover(page: Page) {
+  const popover = page.locator('.agent-popover-content');
+  await expect(popover.locator('#consult-search')).toBeVisible({timeout: FORM_FIELD_TIMEOUT});
+  return popover;
+}
+
+async function clickCategory(
+  page: Page,
+  popover: ReturnType<Page['locator']>,
+  name: 'Agents' | 'Queues' | 'Dial Number' | 'Entry Point'
+): Promise<void> {
+  const button = popover.getByRole('button', {name});
+  await button.click({timeout: AWAIT_TIMEOUT});
+  await page.waitForTimeout(200);
+}
+
+async function clickListItemPrimaryButton(
+  page: Page,
+  popover: ReturnType<Page['locator']>,
+  value: string,
+  categoryLabel: string
+): Promise<void> {
+  const listItem = popover.locator(`[role="listitem"][aria-label="${value}"]`).first();
+  await listItem.waitFor({state: 'visible', timeout: AWAIT_TIMEOUT});
+  await listItem.hover();
+  await listItem.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(200);
+  const primaryButton = listItem.getByRole('button');
+  await primaryButton.waitFor({state: 'visible', timeout: AWAIT_TIMEOUT});
+  await primaryButton.scrollIntoViewIfNeeded();
+  await primaryButton.evaluate((el) => {
+    if (el.hasAttribute('disabled')) {
+      throw new Error(`${categoryLabel} button is disabled`);
     }
-    if (lastError) {
-      throw lastError;
+  });
+  let lastError;
+  for (let i = 0; i < 3; i++) {
+    try {
+      await primaryButton.click({timeout: AWAIT_TIMEOUT, force: true});
+      lastError = undefined;
+      break;
+    } catch (err) {
+      lastError = err;
+      await page.waitForTimeout(300);
     }
-  } else if (type === 'dialNumber') {
-    await page.getByRole('tab', {name: 'Dial Number'}).click({timeout: AWAIT_TIMEOUT});
-    const inputLocator = page.getByTestId('consult-transfer-dial-number-input').locator('input');
-    await inputLocator.waitFor({state: 'visible', timeout: AWAIT_TIMEOUT});
-    await inputLocator.click({timeout: AWAIT_TIMEOUT});
-    await inputLocator.fill(value, {timeout: AWAIT_TIMEOUT});
-    await page.getByTestId('dial-number-btn').click({timeout: AWAIT_TIMEOUT});
   }
+  if (lastError) {
+    throw lastError;
+  }
+  await page
+    .locator('.md-popover-backdrop')
+    .waitFor({state: 'hidden', timeout: 3000})
+    .catch(() => {});
+}
 
-  // Wait a moment for the action to be processed
-  await page.waitForTimeout(2000);
+async function performAgentSelection(page: Page, popover: ReturnType<Page['locator']>, value: string): Promise<void> {
+  await clickCategory(page, popover, 'Agents');
+  await clickListItemPrimaryButton(page, popover, value, 'Agent');
+}
+
+async function performQueueSelection(page: Page, popover: ReturnType<Page['locator']>, value: string): Promise<void> {
+  await clickCategory(page, popover, 'Queues');
+  await clickListItemPrimaryButton(page, popover, value, 'Queue');
+}
+
+async function performDialNumberSelection(
+  page: Page,
+  popover: ReturnType<Page['locator']>,
+  value: string
+): Promise<void> {
+  if (!value || value.trim() === '') {
+    throw new Error(
+      'PW_DIAL_NUMBER_NAME is not set. Please provide the Dial Number list item name (e.g., cypher_pstn).'
+    );
+  }
+  await clickCategory(page, popover, 'Dial Number');
+  const search = popover.locator('#consult-search');
+  if (await search.isVisible({timeout: 500}).catch(() => false)) {
+    await search.fill(value, {timeout: AWAIT_TIMEOUT});
+    await page.waitForTimeout(300);
+  }
+  await popover
+    .getByRole('listitem', {name: value, exact: true})
+    .waitFor({state: 'visible', timeout: FORM_FIELD_TIMEOUT});
+  await clickListItemPrimaryButton(page, popover, value, 'Dial Number');
+}
+
+async function performEntryPointSelection(
+  page: Page,
+  popover: ReturnType<Page['locator']>,
+  value: string
+): Promise<void> {
+  await clickCategory(page, popover, 'Entry Point');
+  if (value) {
+    const search = popover.locator('#consult-search');
+    if (await search.isVisible({timeout: 500}).catch(() => false)) {
+      await search.fill(value, {timeout: AWAIT_TIMEOUT});
+      await page.waitForTimeout(300);
+    }
+  }
+  await clickListItemPrimaryButton(page, popover, value, 'Entry Point');
 }
 
 /**
