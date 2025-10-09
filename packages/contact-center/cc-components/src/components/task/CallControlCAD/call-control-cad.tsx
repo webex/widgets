@@ -1,12 +1,11 @@
 import React from 'react';
 import CallControlComponent from '../CallControl/call-control';
-import {Text} from '@momentum-ui/react-collaboration';
-import {Brandvisual, Icon, Tooltip} from '@momentum-design/components/dist/react';
+import {Text, PopoverNext} from '@momentum-ui/react-collaboration';
+import {Brandvisual, Icon, Tooltip, Button} from '@momentum-design/components/dist/react';
 import './call-control-cad.styles.scss';
 import TaskTimer from '../TaskTimer/index';
 import CallControlConsultComponent from '../CallControl/CallControlCustom/call-control-consult';
 import {MEDIA_CHANNEL as MediaChannelType, CallControlComponentProps} from '../task.types';
-// import {Select, Option} from '@momentum-design/components/dist/react';
 
 import {getMediaTypeInfo} from '../../../utils';
 import {
@@ -69,6 +68,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
   const ani = currentTask?.data?.interaction?.callAssociatedDetails?.ani;
 
   const participants = currentTask?.data?.interaction?.participants || {};
+  const participantsList = Object.values(participants) as {id: string; name: string}[];
 
   // Create unique IDs for tooltips
   const customerNameTriggerId = `customer-name-trigger-${currentTask.data.interaction.interactionId}`;
@@ -169,37 +169,61 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
           <div className="customer-info">
             {renderCustomerName()}
             <div className="call-details">
-              <Text className="call-timer" type="body-secondary" tagName={'small'} data-testid="cc-cad:call-timer">
-                {currentMediaType.labelName} - <TaskTimer startTimeStamp={startTimestamp} />
-              </Text>
-              {/* {controlVisibility.isConferenceInProgress && (
-                <Select
-                  label={participants.length > 1 ? 'Participants' : 'Participant'}
-                  help-text-type=""
-                  height="auto"
-                  data-aria-label="wrapup-reason"
-                  toggletip-text=""
-                  toggletip-placement=""
-                  info-icon-aria-label=""
-                  name=""
-                  className="wrapup-select"
-                  data-testid="call-control:wrapup-select"
-                  placeholder={SELECT}
-                  onChange={(event: CustomEvent) =>
-                   // handleWrapupReasonChange(event, wrapupCodes, handleWrapupChange, logger)
-                  }
-                >
-                  {participants?.map((code) => (
-                    <Option
-                      key={code.id}
-                      value={code.id}
-                      data-testid={`call-control:wrapup-reason-${code.name.toLowerCase()}`}
-                    >
-                      {code.name}
-                    </Option>
-                  ))}
-                </Select>
-              )} */}
+              <div className="call-details-row">
+                <Text className="call-timer" type="body-secondary" tagName={'small'} data-testid="cc-cad:call-timer">
+                  {currentMediaType.labelName} - <TaskTimer startTimeStamp={startTimestamp} />
+                </Text>
+                {controlVisibility.isConferenceInProgress && (
+                  <>
+                    <div className="vertical-divider"></div>
+                    <div className="participants-section">
+                      <div className="participants-indicator">
+                        <Text type="body-secondary" tagName={'small'} className="participants-count">
+                          +{Object.keys(participants).length || 1}
+                        </Text>
+                        <Icon name="participant-list-regular" size={0.875} className="participants-icon" />
+                      </div>
+                      <PopoverNext
+                        color="secondary"
+                        delay={[0, 0]}
+                        placement="bottom-start"
+                        showArrow
+                        trigger="click"
+                        variant="medium"
+                        interactive
+                        offsetDistance={2}
+                        className="participants-popover"
+                        triggerComponent={
+                          <Button
+                            id="participants-trigger"
+                            aria-label="Select Participant"
+                            data-testid="call-control:participants-trigger"
+                            className="participants-select-button"
+                            color="default"
+                            variant="tertiary"
+                          >
+                            <Icon name="arrow-down-bold" className="dropdown-arrow" />
+                          </Button>
+                        }
+                      >
+                        <div className="participants-menu">
+                          {participantsList?.map((participant) => (
+                            <div
+                              key={participant.id}
+                              className="participant-menu-item"
+                              role="menuitem"
+                              tabIndex={0}
+                              data-testid={`call-control:participant-${participant.name?.toLowerCase()}`}
+                            >
+                              {participant.name}
+                            </div>
+                          ))}
+                        </div>
+                      </PopoverNext>
+                    </div>
+                  </>
+                )}
+              </div>
               <div className="call-status">
                 {!controlVisibility.wrapup && isHeld && (
                   <>
