@@ -26,18 +26,22 @@ exports[`CallControlCADComponent Snapshots should handle edge cases and control 
         <div
           class="call-details"
         >
-          <mdc-text
-            class="md-text-wrapper call-timer"
-            data-testid="cc-cad:call-timer"
+          <div
+            class="call-details-row"
           >
-            Voice
-             - 
-            <span
-              data-testid="TaskTimer"
+            <mdc-text
+              class="md-text-wrapper call-timer"
+              data-testid="cc-cad:call-timer"
             >
-              00:00
-            </span>
-          </mdc-text>
+              Voice
+               - 
+              <span
+                data-testid="TaskTimer"
+              >
+                00:00
+              </span>
+            </mdc-text>
+          </div>
           <div
             class="call-status"
           />
@@ -212,18 +216,22 @@ exports[`CallControlCADComponent Snapshots should handle edge cases and control 
       <div
         class="call-details"
       >
-        <mdc-text
-          class="md-text-wrapper call-timer"
-          data-testid="cc-cad:call-timer"
+        <div
+          class="call-details-row"
         >
-          Voice
-           - 
-          <span
-            data-testid="TaskTimer"
+          <mdc-text
+            class="md-text-wrapper call-timer"
+            data-testid="cc-cad:call-timer"
           >
-            00:00
-          </span>
-        </mdc-text>
+            Voice
+             - 
+            <span
+              data-testid="TaskTimer"
+            >
+              00:00
+            </span>
+          </mdc-text>
+        </div>
         <div
           class="call-status"
         />
@@ -362,18 +370,22 @@ exports[`CallControlCADComponent Snapshots should handle edge cases and control 
       <div
         class="call-details"
       >
-        <mdc-text
-          class="md-text-wrapper call-timer"
-          data-testid="cc-cad:call-timer"
+        <div
+          class="call-details-row"
         >
-          Voice
-           - 
-          <span
-            data-testid="TaskTimer"
+          <mdc-text
+            class="md-text-wrapper call-timer"
+            data-testid="cc-cad:call-timer"
           >
-            00:00
-          </span>
-        </mdc-text>
+            Voice
+             - 
+            <span
+              data-testid="TaskTimer"
+            >
+              00:00
+            </span>
+          </mdc-text>
+        </div>
         <div
           class="call-status"
         />
@@ -640,18 +652,22 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
       <div
         class="call-details"
       >
-        <mdc-text
-          class="md-text-wrapper call-timer"
-          data-testid="cc-cad:call-timer"
+        <div
+          class="call-details-row"
         >
-          Chat
-           - 
-          <span
-            data-testid="TaskTimer"
+          <mdc-text
+            class="md-text-wrapper call-timer"
+            data-testid="cc-cad:call-timer"
           >
-            00:00
-          </span>
-        </mdc-text>
+            Chat
+             - 
+            <span
+              data-testid="TaskTimer"
+            >
+              00:00
+            </span>
+          </mdc-text>
+        </div>
         <div
           class="call-status"
         />
@@ -918,18 +934,22 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
       <div
         class="call-details"
       >
-        <mdc-text
-          class="md-text-wrapper call-timer"
-          data-testid="cc-cad:call-timer"
+        <div
+          class="call-details-row"
         >
-          Voice
-           - 
-          <span
-            data-testid="TaskTimer"
+          <mdc-text
+            class="md-text-wrapper call-timer"
+            data-testid="cc-cad:call-timer"
           >
-            00:00
-          </span>
-        </mdc-text>
+            Voice
+             - 
+            <span
+              data-testid="TaskTimer"
+            >
+              00:00
+            </span>
+          </mdc-text>
+        </div>
         <div
           class="call-status"
         >
@@ -1206,18 +1226,22 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
       <div
         class="call-details"
       >
-        <mdc-text
-          class="md-text-wrapper call-timer"
-          data-testid="cc-cad:call-timer"
+        <div
+          class="call-details-row"
         >
-          Voice
-           - 
-          <span
-            data-testid="TaskTimer"
+          <mdc-text
+            class="md-text-wrapper call-timer"
+            data-testid="cc-cad:call-timer"
           >
-            00:00
-          </span>
-        </mdc-text>
+            Voice
+             - 
+            <span
+              data-testid="TaskTimer"
+            >
+              00:00
+            </span>
+          </mdc-text>
+        </div>
         <div
           class="call-status"
         />
@@ -1484,18 +1508,22 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
       <div
         class="call-details"
       >
-        <mdc-text
-          class="md-text-wrapper call-timer"
-          data-testid="cc-cad:call-timer"
+        <div
+          class="call-details-row"
         >
-          Social
-           - 
-          <span
-            data-testid="TaskTimer"
+          <mdc-text
+            class="md-text-wrapper call-timer"
+            data-testid="cc-cad:call-timer"
           >
-            00:00
-          </span>
-        </mdc-text>
+            Social
+             - 
+            <span
+              data-testid="TaskTimer"
+            >
+              00:00
+            </span>
+          </mdc-text>
+        </div>
         <div
           class="call-status"
         />
@@ -1763,18 +1791,22 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
         <div
           class="call-details"
         >
-          <mdc-text
-            class="md-text-wrapper call-timer"
-            data-testid="cc-cad:call-timer"
+          <div
+            class="call-details-row"
           >
-            Voice
-             - 
-            <span
-              data-testid="TaskTimer"
+            <mdc-text
+              class="md-text-wrapper call-timer"
+              data-testid="cc-cad:call-timer"
             >
-              00:00
-            </span>
-          </mdc-text>
+              Voice
+               - 
+              <span
+                data-testid="TaskTimer"
+              >
+                00:00
+              </span>
+            </mdc-text>
+          </div>
           <div
             class="call-status"
           />
@@ -1949,18 +1981,22 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
       <div
         class="call-details"
       >
-        <mdc-text
-          class="md-text-wrapper call-timer"
-          data-testid="cc-cad:call-timer"
+        <div
+          class="call-details-row"
         >
-          Voice
-           - 
-          <span
-            data-testid="TaskTimer"
+          <mdc-text
+            class="md-text-wrapper call-timer"
+            data-testid="cc-cad:call-timer"
           >
-            00:00
-          </span>
-        </mdc-text>
+            Voice
+             - 
+            <span
+              data-testid="TaskTimer"
+            >
+              00:00
+            </span>
+          </mdc-text>
+        </div>
         <div
           class="call-status"
         />
@@ -2055,18 +2091,22 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
         <div
           class="call-details"
         >
-          <mdc-text
-            class="md-text-wrapper call-timer"
-            data-testid="cc-cad:call-timer"
+          <div
+            class="call-details-row"
           >
-            Voice
-             - 
-            <span
-              data-testid="TaskTimer"
+            <mdc-text
+              class="md-text-wrapper call-timer"
+              data-testid="cc-cad:call-timer"
             >
-              00:00
-            </span>
-          </mdc-text>
+              Voice
+               - 
+              <span
+                data-testid="TaskTimer"
+              >
+                00:00
+              </span>
+            </mdc-text>
+          </div>
           <div
             class="call-status"
           />
@@ -2414,18 +2454,22 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
       <div
         class="call-details"
       >
-        <mdc-text
-          class="md-text-wrapper call-timer"
-          data-testid="cc-cad:call-timer"
+        <div
+          class="call-details-row"
         >
-          Voice
-           - 
-          <span
-            data-testid="TaskTimer"
+          <mdc-text
+            class="md-text-wrapper call-timer"
+            data-testid="cc-cad:call-timer"
           >
-            00:00
-          </span>
-        </mdc-text>
+            Voice
+             - 
+            <span
+              data-testid="TaskTimer"
+            >
+              00:00
+            </span>
+          </mdc-text>
+        </div>
         <div
           class="call-status"
         />

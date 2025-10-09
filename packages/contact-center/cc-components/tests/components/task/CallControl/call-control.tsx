@@ -122,6 +122,7 @@ describe('CallControlComponent', () => {
     cancelAutoWrapup: jest.fn(),
     exitConference: jest.fn(),
     consultConference: jest.fn(),
+    conferenceParticipants: [],
   };
 
   // Utility function spies

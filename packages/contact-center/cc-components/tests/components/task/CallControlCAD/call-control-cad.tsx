@@ -142,6 +142,7 @@ describe('CallControlCADComponent', () => {
     cancelAutoWrapup: jest.fn(),
     exitConference: jest.fn(),
     consultConference: jest.fn(),
+    conferenceParticipants: [],
   };
 
   beforeEach(() => {

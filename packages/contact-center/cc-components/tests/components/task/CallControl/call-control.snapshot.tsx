@@ -137,6 +137,7 @@ describe('CallControlComponent Snapshots', () => {
     cancelAutoWrapup: jest.fn(),
     consultConference: jest.fn(),
     exitConference: jest.fn(),
+    conferenceParticipants: [],
   };
 
   beforeEach(() => {
