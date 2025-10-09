@@ -1,6 +1,6 @@
 import React from 'react';
 import '@testing-library/jest-dom';
-import {render, fireEvent, act} from '@testing-library/react';
+import {render, fireEvent, act, waitFor} from '@testing-library/react';
 import ConsultTransferPopoverComponent from '../../../../../src/components/task/CallControl/CallControlCustom/consult-transfer-popover';
 import {ContactServiceQueue} from '@webex/cc-store';
 
@@ -29,6 +29,32 @@ describe('ConsultTransferPopoverComponent Snapshots', () => {
   const mockOnAgentSelect = jest.fn();
   const mockOnQueueSelect = jest.fn();
 
+  const buildQueue = (id: string, name: string, description: string = 'Queue'): ContactServiceQueue => ({
+    organizationId: 'org-test',
+    id,
+    version: 1,
+    name,
+    description,
+    queueType: 'INBOUND',
+    checkAgentAvailability: true,
+    channelType: 'TELEPHONY',
+    serviceLevelThreshold: 20,
+    maxActiveContacts: 25,
+    maxTimeInQueue: 600,
+    defaultMusicInQueueMediaFileId: 'media-1',
+    active: true,
+    monitoringPermitted: true,
+    parkingPermitted: true,
+    recordingPermitted: true,
+    recordingAllCallsPermitted: true,
+    pauseRecordingPermitted: true,
+    controlFlowScriptUrl: 'https://example.com/flow',
+    ivrRequeueUrl: 'https://example.com/requeue',
+    routingType: 'LONGEST_AVAILABLE_AGENT',
+    queueRoutingType: 'TEAM_BASED',
+    callDistributionGroups: [],
+  });
+
   const defaultProps = {
     heading: 'Select an Agent',
     buttonIcon: 'agent-icon',
@@ -50,16 +76,11 @@ describe('ConsultTransferPopoverComponent Snapshots', () => {
         siteId: 'site1',
       },
     ],
-    queues: [
-      {id: 'queue1', name: 'Queue One'} as ContactServiceQueue,
-      {id: 'queue2', name: 'Queue Two'} as ContactServiceQueue,
-    ],
+    getQueues: async () => ({data: [buildQueue('queue1', 'Queue One')], meta: {page: 0, totalPages: 1}}),
     onAgentSelect: mockOnAgentSelect,
     onQueueSelect: mockOnQueueSelect,
     allowConsultToQueue: true,
     logger: mockLogger,
-    showTabs: true,
-    emptyMessage: 'No agents or queues available',
   };
 
   beforeEach(() => {
@@ -67,26 +88,29 @@ describe('ConsultTransferPopoverComponent Snapshots', () => {
   });
 
   describe('Rendering - Tests for UI elements and visual states of ConsultTransferPopoverComponent component', () => {
-    it('should render the component with tabs and agents', async () => {
+    it('should render the component with heading and category buttons', async () => {
       let screen;
       await act(async () => {
         screen = render(<ConsultTransferPopoverComponent {...defaultProps} />);
       });
-
+      expect(screen.getByText('Select an Agent')).toBeInTheDocument();
+      const btns = Array.from(screen.container.querySelectorAll('button')).map(
+        (b) => (b as HTMLButtonElement).textContent
+      );
+      expect(btns).toEqual(expect.arrayContaining(['Agents', 'Queues', 'Dial Number', 'Entry Point']));
       const container = screen.container.querySelector('.agent-popover-content');
       mockUIDProps(container);
       expect(container).toMatchSnapshot();
     });
 
-    it('should render without tabs when showTabs is false', async () => {
-      const noTabsProps = {...defaultProps, showTabs: false};
+    it('should render without errors when rendered with minimal props', async () => {
       let screen;
       await act(async () => {
-        screen = render(<ConsultTransferPopoverComponent {...noTabsProps} />);
+        screen = render(<ConsultTransferPopoverComponent {...defaultProps} />);
       });
-
       const container = screen.container.querySelector('.agent-popover-content');
       mockUIDProps(container);
+      expect(container).toBeInTheDocument();
       expect(container).toMatchSnapshot();
     });
 
@@ -96,7 +120,7 @@ describe('ConsultTransferPopoverComponent Snapshots', () => {
       await act(async () => {
         screen = render(<ConsultTransferPopoverComponent {...customHeadingProps} />);
       });
-
+      expect(screen.getByText('Choose Transfer Target')).toBeInTheDocument();
       const container = screen.container.querySelector('.agent-popover-content');
       mockUIDProps(container);
       expect(container).toMatchSnapshot();
@@ -108,19 +132,30 @@ describe('ConsultTransferPopoverComponent Snapshots', () => {
       await act(async () => {
         screen = render(<ConsultTransferPopoverComponent {...emptyAgentsProps} />);
       });
-
+      const emptyState = screen.container.querySelector('.consult-empty-message');
+      expect(emptyState?.textContent).toBe('No data available for consult transfer.');
       const container = screen.container.querySelector('.agent-popover-content');
       mockUIDProps(container);
       expect(container).toMatchSnapshot();
     });
 
     it('should render with empty queues list', async () => {
-      const emptyQueuesProps = {...defaultProps, queues: []};
+      const emptyQueuesProps = {
+        ...defaultProps,
+        getQueues: async () => ({data: [], meta: {page: 0, totalPages: 0}}),
+      };
       let screen;
       await act(async () => {
         screen = render(<ConsultTransferPopoverComponent {...emptyQueuesProps} />);
       });
 
+      const queuesButton = Array.from(screen.container.querySelectorAll('button')).find(
+        (btn) => (btn as HTMLButtonElement).textContent === 'Queues'
+      ) as HTMLButtonElement | undefined;
+      if (queuesButton) fireEvent.click(queuesButton);
+      const list = screen.container.querySelector('.agent-list');
+      expect(list).toBeNull();
+      expect(screen.container.querySelectorAll('.call-control-list-item').length).toBe(0);
       const container = screen.container.querySelector('.agent-popover-content');
       mockUIDProps(container);
       expect(container).toMatchSnapshot();
@@ -133,6 +168,12 @@ describe('ConsultTransferPopoverComponent Snapshots', () => {
         screen = render(<ConsultTransferPopoverComponent {...noQueueConsultProps} />);
       });
 
+      const queuesButton = Array.from(screen.container.querySelectorAll('button')).find((btn) => {
+        const el = btn as HTMLButtonElement;
+        return el && el.textContent === 'Queues';
+      }) as HTMLButtonElement | undefined;
+      expect(queuesButton).toBeDefined();
+      expect(queuesButton?.disabled).toBe(true);
       const container = screen.container.querySelector('.agent-popover-content');
       mockUIDProps(container);
       expect(container).toMatchSnapshot();
@@ -142,14 +183,16 @@ describe('ConsultTransferPopoverComponent Snapshots', () => {
       const customEmptyProps = {
         ...defaultProps,
         buddyAgents: [],
-        queues: [],
-        emptyMessage: 'Custom empty state message',
+        getQueues: async () => ({data: [], meta: {page: 0, totalPages: 0}}),
       };
       let screen;
       await act(async () => {
         screen = render(<ConsultTransferPopoverComponent {...customEmptyProps} />);
       });
 
+      const emptyState = screen.container.querySelector('.consult-empty-state');
+      expect(emptyState).toBeInTheDocument();
+      expect(screen.getByText('No data available for consult transfer.')).toBeInTheDocument();
       const container = screen.container.querySelector('.agent-popover-content');
       mockUIDProps(container);
       expect(container).toMatchSnapshot();
@@ -174,6 +217,8 @@ describe('ConsultTransferPopoverComponent Snapshots', () => {
         screen = render(<ConsultTransferPopoverComponent {...singleAgentProps} />);
       });
 
+      const singleAgentItem = screen.container.querySelector('[aria-label="Single Agent"]');
+      expect(singleAgentItem).toBeInTheDocument();
       const container = screen.container.querySelector('.agent-popover-content');
       mockUIDProps(container);
       expect(container).toMatchSnapshot();
@@ -182,13 +227,22 @@ describe('ConsultTransferPopoverComponent Snapshots', () => {
     it('should render with single queue', async () => {
       const singleQueueProps = {
         ...defaultProps,
-        queues: [{id: 'queue1', name: 'Single Queue'} as ContactServiceQueue],
+        getQueues: async () => ({
+          data: [buildQueue('queue1', 'Single Queue')],
+          meta: {page: 0, totalPages: 1},
+        }),
       };
       let screen;
       await act(async () => {
         screen = render(<ConsultTransferPopoverComponent {...singleQueueProps} />);
       });
 
+      const queuesButton = Array.from(screen.container.querySelectorAll('button')).find((btn) => {
+        const el = btn as HTMLButtonElement;
+        return el && el.textContent === 'Queues';
+      }) as HTMLButtonElement | undefined;
+      if (queuesButton) fireEvent.click(queuesButton);
+      await waitFor(() => expect(screen.container.querySelector('[aria-label="Single Queue"]')).toBeInTheDocument());
       const container = screen.container.querySelector('.agent-popover-content');
       mockUIDProps(container);
       expect(container).toMatchSnapshot();
@@ -237,52 +291,62 @@ describe('ConsultTransferPopoverComponent Snapshots', () => {
 
   describe('Interactions', () => {
     it('should render component after switching to queues tab', async () => {
-      let screen;
+      let renderResult;
       await act(async () => {
-        screen = render(<ConsultTransferPopoverComponent {...defaultProps} />);
+        renderResult = render(<ConsultTransferPopoverComponent {...defaultProps} />);
       });
 
-      const queueTab = screen.container.querySelector('.queue-tab');
-      fireEvent.click(queueTab);
+      const queuesButton1 = Array.from(renderResult.container.querySelectorAll('button')).find((btn) => {
+        const el = btn as HTMLButtonElement;
+        return el && el.textContent === 'Queues';
+      }) as HTMLButtonElement | undefined;
+      if (queuesButton1) {
+        fireEvent.click(queuesButton1);
+      }
 
-      const container = screen.container.querySelector('.agent-popover-content');
+      await waitFor(() => expect(renderResult.container.querySelector('[aria-label="Queue One"]')).toBeInTheDocument());
+      const container = renderResult.container.querySelector('.agent-popover-content');
       mockUIDProps(container);
       expect(container).toMatchSnapshot();
     });
 
     it('should render component after agent selection', async () => {
-      let screen;
+      let renderResult;
       await act(async () => {
-        screen = render(<ConsultTransferPopoverComponent {...defaultProps} />);
+        renderResult = render(<ConsultTransferPopoverComponent {...defaultProps} />);
       });
 
-      const agentItems = screen.container.querySelectorAll('.call-control-list-item');
-      if (agentItems.length > 0) {
-        fireEvent.click(agentItems[0]);
-      }
-
-      const container = screen.container.querySelector('.agent-popover-content');
+      const firstAgentButton = renderResult.container.querySelectorAll('.call-control-list-item button')[0];
+      if (firstAgentButton) fireEvent.click(firstAgentButton);
+      expect(mockOnAgentSelect).toHaveBeenCalled();
+      const container = renderResult.container.querySelector('.agent-popover-content');
       mockUIDProps(container);
       expect(container).toMatchSnapshot();
     });
 
     it('should render component after queue selection', async () => {
-      let screen;
+      let renderResult;
       await act(async () => {
-        screen = render(<ConsultTransferPopoverComponent {...defaultProps} />);
+        renderResult = render(<ConsultTransferPopoverComponent {...defaultProps} />);
       });
 
       // Switch to queues tab first
-      const queueTab = screen.container.querySelector('.queue-tab');
-      fireEvent.click(queueTab);
-
-      // Then click on a queue
-      const queueItems = screen.container.querySelectorAll('.call-control-list-item');
-      if (queueItems.length > 0) {
-        fireEvent.click(queueItems[0]);
+      const queuesButton2 = Array.from(renderResult.container.querySelectorAll('button')).find((btn) => {
+        const el = btn as HTMLButtonElement;
+        return el && el.textContent === 'Queues';
+      }) as HTMLButtonElement | undefined;
+      if (queuesButton2) {
+        fireEvent.click(queuesButton2);
       }
 
-      const container = screen.container.querySelector('.agent-popover-content');
+      // Then click on a queue's action button
+      await waitFor(() =>
+        expect(renderResult.container.querySelectorAll('.call-control-list-item button').length).toBeGreaterThan(0)
+      );
+      const firstQueueButton = renderResult.container.querySelectorAll('.call-control-list-item button')[0];
+      if (firstQueueButton) fireEvent.click(firstQueueButton);
+      expect(mockOnQueueSelect).toHaveBeenCalled();
+      const container = renderResult.container.querySelector('.agent-popover-content');
       mockUIDProps(container);
       expect(container).toMatchSnapshot();
     });
@@ -290,21 +354,22 @@ describe('ConsultTransferPopoverComponent Snapshots', () => {
 
   describe('State Management', () => {
     it('should update when heading changes', async () => {
-      let screen;
+      let renderResult;
       await act(async () => {
-        screen = render(<ConsultTransferPopoverComponent {...defaultProps} />);
+        renderResult = render(<ConsultTransferPopoverComponent {...defaultProps} />);
       });
 
-      screen.rerender(<ConsultTransferPopoverComponent {...defaultProps} heading="New Heading" />);
-      const container = screen.container.querySelector('.agent-popover-content');
+      renderResult.rerender(<ConsultTransferPopoverComponent {...defaultProps} heading="New Heading" />);
+      expect(renderResult.getByText('New Heading')).toBeInTheDocument();
+      const container = renderResult.container.querySelector('.agent-popover-content');
       mockUIDProps(container);
       expect(container).toMatchSnapshot();
     });
 
     it('should update when agents list changes', async () => {
-      let screen;
+      let renderResult;
       await act(async () => {
-        screen = render(<ConsultTransferPopoverComponent {...defaultProps} />);
+        renderResult = render(<ConsultTransferPopoverComponent {...defaultProps} />);
       });
 
       const newAgents = [
@@ -317,21 +382,38 @@ describe('ConsultTransferPopoverComponent Snapshots', () => {
           siteId: 'site2',
         },
       ];
-      screen.rerender(<ConsultTransferPopoverComponent {...defaultProps} buddyAgents={newAgents} />);
-      const container = screen.container.querySelector('.agent-popover-content');
+      renderResult.rerender(<ConsultTransferPopoverComponent {...defaultProps} buddyAgents={newAgents} />);
+      const updated = renderResult.container.querySelector('[aria-label="New Agent One"]');
+      expect(updated).toBeInTheDocument();
+      const container = renderResult.container.querySelector('.agent-popover-content');
       mockUIDProps(container);
       expect(container).toMatchSnapshot();
     });
 
     it('should update when queues list changes', async () => {
-      let screen;
+      let renderResult;
       await act(async () => {
-        screen = render(<ConsultTransferPopoverComponent {...defaultProps} />);
+        renderResult = render(<ConsultTransferPopoverComponent {...defaultProps} />);
       });
 
-      const newQueues = [{id: 'newQueue1', name: 'New Queue One'} as ContactServiceQueue];
-      screen.rerender(<ConsultTransferPopoverComponent {...defaultProps} queues={newQueues} />);
-      const container = screen.container.querySelector('.agent-popover-content');
+      const newQueues = [buildQueue('newQueue1', 'New Queue One')];
+      renderResult.rerender(
+        <ConsultTransferPopoverComponent
+          {...defaultProps}
+          getQueues={async () => ({data: newQueues, meta: {page: 0, totalPages: 1}})}
+        />
+      );
+      const queuesButton = Array.from(renderResult.container.querySelectorAll('button')).find((btn) => {
+        const el = btn as HTMLButtonElement;
+        return el && el.textContent === 'Queues';
+      }) as HTMLButtonElement | undefined;
+      if (queuesButton) fireEvent.click(queuesButton);
+      await waitFor(() =>
+        expect(renderResult.container.querySelector('[aria-label="New Queue One"]').textContent).toBeDefined()
+      );
+      const newQueue = renderResult.container.querySelector('[aria-label="New Queue One"]');
+      expect(newQueue).toBeInTheDocument();
+      const container = renderResult.container.querySelector('.agent-popover-content');
       mockUIDProps(container);
       expect(container).toMatchSnapshot();
     });

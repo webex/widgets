@@ -8,6 +8,15 @@ import {
   BuddyAgentsResponse,
   StateChange,
   Logout,
+  EntryPointRecord,
+  EntryPointListResponse,
+  EntryPointSearchParams,
+  AddressBookEntry,
+  AddressBookEntriesResponse,
+  AddressBookEntrySearchParams,
+  ContactServiceQueuesResponse,
+  ContactServiceQueueSearchParams,
+  AddressBook,
 } from '@webex/contact-center';
 import {DestinationType} from 'node_modules/@webex/contact-center/dist/types/services/task/types';
 import {
@@ -36,7 +45,9 @@ interface IContactCenter {
     getAllTasks: () => Record<string, ITask>;
   };
   getBuddyAgents(data: BuddyAgents): Promise<BuddyAgentsResponse>;
-  getQueues(search?: string, filter?: string, page?: number, pageSize?: number): Promise<ContactServiceQueue[]>;
+  getQueues(params?: ContactServiceQueueSearchParams): Promise<ContactServiceQueuesResponse>;
+  getEntryPoints(params?: EntryPointSearchParams): Promise<EntryPointListResponse>;
+  addressBook: AddressBook;
   agentConfig?: {
     regexUS: RegExp | string;
     agentId: string;
@@ -119,6 +130,10 @@ interface IStoreWrapper extends IStore {
   onErrorCallback?: (widgetName: string, error: Error) => void;
   setCurrentTask(task: ITask): void;
   refreshTaskList(): void;
+  getBuddyAgents(mediaType?: string): Promise<BuddyDetails[]>;
+  getQueues(mediaType?: string, params?: ContactServiceQueueSearchParams): Promise<ContactServiceQueuesResponse>;
+  getEntryPoints(params?: EntryPointSearchParams): Promise<EntryPointListResponse>;
+  getAddressBookEntries(params?: AddressBookEntrySearchParams): Promise<AddressBookEntriesResponse>;
   setDeviceType(option: string): void;
   setDialNumber(input: string): void;
   setCurrentState(state: string): void;
@@ -249,6 +264,14 @@ export type {
   BuddyDetails,
   ContactServiceQueue,
   AgentLoginProfile,
+  EntryPointRecord,
+  EntryPointListResponse,
+  EntryPointSearchParams,
+  AddressBookEntry,
+  AddressBookEntriesResponse,
+  AddressBookEntrySearchParams,
+  ContactServiceQueuesResponse,
+  ContactServiceQueueSearchParams,
   IWebex,
 };
 

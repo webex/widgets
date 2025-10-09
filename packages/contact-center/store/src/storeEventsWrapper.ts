@@ -14,6 +14,11 @@ import {
   ENGAGED_LABEL,
   ENGAGED_USERNAME,
   ContactServiceQueue,
+  ContactServiceQueueSearchParams,
+  EntryPointListResponse,
+  EntryPointSearchParams,
+  AddressBookEntriesResponse,
+  AddressBookEntrySearchParams,
   Profile,
   AgentLoginProfile,
   ERROR_TRIGGERING_IDLE_CODES,
@@ -670,15 +675,46 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   getQueues = async (
-    mediaType: string = this.currentTask.data.interaction.mediaType ?? 'TELEPHONY'
-  ): Promise<Array<ContactServiceQueue>> => {
+    mediaType: string = this.currentTask.data.interaction.mediaType ?? 'TELEPHONY',
+    params?: ContactServiceQueueSearchParams
+  ): Promise<{
+    data: ContactServiceQueue[];
+    meta: {page: number; pageSize: number; total: number; totalPages: number};
+  }> => {
     try {
       const upperMediaType = mediaType.toUpperCase();
-      let queueList = await this.store.cc.getQueues();
-      queueList = queueList.filter((queue) => queue.channelType === upperMediaType);
-      return queueList;
+      const response = await this.store.cc.getQueues(params);
+      const data = Array.isArray(response) ? response : response.data;
+      const filtered = data.filter((queue) => queue.channelType === upperMediaType);
+      const page = Array.isArray(response) ? 0 : (response.meta?.page ?? 0);
+      const totalPages = Array.isArray(response) ? 1 : (response.meta?.totalPages ?? 1);
+      const pageSize = Array.isArray(response) ? filtered.length : (response.meta?.pageSize ?? filtered.length);
+      const total = Array.isArray(response)
+        ? filtered.length
+        : ((response as {meta?: {total?: number}}).meta?.total ?? filtered.length);
+      return {data: filtered, meta: {page, pageSize, total, totalPages}};
     } catch (error) {
       console.error('Error fetching queues:', error);
+      return Promise.reject(error);
+    }
+  };
+
+  getEntryPoints = async (params?: EntryPointSearchParams): Promise<EntryPointListResponse> => {
+    try {
+      const response: EntryPointListResponse = await this.store.cc.getEntryPoints(params);
+      return response;
+    } catch (error) {
+      console.error('Error fetching entry points:', error);
+      return Promise.reject(error);
+    }
+  };
+
+  getAddressBookEntries = async (params?: AddressBookEntrySearchParams): Promise<AddressBookEntriesResponse> => {
+    try {
+      const response: AddressBookEntriesResponse = await this.store.cc.addressBook.getEntries(params ?? {});
+      return response;
+    } catch (error) {
+      console.error('Error fetching address book entries:', error);
       return Promise.reject(error);
     }
   };

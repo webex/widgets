@@ -58,6 +58,7 @@ const commonPropsForCallControl: Record<string, 'string' | 'number' | 'boolean' 
   wrapupCall: 'function',
   isHeld: 'boolean',
   setIsHeld: 'function',
+  consultTransferOptions: 'json',
 };
 
 const WebCallControlCADComponent = r2wc(CallControlCADComponent, {

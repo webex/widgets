@@ -16,6 +16,7 @@ const CallControlCADInternal: React.FunctionComponent<CallControlProps> = observ
     onToggleMute,
     callControlClassName,
     callControlConsultClassName,
+    consultTransferOptions,
   }) => {
     const {
       logger,
@@ -57,6 +58,7 @@ const CallControlCADInternal: React.FunctionComponent<CallControlProps> = observ
       isEndConsultEnabled,
       allowConsultToQueue,
       logger,
+      consultTransferOptions,
     };
 
     return <CallControlCADComponent {...result} />;

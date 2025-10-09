@@ -1,4 +1,4 @@
-import {ITask, Profile, TaskData, TaskResponse} from '@webex/contact-center';
+import {ITask, Profile, TaskData, TaskResponse, AddressBook} from '@webex/contact-center';
 import {IContactCenter} from '@webex/cc-store';
 
 const mockProfile: Profile = {
@@ -83,7 +83,11 @@ const mockCC: IContactCenter = {
     getAllTasks: jest.fn().mockReturnValue({}),
   },
   getBuddyAgents: jest.fn().mockResolvedValue([]),
-  getQueues: jest.fn().mockResolvedValue([]),
+  getQueues: jest.fn().mockResolvedValue({data: [], meta: {page: 0, pageSize: 25, total: 0, totalPages: 1}}),
+  getEntryPoints: jest.fn().mockResolvedValue({data: [], meta: {page: 0, pageSize: 25, total: 0, totalPages: 1}}),
+  addressBook: {
+    getEntries: jest.fn().mockResolvedValue({data: [], meta: {page: 0, pageSize: 25, total: 0, totalPages: 1}}),
+  } as unknown as AddressBook,
   setAgentState: jest.fn().mockResolvedValue({}),
 };
 
