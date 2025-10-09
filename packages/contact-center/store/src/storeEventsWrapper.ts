@@ -246,13 +246,19 @@ class StoreWrapper implements IStoreWrapper {
     runInAction(() => {
       this.store.taskList = this.store.cc.taskManager.getAllTasks();
       if (Object.keys(this.store.taskList).length === 0) {
+        if (this.currentTask) {
+          this.handleTaskRemove(this.currentTask.data.interactionId);
+        }
         this.setCurrentTask(null);
         this.setState({
           reset: true,
         });
-      } else if (this.currentTask) {
+      } else if (this.currentTask && this.store.taskList[this.currentTask.data.interactionId]) {
         this.setCurrentTask(this.store.taskList[this.currentTask?.data?.interactionId]);
       } else if (Object.keys(this.store.taskList).length > 0) {
+        if (this.currentTask) {
+          this.handleTaskRemove(this.currentTask.data.interactionId);
+        }
         this.setCurrentTask(this.store.taskList[Object.keys(this.store.taskList)[0]]);
       }
     });
@@ -548,7 +554,7 @@ class StoreWrapper implements IStoreWrapper {
     this.refreshTaskList();
   };
 
-  handleConferenceEnded = (task) => {
+  handleConferenceEnded = () => {
     this.refreshTaskList();
   };
 
