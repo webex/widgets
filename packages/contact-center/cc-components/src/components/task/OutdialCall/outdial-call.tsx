@@ -40,7 +40,7 @@ interface OutdialANIEntry {
  * @property startOutdial - Function to initiate the outdial call with the entered destination number.
  */
 const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> = (props) => {
-  const {startOutdial} = props;
+  const {startOutdial, outdialANIEntries} = props;
 
   // State Hooks
   const [destination, setDestination] = useState('');
@@ -53,21 +53,8 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
     []
   );
 
-  const outdialANIEntries: OutdialANIEntry[] = [
-    {number: '+1(234)567-8910', name: 'name 1'},
-    {number: '+1(019)876-5432', name: 'name 2'},
-    {number: '+1(019)876-5432', name: 'name 3'},
-    {number: '+1(019)876-5432', name: 'name 4'},
-    {number: '+1(019)876-5432', name: 'name 2'},
-    {number: '+1(019)876-5432', name: 'name 2'},
-    {number: '+1(019)876-5432', name: 'name 2'},
-    {number: '+1(019)876-5432', name: 'name 2'},
-    {number: '+1(019)876-5432', name: 'name 2'},
-    {number: '+1(019)876-5432', name: 'name 2'},
-    {number: '+1(019)876-5432', name: 'name 2'},
-    {number: '+1(019)876-5432', name: 'name 2'},
-    {number: '+1(019)876-5432', name: 'name 2'},
-  ];
+  // Give Select an empty list if outdial ANI entries are not provided
+  const outdialANIList: OutdialANIEntry[] = outdialANIEntries ?? [];
 
   /**
    * validateOutboundNumber
@@ -107,6 +94,8 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
       <Input
         className="input"
         id="outdial-number-input"
+        name="outdial-number-input"
+        data-testid="outdial-number-input"
         helpText={isValidNumber}
         helpTextType={isValidNumber ? 'error' : 'default'}
         placeholder={OutdialStrings.DN_PLACEHOLDER}
@@ -130,19 +119,20 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
         className="input"
         label={OutdialStrings.ANI_SELECT_LABEL}
         id="outdial-ani-option"
-        name="outdial-ani-option"
+        name="outdial-ani-option-select"
         data-testid="outdial-ani-option-select"
         placeholder={OutdialStrings.ANI_SELECT_PLACEHOLDER}
         onChange={(event: CustomEvent) => {
           setSelectedANI(event.detail.value);
         }}
       >
-        {outdialANIEntries.map((option: OutdialANIEntry, index: number) => {
+        {outdialANIList.map((option: OutdialANIEntry, index: number) => {
           return (
             <Option
               selected={option.number === selectedANI}
               key={index}
               value={option.number}
+              name={`outdial-ani-option-${index}`}
               data-testid={`outdial-ani-option-${index}`}
             >
               {option.name}
@@ -151,6 +141,7 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
         })}
       </Select>
       <Button
+        data-testid="outdial-call-button"
         className="button"
         prefixIcon={'handset-regular'}
         onClick={() => startOutdial(destination)}

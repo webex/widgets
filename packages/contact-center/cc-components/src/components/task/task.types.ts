@@ -466,6 +466,20 @@ export interface OutdialCallProps {
   startOutdial: (destination: string) => void;
 
   /**
+   * Array of Outdial ANI entries.
+   * TODO: update with exported type when SDK PR#4513 is merged
+   */
+  outdialANIEntries?: Array<{
+    organizationId?: string;
+    id?: string;
+    version?: number;
+    name: string;
+    number: string;
+    createdTime?: number;
+    lastUpdatedTime?: number;
+  }>;
+
+  /**
    * CC SDK Instance.
    */
   cc: IContactCenter;
@@ -476,7 +490,7 @@ export interface OutdialCallProps {
   logger: ILogger;
 }
 
-export type OutdialCallComponentProps = Pick<OutdialCallProps, 'startOutdial'>;
+export type OutdialCallComponentProps = Pick<OutdialCallProps, 'startOutdial' | 'outdialANIEntries'>;
 
 /**
  * Interface representing the properties for CallControlListItem component.
