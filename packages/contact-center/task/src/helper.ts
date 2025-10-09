@@ -696,6 +696,28 @@ export const useCallControl = (props: useCallControlProps) => {
     }
   };
 
+  const consultConference = async () => {
+    try {
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      await currentTask.consultConference();
+      logger.info('consultConference success', {module: 'useCallControl', method: 'consultConference'});
+    } catch (error) {
+      logger.error(`Error consulting conference: ${error}`, {module: 'useCallControl', method: 'consultConference'});
+      throw error;
+    }
+  };
+
+  const exitConference = async () => {
+    try {
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      await currentTask.exitConference();
+      logger.info('exitConference success', {module: 'useCallControl', method: 'exitConference'});
+    } catch (error) {
+      logger.error(`Error exiting conference: ${error}`, {module: 'useCallControl', method: 'exitConference'});
+      throw error;
+    }
+  };
+
   const consultCall = async (consultDestination: string, destinationType: DestinationType) => {
     const consultPayload = {
       to: consultDestination,
@@ -746,8 +768,18 @@ export const useCallControl = (props: useCallControlProps) => {
 
   const consultTransfer = async () => {
     try {
-      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
-      await currentTask.consultTransfer();
+      if (currentTask.data.isConferenceInProgress) {
+        logger.info('Conference in progress, using transferConference', {
+          module: 'useCallControl',
+          method: 'transferCall',
+        });
+        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+        await currentTask.transferConference();
+      } else {
+        logger.info('Consult transfer initiated', {module: 'useCallControl', method: 'consultTransfer'});
+        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+        await currentTask.consultTransfer();
+      }
       store.setConsultInitiated(true);
     } catch (error) {
       logError(`Error transferring consult call: ${error}`, 'consultTransfer');
@@ -791,7 +823,6 @@ export const useCallControl = (props: useCallControlProps) => {
         logger.error('CC-Widgets: CallControl: Error initializing auto wrap-up timer', {
           module: 'widget-cc-task#helper.ts',
           method: 'useCallControl#autoWrapupTimer',
-          //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
           error,
         });
       }
@@ -825,6 +856,8 @@ export const useCallControl = (props: useCallControlProps) => {
     consultCall,
     endConsultCall,
     consultTransfer,
+    consultConference,
+    exitConference,
     consultAgentName,
     setConsultAgentName,
     consultAgentId,

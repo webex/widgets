@@ -52,6 +52,7 @@ function CallControlComponent(props: CallControlComponentProps) {
     loadQueues,
     transferCall,
     consultCall,
+    exitConference,
     consultInitiated,
     consultAccepted,
     callControlAudio,
@@ -127,6 +128,7 @@ function CallControlComponent(props: CallControlComponentProps) {
     handletoggleHold,
     toggleRecording,
     endCall,
+    exitConference,
     logger
   );
 

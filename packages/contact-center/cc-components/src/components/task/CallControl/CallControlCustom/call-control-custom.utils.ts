@@ -35,6 +35,7 @@ export const createConsultButtons = (
   onTransfer?: () => void,
   handleConsultMuteToggle?: () => void,
   handleEndConsult?: () => void,
+  handleConsultConferencePress?: () => void,
   logger?
 ): ButtonConfig[] => {
   try {
@@ -56,6 +57,15 @@ export const createConsultButtons = (
         className: 'call-control-button',
         disabled: !consultCompleted,
         shouldShow: isAgentBeingConsulted && !!onTransfer,
+      },
+      {
+        key: 'conference',
+        icon: 'call-merge-bold',
+        tooltip: 'Consult Conference',
+        onClick: handleConsultConferencePress || (() => {}),
+        className: 'call-control-button',
+        disabled: !consultCompleted,
+        shouldShow: isAgentBeingConsulted && !!handleConsultConferencePress,
       },
       {
         key: 'cancel',
@@ -157,6 +167,28 @@ export const handleEndConsultPress = (endConsultCall: (() => void) | undefined, 
     }
   } catch (error) {
     throw new Error(`Error ending consult call: ${error}`);
+  }
+};
+
+/**
+ * Handles merge consult/conference button press with logging
+ */
+export const handleConsultConferencePress = (consultConference: (() => void) | undefined, logger: ILogger): void => {
+  logger.info('CC-Widgets: CallControlConsult: consultConference clicked', {
+    module: 'call-control-consult.tsx',
+    method: 'handleConsultConferencePress',
+  });
+
+  try {
+    if (consultConference) {
+      consultConference();
+      logger.log('CC-Widgets: CallControlConsult: consultConference completed', {
+        module: 'call-control-consult.tsx',
+        method: 'handleConsultConferencePress',
+      });
+    }
+  } catch (error) {
+    throw new Error(`Error consultConference: ${error}`);
   }
 };
 

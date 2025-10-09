@@ -1,5 +1,6 @@
 import {ILogger} from '@webex/cc-store';
 import {ITask} from '@webex/contact-center';
+import {CUSTOMER, SUPERVISOR, VVA} from './constants';
 
 /**
  * This function determines the visibility of various controls based on the task's data.
@@ -25,6 +26,8 @@ export function getControlsVisibility(
 
     const {isEndCallEnabled, isEndConsultEnabled, webRtcEnabled} = featureFlags;
 
+    const isTransferVisibility = isBrowser ? webRtcEnabled : true; // Applicable for all type of station login and media type
+
     const controls = {
       accept:
         (isBrowser && ((webRtcEnabled && isCall) || isChat || isEmail)) ||
@@ -36,13 +39,13 @@ export function getControlsVisibility(
 
       holdResume: isCall && ((isBrowser && webRtcEnabled) || isAgentDN || isExtension), // Applicable for all type of station login
       consult: isCall && ((isBrowser && webRtcEnabled) || isAgentDN || isExtension), // Applicable for all type of station login
-      transfer: isBrowser ? webRtcEnabled : true, // Applicable for all type of station login and media type
-
+      transfer: isTransferVisibility && !task.data.isConferenceInProgress,
       conference: (isBrowser && isCall && webRtcEnabled) || isChat, // This needs further testing after we add support
       wrapup: task?.data?.wrapUpRequired ?? false, // Applicable for all type of station login and media type and getting actual value from task data
       pauseResumeRecording: isCall && ((isBrowser && webRtcEnabled) || isAgentDN || isExtension), // Getting feature flag (isRecordingManagementEnabled) value as undefined, need further testing
       endConsult: isEndConsultEnabled && isCall && ((isBrowser && webRtcEnabled) || isAgentDN || isExtension),
       recordingIndicator: isCall,
+      isConferenceInProgress: task.data.isConferenceInProgress,
     };
 
     return controls;
@@ -65,6 +68,7 @@ export function getControlsVisibility(
       pauseResumeRecording: false,
       endConsult: false,
       recordingIndicator: false,
+      isConferenceInProgress: false,
     };
   }
 }
@@ -87,3 +91,27 @@ export function findHoldTimestamp(interaction: Interaction, mType = 'mainCall', 
     return null;
   }
 }
+
+export const getIsConferenceInProgress = (task: ITask): boolean => {
+  const mediaMainCall = task?.data?.interaction?.media[task?.data?.interactionId];
+  const participantsInMainCall = new Set(mediaMainCall?.participants);
+  const participants = task?.data?.interaction?.participants;
+
+  const agentParticipants = new Set();
+  if (participantsInMainCall.size > 0) {
+    participantsInMainCall.forEach((participantId: string) => {
+      const participant = participants[participantId];
+      if (
+        participant &&
+        participant.pType !== CUSTOMER &&
+        participant.pType !== SUPERVISOR &&
+        !participant.hasLeft &&
+        participant.pType !== VVA
+      ) {
+        agentParticipants.add(participantId);
+      }
+    });
+  }
+
+  return agentParticipants.size >= 2;
+};

@@ -207,6 +207,7 @@ export const buildCallControlButtons = (
   handleToggleHoldFunc: () => void,
   toggleRecording: () => void,
   endCall: () => void,
+  exitConference: () => void,
   logger?
 ): CallControlButton[] => {
   try {
@@ -227,7 +228,7 @@ export const buildCallControlButtons = (
         onClick: handleToggleHoldFunc,
         tooltip: isHeld ? RESUME_CALL : HOLD_CALL,
         className: 'call-control-button',
-        disabled: false,
+        disabled: controlVisibility.isConferenceInProgress,
         isVisible: controlVisibility.holdResume,
         dataTestId: 'call-control:hold-toggle',
       },
@@ -240,6 +241,16 @@ export const buildCallControlButtons = (
         menuType: 'Consult',
         isVisible: controlVisibility.consult,
         dataTestId: 'call-control:consult',
+      },
+      {
+        id: 'exitConference',
+        icon: 'exit-room-bold',
+        tooltip: 'Exit Conference',
+        className: 'call-control-button-muted',
+        onClick: exitConference,
+        disabled: !controlVisibility.isConferenceInProgress,
+        isVisible: controlVisibility.isConferenceInProgress,
+        dataTestId: 'call-control:exit-conference',
       },
       {
         id: 'transfer',

@@ -206,7 +206,7 @@ class StoreWrapper implements IStoreWrapper {
 
   setCurrentTask = (task: ITask | null, isClicked: boolean = false): void => {
     // Don't assign the task as current task is incoming
-    if (isIncomingTask(task)) return;
+    if (isIncomingTask(task, this.agentId)) return;
 
     runInAction(() => {
       // Determine if the new task is the same as the current task
@@ -245,14 +245,17 @@ class StoreWrapper implements IStoreWrapper {
   refreshTaskList = (): void => {
     runInAction(() => {
       this.store.taskList = this.store.cc.taskManager.getAllTasks();
+      if (Object.keys(this.store.taskList).length === 0) {
+        this.setCurrentTask(null);
+        this.setState({
+          reset: true,
+        });
+      } else if (this.currentTask) {
+        this.setCurrentTask(this.store.taskList[this.currentTask?.data?.interactionId]);
+      } else if (Object.keys(this.store.taskList).length > 0) {
+        this.setCurrentTask(this.store.taskList[Object.keys(this.store.taskList)[0]]);
+      }
     });
-    if (this.currentTask) {
-      this.setCurrentTask(this.store.taskList[this.currentTask?.data?.interactionId]);
-    } else if (Object.keys(this.store.taskList).length > 0) {
-      this.setCurrentTask(this.store.taskList[Object.keys(this.store.taskList)[0]]);
-    } else if (Object.keys(this.store.taskList).length === 0) {
-      this.setCurrentTask(null);
-    }
   };
 
   setWrapupCodes = (wrapupCodes: IWrapupCode[]): void => {
@@ -400,6 +403,16 @@ class StoreWrapper implements IStoreWrapper {
       taskToRemove.off(TASK_EVENTS.AGENT_OFFER_CONTACT, this.refreshTaskList);
       taskToRemove.off(TASK_EVENTS.TASK_HOLD, this.refreshTaskList);
       taskToRemove.off(TASK_EVENTS.TASK_UNHOLD, this.refreshTaskList);
+      taskToRemove.off(TASK_EVENTS.TASK_CONFERENCE_ENDED, this.handleConferenceEnded);
+      taskToRemove.off(TASK_EVENTS.TASK_CONFERENCE_END_FAILED, this.refreshTaskList);
+      taskToRemove.off(TASK_EVENTS.TASK_CONFERENCE_ESTABLISHING, this.refreshTaskList);
+      taskToRemove.off(TASK_EVENTS.TASK_CONFERENCE_FAILED, this.refreshTaskList);
+      taskToRemove.off(TASK_EVENTS.TASK_PARTICIPANT_JOINED, this.handleConferenceStarted);
+      taskToRemove.off(TASK_EVENTS.TASK_PARTICIPANT_LEFT, this.handleConferenceEnded);
+      taskToRemove.off(TASK_EVENTS.TASK_PARTICIPANT_LEFT_FAILED, this.refreshTaskList);
+      taskToRemove.off(TASK_EVENTS.TASK_CONFERENCE_STARTED, this.handleConferenceStarted);
+      taskToRemove.off(TASK_EVENTS.TASK_CONFERENCE_TRANSFERRED, this.handleConferenceEnded);
+      taskToRemove.off(TASK_EVENTS.TASK_CONFERENCE_TRANSFER_FAILED, this.refreshTaskList);
       if (this.deviceType === 'BROWSER') {
         taskToRemove.off(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
         this.setCallControlAudio(null);
@@ -521,6 +534,24 @@ class StoreWrapper implements IStoreWrapper {
     this.setConsultStartTimeStamp(null);
   };
 
+  handleConferenceStarted = () => {
+    runInAction(() => {
+      this.setConsultAccepted(false);
+      this.setConsultInitiated(false);
+      this.setConsultCompleted(false);
+      this.setConsultOfferReceived(false);
+      this.setIsQueueConsultInProgress(false);
+      this.setCurrentConsultQueueId(null);
+      this.setConsultCompleted(false);
+      this.setConsultStartTimeStamp(null);
+    });
+    this.refreshTaskList();
+  };
+
+  handleConferenceEnded = (task) => {
+    this.refreshTaskList();
+  };
+
   handleIncomingTask = (event) => {
     const task: ITask = event;
     // Attach event listeners to the task
@@ -547,6 +578,16 @@ class StoreWrapper implements IStoreWrapper {
     task.on(TASK_EVENTS.TASK_CONSULT_END, this.handleConsultEnd);
     task.on(TASK_EVENTS.TASK_HOLD, this.refreshTaskList);
     task.on(TASK_EVENTS.TASK_UNHOLD, this.refreshTaskList);
+    task.on(TASK_EVENTS.TASK_CONFERENCE_ENDED, this.handleConferenceEnded);
+    task.on(TASK_EVENTS.TASK_CONFERENCE_END_FAILED, this.refreshTaskList);
+    task.on(TASK_EVENTS.TASK_CONFERENCE_ESTABLISHING, this.refreshTaskList);
+    task.on(TASK_EVENTS.TASK_CONFERENCE_FAILED, this.refreshTaskList);
+    task.on(TASK_EVENTS.TASK_PARTICIPANT_JOINED, this.handleConferenceStarted);
+    task.on(TASK_EVENTS.TASK_PARTICIPANT_LEFT, this.handleConferenceEnded);
+    task.on(TASK_EVENTS.TASK_PARTICIPANT_LEFT_FAILED, this.refreshTaskList);
+    task.on(TASK_EVENTS.TASK_CONFERENCE_STARTED, this.handleConferenceStarted);
+    task.on(TASK_EVENTS.TASK_CONFERENCE_TRANSFERRED, this.refreshTaskList);
+    task.on(TASK_EVENTS.TASK_CONFERENCE_TRANSFER_FAILED, this.refreshTaskList);
 
     // In case of consulting we check if the task is already in the task list
     // If it is, we dont have to send the incoming task callback
@@ -605,6 +646,16 @@ class StoreWrapper implements IStoreWrapper {
     task.on(TASK_EVENTS.TASK_OFFER_CONSULT, this.handleConsultOffer);
     task.on(TASK_EVENTS.TASK_CONSULT_END, this.handleConsultEnd);
     task.on(TASK_EVENTS.TASK_CONSULT_QUEUE_CANCELLED, this.handleConsultQueueCancelled);
+    task.on(TASK_EVENTS.TASK_CONFERENCE_ENDED, this.handleConferenceEnded);
+    task.on(TASK_EVENTS.TASK_CONFERENCE_END_FAILED, this.refreshTaskList);
+    task.on(TASK_EVENTS.TASK_CONFERENCE_ESTABLISHING, this.refreshTaskList);
+    task.on(TASK_EVENTS.TASK_CONFERENCE_FAILED, this.refreshTaskList);
+    task.on(TASK_EVENTS.TASK_PARTICIPANT_JOINED, this.handleConferenceStarted);
+    task.on(TASK_EVENTS.TASK_PARTICIPANT_LEFT, this.handleConferenceEnded);
+    task.on(TASK_EVENTS.TASK_PARTICIPANT_LEFT_FAILED, this.refreshTaskList);
+    task.on(TASK_EVENTS.TASK_CONFERENCE_STARTED, this.handleConferenceStarted);
+    task.on(TASK_EVENTS.TASK_CONFERENCE_TRANSFERRED, this.refreshTaskList);
+    task.on(TASK_EVENTS.TASK_CONFERENCE_TRANSFER_FAILED, this.refreshTaskList);
     if (this.deviceType === 'BROWSER') {
       task.on(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
     }

@@ -6,6 +6,8 @@ import './call-control-cad.styles.scss';
 import TaskTimer from '../TaskTimer/index';
 import CallControlConsultComponent from '../CallControl/CallControlCustom/call-control-consult';
 import {MEDIA_CHANNEL as MediaChannelType, CallControlComponentProps} from '../task.types';
+// import {Select, Option} from '@momentum-design/components/dist/react';
+
 import {getMediaTypeInfo} from '../../../utils';
 import {
   NO_CUSTOMER_NAME,
@@ -34,6 +36,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
     endConsultCall,
     consultCompleted,
     consultTransfer,
+    consultConference,
     callControlClassName,
     callControlConsultClassName,
     startTimestamp,
@@ -64,6 +67,8 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
 
   //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
   const ani = currentTask?.data?.interaction?.callAssociatedDetails?.ani;
+
+  const participants = currentTask?.data?.interaction?.participants || {};
 
   // Create unique IDs for tooltips
   const customerNameTriggerId = `customer-name-trigger-${currentTask.data.interaction.interactionId}`;
@@ -167,6 +172,34 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
               <Text className="call-timer" type="body-secondary" tagName={'small'} data-testid="cc-cad:call-timer">
                 {currentMediaType.labelName} - <TaskTimer startTimeStamp={startTimestamp} />
               </Text>
+              {/* {controlVisibility.isConferenceInProgress && (
+                <Select
+                  label={participants.length > 1 ? 'Participants' : 'Participant'}
+                  help-text-type=""
+                  height="auto"
+                  data-aria-label="wrapup-reason"
+                  toggletip-text=""
+                  toggletip-placement=""
+                  info-icon-aria-label=""
+                  name=""
+                  className="wrapup-select"
+                  data-testid="call-control:wrapup-select"
+                  placeholder={SELECT}
+                  onChange={(event: CustomEvent) =>
+                   // handleWrapupReasonChange(event, wrapupCodes, handleWrapupChange, logger)
+                  }
+                >
+                  {participants?.map((code) => (
+                    <Option
+                      key={code.id}
+                      value={code.id}
+                      data-testid={`call-control:wrapup-reason-${code.name.toLowerCase()}`}
+                    >
+                      {code.name}
+                    </Option>
+                  ))}
+                </Select>
+              )} */}
               <div className="call-status">
                 {!controlVisibility.wrapup && isHeld && (
                   <>
@@ -220,6 +253,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
             startTimeStamp={consultStartTimeStamp}
             endConsultCall={endConsultCall}
             onTransfer={consultTransfer}
+            consultConference={consultConference}
             consultCompleted={consultCompleted}
             isAgentBeingConsulted={!consultAccepted}
             isEndConsultEnabled={isEndConsultEnabled}
