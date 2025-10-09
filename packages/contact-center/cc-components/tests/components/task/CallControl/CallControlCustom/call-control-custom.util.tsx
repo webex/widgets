@@ -31,6 +31,7 @@ import {
   filterAvailableAgents,
   filterAvailableQueues,
   debounce,
+  handleConsultConferencePress,
 } from '../../../../../src/components/task/CallControl/CallControlCustom/call-control-custom.utils';
 
 const loggerMock = {
@@ -81,34 +82,94 @@ const mockQueues: ContactServiceQueue[] = [
     id: 'queue1',
     name: 'Support Queue',
     description: 'Support Queue Description',
-    queueType: 'inbound',
+    queueType: 'INBOUND',
     checkAgentAvailability: true,
-    channelType: 'telephony',
-  } as ContactServiceQueue,
+    channelType: 'TELEPHONY',
+    serviceLevelThreshold: 30,
+    maxActiveContacts: 10,
+    maxTimeInQueue: 600,
+    defaultMusicInQueueMediaFileId: 'music1',
+    active: true,
+    monitoringPermitted: true,
+    parkingPermitted: true,
+    recordingPermitted: true,
+    recordingAllCallsPermitted: true,
+    pauseRecordingPermitted: true,
+    controlFlowScriptUrl: 'https://example.com/script',
+    ivrRequeueUrl: 'https://example.com/ivr',
+    routingType: 'LONGEST_AVAILABLE_AGENT',
+    queueRoutingType: 'TEAM_BASED',
+    callDistributionGroups: [],
+  },
   {
     id: 'queue2',
     name: 'Sales Queue',
     description: 'Sales Queue Description',
-    queueType: 'inbound',
+    queueType: 'INBOUND',
     checkAgentAvailability: true,
-    channelType: 'telephony',
-  } as ContactServiceQueue,
+    channelType: 'TELEPHONY',
+    serviceLevelThreshold: 30,
+    maxActiveContacts: 10,
+    maxTimeInQueue: 600,
+    defaultMusicInQueueMediaFileId: 'music2',
+    active: true,
+    monitoringPermitted: true,
+    parkingPermitted: true,
+    recordingPermitted: true,
+    recordingAllCallsPermitted: true,
+    pauseRecordingPermitted: true,
+    controlFlowScriptUrl: 'https://example.com/script',
+    ivrRequeueUrl: 'https://example.com/ivr',
+    routingType: 'LONGEST_AVAILABLE_AGENT',
+    queueRoutingType: 'TEAM_BASED',
+    callDistributionGroups: [],
+  },
   {
     id: 'queue3',
     name: '',
     description: 'Empty Name Queue',
-    queueType: 'inbound',
+    queueType: 'INBOUND',
     checkAgentAvailability: true,
-    channelType: 'telephony',
-  } as ContactServiceQueue,
+    channelType: 'TELEPHONY',
+    serviceLevelThreshold: 30,
+    maxActiveContacts: 10,
+    maxTimeInQueue: 600,
+    defaultMusicInQueueMediaFileId: 'music3',
+    active: true,
+    monitoringPermitted: true,
+    parkingPermitted: true,
+    recordingPermitted: true,
+    recordingAllCallsPermitted: true,
+    pauseRecordingPermitted: true,
+    controlFlowScriptUrl: 'https://example.com/script',
+    ivrRequeueUrl: 'https://example.com/ivr',
+    routingType: 'LONGEST_AVAILABLE_AGENT',
+    queueRoutingType: 'TEAM_BASED',
+    callDistributionGroups: [],
+  },
   {
     id: '',
     name: 'Invalid Queue',
     description: 'Invalid Queue Description',
-    queueType: 'inbound',
+    queueType: 'INBOUND',
     checkAgentAvailability: true,
-    channelType: 'telephony',
-  } as ContactServiceQueue,
+    channelType: 'TELEPHONY',
+    serviceLevelThreshold: 30,
+    maxActiveContacts: 10,
+    maxTimeInQueue: 600,
+    defaultMusicInQueueMediaFileId: 'music4',
+    active: true,
+    monitoringPermitted: true,
+    parkingPermitted: true,
+    recordingPermitted: true,
+    recordingAllCallsPermitted: true,
+    pauseRecordingPermitted: true,
+    controlFlowScriptUrl: 'https://example.com/script',
+    ivrRequeueUrl: 'https://example.com/ivr',
+    routingType: 'LONGEST_AVAILABLE_AGENT',
+    queueRoutingType: 'TEAM_BASED',
+    callDistributionGroups: [],
+  },
 ];
 
 describe('Call Control Custom Utils', () => {
@@ -143,10 +204,11 @@ describe('Call Control Custom Utils', () => {
         mockEndConsult
       );
 
-      expect(buttons).toHaveLength(3);
+      expect(buttons).toHaveLength(4);
       expect(buttons[0].key).toBe('mute');
       expect(buttons[1].key).toBe('transfer');
-      expect(buttons[2].key).toBe('cancel');
+      expect(buttons[2].key).toBe('conference');
+      expect(buttons[3].key).toBe('cancel');
     });
 
     it('should configure mute button correctly when muted', () => {
@@ -799,55 +861,58 @@ describe('Call Control Custom Utils', () => {
   });
 
   describe('isQueueAvailable', () => {
+    const validQueue: ContactServiceQueue = {
+      id: 'queue1',
+      name: 'Support Queue',
+      description: 'Support Queue Description',
+      queueType: 'INBOUND',
+      checkAgentAvailability: true,
+      channelType: 'TELEPHONY',
+      serviceLevelThreshold: 30,
+      maxActiveContacts: 10,
+      maxTimeInQueue: 600,
+      defaultMusicInQueueMediaFileId: 'music1',
+      active: true,
+      monitoringPermitted: true,
+      parkingPermitted: true,
+      recordingPermitted: true,
+      recordingAllCallsPermitted: true,
+      pauseRecordingPermitted: true,
+      controlFlowScriptUrl: 'https://example.com/script',
+      ivrRequeueUrl: 'https://example.com/ivr',
+      routingType: 'LONGEST_AVAILABLE_AGENT',
+      queueRoutingType: 'TEAM_BASED',
+      callDistributionGroups: [],
+    };
+
     it('should return true for valid queue', () => {
-      expect(
-        isQueueAvailable({
-          id: 'queue1',
-          name: 'Support Queue',
-          description: 'Support Queue Description',
-          queueType: 'inbound',
-          checkAgentAvailability: true,
-          channelType: 'telephony',
-        } as ContactServiceQueue)
-      ).toBe(true);
+      expect(isQueueAvailable(validQueue)).toBe(true);
     });
 
     it('should return false for missing id', () => {
       expect(
         isQueueAvailable({
+          ...validQueue,
           id: '',
-          name: 'Support Queue',
-          description: 'Support Queue Description',
-          queueType: 'inbound',
-          checkAgentAvailability: true,
-          channelType: 'telephony',
-        } as ContactServiceQueue)
+        })
       ).toBeFalsy();
     });
 
     it('should return false for missing name', () => {
       expect(
         isQueueAvailable({
-          id: 'queue1',
+          ...validQueue,
           name: '',
-          description: 'Support Queue Description',
-          queueType: 'inbound',
-          checkAgentAvailability: true,
-          channelType: 'telephony',
-        } as ContactServiceQueue)
+        })
       ).toBeFalsy();
     });
 
     it('should return false for whitespace-only name', () => {
       expect(
         isQueueAvailable({
-          id: 'queue1',
+          ...validQueue,
           name: '   ',
-          description: 'Support Queue Description',
-          queueType: 'inbound',
-          checkAgentAvailability: true,
-          channelType: 'telephony',
-        } as ContactServiceQueue)
+        })
       ).toBeFalsy();
     });
 
@@ -946,6 +1011,43 @@ describe('Call Control Custom Utils', () => {
       jest.advanceTimersByTime(100);
 
       expect(mockFn).toHaveBeenCalledWith('arg1', 'arg2', 'arg3');
+    });
+  });
+
+  describe('handleConsultConferencePress', () => {
+    it('should call consultConference and log when provided', () => {
+      const mockConsultConference = jest.fn();
+
+      handleConsultConferencePress(mockConsultConference, loggerMock);
+
+      expect(loggerMock.info).toHaveBeenCalledWith('CC-Widgets: CallControlConsult: consultConference clicked', {
+        module: 'call-control-consult.tsx',
+        method: 'handleConsultConferencePress',
+      });
+      expect(mockConsultConference).toHaveBeenCalled();
+      expect(loggerMock.log).toHaveBeenCalledWith('CC-Widgets: CallControlConsult: consultConference completed', {
+        module: 'call-control-consult.tsx',
+        method: 'handleConsultConferencePress',
+      });
+    });
+
+    it('should not call consultConference when not provided', () => {
+      expect(() => {
+        handleConsultConferencePress(undefined, loggerMock);
+      }).not.toThrow();
+
+      expect(loggerMock.info).toHaveBeenCalled();
+      expect(loggerMock.log).not.toHaveBeenCalled();
+    });
+
+    it('should throw error when consultConference throws', () => {
+      const mockConsultConference = jest.fn(() => {
+        throw new Error('Conference failed');
+      });
+
+      expect(() => {
+        handleConsultConferencePress(mockConsultConference, loggerMock);
+      }).toThrow('Error consultConference: Error: Conference failed');
     });
   });
 });

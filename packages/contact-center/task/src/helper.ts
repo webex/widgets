@@ -614,7 +614,6 @@ export const useCallControl = (props: useCallControlProps) => {
       const intendedMuteState = !isMuted;
 
       try {
-        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         await currentTask.toggleMute();
 
         // Only update state after successful SDK call
@@ -687,7 +686,6 @@ export const useCallControl = (props: useCallControlProps) => {
 
   const transferCall = async (to: string, type: DestinationType) => {
     try {
-      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       await currentTask.transfer({to, destinationType: type});
       logger.info('transferCall success', {module: 'useCallControl', method: 'transferCall'});
     } catch (error) {
@@ -698,7 +696,6 @@ export const useCallControl = (props: useCallControlProps) => {
 
   const consultConference = async () => {
     try {
-      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       await currentTask.consultConference();
       logger.info('consultConference success', {module: 'useCallControl', method: 'consultConference'});
     } catch (error) {
@@ -709,7 +706,6 @@ export const useCallControl = (props: useCallControlProps) => {
 
   const exitConference = async () => {
     try {
-      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       await currentTask.exitConference();
       logger.info('exitConference success', {module: 'useCallControl', method: 'exitConference'});
     } catch (error) {
@@ -731,7 +727,6 @@ export const useCallControl = (props: useCallControlProps) => {
     }
 
     try {
-      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       await currentTask.consult(consultPayload);
       store.setIsQueueConsultInProgress(false);
       if (destinationType === 'queue') {
@@ -758,7 +753,6 @@ export const useCallControl = (props: useCallControlProps) => {
     };
 
     try {
-      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       await currentTask.endConsult(consultEndPayload);
     } catch (error) {
       logError(`Error ending consult call: ${error}`, 'endConsultCall');
@@ -773,11 +767,9 @@ export const useCallControl = (props: useCallControlProps) => {
           module: 'useCallControl',
           method: 'transferCall',
         });
-        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         await currentTask.transferConference();
       } else {
         logger.info('Consult transfer initiated', {module: 'useCallControl', method: 'consultTransfer'});
-        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         await currentTask.consultTransfer();
       }
       store.setConsultInitiated(true);

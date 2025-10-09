@@ -127,11 +127,14 @@ const mockTask: ITask = {
   wrapup: jest.fn().mockResolvedValue({} as TaskResponse),
   pauseRecording: jest.fn().mockResolvedValue({} as TaskResponse),
   resumeRecording: jest.fn().mockResolvedValue({} as TaskResponse),
-  //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
   consult: jest.fn().mockResolvedValue({} as TaskResponse),
   transfer: jest.fn().mockResolvedValue({} as TaskResponse),
   consultTransfer: jest.fn().mockResolvedValue({} as TaskResponse),
   endConsult: jest.fn().mockResolvedValue({} as TaskResponse),
+  consultConference: jest.fn(),
+  transferConference: jest.fn(),
+  exitConference: jest.fn(),
+  toggleMute: jest.fn(),
 };
 
 const mockQueueDetails = [
