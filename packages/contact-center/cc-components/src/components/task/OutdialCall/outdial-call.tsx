@@ -1,52 +1,153 @@
-import React, {useState} from 'react';
+import React, {useMemo, useState} from 'react';
 import {OutdialCallComponentProps} from '../task.types';
 import './outdial-call.style.scss';
 import {withMetrics} from '@webex/cc-ui-logging';
+import {Input, Button, Option, Select, Tab} from '@momentum-design/components/dist/react';
+import {OutdialStrings, KEY_LIST} from './constants';
 
+/**
+ * @interface OutdialANIEntry
+ * Interface representing an ANI (Automatic Number Identification) entry returned by the
+ * List Outdial ANI Entries API call.
+ *
+ * @property {string} organizationId - The organization ID the ANI is associated with.
+ * @property {string} id - ID of this contact center ANI entry.
+ * @property {number} version - The version number of the ANI entry.
+ * @property {string} name - The name assigned to the ANI entry.
+ * @property {string} number - The phone number associated with the ANI entry.
+ * @property {number} createdTime - The timestamp(in epoch milliseconds) when the ANI entry was created.
+ * @property {number} lastUpdatedTime - The timestamp(in epoch milliseconds) when the ANI entry was last updated.
+ */
+interface OutdialANIEntry {
+  organizationId?: string;
+  id?: string;
+  version?: number;
+  name: string;
+  number: string;
+  createdTime?: number;
+  lastUpdatedTime?: number;
+}
+// Note: Only 'name' and 'number' are needed in this component.
+
+/**
+ * OutdialCallComponent renders a dialpad UI for agents to initiate outbound calls.
+ * It allows input of a destination number, selection of an ANI, and validates input.
+ *
+ * This component provides a keypad interface for entering a destination number, validates the input,
+ * allows selection of an ANI (Automatic Number Identification), and triggers an outbound call action.
+ *
+ * @param props - Properties for the OutdialCallComponent.
+ * @property startOutdial - Function to initiate the outdial call with the entered destination number.
+ */
 const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> = (props) => {
-  const {startOutdial} = props;
-  const [destination, setDestination] = useState('');
+  const {startOutdial, outdialANIEntries} = props;
 
-  const updateOutboundNumber = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Allow only valid input that is digits, #, *, and +
-    const VALID_KEYPAD_CHARS = /[\d#*+]/g;
-    const filteredValue = e.target.value.match(VALID_KEYPAD_CHARS)?.join('') || '';
-    setDestination(filteredValue);
+  // State Hooks
+  const [destination, setDestination] = useState('');
+  const [isValidNumber, setIsValidNumber] = useState('');
+  const [selectedANI, setSelectedANI] = useState('');
+
+  // Validate the input format using regex from agent desktop
+  const regExForDnSpecialChars = useMemo(
+    () => new RegExp('^[+1][0-9]{3,18}$|^[*#][+1][0-9*#:]{3,18}$|^[0-9*#]{3,18}$'),
+    []
+  );
+
+  // Give Select an empty list if outdial ANI entries are not provided
+  const outdialANIList: OutdialANIEntry[] = outdialANIEntries ?? [];
+
+  /**
+   * validateOutboundNumber
+   * @param e The input change event
+   * If the input is invalid, sets an error message on dialnumber input
+   */
+  const validateOutboundNumber = (value: string) => {
+    if (value && !regExForDnSpecialChars.test(value)) {
+      setIsValidNumber(OutdialStrings.INCORRECT_DN_FORMAT);
+    } else {
+      setIsValidNumber('');
+    }
   };
 
-  // Function to press a key on the outdial keypad.
-  const handelKeyPress = (value: string) => {
-    setDestination((prev) => prev + value);
+  /**
+   * handleKeyPress
+   * @param value The key value pressed
+   * Appends the pressed key to the destination input field
+   */
+  const handleKeyPress = (value: string) => {
+    setDestination(destination + value);
+    validateOutboundNumber(destination + value);
   };
 
   return (
-    <div className="out-dial-call-box">
-      <section className="out-dial-call-section-box">
-        <fieldset className="out-dial-call-fieldset">
-          <legend className="out-dial-call-legend-box">Outdial Call</legend>
-          <div className="keypad">
-            <input
-              onChange={updateOutboundNumber}
-              id="outBoundDialNumber"
-              placeholder="Enter number to dial"
-              value={destination}
-            />
-            <div className="keys">
-              {['1', '2', '3', '4', '5', '6', '7', '8', '9', '*', '0', '#'].map((key) => (
-                <div key={key} className="key" onClick={() => handelKeyPress(key)}>
-                  {key}
-                </div>
-              ))}
-            </div>
-            <button className="out-dial-call-btn" onClick={() => startOutdial(destination)}>
-              <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24">
-                <path d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.27c1.12.45 2.33.69 3.58.69a1 1 0 011 1v3.5a1 1 0 01-1 1C10.29 21 3 13.71 3 4.5a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.24 2.46.69 3.58a1 1 0 01-.27 1.11l-2.2 2.2z" />
-              </svg>
-            </button>
-          </div>
-        </fieldset>
-      </section>
-    </div>
+    <article className="keypad">
+      <header role="tablist" id="outdial-tablist">
+        <Tab
+          active={true}
+          text={OutdialStrings.DIALPAD_LABEL}
+          iconName={'dialpad-bold'}
+          tabId="dialpad-tab"
+          variant="pill"
+          aria-controls="dialpad-panel"
+        ></Tab>
+      </header>
+      <Input
+        className="input"
+        id="outdial-number-input"
+        name="outdial-number-input"
+        data-testid="outdial-number-input"
+        helpText={isValidNumber}
+        helpTextType={isValidNumber ? 'error' : 'default'}
+        placeholder={OutdialStrings.DN_PLACEHOLDER}
+        value={destination}
+        onChange={(e: unknown) => {
+          const inputValue = (e as React.ChangeEvent<HTMLInputElement>).target.value;
+          setDestination(inputValue);
+          validateOutboundNumber(inputValue);
+        }}
+      />
+      <ul className="keys">
+        {KEY_LIST.map((key) => (
+          <li key={key}>
+            <Button className="key button" onClick={() => handleKeyPress(key)}>
+              {key}
+            </Button>
+          </li>
+        ))}
+      </ul>
+      <Select
+        className="input"
+        label={OutdialStrings.ANI_SELECT_LABEL}
+        id="outdial-ani-option"
+        name="outdial-ani-option-select"
+        data-testid="outdial-ani-option-select"
+        placeholder={OutdialStrings.ANI_SELECT_PLACEHOLDER}
+        onChange={(event: CustomEvent) => {
+          setSelectedANI(event.detail.value);
+        }}
+      >
+        {outdialANIList.map((option: OutdialANIEntry, index: number) => {
+          return (
+            <Option
+              selected={option.number === selectedANI}
+              key={index}
+              value={option.number}
+              name={`outdial-ani-option-${index}`}
+              data-testid={`outdial-ani-option-${index}`}
+            >
+              {option.name}
+            </Option>
+          );
+        })}
+      </Select>
+      <Button
+        data-testid="outdial-call-button"
+        className="button"
+        prefixIcon={'handset-regular'}
+        onClick={() => startOutdial(destination)}
+        disabled={!!isValidNumber || !destination}
+      />
+    </article>
   );
 };
 

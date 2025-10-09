@@ -872,3 +872,20 @@ export const useOutdialCall = (props: useOutdialCallProps) => {
     startOutdial,
   };
 };
+
+// Uncomment once SDK PR#4513 is merged
+// export const getOutdialANIEntries = async (props: useOutdialCallProps) => {
+//   const {cc, logger} = props;
+//   const agentProfile = cc.agentConfig;
+//   const outdialANIId = agentProfile?.outdialANIId || '';
+//   try {
+//     const result = await cc.getOutdialANIEntries(outdialANIId);
+//     return result;
+//   } catch (error) {
+//     logger.error(`Error fetching Outdial ANI entries: ${error}`, {
+//       module: 'widget-OutdialCall#helper.ts',
+//       method: 'getOutdialANIEntries',
+//     });
+//     throw error;
+//   }
+// };
