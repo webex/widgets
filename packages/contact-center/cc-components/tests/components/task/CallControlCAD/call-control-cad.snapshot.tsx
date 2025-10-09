@@ -164,10 +164,13 @@ describe('CallControlCADComponent Snapshots', () => {
       pauseResumeRecording: true,
       endConsult: true,
       recordingIndicator: true,
+      isConferenceInProgress: false,
     },
     logger: mockLogger,
     secondsUntilAutoWrapup: undefined,
     cancelAutoWrapup: jest.fn(),
+    exitConference: jest.fn(),
+    consultConference: jest.fn(),
   };
 
   beforeEach(() => {
