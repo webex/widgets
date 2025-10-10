@@ -170,6 +170,16 @@ enum TASK_EVENTS {
   TASK_RECORDING_PAUSED = 'task:recordingPaused',
   TASK_RECORDING_RESUMED = 'task:recordingResumed',
   TASK_OFFER_CONSULT = 'task:offerConsult',
+  TASK_CONFERENCE_ESTABLISHING = 'task:conferenceEstablishing',
+  TASK_CONFERENCE_STARTED = 'task:conferenceStarted',
+  TASK_CONFERENCE_FAILED = 'task:conferenceFailed',
+  TASK_CONFERENCE_ENDED = 'task:conferenceEnded',
+  TASK_PARTICIPANT_JOINED = 'task:participantJoined',
+  TASK_PARTICIPANT_LEFT = 'task:participantLeft',
+  TASK_CONFERENCE_TRANSFERRED = 'task:conferenceTransferred',
+  TASK_CONFERENCE_TRANSFER_FAILED = 'task:conferenceTransferFailed',
+  TASK_CONFERENCE_END_FAILED = 'task:conferenceEndFailed',
+  TASK_PARTICIPANT_LEFT_FAILED = 'task:participantLeftFailed',
 } // TODO: remove this once cc sdk exports this enum
 
 // Events that are received on the contact center SDK

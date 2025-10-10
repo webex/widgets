@@ -29,10 +29,10 @@ export type useCallControlProps = Pick<
 > &
   Partial<Pick<ControlProps, 'onHoldResume' | 'onEnd' | 'onWrapUp' | 'onRecordingToggle' | 'onToggleMute'>>;
 
-export type Participant = {
-  id: string;
-  pType: 'Customer' | 'Agent' | string;
-  name?: string;
-};
+// export type Participant = {
+//   id: string;
+//   pType: 'Customer' | 'Agent' | string;
+//   name?: string;
+// };
 
 export type useOutdialCallProps = Pick<OutdialCallProps, 'cc' | 'logger'>;

@@ -62,11 +62,15 @@ describe('CallControl Component', () => {
         pauseResumeRecording: false,
         endConsult: false,
         recordingIndicator: false,
+        isConferenceInProgress: false,
       },
       secondsUntilAutoWrapup: 0,
       cancelAutoWrapup: jest.fn(),
       toggleMute: jest.fn(),
       isMuted: false,
+      consultConference: jest.fn(),
+      exitConference: jest.fn(),
+      conferenceParticipants: [],
     });
 
     render(

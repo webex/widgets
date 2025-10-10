@@ -271,11 +271,15 @@ describe('CallControlConsultComponent', () => {
     const cancelButton = screen.getByTestId('cancel-consult-btn');
     expect(cancelButton).toHaveAttribute('aria-describedby');
 
+    const mergeButton = screen.queryByTestId('conference-consult-btn');
+    expect(mergeButton).toHaveAttribute('aria-describedby');
+
     // Verify tooltip labels exist and have content
     const tooltipLabels = screen.container.querySelectorAll('.md-tooltip-label p');
-    expect(tooltipLabels.length).toBe(3);
+    expect(tooltipLabels.length).toBe(4);
     expect(tooltipLabels[0]).toHaveTextContent('Mute');
     expect(tooltipLabels[1]).toHaveTextContent('Transfer Consult');
-    expect(tooltipLabels[2]).toHaveTextContent('End Consult');
+    expect(tooltipLabels[2]).toHaveTextContent('Consult Conference');
+    expect(tooltipLabels[3]).toHaveTextContent('End Consult');
   });
 });

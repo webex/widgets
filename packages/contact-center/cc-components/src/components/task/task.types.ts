@@ -10,6 +10,12 @@ import {
 
 type Enum<T extends Record<string, unknown>> = T[keyof T];
 
+export type Participant = {
+  id: string;
+  pType: 'Customer' | 'Agent' | string;
+  name?: string;
+};
+
 /**
  * Interface representing the TaskProps of a user.
  */
@@ -115,6 +121,11 @@ export interface TaskProps {
    * The logger instance from SDK
    */
   logger: ILogger;
+
+  /**
+   * Agent ID of the logged-in user
+   */
+  agentId: string;
 }
 
 export type IncomingTaskComponentProps = Pick<TaskProps, 'isBrowser' | 'accept' | 'reject' | 'logger'> &
@@ -122,7 +133,7 @@ export type IncomingTaskComponentProps = Pick<TaskProps, 'isBrowser' | 'accept' 
 
 export type TaskListComponentProps = Pick<
   TaskProps,
-  'isBrowser' | 'acceptTask' | 'declineTask' | 'onTaskSelect' | 'logger'
+  'isBrowser' | 'acceptTask' | 'declineTask' | 'onTaskSelect' | 'logger' | 'agentId'
 > &
   Partial<Pick<TaskProps, 'currentTask' | 'taskList'>>;
 
@@ -276,6 +287,16 @@ export interface ControlProps {
   consultCall: (consultDestination: string, destinationType: DestinationType) => void;
 
   /**
+   * Function to merge the consult call in a conference.
+   */
+  consultConference: () => void;
+
+  /**
+   * Function to exit Conference
+   */
+  exitConference: () => void;
+
+  /**
    * Function to end the consult call.
    */
   endConsultCall: () => void;
@@ -401,6 +422,7 @@ export interface ControlProps {
     pauseResumeRecording: boolean;
     endConsult: boolean;
     recordingIndicator: boolean;
+    isConferenceInProgress: boolean;
   };
 
   secondsUntilAutoWrapup?: number;
@@ -409,6 +431,11 @@ export interface ControlProps {
    * Function to cancel the auto wrap-up timer.
    */
   cancelAutoWrapup: () => void;
+
+  /**
+   * List of participants in the conference excluding the agent themselves.
+   */
+  conferenceParticipants: Participant[];
 }
 
 export type CallControlComponentProps = Pick<
@@ -429,6 +456,8 @@ export type CallControlComponentProps = Pick<
   | 'loadBuddyAgents'
   | 'transferCall'
   | 'consultCall'
+  | 'consultConference'
+  | 'exitConference'
   | 'endConsultCall'
   | 'consultInitiated'
   | 'consultTransfer'
@@ -454,6 +483,7 @@ export type CallControlComponentProps = Pick<
   | 'logger'
   | 'secondsUntilAutoWrapup'
   | 'cancelAutoWrapup'
+  | 'conferenceParticipants'
 >;
 
 /**
@@ -525,6 +555,7 @@ export interface CallControlConsultComponentsProps {
   startTimeStamp: number;
   onTransfer?: () => void;
   endConsultCall?: () => void;
+  consultConference?: () => void;
   consultCompleted: boolean;
   isAgentBeingConsulted: boolean;
   isEndConsultEnabled: boolean;
@@ -537,7 +568,7 @@ export interface CallControlConsultComponentsProps {
 /**
  * Type representing the possible menu types in call control.
  */
-export type CallControlMenuType = 'Consult' | 'Transfer';
+export type CallControlMenuType = 'Consult' | 'Transfer' | 'ExitConference';
 
 export const MEDIA_CHANNEL = {
   EMAIL: 'email',
@@ -591,6 +622,7 @@ export interface ControlVisibility {
   pauseResumeRecording: boolean;
   endConsult: boolean;
   recordingIndicator: boolean;
+  isConferenceInProgress: boolean;
 }
 
 export interface MediaTypeInfo {

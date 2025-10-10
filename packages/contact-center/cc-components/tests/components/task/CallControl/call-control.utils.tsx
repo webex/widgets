@@ -73,6 +73,7 @@ describe('CallControl Utils', () => {
     pauseResumeRecording: true,
     endConsult: true,
     recordingIndicator: true,
+    isConferenceInProgress: false,
   };
 
   const mockMediaTypeInfo = {
@@ -442,6 +443,7 @@ describe('CallControl Utils', () => {
       handleToggleHoldFunc: jest.fn(),
       toggleRecording: jest.fn(),
       endCall: jest.fn(),
+      exitConference: jest.fn(),
     };
 
     it('should build buttons with correct configuration when muted', () => {
@@ -455,10 +457,11 @@ describe('CallControl Utils', () => {
         mockFunctions.handleMuteToggleFunc,
         mockFunctions.handleToggleHoldFunc,
         mockFunctions.toggleRecording,
-        mockFunctions.endCall
+        mockFunctions.endCall,
+        mockFunctions.exitConference
       );
 
-      expect(buttons).toHaveLength(6);
+      expect(buttons).toHaveLength(7);
 
       // Check mute button
       const muteButton = buttons.find((b) => b.id === 'mute');
@@ -498,7 +501,8 @@ describe('CallControl Utils', () => {
         mockFunctions.handleMuteToggleFunc,
         mockFunctions.handleToggleHoldFunc,
         mockFunctions.toggleRecording,
-        mockFunctions.endCall
+        mockFunctions.endCall,
+        mockFunctions.exitConference
       );
 
       // Check mute button
@@ -543,7 +547,8 @@ describe('CallControl Utils', () => {
         mockFunctions.handleMuteToggleFunc,
         mockFunctions.handleToggleHoldFunc,
         mockFunctions.toggleRecording,
-        mockFunctions.endCall
+        mockFunctions.endCall,
+        mockFunctions.exitConference
       );
 
       const consultButton = buttons.find((b) => b.id === 'consult');
@@ -583,7 +588,8 @@ describe('CallControl Utils', () => {
         mockFunctions.handleMuteToggleFunc,
         mockFunctions.handleToggleHoldFunc,
         mockFunctions.toggleRecording,
-        mockFunctions.endCall
+        mockFunctions.endCall,
+        mockFunctions.exitConference
       );
 
       let recordButton = buttons.find((b) => b.id === 'record');
@@ -601,12 +607,42 @@ describe('CallControl Utils', () => {
         mockFunctions.handleMuteToggleFunc,
         mockFunctions.handleToggleHoldFunc,
         mockFunctions.toggleRecording,
-        mockFunctions.endCall
+        mockFunctions.endCall,
+        mockFunctions.exitConference
       );
 
       recordButton = buttons.find((b) => b.id === 'record');
       expect(recordButton?.icon).toBe('record-bold');
       expect(recordButton?.tooltip).toBe('Resume Recording');
+    });
+
+    it('should build exit conference button when in conference', () => {
+      mockControlVisibility.isConferenceInProgress = true;
+      const buttons = buildCallControlButtons(
+        false, // isMuted
+        false, // isHeld
+        false, // isRecording
+        false, // isMuteButtonDisabled
+        mockMediaTypeInfo,
+        mockControlVisibility,
+        mockFunctions.handleMuteToggleFunc,
+        mockFunctions.handleToggleHoldFunc,
+        mockFunctions.toggleRecording,
+        mockFunctions.endCall,
+        mockFunctions.exitConference
+      );
+      const exitConferenceButton = buttons.find((b) => b.id === 'exitConference');
+      expect(exitConferenceButton).toEqual({
+        id: 'exitConference',
+        icon: 'exit-room-bold',
+        onClick: mockFunctions.exitConference,
+        tooltip: 'Exit Conference',
+        className: 'call-control-button-muted',
+        disabled: false,
+        isVisible: true,
+        dataTestId: 'call-control:exit-conference',
+      });
+      mockControlVisibility.isConferenceInProgress = false; // Reset for other tests
     });
   });
 

@@ -75,6 +75,7 @@ describe('CallControlComponent', () => {
     pauseResumeRecording: true,
     endConsult: true,
     recordingIndicator: true,
+    isConferenceInProgress: false,
   };
 
   const defaultProps: CallControlComponentProps = {
@@ -119,6 +120,9 @@ describe('CallControlComponent', () => {
     logger: mockLogger,
     secondsUntilAutoWrapup: null,
     cancelAutoWrapup: jest.fn(),
+    exitConference: jest.fn(),
+    consultConference: jest.fn(),
+    conferenceParticipants: [],
   };
 
   // Utility function spies

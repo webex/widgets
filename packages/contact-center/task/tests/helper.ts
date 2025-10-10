@@ -803,6 +803,7 @@ describe('useCallControl', () => {
       wrapup: false,
       endConsult: false,
       conference: false,
+      isConferenceInProgress: false,
     };
     mockGetControlsVisibility.mockReturnValue(mockControlVisibility);
   });
@@ -1962,11 +1963,7 @@ describe('useCallControl', () => {
       },
     };
 
-    let setHoldTimeValue = 0;
-    // @ts-expect-error Mock useState to capture the holdTime value
-    jest.spyOn(React, 'useState').mockImplementation((init) => [init, (v) => (setHoldTimeValue = v)]);
-
-    renderHook(() =>
+    const {result} = renderHook(() =>
       useCallControl({
         currentTask: mockTaskWithHold,
         onHoldResume: mockOnHoldResume,
@@ -1981,11 +1978,9 @@ describe('useCallControl', () => {
     );
 
     // The initial holdTime should be about 7 seconds
-    expect(setHoldTimeValue).toBeGreaterThanOrEqual(6);
-    expect(setHoldTimeValue).toBeLessThanOrEqual(7);
-
-    // Restore useState after this test so it doesn't affect others
-    (React.useState as unknown as {mockRestore?: () => void}).mockRestore?.();
+    // Note: We check the result.current.holdTime directly instead of mocking useState
+    expect(result.current.holdTime).toBeGreaterThanOrEqual(6);
+    expect(result.current.holdTime).toBeLessThanOrEqual(7);
   });
 
   it('should reset holdTime to 0 when the worker sends stop', async () => {

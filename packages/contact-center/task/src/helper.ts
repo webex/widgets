@@ -1,8 +1,9 @@
 import {useEffect, useCallback, useState, useRef, useMemo} from 'react';
 import {ITask} from '@webex/contact-center';
-import {useCallControlProps, UseTaskListProps, UseTaskProps, Participant, useOutdialCallProps} from './task.types';
+import {useCallControlProps, UseTaskListProps, UseTaskProps, useOutdialCallProps} from './task.types';
 import store, {TASK_EVENTS, BuddyDetails, DestinationType, ContactServiceQueue} from '@webex/cc-store';
-import {findHoldTimestamp, getControlsVisibility} from './Utils/task-util';
+import {findHoldTimestamp, getConferenceParticipants, getControlsVisibility} from './Utils/task-util';
+import {Participant} from '@webex/cc-components';
 
 const ENGAGED_LABEL = 'ENGAGED';
 const ENGAGED_USERNAME = 'Engaged';
@@ -284,6 +285,7 @@ export const useCallControl = (props: useCallControlProps) => {
   const [secondsUntilAutoWrapup, setsecondsUntilAutoWrapup] = useState<number | null>(null);
   const workerRef = useRef<Worker | null>(null);
   const [lastTargetType, setLastTargetType] = useState<'agent' | 'queue'>('agent');
+  const [conferenceParticipants, setConferenceParticipants] = useState<Participant[]>([]);
 
   const workerScript = `
     let intervalId = null;
@@ -348,6 +350,13 @@ export const useCallControl = (props: useCallControlProps) => {
       }
     };
   }, [currentTask?.data?.interaction]);
+
+  useEffect(() => {
+    if (currentTask && store?.cc?.agentConfig?.agentId) {
+      const participants = getConferenceParticipants(currentTask, store.cc.agentConfig.agentId);
+      setConferenceParticipants(participants);
+    }
+  }, [currentTask]);
   // Function to extract consulting agent information
   const extractConsultingAgent = useCallback(() => {
     try {
@@ -614,7 +623,6 @@ export const useCallControl = (props: useCallControlProps) => {
       const intendedMuteState = !isMuted;
 
       try {
-        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         await currentTask.toggleMute();
 
         // Only update state after successful SDK call
@@ -687,11 +695,30 @@ export const useCallControl = (props: useCallControlProps) => {
 
   const transferCall = async (to: string, type: DestinationType) => {
     try {
-      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       await currentTask.transfer({to, destinationType: type});
       logger.info('transferCall success', {module: 'useCallControl', method: 'transferCall'});
     } catch (error) {
       logger.error(`Error transferring call: ${error}`, {module: 'useCallControl', method: 'transferCall'});
+      throw error;
+    }
+  };
+
+  const consultConference = async () => {
+    try {
+      await currentTask.consultConference();
+      logger.info('consultConference success', {module: 'useCallControl', method: 'consultConference'});
+    } catch (error) {
+      logger.error(`Error consulting conference: ${error}`, {module: 'useCallControl', method: 'consultConference'});
+      throw error;
+    }
+  };
+
+  const exitConference = async () => {
+    try {
+      await currentTask.exitConference();
+      logger.info('exitConference success', {module: 'useCallControl', method: 'exitConference'});
+    } catch (error) {
+      logger.error(`Error exiting conference: ${error}`, {module: 'useCallControl', method: 'exitConference'});
       throw error;
     }
   };
@@ -709,7 +736,6 @@ export const useCallControl = (props: useCallControlProps) => {
     }
 
     try {
-      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       await currentTask.consult(consultPayload);
       store.setIsQueueConsultInProgress(false);
       if (destinationType === 'queue') {
@@ -736,7 +762,6 @@ export const useCallControl = (props: useCallControlProps) => {
     };
 
     try {
-      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       await currentTask.endConsult(consultEndPayload);
     } catch (error) {
       logError(`Error ending consult call: ${error}`, 'endConsultCall');
@@ -746,8 +771,16 @@ export const useCallControl = (props: useCallControlProps) => {
 
   const consultTransfer = async () => {
     try {
-      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
-      await currentTask.consultTransfer();
+      if (currentTask.data.isConferenceInProgress) {
+        logger.info('Conference in progress, using transferConference', {
+          module: 'useCallControl',
+          method: 'transferCall',
+        });
+        await currentTask.transferConference();
+      } else {
+        logger.info('Consult transfer initiated', {module: 'useCallControl', method: 'consultTransfer'});
+        await currentTask.consultTransfer();
+      }
       store.setConsultInitiated(true);
     } catch (error) {
       logError(`Error transferring consult call: ${error}`, 'consultTransfer');
@@ -791,7 +824,6 @@ export const useCallControl = (props: useCallControlProps) => {
         logger.error('CC-Widgets: CallControl: Error initializing auto wrap-up timer', {
           module: 'widget-cc-task#helper.ts',
           method: 'useCallControl#autoWrapupTimer',
-          //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
           error,
         });
       }
@@ -825,6 +857,8 @@ export const useCallControl = (props: useCallControlProps) => {
     consultCall,
     endConsultCall,
     consultTransfer,
+    consultConference,
+    exitConference,
     consultAgentName,
     setConsultAgentName,
     consultAgentId,
@@ -836,6 +870,7 @@ export const useCallControl = (props: useCallControlProps) => {
     controlVisibility,
     secondsUntilAutoWrapup,
     cancelAutoWrapup,
+    conferenceParticipants,
   };
 };
 

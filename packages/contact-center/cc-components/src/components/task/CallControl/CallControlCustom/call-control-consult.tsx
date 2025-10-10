@@ -11,6 +11,7 @@ import {
   handleMuteToggle,
   getConsultStatusText,
   createTimerKey,
+  handleConsultConferencePress,
 } from './call-control-custom.utils';
 
 const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> = ({
@@ -18,6 +19,7 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
   startTimeStamp,
   onTransfer,
   endConsultCall,
+  consultConference,
   consultCompleted,
   isAgentBeingConsulted,
   isEndConsultEnabled,
@@ -42,6 +44,10 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
     handleMuteToggle(onToggleConsultMute, setIsMuteDisabled, logger);
   };
 
+  const handleConsultConference = () => {
+    handleConsultConferencePress(consultConference, logger);
+  };
+
   const buttons = createConsultButtons(
     isMuted,
     isMuteDisabled,
@@ -51,7 +57,8 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
     muteUnmute,
     onTransfer ? handleTransfer : undefined,
     handleConsultMuteToggle,
-    handleEndConsult
+    handleEndConsult,
+    handleConsultConference
   );
 
   // Filter buttons that should be shown, then map them

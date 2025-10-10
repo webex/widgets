@@ -22,6 +22,7 @@ describe('getControlsVisibility', () => {
       pauseResumeRecording: true,
       endConsult: true,
       recordingIndicator: true,
+      isConferenceInProgress: false,
     };
 
     expect(getControlsVisibility(deviceType, featureFlags, mockTask)).toEqual(expectedControls);
@@ -48,6 +49,7 @@ describe('getControlsVisibility', () => {
       pauseResumeRecording: false,
       endConsult: false,
       recordingIndicator: true,
+      isConferenceInProgress: false,
     };
 
     expect(getControlsVisibility(deviceType, featureFlags, mockTask)).toEqual(expectedControls);
@@ -74,6 +76,7 @@ describe('getControlsVisibility', () => {
       pauseResumeRecording: true,
       endConsult: true,
       recordingIndicator: true,
+      isConferenceInProgress: false,
     };
 
     expect(getControlsVisibility(deviceType, featureFlags, mockTask)).toEqual(expectedControls);
@@ -106,6 +109,7 @@ describe('getControlsVisibility', () => {
       pauseResumeRecording: true,
       endConsult: false,
       recordingIndicator: true,
+      isConferenceInProgress: false,
     };
 
     expect(getControlsVisibility(deviceType, featureFlags, task)).toEqual(expectedControls);
@@ -132,6 +136,7 @@ describe('getControlsVisibility', () => {
       pauseResumeRecording: true,
       endConsult: true,
       recordingIndicator: true,
+      isConferenceInProgress: false,
     };
 
     expect(getControlsVisibility(deviceType, featureFlags, mockTask)).toEqual(expectedControls);
@@ -161,6 +166,7 @@ describe('getControlsVisibility', () => {
       pauseResumeRecording: true,
       endConsult: true,
       recordingIndicator: true,
+      isConferenceInProgress: false,
     };
 
     expect(getControlsVisibility(deviceType, featureFlags, task)).toEqual(expectedControls);
@@ -190,6 +196,7 @@ describe('getControlsVisibility', () => {
       pauseResumeRecording: false,
       endConsult: false,
       recordingIndicator: false,
+      isConferenceInProgress: false,
     };
 
     expect(getControlsVisibility(deviceType, featureFlags, task)).toEqual(expectedControls);
@@ -219,6 +226,7 @@ describe('getControlsVisibility', () => {
       pauseResumeRecording: false,
       endConsult: false,
       recordingIndicator: false,
+      isConferenceInProgress: false,
     };
 
     expect(getControlsVisibility(deviceType, featureFlags, task)).toEqual(expectedControls);
@@ -266,6 +274,7 @@ describe('getControlsVisibility', () => {
       pauseResumeRecording: false,
       endConsult: false,
       recordingIndicator: false,
+      isConferenceInProgress: false,
     });
   });
 });

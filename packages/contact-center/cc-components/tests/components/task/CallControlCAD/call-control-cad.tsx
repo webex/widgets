@@ -95,6 +95,7 @@ describe('CallControlCADComponent', () => {
     pauseResumeRecording: true,
     endConsult: true,
     recordingIndicator: true,
+    isConferenceInProgress: false,
   };
 
   const defaultProps: CallControlComponentProps = {
@@ -139,6 +140,9 @@ describe('CallControlCADComponent', () => {
     logger: mockLogger,
     secondsUntilAutoWrapup: undefined,
     cancelAutoWrapup: jest.fn(),
+    exitConference: jest.fn(),
+    consultConference: jest.fn(),
+    conferenceParticipants: [],
   };
 
   beforeEach(() => {
