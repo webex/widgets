@@ -18,7 +18,6 @@ import {
   handleButtonPress,
 } from '../../../../src/components/task/CallControl/call-control.utils';
 import * as utils from '../../../../src/utils';
-import {mock} from 'node:test';
 
 // Mock the external utilities
 jest.mock('../../../../src/utils', () => ({

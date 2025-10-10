@@ -30,7 +30,7 @@ describe('isIncomingTask', () => {
           },
         };
 
-        const result = isIncomingTask(testTask);
+        const result = isIncomingTask(testTask, 'agent1');
         expect(result).toBe(true);
       });
     });
@@ -47,7 +47,7 @@ describe('isIncomingTask', () => {
           participants: undefined,
         },
       };
-      expect(isIncomingTask(testTask)).toBe(true);
+      expect(isIncomingTask(testTask, 'agent1')).toBe(true);
 
       // Test with undefined agentId
       testTask.data = {
@@ -60,7 +60,7 @@ describe('isIncomingTask', () => {
           participants: {agent1: {hasJoined: false}},
         },
       };
-      expect(isIncomingTask(testTask)).toBe(true);
+      expect(isIncomingTask(testTask, undefined as unknown as string)).toBe(true);
     });
   });
 
@@ -77,7 +77,7 @@ describe('isIncomingTask', () => {
           participants: {agent1: {hasJoined: false}},
         },
       };
-      expect(isIncomingTask(testTask)).toBe(false);
+      expect(isIncomingTask(testTask, 'agent1')).toBe(false);
 
       // Test agent has already joined
       testTask.data = {
@@ -90,7 +90,7 @@ describe('isIncomingTask', () => {
           participants: {agent1: {hasJoined: true}},
         },
       };
-      expect(isIncomingTask(testTask)).toBe(false);
+      expect(isIncomingTask(testTask, 'agent1')).toBe(false);
     });
 
     it('should return false for invalid task states', () => {
@@ -107,7 +107,7 @@ describe('isIncomingTask', () => {
             participants: {agent1: {hasJoined: false}},
           },
         };
-        expect(isIncomingTask(testTask)).toBe(false);
+        expect(isIncomingTask(testTask, 'agent1')).toBe(false);
       });
     });
   });
@@ -115,10 +115,10 @@ describe('isIncomingTask', () => {
   describe('edge cases', () => {
     it('should handle invalid task data gracefully', () => {
       // Null/undefined tasks
-      expect(isIncomingTask(null as unknown as ITask)).toBe(false);
-      expect(isIncomingTask(undefined as unknown as ITask)).toBe(false);
-      expect(isIncomingTask({} as ITask)).toBe(false);
-      expect(isIncomingTask({data: null} as unknown as ITask)).toBe(false);
+      expect(isIncomingTask(null as unknown as ITask, 'agent1')).toBe(false);
+      expect(isIncomingTask(undefined as unknown as ITask, 'agent1')).toBe(false);
+      expect(isIncomingTask({} as ITask, 'agent1')).toBe(false);
+      expect(isIncomingTask({data: null} as unknown as ITask, 'agent1')).toBe(false);
 
       // Missing interaction
       testTask.data = {
@@ -127,7 +127,7 @@ describe('isIncomingTask', () => {
         agentId: 'agent1',
         interaction: undefined,
       } as unknown as ITask['data'];
-      expect(isIncomingTask(testTask)).toBe(false);
+      expect(isIncomingTask(testTask, 'agent1')).toBe(false);
     });
 
     it('should handle participant edge cases correctly', () => {
@@ -142,7 +142,7 @@ describe('isIncomingTask', () => {
           participants: {},
         },
       };
-      expect(isIncomingTask(testTask)).toBe(true);
+      expect(isIncomingTask(testTask, 'agent1')).toBe(true);
 
       // Agent not found in participants
       testTask.data = {
@@ -155,7 +155,7 @@ describe('isIncomingTask', () => {
           participants: {agent2: {hasJoined: true}},
         },
       };
-      expect(isIncomingTask(testTask)).toBe(true);
+      expect(isIncomingTask(testTask, 'agent1')).toBe(true);
 
       // Multiple agents with different join states - only current agent matters
       testTask.data = {
@@ -171,7 +171,7 @@ describe('isIncomingTask', () => {
           },
         },
       };
-      expect(isIncomingTask(testTask)).toBe(true);
+      expect(isIncomingTask(testTask, 'agent1')).toBe(true);
     });
   });
 });

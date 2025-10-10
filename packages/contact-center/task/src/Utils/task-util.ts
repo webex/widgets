@@ -40,13 +40,13 @@ export function getControlsVisibility(
 
       holdResume: isCall && ((isBrowser && webRtcEnabled) || isAgentDN || isExtension), // Applicable for all type of station login
       consult: isCall && ((isBrowser && webRtcEnabled) || isAgentDN || isExtension), // Applicable for all type of station login
-      transfer: isTransferVisibility && !task.data.isConferenceInProgress,
+      transfer: isTransferVisibility && !(task.data.isConferenceInProgress ?? false),
       conference: (isBrowser && isCall && webRtcEnabled) || isChat, // This needs further testing after we add support
       wrapup: task?.data?.wrapUpRequired ?? false, // Applicable for all type of station login and media type and getting actual value from task data
       pauseResumeRecording: isCall && ((isBrowser && webRtcEnabled) || isAgentDN || isExtension), // Getting feature flag (isRecordingManagementEnabled) value as undefined, need further testing
       endConsult: isEndConsultEnabled && isCall && ((isBrowser && webRtcEnabled) || isAgentDN || isExtension),
       recordingIndicator: isCall,
-      isConferenceInProgress: task.data.isConferenceInProgress,
+      isConferenceInProgress: task.data.isConferenceInProgress ?? false,
     };
 
     return controls;
@@ -94,12 +94,17 @@ export function findHoldTimestamp(interaction: Interaction, mType = 'mainCall', 
 }
 
 export const getIsConferenceInProgress = (task: ITask): boolean => {
-  const mediaMainCall = task?.data?.interaction?.media[task?.data?.interactionId];
+  // Early return if required data is missing
+  if (!task?.data?.interaction?.media || !task?.data?.interactionId) {
+    return false;
+  }
+
+  const mediaMainCall = task.data.interaction.media[task.data.interactionId];
   const participantsInMainCall = new Set(mediaMainCall?.participants);
   const participants = task?.data?.interaction?.participants;
 
   const agentParticipants = new Set();
-  if (participantsInMainCall.size > 0) {
+  if (participantsInMainCall.size > 0 && participants) {
     participantsInMainCall.forEach((participantId: string) => {
       const participant = participants[participantId];
       if (
@@ -119,11 +124,17 @@ export const getIsConferenceInProgress = (task: ITask): boolean => {
 
 export const getConferenceParticipants = (task: ITask, agentId: string): Participant[] => {
   const participantsList: Participant[] = [];
-  const mediaMainCall = task?.data?.interaction?.media[task?.data?.interactionId];
+
+  // Early return if required data is missing
+  if (!task?.data?.interaction?.media || !task?.data?.interactionId) {
+    return participantsList;
+  }
+
+  const mediaMainCall = task.data.interaction.media[task.data.interactionId];
   const participantsInMainCall = new Set(mediaMainCall?.participants);
   const participants = task?.data?.interaction?.participants;
 
-  if (participantsInMainCall.size > 0) {
+  if (participantsInMainCall.size > 0 && participants) {
     participantsInMainCall.forEach((participantId: string) => {
       const participant = participants[participantId];
       if (
