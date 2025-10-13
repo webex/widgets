@@ -715,6 +715,7 @@ export type CategoryType = 'Agents' | 'Queues' | 'Dial Number' | 'Entry Point';
 export const CATEGORY_DIAL_NUMBER: CategoryType = 'Dial Number';
 export const CATEGORY_ENTRY_POINT: CategoryType = 'Entry Point';
 export const CATEGORY_QUEUES: CategoryType = 'Queues';
+export const CATEGORY_AGENTS: CategoryType = 'Agents';
 
 /**
  * Parameters for `useConsultTransferPopover` hook.

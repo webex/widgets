@@ -9,6 +9,7 @@ import {
   CATEGORY_DIAL_NUMBER,
   CATEGORY_ENTRY_POINT,
   CATEGORY_QUEUES,
+  CATEGORY_AGENTS,
 } from '../../task.types';
 import {debounce} from './call-control-custom.utils';
 
@@ -121,10 +122,6 @@ export const usePaginatedData = <T, U>(
   return {data, page, hasMore, loading, loadData, reset};
 };
 
-// CategoryType moved to shared types
-
-// UseConsultTransferParams moved to shared types
-
 export function useConsultTransferPopover({
   showDialNumberTab,
   showEntryPointTab,
@@ -183,7 +180,7 @@ export function useConsultTransferPopover({
   } = usePaginatedData<ContactServiceQueue, {id: string; name: string; description?: string}>(
     getQueues,
     (entry) => ({id: entry.id, name: entry.name, description: entry.description}),
-    'Queues',
+    CATEGORY_QUEUES,
     logger
   );
 
@@ -227,7 +224,7 @@ export function useConsultTransferPopover({
   const handleSearchChange = useCallback(
     (value: string) => {
       setSearchQuery(value);
-      if (selectedCategory !== 'Agents') {
+      if (selectedCategory !== CATEGORY_AGENTS) {
         debouncedSearchRef.current?.(value, selectedCategory);
       }
     },
@@ -246,7 +243,7 @@ export function useConsultTransferPopover({
   );
 
   const createCategoryClickHandler = (category: CategoryType) => () => handleCategoryChange(category);
-  const handleAgentsClick = createCategoryClickHandler('Agents');
+  const handleAgentsClick = createCategoryClickHandler(CATEGORY_AGENTS);
   const handleQueuesClick = createCategoryClickHandler(CATEGORY_QUEUES);
   const handleDialNumberClick = createCategoryClickHandler(CATEGORY_DIAL_NUMBER);
   const handleEntryPointClick = createCategoryClickHandler(CATEGORY_ENTRY_POINT);
