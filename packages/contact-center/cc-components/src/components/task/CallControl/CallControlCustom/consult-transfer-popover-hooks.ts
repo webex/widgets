@@ -86,7 +86,7 @@ export const usePaginatedData = <T, U>(
         }
 
         const newPage = response.meta?.page ?? currentPage;
-        const totalPages = response.meta?.totalPages ?? 1;
+        const totalPages = response.meta?.totalPages ?? 0;
 
         setPage(newPage);
         setHasMore(newPage < totalPages - 1);
