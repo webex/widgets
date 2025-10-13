@@ -104,7 +104,9 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
           variant={selectedCategory === 'Agents' ? 'primary' : 'secondary'}
           size="small"
           onClick={handleAgentsClick}
-          className="consult-category-button-standard"
+          className={`consult-category-button-standard ${
+            selectedCategory === 'Agents' ? 'consult-category-button-active' : ''
+          }`}
         >
           Agents
         </Button>
@@ -113,7 +115,9 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
           size="small"
           onClick={handleQueuesClick}
           disabled={!allowConsultToQueue}
-          className="consult-category-button-standard"
+          className={`consult-category-button-standard ${
+            selectedCategory === 'Queues' ? 'consult-category-button-active' : ''
+          }`}
         >
           Queues
         </Button>
@@ -122,7 +126,9 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
             variant={selectedCategory === 'Dial Number' ? 'primary' : 'secondary'}
             size="small"
             onClick={handleDialNumberClick}
-            className="consult-category-button-wide"
+            className={`consult-category-button-wide ${
+              selectedCategory === 'Dial Number' ? 'consult-category-button-active' : ''
+            }`}
           >
             Dial Number
           </Button>
@@ -132,7 +138,9 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
             variant={selectedCategory === 'Entry Point' ? 'primary' : 'secondary'}
             size="small"
             onClick={handleEntryPointClick}
-            className="consult-category-button-wide"
+            className={`consult-category-button-wide ${
+              selectedCategory === 'Entry Point' ? 'consult-category-button-active' : ''
+            }`}
           >
             Entry Point
           </Button>

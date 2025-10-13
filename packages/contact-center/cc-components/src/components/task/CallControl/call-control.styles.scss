@@ -237,6 +237,19 @@
       min-width: 6.25rem;
     }
 
+    .consult-category-button-standard:not(.consult-category-button-active),
+    .consult-category-button-wide:not(.consult-category-button-active) {
+      background-color: transparent;
+      border-color: transparent;
+      box-shadow: none;
+    }
+
+    .consult-category-button-standard:not(.consult-category-button-active):hover,
+    .consult-category-button-wide:not(.consult-category-button-active):hover {
+      background-color: var(--mds-color-theme-background-secondary-hover);
+      border-color: transparent;
+    }
+
     .consult-load-more {
       padding: 0.5rem;
       text-align: center;

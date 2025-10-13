@@ -3,7 +3,8 @@ import {render, fireEvent, waitFor, act} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ConsultTransferPopoverComponent from '../../../../../src/components/task/CallControl/CallControlCustom/consult-transfer-popover';
 import {ContactServiceQueue} from '@webex/cc-store';
-import * as utils from '../../../../..//src/components/task/CallControl/CallControlCustom/call-control-custom.utils';
+// hooks import no longer needed in this test
+import * as utils from '../../../../../src/components/task/CallControl/CallControlCustom/call-control-custom.utils';
 
 const loggerMock = {
   log: jest.fn(),
@@ -264,33 +265,15 @@ describe('ConsultTransferPopoverComponent', () => {
     });
 
     it('debounces and triggers queue search on 2+ chars and on clear', async () => {
-      const queuesLoadData = jest.fn();
-      const dialLoadData = jest.fn();
-      const epLoadData = jest.fn();
+      const getQueuesMock = jest.fn().mockResolvedValue({
+        data: [
+          {id: 'queue1', name: 'Queue One'} as ContactServiceQueue,
+          {id: 'queue2', name: 'Queue Two'} as ContactServiceQueue,
+        ],
+        meta: {page: 0, totalPages: 1},
+      });
 
-      const mockUsePaginated = jest
-        .spyOn(utils, 'usePaginatedData')
-        .mockImplementation((_getFn: unknown, _mapper: unknown, label: string) => {
-          const base = {
-            data: [],
-            page: 0,
-            hasMore: false,
-            loading: false,
-            reset: jest.fn(),
-          } as {
-            data: unknown[];
-            page: number;
-            hasMore: boolean;
-            loading: boolean;
-            reset: jest.Mock;
-          } & {loadData?: jest.Mock};
-          if (label === 'Queues') return {...base, loadData: queuesLoadData};
-          if (label === 'Dial Numbers') return {...base, loadData: dialLoadData};
-          if (label === 'Entry Points') return {...base, loadData: epLoadData};
-          return {...base, loadData: jest.fn()};
-        });
-
-      const screen = await render(<ConsultTransferPopoverComponent {...baseProps} />);
+      const screen = await render(<ConsultTransferPopoverComponent {...baseProps} getQueues={getQueuesMock} />);
 
       // Switch to Queues category
       fireEvent.click(screen.getByText('Queues'));
@@ -301,50 +284,27 @@ describe('ConsultTransferPopoverComponent', () => {
       await act(async () => {
         jest.advanceTimersByTime(500);
       });
-      const initialCalls = queuesLoadData.mock.calls.length;
-      expect(initialCalls).toBeGreaterThanOrEqual(1);
+      expect(getQueuesMock).toHaveBeenCalledTimes(1);
 
       fireEvent.change(input, {target: {value: 'qu'}});
       await act(async () => {
         jest.advanceTimersByTime(500);
       });
-      const afterTwoChars = queuesLoadData.mock.calls.length;
-      expect(queuesLoadData).toHaveBeenCalledWith(0, 'qu', true);
-      expect(afterTwoChars).toBe(initialCalls + 1);
+      const afterTwoChars = getQueuesMock.mock.calls.length;
+      expect(getQueuesMock).toHaveBeenLastCalledWith(expect.objectContaining({page: 0, pageSize: 25, search: 'qu'}));
+      expect(afterTwoChars).toBe(2);
 
       fireEvent.change(input, {target: {value: ''}});
       await act(async () => {
         jest.advanceTimersByTime(500);
       });
-      expect(queuesLoadData).toHaveBeenCalledWith(0, '', true);
-      expect(queuesLoadData.mock.calls.length).toBe(afterTwoChars + 1);
-
-      // Ensure only queues loader was used
-      expect(dialLoadData).not.toHaveBeenCalled();
-      expect(epLoadData).not.toHaveBeenCalled();
-
-      mockUsePaginated.mockRestore();
+      expect(getQueuesMock).toHaveBeenLastCalledWith(expect.objectContaining({page: 0, pageSize: 25}));
+      expect(getQueuesMock.mock.calls.length).toBe(afterTwoChars + 1);
     });
 
     it('does not trigger search when category is Agents', async () => {
-      const queuesLoadData = jest.fn();
-      const mockUsePaginated = jest
-        .spyOn(utils, 'usePaginatedData')
-        .mockImplementation((_getFn: unknown, _mapper: unknown, label: string) => {
-          const base = {
-            data: [] as unknown[],
-            page: 0,
-            hasMore: false,
-            loading: false,
-            reset: jest.fn(),
-          } as {data: unknown[]; page: number; hasMore: boolean; loading: boolean; reset: jest.Mock} & {
-            loadData?: jest.Mock;
-          };
-          if (label === 'Queues') return {...base, loadData: queuesLoadData};
-          return {...base, loadData: jest.fn()};
-        });
-
-      const screen = await render(<ConsultTransferPopoverComponent {...baseProps} />);
+      const getQueuesMock = jest.fn().mockResolvedValue({data: [], meta: {page: 0, totalPages: 0}});
+      const screen = await render(<ConsultTransferPopoverComponent {...baseProps} getQueues={getQueuesMock} />);
 
       // Default category is Agents
       const input = screen.getByPlaceholderText('Search...') as HTMLInputElement;
@@ -352,9 +312,7 @@ describe('ConsultTransferPopoverComponent', () => {
       await act(async () => {
         jest.advanceTimersByTime(500);
       });
-      expect(queuesLoadData).not.toHaveBeenCalled();
-
-      mockUsePaginated.mockRestore();
+      expect(getQueuesMock).not.toHaveBeenCalled();
     });
   });
 });
