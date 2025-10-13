@@ -231,6 +231,12 @@ const DIALNUMBER: string = 'AGENT_DN';
 const EXTENSION: string = 'EXTENSION';
 const DESKTOP: string = 'BROWSER';
 
+// Common string constants used across the store wrapper
+const MEDIA_TYPE_TELEPHONY_LOWER = 'telephony';
+const MEDIA_TYPE_TELEPHONY_UPPER = 'TELEPHONY';
+const DEVICE_TYPE_BROWSER = 'BROWSER';
+const AGENT_STATE_AVAILABLE = 'Available';
+
 const LoginOptions: {[key: string]: string} = {
   [DIALNUMBER]: 'Dial Number',
   [EXTENSION]: 'Extension',
@@ -245,6 +251,9 @@ const ERROR_TRIGGERING_IDLE_CODES = {
   CHANNEL_FAILURE: 'Channel_Failure',
   RONA: 'RONA',
 };
+
+// Module identifiers for logger context
+const STORE_EVENTS_WRAPPER_MODULE = 'storeEventsWrapper.ts';
 
 export type {
   IContactCenter,
@@ -283,6 +292,11 @@ export {
   DIALNUMBER,
   EXTENSION,
   DESKTOP,
+  MEDIA_TYPE_TELEPHONY_LOWER,
+  MEDIA_TYPE_TELEPHONY_UPPER,
+  DEVICE_TYPE_BROWSER,
+  AGENT_STATE_AVAILABLE,
   LoginOptions,
   ERROR_TRIGGERING_IDLE_CODES,
+  STORE_EVENTS_WRAPPER_MODULE,
 };

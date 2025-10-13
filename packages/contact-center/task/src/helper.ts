@@ -1,6 +1,13 @@
 import {useEffect, useCallback, useState, useRef, useMemo} from 'react';
 import {ITask} from '@webex/contact-center';
-import {useCallControlProps, UseTaskListProps, UseTaskProps, Participant, useOutdialCallProps} from './task.types';
+import {
+  useCallControlProps,
+  UseTaskListProps,
+  UseTaskProps,
+  Participant,
+  useOutdialCallProps,
+  PaginatedListParams,
+} from './task.types';
 import store, {TASK_EVENTS, BuddyDetails, DestinationType, ContactServiceQueue} from '@webex/cc-store';
 import {findHoldTimestamp, getControlsVisibility} from './Utils/task-util';
 
@@ -427,7 +434,7 @@ export const useCallControl = (props: useCallControlProps) => {
   }, [logger]);
 
   const getAddressBookEntries = useCallback(
-    async ({page, pageSize, search}: {page: number; pageSize: number; search?: string}) => {
+    async ({page, pageSize, search}: PaginatedListParams) => {
       try {
         return await store.getAddressBookEntries({page, pageSize, search});
       } catch (error) {
@@ -442,7 +449,7 @@ export const useCallControl = (props: useCallControlProps) => {
   );
 
   const getEntryPoints = useCallback(
-    async ({page, pageSize, search}: {page: number; pageSize: number; search?: string}) => {
+    async ({page, pageSize, search}: PaginatedListParams) => {
       try {
         return await store.getEntryPoints({page, pageSize, search});
       } catch (error) {
@@ -457,7 +464,7 @@ export const useCallControl = (props: useCallControlProps) => {
   );
 
   const getQueuesFetcher = useCallback(
-    async ({page, pageSize, search}: {page: number; pageSize: number; search?: string}) => {
+    async ({page, pageSize, search}: PaginatedListParams) => {
       try {
         return await store.getQueues('TELEPHONY', {page, pageSize, search});
       } catch (error) {

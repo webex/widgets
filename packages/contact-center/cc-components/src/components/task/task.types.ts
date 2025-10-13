@@ -691,16 +691,42 @@ export interface TimerUIState {
 /**
  * Type for fetch function
  */
-export type FetchPaginatedList<T> = (params: {
+export type PaginatedListParams = {
   page: number;
   pageSize: number;
   search?: string;
-}) => Promise<{data: T[]; meta?: {page?: number; totalPages?: number}}>;
+};
+
+export type FetchPaginatedList<T> = (
+  params: PaginatedListParams
+) => Promise<{data: T[]; meta?: {page?: number; totalPages?: number}}>;
 
 /**
  * Type for transform function
  */
 export type TransformPaginatedData<T, U> = (item: T, page: number, index: number) => U;
+
+/**
+ * Categories displayed in Consult/Transfer popover.
+ */
+export type CategoryType = 'Agents' | 'Queues' | 'Dial Number' | 'Entry Point';
+
+/** Category string constants to avoid typos and ease reuse */
+export const CATEGORY_DIAL_NUMBER: CategoryType = 'Dial Number';
+export const CATEGORY_ENTRY_POINT: CategoryType = 'Entry Point';
+export const CATEGORY_QUEUES: CategoryType = 'Queues';
+
+/**
+ * Parameters for `useConsultTransferPopover` hook.
+ */
+export type UseConsultTransferParams = {
+  showDialNumberTab: boolean;
+  showEntryPointTab: boolean;
+  getAddressBookEntries?: FetchPaginatedList<AddressBookEntry>;
+  getEntryPoints?: FetchPaginatedList<EntryPointRecord>;
+  getQueues?: FetchPaginatedList<ContactServiceQueue>;
+  logger?: ILogger;
+};
 
 /**
  * Options to configure Consult/Transfer popover behavior and visibility.

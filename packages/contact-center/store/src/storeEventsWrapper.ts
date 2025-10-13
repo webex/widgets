@@ -24,6 +24,12 @@ import {
   ERROR_TRIGGERING_IDLE_CODES,
 } from './store.types';
 import Store from './store';
+import {
+  DEVICE_TYPE_BROWSER,
+  MEDIA_TYPE_TELEPHONY_LOWER,
+  MEDIA_TYPE_TELEPHONY_UPPER,
+  AGENT_STATE_AVAILABLE,
+} from './store.types';
 import {runInAction} from 'mobx';
 import {isIncomingTask} from './task-utils';
 
@@ -405,7 +411,7 @@ class StoreWrapper implements IStoreWrapper {
       taskToRemove.off(TASK_EVENTS.AGENT_OFFER_CONTACT, this.refreshTaskList);
       taskToRemove.off(TASK_EVENTS.TASK_HOLD, this.refreshTaskList);
       taskToRemove.off(TASK_EVENTS.TASK_UNHOLD, this.refreshTaskList);
-      if (this.deviceType === 'BROWSER') {
+      if (this.deviceType === DEVICE_TYPE_BROWSER) {
         taskToRemove.off(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
         this.setCallControlAudio(null);
       }
@@ -428,9 +434,9 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   handleTaskMuteState = (task: ITask): void => {
-    const isBrowser = this.deviceType === 'BROWSER';
+    const isBrowser = this.deviceType === DEVICE_TYPE_BROWSER;
     const webRtcEnabled = this.featureFlags?.webRtcEnabled;
-    const isTelephony = task?.data?.interaction?.mediaType === 'telephony';
+    const isTelephony = task?.data?.interaction?.mediaType === MEDIA_TYPE_TELEPHONY_LOWER;
 
     if (isBrowser && isTelephony && webRtcEnabled) {
       this.setIsMuted(false);
@@ -513,7 +519,7 @@ class StoreWrapper implements IStoreWrapper {
         developerName: ENGAGED_LABEL,
         name: ENGAGED_USERNAME,
       });
-      if (this.deviceType === 'BROWSER') {
+      if (this.deviceType === DEVICE_TYPE_BROWSER) {
         task.on(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
       }
     });
@@ -536,7 +542,7 @@ class StoreWrapper implements IStoreWrapper {
     task.on(TASK_EVENTS.AGENT_OFFER_CONTACT, this.refreshTaskList);
     task.on(TASK_EVENTS.AGENT_CONSULT_CREATED, this.handleConsultCreated);
     task.on(TASK_EVENTS.TASK_CONSULT_QUEUE_CANCELLED, this.handleConsultQueueCancelled);
-    if (this.deviceType === 'BROWSER') {
+    if (this.deviceType === DEVICE_TYPE_BROWSER) {
       task.on(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
     }
 
@@ -610,7 +616,7 @@ class StoreWrapper implements IStoreWrapper {
     task.on(TASK_EVENTS.TASK_OFFER_CONSULT, this.handleConsultOffer);
     task.on(TASK_EVENTS.TASK_CONSULT_END, this.handleConsultEnd);
     task.on(TASK_EVENTS.TASK_CONSULT_QUEUE_CANCELLED, this.handleConsultQueueCancelled);
-    if (this.deviceType === 'BROWSER') {
+    if (this.deviceType === DEVICE_TYPE_BROWSER) {
       task.on(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
     }
 
@@ -665,8 +671,8 @@ class StoreWrapper implements IStoreWrapper {
     try {
       const response = await this.store.cc.getBuddyAgents({
         //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
-        mediaType: mediaType ?? 'telephony',
-        state: 'Available',
+        mediaType: mediaType ?? MEDIA_TYPE_TELEPHONY_LOWER,
+        state: AGENT_STATE_AVAILABLE,
       });
       return 'data' in response ? response.data.agentList : [];
     } catch (error) {
@@ -675,7 +681,7 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   getQueues = async (
-    mediaType: string = this.currentTask.data.interaction.mediaType ?? 'TELEPHONY',
+    mediaType: string = this.currentTask.data.interaction.mediaType ?? MEDIA_TYPE_TELEPHONY_UPPER,
     params?: ContactServiceQueueSearchParams
   ): Promise<{
     data: ContactServiceQueue[];

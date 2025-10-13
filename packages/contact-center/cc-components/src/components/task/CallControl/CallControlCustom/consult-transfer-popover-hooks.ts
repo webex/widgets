@@ -1,10 +1,28 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
 import {AddressBookEntry, ContactServiceQueue, EntryPointRecord, ILogger} from '@webex/cc-store';
-import {FetchPaginatedList} from '../../task.types';
+import {
+  FetchPaginatedList,
+  PaginatedListParams,
+  TransformPaginatedData,
+  CategoryType,
+  UseConsultTransferParams,
+  CATEGORY_DIAL_NUMBER,
+  CATEGORY_ENTRY_POINT,
+  CATEGORY_QUEUES,
+} from '../../task.types';
 import {debounce} from './call-control-custom.utils';
 
-type TransformPaginatedData<T, U> = (item: T, page: number, index: number) => U;
-
+/**
+ * React hook to load, transform and manage paginated data with optional search.
+ *
+ * @template T - The item type returned by the provided `fetchFunction` (raw API/entity).
+ * @template U - The transformed item type stored internally and returned to consumers.
+ * @param fetchFunction - Fetcher that returns a paginated list of items of type T.
+ * @param transformFunction - Mapper that converts each T into U for UI consumption.
+ * @param categoryName - Human-readable name used for logging/telemetry.
+ * @param logger - Optional logger instance for diagnostics.
+ * @returns An object containing the transformed data (U[]), pagination state and helpers.
+ */
 export const usePaginatedData = <T, U>(
   fetchFunction: FetchPaginatedList<T> | undefined,
   transformFunction: TransformPaginatedData<T, U>,
@@ -26,7 +44,7 @@ export const usePaginatedData = <T, U>(
 
       setLoading(true);
       try {
-        const apiParams: {page: number; pageSize: number; search?: string} = {
+        const apiParams: PaginatedListParams = {
           page: currentPage,
           pageSize: 25,
         };
@@ -35,11 +53,17 @@ export const usePaginatedData = <T, U>(
           apiParams.search = search;
         }
 
-        logger?.info(`CC-Components: Loading ${categoryName} - page: ${currentPage}, search: "${search}"`);
+        logger?.info(`CC-Components: Loading ${categoryName}`, {
+          module: 'cc-components#consult-transfer-popover-hooks.ts',
+          method: 'usePaginatedData#loadData',
+        });
         const response = await fetchFunction(apiParams);
 
         if (!response || !response.data) {
-          logger?.error(`CC-Components: Invalid response from fetch function for ${categoryName}`);
+          logger?.error(`CC-Components: No data received from fetch function for ${categoryName}`, {
+            module: 'cc-components#consult-transfer-popover-hooks.ts',
+            method: 'usePaginatedData#loadData',
+          });
           if (reset || currentPage === 0) {
             setData([]);
           }
@@ -47,7 +71,10 @@ export const usePaginatedData = <T, U>(
           return;
         }
 
-        logger?.info(`CC-Components: Loaded ${response.data.length} ${categoryName} for page ${currentPage}`);
+        logger?.info(`CC-Components: Loaded ${response.data.length} ${categoryName}`, {
+          module: 'cc-components#consult-transfer-popover-hooks.ts',
+          method: 'usePaginatedData#loadData',
+        });
 
         const transformedEntries = response.data.map((entry, index) => transformFunction(entry, currentPage, index));
 
@@ -63,11 +90,17 @@ export const usePaginatedData = <T, U>(
         setPage(newPage);
         setHasMore(newPage < totalPages - 1);
 
-        logger?.info(
-          `CC-Components: ${categoryName} pagination state - current: ${newPage}, total: ${totalPages}, hasMore: ${newPage < totalPages - 1}`
-        );
+        logger?.info('CC-Components: Pagination state updated', {
+          module: 'cc-components#consult-transfer-popover-hooks.ts',
+          method: 'usePaginatedData#loadData',
+        });
       } catch (error) {
-        logger?.error(`CC-Components: Error loading ${categoryName}:`, error);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        logger?.error(`CC-Components: Error loading ${categoryName}`, {
+          module: 'cc-components#consult-transfer-popover-hooks.ts',
+          method: 'usePaginatedData#loadData',
+          error: errorMessage,
+        });
         if (reset || currentPage === 0) {
           setData([]);
         }
@@ -88,16 +121,9 @@ export const usePaginatedData = <T, U>(
   return {data, page, hasMore, loading, loadData, reset};
 };
 
-export type CategoryType = 'Agents' | 'Queues' | 'Dial Number' | 'Entry Point';
+// CategoryType moved to shared types
 
-type UseConsultTransferParams = {
-  showDialNumberTab: boolean;
-  showEntryPointTab: boolean;
-  getAddressBookEntries?: FetchPaginatedList<AddressBookEntry>;
-  getEntryPoints?: FetchPaginatedList<EntryPointRecord>;
-  getQueues?: FetchPaginatedList<ContactServiceQueue>;
-  logger?: ILogger;
-};
+// UseConsultTransferParams moved to shared types
 
 export function useConsultTransferPopover({
   showDialNumberTab,
@@ -162,13 +188,9 @@ export function useConsultTransferPopover({
   );
 
   const loadNextPage = useCallback(() => {
-    if (selectedCategory === 'Dial Number' && hasMoreDialNumbers && !loadingDialNumbers) {
-      loadDialNumbers(dialNumbersPage + 1, searchQuery);
-    } else if (selectedCategory === 'Entry Point' && hasMoreEntryPoints && !loadingEntryPoints) {
-      loadEntryPoints(entryPointsPage + 1, searchQuery);
-    } else if (selectedCategory === 'Queues' && hasMoreQueues && !loadingQueues) {
-      loadQueues(queuesPage + 1, searchQuery);
-    }
+    if (!canLoadCategory(selectedCategory)) return;
+    const nextPage = currentPageForCategory(selectedCategory) + 1;
+    loadCategory(selectedCategory, nextPage, searchQuery);
   }, [
     selectedCategory,
     hasMoreDialNumbers,
@@ -188,17 +210,12 @@ export function useConsultTransferPopover({
 
   const debouncedSearchRef = useRef<ReturnType<typeof debounce>>();
   if (!debouncedSearchRef.current) {
-    debouncedSearchRef.current = debounce((query: string, category: CategoryType) => {
+    const triggerSearch = (query: string, category: CategoryType) => {
       if (query.length === 0 || query.length >= 2) {
-        if (category === 'Dial Number') {
-          loadDialNumbers(0, query, true);
-        } else if (category === 'Entry Point') {
-          loadEntryPoints(0, query, true);
-        } else if (category === 'Queues') {
-          loadQueues(0, query, true);
-        }
+        loadCategory(category, 0, query, true);
       }
-    }, 500);
+    };
+    debouncedSearchRef.current = debounce(triggerSearch, 500);
   }
 
   useEffect(() => {
@@ -230,17 +247,49 @@ export function useConsultTransferPopover({
 
   const createCategoryClickHandler = (category: CategoryType) => () => handleCategoryChange(category);
   const handleAgentsClick = createCategoryClickHandler('Agents');
-  const handleQueuesClick = createCategoryClickHandler('Queues');
-  const handleDialNumberClick = createCategoryClickHandler('Dial Number');
-  const handleEntryPointClick = createCategoryClickHandler('Entry Point');
+  const handleQueuesClick = createCategoryClickHandler(CATEGORY_QUEUES);
+  const handleDialNumberClick = createCategoryClickHandler(CATEGORY_DIAL_NUMBER);
+  const handleEntryPointClick = createCategoryClickHandler(CATEGORY_ENTRY_POINT);
+
+  // Helper: determines if the given category can load next page now
+  const canLoadCategory = (category: CategoryType): boolean => {
+    if (category === CATEGORY_DIAL_NUMBER) return hasMoreDialNumbers && !loadingDialNumbers;
+    if (category === CATEGORY_ENTRY_POINT) return hasMoreEntryPoints && !loadingEntryPoints;
+    if (category === CATEGORY_QUEUES) return hasMoreQueues && !loadingQueues;
+    return false;
+  };
+
+  // Helper: gets current page number for the given category
+  const currentPageForCategory = (category: CategoryType): number => {
+    if (category === CATEGORY_DIAL_NUMBER) return dialNumbersPage;
+    if (category === CATEGORY_ENTRY_POINT) return entryPointsPage;
+    if (category === CATEGORY_QUEUES) return queuesPage;
+    return 0;
+  };
+
+  // Helper: invokes appropriate loader for the given category
+  const loadCategory = (category: CategoryType, page: number, search: string, reset = false) => {
+    switch (category) {
+      case CATEGORY_DIAL_NUMBER:
+        loadDialNumbers(page, search, reset);
+        break;
+      case CATEGORY_ENTRY_POINT:
+        loadEntryPoints(page, search, reset);
+        break;
+      case CATEGORY_QUEUES:
+        loadQueues(page, search, reset);
+        break;
+      default:
+        break;
+    }
+  };
 
   useEffect(() => {
     const loadMoreElement = loadMoreRef.current;
     if (!loadMoreElement) return;
     const observer = new IntersectionObserver(
-      (entries) => {
-        const [entry] = entries;
-        if (entry.isIntersecting) {
+      ([entry]) => {
+        if (entry?.isIntersecting) {
           loadNextPage();
         }
       },
@@ -253,12 +302,12 @@ export function useConsultTransferPopover({
   }, [loadNextPage]);
 
   useEffect(() => {
-    if (selectedCategory === 'Dial Number' && showDialNumberTab && dialNumbers.length === 0) {
-      loadDialNumbers(0, '', true);
-    } else if (selectedCategory === 'Entry Point' && showEntryPointTab && entryPoints.length === 0) {
-      loadEntryPoints(0, '', true);
-    } else if (selectedCategory === 'Queues' && queuesData.length === 0) {
-      loadQueues(0, '', true);
+    if (selectedCategory === CATEGORY_DIAL_NUMBER && showDialNumberTab && dialNumbers.length === 0) {
+      loadCategory(CATEGORY_DIAL_NUMBER, 0, '', true);
+    } else if (selectedCategory === CATEGORY_ENTRY_POINT && showEntryPointTab && entryPoints.length === 0) {
+      loadCategory(CATEGORY_ENTRY_POINT, 0, '', true);
+    } else if (selectedCategory === CATEGORY_QUEUES && queuesData.length === 0) {
+      loadCategory(CATEGORY_QUEUES, 0, '', true);
     }
   }, [selectedCategory]);
 

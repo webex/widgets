@@ -655,5 +655,3 @@ export const debounce = <T extends (...args: unknown[]) => unknown>(
     };
   }
 };
-
-// moved usePaginatedData to consult-transfer-popover-hooks.ts
