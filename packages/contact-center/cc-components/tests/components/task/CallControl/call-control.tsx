@@ -123,6 +123,7 @@ describe('CallControlComponent', () => {
     exitConference: jest.fn(),
     consultConference: jest.fn(),
     conferenceParticipants: [],
+    isConsultButtonDisabled: false,
   };
 
   // Utility function spies

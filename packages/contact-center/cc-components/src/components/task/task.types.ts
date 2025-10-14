@@ -436,6 +436,11 @@ export interface ControlProps {
    * List of participants in the conference excluding the agent themselves.
    */
   conferenceParticipants: Participant[];
+
+  /**
+   * Flag to determine if the consult button is disabled.
+   */
+  isConsultButtonDisabled: boolean;
 }
 
 export type CallControlComponentProps = Pick<
@@ -484,6 +489,7 @@ export type CallControlComponentProps = Pick<
   | 'secondsUntilAutoWrapup'
   | 'cancelAutoWrapup'
   | 'conferenceParticipants'
+  | 'isConsultButtonDisabled'
 >;
 
 /**

@@ -452,6 +452,7 @@ describe('CallControl Utils', () => {
         false, // isHeld
         true, // isRecording
         false, // isMuteButtonDisabled
+        false,
         mockMediaTypeInfo,
         mockControlVisibility,
         mockFunctions.handleMuteToggleFunc,
@@ -496,6 +497,7 @@ describe('CallControl Utils', () => {
         true, // isHeld
         false, // isRecording
         true, // isMuteButtonDisabled
+        false,
         mockMediaTypeInfo,
         mockControlVisibility,
         mockFunctions.handleMuteToggleFunc,
@@ -542,6 +544,7 @@ describe('CallControl Utils', () => {
         false,
         false,
         false,
+        false,
         mockMediaTypeInfo,
         mockControlVisibility,
         mockFunctions.handleMuteToggleFunc,
@@ -583,6 +586,7 @@ describe('CallControl Utils', () => {
         false,
         true, // isRecording
         false,
+        false,
         mockMediaTypeInfo,
         mockControlVisibility,
         mockFunctions.handleMuteToggleFunc,
@@ -601,6 +605,7 @@ describe('CallControl Utils', () => {
         false,
         false,
         false, // isRecording
+        false,
         false,
         mockMediaTypeInfo,
         mockControlVisibility,
@@ -623,6 +628,7 @@ describe('CallControl Utils', () => {
         false, // isHeld
         false, // isRecording
         false, // isMuteButtonDisabled
+        false,
         mockMediaTypeInfo,
         mockControlVisibility,
         mockFunctions.handleMuteToggleFunc,

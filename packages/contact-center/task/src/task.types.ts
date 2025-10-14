@@ -20,12 +20,19 @@ export type CallControlProps = Partial<
     | 'callControlClassName'
     | 'callControlConsultClassName'
     | 'onToggleMute'
+    | 'multiPartyConferenceEnabled'
   >
 >;
 
 export type useCallControlProps = Pick<
   ControlProps,
-  'currentTask' | 'logger' | 'consultInitiated' | 'deviceType' | 'featureFlags' | 'isMuted'
+  | 'currentTask'
+  | 'logger'
+  | 'consultInitiated'
+  | 'deviceType'
+  | 'featureFlags'
+  | 'isMuted'
+  | 'multiPartyConferenceEnabled'
 > &
   Partial<Pick<ControlProps, 'onHoldResume' | 'onEnd' | 'onWrapUp' | 'onRecordingToggle' | 'onToggleMute'>>;
 

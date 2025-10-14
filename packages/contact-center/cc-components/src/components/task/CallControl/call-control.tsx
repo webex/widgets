@@ -64,6 +64,7 @@ function CallControlComponent(props: CallControlComponentProps) {
     logger,
     secondsUntilAutoWrapup,
     cancelAutoWrapup,
+    isConsultButtonDisabled,
   } = props;
 
   useEffect(() => {
@@ -122,6 +123,7 @@ function CallControlComponent(props: CallControlComponentProps) {
     isHeld,
     isRecording,
     isMuteButtonDisabled,
+    isConsultButtonDisabled,
     currentMediaType,
     controlVisibility,
     handleMuteToggle,

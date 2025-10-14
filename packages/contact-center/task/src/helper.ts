@@ -4,6 +4,7 @@ import {useCallControlProps, UseTaskListProps, UseTaskProps, useOutdialCallProps
 import store, {TASK_EVENTS, BuddyDetails, DestinationType, ContactServiceQueue} from '@webex/cc-store';
 import {findHoldTimestamp, getConferenceParticipants, getControlsVisibility} from './Utils/task-util';
 import {Participant} from '@webex/cc-components';
+import {MAX_PARTICIPANTS_IN_MULTIPARTY_CONFERENCE, MAX_PARTICIPANTS_IN_THREE_PARTY_CONFERENCE} from './Utils/constants';
 
 const ENGAGED_LABEL = 'ENGAGED';
 const ENGAGED_USERNAME = 'Engaged';
@@ -273,6 +274,7 @@ export const useCallControl = (props: useCallControlProps) => {
     deviceType,
     featureFlags,
     isMuted,
+    multiPartyConferenceEnabled,
   } = props;
   const [isHeld, setIsHeld] = useState<boolean | undefined>(undefined);
   const [isRecording, setIsRecording] = useState(true);
@@ -837,6 +839,11 @@ export const useCallControl = (props: useCallControlProps) => {
     };
   }, [currentTask?.autoWrapup, controlVisibility?.wrapup]);
 
+  const maxParticipantsInConference = multiPartyConferenceEnabled
+    ? MAX_PARTICIPANTS_IN_MULTIPARTY_CONFERENCE
+    : MAX_PARTICIPANTS_IN_THREE_PARTY_CONFERENCE;
+
+  const isConsultButtonDisabled = conferenceParticipants.length >= maxParticipantsInConference;
   return {
     currentTask,
     endCall,
@@ -871,6 +878,7 @@ export const useCallControl = (props: useCallControlProps) => {
     secondsUntilAutoWrapup,
     cancelAutoWrapup,
     conferenceParticipants,
+    isConsultButtonDisabled,
   };
 };
 

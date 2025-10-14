@@ -71,6 +71,7 @@ describe('CallControl Component', () => {
       consultConference: jest.fn(),
       exitConference: jest.fn(),
       conferenceParticipants: [],
+      isConsultButtonDisabled: false,
     });
 
     render(
@@ -86,6 +87,7 @@ describe('CallControl Component', () => {
     expect(useCallControlSpy).toHaveBeenCalledWith({
       currentTask: null,
       onHoldResume: onHoldResumeCb,
+      multiPartyConferenceEnabled: true,
       onEnd: onEndCb,
       onWrapUp: onWrapUpCb,
       onRecordingToggle: onRecordingToggleCb,
