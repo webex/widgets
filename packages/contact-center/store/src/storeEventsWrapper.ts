@@ -676,7 +676,8 @@ class StoreWrapper implements IStoreWrapper {
       });
       return 'data' in response ? response.data.agentList : [];
     } catch (error) {
-      return Promise.reject(error);
+      this.store.logger.error('Error fetching buddy agents:', error);
+      throw error;
     }
   };
 
@@ -700,8 +701,8 @@ class StoreWrapper implements IStoreWrapper {
         : ((response as {meta?: {total?: number}}).meta?.total ?? filtered.length);
       return {data: filtered, meta: {page, pageSize, total, totalPages}};
     } catch (error) {
-      console.error('Error fetching queues:', error);
-      return Promise.reject(error);
+      this.store.logger.error('Error fetching queues:', error);
+      throw error;
     }
   };
 
@@ -710,8 +711,8 @@ class StoreWrapper implements IStoreWrapper {
       const response: EntryPointListResponse = await this.store.cc.getEntryPoints(params);
       return response;
     } catch (error) {
-      console.error('Error fetching entry points:', error);
-      return Promise.reject(error);
+      this.store.logger.error('Error fetching entry points:', error);
+      throw error;
     }
   };
 
@@ -720,8 +721,8 @@ class StoreWrapper implements IStoreWrapper {
       const response: AddressBookEntriesResponse = await this.store.cc.addressBook.getEntries(params ?? {});
       return response;
     } catch (error) {
-      console.error('Error fetching address book entries:', error);
-      return Promise.reject(error);
+      this.store.logger.error('Error fetching address book entries:', error);
+      throw error;
     }
   };
 

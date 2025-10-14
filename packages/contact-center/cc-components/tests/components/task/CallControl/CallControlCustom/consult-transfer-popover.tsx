@@ -5,6 +5,7 @@ import ConsultTransferPopoverComponent from '../../../../../src/components/task/
 import {ContactServiceQueue} from '@webex/cc-store';
 // hooks import no longer needed in this test
 import * as utils from '../../../../../src/components/task/CallControl/CallControlCustom/call-control-custom.utils';
+import {DEFAULT_PAGE_SIZE} from '../../../../../src/components/task/constants';
 
 const loggerMock = {
   log: jest.fn(),
@@ -291,14 +292,16 @@ describe('ConsultTransferPopoverComponent', () => {
         jest.advanceTimersByTime(500);
       });
       const afterTwoChars = getQueuesMock.mock.calls.length;
-      expect(getQueuesMock).toHaveBeenLastCalledWith(expect.objectContaining({page: 0, pageSize: 25, search: 'qu'}));
+      expect(getQueuesMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({page: 0, pageSize: DEFAULT_PAGE_SIZE, search: 'qu'})
+      );
       expect(afterTwoChars).toBe(2);
 
       fireEvent.change(input, {target: {value: ''}});
       await act(async () => {
         jest.advanceTimersByTime(500);
       });
-      expect(getQueuesMock).toHaveBeenLastCalledWith(expect.objectContaining({page: 0, pageSize: 25}));
+      expect(getQueuesMock).toHaveBeenLastCalledWith(expect.objectContaining({page: 0, pageSize: DEFAULT_PAGE_SIZE}));
       expect(getQueuesMock.mock.calls.length).toBe(afterTwoChars + 1);
     });
 

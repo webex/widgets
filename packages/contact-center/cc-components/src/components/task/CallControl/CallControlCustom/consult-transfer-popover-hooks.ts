@@ -12,6 +12,7 @@ import {
   CATEGORY_AGENTS,
 } from '../../task.types';
 import {debounce} from './call-control-custom.utils';
+import {DEFAULT_PAGE_SIZE} from '../../constants';
 
 /**
  * React hook to load, transform and manage paginated data with optional search.
@@ -47,7 +48,7 @@ export const usePaginatedData = <T, U>(
       try {
         const apiParams: PaginatedListParams = {
           page: currentPage,
-          pageSize: 25,
+          pageSize: DEFAULT_PAGE_SIZE,
         };
 
         if (search && search.trim()) {
@@ -89,7 +90,7 @@ export const usePaginatedData = <T, U>(
         const totalPages = response.meta?.totalPages ?? 0;
 
         setPage(newPage);
-        setHasMore(newPage < totalPages - 1);
+        setHasMore(totalPages > 0 && newPage < totalPages - 1);
 
         logger?.info('CC-Components: Pagination state updated', {
           module: 'cc-components#consult-transfer-popover-hooks.ts',

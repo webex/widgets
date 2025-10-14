@@ -18,6 +18,8 @@ export const UNMUTE_CALL = 'Unmute';
 export const DIAL_NUMBER = 'DialNumber';
 export const AGENTS = 'Agents';
 export const QUEUES = 'Queues';
+// Pagination
+export const DEFAULT_PAGE_SIZE = 25;
 // CallControlCAD constants
 export const NO_CUSTOMER_NAME = 'No Customer Name';
 export const NO_CALLER_ID = 'No Caller ID';
