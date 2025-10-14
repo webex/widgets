@@ -8,7 +8,7 @@ import {CallControlProps} from '../task.types';
 import {CallControlComponent} from '@webex/cc-components';
 
 const CallControlInternal: React.FunctionComponent<CallControlProps> = observer(
-  ({onHoldResume, onEnd, onWrapUp, onRecordingToggle, onToggleMute}) => {
+  ({onHoldResume, onEnd, onWrapUp, onRecordingToggle, onToggleMute, multiPartyConferenceEnabled}) => {
     const {
       logger,
       currentTask,
@@ -38,6 +38,7 @@ const CallControlInternal: React.FunctionComponent<CallControlProps> = observer(
         deviceType,
         featureFlags,
         isMuted,
+        multiPartyConferenceEnabled,
       }),
       wrapupCodes,
       consultInitiated,
@@ -62,7 +63,7 @@ const CallControl: React.FunctionComponent<CallControlProps> = (props) => {
         if (store.onErrorCallback) store.onErrorCallback('CallControl', error);
       }}
     >
-      <CallControlInternal {...props} />
+      <CallControlInternal {...props} multiPartyConferenceEnabled={props.multiPartyConferenceEnabled ?? true} />
     </ErrorBoundary>
   );
 };
