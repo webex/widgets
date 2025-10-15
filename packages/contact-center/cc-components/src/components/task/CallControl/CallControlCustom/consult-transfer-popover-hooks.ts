@@ -1,9 +1,14 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
-import {AddressBookEntry, ContactServiceQueue, EntryPointRecord, ILogger} from '@webex/cc-store';
 import {
+  AddressBookEntry,
+  ContactServiceQueue,
+  EntryPointRecord,
+  ILogger,
   FetchPaginatedList,
   PaginatedListParams,
   TransformPaginatedData,
+} from '@webex/cc-store';
+import {
   CategoryType,
   UseConsultTransferParams,
   CATEGORY_DIAL_NUMBER,
@@ -31,6 +36,7 @@ export const usePaginatedData = <T, U>(
   categoryName: string,
   logger?: ILogger
 ) => {
+  const MODULE = 'cc-components#consult-transfer-popover-hooks.ts';
   const [data, setData] = useState<U[]>([]);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
@@ -56,14 +62,14 @@ export const usePaginatedData = <T, U>(
         }
 
         logger?.info(`CC-Components: Loading ${categoryName}`, {
-          module: 'cc-components#consult-transfer-popover-hooks.ts',
+          module: MODULE,
           method: 'usePaginatedData#loadData',
         });
         const response = await fetchFunction(apiParams);
 
         if (!response || !response.data) {
           logger?.error(`CC-Components: No data received from fetch function for ${categoryName}`, {
-            module: 'cc-components#consult-transfer-popover-hooks.ts',
+            module: MODULE,
             method: 'usePaginatedData#loadData',
           });
           if (reset || currentPage === 0) {
@@ -74,7 +80,7 @@ export const usePaginatedData = <T, U>(
         }
 
         logger?.info(`CC-Components: Loaded ${response.data.length} ${categoryName}`, {
-          module: 'cc-components#consult-transfer-popover-hooks.ts',
+          module: MODULE,
           method: 'usePaginatedData#loadData',
         });
 
@@ -93,13 +99,13 @@ export const usePaginatedData = <T, U>(
         setHasMore(totalPages > 0 && newPage < totalPages - 1);
 
         logger?.info('CC-Components: Pagination state updated', {
-          module: 'cc-components#consult-transfer-popover-hooks.ts',
+          module: MODULE,
           method: 'usePaginatedData#loadData',
         });
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         logger?.error(`CC-Components: Error loading ${categoryName}`, {
-          module: 'cc-components#consult-transfer-popover-hooks.ts',
+          module: MODULE,
           method: 'usePaginatedData#loadData',
           error: errorMessage,
         });
@@ -131,7 +137,7 @@ export function useConsultTransferPopover({
   getQueues,
   logger,
 }: UseConsultTransferParams) {
-  const [selectedCategory, setSelectedCategory] = useState<CategoryType>('Agents');
+  const [selectedCategory, setSelectedCategory] = useState<CategoryType>(CATEGORY_AGENTS);
   const [searchQuery, setSearchQuery] = useState('');
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
@@ -153,7 +159,7 @@ export function useConsultTransferPopover({
       createdTime: entry.createdTime,
       lastUpdatedTime: entry.lastUpdatedTime,
     }),
-    'Dial Numbers',
+    CATEGORY_DIAL_NUMBER,
     logger
   );
 
@@ -167,7 +173,7 @@ export function useConsultTransferPopover({
   } = usePaginatedData<EntryPointRecord, {id: string; name: string}>(
     getEntryPoints,
     (entry) => ({id: entry.id, name: entry.name}),
-    'Entry Points',
+    CATEGORY_ENTRY_POINT,
     logger
   );
 

@@ -226,6 +226,21 @@ type AgentLoginProfile = {
   };
 };
 
+// Generic pagination params for list-fetching APIs
+type PaginatedListParams = {
+  page: number;
+  pageSize: number;
+  search?: string;
+};
+
+// Generic fetch/transform helpers for paginated APIs
+type FetchPaginatedList<T> = (
+  params: PaginatedListParams
+) => Promise<{data: T[]; meta?: {page?: number; totalPages?: number}}>;
+
+// Generic transform function for paginated APIs
+type TransformPaginatedData<T, U> = (item: T, page: number, index: number) => U;
+
 // Utility consts
 const DIALNUMBER: string = 'AGENT_DN';
 const EXTENSION: string = 'EXTENSION';
@@ -251,9 +266,6 @@ const ERROR_TRIGGERING_IDLE_CODES = {
   CHANNEL_FAILURE: 'Channel_Failure',
   RONA: 'RONA',
 };
-
-// Module identifiers for logger context
-const STORE_EVENTS_WRAPPER_MODULE = 'storeEventsWrapper.ts';
 
 export type {
   IContactCenter,
@@ -282,6 +294,9 @@ export type {
   ContactServiceQueuesResponse,
   ContactServiceQueueSearchParams,
   IWebex,
+  PaginatedListParams,
+  FetchPaginatedList,
+  TransformPaginatedData,
 };
 
 export {
@@ -298,5 +313,4 @@ export {
   AGENT_STATE_AVAILABLE,
   LoginOptions,
   ERROR_TRIGGERING_IDLE_CODES,
-  STORE_EVENTS_WRAPPER_MODULE,
 };

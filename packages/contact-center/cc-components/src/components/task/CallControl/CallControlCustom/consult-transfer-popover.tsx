@@ -5,6 +5,15 @@ import {ConsultTransferPopoverComponentProps} from '../../task.types';
 import ConsultTransferEmptyState from './consult-transfer-empty-state';
 import {isAgentsEmpty, handleAgentSelection, handleQueueSelection} from './call-control-custom.utils';
 import {useConsultTransferPopover} from './consult-transfer-popover-hooks';
+import {
+  SEARCH_PLACEHOLDER,
+  CLEAR_SEARCH,
+  SCROLL_TO_LOAD_MORE,
+  LOADING_MORE_QUEUES,
+  LOADING_MORE_DIAL_NUMBERS,
+  LOADING_MORE_ENTRY_POINTS,
+  NO_DATA_AVAILABLE_CONSULT_TRANSFER,
+} from '../../constants';
 
 const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentProps> = ({
   heading,
@@ -90,10 +99,10 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
       <div>
         <TextInput
           id="consult-search"
-          placeholder="Search..."
+          placeholder={SEARCH_PLACEHOLDER}
           value={searchQuery}
           onChange={(value: string) => handleSearchChange(value)}
-          clearAriaLabel="Clear search"
+          clearAriaLabel={CLEAR_SEARCH}
           aria-labelledby="consult-search-label"
           className="consult-search-input"
         />
@@ -147,7 +156,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
         )}
       </div>
 
-      {!hasAnyData && <ConsultTransferEmptyState message="No data available for consult transfer." />}
+      {!hasAnyData && <ConsultTransferEmptyState message={NO_DATA_AVAILABLE_CONSULT_TRANSFER} />}
 
       {selectedCategory === 'Agents' &&
         !noAgents &&
@@ -166,11 +175,11 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
             <div ref={loadMoreRef} className="consult-load-more">
               {loadingQueues ? (
                 <Text tagName="small" type="body-secondary">
-                  Loading more queues...
+                  {LOADING_MORE_QUEUES}
                 </Text>
               ) : (
                 <Text tagName="small" type="body-secondary">
-                  Scroll to load more
+                  {SCROLL_TO_LOAD_MORE}
                 </Text>
               )}
             </div>
@@ -194,11 +203,11 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
             <div ref={loadMoreRef} className="consult-load-more">
               {loadingDialNumbers ? (
                 <Text tagName="small" type="body-secondary">
-                  Loading more dial numbers...
+                  {LOADING_MORE_DIAL_NUMBERS}
                 </Text>
               ) : (
                 <Text tagName="small" type="body-secondary">
-                  Scroll to load more
+                  {SCROLL_TO_LOAD_MORE}
                 </Text>
               )}
             </div>
@@ -220,11 +229,11 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
             <div ref={loadMoreRef} className="consult-load-more">
               {loadingEntryPoints ? (
                 <Text tagName="small" type="body-secondary">
-                  Loading more entry points...
+                  {LOADING_MORE_ENTRY_POINTS}
                 </Text>
               ) : (
                 <Text tagName="small" type="body-secondary">
-                  Scroll to load more
+                  {SCROLL_TO_LOAD_MORE}
                 </Text>
               )}
             </div>

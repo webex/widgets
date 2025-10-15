@@ -8,6 +8,7 @@ import {
   ContactServiceQueue,
   AddressBookEntry,
   EntryPointRecord,
+  FetchPaginatedList,
 } from '@webex/cc-store';
 
 type Enum<T extends Record<string, unknown>> = T[keyof T];
@@ -414,8 +415,10 @@ export interface ControlProps {
 
   /** Fetch paginated address book entries for dial numbers */
   getAddressBookEntries?: FetchPaginatedList<AddressBookEntry>;
+
   /** Fetch paginated entry points */
   getEntryPoints?: FetchPaginatedList<EntryPointRecord>;
+
   /** Fetch paginated queues (filtered by media type in store) */
   getQueuesFetcher?: FetchPaginatedList<ContactServiceQueue>;
 
@@ -687,24 +690,6 @@ export interface TimerUIState {
   iconName: string;
   formattedTime: string;
 }
-
-/**
- * Type for fetch function
- */
-export type PaginatedListParams = {
-  page: number;
-  pageSize: number;
-  search?: string;
-};
-
-export type FetchPaginatedList<T> = (
-  params: PaginatedListParams
-) => Promise<{data: T[]; meta?: {page?: number; totalPages?: number}}>;
-
-/**
- * Type for transform function
- */
-export type TransformPaginatedData<T, U> = (item: T, page: number, index: number) => U;
 
 /**
  * Categories displayed in Consult/Transfer popover.

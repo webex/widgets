@@ -1,14 +1,13 @@
 import {useEffect, useCallback, useState, useRef, useMemo} from 'react';
 import {ITask} from '@webex/contact-center';
-import {
-  useCallControlProps,
-  UseTaskListProps,
-  UseTaskProps,
-  Participant,
-  useOutdialCallProps,
+import {useCallControlProps, UseTaskListProps, UseTaskProps, Participant, useOutdialCallProps} from './task.types';
+import store, {
+  TASK_EVENTS,
+  BuddyDetails,
+  DestinationType,
+  ContactServiceQueue,
   PaginatedListParams,
-} from './task.types';
-import store, {TASK_EVENTS, BuddyDetails, DestinationType, ContactServiceQueue} from '@webex/cc-store';
+} from '@webex/cc-store';
 import {findHoldTimestamp, getControlsVisibility} from './Utils/task-util';
 
 const ENGAGED_LABEL = 'ENGAGED';

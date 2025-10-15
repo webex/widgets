@@ -88,10 +88,14 @@ describe('ConsultTransferPopoverComponent', () => {
     expect(buttons).toEqual(expect.arrayContaining(['Agents', 'Queues', 'Dial Number', 'Entry Point']));
 
     // Verify Agents tab (active by default)
-    expect(screen.getByText('Agents')).toBeInTheDocument();
+    const agentsButton = screen.getByRole('button', {name: 'Agents'});
+    expect(agentsButton).toBeInTheDocument();
+    expect(agentsButton).toHaveTextContent('Agents');
 
     // Verify Queues tab (inactive by default)
-    expect(screen.getByText('Queues')).toBeInTheDocument();
+    const queuesButton = screen.getByRole('button', {name: 'Queues'});
+    expect(queuesButton).toBeInTheDocument();
+    expect(queuesButton).toHaveTextContent('Queues');
 
     // Verify agent list
     const agentList = screen.container.querySelector('.agent-list');
@@ -180,60 +184,53 @@ describe('ConsultTransferPopoverComponent', () => {
     expect(screen.getByText('No data available for consult transfer.')).toBeInTheDocument();
   });
 
-  it('handles edge cases and conditional rendering', async () => {
-    // Test empty state when both lists are completely empty
+  it('shows empty state when both lists are completely empty', async () => {
     const emptyProps = {
       ...baseProps,
       buddyAgents: [],
       getQueues: async () => ({data: [], meta: {page: 0, totalPages: 0}}),
     };
 
-    let screen = await render(<ConsultTransferPopoverComponent {...emptyProps} />);
+    const screen = await render(<ConsultTransferPopoverComponent {...emptyProps} />);
     expect(screen.getByText('No data available for consult transfer.')).toBeInTheDocument();
-    screen.unmount();
+  });
 
-    // Test empty agents tab with tabs showing (covers lines 94-96)
+  it('shows tabs and empty agents message when no agents are available', async () => {
     const emptyAgentsProps = {
       ...baseProps,
       buddyAgents: [],
     };
 
-    screen = await render(<ConsultTransferPopoverComponent {...emptyAgentsProps} />);
+    const screen = await render(<ConsultTransferPopoverComponent {...emptyAgentsProps} />);
     const buttons = Array.from(screen.container.querySelectorAll('button')).map(
       (b) => (b as HTMLButtonElement).textContent
     );
     expect(buttons).toEqual(expect.arrayContaining(['Agents', 'Queues', 'Dial Number', 'Entry Point']));
     expect(screen.container.querySelector('.consult-empty-state')).toBeInTheDocument();
     expect(screen.getByText('No data available for consult transfer.')).toBeInTheDocument();
-    screen.unmount();
+  });
 
-    // Test empty queues tab when switched to queues (covers lines 98-100)
+  it('shows no items when queues are empty after switching to queues', async () => {
     const emptyQueuesProps = {
       ...baseProps,
       getQueues: async () => ({data: [], meta: {page: 0, totalPages: 0}}),
     };
 
-    screen = await render(<ConsultTransferPopoverComponent {...emptyQueuesProps} />);
-
-    // Switch to queues tab
-    fireEvent.click(screen.getByText('Queues'));
-
-    // With empty queues, the list should not render and no items should be present
+    const screen = await render(<ConsultTransferPopoverComponent {...emptyQueuesProps} />);
+    fireEvent.click(screen.getByRole('button', {name: 'Queues'}));
     expect(screen.container.querySelector('.agent-list')).toBeNull();
     expect(screen.container.querySelectorAll('.call-control-list-item').length).toBe(0);
-    screen.unmount();
+  });
 
-    // Test hidden queue tab when allowConsultToQueue is false
+  it('disables queue selection when allowConsultToQueue is false', async () => {
     const propsWithoutQueue = {
       ...baseProps,
       allowConsultToQueue: false,
     };
 
-    screen = await render(<ConsultTransferPopoverComponent {...propsWithoutQueue} />);
-    const queuesButton = Array.from(screen.container.querySelectorAll('button')).find(
-      (btn) => (btn as HTMLButtonElement).textContent === 'Queues'
-    ) as HTMLButtonElement | undefined;
-    expect(queuesButton?.disabled).toBe(true);
+    const screen = await render(<ConsultTransferPopoverComponent {...propsWithoutQueue} />);
+    const queuesButton = screen.getByRole('button', {name: 'Queues'}) as HTMLButtonElement;
+    expect(queuesButton.disabled).toBe(true);
   });
 
   it('covers edge case for empty items in renderList (line 50)', async () => {

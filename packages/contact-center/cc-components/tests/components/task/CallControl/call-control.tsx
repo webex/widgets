@@ -513,15 +513,13 @@ describe('CallControlComponent', () => {
         />
       );
 
-      // Act: open the consult popover
       const consultButton = screen.getByLabelText('Consult');
       fireEvent.click(consultButton);
 
-      // Assert: popover content should not include Dial Number tab
-      const buttons = Array.from(screen.container.querySelectorAll('button')).map(
-        (b) => (b as HTMLButtonElement).textContent
-      );
-      expect(buttons).not.toEqual(expect.arrayContaining(['Dial Number']));
+      await screen.findByRole('button', {name: 'Agents'});
+      expect(screen.getByRole('button', {name: 'Queues'})).toBeInTheDocument();
+      expect(screen.getByRole('button', {name: 'Entry Point'})).toBeInTheDocument();
+      expect(screen.queryByRole('button', {name: 'Dial Number'})).not.toBeInTheDocument();
     });
   });
 });

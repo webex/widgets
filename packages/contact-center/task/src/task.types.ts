@@ -1,11 +1,5 @@
 import {TaskProps, ControlProps, OutdialCallProps} from '@webex/cc-components';
 
-export type PaginatedListParams = {
-  page: number;
-  pageSize: number;
-  search?: string;
-};
-
 export type UseTaskProps = Pick<TaskProps, 'incomingTask' | 'deviceType' | 'logger'> &
   Partial<Pick<TaskProps, 'onAccepted' | 'onRejected'>>;
 
