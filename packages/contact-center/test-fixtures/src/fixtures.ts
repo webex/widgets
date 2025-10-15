@@ -104,6 +104,8 @@ const mockAddressBookEntriesResponse: AddressBookEntriesResponse = {
 const makeMockAddressBook = (getEntriesMock?: AddressBook['getEntries']): AddressBook =>
   ({
     getEntries: getEntriesMock || jest.fn().mockResolvedValue(mockAddressBookEntriesResponse),
+    // Need to add this only for AddressBook type
+    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   }) as {} as AddressBook;
 
 const mockAddressBook = makeMockAddressBook();
