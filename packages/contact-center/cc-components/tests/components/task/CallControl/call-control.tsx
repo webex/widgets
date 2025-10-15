@@ -521,5 +521,37 @@ describe('CallControlComponent', () => {
       expect(screen.getByRole('button', {name: 'Entry Point'})).toBeInTheDocument();
       expect(screen.queryByRole('button', {name: 'Dial Number'})).not.toBeInTheDocument();
     });
+
+    it('hides Dial Number and Entry Point tabs for non-telephony media', async () => {
+      jest.spyOn(callControlUtils, 'filterButtonsForConsultation').mockReturnValue([
+        {
+          id: 'consult',
+          icon: 'consult',
+          tooltip: 'Consult',
+          className: 'call-control-button',
+          disabled: false,
+          menuType: 'Consult',
+          isVisible: true,
+          dataTestId: 'consult-button',
+        },
+      ]);
+
+      isTelephonyMediaTypeSpy.mockReturnValue(false);
+
+      const screen = await render(
+        <CallControlComponent
+          {...defaultProps}
+          controlVisibility={{...mockControlVisibility, consult: true, transfer: false}}
+        />
+      );
+
+      const consultButton = screen.getByLabelText('Consult');
+      fireEvent.click(consultButton);
+
+      await screen.findByRole('button', {name: 'Agents'});
+      expect(screen.getByRole('button', {name: 'Queues'})).toBeInTheDocument();
+      expect(screen.queryByRole('button', {name: 'Dial Number'})).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', {name: 'Entry Point'})).not.toBeInTheDocument();
+    });
   });
 });

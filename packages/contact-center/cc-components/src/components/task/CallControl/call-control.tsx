@@ -220,7 +220,15 @@ function CallControlComponent(props: CallControlComponentProps) {
                         }
                         onDialNumberSelect={(dialNumber) => handleTargetSelect(dialNumber, dialNumber, 'dialNumber')}
                         allowConsultToQueue={allowConsultToQueue}
-                        consultTransferOptions={consultTransferOptions}
+                        consultTransferOptions={
+                          isTelephony
+                            ? consultTransferOptions
+                            : {
+                                ...consultTransferOptions,
+                                showDialNumberTab: false,
+                                showEntryPointTab: false,
+                              }
+                        }
                         logger={logger}
                       />
                     ) : null}
