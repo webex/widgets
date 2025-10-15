@@ -838,6 +838,7 @@ describe('useCallControl', () => {
         deviceType: store.deviceType,
         consultInitiated: false,
         isMuted: false,
+        multiPartyConferenceEnabled: true,
       })
     );
 
@@ -864,6 +865,7 @@ describe('useCallControl', () => {
         deviceType: store.deviceType,
         consultInitiated: false,
         isMuted: false,
+        multiPartyConferenceEnabled: true,
       })
     );
 
@@ -900,6 +902,7 @@ describe('useCallControl', () => {
         deviceType: store.deviceType,
         consultInitiated: false,
         isMuted: false,
+        multiPartyConferenceEnabled: true,
       })
     );
 
@@ -924,6 +927,7 @@ describe('useCallControl', () => {
         deviceType: store.deviceType,
         consultInitiated: false,
         isMuted: false,
+        multiPartyConferenceEnabled: true,
       })
     );
 
@@ -950,6 +954,7 @@ describe('useCallControl', () => {
         deviceType: store.deviceType,
         consultInitiated: false,
         isMuted: false,
+        multiPartyConferenceEnabled: true,
       })
     );
 
@@ -975,6 +980,7 @@ describe('useCallControl', () => {
         deviceType: store.deviceType,
         consultInitiated: false,
         isMuted: false,
+        multiPartyConferenceEnabled: true,
       })
     );
 
@@ -998,6 +1004,7 @@ describe('useCallControl', () => {
         deviceType: store.deviceType,
         consultInitiated: false,
         isMuted: false,
+        multiPartyConferenceEnabled: true,
       })
     );
 
@@ -1023,6 +1030,7 @@ describe('useCallControl', () => {
         deviceType: store.deviceType,
         consultInitiated: false,
         isMuted: false,
+        multiPartyConferenceEnabled: true,
       })
     );
 
@@ -1055,6 +1063,7 @@ describe('useCallControl', () => {
         deviceType: store.deviceType,
         consultInitiated: false,
         isMuted: false,
+        multiPartyConferenceEnabled: true,
       })
     );
 
@@ -1091,6 +1100,7 @@ describe('useCallControl', () => {
         deviceType: store.deviceType,
         consultInitiated: false,
         isMuted: false,
+        multiPartyConferenceEnabled: true,
       })
     );
 
@@ -1113,6 +1123,7 @@ describe('useCallControl', () => {
         deviceType: store.deviceType,
         consultInitiated: false,
         isMuted: false,
+        multiPartyConferenceEnabled: true,
       })
     );
     await waitFor(() => {
@@ -1139,6 +1150,7 @@ describe('useCallControl', () => {
         deviceType: store.deviceType,
         consultInitiated: false,
         isMuted: false,
+        multiPartyConferenceEnabled: true,
       })
     );
 
@@ -1166,6 +1178,7 @@ describe('useCallControl', () => {
         deviceType: store.deviceType,
         consultInitiated: false,
         isMuted: false,
+        multiPartyConferenceEnabled: true,
       })
     );
 
@@ -1194,6 +1207,7 @@ describe('useCallControl', () => {
         deviceType: store.deviceType,
         consultInitiated: false,
         isMuted: false,
+        multiPartyConferenceEnabled: true,
       })
     );
     await waitFor(() => {
@@ -1220,6 +1234,7 @@ describe('useCallControl', () => {
         deviceType: store.deviceType,
         consultInitiated: false,
         isMuted: false,
+        multiPartyConferenceEnabled: true,
       })
     );
     // Ensure no event handler is set
@@ -1241,6 +1256,7 @@ describe('useCallControl', () => {
         deviceType: store.deviceType,
         consultInitiated: false,
         isMuted: false,
+        multiPartyConferenceEnabled: true,
       })
     );
     // Ensure no event handler is set
@@ -1260,6 +1276,7 @@ describe('useCallControl', () => {
         deviceType: store.deviceType,
         consultInitiated: false,
         isMuted: false,
+        multiPartyConferenceEnabled: true,
       })
     );
     await act(async () => {
@@ -1283,6 +1300,7 @@ describe('useCallControl', () => {
         deviceType: store.deviceType,
         consultInitiated: false,
         isMuted: false,
+        multiPartyConferenceEnabled: true,
       })
     );
     await act(async () => {
@@ -1309,6 +1327,7 @@ describe('useCallControl', () => {
         deviceType: store.deviceType,
         consultInitiated: false,
         isMuted: false,
+        multiPartyConferenceEnabled: true,
       })
     );
     await act(async () => {
@@ -1340,6 +1359,7 @@ describe('useCallControl', () => {
         deviceType: store.deviceType,
         consultInitiated: false,
         isMuted: false,
+        multiPartyConferenceEnabled: true,
       })
     );
 
@@ -1365,6 +1385,7 @@ describe('useCallControl', () => {
         deviceType: store.deviceType,
         consultInitiated: false,
         isMuted: false,
+        multiPartyConferenceEnabled: true,
       })
     );
     await act(async () => {
@@ -1389,6 +1410,7 @@ describe('useCallControl', () => {
         deviceType: store.deviceType,
         consultInitiated: false,
         isMuted: false,
+        multiPartyConferenceEnabled: true,
       })
     );
 
@@ -1413,6 +1435,7 @@ describe('useCallControl', () => {
         deviceType: store.deviceType,
         consultInitiated: true,
         isMuted: false,
+        multiPartyConferenceEnabled: true,
       })
     );
     await act(async () => {
@@ -1437,6 +1460,7 @@ describe('useCallControl', () => {
         deviceType: store.deviceType,
         consultInitiated: false,
         isMuted: false,
+        multiPartyConferenceEnabled: true,
       })
     );
 
@@ -1457,6 +1481,7 @@ describe('useCallControl', () => {
         deviceType: store.deviceType,
         consultInitiated: true,
         isMuted: false,
+        multiPartyConferenceEnabled: true,
       })
     );
 
@@ -1485,6 +1510,7 @@ describe('useCallControl', () => {
         deviceType: store.deviceType,
         consultInitiated: true,
         isMuted: false,
+        multiPartyConferenceEnabled: true,
       })
     );
     await act(async () => {
@@ -1509,6 +1535,7 @@ describe('useCallControl', () => {
         deviceType: store.deviceType,
         consultInitiated: false,
         isMuted: false,
+        multiPartyConferenceEnabled: true,
       })
     );
 
@@ -1573,6 +1600,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
+        multiPartyConferenceEnabled: true,
       })
     );
 
@@ -1641,6 +1669,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
+        multiPartyConferenceEnabled: true,
       })
     );
 
@@ -1702,6 +1731,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
+        multiPartyConferenceEnabled: true,
       });
       return hook;
     });
@@ -1738,6 +1768,7 @@ describe('useCallControl', () => {
         deviceType: store.deviceType,
         consultInitiated: false,
         isMuted: false,
+        multiPartyConferenceEnabled: true,
       });
       // Set initial value
       return hook;
@@ -1759,6 +1790,7 @@ describe('useCallControl', () => {
         deviceType: store.deviceType,
         consultInitiated: false,
         isMuted: false,
+        multiPartyConferenceEnabled: true,
       })
     );
 
@@ -1809,6 +1841,7 @@ describe('useCallControl', () => {
         deviceType: store.deviceType,
         consultInitiated: false,
         isMuted: false,
+        multiPartyConferenceEnabled: true,
       })
     );
 
@@ -1860,6 +1893,7 @@ describe('useCallControl', () => {
         deviceType: store.deviceType,
         consultInitiated: false,
         isMuted: false,
+        multiPartyConferenceEnabled: true,
       })
     );
 
@@ -1905,6 +1939,7 @@ describe('useCallControl', () => {
           deviceType: store.deviceType,
           consultInitiated: false,
           isMuted: false,
+          multiPartyConferenceEnabled: true,
         }),
       {initialProps: {task: mockTaskWithHold}}
     );
@@ -1974,6 +2009,7 @@ describe('useCallControl', () => {
         deviceType: store.deviceType,
         consultInitiated: false,
         isMuted: false,
+        multiPartyConferenceEnabled: true,
       })
     );
 
@@ -2030,6 +2066,7 @@ describe('useCallControl', () => {
         deviceType: store.deviceType,
         consultInitiated: false,
         isMuted: false,
+        multiPartyConferenceEnabled: true,
       })
     );
 
@@ -2091,6 +2128,7 @@ describe('useCallControl', () => {
         deviceType: store.deviceType,
         consultInitiated: false,
         isMuted: false,
+        multiPartyConferenceEnabled: true,
       })
     );
 
@@ -2117,6 +2155,7 @@ describe('useCallControl', () => {
         deviceType: store.deviceType,
         consultInitiated: false,
         isMuted: false,
+        multiPartyConferenceEnabled: true,
       })
     );
 
@@ -2148,6 +2187,7 @@ describe('useCallControl', () => {
         deviceType: store.deviceType,
         consultInitiated: true,
         isMuted: false,
+        multiPartyConferenceEnabled: true,
       })
     );
 
@@ -2173,6 +2213,7 @@ describe('useCallControl', () => {
         deviceType: store.deviceType,
         consultInitiated: false,
         isMuted: false,
+        multiPartyConferenceEnabled: true,
       })
     );
 
@@ -2199,6 +2240,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
+        multiPartyConferenceEnabled: true,
       })
     );
 
@@ -2241,6 +2283,7 @@ describe('useCallControl', () => {
           deviceType: store.deviceType,
           isMuted: false,
           consultInitiated: false,
+          multiPartyConferenceEnabled: true,
         })
       );
 
@@ -2274,6 +2317,7 @@ describe('useCallControl', () => {
           deviceType: store.deviceType,
           isMuted: true,
           consultInitiated: false,
+          multiPartyConferenceEnabled: true,
         })
       );
 
@@ -2307,6 +2351,7 @@ describe('useCallControl', () => {
           deviceType: store.deviceType,
           isMuted: false,
           consultInitiated: false,
+          multiPartyConferenceEnabled: true,
         })
       );
 
@@ -2328,6 +2373,7 @@ describe('useCallControl', () => {
           deviceType: store.deviceType,
           isMuted: false,
           consultInitiated: false,
+          multiPartyConferenceEnabled: true,
         })
       );
 
@@ -2352,6 +2398,7 @@ describe('useCallControl', () => {
           deviceType: store.deviceType,
           isMuted: false,
           consultInitiated: false,
+          multiPartyConferenceEnabled: true,
         })
       );
 
@@ -2381,6 +2428,7 @@ describe('useCallControl', () => {
           deviceType: store.deviceType,
           isMuted: true,
           consultInitiated: false,
+          multiPartyConferenceEnabled: true,
         })
       );
 
@@ -2414,6 +2462,7 @@ describe('useCallControl', () => {
           deviceType: store.deviceType,
           isMuted: false,
           consultInitiated: false,
+          multiPartyConferenceEnabled: true,
         })
       );
 
@@ -2433,6 +2482,7 @@ describe('useCallControl', () => {
           deviceType: store.deviceType,
           isMuted: false,
           consultInitiated: false,
+          multiPartyConferenceEnabled: true,
         })
       );
 
@@ -2445,6 +2495,347 @@ describe('useCallControl', () => {
         method: 'toggleMute',
       });
       expect(mockCurrentTask.toggleMute).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Conference Functions', () => {
+    describe('consultConference', () => {
+      it('should call consultConference successfully', async () => {
+        mockCurrentTask.consultConference = jest.fn().mockResolvedValue(undefined);
+
+        const {result} = renderHook(() =>
+          useCallControl({
+            currentTask: mockCurrentTask,
+            onHoldResume: mockOnHoldResume,
+            onEnd: mockOnEnd,
+            onWrapUp: mockOnWrapUp,
+            logger: mockLogger,
+            featureFlags: store.featureFlags,
+            deviceType: store.deviceType,
+            consultInitiated: false,
+            isMuted: false,
+            multiPartyConferenceEnabled: true,
+          })
+        );
+
+        await act(async () => {
+          await result.current.consultConference();
+        });
+
+        expect(mockCurrentTask.consultConference).toHaveBeenCalled();
+        expect(mockLogger.info).toHaveBeenCalledWith('consultConference success', {
+          module: 'useCallControl',
+          method: 'consultConference',
+        });
+      });
+
+      it('should handle consultConference error', async () => {
+        const error = new Error('consultConference failed');
+        mockCurrentTask.consultConference = jest.fn().mockRejectedValue(error);
+
+        const {result} = renderHook(() =>
+          useCallControl({
+            currentTask: mockCurrentTask,
+            onHoldResume: mockOnHoldResume,
+            onEnd: mockOnEnd,
+            onWrapUp: mockOnWrapUp,
+            logger: mockLogger,
+            featureFlags: store.featureFlags,
+            deviceType: store.deviceType,
+            consultInitiated: false,
+            isMuted: false,
+            multiPartyConferenceEnabled: true,
+          })
+        );
+
+        await expect(
+          act(async () => {
+            await result.current.consultConference();
+          })
+        ).rejects.toThrow('consultConference failed');
+
+        expect(mockLogger.error).toHaveBeenCalledWith('Error consulting conference: Error: consultConference failed', {
+          module: 'useCallControl',
+          method: 'consultConference',
+        });
+      });
+    });
+
+    describe('exitConference', () => {
+      it('should call exitConference successfully', async () => {
+        mockCurrentTask.exitConference = jest.fn().mockResolvedValue(undefined);
+
+        const {result} = renderHook(() =>
+          useCallControl({
+            currentTask: mockCurrentTask,
+            onHoldResume: mockOnHoldResume,
+            onEnd: mockOnEnd,
+            onWrapUp: mockOnWrapUp,
+            logger: mockLogger,
+            featureFlags: store.featureFlags,
+            deviceType: store.deviceType,
+            consultInitiated: false,
+            isMuted: false,
+            multiPartyConferenceEnabled: true,
+          })
+        );
+
+        await act(async () => {
+          await result.current.exitConference();
+        });
+
+        expect(mockCurrentTask.exitConference).toHaveBeenCalled();
+        expect(mockLogger.info).toHaveBeenCalledWith('exitConference success', {
+          module: 'useCallControl',
+          method: 'exitConference',
+        });
+      });
+
+      it('should handle exitConference error', async () => {
+        const error = new Error('exitConference failed');
+        mockCurrentTask.exitConference = jest.fn().mockRejectedValue(error);
+
+        const {result} = renderHook(() =>
+          useCallControl({
+            currentTask: mockCurrentTask,
+            onHoldResume: mockOnHoldResume,
+            onEnd: mockOnEnd,
+            onWrapUp: mockOnWrapUp,
+            logger: mockLogger,
+            featureFlags: store.featureFlags,
+            deviceType: store.deviceType,
+            consultInitiated: false,
+            isMuted: false,
+            multiPartyConferenceEnabled: true,
+          })
+        );
+
+        await expect(
+          act(async () => {
+            await result.current.exitConference();
+          })
+        ).rejects.toThrow('exitConference failed');
+
+        expect(mockLogger.error).toHaveBeenCalledWith('Error exiting conference: Error: exitConference failed', {
+          module: 'useCallControl',
+          method: 'exitConference',
+        });
+      });
+    });
+
+    describe('consultTransfer with conference in progress', () => {
+      it('should call transferConference when conference is in progress', async () => {
+        const taskWithConference = {
+          ...mockCurrentTask,
+          data: {
+            ...mockCurrentTask.data,
+            isConferenceInProgress: true,
+          },
+          transferConference: jest.fn().mockResolvedValue(undefined),
+        };
+
+        const setConsultInitiatedSpy = jest.spyOn(store, 'setConsultInitiated');
+
+        const {result} = renderHook(() =>
+          useCallControl({
+            currentTask: taskWithConference,
+            onHoldResume: mockOnHoldResume,
+            onEnd: mockOnEnd,
+            onWrapUp: mockOnWrapUp,
+            logger: mockLogger,
+            featureFlags: store.featureFlags,
+            deviceType: store.deviceType,
+            consultInitiated: false,
+            isMuted: false,
+            multiPartyConferenceEnabled: true,
+          })
+        );
+
+        await act(async () => {
+          await result.current.consultTransfer();
+        });
+
+        expect(mockLogger.info).toHaveBeenCalledWith('Conference in progress, using transferConference', {
+          module: 'useCallControl',
+          method: 'transferCall',
+        });
+        expect(taskWithConference.transferConference).toHaveBeenCalled();
+        expect(setConsultInitiatedSpy).toHaveBeenCalledWith(true);
+      });
+
+      it('should handle transferConference error when conference is in progress', async () => {
+        const error = new Error('transferConference failed');
+        const taskWithConference = {
+          ...mockCurrentTask,
+          data: {
+            ...mockCurrentTask.data,
+            isConferenceInProgress: true,
+          },
+          transferConference: jest.fn().mockRejectedValue(error),
+        };
+
+        const {result} = renderHook(() =>
+          useCallControl({
+            currentTask: taskWithConference,
+            onHoldResume: mockOnHoldResume,
+            onEnd: mockOnEnd,
+            onWrapUp: mockOnWrapUp,
+            logger: mockLogger,
+            featureFlags: store.featureFlags,
+            deviceType: store.deviceType,
+            consultInitiated: false,
+            isMuted: false,
+            multiPartyConferenceEnabled: true,
+          })
+        );
+
+        await expect(
+          act(async () => {
+            await result.current.consultTransfer();
+          })
+        ).rejects.toThrow('transferConference failed');
+
+        expect(mockLogger.error).toHaveBeenCalledWith(
+          'Error transferring consult call: Error: transferConference failed',
+          {
+            module: 'widget-cc-task#helper.ts',
+            method: 'useCallControl#consultTransfer',
+          }
+        );
+      });
+    });
+
+    describe('isConsultButtonDisabled with conference participants', () => {
+      it('should disable consult button when max participants reached in multi-party conference', () => {
+        const taskWithMaxParticipants = {
+          ...mockCurrentTask,
+          data: {
+            ...mockCurrentTask.data,
+            interactionId: 'main',
+            interaction: {
+              media: {
+                main: {
+                  participants: ['agent1', 'agent2', 'agent3', 'agent4', 'agent5', 'agent6', 'agent7', 'agent8'],
+                },
+              },
+              participants: {
+                agent1: {id: 'agent1', pType: 'Agent', hasLeft: false},
+                agent2: {id: 'agent2', pType: 'Agent', hasLeft: false},
+                agent3: {id: 'agent3', pType: 'Agent', hasLeft: false},
+                agent4: {id: 'agent4', pType: 'Agent', hasLeft: false},
+                agent5: {id: 'agent5', pType: 'Agent', hasLeft: false},
+                agent6: {id: 'agent6', pType: 'Agent', hasLeft: false},
+                agent7: {id: 'agent7', pType: 'Agent', hasLeft: false},
+                agent8: {id: 'agent8', pType: 'Agent', hasLeft: false},
+              },
+            },
+          },
+        };
+
+        store.cc.agentConfig = {agentId: 'agent1', regexUS: ''};
+
+        const {result} = renderHook(() =>
+          useCallControl({
+            currentTask: taskWithMaxParticipants,
+            onHoldResume: mockOnHoldResume,
+            onEnd: mockOnEnd,
+            onWrapUp: mockOnWrapUp,
+            logger: mockLogger,
+            featureFlags: store.featureFlags,
+            deviceType: store.deviceType,
+            consultInitiated: false,
+            isMuted: false,
+            multiPartyConferenceEnabled: true,
+          })
+        );
+
+        // Should be disabled when 7 other agents (8 total - current agent = 7 >= 7 max)
+        expect(result.current.isConsultButtonDisabled).toBe(true);
+      });
+
+      it('should disable consult button when max participants reached in three-party conference', () => {
+        const taskWithThreeParticipants = {
+          ...mockCurrentTask,
+          data: {
+            ...mockCurrentTask.data,
+            interactionId: 'main',
+            interaction: {
+              media: {
+                main: {
+                  participants: ['agent1', 'agent2', 'agent3', 'agent4'],
+                },
+              },
+              participants: {
+                agent1: {id: 'agent1', pType: 'Agent', hasLeft: false},
+                agent2: {id: 'agent2', pType: 'Agent', hasLeft: false},
+                agent3: {id: 'agent3', pType: 'Agent', hasLeft: false},
+                agent4: {id: 'agent4', pType: 'Agent', hasLeft: false},
+              },
+            },
+          },
+        };
+
+        store.cc.agentConfig = {agentId: 'agent1', regexUS: ''};
+
+        const {result} = renderHook(() =>
+          useCallControl({
+            currentTask: taskWithThreeParticipants,
+            onHoldResume: mockOnHoldResume,
+            onEnd: mockOnEnd,
+            onWrapUp: mockOnWrapUp,
+            logger: mockLogger,
+            featureFlags: store.featureFlags,
+            deviceType: store.deviceType,
+            consultInitiated: false,
+            isMuted: false,
+            multiPartyConferenceEnabled: false,
+          })
+        );
+
+        // Should be disabled when 3 other agents (4 total - current agent = 3 >= 3 max for three-party)
+        expect(result.current.isConsultButtonDisabled).toBe(true);
+      });
+
+      it('should enable consult button when below max participants', () => {
+        const taskWithFewParticipants = {
+          ...mockCurrentTask,
+          data: {
+            ...mockCurrentTask.data,
+            interactionId: 'main',
+            interaction: {
+              media: {
+                main: {
+                  participants: ['agent1', 'agent2'],
+                },
+              },
+              participants: {
+                agent1: {id: 'agent1', pType: 'Agent', hasLeft: false},
+                agent2: {id: 'agent2', pType: 'Agent', hasLeft: false},
+              },
+            },
+          },
+        };
+
+        store.cc.agentConfig = {agentId: 'agent1', regexUS: ''};
+
+        const {result} = renderHook(() =>
+          useCallControl({
+            currentTask: taskWithFewParticipants,
+            onHoldResume: mockOnHoldResume,
+            onEnd: mockOnEnd,
+            onWrapUp: mockOnWrapUp,
+            logger: mockLogger,
+            featureFlags: store.featureFlags,
+            deviceType: store.deviceType,
+            consultInitiated: false,
+            isMuted: false,
+            multiPartyConferenceEnabled: true,
+          })
+        );
+
+        // Should be enabled when only 1 other agent (2 - current agent = 1 < 7 max)
+        expect(result.current.isConsultButtonDisabled).toBe(false);
+      });
     });
   });
 
@@ -2496,6 +2887,7 @@ describe('useCallControl', () => {
           deviceType: 'BROWSER',
           featureFlags: {webRtcEnabled: true},
           isMuted: false,
+          multiPartyConferenceEnabled: true,
         })
       );
 
@@ -2528,6 +2920,7 @@ describe('useCallControl', () => {
           deviceType: 'BROWSER',
           featureFlags: {webRtcEnabled: true},
           isMuted: false,
+          multiPartyConferenceEnabled: true,
         })
       );
 
@@ -2568,6 +2961,7 @@ describe('useCallControl', () => {
           deviceType: 'BROWSER',
           featureFlags: {webRtcEnabled: true},
           isMuted: false,
+          multiPartyConferenceEnabled: true,
         })
       );
 
@@ -2600,6 +2994,7 @@ describe('useCallControl', () => {
           deviceType: 'BROWSER',
           featureFlags: {webRtcEnabled: true},
           isMuted: false,
+          multiPartyConferenceEnabled: true,
         })
       );
 

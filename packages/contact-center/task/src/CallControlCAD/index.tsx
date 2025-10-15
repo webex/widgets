@@ -16,6 +16,7 @@ const CallControlCADInternal: React.FunctionComponent<CallControlProps> = observ
     onToggleMute,
     callControlClassName,
     callControlConsultClassName,
+    multiPartyConferenceEnabled,
   }) => {
     const {
       logger,
@@ -45,6 +46,7 @@ const CallControlCADInternal: React.FunctionComponent<CallControlProps> = observ
         deviceType,
         featureFlags,
         isMuted,
+        multiPartyConferenceEnabled,
       }),
       wrapupCodes,
       consultInitiated,
@@ -71,7 +73,7 @@ const CallControlCAD: React.FunctionComponent<CallControlProps> = (props) => {
         if (store.onErrorCallback) store.onErrorCallback('CallControlCAD', error);
       }}
     >
-      <CallControlCADInternal {...props} />
+      <CallControlCADInternal {...props} multiPartyConferenceEnabled={props.multiPartyConferenceEnabled ?? true} />
     </ErrorBoundary>
   );
 };

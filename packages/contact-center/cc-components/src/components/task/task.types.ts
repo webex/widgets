@@ -400,6 +400,11 @@ export interface ControlProps {
   allowConsultToQueue: boolean;
 
   /**
+   * Flag to enable or disable multi-party conference feature
+   */
+  multiPartyConferenceEnabled: boolean;
+
+  /**
    * Function to set the last target type
    */
   lastTargetType: 'queue' | 'agent';

@@ -123,5 +123,19 @@ describe('CallControl Component', () => {
       expect(container.firstChild).toBeNull();
       expect(mockOnErrorCallback).toHaveBeenCalledWith('CallControl', Error('Test error in useCallControl'));
     });
+
+    it('should not throw when onErrorCallback is not set', () => {
+      store.onErrorCallback = undefined;
+
+      // Mock the useCallControl to throw an error
+      jest.spyOn(helper, 'useCallControl').mockImplementation(() => {
+        throw new Error('Test error in useCallControl');
+      });
+
+      const {container} = render(<CallControl onHoldResume={onHoldResumeCb} onEnd={onEndCb} onWrapUp={onWrapUpCb} />);
+
+      // The fallback should still render an empty fragment
+      expect(container.firstChild).toBeNull();
+    });
   });
 });
