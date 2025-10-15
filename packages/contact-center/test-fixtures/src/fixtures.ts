@@ -1,4 +1,4 @@
-import {
+import type {
   ITask,
   Profile,
   TaskData,
@@ -6,6 +6,7 @@ import {
   AddressBook,
   EntryPointListResponse,
   AddressBookEntriesResponse,
+  ContactServiceQueuesResponse,
 } from '@webex/contact-center';
 import {IContactCenter} from '@webex/cc-store';
 
@@ -72,33 +73,6 @@ const mockProfile: Profile = {
   lastIdleCodeChangeTimestamp: 123456789,
 };
 
-const mockCC: IContactCenter = {
-  on: jest.fn(),
-  off: jest.fn(),
-  updateAgentProfile: jest.fn(),
-  stationLogin: jest.fn(),
-  deregister: jest.fn(),
-  stationLogout: jest.fn(),
-  LoggerProxy: {
-    log: jest.fn(),
-    error: jest.fn(),
-    warn: jest.fn(),
-    info: jest.fn(),
-    trace: jest.fn(),
-  },
-  register: jest.fn(),
-  taskManager: {
-    getAllTasks: jest.fn().mockReturnValue({}),
-  },
-  getBuddyAgents: jest.fn().mockResolvedValue([]),
-  getQueues: jest.fn().mockResolvedValue({data: [], meta: {page: 0, pageSize: 25, total: 0, totalPages: 1}}),
-  getEntryPoints: jest.fn().mockResolvedValue({data: [], meta: {page: 0, pageSize: 25, total: 0, totalPages: 1}}),
-  addressBook: {
-    getEntries: jest.fn().mockResolvedValue({data: [], meta: {page: 0, pageSize: 25, total: 0, totalPages: 1}}),
-  } as unknown as AddressBook,
-  setAgentState: jest.fn().mockResolvedValue({}),
-};
-
 const mockEntryPointsResponse: EntryPointListResponse = {
   data: [
     {
@@ -127,11 +101,12 @@ const mockAddressBookEntriesResponse: AddressBookEntriesResponse = {
   meta: {page: 0, pageSize: 25, totalPages: 1},
 };
 
-// Factory to create a typed AddressBook mock without spreading unknown in tests
-const makeMockAddressBook = (getEntriesMock?: jest.Mock): AddressBook =>
+const makeMockAddressBook = (getEntriesMock?: AddressBook['getEntries']): AddressBook =>
   ({
     getEntries: getEntriesMock || jest.fn().mockResolvedValue(mockAddressBookEntriesResponse),
-  }) as unknown as AddressBook;
+  }) as {} as AddressBook;
+
+const mockAddressBook = makeMockAddressBook();
 
 const mockTask: ITask = {
   data: {
@@ -185,9 +160,9 @@ const mockQueueDetails = [
     id: 'q1',
     name: 'Queue1',
     description: 'Test Queue 1',
-    queueType: 'inbound',
+    queueType: 'INBOUND' as const,
     checkAgentAvailability: true,
-    channelType: 'telephony',
+    channelType: 'TELEPHONY' as const,
     skillProfileId: 'skill1',
     siteId: 'site1',
     version: 1,
@@ -265,8 +240,8 @@ const mockQueueDetails = [
     queueStatisticsEnabled: true,
     controlFlowScriptUrl: 'https://example.com/script1.js',
     ivrRequeueUrl: 'https://example.com/requeue1',
-    routingType: 'skill_based',
-    queueRoutingType: 'priority',
+    routingType: 'SKILLS_BASED' as const,
+    queueRoutingType: 'SKILL_BASED' as const,
     callParkingUrl: 'https://example.com/parking1',
     overflowQueueId: 'overflow1',
     queueContactLimit: 100,
@@ -293,9 +268,9 @@ const mockQueueDetails = [
     id: 'q2',
     name: 'Queue2',
     description: 'Test Queue 2',
-    queueType: 'inbound',
+    queueType: 'INBOUND' as const,
     checkAgentAvailability: true,
-    channelType: 'telephony',
+    channelType: 'TELEPHONY' as const,
     skillProfileId: 'skill2',
     siteId: 'site1',
     version: 1,
@@ -373,8 +348,8 @@ const mockQueueDetails = [
     queueStatisticsEnabled: true,
     controlFlowScriptUrl: 'https://example.com/script2.js',
     ivrRequeueUrl: 'https://example.com/requeue2',
-    routingType: 'skill_based',
-    queueRoutingType: 'priority',
+    routingType: 'SKILLS_BASED' as const,
+    queueRoutingType: 'SKILL_BASED' as const,
     callParkingUrl: 'https://example.com/parking2',
     overflowQueueId: 'overflow2',
     queueContactLimit: 100,
@@ -425,6 +400,72 @@ const mockAgents = [
     siteId: 'site1',
   },
 ];
+
+const mockQueuesResponse: ContactServiceQueuesResponse = {
+  data: mockQueueDetails.map((q) => ({
+    id: q.id,
+    version: q.version,
+    name: q.name,
+    description: q.description,
+    queueType: q.queueType,
+    checkAgentAvailability: q.checkAgentAvailability,
+    channelType: q.channelType,
+    serviceLevelThreshold: q.serviceLevelThreshold,
+    maxActiveContacts: q.maxActiveContacts,
+    maxTimeInQueue: q.maxTimeInQueue,
+    defaultMusicInQueueMediaFileId: q.defaultMusicInQueueMediaFileId,
+    timezone: q.timezone,
+    active: q.active,
+    outdialCampaignEnabled: q.outdialCampaignEnabled,
+    monitoringPermitted: q.monitoringPermitted,
+    parkingPermitted: q.parkingPermitted,
+    recordingPermitted: q.recordingPermitted,
+    recordingAllCallsPermitted: q.recordingAllCallsPermitted,
+    pauseRecordingPermitted: q.pauseRecordingPermitted,
+    recordingPauseDuration: q.recordingPauseDuration,
+    controlFlowScriptUrl: q.controlFlowScriptUrl,
+    ivrRequeueUrl: q.ivrRequeueUrl,
+    overflowNumber: q.overflowQueueId,
+    routingType: q.routingType,
+    queueRoutingType: q.queueRoutingType,
+    queueSkillRequirements: q.queueSkillRequirements?.map((s) => ({
+      skillId: s.id,
+      skillName: s.name,
+      condition: 'EQUALS',
+      skillValue: '1',
+    })),
+    agents: q.agents?.map((a) => ({id: a.id})),
+    callDistributionGroups: q.callDistributionGroups,
+    createdTime: typeof q.createdTime === 'number' ? q.createdTime : Date.parse(String(q.createdTime)),
+    lastUpdatedTime: typeof q.lastUpdatedTime === 'number' ? q.lastUpdatedTime : Date.parse(String(q.lastUpdatedTime)),
+  })),
+  meta: {page: 0, pageSize: 25, totalPages: 1},
+};
+
+const mockCC: IContactCenter = {
+  on: jest.fn(),
+  off: jest.fn(),
+  updateAgentProfile: jest.fn(),
+  stationLogin: jest.fn(),
+  deregister: jest.fn(),
+  stationLogout: jest.fn(),
+  LoggerProxy: {
+    log: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+    info: jest.fn(),
+    trace: jest.fn(),
+  },
+  register: jest.fn(),
+  taskManager: {
+    getAllTasks: jest.fn().mockReturnValue({}),
+  },
+  getBuddyAgents: jest.fn().mockResolvedValue(mockAgents),
+  getQueues: jest.fn().mockResolvedValue(mockQueuesResponse),
+  getEntryPoints: jest.fn().mockResolvedValue(mockEntryPointsResponse),
+  addressBook: mockAddressBook,
+  setAgentState: jest.fn().mockResolvedValue({}),
+};
 
 export {
   mockProfile,
