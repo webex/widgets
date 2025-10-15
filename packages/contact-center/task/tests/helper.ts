@@ -2168,7 +2168,11 @@ describe('useCallControl', () => {
   });
 
   it('should load queues successfully', async () => {
-    const getQueuesSpy = jest.spyOn(store, 'getQueues').mockResolvedValue(mockQueueDetails);
+    const getQueuesResponse: Awaited<ReturnType<typeof store.getQueues>> = {
+      data: mockQueueDetails,
+      meta: {page: 0, pageSize: mockQueueDetails.length, total: mockQueueDetails.length, totalPages: 1},
+    };
+    const getQueuesSpy = jest.spyOn(store, 'getQueues').mockResolvedValue(getQueuesResponse);
 
     const {result} = renderHook(() =>
       useCallControl({
@@ -2228,12 +2232,11 @@ describe('useCallControl', () => {
   });
 
   it('should get queues via getQueuesFetcher (paginated)', async () => {
-    const mockResponse = {
-      data: [{id: 'q1', name: 'Queue 1', channelType: 'TELEPHONY'}],
+    const mockResponse: Awaited<ReturnType<typeof store.getQueues>> = {
+      data: [mockQueueDetails[0]],
       meta: {page: 0, pageSize: 25, total: 1, totalPages: 1},
     };
-    // Use a broad cast to satisfy the spy return type regardless of meta shape
-    jest.spyOn(store, 'getQueues').mockResolvedValue(mockResponse as unknown as ReturnType<typeof store.getQueues>);
+    jest.spyOn(store, 'getQueues').mockResolvedValue(mockResponse);
 
     const {result} = renderHook(() =>
       useCallControl({
