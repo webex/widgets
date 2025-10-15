@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom';
-import {BuddyDetails, ContactServiceQueue} from '@webex/cc-store';
+import {BuddyDetails} from '@webex/cc-store';
+import {mockAgents, mockQueueDetails} from '@webex/test-fixtures';
 import {
   createConsultButtons,
   getVisibleButtons,
@@ -40,75 +41,6 @@ const loggerMock = {
   warn: jest.fn(),
   trace: jest.fn(),
 };
-
-// Build a fully typed ContactServiceQueue with explicit required inputs
-const buildQueue = (id: string, name: string, description: string = 'Queue'): ContactServiceQueue => ({
-  organizationId: 'org-1',
-  id,
-  version: 1,
-  name,
-  description,
-  queueType: 'INBOUND',
-  checkAgentAvailability: true,
-  channelType: 'TELEPHONY',
-  serviceLevelThreshold: 20,
-  maxActiveContacts: 25,
-  maxTimeInQueue: 600,
-  defaultMusicInQueueMediaFileId: 'media-1',
-  active: true,
-  monitoringPermitted: true,
-  parkingPermitted: true,
-  recordingPermitted: true,
-  recordingAllCallsPermitted: true,
-  pauseRecordingPermitted: true,
-  controlFlowScriptUrl: 'https://example.com/control-flow',
-  ivrRequeueUrl: 'https://example.com/requeue',
-  routingType: 'LONGEST_AVAILABLE_AGENT',
-  queueRoutingType: 'TEAM_BASED',
-  callDistributionGroups: [],
-});
-
-const mockBuddyAgents: BuddyDetails[] = [
-  {
-    agentId: 'agent1',
-    agentName: 'John Doe',
-    state: 'Available',
-    teamId: 'team1',
-    dn: 'dn1',
-    siteId: 'site1',
-  },
-  {
-    agentId: 'agent2',
-    agentName: 'Jane Smith',
-    state: 'Available',
-    teamId: 'team1',
-    dn: 'dn2',
-    siteId: 'site1',
-  },
-  {
-    agentId: 'agent3',
-    agentName: '',
-    state: 'Available',
-    teamId: 'team1',
-    dn: 'dn3',
-    siteId: 'site1',
-  },
-  {
-    agentId: '',
-    agentName: 'Invalid Agent',
-    state: 'Available',
-    teamId: 'team1',
-    dn: 'dn4',
-    siteId: 'site1',
-  },
-];
-
-const mockQueues: ContactServiceQueue[] = [
-  buildQueue('queue1', 'Support Queue', 'Support Queue Description'),
-  buildQueue('queue2', 'Sales Queue', 'Sales Queue Description'),
-  buildQueue('queue3', '', 'Empty Name Queue'),
-  buildQueue('', 'Invalid Queue', 'Invalid Queue Description'),
-];
 
 describe('Call Control Custom Utils', () => {
   beforeEach(() => {
@@ -417,15 +349,39 @@ describe('Call Control Custom Utils', () => {
 
   describe('shouldShowTabs', () => {
     it('should return true when agents exist', () => {
-      expect(shouldShowTabs(mockBuddyAgents, [])).toBe(true);
+      expect(
+        shouldShowTabs(
+          mockAgents.map((a) => ({
+            agentId: a.agentId,
+            agentName: a.agentName,
+            state: a.state,
+            teamId: a.teamId,
+            dn: a.dn,
+            siteId: a.siteId,
+          })),
+          []
+        )
+      ).toBe(true);
     });
 
     it('should return true when queues exist', () => {
-      expect(shouldShowTabs([], mockQueues)).toBe(true);
+      expect(shouldShowTabs([], mockQueueDetails)).toBe(true);
     });
 
     it('should return true when both exist', () => {
-      expect(shouldShowTabs(mockBuddyAgents, mockQueues)).toBe(true);
+      expect(
+        shouldShowTabs(
+          mockAgents.map((a) => ({
+            agentId: a.agentId,
+            agentName: a.agentName,
+            state: a.state,
+            teamId: a.teamId,
+            dn: a.dn,
+            siteId: a.siteId,
+          })),
+          mockQueueDetails
+        )
+      ).toBe(true);
     });
 
     it('should return false when both are empty', () => {
@@ -439,7 +395,18 @@ describe('Call Control Custom Utils', () => {
 
   describe('isAgentsEmpty', () => {
     it('should return false when agents exist', () => {
-      expect(isAgentsEmpty(mockBuddyAgents)).toBe(false);
+      expect(
+        isAgentsEmpty(
+          mockAgents.map((a) => ({
+            agentId: a.agentId,
+            agentName: a.agentName,
+            state: a.state,
+            teamId: a.teamId,
+            dn: a.dn,
+            siteId: a.siteId,
+          }))
+        )
+      ).toBe(false);
     });
 
     it('should return true when agents array is empty', () => {
@@ -457,7 +424,7 @@ describe('Call Control Custom Utils', () => {
 
   describe('isQueuesEmpty', () => {
     it('should return false when queues exist', () => {
-      expect(isQueuesEmpty(mockQueues)).toBe(false);
+      expect(isQueuesEmpty(mockQueueDetails)).toBe(false);
     });
 
     it('should return true when queues array is empty', () => {
@@ -560,11 +527,20 @@ describe('Call Control Custom Utils', () => {
 
   describe('createAgentListData', () => {
     it('should transform buddy agents to list data', () => {
-      const result = createAgentListData(mockBuddyAgents);
+      const result = createAgentListData(
+        mockAgents.map((a) => ({
+          agentId: a.agentId,
+          agentName: a.agentName,
+          state: a.state,
+          teamId: a.teamId,
+          dn: a.dn,
+          siteId: a.siteId,
+        }))
+      );
 
-      expect(result).toHaveLength(4);
-      expect(result[0]).toEqual({id: 'agent1', name: 'John Doe'});
-      expect(result[1]).toEqual({id: 'agent2', name: 'Jane Smith'});
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual({id: mockAgents[0].agentId, name: mockAgents[0].agentName});
+      expect(result[1]).toEqual({id: mockAgents[1].agentId, name: mockAgents[1].agentName});
     });
 
     it('should handle empty array', () => {
@@ -575,11 +551,11 @@ describe('Call Control Custom Utils', () => {
 
   describe('createQueueListData', () => {
     it('should transform queues to list data', () => {
-      const result = createQueueListData(mockQueues);
+      const result = createQueueListData(mockQueueDetails);
 
-      expect(result).toHaveLength(4);
-      expect(result[0]).toEqual({id: 'queue1', name: 'Support Queue'});
-      expect(result[1]).toEqual({id: 'queue2', name: 'Sales Queue'});
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual({id: mockQueueDetails[0].id, name: mockQueueDetails[0].name});
+      expect(result[1]).toEqual({id: mockQueueDetails[1].id, name: mockQueueDetails[1].name});
     });
 
     it('should handle empty array', () => {
@@ -799,19 +775,19 @@ describe('Call Control Custom Utils', () => {
 
   describe('isQueueAvailable', () => {
     it('should return true for valid queue', () => {
-      expect(isQueueAvailable(buildQueue('queue1', 'Support Queue'))).toBe(true);
+      expect(isQueueAvailable({...mockQueueDetails[0], id: 'queue1', name: 'Support Queue'})).toBe(true);
     });
 
     it('should return false for missing id', () => {
-      expect(isQueueAvailable(buildQueue('', 'Support Queue'))).toBeFalsy();
+      expect(isQueueAvailable({...mockQueueDetails[0], id: '', name: 'Support Queue'})).toBeFalsy();
     });
 
     it('should return false for missing name', () => {
-      expect(isQueueAvailable(buildQueue('queue1', ''))).toBeFalsy();
+      expect(isQueueAvailable({...mockQueueDetails[0], id: 'queue1', name: ''})).toBeFalsy();
     });
 
     it('should return false for whitespace-only name', () => {
-      expect(isQueueAvailable(buildQueue('queue1', '   '))).toBeFalsy();
+      expect(isQueueAvailable({...mockQueueDetails[0], id: 'queue1', name: '   '})).toBeFalsy();
     });
 
     it('should return false for null queue', () => {
@@ -825,10 +801,23 @@ describe('Call Control Custom Utils', () => {
 
   describe('filterAvailableAgents', () => {
     it('should filter out invalid agents', () => {
-      const result = filterAvailableAgents(mockBuddyAgents);
+      const result = filterAvailableAgents(
+        mockAgents.map((a) => ({
+          agentId: a.agentId,
+          agentName: a.agentName,
+          state: a.state,
+          teamId: a.teamId,
+          dn: a.dn,
+          siteId: a.siteId,
+        }))
+      );
       expect(result).toHaveLength(2);
-      expect(result[0]).toEqual(expect.objectContaining({agentId: 'agent1', agentName: 'John Doe'}));
-      expect(result[1]).toEqual(expect.objectContaining({agentId: 'agent2', agentName: 'Jane Smith'}));
+      expect(result[0]).toEqual(
+        expect.objectContaining({agentId: mockAgents[0].agentId, agentName: mockAgents[0].agentName})
+      );
+      expect(result[1]).toEqual(
+        expect.objectContaining({agentId: mockAgents[1].agentId, agentName: mockAgents[1].agentName})
+      );
     });
 
     it('should return empty array for null input', () => {
@@ -842,10 +831,10 @@ describe('Call Control Custom Utils', () => {
 
   describe('filterAvailableQueues', () => {
     it('should filter out invalid queues', () => {
-      const result = filterAvailableQueues(mockQueues);
+      const result = filterAvailableQueues(mockQueueDetails);
       expect(result).toHaveLength(2);
-      expect(result[0]).toEqual(expect.objectContaining({id: 'queue1', name: 'Support Queue'}));
-      expect(result[1]).toEqual(expect.objectContaining({id: 'queue2', name: 'Sales Queue'}));
+      expect(result[0]).toEqual(expect.objectContaining({id: mockQueueDetails[0].id, name: mockQueueDetails[0].name}));
+      expect(result[1]).toEqual(expect.objectContaining({id: mockQueueDetails[1].id, name: mockQueueDetails[1].name}));
     });
 
     it('should return empty array for null input', () => {

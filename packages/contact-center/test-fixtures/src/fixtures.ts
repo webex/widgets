@@ -1,4 +1,12 @@
-import {ITask, Profile, TaskData, TaskResponse, AddressBook} from '@webex/contact-center';
+import {
+  ITask,
+  Profile,
+  TaskData,
+  TaskResponse,
+  AddressBook,
+  EntryPointListResponse,
+  AddressBookEntriesResponse,
+} from '@webex/contact-center';
 import {IContactCenter} from '@webex/cc-store';
 
 const mockProfile: Profile = {
@@ -90,6 +98,40 @@ const mockCC: IContactCenter = {
   } as unknown as AddressBook,
   setAgentState: jest.fn().mockResolvedValue({}),
 };
+
+const mockEntryPointsResponse: EntryPointListResponse = {
+  data: [
+    {
+      id: 'ep1',
+      name: 'Entry 1',
+      type: 'Voice',
+      isActive: true,
+      orgId: 'org1',
+    },
+  ],
+  meta: {page: 0, pageSize: 25, totalPages: 1},
+};
+
+const mockAddressBookEntriesResponse: AddressBookEntriesResponse = {
+  data: [
+    {
+      id: 'ab1',
+      name: 'Alice',
+      number: '123',
+      organizationId: 'org1',
+      version: 1,
+      createdTime: 1704067200000,
+      lastUpdatedTime: 1704067200000,
+    },
+  ],
+  meta: {page: 0, pageSize: 25, totalPages: 1},
+};
+
+// Factory to create a typed AddressBook mock without spreading unknown in tests
+const makeMockAddressBook = (getEntriesMock?: jest.Mock): AddressBook =>
+  ({
+    getEntries: getEntriesMock || jest.fn().mockResolvedValue(mockAddressBookEntriesResponse),
+  }) as unknown as AddressBook;
 
 const mockTask: ITask = {
   data: {
@@ -384,4 +426,13 @@ const mockAgents = [
   },
 ];
 
-export {mockProfile, mockCC, mockTask, mockQueueDetails, mockAgents};
+export {
+  mockProfile,
+  mockCC,
+  mockTask,
+  mockQueueDetails,
+  mockAgents,
+  mockEntryPointsResponse,
+  mockAddressBookEntriesResponse,
+  makeMockAddressBook,
+};

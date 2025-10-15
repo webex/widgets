@@ -24,8 +24,14 @@ console.log = jest.fn();
 
 import {CC_EVENTS, TASK_EVENTS} from '../src/store.types';
 import storeWrapper from '../src/storeEventsWrapper';
-import {ITask, AddressBook} from '@webex/contact-center';
-import {mockCC, mockTask as mockTaskFixture} from '@webex/test-fixtures';
+import {ITask} from '@webex/contact-center';
+import {
+  mockCC,
+  mockTask as mockTaskFixture,
+  mockEntryPointsResponse,
+  mockAddressBookEntriesResponse,
+  mockQueueDetails,
+} from '@webex/test-fixtures';
 
 jest.mock('../src/store', () => ({
   getInstance: jest.fn().mockReturnValue({
@@ -34,6 +40,9 @@ jest.mock('../src/store', () => ({
     cc: {
       on: jest.fn(),
       off: jest.fn(),
+      addressBook: {
+        getEntries: jest.fn(),
+      },
       taskManager: {
         getAllTasks: jest.fn().mockReturnValue({
           interaction1: {
@@ -821,16 +830,16 @@ describe('storeEventsWrapper', () => {
 
     it('should return contact service queues list when SDK returns paginated response', async () => {
       const queueList = [
-        {id: 'queue1', name: 'Queue 1', channelType: 'TELEPHONY'},
-        {id: 'queue2', name: 'Queue 2', channelType: 'CHAT'},
+        {...mockQueueDetails[0], channelType: 'TELEPHONY'},
+        {...mockQueueDetails[1], channelType: 'CHAT'},
       ];
       storeWrapper['store'].cc.getQueues = jest
         .fn()
-        .mockResolvedValue({data: queueList, meta: {page: 1, pageSize: 50, total: 2}});
+        .mockResolvedValue({data: queueList, meta: {page: 1, pageSize: 50, total: 2, totalPages: 1}});
 
       const result = await storeWrapper.getQueues('telephony');
 
-      expect(result.data).toEqual([{id: 'queue1', name: 'Queue 1', channelType: 'TELEPHONY'}]);
+      expect(result.data).toEqual([{...mockQueueDetails[0], channelType: 'TELEPHONY'}]);
       expect(storeWrapper['store'].cc.getQueues).toHaveBeenCalled();
     });
 
@@ -849,12 +858,11 @@ describe('storeEventsWrapper', () => {
     });
 
     it('should fetch entry points successfully', async () => {
-      const mockResponse = {data: [{id: 'ep1', name: 'Entry 1'}], meta: {page: 0, totalPages: 1}};
-      storeWrapper['store'].cc.getEntryPoints = jest.fn().mockResolvedValue(mockResponse);
+      storeWrapper['store'].cc.getEntryPoints = jest.fn().mockResolvedValue(mockEntryPointsResponse);
 
       const result = await storeWrapper.getEntryPoints({page: 0, pageSize: 25});
       expect(storeWrapper['store'].cc.getEntryPoints).toHaveBeenCalledWith({page: 0, pageSize: 25});
-      expect(result).toEqual(mockResponse);
+      expect(result).toEqual(mockEntryPointsResponse);
     });
 
     it('should handle error while fetching entry points', async () => {
@@ -863,21 +871,15 @@ describe('storeEventsWrapper', () => {
     });
 
     it('should fetch address book entries successfully', async () => {
-      const mockResponse = {data: [{id: 'ab1', name: 'Alice'}], meta: {page: 0, totalPages: 1}};
-      // Fix: Use type assertion to 'unknown' first to avoid TS error about missing properties
-      storeWrapper['store'].cc.addressBook = {
-        getEntries: jest.fn().mockResolvedValue(mockResponse),
-      } as unknown as AddressBook;
+      jest.spyOn(storeWrapper['store'].cc.addressBook, 'getEntries').mockResolvedValue(mockAddressBookEntriesResponse);
 
       const result = await storeWrapper.getAddressBookEntries({page: 0, pageSize: 25});
       expect(storeWrapper['store'].cc.addressBook.getEntries).toHaveBeenCalledWith({page: 0, pageSize: 25});
-      expect(result).toEqual(mockResponse);
+      expect(result).toEqual(mockAddressBookEntriesResponse);
     });
 
     it('should handle error while fetching address book entries', async () => {
-      storeWrapper['store'].cc.addressBook = {
-        getEntries: jest.fn().mockRejectedValue(new Error('ab error')),
-      } as unknown as AddressBook;
+      jest.spyOn(storeWrapper['store'].cc.addressBook, 'getEntries').mockRejectedValue(new Error('ab error'));
       await expect(storeWrapper.getAddressBookEntries({page: 0, pageSize: 25})).rejects.toThrow('ab error');
     });
   });
