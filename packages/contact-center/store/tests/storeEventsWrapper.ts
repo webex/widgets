@@ -25,7 +25,13 @@ console.log = jest.fn();
 import {CC_EVENTS, TASK_EVENTS} from '../src/store.types';
 import storeWrapper from '../src/storeEventsWrapper';
 import {ITask} from '@webex/contact-center';
-import {mockCC, mockTask as mockTaskFixture} from '@webex/test-fixtures';
+import {
+  mockCC,
+  mockTask as mockTaskFixture,
+  mockEntryPointsResponse,
+  mockAddressBookEntriesResponse,
+  mockQueueDetails,
+} from '@webex/test-fixtures';
 
 jest.mock('../src/store', () => ({
   getInstance: jest.fn().mockReturnValue({
@@ -34,6 +40,9 @@ jest.mock('../src/store', () => ({
     cc: {
       on: jest.fn(),
       off: jest.fn(),
+      addressBook: {
+        getEntries: jest.fn(),
+      },
       taskManager: {
         getAllTasks: jest.fn().mockReturnValue({
           interaction1: {
@@ -811,7 +820,7 @@ describe('storeEventsWrapper', () => {
 
       const result = await storeWrapper.getQueues('telephony');
 
-      expect(result).toEqual([
+      expect(result.data).toEqual([
         {id: 'queue1', name: 'Queue 1', channelType: 'TELEPHONY'},
         {id: 'queue2', name: 'Queue 2', channelType: 'TELEPHONY'},
       ]);
@@ -822,6 +831,21 @@ describe('storeEventsWrapper', () => {
       storeWrapper['store'].cc.getQueues = jest.fn().mockRejectedValue(new Error('queue error'));
 
       await expect(storeWrapper.getQueues('telephony')).rejects.toThrow('queue error');
+    });
+
+    it('should return contact service queues list when SDK returns paginated response', async () => {
+      const queueList = [
+        {...mockQueueDetails[0], channelType: 'TELEPHONY'},
+        {...mockQueueDetails[1], channelType: 'CHAT'},
+      ];
+      storeWrapper['store'].cc.getQueues = jest
+        .fn()
+        .mockResolvedValue({data: queueList, meta: {page: 1, pageSize: 50, total: 2, totalPages: 1}});
+
+      const result = await storeWrapper.getQueues('telephony');
+
+      expect(result.data).toEqual([{...mockQueueDetails[0], channelType: 'TELEPHONY'}]);
+      expect(storeWrapper['store'].cc.getQueues).toHaveBeenCalled();
     });
 
     it('should handle consultQueueCancelled event', () => {
@@ -836,6 +860,32 @@ describe('storeEventsWrapper', () => {
       expect(isQueueConsultInProgressSpy).toHaveBeenCalledWith(false);
       expect(currentConsultQueueIdSpy).toHaveBeenCalledWith(null);
       expect(consultStartTimeStampSpy).toHaveBeenCalledWith(null);
+    });
+
+    it('should fetch entry points successfully', async () => {
+      storeWrapper['store'].cc.getEntryPoints = jest.fn().mockResolvedValue(mockEntryPointsResponse);
+
+      const result = await storeWrapper.getEntryPoints({page: 0, pageSize: 25});
+      expect(storeWrapper['store'].cc.getEntryPoints).toHaveBeenCalledWith({page: 0, pageSize: 25});
+      expect(result).toEqual(mockEntryPointsResponse);
+    });
+
+    it('should handle error while fetching entry points', async () => {
+      storeWrapper['store'].cc.getEntryPoints = jest.fn().mockRejectedValue(new Error('ep error'));
+      await expect(storeWrapper.getEntryPoints({page: 0, pageSize: 25})).rejects.toThrow('ep error');
+    });
+
+    it('should fetch address book entries successfully', async () => {
+      jest.spyOn(storeWrapper['store'].cc.addressBook, 'getEntries').mockResolvedValue(mockAddressBookEntriesResponse);
+
+      const result = await storeWrapper.getAddressBookEntries({page: 0, pageSize: 25});
+      expect(storeWrapper['store'].cc.addressBook.getEntries).toHaveBeenCalledWith({page: 0, pageSize: 25});
+      expect(result).toEqual(mockAddressBookEntriesResponse);
+    });
+
+    it('should handle error while fetching address book entries', async () => {
+      jest.spyOn(storeWrapper['store'].cc.addressBook, 'getEntries').mockRejectedValue(new Error('ab error'));
+      await expect(storeWrapper.getAddressBookEntries({page: 0, pageSize: 25})).rejects.toThrow('ab error');
     });
   });
 

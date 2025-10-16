@@ -1,9 +1,15 @@
 import {useEffect, useCallback, useState, useRef, useMemo} from 'react';
 import {ITask} from '@webex/contact-center';
 import {useCallControlProps, UseTaskListProps, UseTaskProps, useOutdialCallProps} from './task.types';
-import store, {TASK_EVENTS, BuddyDetails, DestinationType, ContactServiceQueue} from '@webex/cc-store';
-import {findHoldTimestamp, getConferenceParticipants, getControlsVisibility} from './Utils/task-util';
+import store, {
+  TASK_EVENTS,
+  BuddyDetails,
+  DestinationType,
+  ContactServiceQueue,
+  PaginatedListParams,
+} from '@webex/cc-store';
 import {Participant} from '@webex/cc-components';
+import {findHoldTimestamp, getConferenceParticipants, getControlsVisibility} from './Utils/task-util';
 import {MAX_PARTICIPANTS_IN_MULTIPARTY_CONFERENCE, MAX_PARTICIPANTS_IN_THREE_PARTY_CONFERENCE} from './Utils/constants';
 
 const ENGAGED_LABEL = 'ENGAGED';
@@ -421,8 +427,8 @@ export const useCallControl = (props: useCallControlProps) => {
 
   const loadQueues = useCallback(async () => {
     try {
-      const queues = await store.getQueues();
-      setQueues(queues);
+      const {data} = await store.getQueues();
+      setQueues(data);
     } catch (error) {
       logger?.error(`CC-Widgets: Task: Error loading queues - ${error.message || error}`, {
         module: 'useCallControl',
@@ -431,6 +437,52 @@ export const useCallControl = (props: useCallControlProps) => {
       setQueues([]);
     }
   }, [logger]);
+
+  const getAddressBookEntries = useCallback(
+    async ({page, pageSize, search}: PaginatedListParams) => {
+      try {
+        return await store.getAddressBookEntries({page, pageSize, search});
+      } catch (error) {
+        logger?.error(`CC-Widgets: Task: Error fetching address book entries - ${error.message || error}`, {
+          module: 'useCallControl',
+          method: 'getAddressBookEntries',
+        });
+        return {data: [], meta: {page: 0, totalPages: 0}};
+      }
+    },
+    [logger]
+  );
+
+  const getEntryPoints = useCallback(
+    async ({page, pageSize, search}: PaginatedListParams) => {
+      try {
+        return await store.getEntryPoints({page, pageSize, search});
+      } catch (error) {
+        logger?.error(`CC-Widgets: Task: Error fetching entry points - ${error.message || error}`, {
+          module: 'useCallControl',
+          method: 'getEntryPoints',
+        });
+        return {data: [], meta: {page: 0, totalPages: 0}};
+      }
+    },
+    [logger]
+  );
+
+  const getQueuesFetcher = useCallback(
+    async ({page, pageSize, search}: PaginatedListParams) => {
+      try {
+        const mediaType = currentTask?.data?.interaction?.mediaType;
+        return await store.getQueues(mediaType, {page, pageSize, search});
+      } catch (error) {
+        logger?.error(`CC-Widgets: Task: Error fetching queues (paginated) - ${error.message || error}`, {
+          module: 'useCallControl',
+          method: 'getQueuesFetcher',
+        });
+        return {data: [], meta: {page: 0, totalPages: 0}};
+      }
+    },
+    [logger, currentTask]
+  );
 
   const holdCallback = () => {
     try {
@@ -879,6 +931,9 @@ export const useCallControl = (props: useCallControlProps) => {
     cancelAutoWrapup,
     conferenceParticipants,
     isConsultButtonDisabled,
+    getAddressBookEntries,
+    getEntryPoints,
+    getQueuesFetcher,
   };
 };
 

@@ -16,32 +16,22 @@ const ConsultTransferListComponent: React.FC<ConsultTransferListComponentProps> 
 
   return (
     <ListItemBase className={classnames('call-control-list-item', className)} size={50} isPadded aria-label={title}>
-      <ListItemBaseSection position="start">
+      <ListItemBaseSection position="start" className="call-control-list-item-start">
         <AvatarNext size={32} initials={initials} title={title} />
       </ListItemBaseSection>
-      <ListItemBaseSection
-        position="middle"
-        style={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          marginLeft: '8px',
-          minWidth: 0,
-          overflow: 'hidden',
-        }}
-      >
-        <Text tagName="p" type="body-primary" style={{margin: 0, lineHeight: '1.2'}}>
+      <ListItemBaseSection position="middle" className="call-control-list-item-middle">
+        <Text tagName="div" type="body-primary" className="call-control-list-item-title">
           {title}
         </Text>
         {subtitle && (
-          <Text tagName="p" type="body-secondary" style={{margin: 0, lineHeight: '1.2'}}>
+          <Text tagName="div" type="body-secondary" className="call-control-list-item-subtitle">
             {subtitle}
           </Text>
         )}
       </ListItemBaseSection>
-      <ListItemBaseSection position="end">
+      <ListItemBaseSection position="end" className="call-control-list-item-end">
         <div className="hover-button">
-          <ButtonCircle onPress={handleButtonPress} size={28} color="join">
+          <ButtonCircle onPress={handleButtonPress} size={32} color="join">
             <Icon name={buttonIcon} />
           </ButtonCircle>
         </div>

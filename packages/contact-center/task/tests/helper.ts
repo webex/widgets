@@ -1,7 +1,7 @@
 import {renderHook, act, waitFor} from '@testing-library/react';
 import {useIncomingTask, useTaskList, useCallControl, useOutdialCall} from '../src/helper';
 import * as taskUtils from '../src/Utils/task-util';
-import {TASK_EVENTS} from '@webex/cc-store';
+import {AddressBookEntriesResponse, EntryPointListResponse, TASK_EVENTS, IContactCenter} from '@webex/cc-store';
 import {mockAgents, mockCC, mockQueueDetails, mockTask} from '@webex/test-fixtures';
 import store from '@webex/cc-store';
 import React from 'react';
@@ -43,13 +43,13 @@ beforeAll(() => {
     webRtcEnabled: true,
   };
   store.store.cc = {
-    ...store.store.cc, // Keep other properties if they exist
+    ...mockCC,
     taskManager: {
       getAllTasks: jest.fn().mockReturnValue({
         [taskMock.data.interactionId]: taskMock,
       }),
     },
-  };
+  } as IContactCenter;
 });
 
 describe('useIncomingTask Hook', () => {
@@ -2203,7 +2203,11 @@ describe('useCallControl', () => {
   });
 
   it('should load queues successfully', async () => {
-    const getQueuesSpy = jest.spyOn(store, 'getQueues').mockResolvedValue(mockQueueDetails);
+    const getQueuesResponse: Awaited<ReturnType<typeof store.getQueues>> = {
+      data: mockQueueDetails,
+      meta: {page: 0, pageSize: mockQueueDetails.length, total: mockQueueDetails.length, totalPages: 1},
+    };
+    const getQueuesSpy = jest.spyOn(store, 'getQueues').mockResolvedValue(getQueuesResponse);
 
     const {result} = renderHook(() =>
       useCallControl({
@@ -2223,6 +2227,69 @@ describe('useCallControl', () => {
 
     expect(result.current.queues).toEqual(mockQueueDetails);
     getQueuesSpy.mockRestore();
+  });
+
+  it('should get address book entries via getAddressBookEntries', async () => {
+    const mockResponse = {data: [{id: '1', name: 'Alice', number: '123'}], meta: {page: 0, totalPages: 1}};
+    jest.spyOn(store, 'getAddressBookEntries').mockResolvedValue(mockResponse as AddressBookEntriesResponse);
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
+        consultInitiated: false,
+        isMuted: false,
+        multiPartyConferenceEnabled: false,
+      })
+    );
+
+    const res = await result.current.getAddressBookEntries({page: 0, pageSize: 25});
+    expect(res).toEqual(mockResponse);
+  });
+
+  it('should get entry points via getEntryPoints', async () => {
+    const mockResponse = {data: [{id: 'ep1', name: 'Entry 1'}], meta: {page: 0, totalPages: 1}};
+    jest.spyOn(store, 'getEntryPoints').mockResolvedValue(mockResponse as EntryPointListResponse);
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
+        consultInitiated: false,
+        isMuted: false,
+        multiPartyConferenceEnabled: false,
+      })
+    );
+
+    const res = await result.current.getEntryPoints({page: 0, pageSize: 25});
+    expect(res).toEqual(mockResponse);
+  });
+
+  it('should get queues via getQueuesFetcher (paginated)', async () => {
+    const mockResponse: Awaited<ReturnType<typeof store.getQueues>> = {
+      data: [mockQueueDetails[0]],
+      meta: {page: 0, pageSize: 25, total: 1, totalPages: 1},
+    };
+    jest.spyOn(store, 'getQueues').mockResolvedValue(mockResponse);
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
+        consultInitiated: false,
+        isMuted: false,
+        multiPartyConferenceEnabled: false,
+      })
+    );
+
+    const res = await result.current.getQueuesFetcher({page: 0, pageSize: 25});
+    expect(res).toEqual(mockResponse);
   });
 
   it('should call cancelAutoWrapup successfully', async () => {

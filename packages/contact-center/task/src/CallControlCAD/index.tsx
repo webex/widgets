@@ -17,6 +17,7 @@ const CallControlCADInternal: React.FunctionComponent<CallControlProps> = observ
     callControlClassName,
     callControlConsultClassName,
     multiPartyConferenceEnabled,
+    consultTransferOptions,
   }) => {
     const {
       logger,
@@ -59,6 +60,7 @@ const CallControlCADInternal: React.FunctionComponent<CallControlProps> = observ
       isEndConsultEnabled,
       allowConsultToQueue,
       logger,
+      consultTransferOptions,
     };
 
     return <CallControlCADComponent {...result} />;

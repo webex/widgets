@@ -18,6 +18,16 @@ export const UNMUTE_CALL = 'Unmute';
 export const DIAL_NUMBER = 'DialNumber';
 export const AGENTS = 'Agents';
 export const QUEUES = 'Queues';
+// Generic UI strings
+export const SEARCH_PLACEHOLDER = 'Search...';
+export const CLEAR_SEARCH = 'Clear search';
+export const SCROLL_TO_LOAD_MORE = 'Scroll to load more';
+export const LOADING_MORE_QUEUES = 'Loading more queues...';
+export const LOADING_MORE_DIAL_NUMBERS = 'Loading more dial numbers...';
+export const LOADING_MORE_ENTRY_POINTS = 'Loading more entry points...';
+export const NO_DATA_AVAILABLE_CONSULT_TRANSFER = 'No data available for consult transfer.';
+// Pagination
+export const DEFAULT_PAGE_SIZE = 25;
 // CallControlCAD constants
 export const NO_CUSTOMER_NAME = 'No Customer Name';
 export const NO_CALLER_ID = 'No Caller ID';

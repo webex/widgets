@@ -21,6 +21,7 @@ export type CallControlProps = Partial<
     | 'callControlConsultClassName'
     | 'onToggleMute'
     | 'multiPartyConferenceEnabled'
+    | 'consultTransferOptions'
   >
 >;
 

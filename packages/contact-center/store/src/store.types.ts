@@ -8,6 +8,15 @@ import {
   BuddyAgentsResponse,
   StateChange,
   Logout,
+  EntryPointRecord,
+  EntryPointListResponse,
+  EntryPointSearchParams,
+  AddressBookEntry,
+  AddressBookEntriesResponse,
+  AddressBookEntrySearchParams,
+  ContactServiceQueuesResponse,
+  ContactServiceQueueSearchParams,
+  AddressBook,
 } from '@webex/contact-center';
 import {DestinationType} from 'node_modules/@webex/contact-center/dist/types/services/task/types';
 import {
@@ -36,7 +45,9 @@ interface IContactCenter {
     getAllTasks: () => Record<string, ITask>;
   };
   getBuddyAgents(data: BuddyAgents): Promise<BuddyAgentsResponse>;
-  getQueues(search?: string, filter?: string, page?: number, pageSize?: number): Promise<ContactServiceQueue[]>;
+  getQueues(params?: ContactServiceQueueSearchParams): Promise<ContactServiceQueuesResponse>;
+  getEntryPoints(params?: EntryPointSearchParams): Promise<EntryPointListResponse>;
+  addressBook: AddressBook;
   agentConfig?: {
     regexUS: RegExp | string;
     agentId: string;
@@ -119,6 +130,10 @@ interface IStoreWrapper extends IStore {
   onErrorCallback?: (widgetName: string, error: Error) => void;
   setCurrentTask(task: ITask): void;
   refreshTaskList(): void;
+  getBuddyAgents(mediaType?: string): Promise<BuddyDetails[]>;
+  getQueues(mediaType?: string, params?: ContactServiceQueueSearchParams): Promise<ContactServiceQueuesResponse>;
+  getEntryPoints(params?: EntryPointSearchParams): Promise<EntryPointListResponse>;
+  getAddressBookEntries(params?: AddressBookEntrySearchParams): Promise<AddressBookEntriesResponse>;
   setDeviceType(option: string): void;
   setDialNumber(input: string): void;
   setCurrentState(state: string): void;
@@ -221,10 +236,31 @@ type AgentLoginProfile = {
   };
 };
 
+// Generic pagination params for list-fetching APIs
+type PaginatedListParams = {
+  page: number;
+  pageSize: number;
+  search?: string;
+};
+
+// Generic fetch/transform helpers for paginated APIs
+type FetchPaginatedList<T> = (
+  params: PaginatedListParams
+) => Promise<{data: T[]; meta?: {page?: number; totalPages?: number}}>;
+
+// Generic transform function for paginated APIs
+type TransformPaginatedData<T, U> = (item: T, page: number, index: number) => U;
+
 // Utility consts
 const DIALNUMBER: string = 'AGENT_DN';
 const EXTENSION: string = 'EXTENSION';
 const DESKTOP: string = 'BROWSER';
+
+// Common string constants used across the store wrapper
+const MEDIA_TYPE_TELEPHONY_LOWER = 'telephony';
+const MEDIA_TYPE_TELEPHONY_UPPER = 'TELEPHONY';
+const DEVICE_TYPE_BROWSER = 'BROWSER';
+const AGENT_STATE_AVAILABLE = 'Available';
 
 const LoginOptions: {[key: string]: string} = {
   [DIALNUMBER]: 'Dial Number',
@@ -259,7 +295,18 @@ export type {
   BuddyDetails,
   ContactServiceQueue,
   AgentLoginProfile,
+  EntryPointRecord,
+  EntryPointListResponse,
+  EntryPointSearchParams,
+  AddressBookEntry,
+  AddressBookEntriesResponse,
+  AddressBookEntrySearchParams,
+  ContactServiceQueuesResponse,
+  ContactServiceQueueSearchParams,
   IWebex,
+  PaginatedListParams,
+  FetchPaginatedList,
+  TransformPaginatedData,
 };
 
 export {
@@ -270,6 +317,10 @@ export {
   DIALNUMBER,
   EXTENSION,
   DESKTOP,
+  MEDIA_TYPE_TELEPHONY_LOWER,
+  MEDIA_TYPE_TELEPHONY_UPPER,
+  DEVICE_TYPE_BROWSER,
+  AGENT_STATE_AVAILABLE,
   LoginOptions,
   ERROR_TRIGGERING_IDLE_CODES,
 };

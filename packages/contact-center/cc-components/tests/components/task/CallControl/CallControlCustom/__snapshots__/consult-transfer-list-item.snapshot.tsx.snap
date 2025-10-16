@@ -14,6 +14,7 @@ exports[`ConsultTransferListComponent Snapshots Interactions should render compo
   tabindex="0"
 >
   <div
+    class="call-control-list-item-start"
     data-position="start"
   >
     <div
@@ -33,27 +34,26 @@ exports[`ConsultTransferListComponent Snapshots Interactions should render compo
     </div>
   </div>
   <div
+    class="call-control-list-item-middle"
     data-position="middle"
-    style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
   >
     <mdc-text
-      class="md-text-wrapper"
-      style="margin: 0px; line-height: 1.2;"
-      tagname="p"
+      class="md-text-wrapper call-control-list-item-title"
+      tagname="div"
       type="body-large-regular"
     >
       John Doe
     </mdc-text>
     <mdc-text
-      class="md-text-wrapper"
-      style="margin: 0px; line-height: 1.2;"
-      tagname="p"
+      class="md-text-wrapper call-control-list-item-subtitle"
+      tagname="div"
       type="body-midsize-regular"
     >
       Manager
     </mdc-text>
   </div>
   <div
+    class="call-control-list-item-end"
     data-position="end"
   >
     <div
@@ -68,7 +68,7 @@ exports[`ConsultTransferListComponent Snapshots Interactions should render compo
         data-multiple-children="false"
         data-outline="false"
         data-shallow-disabled="false"
-        data-size="28"
+        data-size="32"
         tabindex="0"
         type="button"
       >
@@ -95,6 +95,7 @@ exports[`ConsultTransferListComponent Snapshots Interactions should render compo
   tabindex="0"
 >
   <div
+    class="call-control-list-item-start"
     data-position="start"
   >
     <div
@@ -114,27 +115,26 @@ exports[`ConsultTransferListComponent Snapshots Interactions should render compo
     </div>
   </div>
   <div
+    class="call-control-list-item-middle"
     data-position="middle"
-    style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
   >
     <mdc-text
-      class="md-text-wrapper"
-      style="margin: 0px; line-height: 1.2;"
-      tagname="p"
+      class="md-text-wrapper call-control-list-item-title"
+      tagname="div"
       type="body-large-regular"
     >
       John Doe
     </mdc-text>
     <mdc-text
-      class="md-text-wrapper"
-      style="margin: 0px; line-height: 1.2;"
-      tagname="p"
+      class="md-text-wrapper call-control-list-item-subtitle"
+      tagname="div"
       type="body-midsize-regular"
     >
       Manager
     </mdc-text>
   </div>
   <div
+    class="call-control-list-item-end"
     data-position="end"
   >
     <div
@@ -149,7 +149,7 @@ exports[`ConsultTransferListComponent Snapshots Interactions should render compo
         data-multiple-children="false"
         data-outline="false"
         data-shallow-disabled="false"
-        data-size="28"
+        data-size="32"
         tabindex="-1"
         type="button"
       >
@@ -176,6 +176,7 @@ exports[`ConsultTransferListComponent Snapshots Interactions should render compo
   tabindex="0"
 >
   <div
+    class="call-control-list-item-start"
     data-position="start"
   >
     <div
@@ -195,27 +196,26 @@ exports[`ConsultTransferListComponent Snapshots Interactions should render compo
     </div>
   </div>
   <div
+    class="call-control-list-item-middle"
     data-position="middle"
-    style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
   >
     <mdc-text
-      class="md-text-wrapper"
-      style="margin: 0px; line-height: 1.2;"
-      tagname="p"
+      class="md-text-wrapper call-control-list-item-title"
+      tagname="div"
       type="body-large-regular"
     >
       John Doe
     </mdc-text>
     <mdc-text
-      class="md-text-wrapper"
-      style="margin: 0px; line-height: 1.2;"
-      tagname="p"
+      class="md-text-wrapper call-control-list-item-subtitle"
+      tagname="div"
       type="body-midsize-regular"
     >
       Manager
     </mdc-text>
   </div>
   <div
+    class="call-control-list-item-end"
     data-position="end"
   >
     <div
@@ -230,7 +230,7 @@ exports[`ConsultTransferListComponent Snapshots Interactions should render compo
         data-multiple-children="false"
         data-outline="false"
         data-shallow-disabled="false"
-        data-size="28"
+        data-size="32"
         tabindex="-1"
         type="button"
       >
@@ -257,6 +257,7 @@ exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI element
   tabindex="0"
 >
   <div
+    class="call-control-list-item-start"
     data-position="start"
   >
     <div
@@ -276,27 +277,26 @@ exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI element
     </div>
   </div>
   <div
+    class="call-control-list-item-middle"
     data-position="middle"
-    style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
   >
     <mdc-text
-      class="md-text-wrapper"
-      style="margin: 0px; line-height: 1.2;"
-      tagname="p"
+      class="md-text-wrapper call-control-list-item-title"
+      tagname="div"
       type="body-large-regular"
     >
       John Doe
     </mdc-text>
     <mdc-text
-      class="md-text-wrapper"
-      style="margin: 0px; line-height: 1.2;"
-      tagname="p"
+      class="md-text-wrapper call-control-list-item-subtitle"
+      tagname="div"
       type="body-midsize-regular"
     >
       Manager
     </mdc-text>
   </div>
   <div
+    class="call-control-list-item-end"
     data-position="end"
   >
     <div
@@ -311,7 +311,7 @@ exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI element
         data-multiple-children="false"
         data-outline="false"
         data-shallow-disabled="false"
-        data-size="28"
+        data-size="32"
         tabindex="-1"
         type="button"
       >
@@ -338,6 +338,7 @@ exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI element
   tabindex="0"
 >
   <div
+    class="call-control-list-item-start"
     data-position="start"
   >
     <div
@@ -357,27 +358,26 @@ exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI element
     </div>
   </div>
   <div
+    class="call-control-list-item-middle"
     data-position="middle"
-    style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
   >
     <mdc-text
-      class="md-text-wrapper"
-      style="margin: 0px; line-height: 1.2;"
-      tagname="p"
+      class="md-text-wrapper call-control-list-item-title"
+      tagname="div"
       type="body-large-regular"
     >
       John Doe
     </mdc-text>
     <mdc-text
-      class="md-text-wrapper"
-      style="margin: 0px; line-height: 1.2;"
-      tagname="p"
+      class="md-text-wrapper call-control-list-item-subtitle"
+      tagname="div"
       type="body-midsize-regular"
     >
       Manager
     </mdc-text>
   </div>
   <div
+    class="call-control-list-item-end"
     data-position="end"
   >
     <div
@@ -392,7 +392,7 @@ exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI element
         data-multiple-children="false"
         data-outline="false"
         data-shallow-disabled="false"
-        data-size="28"
+        data-size="32"
         tabindex="-1"
         type="button"
       >
@@ -419,6 +419,7 @@ exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI element
   tabindex="0"
 >
   <div
+    class="call-control-list-item-start"
     data-position="start"
   >
     <div
@@ -438,27 +439,26 @@ exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI element
     </div>
   </div>
   <div
+    class="call-control-list-item-middle"
     data-position="middle"
-    style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
   >
     <mdc-text
-      class="md-text-wrapper"
-      style="margin: 0px; line-height: 1.2;"
-      tagname="p"
+      class="md-text-wrapper call-control-list-item-title"
+      tagname="div"
       type="body-large-regular"
     >
       John Doe
     </mdc-text>
     <mdc-text
-      class="md-text-wrapper"
-      style="margin: 0px; line-height: 1.2;"
-      tagname="p"
+      class="md-text-wrapper call-control-list-item-subtitle"
+      tagname="div"
       type="body-midsize-regular"
     >
       Manager
     </mdc-text>
   </div>
   <div
+    class="call-control-list-item-end"
     data-position="end"
   >
     <div
@@ -473,7 +473,7 @@ exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI element
         data-multiple-children="false"
         data-outline="false"
         data-shallow-disabled="false"
-        data-size="28"
+        data-size="32"
         tabindex="-1"
         type="button"
       >
@@ -500,6 +500,7 @@ exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI element
   tabindex="0"
 >
   <div
+    class="call-control-list-item-start"
     data-position="start"
   >
     <div
@@ -519,27 +520,26 @@ exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI element
     </div>
   </div>
   <div
+    class="call-control-list-item-middle"
     data-position="middle"
-    style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
   >
     <mdc-text
-      class="md-text-wrapper"
-      style="margin: 0px; line-height: 1.2;"
-      tagname="p"
+      class="md-text-wrapper call-control-list-item-title"
+      tagname="div"
       type="body-large-regular"
     >
       Alexander Benjamin Christopher
     </mdc-text>
     <mdc-text
-      class="md-text-wrapper"
-      style="margin: 0px; line-height: 1.2;"
-      tagname="p"
+      class="md-text-wrapper call-control-list-item-subtitle"
+      tagname="div"
       type="body-midsize-regular"
     >
       Manager
     </mdc-text>
   </div>
   <div
+    class="call-control-list-item-end"
     data-position="end"
   >
     <div
@@ -554,7 +554,7 @@ exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI element
         data-multiple-children="false"
         data-outline="false"
         data-shallow-disabled="false"
-        data-size="28"
+        data-size="32"
         tabindex="-1"
         type="button"
       >
@@ -581,6 +581,7 @@ exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI element
   tabindex="0"
 >
   <div
+    class="call-control-list-item-start"
     data-position="start"
   >
     <div
@@ -600,27 +601,26 @@ exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI element
     </div>
   </div>
   <div
+    class="call-control-list-item-middle"
     data-position="middle"
-    style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
   >
     <mdc-text
-      class="md-text-wrapper"
-      style="margin: 0px; line-height: 1.2;"
-      tagname="p"
+      class="md-text-wrapper call-control-list-item-title"
+      tagname="div"
       type="body-large-regular"
     >
       John Doe
     </mdc-text>
     <mdc-text
-      class="md-text-wrapper"
-      style="margin: 0px; line-height: 1.2;"
-      tagname="p"
+      class="md-text-wrapper call-control-list-item-subtitle"
+      tagname="div"
       type="body-midsize-regular"
     >
       Senior Manager of Customer Relations and Business Development
     </mdc-text>
   </div>
   <div
+    class="call-control-list-item-end"
     data-position="end"
   >
     <div
@@ -635,7 +635,7 @@ exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI element
         data-multiple-children="false"
         data-outline="false"
         data-shallow-disabled="false"
-        data-size="28"
+        data-size="32"
         tabindex="-1"
         type="button"
       >
@@ -662,6 +662,7 @@ exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI element
   tabindex="0"
 >
   <div
+    class="call-control-list-item-start"
     data-position="start"
   >
     <div
@@ -681,27 +682,26 @@ exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI element
     </div>
   </div>
   <div
+    class="call-control-list-item-middle"
     data-position="middle"
-    style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
   >
     <mdc-text
-      class="md-text-wrapper"
-      style="margin: 0px; line-height: 1.2;"
-      tagname="p"
+      class="md-text-wrapper call-control-list-item-title"
+      tagname="div"
       type="body-large-regular"
     >
       John
     </mdc-text>
     <mdc-text
-      class="md-text-wrapper"
-      style="margin: 0px; line-height: 1.2;"
-      tagname="p"
+      class="md-text-wrapper call-control-list-item-subtitle"
+      tagname="div"
       type="body-midsize-regular"
     >
       Manager
     </mdc-text>
   </div>
   <div
+    class="call-control-list-item-end"
     data-position="end"
   >
     <div
@@ -716,7 +716,7 @@ exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI element
         data-multiple-children="false"
         data-outline="false"
         data-shallow-disabled="false"
-        data-size="28"
+        data-size="32"
         tabindex="-1"
         type="button"
       >
@@ -743,6 +743,7 @@ exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI element
   tabindex="0"
 >
   <div
+    class="call-control-list-item-start"
     data-position="start"
   >
     <div
@@ -762,27 +763,26 @@ exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI element
     </div>
   </div>
   <div
+    class="call-control-list-item-middle"
     data-position="middle"
-    style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
   >
     <mdc-text
-      class="md-text-wrapper"
-      style="margin: 0px; line-height: 1.2;"
-      tagname="p"
+      class="md-text-wrapper call-control-list-item-title"
+      tagname="div"
       type="body-large-regular"
     >
       John O'Connor & Jane
     </mdc-text>
     <mdc-text
-      class="md-text-wrapper"
-      style="margin: 0px; line-height: 1.2;"
-      tagname="p"
+      class="md-text-wrapper call-control-list-item-subtitle"
+      tagname="div"
       type="body-midsize-regular"
     >
       Manager
     </mdc-text>
   </div>
   <div
+    class="call-control-list-item-end"
     data-position="end"
   >
     <div
@@ -797,7 +797,7 @@ exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI element
         data-multiple-children="false"
         data-outline="false"
         data-shallow-disabled="false"
-        data-size="28"
+        data-size="32"
         tabindex="-1"
         type="button"
       >
@@ -824,6 +824,7 @@ exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI element
   tabindex="0"
 >
   <div
+    class="call-control-list-item-start"
     data-position="start"
   >
     <div
@@ -843,27 +844,26 @@ exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI element
     </div>
   </div>
   <div
+    class="call-control-list-item-middle"
     data-position="middle"
-    style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
   >
     <mdc-text
-      class="md-text-wrapper"
-      style="margin: 0px; line-height: 1.2;"
-      tagname="p"
+      class="md-text-wrapper call-control-list-item-title"
+      tagname="div"
       type="body-large-regular"
     >
       John Doe
     </mdc-text>
     <mdc-text
-      class="md-text-wrapper"
-      style="margin: 0px; line-height: 1.2;"
-      tagname="p"
+      class="md-text-wrapper call-control-list-item-subtitle"
+      tagname="div"
       type="body-midsize-regular"
     >
       Manager
     </mdc-text>
   </div>
   <div
+    class="call-control-list-item-end"
     data-position="end"
   >
     <div
@@ -878,7 +878,7 @@ exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI element
         data-multiple-children="false"
         data-outline="false"
         data-shallow-disabled="false"
-        data-size="28"
+        data-size="32"
         tabindex="-1"
         type="button"
       >
@@ -905,6 +905,7 @@ exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI element
   tabindex="0"
 >
   <div
+    class="call-control-list-item-start"
     data-position="start"
   >
     <div
@@ -924,19 +925,19 @@ exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI element
     </div>
   </div>
   <div
+    class="call-control-list-item-middle"
     data-position="middle"
-    style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
   >
     <mdc-text
-      class="md-text-wrapper"
-      style="margin: 0px; line-height: 1.2;"
-      tagname="p"
+      class="md-text-wrapper call-control-list-item-title"
+      tagname="div"
       type="body-large-regular"
     >
       John Doe
     </mdc-text>
   </div>
   <div
+    class="call-control-list-item-end"
     data-position="end"
   >
     <div
@@ -951,7 +952,7 @@ exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI element
         data-multiple-children="false"
         data-outline="false"
         data-shallow-disabled="false"
-        data-size="28"
+        data-size="32"
         tabindex="-1"
         type="button"
       >
@@ -978,6 +979,7 @@ exports[`ConsultTransferListComponent Snapshots State Management should update w
   tabindex="0"
 >
   <div
+    class="call-control-list-item-start"
     data-position="start"
   >
     <div
@@ -997,27 +999,26 @@ exports[`ConsultTransferListComponent Snapshots State Management should update w
     </div>
   </div>
   <div
+    class="call-control-list-item-middle"
     data-position="middle"
-    style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
   >
     <mdc-text
-      class="md-text-wrapper"
-      style="margin: 0px; line-height: 1.2;"
-      tagname="p"
+      class="md-text-wrapper call-control-list-item-title"
+      tagname="div"
       type="body-large-regular"
     >
       John Doe
     </mdc-text>
     <mdc-text
-      class="md-text-wrapper"
-      style="margin: 0px; line-height: 1.2;"
-      tagname="p"
+      class="md-text-wrapper call-control-list-item-subtitle"
+      tagname="div"
       type="body-midsize-regular"
     >
       Manager
     </mdc-text>
   </div>
   <div
+    class="call-control-list-item-end"
     data-position="end"
   >
     <div
@@ -1032,7 +1033,7 @@ exports[`ConsultTransferListComponent Snapshots State Management should update w
         data-multiple-children="false"
         data-outline="false"
         data-shallow-disabled="false"
-        data-size="28"
+        data-size="32"
         tabindex="-1"
         type="button"
       >
@@ -1059,6 +1060,7 @@ exports[`ConsultTransferListComponent Snapshots State Management should update w
   tabindex="0"
 >
   <div
+    class="call-control-list-item-start"
     data-position="start"
   >
     <div
@@ -1078,27 +1080,26 @@ exports[`ConsultTransferListComponent Snapshots State Management should update w
     </div>
   </div>
   <div
+    class="call-control-list-item-middle"
     data-position="middle"
-    style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
   >
     <mdc-text
-      class="md-text-wrapper"
-      style="margin: 0px; line-height: 1.2;"
-      tagname="p"
+      class="md-text-wrapper call-control-list-item-title"
+      tagname="div"
       type="body-large-regular"
     >
       John Doe
     </mdc-text>
     <mdc-text
-      class="md-text-wrapper"
-      style="margin: 0px; line-height: 1.2;"
-      tagname="p"
+      class="md-text-wrapper call-control-list-item-subtitle"
+      tagname="div"
       type="body-midsize-regular"
     >
       Senior Manager
     </mdc-text>
   </div>
   <div
+    class="call-control-list-item-end"
     data-position="end"
   >
     <div
@@ -1113,7 +1114,7 @@ exports[`ConsultTransferListComponent Snapshots State Management should update w
         data-multiple-children="false"
         data-outline="false"
         data-shallow-disabled="false"
-        data-size="28"
+        data-size="32"
         tabindex="-1"
         type="button"
       >
@@ -1140,6 +1141,7 @@ exports[`ConsultTransferListComponent Snapshots State Management should update w
   tabindex="0"
 >
   <div
+    class="call-control-list-item-start"
     data-position="start"
   >
     <div
@@ -1159,27 +1161,26 @@ exports[`ConsultTransferListComponent Snapshots State Management should update w
     </div>
   </div>
   <div
+    class="call-control-list-item-middle"
     data-position="middle"
-    style="flex: 1; display: flex; flex-direction: column; margin-left: 8px; min-width: 0; overflow: hidden;"
   >
     <mdc-text
-      class="md-text-wrapper"
-      style="margin: 0px; line-height: 1.2;"
-      tagname="p"
+      class="md-text-wrapper call-control-list-item-title"
+      tagname="div"
       type="body-large-regular"
     >
       Jane Smith
     </mdc-text>
     <mdc-text
-      class="md-text-wrapper"
-      style="margin: 0px; line-height: 1.2;"
-      tagname="p"
+      class="md-text-wrapper call-control-list-item-subtitle"
+      tagname="div"
       type="body-midsize-regular"
     >
       Manager
     </mdc-text>
   </div>
   <div
+    class="call-control-list-item-end"
     data-position="end"
   >
     <div
@@ -1194,7 +1195,7 @@ exports[`ConsultTransferListComponent Snapshots State Management should update w
         data-multiple-children="false"
         data-outline="false"
         data-shallow-disabled="false"
-        data-size="28"
+        data-size="32"
         tabindex="-1"
         type="button"
       >

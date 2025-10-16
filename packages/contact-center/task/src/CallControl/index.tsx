@@ -8,7 +8,15 @@ import {CallControlProps} from '../task.types';
 import {CallControlComponent} from '@webex/cc-components';
 
 const CallControlInternal: React.FunctionComponent<CallControlProps> = observer(
-  ({onHoldResume, onEnd, onWrapUp, onRecordingToggle, onToggleMute, multiPartyConferenceEnabled}) => {
+  ({
+    onHoldResume,
+    onEnd,
+    onWrapUp,
+    onRecordingToggle,
+    onToggleMute,
+    consultTransferOptions,
+    multiPartyConferenceEnabled,
+  }) => {
     const {
       logger,
       currentTask,
@@ -49,6 +57,7 @@ const CallControlInternal: React.FunctionComponent<CallControlProps> = observer(
       isEndConsultEnabled,
       allowConsultToQueue,
       logger,
+      consultTransferOptions,
     };
 
     return <CallControlComponent {...result} />;

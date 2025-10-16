@@ -48,8 +48,6 @@ function CallControlComponent(props: CallControlComponentProps) {
     setIsRecording,
     buddyAgents,
     loadBuddyAgents,
-    queues,
-    loadQueues,
     transferCall,
     consultCall,
     exitConference,
@@ -65,6 +63,10 @@ function CallControlComponent(props: CallControlComponentProps) {
     secondsUntilAutoWrapup,
     cancelAutoWrapup,
     isConsultButtonDisabled,
+    getAddressBookEntries,
+    getEntryPoints,
+    getQueuesFetcher,
+    consultTransferOptions,
   } = props;
 
   useEffect(() => {
@@ -163,7 +165,6 @@ function CallControlComponent(props: CallControlComponentProps) {
                       setShowAgentMenu(true);
                       setAgentMenuType(button.menuType as CallControlMenuType);
                       loadBuddyAgents();
-                      loadQueues();
                     }}
                     onHide={() => {
                       setShowAgentMenu(false);
@@ -213,11 +214,25 @@ function CallControlComponent(props: CallControlComponentProps) {
                         heading={button.menuType}
                         buttonIcon={button.icon}
                         buddyAgents={buddyAgents}
-                        queues={queues}
+                        getAddressBookEntries={getAddressBookEntries}
+                        getEntryPoints={getEntryPoints}
+                        getQueues={getQueuesFetcher}
                         onAgentSelect={(agentId, agentName) => handleTargetSelect(agentId, agentName, 'agent')}
                         onQueueSelect={(queueId, queueName) => handleTargetSelect(queueId, queueName, 'queue')}
+                        onEntryPointSelect={(entryPointId, entryPointName) =>
+                          handleTargetSelect(entryPointId, entryPointName, 'entryPoint')
+                        }
                         onDialNumberSelect={(dialNumber) => handleTargetSelect(dialNumber, dialNumber, 'dialNumber')}
                         allowConsultToQueue={allowConsultToQueue}
+                        consultTransferOptions={
+                          isTelephony
+                            ? consultTransferOptions
+                            : {
+                                ...consultTransferOptions,
+                                showDialNumberTab: false,
+                                showEntryPointTab: false,
+                              }
+                        }
                         logger={logger}
                       />
                     ) : null}

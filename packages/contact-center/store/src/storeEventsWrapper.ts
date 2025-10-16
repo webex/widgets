@@ -14,11 +14,22 @@ import {
   ENGAGED_LABEL,
   ENGAGED_USERNAME,
   ContactServiceQueue,
+  ContactServiceQueueSearchParams,
+  EntryPointListResponse,
+  EntryPointSearchParams,
+  AddressBookEntriesResponse,
+  AddressBookEntrySearchParams,
   Profile,
   AgentLoginProfile,
   ERROR_TRIGGERING_IDLE_CODES,
 } from './store.types';
 import Store from './store';
+import {
+  DEVICE_TYPE_BROWSER,
+  MEDIA_TYPE_TELEPHONY_LOWER,
+  MEDIA_TYPE_TELEPHONY_UPPER,
+  AGENT_STATE_AVAILABLE,
+} from './store.types';
 import {runInAction} from 'mobx';
 import {isIncomingTask} from './task-utils';
 
@@ -419,7 +430,7 @@ class StoreWrapper implements IStoreWrapper {
       taskToRemove.off(TASK_EVENTS.TASK_CONFERENCE_STARTED, this.handleConferenceStarted);
       taskToRemove.off(TASK_EVENTS.TASK_CONFERENCE_TRANSFERRED, this.handleConferenceEnded);
       taskToRemove.off(TASK_EVENTS.TASK_CONFERENCE_TRANSFER_FAILED, this.refreshTaskList);
-      if (this.deviceType === 'BROWSER') {
+      if (this.deviceType === DEVICE_TYPE_BROWSER) {
         taskToRemove.off(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
         this.setCallControlAudio(null);
       }
@@ -442,9 +453,9 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   handleTaskMuteState = (task: ITask): void => {
-    const isBrowser = this.deviceType === 'BROWSER';
+    const isBrowser = this.deviceType === DEVICE_TYPE_BROWSER;
     const webRtcEnabled = this.featureFlags?.webRtcEnabled;
-    const isTelephony = task?.data?.interaction?.mediaType === 'telephony';
+    const isTelephony = task?.data?.interaction?.mediaType === MEDIA_TYPE_TELEPHONY_LOWER;
 
     if (isBrowser && isTelephony && webRtcEnabled) {
       this.setIsMuted(false);
@@ -527,7 +538,7 @@ class StoreWrapper implements IStoreWrapper {
         developerName: ENGAGED_LABEL,
         name: ENGAGED_USERNAME,
       });
-      if (this.deviceType === 'BROWSER') {
+      if (this.deviceType === DEVICE_TYPE_BROWSER) {
         task.on(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
       }
     });
@@ -568,7 +579,7 @@ class StoreWrapper implements IStoreWrapper {
     task.on(TASK_EVENTS.AGENT_OFFER_CONTACT, this.refreshTaskList);
     task.on(TASK_EVENTS.AGENT_CONSULT_CREATED, this.handleConsultCreated);
     task.on(TASK_EVENTS.TASK_CONSULT_QUEUE_CANCELLED, this.handleConsultQueueCancelled);
-    if (this.deviceType === 'BROWSER') {
+    if (this.deviceType === DEVICE_TYPE_BROWSER) {
       task.on(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
     }
 
@@ -662,7 +673,7 @@ class StoreWrapper implements IStoreWrapper {
     task.on(TASK_EVENTS.TASK_CONFERENCE_STARTED, this.handleConferenceStarted);
     task.on(TASK_EVENTS.TASK_CONFERENCE_TRANSFERRED, this.refreshTaskList);
     task.on(TASK_EVENTS.TASK_CONFERENCE_TRANSFER_FAILED, this.refreshTaskList);
-    if (this.deviceType === 'BROWSER') {
+    if (this.deviceType === DEVICE_TYPE_BROWSER) {
       task.on(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
     }
 
@@ -717,26 +728,58 @@ class StoreWrapper implements IStoreWrapper {
     try {
       const response = await this.store.cc.getBuddyAgents({
         //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
-        mediaType: mediaType ?? 'telephony',
-        state: 'Available',
+        mediaType: mediaType ?? MEDIA_TYPE_TELEPHONY_LOWER,
+        state: AGENT_STATE_AVAILABLE,
       });
       return 'data' in response ? response.data.agentList : [];
     } catch (error) {
-      return Promise.reject(error);
+      this.store.logger.error('Error fetching buddy agents:', error);
+      throw error;
     }
   };
 
   getQueues = async (
-    mediaType: string = this.currentTask.data.interaction.mediaType ?? 'TELEPHONY'
-  ): Promise<Array<ContactServiceQueue>> => {
+    mediaType: string = this.currentTask.data.interaction.mediaType ?? MEDIA_TYPE_TELEPHONY_UPPER,
+    params?: ContactServiceQueueSearchParams
+  ): Promise<{
+    data: ContactServiceQueue[];
+    meta: {page: number; pageSize: number; total: number; totalPages: number};
+  }> => {
     try {
       const upperMediaType = mediaType.toUpperCase();
-      let queueList = await this.store.cc.getQueues();
-      queueList = queueList.filter((queue) => queue.channelType === upperMediaType);
-      return queueList;
+      const response = await this.store.cc.getQueues(params);
+      const data = Array.isArray(response) ? response : response.data;
+      const filtered = data.filter((queue) => queue.channelType === upperMediaType);
+      const page = Array.isArray(response) ? 0 : (response.meta?.page ?? 0);
+      const totalPages = Array.isArray(response) ? 1 : (response.meta?.totalPages ?? 1);
+      const pageSize = Array.isArray(response) ? filtered.length : (response.meta?.pageSize ?? filtered.length);
+      const total = Array.isArray(response)
+        ? filtered.length
+        : ((response as {meta?: {total?: number}}).meta?.total ?? filtered.length);
+      return {data: filtered, meta: {page, pageSize, total, totalPages}};
     } catch (error) {
-      console.error('Error fetching queues:', error);
-      return Promise.reject(error);
+      this.store.logger.error('Error fetching queues:', error);
+      throw error;
+    }
+  };
+
+  getEntryPoints = async (params?: EntryPointSearchParams): Promise<EntryPointListResponse> => {
+    try {
+      const response: EntryPointListResponse = await this.store.cc.getEntryPoints(params);
+      return response;
+    } catch (error) {
+      this.store.logger.error('Error fetching entry points:', error);
+      throw error;
+    }
+  };
+
+  getAddressBookEntries = async (params?: AddressBookEntrySearchParams): Promise<AddressBookEntriesResponse> => {
+    try {
+      const response: AddressBookEntriesResponse = await this.store.cc.addressBook.getEntries(params ?? {});
+      return response;
+    } catch (error) {
+      this.store.logger.error('Error fetching address book entries:', error);
+      throw error;
     }
   };
 

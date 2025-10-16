@@ -73,6 +73,9 @@ describe('CallControlCAD Component', () => {
       exitConference: jest.fn(),
       conferenceParticipants: [],
       isConsultButtonDisabled: false,
+      getAddressBookEntries: jest.fn(),
+      getEntryPoints: jest.fn(),
+      getQueuesFetcher: jest.fn(),
     });
 
     render(
@@ -154,6 +157,9 @@ describe('CallControlCAD Component', () => {
       exitConference: jest.fn(),
       conferenceParticipants: [],
       isConsultButtonDisabled: false,
+      getAddressBookEntries: jest.fn(),
+      getEntryPoints: jest.fn(),
+      getQueuesFetcher: jest.fn(),
     });
 
     render(<CallControlCAD onHoldResume={onHoldResumeCb} onEnd={onEndCb} onWrapUp={onWrapUpCb} />);
@@ -216,6 +222,9 @@ describe('CallControlCAD Component', () => {
       exitConference: jest.fn(),
       conferenceParticipants: [],
       isConsultButtonDisabled: false,
+      getAddressBookEntries: jest.fn(),
+      getEntryPoints: jest.fn(),
+      getQueuesFetcher: jest.fn(),
     });
 
     render(
@@ -285,6 +294,9 @@ describe('CallControlCAD Component', () => {
       exitConference: jest.fn(),
       conferenceParticipants: [],
       isConsultButtonDisabled: false,
+      getAddressBookEntries: jest.fn(),
+      getEntryPoints: jest.fn(),
+      getQueuesFetcher: jest.fn(),
     });
 
     render(

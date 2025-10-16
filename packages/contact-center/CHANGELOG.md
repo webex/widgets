@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.118](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.117...v1.28.0-ccwidgets.118) (2025-10-15)
+
+
+### Features
+
+* **cc-widgets:** added-address-book ([#537](https://github.com/webex/widgets/issues/537)) ([0997d10](https://github.com/webex/widgets/commit/0997d106299ce12fc04a61c5e7f387511a76c76d))
+
 # [1.28.0-ccwidgets.117](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.116...v1.28.0-ccwidgets.117) (2025-10-13)
 
 

@@ -72,6 +72,9 @@ describe('CallControl Component', () => {
       exitConference: jest.fn(),
       conferenceParticipants: [],
       isConsultButtonDisabled: false,
+      getAddressBookEntries: jest.fn().mockResolvedValue({data: [], meta: {page: 0, totalPages: 0}}),
+      getEntryPoints: jest.fn().mockResolvedValue({data: [], meta: {page: 0, totalPages: 0}}),
+      getQueuesFetcher: jest.fn().mockResolvedValue({data: [], meta: {page: 0, totalPages: 0}}),
     });
 
     render(
