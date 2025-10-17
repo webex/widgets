@@ -287,7 +287,11 @@ export interface ControlProps {
    * @param destinationType
    * @returns
    */
-  consultCall: (consultDestination: string, destinationType: DestinationType) => void;
+  consultCall: (
+    consultDestination: string,
+    destinationType: DestinationType,
+    allowParticipantsToInteract: boolean
+  ) => void;
 
   /**
    * Function to merge the consult call in a conference.
@@ -573,13 +577,14 @@ export interface ConsultTransferPopoverComponentProps {
   getAddressBookEntries?: FetchPaginatedList<AddressBookEntry>;
   getEntryPoints?: FetchPaginatedList<EntryPointRecord>;
   getQueues?: FetchPaginatedList<ContactServiceQueue>;
-  onAgentSelect?: (agentId: string, agentName: string) => void;
-  onQueueSelect?: (queueId: string, queueName: string) => void;
-  onEntryPointSelect?: (entryPointId: string, entryPointName: string) => void;
-  onDialNumberSelect?: (dialNumber: string) => void;
+  onAgentSelect?: (agentId: string, agentName: string, allowParticipantsToInteract: boolean) => void;
+  onQueueSelect?: (queueId: string, queueName: string, allowParticipantsToInteract: boolean) => void;
+  onEntryPointSelect?: (entryPointId: string, entryPointName: string, allowParticipantsToInteract: boolean) => void;
+  onDialNumberSelect?: (dialNumber: string, allowParticipantsToInteract: boolean) => void;
   allowConsultToQueue: boolean;
   /** Options governing popover visibility/behavior */
   consultTransferOptions?: ConsultTransferOptions;
+  isConferenceInProgress?: boolean;
   logger: ILogger;
 }
 

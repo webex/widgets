@@ -324,7 +324,8 @@ export const handleTabSelection = (key: string, setSelectedTab: (tab: string) =>
 export const handleAgentSelection = (
   agentId: string,
   agentName: string,
-  onAgentSelect: ((agentId: string, agentName: string) => void) | undefined,
+  allowParticipantsToInteract: boolean,
+  onAgentSelect: ((agentId: string, agentName: string, allowParticipantsToInteract: boolean) => void) | undefined,
   logger: ILogger
 ): void => {
   try {
@@ -333,7 +334,7 @@ export const handleAgentSelection = (
       method: 'onAgentSelect',
     });
     if (onAgentSelect) {
-      onAgentSelect(agentId, agentName);
+      onAgentSelect(agentId, agentName, allowParticipantsToInteract);
     }
   } catch (error) {
     logger.error(`CC-Widgets: CallControlCustom: Error in handleAgentSelection: ${error.message}`, {
@@ -349,7 +350,8 @@ export const handleAgentSelection = (
 export const handleQueueSelection = (
   queueId: string,
   queueName: string,
-  onQueueSelect: ((queueId: string, queueName: string) => void) | undefined,
+  allowParticipantsToInteract: boolean,
+  onQueueSelect: ((queueId: string, queueName: string, allowParticipantsToInteract: boolean) => void) | undefined,
   logger: ILogger
 ): void => {
   try {
@@ -358,7 +360,7 @@ export const handleQueueSelection = (
       method: 'onQueueSelect',
     });
     if (onQueueSelect) {
-      onQueueSelect(queueId, queueName);
+      onQueueSelect(queueId, queueName, allowParticipantsToInteract);
     }
   } catch (error) {
     logger.error(`CC-Widgets: CallControlCustom: Error in handleQueueSelection: ${error.message}`, {

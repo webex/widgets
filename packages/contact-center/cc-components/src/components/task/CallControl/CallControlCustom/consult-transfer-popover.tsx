@@ -1,10 +1,12 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {Text, ListNext, TextInput, Button} from '@momentum-ui/react-collaboration';
 import ConsultTransferListComponent from './consult-transfer-list-item';
 import {ConsultTransferPopoverComponentProps} from '../../task.types';
 import ConsultTransferEmptyState from './consult-transfer-empty-state';
 import {isAgentsEmpty, handleAgentSelection, handleQueueSelection} from './call-control-custom.utils';
 import {useConsultTransferPopover} from './consult-transfer-popover-hooks';
+import {Checkbox} from '@momentum-design/components/dist/react';
+
 import {
   SEARCH_PLACEHOLDER,
   CLEAR_SEARCH,
@@ -28,6 +30,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
   onEntryPointSelect,
   allowConsultToQueue,
   consultTransferOptions,
+  isConferenceInProgress,
   logger,
 }) => {
   const {showDialNumberTab = true, showEntryPointTab = true} = consultTransferOptions || {};
@@ -59,6 +62,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
   });
 
   const noAgents = isAgentsEmpty(buddyAgents, logger);
+  const [allowParticipantsToInteract, setAllowParticipantsToInteract] = useState<boolean>(false);
 
   const renderList = <T extends {id: string; name: string; number?: string}>(
     items: T[],
@@ -162,14 +166,14 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
         !noAgents &&
         renderList(
           buddyAgents.map((agent) => ({id: agent.agentId, name: agent.agentName})),
-          (item) => handleAgentSelection(item.id, item.name, onAgentSelect, logger)
+          (item) => handleAgentSelection(item.id, item.name, allowParticipantsToInteract, onAgentSelect, logger)
         )}
 
       {selectedCategory === 'Queues' && !noQueues && (
         <div>
           {renderList(
             queuesData.map((q) => ({id: q.id, name: q.name})),
-            (item) => handleQueueSelection(item.id, item.name, onQueueSelect, logger)
+            (item) => handleQueueSelection(item.id, item.name, allowParticipantsToInteract, onQueueSelect, logger)
           )}
           {hasMoreQueues && (
             <div ref={loadMoreRef} className="consult-load-more">
@@ -194,7 +198,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
             (item) => {
               if (item.number) {
                 if (onDialNumberSelect) {
-                  onDialNumberSelect(item.number);
+                  onDialNumberSelect(item.number, allowParticipantsToInteract);
                 }
               }
             }
@@ -221,7 +225,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
             entryPoints.map((e) => ({id: e.id, name: e.name})),
             (item) => {
               if (onEntryPointSelect) {
-                onEntryPointSelect(item.id, item.name);
+                onEntryPointSelect(item.id, item.name, allowParticipantsToInteract);
               }
             }
           )}
@@ -238,6 +242,21 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
               )}
             </div>
           )}
+        </div>
+      )}
+      {isConferenceInProgress && (
+        <div>
+          <Checkbox
+            checked={allowParticipantsToInteract}
+            aria-label="theme checkbox"
+            id="theme-checkbox"
+            // value={allowParticipantsToInteract}
+            label="Allow participants to continue interacting."
+            // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
+            onchange={() => {
+              setAllowParticipantsToInteract(!allowParticipantsToInteract);
+            }}
+          />
         </div>
       )}
     </div>

@@ -777,10 +777,15 @@ export const useCallControl = (props: useCallControlProps) => {
     }
   };
 
-  const consultCall = async (consultDestination: string, destinationType: DestinationType) => {
+  const consultCall = async (
+    consultDestination: string,
+    destinationType: DestinationType,
+    allowParticipantsToInteract: boolean
+  ) => {
     const consultPayload = {
       to: consultDestination,
       destinationType: destinationType,
+      holdParticipants: !allowParticipantsToInteract,
     };
 
     if (destinationType === 'queue') {

@@ -96,11 +96,17 @@ function CallControlComponent(props: CallControlComponentProps) {
     handleWrapupChangeUtil(text, value, setSelectedWrapupReason, setSelectedWrapupId, logger);
   };
 
-  const handleTargetSelect = (id: string, name: string, type: DestinationType) => {
+  const handleTargetSelect = (
+    id: string,
+    name: string,
+    type: DestinationType,
+    allowParticipantsToInteract: boolean
+  ) => {
     handleTargetSelectUtil(
       id,
       name,
       type,
+      allowParticipantsToInteract,
       agentMenuType,
       consultCall,
       transferCall,
@@ -217,12 +223,18 @@ function CallControlComponent(props: CallControlComponentProps) {
                         getAddressBookEntries={getAddressBookEntries}
                         getEntryPoints={getEntryPoints}
                         getQueues={getQueuesFetcher}
-                        onAgentSelect={(agentId, agentName) => handleTargetSelect(agentId, agentName, 'agent')}
-                        onQueueSelect={(queueId, queueName) => handleTargetSelect(queueId, queueName, 'queue')}
-                        onEntryPointSelect={(entryPointId, entryPointName) =>
-                          handleTargetSelect(entryPointId, entryPointName, 'entryPoint')
+                        onAgentSelect={(agentId, agentName, allowParticipantsToInteract) =>
+                          handleTargetSelect(agentId, agentName, 'agent', allowParticipantsToInteract)
                         }
-                        onDialNumberSelect={(dialNumber) => handleTargetSelect(dialNumber, dialNumber, 'dialNumber')}
+                        onQueueSelect={(queueId, queueName, allowParticipantsToInteract) =>
+                          handleTargetSelect(queueId, queueName, 'queue', allowParticipantsToInteract)
+                        }
+                        onEntryPointSelect={(entryPointId, entryPointName, allowParticipantsToInteract) =>
+                          handleTargetSelect(entryPointId, entryPointName, 'entryPoint', allowParticipantsToInteract)
+                        }
+                        onDialNumberSelect={(dialNumber, allowParticipantsToInteract) =>
+                          handleTargetSelect(dialNumber, dialNumber, 'dialNumber', allowParticipantsToInteract)
+                        }
                         allowConsultToQueue={allowConsultToQueue}
                         consultTransferOptions={
                           isTelephony
@@ -233,6 +245,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                                 showEntryPointTab: false,
                               }
                         }
+                        isConferenceInProgress={controlVisibility.isConferenceInProgress}
                         logger={logger}
                       />
                     ) : null}

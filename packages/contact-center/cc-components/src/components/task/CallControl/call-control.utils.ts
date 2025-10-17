@@ -120,8 +120,9 @@ export const handleTargetSelect = (
   id: string,
   name: string,
   type: DestinationType,
+  allowParticipantsToInteract: boolean,
   agentMenuType: CallControlMenuType | null,
-  consultCall: (id: string, type: DestinationType) => void,
+  consultCall: (id: string, type: DestinationType, allowParticipantsToInteract: boolean) => void,
   transferCall: (id: string, type: DestinationType) => void,
   setConsultAgentId: (id: string) => void,
   setConsultAgentName: (name: string) => void,
@@ -134,7 +135,7 @@ export const handleTargetSelect = (
   });
   if (agentMenuType === 'Consult') {
     try {
-      consultCall(id, type);
+      consultCall(id, type, allowParticipantsToInteract);
       setConsultAgentId(id);
       setConsultAgentName(name);
       setLastTargetType(type);
