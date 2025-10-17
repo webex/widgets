@@ -463,18 +463,18 @@ describe('Call Control Custom Utils', () => {
       const agentId = 'agent1';
       const agentName = 'John Doe';
 
-      handleAgentSelection(agentId, agentName, mockOnAgentSelect, loggerMock);
+      handleAgentSelection(agentId, agentName, false, mockOnAgentSelect, loggerMock);
 
       expect(loggerMock.info).toHaveBeenCalledWith(`CC-Widgets: ConsultTransferPopover: agent selected: ${agentId}`, {
         module: 'consult-transfer-popover.tsx',
         method: 'onAgentSelect',
       });
-      expect(mockOnAgentSelect).toHaveBeenCalledWith(agentId, agentName);
+      expect(mockOnAgentSelect).toHaveBeenCalledWith(agentId, agentName, false);
     });
 
     it('should not call onAgentSelect when not provided', () => {
       expect(() => {
-        handleAgentSelection('agent1', 'John Doe', undefined, loggerMock);
+        handleAgentSelection('agent1', 'John Doe', false, undefined, loggerMock);
       }).not.toThrow();
 
       expect(loggerMock.info).toHaveBeenCalled();
@@ -487,18 +487,18 @@ describe('Call Control Custom Utils', () => {
       const queueId = 'queue1';
       const queueName = 'Support Queue';
 
-      handleQueueSelection(queueId, queueName, mockOnQueueSelect, loggerMock);
+      handleQueueSelection(queueId, queueName, false, mockOnQueueSelect, loggerMock);
 
       expect(loggerMock.log).toHaveBeenCalledWith(`CC-Widgets: ConsultTransferPopover: queue selected: ${queueId}`, {
         module: 'consult-transfer-popover.tsx',
         method: 'onQueueSelect',
       });
-      expect(mockOnQueueSelect).toHaveBeenCalledWith(queueId, queueName);
+      expect(mockOnQueueSelect).toHaveBeenCalledWith(queueId, queueName, false);
     });
 
     it('should not call onQueueSelect when not provided', () => {
       expect(() => {
-        handleQueueSelection('queue1', 'Support Queue', undefined, loggerMock);
+        handleQueueSelection('queue1', 'Support Queue', false, undefined, loggerMock);
       }).not.toThrow();
 
       expect(loggerMock.log).toHaveBeenCalled();

@@ -63,7 +63,7 @@ describe('TaskList Component', () => {
   });
 
   describe('ErrorBoundary Tests', () => {
-    it('should render empty fragment when ErrorBoundary catches an error', () => {
+    it('should render empty fragment when ErrorBoundary catches an error and onErrorCallback is defined', () => {
       const mockOnErrorCallback = jest.fn();
       store.onErrorCallback = mockOnErrorCallback;
       // Mock the useTaskList to throw an error
@@ -79,6 +79,22 @@ describe('TaskList Component', () => {
       expect(container.firstChild).toBeNull();
       expect(mockOnErrorCallback).toHaveBeenCalledWith('TaskList', expect.any(Error));
       expect(mockOnErrorCallback).toHaveBeenCalledTimes(1);
+    });
+
+    it('should render empty fragment when ErrorBoundary catches an error and onErrorCallback is undefined', () => {
+      store.onErrorCallback = undefined;
+      // Mock the useTaskList to throw an error
+      jest.spyOn(helper, 'useTaskList').mockImplementation(() => {
+        throw new Error('Test error without callback');
+      });
+
+      const {container} = render(
+        <TaskList onTaskAccepted={jest.fn()} onTaskDeclined={jest.fn()} onTaskSelected={jest.fn()} />
+      );
+
+      // The fallback should render an empty fragment (no content)
+      expect(container.firstChild).toBeNull();
+      // Should not throw, just render empty
     });
   });
 });

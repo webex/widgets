@@ -49,7 +49,7 @@ describe('IncomingTask Component', () => {
   });
 
   describe('ErrorBoundary Tests', () => {
-    it('should render empty fragment when ErrorBoundary catches an error', () => {
+    it('should render empty fragment when ErrorBoundary catches an error and onErrorCallback is defined', () => {
       jest.spyOn(helper, 'useIncomingTask').mockImplementation(() => {
         throw new Error('Test error in useIncomingTask');
       });
@@ -62,6 +62,19 @@ describe('IncomingTask Component', () => {
       expect(container.firstChild).toBeNull();
       expect(mockOnErrorCallback).toHaveBeenCalledWith('IncomingTask', Error('Test error in useIncomingTask'));
       expect(mockOnErrorCallback).toHaveBeenCalledTimes(1);
+    });
+
+    it('should render empty fragment when ErrorBoundary catches an error and onErrorCallback is undefined', () => {
+      jest.spyOn(helper, 'useIncomingTask').mockImplementation(() => {
+        throw new Error('Test error without callback');
+      });
+      store.onErrorCallback = undefined;
+      const {container} = render(
+        <IncomingTask incomingTask={mockTask} onAccepted={onAcceptedCb} onRejected={onRejectedCb} />
+      );
+
+      expect(container.firstChild).toBeNull();
+      // Should not throw, just render empty
     });
   });
 });

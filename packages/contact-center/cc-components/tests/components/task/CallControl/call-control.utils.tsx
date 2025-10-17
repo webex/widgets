@@ -273,6 +273,7 @@ describe('CallControl Utils', () => {
         'agent-123',
         'John Doe',
         'agent',
+        false,
         'Consult',
         mockConsultCall,
         mockTransferCall,
@@ -286,7 +287,7 @@ describe('CallControl Utils', () => {
         module: 'call-control.tsx',
         method: 'handleTargetSelect',
       });
-      expect(mockConsultCall).toHaveBeenCalledWith('agent-123', 'agent');
+      expect(mockConsultCall).toHaveBeenCalledWith('agent-123', 'agent', false);
       expect(mockSetConsultAgentId).toHaveBeenCalledWith('agent-123');
       expect(mockSetConsultAgentName).toHaveBeenCalledWith('John Doe');
       expect(mockSetLastTargetType).toHaveBeenCalledWith('agent');
@@ -298,6 +299,7 @@ describe('CallControl Utils', () => {
         'queue-456',
         'Support Queue',
         'queue',
+        false,
         'Transfer',
         mockConsultCall,
         mockTransferCall,
@@ -328,6 +330,7 @@ describe('CallControl Utils', () => {
           'agent-123',
           'John Doe',
           'agent',
+          false,
           'Consult',
           mockConsultCall,
           mockTransferCall,
@@ -354,6 +357,7 @@ describe('CallControl Utils', () => {
           'queue-456',
           'Support Queue',
           'queue',
+          false,
           'Transfer',
           mockConsultCall,
           mockTransferCall,
@@ -375,6 +379,7 @@ describe('CallControl Utils', () => {
         'agent-123',
         'John Doe',
         'agent',
+        false,
         null,
         mockConsultCall,
         mockTransferCall,

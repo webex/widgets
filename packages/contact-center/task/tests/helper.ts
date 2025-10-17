@@ -1389,9 +1389,43 @@ describe('useCallControl', () => {
       })
     );
     await act(async () => {
-      await result.current.consultCall('dest123', 'agent');
+      await result.current.consultCall('dest123', 'agent', false);
     });
-    expect(mockCurrentTask.consult).toHaveBeenCalledWith({to: 'dest123', destinationType: 'agent'});
+    expect(mockCurrentTask.consult).toHaveBeenCalledWith({
+      to: 'dest123',
+      destinationType: 'agent',
+      holdParticipants: true,
+    });
+    expect(setConsultInitiatedSpy).toHaveBeenCalledWith(true);
+    setConsultInitiatedSpy.mockRestore();
+  });
+
+  it('should call consultCall with allowParticipantsToInteract set to true', async () => {
+    mockCurrentTask.consult = jest.fn().mockResolvedValue('Consulted');
+    const setConsultInitiatedSpy = jest.spyOn(store, 'setConsultInitiated');
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
+        consultInitiated: false,
+        isMuted: false,
+        multiPartyConferenceEnabled: true,
+      })
+    );
+    await act(async () => {
+      await result.current.consultCall('dest123', 'agent', true);
+    });
+    expect(mockCurrentTask.consult).toHaveBeenCalledWith({
+      to: 'dest123',
+      destinationType: 'agent',
+      holdParticipants: false,
+    });
     expect(setConsultInitiatedSpy).toHaveBeenCalledWith(true);
     setConsultInitiatedSpy.mockRestore();
   });
@@ -1414,8 +1448,12 @@ describe('useCallControl', () => {
       })
     );
 
-    await expect(result.current.consultCall('dest123', 'agent')).rejects.toThrow(consultError);
-    expect(mockCurrentTask.consult).toHaveBeenCalledWith({to: 'dest123', destinationType: 'agent'});
+    await expect(result.current.consultCall('dest123', 'agent', false)).rejects.toThrow(consultError);
+    expect(mockCurrentTask.consult).toHaveBeenCalledWith({
+      to: 'dest123',
+      destinationType: 'agent',
+      holdParticipants: true,
+    });
     expect(mockLogger.error).toHaveBeenCalledWith('Error consulting call: Error: Consult failed', {
       module: 'widget-cc-task#helper.ts',
       method: 'useCallControl#consultCall',
@@ -2160,14 +2198,64 @@ describe('useCallControl', () => {
     );
 
     await act(async () => {
-      await result.current.consultCall('queueId123', 'queue');
+      await result.current.consultCall('queueId123', 'queue', false);
     });
 
-    expect(mockCurrentTask.consult).toHaveBeenCalledWith({to: 'queueId123', destinationType: 'queue'});
+    expect(mockCurrentTask.consult).toHaveBeenCalledWith({
+      to: 'queueId123',
+      destinationType: 'queue',
+      holdParticipants: true,
+    });
     expect(setIsQueueConsultInProgressSpy).toHaveBeenCalledWith(true);
     expect(setCurrentConsultQueueIdSpy).toHaveBeenCalledWith('queueId123');
     expect(setIsQueueConsultInProgressSpy).toHaveBeenCalledWith(false);
     expect(setCurrentConsultQueueIdSpy).toHaveBeenCalledWith(null);
+
+    setIsQueueConsultInProgressSpy.mockRestore();
+    setCurrentConsultQueueIdSpy.mockRestore();
+    setConsultInitiatedSpy.mockRestore();
+  });
+
+  it('should handle errors when calling consultCall with queue destination type', async () => {
+    const consultError = new Error('Queue consult failed');
+    mockCurrentTask.consult = jest.fn().mockRejectedValue(consultError);
+    const setIsQueueConsultInProgressSpy = jest.spyOn(store, 'setIsQueueConsultInProgress');
+    const setCurrentConsultQueueIdSpy = jest.spyOn(store, 'setCurrentConsultQueueId');
+    const setConsultInitiatedSpy = jest.spyOn(store, 'setConsultInitiated');
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
+        consultInitiated: false,
+        isMuted: false,
+        multiPartyConferenceEnabled: true,
+      })
+    );
+
+    await expect(result.current.consultCall('queueId123', 'queue', false)).rejects.toThrow(consultError);
+
+    expect(mockCurrentTask.consult).toHaveBeenCalledWith({
+      to: 'queueId123',
+      destinationType: 'queue',
+      holdParticipants: true,
+    });
+    expect(setIsQueueConsultInProgressSpy).toHaveBeenCalledWith(true);
+    expect(setCurrentConsultQueueIdSpy).toHaveBeenCalledWith('queueId123');
+    expect(setConsultInitiatedSpy).toHaveBeenCalledWith(true);
+    // Check that cleanup happened on error
+    expect(setIsQueueConsultInProgressSpy).toHaveBeenCalledWith(false);
+    expect(setCurrentConsultQueueIdSpy).toHaveBeenCalledWith(null);
+    expect(setConsultInitiatedSpy).toHaveBeenCalledWith(false);
+    expect(mockLogger.error).toHaveBeenCalledWith('Error consulting call: Error: Queue consult failed', {
+      module: 'widget-cc-task#helper.ts',
+      method: 'useCallControl#consultCall',
+    });
 
     setIsQueueConsultInProgressSpy.mockRestore();
     setCurrentConsultQueueIdSpy.mockRestore();

@@ -118,7 +118,7 @@ describe('ConsultTransferPopoverComponent', () => {
     // Test agent selection - click on the button inside the first agent item
     const firstAgentButton = screen.container.querySelectorAll('.call-control-list-item button')[0];
     fireEvent.click(firstAgentButton);
-    expect(mockOnAgentSelect).toHaveBeenCalledWith('agent1', 'Agent One');
+    expect(mockOnAgentSelect).toHaveBeenCalledWith('agent1', 'Agent One', false);
 
     // Test onMouseDown event handler (covers line 39) - just trigger the event
     const listItemContainer = screen.container.querySelector('.consult-list-item-wrapper');
@@ -133,7 +133,7 @@ describe('ConsultTransferPopoverComponent', () => {
     );
     const firstQueueButton = screen.container.querySelectorAll('.call-control-list-item button')[0];
     fireEvent.click(firstQueueButton);
-    expect(mockOnQueueSelect).toHaveBeenCalledWith('queue1', 'Queue One');
+    expect(mockOnQueueSelect).toHaveBeenCalledWith('queue1', 'Queue One', false);
   });
 
   it('hides Dial Number tab when consultTransferOptions.showDialNumberTab is false', async () => {
