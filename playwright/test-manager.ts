@@ -402,6 +402,7 @@ export class TestManager {
       needsAgent1: true,
       needsAgent2: true,
       needsCaller: true,
+      needDialNumberLogin: true,
       agent1LoginMode: LOGIN_MODE.DESKTOP,
       enableConsoleLogging: true,
       enableAdvancedLogging: true,
@@ -558,6 +559,7 @@ export class TestManager {
       this.callerPage,
       this.agent1ExtensionPage,
       this.chatPage,
+      this.dialNumberPage,
     ].filter(Boolean);
 
     pagesToClose.forEach((page) => {
@@ -574,6 +576,7 @@ export class TestManager {
       this.callerExtensionContext,
       this.extensionContext,
       this.chatContext,
+      this.dialNumberContext,
     ].filter(Boolean);
 
     contextsToClose.forEach((context) => {
