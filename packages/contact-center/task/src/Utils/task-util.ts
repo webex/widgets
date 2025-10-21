@@ -156,3 +156,31 @@ export const getConferenceParticipants = (task: ITask, agentId: string): Partici
 
   return participantsList;
 };
+
+export const getConferenceParticipantsCount = (task: ITask): number => {
+  const participantsList: Participant[] = [];
+
+  // Early return if required data is missing
+  if (!task?.data?.interaction?.media || !task?.data?.interactionId) {
+    return 0;
+  }
+
+  const mediaMainCall = task.data.interaction.media[task.data.interactionId];
+  const participantsInMainCall = new Set(mediaMainCall?.participants);
+  const participants = task?.data?.interaction?.participants;
+
+  if (participantsInMainCall.size > 0 && participants) {
+    participantsInMainCall.forEach((participantId: string) => {
+      const participant = participants[participantId];
+      if (participant && participant.pType !== SUPERVISOR && !participant.hasLeft && participant.pType !== VVA) {
+        participantsList.push({
+          id: participant.id,
+          pType: participant.pType,
+          name: participant.name,
+        });
+      }
+    });
+  }
+
+  return participantsList.length;
+};

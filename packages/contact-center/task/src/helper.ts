@@ -9,7 +9,12 @@ import store, {
   PaginatedListParams,
 } from '@webex/cc-store';
 import {Participant} from '@webex/cc-components';
-import {findHoldTimestamp, getConferenceParticipants, getControlsVisibility} from './Utils/task-util';
+import {
+  findHoldTimestamp,
+  getConferenceParticipants,
+  getConferenceParticipantsCount,
+  getControlsVisibility,
+} from './Utils/task-util';
 import {MAX_PARTICIPANTS_IN_MULTIPARTY_CONFERENCE, MAX_PARTICIPANTS_IN_THREE_PARTY_CONFERENCE} from './Utils/constants';
 
 const ENGAGED_LABEL = 'ENGAGED';
@@ -294,6 +299,7 @@ export const useCallControl = (props: useCallControlProps) => {
   const workerRef = useRef<Worker | null>(null);
   const [lastTargetType, setLastTargetType] = useState<'agent' | 'queue'>('agent');
   const [conferenceParticipants, setConferenceParticipants] = useState<Participant[]>([]);
+  const [conferenceParticipantsCount, setConferenceParticipantsCount] = useState<number>(0);
 
   const workerScript = `
     let intervalId = null;
@@ -364,6 +370,7 @@ export const useCallControl = (props: useCallControlProps) => {
       const participants = getConferenceParticipants(currentTask, store.cc.agentConfig.agentId);
       setConferenceParticipants(participants);
     }
+    setConferenceParticipantsCount(getConferenceParticipantsCount(currentTask));
   }, [currentTask]);
   // Function to extract consulting agent information
   const extractConsultingAgent = useCallback(() => {
@@ -900,7 +907,7 @@ export const useCallControl = (props: useCallControlProps) => {
     ? MAX_PARTICIPANTS_IN_MULTIPARTY_CONFERENCE
     : MAX_PARTICIPANTS_IN_THREE_PARTY_CONFERENCE;
 
-  const isConsultButtonDisabled = conferenceParticipants.length >= maxParticipantsInConference;
+  const isConsultButtonDisabled = conferenceParticipantsCount >= maxParticipantsInConference;
   return {
     currentTask,
     endCall,
