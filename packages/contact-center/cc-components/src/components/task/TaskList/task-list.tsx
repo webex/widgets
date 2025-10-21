@@ -45,7 +45,7 @@ const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (prop
             acceptTask={() => acceptTask(task)}
             declineTask={() => declineTask(task)}
             ronaTimeout={taskData.ronaTimeout}
-            onTaskSelect={createTaskSelectHandler(task, currentTask, onTaskSelect)}
+            onTaskSelect={createTaskSelectHandler(task, currentTask, onTaskSelect, agentId)}
             acceptText={taskData.acceptText}
             disableAccept={taskData.disableAccept}
             declineText={taskData.declineText}

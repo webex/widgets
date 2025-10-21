@@ -198,12 +198,13 @@ export const createTaskSelectHandler = (
   task: ITask,
   currentTask: ITask | null,
   onTaskSelect: (task: ITask) => void,
+  agentId: string,
   logger?
 ) => {
   return () => {
     try {
       // Logging moved to helper.ts
-      const taskData = extractTaskListItemData(task, true, logger); // Use browser=true for selection logic
+      const taskData = extractTaskListItemData(task, true, agentId, logger); // Use browser=true for selection logic
 
       if (isTaskSelectable(task, currentTask, taskData, logger)) {
         onTaskSelect(task);

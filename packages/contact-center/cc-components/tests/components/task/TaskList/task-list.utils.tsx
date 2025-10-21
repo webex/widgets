@@ -446,7 +446,7 @@ describe('task-list.utils', () => {
         },
       };
 
-      const handler = createTaskSelectHandler(task, currentTask, mockOnTaskSelect);
+      const handler = createTaskSelectHandler(task, currentTask, mockOnTaskSelect, mockTask.agentId);
       handler();
 
       expect(mockOnTaskSelect).toHaveBeenCalledWith(task);
@@ -477,7 +477,7 @@ describe('task-list.utils', () => {
         },
       };
 
-      const handler = createTaskSelectHandler(task, currentTask, mockOnTaskSelect);
+      const handler = createTaskSelectHandler(task, currentTask, mockOnTaskSelect, mockTask.agentId);
       handler();
 
       expect(mockOnTaskSelect).not.toHaveBeenCalled();
