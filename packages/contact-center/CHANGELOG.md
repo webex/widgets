@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.119](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.118...v1.28.0-ccwidgets.119) (2025-10-22)
+
+
+### Features
+
+* **task:** Update Outdial Dialpad UI to Match Figma ([#538](https://github.com/webex/widgets/issues/538)) ([07577f6](https://github.com/webex/widgets/commit/07577f634fb1e6486af088672adaba9b9dccb43b))
+
 # [1.28.0-ccwidgets.118](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.117...v1.28.0-ccwidgets.118) (2025-10-15)
 
 

@@ -827,7 +827,16 @@ function App() {
                         </section>
                       </div>
                     )}
-                    {selectedWidgets.outdialCall && <OutdialCall />}
+                    {selectedWidgets.outdialCall && (
+                      <div className="box">
+                        <section className="section-box">
+                          <fieldset className="fieldset">
+                            <legend className="legend-box">Outdial Call</legend>
+                            <OutdialCall />
+                          </fieldset>
+                        </section>
+                      </div>
+                    )}
                   </>
                 )}
               </>

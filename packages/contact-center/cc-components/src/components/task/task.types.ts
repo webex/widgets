@@ -521,6 +521,21 @@ export type CallControlComponentProps = Pick<
   | 'consultTransferOptions'
 >;
 
+export type OutdialAniEntry = {
+  /** Unique identifier for the ANI entry */
+  id: string;
+  /** Display name for the ANI entry */
+  name: string;
+  /** Phone number associated with this ANI entry */
+  number: string;
+  /** Related links for this ANI entry */
+  links: string[];
+  /** Timestamp when this entry was created (Unix timestamp in milliseconds) */
+  createdTime: number;
+  /** Timestamp when this entry was last updated (Unix timestamp in milliseconds) */
+  lastUpdatedTime: number;
+};
+
 /**
  * Interface representing the properties for OutdialCall component.
  */
@@ -528,7 +543,12 @@ export interface OutdialCallProps {
   /**
    * Function to start outdial call.
    */
-  startOutdial: (destination: string) => void;
+  startOutdial: (destination: string, origin?: string) => void;
+
+  /**
+   * Function to get a list of Outdial ANI entries.
+   */
+  getOutdialANIEntries: () => Promise<OutdialAniEntry[]>;
 
   /**
    * CC SDK Instance.
@@ -541,7 +561,7 @@ export interface OutdialCallProps {
   logger: ILogger;
 }
 
-export type OutdialCallComponentProps = Pick<OutdialCallProps, 'startOutdial'>;
+export type OutdialCallComponentProps = Pick<OutdialCallProps, 'logger' | 'startOutdial' | 'getOutdialANIEntries'>;
 
 /**
  * Interface representing the properties for CallControlListItem component.

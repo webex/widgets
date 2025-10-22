@@ -2,7 +2,15 @@ import {renderHook, act, waitFor} from '@testing-library/react';
 import {useIncomingTask, useTaskList, useCallControl, useOutdialCall} from '../src/helper';
 import * as taskUtils from '../src/Utils/task-util';
 import {AddressBookEntriesResponse, EntryPointListResponse, TASK_EVENTS, IContactCenter} from '@webex/cc-store';
-import {mockAgents, mockCC, mockQueueDetails, mockTask} from '@webex/test-fixtures';
+import {
+  mockAgents,
+  mockCC,
+  mockQueueDetails,
+  mockTask,
+  mockAniEntries,
+  mockOutdialCallProps,
+  mockCCWithAni,
+} from '@webex/test-fixtures';
 import store from '@webex/cc-store';
 import React from 'react';
 const mockGetControlsVisibility = jest.spyOn(taskUtils, 'getControlsVisibility');
@@ -25,13 +33,7 @@ const onTaskAccepted = jest.fn().mockImplementation(() => {});
 const onTaskDeclined = jest.fn();
 const onTaskSelected = jest.fn().mockImplementation(() => {});
 
-const logger = {
-  error: jest.fn(),
-  log: jest.fn(),
-  warn: jest.fn(),
-  info: jest.fn(),
-  trace: jest.fn(),
-};
+const logger = mockCC.LoggerProxy;
 
 // Override the wrapupCodes property before your tests run
 beforeAll(() => {
@@ -751,13 +753,7 @@ describe('useCallControl', () => {
     toggleMute: jest.fn(() => Promise.resolve()),
   };
 
-  const mockLogger = {
-    error: jest.fn(),
-    info: jest.fn(),
-    log: jest.fn(),
-    warn: jest.fn(),
-    trace: jest.fn(),
-  };
+  const mockLogger = mockCC.LoggerProxy;
 
   const mockOnHoldResume = jest.fn();
   const mockOnEnd = jest.fn();
@@ -3000,13 +2996,7 @@ describe('useCallControl', () => {
     const onWrapUp = jest.fn();
     const onRecordingToggle = jest.fn();
     const onToggleMute = jest.fn();
-    const logger = {
-      error: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      log: jest.fn(),
-      trace: jest.fn(),
-    };
+    const logger = mockCC.LoggerProxy;
 
     it('should handle errors in extractConsultingAgent', () => {
       // Mock currentTask with problematic participants structure
@@ -3168,19 +3158,7 @@ describe('useCallControl', () => {
 });
 
 describe('useOutdialCall', () => {
-  const ccMock = {
-    ...mockCC,
-    startOutdial: jest.fn().mockResolvedValue('Success'),
-  };
-
-  const logger = {
-    info: jest.fn(),
-    error: jest.fn(),
-    trace: jest.fn(),
-    debug: jest.fn(),
-    warn: jest.fn(),
-    log: jest.fn(),
-  };
+  const logger = mockCC.LoggerProxy;
 
   const destination = '123456789';
 
@@ -3197,7 +3175,7 @@ describe('useOutdialCall', () => {
   it('should successfully start an outdial call', async () => {
     const {result} = renderHook(() =>
       useOutdialCall({
-        cc: ccMock,
+        cc: mockOutdialCallProps,
         logger,
       })
     );
@@ -3206,14 +3184,14 @@ describe('useOutdialCall', () => {
       await result.current.startOutdial(destination);
     });
 
-    expect(ccMock.startOutdial).toHaveBeenCalledWith(destination);
+    expect(mockOutdialCallProps.startOutdial).toHaveBeenCalledWith(destination, undefined);
     expect(logger.info).toHaveBeenCalledWith('Outdial call started', 'Success');
   });
 
-  it('should show alert when destination is empty or only constains spaces', async () => {
+  it('should show alert when destination is empty or only contains spaces', async () => {
     const {result} = renderHook(() =>
       useOutdialCall({
-        cc: ccMock,
+        cc: mockCC,
         logger,
       })
     );
@@ -3223,18 +3201,18 @@ describe('useOutdialCall', () => {
     });
 
     expect(global.alert).toHaveBeenCalledWith('Destination number is required, it cannot be empty');
-    expect(ccMock.startOutdial).not.toHaveBeenCalled();
+    expect(mockOutdialCallProps.startOutdial).not.toHaveBeenCalled();
   });
 
   it('should handle errors when starting outdial call fails', async () => {
-    const errormockCC = {
-      ...mockCC,
+    const mockCCWithError = {
+      ...mockOutdialCallProps,
       startOutdial: jest.fn().mockRejectedValue(new Error('Outdial call failed')),
     };
 
     const {result} = renderHook(() =>
       useOutdialCall({
-        cc: errormockCC,
+        cc: mockCCWithError,
         logger,
       })
     );
@@ -3243,7 +3221,7 @@ describe('useOutdialCall', () => {
       await result.current.startOutdial(destination);
     });
 
-    expect(errormockCC.startOutdial).toHaveBeenCalledWith(destination);
+    expect(mockCCWithError.startOutdial).toHaveBeenCalledWith(destination, undefined);
     expect(logger.error).toHaveBeenCalledWith('Error: Outdial call failed', {
       module: 'widget-OutdialCall#helper.ts',
       method: 'startOutdial',
@@ -3253,7 +3231,7 @@ describe('useOutdialCall', () => {
   it('should return if no destination is provided', async () => {
     const {result} = renderHook(() =>
       useOutdialCall({
-        cc: ccMock,
+        cc: mockCC,
         logger,
       })
     );
@@ -3264,8 +3242,251 @@ describe('useOutdialCall', () => {
       await result.current.startOutdial(invalidDestination);
     });
 
-    expect(ccMock.startOutdial).not.toHaveBeenCalled();
+    expect(mockOutdialCallProps.startOutdial).not.toHaveBeenCalled();
     expect(logger.info).not.toHaveBeenCalled();
+  });
+
+  describe('getOutdialAniEntries', () => {
+    it('should successfully fetch outdial ANI entries', async () => {
+      const {result} = renderHook(() =>
+        useOutdialCall({
+          cc: mockCCWithAni,
+          logger,
+        })
+      );
+
+      const aniEntries = await act(async () => {
+        return await result.current.getOutdialANIEntries();
+      });
+
+      expect(mockCCWithAni.getOutdialAniEntries).toHaveBeenCalledWith({
+        outdialANI: 'test-ani-id',
+      });
+      expect(aniEntries).toEqual({
+        data: mockAniEntries,
+        meta: {
+          page: 0,
+          pageSize: 25,
+          total: 2,
+          totalPages: 1,
+        },
+      });
+    });
+
+    it('should throw error when no outdialANIId is configured', async () => {
+      const mockCCWithoutAni = {
+        ...mockCC,
+        agentConfig: {
+          ...mockCC.agentConfig,
+          outdialANIId: undefined,
+        },
+        getOutdialAniEntries: jest.fn(),
+      };
+
+      const {result} = renderHook(() =>
+        useOutdialCall({
+          cc: mockCCWithoutAni,
+          logger,
+        })
+      );
+
+      await act(async () => {
+        await expect(result.current.getOutdialANIEntries()).rejects.toThrow('No OutdialANI Id received.');
+      });
+
+      expect(mockCCWithoutAni.getOutdialAniEntries).not.toHaveBeenCalled();
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: Task: Error fetching Outdial ANI entries: Error: No OutdialANI Id received.',
+        {
+          module: 'useOutdialCall',
+          method: 'getOutdialANIEntries',
+        }
+      );
+    });
+
+    it('should throw error when outdialANIId is empty string', async () => {
+      const mockCCWithEmptyAni = {
+        ...mockCC,
+        agentConfig: {
+          ...mockCC.agentConfig,
+          outdialANIId: '',
+        },
+        getOutdialAniEntries: jest.fn(),
+      };
+
+      const {result} = renderHook(() =>
+        useOutdialCall({
+          cc: mockCCWithEmptyAni,
+          logger,
+        })
+      );
+
+      await act(async () => {
+        await expect(result.current.getOutdialANIEntries()).rejects.toThrow('No OutdialANI Id received.');
+      });
+
+      expect(mockCCWithEmptyAni.getOutdialAniEntries).not.toHaveBeenCalled();
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: Task: Error fetching Outdial ANI entries: Error: No OutdialANI Id received.',
+        {
+          module: 'useOutdialCall',
+          method: 'getOutdialANIEntries',
+        }
+      );
+    });
+
+    it('should throw error when agentConfig is null', async () => {
+      const mockCCWithNullConfig = {
+        ...mockCC,
+        agentConfig: null,
+        getOutdialAniEntries: jest.fn(),
+      };
+
+      const {result} = renderHook(() =>
+        useOutdialCall({
+          cc: mockCCWithNullConfig,
+          logger,
+        })
+      );
+
+      await act(async () => {
+        await expect(result.current.getOutdialANIEntries()).rejects.toThrow('No OutdialANI Id received.');
+      });
+
+      expect(mockCCWithNullConfig.getOutdialAniEntries).not.toHaveBeenCalled();
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: Task: Error fetching Outdial ANI entries: Error: No OutdialANI Id received.',
+        {
+          module: 'useOutdialCall',
+          method: 'getOutdialANIEntries',
+        }
+      );
+    });
+
+    it('should handle API errors when fetching ANI entries', async () => {
+      const apiError = new Error('API request failed');
+      const mockCCWithApiError = {
+        ...mockCCWithAni,
+        getOutdialAniEntries: jest.fn().mockRejectedValue(apiError),
+      };
+
+      const {result} = renderHook(() =>
+        useOutdialCall({
+          cc: mockCCWithApiError,
+          logger,
+        })
+      );
+
+      await act(async () => {
+        await expect(result.current.getOutdialANIEntries()).rejects.toThrow('API request failed');
+      });
+
+      expect(mockCCWithApiError.getOutdialAniEntries).toHaveBeenCalledWith({
+        outdialANI: 'test-ani-id',
+      });
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: Task: Error fetching Outdial ANI entries: Error: API request failed',
+        {
+          module: 'useOutdialCall',
+          method: 'getOutdialANIEntries',
+        }
+      );
+    });
+
+    it('should handle empty ANI entries response', async () => {
+      const mockCCWithEmptyResponse = {
+        ...mockCCWithAni,
+        getOutdialAniEntries: jest.fn().mockResolvedValue({
+          data: [],
+          meta: {
+            page: 0,
+            pageSize: 25,
+            total: 0,
+            totalPages: 0,
+          },
+        }),
+      };
+
+      const {result} = renderHook(() =>
+        useOutdialCall({
+          cc: mockCCWithEmptyResponse,
+          logger,
+        })
+      );
+
+      const aniEntries = await act(async () => {
+        return await result.current.getOutdialANIEntries();
+      });
+
+      expect(mockCCWithEmptyResponse.getOutdialAniEntries).toHaveBeenCalledWith({
+        outdialANI: 'test-ani-id',
+      });
+      expect(aniEntries).toEqual({
+        data: [],
+        meta: {
+          page: 0,
+          pageSize: 25,
+          total: 0,
+          totalPages: 0,
+        },
+      });
+    });
+
+    it('should handle network timeout errors', async () => {
+      const timeoutError = new Error('Request timeout');
+      const mockCCWithTimeout = {
+        ...mockCCWithAni,
+        getOutdialAniEntries: jest.fn().mockRejectedValue(timeoutError),
+      };
+
+      const {result} = renderHook(() =>
+        useOutdialCall({
+          cc: mockCCWithTimeout,
+          logger,
+        })
+      );
+
+      await act(async () => {
+        await expect(result.current.getOutdialANIEntries()).rejects.toThrow('Request timeout');
+      });
+
+      expect(mockCCWithTimeout.getOutdialAniEntries).toHaveBeenCalledWith({
+        outdialANI: 'test-ani-id',
+      });
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: Task: Error fetching Outdial ANI entries: Error: Request timeout',
+        {
+          module: 'useOutdialCall',
+          method: 'getOutdialANIEntries',
+        }
+      );
+    });
+
+    it('should pass correct parameters to getOutdialAniEntries', async () => {
+      const customOutdialANIId = 'custom-ani-12345';
+      const mockCCWithCustomAni = {
+        ...mockCCWithAni,
+        agentConfig: {
+          outdialANIId: customOutdialANIId,
+        },
+      };
+
+      const {result} = renderHook(() =>
+        useOutdialCall({
+          cc: mockCCWithCustomAni,
+          logger,
+        })
+      );
+
+      await act(async () => {
+        await result.current.getOutdialANIEntries();
+      });
+
+      expect(mockCCWithCustomAni.getOutdialAniEntries).toHaveBeenCalledWith({
+        outdialANI: customOutdialANIId,
+      });
+      expect(mockCCWithCustomAni.getOutdialAniEntries).toHaveBeenCalledTimes(1);
+    });
   });
   describe('useOutdialCall Error Handling', () => {
     it('should handle errors in startOutdial', () => {

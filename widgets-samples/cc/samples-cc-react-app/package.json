@@ -25,7 +25,7 @@
     "react-dom": "18.3.1",
     "ts-loader": "^9.5.1",
     "typescript": "^5.6.3",
-    "webex": "3.8.0-next.120",
+    "webex": "3.9.0-next.30",
     "webpack": "^5.94.0",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^5.1.0",

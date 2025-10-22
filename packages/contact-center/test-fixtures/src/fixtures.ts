@@ -470,6 +470,7 @@ const mockCC: IContactCenter = {
   getEntryPoints: jest.fn().mockResolvedValue(mockEntryPointsResponse),
   addressBook: mockAddressBook,
   setAgentState: jest.fn().mockResolvedValue({}),
+  getOutdialAniEntries: jest.fn().mockResolvedValue({entries: []}),
 };
 
 export {
