@@ -2883,7 +2883,7 @@ describe('useCallControl', () => {
           },
         };
 
-        store.cc.agentConfig = {agentId: 'agent1', regexUS: ''};
+        store.cc.agentConfig = {agentId: 'agent1', regexUS: '', outdialANIId: ''};
 
         const {result} = renderHook(() =>
           useCallControl({
@@ -2926,7 +2926,7 @@ describe('useCallControl', () => {
           },
         };
 
-        store.cc.agentConfig = {agentId: 'agent1', regexUS: ''};
+        store.cc.agentConfig = {agentId: 'agent1', regexUS: '', outdialANIId: ''};
 
         const {result} = renderHook(() =>
           useCallControl({
@@ -2967,7 +2967,7 @@ describe('useCallControl', () => {
           },
         };
 
-        store.cc.agentConfig = {agentId: 'agent1', regexUS: ''};
+        store.cc.agentConfig = {agentId: 'agent1', regexUS: '', outdialANIId: ''};
 
         const {result} = renderHook(() =>
           useCallControl({
