@@ -14,6 +14,7 @@ import {
   UI_SETTLE_TIMEOUT,
 } from '../constants';
 import nodemailer from 'nodemailer';
+import {dismissOverlays} from './helperUtils';
 
 const transporter = nodemailer.createTransport({
   service: 'gmail', // Make sure to use Secure Port for Gmail SMTP
@@ -46,15 +47,30 @@ export async function createCallTask(page: Page, number: string) {
   } catch (error) {
     throw new Error('The Input Page should be logged into calling web-client.');
   }
+
+  // Ensure page is foregrounded and clean of overlays
+  await page.bringToFront();
+  await dismissOverlays(page);
+
+  const endBtn = page.locator('[data-test="call-end"]');
+  if (await endBtn.isVisible({timeout: 500}).catch(() => false)) {
+    await endBtn.click({timeout: AWAIT_TIMEOUT});
+    await page.waitForTimeout(500);
+  }
+
+  await page
+    .locator('[data-test="statusMessage"]')
+    .waitFor({state: 'hidden', timeout: NETWORK_OPERATION_TIMEOUT})
+    .catch(() => {});
+
   await page.getByRole('textbox', {name: 'Dial'}).waitFor({state: 'visible', timeout: AWAIT_TIMEOUT});
   await page.getByRole('textbox', {name: 'Dial'}).fill(number, {timeout: AWAIT_TIMEOUT});
-  await expect(
-    page.locator('[data-test="calling-ui-keypad-control"]').getByRole('button', {name: 'Call'})
-  ).toBeVisible();
-  await page
-    .locator('[data-test="calling-ui-keypad-control"]')
-    .getByRole('button', {name: 'Call'})
-    .click({timeout: AWAIT_TIMEOUT});
+
+  const callButton = page.locator('[data-test="calling-ui-keypad-control"]').getByRole('button', {name: 'Call'});
+  await expect(callButton).toBeVisible({timeout: AWAIT_TIMEOUT});
+  // Ensure button is enabled before clicking
+  await callButton.waitFor({state: 'visible', timeout: AWAIT_TIMEOUT});
+  await callButton.click({timeout: AWAIT_TIMEOUT});
   await page.waitForTimeout(2000);
 }
 

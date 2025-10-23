@@ -281,7 +281,10 @@ export async function ensureDialNumberLoggedIn(page: Page): Promise<void> {
   // Dismiss any stale overlays/popovers (e.g., "Media failed" from previous calls)
   await dismissOverlays(page);
 
+  // Ensure the dial number page is in the foreground to avoid background throttling
+  await page.bringToFront();
+
   // Wait for the incoming call to appear on the dial number page
   // Use extended timeout to handle network routing delays and test interference
-  await page.locator('[data-test="right-action-button"]').waitFor({state: 'visible', timeout: AWAIT_TIMEOUT * 2});
+  await page.locator('[data-test="right-action-button"]').waitFor({state: 'visible', timeout: AWAIT_TIMEOUT * 2.5});
 }

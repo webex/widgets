@@ -14,6 +14,7 @@ import {
   AWAIT_TIMEOUT,
   PAGE_TYPES,
   PageType,
+  CALL_URL,
 } from './constants';
 
 // Configuration interfaces for setup options
@@ -586,5 +587,29 @@ export class TestManager {
     });
 
     await Promise.all(cleanupOperations);
+  }
+
+  // Helper method to hard-reset the dial number login session
+  public async resetDialNumberSession(): Promise<void> {
+    if (!this.dialNumberPage || !this.dialNumberContext) {
+      return;
+    }
+    const envTokens = this.getEnvTokens();
+    try {
+      await this.dialNumberContext.clearCookies();
+      await this.dialNumberPage.evaluate(() => {
+        try {
+          localStorage.clear();
+        } catch {}
+        try {
+          sessionStorage.clear();
+        } catch {}
+      });
+      // Navigate fresh and login again
+      await this.dialNumberPage.goto(CALL_URL);
+      await loginExtension(this.dialNumberPage, envTokens.dialNumberUsername!, envTokens.dialNumberPassword!);
+    } catch (error) {
+      throw new Error(`Failed to reset dial number session: ${error}`);
+    }
   }
 }

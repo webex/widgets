@@ -274,6 +274,7 @@ export default function createAdvanceCombinationsTests() {
     test('Dial Number: consult then end consult returns UI to normal', async () => {
       test.skip(!process.env.PW_DIAL_NUMBER_NAME, 'PW_DIAL_NUMBER_NAME not set');
 
+      await testManager.resetDialNumberSession();
       await changeUserState(testManager.agent2Page, USER_STATES.MEETING);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
@@ -285,8 +286,6 @@ export default function createAdvanceCombinationsTests() {
       clearAdvancedCapturedLogs();
       await consultOrTransfer(testManager.agent1Page, 'dialNumber', 'consult', process.env.PW_DIAL_NUMBER_NAME!);
       await expect(testManager.agent1Page.getByTestId('cancel-consult-btn')).toBeVisible();
-      await ensureDialNumberLoggedIn(testManager.dialNumberPage);
-      await acceptExtensionCall(testManager.dialNumberPage);
       await cancelConsult(testManager.agent1Page);
       await expect(testManager.agent1Page.getByTestId('cancel-consult-btn')).not.toBeVisible();
       await endCallTask(testManager.callerPage!);
@@ -296,6 +295,7 @@ export default function createAdvanceCombinationsTests() {
     test('Dial Number: consult then transfer completes and remote ends', async () => {
       test.skip(!process.env.PW_DIAL_NUMBER_NAME, 'PW_DIAL_NUMBER_NAME not set');
 
+      await testManager.resetDialNumberSession();
       await changeUserState(testManager.agent2Page, USER_STATES.MEETING);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
@@ -336,6 +336,7 @@ export default function createAdvanceCombinationsTests() {
     test('Two-hop: consult to Agent then consult-transfer to Dial Number', async () => {
       test.skip(!process.env.PW_DIAL_NUMBER_NAME, 'PW_DIAL_NUMBER_NAME not set');
 
+      await testManager.resetDialNumberSession();
       await changeUserState(testManager.agent2Page, USER_STATES.MEETING);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
