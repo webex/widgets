@@ -12,6 +12,7 @@ import {
   AWAIT_TIMEOUT,
 } from '../constants';
 import {submitWrapup} from './wrapupUtils';
+import {holdCallToggle} from './taskControlUtils';
 import {acceptExtensionCall, submitRonaPopup} from './incomingTaskUtils';
 import {
   loginViaAccessToken,
@@ -439,6 +440,57 @@ export const handleStrayTasks = async (
 
   console.log(`Completed stray task handling after ${iterations} iterations`);
 };
+
+/**
+ * Clears any pending call UI on the page by ending the call and/or submitting wrapup if visible.
+ * Does nothing if neither end-call nor wrapup controls are present.
+ */
+export async function clearPendingCallAndWrapup(page: Page): Promise<void> {
+  // If wrapup is available, submit it
+  const wrapupBtn = page.getByTestId('call-control:wrapup-button').first();
+  const wrapupVisible = await wrapupBtn.isVisible().catch(() => false);
+  if (wrapupVisible) {
+    await submitWrapup(page, WRAPUP_REASONS.SALE);
+    await page.waitForTimeout(500);
+    return;
+  }
+
+  const endBtn = page.getByTestId('call-control:end-call').first();
+  const endVisible = await endBtn.isVisible().catch(() => false);
+  if (endVisible) {
+    const endEnabled = await endBtn.isEnabled().catch(() => false);
+    if (endEnabled) {
+      try {
+        await endBtn.click({timeout: AWAIT_TIMEOUT});
+        await submitWrapup(page, WRAPUP_REASONS.SALE);
+        await page.waitForTimeout(500);
+      } catch {}
+    } else {
+      // If end button is disabled, try resuming from hold then end; otherwise, see if wrapup is available
+      try {
+        await holdCallToggle(page);
+      } catch {}
+      const endEnabledAfterResume = await endBtn.isEnabled().catch(() => false);
+      if (endEnabledAfterResume) {
+        try {
+          await endBtn.click({timeout: AWAIT_TIMEOUT});
+          await submitWrapup(page, WRAPUP_REASONS.SALE);
+          await page.waitForTimeout(500);
+          return;
+        } catch {}
+      }
+
+      // If resume path failed, see if wrapup became available instead; otherwise, skip silently
+      const wrapupNowVisible = await wrapupBtn.isVisible().catch(() => false);
+      if (wrapupNowVisible) {
+        try {
+          await submitWrapup(page, WRAPUP_REASONS.SALE);
+          await page.waitForTimeout(500);
+        } catch {}
+      }
+    }
+  }
+}
 
 /*
 / * Sets up the page for testing by logging in, enabling widgets, and handling user states, cleaning up stray tasks, submitting RONA popups

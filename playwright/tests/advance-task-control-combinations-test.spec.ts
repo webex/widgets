@@ -11,7 +11,7 @@ import {changeUserState, verifyCurrentState} from '../Utils/userStateUtils';
 import {createCallTask, acceptIncomingTask, acceptExtensionCall, endCallTask} from '../Utils/incomingTaskUtils';
 import {submitWrapup} from '../Utils/wrapupUtils';
 import {USER_STATES, TASK_TYPES, WRAPUP_REASONS} from '../constants';
-import {waitForState} from '../Utils/helperUtils';
+import {waitForState, clearPendingCallAndWrapup} from '../Utils/helperUtils';
 import {endTask, holdCallToggle} from '../Utils/taskControlUtils';
 import {TestManager} from '../test-manager';
 
@@ -336,6 +336,8 @@ export default function createAdvanceCombinationsTests() {
     test('Two-hop: consult to Agent then consult-transfer to Dial Number', async () => {
       test.skip(!process.env.PW_DIAL_NUMBER_NAME, 'PW_DIAL_NUMBER_NAME not set');
 
+      await clearPendingCallAndWrapup(testManager.agent1Page);
+      await clearPendingCallAndWrapup(testManager.agent2Page);
       await testManager.resetDialNumberSession();
       await changeUserState(testManager.agent2Page, USER_STATES.MEETING);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);

@@ -327,6 +327,8 @@ export class TestManager {
       () => loginExtension(this.dialNumberPage, envTokens.dialNumberUsername, envTokens.dialNumberPassword),
       'dial number login'
     );
+    // Ensure only one page remains in the Dial Number context to avoid duplicate web client instances
+    await this.enforceSingleDialNumberInOwnContext();
   }
 
   // Helper method for Caller setup
@@ -608,8 +610,25 @@ export class TestManager {
       // Navigate fresh and login again
       await this.dialNumberPage.goto(CALL_URL);
       await loginExtension(this.dialNumberPage, envTokens.dialNumberUsername!, envTokens.dialNumberPassword!);
+      await this.enforceSingleDialNumberInOwnContext();
     } catch (error) {
       throw new Error(`Failed to reset dial number session: ${error}`);
     }
+  }
+
+  // Ensures at most one page exists in the dedicated Dial Number context we manage.
+  // Closes any extra tabs/pages opened in that context to prevent multiple web.webex.com instances for the Dial Number user.
+  private async enforceSingleDialNumberInOwnContext(): Promise<void> {
+    if (!this.dialNumberContext) return;
+    try {
+      const pages = this.dialNumberContext.pages();
+      for (const p of pages) {
+        if (p !== this.dialNumberPage) {
+          try {
+            await p.close();
+          } catch {}
+        }
+      }
+    } catch {}
   }
 }
