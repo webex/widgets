@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.120](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.119...v1.28.0-ccwidgets.120) (2025-10-24)
+
+
+### Features
+
+* **cc-widgets:** added-e2e-tests ([#541](https://github.com/webex/widgets/issues/541)) ([07fa138](https://github.com/webex/widgets/commit/07fa138195907388f3266c1a4fe39714fe36f713))
+
 # [1.28.0-ccwidgets.119](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.118...v1.28.0-ccwidgets.119) (2025-10-22)
 
 

@@ -7,6 +7,7 @@ import {
   verifyConsultStartSuccessLogs,
   verifyConsultEndSuccessLogs,
   verifyConsultTransferredLogs,
+  ensureDialNumberLoggedIn,
 } from '../Utils/advancedTaskControlUtils';
 
 import {changeUserState, verifyCurrentState} from '../Utils/userStateUtils';
@@ -139,9 +140,11 @@ export default function createAdvancedTaskControlsTests() {
     });
 
     test('Call Blind Transferred to DialNumber', async () => {
+      await testManager.resetDialNumberSession();
       await consultOrTransfer(testManager.agent1Page, 'dialNumber', 'transfer', process.env.PW_DIAL_NUMBER_NAME);
 
       //DialNumber accepts the transfer
+      await ensureDialNumberLoggedIn(testManager.dialNumberPage);
       await acceptExtensionCall(testManager.dialNumberPage);
       verifyTransferSuccessLogs();
       await endCallTask(testManager.callerPage!);
@@ -155,10 +158,12 @@ export default function createAdvancedTaskControlsTests() {
     });
 
     test('Call Blind Transferred to Queue with DialNumber', async () => {
+      await testManager.resetDialNumberSession();
       // First transfer from Agent 1 to Agent 2
       await consultOrTransfer(testManager.agent1Page, 'queue', 'transfer', 'queue with dn');
 
       //DialNumber accepts the transfer
+      await ensureDialNumberLoggedIn(testManager.dialNumberPage);
       await acceptExtensionCall(testManager.dialNumberPage);
       verifyTransferSuccessLogs();
       await endCallTask(testManager.callerPage!);

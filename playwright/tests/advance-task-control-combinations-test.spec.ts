@@ -1,10 +1,17 @@
 import {test, expect} from '@playwright/test';
-import {cancelConsult, consultOrTransfer} from '../Utils/advancedTaskControlUtils';
+import {
+  cancelConsult,
+  consultOrTransfer,
+  clearAdvancedCapturedLogs,
+  verifyConsultStartSuccessLogs,
+  verifyConsultTransferredLogs,
+  ensureDialNumberLoggedIn,
+} from '../Utils/advancedTaskControlUtils';
 import {changeUserState, verifyCurrentState} from '../Utils/userStateUtils';
-import {createCallTask, acceptIncomingTask} from '../Utils/incomingTaskUtils';
+import {createCallTask, acceptIncomingTask, acceptExtensionCall, endCallTask} from '../Utils/incomingTaskUtils';
 import {submitWrapup} from '../Utils/wrapupUtils';
 import {USER_STATES, TASK_TYPES, WRAPUP_REASONS} from '../constants';
-import {waitForState} from '../Utils/helperUtils';
+import {waitForState, clearPendingCallAndWrapup} from '../Utils/helperUtils';
 import {endTask, holdCallToggle} from '../Utils/taskControlUtils';
 import {TestManager} from '../test-manager';
 
@@ -262,6 +269,113 @@ export default function createAdvanceCombinationsTests() {
       await testManager.agent1Page.waitForTimeout(3000);
       await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.RESOLVED);
       await testManager.agent1Page.waitForTimeout(2000);
+    });
+
+    test('Dial Number: consult then end consult returns UI to normal', async () => {
+      test.skip(!process.env.PW_DIAL_NUMBER_NAME, 'PW_DIAL_NUMBER_NAME not set');
+
+      await testManager.resetDialNumberSession();
+      await changeUserState(testManager.agent2Page, USER_STATES.MEETING);
+      await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
+      await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
+      const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
+      await incomingTaskDiv.waitFor({state: 'visible', timeout: 80000});
+      await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CALL);
+      await waitForState(testManager.agent1Page, USER_STATES.ENGAGED);
+
+      clearAdvancedCapturedLogs();
+      await consultOrTransfer(testManager.agent1Page, 'dialNumber', 'consult', process.env.PW_DIAL_NUMBER_NAME!);
+      await expect(testManager.agent1Page.getByTestId('cancel-consult-btn')).toBeVisible();
+      await cancelConsult(testManager.agent1Page);
+      await expect(testManager.agent1Page.getByTestId('cancel-consult-btn')).not.toBeVisible();
+      await endCallTask(testManager.callerPage!);
+      await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
+    });
+
+    test('Dial Number: consult then transfer completes and remote ends', async () => {
+      test.skip(!process.env.PW_DIAL_NUMBER_NAME, 'PW_DIAL_NUMBER_NAME not set');
+
+      await testManager.resetDialNumberSession();
+      await changeUserState(testManager.agent2Page, USER_STATES.MEETING);
+      await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
+      await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
+      const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
+      await incomingTaskDiv.waitFor({state: 'visible', timeout: 80000});
+      await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CALL);
+
+      clearAdvancedCapturedLogs();
+      await consultOrTransfer(testManager.agent1Page, 'dialNumber', 'consult', process.env.PW_DIAL_NUMBER_NAME!);
+      await ensureDialNumberLoggedIn(testManager.dialNumberPage);
+      await expect(testManager.dialNumberPage.locator('[data-test="right-action-button"]')).toBeVisible();
+      await acceptExtensionCall(testManager.dialNumberPage);
+      await testManager.agent1Page.getByTestId('transfer-consult-btn').click();
+      await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
+      await verifyConsultStartSuccessLogs();
+      await verifyConsultTransferredLogs();
+      await endCallTask(testManager.dialNumberPage);
+    });
+
+    test('Entry Point: consult then end consult returns UI to normal', async () => {
+      test.skip(!process.env.PW_ENTRYPOINT_NAME, 'PW_ENTRYPOINT_NAME not set');
+
+      await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
+      await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
+      const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
+      await incomingTaskDiv.waitFor({state: 'visible', timeout: 80000});
+      await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CALL);
+
+      clearAdvancedCapturedLogs();
+      await consultOrTransfer(testManager.agent1Page, 'entryPoint', 'consult', process.env.PW_ENTRYPOINT_NAME!);
+      await expect(testManager.agent1Page.getByTestId('cancel-consult-btn')).toBeVisible();
+      await verifyConsultStartSuccessLogs();
+      await cancelConsult(testManager.agent1Page);
+      await testManager.agent1Page.waitForTimeout(1000);
+    });
+
+    // Two-hop to Dial Number (moved into top-level describe)
+    test('Two-hop: consult to Agent then consult-transfer to Dial Number', async () => {
+      test.skip(!process.env.PW_DIAL_NUMBER_NAME, 'PW_DIAL_NUMBER_NAME not set');
+
+      await clearPendingCallAndWrapup(testManager.agent1Page);
+      await clearPendingCallAndWrapup(testManager.agent2Page);
+      await testManager.resetDialNumberSession();
+      await changeUserState(testManager.agent2Page, USER_STATES.MEETING);
+      await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
+      await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
+      const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
+      await incomingTaskDiv.waitFor({state: 'visible', timeout: 80000});
+      await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CALL);
+      await changeUserState(testManager.agent2Page, USER_STATES.AVAILABLE);
+      await waitForState(testManager.agent1Page, USER_STATES.ENGAGED);
+      await waitForState(testManager.agent2Page, USER_STATES.AVAILABLE);
+      await testManager.agent2Page.waitForTimeout(2000);
+      await testManager.agent1Page.waitForTimeout(2000);
+
+      clearAdvancedCapturedLogs();
+      await consultOrTransfer(
+        testManager.agent1Page,
+        'agent',
+        'consult',
+        process.env[`${testManager.projectName}_AGENT2_NAME`]!
+      );
+      const consultRequestDiv = testManager.agent2Page.getByTestId('samples:incoming-task-telephony').first();
+      await consultRequestDiv.waitFor({state: 'visible', timeout: 60000});
+      await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL);
+      await testManager.agent2Page.waitForTimeout(3000);
+      await verifyCurrentState(testManager.agent2Page, USER_STATES.ENGAGED);
+      await testManager.agent1Page.getByTestId('transfer-consult-btn').click();
+      await testManager.agent1Page.waitForTimeout(2000);
+      await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
+      await testManager.agent2Page.waitForTimeout(3000);
+      await verifyCurrentState(testManager.agent2Page, USER_STATES.ENGAGED);
+
+      await consultOrTransfer(testManager.agent2Page, 'dialNumber', 'consult', process.env.PW_DIAL_NUMBER_NAME!);
+      await ensureDialNumberLoggedIn(testManager.dialNumberPage);
+      await acceptExtensionCall(testManager.dialNumberPage);
+      await testManager.agent2Page.getByTestId('transfer-consult-btn').click();
+      await submitWrapup(testManager.agent2Page, WRAPUP_REASONS.SALE);
+      await verifyConsultTransferredLogs();
+      await endCallTask(testManager.dialNumberPage);
     });
 
     test.afterAll(async () => {

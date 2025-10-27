@@ -1,4 +1,5 @@
 import {Page, expect} from '@playwright/test';
+import {loginExtension} from './incomingTaskUtils';
 import {dismissOverlays} from './helperUtils';
 import {AWAIT_TIMEOUT, FORM_FIELD_TIMEOUT} from '../constants';
 
@@ -260,4 +261,30 @@ async function performEntryPointSelection(
 export async function cancelConsult(page: Page): Promise<void> {
   // Click cancel consult button
   await page.getByTestId('cancel-consult-btn').click({timeout: AWAIT_TIMEOUT});
+}
+
+/**
+ * Ensures the Dial Number softphone (web.webex.com) page is logged in using env creds.
+ * Uses: PW_DIAL_NUMBER_LOGIN_USERNAME, PW_DIAL_NUMBER_LOGIN_PASSWORD
+ * Also dismisses any stale overlays/popovers (e.g., "Media failed") that might block interaction.
+ */
+export async function ensureDialNumberLoggedIn(page: Page): Promise<void> {
+  const currentUrl = page?.url?.() || '';
+  if (!/\.webex\.com\/calling/.test(currentUrl)) {
+    const user = process.env.PW_DIAL_NUMBER_LOGIN_USERNAME;
+    const pass = process.env.PW_DIAL_NUMBER_LOGIN_PASSWORD;
+    if (user && pass) {
+      await loginExtension(page, user, pass);
+    }
+  }
+
+  // Dismiss any stale overlays/popovers (e.g., "Media failed" from previous calls)
+  await dismissOverlays(page);
+
+  // Ensure the dial number page is in the foreground to avoid background throttling
+  await page.bringToFront();
+
+  // Wait for the incoming call to appear on the dial number page
+  // Use extended timeout to handle network routing delays and test interference
+  await page.locator('[data-test="right-action-button"]').waitFor({state: 'visible', timeout: AWAIT_TIMEOUT * 2.5});
 }
