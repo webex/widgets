@@ -25,21 +25,16 @@ import {withMetrics} from '@webex/cc-ui-logging';
 const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => {
   const {
     currentTask,
-    isHeld,
     isRecording,
     holdTime,
-    consultAccepted,
-    consultInitiated,
     consultAgentName,
     consultStartTimeStamp,
     endConsultCall,
-    consultCompleted,
     consultTransfer,
     consultConference,
     callControlClassName,
     callControlConsultClassName,
     startTimestamp,
-    isEndConsultEnabled,
     controlVisibility,
     logger,
     isMuted,
@@ -223,7 +218,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
                 )}
               </div>
               <div className="call-status">
-                {!controlVisibility.wrapup && isHeld && (
+                {!controlVisibility.wrapup.isVisible && controlVisibility.isHeld && (
                   <>
                     <span className="dot">•</span>
                     <div className="on-hold">
@@ -238,7 +233,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
             </div>
           </div>
         </div>
-        {!controlVisibility.wrapup && controlVisibility.recordingIndicator && (
+        {!controlVisibility.wrapup.isVisible && controlVisibility.recordingIndicator.isVisible && (
           <div className="recording-indicator">
             <Icon name={isRecording ? 'record-active-badge-filled' : 'record-paused-badge-filled'} size={1.3} />
           </div>
@@ -268,7 +263,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
           </Text>
         </div>
       </div>
-      {(consultAccepted || consultInitiated) && !controlVisibility.wrapup && isTelephony && (
+      {controlVisibility.isConsultInitiatedOrAccepted && (
         <div className={`call-control-consult-container ${callControlConsultClassName || ''}`}>
           <CallControlConsultComponent
             agentName={consultAgentName}
@@ -276,12 +271,9 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
             endConsultCall={endConsultCall}
             onTransfer={consultTransfer}
             consultConference={consultConference}
-            consultCompleted={consultCompleted}
-            isAgentBeingConsulted={!consultAccepted}
-            isEndConsultEnabled={isEndConsultEnabled}
             logger={logger}
-            muteUnmute={controlVisibility.muteUnmute}
             isMuted={isMuted}
+            controlVisibility={controlVisibility}
             onToggleConsultMute={toggleMute}
           />
         </div>

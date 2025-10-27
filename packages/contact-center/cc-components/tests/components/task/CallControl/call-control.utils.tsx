@@ -61,19 +61,25 @@ describe('CallControl Utils', () => {
   };
 
   const mockControlVisibility = {
-    accept: true,
-    decline: true,
-    end: true,
-    muteUnmute: true,
-    holdResume: true,
-    consult: true,
-    transfer: true,
-    conference: true,
-    wrapup: true,
-    pauseResumeRecording: true,
-    endConsult: true,
-    recordingIndicator: true,
+    accept: {isVisible: true, isEnabled: true},
+    decline: {isVisible: true, isEnabled: true},
+    end: {isVisible: true, isEnabled: true},
+    muteUnmute: {isVisible: true, isEnabled: true},
+    holdResume: {isVisible: true, isEnabled: true},
+    consult: {isVisible: true, isEnabled: true},
+    transfer: {isVisible: true, isEnabled: true},
+    conference: {isVisible: true, isEnabled: true},
+    wrapup: {isVisible: true, isEnabled: true},
+    pauseResumeRecording: {isVisible: true, isEnabled: true},
+    endConsult: {isVisible: true, isEnabled: true},
+    recordingIndicator: {isVisible: true, isEnabled: true},
+    exitConference: {isVisible: false, isEnabled: false},
+    mergeConference: {isVisible: false, isEnabled: false},
+    consultTransfer: {isVisible: false, isEnabled: false},
     isConferenceInProgress: false,
+    isConsultInitiatedOrAccepted: false,
+    hideCallControls: false,
+    isHeld: false,
   };
 
   const mockMediaTypeInfo = {
@@ -106,30 +112,26 @@ describe('CallControl Utils', () => {
   describe('handleToggleHold', () => {
     it('should toggle hold from false to true', () => {
       const mockToggleHold = jest.fn();
-      const mockSetIsHeld = jest.fn();
 
-      handleToggleHold(false, mockToggleHold, mockSetIsHeld, loggerMock);
+      handleToggleHold(false, mockToggleHold, loggerMock);
 
       expect(loggerMock.info).toHaveBeenCalledWith('CC-Widgets: CallControl: is Call On Hold status is false', {
         module: 'call-control.tsx',
         method: 'handletoggleHold',
       });
       expect(mockToggleHold).toHaveBeenCalledWith(true);
-      expect(mockSetIsHeld).toHaveBeenCalledWith(true);
     });
 
     it('should toggle hold from true to false', () => {
       const mockToggleHold = jest.fn();
-      const mockSetIsHeld = jest.fn();
 
-      handleToggleHold(true, mockToggleHold, mockSetIsHeld, loggerMock);
+      handleToggleHold(true, mockToggleHold, loggerMock);
 
       expect(loggerMock.info).toHaveBeenCalledWith('CC-Widgets: CallControl: is Call On Hold status is true', {
         module: 'call-control.tsx',
         method: 'handletoggleHold',
       });
       expect(mockToggleHold).toHaveBeenCalledWith(false);
-      expect(mockSetIsHeld).toHaveBeenCalledWith(false);
     });
   });
 
@@ -256,14 +258,12 @@ describe('CallControl Utils', () => {
   describe('handleTargetSelect', () => {
     const mockConsultCall = jest.fn();
     const mockTransferCall = jest.fn();
-    const mockSetConsultAgentId = jest.fn();
     const mockSetConsultAgentName = jest.fn();
     const mockSetLastTargetType = jest.fn();
 
     beforeEach(() => {
       mockConsultCall.mockClear();
       mockTransferCall.mockClear();
-      mockSetConsultAgentId.mockClear();
       mockSetConsultAgentName.mockClear();
       mockSetLastTargetType.mockClear();
     });
@@ -277,7 +277,6 @@ describe('CallControl Utils', () => {
         'Consult',
         mockConsultCall,
         mockTransferCall,
-        mockSetConsultAgentId,
         mockSetConsultAgentName,
         mockSetLastTargetType,
         loggerMock
@@ -288,7 +287,6 @@ describe('CallControl Utils', () => {
         method: 'handleTargetSelect',
       });
       expect(mockConsultCall).toHaveBeenCalledWith('agent-123', 'agent', false);
-      expect(mockSetConsultAgentId).toHaveBeenCalledWith('agent-123');
       expect(mockSetConsultAgentName).toHaveBeenCalledWith('John Doe');
       expect(mockSetLastTargetType).toHaveBeenCalledWith('agent');
       expect(mockTransferCall).not.toHaveBeenCalled();
@@ -303,7 +301,6 @@ describe('CallControl Utils', () => {
         'Transfer',
         mockConsultCall,
         mockTransferCall,
-        mockSetConsultAgentId,
         mockSetConsultAgentName,
         mockSetLastTargetType,
         loggerMock
@@ -315,7 +312,6 @@ describe('CallControl Utils', () => {
       });
       expect(mockTransferCall).toHaveBeenCalledWith('queue-456', 'queue');
       expect(mockConsultCall).not.toHaveBeenCalled();
-      expect(mockSetConsultAgentId).not.toHaveBeenCalled();
       expect(mockSetConsultAgentName).not.toHaveBeenCalled();
       expect(mockSetLastTargetType).not.toHaveBeenCalled();
     });
@@ -334,7 +330,6 @@ describe('CallControl Utils', () => {
           'Consult',
           mockConsultCall,
           mockTransferCall,
-          mockSetConsultAgentId,
           mockSetConsultAgentName,
           mockSetLastTargetType,
           loggerMock
@@ -361,7 +356,6 @@ describe('CallControl Utils', () => {
           'Transfer',
           mockConsultCall,
           mockTransferCall,
-          mockSetConsultAgentId,
           mockSetConsultAgentName,
           mockSetLastTargetType,
           loggerMock
@@ -383,7 +377,6 @@ describe('CallControl Utils', () => {
         null,
         mockConsultCall,
         mockTransferCall,
-        mockSetConsultAgentId,
         mockSetConsultAgentName,
         mockSetLastTargetType,
         loggerMock
@@ -454,10 +447,8 @@ describe('CallControl Utils', () => {
     it('should build buttons with correct configuration when muted', () => {
       const buttons = buildCallControlButtons(
         true, // isMuted
-        false, // isHeld
         true, // isRecording
         false, // isMuteButtonDisabled
-        false,
         mockMediaTypeInfo,
         mockControlVisibility,
         mockFunctions.handleMuteToggleFunc,
@@ -497,14 +488,17 @@ describe('CallControl Utils', () => {
     });
 
     it('should build buttons with correct configuration when not muted and held', () => {
+      const heldControlVisibility = {
+        ...mockControlVisibility,
+        isHeld: true,
+        end: {isVisible: true, isEnabled: false}, // End button should be disabled when held
+      };
       const buttons = buildCallControlButtons(
         false, // isMuted
-        true, // isHeld
         false, // isRecording
         true, // isMuteButtonDisabled
-        false,
         mockMediaTypeInfo,
-        mockControlVisibility,
+        heldControlVisibility,
         mockFunctions.handleMuteToggleFunc,
         mockFunctions.handleToggleHoldFunc,
         mockFunctions.toggleRecording,
@@ -548,8 +542,6 @@ describe('CallControl Utils', () => {
         false,
         false,
         false,
-        false,
-        false,
         mockMediaTypeInfo,
         mockControlVisibility,
         mockFunctions.handleMuteToggleFunc,
@@ -588,9 +580,7 @@ describe('CallControl Utils', () => {
       // When recording
       let buttons = buildCallControlButtons(
         false,
-        false,
         true, // isRecording
-        false,
         false,
         mockMediaTypeInfo,
         mockControlVisibility,
@@ -608,9 +598,7 @@ describe('CallControl Utils', () => {
       // When not recording
       buttons = buildCallControlButtons(
         false,
-        false,
         false, // isRecording
-        false,
         false,
         mockMediaTypeInfo,
         mockControlVisibility,
@@ -627,15 +615,17 @@ describe('CallControl Utils', () => {
     });
 
     it('should build exit conference button when in conference', () => {
-      mockControlVisibility.isConferenceInProgress = true;
+      const conferenceControlVisibility = {
+        ...mockControlVisibility,
+        isConferenceInProgress: true,
+        exitConference: {isVisible: true, isEnabled: true},
+      };
       const buttons = buildCallControlButtons(
         false, // isMuted
-        false, // isHeld
         false, // isRecording
         false, // isMuteButtonDisabled
-        false,
         mockMediaTypeInfo,
-        mockControlVisibility,
+        conferenceControlVisibility,
         mockFunctions.handleMuteToggleFunc,
         mockFunctions.handleToggleHoldFunc,
         mockFunctions.toggleRecording,
@@ -653,7 +643,6 @@ describe('CallControl Utils', () => {
         isVisible: true,
         dataTestId: 'call-control:exit-conference',
       });
-      mockControlVisibility.isConferenceInProgress = false; // Reset for other tests
     });
   });
 
@@ -697,40 +686,16 @@ describe('CallControl Utils', () => {
   });
 
   describe('updateCallStateFromTask', () => {
-    const mockSetIsHeld = jest.fn();
     const mockSetIsRecording = jest.fn();
 
     beforeEach(() => {
-      mockSetIsHeld.mockClear();
       mockSetIsRecording.mockClear();
     });
 
-    it('should update hold and recording state from task data', () => {
-      updateCallStateFromTask(mockCurrentTask as unknown as ITask, mockSetIsHeld, mockSetIsRecording);
+    it('should update recording state from task data', () => {
+      updateCallStateFromTask(mockCurrentTask as unknown as ITask, mockSetIsRecording);
 
-      expect(mockSetIsHeld).toHaveBeenCalledWith(false);
       expect(mockSetIsRecording).toHaveBeenCalledWith(true); // !isPaused = !false = true
-    });
-
-    it('should handle task with hold state true', () => {
-      const taskWithHold = {
-        ...mockCurrentTask,
-        data: {
-          ...mockCurrentTask.data,
-          interaction: {
-            ...mockCurrentTask.data.interaction,
-            media: {
-              'media-resource-1': {
-                isHold: true,
-              },
-            },
-          },
-        },
-      };
-
-      updateCallStateFromTask(taskWithHold as unknown as ITask, mockSetIsHeld, mockSetIsRecording);
-
-      expect(mockSetIsHeld).toHaveBeenCalledWith(true);
     });
 
     it('should handle task with recording paused', () => {
@@ -747,24 +712,22 @@ describe('CallControl Utils', () => {
         },
       };
 
-      updateCallStateFromTask(taskWithPausedRecording as unknown as ITask, mockSetIsHeld, mockSetIsRecording);
+      updateCallStateFromTask(taskWithPausedRecording as unknown as ITask, mockSetIsRecording);
 
       expect(mockSetIsRecording).toHaveBeenCalledWith(false); // !isPaused = !true = false
     });
 
     it('should return early when currentTask is null', () => {
-      updateCallStateFromTask(null as unknown as ITask, mockSetIsHeld, mockSetIsRecording);
+      updateCallStateFromTask(null as unknown as ITask, mockSetIsRecording);
 
-      expect(mockSetIsHeld).not.toHaveBeenCalled();
       expect(mockSetIsRecording).not.toHaveBeenCalled();
     });
 
     it('should return early when currentTask.data is null', () => {
       const invalidTask = {data: null};
 
-      updateCallStateFromTask(invalidTask as unknown as ITask, mockSetIsHeld, mockSetIsRecording);
+      updateCallStateFromTask(invalidTask as unknown as ITask, mockSetIsRecording);
 
-      expect(mockSetIsHeld).not.toHaveBeenCalled();
       expect(mockSetIsRecording).not.toHaveBeenCalled();
     });
 
@@ -775,27 +738,9 @@ describe('CallControl Utils', () => {
         },
       };
 
-      updateCallStateFromTask(invalidTask as unknown as ITask, mockSetIsHeld, mockSetIsRecording);
+      updateCallStateFromTask(invalidTask as unknown as ITask, mockSetIsRecording);
 
-      expect(mockSetIsHeld).not.toHaveBeenCalled();
       expect(mockSetIsRecording).not.toHaveBeenCalled();
-    });
-
-    it('should handle missing media resource', () => {
-      const taskWithoutMedia = {
-        ...mockCurrentTask,
-        data: {
-          ...mockCurrentTask.data,
-          interaction: {
-            ...mockCurrentTask.data.interaction,
-            media: {},
-          },
-        },
-      };
-
-      updateCallStateFromTask(taskWithoutMedia as unknown as ITask, mockSetIsHeld, mockSetIsRecording);
-
-      expect(mockSetIsHeld).toHaveBeenCalledWith(undefined); // undefined && undefined && undefined = falsy
     });
 
     it('should handle missing callProcessingDetails', () => {
@@ -810,9 +755,8 @@ describe('CallControl Utils', () => {
         },
       };
 
-      updateCallStateFromTask(taskWithoutCallProcessing as unknown as ITask, mockSetIsHeld, mockSetIsRecording);
+      updateCallStateFromTask(taskWithoutCallProcessing as unknown as ITask, mockSetIsRecording);
 
-      expect(mockSetIsHeld).toHaveBeenCalledWith(false);
       expect(mockSetIsRecording).not.toHaveBeenCalled();
     });
   });

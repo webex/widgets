@@ -22,19 +22,13 @@ import {
 /**
  * Handles toggle hold functionality
  */
-export const handleToggleHold = (
-  isHeld: boolean,
-  toggleHold: (hold: boolean) => void,
-  setIsHeld: (held: boolean) => void,
-  logger: ILogger
-): void => {
+export const handleToggleHold = (isHeld: boolean, toggleHold: (hold: boolean) => void, logger: ILogger): void => {
   try {
     logger.info(`CC-Widgets: CallControl: is Call On Hold status is ${isHeld}`, {
       module: 'call-control.tsx',
       method: 'handletoggleHold',
     });
     toggleHold(!isHeld);
-    setIsHeld(!isHeld);
   } catch (error) {
     logger?.error(`CC-Widgets: CallControl: Error in handleToggleHold - ${error.message}`);
   }
@@ -124,7 +118,6 @@ export const handleTargetSelect = (
   agentMenuType: CallControlMenuType | null,
   consultCall: (id: string, type: DestinationType, allowParticipantsToInteract: boolean) => void,
   transferCall: (id: string, type: DestinationType) => void,
-  setConsultAgentId: (id: string) => void,
   setConsultAgentName: (name: string) => void,
   setLastTargetType: (type: DestinationType) => void,
   logger: ILogger
@@ -136,7 +129,6 @@ export const handleTargetSelect = (
   if (agentMenuType === 'Consult') {
     try {
       consultCall(id, type, allowParticipantsToInteract);
-      setConsultAgentId(id);
       setConsultAgentName(name);
       setLastTargetType(type);
     } catch (error) {
@@ -199,10 +191,8 @@ export const isTelephonyMediaType = (mediaType: MediaChannelType, logger?): bool
  */
 export const buildCallControlButtons = (
   isMuted: boolean,
-  isHeld: boolean,
   isRecording: boolean,
   isMuteButtonDisabled: boolean,
-  isConsultButtonDisabled: boolean,
   currentMediaType: MediaTypeInfo,
   controlVisibility: ControlVisibility,
   handleMuteToggleFunc: () => void,
@@ -221,17 +211,17 @@ export const buildCallControlButtons = (
         tooltip: isMuted ? UNMUTE_CALL : MUTE_CALL,
         className: `${isMuted ? 'call-control-button-muted' : 'call-control-button'}`,
         disabled: isMuteButtonDisabled,
-        isVisible: controlVisibility.muteUnmute,
+        isVisible: controlVisibility.muteUnmute.isVisible,
         dataTestId: 'call-control:mute-toggle',
       },
       {
         id: 'hold',
-        icon: isHeld ? 'play-bold' : 'pause-bold',
+        icon: controlVisibility.isHeld ? 'play-bold' : 'pause-bold',
         onClick: handleToggleHoldFunc,
-        tooltip: isHeld ? RESUME_CALL : HOLD_CALL,
+        tooltip: controlVisibility.isHeld ? RESUME_CALL : HOLD_CALL,
         className: 'call-control-button',
-        disabled: controlVisibility.isConferenceInProgress,
-        isVisible: controlVisibility.holdResume,
+        disabled: !controlVisibility.holdResume.isEnabled,
+        isVisible: controlVisibility.holdResume.isVisible,
         dataTestId: 'call-control:hold-toggle',
       },
       {
@@ -239,9 +229,9 @@ export const buildCallControlButtons = (
         icon: 'headset-bold',
         tooltip: CONSULT_AGENT,
         className: 'call-control-button',
-        disabled: isConsultButtonDisabled,
+        disabled: !controlVisibility.consult.isEnabled,
         menuType: 'Consult',
-        isVisible: controlVisibility.consult,
+        isVisible: controlVisibility.consult.isVisible,
         dataTestId: 'call-control:consult',
       },
       {
@@ -250,8 +240,8 @@ export const buildCallControlButtons = (
         tooltip: 'Exit Conference',
         className: 'call-control-button-muted',
         onClick: exitConference,
-        disabled: !controlVisibility.isConferenceInProgress,
-        isVisible: controlVisibility.isConferenceInProgress,
+        disabled: !controlVisibility.exitConference.isEnabled,
+        isVisible: controlVisibility.exitConference.isVisible,
         dataTestId: 'call-control:exit-conference',
       },
       {
@@ -259,9 +249,9 @@ export const buildCallControlButtons = (
         icon: 'next-bold',
         tooltip: `${TRANSFER} ${currentMediaType.labelName}`,
         className: 'call-control-button',
-        disabled: false,
+        disabled: !controlVisibility.transfer.isEnabled,
         menuType: 'Transfer',
-        isVisible: controlVisibility.transfer,
+        isVisible: controlVisibility.transfer.isVisible,
         dataTestId: 'call-control:transfer',
       },
       {
@@ -270,8 +260,8 @@ export const buildCallControlButtons = (
         onClick: toggleRecording,
         tooltip: isRecording ? PAUSE_RECORDING : RESUME_RECORDING,
         className: 'call-control-button',
-        disabled: false,
-        isVisible: controlVisibility.pauseResumeRecording,
+        disabled: !controlVisibility.pauseResumeRecording.isEnabled,
+        isVisible: controlVisibility.pauseResumeRecording.isVisible,
         dataTestId: 'call-control:recording-toggle',
       },
       {
@@ -280,8 +270,8 @@ export const buildCallControlButtons = (
         onClick: endCall,
         tooltip: `${END} ${currentMediaType.labelName}`,
         className: 'call-control-button-cancel',
-        disabled: isHeld,
-        isVisible: controlVisibility.end,
+        disabled: !controlVisibility.end.isEnabled,
+        isVisible: controlVisibility.end.isVisible,
         dataTestId: 'call-control:end-call',
       },
     ];
@@ -325,17 +315,14 @@ export const filterButtonsForConsultation = (
  */
 export const updateCallStateFromTask = (
   currentTask: ITask,
-  setIsHeld: (held: boolean) => void,
   setIsRecording: (recording: boolean) => void,
   logger?
 ): void => {
   try {
     if (!currentTask || !currentTask.data || !currentTask.data.interaction) return;
 
-    const {interaction, mediaResourceId} = currentTask.data;
-    const {media, callProcessingDetails} = interaction;
-    const isHold = media && media[mediaResourceId] && media[mediaResourceId].isHold;
-    setIsHeld(isHold);
+    const {interaction} = currentTask.data;
+    const {callProcessingDetails} = interaction;
 
     if (callProcessingDetails) {
       const {isPaused} = callProcessingDetails;

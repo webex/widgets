@@ -787,19 +787,25 @@ describe('useCallControl', () => {
     mockGetControlsVisibility.mockClear();
 
     const mockControlVisibility = {
-      muteUnmute: true,
-      holdResume: true,
-      transfer: true,
-      consult: true,
-      end: true,
-      accept: true,
-      decline: true,
-      pauseResumeRecording: true,
-      recordingIndicator: true,
-      wrapup: false,
-      endConsult: false,
-      conference: false,
+      muteUnmute: {isVisible: true, isEnabled: true},
+      holdResume: {isVisible: true, isEnabled: true},
+      transfer: {isVisible: true, isEnabled: true},
+      consult: {isVisible: true, isEnabled: true},
+      end: {isVisible: true, isEnabled: true},
+      accept: {isVisible: true, isEnabled: true},
+      decline: {isVisible: true, isEnabled: true},
+      pauseResumeRecording: {isVisible: true, isEnabled: true},
+      recordingIndicator: {isVisible: true, isEnabled: true},
+      wrapup: {isVisible: false, isEnabled: false},
+      endConsult: {isVisible: false, isEnabled: false},
+      conference: {isVisible: false, isEnabled: false},
+      consultTransfer: {isVisible: false, isEnabled: false},
+      mergeConference: {isVisible: false, isEnabled: false},
+      exitConference: {isVisible: false, isEnabled: false},
       isConferenceInProgress: false,
+      isConsultInitiatedOrAccepted: false,
+      hideCallControls: false,
+      isHeld: false,
     };
     mockGetControlsVisibility.mockReturnValue(mockControlVisibility);
   });
@@ -832,9 +838,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -859,9 +865,9 @@ describe('useCallControl', () => {
         onWrapUp: jest.fn(),
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -896,9 +902,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -921,9 +927,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -948,9 +954,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -974,9 +980,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -998,9 +1004,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -1024,9 +1030,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -1057,9 +1063,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -1094,9 +1100,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -1117,9 +1123,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
     await waitFor(() => {
@@ -1144,9 +1150,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -1172,9 +1178,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -1201,9 +1207,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
     await waitFor(() => {
@@ -1228,9 +1234,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
     // Ensure no event handler is set
@@ -1250,9 +1256,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
     // Ensure no event handler is set
@@ -1270,9 +1276,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
     await act(async () => {
@@ -1294,9 +1300,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
     await act(async () => {
@@ -1321,9 +1327,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
     await act(async () => {
@@ -1353,9 +1359,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -1369,7 +1375,6 @@ describe('useCallControl', () => {
 
   it('should call consultCall successfully', async () => {
     mockCurrentTask.consult = jest.fn().mockResolvedValue('Consulted');
-    const setConsultInitiatedSpy = jest.spyOn(store, 'setConsultInitiated');
     const {result} = renderHook(() =>
       useCallControl({
         currentTask: mockCurrentTask,
@@ -1379,9 +1384,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
     await act(async () => {
@@ -1392,13 +1397,10 @@ describe('useCallControl', () => {
       destinationType: 'agent',
       holdParticipants: true,
     });
-    expect(setConsultInitiatedSpy).toHaveBeenCalledWith(true);
-    setConsultInitiatedSpy.mockRestore();
   });
 
   it('should call consultCall with allowParticipantsToInteract set to true', async () => {
     mockCurrentTask.consult = jest.fn().mockResolvedValue('Consulted');
-    const setConsultInitiatedSpy = jest.spyOn(store, 'setConsultInitiated');
 
     const {result} = renderHook(() =>
       useCallControl({
@@ -1409,9 +1411,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
     await act(async () => {
@@ -1422,8 +1424,6 @@ describe('useCallControl', () => {
       destinationType: 'agent',
       holdParticipants: false,
     });
-    expect(setConsultInitiatedSpy).toHaveBeenCalledWith(true);
-    setConsultInitiatedSpy.mockRestore();
   });
 
   it('should handle errors when calling consultCall', async () => {
@@ -1438,9 +1438,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -1467,9 +1467,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: true,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
     await act(async () => {
@@ -1492,9 +1492,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -1513,9 +1513,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: true,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -1532,7 +1532,6 @@ describe('useCallControl', () => {
 
   it('should call consultTransfer successfully', async () => {
     mockCurrentTask.consultTransfer = jest.fn().mockResolvedValue('ConsultTransferred');
-    const setConsultInitiatedSpy = jest.spyOn(store, 'setConsultInitiated');
     const {result} = renderHook(() =>
       useCallControl({
         currentTask: mockCurrentTask,
@@ -1542,17 +1541,15 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: true,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
     await act(async () => {
       await result.current.consultTransfer();
     });
     expect(mockCurrentTask.consultTransfer).toHaveBeenCalled();
-    expect(setConsultInitiatedSpy).toHaveBeenCalledWith(true);
-    setConsultInitiatedSpy.mockRestore();
   });
 
   it('should handle errors when calling consultTransfer', async () => {
@@ -1567,9 +1564,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -1630,11 +1627,11 @@ describe('useCallControl', () => {
       useCallControl({
         currentTask: taskWithParticipants,
         logger: mockLogger,
-        consultInitiated: true,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -1699,11 +1696,11 @@ describe('useCallControl', () => {
       useCallControl({
         currentTask: taskWithParticipants,
         logger: mockLogger,
-        consultInitiated: false,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -1761,11 +1758,11 @@ describe('useCallControl', () => {
       const hook = useCallControl({
         currentTask: taskWithoutConsultAgent,
         logger: mockLogger,
-        consultInitiated: true,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       });
       return hook;
     });
@@ -1782,10 +1779,12 @@ describe('useCallControl', () => {
 
   it('should handle missing interaction data gracefully', async () => {
     // Create a task with missing interaction data
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const {interaction, ...dataWithoutInteraction} = mockCurrentTask.data;
     const taskWithNoInteraction = {
       ...mockCurrentTask,
       data: {
-        ...mockCurrentTask.data,
+        ...dataWithoutInteraction,
         interactionId: 'someMockInteractionId',
         // No interaction property
       },
@@ -1800,9 +1799,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       });
       // Set initial value
       return hook;
@@ -1822,9 +1821,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -1873,9 +1872,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -1925,9 +1924,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -1971,9 +1970,9 @@ describe('useCallControl', () => {
           logger: mockLogger,
           featureFlags: store.featureFlags,
           deviceType: store.deviceType,
-          consultInitiated: false,
           isMuted: false,
           multiPartyConferenceEnabled: true,
+          agentId: 'test-agent-id',
         }),
       {initialProps: {task: mockTaskWithHold}}
     );
@@ -2041,9 +2040,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -2098,9 +2097,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -2160,9 +2159,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -2176,7 +2175,6 @@ describe('useCallControl', () => {
     mockCurrentTask.consult = jest.fn().mockResolvedValue('Consulted');
     const setIsQueueConsultInProgressSpy = jest.spyOn(store, 'setIsQueueConsultInProgress');
     const setCurrentConsultQueueIdSpy = jest.spyOn(store, 'setCurrentConsultQueueId');
-    const setConsultInitiatedSpy = jest.spyOn(store, 'setConsultInitiated');
 
     const {result} = renderHook(() =>
       useCallControl({
@@ -2187,9 +2185,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -2209,7 +2207,6 @@ describe('useCallControl', () => {
 
     setIsQueueConsultInProgressSpy.mockRestore();
     setCurrentConsultQueueIdSpy.mockRestore();
-    setConsultInitiatedSpy.mockRestore();
   });
 
   it('should handle errors when calling consultCall with queue destination type', async () => {
@@ -2217,7 +2214,6 @@ describe('useCallControl', () => {
     mockCurrentTask.consult = jest.fn().mockRejectedValue(consultError);
     const setIsQueueConsultInProgressSpy = jest.spyOn(store, 'setIsQueueConsultInProgress');
     const setCurrentConsultQueueIdSpy = jest.spyOn(store, 'setCurrentConsultQueueId');
-    const setConsultInitiatedSpy = jest.spyOn(store, 'setConsultInitiated');
 
     const {result} = renderHook(() =>
       useCallControl({
@@ -2228,9 +2224,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -2243,11 +2239,9 @@ describe('useCallControl', () => {
     });
     expect(setIsQueueConsultInProgressSpy).toHaveBeenCalledWith(true);
     expect(setCurrentConsultQueueIdSpy).toHaveBeenCalledWith('queueId123');
-    expect(setConsultInitiatedSpy).toHaveBeenCalledWith(true);
     // Check that cleanup happened on error
     expect(setIsQueueConsultInProgressSpy).toHaveBeenCalledWith(false);
     expect(setCurrentConsultQueueIdSpy).toHaveBeenCalledWith(null);
-    expect(setConsultInitiatedSpy).toHaveBeenCalledWith(false);
     expect(mockLogger.error).toHaveBeenCalledWith('Error consulting call: Error: Queue consult failed', {
       module: 'widget-cc-task#helper.ts',
       method: 'useCallControl#consultCall',
@@ -2255,7 +2249,6 @@ describe('useCallControl', () => {
 
     setIsQueueConsultInProgressSpy.mockRestore();
     setCurrentConsultQueueIdSpy.mockRestore();
-    setConsultInitiatedSpy.mockRestore();
   });
 
   it('should call endConsultCall with queue parameters when queue consult is in progress', async () => {
@@ -2269,9 +2262,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: true,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -2286,7 +2279,7 @@ describe('useCallControl', () => {
     });
   });
 
-  it('should load queues successfully', async () => {
+  it('should get queues via getQueuesFetcher', async () => {
     const getQueuesResponse: Awaited<ReturnType<typeof store.getQueues>> = {
       data: mockQueueDetails,
       meta: {page: 0, pageSize: mockQueueDetails.length, total: mockQueueDetails.length, totalPages: 1},
@@ -2299,17 +2292,16 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
-    await act(async () => {
-      await result.current.loadQueues();
-    });
+    const res = await result.current.getQueuesFetcher({page: 0, pageSize: mockQueueDetails.length});
 
-    expect(result.current.queues).toEqual(mockQueueDetails);
+    expect(res.data).toEqual(mockQueueDetails);
+    expect(res).toEqual(getQueuesResponse);
     getQueuesSpy.mockRestore();
   });
 
@@ -2323,9 +2315,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
         multiPartyConferenceEnabled: false,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -2343,9 +2335,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
         multiPartyConferenceEnabled: false,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -2366,9 +2358,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
         multiPartyConferenceEnabled: false,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -2387,11 +2379,11 @@ describe('useCallControl', () => {
         onWrapUp: mockOnWrapUp,
         onRecordingToggle: mockOnRecordingToggle,
         logger: mockLogger,
-        consultInitiated: false,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
         multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -2433,8 +2425,8 @@ describe('useCallControl', () => {
           featureFlags: store.featureFlags,
           deviceType: store.deviceType,
           isMuted: false,
-          consultInitiated: false,
           multiPartyConferenceEnabled: true,
+          agentId: 'test-agent-id',
         })
       );
 
@@ -2467,8 +2459,8 @@ describe('useCallControl', () => {
           featureFlags: store.featureFlags,
           deviceType: store.deviceType,
           isMuted: true,
-          consultInitiated: false,
           multiPartyConferenceEnabled: true,
+          agentId: 'test-agent-id',
         })
       );
 
@@ -2501,8 +2493,8 @@ describe('useCallControl', () => {
           featureFlags: store.featureFlags,
           deviceType: store.deviceType,
           isMuted: false,
-          consultInitiated: false,
           multiPartyConferenceEnabled: true,
+          agentId: 'test-agent-id',
         })
       );
 
@@ -2523,8 +2515,8 @@ describe('useCallControl', () => {
           featureFlags: store.featureFlags,
           deviceType: store.deviceType,
           isMuted: false,
-          consultInitiated: false,
           multiPartyConferenceEnabled: true,
+          agentId: 'test-agent-id',
         })
       );
 
@@ -2548,8 +2540,8 @@ describe('useCallControl', () => {
           featureFlags: store.featureFlags,
           deviceType: store.deviceType,
           isMuted: false,
-          consultInitiated: false,
           multiPartyConferenceEnabled: true,
+          agentId: 'test-agent-id',
         })
       );
 
@@ -2578,8 +2570,8 @@ describe('useCallControl', () => {
           featureFlags: store.featureFlags,
           deviceType: store.deviceType,
           isMuted: true,
-          consultInitiated: false,
           multiPartyConferenceEnabled: true,
+          agentId: 'test-agent-id',
         })
       );
 
@@ -2612,8 +2604,8 @@ describe('useCallControl', () => {
           featureFlags: store.featureFlags,
           deviceType: store.deviceType,
           isMuted: false,
-          consultInitiated: false,
           multiPartyConferenceEnabled: true,
+          agentId: 'test-agent-id',
         })
       );
 
@@ -2632,8 +2624,8 @@ describe('useCallControl', () => {
           featureFlags: store.featureFlags,
           deviceType: store.deviceType,
           isMuted: false,
-          consultInitiated: false,
           multiPartyConferenceEnabled: true,
+          agentId: 'test-agent-id',
         })
       );
 
@@ -2663,9 +2655,9 @@ describe('useCallControl', () => {
             logger: mockLogger,
             featureFlags: store.featureFlags,
             deviceType: store.deviceType,
-            consultInitiated: false,
             isMuted: false,
             multiPartyConferenceEnabled: true,
+            agentId: 'test-agent-id',
           })
         );
 
@@ -2693,9 +2685,9 @@ describe('useCallControl', () => {
             logger: mockLogger,
             featureFlags: store.featureFlags,
             deviceType: store.deviceType,
-            consultInitiated: false,
             isMuted: false,
             multiPartyConferenceEnabled: true,
+            agentId: 'test-agent-id',
           })
         );
 
@@ -2725,9 +2717,9 @@ describe('useCallControl', () => {
             logger: mockLogger,
             featureFlags: store.featureFlags,
             deviceType: store.deviceType,
-            consultInitiated: false,
             isMuted: false,
             multiPartyConferenceEnabled: true,
+            agentId: 'test-agent-id',
           })
         );
 
@@ -2755,9 +2747,9 @@ describe('useCallControl', () => {
             logger: mockLogger,
             featureFlags: store.featureFlags,
             deviceType: store.deviceType,
-            consultInitiated: false,
             isMuted: false,
             multiPartyConferenceEnabled: true,
+            agentId: 'test-agent-id',
           })
         );
 
@@ -2785,8 +2777,6 @@ describe('useCallControl', () => {
           transferConference: jest.fn().mockResolvedValue(undefined),
         };
 
-        const setConsultInitiatedSpy = jest.spyOn(store, 'setConsultInitiated');
-
         const {result} = renderHook(() =>
           useCallControl({
             currentTask: taskWithConference,
@@ -2796,9 +2786,9 @@ describe('useCallControl', () => {
             logger: mockLogger,
             featureFlags: store.featureFlags,
             deviceType: store.deviceType,
-            consultInitiated: false,
             isMuted: false,
             multiPartyConferenceEnabled: true,
+            agentId: 'test-agent-id',
           })
         );
 
@@ -2811,7 +2801,6 @@ describe('useCallControl', () => {
           method: 'transferCall',
         });
         expect(taskWithConference.transferConference).toHaveBeenCalled();
-        expect(setConsultInitiatedSpy).toHaveBeenCalledWith(true);
       });
 
       it('should handle transferConference error when conference is in progress', async () => {
@@ -2834,9 +2823,9 @@ describe('useCallControl', () => {
             logger: mockLogger,
             featureFlags: store.featureFlags,
             deviceType: store.deviceType,
-            consultInitiated: false,
             isMuted: false,
             multiPartyConferenceEnabled: true,
+            agentId: 'test-agent-id',
           })
         );
 
@@ -2894,9 +2883,9 @@ describe('useCallControl', () => {
             logger: mockLogger,
             featureFlags: store.featureFlags,
             deviceType: store.deviceType,
-            consultInitiated: false,
             isMuted: false,
             multiPartyConferenceEnabled: true,
+            agentId: 'test-agent-id',
           })
         );
 
@@ -2937,9 +2926,9 @@ describe('useCallControl', () => {
             logger: mockLogger,
             featureFlags: store.featureFlags,
             deviceType: store.deviceType,
-            consultInitiated: false,
             isMuted: false,
             multiPartyConferenceEnabled: false,
+            agentId: 'test-agent-id',
           })
         );
 
@@ -2978,9 +2967,9 @@ describe('useCallControl', () => {
             logger: mockLogger,
             featureFlags: store.featureFlags,
             deviceType: store.deviceType,
-            consultInitiated: false,
             isMuted: false,
             multiPartyConferenceEnabled: true,
+            agentId: 'test-agent-id',
           })
         );
 
@@ -3028,11 +3017,11 @@ describe('useCallControl', () => {
           onRecordingToggle,
           onToggleMute,
           logger,
-          consultInitiated: false,
           deviceType: 'BROWSER',
           featureFlags: {webRtcEnabled: true},
           isMuted: false,
           multiPartyConferenceEnabled: true,
+          agentId: 'test-agent-id',
         })
       );
 
@@ -3061,11 +3050,11 @@ describe('useCallControl', () => {
           onRecordingToggle,
           onToggleMute,
           logger,
-          consultInitiated: false,
           deviceType: 'BROWSER',
           featureFlags: {webRtcEnabled: true},
           isMuted: false,
           multiPartyConferenceEnabled: true,
+          agentId: 'test-agent-id',
         })
       );
 
@@ -3102,11 +3091,11 @@ describe('useCallControl', () => {
           onRecordingToggle,
           onToggleMute,
           logger,
-          consultInitiated: false,
           deviceType: 'BROWSER',
           featureFlags: {webRtcEnabled: true},
           isMuted: false,
           multiPartyConferenceEnabled: true,
+          agentId: 'test-agent-id',
         })
       );
 
@@ -3135,11 +3124,11 @@ describe('useCallControl', () => {
           onRecordingToggle,
           onToggleMute,
           logger,
-          consultInitiated: false,
           deviceType: 'BROWSER',
           featureFlags: {webRtcEnabled: true},
           isMuted: false,
           multiPartyConferenceEnabled: true,
+          agentId: 'test-agent-id',
         })
       );
 

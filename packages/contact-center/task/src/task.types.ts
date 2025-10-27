@@ -27,13 +27,7 @@ export type CallControlProps = Partial<
 
 export type useCallControlProps = Pick<
   ControlProps,
-  | 'currentTask'
-  | 'logger'
-  | 'consultInitiated'
-  | 'deviceType'
-  | 'featureFlags'
-  | 'isMuted'
-  | 'multiPartyConferenceEnabled'
+  'currentTask' | 'logger' | 'deviceType' | 'featureFlags' | 'isMuted' | 'multiPartyConferenceEnabled' | 'agentId'
 > &
   Partial<Pick<ControlProps, 'onHoldResume' | 'onEnd' | 'onWrapUp' | 'onRecordingToggle' | 'onToggleMute'>>;
 

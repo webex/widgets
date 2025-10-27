@@ -57,6 +57,29 @@ describe('CallControlConsultComponent', () => {
   const mockOnTransfer = jest.fn();
   const mockEndConsultCall = jest.fn();
   const mockOnToggleConsultMute = jest.fn();
+  const mockConsultConference = jest.fn();
+
+  const mockControlVisibility = {
+    accept: {isVisible: true, isEnabled: true},
+    decline: {isVisible: true, isEnabled: true},
+    end: {isVisible: true, isEnabled: true},
+    muteUnmute: {isVisible: true, isEnabled: true},
+    holdResume: {isVisible: true, isEnabled: true},
+    consult: {isVisible: true, isEnabled: true},
+    transfer: {isVisible: true, isEnabled: true},
+    conference: {isVisible: true, isEnabled: true},
+    wrapup: {isVisible: false, isEnabled: false},
+    pauseResumeRecording: {isVisible: true, isEnabled: true},
+    endConsult: {isVisible: true, isEnabled: true},
+    recordingIndicator: {isVisible: true, isEnabled: true},
+    exitConference: {isVisible: false, isEnabled: false},
+    mergeConference: {isVisible: true, isEnabled: true},
+    consultTransfer: {isVisible: true, isEnabled: true},
+    isConferenceInProgress: false,
+    isConsultInitiatedOrAccepted: false,
+    hideCallControls: false,
+    isHeld: false,
+  };
 
   const defaultProps = {
     agentName: 'Alice',
@@ -64,12 +87,10 @@ describe('CallControlConsultComponent', () => {
     onTransfer: mockOnTransfer,
     endConsultCall: mockEndConsultCall,
     onToggleConsultMute: mockOnToggleConsultMute,
-    consultCompleted: true,
-    isAgentBeingConsulted: true,
-    isEndConsultEnabled: true,
+    consultConference: mockConsultConference,
     logger: loggerMock,
-    muteUnmute: true,
     isMuted: false,
+    controlVisibility: mockControlVisibility,
   };
 
   beforeEach(() => {
@@ -163,7 +184,13 @@ describe('CallControlConsultComponent', () => {
   });
 
   it('conditionally renders buttons based on props', async () => {
-    const propsWithoutMute = {...defaultProps, muteUnmute: false};
+    const propsWithoutMute = {
+      ...defaultProps,
+      controlVisibility: {
+        ...mockControlVisibility,
+        muteUnmute: {isVisible: false, isEnabled: false},
+      },
+    };
     const screen = await render(<CallControlConsultComponent {...propsWithoutMute} />);
 
     // Mute button should not be rendered when muteUnmute is false
@@ -225,10 +252,16 @@ describe('CallControlConsultComponent', () => {
   });
 
   it('tests button disabled states and tooltips', async () => {
-    const propsWithIncompleteConsult = {...defaultProps, consultCompleted: false};
+    const propsWithIncompleteConsult = {
+      ...defaultProps,
+      controlVisibility: {
+        ...mockControlVisibility,
+        consultTransfer: {isVisible: true, isEnabled: false},
+      },
+    };
     const screen = await render(<CallControlConsultComponent {...propsWithIncompleteConsult} />);
 
-    // Transfer button should be disabled when consultCompleted is false
+    // Transfer button should be disabled
     const transferButton = screen.getByTestId('transfer-consult-btn');
     expect(transferButton).toHaveAttribute('data-disabled', 'true');
     expect(transferButton).toHaveAttribute('disabled', '');

@@ -579,7 +579,7 @@ describe('storeEventsWrapper', () => {
       expect(mockTask2.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_CONSULT_QUEUE_CANCELLED, expect.any(Function));
       expect(mockTask2.on).toHaveBeenCalledWith(TASK_EVENTS.AGENT_WRAPPEDUP, expect.any(Function));
       expect(mockTask2.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_HOLD, storeWrapper.refreshTaskList);
-      expect(mockTask2.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_UNHOLD, storeWrapper.refreshTaskList);
+      expect(mockTask2.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_RESUME, storeWrapper.refreshTaskList);
     });
 
     it('should handle consulting i.e handleIncomingTask with the task already present in the taskList', () => {
@@ -758,7 +758,7 @@ describe('storeEventsWrapper', () => {
       expect(mockTask.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function));
       expect(mockTask.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));
       expect(mockTask.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_HOLD, storeWrapper.refreshTaskList);
-      expect(mockTask.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_UNHOLD, storeWrapper.refreshTaskList);
+      expect(mockTask.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_RESUME, storeWrapper.refreshTaskList);
 
       expect(refreshTaskListSpy).toHaveBeenCalledWith();
       expect(setCurrentTaskSpy).toHaveBeenCalledWith(null);
@@ -1234,7 +1234,7 @@ describe('storeEventsWrapper', () => {
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.AGENT_WRAPPEDUP, expect.any(Function));
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_REJECT, expect.any(Function));
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_HOLD, storeWrapper.refreshTaskList);
-      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_UNHOLD, storeWrapper.refreshTaskList);
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_RESUME, storeWrapper.refreshTaskList);
 
       act(() => {
         const mockWrapupCb = mockTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.AGENT_WRAPPEDUP)[1];

@@ -1,5 +1,6 @@
 import {BuddyDetails, ContactServiceQueue, ILogger} from '@webex/cc-store';
 import {MUTE_CALL, UNMUTE_CALL} from '../../constants';
+import {ControlVisibility} from '../../task.types';
 
 /**
  * Interface for button configuration
@@ -27,11 +28,7 @@ export interface ListItemData {
  */
 export const createConsultButtons = (
   isMuted: boolean,
-  isMuteDisabled: boolean,
-  consultCompleted: boolean,
-  isAgentBeingConsulted: boolean,
-  isEndConsultEnabled: boolean,
-  muteUnmute: boolean,
+  controlVisibility: ControlVisibility,
   onTransfer?: () => void,
   handleConsultMuteToggle?: () => void,
   handleEndConsult?: () => void,
@@ -46,8 +43,8 @@ export const createConsultButtons = (
         onClick: handleConsultMuteToggle || (() => {}),
         tooltip: isMuted ? UNMUTE_CALL : MUTE_CALL,
         className: `${isMuted ? 'call-control-button-muted' : 'call-control-button'}`,
-        disabled: isMuteDisabled,
-        shouldShow: muteUnmute,
+        disabled: !controlVisibility.muteUnmute.isEnabled,
+        shouldShow: controlVisibility.muteUnmute.isVisible,
       },
       {
         key: 'transfer',
@@ -55,8 +52,8 @@ export const createConsultButtons = (
         tooltip: 'Transfer Consult',
         onClick: onTransfer || (() => {}),
         className: 'call-control-button',
-        disabled: !consultCompleted,
-        shouldShow: isAgentBeingConsulted && !!onTransfer,
+        disabled: !controlVisibility.consultTransfer.isEnabled,
+        shouldShow: controlVisibility.consultTransfer.isVisible && !!onTransfer,
       },
       {
         key: 'conference',
@@ -64,8 +61,8 @@ export const createConsultButtons = (
         tooltip: 'Consult Conference',
         onClick: handleConsultConferencePress || (() => {}),
         className: 'call-control-button',
-        disabled: !consultCompleted,
-        shouldShow: isAgentBeingConsulted && !!handleConsultConferencePress,
+        disabled: !controlVisibility.mergeConference.isEnabled,
+        shouldShow: controlVisibility.mergeConference.isVisible && !!handleConsultConferencePress,
       },
       {
         key: 'cancel',
@@ -73,7 +70,7 @@ export const createConsultButtons = (
         tooltip: 'End Consult',
         onClick: handleEndConsult || (() => {}),
         className: 'call-control-consult-button-cancel',
-        shouldShow: isEndConsultEnabled || isAgentBeingConsulted,
+        shouldShow: controlVisibility.endConsult.isVisible && !!handleEndConsult,
       },
     ];
   } catch (error) {
@@ -195,13 +192,7 @@ export const handleConsultConferencePress = (consultConference: (() => void) | u
 /**
  * Handles mute toggle with disabled state management
  */
-export const handleMuteToggle = (
-  onToggleConsultMute: (() => void) | undefined,
-  setIsMuteDisabled: (disabled: boolean) => void,
-  logger: ILogger
-): void => {
-  setIsMuteDisabled(true);
-
+export const handleMuteToggle = (onToggleConsultMute: (() => void) | undefined, logger: ILogger): void => {
   try {
     if (onToggleConsultMute) {
       onToggleConsultMute();
@@ -213,9 +204,7 @@ export const handleMuteToggle = (
     });
   } finally {
     // Re-enable button after operation
-    setTimeout(() => {
-      setIsMuteDisabled(false);
-    }, 500);
+    setTimeout(() => {}, 500);
   }
 };
 

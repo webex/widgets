@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React from 'react';
 import {ButtonCircle, TooltipNext, Text} from '@momentum-ui/react-collaboration';
 import {Avatar, Icon} from '@momentum-design/components/dist/react';
 import TaskTimer from '../../TaskTimer';
@@ -20,16 +20,11 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
   onTransfer,
   endConsultCall,
   consultConference,
-  consultCompleted,
-  isAgentBeingConsulted,
-  isEndConsultEnabled,
   logger,
-  muteUnmute,
   isMuted,
+  controlVisibility,
   onToggleConsultMute,
 }) => {
-  const [isMuteDisabled, setIsMuteDisabled] = useState(false);
-
   const timerKey = createTimerKey(startTimeStamp);
 
   const handleTransfer = () => {
@@ -41,7 +36,7 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
   };
 
   const handleConsultMuteToggle = () => {
-    handleMuteToggle(onToggleConsultMute, setIsMuteDisabled, logger);
+    handleMuteToggle(onToggleConsultMute, logger);
   };
 
   const handleConsultConference = () => {
@@ -50,11 +45,7 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
 
   const buttons = createConsultButtons(
     isMuted,
-    isMuteDisabled,
-    consultCompleted,
-    isAgentBeingConsulted,
-    isEndConsultEnabled,
-    muteUnmute,
+    controlVisibility,
     onTransfer ? handleTransfer : undefined,
     handleConsultMuteToggle,
     handleEndConsult,
@@ -73,7 +64,7 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
             {agentName}
           </Text>
           <Text tagName="p" type="body-secondary" className="consult-sub-text">
-            {getConsultStatusText(consultCompleted)}&nbsp;&bull;&nbsp;
+            {getConsultStatusText(controlVisibility.isConsultInitiatedOrAccepted)}&nbsp;&bull;&nbsp;
             <TaskTimer key={timerKey} startTimeStamp={startTimeStamp} />
           </Text>
         </div>

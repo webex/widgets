@@ -32,22 +32,28 @@ describe('getControlsVisibility', () => {
     };
     // Updating
     const expectedControls = {
-      accept: true,
-      decline: true,
-      end: true,
-      muteUnmute: true,
-      holdResume: true,
-      consult: true,
-      transfer: true,
-      conference: true,
-      wrapup: false,
-      pauseResumeRecording: true,
-      endConsult: true,
-      recordingIndicator: true,
+      accept: {isVisible: true, isEnabled: true},
+      decline: {isVisible: true, isEnabled: true},
+      end: {isVisible: true, isEnabled: true},
+      muteUnmute: {isVisible: true, isEnabled: true},
+      holdResume: {isVisible: true, isEnabled: true},
+      consult: {isVisible: true, isEnabled: true},
+      transfer: {isVisible: true, isEnabled: true},
+      conference: {isVisible: true, isEnabled: true},
+      wrapup: {isVisible: false, isEnabled: true},
+      pauseResumeRecording: {isVisible: true, isEnabled: true},
+      endConsult: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
+      consultTransfer: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
+      mergeConference: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
+      exitConference: {isVisible: false, isEnabled: true}, // Not visible when no conference in progress
+      recordingIndicator: {isVisible: true, isEnabled: true},
       isConferenceInProgress: false,
+      isConsultInitiatedOrAccepted: false,
+      hideCallControls: false,
+      isHeld: false,
     };
 
-    expect(getControlsVisibility(deviceType, featureFlags, mockTask)).toEqual(expectedControls);
+    expect(getControlsVisibility(deviceType, featureFlags, mockTask, 'agent1')).toEqual(expectedControls);
   });
 
   it('should show correct controls when station logis is BROWSER, webRtcEnabled is disbaled and media type is telehphony', () => {
@@ -59,22 +65,28 @@ describe('getControlsVisibility', () => {
     };
 
     const expectedControls = {
-      accept: false,
-      decline: false,
-      end: true,
-      muteUnmute: false,
-      holdResume: false,
-      consult: false,
-      transfer: false,
-      conference: false,
-      wrapup: false,
-      pauseResumeRecording: false,
-      endConsult: false,
-      recordingIndicator: true,
+      accept: {isVisible: false, isEnabled: true},
+      decline: {isVisible: false, isEnabled: true},
+      end: {isVisible: true, isEnabled: true},
+      muteUnmute: {isVisible: false, isEnabled: true},
+      holdResume: {isVisible: false, isEnabled: true},
+      consult: {isVisible: false, isEnabled: true},
+      transfer: {isVisible: false, isEnabled: true},
+      conference: {isVisible: false, isEnabled: true},
+      wrapup: {isVisible: false, isEnabled: true},
+      pauseResumeRecording: {isVisible: false, isEnabled: true},
+      endConsult: {isVisible: false, isEnabled: true},
+      consultTransfer: {isVisible: false, isEnabled: true},
+      mergeConference: {isVisible: false, isEnabled: true},
+      exitConference: {isVisible: false, isEnabled: true},
+      recordingIndicator: {isVisible: true, isEnabled: true},
       isConferenceInProgress: false,
+      isConsultInitiatedOrAccepted: false,
+      hideCallControls: false,
+      isHeld: false,
     };
 
-    expect(getControlsVisibility(deviceType, featureFlags, mockTask)).toEqual(expectedControls);
+    expect(getControlsVisibility(deviceType, featureFlags, mockTask, 'agent1')).toEqual(expectedControls);
   });
 
   it('should show correct controls when station logis is BROWSER, isEndCallEnabled is disbaled and media type is telehphony', () => {
@@ -86,22 +98,28 @@ describe('getControlsVisibility', () => {
     };
 
     const expectedControls = {
-      accept: true,
-      decline: true,
-      end: true,
-      muteUnmute: true,
-      holdResume: true,
-      consult: true,
-      transfer: true,
-      conference: true,
-      wrapup: false,
-      pauseResumeRecording: true,
-      endConsult: true,
-      recordingIndicator: true,
+      accept: {isVisible: true, isEnabled: true},
+      decline: {isVisible: true, isEnabled: true},
+      end: {isVisible: true, isEnabled: true},
+      muteUnmute: {isVisible: true, isEnabled: true},
+      holdResume: {isVisible: true, isEnabled: true},
+      consult: {isVisible: true, isEnabled: true},
+      transfer: {isVisible: true, isEnabled: true},
+      conference: {isVisible: true, isEnabled: true},
+      wrapup: {isVisible: false, isEnabled: true},
+      pauseResumeRecording: {isVisible: true, isEnabled: true},
+      endConsult: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
+      consultTransfer: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
+      mergeConference: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
+      exitConference: {isVisible: false, isEnabled: true}, // Not visible when no conference in progress
+      recordingIndicator: {isVisible: true, isEnabled: true},
       isConferenceInProgress: false,
+      isConsultInitiatedOrAccepted: false,
+      hideCallControls: false,
+      isHeld: false,
     };
 
-    expect(getControlsVisibility(deviceType, featureFlags, mockTask)).toEqual(expectedControls);
+    expect(getControlsVisibility(deviceType, featureFlags, mockTask, 'agent1')).toEqual(expectedControls);
   });
 
   it('should show correct controls when station logis is BROWSER, isEndConsultEnabled is disbaled and media type is telehphony', () => {
@@ -119,22 +137,28 @@ describe('getControlsVisibility', () => {
     };
 
     const expectedControls = {
-      accept: true,
-      decline: true,
-      end: true,
-      muteUnmute: true,
-      holdResume: true,
-      consult: true,
-      transfer: true,
-      conference: true,
-      wrapup: false,
-      pauseResumeRecording: true,
-      endConsult: false,
-      recordingIndicator: true,
+      accept: {isVisible: true, isEnabled: true},
+      decline: {isVisible: true, isEnabled: true},
+      end: {isVisible: true, isEnabled: true},
+      muteUnmute: {isVisible: true, isEnabled: true},
+      holdResume: {isVisible: true, isEnabled: true},
+      consult: {isVisible: true, isEnabled: true},
+      transfer: {isVisible: true, isEnabled: true},
+      conference: {isVisible: true, isEnabled: true},
+      wrapup: {isVisible: false, isEnabled: true},
+      pauseResumeRecording: {isVisible: true, isEnabled: true},
+      endConsult: {isVisible: false, isEnabled: true}, // Not visible when isEndConsultEnabled is false
+      consultTransfer: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
+      mergeConference: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
+      exitConference: {isVisible: false, isEnabled: true}, // Not visible when no conference in progress
+      recordingIndicator: {isVisible: true, isEnabled: true},
       isConferenceInProgress: false,
+      isConsultInitiatedOrAccepted: false,
+      hideCallControls: false,
+      isHeld: false,
     };
 
-    expect(getControlsVisibility(deviceType, featureFlags, task)).toEqual(expectedControls);
+    expect(getControlsVisibility(deviceType, featureFlags, task, 'agent1')).toEqual(expectedControls);
   });
 
   it('should show correct controls when station logis is AGENT_DN, all flags are enabled and media type is telehphony', () => {
@@ -146,22 +170,28 @@ describe('getControlsVisibility', () => {
     };
 
     const expectedControls = {
-      accept: false,
-      decline: false,
-      end: true,
-      muteUnmute: false,
-      holdResume: true,
-      consult: true,
-      transfer: true,
-      conference: false,
-      wrapup: false,
-      pauseResumeRecording: true,
-      endConsult: true,
-      recordingIndicator: true,
+      accept: {isVisible: false, isEnabled: true},
+      decline: {isVisible: false, isEnabled: true},
+      end: {isVisible: true, isEnabled: true},
+      muteUnmute: {isVisible: false, isEnabled: true},
+      holdResume: {isVisible: true, isEnabled: true},
+      consult: {isVisible: true, isEnabled: true},
+      transfer: {isVisible: true, isEnabled: true},
+      conference: {isVisible: false, isEnabled: true},
+      wrapup: {isVisible: false, isEnabled: true},
+      pauseResumeRecording: {isVisible: true, isEnabled: true},
+      endConsult: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
+      consultTransfer: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
+      mergeConference: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
+      exitConference: {isVisible: false, isEnabled: true}, // Not visible when no conference in progress
+      recordingIndicator: {isVisible: true, isEnabled: true},
       isConferenceInProgress: false,
+      isConsultInitiatedOrAccepted: false,
+      hideCallControls: false,
+      isHeld: false,
     };
 
-    expect(getControlsVisibility(deviceType, featureFlags, mockTask)).toEqual(expectedControls);
+    expect(getControlsVisibility(deviceType, featureFlags, mockTask, 'agent1')).toEqual(expectedControls);
   });
 
   it('should show correct controls when station logis is EXTENSION, all flags are enabled and media type is telehphony', () => {
@@ -176,22 +206,28 @@ describe('getControlsVisibility', () => {
     task.data.interaction.mediaType = 'telephony';
 
     const expectedControls = {
-      accept: false,
-      decline: false,
-      end: true,
-      muteUnmute: false,
-      holdResume: true,
-      consult: true,
-      transfer: true,
-      conference: false,
-      wrapup: false,
-      pauseResumeRecording: true,
-      endConsult: true,
-      recordingIndicator: true,
+      accept: {isVisible: false, isEnabled: true},
+      decline: {isVisible: false, isEnabled: true},
+      end: {isVisible: true, isEnabled: true},
+      muteUnmute: {isVisible: false, isEnabled: true},
+      holdResume: {isVisible: true, isEnabled: true},
+      consult: {isVisible: true, isEnabled: true},
+      transfer: {isVisible: true, isEnabled: true},
+      conference: {isVisible: false, isEnabled: true},
+      wrapup: {isVisible: false, isEnabled: true},
+      pauseResumeRecording: {isVisible: true, isEnabled: true},
+      endConsult: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
+      consultTransfer: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
+      mergeConference: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
+      exitConference: {isVisible: false, isEnabled: true}, // Not visible when no conference in progress
+      recordingIndicator: {isVisible: true, isEnabled: true},
       isConferenceInProgress: false,
+      isConsultInitiatedOrAccepted: false,
+      hideCallControls: false,
+      isHeld: false,
     };
 
-    expect(getControlsVisibility(deviceType, featureFlags, task)).toEqual(expectedControls);
+    expect(getControlsVisibility(deviceType, featureFlags, task, 'agent1')).toEqual(expectedControls);
   });
 
   it('should show correct controls when station logis is EXTENSION, all flags are enabled and media type is chat', () => {
@@ -206,22 +242,28 @@ describe('getControlsVisibility', () => {
     task.data.interaction.mediaType = 'chat';
 
     const expectedControls = {
-      accept: true,
-      decline: false,
-      end: true,
-      muteUnmute: false,
-      holdResume: false,
-      consult: false,
-      transfer: true,
-      conference: true,
-      wrapup: false,
-      pauseResumeRecording: false,
-      endConsult: false,
-      recordingIndicator: false,
+      accept: {isVisible: true, isEnabled: true},
+      decline: {isVisible: false, isEnabled: true},
+      end: {isVisible: true, isEnabled: true},
+      muteUnmute: {isVisible: false, isEnabled: true},
+      holdResume: {isVisible: false, isEnabled: true},
+      consult: {isVisible: false, isEnabled: true},
+      transfer: {isVisible: true, isEnabled: true},
+      conference: {isVisible: true, isEnabled: true},
+      wrapup: {isVisible: false, isEnabled: true},
+      pauseResumeRecording: {isVisible: false, isEnabled: true},
+      endConsult: {isVisible: false, isEnabled: true},
+      consultTransfer: {isVisible: false, isEnabled: true},
+      mergeConference: {isVisible: false, isEnabled: true},
+      exitConference: {isVisible: false, isEnabled: true},
+      recordingIndicator: {isVisible: false, isEnabled: true},
       isConferenceInProgress: false,
+      isConsultInitiatedOrAccepted: false,
+      hideCallControls: false,
+      isHeld: false,
     };
 
-    expect(getControlsVisibility(deviceType, featureFlags, task)).toEqual(expectedControls);
+    expect(getControlsVisibility(deviceType, featureFlags, task, 'agent1')).toEqual(expectedControls);
   });
 
   it('should show correct controls when station logis is BROWSER, all flags are enabled and media type is email', () => {
@@ -236,22 +278,28 @@ describe('getControlsVisibility', () => {
     task.data.interaction.mediaType = 'email';
 
     const expectedControls = {
-      accept: true,
-      decline: false,
-      end: true,
-      muteUnmute: false,
-      holdResume: false,
-      consult: false,
-      transfer: true,
-      conference: false,
-      wrapup: false,
-      pauseResumeRecording: false,
-      endConsult: false,
-      recordingIndicator: false,
+      accept: {isVisible: true, isEnabled: true},
+      decline: {isVisible: false, isEnabled: true},
+      end: {isVisible: true, isEnabled: true},
+      muteUnmute: {isVisible: false, isEnabled: true},
+      holdResume: {isVisible: false, isEnabled: true},
+      consult: {isVisible: false, isEnabled: true},
+      transfer: {isVisible: true, isEnabled: true},
+      conference: {isVisible: false, isEnabled: true},
+      wrapup: {isVisible: false, isEnabled: true},
+      pauseResumeRecording: {isVisible: false, isEnabled: true},
+      endConsult: {isVisible: false, isEnabled: true},
+      consultTransfer: {isVisible: false, isEnabled: true},
+      mergeConference: {isVisible: false, isEnabled: true},
+      exitConference: {isVisible: false, isEnabled: true},
+      recordingIndicator: {isVisible: false, isEnabled: true},
       isConferenceInProgress: false,
+      isConsultInitiatedOrAccepted: false,
+      hideCallControls: false,
+      isHeld: false,
     };
 
-    expect(getControlsVisibility(deviceType, featureFlags, task)).toEqual(expectedControls);
+    expect(getControlsVisibility(deviceType, featureFlags, task, 'agent1')).toEqual(expectedControls);
   });
 
   it('should handle errors when accessing featureFlags and return safe defaults', () => {
@@ -273,7 +321,7 @@ describe('getControlsVisibility', () => {
       }
     );
 
-    const result = getControlsVisibility(deviceType, problematicFeatureFlags, mockTask, logger);
+    const result = getControlsVisibility(deviceType, problematicFeatureFlags, mockTask, 'agent1', logger);
 
     expect(logger.error).toHaveBeenCalledWith(
       'CC-Widgets: Task: Error in getControlsVisibility - FeatureFlags access error',
@@ -284,19 +332,25 @@ describe('getControlsVisibility', () => {
     );
 
     expect(result).toEqual({
-      accept: false,
-      decline: false,
-      end: false,
-      muteUnmute: false,
-      holdResume: false,
-      consult: false,
-      transfer: false,
-      conference: false,
-      wrapup: false,
-      pauseResumeRecording: false,
-      endConsult: false,
-      recordingIndicator: false,
+      accept: {isVisible: false, isEnabled: false},
+      decline: {isVisible: false, isEnabled: false},
+      end: {isVisible: false, isEnabled: false},
+      muteUnmute: {isVisible: false, isEnabled: false},
+      holdResume: {isVisible: false, isEnabled: false},
+      consult: {isVisible: false, isEnabled: false},
+      transfer: {isVisible: false, isEnabled: false},
+      conference: {isVisible: false, isEnabled: false},
+      wrapup: {isVisible: false, isEnabled: true},
+      pauseResumeRecording: {isVisible: false, isEnabled: false},
+      endConsult: {isVisible: false, isEnabled: false},
+      consultTransfer: {isVisible: false, isEnabled: false},
+      mergeConference: {isVisible: false, isEnabled: false},
+      exitConference: {isVisible: false, isEnabled: false},
+      recordingIndicator: {isVisible: false, isEnabled: false},
       isConferenceInProgress: false,
+      isConsultInitiatedOrAccepted: false,
+      hideCallControls: false,
+      isHeld: false,
     });
   });
 });

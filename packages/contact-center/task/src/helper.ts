@@ -1,13 +1,7 @@
 import {useEffect, useCallback, useState, useRef, useMemo} from 'react';
 import {ITask} from '@webex/contact-center';
 import {useCallControlProps, UseTaskListProps, UseTaskProps, useOutdialCallProps} from './task.types';
-import store, {
-  TASK_EVENTS,
-  BuddyDetails,
-  DestinationType,
-  ContactServiceQueue,
-  PaginatedListParams,
-} from '@webex/cc-store';
+import store, {TASK_EVENTS, BuddyDetails, DestinationType, PaginatedListParams} from '@webex/cc-store';
 import {Participant} from '@webex/cc-components';
 import {
   findHoldTimestamp,
@@ -282,18 +276,15 @@ export const useCallControl = (props: useCallControlProps) => {
     onRecordingToggle,
     onToggleMute,
     logger,
-    consultInitiated,
     deviceType,
     featureFlags,
     isMuted,
     multiPartyConferenceEnabled,
+    agentId,
   } = props;
-  const [isHeld, setIsHeld] = useState<boolean | undefined>(undefined);
   const [isRecording, setIsRecording] = useState(true);
   const [buddyAgents, setBuddyAgents] = useState<BuddyDetails[]>([]);
-  const [queues, setQueues] = useState<ContactServiceQueue[]>([]);
   const [consultAgentName, setConsultAgentName] = useState<string>('Consult Agent');
-  const [consultAgentId, setConsultAgentId] = useState<string>(null);
   const [holdTime, setHoldTime] = useState(0);
   const [startTimestamp, setStartTimestamp] = useState<number>(0);
   const [secondsUntilAutoWrapup, setsecondsUntilAutoWrapup] = useState<number | null>(null);
@@ -392,7 +383,6 @@ export const useCallControl = (props: useCallControlProps) => {
 
       if (foundAgent) {
         setConsultAgentName(foundAgent.name);
-        setConsultAgentId(foundAgent.id);
         logger.info(`Consulting agent detected: ${foundAgent.name} ${foundAgent.id}`, {
           module: 'widget-cc-task#helper.ts',
           method: 'useCallControl#extractConsultingAgent',
@@ -405,7 +395,7 @@ export const useCallControl = (props: useCallControlProps) => {
         method: 'extractConsultingAgent',
       });
     }
-  }, [currentTask, logger, consultInitiated]);
+  }, [currentTask, logger]);
 
   // Check for consulting agent whenever currentTask changes
   useEffect(() => {
@@ -417,7 +407,7 @@ export const useCallControl = (props: useCallControlProps) => {
     ) {
       setStartTimestamp(currentTask.data.interaction.participants[store.cc.agentConfig.agentId].joinTimestamp);
     }
-  }, [currentTask, extractConsultingAgent, consultInitiated]);
+  }, [currentTask, extractConsultingAgent]);
 
   const loadBuddyAgents = useCallback(async () => {
     try {
@@ -430,19 +420,6 @@ export const useCallControl = (props: useCallControlProps) => {
         method: 'loadBuddyAgents',
       });
       setBuddyAgents([]);
-    }
-  }, [logger]);
-
-  const loadQueues = useCallback(async () => {
-    try {
-      const {data} = await store.getQueues();
-      setQueues(data);
-    } catch (error) {
-      logger?.error(`CC-Widgets: Task: Error loading queues - ${error.message || error}`, {
-        module: 'useCallControl',
-        method: 'loadQueues',
-      });
-      setQueues([]);
     }
   }, [logger]);
 
@@ -494,7 +471,6 @@ export const useCallControl = (props: useCallControlProps) => {
 
   const holdCallback = () => {
     try {
-      setIsHeld(true);
       if (onHoldResume) {
         onHoldResume({
           isHeld: true,
@@ -511,7 +487,6 @@ export const useCallControl = (props: useCallControlProps) => {
 
   const resumeCallback = () => {
     try {
-      setIsHeld(false);
       if (onHoldResume) {
         onHoldResume({
           isHeld: false,
@@ -799,7 +774,6 @@ export const useCallControl = (props: useCallControlProps) => {
     if (destinationType === 'queue') {
       store.setIsQueueConsultInProgress(true);
       store.setCurrentConsultQueueId(consultDestination);
-      store.setConsultInitiated(true);
     }
 
     try {
@@ -807,14 +781,11 @@ export const useCallControl = (props: useCallControlProps) => {
       store.setIsQueueConsultInProgress(false);
       if (destinationType === 'queue') {
         store.setCurrentConsultQueueId(null);
-      } else {
-        store.setConsultInitiated(true);
       }
     } catch (error) {
       if (destinationType === 'queue') {
         store.setIsQueueConsultInProgress(false);
         store.setCurrentConsultQueueId(null);
-        store.setConsultInitiated(false);
       }
       logError(`Error consulting call: ${error}`, 'consultCall');
       throw error;
@@ -848,7 +819,6 @@ export const useCallControl = (props: useCallControlProps) => {
         logger.info('Consult transfer initiated', {module: 'useCallControl', method: 'consultTransfer'});
         await currentTask.consultTransfer();
       }
-      store.setConsultInitiated(true);
     } catch (error) {
       logError(`Error transferring consult call: ${error}`, 'consultTransfer');
       throw error;
@@ -864,8 +834,8 @@ export const useCallControl = (props: useCallControlProps) => {
   };
 
   const controlVisibility = useMemo(
-    () => getControlsVisibility(deviceType, featureFlags, currentTask, logger),
-    [deviceType, featureFlags, currentTask, logger]
+    () => getControlsVisibility(deviceType, featureFlags, currentTask, agentId, logger),
+    [deviceType, featureFlags, currentTask, agentId, logger]
   );
 
   // Add useEffect for auto wrap-up timer
@@ -917,14 +887,10 @@ export const useCallControl = (props: useCallControlProps) => {
     toggleMute,
     isMuted,
     wrapupCall,
-    isHeld,
-    setIsHeld,
     isRecording,
     setIsRecording,
     buddyAgents,
     loadBuddyAgents,
-    queues,
-    loadQueues,
     transferCall,
     consultCall,
     endConsultCall,
@@ -933,8 +899,6 @@ export const useCallControl = (props: useCallControlProps) => {
     exitConference,
     consultAgentName,
     setConsultAgentName,
-    consultAgentId,
-    setConsultAgentId,
     holdTime,
     startTimestamp,
     lastTargetType,

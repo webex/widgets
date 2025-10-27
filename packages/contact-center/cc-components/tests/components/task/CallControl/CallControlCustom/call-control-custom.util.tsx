@@ -48,31 +48,42 @@ describe('Call Control Custom Utils', () => {
     jest.clearAllMocks();
   });
 
-  describe('createConsultButtons', () => {
-    const defaultParams = {
-      isMuted: false,
-      isMuteDisabled: false,
-      consultCompleted: true,
-      isAgentBeingConsulted: true,
-      isEndConsultEnabled: true,
-      muteUnmute: true,
-    };
+  const mockControlVisibility = {
+    accept: {isVisible: true, isEnabled: true},
+    decline: {isVisible: true, isEnabled: true},
+    end: {isVisible: true, isEnabled: true},
+    muteUnmute: {isVisible: true, isEnabled: true},
+    holdResume: {isVisible: true, isEnabled: true},
+    consult: {isVisible: true, isEnabled: true},
+    transfer: {isVisible: true, isEnabled: true},
+    conference: {isVisible: true, isEnabled: true},
+    wrapup: {isVisible: false, isEnabled: false},
+    pauseResumeRecording: {isVisible: true, isEnabled: true},
+    endConsult: {isVisible: true, isEnabled: true},
+    recordingIndicator: {isVisible: true, isEnabled: true},
+    exitConference: {isVisible: false, isEnabled: false},
+    mergeConference: {isVisible: false, isEnabled: false},
+    consultTransfer: {isVisible: false, isEnabled: false},
+    isConferenceInProgress: false,
+    isConsultInitiatedOrAccepted: false,
+    hideCallControls: false,
+    isHeld: false,
+  };
 
+  describe('createConsultButtons', () => {
     it('should create button configuration array with all buttons visible', () => {
       const mockTransfer = jest.fn();
       const mockMuteToggle = jest.fn();
       const mockEndConsult = jest.fn();
+      const mockConsultConference = jest.fn();
 
       const buttons = createConsultButtons(
-        defaultParams.isMuted,
-        defaultParams.isMuteDisabled,
-        defaultParams.consultCompleted,
-        defaultParams.isAgentBeingConsulted,
-        defaultParams.isEndConsultEnabled,
-        defaultParams.muteUnmute,
+        false, // isMuted
+        mockControlVisibility,
         mockTransfer,
         mockMuteToggle,
-        mockEndConsult
+        mockEndConsult,
+        mockConsultConference
       );
 
       expect(buttons).toHaveLength(4);
@@ -85,11 +96,7 @@ describe('Call Control Custom Utils', () => {
     it('should configure mute button correctly when muted', () => {
       const buttons = createConsultButtons(
         true, // isMuted
-        false,
-        defaultParams.consultCompleted,
-        defaultParams.isAgentBeingConsulted,
-        defaultParams.isEndConsultEnabled,
-        defaultParams.muteUnmute
+        mockControlVisibility
       );
 
       const muteButton = buttons.find((b) => b.key === 'mute');
@@ -101,11 +108,7 @@ describe('Call Control Custom Utils', () => {
     it('should configure mute button correctly when not muted', () => {
       const buttons = createConsultButtons(
         false, // isMuted
-        false,
-        defaultParams.consultCompleted,
-        defaultParams.isAgentBeingConsulted,
-        defaultParams.isEndConsultEnabled,
-        defaultParams.muteUnmute
+        mockControlVisibility
       );
 
       const muteButton = buttons.find((b) => b.key === 'mute');
@@ -115,13 +118,10 @@ describe('Call Control Custom Utils', () => {
     });
 
     it('should disable transfer button when consult not completed', () => {
+      const customVisibility = {...mockControlVisibility, consultTransfer: {isVisible: false, isEnabled: false}};
       const buttons = createConsultButtons(
-        defaultParams.isMuted,
-        defaultParams.isMuteDisabled,
-        false, // consultCompleted
-        defaultParams.isAgentBeingConsulted,
-        defaultParams.isEndConsultEnabled,
-        defaultParams.muteUnmute
+        false, // isMuted
+        customVisibility
       );
 
       const transferButton = buttons.find((b) => b.key === 'transfer');
@@ -129,13 +129,10 @@ describe('Call Control Custom Utils', () => {
     });
 
     it('should hide transfer button when not agent being consulted or no onTransfer', () => {
+      const customVisibility = {...mockControlVisibility, consultTransfer: {isVisible: false, isEnabled: false}};
       const buttons = createConsultButtons(
-        defaultParams.isMuted,
-        defaultParams.isMuteDisabled,
-        defaultParams.consultCompleted,
-        false, // isAgentBeingConsulted
-        defaultParams.isEndConsultEnabled,
-        defaultParams.muteUnmute
+        false, // isMuted
+        customVisibility
       );
 
       const transferButton = buttons.find((b) => b.key === 'transfer');
@@ -143,13 +140,10 @@ describe('Call Control Custom Utils', () => {
     });
 
     it('should hide mute button when muteUnmute is false', () => {
+      const customVisibility = {...mockControlVisibility, muteUnmute: {isVisible: false, isEnabled: false}};
       const buttons = createConsultButtons(
-        defaultParams.isMuted,
-        defaultParams.isMuteDisabled,
-        defaultParams.consultCompleted,
-        defaultParams.isAgentBeingConsulted,
-        defaultParams.isEndConsultEnabled,
-        false // muteUnmute
+        false, // isMuted
+        customVisibility
       );
 
       const muteButton = buttons.find((b) => b.key === 'mute');
@@ -281,43 +275,29 @@ describe('Call Control Custom Utils', () => {
 
     it('should disable button, call toggle, and re-enable after timeout', () => {
       const mockToggleMute = jest.fn();
-      const mockSetDisabled = jest.fn();
 
-      handleMuteToggle(mockToggleMute, mockSetDisabled, loggerMock);
+      handleMuteToggle(mockToggleMute, loggerMock);
 
-      expect(mockSetDisabled).toHaveBeenCalledWith(true);
       expect(mockToggleMute).toHaveBeenCalled();
-
-      jest.advanceTimersByTime(500);
-
-      expect(mockSetDisabled).toHaveBeenCalledWith(false);
     });
 
     it('should handle error and still re-enable button', () => {
       const mockToggleMute = jest.fn(() => {
         throw new Error('Mute failed');
       });
-      const mockSetDisabled = jest.fn();
 
-      handleMuteToggle(mockToggleMute, mockSetDisabled, loggerMock);
+      handleMuteToggle(mockToggleMute, loggerMock);
 
       expect(loggerMock.error).toHaveBeenCalledWith('Mute toggle failed: Error: Mute failed', {
         module: 'call-control-consult.tsx',
         method: 'handleConsultMuteToggle',
       });
-
-      jest.advanceTimersByTime(500);
-      expect(mockSetDisabled).toHaveBeenCalledWith(false);
     });
 
     it('should not call toggle when not provided', () => {
-      const mockSetDisabled = jest.fn();
-
       expect(() => {
-        handleMuteToggle(undefined, mockSetDisabled, loggerMock);
+        handleMuteToggle(undefined, loggerMock);
       }).not.toThrow();
-
-      expect(mockSetDisabled).toHaveBeenCalledWith(true);
     });
   });
 

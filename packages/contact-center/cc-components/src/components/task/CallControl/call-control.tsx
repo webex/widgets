@@ -42,8 +42,6 @@ function CallControlComponent(props: CallControlComponentProps) {
     endCall,
     wrapupCall,
     wrapupCodes,
-    isHeld,
-    setIsHeld,
     isRecording,
     setIsRecording,
     buddyAgents,
@@ -51,18 +49,14 @@ function CallControlComponent(props: CallControlComponentProps) {
     transferCall,
     consultCall,
     exitConference,
-    consultInitiated,
-    consultAccepted,
     callControlAudio,
     setConsultAgentName,
-    setConsultAgentId,
     allowConsultToQueue,
     setLastTargetType,
     controlVisibility,
     logger,
     secondsUntilAutoWrapup,
     cancelAutoWrapup,
-    isConsultButtonDisabled,
     getAddressBookEntries,
     getEntryPoints,
     getQueuesFetcher,
@@ -70,11 +64,11 @@ function CallControlComponent(props: CallControlComponentProps) {
   } = props;
 
   useEffect(() => {
-    updateCallStateFromTask(currentTask, setIsHeld, setIsRecording, logger);
+    updateCallStateFromTask(currentTask, setIsRecording, logger);
   }, [currentTask, logger]);
 
   const handletoggleHold = () => {
-    handleToggleHoldUtil(isHeld, toggleHold, setIsHeld, logger);
+    handleToggleHoldUtil(controlVisibility.isHeld, toggleHold, logger);
   };
 
   const handleMuteToggle = () => {
@@ -110,7 +104,6 @@ function CallControlComponent(props: CallControlComponentProps) {
       agentMenuType,
       consultCall,
       transferCall,
-      setConsultAgentId,
       setConsultAgentName,
       setLastTargetType,
       logger
@@ -128,10 +121,8 @@ function CallControlComponent(props: CallControlComponentProps) {
 
   const buttons = buildCallControlButtons(
     isMuted,
-    isHeld,
     isRecording,
     isMuteButtonDisabled,
-    isConsultButtonDisabled,
     currentMediaType,
     controlVisibility,
     handleMuteToggle,
@@ -142,7 +133,12 @@ function CallControlComponent(props: CallControlComponentProps) {
     logger
   );
 
-  const filteredButtons = filterButtonsForConsultation(buttons, consultInitiated, isTelephony, logger);
+  const filteredButtons = filterButtonsForConsultation(
+    buttons,
+    controlVisibility.isConsultInitiatedOrAccepted,
+    isTelephony,
+    logger
+  );
 
   if (!currentTask) return null;
 
@@ -154,7 +150,7 @@ function CallControlComponent(props: CallControlComponentProps) {
         autoPlay
       ></audio>
       <div className="call-control-container" data-testid="call-control-container">
-        {!(consultAccepted && isTelephony) && !controlVisibility.wrapup && (
+        {!controlVisibility.hideCallControls && !controlVisibility.wrapup.isVisible && (
           <div className="button-group">
             {filteredButtons.map((button, index) => {
               if (!button.isVisible) return null;
@@ -198,7 +194,9 @@ function CallControlComponent(props: CallControlComponentProps) {
                           <ButtonCircle
                             className={button.className}
                             aria-label={button.tooltip}
-                            disabled={button.disabled || (consultInitiated && isTelephony)}
+                            disabled={
+                              button.disabled || (controlVisibility.isConsultInitiatedOrAccepted && isTelephony)
+                            }
                             data-testid={button.dataTestId}
                           >
                             <Icon className={button.className + '-icon'} name={button.icon} />
@@ -259,11 +257,13 @@ function CallControlComponent(props: CallControlComponentProps) {
                     <ButtonCircle
                       className={
                         button.className +
-                        (button.disabled || (consultInitiated && isTelephony) ? ` ${button.className}-disabled` : '')
+                        (button.disabled || (controlVisibility.isConsultInitiatedOrAccepted && isTelephony)
+                          ? ` ${button.className}-disabled`
+                          : '')
                       }
                       data-testid={button.dataTestId}
                       onPress={button.onClick}
-                      disabled={button.disabled || (consultInitiated && isTelephony)}
+                      disabled={button.disabled || (controlVisibility.isConsultInitiatedOrAccepted && isTelephony)}
                       aria-label={button.tooltip}
                     >
                       <Icon className={button.className + '-icon'} name={button.icon} />
@@ -282,7 +282,7 @@ function CallControlComponent(props: CallControlComponentProps) {
             })}
           </div>
         )}
-        {controlVisibility.wrapup && (
+        {controlVisibility.wrapup.isVisible && (
           <div className="wrapup-group">
             <PopoverNext
               color="primary"

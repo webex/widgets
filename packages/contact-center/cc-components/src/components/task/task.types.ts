@@ -340,17 +340,6 @@ export interface ControlProps {
   callControlAudio: MediaStream | null;
 
   /**
-   * ID of the consulting agent
-   */
-  consultAgentId: string;
-
-  /**
-   * Function to set the consulting agent ID
-   * @param agentId - The ID of the consulting agent.
-   */
-  setConsultAgentId: (agentId: string) => void;
-
-  /**
    * Name of the consulting agent.
    */
   consultAgentName: string;
@@ -421,21 +410,7 @@ export interface ControlProps {
    */
   setLastTargetType: (targetType: 'queue' | 'agent') => void;
 
-  controlVisibility: {
-    accept: boolean;
-    decline: boolean;
-    end: boolean;
-    muteUnmute: boolean;
-    holdResume: boolean;
-    consult: boolean;
-    transfer: boolean;
-    conference: boolean;
-    wrapup: boolean;
-    pauseResumeRecording: boolean;
-    endConsult: boolean;
-    recordingIndicator: boolean;
-    isConferenceInProgress: boolean;
-  };
+  controlVisibility: ControlVisibility;
 
   secondsUntilAutoWrapup?: number;
 
@@ -466,6 +441,11 @@ export interface ControlProps {
    * Options to configure consult/transfer popover behavior.
    */
   consultTransferOptions?: ConsultTransferOptions;
+
+  /**
+   * Agent ID of the logged-in user
+   */
+  agentId: string;
 }
 
 export type CallControlComponentProps = Pick<
@@ -478,8 +458,6 @@ export type CallControlComponentProps = Pick<
   | 'isMuted'
   | 'endCall'
   | 'wrapupCall'
-  | 'isHeld'
-  | 'setIsHeld'
   | 'isRecording'
   | 'setIsRecording'
   | 'buddyAgents'
@@ -489,23 +467,15 @@ export type CallControlComponentProps = Pick<
   | 'consultConference'
   | 'exitConference'
   | 'endConsultCall'
-  | 'consultInitiated'
   | 'consultTransfer'
-  | 'consultCompleted'
-  | 'consultAccepted'
   | 'consultStartTimeStamp'
   | 'callControlAudio'
   | 'consultAgentName'
   | 'setConsultAgentName'
-  | 'consultAgentId'
-  | 'setConsultAgentId'
   | 'holdTime'
   | 'callControlClassName'
   | 'callControlConsultClassName'
   | 'startTimestamp'
-  | 'queues'
-  | 'loadQueues'
-  | 'isEndConsultEnabled'
   | 'allowConsultToQueue'
   | 'lastTargetType'
   | 'setLastTargetType'
@@ -617,12 +587,9 @@ export interface CallControlConsultComponentsProps {
   onTransfer?: () => void;
   endConsultCall?: () => void;
   consultConference?: () => void;
-  consultCompleted: boolean;
-  isAgentBeingConsulted: boolean;
-  isEndConsultEnabled: boolean;
   logger: ILogger;
-  muteUnmute: boolean;
   isMuted: boolean;
+  controlVisibility: ControlVisibility;
   onToggleConsultMute?: () => void;
 }
 
@@ -670,20 +637,30 @@ export interface CallControlButton {
   dataTestId?: string;
 }
 
+export type Visibility = {
+  isVisible: boolean;
+  isEnabled: boolean;
+};
 export interface ControlVisibility {
-  accept: boolean;
-  decline: boolean;
-  end: boolean;
-  muteUnmute: boolean;
-  holdResume: boolean;
-  consult: boolean;
-  transfer: boolean;
-  conference: boolean;
-  wrapup: boolean;
-  pauseResumeRecording: boolean;
-  endConsult: boolean;
-  recordingIndicator: boolean;
+  accept: Visibility;
+  decline: Visibility;
+  end: Visibility;
+  muteUnmute: Visibility;
+  holdResume: Visibility;
+  consult: Visibility;
+  transfer: Visibility;
+  conference: Visibility;
+  wrapup: Visibility;
+  pauseResumeRecording: Visibility;
+  endConsult: Visibility;
+  recordingIndicator: Visibility;
+  exitConference: Visibility;
+  mergeConference: Visibility;
+  consultTransfer: Visibility;
   isConferenceInProgress: boolean;
+  isConsultInitiatedOrAccepted: boolean;
+  hideCallControls: boolean;
+  isHeld: boolean;
 }
 
 export interface MediaTypeInfo {
