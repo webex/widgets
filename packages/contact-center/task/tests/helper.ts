@@ -2845,7 +2845,7 @@ describe('useCallControl', () => {
       });
     });
 
-    describe('isConsultButtonDisabled with conference participants', () => {
+    describe('consult button disabled via controlVisibility with conference participants', () => {
       it('should disable consult button when max participants reached in multi-party conference', () => {
         const taskWithMaxParticipants = {
           ...mockCurrentTask,
@@ -2890,7 +2890,7 @@ describe('useCallControl', () => {
         );
 
         // Should be disabled when 7 other agents (8 total - current agent = 7 >= 7 max)
-        expect(result.current.isConsultButtonDisabled).toBe(true);
+        expect(result.current.controlVisibility.consult.isEnabled).toBe(false);
       });
 
       it('should disable consult button when max participants reached in three-party conference', () => {
@@ -2933,7 +2933,7 @@ describe('useCallControl', () => {
         );
 
         // Should be disabled when 3 other agents (4 total - current agent = 3 >= 3 max for three-party)
-        expect(result.current.isConsultButtonDisabled).toBe(true);
+        expect(result.current.controlVisibility.consult.isEnabled).toBe(false);
       });
 
       it('should enable consult button when below max participants', () => {
@@ -2974,7 +2974,7 @@ describe('useCallControl', () => {
         );
 
         // Should be enabled when only 1 other agent (2 - current agent = 1 < 7 max)
-        expect(result.current.isConsultButtonDisabled).toBe(false);
+        expect(result.current.controlVisibility.consult.isEnabled).toBe(true);
       });
     });
   });

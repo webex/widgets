@@ -139,7 +139,6 @@ describe('CallControlCADComponent', () => {
     exitConference: jest.fn(),
     consultConference: jest.fn(),
     conferenceParticipants: [],
-    isConsultButtonDisabled: false,
   };
 
   beforeEach(() => {

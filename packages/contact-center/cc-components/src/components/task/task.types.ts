@@ -424,10 +424,6 @@ export interface ControlProps {
    */
   conferenceParticipants: Participant[];
 
-  /**
-   * Flag to determine if the consult button is disabled.
-   */
-  isConsultButtonDisabled: boolean;
   /** Fetch paginated address book entries for dial numbers */
   getAddressBookEntries?: FetchPaginatedList<AddressBookEntry>;
 
@@ -484,7 +480,6 @@ export type CallControlComponentProps = Pick<
   | 'secondsUntilAutoWrapup'
   | 'cancelAutoWrapup'
   | 'conferenceParticipants'
-  | 'isConsultButtonDisabled'
   | 'getAddressBookEntries'
   | 'getEntryPoints'
   | 'getQueuesFetcher'

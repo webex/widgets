@@ -125,7 +125,6 @@ describe('CallControlComponent Snapshots', () => {
     consultConference: jest.fn(),
     exitConference: jest.fn(),
     conferenceParticipants: [],
-    isConsultButtonDisabled: false,
   };
 
   beforeEach(() => {

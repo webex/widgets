@@ -1,6 +1,12 @@
 import {ILogger} from '@webex/cc-store';
 import {ITask} from '@webex/contact-center';
-import {CUSTOMER, SUPERVISOR, VVA} from './constants';
+import {
+  CUSTOMER,
+  SUPERVISOR,
+  VVA,
+  MAX_PARTICIPANTS_IN_MULTIPARTY_CONFERENCE,
+  MAX_PARTICIPANTS_IN_THREE_PARTY_CONFERENCE,
+} from './constants';
 import {Participant, Visibility} from '@webex/cc-components';
 
 //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
@@ -328,19 +334,35 @@ export function getMuteUnmuteButtonVisibility(deviceType: string, webRtcEnabled:
 /**
  * Get visibility for Hold/Resume button
  */
-export function getHoldResumeButtonVisibility(deviceType: string, webRtcEnabled: boolean, isCall: boolean): Visibility {
+export function getHoldResumeButtonVisibility(
+  deviceType: string,
+  webRtcEnabled: boolean,
+  isCall: boolean,
+  isConferenceInProgress: boolean,
+  isHeld: boolean
+): Visibility {
   const isVisible = isCall && isTelephonySupported(deviceType, webRtcEnabled);
 
-  return {isVisible, isEnabled: true};
+  const isEnabled = !isConferenceInProgress && !isHeld;
+  return {isVisible, isEnabled};
 }
 
 /**
  * Get visibility for Consult button
  */
-export function getConsultButtonVisibility(deviceType: string, webRtcEnabled: boolean, isCall: boolean): Visibility {
+export function getConsultButtonVisibility(
+  deviceType: string,
+  webRtcEnabled: boolean,
+  isCall: boolean,
+  conferenceParticipantsCount: number,
+  maxParticipantsInConference: number
+): Visibility {
   const isVisible = isCall && isTelephonySupported(deviceType, webRtcEnabled);
 
-  return {isVisible, isEnabled: true};
+  // Disable consult button when max participants reached in conference
+  const isEnabled = conferenceParticipantsCount < maxParticipantsInConference;
+
+  return {isVisible, isEnabled};
 }
 
 /**
@@ -385,9 +407,10 @@ export function getWrapupButtonVisibility(task: ITask): Visibility {
 export function getPauseResumeRecordingButtonVisibility(
   deviceType: string,
   webRtcEnabled: boolean,
-  isCall: boolean
+  isCall: boolean,
+  isConferenceInProgress: boolean
 ): Visibility {
-  const isVisible = isCall && isTelephonySupported(deviceType, webRtcEnabled);
+  const isVisible = isCall && isTelephonySupported(deviceType, webRtcEnabled) && !isConferenceInProgress;
 
   return {isVisible, isEnabled: true};
 }
@@ -458,6 +481,7 @@ export function getControlsVisibility(
   featureFlags: {[key: string]: boolean},
   task: ITask,
   agentId: string,
+  multiPartyConferenceEnabled: boolean,
   logger?: ILogger
 ) {
   try {
@@ -474,6 +498,12 @@ export function getControlsVisibility(
     const isConferenceInProgress = task.data.isConferenceInProgress ?? false;
     const isHeld = isInteractionOnHold(task);
 
+    // Calculate conference participants for consult button enable/disable logic
+    const conferenceParticipantsCount = getConferenceParticipantsCount(task);
+    const maxParticipantsInConference = multiPartyConferenceEnabled
+      ? MAX_PARTICIPANTS_IN_MULTIPARTY_CONFERENCE
+      : MAX_PARTICIPANTS_IN_THREE_PARTY_CONFERENCE;
+
     const taskConsultStatus = getConsultStatus(task, agentId);
     // Use dedicated visibility functions for each button
     const controls = {
@@ -488,12 +518,23 @@ export function getControlsVisibility(
         taskConsultStatus
       ),
       muteUnmute: getMuteUnmuteButtonVisibility(deviceType, webRtcEnabled, isCall),
-      holdResume: getHoldResumeButtonVisibility(deviceType, webRtcEnabled, isCall),
-      consult: getConsultButtonVisibility(deviceType, webRtcEnabled, isCall),
+      holdResume: getHoldResumeButtonVisibility(deviceType, webRtcEnabled, isCall, isConferenceInProgress, isHeld),
+      consult: getConsultButtonVisibility(
+        deviceType,
+        webRtcEnabled,
+        isCall,
+        conferenceParticipantsCount,
+        maxParticipantsInConference
+      ),
       transfer: getTransferButtonVisibility(isTransferVisibility, isConferenceInProgress),
       conference: getConferenceButtonVisibility(deviceType, webRtcEnabled, isCall, isChat),
       wrapup: getWrapupButtonVisibility(task),
-      pauseResumeRecording: getPauseResumeRecordingButtonVisibility(deviceType, webRtcEnabled, isCall),
+      pauseResumeRecording: getPauseResumeRecordingButtonVisibility(
+        deviceType,
+        webRtcEnabled,
+        isCall,
+        isConferenceInProgress
+      ),
       endConsult: getEndConsultButtonVisibility(
         isEndConsultEnabled,
         deviceType,

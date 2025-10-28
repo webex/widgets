@@ -171,12 +171,12 @@ export const handleEndConsultPress = (endConsultCall: (() => void) | undefined, 
  * Handles merge consult/conference button press with logging
  */
 export const handleConsultConferencePress = (consultConference: (() => void) | undefined, logger: ILogger): void => {
-  logger.info('CC-Widgets: CallControlConsult: consultConference clicked', {
-    module: 'call-control-consult.tsx',
-    method: 'handleConsultConferencePress',
-  });
-
   try {
+    logger.info('CC-Widgets: CallControlConsult: consultConference clicked', {
+      module: 'call-control-consult.tsx',
+      method: 'handleConsultConferencePress',
+    });
+
     if (consultConference) {
       consultConference();
       logger.log('CC-Widgets: CallControlConsult: consultConference completed', {

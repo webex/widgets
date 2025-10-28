@@ -3,13 +3,7 @@ import {ITask} from '@webex/contact-center';
 import {useCallControlProps, UseTaskListProps, UseTaskProps, useOutdialCallProps} from './task.types';
 import store, {TASK_EVENTS, BuddyDetails, DestinationType, PaginatedListParams} from '@webex/cc-store';
 import {Participant} from '@webex/cc-components';
-import {
-  findHoldTimestamp,
-  getConferenceParticipants,
-  getConferenceParticipantsCount,
-  getControlsVisibility,
-} from './Utils/task-util';
-import {MAX_PARTICIPANTS_IN_MULTIPARTY_CONFERENCE, MAX_PARTICIPANTS_IN_THREE_PARTY_CONFERENCE} from './Utils/constants';
+import {findHoldTimestamp, getConferenceParticipants, getControlsVisibility} from './Utils/task-util';
 import {OutdialAniEntriesResponse} from '@webex/contact-center/dist/types/services/config/types';
 
 const ENGAGED_LABEL = 'ENGAGED';
@@ -291,7 +285,6 @@ export const useCallControl = (props: useCallControlProps) => {
   const workerRef = useRef<Worker | null>(null);
   const [lastTargetType, setLastTargetType] = useState<'agent' | 'queue'>('agent');
   const [conferenceParticipants, setConferenceParticipants] = useState<Participant[]>([]);
-  const [conferenceParticipantsCount, setConferenceParticipantsCount] = useState<number>(0);
 
   const workerScript = `
     let intervalId = null;
@@ -362,7 +355,6 @@ export const useCallControl = (props: useCallControlProps) => {
       const participants = getConferenceParticipants(currentTask, store.cc.agentConfig.agentId);
       setConferenceParticipants(participants);
     }
-    setConferenceParticipantsCount(getConferenceParticipantsCount(currentTask));
   }, [currentTask]);
   // Function to extract consulting agent information
   const extractConsultingAgent = useCallback(() => {
@@ -834,8 +826,8 @@ export const useCallControl = (props: useCallControlProps) => {
   };
 
   const controlVisibility = useMemo(
-    () => getControlsVisibility(deviceType, featureFlags, currentTask, agentId, logger),
-    [deviceType, featureFlags, currentTask, agentId, logger]
+    () => getControlsVisibility(deviceType, featureFlags, currentTask, agentId, multiPartyConferenceEnabled, logger),
+    [deviceType, featureFlags, currentTask, agentId, multiPartyConferenceEnabled, logger]
   );
 
   // Add useEffect for auto wrap-up timer
@@ -874,11 +866,6 @@ export const useCallControl = (props: useCallControlProps) => {
     };
   }, [currentTask?.autoWrapup, controlVisibility?.wrapup]);
 
-  const maxParticipantsInConference = multiPartyConferenceEnabled
-    ? MAX_PARTICIPANTS_IN_MULTIPARTY_CONFERENCE
-    : MAX_PARTICIPANTS_IN_THREE_PARTY_CONFERENCE;
-
-  const isConsultButtonDisabled = conferenceParticipantsCount >= maxParticipantsInConference;
   return {
     currentTask,
     endCall,
@@ -907,7 +894,6 @@ export const useCallControl = (props: useCallControlProps) => {
     secondsUntilAutoWrapup,
     cancelAutoWrapup,
     conferenceParticipants,
-    isConsultButtonDisabled,
     getAddressBookEntries,
     getEntryPoints,
     getQueuesFetcher,
