@@ -115,14 +115,10 @@ interface IStore {
   showMultipleLoginAlert: boolean;
   currentTheme: string;
   customState: ICustomState;
-  consultCompleted: boolean;
-  consultInitiated: boolean;
-  consultAccepted: boolean;
   isQueueConsultInProgress: boolean;
   currentConsultQueueId: string;
   consultStartTimeStamp?: number;
   callControlAudio: MediaStream | null;
-  consultOfferReceived: boolean;
   isEndConsultEnabled: boolean;
   allowConsultToQueue: boolean;
   agentProfile: AgentLoginProfile;
@@ -150,9 +146,6 @@ interface IStoreWrapper extends IStore {
   setIsAgentLoggedIn(value: boolean): void;
   setWrapupCodes(wrapupCodes: IWrapupCode[]): void;
   setState(state: IdleCode | ICustomState): void;
-  setConsultCompleted(value: boolean): void;
-  setConsultInitiated(value: boolean): void;
-  setConsultAccepted(value: boolean): void;
   setConsultStartTimeStamp(timestamp: number): void;
   setAgentProfile(profile: Profile): void;
   setTeamId(id: string): void;
@@ -330,3 +323,13 @@ export {
   LoginOptions,
   ERROR_TRIGGERING_IDLE_CODES,
 };
+
+export enum ConsultStatus {
+  NO_CONSULTATION_IN_PROGRESS = 'No consultation in progress',
+  BEING_CONSULTED = 'beingConsulted',
+  CONSULT_INITIATED = 'consultInitiated',
+  BEING_CONSULTED_ACCEPTED = 'beingConsultedAccepted',
+  CONSULT_ACCEPTED = 'consultAccepted',
+  CONNECTED = 'connected',
+  CONFERENCE = 'conference',
+}

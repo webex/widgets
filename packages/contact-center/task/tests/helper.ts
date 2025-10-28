@@ -3507,3 +3507,931 @@ describe('useOutdialCall', () => {
     });
   });
 });
+
+describe('Task Hook Error Handling and Logging', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
+    logger.error.mockRestore();
+  });
+
+  describe('useTaskList - error scenarios', () => {
+    const mockTaskList = {
+      mockId1: taskMock,
+    };
+
+    it('should handle errors in setTaskRejected callback', () => {
+      const errorOnTaskDeclined = jest.fn().mockImplementation(() => {
+        throw new Error('Test error in onTaskDeclined');
+      });
+
+      store.setTaskRejected = jest.fn((callback) => {
+        store.onTaskRejected = callback;
+      });
+
+      renderHook(() =>
+        useTaskList({
+          cc: mockCC,
+          deviceType: 'BROWSER',
+          onTaskDeclined: errorOnTaskDeclined,
+          logger,
+          taskList: mockTaskList,
+        })
+      );
+
+      act(() => {
+        store.onTaskRejected(taskMock, 'test-reason');
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: Task: Error in taskRejected callback - Test error in onTaskDeclined',
+        {
+          module: 'useTaskList',
+          method: 'setTaskRejected',
+        }
+      );
+    });
+
+    it('should handle errors in useTaskList useEffect setup', () => {
+      const errorLogger = {
+        ...logger,
+        log: jest.fn(),
+        info: jest.fn(),
+        error: jest.fn(),
+      };
+
+      // Force an error during useEffect setup
+      jest.spyOn(store, 'setTaskAssigned').mockImplementation(() => {
+        throw new Error('Setup error');
+      });
+
+      renderHook(() =>
+        useTaskList({
+          cc: mockCC,
+          deviceType: 'BROWSER',
+          onTaskAccepted: jest.fn(),
+          logger: errorLogger,
+          taskList: mockTaskList,
+        })
+      );
+
+      expect(errorLogger.error).toHaveBeenCalledWith('CC-Widgets: Task: Error in useTaskList useEffect - Setup error', {
+        module: 'useTaskList',
+        method: 'useEffect',
+      });
+    });
+
+    it('should handle synchronous errors in declineTask', () => {
+      const errorTask = {
+        ...taskMock,
+        decline: jest.fn().mockImplementation(() => {
+          throw new Error('Decline synchronous error');
+        }),
+      };
+
+      const {result} = renderHook(() =>
+        useTaskList({
+          cc: mockCC,
+          deviceType: 'BROWSER',
+          logger,
+          taskList: mockTaskList,
+        })
+      );
+
+      act(() => {
+        result.current.declineTask(errorTask);
+      });
+
+      expect(logger.error).toHaveBeenCalledWith('CC-Widgets: Task: Error in declineTask - Decline synchronous error', {
+        module: 'useTaskList',
+        method: 'declineTask',
+      });
+    });
+  });
+
+  describe('useIncomingTask - error scenarios', () => {
+    it('should handle errors in taskAssignCallback (consult accepted)', () => {
+      const errorOnAccepted = jest.fn().mockImplementation(() => {
+        throw new Error('Test error in onAccepted for consult');
+      });
+
+      const setTaskCallbackSpy = jest.spyOn(store, 'setTaskCallback');
+
+      renderHook(() =>
+        useIncomingTask({
+          onAccepted: errorOnAccepted,
+          deviceType: 'BROWSER',
+          incomingTask: taskMock,
+          logger,
+        })
+      );
+
+      const consultCallback = setTaskCallbackSpy.mock.calls.find(
+        (call) => call[0] === TASK_EVENTS.TASK_CONSULT_ACCEPTED
+      )?.[1];
+
+      act(() => {
+        consultCallback();
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: Task: Error in taskAssignCallback - Test error in onAccepted for consult',
+        {
+          module: 'useIncomingTask',
+          method: 'taskAssignCallback',
+        }
+      );
+    });
+
+    it('should handle errors in taskRejectCallback', () => {
+      const errorOnRejected = jest.fn().mockImplementation(() => {
+        throw new Error('Test error in onRejected');
+      });
+
+      const setTaskCallbackSpy = jest.spyOn(store, 'setTaskCallback');
+
+      renderHook(() =>
+        useIncomingTask({
+          onRejected: errorOnRejected,
+          deviceType: 'BROWSER',
+          incomingTask: taskMock,
+          logger,
+        })
+      );
+
+      const rejectCallback = setTaskCallbackSpy.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_REJECT)?.[1];
+
+      act(() => {
+        rejectCallback();
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: Task: Error in taskRejectCallback - Test error in onRejected',
+        {
+          module: 'useIncomingTask',
+          method: 'taskRejectCallback',
+        }
+      );
+    });
+
+    it('should handle errors in useIncomingTask cleanup', () => {
+      jest.spyOn(store, 'removeTaskCallback').mockImplementation(() => {
+        throw new Error('Cleanup error');
+      });
+
+      const {unmount} = renderHook(() =>
+        useIncomingTask({
+          onAccepted: jest.fn(),
+          deviceType: 'BROWSER',
+          incomingTask: taskMock,
+          logger,
+        })
+      );
+
+      act(() => {
+        unmount();
+      });
+
+      expect(logger.error).toHaveBeenCalledWith('CC-Widgets: Task: Error in useIncomingTask cleanup - Cleanup error', {
+        module: 'useIncomingTask',
+        method: 'useEffect_cleanup',
+      });
+    });
+
+    it('should handle errors in useIncomingTask useEffect setup', () => {
+      jest.spyOn(store, 'setTaskCallback').mockImplementation(() => {
+        throw new Error('Setup error in useEffect');
+      });
+
+      renderHook(() =>
+        useIncomingTask({
+          onAccepted: jest.fn(),
+          deviceType: 'BROWSER',
+          incomingTask: taskMock,
+          logger,
+        })
+      );
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: Task: Error in useIncomingTask useEffect - Setup error in useEffect',
+        {
+          module: 'useIncomingTask',
+          method: 'useEffect',
+        }
+      );
+    });
+
+    it('should handle synchronous errors in reject', () => {
+      const errorTask = {
+        ...taskMock,
+        decline: jest.fn().mockImplementation(() => {
+          throw new Error('Reject synchronous error');
+        }),
+      };
+
+      const {result} = renderHook(() =>
+        useIncomingTask({
+          incomingTask: errorTask,
+          deviceType: 'BROWSER',
+          logger,
+        })
+      );
+
+      act(() => {
+        result.current.reject();
+      });
+
+      expect(logger.error).toHaveBeenCalledWith('CC-Widgets: Task: Error in reject - Reject synchronous error', {
+        module: 'useIncomingTask',
+        method: 'reject',
+      });
+    });
+  });
+
+  describe('useCallControl - error scenarios', () => {
+    const mockTaskWithInteraction = {
+      ...mockTask,
+      data: {
+        ...mockTask.data,
+        interactionId: 'interaction1',
+        interaction: {
+          participants: {
+            agent1: {
+              id: 'agent1',
+              pType: 'Agent',
+              joinTimestamp: 1234567890,
+            },
+          },
+          mediaType: 'telephony',
+        },
+        isConferenceInProgress: false,
+      },
+      hold: jest.fn().mockResolvedValue(undefined),
+      resume: jest.fn().mockResolvedValue(undefined),
+      end: jest.fn().mockResolvedValue(undefined),
+      wrapup: jest.fn().mockResolvedValue(undefined),
+      pauseRecording: jest.fn().mockResolvedValue(undefined),
+      resumeRecording: jest.fn().mockResolvedValue(undefined),
+      toggleMute: jest.fn().mockResolvedValue(undefined),
+      consult: jest.fn().mockResolvedValue(undefined),
+      endConsult: jest.fn().mockResolvedValue(undefined),
+      consultTransfer: jest.fn().mockResolvedValue(undefined),
+      transfer: jest.fn().mockResolvedValue(undefined),
+      cancelAutoWrapupTimer: jest.fn(),
+    };
+
+    beforeAll(() => {
+      store.store.cc = {
+        ...mockCC,
+        agentConfig: {
+          agentId: 'agent1',
+        },
+      } as IContactCenter;
+    });
+
+    it('should handle errors in resumeCallback', () => {
+      const errorOnHoldResume = jest.fn().mockImplementation(() => {
+        throw new Error('Test error in onHoldResume');
+      });
+
+      const setTaskCallbackSpy = jest.spyOn(store, 'setTaskCallback');
+
+      renderHook(() =>
+        useCallControl({
+          currentTask: mockTaskWithInteraction,
+          onHoldResume: errorOnHoldResume,
+          logger,
+          deviceType: 'BROWSER',
+          featureFlags: {},
+          isMuted: false,
+          multiPartyConferenceEnabled: false,
+          agentId: 'agent1',
+        })
+      );
+
+      const resumeCallback = setTaskCallbackSpy.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_RESUME)?.[1];
+
+      act(() => {
+        resumeCallback();
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: Task: Error in resumeCallback - Test error in onHoldResume',
+        {
+          module: 'useCallControl',
+          method: 'resumeCallback',
+        }
+      );
+    });
+
+    it('should handle errors in endCallCallback', () => {
+      const errorOnEnd = jest.fn().mockImplementation(() => {
+        throw new Error('Test error in onEnd');
+      });
+
+      const setTaskCallbackSpy = jest.spyOn(store, 'setTaskCallback');
+
+      renderHook(() =>
+        useCallControl({
+          currentTask: mockTaskWithInteraction,
+          onEnd: errorOnEnd,
+          logger,
+          deviceType: 'BROWSER',
+          featureFlags: {},
+          isMuted: false,
+          multiPartyConferenceEnabled: false,
+          agentId: 'agent1',
+        })
+      );
+
+      const endCallback = setTaskCallbackSpy.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_END)?.[1];
+
+      act(() => {
+        endCallback();
+      });
+
+      expect(logger.error).toHaveBeenCalledWith('CC-Widgets: Task: Error in endCallCallback - Test error in onEnd', {
+        module: 'useCallControl',
+        method: 'endCallCallback',
+      });
+    });
+
+    it('should handle errors in wrapupCallCallback', () => {
+      const errorOnWrapUp = jest.fn().mockImplementation(() => {
+        throw new Error('Test error in onWrapUp');
+      });
+
+      const setTaskCallbackSpy = jest.spyOn(store, 'setTaskCallback');
+
+      renderHook(() =>
+        useCallControl({
+          currentTask: mockTaskWithInteraction,
+          onWrapUp: errorOnWrapUp,
+          logger,
+          deviceType: 'BROWSER',
+          featureFlags: {},
+          isMuted: false,
+          multiPartyConferenceEnabled: false,
+          agentId: 'agent1',
+        })
+      );
+
+      const wrapupCallback = setTaskCallbackSpy.mock.calls.find((call) => call[0] === TASK_EVENTS.AGENT_WRAPPEDUP)?.[1];
+
+      act(() => {
+        wrapupCallback({wrapUpAuxCodeId: '123'});
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: Task: Error in wrapupCallCallback - Test error in onWrapUp',
+        {
+          module: 'useCallControl',
+          method: 'wrapupCallCallback',
+        }
+      );
+    });
+
+    it('should handle errors in pauseRecordingCallback', () => {
+      const errorOnRecordingToggle = jest.fn().mockImplementation(() => {
+        throw new Error('Test error in pauseRecording');
+      });
+
+      const setTaskCallbackSpy = jest.spyOn(store, 'setTaskCallback');
+
+      renderHook(() =>
+        useCallControl({
+          currentTask: mockTaskWithInteraction,
+          onRecordingToggle: errorOnRecordingToggle,
+          logger,
+          deviceType: 'BROWSER',
+          featureFlags: {},
+          isMuted: false,
+          multiPartyConferenceEnabled: false,
+          agentId: 'agent1',
+        })
+      );
+
+      const pauseCallback = setTaskCallbackSpy.mock.calls.find(
+        (call) => call[0] === TASK_EVENTS.TASK_RECORDING_PAUSED
+      )?.[1];
+
+      act(() => {
+        pauseCallback();
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: Task: Error in pauseRecordingCallback - Test error in pauseRecording',
+        {
+          module: 'useCallControl',
+          method: 'pauseRecordingCallback',
+        }
+      );
+    });
+
+    it('should handle errors in resumeRecordingCallback', () => {
+      const errorOnRecordingToggle = jest.fn().mockImplementation(() => {
+        throw new Error('Test error in resumeRecording');
+      });
+
+      const setTaskCallbackSpy = jest.spyOn(store, 'setTaskCallback');
+
+      renderHook(() =>
+        useCallControl({
+          currentTask: mockTaskWithInteraction,
+          onRecordingToggle: errorOnRecordingToggle,
+          logger,
+          deviceType: 'BROWSER',
+          featureFlags: {},
+          isMuted: false,
+          multiPartyConferenceEnabled: false,
+          agentId: 'agent1',
+        })
+      );
+
+      const resumeCallback = setTaskCallbackSpy.mock.calls.find(
+        (call) => call[0] === TASK_EVENTS.TASK_RECORDING_RESUMED
+      )?.[1];
+
+      act(() => {
+        resumeCallback();
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: Task: Error in resumeRecordingCallback - Test error in resumeRecording',
+        {
+          module: 'useCallControl',
+          method: 'resumeRecordingCallback',
+        }
+      );
+    });
+
+    it('should handle synchronous errors in toggleRecording', () => {
+      const errorTask = {
+        ...mockTaskWithInteraction,
+        pauseRecording: jest.fn().mockImplementation(() => {
+          throw new Error('toggleRecording synchronous error');
+        }),
+      };
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: errorTask,
+          logger,
+          deviceType: 'BROWSER',
+          featureFlags: {},
+          isMuted: false,
+          multiPartyConferenceEnabled: false,
+          agentId: 'agent1',
+        })
+      );
+
+      act(() => {
+        result.current.toggleRecording();
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: Task: Error in toggleRecording - toggleRecording synchronous error',
+        {
+          module: 'useCallControl',
+          method: 'toggleRecording',
+        }
+      );
+    });
+
+    it('should handle synchronous errors in toggleMute', () => {
+      mockGetControlsVisibility.mockReturnValue({
+        muteUnmute: {isVisible: true, isEnabled: true},
+        holdResume: {isVisible: true, isEnabled: true},
+        transfer: {isVisible: true, isEnabled: true},
+        consult: {isVisible: true, isEnabled: true},
+        end: {isVisible: true, isEnabled: true},
+        accept: {isVisible: true, isEnabled: true},
+        decline: {isVisible: true, isEnabled: true},
+        pauseResumeRecording: {isVisible: true, isEnabled: true},
+        recordingIndicator: {isVisible: true, isEnabled: true},
+        wrapup: {isVisible: false, isEnabled: false},
+        endConsult: {isVisible: false, isEnabled: false},
+        conference: {isVisible: false, isEnabled: false},
+        consultTransfer: {isVisible: false, isEnabled: false},
+        mergeConference: {isVisible: false, isEnabled: false},
+        exitConference: {isVisible: false, isEnabled: false},
+        isConferenceInProgress: false,
+        isConsultInitiatedOrAccepted: false,
+        hideCallControls: false,
+        isHeld: false,
+      });
+
+      const errorTask = {
+        ...mockTaskWithInteraction,
+        toggleMute: jest.fn().mockImplementation(() => {
+          throw new Error('toggleMute synchronous error');
+        }),
+      };
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: errorTask,
+          logger,
+          deviceType: 'BROWSER',
+          featureFlags: {},
+          isMuted: false,
+          multiPartyConferenceEnabled: false,
+          agentId: 'agent1',
+        })
+      );
+
+      act(() => {
+        result.current.toggleMute();
+      });
+
+      expect(logger.error).toHaveBeenCalledWith('toggleMute failed: Error: toggleMute synchronous error', {
+        module: 'useCallControl',
+        method: 'toggleMute',
+      });
+    });
+
+    it('should handle synchronous errors in endCall', () => {
+      const errorTask = {
+        ...mockTaskWithInteraction,
+        end: jest.fn().mockImplementation(() => {
+          throw new Error('endCall synchronous error');
+        }),
+      };
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: errorTask,
+          logger,
+          deviceType: 'BROWSER',
+          featureFlags: {},
+          isMuted: false,
+          multiPartyConferenceEnabled: false,
+          agentId: 'agent1',
+        })
+      );
+
+      act(() => {
+        result.current.endCall();
+      });
+
+      expect(logger.error).toHaveBeenCalledWith('CC-Widgets: Task: Error in endCall - endCall synchronous error', {
+        module: 'useCallControl',
+        method: 'endCall',
+      });
+    });
+
+    it('should handle synchronous errors in wrapupCall', () => {
+      const errorTask = {
+        ...mockTaskWithInteraction,
+        wrapup: jest.fn().mockImplementation(() => {
+          throw new Error('wrapupCall synchronous error');
+        }),
+      };
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: errorTask,
+          logger,
+          deviceType: 'BROWSER',
+          featureFlags: {},
+          isMuted: false,
+          multiPartyConferenceEnabled: false,
+          agentId: 'agent1',
+        })
+      );
+
+      act(() => {
+        result.current.wrapupCall('test reason', '123');
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: Task: Error in wrapupCall - wrapupCall synchronous error',
+        {
+          module: 'useCallControl',
+          method: 'wrapupCall',
+        }
+      );
+    });
+
+    it('should handle errors in getAddressBookEntries', async () => {
+      store.getAddressBookEntries = jest.fn().mockRejectedValue(new Error('Address book error'));
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: mockTaskWithInteraction,
+          logger,
+          deviceType: 'BROWSER',
+          featureFlags: {},
+          isMuted: false,
+          multiPartyConferenceEnabled: false,
+          agentId: 'agent1',
+        })
+      );
+
+      let response;
+      await act(async () => {
+        response = await result.current.getAddressBookEntries({page: 0, pageSize: 10, search: ''});
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: Task: Error fetching address book entries - Address book error',
+        {
+          module: 'useCallControl',
+          method: 'getAddressBookEntries',
+        }
+      );
+      expect(response).toEqual({data: [], meta: {page: 0, totalPages: 0}});
+    });
+
+    it('should handle errors in getEntryPoints', async () => {
+      store.getEntryPoints = jest.fn().mockRejectedValue(new Error('Entry points error'));
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: mockTaskWithInteraction,
+          logger,
+          deviceType: 'BROWSER',
+          featureFlags: {},
+          isMuted: false,
+          multiPartyConferenceEnabled: false,
+          agentId: 'agent1',
+        })
+      );
+
+      let response;
+      await act(async () => {
+        response = await result.current.getEntryPoints({page: 0, pageSize: 10, search: ''});
+      });
+
+      expect(logger.error).toHaveBeenCalledWith('CC-Widgets: Task: Error fetching entry points - Entry points error', {
+        module: 'useCallControl',
+        method: 'getEntryPoints',
+      });
+      expect(response).toEqual({data: [], meta: {page: 0, totalPages: 0}});
+    });
+
+    it('should handle errors in getQueuesFetcher', async () => {
+      store.getQueues = jest.fn().mockRejectedValue(new Error('Queues error'));
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: mockTaskWithInteraction,
+          logger,
+          deviceType: 'BROWSER',
+          featureFlags: {},
+          isMuted: false,
+          multiPartyConferenceEnabled: false,
+          agentId: 'agent1',
+        })
+      );
+
+      let response;
+      await act(async () => {
+        response = await result.current.getQueuesFetcher({page: 0, pageSize: 10, search: ''});
+      });
+
+      expect(logger.error).toHaveBeenCalledWith('CC-Widgets: Task: Error fetching queues (paginated) - Queues error', {
+        module: 'useCallControl',
+        method: 'getQueuesFetcher',
+      });
+      expect(response).toEqual({data: [], meta: {page: 0, totalPages: 0}});
+    });
+
+    it('should set startTimestamp when conditions are met', () => {
+      const taskWithJoinTimestamp = {
+        ...mockTaskWithInteraction,
+        data: {
+          ...mockTaskWithInteraction.data,
+          interaction: {
+            ...mockTaskWithInteraction.data.interaction,
+            participants: {
+              agent1: {
+                id: 'agent1',
+                pType: 'Agent',
+                joinTimestamp: 9999999999,
+              },
+            },
+          },
+        },
+      };
+
+      store.store.cc = {
+        ...mockCC,
+        agentConfig: {
+          agentId: 'agent1',
+        },
+      } as IContactCenter;
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: taskWithJoinTimestamp,
+          logger,
+          deviceType: 'BROWSER',
+          featureFlags: {},
+          isMuted: false,
+          multiPartyConferenceEnabled: false,
+          agentId: 'agent1',
+        })
+      );
+
+      expect(result.current.startTimestamp).toBe(9999999999);
+    });
+
+    it('should handle errors in auto wrapup timer initialization', () => {
+      const mockAutoWrapup = {
+        getTimeLeftSeconds: jest.fn().mockImplementation(() => {
+          throw new Error('Auto wrapup timer error');
+        }),
+      };
+
+      mockGetControlsVisibility.mockReturnValue({
+        muteUnmute: {isVisible: true, isEnabled: true},
+        holdResume: {isVisible: true, isEnabled: true},
+        transfer: {isVisible: true, isEnabled: true},
+        consult: {isVisible: true, isEnabled: true},
+        end: {isVisible: true, isEnabled: true},
+        accept: {isVisible: true, isEnabled: true},
+        decline: {isVisible: true, isEnabled: true},
+        pauseResumeRecording: {isVisible: true, isEnabled: true},
+        recordingIndicator: {isVisible: true, isEnabled: true},
+        wrapup: {isVisible: true, isEnabled: true},
+        endConsult: {isVisible: false, isEnabled: false},
+        conference: {isVisible: false, isEnabled: false},
+        consultTransfer: {isVisible: false, isEnabled: false},
+        mergeConference: {isVisible: false, isEnabled: false},
+        exitConference: {isVisible: false, isEnabled: false},
+        isConferenceInProgress: false,
+        isConsultInitiatedOrAccepted: false,
+        hideCallControls: false,
+        isHeld: false,
+      });
+
+      const taskWithAutoWrapup = {
+        ...mockTaskWithInteraction,
+        autoWrapup: mockAutoWrapup,
+      };
+
+      renderHook(() =>
+        useCallControl({
+          currentTask: taskWithAutoWrapup,
+          logger,
+          deviceType: 'BROWSER',
+          featureFlags: {},
+          isMuted: false,
+          multiPartyConferenceEnabled: false,
+          agentId: 'agent1',
+        })
+      );
+
+      expect(logger.error).toHaveBeenCalledWith('CC-Widgets: CallControl: Error initializing auto wrap-up timer', {
+        module: 'widget-cc-task#helper.ts',
+        method: 'useCallControl#autoWrapupTimer',
+        error: expect.any(Error),
+      });
+    });
+
+    it('should clear interval on unmount for auto wrapup timer', () => {
+      jest.useFakeTimers();
+      const clearIntervalSpy = jest.spyOn(global, 'clearInterval');
+
+      const mockAutoWrapup = {
+        getTimeLeftSeconds: jest.fn().mockReturnValue(30),
+      };
+
+      mockGetControlsVisibility.mockReturnValue({
+        muteUnmute: {isVisible: true, isEnabled: true},
+        holdResume: {isVisible: true, isEnabled: true},
+        transfer: {isVisible: true, isEnabled: true},
+        consult: {isVisible: true, isEnabled: true},
+        end: {isVisible: true, isEnabled: true},
+        accept: {isVisible: true, isEnabled: true},
+        decline: {isVisible: true, isEnabled: true},
+        pauseResumeRecording: {isVisible: true, isEnabled: true},
+        recordingIndicator: {isVisible: true, isEnabled: true},
+        wrapup: {isVisible: true, isEnabled: true},
+        endConsult: {isVisible: false, isEnabled: false},
+        conference: {isVisible: false, isEnabled: false},
+        consultTransfer: {isVisible: false, isEnabled: false},
+        mergeConference: {isVisible: false, isEnabled: false},
+        exitConference: {isVisible: false, isEnabled: false},
+        isConferenceInProgress: false,
+        isConsultInitiatedOrAccepted: false,
+        hideCallControls: false,
+        isHeld: false,
+      });
+
+      const taskWithAutoWrapup = {
+        ...mockTaskWithInteraction,
+        autoWrapup: mockAutoWrapup,
+      };
+
+      const {unmount} = renderHook(() =>
+        useCallControl({
+          currentTask: taskWithAutoWrapup,
+          logger,
+          deviceType: 'BROWSER',
+          featureFlags: {},
+          isMuted: false,
+          multiPartyConferenceEnabled: false,
+          agentId: 'agent1',
+        })
+      );
+
+      act(() => {
+        unmount();
+      });
+
+      expect(clearIntervalSpy).toHaveBeenCalled();
+      jest.useRealTimers();
+    });
+
+    it('should handle worker cleanup with non-function postMessage', () => {
+      const mockTaskWithHold = {
+        ...mockTaskWithInteraction,
+        data: {
+          ...mockTaskWithInteraction.data,
+          interaction: {
+            ...mockTaskWithInteraction.data.interaction,
+            callProcessingDetails: {
+              mainCall: {
+                events: [{type: 'Hold', eventTime: Date.now() - 5000}],
+              },
+            },
+          },
+        },
+      };
+
+      // Mock Worker with non-function postMessage
+      const mockWorker = {
+        postMessage: undefined,
+        terminate: jest.fn(),
+        onmessage: null,
+      };
+
+      global.Worker = jest.fn().mockImplementation(() => mockWorker);
+      global.URL.createObjectURL = jest.fn().mockReturnValue('blob:mock');
+
+      const {unmount} = renderHook(() =>
+        useCallControl({
+          currentTask: mockTaskWithHold,
+          logger,
+          deviceType: 'BROWSER',
+          featureFlags: {},
+          isMuted: false,
+          multiPartyConferenceEnabled: false,
+          agentId: 'agent1',
+        })
+      );
+
+      act(() => {
+        unmount();
+      });
+
+      // Should not throw error when postMessage is not a function
+      // Test passes if no error is thrown during unmount
+    });
+
+    it('should handle worker cleanup with non-function terminate', () => {
+      const mockTaskWithHold = {
+        ...mockTaskWithInteraction,
+        data: {
+          ...mockTaskWithInteraction.data,
+          interaction: {
+            ...mockTaskWithInteraction.data.interaction,
+            callProcessingDetails: {
+              mainCall: {
+                events: [{type: 'Hold', eventTime: Date.now() - 5000}],
+              },
+            },
+          },
+        },
+      };
+
+      // Mock Worker with non-function terminate
+      const mockWorker = {
+        postMessage: jest.fn(),
+        terminate: undefined,
+        onmessage: null,
+      };
+
+      global.Worker = jest.fn().mockImplementation(() => mockWorker);
+      global.URL.createObjectURL = jest.fn().mockReturnValue('blob:mock');
+
+      const {unmount} = renderHook(() =>
+        useCallControl({
+          currentTask: mockTaskWithHold,
+          logger,
+          deviceType: 'BROWSER',
+          featureFlags: {},
+          isMuted: false,
+          multiPartyConferenceEnabled: false,
+          agentId: 'agent1',
+        })
+      );
+
+      act(() => {
+        unmount();
+      });
+    });
+  });
+});

@@ -314,21 +314,6 @@ export interface ControlProps {
   consultTransfer: () => void;
 
   /**
-   * Flag to determine if the consult call is connecting.
-   */
-  consultInitiated: boolean;
-
-  /**
-   * Flag to determine if the consult call is connecting.
-   */
-  consultCompleted: boolean;
-
-  /**
-   * Flag to determine if the consult call is accepted.
-   */
-  consultAccepted: boolean;
-
-  /**
    * Timestamp when the consult call started.
    */
   consultStartTimeStamp?: number;

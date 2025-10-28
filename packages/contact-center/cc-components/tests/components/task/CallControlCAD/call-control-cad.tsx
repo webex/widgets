@@ -221,7 +221,6 @@ describe('CallControlCADComponent', () => {
     // Test consultation functionality for telephony
     const consultProps = {
       ...defaultProps,
-      consultAccepted: true,
       consultAgentName: 'Consult Agent',
       consultStartTimeStamp: Date.now(),
       controlVisibility: {
@@ -248,7 +247,6 @@ describe('CallControlCADComponent', () => {
           },
         },
       },
-      consultAccepted: true,
     };
     const chatConsultScreen = render(<CallControlCADComponent {...chatConsultProps} />);
     const chatConsultContainer = chatConsultScreen.container.querySelector('.call-control-consult-container');
@@ -266,7 +264,6 @@ describe('CallControlCADComponent', () => {
         isHeld: true,
       },
       isRecording: true,
-      consultAccepted: true,
     };
     const screen = render(<CallControlCADComponent {...wrapupProps} />);
 
@@ -317,7 +314,6 @@ describe('CallControlCADComponent', () => {
       ...defaultProps,
       callControlClassName: 'custom-call-control',
       callControlConsultClassName: 'custom-consult-control',
-      consultAccepted: true,
       controlVisibility: {
         ...mockControlVisibility,
         isConsultInitiatedOrAccepted: true,

@@ -119,28 +119,12 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.customState;
   }
 
-  get consultCompleted() {
-    return this.store.consultCompleted;
-  }
-
-  get consultInitiated() {
-    return this.store.consultInitiated;
-  }
-
-  get consultAccepted() {
-    return this.store.consultAccepted;
-  }
-
   get consultStartTimeStamp() {
     return this.store.consultStartTimeStamp;
   }
 
   get callControlAudio() {
     return this.store.callControlAudio;
-  }
-
-  get consultOfferReceived() {
-    return this.store.consultOfferReceived;
   }
 
   get isQueueConsultInProgress() {
@@ -258,7 +242,7 @@ class StoreWrapper implements IStoreWrapper {
       this.store.taskList = this.store.cc.taskManager.getAllTasks();
       if (Object.keys(this.store.taskList).length === 0) {
         if (this.currentTask) {
-          this.handleTaskRemove(this.currentTask.data.interactionId);
+          this.handleTaskRemove(this.currentTask);
         }
         this.setCurrentTask(null);
         this.setState({
@@ -268,7 +252,7 @@ class StoreWrapper implements IStoreWrapper {
         this.setCurrentTask(this.store.taskList[this.currentTask?.data?.interactionId]);
       } else if (Object.keys(this.store.taskList).length > 0) {
         if (this.currentTask) {
-          this.handleTaskRemove(this.currentTask.data.interactionId);
+          this.handleTaskRemove(this.currentTask);
         }
         this.setCurrentTask(this.store.taskList[Object.keys(this.store.taskList)[0]]);
       }
@@ -277,22 +261,6 @@ class StoreWrapper implements IStoreWrapper {
 
   setWrapupCodes = (wrapupCodes: IWrapupCode[]): void => {
     this.store.wrapupCodes = wrapupCodes;
-  };
-
-  setConsultCompleted = (value: boolean): void => {
-    this.store.consultCompleted = value;
-  };
-
-  setConsultInitiated = (value: boolean): void => {
-    this.store.consultInitiated = value;
-  };
-
-  setConsultAccepted = (value: boolean): void => {
-    this.store.consultAccepted = value;
-  };
-
-  setConsultOfferReceived = (value: boolean): void => {
-    this.store.consultOfferReceived = value;
   };
 
   setConsultStartTimeStamp = (timestamp: number): void => {
@@ -404,8 +372,7 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.registerCC(webex);
   };
 
-  handleTaskRemove = (taskId) => {
-    const taskToRemove = this.store.taskList[taskId];
+  handleTaskRemove = (taskToRemove: ITask) => {
     if (taskToRemove) {
       taskToRemove.off(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
       taskToRemove.off(TASK_EVENTS.TASK_END, this.handleTaskEnd);
@@ -437,11 +404,7 @@ class StoreWrapper implements IStoreWrapper {
     }
 
     runInAction(() => {
-      this.setConsultAccepted(false);
-      this.setConsultInitiated(false);
-      this.setConsultCompleted(false);
-
-      if (this.store.currentTask?.data.interactionId === taskId) {
+      if (taskToRemove && this.store.currentTask?.data.interactionId === taskToRemove.data.interactionId) {
         this.setCurrentTask(null);
       }
 
@@ -472,12 +435,6 @@ class StoreWrapper implements IStoreWrapper {
       this.onTaskAssigned(task);
     }
     runInAction(() => {
-      if (this.consultAccepted) {
-        this.setConsultAccepted(false);
-        this.setConsultInitiated(false);
-        this.setConsultCompleted(false);
-        this.setConsultOfferReceived(false);
-      }
       this.setCurrentTask(task);
       this.setState({
         developerName: ENGAGED_LABEL,
@@ -486,8 +443,8 @@ class StoreWrapper implements IStoreWrapper {
     });
   };
 
-  handleTaskWrapUp = (task) => {
-    this.handleTaskRemove(task?.data?.interactionId);
+  handleTaskWrapUp = () => {
+    this.refreshTaskList();
   };
 
   handleTaskMedia = (track) => {
@@ -496,44 +453,31 @@ class StoreWrapper implements IStoreWrapper {
 
   // Case to handle multi session
   handleConsultCreated = () => {
-    this.setConsultInitiated(true);
+    this.refreshTaskList();
     this.setConsultStartTimeStamp(Date.now());
   };
 
-  handleConsulting = (event) => {
-    this.setConsultCompleted(true);
-    this.setCurrentTask(event);
-    this.handleIncomingTask(event);
+  handleConsulting = () => {
+    this.refreshTaskList();
     this.setConsultStartTimeStamp(Date.now());
   };
 
-  handleConsultEnd = (event) => {
-    const task = event;
-    this.setConsultInitiated(false);
+  handleConsultEnd = () => {
     this.setIsQueueConsultInProgress(false);
     this.setCurrentConsultQueueId(null);
-    if (this.consultAccepted) {
-      this.setConsultAccepted(false);
-      this.handleTaskRemove(task.data.interactionId);
-    } else if (this.consultOfferReceived) {
-      this.setConsultOfferReceived(false);
-      this.handleTaskRemove(task.data.interactionId);
-    }
-    this.setConsultCompleted(false);
+    this.refreshTaskList();
     this.setConsultStartTimeStamp(null);
   };
 
   handleConsultOffer = () => {
-    this.setConsultOfferReceived(true);
+    this.refreshTaskList();
   };
 
   handleConsultAccepted = (event) => {
     const task = event;
     runInAction(() => {
-      this.setCurrentTask(task);
-      this.setConsultAccepted(true);
+      this.refreshTaskList();
       this.setConsultStartTimeStamp(Date.now());
-      this.setConsultCompleted(true);
       this.setState({
         developerName: ENGAGED_LABEL,
         name: ENGAGED_USERNAME,
@@ -545,21 +489,16 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   handleConsultQueueCancelled = () => {
-    this.setConsultInitiated(false);
     this.setIsQueueConsultInProgress(false);
     this.setCurrentConsultQueueId(null);
     this.setConsultStartTimeStamp(null);
+    this.refreshTaskList();
   };
 
   handleConferenceStarted = () => {
     runInAction(() => {
-      this.setConsultAccepted(false);
-      this.setConsultInitiated(false);
-      this.setConsultCompleted(false);
-      this.setConsultOfferReceived(false);
       this.setIsQueueConsultInProgress(false);
       this.setCurrentConsultQueueId(null);
-      this.setConsultCompleted(false);
       this.setConsultStartTimeStamp(null);
     });
     this.refreshTaskList();
@@ -682,12 +621,9 @@ class StoreWrapper implements IStoreWrapper {
     this.setCurrentTask(task);
     if (task.data.interaction.state === 'consulting') {
       if (task.data.isConsulted) {
-        this.setConsultAccepted(true);
-      } else {
-        this.setConsultInitiated(true);
+        // this.setConsultAccepted(true);
       }
       this.setConsultStartTimeStamp(Date.now());
-      this.setConsultCompleted(true);
     }
 
     if (
@@ -719,7 +655,7 @@ class StoreWrapper implements IStoreWrapper {
     if (this.onTaskRejected) {
       this.onTaskRejected(task, reason || 'No reason provided');
     }
-    this.handleTaskRemove(task.data.interactionId);
+    this.refreshTaskList();
   };
 
   getBuddyAgents = async (
