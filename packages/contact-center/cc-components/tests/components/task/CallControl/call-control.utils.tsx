@@ -77,8 +77,10 @@ describe('CallControl Utils', () => {
     mergeConference: {isVisible: false, isEnabled: false},
     consultTransfer: {isVisible: false, isEnabled: false},
     isConferenceInProgress: false,
+    isConsultInitiated: false,
+    isConsultInitiatedAndAccepted: false,
     isConsultInitiatedOrAccepted: false,
-    hideCallControls: false,
+    isConsultReceived: false,
     isHeld: false,
   };
 

@@ -150,7 +150,7 @@ function CallControlComponent(props: CallControlComponentProps) {
         autoPlay
       ></audio>
       <div className="call-control-container" data-testid="call-control-container">
-        {!controlVisibility.hideCallControls && !controlVisibility.wrapup.isVisible && (
+        {!controlVisibility.isConsultReceived && !controlVisibility.wrapup.isVisible && (
           <div className="button-group">
             {filteredButtons.map((button, index) => {
               if (!button.isVisible) return null;

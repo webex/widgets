@@ -218,17 +218,19 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
                 )}
               </div>
               <div className="call-status">
-                {!controlVisibility.wrapup.isVisible && controlVisibility.isHeld && (
-                  <>
-                    <span className="dot">•</span>
-                    <div className="on-hold">
-                      <Icon name="call-hold-filled" size={1} className="call-hold-filled-icon" />
-                      <span className="on-hold-chip-text">
-                        {ON_HOLD} {formatTime(holdTime)}
-                      </span>
-                    </div>
-                  </>
-                )}
+                {!controlVisibility.wrapup.isVisible &&
+                  controlVisibility.isHeld &&
+                  !controlVisibility.isConsultReceived && (
+                    <>
+                      <span className="dot">•</span>
+                      <div className="on-hold">
+                        <Icon name="call-hold-filled" size={1} className="call-hold-filled-icon" />
+                        <span className="on-hold-chip-text">
+                          {ON_HOLD} {formatTime(holdTime)}
+                        </span>
+                      </div>
+                    </>
+                  )}
               </div>
             </div>
           </div>

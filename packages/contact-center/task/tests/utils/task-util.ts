@@ -48,8 +48,10 @@ describe('getControlsVisibility', () => {
       exitConference: {isVisible: false, isEnabled: true}, // Not visible when no conference in progress
       recordingIndicator: {isVisible: true, isEnabled: true},
       isConferenceInProgress: false,
+      isConsultInitiated: false,
+      isConsultInitiatedAndAccepted: false,
       isConsultInitiatedOrAccepted: false,
-      hideCallControls: false,
+      isConsultReceived: false,
       isHeld: false,
     };
 
@@ -81,8 +83,10 @@ describe('getControlsVisibility', () => {
       exitConference: {isVisible: false, isEnabled: true},
       recordingIndicator: {isVisible: true, isEnabled: true},
       isConferenceInProgress: false,
+      isConsultInitiated: false,
+      isConsultInitiatedAndAccepted: false,
       isConsultInitiatedOrAccepted: false,
-      hideCallControls: false,
+      isConsultReceived: false,
       isHeld: false,
     };
 
@@ -114,8 +118,10 @@ describe('getControlsVisibility', () => {
       exitConference: {isVisible: false, isEnabled: true}, // Not visible when no conference in progress
       recordingIndicator: {isVisible: true, isEnabled: true},
       isConferenceInProgress: false,
+      isConsultInitiated: false,
+      isConsultInitiatedAndAccepted: false,
       isConsultInitiatedOrAccepted: false,
-      hideCallControls: false,
+      isConsultReceived: false,
       isHeld: false,
     };
 
@@ -153,8 +159,10 @@ describe('getControlsVisibility', () => {
       exitConference: {isVisible: false, isEnabled: true}, // Not visible when no conference in progress
       recordingIndicator: {isVisible: true, isEnabled: true},
       isConferenceInProgress: false,
+      isConsultInitiated: false,
+      isConsultInitiatedAndAccepted: false,
       isConsultInitiatedOrAccepted: false,
-      hideCallControls: false,
+      isConsultReceived: false,
       isHeld: false,
     };
 
@@ -186,8 +194,10 @@ describe('getControlsVisibility', () => {
       exitConference: {isVisible: false, isEnabled: true}, // Not visible when no conference in progress
       recordingIndicator: {isVisible: true, isEnabled: true},
       isConferenceInProgress: false,
+      isConsultInitiated: false,
+      isConsultInitiatedAndAccepted: false,
       isConsultInitiatedOrAccepted: false,
-      hideCallControls: false,
+      isConsultReceived: false,
       isHeld: false,
     };
 
@@ -222,8 +232,10 @@ describe('getControlsVisibility', () => {
       exitConference: {isVisible: false, isEnabled: true}, // Not visible when no conference in progress
       recordingIndicator: {isVisible: true, isEnabled: true},
       isConferenceInProgress: false,
+      isConsultInitiated: false,
+      isConsultInitiatedAndAccepted: false,
       isConsultInitiatedOrAccepted: false,
-      hideCallControls: false,
+      isConsultReceived: false,
       isHeld: false,
     };
 
@@ -258,8 +270,10 @@ describe('getControlsVisibility', () => {
       exitConference: {isVisible: false, isEnabled: true},
       recordingIndicator: {isVisible: false, isEnabled: true},
       isConferenceInProgress: false,
+      isConsultInitiated: false,
+      isConsultInitiatedAndAccepted: false,
       isConsultInitiatedOrAccepted: false,
-      hideCallControls: false,
+      isConsultReceived: false,
       isHeld: false,
     };
 
@@ -294,8 +308,10 @@ describe('getControlsVisibility', () => {
       exitConference: {isVisible: false, isEnabled: true},
       recordingIndicator: {isVisible: false, isEnabled: true},
       isConferenceInProgress: false,
+      isConsultInitiated: false,
+      isConsultInitiatedAndAccepted: false,
       isConsultInitiatedOrAccepted: false,
-      hideCallControls: false,
+      isConsultReceived: false,
       isHeld: false,
     };
 
@@ -348,8 +364,10 @@ describe('getControlsVisibility', () => {
       exitConference: {isVisible: false, isEnabled: false},
       recordingIndicator: {isVisible: false, isEnabled: false},
       isConferenceInProgress: false,
+      isConsultInitiated: false,
+      isConsultInitiatedAndAccepted: false,
       isConsultInitiatedOrAccepted: false,
-      hideCallControls: false,
+      isConsultReceived: false,
       isHeld: false,
     });
   });

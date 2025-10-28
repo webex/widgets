@@ -64,7 +64,7 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
             {agentName}
           </Text>
           <Text tagName="p" type="body-secondary" className="consult-sub-text">
-            {getConsultStatusText(controlVisibility.isConsultInitiatedOrAccepted)}&nbsp;&bull;&nbsp;
+            {getConsultStatusText(controlVisibility.isConsultInitiated)}&nbsp;&bull;&nbsp;
             <TaskTimer key={timerKey} startTimeStamp={startTimeStamp} />
           </Text>
         </div>

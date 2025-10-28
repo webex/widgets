@@ -91,8 +91,10 @@ describe('CallControlConsultComponent Snapshots', () => {
     mergeConference: {isVisible: true, isEnabled: true},
     consultTransfer: {isVisible: true, isEnabled: true},
     isConferenceInProgress: false,
+    isConsultInitiated: false,
+    isConsultInitiatedAndAccepted: false,
     isConsultInitiatedOrAccepted: false,
-    hideCallControls: false,
+    isConsultReceived: false,
     isHeld: false,
   };
 

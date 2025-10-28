@@ -348,7 +348,7 @@ export const useCallControl = (props: useCallControlProps) => {
         workerRef.current = null;
       }
     };
-  }, [currentTask?.data?.interaction]);
+  }, [currentTask]);
 
   useEffect(() => {
     if (currentTask && store?.cc?.agentConfig?.agentId) {

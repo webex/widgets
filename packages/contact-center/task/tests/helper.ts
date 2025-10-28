@@ -803,8 +803,10 @@ describe('useCallControl', () => {
       mergeConference: {isVisible: false, isEnabled: false},
       exitConference: {isVisible: false, isEnabled: false},
       isConferenceInProgress: false,
+      isConsultInitiated: false,
+      isConsultInitiatedAndAccepted: false,
       isConsultInitiatedOrAccepted: false,
-      hideCallControls: false,
+      isConsultReceived: false,
       isHeld: false,
     };
     mockGetControlsVisibility.mockReturnValue(mockControlVisibility);
@@ -4016,8 +4018,10 @@ describe('Task Hook Error Handling and Logging', () => {
         mergeConference: {isVisible: false, isEnabled: false},
         exitConference: {isVisible: false, isEnabled: false},
         isConferenceInProgress: false,
+        isConsultInitiated: false,
+        isConsultInitiatedAndAccepted: false,
         isConsultInitiatedOrAccepted: false,
-        hideCallControls: false,
+        isConsultReceived: false,
         isHeld: false,
       });
 
@@ -4261,8 +4265,10 @@ describe('Task Hook Error Handling and Logging', () => {
         mergeConference: {isVisible: false, isEnabled: false},
         exitConference: {isVisible: false, isEnabled: false},
         isConferenceInProgress: false,
+        isConsultInitiated: false,
+        isConsultInitiatedAndAccepted: false,
         isConsultInitiatedOrAccepted: false,
-        hideCallControls: false,
+        isConsultReceived: false,
         isHeld: false,
       });
 
@@ -4315,8 +4321,10 @@ describe('Task Hook Error Handling and Logging', () => {
         mergeConference: {isVisible: false, isEnabled: false},
         exitConference: {isVisible: false, isEnabled: false},
         isConferenceInProgress: false,
+        isConsultInitiated: false,
+        isConsultInitiatedAndAccepted: false,
         isConsultInitiatedOrAccepted: false,
-        hideCallControls: false,
+        isConsultReceived: false,
         isHeld: false,
       });
 

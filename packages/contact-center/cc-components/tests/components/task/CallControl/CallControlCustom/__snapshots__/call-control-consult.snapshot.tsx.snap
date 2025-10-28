@@ -24,7 +24,7 @@ exports[`CallControlConsultComponent Snapshots Interactions should call mockEndC
         tagname="p"
         type="body-midsize-regular"
       >
-        Consult requested
+        Consulting
          • 
         <time
           class="task-text task-text--secondary"
@@ -179,7 +179,7 @@ exports[`CallControlConsultComponent Snapshots Interactions should call mockOnTo
         tagname="p"
         type="body-midsize-regular"
       >
-        Consult requested
+        Consulting
          • 
         <time
           class="task-text task-text--secondary"
@@ -334,7 +334,7 @@ exports[`CallControlConsultComponent Snapshots Interactions should call mockOnTr
         tagname="p"
         type="body-midsize-regular"
       >
-        Consult requested
+        Consulting
          • 
         <time
           class="task-text task-text--secondary"
@@ -489,7 +489,7 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
         tagname="p"
         type="body-midsize-regular"
       >
-        Consult requested
+        Consulting
          • 
         <time
           class="task-text task-text--secondary"
@@ -639,7 +639,7 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
         tagname="p"
         type="body-midsize-regular"
       >
-        Consult requested
+        Consulting
          • 
         <time
           class="task-text task-text--secondary"
@@ -789,7 +789,7 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
         tagname="p"
         type="body-midsize-regular"
       >
-        Consult requested
+        Consulting
          • 
         <time
           class="task-text task-text--secondary"
@@ -940,7 +940,7 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
         tagname="p"
         type="body-midsize-regular"
       >
-        Consult requested
+        Consulting
          • 
         <time
           class="task-text task-text--secondary"
@@ -1090,7 +1090,7 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
         tagname="p"
         type="body-midsize-regular"
       >
-        Consult requested
+        Consulting
          • 
         <time
           class="task-text task-text--secondary"
@@ -1213,7 +1213,7 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
         tagname="p"
         type="body-midsize-regular"
       >
-        Consult requested
+        Consulting
          • 
         <time
           class="task-text task-text--secondary"
@@ -1363,7 +1363,7 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
         tagname="p"
         type="body-midsize-regular"
       >
-        Consult requested
+        Consulting
          • 
         <time
           class="task-text task-text--secondary"
@@ -1486,7 +1486,7 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
         tagname="p"
         type="body-midsize-regular"
       >
-        Consult requested
+        Consulting
          • 
         <time
           class="task-text task-text--secondary"
@@ -1609,7 +1609,7 @@ exports[`CallControlConsultComponent Snapshots State Management should handle co
         tagname="p"
         type="body-midsize-regular"
       >
-        Consult requested
+        Consulting
          • 
         <time
           class="task-text task-text--secondary"
@@ -1703,7 +1703,7 @@ exports[`CallControlConsultComponent Snapshots State Management should handle ed
         tagname="p"
         type="body-midsize-regular"
       >
-        Consult requested
+        Consulting
          • 
         <time
           class="task-text task-text--secondary"
@@ -1853,7 +1853,7 @@ exports[`CallControlConsultComponent Snapshots State Management should update wh
         tagname="p"
         type="body-midsize-regular"
       >
-        Consult requested
+        Consulting
          • 
         <time
           class="task-text task-text--secondary"
@@ -2003,7 +2003,7 @@ exports[`CallControlConsultComponent Snapshots State Management should update wh
         tagname="p"
         type="body-midsize-regular"
       >
-        Consult requested
+        Consulting
          • 
         <time
           class="task-text task-text--secondary"

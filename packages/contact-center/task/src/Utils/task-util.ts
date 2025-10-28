@@ -240,7 +240,7 @@ export function getHoldResumeButtonVisibility(
 ): Visibility {
   const isVisible = isCall && isTelephonySupported(deviceType, webRtcEnabled);
 
-  const isEnabled = !isConferenceInProgress && !isHeld;
+  const isEnabled = !isConferenceInProgress || isHeld;
   return {isVisible, isEnabled};
 }
 
@@ -451,17 +451,16 @@ export function getControlsVisibility(
       mergeConference: getMergeConferenceButtonVisibility(taskConsultStatus),
       consultTransfer: getConsultTransferButtonVisibility(taskConsultStatus),
       isConferenceInProgress: getConferenceInProgressVisibility(task),
-      isConsultInitiatedOrAccepted:
-        (
-          [
-            ConsultStatus.CONSULT_INITIATED,
-            ConsultStatus.BEING_CONSULTED_ACCEPTED,
-            ConsultStatus.CONSULT_ACCEPTED,
-          ] as string[]
-        ).includes(taskConsultStatus) &&
-        !task.data.wrapUpRequired &&
-        isCall,
-      hideCallControls: taskConsultStatus == ConsultStatus.BEING_CONSULTED_ACCEPTED,
+      isConsultInitiated: taskConsultStatus === ConsultStatus.CONSULT_INITIATED,
+      isConsultInitiatedAndAccepted: taskConsultStatus === ConsultStatus.CONSULT_ACCEPTED,
+      isConsultReceived: taskConsultStatus == ConsultStatus.BEING_CONSULTED_ACCEPTED,
+      isConsultInitiatedOrAccepted: (
+        [
+          ConsultStatus.CONSULT_INITIATED,
+          ConsultStatus.CONSULT_ACCEPTED,
+          ConsultStatus.BEING_CONSULTED_ACCEPTED,
+        ] as string[]
+      ).includes(taskConsultStatus),
       isHeld,
     };
 
@@ -490,8 +489,10 @@ export function getControlsVisibility(
       mergeConference: defaultVisibility,
       consultTransfer: defaultVisibility,
       isConferenceInProgress: false,
+      isConsultInitiated: false,
+      isConsultInitiatedAndAccepted: false,
       isConsultInitiatedOrAccepted: false,
-      hideCallControls: false,
+      isConsultReceived: false,
       isHeld: false,
     };
   }

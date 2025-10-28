@@ -65,8 +65,10 @@ describe('Call Control Custom Utils', () => {
     mergeConference: {isVisible: false, isEnabled: false},
     consultTransfer: {isVisible: false, isEnabled: false},
     isConferenceInProgress: false,
+    isConsultInitiated: false,
+    isConsultInitiatedAndAccepted: false,
     isConsultInitiatedOrAccepted: false,
-    hideCallControls: false,
+    isConsultReceived: false,
     isHeld: false,
   };
 
@@ -303,11 +305,11 @@ describe('Call Control Custom Utils', () => {
 
   describe('getConsultStatusText', () => {
     it('should return "Consulting" when completed', () => {
-      expect(getConsultStatusText(true)).toBe('Consulting');
+      expect(getConsultStatusText(true)).toBe('Consult requested');
     });
 
     it('should return "Consult requested" when not completed', () => {
-      expect(getConsultStatusText(false)).toBe('Consult requested');
+      expect(getConsultStatusText(false)).toBe('Consulting');
     });
   });
 

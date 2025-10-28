@@ -211,9 +211,9 @@ export const handleMuteToggle = (onToggleConsultMute: (() => void) | undefined, 
 /**
  * Gets the consult status text based on completion state
  */
-export const getConsultStatusText = (consultCompleted: boolean, logger?): string => {
+export const getConsultStatusText = (consultInitiated: boolean, logger?): string => {
   try {
-    return consultCompleted ? 'Consulting' : 'Consult requested';
+    return consultInitiated ? 'Consult requested' : 'Consulting';
   } catch (error) {
     logger?.error('CC-Widgets: CallControlCustom: Error in getConsultStatusText', {
       module: 'cc-components#call-control-custom.utils.ts',

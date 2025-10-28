@@ -638,8 +638,10 @@ export interface ControlVisibility {
   mergeConference: Visibility;
   consultTransfer: Visibility;
   isConferenceInProgress: boolean;
+  isConsultInitiated: boolean;
+  isConsultInitiatedAndAccepted: boolean;
+  isConsultReceived: boolean;
   isConsultInitiatedOrAccepted: boolean;
-  hideCallControls: boolean;
   isHeld: boolean;
 }
 
