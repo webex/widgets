@@ -236,11 +236,12 @@ export function getHoldResumeButtonVisibility(
   webRtcEnabled: boolean,
   isCall: boolean,
   isConferenceInProgress: boolean,
+  isConsultInProgress: boolean,
   isHeld: boolean
 ): Visibility {
   const isVisible = isCall && isTelephonySupported(deviceType, webRtcEnabled);
 
-  const isEnabled = !isConferenceInProgress || isHeld;
+  const isEnabled = (!isConferenceInProgress || isHeld) && !isConsultInProgress;
   return {isVisible, isEnabled};
 }
 
@@ -251,13 +252,14 @@ export function getConsultButtonVisibility(
   deviceType: string,
   webRtcEnabled: boolean,
   isCall: boolean,
+  isConsultInProgress: boolean,
   conferenceParticipantsCount: number,
   maxParticipantsInConference: number
 ): Visibility {
   const isVisible = isCall && isTelephonySupported(deviceType, webRtcEnabled);
 
   // Disable consult button when max participants reached in conference
-  const isEnabled = conferenceParticipantsCount < maxParticipantsInConference;
+  const isEnabled = conferenceParticipantsCount < maxParticipantsInConference && !isConsultInProgress;
 
   return {isVisible, isEnabled};
 }
@@ -400,6 +402,7 @@ export function getControlsVisibility(
 
     const isTransferVisibility = isBrowser ? webRtcEnabled : true; // Applicable for all type of station login and media type
     const isConferenceInProgress = task.data.isConferenceInProgress ?? false;
+    const isConsultInProgress = getIsConsultInProgress(task);
     const isHeld = isInteractionOnHold(task);
 
     // Calculate conference participants for consult button enable/disable logic
@@ -422,11 +425,19 @@ export function getControlsVisibility(
         taskConsultStatus
       ),
       muteUnmute: getMuteUnmuteButtonVisibility(deviceType, webRtcEnabled, isCall),
-      holdResume: getHoldResumeButtonVisibility(deviceType, webRtcEnabled, isCall, isConferenceInProgress, isHeld),
+      holdResume: getHoldResumeButtonVisibility(
+        deviceType,
+        webRtcEnabled,
+        isCall,
+        isConferenceInProgress,
+        isConsultInProgress,
+        isHeld
+      ),
       consult: getConsultButtonVisibility(
         deviceType,
         webRtcEnabled,
         isCall,
+        isConsultInProgress,
         conferenceParticipantsCount,
         maxParticipantsInConference
       ),
