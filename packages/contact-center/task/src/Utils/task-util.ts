@@ -1,4 +1,4 @@
-import {ILogger} from '@webex/cc-store';
+import {ILogger, DIALNUMBER, EXTENSION, DESKTOP} from '@webex/cc-store';
 import {ITask} from '@webex/contact-center';
 import {
   CUSTOMER,
@@ -6,6 +6,22 @@ import {
   VVA,
   MAX_PARTICIPANTS_IN_MULTIPARTY_CONFERENCE,
   MAX_PARTICIPANTS_IN_THREE_PARTY_CONFERENCE,
+  ConsultStatus,
+  INTERACTION_STATE_WRAPUP,
+  INTERACTION_STATE_POST_CALL,
+  INTERACTION_STATE_CONNECTED,
+  INTERACTION_STATE_CONFERENCE,
+  TASK_STATE_CONSULT,
+  TASK_STATE_CONSULTING,
+  TASK_STATE_CONSULT_COMPLETED,
+  CONSULT_STATE_INITIATED,
+  CONSULT_STATE_COMPLETED,
+  CONSULT_STATE_CONFERENCING,
+  MEDIA_TYPE_TELEPHONY,
+  MEDIA_TYPE_CHAT,
+  MEDIA_TYPE_EMAIL,
+  MEDIA_TYPE_CONSULT,
+  RELATIONSHIP_TYPE_CONSULT,
 } from './constants';
 import {Participant, Visibility} from '@webex/cc-components';
 
@@ -42,13 +58,7 @@ export function getIsConferenceInProgress(task: ITask): boolean {
   if (participantsInMainCall.size > 0 && participants) {
     participantsInMainCall.forEach((participantId: string) => {
       const participant = participants[participantId];
-      if (
-        participant &&
-        participant.pType !== CUSTOMER &&
-        participant.pType !== SUPERVISOR &&
-        !participant.hasLeft &&
-        participant.pType !== VVA
-      ) {
+      if (participant && ![CUSTOMER, SUPERVISOR, VVA].includes(participant.pType) && !participant.hasLeft) {
         agentParticipants.add(participantId);
       }
     });
@@ -74,10 +84,8 @@ export const getConferenceParticipants = (task: ITask, agentId: string): Partici
       const participant = participants[participantId];
       if (
         participant &&
-        participant.pType !== CUSTOMER &&
-        participant.pType !== SUPERVISOR &&
+        ![CUSTOMER, SUPERVISOR, VVA].includes(participant.pType) &&
         !participant.hasLeft &&
-        participant.pType !== VVA &&
         participant.id !== agentId
       ) {
         participantsList.push({
@@ -107,7 +115,7 @@ export function getConferenceParticipantsCount(task: ITask): number {
   if (participantsInMainCall.size > 0 && participants) {
     participantsInMainCall.forEach((participantId: string) => {
       const participant = participants[participantId];
-      if (participant && participant.pType !== SUPERVISOR && !participant.hasLeft && participant.pType !== VVA) {
+      if (participant && ![SUPERVISOR, VVA].includes(participant.pType) && !participant.hasLeft) {
         participantsList.push({
           id: participant.id,
           pType: participant.pType,
@@ -125,19 +133,21 @@ export function getConsultMPCState(task: ITask, agentId: string): string {
   if (
     !!task.data.consultMediaResourceId &&
     !!interaction.participants[agentId]?.consultState &&
-    task.data.interaction.state !== 'wrapUp' &&
-    task.data.interaction.state !== 'post_call' // If interaction.state is post_call, we want to return post_call.
+    task.data.interaction.state !== INTERACTION_STATE_WRAPUP &&
+    task.data.interaction.state !== INTERACTION_STATE_POST_CALL // If interaction.state is post_call, we want to return post_call.
   ) {
     // interaction state for all agents when consult is going on
     switch (interaction.participants[agentId]?.consultState) {
-      case 'consultInitiated':
-        return 'consult';
-      case 'consultCompleted':
-        return interaction.state === 'connected' ? 'connected' : 'consultCompleted';
-      case 'conferencing':
-        return 'conference';
+      case CONSULT_STATE_INITIATED:
+        return TASK_STATE_CONSULT;
+      case CONSULT_STATE_COMPLETED:
+        return interaction.state === INTERACTION_STATE_CONNECTED
+          ? INTERACTION_STATE_CONNECTED
+          : TASK_STATE_CONSULT_COMPLETED;
+      case CONSULT_STATE_CONFERENCING:
+        return INTERACTION_STATE_CONFERENCE;
       default:
-        return 'consulting';
+        return TASK_STATE_CONSULTING;
     }
   }
 
@@ -155,7 +165,7 @@ export function isSecondaryAgent(task: ITask): boolean {
 
   return (
     !!interaction.callProcessingDetails &&
-    interaction.callProcessingDetails.relationshipType === 'consult' &&
+    interaction.callProcessingDetails.relationshipType === RELATIONSHIP_TYPE_CONSULT &&
     interaction.callProcessingDetails.parentInteractionId &&
     interaction.callProcessingDetails.parentInteractionId !== interaction.interactionId
   );
@@ -168,22 +178,23 @@ export function isSecondaryAgent(task: ITask): boolean {
  * @returns {boolean} True if this is a secondary EP-DN agent in telephony consultation
  */
 export function isSecondaryEpDnAgent(task: ITask): boolean {
-  return task.data.interaction.mediaType === 'telephony' && isSecondaryAgent(task);
+  return task.data.interaction.mediaType === MEDIA_TYPE_TELEPHONY && isSecondaryAgent(task);
 }
 
 export function getTaskStatus(task: ITask, agentId: string): string {
   const interaction = task.data.interaction;
   if (isSecondaryEpDnAgent(task)) {
-    if (interaction.state === 'conference') {
-      return 'conference';
+    if (interaction.state === INTERACTION_STATE_CONFERENCE) {
+      return INTERACTION_STATE_CONFERENCE;
     }
-    return 'consulting'; // handle state of child agent case as we cant rely on interaction state.
+    return TASK_STATE_CONSULTING; // handle state of child agent case as we cant rely on interaction state.
   }
   if (
-    (task.data.interaction.state === 'wrapUp' || task.data.interaction.state === 'post_call') &&
-    interaction.participants[agentId]?.consultState === 'consultCompleted'
+    (task.data.interaction.state === INTERACTION_STATE_WRAPUP ||
+      task.data.interaction.state === INTERACTION_STATE_POST_CALL) &&
+    interaction.participants[agentId]?.consultState === CONSULT_STATE_COMPLETED
   ) {
-    return 'consultCompleted';
+    return TASK_STATE_CONSULT_COMPLETED;
   }
 
   return getConsultMPCState(task, agentId);
@@ -191,7 +202,7 @@ export function getTaskStatus(task: ITask, agentId: string): string {
 
 export function getConsultStatus(task: ITask, agentId: string): string {
   if (!task || !task.data) {
-    return 'No consultation in progress';
+    return ConsultStatus.NO_CONSULTATION_IN_PROGRESS;
   }
 
   const state = getTaskStatus(task, agentId);
@@ -202,30 +213,30 @@ export function getConsultStatus(task: ITask, agentId: string): string {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const participant: any = Object.values(participants).find((p: any) => p.pType === 'Agent' && p.id === agentId);
 
-  if (state === 'consult') {
+  if (state === TASK_STATE_CONSULT) {
     if (participant && participant.isConsulted) {
-      return 'beingConsulted';
+      return ConsultStatus.BEING_CONSULTED;
     }
-    return 'consultInitiated';
-  } else if (state === 'consulting') {
+    return ConsultStatus.CONSULT_INITIATED;
+  } else if (state === TASK_STATE_CONSULTING) {
     if (participant && participant.isConsulted) {
-      return 'beingConsultedAccepted';
+      return ConsultStatus.BEING_CONSULTED_ACCEPTED;
     }
-    return 'consultAccepted';
-  } else if (state === 'connected') {
-    return 'connected';
-  } else if (state === 'conference') {
-    return 'conference';
-  } else if (state === 'consultCompleted') {
+    return ConsultStatus.CONSULT_ACCEPTED;
+  } else if (state === INTERACTION_STATE_CONNECTED) {
+    return ConsultStatus.CONNECTED;
+  } else if (state === INTERACTION_STATE_CONFERENCE) {
+    return ConsultStatus.CONFERENCE;
+  } else if (state === TASK_STATE_CONSULT_COMPLETED) {
     return taskState;
   }
   // Default return for states that don't match any condition (e.g., chat, email initial states)
-  return state || 'No consultation in progress';
+  return state || ConsultStatus.NO_CONSULTATION_IN_PROGRESS;
 }
 
 export function getIsConsultInProgress(task: ITask): boolean {
   const mediaObject = task.data.interaction.media;
-  return Object.values(mediaObject).some((media) => media.mType === 'consult');
+  return Object.values(mediaObject).some((media) => media.mType === MEDIA_TYPE_CONSULT);
 }
 
 export function isInteractionOnHold(task: ITask): boolean {
@@ -253,9 +264,9 @@ interface DeviceTypeFlags {
  */
 function getDeviceTypeFlags(deviceType: string): DeviceTypeFlags {
   return {
-    isBrowser: deviceType === 'BROWSER',
-    isAgentDN: deviceType === 'AGENT_DN',
-    isExtension: deviceType === 'EXTENSION',
+    isBrowser: deviceType === DESKTOP,
+    isAgentDN: deviceType === DIALNUMBER,
+    isExtension: deviceType === EXTENSION,
   };
 }
 
@@ -314,10 +325,14 @@ export function getEndButtonVisibility(
   const isEnabled =
     !isHeld ||
     (isConferenceInProgress &&
-      taskConsultStatus !== 'consultInitiated' &&
-      taskConsultStatus !== 'consultAccepted' &&
-      taskConsultStatus !== 'beingConsulted' &&
-      taskConsultStatus !== 'beingConsultedAccepted');
+      !(
+        [
+          ConsultStatus.CONSULT_INITIATED,
+          ConsultStatus.CONSULT_ACCEPTED,
+          ConsultStatus.BEING_CONSULTED,
+          ConsultStatus.BEING_CONSULTED_ACCEPTED,
+        ] as string[]
+      ).includes(taskConsultStatus));
   return {isVisible, isEnabled};
 }
 
@@ -425,10 +440,13 @@ export function getEndConsultButtonVisibility(
   isCall: boolean,
   consultStatus: string
 ): Visibility {
-  const consultVisibleCondition =
-    consultStatus == 'consultInitiated' ||
-    consultStatus == 'consultAccepted' ||
-    consultStatus == 'beingConsultedAccepted';
+  const consultVisibleCondition = (
+    [
+      ConsultStatus.CONSULT_INITIATED,
+      ConsultStatus.CONSULT_ACCEPTED,
+      ConsultStatus.BEING_CONSULTED_ACCEPTED,
+    ] as string[]
+  ).includes(consultStatus);
   const isVisible =
     isEndConsultEnabled && isCall && isTelephonySupported(deviceType, webRtcEnabled) && consultVisibleCondition;
 
@@ -461,14 +479,18 @@ export function getExitConferenceButtonVisibility(isConferenceInProgress: boolea
  * Get visibility for Merge Conference button
  */
 export function getMergeConferenceButtonVisibility(consultStatus: string): Visibility {
-  const isVisible = consultStatus === 'consultAccepted' || consultStatus === 'consultInitiated';
-  const isEnabled = consultStatus !== 'consultInitiated';
+  const isVisible = ([ConsultStatus.CONSULT_ACCEPTED, ConsultStatus.CONSULT_INITIATED] as string[]).includes(
+    consultStatus
+  );
+  const isEnabled = consultStatus !== ConsultStatus.CONSULT_INITIATED;
   return {isVisible, isEnabled};
 }
 
 export function getConsultTransferButtonVisibility(consultStatus: string): Visibility {
-  const isVisible = consultStatus === 'consultAccepted' || consultStatus === 'consultInitiated';
-  const isEnabled = consultStatus !== 'consultInitiated';
+  const isVisible = ([ConsultStatus.CONSULT_ACCEPTED, ConsultStatus.CONSULT_INITIATED] as string[]).includes(
+    consultStatus
+  );
+  const isEnabled = consultStatus !== ConsultStatus.CONSULT_INITIATED;
   return {isVisible, isEnabled};
 }
 /**
@@ -487,9 +509,9 @@ export function getControlsVisibility(
   try {
     const {mediaType} = task?.data?.interaction || {};
 
-    const isCall = mediaType === 'telephony';
-    const isChat = mediaType === 'chat';
-    const isEmail = mediaType === 'email';
+    const isCall = mediaType === MEDIA_TYPE_TELEPHONY;
+    const isChat = mediaType === MEDIA_TYPE_CHAT;
+    const isEmail = mediaType === MEDIA_TYPE_EMAIL;
 
     const {isBrowser} = getDeviceTypeFlags(deviceType);
     const {isEndCallEnabled, isEndConsultEnabled, webRtcEnabled} = featureFlags;
@@ -548,12 +570,16 @@ export function getControlsVisibility(
       consultTransfer: getConsultTransferButtonVisibility(taskConsultStatus),
       isConferenceInProgress: getConferenceInProgressVisibility(task),
       isConsultInitiatedOrAccepted:
-        (taskConsultStatus === 'consultInitiated' ||
-          taskConsultStatus === 'beingConsultedAccepted' ||
-          taskConsultStatus === 'consultAccepted') &&
+        (
+          [
+            ConsultStatus.CONSULT_INITIATED,
+            ConsultStatus.BEING_CONSULTED_ACCEPTED,
+            ConsultStatus.CONSULT_ACCEPTED,
+          ] as string[]
+        ).includes(taskConsultStatus) &&
         !task.data.wrapUpRequired &&
         isCall,
-      hideCallControls: taskConsultStatus == 'beingConsultedAccepted',
+      hideCallControls: taskConsultStatus == ConsultStatus.BEING_CONSULTED_ACCEPTED,
       isHeld,
     };
 
