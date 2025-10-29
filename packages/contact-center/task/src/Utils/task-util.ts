@@ -79,7 +79,7 @@ export const getConferenceParticipants = (task: ITask, agentId: string): Partici
         participantsList.push({
           id: participant.id,
           pType: participant.pType,
-          name: participant.name,
+          name: participant.name ? participant.name : participant.id,
         });
       }
     });
@@ -103,7 +103,7 @@ export function getConferenceParticipantsCount(task: ITask): number {
   if (participantsInMainCall.size > 0 && participants) {
     participantsInMainCall.forEach((participantId: string) => {
       const participant = participants[participantId];
-      if (participant && ![SUPERVISOR, VVA].includes(participant.pType) && !participant.hasLeft) {
+      if (participant && ![SUPERVISOR, VVA, CUSTOMER].includes(participant.pType) && !participant.hasLeft) {
         participantsList.push({
           id: participant.id,
           pType: participant.pType,
@@ -114,6 +114,26 @@ export function getConferenceParticipantsCount(task: ITask): number {
   }
 
   return participantsList.length;
+}
+
+export function getIsCustomerInCall(task: ITask): boolean {
+  // Early return if required data is missing
+  if (!task?.data?.interaction?.media || !task?.data?.interactionId) {
+    return false;
+  }
+
+  const mediaMainCall = task.data.interaction.media[task.data.interactionId];
+  const participantsInMainCall = new Set(mediaMainCall?.participants);
+  const participants = task?.data?.interaction?.participants;
+
+  if (participantsInMainCall.size > 0 && participants) {
+    return Array.from(participantsInMainCall).some((participantId: string) => {
+      const participant = participants[participantId];
+      return participant && participant.pType === CUSTOMER && !participant.hasLeft;
+    });
+  }
+
+  return false;
 }
 
 export function getIsConsultInProgress(task: ITask): boolean {
@@ -253,13 +273,15 @@ export function getConsultButtonVisibility(
   webRtcEnabled: boolean,
   isCall: boolean,
   isConsultInProgress: boolean,
+  isCustomerInCall: boolean,
   conferenceParticipantsCount: number,
   maxParticipantsInConference: number
 ): Visibility {
   const isVisible = isCall && isTelephonySupported(deviceType, webRtcEnabled);
 
   // Disable consult button when max participants reached in conference
-  const isEnabled = conferenceParticipantsCount < maxParticipantsInConference && !isConsultInProgress;
+  const isEnabled =
+    conferenceParticipantsCount < maxParticipantsInConference && !isConsultInProgress && isCustomerInCall;
 
   return {isVisible, isEnabled};
 }
@@ -404,6 +426,7 @@ export function getControlsVisibility(
     const isConferenceInProgress = task.data.isConferenceInProgress ?? false;
     const isConsultInProgress = getIsConsultInProgress(task);
     const isHeld = isInteractionOnHold(task);
+    const isCustomerInCall = getIsCustomerInCall(task);
 
     // Calculate conference participants for consult button enable/disable logic
     const conferenceParticipantsCount = getConferenceParticipantsCount(task);
@@ -438,6 +461,7 @@ export function getControlsVisibility(
         webRtcEnabled,
         isCall,
         isConsultInProgress,
+        isCustomerInCall,
         conferenceParticipantsCount,
         maxParticipantsInConference
       ),

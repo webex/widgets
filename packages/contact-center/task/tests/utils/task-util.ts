@@ -939,7 +939,7 @@ describe('getConferenceParticipants', () => {
     expect(result).toContainEqual({
       id: 'agent2',
       pType: 'Agent',
-      name: undefined,
+      name: 'agent2',
     });
   });
 });

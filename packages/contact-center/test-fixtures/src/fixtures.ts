@@ -125,12 +125,22 @@ const mockTask: ITask = {
           hasJoined: true,
           pType: 'Agent',
           id: 'agent1',
+          name: 'agent1',
+          hasLeft: false,
+        },
+        customer1: {
+          hasJoined: true,
+          pType: 'Customer',
+          id: 'customer1',
+          name: 'customer1',
+          hasLeft: false,
         },
       },
       media: {
-        main: {
+        interaction123: {
           mType: 'main',
           isHold: false,
+          participants: ['agent1', 'customer1'],
         },
       },
     },

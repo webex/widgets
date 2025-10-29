@@ -2947,12 +2947,13 @@ describe('useCallControl', () => {
             interaction: {
               media: {
                 main: {
-                  participants: ['agent1', 'agent2'],
+                  participants: ['agent1', 'agent2', 'customer1'],
                 },
               },
               participants: {
                 agent1: {id: 'agent1', pType: 'Agent', hasLeft: false},
                 agent2: {id: 'agent2', pType: 'Agent', hasLeft: false},
+                customer1: {id: 'customer1', pType: 'Customer', hasLeft: false},
               },
             },
           },
