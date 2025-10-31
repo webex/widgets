@@ -788,6 +788,7 @@ describe('useCallControl', () => {
 
     const mockControlVisibility = {
       muteUnmute: {isVisible: true, isEnabled: true},
+      muteUnmuteConsult: {isVisible: false, isEnabled: false},
       holdResume: {isVisible: true, isEnabled: true},
       transfer: {isVisible: true, isEnabled: true},
       consult: {isVisible: true, isEnabled: true},
@@ -801,6 +802,10 @@ describe('useCallControl', () => {
       conference: {isVisible: false, isEnabled: false},
       consultTransfer: {isVisible: false, isEnabled: false},
       mergeConference: {isVisible: false, isEnabled: false},
+      mergeConferenceConsult: {isVisible: false, isEnabled: false},
+      consultTransferConsult: {isVisible: false, isEnabled: false},
+      switchToMainCall: {isVisible: false, isEnabled: false},
+      switchToConsult: {isVisible: false, isEnabled: false},
       exitConference: {isVisible: false, isEnabled: false},
       isConferenceInProgress: false,
       isConsultInitiated: false,
@@ -808,6 +813,7 @@ describe('useCallControl', () => {
       isConsultInitiatedOrAccepted: false,
       isConsultReceived: false,
       isHeld: false,
+      consultCallHeld: false,
     };
     mockGetControlsVisibility.mockReturnValue(mockControlVisibility);
   });
@@ -4004,6 +4010,7 @@ describe('Task Hook Error Handling and Logging', () => {
     it('should handle synchronous errors in toggleMute', () => {
       mockGetControlsVisibility.mockReturnValue({
         muteUnmute: {isVisible: true, isEnabled: true},
+        muteUnmuteConsult: {isVisible: false, isEnabled: false},
         holdResume: {isVisible: true, isEnabled: true},
         transfer: {isVisible: true, isEnabled: true},
         consult: {isVisible: true, isEnabled: true},
@@ -4017,6 +4024,10 @@ describe('Task Hook Error Handling and Logging', () => {
         conference: {isVisible: false, isEnabled: false},
         consultTransfer: {isVisible: false, isEnabled: false},
         mergeConference: {isVisible: false, isEnabled: false},
+        mergeConferenceConsult: {isVisible: false, isEnabled: false},
+        consultTransferConsult: {isVisible: false, isEnabled: false},
+        switchToMainCall: {isVisible: false, isEnabled: false},
+        switchToConsult: {isVisible: false, isEnabled: false},
         exitConference: {isVisible: false, isEnabled: false},
         isConferenceInProgress: false,
         isConsultInitiated: false,
@@ -4024,6 +4035,7 @@ describe('Task Hook Error Handling and Logging', () => {
         isConsultInitiatedOrAccepted: false,
         isConsultReceived: false,
         isHeld: false,
+        consultCallHeld: false,
       });
 
       const errorTask = {
@@ -4251,6 +4263,7 @@ describe('Task Hook Error Handling and Logging', () => {
 
       mockGetControlsVisibility.mockReturnValue({
         muteUnmute: {isVisible: true, isEnabled: true},
+        muteUnmuteConsult: {isVisible: false, isEnabled: false},
         holdResume: {isVisible: true, isEnabled: true},
         transfer: {isVisible: true, isEnabled: true},
         consult: {isVisible: true, isEnabled: true},
@@ -4264,6 +4277,10 @@ describe('Task Hook Error Handling and Logging', () => {
         conference: {isVisible: false, isEnabled: false},
         consultTransfer: {isVisible: false, isEnabled: false},
         mergeConference: {isVisible: false, isEnabled: false},
+        mergeConferenceConsult: {isVisible: false, isEnabled: false},
+        consultTransferConsult: {isVisible: false, isEnabled: false},
+        switchToMainCall: {isVisible: false, isEnabled: false},
+        switchToConsult: {isVisible: false, isEnabled: false},
         exitConference: {isVisible: false, isEnabled: false},
         isConferenceInProgress: false,
         isConsultInitiated: false,
@@ -4271,6 +4288,7 @@ describe('Task Hook Error Handling and Logging', () => {
         isConsultInitiatedOrAccepted: false,
         isConsultReceived: false,
         isHeld: false,
+        consultCallHeld: false,
       });
 
       const taskWithAutoWrapup = {
@@ -4307,6 +4325,7 @@ describe('Task Hook Error Handling and Logging', () => {
 
       mockGetControlsVisibility.mockReturnValue({
         muteUnmute: {isVisible: true, isEnabled: true},
+        muteUnmuteConsult: {isVisible: false, isEnabled: false},
         holdResume: {isVisible: true, isEnabled: true},
         transfer: {isVisible: true, isEnabled: true},
         consult: {isVisible: true, isEnabled: true},
@@ -4320,6 +4339,10 @@ describe('Task Hook Error Handling and Logging', () => {
         conference: {isVisible: false, isEnabled: false},
         consultTransfer: {isVisible: false, isEnabled: false},
         mergeConference: {isVisible: false, isEnabled: false},
+        mergeConferenceConsult: {isVisible: false, isEnabled: false},
+        consultTransferConsult: {isVisible: false, isEnabled: false},
+        switchToMainCall: {isVisible: false, isEnabled: false},
+        switchToConsult: {isVisible: false, isEnabled: false},
         exitConference: {isVisible: false, isEnabled: false},
         isConferenceInProgress: false,
         isConsultInitiated: false,
@@ -4327,6 +4350,7 @@ describe('Task Hook Error Handling and Logging', () => {
         isConsultInitiatedOrAccepted: false,
         isConsultReceived: false,
         isHeld: false,
+        consultCallHeld: false,
       });
 
       const taskWithAutoWrapup = {

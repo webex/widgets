@@ -65,6 +65,7 @@ describe('CallControl Utils', () => {
     decline: {isVisible: true, isEnabled: true},
     end: {isVisible: true, isEnabled: true},
     muteUnmute: {isVisible: true, isEnabled: true},
+    muteUnmuteConsult: {isVisible: true, isEnabled: true},
     holdResume: {isVisible: true, isEnabled: true},
     consult: {isVisible: true, isEnabled: true},
     transfer: {isVisible: true, isEnabled: true},
@@ -75,13 +76,18 @@ describe('CallControl Utils', () => {
     recordingIndicator: {isVisible: true, isEnabled: true},
     exitConference: {isVisible: false, isEnabled: false},
     mergeConference: {isVisible: false, isEnabled: false},
+    mergeConferenceConsult: {isVisible: false, isEnabled: false},
     consultTransfer: {isVisible: false, isEnabled: false},
+    consultTransferConsult: {isVisible: false, isEnabled: false},
+    switchToMainCall: {isVisible: false, isEnabled: false},
+    switchToConsult: {isVisible: false, isEnabled: false},
     isConferenceInProgress: false,
     isConsultInitiated: false,
     isConsultInitiatedAndAccepted: false,
     isConsultInitiatedOrAccepted: false,
     isConsultReceived: false,
     isHeld: false,
+    consultCallHeld: false,
   };
 
   const mockMediaTypeInfo = {
@@ -444,6 +450,7 @@ describe('CallControl Utils', () => {
       toggleRecording: jest.fn(),
       endCall: jest.fn(),
       exitConference: jest.fn(),
+      switchToConsult: jest.fn(),
     };
 
     it('should build buttons with correct configuration when muted', () => {
@@ -457,10 +464,13 @@ describe('CallControl Utils', () => {
         mockFunctions.handleToggleHoldFunc,
         mockFunctions.toggleRecording,
         mockFunctions.endCall,
-        mockFunctions.exitConference
+        mockFunctions.exitConference,
+        mockFunctions.switchToConsult,
+        jest.fn(), // switchToMainCall
+        jest.fn() // mergeConference
       );
 
-      expect(buttons).toHaveLength(7);
+      expect(buttons).toHaveLength(10); // Updated to 10 to include switchToConsult, transferConsult, and conference buttons
 
       // Check mute button
       const muteButton = buttons.find((b) => b.id === 'mute');
@@ -505,7 +515,10 @@ describe('CallControl Utils', () => {
         mockFunctions.handleToggleHoldFunc,
         mockFunctions.toggleRecording,
         mockFunctions.endCall,
-        mockFunctions.exitConference
+        mockFunctions.exitConference,
+        mockFunctions.switchToConsult,
+        jest.fn(), // switchToMainCall
+        jest.fn() // mergeConference
       );
 
       // Check mute button
@@ -550,7 +563,10 @@ describe('CallControl Utils', () => {
         mockFunctions.handleToggleHoldFunc,
         mockFunctions.toggleRecording,
         mockFunctions.endCall,
-        mockFunctions.exitConference
+        mockFunctions.exitConference,
+        mockFunctions.switchToConsult,
+        jest.fn(), // switchToMainCall
+        jest.fn() // mergeConference
       );
 
       const consultButton = buttons.find((b) => b.id === 'consult');
@@ -590,7 +606,10 @@ describe('CallControl Utils', () => {
         mockFunctions.handleToggleHoldFunc,
         mockFunctions.toggleRecording,
         mockFunctions.endCall,
-        mockFunctions.exitConference
+        mockFunctions.exitConference,
+        mockFunctions.switchToConsult,
+        jest.fn(), // switchToMainCall
+        jest.fn() // mergeConference
       );
 
       let recordButton = buttons.find((b) => b.id === 'record');
@@ -608,7 +627,10 @@ describe('CallControl Utils', () => {
         mockFunctions.handleToggleHoldFunc,
         mockFunctions.toggleRecording,
         mockFunctions.endCall,
-        mockFunctions.exitConference
+        mockFunctions.exitConference,
+        mockFunctions.switchToConsult,
+        jest.fn(), // switchToMainCall
+        jest.fn() // mergeConference
       );
 
       recordButton = buttons.find((b) => b.id === 'record');
@@ -632,7 +654,10 @@ describe('CallControl Utils', () => {
         mockFunctions.handleToggleHoldFunc,
         mockFunctions.toggleRecording,
         mockFunctions.endCall,
-        mockFunctions.exitConference
+        mockFunctions.exitConference,
+        mockFunctions.switchToConsult,
+        jest.fn(), // switchToMainCall
+        jest.fn() // mergeConference
       );
       const exitConferenceButton = buttons.find((b) => b.id === 'exitConference');
       expect(exitConferenceButton).toEqual({

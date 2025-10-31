@@ -9,15 +9,10 @@ import {
   AddressBookEntry,
   EntryPointRecord,
   FetchPaginatedList,
+  Participant,
 } from '@webex/cc-store';
 
 type Enum<T extends Record<string, unknown>> = T[keyof T];
-
-export type Participant = {
-  id: string;
-  pType: 'Customer' | 'Agent' | string;
-  name?: string;
-};
 
 /**
  * Interface representing the TaskProps of a user.
@@ -299,6 +294,16 @@ export interface ControlProps {
   consultConference: () => void;
 
   /**
+   * Function to switch to conference call.
+   */
+  switchToMainCall: () => void;
+
+  /**
+   * Function to switch to consult call.
+   */
+  switchToConsult: () => void;
+
+  /**
    * Function to exit Conference
    */
   exitConference: () => void;
@@ -446,6 +451,8 @@ export type CallControlComponentProps = Pick<
   | 'transferCall'
   | 'consultCall'
   | 'consultConference'
+  | 'switchToMainCall'
+  | 'switchToConsult'
   | 'exitConference'
   | 'endConsultCall'
   | 'consultTransfer'
@@ -567,6 +574,7 @@ export interface CallControlConsultComponentsProps {
   onTransfer?: () => void;
   endConsultCall?: () => void;
   consultConference?: () => void;
+  switchToMainCall?: () => void;
   logger: ILogger;
   isMuted: boolean;
   controlVisibility: ControlVisibility;
@@ -626,6 +634,7 @@ export interface ControlVisibility {
   decline: Visibility;
   end: Visibility;
   muteUnmute: Visibility;
+  muteUnmuteConsult: Visibility;
   holdResume: Visibility;
   consult: Visibility;
   transfer: Visibility;
@@ -637,12 +646,17 @@ export interface ControlVisibility {
   exitConference: Visibility;
   mergeConference: Visibility;
   consultTransfer: Visibility;
+  mergeConferenceConsult: Visibility;
+  consultTransferConsult: Visibility;
+  switchToMainCall: Visibility;
+  switchToConsult: Visibility;
   isConferenceInProgress: boolean;
   isConsultInitiated: boolean;
   isConsultInitiatedAndAccepted: boolean;
   isConsultReceived: boolean;
   isConsultInitiatedOrAccepted: boolean;
   isHeld: boolean;
+  consultCallHeld: boolean;
 }
 
 export interface MediaTypeInfo {

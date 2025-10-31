@@ -200,6 +200,9 @@ export const buildCallControlButtons = (
   toggleRecording: () => void,
   endCall: () => void,
   exitConference: () => void,
+  switchToConsult: () => void,
+  onTransferConsult: () => void,
+  handleConsultConferencePress: () => void,
   logger?
 ): CallControlButton[] => {
   try {
@@ -214,6 +217,17 @@ export const buildCallControlButtons = (
         isVisible: controlVisibility.muteUnmute.isVisible,
         dataTestId: 'call-control:mute-toggle',
       },
+      {
+        id: 'switchToConsult',
+        icon: 'call-swap-bold',
+        tooltip: 'Switch to Consult Call',
+        className: 'call-control-button',
+        onClick: switchToConsult,
+        disabled: !controlVisibility.switchToConsult.isEnabled,
+        isVisible: controlVisibility.switchToConsult.isVisible,
+        dataTestId: 'call-control:switch-to-consult',
+      },
+
       {
         id: 'hold',
         icon: controlVisibility.isHeld ? 'play-bold' : 'pause-bold',
@@ -235,14 +249,22 @@ export const buildCallControlButtons = (
         dataTestId: 'call-control:consult',
       },
       {
-        id: 'exitConference',
-        icon: 'exit-room-bold',
-        tooltip: 'Exit Conference',
-        className: 'call-control-button-muted',
-        onClick: exitConference,
-        disabled: !controlVisibility.exitConference.isEnabled,
-        isVisible: controlVisibility.exitConference.isVisible,
-        dataTestId: 'call-control:exit-conference',
+        id: 'transferConsult',
+        icon: 'next-bold',
+        tooltip: controlVisibility.isConferenceInProgress ? 'Transfer Conference' : 'Transfer',
+        onClick: onTransferConsult || (() => {}),
+        className: 'call-control-button',
+        disabled: !controlVisibility.consultTransfer.isEnabled,
+        isVisible: controlVisibility.consultTransfer.isVisible && !!onTransferConsult,
+      },
+      {
+        id: 'conference',
+        icon: 'webex-teams-bold',
+        tooltip: 'conference',
+        onClick: handleConsultConferencePress || (() => {}),
+        className: 'call-control-button',
+        disabled: !controlVisibility.mergeConference.isEnabled,
+        isVisible: controlVisibility.mergeConference.isVisible && !!handleConsultConferencePress,
       },
       {
         id: 'transfer',
@@ -263,6 +285,16 @@ export const buildCallControlButtons = (
         disabled: !controlVisibility.pauseResumeRecording.isEnabled,
         isVisible: controlVisibility.pauseResumeRecording.isVisible,
         dataTestId: 'call-control:recording-toggle',
+      },
+      {
+        id: 'exitConference',
+        icon: 'exit-room-bold',
+        tooltip: 'Exit Conference',
+        className: 'call-control-button-muted',
+        onClick: exitConference,
+        disabled: !controlVisibility.exitConference.isEnabled,
+        isVisible: controlVisibility.exitConference.isVisible,
+        dataTestId: 'call-control:exit-conference',
       },
       {
         id: 'end',

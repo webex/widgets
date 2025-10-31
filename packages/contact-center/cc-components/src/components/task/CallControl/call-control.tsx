@@ -25,6 +25,7 @@ import {
   updateCallStateFromTask,
 } from './call-control.utils';
 import {withMetrics} from '@webex/cc-ui-logging';
+import {handleConsultConferencePress, handleTransferPress} from './CallControlCustom/call-control-custom.utils';
 
 function CallControlComponent(props: CallControlComponentProps) {
   const [selectedWrapupReason, setSelectedWrapupReason] = useState<string | null>(null);
@@ -49,6 +50,9 @@ function CallControlComponent(props: CallControlComponentProps) {
     transferCall,
     consultCall,
     exitConference,
+    switchToConsult,
+    consultConference,
+    consultTransfer,
     callControlAudio,
     setConsultAgentName,
     allowConsultToQueue,
@@ -88,6 +92,12 @@ function CallControlComponent(props: CallControlComponentProps) {
 
   const handleWrapupChange = (text, value) => {
     handleWrapupChangeUtil(text, value, setSelectedWrapupReason, setSelectedWrapupId, logger);
+  };
+  const handleConsultTransfer = () => {
+    handleTransferPress(consultTransfer, logger);
+  };
+  const handleConsultConference = () => {
+    handleConsultConferencePress(consultConference, logger);
   };
 
   const handleTargetSelect = (
@@ -130,7 +140,9 @@ function CallControlComponent(props: CallControlComponentProps) {
     toggleRecording,
     endCall,
     exitConference,
-    logger
+    switchToConsult,
+    handleConsultTransfer,
+    handleConsultConference
   );
 
   const filteredButtons = filterButtonsForConsultation(
@@ -194,9 +206,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                           <ButtonCircle
                             className={button.className}
                             aria-label={button.tooltip}
-                            disabled={
-                              button.disabled || (controlVisibility.isConsultInitiatedOrAccepted && isTelephony)
-                            }
+                            disabled={button.disabled}
                             data-testid={button.dataTestId}
                           >
                             <Icon className={button.className + '-icon'} name={button.icon} />
@@ -255,15 +265,10 @@ function CallControlComponent(props: CallControlComponentProps) {
                   key={index}
                   triggerComponent={
                     <ButtonCircle
-                      className={
-                        button.className +
-                        (button.disabled || (controlVisibility.isConsultInitiatedOrAccepted && isTelephony)
-                          ? ` ${button.className}-disabled`
-                          : '')
-                      }
+                      className={button.className + (button.disabled ? ` ${button.className}-disabled` : '')}
                       data-testid={button.dataTestId}
                       onPress={button.onClick}
-                      disabled={button.disabled || (controlVisibility.isConsultInitiatedOrAccepted && isTelephony)}
+                      disabled={button.disabled}
                       aria-label={button.tooltip}
                     >
                       <Icon className={button.className + '-icon'} name={button.icon} />

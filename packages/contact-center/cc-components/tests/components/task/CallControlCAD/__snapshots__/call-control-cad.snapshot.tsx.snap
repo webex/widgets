@@ -67,9 +67,9 @@ exports[`CallControlCADComponent Snapshots should handle edge cases and control 
         <button
           aria-describedby="react-aria-:r1m:"
           aria-label="Mute"
-          class="md-button-circle-wrapper call-control-button call-control-button-disabled md-button-simple-wrapper"
+          class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
           data-color="primary"
-          data-disabled="true"
+          data-disabled="false"
           data-ghost="false"
           data-inverted="false"
           data-multiple-children="false"
@@ -77,7 +77,6 @@ exports[`CallControlCADComponent Snapshots should handle edge cases and control 
           data-shallow-disabled="false"
           data-size="40"
           data-testid="call-control:mute-toggle"
-          disabled=""
           type="button"
         >
           <mdc-icon
@@ -99,7 +98,7 @@ exports[`CallControlCADComponent Snapshots should handle edge cases and control 
           aria-label="Transfer Voice"
           class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
           data-color="primary"
-          data-disabled="true"
+          data-disabled="false"
           data-ghost="false"
           data-inverted="false"
           data-multiple-children="false"
@@ -107,7 +106,6 @@ exports[`CallControlCADComponent Snapshots should handle edge cases and control 
           data-shallow-disabled="false"
           data-size="40"
           data-testid="call-control:transfer"
-          disabled=""
           type="button"
         >
           <mdc-icon
@@ -125,9 +123,9 @@ exports[`CallControlCADComponent Snapshots should handle edge cases and control 
         <button
           aria-describedby="react-aria-:r1o:"
           aria-label="Resume Recording"
-          class="md-button-circle-wrapper call-control-button call-control-button-disabled md-button-simple-wrapper"
+          class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
           data-color="primary"
-          data-disabled="true"
+          data-disabled="false"
           data-ghost="false"
           data-inverted="false"
           data-multiple-children="false"
@@ -135,7 +133,6 @@ exports[`CallControlCADComponent Snapshots should handle edge cases and control 
           data-shallow-disabled="false"
           data-size="40"
           data-testid="call-control:recording-toggle"
-          disabled=""
           type="button"
         >
           <mdc-icon
@@ -153,9 +150,9 @@ exports[`CallControlCADComponent Snapshots should handle edge cases and control 
         <button
           aria-describedby="react-aria-:r1p:"
           aria-label="End Voice"
-          class="md-button-circle-wrapper call-control-button-cancel call-control-button-cancel-disabled md-button-simple-wrapper"
+          class="md-button-circle-wrapper call-control-button-cancel md-button-simple-wrapper"
           data-color="primary"
-          data-disabled="true"
+          data-disabled="false"
           data-ghost="false"
           data-inverted="false"
           data-multiple-children="false"
@@ -163,7 +160,6 @@ exports[`CallControlCADComponent Snapshots should handle edge cases and control 
           data-shallow-disabled="false"
           data-size="40"
           data-testid="call-control:end-call"
-          disabled=""
           type="button"
         >
           <mdc-icon
@@ -1875,9 +1871,9 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
         <button
           aria-describedby="react-aria-:ru:"
           aria-label="Mute"
-          class="md-button-circle-wrapper call-control-button call-control-button-disabled md-button-simple-wrapper"
+          class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
           data-color="primary"
-          data-disabled="true"
+          data-disabled="false"
           data-ghost="false"
           data-inverted="false"
           data-multiple-children="false"
@@ -1885,7 +1881,6 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
           data-shallow-disabled="false"
           data-size="40"
           data-testid="call-control:mute-toggle"
-          disabled=""
           type="button"
         >
           <mdc-icon
@@ -1907,7 +1902,7 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
           aria-label="Transfer Voice"
           class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
           data-color="primary"
-          data-disabled="true"
+          data-disabled="false"
           data-ghost="false"
           data-inverted="false"
           data-multiple-children="false"
@@ -1915,7 +1910,6 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
           data-shallow-disabled="false"
           data-size="40"
           data-testid="call-control:transfer"
-          disabled=""
           type="button"
         >
           <mdc-icon
@@ -1933,9 +1927,9 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
         <button
           aria-describedby="react-aria-:r10:"
           aria-label="Resume Recording"
-          class="md-button-circle-wrapper call-control-button call-control-button-disabled md-button-simple-wrapper"
+          class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
           data-color="primary"
-          data-disabled="true"
+          data-disabled="false"
           data-ghost="false"
           data-inverted="false"
           data-multiple-children="false"
@@ -1943,7 +1937,6 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
           data-shallow-disabled="false"
           data-size="40"
           data-testid="call-control:recording-toggle"
-          disabled=""
           type="button"
         >
           <mdc-icon
@@ -1961,9 +1954,9 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
         <button
           aria-describedby="react-aria-:r11:"
           aria-label="End Voice"
-          class="md-button-circle-wrapper call-control-button-cancel call-control-button-cancel-disabled md-button-simple-wrapper"
+          class="md-button-circle-wrapper call-control-button-cancel md-button-simple-wrapper"
           data-color="primary"
-          data-disabled="true"
+          data-disabled="false"
           data-ghost="false"
           data-inverted="false"
           data-multiple-children="false"
@@ -1971,7 +1964,6 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
           data-shallow-disabled="false"
           data-size="40"
           data-testid="call-control:end-call"
-          disabled=""
           type="button"
         >
           <mdc-icon
@@ -2184,9 +2176,9 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
       <button
         aria-describedby="react-aria-:r1a:"
         aria-label="Mute"
-        class="md-button-circle-wrapper call-control-button call-control-button-disabled md-button-simple-wrapper"
+        class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
         data-color="primary"
-        data-disabled="true"
+        data-disabled="false"
         data-ghost="false"
         data-inverted="false"
         data-multiple-children="false"
@@ -2194,7 +2186,6 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
         data-shallow-disabled="false"
         data-size="40"
         data-testid="call-control:mute-toggle"
-        disabled=""
         type="button"
       >
         <mdc-icon
@@ -2216,7 +2207,7 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
         aria-label="Transfer Voice"
         class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
         data-color="primary"
-        data-disabled="true"
+        data-disabled="false"
         data-ghost="false"
         data-inverted="false"
         data-multiple-children="false"
@@ -2224,7 +2215,6 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
         data-shallow-disabled="false"
         data-size="40"
         data-testid="call-control:transfer"
-        disabled=""
         type="button"
       >
         <mdc-icon
@@ -2242,9 +2232,9 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
       <button
         aria-describedby="react-aria-:r1c:"
         aria-label="Resume Recording"
-        class="md-button-circle-wrapper call-control-button call-control-button-disabled md-button-simple-wrapper"
+        class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
         data-color="primary"
-        data-disabled="true"
+        data-disabled="false"
         data-ghost="false"
         data-inverted="false"
         data-multiple-children="false"
@@ -2252,7 +2242,6 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
         data-shallow-disabled="false"
         data-size="40"
         data-testid="call-control:recording-toggle"
-        disabled=""
         type="button"
       >
         <mdc-icon
@@ -2270,9 +2259,9 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
       <button
         aria-describedby="react-aria-:r1d:"
         aria-label="End Voice"
-        class="md-button-circle-wrapper call-control-button-cancel call-control-button-cancel-disabled md-button-simple-wrapper"
+        class="md-button-circle-wrapper call-control-button-cancel md-button-simple-wrapper"
         data-color="primary"
-        data-disabled="true"
+        data-disabled="false"
         data-ghost="false"
         data-inverted="false"
         data-multiple-children="false"
@@ -2280,7 +2269,6 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
         data-shallow-disabled="false"
         data-size="40"
         data-testid="call-control:end-call"
-        disabled=""
         type="button"
       >
         <mdc-icon

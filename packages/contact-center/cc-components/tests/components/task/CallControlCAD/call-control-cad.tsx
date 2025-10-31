@@ -87,6 +87,7 @@ describe('CallControlCADComponent', () => {
     decline: {isVisible: true, isEnabled: true},
     end: {isVisible: true, isEnabled: true},
     muteUnmute: {isVisible: true, isEnabled: true},
+    muteUnmuteConsult: {isVisible: true, isEnabled: true},
     holdResume: {isVisible: true, isEnabled: true},
     consult: {isVisible: true, isEnabled: true},
     transfer: {isVisible: true, isEnabled: true},
@@ -97,13 +98,18 @@ describe('CallControlCADComponent', () => {
     recordingIndicator: {isVisible: true, isEnabled: true},
     exitConference: {isVisible: false, isEnabled: false},
     mergeConference: {isVisible: false, isEnabled: false},
+    mergeConferenceConsult: {isVisible: false, isEnabled: false},
     consultTransfer: {isVisible: false, isEnabled: false},
+    consultTransferConsult: {isVisible: false, isEnabled: false},
+    switchToMainCall: {isVisible: false, isEnabled: false},
+    switchToConsult: {isVisible: false, isEnabled: false},
     isConferenceInProgress: false,
     isConsultInitiated: false,
     isConsultInitiatedAndAccepted: false,
     isConsultInitiatedOrAccepted: false,
     isConsultReceived: false,
     isHeld: false,
+    consultCallHeld: false,
   };
 
   const defaultProps: CallControlComponentProps = {
@@ -140,6 +146,8 @@ describe('CallControlCADComponent', () => {
     cancelAutoWrapup: jest.fn(),
     exitConference: jest.fn(),
     consultConference: jest.fn(),
+    switchToMainCall: jest.fn(),
+    switchToConsult: jest.fn(),
     conferenceParticipants: [],
   };
 

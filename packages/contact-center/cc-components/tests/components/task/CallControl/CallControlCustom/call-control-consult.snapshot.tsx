@@ -79,6 +79,7 @@ describe('CallControlConsultComponent Snapshots', () => {
     decline: {isVisible: true, isEnabled: true},
     end: {isVisible: true, isEnabled: true},
     muteUnmute: {isVisible: true, isEnabled: true},
+    muteUnmuteConsult: {isVisible: true, isEnabled: true},
     holdResume: {isVisible: true, isEnabled: true},
     consult: {isVisible: true, isEnabled: true},
     transfer: {isVisible: true, isEnabled: true},
@@ -89,13 +90,18 @@ describe('CallControlConsultComponent Snapshots', () => {
     recordingIndicator: {isVisible: true, isEnabled: true},
     exitConference: {isVisible: false, isEnabled: false},
     mergeConference: {isVisible: true, isEnabled: true},
+    mergeConferenceConsult: {isVisible: true, isEnabled: true},
     consultTransfer: {isVisible: true, isEnabled: true},
+    consultTransferConsult: {isVisible: true, isEnabled: true},
+    switchToMainCall: {isVisible: true, isEnabled: true},
+    switchToConsult: {isVisible: true, isEnabled: true},
     isConferenceInProgress: false,
     isConsultInitiated: false,
     isConsultInitiatedAndAccepted: false,
     isConsultInitiatedOrAccepted: false,
     isConsultReceived: false,
     isHeld: false,
+    consultCallHeld: false,
   };
 
   const defaultProps = {

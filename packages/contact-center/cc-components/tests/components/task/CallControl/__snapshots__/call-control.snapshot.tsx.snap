@@ -1164,9 +1164,9 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
     <button
       aria-describedby="react-aria-:r14:"
       aria-label="Mute"
-      class="md-button-circle-wrapper call-control-button call-control-button-disabled md-button-simple-wrapper"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
-      data-disabled="true"
+      data-disabled="false"
       data-ghost="false"
       data-inverted="false"
       data-multiple-children="false"
@@ -1174,7 +1174,6 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:mute-toggle"
-      disabled=""
       type="button"
     >
       <mdc-icon
@@ -1197,7 +1196,7 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       aria-label="Transfer Call"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
-      data-disabled="true"
+      data-disabled="false"
       data-ghost="false"
       data-inverted="false"
       data-multiple-children="false"
@@ -1205,7 +1204,6 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:transfer"
-      disabled=""
       type="button"
     >
       <mdc-icon
@@ -1224,9 +1222,9 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
     <button
       aria-describedby="react-aria-:r16:"
       aria-label="Resume Recording"
-      class="md-button-circle-wrapper call-control-button call-control-button-disabled md-button-simple-wrapper"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
-      data-disabled="true"
+      data-disabled="false"
       data-ghost="false"
       data-inverted="false"
       data-multiple-children="false"
@@ -1234,7 +1232,6 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:recording-toggle"
-      disabled=""
       type="button"
     >
       <mdc-icon
@@ -1253,9 +1250,9 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
     <button
       aria-describedby="react-aria-:r17:"
       aria-label="End Call"
-      class="md-button-circle-wrapper call-control-button-cancel call-control-button-cancel-disabled md-button-simple-wrapper"
+      class="md-button-circle-wrapper call-control-button-cancel md-button-simple-wrapper"
       data-color="primary"
-      data-disabled="true"
+      data-disabled="false"
       data-ghost="false"
       data-inverted="false"
       data-multiple-children="false"
@@ -1263,7 +1260,6 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:end-call"
-      disabled=""
       type="button"
     >
       <mdc-icon

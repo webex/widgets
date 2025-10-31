@@ -16,3 +16,10 @@ export const CONSULT_STATE_CONFERENCING = 'conferencing';
 
 // Relationship Types
 export const RELATIONSHIP_TYPE_CONSULT = 'consult';
+
+export const AGENT = 'Agent';
+export const CUSTOMER = 'Customer';
+export const SUPERVISOR = 'Supervisor';
+export const VVA = 'VVA';
+
+export const MEDIA_TYPE_CONSULT = 'consult';

@@ -32,6 +32,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
     endConsultCall,
     consultTransfer,
     consultConference,
+    switchToMainCall,
     callControlClassName,
     callControlConsultClassName,
     startTimestamp,
@@ -220,7 +221,8 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
               <div className="call-status">
                 {!controlVisibility.wrapup.isVisible &&
                   controlVisibility.isHeld &&
-                  !controlVisibility.isConsultReceived && (
+                  !controlVisibility.isConsultReceived &&
+                  !controlVisibility.consultCallHeld && (
                     <>
                       <span className="dot">•</span>
                       <div className="on-hold">
@@ -273,6 +275,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
             endConsultCall={endConsultCall}
             onTransfer={consultTransfer}
             consultConference={consultConference}
+            switchToMainCall={switchToMainCall}
             logger={logger}
             isMuted={isMuted}
             controlVisibility={controlVisibility}

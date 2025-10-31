@@ -1,9 +1,16 @@
 import {useEffect, useCallback, useState, useRef, useMemo} from 'react';
 import {ITask} from '@webex/contact-center';
 import {useCallControlProps, UseTaskListProps, UseTaskProps, useOutdialCallProps} from './task.types';
-import store, {TASK_EVENTS, BuddyDetails, DestinationType, PaginatedListParams} from '@webex/cc-store';
-import {Participant} from '@webex/cc-components';
-import {findHoldTimestamp, getConferenceParticipants, getControlsVisibility} from './Utils/task-util';
+import store, {
+  TASK_EVENTS,
+  BuddyDetails,
+  DestinationType,
+  PaginatedListParams,
+  getConferenceParticipants,
+  Participant,
+  findMediaResourceId,
+} from '@webex/cc-store';
+import {findHoldTimestamp, getControlsVisibility} from './Utils/task-util';
 import {OutdialAniEntriesResponse} from '@webex/contact-center/dist/types/services/config/types';
 
 const ENGAGED_LABEL = 'ENGAGED';
@@ -742,6 +749,30 @@ export const useCallControl = (props: useCallControlProps) => {
     }
   };
 
+  const switchToMainCall = async () => {
+    try {
+      // const isHold = findHoldStatus(currentTask, agentId, 'mainCall');
+      // const consultHold = findHoldStatus(currentTask, agentId, 'consult');
+      await currentTask.resume(findMediaResourceId(currentTask, 'consult'));
+      logger.info('switchToMainCall success', {module: 'useCallControl', method: 'switchToMainCall'});
+    } catch (error) {
+      logger.error(`Error switching to conference: ${error}`, {module: 'useCallControl', method: 'switchToMainCall'});
+      throw error;
+    }
+  };
+
+  const switchToConsult = async () => {
+    try {
+      // const isHold = findHoldStatus(currentTask, agentId, 'mainCall');
+      // const consultHold = findHoldStatus(currentTask, agentId, 'consult');
+      await currentTask.hold(findMediaResourceId(currentTask, 'mainCall'));
+      logger.info('switchToConsult success', {module: 'useCallControl', method: 'switchToConsult'});
+    } catch (error) {
+      logger.error(`Error switching to consult: ${error}`, {module: 'useCallControl', method: 'switchToConsult'});
+      throw error;
+    }
+  };
+
   const exitConference = async () => {
     try {
       await currentTask.exitConference();
@@ -883,6 +914,8 @@ export const useCallControl = (props: useCallControlProps) => {
     endConsultCall,
     consultTransfer,
     consultConference,
+    switchToMainCall,
+    switchToConsult,
     exitConference,
     consultAgentName,
     setConsultAgentName,

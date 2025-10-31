@@ -12,6 +12,7 @@ import {
   getConsultStatusText,
   createTimerKey,
   handleConsultConferencePress,
+  handleSwitchToMainCallPress,
 } from './call-control-custom.utils';
 
 const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> = ({
@@ -20,6 +21,7 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
   onTransfer,
   endConsultCall,
   consultConference,
+  switchToMainCall,
   logger,
   isMuted,
   controlVisibility,
@@ -43,13 +45,18 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
     handleConsultConferencePress(consultConference, logger);
   };
 
+  const handleSwitchToMainCall = () => {
+    handleSwitchToMainCallPress(switchToMainCall, logger);
+  };
+
   const buttons = createConsultButtons(
     isMuted,
     controlVisibility,
     onTransfer ? handleTransfer : undefined,
     handleConsultMuteToggle,
     handleEndConsult,
-    handleConsultConference
+    handleConsultConference,
+    handleSwitchToMainCall
   );
 
   // Filter buttons that should be shown, then map them

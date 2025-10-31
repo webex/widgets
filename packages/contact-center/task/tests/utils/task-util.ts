@@ -1,10 +1,6 @@
 import {mockTask} from '@webex/test-fixtures';
-import {
-  findHoldTimestamp,
-  getControlsVisibility,
-  getIsConferenceInProgress,
-  getConferenceParticipants,
-} from '../../src/Utils/task-util';
+import {findHoldTimestamp, getControlsVisibility} from '../../src/Utils/task-util';
+import {getIsConferenceInProgress, getConferenceParticipants} from '@webex/cc-store';
 import {ITask, TaskData} from '@webex/contact-center';
 
 // Helper function to create properly typed partial task objects for testing
@@ -36,6 +32,7 @@ describe('getControlsVisibility', () => {
       decline: {isVisible: true, isEnabled: true},
       end: {isVisible: true, isEnabled: true},
       muteUnmute: {isVisible: true, isEnabled: true},
+      muteUnmuteConsult: {isVisible: true, isEnabled: true},
       holdResume: {isVisible: true, isEnabled: true},
       consult: {isVisible: true, isEnabled: true},
       transfer: {isVisible: true, isEnabled: true},
@@ -43,8 +40,12 @@ describe('getControlsVisibility', () => {
       wrapup: {isVisible: false, isEnabled: true},
       pauseResumeRecording: {isVisible: true, isEnabled: true},
       endConsult: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
-      consultTransfer: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
-      mergeConference: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
+      consultTransfer: {isVisible: false, isEnabled: false}, // Not visible when no consult in progress
+      mergeConference: {isVisible: false, isEnabled: false}, // Not visible when no consult in progress
+      mergeConferenceConsult: {isVisible: false, isEnabled: true},
+      consultTransferConsult: {isVisible: false, isEnabled: true},
+      switchToMainCall: {isVisible: false, isEnabled: false},
+      switchToConsult: {isVisible: false, isEnabled: true},
       exitConference: {isVisible: false, isEnabled: true}, // Not visible when no conference in progress
       recordingIndicator: {isVisible: true, isEnabled: true},
       isConferenceInProgress: false,
@@ -53,6 +54,7 @@ describe('getControlsVisibility', () => {
       isConsultInitiatedOrAccepted: false,
       isConsultReceived: false,
       isHeld: false,
+      consultCallHeld: false,
     };
 
     expect(getControlsVisibility(deviceType, featureFlags, mockTask, 'agent1', false)).toEqual(expectedControls);
@@ -71,6 +73,7 @@ describe('getControlsVisibility', () => {
       decline: {isVisible: false, isEnabled: true},
       end: {isVisible: true, isEnabled: true},
       muteUnmute: {isVisible: false, isEnabled: true},
+      muteUnmuteConsult: {isVisible: false, isEnabled: true},
       holdResume: {isVisible: false, isEnabled: true},
       consult: {isVisible: false, isEnabled: true},
       transfer: {isVisible: false, isEnabled: true},
@@ -78,8 +81,12 @@ describe('getControlsVisibility', () => {
       wrapup: {isVisible: false, isEnabled: true},
       pauseResumeRecording: {isVisible: false, isEnabled: true},
       endConsult: {isVisible: false, isEnabled: true},
-      consultTransfer: {isVisible: false, isEnabled: true},
-      mergeConference: {isVisible: false, isEnabled: true},
+      consultTransfer: {isVisible: false, isEnabled: false},
+      mergeConference: {isVisible: false, isEnabled: false},
+      mergeConferenceConsult: {isVisible: false, isEnabled: true},
+      consultTransferConsult: {isVisible: false, isEnabled: true},
+      switchToMainCall: {isVisible: false, isEnabled: false},
+      switchToConsult: {isVisible: false, isEnabled: true},
       exitConference: {isVisible: false, isEnabled: true},
       recordingIndicator: {isVisible: true, isEnabled: true},
       isConferenceInProgress: false,
@@ -88,6 +95,7 @@ describe('getControlsVisibility', () => {
       isConsultInitiatedOrAccepted: false,
       isConsultReceived: false,
       isHeld: false,
+      consultCallHeld: false,
     };
 
     expect(getControlsVisibility(deviceType, featureFlags, mockTask, 'agent1', false)).toEqual(expectedControls);
@@ -106,6 +114,7 @@ describe('getControlsVisibility', () => {
       decline: {isVisible: true, isEnabled: true},
       end: {isVisible: true, isEnabled: true},
       muteUnmute: {isVisible: true, isEnabled: true},
+      muteUnmuteConsult: {isVisible: true, isEnabled: true},
       holdResume: {isVisible: true, isEnabled: true},
       consult: {isVisible: true, isEnabled: true},
       transfer: {isVisible: true, isEnabled: true},
@@ -113,8 +122,12 @@ describe('getControlsVisibility', () => {
       wrapup: {isVisible: false, isEnabled: true},
       pauseResumeRecording: {isVisible: true, isEnabled: true},
       endConsult: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
-      consultTransfer: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
-      mergeConference: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
+      consultTransfer: {isVisible: false, isEnabled: false}, // Not visible when no consult in progress
+      mergeConference: {isVisible: false, isEnabled: false}, // Not visible when no consult in progress
+      mergeConferenceConsult: {isVisible: false, isEnabled: true},
+      consultTransferConsult: {isVisible: false, isEnabled: true},
+      switchToMainCall: {isVisible: false, isEnabled: false},
+      switchToConsult: {isVisible: false, isEnabled: true},
       exitConference: {isVisible: false, isEnabled: true}, // Not visible when no conference in progress
       recordingIndicator: {isVisible: true, isEnabled: true},
       isConferenceInProgress: false,
@@ -123,6 +136,7 @@ describe('getControlsVisibility', () => {
       isConsultInitiatedOrAccepted: false,
       isConsultReceived: false,
       isHeld: false,
+      consultCallHeld: false,
     };
 
     expect(getControlsVisibility(deviceType, featureFlags, mockTask, 'agent1', false)).toEqual(expectedControls);
@@ -147,6 +161,7 @@ describe('getControlsVisibility', () => {
       decline: {isVisible: true, isEnabled: true},
       end: {isVisible: true, isEnabled: true},
       muteUnmute: {isVisible: true, isEnabled: true},
+      muteUnmuteConsult: {isVisible: true, isEnabled: true},
       holdResume: {isVisible: true, isEnabled: true},
       consult: {isVisible: true, isEnabled: true},
       transfer: {isVisible: true, isEnabled: true},
@@ -154,8 +169,12 @@ describe('getControlsVisibility', () => {
       wrapup: {isVisible: false, isEnabled: true},
       pauseResumeRecording: {isVisible: true, isEnabled: true},
       endConsult: {isVisible: false, isEnabled: true}, // Not visible when isEndConsultEnabled is false
-      consultTransfer: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
-      mergeConference: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
+      consultTransfer: {isVisible: false, isEnabled: false}, // Not visible when no consult in progress
+      mergeConference: {isVisible: false, isEnabled: false}, // Not visible when no consult in progress
+      mergeConferenceConsult: {isVisible: false, isEnabled: true},
+      consultTransferConsult: {isVisible: false, isEnabled: true},
+      switchToMainCall: {isVisible: false, isEnabled: false},
+      switchToConsult: {isVisible: false, isEnabled: true},
       exitConference: {isVisible: false, isEnabled: true}, // Not visible when no conference in progress
       recordingIndicator: {isVisible: true, isEnabled: true},
       isConferenceInProgress: false,
@@ -164,6 +183,7 @@ describe('getControlsVisibility', () => {
       isConsultInitiatedOrAccepted: false,
       isConsultReceived: false,
       isHeld: false,
+      consultCallHeld: false,
     };
 
     expect(getControlsVisibility(deviceType, featureFlags, task, 'agent1', false)).toEqual(expectedControls);
@@ -182,6 +202,7 @@ describe('getControlsVisibility', () => {
       decline: {isVisible: false, isEnabled: true},
       end: {isVisible: true, isEnabled: true},
       muteUnmute: {isVisible: false, isEnabled: true},
+      muteUnmuteConsult: {isVisible: false, isEnabled: true},
       holdResume: {isVisible: true, isEnabled: true},
       consult: {isVisible: true, isEnabled: true},
       transfer: {isVisible: true, isEnabled: true},
@@ -189,8 +210,12 @@ describe('getControlsVisibility', () => {
       wrapup: {isVisible: false, isEnabled: true},
       pauseResumeRecording: {isVisible: true, isEnabled: true},
       endConsult: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
-      consultTransfer: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
-      mergeConference: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
+      consultTransfer: {isVisible: false, isEnabled: false}, // Not visible when no consult in progress
+      mergeConference: {isVisible: false, isEnabled: false}, // Not visible when no consult in progress
+      mergeConferenceConsult: {isVisible: false, isEnabled: true},
+      consultTransferConsult: {isVisible: false, isEnabled: true},
+      switchToMainCall: {isVisible: false, isEnabled: false},
+      switchToConsult: {isVisible: false, isEnabled: true},
       exitConference: {isVisible: false, isEnabled: true}, // Not visible when no conference in progress
       recordingIndicator: {isVisible: true, isEnabled: true},
       isConferenceInProgress: false,
@@ -199,6 +224,7 @@ describe('getControlsVisibility', () => {
       isConsultInitiatedOrAccepted: false,
       isConsultReceived: false,
       isHeld: false,
+      consultCallHeld: false,
     };
 
     expect(getControlsVisibility(deviceType, featureFlags, mockTask, 'agent1', false)).toEqual(expectedControls);
@@ -220,6 +246,7 @@ describe('getControlsVisibility', () => {
       decline: {isVisible: false, isEnabled: true},
       end: {isVisible: true, isEnabled: true},
       muteUnmute: {isVisible: false, isEnabled: true},
+      muteUnmuteConsult: {isVisible: false, isEnabled: true},
       holdResume: {isVisible: true, isEnabled: true},
       consult: {isVisible: true, isEnabled: true},
       transfer: {isVisible: true, isEnabled: true},
@@ -227,8 +254,12 @@ describe('getControlsVisibility', () => {
       wrapup: {isVisible: false, isEnabled: true},
       pauseResumeRecording: {isVisible: true, isEnabled: true},
       endConsult: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
-      consultTransfer: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
-      mergeConference: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
+      consultTransfer: {isVisible: false, isEnabled: false}, // Not visible when no consult in progress
+      mergeConference: {isVisible: false, isEnabled: false}, // Not visible when no consult in progress
+      mergeConferenceConsult: {isVisible: false, isEnabled: true},
+      consultTransferConsult: {isVisible: false, isEnabled: true},
+      switchToMainCall: {isVisible: false, isEnabled: false},
+      switchToConsult: {isVisible: false, isEnabled: true},
       exitConference: {isVisible: false, isEnabled: true}, // Not visible when no conference in progress
       recordingIndicator: {isVisible: true, isEnabled: true},
       isConferenceInProgress: false,
@@ -237,6 +268,7 @@ describe('getControlsVisibility', () => {
       isConsultInitiatedOrAccepted: false,
       isConsultReceived: false,
       isHeld: false,
+      consultCallHeld: false,
     };
 
     expect(getControlsVisibility(deviceType, featureFlags, task, 'agent1', false)).toEqual(expectedControls);
@@ -258,6 +290,7 @@ describe('getControlsVisibility', () => {
       decline: {isVisible: false, isEnabled: true},
       end: {isVisible: true, isEnabled: true},
       muteUnmute: {isVisible: false, isEnabled: true},
+      muteUnmuteConsult: {isVisible: false, isEnabled: true},
       holdResume: {isVisible: false, isEnabled: true},
       consult: {isVisible: false, isEnabled: true},
       transfer: {isVisible: true, isEnabled: true},
@@ -265,8 +298,12 @@ describe('getControlsVisibility', () => {
       wrapup: {isVisible: false, isEnabled: true},
       pauseResumeRecording: {isVisible: false, isEnabled: true},
       endConsult: {isVisible: false, isEnabled: true},
-      consultTransfer: {isVisible: false, isEnabled: true},
-      mergeConference: {isVisible: false, isEnabled: true},
+      consultTransfer: {isVisible: false, isEnabled: false},
+      mergeConference: {isVisible: false, isEnabled: false},
+      mergeConferenceConsult: {isVisible: false, isEnabled: true},
+      consultTransferConsult: {isVisible: false, isEnabled: true},
+      switchToMainCall: {isVisible: false, isEnabled: false},
+      switchToConsult: {isVisible: false, isEnabled: true},
       exitConference: {isVisible: false, isEnabled: true},
       recordingIndicator: {isVisible: false, isEnabled: true},
       isConferenceInProgress: false,
@@ -275,6 +312,7 @@ describe('getControlsVisibility', () => {
       isConsultInitiatedOrAccepted: false,
       isConsultReceived: false,
       isHeld: false,
+      consultCallHeld: false,
     };
 
     expect(getControlsVisibility(deviceType, featureFlags, task, 'agent1', false)).toEqual(expectedControls);
@@ -296,6 +334,7 @@ describe('getControlsVisibility', () => {
       decline: {isVisible: false, isEnabled: true},
       end: {isVisible: true, isEnabled: true},
       muteUnmute: {isVisible: false, isEnabled: true},
+      muteUnmuteConsult: {isVisible: false, isEnabled: true},
       holdResume: {isVisible: false, isEnabled: true},
       consult: {isVisible: false, isEnabled: true},
       transfer: {isVisible: true, isEnabled: true},
@@ -303,8 +342,12 @@ describe('getControlsVisibility', () => {
       wrapup: {isVisible: false, isEnabled: true},
       pauseResumeRecording: {isVisible: false, isEnabled: true},
       endConsult: {isVisible: false, isEnabled: true},
-      consultTransfer: {isVisible: false, isEnabled: true},
-      mergeConference: {isVisible: false, isEnabled: true},
+      consultTransfer: {isVisible: false, isEnabled: false},
+      mergeConference: {isVisible: false, isEnabled: false},
+      mergeConferenceConsult: {isVisible: false, isEnabled: true},
+      consultTransferConsult: {isVisible: false, isEnabled: true},
+      switchToMainCall: {isVisible: false, isEnabled: false},
+      switchToConsult: {isVisible: false, isEnabled: true},
       exitConference: {isVisible: false, isEnabled: true},
       recordingIndicator: {isVisible: false, isEnabled: true},
       isConferenceInProgress: false,
@@ -313,6 +356,7 @@ describe('getControlsVisibility', () => {
       isConsultInitiatedOrAccepted: false,
       isConsultReceived: false,
       isHeld: false,
+      consultCallHeld: false,
     };
 
     expect(getControlsVisibility(deviceType, featureFlags, task, 'agent1', false)).toEqual(expectedControls);
@@ -352,6 +396,7 @@ describe('getControlsVisibility', () => {
       decline: {isVisible: false, isEnabled: false},
       end: {isVisible: false, isEnabled: false},
       muteUnmute: {isVisible: false, isEnabled: false},
+      muteUnmuteConsult: {isVisible: false, isEnabled: false},
       holdResume: {isVisible: false, isEnabled: false},
       consult: {isVisible: false, isEnabled: false},
       transfer: {isVisible: false, isEnabled: false},
@@ -361,6 +406,10 @@ describe('getControlsVisibility', () => {
       endConsult: {isVisible: false, isEnabled: false},
       consultTransfer: {isVisible: false, isEnabled: false},
       mergeConference: {isVisible: false, isEnabled: false},
+      mergeConferenceConsult: {isVisible: false, isEnabled: false},
+      consultTransferConsult: {isVisible: false, isEnabled: false},
+      switchToMainCall: {isVisible: false, isEnabled: false},
+      switchToConsult: {isVisible: false, isEnabled: false},
       exitConference: {isVisible: false, isEnabled: false},
       recordingIndicator: {isVisible: false, isEnabled: false},
       isConferenceInProgress: false,
@@ -369,6 +418,7 @@ describe('getControlsVisibility', () => {
       isConsultInitiatedOrAccepted: false,
       isConsultReceived: false,
       isHeld: false,
+      consultCallHeld: false,
     });
   });
 });

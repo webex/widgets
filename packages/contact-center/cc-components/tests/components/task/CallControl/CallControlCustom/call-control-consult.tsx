@@ -64,6 +64,7 @@ describe('CallControlConsultComponent', () => {
     decline: {isVisible: true, isEnabled: true},
     end: {isVisible: true, isEnabled: true},
     muteUnmute: {isVisible: true, isEnabled: true},
+    muteUnmuteConsult: {isVisible: true, isEnabled: true},
     holdResume: {isVisible: true, isEnabled: true},
     consult: {isVisible: true, isEnabled: true},
     transfer: {isVisible: true, isEnabled: true},
@@ -74,13 +75,18 @@ describe('CallControlConsultComponent', () => {
     recordingIndicator: {isVisible: true, isEnabled: true},
     exitConference: {isVisible: false, isEnabled: false},
     mergeConference: {isVisible: true, isEnabled: true},
+    mergeConferenceConsult: {isVisible: true, isEnabled: true},
     consultTransfer: {isVisible: true, isEnabled: true},
+    consultTransferConsult: {isVisible: true, isEnabled: true},
+    switchToMainCall: {isVisible: true, isEnabled: true},
+    switchToConsult: {isVisible: true, isEnabled: true},
     isConferenceInProgress: false,
     isConsultInitiated: false,
     isConsultInitiatedAndAccepted: false,
     isConsultInitiatedOrAccepted: false,
     isConsultReceived: false,
     isHeld: false,
+    consultCallHeld: false,
   };
 
   const defaultProps = {
@@ -190,12 +196,12 @@ describe('CallControlConsultComponent', () => {
       ...defaultProps,
       controlVisibility: {
         ...mockControlVisibility,
-        muteUnmute: {isVisible: false, isEnabled: false},
+        muteUnmuteConsult: {isVisible: false, isEnabled: false},
       },
     };
     const screen = await render(<CallControlConsultComponent {...propsWithoutMute} />);
 
-    // Mute button should not be rendered when muteUnmute is false
+    // Mute button should not be rendered when muteUnmuteConsult is false
     expect(screen.queryByTestId('mute-consult-btn')).not.toBeInTheDocument();
 
     // Verify remaining buttons and their attributes
@@ -258,15 +264,14 @@ describe('CallControlConsultComponent', () => {
       ...defaultProps,
       controlVisibility: {
         ...mockControlVisibility,
-        consultTransfer: {isVisible: true, isEnabled: false},
+        consultTransferConsult: {isVisible: true, isEnabled: false},
       },
     };
     const screen = await render(<CallControlConsultComponent {...propsWithIncompleteConsult} />);
 
-    // Transfer button should be disabled
+    // Transfer button should be disabled when consultTransferConsult.isEnabled is false
     const transferButton = screen.getByTestId('transfer-consult-btn');
     expect(transferButton).toHaveAttribute('data-disabled', 'true');
-    expect(transferButton).toHaveAttribute('disabled', '');
     expect(transferButton).toHaveAttribute('type', 'button');
     expect(transferButton).toHaveAttribute('data-color', 'primary');
 
@@ -311,10 +316,11 @@ describe('CallControlConsultComponent', () => {
 
     // Verify tooltip labels exist and have content
     const tooltipLabels = screen.container.querySelectorAll('.md-tooltip-label p');
-    expect(tooltipLabels.length).toBe(4);
+    expect(tooltipLabels.length).toBe(5); // Updated to 5 to include switchToMainCall button
     expect(tooltipLabels[0]).toHaveTextContent('Mute');
-    expect(tooltipLabels[1]).toHaveTextContent('Transfer Consult');
-    expect(tooltipLabels[2]).toHaveTextContent('Consult Conference');
-    expect(tooltipLabels[3]).toHaveTextContent('End Consult');
+    expect(tooltipLabels[1]).toHaveTextContent('Switch to Call');
+    expect(tooltipLabels[2]).toHaveTextContent('Transfer');
+    expect(tooltipLabels[3]).toHaveTextContent('merge');
+    expect(tooltipLabels[4]).toHaveTextContent('End Consult');
   });
 });

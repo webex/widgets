@@ -1,6 +1,7 @@
 import '@testing-library/jest-dom';
 import {BuddyDetails, ContactServiceQueue} from '@webex/cc-store';
 import {mockAgents, mockQueueDetails} from '@webex/test-fixtures';
+import {ControlVisibility} from '../../../../../src/components/task/task.types';
 import {
   createConsultButtons,
   getVisibleButtons,
@@ -33,6 +34,8 @@ import {
   filterAvailableQueues,
   debounce,
   handleConsultConferencePress,
+  handleSwitchToMainCallPress,
+  ButtonConfig,
 } from '../../../../../src/components/task/CallControl/CallControlCustom/call-control-custom.utils';
 
 const loggerMock = {
@@ -53,6 +56,7 @@ describe('Call Control Custom Utils', () => {
     decline: {isVisible: true, isEnabled: true},
     end: {isVisible: true, isEnabled: true},
     muteUnmute: {isVisible: true, isEnabled: true},
+    muteUnmuteConsult: {isVisible: true, isEnabled: true},
     holdResume: {isVisible: true, isEnabled: true},
     consult: {isVisible: true, isEnabled: true},
     transfer: {isVisible: true, isEnabled: true},
@@ -63,13 +67,18 @@ describe('Call Control Custom Utils', () => {
     recordingIndicator: {isVisible: true, isEnabled: true},
     exitConference: {isVisible: false, isEnabled: false},
     mergeConference: {isVisible: false, isEnabled: false},
+    mergeConferenceConsult: {isVisible: false, isEnabled: false},
     consultTransfer: {isVisible: false, isEnabled: false},
+    consultTransferConsult: {isVisible: false, isEnabled: false},
+    switchToMainCall: {isVisible: false, isEnabled: false},
+    switchToConsult: {isVisible: false, isEnabled: false},
     isConferenceInProgress: false,
     isConsultInitiated: false,
     isConsultInitiatedAndAccepted: false,
     isConsultInitiatedOrAccepted: false,
     isConsultReceived: false,
     isHeld: false,
+    consultCallHeld: false,
   };
 
   describe('createConsultButtons', () => {
@@ -88,11 +97,12 @@ describe('Call Control Custom Utils', () => {
         mockConsultConference
       );
 
-      expect(buttons).toHaveLength(4);
+      expect(buttons).toHaveLength(5); // Updated to 5 to include switchToMainCall button
       expect(buttons[0].key).toBe('mute');
-      expect(buttons[1].key).toBe('transfer');
-      expect(buttons[2].key).toBe('conference');
-      expect(buttons[3].key).toBe('cancel');
+      expect(buttons[1].key).toBe('switchToMainCall');
+      expect(buttons[2].key).toBe('transfer');
+      expect(buttons[3].key).toBe('conference');
+      expect(buttons[4].key).toBe('cancel');
     });
 
     it('should configure mute button correctly when muted', () => {
@@ -141,8 +151,8 @@ describe('Call Control Custom Utils', () => {
       expect(transferButton?.shouldShow).toBe(false);
     });
 
-    it('should hide mute button when muteUnmute is false', () => {
-      const customVisibility = {...mockControlVisibility, muteUnmute: {isVisible: false, isEnabled: false}};
+    it('should hide mute button when muteUnmuteConsult is false', () => {
+      const customVisibility = {...mockControlVisibility, muteUnmuteConsult: {isVisible: false, isEnabled: false}};
       const buttons = createConsultButtons(
         false, // isMuted
         customVisibility
@@ -971,6 +981,242 @@ describe('Call Control Custom Utils', () => {
       expect(() => {
         handleConsultConferencePress(mockConsultConference, loggerMock);
       }).toThrow('Error consultConference: Error: Conference failed');
+    });
+  });
+
+  describe('handleSwitchToMainCallPress', () => {
+    it('should call switchToMainCall and log when provided', () => {
+      const mockSwitchToMainCall = jest.fn();
+
+      handleSwitchToMainCallPress(mockSwitchToMainCall, loggerMock);
+
+      expect(loggerMock.info).toHaveBeenCalledWith('CC-Widgets: CallControlConsult: switchToMainCall clicked', {
+        module: 'call-control-consult.tsx',
+        method: 'handleSwitchToMainCallPress',
+      });
+      expect(mockSwitchToMainCall).toHaveBeenCalled();
+      expect(loggerMock.log).toHaveBeenCalledWith('CC-Widgets: CallControlConsult: switchToMainCall completed', {
+        module: 'call-control-consult.tsx',
+        method: 'handleSwitchToMainCallPress',
+      });
+    });
+
+    it('should not call switchToMainCall when not provided', () => {
+      expect(() => {
+        handleSwitchToMainCallPress(undefined, loggerMock);
+      }).not.toThrow();
+
+      expect(loggerMock.info).toHaveBeenCalled();
+      expect(loggerMock.log).not.toHaveBeenCalled();
+    });
+
+    it('should throw error when switchToMainCall throws', () => {
+      const mockSwitchToMainCall = jest.fn(() => {
+        throw new Error('Switch failed');
+      });
+
+      expect(() => {
+        handleSwitchToMainCallPress(mockSwitchToMainCall, loggerMock);
+      }).toThrow('Error switchToMainCall: Error: Switch failed');
+    });
+  });
+
+  describe('Error Handling in utility functions', () => {
+    it('should handle errors in createConsultButtons', () => {
+      // Create a mock that throws when accessed
+      const badControlVisibility = new Proxy(
+        {},
+        {
+          get() {
+            throw new Error('Test error');
+          },
+        }
+      );
+
+      const buttons = createConsultButtons(
+        false,
+        badControlVisibility as unknown as ControlVisibility,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        loggerMock
+      );
+
+      expect(buttons).toEqual([]);
+      expect(loggerMock.error).toHaveBeenCalledWith(
+        'CC-Widgets: CallControlCustom: Error in createConsultButtons',
+        expect.objectContaining({
+          module: 'cc-components#call-control-custom.utils.ts',
+          method: 'createConsultButtons',
+        })
+      );
+    });
+
+    it('should handle errors in getVisibleButtons', () => {
+      const badButtons = [
+        {
+          get shouldShow() {
+            throw new Error('Test error');
+          },
+        },
+      ];
+
+      const result = getVisibleButtons(badButtons as unknown as ButtonConfig[], loggerMock);
+
+      expect(result).toEqual([]);
+      expect(loggerMock.error).toHaveBeenCalledWith(
+        'CC-Widgets: CallControlCustom: Error in getVisibleButtons',
+        expect.objectContaining({
+          module: 'cc-components#call-control-custom.utils.ts',
+          method: 'getVisibleButtons',
+        })
+      );
+    });
+
+    it('should handle errors in createInitials', () => {
+      const badName = {
+        split() {
+          throw new Error('Test error');
+        },
+      };
+
+      const result = createInitials(badName as unknown as string, loggerMock);
+
+      expect(result).toBe('??');
+      expect(loggerMock.error).toHaveBeenCalledWith(
+        'CC-Widgets: CallControlCustom: Error in createInitials',
+        expect.objectContaining({
+          module: 'cc-components#call-control-custom.utils.ts',
+          method: 'createInitials',
+        })
+      );
+    });
+
+    it('should handle errors in getConsultStatusText', () => {
+      // getConsultStatusText doesn't actually throw errors with undefined, it just evaluates the boolean
+      const result = getConsultStatusText(undefined as unknown as boolean, loggerMock);
+
+      // undefined is falsy, so it returns 'Consulting'
+      expect(result).toBe('Consulting');
+      // This function doesn't actually log errors for undefined input
+    });
+
+    it('should handle errors in shouldShowTabs', () => {
+      const badAgents = {
+        get length() {
+          throw new Error('Test error');
+        },
+      };
+
+      const result = shouldShowTabs(badAgents as unknown as BuddyDetails[], [], loggerMock);
+
+      expect(result).toBe(false);
+      expect(loggerMock.error).toHaveBeenCalled();
+    });
+
+    it('should handle errors in isAgentsEmpty', () => {
+      const badAgents = {
+        get length() {
+          throw new Error('Test error');
+        },
+      };
+
+      const result = isAgentsEmpty(badAgents as unknown as BuddyDetails[], loggerMock);
+
+      expect(result).toBe(true);
+      expect(loggerMock.error).toHaveBeenCalled();
+    });
+
+    it('should handle errors in isQueuesEmpty', () => {
+      const badQueues = {
+        get length() {
+          throw new Error('Test error');
+        },
+      };
+
+      const result = isQueuesEmpty(badQueues as unknown as ContactServiceQueue[], loggerMock);
+
+      expect(result).toBe(true);
+      expect(loggerMock.error).toHaveBeenCalled();
+    });
+
+    it('should handle errors in handleTabSelection', () => {
+      const mockSetSelectedTab = jest.fn(() => {
+        throw new Error('Test error');
+      });
+
+      handleTabSelection('Agents', mockSetSelectedTab, loggerMock);
+
+      expect(loggerMock.error).toHaveBeenCalledWith(
+        expect.stringContaining('Error in handleTabSelection'),
+        expect.any(Object)
+      );
+    });
+
+    it('should handle errors in handleAgentSelection', () => {
+      const mockOnAgentSelect = jest.fn(() => {
+        throw new Error('Test error');
+      });
+
+      handleAgentSelection('agent1', 'John Doe', false, mockOnAgentSelect, loggerMock);
+
+      expect(loggerMock.error).toHaveBeenCalledWith(
+        expect.stringContaining('Error in handleAgentSelection'),
+        expect.any(Object)
+      );
+    });
+
+    it('should handle errors in handleQueueSelection', () => {
+      const mockOnQueueSelect = jest.fn(() => {
+        throw new Error('Test error');
+      });
+
+      handleQueueSelection('queue1', 'Support Queue', false, mockOnQueueSelect, loggerMock);
+
+      expect(loggerMock.error).toHaveBeenCalledWith(
+        expect.stringContaining('Error in handleQueueSelection'),
+        expect.any(Object)
+      );
+    });
+
+    it('should handle errors in getEmptyStateMessage', () => {
+      // When showTabs is true and selectedTab is undefined, it falls through to the default case (queues)
+      const result = getEmptyStateMessage(undefined as unknown as string, true, loggerMock);
+
+      expect(result).toBe("We can't find any queue available for now.");
+      // This function doesn't throw errors for undefined selectedTab, it just returns the default message
+    });
+
+    it('should handle errors in createAgentListData', () => {
+      const badAgents = [
+        {
+          get agentId() {
+            throw new Error('Test error');
+          },
+        },
+      ];
+
+      const result = createAgentListData(badAgents as unknown as BuddyDetails[], loggerMock);
+
+      expect(result).toEqual([]);
+      expect(loggerMock.error).toHaveBeenCalled();
+    });
+
+    it('should handle errors in createQueueListData', () => {
+      const badQueues = [
+        {
+          get id() {
+            throw new Error('Test error');
+          },
+        },
+      ];
+
+      const result = createQueueListData(badQueues as unknown as ContactServiceQueue[], loggerMock);
+
+      expect(result).toEqual([]);
+      expect(loggerMock.error).toHaveBeenCalled();
     });
   });
 });

@@ -333,3 +333,9 @@ export enum ConsultStatus {
   CONNECTED = 'connected',
   CONFERENCE = 'conference',
 }
+
+export type Participant = {
+  id: string;
+  pType: 'Customer' | 'Agent' | string;
+  name?: string;
+};

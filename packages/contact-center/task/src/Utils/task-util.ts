@@ -1,156 +1,27 @@
-import {ILogger, DIALNUMBER, EXTENSION, DESKTOP, ConsultStatus, getConsultStatus} from '@webex/cc-store';
+import {
+  ILogger,
+  DIALNUMBER,
+  EXTENSION,
+  DESKTOP,
+  ConsultStatus,
+  getConsultStatus,
+  getIsConsultInProgress,
+  isInteractionOnHold,
+  getIsCustomerInCall,
+  getConferenceParticipantsCount,
+  findHoldStatus,
+} from '@webex/cc-store';
 import {ITask} from '@webex/contact-center';
 import {
-  CUSTOMER,
-  SUPERVISOR,
-  VVA,
-  MAX_PARTICIPANTS_IN_MULTIPARTY_CONFERENCE,
-  MAX_PARTICIPANTS_IN_THREE_PARTY_CONFERENCE,
   MEDIA_TYPE_TELEPHONY,
   MEDIA_TYPE_CHAT,
   MEDIA_TYPE_EMAIL,
-  MEDIA_TYPE_CONSULT,
+  MAX_PARTICIPANTS_IN_MULTIPARTY_CONFERENCE,
+  MAX_PARTICIPANTS_IN_THREE_PARTY_CONFERENCE,
 } from './constants';
-import {Participant, Visibility} from '@webex/cc-components';
+import {Visibility} from '@webex/cc-components';
 
-//@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
-export function findHoldTimestamp(interaction: Interaction, mType = 'mainCall', logger?: ILogger): number | null {
-  try {
-    if (!interaction?.media) return null;
-    for (const key in interaction.media) {
-      if (interaction.media[key].mType === mType) {
-        return interaction.media[key].holdTimestamp ?? null;
-      }
-    }
-    return null;
-  } catch (error) {
-    logger?.error(`CC-Widgets: Task: Error in findHoldTimestamp - ${error.message}`, {
-      module: 'task-util',
-      method: 'findHoldTimestamp',
-    });
-    return null;
-  }
-}
-
-export function getIsConferenceInProgress(task: ITask): boolean {
-  // Early return if required data is missing
-  if (!task?.data?.interaction?.media || !task?.data?.interactionId) {
-    return false;
-  }
-
-  const mediaMainCall = task.data.interaction.media[task.data.interactionId];
-  const participantsInMainCall = new Set(mediaMainCall?.participants);
-  const participants = task?.data?.interaction?.participants;
-
-  const agentParticipants = new Set();
-  if (participantsInMainCall.size > 0 && participants) {
-    participantsInMainCall.forEach((participantId: string) => {
-      const participant = participants[participantId];
-      if (participant && ![CUSTOMER, SUPERVISOR, VVA].includes(participant.pType) && !participant.hasLeft) {
-        agentParticipants.add(participantId);
-      }
-    });
-  }
-
-  return agentParticipants.size >= 2;
-}
-
-export const getConferenceParticipants = (task: ITask, agentId: string): Participant[] => {
-  const participantsList: Participant[] = [];
-
-  // Early return if required data is missing
-  if (!task?.data?.interaction?.media || !task?.data?.interactionId) {
-    return participantsList;
-  }
-
-  const mediaMainCall = task.data.interaction.media[task.data.interactionId];
-  const participantsInMainCall = new Set(mediaMainCall?.participants);
-  const participants = task?.data?.interaction?.participants;
-
-  if (participantsInMainCall.size > 0 && participants) {
-    participantsInMainCall.forEach((participantId: string) => {
-      const participant = participants[participantId];
-      if (
-        participant &&
-        ![CUSTOMER, SUPERVISOR, VVA].includes(participant.pType) &&
-        !participant.hasLeft &&
-        participant.id !== agentId
-      ) {
-        participantsList.push({
-          id: participant.id,
-          pType: participant.pType,
-          name: participant.name ? participant.name : participant.id,
-        });
-      }
-    });
-  }
-
-  return participantsList;
-};
-
-export function getConferenceParticipantsCount(task: ITask): number {
-  const participantsList: Participant[] = [];
-
-  // Early return if required data is missing
-  if (!task?.data?.interaction?.media || !task?.data?.interactionId) {
-    return 0;
-  }
-
-  const mediaMainCall = task.data.interaction.media[task.data.interactionId];
-  const participantsInMainCall = new Set(mediaMainCall?.participants);
-  const participants = task?.data?.interaction?.participants;
-
-  if (participantsInMainCall.size > 0 && participants) {
-    participantsInMainCall.forEach((participantId: string) => {
-      const participant = participants[participantId];
-      if (participant && ![SUPERVISOR, VVA, CUSTOMER].includes(participant.pType) && !participant.hasLeft) {
-        participantsList.push({
-          id: participant.id,
-          pType: participant.pType,
-          name: participant.name,
-        });
-      }
-    });
-  }
-
-  return participantsList.length;
-}
-
-export function getIsCustomerInCall(task: ITask): boolean {
-  // Early return if required data is missing
-  if (!task?.data?.interaction?.media || !task?.data?.interactionId) {
-    return false;
-  }
-
-  const mediaMainCall = task.data.interaction.media[task.data.interactionId];
-  const participantsInMainCall = new Set(mediaMainCall?.participants);
-  const participants = task?.data?.interaction?.participants;
-
-  if (participantsInMainCall.size > 0 && participants) {
-    return Array.from(participantsInMainCall).some((participantId: string) => {
-      const participant = participants[participantId];
-      return participant && participant.pType === CUSTOMER && !participant.hasLeft;
-    });
-  }
-
-  return false;
-}
-
-export function getIsConsultInProgress(task: ITask): boolean {
-  const mediaObject = task.data.interaction.media;
-  return Object.values(mediaObject).some((media) => media.mType === MEDIA_TYPE_CONSULT);
-}
-
-export function isInteractionOnHold(task: ITask): boolean {
-  if (!task || !task.data || !task.data.interaction) {
-    return false;
-  }
-  const interaction = task.data.interaction;
-  if (!interaction.media) {
-    return false;
-  }
-  return Object.values(interaction.media).some((media) => media.isHold);
-}
+// ==================== UTILITY FUNCTIONS ====================
 
 /**
  * Helper interface for device type checks
@@ -180,22 +51,40 @@ function isTelephonySupported(deviceType: string, webRtcEnabled: boolean): boole
   return (isBrowser && webRtcEnabled) || isAgentDN || isExtension;
 }
 
+//@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+export function findHoldTimestamp(interaction: Interaction, mType = 'mainCall', logger?: ILogger): number | null {
+  try {
+    if (!interaction?.media) return null;
+
+    for (const key in interaction.media) {
+      if (interaction.media[key].mType === mType) {
+        return interaction.media[key].holdTimestamp ?? null;
+      }
+    }
+    return null;
+  } catch (error) {
+    logger?.error(`CC-Widgets: Task: Error in findHoldTimestamp - ${error.message}`, {
+      module: 'task-util',
+      method: 'findHoldTimestamp',
+    });
+    return null;
+  }
+}
+
+// ==================== CALL CONTROL BUTTON VISIBILITY FUNCTIONS ====================
+
 /**
  * Get visibility for Accept button
  */
 export function getAcceptButtonVisibility(
-  deviceType: string,
+  isBrowser: boolean,
+  isPhoneDevice: boolean,
   webRtcEnabled: boolean,
   isCall: boolean,
-  isChat: boolean,
-  isEmail: boolean
+  isDigitalChannel: boolean
 ): Visibility {
-  const {isBrowser, isAgentDN, isExtension} = getDeviceTypeFlags(deviceType);
-  const isDigitalChannel = isChat || isEmail;
-
-  const isBrowserVisible = isBrowser && ((webRtcEnabled && isCall) || isDigitalChannel);
-  const isPhoneDeviceVisible = (isAgentDN || isExtension) && isDigitalChannel;
-  const isVisible = isBrowserVisible || isPhoneDeviceVisible;
+  const isVisible =
+    (isBrowser && ((webRtcEnabled && isCall) || isDigitalChannel)) || (isPhoneDevice && isDigitalChannel);
 
   return {isVisible, isEnabled: true};
 }
@@ -203,8 +92,7 @@ export function getAcceptButtonVisibility(
 /**
  * Get visibility for Decline button
  */
-export function getDeclineButtonVisibility(deviceType: string, webRtcEnabled: boolean, isCall: boolean): Visibility {
-  const {isBrowser} = getDeviceTypeFlags(deviceType);
+export function getDeclineButtonVisibility(isBrowser: boolean, webRtcEnabled: boolean, isCall: boolean): Visibility {
   const isVisible = isBrowser && webRtcEnabled && isCall;
 
   return {isVisible, isEnabled: true};
@@ -214,36 +102,32 @@ export function getDeclineButtonVisibility(deviceType: string, webRtcEnabled: bo
  * Get visibility for End button
  */
 export function getEndButtonVisibility(
-  deviceType: string,
+  isBrowser: boolean,
   isEndCallEnabled: boolean,
   isCall: boolean,
   isHeld: boolean,
+  isConsultInitiatedOrAcceptedOrBeingConsulted: boolean,
   isConferenceInProgress: boolean,
-  taskConsultStatus: string
+  isConsultInitiatedOrAccepted: boolean,
+  consultCallHeld: boolean
 ): Visibility {
-  const {isBrowser} = getDeviceTypeFlags(deviceType);
   const isVisible = isBrowser || (isEndCallEnabled && isCall) || !isCall;
+  const isConferenceWithConsultNotHeld = isConferenceInProgress && isConsultInitiatedOrAccepted && !consultCallHeld;
+  const isEnabled = !isHeld && !isConsultInitiatedOrAcceptedOrBeingConsulted && !isConferenceWithConsultNotHeld;
 
-  const isEnabled =
-    !isHeld ||
-    (isConferenceInProgress &&
-      !(
-        [
-          ConsultStatus.CONSULT_INITIATED,
-          ConsultStatus.CONSULT_ACCEPTED,
-          ConsultStatus.BEING_CONSULTED,
-          ConsultStatus.BEING_CONSULTED_ACCEPTED,
-        ] as string[]
-      ).includes(taskConsultStatus));
   return {isVisible, isEnabled};
 }
 
 /**
  * Get visibility for Mute/Unmute button
  */
-export function getMuteUnmuteButtonVisibility(deviceType: string, webRtcEnabled: boolean, isCall: boolean): Visibility {
-  const {isBrowser} = getDeviceTypeFlags(deviceType);
-  const isVisible = isBrowser && webRtcEnabled && isCall;
+export function getMuteUnmuteButtonVisibility(
+  isBrowser: boolean,
+  webRtcEnabled: boolean,
+  isCall: boolean,
+  isConsultInitiatedOrAccepted: boolean
+): Visibility {
+  const isVisible = (isBrowser && webRtcEnabled && isCall) || isConsultInitiatedOrAccepted;
 
   return {isVisible, isEnabled: true};
 }
@@ -252,109 +136,31 @@ export function getMuteUnmuteButtonVisibility(deviceType: string, webRtcEnabled:
  * Get visibility for Hold/Resume button
  */
 export function getHoldResumeButtonVisibility(
-  deviceType: string,
-  webRtcEnabled: boolean,
+  isTelephonySupported: boolean,
   isCall: boolean,
   isConferenceInProgress: boolean,
   isConsultInProgress: boolean,
-  isHeld: boolean
+  isHeld: boolean,
+  isBeingConsulted: boolean
 ): Visibility {
-  const isVisible = isCall && isTelephonySupported(deviceType, webRtcEnabled);
-
+  const isVisible = isCall && isTelephonySupported && !isBeingConsulted;
   const isEnabled = (!isConferenceInProgress || isHeld) && !isConsultInProgress;
-  return {isVisible, isEnabled};
-}
-
-/**
- * Get visibility for Consult button
- */
-export function getConsultButtonVisibility(
-  deviceType: string,
-  webRtcEnabled: boolean,
-  isCall: boolean,
-  isConsultInProgress: boolean,
-  isCustomerInCall: boolean,
-  conferenceParticipantsCount: number,
-  maxParticipantsInConference: number
-): Visibility {
-  const isVisible = isCall && isTelephonySupported(deviceType, webRtcEnabled);
-
-  // Disable consult button when max participants reached in conference
-  const isEnabled =
-    conferenceParticipantsCount < maxParticipantsInConference && !isConsultInProgress && isCustomerInCall;
 
   return {isVisible, isEnabled};
 }
 
-/**
- * Get visibility for Transfer button
- */
-export function getTransferButtonVisibility(
-  isTransferVisibility: boolean,
-  isConferenceInProgress: boolean
-): Visibility {
-  const isVisible = isTransferVisibility && !isConferenceInProgress;
-
-  return {isVisible, isEnabled: true};
-}
-
-/**
- * Get visibility for Conference button
- */
-export function getConferenceButtonVisibility(
-  deviceType: string,
-  webRtcEnabled: boolean,
-  isCall: boolean,
-  isChat: boolean
-): Visibility {
-  const {isBrowser} = getDeviceTypeFlags(deviceType);
-  const isVisible = (isBrowser && isCall && webRtcEnabled) || isChat;
-
-  return {isVisible, isEnabled: true};
-}
-
-/**
- * Get visibility for Wrapup button
- */
-export function getWrapupButtonVisibility(task: ITask): Visibility {
-  const isVisible = task?.data?.wrapUpRequired ?? false;
-
-  return {isVisible, isEnabled: true};
-}
+// ==================== RECORDING FUNCTIONS ====================
 
 /**
  * Get visibility for Pause/Resume Recording button
  */
 export function getPauseResumeRecordingButtonVisibility(
-  deviceType: string,
-  webRtcEnabled: boolean,
+  isTelephonySupported: boolean,
   isCall: boolean,
-  isConferenceInProgress: boolean
+  isConferenceInProgress: boolean,
+  isConsultInitiatedOrAccepted: boolean
 ): Visibility {
-  const isVisible = isCall && isTelephonySupported(deviceType, webRtcEnabled) && !isConferenceInProgress;
-
-  return {isVisible, isEnabled: true};
-}
-
-/**
- * Get visibility for End Consult button
- */
-export function getEndConsultButtonVisibility(
-  isEndConsultEnabled: boolean,
-  deviceType: string,
-  webRtcEnabled: boolean,
-  isCall: boolean,
-  consultStatus: string
-): Visibility {
-  const consultVisibleCondition = (
-    [
-      ConsultStatus.CONSULT_INITIATED,
-      ConsultStatus.CONSULT_ACCEPTED,
-      ConsultStatus.BEING_CONSULTED_ACCEPTED,
-    ] as string[]
-  ).includes(consultStatus);
-  const isVisible =
-    isEndConsultEnabled && isCall && isTelephonySupported(deviceType, webRtcEnabled) && consultVisibleCondition;
+  const isVisible = isCall && isTelephonySupported && !isConferenceInProgress && !isConsultInitiatedOrAccepted;
 
   return {isVisible, isEnabled: true};
 }
@@ -364,6 +170,36 @@ export function getEndConsultButtonVisibility(
  */
 export function getRecordingIndicatorVisibility(isCall: boolean): Visibility {
   return {isVisible: isCall, isEnabled: true};
+}
+
+// ==================== TRANSFER AND CONFERENCE FUNCTIONS ====================
+
+/**
+ * Get visibility for Transfer button
+ */
+export function getTransferButtonVisibility(
+  isTransferVisibility: boolean,
+  isConferenceInProgress: boolean,
+  isConsultInitiatedOrAccepted: boolean
+): Visibility {
+  const isVisible = isTransferVisibility && !isConferenceInProgress && !isConsultInitiatedOrAccepted;
+
+  return {isVisible, isEnabled: true};
+}
+
+/**
+ * Get visibility for Conference button
+ */
+export function getConferenceButtonVisibility(
+  isBrowser: boolean,
+  webRtcEnabled: boolean,
+  isCall: boolean,
+  isChat: boolean,
+  isBeingConsulted: boolean
+): Visibility {
+  const isVisible = ((isBrowser && isCall && webRtcEnabled) || isChat) && !isBeingConsulted;
+
+  return {isVisible, isEnabled: true};
 }
 
 /**
@@ -376,33 +212,174 @@ export function getConferenceInProgressVisibility(task: ITask): boolean {
 /**
  * Get visibility for Exit Conference button
  */
-export function getExitConferenceButtonVisibility(isConferenceInProgress: boolean): Visibility {
+export function getExitConferenceButtonVisibility(
+  isConferenceInProgress: boolean,
+  isConsultInitiatedOrAccepted: boolean,
+  consultCallHeld: boolean
+): Visibility {
   const isVisible = isConferenceInProgress;
+  const isConferenceWithConsultNotHeld = isConferenceInProgress && isConsultInitiatedOrAccepted && !consultCallHeld;
+  const isEnabled = !isConferenceWithConsultNotHeld;
 
-  return {isVisible, isEnabled: true};
+  return {isVisible, isEnabled};
 }
+
 /**
  * Get visibility for Merge Conference button
  */
-export function getMergeConferenceButtonVisibility(consultStatus: string): Visibility {
-  const isVisible = ([ConsultStatus.CONSULT_ACCEPTED, ConsultStatus.CONSULT_INITIATED] as string[]).includes(
-    consultStatus
-  );
-  const isEnabled = consultStatus !== ConsultStatus.CONSULT_INITIATED;
+export function getMergeConferenceButtonVisibility(
+  isConsultInitiatedOrAccepted: boolean,
+  isConsultAccepted: boolean,
+  consultCallHeld: boolean,
+  isConferenceInProgress: boolean
+): Visibility {
+  const isVisible = isConsultInitiatedOrAccepted;
+  const isConferenceWithConsultNotHeld = isConferenceInProgress && isConsultInitiatedOrAccepted && !consultCallHeld;
+  const isEnabled = isConsultAccepted && consultCallHeld && !isConferenceWithConsultNotHeld;
+
   return {isVisible, isEnabled};
 }
 
-export function getConsultTransferButtonVisibility(consultStatus: string): Visibility {
-  const isVisible = ([ConsultStatus.CONSULT_ACCEPTED, ConsultStatus.CONSULT_INITIATED] as string[]).includes(
-    consultStatus
-  );
-  const isEnabled = consultStatus !== ConsultStatus.CONSULT_INITIATED;
+// ==================== CONSULT FUNCTIONS ====================
+
+/**
+ * Get visibility for Consult button
+ */
+export function getConsultButtonVisibility(
+  isTelephonySupported: boolean,
+  isCall: boolean,
+  isConsultInProgress: boolean,
+  isCustomerInCall: boolean,
+  conferenceParticipantsCount: number,
+  maxParticipantsInConference: number,
+  isBeingConsulted: boolean
+): Visibility {
+  const isVisible = isCall && isTelephonySupported && !isBeingConsulted;
+  const isEnabled =
+    conferenceParticipantsCount < maxParticipantsInConference && !isConsultInProgress && isCustomerInCall;
+
   return {isVisible, isEnabled};
 }
+
+/**
+ * Get visibility for End Consult button
+ */
+export function getEndConsultButtonVisibility(
+  isEndConsultEnabled: boolean,
+  isTelephonySupported: boolean,
+  isCall: boolean,
+  isConsultInitiatedOrAccepted: boolean
+): Visibility {
+  const isVisible = isEndConsultEnabled && isCall && isTelephonySupported && isConsultInitiatedOrAccepted;
+
+  return {isVisible, isEnabled: true};
+}
+
+/**
+ * Get visibility for Consult Transfer button
+ */
+export function getConsultTransferButtonVisibility(
+  isConsultInitiatedOrAccepted: boolean,
+  isConsultAccepted: boolean,
+  consultCallHeld: boolean,
+  isConferenceInProgress: boolean
+): Visibility {
+  const isVisible = isConsultInitiatedOrAccepted;
+  const isConferenceWithConsultNotHeld = isConferenceInProgress && isConsultInitiatedOrAccepted && !consultCallHeld;
+  const isEnabled = isConsultAccepted && consultCallHeld && !isConferenceWithConsultNotHeld;
+
+  return {isVisible, isEnabled};
+}
+
+/**
+ * Get visibility for Merge Conference Consult button
+ */
+export function getMergeConferenceConsultButtonVisibility(
+  isConsultAccepted: boolean,
+  consultCallHeld: boolean
+): Visibility {
+  const isVisible = isConsultAccepted;
+  const isEnabled = !consultCallHeld;
+
+  return {isVisible, isEnabled};
+}
+
+/**
+ * Get visibility for Consult Transfer Consult button
+ */
+export function getConsultTransferConsultButtonVisibility(
+  isConsultAccepted: boolean,
+  consultCallHeld: boolean
+): Visibility {
+  const isVisible = isConsultAccepted;
+  const isEnabled = !consultCallHeld;
+
+  return {isVisible, isEnabled};
+}
+
+/**
+ * Get visibility for Mute/Unmute Consult button
+ */
+export function getMuteUnmuteConsultButtonVisibility(
+  isBrowser: boolean,
+  webRtcEnabled: boolean,
+  isCall: boolean,
+  isConsultInitiatedOrAccepted: boolean,
+  isConsultAccepted: boolean
+): Visibility {
+  const isVisible = (isBrowser && webRtcEnabled && isCall) || (isConsultInitiatedOrAccepted && !isConsultAccepted);
+
+  return {isVisible, isEnabled: true};
+}
+
+// ==================== SWITCH CALL FUNCTIONS ====================
+
+/**
+ * Get visibility for Switch to Main Call button
+ */
+export function getswitchToMainCallButtonVisibility(
+  isBeingConsulted: boolean,
+  isConsultAccepted: boolean,
+  consultCallHeld: boolean
+): Visibility {
+  const isVisible = !isBeingConsulted && isConsultAccepted && !consultCallHeld;
+  const isEnabled = isConsultAccepted;
+
+  return {isVisible, isEnabled};
+}
+
+/**
+ * Get visibility for Switch to Consult button
+ */
+export function getSwitchToConsultButtonVisibility(isBeingConsulted: boolean, consultCallHeld: boolean): Visibility {
+  const isVisible = !isBeingConsulted && consultCallHeld;
+  // const isConferenceWithConsultNotHeld = isConferenceInProgress && isConsultAccepted && !consultCallHeld;
+  const isEnabled = true;
+
+  return {isVisible, isEnabled};
+}
+
+// ==================== OTHER FUNCTIONS ====================
+
+/**
+ * Get visibility for Wrapup button
+ */
+export function getWrapupButtonVisibility(task: ITask): Visibility {
+  const isVisible = task?.data?.wrapUpRequired ?? false;
+
+  return {isVisible, isEnabled: true};
+}
+// ==================== MAIN AGGREGATOR FUNCTION ====================
+
 /**
  * This function determines the visibility of various controls based on the task's data.
+ * @param deviceType The device type (Browser, Extension, AgentDN)
+ * @param featureFlags Feature flags configuration object
  * @param task The task object
- * @returns An object containing the visibility of various controls based on the task's data
+ * @param agentId The agent ID
+ * @param multiPartyConferenceEnabled Whether multiparty conference is enabled
+ * @param logger Optional logger instance
+ * @returns An object containing the visibility and state of various controls
  */
 export function getControlsVisibility(
   deviceType: string,
@@ -413,90 +390,147 @@ export function getControlsVisibility(
   logger?: ILogger
 ) {
   try {
+    // Extract media type and related flags
     const {mediaType} = task?.data?.interaction || {};
-
     const isCall = mediaType === MEDIA_TYPE_TELEPHONY;
     const isChat = mediaType === MEDIA_TYPE_CHAT;
     const isEmail = mediaType === MEDIA_TYPE_EMAIL;
+    const isDigitalChannel = isChat || isEmail;
 
-    const {isBrowser} = getDeviceTypeFlags(deviceType);
+    // Extract device type flags
+    const {isBrowser, isAgentDN, isExtension} = getDeviceTypeFlags(deviceType);
+    const isPhoneDevice = isAgentDN || isExtension;
+
+    // Extract feature flags
     const {isEndCallEnabled, isEndConsultEnabled, webRtcEnabled} = featureFlags;
 
-    const isTransferVisibility = isBrowser ? webRtcEnabled : true; // Applicable for all type of station login and media type
+    // Calculate telephony support
+    const telephonySupported = isTelephonySupported(deviceType, webRtcEnabled);
+
+    // Calculate task state flags
+    const isTransferVisibility = isBrowser ? webRtcEnabled : true;
     const isConferenceInProgress = task.data.isConferenceInProgress ?? false;
     const isConsultInProgress = getIsConsultInProgress(task);
     const isHeld = isInteractionOnHold(task);
     const isCustomerInCall = getIsCustomerInCall(task);
+    // const mainCallHeld = findHoldStatus(task, 'mainCall', agentId);
+    const consultCallHeld = findHoldStatus(task, 'consult', agentId);
+    const taskConsultStatus = getConsultStatus(task, agentId);
 
-    // Calculate conference participants for consult button enable/disable logic
+    // Calculate conference participants count
     const conferenceParticipantsCount = getConferenceParticipantsCount(task);
     const maxParticipantsInConference = multiPartyConferenceEnabled
       ? MAX_PARTICIPANTS_IN_MULTIPARTY_CONFERENCE
       : MAX_PARTICIPANTS_IN_THREE_PARTY_CONFERENCE;
 
-    const taskConsultStatus = getConsultStatus(task, agentId);
-    // Use dedicated visibility functions for each button
+    // Calculate consult status flags (REUSED CONDITIONS)
+    const isConsultInitiated = taskConsultStatus === ConsultStatus.CONSULT_INITIATED;
+    const isConsultAccepted = taskConsultStatus === ConsultStatus.CONSULT_ACCEPTED;
+    const isBeingConsulted = taskConsultStatus === ConsultStatus.BEING_CONSULTED_ACCEPTED;
+    const isConsultInitiatedOrAccepted = isConsultInitiated || isConsultAccepted || isBeingConsulted;
+    const isConsultInitiatedOrAcceptedOnly = isConsultInitiated || isConsultAccepted;
+    const isConsultInitiatedOrAcceptedOrBeingConsulted =
+      isConsultInitiated ||
+      isConsultAccepted ||
+      taskConsultStatus === ConsultStatus.BEING_CONSULTED ||
+      isBeingConsulted;
+
+    // Build controls visibility object
     const controls = {
-      accept: getAcceptButtonVisibility(deviceType, webRtcEnabled, isCall, isChat, isEmail),
-      decline: getDeclineButtonVisibility(deviceType, webRtcEnabled, isCall),
+      // Basic call controls
+      accept: getAcceptButtonVisibility(isBrowser, isPhoneDevice, webRtcEnabled, isCall, isDigitalChannel),
+      decline: getDeclineButtonVisibility(isBrowser, webRtcEnabled, isCall),
       end: getEndButtonVisibility(
-        deviceType,
+        isBrowser,
         isEndCallEnabled,
         isCall,
         isHeld,
+        isConsultInitiatedOrAcceptedOrBeingConsulted,
         isConferenceInProgress,
-        taskConsultStatus
+        isConsultInitiatedOrAccepted,
+        consultCallHeld
       ),
-      muteUnmute: getMuteUnmuteButtonVisibility(deviceType, webRtcEnabled, isCall),
+      muteUnmute: getMuteUnmuteButtonVisibility(isBrowser, webRtcEnabled, isCall, isConsultInitiatedOrAccepted),
       holdResume: getHoldResumeButtonVisibility(
-        deviceType,
-        webRtcEnabled,
+        telephonySupported,
         isCall,
         isConferenceInProgress,
         isConsultInProgress,
-        isHeld
+        isHeld,
+        isBeingConsulted
       ),
+
+      // Recording controls
+      pauseResumeRecording: getPauseResumeRecordingButtonVisibility(
+        telephonySupported,
+        isCall,
+        isConferenceInProgress,
+        isConsultInitiatedOrAccepted
+      ),
+      recordingIndicator: getRecordingIndicatorVisibility(isCall),
+
+      // Transfer and conference controls
+      transfer: getTransferButtonVisibility(isTransferVisibility, isConferenceInProgress, isConsultInitiatedOrAccepted),
+      conference: getConferenceButtonVisibility(isBrowser, webRtcEnabled, isCall, isChat, isBeingConsulted),
+      exitConference: getExitConferenceButtonVisibility(
+        isConferenceInProgress,
+        isConsultInitiatedOrAccepted,
+        consultCallHeld
+      ),
+      mergeConference: getMergeConferenceButtonVisibility(
+        isConsultInitiatedOrAcceptedOnly,
+        isConsultAccepted,
+        consultCallHeld,
+        isConferenceInProgress
+      ),
+
+      // Consult controls
       consult: getConsultButtonVisibility(
-        deviceType,
-        webRtcEnabled,
+        telephonySupported,
         isCall,
         isConsultInProgress,
         isCustomerInCall,
         conferenceParticipantsCount,
-        maxParticipantsInConference
-      ),
-      transfer: getTransferButtonVisibility(isTransferVisibility, isConferenceInProgress),
-      conference: getConferenceButtonVisibility(deviceType, webRtcEnabled, isCall, isChat),
-      wrapup: getWrapupButtonVisibility(task),
-      pauseResumeRecording: getPauseResumeRecordingButtonVisibility(
-        deviceType,
-        webRtcEnabled,
-        isCall,
-        isConferenceInProgress
+        maxParticipantsInConference,
+        isBeingConsulted
       ),
       endConsult: getEndConsultButtonVisibility(
         isEndConsultEnabled,
-        deviceType,
+        telephonySupported,
+        isCall,
+        isConsultInitiatedOrAccepted
+      ),
+      consultTransfer: getConsultTransferButtonVisibility(
+        isConsultInitiatedOrAcceptedOnly,
+        isConsultAccepted,
+        consultCallHeld,
+        isConferenceInProgress
+      ),
+      consultTransferConsult: getConsultTransferConsultButtonVisibility(isConsultAccepted, consultCallHeld),
+      mergeConferenceConsult: getMergeConferenceConsultButtonVisibility(isConsultAccepted, consultCallHeld),
+      muteUnmuteConsult: getMuteUnmuteConsultButtonVisibility(
+        isBrowser,
         webRtcEnabled,
         isCall,
-        taskConsultStatus
+        isConsultInitiatedOrAccepted,
+        isConsultAccepted
       ),
-      recordingIndicator: getRecordingIndicatorVisibility(isCall),
-      exitConference: getExitConferenceButtonVisibility(isConferenceInProgress),
-      mergeConference: getMergeConferenceButtonVisibility(taskConsultStatus),
-      consultTransfer: getConsultTransferButtonVisibility(taskConsultStatus),
+
+      // Switch call controls
+      switchToMainCall: getswitchToMainCallButtonVisibility(isBeingConsulted, isConsultAccepted, consultCallHeld),
+      switchToConsult: getSwitchToConsultButtonVisibility(isBeingConsulted, consultCallHeld),
+
+      // Other controls
+      wrapup: getWrapupButtonVisibility(task),
+
+      // State flags
       isConferenceInProgress: getConferenceInProgressVisibility(task),
-      isConsultInitiated: taskConsultStatus === ConsultStatus.CONSULT_INITIATED,
-      isConsultInitiatedAndAccepted: taskConsultStatus === ConsultStatus.CONSULT_ACCEPTED,
-      isConsultReceived: taskConsultStatus == ConsultStatus.BEING_CONSULTED_ACCEPTED,
-      isConsultInitiatedOrAccepted: (
-        [
-          ConsultStatus.CONSULT_INITIATED,
-          ConsultStatus.CONSULT_ACCEPTED,
-          ConsultStatus.BEING_CONSULTED_ACCEPTED,
-        ] as string[]
-      ).includes(taskConsultStatus),
+      isConsultInitiated,
+      isConsultInitiatedAndAccepted: isConsultAccepted,
+      isConsultReceived: isBeingConsulted,
+      isConsultInitiatedOrAccepted: isConsultInitiatedOrAccepted,
       isHeld,
+      consultCallHeld,
     };
 
     return controls;
@@ -505,6 +539,7 @@ export function getControlsVisibility(
       module: 'task-util',
       method: 'getControlsVisibility',
     });
+
     // Return safe default controls
     const defaultVisibility: Visibility = {isVisible: false, isEnabled: false};
     return {
@@ -513,22 +548,28 @@ export function getControlsVisibility(
       end: defaultVisibility,
       muteUnmute: defaultVisibility,
       holdResume: defaultVisibility,
-      consult: defaultVisibility,
+      pauseResumeRecording: defaultVisibility,
+      recordingIndicator: defaultVisibility,
       transfer: defaultVisibility,
       conference: defaultVisibility,
-      wrapup: {isVisible: false, isEnabled: true}, // Wrapup is always enabled
-      pauseResumeRecording: defaultVisibility,
-      endConsult: defaultVisibility,
-      recordingIndicator: defaultVisibility,
       exitConference: defaultVisibility,
       mergeConference: defaultVisibility,
+      consult: defaultVisibility,
+      endConsult: defaultVisibility,
       consultTransfer: defaultVisibility,
+      consultTransferConsult: defaultVisibility,
+      mergeConferenceConsult: defaultVisibility,
+      muteUnmuteConsult: defaultVisibility,
+      switchToMainCall: defaultVisibility,
+      switchToConsult: defaultVisibility,
+      wrapup: {isVisible: false, isEnabled: true},
       isConferenceInProgress: false,
       isConsultInitiated: false,
       isConsultInitiatedAndAccepted: false,
-      isConsultInitiatedOrAccepted: false,
       isConsultReceived: false,
+      isConsultInitiatedOrAccepted: false,
       isHeld: false,
+      consultCallHeld: false,
     };
   }
 }

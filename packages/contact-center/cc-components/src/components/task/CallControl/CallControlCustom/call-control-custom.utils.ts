@@ -33,6 +33,7 @@ export const createConsultButtons = (
   handleConsultMuteToggle?: () => void,
   handleEndConsult?: () => void,
   handleConsultConferencePress?: () => void,
+  handleSwitchToMainCallPress?: () => void,
   logger?
 ): ButtonConfig[] => {
   try {
@@ -43,26 +44,35 @@ export const createConsultButtons = (
         onClick: handleConsultMuteToggle || (() => {}),
         tooltip: isMuted ? UNMUTE_CALL : MUTE_CALL,
         className: `${isMuted ? 'call-control-button-muted' : 'call-control-button'}`,
-        disabled: !controlVisibility.muteUnmute.isEnabled,
-        shouldShow: controlVisibility.muteUnmute.isVisible,
+        disabled: !controlVisibility.muteUnmuteConsult.isEnabled,
+        shouldShow: controlVisibility.muteUnmuteConsult.isVisible,
+      },
+      {
+        key: 'switchToMainCall',
+        icon: 'call-swap-bold',
+        tooltip: controlVisibility.isConferenceInProgress ? 'Switch to Conference Call' : 'Switch to Call',
+        onClick: handleSwitchToMainCallPress || (() => {}),
+        className: 'call-control-button',
+        disabled: !controlVisibility.switchToMainCall.isEnabled,
+        shouldShow: controlVisibility.switchToMainCall.isVisible && !!handleSwitchToMainCallPress,
       },
       {
         key: 'transfer',
         icon: 'next-bold',
-        tooltip: 'Transfer Consult',
+        tooltip: controlVisibility.isConferenceInProgress ? 'Transfer Conference' : 'Transfer',
         onClick: onTransfer || (() => {}),
         className: 'call-control-button',
-        disabled: !controlVisibility.consultTransfer.isEnabled,
-        shouldShow: controlVisibility.consultTransfer.isVisible && !!onTransfer,
+        disabled: !controlVisibility.consultTransferConsult.isEnabled,
+        shouldShow: controlVisibility.consultTransferConsult.isVisible && !!onTransfer,
       },
       {
         key: 'conference',
         icon: 'call-merge-bold',
-        tooltip: 'Consult Conference',
+        tooltip: 'merge',
         onClick: handleConsultConferencePress || (() => {}),
         className: 'call-control-button',
-        disabled: !controlVisibility.mergeConference.isEnabled,
-        shouldShow: controlVisibility.mergeConference.isVisible && !!handleConsultConferencePress,
+        disabled: !controlVisibility.mergeConferenceConsult.isEnabled,
+        shouldShow: controlVisibility.mergeConferenceConsult.isVisible && !!handleConsultConferencePress,
       },
       {
         key: 'cancel',
@@ -186,6 +196,28 @@ export const handleConsultConferencePress = (consultConference: (() => void) | u
     }
   } catch (error) {
     throw new Error(`Error consultConference: ${error}`);
+  }
+};
+
+/**
+ * Handles switch to conference call button press with logging
+ */
+export const handleSwitchToMainCallPress = (switchToMainCall: (() => void) | undefined, logger: ILogger): void => {
+  try {
+    logger.info('CC-Widgets: CallControlConsult: switchToMainCall clicked', {
+      module: 'call-control-consult.tsx',
+      method: 'handleSwitchToMainCallPress',
+    });
+
+    if (switchToMainCall) {
+      switchToMainCall();
+      logger.log('CC-Widgets: CallControlConsult: switchToMainCall completed', {
+        module: 'call-control-consult.tsx',
+        method: 'handleSwitchToMainCallPress',
+      });
+    }
+  } catch (error) {
+    throw new Error(`Error switchToMainCall: ${error}`);
   }
 };
 
