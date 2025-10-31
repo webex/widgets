@@ -110,6 +110,7 @@ class Store implements IStore {
         this.lastStateChangeTimestamp = response.lastStateChangeTimestamp;
         this.lastIdleCodeChangeTimestamp = response.lastIdleCodeChangeTimestamp;
         this.isEndConsultEnabled = response.isEndConsultEnabled;
+        // TODO: Remove this once SDK performs the validation
         this.isAddressBookEnabled = Boolean(response.addressBookId);
         this.allowConsultToQueue = response.allowConsultToQueue;
         this.agentProfile.agentName = response.agentName;

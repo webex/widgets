@@ -7,7 +7,7 @@ import ConsultTransferEmptyState from './consult-transfer-empty-state';
 import {
   handleAgentSelection,
   handleQueueSelection,
-  buildConsultTransferQuickAction,
+  shouldAddConsultTransferAction,
   getAgentsForDisplay,
 } from './call-control-custom.utils';
 import {useConsultTransferPopover} from './consult-transfer-popover-hooks';
@@ -20,6 +20,7 @@ import {
   LOADING_MORE_ENTRY_POINTS,
   NO_DATA_AVAILABLE_CONSULT_TRANSFER,
 } from '../../constants';
+import {CATEGORY_AGENTS, CATEGORY_DIAL_NUMBER, CATEGORY_ENTRY_POINT, CATEGORY_QUEUES} from '../../task.types';
 
 const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentProps> = ({
   heading,
@@ -37,7 +38,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
   logger,
 }) => {
   const {showDialNumberTab = true, showEntryPointTab = true} = consultTransferOptions || {};
-  const isEntryPointTabVisible = (showEntryPointTab ?? true) && heading === 'Consult';
+  const isEntryPointTabVisible = showEntryPointTab && heading === 'Consult';
   const {
     selectedCategory,
     searchQuery,
@@ -93,7 +94,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
   const noDialNumbers = !showDialNumberTab || dialNumbers.length === 0;
   const noEntryPoints = !isEntryPointTabVisible || entryPoints.length === 0;
 
-  const consultTransferManualAction = buildConsultTransferQuickAction(
+  const consultTransferManualAction = shouldAddConsultTransferAction(
     selectedCategory,
     isEntryPointTabVisible,
     searchQuery,
@@ -146,49 +147,49 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
 
       <div className="consult-category-buttons">
         <Button
-          variant={selectedCategory === 'Agents' ? 'primary' : 'secondary'}
+          variant={selectedCategory === CATEGORY_AGENTS ? 'primary' : 'secondary'}
           size="small"
           onClick={handleAgentsClick}
           className={`consult-category-button-standard ${
-            selectedCategory === 'Agents' ? 'consult-category-button-active' : ''
+            selectedCategory === CATEGORY_AGENTS ? 'consult-category-button-active' : ''
           }`}
         >
-          Agents
+          {CATEGORY_AGENTS}
         </Button>
         {allowConsultToQueue && (
           <Button
-            variant={selectedCategory === 'Queues' ? 'primary' : 'secondary'}
+            variant={selectedCategory === CATEGORY_QUEUES ? 'primary' : 'secondary'}
             size="small"
             onClick={handleQueuesClick}
             className={`consult-category-button-standard ${
-              selectedCategory === 'Queues' ? 'consult-category-button-active' : ''
+              selectedCategory === CATEGORY_QUEUES ? 'consult-category-button-active' : ''
             }`}
           >
-            Queues
+            {CATEGORY_QUEUES}
           </Button>
         )}
         {showDialNumberTab && (
           <Button
-            variant={selectedCategory === 'Dial Number' ? 'primary' : 'secondary'}
+            variant={selectedCategory === CATEGORY_DIAL_NUMBER ? 'primary' : 'secondary'}
             size="small"
             onClick={handleDialNumberClick}
             className={`consult-category-button-wide ${
-              selectedCategory === 'Dial Number' ? 'consult-category-button-active' : ''
+              selectedCategory === CATEGORY_DIAL_NUMBER ? 'consult-category-button-active' : ''
             }`}
           >
-            Dial Number
+            {CATEGORY_DIAL_NUMBER}
           </Button>
         )}
         {isEntryPointTabVisible && (
           <Button
-            variant={selectedCategory === 'Entry Point' ? 'primary' : 'secondary'}
+            variant={selectedCategory === CATEGORY_ENTRY_POINT ? 'primary' : 'secondary'}
             size="small"
             onClick={handleEntryPointClick}
             className={`consult-category-button-wide ${
-              selectedCategory === 'Entry Point' ? 'consult-category-button-active' : ''
+              selectedCategory === CATEGORY_ENTRY_POINT ? 'consult-category-button-active' : ''
             }`}
           >
-            Entry Point
+            {CATEGORY_ENTRY_POINT}
           </Button>
         )}
       </div>
@@ -232,7 +233,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
         ))}
 
       {showDialNumberTab &&
-        selectedCategory === 'Dial Number' &&
+        selectedCategory === CATEGORY_DIAL_NUMBER &&
         (noDialNumbers ? (
           <ConsultTransferEmptyState message={NO_DATA_AVAILABLE_CONSULT_TRANSFER} />
         ) : (
@@ -264,7 +265,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
         ))}
 
       {isEntryPointTabVisible &&
-        selectedCategory === 'Entry Point' &&
+        selectedCategory === CATEGORY_ENTRY_POINT &&
         (noEntryPoints ? (
           <ConsultTransferEmptyState message={NO_DATA_AVAILABLE_CONSULT_TRANSFER} />
         ) : (

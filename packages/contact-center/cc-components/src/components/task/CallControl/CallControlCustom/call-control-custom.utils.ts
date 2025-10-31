@@ -683,7 +683,7 @@ export const debounce = <T extends (...args: unknown[]) => unknown>(
 /**
  * Helpers for Dial Number / Entry Point manual actions
  */
-export const buildConsultTransferQuickAction = (
+export const shouldAddConsultTransferAction = (
   selectedCategory: string,
   isEntryPointTabVisible: boolean,
   query: string,
