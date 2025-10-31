@@ -167,6 +167,10 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.isMuted;
   }
 
+  get isAddressBookEnabled() {
+    return this.store.isAddressBookEnabled;
+  }
+
   setIsMuted = (value: boolean): void => {
     runInAction(() => {
       this.store.isMuted = value;
@@ -718,6 +722,9 @@ class StoreWrapper implements IStoreWrapper {
 
   getAddressBookEntries = async (params?: AddressBookEntrySearchParams): Promise<AddressBookEntriesResponse> => {
     try {
+      if (!this.store.isAddressBookEnabled) {
+        return {data: [], meta: {page: 0, totalPages: 0}};
+      }
       const response: AddressBookEntriesResponse = await this.store.cc.addressBook.getEntries(params ?? {});
       return response;
     } catch (error) {

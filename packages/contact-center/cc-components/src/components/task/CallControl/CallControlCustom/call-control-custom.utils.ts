@@ -613,6 +613,30 @@ export const filterAvailableAgents = (agents: BuddyDetails[], logger?): BuddyDet
 };
 
 /**
+ * Filters buddy agents by a free-text query across name, dn and id.
+ */
+export const filterAgentsByQuery = (agents: BuddyDetails[], query: string): BuddyDetails[] => {
+  const q = (query || '').trim().toLowerCase();
+  if (!q) return agents || [];
+  const safeAgents = agents || [];
+  return safeAgents.filter((a) => {
+    const name = a.agentName?.toLowerCase() || '';
+    const dn = (a as unknown as {dn?: string})?.dn?.toLowerCase() || '';
+    const id = a.agentId?.toLowerCase() || '';
+    return name.includes(q) || dn.includes(q) || id.includes(q);
+  });
+};
+
+/**
+ * Returns agents to display for current category, applying search only for Agents tab.
+ */
+export const getAgentsForDisplay = (
+  selectedCategory: 'Agents' | string,
+  agents: BuddyDetails[],
+  query: string
+): BuddyDetails[] => (selectedCategory === 'Agents' ? filterAgentsByQuery(agents, query) : agents || []);
+
+/**
  * Filters available queues
  */
 export const filterAvailableQueues = (queues: ContactServiceQueue[], logger?): ContactServiceQueue[] => {
@@ -654,4 +678,37 @@ export const debounce = <T extends (...args: unknown[]) => unknown>(
       func(...args);
     };
   }
+};
+
+/**
+ * Helpers for Dial Number / Entry Point manual actions
+ */
+export const buildConsultTransferQuickAction = (
+  selectedCategory: string,
+  isEntryPointTabVisible: boolean,
+  query: string,
+  entryPoints: {id: string; name: string}[],
+  onDialNumberSelect: ((dialNumber: string) => void) | undefined,
+  onEntryPointSelect: ((entryPointId: string, entryPointName: string) => void) | undefined
+): {visible: boolean; onClick?: () => void; title?: string} => {
+  const DN_REGEX = new RegExp('^[+1][0-9]{3,18}$|^[*#:][+1][0-9*#:]{3,18}$|^[0-9*#:]{3,18}$');
+
+  const isDial = selectedCategory === 'Dial Number';
+  const isEntry = selectedCategory === 'Entry Point' && isEntryPointTabVisible;
+  const valid = DN_REGEX.test(query || '');
+
+  if (isDial) {
+    return valid && onDialNumberSelect
+      ? {visible: true, onClick: () => onDialNumberSelect(query), title: query}
+      : {visible: false};
+  }
+
+  if (isEntry) {
+    const match = query ? entryPoints?.find((e) => e.name === query || e.id === query) : null;
+    return valid && match && onEntryPointSelect
+      ? {visible: true, onClick: () => onEntryPointSelect(match.id, match.name), title: match.name}
+      : {visible: false};
+  }
+
+  return {visible: false};
 };

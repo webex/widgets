@@ -871,6 +871,7 @@ describe('storeEventsWrapper', () => {
     });
 
     it('should fetch address book entries successfully', async () => {
+      storeWrapper['store'].isAddressBookEnabled = true;
       jest.spyOn(storeWrapper['store'].cc.addressBook, 'getEntries').mockResolvedValue(mockAddressBookEntriesResponse);
 
       const result = await storeWrapper.getAddressBookEntries({page: 0, pageSize: 25});
@@ -879,8 +880,17 @@ describe('storeEventsWrapper', () => {
     });
 
     it('should handle error while fetching address book entries', async () => {
+      storeWrapper['store'].isAddressBookEnabled = true;
       jest.spyOn(storeWrapper['store'].cc.addressBook, 'getEntries').mockRejectedValue(new Error('ab error'));
       await expect(storeWrapper.getAddressBookEntries({page: 0, pageSize: 25})).rejects.toThrow('ab error');
+    });
+
+    it('should return empty list and not call API when address book is disabled', async () => {
+      storeWrapper['store'].isAddressBookEnabled = false;
+      const getEntriesSpy = jest.spyOn(storeWrapper['store'].cc.addressBook, 'getEntries');
+      const result = await storeWrapper.getAddressBookEntries({page: 0, pageSize: 25});
+      expect(result).toEqual({data: [], meta: {page: 0, totalPages: 0}});
+      expect(getEntriesSpy).not.toHaveBeenCalled();
     });
   });
 

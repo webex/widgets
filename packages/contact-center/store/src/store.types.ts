@@ -127,6 +127,7 @@ interface IStore {
   allowConsultToQueue: boolean;
   agentProfile: AgentLoginProfile;
   isMuted: boolean;
+  isAddressBookEnabled: boolean;
   init(params: InitParams, callback: (ccSDK: IContactCenter) => void): Promise<void>;
   registerCC(webex?: WithWebex['webex']): Promise<void>;
 }
