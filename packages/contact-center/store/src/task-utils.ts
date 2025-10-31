@@ -3,6 +3,7 @@ import {
   CONSULT_STATE_CONFERENCING,
   CONSULT_STATE_INITIATED,
   CUSTOMER,
+  EXCLUDED_PARTICIPANT_TYPES,
   INTERACTION_STATE_CONFERENCE,
   INTERACTION_STATE_CONNECTED,
   INTERACTION_STATE_POST_CALL,
@@ -166,6 +167,14 @@ export function getIsConferenceInProgress(task: ITask): boolean {
   return agentParticipants.size >= 2;
 }
 
+/**
+ * Retrieves the list of active conference participants excluding the current agent
+ * Filters out customers, supervisors, VVAs, and participants who have left
+ *
+ * @param task - The task object containing interaction data
+ * @param agentId - The ID of the current agent to exclude from results
+ * @returns Array of active agent participants in the conference
+ */
 export const getConferenceParticipants = (task: ITask, agentId: string): Participant[] => {
   const participantsList: Participant[] = [];
 
@@ -174,16 +183,17 @@ export const getConferenceParticipants = (task: ITask, agentId: string): Partici
     return participantsList;
   }
 
-  const mediaMainCall = task.data.interaction.media[task.data.interactionId];
-  const participantsInMainCall = new Set(mediaMainCall?.participants);
-  const participants = task?.data?.interaction?.participants;
+  const mediaMainCall = task.data.interaction.media?.[task.data.interactionId];
+  const participantsInMainCall = new Set(mediaMainCall?.participants ?? []);
+  const participants = task.data.interaction.participants ?? {};
 
   if (participantsInMainCall.size > 0 && participants) {
     participantsInMainCall.forEach((participantId: string) => {
       const participant = participants[participantId];
+      // Include only active agent participants (excluding current agent, customers, supervisors, and VVAs)
       if (
         participant &&
-        ![CUSTOMER, SUPERVISOR, VVA].includes(participant.pType) &&
+        !EXCLUDED_PARTICIPANT_TYPES.includes(participant.pType) &&
         !participant.hasLeft &&
         participant.id !== agentId
       ) {
@@ -199,6 +209,13 @@ export const getConferenceParticipants = (task: ITask, agentId: string): Partici
   return participantsList;
 };
 
+/**
+ * Counts the number of active agent participants in the conference
+ * Excludes customers, supervisors, VVAs, and participants who have left
+ *
+ * @param task - The task object containing interaction data
+ * @returns Count of active agent participants
+ */
 export function getConferenceParticipantsCount(task: ITask): number {
   const participantsList: Participant[] = [];
 
@@ -207,14 +224,15 @@ export function getConferenceParticipantsCount(task: ITask): number {
     return 0;
   }
 
-  const mediaMainCall = task.data.interaction.media[task.data.interactionId];
-  const participantsInMainCall = new Set(mediaMainCall?.participants);
-  const participants = task?.data?.interaction?.participants;
+  const mediaMainCall = task.data.interaction.media?.[task.data.interactionId];
+  const participantsInMainCall = new Set(mediaMainCall?.participants ?? []);
+  const participants = task.data.interaction.participants ?? {};
 
   if (participantsInMainCall.size > 0 && participants) {
     participantsInMainCall.forEach((participantId: string) => {
       const participant = participants[participantId];
-      if (participant && ![SUPERVISOR, VVA, CUSTOMER].includes(participant.pType) && !participant.hasLeft) {
+      // Count only active agent participants (excluding customers, supervisors, and VVAs)
+      if (participant && !EXCLUDED_PARTICIPANT_TYPES.includes(participant.pType) && !participant.hasLeft) {
         participantsList.push({
           id: participant.id,
           pType: participant.pType,
