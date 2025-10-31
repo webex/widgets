@@ -267,7 +267,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
           </Text>
         </div>
       </div>
-      {controlVisibility.isConsultInitiatedOrAccepted && (
+      {controlVisibility.isConsultInitiatedOrAccepted && !controlVisibility.wrapup.isVisible && (
         <div className={`call-control-consult-container ${callControlConsultClassName || ''}`}>
           <CallControlConsultComponent
             agentName={consultAgentName}

@@ -217,7 +217,7 @@ export function getExitConferenceButtonVisibility(
   isConsultInitiatedOrAccepted: boolean,
   consultCallHeld: boolean
 ): Visibility {
-  const isVisible = isConferenceInProgress;
+  const isVisible = isConferenceInProgress && !isConsultInitiatedOrAccepted;
   const isConferenceWithConsultNotHeld = isConferenceInProgress && isConsultInitiatedOrAccepted && !consultCallHeld;
   const isEnabled = !isConferenceWithConsultNotHeld;
 
