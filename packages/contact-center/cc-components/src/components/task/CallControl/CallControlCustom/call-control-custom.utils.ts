@@ -68,7 +68,7 @@ export const createConsultButtons = (
       {
         key: 'conference',
         icon: 'call-merge-bold',
-        tooltip: 'merge',
+        tooltip: 'Merge',
         onClick: handleConsultConferencePress || (() => {}),
         className: 'call-control-button',
         disabled: !controlVisibility.mergeConferenceConsult.isEnabled,

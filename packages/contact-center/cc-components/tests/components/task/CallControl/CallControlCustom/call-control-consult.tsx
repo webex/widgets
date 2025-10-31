@@ -320,7 +320,7 @@ describe('CallControlConsultComponent', () => {
     expect(tooltipLabels[0]).toHaveTextContent('Mute');
     expect(tooltipLabels[1]).toHaveTextContent('Switch to Call');
     expect(tooltipLabels[2]).toHaveTextContent('Transfer');
-    expect(tooltipLabels[3]).toHaveTextContent('merge');
+    expect(tooltipLabels[3]).toHaveTextContent('Merge');
     expect(tooltipLabels[4]).toHaveTextContent('End Consult');
   });
 });

@@ -31,8 +31,8 @@ describe('getControlsVisibility', () => {
       accept: {isVisible: true, isEnabled: true},
       decline: {isVisible: true, isEnabled: true},
       end: {isVisible: true, isEnabled: true},
-      muteUnmute: {isVisible: true, isEnabled: true},
-      muteUnmuteConsult: {isVisible: true, isEnabled: true},
+      muteUnmute: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
+      muteUnmuteConsult: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
       holdResume: {isVisible: true, isEnabled: true},
       consult: {isVisible: true, isEnabled: true},
       transfer: {isVisible: true, isEnabled: true},
@@ -42,8 +42,8 @@ describe('getControlsVisibility', () => {
       endConsult: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
       consultTransfer: {isVisible: false, isEnabled: false}, // Not visible when no consult in progress
       mergeConference: {isVisible: false, isEnabled: false}, // Not visible when no consult in progress
-      mergeConferenceConsult: {isVisible: false, isEnabled: true},
-      consultTransferConsult: {isVisible: false, isEnabled: true},
+      mergeConferenceConsult: {isVisible: false, isEnabled: false}, // Not enabled when consult not accepted
+      consultTransferConsult: {isVisible: false, isEnabled: false}, // Not enabled when consult not accepted
       switchToMainCall: {isVisible: false, isEnabled: false},
       switchToConsult: {isVisible: false, isEnabled: true},
       exitConference: {isVisible: false, isEnabled: true}, // Not visible when no conference in progress
@@ -83,8 +83,8 @@ describe('getControlsVisibility', () => {
       endConsult: {isVisible: false, isEnabled: true},
       consultTransfer: {isVisible: false, isEnabled: false},
       mergeConference: {isVisible: false, isEnabled: false},
-      mergeConferenceConsult: {isVisible: false, isEnabled: true},
-      consultTransferConsult: {isVisible: false, isEnabled: true},
+      mergeConferenceConsult: {isVisible: false, isEnabled: false}, // Not enabled when consult not accepted
+      consultTransferConsult: {isVisible: false, isEnabled: false}, // Not enabled when consult not accepted
       switchToMainCall: {isVisible: false, isEnabled: false},
       switchToConsult: {isVisible: false, isEnabled: true},
       exitConference: {isVisible: false, isEnabled: true},
@@ -113,8 +113,8 @@ describe('getControlsVisibility', () => {
       accept: {isVisible: true, isEnabled: true},
       decline: {isVisible: true, isEnabled: true},
       end: {isVisible: true, isEnabled: true},
-      muteUnmute: {isVisible: true, isEnabled: true},
-      muteUnmuteConsult: {isVisible: true, isEnabled: true},
+      muteUnmute: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
+      muteUnmuteConsult: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
       holdResume: {isVisible: true, isEnabled: true},
       consult: {isVisible: true, isEnabled: true},
       transfer: {isVisible: true, isEnabled: true},
@@ -124,8 +124,8 @@ describe('getControlsVisibility', () => {
       endConsult: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
       consultTransfer: {isVisible: false, isEnabled: false}, // Not visible when no consult in progress
       mergeConference: {isVisible: false, isEnabled: false}, // Not visible when no consult in progress
-      mergeConferenceConsult: {isVisible: false, isEnabled: true},
-      consultTransferConsult: {isVisible: false, isEnabled: true},
+      mergeConferenceConsult: {isVisible: false, isEnabled: false}, // Not enabled when consult not accepted
+      consultTransferConsult: {isVisible: false, isEnabled: false}, // Not enabled when consult not accepted
       switchToMainCall: {isVisible: false, isEnabled: false},
       switchToConsult: {isVisible: false, isEnabled: true},
       exitConference: {isVisible: false, isEnabled: true}, // Not visible when no conference in progress
@@ -160,8 +160,8 @@ describe('getControlsVisibility', () => {
       accept: {isVisible: true, isEnabled: true},
       decline: {isVisible: true, isEnabled: true},
       end: {isVisible: true, isEnabled: true},
-      muteUnmute: {isVisible: true, isEnabled: true},
-      muteUnmuteConsult: {isVisible: true, isEnabled: true},
+      muteUnmute: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
+      muteUnmuteConsult: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
       holdResume: {isVisible: true, isEnabled: true},
       consult: {isVisible: true, isEnabled: true},
       transfer: {isVisible: true, isEnabled: true},
@@ -171,8 +171,8 @@ describe('getControlsVisibility', () => {
       endConsult: {isVisible: false, isEnabled: true}, // Not visible when isEndConsultEnabled is false
       consultTransfer: {isVisible: false, isEnabled: false}, // Not visible when no consult in progress
       mergeConference: {isVisible: false, isEnabled: false}, // Not visible when no consult in progress
-      mergeConferenceConsult: {isVisible: false, isEnabled: true},
-      consultTransferConsult: {isVisible: false, isEnabled: true},
+      mergeConferenceConsult: {isVisible: false, isEnabled: false}, // Not enabled when consult not accepted
+      consultTransferConsult: {isVisible: false, isEnabled: false}, // Not enabled when consult not accepted
       switchToMainCall: {isVisible: false, isEnabled: false},
       switchToConsult: {isVisible: false, isEnabled: true},
       exitConference: {isVisible: false, isEnabled: true}, // Not visible when no conference in progress
@@ -212,8 +212,8 @@ describe('getControlsVisibility', () => {
       endConsult: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
       consultTransfer: {isVisible: false, isEnabled: false}, // Not visible when no consult in progress
       mergeConference: {isVisible: false, isEnabled: false}, // Not visible when no consult in progress
-      mergeConferenceConsult: {isVisible: false, isEnabled: true},
-      consultTransferConsult: {isVisible: false, isEnabled: true},
+      mergeConferenceConsult: {isVisible: false, isEnabled: false}, // Not enabled when consult not accepted
+      consultTransferConsult: {isVisible: false, isEnabled: false}, // Not enabled when consult not accepted
       switchToMainCall: {isVisible: false, isEnabled: false},
       switchToConsult: {isVisible: false, isEnabled: true},
       exitConference: {isVisible: false, isEnabled: true}, // Not visible when no conference in progress
@@ -256,8 +256,8 @@ describe('getControlsVisibility', () => {
       endConsult: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
       consultTransfer: {isVisible: false, isEnabled: false}, // Not visible when no consult in progress
       mergeConference: {isVisible: false, isEnabled: false}, // Not visible when no consult in progress
-      mergeConferenceConsult: {isVisible: false, isEnabled: true},
-      consultTransferConsult: {isVisible: false, isEnabled: true},
+      mergeConferenceConsult: {isVisible: false, isEnabled: false}, // Not enabled when consult not accepted
+      consultTransferConsult: {isVisible: false, isEnabled: false}, // Not enabled when consult not accepted
       switchToMainCall: {isVisible: false, isEnabled: false},
       switchToConsult: {isVisible: false, isEnabled: true},
       exitConference: {isVisible: false, isEnabled: true}, // Not visible when no conference in progress
@@ -300,8 +300,8 @@ describe('getControlsVisibility', () => {
       endConsult: {isVisible: false, isEnabled: true},
       consultTransfer: {isVisible: false, isEnabled: false},
       mergeConference: {isVisible: false, isEnabled: false},
-      mergeConferenceConsult: {isVisible: false, isEnabled: true},
-      consultTransferConsult: {isVisible: false, isEnabled: true},
+      mergeConferenceConsult: {isVisible: false, isEnabled: false}, // Not enabled when consult not accepted
+      consultTransferConsult: {isVisible: false, isEnabled: false}, // Not enabled when consult not accepted
       switchToMainCall: {isVisible: false, isEnabled: false},
       switchToConsult: {isVisible: false, isEnabled: true},
       exitConference: {isVisible: false, isEnabled: true},
@@ -344,8 +344,8 @@ describe('getControlsVisibility', () => {
       endConsult: {isVisible: false, isEnabled: true},
       consultTransfer: {isVisible: false, isEnabled: false},
       mergeConference: {isVisible: false, isEnabled: false},
-      mergeConferenceConsult: {isVisible: false, isEnabled: true},
-      consultTransferConsult: {isVisible: false, isEnabled: true},
+      mergeConferenceConsult: {isVisible: false, isEnabled: false}, // Not enabled when consult not accepted
+      consultTransferConsult: {isVisible: false, isEnabled: false}, // Not enabled when consult not accepted
       switchToMainCall: {isVisible: false, isEnabled: false},
       switchToConsult: {isVisible: false, isEnabled: true},
       exitConference: {isVisible: false, isEnabled: true},

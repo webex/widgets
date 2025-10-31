@@ -563,39 +563,33 @@ export const useCallControl = (props: useCallControlProps) => {
   };
 
   useEffect(() => {
-    if (!currentTask) return;
+    if (!currentTask?.data?.interactionId) return;
     logger.log(`useCallControl init for task ${currentTask.data.interactionId}`, {
       module: 'useCallControl',
       method: 'useEffect-init',
     });
 
+    const interactionId = currentTask.data.interactionId;
+
     store.setTaskCallback(
       // Should use holdCallback
       TASK_EVENTS.TASK_HOLD,
       holdCallback,
-      currentTask.data.interactionId
+      interactionId
     );
-    store.setTaskCallback(TASK_EVENTS.TASK_RESUME, resumeCallback, currentTask.data.interactionId);
-    store.setTaskCallback(TASK_EVENTS.TASK_END, endCallCallback, currentTask.data.interactionId);
-    store.setTaskCallback(TASK_EVENTS.AGENT_WRAPPEDUP, wrapupCallCallback, currentTask.data.interactionId);
-    store.setTaskCallback(TASK_EVENTS.TASK_RECORDING_PAUSED, pauseRecordingCallback, currentTask.data.interactionId);
-    store.setTaskCallback(TASK_EVENTS.TASK_RECORDING_RESUMED, resumeRecordingCallback, currentTask.data.interactionId);
+    store.setTaskCallback(TASK_EVENTS.TASK_RESUME, resumeCallback, interactionId);
+    store.setTaskCallback(TASK_EVENTS.TASK_END, endCallCallback, interactionId);
+    store.setTaskCallback(TASK_EVENTS.AGENT_WRAPPEDUP, wrapupCallCallback, interactionId);
+    store.setTaskCallback(TASK_EVENTS.TASK_RECORDING_PAUSED, pauseRecordingCallback, interactionId);
+    store.setTaskCallback(TASK_EVENTS.TASK_RECORDING_RESUMED, resumeRecordingCallback, interactionId);
 
     return () => {
-      store.removeTaskCallback(TASK_EVENTS.TASK_HOLD, holdCallback, currentTask.data.interactionId);
-      store.removeTaskCallback(TASK_EVENTS.TASK_RESUME, resumeCallback, currentTask.data.interactionId);
-      store.removeTaskCallback(TASK_EVENTS.TASK_END, endCallCallback, currentTask.data.interactionId);
-      store.removeTaskCallback(TASK_EVENTS.AGENT_WRAPPEDUP, wrapupCallCallback, currentTask.data.interactionId);
-      store.removeTaskCallback(
-        TASK_EVENTS.CONTACT_RECORDING_PAUSED,
-        pauseRecordingCallback,
-        currentTask.data.interactionId
-      );
-      store.removeTaskCallback(
-        TASK_EVENTS.CONTACT_RECORDING_RESUMED,
-        resumeRecordingCallback,
-        currentTask.data.interactionId
-      );
+      store.removeTaskCallback(TASK_EVENTS.TASK_HOLD, holdCallback, interactionId);
+      store.removeTaskCallback(TASK_EVENTS.TASK_RESUME, resumeCallback, interactionId);
+      store.removeTaskCallback(TASK_EVENTS.TASK_END, endCallCallback, interactionId);
+      store.removeTaskCallback(TASK_EVENTS.AGENT_WRAPPEDUP, wrapupCallCallback, interactionId);
+      store.removeTaskCallback(TASK_EVENTS.CONTACT_RECORDING_PAUSED, pauseRecordingCallback, interactionId);
+      store.removeTaskCallback(TASK_EVENTS.CONTACT_RECORDING_RESUMED, resumeRecordingCallback, interactionId);
     };
   }, [currentTask]);
 
@@ -816,6 +810,11 @@ export const useCallControl = (props: useCallControlProps) => {
   };
 
   const endConsultCall = async () => {
+    if (!currentTask?.data?.interactionId) {
+      logError('Cannot end consult call: currentTask or interactionId is missing', 'endConsultCall');
+      return;
+    }
+
     const consultEndPayload = {
       isConsult: true,
       taskId: currentTask.data.interactionId,
@@ -831,6 +830,11 @@ export const useCallControl = (props: useCallControlProps) => {
   };
 
   const consultTransfer = async () => {
+    if (!currentTask?.data) {
+      logError('Cannot transfer consult call: currentTask or data is missing', 'consultTransfer');
+      return;
+    }
+
     try {
       if (currentTask.data.isConferenceInProgress) {
         logger.info('Conference in progress, using transferConference', {
@@ -849,6 +853,14 @@ export const useCallControl = (props: useCallControlProps) => {
   };
 
   const cancelAutoWrapup = () => {
+    if (!currentTask) {
+      logger.warn('CC-Widgets: CallControl: Cannot cancel auto-wrapup, currentTask is missing', {
+        module: 'widget-cc-task#helper.ts',
+        method: 'useCallControl#cancelAutoWrapup',
+      });
+      return;
+    }
+
     logger.info('CC-Widgets: CallControl: wrap-up cancelled', {
       module: 'widget-cc-task#helper.ts',
       method: 'useCallControl#cancelAutoWrapup',
