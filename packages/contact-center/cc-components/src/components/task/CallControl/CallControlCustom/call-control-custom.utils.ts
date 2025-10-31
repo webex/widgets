@@ -616,15 +616,13 @@ export const filterAvailableAgents = (agents: BuddyDetails[], logger?): BuddyDet
  * Filters buddy agents by a free-text query across name, dn and id.
  */
 export const filterAgentsByQuery = (agents: BuddyDetails[], query: string): BuddyDetails[] => {
-  const q = (query || '').trim().toLowerCase();
-  if (!q) return agents || [];
-  const safeAgents = agents || [];
-  return safeAgents.filter((a) => {
-    const name = a.agentName?.toLowerCase() || '';
-    const dn = (a as unknown as {dn?: string})?.dn?.toLowerCase() || '';
-    const id = a.agentId?.toLowerCase() || '';
-    return name.includes(q) || dn.includes(q) || id.includes(q);
-  });
+  const searchTerm = (query ?? '').trim().toLowerCase();
+  if (!searchTerm) return agents ?? [];
+  return (agents ?? []).filter((agent) =>
+    `${agent.agentName ?? ''}|${(agent as {dn?: string}).dn ?? ''}|${agent.agentId ?? ''}`
+      .toLowerCase()
+      .includes(searchTerm)
+  );
 };
 
 /**
