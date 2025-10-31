@@ -628,7 +628,7 @@ export const filterAgentsByQuery = (agents: BuddyDetails[], query: string): Budd
 };
 
 /**
- * Returns agents to display for current category, applying search only for Agents tab.
+ * Returns agents to display for current category, applying search only for Agents tab, since other tabs support via the SDK
  */
 export const getAgentsForDisplay = (
   selectedCategory: 'Agents' | string,
