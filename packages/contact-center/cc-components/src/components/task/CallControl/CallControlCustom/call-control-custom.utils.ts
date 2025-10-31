@@ -12,7 +12,7 @@ export interface ButtonConfig {
   tooltip: string;
   className: string;
   disabled?: boolean;
-  shouldShow: boolean;
+  isVisible: boolean;
 }
 
 /**
@@ -45,7 +45,7 @@ export const createConsultButtons = (
         tooltip: isMuted ? UNMUTE_CALL : MUTE_CALL,
         className: `${isMuted ? 'call-control-button-muted' : 'call-control-button'}`,
         disabled: !controlVisibility.muteUnmuteConsult.isEnabled,
-        shouldShow: controlVisibility.muteUnmuteConsult.isVisible,
+        isVisible: controlVisibility.muteUnmuteConsult.isVisible,
       },
       {
         key: 'switchToMainCall',
@@ -54,7 +54,7 @@ export const createConsultButtons = (
         onClick: handleSwitchToMainCallPress || (() => {}),
         className: 'call-control-button',
         disabled: !controlVisibility.switchToMainCall.isEnabled,
-        shouldShow: controlVisibility.switchToMainCall.isVisible && !!handleSwitchToMainCallPress,
+        isVisible: controlVisibility.switchToMainCall.isVisible && !!handleSwitchToMainCallPress,
       },
       {
         key: 'transfer',
@@ -63,7 +63,7 @@ export const createConsultButtons = (
         onClick: onTransfer || (() => {}),
         className: 'call-control-button',
         disabled: !controlVisibility.consultTransferConsult.isEnabled,
-        shouldShow: controlVisibility.consultTransferConsult.isVisible && !!onTransfer,
+        isVisible: controlVisibility.consultTransferConsult.isVisible && !!onTransfer,
       },
       {
         key: 'conference',
@@ -72,7 +72,7 @@ export const createConsultButtons = (
         onClick: handleConsultConferencePress || (() => {}),
         className: 'call-control-button',
         disabled: !controlVisibility.mergeConferenceConsult.isEnabled,
-        shouldShow: controlVisibility.mergeConferenceConsult.isVisible && !!handleConsultConferencePress,
+        isVisible: controlVisibility.mergeConferenceConsult.isVisible && !!handleConsultConferencePress,
       },
       {
         key: 'cancel',
@@ -80,7 +80,7 @@ export const createConsultButtons = (
         tooltip: 'End Consult',
         onClick: handleEndConsult || (() => {}),
         className: 'call-control-consult-button-cancel',
-        shouldShow: controlVisibility.endConsult.isVisible && !!handleEndConsult,
+        isVisible: controlVisibility.endConsult.isVisible && !!handleEndConsult,
       },
     ];
   } catch (error) {
@@ -99,7 +99,7 @@ export const createConsultButtons = (
  */
 export const getVisibleButtons = (buttons: ButtonConfig[], logger?): ButtonConfig[] => {
   try {
-    return buttons.filter((button) => button.shouldShow);
+    return buttons.filter((button) => button.isVisible);
   } catch (error) {
     logger?.error('CC-Widgets: CallControlCustom: Error in getVisibleButtons', {
       module: 'cc-components#call-control-custom.utils.ts',

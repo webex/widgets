@@ -148,7 +148,7 @@ describe('Call Control Custom Utils', () => {
       );
 
       const transferButton = buttons.find((b) => b.key === 'transfer');
-      expect(transferButton?.shouldShow).toBe(false);
+      expect(transferButton?.isVisible).toBe(false);
     });
 
     it('should hide mute button when muteUnmuteConsult is false', () => {
@@ -159,16 +159,16 @@ describe('Call Control Custom Utils', () => {
       );
 
       const muteButton = buttons.find((b) => b.key === 'mute');
-      expect(muteButton?.shouldShow).toBe(false);
+      expect(muteButton?.isVisible).toBe(false);
     });
   });
 
   describe('getVisibleButtons', () => {
     it('should filter buttons that should be shown', () => {
       const buttons = [
-        {key: 'btn1', shouldShow: true, icon: '', onClick: jest.fn(), tooltip: '', className: ''},
-        {key: 'btn2', shouldShow: false, icon: '', onClick: jest.fn(), tooltip: '', className: ''},
-        {key: 'btn3', shouldShow: true, icon: '', onClick: jest.fn(), tooltip: '', className: ''},
+        {key: 'btn1', isVisible: true, icon: '', onClick: jest.fn(), tooltip: '', className: ''},
+        {key: 'btn2', isVisible: false, icon: '', onClick: jest.fn(), tooltip: '', className: ''},
+        {key: 'btn3', isVisible: true, icon: '', onClick: jest.fn(), tooltip: '', className: ''},
       ];
 
       const visible = getVisibleButtons(buttons);
@@ -178,7 +178,7 @@ describe('Call Control Custom Utils', () => {
     });
 
     it('should return empty array when no buttons should be shown', () => {
-      const buttons = [{key: 'btn1', shouldShow: false, icon: '', onClick: jest.fn(), tooltip: '', className: ''}];
+      const buttons = [{key: 'btn1', isVisible: false, icon: '', onClick: jest.fn(), tooltip: '', className: ''}];
 
       const visible = getVisibleButtons(buttons);
       expect(visible).toHaveLength(0);
@@ -1057,7 +1057,7 @@ describe('Call Control Custom Utils', () => {
     it('should handle errors in getVisibleButtons', () => {
       const badButtons = [
         {
-          get shouldShow() {
+          get isVisible() {
             throw new Error('Test error');
           },
         },
