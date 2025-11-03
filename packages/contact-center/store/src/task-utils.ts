@@ -124,12 +124,12 @@ export function getConsultStatus(task: ITask, agentId: string): string {
   const participant: any = Object.values(participants).find((p: any) => p.pType === 'Agent' && p.id === agentId);
 
   if (state === TASK_STATE_CONSULT) {
-    if (participant && participant.isConsulted) {
+    if ((participant && participant.isConsulted) || isSecondaryEpDnAgent(task)) {
       return ConsultStatus.BEING_CONSULTED;
     }
     return ConsultStatus.CONSULT_INITIATED;
   } else if (state === TASK_STATE_CONSULTING) {
-    if (participant && participant.isConsulted) {
+    if ((participant && participant.isConsulted) || isSecondaryEpDnAgent(task)) {
       return ConsultStatus.BEING_CONSULTED_ACCEPTED;
     }
     return ConsultStatus.CONSULT_ACCEPTED;
