@@ -217,8 +217,21 @@
       pointer-events: auto;
     }
 
+    .consult-search-row {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      gap: 0.5rem;
+    }
+
     .consult-search-input {
       width: 100%;
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    .consult-quick-action-button {
+      flex: 0 0 2rem; /* 32px */
     }
 
     .consult-category-buttons {

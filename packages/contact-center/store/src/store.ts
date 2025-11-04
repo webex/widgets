@@ -44,6 +44,7 @@ class Store implements IStore {
   callControlAudio: MediaStream | null = null;
   featureFlags: {[key: string]: boolean} = {};
   isEndConsultEnabled: boolean = false;
+  isAddressBookEnabled: boolean = false;
   allowConsultToQueue: boolean = false;
   agentProfile: AgentLoginProfile = {};
   isMuted: boolean = false;
@@ -105,6 +106,8 @@ class Store implements IStore {
         this.lastStateChangeTimestamp = response.lastStateChangeTimestamp;
         this.lastIdleCodeChangeTimestamp = response.lastIdleCodeChangeTimestamp;
         this.isEndConsultEnabled = response.isEndConsultEnabled;
+        // TODO: Remove this once SDK performs the validation
+        this.isAddressBookEnabled = Boolean(response.addressBookId);
         this.allowConsultToQueue = response.allowConsultToQueue;
         this.agentProfile.agentName = response.agentName;
       })

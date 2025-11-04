@@ -26,6 +26,7 @@ export const LOADING_MORE_QUEUES = 'Loading more queues...';
 export const LOADING_MORE_DIAL_NUMBERS = 'Loading more dial numbers...';
 export const LOADING_MORE_ENTRY_POINTS = 'Loading more entry points...';
 export const NO_DATA_AVAILABLE_CONSULT_TRANSFER = 'No data available for consult transfer.';
+export const VIA_SEARCH_SUFFIX = ' via search';
 // Pagination
 export const DEFAULT_PAGE_SIZE = 25;
 // CallControlCAD constants

@@ -1,7 +1,7 @@
 {
   "name": "@webex/cc-station-login",
   "description": "Webex Contact Center Widgets: Station Login",
-  "version": "1.28.0-ccwidgets.120",
+  "version": "1.28.0-ccwidgets.121",
   "main": "dist/index.js",
   "types": "dist/types/index.d.ts",
   "publishConfig": {

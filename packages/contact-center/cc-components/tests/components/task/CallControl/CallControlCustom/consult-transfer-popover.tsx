@@ -3,8 +3,6 @@ import {render, fireEvent, waitFor, act} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ConsultTransferPopoverComponent from '../../../../../src/components/task/CallControl/CallControlCustom/consult-transfer-popover';
 import {ContactServiceQueue} from '@webex/cc-store';
-// hooks import no longer needed in this test
-import * as utils from '../../../../../src/components/task/CallControl/CallControlCustom/call-control-custom.utils';
 import {DEFAULT_PAGE_SIZE} from '../../../../../src/components/task/constants';
 
 const loggerMock = {
@@ -68,7 +66,7 @@ describe('ConsultTransferPopoverComponent', () => {
   });
 
   it('renders heading and tabs when showTabs is true', async () => {
-    const screen = await render(<ConsultTransferPopoverComponent {...baseProps} />);
+    const screen = await render(<ConsultTransferPopoverComponent {...baseProps} heading="Consult" />);
 
     // Verify main container
     expect(screen.container.querySelector('.agent-popover-content')).toBeInTheDocument();
@@ -76,7 +74,7 @@ describe('ConsultTransferPopoverComponent', () => {
     // Verify heading - it's wrapped in mdc-text component
     const heading = screen.container.querySelector('.agent-popover-title');
     expect(heading).toBeInTheDocument();
-    expect(heading).toHaveTextContent('Select an Agent');
+    expect(heading).toHaveTextContent('Consult');
     expect(heading?.tagName.toLowerCase()).toBe('mdc-text');
     expect(heading).toHaveAttribute('tagname', 'h3');
     expect(heading).toHaveAttribute('type', 'body-large-bold');
@@ -201,7 +199,7 @@ describe('ConsultTransferPopoverComponent', () => {
       buddyAgents: [],
     };
 
-    const screen = await render(<ConsultTransferPopoverComponent {...emptyAgentsProps} />);
+    const screen = await render(<ConsultTransferPopoverComponent {...emptyAgentsProps} heading="Consult" />);
     const buttons = Array.from(screen.container.querySelectorAll('button')).map(
       (b) => (b as HTMLButtonElement).textContent
     );
@@ -222,35 +220,27 @@ describe('ConsultTransferPopoverComponent', () => {
     expect(screen.container.querySelectorAll('.call-control-list-item').length).toBe(0);
   });
 
-  it('disables queue selection when allowConsultToQueue is false', async () => {
+  it('hides queue tab when allowConsultToQueue is false', async () => {
     const propsWithoutQueue = {
       ...baseProps,
       allowConsultToQueue: false,
     };
 
     const screen = await render(<ConsultTransferPopoverComponent {...propsWithoutQueue} />);
-    const queuesButton = screen.getByRole('button', {name: 'Queues'}) as HTMLButtonElement;
-    expect(queuesButton.disabled).toBe(true);
+    const maybeQueuesButton = screen.queryByRole('button', {name: 'Queues'}) as HTMLButtonElement | null;
+    expect(maybeQueuesButton).toBeNull();
   });
 
   it('covers edge case for empty items in renderList (line 50)', async () => {
-    // Mock isAgentsEmpty to return false even with empty array to force renderList call
-    const mockIsAgentsEmpty = jest.spyOn(utils, 'isAgentsEmpty').mockReturnValue(false);
+    const propsWithEmptyAgents = {
+      ...baseProps,
+      buddyAgents: [],
+    };
 
-    try {
-      const propsWithEmptyAgents = {
-        ...baseProps,
-        buddyAgents: [], // Empty array but mocked to return false for isEmpty
-      };
+    const screen = await render(<ConsultTransferPopoverComponent {...propsWithEmptyAgents} />);
 
-      const screen = await render(<ConsultTransferPopoverComponent {...propsWithEmptyAgents} />);
-
-      // Should render the "No agents found" text via empty list state
-      expect(screen.getByText('No agents found')).toBeInTheDocument();
-    } finally {
-      // Restore original functions
-      mockIsAgentsEmpty.mockRestore();
-    }
+    // With zero agents, the per-tab empty state should render
+    expect(screen.getByText('No data available for consult transfer.')).toBeInTheDocument();
   });
 
   describe('Search behavior', () => {

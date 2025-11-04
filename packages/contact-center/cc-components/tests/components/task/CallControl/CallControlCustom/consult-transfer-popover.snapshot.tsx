@@ -91,9 +91,9 @@ describe('ConsultTransferPopoverComponent Snapshots', () => {
     it('should render the component with heading and category buttons', async () => {
       let screen;
       await act(async () => {
-        screen = render(<ConsultTransferPopoverComponent {...defaultProps} />);
+        screen = render(<ConsultTransferPopoverComponent {...defaultProps} heading="Consult" />);
       });
-      expect(screen.getByText('Select an Agent')).toBeInTheDocument();
+      expect(screen.getByText('Consult')).toBeInTheDocument();
       const btns = Array.from(screen.container.querySelectorAll('button')).map(
         (b) => (b as HTMLButtonElement).textContent
       );
@@ -172,8 +172,7 @@ describe('ConsultTransferPopoverComponent Snapshots', () => {
         const el = btn as HTMLButtonElement;
         return el && el.textContent === 'Queues';
       }) as HTMLButtonElement | undefined;
-      expect(queuesButton).toBeDefined();
-      expect(queuesButton?.disabled).toBe(true);
+      expect(queuesButton).toBeUndefined();
       const container = screen.container.querySelector('.agent-popover-content');
       mockUIDProps(container);
       expect(container).toMatchSnapshot();

@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.121](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.120...v1.28.0-ccwidgets.121) (2025-11-04)
+
+
+### Bug Fixes
+
+* **widgets:** fixed-consult-transfer-popover-epic-bugs ([#548](https://github.com/webex/widgets/issues/548)) ([4edf83f](https://github.com/webex/widgets/commit/4edf83f7424f4a38fed0a689ec642e6ef6b9598f))
+
 # [1.28.0-ccwidgets.120](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.119...v1.28.0-ccwidgets.120) (2025-10-24)
 
 
