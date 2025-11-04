@@ -38,9 +38,9 @@ This is for compliance purposes with FedRAMP program.
 < ENUMERATE TESTS PERFORMED, WHETHER MANUAL OR AUTOMATED >
 
 ## The GAI Coding Policy And Copyright Annotation Best Practices ##
- 
+
 <!-- **MANDATORY** If Yes, Mention the GAI Coding Policy Copyright Annotation Best Practices followed separated by a comma below the yes checkbox -->
- 
+
 - [ ] GAI was not used (or, no additional notation is required)
 - [ ] Code was generated entirely by GAI
 - [ ] GAI was used to create a draft that was subsequently customized or modified

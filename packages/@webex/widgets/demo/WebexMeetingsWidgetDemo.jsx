@@ -8,6 +8,8 @@ import {deconstructHydraId} from '@webex/common';
 
 export default function WebexMeetingsWidgetDemo({token, fedramp}) {
   const [destination, setDestination] = useState('');
+  const [pinOrPass, setPinOrPass] = useState('');
+  const [name, setName] = useState('');
   const [displayWidget, setDisplayWidget] = useState(false);
   const [theme, setTheme] = useState('dark');
   const [layout, setLayout] = useState('Grid');
@@ -90,6 +92,26 @@ export default function WebexMeetingsWidgetDemo({token, fedramp}) {
           type="text"
           value={destination}
         />
+        <Input
+          htmlId="meetingPasswordOrPin"
+          label="Meeting Pin or Password"
+          name="meetingPasswordOrPin"
+          onChange={(event) => setPinOrPass(event.target.value)}
+          placeholder="Meeting Pin or Password"
+          readOnly={displayWidget}
+          type="text"
+          value={pinOrPass}
+        />
+        <Input
+          htmlId="participantName"
+          label="Participant Name"
+          name="participantName"
+          onChange={(event) => setName(event.target.value)}
+          placeholder="Participant Name"
+          readOnly={displayWidget}
+          type="text"
+          value={name}
+        />
         <Button
           type="submit"
           disabled={!displayButtonEnabled}
@@ -129,6 +151,8 @@ export default function WebexMeetingsWidgetDemo({token, fedramp}) {
         <WebexMeetingsWidget
           accessToken={token}
           meetingDestination={destination}
+          meetingPasswordOrPin={pinOrPass}
+          participantName={name}
           className={`webex-meeting-widget-demo wxc-theme-${theme}`}
           layout={layout}
           fedramp={fedramp}

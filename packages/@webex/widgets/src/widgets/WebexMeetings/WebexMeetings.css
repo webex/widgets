@@ -13,3 +13,7 @@
   flex: 1;
   min-height: 0;
 }
+
+.wxc-meeting-control-bar .wxc-meeting-control-bar__controls--control-refs[aria-hidden="true"] {
+  visibility: hidden;
+}

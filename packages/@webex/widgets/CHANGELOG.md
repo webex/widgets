@@ -1,3 +1,46 @@
+## [1.28.2](https://github.com/webex/widgets/compare/v1.28.1...v1.28.2) (2025-10-22)
+
+
+### Bug Fixes
+
+* **meeting-widget:** add custom focus management and arrow key navigation ([#533](https://github.com/webex/widgets/issues/533)) ([766a646](https://github.com/webex/widgets/commit/766a646ba187250ca7f412e8f00a068c01ed0a5e))
+* **Meeting Widget:** stop screen readers focusing on visually hidden controls ([#532](https://github.com/webex/widgets/issues/532)) ([d728896](https://github.com/webex/widgets/commit/d72889685890bdefdb67b2d50dcbc281ca336052))
+
+## [1.28.1](https://github.com/webex/widgets/compare/v1.28.0...v1.28.1) (2025-05-28)
+
+
+### Bug Fixes
+
+* **accessibility:** fix wrong mic/camera instructions ([#450](https://github.com/webex/widgets/issues/450)) ([ff88612](https://github.com/webex/widgets/commit/ff88612e563c3ab93be82bda3a05effd68a68e3a))
+
+# [1.28.0](https://github.com/webex/widgets/compare/v1.27.8...v1.28.0) (2024-12-30)
+
+
+### Features
+
+* **widgets:** enable password and name inputs during init ([#351](https://github.com/webex/widgets/issues/351)) ([7f36b73](https://github.com/webex/widgets/commit/7f36b73a4f41e38ef0f94e36e2bb92fb1e37aecb))
+
+## [1.27.8](https://github.com/webex/widgets/compare/v1.27.7...v1.27.8) (2024-12-11)
+
+
+### Bug Fixes
+
+* **release:** accessibility issues fixed on components repo. ([#346](https://github.com/webex/widgets/issues/346)) ([6390d24](https://github.com/webex/widgets/commit/6390d24880a0a5362dffc427d4aae7d8d5292ba3))
+
+## [1.27.7](https://github.com/webex/widgets/compare/v1.27.6...v1.27.7) (2024-11-27)
+
+
+### Bug Fixes
+
+* updated-to-latest-components ([#343](https://github.com/webex/widgets/issues/343)) ([78c3e90](https://github.com/webex/widgets/commit/78c3e907946637b79b251735afae2ac712565130))
+
+## [1.27.6](https://github.com/webex/widgets/compare/v1.27.5...v1.27.6) (2024-11-13)
+
+
+### Bug Fixes
+
+* **WebexMeetings:** update member name from join prompt ([#240](https://github.com/webex/widgets/issues/240)) ([a6c5298](https://github.com/webex/widgets/commit/a6c529843ec1dadcb142fd0acd58dbd72ec52cc5))
+
 ## [1.27.5](https://github.com/webex/widgets/compare/v1.27.4...v1.27.5) (2024-10-29)
 
 
