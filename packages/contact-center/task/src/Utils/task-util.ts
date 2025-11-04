@@ -115,10 +115,11 @@ export function getEndButtonVisibility(
   const isVisible = isBrowser || (isEndCallEnabled && isCall) || !isCall;
   const isConferenceWithConsultNotHeld = isConferenceInProgress && isConsultInitiatedOrAccepted && !consultCallHeld;
   const isEnabled =
-    !(isHeld && !isConsultCompleted) &&
-    !isConferenceInProgress &&
-    !isConsultInitiatedOrAcceptedOrBeingConsulted &&
-    !isConferenceWithConsultNotHeld;
+    (!isHeld &&
+      !isConferenceInProgress &&
+      !isConsultInitiatedOrAcceptedOrBeingConsulted &&
+      !isConferenceWithConsultNotHeld) ||
+    (isHeld && isConferenceInProgress && !isConsultCompleted);
 
   return {isVisible, isEnabled};
 }
@@ -150,7 +151,9 @@ export function getHoldResumeButtonVisibility(
   isConsultCompleted: boolean
 ): Visibility {
   const isVisible = isCall && isTelephonySupported && !isBeingConsulted;
-  const isEnabled = (!isConferenceInProgress || (isHeld && isConsultCompleted)) && !isConsultInProgress;
+  // Enable if: (NOT in conference AND NOT in consult) OR (in conference AND consult completed AND held)
+  const isEnabled =
+    (!isConferenceInProgress && !isConsultInProgress) || (isConferenceInProgress && isConsultCompleted && isHeld);
 
   return {isVisible, isEnabled};
 }
@@ -221,11 +224,14 @@ export function getConferenceInProgressVisibility(task: ITask): boolean {
 export function getExitConferenceButtonVisibility(
   isConferenceInProgress: boolean,
   isConsultInitiatedOrAccepted: boolean,
-  consultCallHeld: boolean
+  consultCallHeld: boolean,
+  isHeld: boolean,
+  isConsultCompleted: boolean
 ): Visibility {
   const isVisible = isConferenceInProgress && !isConsultInitiatedOrAccepted;
   const isConferenceWithConsultNotHeld = isConferenceInProgress && isConsultInitiatedOrAccepted && !consultCallHeld;
-  const isEnabled = !isConferenceWithConsultNotHeld;
+  // Disable if: conference with consult not held OR (held AND in conference AND consult completed)
+  const isEnabled = !isConferenceWithConsultNotHeld && !(isHeld && isConferenceInProgress && isConsultCompleted);
 
   return {isVisible, isEnabled};
 }
@@ -487,7 +493,9 @@ export function getControlsVisibility(
       exitConference: getExitConferenceButtonVisibility(
         isConferenceInProgress,
         isConsultInitiatedOrAccepted,
-        consultCallHeld
+        consultCallHeld,
+        isHeld,
+        isConsultCompleted
       ),
       mergeConference: getMergeConferenceButtonVisibility(
         isConsultInitiatedOrAcceptedOnly,
