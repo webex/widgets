@@ -115,8 +115,7 @@ export function getEndButtonVisibility(
   const isVisible = isBrowser || (isEndCallEnabled && isCall) || !isCall;
   const isConferenceWithConsultNotHeld = isConferenceInProgress && isConsultInitiatedOrAccepted && !consultCallHeld;
   const isEnabled =
-    !isHeld &&
-    !isConsultCompleted &&
+    !(isHeld && !isConsultCompleted) &&
     !isConferenceInProgress &&
     !isConsultInitiatedOrAcceptedOrBeingConsulted &&
     !isConferenceWithConsultNotHeld;
