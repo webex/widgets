@@ -918,6 +918,7 @@ describe('storeEventsWrapper', () => {
 
       expect(onSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_HYDRATE, expect.any(Function));
       expect(onSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_INCOMING, expect.any(Function));
+      expect(onSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_MERGED, expect.any(Function));
       expect(onSpy).toHaveBeenCalledWith(CC_EVENTS.AGENT_STATE_CHANGE, expect.any(Function));
       expect(onSpy).toHaveBeenCalledWith(CC_EVENTS.AGENT_MULTI_LOGIN, expect.any(Function));
 
@@ -1179,6 +1180,45 @@ describe('storeEventsWrapper', () => {
       expect(handleTaskRemoveSpy).toHaveBeenCalledWith(mockTask);
     });
 
+    it('should handle task merged event', async () => {
+      const onSpy = jest.spyOn(storeWrapper['cc'], 'on');
+      const refreshTaskListSpy = jest.spyOn(storeWrapper, 'refreshTaskList');
+
+      const cc = storeWrapper['store'].cc;
+      storeWrapper['store'].init = jest.fn().mockReturnValue(storeWrapper.setupIncomingTaskHandler(cc));
+
+      await storeWrapper.init(options);
+
+      act(() => {
+        onSpy.mock.calls[1][1]({});
+      });
+
+      const mockMergedTask = {
+        data: {
+          interactionId: 'mergedTask1',
+          interaction: {
+            state: 'connected',
+          },
+        },
+        on: jest.fn(),
+        off: jest.fn(),
+      };
+
+      expect(onSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_MERGED, expect.any(Function));
+
+      const taskMergedCb = onSpy.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_MERGED)[1];
+
+      act(() => {
+        taskMergedCb(mockMergedTask);
+      });
+
+      expect(refreshTaskListSpy).toHaveBeenCalled();
+      expect(mockMergedTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));
+      expect(mockMergedTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function));
+      expect(mockMergedTask.on).toHaveBeenCalledWith(TASK_EVENTS.AGENT_WRAPPEDUP, expect.any(Function));
+      expect(mockMergedTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_REJECT, expect.any(Function));
+    });
+
     describe('customStates on hydration', () => {
       it('should handle custom state correctly when wrapup required', async () => {
         const setStateSpy = jest.spyOn(storeWrapper, 'setState');
@@ -1324,6 +1364,7 @@ describe('storeEventsWrapper', () => {
 
       expect(storeWrapper['cc'].off).toHaveBeenCalledWith(TASK_EVENTS.TASK_HYDRATE, expect.any(Function));
       expect(storeWrapper['cc'].off).toHaveBeenCalledWith(TASK_EVENTS.TASK_INCOMING, expect.any(Function));
+      expect(storeWrapper['cc'].off).toHaveBeenCalledWith(TASK_EVENTS.TASK_MERGED, expect.any(Function));
       expect(storeWrapper['cc'].off).toHaveBeenCalledWith(CC_EVENTS.AGENT_STATE_CHANGE, expect.any(Function));
       expect(storeWrapper['cc'].off).toHaveBeenCalledWith(CC_EVENTS.AGENT_MULTI_LOGIN, expect.any(Function));
       expect(setAgentProfileSpy).toHaveBeenCalledWith({});

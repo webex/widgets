@@ -508,8 +508,11 @@ class StoreWrapper implements IStoreWrapper {
     this.refreshTaskList();
   };
 
-  handleIncomingTask = (event) => {
-    const task: ITask = event;
+  /**
+   * Register all task event listeners
+   * @param task - The task to register event listeners for
+   */
+  private registerTaskEventListeners = (task: ITask): void => {
     // Attach event listeners to the task
     task.on(TASK_EVENTS.TASK_END, this.handleTaskEnd);
 
@@ -518,9 +521,6 @@ class StoreWrapper implements IStoreWrapper {
     task.on(TASK_EVENTS.AGENT_OFFER_CONTACT, this.refreshTaskList);
     task.on(TASK_EVENTS.AGENT_CONSULT_CREATED, this.handleConsultCreated);
     task.on(TASK_EVENTS.TASK_CONSULT_QUEUE_CANCELLED, this.handleConsultQueueCancelled);
-    if (this.deviceType === DEVICE_TYPE_BROWSER) {
-      task.on(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
-    }
 
     // When we receive TASK_REJECT sdk changes the agent status
     // When we receive TASK_REJECT that means the task was not accepted by the agent and we wont need wrap up
@@ -544,6 +544,18 @@ class StoreWrapper implements IStoreWrapper {
     task.on(TASK_EVENTS.TASK_CONFERENCE_STARTED, this.handleConferenceStarted);
     task.on(TASK_EVENTS.TASK_CONFERENCE_TRANSFERRED, this.refreshTaskList);
     task.on(TASK_EVENTS.TASK_CONFERENCE_TRANSFER_FAILED, this.refreshTaskList);
+
+    // Register media event listener for browser devices
+    if (this.deviceType === DEVICE_TYPE_BROWSER) {
+      task.on(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
+    }
+  };
+
+  handleIncomingTask = (event) => {
+    const task: ITask = event;
+
+    // Register all task event listeners
+    this.registerTaskEventListeners(task);
 
     // In case of consulting we check if the task is already in the task list
     // If it is, we dont have to send the incoming task callback
@@ -580,41 +592,17 @@ class StoreWrapper implements IStoreWrapper {
     }
   };
 
+  handleTaskMerged = (event) => {
+    const task = event;
+    this.registerTaskEventListeners(task);
+    this.refreshTaskList();
+  };
+
   handleTaskHydrate = (event) => {
     const task = event;
-    task.on(TASK_EVENTS.TASK_END, this.handleTaskEnd);
 
-    // When we receive TASK_ASSIGNED the task was accepted by the agent and we need wrap up
-    task.on(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
-    task.on(TASK_EVENTS.AGENT_OFFER_CONTACT, this.refreshTaskList);
-    task.on(TASK_EVENTS.TASK_CONSULT_ACCEPTED, this.handleConsultAccepted);
-    task.on(TASK_EVENTS.AGENT_CONSULT_CREATED, this.handleConsultCreated);
-    task.on(TASK_EVENTS.TASK_HOLD, this.refreshTaskList);
-    task.on(TASK_EVENTS.TASK_RESUME, this.refreshTaskList);
-
-    // When we receive TASK_REJECT sdk changes the agent status
-    // When we receive TASK_REJECT that means the task was not accepted by the agent and we wont need wrap up
-    task.on(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(task, reason));
-
-    task.on(TASK_EVENTS.AGENT_WRAPPEDUP, this.handleTaskWrapUp);
-
-    task.on(TASK_EVENTS.TASK_CONSULTING, this.handleConsulting);
-    task.on(TASK_EVENTS.TASK_OFFER_CONSULT, this.handleConsultOffer);
-    task.on(TASK_EVENTS.TASK_CONSULT_END, this.refreshTaskList);
-    task.on(TASK_EVENTS.TASK_CONSULT_QUEUE_CANCELLED, this.handleConsultQueueCancelled);
-    task.on(TASK_EVENTS.TASK_CONFERENCE_ENDED, this.handleConferenceEnded);
-    task.on(TASK_EVENTS.TASK_CONFERENCE_END_FAILED, this.refreshTaskList);
-    task.on(TASK_EVENTS.TASK_CONFERENCE_ESTABLISHING, this.refreshTaskList);
-    task.on(TASK_EVENTS.TASK_CONFERENCE_FAILED, this.refreshTaskList);
-    task.on(TASK_EVENTS.TASK_PARTICIPANT_JOINED, this.handleConferenceStarted);
-    task.on(TASK_EVENTS.TASK_PARTICIPANT_LEFT, this.handleConferenceEnded);
-    task.on(TASK_EVENTS.TASK_PARTICIPANT_LEFT_FAILED, this.refreshTaskList);
-    task.on(TASK_EVENTS.TASK_CONFERENCE_STARTED, this.handleConferenceStarted);
-    task.on(TASK_EVENTS.TASK_CONFERENCE_TRANSFERRED, this.refreshTaskList);
-    task.on(TASK_EVENTS.TASK_CONFERENCE_TRANSFER_FAILED, this.refreshTaskList);
-    if (this.deviceType === DEVICE_TYPE_BROWSER) {
-      task.on(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
-    }
+    // Register all task event listeners
+    this.registerTaskEventListeners(task);
 
     this.refreshTaskList();
 
@@ -760,6 +748,7 @@ class StoreWrapper implements IStoreWrapper {
       ccSDK.on(TASK_EVENTS.TASK_HYDRATE, this.handleTaskHydrate);
       ccSDK.on(CC_EVENTS.AGENT_STATE_CHANGE, this.handleStateChange);
       ccSDK.on(TASK_EVENTS.TASK_INCOMING, this.handleIncomingTask);
+      ccSDK.on(TASK_EVENTS.TASK_MERGED, this.handleTaskMerged);
       ccSDK.on(CC_EVENTS.AGENT_MULTI_LOGIN, this.handleMultiLoginCloseSession);
       ccSDK.on(CC_EVENTS.AGENT_LOGOUT_SUCCESS, handleLogOut);
     };
@@ -772,6 +761,7 @@ class StoreWrapper implements IStoreWrapper {
       ccSDK.off(TASK_EVENTS.TASK_HYDRATE, this.handleTaskHydrate);
       ccSDK.off(CC_EVENTS.AGENT_STATE_CHANGE, this.handleStateChange);
       ccSDK.off(TASK_EVENTS.TASK_INCOMING, this.handleIncomingTask);
+      ccSDK.off(TASK_EVENTS.TASK_MERGED, this.handleTaskMerged);
       ccSDK.off(CC_EVENTS.AGENT_MULTI_LOGIN, this.handleMultiLoginCloseSession);
       ccSDK.off(CC_EVENTS.AGENT_LOGOUT_SUCCESS, handleLogOut);
     };

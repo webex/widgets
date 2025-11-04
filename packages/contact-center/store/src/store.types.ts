@@ -194,6 +194,7 @@ enum TASK_EVENTS {
   TASK_CONFERENCE_TRANSFER_FAILED = 'task:conferenceTransferFailed',
   TASK_CONFERENCE_END_FAILED = 'task:conferenceEndFailed',
   TASK_PARTICIPANT_LEFT_FAILED = 'task:participantLeftFailed',
+  TASK_MERGED = 'task:merged',
 } // TODO: remove this once cc sdk exports this enum
 
 // Events that are received on the contact center SDK
