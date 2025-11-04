@@ -109,11 +109,17 @@ export function getEndButtonVisibility(
   isConsultInitiatedOrAcceptedOrBeingConsulted: boolean,
   isConferenceInProgress: boolean,
   isConsultInitiatedOrAccepted: boolean,
-  consultCallHeld: boolean
+  consultCallHeld: boolean,
+  isConsultCompleted: boolean
 ): Visibility {
   const isVisible = isBrowser || (isEndCallEnabled && isCall) || !isCall;
   const isConferenceWithConsultNotHeld = isConferenceInProgress && isConsultInitiatedOrAccepted && !consultCallHeld;
-  const isEnabled = !isHeld && !isConsultInitiatedOrAcceptedOrBeingConsulted && !isConferenceWithConsultNotHeld;
+  const isEnabled =
+    !isHeld &&
+    !isConsultCompleted &&
+    !isConferenceInProgress &&
+    !isConsultInitiatedOrAcceptedOrBeingConsulted &&
+    !isConferenceWithConsultNotHeld;
 
   return {isVisible, isEnabled};
 }
@@ -141,10 +147,11 @@ export function getHoldResumeButtonVisibility(
   isConferenceInProgress: boolean,
   isConsultInProgress: boolean,
   isHeld: boolean,
-  isBeingConsulted: boolean
+  isBeingConsulted: boolean,
+  isConsultCompleted: boolean
 ): Visibility {
   const isVisible = isCall && isTelephonySupported && !isBeingConsulted;
-  const isEnabled = (!isConferenceInProgress || isHeld) && !isConsultInProgress;
+  const isEnabled = (!isConferenceInProgress || (isHeld && isConsultCompleted)) && !isConsultInProgress;
 
   return {isVisible, isEnabled};
 }
@@ -430,6 +437,7 @@ export function getControlsVisibility(
     const isConsultInitiated = taskConsultStatus === ConsultStatus.CONSULT_INITIATED;
     const isConsultAccepted = taskConsultStatus === ConsultStatus.CONSULT_ACCEPTED;
     const isBeingConsulted = taskConsultStatus === ConsultStatus.BEING_CONSULTED_ACCEPTED;
+    const isConsultCompleted = taskConsultStatus === ConsultStatus.CONSULT_COMPLETED;
     const isConsultInitiatedOrAccepted = isConsultInitiated || isConsultAccepted || isBeingConsulted;
     const isConsultInitiatedOrAcceptedOnly = isConsultInitiated || isConsultAccepted;
     const isConsultInitiatedOrAcceptedOrBeingConsulted =
@@ -451,7 +459,8 @@ export function getControlsVisibility(
         isConsultInitiatedOrAcceptedOrBeingConsulted,
         isConferenceInProgress,
         isConsultInitiatedOrAccepted,
-        consultCallHeld
+        consultCallHeld,
+        isConsultCompleted
       ),
       muteUnmute: getMuteUnmuteButtonVisibility(isBrowser, webRtcEnabled, isCall, isConsultInitiatedOrAccepted),
       holdResume: getHoldResumeButtonVisibility(
@@ -460,7 +469,8 @@ export function getControlsVisibility(
         isConferenceInProgress,
         isConsultInProgress,
         isHeld,
-        isBeingConsulted
+        isBeingConsulted,
+        isConsultCompleted
       ),
 
       // Recording controls

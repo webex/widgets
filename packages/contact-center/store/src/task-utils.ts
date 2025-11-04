@@ -118,7 +118,6 @@ export function getConsultStatus(task: ITask, agentId: string): string {
   const state = getTaskStatus(task, agentId);
 
   const {interaction} = task.data;
-  const taskState = interaction?.state;
   const participants = interaction?.participants || {};
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const participant: any = Object.values(participants).find((p: any) => p.pType === 'Agent' && p.id === agentId);
@@ -138,7 +137,7 @@ export function getConsultStatus(task: ITask, agentId: string): string {
   } else if (state === INTERACTION_STATE_CONFERENCE) {
     return ConsultStatus.CONFERENCE;
   } else if (state === TASK_STATE_CONSULT_COMPLETED) {
-    return taskState;
+    return ConsultStatus.CONSULT_COMPLETED;
   }
   // Default return for states that don't match any condition (e.g., chat, email initial states)
   return state || ConsultStatus.NO_CONSULTATION_IN_PROGRESS;

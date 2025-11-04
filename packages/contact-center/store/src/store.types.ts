@@ -334,6 +334,7 @@ export enum ConsultStatus {
   CONSULT_ACCEPTED = 'consultAccepted',
   CONNECTED = 'connected',
   CONFERENCE = 'conference',
+  CONSULT_COMPLETED = 'consultCompleted',
 }
 
 export type Participant = {
