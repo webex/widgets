@@ -295,23 +295,23 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
                 )}
               </div>
             )}
-            {isConferenceInProgress && (
-              <div className="consult-checkbox-container">
-                <Checkbox
-                  checked={allowParticipantsToInteract}
-                  aria-label="Allow participants to continue interacting"
-                  id="allow-participants-checkbox"
-                  // value={allowParticipantsToInteract}
-                  label="Allow participants to continue interacting."
-                  // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
-                  onchange={() => {
-                    setAllowParticipantsToInteract(!allowParticipantsToInteract);
-                  }}
-                />
-              </div>
-            )}
           </div>
         ))}
+      {isConferenceInProgress && (
+        <div className="consult-checkbox-container">
+          <Checkbox
+            checked={allowParticipantsToInteract}
+            aria-label="Allow participants to continue interacting"
+            id="allow-participants-checkbox"
+            // value={allowParticipantsToInteract}
+            label="Allow participants to continue interacting."
+            // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
+            onchange={() => {
+              setAllowParticipantsToInteract(!allowParticipantsToInteract);
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 };
