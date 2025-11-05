@@ -237,9 +237,10 @@ export function getMergeConferenceButtonVisibility(
   isConsultInitiatedOrAccepted: boolean,
   isConsultAccepted: boolean,
   consultCallHeld: boolean,
-  isConferenceInProgress: boolean
+  isConferenceInProgress: boolean,
+  isCustomerInCall: boolean
 ): Visibility {
-  const isVisible = isConsultInitiatedOrAccepted;
+  const isVisible = isConsultInitiatedOrAccepted && isCustomerInCall;
   const isConferenceWithConsultNotHeld = isConferenceInProgress && isConsultInitiatedOrAccepted && !consultCallHeld;
   const isEnabled = isConsultAccepted && consultCallHeld && !isConferenceWithConsultNotHeld;
 
@@ -294,9 +295,10 @@ export function getConsultTransferButtonVisibility(
   isConsultInitiatedOrAccepted: boolean,
   isConsultAccepted: boolean,
   consultCallHeld: boolean,
-  isConferenceInProgress: boolean
+  isConferenceInProgress: boolean,
+  isCustomerInCall: boolean
 ): Visibility {
-  const isVisible = isConsultInitiatedOrAccepted;
+  const isVisible = isConsultInitiatedOrAccepted && isCustomerInCall;
   const isConferenceWithConsultNotHeld = isConferenceInProgress && isConsultInitiatedOrAccepted && !consultCallHeld;
   const isEnabled = isConsultAccepted && consultCallHeld && !isConferenceWithConsultNotHeld;
 
@@ -309,10 +311,11 @@ export function getConsultTransferButtonVisibility(
 export function getMergeConferenceConsultButtonVisibility(
   isConsultAccepted: boolean,
   isConsultInitiated: boolean,
-  consultCallHeld: boolean
+  consultCallHeld: boolean,
+  isCustomerInCall: boolean
 ): Visibility {
   const isVisible = isConsultAccepted || isConsultInitiated;
-  const isEnabled = !consultCallHeld && isConsultAccepted;
+  const isEnabled = !consultCallHeld && isConsultAccepted && isCustomerInCall;
 
   return {isVisible, isEnabled};
 }
@@ -323,10 +326,11 @@ export function getMergeConferenceConsultButtonVisibility(
 export function getConsultTransferConsultButtonVisibility(
   isConsultAccepted: boolean,
   isConsultInitiated: boolean,
-  consultCallHeld: boolean
+  consultCallHeld: boolean,
+  isCustomerInCall: boolean
 ): Visibility {
   const isVisible = isConsultAccepted || isConsultInitiated;
-  const isEnabled = !consultCallHeld && isConsultAccepted;
+  const isEnabled = !consultCallHeld && isConsultAccepted && isCustomerInCall;
 
   return {isVisible, isEnabled};
 }
@@ -355,10 +359,11 @@ export function getSwitchToMainCallButtonVisibility(
   isBeingConsulted: boolean,
   isConsultAccepted: boolean,
   isConsultInitiated: boolean,
-  consultCallHeld: boolean
+  consultCallHeld: boolean,
+  isCustomerInCall: boolean
 ): Visibility {
   const isVisible = !isBeingConsulted && (isConsultAccepted || isConsultInitiated) && !consultCallHeld;
-  const isEnabled = isConsultAccepted;
+  const isEnabled = isConsultAccepted && isCustomerInCall;
 
   return {isVisible, isEnabled};
 }
@@ -499,7 +504,8 @@ export function getControlsVisibility(
         isConsultInitiatedOrAcceptedOnly,
         isConsultAccepted,
         consultCallHeld,
-        isConferenceInProgress
+        isConferenceInProgress,
+        isCustomerInCall
       ),
 
       // Consult controls
@@ -525,17 +531,20 @@ export function getControlsVisibility(
         isConsultInitiatedOrAcceptedOnly,
         isConsultAccepted,
         consultCallHeld,
-        isConferenceInProgress
+        isConferenceInProgress,
+        isCustomerInCall
       ),
       consultTransferConsult: getConsultTransferConsultButtonVisibility(
         isConsultAccepted,
         isConsultInitiated,
-        consultCallHeld
+        consultCallHeld,
+        isCustomerInCall
       ),
       mergeConferenceConsult: getMergeConferenceConsultButtonVisibility(
         isConsultAccepted,
         isConsultInitiated,
-        consultCallHeld
+        consultCallHeld,
+        isCustomerInCall
       ),
       muteUnmuteConsult: getMuteUnmuteConsultButtonVisibility(
         isBrowser,
@@ -550,7 +559,8 @@ export function getControlsVisibility(
         isBeingConsulted,
         isConsultAccepted,
         isConsultInitiated,
-        consultCallHeld
+        consultCallHeld,
+        isCustomerInCall
       ),
       switchToConsult: getSwitchToConsultButtonVisibility(isBeingConsulted, consultCallHeld),
 
