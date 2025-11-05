@@ -274,13 +274,13 @@
     .consult-list-container {
       flex: 1;
       overflow-y: auto;
-      max-height: 20rem; /* Limit height to ensure checkbox remains visible */
+      max-height: 15rem; /* Limit height to ensure checkbox remains visible */
+      min-height: 15rem;
       margin-bottom: 1rem;
     }
 
     .consult-checkbox-container {
       padding-top: 1rem;
-      //border-top: 1px solid var(--mds-color-theme-outline-secondary-normal);
       margin-top: auto; /* Push to bottom if there's extra space */
       flex-shrink: 0; /* Don't allow shrinking */
     }
