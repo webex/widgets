@@ -745,8 +745,6 @@ export const useCallControl = (props: useCallControlProps) => {
 
   const switchToMainCall = async () => {
     try {
-      // const isHold = findHoldStatus(currentTask, agentId, 'mainCall');
-      // const consultHold = findHoldStatus(currentTask, agentId, 'consult');
       await currentTask.resume(findMediaResourceId(currentTask, 'consult'));
       logger.info('switchToMainCall success', {module: 'useCallControl', method: 'switchToMainCall'});
     } catch (error) {

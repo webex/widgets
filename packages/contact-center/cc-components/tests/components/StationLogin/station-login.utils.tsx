@@ -1,6 +1,6 @@
 import React from 'react';
 import '@testing-library/jest-dom';
-import {DESKTOP, DIALNUMBER, EXTENSION, LoginOptions} from '@webex/cc-store';
+import {DESKTOP, DIAL_NUMBER, EXTENSION, LoginOptions} from '@webex/cc-store';
 import {
   handleModals,
   continueClicked,
@@ -176,14 +176,14 @@ describe('Station Login Utils', () => {
   });
 
   describe('updateDialNumberLabel', () => {
-    it('should update label and placeholder for DIALNUMBER option', () => {
+    it('should update label and placeholder for DIAL_NUMBER option', () => {
       const mockSetDialNumberLabel = jest.fn();
       const mockSetDialNumberPlaceholder = jest.fn();
 
-      updateDialNumberLabel(DIALNUMBER, mockSetDialNumberLabel, mockSetDialNumberPlaceholder, loggerMock);
+      updateDialNumberLabel(DIAL_NUMBER, mockSetDialNumberLabel, mockSetDialNumberPlaceholder, loggerMock);
 
-      expect(mockSetDialNumberLabel).toHaveBeenCalledWith(LoginOptions[DIALNUMBER]);
-      expect(mockSetDialNumberPlaceholder).toHaveBeenCalledWith(LoginOptions[DIALNUMBER]);
+      expect(mockSetDialNumberLabel).toHaveBeenCalledWith(LoginOptions[DIAL_NUMBER]);
+      expect(mockSetDialNumberPlaceholder).toHaveBeenCalledWith(LoginOptions[DIAL_NUMBER]);
     });
 
     it('should update label and placeholder for EXTENSION option', () => {
@@ -342,7 +342,7 @@ describe('Station Login Utils', () => {
     });
 
     it('should handle valid login option change', () => {
-      const event = {detail: {value: DIALNUMBER}};
+      const event = {detail: {value: DIAL_NUMBER}};
 
       handleLoginOptionChanged(
         event,
@@ -362,24 +362,27 @@ describe('Station Login Utils', () => {
         'team456'
       );
 
-      expect(loggerMock.info).toHaveBeenCalledWith(`CC-Widgets: StationLogin: login option changed to: ${DIALNUMBER}`, {
-        module: 'cc-components#station-login.tsx',
-        method: 'loginOptionChanged',
-      });
-      expect(mockSetters.setDeviceType).toHaveBeenCalledWith(DIALNUMBER);
-      expect(mockSetters.setSelectedDeviceType).toHaveBeenCalledWith(DIALNUMBER);
+      expect(loggerMock.info).toHaveBeenCalledWith(
+        `CC-Widgets: StationLogin: login option changed to: ${DIAL_NUMBER}`,
+        {
+          module: 'cc-components#station-login.tsx',
+          method: 'loginOptionChanged',
+        }
+      );
+      expect(mockSetters.setDeviceType).toHaveBeenCalledWith(DIAL_NUMBER);
+      expect(mockSetters.setSelectedDeviceType).toHaveBeenCalledWith(DIAL_NUMBER);
       expect(mockUpdateDialNumberLabel).toHaveBeenCalled();
       expect(mockSetters.setDialNumber).toHaveBeenCalledWith('');
       expect(mockSetters.setShowDNError).toHaveBeenCalledWith(false);
       expect(mockSetters.setCurrentLoginOptions).toHaveBeenCalledWith({
-        deviceType: DIALNUMBER,
+        deviceType: DIAL_NUMBER,
         dialNumber: '',
         teamId: 'team456',
       });
     });
 
     it('should handle valid login option change without selectedTeamId', () => {
-      const event = {detail: {value: DIALNUMBER}};
+      const event = {detail: {value: DIAL_NUMBER}};
 
       handleLoginOptionChanged(
         event,
@@ -399,17 +402,20 @@ describe('Station Login Utils', () => {
         null
       );
 
-      expect(loggerMock.info).toHaveBeenCalledWith(`CC-Widgets: StationLogin: login option changed to: ${DIALNUMBER}`, {
-        module: 'cc-components#station-login.tsx',
-        method: 'loginOptionChanged',
-      });
-      expect(mockSetters.setDeviceType).toHaveBeenCalledWith(DIALNUMBER);
-      expect(mockSetters.setSelectedDeviceType).toHaveBeenCalledWith(DIALNUMBER);
+      expect(loggerMock.info).toHaveBeenCalledWith(
+        `CC-Widgets: StationLogin: login option changed to: ${DIAL_NUMBER}`,
+        {
+          module: 'cc-components#station-login.tsx',
+          method: 'loginOptionChanged',
+        }
+      );
+      expect(mockSetters.setDeviceType).toHaveBeenCalledWith(DIAL_NUMBER);
+      expect(mockSetters.setSelectedDeviceType).toHaveBeenCalledWith(DIAL_NUMBER);
       expect(mockUpdateDialNumberLabel).toHaveBeenCalled();
       expect(mockSetters.setDialNumber).toHaveBeenCalledWith('');
       expect(mockSetters.setShowDNError).toHaveBeenCalledWith(false);
       expect(mockSetters.setCurrentLoginOptions).toHaveBeenCalledWith({
-        deviceType: DIALNUMBER,
+        deviceType: DIAL_NUMBER,
         dialNumber: '',
         teamId: '',
       });
@@ -530,7 +536,7 @@ describe('Station Login Utils', () => {
         mockSetters.setDNErrorText,
         dialNumberRegex,
         mockSetters.setCurrentLoginOptions,
-        DIALNUMBER,
+        DIAL_NUMBER,
         loggerMock
       );
 
@@ -565,7 +571,7 @@ describe('Station Login Utils', () => {
       expect(mockSetters.setShowDNError).toHaveBeenCalledWith(true);
     });
 
-    it('should validate dial number format for DIALNUMBER type', () => {
+    it('should validate dial number format for DIAL_NUMBER type', () => {
       const event = {target: {value: '911'}};
       const dialNumberRegex = null; // Use null to trigger default regex
 
@@ -577,7 +583,7 @@ describe('Station Login Utils', () => {
         mockSetters.setDNErrorText,
         dialNumberRegex,
         mockSetters.setCurrentLoginOptions,
-        DIALNUMBER,
+        DIAL_NUMBER,
         loggerMock
       );
 

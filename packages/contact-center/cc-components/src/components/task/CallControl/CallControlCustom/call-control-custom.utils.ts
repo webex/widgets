@@ -151,7 +151,7 @@ export const handleTransferPress = (onTransfer: (() => void) | undefined, logger
       });
     }
   } catch (error) {
-    throw new Error(`Error transferring call: ${error}`);
+    throw new Error(`Error transferring call: ${error.message}`);
   }
 };
 
@@ -173,7 +173,7 @@ export const handleEndConsultPress = (endConsultCall: (() => void) | undefined, 
       });
     }
   } catch (error) {
-    throw new Error(`Error ending consult call: ${error}`);
+    throw new Error(`Error ending consult call: ${error.message}`);
   }
 };
 
@@ -195,7 +195,7 @@ export const handleConsultConferencePress = (consultConference: (() => void) | u
       });
     }
   } catch (error) {
-    throw new Error(`Error consultConference: ${error}`);
+    throw new Error(`Error consultConference: ${error.message}`);
   }
 };
 
@@ -217,7 +217,7 @@ export const handleSwitchToMainCallPress = (switchToMainCall: (() => void) | und
       });
     }
   } catch (error) {
-    throw new Error(`Error switchToMainCall: ${error}`);
+    throw new Error(`Error switchToMainCall: ${error.message}`);
   }
 };
 
@@ -230,7 +230,7 @@ export const handleMuteToggle = (onToggleConsultMute: (() => void) | undefined, 
       onToggleConsultMute();
     }
   } catch (error) {
-    logger.error(`Mute toggle failed: ${error}`, {
+    logger.error(`Mute toggle failed: ${error.message}`, {
       module: 'call-control-consult.tsx',
       method: 'handleConsultMuteToggle',
     });
@@ -742,10 +742,8 @@ export const shouldAddConsultTransferAction = (
   allowParticipantsToInteract: boolean,
   query: string,
   entryPoints: {id: string; name: string}[],
-  onDialNumberSelect: ((dialNumber: string, allowParticipantsToInteract: boolean) => void) | undefined,
-  onEntryPointSelect:
-    | ((entryPointId: string, entryPointName: string, allowParticipantsToInteract: boolean) => void)
-    | undefined
+  onDialNumberSelect: (dialNumber: string, allowParticipantsToInteract: boolean) => void,
+  onEntryPointSelect: (entryPointId: string, entryPointName: string, allowParticipantsToInteract: boolean) => void
 ): {visible: boolean; onClick?: () => void; title?: string} => {
   const DN_REGEX = new RegExp('^[+1][0-9]{3,18}$|^[*#:][+1][0-9*#:]{3,18}$|^[0-9*#:]{3,18}$');
 

@@ -11,6 +11,11 @@ const onEndCb = jest.fn();
 const onWrapUpCb = jest.fn();
 const onRecordingToggleCb = jest.fn();
 
+const defaultVisibility = {
+  isVisible: false,
+  isEnabled: false,
+};
+
 describe('CallControl Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -44,26 +49,26 @@ describe('CallControl Component', () => {
       lastTargetType: 'agent' as const,
       setLastTargetType: jest.fn(),
       controlVisibility: {
-        accept: {isVisible: false, isEnabled: false},
-        decline: {isVisible: false, isEnabled: false},
-        end: {isVisible: false, isEnabled: false},
-        muteUnmute: {isVisible: false, isEnabled: false},
-        muteUnmuteConsult: {isVisible: false, isEnabled: false},
-        holdResume: {isVisible: true, isEnabled: true},
-        consult: {isVisible: false, isEnabled: false},
-        transfer: {isVisible: false, isEnabled: false},
-        conference: {isVisible: false, isEnabled: false},
-        wrapup: {isVisible: false, isEnabled: false},
-        pauseResumeRecording: {isVisible: false, isEnabled: false},
-        endConsult: {isVisible: false, isEnabled: false},
-        consultTransfer: {isVisible: false, isEnabled: false},
-        mergeConference: {isVisible: false, isEnabled: false},
-        mergeConferenceConsult: {isVisible: false, isEnabled: false},
-        consultTransferConsult: {isVisible: false, isEnabled: false},
-        switchToMainCall: {isVisible: false, isEnabled: false},
-        switchToConsult: {isVisible: false, isEnabled: false},
-        exitConference: {isVisible: false, isEnabled: false},
-        recordingIndicator: {isVisible: false, isEnabled: false},
+        accept: defaultVisibility,
+        decline: defaultVisibility,
+        end: defaultVisibility,
+        muteUnmute: defaultVisibility,
+        muteUnmuteConsult: defaultVisibility,
+        holdResume: defaultVisibility,
+        consult: defaultVisibility,
+        transfer: defaultVisibility,
+        conference: defaultVisibility,
+        wrapup: defaultVisibility,
+        pauseResumeRecording: defaultVisibility,
+        endConsult: defaultVisibility,
+        consultTransfer: defaultVisibility,
+        mergeConference: defaultVisibility,
+        mergeConferenceConsult: defaultVisibility,
+        consultTransferConsult: defaultVisibility,
+        switchToMainCall: defaultVisibility,
+        switchToConsult: defaultVisibility,
+        exitConference: defaultVisibility,
+        recordingIndicator: defaultVisibility,
         isConferenceInProgress: false,
         isConsultInitiated: false,
         isConsultInitiatedAndAccepted: false,

@@ -1,6 +1,6 @@
 import {
   ILogger,
-  DIALNUMBER,
+  DIAL_NUMBER,
   EXTENSION,
   DESKTOP,
   ConsultStatus,
@@ -12,6 +12,7 @@ import {
   findHoldStatus,
 } from '@webex/cc-store';
 import {ITask} from '@webex/contact-center';
+import {Visibility} from '@webex/cc-components';
 import {
   MEDIA_TYPE_TELEPHONY,
   MEDIA_TYPE_CHAT,
@@ -19,18 +20,9 @@ import {
   MAX_PARTICIPANTS_IN_MULTIPARTY_CONFERENCE,
   MAX_PARTICIPANTS_IN_THREE_PARTY_CONFERENCE,
 } from './constants';
-import {Visibility} from '@webex/cc-components';
+import {DeviceTypeFlags} from '../task.types';
 
 // ==================== UTILITY FUNCTIONS ====================
-
-/**
- * Helper interface for device type checks
- */
-interface DeviceTypeFlags {
-  isBrowser: boolean;
-  isAgentDN: boolean;
-  isExtension: boolean;
-}
 
 /**
  * Helper function to get device type flags to avoid repetition
@@ -38,7 +30,7 @@ interface DeviceTypeFlags {
 function getDeviceTypeFlags(deviceType: string): DeviceTypeFlags {
   return {
     isBrowser: deviceType === DESKTOP,
-    isAgentDN: deviceType === DIALNUMBER,
+    isAgentDN: deviceType === DIAL_NUMBER,
     isExtension: deviceType === EXTENSION,
   };
 }
@@ -53,22 +45,23 @@ function isTelephonySupported(deviceType: string, webRtcEnabled: boolean): boole
 
 //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
 export function findHoldTimestamp(interaction: Interaction, mType = 'mainCall', logger?: ILogger): number | null {
-  try {
-    if (!interaction?.media) return null;
+  let result: number | null = null;
 
-    for (const key in interaction.media) {
-      if (interaction.media[key].mType === mType) {
-        return interaction.media[key].holdTimestamp ?? null;
-      }
+  try {
+    if (interaction?.media) {
+      const media = Object.values(interaction.media).find(
+        (m) => (m as {mType: string; holdTimestamp?: number}).mType === mType
+      );
+      result = (media as {holdTimestamp?: number})?.holdTimestamp ?? null;
     }
-    return null;
   } catch (error) {
     logger?.error(`CC-Widgets: Task: Error in findHoldTimestamp - ${error.message}`, {
       module: 'task-util',
       method: 'findHoldTimestamp',
     });
-    return null;
   }
+
+  return result;
 }
 
 // ==================== CALL CONTROL BUTTON VISIBILITY FUNCTIONS ====================

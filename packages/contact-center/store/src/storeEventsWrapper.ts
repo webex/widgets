@@ -244,21 +244,21 @@ class StoreWrapper implements IStoreWrapper {
   refreshTaskList = (): void => {
     runInAction(() => {
       this.store.taskList = this.store.cc.taskManager.getAllTasks();
-      if (Object.keys(this.store.taskList).length === 0) {
+      const taskListKeys = Object.keys(this.store.taskList);
+
+      if (taskListKeys.length === 0) {
         if (this.currentTask) {
           this.handleTaskRemove(this.currentTask);
         }
         this.setCurrentTask(null);
-        this.setState({
-          reset: true,
-        });
+        this.setState({reset: true});
       } else if (this.currentTask && this.store.taskList[this.currentTask.data.interactionId]) {
         this.setCurrentTask(this.store.taskList[this.currentTask?.data?.interactionId]);
-      } else if (Object.keys(this.store.taskList).length > 0) {
+      } else if (taskListKeys.length > 0) {
         if (this.currentTask) {
           this.handleTaskRemove(this.currentTask);
         }
-        this.setCurrentTask(this.store.taskList[Object.keys(this.store.taskList)[0]]);
+        this.setCurrentTask(this.store.taskList[taskListKeys[0]]);
       }
     });
   };
@@ -381,7 +381,7 @@ class StoreWrapper implements IStoreWrapper {
       taskToRemove.off(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
       taskToRemove.off(TASK_EVENTS.TASK_END, this.handleTaskEnd);
       taskToRemove.off(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(taskToRemove, reason));
-      taskToRemove.off(TASK_EVENTS.AGENT_WRAPPEDUP, this.handleTaskWrapUp);
+      taskToRemove.off(TASK_EVENTS.AGENT_WRAPPEDUP, this.refreshTaskList);
       taskToRemove.off(TASK_EVENTS.TASK_CONSULTING, this.handleConsulting);
       taskToRemove.off(TASK_EVENTS.TASK_OFFER_CONSULT, this.handleConsultOffer);
       taskToRemove.off(TASK_EVENTS.TASK_CONSULT_END, this.refreshTaskList);
@@ -447,10 +447,6 @@ class StoreWrapper implements IStoreWrapper {
         name: ENGAGED_USERNAME,
       });
     });
-  };
-
-  handleTaskWrapUp = () => {
-    this.refreshTaskList();
   };
 
   handleTaskMedia = (track) => {
@@ -532,7 +528,7 @@ class StoreWrapper implements IStoreWrapper {
     // When we receive TASK_REJECT that means the task was not accepted by the agent and we wont need wrap up
     task.on(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(task, reason));
 
-    task.on(TASK_EVENTS.AGENT_WRAPPEDUP, this.handleTaskWrapUp);
+    task.on(TASK_EVENTS.AGENT_WRAPPEDUP, this.refreshTaskList);
 
     task.on(TASK_EVENTS.TASK_CONSULTING, this.handleConsulting);
     task.on(TASK_EVENTS.TASK_CONSULT_ACCEPTED, this.handleConsultAccepted);
@@ -638,9 +634,7 @@ class StoreWrapper implements IStoreWrapper {
     // Update call control states
     if (isTerminated) {
       if (!task.data.wrapUpRequired) {
-        this.setState({
-          reset: true,
-        });
+        this.setState({reset: true});
       }
 
       return;

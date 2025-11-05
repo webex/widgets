@@ -244,7 +244,7 @@ describe('Call Control Custom Utils', () => {
 
       expect(() => {
         handleTransferPress(mockOnTransfer, loggerMock);
-      }).toThrow('Error transferring call: Error: Transfer failed');
+      }).toThrow('Error transferring call: Transfer failed');
     });
   });
 
@@ -272,7 +272,7 @@ describe('Call Control Custom Utils', () => {
 
       expect(() => {
         handleEndConsultPress(mockEndConsult, loggerMock);
-      }).toThrow('Error ending consult call: Error: End consult failed');
+      }).toThrow('Error ending consult call: End consult failed');
     });
   });
 
@@ -300,7 +300,7 @@ describe('Call Control Custom Utils', () => {
 
       handleMuteToggle(mockToggleMute, loggerMock);
 
-      expect(loggerMock.error).toHaveBeenCalledWith('Mute toggle failed: Error: Mute failed', {
+      expect(loggerMock.error).toHaveBeenCalledWith('Mute toggle failed: Mute failed', {
         module: 'call-control-consult.tsx',
         method: 'handleConsultMuteToggle',
       });
@@ -980,7 +980,7 @@ describe('Call Control Custom Utils', () => {
 
       expect(() => {
         handleConsultConferencePress(mockConsultConference, loggerMock);
-      }).toThrow('Error consultConference: Error: Conference failed');
+      }).toThrow('Error consultConference: Conference failed');
     });
   });
 
@@ -1017,7 +1017,7 @@ describe('Call Control Custom Utils', () => {
 
       expect(() => {
         handleSwitchToMainCallPress(mockSwitchToMainCall, loggerMock);
-      }).toThrow('Error switchToMainCall: Error: Switch failed');
+      }).toThrow('Error switchToMainCall: Switch failed');
     });
   });
 

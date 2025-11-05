@@ -1,6 +1,6 @@
 import {useRef} from 'react';
 import {StationLoginLabels} from './constants';
-import {LoginOptions, DESKTOP, DIALNUMBER} from '@webex/cc-store';
+import {LoginOptions, DESKTOP, DIAL_NUMBER} from '@webex/cc-store';
 
 const handleModals = (
   modalRef,
@@ -270,7 +270,7 @@ const handleDNInputChanged = (
       // show error for empty string
       setDNErrorText(`${LoginOptions[selectedDeviceType]} ${StationLoginLabels.IS_REQUIRED}`);
       setShowDNError(true);
-    } else if (selectedDeviceType === DIALNUMBER) {
+    } else if (selectedDeviceType === DIAL_NUMBER) {
       setShowDNError(validateDialNumber(input, dialNumberRegex, setDNErrorText, logger));
     } else {
       setShowDNError(false);

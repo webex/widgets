@@ -32,3 +32,12 @@ export type useCallControlProps = Pick<
   Partial<Pick<ControlProps, 'onHoldResume' | 'onEnd' | 'onWrapUp' | 'onRecordingToggle' | 'onToggleMute'>>;
 
 export type useOutdialCallProps = Pick<OutdialCallProps, 'cc' | 'logger'>;
+
+/**
+ * Helper interface for device type checks
+ */
+export interface DeviceTypeFlags {
+  isBrowser: boolean;
+  isAgentDN: boolean;
+  isExtension: boolean;
+}

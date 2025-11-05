@@ -255,7 +255,7 @@ type FetchPaginatedList<T> = (
 type TransformPaginatedData<T, U> = (item: T, page: number, index: number) => U;
 
 // Utility consts
-const DIALNUMBER: string = 'AGENT_DN';
+const DIAL_NUMBER: string = 'AGENT_DN';
 const EXTENSION: string = 'EXTENSION';
 const DESKTOP: string = 'BROWSER';
 
@@ -266,7 +266,7 @@ const DEVICE_TYPE_BROWSER = 'BROWSER';
 const AGENT_STATE_AVAILABLE = 'Available';
 
 const LoginOptions: {[key: string]: string} = {
-  [DIALNUMBER]: 'Dial Number',
+  [DIAL_NUMBER]: 'Dial Number',
   [EXTENSION]: 'Extension',
   [DESKTOP]: 'Desktop',
 };
@@ -317,7 +317,7 @@ export {
   TASK_EVENTS,
   ENGAGED_LABEL,
   ENGAGED_USERNAME,
-  DIALNUMBER,
+  DIAL_NUMBER,
   EXTENSION,
   DESKTOP,
   MEDIA_TYPE_TELEPHONY_LOWER,
