@@ -360,10 +360,11 @@ export function getSwitchToMainCallButtonVisibility(
   isConsultAccepted: boolean,
   isConsultInitiated: boolean,
   consultCallHeld: boolean,
-  isCustomerInCall: boolean
+  isCustomerInCall: boolean,
+  isConferenceInProgress: boolean
 ): Visibility {
   const isVisible = !isBeingConsulted && (isConsultAccepted || isConsultInitiated) && !consultCallHeld;
-  const isEnabled = isConsultAccepted && isCustomerInCall;
+  const isEnabled = isConsultAccepted && (isCustomerInCall || (!isCustomerInCall && isConferenceInProgress));
 
   return {isVisible, isEnabled};
 }
@@ -560,7 +561,8 @@ export function getControlsVisibility(
         isConsultAccepted,
         isConsultInitiated,
         consultCallHeld,
-        isCustomerInCall
+        isCustomerInCall,
+        isConferenceInProgress
       ),
       switchToConsult: getSwitchToConsultButtonVisibility(isBeingConsulted, consultCallHeld),
 
