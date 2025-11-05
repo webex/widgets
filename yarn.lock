@@ -9552,6 +9552,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@webex/cli-tools@npm:0.0.0-next.1":
+  version: 0.0.0-next.1
+  resolution: "@webex/cli-tools@npm:0.0.0-next.1"
+  dependencies:
+    commander: "npm:11.1.0"
+    shelljs: "npm:^0.8.5"
+  checksum: 10c0/959380b83ebe91a1a014c1852453a279facf47a37a0af6b1b50c73992462c9dff0c19c26b4dfc9b40532f1d866a799a82a9ed43f5f316417f39b7b3d4c448442
+  languageName: node
+  linkType: hard
+
 "@webex/common-timers@npm:2.60.2":
   version: 2.60.2
   resolution: "@webex/common-timers@npm:2.60.2"
@@ -10649,6 +10659,17 @@ __metadata:
     "@webex/ts-events": "npm:^1.1.0"
     "@webex/web-media-effects": "npm:2.27.1"
   checksum: 10c0/42ab6337fed3f0dd70ba9214e4c828b5e5fe7e0d293703f98b260a84f74855f34e45a86540d0e88f21a6def18d1bf1292d79e0abc5ff6c6cb8f9136dc9aa933e
+  languageName: node
+  linkType: hard
+
+"@webex/package-tools@npm:0.0.0-next.1":
+  version: 0.0.0-next.1
+  resolution: "@webex/package-tools@npm:0.0.0-next.1"
+  dependencies:
+    "@webex/cli-tools": "npm:0.0.0-next.1"
+  bin:
+    webex-package-tools: ./index.js
+  checksum: 10c0/c2413342223c60dcb531efa63b63ef22a36ba38527b3607fb986e34d2570c43ff0f1236bdfebfff189209085f11fedae06205565edfecac7d5f186edc912af4d
   languageName: node
   linkType: hard
 
@@ -15059,6 +15080,13 @@ __metadata:
   version: 1.0.8
   resolution: "comma-separated-tokens@npm:1.0.8"
   checksum: 10c0/c3bcfeaa6d50313528a006a40bcc0f9576086665c9b48d4b3a76ddd63e7d6174734386c98be1881cbf6ecfc25e1db61cd775a7b896d2ea7a65de28f83a0f9b17
+  languageName: node
+  linkType: hard
+
+"commander@npm:11.1.0":
+  version: 11.1.0
+  resolution: "commander@npm:11.1.0"
+  checksum: 10c0/13cc6ac875e48780250f723fb81c1c1178d35c5decb1abb1b628b3177af08a8554e76b2c0f29de72d69eef7c864d12613272a71fabef8047922bc622ab75a179
   languageName: node
   linkType: hard
 
@@ -34139,6 +34167,7 @@ __metadata:
     "@semantic-release/git": "npm:^10.0.1"
     "@semantic-release/github": "npm:^11.0.1"
     "@testing-library/react-hooks": "npm:^8.0.1"
+    "@webex/package-tools": "npm:0.0.0-next.1"
     babel-jest: "npm:^29.7.0"
     crypto-browserify: "npm:^3.12.1"
     css-loader: "npm:^7.1.2"
