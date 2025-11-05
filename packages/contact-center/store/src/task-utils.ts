@@ -43,8 +43,9 @@ export function getConsultMPCState(task: ITask, agentId: string): string {
   if (
     !!consultMediaResourceId &&
     !!interaction.participants[agentId]?.consultState &&
-    task.data.interaction.state !== INTERACTION_STATE_WRAPUP &&
-    task.data.interaction.state !== INTERACTION_STATE_POST_CALL // If interaction.state is post_call, we want to return post_call.
+    task.data.interaction.state !== INTERACTION_STATE_WRAPUP
+    // revisit below condition if needed for post_call scenarios in future
+    //&& task.data.interaction.state !== INTERACTION_STATE_POST_CALL // If interaction.state is post_call, we want to return post_call.
   ) {
     // interaction state for all agents when consult is going on
     switch (interaction.participants[agentId]?.consultState) {
