@@ -1,5 +1,5 @@
 import {MEDIA_CHANNEL, TaskListItemData} from '../task.types';
-import {ITask} from '@webex/cc-store';
+import {ILogger, ITask} from '@webex/cc-store';
 import {isIncomingTask} from '@webex/cc-store';
 /**
  * Extracts and processes data from a task for rendering in the task list
@@ -11,7 +11,7 @@ export const extractTaskListItemData = (
   task: ITask,
   isBrowser: boolean,
   agentId: string,
-  logger?
+  logger?: ILogger
 ): TaskListItemData => {
   try {
     // Extract basic data from task

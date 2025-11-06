@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {Text, ListNext, TextInput, Button, ButtonCircle, TooltipNext} from '@momentum-ui/react-collaboration';
-import {Icon} from '@momentum-design/components/dist/react';
+import {Icon, Checkbox} from '@momentum-design/components/dist/react';
 import ConsultTransferListComponent from './consult-transfer-list-item';
 import {ConsultTransferPopoverComponentProps} from '../../task.types';
 import ConsultTransferEmptyState from './consult-transfer-empty-state';
@@ -11,7 +11,6 @@ import {
   getAgentsForDisplay,
 } from './call-control-custom.utils';
 import {useConsultTransferPopover} from './consult-transfer-popover-hooks';
-import {Checkbox} from '@momentum-design/components/dist/react';
 
 import {
   SEARCH_PLACEHOLDER,
@@ -305,7 +304,6 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
             checked={allowParticipantsToInteract}
             aria-label="Allow participants to continue interacting"
             id="allow-participants-checkbox"
-            // value={allowParticipantsToInteract}
             label="Allow participants to continue interacting."
             // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
             onchange={() => {

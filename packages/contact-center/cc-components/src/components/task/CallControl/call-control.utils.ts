@@ -203,7 +203,7 @@ export const buildCallControlButtons = (
   switchToConsult: () => void,
   onTransferConsult: () => void,
   handleConsultConferencePress: () => void,
-  logger?
+  logger?: ILogger
 ): CallControlButton[] => {
   try {
     return [
