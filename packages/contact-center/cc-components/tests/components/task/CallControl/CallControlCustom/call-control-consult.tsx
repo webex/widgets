@@ -313,6 +313,13 @@ describe('CallControlConsultComponent', () => {
 
     const mergeButton = screen.queryByTestId('conference-consult-btn');
     expect(mergeButton).toHaveAttribute('aria-describedby');
+    expect(mergeButton).toHaveAttribute('data-disabled', 'false');
+    expect(mergeButton).toHaveAttribute('data-ghost', 'false');
+    expect(mergeButton).toHaveAttribute('data-inverted', 'false');
+    expect(mergeButton).toHaveAttribute('type', 'button');
+    expect(mergeButton).toHaveAttribute('data-color', 'primary');
+    expect(mergeButton).toHaveAttribute('data-size', '40');
+    expect(mergeButton).toHaveClass('call-control-button');
 
     // Verify tooltip labels exist and have content
     const tooltipLabels = screen.container.querySelectorAll('.md-tooltip-label p');
