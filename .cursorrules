@@ -1,0 +1,159 @@
+# Webex Contact Center Widgets - Cursor AI Rules
+
+## About This Project
+
+This is a **monorepo** for Webex Contact Center Widgets built with TypeScript, React, MobX, and Webpack. Components are available as both React components and Web Components.
+
+## 📚 Documentation Structure
+
+All detailed documentation is organized in the `.cursor/` directory. Please refer to these files for specific topics:
+
+### Getting Started
+
+- **`.cursor/overview.md`** - Project overview, tech stack, repository structure
+- **`.cursor/setup.md`** - Initial setup, prerequisites, installation steps
+
+### Development
+
+- **`.cursor/development-workflow.md`** - Daily development commands, build process, debugging
+- **`.cursor/component-patterns.md`** - How to create components, file structure, design patterns
+- **`.cursor/state-management.md`** - MobX store patterns, reactive state management
+
+### Building & Configuration
+
+- **`.cursor/build-and-webpack.md`** - Webpack configuration, build system, loaders, plugins
+
+### Testing
+
+- **`.cursor/unit-testing.md`** - Jest unit testing with React Testing Library
+- **`.cursor/e2e-testing.md`** - Playwright E2E testing, multi-user sessions
+
+### Standards
+
+- **`.cursor/code-standards.md`** - TypeScript, React, styling, and git commit conventions
+
+## ⚡ Quick Reference
+
+### Package Manager
+
+**ALWAYS use `yarn`, NEVER `npm`**
+
+- Package manager: Yarn 4.5.1+
+- This is a Yarn workspaces monorepo
+
+### Build Order (CRITICAL)
+
+Packages must be built in this dependency order:
+
+1. `@webex/cc-store` (build first - no dependencies)
+2. `@webex/cc-ui-logging`
+3. `@webex/cc-components`
+4. `@webex/cc-station-login`, `@webex/cc-task`, `@webex/cc-user-state`
+5. `@webex/cc-widgets`
+
+### Common Commands
+
+```bash
+# Setup
+yarn install
+yarn run build
+
+# Development
+yarn samples:serve-react              # Start dev server with HMR
+yarn workspace @webex/cc-components run build:watch  # Watch mode
+
+# Testing
+yarn run test:cc-widgets              # Unit tests
+yarn run test:e2e                     # E2E tests
+yarn run test:styles                  # Linting
+
+# Building
+yarn workspace @webex/cc-store run build:src        # Build store first
+yarn workspace @webex/cc-components run build:src   # Then components
+```
+
+### Key Technologies
+
+- **TypeScript 5.6.3** - All code is typed
+- **React 18.3.1+** - Functional components with hooks
+- **MobX** - State management (singleton pattern with `makeAutoObservable`)
+- **Webpack 5** - Module bundler
+- **Jest 29.7.0** - Unit testing
+- **Playwright** - E2E testing
+- **@momentum-design/components** - UI component library
+
+## 🎯 When Helping with Code
+
+### Always Consider:
+
+1. **Check documentation first** - Refer to appropriate `.cursor/*.md` file for detailed guidance
+2. **Use Yarn** - Never suggest `npm` commands
+3. **Build dependencies** - Remember build order, especially store
+4. **Follow patterns** - Check `component-patterns.md` for structure
+5. **TypeScript strict** - All types must be properly defined
+6. **Test changes** - Add/update unit tests
+7. **Use HOCs** - Wrap components with `withMetrics` for telemetry
+8. **MobX observability** - Use `observer()` for components that use store
+
+### Common Tasks → Documentation:
+
+- **Creating new component** → `.cursor/component-patterns.md`
+- **Modifying store** → `.cursor/state-management.md`
+- **Build issues** → `.cursor/build-and-webpack.md`
+- **Writing tests** → `.cursor/unit-testing.md` or `.cursor/e2e-testing.md`
+- **Development setup** → `.cursor/setup.md`
+- **Code style questions** → `.cursor/code-standards.md`
+
+### File Structure Pattern:
+
+```
+ComponentName/
+├── component-name.tsx          # Main component
+├── component-name.types.ts     # TypeScript types
+├── component-name.utils.ts     # Helper functions
+├── component-name.style.scss   # Styles
+└── constants.ts                # Constants (optional)
+```
+
+### Component Export Pattern:
+
+```typescript
+// 1. Define types in .types.ts
+export interface ComponentProps { ... }
+
+// 2. Implement in .tsx
+const ComponentNameComponent: React.FC<Props> = (props) => { ... };
+
+// 3. Wrap with HOCs and export
+export const ComponentName = withMetrics(ComponentNameComponent);
+// Or with observer: observer(withMetrics(ComponentNameComponent))
+```
+
+## 🚫 Don't Do This:
+
+- ❌ Use `npm` commands (use `yarn`)
+- ❌ Modify generated files in `dist/`
+- ❌ Bypass ESLint rules without justification
+- ❌ Skip building `@webex/cc-store` when modifying it
+- ❌ Commit without running tests
+- ❌ Use `console.log` (use `logger` from props)
+- ❌ Create components without proper TypeScript types
+- ❌ Mutate store state outside of store actions
+
+## 📖 For Detailed Information
+
+**Before suggesting solutions, please check the relevant documentation file in `.cursor/` for detailed patterns, examples, and best practices.**
+
+Each markdown file contains:
+
+- ✅ Complete examples
+- ✅ Best practices
+- ✅ Common pitfalls
+- ✅ Troubleshooting tips
+- ✅ Step-by-step guides
+
+---
+
+**Repository**: https://github.com/webex/widgets  
+**Current Version**: 1.28.0-ccwidgets.122  
+**Last Updated**: November 2025
