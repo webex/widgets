@@ -251,7 +251,7 @@
 }
 
 .participants-popover {
-
+  background: var(--mds-color-theme-background-solid-primary-normal, #FFFFFF) !important;
   .participants-menu {
     max-height: 12.5rem;
     overflow-y: auto;
@@ -261,6 +261,6 @@
     padding: 0.2rem;
     font-size: 0.875rem;
     cursor: pointer;
-    color: var(--mds-color-theme-text-primary-normal);
+    color: var(--mds-color-theme-text-primary-normal, #000000F2);
   }
 }
