@@ -325,7 +325,7 @@ export const useCallControl = (props: useCallControlProps) => {
 
     // Get holdTimestamp from the interaction object
     const holdTimestamp = currentTask?.data?.interaction
-      ? findHoldTimestamp(currentTask.data.interaction, 'mainCall', logger)
+      ? findHoldTimestamp(currentTask.data.interaction, 'mainCall')
       : null;
 
     if (holdTimestamp) {
@@ -755,8 +755,6 @@ export const useCallControl = (props: useCallControlProps) => {
 
   const switchToConsult = async () => {
     try {
-      // const isHold = findHoldStatus(currentTask, agentId, 'mainCall');
-      // const consultHold = findHoldStatus(currentTask, agentId, 'consult');
       await currentTask.hold(findMediaResourceId(currentTask, 'mainCall'));
       logger.info('switchToConsult success', {module: 'useCallControl', method: 'switchToConsult'});
     } catch (error) {

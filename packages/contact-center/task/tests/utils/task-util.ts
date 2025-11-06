@@ -1,7 +1,7 @@
 import {mockTask} from '@webex/test-fixtures';
 import {findHoldTimestamp, getControlsVisibility} from '../../src/Utils/task-util';
 import {getIsConferenceInProgress, getConferenceParticipants} from '@webex/cc-store';
-import {ITask, TaskData} from '@webex/contact-center';
+import {ITask, TaskData, Interaction} from '@webex/contact-center';
 
 // Helper function to create properly typed partial task objects for testing
 const createMockTask = (data: Partial<TaskData>): ITask => {
@@ -430,7 +430,7 @@ describe('findHoldTimestamp', () => {
         main: {mType: 'mainCall', holdTimestamp: 123456},
         aux: {mType: 'auxCall', holdTimestamp: 654321},
       },
-    };
+    } as unknown as Interaction;
     expect(findHoldTimestamp(interaction, 'mainCall')).toBe(123456);
     expect(findHoldTimestamp(interaction, 'auxCall')).toBe(654321);
   });
@@ -440,7 +440,7 @@ describe('findHoldTimestamp', () => {
       media: {
         main: {mType: 'mainCall', holdTimestamp: 123456},
       },
-    };
+    } as unknown as Interaction;
     expect(findHoldTimestamp(interaction, 'otherCall')).toBeNull();
   });
 
@@ -449,12 +449,12 @@ describe('findHoldTimestamp', () => {
       media: {
         main: {mType: 'mainCall'},
       },
-    };
+    } as unknown as Interaction;
     expect(findHoldTimestamp(interaction, 'mainCall')).toBeNull();
   });
 
   it('returns null if media is missing', () => {
-    const interaction = {};
+    const interaction = {} as unknown as Interaction;
     expect(findHoldTimestamp(interaction, 'mainCall')).toBeNull();
   });
 
@@ -463,7 +463,7 @@ describe('findHoldTimestamp', () => {
       media: {
         main: {mType: 'mainCall', holdTimestamp: 0},
       },
-    };
+    } as unknown as Interaction;
     expect(findHoldTimestamp(interaction, 'mainCall')).toBe(0);
   });
 
@@ -473,39 +473,8 @@ describe('findHoldTimestamp', () => {
         main: {mType: 'mainCall', holdTimestamp: 42, foo: 'bar'},
       },
       extra: 123,
-    };
+    } as unknown as Interaction;
     expect(findHoldTimestamp(interaction, 'mainCall')).toBe(42);
-  });
-
-  it('should handle errors when accessing interaction media and return null', () => {
-    const logger = {
-      error: jest.fn(),
-      log: jest.fn(),
-      warn: jest.fn(),
-      info: jest.fn(),
-      trace: jest.fn(),
-    };
-    // Create a problematic interaction that throws when accessing media
-    const problematicInteraction = new Proxy(
-      {},
-      {
-        get: (target, prop) => {
-          if (prop === 'media') {
-            throw new Error('Media access error');
-          }
-          return target[prop];
-        },
-      }
-    );
-
-    const result = findHoldTimestamp(problematicInteraction, 'mainCall', logger);
-
-    expect(logger.error).toHaveBeenCalledWith('CC-Widgets: Task: Error in findHoldTimestamp - Media access error', {
-      module: 'task-util',
-      method: 'findHoldTimestamp',
-    });
-
-    expect(result).toBeNull();
   });
 });
 

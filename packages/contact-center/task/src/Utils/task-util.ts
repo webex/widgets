@@ -6,12 +6,11 @@ import {
   ConsultStatus,
   getConsultStatus,
   getIsConsultInProgress,
-  isInteractionOnHold,
   getIsCustomerInCall,
   getConferenceParticipantsCount,
   findHoldStatus,
 } from '@webex/cc-store';
-import {ITask} from '@webex/contact-center';
+import {ITask, Interaction} from '@webex/contact-center';
 import {Visibility} from '@webex/cc-components';
 import {
   MEDIA_TYPE_TELEPHONY,
@@ -43,25 +42,12 @@ function isTelephonySupported(deviceType: string, webRtcEnabled: boolean): boole
   return (isBrowser && webRtcEnabled) || isAgentDN || isExtension;
 }
 
-//@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
-export function findHoldTimestamp(interaction: Interaction, mType = 'mainCall', logger?: ILogger): number | null {
-  let result: number | null = null;
-
-  try {
-    if (interaction?.media) {
-      const media = Object.values(interaction.media).find(
-        (m) => (m as {mType: string; holdTimestamp?: number}).mType === mType
-      );
-      result = (media as {holdTimestamp?: number})?.holdTimestamp ?? null;
-    }
-  } catch (error) {
-    logger?.error(`CC-Widgets: Task: Error in findHoldTimestamp - ${error.message}`, {
-      module: 'task-util',
-      method: 'findHoldTimestamp',
-    });
+export function findHoldTimestamp(interaction: Interaction, mType = 'mainCall'): number | null {
+  if (interaction?.media) {
+    const media = Object.values(interaction.media).find((m) => m.mType === mType);
+    return media?.holdTimestamp ?? null;
   }
-
-  return result;
+  return null;
 }
 
 // ==================== CALL CONTROL BUTTON VISIBILITY FUNCTIONS ====================
@@ -425,7 +411,7 @@ export function getControlsVisibility(
     const isTransferVisibility = isBrowser ? webRtcEnabled : true;
     const isConferenceInProgress = task?.data?.isConferenceInProgress ?? false;
     const isConsultInProgress = getIsConsultInProgress(task);
-    const isHeld = isInteractionOnHold(task);
+    const isHeld = findHoldStatus(task, 'mainCall', agentId);
     const isCustomerInCall = getIsCustomerInCall(task);
     // const mainCallHeld = findHoldStatus(task, 'mainCall', agentId);
     const consultCallHeld = findHoldStatus(task, 'consult', agentId);
