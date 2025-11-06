@@ -763,3 +763,16 @@ export interface ConsultTransferOptions {
   /** Show the Entry Point tab. Defaults to true. */
   showEntryPointTab?: boolean;
 }
+
+/**
+ * Interface for button configuration
+ */
+export interface ButtonConfig {
+  key: string;
+  icon: string;
+  onClick: () => void;
+  tooltip: string;
+  className: string;
+  disabled?: boolean;
+  isVisible: boolean;
+}

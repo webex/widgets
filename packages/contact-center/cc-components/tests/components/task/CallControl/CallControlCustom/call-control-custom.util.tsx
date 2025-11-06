@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom';
 import {BuddyDetails, ContactServiceQueue} from '@webex/cc-store';
 import {mockAgents, mockQueueDetails} from '@webex/test-fixtures';
-import {ControlVisibility} from '../../../../../src/components/task/task.types';
+import {ButtonConfig, ControlVisibility} from '../../../../../src/components/task/task.types';
 import {
   createConsultButtons,
   getVisibleButtons,
@@ -35,7 +35,6 @@ import {
   debounce,
   handleConsultConferencePress,
   handleSwitchToMainCallPress,
-  ButtonConfig,
 } from '../../../../../src/components/task/CallControl/CallControlCustom/call-control-custom.utils';
 
 const loggerMock = {

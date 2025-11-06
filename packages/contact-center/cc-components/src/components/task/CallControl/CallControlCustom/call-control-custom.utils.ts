@@ -1,19 +1,6 @@
 import {BuddyDetails, ContactServiceQueue, ILogger} from '@webex/cc-store';
 import {MUTE_CALL, UNMUTE_CALL} from '../../constants';
-import {ControlVisibility} from '../../task.types';
-
-/**
- * Interface for button configuration
- */
-export interface ButtonConfig {
-  key: string;
-  icon: string;
-  onClick: () => void;
-  tooltip: string;
-  className: string;
-  disabled?: boolean;
-  isVisible: boolean;
-}
+import {ButtonConfig, ControlVisibility} from '../../task.types';
 
 /**
  * Interface for list item data
