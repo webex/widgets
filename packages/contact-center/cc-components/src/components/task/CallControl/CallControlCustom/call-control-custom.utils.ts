@@ -16,11 +16,11 @@ export interface ListItemData {
 export const createConsultButtons = (
   isMuted: boolean,
   controlVisibility: ControlVisibility,
-  onTransfer?: () => void,
-  handleConsultMuteToggle?: () => void,
-  handleEndConsult?: () => void,
-  handleConsultConferencePress?: () => void,
-  handleSwitchToMainCallPress?: () => void,
+  consultTransfer: () => void,
+  toggleConsultMute: () => void,
+  endConsultCall: () => void,
+  consultConference: () => void,
+  switchToMainCall: () => void,
   logger?
 ): ButtonConfig[] => {
   try {
@@ -28,7 +28,7 @@ export const createConsultButtons = (
       {
         key: 'mute',
         icon: isMuted ? 'microphone-muted-bold' : 'microphone-bold',
-        onClick: handleConsultMuteToggle || (() => {}),
+        onClick: toggleConsultMute,
         tooltip: isMuted ? UNMUTE_CALL : MUTE_CALL,
         className: `${isMuted ? 'call-control-button-muted' : 'call-control-button'}`,
         disabled: !controlVisibility.muteUnmuteConsult.isEnabled,
@@ -38,36 +38,36 @@ export const createConsultButtons = (
         key: 'switchToMainCall',
         icon: 'call-swap-bold',
         tooltip: controlVisibility.isConferenceInProgress ? 'Switch to Conference Call' : 'Switch to Call',
-        onClick: handleSwitchToMainCallPress || (() => {}),
+        onClick: switchToMainCall,
         className: 'call-control-button',
         disabled: !controlVisibility.switchToMainCall.isEnabled,
-        isVisible: controlVisibility.switchToMainCall.isVisible && !!handleSwitchToMainCallPress,
+        isVisible: controlVisibility.switchToMainCall.isVisible,
       },
       {
         key: 'transfer',
         icon: 'next-bold',
         tooltip: controlVisibility.isConferenceInProgress ? 'Transfer Conference' : 'Transfer',
-        onClick: onTransfer || (() => {}),
+        onClick: consultTransfer,
         className: 'call-control-button',
         disabled: !controlVisibility.consultTransferConsult.isEnabled,
-        isVisible: controlVisibility.consultTransferConsult.isVisible && !!onTransfer,
+        isVisible: controlVisibility.consultTransferConsult.isVisible,
       },
       {
         key: 'conference',
         icon: 'call-merge-bold',
         tooltip: 'Merge',
-        onClick: handleConsultConferencePress || (() => {}),
+        onClick: consultConference,
         className: 'call-control-button',
         disabled: !controlVisibility.mergeConferenceConsult.isEnabled,
-        isVisible: controlVisibility.mergeConferenceConsult.isVisible && !!handleConsultConferencePress,
+        isVisible: controlVisibility.mergeConferenceConsult.isVisible,
       },
       {
         key: 'cancel',
         icon: 'headset-muted-bold',
         tooltip: 'End Consult',
-        onClick: handleEndConsult || (() => {}),
+        onClick: endConsultCall,
         className: 'call-control-consult-button-cancel',
-        isVisible: controlVisibility.endConsult.isVisible && !!handleEndConsult,
+        isVisible: controlVisibility.endConsult.isVisible,
       },
     ];
   } catch (error) {
@@ -117,113 +117,6 @@ export const createInitials = (name: string, logger?): string => {
     });
     // Return safe default
     return '??';
-  }
-};
-
-/**
- * Handles transfer button press with logging
- */
-export const handleTransferPress = (onTransfer: (() => void) | undefined, logger: ILogger): void => {
-  logger.info('CC-Widgets: CallControlConsult: transfer button clicked', {
-    module: 'call-control-consult.tsx',
-    method: 'handleTransfer',
-  });
-
-  try {
-    if (onTransfer) {
-      onTransfer();
-      logger.log('CC-Widgets: CallControlConsult: transfer completed', {
-        module: 'call-control-consult.tsx',
-        method: 'handleTransfer',
-      });
-    }
-  } catch (error) {
-    throw new Error(`Error transferring call: ${error.message}`);
-  }
-};
-
-/**
- * Handles end consult button press with logging
- */
-export const handleEndConsultPress = (endConsultCall: (() => void) | undefined, logger: ILogger): void => {
-  logger.info('CC-Widgets: CallControlConsult: end consult clicked', {
-    module: 'call-control-consult.tsx',
-    method: 'handleEndConsult',
-  });
-
-  try {
-    if (endConsultCall) {
-      endConsultCall();
-      logger.log('CC-Widgets: CallControlConsult: end consult completed', {
-        module: 'call-control-consult.tsx',
-        method: 'handleEndConsult',
-      });
-    }
-  } catch (error) {
-    throw new Error(`Error ending consult call: ${error.message}`);
-  }
-};
-
-/**
- * Handles merge consult/conference button press with logging
- */
-export const handleConsultConferencePress = (consultConference: (() => void) | undefined, logger: ILogger): void => {
-  try {
-    logger.info('CC-Widgets: CallControlConsult: consultConference clicked', {
-      module: 'call-control-consult.tsx',
-      method: 'handleConsultConferencePress',
-    });
-
-    if (consultConference) {
-      consultConference();
-      logger.log('CC-Widgets: CallControlConsult: consultConference completed', {
-        module: 'call-control-consult.tsx',
-        method: 'handleConsultConferencePress',
-      });
-    }
-  } catch (error) {
-    throw new Error(`Error consultConference: ${error.message}`);
-  }
-};
-
-/**
- * Handles switch to conference call button press with logging
- */
-export const handleSwitchToMainCallPress = (switchToMainCall: (() => void) | undefined, logger: ILogger): void => {
-  try {
-    logger.info('CC-Widgets: CallControlConsult: switchToMainCall clicked', {
-      module: 'call-control-consult.tsx',
-      method: 'handleSwitchToMainCallPress',
-    });
-
-    if (switchToMainCall) {
-      switchToMainCall();
-      logger.log('CC-Widgets: CallControlConsult: switchToMainCall completed', {
-        module: 'call-control-consult.tsx',
-        method: 'handleSwitchToMainCallPress',
-      });
-    }
-  } catch (error) {
-    throw new Error(`Error switchToMainCall: ${error.message}`);
-  }
-};
-
-/**
- * Handles mute toggle with disabled state management
- */
-export const handleMuteToggle = (onToggleConsultMute: (() => void) | undefined, logger: ILogger): void => {
-  try {
-    if (onToggleConsultMute) {
-      onToggleConsultMute();
-    }
-  } catch (error) {
-    logger.error(`Mute toggle failed: ${error.message}`, {
-      module: 'call-control-consult.tsx',
-      method: 'handleConsultMuteToggle',
-    });
-  } finally {
-    // Re-enable button after operation
-    setTimeout(() => {}, 500);
   }
 };
 

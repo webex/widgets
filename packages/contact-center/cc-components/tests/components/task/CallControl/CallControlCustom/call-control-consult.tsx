@@ -92,10 +92,11 @@ describe('CallControlConsultComponent', () => {
   const defaultProps = {
     agentName: 'Alice',
     startTimeStamp: Date.now(),
-    onTransfer: mockOnTransfer,
+    consultTransfer: mockOnTransfer,
     endConsultCall: mockEndConsultCall,
-    onToggleConsultMute: mockOnToggleConsultMute,
+    toggleConsultMute: mockOnToggleConsultMute,
     consultConference: mockConsultConference,
+    switchToMainCall: jest.fn(),
     logger: loggerMock,
     isMuted: false,
     controlVisibility: mockControlVisibility,
@@ -218,8 +219,8 @@ describe('CallControlConsultComponent', () => {
     expect(cancelButton).toHaveClass('call-control-consult-button-cancel');
   });
 
-  it('handles case when onTransfer is undefined (covers line 52)', async () => {
-    const propsWithoutTransfer = {...defaultProps, onTransfer: undefined};
+  it('handles case when consultTransfer is undefined (covers line 52)', async () => {
+    const propsWithoutTransfer = {...defaultProps, consultTransfer: undefined};
     const screen = await render(<CallControlConsultComponent {...propsWithoutTransfer} />);
 
     // Component should still render without transfer functionality
@@ -238,8 +239,8 @@ describe('CallControlConsultComponent', () => {
     expect(cancelButton).toHaveAttribute('type', 'button');
     expect(cancelButton).toHaveClass('call-control-consult-button-cancel');
 
-    // Transfer button should NOT be present when onTransfer is undefined
-    expect(screen.queryByTestId('transfer-consult-btn')).not.toBeInTheDocument();
+    // Transfer button should be present even when consultTransfer is undefined (it's now mandatory)
+    expect(screen.queryByTestId('transfer-consult-btn')).toBeInTheDocument();
   });
 
   it('renders with muted state correctly', async () => {

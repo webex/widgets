@@ -1538,6 +1538,40 @@ describe('useCallControl', () => {
     });
   });
 
+  it('should handle endConsultCall when interactionId is missing', async () => {
+    const taskWithoutInteractionId = {
+      ...mockCurrentTask,
+      data: {
+        ...mockCurrentTask.data,
+        interactionId: undefined,
+      },
+    };
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: taskWithoutInteractionId,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
+        isMuted: false,
+        multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
+      })
+    );
+
+    await act(async () => {
+      await result.current.endConsultCall();
+    });
+
+    expect(mockLogger.error).toHaveBeenCalledWith('Cannot end consult call: currentTask or interactionId is missing', {
+      module: 'widget-cc-task#helper.ts',
+      method: 'useCallControl#endConsultCall',
+    });
+  });
+
   it('should call consultTransfer successfully', async () => {
     mockCurrentTask.consultTransfer = jest.fn().mockResolvedValue('ConsultTransferred');
     const {result} = renderHook(() =>
@@ -1581,6 +1615,37 @@ describe('useCallControl', () => {
     await expect(result.current.consultTransfer()).rejects.toThrow(transferError);
     expect(mockCurrentTask.consultTransfer).toHaveBeenCalled();
     expect(mockLogger.error).toHaveBeenCalledWith('Error transferring consult call: Error: Consult transfer failed', {
+      module: 'widget-cc-task#helper.ts',
+      method: 'useCallControl#consultTransfer',
+    });
+  });
+
+  it('should handle consultTransfer when currentTask data is missing', async () => {
+    const taskWithoutData = {
+      ...mockCurrentTask,
+      data: undefined,
+    };
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: taskWithoutData,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
+        isMuted: false,
+        multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
+      })
+    );
+
+    await act(async () => {
+      await result.current.consultTransfer();
+    });
+
+    expect(mockLogger.error).toHaveBeenCalledWith('Cannot transfer consult call: currentTask or data is missing', {
       module: 'widget-cc-task#helper.ts',
       method: 'useCallControl#consultTransfer',
     });
@@ -2406,6 +2471,35 @@ describe('useCallControl', () => {
     });
   });
 
+  it('should handle cancelAutoWrapup when currentTask is missing', async () => {
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: undefined,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
+        isMuted: false,
+        multiPartyConferenceEnabled: true,
+        agentId: 'test-agent-id',
+      })
+    );
+
+    await act(async () => {
+      result.current.cancelAutoWrapup();
+    });
+
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      'CC-Widgets: CallControl: Cannot cancel auto-wrapup, currentTask is missing',
+      {
+        module: 'widget-cc-task#helper.ts',
+        method: 'useCallControl#cancelAutoWrapup',
+      }
+    );
+  });
+
   describe('toggleMute functionality', () => {
     const mockOnToggleMute = jest.fn();
 
@@ -2647,6 +2741,33 @@ describe('useCallControl', () => {
       });
       expect(mockCurrentTask.toggleMute).not.toHaveBeenCalled();
     });
+
+    it('should handle toggleMute error', async () => {
+      const error = new Error('toggleMute failed');
+      mockCurrentTask.toggleMute = jest.fn().mockRejectedValue(error);
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: mockCurrentTask,
+          onToggleMute: mockOnToggleMute,
+          logger: mockLogger,
+          featureFlags: store.featureFlags,
+          deviceType: store.deviceType,
+          isMuted: false,
+          multiPartyConferenceEnabled: true,
+          agentId: 'test-agent-id',
+        })
+      );
+
+      await act(async () => {
+        await result.current.toggleMute();
+      });
+
+      expect(mockLogger.error).toHaveBeenCalledWith('toggleMute failed: Error: toggleMute failed', {
+        module: 'useCallControl',
+        method: 'toggleMute',
+      });
+    });
   });
 
   describe('Conference Functions', () => {
@@ -2770,6 +2891,126 @@ describe('useCallControl', () => {
         expect(mockLogger.error).toHaveBeenCalledWith('Error exiting conference: Error: exitConference failed', {
           module: 'useCallControl',
           method: 'exitConference',
+        });
+      });
+    });
+
+    describe('switchToMainCall', () => {
+      it('should call switchToMainCall successfully', async () => {
+        mockCurrentTask.resume = jest.fn().mockResolvedValue(undefined);
+
+        const {result} = renderHook(() =>
+          useCallControl({
+            currentTask: mockCurrentTask,
+            onHoldResume: mockOnHoldResume,
+            onEnd: mockOnEnd,
+            onWrapUp: mockOnWrapUp,
+            logger: mockLogger,
+            featureFlags: store.featureFlags,
+            deviceType: store.deviceType,
+            isMuted: false,
+            multiPartyConferenceEnabled: true,
+            agentId: 'test-agent-id',
+          })
+        );
+
+        await act(async () => {
+          await result.current.switchToMainCall();
+        });
+
+        expect(mockCurrentTask.resume).toHaveBeenCalled();
+      });
+
+      it('should handle switchToMainCall error', async () => {
+        const error = new Error('switchToMainCall failed');
+        mockCurrentTask.resume = jest.fn().mockRejectedValue(error);
+
+        const {result} = renderHook(() =>
+          useCallControl({
+            currentTask: mockCurrentTask,
+            onHoldResume: mockOnHoldResume,
+            onEnd: mockOnEnd,
+            onWrapUp: mockOnWrapUp,
+            logger: mockLogger,
+            featureFlags: store.featureFlags,
+            deviceType: store.deviceType,
+            isMuted: false,
+            multiPartyConferenceEnabled: true,
+            agentId: 'test-agent-id',
+          })
+        );
+
+        await expect(
+          act(async () => {
+            await result.current.switchToMainCall();
+          })
+        ).rejects.toThrow('switchToMainCall failed');
+
+        expect(mockLogger.error).toHaveBeenCalledWith('Error switchToMainCall: Error: switchToMainCall failed', {
+          module: 'useCallControl',
+          method: 'switchToMainCall',
+        });
+      });
+    });
+
+    describe('switchToConsult', () => {
+      it('should call switchToConsult successfully', async () => {
+        mockCurrentTask.hold = jest.fn().mockResolvedValue(undefined);
+
+        const {result} = renderHook(() =>
+          useCallControl({
+            currentTask: mockCurrentTask,
+            onHoldResume: mockOnHoldResume,
+            onEnd: mockOnEnd,
+            onWrapUp: mockOnWrapUp,
+            logger: mockLogger,
+            featureFlags: store.featureFlags,
+            deviceType: store.deviceType,
+            isMuted: false,
+            multiPartyConferenceEnabled: true,
+            agentId: 'test-agent-id',
+          })
+        );
+
+        await act(async () => {
+          await result.current.switchToConsult();
+        });
+
+        expect(mockCurrentTask.hold).toHaveBeenCalled();
+        expect(mockLogger.info).toHaveBeenCalledWith('switchToConsult success', {
+          module: 'useCallControl',
+          method: 'switchToConsult',
+        });
+      });
+
+      it('should handle switchToConsult error', async () => {
+        const error = new Error('switchToConsult failed');
+        mockCurrentTask.hold = jest.fn().mockRejectedValue(error);
+
+        const {result} = renderHook(() =>
+          useCallControl({
+            currentTask: mockCurrentTask,
+            onHoldResume: mockOnHoldResume,
+            onEnd: mockOnEnd,
+            onWrapUp: mockOnWrapUp,
+            logger: mockLogger,
+            featureFlags: store.featureFlags,
+            deviceType: store.deviceType,
+            isMuted: false,
+            multiPartyConferenceEnabled: true,
+            agentId: 'test-agent-id',
+          })
+        );
+
+        await expect(
+          act(async () => {
+            await result.current.switchToConsult();
+          })
+        ).rejects.toThrow('switchToConsult failed');
+
+        expect(mockLogger.error).toHaveBeenCalledWith('Error switching to consult: Error: switchToConsult failed', {
+          module: 'useCallControl',
+          method: 'switchToConsult',
         });
       });
     });

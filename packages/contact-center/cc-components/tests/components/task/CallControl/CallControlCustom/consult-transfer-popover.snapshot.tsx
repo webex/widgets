@@ -79,6 +79,8 @@ describe('ConsultTransferPopoverComponent Snapshots', () => {
     getQueues: async () => ({data: [buildQueue('queue1', 'Queue One')], meta: {page: 0, totalPages: 1}}),
     onAgentSelect: mockOnAgentSelect,
     onQueueSelect: mockOnQueueSelect,
+    onDialNumberSelect: jest.fn(),
+    onEntryPointSelect: jest.fn(),
     allowConsultToQueue: true,
     logger: mockLogger,
   };

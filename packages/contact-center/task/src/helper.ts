@@ -736,7 +736,10 @@ export const useCallControl = (props: useCallControlProps) => {
   const consultConference = async () => {
     try {
       await currentTask.consultConference();
-      logger.info('consultConference success', {module: 'useCallControl', method: 'consultConference'});
+      logger.info('consultConference success', {
+        module: 'useCallControl',
+        method: 'consultConference',
+      });
     } catch (error) {
       logger.error(`Error consulting conference: ${error}`, {module: 'useCallControl', method: 'consultConference'});
       throw error;
@@ -748,7 +751,7 @@ export const useCallControl = (props: useCallControlProps) => {
       await currentTask.resume(findMediaResourceId(currentTask, 'consult'));
       logger.info('switchToMainCall success', {module: 'useCallControl', method: 'switchToMainCall'});
     } catch (error) {
-      logger.error(`Error switching to conference: ${error}`, {module: 'useCallControl', method: 'switchToMainCall'});
+      logger.error(`Error switchToMainCall: ${error}`, {module: 'useCallControl', method: 'switchToMainCall'});
       throw error;
     }
   };

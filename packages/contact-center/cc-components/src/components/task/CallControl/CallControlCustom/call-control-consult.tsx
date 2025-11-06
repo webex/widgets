@@ -6,57 +6,33 @@ import {CallControlConsultComponentsProps} from '../../task.types';
 import {
   createConsultButtons,
   getVisibleButtons,
-  handleTransferPress,
-  handleEndConsultPress,
-  handleMuteToggle,
   getConsultStatusText,
   createTimerKey,
-  handleConsultConferencePress,
-  handleSwitchToMainCallPress,
 } from './call-control-custom.utils';
 
 const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> = ({
   agentName,
   startTimeStamp,
-  onTransfer,
+  consultTransfer,
   endConsultCall,
   consultConference,
   switchToMainCall,
   logger,
   isMuted,
   controlVisibility,
-  onToggleConsultMute,
+  toggleConsultMute,
 }) => {
   const timerKey = createTimerKey(startTimeStamp);
-
-  const handleTransfer = () => {
-    handleTransferPress(onTransfer, logger);
-  };
-
-  const handleEndConsult = () => {
-    handleEndConsultPress(endConsultCall, logger);
-  };
-
-  const handleConsultMuteToggle = () => {
-    handleMuteToggle(onToggleConsultMute, logger);
-  };
-
-  const handleConsultConference = () => {
-    handleConsultConferencePress(consultConference, logger);
-  };
-
-  const handleSwitchToMainCall = () => {
-    handleSwitchToMainCallPress(switchToMainCall, logger);
-  };
 
   const buttons = createConsultButtons(
     isMuted,
     controlVisibility,
-    onTransfer ? handleTransfer : undefined,
-    handleConsultMuteToggle,
-    handleEndConsult,
-    handleConsultConference,
-    handleSwitchToMainCall
+    consultTransfer,
+    toggleConsultMute,
+    endConsultCall,
+    consultConference,
+    switchToMainCall,
+    logger
   );
 
   // Filter buttons that should be shown, then map them

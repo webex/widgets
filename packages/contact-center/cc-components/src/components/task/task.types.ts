@@ -554,10 +554,10 @@ export interface ConsultTransferPopoverComponentProps {
   getAddressBookEntries?: FetchPaginatedList<AddressBookEntry>;
   getEntryPoints?: FetchPaginatedList<EntryPointRecord>;
   getQueues?: FetchPaginatedList<ContactServiceQueue>;
-  onAgentSelect?: (agentId: string, agentName: string, allowParticipantsToInteract: boolean) => void;
-  onQueueSelect?: (queueId: string, queueName: string, allowParticipantsToInteract: boolean) => void;
-  onEntryPointSelect?: (entryPointId: string, entryPointName: string, allowParticipantsToInteract: boolean) => void;
-  onDialNumberSelect?: (dialNumber: string, allowParticipantsToInteract: boolean) => void;
+  onAgentSelect: (agentId: string, agentName: string, allowParticipantsToInteract: boolean) => void;
+  onQueueSelect: (queueId: string, queueName: string, allowParticipantsToInteract: boolean) => void;
+  onEntryPointSelect: (entryPointId: string, entryPointName: string, allowParticipantsToInteract: boolean) => void;
+  onDialNumberSelect: (dialNumber: string, allowParticipantsToInteract: boolean) => void;
   allowConsultToQueue: boolean;
   /** Options governing popover visibility/behavior */
   consultTransferOptions?: ConsultTransferOptions;
@@ -571,14 +571,14 @@ export interface ConsultTransferPopoverComponentProps {
 export interface CallControlConsultComponentsProps {
   agentName: string;
   startTimeStamp: number;
-  onTransfer?: () => void;
-  endConsultCall?: () => void;
-  consultConference?: () => void;
-  switchToMainCall?: () => void;
+  consultTransfer: () => void;
+  endConsultCall: () => void;
+  consultConference: () => void;
+  switchToMainCall: () => void;
   logger: ILogger;
   isMuted: boolean;
   controlVisibility: ControlVisibility;
-  onToggleConsultMute?: () => void;
+  toggleConsultMute: () => void;
 }
 
 /**

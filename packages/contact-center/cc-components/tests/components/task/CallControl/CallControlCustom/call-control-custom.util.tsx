@@ -6,9 +6,6 @@ import {
   createConsultButtons,
   getVisibleButtons,
   createInitials,
-  handleTransferPress,
-  handleEndConsultPress,
-  handleMuteToggle,
   getConsultStatusText,
   handleListItemPress,
   shouldShowTabs,
@@ -33,8 +30,6 @@ import {
   filterAvailableAgents,
   filterAvailableQueues,
   debounce,
-  handleConsultConferencePress,
-  handleSwitchToMainCallPress,
 } from '../../../../../src/components/task/CallControl/CallControlCustom/call-control-custom.utils';
 
 const loggerMock = {
@@ -86,6 +81,7 @@ describe('Call Control Custom Utils', () => {
       const mockMuteToggle = jest.fn();
       const mockEndConsult = jest.fn();
       const mockConsultConference = jest.fn();
+      const mockSwitchToMainCall = jest.fn();
 
       const buttons = createConsultButtons(
         false, // isMuted
@@ -93,7 +89,9 @@ describe('Call Control Custom Utils', () => {
         mockTransfer,
         mockMuteToggle,
         mockEndConsult,
-        mockConsultConference
+        mockConsultConference,
+        mockSwitchToMainCall,
+        loggerMock
       );
 
       expect(buttons).toHaveLength(5); // Updated to 5 to include switchToMainCall button
@@ -107,7 +105,13 @@ describe('Call Control Custom Utils', () => {
     it('should configure mute button correctly when muted', () => {
       const buttons = createConsultButtons(
         true, // isMuted
-        mockControlVisibility
+        mockControlVisibility,
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        loggerMock
       );
 
       const muteButton = buttons.find((b) => b.key === 'mute');
@@ -119,7 +123,13 @@ describe('Call Control Custom Utils', () => {
     it('should configure mute button correctly when not muted', () => {
       const buttons = createConsultButtons(
         false, // isMuted
-        mockControlVisibility
+        mockControlVisibility,
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        loggerMock
       );
 
       const muteButton = buttons.find((b) => b.key === 'mute');
@@ -129,10 +139,16 @@ describe('Call Control Custom Utils', () => {
     });
 
     it('should disable transfer button when consult not completed', () => {
-      const customVisibility = {...mockControlVisibility, consultTransfer: {isVisible: false, isEnabled: false}};
+      const customVisibility = {...mockControlVisibility, consultTransferConsult: {isVisible: true, isEnabled: false}};
       const buttons = createConsultButtons(
         false, // isMuted
-        customVisibility
+        customVisibility,
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        loggerMock
       );
 
       const transferButton = buttons.find((b) => b.key === 'transfer');
@@ -140,10 +156,16 @@ describe('Call Control Custom Utils', () => {
     });
 
     it('should hide transfer button when not agent being consulted or no onTransfer', () => {
-      const customVisibility = {...mockControlVisibility, consultTransfer: {isVisible: false, isEnabled: false}};
+      const customVisibility = {...mockControlVisibility, consultTransferConsult: {isVisible: false, isEnabled: false}};
       const buttons = createConsultButtons(
         false, // isMuted
-        customVisibility
+        customVisibility,
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        loggerMock
       );
 
       const transferButton = buttons.find((b) => b.key === 'transfer');
@@ -154,7 +176,13 @@ describe('Call Control Custom Utils', () => {
       const customVisibility = {...mockControlVisibility, muteUnmuteConsult: {isVisible: false, isEnabled: false}};
       const buttons = createConsultButtons(
         false, // isMuted
-        customVisibility
+        customVisibility,
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        loggerMock
       );
 
       const muteButton = buttons.find((b) => b.key === 'mute');
@@ -207,108 +235,6 @@ describe('Call Control Custom Utils', () => {
 
     it('should handle names with extra spaces', () => {
       expect(createInitials('  John   Doe  ')).toBe('JD');
-    });
-  });
-
-  describe('handleTransferPress', () => {
-    it('should call onTransfer and log when provided', () => {
-      const mockOnTransfer = jest.fn();
-
-      handleTransferPress(mockOnTransfer, loggerMock);
-
-      expect(loggerMock.info).toHaveBeenCalledWith('CC-Widgets: CallControlConsult: transfer button clicked', {
-        module: 'call-control-consult.tsx',
-        method: 'handleTransfer',
-      });
-      expect(mockOnTransfer).toHaveBeenCalled();
-      expect(loggerMock.log).toHaveBeenCalledWith('CC-Widgets: CallControlConsult: transfer completed', {
-        module: 'call-control-consult.tsx',
-        method: 'handleTransfer',
-      });
-    });
-
-    it('should not call onTransfer when not provided', () => {
-      expect(() => {
-        handleTransferPress(undefined, loggerMock);
-      }).not.toThrow();
-
-      expect(loggerMock.info).toHaveBeenCalled();
-      expect(loggerMock.log).not.toHaveBeenCalled();
-    });
-
-    it('should throw error when onTransfer throws', () => {
-      const mockOnTransfer = jest.fn(() => {
-        throw new Error('Transfer failed');
-      });
-
-      expect(() => {
-        handleTransferPress(mockOnTransfer, loggerMock);
-      }).toThrow('Error transferring call: Transfer failed');
-    });
-  });
-
-  describe('handleEndConsultPress', () => {
-    it('should call endConsultCall and log when provided', () => {
-      const mockEndConsult = jest.fn();
-
-      handleEndConsultPress(mockEndConsult, loggerMock);
-
-      expect(loggerMock.info).toHaveBeenCalledWith('CC-Widgets: CallControlConsult: end consult clicked', {
-        module: 'call-control-consult.tsx',
-        method: 'handleEndConsult',
-      });
-      expect(mockEndConsult).toHaveBeenCalled();
-      expect(loggerMock.log).toHaveBeenCalledWith('CC-Widgets: CallControlConsult: end consult completed', {
-        module: 'call-control-consult.tsx',
-        method: 'handleEndConsult',
-      });
-    });
-
-    it('should throw error when endConsultCall throws', () => {
-      const mockEndConsult = jest.fn(() => {
-        throw new Error('End consult failed');
-      });
-
-      expect(() => {
-        handleEndConsultPress(mockEndConsult, loggerMock);
-      }).toThrow('Error ending consult call: End consult failed');
-    });
-  });
-
-  describe('handleMuteToggle', () => {
-    beforeEach(() => {
-      jest.useFakeTimers();
-    });
-
-    afterEach(() => {
-      jest.useRealTimers();
-    });
-
-    it('should disable button, call toggle, and re-enable after timeout', () => {
-      const mockToggleMute = jest.fn();
-
-      handleMuteToggle(mockToggleMute, loggerMock);
-
-      expect(mockToggleMute).toHaveBeenCalled();
-    });
-
-    it('should handle error and still re-enable button', () => {
-      const mockToggleMute = jest.fn(() => {
-        throw new Error('Mute failed');
-      });
-
-      handleMuteToggle(mockToggleMute, loggerMock);
-
-      expect(loggerMock.error).toHaveBeenCalledWith('Mute toggle failed: Mute failed', {
-        module: 'call-control-consult.tsx',
-        method: 'handleConsultMuteToggle',
-      });
-    });
-
-    it('should not call toggle when not provided', () => {
-      expect(() => {
-        handleMuteToggle(undefined, loggerMock);
-      }).not.toThrow();
     });
   });
 
@@ -445,6 +371,54 @@ describe('Call Control Custom Utils', () => {
         module: 'consult-transfer-popover.tsx',
         method: 'onTabSelection',
       });
+    });
+  });
+
+  describe('handleAgentSelection', () => {
+    it('should call onAgentSelect and log when provided', () => {
+      const mockOnAgentSelect = jest.fn();
+      const agentId = 'agent1';
+      const agentName = 'John Doe';
+
+      handleAgentSelection(agentId, agentName, false, mockOnAgentSelect, loggerMock);
+
+      expect(loggerMock.info).toHaveBeenCalledWith(`CC-Widgets: ConsultTransferPopover: agent selected: ${agentId}`, {
+        module: 'consult-transfer-popover.tsx',
+        method: 'onAgentSelect',
+      });
+      expect(mockOnAgentSelect).toHaveBeenCalledWith(agentId, agentName, false);
+    });
+
+    it('should not call onAgentSelect when not provided', () => {
+      expect(() => {
+        handleAgentSelection('agent1', 'John Doe', false, undefined, loggerMock);
+      }).not.toThrow();
+
+      expect(loggerMock.info).toHaveBeenCalled();
+    });
+  });
+
+  describe('handleQueueSelection', () => {
+    it('should call onQueueSelect and log when provided', () => {
+      const mockOnQueueSelect = jest.fn();
+      const queueId = 'queue1';
+      const queueName = 'Support Queue';
+
+      handleQueueSelection(queueId, queueName, false, mockOnQueueSelect, loggerMock);
+
+      expect(loggerMock.log).toHaveBeenCalledWith(`CC-Widgets: ConsultTransferPopover: queue selected: ${queueId}`, {
+        module: 'consult-transfer-popover.tsx',
+        method: 'onQueueSelect',
+      });
+      expect(mockOnQueueSelect).toHaveBeenCalledWith(queueId, queueName, false);
+    });
+
+    it('should not call onQueueSelect when not provided', () => {
+      expect(() => {
+        handleQueueSelection('queue1', 'Support Queue', false, undefined, loggerMock);
+      }).not.toThrow();
+
+      expect(loggerMock.log).toHaveBeenCalled();
     });
   });
 
@@ -946,80 +920,6 @@ describe('Call Control Custom Utils', () => {
     });
   });
 
-  describe('handleConsultConferencePress', () => {
-    it('should call consultConference and log when provided', () => {
-      const mockConsultConference = jest.fn();
-
-      handleConsultConferencePress(mockConsultConference, loggerMock);
-
-      expect(loggerMock.info).toHaveBeenCalledWith('CC-Widgets: CallControlConsult: consultConference clicked', {
-        module: 'call-control-consult.tsx',
-        method: 'handleConsultConferencePress',
-      });
-      expect(mockConsultConference).toHaveBeenCalled();
-      expect(loggerMock.log).toHaveBeenCalledWith('CC-Widgets: CallControlConsult: consultConference completed', {
-        module: 'call-control-consult.tsx',
-        method: 'handleConsultConferencePress',
-      });
-    });
-
-    it('should not call consultConference when not provided', () => {
-      expect(() => {
-        handleConsultConferencePress(undefined, loggerMock);
-      }).not.toThrow();
-
-      expect(loggerMock.info).toHaveBeenCalled();
-      expect(loggerMock.log).not.toHaveBeenCalled();
-    });
-
-    it('should throw error when consultConference throws', () => {
-      const mockConsultConference = jest.fn(() => {
-        throw new Error('Conference failed');
-      });
-
-      expect(() => {
-        handleConsultConferencePress(mockConsultConference, loggerMock);
-      }).toThrow('Error consultConference: Conference failed');
-    });
-  });
-
-  describe('handleSwitchToMainCallPress', () => {
-    it('should call switchToMainCall and log when provided', () => {
-      const mockSwitchToMainCall = jest.fn();
-
-      handleSwitchToMainCallPress(mockSwitchToMainCall, loggerMock);
-
-      expect(loggerMock.info).toHaveBeenCalledWith('CC-Widgets: CallControlConsult: switchToMainCall clicked', {
-        module: 'call-control-consult.tsx',
-        method: 'handleSwitchToMainCallPress',
-      });
-      expect(mockSwitchToMainCall).toHaveBeenCalled();
-      expect(loggerMock.log).toHaveBeenCalledWith('CC-Widgets: CallControlConsult: switchToMainCall completed', {
-        module: 'call-control-consult.tsx',
-        method: 'handleSwitchToMainCallPress',
-      });
-    });
-
-    it('should not call switchToMainCall when not provided', () => {
-      expect(() => {
-        handleSwitchToMainCallPress(undefined, loggerMock);
-      }).not.toThrow();
-
-      expect(loggerMock.info).toHaveBeenCalled();
-      expect(loggerMock.log).not.toHaveBeenCalled();
-    });
-
-    it('should throw error when switchToMainCall throws', () => {
-      const mockSwitchToMainCall = jest.fn(() => {
-        throw new Error('Switch failed');
-      });
-
-      expect(() => {
-        handleSwitchToMainCallPress(mockSwitchToMainCall, loggerMock);
-      }).toThrow('Error switchToMainCall: Switch failed');
-    });
-  });
-
   describe('Error Handling in utility functions', () => {
     it('should handle errors in createConsultButtons', () => {
       // Create a mock that throws when accessed
@@ -1035,11 +935,11 @@ describe('Call Control Custom Utils', () => {
       const buttons = createConsultButtons(
         false,
         badControlVisibility as unknown as ControlVisibility,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
         loggerMock
       );
 
@@ -1150,6 +1050,32 @@ describe('Call Control Custom Utils', () => {
 
       expect(loggerMock.error).toHaveBeenCalledWith(
         expect.stringContaining('Error in handleTabSelection'),
+        expect.any(Object)
+      );
+    });
+
+    it('should handle errors in handleAgentSelection', () => {
+      const mockOnAgentSelect = jest.fn(() => {
+        throw new Error('Test error');
+      });
+
+      handleAgentSelection('agent1', 'John Doe', false, mockOnAgentSelect, loggerMock);
+
+      expect(loggerMock.error).toHaveBeenCalledWith(
+        expect.stringContaining('Error in handleAgentSelection'),
+        expect.any(Object)
+      );
+    });
+
+    it('should handle errors in handleQueueSelection', () => {
+      const mockOnQueueSelect = jest.fn(() => {
+        throw new Error('Test error');
+      });
+
+      handleQueueSelection('queue1', 'Support Queue', false, mockOnQueueSelect, loggerMock);
+
+      expect(loggerMock.error).toHaveBeenCalledWith(
+        expect.stringContaining('Error in handleQueueSelection'),
         expect.any(Object)
       );
     });

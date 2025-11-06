@@ -273,13 +273,13 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
             agentName={consultAgentName}
             startTimeStamp={consultStartTimeStamp}
             endConsultCall={endConsultCall}
-            onTransfer={consultTransfer}
+            consultTransfer={consultTransfer}
             consultConference={consultConference}
             switchToMainCall={switchToMainCall}
             logger={logger}
             isMuted={isMuted}
             controlVisibility={controlVisibility}
-            onToggleConsultMute={toggleMute}
+            toggleConsultMute={toggleMute}
           />
         </div>
       )}

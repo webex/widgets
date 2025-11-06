@@ -25,7 +25,6 @@ import {
   updateCallStateFromTask,
 } from './call-control.utils';
 import {withMetrics} from '@webex/cc-ui-logging';
-import {handleConsultConferencePress, handleTransferPress} from './CallControlCustom/call-control-custom.utils';
 
 function CallControlComponent(props: CallControlComponentProps) {
   const [selectedWrapupReason, setSelectedWrapupReason] = useState<string | null>(null);
@@ -93,12 +92,6 @@ function CallControlComponent(props: CallControlComponentProps) {
   const handleWrapupChange = (text, value) => {
     handleWrapupChangeUtil(text, value, setSelectedWrapupReason, setSelectedWrapupId, logger);
   };
-  const handleConsultTransfer = () => {
-    handleTransferPress(consultTransfer, logger);
-  };
-  const handleConsultConference = () => {
-    handleConsultConferencePress(consultConference, logger);
-  };
 
   const handleTargetSelect = (
     id: string,
@@ -141,8 +134,8 @@ function CallControlComponent(props: CallControlComponentProps) {
     endCall,
     exitConference,
     switchToConsult,
-    handleConsultTransfer,
-    handleConsultConference
+    consultTransfer,
+    consultConference
   );
 
   const filteredButtons = filterButtonsForConsultation(

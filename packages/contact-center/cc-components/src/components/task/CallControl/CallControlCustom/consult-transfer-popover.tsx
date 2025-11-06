@@ -246,9 +246,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
                 dialNumbers.map((d) => ({id: d.id, name: d.name, number: d.number})),
                 (item) => {
                   if (item.number) {
-                    if (onDialNumberSelect) {
-                      onDialNumberSelect(item.number, allowParticipantsToInteract);
-                    }
+                    onDialNumberSelect(item.number, allowParticipantsToInteract);
                   }
                 }
               )}
@@ -277,9 +275,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
               {renderList(
                 entryPoints.map((e) => ({id: e.id, name: e.name})),
                 (item) => {
-                  if (onEntryPointSelect) {
-                    onEntryPointSelect(item.id, item.name, allowParticipantsToInteract);
-                  }
+                  onEntryPointSelect(item.id, item.name, allowParticipantsToInteract);
                 }
               )}
               {hasMoreEntryPoints && (

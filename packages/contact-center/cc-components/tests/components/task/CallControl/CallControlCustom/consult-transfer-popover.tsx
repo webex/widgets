@@ -57,6 +57,8 @@ describe('ConsultTransferPopoverComponent', () => {
     }),
     onAgentSelect: mockOnAgentSelect,
     onQueueSelect: mockOnQueueSelect,
+    onDialNumberSelect: jest.fn(),
+    onEntryPointSelect: jest.fn(),
     allowConsultToQueue: true,
     logger: loggerMock,
   };

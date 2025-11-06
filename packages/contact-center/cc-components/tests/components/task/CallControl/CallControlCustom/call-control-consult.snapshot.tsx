@@ -107,10 +107,11 @@ describe('CallControlConsultComponent Snapshots', () => {
   const defaultProps = {
     agentName: 'Alice',
     startTimeStamp: Date.now(),
-    onTransfer: mockOnTransfer,
+    consultTransfer: mockOnTransfer,
     endConsultCall: mockEndConsultCall,
-    onToggleConsultMute: mockOnToggleConsultMute,
+    toggleConsultMute: mockOnToggleConsultMute,
     consultConference: mockConsultConference,
+    switchToMainCall: jest.fn(),
     logger: mockLogger,
     isMuted: false,
     controlVisibility: mockControlVisibility,
@@ -163,7 +164,7 @@ describe('CallControlConsultComponent Snapshots', () => {
     });
 
     it('should render without transfer button when onTransfer is undefined', async () => {
-      const propsWithoutTransfer = {...defaultProps, onTransfer: undefined};
+      const propsWithoutTransfer = {...defaultProps, consultTransfer: undefined};
       let screen;
       await act(async () => {
         screen = render(<CallControlConsultComponent {...propsWithoutTransfer} />);
@@ -320,7 +321,7 @@ describe('CallControlConsultComponent Snapshots', () => {
     it('should handle combination of props: no mute, no transfer, disabled end consult', async () => {
       const complexProps = {
         ...defaultProps,
-        onTransfer: undefined,
+        consultTransfer: undefined,
         controlVisibility: {
           ...mockControlVisibility,
           muteUnmute: {isVisible: false, isEnabled: false},
