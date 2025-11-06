@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.122](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.121...v1.28.0-ccwidgets.122) (2025-11-06)
+
+
+### Bug Fixes
+
+* **cc-widgets:** add license in package.json ([#549](https://github.com/webex/widgets/issues/549)) ([a08cc66](https://github.com/webex/widgets/commit/a08cc66ef0a7fea0224a4c4f3bc899781c1ff6d8))
+
 # [1.28.0-ccwidgets.121](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.120...v1.28.0-ccwidgets.121) (2025-11-04)
 
 
