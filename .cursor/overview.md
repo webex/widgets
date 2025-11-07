@@ -19,7 +19,7 @@ This is a **monorepo** built with TypeScript, React, and Webpack containing reus
 ```
 packages/contact-center/
 ├── cc-components/       # Core UI components library (React + Web Components)
-├── cc-widgets/          # High-level widgets orchestrating multiple components
+├── cc-widgets/          # ⭐ MAIN EXPORT PACKAGE - Re-exports all widgets for consumers
 ├── station-login/       # Agent station login widget
 ├── store/               # Central MobX store for state management
 ├── task/                # Task management widgets (call control, incoming tasks, etc.)
@@ -31,8 +31,35 @@ packages/contact-center/
 
 - **`packages/contact-center/cc-components/src/components/`**: Individual component implementations
 - **`playwright/`**: End-to-end tests using Playwright
-- **`widgets-samples/`**: Sample applications (React & Web Components)
+- **`widgets-samples/cc/samples-cc-react-app/`**: React sample app for testing widgets
+- **`widgets-samples/cc/samples-cc-wc-app/`**: Web Components sample app
 - **`tooling/`**: Build and publish utilities
+
+## How Widgets Are Exposed
+
+### ⚠️ CRITICAL: cc-widgets Package Role
+
+The **`@webex/cc-widgets`** package is the **MAIN EXPORT PACKAGE** that consumers use:
+
+1. **Individual widget packages** (station-login, task, user-state) create widgets
+2. **cc-widgets package** re-exports ALL widgets in one place
+3. **Consumers install** only `@webex/cc-widgets` and get everything
+
+**Flow**:
+
+```
+Individual Widget Package → cc-widgets Package → Consumer
+@webex/cc-station-login  ↘
+@webex/cc-task           → @webex/cc-widgets → npm install @webex/cc-widgets
+@webex/cc-user-state     ↗
+```
+
+**What cc-widgets exports**:
+
+- All React components (for React apps)
+- All Web Components (for vanilla JS apps)
+- Store singleton
+- Common types
 
 ## Package Dependency Order
 
@@ -47,6 +74,7 @@ packages/contact-center/
 ## Tech Stack Summary
 
 ### Core
+
 - TypeScript 5.6.3
 - React 18.3.1+
 - MobX (state management)
@@ -54,17 +82,20 @@ packages/contact-center/
 - SCSS/Sass (styling)
 
 ### UI/Design
+
 - @momentum-design/components (v0.53.8+)
 - @momentum-design/icons (v0.17.0+)
 - @momentum-ui/react-collaboration (v26.197.0+)
 - @r2wc/react-to-web-component (2.0.3)
 
 ### Testing
+
 - Jest 29.7.0 (unit tests)
 - @testing-library/react (16.0.1)
 - Playwright (E2E tests)
 
 ### Development
+
 - ESLint 9.20+ with TypeScript ESLint
 - Prettier
 - Husky 9.1.7+ (git hooks)
@@ -73,6 +104,7 @@ packages/contact-center/
 ## SDK Integration
 
 The widgets integrate with **Webex Contact Center SDK**:
+
 - Package: `@webex/contact-center` (formerly `@webex/plugin-cc`)
 - Store initialization: `store.registerCC(webex)`
 - SDK provides: Task management, agent state, call controls, etc.
@@ -92,4 +124,3 @@ The widgets integrate with **Webex Contact Center SDK**:
 - Contributing guide: `packages/contact-center/CONTRIBUTING.md`
 - Changelog: `packages/contact-center/CHANGELOG.md`
 - Video tutorial: https://app.vidcast.io/share/6276b573-ba47-4fd0-a171-16af936b69d3
-

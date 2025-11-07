@@ -20,6 +20,7 @@ yarn workspace @webex/cc-components run build:watch
 ```
 
 **Build Order** (if building manually):
+
 1. `@webex/cc-store`
 2. `@webex/cc-ui-logging`
 3. `@webex/cc-components`
@@ -43,6 +44,7 @@ yarn samples:serve-react
 Opens: http://localhost:3000
 
 **Hot Module Replacement (HMR)**:
+
 - `.scss/.css` changes: **Instant hot reload** ✨
 - `.ts/.tsx/.js/.jsx` changes: **Full page reload**
 
@@ -77,11 +79,13 @@ Opens: http://localhost:8080
 ### Making Changes to Components
 
 1. **Edit component files**:
+
    ```bash
    # Edit files in packages/contact-center/cc-components/src/
    ```
 
 2. **Rebuild the package**:
+
    ```bash
    yarn workspace @webex/cc-components run build:src
    ```
@@ -109,11 +113,13 @@ Changes are automatically rebuilt and reflected in the sample app.
 **IMPORTANT**: Store is a dependency for many packages!
 
 1. **Edit store files**:
+
    ```bash
    # Edit packages/contact-center/store/src/
    ```
 
 2. **Rebuild store and dependent packages**:
+
    ```bash
    yarn workspace @webex/cc-store run build:src
    yarn workspace @webex/cc-components run build:src
@@ -125,59 +131,154 @@ Changes are automatically rebuilt and reflected in the sample app.
    yarn samples:serve-react
    ```
 
-### Adding New Component
+### Adding New Widget
 
-1. **Create component structure**:
-   ```bash
-   cd packages/contact-center/cc-components/src/components
-   mkdir MyNewComponent
-   cd MyNewComponent
-   touch my-new-component.tsx
-   touch my-new-component.types.ts
-   touch my-new-component.utils.ts
-   touch my-new-component.style.scss
-   ```
+⚠️ **IMPORTANT**: All widgets must be exposed through `@webex/cc-widgets` and tested in the sample app!
 
-2. **Implement component** (see `component-patterns.md`)
+#### 1. Create Widget Package Structure
 
-3. **Export component**:
-   ```typescript
-   // packages/contact-center/cc-components/src/index.ts
-   export { MyNewComponent } from './components/MyNewComponent/my-new-component';
-   export type { MyNewComponentProps } from './components/MyNewComponent/my-new-component.types';
-   ```
+```bash
+# Create new widget package (if doesn't exist)
+cd packages/contact-center
+mkdir my-widget
+cd my-widget
 
-4. **For Web Components**:
-   ```typescript
-   // packages/contact-center/cc-components/src/wc.ts
-   import r2wc from '@r2wc/react-to-web-component';
-   import { MyNewComponent } from './components/MyNewComponent/my-new-component';
+# Create basic structure
+mkdir src
+touch package.json webpack.config.js tsconfig.json
+```
 
-   const MyNewComponentWC = r2wc(MyNewComponent, {
-     props: {
-       someProp: 'string',
-       anotherProp: 'json',
-     },
-   });
+#### 2. Implement Widget
 
-   customElements.define('widget-my-new-component', MyNewComponentWC);
-   ```
+See `component-patterns.md` for detailed patterns.
 
-5. **Build and test**:
-   ```bash
-   yarn workspace @webex/cc-components run build:src
-   yarn samples:serve-react
-   ```
+```typescript
+// packages/contact-center/my-widget/src/my-widget.tsx
+import React from 'react';
+import { withMetrics } from '@webex/cc-ui-logging';
 
-6. **Add tests** (see `unit-testing.md`)
+const MyWidgetComponent: React.FC<Props> = (props) => {
+  return <div>My Widget</div>;
+};
 
-7. **Use in sample app**:
-   ```typescript
-   // widgets-samples/cc/samples-cc-react-app/src/App.tsx
-   import { MyNewComponent } from '@webex/cc-components';
+export const MyWidget = withMetrics(MyWidgetComponent);
+```
 
-   <MyNewComponent someProp="value" />
-   ```
+#### 3. Export from Widget Package
+
+```typescript
+// packages/contact-center/my-widget/src/index.ts
+export {MyWidget} from './my-widget';
+export type {MyWidgetProps} from './my-widget.types';
+```
+
+#### 4. Expose Through cc-widgets Package
+
+```typescript
+// packages/contact-center/cc-widgets/src/index.ts
+import {MyWidget} from '@webex/cc-my-widget'; // Add import
+
+export {
+  StationLogin,
+  UserState,
+  MyWidget, // Add export
+  store,
+};
+```
+
+#### 5. Add Web Component (cc-widgets/src/wc.ts)
+
+```typescript
+// packages/contact-center/cc-widgets/src/wc.ts
+import {MyWidget} from '@webex/cc-my-widget';
+
+const WebMyWidget = r2wc(MyWidget, {
+  props: {
+    title: 'string',
+    onAction: 'function',
+  },
+});
+
+const components = [
+  // ... existing components
+  {name: 'widget-cc-my-widget', component: WebMyWidget}, // Add here
+];
+```
+
+#### 6. Build Packages
+
+```bash
+# Build widget package
+yarn workspace @webex/cc-my-widget run build:src
+
+# Build cc-widgets (critical!)
+yarn workspace @webex/cc-widgets run build:src
+```
+
+#### 7. Test in Sample React App
+
+**THIS IS MANDATORY** - All widgets MUST be tested in the sample app!
+
+```typescript
+// widgets-samples/cc/samples-cc-react-app/src/App.tsx
+import {
+  StationLogin,
+  UserState,
+  MyWidget,  // Import from cc-widgets
+  store,
+} from '@webex/cc-widgets';
+
+// Add widget toggle
+const defaultWidgets = {
+  stationLogin: true,
+  userState: true,
+  myWidget: true,  // Add toggle
+};
+
+function App() {
+  return (
+    <div className="app">
+      {/* Add checkbox for toggling */}
+      <Checkbox
+        checked={selectedWidgets.myWidget}
+        onChange={(e) => handleWidgetToggle('myWidget', e.target.checked)}
+      >
+        My Widget
+      </Checkbox>
+
+      {/* Render widget */}
+      {selectedWidgets.myWidget && (
+        <MyWidget
+          title="Test"
+          onAction={handleAction}
+        />
+      )}
+    </div>
+  );
+}
+```
+
+#### 8. Run and Test
+
+```bash
+# Start sample app
+yarn samples:serve-react
+
+# Open http://localhost:3000
+# Toggle your widget on/off
+# Test all functionality
+# Verify no console errors
+```
+
+#### 9. Add Tests
+
+```bash
+# Unit tests
+yarn workspace @webex/cc-my-widget run test:unit
+
+# E2E tests (if applicable)
+yarn run test:e2e
+```
 
 ## Testing During Development
 
@@ -251,17 +352,20 @@ yarn run build
 ### Before Committing
 
 1. **Run tests**:
+
    ```bash
    yarn run test:cc-widgets
    yarn run test:styles
    ```
 
 2. **Fix linting issues**:
+
    ```bash
    yarn run test:styles --fix
    ```
 
 3. **Stage changes**:
+
    ```bash
    git add .
    ```
@@ -272,6 +376,7 @@ yarn run build
    ```
 
 **Commit Message Format** (Conventional Commits):
+
 - `feat:` - New feature
 - `fix:` - Bug fix
 - `docs:` - Documentation changes
@@ -283,6 +388,7 @@ yarn run build
 ### Creating Pull Request
 
 1. **Push to remote**:
+
    ```bash
    git push origin your-branch-name
    ```
@@ -309,6 +415,7 @@ With React sample app running:
 ### MobX DevTools
 
 Install MobX DevTools browser extension to:
+
 - Inspect store state
 - Track state changes
 - Debug reactions
@@ -426,12 +533,7 @@ Create `.vscode/settings.json`:
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true
   },
-  "eslint.validate": [
-    "javascript",
-    "javascriptreact",
-    "typescript",
-    "typescriptreact"
-  ],
+  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
   "typescript.tsdk": "node_modules/typescript/lib",
   "files.exclude": {
     "**/node_modules": true,
@@ -460,4 +562,3 @@ See `troubleshooting.md` for detailed solutions to common development issues.
 - See `unit-testing.md` for testing
 - See `troubleshooting.md` for common issues
 - See `commands-reference.md` for quick command lookup
-

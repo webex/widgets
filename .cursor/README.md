@@ -4,19 +4,20 @@ This directory contains comprehensive documentation for the Webex Contact Center
 
 ## 📂 Documentation Files
 
-| File                        | Purpose                                        | When to Use                                       |
-| --------------------------- | ---------------------------------------------- | ------------------------------------------------- |
-| **overview.md**             | Project overview, architecture, tech stack     | First time setup, understanding project structure |
-| **setup.md**                | Installation, prerequisites, environment setup | Setting up dev environment for first time         |
-| **development-workflow.md** | Daily development commands, build process      | Daily development, making changes                 |
-| **component-patterns.md**   | Component structure, design patterns           | Creating new components, following conventions    |
-| **state-management.md**     | MobX store patterns, reactive state            | Working with store, state updates                 |
-| **unit-testing.md**         | Jest & React Testing Library patterns          | Writing unit tests                                |
-| **e2e-testing.md**          | Playwright E2E testing                         | Writing end-to-end tests                          |
-| **build-and-webpack.md**    | Webpack config, build system                   | Build issues, understanding bundling              |
-| **code-standards.md**       | TypeScript, React, style conventions           | Code review, maintaining consistency              |
-| **commands-reference.md**   | Quick command cheatsheet                       | Quick lookup for commands                         |
-| **troubleshooting.md**      | Common issues and solutions                    | Debugging problems                                |
+| File                         | Purpose                                        | When to Use                                       |
+| ---------------------------- | ---------------------------------------------- | ------------------------------------------------- |
+| **overview.md**              | Project overview, architecture, tech stack     | First time setup, understanding project structure |
+| **setup.md**                 | Installation, prerequisites, environment setup | Setting up dev environment for first time         |
+| **development-workflow.md**  | Daily development commands, build process      | Daily development, making changes                 |
+| **component-patterns.md**    | Component structure, design patterns           | Creating new components, following conventions    |
+| **state-management.md**      | MobX store patterns, reactive state            | Working with store, state updates                 |
+| **unit-testing.md**          | Jest & React Testing Library patterns          | Writing unit tests                                |
+| **e2e-testing.md**           | Playwright E2E testing                         | Writing end-to-end tests                          |
+| **build-and-webpack.md**     | Webpack config, build system                   | Build issues, understanding bundling              |
+| **code-standards.md**        | TypeScript, React, style conventions           | Code review, maintaining consistency              |
+| **commands-reference.md**    | Quick command cheatsheet                       | Quick lookup for commands                         |
+| **troubleshooting.md**       | Common issues and solutions                    | Debugging problems                                |
+| **WIDGET-EXPOSURE-GUIDE.md** | Widget exposure & testing workflow             | Exposing widgets, testing in sample app           |
 
 ## 🎯 How to Use This Documentation
 

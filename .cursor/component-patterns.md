@@ -320,51 +320,183 @@ export const MyComponent = withMetrics(ComponentWithStore);
 
 ## Exporting Components
 
-### For React Components (`src/index.ts`)
+### Step 1: Export from Component Package
+
+After creating a widget in its own package (e.g., `@webex/cc-my-widget`):
 
 ```typescript
-// src/index.ts
-export {ComponentName} from './components/ComponentName/component-name';
-export type {ComponentNameProps} from './components/ComponentName/component-name.types';
+// packages/contact-center/my-widget/src/index.ts
+export {MyWidget} from './my-widget';
+export type {MyWidgetProps} from './my-widget.types';
 ```
 
-### For Web Components (`src/wc.ts`)
+### Step 2: Expose Through cc-widgets Package
+
+⚠️ **CRITICAL**: All widgets MUST be exposed through `@webex/cc-widgets` package for consumers to use.
+
+#### For React Components (`cc-widgets/src/index.ts`)
 
 ```typescript
-// src/wc.ts
-import r2wc from '@r2wc/react-to-web-component';
-import {ComponentName} from './components/ComponentName/component-name';
+// packages/contact-center/cc-widgets/src/index.ts
+import {StationLogin} from '@webex/cc-station-login';
+import {UserState} from '@webex/cc-user-state';
+import {MyWidget} from '@webex/cc-my-widget'; // Add your widget
+import store from '@webex/cc-store';
+import '@momentum-ui/core/css/momentum-ui.min.css';
 
-const ComponentNameWC = r2wc(ComponentName, {
+// Re-export all widgets
+export {
+  StationLogin,
+  UserState,
+  MyWidget, // Export your widget
+  store,
+};
+```
+
+#### For Web Components (`cc-widgets/src/wc.ts`)
+
+```typescript
+// packages/contact-center/cc-widgets/src/wc.ts
+import r2wc from '@r2wc/react-to-web-component';
+import {MyWidget} from '@webex/cc-my-widget';
+
+// 1. Wrap React component with r2wc
+const WebMyWidget = r2wc(MyWidget, {
   props: {
-    someProperty: 'string',
-    data: 'json',
+    // Map prop types (string, number, boolean, json, function)
+    title: 'string',
+    config: 'json',
     onAction: 'function',
   },
 });
 
-customElements.define('widget-component-name', ComponentNameWC);
+// 2. Add to components array
+const components = [
+  {name: 'widget-cc-user-state', component: WebUserState},
+  {name: 'widget-cc-station-login', component: WebStationLogin},
+  {name: 'widget-cc-my-widget', component: WebMyWidget}, // Add your widget
+  // ... other widgets
+];
+
+// 3. Components are auto-registered
+components.forEach(({name, component}) => {
+  if (!customElements.get(name)) {
+    customElements.define(name, component);
+  }
+});
 ```
+
+**Web Component Naming Convention**: `widget-cc-{component-name}` (kebab-case)
+
+**Prop Type Mapping**:
+
+- `'string'` - String values
+- `'number'` - Numeric values
+- `'boolean'` - Boolean values
+- `'json'` - Objects and arrays
+- `'function'` - Callback functions
 
 ## Testing the Component
 
-After creating a component:
+### Step 1: Build the Packages
 
-1. **Build the package**:
+```bash
+# Build your widget package
+yarn workspace @webex/cc-my-widget run build:src
 
-   ```bash
-   yarn workspace @webex/cc-components run build:src
-   ```
+# Build cc-widgets (to expose your widget)
+yarn workspace @webex/cc-widgets run build:src
+```
 
-2. **Test in sample app**:
+### Step 2: Add to Sample React App
 
-   ```bash
-   yarn samples:serve-react
-   ```
+⚠️ **IMPORTANT**: ALL widgets must be tested in the sample React app (`widgets-samples/cc/samples-cc-react-app`).
 
-3. **Add unit tests** (see `unit-testing.md`)
+**Add your widget to the sample app:**
 
-4. **Add to documentation** (update README if needed)
+```typescript
+// widgets-samples/cc/samples-cc-react-app/src/App.tsx
+import {
+  StationLogin,
+  UserState,
+  MyWidget,  // Import from @webex/cc-widgets
+  store,
+} from '@webex/cc-widgets';
+
+// Add to default widgets configuration
+const defaultWidgets = {
+  stationLogin: true,
+  userState: true,
+  myWidget: true,  // Add your widget toggle
+  // ... other widgets
+};
+
+function App() {
+  const [selectedWidgets, setSelectedWidgets] = useState(() => {
+    const savedWidgets = window.localStorage.getItem('selectedWidgets');
+    return savedWidgets ? JSON.parse(savedWidgets) : defaultWidgets;
+  });
+
+  return (
+    <div className="app">
+      {/* Add widget toggle in sidebar */}
+      <div className="widget-controls">
+        <Checkbox
+          checked={selectedWidgets.myWidget}
+          onChange={(e) => handleWidgetToggle('myWidget', e.target.checked)}
+        >
+          My Widget
+        </Checkbox>
+      </div>
+
+      {/* Render your widget */}
+      <ThemeProvider theme={currentTheme}>
+        <IconProvider>
+          {selectedWidgets.myWidget && (
+            <div className="widget-container">
+              <MyWidget
+                title="Test Widget"
+                onAction={handleMyWidgetAction}
+              />
+            </div>
+          )}
+        </IconProvider>
+      </ThemeProvider>
+    </div>
+  );
+}
+```
+
+### Step 3: Run and Test
+
+```bash
+# Start the sample app
+yarn samples:serve-react
+
+# Open http://localhost:3000
+# Toggle your widget on/off to test
+# Verify all functionality works
+```
+
+### Step 4: Test as Web Component (Optional)
+
+```html
+<!-- widgets-samples/cc/samples-cc-wc-app/index.html -->
+<script src="bundle.js"></script>
+<widget-cc-my-widget title="Test"></widget-cc-my-widget>
+```
+
+```bash
+yarn samples:serve-wc
+```
+
+### Step 5: Add Unit Tests
+
+See `unit-testing.md` for testing patterns.
+
+### Step 6: Add E2E Tests (if applicable)
+
+See `e2e-testing.md` for Playwright tests.
 
 ## Common Patterns
 

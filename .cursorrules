@@ -84,20 +84,39 @@ yarn workspace @webex/cc-components run build:src   # Then components
 
 ## 🎯 When Helping with Code
 
+### ⚠️ CRITICAL Requirements:
+
+1. **ALL widgets MUST be exposed through `@webex/cc-widgets` package**
+
+   - Individual widget packages (station-login, task, user-state) create widgets
+   - **cc-widgets package** re-exports everything for consumers
+   - Add to both `cc-widgets/src/index.ts` (React) and `cc-widgets/src/wc.ts` (Web Components)
+   - See `.cursor/component-patterns.md` → "Exporting Components" section
+
+2. **ALL widgets MUST be tested in the sample React app**
+   - Location: `widgets-samples/cc/samples-cc-react-app/src/App.tsx`
+   - Import from `@webex/cc-widgets` (not individual packages)
+   - Add widget toggle to `defaultWidgets` object
+   - Add checkbox and render logic in App component
+   - Test by running `yarn samples:serve-react`
+   - See `.cursor/development-workflow.md` → "Adding New Widget" section
+
 ### Always Consider:
 
-1. **Check documentation first** - Refer to appropriate `.cursor/*.md` file for detailed guidance
-2. **Use Yarn** - Never suggest `npm` commands
-3. **Build dependencies** - Remember build order, especially store
-4. **Follow patterns** - Check `component-patterns.md` for structure
-5. **TypeScript strict** - All types must be properly defined
-6. **Test changes** - Add/update unit tests
-7. **Use HOCs** - Wrap components with `withMetrics` for telemetry
-8. **MobX observability** - Use `observer()` for components that use store
+3. **Check documentation first** - Refer to appropriate `.cursor/*.md` file for detailed guidance
+4. **Use Yarn** - Never suggest `npm` commands
+5. **Build dependencies** - Remember build order, especially store
+6. **Follow patterns** - Check `component-patterns.md` for structure
+7. **TypeScript strict** - All types must be properly defined
+8. **Test changes** - Add/update unit tests
+9. **Use HOCs** - Wrap components with `withMetrics` for telemetry
+10. **MobX observability** - Use `observer()` for components that use store
 
 ### Common Tasks → Documentation:
 
-- **Creating new component** → `.cursor/component-patterns.md`
+- **Creating new widget** → `.cursor/development-workflow.md` (see "Adding New Widget")
+- **Exposing widgets through cc-widgets** → `.cursor/component-patterns.md` (see "Exporting Components")
+- **Testing in sample app** → `.cursor/component-patterns.md` (see "Testing the Component")
 - **Modifying store** → `.cursor/state-management.md`
 - **Build issues** → `.cursor/build-and-webpack.md`
 - **Writing tests** → `.cursor/unit-testing.md` or `.cursor/e2e-testing.md`
@@ -118,15 +137,23 @@ ComponentName/
 ### Component Export Pattern:
 
 ```typescript
-// 1. Define types in .types.ts
+// 1. Define types in .types.ts (in widget package)
 export interface ComponentProps { ... }
 
-// 2. Implement in .tsx
+// 2. Implement in .tsx (in widget package)
 const ComponentNameComponent: React.FC<Props> = (props) => { ... };
 
-// 3. Wrap with HOCs and export
+// 3. Wrap with HOCs and export (in widget package)
 export const ComponentName = withMetrics(ComponentNameComponent);
 // Or with observer: observer(withMetrics(ComponentNameComponent))
+
+// 4. RE-EXPORT through cc-widgets/src/index.ts (CRITICAL!)
+import { ComponentName } from '@webex/cc-component-name';
+export { ComponentName };
+
+// 5. Add Web Component in cc-widgets/src/wc.ts (CRITICAL!)
+const WebComponentName = r2wc(ComponentName, { props: {...} });
+// Add to components array
 ```
 
 ## 🚫 Don't Do This:
