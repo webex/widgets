@@ -41,9 +41,10 @@ export function getConsultMPCState(task: ITask, agentId: string): string {
 
   const interaction = task.data.interaction;
   if (
-    !!consultMediaResourceId &&
-    !!interaction.participants[agentId]?.consultState &&
-    task.data.interaction.state !== INTERACTION_STATE_WRAPUP
+    (!!consultMediaResourceId &&
+      !!interaction.participants[agentId]?.consultState &&
+      task.data.interaction.state !== INTERACTION_STATE_WRAPUP) ||
+    (!consultMediaResourceId && interaction.participants[agentId]?.consultState === CONSULT_STATE_COMPLETED)
     // revisit below condition if needed for post_call scenarios in future
     //&& task.data.interaction.state !== INTERACTION_STATE_POST_CALL // If interaction.state is post_call, we want to return post_call.
   ) {
