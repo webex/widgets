@@ -12,7 +12,8 @@
     "clean": "rm -rf dist",
     "clean:dist": "rm -rf dist",
     "test:unit": "jest --coverage",
-    "test:styles": "echo 'No styles to test'"
+    "test:styles": "echo 'No styles to test'",
+    "deploy:npm": "yarn npm publish"
   },
   "dependencies": {
     "@webex/cc-store": "workspace:*"

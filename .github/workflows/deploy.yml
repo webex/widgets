@@ -5,15 +5,19 @@ on:
   push:
     branches: # White-list of deployable tags and branches. Note that all white-listed branches cannot include any `/` characters
       - ccwidgets
+      # - next uncomment when ready to deploy next
 
 env:
   rid: ${{ github.run_id }}-${{ github.run_number }}
   token: ${{ secrets.NPM_TOKEN }}
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
+  GIT_AUTHOR_NAME: ${{ github.actor }}
+  GIT_AUTHOR_EMAIL: ${{ github.actor }}@users.noreply.github.com
 
 jobs:
   install:
     runs-on: ubuntu-latest
+    name: Initialize Project
     steps:
       - name: Checkout Project
         uses: actions/checkout@v3
@@ -23,15 +27,15 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
-          registry-url: 'https://registry.npmjs.org'
-          cache: 'yarn'
+          node-version-file: ".nvmrc"
+          registry-url: "https://registry.npmjs.org"
+          cache: "yarn"
 
       - id: validate-dependencies
         name: Validate Dependencies
         uses: actions/cache@v4
         with:
-          path: '**/node_modules'
+          path: "**/node_modules"
           key: node-modules-${{ hashFiles('./yarn.lock') }}
 
       - id: lock-hash
@@ -45,7 +49,7 @@ jobs:
         uses: actions/cache@v4
         if: steps.validate-dependencies.outputs.cache-hit != 'true'
         with:
-          path: '**/node_modules'
+          path: "**/node_modules"
           key: node-modules-${{ hashFiles('./yarn.lock') }}
 
   build:
@@ -60,14 +64,14 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
-          registry-url: 'https://registry.npmjs.org'
-          cache: 'yarn'
+          node-version-file: ".nvmrc"
+          registry-url: "https://registry.npmjs.org"
+          cache: "yarn"
 
       - name: Uncache Dependencies
         uses: actions/cache@v4
         with:
-          path: '**/node_modules'
+          path: "**/node_modules"
           key: node-modules-${{ hashFiles('./yarn.lock') }}
 
       - name: Build meetings widget
@@ -79,46 +83,78 @@ jobs:
       - name: Cache Distributables
         uses: actions/cache@v4
         with:
-          path: '**/dist'
+          path: "**/dist"
           key: dist-${{ env.rid }}
-
-  unit_tests:
-    runs-on: ubuntu-latest
+  generate-package-matrix:
+    name: Determine Changed Packages
     needs: build
+    runs-on: ubuntu-latest
+
+    outputs:
+      node-changed: ${{ steps.generate-package-matrix-node-changed.outputs.node-changed }} # Used for execution.
+      node-recursive: ${{ steps.generate-package-matrix-node-recursive.outputs.node-recursive }} # Used for execution.
+      yarn-changed: ${{ steps.generate-package-matrix-yarn-changed.outputs.yarn-changed }} # Used for workspaces.
+      yarn-recursive: ${{ steps.generate-package-matrix-yarn-recursive.outputs.yarn-recursive }} # Used for workspaces.
+
     steps:
       - name: Checkout Project
         uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v3.7.0
         with:
-          node-version-file: '.nvmrc'
-          registry-url: 'https://registry.npmjs.org'
-          cache: 'yarn'
+          node-version-file: ".nvmrc"
+          registry-url: "https://registry.npmjs.org"
+          cache: "yarn"
 
       - name: Uncache Dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v3
         with:
-          path: '**/node_modules'
+          path: "**/node_modules"
           key: node-modules-${{ hashFiles('./yarn.lock') }}
 
       - name: Uncache Distributables
-        uses: actions/cache@v4
+        uses: actions/cache@v3
         with:
-          path: '**/dist'
+          path: "**/dist"
           key: dist-${{ env.rid }}
 
-      - name: Test Tooling
-        run: yarn run test:tooling
+      - name: Synchronize Packages
+        run: yarn
 
-      - name: Test CC Widgets
-        run: yarn run test:cc-widgets
+      - name: Update Main Branch
+        run: git fetch origin ${GITHUB_REF##*/} --unshallow
+
+        # Used for running node scripts against all changed packages since the last push to the target branch.
+      - id: generate-package-matrix-node-changed
+        name: Generate Package Matrix
+        run: echo "node-changed=$(yarn package-tools list --mode node --since ${{ github.event.before }})" >> $GITHUB_OUTPUT
+
+        # Used for running node scripts against all changed packages, and their dependents, since the last push to the target branch.
+      - id: generate-package-matrix-node-recursive
+        name: Generate Package Matrix
+        run: echo "node-recursive=$(yarn package-tools list --mode node --recursive --since ${{ github.event.before }})" >> $GITHUB_OUTPUT
+
+        # Used for running yarn tools against all changed packages since the last push to the target branch.
+      - id: generate-package-matrix-yarn-changed
+        name: Generate Package Matrix
+        run: echo "yarn-changed=$(yarn package-tools list --since ${{ github.event.before }})" >> $GITHUB_OUTPUT
+
+        # Used for running yarn tools against all changed packages, and their dependents, since the last push to the target branch.
+      - id: generate-package-matrix-yarn-recursive
+        name: Generate Package Matrix
+        run: echo "yarn-recursive=$(yarn package-tools list --recursive --since ${{ github.event.before }})" >> $GITHUB_OUTPUT
+
+      - name: Display Package Matrix
+        run: |
+          echo "changed packages for node - ${{ steps.generate-package-matrix-node-changed.outputs.node-changed}}"
+          echo "changed packages and dependents for node - ${{ steps.generate-package-matrix-node-recursive.outputs.node-recursive }}"
+          echo "changed packages for yarn - ${{ steps.generate-package-matrix-yarn-changed.outputs.yarn-changed}}"
+          echo "changed packages and dependents for yarn - ${{ steps.generate-package-matrix-yarn-recursive.outputs.yarn-recursive }}"
 
   publish-npm:
     name: Publish - NPM
-    needs: [build, unit_tests]
+    needs: generate-package-matrix
     runs-on: ubuntu-latest
 
     steps:
@@ -128,25 +164,42 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
-          registry-url: 'https://registry.npmjs.org'
-          cache: 'yarn'
+          node-version-file: ".nvmrc"
+          registry-url: "https://registry.npmjs.org"
+          cache: "yarn"
 
       - name: Uncache Dependencies
         uses: actions/cache@v4
         with:
-          path: '**/node_modules'
+          path: "**/node_modules"
           key: node-modules-${{ hashFiles('./yarn.lock') }}
 
       - name: Uncache Distributables
         uses: actions/cache@v4
         with:
-          path: '**/dist'
+          path: "**/dist"
           key: dist-${{ env.rid }}
 
       - name: Add NPM token to .yarnrc.yml file
         run: |
           echo "npmAuthToken: ${{ env.token }}" >> ~/.yarnrc.yml
 
-      - name: Publish cc widgets
-        run: yarn run release:widgets
+      - name: Synchronize Packages
+        run: |
+          yarn
+          yarn package-tools sync --tag ${GITHUB_REF##*/}
+
+      - name: Display Notice
+        run: |
+          echo "packages to increment: ${{ needs.generate-package-matrix.outputs.node-recursive }}"
+          echo "tag to increment: ${GITHUB_REF##*/}"
+
+      - name: Increment Package Versions
+        run: yarn package-tools increment --packages ${{ needs.generate-package-matrix.outputs.node-recursive }} --tag ${GITHUB_REF##*/}
+
+      - name: Build all packages for publish
+        run: yarn run build:prod
+      - name: Deploy Packages
+        run: yarn workspaces foreach --from '${{ needs.generate-package-matrix.outputs.yarn-recursive }}' --verbose run deploy:npm --access public --tag ${GITHUB_REF##*/}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -30,7 +30,8 @@
     "build:src": "yarn run clean:dist && webpack",
     "build:watch": "webpack --watch",
     "test:unit": "jest --coverage",
-    "test:styles": "eslint"
+    "test:styles": "eslint",
+    "deploy:npm": "yarn npm publish"
   },
   "dependencies": {
     "@r2wc/react-to-web-component": "2.0.3",

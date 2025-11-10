@@ -19,7 +19,8 @@
     "build:src": "yarn run clean:dist && webpack",
     "build:watch": "webpack --watch",
     "test:unit": "tsc --project tsconfig.test.json && jest --coverage",
-    "test:styles": "eslint"
+    "test:styles": "eslint",
+    "deploy:npm": "yarn npm publish"
   },
   "dependencies": {
     "@webex/contact-center": "3.9.0-next.18",

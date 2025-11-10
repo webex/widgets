@@ -30,7 +30,8 @@
     "build:src": "yarn run clean:dist && webpack",
     "build:watch": "webpack --watch",
     "test:unit": "tsc --project tsconfig.test.json && jest --coverage",
-    "test:styles": "eslint"
+    "test:styles": "eslint",
+    "deploy:npm": "yarn npm publish"
   },
   "dependencies": {
     "@momentum-ui/illustrations": "^1.24.0",

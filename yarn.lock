@@ -34167,6 +34167,7 @@ __metadata:
     "@semantic-release/git": "npm:^10.0.1"
     "@semantic-release/github": "npm:^11.0.1"
     "@testing-library/react-hooks": "npm:^8.0.1"
+    "@webex/cli-tools": "npm:0.0.0-next.1"
     "@webex/package-tools": "npm:0.0.0-next.1"
     babel-jest: "npm:^29.7.0"
     crypto-browserify: "npm:^3.12.1"

@@ -12,6 +12,7 @@
     "build:src": "yarn clean:dist && rollup -c",
     "demo:serve": "webpack serve ./demo/App.jsx --mode development",
     "demo:build": "webpack ./demo/App.jsx --mode production",
+    "deploy:npm": "yarn npm publish",
     "release": "semantic-release",
     "release:debug": "semantic-release --debug",
     "release:dry-run": "semantic-release --dry-run",

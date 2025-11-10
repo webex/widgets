@@ -17,7 +17,8 @@
     "build": "yarn run -T tsc",
     "build:src": "yarn run clean:dist && webpack",
     "build:watch": "webpack --watch",
-    "test:styles": "eslint"
+    "test:styles": "eslint",
+    "deploy:npm": "echo \"Ignoring request to deploy test-fixtures to NPM\";exit 0"
   },
   "dependencies": {
     "@webex/cc-store": "workspace:*",
