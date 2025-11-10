@@ -401,7 +401,6 @@ class StoreWrapper implements IStoreWrapper {
       taskToRemove.off(TASK_EVENTS.TASK_CONFERENCE_STARTED, this.handleConferenceStarted);
       taskToRemove.off(TASK_EVENTS.TASK_CONFERENCE_TRANSFERRED, this.handleConferenceEnded);
       taskToRemove.off(TASK_EVENTS.TASK_CONFERENCE_TRANSFER_FAILED, this.refreshTaskList);
-      taskToRemove.off(TASK_EVENTS.TASK_PARTICIPANT_MOVING, this.refreshTaskList);
       taskToRemove.off(TASK_EVENTS.TASK_POST_CALL_ACTIVITY, this.refreshTaskList);
       if (this.deviceType === DEVICE_TYPE_BROWSER) {
         taskToRemove.off(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
@@ -546,7 +545,6 @@ class StoreWrapper implements IStoreWrapper {
     task.on(TASK_EVENTS.TASK_CONFERENCE_STARTED, this.handleConferenceStarted);
     task.on(TASK_EVENTS.TASK_CONFERENCE_TRANSFERRED, this.refreshTaskList);
     task.on(TASK_EVENTS.TASK_CONFERENCE_TRANSFER_FAILED, this.refreshTaskList);
-    task.on(TASK_EVENTS.TASK_PARTICIPANT_MOVING, this.refreshTaskList);
     task.on(TASK_EVENTS.TASK_POST_CALL_ACTIVITY, this.refreshTaskList);
 
     // Register media event listener for browser devices

@@ -196,7 +196,6 @@ enum TASK_EVENTS {
   TASK_CONFERENCE_END_FAILED = 'task:conferenceEndFailed',
   TASK_PARTICIPANT_LEFT_FAILED = 'task:participantLeftFailed',
   TASK_MERGED = 'task:merged',
-  TASK_PARTICIPANT_MOVING = 'task:participantMoving',
   TASK_POST_CALL_ACTIVITY = 'task:postCallActivity',
 } // TODO: remove this once cc sdk exports this enum
 

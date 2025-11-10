@@ -167,7 +167,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
                 <Text className="call-timer" type="body-secondary" tagName={'small'} data-testid="cc-cad:call-timer">
                   {currentMediaType.labelName} - <TaskTimer startTimeStamp={startTimestamp} />
                 </Text>
-                {controlVisibility.isConferenceInProgress && (
+                {controlVisibility.isConferenceInProgress && !controlVisibility.wrapup.isVisible && (
                   <>
                     <div className="vertical-divider"></div>
                     <div className="participants-section">

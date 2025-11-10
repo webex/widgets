@@ -104,9 +104,9 @@ export function getMuteUnmuteButtonVisibility(
   isBrowser: boolean,
   webRtcEnabled: boolean,
   isCall: boolean,
-  isConsultInitiatedOrAccepted: boolean
+  isBeingConsulted: boolean
 ): Visibility {
-  const isVisible = isBrowser && webRtcEnabled && isCall && isConsultInitiatedOrAccepted;
+  const isVisible = isBrowser && webRtcEnabled && isCall && !isBeingConsulted;
 
   return {isVisible, isEnabled: true};
 }
@@ -321,10 +321,10 @@ export function getMuteUnmuteConsultButtonVisibility(
   isBrowser: boolean,
   webRtcEnabled: boolean,
   isCall: boolean,
-  isConsultInitiatedOrAccepted: boolean,
-  isConsultAccepted: boolean
+  isConsultInitiated: boolean,
+  isBeingConsulted: boolean
 ): Visibility {
-  const isVisible = isBrowser && webRtcEnabled && isCall && isConsultInitiatedOrAccepted && !isConsultAccepted;
+  const isVisible = isBrowser && webRtcEnabled && isCall && (isConsultInitiated || isBeingConsulted);
 
   return {isVisible, isEnabled: true};
 }
@@ -450,7 +450,7 @@ export function getControlsVisibility(
         isConsultCompleted,
         isHeld
       ),
-      muteUnmute: getMuteUnmuteButtonVisibility(isBrowser, webRtcEnabled, isCall, isConsultInitiatedOrAccepted),
+      muteUnmute: getMuteUnmuteButtonVisibility(isBrowser, webRtcEnabled, isCall, isBeingConsulted),
       holdResume: getHoldResumeButtonVisibility(
         telephonySupported,
         isCall,
@@ -530,8 +530,8 @@ export function getControlsVisibility(
         isBrowser,
         webRtcEnabled,
         isCall,
-        isConsultInitiatedOrAccepted,
-        isConsultAccepted
+        isConsultInitiated,
+        isBeingConsulted
       ),
 
       // Switch call controls

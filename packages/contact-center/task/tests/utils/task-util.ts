@@ -31,7 +31,7 @@ describe('getControlsVisibility', () => {
       accept: {isVisible: true, isEnabled: true},
       decline: {isVisible: true, isEnabled: true},
       end: {isVisible: true, isEnabled: true},
-      muteUnmute: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
+      muteUnmute: {isVisible: true, isEnabled: true}, // Visible for browser with webRTC enabled
       muteUnmuteConsult: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
       holdResume: {isVisible: true, isEnabled: true},
       consult: {isVisible: true, isEnabled: true},
@@ -113,7 +113,7 @@ describe('getControlsVisibility', () => {
       accept: {isVisible: true, isEnabled: true},
       decline: {isVisible: true, isEnabled: true},
       end: {isVisible: true, isEnabled: true},
-      muteUnmute: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
+      muteUnmute: {isVisible: true, isEnabled: true}, // Visible for browser with webRTC enabled
       muteUnmuteConsult: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
       holdResume: {isVisible: true, isEnabled: true},
       consult: {isVisible: true, isEnabled: true},
@@ -160,7 +160,7 @@ describe('getControlsVisibility', () => {
       accept: {isVisible: true, isEnabled: true},
       decline: {isVisible: true, isEnabled: true},
       end: {isVisible: true, isEnabled: true},
-      muteUnmute: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
+      muteUnmute: {isVisible: true, isEnabled: true}, // Visible for browser with webRTC enabled
       muteUnmuteConsult: {isVisible: false, isEnabled: true}, // Not visible when no consult in progress
       holdResume: {isVisible: true, isEnabled: true},
       consult: {isVisible: true, isEnabled: true},
