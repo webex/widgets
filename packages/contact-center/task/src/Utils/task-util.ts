@@ -17,7 +17,6 @@ import {
   MEDIA_TYPE_CHAT,
   MEDIA_TYPE_EMAIL,
   MAX_PARTICIPANTS_IN_MULTIPARTY_CONFERENCE,
-  MAX_PARTICIPANTS_IN_THREE_PARTY_CONFERENCE,
 } from './constants';
 import {DeviceTypeFlags} from '../task.types';
 
@@ -177,9 +176,11 @@ export function getConferenceButtonVisibility(
   webRtcEnabled: boolean,
   isCall: boolean,
   isChat: boolean,
-  isBeingConsulted: boolean
+  isBeingConsulted: boolean,
+  multiPartyConferenceEnabled: boolean
 ): Visibility {
-  const isVisible = ((isBrowser && isCall && webRtcEnabled) || isChat) && !isBeingConsulted;
+  const isVisible =
+    ((isBrowser && isCall && webRtcEnabled) || isChat) && !isBeingConsulted && multiPartyConferenceEnabled;
 
   return {isVisible, isEnabled: true};
 }
@@ -199,9 +200,10 @@ export function getExitConferenceButtonVisibility(
   isConsultInitiatedOrAccepted: boolean,
   consultCallHeld: boolean,
   isHeld: boolean,
-  isConsultCompleted: boolean
+  isConsultCompleted: boolean,
+  multiPartyConferenceEnabled: boolean
 ): Visibility {
-  const isVisible = isConferenceInProgress && !isConsultInitiatedOrAccepted;
+  const isVisible = isConferenceInProgress && !isConsultInitiatedOrAccepted && multiPartyConferenceEnabled;
   const isConferenceWithConsultNotHeld = isConferenceInProgress && isConsultInitiatedOrAccepted && !consultCallHeld;
   // Disable if: conference with consult not held OR (held AND in conference AND consult completed)
   const isEnabled = !isConferenceWithConsultNotHeld && !(isHeld && isConferenceInProgress && isConsultCompleted);
@@ -217,9 +219,10 @@ export function getMergeConferenceButtonVisibility(
   isConsultAccepted: boolean,
   consultCallHeld: boolean,
   isConferenceInProgress: boolean,
-  isCustomerInCall: boolean
+  isCustomerInCall: boolean,
+  multiPartyConferenceEnabled: boolean
 ): Visibility {
-  const isVisible = isConsultInitiatedOrAccepted && isCustomerInCall;
+  const isVisible = isConsultInitiatedOrAccepted && isCustomerInCall && multiPartyConferenceEnabled;
   const isConferenceWithConsultNotHeld = isConferenceInProgress && isConsultInitiatedOrAccepted && !consultCallHeld;
   const isEnabled = isConsultAccepted && consultCallHeld && !isConferenceWithConsultNotHeld;
 
@@ -291,9 +294,10 @@ export function getMergeConferenceConsultButtonVisibility(
   isConsultAccepted: boolean,
   isConsultInitiated: boolean,
   consultCallHeld: boolean,
-  isCustomerInCall: boolean
+  isCustomerInCall: boolean,
+  multiPartyConferenceEnabled: boolean
 ): Visibility {
-  const isVisible = isConsultAccepted || isConsultInitiated;
+  const isVisible = (isConsultAccepted || isConsultInitiated) && multiPartyConferenceEnabled;
   const isEnabled = !consultCallHeld && isConsultAccepted && isCustomerInCall;
 
   return {isVisible, isEnabled};
@@ -419,9 +423,6 @@ export function getControlsVisibility(
 
     // Calculate conference participants count
     const conferenceParticipantsCount = getConferenceParticipantsCount(task);
-    const maxParticipantsInConference = multiPartyConferenceEnabled
-      ? MAX_PARTICIPANTS_IN_MULTIPARTY_CONFERENCE
-      : MAX_PARTICIPANTS_IN_THREE_PARTY_CONFERENCE;
 
     // Calculate consult status flags (REUSED CONDITIONS)
     const isConsultInitiated = taskConsultStatus === ConsultStatus.CONSULT_INITIATED;
@@ -472,20 +473,29 @@ export function getControlsVisibility(
 
       // Transfer and conference controls
       transfer: getTransferButtonVisibility(isTransferVisibility, isConferenceInProgress, isConsultInitiatedOrAccepted),
-      conference: getConferenceButtonVisibility(isBrowser, webRtcEnabled, isCall, isChat, isBeingConsulted),
+      conference: getConferenceButtonVisibility(
+        isBrowser,
+        webRtcEnabled,
+        isCall,
+        isChat,
+        isBeingConsulted,
+        multiPartyConferenceEnabled
+      ),
       exitConference: getExitConferenceButtonVisibility(
         isConferenceInProgress,
         isConsultInitiatedOrAccepted,
         consultCallHeld,
         isHeld,
-        isConsultCompleted
+        isConsultCompleted,
+        multiPartyConferenceEnabled
       ),
       mergeConference: getMergeConferenceButtonVisibility(
         isConsultInitiatedOrAcceptedOnly,
         isConsultAccepted,
         consultCallHeld,
         isConferenceInProgress,
-        isCustomerInCall
+        isCustomerInCall,
+        multiPartyConferenceEnabled
       ),
 
       // Consult controls
@@ -495,7 +505,7 @@ export function getControlsVisibility(
         isConsultInProgress,
         isCustomerInCall,
         conferenceParticipantsCount,
-        maxParticipantsInConference,
+        MAX_PARTICIPANTS_IN_MULTIPARTY_CONFERENCE,
         isBeingConsulted,
         isHeld,
         isConsultCompleted,
@@ -524,7 +534,8 @@ export function getControlsVisibility(
         isConsultAccepted,
         isConsultInitiated,
         consultCallHeld,
-        isCustomerInCall
+        isCustomerInCall,
+        multiPartyConferenceEnabled
       ),
       muteUnmuteConsult: getMuteUnmuteConsultButtonVisibility(
         isBrowser,

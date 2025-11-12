@@ -74,6 +74,10 @@ function App() {
     const savedintegrationEnv = window.localStorage.getItem('integrationEnv');
     return savedintegrationEnv === 'true';
   });
+  const [multiPartyConferenceEnabled, setMultiPartyConferenceEnabled] = useState(() => {
+    const savedMultiPartyConferenceEnabled = window.localStorage.getItem('multiPartyConferenceEnabled');
+    return savedMultiPartyConferenceEnabled !== null ? savedMultiPartyConferenceEnabled === 'true' : true;
+  });
 
   const handleSaveStart = () => {
     setShowLoader(true);
@@ -339,6 +343,9 @@ function App() {
   useEffect(() => {
     window.localStorage.setItem('integrationEnv', JSON.stringify(integrationEnv));
   }, [integrationEnv]);
+  useEffect(() => {
+    window.localStorage.setItem('multiPartyConferenceEnabled', JSON.stringify(multiPartyConferenceEnabled));
+  }, [multiPartyConferenceEnabled]);
 
   useEffect(() => {
     store.setIncomingTaskCb(onIncomingTaskCB);
@@ -556,6 +563,16 @@ function App() {
                         setintegrationEnv(!integrationEnv);
                       }}
                     />
+                    <Checkbox
+                      checked={multiPartyConferenceEnabled}
+                      aria-label="multi party conference enabled checkbox"
+                      id="multi-party-conference-enabled-checkbox"
+                      label="Enable Multi-Party Conference"
+                      // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
+                      onchange={() => {
+                        setMultiPartyConferenceEnabled(!multiPartyConferenceEnabled);
+                      }}
+                    />
                     {store.isAgentLoggedIn && (
                       <Button
                         id="logoutAgent"
@@ -753,6 +770,7 @@ function App() {
                               onWrapUp={onWrapUp}
                               onRecordingToggle={onRecordingToggle}
                               onToggleMute={onToggleMute}
+                              multiPartyConferenceEnabled={multiPartyConferenceEnabled}
                             />
                           </fieldset>
                         </section>
@@ -771,6 +789,7 @@ function App() {
                               callControlClassName={'call-control-outer'}
                               callControlConsultClassName={'call-control-consult-outer'}
                               onToggleMute={onToggleMute}
+                              multiPartyConferenceEnabled={multiPartyConferenceEnabled}
                             />
                           </fieldset>
                         </section>
