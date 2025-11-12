@@ -57,7 +57,7 @@ describe('getControlsVisibility', () => {
       consultCallHeld: false,
     };
 
-    expect(getControlsVisibility(deviceType, featureFlags, mockTask, 'agent1', false)).toEqual(expectedControls);
+    expect(getControlsVisibility(deviceType, featureFlags, mockTask, 'agent1', true)).toEqual(expectedControls);
   });
 
   it('should show correct controls when station logis is BROWSER, webRtcEnabled is disbaled and media type is telehphony', () => {
@@ -98,7 +98,7 @@ describe('getControlsVisibility', () => {
       consultCallHeld: false,
     };
 
-    expect(getControlsVisibility(deviceType, featureFlags, mockTask, 'agent1', false)).toEqual(expectedControls);
+    expect(getControlsVisibility(deviceType, featureFlags, mockTask, 'agent1', true)).toEqual(expectedControls);
   });
 
   it('should show correct controls when station logis is BROWSER, isEndCallEnabled is disbaled and media type is telehphony', () => {
@@ -139,7 +139,7 @@ describe('getControlsVisibility', () => {
       consultCallHeld: false,
     };
 
-    expect(getControlsVisibility(deviceType, featureFlags, mockTask, 'agent1', false)).toEqual(expectedControls);
+    expect(getControlsVisibility(deviceType, featureFlags, mockTask, 'agent1', true)).toEqual(expectedControls);
   });
 
   it('should show correct controls when station logis is BROWSER, isEndConsultEnabled is disbaled and media type is telehphony', () => {
@@ -186,7 +186,7 @@ describe('getControlsVisibility', () => {
       consultCallHeld: false,
     };
 
-    expect(getControlsVisibility(deviceType, featureFlags, task, 'agent1', false)).toEqual(expectedControls);
+    expect(getControlsVisibility(deviceType, featureFlags, task, 'agent1', true)).toEqual(expectedControls);
   });
 
   it('should show correct controls when station logis is AGENT_DN, all flags are enabled and media type is telehphony', () => {
@@ -227,7 +227,7 @@ describe('getControlsVisibility', () => {
       consultCallHeld: false,
     };
 
-    expect(getControlsVisibility(deviceType, featureFlags, mockTask, 'agent1', false)).toEqual(expectedControls);
+    expect(getControlsVisibility(deviceType, featureFlags, mockTask, 'agent1', true)).toEqual(expectedControls);
   });
 
   it('should show correct controls when station logis is EXTENSION, all flags are enabled and media type is telehphony', () => {
@@ -271,7 +271,7 @@ describe('getControlsVisibility', () => {
       consultCallHeld: false,
     };
 
-    expect(getControlsVisibility(deviceType, featureFlags, task, 'agent1', false)).toEqual(expectedControls);
+    expect(getControlsVisibility(deviceType, featureFlags, task, 'agent1', true)).toEqual(expectedControls);
   });
 
   it('should show correct controls when station logis is EXTENSION, all flags are enabled and media type is chat', () => {
@@ -315,7 +315,7 @@ describe('getControlsVisibility', () => {
       consultCallHeld: false,
     };
 
-    expect(getControlsVisibility(deviceType, featureFlags, task, 'agent1', false)).toEqual(expectedControls);
+    expect(getControlsVisibility(deviceType, featureFlags, task, 'agent1', true)).toEqual(expectedControls);
   });
 
   it('should show correct controls when station logis is BROWSER, all flags are enabled and media type is email', () => {
@@ -359,7 +359,7 @@ describe('getControlsVisibility', () => {
       consultCallHeld: false,
     };
 
-    expect(getControlsVisibility(deviceType, featureFlags, task, 'agent1', false)).toEqual(expectedControls);
+    expect(getControlsVisibility(deviceType, featureFlags, task, 'agent1', true)).toEqual(expectedControls);
   });
 
   it('should handle errors when accessing featureFlags and return safe defaults', () => {
