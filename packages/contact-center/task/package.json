@@ -2,7 +2,7 @@
   "name": "@webex/cc-task",
   "description": "Webex Contact Center Widgets: Task",
   "license": "Cisco's General Terms (https://www.cisco.com/site/us/en/about/legal/contract-experience/index.html)",
-  "version": "1.28.0-ccwidgets.122",
+  "version": "1.28.0-ccwidgets.123",
   "main": "dist/index.js",
   "types": "dist/types/index.d.ts",
   "publishConfig": {

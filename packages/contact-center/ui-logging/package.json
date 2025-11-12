@@ -1,6 +1,6 @@
 {
   "name": "@webex/cc-ui-logging",
-  "version": "1.28.0-ccwidgets.122",
+  "version": "1.28.0-ccwidgets.123",
   "description": "UI metrics tracking for Webex widgets",
   "license": "Cisco's General Terms (https://www.cisco.com/site/us/en/about/legal/contract-experience/index.html)",
   "main": "dist/index.js",

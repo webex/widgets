@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.123](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.122...v1.28.0-ccwidgets.123) (2025-11-11)
+
+
+### Features
+
+* **cc-widgets:** multi party conference ([#539](https://github.com/webex/widgets/issues/539)) ([f2a23d4](https://github.com/webex/widgets/commit/f2a23d4650fdf55ac9c44d489f45f13b3650341a))
+
 # [1.28.0-ccwidgets.122](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.121...v1.28.0-ccwidgets.122) (2025-11-06)
 
 
