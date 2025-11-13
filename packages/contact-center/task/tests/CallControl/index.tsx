@@ -104,7 +104,7 @@ describe('CallControl Component', () => {
     expect(useCallControlSpy).toHaveBeenCalledWith({
       currentTask: null,
       onHoldResume: onHoldResumeCb,
-      multiPartyConferenceEnabled: true,
+      conferenceEnabled: true,
       onEnd: onEndCb,
       onWrapUp: onWrapUpCb,
       onRecordingToggle: onRecordingToggleCb,

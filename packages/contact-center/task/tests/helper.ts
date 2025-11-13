@@ -847,7 +847,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -874,7 +874,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -911,7 +911,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -936,7 +936,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -963,7 +963,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -989,7 +989,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -1013,7 +1013,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -1039,7 +1039,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -1072,7 +1072,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -1109,7 +1109,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -1132,7 +1132,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -1159,7 +1159,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -1187,7 +1187,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -1216,7 +1216,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -1243,7 +1243,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -1265,7 +1265,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -1285,7 +1285,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -1309,7 +1309,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -1336,7 +1336,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -1368,7 +1368,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -1393,7 +1393,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -1420,7 +1420,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -1447,7 +1447,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -1476,7 +1476,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -1501,7 +1501,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -1522,7 +1522,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -1557,7 +1557,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -1584,7 +1584,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -1607,7 +1607,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -1636,7 +1636,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -1703,7 +1703,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -1772,7 +1772,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -1834,7 +1834,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       });
       return hook;
@@ -1873,7 +1873,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       });
       // Set initial value
@@ -1895,7 +1895,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -1946,7 +1946,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -1998,7 +1998,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -2044,7 +2044,7 @@ describe('useCallControl', () => {
           featureFlags: store.featureFlags,
           deviceType: store.deviceType,
           isMuted: false,
-          multiPartyConferenceEnabled: true,
+          conferenceEnabled: true,
           agentId: 'test-agent-id',
         }),
       {initialProps: {task: mockTaskWithHold}}
@@ -2114,7 +2114,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -2171,7 +2171,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -2233,7 +2233,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -2259,7 +2259,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -2298,7 +2298,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -2336,7 +2336,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -2366,7 +2366,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -2389,7 +2389,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: false,
+        conferenceEnabled: false,
         agentId: 'test-agent-id',
       })
     );
@@ -2409,7 +2409,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: false,
+        conferenceEnabled: false,
         agentId: 'test-agent-id',
       })
     );
@@ -2432,7 +2432,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: false,
+        conferenceEnabled: false,
         agentId: 'test-agent-id',
       })
     );
@@ -2455,7 +2455,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -2482,7 +2482,7 @@ describe('useCallControl', () => {
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
         agentId: 'test-agent-id',
       })
     );
@@ -2527,7 +2527,7 @@ describe('useCallControl', () => {
           featureFlags: store.featureFlags,
           deviceType: store.deviceType,
           isMuted: false,
-          multiPartyConferenceEnabled: true,
+          conferenceEnabled: true,
           agentId: 'test-agent-id',
         })
       );
@@ -2561,7 +2561,7 @@ describe('useCallControl', () => {
           featureFlags: store.featureFlags,
           deviceType: store.deviceType,
           isMuted: true,
-          multiPartyConferenceEnabled: true,
+          conferenceEnabled: true,
           agentId: 'test-agent-id',
         })
       );
@@ -2595,7 +2595,7 @@ describe('useCallControl', () => {
           featureFlags: store.featureFlags,
           deviceType: store.deviceType,
           isMuted: false,
-          multiPartyConferenceEnabled: true,
+          conferenceEnabled: true,
           agentId: 'test-agent-id',
         })
       );
@@ -2617,7 +2617,7 @@ describe('useCallControl', () => {
           featureFlags: store.featureFlags,
           deviceType: store.deviceType,
           isMuted: false,
-          multiPartyConferenceEnabled: true,
+          conferenceEnabled: true,
           agentId: 'test-agent-id',
         })
       );
@@ -2642,7 +2642,7 @@ describe('useCallControl', () => {
           featureFlags: store.featureFlags,
           deviceType: store.deviceType,
           isMuted: false,
-          multiPartyConferenceEnabled: true,
+          conferenceEnabled: true,
           agentId: 'test-agent-id',
         })
       );
@@ -2672,7 +2672,7 @@ describe('useCallControl', () => {
           featureFlags: store.featureFlags,
           deviceType: store.deviceType,
           isMuted: true,
-          multiPartyConferenceEnabled: true,
+          conferenceEnabled: true,
           agentId: 'test-agent-id',
         })
       );
@@ -2706,7 +2706,7 @@ describe('useCallControl', () => {
           featureFlags: store.featureFlags,
           deviceType: store.deviceType,
           isMuted: false,
-          multiPartyConferenceEnabled: true,
+          conferenceEnabled: true,
           agentId: 'test-agent-id',
         })
       );
@@ -2726,7 +2726,7 @@ describe('useCallControl', () => {
           featureFlags: store.featureFlags,
           deviceType: store.deviceType,
           isMuted: false,
-          multiPartyConferenceEnabled: true,
+          conferenceEnabled: true,
           agentId: 'test-agent-id',
         })
       );
@@ -2754,7 +2754,7 @@ describe('useCallControl', () => {
           featureFlags: store.featureFlags,
           deviceType: store.deviceType,
           isMuted: false,
-          multiPartyConferenceEnabled: true,
+          conferenceEnabled: true,
           agentId: 'test-agent-id',
         })
       );
@@ -2785,7 +2785,7 @@ describe('useCallControl', () => {
             featureFlags: store.featureFlags,
             deviceType: store.deviceType,
             isMuted: false,
-            multiPartyConferenceEnabled: true,
+            conferenceEnabled: true,
             agentId: 'test-agent-id',
           })
         );
@@ -2815,7 +2815,7 @@ describe('useCallControl', () => {
             featureFlags: store.featureFlags,
             deviceType: store.deviceType,
             isMuted: false,
-            multiPartyConferenceEnabled: true,
+            conferenceEnabled: true,
             agentId: 'test-agent-id',
           })
         );
@@ -2847,7 +2847,7 @@ describe('useCallControl', () => {
             featureFlags: store.featureFlags,
             deviceType: store.deviceType,
             isMuted: false,
-            multiPartyConferenceEnabled: true,
+            conferenceEnabled: true,
             agentId: 'test-agent-id',
           })
         );
@@ -2877,7 +2877,7 @@ describe('useCallControl', () => {
             featureFlags: store.featureFlags,
             deviceType: store.deviceType,
             isMuted: false,
-            multiPartyConferenceEnabled: true,
+            conferenceEnabled: true,
             agentId: 'test-agent-id',
           })
         );
@@ -2909,7 +2909,7 @@ describe('useCallControl', () => {
             featureFlags: store.featureFlags,
             deviceType: store.deviceType,
             isMuted: false,
-            multiPartyConferenceEnabled: true,
+            conferenceEnabled: true,
             agentId: 'test-agent-id',
           })
         );
@@ -2935,7 +2935,7 @@ describe('useCallControl', () => {
             featureFlags: store.featureFlags,
             deviceType: store.deviceType,
             isMuted: false,
-            multiPartyConferenceEnabled: true,
+            conferenceEnabled: true,
             agentId: 'test-agent-id',
           })
         );
@@ -2967,7 +2967,7 @@ describe('useCallControl', () => {
             featureFlags: store.featureFlags,
             deviceType: store.deviceType,
             isMuted: false,
-            multiPartyConferenceEnabled: true,
+            conferenceEnabled: true,
             agentId: 'test-agent-id',
           })
         );
@@ -2997,7 +2997,7 @@ describe('useCallControl', () => {
             featureFlags: store.featureFlags,
             deviceType: store.deviceType,
             isMuted: false,
-            multiPartyConferenceEnabled: true,
+            conferenceEnabled: true,
             agentId: 'test-agent-id',
           })
         );
@@ -3036,7 +3036,7 @@ describe('useCallControl', () => {
             featureFlags: store.featureFlags,
             deviceType: store.deviceType,
             isMuted: false,
-            multiPartyConferenceEnabled: true,
+            conferenceEnabled: true,
             agentId: 'test-agent-id',
           })
         );
@@ -3073,7 +3073,7 @@ describe('useCallControl', () => {
             featureFlags: store.featureFlags,
             deviceType: store.deviceType,
             isMuted: false,
-            multiPartyConferenceEnabled: true,
+            conferenceEnabled: true,
             agentId: 'test-agent-id',
           })
         );
@@ -3133,7 +3133,7 @@ describe('useCallControl', () => {
             featureFlags: store.featureFlags,
             deviceType: store.deviceType,
             isMuted: false,
-            multiPartyConferenceEnabled: true,
+            conferenceEnabled: true,
             agentId: 'test-agent-id',
           })
         );
@@ -3176,7 +3176,7 @@ describe('useCallControl', () => {
             featureFlags: store.featureFlags,
             deviceType: store.deviceType,
             isMuted: false,
-            multiPartyConferenceEnabled: false,
+            conferenceEnabled: false,
             agentId: 'test-agent-id',
           })
         );
@@ -3218,7 +3218,7 @@ describe('useCallControl', () => {
             featureFlags: store.featureFlags,
             deviceType: store.deviceType,
             isMuted: false,
-            multiPartyConferenceEnabled: true,
+            conferenceEnabled: true,
             agentId: 'test-agent-id',
           })
         );
@@ -3270,7 +3270,7 @@ describe('useCallControl', () => {
           deviceType: 'BROWSER',
           featureFlags: {webRtcEnabled: true},
           isMuted: false,
-          multiPartyConferenceEnabled: true,
+          conferenceEnabled: true,
           agentId: 'test-agent-id',
         })
       );
@@ -3303,7 +3303,7 @@ describe('useCallControl', () => {
           deviceType: 'BROWSER',
           featureFlags: {webRtcEnabled: true},
           isMuted: false,
-          multiPartyConferenceEnabled: true,
+          conferenceEnabled: true,
           agentId: 'test-agent-id',
         })
       );
@@ -3344,7 +3344,7 @@ describe('useCallControl', () => {
           deviceType: 'BROWSER',
           featureFlags: {webRtcEnabled: true},
           isMuted: false,
-          multiPartyConferenceEnabled: true,
+          conferenceEnabled: true,
           agentId: 'test-agent-id',
         })
       );
@@ -3377,7 +3377,7 @@ describe('useCallControl', () => {
           deviceType: 'BROWSER',
           featureFlags: {webRtcEnabled: true},
           isMuted: false,
-          multiPartyConferenceEnabled: true,
+          conferenceEnabled: true,
           agentId: 'test-agent-id',
         })
       );
@@ -4054,7 +4054,7 @@ describe('Task Hook Error Handling and Logging', () => {
           deviceType: 'BROWSER',
           featureFlags: {},
           isMuted: false,
-          multiPartyConferenceEnabled: false,
+          conferenceEnabled: false,
           agentId: 'agent1',
         })
       );
@@ -4089,7 +4089,7 @@ describe('Task Hook Error Handling and Logging', () => {
           deviceType: 'BROWSER',
           featureFlags: {},
           isMuted: false,
-          multiPartyConferenceEnabled: false,
+          conferenceEnabled: false,
           agentId: 'agent1',
         })
       );
@@ -4121,7 +4121,7 @@ describe('Task Hook Error Handling and Logging', () => {
           deviceType: 'BROWSER',
           featureFlags: {},
           isMuted: false,
-          multiPartyConferenceEnabled: false,
+          conferenceEnabled: false,
           agentId: 'agent1',
         })
       );
@@ -4156,7 +4156,7 @@ describe('Task Hook Error Handling and Logging', () => {
           deviceType: 'BROWSER',
           featureFlags: {},
           isMuted: false,
-          multiPartyConferenceEnabled: false,
+          conferenceEnabled: false,
           agentId: 'agent1',
         })
       );
@@ -4193,7 +4193,7 @@ describe('Task Hook Error Handling and Logging', () => {
           deviceType: 'BROWSER',
           featureFlags: {},
           isMuted: false,
-          multiPartyConferenceEnabled: false,
+          conferenceEnabled: false,
           agentId: 'agent1',
         })
       );
@@ -4230,7 +4230,7 @@ describe('Task Hook Error Handling and Logging', () => {
           deviceType: 'BROWSER',
           featureFlags: {},
           isMuted: false,
-          multiPartyConferenceEnabled: false,
+          conferenceEnabled: false,
           agentId: 'agent1',
         })
       );
@@ -4293,7 +4293,7 @@ describe('Task Hook Error Handling and Logging', () => {
           deviceType: 'BROWSER',
           featureFlags: {},
           isMuted: false,
-          multiPartyConferenceEnabled: false,
+          conferenceEnabled: false,
           agentId: 'agent1',
         })
       );
@@ -4323,7 +4323,7 @@ describe('Task Hook Error Handling and Logging', () => {
           deviceType: 'BROWSER',
           featureFlags: {},
           isMuted: false,
-          multiPartyConferenceEnabled: false,
+          conferenceEnabled: false,
           agentId: 'agent1',
         })
       );
@@ -4353,7 +4353,7 @@ describe('Task Hook Error Handling and Logging', () => {
           deviceType: 'BROWSER',
           featureFlags: {},
           isMuted: false,
-          multiPartyConferenceEnabled: false,
+          conferenceEnabled: false,
           agentId: 'agent1',
         })
       );
@@ -4381,7 +4381,7 @@ describe('Task Hook Error Handling and Logging', () => {
           deviceType: 'BROWSER',
           featureFlags: {},
           isMuted: false,
-          multiPartyConferenceEnabled: false,
+          conferenceEnabled: false,
           agentId: 'agent1',
         })
       );
@@ -4411,7 +4411,7 @@ describe('Task Hook Error Handling and Logging', () => {
           deviceType: 'BROWSER',
           featureFlags: {},
           isMuted: false,
-          multiPartyConferenceEnabled: false,
+          conferenceEnabled: false,
           agentId: 'agent1',
         })
       );
@@ -4438,7 +4438,7 @@ describe('Task Hook Error Handling and Logging', () => {
           deviceType: 'BROWSER',
           featureFlags: {},
           isMuted: false,
-          multiPartyConferenceEnabled: false,
+          conferenceEnabled: false,
           agentId: 'agent1',
         })
       );
@@ -4487,7 +4487,7 @@ describe('Task Hook Error Handling and Logging', () => {
           deviceType: 'BROWSER',
           featureFlags: {},
           isMuted: false,
-          multiPartyConferenceEnabled: false,
+          conferenceEnabled: false,
           agentId: 'agent1',
         })
       );
@@ -4544,7 +4544,7 @@ describe('Task Hook Error Handling and Logging', () => {
           deviceType: 'BROWSER',
           featureFlags: {},
           isMuted: false,
-          multiPartyConferenceEnabled: false,
+          conferenceEnabled: false,
           agentId: 'agent1',
         })
       );
@@ -4606,7 +4606,7 @@ describe('Task Hook Error Handling and Logging', () => {
           deviceType: 'BROWSER',
           featureFlags: {},
           isMuted: false,
-          multiPartyConferenceEnabled: false,
+          conferenceEnabled: false,
           agentId: 'agent1',
         })
       );
@@ -4652,7 +4652,7 @@ describe('Task Hook Error Handling and Logging', () => {
           deviceType: 'BROWSER',
           featureFlags: {},
           isMuted: false,
-          multiPartyConferenceEnabled: false,
+          conferenceEnabled: false,
           agentId: 'agent1',
         })
       );
@@ -4698,7 +4698,7 @@ describe('Task Hook Error Handling and Logging', () => {
           deviceType: 'BROWSER',
           featureFlags: {},
           isMuted: false,
-          multiPartyConferenceEnabled: false,
+          conferenceEnabled: false,
           agentId: 'agent1',
         })
       );

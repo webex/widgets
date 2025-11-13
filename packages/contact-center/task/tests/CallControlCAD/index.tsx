@@ -111,12 +111,12 @@ describe('CallControlCAD Component', () => {
       featureFlags: store.featureFlags,
       deviceType: '',
       isMuted: false,
-      multiPartyConferenceEnabled: true,
+      conferenceEnabled: true,
       agentId: store.agentId,
     });
   });
 
-  it('should use default multiPartyConferenceEnabled value when not provided', () => {
+  it('should use default conferenceEnabled value when not provided', () => {
     const useCallControlSpy = jest.spyOn(helper, 'useCallControl').mockReturnValue({
       currentTask: mockTask,
       endCall: jest.fn(),
@@ -185,12 +185,12 @@ describe('CallControlCAD Component', () => {
     // Should default to true when not provided
     expect(useCallControlSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        multiPartyConferenceEnabled: true,
+        conferenceEnabled: true,
       })
     );
   });
 
-  it('should use provided multiPartyConferenceEnabled value', () => {
+  it('should use provided conferenceEnabled value', () => {
     const useCallControlSpy = jest.spyOn(helper, 'useCallControl').mockReturnValue({
       currentTask: mockTask,
       endCall: jest.fn(),
@@ -255,18 +255,13 @@ describe('CallControlCAD Component', () => {
     });
 
     render(
-      <CallControlCAD
-        onHoldResume={onHoldResumeCb}
-        onEnd={onEndCb}
-        onWrapUp={onWrapUpCb}
-        multiPartyConferenceEnabled={false}
-      />
+      <CallControlCAD onHoldResume={onHoldResumeCb} onEnd={onEndCb} onWrapUp={onWrapUpCb} conferenceEnabled={false} />
     );
 
     // Should use the provided value
     expect(useCallControlSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        multiPartyConferenceEnabled: false,
+        conferenceEnabled: false,
       })
     );
   });

@@ -280,7 +280,7 @@ export const useCallControl = (props: useCallControlProps) => {
     deviceType,
     featureFlags,
     isMuted,
-    multiPartyConferenceEnabled,
+    conferenceEnabled,
     agentId,
   } = props;
   const [isRecording, setIsRecording] = useState(true);
@@ -868,8 +868,8 @@ export const useCallControl = (props: useCallControlProps) => {
   };
 
   const controlVisibility = useMemo(
-    () => getControlsVisibility(deviceType, featureFlags, currentTask, agentId, multiPartyConferenceEnabled, logger),
-    [deviceType, featureFlags, currentTask, agentId, multiPartyConferenceEnabled, logger]
+    () => getControlsVisibility(deviceType, featureFlags, currentTask, agentId, conferenceEnabled, logger),
+    [deviceType, featureFlags, currentTask, agentId, conferenceEnabled, logger]
   );
 
   // Add useEffect for auto wrap-up timer
