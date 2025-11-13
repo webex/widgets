@@ -200,6 +200,6 @@ jobs:
       - name: Build all packages for publish
         run: yarn run build:prod
       - name: Deploy Packages
-        run: yarn workspaces foreach --from '${{ needs.generate-package-matrix.outputs.yarn-recursive }}' --verbose run deploy:npm --access public --tag ${GITHUB_REF##*/}
+        run: yarn workspaces foreach --from '${{ needs.generate-package-matrix.outputs.yarn-recursive }}' --verbose run deploy:npm  --dry-run --access public --tag ${GITHUB_REF##*/}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
