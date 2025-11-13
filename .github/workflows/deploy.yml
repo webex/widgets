@@ -113,19 +113,55 @@ jobs:
           path: "**/dist"
           key: dist-${{ env.rid }}
 
+      - name: Check for Changed Packages
+        id: check-changes
+        run: |
+          PACKAGES='${{ needs.build-and-analyze.outputs.yarn-recursive }}'
+          if [ -z "$PACKAGES" ] || [ "$PACKAGES" == "{}" ] || [ "$PACKAGES" == "[]" ]; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "⚠️  No packages have changed - skipping deployment"
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "✅ Found changed packages: $PACKAGES"
+          fi
+
+      - name: No Changes Detected
+        if: steps.check-changes.outputs.has_changes == 'false'
+        run: |
+          echo "=========================================="
+          echo "🔍 No packages changed in this push"
+          echo "=========================================="
+          echo "Deployment skipped - no changes detected since last push"
+          echo "Compared against: ${{ github.event.before }}"
+          echo "=========================================="
+
       - name: Add NPM token to .yarnrc.yml file
+        if: steps.check-changes.outputs.has_changes == 'true'
         run: |
           echo "npmAuthToken: ${{ env.token }}" >> ~/.yarnrc.yml
 
       - name: Sync and Increment Package Versions
+        if: steps.check-changes.outputs.has_changes == 'true'
         run: |
           yarn package-tools sync --tag ${GITHUB_REF##*/}
           yarn package-tools increment --packages ${{ needs.build-and-analyze.outputs.node-recursive }} --tag ${GITHUB_REF##*/}
 
+      - name: Display Packages to be Published
+        if: steps.check-changes.outputs.has_changes == 'true'
+        run: |
+          echo "=========================================="
+          echo "📋 Packages scheduled for deployment:"
+          echo "Tag: ${GITHUB_REF##*/}"
+          echo "=========================================="
+          yarn workspaces foreach --from '${{ needs.build-and-analyze.outputs.yarn-recursive }}' exec sh -c 'echo "📦 $(jq -r .name package.json) @ v$(jq -r .version package.json)"'
+          echo "=========================================="
+
       - name: Rebuild Changed Packages
+        if: steps.check-changes.outputs.has_changes == 'true'
         run: yarn run build:prod
 
       - name: Deploy Packages (Dry Run)
+        if: steps.check-changes.outputs.has_changes == 'true'
         run: yarn workspaces foreach --from '${{ needs.build-and-analyze.outputs.yarn-recursive }}' --verbose run deploy:npm --dry-run --access public --tag ${GITHUB_REF##*/}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
