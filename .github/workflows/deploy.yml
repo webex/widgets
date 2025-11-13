@@ -15,8 +15,8 @@ env:
   GIT_AUTHOR_EMAIL: ${{ github.actor }}@users.noreply.github.com
 
 jobs:
-  build-and-analyze:
-    name: Build and Determine Changed Packages
+  analyze-changes:
+    name: Determine Changed Packages
     runs-on: ubuntu-latest
 
     outputs:
@@ -49,18 +49,6 @@ jobs:
         if: steps.cache-dependencies.outputs.cache-hit != 'true'
         run: yarn install --immutable
 
-      - name: Build meetings widget
-        run: yarn workspace @webex/widgets run build:src
-
-      - name: Build cc widgets
-        run: yarn run build:prod
-
-      - name: Cache Build Outputs
-        uses: actions/cache@v4
-        with:
-          path: "**/dist"
-          key: dist-${{ env.rid }}
-
       # Generate package matrix for changed packages
       - id: generate-package-matrix-node-changed
         name: Generate Package Matrix (Node Changed)
@@ -87,7 +75,7 @@ jobs:
 
   publish-npm:
     name: Publish to NPM
-    needs: build-and-analyze
+    needs: analyze-changes
     runs-on: ubuntu-latest
 
     steps:
@@ -107,16 +95,10 @@ jobs:
           path: "**/node_modules"
           key: node-modules-${{ hashFiles('./yarn.lock') }}
 
-      - name: Restore Build Outputs
-        uses: actions/cache/restore@v4
-        with:
-          path: "**/dist"
-          key: dist-${{ env.rid }}
-
       - name: Check for Changed Packages
         id: check-changes
         run: |
-          PACKAGES='${{ needs.build-and-analyze.outputs.yarn-recursive }}'
+          PACKAGES='${{ needs.analyze-changes.outputs.yarn-recursive }}'
           if [ -z "$PACKAGES" ] || [ "$PACKAGES" == "{}" ] || [ "$PACKAGES" == "[]" ]; then
             echo "has_changes=false" >> $GITHUB_OUTPUT
             echo "⚠️  No packages have changed - skipping deployment"
@@ -144,7 +126,7 @@ jobs:
         if: steps.check-changes.outputs.has_changes == 'true'
         run: |
           yarn package-tools sync --tag ${GITHUB_REF##*/}
-          yarn package-tools increment --packages ${{ needs.build-and-analyze.outputs.node-recursive }} --tag ${GITHUB_REF##*/}
+          yarn package-tools increment --packages ${{ needs.analyze-changes.outputs.node-recursive }} --tag ${GITHUB_REF##*/}
 
       - name: Display Packages to be Published
         if: steps.check-changes.outputs.has_changes == 'true'
@@ -153,15 +135,15 @@ jobs:
           echo "📋 Packages scheduled for deployment:"
           echo "Tag: ${GITHUB_REF##*/}"
           echo "=========================================="
-          yarn workspaces foreach --from '${{ needs.build-and-analyze.outputs.yarn-recursive }}' exec sh -c 'echo "📦 $(jq -r .name package.json) @ v$(jq -r .version package.json)"'
+          yarn workspaces foreach --from '${{ needs.analyze-changes.outputs.yarn-recursive }}' exec sh -c 'echo "📦 $(jq -r .name package.json) @ v$(jq -r .version package.json)"'
           echo "=========================================="
 
-      - name: Rebuild Changed Packages
+      - name: Build Changed Packages
         if: steps.check-changes.outputs.has_changes == 'true'
         run: yarn run build:prod
 
       - name: Deploy Packages (Dry Run)
         if: steps.check-changes.outputs.has_changes == 'true'
-        run: yarn workspaces foreach --from '${{ needs.build-and-analyze.outputs.yarn-recursive }}' --verbose run deploy:npm --dry-run --access public --tag ${GITHUB_REF##*/}
+        run: yarn workspaces foreach --from '${{ needs.analyze-changes.outputs.yarn-recursive }}' --verbose run deploy:npm --dry-run --access public --tag ${GITHUB_REF##*/}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
