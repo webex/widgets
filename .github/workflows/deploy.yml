@@ -133,6 +133,6 @@ jobs:
 
       - name: Deploy Packages (Dry Run)
         if: steps.check-changes.outputs.has_changes == 'true'
-        run: yarn workspaces foreach --from '${{ needs.analyze-changes.outputs.yarn-recursive }}' --verbose run deploy:npm --dry-run --access public --tag ${GITHUB_REF##*/}
+        run: yarn workspaces foreach -W --dry-run --from '${{ needs.analyze-changes.outputs.yarn-recursive }}' --verbose run deploy:npm --access public --tag ${GITHUB_REF##*/}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
