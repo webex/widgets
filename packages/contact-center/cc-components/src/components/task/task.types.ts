@@ -386,9 +386,9 @@ export interface ControlProps {
   allowConsultToQueue: boolean;
 
   /**
-   * Flag to enable or disable multi-party conference feature
+   * Flag to enable or disable conference feature
    */
-  multiPartyConferenceEnabled: boolean;
+  conferenceEnabled: boolean;
 
   /**
    * Function to set the last target type
