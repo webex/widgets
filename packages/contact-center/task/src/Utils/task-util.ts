@@ -186,13 +186,6 @@ export function getConferenceButtonVisibility(
 }
 
 /**
- * Get visibility for Conference In Progress indicator
- */
-export function getConferenceInProgressVisibility(task: ITask): boolean {
-  return task?.data?.isConferenceInProgress ?? false;
-}
-
-/**
  * Get visibility for Exit Conference button
  */
 export function getExitConferenceButtonVisibility(
@@ -413,7 +406,7 @@ export function getControlsVisibility(
 
     // Calculate task state flags
     const isTransferVisibility = isBrowser ? webRtcEnabled : true;
-    const isConferenceInProgress = task?.data?.isConferenceInProgress ?? false;
+    const isConferenceInProgress = (task?.data?.isConferenceInProgress && multiPartyConferenceEnabled) ?? false;
     const isConsultInProgress = getIsConsultInProgress(task);
     const isHeld = findHoldStatus(task, 'mainCall', agentId);
     const isCustomerInCall = getIsCustomerInCall(task);
@@ -560,7 +553,7 @@ export function getControlsVisibility(
       wrapup: getWrapupButtonVisibility(task),
 
       // State flags
-      isConferenceInProgress: getConferenceInProgressVisibility(task),
+      isConferenceInProgress,
       isConsultInitiated,
       isConsultInitiatedAndAccepted: isConsultAccepted,
       isConsultReceived: isBeingConsulted,
