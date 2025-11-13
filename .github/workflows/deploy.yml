@@ -127,17 +127,6 @@ jobs:
         run: |
           yarn package-tools sync --tag ${GITHUB_REF##*/}
           yarn package-tools increment --packages ${{ needs.analyze-changes.outputs.node-recursive }} --tag ${GITHUB_REF##*/}
-
-      - name: Display Packages to be Published
-        if: steps.check-changes.outputs.has_changes == 'true'
-        run: |
-          echo "=========================================="
-          echo "📋 Packages scheduled for deployment:"
-          echo "Tag: ${GITHUB_REF##*/}"
-          echo "=========================================="
-          yarn workspaces foreach --from '${{ needs.analyze-changes.outputs.yarn-recursive }}' exec sh -c 'echo "📦 $(jq -r .name package.json) @ v$(jq -r .version package.json)"'
-          echo "=========================================="
-
       - name: Build Changed Packages
         if: steps.check-changes.outputs.has_changes == 'true'
         run: yarn run build:prod
