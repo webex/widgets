@@ -7,7 +7,7 @@ import WebexMeetingsWidgetDemo from './WebexMeetingsWidgetDemo';
 import '@momentum-ui/core/css/momentum-ui.min.css';
 import './App.scss';
 
-// App component for the Webex Widgets Demo.
+// App component for the Webex Widgets Demo
 export default function App() {
   const [tokenInput, setTokenInput] = useState('');
   const [token, setToken] = useState();
