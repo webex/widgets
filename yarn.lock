@@ -9552,13 +9552,13 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@webex/cli-tools@npm:0.0.0-next.1":
-  version: 0.0.0-next.1
-  resolution: "@webex/cli-tools@npm:0.0.0-next.1"
+"@webex/cli-tools@npm:0.0.0-next.2":
+  version: 0.0.0-next.2
+  resolution: "@webex/cli-tools@npm:0.0.0-next.2"
   dependencies:
     commander: "npm:11.1.0"
     shelljs: "npm:^0.8.5"
-  checksum: 10c0/959380b83ebe91a1a014c1852453a279facf47a37a0af6b1b50c73992462c9dff0c19c26b4dfc9b40532f1d866a799a82a9ed43f5f316417f39b7b3d4c448442
+  checksum: 10c0/f2accfe0c91995f5870311d8ea2093390fe7869c9df883ce9d952ba9c3d14d13c22d81c9bd6276ce95967c81a5f0fa5e41c049b23d4624b303f24a9856b37856
   languageName: node
   linkType: hard
 
@@ -10662,14 +10662,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/package-tools@npm:0.0.0-next.1":
-  version: 0.0.0-next.1
-  resolution: "@webex/package-tools@npm:0.0.0-next.1"
+"@webex/package-tools@npm:0.0.0-next.6":
+  version: 0.0.0-next.6
+  resolution: "@webex/package-tools@npm:0.0.0-next.6"
   dependencies:
-    "@webex/cli-tools": "npm:0.0.0-next.1"
+    "@webex/cli-tools": "npm:0.0.0-next.2"
   bin:
     webex-package-tools: ./index.js
-  checksum: 10c0/c2413342223c60dcb531efa63b63ef22a36ba38527b3607fb986e34d2570c43ff0f1236bdfebfff189209085f11fedae06205565edfecac7d5f186edc912af4d
+  checksum: 10c0/84812dab032aa0e1db92ecae6c20bbaeace5f3cf92c74f0852b1abc57f5a1e99d30297532101873086f0bc49e6f2b02329b48d4425147866cb3a38c26be7961e
   languageName: node
   linkType: hard
 
@@ -34167,8 +34167,8 @@ __metadata:
     "@semantic-release/git": "npm:^10.0.1"
     "@semantic-release/github": "npm:^11.0.1"
     "@testing-library/react-hooks": "npm:^8.0.1"
-    "@webex/cli-tools": "npm:0.0.0-next.1"
-    "@webex/package-tools": "npm:0.0.0-next.1"
+    "@webex/cli-tools": "npm:0.0.0-next.2"
+    "@webex/package-tools": "npm:0.0.0-next.6"
     babel-jest: "npm:^29.7.0"
     crypto-browserify: "npm:^3.12.1"
     css-loader: "npm:^7.1.2"
