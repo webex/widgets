@@ -1,6 +1,11 @@
 import {test, expect} from '@playwright/test';
 import {agentRelogin} from '../Utils/initUtils';
-import {telephonyLogin, verifyLoginMode, ensureUserStateVisible} from '../Utils/stationLoginUtils';
+import {
+  telephonyLogin,
+  verifyLoginMode,
+  ensureUserStateVisible,
+  verifyDesktopOptionVisibility,
+} from '../Utils/stationLoginUtils';
 import {changeUserState, verifyCurrentState, getStateElapsedTime} from '../Utils/userStateUtils';
 import {parseTimeString, waitForWebSocketDisconnection, waitForWebSocketReconnection} from '../Utils/helperUtils';
 import {USER_STATES, LOGIN_MODE, LONG_WAIT} from '../constants';
@@ -275,6 +280,42 @@ export default function createStationLoginTests() {
         .isVisible()
         .catch(() => false);
       expect(isLogoutButtonVisible).toBe(false);
+    });
+  });
+
+  test.describe('Station Login Tests - hideDesktopLogin Feature', () => {
+    let testManager: TestManager;
+
+    test.beforeAll(async ({browser}, testInfo) => {
+      const projectName = testInfo.project.name;
+      testManager = new TestManager(projectName);
+      await testManager.setupForStationLogin(browser, false);
+    });
+
+    test.afterAll(async () => {
+      if (testManager) {
+        await testManager.cleanup();
+      }
+    });
+
+    test('should toggle Desktop option visibility when hideDesktopLogin checkbox is toggled', async () => {
+      await expect(testManager.agent1Page.getByTestId('station-login-widget')).toBeVisible({timeout: 2000});
+      const hideDesktopCheckbox = testManager.agent1Page.getByTestId('samples:hide-desktop-login-checkbox');
+
+      // Uncheck - Desktop should be visible
+      await hideDesktopCheckbox.click();
+      await testManager.agent1Page.waitForTimeout(500);
+      await verifyDesktopOptionVisibility(testManager.agent1Page, true);
+
+      // Check - Desktop should be hidden
+      await hideDesktopCheckbox.click();
+      await testManager.agent1Page.waitForTimeout(500);
+      await verifyDesktopOptionVisibility(testManager.agent1Page, false);
+
+      // Uncheck again - Desktop should be visible again
+      await hideDesktopCheckbox.click();
+      await testManager.agent1Page.waitForTimeout(500);
+      await verifyDesktopOptionVisibility(testManager.agent1Page, true);
     });
   });
 

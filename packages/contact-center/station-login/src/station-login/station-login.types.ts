@@ -20,6 +20,13 @@ export type StationLoginProps = Pick<IStationLoginProps, 'profileMode'> &
   Partial<
     Pick<
       IStationLoginProps,
-      'onLogin' | 'onLogout' | 'onCCSignOut' | 'onSaveStart' | 'onSaveEnd' | 'teamId' | 'doStationLogout'
+      | 'onLogin'
+      | 'onLogout'
+      | 'onCCSignOut'
+      | 'onSaveStart'
+      | 'onSaveEnd'
+      | 'teamId'
+      | 'doStationLogout'
+      | 'hideDesktopLogin'
     >
   >;
