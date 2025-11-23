@@ -144,6 +144,74 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+  publish-documentation:
+    name: Publish - Documentation
+    needs: [publish-npm,analyze-changes]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Documentation Deploy Steps
+        run: echo "Documentation Deploy Steps"
+
+      - name: Checkout Project
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'yarn'
+
+      - name: Restore Dependencies Cache
+        uses: actions/cache/restore@v4
+        with:
+          path: '**/node_modules'
+          key: node-modules-${{ hashFiles('./yarn.lock') }}
+
+      - name: Restore Distributables Cache
+        uses: actions/cache/restore@v4
+        with:
+          path: '**/dist'
+          key: dist-${{ env.rid }}
+
+      - name: Synchronize Packages
+        run: yarn
+
+      - name: Build tools and set versions
+        run: |
+          yarn package-tools sync --tag ${GITHUB_REF##*/}
+
+      - name: Build samples locally
+        run: yarn samples:build
+
+      - name: Copy samples to docs
+        run: ./copy_to_docs.sh
+
+      - name: Set Git Identity
+        run: |
+          git config user.email "${GIT_AUTHOR_EMAIL}"
+          git config user.name "${GIT_AUTHOR_NAME}"
+
+      - name: Get existing changelog from documentation Branch
+        run: |
+          git fetch origin documentation
+          git checkout origin/documentation -- docs/changelog/logs
+
+      - name: Update changelog
+        run: yarn package-tools changelog --packages ${{ needs.analyze-changes.outputs.node-recursive }} --tag ${GITHUB_REF##*/} --commit ${{ github.event.before }}
+
+      - name: Update Changelog and Publish Docs Folder
+        run: |
+          # Check if there's anything to commit before committing
+          if [ -n "$(git status --porcelain)" ]; then
+            git add docs/
+            git commit -m "chore(docs): update docs"
+            git push origin HEAD:documentation --force
+          fi
+
   publish-tag:
     name: Publish - Tags
     runs-on: ubuntu-latest
