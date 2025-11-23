@@ -187,9 +187,6 @@ jobs:
       - name: Build samples locally
         run: yarn samples:build
 
-      - name: Copy samples to docs
-        run: ./copy_to_docs.sh
-
       - name: Set Git Identity
         run: |
           git config user.email "${GIT_AUTHOR_EMAIL}"
