@@ -28,7 +28,7 @@ The Meetings widget is fluid, and therefore it doesn't have a size by default.
 Without any extra styling, the widget will attempt to fill up the space with its current content, which may change on different screens.
 For a more optimal user experience, set a `width` and `height` that works for your application.
 
-`width` and `height` can be set via `style` or `className` props.
+`width` and `height` can be set via `style` or `className` props
 
 ### Access Tokens
 
