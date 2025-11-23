@@ -165,17 +165,17 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           cache: 'yarn'
 
-      # - name: Restore Dependencies Cache
-      #   uses: actions/cache/restore@v4
-      #   with:
-      #     path: '**/node_modules'
-      #     key: node-modules-${{ hashFiles('./yarn.lock') }}
+      - name: Restore Dependencies Cache
+        uses: actions/cache/restore@v4
+        with:
+          path: '**/node_modules'
+          key: node-modules-${{ hashFiles('./yarn.lock') }}
 
-      # - name: Restore Distributables Cache
-      #   uses: actions/cache/restore@v4
-      #   with:
-      #     path: '**/dist'
-      #     key: dist-${{ env.rid }}
+      - name: Restore Distributables Cache
+        uses: actions/cache/restore@v4
+        with:
+          path: '**/dist'
+          key: dist-${{ env.rid }}
 
       - name: Synchronize Packages
         run: yarn
@@ -183,6 +183,9 @@ jobs:
       - name: Build tools and set versions
         run: |
           yarn package-tools sync --tag ${GITHUB_REF##*/}
+
+      - name: Build packages
+        run: yarn run build:prod
 
       - name: Build samples locally
         run: yarn samples:build
