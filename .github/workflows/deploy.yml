@@ -78,6 +78,9 @@ jobs:
     needs: analyze-changes
     runs-on: ubuntu-latest
 
+    outputs:
+      published: ${{ steps.check-changes.outputs.has_changes }}
+
     steps:
       - name: Checkout Project
         uses: actions/checkout@v4
@@ -217,12 +220,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: [analyze-changes, publish-npm]
 
-    outputs:
-      message: ${{ steps.versionextractor.outputs.message }}
-      version: ${{ steps.versionextractor.outputs.version }}
-      commit: ${{ steps.lastcommit.outputs.commit }}
-      proceed: ${{ steps.skipcondition.outputs.proceed }}
-
     steps:
       - name: Checkout Project
         uses: actions/checkout@v4
@@ -251,56 +248,84 @@ jobs:
       - name: Synchronize Packages
         run: yarn
 
-      - name: Extract latest version from NPM and commit message
-        id: versionextractor
+      - name: Check if packages were published
+        id: check-publish
         run: |
-          echo "message=$(git log -1 --oneline --no-decorate)" >> $GITHUB_OUTPUT
-          echo "version=v$(yarn package-tools sync --tag ${GITHUB_REF##*/} --packages webex | awk '{print $3}' | tr -d '%')" >> $GITHUB_OUTPUT
-
-      - name: Conditions to skip tag publish
-        id: skipcondition
-        run: |
-          echo "proceed=true" >> $GITHUB_OUTPUT
-          if git rev-parse "${{ steps.versionextractor.outputs.version }}" >/dev/null 2>&1; then
-            echo "Tag ${{ steps.versionextractor.outputs.version }} already exists. Exiting job."
-            echo "proceed=false" >> $GITHUB_OUTPUT
-          elif [ -z "${{ needs.analyze-changes.outputs.node-recursive }}" ]; then
-            echo "No packages published, therefore, publishing a tag is unnecessary. Exiting job."
-            echo "proceed=false" >> $GITHUB_OUTPUT
+          if [ "${{ needs.publish-npm.outputs.published }}" != "true" ]; then
+            echo "⚠️  NPM publish was skipped - no tags will be created"
+            echo "should_tag=false" >> $GITHUB_OUTPUT
           else
-            echo "Creating the tag."
-          fi
-
-      - name: Get the last commit hash
-        id: lastcommit
-        run: |
-          if [ ${{ steps.skipcondition.outputs.proceed }} = false ]; then
-            echo "Skipping this step."
-          else
-            echo "commit=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+            echo "✅ NPM publish succeeded - proceeding with tagging"
+            echo "should_tag=true" >> $GITHUB_OUTPUT
           fi
 
       - name: Set Git Identity
+        if: steps.check-publish.outputs.should_tag == 'true'
         run: |
-          if [ ${{ steps.skipcondition.outputs.proceed }} = false ]; then
-            echo "Skipping this step."
-          else
-            git config user.email "${GIT_AUTHOR_EMAIL}"
-            git config user.name "${GIT_AUTHOR_NAME}"
+          git config user.email "${GIT_AUTHOR_EMAIL}"
+          git config user.name "${GIT_AUTHOR_NAME}"
+
+      - name: Create and Push Tags for Each Package
+        if: steps.check-publish.outputs.should_tag == 'true'
+        run: |
+          COMMIT_MESSAGE="$(git log -1 --oneline --no-decorate)"
+          COMMIT_HASH="$(git rev-parse HEAD)"
+          PACKAGES='${{ needs.analyze-changes.outputs.node-recursive }}'
+
+          echo "=========================================="
+          echo "Creating tags for published packages"
+          echo "=========================================="
+
+          # Parse the JSON array of packages
+          if [ -z "$PACKAGES" ] || [ "$PACKAGES" == "{}" ] || [ "$PACKAGES" == "[]" ]; then
+            echo "⚠️  No packages to tag"
+            exit 0
           fi
 
-      - name: Create a tag for the last commit
-        run: |
-          if [ ${{ steps.skipcondition.outputs.proceed }} = false ]; then
-            echo "Skipping this step."
-          else
-            git tag -a "${{ steps.versionextractor.outputs.version }}" ${{ steps.lastcommit.outputs.commit }} -m "${{ steps.versionextractor.outputs.message }}"
-          fi
+          # Extract package names from JSON array
+          PACKAGE_LIST=$(echo "$PACKAGES" | jq -r '.[]' 2>/dev/null || echo "$PACKAGES")
 
-      - name: Publish the tag to GitHub
-        run: |
-          if [ ${{ steps.skipcondition.outputs.proceed }} = false ]; then
-            echo "Skipping this step."
-          else
-            git push origin ${{ steps.versionextractor.outputs.version }}
-          fi
+          for PACKAGE in $PACKAGE_LIST; do
+            # Skip if package is empty or null
+            if [ -z "$PACKAGE" ] || [ "$PACKAGE" == "null" ]; then
+              continue
+            fi
+
+            echo "----------------------------------------"
+            echo "Processing package: $PACKAGE"
+
+            # Get version for this specific package
+            VERSION=$(yarn package-tools sync --tag ${GITHUB_REF##*/} --packages "$PACKAGE" | awk '{print $3}' | tr -d '%' | head -1)
+
+            if [ -z "$VERSION" ]; then
+              echo "⚠️  Could not determine version for $PACKAGE, skipping..."
+              continue
+            fi
+
+            # Create tag name: convert @scope/package to scope-package-vX.X.X
+            TAG_NAME=$(echo "$PACKAGE" | sed 's/@//g' | sed 's/\//-/g')-v${VERSION}
+
+            echo "Tag name: $TAG_NAME"
+
+            # Check if tag already exists
+            if git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
+              echo "⚠️  Tag $TAG_NAME already exists, skipping..."
+              continue
+            fi
+
+            # Create annotated tag
+            git tag -a "$TAG_NAME" "$COMMIT_HASH" -m "Release $PACKAGE v${VERSION}: $COMMIT_MESSAGE"
+
+            # Push tag
+            if git push origin "$TAG_NAME"; then
+              echo "✅ Successfully created and pushed tag: $TAG_NAME"
+            else
+              echo "❌ Failed to push tag: $TAG_NAME"
+            fi
+
+            echo "----------------------------------------"
+          done
+
+          echo "=========================================="
+          echo "Tagging complete!"
+          echo "=========================================="
