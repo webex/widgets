@@ -67,18 +67,17 @@
             <p class="note">&#9432; Note</p>
             <ul>
               <li>
-                This page contains changelog from
-                <a href="?stable_version=3.3.1&package=webex&version=3.3.1-next.33">v3.3.1-next.33</a> and the changelog
-                prior to that is available
-                <a target="_blank" href="https://github.com/webex/widgets/wiki/Changelog">here</a>.
+                This page provides an interactive search for package changelogs across all Webex Widgets releases.
               </li>
               <li>
-                To read the Changelog for V2 SDKs, please check
-                <a target="_blank" href="https://github.com/webex/widgets/blob/master/CHANGELOG.md">here</a>.<br />
-                (
-                <p class="warning">Warning:</p>
-                Please be reminded that the V2 SDK is EoL by 2025. Read more about it
-                <a target="_blank" href="https://github.com/orgs/webex/discussions/3822">here</a>.)
+                For complete changelog history, please visit the
+                <a target="_blank" href="https://github.com/webex/widgets/wiki/Changelog">Changelog Wiki</a> or view the
+                <a target="_blank" href="https://github.com/webex/widgets/blob/master/CHANGELOG.md">CHANGELOG.md</a>
+                file.
+              </li>
+              <li>
+                Available packages include: <code>@webex/widgets</code>, <code>@webex/cc-widgets</code>,
+                <code>@webex/cc-components</code>, and related Contact Center packages.
               </li>
             </ul>
           </div>
@@ -132,32 +131,34 @@
           <div class="search-container" id="helper-section">
             <b>Search Examples:</b>
             <ul>
-              <li><a href="?stable_version=3.3.1&package=webex">Just package search - webex@3.3.1</a></li>
               <li>
-                <a href="?stable_version=3.3.1&package=webex&version=3.3.1-next.33"
-                  >Package + version search - webex@3.3.1-next.33</a
+                <a href="?stable_version=1.27.0&package=@webex/widgets">Package search - @webex/widgets@1.27.0</a>
+              </li>
+              <li>
+                <a href="?stable_version=1.28.0&package=@webex/cc-widgets&version=1.28.0-ccwidgets.121"
+                  >Package + version search - @webex/cc-widgets@1.28.0-ccwidgets.121</a
                 >
               </li>
               <li>
-                <a
-                  href="?stable_version=3.3.1&commitMessage=behavioral+metrics&commitHash=ddb2adf9367a83d82f6a0c18815bef578bc9b07a"
-                  >Commit Hash + Commit Message Search</a
+                <a href="?stable_version=1.28.0&package=@webex/cc-components"
+                  >Package search - @webex/cc-components@1.28.0</a
                 >
               </li>
-              <li><a href="?stable_version=3.3.1&commitHash=221c77c">Commit Hash Search</a></li>
-              <li><a href="?stable_version=3.3.1&commitMessage=%233726">PR Number search - #3726</a></li>
+              <li><a href="?stable_version=1.27.0&commitMessage=widget">Commit Message Search - "widget"</a></li>
+              <li><a href="?stable_version=1.27.0&commitHash=abc123">Commit Hash Search (short hash)</a></li>
+              <li><a href="?stable_version=1.27.0&commitMessage=%231234">PR Number search - #1234</a></li>
               <li>
-                <a href="?stable_version=3.3.1&commitMessage=fix%28">Fix Releases</a> and
-                <a href="?stable_version=3.3.1&commitMessage=feat%28">Feature Releases</a>
+                <a href="?stable_version=1.27.0&commitMessage=fix%28">Fix Releases</a> and
+                <a href="?stable_version=1.27.0&commitMessage=feat%28">Feature Releases</a>
               </li>
             </ul>
-            <b>A quick Vidcast on how to use this portal:</b><br />
+            <b>How to use this changelog portal:</b>
             <ul>
-              <li>
-                <a href="https://app.vidcast.io/share/072f82d1-3735-4a13-8c74-1ece59723ff3" target="_blank"
-                  >Watch the vidcast here</a
-                >
-              </li>
+              <li>Select a stable version from the dropdown</li>
+              <li>Search by package name (e.g., @webex/widgets, @webex/cc-widgets, @webex/cc-components)</li>
+              <li>Optionally add a specific version number for precise results</li>
+              <li>Or search by commit message and/or commit hash across all packages</li>
+              <li>View related packages that were released together</li>
             </ul>
           </div>
         </div>
@@ -173,7 +174,7 @@
       <div class="container">
         <div class="row">
           <div class="col-xs-12 col-md-12">
-            <div class="copyright">&copy; 2015-2024 Cisco and/or its affiliates. All Rights Reserved.</div>
+            <div class="copyright">&copy; 2015-2025 Cisco and/or its affiliates. All Rights Reserved.</div>
           </div>
         </div>
       </div>
