@@ -1176,6 +1176,7 @@ describe('storeEventsWrapper', () => {
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function));
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.AGENT_WRAPPEDUP, expect.any(Function));
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_REJECT, expect.any(Function));
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_OUTDIAL_FAILED, expect.any(Function));
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_HOLD, storeWrapper.refreshTaskList);
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_RESUME, storeWrapper.refreshTaskList);
 
@@ -1227,6 +1228,7 @@ describe('storeEventsWrapper', () => {
       expect(mockMergedTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function));
       expect(mockMergedTask.on).toHaveBeenCalledWith(TASK_EVENTS.AGENT_WRAPPEDUP, expect.any(Function));
       expect(mockMergedTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_REJECT, expect.any(Function));
+      expect(mockMergedTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_OUTDIAL_FAILED, expect.any(Function));
     });
 
     describe('customStates on hydration', () => {
@@ -1476,6 +1478,35 @@ describe('storeEventsWrapper', () => {
 
       // Ensure handleTaskRemove is called with the correct task object
       expect(removeSpy).toHaveBeenCalledWith(rejectTask);
+    });
+
+    it('should handle outdial failed event and call onOutdialFailed with the provided reason', () => {
+      const outdialTask: ITask = {
+        data: {interactionId: 'outdialTest', interaction: {state: 'connected'}},
+        on: jest.fn(),
+        off: jest.fn(),
+      } as unknown as ITask;
+
+      const outdialTaskOnSpy = jest.spyOn(outdialTask, 'on');
+      const onOutdialFailedMock = jest.fn();
+
+      storeWrapper.setOutdialFailed(onOutdialFailedMock);
+      storeWrapper['store'].cc.taskManager.getAllTasks = jest
+        .fn()
+        .mockReturnValue({[outdialTask.data.interactionId]: outdialTask});
+      storeWrapper.refreshTaskList();
+      storeWrapper.handleIncomingTask(outdialTask);
+
+      const outdialFailedCall = outdialTaskOnSpy.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_OUTDIAL_FAILED);
+
+      expect(outdialFailedCall).toBeDefined();
+
+      const outdialFailedCallback = outdialFailedCall[1];
+      const reason = 'Outdial Failed Reason';
+
+      outdialFailedCallback(reason);
+
+      expect(onOutdialFailedMock).toHaveBeenCalledWith(reason);
     });
 
     it('should handle consultEnd event and reset queue consult state', () => {

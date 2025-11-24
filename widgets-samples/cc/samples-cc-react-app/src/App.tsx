@@ -61,6 +61,8 @@ function App() {
   const [showRejectedPopup, setShowRejectedPopup] = useState(false);
   const [rejectedReason, setRejectedReason] = useState('');
   const [selectedState, setSelectedState] = useState('');
+  const [showOutdialFailedModal, setShowOutdialFailedModal] = useState(false);
+  const [outdialFailedReason, setOutdialFailedReason] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [incomingTasks, setIncomingTasks] = useState([]);
   const [loginType, setLoginType] = useState('token');
@@ -350,16 +352,40 @@ function App() {
   useEffect(() => {
     store.setIncomingTaskCb(onIncomingTaskCB);
     store.setOnError(onError);
+    store.setOutdialFailed(onOutdialFailed);
 
     return () => {
       store.setOnError(undefined);
       store.setTaskRejected(undefined);
+      store.setOutdialFailed(undefined);
       store.setIncomingTaskCb(undefined);
     };
   }, []);
 
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && showOutdialFailedModal) {
+        setShowOutdialFailedModal(false);
+      }
+    };
+
+    if (showOutdialFailedModal) {
+      window.addEventListener('keydown', handleEscape);
+    }
+
+    return () => {
+      window.removeEventListener('keydown', handleEscape);
+    };
+  }, [showOutdialFailedModal]);
+
   const onError = (widgetName: string, error: Error) => {
     console.log('Error in widgets:', widgetName, error);
+  };
+
+  const onOutdialFailed = (reason: string) => {
+    console.log('Outdial failed:', reason);
+    setOutdialFailedReason(reason);
+    setShowOutdialFailedModal(true);
   };
 
   const onStateChange = (status) => {
@@ -899,6 +925,22 @@ function App() {
                     Confirm State Change
                   </Button>
                 </div>
+              </div>
+            )}
+
+            {showOutdialFailedModal && (
+              <div className="task-rejected-popup" data-testid="samples:outdial-failed-modal">
+                <button className="close-btn" onClick={() => setShowOutdialFailedModal(false)}>
+                  ×
+                </button>
+                <Text>
+                  <div style={{textAlign: 'center', fontSize: '1.25rem', fontWeight: 600}}>Outdial Failed</div>
+                </Text>
+                <Text>
+                  <div style={{fontSize: '0.875rem', textAlign: 'center', color: 'rgb(171, 10, 21)'}}>
+                    Reason: {outdialFailedReason}
+                  </div>
+                </Text>
               </div>
             )}
 

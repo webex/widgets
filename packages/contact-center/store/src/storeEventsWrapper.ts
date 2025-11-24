@@ -37,6 +37,7 @@ class StoreWrapper implements IStoreWrapper {
   store: IStore;
   onIncomingTask: ({task}: {task: ITask}) => void;
   onTaskRejected?: (task: ITask, reason: string) => void;
+  onOutdialFailed?: (reason: string) => void;
   onTaskAssigned?: (task: ITask) => void;
   onTaskSelected?: (task: ITask, isClicked: boolean) => void;
   onErrorCallback?: (widgetName: string, error: Error) => void;
@@ -313,6 +314,10 @@ class StoreWrapper implements IStoreWrapper {
     this.onTaskRejected = callback;
   };
 
+  setOutdialFailed = (callback: ((reason: string) => void) | undefined): void => {
+    this.onOutdialFailed = callback;
+  };
+
   setTaskAssigned = (callback: ((task: ITask) => void) | undefined): void => {
     this.onTaskAssigned = callback;
   };
@@ -381,6 +386,7 @@ class StoreWrapper implements IStoreWrapper {
       taskToRemove.off(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
       taskToRemove.off(TASK_EVENTS.TASK_END, this.handleTaskEnd);
       taskToRemove.off(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(taskToRemove, reason));
+      taskToRemove.off(TASK_EVENTS.TASK_OUTDIAL_FAILED, (reason) => this.handleOutdialFailed(reason));
       taskToRemove.off(TASK_EVENTS.AGENT_WRAPPEDUP, this.refreshTaskList);
       taskToRemove.off(TASK_EVENTS.TASK_CONSULTING, this.handleConsulting);
       taskToRemove.off(TASK_EVENTS.TASK_OFFER_CONSULT, this.handleConsultOffer);
@@ -527,6 +533,9 @@ class StoreWrapper implements IStoreWrapper {
     // When we receive TASK_REJECT that means the task was not accepted by the agent and we wont need wrap up
     task.on(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(task, reason));
 
+    // When we receive TASK_OUTDIAL_FAILED the outdial call failed
+    task.on(TASK_EVENTS.TASK_OUTDIAL_FAILED, (reason) => this.handleOutdialFailed(reason));
+
     task.on(TASK_EVENTS.AGENT_WRAPPEDUP, this.refreshTaskList);
 
     task.on(TASK_EVENTS.TASK_CONSULTING, this.handleConsulting);
@@ -644,6 +653,12 @@ class StoreWrapper implements IStoreWrapper {
       this.onTaskRejected(task, reason || 'No reason provided');
     }
     this.refreshTaskList();
+  };
+
+  handleOutdialFailed = (reason: string) => {
+    if (this.onOutdialFailed) {
+      this.onOutdialFailed(reason || 'No reason provided');
+    }
   };
 
   getBuddyAgents = async (
