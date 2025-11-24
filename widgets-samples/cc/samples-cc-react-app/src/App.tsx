@@ -80,6 +80,10 @@ function App() {
     const savedMultiPartyConferenceEnabled = window.localStorage.getItem('conferenceEnabled');
     return savedMultiPartyConferenceEnabled !== null ? savedMultiPartyConferenceEnabled === 'true' : true;
   });
+  const [hideDesktopLogin, setHideDesktopLogin] = useState(() => {
+    const savedHideDesktopLogin = window.localStorage.getItem('hideDesktopLogin');
+    return savedHideDesktopLogin === 'true';
+  });
 
   const handleSaveStart = () => {
     setShowLoader(true);
@@ -348,6 +352,9 @@ function App() {
   useEffect(() => {
     window.localStorage.setItem('conferenceEnabled', JSON.stringify(conferenceEnabled));
   }, [conferenceEnabled]);
+  useEffect(() => {
+    window.localStorage.setItem('hideDesktopLogin', JSON.stringify(hideDesktopLogin));
+  }, [hideDesktopLogin]);
 
   useEffect(() => {
     store.setIncomingTaskCb(onIncomingTaskCB);
@@ -570,16 +577,6 @@ function App() {
                       }}
                     />
                     <Checkbox
-                      checked={doStationLogout}
-                      aria-label="theme checkbox"
-                      id="theme-checkbox"
-                      label="Do Station Logout"
-                      // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
-                      onchange={() => {
-                        setDoStationLogout(!doStationLogout);
-                      }}
-                    />
-                    <Checkbox
                       checked={integrationEnv}
                       aria-label="integration env checkbox"
                       id="integration-env-checkbox"
@@ -738,6 +735,29 @@ function App() {
                     <section className="section-box">
                       <fieldset className="fieldset">
                         <legend className="legend-box">Station Login</legend>
+                        <div style={{marginBottom: '15px'}}>
+                          <Checkbox
+                            data-testid="samples:hide-desktop-login-checkbox"
+                            checked={hideDesktopLogin}
+                            aria-label="hide desktop login checkbox"
+                            id="hide-desktop-login-checkbox"
+                            label="Hide Desktop Login Mode"
+                            // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
+                            onchange={() => {
+                              setHideDesktopLogin(!hideDesktopLogin);
+                            }}
+                          />
+                          <Checkbox
+                            checked={doStationLogout}
+                            aria-label="do station logout checkbox"
+                            id="do-station-logout-checkbox"
+                            label="Do Station Logout"
+                            // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
+                            onchange={() => {
+                              setDoStationLogout(!doStationLogout);
+                            }}
+                          />
+                        </div>
                         <div className="station-login">
                           <StationLogin
                             onLogin={onLogin}
@@ -745,6 +765,7 @@ function App() {
                             onCCSignOut={onCCSignOut}
                             profileMode={false}
                             doStationLogout={doStationLogout}
+                            hideDesktopLogin={hideDesktopLogin}
                           />
                         </div>
                       </fieldset>
@@ -756,8 +777,26 @@ function App() {
                     <section className="section-box">
                       <fieldset className="fieldset">
                         <legend className="legend-box">Station Login (Profile Mode)</legend>
+                        <div style={{marginBottom: '15px'}}>
+                          <Checkbox
+                            data-testid="samples:hide-desktop-login-profile-checkbox"
+                            checked={hideDesktopLogin}
+                            aria-label="hide desktop login checkbox"
+                            id="hide-desktop-login-profile-checkbox"
+                            label="Hide Desktop Login Mode"
+                            // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
+                            onchange={() => {
+                              setHideDesktopLogin(!hideDesktopLogin);
+                            }}
+                          />
+                        </div>
                         <div className="station-login">
-                          <StationLogin profileMode={true} onSaveStart={handleSaveStart} onSaveEnd={handleSaveEnd} />
+                          <StationLogin
+                            profileMode={true}
+                            onSaveStart={handleSaveStart}
+                            onSaveEnd={handleSaveEnd}
+                            hideDesktopLogin={hideDesktopLogin}
+                          />
                         </div>
                       </fieldset>
                     </section>

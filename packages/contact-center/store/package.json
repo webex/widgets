@@ -2,7 +2,7 @@
   "name": "@webex/cc-store",
   "description": "Webex Contact Center Widgets: Widgets Store",
   "license": "Cisco's General Terms (https://www.cisco.com/site/us/en/about/legal/contract-experience/index.html)",
-  "version": "1.28.0-ccwidgets.124",
+  "version": "1.28.0-ccwidgets.125",
   "main": "dist/index.js",
   "types": "dist/types/index.d.ts",
   "publishConfig": {

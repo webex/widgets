@@ -48,6 +48,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
     selectedDeviceType,
     dialNumberValue,
     setSelectedTeamId,
+    hideDesktopLogin,
   } = props;
 
   const [dialNumberLabel, setDialNumberLabel] = useState<string>('');
@@ -58,6 +59,9 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
   const [showDNError, setShowDNError] = useState<boolean>(false);
   const [dnErrorText, setDNErrorText] = useState<string>('');
   const {multiSignInModalRef, ccSignOutModalRef, saveConfirmDialogRef} = createStationLoginRefs(logger);
+
+  // Filter out Desktop mode if hideDesktopLogin is true
+  const filteredLoginOptions = hideDesktopLogin ? loginOptions.filter((option) => option !== DESKTOP) : loginOptions;
 
   useEffect(() => {
     if (deviceType !== DESKTOP && Object.keys(LoginOptions).includes(deviceType)) {
@@ -227,8 +231,8 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
                 selectedValueText={LoginOptions[selectedDeviceType]}
               >
                 {Object.keys(LoginOptions).map((option: string, index: number) => {
-                  // only show loginOptions provided by store
-                  if (loginOptions.includes(option)) {
+                  // only show loginOptions provided by store and filtered by hideDesktopLogin
+                  if (filteredLoginOptions.includes(option)) {
                     return (
                       <Option
                         selected={option === selectedDeviceType}

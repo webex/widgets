@@ -1,3 +1,10 @@
+# [1.28.0-ccwidgets.125](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.124...v1.28.0-ccwidgets.125) (2025-11-21)
+
+
+### Bug Fixes
+
+* **station-login:** visibility toggle for desktop login ([#554](https://github.com/webex/widgets/issues/554)) ([f657c7e](https://github.com/webex/widgets/commit/f657c7ecde7cee3e70d6f20f483b731c144a6368))
+
 # [1.28.0-ccwidgets.124](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.123...v1.28.0-ccwidgets.124) (2025-11-13)
 
 

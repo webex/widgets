@@ -227,3 +227,31 @@ export async function ensureUserStateVisible(page: Page, loginMode: string, numb
     await expect(page.getByTestId('state-select')).toBeVisible({timeout: LONG_WAIT});
   }
 }
+
+/**
+ * Verifies if Desktop login option is visible or hidden in the login dropdown
+ * @param page - The Playwright page object
+ * @param shouldBeVisible - Whether Desktop option should be visible (true) or hidden (false)
+ * @throws {Error} When the Desktop option visibility doesn't match expectation
+ * @example
+ * ```typescript
+ * // Verify Desktop is visible
+ * await verifyDesktopOptionVisibility(page, true);
+ *
+ * // Verify Desktop is hidden (when hideDesktopLogin is true)
+ * await verifyDesktopOptionVisibility(page, false);
+ * ```
+ */
+export async function verifyDesktopOptionVisibility(page: Page, shouldBeVisible: boolean): Promise<void> {
+  // Open the dropdown
+  await page.getByTestId('login-option-select').locator('#select-base-triggerid svg').click({timeout: AWAIT_TIMEOUT});
+
+  // Check Desktop option visibility
+  const desktopOption = page.getByTestId('login-option-Desktop');
+
+  if (shouldBeVisible) {
+    await expect(desktopOption).toBeVisible({timeout: AWAIT_TIMEOUT});
+  } else {
+    await expect(desktopOption).not.toBeVisible();
+  }
+}

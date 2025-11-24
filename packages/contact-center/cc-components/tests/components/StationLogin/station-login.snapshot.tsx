@@ -164,6 +164,63 @@ describe('Station Login Component', () => {
       container.querySelectorAll('[id^="mdc-input"]').forEach((el) => el.removeAttribute('id'));
       expect(container).toMatchSnapshot();
     });
+
+    it('hides Desktop login option when hideDesktopLogin is true', async () => {
+      const {container} = await render(
+        <StationLoginComponent
+          {...props}
+          loginOptions={['AGENT_DN', 'EXTENSION', 'BROWSER']}
+          hideDesktopLogin={true}
+          profileMode={false}
+        />
+      );
+      // Remove IDs to avoid snapshot issues with dynamic IDs
+      container.querySelectorAll('[id^="mdc-input"]').forEach((el) => el.removeAttribute('id'));
+      expect(container).toMatchSnapshot();
+    });
+
+    it('shows Desktop login option when hideDesktopLogin is false', async () => {
+      const {container} = await render(
+        <StationLoginComponent
+          {...props}
+          loginOptions={['AGENT_DN', 'EXTENSION', 'BROWSER']}
+          hideDesktopLogin={false}
+          profileMode={false}
+        />
+      );
+      // Remove IDs to avoid snapshot issues with dynamic IDs
+      container.querySelectorAll('[id^="mdc-input"]').forEach((el) => el.removeAttribute('id'));
+      expect(container).toMatchSnapshot();
+    });
+
+    it('shows Desktop login option when hideDesktopLogin is undefined', async () => {
+      const {container} = await render(
+        <StationLoginComponent
+          {...props}
+          loginOptions={['AGENT_DN', 'EXTENSION', 'BROWSER']}
+          hideDesktopLogin={undefined}
+          profileMode={false}
+        />
+      );
+      // Remove IDs to avoid snapshot issues with dynamic IDs
+      container.querySelectorAll('[id^="mdc-input"]').forEach((el) => el.removeAttribute('id'));
+      expect(container).toMatchSnapshot();
+    });
+
+    it('hides Desktop login option in profile mode when hideDesktopLogin is true', async () => {
+      const {container} = await render(
+        <StationLoginComponent
+          {...props}
+          loginOptions={['AGENT_DN', 'EXTENSION', 'BROWSER']}
+          hideDesktopLogin={true}
+          profileMode={true}
+          isAgentLoggedIn={true}
+        />
+      );
+      // Remove IDs to avoid snapshot issues with dynamic IDs
+      container.querySelectorAll('[id^="mdc-input"]').forEach((el) => el.removeAttribute('id'));
+      expect(container).toMatchSnapshot();
+    });
   });
 
   describe('Actions', () => {
