@@ -1,0 +1,203 @@
+@startuml
+title Call Control CAD Widget Flow (Consult, Transfer)
+
+actor User
+participant "CallControlCAD Widget" as Widget
+participant "useCallControlCAD Hook" as Hook
+participant "CallControlCADComponent" as Component
+participant "Store" as Store
+participant "SDK" as SDK
+
+== Active Call with CAD ==
+
+SDK -> Store: emit('call.connected', {call, cadEnabled: true})
+activate Store
+
+Store -> Store: runInAction(() => setActiveCall(call, {cad: true}))
+Store --> Hook: Notify observers
+
+activate Hook
+Hook --> Component: {call, cadEnabled: true, handlers}
+deactivate Hook
+
+activate Component
+Component -> Component: Display CAD-enhanced controls
+Component -> Component: Show Consult/Transfer buttons
+deactivate Component
+
+deactivate Store
+
+== Initiate Consult ==
+
+User -> Component: Click Consult button
+activate Component
+
+Component -> Hook: onConsultClick()
+activate Hook
+
+Hook --> Component: Show consult dialog
+deactivate Hook
+
+User -> Component: Enter agent/number to consult
+Component -> Hook: onConsultStart(target)
+activate Hook
+
+Hook -> Store: runInAction(() => startConsult(target))
+activate Store
+
+Store -> SDK: startConsult(callId, target)
+SDK --> Store: Consult call initiated
+
+Store -> Store: Create consult call
+Store -> Store: Set original call on hold
+Store --> Hook: {originalCall: 'held', consultCall: 'active'}
+
+deactivate Store
+
+Hook --> Component: Updated call states
+deactivate Hook
+
+Component -> Component: Show both calls
+Component -> Component: Highlight active consult call
+deactivate Component
+
+== Switch Between Calls ==
+
+User -> Component: Click on original call
+activate Component
+
+Component -> Hook: onSwitchCall(originalCallId)
+activate Hook
+
+Hook -> Store: runInAction(() => switchCalls())
+activate Store
+
+Store -> SDK: holdCall(consultCallId)
+Store -> SDK: resumeCall(originalCallId)
+
+SDK --> Store: Calls switched
+
+Store -> Store: Update call states
+Store --> Hook: {originalCall: 'active', consultCall: 'held'}
+
+deactivate Store
+
+Hook --> Component: Updated states
+deactivate Hook
+
+Component -> Component: Update active call indicator
+deactivate Component
+
+== Complete Transfer ==
+
+User -> Component: Click Transfer button
+activate Component
+
+Component -> Hook: onTransferComplete()
+activate Hook
+
+Hook -> Store: runInAction(() => completeTransfer())
+activate Store
+
+Store -> SDK: transferCall(originalCallId, consultCallId)
+SDK --> Store: Transfer completed
+
+Store -> Store: Remove original call
+Store -> Store: Clear consult call
+Store --> Hook: {calls: []}
+
+deactivate Store
+
+Hook --> Component: Transfer successful
+deactivate Hook
+
+Component -> Component: Show success message
+Component -> Component: Clear call displays
+deactivate Component
+
+== Conference Calls ==
+
+User -> Component: Click Conference button
+activate Component
+
+Component -> Hook: onConferenceCreate()
+activate Hook
+
+Hook -> Store: runInAction(() => createConference())
+activate Store
+
+Store -> SDK: conferenceCall(originalCallId, consultCallId)
+SDK --> Store: Conference created
+
+Store -> Store: Merge calls into conference
+Store -> Store: Update call type: 'conference'
+Store --> Hook: {call: {type: 'conference', participants: 2}}
+
+deactivate Store
+
+Hook --> Component: Conference active
+deactivate Hook
+
+Component -> Component: Show conference controls
+Component -> Component: Display participant count
+deactivate Component
+
+== Direct Transfer ==
+
+User -> Component: Click Direct Transfer
+activate Component
+
+Component -> Hook: onDirectTransferClick()
+activate Hook
+
+Hook --> Component: Show transfer dialog
+deactivate Hook
+
+User -> Component: Enter transfer target
+Component -> Hook: onDirectTransfer(target)
+activate Hook
+
+Hook -> Store: runInAction(() => directTransfer(target))
+activate Store
+
+Store -> SDK: directTransfer(callId, target)
+SDK --> Store: Transfer initiated
+
+Store -> Store: Clear active call
+Store --> Hook: {call: null}
+
+deactivate Store
+
+Hook --> Component: Call transferred
+deactivate Hook
+
+Component -> Component: Show success & clear
+deactivate Component
+
+note right of Widget
+  CAD Widget adds:
+  - Consult calling
+  - Call transfer
+  - Conference
+  - Direct transfer
+end note
+
+note right of Store
+  Store manages:
+  - Multiple call states
+  - Consult call tracking
+  - Transfer operations
+  - Conference state
+end note
+
+note right of Component
+  Component displays:
+  - Multiple call views
+  - Consult/Transfer buttons
+  - Conference controls
+  - Call switch interface
+  - Transfer dialogs
+end note
+
+@enduml
+

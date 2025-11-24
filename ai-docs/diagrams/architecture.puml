@@ -1,0 +1,77 @@
+@startuml
+title Contact Center Widgets - Monorepo Architecture
+
+package "packages/contact-center" {
+  package "store" {
+    [Store Singleton]
+    [StoreWrapper]
+    [Event Handlers]
+  }
+  
+  package "cc-components" {
+    [React Components]
+    [ErrorBoundary]
+    [UI Primitives]
+  }
+  
+  package "cc-widgets" {
+    [Web Component Exports]
+    [r2wc Wrappers]
+  }
+  
+  package "station-login" {
+    [StationLogin Widget]
+    [useStationLogin Hook]
+  }
+  
+  package "user-state" {
+    [UserState Widget]
+    [useUserState Hook]
+  }
+  
+  package "task" {
+    [IncomingTask Widget]
+    [TaskList Widget]
+    [CallControl Widget]
+    [CallControlCAD Widget]
+    [OutdialCall Widget]
+  }
+  
+  package "ui-logging" {
+    [Logger Utilities]
+  }
+  
+  package "test-fixtures" {
+    [Test Data]
+    [Mock Factories]
+  }
+}
+
+[StationLogin Widget] --> [useStationLogin Hook]
+[useStationLogin Hook] --> [React Components]
+[useStationLogin Hook] --> [Store Singleton]
+
+[UserState Widget] --> [useUserState Hook]
+[useUserState Hook] --> [React Components]
+[useUserState Hook] --> [Store Singleton]
+
+[Web Component Exports] --> [StationLogin Widget]
+[Web Component Exports] --> [UserState Widget]
+[Web Component Exports] --> [IncomingTask Widget]
+
+[r2wc Wrappers] ..> [Web Component Exports]
+
+note right of [Store Singleton]
+  MobX state management
+  SDK integration
+  Event handling
+end note
+
+note right of [Web Component Exports]
+  Exposes widgets as
+  custom elements for
+  non-React consumers
+end note
+
+@enduml
+

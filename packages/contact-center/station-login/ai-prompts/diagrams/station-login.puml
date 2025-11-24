@@ -1,0 +1,114 @@
+@startuml
+title Station Login Widget Flow
+
+actor User
+participant "StationLogin Widget" as Widget
+participant "useStationLogin Hook" as Hook
+participant "StationLoginComponent" as Component
+participant "Store" as Store
+participant "SDK" as SDK
+
+User -> Widget: Load widget
+activate Widget
+
+Widget -> Hook: useStationLogin()
+activate Hook
+
+Hook -> Store: getInstance()
+Store --> Hook: {configuration, teams, deviceTypes}
+
+Hook --> Widget: {state, handlers}
+deactivate Hook
+
+Widget -> Component: Render with state
+activate Component
+
+Component -> Component: Display teams dropdown
+Component -> Component: Display device types
+Component --> Widget: UI rendered
+
+deactivate Component
+deactivate Widget
+
+== User Selects Team ==
+
+User -> Component: Select team from dropdown
+activate Component
+
+Component -> Hook: onTeamChange(teamId)
+activate Hook
+
+Hook -> Store: runInAction(() => setSelectedTeam(teamId))
+Store --> Hook: Updated state
+
+Hook --> Component: New state
+deactivate Hook
+
+Component -> Component: Update UI
+deactivate Component
+
+== User Selects Device Type ==
+
+User -> Component: Select device type (Extension/Mobile)
+activate Component
+
+Component -> Hook: onDeviceTypeChange(type)
+activate Hook
+
+Hook -> Store: runInAction(() => setDeviceType(type))
+Store --> Hook: Updated state
+
+Hook --> Component: New state
+deactivate Hook
+
+Component -> Component: Show appropriate fields
+deactivate Component
+
+== User Submits Login ==
+
+User -> Component: Click Login button
+activate Component
+
+Component -> Hook: onLoginClick(credentials)
+activate Hook
+
+Hook -> Store: runInAction(() => login(credentials))
+activate Store
+
+Store -> SDK: login({extension, team, deviceType})
+SDK --> Store: Success/Error
+
+Store --> Hook: Login result
+deactivate Store
+
+Hook --> Component: Updated state
+deactivate Hook
+
+Component -> Component: Show success/error
+deactivate Component
+
+note right of Widget
+  Widget Responsibilities:
+  - Error boundary wrapper
+  - Hook consumption
+  - Component composition
+end note
+
+note right of Hook
+  Hook Responsibilities:
+  - Store subscription
+  - Team/device selection
+  - Login logic
+  - State management
+end note
+
+note right of Component
+  Component Responsibilities:
+  - Form rendering
+  - User input handling
+  - Validation
+  - UI feedback
+end note
+
+@enduml
+

@@ -1,0 +1,79 @@
+@startuml
+title Web Component Creation - React to Custom Element
+
+participant "r2wc Library" as R2WC
+participant "React Component" as React
+participant "Custom Element" as CE
+participant "DOM" as DOM
+
+React -> R2WC: r2wc(ComponentCCStationLogin, { props })
+activate R2WC
+
+R2WC -> CE: Create CustomElement class
+activate CE
+
+CE -> CE: Define observed attributes
+CE -> CE: Map props to attributes
+
+R2WC -> DOM: customElements.define('widget-cc-station-login', CE)
+DOM --> R2WC: Registered
+
+deactivate CE
+deactivate R2WC
+
+== Usage in HTML ==
+
+DOM -> CE: <widget-cc-station-login></widget-cc-station-login>
+activate CE
+
+CE -> CE: connectedCallback()
+CE -> React: ReactDOM.render(<ComponentCCStationLogin />)
+activate React
+
+React -> React: Initialize component
+React --> CE: Rendered
+
+deactivate React
+
+== Prop Update ==
+
+DOM -> CE: setAttribute('theme', 'dark')
+CE -> CE: attributeChangedCallback()
+CE -> React: Update props
+activate React
+
+React -> React: Re-render with new props
+React --> CE: Updated
+
+deactivate React
+
+== Cleanup ==
+
+DOM -> CE: Remove from DOM
+CE -> CE: disconnectedCallback()
+CE -> React: ReactDOM.unmountComponentAtNode()
+activate React
+
+React -> React: Cleanup
+React --> CE: Unmounted
+
+deactivate React
+deactivate CE
+
+note right of R2WC
+  r2wc library:
+  - Wraps React components
+  - Creates Custom Elements
+  - Manages lifecycle
+  - Maps props ↔ attributes
+end note
+
+note right of CE
+  Custom Element:
+  - Dual export strategy
+  - Native Web Component API
+  - Framework-agnostic
+end note
+
+@enduml
+

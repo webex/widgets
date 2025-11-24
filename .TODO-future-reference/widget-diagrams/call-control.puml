@@ -1,0 +1,186 @@
+@startuml
+title Call Control Widget Flow
+
+actor User
+participant "CallControl Widget" as Widget
+participant "useCallControl Hook" as Hook
+participant "CallControlComponent" as Component
+participant "Store" as Store
+participant "SDK" as SDK
+
+== Active Call ==
+
+SDK -> Store: emit('call.connected', callData)
+activate Store
+
+Store -> Store: runInAction(() => setActiveCall(callData))
+Store --> Hook: Notify observers
+
+activate Hook
+Hook --> Component: {call: callData, handlers}
+deactivate Hook
+
+activate Component
+Component -> Component: Display call controls
+Component -> Component: Show call duration
+Component -> Component: Enable Hold/Resume button
+deactivate Component
+
+deactivate Store
+
+== Hold Call ==
+
+User -> Component: Click Hold button
+activate Component
+
+Component -> Hook: onHoldCall()
+activate Hook
+
+Hook -> Store: runInAction(() => holdCall())
+activate Store
+
+Store -> SDK: holdCall(callId)
+SDK --> Store: Call on hold
+
+Store -> Store: Update call state: 'held'
+Store --> Hook: {call: {state: 'held'}}
+
+deactivate Store
+
+Hook --> Component: Updated call state
+deactivate Hook
+
+Component -> Component: Change Hold → Resume button
+Component -> Component: Show hold indicator
+deactivate Component
+
+== Resume Call ==
+
+User -> Component: Click Resume button
+activate Component
+
+Component -> Hook: onResumeCall()
+activate Hook
+
+Hook -> Store: runInAction(() => resumeCall())
+activate Store
+
+Store -> SDK: resumeCall(callId)
+SDK --> Store: Call resumed
+
+Store -> Store: Update call state: 'connected'
+Store --> Hook: {call: {state: 'connected'}}
+
+deactivate Store
+
+Hook --> Component: Updated call state
+deactivate Hook
+
+Component -> Component: Change Resume → Hold button
+Component -> Component: Hide hold indicator
+deactivate Component
+
+== Start Recording ==
+
+User -> Component: Click Record button
+activate Component
+
+Component -> Hook: onStartRecording()
+activate Hook
+
+Hook -> Store: runInAction(() => startRecording())
+activate Store
+
+Store -> SDK: startRecording(callId)
+SDK --> Store: Recording started
+
+Store -> Store: Set recording: true
+Store --> Hook: {call: {recording: true}}
+
+deactivate Store
+
+Hook --> Component: Recording active
+deactivate Hook
+
+Component -> Component: Show recording indicator
+Component -> Component: Enable Stop Recording button
+deactivate Component
+
+== End Call ==
+
+User -> Component: Click End button
+activate Component
+
+Component -> Hook: onEndCall()
+activate Hook
+
+Hook -> Store: runInAction(() => endCall())
+activate Store
+
+Store -> SDK: endCall(callId)
+SDK --> Store: Call ended
+
+Store -> Store: Clear active call
+Store -> Store: Show wrapup if required
+Store --> Hook: {call: null, wrapup: true}
+
+deactivate Store
+
+Hook --> Component: Enter wrapup mode
+deactivate Hook
+
+Component -> Component: Show wrapup form
+deactivate Component
+
+== Complete Wrapup ==
+
+User -> Component: Select wrapup code & submit
+activate Component
+
+Component -> Hook: onWrapupComplete(wrapupData)
+activate Hook
+
+Hook -> Store: runInAction(() => completeWrapup(wrapupData))
+activate Store
+
+Store -> SDK: completeWrapup(callId, wrapupData)
+SDK --> Store: Wrapup completed
+
+Store -> Store: Clear wrapup state
+Store --> Hook: {wrapup: false}
+
+deactivate Store
+
+Hook --> Component: Wrapup complete
+deactivate Hook
+
+Component -> Component: Hide wrapup form
+Component -> Component: Return to ready state
+deactivate Component
+
+note right of Widget
+  Widget controls:
+  - Call lifecycle
+  - Call actions
+  - Wrapup flow
+end note
+
+note right of Store
+  Store manages:
+  - Active call state
+  - Hold/Resume state
+  - Recording state
+  - Wrapup requirements
+end note
+
+note right of Component
+  Component displays:
+  - Hold/Resume toggle
+  - End call button
+  - Recording controls
+  - Call duration timer
+  - Wrapup form
+end note
+
+@enduml
+

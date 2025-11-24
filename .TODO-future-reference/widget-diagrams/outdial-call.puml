@@ -1,0 +1,199 @@
+@startuml
+title Outdial Call Widget Flow
+
+actor User
+participant "OutdialCall Widget" as Widget
+participant "useOutdialCall Hook" as Hook
+participant "OutdialCallComponent" as Component
+participant "Store" as Store
+participant "SDK" as SDK
+
+== Widget Initialization ==
+
+Widget -> Hook: useOutdialCall()
+activate Hook
+
+Hook -> Store: getInstance()
+Store --> Hook: {outdialEntryPoints, ani, agentState}
+
+Hook --> Widget: {entryPoints, ani, handlers}
+deactivate Hook
+
+Widget -> Component: Render outdial form
+activate Component
+
+Component -> Component: Display ANI selector
+Component -> Component: Display entry point dropdown
+Component -> Component: Display destination field
+deactivate Component
+
+== User Selects ANI ==
+
+User -> Component: Select ANI from dropdown
+activate Component
+
+Component -> Hook: onANIChange(aniId)
+activate Hook
+
+Hook -> Store: runInAction(() => setSelectedANI(aniId))
+Store --> Hook: Updated state
+
+Hook --> Component: {ani: selectedANI}
+deactivate Hook
+
+Component -> Component: Update ANI display
+deactivate Component
+
+== User Selects Entry Point ==
+
+User -> Component: Select entry point
+activate Component
+
+Component -> Hook: onEntryPointChange(entryPointId)
+activate Hook
+
+Hook -> Store: runInAction(() => setEntryPoint(entryPointId))
+Store --> Hook: Updated state
+
+Hook --> Component: {entryPoint: selected}
+deactivate Hook
+
+Component -> Component: Update form
+deactivate Component
+
+== User Enters Destination ==
+
+User -> Component: Enter phone number
+activate Component
+
+Component -> Component: Validate phone format
+Component -> Component: Enable Dial button
+deactivate Component
+
+== Initiate Outdial ==
+
+User -> Component: Click Dial button
+activate Component
+
+Component -> Hook: onDialClick({ani, entryPoint, destination})
+activate Hook
+
+Hook -> Store: runInAction(() => initiateOutdial(params))
+activate Store
+
+Store -> SDK: makeOutdialCall({
+  ani: selectedANI,
+  entryPoint: selectedEntryPoint,
+  destination: phoneNumber
+})
+
+SDK --> Store: Outdial initiated
+
+Store -> Store: Create outbound call
+Store -> Store: Set call state: 'dialing'
+Store --> Hook: {call: {state: 'dialing', direction: 'outbound'}}
+
+deactivate Store
+
+Hook --> Component: Call dialing
+deactivate Hook
+
+Component -> Component: Show dialing indicator
+Component -> Component: Disable form
+Component -> Component: Enable Cancel button
+deactivate Component
+
+== Call Connects ==
+
+SDK -> Store: emit('call.connected', callData)
+activate Store
+
+Store -> Store: runInAction(() => updateCallState('connected'))
+Store --> Hook: {call: {state: 'connected'}}
+
+activate Hook
+Hook --> Component: Call connected
+deactivate Hook
+
+activate Component
+Component -> Component: Show call duration
+Component -> Component: Enable call controls
+deactivate Component
+
+deactivate Store
+
+== User Cancels During Dial ==
+
+User -> Component: Click Cancel button
+activate Component
+
+Component -> Hook: onCancelOutdial()
+activate Hook
+
+Hook -> Store: runInAction(() => cancelOutdial())
+activate Store
+
+Store -> SDK: endCall(callId)
+SDK --> Store: Call cancelled
+
+Store -> Store: Clear call state
+Store --> Hook: {call: null}
+
+deactivate Store
+
+Hook --> Component: Call cancelled
+deactivate Hook
+
+Component -> Component: Reset form
+Component -> Component: Enable Dial button
+deactivate Component
+
+== Call Fails ==
+
+SDK -> Store: emit('call.failed', {reason})
+activate Store
+
+Store -> Store: runInAction(() => handleOutdialFailure(reason))
+Store --> Hook: {call: null, error: reason}
+
+activate Hook
+Hook --> Component: {error: 'Call failed'}
+deactivate Hook
+
+activate Component
+Component -> Component: Show error message
+Component -> Component: Reset form
+Component -> Component: Enable retry
+deactivate Component
+
+deactivate Store
+
+note right of Widget
+  Widget manages:
+  - Outdial initiation
+  - ANI selection
+  - Entry point selection
+  - Form validation
+end note
+
+note right of Store
+  Store handles:
+  - Available ANIs
+  - Entry points
+  - Outdial call state
+  - Call progress
+  - Error handling
+end note
+
+note right of Component
+  Component displays:
+  - ANI dropdown
+  - Entry point selector
+  - Destination input
+  - Dial/Cancel buttons
+  - Call progress
+  - Error messages
+end note
+
+@enduml
+

@@ -1,0 +1,166 @@
+@startuml
+title Task List Widget Flow
+
+actor User
+participant "TaskList Widget" as Widget
+participant "useTaskList Hook" as Hook
+participant "TaskListComponent" as Component
+participant "Store" as Store
+participant "SDK" as SDK
+
+== Widget Initialization ==
+
+Widget -> Hook: useTaskList()
+activate Hook
+
+Hook -> Store: getInstance()
+Store --> Hook: {activeTasks: [], selectedTask: null}
+
+Hook --> Widget: {tasks, selectedTask, handlers}
+deactivate Hook
+
+Widget -> Component: Render tasks
+activate Component
+
+Component -> Component: Display task list
+Component -> Component: Show empty state if no tasks
+deactivate Component
+
+== New Task Added ==
+
+SDK -> Store: emit('task.accepted', taskData)
+activate Store
+
+Store -> Store: runInAction(() => addTask(taskData))
+Store --> Hook: Notify observers
+
+activate Hook
+Hook --> Component: {tasks: [...tasks, newTask]}
+deactivate Hook
+
+activate Component
+Component -> Component: Add task to list
+Component -> Component: Highlight new task
+deactivate Component
+
+deactivate Store
+
+== User Selects Task ==
+
+User -> Component: Click on task in list
+activate Component
+
+Component -> Hook: onTaskSelect(taskId)
+activate Hook
+
+Hook -> Store: runInAction(() => setSelectedTask(taskId))
+activate Store
+
+Store -> SDK: setActiveTask(taskId)
+SDK --> Store: Task activated
+
+Store --> Hook: {selectedTask: taskId}
+deactivate Store
+
+Hook --> Component: {selectedTask: taskId}
+deactivate Hook
+
+Component -> Component: Highlight selected task
+Component -> Component: Show task details
+deactivate Component
+
+== Task State Change ==
+
+SDK -> Store: emit('task.statechange', {taskId, newState})
+activate Store
+
+Store -> Store: runInAction(() => updateTaskState(taskId, newState))
+Store --> Hook: Notify observers
+
+activate Hook
+Hook --> Component: {tasks: updatedTasks}
+deactivate Hook
+
+activate Component
+Component -> Component: Update task status badge
+Component -> Component: Update task icon
+deactivate Component
+
+deactivate Store
+
+== User Ends Task ==
+
+User -> Component: Click End Task button
+activate Component
+
+Component -> Hook: onEndTask(taskId)
+activate Hook
+
+Hook -> Store: runInAction(() => endTask(taskId))
+activate Store
+
+Store -> SDK: endTask(taskId)
+SDK --> Store: Task ended
+
+Store -> Store: Remove from active tasks
+Store --> Hook: {tasks: remainingTasks}
+
+deactivate Store
+
+Hook --> Component: {tasks: remainingTasks}
+deactivate Hook
+
+Component -> Component: Remove task from list
+Component -> Component: Select next task if available
+deactivate Component
+
+== Multi-Task Handling ==
+
+User -> Component: Switch between tasks
+activate Component
+
+Component -> Hook: onTaskSwitch(taskId)
+activate Hook
+
+Hook -> Store: runInAction(() => switchTask(taskId))
+activate Store
+
+Store -> SDK: setActiveTask(taskId)
+Store -> Store: Update task order (bring to top)
+
+Store --> Hook: Updated task list
+deactivate Store
+
+Hook --> Component: {tasks: reorderedTasks}
+deactivate Hook
+
+Component -> Component: Reorder task list
+Component -> Component: Focus on selected task
+deactivate Component
+
+note right of Widget
+  Widget manages:
+  - Multiple active tasks
+  - Task selection
+  - Task lifecycle
+end note
+
+note right of Store
+  Store handles:
+  - Active task collection
+  - Task state tracking
+  - Selected task pointer
+  - Task ordering
+end note
+
+note right of Component
+  Component displays:
+  - Task list with status
+  - Task details panel
+  - Selected task highlight
+  - Task count badge
+  - Action buttons per task
+end note
+
+@enduml
+

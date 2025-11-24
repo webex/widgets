@@ -1,0 +1,73 @@
+@startuml
+title SDK Event Handling Flow
+
+participant "SDK" as SDK
+participant "StoreWrapper" as Wrapper
+participant "Store" as Store
+participant "Observer Component" as Comp
+
+== Initialization ==
+
+Store -> Wrapper: new StoreWrapper(sdk)
+activate Wrapper
+
+Wrapper -> SDK: sdk.on('agent.statechange', handler)
+Wrapper -> SDK: sdk.on('task.incoming', handler)
+Wrapper -> SDK: sdk.on('call.statechange', handler)
+
+Wrapper --> Store: Wrapped SDK with listeners
+deactivate Wrapper
+
+Store -> Comp: getInstance()
+Comp -> Comp: observer() HOC
+
+== Event Occurs ==
+
+SDK -> Wrapper: emit('agent.statechange', data)
+activate Wrapper
+
+Wrapper -> Store: runInAction(() => ...)
+activate Store
+
+Store -> Store: Update observable state
+Store --> Wrapper: State updated
+
+deactivate Store
+
+Wrapper --> Comp: MobX notification
+deactivate Wrapper
+
+Comp -> Comp: Re-render with new state
+
+== Cleanup ==
+
+Comp -> Comp: useEffect cleanup
+Comp -> Store: Remove references
+Store -> Wrapper: Cleanup
+activate Wrapper
+
+Wrapper -> SDK: sdk.off('agent.statechange', handler)
+Wrapper -> SDK: sdk.off('task.incoming', handler)
+Wrapper -> SDK: sdk.off('call.statechange', handler)
+
+Wrapper --> Store: Listeners removed
+deactivate Wrapper
+
+note right of Wrapper
+  StoreWrapper responsibilities:
+  - Event listener management
+  - Automatic cleanup
+  - State synchronization
+  - runInAction wrapping
+end note
+
+note right of Store
+  Store pattern:
+  - Singleton instance
+  - Observable state
+  - Event-driven updates
+  - Centralized state
+end note
+
+@enduml
+

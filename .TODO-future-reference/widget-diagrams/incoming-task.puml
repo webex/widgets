@@ -1,0 +1,145 @@
+@startuml
+title Incoming Task Widget Flow
+
+actor User
+participant "IncomingTask Widget" as Widget
+participant "useIncomingTask Hook" as Hook
+participant "IncomingTaskComponent" as Component
+participant "Store" as Store
+participant "SDK" as SDK
+
+== Widget Initialization ==
+
+Widget -> Hook: useIncomingTask()
+activate Hook
+
+Hook -> Store: getInstance()
+Store --> Hook: {incomingTask: null}
+
+Hook --> Widget: {task: null, handlers}
+deactivate Hook
+
+Widget -> Component: Render (no task)
+activate Component
+
+Component -> Component: Show empty state
+deactivate Component
+
+== Incoming Task Event ==
+
+SDK -> Store: emit('task.incoming', taskData)
+activate Store
+
+Store -> Store: runInAction(() => setIncomingTask(taskData))
+Store --> Hook: Notify observers
+
+activate Hook
+Hook --> Component: {task: taskData, handlers}
+deactivate Hook
+
+activate Component
+Component -> Component: Display task notification
+Component -> Component: Show Accept/Reject buttons
+Component -> Component: Display task details
+Component -> Component: Play notification sound
+deactivate Component
+
+== User Accepts Task ==
+
+User -> Component: Click Accept button
+activate Component
+
+Component -> Hook: onAcceptTask()
+activate Hook
+
+Hook -> Store: runInAction(() => acceptTask())
+activate Store
+
+Store -> SDK: acceptTask(taskId)
+SDK --> Store: Task accepted
+
+Store -> Store: Clear incoming task
+Store -> Store: Add to active tasks
+Store --> Hook: Updated state
+
+deactivate Store
+
+Hook --> Component: {task: null}
+deactivate Hook
+
+Component -> Component: Clear notification
+Component -> Component: Show success message
+deactivate Component
+
+== User Rejects Task ==
+
+User -> Component: Click Reject button
+activate Component
+
+Component -> Hook: onRejectTask()
+activate Hook
+
+Hook -> Store: runInAction(() => rejectTask())
+activate Store
+
+Store -> SDK: rejectTask(taskId)
+SDK --> Store: Task rejected
+
+Store -> Store: Clear incoming task
+Store --> Hook: Updated state
+
+deactivate Store
+
+Hook --> Component: {task: null}
+deactivate Hook
+
+Component -> Component: Clear notification
+deactivate Component
+
+== Auto-Decline Timeout ==
+
+Store -> Store: Task timeout expires
+activate Store
+
+Store -> SDK: rejectTask(taskId, 'timeout')
+SDK --> Store: Task auto-declined
+
+Store -> Store: Clear incoming task
+Store --> Hook: Updated state
+
+activate Hook
+Hook --> Component: {task: null}
+deactivate Hook
+
+activate Component
+Component -> Component: Show timeout message
+deactivate Component
+
+deactivate Store
+
+note right of Widget
+  Widget handles:
+  - Error boundaries
+  - Hook integration
+  - Lifecycle management
+end note
+
+note right of Store
+  Store manages:
+  - Incoming task state
+  - Accept/Reject logic
+  - Timeout handling
+  - Task history
+end note
+
+note right of Component
+  Component displays:
+  - Task notification
+  - Task details
+  - Accept/Reject buttons
+  - Audio/visual alerts
+  - Timeout countdown
+end note
+
+@enduml
+

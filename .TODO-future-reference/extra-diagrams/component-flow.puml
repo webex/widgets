@@ -1,0 +1,77 @@
+@startuml
+title Widget Component Flow - Three-Layer Architecture
+
+actor "Application" as App
+participant "Widget Layer" as Widget
+participant "Hook Layer" as Hook
+participant "Component Layer" as Component
+participant "MobX Store" as Store
+participant "SDK" as SDK
+
+App -> Widget: <ComponentCCStationLogin />
+activate Widget
+
+Widget -> Widget: Error boundary wrapper
+Widget -> Hook: useStationLogin()
+activate Hook
+
+Hook -> Store: getInstance()
+activate Store
+
+Store -> SDK: getConfiguration()
+SDK --> Store: config data
+
+Store --> Hook: observable state
+Hook --> Widget: {state, handlers}
+
+deactivate Hook
+
+Widget -> Component: <StationLoginComponent />
+activate Component
+
+Component -> Component: Render UI
+Component -> Component: User interaction
+
+Component -> Hook: onLoginClick()
+activate Hook
+
+Hook -> Store: runInAction(() => ...)
+activate Store
+
+Store -> SDK: login(credentials)
+SDK --> Store: success/error
+
+Store --> Hook: updated state
+deactivate Store
+
+Hook --> Component: new state
+deactivate Hook
+
+Component -> Component: Re-render
+deactivate Component
+
+deactivate Widget
+
+note right of Widget
+  Widget Layer:
+  - Error boundary
+  - Hook consumption
+  - Component composition
+end note
+
+note right of Hook
+  Hook Layer:
+  - Store subscription
+  - Business logic
+  - Event handlers
+end note
+
+note right of Component
+  Component Layer:
+  - Pure presentation
+  - User interactions
+  - Local UI state
+end note
+
+@enduml
+

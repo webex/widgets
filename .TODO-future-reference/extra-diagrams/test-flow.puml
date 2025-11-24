@@ -1,0 +1,107 @@
+@startuml
+title Testing Flow - Jest & Playwright
+
+== Jest Unit Testing ==
+
+participant "Test File" as Test
+participant "Mock Store" as MockStore
+participant "Component" as Comp
+participant "React Testing Library" as RTL
+
+Test -> MockStore: Create mock with initial state
+activate MockStore
+
+MockStore --> Test: mockStore instance
+
+Test -> Test: Mock Store.getInstance()
+Test -> RTL: render(<Component />)
+activate RTL
+
+RTL -> Comp: Mount component
+activate Comp
+
+Comp -> MockStore: getInstance()
+MockStore --> Comp: mockStore
+
+Comp -> Comp: Render with mock data
+Comp --> RTL: Rendered output
+
+deactivate Comp
+RTL --> Test: screen queries
+
+Test -> RTL: fireEvent.click(button)
+RTL -> Comp: Trigger handler
+activate Comp
+
+Comp -> MockStore: Update state
+MockStore -> Comp: New state
+
+Comp -> Comp: Re-render
+Comp --> RTL: Updated output
+
+deactivate Comp
+RTL --> Test: Updated screen
+
+Test -> Test: expect(screen.getByText(...))
+
+deactivate RTL
+deactivate MockStore
+
+== Playwright E2E Testing ==
+
+participant "Playwright Test" as PW
+participant "Browser" as Browser
+participant "TestManager" as Manager
+participant "Application" as App
+
+PW -> Manager: new TestManager(config)
+activate Manager
+
+Manager -> Browser: Launch browser
+Browser --> Manager: page instance
+
+Manager -> Browser: Navigate to app
+Browser -> App: Load application
+App --> Browser: Rendered
+
+Manager --> PW: TestManager instance
+
+PW -> Manager: login(credentials)
+Manager -> Browser: page.fill('[data-testid="username"]')
+Manager -> Browser: page.click('[data-testid="login-btn"]')
+
+Browser -> App: Submit login
+App --> Browser: Dashboard loaded
+
+Manager --> PW: Login successful
+
+PW -> Manager: acceptTask()
+Manager -> Browser: page.click('[data-testid="accept-task"]')
+
+Browser -> App: Accept task
+App --> Browser: Task accepted
+
+Manager --> PW: Task accepted
+
+PW -> PW: expect(page.locator(...))
+
+deactivate Manager
+
+note right of MockStore
+  Jest Mocking:
+  - Mock Store.getInstance()
+  - Control state
+  - Verify interactions
+  - Isolate components
+end note
+
+note right of Manager
+  TestManager:
+  - Multi-agent scenarios
+  - Complex workflows
+  - Page object pattern
+  - Reusable helpers
+end note
+
+@enduml
+

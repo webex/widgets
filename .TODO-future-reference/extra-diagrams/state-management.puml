@@ -1,0 +1,66 @@
+@startuml
+title MobX State Management Pattern
+
+participant "Component" as Comp
+participant "observer() HOC" as Observer
+participant "Store Singleton" as Store
+participant "StoreWrapper" as Wrapper
+participant "SDK" as SDK
+
+Comp -> Observer: Use observer(Component)
+activate Observer
+
+Observer -> Store: getInstance()
+activate Store
+
+Store -> Wrapper: Proxy access
+activate Wrapper
+
+Wrapper -> Wrapper: Event listener setup
+Wrapper -> SDK: Subscribe to events
+SDK --> Wrapper: Event stream
+
+note right of Store
+  Store is:
+  - Singleton instance
+  - makeAutoObservable
+  - Reactive state
+end note
+
+Wrapper --> Store: Wrapped SDK
+deactivate Wrapper
+
+Store --> Observer: Observable state
+Observer --> Comp: Reactive data
+
+note right of Observer
+  Observer:
+  - Auto-subscribes to observables
+  - Re-renders on state change
+  - Cleanup on unmount
+end note
+
+== State Mutation ==
+
+Comp -> Comp: User action
+Comp -> Store: runInAction(() => ...)
+activate Store
+
+Store -> Store: Mutate observable
+Store -> SDK: API call
+SDK --> Store: Response
+
+Store --> Observer: Notify observers
+deactivate Store
+
+Observer -> Comp: Re-render
+
+deactivate Observer
+
+note bottom
+  All state mutations MUST use runInAction()
+  to ensure MobX tracks changes correctly
+end note
+
+@enduml
+
