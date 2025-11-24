@@ -3,7 +3,7 @@ run-name: ${{ github.actor }} is running Deploy CD
 
 on:
   push:
-    branches: # White-list of deployable tags and branches. Note that all white-listed branches cannot include any `/` characters
+    branches: # Allow list of deployable tags and branches. Note that all allow-listed branches cannot include any `/` characters
       - ccwidgets
       # - next uncomment when ready to deploy next
 
@@ -266,45 +266,64 @@ jobs:
           git config user.email "${GIT_AUTHOR_EMAIL}"
           git config user.name "${GIT_AUTHOR_NAME}"
 
-      - name: Create and Push Tags for Each Package
+      - name: Create and Push Tags for Main Packages
         if: steps.check-publish.outputs.should_tag == 'true'
         run: |
           COMMIT_MESSAGE="$(git log -1 --oneline --no-decorate)"
           COMMIT_HASH="$(git rev-parse HEAD)"
+          # node-recursive includes both changed packages AND their dependents
+          # e.g., if @webex/cc-store changes, @webex/cc-widgets will be in this list if it depends on store
           PACKAGES='${{ needs.analyze-changes.outputs.node-recursive }}'
 
+          # Define the packages we want to tag (only main/published packages)
+          TAGGABLE_PACKAGES=("@webex/widgets" "@webex/cc-widgets")
+
           echo "=========================================="
-          echo "Creating tags for published packages"
+          echo "Creating tags for main packages"
           echo "=========================================="
 
-          # Parse the JSON array of packages
+          # Check if any packages were changed
           if [ -z "$PACKAGES" ] || [ "$PACKAGES" == "{}" ] || [ "$PACKAGES" == "[]" ]; then
-            echo "⚠️  No packages to tag"
+            echo "⚠️  No packages changed - skipping tagging"
             exit 0
           fi
 
           # Extract package names from JSON array
-          PACKAGE_LIST=$(echo "$PACKAGES" | jq -r '.[]' 2>/dev/null || echo "$PACKAGES")
+          CHANGED_PACKAGES=$(echo "$PACKAGES" | jq -r '.[]' 2>/dev/null || echo "$PACKAGES")
 
-          for PACKAGE in $PACKAGE_LIST; do
-            # Skip if package is empty or null
-            if [ -z "$PACKAGE" ] || [ "$PACKAGE" == "null" ]; then
+          echo "Packages to evaluate (changed + dependents): $CHANGED_PACKAGES"
+          echo ""
+
+          for TAGGABLE_PKG in "${TAGGABLE_PACKAGES[@]}"; do
+            echo "----------------------------------------"
+            echo "Checking if $TAGGABLE_PKG needs to be tagged..."
+
+            # Check if this package is in the changed packages list (includes dependents)
+            FOUND=false
+            for CHANGED_PKG in $CHANGED_PACKAGES; do
+              if [ "$CHANGED_PKG" == "$TAGGABLE_PKG" ]; then
+                FOUND=true
+                break
+              fi
+            done
+
+            if [ "$FOUND" == "false" ]; then
+              echo "⏭️  $TAGGABLE_PKG not in publish list - skipping"
               continue
             fi
 
-            echo "----------------------------------------"
-            echo "Processing package: $PACKAGE"
+            echo "✅ $TAGGABLE_PKG needs to be published - creating tag..."
 
             # Get version for this specific package
-            VERSION=$(yarn package-tools sync --tag ${GITHUB_REF##*/} --packages "$PACKAGE" | awk '{print $3}' | tr -d '%' | head -1)
+            VERSION=$(yarn package-tools sync --tag ${GITHUB_REF##*/} --packages "$TAGGABLE_PKG" | awk '{print $3}' | tr -d '%' | head -1)
 
             if [ -z "$VERSION" ]; then
-              echo "⚠️  Could not determine version for $PACKAGE, skipping..."
+              echo "⚠️  Could not determine version for $TAGGABLE_PKG, skipping..."
               continue
             fi
 
             # Create tag name: convert @scope/package to scope-package-vX.X.X
-            TAG_NAME=$(echo "$PACKAGE" | sed 's/@//g' | sed 's/\//-/g')-v${VERSION}
+            TAG_NAME=$(echo "$TAGGABLE_PKG" | sed 's/@//g' | sed 's/\//-/g')-v${VERSION}
 
             echo "Tag name: $TAG_NAME"
 
@@ -315,7 +334,7 @@ jobs:
             fi
 
             # Create annotated tag
-            git tag -a "$TAG_NAME" "$COMMIT_HASH" -m "Release $PACKAGE v${VERSION}: $COMMIT_MESSAGE"
+            git tag -a "$TAG_NAME" "$COMMIT_HASH" -m "Release $TAGGABLE_PKG v${VERSION}: $COMMIT_MESSAGE"
 
             # Push tag
             if git push origin "$TAG_NAME"; then
