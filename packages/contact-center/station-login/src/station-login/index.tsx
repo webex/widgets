@@ -60,7 +60,7 @@ const StationLoginInternal: React.FunctionComponent<StationLoginProps> = observe
   }
 );
 
-// Main component wrapped with ErrorBoundary.
+// Main component wrapped with ErrorBoundary
 const StationLogin: React.FunctionComponent<StationLoginProps> = (props) => {
   return (
     <ErrorBoundary
