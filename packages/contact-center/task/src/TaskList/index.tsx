@@ -9,13 +9,14 @@ import {TaskListProps} from '../task.types';
 
 const TaskListInternal: React.FunctionComponent<TaskListProps> = observer(
   ({onTaskAccepted, onTaskDeclined, onTaskSelected}) => {
-    const {cc, taskList, currentTask, deviceType, logger} = store;
+    const {cc, taskList, currentTask, deviceType, logger, agentId} = store;
 
     const result = useTaskList({cc, deviceType, logger, taskList, onTaskAccepted, onTaskDeclined, onTaskSelected});
     const props = {
       ...result,
       currentTask,
       logger,
+      agentId,
     };
 
     return <TaskListComponent {...props} />;

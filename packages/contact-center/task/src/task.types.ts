@@ -20,20 +20,24 @@ export type CallControlProps = Partial<
     | 'callControlClassName'
     | 'callControlConsultClassName'
     | 'onToggleMute'
+    | 'conferenceEnabled'
     | 'consultTransferOptions'
   >
 >;
 
 export type useCallControlProps = Pick<
   ControlProps,
-  'currentTask' | 'logger' | 'consultInitiated' | 'deviceType' | 'featureFlags' | 'isMuted'
+  'currentTask' | 'logger' | 'deviceType' | 'featureFlags' | 'isMuted' | 'conferenceEnabled' | 'agentId'
 > &
   Partial<Pick<ControlProps, 'onHoldResume' | 'onEnd' | 'onWrapUp' | 'onRecordingToggle' | 'onToggleMute'>>;
 
-export type Participant = {
-  id: string;
-  pType: 'Customer' | 'Agent' | string;
-  name?: string;
-};
-
 export type useOutdialCallProps = Pick<OutdialCallProps, 'cc' | 'logger'>;
+
+/**
+ * Helper interface for device type checks
+ */
+export interface DeviceTypeFlags {
+  isBrowser: boolean;
+  isAgentDN: boolean;
+  isExtension: boolean;
+}

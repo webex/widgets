@@ -202,6 +202,13 @@ export interface IStationLoginProps {
    * The selected team ID for login
    */
   selectedTeamId: string;
+
+  /**
+   * If true, hides the Desktop login mode from the dropdown options.
+   * Applies in both login screen and profile mode.
+   * Default: undefined (shows Desktop mode)
+   */
+  hideDesktopLogin?: boolean;
 }
 
 export interface LoginOptionsState {
@@ -243,4 +250,5 @@ export type StationLoginComponentProps = Pick<
   | 'setDialNumberValue'
   | 'setSelectedTeamId'
   | 'selectedTeamId'
+  | 'hideDesktopLogin'
 >;

@@ -3,7 +3,7 @@ import {render} from '@testing-library/react';
 import CallControlCADComponent from '../../../../src/components/task/CallControlCAD/call-control-cad';
 import {CallControlComponentProps} from '../../../../src/components/task/task.types';
 import {mockTask} from '@webex/test-fixtures';
-import {ContactServiceQueue, BuddyDetails} from '@webex/cc-store';
+import {BuddyDetails} from '@webex/cc-store';
 import '@testing-library/jest-dom';
 
 // Mock MediaStream for testing
@@ -83,18 +83,33 @@ describe('CallControlCADComponent', () => {
   ];
 
   const mockControlVisibility = {
-    accept: true,
-    decline: true,
-    end: true,
-    muteUnmute: true,
-    holdResume: true,
-    consult: true,
-    transfer: true,
-    conference: true,
-    wrapup: false,
-    pauseResumeRecording: true,
-    endConsult: true,
-    recordingIndicator: true,
+    accept: {isVisible: true, isEnabled: true},
+    decline: {isVisible: true, isEnabled: true},
+    end: {isVisible: true, isEnabled: true},
+    muteUnmute: {isVisible: true, isEnabled: true},
+    muteUnmuteConsult: {isVisible: true, isEnabled: true},
+    holdResume: {isVisible: true, isEnabled: true},
+    consult: {isVisible: true, isEnabled: true},
+    transfer: {isVisible: true, isEnabled: true},
+    conference: {isVisible: true, isEnabled: true},
+    wrapup: {isVisible: false, isEnabled: false},
+    pauseResumeRecording: {isVisible: true, isEnabled: true},
+    endConsult: {isVisible: true, isEnabled: true},
+    recordingIndicator: {isVisible: true, isEnabled: true},
+    exitConference: {isVisible: false, isEnabled: false},
+    mergeConference: {isVisible: false, isEnabled: false},
+    mergeConferenceConsult: {isVisible: false, isEnabled: false},
+    consultTransfer: {isVisible: false, isEnabled: false},
+    consultTransferConsult: {isVisible: false, isEnabled: false},
+    switchToMainCall: {isVisible: false, isEnabled: false},
+    switchToConsult: {isVisible: false, isEnabled: false},
+    isConferenceInProgress: false,
+    isConsultInitiated: false,
+    isConsultInitiatedAndAccepted: false,
+    isConsultInitiatedOrAccepted: false,
+    isConsultReceived: false,
+    isHeld: false,
+    consultCallHeld: false,
   };
 
   const defaultProps: CallControlComponentProps = {
@@ -106,32 +121,22 @@ describe('CallControlCADComponent', () => {
     isMuted: false,
     endCall: jest.fn(),
     wrapupCall: jest.fn(),
-    isHeld: false,
-    setIsHeld: jest.fn(),
     isRecording: false,
     setIsRecording: jest.fn(),
     buddyAgents: mockBuddyAgents,
     loadBuddyAgents: jest.fn(),
-    queues: [] as ContactServiceQueue[],
-    loadQueues: jest.fn(),
     transferCall: jest.fn(),
     consultCall: jest.fn(),
     endConsultCall: jest.fn(),
-    consultInitiated: false,
     consultTransfer: jest.fn(),
-    consultCompleted: false,
-    consultAccepted: false,
     consultStartTimeStamp: Date.now(),
     callControlAudio: null as unknown as MediaStream,
     consultAgentName: '',
     setConsultAgentName: jest.fn(),
-    consultAgentId: '',
-    setConsultAgentId: jest.fn(),
     holdTime: 0,
     callControlClassName: '',
     callControlConsultClassName: '',
     startTimestamp: Date.now(),
-    isEndConsultEnabled: true,
     allowConsultToQueue: true,
     lastTargetType: 'agent',
     setLastTargetType: jest.fn(),
@@ -139,6 +144,11 @@ describe('CallControlCADComponent', () => {
     logger: mockLogger,
     secondsUntilAutoWrapup: undefined,
     cancelAutoWrapup: jest.fn(),
+    exitConference: jest.fn(),
+    consultConference: jest.fn(),
+    switchToMainCall: jest.fn(),
+    switchToConsult: jest.fn(),
+    conferenceParticipants: [],
   };
 
   beforeEach(() => {
@@ -178,7 +188,10 @@ describe('CallControlCADComponent', () => {
     // Test held state with hold time
     const heldProps = {
       ...defaultProps,
-      isHeld: true,
+      controlVisibility: {
+        ...mockControlVisibility,
+        isHeld: true,
+      },
       holdTime: 65,
     };
     const heldScreen = render(<CallControlCADComponent {...heldProps} />);
@@ -218,9 +231,12 @@ describe('CallControlCADComponent', () => {
     // Test consultation functionality for telephony
     const consultProps = {
       ...defaultProps,
-      consultAccepted: true,
       consultAgentName: 'Consult Agent',
       consultStartTimeStamp: Date.now(),
+      controlVisibility: {
+        ...mockControlVisibility,
+        isConsultInitiatedOrAccepted: true,
+      },
     };
     const consultScreen = render(<CallControlCADComponent {...consultProps} />);
     const consultContainer = consultScreen.container.querySelector('.call-control-consult-container');
@@ -241,7 +257,6 @@ describe('CallControlCADComponent', () => {
           },
         },
       },
-      consultAccepted: true,
     };
     const chatConsultScreen = render(<CallControlCADComponent {...chatConsultProps} />);
     const chatConsultContainer = chatConsultScreen.container.querySelector('.call-control-consult-container');
@@ -255,11 +270,10 @@ describe('CallControlCADComponent', () => {
       ...defaultProps,
       controlVisibility: {
         ...mockControlVisibility,
-        wrapup: true,
+        wrapup: {isVisible: true, isEnabled: true},
+        isHeld: true,
       },
-      isHeld: true,
       isRecording: true,
-      consultAccepted: true,
     };
     const screen = render(<CallControlCADComponent {...wrapupProps} />);
 
@@ -310,7 +324,10 @@ describe('CallControlCADComponent', () => {
       ...defaultProps,
       callControlClassName: 'custom-call-control',
       callControlConsultClassName: 'custom-consult-control',
-      consultAccepted: true,
+      controlVisibility: {
+        ...mockControlVisibility,
+        isConsultInitiatedOrAccepted: true,
+      },
     };
     const customScreen = render(<CallControlCADComponent {...customProps} />);
     const container = customScreen.container.querySelector('.call-control-container');

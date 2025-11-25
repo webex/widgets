@@ -12,7 +12,7 @@ import './styles.scss';
 import {withMetrics} from '@webex/cc-ui-logging';
 
 const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (props) => {
-  const {currentTask, taskList, acceptTask, declineTask, isBrowser, onTaskSelect, logger} = props;
+  const {currentTask, taskList, acceptTask, declineTask, isBrowser, onTaskSelect, logger, agentId} = props;
 
   // Early return for empty task list
   if (isTaskListEmpty(taskList)) {
@@ -25,7 +25,7 @@ const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (prop
     <ul className="task-list" data-testid="task-list">
       {tasks.map((task, index) => {
         // Extract all task data using the utility function
-        const taskData = extractTaskListItemData(task, isBrowser);
+        const taskData = extractTaskListItemData(task, isBrowser, agentId, logger);
 
         // Log task rendering
         logger.info('CC-Widgets: TaskList: rendering task list', {
@@ -45,7 +45,7 @@ const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (prop
             acceptTask={() => acceptTask(task)}
             declineTask={() => declineTask(task)}
             ronaTimeout={taskData.ronaTimeout}
-            onTaskSelect={createTaskSelectHandler(task, currentTask, onTaskSelect)}
+            onTaskSelect={createTaskSelectHandler(task, currentTask, onTaskSelect, agentId)}
             acceptText={taskData.acceptText}
             disableAccept={taskData.disableAccept}
             declineText={taskData.declineText}

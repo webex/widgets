@@ -49,6 +49,7 @@ describe('TaskListComponent', () => {
     isBrowser: true,
     onTaskSelect: mockOnTaskSelect,
     logger: mockLogger,
+    agentId: mockTask.data.agentId,
   };
 
   // Utility function spies

@@ -80,9 +80,46 @@
 
 .call-details {
   display: flex;
+  gap: 0.25rem;
+}
+
+.call-details-row {
+  display: flex;
   align-items: center;
   gap: 0.5rem;
 }
+
+.vertical-divider {
+  width: 0.0625rem;
+  height: 0.75rem;
+  background-color: var(--mds-color-theme-outline-secondary-normal);
+  margin: 0 0.25rem;
+  opacity: 1;
+}
+
+.participants-section {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.participants-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.participants-icon {
+  color: var(--mds-color-theme-text-primary-normal);
+}
+
+.participants-count {
+  font-size: 0.875rem;
+  color: var(--mds-color-theme-text-primary-normal);
+  white-space: nowrap;
+}
+
+
 
 .call-status {
   display: flex;
@@ -210,5 +247,20 @@
   .call-control-task-tooltip {
     width: 50%;
     text-align: center;
+  }
+}
+
+.participants-popover {
+  background: var(--mds-color-theme-background-solid-primary-normal, #FFFFFF) !important;
+  .participants-menu {
+    max-height: 12.5rem;
+    overflow-y: auto;
+  }
+
+  .participant-menu-item {
+    padding: 0.2rem;
+    font-size: 0.875rem;
+    cursor: pointer;
+    color: var(--mds-color-theme-text-primary-normal, #000000F2);
   }
 }

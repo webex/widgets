@@ -3,7 +3,7 @@ import {render} from '@testing-library/react';
 import CallControlCADComponent from '../../../../src/components/task/CallControlCAD/call-control-cad';
 import {CallControlComponentProps} from '../../../../src/components/task/task.types';
 import {mockTask} from '@webex/test-fixtures';
-import {ContactServiceQueue, BuddyDetails} from '@webex/cc-store';
+import {BuddyDetails} from '@webex/cc-store';
 import '@testing-library/jest-dom';
 
 const mockUIDProps = (container: Element) => {
@@ -102,17 +102,6 @@ describe('CallControlCADComponent Snapshots', () => {
     },
   ] as BuddyDetails[];
 
-  const mockQueues: ContactServiceQueue[] = [
-    {
-      id: 'queue1',
-      name: 'Support Queue',
-    },
-    {
-      id: 'queue2',
-      name: 'Sales Queue',
-    },
-  ] as ContactServiceQueue[];
-
   const defaultProps: CallControlComponentProps = {
     currentTask: mockCurrentTask,
     wrapupCodes: mockWrapupCodes,
@@ -122,8 +111,6 @@ describe('CallControlCADComponent Snapshots', () => {
     isMuted: false,
     endCall: jest.fn(),
     wrapupCall: jest.fn(),
-    isHeld: false,
-    setIsHeld: jest.fn(),
     isRecording: false,
     setIsRecording: jest.fn(),
     buddyAgents: mockBuddyAgents,
@@ -131,43 +118,55 @@ describe('CallControlCADComponent Snapshots', () => {
     transferCall: jest.fn(),
     consultCall: jest.fn(),
     endConsultCall: jest.fn(),
-    consultInitiated: false,
     consultTransfer: jest.fn(),
-    consultCompleted: false,
-    consultAccepted: false,
     consultStartTimeStamp: 1234567890000,
     callControlAudio: null,
     consultAgentName: '',
     setConsultAgentName: jest.fn(),
-    consultAgentId: '',
-    setConsultAgentId: jest.fn(),
     holdTime: 0,
     callControlClassName: '',
     callControlConsultClassName: '',
     startTimestamp: 1234567890000,
-    queues: mockQueues,
-    loadQueues: jest.fn(),
-    isEndConsultEnabled: true,
     allowConsultToQueue: true,
     lastTargetType: 'agent',
     setLastTargetType: jest.fn(),
     controlVisibility: {
-      accept: true,
-      decline: true,
-      end: true,
-      muteUnmute: true,
-      holdResume: true,
-      consult: true,
-      transfer: true,
-      conference: true,
-      wrapup: false,
-      pauseResumeRecording: true,
-      endConsult: true,
-      recordingIndicator: true,
+      accept: {isVisible: true, isEnabled: true},
+      decline: {isVisible: true, isEnabled: true},
+      end: {isVisible: true, isEnabled: true},
+      muteUnmute: {isVisible: true, isEnabled: true},
+      muteUnmuteConsult: {isVisible: true, isEnabled: true},
+      holdResume: {isVisible: true, isEnabled: true},
+      consult: {isVisible: true, isEnabled: true},
+      transfer: {isVisible: true, isEnabled: true},
+      conference: {isVisible: true, isEnabled: true},
+      wrapup: {isVisible: false, isEnabled: false},
+      pauseResumeRecording: {isVisible: true, isEnabled: true},
+      endConsult: {isVisible: true, isEnabled: true},
+      recordingIndicator: {isVisible: true, isEnabled: true},
+      exitConference: {isVisible: false, isEnabled: false},
+      mergeConference: {isVisible: false, isEnabled: false},
+      mergeConferenceConsult: {isVisible: false, isEnabled: false},
+      consultTransfer: {isVisible: false, isEnabled: false},
+      consultTransferConsult: {isVisible: false, isEnabled: false},
+      switchToMainCall: {isVisible: false, isEnabled: false},
+      switchToConsult: {isVisible: false, isEnabled: false},
+      isConferenceInProgress: false,
+      isConsultInitiated: false,
+      isConsultInitiatedAndAccepted: false,
+      isConsultInitiatedOrAccepted: false,
+      isConsultReceived: false,
+      isHeld: false,
+      consultCallHeld: false,
     },
     logger: mockLogger,
     secondsUntilAutoWrapup: undefined,
     cancelAutoWrapup: jest.fn(),
+    exitConference: jest.fn(),
+    consultConference: jest.fn(),
+    switchToMainCall: jest.fn(),
+    switchToConsult: jest.fn(),
+    conferenceParticipants: [],
   };
 
   beforeEach(() => {
@@ -268,7 +267,10 @@ describe('CallControlCADComponent Snapshots', () => {
     // Consultation accepted
     const consultAcceptedProps = {
       ...defaultProps,
-      consultAccepted: true,
+      controlVisibility: {
+        ...defaultProps.controlVisibility,
+        isConsultInitiatedOrAccepted: true,
+      },
       consultAgentName: 'Consult Agent',
       consultStartTimeStamp: 1234567890000,
     };
@@ -296,9 +298,12 @@ describe('CallControlCADComponent Snapshots', () => {
     // Consultation with wrapup (consultation should be hidden)
     const consultWrapupProps = {
       ...defaultProps,
-      consultAccepted: true,
+      controlVisibility: {
+        ...defaultProps.controlVisibility,
+        isConsultInitiatedOrAccepted: true,
+        wrapup: true,
+      },
       consultAgentName: 'Consult Agent',
-      controlVisibility: {...defaultProps.controlVisibility, wrapup: true},
     };
     screen = render(<CallControlCADComponent {...consultWrapupProps} />);
     const wrapupContainer = screen.container.querySelector('.call-control-container');
@@ -356,7 +361,10 @@ describe('CallControlCADComponent Snapshots', () => {
       ...defaultProps,
       callControlClassName: 'custom-call-control',
       callControlConsultClassName: 'custom-consult-control',
-      consultAccepted: true,
+      controlVisibility: {
+        ...defaultProps.controlVisibility,
+        isConsultInitiatedOrAccepted: true,
+      },
       consultAgentName: 'Consult Agent',
     };
     screen = render(<CallControlCADComponent {...customProps} />);

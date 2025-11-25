@@ -1,18 +1,6 @@
 import {BuddyDetails, ContactServiceQueue, ILogger} from '@webex/cc-store';
 import {MUTE_CALL, UNMUTE_CALL} from '../../constants';
-
-/**
- * Interface for button configuration
- */
-export interface ButtonConfig {
-  key: string;
-  icon: string;
-  onClick: () => void;
-  tooltip: string;
-  className: string;
-  disabled?: boolean;
-  shouldShow: boolean;
-}
+import {ButtonConfig, ControlVisibility} from '../../task.types';
 
 /**
  * Interface for list item data
@@ -27,14 +15,12 @@ export interface ListItemData {
  */
 export const createConsultButtons = (
   isMuted: boolean,
-  isMuteDisabled: boolean,
-  consultCompleted: boolean,
-  isAgentBeingConsulted: boolean,
-  isEndConsultEnabled: boolean,
-  muteUnmute: boolean,
-  onTransfer?: () => void,
-  handleConsultMuteToggle?: () => void,
-  handleEndConsult?: () => void,
+  controlVisibility: ControlVisibility,
+  consultTransfer: () => void,
+  toggleConsultMute: () => void,
+  endConsultCall: () => void,
+  consultConference: () => void,
+  switchToMainCall: () => void,
   logger?
 ): ButtonConfig[] => {
   try {
@@ -42,28 +28,46 @@ export const createConsultButtons = (
       {
         key: 'mute',
         icon: isMuted ? 'microphone-muted-bold' : 'microphone-bold',
-        onClick: handleConsultMuteToggle || (() => {}),
+        onClick: toggleConsultMute,
         tooltip: isMuted ? UNMUTE_CALL : MUTE_CALL,
         className: `${isMuted ? 'call-control-button-muted' : 'call-control-button'}`,
-        disabled: isMuteDisabled,
-        shouldShow: muteUnmute,
+        disabled: !controlVisibility.muteUnmuteConsult.isEnabled,
+        isVisible: controlVisibility.muteUnmuteConsult.isVisible,
+      },
+      {
+        key: 'switchToMainCall',
+        icon: 'call-swap-bold',
+        tooltip: controlVisibility.isConferenceInProgress ? 'Switch to Conference Call' : 'Switch to Call',
+        onClick: switchToMainCall,
+        className: 'call-control-button',
+        disabled: !controlVisibility.switchToMainCall.isEnabled,
+        isVisible: controlVisibility.switchToMainCall.isVisible,
       },
       {
         key: 'transfer',
         icon: 'next-bold',
-        tooltip: 'Transfer Consult',
-        onClick: onTransfer || (() => {}),
+        tooltip: controlVisibility.isConferenceInProgress ? 'Transfer Conference' : 'Transfer',
+        onClick: consultTransfer,
         className: 'call-control-button',
-        disabled: !consultCompleted,
-        shouldShow: isAgentBeingConsulted && !!onTransfer,
+        disabled: !controlVisibility.consultTransferConsult.isEnabled,
+        isVisible: controlVisibility.consultTransferConsult.isVisible,
+      },
+      {
+        key: 'conference',
+        icon: 'call-merge-bold',
+        tooltip: 'Merge',
+        onClick: consultConference,
+        className: 'call-control-button',
+        disabled: !controlVisibility.mergeConferenceConsult.isEnabled,
+        isVisible: controlVisibility.mergeConferenceConsult.isVisible,
       },
       {
         key: 'cancel',
         icon: 'headset-muted-bold',
         tooltip: 'End Consult',
-        onClick: handleEndConsult || (() => {}),
+        onClick: endConsultCall,
         className: 'call-control-consult-button-cancel',
-        shouldShow: isEndConsultEnabled || isAgentBeingConsulted,
+        isVisible: controlVisibility.endConsult.isVisible,
       },
     ];
   } catch (error) {
@@ -82,7 +86,7 @@ export const createConsultButtons = (
  */
 export const getVisibleButtons = (buttons: ButtonConfig[], logger?): ButtonConfig[] => {
   try {
-    return buttons.filter((button) => button.shouldShow);
+    return buttons.filter((button) => button.isVisible);
   } catch (error) {
     logger?.error('CC-Widgets: CallControlCustom: Error in getVisibleButtons', {
       module: 'cc-components#call-control-custom.utils.ts',
@@ -117,82 +121,11 @@ export const createInitials = (name: string, logger?): string => {
 };
 
 /**
- * Handles transfer button press with logging
- */
-export const handleTransferPress = (onTransfer: (() => void) | undefined, logger: ILogger): void => {
-  logger.info('CC-Widgets: CallControlConsult: transfer button clicked', {
-    module: 'call-control-consult.tsx',
-    method: 'handleTransfer',
-  });
-
-  try {
-    if (onTransfer) {
-      onTransfer();
-      logger.log('CC-Widgets: CallControlConsult: transfer completed', {
-        module: 'call-control-consult.tsx',
-        method: 'handleTransfer',
-      });
-    }
-  } catch (error) {
-    throw new Error(`Error transferring call: ${error}`);
-  }
-};
-
-/**
- * Handles end consult button press with logging
- */
-export const handleEndConsultPress = (endConsultCall: (() => void) | undefined, logger: ILogger): void => {
-  logger.info('CC-Widgets: CallControlConsult: end consult clicked', {
-    module: 'call-control-consult.tsx',
-    method: 'handleEndConsult',
-  });
-
-  try {
-    if (endConsultCall) {
-      endConsultCall();
-      logger.log('CC-Widgets: CallControlConsult: end consult completed', {
-        module: 'call-control-consult.tsx',
-        method: 'handleEndConsult',
-      });
-    }
-  } catch (error) {
-    throw new Error(`Error ending consult call: ${error}`);
-  }
-};
-
-/**
- * Handles mute toggle with disabled state management
- */
-export const handleMuteToggle = (
-  onToggleConsultMute: (() => void) | undefined,
-  setIsMuteDisabled: (disabled: boolean) => void,
-  logger: ILogger
-): void => {
-  setIsMuteDisabled(true);
-
-  try {
-    if (onToggleConsultMute) {
-      onToggleConsultMute();
-    }
-  } catch (error) {
-    logger.error(`Mute toggle failed: ${error}`, {
-      module: 'call-control-consult.tsx',
-      method: 'handleConsultMuteToggle',
-    });
-  } finally {
-    // Re-enable button after operation
-    setTimeout(() => {
-      setIsMuteDisabled(false);
-    }, 500);
-  }
-};
-
-/**
  * Gets the consult status text based on completion state
  */
-export const getConsultStatusText = (consultCompleted: boolean, logger?): string => {
+export const getConsultStatusText = (consultInitiated: boolean, logger?): string => {
   try {
-    return consultCompleted ? 'Consulting' : 'Consult requested';
+    return consultInitiated ? 'Consult requested' : 'Consulting';
   } catch (error) {
     logger?.error('CC-Widgets: CallControlCustom: Error in getConsultStatusText', {
       module: 'cc-components#call-control-custom.utils.ts',
@@ -292,7 +225,8 @@ export const handleTabSelection = (key: string, setSelectedTab: (tab: string) =>
 export const handleAgentSelection = (
   agentId: string,
   agentName: string,
-  onAgentSelect: ((agentId: string, agentName: string) => void) | undefined,
+  allowParticipantsToInteract: boolean,
+  onAgentSelect: ((agentId: string, agentName: string, allowParticipantsToInteract: boolean) => void) | undefined,
   logger: ILogger
 ): void => {
   try {
@@ -301,7 +235,7 @@ export const handleAgentSelection = (
       method: 'onAgentSelect',
     });
     if (onAgentSelect) {
-      onAgentSelect(agentId, agentName);
+      onAgentSelect(agentId, agentName, allowParticipantsToInteract);
     }
   } catch (error) {
     logger.error(`CC-Widgets: CallControlCustom: Error in handleAgentSelection: ${error.message}`, {
@@ -317,7 +251,8 @@ export const handleAgentSelection = (
 export const handleQueueSelection = (
   queueId: string,
   queueName: string,
-  onQueueSelect: ((queueId: string, queueName: string) => void) | undefined,
+  allowParticipantsToInteract: boolean,
+  onQueueSelect: ((queueId: string, queueName: string, allowParticipantsToInteract: boolean) => void) | undefined,
   logger: ILogger
 ): void => {
   try {
@@ -326,7 +261,7 @@ export const handleQueueSelection = (
       method: 'onQueueSelect',
     });
     if (onQueueSelect) {
-      onQueueSelect(queueId, queueName);
+      onQueueSelect(queueId, queueName, allowParticipantsToInteract);
     }
   } catch (error) {
     logger.error(`CC-Widgets: CallControlCustom: Error in handleQueueSelection: ${error.message}`, {
@@ -684,10 +619,11 @@ export const debounce = <T extends (...args: unknown[]) => unknown>(
 export const shouldAddConsultTransferAction = (
   selectedCategory: string,
   isEntryPointTabVisible: boolean,
+  allowParticipantsToInteract: boolean,
   query: string,
   entryPoints: {id: string; name: string}[],
-  onDialNumberSelect: ((dialNumber: string) => void) | undefined,
-  onEntryPointSelect: ((entryPointId: string, entryPointName: string) => void) | undefined
+  onDialNumberSelect: (dialNumber: string, allowParticipantsToInteract: boolean) => void,
+  onEntryPointSelect: (entryPointId: string, entryPointName: string, allowParticipantsToInteract: boolean) => void
 ): {visible: boolean; onClick?: () => void; title?: string} => {
   const DN_REGEX = new RegExp('^[+1][0-9]{3,18}$|^[*#:][+1][0-9*#:]{3,18}$|^[0-9*#:]{3,18}$');
 
@@ -697,14 +633,18 @@ export const shouldAddConsultTransferAction = (
 
   if (isDial) {
     return valid && onDialNumberSelect
-      ? {visible: true, onClick: () => onDialNumberSelect(query), title: query}
+      ? {visible: true, onClick: () => onDialNumberSelect(query, allowParticipantsToInteract), title: query}
       : {visible: false};
   }
 
   if (isEntry) {
     const match = query ? entryPoints?.find((e) => e.name === query || e.id === query) : null;
     return valid && match && onEntryPointSelect
-      ? {visible: true, onClick: () => onEntryPointSelect(match.id, match.name), title: match.name}
+      ? {
+          visible: true,
+          onClick: () => onEntryPointSelect(match.id, match.name, allowParticipantsToInteract),
+          title: match.name,
+        }
       : {visible: false};
   }
 

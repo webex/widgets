@@ -3,8 +3,8 @@ import '@testing-library/jest-dom';
 import {render, fireEvent, act} from '@testing-library/react';
 import CallControlComponent from '../../../../src/components/task/CallControl/call-control';
 import {CallControlComponentProps} from '../../../../src/components/task/task.types';
-import {mockTask, mockQueueDetails, mockAgents, mockProfile, mockCC} from '@webex/test-fixtures';
-import {BuddyDetails, ContactServiceQueue, IWrapupCode} from '@webex/cc-store';
+import {mockTask, mockAgents, mockProfile, mockCC} from '@webex/test-fixtures';
+import {BuddyDetails, IWrapupCode} from '@webex/cc-store';
 
 const mockUIDProps = (container) => {
   container
@@ -70,15 +70,6 @@ describe('CallControlComponent Snapshots', () => {
     teamIds: [mockProfile.teams[0]?.teamId || 'team1'],
   })) as BuddyDetails[];
 
-  const mockQueues: ContactServiceQueue[] = mockQueueDetails.map((queue) => ({
-    id: queue.id,
-    name: queue.name,
-    description: queue.description,
-    queueType: queue.queueType,
-    checkAgentAvailability: queue.checkAgentAvailability,
-    channelType: queue.channelType,
-  })) as ContactServiceQueue[];
-
   const defaultProps: CallControlComponentProps = {
     currentTask: mockCurrentTask,
     wrapupCodes: mockWrapupCodes,
@@ -88,8 +79,6 @@ describe('CallControlComponent Snapshots', () => {
     isMuted: false,
     endCall: jest.fn(),
     wrapupCall: jest.fn(),
-    isHeld: false,
-    setIsHeld: jest.fn(),
     isRecording: false,
     setIsRecording: jest.fn(),
     buddyAgents: mockBuddyAgents,
@@ -97,43 +86,55 @@ describe('CallControlComponent Snapshots', () => {
     transferCall: jest.fn(),
     consultCall: jest.fn(),
     endConsultCall: jest.fn(),
-    consultInitiated: false,
     consultTransfer: jest.fn(),
-    consultCompleted: false,
-    consultAccepted: false,
     consultStartTimeStamp: undefined,
     callControlAudio: null,
     consultAgentName: '',
     setConsultAgentName: jest.fn(),
-    consultAgentId: '',
-    setConsultAgentId: jest.fn(),
     holdTime: 0,
     callControlClassName: '',
     callControlConsultClassName: '',
     startTimestamp: Date.now(),
-    queues: mockQueues,
-    loadQueues: jest.fn(),
-    isEndConsultEnabled: mockProfile.isEndConsultEnabled,
     allowConsultToQueue: mockProfile.allowConsultToQueue,
     lastTargetType: 'agent',
     setLastTargetType: jest.fn(),
     controlVisibility: {
-      accept: true,
-      decline: true,
-      end: true,
-      muteUnmute: true,
-      holdResume: true,
-      consult: true,
-      transfer: true,
-      conference: true,
-      wrapup: false,
-      pauseResumeRecording: true,
-      endConsult: true,
-      recordingIndicator: true,
+      accept: {isVisible: true, isEnabled: true},
+      decline: {isVisible: true, isEnabled: true},
+      end: {isVisible: true, isEnabled: true},
+      muteUnmute: {isVisible: true, isEnabled: true},
+      muteUnmuteConsult: {isVisible: true, isEnabled: true},
+      holdResume: {isVisible: true, isEnabled: true},
+      consult: {isVisible: true, isEnabled: true},
+      transfer: {isVisible: true, isEnabled: true},
+      conference: {isVisible: true, isEnabled: true},
+      wrapup: {isVisible: false, isEnabled: false},
+      pauseResumeRecording: {isVisible: true, isEnabled: true},
+      endConsult: {isVisible: true, isEnabled: true},
+      recordingIndicator: {isVisible: true, isEnabled: true},
+      exitConference: {isVisible: false, isEnabled: false},
+      mergeConference: {isVisible: false, isEnabled: false},
+      mergeConferenceConsult: {isVisible: false, isEnabled: false},
+      consultTransfer: {isVisible: false, isEnabled: false},
+      consultTransferConsult: {isVisible: false, isEnabled: false},
+      switchToMainCall: {isVisible: false, isEnabled: false},
+      switchToConsult: {isVisible: false, isEnabled: false},
+      isConferenceInProgress: false,
+      isConsultInitiated: false,
+      isConsultInitiatedAndAccepted: false,
+      isConsultInitiatedOrAccepted: false,
+      isConsultReceived: false,
+      isHeld: false,
+      consultCallHeld: false,
     },
     logger: mockLogger,
     secondsUntilAutoWrapup: undefined,
     cancelAutoWrapup: jest.fn(),
+    consultConference: jest.fn(),
+    switchToMainCall: jest.fn(),
+    switchToConsult: jest.fn(),
+    exitConference: jest.fn(),
+    conferenceParticipants: [],
   };
 
   beforeEach(() => {
@@ -216,7 +217,13 @@ describe('CallControlComponent Snapshots', () => {
     });
 
     it('should render with consultation accepted', async () => {
-      const consultAcceptedProps = {...defaultProps, consultAccepted: true};
+      const consultAcceptedProps = {
+        ...defaultProps,
+        controlVisibility: {
+          ...defaultProps.controlVisibility,
+          isConsultInitiatedOrAccepted: true,
+        },
+      };
       let screen;
       await act(async () => {
         screen = render(<CallControlComponent {...consultAcceptedProps} />);
@@ -341,7 +348,7 @@ describe('CallControlComponent Snapshots', () => {
     it('should render wrapup button in wrapup mode', async () => {
       const wrapupProps = {
         ...defaultProps,
-        controlVisibility: {...defaultProps.controlVisibility, wrapup: true},
+        controlVisibility: {...defaultProps.controlVisibility, wrapup: {isVisible: true, isEnabled: true}},
       };
       let screen;
       await act(async () => {

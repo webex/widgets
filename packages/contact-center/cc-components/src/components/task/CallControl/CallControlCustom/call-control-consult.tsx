@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React from 'react';
 import {ButtonCircle, TooltipNext, Text} from '@momentum-ui/react-collaboration';
 import {Avatar, Icon} from '@momentum-design/components/dist/react';
 import TaskTimer from '../../TaskTimer';
@@ -6,9 +6,6 @@ import {CallControlConsultComponentsProps} from '../../task.types';
 import {
   createConsultButtons,
   getVisibleButtons,
-  handleTransferPress,
-  handleEndConsultPress,
-  handleMuteToggle,
   getConsultStatusText,
   createTimerKey,
 } from './call-control-custom.utils';
@@ -16,42 +13,26 @@ import {
 const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> = ({
   agentName,
   startTimeStamp,
-  onTransfer,
+  consultTransfer,
   endConsultCall,
-  consultCompleted,
-  isAgentBeingConsulted,
-  isEndConsultEnabled,
+  consultConference,
+  switchToMainCall,
   logger,
-  muteUnmute,
   isMuted,
-  onToggleConsultMute,
+  controlVisibility,
+  toggleConsultMute,
 }) => {
-  const [isMuteDisabled, setIsMuteDisabled] = useState(false);
-
   const timerKey = createTimerKey(startTimeStamp);
-
-  const handleTransfer = () => {
-    handleTransferPress(onTransfer, logger);
-  };
-
-  const handleEndConsult = () => {
-    handleEndConsultPress(endConsultCall, logger);
-  };
-
-  const handleConsultMuteToggle = () => {
-    handleMuteToggle(onToggleConsultMute, setIsMuteDisabled, logger);
-  };
 
   const buttons = createConsultButtons(
     isMuted,
-    isMuteDisabled,
-    consultCompleted,
-    isAgentBeingConsulted,
-    isEndConsultEnabled,
-    muteUnmute,
-    onTransfer ? handleTransfer : undefined,
-    handleConsultMuteToggle,
-    handleEndConsult
+    controlVisibility,
+    consultTransfer,
+    toggleConsultMute,
+    endConsultCall,
+    consultConference,
+    switchToMainCall,
+    logger
   );
 
   // Filter buttons that should be shown, then map them
@@ -66,7 +47,7 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
             {agentName}
           </Text>
           <Text tagName="p" type="body-secondary" className="consult-sub-text">
-            {getConsultStatusText(consultCompleted)}&nbsp;&bull;&nbsp;
+            {getConsultStatusText(controlVisibility.isConsultInitiated)}&nbsp;&bull;&nbsp;
             <TaskTimer key={timerKey} startTimeStamp={startTimeStamp} />
           </Text>
         </div>

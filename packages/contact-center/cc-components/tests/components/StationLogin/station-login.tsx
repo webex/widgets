@@ -427,6 +427,97 @@ describe('Station Login Component', () => {
         }
       });
     });
+
+    it('hides Desktop login option when hideDesktopLogin is true', async () => {
+      const screen = await render(
+        <StationLoginComponent
+          {...props}
+          loginOptions={['AGENT_DN', 'EXTENSION', 'BROWSER']}
+          hideDesktopLogin={true}
+          profileMode={false}
+        />
+      );
+
+      const loginOptionsSelect = screen.getAllByTestId('login-option-select')[0];
+      const loginOptions = loginOptionsSelect.childNodes;
+
+      // Should only render 2 options (AGENT_DN and EXTENSION), Desktop (BROWSER) should be hidden
+      expect(loginOptions.length).toBe(2);
+
+      // Verify Desktop is not in the rendered options
+      const desktopOption = screen.queryByTestId('login-option-Desktop');
+      expect(desktopOption).not.toBeInTheDocument();
+
+      // Verify other options are present
+      expect(screen.getByTestId('login-option-Dial Number')).toBeInTheDocument();
+      expect(screen.getByTestId('login-option-Extension')).toBeInTheDocument();
+    });
+
+    it('shows Desktop login option when hideDesktopLogin is false', async () => {
+      const screen = await render(
+        <StationLoginComponent
+          {...props}
+          loginOptions={['AGENT_DN', 'EXTENSION', 'BROWSER']}
+          hideDesktopLogin={false}
+          profileMode={false}
+        />
+      );
+
+      const loginOptionsSelect = screen.getAllByTestId('login-option-select')[0];
+      const loginOptions = loginOptionsSelect.childNodes;
+
+      // Should render all 3 options including Desktop
+      expect(loginOptions.length).toBe(3);
+
+      // Verify Desktop is in the rendered options
+      expect(screen.getByTestId('login-option-Desktop')).toBeInTheDocument();
+      expect(screen.getByTestId('login-option-Dial Number')).toBeInTheDocument();
+      expect(screen.getByTestId('login-option-Extension')).toBeInTheDocument();
+    });
+
+    it('shows Desktop login option when hideDesktopLogin is undefined', async () => {
+      const screen = await render(
+        <StationLoginComponent
+          {...props}
+          loginOptions={['AGENT_DN', 'EXTENSION', 'BROWSER']}
+          hideDesktopLogin={undefined}
+          profileMode={false}
+        />
+      );
+
+      const loginOptionsSelect = screen.getAllByTestId('login-option-select')[0];
+      const loginOptions = loginOptionsSelect.childNodes;
+
+      // Should render all 3 options including Desktop (default behavior)
+      expect(loginOptions.length).toBe(3);
+
+      // Verify Desktop is in the rendered options
+      expect(screen.getByTestId('login-option-Desktop')).toBeInTheDocument();
+    });
+
+    it('hides Desktop login option in profile mode when hideDesktopLogin is true', async () => {
+      const screen = await render(
+        <StationLoginComponent
+          {...props}
+          loginOptions={['AGENT_DN', 'EXTENSION', 'BROWSER']}
+          hideDesktopLogin={true}
+          profileMode={true}
+          isAgentLoggedIn={true}
+        />
+      );
+
+      const loginOptionsSelect = screen.getAllByTestId('login-option-select')[0];
+      const loginOptions = loginOptionsSelect.childNodes;
+
+      // Should only render 2 options (AGENT_DN and EXTENSION), Desktop (BROWSER) should be hidden even in profile mode
+      expect(loginOptions.length).toBe(2);
+
+      // Verify Desktop is NOT in the rendered options (hideDesktopLogin applies in profile mode too)
+      const desktopOption = screen.queryByTestId('login-option-Desktop');
+      expect(desktopOption).not.toBeInTheDocument();
+      expect(screen.getByTestId('login-option-Dial Number')).toBeInTheDocument();
+      expect(screen.getByTestId('login-option-Extension')).toBeInTheDocument();
+    });
   });
 
   describe('Actions', () => {

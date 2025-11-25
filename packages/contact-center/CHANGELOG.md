@@ -1,3 +1,38 @@
+# [1.28.0-ccwidgets.126](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.125...v1.28.0-ccwidgets.126) (2025-11-25)
+
+
+### Bug Fixes
+
+* **widgets:** fixed-outbound-fail-error ([#555](https://github.com/webex/widgets/issues/555)) ([58a2219](https://github.com/webex/widgets/commit/58a2219aa4afbac016a82206890391eb60ddf8e0))
+
+# [1.28.0-ccwidgets.125](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.124...v1.28.0-ccwidgets.125) (2025-11-21)
+
+
+### Bug Fixes
+
+* **station-login:** visibility toggle for desktop login ([#554](https://github.com/webex/widgets/issues/554)) ([f657c7e](https://github.com/webex/widgets/commit/f657c7ecde7cee3e70d6f20f483b731c144a6368))
+
+# [1.28.0-ccwidgets.124](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.123...v1.28.0-ccwidgets.124) (2025-11-13)
+
+
+### Bug Fixes
+
+* **cc-task:** visibility toggle for conference feature ([#553](https://github.com/webex/widgets/issues/553)) ([ab5fd64](https://github.com/webex/widgets/commit/ab5fd64e6c8b6c9efaf85281d9b31cd5cac8a32e))
+
+# [1.28.0-ccwidgets.123](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.122...v1.28.0-ccwidgets.123) (2025-11-11)
+
+
+### Features
+
+* **cc-widgets:** multi party conference ([#539](https://github.com/webex/widgets/issues/539)) ([f2a23d4](https://github.com/webex/widgets/commit/f2a23d4650fdf55ac9c44d489f45f13b3650341a))
+
+# [1.28.0-ccwidgets.122](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.121...v1.28.0-ccwidgets.122) (2025-11-06)
+
+
+### Bug Fixes
+
+* **cc-widgets:** add license in package.json ([#549](https://github.com/webex/widgets/issues/549)) ([a08cc66](https://github.com/webex/widgets/commit/a08cc66ef0a7fea0224a4c4f3bc899781c1ff6d8))
+
 # [1.28.0-ccwidgets.121](https://github.com/webex/widgets/compare/v1.28.0-ccwidgets.120...v1.28.0-ccwidgets.121) (2025-11-04)
 
 

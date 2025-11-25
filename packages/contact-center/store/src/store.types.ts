@@ -115,14 +115,10 @@ interface IStore {
   showMultipleLoginAlert: boolean;
   currentTheme: string;
   customState: ICustomState;
-  consultCompleted: boolean;
-  consultInitiated: boolean;
-  consultAccepted: boolean;
   isQueueConsultInProgress: boolean;
   currentConsultQueueId: string;
   consultStartTimeStamp?: number;
   callControlAudio: MediaStream | null;
-  consultOfferReceived: boolean;
   isEndConsultEnabled: boolean;
   allowConsultToQueue: boolean;
   agentProfile: AgentLoginProfile;
@@ -151,9 +147,6 @@ interface IStoreWrapper extends IStore {
   setIsAgentLoggedIn(value: boolean): void;
   setWrapupCodes(wrapupCodes: IWrapupCode[]): void;
   setState(state: IdleCode | ICustomState): void;
-  setConsultCompleted(value: boolean): void;
-  setConsultInitiated(value: boolean): void;
-  setConsultAccepted(value: boolean): void;
   setConsultStartTimeStamp(timestamp: number): void;
   setAgentProfile(profile: Profile): void;
   setTeamId(id: string): void;
@@ -192,6 +185,19 @@ enum TASK_EVENTS {
   TASK_RECORDING_PAUSED = 'task:recordingPaused',
   TASK_RECORDING_RESUMED = 'task:recordingResumed',
   TASK_OFFER_CONSULT = 'task:offerConsult',
+  TASK_CONFERENCE_ESTABLISHING = 'task:conferenceEstablishing',
+  TASK_CONFERENCE_STARTED = 'task:conferenceStarted',
+  TASK_CONFERENCE_FAILED = 'task:conferenceFailed',
+  TASK_CONFERENCE_ENDED = 'task:conferenceEnded',
+  TASK_PARTICIPANT_JOINED = 'task:participantJoined',
+  TASK_PARTICIPANT_LEFT = 'task:participantLeft',
+  TASK_CONFERENCE_TRANSFERRED = 'task:conferenceTransferred',
+  TASK_CONFERENCE_TRANSFER_FAILED = 'task:conferenceTransferFailed',
+  TASK_CONFERENCE_END_FAILED = 'task:conferenceEndFailed',
+  TASK_PARTICIPANT_LEFT_FAILED = 'task:participantLeftFailed',
+  TASK_MERGED = 'task:merged',
+  TASK_POST_CALL_ACTIVITY = 'task:postCallActivity',
+  TASK_OUTDIAL_FAILED = 'task:outdialFailed',
 } // TODO: remove this once cc sdk exports this enum
 
 // Events that are received on the contact center SDK
@@ -249,7 +255,7 @@ type FetchPaginatedList<T> = (
 type TransformPaginatedData<T, U> = (item: T, page: number, index: number) => U;
 
 // Utility consts
-const DIALNUMBER: string = 'AGENT_DN';
+const DIAL_NUMBER: string = 'AGENT_DN';
 const EXTENSION: string = 'EXTENSION';
 const DESKTOP: string = 'BROWSER';
 
@@ -260,7 +266,7 @@ const DEVICE_TYPE_BROWSER = 'BROWSER';
 const AGENT_STATE_AVAILABLE = 'Available';
 
 const LoginOptions: {[key: string]: string} = {
-  [DIALNUMBER]: 'Dial Number',
+  [DIAL_NUMBER]: 'Dial Number',
   [EXTENSION]: 'Extension',
   [DESKTOP]: 'Desktop',
 };
@@ -311,7 +317,7 @@ export {
   TASK_EVENTS,
   ENGAGED_LABEL,
   ENGAGED_USERNAME,
-  DIALNUMBER,
+  DIAL_NUMBER,
   EXTENSION,
   DESKTOP,
   MEDIA_TYPE_TELEPHONY_LOWER,
@@ -320,4 +326,21 @@ export {
   AGENT_STATE_AVAILABLE,
   LoginOptions,
   ERROR_TRIGGERING_IDLE_CODES,
+};
+
+export enum ConsultStatus {
+  NO_CONSULTATION_IN_PROGRESS = 'No consultation in progress',
+  BEING_CONSULTED = 'beingConsulted',
+  CONSULT_INITIATED = 'consultInitiated',
+  BEING_CONSULTED_ACCEPTED = 'beingConsultedAccepted',
+  CONSULT_ACCEPTED = 'consultAccepted',
+  CONNECTED = 'connected',
+  CONFERENCE = 'conference',
+  CONSULT_COMPLETED = 'consultCompleted',
+}
+
+export type Participant = {
+  id: string;
+  pType: 'Customer' | 'Agent' | string;
+  name?: string;
 };

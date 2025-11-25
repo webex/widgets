@@ -1,12 +1,14 @@
 import {useEffect, useCallback, useState, useRef, useMemo} from 'react';
 import {ITask} from '@webex/contact-center';
-import {useCallControlProps, UseTaskListProps, UseTaskProps, Participant, useOutdialCallProps} from './task.types';
+import {useCallControlProps, UseTaskListProps, UseTaskProps, useOutdialCallProps} from './task.types';
 import store, {
   TASK_EVENTS,
   BuddyDetails,
   DestinationType,
-  ContactServiceQueue,
   PaginatedListParams,
+  getConferenceParticipants,
+  Participant,
+  findMediaResourceId,
 } from '@webex/cc-store';
 import {findHoldTimestamp, getControlsVisibility} from './Utils/task-util';
 import {OutdialAniEntriesResponse} from '@webex/contact-center/dist/types/services/config/types';
@@ -275,22 +277,21 @@ export const useCallControl = (props: useCallControlProps) => {
     onRecordingToggle,
     onToggleMute,
     logger,
-    consultInitiated,
     deviceType,
     featureFlags,
     isMuted,
+    conferenceEnabled,
+    agentId,
   } = props;
-  const [isHeld, setIsHeld] = useState<boolean | undefined>(undefined);
   const [isRecording, setIsRecording] = useState(true);
   const [buddyAgents, setBuddyAgents] = useState<BuddyDetails[]>([]);
-  const [queues, setQueues] = useState<ContactServiceQueue[]>([]);
   const [consultAgentName, setConsultAgentName] = useState<string>('Consult Agent');
-  const [consultAgentId, setConsultAgentId] = useState<string>(null);
   const [holdTime, setHoldTime] = useState(0);
   const [startTimestamp, setStartTimestamp] = useState<number>(0);
   const [secondsUntilAutoWrapup, setsecondsUntilAutoWrapup] = useState<number | null>(null);
   const workerRef = useRef<Worker | null>(null);
   const [lastTargetType, setLastTargetType] = useState<'agent' | 'queue'>('agent');
+  const [conferenceParticipants, setConferenceParticipants] = useState<Participant[]>([]);
 
   const workerScript = `
     let intervalId = null;
@@ -324,7 +325,7 @@ export const useCallControl = (props: useCallControlProps) => {
 
     // Get holdTimestamp from the interaction object
     const holdTimestamp = currentTask?.data?.interaction
-      ? findHoldTimestamp(currentTask.data.interaction, 'mainCall', logger)
+      ? findHoldTimestamp(currentTask.data.interaction, 'mainCall')
       : null;
 
     if (holdTimestamp) {
@@ -354,7 +355,14 @@ export const useCallControl = (props: useCallControlProps) => {
         workerRef.current = null;
       }
     };
-  }, [currentTask?.data?.interaction]);
+  }, [currentTask]);
+
+  useEffect(() => {
+    if (currentTask && store?.cc?.agentConfig?.agentId) {
+      const participants = getConferenceParticipants(currentTask, store.cc.agentConfig.agentId);
+      setConferenceParticipants(participants);
+    }
+  }, [currentTask]);
   // Function to extract consulting agent information
   const extractConsultingAgent = useCallback(() => {
     try {
@@ -374,7 +382,6 @@ export const useCallControl = (props: useCallControlProps) => {
 
       if (foundAgent) {
         setConsultAgentName(foundAgent.name);
-        setConsultAgentId(foundAgent.id);
         logger.info(`Consulting agent detected: ${foundAgent.name} ${foundAgent.id}`, {
           module: 'widget-cc-task#helper.ts',
           method: 'useCallControl#extractConsultingAgent',
@@ -387,7 +394,7 @@ export const useCallControl = (props: useCallControlProps) => {
         method: 'extractConsultingAgent',
       });
     }
-  }, [currentTask, logger, consultInitiated]);
+  }, [currentTask, logger]);
 
   // Check for consulting agent whenever currentTask changes
   useEffect(() => {
@@ -399,7 +406,7 @@ export const useCallControl = (props: useCallControlProps) => {
     ) {
       setStartTimestamp(currentTask.data.interaction.participants[store.cc.agentConfig.agentId].joinTimestamp);
     }
-  }, [currentTask, extractConsultingAgent, consultInitiated]);
+  }, [currentTask, extractConsultingAgent]);
 
   const loadBuddyAgents = useCallback(async () => {
     try {
@@ -412,19 +419,6 @@ export const useCallControl = (props: useCallControlProps) => {
         method: 'loadBuddyAgents',
       });
       setBuddyAgents([]);
-    }
-  }, [logger]);
-
-  const loadQueues = useCallback(async () => {
-    try {
-      const {data} = await store.getQueues();
-      setQueues(data);
-    } catch (error) {
-      logger?.error(`CC-Widgets: Task: Error loading queues - ${error.message || error}`, {
-        module: 'useCallControl',
-        method: 'loadQueues',
-      });
-      setQueues([]);
     }
   }, [logger]);
 
@@ -476,7 +470,6 @@ export const useCallControl = (props: useCallControlProps) => {
 
   const holdCallback = () => {
     try {
-      setIsHeld(true);
       if (onHoldResume) {
         onHoldResume({
           isHeld: true,
@@ -493,7 +486,6 @@ export const useCallControl = (props: useCallControlProps) => {
 
   const resumeCallback = () => {
     try {
-      setIsHeld(false);
       if (onHoldResume) {
         onHoldResume({
           isHeld: false,
@@ -571,39 +563,33 @@ export const useCallControl = (props: useCallControlProps) => {
   };
 
   useEffect(() => {
-    if (!currentTask) return;
+    if (!currentTask?.data?.interactionId) return;
     logger.log(`useCallControl init for task ${currentTask.data.interactionId}`, {
       module: 'useCallControl',
       method: 'useEffect-init',
     });
 
+    const interactionId = currentTask.data.interactionId;
+
     store.setTaskCallback(
       // Should use holdCallback
       TASK_EVENTS.TASK_HOLD,
       holdCallback,
-      currentTask.data.interactionId
+      interactionId
     );
-    store.setTaskCallback(TASK_EVENTS.TASK_RESUME, resumeCallback, currentTask.data.interactionId);
-    store.setTaskCallback(TASK_EVENTS.TASK_END, endCallCallback, currentTask.data.interactionId);
-    store.setTaskCallback(TASK_EVENTS.AGENT_WRAPPEDUP, wrapupCallCallback, currentTask.data.interactionId);
-    store.setTaskCallback(TASK_EVENTS.TASK_RECORDING_PAUSED, pauseRecordingCallback, currentTask.data.interactionId);
-    store.setTaskCallback(TASK_EVENTS.TASK_RECORDING_RESUMED, resumeRecordingCallback, currentTask.data.interactionId);
+    store.setTaskCallback(TASK_EVENTS.TASK_RESUME, resumeCallback, interactionId);
+    store.setTaskCallback(TASK_EVENTS.TASK_END, endCallCallback, interactionId);
+    store.setTaskCallback(TASK_EVENTS.AGENT_WRAPPEDUP, wrapupCallCallback, interactionId);
+    store.setTaskCallback(TASK_EVENTS.TASK_RECORDING_PAUSED, pauseRecordingCallback, interactionId);
+    store.setTaskCallback(TASK_EVENTS.TASK_RECORDING_RESUMED, resumeRecordingCallback, interactionId);
 
     return () => {
-      store.removeTaskCallback(TASK_EVENTS.TASK_HOLD, holdCallback, currentTask.data.interactionId);
-      store.removeTaskCallback(TASK_EVENTS.TASK_RESUME, resumeCallback, currentTask.data.interactionId);
-      store.removeTaskCallback(TASK_EVENTS.TASK_END, endCallCallback, currentTask.data.interactionId);
-      store.removeTaskCallback(TASK_EVENTS.AGENT_WRAPPEDUP, wrapupCallCallback, currentTask.data.interactionId);
-      store.removeTaskCallback(
-        TASK_EVENTS.CONTACT_RECORDING_PAUSED,
-        pauseRecordingCallback,
-        currentTask.data.interactionId
-      );
-      store.removeTaskCallback(
-        TASK_EVENTS.CONTACT_RECORDING_RESUMED,
-        resumeRecordingCallback,
-        currentTask.data.interactionId
-      );
+      store.removeTaskCallback(TASK_EVENTS.TASK_HOLD, holdCallback, interactionId);
+      store.removeTaskCallback(TASK_EVENTS.TASK_RESUME, resumeCallback, interactionId);
+      store.removeTaskCallback(TASK_EVENTS.TASK_END, endCallCallback, interactionId);
+      store.removeTaskCallback(TASK_EVENTS.AGENT_WRAPPEDUP, wrapupCallCallback, interactionId);
+      store.removeTaskCallback(TASK_EVENTS.CONTACT_RECORDING_PAUSED, pauseRecordingCallback, interactionId);
+      store.removeTaskCallback(TASK_EVENTS.CONTACT_RECORDING_RESUMED, resumeRecordingCallback, interactionId);
     };
   }, [currentTask]);
 
@@ -667,7 +653,6 @@ export const useCallControl = (props: useCallControlProps) => {
       const intendedMuteState = !isMuted;
 
       try {
-        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         await currentTask.toggleMute();
 
         // Only update state after successful SDK call
@@ -740,7 +725,6 @@ export const useCallControl = (props: useCallControlProps) => {
 
   const transferCall = async (to: string, type: DestinationType) => {
     try {
-      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       await currentTask.transfer({to, destinationType: type});
       logger.info('transferCall success', {module: 'useCallControl', method: 'transferCall'});
     } catch (error) {
@@ -749,32 +733,75 @@ export const useCallControl = (props: useCallControlProps) => {
     }
   };
 
-  const consultCall = async (consultDestination: string, destinationType: DestinationType) => {
+  const consultConference = async () => {
+    try {
+      await currentTask.consultConference();
+      logger.info('consultConference success', {
+        module: 'useCallControl',
+        method: 'consultConference',
+      });
+    } catch (error) {
+      logger.error(`Error consulting conference: ${error}`, {module: 'useCallControl', method: 'consultConference'});
+      throw error;
+    }
+  };
+
+  const switchToMainCall = async () => {
+    try {
+      await currentTask.resume(findMediaResourceId(currentTask, 'consult'));
+      logger.info('switchToMainCall success', {module: 'useCallControl', method: 'switchToMainCall'});
+    } catch (error) {
+      logger.error(`Error switchToMainCall: ${error}`, {module: 'useCallControl', method: 'switchToMainCall'});
+      throw error;
+    }
+  };
+
+  const switchToConsult = async () => {
+    try {
+      await currentTask.hold(findMediaResourceId(currentTask, 'mainCall'));
+      logger.info('switchToConsult success', {module: 'useCallControl', method: 'switchToConsult'});
+    } catch (error) {
+      logger.error(`Error switching to consult: ${error}`, {module: 'useCallControl', method: 'switchToConsult'});
+      throw error;
+    }
+  };
+
+  const exitConference = async () => {
+    try {
+      await currentTask.exitConference();
+      logger.info('exitConference success', {module: 'useCallControl', method: 'exitConference'});
+    } catch (error) {
+      logger.error(`Error exiting conference: ${error}`, {module: 'useCallControl', method: 'exitConference'});
+      throw error;
+    }
+  };
+
+  const consultCall = async (
+    consultDestination: string,
+    destinationType: DestinationType,
+    allowParticipantsToInteract: boolean
+  ) => {
     const consultPayload = {
       to: consultDestination,
       destinationType: destinationType,
+      holdParticipants: !allowParticipantsToInteract,
     };
 
     if (destinationType === 'queue') {
       store.setIsQueueConsultInProgress(true);
       store.setCurrentConsultQueueId(consultDestination);
-      store.setConsultInitiated(true);
     }
 
     try {
-      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       await currentTask.consult(consultPayload);
       store.setIsQueueConsultInProgress(false);
       if (destinationType === 'queue') {
         store.setCurrentConsultQueueId(null);
-      } else {
-        store.setConsultInitiated(true);
       }
     } catch (error) {
       if (destinationType === 'queue') {
         store.setIsQueueConsultInProgress(false);
         store.setCurrentConsultQueueId(null);
-        store.setConsultInitiated(false);
       }
       logError(`Error consulting call: ${error}`, 'consultCall');
       throw error;
@@ -782,6 +809,11 @@ export const useCallControl = (props: useCallControlProps) => {
   };
 
   const endConsultCall = async () => {
+    if (!currentTask?.data?.interactionId) {
+      logError('Cannot end consult call: currentTask or interactionId is missing', 'endConsultCall');
+      return;
+    }
+
     const consultEndPayload = {
       isConsult: true,
       taskId: currentTask.data.interactionId,
@@ -789,7 +821,6 @@ export const useCallControl = (props: useCallControlProps) => {
     };
 
     try {
-      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       await currentTask.endConsult(consultEndPayload);
     } catch (error) {
       logError(`Error ending consult call: ${error}`, 'endConsultCall');
@@ -798,10 +829,22 @@ export const useCallControl = (props: useCallControlProps) => {
   };
 
   const consultTransfer = async () => {
+    if (!currentTask?.data) {
+      logError('Cannot transfer consult call: currentTask or data is missing', 'consultTransfer');
+      return;
+    }
+
     try {
-      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
-      await currentTask.consultTransfer();
-      store.setConsultInitiated(true);
+      if (currentTask.data.isConferenceInProgress) {
+        logger.info('Conference in progress, using transferConference', {
+          module: 'useCallControl',
+          method: 'transferCall',
+        });
+        await currentTask.transferConference();
+      } else {
+        logger.info('Consult transfer initiated', {module: 'useCallControl', method: 'consultTransfer'});
+        await currentTask.consultTransfer();
+      }
     } catch (error) {
       logError(`Error transferring consult call: ${error}`, 'consultTransfer');
       throw error;
@@ -809,6 +852,14 @@ export const useCallControl = (props: useCallControlProps) => {
   };
 
   const cancelAutoWrapup = () => {
+    if (!currentTask) {
+      logger.warn('CC-Widgets: CallControl: Cannot cancel auto-wrapup, currentTask is missing', {
+        module: 'widget-cc-task#helper.ts',
+        method: 'useCallControl#cancelAutoWrapup',
+      });
+      return;
+    }
+
     logger.info('CC-Widgets: CallControl: wrap-up cancelled', {
       module: 'widget-cc-task#helper.ts',
       method: 'useCallControl#cancelAutoWrapup',
@@ -817,8 +868,8 @@ export const useCallControl = (props: useCallControlProps) => {
   };
 
   const controlVisibility = useMemo(
-    () => getControlsVisibility(deviceType, featureFlags, currentTask, logger),
-    [deviceType, featureFlags, currentTask, logger]
+    () => getControlsVisibility(deviceType, featureFlags, currentTask, agentId, conferenceEnabled, logger),
+    [deviceType, featureFlags, currentTask, agentId, conferenceEnabled, logger]
   );
 
   // Add useEffect for auto wrap-up timer
@@ -865,22 +916,20 @@ export const useCallControl = (props: useCallControlProps) => {
     toggleMute,
     isMuted,
     wrapupCall,
-    isHeld,
-    setIsHeld,
     isRecording,
     setIsRecording,
     buddyAgents,
     loadBuddyAgents,
-    queues,
-    loadQueues,
     transferCall,
     consultCall,
     endConsultCall,
     consultTransfer,
+    consultConference,
+    switchToMainCall,
+    switchToConsult,
+    exitConference,
     consultAgentName,
     setConsultAgentName,
-    consultAgentId,
-    setConsultAgentId,
     holdTime,
     startTimestamp,
     lastTargetType,
@@ -888,6 +937,7 @@ export const useCallControl = (props: useCallControlProps) => {
     controlVisibility,
     secondsUntilAutoWrapup,
     cancelAutoWrapup,
+    conferenceParticipants,
     getAddressBookEntries,
     getEntryPoints,
     getQueuesFetcher,

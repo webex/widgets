@@ -1,9 +1,9 @@
 {
   "name": "@webex/test-fixtures",
   "description": "Webex Contact Center Widgets: Test Fixtures",
+  "license": "Cisco's General Terms (https://www.cisco.com/site/us/en/about/legal/contract-experience/index.html)",
   "main": "dist/index.js",
   "types": "dist/types/index.d.ts",
-  "license": "MIT",
   "publishConfig": {
     "access": "public"
   },

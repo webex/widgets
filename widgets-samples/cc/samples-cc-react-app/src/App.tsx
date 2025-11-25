@@ -61,6 +61,8 @@ function App() {
   const [showRejectedPopup, setShowRejectedPopup] = useState(false);
   const [rejectedReason, setRejectedReason] = useState('');
   const [selectedState, setSelectedState] = useState('');
+  const [showOutdialFailedModal, setShowOutdialFailedModal] = useState(false);
+  const [outdialFailedReason, setOutdialFailedReason] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [incomingTasks, setIncomingTasks] = useState([]);
   const [loginType, setLoginType] = useState('token');
@@ -73,6 +75,14 @@ function App() {
   const [integrationEnv, setintegrationEnv] = useState(() => {
     const savedintegrationEnv = window.localStorage.getItem('integrationEnv');
     return savedintegrationEnv === 'true';
+  });
+  const [conferenceEnabled, setConferenceEnabled] = useState(() => {
+    const savedMultiPartyConferenceEnabled = window.localStorage.getItem('conferenceEnabled');
+    return savedMultiPartyConferenceEnabled !== null ? savedMultiPartyConferenceEnabled === 'true' : true;
+  });
+  const [hideDesktopLogin, setHideDesktopLogin] = useState(() => {
+    const savedHideDesktopLogin = window.localStorage.getItem('hideDesktopLogin');
+    return savedHideDesktopLogin === 'true';
   });
 
   const handleSaveStart = () => {
@@ -339,20 +349,50 @@ function App() {
   useEffect(() => {
     window.localStorage.setItem('integrationEnv', JSON.stringify(integrationEnv));
   }, [integrationEnv]);
+  useEffect(() => {
+    window.localStorage.setItem('conferenceEnabled', JSON.stringify(conferenceEnabled));
+  }, [conferenceEnabled]);
+  useEffect(() => {
+    window.localStorage.setItem('hideDesktopLogin', JSON.stringify(hideDesktopLogin));
+  }, [hideDesktopLogin]);
 
   useEffect(() => {
     store.setIncomingTaskCb(onIncomingTaskCB);
     store.setOnError(onError);
+    store.setOutdialFailed(onOutdialFailed);
 
     return () => {
       store.setOnError(undefined);
       store.setTaskRejected(undefined);
+      store.setOutdialFailed(undefined);
       store.setIncomingTaskCb(undefined);
     };
   }, []);
 
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && showOutdialFailedModal) {
+        setShowOutdialFailedModal(false);
+      }
+    };
+
+    if (showOutdialFailedModal) {
+      window.addEventListener('keydown', handleEscape);
+    }
+
+    return () => {
+      window.removeEventListener('keydown', handleEscape);
+    };
+  }, [showOutdialFailedModal]);
+
   const onError = (widgetName: string, error: Error) => {
     console.log('Error in widgets:', widgetName, error);
+  };
+
+  const onOutdialFailed = (reason: string) => {
+    console.log('Outdial failed:', reason);
+    setOutdialFailedReason(reason);
+    setShowOutdialFailedModal(true);
   };
 
   const onStateChange = (status) => {
@@ -537,16 +577,6 @@ function App() {
                       }}
                     />
                     <Checkbox
-                      checked={doStationLogout}
-                      aria-label="theme checkbox"
-                      id="theme-checkbox"
-                      label="Do Station Logout"
-                      // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
-                      onchange={() => {
-                        setDoStationLogout(!doStationLogout);
-                      }}
-                    />
-                    <Checkbox
                       checked={integrationEnv}
                       aria-label="integration env checkbox"
                       id="integration-env-checkbox"
@@ -705,6 +735,29 @@ function App() {
                     <section className="section-box">
                       <fieldset className="fieldset">
                         <legend className="legend-box">Station Login</legend>
+                        <div style={{marginBottom: '15px'}}>
+                          <Checkbox
+                            data-testid="samples:hide-desktop-login-checkbox"
+                            checked={hideDesktopLogin}
+                            aria-label="hide desktop login checkbox"
+                            id="hide-desktop-login-checkbox"
+                            label="Hide Desktop Login Mode"
+                            // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
+                            onchange={() => {
+                              setHideDesktopLogin(!hideDesktopLogin);
+                            }}
+                          />
+                          <Checkbox
+                            checked={doStationLogout}
+                            aria-label="do station logout checkbox"
+                            id="do-station-logout-checkbox"
+                            label="Do Station Logout"
+                            // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
+                            onchange={() => {
+                              setDoStationLogout(!doStationLogout);
+                            }}
+                          />
+                        </div>
                         <div className="station-login">
                           <StationLogin
                             onLogin={onLogin}
@@ -712,6 +765,7 @@ function App() {
                             onCCSignOut={onCCSignOut}
                             profileMode={false}
                             doStationLogout={doStationLogout}
+                            hideDesktopLogin={hideDesktopLogin}
                           />
                         </div>
                       </fieldset>
@@ -723,8 +777,26 @@ function App() {
                     <section className="section-box">
                       <fieldset className="fieldset">
                         <legend className="legend-box">Station Login (Profile Mode)</legend>
+                        <div style={{marginBottom: '15px'}}>
+                          <Checkbox
+                            data-testid="samples:hide-desktop-login-profile-checkbox"
+                            checked={hideDesktopLogin}
+                            aria-label="hide desktop login checkbox"
+                            id="hide-desktop-login-profile-checkbox"
+                            label="Hide Desktop Login Mode"
+                            // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
+                            onchange={() => {
+                              setHideDesktopLogin(!hideDesktopLogin);
+                            }}
+                          />
+                        </div>
                         <div className="station-login">
-                          <StationLogin profileMode={true} onSaveStart={handleSaveStart} onSaveEnd={handleSaveEnd} />
+                          <StationLogin
+                            profileMode={true}
+                            onSaveStart={handleSaveStart}
+                            onSaveEnd={handleSaveEnd}
+                            hideDesktopLogin={hideDesktopLogin}
+                          />
                         </div>
                       </fieldset>
                     </section>
@@ -742,40 +814,53 @@ function App() {
                         </section>
                       </div>
                     )}
-                    {selectedWidgets.callControl && store.currentTask && (
-                      <div className="box">
-                        <section className="section-box">
-                          <fieldset className="fieldset">
-                            <legend className="legend-box">Call Control</legend>
-                            <CallControl
-                              onHoldResume={onHoldResume}
-                              onEnd={onEnd}
-                              onWrapUp={onWrapUp}
-                              onRecordingToggle={onRecordingToggle}
-                              onToggleMute={onToggleMute}
-                            />
-                          </fieldset>
-                        </section>
-                      </div>
-                    )}
-                    {selectedWidgets.callControlCAD && store.currentTask && (
-                      <div className="box">
-                        <section className="section-box">
-                          <fieldset className="fieldset">
-                            <legend className="legend-box">Call Control with Call Associated Data (CAD)</legend>
-                            <CallControlCAD
-                              onHoldResume={onHoldResume}
-                              onEnd={onEnd}
-                              onWrapUp={onWrapUp}
-                              onRecordingToggle={onRecordingToggle}
-                              callControlClassName={'call-control-outer'}
-                              callControlConsultClassName={'call-control-consult-outer'}
-                              onToggleMute={onToggleMute}
-                            />
-                          </fieldset>
-                        </section>
-                      </div>
-                    )}
+
+                    <div className="box">
+                      <section className="section-box">
+                        <fieldset className="fieldset">
+                          <legend className="legend-box">&nbsp;Call Control and Call Control with CAD&nbsp;</legend>
+                          <Checkbox
+                            checked={conferenceEnabled}
+                            aria-label="onference enabled checkbox"
+                            id="conference-enabled-checkbox"
+                            label="Enable Conference Feature"
+                            // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
+                            onchange={() => {
+                              setConferenceEnabled(!conferenceEnabled);
+                            }}
+                          />
+                          {selectedWidgets.callControl && store.currentTask && (
+                            <fieldset className="fieldset">
+                              <legend className="legend-box">Call Control</legend>
+
+                              <CallControl
+                                onHoldResume={onHoldResume}
+                                onEnd={onEnd}
+                                onWrapUp={onWrapUp}
+                                onRecordingToggle={onRecordingToggle}
+                                onToggleMute={onToggleMute}
+                                conferenceEnabled={conferenceEnabled}
+                              />
+                            </fieldset>
+                          )}
+                          {selectedWidgets.callControlCAD && store.currentTask && (
+                            <fieldset className="fieldset">
+                              <legend className="legend-box">Call Control with Call Associated Data (CAD)</legend>
+                              <CallControlCAD
+                                onHoldResume={onHoldResume}
+                                onEnd={onEnd}
+                                onWrapUp={onWrapUp}
+                                onRecordingToggle={onRecordingToggle}
+                                callControlClassName={'call-control-outer'}
+                                callControlConsultClassName={'call-control-consult-outer'}
+                                onToggleMute={onToggleMute}
+                                conferenceEnabled={conferenceEnabled}
+                              />
+                            </fieldset>
+                          )}
+                        </fieldset>
+                      </section>
+                    </div>
 
                     {selectedWidgets.incomingTask && (
                       <>
@@ -879,6 +964,22 @@ function App() {
                     Confirm State Change
                   </Button>
                 </div>
+              </div>
+            )}
+
+            {showOutdialFailedModal && (
+              <div className="task-rejected-popup" data-testid="samples:outdial-failed-modal">
+                <button className="close-btn" onClick={() => setShowOutdialFailedModal(false)}>
+                  ×
+                </button>
+                <Text>
+                  <div style={{textAlign: 'center', fontSize: '1.25rem', fontWeight: 600}}>Outdial Failed</div>
+                </Text>
+                <Text>
+                  <div style={{fontSize: '0.875rem', textAlign: 'center', color: 'rgb(171, 10, 21)'}}>
+                    Reason: {outdialFailedReason}
+                  </div>
+                </Text>
               </div>
             )}
 

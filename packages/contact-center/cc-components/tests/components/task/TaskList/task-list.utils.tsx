@@ -48,7 +48,7 @@ describe('task-list.utils', () => {
         mockTask.data.wrapUpRequired = false;
         mockTask.data.interaction.mediaType = MEDIA_CHANNEL.TELEPHONY;
 
-        const result = extractTaskListItemData(mockTask, true);
+        const result = extractTaskListItemData(mockTask, true, mockTask.data.agentId);
 
         expect(result.ani).toBe('1234567890');
         expect(result.customerName).toBe('John Doe');
@@ -89,7 +89,7 @@ describe('task-list.utils', () => {
         mockTask.data.interaction.mediaType = MEDIA_CHANNEL.SOCIAL;
         mockTask.data.interaction.mediaChannel = 'facebook';
 
-        const result = extractTaskListItemData(mockTask, true);
+        const result = extractTaskListItemData(mockTask, true, mockTask.data.agentId);
 
         expect(result.title).toBe('Alice Johnson'); // Customer name for social
         expect(result.isSocial).toBe(true);
@@ -127,7 +127,7 @@ describe('task-list.utils', () => {
         mockTask.data.wrapUpRequired = false;
         mockTask.data.interaction.mediaType = MEDIA_CHANNEL.TELEPHONY;
 
-        const result = extractTaskListItemData(mockTask, true);
+        const result = extractTaskListItemData(mockTask, true, mockTask.data.agentId);
 
         expect(result.ani).toBe('9876543210');
         expect(result.ronaTimeout).toBe(60); // Shows RONA timeout for incoming tasks
@@ -161,7 +161,7 @@ describe('task-list.utils', () => {
         mockTask.data.wrapUpRequired = true;
         mockTask.data.interaction.mediaType = MEDIA_CHANNEL.TELEPHONY;
 
-        const result = extractTaskListItemData(mockTask, true);
+        const result = extractTaskListItemData(mockTask, true, mockTask.data.agentId);
 
         expect(result.ani).toBe('9876543210');
         expect(result.ronaTimeout).toBeNull(); // Active tasks don't show RONA timeout
@@ -197,7 +197,7 @@ describe('task-list.utils', () => {
         mockTask.data.wrapUpRequired = false;
         mockTask.data.interaction.mediaType = MEDIA_CHANNEL.TELEPHONY;
 
-        const result = extractTaskListItemData(mockTask, false);
+        const result = extractTaskListItemData(mockTask, false, mockTask.data.agentId);
 
         expect(result.acceptText).toBe('Ringing...');
         expect(result.declineText).toBeUndefined();
@@ -229,7 +229,7 @@ describe('task-list.utils', () => {
         mockTask.data.wrapUpRequired = false;
         mockTask.data.interaction.mediaType = MEDIA_CHANNEL.SOCIAL;
 
-        const result = extractTaskListItemData(mockTask, true);
+        const result = extractTaskListItemData(mockTask, true, mockTask.data.agentId);
 
         expect(result.acceptText).toBe('Accept');
         expect(result.declineText).toBeUndefined(); // No decline for social
@@ -446,7 +446,7 @@ describe('task-list.utils', () => {
         },
       };
 
-      const handler = createTaskSelectHandler(task, currentTask, mockOnTaskSelect);
+      const handler = createTaskSelectHandler(task, currentTask, mockOnTaskSelect, mockTask.agentId);
       handler();
 
       expect(mockOnTaskSelect).toHaveBeenCalledWith(task);
@@ -477,7 +477,7 @@ describe('task-list.utils', () => {
         },
       };
 
-      const handler = createTaskSelectHandler(task, currentTask, mockOnTaskSelect);
+      const handler = createTaskSelectHandler(task, currentTask, mockOnTaskSelect, mockTask.agentId);
       handler();
 
       expect(mockOnTaskSelect).not.toHaveBeenCalled();

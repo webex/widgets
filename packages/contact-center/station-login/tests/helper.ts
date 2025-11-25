@@ -603,7 +603,7 @@ describe('useStationLogin Hook', () => {
     // Simulate a change
     act(() => {
       result.current.setCurrentLoginOptions({
-        deviceType: 'DIALNUMBER',
+        deviceType: 'DIAL_NUMBER',
         dialNumber: '2002',
         teamId: 'team123',
       });
@@ -616,7 +616,7 @@ describe('useStationLogin Hook', () => {
     });
 
     expect(cc.updateAgentProfile).toHaveBeenCalledWith({
-      loginOption: 'DIALNUMBER',
+      loginOption: 'DIAL_NUMBER',
       teamId: 'team123',
       dialNumber: '2002',
     });
@@ -648,7 +648,7 @@ describe('useStationLogin Hook', () => {
     // Simulate a change
     act(() => {
       result.current.setCurrentLoginOptions({
-        deviceType: 'DIALNUMBER',
+        deviceType: 'DIAL_NUMBER',
         dialNumber: '2002',
         teamId: 'team123',
       });

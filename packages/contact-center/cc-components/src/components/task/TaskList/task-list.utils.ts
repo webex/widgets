@@ -1,5 +1,5 @@
 import {MEDIA_CHANNEL, TaskListItemData} from '../task.types';
-import {ITask} from '@webex/cc-store';
+import {ILogger, ITask} from '@webex/cc-store';
 import {isIncomingTask} from '@webex/cc-store';
 /**
  * Extracts and processes data from a task for rendering in the task list
@@ -7,7 +7,12 @@ import {isIncomingTask} from '@webex/cc-store';
  * @param isBrowser - Whether the device type is browser
  * @returns Processed task data with computed values
  */
-export const extractTaskListItemData = (task: ITask, isBrowser: boolean, logger?): TaskListItemData => {
+export const extractTaskListItemData = (
+  task: ITask,
+  isBrowser: boolean,
+  agentId: string,
+  logger?: ILogger
+): TaskListItemData => {
   try {
     // Extract basic data from task
     //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
@@ -21,7 +26,7 @@ export const extractTaskListItemData = (task: ITask, isBrowser: boolean, logger?
 
     const taskState = task.data.interaction.state;
     const startTimeStamp = task.data.interaction.createdTimestamp;
-    const isTaskIncoming = isIncomingTask(task);
+    const isTaskIncoming = isIncomingTask(task, agentId);
     const mediaType = task.data.interaction.mediaType;
     const mediaChannel = task.data.interaction.mediaChannel;
 
@@ -193,12 +198,13 @@ export const createTaskSelectHandler = (
   task: ITask,
   currentTask: ITask | null,
   onTaskSelect: (task: ITask) => void,
+  agentId: string,
   logger?
 ) => {
   return () => {
     try {
       // Logging moved to helper.ts
-      const taskData = extractTaskListItemData(task, true, logger); // Use browser=true for selection logic
+      const taskData = extractTaskListItemData(task, true, agentId, logger); // Use browser=true for selection logic
 
       if (isTaskSelectable(task, currentTask, taskData, logger)) {
         onTaskSelect(task);

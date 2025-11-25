@@ -57,19 +57,49 @@ describe('CallControlConsultComponent', () => {
   const mockOnTransfer = jest.fn();
   const mockEndConsultCall = jest.fn();
   const mockOnToggleConsultMute = jest.fn();
+  const mockConsultConference = jest.fn();
+
+  const mockControlVisibility = {
+    accept: {isVisible: true, isEnabled: true},
+    decline: {isVisible: true, isEnabled: true},
+    end: {isVisible: true, isEnabled: true},
+    muteUnmute: {isVisible: true, isEnabled: true},
+    muteUnmuteConsult: {isVisible: true, isEnabled: true},
+    holdResume: {isVisible: true, isEnabled: true},
+    consult: {isVisible: true, isEnabled: true},
+    transfer: {isVisible: true, isEnabled: true},
+    conference: {isVisible: true, isEnabled: true},
+    wrapup: {isVisible: false, isEnabled: false},
+    pauseResumeRecording: {isVisible: true, isEnabled: true},
+    endConsult: {isVisible: true, isEnabled: true},
+    recordingIndicator: {isVisible: true, isEnabled: true},
+    exitConference: {isVisible: false, isEnabled: false},
+    mergeConference: {isVisible: true, isEnabled: true},
+    mergeConferenceConsult: {isVisible: true, isEnabled: true},
+    consultTransfer: {isVisible: true, isEnabled: true},
+    consultTransferConsult: {isVisible: true, isEnabled: true},
+    switchToMainCall: {isVisible: true, isEnabled: true},
+    switchToConsult: {isVisible: true, isEnabled: true},
+    isConferenceInProgress: false,
+    isConsultInitiated: false,
+    isConsultInitiatedAndAccepted: false,
+    isConsultInitiatedOrAccepted: false,
+    isConsultReceived: false,
+    isHeld: false,
+    consultCallHeld: false,
+  };
 
   const defaultProps = {
     agentName: 'Alice',
     startTimeStamp: Date.now(),
-    onTransfer: mockOnTransfer,
+    consultTransfer: mockOnTransfer,
     endConsultCall: mockEndConsultCall,
-    onToggleConsultMute: mockOnToggleConsultMute,
-    consultCompleted: true,
-    isAgentBeingConsulted: true,
-    isEndConsultEnabled: true,
+    toggleConsultMute: mockOnToggleConsultMute,
+    consultConference: mockConsultConference,
+    switchToMainCall: jest.fn(),
     logger: loggerMock,
-    muteUnmute: true,
     isMuted: false,
+    controlVisibility: mockControlVisibility,
   };
 
   beforeEach(() => {
@@ -163,10 +193,16 @@ describe('CallControlConsultComponent', () => {
   });
 
   it('conditionally renders buttons based on props', async () => {
-    const propsWithoutMute = {...defaultProps, muteUnmute: false};
+    const propsWithoutMute = {
+      ...defaultProps,
+      controlVisibility: {
+        ...mockControlVisibility,
+        muteUnmuteConsult: {isVisible: false, isEnabled: false},
+      },
+    };
     const screen = await render(<CallControlConsultComponent {...propsWithoutMute} />);
 
-    // Mute button should not be rendered when muteUnmute is false
+    // Mute button should not be rendered when muteUnmuteConsult is false
     expect(screen.queryByTestId('mute-consult-btn')).not.toBeInTheDocument();
 
     // Verify remaining buttons and their attributes
@@ -183,8 +219,8 @@ describe('CallControlConsultComponent', () => {
     expect(cancelButton).toHaveClass('call-control-consult-button-cancel');
   });
 
-  it('handles case when onTransfer is undefined (covers line 52)', async () => {
-    const propsWithoutTransfer = {...defaultProps, onTransfer: undefined};
+  it('handles case when consultTransfer is undefined (covers line 52)', async () => {
+    const propsWithoutTransfer = {...defaultProps, consultTransfer: undefined};
     const screen = await render(<CallControlConsultComponent {...propsWithoutTransfer} />);
 
     // Component should still render without transfer functionality
@@ -203,8 +239,8 @@ describe('CallControlConsultComponent', () => {
     expect(cancelButton).toHaveAttribute('type', 'button');
     expect(cancelButton).toHaveClass('call-control-consult-button-cancel');
 
-    // Transfer button should NOT be present when onTransfer is undefined
-    expect(screen.queryByTestId('transfer-consult-btn')).not.toBeInTheDocument();
+    // Transfer button should be present even when consultTransfer is undefined (it's now mandatory)
+    expect(screen.queryByTestId('transfer-consult-btn')).toBeInTheDocument();
   });
 
   it('renders with muted state correctly', async () => {
@@ -225,13 +261,18 @@ describe('CallControlConsultComponent', () => {
   });
 
   it('tests button disabled states and tooltips', async () => {
-    const propsWithIncompleteConsult = {...defaultProps, consultCompleted: false};
+    const propsWithIncompleteConsult = {
+      ...defaultProps,
+      controlVisibility: {
+        ...mockControlVisibility,
+        consultTransferConsult: {isVisible: true, isEnabled: false},
+      },
+    };
     const screen = await render(<CallControlConsultComponent {...propsWithIncompleteConsult} />);
 
-    // Transfer button should be disabled when consultCompleted is false
+    // Transfer button should be disabled when consultTransferConsult.isEnabled is false
     const transferButton = screen.getByTestId('transfer-consult-btn');
     expect(transferButton).toHaveAttribute('data-disabled', 'true');
-    expect(transferButton).toHaveAttribute('disabled', '');
     expect(transferButton).toHaveAttribute('type', 'button');
     expect(transferButton).toHaveAttribute('data-color', 'primary');
 
@@ -271,11 +312,23 @@ describe('CallControlConsultComponent', () => {
     const cancelButton = screen.getByTestId('cancel-consult-btn');
     expect(cancelButton).toHaveAttribute('aria-describedby');
 
+    const mergeButton = screen.queryByTestId('conference-consult-btn');
+    expect(mergeButton).toHaveAttribute('aria-describedby');
+    expect(mergeButton).toHaveAttribute('data-disabled', 'false');
+    expect(mergeButton).toHaveAttribute('data-ghost', 'false');
+    expect(mergeButton).toHaveAttribute('data-inverted', 'false');
+    expect(mergeButton).toHaveAttribute('type', 'button');
+    expect(mergeButton).toHaveAttribute('data-color', 'primary');
+    expect(mergeButton).toHaveAttribute('data-size', '40');
+    expect(mergeButton).toHaveClass('call-control-button');
+
     // Verify tooltip labels exist and have content
     const tooltipLabels = screen.container.querySelectorAll('.md-tooltip-label p');
-    expect(tooltipLabels.length).toBe(3);
+    expect(tooltipLabels.length).toBe(5); // Updated to 5 to include switchToMainCall button
     expect(tooltipLabels[0]).toHaveTextContent('Mute');
-    expect(tooltipLabels[1]).toHaveTextContent('Transfer Consult');
-    expect(tooltipLabels[2]).toHaveTextContent('End Consult');
+    expect(tooltipLabels[1]).toHaveTextContent('Switch to Call');
+    expect(tooltipLabels[2]).toHaveTextContent('Transfer');
+    expect(tooltipLabels[3]).toHaveTextContent('Merge');
+    expect(tooltipLabels[4]).toHaveTextContent('End Consult');
   });
 });

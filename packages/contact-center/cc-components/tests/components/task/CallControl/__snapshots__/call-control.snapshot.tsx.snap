@@ -9,7 +9,7 @@ exports[`CallControlComponent Snapshots Interactions should handle end call butt
     class="button-group"
   >
     <button
-      aria-describedby="react-aria-:r1m:"
+      aria-describedby="react-aria-:r20:"
       aria-label="Mute"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
@@ -30,14 +30,14 @@ exports[`CallControlComponent Snapshots Interactions should handle end call butt
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1m:"
+      id="react-aria-:r20:"
     >
       <p>
         Mute
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r1n:"
+      aria-describedby="react-aria-:r21:"
       aria-label="Hold the call"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
@@ -58,14 +58,14 @@ exports[`CallControlComponent Snapshots Interactions should handle end call butt
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1n:"
+      id="react-aria-:r21:"
     >
       <p>
         Hold the call
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r1o:"
+      aria-describedby="react-aria-:r22:"
       aria-expanded="false"
       aria-haspopup="dialog"
       aria-label="Consult with another agent"
@@ -88,14 +88,14 @@ exports[`CallControlComponent Snapshots Interactions should handle end call butt
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1o:"
+      id="react-aria-:r22:"
     >
       <p>
         Consult with another agent
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r1p:"
+      aria-describedby="react-aria-:r23:"
       aria-expanded="false"
       aria-haspopup="dialog"
       aria-label="Transfer Call"
@@ -118,14 +118,14 @@ exports[`CallControlComponent Snapshots Interactions should handle end call butt
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1p:"
+      id="react-aria-:r23:"
     >
       <p>
         Transfer Call
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r1q:"
+      aria-describedby="react-aria-:r24:"
       aria-label="Resume Recording"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
@@ -146,14 +146,14 @@ exports[`CallControlComponent Snapshots Interactions should handle end call butt
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1q:"
+      id="react-aria-:r24:"
     >
       <p>
         Resume Recording
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r1r:"
+      aria-describedby="react-aria-:r25:"
       aria-label="End Call"
       class="md-button-circle-wrapper call-control-button-cancel md-button-simple-wrapper md-focus-ring-wrapper children"
       data-color="primary"
@@ -174,7 +174,7 @@ exports[`CallControlComponent Snapshots Interactions should handle end call butt
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1r:"
+      id="react-aria-:r25:"
     >
       <p>
         End Call
@@ -182,7 +182,7 @@ exports[`CallControlComponent Snapshots Interactions should handle end call butt
     </div>
     <div
       data-tippy-root=""
-      id="tippy-80"
+      id="tippy-93"
       style="pointer-events: none; z-index: 9999; transition: none; position: absolute; left: 0px; top: 0px; margin: 0px;"
     />
   </div>
@@ -198,7 +198,7 @@ exports[`CallControlComponent Snapshots Interactions should handle hold button c
     class="button-group"
   >
     <button
-      aria-describedby="react-aria-:r1a:"
+      aria-describedby="react-aria-:r1k:"
       aria-label="Mute"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
@@ -219,14 +219,14 @@ exports[`CallControlComponent Snapshots Interactions should handle hold button c
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1a:"
+      id="react-aria-:r1k:"
     >
       <p>
         Mute
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r1b:"
+      aria-describedby="react-aria-:r1l:"
       aria-label="Hold the call"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper md-focus-ring-wrapper children"
       data-color="primary"
@@ -247,14 +247,14 @@ exports[`CallControlComponent Snapshots Interactions should handle hold button c
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1b:"
+      id="react-aria-:r1l:"
     >
       <p>
         Hold the call
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r1c:"
+      aria-describedby="react-aria-:r1m:"
       aria-expanded="false"
       aria-haspopup="dialog"
       aria-label="Consult with another agent"
@@ -277,14 +277,14 @@ exports[`CallControlComponent Snapshots Interactions should handle hold button c
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1c:"
+      id="react-aria-:r1m:"
     >
       <p>
         Consult with another agent
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r1d:"
+      aria-describedby="react-aria-:r1n:"
       aria-expanded="false"
       aria-haspopup="dialog"
       aria-label="Transfer Call"
@@ -307,14 +307,14 @@ exports[`CallControlComponent Snapshots Interactions should handle hold button c
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1d:"
+      id="react-aria-:r1n:"
     >
       <p>
         Transfer Call
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r1e:"
+      aria-describedby="react-aria-:r1o:"
       aria-label="Resume Recording"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
@@ -335,14 +335,14 @@ exports[`CallControlComponent Snapshots Interactions should handle hold button c
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1e:"
+      id="react-aria-:r1o:"
     >
       <p>
         Resume Recording
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r1f:"
+      aria-describedby="react-aria-:r1p:"
       aria-label="End Call"
       class="md-button-circle-wrapper call-control-button-cancel md-button-simple-wrapper"
       data-color="primary"
@@ -363,7 +363,7 @@ exports[`CallControlComponent Snapshots Interactions should handle hold button c
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1f:"
+      id="react-aria-:r1p:"
     >
       <p>
         End Call
@@ -371,7 +371,7 @@ exports[`CallControlComponent Snapshots Interactions should handle hold button c
     </div>
     <div
       data-tippy-root=""
-      id="tippy-58"
+      id="tippy-71"
       style="pointer-events: none; z-index: 9999; transition: none; position: absolute; left: 0px; top: 0px; margin: 0px;"
     />
   </div>
@@ -387,7 +387,7 @@ exports[`CallControlComponent Snapshots Interactions should handle mute button c
     class="button-group"
   >
     <button
-      aria-describedby="react-aria-:r14:"
+      aria-describedby="react-aria-:r1e:"
       aria-label="Mute"
       class="md-button-circle-wrapper call-control-button call-control-button-disabled md-button-simple-wrapper md-focus-ring-wrapper-disabled"
       data-color="primary"
@@ -409,14 +409,14 @@ exports[`CallControlComponent Snapshots Interactions should handle mute button c
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r14:"
+      id="react-aria-:r1e:"
     >
       <p>
         Mute
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r15:"
+      aria-describedby="react-aria-:r1f:"
       aria-label="Hold the call"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
@@ -437,14 +437,14 @@ exports[`CallControlComponent Snapshots Interactions should handle mute button c
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r15:"
+      id="react-aria-:r1f:"
     >
       <p>
         Hold the call
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r16:"
+      aria-describedby="react-aria-:r1g:"
       aria-expanded="false"
       aria-haspopup="dialog"
       aria-label="Consult with another agent"
@@ -467,14 +467,14 @@ exports[`CallControlComponent Snapshots Interactions should handle mute button c
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r16:"
+      id="react-aria-:r1g:"
     >
       <p>
         Consult with another agent
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r17:"
+      aria-describedby="react-aria-:r1h:"
       aria-expanded="false"
       aria-haspopup="dialog"
       aria-label="Transfer Call"
@@ -497,14 +497,14 @@ exports[`CallControlComponent Snapshots Interactions should handle mute button c
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r17:"
+      id="react-aria-:r1h:"
     >
       <p>
         Transfer Call
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r18:"
+      aria-describedby="react-aria-:r1i:"
       aria-label="Resume Recording"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
@@ -525,14 +525,14 @@ exports[`CallControlComponent Snapshots Interactions should handle mute button c
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r18:"
+      id="react-aria-:r1i:"
     >
       <p>
         Resume Recording
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r19:"
+      aria-describedby="react-aria-:r1j:"
       aria-label="End Call"
       class="md-button-circle-wrapper call-control-button-cancel md-button-simple-wrapper"
       data-color="primary"
@@ -553,7 +553,7 @@ exports[`CallControlComponent Snapshots Interactions should handle mute button c
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r19:"
+      id="react-aria-:r1j:"
     >
       <p>
         End Call
@@ -561,7 +561,7 @@ exports[`CallControlComponent Snapshots Interactions should handle mute button c
     </div>
     <div
       data-tippy-root=""
-      id="tippy-49"
+      id="tippy-62"
       style="pointer-events: none; z-index: 9999; transition: none; position: absolute; left: 0px; top: 0px; margin: 0px; transform: translate(0px, 0px);"
     />
   </div>
@@ -577,7 +577,7 @@ exports[`CallControlComponent Snapshots Interactions should handle record button
     class="button-group"
   >
     <button
-      aria-describedby="react-aria-:r1g:"
+      aria-describedby="react-aria-:r1q:"
       aria-label="Mute"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
@@ -598,14 +598,14 @@ exports[`CallControlComponent Snapshots Interactions should handle record button
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1g:"
+      id="react-aria-:r1q:"
     >
       <p>
         Mute
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r1h:"
+      aria-describedby="react-aria-:r1r:"
       aria-label="Hold the call"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
@@ -626,14 +626,14 @@ exports[`CallControlComponent Snapshots Interactions should handle record button
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1h:"
+      id="react-aria-:r1r:"
     >
       <p>
         Hold the call
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r1i:"
+      aria-describedby="react-aria-:r1s:"
       aria-expanded="false"
       aria-haspopup="dialog"
       aria-label="Consult with another agent"
@@ -656,14 +656,14 @@ exports[`CallControlComponent Snapshots Interactions should handle record button
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1i:"
+      id="react-aria-:r1s:"
     >
       <p>
         Consult with another agent
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r1j:"
+      aria-describedby="react-aria-:r1t:"
       aria-expanded="false"
       aria-haspopup="dialog"
       aria-label="Transfer Call"
@@ -686,14 +686,14 @@ exports[`CallControlComponent Snapshots Interactions should handle record button
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1j:"
+      id="react-aria-:r1t:"
     >
       <p>
         Transfer Call
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r1k:"
+      aria-describedby="react-aria-:r1u:"
       aria-label="Resume Recording"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper md-focus-ring-wrapper children"
       data-color="primary"
@@ -714,14 +714,14 @@ exports[`CallControlComponent Snapshots Interactions should handle record button
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1k:"
+      id="react-aria-:r1u:"
     >
       <p>
         Resume Recording
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r1l:"
+      aria-describedby="react-aria-:r1v:"
       aria-label="End Call"
       class="md-button-circle-wrapper call-control-button-cancel md-button-simple-wrapper"
       data-color="primary"
@@ -742,7 +742,7 @@ exports[`CallControlComponent Snapshots Interactions should handle record button
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1l:"
+      id="react-aria-:r1v:"
     >
       <p>
         End Call
@@ -750,7 +750,7 @@ exports[`CallControlComponent Snapshots Interactions should handle record button
     </div>
     <div
       data-tippy-root=""
-      id="tippy-71"
+      id="tippy-84"
       style="pointer-events: none; z-index: 9999; transition: none; position: absolute; left: 0px; top: 0px; margin: 0px;"
     />
   </div>
@@ -978,6 +978,316 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
     class="button-group"
   >
     <button
+      aria-describedby="react-aria-:r18:"
+      aria-label="Mute"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:mute-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="microphone-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r18:"
+    >
+      <p>
+        Mute
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r19:"
+      aria-label="Hold the call"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:hold-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="pause-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r19:"
+    >
+      <p>
+        Hold the call
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r1a:"
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      aria-label="Consult with another agent"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:consult"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="headset-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r1a:"
+    >
+      <p>
+        Consult with another agent
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r1b:"
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      aria-label="Transfer Chat"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:transfer"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="next-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r1b:"
+    >
+      <p>
+        Transfer Chat
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r1c:"
+      aria-label="Resume Recording"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:recording-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="record-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r1c:"
+    >
+      <p>
+        Resume Recording
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r1d:"
+      aria-label="End Chat"
+      class="md-button-circle-wrapper call-control-button-cancel md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:end-call"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-cancel-icon"
+        name="cancel-regular"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r1d:"
+    >
+      <p>
+        End Chat
+      </p>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and visual states of CallControl component should render with consultation accepted 1`] = `
+<div
+  class="call-control-container"
+  data-testid="call-control-container"
+>
+  <div
+    class="button-group"
+  >
+    <button
+      aria-describedby="react-aria-:r14:"
+      aria-label="Mute"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:mute-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="microphone-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r14:"
+    >
+      <p>
+        Mute
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r15:"
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      aria-label="Transfer Call"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:transfer"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="next-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r15:"
+    >
+      <p>
+        Transfer Call
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r16:"
+      aria-label="Resume Recording"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:recording-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="record-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r16:"
+    >
+      <p>
+        Resume Recording
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r17:"
+      aria-label="End Call"
+      class="md-button-circle-wrapper call-control-button-cancel md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:end-call"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-cancel-icon"
+        name="cancel-regular"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r17:"
+    >
+      <p>
+        End Call
+      </p>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and visual states of CallControl component should render with consultation initiated 1`] = `
+<div
+  class="call-control-container"
+  data-testid="call-control-container"
+>
+  <div
+    class="button-group"
+  >
+    <button
       aria-describedby="react-aria-:ru:"
       aria-label="Mute"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
@@ -1067,7 +1377,7 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       aria-describedby="react-aria-:r11:"
       aria-expanded="false"
       aria-haspopup="dialog"
-      aria-label="Transfer Chat"
+      aria-label="Transfer Call"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -1090,7 +1400,7 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       id="react-aria-:r11:"
     >
       <p>
-        Transfer Chat
+        Transfer Call
       </p>
     </div>
     <button
@@ -1123,7 +1433,7 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
     </div>
     <button
       aria-describedby="react-aria-:r13:"
-      aria-label="End Chat"
+      aria-label="End Call"
       class="md-button-circle-wrapper call-control-button-cancel md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -1144,143 +1454,6 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
     <div
       class="md-tooltip-label"
       id="react-aria-:r13:"
-    >
-      <p>
-        End Chat
-      </p>
-    </div>
-  </div>
-</div>
-`;
-
-exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and visual states of CallControl component should render with consultation accepted 1`] = `
-<div
-  class="call-control-container"
-  data-testid="call-control-container"
-/>
-`;
-
-exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and visual states of CallControl component should render with consultation initiated 1`] = `
-<div
-  class="call-control-container"
-  data-testid="call-control-container"
->
-  <div
-    class="button-group"
-  >
-    <button
-      aria-describedby="react-aria-:ro:"
-      aria-label="Mute"
-      class="md-button-circle-wrapper call-control-button call-control-button-disabled md-button-simple-wrapper"
-      data-color="primary"
-      data-disabled="true"
-      data-ghost="false"
-      data-inverted="false"
-      data-multiple-children="false"
-      data-outline="false"
-      data-shallow-disabled="false"
-      data-size="40"
-      data-testid="call-control:mute-toggle"
-      disabled=""
-      type="button"
-    >
-      <mdc-icon
-        class="call-control-button-icon"
-        name="microphone-bold"
-      />
-    </button>
-    <div
-      class="md-tooltip-label"
-      id="react-aria-:ro:"
-    >
-      <p>
-        Mute
-      </p>
-    </div>
-    <button
-      aria-describedby="react-aria-:rp:"
-      aria-expanded="false"
-      aria-haspopup="dialog"
-      aria-label="Transfer Call"
-      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
-      data-color="primary"
-      data-disabled="true"
-      data-ghost="false"
-      data-inverted="false"
-      data-multiple-children="false"
-      data-outline="false"
-      data-shallow-disabled="false"
-      data-size="40"
-      data-testid="call-control:transfer"
-      disabled=""
-      type="button"
-    >
-      <mdc-icon
-        class="call-control-button-icon"
-        name="next-bold"
-      />
-    </button>
-    <div
-      class="md-tooltip-label"
-      id="react-aria-:rp:"
-    >
-      <p>
-        Transfer Call
-      </p>
-    </div>
-    <button
-      aria-describedby="react-aria-:rq:"
-      aria-label="Resume Recording"
-      class="md-button-circle-wrapper call-control-button call-control-button-disabled md-button-simple-wrapper"
-      data-color="primary"
-      data-disabled="true"
-      data-ghost="false"
-      data-inverted="false"
-      data-multiple-children="false"
-      data-outline="false"
-      data-shallow-disabled="false"
-      data-size="40"
-      data-testid="call-control:recording-toggle"
-      disabled=""
-      type="button"
-    >
-      <mdc-icon
-        class="call-control-button-icon"
-        name="record-bold"
-      />
-    </button>
-    <div
-      class="md-tooltip-label"
-      id="react-aria-:rq:"
-    >
-      <p>
-        Resume Recording
-      </p>
-    </div>
-    <button
-      aria-describedby="react-aria-:rr:"
-      aria-label="End Call"
-      class="md-button-circle-wrapper call-control-button-cancel call-control-button-cancel-disabled md-button-simple-wrapper"
-      data-color="primary"
-      data-disabled="true"
-      data-ghost="false"
-      data-inverted="false"
-      data-multiple-children="false"
-      data-outline="false"
-      data-shallow-disabled="false"
-      data-size="40"
-      data-testid="call-control:end-call"
-      disabled=""
-      type="button"
-    >
-      <mdc-icon
-        class="call-control-button-cancel-icon"
-        name="cancel-regular"
-      />
-    </button>
-    <div
-      class="md-tooltip-label"
-      id="react-aria-:rr:"
     >
       <p>
         End Call
@@ -1328,7 +1501,7 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
     </div>
     <button
       aria-describedby="react-aria-:rd:"
-      aria-label="Resume the call"
+      aria-label="Hold the call"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -1343,7 +1516,7 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
     >
       <mdc-icon
         class="call-control-button-icon"
-        name="play-bold"
+        name="pause-bold"
       />
     </button>
     <div
@@ -1351,7 +1524,7 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       id="react-aria-:rd:"
     >
       <p>
-        Resume the call
+        Hold the call
       </p>
     </div>
     <button
@@ -1445,9 +1618,9 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
     <button
       aria-describedby="react-aria-:rh:"
       aria-label="End Call"
-      class="md-button-circle-wrapper call-control-button-cancel call-control-button-cancel-disabled md-button-simple-wrapper"
+      class="md-button-circle-wrapper call-control-button-cancel md-button-simple-wrapper"
       data-color="primary"
-      data-disabled="true"
+      data-disabled="false"
       data-ghost="false"
       data-inverted="false"
       data-multiple-children="false"
@@ -1455,7 +1628,6 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:end-call"
-      disabled=""
       type="button"
     >
       <mdc-icon
@@ -1482,64 +1654,7 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
 >
   <div
     class="button-group"
-  >
-    <button
-      aria-describedby="react-aria-:rs:"
-      aria-label="Mute"
-      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
-      data-color="primary"
-      data-disabled="false"
-      data-ghost="false"
-      data-inverted="false"
-      data-multiple-children="false"
-      data-outline="false"
-      data-shallow-disabled="false"
-      data-size="40"
-      data-testid="call-control:mute-toggle"
-      type="button"
-    >
-      <mdc-icon
-        class="call-control-button-icon"
-        name="microphone-bold"
-      />
-    </button>
-    <div
-      class="md-tooltip-label"
-      id="react-aria-:rs:"
-    >
-      <p>
-        Mute
-      </p>
-    </div>
-    <button
-      aria-describedby="react-aria-:rt:"
-      aria-label="End Call"
-      class="md-button-circle-wrapper call-control-button-cancel md-button-simple-wrapper"
-      data-color="primary"
-      data-disabled="false"
-      data-ghost="false"
-      data-inverted="false"
-      data-multiple-children="false"
-      data-outline="false"
-      data-shallow-disabled="false"
-      data-size="40"
-      data-testid="call-control:end-call"
-      type="button"
-    >
-      <mdc-icon
-        class="call-control-button-cancel-icon"
-        name="cancel-regular"
-      />
-    </button>
-    <div
-      class="md-tooltip-label"
-      id="react-aria-:rt:"
-    >
-      <p>
-        End Call
-      </p>
-    </div>
-  </div>
+  />
 </div>
 `;
 
@@ -1917,24 +2032,180 @@ exports[`CallControlComponent Snapshots Rendering - Tests for UI elements and vi
   data-testid="call-control-container"
 >
   <div
-    class="wrapup-group"
+    class="button-group"
   >
-    <mdc-button
+    <button
+      aria-describedby="react-aria-:ro:"
+      aria-label="Mute"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:mute-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="microphone-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:ro:"
+    >
+      <p>
+        Mute
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:rp:"
+      aria-label="Hold the call"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:hold-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="pause-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:rp:"
+    >
+      <p>
+        Hold the call
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:rq:"
       aria-expanded="false"
       aria-haspopup="dialog"
-      color="default"
-      data-btn-type="pill-with-icon"
-      data-testid="call-control:wrapup-button"
-      id="call-control-wrapup-button"
-      postfix-icon="arrow-down-bold"
-      role="button"
-      size="28"
-      tabindex="0"
+      aria-label="Consult with another agent"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:consult"
       type="button"
-      variant="secondary"
     >
-      Wrap up
-    </mdc-button>
+      <mdc-icon
+        class="call-control-button-icon"
+        name="headset-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:rq:"
+    >
+      <p>
+        Consult with another agent
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:rr:"
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      aria-label="Transfer Call"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:transfer"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="next-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:rr:"
+    >
+      <p>
+        Transfer Call
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:rs:"
+      aria-label="Resume Recording"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:recording-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="record-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:rs:"
+    >
+      <p>
+        Resume Recording
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:rt:"
+      aria-label="End Call"
+      class="md-button-circle-wrapper call-control-button-cancel md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:end-call"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-cancel-icon"
+        name="cancel-regular"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:rt:"
+    >
+      <p>
+        End Call
+      </p>
+    </div>
   </div>
 </div>
 `;
@@ -1948,7 +2219,7 @@ exports[`CallControlComponent Snapshots State Management should handle combinati
     class="button-group"
   >
     <button
-      aria-describedby="react-aria-:r2e:"
+      aria-describedby="react-aria-:r2o:"
       aria-label="Unmute"
       class="md-button-circle-wrapper call-control-button-muted md-button-simple-wrapper"
       data-color="primary"
@@ -1969,15 +2240,15 @@ exports[`CallControlComponent Snapshots State Management should handle combinati
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r2e:"
+      id="react-aria-:r2o:"
     >
       <p>
         Unmute
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r2f:"
-      aria-label="Resume the call"
+      aria-describedby="react-aria-:r2p:"
+      aria-label="Hold the call"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -1992,19 +2263,19 @@ exports[`CallControlComponent Snapshots State Management should handle combinati
     >
       <mdc-icon
         class="call-control-button-icon"
-        name="play-bold"
+        name="pause-bold"
       />
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r2f:"
+      id="react-aria-:r2p:"
     >
       <p>
-        Resume the call
+        Hold the call
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r2g:"
+      aria-describedby="react-aria-:r2q:"
       aria-expanded="false"
       aria-haspopup="dialog"
       aria-label="Consult with another agent"
@@ -2027,14 +2298,14 @@ exports[`CallControlComponent Snapshots State Management should handle combinati
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r2g:"
+      id="react-aria-:r2q:"
     >
       <p>
         Consult with another agent
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r2h:"
+      aria-describedby="react-aria-:r2r:"
       aria-expanded="false"
       aria-haspopup="dialog"
       aria-label="Transfer Call"
@@ -2057,14 +2328,14 @@ exports[`CallControlComponent Snapshots State Management should handle combinati
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r2h:"
+      id="react-aria-:r2r:"
     >
       <p>
         Transfer Call
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r2i:"
+      aria-describedby="react-aria-:r2s:"
       aria-label="Pause Recording"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
@@ -2085,18 +2356,18 @@ exports[`CallControlComponent Snapshots State Management should handle combinati
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r2i:"
+      id="react-aria-:r2s:"
     >
       <p>
         Pause Recording
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r2j:"
+      aria-describedby="react-aria-:r2t:"
       aria-label="End Call"
-      class="md-button-circle-wrapper call-control-button-cancel call-control-button-cancel-disabled md-button-simple-wrapper"
+      class="md-button-circle-wrapper call-control-button-cancel md-button-simple-wrapper"
       data-color="primary"
-      data-disabled="true"
+      data-disabled="false"
       data-ghost="false"
       data-inverted="false"
       data-multiple-children="false"
@@ -2104,7 +2375,6 @@ exports[`CallControlComponent Snapshots State Management should handle combinati
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:end-call"
-      disabled=""
       type="button"
     >
       <mdc-icon
@@ -2114,7 +2384,7 @@ exports[`CallControlComponent Snapshots State Management should handle combinati
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r2j:"
+      id="react-aria-:r2t:"
     >
       <p>
         End Call
@@ -2133,7 +2403,7 @@ exports[`CallControlComponent Snapshots State Management should handle edge case
     class="button-group"
   >
     <button
-      aria-describedby="react-aria-:r2k:"
+      aria-describedby="react-aria-:r2u:"
       aria-label="Mute"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
@@ -2154,14 +2424,14 @@ exports[`CallControlComponent Snapshots State Management should handle edge case
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r2k:"
+      id="react-aria-:r2u:"
     >
       <p>
         Mute
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r2l:"
+      aria-describedby="react-aria-:r2v:"
       aria-label="Hold the call"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
@@ -2182,14 +2452,14 @@ exports[`CallControlComponent Snapshots State Management should handle edge case
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r2l:"
+      id="react-aria-:r2v:"
     >
       <p>
         Hold the call
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r2m:"
+      aria-describedby="react-aria-:r30:"
       aria-expanded="false"
       aria-haspopup="dialog"
       aria-label="Consult with another agent"
@@ -2212,14 +2482,14 @@ exports[`CallControlComponent Snapshots State Management should handle edge case
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r2m:"
+      id="react-aria-:r30:"
     >
       <p>
         Consult with another agent
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r2n:"
+      aria-describedby="react-aria-:r31:"
       aria-expanded="false"
       aria-haspopup="dialog"
       aria-label="Transfer Call"
@@ -2242,14 +2512,14 @@ exports[`CallControlComponent Snapshots State Management should handle edge case
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r2n:"
+      id="react-aria-:r31:"
     >
       <p>
         Transfer Call
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r2o:"
+      aria-describedby="react-aria-:r32:"
       aria-label="Resume Recording"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
@@ -2270,14 +2540,14 @@ exports[`CallControlComponent Snapshots State Management should handle edge case
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r2o:"
+      id="react-aria-:r32:"
     >
       <p>
         Resume Recording
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r2p:"
+      aria-describedby="react-aria-:r33:"
       aria-label="End Call"
       class="md-button-circle-wrapper call-control-button-cancel md-button-simple-wrapper"
       data-color="primary"
@@ -2298,7 +2568,7 @@ exports[`CallControlComponent Snapshots State Management should handle edge case
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r2p:"
+      id="react-aria-:r33:"
     >
       <p>
         End Call
@@ -2317,7 +2587,7 @@ exports[`CallControlComponent Snapshots State Management should handle edge case
     class="button-group"
   >
     <button
-      aria-describedby="react-aria-:r2q:"
+      aria-describedby="react-aria-:r34:"
       aria-label="Mute"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
@@ -2338,14 +2608,14 @@ exports[`CallControlComponent Snapshots State Management should handle edge case
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r2q:"
+      id="react-aria-:r34:"
     >
       <p>
         Mute
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r2r:"
+      aria-describedby="react-aria-:r35:"
       aria-label="Hold the call"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
@@ -2366,14 +2636,14 @@ exports[`CallControlComponent Snapshots State Management should handle edge case
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r2r:"
+      id="react-aria-:r35:"
     >
       <p>
         Hold the call
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r2s:"
+      aria-describedby="react-aria-:r36:"
       aria-expanded="false"
       aria-haspopup="dialog"
       aria-label="Consult with another agent"
@@ -2396,14 +2666,14 @@ exports[`CallControlComponent Snapshots State Management should handle edge case
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r2s:"
+      id="react-aria-:r36:"
     >
       <p>
         Consult with another agent
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r2t:"
+      aria-describedby="react-aria-:r37:"
       aria-expanded="false"
       aria-haspopup="dialog"
       aria-label="Transfer Call"
@@ -2426,14 +2696,14 @@ exports[`CallControlComponent Snapshots State Management should handle edge case
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r2t:"
+      id="react-aria-:r37:"
     >
       <p>
         Transfer Call
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r2u:"
+      aria-describedby="react-aria-:r38:"
       aria-label="Resume Recording"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
@@ -2454,14 +2724,14 @@ exports[`CallControlComponent Snapshots State Management should handle edge case
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r2u:"
+      id="react-aria-:r38:"
     >
       <p>
         Resume Recording
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r2v:"
+      aria-describedby="react-aria-:r39:"
       aria-label="End Call"
       class="md-button-circle-wrapper call-control-button-cancel md-button-simple-wrapper"
       data-color="primary"
@@ -2482,7 +2752,7 @@ exports[`CallControlComponent Snapshots State Management should handle edge case
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r2v:"
+      id="react-aria-:r39:"
     >
       <p>
         End Call
@@ -2498,38 +2768,10 @@ exports[`CallControlComponent Snapshots State Management should handle edge case
   data-testid="call-control-container"
 >
   <div
-    class="wrapup-group"
-  >
-    <mdc-button
-      aria-expanded="false"
-      aria-haspopup="dialog"
-      color="default"
-      data-btn-type="pill-with-icon"
-      data-testid="call-control:wrapup-button"
-      id="call-control-wrapup-button"
-      postfix-icon="arrow-down-bold"
-      role="button"
-      size="28"
-      tabindex="0"
-      type="button"
-      variant="secondary"
-    >
-      Wrap up
-    </mdc-button>
-  </div>
-</div>
-`;
-
-exports[`CallControlComponent Snapshots State Management should update when hold state changes 1`] = `
-<div
-  class="call-control-container"
-  data-testid="call-control-container"
->
-  <div
     class="button-group"
   >
     <button
-      aria-describedby="react-aria-:r1s:"
+      aria-describedby="react-aria-:r3a:"
       aria-label="Mute"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
@@ -2550,15 +2792,15 @@ exports[`CallControlComponent Snapshots State Management should update when hold
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1s:"
+      id="react-aria-:r3a:"
     >
       <p>
         Mute
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r1t:"
-      aria-label="Resume the call"
+      aria-describedby="react-aria-:r3b:"
+      aria-label="Hold the call"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -2578,14 +2820,14 @@ exports[`CallControlComponent Snapshots State Management should update when hold
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1t:"
+      id="react-aria-:r3b:"
     >
       <p>
-        Resume the call
+        Hold the call
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r1u:"
+      aria-describedby="react-aria-:r3c:"
       aria-expanded="false"
       aria-haspopup="dialog"
       aria-label="Consult with another agent"
@@ -2608,14 +2850,14 @@ exports[`CallControlComponent Snapshots State Management should update when hold
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1u:"
+      id="react-aria-:r3c:"
     >
       <p>
         Consult with another agent
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r1v:"
+      aria-describedby="react-aria-:r3d:"
       aria-expanded="false"
       aria-haspopup="dialog"
       aria-label="Transfer Call"
@@ -2638,14 +2880,14 @@ exports[`CallControlComponent Snapshots State Management should update when hold
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1v:"
+      id="react-aria-:r3d:"
     >
       <p>
         Transfer Call
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r20:"
+      aria-describedby="react-aria-:r3e:"
       aria-label="Resume Recording"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
@@ -2666,18 +2908,18 @@ exports[`CallControlComponent Snapshots State Management should update when hold
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r20:"
+      id="react-aria-:r3e:"
     >
       <p>
         Resume Recording
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r21:"
+      aria-describedby="react-aria-:r3f:"
       aria-label="End Call"
-      class="md-button-circle-wrapper call-control-button-cancel call-control-button-cancel-disabled md-button-simple-wrapper"
+      class="md-button-circle-wrapper call-control-button-cancel md-button-simple-wrapper"
       data-color="primary"
-      data-disabled="true"
+      data-disabled="false"
       data-ghost="false"
       data-inverted="false"
       data-multiple-children="false"
@@ -2685,7 +2927,6 @@ exports[`CallControlComponent Snapshots State Management should update when hold
       data-shallow-disabled="false"
       data-size="40"
       data-testid="call-control:end-call"
-      disabled=""
       type="button"
     >
       <mdc-icon
@@ -2695,7 +2936,191 @@ exports[`CallControlComponent Snapshots State Management should update when hold
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r21:"
+      id="react-aria-:r3f:"
+    >
+      <p>
+        End Call
+      </p>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`CallControlComponent Snapshots State Management should update when hold state changes 1`] = `
+<div
+  class="call-control-container"
+  data-testid="call-control-container"
+>
+  <div
+    class="button-group"
+  >
+    <button
+      aria-describedby="react-aria-:r26:"
+      aria-label="Mute"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:mute-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="microphone-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r26:"
+    >
+      <p>
+        Mute
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r27:"
+      aria-label="Hold the call"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:hold-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="pause-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r27:"
+    >
+      <p>
+        Hold the call
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r28:"
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      aria-label="Consult with another agent"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:consult"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="headset-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r28:"
+    >
+      <p>
+        Consult with another agent
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r29:"
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      aria-label="Transfer Call"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:transfer"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="next-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r29:"
+    >
+      <p>
+        Transfer Call
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r2a:"
+      aria-label="Resume Recording"
+      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:recording-toggle"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-icon"
+        name="record-bold"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r2a:"
+    >
+      <p>
+        Resume Recording
+      </p>
+    </div>
+    <button
+      aria-describedby="react-aria-:r2b:"
+      aria-label="End Call"
+      class="md-button-circle-wrapper call-control-button-cancel md-button-simple-wrapper"
+      data-color="primary"
+      data-disabled="false"
+      data-ghost="false"
+      data-inverted="false"
+      data-multiple-children="false"
+      data-outline="false"
+      data-shallow-disabled="false"
+      data-size="40"
+      data-testid="call-control:end-call"
+      type="button"
+    >
+      <mdc-icon
+        class="call-control-button-cancel-icon"
+        name="cancel-regular"
+      />
+    </button>
+    <div
+      class="md-tooltip-label"
+      id="react-aria-:r2b:"
     >
       <p>
         End Call
@@ -2714,7 +3139,7 @@ exports[`CallControlComponent Snapshots State Management should update when mute
     class="button-group"
   >
     <button
-      aria-describedby="react-aria-:r22:"
+      aria-describedby="react-aria-:r2c:"
       aria-label="Unmute"
       class="md-button-circle-wrapper call-control-button-muted md-button-simple-wrapper"
       data-color="primary"
@@ -2735,14 +3160,14 @@ exports[`CallControlComponent Snapshots State Management should update when mute
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r22:"
+      id="react-aria-:r2c:"
     >
       <p>
         Unmute
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r23:"
+      aria-describedby="react-aria-:r2d:"
       aria-label="Hold the call"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
@@ -2763,14 +3188,14 @@ exports[`CallControlComponent Snapshots State Management should update when mute
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r23:"
+      id="react-aria-:r2d:"
     >
       <p>
         Hold the call
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r24:"
+      aria-describedby="react-aria-:r2e:"
       aria-expanded="false"
       aria-haspopup="dialog"
       aria-label="Consult with another agent"
@@ -2793,14 +3218,14 @@ exports[`CallControlComponent Snapshots State Management should update when mute
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r24:"
+      id="react-aria-:r2e:"
     >
       <p>
         Consult with another agent
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r25:"
+      aria-describedby="react-aria-:r2f:"
       aria-expanded="false"
       aria-haspopup="dialog"
       aria-label="Transfer Call"
@@ -2823,14 +3248,14 @@ exports[`CallControlComponent Snapshots State Management should update when mute
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r25:"
+      id="react-aria-:r2f:"
     >
       <p>
         Transfer Call
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r26:"
+      aria-describedby="react-aria-:r2g:"
       aria-label="Resume Recording"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
@@ -2851,14 +3276,14 @@ exports[`CallControlComponent Snapshots State Management should update when mute
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r26:"
+      id="react-aria-:r2g:"
     >
       <p>
         Resume Recording
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r27:"
+      aria-describedby="react-aria-:r2h:"
       aria-label="End Call"
       class="md-button-circle-wrapper call-control-button-cancel md-button-simple-wrapper"
       data-color="primary"
@@ -2879,7 +3304,7 @@ exports[`CallControlComponent Snapshots State Management should update when mute
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r27:"
+      id="react-aria-:r2h:"
     >
       <p>
         End Call
@@ -2898,7 +3323,7 @@ exports[`CallControlComponent Snapshots State Management should update when reco
     class="button-group"
   >
     <button
-      aria-describedby="react-aria-:r28:"
+      aria-describedby="react-aria-:r2i:"
       aria-label="Mute"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
@@ -2919,14 +3344,14 @@ exports[`CallControlComponent Snapshots State Management should update when reco
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r28:"
+      id="react-aria-:r2i:"
     >
       <p>
         Mute
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r29:"
+      aria-describedby="react-aria-:r2j:"
       aria-label="Hold the call"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
@@ -2947,14 +3372,14 @@ exports[`CallControlComponent Snapshots State Management should update when reco
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r29:"
+      id="react-aria-:r2j:"
     >
       <p>
         Hold the call
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r2a:"
+      aria-describedby="react-aria-:r2k:"
       aria-expanded="false"
       aria-haspopup="dialog"
       aria-label="Consult with another agent"
@@ -2977,14 +3402,14 @@ exports[`CallControlComponent Snapshots State Management should update when reco
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r2a:"
+      id="react-aria-:r2k:"
     >
       <p>
         Consult with another agent
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r2b:"
+      aria-describedby="react-aria-:r2l:"
       aria-expanded="false"
       aria-haspopup="dialog"
       aria-label="Transfer Call"
@@ -3007,14 +3432,14 @@ exports[`CallControlComponent Snapshots State Management should update when reco
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r2b:"
+      id="react-aria-:r2l:"
     >
       <p>
         Transfer Call
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r2c:"
+      aria-describedby="react-aria-:r2m:"
       aria-label="Pause Recording"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
@@ -3035,14 +3460,14 @@ exports[`CallControlComponent Snapshots State Management should update when reco
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r2c:"
+      id="react-aria-:r2m:"
     >
       <p>
         Pause Recording
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r2d:"
+      aria-describedby="react-aria-:r2n:"
       aria-label="End Call"
       class="md-button-circle-wrapper call-control-button-cancel md-button-simple-wrapper"
       data-color="primary"
@@ -3063,7 +3488,7 @@ exports[`CallControlComponent Snapshots State Management should update when reco
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r2d:"
+      id="react-aria-:r2n:"
     >
       <p>
         End Call

@@ -35,9 +35,6 @@ class Store implements IStore {
   dialNumber: string = '';
   currentState: string = '';
   customState: ICustomState = null;
-  consultCompleted = false;
-  consultInitiated = false;
-  consultAccepted = false;
   isQueueConsultInProgress = false;
   currentConsultQueueId: string = '';
   consultStartTimeStamp = undefined;
@@ -45,7 +42,6 @@ class Store implements IStore {
   lastIdleCodeChangeTimestamp?: number;
   showMultipleLoginAlert: boolean = false;
   callControlAudio: MediaStream | null = null;
-  consultOfferReceived: boolean = false;
   featureFlags: {[key: string]: boolean} = {};
   isEndConsultEnabled: boolean = false;
   isAddressBookEnabled: boolean = false;

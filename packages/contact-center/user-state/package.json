@@ -1,7 +1,8 @@
 {
   "name": "@webex/cc-user-state",
   "description": "Webex Contact Center Widgets: User State",
-  "version": "1.28.0-ccwidgets.121",
+  "license": "Cisco's General Terms (https://www.cisco.com/site/us/en/about/legal/contract-experience/index.html)",
+  "version": "1.28.0-ccwidgets.126",
   "main": "dist/index.js",
   "types": "dist/types/index.d.ts",
   "publishConfig": {

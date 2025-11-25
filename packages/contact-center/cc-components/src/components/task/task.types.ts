@@ -9,6 +9,7 @@ import {
   AddressBookEntry,
   EntryPointRecord,
   FetchPaginatedList,
+  Participant,
 } from '@webex/cc-store';
 
 type Enum<T extends Record<string, unknown>> = T[keyof T];
@@ -118,6 +119,11 @@ export interface TaskProps {
    * The logger instance from SDK
    */
   logger: ILogger;
+
+  /**
+   * Agent ID of the logged-in user
+   */
+  agentId: string;
 }
 
 export type IncomingTaskComponentProps = Pick<TaskProps, 'isBrowser' | 'accept' | 'reject' | 'logger'> &
@@ -125,7 +131,7 @@ export type IncomingTaskComponentProps = Pick<TaskProps, 'isBrowser' | 'accept' 
 
 export type TaskListComponentProps = Pick<
   TaskProps,
-  'isBrowser' | 'acceptTask' | 'declineTask' | 'onTaskSelect' | 'logger'
+  'isBrowser' | 'acceptTask' | 'declineTask' | 'onTaskSelect' | 'logger' | 'agentId'
 > &
   Partial<Pick<TaskProps, 'currentTask' | 'taskList'>>;
 
@@ -276,7 +282,31 @@ export interface ControlProps {
    * @param destinationType
    * @returns
    */
-  consultCall: (consultDestination: string, destinationType: DestinationType) => void;
+  consultCall: (
+    consultDestination: string,
+    destinationType: DestinationType,
+    allowParticipantsToInteract: boolean
+  ) => void;
+
+  /**
+   * Function to merge the consult call in a conference.
+   */
+  consultConference: () => void;
+
+  /**
+   * Function to switch to conference call.
+   */
+  switchToMainCall: () => void;
+
+  /**
+   * Function to switch to consult call.
+   */
+  switchToConsult: () => void;
+
+  /**
+   * Function to exit Conference
+   */
+  exitConference: () => void;
 
   /**
    * Function to end the consult call.
@@ -289,21 +319,6 @@ export interface ControlProps {
   consultTransfer: () => void;
 
   /**
-   * Flag to determine if the consult call is connecting.
-   */
-  consultInitiated: boolean;
-
-  /**
-   * Flag to determine if the consult call is connecting.
-   */
-  consultCompleted: boolean;
-
-  /**
-   * Flag to determine if the consult call is accepted.
-   */
-  consultAccepted: boolean;
-
-  /**
    * Timestamp when the consult call started.
    */
   consultStartTimeStamp?: number;
@@ -313,17 +328,6 @@ export interface ControlProps {
    * This is used to play audio for the call control.
    */
   callControlAudio: MediaStream | null;
-
-  /**
-   * ID of the consulting agent
-   */
-  consultAgentId: string;
-
-  /**
-   * Function to set the consulting agent ID
-   * @param agentId - The ID of the consulting agent.
-   */
-  setConsultAgentId: (agentId: string) => void;
 
   /**
    * Name of the consulting agent.
@@ -382,6 +386,11 @@ export interface ControlProps {
   allowConsultToQueue: boolean;
 
   /**
+   * Flag to enable or disable conference feature
+   */
+  conferenceEnabled: boolean;
+
+  /**
    * Function to set the last target type
    */
   lastTargetType: 'queue' | 'agent';
@@ -391,20 +400,7 @@ export interface ControlProps {
    */
   setLastTargetType: (targetType: 'queue' | 'agent') => void;
 
-  controlVisibility: {
-    accept: boolean;
-    decline: boolean;
-    end: boolean;
-    muteUnmute: boolean;
-    holdResume: boolean;
-    consult: boolean;
-    transfer: boolean;
-    conference: boolean;
-    wrapup: boolean;
-    pauseResumeRecording: boolean;
-    endConsult: boolean;
-    recordingIndicator: boolean;
-  };
+  controlVisibility: ControlVisibility;
 
   secondsUntilAutoWrapup?: number;
 
@@ -412,6 +408,11 @@ export interface ControlProps {
    * Function to cancel the auto wrap-up timer.
    */
   cancelAutoWrapup: () => void;
+
+  /**
+   * List of participants in the conference excluding the agent themselves.
+   */
+  conferenceParticipants: Participant[];
 
   /** Fetch paginated address book entries for dial numbers */
   getAddressBookEntries?: FetchPaginatedList<AddressBookEntry>;
@@ -426,6 +427,11 @@ export interface ControlProps {
    * Options to configure consult/transfer popover behavior.
    */
   consultTransferOptions?: ConsultTransferOptions;
+
+  /**
+   * Agent ID of the logged-in user
+   */
+  agentId: string;
 }
 
 export type CallControlComponentProps = Pick<
@@ -438,32 +444,26 @@ export type CallControlComponentProps = Pick<
   | 'isMuted'
   | 'endCall'
   | 'wrapupCall'
-  | 'isHeld'
-  | 'setIsHeld'
   | 'isRecording'
   | 'setIsRecording'
   | 'buddyAgents'
   | 'loadBuddyAgents'
   | 'transferCall'
   | 'consultCall'
+  | 'consultConference'
+  | 'switchToMainCall'
+  | 'switchToConsult'
+  | 'exitConference'
   | 'endConsultCall'
-  | 'consultInitiated'
   | 'consultTransfer'
-  | 'consultCompleted'
-  | 'consultAccepted'
   | 'consultStartTimeStamp'
   | 'callControlAudio'
   | 'consultAgentName'
   | 'setConsultAgentName'
-  | 'consultAgentId'
-  | 'setConsultAgentId'
   | 'holdTime'
   | 'callControlClassName'
   | 'callControlConsultClassName'
   | 'startTimestamp'
-  | 'queues'
-  | 'loadQueues'
-  | 'isEndConsultEnabled'
   | 'allowConsultToQueue'
   | 'lastTargetType'
   | 'setLastTargetType'
@@ -471,6 +471,7 @@ export type CallControlComponentProps = Pick<
   | 'logger'
   | 'secondsUntilAutoWrapup'
   | 'cancelAutoWrapup'
+  | 'conferenceParticipants'
   | 'getAddressBookEntries'
   | 'getEntryPoints'
   | 'getQueuesFetcher'
@@ -553,13 +554,14 @@ export interface ConsultTransferPopoverComponentProps {
   getAddressBookEntries?: FetchPaginatedList<AddressBookEntry>;
   getEntryPoints?: FetchPaginatedList<EntryPointRecord>;
   getQueues?: FetchPaginatedList<ContactServiceQueue>;
-  onAgentSelect?: (agentId: string, agentName: string) => void;
-  onQueueSelect?: (queueId: string, queueName: string) => void;
-  onEntryPointSelect?: (entryPointId: string, entryPointName: string) => void;
-  onDialNumberSelect?: (dialNumber: string) => void;
+  onAgentSelect: (agentId: string, agentName: string, allowParticipantsToInteract: boolean) => void;
+  onQueueSelect: (queueId: string, queueName: string, allowParticipantsToInteract: boolean) => void;
+  onEntryPointSelect: (entryPointId: string, entryPointName: string, allowParticipantsToInteract: boolean) => void;
+  onDialNumberSelect: (dialNumber: string, allowParticipantsToInteract: boolean) => void;
   allowConsultToQueue: boolean;
   /** Options governing popover visibility/behavior */
   consultTransferOptions?: ConsultTransferOptions;
+  isConferenceInProgress?: boolean;
   logger: ILogger;
 }
 
@@ -569,21 +571,20 @@ export interface ConsultTransferPopoverComponentProps {
 export interface CallControlConsultComponentsProps {
   agentName: string;
   startTimeStamp: number;
-  onTransfer?: () => void;
-  endConsultCall?: () => void;
-  consultCompleted: boolean;
-  isAgentBeingConsulted: boolean;
-  isEndConsultEnabled: boolean;
+  consultTransfer: () => void;
+  endConsultCall: () => void;
+  consultConference: () => void;
+  switchToMainCall: () => void;
   logger: ILogger;
-  muteUnmute: boolean;
   isMuted: boolean;
-  onToggleConsultMute?: () => void;
+  controlVisibility: ControlVisibility;
+  toggleConsultMute: () => void;
 }
 
 /**
  * Type representing the possible menu types in call control.
  */
-export type CallControlMenuType = 'Consult' | 'Transfer';
+export type CallControlMenuType = 'Consult' | 'Transfer' | 'ExitConference';
 
 export const MEDIA_CHANNEL = {
   EMAIL: 'email',
@@ -624,19 +625,38 @@ export interface CallControlButton {
   dataTestId?: string;
 }
 
+export type Visibility = {
+  isVisible: boolean;
+  isEnabled: boolean;
+};
 export interface ControlVisibility {
-  accept: boolean;
-  decline: boolean;
-  end: boolean;
-  muteUnmute: boolean;
-  holdResume: boolean;
-  consult: boolean;
-  transfer: boolean;
-  conference: boolean;
-  wrapup: boolean;
-  pauseResumeRecording: boolean;
-  endConsult: boolean;
-  recordingIndicator: boolean;
+  accept: Visibility;
+  decline: Visibility;
+  end: Visibility;
+  muteUnmute: Visibility;
+  muteUnmuteConsult: Visibility;
+  holdResume: Visibility;
+  consult: Visibility;
+  transfer: Visibility;
+  conference: Visibility;
+  wrapup: Visibility;
+  pauseResumeRecording: Visibility;
+  endConsult: Visibility;
+  recordingIndicator: Visibility;
+  exitConference: Visibility;
+  mergeConference: Visibility;
+  consultTransfer: Visibility;
+  mergeConferenceConsult: Visibility;
+  consultTransferConsult: Visibility;
+  switchToMainCall: Visibility;
+  switchToConsult: Visibility;
+  isConferenceInProgress: boolean;
+  isConsultInitiated: boolean;
+  isConsultInitiatedAndAccepted: boolean;
+  isConsultReceived: boolean;
+  isConsultInitiatedOrAccepted: boolean;
+  isHeld: boolean;
+  consultCallHeld: boolean;
 }
 
 export interface MediaTypeInfo {
@@ -742,4 +762,17 @@ export interface ConsultTransferOptions {
   showDialNumberTab?: boolean;
   /** Show the Entry Point tab. Defaults to true. */
   showEntryPointTab?: boolean;
+}
+
+/**
+ * Interface for button configuration
+ */
+export interface ButtonConfig {
+  key: string;
+  icon: string;
+  onClick: () => void;
+  tooltip: string;
+  className: string;
+  disabled?: boolean;
+  isVisible: boolean;
 }

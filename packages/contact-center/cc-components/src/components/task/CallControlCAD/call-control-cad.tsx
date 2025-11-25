@@ -1,11 +1,12 @@
 import React from 'react';
 import CallControlComponent from '../CallControl/call-control';
-import {Text} from '@momentum-ui/react-collaboration';
-import {Brandvisual, Icon, Tooltip} from '@momentum-design/components/dist/react';
+import {Text, PopoverNext} from '@momentum-ui/react-collaboration';
+import {Brandvisual, Icon, Tooltip, Button} from '@momentum-design/components/dist/react';
 import './call-control-cad.styles.scss';
 import TaskTimer from '../TaskTimer/index';
 import CallControlConsultComponent from '../CallControl/CallControlCustom/call-control-consult';
 import {MEDIA_CHANNEL as MediaChannelType, CallControlComponentProps} from '../task.types';
+
 import {getMediaTypeInfo} from '../../../utils';
 import {
   NO_CUSTOMER_NAME,
@@ -24,24 +25,22 @@ import {withMetrics} from '@webex/cc-ui-logging';
 const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => {
   const {
     currentTask,
-    isHeld,
     isRecording,
     holdTime,
-    consultAccepted,
-    consultInitiated,
     consultAgentName,
     consultStartTimeStamp,
     endConsultCall,
-    consultCompleted,
     consultTransfer,
+    consultConference,
+    switchToMainCall,
     callControlClassName,
     callControlConsultClassName,
     startTimestamp,
-    isEndConsultEnabled,
     controlVisibility,
     logger,
     isMuted,
     toggleMute,
+    conferenceParticipants,
   } = props;
 
   const formatTime = (time: number): string => {
@@ -164,26 +163,81 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
           <div className="customer-info">
             {renderCustomerName()}
             <div className="call-details">
-              <Text className="call-timer" type="body-secondary" tagName={'small'} data-testid="cc-cad:call-timer">
-                {currentMediaType.labelName} - <TaskTimer startTimeStamp={startTimestamp} />
-              </Text>
-              <div className="call-status">
-                {!controlVisibility.wrapup && isHeld && (
+              <div className="call-details-row">
+                <Text className="call-timer" type="body-secondary" tagName={'small'} data-testid="cc-cad:call-timer">
+                  {currentMediaType.labelName} - <TaskTimer startTimeStamp={startTimestamp} />
+                </Text>
+                {controlVisibility.isConferenceInProgress && !controlVisibility.wrapup.isVisible && (
                   <>
-                    <span className="dot">•</span>
-                    <div className="on-hold">
-                      <Icon name="call-hold-filled" size={1} className="call-hold-filled-icon" />
-                      <span className="on-hold-chip-text">
-                        {ON_HOLD} {formatTime(holdTime)}
-                      </span>
+                    <div className="vertical-divider"></div>
+                    <div className="participants-section">
+                      <div className="participants-indicator">
+                        <Text type="body-secondary" tagName={'small'} className="participants-count">
+                          +{Object.keys(conferenceParticipants).length || 1}
+                        </Text>
+                        <Icon name="participant-list-regular" size={0.875} className="participants-icon" />
+                      </div>
+                      <PopoverNext
+                        color="secondary"
+                        delay={[0, 0]}
+                        placement="bottom-start"
+                        showArrow
+                        trigger="click"
+                        variant="medium"
+                        interactive
+                        offsetDistance={2}
+                        className="participants-popover"
+                        triggerComponent={
+                          <Button
+                            id="participants-trigger"
+                            aria-label="Select Participant"
+                            data-testid="call-control:participants-trigger"
+                            className="participants-select-button"
+                            color="default"
+                            variant="tertiary"
+                          >
+                            <Icon name="arrow-down-bold" className="dropdown-arrow" />
+                          </Button>
+                        }
+                      >
+                        <div className="participants-menu">
+                          {conferenceParticipants?.map((participant) => (
+                            <div
+                              key={participant.id}
+                              className="participant-menu-item"
+                              role="menuitem"
+                              tabIndex={0}
+                              data-testid={`call-control:participant-${participant.name?.toLowerCase()}`}
+                            >
+                              {participant.name}
+                            </div>
+                          ))}
+                        </div>
+                      </PopoverNext>
                     </div>
                   </>
                 )}
               </div>
+              <div className="call-status">
+                {!controlVisibility.wrapup.isVisible &&
+                  controlVisibility.isHeld &&
+                  !controlVisibility.isConsultReceived &&
+                  !controlVisibility.consultCallHeld && (
+                    <>
+                      <span className="dot">•</span>
+                      <div className="on-hold">
+                        <Icon name="call-hold-filled" size={1} className="call-hold-filled-icon" />
+                        <span className="on-hold-chip-text">
+                          {ON_HOLD} {formatTime(holdTime)}
+                        </span>
+                      </div>
+                    </>
+                  )}
+              </div>
             </div>
           </div>
         </div>
-        {!controlVisibility.wrapup && controlVisibility.recordingIndicator && (
+        {!controlVisibility.wrapup.isVisible && controlVisibility.recordingIndicator.isVisible && (
           <div className="recording-indicator">
             <Icon name={isRecording ? 'record-active-badge-filled' : 'record-paused-badge-filled'} size={1.3} />
           </div>
@@ -213,20 +267,19 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
           </Text>
         </div>
       </div>
-      {(consultAccepted || consultInitiated) && !controlVisibility.wrapup && isTelephony && (
+      {controlVisibility.isConsultInitiatedOrAccepted && !controlVisibility.wrapup.isVisible && (
         <div className={`call-control-consult-container ${callControlConsultClassName || ''}`}>
           <CallControlConsultComponent
             agentName={consultAgentName}
             startTimeStamp={consultStartTimeStamp}
             endConsultCall={endConsultCall}
-            onTransfer={consultTransfer}
-            consultCompleted={consultCompleted}
-            isAgentBeingConsulted={!consultAccepted}
-            isEndConsultEnabled={isEndConsultEnabled}
+            consultTransfer={consultTransfer}
+            consultConference={consultConference}
+            switchToMainCall={switchToMainCall}
             logger={logger}
-            muteUnmute={controlVisibility.muteUnmute}
             isMuted={isMuted}
-            onToggleConsultMute={toggleMute}
+            controlVisibility={controlVisibility}
+            toggleConsultMute={toggleMute}
           />
         </div>
       )}

@@ -114,14 +114,53 @@ const mockTask: ITask = {
   data: {
     interaction: {
       mediaType: 'telephony',
+      state: 'connected',
+      interactionId: 'interaction123',
+      callProcessingDetails: {
+        relationshipType: 'primary',
+        parentInteractionId: null,
+      },
       participants: {
         agent1: {
           hasJoined: true,
+          pType: 'Agent',
+          id: 'agent1',
+          name: 'agent1',
+          hasLeft: false,
+        },
+        customer1: {
+          hasJoined: true,
+          pType: 'Customer',
+          id: 'customer1',
+          name: 'customer1',
+          hasLeft: false,
+        },
+      },
+      media: {
+        interaction123: {
+          mType: 'main',
+          isHold: false,
+          participants: ['agent1', 'customer1'],
         },
       },
     },
     agentId: 'agent1',
-  } as TaskData,
+    isConferenceInProgress: false,
+    wrapUpRequired: false,
+    mediaResourceId: 'interaction123',
+    interactionId: 'interaction123',
+    eventType: 'TASK_UPDATE',
+    destAgentId: '',
+    trackingId: 'tracking123',
+    orgId: 'org123',
+    teamId: 'team1',
+    channelType: 'telephony',
+    consultMediaResourceId: null,
+    owner: 'agent1',
+    queueMgr: 'queue-mgr-1',
+    type: 'TASK',
+    isConferencing: false,
+  } as unknown as TaskData,
   webCallMap: {},
   autoWrapup: undefined,
   on: jest.fn(),
@@ -150,11 +189,14 @@ const mockTask: ITask = {
   wrapup: jest.fn().mockResolvedValue({} as TaskResponse),
   pauseRecording: jest.fn().mockResolvedValue({} as TaskResponse),
   resumeRecording: jest.fn().mockResolvedValue({} as TaskResponse),
-  //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
   consult: jest.fn().mockResolvedValue({} as TaskResponse),
   transfer: jest.fn().mockResolvedValue({} as TaskResponse),
   consultTransfer: jest.fn().mockResolvedValue({} as TaskResponse),
   endConsult: jest.fn().mockResolvedValue({} as TaskResponse),
+  consultConference: jest.fn(),
+  transferConference: jest.fn(),
+  exitConference: jest.fn(),
+  toggleMute: jest.fn(),
 };
 
 const mockQueueDetails = [

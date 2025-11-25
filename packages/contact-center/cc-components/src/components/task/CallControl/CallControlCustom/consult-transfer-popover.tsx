@@ -1,6 +1,6 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {Text, ListNext, TextInput, Button, ButtonCircle, TooltipNext} from '@momentum-ui/react-collaboration';
-import {Icon} from '@momentum-design/components/dist/react';
+import {Icon, Checkbox} from '@momentum-design/components/dist/react';
 import ConsultTransferListComponent from './consult-transfer-list-item';
 import {ConsultTransferPopoverComponentProps} from '../../task.types';
 import ConsultTransferEmptyState from './consult-transfer-empty-state';
@@ -11,6 +11,7 @@ import {
   getAgentsForDisplay,
 } from './call-control-custom.utils';
 import {useConsultTransferPopover} from './consult-transfer-popover-hooks';
+
 import {
   SEARCH_PLACEHOLDER,
   CLEAR_SEARCH,
@@ -35,6 +36,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
   onEntryPointSelect,
   allowConsultToQueue,
   consultTransferOptions,
+  isConferenceInProgress,
   logger,
 }) => {
   const {showDialNumberTab = true, showEntryPointTab = true} = consultTransferOptions || {};
@@ -65,7 +67,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
     getQueues,
     logger,
   });
-
+  const [allowParticipantsToInteract, setAllowParticipantsToInteract] = useState<boolean>(false);
   const renderList = <T extends {id: string; name: string; number?: string}>(
     items: T[],
     onButtonPress: (item: T) => void
@@ -97,6 +99,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
   const consultTransferManualAction = shouldAddConsultTransferAction(
     selectedCategory,
     isEntryPointTabVisible,
+    allowParticipantsToInteract,
     searchQuery,
     entryPoints,
     onDialNumberSelect,
@@ -194,105 +197,117 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
         )}
       </div>
 
-      {selectedCategory === 'Agents' &&
-        (getAgentsForDisplay(selectedCategory, buddyAgents, searchQuery).length === 0 ? (
-          <ConsultTransferEmptyState message={NO_DATA_AVAILABLE_CONSULT_TRANSFER} />
-        ) : (
-          renderList(
-            getAgentsForDisplay(selectedCategory, buddyAgents, searchQuery).map((agent) => ({
-              id: agent.agentId,
-              name: agent.agentName,
-            })),
-            (item) => handleAgentSelection(item.id, item.name, onAgentSelect, logger)
-          )
-        ))}
+      <div className="consult-list-container">
+        {selectedCategory === 'Agents' &&
+          (getAgentsForDisplay(selectedCategory, buddyAgents, searchQuery).length === 0 ? (
+            <ConsultTransferEmptyState message={NO_DATA_AVAILABLE_CONSULT_TRANSFER} />
+          ) : (
+            renderList(
+              getAgentsForDisplay(selectedCategory, buddyAgents, searchQuery).map((agent) => ({
+                id: agent.agentId,
+                name: agent.agentName,
+              })),
+              (item) => handleAgentSelection(item.id, item.name, allowParticipantsToInteract, onAgentSelect, logger)
+            )
+          ))}
 
-      {selectedCategory === 'Queues' &&
-        (noQueues ? (
-          <ConsultTransferEmptyState message={NO_DATA_AVAILABLE_CONSULT_TRANSFER} />
-        ) : (
-          <div>
-            {renderList(
-              queuesData.map((q) => ({id: q.id, name: q.name})),
-              (item) => handleQueueSelection(item.id, item.name, onQueueSelect, logger)
-            )}
-            {hasMoreQueues && (
-              <div ref={loadMoreRef} className="consult-load-more">
-                {loadingQueues ? (
-                  <Text tagName="small" type="body-secondary">
-                    {LOADING_MORE_QUEUES}
-                  </Text>
-                ) : (
-                  <Text tagName="small" type="body-secondary">
-                    {SCROLL_TO_LOAD_MORE}
-                  </Text>
-                )}
-              </div>
-            )}
-          </div>
-        ))}
+        {selectedCategory === 'Queues' &&
+          (noQueues ? (
+            <ConsultTransferEmptyState message={NO_DATA_AVAILABLE_CONSULT_TRANSFER} />
+          ) : (
+            <div>
+              {renderList(
+                queuesData.map((q) => ({id: q.id, name: q.name})),
+                (item) => handleQueueSelection(item.id, item.name, allowParticipantsToInteract, onQueueSelect, logger)
+              )}
+              {hasMoreQueues && (
+                <div ref={loadMoreRef} className="consult-load-more">
+                  {loadingQueues ? (
+                    <Text tagName="small" type="body-secondary">
+                      {LOADING_MORE_QUEUES}
+                    </Text>
+                  ) : (
+                    <Text tagName="small" type="body-secondary">
+                      {SCROLL_TO_LOAD_MORE}
+                    </Text>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
 
-      {showDialNumberTab &&
-        selectedCategory === CATEGORY_DIAL_NUMBER &&
-        (noDialNumbers ? (
-          <ConsultTransferEmptyState message={NO_DATA_AVAILABLE_CONSULT_TRANSFER} />
-        ) : (
-          <div>
-            {renderList(
-              dialNumbers.map((d) => ({id: d.id, name: d.name, number: d.number})),
-              (item) => {
-                if (item.number) {
-                  if (onDialNumberSelect) {
-                    onDialNumberSelect(item.number);
+        {showDialNumberTab &&
+          selectedCategory === CATEGORY_DIAL_NUMBER &&
+          (noDialNumbers ? (
+            <ConsultTransferEmptyState message={NO_DATA_AVAILABLE_CONSULT_TRANSFER} />
+          ) : (
+            <div>
+              {renderList(
+                dialNumbers.map((d) => ({id: d.id, name: d.name, number: d.number})),
+                (item) => {
+                  if (item.number) {
+                    onDialNumberSelect(item.number, allowParticipantsToInteract);
                   }
                 }
-              }
-            )}
-            {hasMoreDialNumbers && (
-              <div ref={loadMoreRef} className="consult-load-more">
-                {loadingDialNumbers ? (
-                  <Text tagName="small" type="body-secondary">
-                    {LOADING_MORE_DIAL_NUMBERS}
-                  </Text>
-                ) : (
-                  <Text tagName="small" type="body-secondary">
-                    {SCROLL_TO_LOAD_MORE}
-                  </Text>
-                )}
-              </div>
-            )}
-          </div>
-        ))}
+              )}
+              {hasMoreDialNumbers && (
+                <div ref={loadMoreRef} className="consult-load-more">
+                  {loadingDialNumbers ? (
+                    <Text tagName="small" type="body-secondary">
+                      {LOADING_MORE_DIAL_NUMBERS}
+                    </Text>
+                  ) : (
+                    <Text tagName="small" type="body-secondary">
+                      {SCROLL_TO_LOAD_MORE}
+                    </Text>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
 
-      {isEntryPointTabVisible &&
-        selectedCategory === CATEGORY_ENTRY_POINT &&
-        (noEntryPoints ? (
-          <ConsultTransferEmptyState message={NO_DATA_AVAILABLE_CONSULT_TRANSFER} />
-        ) : (
-          <div>
-            {renderList(
-              entryPoints.map((e) => ({id: e.id, name: e.name})),
-              (item) => {
-                if (onEntryPointSelect) {
-                  onEntryPointSelect(item.id, item.name);
+        {isEntryPointTabVisible &&
+          selectedCategory === CATEGORY_ENTRY_POINT &&
+          (noEntryPoints ? (
+            <ConsultTransferEmptyState message={NO_DATA_AVAILABLE_CONSULT_TRANSFER} />
+          ) : (
+            <div>
+              {renderList(
+                entryPoints.map((e) => ({id: e.id, name: e.name})),
+                (item) => {
+                  onEntryPointSelect(item.id, item.name, allowParticipantsToInteract);
                 }
-              }
-            )}
-            {hasMoreEntryPoints && (
-              <div ref={loadMoreRef} className="consult-load-more">
-                {loadingEntryPoints ? (
-                  <Text tagName="small" type="body-secondary">
-                    {LOADING_MORE_ENTRY_POINTS}
-                  </Text>
-                ) : (
-                  <Text tagName="small" type="body-secondary">
-                    {SCROLL_TO_LOAD_MORE}
-                  </Text>
-                )}
-              </div>
-            )}
-          </div>
-        ))}
+              )}
+              {hasMoreEntryPoints && (
+                <div ref={loadMoreRef} className="consult-load-more">
+                  {loadingEntryPoints ? (
+                    <Text tagName="small" type="body-secondary">
+                      {LOADING_MORE_ENTRY_POINTS}
+                    </Text>
+                  ) : (
+                    <Text tagName="small" type="body-secondary">
+                      {SCROLL_TO_LOAD_MORE}
+                    </Text>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
+      </div>
+      {isConferenceInProgress && (
+        <div className="consult-checkbox-container">
+          <Checkbox
+            checked={allowParticipantsToInteract}
+            aria-label="Allow participants to continue interacting"
+            id="allow-participants-checkbox"
+            label="Allow participants to continue interacting."
+            // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
+            onchange={() => {
+              setAllowParticipantsToInteract(!allowParticipantsToInteract);
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 };

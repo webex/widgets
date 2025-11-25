@@ -270,6 +270,20 @@
       justify-content: center;
       align-items: center;
     }
+
+    .consult-list-container {
+      flex: 1;
+      overflow-y: auto;
+      max-height: 15rem; /* Limit height to ensure checkbox remains visible */
+      min-height: 15rem;
+      margin-bottom: 1rem;
+    }
+
+    .consult-checkbox-container {
+      padding-top: 1rem;
+      margin-top: auto; /* Push to bottom if there's extra space */
+      flex-shrink: 0; /* Don't allow shrinking */
+    }
   }
 
   .agent-tablist {

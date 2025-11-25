@@ -16,22 +16,20 @@ const CallControlCADInternal: React.FunctionComponent<CallControlProps> = observ
     onToggleMute,
     callControlClassName,
     callControlConsultClassName,
+    conferenceEnabled,
     consultTransferOptions,
   }) => {
     const {
       logger,
       currentTask,
       wrapupCodes,
-      consultInitiated,
-      consultAccepted,
       consultStartTimeStamp,
       callControlAudio,
-      consultCompleted,
-      isEndConsultEnabled,
       allowConsultToQueue,
       featureFlags,
       deviceType,
       isMuted,
+      agentId,
     } = store;
     const result = {
       ...useCallControl({
@@ -42,20 +40,17 @@ const CallControlCADInternal: React.FunctionComponent<CallControlProps> = observ
         onRecordingToggle,
         onToggleMute,
         logger,
-        consultInitiated,
         deviceType,
         featureFlags,
         isMuted,
+        conferenceEnabled,
+        agentId,
       }),
       wrapupCodes,
-      consultInitiated,
-      consultCompleted,
-      consultAccepted,
       consultStartTimeStamp,
       callControlAudio,
       callControlClassName,
       callControlConsultClassName,
-      isEndConsultEnabled,
       allowConsultToQueue,
       logger,
       consultTransferOptions,
@@ -73,7 +68,7 @@ const CallControlCAD: React.FunctionComponent<CallControlProps> = (props) => {
         if (store.onErrorCallback) store.onErrorCallback('CallControlCAD', error);
       }}
     >
-      <CallControlCADInternal {...props} />
+      <CallControlCADInternal {...props} conferenceEnabled={props.conferenceEnabled ?? true} />
     </ErrorBoundary>
   );
 };

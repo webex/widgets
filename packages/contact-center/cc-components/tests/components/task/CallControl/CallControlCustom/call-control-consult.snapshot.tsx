@@ -72,19 +72,49 @@ describe('CallControlConsultComponent Snapshots', () => {
   const mockOnTransfer = jest.fn();
   const mockEndConsultCall = jest.fn();
   const mockOnToggleConsultMute = jest.fn();
+  const mockConsultConference = jest.fn();
+
+  const mockControlVisibility = {
+    accept: {isVisible: true, isEnabled: true},
+    decline: {isVisible: true, isEnabled: true},
+    end: {isVisible: true, isEnabled: true},
+    muteUnmute: {isVisible: true, isEnabled: true},
+    muteUnmuteConsult: {isVisible: true, isEnabled: true},
+    holdResume: {isVisible: true, isEnabled: true},
+    consult: {isVisible: true, isEnabled: true},
+    transfer: {isVisible: true, isEnabled: true},
+    conference: {isVisible: true, isEnabled: true},
+    wrapup: {isVisible: false, isEnabled: false},
+    pauseResumeRecording: {isVisible: true, isEnabled: true},
+    endConsult: {isVisible: true, isEnabled: true},
+    recordingIndicator: {isVisible: true, isEnabled: true},
+    exitConference: {isVisible: false, isEnabled: false},
+    mergeConference: {isVisible: true, isEnabled: true},
+    mergeConferenceConsult: {isVisible: true, isEnabled: true},
+    consultTransfer: {isVisible: true, isEnabled: true},
+    consultTransferConsult: {isVisible: true, isEnabled: true},
+    switchToMainCall: {isVisible: true, isEnabled: true},
+    switchToConsult: {isVisible: true, isEnabled: true},
+    isConferenceInProgress: false,
+    isConsultInitiated: false,
+    isConsultInitiatedAndAccepted: false,
+    isConsultInitiatedOrAccepted: false,
+    isConsultReceived: false,
+    isHeld: false,
+    consultCallHeld: false,
+  };
 
   const defaultProps = {
     agentName: 'Alice',
     startTimeStamp: Date.now(),
-    onTransfer: mockOnTransfer,
+    consultTransfer: mockOnTransfer,
     endConsultCall: mockEndConsultCall,
-    onToggleConsultMute: mockOnToggleConsultMute,
-    consultCompleted: true,
-    isAgentBeingConsulted: true,
-    isEndConsultEnabled: true,
+    toggleConsultMute: mockOnToggleConsultMute,
+    consultConference: mockConsultConference,
+    switchToMainCall: jest.fn(),
     logger: mockLogger,
-    muteUnmute: true,
     isMuted: false,
+    controlVisibility: mockControlVisibility,
   };
 
   beforeEach(() => {
@@ -115,8 +145,14 @@ describe('CallControlConsultComponent Snapshots', () => {
       expect(container).toMatchSnapshot();
     });
 
-    it('should render without mute button when muteUnmute is false', async () => {
-      const propsWithoutMute = {...defaultProps, muteUnmute: false};
+    it('should render without mute button when muteUnmute is hidden', async () => {
+      const propsWithoutMute = {
+        ...defaultProps,
+        controlVisibility: {
+          ...mockControlVisibility,
+          muteUnmute: {isVisible: false, isEnabled: false},
+        },
+      };
       let screen;
       await act(async () => {
         screen = render(<CallControlConsultComponent {...propsWithoutMute} />);
@@ -128,7 +164,7 @@ describe('CallControlConsultComponent Snapshots', () => {
     });
 
     it('should render without transfer button when onTransfer is undefined', async () => {
-      const propsWithoutTransfer = {...defaultProps, onTransfer: undefined};
+      const propsWithoutTransfer = {...defaultProps, consultTransfer: undefined};
       let screen;
       await act(async () => {
         screen = render(<CallControlConsultComponent {...propsWithoutTransfer} />);
@@ -151,8 +187,14 @@ describe('CallControlConsultComponent Snapshots', () => {
       expect(container).toMatchSnapshot();
     });
 
-    it('should render when consultCompleted is false', async () => {
-      const propsIncompleteConsult = {...defaultProps, consultCompleted: false};
+    it('should render when transfer is disabled', async () => {
+      const propsIncompleteConsult = {
+        ...defaultProps,
+        controlVisibility: {
+          ...mockControlVisibility,
+          consultTransfer: {isVisible: true, isEnabled: false},
+        },
+      };
       let screen;
       await act(async () => {
         screen = render(<CallControlConsultComponent {...propsIncompleteConsult} />);
@@ -163,8 +205,14 @@ describe('CallControlConsultComponent Snapshots', () => {
       expect(container).toMatchSnapshot();
     });
 
-    it('should render when isAgentBeingConsulted is false', async () => {
-      const propsNotBeingConsulted = {...defaultProps, isAgentBeingConsulted: false};
+    it('should render with end consult hidden', async () => {
+      const propsNotBeingConsulted = {
+        ...defaultProps,
+        controlVisibility: {
+          ...mockControlVisibility,
+          endConsult: {isVisible: false, isEnabled: false},
+        },
+      };
       let screen;
       await act(async () => {
         screen = render(<CallControlConsultComponent {...propsNotBeingConsulted} />);
@@ -175,8 +223,14 @@ describe('CallControlConsultComponent Snapshots', () => {
       expect(container).toMatchSnapshot();
     });
 
-    it('should render when isEndConsultEnabled is false', async () => {
-      const propsEndConsultDisabled = {...defaultProps, isEndConsultEnabled: false};
+    it('should render when end consult is disabled', async () => {
+      const propsEndConsultDisabled = {
+        ...defaultProps,
+        controlVisibility: {
+          ...mockControlVisibility,
+          endConsult: {isVisible: true, isEnabled: false},
+        },
+      };
       let screen;
       await act(async () => {
         screen = render(<CallControlConsultComponent {...propsEndConsultDisabled} />);
@@ -233,13 +287,20 @@ describe('CallControlConsultComponent Snapshots', () => {
   });
 
   describe('State Management', () => {
-    it('should update when muteUnmute prop changes', async () => {
+    it('should update when muteUnmute visibility changes', async () => {
       let screen;
       await act(async () => {
         screen = render(<CallControlConsultComponent {...defaultProps} />);
       });
 
-      screen.rerender(<CallControlConsultComponent {...defaultProps} muteUnmute={false} />);
+      const updatedProps = {
+        ...defaultProps,
+        controlVisibility: {
+          ...mockControlVisibility,
+          muteUnmute: {isVisible: false, isEnabled: false},
+        },
+      };
+      screen.rerender(<CallControlConsultComponent {...updatedProps} />);
       const container = screen.container.querySelector('.call-control-consult');
       mockUIDProps(container);
       expect(container).toMatchSnapshot();
@@ -260,9 +321,12 @@ describe('CallControlConsultComponent Snapshots', () => {
     it('should handle combination of props: no mute, no transfer, disabled end consult', async () => {
       const complexProps = {
         ...defaultProps,
-        muteUnmute: false,
-        onTransfer: undefined,
-        isEndConsultEnabled: false,
+        consultTransfer: undefined,
+        controlVisibility: {
+          ...mockControlVisibility,
+          muteUnmute: {isVisible: false, isEnabled: false},
+          endConsult: {isVisible: true, isEnabled: false},
+        },
       };
       let screen;
       await act(async () => {

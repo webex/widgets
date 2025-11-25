@@ -42,19 +42,18 @@ function CallControlComponent(props: CallControlComponentProps) {
     endCall,
     wrapupCall,
     wrapupCodes,
-    isHeld,
-    setIsHeld,
     isRecording,
     setIsRecording,
     buddyAgents,
     loadBuddyAgents,
     transferCall,
     consultCall,
-    consultInitiated,
-    consultAccepted,
+    exitConference,
+    switchToConsult,
+    consultConference,
+    consultTransfer,
     callControlAudio,
     setConsultAgentName,
-    setConsultAgentId,
     allowConsultToQueue,
     setLastTargetType,
     controlVisibility,
@@ -68,11 +67,11 @@ function CallControlComponent(props: CallControlComponentProps) {
   } = props;
 
   useEffect(() => {
-    updateCallStateFromTask(currentTask, setIsHeld, setIsRecording, logger);
+    updateCallStateFromTask(currentTask, setIsRecording, logger);
   }, [currentTask, logger]);
 
   const handletoggleHold = () => {
-    handleToggleHoldUtil(isHeld, toggleHold, setIsHeld, logger);
+    handleToggleHoldUtil(controlVisibility.isHeld, toggleHold, logger);
   };
 
   const handleMuteToggle = () => {
@@ -94,15 +93,20 @@ function CallControlComponent(props: CallControlComponentProps) {
     handleWrapupChangeUtil(text, value, setSelectedWrapupReason, setSelectedWrapupId, logger);
   };
 
-  const handleTargetSelect = (id: string, name: string, type: DestinationType) => {
+  const handleTargetSelect = (
+    id: string,
+    name: string,
+    type: DestinationType,
+    allowParticipantsToInteract: boolean
+  ) => {
     handleTargetSelectUtil(
       id,
       name,
       type,
+      allowParticipantsToInteract,
       agentMenuType,
       consultCall,
       transferCall,
-      setConsultAgentId,
       setConsultAgentName,
       setLastTargetType,
       logger
@@ -120,7 +124,6 @@ function CallControlComponent(props: CallControlComponentProps) {
 
   const buttons = buildCallControlButtons(
     isMuted,
-    isHeld,
     isRecording,
     isMuteButtonDisabled,
     currentMediaType,
@@ -129,10 +132,18 @@ function CallControlComponent(props: CallControlComponentProps) {
     handletoggleHold,
     toggleRecording,
     endCall,
-    logger
+    exitConference,
+    switchToConsult,
+    consultTransfer,
+    consultConference
   );
 
-  const filteredButtons = filterButtonsForConsultation(buttons, consultInitiated, isTelephony, logger);
+  const filteredButtons = filterButtonsForConsultation(
+    buttons,
+    controlVisibility.isConsultInitiatedOrAccepted,
+    isTelephony,
+    logger
+  );
 
   if (!currentTask) return null;
 
@@ -144,7 +155,7 @@ function CallControlComponent(props: CallControlComponentProps) {
         autoPlay
       ></audio>
       <div className="call-control-container" data-testid="call-control-container">
-        {!(consultAccepted && isTelephony) && !controlVisibility.wrapup && (
+        {!controlVisibility.isConsultReceived && !controlVisibility.wrapup.isVisible && (
           <div className="button-group">
             {filteredButtons.map((button, index) => {
               if (!button.isVisible) return null;
@@ -188,7 +199,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                           <ButtonCircle
                             className={button.className}
                             aria-label={button.tooltip}
-                            disabled={button.disabled || (consultInitiated && isTelephony)}
+                            disabled={button.disabled}
                             data-testid={button.dataTestId}
                           >
                             <Icon className={button.className + '-icon'} name={button.icon} />
@@ -213,12 +224,18 @@ function CallControlComponent(props: CallControlComponentProps) {
                         getAddressBookEntries={getAddressBookEntries}
                         getEntryPoints={getEntryPoints}
                         getQueues={getQueuesFetcher}
-                        onAgentSelect={(agentId, agentName) => handleTargetSelect(agentId, agentName, 'agent')}
-                        onQueueSelect={(queueId, queueName) => handleTargetSelect(queueId, queueName, 'queue')}
-                        onEntryPointSelect={(entryPointId, entryPointName) =>
-                          handleTargetSelect(entryPointId, entryPointName, 'entryPoint')
+                        onAgentSelect={(agentId, agentName, allowParticipantsToInteract) =>
+                          handleTargetSelect(agentId, agentName, 'agent', allowParticipantsToInteract)
                         }
-                        onDialNumberSelect={(dialNumber) => handleTargetSelect(dialNumber, dialNumber, 'dialNumber')}
+                        onQueueSelect={(queueId, queueName, allowParticipantsToInteract) =>
+                          handleTargetSelect(queueId, queueName, 'queue', allowParticipantsToInteract)
+                        }
+                        onEntryPointSelect={(entryPointId, entryPointName, allowParticipantsToInteract) =>
+                          handleTargetSelect(entryPointId, entryPointName, 'entryPoint', allowParticipantsToInteract)
+                        }
+                        onDialNumberSelect={(dialNumber, allowParticipantsToInteract) =>
+                          handleTargetSelect(dialNumber, dialNumber, 'dialNumber', allowParticipantsToInteract)
+                        }
                         allowConsultToQueue={allowConsultToQueue}
                         consultTransferOptions={
                           isTelephony
@@ -229,6 +246,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                                 showEntryPointTab: false,
                               }
                         }
+                        isConferenceInProgress={controlVisibility.isConferenceInProgress}
                         logger={logger}
                       />
                     ) : null}
@@ -240,13 +258,10 @@ function CallControlComponent(props: CallControlComponentProps) {
                   key={index}
                   triggerComponent={
                     <ButtonCircle
-                      className={
-                        button.className +
-                        (button.disabled || (consultInitiated && isTelephony) ? ` ${button.className}-disabled` : '')
-                      }
+                      className={button.className + (button.disabled ? ` ${button.className}-disabled` : '')}
                       data-testid={button.dataTestId}
                       onPress={button.onClick}
-                      disabled={button.disabled || (consultInitiated && isTelephony)}
+                      disabled={button.disabled}
                       aria-label={button.tooltip}
                     >
                       <Icon className={button.className + '-icon'} name={button.icon} />
@@ -265,7 +280,7 @@ function CallControlComponent(props: CallControlComponentProps) {
             })}
           </div>
         )}
-        {controlVisibility.wrapup && (
+        {controlVisibility.wrapup.isVisible && (
           <div className="wrapup-group">
             <PopoverNext
               color="primary"

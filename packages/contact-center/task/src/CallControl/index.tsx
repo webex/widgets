@@ -8,21 +8,18 @@ import {CallControlProps} from '../task.types';
 import {CallControlComponent} from '@webex/cc-components';
 
 const CallControlInternal: React.FunctionComponent<CallControlProps> = observer(
-  ({onHoldResume, onEnd, onWrapUp, onRecordingToggle, onToggleMute, consultTransferOptions}) => {
+  ({onHoldResume, onEnd, onWrapUp, onRecordingToggle, onToggleMute, consultTransferOptions, conferenceEnabled}) => {
     const {
       logger,
       currentTask,
       wrapupCodes,
-      consultInitiated,
-      consultCompleted,
-      consultAccepted,
       consultStartTimeStamp,
       callControlAudio,
       deviceType,
       featureFlags,
-      isEndConsultEnabled,
       allowConsultToQueue,
       isMuted,
+      agentId,
     } = store;
 
     const result = {
@@ -34,18 +31,15 @@ const CallControlInternal: React.FunctionComponent<CallControlProps> = observer(
         onRecordingToggle,
         onToggleMute,
         logger,
-        consultInitiated,
         deviceType,
         featureFlags,
         isMuted,
+        conferenceEnabled,
+        agentId,
       }),
       wrapupCodes,
-      consultInitiated,
-      consultCompleted,
-      consultAccepted,
       consultStartTimeStamp,
       callControlAudio,
-      isEndConsultEnabled,
       allowConsultToQueue,
       logger,
       consultTransferOptions,
@@ -63,7 +57,7 @@ const CallControl: React.FunctionComponent<CallControlProps> = (props) => {
         if (store.onErrorCallback) store.onErrorCallback('CallControl', error);
       }}
     >
-      <CallControlInternal {...props} />
+      <CallControlInternal {...props} conferenceEnabled={props.conferenceEnabled ?? true} />
     </ErrorBoundary>
   );
 };

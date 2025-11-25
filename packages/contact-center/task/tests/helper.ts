@@ -787,18 +787,33 @@ describe('useCallControl', () => {
     mockGetControlsVisibility.mockClear();
 
     const mockControlVisibility = {
-      muteUnmute: true,
-      holdResume: true,
-      transfer: true,
-      consult: true,
-      end: true,
-      accept: true,
-      decline: true,
-      pauseResumeRecording: true,
-      recordingIndicator: true,
-      wrapup: false,
-      endConsult: false,
-      conference: false,
+      muteUnmute: {isVisible: true, isEnabled: true},
+      muteUnmuteConsult: {isVisible: false, isEnabled: false},
+      holdResume: {isVisible: true, isEnabled: true},
+      transfer: {isVisible: true, isEnabled: true},
+      consult: {isVisible: true, isEnabled: true},
+      end: {isVisible: true, isEnabled: true},
+      accept: {isVisible: true, isEnabled: true},
+      decline: {isVisible: true, isEnabled: true},
+      pauseResumeRecording: {isVisible: true, isEnabled: true},
+      recordingIndicator: {isVisible: true, isEnabled: true},
+      wrapup: {isVisible: false, isEnabled: false},
+      endConsult: {isVisible: false, isEnabled: false},
+      conference: {isVisible: false, isEnabled: false},
+      consultTransfer: {isVisible: false, isEnabled: false},
+      mergeConference: {isVisible: false, isEnabled: false},
+      mergeConferenceConsult: {isVisible: false, isEnabled: false},
+      consultTransferConsult: {isVisible: false, isEnabled: false},
+      switchToMainCall: {isVisible: false, isEnabled: false},
+      switchToConsult: {isVisible: false, isEnabled: false},
+      exitConference: {isVisible: false, isEnabled: false},
+      isConferenceInProgress: false,
+      isConsultInitiated: false,
+      isConsultInitiatedAndAccepted: false,
+      isConsultInitiatedOrAccepted: false,
+      isConsultReceived: false,
+      isHeld: false,
+      consultCallHeld: false,
     };
     mockGetControlsVisibility.mockReturnValue(mockControlVisibility);
   });
@@ -831,8 +846,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -857,8 +873,9 @@ describe('useCallControl', () => {
         onWrapUp: jest.fn(),
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -893,8 +910,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -917,8 +935,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -943,8 +962,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -968,8 +988,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -991,8 +1012,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -1016,8 +1038,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -1048,8 +1071,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -1084,8 +1108,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -1106,8 +1131,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
     await waitFor(() => {
@@ -1132,8 +1158,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -1159,8 +1186,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -1187,8 +1215,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
     await waitFor(() => {
@@ -1213,8 +1242,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
     // Ensure no event handler is set
@@ -1234,8 +1264,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
     // Ensure no event handler is set
@@ -1253,8 +1284,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
     await act(async () => {
@@ -1276,8 +1308,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
     await act(async () => {
@@ -1302,8 +1335,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
     await act(async () => {
@@ -1333,8 +1367,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -1348,7 +1383,6 @@ describe('useCallControl', () => {
 
   it('should call consultCall successfully', async () => {
     mockCurrentTask.consult = jest.fn().mockResolvedValue('Consulted');
-    const setConsultInitiatedSpy = jest.spyOn(store, 'setConsultInitiated');
     const {result} = renderHook(() =>
       useCallControl({
         currentTask: mockCurrentTask,
@@ -1358,16 +1392,46 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
     await act(async () => {
-      await result.current.consultCall('dest123', 'agent');
+      await result.current.consultCall('dest123', 'agent', false);
     });
-    expect(mockCurrentTask.consult).toHaveBeenCalledWith({to: 'dest123', destinationType: 'agent'});
-    expect(setConsultInitiatedSpy).toHaveBeenCalledWith(true);
-    setConsultInitiatedSpy.mockRestore();
+    expect(mockCurrentTask.consult).toHaveBeenCalledWith({
+      to: 'dest123',
+      destinationType: 'agent',
+      holdParticipants: true,
+    });
+  });
+
+  it('should call consultCall with allowParticipantsToInteract set to true', async () => {
+    mockCurrentTask.consult = jest.fn().mockResolvedValue('Consulted');
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
+        isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
+      })
+    );
+    await act(async () => {
+      await result.current.consultCall('dest123', 'agent', true);
+    });
+    expect(mockCurrentTask.consult).toHaveBeenCalledWith({
+      to: 'dest123',
+      destinationType: 'agent',
+      holdParticipants: false,
+    });
   });
 
   it('should handle errors when calling consultCall', async () => {
@@ -1382,13 +1446,18 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
-    await expect(result.current.consultCall('dest123', 'agent')).rejects.toThrow(consultError);
-    expect(mockCurrentTask.consult).toHaveBeenCalledWith({to: 'dest123', destinationType: 'agent'});
+    await expect(result.current.consultCall('dest123', 'agent', false)).rejects.toThrow(consultError);
+    expect(mockCurrentTask.consult).toHaveBeenCalledWith({
+      to: 'dest123',
+      destinationType: 'agent',
+      holdParticipants: true,
+    });
     expect(mockLogger.error).toHaveBeenCalledWith('Error consulting call: Error: Consult failed', {
       module: 'widget-cc-task#helper.ts',
       method: 'useCallControl#consultCall',
@@ -1406,8 +1475,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: true,
         isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
     await act(async () => {
@@ -1430,8 +1500,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -1450,8 +1521,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: true,
         isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -1466,9 +1538,42 @@ describe('useCallControl', () => {
     });
   });
 
+  it('should handle endConsultCall when interactionId is missing', async () => {
+    const taskWithoutInteractionId = {
+      ...mockCurrentTask,
+      data: {
+        ...mockCurrentTask.data,
+        interactionId: undefined,
+      },
+    };
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: taskWithoutInteractionId,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
+        isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
+      })
+    );
+
+    await act(async () => {
+      await result.current.endConsultCall();
+    });
+
+    expect(mockLogger.error).toHaveBeenCalledWith('Cannot end consult call: currentTask or interactionId is missing', {
+      module: 'widget-cc-task#helper.ts',
+      method: 'useCallControl#endConsultCall',
+    });
+  });
+
   it('should call consultTransfer successfully', async () => {
     mockCurrentTask.consultTransfer = jest.fn().mockResolvedValue('ConsultTransferred');
-    const setConsultInitiatedSpy = jest.spyOn(store, 'setConsultInitiated');
     const {result} = renderHook(() =>
       useCallControl({
         currentTask: mockCurrentTask,
@@ -1478,16 +1583,15 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: true,
         isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
     await act(async () => {
       await result.current.consultTransfer();
     });
     expect(mockCurrentTask.consultTransfer).toHaveBeenCalled();
-    expect(setConsultInitiatedSpy).toHaveBeenCalledWith(true);
-    setConsultInitiatedSpy.mockRestore();
   });
 
   it('should handle errors when calling consultTransfer', async () => {
@@ -1502,14 +1606,46 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
     await expect(result.current.consultTransfer()).rejects.toThrow(transferError);
     expect(mockCurrentTask.consultTransfer).toHaveBeenCalled();
     expect(mockLogger.error).toHaveBeenCalledWith('Error transferring consult call: Error: Consult transfer failed', {
+      module: 'widget-cc-task#helper.ts',
+      method: 'useCallControl#consultTransfer',
+    });
+  });
+
+  it('should handle consultTransfer when currentTask data is missing', async () => {
+    const taskWithoutData = {
+      ...mockCurrentTask,
+      data: undefined,
+    };
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: taskWithoutData,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
+        isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
+      })
+    );
+
+    await act(async () => {
+      await result.current.consultTransfer();
+    });
+
+    expect(mockLogger.error).toHaveBeenCalledWith('Cannot transfer consult call: currentTask or data is missing', {
       module: 'widget-cc-task#helper.ts',
       method: 'useCallControl#consultTransfer',
     });
@@ -1564,10 +1700,11 @@ describe('useCallControl', () => {
       useCallControl({
         currentTask: taskWithParticipants,
         logger: mockLogger,
-        consultInitiated: true,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -1632,10 +1769,11 @@ describe('useCallControl', () => {
       useCallControl({
         currentTask: taskWithParticipants,
         logger: mockLogger,
-        consultInitiated: false,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -1693,10 +1831,11 @@ describe('useCallControl', () => {
       const hook = useCallControl({
         currentTask: taskWithoutConsultAgent,
         logger: mockLogger,
-        consultInitiated: true,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
       });
       return hook;
     });
@@ -1713,10 +1852,12 @@ describe('useCallControl', () => {
 
   it('should handle missing interaction data gracefully', async () => {
     // Create a task with missing interaction data
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const {interaction, ...dataWithoutInteraction} = mockCurrentTask.data;
     const taskWithNoInteraction = {
       ...mockCurrentTask,
       data: {
-        ...mockCurrentTask.data,
+        ...dataWithoutInteraction,
         interactionId: 'someMockInteractionId',
         // No interaction property
       },
@@ -1731,8 +1872,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
       });
       // Set initial value
       return hook;
@@ -1752,8 +1894,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -1802,8 +1945,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -1853,8 +1997,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -1898,8 +2043,9 @@ describe('useCallControl', () => {
           logger: mockLogger,
           featureFlags: store.featureFlags,
           deviceType: store.deviceType,
-          consultInitiated: false,
           isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'test-agent-id',
         }),
       {initialProps: {task: mockTaskWithHold}}
     );
@@ -1958,11 +2104,7 @@ describe('useCallControl', () => {
       },
     };
 
-    let setHoldTimeValue = 0;
-    // @ts-expect-error Mock useState to capture the holdTime value
-    jest.spyOn(React, 'useState').mockImplementation((init) => [init, (v) => (setHoldTimeValue = v)]);
-
-    renderHook(() =>
+    const {result} = renderHook(() =>
       useCallControl({
         currentTask: mockTaskWithHold,
         onHoldResume: mockOnHoldResume,
@@ -1971,17 +2113,16 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
     // The initial holdTime should be about 7 seconds
-    expect(setHoldTimeValue).toBeGreaterThanOrEqual(6);
-    expect(setHoldTimeValue).toBeLessThanOrEqual(7);
-
-    // Restore useState after this test so it doesn't affect others
-    (React.useState as unknown as {mockRestore?: () => void}).mockRestore?.();
+    // Note: We check the result.current.holdTime directly instead of mocking useState
+    expect(result.current.holdTime).toBeGreaterThanOrEqual(6);
+    expect(result.current.holdTime).toBeLessThanOrEqual(7);
   });
 
   it('should reset holdTime to 0 when the worker sends stop', async () => {
@@ -2029,8 +2170,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -2090,8 +2232,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -2105,7 +2248,6 @@ describe('useCallControl', () => {
     mockCurrentTask.consult = jest.fn().mockResolvedValue('Consulted');
     const setIsQueueConsultInProgressSpy = jest.spyOn(store, 'setIsQueueConsultInProgress');
     const setCurrentConsultQueueIdSpy = jest.spyOn(store, 'setCurrentConsultQueueId');
-    const setConsultInitiatedSpy = jest.spyOn(store, 'setConsultInitiated');
 
     const {result} = renderHook(() =>
       useCallControl({
@@ -2116,16 +2258,21 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
     await act(async () => {
-      await result.current.consultCall('queueId123', 'queue');
+      await result.current.consultCall('queueId123', 'queue', false);
     });
 
-    expect(mockCurrentTask.consult).toHaveBeenCalledWith({to: 'queueId123', destinationType: 'queue'});
+    expect(mockCurrentTask.consult).toHaveBeenCalledWith({
+      to: 'queueId123',
+      destinationType: 'queue',
+      holdParticipants: true,
+    });
     expect(setIsQueueConsultInProgressSpy).toHaveBeenCalledWith(true);
     expect(setCurrentConsultQueueIdSpy).toHaveBeenCalledWith('queueId123');
     expect(setIsQueueConsultInProgressSpy).toHaveBeenCalledWith(false);
@@ -2133,7 +2280,48 @@ describe('useCallControl', () => {
 
     setIsQueueConsultInProgressSpy.mockRestore();
     setCurrentConsultQueueIdSpy.mockRestore();
-    setConsultInitiatedSpy.mockRestore();
+  });
+
+  it('should handle errors when calling consultCall with queue destination type', async () => {
+    const consultError = new Error('Queue consult failed');
+    mockCurrentTask.consult = jest.fn().mockRejectedValue(consultError);
+    const setIsQueueConsultInProgressSpy = jest.spyOn(store, 'setIsQueueConsultInProgress');
+    const setCurrentConsultQueueIdSpy = jest.spyOn(store, 'setCurrentConsultQueueId');
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
+        isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
+      })
+    );
+
+    await expect(result.current.consultCall('queueId123', 'queue', false)).rejects.toThrow(consultError);
+
+    expect(mockCurrentTask.consult).toHaveBeenCalledWith({
+      to: 'queueId123',
+      destinationType: 'queue',
+      holdParticipants: true,
+    });
+    expect(setIsQueueConsultInProgressSpy).toHaveBeenCalledWith(true);
+    expect(setCurrentConsultQueueIdSpy).toHaveBeenCalledWith('queueId123');
+    // Check that cleanup happened on error
+    expect(setIsQueueConsultInProgressSpy).toHaveBeenCalledWith(false);
+    expect(setCurrentConsultQueueIdSpy).toHaveBeenCalledWith(null);
+    expect(mockLogger.error).toHaveBeenCalledWith('Error consulting call: Error: Queue consult failed', {
+      module: 'widget-cc-task#helper.ts',
+      method: 'useCallControl#consultCall',
+    });
+
+    setIsQueueConsultInProgressSpy.mockRestore();
+    setCurrentConsultQueueIdSpy.mockRestore();
   });
 
   it('should call endConsultCall with queue parameters when queue consult is in progress', async () => {
@@ -2147,8 +2335,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: true,
         isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -2163,7 +2352,7 @@ describe('useCallControl', () => {
     });
   });
 
-  it('should load queues successfully', async () => {
+  it('should get queues via getQueuesFetcher', async () => {
     const getQueuesResponse: Awaited<ReturnType<typeof store.getQueues>> = {
       data: mockQueueDetails,
       meta: {page: 0, pageSize: mockQueueDetails.length, total: mockQueueDetails.length, totalPages: 1},
@@ -2176,16 +2365,16 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
-    await act(async () => {
-      await result.current.loadQueues();
-    });
+    const res = await result.current.getQueuesFetcher({page: 0, pageSize: mockQueueDetails.length});
 
-    expect(result.current.queues).toEqual(mockQueueDetails);
+    expect(res.data).toEqual(mockQueueDetails);
+    expect(res).toEqual(getQueuesResponse);
     getQueuesSpy.mockRestore();
   });
 
@@ -2199,8 +2388,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
+        conferenceEnabled: false,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -2218,8 +2408,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
+        conferenceEnabled: false,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -2240,8 +2431,9 @@ describe('useCallControl', () => {
         logger: mockLogger,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
-        consultInitiated: false,
         isMuted: false,
+        conferenceEnabled: false,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -2260,10 +2452,11 @@ describe('useCallControl', () => {
         onWrapUp: mockOnWrapUp,
         onRecordingToggle: mockOnRecordingToggle,
         logger: mockLogger,
-        consultInitiated: false,
         featureFlags: store.featureFlags,
         deviceType: store.deviceType,
         isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
       })
     );
 
@@ -2276,6 +2469,35 @@ describe('useCallControl', () => {
       module: 'widget-cc-task#helper.ts',
       method: 'useCallControl#cancelAutoWrapup',
     });
+  });
+
+  it('should handle cancelAutoWrapup when currentTask is missing', async () => {
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: undefined,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
+        isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
+      })
+    );
+
+    await act(async () => {
+      result.current.cancelAutoWrapup();
+    });
+
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      'CC-Widgets: CallControl: Cannot cancel auto-wrapup, currentTask is missing',
+      {
+        module: 'widget-cc-task#helper.ts',
+        method: 'useCallControl#cancelAutoWrapup',
+      }
+    );
   });
 
   describe('toggleMute functionality', () => {
@@ -2305,7 +2527,8 @@ describe('useCallControl', () => {
           featureFlags: store.featureFlags,
           deviceType: store.deviceType,
           isMuted: false,
-          consultInitiated: false,
+          conferenceEnabled: true,
+          agentId: 'test-agent-id',
         })
       );
 
@@ -2338,7 +2561,8 @@ describe('useCallControl', () => {
           featureFlags: store.featureFlags,
           deviceType: store.deviceType,
           isMuted: true,
-          consultInitiated: false,
+          conferenceEnabled: true,
+          agentId: 'test-agent-id',
         })
       );
 
@@ -2371,7 +2595,8 @@ describe('useCallControl', () => {
           featureFlags: store.featureFlags,
           deviceType: store.deviceType,
           isMuted: false,
-          consultInitiated: false,
+          conferenceEnabled: true,
+          agentId: 'test-agent-id',
         })
       );
 
@@ -2392,7 +2617,8 @@ describe('useCallControl', () => {
           featureFlags: store.featureFlags,
           deviceType: store.deviceType,
           isMuted: false,
-          consultInitiated: false,
+          conferenceEnabled: true,
+          agentId: 'test-agent-id',
         })
       );
 
@@ -2416,7 +2642,8 @@ describe('useCallControl', () => {
           featureFlags: store.featureFlags,
           deviceType: store.deviceType,
           isMuted: false,
-          consultInitiated: false,
+          conferenceEnabled: true,
+          agentId: 'test-agent-id',
         })
       );
 
@@ -2445,7 +2672,8 @@ describe('useCallControl', () => {
           featureFlags: store.featureFlags,
           deviceType: store.deviceType,
           isMuted: true,
-          consultInitiated: false,
+          conferenceEnabled: true,
+          agentId: 'test-agent-id',
         })
       );
 
@@ -2478,7 +2706,8 @@ describe('useCallControl', () => {
           featureFlags: store.featureFlags,
           deviceType: store.deviceType,
           isMuted: false,
-          consultInitiated: false,
+          conferenceEnabled: true,
+          agentId: 'test-agent-id',
         })
       );
 
@@ -2497,7 +2726,8 @@ describe('useCallControl', () => {
           featureFlags: store.featureFlags,
           deviceType: store.deviceType,
           isMuted: false,
-          consultInitiated: false,
+          conferenceEnabled: true,
+          agentId: 'test-agent-id',
         })
       );
 
@@ -2510,6 +2740,492 @@ describe('useCallControl', () => {
         method: 'toggleMute',
       });
       expect(mockCurrentTask.toggleMute).not.toHaveBeenCalled();
+    });
+
+    it('should handle toggleMute error', async () => {
+      const error = new Error('toggleMute failed');
+      mockCurrentTask.toggleMute = jest.fn().mockRejectedValue(error);
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: mockCurrentTask,
+          onToggleMute: mockOnToggleMute,
+          logger: mockLogger,
+          featureFlags: store.featureFlags,
+          deviceType: store.deviceType,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'test-agent-id',
+        })
+      );
+
+      await act(async () => {
+        await result.current.toggleMute();
+      });
+
+      expect(mockLogger.error).toHaveBeenCalledWith('toggleMute failed: Error: toggleMute failed', {
+        module: 'useCallControl',
+        method: 'toggleMute',
+      });
+    });
+  });
+
+  describe('Conference Functions', () => {
+    describe('consultConference', () => {
+      it('should call consultConference successfully', async () => {
+        mockCurrentTask.consultConference = jest.fn().mockResolvedValue(undefined);
+
+        const {result} = renderHook(() =>
+          useCallControl({
+            currentTask: mockCurrentTask,
+            onHoldResume: mockOnHoldResume,
+            onEnd: mockOnEnd,
+            onWrapUp: mockOnWrapUp,
+            logger: mockLogger,
+            featureFlags: store.featureFlags,
+            deviceType: store.deviceType,
+            isMuted: false,
+            conferenceEnabled: true,
+            agentId: 'test-agent-id',
+          })
+        );
+
+        await act(async () => {
+          await result.current.consultConference();
+        });
+
+        expect(mockCurrentTask.consultConference).toHaveBeenCalled();
+        expect(mockLogger.info).toHaveBeenCalledWith('consultConference success', {
+          module: 'useCallControl',
+          method: 'consultConference',
+        });
+      });
+
+      it('should handle consultConference error', async () => {
+        const error = new Error('consultConference failed');
+        mockCurrentTask.consultConference = jest.fn().mockRejectedValue(error);
+
+        const {result} = renderHook(() =>
+          useCallControl({
+            currentTask: mockCurrentTask,
+            onHoldResume: mockOnHoldResume,
+            onEnd: mockOnEnd,
+            onWrapUp: mockOnWrapUp,
+            logger: mockLogger,
+            featureFlags: store.featureFlags,
+            deviceType: store.deviceType,
+            isMuted: false,
+            conferenceEnabled: true,
+            agentId: 'test-agent-id',
+          })
+        );
+
+        await expect(
+          act(async () => {
+            await result.current.consultConference();
+          })
+        ).rejects.toThrow('consultConference failed');
+
+        expect(mockLogger.error).toHaveBeenCalledWith('Error consulting conference: Error: consultConference failed', {
+          module: 'useCallControl',
+          method: 'consultConference',
+        });
+      });
+    });
+
+    describe('exitConference', () => {
+      it('should call exitConference successfully', async () => {
+        mockCurrentTask.exitConference = jest.fn().mockResolvedValue(undefined);
+
+        const {result} = renderHook(() =>
+          useCallControl({
+            currentTask: mockCurrentTask,
+            onHoldResume: mockOnHoldResume,
+            onEnd: mockOnEnd,
+            onWrapUp: mockOnWrapUp,
+            logger: mockLogger,
+            featureFlags: store.featureFlags,
+            deviceType: store.deviceType,
+            isMuted: false,
+            conferenceEnabled: true,
+            agentId: 'test-agent-id',
+          })
+        );
+
+        await act(async () => {
+          await result.current.exitConference();
+        });
+
+        expect(mockCurrentTask.exitConference).toHaveBeenCalled();
+        expect(mockLogger.info).toHaveBeenCalledWith('exitConference success', {
+          module: 'useCallControl',
+          method: 'exitConference',
+        });
+      });
+
+      it('should handle exitConference error', async () => {
+        const error = new Error('exitConference failed');
+        mockCurrentTask.exitConference = jest.fn().mockRejectedValue(error);
+
+        const {result} = renderHook(() =>
+          useCallControl({
+            currentTask: mockCurrentTask,
+            onHoldResume: mockOnHoldResume,
+            onEnd: mockOnEnd,
+            onWrapUp: mockOnWrapUp,
+            logger: mockLogger,
+            featureFlags: store.featureFlags,
+            deviceType: store.deviceType,
+            isMuted: false,
+            conferenceEnabled: true,
+            agentId: 'test-agent-id',
+          })
+        );
+
+        await expect(
+          act(async () => {
+            await result.current.exitConference();
+          })
+        ).rejects.toThrow('exitConference failed');
+
+        expect(mockLogger.error).toHaveBeenCalledWith('Error exiting conference: Error: exitConference failed', {
+          module: 'useCallControl',
+          method: 'exitConference',
+        });
+      });
+    });
+
+    describe('switchToMainCall', () => {
+      it('should call switchToMainCall successfully', async () => {
+        mockCurrentTask.resume = jest.fn().mockResolvedValue(undefined);
+
+        const {result} = renderHook(() =>
+          useCallControl({
+            currentTask: mockCurrentTask,
+            onHoldResume: mockOnHoldResume,
+            onEnd: mockOnEnd,
+            onWrapUp: mockOnWrapUp,
+            logger: mockLogger,
+            featureFlags: store.featureFlags,
+            deviceType: store.deviceType,
+            isMuted: false,
+            conferenceEnabled: true,
+            agentId: 'test-agent-id',
+          })
+        );
+
+        await act(async () => {
+          await result.current.switchToMainCall();
+        });
+
+        expect(mockCurrentTask.resume).toHaveBeenCalled();
+      });
+
+      it('should handle switchToMainCall error', async () => {
+        const error = new Error('switchToMainCall failed');
+        mockCurrentTask.resume = jest.fn().mockRejectedValue(error);
+
+        const {result} = renderHook(() =>
+          useCallControl({
+            currentTask: mockCurrentTask,
+            onHoldResume: mockOnHoldResume,
+            onEnd: mockOnEnd,
+            onWrapUp: mockOnWrapUp,
+            logger: mockLogger,
+            featureFlags: store.featureFlags,
+            deviceType: store.deviceType,
+            isMuted: false,
+            conferenceEnabled: true,
+            agentId: 'test-agent-id',
+          })
+        );
+
+        await expect(
+          act(async () => {
+            await result.current.switchToMainCall();
+          })
+        ).rejects.toThrow('switchToMainCall failed');
+
+        expect(mockLogger.error).toHaveBeenCalledWith('Error switchToMainCall: Error: switchToMainCall failed', {
+          module: 'useCallControl',
+          method: 'switchToMainCall',
+        });
+      });
+    });
+
+    describe('switchToConsult', () => {
+      it('should call switchToConsult successfully', async () => {
+        mockCurrentTask.hold = jest.fn().mockResolvedValue(undefined);
+
+        const {result} = renderHook(() =>
+          useCallControl({
+            currentTask: mockCurrentTask,
+            onHoldResume: mockOnHoldResume,
+            onEnd: mockOnEnd,
+            onWrapUp: mockOnWrapUp,
+            logger: mockLogger,
+            featureFlags: store.featureFlags,
+            deviceType: store.deviceType,
+            isMuted: false,
+            conferenceEnabled: true,
+            agentId: 'test-agent-id',
+          })
+        );
+
+        await act(async () => {
+          await result.current.switchToConsult();
+        });
+
+        expect(mockCurrentTask.hold).toHaveBeenCalled();
+        expect(mockLogger.info).toHaveBeenCalledWith('switchToConsult success', {
+          module: 'useCallControl',
+          method: 'switchToConsult',
+        });
+      });
+
+      it('should handle switchToConsult error', async () => {
+        const error = new Error('switchToConsult failed');
+        mockCurrentTask.hold = jest.fn().mockRejectedValue(error);
+
+        const {result} = renderHook(() =>
+          useCallControl({
+            currentTask: mockCurrentTask,
+            onHoldResume: mockOnHoldResume,
+            onEnd: mockOnEnd,
+            onWrapUp: mockOnWrapUp,
+            logger: mockLogger,
+            featureFlags: store.featureFlags,
+            deviceType: store.deviceType,
+            isMuted: false,
+            conferenceEnabled: true,
+            agentId: 'test-agent-id',
+          })
+        );
+
+        await expect(
+          act(async () => {
+            await result.current.switchToConsult();
+          })
+        ).rejects.toThrow('switchToConsult failed');
+
+        expect(mockLogger.error).toHaveBeenCalledWith('Error switching to consult: Error: switchToConsult failed', {
+          module: 'useCallControl',
+          method: 'switchToConsult',
+        });
+      });
+    });
+
+    describe('consultTransfer with conference in progress', () => {
+      it('should call transferConference when conference is in progress', async () => {
+        const taskWithConference = {
+          ...mockCurrentTask,
+          data: {
+            ...mockCurrentTask.data,
+            isConferenceInProgress: true,
+          },
+          transferConference: jest.fn().mockResolvedValue(undefined),
+        };
+
+        const {result} = renderHook(() =>
+          useCallControl({
+            currentTask: taskWithConference,
+            onHoldResume: mockOnHoldResume,
+            onEnd: mockOnEnd,
+            onWrapUp: mockOnWrapUp,
+            logger: mockLogger,
+            featureFlags: store.featureFlags,
+            deviceType: store.deviceType,
+            isMuted: false,
+            conferenceEnabled: true,
+            agentId: 'test-agent-id',
+          })
+        );
+
+        await act(async () => {
+          await result.current.consultTransfer();
+        });
+
+        expect(mockLogger.info).toHaveBeenCalledWith('Conference in progress, using transferConference', {
+          module: 'useCallControl',
+          method: 'transferCall',
+        });
+        expect(taskWithConference.transferConference).toHaveBeenCalled();
+      });
+
+      it('should handle transferConference error when conference is in progress', async () => {
+        const error = new Error('transferConference failed');
+        const taskWithConference = {
+          ...mockCurrentTask,
+          data: {
+            ...mockCurrentTask.data,
+            isConferenceInProgress: true,
+          },
+          transferConference: jest.fn().mockRejectedValue(error),
+        };
+
+        const {result} = renderHook(() =>
+          useCallControl({
+            currentTask: taskWithConference,
+            onHoldResume: mockOnHoldResume,
+            onEnd: mockOnEnd,
+            onWrapUp: mockOnWrapUp,
+            logger: mockLogger,
+            featureFlags: store.featureFlags,
+            deviceType: store.deviceType,
+            isMuted: false,
+            conferenceEnabled: true,
+            agentId: 'test-agent-id',
+          })
+        );
+
+        await expect(
+          act(async () => {
+            await result.current.consultTransfer();
+          })
+        ).rejects.toThrow('transferConference failed');
+
+        expect(mockLogger.error).toHaveBeenCalledWith(
+          'Error transferring consult call: Error: transferConference failed',
+          {
+            module: 'widget-cc-task#helper.ts',
+            method: 'useCallControl#consultTransfer',
+          }
+        );
+      });
+    });
+
+    describe('consult button disabled via controlVisibility with conference participants', () => {
+      it('should disable consult button when max participants reached in multi-party conference', () => {
+        const taskWithMaxParticipants = {
+          ...mockCurrentTask,
+          data: {
+            ...mockCurrentTask.data,
+            interactionId: 'main',
+            interaction: {
+              media: {
+                main: {
+                  participants: ['agent1', 'agent2', 'agent3', 'agent4', 'agent5', 'agent6', 'agent7', 'agent8'],
+                },
+              },
+              participants: {
+                agent1: {id: 'agent1', pType: 'Agent', hasLeft: false},
+                agent2: {id: 'agent2', pType: 'Agent', hasLeft: false},
+                agent3: {id: 'agent3', pType: 'Agent', hasLeft: false},
+                agent4: {id: 'agent4', pType: 'Agent', hasLeft: false},
+                agent5: {id: 'agent5', pType: 'Agent', hasLeft: false},
+                agent6: {id: 'agent6', pType: 'Agent', hasLeft: false},
+                agent7: {id: 'agent7', pType: 'Agent', hasLeft: false},
+                agent8: {id: 'agent8', pType: 'Agent', hasLeft: false},
+              },
+            },
+          },
+        };
+
+        store.cc.agentConfig = {agentId: 'agent1', regexUS: '', outdialANIId: ''};
+
+        const {result} = renderHook(() =>
+          useCallControl({
+            currentTask: taskWithMaxParticipants,
+            onHoldResume: mockOnHoldResume,
+            onEnd: mockOnEnd,
+            onWrapUp: mockOnWrapUp,
+            logger: mockLogger,
+            featureFlags: store.featureFlags,
+            deviceType: store.deviceType,
+            isMuted: false,
+            conferenceEnabled: true,
+            agentId: 'test-agent-id',
+          })
+        );
+
+        // Should be disabled when 7 other agents (8 total - current agent = 7 >= 7 max)
+        expect(result.current.controlVisibility.consult.isEnabled).toBe(false);
+      });
+
+      it('should disable consult button when max participants reached in three-party conference', () => {
+        const taskWithThreeParticipants = {
+          ...mockCurrentTask,
+          data: {
+            ...mockCurrentTask.data,
+            interactionId: 'main',
+            interaction: {
+              media: {
+                main: {
+                  participants: ['agent1', 'agent2', 'agent3', 'agent4'],
+                },
+              },
+              participants: {
+                agent1: {id: 'agent1', pType: 'Agent', hasLeft: false},
+                agent2: {id: 'agent2', pType: 'Agent', hasLeft: false},
+                agent3: {id: 'agent3', pType: 'Agent', hasLeft: false},
+                agent4: {id: 'agent4', pType: 'Agent', hasLeft: false},
+              },
+            },
+          },
+        };
+
+        store.cc.agentConfig = {agentId: 'agent1', regexUS: '', outdialANIId: ''};
+
+        const {result} = renderHook(() =>
+          useCallControl({
+            currentTask: taskWithThreeParticipants,
+            onHoldResume: mockOnHoldResume,
+            onEnd: mockOnEnd,
+            onWrapUp: mockOnWrapUp,
+            logger: mockLogger,
+            featureFlags: store.featureFlags,
+            deviceType: store.deviceType,
+            isMuted: false,
+            conferenceEnabled: false,
+            agentId: 'test-agent-id',
+          })
+        );
+
+        // Should be disabled when 3 other agents (4 total - current agent = 3 >= 3 max for three-party)
+        expect(result.current.controlVisibility.consult.isEnabled).toBe(false);
+      });
+
+      it('should enable consult button when below max participants', () => {
+        const taskWithFewParticipants = {
+          ...mockCurrentTask,
+          data: {
+            ...mockCurrentTask.data,
+            interactionId: 'main',
+            interaction: {
+              media: {
+                main: {
+                  participants: ['agent1', 'agent2', 'customer1'],
+                },
+              },
+              participants: {
+                agent1: {id: 'agent1', pType: 'Agent', hasLeft: false},
+                agent2: {id: 'agent2', pType: 'Agent', hasLeft: false},
+                customer1: {id: 'customer1', pType: 'Customer', hasLeft: false},
+              },
+            },
+          },
+        };
+
+        store.cc.agentConfig = {agentId: 'agent1', regexUS: '', outdialANIId: ''};
+
+        const {result} = renderHook(() =>
+          useCallControl({
+            currentTask: taskWithFewParticipants,
+            onHoldResume: mockOnHoldResume,
+            onEnd: mockOnEnd,
+            onWrapUp: mockOnWrapUp,
+            logger: mockLogger,
+            featureFlags: store.featureFlags,
+            deviceType: store.deviceType,
+            isMuted: false,
+            conferenceEnabled: true,
+            agentId: 'test-agent-id',
+          })
+        );
+
+        // Should be enabled when only 1 other agent (2 - current agent = 1 < 7 max)
+        expect(result.current.controlVisibility.consult.isEnabled).toBe(true);
+      });
     });
   });
 
@@ -2551,10 +3267,11 @@ describe('useCallControl', () => {
           onRecordingToggle,
           onToggleMute,
           logger,
-          consultInitiated: false,
           deviceType: 'BROWSER',
           featureFlags: {webRtcEnabled: true},
           isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'test-agent-id',
         })
       );
 
@@ -2583,10 +3300,11 @@ describe('useCallControl', () => {
           onRecordingToggle,
           onToggleMute,
           logger,
-          consultInitiated: false,
           deviceType: 'BROWSER',
           featureFlags: {webRtcEnabled: true},
           isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'test-agent-id',
         })
       );
 
@@ -2623,10 +3341,11 @@ describe('useCallControl', () => {
           onRecordingToggle,
           onToggleMute,
           logger,
-          consultInitiated: false,
           deviceType: 'BROWSER',
           featureFlags: {webRtcEnabled: true},
           isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'test-agent-id',
         })
       );
 
@@ -2655,10 +3374,11 @@ describe('useCallControl', () => {
           onRecordingToggle,
           onToggleMute,
           logger,
-          consultInitiated: false,
           deviceType: 'BROWSER',
           featureFlags: {webRtcEnabled: true},
           isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'test-agent-id',
         })
       );
 
@@ -3034,6 +3754,958 @@ describe('useOutdialCall', () => {
           method: 'startOutdial',
         }
       );
+    });
+  });
+});
+
+describe('Task Hook Error Handling and Logging', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
+    logger.error.mockRestore();
+  });
+
+  describe('useTaskList - error scenarios', () => {
+    const mockTaskList = {
+      mockId1: taskMock,
+    };
+
+    it('should handle errors in setTaskRejected callback', () => {
+      const errorOnTaskDeclined = jest.fn().mockImplementation(() => {
+        throw new Error('Test error in onTaskDeclined');
+      });
+
+      store.setTaskRejected = jest.fn((callback) => {
+        store.onTaskRejected = callback;
+      });
+
+      renderHook(() =>
+        useTaskList({
+          cc: mockCC,
+          deviceType: 'BROWSER',
+          onTaskDeclined: errorOnTaskDeclined,
+          logger,
+          taskList: mockTaskList,
+        })
+      );
+
+      act(() => {
+        store.onTaskRejected(taskMock, 'test-reason');
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: Task: Error in taskRejected callback - Test error in onTaskDeclined',
+        {
+          module: 'useTaskList',
+          method: 'setTaskRejected',
+        }
+      );
+    });
+
+    it('should handle errors in useTaskList useEffect setup', () => {
+      const errorLogger = {
+        ...logger,
+        log: jest.fn(),
+        info: jest.fn(),
+        error: jest.fn(),
+      };
+
+      // Force an error during useEffect setup
+      jest.spyOn(store, 'setTaskAssigned').mockImplementation(() => {
+        throw new Error('Setup error');
+      });
+
+      renderHook(() =>
+        useTaskList({
+          cc: mockCC,
+          deviceType: 'BROWSER',
+          onTaskAccepted: jest.fn(),
+          logger: errorLogger,
+          taskList: mockTaskList,
+        })
+      );
+
+      expect(errorLogger.error).toHaveBeenCalledWith('CC-Widgets: Task: Error in useTaskList useEffect - Setup error', {
+        module: 'useTaskList',
+        method: 'useEffect',
+      });
+    });
+
+    it('should handle synchronous errors in declineTask', () => {
+      const errorTask = {
+        ...taskMock,
+        decline: jest.fn().mockImplementation(() => {
+          throw new Error('Decline synchronous error');
+        }),
+      };
+
+      const {result} = renderHook(() =>
+        useTaskList({
+          cc: mockCC,
+          deviceType: 'BROWSER',
+          logger,
+          taskList: mockTaskList,
+        })
+      );
+
+      act(() => {
+        result.current.declineTask(errorTask);
+      });
+
+      expect(logger.error).toHaveBeenCalledWith('CC-Widgets: Task: Error in declineTask - Decline synchronous error', {
+        module: 'useTaskList',
+        method: 'declineTask',
+      });
+    });
+  });
+
+  describe('useIncomingTask - error scenarios', () => {
+    it('should handle errors in taskAssignCallback (consult accepted)', () => {
+      const errorOnAccepted = jest.fn().mockImplementation(() => {
+        throw new Error('Test error in onAccepted for consult');
+      });
+
+      const setTaskCallbackSpy = jest.spyOn(store, 'setTaskCallback');
+
+      renderHook(() =>
+        useIncomingTask({
+          onAccepted: errorOnAccepted,
+          deviceType: 'BROWSER',
+          incomingTask: taskMock,
+          logger,
+        })
+      );
+
+      const consultCallback = setTaskCallbackSpy.mock.calls.find(
+        (call) => call[0] === TASK_EVENTS.TASK_CONSULT_ACCEPTED
+      )?.[1];
+
+      act(() => {
+        consultCallback();
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: Task: Error in taskAssignCallback - Test error in onAccepted for consult',
+        {
+          module: 'useIncomingTask',
+          method: 'taskAssignCallback',
+        }
+      );
+    });
+
+    it('should handle errors in taskRejectCallback', () => {
+      const errorOnRejected = jest.fn().mockImplementation(() => {
+        throw new Error('Test error in onRejected');
+      });
+
+      const setTaskCallbackSpy = jest.spyOn(store, 'setTaskCallback');
+
+      renderHook(() =>
+        useIncomingTask({
+          onRejected: errorOnRejected,
+          deviceType: 'BROWSER',
+          incomingTask: taskMock,
+          logger,
+        })
+      );
+
+      const rejectCallback = setTaskCallbackSpy.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_REJECT)?.[1];
+
+      act(() => {
+        rejectCallback();
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: Task: Error in taskRejectCallback - Test error in onRejected',
+        {
+          module: 'useIncomingTask',
+          method: 'taskRejectCallback',
+        }
+      );
+    });
+
+    it('should handle errors in useIncomingTask cleanup', () => {
+      jest.spyOn(store, 'removeTaskCallback').mockImplementation(() => {
+        throw new Error('Cleanup error');
+      });
+
+      const {unmount} = renderHook(() =>
+        useIncomingTask({
+          onAccepted: jest.fn(),
+          deviceType: 'BROWSER',
+          incomingTask: taskMock,
+          logger,
+        })
+      );
+
+      act(() => {
+        unmount();
+      });
+
+      expect(logger.error).toHaveBeenCalledWith('CC-Widgets: Task: Error in useIncomingTask cleanup - Cleanup error', {
+        module: 'useIncomingTask',
+        method: 'useEffect_cleanup',
+      });
+    });
+
+    it('should handle errors in useIncomingTask useEffect setup', () => {
+      jest.spyOn(store, 'setTaskCallback').mockImplementation(() => {
+        throw new Error('Setup error in useEffect');
+      });
+
+      renderHook(() =>
+        useIncomingTask({
+          onAccepted: jest.fn(),
+          deviceType: 'BROWSER',
+          incomingTask: taskMock,
+          logger,
+        })
+      );
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: Task: Error in useIncomingTask useEffect - Setup error in useEffect',
+        {
+          module: 'useIncomingTask',
+          method: 'useEffect',
+        }
+      );
+    });
+
+    it('should handle synchronous errors in reject', () => {
+      const errorTask = {
+        ...taskMock,
+        decline: jest.fn().mockImplementation(() => {
+          throw new Error('Reject synchronous error');
+        }),
+      };
+
+      const {result} = renderHook(() =>
+        useIncomingTask({
+          incomingTask: errorTask,
+          deviceType: 'BROWSER',
+          logger,
+        })
+      );
+
+      act(() => {
+        result.current.reject();
+      });
+
+      expect(logger.error).toHaveBeenCalledWith('CC-Widgets: Task: Error in reject - Reject synchronous error', {
+        module: 'useIncomingTask',
+        method: 'reject',
+      });
+    });
+  });
+
+  describe('useCallControl - error scenarios', () => {
+    const mockTaskWithInteraction = {
+      ...mockTask,
+      data: {
+        ...mockTask.data,
+        interactionId: 'interaction1',
+        interaction: {
+          participants: {
+            agent1: {
+              id: 'agent1',
+              pType: 'Agent',
+              joinTimestamp: 1234567890,
+            },
+          },
+          mediaType: 'telephony',
+        },
+        isConferenceInProgress: false,
+      },
+      hold: jest.fn().mockResolvedValue(undefined),
+      resume: jest.fn().mockResolvedValue(undefined),
+      end: jest.fn().mockResolvedValue(undefined),
+      wrapup: jest.fn().mockResolvedValue(undefined),
+      pauseRecording: jest.fn().mockResolvedValue(undefined),
+      resumeRecording: jest.fn().mockResolvedValue(undefined),
+      toggleMute: jest.fn().mockResolvedValue(undefined),
+      consult: jest.fn().mockResolvedValue(undefined),
+      endConsult: jest.fn().mockResolvedValue(undefined),
+      consultTransfer: jest.fn().mockResolvedValue(undefined),
+      transfer: jest.fn().mockResolvedValue(undefined),
+      cancelAutoWrapupTimer: jest.fn(),
+    };
+
+    beforeAll(() => {
+      store.store.cc = {
+        ...mockCC,
+        agentConfig: {
+          agentId: 'agent1',
+        },
+      } as IContactCenter;
+    });
+
+    it('should handle errors in resumeCallback', () => {
+      const errorOnHoldResume = jest.fn().mockImplementation(() => {
+        throw new Error('Test error in onHoldResume');
+      });
+
+      const setTaskCallbackSpy = jest.spyOn(store, 'setTaskCallback');
+
+      renderHook(() =>
+        useCallControl({
+          currentTask: mockTaskWithInteraction,
+          onHoldResume: errorOnHoldResume,
+          logger,
+          deviceType: 'BROWSER',
+          featureFlags: {},
+          isMuted: false,
+          conferenceEnabled: false,
+          agentId: 'agent1',
+        })
+      );
+
+      const resumeCallback = setTaskCallbackSpy.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_RESUME)?.[1];
+
+      act(() => {
+        resumeCallback();
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: Task: Error in resumeCallback - Test error in onHoldResume',
+        {
+          module: 'useCallControl',
+          method: 'resumeCallback',
+        }
+      );
+    });
+
+    it('should handle errors in endCallCallback', () => {
+      const errorOnEnd = jest.fn().mockImplementation(() => {
+        throw new Error('Test error in onEnd');
+      });
+
+      const setTaskCallbackSpy = jest.spyOn(store, 'setTaskCallback');
+
+      renderHook(() =>
+        useCallControl({
+          currentTask: mockTaskWithInteraction,
+          onEnd: errorOnEnd,
+          logger,
+          deviceType: 'BROWSER',
+          featureFlags: {},
+          isMuted: false,
+          conferenceEnabled: false,
+          agentId: 'agent1',
+        })
+      );
+
+      const endCallback = setTaskCallbackSpy.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_END)?.[1];
+
+      act(() => {
+        endCallback();
+      });
+
+      expect(logger.error).toHaveBeenCalledWith('CC-Widgets: Task: Error in endCallCallback - Test error in onEnd', {
+        module: 'useCallControl',
+        method: 'endCallCallback',
+      });
+    });
+
+    it('should handle errors in wrapupCallCallback', () => {
+      const errorOnWrapUp = jest.fn().mockImplementation(() => {
+        throw new Error('Test error in onWrapUp');
+      });
+
+      const setTaskCallbackSpy = jest.spyOn(store, 'setTaskCallback');
+
+      renderHook(() =>
+        useCallControl({
+          currentTask: mockTaskWithInteraction,
+          onWrapUp: errorOnWrapUp,
+          logger,
+          deviceType: 'BROWSER',
+          featureFlags: {},
+          isMuted: false,
+          conferenceEnabled: false,
+          agentId: 'agent1',
+        })
+      );
+
+      const wrapupCallback = setTaskCallbackSpy.mock.calls.find((call) => call[0] === TASK_EVENTS.AGENT_WRAPPEDUP)?.[1];
+
+      act(() => {
+        wrapupCallback({wrapUpAuxCodeId: '123'});
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: Task: Error in wrapupCallCallback - Test error in onWrapUp',
+        {
+          module: 'useCallControl',
+          method: 'wrapupCallCallback',
+        }
+      );
+    });
+
+    it('should handle errors in pauseRecordingCallback', () => {
+      const errorOnRecordingToggle = jest.fn().mockImplementation(() => {
+        throw new Error('Test error in pauseRecording');
+      });
+
+      const setTaskCallbackSpy = jest.spyOn(store, 'setTaskCallback');
+
+      renderHook(() =>
+        useCallControl({
+          currentTask: mockTaskWithInteraction,
+          onRecordingToggle: errorOnRecordingToggle,
+          logger,
+          deviceType: 'BROWSER',
+          featureFlags: {},
+          isMuted: false,
+          conferenceEnabled: false,
+          agentId: 'agent1',
+        })
+      );
+
+      const pauseCallback = setTaskCallbackSpy.mock.calls.find(
+        (call) => call[0] === TASK_EVENTS.TASK_RECORDING_PAUSED
+      )?.[1];
+
+      act(() => {
+        pauseCallback();
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: Task: Error in pauseRecordingCallback - Test error in pauseRecording',
+        {
+          module: 'useCallControl',
+          method: 'pauseRecordingCallback',
+        }
+      );
+    });
+
+    it('should handle errors in resumeRecordingCallback', () => {
+      const errorOnRecordingToggle = jest.fn().mockImplementation(() => {
+        throw new Error('Test error in resumeRecording');
+      });
+
+      const setTaskCallbackSpy = jest.spyOn(store, 'setTaskCallback');
+
+      renderHook(() =>
+        useCallControl({
+          currentTask: mockTaskWithInteraction,
+          onRecordingToggle: errorOnRecordingToggle,
+          logger,
+          deviceType: 'BROWSER',
+          featureFlags: {},
+          isMuted: false,
+          conferenceEnabled: false,
+          agentId: 'agent1',
+        })
+      );
+
+      const resumeCallback = setTaskCallbackSpy.mock.calls.find(
+        (call) => call[0] === TASK_EVENTS.TASK_RECORDING_RESUMED
+      )?.[1];
+
+      act(() => {
+        resumeCallback();
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: Task: Error in resumeRecordingCallback - Test error in resumeRecording',
+        {
+          module: 'useCallControl',
+          method: 'resumeRecordingCallback',
+        }
+      );
+    });
+
+    it('should handle synchronous errors in toggleRecording', () => {
+      const errorTask = {
+        ...mockTaskWithInteraction,
+        pauseRecording: jest.fn().mockImplementation(() => {
+          throw new Error('toggleRecording synchronous error');
+        }),
+      };
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: errorTask,
+          logger,
+          deviceType: 'BROWSER',
+          featureFlags: {},
+          isMuted: false,
+          conferenceEnabled: false,
+          agentId: 'agent1',
+        })
+      );
+
+      act(() => {
+        result.current.toggleRecording();
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: Task: Error in toggleRecording - toggleRecording synchronous error',
+        {
+          module: 'useCallControl',
+          method: 'toggleRecording',
+        }
+      );
+    });
+
+    it('should handle synchronous errors in toggleMute', () => {
+      mockGetControlsVisibility.mockReturnValue({
+        muteUnmute: {isVisible: true, isEnabled: true},
+        muteUnmuteConsult: {isVisible: false, isEnabled: false},
+        holdResume: {isVisible: true, isEnabled: true},
+        transfer: {isVisible: true, isEnabled: true},
+        consult: {isVisible: true, isEnabled: true},
+        end: {isVisible: true, isEnabled: true},
+        accept: {isVisible: true, isEnabled: true},
+        decline: {isVisible: true, isEnabled: true},
+        pauseResumeRecording: {isVisible: true, isEnabled: true},
+        recordingIndicator: {isVisible: true, isEnabled: true},
+        wrapup: {isVisible: false, isEnabled: false},
+        endConsult: {isVisible: false, isEnabled: false},
+        conference: {isVisible: false, isEnabled: false},
+        consultTransfer: {isVisible: false, isEnabled: false},
+        mergeConference: {isVisible: false, isEnabled: false},
+        mergeConferenceConsult: {isVisible: false, isEnabled: false},
+        consultTransferConsult: {isVisible: false, isEnabled: false},
+        switchToMainCall: {isVisible: false, isEnabled: false},
+        switchToConsult: {isVisible: false, isEnabled: false},
+        exitConference: {isVisible: false, isEnabled: false},
+        isConferenceInProgress: false,
+        isConsultInitiated: false,
+        isConsultInitiatedAndAccepted: false,
+        isConsultInitiatedOrAccepted: false,
+        isConsultReceived: false,
+        isHeld: false,
+        consultCallHeld: false,
+      });
+
+      const errorTask = {
+        ...mockTaskWithInteraction,
+        toggleMute: jest.fn().mockImplementation(() => {
+          throw new Error('toggleMute synchronous error');
+        }),
+      };
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: errorTask,
+          logger,
+          deviceType: 'BROWSER',
+          featureFlags: {},
+          isMuted: false,
+          conferenceEnabled: false,
+          agentId: 'agent1',
+        })
+      );
+
+      act(() => {
+        result.current.toggleMute();
+      });
+
+      expect(logger.error).toHaveBeenCalledWith('toggleMute failed: Error: toggleMute synchronous error', {
+        module: 'useCallControl',
+        method: 'toggleMute',
+      });
+    });
+
+    it('should handle synchronous errors in endCall', () => {
+      const errorTask = {
+        ...mockTaskWithInteraction,
+        end: jest.fn().mockImplementation(() => {
+          throw new Error('endCall synchronous error');
+        }),
+      };
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: errorTask,
+          logger,
+          deviceType: 'BROWSER',
+          featureFlags: {},
+          isMuted: false,
+          conferenceEnabled: false,
+          agentId: 'agent1',
+        })
+      );
+
+      act(() => {
+        result.current.endCall();
+      });
+
+      expect(logger.error).toHaveBeenCalledWith('CC-Widgets: Task: Error in endCall - endCall synchronous error', {
+        module: 'useCallControl',
+        method: 'endCall',
+      });
+    });
+
+    it('should handle synchronous errors in wrapupCall', () => {
+      const errorTask = {
+        ...mockTaskWithInteraction,
+        wrapup: jest.fn().mockImplementation(() => {
+          throw new Error('wrapupCall synchronous error');
+        }),
+      };
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: errorTask,
+          logger,
+          deviceType: 'BROWSER',
+          featureFlags: {},
+          isMuted: false,
+          conferenceEnabled: false,
+          agentId: 'agent1',
+        })
+      );
+
+      act(() => {
+        result.current.wrapupCall('test reason', '123');
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: Task: Error in wrapupCall - wrapupCall synchronous error',
+        {
+          module: 'useCallControl',
+          method: 'wrapupCall',
+        }
+      );
+    });
+
+    it('should handle errors in getAddressBookEntries', async () => {
+      store.getAddressBookEntries = jest.fn().mockRejectedValue(new Error('Address book error'));
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: mockTaskWithInteraction,
+          logger,
+          deviceType: 'BROWSER',
+          featureFlags: {},
+          isMuted: false,
+          conferenceEnabled: false,
+          agentId: 'agent1',
+        })
+      );
+
+      let response;
+      await act(async () => {
+        response = await result.current.getAddressBookEntries({page: 0, pageSize: 10, search: ''});
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: Task: Error fetching address book entries - Address book error',
+        {
+          module: 'useCallControl',
+          method: 'getAddressBookEntries',
+        }
+      );
+      expect(response).toEqual({data: [], meta: {page: 0, totalPages: 0}});
+    });
+
+    it('should handle errors in getEntryPoints', async () => {
+      store.getEntryPoints = jest.fn().mockRejectedValue(new Error('Entry points error'));
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: mockTaskWithInteraction,
+          logger,
+          deviceType: 'BROWSER',
+          featureFlags: {},
+          isMuted: false,
+          conferenceEnabled: false,
+          agentId: 'agent1',
+        })
+      );
+
+      let response;
+      await act(async () => {
+        response = await result.current.getEntryPoints({page: 0, pageSize: 10, search: ''});
+      });
+
+      expect(logger.error).toHaveBeenCalledWith('CC-Widgets: Task: Error fetching entry points - Entry points error', {
+        module: 'useCallControl',
+        method: 'getEntryPoints',
+      });
+      expect(response).toEqual({data: [], meta: {page: 0, totalPages: 0}});
+    });
+
+    it('should handle errors in getQueuesFetcher', async () => {
+      store.getQueues = jest.fn().mockRejectedValue(new Error('Queues error'));
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: mockTaskWithInteraction,
+          logger,
+          deviceType: 'BROWSER',
+          featureFlags: {},
+          isMuted: false,
+          conferenceEnabled: false,
+          agentId: 'agent1',
+        })
+      );
+
+      let response;
+      await act(async () => {
+        response = await result.current.getQueuesFetcher({page: 0, pageSize: 10, search: ''});
+      });
+
+      expect(logger.error).toHaveBeenCalledWith('CC-Widgets: Task: Error fetching queues (paginated) - Queues error', {
+        module: 'useCallControl',
+        method: 'getQueuesFetcher',
+      });
+      expect(response).toEqual({data: [], meta: {page: 0, totalPages: 0}});
+    });
+
+    it('should set startTimestamp when conditions are met', () => {
+      const taskWithJoinTimestamp = {
+        ...mockTaskWithInteraction,
+        data: {
+          ...mockTaskWithInteraction.data,
+          interaction: {
+            ...mockTaskWithInteraction.data.interaction,
+            participants: {
+              agent1: {
+                id: 'agent1',
+                pType: 'Agent',
+                joinTimestamp: 9999999999,
+              },
+            },
+          },
+        },
+      };
+
+      store.store.cc = {
+        ...mockCC,
+        agentConfig: {
+          agentId: 'agent1',
+        },
+      } as IContactCenter;
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: taskWithJoinTimestamp,
+          logger,
+          deviceType: 'BROWSER',
+          featureFlags: {},
+          isMuted: false,
+          conferenceEnabled: false,
+          agentId: 'agent1',
+        })
+      );
+
+      expect(result.current.startTimestamp).toBe(9999999999);
+    });
+
+    it('should handle errors in auto wrapup timer initialization', () => {
+      const mockAutoWrapup = {
+        getTimeLeftSeconds: jest.fn().mockImplementation(() => {
+          throw new Error('Auto wrapup timer error');
+        }),
+      };
+
+      mockGetControlsVisibility.mockReturnValue({
+        muteUnmute: {isVisible: true, isEnabled: true},
+        muteUnmuteConsult: {isVisible: false, isEnabled: false},
+        holdResume: {isVisible: true, isEnabled: true},
+        transfer: {isVisible: true, isEnabled: true},
+        consult: {isVisible: true, isEnabled: true},
+        end: {isVisible: true, isEnabled: true},
+        accept: {isVisible: true, isEnabled: true},
+        decline: {isVisible: true, isEnabled: true},
+        pauseResumeRecording: {isVisible: true, isEnabled: true},
+        recordingIndicator: {isVisible: true, isEnabled: true},
+        wrapup: {isVisible: true, isEnabled: true},
+        endConsult: {isVisible: false, isEnabled: false},
+        conference: {isVisible: false, isEnabled: false},
+        consultTransfer: {isVisible: false, isEnabled: false},
+        mergeConference: {isVisible: false, isEnabled: false},
+        mergeConferenceConsult: {isVisible: false, isEnabled: false},
+        consultTransferConsult: {isVisible: false, isEnabled: false},
+        switchToMainCall: {isVisible: false, isEnabled: false},
+        switchToConsult: {isVisible: false, isEnabled: false},
+        exitConference: {isVisible: false, isEnabled: false},
+        isConferenceInProgress: false,
+        isConsultInitiated: false,
+        isConsultInitiatedAndAccepted: false,
+        isConsultInitiatedOrAccepted: false,
+        isConsultReceived: false,
+        isHeld: false,
+        consultCallHeld: false,
+      });
+
+      const taskWithAutoWrapup = {
+        ...mockTaskWithInteraction,
+        autoWrapup: mockAutoWrapup,
+      };
+
+      renderHook(() =>
+        useCallControl({
+          currentTask: taskWithAutoWrapup,
+          logger,
+          deviceType: 'BROWSER',
+          featureFlags: {},
+          isMuted: false,
+          conferenceEnabled: false,
+          agentId: 'agent1',
+        })
+      );
+
+      expect(logger.error).toHaveBeenCalledWith('CC-Widgets: CallControl: Error initializing auto wrap-up timer', {
+        module: 'widget-cc-task#helper.ts',
+        method: 'useCallControl#autoWrapupTimer',
+        error: expect.any(Error),
+      });
+    });
+
+    it('should clear interval on unmount for auto wrapup timer', () => {
+      jest.useFakeTimers();
+      const clearIntervalSpy = jest.spyOn(global, 'clearInterval');
+
+      const mockAutoWrapup = {
+        getTimeLeftSeconds: jest.fn().mockReturnValue(30),
+      };
+
+      mockGetControlsVisibility.mockReturnValue({
+        muteUnmute: {isVisible: true, isEnabled: true},
+        muteUnmuteConsult: {isVisible: false, isEnabled: false},
+        holdResume: {isVisible: true, isEnabled: true},
+        transfer: {isVisible: true, isEnabled: true},
+        consult: {isVisible: true, isEnabled: true},
+        end: {isVisible: true, isEnabled: true},
+        accept: {isVisible: true, isEnabled: true},
+        decline: {isVisible: true, isEnabled: true},
+        pauseResumeRecording: {isVisible: true, isEnabled: true},
+        recordingIndicator: {isVisible: true, isEnabled: true},
+        wrapup: {isVisible: true, isEnabled: true},
+        endConsult: {isVisible: false, isEnabled: false},
+        conference: {isVisible: false, isEnabled: false},
+        consultTransfer: {isVisible: false, isEnabled: false},
+        mergeConference: {isVisible: false, isEnabled: false},
+        mergeConferenceConsult: {isVisible: false, isEnabled: false},
+        consultTransferConsult: {isVisible: false, isEnabled: false},
+        switchToMainCall: {isVisible: false, isEnabled: false},
+        switchToConsult: {isVisible: false, isEnabled: false},
+        exitConference: {isVisible: false, isEnabled: false},
+        isConferenceInProgress: false,
+        isConsultInitiated: false,
+        isConsultInitiatedAndAccepted: false,
+        isConsultInitiatedOrAccepted: false,
+        isConsultReceived: false,
+        isHeld: false,
+        consultCallHeld: false,
+      });
+
+      const taskWithAutoWrapup = {
+        ...mockTaskWithInteraction,
+        autoWrapup: mockAutoWrapup,
+      };
+
+      const {unmount} = renderHook(() =>
+        useCallControl({
+          currentTask: taskWithAutoWrapup,
+          logger,
+          deviceType: 'BROWSER',
+          featureFlags: {},
+          isMuted: false,
+          conferenceEnabled: false,
+          agentId: 'agent1',
+        })
+      );
+
+      act(() => {
+        unmount();
+      });
+
+      expect(clearIntervalSpy).toHaveBeenCalled();
+      jest.useRealTimers();
+    });
+
+    it('should handle worker cleanup with non-function postMessage', () => {
+      const mockTaskWithHold = {
+        ...mockTaskWithInteraction,
+        data: {
+          ...mockTaskWithInteraction.data,
+          interaction: {
+            ...mockTaskWithInteraction.data.interaction,
+            callProcessingDetails: {
+              mainCall: {
+                events: [{type: 'Hold', eventTime: Date.now() - 5000}],
+              },
+            },
+          },
+        },
+      };
+
+      // Mock Worker with non-function postMessage
+      const mockWorker = {
+        postMessage: undefined,
+        terminate: jest.fn(),
+        onmessage: null,
+      };
+
+      global.Worker = jest.fn().mockImplementation(() => mockWorker);
+      global.URL.createObjectURL = jest.fn().mockReturnValue('blob:mock');
+
+      const {unmount} = renderHook(() =>
+        useCallControl({
+          currentTask: mockTaskWithHold,
+          logger,
+          deviceType: 'BROWSER',
+          featureFlags: {},
+          isMuted: false,
+          conferenceEnabled: false,
+          agentId: 'agent1',
+        })
+      );
+
+      act(() => {
+        unmount();
+      });
+
+      // Should not throw error when postMessage is not a function
+      // Test passes if no error is thrown during unmount
+    });
+
+    it('should handle worker cleanup with non-function terminate', () => {
+      const mockTaskWithHold = {
+        ...mockTaskWithInteraction,
+        data: {
+          ...mockTaskWithInteraction.data,
+          interaction: {
+            ...mockTaskWithInteraction.data.interaction,
+            callProcessingDetails: {
+              mainCall: {
+                events: [{type: 'Hold', eventTime: Date.now() - 5000}],
+              },
+            },
+          },
+        },
+      };
+
+      // Mock Worker with non-function terminate
+      const mockWorker = {
+        postMessage: jest.fn(),
+        terminate: undefined,
+        onmessage: null,
+      };
+
+      global.Worker = jest.fn().mockImplementation(() => mockWorker);
+      global.URL.createObjectURL = jest.fn().mockReturnValue('blob:mock');
+
+      const {unmount} = renderHook(() =>
+        useCallControl({
+          currentTask: mockTaskWithHold,
+          logger,
+          deviceType: 'BROWSER',
+          featureFlags: {},
+          isMuted: false,
+          conferenceEnabled: false,
+          agentId: 'agent1',
+        })
+      );
+
+      act(() => {
+        unmount();
+      });
     });
   });
 });
