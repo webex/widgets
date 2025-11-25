@@ -349,11 +349,13 @@ jobs:
           PUBLISHED_JSON='${{ needs.publish-npm.outputs.published_packages }}'
 
           VERSION_INFO=""
+          TAG_LINKS=""
 
           # Check if any packages were published
           if [ -z "$PUBLISHED_JSON" ] || [ "$PUBLISHED_JSON" == "[]" ]; then
             echo "No packages were published to NPM"
             echo "version_info=No packages were published" >> $GITHUB_OUTPUT
+            echo "tag_links=" >> $GITHUB_OUTPUT
             exit 0
           fi
 
@@ -369,11 +371,24 @@ jobs:
               continue
             fi
 
+            # Split package@version
+            PKG_NAME=$(echo "$PKG_VERSION" | cut -d@ -f1-2)
+            VERSION=$(echo "$PKG_VERSION" | rev | cut -d@ -f1 | rev)
+
             if [ -n "$VERSION_INFO" ]; then
               VERSION_INFO="${VERSION_INFO}\n"
             fi
             VERSION_INFO="${VERSION_INFO}- \`${PKG_VERSION}\`"
             echo "  ✓ ${PKG_VERSION}"
+
+            # Create tag name: convert @scope/package to scope-package-vX.X.X
+            TAG_NAME=$(echo "$PKG_NAME" | sed 's/@//g' | sed 's/\//-/g')-v${VERSION}
+            TAG_URL="${{ github.server_url }}/${{ github.repository }}/releases/tag/${TAG_NAME}"
+
+            if [ -n "$TAG_LINKS" ]; then
+              TAG_LINKS="${TAG_LINKS}\n"
+            fi
+            TAG_LINKS="${TAG_LINKS}- [\`${TAG_NAME}\`](${TAG_URL})"
           done
 
           # Save to output using heredoc to handle multiline
@@ -381,11 +396,16 @@ jobs:
           echo -e "$VERSION_INFO" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
+          echo "tag_links<<EOF" >> $GITHUB_OUTPUT
+          echo -e "$TAG_LINKS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - name: Comment on PR
         if: steps.find-pr.outputs.pr_found == 'true'
         run: |
           PR_NUMBER="${{ steps.find-pr.outputs.pr_number }}"
           VERSION_INFO="${{ steps.get-versions.outputs.version_info }}"
+          TAG_LINKS="${{ steps.get-versions.outputs.tag_links }}"
           TAG_NAME="${GITHUB_REF##*/}"
 
           # Create comment body with proper escaping
@@ -397,12 +417,16 @@ jobs:
           ### Published Versions
           VERSION_INFO_PLACEHOLDER
 
+          ### Release Tags
+          TAG_LINKS_PLACEHOLDER
+
           **Workflow Run:** [RUN_ID_PLACEHOLDER](RUN_URL_PLACEHOLDER)
           COMMENT_EOF
 
           # Replace placeholders
           sed -i "s|TAG_PLACEHOLDER|${TAG_NAME}|g" comment.md
           sed -i "s|VERSION_INFO_PLACEHOLDER|${VERSION_INFO}|g" comment.md
+          sed -i "s|TAG_LINKS_PLACEHOLDER|${TAG_LINKS}|g" comment.md
           sed -i "s|RUN_ID_PLACEHOLDER|${{ github.run_id }}|g" comment.md
           sed -i "s|RUN_URL_PLACEHOLDER|${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|g" comment.md
 
