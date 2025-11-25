@@ -9,7 +9,7 @@ import '@webex/components/dist/css/webex-components.css';
 import './WebexMeetings.css';
 
 /**
- * Webex meeting widget presents a Webex meeting experience.
+ * Webex meeting widget presents a Webex meeting experience
  *
  * @param {string} props.meetingDestination  ID of the virtual meeting location
  * @param {string} props.meetingPasswordOrPin  Password or pin of the virtual meeting location
@@ -27,67 +27,73 @@ class WebexMeetingsWidget extends Component {
   constructor(props) {
     super(props);
   }
-/**
- * Temporary custom accessibility fix:
- * - Redirects focus to the first actionable control inside the meeting
- * - Makes video layout focusable and supports left/right arrow navigation
- * - Prevents focus from escaping to the browser URL bar
- *
- * NOTE: This is a workaround because the base @webex/components WebexMeeting
- * does not yet support these accessibility features.
- * Once the upstream component is fixed, we must remove this custom code
- * from our repo to avoid duplication and ensure long-term maintainability.
- */
+  /**
+   * Temporary custom accessibility fix:
+   * - Redirects focus to the first actionable control inside the meeting
+   * - Makes video layout focusable and supports left/right arrow navigation
+   * - Prevents focus from escaping to the browser URL bar
+   *
+   * NOTE: This is a workaround because the base @webex/components WebexMeeting
+   * does not yet support these accessibility features.
+   * Once the upstream component is fixed, we must remove this custom code
+   * from our repo to avoid duplication and ensure long-term maintainability.
+   */
   componentDidMount() {
     // When focus comes to the widget container, move to the correct media container before and after joining
     if (this.widgetDiv) {
       if (!this._mediaContainerTabHandler) {
-            this._mediaContainerTabHandler = (evt) => {
-              const mediaContainer = evt.currentTarget;
-              // Only handle if the media container itself is focused
-              if ((evt.code === 'Tab' || evt.key === 'Tab') && document.activeElement === mediaContainer) {
-                if (!evt.shiftKey) {
-                  evt.preventDefault();
-                  let joinButton = this.widgetDiv.querySelector('button[aria-label="Join meeting"]');
-                  if (!joinButton) {
-                    joinButton = this.widgetDiv.querySelector('.wxc-meeting-control button, .wxc-meeting-control [tabindex]:not([tabindex="-1"])');
-                  }
-                  if (joinButton) {
-                    joinButton.focus();
-                  }
-                } else {
-                  evt.preventDefault();
-                  // Move focus back to the widget container
-                  if (this.widgetDiv) {
-                    this.widgetDiv.tabIndex = 0;
-                    this.widgetDiv.focus();
-                  }
-                }
+        this._mediaContainerTabHandler = (evt) => {
+          const mediaContainer = evt.currentTarget;
+          // Only handle if the media container itself is focused
+          if ((evt.code === 'Tab' || evt.key === 'Tab') && document.activeElement === mediaContainer) {
+            if (!evt.shiftKey) {
+              evt.preventDefault();
+              let joinButton = this.widgetDiv.querySelector('button[aria-label="Join meeting"]');
+              if (!joinButton) {
+                joinButton = this.widgetDiv.querySelector(
+                  '.wxc-meeting-control button, .wxc-meeting-control [tabindex]:not([tabindex="-1"])'
+                );
               }
-            };
+              if (joinButton) {
+                joinButton.focus();
+              }
+            } else {
+              evt.preventDefault();
+              // Move focus back to the widget container
+              if (this.widgetDiv) {
+                this.widgetDiv.tabIndex = 0;
+                this.widgetDiv.focus();
+              }
+            }
+          }
+        };
       }
       this.widgetDiv.addEventListener('focus', () => {
         setTimeout(() => {
           // Attach handler to both possible media containers if they exist
           const containers = [
-            ...this.widgetDiv.querySelectorAll('.wxc-interstitial-meeting__media-container, .wxc-in-meeting__media-container')
+            ...this.widgetDiv.querySelectorAll(
+              '.wxc-interstitial-meeting__media-container, .wxc-in-meeting__media-container'
+            ),
           ];
-            if (containers.length > 0) {
-              containers.forEach((mediaContainer) => {
-                mediaContainer.tabIndex = 0;
-                mediaContainer.removeEventListener('keydown', this._mediaContainerTabHandler, true);
-                mediaContainer.addEventListener('keydown', this._mediaContainerTabHandler, true);
-              });
-            } else {
-              // fallback to Join meeting button or first .wxc-meeting-control button
-              let joinButton = this.widgetDiv.querySelector('button[aria-label="Join meeting"]');
-              if (!joinButton) {
-                joinButton = this.widgetDiv.querySelector('.wxc-meeting-control button, .wxc-meeting-control [tabindex]:not([tabindex="-1"])');
-              }
-              if (joinButton) {
-                joinButton.focus();
-              }
+          if (containers.length > 0) {
+            containers.forEach((mediaContainer) => {
+              mediaContainer.tabIndex = 0;
+              mediaContainer.removeEventListener('keydown', this._mediaContainerTabHandler, true);
+              mediaContainer.addEventListener('keydown', this._mediaContainerTabHandler, true);
+            });
+          } else {
+            // fallback to Join meeting button or first .wxc-meeting-control button
+            let joinButton = this.widgetDiv.querySelector('button[aria-label="Join meeting"]');
+            if (!joinButton) {
+              joinButton = this.widgetDiv.querySelector(
+                '.wxc-meeting-control button, .wxc-meeting-control [tabindex]:not([tabindex="-1"])'
+              );
             }
+            if (joinButton) {
+              joinButton.focus();
+            }
+          }
         }, 0);
       });
 
@@ -130,7 +136,7 @@ class WebexMeetingsWidget extends Component {
       const observer = new window.MutationObserver(() => {
         attachArrowNav();
       });
-      observer.observe(this.widgetDiv, { childList: true, subtree: true });
+      observer.observe(this.widgetDiv, {childList: true, subtree: true});
       // Clean up observer on unmount
       this._arrowNavObserver = observer;
     }
@@ -200,7 +206,14 @@ class WebexMeetingsWidget extends Component {
     }
 
     return (
-      <div className={`webex-meetings-widget ${this.props.className}`} style={this.props.style} ref={(div) => { this.widgetDiv = div; }} tabIndex={0}>
+      <div
+        className={`webex-meetings-widget ${this.props.className}`}
+        style={this.props.style}
+        ref={(div) => {
+          this.widgetDiv = div;
+        }}
+        tabIndex={0}
+      >
         {content}
       </div>
     );
@@ -255,7 +268,7 @@ export default withAdapter(withMeeting(WebexMeetingsWidget), (props) => {
       meetings: {
         experimental: {
           enableUnifiedMeetings: true,
-          enableAdhocMeetings: true
+          enableAdhocMeetings: true,
         },
       },
     },
