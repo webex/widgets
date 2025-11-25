@@ -4,8 +4,7 @@ run-name: ${{ github.actor }} is running Deploy CD
 on:
   push:
     branches: # Allow list of deployable tags and branches. Note that all allow-listed branches cannot include any `/` characters
-      - ccwidgets
-      # - next uncomment when ready to deploy next
+      - next
 
 env:
   rid: ${{ github.run_id }}-${{ github.run_number }}
