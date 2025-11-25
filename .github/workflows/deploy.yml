@@ -80,6 +80,7 @@ jobs:
 
     outputs:
       published: ${{ steps.check-changes.outputs.has_changes }}
+      published_packages: ${{ steps.get-published-versions.outputs.published_packages }}
 
     steps:
       - name: Checkout Project
@@ -141,11 +142,92 @@ jobs:
           path: "**/dist"
           key: dist-${{ env.rid }}
 
+      - name: Identify Publishable Packages
+        if: steps.check-changes.outputs.has_changes == 'true'
+        id: identify-publishable
+        run: |
+          CHANGED_PACKAGES='${{ needs.analyze-changes.outputs.yarn-recursive }}'
+
+          echo "Identifying packages with deploy:npm script..."
+          PUBLISHABLE_PACKAGES=""
+
+          # Parse the JSON array of changed packages
+          if [ "$CHANGED_PACKAGES" != "[]" ] && [ -n "$CHANGED_PACKAGES" ]; then
+            for PKG in $(echo "$CHANGED_PACKAGES" | jq -r '.[]' 2>/dev/null); do
+              # Find the package.json for this package
+              PKG_PATH=$(yarn workspaces list --json | jq -r "select(.name == \"$PKG\") | .location")
+
+              if [ -n "$PKG_PATH" ] && [ -f "$PKG_PATH/package.json" ]; then
+                # Check if package.json has a deploy:npm script
+                HAS_DEPLOY=$(jq -r '.scripts["deploy:npm"] // empty' "$PKG_PATH/package.json")
+
+                if [ -n "$HAS_DEPLOY" ]; then
+                  echo "  ✓ $PKG has deploy:npm script"
+                  if [ -n "$PUBLISHABLE_PACKAGES" ]; then
+                    PUBLISHABLE_PACKAGES="$PUBLISHABLE_PACKAGES,"
+                  fi
+                  PUBLISHABLE_PACKAGES="$PUBLISHABLE_PACKAGES\"$PKG\""
+                else
+                  echo "  ⏭  $PKG skipped (no deploy:npm script)"
+                fi
+              fi
+            done
+          fi
+
+          # Convert to JSON array
+          if [ -n "$PUBLISHABLE_PACKAGES" ]; then
+            PUBLISHABLE_JSON="[$PUBLISHABLE_PACKAGES]"
+          else
+            PUBLISHABLE_JSON="[]"
+          fi
+
+          echo "publishable_packages=$PUBLISHABLE_JSON" >> $GITHUB_OUTPUT
+          echo "Publishable packages: $PUBLISHABLE_JSON"
+
       - name: Deploy Packages
         if: steps.check-changes.outputs.has_changes == 'true'
+        id: deploy-packages
         run: yarn workspaces foreach -W --from '${{ needs.analyze-changes.outputs.yarn-recursive }}' --verbose run deploy:npm --access public --tag ${GITHUB_REF##*/}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Get Published Package Versions
+        if: steps.check-changes.outputs.has_changes == 'true'
+        id: get-published-versions
+        run: |
+          PUBLISHABLE_PACKAGES='${{ steps.identify-publishable.outputs.publishable_packages }}'
+
+          echo "Getting versions for published packages..."
+          PUBLISHED_WITH_VERSIONS=""
+
+          if [ "$PUBLISHABLE_PACKAGES" != "[]" ] && [ -n "$PUBLISHABLE_PACKAGES" ]; then
+            for PKG in $(echo "$PUBLISHABLE_PACKAGES" | jq -r '.[]' 2>/dev/null); do
+              # Get the version that was just set by package-tools sync
+              PKG_PATH=$(yarn workspaces list --json | jq -r "select(.name == \"$PKG\") | .location")
+
+              if [ -n "$PKG_PATH" ] && [ -f "$PKG_PATH/package.json" ]; then
+                VERSION=$(jq -r '.version' "$PKG_PATH/package.json")
+
+                if [ -n "$VERSION" ]; then
+                  echo "  ✓ $PKG@$VERSION"
+                  if [ -n "$PUBLISHED_WITH_VERSIONS" ]; then
+                    PUBLISHED_WITH_VERSIONS="$PUBLISHED_WITH_VERSIONS,"
+                  fi
+                  PUBLISHED_WITH_VERSIONS="$PUBLISHED_WITH_VERSIONS\"$PKG@$VERSION\""
+                fi
+              fi
+            done
+          fi
+
+          # Convert to JSON array
+          if [ -n "$PUBLISHED_WITH_VERSIONS" ]; then
+            PUBLISHED_JSON="[$PUBLISHED_WITH_VERSIONS]"
+          else
+            PUBLISHED_JSON="[]"
+          fi
+
+          echo "published_packages=$PUBLISHED_JSON" >> $GITHUB_OUTPUT
+          echo "Published packages with versions: $PUBLISHED_JSON"
 
   publish-documentation:
     name: Publish - Documentation
@@ -214,6 +296,122 @@ jobs:
             git commit -m "chore(docs): update docs"
             git push origin HEAD:documentation --force
           fi
+
+  comment-on-pr:
+    name: Comment on Merged PR
+    runs-on: ubuntu-latest
+    needs: [analyze-changes, publish-npm]
+    if: needs.publish-npm.outputs.published == 'true'
+
+    steps:
+      - name: Checkout Project
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          registry-url: "https://registry.npmjs.org"
+          cache: "yarn"
+
+      - name: Restore Dependencies Cache
+        uses: actions/cache/restore@v4
+        with:
+          path: "**/node_modules"
+          key: node-modules-${{ hashFiles('./yarn.lock') }}
+
+      - name: Find Merged PR
+        id: find-pr
+        run: |
+          # Get the commit SHA
+          COMMIT_SHA="${{ github.sha }}"
+
+          # Find PR associated with this commit
+          PR_NUMBER=$(gh pr list --state merged --search "$COMMIT_SHA" --json number --jq '.[0].number')
+
+          if [ -z "$PR_NUMBER" ]; then
+            echo "⚠️  No merged PR found for commit $COMMIT_SHA"
+            echo "pr_found=false" >> $GITHUB_OUTPUT
+          else
+            echo "✅ Found merged PR #$PR_NUMBER"
+            echo "pr_found=true" >> $GITHUB_OUTPUT
+            echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Get Published Versions
+        id: get-versions
+        if: steps.find-pr.outputs.pr_found == 'true'
+        run: |
+          PUBLISHED_JSON='${{ needs.publish-npm.outputs.published_packages }}'
+
+          VERSION_INFO=""
+
+          # Check if any packages were published
+          if [ -z "$PUBLISHED_JSON" ] || [ "$PUBLISHED_JSON" == "[]" ]; then
+            echo "No packages were published to NPM"
+            echo "version_info=No packages were published" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "Processing published packages from NPM output..."
+
+          # Extract package@version strings from JSON array
+          PUBLISHED_PACKAGES=$(echo "$PUBLISHED_JSON" | jq -r '.[]' 2>/dev/null)
+
+          # Iterate through all published packages
+          for PKG_VERSION in $PUBLISHED_PACKAGES; do
+            # Skip empty values
+            if [ -z "$PKG_VERSION" ]; then
+              continue
+            fi
+
+            if [ -n "$VERSION_INFO" ]; then
+              VERSION_INFO="${VERSION_INFO}\n"
+            fi
+            VERSION_INFO="${VERSION_INFO}- \`${PKG_VERSION}\`"
+            echo "  ✓ ${PKG_VERSION}"
+          done
+
+          # Save to output using heredoc to handle multiline
+          echo "version_info<<EOF" >> $GITHUB_OUTPUT
+          echo -e "$VERSION_INFO" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Comment on PR
+        if: steps.find-pr.outputs.pr_found == 'true'
+        run: |
+          PR_NUMBER="${{ steps.find-pr.outputs.pr_number }}"
+          VERSION_INFO="${{ steps.get-versions.outputs.version_info }}"
+          TAG_NAME="${GITHUB_REF##*/}"
+
+          # Create comment body with proper escaping
+          cat << 'COMMENT_EOF' > comment.md
+          ## 🚀 Deployment Successful
+
+          This PR has been deployed to NPM with tag `TAG_PLACEHOLDER`.
+
+          ### Published Versions
+          VERSION_INFO_PLACEHOLDER
+
+          **Workflow Run:** [RUN_ID_PLACEHOLDER](RUN_URL_PLACEHOLDER)
+          COMMENT_EOF
+
+          # Replace placeholders
+          sed -i "s|TAG_PLACEHOLDER|${TAG_NAME}|g" comment.md
+          sed -i "s|VERSION_INFO_PLACEHOLDER|${VERSION_INFO}|g" comment.md
+          sed -i "s|RUN_ID_PLACEHOLDER|${{ github.run_id }}|g" comment.md
+          sed -i "s|RUN_URL_PLACEHOLDER|${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|g" comment.md
+
+          # Post comment to PR
+          gh pr comment "$PR_NUMBER" --body-file comment.md
+
+          echo "✅ Comment posted to PR #$PR_NUMBER"
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
   publish-tag:
     name: Publish - Tags
