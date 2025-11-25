@@ -9,7 +9,7 @@ import '@webex/components/dist/css/webex-components.css';
 import './WebexMeetings.css';
 
 /**
- * Webex meeting widget presents a Webex meeting experience
+ * Webex meeting widget presents a Webex meeting experience.
  *
  * @param {string} props.meetingDestination  ID of the virtual meeting location
  * @param {string} props.meetingPasswordOrPin  Password or pin of the virtual meeting location
