@@ -186,8 +186,8 @@ As the documentation is created, developers will reinforce or gain:
 
 | Phase | Component | Task Description | File to Create | Learning Focus | Status |
 |-------|-----------|------------------|----------------|----------------|--------|
-| 0.13 | Store | Create agent.md | `packages/.../store/ai-prompts/agent.md` | Store API, singleton pattern, usage examples | 🔲 Not Started |
-| 0.14 | Store | Create architecture.md | `packages/.../store/ai-prompts/architecture.md` | Store architecture, wrapper, events, data flows | 🔲 Not Started |
+| 0.13 | Store | Create agent.md | `packages/.../store/ai-prompts/agent.md` | Store API, singleton pattern, usage examples | ✅ Done |
+| 0.14 | Store | Create architecture.md | `packages/.../store/ai-prompts/architecture.md` | Store architecture, wrapper, events, data flows | ✅ Done |
 
 ### Phase 0.15-0.23: Additional Documentation (⏳ PLANNED)
 
