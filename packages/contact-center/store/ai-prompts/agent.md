@@ -194,19 +194,7 @@ yarn add @webex/cc-store
 
 ## Additional Resources
 
-- Architecture and event flows: architecture.md
-- MobX patterns: ai-docs/patterns/mobx-patterns.md
-- React patterns: ai-docs/patterns/react-patterns.md
-
----
-
-## References
-
-- package.json: (../package.json)
-- src/store.types.ts: (../src/store.types.ts)
-- architecture.md: (./architecture.md)
-- MobX patterns: (../../../../ai-docs/patterns/mobx-patterns.md)
-- React patterns: (../../../../ai-docs/patterns/react-patterns.md)
+For detailed store architecture, event flows, and sequence diagrams, see [architecture.md](./architecture.md).
 
 ---
 

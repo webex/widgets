@@ -217,9 +217,11 @@ store.setOnError((name, err) => {
 
 ## Related Documentation
 
-- Usage and examples: [agent.md](./agent.md)
-- Store types and enums: `src/store.types.ts`
-- MobX, React, and Testing patterns: `ai-docs/patterns/*`
+- [Agent Documentation](./agent.md) - Usage examples and API
+- [Store Types](../src/store.types.ts) - Type definitions and enums
+- [MobX Patterns](../../../../ai-docs/patterns/mobx-patterns.md) - MobX best practices
+- [React Patterns](../../../../ai-docs/patterns/react-patterns.md) - React integration patterns
+- [Testing Patterns](../../../../ai-docs/patterns/testing-patterns.md) - Testing strategies
 
 ---
 
