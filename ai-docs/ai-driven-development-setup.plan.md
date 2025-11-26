@@ -36,10 +36,11 @@ This plan establishes comprehensive AI guidance documentation for the contact ce
 
 1. ✅ Analyze existing patterns to capture expectations for TypeScript, MobX, React, Web Components, and tests
 2. ✅ Produce foundation documentation (repo-wide patterns, diagrams, navigation guides)
-3. 🔄 Document station-login and user-state (README, OVERVIEW, EXAMPLES, RULES in ai-prompts/)
-4. ⏳ Create templates (widget scaffolding, prompt/checklist guidance)
-5. ⏳ Validate with Cursor and Windsurf prompts to ensure AI consistency
-6. ⏳ Refine documents based on pilot learnings and developer feedback
+3. ✅ Document station-login and user-state (agent.md, architecture.md in ai-prompts/)
+4. ✅ Convert all diagrams to Mermaid format for better compatibility
+5. ⏳ Create templates (widget scaffolding, prompt/checklist guidance)
+6. ⏳ Validate with Cursor and Windsurf prompts to ensure AI consistency
+7. ⏳ Refine documents based on pilot learnings and developer feedback
 
 ### Scaling Phase: Task Widgets and Remaining Packages
 
@@ -80,17 +81,19 @@ As the documentation is created, developers will reinforce or gain:
 ```json
 {
   "root": {
-    "agents.md": "AI navigation guide (task-based workflows, best practices)",
-    "docs/README.md": "Repository information (technologies, components, architecture)"
+    "agents.md": "AI navigation guide (task-based workflows, references to widget agent.md files)",
+    "ai-docs/README.md": "Repository information (technologies, components, architecture)"
   },
-  "docs": {
+  "ai-docs": {
     "patterns": ["typescript-patterns.md", "mobx-patterns.md", "react-patterns.md", "web-component-patterns.md", "testing-patterns.md"],
     "diagrams": ["llm-navigation.puml", "architecture.puml"]
   },
   "components": {
     "ai-prompts": {
-      "structure": ["README.md", "OVERVIEW.md", "EXAMPLES.md", "RULES.md", "diagrams/"],
-      "purpose": "Component-specific documentation co-located with code"
+      "structure": ["agent.md", "architecture.md"],
+      "purpose": "Component-specific documentation co-located with code",
+      "agent.md": "Overview, why/what, examples/use cases, dependencies",
+      "architecture.md": "Component overview table (config/props/state/callbacks/events/tests), data flows, sequence diagrams (PlantUML), troubleshooting guide"
     }
   }
 }
@@ -100,8 +103,8 @@ As the documentation is created, developers will reinforce or gain:
 
 ```
 /
-├── agents.md                          # AI assistant navigation guide
-├── docs/
+├── agents.md                          # AI assistant navigation guide (references widget-level agent.md files)
+├── ai-docs/
 │   ├── README.md                      # Repository information
 │   ├── ai-driven-development-setup.plan.md  # This file
 │   ├── patterns/                      # Repo-wide patterns
@@ -116,10 +119,29 @@ As the documentation is created, developers will reinforce or gain:
 │
 └── packages/contact-center/
     ├── station-login/ai-prompts/      # Component docs
-    │   └── diagrams/station-login.puml
+    │   ├── agent.md                   # Overview, use cases, examples, dependencies
+    │   └── architecture.md            # Component table, data flows, diagrams, troubleshooting
     ├── user-state/ai-prompts/
-    │   └── diagrams/user-state.puml
-    └── store/ai-prompts/
+    │   ├── agent.md
+    │   └── architecture.md
+    ├── store/ai-prompts/
+    │   ├── agent.md
+    │   └── architecture.md
+    ├── cc-components/ai-prompts/
+    │   ├── agent.md
+    │   └── architecture.md
+    ├── cc-widgets/ai-prompts/
+    │   ├── agent.md
+    │   └── architecture.md
+    ├── ui-logging/ai-prompts/
+    │   ├── agent.md
+    │   └── architecture.md
+    ├── test-fixtures/ai-prompts/
+    │   ├── agent.md
+    │   └── architecture.md
+    └── task/ai-prompts/
+        ├── agent.md
+        └── architecture.md
 ```
 
 ---
@@ -128,91 +150,97 @@ As the documentation is created, developers will reinforce or gain:
 
 ### Phase 0.1-0.5: Foundation Patterns (✅ COMPLETED)
 
-| Phase | Component | Task Description | File Created | Learning Focus | Owner | Status |
-|-------|-----------|------------------|--------------|----------------|-------|--------|
-| 0.1 | Patterns | Create TypeScript patterns doc | `docs/patterns/typescript-patterns.md` | TypeScript strict conventions, naming, imports | Documentation Team | ✅ Done |
-| 0.2 | Patterns | Create MobX patterns doc | `docs/patterns/mobx-patterns.md` | MobX observables, actions, store patterns | Documentation Team | ✅ Done |
-| 0.3 | Patterns | Create React patterns doc | `docs/patterns/react-patterns.md` | Hooks, composition, error boundaries | Documentation Team | ✅ Done |
-| 0.4 | Patterns | Create Web Component patterns doc | `docs/patterns/web-component-patterns.md` | r2wc, custom elements, prop mapping | Documentation Team | ✅ Done |
-| 0.5 | Patterns | Create Testing patterns doc | `docs/patterns/testing-patterns.md` | Jest, Playwright, mocking strategies | Documentation Team | ✅ Done |
+| Phase | Component | Task Description | File Created | Learning Focus | Status |
+|-------|-----------|------------------|--------------|----------------|--------|
+| 0.1 | Patterns | Create TypeScript patterns doc | `docs/patterns/typescript-patterns.md` | TypeScript strict conventions, naming, imports | ✅ Done |
+| 0.2 | Patterns | Create MobX patterns doc | `docs/patterns/mobx-patterns.md` | MobX observables, actions, store patterns | ✅ Done |
+| 0.3 | Patterns | Create React patterns doc | `docs/patterns/react-patterns.md` | Hooks, composition, error boundaries | ✅ Done |
+| 0.4 | Patterns | Create Web Component patterns doc | `docs/patterns/web-component-patterns.md` | r2wc, custom elements, prop mapping | ✅ Done |
+| 0.5 | Patterns | Create Testing patterns doc | `docs/patterns/testing-patterns.md` | Jest, Playwright, mocking strategies | ✅ Done |
 
 ### Phase 0.6-0.8: Master Documentation (✅ COMPLETED)
 
-| Phase | Component | Task Description | File Created | Learning Focus | Owner | Status |
-|-------|-----------|------------------|--------------|----------------|-------|--------|
-| 0.6 | Diagrams | Create LLM navigation diagram | `docs/diagrams/llm-navigation.puml` | How AIs should navigate docs | Documentation Team | ✅ Done |
-| 0.7 | Diagrams | Create architecture diagram | `docs/diagrams/architecture.puml` | Monorepo structure, dependencies | Documentation Team | ✅ Done |
-| 0.8 | Entry Points | Create master README + agents.md | `docs/README.md` + `/agents.md` | Repo info + AI navigation | Documentation Team | ✅ Done |
+| Phase | Component | Task Description | File Created | Learning Focus | Status |
+|-------|-----------|------------------|--------------|----------------|--------|
+| 0.6 | Diagrams | Create LLM navigation diagram | `docs/diagrams/llm-navigation.puml` | How AIs should navigate docs | ✅ Done |
+| 0.7 | Diagrams | Create architecture diagram | `docs/diagrams/architecture.puml` | Monorepo structure, dependencies | ✅ Done |
+| 0.8 | Entry Points | Create master README + agents.md | `docs/README.md` + `/agents.md` | Repo info + AI navigation | ✅ Done |
 
-### Phase 0.9-0.11: Component Documentation (🔄 IN PROGRESS)
+### Phase 0.9-0.12: Component Documentation (✅ COMPLETED)
 
 **Station Login Component:**
 
-| Phase | Component | Task Description | File to Create | Learning Focus | Owner | Status |
-|-------|-----------|------------------|----------------|----------------|-------|--------|
-| 0.9 | Station Login | Create README | `packages/.../station-login/ai-prompts/README.md` | Widget API, props, usage | Documentation Team | 🔲 Not Started |
-| 0.10 | Station Login | Create OVERVIEW | `packages/.../station-login/ai-prompts/OVERVIEW.md` | Internal architecture, hooks, flow | Documentation Team | 🔲 Not Started |
-| 0.11 | Station Login | Create EXAMPLES | `packages/.../station-login/ai-prompts/EXAMPLES.md` | Common patterns, code examples | Documentation Team | 🔲 Not Started |
-| 0.12 | Station Login | Create RULES | `packages/.../station-login/ai-prompts/RULES.md` | Component conventions, constraints | Documentation Team | 🔲 Not Started |
+| Phase | Component | Task Description | File to Create | Learning Focus | Status |
+|-------|-----------|------------------|----------------|----------------|--------|
+| 0.9 | Station Login | Create agent.md | `packages/.../station-login/ai-prompts/agent.md` | Widget overview, use cases, examples, dependencies | ✅ Done |
+| 0.10 | Station Login | Create architecture.md | `packages/.../station-login/ai-prompts/architecture.md` | Component table, data flows, sequence diagrams, troubleshooting | ✅ Done |
 
 **User State Component:**
 
-| Phase | Component | Task Description | File to Create | Learning Focus | Owner | Status |
-|-------|-----------|------------------|----------------|----------------|-------|--------|
-| 0.13 | User State | Create README | `packages/.../user-state/ai-prompts/README.md` | Widget API, props, usage | Documentation Team | 🔲 Not Started |
-| 0.14 | User State | Create OVERVIEW | `packages/.../user-state/ai-prompts/OVERVIEW.md` | Internal architecture, timer, flow | Documentation Team | 🔲 Not Started |
-| 0.15 | User State | Create EXAMPLES | `packages/.../user-state/ai-prompts/EXAMPLES.md` | Common patterns, code examples | Documentation Team | 🔲 Not Started |
-| 0.16 | User State | Create RULES | `packages/.../user-state/ai-prompts/RULES.md` | Component conventions, constraints | Documentation Team | 🔲 Not Started |
+| Phase | Component | Task Description | File to Create | Learning Focus | Status |
+|-------|-----------|------------------|----------------|----------------|--------|
+| 0.11 | User State | Create agent.md | `packages/.../user-state/ai-prompts/agent.md` | Widget overview, use cases, examples, dependencies | ✅ Done |
+| 0.12 | User State | Create architecture.md | `packages/.../user-state/ai-prompts/architecture.md` | Component table, data flows, timer logic, troubleshooting | ✅ Done |
 
 **Store Documentation:**
 
-| Phase | Component | Task Description | File to Create | Learning Focus | Owner | Status |
-|-------|-----------|------------------|----------------|----------------|-------|--------|
-| 0.17 | Store | Create README | `packages/.../store/ai-prompts/README.md` | Store API, singleton pattern | Documentation Team | 🔲 Not Started |
-| 0.18 | Store | Create OVERVIEW | `packages/.../store/ai-prompts/OVERVIEW.md` | Store architecture, wrapper, events | Documentation Team | 🔲 Not Started |
+| Phase | Component | Task Description | File to Create | Learning Focus | Status |
+|-------|-----------|------------------|----------------|----------------|--------|
+| 0.13 | Store | Create agent.md | `packages/.../store/ai-prompts/agent.md` | Store API, singleton pattern, usage examples | 🔲 Not Started |
+| 0.14 | Store | Create architecture.md | `packages/.../store/ai-prompts/architecture.md` | Store architecture, wrapper, events, data flows | 🔲 Not Started |
 
-### Phase 0.19-0.23: Additional Documentation (⏳ PLANNED)
+### Phase 0.15-0.23: Additional Documentation (⏳ PLANNED)
 
-| Phase | Component | Task Description | File to Create | Learning Focus | Owner | Status |
-|-------|-----------|------------------|----------------|----------------|-------|--------|
-| 0.19 | cc-components | Document component library | `packages/.../cc-components/ai-prompts/` | React component patterns | Documentation Team | ⏳ Planned |
-| 0.20 | cc-widgets | Document widget exports | `packages/.../cc-widgets/ai-prompts/` | Web Component aggregation | Documentation Team | ⏳ Planned |
-| 0.21 | ui-logging | Document logging utilities | `packages/.../ui-logging/ai-prompts/` | Metrics/logging helper usage | Documentation Team | ⏳ Planned |
-| 0.22 | test-fixtures | Document test fixtures | `packages/.../test-fixtures/ai-prompts/` | Fixture utilization | Documentation Team | ⏳ Planned |
-| 0.23 | Templates | Create widget template | `WIDGET_TEMPLATE/` + configs | Template scaffolding | Documentation Team | ⏳ Planned |
+| Phase | Component | Task Description | File to Create | Learning Focus | Status |
+|-------|-----------|------------------|----------------|----------------|--------|
+| 0.15 | cc-components | Create agent.md | `packages/.../cc-components/ai-prompts/agent.md` | Component library overview, usage | ⏳ Planned |
+| 0.16 | cc-components | Create architecture.md | `packages/.../cc-components/ai-prompts/architecture.md` | React component patterns, structure | ⏳ Planned |
+| 0.17 | cc-widgets | Create agent.md | `packages/.../cc-widgets/ai-prompts/agent.md` | Widget exports, aggregation overview | ⏳ Planned |
+| 0.18 | cc-widgets | Create architecture.md | `packages/.../cc-widgets/ai-prompts/architecture.md` | Web Component aggregation patterns | ⏳ Planned |
+| 0.19 | ui-logging | Create agent.md | `packages/.../ui-logging/ai-prompts/agent.md` | Logging utilities overview, usage | ⏳ Planned |
+| 0.20 | ui-logging | Create architecture.md | `packages/.../ui-logging/ai-prompts/architecture.md` | Metrics/logging patterns, flows | ⏳ Planned |
+| 0.21 | test-fixtures | Create agent.md | `packages/.../test-fixtures/ai-prompts/agent.md` | Test fixtures overview, usage | ⏳ Planned |
+| 0.22 | test-fixtures | Create architecture.md | `packages/.../test-fixtures/ai-prompts/architecture.md` | Fixture patterns, structure | ⏳ Planned |
+| 0.23 | Templates | Create widget template | `WIDGET_TEMPLATE/` + configs | Template scaffolding | ⏳ Planned |
 
 ### Phase 0.24-0.27: IDE Integration (⏳ PLANNED)
 
-| Phase | Component | Task Description | File to Create | Learning Focus | Owner | Status |
-|-------|-----------|------------------|----------------|----------------|-------|--------|
-| 0.24 | AI Rules | Draft `.cursorrules` | `.cursorrules` | Cursor-specific references | Documentation Team | ⏳ Planned |
-| 0.25 | AI Rules | Draft `.windsurfrules` | `.windsurfrules` | Windsurf references | Documentation Team | ⏳ Planned |
-| 0.26 | Prompts | Document prompt templates | `PROMPTS.md` | Bug/enhancement/new widget prompts | Documentation Team | ⏳ Planned |
-| 0.27 | Checklists | Document pre/post change checks | `CHECKLIST.md` | Validation workflows | Documentation Team | ⏳ Planned |
+| Phase | Component | Task Description | File to Create | Learning Focus | Status |
+|-------|-----------|------------------|----------------|----------------|--------|
+| 0.24 | AI Rules | Draft `.cursorrules` | `.cursorrules` | Cursor-specific references | ⏳ Planned |
+| 0.25 | AI Rules | Draft `.windsurfrules` | `.windsurfrules` | Windsurf references | ⏳ Planned |
+| 0.26 | Prompts | Document prompt templates | `PROMPTS.md` | Bug/enhancement/new widget prompts | ⏳ Planned |
+| 0.27 | Checklists | Document pre/post change checks | `CHECKLIST.md` | Validation workflows | ⏳ Planned |
 
 ### Phase 0.28-0.33: Validation & Refinement (⏳ PLANNED)
 
-| Phase | Component | Task Description | File/Context | Learning Focus | Owner | Status |
-|-------|-----------|------------------|--------------|----------------|-------|--------|
-| 0.28 | Validation | Cursor prompt (bug fix) | — | AI query hygiene | Documentation Team | ⏳ Planned |
-| 0.29 | Validation | Cursor prompt (enhancement) | — | Prompt clarity | Documentation Team | ⏳ Planned |
-| 0.30 | Validation | Windsurf prompt (bug fix) | — | Cross-IDE consistency | Documentation Team | ⏳ Planned |
-| 0.31 | Validation | Windsurf prompt (enhancement) | — | Pattern enforcement | Documentation Team | ⏳ Planned |
-| 0.32 | Refinement | Update docs based on validation | Various pilot files | Continuous improvement | Documentation Team | ⏳ Planned |
-| 0.33 | Review | Team review & sign-off | All pilot artifacts | Collaboration & feedback cycle | Documentation Team | ⏳ Planned |
+| Phase | Component | Task Description | File/Context | Learning Focus | Status |
+|-------|-----------|------------------|--------------|----------------|--------|
+| 0.28 | Validation | Cursor prompt (bug fix) | — | AI query hygiene | ⏳ Planned |
+| 0.29 | Validation | Cursor prompt (enhancement) | — | Prompt clarity | ⏳ Planned |
+| 0.30 | Validation | Windsurf prompt (bug fix) | — | Cross-IDE consistency | ⏳ Planned |
+| 0.31 | Validation | Windsurf prompt (enhancement) | — | Pattern enforcement | ⏳ Planned |
+| 0.32 | Refinement | Update docs based on validation | Various pilot files | Continuous improvement | ⏳ Planned |
+| 0.33 | Review | Team review & sign-off | All pilot artifacts | Collaboration & feedback cycle | ⏳ Planned |
 
 ### Phase 1: Scaling — Task Package + Widgets (⏳ FUTURE)
 
-| Phase | Component | Task Description | File to Create | Learning Focus | Owner | Status |
-|-------|-----------|------------------|----------------|----------------|-------|--------|
-| 1.1 | Task Package | Document package | `task/ai-prompts/{README,OVERVIEW,EXAMPLES,RULES}` | Aggregator patterns | Documentation Team | ⏳ Future |
-| 1.2 | IncomingTask | Document widget | `task/IncomingTask/ai-prompts/{README,OVERVIEW,EXAMPLES,RULES}` | Task intake design | Documentation Team | ⏳ Future |
-| 1.3 | TaskList | Document widget | `task/TaskList/ai-prompts/{README,OVERVIEW,EXAMPLES,RULES}` | Task management flows | Documentation Team | ⏳ Future |
-| 1.4 | CallControl | Document widget | `task/CallControl/ai-prompts/{README,OVERVIEW,EXAMPLES,RULES}` | Call handling patterns | Documentation Team | ⏳ Future |
-| 1.5 | CallControlCAD | Document widget | `task/CallControlCAD/ai-prompts/{README,OVERVIEW,EXAMPLES,RULES}` | CAD-enabled flows | Documentation Team | ⏳ Future |
-| 1.6 | OutdialCall | Document widget | `task/OutdialCall/ai-prompts/{README,OVERVIEW,EXAMPLES,RULES}` | Outbound call flows | Documentation Team | ⏳ Future |
-| 1.7 | Validation | Spot-check with AI tool | — | Lightweight regression validation | Documentation Team | ⏳ Future |
-| 1.8 | Review | Final review & updates | Various task files | Quality & completeness | Documentation Team | ⏳ Future |
+| Phase | Component | Task Description | File to Create | Learning Focus | Status |
+|-------|-----------|------------------|----------------|----------------|--------|
+| 1.1 | Task Package | Create agent.md | `task/ai-prompts/agent.md` | Task package overview, aggregator patterns | ⏳ Future |
+| 1.2 | Task Package | Create architecture.md | `task/ai-prompts/architecture.md` | Package structure, widget relationships | ⏳ Future |
+| 1.3 | IncomingTask | Create agent.md | `task/IncomingTask/ai-prompts/agent.md` | Task intake widget overview | ⏳ Future |
+| 1.4 | IncomingTask | Create architecture.md | `task/IncomingTask/ai-prompts/architecture.md` | Task intake flows, sequence diagrams | ⏳ Future |
+| 1.5 | TaskList | Create agent.md | `task/TaskList/ai-prompts/agent.md` | Task management widget overview | ⏳ Future |
+| 1.6 | TaskList | Create architecture.md | `task/TaskList/ai-prompts/architecture.md` | Task management flows, diagrams | ⏳ Future |
+| 1.7 | CallControl | Create agent.md | `task/CallControl/ai-prompts/agent.md` | Call handling widget overview | ⏳ Future |
+| 1.8 | CallControl | Create architecture.md | `task/CallControl/ai-prompts/architecture.md` | Call handling flows, diagrams | ⏳ Future |
+| 1.9 | CallControlCAD | Create agent.md | `task/CallControlCAD/ai-prompts/agent.md` | CAD-enabled widget overview | ⏳ Future |
+| 1.10 | CallControlCAD | Create architecture.md | `task/CallControlCAD/ai-prompts/architecture.md` | CAD flows, diagrams | ⏳ Future |
+| 1.11 | OutdialCall | Create agent.md | `task/OutdialCall/ai-prompts/agent.md` | Outbound call widget overview | ⏳ Future |
+| 1.12 | OutdialCall | Create architecture.md | `task/OutdialCall/ai-prompts/architecture.md` | Outbound call flows, diagrams | ⏳ Future |
+| 1.13 | Validation | Spot-check with AI tool | — | Lightweight regression validation | ⏳ Future |
+| 1.14 | Review | Final review & updates | Various task files | Quality & completeness | ⏳ Future |
 
 ---
 
@@ -251,7 +279,8 @@ As the documentation is created, developers will reinforce or gain:
 - ✅ Pattern documentation created (TypeScript, MobX, React, WC, Testing)
 - ✅ Master navigation created (agents.md + docs/README.md)
 - ✅ Architecture diagrams created
-- 🔄 Component ai-prompts/ documentation (station-login, user-state, store)
+- ✅ Component ai-prompts/ documentation (station-login, user-state) - Using Mermaid diagrams
+- 🔄 Store documentation (agent.md, architecture.md)
 - ⏳ IDE integration files (.cursorrules, .windsurfrules)
 - ⏳ Validation with actual AI coding tasks
 
@@ -271,16 +300,6 @@ As the documentation is created, developers will reinforce or gain:
 - Naming and import conventions added
 - Technology-based versioning implemented
 
-**🔄 In Progress:**
-- Component-specific ai-prompts/ documentation
-
-**⏳ Next Steps:**
-1. Document station-login component (README, OVERVIEW, EXAMPLES, RULES)
-2. Document user-state component (README, OVERVIEW, EXAMPLES, RULES)
-3. Document store (README, OVERVIEW)
-4. Create .cursorrules and .windsurfrules
-5. Validate with AI coding tasks
-6. Refine based on feedback
 
 ---
 
