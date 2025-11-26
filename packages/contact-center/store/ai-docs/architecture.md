@@ -43,7 +43,7 @@ store/
 │   ├── util.ts                  # Feature flags parsing, utilities
 │   └── constants.ts             # Shared constants (if any)
 ├── tests/                       # Store unit tests
-├── ai-prompts/
+├── ai-docs/
 │   ├── agent.md                 # Overview & usage
 │   └── architecture.md          # This file
 ├── package.json

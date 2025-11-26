@@ -564,7 +564,7 @@ describe('use{WidgetName} - New Feature', () => {
 
 ### 6.1 Update agent.md
 
-**File:** `ai-prompts/agent.md`
+**File:** `ai-docs/agent.md`
 
 **Add to Examples section:**
 
@@ -617,7 +617,7 @@ function App() {
 
 ### 6.2 Update architecture.md
 
-**File:** `ai-prompts/architecture.md`
+**File:** `ai-docs/architecture.md`
 
 **Update Component Table:**
 

@@ -134,7 +134,7 @@ List all files that need changes:
 - [ ] `src/{widget-name}/{widget-name}.types.ts`
 - [ ] `tests/{widget-name}/index.tsx`
 - [ ] `tests/helper.ts`
-- [ ] `ai-prompts/architecture.md`
+- [ ] `ai-docs/architecture.md`
 - [ ] Other: _______________
 
 ### 2.3 Breaking Changes?
@@ -371,7 +371,7 @@ yarn test:e2e
 
 ### 5.1 Update architecture.md (if needed)
 
-**File:** `ai-prompts/architecture.md`
+**File:** `ai-docs/architecture.md`
 
 **Update if:**
 - Data flow changed
@@ -400,7 +400,7 @@ yarn test:e2e
 
 ### 5.2 Update agent.md (if needed)
 
-**File:** `ai-prompts/agent.md`
+**File:** `ai-docs/agent.md`
 
 **Update if:**
 - API changed

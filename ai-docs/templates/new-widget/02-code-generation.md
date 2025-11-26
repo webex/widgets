@@ -23,7 +23,7 @@ packages/contact-center/{widget-name}/
 │   ├── helper.ts                  # Custom hook (business logic)
 │   ├── index.ts                   # Package exports with metrics
 │   └── wc.ts                      # Web Component export
-├── ai-prompts/
+├── ai-docs/
 │   ├── agent.md                   # Usage documentation (use template)
 │   └── architecture.md            # Technical documentation (use template)
 ├── tests/

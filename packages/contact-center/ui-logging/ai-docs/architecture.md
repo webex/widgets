@@ -489,7 +489,7 @@ window.addEventListener('beforeunload', () => {
 
 - [Agent Documentation](./agent.md) - Usage examples and API
 - [React Patterns](../../../../ai-docs/patterns/react-patterns.md) - HOC patterns
-- [CC Store Documentation](../../store/ai-prompts/agent.md) - Logger configuration
+- [CC Store Documentation](../../store/ai-docs/agent.md) - Logger configuration
 
 ---
 

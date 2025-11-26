@@ -507,8 +507,8 @@ test('component renders', async () => {
 - [Agent Documentation](./agent.md) - Usage examples and exports
 - [React Patterns](../../../../ai-docs/patterns/react-patterns.md) - Component patterns
 - [Testing Patterns](../../../../ai-docs/patterns/testing-patterns.md) - Testing guidelines
-- [UI Logging Documentation](../../ui-logging/ai-prompts/agent.md) - Metrics HOC usage
-- [CC Widgets Documentation](../../cc-widgets/ai-prompts/agent.md) - Web Component integration
+- [UI Logging Documentation](../../ui-logging/ai-docs/agent.md) - Metrics HOC usage
+- [CC Widgets Documentation](../../cc-widgets/ai-docs/agent.md) - Web Component integration
 
 ---
 

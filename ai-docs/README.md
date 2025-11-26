@@ -33,17 +33,17 @@ Monorepo for Webex Contact Center UI widgets built with React, MobX, and Web Com
 
 **station-login** - Agent login with team and device selection
 - Location: `packages/contact-center/station-login/`
-- Docs: [ai-prompts/](../packages/contact-center/station-login/ai-prompts/)
+- Docs: [ai-docs/](../packages/contact-center/station-login/ai-docs/)
 
 **user-state** - Agent state management with timer and idle codes
 - Location: `packages/contact-center/user-state/`
-- Docs: [ai-prompts/](../packages/contact-center/user-state/ai-prompts/)
+- Docs: [ai-docs/](../packages/contact-center/user-state/ai-docs/)
 
 ### Shared Packages
 
 **store** - Centralized MobX state (singleton)
 - Location: `packages/contact-center/store/`
-- Docs: [ai-prompts/](../packages/contact-center/store/ai-prompts/)
+- Docs: [ai-docs/](../packages/contact-center/store/ai-docs/)
 
 **cc-components** - React UI primitives
 - Location: `packages/contact-center/cc-components/`
@@ -139,7 +139,7 @@ npx playwright test suites/station-login-user-state-tests.spec.ts
 ## Development Workflow
 
 1. **Choose component** to work on
-2. **Read component docs** in `packages/*/ai-prompts/`
+2. **Read component docs** in `packages/*/ai-docs/`
 3. **Follow repo patterns** in `docs/patterns/`
 4. **Make changes** following component `RULES.md`
 5. **Write tests** (unit + E2E)
@@ -163,7 +163,7 @@ Widget (Observer) → Custom Hook (Business Logic) → Component (UI) → Store 
 
 **For detailed architecture, see:**
 - [Architecture Diagram](./diagrams/architecture.puml)
-- [Store Documentation](../packages/contact-center/store/ai-prompts/)
+- [Store Documentation](../packages/contact-center/store/ai-docs/)
 
 ---
 
@@ -173,11 +173,11 @@ Widget (Observer) → Custom Hook (Business Logic) → Component (UI) → Store 
 - `docs/patterns/` - TypeScript, MobX, React, Web Components, Testing patterns
 
 **Component Documentation:**
-- `packages/*/ai-prompts/README.md` - API and usage
-- `packages/*/ai-prompts/OVERVIEW.md` - Architecture and design
-- `packages/*/ai-prompts/EXAMPLES.md` - Code examples
-- `packages/*/ai-prompts/RULES.md` - Component conventions
-- `packages/*/ai-prompts/diagrams/` - Visual flows
+- `packages/*/ai-docs/README.md` - API and usage
+- `packages/*/ai-docs/OVERVIEW.md` - Architecture and design
+- `packages/*/ai-docs/EXAMPLES.md` - Code examples
+- `packages/*/ai-docs/RULES.md` - Component conventions
+- `packages/*/ai-docs/diagrams/` - Visual flows
 
 **Diagrams:**
 - `docs/diagrams/llm-navigation.puml` - Documentation navigation guide

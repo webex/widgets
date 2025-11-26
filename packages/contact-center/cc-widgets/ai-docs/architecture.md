@@ -424,9 +424,9 @@ customElements.whenDefined('widget-cc-station-login').then(() => {
 
 - [Agent Documentation](./agent.md) - Usage examples and exports
 - [Web Component Patterns](../../../../ai-docs/patterns/web-component-patterns.md) - r2wc patterns
-- [Station Login Widget](../../station-login/ai-prompts/agent.md) - Individual widget docs
-- [User State Widget](../../user-state/ai-prompts/agent.md) - Individual widget docs
-- [CC Components Library](../../cc-components/ai-prompts/agent.md) - Component library
+- [Station Login Widget](../../station-login/ai-docs/agent.md) - Individual widget docs
+- [User State Widget](../../user-state/ai-docs/agent.md) - Individual widget docs
+- [CC Components Library](../../cc-components/ai-docs/agent.md) - Component library
 
 ---
 

@@ -13,7 +13,7 @@ This plan establishes comprehensive AI guidance documentation for the contact ce
 
 - **Pilot-first**: Validate all instructions, templates, and prompts using the **station-login** and **user-state** widgets before scaling to the rest of the widget set
 - **Incremental widget coverage**: After the pilot, apply the proven templates to `task` widgets and any remaining packages
-- **Distributed documentation**: Component-specific docs co-located with code in `ai-prompts/` folders
+- **Distributed documentation**: Component-specific docs co-located with code in `ai-docs/` folders
 
 ---
 
@@ -36,7 +36,7 @@ This plan establishes comprehensive AI guidance documentation for the contact ce
 
 1. ✅ Analyze existing patterns to capture expectations for TypeScript, MobX, React, Web Components, and tests
 2. ✅ Produce foundation documentation (repo-wide patterns, diagrams, navigation guides)
-3. ✅ Document station-login and user-state (agent.md, architecture.md in ai-prompts/)
+3. ✅ Document station-login and user-state (agent.md, architecture.md in ai-docs/)
 4. ✅ Convert all diagrams to Mermaid format for better compatibility
 5. ⏳ Create templates (widget scaffolding, prompt/checklist guidance)
 6. ⏳ Validate with Cursor and Windsurf prompts to ensure AI consistency
@@ -89,7 +89,7 @@ As the documentation is created, developers will reinforce or gain:
     "diagrams": ["llm-navigation.puml", "architecture.puml"]
   },
   "components": {
-    "ai-prompts": {
+    "ai-docs": {
       "structure": ["agent.md", "architecture.md"],
       "purpose": "Component-specific documentation co-located with code",
       "agent.md": "Overview, why/what, examples/use cases, dependencies",
@@ -242,6 +242,29 @@ As the documentation is created, developers will reinforce or gain:
 | 1.13 | Validation | Spot-check with AI tool | — | Lightweight regression validation | ⏳ Future |
 | 1.14 | Review | Final review & updates | Various task files | Quality & completeness | ⏳ Future |
 
+### Phase 2: SDK Knowledge Base Enhancement (⏳ FUTURE)
+
+| Phase | Component | Task Description | File to Create | Learning Focus | Status |
+|-------|-----------|------------------|----------------|----------------|--------|
+| 2.1 | SDK APIs | Analyze current JSON structure | — | Understand TypeDoc output format | ⏳ Future |
+| 2.2 | SDK APIs | Design LLM-optimized format | Design doc | Token-efficient SDK reference | ⏳ Future |
+| 2.3 | SDK APIs | Create SDK API summary | `ai-docs/sdk-api-reference.md` | Quick lookup for common APIs | ⏳ Future |
+| 2.4 | SDK APIs | Generate method examples | Templates with code examples | Usage patterns for SDK methods | ⏳ Future |
+| 2.5 | SDK APIs | Document event patterns | Event subscription guide | SDK event handling patterns | ⏳ Future |
+| 2.6 | SDK APIs | Create SDK API index | Categorized index by functionality | Easy navigation to relevant APIs | ⏳ Future |
+| 2.7 | SDK APIs | Validate with LLM | Test with widget generation | Measure token efficiency improvement | ⏳ Future |
+
+**Current State:** Using TypeDoc JSON output ([contact-centre-sdk-apis/contact-center.json](./contact-centre-sdk-apis/contact-center.json))
+- LLM scans JSON when SDK methods needed
+- URLs updated from master → next branch
+- Works but not optimized for LLM token usage
+
+**Future Enhancement:** Create LLM-friendly SDK reference
+- Structured markdown with categorized APIs
+- Common usage patterns with code examples
+- Quick lookup by functionality
+- Reduced token usage vs scanning full JSON
+
 ---
 
 ## AI Templates
@@ -377,6 +400,11 @@ ai-docs/templates/
   - New widget generation: 7 modules
   - Documentation: 2 reusable modules
   - Existing widget maintenance: 2 modules
+- ✅ Main orchestrator (ai-docs/agent.md)
+  - Routes LLMs to appropriate templates
+  - Guides SDK API usage
+  - Enforces documentation updates
+- ✅ SDK API reference (contact-center.json, URLs updated to next branch)
 - ⏳ IDE integration files (.cursorrules, .windsurfrules)
 - ⏳ Validation with actual AI coding tasks
 
@@ -391,8 +419,8 @@ ai-docs/templates/
 
 **✅ Completed:**
 - Foundation patterns (5 files)
-- Master documentation (README, agents.md, diagrams)
-- Directory restructure (docs/patterns/, ai-prompts/ folders)
+- Architecture diagrams (Mermaid format)
+- Directory restructure (ai-docs/ with patterns, templates, diagrams)
 - Naming and import conventions added
 - Technology-based versioning implemented
 - Widget documentation (station-login, user-state) - with Mermaid diagrams
@@ -402,6 +430,12 @@ ai-docs/templates/
   - New Widget Generation: 7 modules
   - Documentation: 2 reusable modules
   - Existing Widget Maintenance: 2 modules
+- Main orchestrator (ai-docs/agent.md):
+  - Routes LLMs based on task type
+  - Integrates SDK API reference
+  - Enforces documentation updates
+- SDK API reference (contact-center.json with next branch URLs)
+- Repository cleanup (removed outdated/redundant files)
 
 
 ---

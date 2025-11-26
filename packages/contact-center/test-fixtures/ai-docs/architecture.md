@@ -632,7 +632,7 @@ const consultingTask = {
 
 - [Agent Documentation](./agent.md) - Usage examples and fixtures
 - [Testing Patterns](../../../../ai-docs/patterns/testing-patterns.md) - Testing strategies
-- [CC Store Documentation](../../store/ai-prompts/agent.md) - Store mocking patterns
+- [CC Store Documentation](../../store/ai-docs/agent.md) - Store mocking patterns
 
 ---
 

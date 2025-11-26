@@ -38,7 +38,7 @@ user-state/
 │   ├── helper.ts                      # Hook tests
 │   └── user-state/
 │       └── index.tsx                  # Widget tests
-├── ai-prompts/
+├── ai-docs/
 │   ├── agent.md                       # Overview, examples, usage
 │   └── architecture.md                # Architecture documentation
 ├── dist/                              # Build output
@@ -554,7 +554,7 @@ if (currentState === 'Available') {
 - [MobX Patterns](../../../../ai-docs/patterns/mobx-patterns.md) - Store patterns
 - [React Patterns](../../../../ai-docs/patterns/react-patterns.md) - Component patterns
 - [Testing Patterns](../../../../ai-docs/patterns/testing-patterns.md) - Testing guidelines
-- [Store Documentation](../../store/ai-prompts/agent.md) - Store API reference
+- [Store Documentation](../../store/ai-docs/agent.md) - Store API reference
 
 ---
 

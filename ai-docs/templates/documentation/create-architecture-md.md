@@ -98,7 +98,7 @@ This template generates the `architecture.md` file for any package. It provides 
 │   ├── constants.ts               # Constants
 │   ├── index.ts                   # Package exports
 │   └── wc.ts                      # Web Component export (if applicable)
-├── ai-prompts/
+├── ai-docs/
 │   ├── agent.md                   # Usage docs
 │   └── architecture.md            # This file
 ├── tests/
@@ -380,8 +380,8 @@ const fixed = correctWay();
 
 - [Agent Documentation](./agent.md) - Usage examples and API
 - [{Related Pattern}](../../../../ai-docs/patterns/{pattern}.md) - Pattern documentation
-- [{Related Package}](../../{package}/ai-prompts/agent.md) - Related package docs
-- [{Another Related}](../../{package}/ai-prompts/architecture.md) - Related architecture
+- [{Related Package}](../../{package}/ai-docs/agent.md) - Related package docs
+- [{Another Related}](../../{package}/ai-docs/architecture.md) - Related architecture
 
 ---
 
