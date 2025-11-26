@@ -116,6 +116,7 @@ interface IStore {
   currentTheme: string;
   customState: ICustomState;
   isQueueConsultInProgress: boolean;
+  isEnableDeclineButton: boolean;
   currentConsultQueueId: string;
   consultStartTimeStamp?: number;
   callControlAudio: MediaStream | null;
@@ -185,6 +186,7 @@ enum TASK_EVENTS {
   TASK_RECORDING_PAUSED = 'task:recordingPaused',
   TASK_RECORDING_RESUMED = 'task:recordingResumed',
   TASK_OFFER_CONSULT = 'task:offerConsult',
+  TASK_AUTO_ANSWERED = 'task:autoAnswered',
   TASK_CONFERENCE_ESTABLISHING = 'task:conferenceEstablishing',
   TASK_CONFERENCE_STARTED = 'task:conferenceStarted',
   TASK_CONFERENCE_FAILED = 'task:conferenceFailed',

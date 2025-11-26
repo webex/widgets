@@ -2,7 +2,9 @@ import React, {useEffect, useMemo, useState} from 'react';
 import {OutdialAniEntry, OutdialCallComponentProps} from '../task.types';
 import './outdial-call.style.scss';
 import {withMetrics} from '@webex/cc-ui-logging';
-import {Input, Button, Option, Select} from '@momentum-design/components/dist/react';
+import {Input, Button, Icon} from '@momentum-design/components/dist/react';
+import {SelectNext} from '@momentum-ui/react-collaboration';
+import {Item} from '@react-stately/collections';
 import {OutdialStrings, KEY_LIST} from './constants';
 
 /**
@@ -14,15 +16,17 @@ import {OutdialStrings, KEY_LIST} from './constants';
  *
  * @param props - Properties for the OutdialCallComponent.
  * @property startOutdial - Function to initiate the outdial call with the entered destination number.
+ * @property currentTask - Current task instance (optional).
  */
 const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> = (props) => {
-  const {logger, startOutdial, getOutdialANIEntries} = props;
+  const {logger, startOutdial, getOutdialANIEntries, currentTask} = props;
 
   // State Hooks
   const [destination, setDestination] = useState('');
   const [isValidNumber, setIsValidNumber] = useState('');
-  const [selectedANI, setSelectedANI] = useState(undefined);
+  const [selectedANI, setSelectedANI] = useState<string | undefined>(undefined);
   const [outdialANIList, setOutdialANIList] = useState<OutdialAniEntry[]>([]);
+  const [isSelectOpen, setIsSelectOpen] = useState(false);
 
   // Validate the input format using regex from agent desktop
   const regExForDnSpecialChars = useMemo(
@@ -82,7 +86,7 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
         helpTextType={isValidNumber ? 'error' : 'default'}
         placeholder={OutdialStrings.DN_PLACEHOLDER}
         value={destination}
-        onChange={(e: unknown) => {
+        onInput={(e: unknown) => {
           const inputValue = (e as React.ChangeEvent<HTMLInputElement>).target.value;
           setDestination(inputValue);
           validateOutboundNumber(inputValue);
@@ -97,36 +101,48 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
           </li>
         ))}
       </ul>
-      <Select
-        className="outdial-input"
-        label={OutdialStrings.ANI_SELECT_LABEL}
-        id="outdial-ani-option-select"
-        name="outdial-ani-option-select"
-        data-testid="outdial-ani-option-select"
-        placeholder={OutdialStrings.ANI_SELECT_PLACEHOLDER}
-        onChange={(event: CustomEvent) => {
-          setSelectedANI(event.detail.value);
-        }}
-      >
-        {outdialANIList.map((option: OutdialAniEntry, index: number) => {
-          return (
-            <Option
-              selected={option.number === selectedANI}
-              key={index}
-              value={option.number}
-              name={`outdial-ani-option-${index}`}
-              data-testid={`outdial-ani-option-${index}`}
-            >
-              {option.name}
-            </Option>
-          );
-        })}
-      </Select>
+      <div className="outdial-ani-select-container">
+        <Icon
+          className="outdial-select-arrow-icon"
+          name={isSelectOpen ? 'arrow-up-bold' : 'arrow-down-bold'}
+          title=""
+          data-testid="select-arrow-icon"
+        />
+
+        <SelectNext
+          className="outdial-input"
+          label={OutdialStrings.ANI_SELECT_LABEL}
+          id="outdial-ani-option-select"
+          data-testid="outdial-ani-option-select"
+          placeholder={OutdialStrings.ANI_SELECT_PLACEHOLDER}
+          selectedKey={selectedANI || null}
+          onSelectionChange={(key: React.Key) => {
+            const value = key as string;
+            // Set to undefined if key is 'none' or null
+            const newANI = !value || value === 'none' ? undefined : value;
+            setSelectedANI(newANI);
+          }}
+          onOpenChange={(isOpen: boolean) => setIsSelectOpen(isOpen)}
+          items={[
+            {id: 'none', name: OutdialStrings.ANI_SELECT_PLACEHOLDER},
+            ...outdialANIList.map((ani) => ({id: ani.number, name: ani.name})),
+          ]}
+          direction="bottom"
+          showBorder
+        >
+          {(item: {id: string; name: string}) => (
+            <Item key={item.id} textValue={item.name} data-testid={`outdial-ani-option-${item.id}`}>
+              <div className="outdial-ani-option-name">{item.name}</div>
+            </Item>
+          )}
+        </SelectNext>
+      </div>
       <Button
         data-testid="outdial-call-button"
         prefixIcon={'handset-regular'}
+        className="outDialCallButton"
         onClick={() => startOutdial(destination, selectedANI)}
-        disabled={!!isValidNumber || !destination}
+        disabled={!!isValidNumber || !destination || !!currentTask}
         size={40}
       />
     </article>

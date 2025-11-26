@@ -6,11 +6,12 @@ import {OutdialCallComponent} from '@webex/cc-components';
 import {useOutdialCall} from '../helper';
 
 const OutdialCallInternal: React.FunctionComponent = observer(() => {
-  const {cc, logger} = store;
+  const {cc, logger, currentTask} = store;
 
   const result = useOutdialCall({cc, logger});
   const props = {
     logger,
+    currentTask,
     ...result,
   };
 

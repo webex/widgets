@@ -124,10 +124,14 @@ export interface TaskProps {
    * Agent ID of the logged-in user
    */
   agentId: string;
+  /**
+   * Flag to enable decline button on incoming task component
+   */
+  isEnableDeclineButton?: boolean;
 }
 
 export type IncomingTaskComponentProps = Pick<TaskProps, 'isBrowser' | 'accept' | 'reject' | 'logger'> &
-  Partial<Pick<TaskProps, 'incomingTask'>>;
+  Partial<Pick<TaskProps, 'incomingTask' | 'isEnableDeclineButton'>>;
 
 export type TaskListComponentProps = Pick<
   TaskProps,
@@ -516,9 +520,17 @@ export interface OutdialCallProps {
    * Logger instance for logging purpose.
    */
   logger: ILogger;
+
+  /**
+   * Current task instance.
+   */
+  currentTask?: ITask;
 }
 
-export type OutdialCallComponentProps = Pick<OutdialCallProps, 'logger' | 'startOutdial' | 'getOutdialANIEntries'>;
+export type OutdialCallComponentProps = Pick<
+  OutdialCallProps,
+  'logger' | 'startOutdial' | 'getOutdialANIEntries' | 'currentTask'
+>;
 
 /**
  * Interface representing the properties for CallControlListItem component.
@@ -697,6 +709,7 @@ export interface TaskListItemData {
   declineText: string | undefined;
   title: string;
   disableAccept: boolean;
+  disableDecline: boolean;
   displayState: string;
 }
 

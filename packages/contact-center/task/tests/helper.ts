@@ -3411,7 +3411,7 @@ describe('useOutdialCall', () => {
     logger.info.mockRestore();
   });
 
-  it('should successfully start an outdial call', async () => {
+  it('should successfully start an outdial call without origin', async () => {
     const {result} = renderHook(() =>
       useOutdialCall({
         cc: mockOutdialCallProps,
@@ -3423,7 +3423,24 @@ describe('useOutdialCall', () => {
       await result.current.startOutdial(destination);
     });
 
-    expect(mockOutdialCallProps.startOutdial).toHaveBeenCalledWith(destination, undefined);
+    expect(mockOutdialCallProps.startOutdial).toHaveBeenCalledWith(destination);
+    expect(logger.info).toHaveBeenCalledWith('Outdial call started', 'Success');
+  });
+
+  it('should successfully start an outdial call with origin', async () => {
+    const origin = '+16675260082';
+    const {result} = renderHook(() =>
+      useOutdialCall({
+        cc: mockOutdialCallProps,
+        logger,
+      })
+    );
+
+    await act(async () => {
+      await result.current.startOutdial(destination, origin);
+    });
+
+    expect(mockOutdialCallProps.startOutdial).toHaveBeenCalledWith(destination, origin);
     expect(logger.info).toHaveBeenCalledWith('Outdial call started', 'Success');
   });
 
@@ -3460,7 +3477,7 @@ describe('useOutdialCall', () => {
       await result.current.startOutdial(destination);
     });
 
-    expect(mockCCWithError.startOutdial).toHaveBeenCalledWith(destination, undefined);
+    expect(mockCCWithError.startOutdial).toHaveBeenCalledWith(destination);
     expect(logger.error).toHaveBeenCalledWith('Error: Outdial call failed', {
       module: 'widget-OutdialCall#helper.ts',
       method: 'startOutdial',

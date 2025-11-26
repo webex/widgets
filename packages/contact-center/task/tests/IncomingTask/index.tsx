@@ -35,6 +35,7 @@ describe('IncomingTask Component', () => {
       accept: jest.fn(),
       reject: jest.fn(),
       isBrowser: true,
+      isEnableDeclineButton: true,
     });
 
     render(<IncomingTask incomingTask={mockTask} onAccepted={onAcceptedCb} onRejected={onRejectedCb} />);

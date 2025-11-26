@@ -138,6 +138,7 @@ export const useTaskList = (props: UseTaskListProps) => {
 export const useIncomingTask = (props: UseTaskProps) => {
   const {onAccepted, onRejected, deviceType, incomingTask, logger} = props;
   const isBrowser = deviceType === 'BROWSER';
+  const isEnableDeclineButton = store.isEnableDeclineButton;
 
   const taskAssignCallback = () => {
     try {
@@ -265,6 +266,7 @@ export const useIncomingTask = (props: UseTaskProps) => {
     accept,
     reject,
     isBrowser,
+    isEnableDeclineButton,
   };
 };
 
@@ -954,8 +956,12 @@ export const useOutdialCall = (props: useOutdialCallProps) => {
         alert('Destination number is required, it cannot be empty');
         return;
       }
+
+      // Only pass origin if it's defined and not empty
+      const outdialArgs = origin ? [destination, origin] : [destination];
+
       //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
-      cc.startOutdial(destination, origin)
+      cc.startOutdial(...outdialArgs)
         .then((response) => {
           logger.info('Outdial call started', response);
         })

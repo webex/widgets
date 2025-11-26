@@ -216,10 +216,16 @@ describe('IncomingTaskComponent', () => {
 
       // Verify utility function was called correctly for each task
       expect(extractIncomingTaskDataSpy).toHaveBeenCalledTimes(4);
-      expect(extractIncomingTaskDataSpy).toHaveBeenNthCalledWith(1, telephonyWebRTCTask, true, loggerMock);
-      expect(extractIncomingTaskDataSpy).toHaveBeenNthCalledWith(2, telephonyExtensionTask, false, loggerMock);
-      expect(extractIncomingTaskDataSpy).toHaveBeenNthCalledWith(3, chatTask, true, loggerMock);
-      expect(extractIncomingTaskDataSpy).toHaveBeenNthCalledWith(4, socialTask, true, loggerMock);
+      expect(extractIncomingTaskDataSpy).toHaveBeenNthCalledWith(1, telephonyWebRTCTask, true, loggerMock, undefined);
+      expect(extractIncomingTaskDataSpy).toHaveBeenNthCalledWith(
+        2,
+        telephonyExtensionTask,
+        false,
+        loggerMock,
+        undefined
+      );
+      expect(extractIncomingTaskDataSpy).toHaveBeenNthCalledWith(3, chatTask, true, loggerMock, undefined);
+      expect(extractIncomingTaskDataSpy).toHaveBeenNthCalledWith(4, socialTask, true, loggerMock, undefined);
 
       // === WebRTC Telephony Task Assertions ===
       const webRTCListItem = webRTCContainer.querySelector('li.task-list-item');
