@@ -246,13 +246,9 @@ As the documentation is created, developers will reinforce or gain:
 
 ## AI Templates
 
-### Overview
-
-Modular, token-optimized templates for generating and maintaining code. Replaced monolithic 1595-line template with focused modules that save 40-80% tokens.
-
 **Location:** `ai-docs/templates/`
 
-**Key Innovation:** Reusable documentation templates work for ALL packages (widgets, store, components, utilities)
+Modular templates for generating and maintaining widgets, components, and documentation.
 
 ### Template Structure
 
@@ -290,77 +286,26 @@ ai-docs/templates/
     └── testing.md
 ```
 
-### Created Templates (Complete)
+### Available Templates
 
-| Template | File | Lines | Purpose | Status |
-|----------|------|-------|---------|--------|
-| **Master** | new-widget/00-master.md | ~350 | Orchestrate widget generation | ✅ Done |
-| **Pre-Questions** | new-widget/01-pre-questions.md | ~400 | Requirements gathering | ✅ Done |
-| **Code Generation** | new-widget/02-code-generation.md | ~550 | Widget code patterns | ✅ Done |
-| **Component Generation** | new-widget/03-component-generation.md | ~450 | Presentational components | ✅ Done |
-| **Integration** | new-widget/04-integration.md | ~500 | cc-widgets + samples | ✅ Done |
-| **Test Generation** | new-widget/05-test-generation.md | ~500 | Unit & E2E tests | ✅ Done |
-| **Validation** | new-widget/06-validation.md | ~450 | Quality checklist | ✅ Done |
-| **Agent Docs** | documentation/create-agent-md.md | ~510 | Generate agent.md (reusable!) | ✅ Done |
-| **Architecture Docs** | documentation/create-architecture-md.md | ~685 | Generate architecture.md (reusable!) | ✅ Done |
-| **Bug Fix** | existing-widget/bug-fix.md | ~600 | Fix bugs in existing widgets | ✅ Done |
-| **Feature Enhancement** | existing-widget/feature-enhancement.md | ~720 | Add features to widgets | ✅ Done |
-| **Templates README** | README.md | ~400 | Template usage guide | ✅ Done |
+**New Widget Generation (7 modules):**
+1. 00-master.md - Orchestrator & workflow
+2. 01-pre-questions.md - Requirements gathering
+3. 02-code-generation.md - Widget code patterns
+4. 03-component-generation.md - Presentational components (conditional)
+5. 04-integration.md - cc-widgets + samples integration
+6. 05-test-generation.md - Unit & E2E tests
+7. 06-validation.md - Quality checklist
 
-**Total: 12 templates | ~5,615 lines | Token savings: 40-80%**
+**Documentation (2 modules, reusable for all packages):**
+1. create-agent-md.md - Generate agent.md
+2. create-architecture-md.md - Generate architecture.md
 
-### Token Efficiency Comparison
+**Existing Widget Maintenance (2 modules):**
+1. bug-fix.md - Bug fix workflow
+2. feature-enhancement.md - Feature addition workflow
 
-| Task | Old Monolithic | New Modular | Savings |
-|------|----------------|-------------|---------|
-| Simple widget | ~4,000 tokens | ~1,600 tokens | **60%** |
-| Complex widget | ~4,000 tokens | ~2,400 tokens | **40%** |
-| Bug fix | ~4,000 tokens | ~800 tokens | **80%** |
-| Documentation | ~4,000 tokens | ~900 tokens | **77%** |
-| Feature add | ~4,000 tokens | ~1,000 tokens | **75%** |
-
-### Key Benefits
-
-1. **Token Efficient:** Read only what you need (40-80% reduction)
-2. **Reusable:** Documentation templates work for all packages
-3. **Maintainable:** Small, focused modules easy to update
-4. **Flexible:** Mix and match based on task
-5. **Scalable:** Easy to add new modules
-
-### Usage Examples
-
-**Example 1: Generate New Simple Widget**
-```
-Read: new-widget/00-master.md (300 tokens)
-Read: new-widget/02-code-generation.md (500 tokens) 
-Read: new-widget/04-integration.md (400 tokens)
-Read: documentation/create-agent-md.md (400 tokens)
-Total: 1,600 tokens (vs 4,000 monolithic - 60% savings)
-```
-
-**Example 2: Fix Bug in Existing Widget**
-```
-Read: existing-widget/bug-fix.md (400 tokens)
-Read: testing/add-unit-tests.md (400 tokens)
-Total: 800 tokens (vs 4,000 monolithic - 80% savings)
-```
-
-**Example 3: Add Documentation to Store**
-```
-Read: documentation/create-agent-md.md (400 tokens)
-Read: documentation/create-architecture-md.md (500 tokens)
-Total: 900 tokens (vs 4,000 monolithic - 77% savings)
-```
-
-**Example 4: Add Feature to Widget**
-```
-Read: existing-widget/feature-enhancement.md (500 tokens)
-Read: testing/add-unit-tests.md (400 tokens)
-Read: documentation/update-documentation.md (300 tokens)
-Total: 1,200 tokens (vs 4,000 monolithic - 70% savings)
-```
-
-### Planned Templates (Future)
+### Planned Templates
 
 **Testing Modules:**
 - add-unit-tests.md - Unit test generation
@@ -413,9 +358,8 @@ Total: 1,200 tokens (vs 4,000 monolithic - 70% savings)
 - **Location:** `docs/patterns/typescript-patterns.md`
 
 ### Modular Templates
-- **Decision:** Replaced monolithic 1595-line template with modular templates
-- **Rationale:** 40-80% token savings, reusable documentation templates, easier maintenance
-- **Impact:** LLMs read only what they need, documentation templates work for ALL packages
+- **Decision:** Use modular templates instead of monolithic templates
+- **Rationale:** LLMs read only required modules, documentation templates are reusable across all packages
 - **Location:** `ai-docs/templates/`
 
 ---
@@ -429,11 +373,10 @@ Total: 1,200 tokens (vs 4,000 monolithic - 70% savings)
 - ✅ Component ai-prompts/ documentation (station-login, user-state) - Using Mermaid diagrams
 - ✅ Store documentation (agent.md, architecture.md) - Reviewed and aligned with guidelines
 - ✅ Supporting packages documentation (cc-components, cc-widgets, ui-logging, test-fixtures)
-- ✅ Modular templates (12 complete templates, 40-84% token savings)
-  - **New widget generation:** 7 modules (pre-questions → validation)
-  - **Documentation:** 2 reusable modules (agent.md, architecture.md)
-  - **Existing widget maintenance:** 2 modules (bug-fix, feature-enhancement)
-  - **Ready for testing with real widget generation**
+- ✅ Modular templates (12 complete templates)
+  - New widget generation: 7 modules
+  - Documentation: 2 reusable modules
+  - Existing widget maintenance: 2 modules
 - ⏳ IDE integration files (.cursorrules, .windsurfrules)
 - ⏳ Validation with actual AI coding tasks
 
@@ -455,13 +398,10 @@ Total: 1,200 tokens (vs 4,000 monolithic - 70% savings)
 - Widget documentation (station-login, user-state) - with Mermaid diagrams
 - Store documentation (agent.md, architecture.md) - Reviewed and optimized
 - Supporting package documentation (cc-components, cc-widgets, ui-logging, test-fixtures)
-- Modular templates (12 complete templates + README):
-  - **New Widget Generation (7 modules):** master, pre-questions, code-generation, component-generation, integration, test-generation, validation
-  - **Documentation (2 modules):** create-agent-md, create-architecture-md (reusable for all packages)
-  - **Existing Widget (2 modules):** bug-fix, feature-enhancement
-  - **Total: ~5,615 lines across 12 templates**
-  - **Token savings: 40-84% vs monolithic approach**
-  - **All modules tested and ready for use**
+- Modular templates (12 templates):
+  - New Widget Generation: 7 modules
+  - Documentation: 2 reusable modules
+  - Existing Widget Maintenance: 2 modules
 
 
 ---
