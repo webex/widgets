@@ -8,6 +8,7 @@ const popupContainer = document.getElementById('popup-container');
 const taskRejectedSubmitButton = document.getElementById('task-rejected-submit-button');
 const ccStationLogin = document.createElement('widget-cc-station-login');
 const ccUserState = document.createElement('widget-cc-user-state');
+const ccCallHistory = document.createElement('widget-cc-call-history');
 const ccIncomingTask = document.createElement('widget-cc-incoming-task');
 const ccTaskList = document.createElement('widget-cc-task-list');
 const ccCallControl = document.createElement('widget-cc-call-control');
@@ -19,6 +20,7 @@ const themeProviderElem = document.getElementById('theme-provider-elem');
 
 const stationLoginCheckbox = document.getElementById('stationLoginCheckbox');
 const userStateCheckbox = document.getElementById('userStateCheckbox');
+const callHistoryCheckbox = document.getElementById('callHistoryCheckbox');
 const incomingTaskCheckbox = document.getElementById('incomingTaskCheckbox');
 const taskListCheckbox = document.getElementById('taskListCheckbox');
 const callControlCheckbox = document.getElementById('callControlCheckbox');
@@ -231,6 +233,24 @@ function loginSuccess() {
     widgetsContainer.appendChild(userStateContainer);
     ccUserState.onStateChange = onStateChange;
   }
+  if (callHistoryCheckbox.checked) {
+    ccCallHistory.classList.remove('disabled');
+
+    const callHistoryContainer = document.createElement('div');
+    callHistoryContainer.className = 'box';
+    callHistoryContainer.innerHTML = `
+      <section class="section-box">
+        <fieldset class="fieldset">
+          <legend class="legend-box">Call History</legend>
+        </fieldset>
+      </section>
+    `;
+
+    callHistoryContainer.querySelector('fieldset').appendChild(ccCallHistory);
+    widgetsContainer.appendChild(callHistoryContainer);
+    ccCallHistory.onDial = (phoneNumber) => console.log('Dial:', phoneNumber);
+    ccCallHistory.onError = (error) => console.error('CallHistory error:', error);
+  }
   if (incomingTaskCheckbox.checked) {
     ccIncomingTask.classList.remove('disabled');
     widgetsContainer.appendChild(ccIncomingTask);
@@ -279,6 +299,7 @@ function loginSuccess() {
 function logoutSuccess() {
   console.log('Agent logout has been successful');
   ccUserState.classList.add('disabled');
+  ccCallHistory.classList.add('disabled');
   ccIncomingTask.classList.add('disabled');
   ccTaskList.classList.add('disabled');
   ccCallControl.classList.add('disabled');

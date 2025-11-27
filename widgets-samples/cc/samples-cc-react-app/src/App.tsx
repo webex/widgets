@@ -2,6 +2,7 @@ import React, {useState, useEffect} from 'react';
 import {
   StationLogin,
   UserState,
+  CallHistory,
   IncomingTask,
   TaskList,
   CallControl,
@@ -34,6 +35,7 @@ const defaultWidgets = {
   stationLogin: true,
   stationLoginProfile: false,
   userState: true,
+  callHistory: false,
   incomingTask: true,
   taskList: true,
   callControl: true,
@@ -371,6 +373,10 @@ function App() {
       setShowRejectedPopup(false);
       setRejectedReason('');
     }
+  };
+
+  const onCallHistoryDial = (phoneNumber: string) => {
+    console.log('CallHistory dial requested:', phoneNumber);
   };
 
   const stationLogout = () => {
@@ -745,6 +751,20 @@ function App() {
                           <fieldset className="fieldset">
                             <legend className="legend-box">User State</legend>
                             <UserState onStateChange={onStateChange} />
+                          </fieldset>
+                        </section>
+                      </div>
+                    )}
+
+                    {selectedWidgets.callHistory && (
+                      <div className="box">
+                        <section className="section-box">
+                          <fieldset className="fieldset">
+                            <legend className="legend-box">Call History</legend>
+                            <CallHistory
+                              onDial={onCallHistoryDial}
+                              onError={(error) => onError('CallHistory', error)}
+                            />
                           </fieldset>
                         </section>
                       </div>

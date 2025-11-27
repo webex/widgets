@@ -1,0 +1,234 @@
+// Call History Component Styles
+.call-history {
+  background-color: var(--mds-color-theme-background-primary-normal);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  max-width: 700px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  // Minimized state
+  &--minimized {
+    .call-history__content {
+      display: none;
+    }
+  }
+
+  // Header
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--mds-color-theme-outline-secondary-normal);
+  }
+
+  &__title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--mds-color-theme-text-primary-normal);
+  }
+
+  &__minimize-btn {
+    background: transparent;
+    border: none;
+    padding: 0.25rem;
+    cursor: pointer;
+    color: var(--mds-color-theme-text-primary-normal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      background-color: var(--mds-color-theme-background-primary-hover);
+      border-radius: 0.25rem;
+    }
+  }
+
+  // Content
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  // Tabs
+  &__tabs {
+    display: flex;
+    gap: 0.5rem;
+    border-bottom: 1px solid var(--mds-color-theme-outline-secondary-normal);
+    margin-bottom: 1rem;
+  }
+
+  &__tab {
+    padding: 0.5rem 1rem;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    color: var(--mds-color-theme-text-primary-normal);
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s;
+
+    &:hover {
+      background-color: var(--mds-color-theme-background-primary-hover);
+    }
+
+    &--active {
+      border-bottom-color: var(--mds-color-theme-button-primary-normal);
+      color: var(--mds-color-theme-button-primary-normal);
+    }
+  }
+
+  // Call List
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-height: 600px;
+    overflow-y: auto;
+  }
+
+  // Empty state
+  &__empty {
+    padding: 2rem;
+    text-align: center;
+    color: var(--mds-color-theme-text-secondary-normal);
+  }
+
+  // Contact Group
+  &__contact-group {
+    border: 1px solid var(--mds-color-theme-outline-secondary-normal);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    background-color: var(--mds-color-theme-background-secondary-normal);
+  }
+
+  // Contact Header
+  &__contact-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--mds-color-theme-outline-secondary-normal);
+  }
+
+  &__avatar {
+    flex-shrink: 0;
+  }
+
+  &__contact-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__contact-name {
+    display: flex;
+    align-items: baseline;
+    gap: 0.25rem;
+  }
+
+  &__contact-name-text {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--mds-color-theme-text-primary-normal);
+  }
+
+  &__call-count {
+    color: var(--mds-color-theme-text-secondary-normal);
+    font-size: 0.875rem;
+  }
+
+  &__phone-number {
+    color: var(--mds-color-theme-text-secondary-normal);
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+  }
+
+  &__dial-button {
+    flex-shrink: 0;
+    background: transparent;
+    border: none;
+    padding: 0.5rem;
+    cursor: pointer;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      background-color: var(--mds-color-theme-background-success-hover);
+    }
+  }
+
+  // Call Details
+  &__call-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-left: 56px; // Align with contact info (avatar width + gap)
+  }
+
+  &__call-item {
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    background-color: var(--mds-color-theme-background-primary-normal);
+
+    &:hover {
+      background-color: var(--mds-color-theme-background-primary-hover);
+    }
+  }
+
+  &__call-info {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    font-size: 0.75rem;
+  }
+
+  &__call-date {
+    color: var(--mds-color-theme-text-primary-normal);
+  }
+
+  &__call-type {
+    min-width: 80px;
+    color: var(--mds-color-theme-text-primary-normal);
+  }
+
+  &__call-duration {
+    color: var(--mds-color-theme-text-secondary-normal);
+
+    &--missed {
+      color: var(--mds-color-theme-text-error-normal);
+      font-weight: 600;
+    }
+  }
+
+  // Loading state
+  &--loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+  }
+
+  &__loader {
+    color: var(--mds-color-theme-text-secondary-normal);
+  }
+
+  // Error state
+  &--error {
+    border-color: var(--mds-color-theme-outline-error-normal);
+  }
+
+  &__error-message,
+  &__error-boundary {
+    padding: 1rem;
+    text-align: center;
+    color: var(--mds-color-theme-text-error-normal);
+  }
+}
+
