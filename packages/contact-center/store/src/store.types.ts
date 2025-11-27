@@ -116,7 +116,7 @@ interface IStore {
   currentTheme: string;
   customState: ICustomState;
   isQueueConsultInProgress: boolean;
-  isEnableDeclineButton: boolean;
+  isDeclineButtonEnabled: boolean;
   currentConsultQueueId: string;
   consultStartTimeStamp?: number;
   callControlAudio: MediaStream | null;
@@ -152,6 +152,7 @@ interface IStoreWrapper extends IStore {
   setAgentProfile(profile: Profile): void;
   setTeamId(id: string): void;
   setIsMuted(value: boolean): void;
+  setIsDeclineButtonEnabled(value: boolean): void;
   setOnError(callback: (widgetName: string, error: Error) => void): void;
 }
 

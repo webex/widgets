@@ -28,7 +28,7 @@ export const extractIncomingTaskData = (
   incomingTask: ITask,
   isBrowser: boolean,
   logger?,
-  isEnableDeclineButton?: boolean
+  isDeclineButtonEnabled?: boolean
 ): IncomingTaskData => {
   try {
     // Extract basic data from task
@@ -63,7 +63,7 @@ export const extractIncomingTaskData = (
     // Compute disable state for accept button
     const disableAccept = (isTelephony && !isBrowser) || isAutoAnswering;
 
-    const disableDecline = (isTelephony && !isBrowser) || (isAutoAnswering && !isEnableDeclineButton);
+    const disableDecline = (isTelephony && !isBrowser) || (isAutoAnswering && !isDeclineButtonEnabled);
 
     return {
       ani,

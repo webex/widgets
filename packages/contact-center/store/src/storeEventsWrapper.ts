@@ -132,8 +132,8 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.isQueueConsultInProgress;
   }
 
-  get isEnableDeclineButton() {
-    return this.store.isEnableDeclineButton;
+  get isDeclineButtonEnabled() {
+    return this.store.isDeclineButtonEnabled;
   }
 
   get currentConsultQueueId() {
@@ -286,9 +286,9 @@ class StoreWrapper implements IStoreWrapper {
     });
   };
 
-  setIsEnableDeclineButton = (value: boolean): void => {
+  setIsDeclineButtonEnabled = (value: boolean): void => {
     runInAction(() => {
-      this.store.isEnableDeclineButton = value;
+      this.store.isDeclineButtonEnabled = value;
     });
   };
 
@@ -448,7 +448,7 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   handleTaskEnd = () => {
-    this.setIsEnableDeclineButton(false);
+    this.setIsDeclineButtonEnabled(false);
     this.refreshTaskList();
   };
 
@@ -493,7 +493,7 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   handleAutoAnswer = () => {
-    this.setIsEnableDeclineButton(true);
+    this.setIsDeclineButtonEnabled(true);
     this.refreshTaskList();
   };
 

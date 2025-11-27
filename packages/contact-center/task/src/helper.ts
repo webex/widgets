@@ -138,7 +138,7 @@ export const useTaskList = (props: UseTaskListProps) => {
 export const useIncomingTask = (props: UseTaskProps) => {
   const {onAccepted, onRejected, deviceType, incomingTask, logger} = props;
   const isBrowser = deviceType === 'BROWSER';
-  const isEnableDeclineButton = store.isEnableDeclineButton;
+  const isDeclineButtonEnabled = store.isDeclineButtonEnabled;
 
   const taskAssignCallback = () => {
     try {
@@ -266,7 +266,7 @@ export const useIncomingTask = (props: UseTaskProps) => {
     accept,
     reject,
     isBrowser,
-    isEnableDeclineButton,
+    isDeclineButtonEnabled,
   };
 };
 

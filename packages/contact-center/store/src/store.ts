@@ -36,7 +36,7 @@ class Store implements IStore {
   currentState: string = '';
   customState: ICustomState = null;
   isQueueConsultInProgress = false;
-  isEnableDeclineButton = false;
+  isDeclineButtonEnabled = false;
   currentConsultQueueId: string = '';
   consultStartTimeStamp = undefined;
   lastStateChangeTimestamp?: number;

@@ -127,11 +127,11 @@ export interface TaskProps {
   /**
    * Flag to enable decline button on incoming task component
    */
-  isEnableDeclineButton?: boolean;
+  isDeclineButtonEnabled?: boolean;
 }
 
 export type IncomingTaskComponentProps = Pick<TaskProps, 'isBrowser' | 'accept' | 'reject' | 'logger'> &
-  Partial<Pick<TaskProps, 'incomingTask' | 'isEnableDeclineButton'>>;
+  Partial<Pick<TaskProps, 'incomingTask' | 'isDeclineButtonEnabled'>>;
 
 export type TaskListComponentProps = Pick<
   TaskProps,

@@ -141,7 +141,12 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
         data-testid="outdial-call-button"
         prefixIcon={'handset-regular'}
         className="outDialCallButton"
-        onClick={() => startOutdial(destination, selectedANI)}
+        onClick={() => {
+          startOutdial(destination, selectedANI);
+          // Clear input field after initiating the call
+          setDestination('');
+          setIsValidNumber('');
+        }}
         disabled={!!isValidNumber || !destination || !!currentTask}
         size={40}
       />

@@ -5,13 +5,13 @@ import {withMetrics} from '@webex/cc-ui-logging';
 import {extractIncomingTaskData} from './incoming-task.utils';
 
 const IncomingTaskComponent: React.FunctionComponent<IncomingTaskComponentProps> = (props) => {
-  const {incomingTask, isBrowser, accept, reject, logger, isEnableDeclineButton} = props;
+  const {incomingTask, isBrowser, accept, reject, logger, isDeclineButtonEnabled} = props;
   if (!incomingTask) {
     return <></>; // hidden component
   }
 
   // Extract all task data using the utility function
-  const taskData = extractIncomingTaskData(incomingTask, isBrowser, logger, isEnableDeclineButton);
+  const taskData = extractIncomingTaskData(incomingTask, isBrowser, logger, isDeclineButtonEnabled);
 
   return (
     <Task

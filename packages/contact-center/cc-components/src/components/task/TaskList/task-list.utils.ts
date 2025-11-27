@@ -49,7 +49,7 @@ export const extractTaskListItemData = (
     const disableAccept = (isTaskIncoming && isTelephony && !isBrowser) || isAutoAnswering;
 
     const disableDecline =
-      (isTaskIncoming && isTelephony && !isBrowser) || (isAutoAnswering && !store.isEnableDeclineButton);
+      (isTaskIncoming && isTelephony && !isBrowser) || (isAutoAnswering && !store.isDeclineButtonEnabled);
 
     const ronaTimeout = isTaskIncoming ? rawRonaTimeout : null;
 
