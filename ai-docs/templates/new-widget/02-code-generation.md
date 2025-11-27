@@ -10,6 +10,238 @@ This module provides templates and patterns for generating widget code following
 
 ---
 
+## ⚠️ Import Pattern Rules (PREVENT CIRCULAR DEPENDENCIES)
+
+**Before writing ANY import statements, review these rules.**
+
+### Widget File Imports - ONLY These Patterns
+
+```typescript
+// ✅ CORRECT - External dependencies
+import React, { useState, useCallback } from 'react';
+import { observer } from 'mobx-react-lite';
+import { ErrorBoundary } from 'react-error-boundary';
+
+// ✅ CORRECT - Internal widget files
+import { useWidgetName } from '../helper';
+import type { WidgetNameProps } from './widget-name.types';
+
+// ✅ CORRECT - cc-components (presentational layer)
+import { WidgetNameComponent } from '@webex/cc-components';
+
+// ❌ NEVER - cc-widgets aggregator
+// import { AnotherWidget } from '@webex/cc-widgets';  // CIRCULAR DEPENDENCY!
+```
+
+### Hook File Imports
+
+```typescript
+// ✅ CORRECT - Store access
+import store from '@webex/cc-store';
+import { runInAction } from 'mobx';
+
+// ✅ CORRECT - SDK via store
+store.cc.methodName()  // Accessed through store instance
+
+// ❌ NEVER - Direct SDK import
+// import webex from '@webex/contact-center';  // WRONG PATTERN!
+```
+
+### Validation Before Committing Code
+
+**Run this checklist:**
+
+- [ ] No `import ... from '@webex/cc-widgets'` in widget code
+- [ ] No `import ... from '@webex/cc-*-widget'` in cc-components
+- [ ] All SDK calls via `store.cc.methodName()`
+- [ ] All imports follow: Widget → cc-components → store → SDK
+- [ ] No circular dependencies between packages
+
+**If ANY check fails, refactor imports before proceeding.**
+
+---
+
+## ⚠️ Validate Sequence Diagrams Before Coding
+
+**Before writing ANY code, validate your implementation plan against approved sequence diagrams.**
+
+### Step 1: Load Approved Diagrams
+
+From 01-pre-questions.md, load:
+- Primary data load/fetch sequence diagram
+- User interaction sequence diagrams
+- Error handling flow diagram
+- Data transformation documentation
+- SDK API documentation
+
+### Step 2: Verify SDK API Calls
+
+**For EACH SDK call in the sequence diagrams:**
+
+1. **Find exact API path in SDK knowledge base:**
+   ```typescript
+   // Open: ai-docs/contact-centre-sdk-apis/contact-center.json
+   // Search for method name
+   // Verify path exists and is correct
+   ```
+
+2. **Match method signatures:**
+   ```typescript
+   // Diagram says: store.cc.someService.someMethod(param1, param2)
+   
+   // Verify in SDK JSON:
+   // - Method exists at this path
+   // - Parameters are correct (param1: type1, param2: type2)
+   // - Return type matches expected response
+   ```
+
+3. **Document response structure:**
+   ```typescript
+   // From SDK docs and sequence diagram:
+   // Response: {statusCode: 200, data: {userSessions: UserSession[]}}
+   // Extract: response.data.userSessions
+   ```
+
+### Step 3: Map Data Transformations
+
+**For EACH data transformation in sequence diagrams:**
+
+1. **Define source type (SDK response):**
+   ```typescript
+   // From sequence diagram:
+   type UserSession = {
+     sessionId: string;
+     startTime: string;  // ISO date
+     endTime: string;    // ISO date
+     durationSeconds: number;
+     other: {
+       name?: string;
+       phoneNumber?: string;
+     };
+   };
+   ```
+
+2. **Define target type (widget state):**
+   ```typescript
+   // From sequence diagram:
+   type CallRecord = {
+     id: string;
+     name: string;
+     phone: string;
+     timestamp: number;
+   };
+   ```
+
+3. **Write transformation function:**
+   ```typescript
+   // Follow sequence diagram field mappings:
+   const transform = (session: UserSession): CallRecord => ({
+     id: session.sessionId,
+     name: session.other?.name || 'Unknown',
+     phone: session.other?.phoneNumber || '',
+     timestamp: new Date(session.startTime).getTime(),
+   });
+   ```
+
+### Step 4: Verify State Flow
+
+**For EACH state update in sequence diagrams:**
+
+1. **Identify state variable:**
+   ```typescript
+   // Diagram shows: setIsLoading(true)
+   const [isLoading, setIsLoading] = useState(false);
+   ```
+
+2. **Match update timing:**
+   ```typescript
+   // Sequence diagram order:
+   // 1. setIsLoading(true)
+   // 2. setError(null)
+   // 3. Call SDK
+   // 4. Transform data
+   // 5. setData(records)
+   // 6. setIsLoading(false)
+   ```
+
+3. **Verify error handling:**
+   ```typescript
+   // Diagram shows error path:
+   try {
+     setIsLoading(true);
+     setError(null);
+     const response = await sdk.method();
+     setData(transform(response));
+   } catch (err) {
+     setError(err);  // As per diagram
+   } finally {
+     setIsLoading(false);  // Always runs
+   }
+   ```
+
+### Step 5: Validation Checklist
+
+**Before writing hook/widget code, confirm:**
+
+- [ ] All SDK calls match exact paths from sequence diagrams
+- [ ] All parameters match diagram specifications
+- [ ] All response structures verified in SDK JSON
+- [ ] All data transformations documented with field mappings
+- [ ] All state updates follow diagram sequence
+- [ ] Error handling paths match diagrams
+- [ ] Logging calls placed as per diagrams
+- [ ] Callback invocations match diagram timing
+
+**If ANY item unchecked, return to sequence diagrams and clarify.**
+
+---
+
+## Key Implementation Guidelines
+
+**Follow these generic best practices when implementing widgets:**
+
+### SDK Integration
+1. **Always validate SDK object existence before calling methods**
+   - Check if nested objects exist (e.g., nested SDK services and clients)
+   - Throw descriptive errors if missing
+   - Don't assume SDK objects are available
+
+2. **Use exact SDK paths from sequence diagrams**
+   - Copy paths exactly as documented
+   - Don't modify or simplify SDK access patterns
+   - Follow tested patterns from reference examples
+
+3. **Let SDK handle validation**
+   - Don't add manual agent state checks
+   - Don't duplicate SDK permission logic
+   - Trust SDK to manage state transitions
+
+### Data Handling
+4. **Handle data variations with fallback chains**
+   - Use `||` operator for string fallbacks: `field1 || field2 || 'Default'`
+   - Use `??` operator for numeric fallbacks: `value1 ?? value2 ?? 0`
+   - Handle optional fields with `?.` operator
+   - Provide sensible defaults for missing data
+
+5. **Transform data as documented in mappings**
+   - Follow exact field mappings from sequence diagrams
+   - Apply type conversions (ISO strings → timestamps, etc.)
+   - Maintain transformation logic consistency
+
+### Patterns
+6. **Follow existing widget patterns**
+   - Reference similar widgets for behavior (e.g., OutdialCall for outdial)
+   - Match error handling patterns
+   - Use same logging patterns
+   - Copy proven state management approaches
+
+7. **Expected behaviors are not bugs**
+   - IncomingTask shows agent ANI, not destination (by design)
+   - SDK manages complex state transitions (trust it)
+   - Some UI behaviors match backend logic (document, don't fix)
+
+---
+
 ## Directory Structure
 
 First, create the widget directory structure:

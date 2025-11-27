@@ -29,7 +29,7 @@ Orchestrator template for creating contact center widgets following the architec
 ## Step Details
 
 ### Step 1: Requirements ([01-pre-questions.md](./01-pre-questions.md))
-Gather widget name, purpose, design input, complexity level, store needs, component requirements, props, and callbacks.
+Gather widget name, design input, and 4 essential technical inputs: high-level user flow, detailed technical sequences, data structure mappings, and required API details.
 
 ### Step 2: Code Generation ([02-code-generation.md](./02-code-generation.md))
 Generate widget component, custom hook, type definitions, package configuration, and config files.

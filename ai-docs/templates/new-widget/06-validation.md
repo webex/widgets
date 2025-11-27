@@ -94,7 +94,302 @@ This module provides comprehensive validation checklists to ensure the widget is
 
 ---
 
-## 2. Testing Validation
+## 2. Functional Validation (NEW - CRITICAL)
+
+### Purpose
+
+Verify that the widget actually WORKS as intended, not just that it compiles. Test the complete data flow from user action to UI update.
+
+### Sequence Diagram Validation
+
+**FIRST STEP: Load approved sequence diagrams from 01-pre-questions.md**
+
+Before running any tests, verify implementation matches approved diagrams:
+
+- [ ] Load all sequence diagrams from pre-questions
+- [ ] Load SDK API documentation from pre-questions
+- [ ] Load data transformation mappings from pre-questions
+
+### SDK Integration Test
+
+**Compare implemented code against approved sequence diagrams:**
+
+**For each SDK method in sequence diagrams:**
+
+- [ ] Method exists in [contact-centre-sdk-apis/contact-center.json](../../contact-centre-sdk-apis/contact-center.json)
+- [ ] **Exact path matches sequence diagram** (e.g., `store.cc.someService.someMethod`)
+- [ ] **Parameters match diagram specification** (type, order, values)
+- [ ] **Return type matches SDK documentation AND diagram**
+- [ ] Accessed via `store.cc.methodName()` (not direct import)
+- [ ] Error handling present (try/catch) as per error flow diagram
+- [ ] Success callbacks fire on success (verify timing per diagram)
+- [ ] Error callbacks fire on error (verify error path per diagram)
+- [ ] Response structure matches documented structure
+
+**Example Verification:**
+
+```typescript
+// From sequence diagram: store.cc.someService.someMethod(param1, param2)
+// ✓ Exists in SDK JSON at exact path
+// ✓ Parameters: (param1: value1, param2: value2) - matches diagram
+// ✓ Return type: Promise<{statusCode: number, data: {...}}>
+// ✓ Error handling: try/catch present with setError() call
+// ✓ Callback: props.onSuccess?.(data) called on success
+// ✓ Error callback: props.onError?.(error) called on failure
+// ✓ Response accessed: response.data.items (matches diagram)
+```
+
+**If method not found in SDK or signature mismatch → RETURN to sequence diagrams and fix**
+
+**Data Transformation Validation:**
+
+- [ ] **Every transformation matches diagram mapping**
+- [ ] Source fields extracted correctly (e.g., `session.other.name`)
+- [ ] Fallback values match diagram (e.g., `|| 'Unknown'`)
+- [ ] Type conversions correct (e.g., ISO string → timestamp)
+- [ ] Optional field handling matches diagram (`?? operator`)
+
+**Example:**
+```typescript
+// Diagram says: contactName = session.other.name || session.other.primaryDisplayString || 'Unknown'
+// Code implements:
+contactName: session.other?.name || session.other?.primaryDisplayString || 'Unknown'
+// ✓ Matches diagram
+```
+
+### Event Flow Test
+
+**Validate implementation against sequence diagrams:**
+
+**For EACH sequence diagram, manually test the flow:**
+
+#### Testing Procedure
+
+1. **Load sequence diagram** from pre-questions for scenario
+2. **Perform user action** shown in diagram
+3. **Verify EACH step** in diagram occurs in correct order
+4. **Check state updates** match diagram timing
+5. **Confirm UI updates** match diagram end state
+
+#### Example: Button Click Flow (from sequence diagram)
+
+Per diagram sequence:
+1. User clicks button → Event handler called? ✓
+2. Handler sets `isLoading=true` → State updated? ✓
+3. Handler sets `error=null` → State cleared? ✓
+4. Handler calls SDK method → Method invoked with correct params? ✓
+5. SDK returns response → Response structure matches diagram? ✓
+6. Handler transforms data → Transformation per diagram mappings? ✓
+7. Handler sets `data=records` → State updated with transformed data? ✓
+8. Handler sets `isLoading=false` → Loading state cleared? ✓
+9. Component re-renders → UI shows new data? ✓
+
+**If ANY step fails or order wrong → Debug against sequence diagram**
+
+**For YOUR widget, test ALL diagram scenarios:**
+
+**Scenario 1:** (from sequence diagram: _______________)
+```
+Diagram step → Implemented code → Verified?
+───────────────────────────────────────────
+User action: _______________     →  _______________  →  [ ]
+Handler called: _______________  →  _______________  →  [ ]
+State update 1: _______________  →  _______________  →  [ ]
+State update 2: _______________  →  _______________  →  [ ]
+SDK call: _______________        →  _______________  →  [ ]
+SDK response: _______________    →  _______________  →  [ ]
+Data transform: _______________  →  _______________  →  [ ]
+Final state: _______________     →  _______________  →  [ ]
+UI renders: _______________      →  _______________  →  [ ]
+
+Overall Status: [ ] VERIFIED [ ] FAILED
+```
+
+**Scenario 2:** (from sequence diagram: _______________)
+```
+Diagram step → Implemented code → Verified?
+───────────────────────────────────────────
+User action: _______________     →  _______________  →  [ ]
+Handler called: _______________  →  _______________  →  [ ]
+State update 1: _______________  →  _______________  →  [ ]
+State update 2: _______________  →  _______________  →  [ ]
+SDK call: _______________        →  _______________  →  [ ]
+SDK response: _______________    →  _______________  →  [ ]
+Data transform: _______________  →  _______________  →  [ ]
+Final state: _______________     →  _______________  →  [ ]
+UI renders: _______________      →  _______________  →  [ ]
+
+Overall Status: [ ] VERIFIED [ ] FAILED
+```
+
+**Scenario 3:** (from sequence diagram: _______________)
+```
+Diagram step → Implemented code → Verified?
+───────────────────────────────────────────
+User action: _______________     →  _______________  →  [ ]
+Handler called: _______________  →  _______________  →  [ ]
+State update 1: _______________  →  _______________  →  [ ]
+State update 2: _______________  →  _______________  →  [ ]
+SDK call: _______________        →  _______________  →  [ ]
+SDK response: _______________    →  _______________  →  [ ]
+Data transform: _______________  →  _______________  →  [ ]
+Final state: _______________     →  _______________  →  [ ]
+UI renders: _______________      →  _______________  →  [ ]
+
+Overall Status: [ ] VERIFIED [ ] FAILED
+```
+
+### Data Flow Test
+
+**Trace data through ALL layers:**
+
+```
+User Action (UI)
+  ↓
+Widget Handler (index.tsx)
+  ↓
+Hook Method (helper.ts)
+  ↓
+Store/SDK Call
+  ↓
+Response/Observable Update
+  ↓
+Hook State Update
+  ↓
+Component Props
+  ↓
+UI Render
+```
+
+**Verification:**
+
+- [ ] User action triggers widget handler
+- [ ] Widget handler calls hook method correctly
+- [ ] Hook method accesses store/SDK correctly
+- [ ] Response updates hook state
+- [ ] Hook state passes to component props
+- [ ] Component renders with updated props
+- [ ] UI reflects the change
+
+**If any transition fails → Debug and fix**
+
+### Import Validation Test
+
+**Check for circular dependencies:**
+
+```bash
+# In widget code, search for cc-widgets import:
+grep -r "from '@webex/cc-widgets'" packages/contact-center/{widget-name}/src/
+# Expected: NO MATCHES
+
+# In cc-components, search for widget imports:
+grep -r "from '@webex/cc-.*-widget'" packages/contact-center/cc-components/src/
+# Expected: NO MATCHES
+```
+
+**Validation:**
+
+- [ ] No matches for `@webex/cc-widgets` in widget code
+- [ ] No matches for widget packages in cc-components
+- [ ] All imports follow one-directional flow
+- [ ] No circular dependencies detected
+
+**If any matches found → Refactor imports**
+
+### UI Visual Test
+
+**Compare with design input (Figma/screenshot/spec):**
+
+- [ ] Colors match design (or use Momentum tokens)
+- [ ] Spacing matches (8px/0.5rem grid adhered)
+- [ ] Layout matches (flex/grid structure correct)
+- [ ] Components match design (correct Momentum components used)
+- [ ] Typography matches (sizes, weights correct)
+- [ ] Interactions work (hover, active, focus states)
+- [ ] Theme switching works (light/dark modes)
+
+**Visual differences found:**
+
+| Element | Design | Generated | Status | Notes |
+|---------|--------|-----------|--------|-------|
+| _____ | _____ | _____ | [ ] Fixed | _____ |
+| _____ | _____ | _____ | [ ] Fixed | _____ |
+| _____ | _____ | _____ | [ ] Fixed | _____ |
+
+**If visual mismatch → Update styling**
+
+### Compiler Test
+
+```bash
+# Build the widget
+yarn build
+
+# Expected: NO ERRORS
+```
+
+**Common compiler errors and fixes:**
+
+| Error | Cause | Fix |
+|-------|-------|-----|
+| Type error | Missing/incorrect types | Add proper type definitions |
+| Import error | Wrong path or missing export | Check paths and exports |
+| Circular dependency | Improper imports | Refactor to follow dependency flow |
+| Syntax error | Code syntax issue | Fix syntax |
+
+**Validation:**
+
+- [ ] `yarn build` completes without errors
+- [ ] No TypeScript errors
+- [ ] No import errors
+- [ ] No syntax errors
+- [ ] Bundle size reasonable
+
+**Fix ALL compiler errors before completing**
+
+### Runtime Test (Manual)
+
+**Run sample app and test widget:**
+
+```bash
+# Start React sample app
+yarn samples:serve-react
+```
+
+**Test checklist:**
+
+- [ ] Widget renders without errors
+- [ ] All buttons work
+- [ ] All inputs work
+- [ ] All dropdowns/selects work
+- [ ] Callbacks fire correctly
+- [ ] State updates reflect in UI immediately
+- [ ] Error scenarios handled gracefully
+- [ ] No console errors or warnings
+
+**Test scenarios:**
+
+1. **Happy Path:**
+   - [ ] Primary user flow works end-to-end
+   - [ ] UI updates correctly
+   - [ ] Callbacks fire with correct data
+
+2. **Error Scenarios:**
+   - [ ] Invalid input shows error message
+   - [ ] API errors handled gracefully
+   - [ ] Error callbacks fire
+   - [ ] User can recover from errors
+
+3. **Edge Cases:**
+   - [ ] Empty state handled
+   - [ ] Loading state shown
+   - [ ] No data scenario handled
+   - [ ] Rapid clicks handled
+
+**If runtime errors → Debug and fix**
+
+---
+
+## 3. Testing Validation
 
 ### Unit Tests - Widget
 
