@@ -1,7 +1,5 @@
 import {MEDIA_CHANNEL, TaskListItemData} from '../task.types';
-import {ILogger, ITask} from '@webex/cc-store';
-import {isIncomingTask} from '@webex/cc-store';
-import store from '@webex/cc-store';
+import store, {isIncomingTask, ILogger, ITask} from '@webex/cc-store';
 /**
  * Extracts and processes data from a task for rendering in the task list
  * @param task - The task object

@@ -3,6 +3,9 @@ import {OutdialAniEntry, OutdialCallComponentProps} from '../task.types';
 import './outdial-call.style.scss';
 import {withMetrics} from '@webex/cc-ui-logging';
 import {Input, Button, Icon} from '@momentum-design/components/dist/react';
+// Migrate from @momentum-ui/react-collaboration to @momentum-design/components
+// Currently using SelectNext for controlled selection behavior with proper onSelectionChange and onOpenChange support
+// bug ticket: https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6990
 import {SelectNext} from '@momentum-ui/react-collaboration';
 import {Item} from '@react-stately/collections';
 import {OutdialStrings, KEY_LIST} from './constants';

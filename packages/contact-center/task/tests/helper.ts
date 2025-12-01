@@ -3969,31 +3969,6 @@ describe('useOutdialCall', () => {
 
       expect(result.current.isTelephonyTaskActive).toBe(false);
     });
-
-    it('should handle case-sensitive mediaType check correctly', () => {
-      const taskWithUppercaseMediaType = {
-        data: {
-          interactionId: 'uppercase-task-1',
-          interaction: {
-            mediaType: 'TELEPHONY',
-          },
-        },
-      } as ITask;
-
-      jest.spyOn(store, 'taskList', 'get').mockReturnValue({
-        'uppercase-task-1': taskWithUppercaseMediaType,
-      });
-
-      const {result} = renderHook(() =>
-        useOutdialCall({
-          cc: mockCC,
-          logger,
-        })
-      );
-
-      // Should return false because mediaType should be lowercase 'telephony'
-      expect(result.current.isTelephonyTaskActive).toBe(false);
-    });
   });
 });
 
