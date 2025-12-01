@@ -522,14 +522,15 @@ export interface OutdialCallProps {
   logger: ILogger;
 
   /**
-   * Current task instance.
+   * Boolean indicating if there's an active telephony task.
+   * Used to disable the outdial button when a telephony task is in progress.
    */
-  currentTask?: ITask;
+  isTelephonyTaskActive?: boolean;
 }
 
 export type OutdialCallComponentProps = Pick<
   OutdialCallProps,
-  'logger' | 'startOutdial' | 'getOutdialANIEntries' | 'currentTask'
+  'logger' | 'startOutdial' | 'getOutdialANIEntries' | 'isTelephonyTaskActive'
 >;
 
 /**

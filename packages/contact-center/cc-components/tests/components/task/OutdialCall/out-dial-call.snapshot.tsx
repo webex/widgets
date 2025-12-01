@@ -18,7 +18,7 @@ describe('Outdial Call Component', () => {
       {name: 'name 1', number: '1'},
       {name: 'name 2', number: '2'},
     ]),
-    currentTask: undefined,
+    isTelephonyTaskActive: false,
   };
 
   beforeEach(() => {
@@ -126,7 +126,7 @@ describe('Outdial Call Component', () => {
         logger={props.logger}
         startOutdial={props.startOutdial}
         getOutdialANIEntries={jest.fn().mockResolvedValue([])}
-        currentTask={undefined}
+        isTelephonyTaskActive={false}
       />
     );
     const select = await screen.findByTestId('outdial-ani-option-select');

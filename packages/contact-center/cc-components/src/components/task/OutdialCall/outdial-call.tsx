@@ -16,10 +16,10 @@ import {OutdialStrings, KEY_LIST} from './constants';
  *
  * @param props - Properties for the OutdialCallComponent.
  * @property startOutdial - Function to initiate the outdial call with the entered destination number.
- * @property currentTask - Current task instance (optional).
+ * @property isTelephonyTaskActive - Boolean indicating if there's an active telephony task.
  */
 const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> = (props) => {
-  const {logger, startOutdial, getOutdialANIEntries, currentTask} = props;
+  const {logger, startOutdial, getOutdialANIEntries, isTelephonyTaskActive} = props;
 
   // State Hooks
   const [destination, setDestination] = useState('');
@@ -147,7 +147,7 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
           setDestination('');
           setIsValidNumber('');
         }}
-        disabled={!!isValidNumber || !destination || !!currentTask}
+        disabled={!!isValidNumber || !destination || !!isTelephonyTaskActive}
         size={40}
       />
     </article>

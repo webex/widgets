@@ -30,7 +30,7 @@ describe('OutdialCallComponent', () => {
       {name: 'name 1', number: '1'},
       {name: 'name 2', number: '2'},
     ]),
-    currentTask: undefined,
+    isTelephonyTaskActive: false,
   };
   describe('renders the component correctly, should render:', () => {
     it('article container', async () => {
@@ -197,13 +197,8 @@ describe('OutdialCallComponent', () => {
     expect(callButton).toBeDisabled();
   });
 
-  it('disables call button when there is an active task', async () => {
-    const mockTask = {
-      data: {
-        interactionId: 'test-interaction-id',
-      },
-    };
-    render(<OutdialCallComponent {...props} currentTask={mockTask} />);
+  it('disables call button when there is an active telephony task', async () => {
+    render(<OutdialCallComponent {...props} isTelephonyTaskActive={true} />);
     const input = await screen.findByTestId('outdial-number-input');
     Object.defineProperty(customEvent, 'target', {
       writable: false,
@@ -213,6 +208,21 @@ describe('OutdialCallComponent', () => {
 
     const callButton = await screen.findByTestId('outdial-call-button');
     expect(callButton).toBeDisabled();
+  });
+
+  it('enables call button when there is no telephony task (digital task active)', async () => {
+    render(<OutdialCallComponent {...props} isTelephonyTaskActive={false} />);
+    const input = await screen.findByTestId('outdial-number-input');
+    Object.defineProperty(customEvent, 'target', {
+      writable: false,
+      value: {value: '123'},
+    });
+    fireEvent(input, customEvent);
+
+    await waitFor(() => {
+      const callButton = screen.getByTestId('outdial-call-button');
+      expect(callButton).not.toBeDisabled();
+    });
   });
 
   it('shows placeholder option to clear ANI selection', async () => {

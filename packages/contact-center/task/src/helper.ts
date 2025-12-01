@@ -9,6 +9,7 @@ import store, {
   getConferenceParticipants,
   Participant,
   findMediaResourceId,
+  MEDIA_TYPE_TELEPHONY_LOWER,
 } from '@webex/cc-store';
 import {findHoldTimestamp, getControlsVisibility} from './Utils/task-util';
 import {OutdialAniEntriesResponse} from '@webex/contact-center/dist/types/services/config/types';
@@ -949,6 +950,29 @@ export const useCallControl = (props: useCallControlProps) => {
 export const useOutdialCall = (props: useOutdialCallProps) => {
   const {cc, logger} = props;
 
+  /**
+   * Check if there's an active telephony task in the task list.
+   * Returns true if any task in the task list is a telephony task.
+   * Digital tasks (email, chat) should not prevent outdial calls.
+   */
+  const isTelephonyTaskActive = useMemo(() => {
+    try {
+      const taskList = store.taskList;
+      if (!taskList || Object.keys(taskList).length === 0) {
+        return false;
+      }
+
+      // Check if any task in the list is a telephony task
+      return Object.values(taskList).some((task) => task?.data?.interaction?.mediaType === MEDIA_TYPE_TELEPHONY_LOWER);
+    } catch (error) {
+      logger?.error(`CC-Widgets: Task: Error checking telephony task - ${error.message}`, {
+        module: 'useOutdialCall',
+        method: 'isTelephonyTaskActive',
+      });
+      return false;
+    }
+  }, [store.taskList, logger]);
+
   const startOutdial = (destination: string, origin: string = undefined) => {
     try {
       // Perform validation on destination number.
@@ -1004,5 +1028,6 @@ export const useOutdialCall = (props: useOutdialCallProps) => {
   return {
     startOutdial,
     getOutdialANIEntries,
+    isTelephonyTaskActive,
   };
 };
