@@ -1,4 +1,4 @@
-.keypad {
+.outdial-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -37,6 +37,17 @@
 
     &:active {
       background: var(--mds-color-theme-background-primary-active);
+    }
+  }
+
+  .tab-list {
+    mdc-button { 
+      display: none;
+    }
+
+    mdc-tab {
+      width: 7.395rem;
+      padding: 0;
     }
   }
 }
