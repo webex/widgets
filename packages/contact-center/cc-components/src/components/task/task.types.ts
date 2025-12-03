@@ -10,6 +10,8 @@ import {
   EntryPointRecord,
   FetchPaginatedList,
   Participant,
+  AddressBookEntrySearchParams,
+  AddressBookEntriesResponse,
 } from '@webex/cc-store';
 
 type Enum<T extends Record<string, unknown>> = T[keyof T];
@@ -516,9 +518,17 @@ export interface OutdialCallProps {
    * Logger instance for logging purpose.
    */
   logger: ILogger;
+
+  /**
+   * Function to get a list of address book entries.
+   */
+  getAddressBookEntries: (params: AddressBookEntrySearchParams) => Promise<AddressBookEntriesResponse>;
 }
 
-export type OutdialCallComponentProps = Pick<OutdialCallProps, 'logger' | 'startOutdial' | 'getOutdialANIEntries'>;
+export type OutdialCallComponentProps = Pick<
+  OutdialCallProps,
+  'logger' | 'startOutdial' | 'getOutdialANIEntries' | 'getAddressBookEntries'
+>;
 
 /**
  * Interface representing the properties for CallControlListItem component.

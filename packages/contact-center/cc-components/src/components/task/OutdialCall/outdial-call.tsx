@@ -1,9 +1,12 @@
 import React, {useEffect, useMemo, useState} from 'react';
 import {withMetrics} from '@webex/cc-ui-logging';
-import {Input, Button, Option, Select, Tab, TabList} from '@momentum-design/components/dist/react';
+import {Input, Button, Option, Select, Tab, TabList, Avatar, Spinner} from '@momentum-design/components/dist/react';
+import {AddressBookEntry} from '@webex/contact-center';
 
 import {OutdialAniEntry, OutdialCallComponentProps} from '../task.types';
 import {OutdialStrings, KEY_LIST} from './constants';
+import {DEFAULT_PAGE_SIZE} from '../constants';
+import {createInitials, debounce} from '../CallControl/CallControlCustom/call-control-custom.utils';
 
 import './outdial-call.style.scss';
 
@@ -18,7 +21,7 @@ import './outdial-call.style.scss';
  * @property startOutdial - Function to initiate the outdial call with the entered destination number.
  */
 const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> = (props) => {
-  const {logger, startOutdial, getOutdialANIEntries} = props;
+  const {logger, startOutdial, getOutdialANIEntries, getAddressBookEntries} = props;
 
   const TABS = {
     DIAL_PAD: 'dial_pad',
@@ -30,6 +33,11 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
   const [destination, setDestination] = useState('');
   const [isValidNumber, setIsValidNumber] = useState('');
   const [selectedANI, setSelectedANI] = useState(undefined);
+  const [addressBookLoading, setAddressBookLoading] = useState(false);
+  const [addressBookPage, setAddressBookPage] = useState(0);
+  const [selectedAddressBookEntry, setSelectedAddressBookEntry] = useState<string | null>(null);
+  const [addressBookSearch, setAddressBookSearch] = useState('');
+  const [addressBookEntries, setAddressBookEntries] = useState<AddressBookEntry[]>([]);
   const [outdialANIList, setOutdialANIList] = useState<OutdialAniEntry[]>([]);
 
   // Validate the input format using regex from agent desktop
@@ -56,6 +64,19 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
     updateOutdialANIList();
   }, []);
 
+  const fetchAddressBookEntries = async (page = 0, search = '') => {
+    try {
+      const result = await getAddressBookEntries({page, pageSize: DEFAULT_PAGE_SIZE, search});
+      setAddressBookEntries((prevEntries) => [...prevEntries, ...result.data]);
+    } catch (error) {
+      logger?.error(`CC-Widgets: Task: Error fetching address book entries: ${error}`, {
+        module: 'OutdialCallComponent',
+        method: 'fetchAddressBookEntries',
+      });
+      setAddressBookEntries([]);
+    }
+  };
+
   /**
    * validateOutboundNumber
    * @param value the dial number to validate
@@ -79,10 +100,91 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
     validateOutboundNumber(destination + value);
   };
 
+  const handleAddressBookTabClick = async () => {
+    setSelectedTab(TABS.ADDRESS_BOOK);
+    if (addressBookEntries.length === 0) {
+      setAddressBookLoading(true);
+      await fetchAddressBookEntries();
+      setAddressBookLoading(false);
+    }
+  };
+
+  const handleDiapadTabClick = () => {
+    setSelectedTab(TABS.DIAL_PAD);
+  };
+
+  const handleAddressBookSearchChange = (e: unknown) => {
+    (e as React.ChangeEvent<HTMLInputElement>).preventDefault();
+    const inputValue = (e as React.ChangeEvent<HTMLInputElement>).target.value;
+    setAddressBookEntries([]);
+    setAddressBookSearch(inputValue);
+    setAddressBookLoading(true);
+
+    debounce(async () => {
+      try {
+        setAddressBookPage(0);
+        await fetchAddressBookEntries(0, inputValue);
+      } catch (error) {
+        logger?.error(`CC-Widgets: Task: Error fetching address book entries: ${error}`, {
+          module: 'OutdialCallComponent',
+          method: 'handleAddressBookSearchChange',
+        });
+      } finally {
+        setAddressBookLoading(false);
+      }
+    }, 500)();
+  };
+
+  const handleAddressBookEntryClick = (number: string, id: string) => {
+    setSelectedAddressBookEntry(id);
+    setDestination(number);
+    validateOutboundNumber(number);
+  };
+
   const renderAddressBook = () => {
     return (
       <section className="address-book" data-testid="outdial-address-book-container">
-        <p>Address book panel</p>
+        <Input
+          className="address-book-search-input"
+          id="outdial-address-book-search-input"
+          name="outdial-address-book-search-input"
+          data-testid="outdial-address-book-search-input"
+          placeholder={OutdialStrings.ADDRESS_BOOK_SEARCH_PLACEHOLDER}
+          value={addressBookSearch}
+          onChange={handleAddressBookSearchChange}
+        />
+
+        <ul className="address-book-entries">
+          {addressBookEntries.length > 0 ? (
+            addressBookEntries.map((entry: AddressBookEntry) => (
+              <li
+                key={entry.id}
+                className={`address-book-entry ${selectedAddressBookEntry === entry.id ? 'selected' : ''}`}
+                onClick={() => handleAddressBookEntryClick(entry.number, entry.id)}
+                role="button"
+                tabIndex={0}
+                aria-label={`Select ${entry.name}`}
+                onKeyDown={(e: React.KeyboardEvent<HTMLLIElement>) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    handleAddressBookEntryClick(entry.number, entry.id);
+                  }
+                }}
+              >
+                <Avatar initials={createInitials(entry.name)} />
+                <div>
+                  <p>{entry.name}</p>
+                  <p>{entry.number}</p>
+                </div>
+              </li>
+            ))
+          ) : addressBookLoading ? (
+            <div className="address-book-loading-container">
+              <Spinner variant="button" />
+            </div>
+          ) : (
+            <p>No address book entries found.</p>
+          )}
+        </ul>
       </section>
     );
   };
@@ -126,7 +228,7 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
           tabId={TABS.ADDRESS_BOOK}
           aria-controls={TABS.ADDRESS_BOOK}
           variant="glass"
-          onClick={() => setSelectedTab(TABS.ADDRESS_BOOK)}
+          onClick={handleAddressBookTabClick}
         ></Tab>
 
         <Tab
@@ -134,12 +236,17 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
           tabId={TABS.DIAL_PAD}
           aria-controls={TABS.DIAL_PAD}
           variant="glass"
-          onClick={() => setSelectedTab(TABS.DIAL_PAD)}
+          onClick={handleDiapadTabClick}
         ></Tab>
       </TabList>
 
       {selectedTab === TABS.ADDRESS_BOOK && (
-        <div id={TABS.ADDRESS_BOOK} role="tabpanel" aria-labelledby={TABS.ADDRESS_BOOK}>
+        <div
+          id={TABS.ADDRESS_BOOK}
+          role="tabpanel"
+          aria-labelledby={TABS.ADDRESS_BOOK}
+          className="address-book-container"
+        >
           {renderAddressBook()}
         </div>
       )}
@@ -150,7 +257,7 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
       )}
 
       <Select
-        className="outdial-input"
+        className="outdial-input ani-select-input"
         label={OutdialStrings.ANI_SELECT_LABEL}
         id="outdial-ani-option-select"
         name="outdial-ani-option-select"

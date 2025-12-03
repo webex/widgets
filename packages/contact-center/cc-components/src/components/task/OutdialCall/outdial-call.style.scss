@@ -4,6 +4,7 @@
   align-items: center;
   border-radius: 0.625rem;
   width: 15.625rem;
+  height: 26.5rem;
 
   
   mdc-input {
@@ -40,6 +41,52 @@
     }
   }
 
+
+  .address-book-container {
+    width: 100%;
+  }
+
+  .address-book {
+    height: 16rem;
+    width: 100%;
+  }
+
+  .address-book-search-input {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .address-book-entries {
+    width: 100%;
+    height: 14rem;
+    overflow-y: auto;
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+  }
+
+  .address-book-loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+  }
+
+  .address-book-entry {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    padding: 0 1rem;
+  }
+
+  .address-book-entry:hover {
+    background: var(--mds-color-theme-background-primary-hover);
+  }
+
+  .address-book-entry.selected {
+    background: var(--mds-color-theme-background-primary-hover);
+  }
+
   .tab-list {
     mdc-button { 
       display: none;
@@ -49,5 +96,9 @@
       width: 7.395rem;
       padding: 0;
     }
+  }
+
+  .ani-select-input {
+    margin-top: 1rem;
   }
 }

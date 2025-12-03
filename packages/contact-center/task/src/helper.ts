@@ -1,5 +1,5 @@
 import {useEffect, useCallback, useState, useRef, useMemo} from 'react';
-import {ITask} from '@webex/contact-center';
+import {AddressBookEntriesResponse, AddressBookEntrySearchParams, ITask} from '@webex/contact-center';
 import {useCallControlProps, UseTaskListProps, UseTaskProps, useOutdialCallProps} from './task.types';
 import store, {
   TASK_EVENTS,
@@ -995,8 +995,23 @@ export const useOutdialCall = (props: useOutdialCallProps) => {
     }
   };
 
+  const getAddressBookEntries = async (params: AddressBookEntrySearchParams): Promise<AddressBookEntriesResponse> => {
+    try {
+      const result = await cc.addressBook.getEntries(params);
+      return result;
+    } catch (error) {
+      logger.error(`CC-Widgets: Task: Error fetching address book entries: ${error}`, {
+        module: 'useOutdialCall',
+        method: 'getAddressBookEntries',
+      });
+
+      throw error;
+    }
+  };
+
   return {
     startOutdial,
     getOutdialANIEntries,
+    getAddressBookEntries,
   };
 };
