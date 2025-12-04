@@ -1,7 +1,7 @@
-import React, {useMemo} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import store from '@webex/cc-store';
 import {observer} from 'mobx-react-lite';
-import Engage from '@webex-engage/wxengage-conversations';
+import Engage, {initializeApp} from '@webex/cc-digital-interactions';
 
 import {useDigitalChannels} from '../helper';
 import {DigitalChannelsProps} from './digital-channels.types';
@@ -13,6 +13,17 @@ const DigitalChannels: React.FunctionComponent<DigitalChannelsProps> = observer(
   if (!currentTask) {
     return null;
   }
+  const [initialized, setInitialized] = useState(false);
+
+  const initialize = async () => {
+    await initializeApp(dataCenter, jwtToken);
+    setInitialized(true);
+  };
+
+  useEffect(() => {
+    // Initialize the digital interactions app when component mounts or when jwtToken/dataCenter changes
+    initialize();
+  }, []);
 
   const result = useDigitalChannels({
     currentTask,
@@ -32,15 +43,17 @@ const DigitalChannels: React.FunctionComponent<DigitalChannelsProps> = observer(
 
   return (
     <div>
-      <md-theme id="app-theme" theme="momentumV2" class="is-visual-rebrand">
-        <Engage
-          key={componentKey}
-          conversationId={conversationId}
-          jwtToken={jwtToken}
-          dataCenter={dataCenter}
-          onError={handleError}
-        />
-      </md-theme>
+      {initialized && (
+        <md-theme id="app-theme" theme="momentumV2" class="is-visual-rebrand">
+          <Engage
+            key={componentKey}
+            conversationId={conversationId}
+            jwtToken={jwtToken}
+            dataCenter={dataCenter}
+            onError={handleError}
+          />
+        </md-theme>
+      )}
     </div>
   );
 });

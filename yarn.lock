@@ -8823,9 +8823,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@uuip/unified-ui-platform-sdk@npm:^1.3.28":
+"@uuip/unified-ui-platform-sdk@https://registry.npmjs.org/@uuip/unified-ui-platform-sdk/-/unified-ui-platform-sdk-1.3.28.tgz":
   version: 1.3.28
-  resolution: "@uuip/unified-ui-platform-sdk@npm:1.3.28"
+  resolution: "@uuip/unified-ui-platform-sdk@https://registry.npmjs.org/@uuip/unified-ui-platform-sdk/-/unified-ui-platform-sdk-1.3.28.tgz"
   dependencies:
     axios: "npm:^1.6.7"
     event-emitter: "npm:0.3.5"
@@ -9516,29 +9516,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex-engage/wxengage-conversations@npm:^1.0.11":
-  version: 1.0.11
-  resolution: "@webex-engage/wxengage-conversations@npm:1.0.11::__archiveUrl=https%3A%2F%2Fengci-maven-master.cisco.com%2Fartifactory%2Fapi%2Fnpm%2Fwebex-release-npm%2F%40webex-engage%2Fwxengage-conversations%2F-%2F%40webex-engage%2Fwxengage-conversations-1.0.11.tgz"
-  dependencies:
-    "@microsoft/signalr": "npm:^8.0.7"
-    "@wxcc-desktop/sdk": "npm:^2.0.3"
-    "@wxcc-desktop/sdk-types": "npm:^1.0.15"
-    axios: "npm:^1.7.9"
-    dompurify: "npm:^3.2.3"
-    i18next: "npm:^24.2.2"
-    i18next-browser-languagedetector: "npm:^8.0.2"
-    i18next-http-backend: "npm:^3.0.2"
-    react-froala-wysiwyg: "npm:^4.4.0"
-    react-i18next: "npm:^15.4.0"
-    showdown: "npm:2.1.0"
-  peerDependencies:
-    "@momentum-ui/web-components": ^2.23.35
-    react: ^18.3.1
-    react-dom: ^18.3.1
-  checksum: 10c0/245511b4207f65409c6d4a1cc1fb8c721cbee37820915b8ff5933ef0e45f69ee22587c6561a6038f8bf0376ca4656d631767197ba7ef67b745343e80e186ab75
-  languageName: node
-  linkType: hard
-
 "@webex/calling@npm:3.8.0-next.32":
   version: 3.8.0-next.32
   resolution: "@webex/calling@npm:3.8.0-next.32"
@@ -9631,7 +9608,7 @@ __metadata:
     "@types/react": "npm:^18.3.23"
     "@types/react-dom": "npm:^18.3.7"
     "@vitejs/plugin-react": "npm:^4.3.1"
-    "@webex-engage/wxengage-conversations": "npm:^1.0.11"
+    "@webex/cc-digital-interactions": "npm:^3.0.4"
     "@webex/cc-store": "workspace:*"
     "@webex/test-fixtures": "workspace:*"
     jest: "npm:^29.7.0"
@@ -9647,6 +9624,29 @@ __metadata:
     react-dom: ^18.3.1
   languageName: unknown
   linkType: soft
+
+"@webex/cc-digital-interactions@npm:^3.0.4":
+  version: 3.0.4
+  resolution: "@webex/cc-digital-interactions@npm:3.0.4::__archiveUrl=https%3A%2F%2Fengci-maven-master.cisco.com%2Fartifactory%2Fapi%2Fnpm%2Fwebex-release-npm%2F%40webex%2Fcc-digital-interactions%2F-%2F%40webex%2Fcc-digital-interactions-3.0.4.tgz"
+  dependencies:
+    "@microsoft/signalr": "npm:^8.0.7"
+    "@wxcc-desktop/sdk": "npm:^2.0.11"
+    "@wxcc-desktop/sdk-types": "npm:^1.0.28"
+    axios: "npm:^1.12.0"
+    dompurify: "npm:^3.2.3"
+    i18next: "npm:^24.2.2"
+    i18next-browser-languagedetector: "npm:^8.0.2"
+    i18next-http-backend: "npm:^3.0.2"
+    react-froala-wysiwyg: "npm:^4.7.0"
+    react-i18next: "npm:^15.4.0"
+    showdown: "npm:2.1.0"
+  peerDependencies:
+    "@momentum-ui/web-components": ^2.26.20
+    react: ^18.3.1
+    react-dom: ^18.3.1
+  checksum: 10c0/3e144002e4a9a389d5fe490f223eb5c165f56bd4016b528fac40f0655a80aac9719d88545d22b3e3c7f0e7e2ce59805bee563115d88da2e4d564e927290f43ad
+  languageName: node
+  linkType: hard
 
 "@webex/cc-station-login@workspace:*, @webex/cc-station-login@workspace:packages/contact-center/station-login":
   version: 0.0.0-use.local
@@ -12892,23 +12892,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@wxcc-desktop/sdk-types@npm:^1.0.15, @wxcc-desktop/sdk-types@npm:^1.0.23":
-  version: 1.0.23
-  resolution: "@wxcc-desktop/sdk-types@npm:1.0.23"
-  checksum: 10c0/25a433ec21cfb5f9491ba45cdbf2962c23926d6fda05a9fa4e24d632962030bf91ddf2b93b44c0369ecbcb27f52cc7c0204be7f29f6279bcdb43c27019af79d9
+"@wxcc-desktop/sdk-types@npm:^1.0.28, @wxcc-desktop/sdk-types@npm:^1.0.30":
+  version: 1.0.30
+  resolution: "@wxcc-desktop/sdk-types@npm:1.0.30"
+  checksum: 10c0/87bca6aa0dde1d248ed661d1cc24bef20f73a2eb6badf8627b43975ac938e30b01cf0088ba175942f8bee0a0c490843fa3212737adac65bf32ab2fb3f4937685
   languageName: node
   linkType: hard
 
-"@wxcc-desktop/sdk@npm:^2.0.3":
-  version: 2.0.9
-  resolution: "@wxcc-desktop/sdk@npm:2.0.9"
+"@wxcc-desktop/sdk@npm:^2.0.11":
+  version: 2.0.12
+  resolution: "@wxcc-desktop/sdk@npm:2.0.12"
   dependencies:
     "@babel/runtime": "npm:^7.25.6"
-    "@uuip/unified-ui-platform-sdk": "npm:^1.3.28"
-    "@wxcc-desktop/sdk-types": "npm:^1.0.23"
+    "@uuip/unified-ui-platform-sdk": "https://registry.npmjs.org/@uuip/unified-ui-platform-sdk/-/unified-ui-platform-sdk-1.3.28.tgz"
+    "@wxcc-desktop/sdk-types": "npm:^1.0.30"
     event-emitter: "npm:^0.3.5"
     js-cookie: "npm:^3.0.1"
-  checksum: 10c0/c28b541e57eda1031327b5bd2cb25d6e1ca46e867c7bdaed8a7ef37cd7664eb599b506ed5b29e8edc5cdf682baefa6a131d78c0be1ebbe92b84869769bae3e96
+  checksum: 10c0/dc9073aab99b920f2141751112c0a47ce9ffee5c8c7f245d104a01c5540cb7b21a5f34fae29b385169164536bcfbbbbef7a9be8c1b3a30ecb1c768ff951ebbcd
   languageName: node
   linkType: hard
 
@@ -14104,7 +14104,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:^1.6.7, axios@npm:^1.7.9":
+"axios@npm:^1.12.0":
+  version: 1.13.2
+  resolution: "axios@npm:1.13.2"
+  dependencies:
+    follow-redirects: "npm:^1.15.6"
+    form-data: "npm:^4.0.4"
+    proxy-from-env: "npm:^1.1.0"
+  checksum: 10c0/e8a42e37e5568ae9c7a28c348db0e8cf3e43d06fcbef73f0048669edfe4f71219664da7b6cc991b0c0f01c28a48f037c515263cb79be1f1ae8ff034cd813867b
+  languageName: node
+  linkType: hard
+
+"axios@npm:^1.6.7":
   version: 1.10.0
   resolution: "axios@npm:1.10.0"
   dependencies:
@@ -20243,6 +20254,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"form-data@npm:^4.0.4":
+  version: 4.0.5
+  resolution: "form-data@npm:4.0.5"
+  dependencies:
+    asynckit: "npm:^0.4.0"
+    combined-stream: "npm:^1.0.8"
+    es-set-tostringtag: "npm:^2.1.0"
+    hasown: "npm:^2.0.2"
+    mime-types: "npm:^2.1.12"
+  checksum: 10c0/dd6b767ee0bbd6d84039db12a0fa5a2028160ffbfaba1800695713b46ae974a5f6e08b3356c3195137f8530dcd9dfcb5d5ae1eeff53d0db1e5aad863b619ce3b
+  languageName: node
+  linkType: hard
+
 "form-data@npm:~2.3.2":
   version: 2.3.3
   resolution: "form-data@npm:2.3.3"
@@ -20277,10 +20301,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"froala-editor@npm:4.5.2":
-  version: 4.5.2
-  resolution: "froala-editor@npm:4.5.2"
-  checksum: 10c0/423940c71cfca0f9eb67a88c97d55882a7518a9d99a525bed1580432151e86f5841483fb89a2ae7c4235c8bbe64e1eeab27561770975327b9da5f9dbd9033d47
+"froala-editor@npm:4.7.1":
+  version: 4.7.1
+  resolution: "froala-editor@npm:4.7.1"
+  checksum: 10c0/064e20c894e4428e67e6da576cb6a831979ec97a114785a84c878b1a91fd81fc780b4ac5f84b5b5b8062636388a2efdbb189520d3d0e94280c9e06e2f809d051
   languageName: node
   linkType: hard
 
@@ -30300,15 +30324,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-froala-wysiwyg@npm:^4.4.0":
-  version: 4.5.2
-  resolution: "react-froala-wysiwyg@npm:4.5.2"
+"react-froala-wysiwyg@npm:^4.7.0":
+  version: 4.7.1
+  resolution: "react-froala-wysiwyg@npm:4.7.1"
   dependencies:
-    froala-editor: "npm:4.5.2"
+    froala-editor: "npm:4.7.1"
+    serialize-javascript: "npm:^6.0.2"
   peerDependencies:
-    react: ~0.14 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
-    react-dom: ~0.14 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
-  checksum: 10c0/e4baec4bb165950a1e3ab3da99493275de40004dc08a94212775dcb4d35ec8991d30e7daf2014b349c6a1dfb26696705c1a7774bc491224d2cc7993c0ad000ea
+    react: ~0.14 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+    react-dom: ~0.14 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+  checksum: 10c0/56ee360f6e1adf5bd7a5a8013a51a00254caa58ca8de54ce3c76bf331e31a09521bfb922d25f83a73c068bbb907c6f0dc6b5b229777b563869c48b7d102b0fd0
   languageName: node
   linkType: hard
 

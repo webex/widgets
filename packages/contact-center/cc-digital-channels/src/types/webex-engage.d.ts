@@ -1,4 +1,4 @@
-declare module '@webex-engage/wxengage-conversations' {
+declare module '@webex/cc-digital-interactions' {
   import {ComponentType} from 'react';
 
   interface EngageProps {

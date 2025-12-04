@@ -17,7 +17,7 @@
     "test:unit": "jest"
   },
   "dependencies": {
-    "@webex-engage/wxengage-conversations": "^1.0.11",
+    "@webex/cc-digital-interactions": "^3.0.4",
     "@webex/cc-store": "workspace:*"
   },
   "peerDependencies": {
