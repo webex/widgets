@@ -523,11 +523,16 @@ export interface OutdialCallProps {
    * Function to get a list of address book entries.
    */
   getAddressBookEntries: (params: AddressBookEntrySearchParams) => Promise<AddressBookEntriesResponse>;
+
+  /**
+   * Flag to determine if the address book is enabled.
+   */
+  isAddressBookEnabled: boolean;
 }
 
 export type OutdialCallComponentProps = Pick<
   OutdialCallProps,
-  'logger' | 'startOutdial' | 'getOutdialANIEntries' | 'getAddressBookEntries'
+  'logger' | 'startOutdial' | 'getOutdialANIEntries' | 'getAddressBookEntries' | 'isAddressBookEnabled'
 >;
 
 /**

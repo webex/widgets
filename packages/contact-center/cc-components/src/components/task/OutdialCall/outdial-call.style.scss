@@ -6,7 +6,6 @@
   width: 15.625rem;
   height: 26.5rem;
 
-  
   mdc-input {
     padding-bottom: 0; // default is 1 rem, 1.5 rem needed but provided by .keys
   }
@@ -14,7 +13,7 @@
   .outdial-input {
     width: 100%;
   }
-  
+
   .keys {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -29,7 +28,7 @@
     justify-content: center;
     background: var(--mds-color-theme-background-alert-default-normal);
     color: var(--mds-color-theme-text-primary-normal);
-    
+
     transition: background-color 0.2s ease;
 
     &:hover {
@@ -40,7 +39,6 @@
       background: var(--mds-color-theme-background-primary-active);
     }
   }
-
 
   .address-book-container {
     width: 100%;
@@ -88,7 +86,7 @@
   }
 
   .tab-list {
-    mdc-button { 
+    mdc-button {
       display: none;
     }
 
@@ -101,4 +99,8 @@
   .ani-select-input {
     margin-top: 1rem;
   }
+}
+
+.height-auto {
+  height: auto;
 }

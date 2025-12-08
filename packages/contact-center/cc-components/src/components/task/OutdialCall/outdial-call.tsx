@@ -21,7 +21,7 @@ import './outdial-call.style.scss';
  * @property startOutdial - Function to initiate the outdial call with the entered destination number.
  */
 const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> = (props) => {
-  const {logger, startOutdial, getOutdialANIEntries, getAddressBookEntries} = props;
+  const {logger, startOutdial, getOutdialANIEntries, getAddressBookEntries, isAddressBookEnabled} = props;
 
   const TABS = {
     DIAL_PAD: 'dial_pad',
@@ -113,6 +113,7 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
   };
 
   const handleAddressBookTabClick = async () => {
+    setDestination('');
     setSelectedTab(TABS.ADDRESS_BOOK);
     if (addressBookEntries.length === 0) {
       setAddressBookLoading(true);
@@ -122,6 +123,8 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
   };
 
   const handleDiapadTabClick = () => {
+    setSelectedAddressBookEntry(null);
+    setDestination('');
     setSelectedTab(TABS.DIAL_PAD);
   };
 
@@ -287,39 +290,45 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
 
   return (
     <article className="outdial-container">
-      <TabList activeTabId={selectedTab} dataAriaLabel="Outdial call tabs" className="tab-list">
-        <Tab
-          iconName="contact-card-bold"
-          tabId={TABS.ADDRESS_BOOK}
-          aria-controls={TABS.ADDRESS_BOOK}
-          variant="glass"
-          onClick={handleAddressBookTabClick}
-        ></Tab>
+      {isAddressBookEnabled && (
+        <>
+          <TabList activeTabId={selectedTab} dataAriaLabel="Outdial call tabs" className="tab-list">
+            <Tab
+              iconName="contact-card-bold"
+              tabId={TABS.ADDRESS_BOOK}
+              aria-controls={TABS.ADDRESS_BOOK}
+              variant="glass"
+              onClick={handleAddressBookTabClick}
+            ></Tab>
 
-        <Tab
-          iconName="dialpad-bold"
-          tabId={TABS.DIAL_PAD}
-          aria-controls={TABS.DIAL_PAD}
-          variant="glass"
-          onClick={handleDiapadTabClick}
-        ></Tab>
-      </TabList>
+            <Tab
+              iconName="dialpad-bold"
+              tabId={TABS.DIAL_PAD}
+              aria-controls={TABS.DIAL_PAD}
+              variant="glass"
+              onClick={handleDiapadTabClick}
+            ></Tab>
+          </TabList>
 
-      {selectedTab === TABS.ADDRESS_BOOK && (
-        <div
-          id={TABS.ADDRESS_BOOK}
-          role="tabpanel"
-          aria-labelledby={TABS.ADDRESS_BOOK}
-          className="address-book-container"
-        >
-          {renderAddressBook()}
-        </div>
+          {selectedTab === TABS.ADDRESS_BOOK && (
+            <div
+              id={TABS.ADDRESS_BOOK}
+              role="tabpanel"
+              aria-labelledby={TABS.ADDRESS_BOOK}
+              className="address-book-container"
+            >
+              {renderAddressBook()}
+            </div>
+          )}
+          {selectedTab === TABS.DIAL_PAD && (
+            <div id={TABS.DIAL_PAD} role="tabpanel" aria-labelledby={TABS.DIAL_PAD}>
+              {renderDiapad()}
+            </div>
+          )}
+        </>
       )}
-      {selectedTab === TABS.DIAL_PAD && (
-        <div id={TABS.DIAL_PAD} role="tabpanel" aria-labelledby={TABS.DIAL_PAD}>
-          {renderDiapad()}
-        </div>
-      )}
+
+      {!isAddressBookEnabled && renderDiapad()}
 
       <Select
         className="outdial-input ani-select-input"

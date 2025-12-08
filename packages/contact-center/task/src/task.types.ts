@@ -32,6 +32,12 @@ export type useCallControlProps = Pick<
   Partial<Pick<ControlProps, 'onHoldResume' | 'onEnd' | 'onWrapUp' | 'onRecordingToggle' | 'onToggleMute'>>;
 
 export type useOutdialCallProps = Pick<OutdialCallProps, 'cc' | 'logger'>;
+export interface OutdialProps {
+  /**
+   * Flag to determine if the address book is enabled.
+   */
+  isAddressBookEnabled: boolean;
+}
 
 /**
  * Helper interface for device type checks
