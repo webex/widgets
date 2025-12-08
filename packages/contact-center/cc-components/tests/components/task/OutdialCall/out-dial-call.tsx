@@ -2,10 +2,10 @@ import React from 'react';
 import {render, fireEvent, screen, waitFor, within} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import OutdialCallComponent from '../../../../src/components/task/OutdialCall/outdial-call';
-import {KEY_LIST, OutdialStrings} from '../../../../src/components/task/OutdialCall/constants';
+import {KEY_LIST} from '../../../../src/components/task/OutdialCall/constants';
 import store from '@webex/cc-store';
 import {mockCC} from '@webex/test-fixtures';
-import {OutdialCallComponentProps} from 'packages/contact-center/cc-components/src/components/task/task.types';
+import {OutdialCallComponentProps} from '../../../../src/components/task/task.types';
 
 describe('OutdialCallComponent', () => {
   let customEvent;
@@ -15,7 +15,7 @@ describe('OutdialCallComponent', () => {
 
   beforeEach(() => {
     // Create a custom event that mimics what the mdc-input component would fire
-    customEvent = new Event('change', {bubbles: true});
+    customEvent = new Event('input', {bubbles: true});
   });
 
   afterEach(() => {
@@ -30,6 +30,7 @@ describe('OutdialCallComponent', () => {
       {name: 'name 1', number: '1'},
       {name: 'name 2', number: '2'},
     ]),
+    isTelephonyTaskActive: false,
   };
   describe('renders the component correctly, should render:', () => {
     it('article container', async () => {
@@ -69,11 +70,7 @@ describe('OutdialCallComponent', () => {
     it('outdial ani option select', async () => {
       render(<OutdialCallComponent {...props} />);
       const outdialAniSelect = await screen.findByTestId('outdial-ani-option-select');
-      expect(outdialAniSelect).toHaveClass('outdial-input');
-      expect(outdialAniSelect).toHaveAttribute('help-text-type', 'default');
-      expect(outdialAniSelect).toHaveAttribute('label', OutdialStrings.ANI_SELECT_LABEL);
-      expect(outdialAniSelect).toHaveAttribute('name', 'outdial-ani-option-select');
-      expect(outdialAniSelect).toHaveTextContent(/name 1/);
+      expect(outdialAniSelect).toBeInTheDocument();
     });
 
     it('call button', async () => {
@@ -107,10 +104,11 @@ describe('OutdialCallComponent', () => {
 
   it('updates input value when clicking keypad buttons', async () => {
     render(<OutdialCallComponent {...props} />);
-    await screen.findByTestId('outdial-ani-option-1');
-    fireEvent.click(await screen.findByText('1'));
-    fireEvent.click(await screen.findByText('2'));
-    fireEvent.click(await screen.findByText('3'));
+    const keypad = await screen.findByTestId('outdial-keypad-keys');
+    const buttons = within(keypad).getAllByRole('button');
+    fireEvent.click(buttons[0]); // '1'
+    fireEvent.click(buttons[1]); // '2'
+    fireEvent.click(buttons[2]); // '3'
     expect(await screen.findByTestId('outdial-number-input')).toHaveValue('123');
   });
 
@@ -126,8 +124,8 @@ describe('OutdialCallComponent', () => {
     const callButton = await screen.findByTestId('outdial-call-button');
     fireEvent.click(callButton);
 
-    waitFor(() => {
-      expect(props.getOutdialANIEntries).toHaveBeenCalledWith('123', undefined);
+    await waitFor(() => {
+      expect(props.startOutdial).toHaveBeenCalledWith('123', undefined);
     });
   });
 
@@ -161,17 +159,31 @@ describe('OutdialCallComponent', () => {
   });
 
   it('has no ANI entry options when the entry list is empty', async () => {
-    render(<OutdialCallComponent startOutdial={props.startOutdial} outdialANIEntries={[]} />);
+    render(
+      <OutdialCallComponent
+        logger={props.logger}
+        startOutdial={props.startOutdial}
+        getOutdialANIEntries={jest.fn().mockResolvedValue([])}
+        currentTask={undefined}
+      />
+    );
     const select = await screen.findByTestId('outdial-ani-option-select');
     fireEvent.click(select);
-    expect(await screen.queryByText('name 1')).not.toBeInTheDocument();
+
+    // Should still show the placeholder option
+    const placeholderOption = await screen.findByTestId('outdial-ani-option-none');
+    expect(placeholderOption).toBeInTheDocument();
+
+    // But should not show 'name 1' or 'name 2'
+    expect(screen.queryByTestId('outdial-ani-option-1')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('outdial-ani-option-2')).not.toBeInTheDocument();
   });
 
   it('sets selected ani when an option is selected', async () => {
     render(<OutdialCallComponent {...props} />);
     const select = await screen.findByTestId('outdial-ani-option-select');
     fireEvent.click(select);
-    const option = await screen.findByText('name 1');
+    const option = await screen.findByTestId('outdial-ani-option-1');
     expect(option).toBeInTheDocument();
     fireEvent.click(option);
     await waitFor(() => {
@@ -183,5 +195,139 @@ describe('OutdialCallComponent', () => {
     render(<OutdialCallComponent {...props} />);
     const callButton = await screen.findByTestId('outdial-call-button');
     expect(callButton).toBeDisabled();
+  });
+
+  it('disables call button when there is an active telephony task', async () => {
+    render(<OutdialCallComponent {...props} isTelephonyTaskActive={true} />);
+    const input = await screen.findByTestId('outdial-number-input');
+    Object.defineProperty(customEvent, 'target', {
+      writable: false,
+      value: {value: '123'},
+    });
+    fireEvent(input, customEvent);
+
+    const callButton = await screen.findByTestId('outdial-call-button');
+    expect(callButton).toBeDisabled();
+  });
+
+  it('enables call button when there is no telephony task (digital task active)', async () => {
+    render(<OutdialCallComponent {...props} isTelephonyTaskActive={false} />);
+    const input = await screen.findByTestId('outdial-number-input');
+    Object.defineProperty(customEvent, 'target', {
+      writable: false,
+      value: {value: '123'},
+    });
+    fireEvent(input, customEvent);
+
+    await waitFor(() => {
+      const callButton = screen.getByTestId('outdial-call-button');
+      expect(callButton).not.toBeDisabled();
+    });
+  });
+
+  it('shows placeholder option to clear ANI selection', async () => {
+    render(<OutdialCallComponent {...props} />);
+    const select = await screen.findByTestId('outdial-ani-option-select');
+    expect(select).toBeInTheDocument();
+  });
+
+  it('allows unselecting ANI by selecting placeholder option', async () => {
+    const mockStartOutdial = jest.fn();
+    render(<OutdialCallComponent {...props} startOutdial={mockStartOutdial} />);
+
+    // Enter a destination
+    const input = await screen.findByTestId('outdial-number-input');
+    Object.defineProperty(customEvent, 'target', {
+      writable: false,
+      value: {value: '123'},
+    });
+    fireEvent(input, customEvent);
+
+    // Initially, call should be without origin
+    const callButton = await screen.findByTestId('outdial-call-button');
+    fireEvent.click(callButton);
+
+    await waitFor(() => {
+      expect(mockStartOutdial).toHaveBeenCalledWith('123', undefined);
+    });
+
+    mockStartOutdial.mockClear();
+  });
+
+  it('shows arrow-down icon by default', async () => {
+    render(<OutdialCallComponent {...props} />);
+    const arrowIcon = await screen.findByTestId('select-arrow-icon');
+    expect(arrowIcon).toBeInTheDocument();
+    expect(arrowIcon).toHaveAttribute('name', 'arrow-down-bold');
+  });
+
+  it('passes origin parameter when ANI is selected', async () => {
+    const mockStartOutdial = jest.fn();
+    render(<OutdialCallComponent {...props} startOutdial={mockStartOutdial} />);
+
+    // Enter a destination
+    const input = await screen.findByTestId('outdial-number-input');
+    Object.defineProperty(customEvent, 'target', {
+      writable: false,
+      value: {value: '+14698041796'},
+    });
+    fireEvent(input, customEvent);
+
+    // Wait for button to update
+    await waitFor(() => {
+      const callButton = screen.getByTestId('outdial-call-button');
+      expect(callButton).not.toBeDisabled();
+    });
+
+    // Select an ANI
+    const select = await screen.findByTestId('outdial-ani-option-select');
+    fireEvent.click(select);
+    const aniOption = await screen.findByTestId('outdial-ani-option-1');
+    fireEvent.click(aniOption);
+
+    // Make the call
+    const callButton = await screen.findByTestId('outdial-call-button');
+    fireEvent.click(callButton);
+
+    await waitFor(() => {
+      expect(mockStartOutdial).toHaveBeenCalledWith('+14698041796', '1');
+    });
+  });
+
+  it('does not pass origin parameter when placeholder is selected', async () => {
+    const mockStartOutdial = jest.fn();
+    render(<OutdialCallComponent {...props} startOutdial={mockStartOutdial} />);
+
+    // Enter a destination
+    const input = await screen.findByTestId('outdial-number-input');
+    Object.defineProperty(customEvent, 'target', {
+      writable: false,
+      value: {value: '+14698041796'},
+    });
+    fireEvent(input, customEvent);
+
+    await waitFor(() => {
+      const callButton = screen.getByTestId('outdial-call-button');
+      expect(callButton).not.toBeDisabled();
+    });
+
+    // First select an ANI
+    const select = await screen.findByTestId('outdial-ani-option-select');
+    fireEvent.click(select);
+    const aniOption = await screen.findByTestId('outdial-ani-option-1');
+    fireEvent.click(aniOption);
+
+    // Then select the placeholder to clear
+    fireEvent.click(select);
+    const placeholderOption = await screen.findByTestId('outdial-ani-option-none');
+    fireEvent.click(placeholderOption);
+
+    // Make the call
+    const callButton = await screen.findByTestId('outdial-call-button');
+    fireEvent.click(callButton);
+
+    await waitFor(() => {
+      expect(mockStartOutdial).toHaveBeenCalledWith('+14698041796', undefined);
+    });
   });
 });

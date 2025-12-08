@@ -1,5 +1,5 @@
 import React from 'react';
-import {fireEvent, render, screen} from '@testing-library/react';
+import {fireEvent, render, screen, within} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import OutdialCallComponent from '../../../../src/components/task/OutdialCall/outdial-call';
 import store from '@webex/cc-store';
@@ -18,11 +18,12 @@ describe('Outdial Call Component', () => {
       {name: 'name 1', number: '1'},
       {name: 'name 2', number: '2'},
     ]),
+    isTelephonyTaskActive: false,
   };
 
   beforeEach(() => {
     // Create a custom event that mimics what the mdc-input component would fire
-    customEvent = new Event('change', {bubbles: true});
+    customEvent = new Event('input', {bubbles: true});
   });
 
   afterEach(() => {
@@ -57,10 +58,11 @@ describe('Outdial Call Component', () => {
 
   it('updates input value when clicking keypad buttons', async () => {
     const {container} = render(<OutdialCallComponent {...props} />);
-    await screen.findByTestId('outdial-ani-option-1');
-    fireEvent.click(await screen.findByText('1'));
-    fireEvent.click(await screen.findByText('2'));
-    fireEvent.click(await screen.findByText('3'));
+    const keypad = await screen.findByTestId('outdial-keypad-keys');
+    const buttons = within(keypad).getAllByRole('button');
+    fireEvent.click(buttons[0]); // '1'
+    fireEvent.click(buttons[1]); // '2'
+    fireEvent.click(buttons[2]); // '3'
     // Remove IDs to avoid snapshot issues with dynamic IDs
     container.querySelectorAll('[id^="mdc-input"]').forEach((el) => el.removeAttribute('id'));
     expect(container).toMatchSnapshot();
@@ -119,7 +121,14 @@ describe('Outdial Call Component', () => {
   });
 
   it('has no ANI entry options when the entry list is empty', async () => {
-    const {container} = render(<OutdialCallComponent startOutdial={props.startOutdial} outdialANIEntries={[]} />);
+    const {container} = render(
+      <OutdialCallComponent
+        logger={props.logger}
+        startOutdial={props.startOutdial}
+        getOutdialANIEntries={jest.fn().mockResolvedValue([])}
+        isTelephonyTaskActive={false}
+      />
+    );
     const select = await screen.findByTestId('outdial-ani-option-select');
     fireEvent.click(select);
     // Remove IDs to avoid snapshot issues with dynamic IDs

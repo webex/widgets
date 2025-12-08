@@ -15,6 +15,7 @@ export interface IncomingTaskData {
   declineText: string | undefined;
   title: string;
   disableAccept: boolean;
+  disableDecline: boolean;
 }
 
 /**
@@ -23,7 +24,12 @@ export interface IncomingTaskData {
  * @param isBrowser - Whether the device type is browser
  * @returns Processed task data with computed values
  */
-export const extractIncomingTaskData = (incomingTask: ITask, isBrowser: boolean, logger?): IncomingTaskData => {
+export const extractIncomingTaskData = (
+  incomingTask: ITask,
+  isBrowser: boolean,
+  logger?,
+  isDeclineButtonEnabled?: boolean
+): IncomingTaskData => {
   try {
     // Extract basic data from task
     //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
@@ -52,8 +58,12 @@ export const extractIncomingTaskData = (incomingTask: ITask, isBrowser: boolean,
     // Compute title based on media type
     const title = isSocial ? customerName : ani;
 
+    // Compute disable state for accept button when auto-answering
+    const isAutoAnswering = incomingTask.data.isAutoAnswering || false;
     // Compute disable state for accept button
-    const disableAccept = isTelephony && !isBrowser;
+    const disableAccept = (isTelephony && !isBrowser) || isAutoAnswering;
+
+    const disableDecline = (isTelephony && !isBrowser) || (isAutoAnswering && !isDeclineButtonEnabled);
 
     return {
       ani,
@@ -69,6 +79,7 @@ export const extractIncomingTaskData = (incomingTask: ITask, isBrowser: boolean,
       declineText,
       title,
       disableAccept,
+      disableDecline,
     };
   } catch (error) {
     logger?.error('CC-Widgets: IncomingTask: Error in extractIncomingTaskData', {
@@ -91,6 +102,7 @@ export const extractIncomingTaskData = (incomingTask: ITask, isBrowser: boolean,
       declineText: undefined,
       title: '',
       disableAccept: false,
+      disableDecline: false,
     };
   }
 };

@@ -1,6 +1,5 @@
 import {MEDIA_CHANNEL, TaskListItemData} from '../task.types';
-import {ILogger, ITask} from '@webex/cc-store';
-import {isIncomingTask} from '@webex/cc-store';
+import store, {isIncomingTask, ILogger, ITask} from '@webex/cc-store';
 /**
  * Extracts and processes data from a task for rendering in the task list
  * @param task - The task object
@@ -42,8 +41,13 @@ export const extractTaskListItemData = (
     // Compute title based on media type
     const title = isSocial ? customerName : ani;
 
+    const isAutoAnswering = task.data.isAutoAnswering || false;
+
     // Compute disable state for accept button
-    const disableAccept = isTaskIncoming && isTelephony && !isBrowser;
+    const disableAccept = (isTaskIncoming && isTelephony && !isBrowser) || isAutoAnswering;
+
+    const disableDecline =
+      (isTaskIncoming && isTelephony && !isBrowser) || (isAutoAnswering && !store.isDeclineButtonEnabled);
 
     const ronaTimeout = isTaskIncoming ? rawRonaTimeout : null;
 
@@ -66,6 +70,7 @@ export const extractTaskListItemData = (
       declineText,
       title,
       disableAccept,
+      disableDecline,
       displayState,
     };
   } catch (error) {
@@ -91,6 +96,7 @@ export const extractTaskListItemData = (
       declineText: undefined,
       title: '',
       disableAccept: false,
+      disableDecline: false,
       displayState: '',
     };
   }

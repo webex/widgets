@@ -22,6 +22,7 @@ export interface TaskProps {
   acceptText?: string;
   declineText?: string;
   disableAccept?: boolean;
+  disableDecline?: boolean;
   styles?: string;
   mediaType?: MediaChannelType;
   mediaChannel?: MediaChannelType;
@@ -42,6 +43,7 @@ const Task: React.FC<TaskProps> = ({
   onTaskSelect,
   acceptText,
   disableAccept = false,
+  disableDecline = false,
   declineText,
   mediaType,
   mediaChannel,
@@ -173,7 +175,12 @@ const Task: React.FC<TaskProps> = ({
             </ButtonPill>
           ) : null}
           {declineText ? (
-            <ButtonPill onPress={declineTask} color="cancel" data-testid="task:decline-button">
+            <ButtonPill
+              onPress={declineTask}
+              color="cancel"
+              disabled={disableDecline}
+              data-testid="task:decline-button"
+            >
               {declineText}
             </ButtonPill>
           ) : null}

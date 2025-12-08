@@ -1,7 +1,12 @@
 import React, {useEffect, useMemo, useState, useRef, useCallback} from 'react';
 import {withMetrics} from '@webex/cc-ui-logging';
-import {Input, Button, Option, Select, Tab, TabList, Avatar, Spinner} from '@momentum-design/components/dist/react';
+import {Input, Button, Icon, Tab, TabList, Avatar, Spinner} from '@momentum-design/components/dist/react';
 import {AddressBookEntry} from '@webex/contact-center';
+// Migrate from @momentum-ui/react-collaboration to @momentum-design/components
+// Currently using SelectNext for controlled selection behavior with proper onSelectionChange and onOpenChange support
+// bug ticket: https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6990
+import {SelectNext} from '@momentum-ui/react-collaboration';
+import {Item} from '@react-stately/collections';
 
 import {OutdialAniEntry, OutdialCallComponentProps} from '../task.types';
 import {OutdialStrings, KEY_LIST} from './constants';
@@ -19,9 +24,17 @@ import './outdial-call.style.scss';
  *
  * @param props - Properties for the OutdialCallComponent.
  * @property startOutdial - Function to initiate the outdial call with the entered destination number.
+ * @property isTelephonyTaskActive - Boolean indicating if there's an active telephony task.
  */
 const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> = (props) => {
-  const {logger, startOutdial, getOutdialANIEntries, getAddressBookEntries, isAddressBookEnabled} = props;
+  const {
+    logger,
+    startOutdial,
+    getOutdialANIEntries,
+    isTelephonyTaskActive,
+    getAddressBookEntries,
+    isAddressBookEnabled,
+  } = props;
 
   const TABS = {
     DIAL_PAD: 'dial_pad',
@@ -40,6 +53,7 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
   const [addressBookEntries, setAddressBookEntries] = useState<AddressBookEntry[]>([]);
   const [outdialANIList, setOutdialANIList] = useState<OutdialAniEntry[]>([]);
   const [hasMoreAddressBookEntries, setHasMoreAddressBookEntries] = useState(true);
+  const [isSelectOpen, setIsSelectOpen] = useState(false);
 
   // Ref for infinite scroll observer
   const observerTarget = useRef<HTMLDivElement>(null);
@@ -289,7 +303,7 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
   };
 
   return (
-    <article className="outdial-container">
+    <article className={`outdial-container ${isAddressBookEnabled ? 'height-28-5rem' : ''}`}>
       {isAddressBookEnabled && (
         <>
           <TabList activeTabId={selectedTab} dataAriaLabel="Outdial call tabs" className="tab-list">
@@ -330,36 +344,53 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
 
       {!isAddressBookEnabled && renderDiapad()}
 
-      <Select
-        className="outdial-input ani-select-input"
-        label={OutdialStrings.ANI_SELECT_LABEL}
-        id="outdial-ani-option-select"
-        name="outdial-ani-option-select"
-        data-testid="outdial-ani-option-select"
-        placeholder={OutdialStrings.ANI_SELECT_PLACEHOLDER}
-        onChange={(event: CustomEvent) => {
-          setSelectedANI(event.detail.value);
-        }}
-      >
-        {outdialANIList.map((option: OutdialAniEntry, index: number) => {
-          return (
-            <Option
-              selected={option.number === selectedANI}
-              key={index}
-              value={option.number}
-              name={`outdial-ani-option-${index}`}
-              data-testid={`outdial-ani-option-${index}`}
-            >
-              {option.name}
-            </Option>
-          );
-        })}
-      </Select>
+      <div className="outdial-ani-select-container">
+        <Icon
+          className="outdial-select-arrow-icon"
+          name={isSelectOpen ? 'arrow-up-bold' : 'arrow-down-bold'}
+          title=""
+          data-testid="select-arrow-icon"
+        />
+
+        <SelectNext
+          className="outdial-input"
+          label={OutdialStrings.ANI_SELECT_LABEL}
+          id="outdial-ani-option-select"
+          data-testid="outdial-ani-option-select"
+          placeholder={OutdialStrings.ANI_SELECT_PLACEHOLDER}
+          selectedKey={selectedANI || null}
+          onSelectionChange={(key: React.Key) => {
+            const value = key as string;
+            // Set to undefined if key is 'none' or null
+            const newANI = !value || value === 'none' ? undefined : value;
+            setSelectedANI(newANI);
+          }}
+          onOpenChange={(isOpen: boolean) => setIsSelectOpen(isOpen)}
+          items={[
+            {id: 'none', name: OutdialStrings.ANI_SELECT_PLACEHOLDER},
+            ...outdialANIList.map((ani) => ({id: ani.number, name: ani.name})),
+          ]}
+          direction="bottom"
+          showBorder
+        >
+          {(item: {id: string; name: string}) => (
+            <Item key={item.id} textValue={item.name} data-testid={`outdial-ani-option-${item.id}`}>
+              <div className="outdial-ani-option-name">{item.name}</div>
+            </Item>
+          )}
+        </SelectNext>
+      </div>
       <Button
         data-testid="outdial-call-button"
         prefixIcon={'handset-regular'}
-        onClick={() => startOutdial(destination, selectedANI)}
-        disabled={!!isValidNumber || !destination}
+        className="outDialCallButton"
+        onClick={() => {
+          startOutdial(destination, selectedANI);
+          // Clear input field after initiating the call
+          setDestination('');
+          setIsValidNumber('');
+        }}
+        disabled={!!isValidNumber || !destination || !!isTelephonyTaskActive}
         size={40}
       />
     </article>

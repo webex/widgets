@@ -2,6 +2,7 @@ import {renderHook, act, waitFor} from '@testing-library/react';
 import {useIncomingTask, useTaskList, useCallControl, useOutdialCall} from '../src/helper';
 import * as taskUtils from '../src/Utils/task-util';
 import {AddressBookEntriesResponse, EntryPointListResponse, TASK_EVENTS, IContactCenter} from '@webex/cc-store';
+import {ITask} from '@webex/contact-center';
 import {
   mockAgents,
   mockCC,
@@ -3411,7 +3412,7 @@ describe('useOutdialCall', () => {
     logger.info.mockRestore();
   });
 
-  it('should successfully start an outdial call', async () => {
+  it('should successfully start an outdial call without origin', async () => {
     const {result} = renderHook(() =>
       useOutdialCall({
         cc: mockOutdialCallProps,
@@ -3423,7 +3424,24 @@ describe('useOutdialCall', () => {
       await result.current.startOutdial(destination);
     });
 
-    expect(mockOutdialCallProps.startOutdial).toHaveBeenCalledWith(destination, undefined);
+    expect(mockOutdialCallProps.startOutdial).toHaveBeenCalledWith(destination);
+    expect(logger.info).toHaveBeenCalledWith('Outdial call started', 'Success');
+  });
+
+  it('should successfully start an outdial call with origin', async () => {
+    const origin = '+16675260082';
+    const {result} = renderHook(() =>
+      useOutdialCall({
+        cc: mockOutdialCallProps,
+        logger,
+      })
+    );
+
+    await act(async () => {
+      await result.current.startOutdial(destination, origin);
+    });
+
+    expect(mockOutdialCallProps.startOutdial).toHaveBeenCalledWith(destination, origin);
     expect(logger.info).toHaveBeenCalledWith('Outdial call started', 'Success');
   });
 
@@ -3460,7 +3478,7 @@ describe('useOutdialCall', () => {
       await result.current.startOutdial(destination);
     });
 
-    expect(mockCCWithError.startOutdial).toHaveBeenCalledWith(destination, undefined);
+    expect(mockCCWithError.startOutdial).toHaveBeenCalledWith(destination);
     expect(logger.error).toHaveBeenCalledWith('Error: Outdial call failed', {
       module: 'widget-OutdialCall#helper.ts',
       method: 'startOutdial',
@@ -3754,6 +3772,202 @@ describe('useOutdialCall', () => {
           method: 'startOutdial',
         }
       );
+    });
+  });
+
+  describe('isTelephonyTaskActive', () => {
+    const originalTaskList = store.taskList;
+
+    afterEach(() => {
+      // Reset store.taskList to original state
+      store.store.taskList = originalTaskList;
+      jest.clearAllMocks();
+    });
+
+    it('should return false when task list is empty, null, or undefined', () => {
+      // Test empty object
+      jest.spyOn(store, 'taskList', 'get').mockReturnValue({});
+
+      const {result} = renderHook(() =>
+        useOutdialCall({
+          cc: mockCC,
+          logger,
+        })
+      );
+
+      expect(result.current.isTelephonyTaskActive).toBe(false);
+
+      // Test null/undefined
+      jest.spyOn(store, 'taskList', 'get').mockReturnValue(null);
+
+      const hookResult = renderHook(() =>
+        useOutdialCall({
+          cc: mockCC,
+          logger,
+        })
+      );
+
+      expect(hookResult.result.current.isTelephonyTaskActive).toBe(false);
+    });
+
+    it('should return true when there is a telephony task in the list', () => {
+      const telephonyTask = {
+        data: {
+          interactionId: 'telephony-task-1',
+          interaction: {
+            mediaType: 'telephony',
+          },
+        },
+      } as ITask;
+
+      jest.spyOn(store, 'taskList', 'get').mockReturnValue({
+        'telephony-task-1': telephonyTask,
+      });
+
+      const {result} = renderHook(() =>
+        useOutdialCall({
+          cc: mockCC,
+          logger,
+        })
+      );
+
+      expect(result.current.isTelephonyTaskActive).toBe(true);
+    });
+
+    it('should return false when there are only digital tasks', () => {
+      const chatTask = {
+        data: {
+          interactionId: 'chat-task-1',
+          interaction: {
+            mediaType: 'chat',
+          },
+        },
+      } as ITask;
+
+      jest.spyOn(store, 'taskList', 'get').mockReturnValue({
+        'chat-task-1': chatTask,
+      });
+
+      const {result} = renderHook(() =>
+        useOutdialCall({
+          cc: mockCC,
+          logger,
+        })
+      );
+
+      expect(result.current.isTelephonyTaskActive).toBe(false);
+    });
+
+    it('should return true when there is a mix of telephony and digital tasks', () => {
+      const telephonyTask = {
+        data: {
+          interactionId: 'telephony-task-1',
+          interaction: {
+            mediaType: 'telephony',
+          },
+        },
+      } as ITask;
+
+      const chatTask = {
+        data: {
+          interactionId: 'chat-task-1',
+          interaction: {
+            mediaType: 'chat',
+          },
+        },
+      } as ITask;
+
+      jest.spyOn(store, 'taskList', 'get').mockReturnValue({
+        'telephony-task-1': telephonyTask,
+        'chat-task-1': chatTask,
+      });
+
+      const {result} = renderHook(() =>
+        useOutdialCall({
+          cc: mockCC,
+          logger,
+        })
+      );
+
+      expect(result.current.isTelephonyTaskActive).toBe(true);
+    });
+
+    it('should handle errors gracefully and return false', () => {
+      // Create a task that will throw an error when accessed
+      const errorTask = {
+        get data() {
+          throw new Error('Error accessing task data');
+        },
+      } as unknown as ITask;
+
+      jest.spyOn(store, 'taskList', 'get').mockReturnValue({
+        'error-task': errorTask,
+      });
+
+      const {result} = renderHook(() =>
+        useOutdialCall({
+          cc: mockCC,
+          logger,
+        })
+      );
+
+      expect(result.current.isTelephonyTaskActive).toBe(false);
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('CC-Widgets: Task: Error checking telephony task'),
+        {
+          module: 'useOutdialCall',
+          method: 'isTelephonyTaskActive',
+        }
+      );
+    });
+
+    it('should update when taskList changes', () => {
+      const taskListSpy = jest.spyOn(store, 'taskList', 'get').mockReturnValue({});
+
+      const {result, rerender} = renderHook(() =>
+        useOutdialCall({
+          cc: mockCC,
+          logger,
+        })
+      );
+
+      expect(result.current.isTelephonyTaskActive).toBe(false);
+
+      // Add a telephony task
+      const telephonyTask = {
+        data: {
+          interactionId: 'telephony-task-1',
+          interaction: {
+            mediaType: 'telephony',
+          },
+        },
+      } as ITask;
+
+      taskListSpy.mockReturnValue({
+        'telephony-task-1': telephonyTask,
+      });
+
+      rerender();
+
+      expect(result.current.isTelephonyTaskActive).toBe(true);
+
+      // Remove telephony task and add digital task
+      const chatTask = {
+        data: {
+          interactionId: 'chat-task-1',
+          interaction: {
+            mediaType: 'chat',
+          },
+        },
+      } as ITask;
+
+      taskListSpy.mockReturnValue({
+        'chat-task-1': chatTask,
+      });
+
+      rerender();
+
+      expect(result.current.isTelephonyTaskActive).toBe(false);
     });
   });
 });
