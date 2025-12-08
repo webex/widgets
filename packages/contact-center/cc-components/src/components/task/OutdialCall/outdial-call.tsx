@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useState, useRef, useCallback} from 'react';
 import {withMetrics} from '@webex/cc-ui-logging';
 import {Input, Button, Option, Select, Tab, TabList, Avatar, Spinner} from '@momentum-design/components/dist/react';
 import {AddressBookEntry} from '@webex/contact-center';
@@ -39,6 +39,10 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
   const [addressBookSearch, setAddressBookSearch] = useState('');
   const [addressBookEntries, setAddressBookEntries] = useState<AddressBookEntry[]>([]);
   const [outdialANIList, setOutdialANIList] = useState<OutdialAniEntry[]>([]);
+  const [hasMoreAddressBookEntries, setHasMoreAddressBookEntries] = useState(true);
+
+  // Ref for infinite scroll observer
+  const observerTarget = useRef<HTMLDivElement>(null);
 
   // Validate the input format using regex from agent desktop
   const regExForDnSpecialChars = useMemo(
@@ -68,12 +72,20 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
     try {
       const result = await getAddressBookEntries({page, pageSize: DEFAULT_PAGE_SIZE, search});
       setAddressBookEntries((prevEntries) => [...prevEntries, ...result.data]);
+
+      // Check if there are more entries to load
+      if (result.data.length < DEFAULT_PAGE_SIZE) {
+        setHasMoreAddressBookEntries(false);
+      } else {
+        setHasMoreAddressBookEntries(true);
+      }
     } catch (error) {
-      logger?.error(`CC-Widgets: Task: Error fetching address book entries: ${error}`, {
+      logger?.error(`CC-Widgets: Task: Error fetching address book entries: ${error.toString()}`, {
         module: 'OutdialCallComponent',
         method: 'fetchAddressBookEntries',
       });
       setAddressBookEntries([]);
+      setHasMoreAddressBookEntries(false);
     }
   };
 
@@ -113,33 +125,74 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
     setSelectedTab(TABS.DIAL_PAD);
   };
 
-  const handleAddressBookSearchChange = (e: unknown) => {
+  const handleAddressBookSearchChange = debounce(async (e: unknown) => {
     (e as React.ChangeEvent<HTMLInputElement>).preventDefault();
     const inputValue = (e as React.ChangeEvent<HTMLInputElement>).target.value;
     setAddressBookEntries([]);
     setAddressBookSearch(inputValue);
     setAddressBookLoading(true);
+    setAddressBookPage(0);
 
-    debounce(async () => {
-      try {
-        setAddressBookPage(0);
-        await fetchAddressBookEntries(0, inputValue);
-      } catch (error) {
-        logger?.error(`CC-Widgets: Task: Error fetching address book entries: ${error}`, {
-          module: 'OutdialCallComponent',
-          method: 'handleAddressBookSearchChange',
-        });
-      } finally {
-        setAddressBookLoading(false);
-      }
-    }, 500)();
-  };
+    try {
+      await fetchAddressBookEntries(0, inputValue);
+    } catch (error) {
+      logger?.error(`CC-Widgets: Task: Error fetching address book entries: ${error}`, {
+        module: 'OutdialCallComponent',
+        method: 'handleAddressBookSearchChange',
+      });
+    } finally {
+      setAddressBookLoading(false);
+    }
+  }, 500);
 
   const handleAddressBookEntryClick = (number: string, id: string) => {
     setSelectedAddressBookEntry(id);
     setDestination(number);
     validateOutboundNumber(number);
   };
+
+  // Infinite scroll: Load more entries when scrolling to bottom
+  const loadMoreAddressBookEntries = useCallback(async () => {
+    if (addressBookLoading || !hasMoreAddressBookEntries) return;
+
+    setAddressBookLoading(true);
+    const nextPage = addressBookPage + 1;
+    setAddressBookPage(nextPage);
+
+    try {
+      await fetchAddressBookEntries(nextPage, addressBookSearch);
+    } catch (error) {
+      logger?.error(`CC-Widgets: Task: Error loading more address book entries: ${error}`, {
+        module: 'OutdialCallComponent',
+        method: 'loadMoreAddressBookEntries',
+      });
+    } finally {
+      setAddressBookLoading(false);
+    }
+  }, [addressBookLoading, hasMoreAddressBookEntries, addressBookPage, addressBookSearch]);
+
+  // Set up IntersectionObserver for infinite scroll
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMoreAddressBookEntries && !addressBookLoading) {
+          loadMoreAddressBookEntries();
+        }
+      },
+      {threshold: 1.0}
+    );
+
+    const currentTarget = observerTarget.current;
+    if (currentTarget) {
+      observer.observe(currentTarget);
+    }
+
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
+      }
+    };
+  }, [loadMoreAddressBookEntries, hasMoreAddressBookEntries, addressBookLoading]);
 
   const renderAddressBook = () => {
     return (
@@ -151,32 +204,44 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
           data-testid="outdial-address-book-search-input"
           placeholder={OutdialStrings.ADDRESS_BOOK_SEARCH_PLACEHOLDER}
           value={addressBookSearch}
-          onChange={handleAddressBookSearchChange}
+          onInput={handleAddressBookSearchChange}
         />
 
         <ul className="address-book-entries">
           {addressBookEntries.length > 0 ? (
-            addressBookEntries.map((entry: AddressBookEntry) => (
-              <li
-                key={entry.id}
-                className={`address-book-entry ${selectedAddressBookEntry === entry.id ? 'selected' : ''}`}
-                onClick={() => handleAddressBookEntryClick(entry.number, entry.id)}
-                role="button"
-                tabIndex={0}
-                aria-label={`Select ${entry.name}`}
-                onKeyDown={(e: React.KeyboardEvent<HTMLLIElement>) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    handleAddressBookEntryClick(entry.number, entry.id);
-                  }
-                }}
-              >
-                <Avatar initials={createInitials(entry.name)} />
-                <div>
-                  <p>{entry.name}</p>
-                  <p>{entry.number}</p>
+            <>
+              {addressBookEntries.map((entry: AddressBookEntry) => (
+                <li
+                  key={entry.id}
+                  className={`address-book-entry ${selectedAddressBookEntry === entry.id ? 'selected' : ''}`}
+                  onClick={() => handleAddressBookEntryClick(entry.number, entry.id)}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Select ${entry.name}`}
+                  onKeyDown={(e: React.KeyboardEvent<HTMLLIElement>) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      handleAddressBookEntryClick(entry.number, entry.id);
+                    }
+                  }}
+                >
+                  <Avatar initials={createInitials(entry.name)} />
+                  <div>
+                    <p>{entry.name}</p>
+                    <p>{entry.number}</p>
+                  </div>
+                </li>
+              ))}
+              {/* Sentinel element for infinite scroll */}
+              {hasMoreAddressBookEntries && (
+                <div ref={observerTarget} className="address-book-observer">
+                  {addressBookLoading && (
+                    <div className="address-book-loading-container">
+                      <Spinner variant="button" size="small" />
+                    </div>
+                  )}
                 </div>
-              </li>
-            ))
+              )}
+            </>
           ) : addressBookLoading ? (
             <div className="address-book-loading-container">
               <Spinner variant="button" />
