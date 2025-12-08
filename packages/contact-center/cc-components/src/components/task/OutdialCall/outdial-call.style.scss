@@ -6,6 +6,10 @@
   width: 15.625rem;
   height: 26.5rem;
 
+  .keypad {
+    width: 100%;
+  }
+
   mdc-input {
     padding-bottom: 0; // default is 1 rem, 1.5 rem needed but provided by .keys
   }
@@ -21,7 +25,7 @@
     column-gap: 1.5rem;
     padding: 1.5rem 0;
     list-style-type: none;
-    margin: 0;
+    margin: 0 20%;
   }
 
   .key {

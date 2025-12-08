@@ -321,7 +321,7 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
             </div>
           )}
           {selectedTab === TABS.DIAL_PAD && (
-            <div id={TABS.DIAL_PAD} role="tabpanel" aria-labelledby={TABS.DIAL_PAD}>
+            <div id={TABS.DIAL_PAD} role="tabpanel" aria-labelledby={TABS.DIAL_PAD} className="keypad">
               {renderDiapad()}
             </div>
           )}
