@@ -1,5 +1,5 @@
 import React from 'react';
-import {fireEvent, render, screen, within} from '@testing-library/react';
+import {fireEvent, render, screen, waitFor, within} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import OutdialCallComponent from '../../../../src/components/task/OutdialCall/outdial-call';
 import store from '@webex/cc-store';
@@ -11,6 +11,15 @@ describe('Outdial Call Component', () => {
   // Prevent warning 'CC-Widgets: UI Metrics: No logger found'
   store.store.logger = mockCC.LoggerProxy;
 
+  // Helper function to get the tablist element (web component)
+  const getTabList = async (container: HTMLElement) => {
+    const tabList = container.querySelector('mdc-tablist');
+    if (!tabList) {
+      throw new Error('TabList not found');
+    }
+    return tabList;
+  };
+
   const props: OutdialCallComponentProps = {
     logger: mockCC.LoggerProxy,
     startOutdial: jest.fn(),
@@ -19,6 +28,8 @@ describe('Outdial Call Component', () => {
       {name: 'name 2', number: '2'},
     ]),
     isTelephonyTaskActive: false,
+    getAddressBookEntries: jest.fn().mockResolvedValue([]),
+    isAddressBookEnabled: false,
   };
 
   beforeEach(() => {
@@ -127,6 +138,8 @@ describe('Outdial Call Component', () => {
         startOutdial={props.startOutdial}
         getOutdialANIEntries={jest.fn().mockResolvedValue([])}
         isTelephonyTaskActive={false}
+        getAddressBookEntries={jest.fn().mockResolvedValue([])}
+        isAddressBookEnabled={false}
       />
     );
     const select = await screen.findByTestId('outdial-ani-option-select');
@@ -154,5 +167,112 @@ describe('Outdial Call Component', () => {
     // Remove IDs to avoid snapshot issues with dynamic IDs
     container.querySelectorAll('[id^="mdc-input"]').forEach((el) => el.removeAttribute('id'));
     expect(container).toMatchSnapshot();
+  });
+
+  describe('Address Book functionality', () => {
+    const addressBookProps: OutdialCallComponentProps = {
+      ...props,
+      isAddressBookEnabled: true,
+      getAddressBookEntries: jest.fn().mockResolvedValue({
+        data: [
+          {id: '1', name: 'John Doe', number: '+14691234567'},
+          {id: '2', name: 'Jane Smith', number: '+14699876543'},
+        ],
+        total: 2,
+      }),
+    };
+
+    it('renders with address book enabled', async () => {
+      const {container} = render(<OutdialCallComponent {...addressBookProps} />);
+      await screen.findByTestId('outdial-number-input');
+      // Remove IDs to avoid snapshot issues with dynamic IDs
+      container.querySelectorAll('[id^="mdc-input"]').forEach((el) => el.removeAttribute('id'));
+      expect(container).toMatchSnapshot();
+    });
+
+    it('switches to address book tab', async () => {
+      const {container} = render(<OutdialCallComponent {...addressBookProps} />);
+      const tabList = await waitFor(() => getTabList(container));
+      const tabs = within(tabList as HTMLElement).getAllByRole('tab');
+      const addressBookTab = tabs[0]; // First tab is address book
+      fireEvent.click(addressBookTab);
+      await screen.findByTestId('outdial-address-book-container');
+      // Remove IDs to avoid snapshot issues with dynamic IDs
+      container.querySelectorAll('[id^="mdc-input"]').forEach((el) => el.removeAttribute('id'));
+      expect(container).toMatchSnapshot();
+    });
+
+    it('displays address book entries', async () => {
+      const {container} = render(<OutdialCallComponent {...addressBookProps} />);
+      const tabList = await waitFor(() => getTabList(container));
+      const tabs = within(tabList as HTMLElement).getAllByRole('tab');
+      const addressBookTab = tabs[0];
+      fireEvent.click(addressBookTab);
+      await screen.findByText('John Doe');
+      await screen.findByText('Jane Smith');
+      // Remove IDs to avoid snapshot issues with dynamic IDs
+      container.querySelectorAll('[id^="mdc-input"]').forEach((el) => el.removeAttribute('id'));
+      expect(container).toMatchSnapshot();
+    });
+
+    it('selects an address book entry', async () => {
+      const {container} = render(<OutdialCallComponent {...addressBookProps} />);
+      const tabList = await waitFor(() => getTabList(container));
+      const tabs = within(tabList as HTMLElement).getAllByRole('tab');
+      const addressBookTab = tabs[0];
+      fireEvent.click(addressBookTab);
+      const entry = await screen.findByText('John Doe');
+      fireEvent.click(entry);
+      // Remove IDs to avoid snapshot issues with dynamic IDs
+      container.querySelectorAll('[id^="mdc-input"]').forEach((el) => el.removeAttribute('id'));
+      expect(container).toMatchSnapshot();
+    });
+
+    it('renders address book search input', async () => {
+      const {container} = render(<OutdialCallComponent {...addressBookProps} />);
+      const tabList = await waitFor(() => getTabList(container));
+      const tabs = within(tabList as HTMLElement).getAllByRole('tab');
+      const addressBookTab = tabs[0];
+      fireEvent.click(addressBookTab);
+      const searchInput = await screen.findByTestId('outdial-address-book-search-input');
+      expect(searchInput).toBeInTheDocument();
+      // Remove IDs to avoid snapshot issues with dynamic IDs
+      container.querySelectorAll('[id^="mdc-input"]').forEach((el) => el.removeAttribute('id'));
+      expect(container).toMatchSnapshot();
+    });
+
+    it('shows empty state when no address book entries', async () => {
+      const emptyProps = {
+        ...addressBookProps,
+        getAddressBookEntries: jest.fn().mockResolvedValue({
+          data: [],
+          total: 0,
+        }),
+      };
+      const {container} = render(<OutdialCallComponent {...emptyProps} />);
+      const tabList = await waitFor(() => getTabList(container));
+      const tabs = within(tabList as HTMLElement).getAllByRole('tab');
+      const addressBookTab = tabs[0];
+      fireEvent.click(addressBookTab);
+      await screen.findByText('No address book entries found.');
+      // Remove IDs to avoid snapshot issues with dynamic IDs
+      container.querySelectorAll('[id^="mdc-input"]').forEach((el) => el.removeAttribute('id'));
+      expect(container).toMatchSnapshot();
+    });
+
+    it('switches back to dial pad from address book', async () => {
+      const {container} = render(<OutdialCallComponent {...addressBookProps} />);
+      const tabList = await waitFor(() => getTabList(container));
+      const tabs = within(tabList as HTMLElement).getAllByRole('tab');
+      const addressBookTab = tabs[0];
+      fireEvent.click(addressBookTab);
+      await screen.findByTestId('outdial-address-book-container');
+      const dialPadTab = tabs[1]; // Second tab is dial pad
+      fireEvent.click(dialPadTab);
+      await screen.findByTestId('outdial-keypad-keys');
+      // Remove IDs to avoid snapshot issues with dynamic IDs
+      container.querySelectorAll('[id^="mdc-input"]').forEach((el) => el.removeAttribute('id'));
+      expect(container).toMatchSnapshot();
+    });
   });
 });

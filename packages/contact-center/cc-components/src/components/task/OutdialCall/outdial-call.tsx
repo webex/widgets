@@ -138,7 +138,7 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
 
   const handleDiapadTabClick = () => {
     setSelectedAddressBookEntry(null);
-    setDestination('');
+    // Don't clear destination - preserve selected address book entry number
     setSelectedTab(TABS.DIAL_PAD);
   };
 
@@ -283,7 +283,7 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
           helpTextType={isValidNumber ? 'error' : 'default'}
           placeholder={OutdialStrings.DN_PLACEHOLDER}
           value={destination}
-          onChange={(e: unknown) => {
+          onInput={(e: unknown) => {
             const inputValue = (e as React.ChangeEvent<HTMLInputElement>).target.value;
             setDestination(inputValue);
             validateOutboundNumber(inputValue);

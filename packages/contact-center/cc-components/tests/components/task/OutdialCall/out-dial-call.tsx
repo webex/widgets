@@ -31,6 +31,8 @@ describe('OutdialCallComponent', () => {
       {name: 'name 2', number: '2'},
     ]),
     isTelephonyTaskActive: false,
+    getAddressBookEntries: jest.fn().mockResolvedValue([]),
+    isAddressBookEnabled: false,
   };
   describe('renders the component correctly, should render:', () => {
     it('article container', async () => {
@@ -164,7 +166,9 @@ describe('OutdialCallComponent', () => {
         logger={props.logger}
         startOutdial={props.startOutdial}
         getOutdialANIEntries={jest.fn().mockResolvedValue([])}
-        currentTask={undefined}
+        isTelephonyTaskActive={false}
+        getAddressBookEntries={jest.fn().mockResolvedValue([])}
+        isAddressBookEnabled={false}
       />
     );
     const select = await screen.findByTestId('outdial-ani-option-select');
@@ -328,6 +332,343 @@ describe('OutdialCallComponent', () => {
 
     await waitFor(() => {
       expect(mockStartOutdial).toHaveBeenCalledWith('+14698041796', undefined);
+    });
+  });
+
+  describe('Address Book functionality', () => {
+    const addressBookProps: OutdialCallComponentProps = {
+      ...props,
+      isAddressBookEnabled: true,
+      getAddressBookEntries: jest.fn().mockResolvedValue({
+        data: [
+          {id: '1', name: 'John Doe', number: '+14691234567'},
+          {id: '2', name: 'Jane Smith', number: '+14699876543'},
+        ],
+        total: 2,
+      }),
+    };
+
+    // Helper function to get the tablist element (web component)
+    const getTabList = async (container: HTMLElement) => {
+      const tabList = container.querySelector('mdc-tablist');
+      if (!tabList) {
+        throw new Error('TabList not found');
+      }
+      return tabList;
+    };
+
+    it('does not show tabs when address book is disabled', async () => {
+      const {container} = render(<OutdialCallComponent {...props} />);
+      const tabList = container.querySelector('mdc-tablist');
+      expect(tabList).not.toBeInTheDocument();
+    });
+
+    it('shows tabs when address book is enabled', async () => {
+      const {container} = render(<OutdialCallComponent {...addressBookProps} />);
+      const tabList = await waitFor(() => getTabList(container));
+      expect(tabList).toBeInTheDocument();
+      const tabs = within(tabList as HTMLElement).getAllByRole('tab');
+      expect(tabs).toHaveLength(2);
+    });
+
+    it('switches to address book tab and loads entries', async () => {
+      const {container} = render(<OutdialCallComponent {...addressBookProps} />);
+      const tabList = await waitFor(() => getTabList(container));
+      const tabs = within(tabList as HTMLElement).getAllByRole('tab');
+      const addressBookTab = tabs[0]; // First tab is address book
+      fireEvent.click(addressBookTab);
+
+      // Verify address book container is shown
+      const addressBookContainer = await screen.findByTestId('outdial-address-book-container');
+      expect(addressBookContainer).toBeInTheDocument();
+
+      // Verify entries are loaded
+      await waitFor(() => {
+        expect(screen.getByText('John Doe')).toBeInTheDocument();
+        expect(screen.getByText('Jane Smith')).toBeInTheDocument();
+      });
+
+      // Verify getAddressBookEntries was called
+      expect(addressBookProps.getAddressBookEntries).toHaveBeenCalled();
+    });
+
+    it('renders address book search input', async () => {
+      const {container} = render(<OutdialCallComponent {...addressBookProps} />);
+      const tabList = await waitFor(() => getTabList(container));
+      const tabs = within(tabList as HTMLElement).getAllByRole('tab');
+      const addressBookTab = tabs[0];
+      fireEvent.click(addressBookTab);
+
+      const searchInput = await screen.findByTestId('outdial-address-book-search-input');
+      expect(searchInput).toBeInTheDocument();
+      // Note: Web components don't always expose props as HTML attributes
+    });
+
+    it('selects an address book entry and populates destination', async () => {
+      const {container} = render(<OutdialCallComponent {...addressBookProps} />);
+      const tabList = await waitFor(() => getTabList(container));
+      const tabs = within(tabList as HTMLElement).getAllByRole('tab');
+      const addressBookTab = tabs[0];
+      fireEvent.click(addressBookTab);
+
+      // Wait for entries to load
+      const johnDoe = await screen.findByText('John Doe');
+      fireEvent.click(johnDoe);
+
+      // Switch back to dial pad to verify destination was set
+      const dialPadTab = tabs[1];
+      fireEvent.click(dialPadTab);
+
+      const input = await screen.findByTestId('outdial-number-input');
+      await waitFor(() => {
+        expect(input).toHaveValue('+14691234567');
+      });
+    });
+
+    it('allows making a call with address book selected number', async () => {
+      const mockStartOutdial = jest.fn();
+      const {container} = render(<OutdialCallComponent {...addressBookProps} startOutdial={mockStartOutdial} />);
+
+      const tabList = await waitFor(() => getTabList(container));
+      const tabs = within(tabList as HTMLElement).getAllByRole('tab');
+      const addressBookTab = tabs[0];
+      fireEvent.click(addressBookTab);
+
+      // Select an entry
+      const janeDoe = await screen.findByText('Jane Smith');
+      fireEvent.click(janeDoe);
+
+      // Make the call
+      const callButton = await screen.findByTestId('outdial-call-button');
+      fireEvent.click(callButton);
+
+      await waitFor(() => {
+        expect(mockStartOutdial).toHaveBeenCalledWith('+14699876543', undefined);
+      });
+    });
+
+    it('shows empty state when no address book entries', async () => {
+      const emptyProps = {
+        ...addressBookProps,
+        getAddressBookEntries: jest.fn().mockResolvedValue({
+          data: [],
+          total: 0,
+        }),
+      };
+
+      const {container} = render(<OutdialCallComponent {...emptyProps} />);
+      const tabList = await waitFor(() => getTabList(container));
+      const tabs = within(tabList as HTMLElement).getAllByRole('tab');
+      const addressBookTab = tabs[0];
+      fireEvent.click(addressBookTab);
+
+      await waitFor(() => {
+        expect(screen.getByText('No address book entries found.')).toBeInTheDocument();
+      });
+    });
+
+    it('clears destination when switching from dial pad to address book', async () => {
+      const {container} = render(<OutdialCallComponent {...addressBookProps} />);
+
+      // Enter a number on dial pad
+      const input = await screen.findByTestId('outdial-number-input');
+      Object.defineProperty(customEvent, 'target', {
+        writable: false,
+        value: {value: '123'},
+      });
+      fireEvent(input, customEvent);
+
+      await waitFor(() => {
+        expect(input).toHaveValue('123');
+      });
+
+      // Switch to address book
+      const tabList = await waitFor(() => getTabList(container));
+      const tabs = within(tabList as HTMLElement).getAllByRole('tab');
+      const addressBookTab = tabs[0];
+      fireEvent.click(addressBookTab);
+
+      // Switch back to dial pad
+      const dialPadTab = tabs[1];
+      fireEvent.click(dialPadTab);
+
+      // Destination should be cleared
+      const inputAfter = await screen.findByTestId('outdial-number-input');
+      expect(inputAfter).toHaveValue('');
+    });
+
+    it('searches address book entries', async () => {
+      const mockSearch = jest.fn().mockResolvedValue({
+        data: [{id: '1', name: 'John Doe', number: '+14691234567'}],
+        total: 1,
+      });
+
+      const searchProps = {
+        ...addressBookProps,
+        getAddressBookEntries: mockSearch,
+      };
+
+      const {container} = render(<OutdialCallComponent {...searchProps} />);
+      const tabList = await waitFor(() => getTabList(container));
+      const tabs = within(tabList as HTMLElement).getAllByRole('tab');
+      const addressBookTab = tabs[0];
+      fireEvent.click(addressBookTab);
+
+      const searchInput = await screen.findByTestId('outdial-address-book-search-input');
+
+      // Create a custom event for the search input
+      const searchEvent = new Event('input', {bubbles: true});
+      Object.defineProperty(searchEvent, 'target', {
+        writable: false,
+        value: {value: 'John'},
+      });
+
+      fireEvent(searchInput, searchEvent);
+
+      // Wait for debounced search (500ms + some buffer)
+      await waitFor(
+        () => {
+          // First call is initial load with page: 0, pageSize: 25, search: ''
+          // Second call should be search with page: 0, pageSize: 25, search: 'John'
+          expect(mockSearch).toHaveBeenCalledWith({page: 0, pageSize: 25, search: 'John'});
+        },
+        {timeout: 1000}
+      );
+    });
+
+    it('handles address book loading error gracefully', async () => {
+      const errorProps = {
+        ...addressBookProps,
+        getAddressBookEntries: jest.fn().mockRejectedValue(new Error('Network error')),
+      };
+
+      const {container} = render(<OutdialCallComponent {...errorProps} />);
+      const tabList = await waitFor(() => getTabList(container));
+      const tabs = within(tabList as HTMLElement).getAllByRole('tab');
+      const addressBookTab = tabs[0];
+      fireEvent.click(addressBookTab);
+
+      await waitFor(() => {
+        expect(screen.getByText('No address book entries found.')).toBeInTheDocument();
+      });
+    });
+
+    it('validates phone number from address book entry', async () => {
+      const invalidPhoneProps = {
+        ...addressBookProps,
+        getAddressBookEntries: jest.fn().mockResolvedValue({
+          data: [{id: '1', name: 'Invalid Contact', number: 'invalid'}],
+          total: 1,
+        }),
+      };
+
+      const {container} = render(<OutdialCallComponent {...invalidPhoneProps} />);
+      const tabList = await waitFor(() => getTabList(container));
+      const tabs = within(tabList as HTMLElement).getAllByRole('tab');
+      const addressBookTab = tabs[0];
+      fireEvent.click(addressBookTab);
+
+      const invalidContact = await screen.findByText('Invalid Contact');
+      fireEvent.click(invalidContact);
+
+      // Switch to dial pad to check validation
+      const dialPadTab = tabs[1];
+      fireEvent.click(dialPadTab);
+
+      const input = await screen.findByTestId('outdial-number-input');
+      await waitFor(() => {
+        expect(input).toHaveAttribute('help-text', 'Incorrect format.');
+      });
+    });
+
+    it('applies selected class to chosen address book entry', async () => {
+      const {container} = render(<OutdialCallComponent {...addressBookProps} />);
+      const tabList = await waitFor(() => getTabList(container));
+      const tabs = within(tabList as HTMLElement).getAllByRole('tab');
+      const addressBookTab = tabs[0];
+      fireEvent.click(addressBookTab);
+
+      const johnDoe = await screen.findByText('John Doe');
+      const listItem = johnDoe.closest('li');
+
+      // Initially should not have selected class
+      expect(listItem).not.toHaveClass('selected');
+
+      fireEvent.click(johnDoe);
+
+      // After selection should have selected class
+      await waitFor(() => {
+        expect(listItem).toHaveClass('selected');
+      });
+    });
+
+    it('allows keyboard navigation for address book entries', async () => {
+      const {container} = render(<OutdialCallComponent {...addressBookProps} />);
+      const tabList = await waitFor(() => getTabList(container));
+      const tabs = within(tabList as HTMLElement).getAllByRole('tab');
+      const addressBookTab = tabs[0];
+      fireEvent.click(addressBookTab);
+
+      const johnDoe = await screen.findByText('John Doe');
+      const listItem = johnDoe.closest('li');
+
+      // Test Enter key
+      fireEvent.keyDown(listItem!, {key: 'Enter'});
+
+      const dialPadTab = tabs[1];
+      fireEvent.click(dialPadTab);
+
+      const input = await screen.findByTestId('outdial-number-input');
+      await waitFor(() => {
+        expect(input).toHaveValue('+14691234567');
+      });
+    });
+
+    it('handles space key for address book entry selection', async () => {
+      const {container} = render(<OutdialCallComponent {...addressBookProps} />);
+      const tabList = await waitFor(() => getTabList(container));
+      const tabs = within(tabList as HTMLElement).getAllByRole('tab');
+      const addressBookTab = tabs[0];
+      fireEvent.click(addressBookTab);
+
+      const janeDoe = await screen.findByText('Jane Smith');
+      const listItem = janeDoe.closest('li');
+
+      // Test Space key
+      fireEvent.keyDown(listItem!, {key: ' '});
+
+      const dialPadTab = tabs[1];
+      fireEvent.click(dialPadTab);
+
+      const input = await screen.findByTestId('outdial-number-input');
+      await waitFor(() => {
+        expect(input).toHaveValue('+14699876543');
+      });
+    });
+
+    it('clears input after successful call from address book', async () => {
+      const mockStartOutdial = jest.fn();
+      const {container} = render(<OutdialCallComponent {...addressBookProps} startOutdial={mockStartOutdial} />);
+
+      const tabList = await waitFor(() => getTabList(container));
+      const tabs = within(tabList as HTMLElement).getAllByRole('tab');
+      const addressBookTab = tabs[0];
+      fireEvent.click(addressBookTab);
+
+      const johnDoe = await screen.findByText('John Doe');
+      fireEvent.click(johnDoe);
+
+      const callButton = await screen.findByTestId('outdial-call-button');
+      fireEvent.click(callButton);
+
+      // Switch to dial pad
+      const dialPadTab = tabs[1];
+      fireEvent.click(dialPadTab);
+
+      const input = await screen.findByTestId('outdial-number-input');
+      await waitFor(() => {
+        expect(input).toHaveValue('');
+      });
     });
   });
 });
