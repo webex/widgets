@@ -292,6 +292,21 @@ export const useCallControl = (props: useCallControlProps) => {
   const [holdTime, setHoldTime] = useState(0);
   const [startTimestamp, setStartTimestamp] = useState<number>(0);
   const [secondsUntilAutoWrapup, setsecondsUntilAutoWrapup] = useState<number | null>(null);
+
+  // Timestamp state variables for various call states
+  const [consultStartTimeStamp, setConsultStartTimeStamp] = useState<number>(0);
+  const [wrapUpTimestamp, setWrapUpTimestamp] = useState<number>(0);
+  const [postCallTimestamp, setPostCallTimestamp] = useState<number>(0);
+  const [holdTimestamp, setHoldTimestamp] = useState<number>(0);
+  const [consultHoldTimestamp, setConsultHoldTimestamp] = useState<number>(0);
+
+  // State timer labels and timestamps
+  const [stateTimerLabel, setStateTimerLabel] = useState<string | null>(null);
+  const [stateTimerTimestamp, setStateTimerTimestamp] = useState<number>(0);
+
+  // Consult timer labels and timestamps
+  const [consultTimerLabel, setConsultTimerLabel] = useState<string>('Consulting');
+  const [consultTimerTimestamp, setConsultTimerTimestamp] = useState<number>(0);
   const workerRef = useRef<Worker | null>(null);
   const [lastTargetType, setLastTargetType] = useState<'agent' | 'queue'>('agent');
   const [conferenceParticipants, setConferenceParticipants] = useState<Participant[]>([]);
@@ -326,13 +341,20 @@ export const useCallControl = (props: useCallControlProps) => {
       workerRef.current = null;
     }
 
-    // Get holdTimestamp from the interaction object
-    const holdTimestamp = currentTask?.data?.interaction
+    // Get holdTimestamp - prioritize consult hold over main call hold
+    // This ensures the hold timer shows the correct time for whichever call is currently on hold
+    const consultHoldTs = currentTask?.data?.interaction
+      ? findHoldTimestamp(currentTask.data.interaction, 'consult')
+      : null;
+    const mainCallHoldTs = currentTask?.data?.interaction
       ? findHoldTimestamp(currentTask.data.interaction, 'mainCall')
       : null;
 
-    if (holdTimestamp) {
-      const holdTimeMs = holdTimestamp < 10000000000 ? holdTimestamp * 1000 : holdTimestamp;
+    // Use consult hold timestamp if available, otherwise use main call hold timestamp
+    const activeHoldTimestamp = consultHoldTs || mainCallHoldTs;
+
+    if (activeHoldTimestamp) {
+      const holdTimeMs = activeHoldTimestamp < 10000000000 ? activeHoldTimestamp * 1000 : activeHoldTimestamp;
       const blob = new Blob([workerScript], {type: 'application/javascript'});
       const workerUrl = URL.createObjectURL(blob);
       workerRef.current = new Worker(workerUrl);
@@ -399,17 +421,64 @@ export const useCallControl = (props: useCallControlProps) => {
     }
   }, [currentTask, logger]);
 
-  // Check for consulting agent whenever currentTask changes
+  // Extract all timestamps whenever currentTask changes
   useEffect(() => {
     extractConsultingAgent();
-    if (
-      currentTask?.data?.interaction?.participants &&
-      store?.cc?.agentConfig?.agentId &&
-      currentTask.data.interaction.participants[store.cc.agentConfig.agentId]?.joinTimestamp
-    ) {
-      setStartTimestamp(currentTask.data.interaction.participants[store.cc.agentConfig.agentId].joinTimestamp);
+
+    if (!currentTask?.data?.interaction?.participants || !agentId) {
+      return;
     }
-  }, [currentTask, extractConsultingAgent]);
+
+    const participant = currentTask.data.interaction.participants[agentId];
+    const interaction = currentTask.data.interaction;
+
+    if (!participant) {
+      return;
+    }
+
+    // 1. Main call timer - use joinTimestamp
+    if (participant.joinTimestamp) {
+      setStartTimestamp(participant.joinTimestamp);
+    }
+
+    // 2. Consult timer - use consultTimestamp or fallback to lastUpdated
+    // This ensures consult timer doesn't reset when resuming from hold
+    if (participant.consultTimestamp) {
+      setConsultStartTimeStamp(participant.consultTimestamp);
+    } else if (participant.lastUpdated) {
+      setConsultStartTimeStamp(participant.lastUpdated);
+    }
+
+    // 3. Wrap-up timer - if currently in wrap-up, use lastUpdated; otherwise use wrapUpTimestamp
+    if (participant.isWrapUp) {
+      setWrapUpTimestamp(participant.lastUpdated || 0);
+    } else {
+      setWrapUpTimestamp(participant.wrapUpTimestamp || 0);
+    }
+
+    // 4. Post-call timer - use currentStateTimestamp
+    if (participant.currentStateTimestamp) {
+      setPostCallTimestamp(participant.currentStateTimestamp);
+    } else {
+      setPostCallTimestamp(0);
+    }
+
+    // 5. Main call hold timestamp
+    const mainHoldTs = findHoldTimestamp(interaction, 'mainCall');
+    if (mainHoldTs) {
+      setHoldTimestamp(mainHoldTs);
+    } else {
+      setHoldTimestamp(0);
+    }
+
+    // 6. Consult hold timestamp
+    const consultHoldTs = findHoldTimestamp(interaction, 'consult');
+    if (consultHoldTs) {
+      setConsultHoldTimestamp(consultHoldTs);
+    } else {
+      setConsultHoldTimestamp(0);
+    }
+  }, [currentTask, agentId, extractConsultingAgent]);
 
   const loadBuddyAgents = useCallback(async () => {
     try {
@@ -911,6 +980,62 @@ export const useCallControl = (props: useCallControlProps) => {
     };
   }, [currentTask?.autoWrapup, controlVisibility?.wrapup]);
 
+  // Calculate state timer label and timestamp
+  // Priority: Wrap Up > Post Call
+  useEffect(() => {
+    if (!currentTask || !controlVisibility) {
+      setStateTimerLabel(null);
+      setStateTimerTimestamp(0);
+      return;
+    }
+
+    const interaction = currentTask.data?.interaction;
+    const participant = interaction?.participants?.[agentId];
+
+    // Priority 1: Wrap-up state (highest priority)
+    if (controlVisibility.wrapup?.isVisible && wrapUpTimestamp) {
+      setStateTimerLabel('Wrap Up');
+      setStateTimerTimestamp(wrapUpTimestamp);
+    }
+    // Priority 2: Post-call state (only if not in wrap-up)
+    else {
+      const isInPostCall = interaction?.state === 'post_call' || participant?.currentState === 'post_call';
+      if (isInPostCall && postCallTimestamp) {
+        setStateTimerLabel('Post Call');
+        setStateTimerTimestamp(postCallTimestamp);
+      } else {
+        setStateTimerLabel(null);
+        setStateTimerTimestamp(0);
+      }
+    }
+  }, [currentTask, controlVisibility, wrapUpTimestamp, postCallTimestamp, agentId]);
+
+  // Calculate consult timer label and timestamp
+  useEffect(() => {
+    if (!currentTask || !consultStartTimeStamp || !controlVisibility) {
+      setConsultTimerLabel('Consulting');
+      setConsultTimerTimestamp(0);
+      return;
+    }
+
+    // Determine label and timestamp based on consult hold state
+    if (controlVisibility.consultCallHeld) {
+      setConsultTimerLabel('Consult on Hold');
+      // Use consultHoldTimestamp when on hold
+      if (consultHoldTimestamp && consultHoldTimestamp > 0) {
+        setConsultTimerTimestamp(consultHoldTimestamp);
+      } else {
+        // Fallback to consult start time
+        setConsultTimerTimestamp(consultStartTimeStamp);
+      }
+    } else {
+      // Active consulting - use consultStartTimeStamp to preserve original timer
+      const label = controlVisibility.isConsultInitiated ? 'Consult Requested' : 'Consulting';
+      setConsultTimerLabel(label);
+      setConsultTimerTimestamp(consultStartTimeStamp);
+    }
+  }, [currentTask, consultStartTimeStamp, consultHoldTimestamp, controlVisibility, agentId]);
+
   return {
     currentTask,
     endCall,
@@ -935,6 +1060,15 @@ export const useCallControl = (props: useCallControlProps) => {
     setConsultAgentName,
     holdTime,
     startTimestamp,
+    consultStartTimeStamp,
+    wrapUpTimestamp,
+    postCallTimestamp,
+    holdTimestamp,
+    consultHoldTimestamp,
+    stateTimerLabel,
+    stateTimerTimestamp,
+    consultTimerLabel,
+    consultTimerTimestamp,
     lastTargetType,
     setLastTargetType,
     controlVisibility,

@@ -29,6 +29,8 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
     holdTime,
     consultAgentName,
     consultStartTimeStamp,
+    consultTimerLabel,
+    consultTimerTimestamp,
     endConsultCall,
     consultTransfer,
     consultConference,
@@ -36,6 +38,8 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
     callControlClassName,
     callControlConsultClassName,
     startTimestamp,
+    stateTimerLabel,
+    stateTimerTimestamp,
     controlVisibility,
     logger,
     isMuted,
@@ -166,6 +170,12 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
               <div className="call-details-row">
                 <Text className="call-timer" type="body-secondary" tagName={'small'} data-testid="cc-cad:call-timer">
                   {currentMediaType.labelName} - <TaskTimer startTimeStamp={startTimestamp} />
+                  {stateTimerLabel && stateTimerTimestamp && (
+                    <>
+                      {' '}
+                      • {stateTimerLabel} - <TaskTimer startTimeStamp={stateTimerTimestamp} />
+                    </>
+                  )}
                 </Text>
                 {controlVisibility.isConferenceInProgress && !controlVisibility.wrapup.isVisible && (
                   <>
@@ -272,6 +282,8 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
           <CallControlConsultComponent
             agentName={consultAgentName}
             startTimeStamp={consultStartTimeStamp}
+            consultTimerLabel={consultTimerLabel}
+            consultTimerTimestamp={consultTimerTimestamp}
             endConsultCall={endConsultCall}
             consultTransfer={consultTransfer}
             consultConference={consultConference}

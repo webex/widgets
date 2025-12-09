@@ -3,16 +3,13 @@ import {ButtonCircle, TooltipNext, Text} from '@momentum-ui/react-collaboration'
 import {Avatar, Icon} from '@momentum-design/components/dist/react';
 import TaskTimer from '../../TaskTimer';
 import {CallControlConsultComponentsProps} from '../../task.types';
-import {
-  createConsultButtons,
-  getVisibleButtons,
-  getConsultStatusText,
-  createTimerKey,
-} from './call-control-custom.utils';
+import {createConsultButtons, getVisibleButtons, createTimerKey} from './call-control-custom.utils';
 
 const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> = ({
   agentName,
   startTimeStamp,
+  consultTimerLabel,
+  consultTimerTimestamp,
   consultTransfer,
   endConsultCall,
   consultConference,
@@ -22,7 +19,12 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
   controlVisibility,
   toggleConsultMute,
 }) => {
+  // Use the label and timestamp calculated in helper.ts
+  // Stable key based on original start time to prevent timer resets
   const timerKey = createTimerKey(startTimeStamp);
+
+  // Use consultTimerTimestamp if available, otherwise fallback to startTimeStamp
+  const effectiveTimestamp = consultTimerTimestamp || startTimeStamp || Date.now();
 
   const buttons = createConsultButtons(
     isMuted,
@@ -47,8 +49,8 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
             {agentName}
           </Text>
           <Text tagName="p" type="body-secondary" className="consult-sub-text">
-            {getConsultStatusText(controlVisibility.isConsultInitiated)}&nbsp;&bull;&nbsp;
-            <TaskTimer key={timerKey} startTimeStamp={startTimeStamp} />
+            {consultTimerLabel}&nbsp;&bull;&nbsp;
+            <TaskTimer key={timerKey} startTimeStamp={effectiveTimestamp} />
           </Text>
         </div>
       </div>

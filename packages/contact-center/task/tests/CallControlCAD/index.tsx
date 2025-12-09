@@ -85,6 +85,15 @@ describe('CallControlCAD Component', () => {
       getAddressBookEntries: jest.fn(),
       getEntryPoints: jest.fn(),
       getQueuesFetcher: jest.fn(),
+      consultStartTimeStamp: 0,
+      wrapUpTimestamp: 0,
+      postCallTimestamp: 0,
+      holdTimestamp: 0,
+      consultHoldTimestamp: 0,
+      stateTimerLabel: null,
+      stateTimerTimestamp: 0,
+      consultTimerLabel: 'Consulting',
+      consultTimerTimestamp: 0,
     });
 
     render(
@@ -178,6 +187,15 @@ describe('CallControlCAD Component', () => {
       getAddressBookEntries: jest.fn(),
       getEntryPoints: jest.fn(),
       getQueuesFetcher: jest.fn(),
+      consultStartTimeStamp: 0,
+      wrapUpTimestamp: 0,
+      postCallTimestamp: 0,
+      holdTimestamp: 0,
+      consultHoldTimestamp: 0,
+      stateTimerLabel: null,
+      stateTimerTimestamp: 0,
+      consultTimerLabel: 'Consulting',
+      consultTimerTimestamp: 0,
     });
 
     render(<CallControlCAD onHoldResume={onHoldResumeCb} onEnd={onEndCb} onWrapUp={onWrapUpCb} />);
@@ -252,6 +270,15 @@ describe('CallControlCAD Component', () => {
       getAddressBookEntries: jest.fn(),
       getEntryPoints: jest.fn(),
       getQueuesFetcher: jest.fn(),
+      consultStartTimeStamp: 0,
+      wrapUpTimestamp: 0,
+      postCallTimestamp: 0,
+      holdTimestamp: 0,
+      consultHoldTimestamp: 0,
+      stateTimerLabel: null,
+      stateTimerTimestamp: 0,
+      consultTimerLabel: 'Consulting',
+      consultTimerTimestamp: 0,
     });
 
     render(
@@ -328,6 +355,15 @@ describe('CallControlCAD Component', () => {
       getAddressBookEntries: jest.fn(),
       getEntryPoints: jest.fn(),
       getQueuesFetcher: jest.fn(),
+      consultStartTimeStamp: 0,
+      wrapUpTimestamp: 0,
+      postCallTimestamp: 0,
+      holdTimestamp: 0,
+      consultHoldTimestamp: 0,
+      stateTimerLabel: null,
+      stateTimerTimestamp: 0,
+      consultTimerLabel: 'Consulting',
+      consultTimerTimestamp: 0,
     });
 
     const {container} = render(

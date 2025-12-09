@@ -89,6 +89,15 @@ describe('CallControl Component', () => {
       getAddressBookEntries: jest.fn().mockResolvedValue({data: [], meta: {page: 0, totalPages: 0}}),
       getEntryPoints: jest.fn().mockResolvedValue({data: [], meta: {page: 0, totalPages: 0}}),
       getQueuesFetcher: jest.fn().mockResolvedValue({data: [], meta: {page: 0, totalPages: 0}}),
+      consultStartTimeStamp: 0,
+      wrapUpTimestamp: 0,
+      postCallTimestamp: 0,
+      holdTimestamp: 0,
+      consultHoldTimestamp: 0,
+      stateTimerLabel: null,
+      stateTimerTimestamp: 0,
+      consultTimerLabel: 'Consulting',
+      consultTimerTimestamp: 0,
     });
 
     render(
