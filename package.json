@@ -12,7 +12,6 @@
   "packageManager": "yarn@4.5.1",
   "devDependencies": {
     "@babel/preset-typescript": "7.25.9",
-    "@jest/test-sequencer": "^30.2.0",
     "@playwright/test": "^1.51.1",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/exec": "^6.0.3",
