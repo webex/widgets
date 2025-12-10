@@ -297,7 +297,6 @@ export const useCallControl = (props: useCallControlProps) => {
   const [consultStartTimeStamp, setConsultStartTimeStamp] = useState<number>(0);
   const [wrapUpTimestamp, setWrapUpTimestamp] = useState<number>(0);
   const [postCallTimestamp, setPostCallTimestamp] = useState<number>(0);
-  const [holdTimestamp, setHoldTimestamp] = useState<number>(0);
   const [consultHoldTimestamp, setConsultHoldTimestamp] = useState<number>(0);
 
   // State timer labels and timestamps
@@ -463,15 +462,7 @@ export const useCallControl = (props: useCallControlProps) => {
       setPostCallTimestamp(0);
     }
 
-    // 5. Main call hold timestamp
-    const mainHoldTs = findHoldTimestamp(interaction, 'mainCall');
-    if (mainHoldTs) {
-      setHoldTimestamp(mainHoldTs);
-    } else {
-      setHoldTimestamp(0);
-    }
-
-    // 6. Consult hold timestamp
+    // 5. Consult hold timestamp
     const consultHoldTs = findHoldTimestamp(interaction, 'consult');
     if (consultHoldTs) {
       setConsultHoldTimestamp(consultHoldTs);
@@ -1063,7 +1054,6 @@ export const useCallControl = (props: useCallControlProps) => {
     consultStartTimeStamp,
     wrapUpTimestamp,
     postCallTimestamp,
-    holdTimestamp,
     consultHoldTimestamp,
     stateTimerLabel,
     stateTimerTimestamp,

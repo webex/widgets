@@ -354,7 +354,7 @@ export const findHoldTimestamp = (task: ITask, mType: string): number | null => 
   const mediaId = findMediaResourceId(task, mType);
 
   // Return the holdTimestamp if media exists and has a hold timestamp
-  if (mediaId && interaction.media[mediaId]?.holdTimestamp) {
+  if (mediaId && interaction.media[mediaId]?.holdTimestamp !== undefined) {
     return interaction.media[mediaId].holdTimestamp;
   }
 

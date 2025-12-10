@@ -338,11 +338,6 @@ export interface ControlProps {
   postCallTimestamp?: number;
 
   /**
-   * Timestamp when main call was put on hold.
-   */
-  holdTimestamp?: number;
-
-  /**
    * Timestamp when consult call was put on hold.
    */
   consultHoldTimestamp?: number;
@@ -510,7 +505,6 @@ export type CallControlComponentProps = Pick<
   | 'startTimestamp'
   | 'wrapUpTimestamp'
   | 'postCallTimestamp'
-  | 'holdTimestamp'
   | 'consultHoldTimestamp'
   | 'stateTimerLabel'
   | 'stateTimerTimestamp'

@@ -92,7 +92,6 @@ describe('CallControl Component', () => {
       consultStartTimeStamp: 0,
       wrapUpTimestamp: 0,
       postCallTimestamp: 0,
-      holdTimestamp: 0,
       consultHoldTimestamp: 0,
       stateTimerLabel: null,
       stateTimerTimestamp: 0,

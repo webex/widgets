@@ -3,6 +3,7 @@ import {
   getIsConferenceInProgress,
   getConferenceParticipants,
   getConferenceParticipantsCount,
+  findHoldTimestamp,
 } from '../src/task-utils';
 import {mockTask} from '../../test-fixtures/src/fixtures';
 import {ITask} from '../src/store.types';
@@ -1007,5 +1008,151 @@ describe('getConferenceParticipantsCount', () => {
 
     // Should count only agent1, agent2, and agent4 (agent3 has left, others are excluded types)
     expect(getConferenceParticipantsCount(task)).toBe(3);
+  });
+});
+
+describe('findHoldTimestamp', () => {
+  it('should return null when task data is missing or undefined', () => {
+    const task = {} as Partial<ITask> as ITask;
+    expect(findHoldTimestamp(task, 'mainCall')).toBeNull();
+  });
+
+  it('should return null when interaction is missing', () => {
+    const task = createMockTask({
+      interaction: undefined as unknown as ITask['data']['interaction'],
+    });
+    expect(findHoldTimestamp(task, 'mainCall')).toBeNull();
+  });
+
+  it('should return null when interaction.media is missing', () => {
+    const task = createMockTask({
+      interaction: createPartialInteraction({
+        media: undefined,
+      }),
+    });
+    expect(findHoldTimestamp(task, 'mainCall')).toBeNull();
+  });
+
+  it('should return null when no media exists for the specified mType', () => {
+    const task = createMockTask({
+      interaction: createPartialInteraction({
+        media: {
+          someOtherId: {
+            mType: 'someOtherType',
+            mediaResourceId: 'someOtherId',
+          },
+        },
+      }),
+    });
+    expect(findHoldTimestamp(task, 'mainCall')).toBeNull();
+  });
+
+  it('should return null when media exists but has no holdTimestamp', () => {
+    const task = createMockTask({
+      interaction: createPartialInteraction({
+        media: {
+          mainCallId: {
+            mType: 'mainCall',
+            mediaResourceId: 'mainCallId',
+            isHold: true,
+            // No holdTimestamp
+          },
+        },
+      }),
+    });
+    expect(findHoldTimestamp(task, 'mainCall')).toBeNull();
+  });
+
+  it('should return holdTimestamp for mainCall when it exists', () => {
+    const holdTimestamp = 1638360000000;
+    const task = createMockTask({
+      interaction: createPartialInteraction({
+        media: {
+          mainCallId: {
+            mType: 'mainCall',
+            mediaResourceId: 'mainCallId',
+            isHold: true,
+            holdTimestamp: holdTimestamp,
+          },
+        },
+      }),
+    });
+    expect(findHoldTimestamp(task, 'mainCall')).toBe(holdTimestamp);
+  });
+
+  it('should return holdTimestamp for consult when it exists', () => {
+    const consultHoldTimestamp = 1638360500000;
+    const task = createMockTask({
+      interaction: createPartialInteraction({
+        media: {
+          consultId: {
+            mType: 'consult',
+            mediaResourceId: 'consultId',
+            isHold: true,
+            holdTimestamp: consultHoldTimestamp,
+          },
+        },
+      }),
+    });
+    expect(findHoldTimestamp(task, 'consult')).toBe(consultHoldTimestamp);
+  });
+
+  it('should return correct holdTimestamp when multiple media types exist', () => {
+    const mainHoldTimestamp = 1638360000000;
+    const consultHoldTimestamp = 1638360500000;
+    const task = createMockTask({
+      interaction: createPartialInteraction({
+        media: {
+          mainCallId: {
+            mType: 'mainCall',
+            mediaResourceId: 'mainCallId',
+            isHold: true,
+            holdTimestamp: mainHoldTimestamp,
+          },
+          consultId: {
+            mType: 'consult',
+            mediaResourceId: 'consultId',
+            isHold: true,
+            holdTimestamp: consultHoldTimestamp,
+          },
+        },
+      }),
+    });
+
+    expect(findHoldTimestamp(task, 'mainCall')).toBe(mainHoldTimestamp);
+    expect(findHoldTimestamp(task, 'consult')).toBe(consultHoldTimestamp);
+  });
+
+  it('should handle holdTimestamp as zero', () => {
+    const task = createMockTask({
+      interaction: createPartialInteraction({
+        media: {
+          mainCallId: {
+            mType: 'mainCall',
+            mediaResourceId: 'mainCallId',
+            isHold: false,
+            holdTimestamp: 0,
+          },
+        },
+      }),
+    });
+    expect(findHoldTimestamp(task, 'mainCall')).toBe(0);
+  });
+
+  it('should return null when mediaResourceId does not match', () => {
+    const task = createMockTask({
+      interaction: createPartialInteraction({
+        media: {
+          mainCallId: {
+            mType: 'mainCall',
+            mediaResourceId: 'mainCallId',
+            isHold: true,
+            holdTimestamp: 1638360000000,
+          },
+        },
+      }),
+    });
+    // Request consult but only mainCall exists
+    expect(findHoldTimestamp(task, 'consult')).toBeNull();
   });
 });
