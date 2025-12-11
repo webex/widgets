@@ -1,6 +1,12 @@
 import {renderHook, act, waitFor} from '@testing-library/react';
 import {useIncomingTask, useTaskList, useCallControl, useOutdialCall} from '../src/helper';
 import * as taskUtils from '../src/Utils/task-util';
+import {
+  TIMER_LABEL_WRAP_UP,
+  TIMER_LABEL_POST_CALL,
+  TIMER_LABEL_CONSULT_ON_HOLD,
+  TIMER_LABEL_CONSULTING,
+} from '../src/Utils/constants';
 import {AddressBookEntriesResponse, EntryPointListResponse, TASK_EVENTS, IContactCenter} from '@webex/cc-store';
 import {ITask} from '@webex/contact-center';
 import {
@@ -3567,7 +3573,7 @@ describe('useCallControl', () => {
       );
 
       await waitFor(() => {
-        expect(result.current.stateTimerLabel).toBe('Wrap Up');
+        expect(result.current.stateTimerLabel).toBe(TIMER_LABEL_WRAP_UP);
         expect(result.current.stateTimerTimestamp).toBe(3000);
       });
     });
@@ -3609,7 +3615,7 @@ describe('useCallControl', () => {
         })
       );
 
-      expect(result.current.stateTimerLabel).toBe('Post Call');
+      expect(result.current.stateTimerLabel).toBe(TIMER_LABEL_POST_CALL);
       expect(result.current.stateTimerTimestamp).toBe(4000);
     });
 
@@ -3649,7 +3655,7 @@ describe('useCallControl', () => {
       );
 
       await waitFor(() => {
-        expect(result.current.stateTimerLabel).toBe('Wrap Up');
+        expect(result.current.stateTimerLabel).toBe(TIMER_LABEL_WRAP_UP);
         expect(result.current.stateTimerTimestamp).toBe(3000);
       });
     });
@@ -3695,7 +3701,7 @@ describe('useCallControl', () => {
       );
 
       await waitFor(() => {
-        expect(result.current.consultTimerLabel).toBe('Consult on Hold');
+        expect(result.current.consultTimerLabel).toBe(TIMER_LABEL_CONSULT_ON_HOLD);
         expect(result.current.consultTimerTimestamp).toBe(5000);
       });
     });
@@ -3788,7 +3794,7 @@ describe('useCallControl', () => {
         })
       );
 
-      expect(result.current.consultTimerLabel).toBe('Consulting');
+      expect(result.current.consultTimerLabel).toBe(TIMER_LABEL_CONSULTING);
       expect(result.current.consultTimerTimestamp).toBe(2000);
     });
 

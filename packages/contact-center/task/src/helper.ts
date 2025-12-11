@@ -12,6 +12,13 @@ import store, {
   MEDIA_TYPE_TELEPHONY_LOWER,
 } from '@webex/cc-store';
 import {findHoldTimestamp, getControlsVisibility} from './Utils/task-util';
+import {
+  TIMER_LABEL_WRAP_UP,
+  TIMER_LABEL_POST_CALL,
+  TIMER_LABEL_CONSULT_ON_HOLD,
+  TIMER_LABEL_CONSULT_REQUESTED,
+  TIMER_LABEL_CONSULTING,
+} from './Utils/constants';
 import {OutdialAniEntriesResponse} from '@webex/contact-center/dist/types/services/config/types';
 
 const ENGAGED_LABEL = 'ENGAGED';
@@ -304,7 +311,7 @@ export const useCallControl = (props: useCallControlProps) => {
   const [stateTimerTimestamp, setStateTimerTimestamp] = useState<number>(0);
 
   // Consult timer labels and timestamps
-  const [consultTimerLabel, setConsultTimerLabel] = useState<string>('Consulting');
+  const [consultTimerLabel, setConsultTimerLabel] = useState<string>(TIMER_LABEL_CONSULTING);
   const [consultTimerTimestamp, setConsultTimerTimestamp] = useState<number>(0);
   const workerRef = useRef<Worker | null>(null);
   const [lastTargetType, setLastTargetType] = useState<'agent' | 'queue'>('agent');
@@ -985,14 +992,14 @@ export const useCallControl = (props: useCallControlProps) => {
 
     // Priority 1: Wrap-up state (highest priority)
     if (controlVisibility.wrapup?.isVisible && wrapUpTimestamp) {
-      setStateTimerLabel('Wrap Up');
+      setStateTimerLabel(TIMER_LABEL_WRAP_UP);
       setStateTimerTimestamp(wrapUpTimestamp);
     }
     // Priority 2: Post-call state (only if not in wrap-up)
     else {
       const isInPostCall = interaction?.state === 'post_call' || participant?.currentState === 'post_call';
       if (isInPostCall && postCallTimestamp) {
-        setStateTimerLabel('Post Call');
+        setStateTimerLabel(TIMER_LABEL_POST_CALL);
         setStateTimerTimestamp(postCallTimestamp);
       } else {
         setStateTimerLabel(null);
@@ -1004,14 +1011,14 @@ export const useCallControl = (props: useCallControlProps) => {
   // Calculate consult timer label and timestamp
   useEffect(() => {
     if (!currentTask || !consultStartTimeStamp || !controlVisibility) {
-      setConsultTimerLabel('Consulting');
+      setConsultTimerLabel(TIMER_LABEL_CONSULTING);
       setConsultTimerTimestamp(0);
       return;
     }
 
     // Determine label and timestamp based on consult hold state
     if (controlVisibility.consultCallHeld) {
-      setConsultTimerLabel('Consult on Hold');
+      setConsultTimerLabel(TIMER_LABEL_CONSULT_ON_HOLD);
       // Use consultHoldTimestamp when on hold
       if (consultHoldTimestamp && consultHoldTimestamp > 0) {
         setConsultTimerTimestamp(consultHoldTimestamp);
@@ -1021,7 +1028,7 @@ export const useCallControl = (props: useCallControlProps) => {
       }
     } else {
       // Active consulting - use consultStartTimeStamp to preserve original timer
-      const label = controlVisibility.isConsultInitiated ? 'Consult Requested' : 'Consulting';
+      const label = controlVisibility.isConsultInitiated ? TIMER_LABEL_CONSULT_REQUESTED : TIMER_LABEL_CONSULTING;
       setConsultTimerLabel(label);
       setConsultTimerTimestamp(consultStartTimeStamp);
     }
