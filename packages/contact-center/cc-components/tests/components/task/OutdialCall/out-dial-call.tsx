@@ -671,4 +671,476 @@ describe('OutdialCallComponent', () => {
       });
     });
   });
+
+  describe('Infinite scroll functionality', () => {
+    // Mock IntersectionObserver
+    let mockIntersectionObserver: jest.Mock;
+    let intersectionCallback: IntersectionObserverCallback;
+
+    // Helper function to get the tablist element (web component)
+    const getTabList = async (container: HTMLElement) => {
+      const tabList = container.querySelector('mdc-tablist');
+      if (!tabList) {
+        throw new Error('TabList not found');
+      }
+      return tabList;
+    };
+
+    beforeEach(() => {
+      mockIntersectionObserver = jest.fn().mockImplementation((callback) => {
+        intersectionCallback = callback;
+        return {
+          observe: jest.fn(),
+          unobserve: jest.fn(),
+          disconnect: jest.fn(),
+        };
+      });
+
+      global.IntersectionObserver = mockIntersectionObserver as unknown as typeof IntersectionObserver;
+    });
+
+    afterEach(() => {
+      delete (global as {IntersectionObserver?: typeof IntersectionObserver}).IntersectionObserver;
+    });
+
+    it('renders sentinel element for infinite scroll when there are more entries', async () => {
+      const addressBookProps: OutdialCallComponentProps = {
+        ...props,
+        isAddressBookEnabled: true,
+        getAddressBookEntries: jest.fn().mockResolvedValue({
+          data: Array.from({length: 25}, (_, i) => ({
+            id: `${i}`,
+            name: `Contact ${i}`,
+            number: `+1469000${i}`,
+          })),
+          total: 50,
+        }),
+      };
+
+      const {container} = render(<OutdialCallComponent {...addressBookProps} />);
+      const tabList = await waitFor(() => getTabList(container));
+      const tabs = within(tabList as HTMLElement).getAllByRole('tab');
+      const addressBookTab = tabs[0];
+      fireEvent.click(addressBookTab);
+
+      await waitFor(() => {
+        expect(screen.getByText('Contact 0')).toBeInTheDocument();
+      });
+
+      const observerElement = container.querySelector('.address-book-observer');
+      expect(observerElement).toBeInTheDocument();
+    });
+
+    it('does not render sentinel element when no more entries to load', async () => {
+      const addressBookProps: OutdialCallComponentProps = {
+        ...props,
+        isAddressBookEnabled: true,
+        getAddressBookEntries: jest
+          .fn()
+          .mockResolvedValueOnce({
+            data: Array.from({length: 10}, (_, i) => ({
+              id: `${i}`,
+              name: `Contact ${i}`,
+              number: `+1469000${i}`,
+            })),
+            total: 10,
+          })
+          .mockResolvedValueOnce({
+            data: [],
+            total: 10,
+          }),
+      };
+
+      const {container} = render(<OutdialCallComponent {...addressBookProps} />);
+      const tabList = await waitFor(() => getTabList(container));
+      const tabs = within(tabList as HTMLElement).getAllByRole('tab');
+      const addressBookTab = tabs[0];
+      fireEvent.click(addressBookTab);
+
+      await waitFor(() => {
+        expect(screen.getByText('Contact 0')).toBeInTheDocument();
+      });
+
+      // Trigger intersection to load more
+      const mockEntry = {
+        isIntersecting: true,
+        target: container.querySelector('.address-book-observer'),
+      } as IntersectionObserverEntry;
+
+      await waitFor(() => {
+        if (intersectionCallback) {
+          intersectionCallback([mockEntry], {} as IntersectionObserver);
+        }
+      });
+
+      // Wait for loading to complete
+      await waitFor(() => {
+        const observerElement = container.querySelector('.address-book-observer');
+        expect(observerElement).not.toBeInTheDocument();
+      });
+    });
+
+    it('loads more entries when scrolling to bottom', async () => {
+      const mockGetAddressBook = jest
+        .fn()
+        .mockResolvedValueOnce({
+          data: Array.from({length: 25}, (_, i) => ({
+            id: `${i}`,
+            name: `Contact ${i}`,
+            number: `+1469000${i}`,
+          })),
+          total: 50,
+        })
+        .mockResolvedValueOnce({
+          data: Array.from({length: 25}, (_, i) => ({
+            id: `${i + 25}`,
+            name: `Contact ${i + 25}`,
+            number: `+1469000${i + 25}`,
+          })),
+          total: 50,
+        });
+
+      const addressBookProps: OutdialCallComponentProps = {
+        ...props,
+        isAddressBookEnabled: true,
+        getAddressBookEntries: mockGetAddressBook,
+      };
+
+      const {container} = render(<OutdialCallComponent {...addressBookProps} />);
+      const tabList = await waitFor(() => getTabList(container));
+      const tabs = within(tabList as HTMLElement).getAllByRole('tab');
+      const addressBookTab = tabs[0];
+      fireEvent.click(addressBookTab);
+
+      // Wait for initial entries
+      await waitFor(() => {
+        expect(screen.getByText('Contact 0')).toBeInTheDocument();
+      });
+
+      // Verify initial call
+      expect(mockGetAddressBook).toHaveBeenCalledWith({page: 0, pageSize: 25, search: ''});
+
+      // Trigger intersection observer
+      const mockEntry = {
+        isIntersecting: true,
+        target: container.querySelector('.address-book-observer'),
+      } as IntersectionObserverEntry;
+
+      if (intersectionCallback) {
+        intersectionCallback([mockEntry], {} as IntersectionObserver);
+      }
+
+      // Wait for second page to load
+      await waitFor(() => {
+        expect(mockGetAddressBook).toHaveBeenCalledWith({page: 1, pageSize: 25, search: ''});
+      });
+
+      // Verify new entries are appended
+      await waitFor(() => {
+        expect(screen.getByText('Contact 25')).toBeInTheDocument();
+      });
+
+      // Verify old entries are still present
+      expect(screen.getByText('Contact 0')).toBeInTheDocument();
+    });
+
+    it('shows loading spinner while loading more entries', async () => {
+      let resolvePromise:
+        | ((value: {data: Array<{id: string; name: string; number: string}>; total: number}) => void)
+        | undefined;
+      const loadingPromise = new Promise((resolve) => {
+        resolvePromise = resolve;
+      });
+
+      const mockGetAddressBook = jest
+        .fn()
+        .mockResolvedValueOnce({
+          data: Array.from({length: 25}, (_, i) => ({
+            id: `${i}`,
+            name: `Contact ${i}`,
+            number: `+1469000${i}`,
+          })),
+          total: 50,
+        })
+        .mockImplementationOnce(() => loadingPromise);
+
+      const addressBookProps: OutdialCallComponentProps = {
+        ...props,
+        isAddressBookEnabled: true,
+        getAddressBookEntries: mockGetAddressBook,
+      };
+
+      const {container} = render(<OutdialCallComponent {...addressBookProps} />);
+      const tabList = await waitFor(() => getTabList(container));
+      const tabs = within(tabList as HTMLElement).getAllByRole('tab');
+      const addressBookTab = tabs[0];
+      fireEvent.click(addressBookTab);
+
+      await waitFor(() => {
+        expect(screen.getByText('Contact 0')).toBeInTheDocument();
+      });
+
+      // Trigger intersection observer
+      const mockEntry = {
+        isIntersecting: true,
+        target: container.querySelector('.address-book-observer'),
+      } as IntersectionObserverEntry;
+
+      if (intersectionCallback) {
+        intersectionCallback([mockEntry], {} as IntersectionObserver);
+      }
+
+      // Check for spinner
+      await waitFor(() => {
+        const spinner = container.querySelector('mdc-spinner');
+        expect(spinner).toBeInTheDocument();
+      });
+
+      // Resolve the promise
+      resolvePromise!({
+        data: Array.from({length: 25}, (_, i) => ({
+          id: `${i + 25}`,
+          name: `Contact ${i + 25}`,
+          number: `+1469000${i + 25}`,
+        })),
+        total: 50,
+      });
+    });
+
+    it('does not load more entries when already loading', async () => {
+      const mockGetAddressBook = jest
+        .fn()
+        .mockResolvedValueOnce({
+          data: Array.from({length: 25}, (_, i) => ({
+            id: `${i}`,
+            name: `Contact ${i}`,
+            number: `+1469000${i}`,
+          })),
+          total: 50,
+        })
+        .mockResolvedValueOnce({
+          data: Array.from({length: 25}, (_, i) => ({
+            id: `${i + 25}`,
+            name: `Contact ${i + 25}`,
+            number: `+1469000${i + 25}`,
+          })),
+          total: 50,
+        });
+
+      const addressBookProps: OutdialCallComponentProps = {
+        ...props,
+        isAddressBookEnabled: true,
+        getAddressBookEntries: mockGetAddressBook,
+      };
+
+      const {container} = render(<OutdialCallComponent {...addressBookProps} />);
+      const tabList = await waitFor(() => getTabList(container));
+      const tabs = within(tabList as HTMLElement).getAllByRole('tab');
+      const addressBookTab = tabs[0];
+      fireEvent.click(addressBookTab);
+
+      await waitFor(() => {
+        expect(screen.getByText('Contact 0')).toBeInTheDocument();
+      });
+
+      // Verify initial call
+      expect(mockGetAddressBook).toHaveBeenCalledTimes(1);
+
+      const mockEntry = {
+        isIntersecting: true,
+        target: container.querySelector('.address-book-observer'),
+      } as IntersectionObserverEntry;
+
+      // Trigger intersection observer once
+      if (intersectionCallback) {
+        intersectionCallback([mockEntry], {} as IntersectionObserver);
+      }
+
+      // Wait for second page to load
+      await waitFor(() => {
+        expect(screen.getByText('Contact 25')).toBeInTheDocument();
+      });
+
+      // Should have been called exactly twice (initial + one scroll)
+      expect(mockGetAddressBook).toHaveBeenCalledTimes(2);
+    });
+
+    it('handles error while loading more entries', async () => {
+      const mockGetAddressBook = jest
+        .fn()
+        .mockResolvedValueOnce({
+          data: Array.from({length: 25}, (_, i) => ({
+            id: `${i}`,
+            name: `Contact ${i}`,
+            number: `+1469000${i}`,
+          })),
+          total: 50,
+        })
+        .mockRejectedValueOnce(new Error('Network error'));
+
+      const addressBookProps: OutdialCallComponentProps = {
+        ...props,
+        isAddressBookEnabled: true,
+        getAddressBookEntries: mockGetAddressBook,
+      };
+
+      const {container} = render(<OutdialCallComponent {...addressBookProps} />);
+      const tabList = await waitFor(() => getTabList(container));
+      const tabs = within(tabList as HTMLElement).getAllByRole('tab');
+      const addressBookTab = tabs[0];
+      fireEvent.click(addressBookTab);
+
+      await waitFor(() => {
+        expect(screen.getByText('Contact 0')).toBeInTheDocument();
+      });
+
+      const mockEntry = {
+        isIntersecting: true,
+        target: container.querySelector('.address-book-observer'),
+      } as IntersectionObserverEntry;
+
+      if (intersectionCallback) {
+        intersectionCallback([mockEntry], {} as IntersectionObserver);
+      }
+
+      // Wait for error to be handled
+      await waitFor(() => {
+        expect(mockGetAddressBook).toHaveBeenCalledTimes(2);
+      });
+
+      // After error, entries are cleared and no more entries flag is set
+      await waitFor(() => {
+        expect(screen.queryByText('Contact 0')).not.toBeInTheDocument();
+      });
+
+      // Observer element should not be present anymore (no more entries)
+      const observerElement = container.querySelector('.address-book-observer');
+      expect(observerElement).not.toBeInTheDocument();
+    });
+
+    it('stops loading when returned data is less than page size', async () => {
+      const mockGetAddressBook = jest
+        .fn()
+        .mockResolvedValueOnce({
+          data: Array.from({length: 25}, (_, i) => ({
+            id: `${i}`,
+            name: `Contact ${i}`,
+            number: `+1469000${i}`,
+          })),
+          total: 30,
+        })
+        .mockResolvedValueOnce({
+          data: Array.from({length: 5}, (_, i) => ({
+            id: `${i + 25}`,
+            name: `Contact ${i + 25}`,
+            number: `+1469000${i + 25}`,
+          })),
+          total: 30,
+        });
+
+      const addressBookProps: OutdialCallComponentProps = {
+        ...props,
+        isAddressBookEnabled: true,
+        getAddressBookEntries: mockGetAddressBook,
+      };
+
+      const {container} = render(<OutdialCallComponent {...addressBookProps} />);
+      const tabList = await waitFor(() => getTabList(container));
+      const tabs = within(tabList as HTMLElement).getAllByRole('tab');
+      const addressBookTab = tabs[0];
+      fireEvent.click(addressBookTab);
+
+      await waitFor(() => {
+        expect(screen.getByText('Contact 0')).toBeInTheDocument();
+      });
+
+      const mockEntry = {
+        isIntersecting: true,
+        target: container.querySelector('.address-book-observer'),
+      } as IntersectionObserverEntry;
+
+      if (intersectionCallback) {
+        intersectionCallback([mockEntry], {} as IntersectionObserver);
+      }
+
+      // Wait for second page to load
+      await waitFor(() => {
+        expect(screen.getByText('Contact 25')).toBeInTheDocument();
+      });
+
+      // Observer element should not be present anymore
+      await waitFor(() => {
+        const observerElement = container.querySelector('.address-book-observer');
+        expect(observerElement).not.toBeInTheDocument();
+      });
+    });
+
+    it('maintains scroll pagination with search', async () => {
+      const mockGetAddressBook = jest
+        .fn()
+        .mockResolvedValueOnce({
+          data: Array.from({length: 25}, (_, i) => ({
+            id: `${i}`,
+            name: `John ${i}`,
+            number: `+1469000${i}`,
+          })),
+          total: 50,
+        })
+        .mockResolvedValueOnce({
+          data: Array.from({length: 25}, (_, i) => ({
+            id: `${i + 25}`,
+            name: `John ${i + 25}`,
+            number: `+1469000${i + 25}`,
+          })),
+          total: 50,
+        });
+
+      const addressBookProps: OutdialCallComponentProps = {
+        ...props,
+        isAddressBookEnabled: true,
+        getAddressBookEntries: mockGetAddressBook,
+      };
+
+      const {container} = render(<OutdialCallComponent {...addressBookProps} />);
+      const tabList = await waitFor(() => getTabList(container));
+      const tabs = within(tabList as HTMLElement).getAllByRole('tab');
+      const addressBookTab = tabs[0];
+      fireEvent.click(addressBookTab);
+
+      await waitFor(() => {
+        expect(screen.getByText('John 0')).toBeInTheDocument();
+      });
+
+      // Search
+      const searchInput = await screen.findByTestId('outdial-address-book-search-input');
+      const searchEvent = new Event('input', {bubbles: true});
+      Object.defineProperty(searchEvent, 'target', {
+        writable: false,
+        value: {value: 'John'},
+      });
+      fireEvent(searchInput, searchEvent);
+
+      // Wait for debounced search
+      await waitFor(
+        () => {
+          expect(mockGetAddressBook).toHaveBeenCalledWith({page: 0, pageSize: 25, search: 'John'});
+        },
+        {timeout: 1000}
+      );
+
+      // Trigger load more with search term
+      const mockEntry = {
+        isIntersecting: true,
+        target: container.querySelector('.address-book-observer'),
+      } as IntersectionObserverEntry;
+
+      if (intersectionCallback) {
+        intersectionCallback([mockEntry], {} as IntersectionObserver);
+      }
+
+      await waitFor(() => {
+        expect(mockGetAddressBook).toHaveBeenCalledWith({page: 1, pageSize: 25, search: 'John'});
+      });
+    });
+  });
 });

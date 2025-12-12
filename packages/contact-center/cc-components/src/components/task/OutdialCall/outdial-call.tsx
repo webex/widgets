@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useState, useRef, useCallback} from 'react';
+import React, {useEffect, useMemo, useState, useCallback} from 'react';
 import {withMetrics} from '@webex/cc-ui-logging';
 import {Input, Button, Icon, Tab, TabList, Avatar, Spinner} from '@momentum-design/components/dist/react';
 import {AddressBookEntry} from '@webex/contact-center';
@@ -12,6 +12,7 @@ import {OutdialAniEntry, OutdialCallComponentProps} from '../task.types';
 import {OutdialStrings, KEY_LIST} from './constants';
 import {DEFAULT_PAGE_SIZE} from '../constants';
 import {createInitials, debounce} from '../CallControl/CallControlCustom/call-control-custom.utils';
+import {useIntersectionObserver} from '../../../hooks';
 
 import './outdial-call.style.scss';
 
@@ -55,9 +56,6 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
   const [hasMoreAddressBookEntries, setHasMoreAddressBookEntries] = useState(true);
   const [isSelectOpen, setIsSelectOpen] = useState(false);
 
-  // Ref for infinite scroll observer
-  const observerTarget = useRef<HTMLDivElement>(null);
-
   // Validate the input format using regex from agent desktop
   const regExForDnSpecialChars = useMemo(
     () => new RegExp('^[+1][0-9]{3,18}$|^[*#][+1][0-9*#:]{3,18}$|^[0-9*#]{3,18}$'),
@@ -85,6 +83,12 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
   const fetchAddressBookEntries = async (page = 0, search = '') => {
     try {
       const result = await getAddressBookEntries({page, pageSize: DEFAULT_PAGE_SIZE, search});
+
+      logger?.log(`CC-Widgets: Task: Address book entries fetched: ${result.data.length}`, {
+        module: 'OutdialCallComponent',
+        method: 'fetchAddressBookEntries',
+      });
+
       setAddressBookEntries((prevEntries) => [...prevEntries, ...result.data]);
 
       // Check if there are more entries to load
@@ -189,27 +193,11 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
   }, [addressBookLoading, hasMoreAddressBookEntries, addressBookPage, addressBookSearch]);
 
   // Set up IntersectionObserver for infinite scroll
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasMoreAddressBookEntries && !addressBookLoading) {
-          loadMoreAddressBookEntries();
-        }
-      },
-      {threshold: 1.0}
-    );
-
-    const currentTarget = observerTarget.current;
-    if (currentTarget) {
-      observer.observe(currentTarget);
-    }
-
-    return () => {
-      if (currentTarget) {
-        observer.unobserve(currentTarget);
-      }
-    };
-  }, [loadMoreAddressBookEntries, hasMoreAddressBookEntries, addressBookLoading]);
+  const observerTarget = useIntersectionObserver({
+    onIntersect: loadMoreAddressBookEntries,
+    enabled: hasMoreAddressBookEntries && !addressBookLoading,
+    options: {threshold: 1.0},
+  });
 
   const renderAddressBook = () => {
     return (

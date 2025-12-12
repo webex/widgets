@@ -274,5 +274,149 @@ describe('Outdial Call Component', () => {
       container.querySelectorAll('[id^="mdc-input"]').forEach((el) => el.removeAttribute('id'));
       expect(container).toMatchSnapshot();
     });
+
+    it('renders address book with infinite scroll sentinel', async () => {
+      // Mock IntersectionObserver
+      const mockIntersectionObserver = jest.fn().mockImplementation(() => ({
+        observe: jest.fn(),
+        unobserve: jest.fn(),
+        disconnect: jest.fn(),
+      }));
+      global.IntersectionObserver = mockIntersectionObserver as unknown as typeof IntersectionObserver;
+
+      const manyEntriesProps = {
+        ...addressBookProps,
+        getAddressBookEntries: jest.fn().mockResolvedValue({
+          data: Array.from({length: 25}, (_, i) => ({
+            id: `${i}`,
+            name: `Contact ${i}`,
+            number: `+1469000${i}`,
+          })),
+          total: 50, // More entries available
+        }),
+      };
+
+      const {container} = render(<OutdialCallComponent {...manyEntriesProps} />);
+      const tabList = await waitFor(() => getTabList(container));
+      const tabs = within(tabList as HTMLElement).getAllByRole('tab');
+      const addressBookTab = tabs[0];
+      fireEvent.click(addressBookTab);
+      await screen.findByText('Contact 0');
+      // Remove IDs to avoid snapshot issues with dynamic IDs
+      container.querySelectorAll('[id^="mdc-input"]').forEach((el) => el.removeAttribute('id'));
+      expect(container).toMatchSnapshot();
+
+      delete (global as {IntersectionObserver?: typeof IntersectionObserver}).IntersectionObserver;
+    });
+
+    it('renders loading spinner while loading more entries', async () => {
+      // Mock IntersectionObserver
+      let intersectionCallback: IntersectionObserverCallback;
+      const mockIntersectionObserver = jest.fn().mockImplementation((callback) => {
+        intersectionCallback = callback;
+        return {
+          observe: jest.fn(),
+          unobserve: jest.fn(),
+          disconnect: jest.fn(),
+        };
+      });
+      global.IntersectionObserver = mockIntersectionObserver as unknown as typeof IntersectionObserver;
+
+      let resolvePromise: (value: {data: Array<{id: string; name: string; number: string}>; total: number}) => void;
+      const loadingPromise = new Promise((resolve) => {
+        resolvePromise = resolve;
+      });
+
+      const loadingProps = {
+        ...addressBookProps,
+        getAddressBookEntries: jest
+          .fn()
+          .mockResolvedValueOnce({
+            data: Array.from({length: 25}, (_, i) => ({
+              id: `${i}`,
+              name: `Contact ${i}`,
+              number: `+1469000${i}`,
+            })),
+            total: 50,
+          })
+          .mockImplementationOnce(() => loadingPromise),
+      };
+
+      const {container} = render(<OutdialCallComponent {...loadingProps} />);
+      const tabList = await waitFor(() => getTabList(container));
+      const tabs = within(tabList as HTMLElement).getAllByRole('tab');
+      const addressBookTab = tabs[0];
+      fireEvent.click(addressBookTab);
+      await screen.findByText('Contact 0');
+
+      // Trigger intersection observer
+      const mockEntry = {
+        isIntersecting: true,
+        target: container.querySelector('.address-book-observer'),
+      } as IntersectionObserverEntry;
+
+      if (intersectionCallback!) {
+        intersectionCallback!([mockEntry], {} as IntersectionObserver);
+      }
+
+      // Wait for spinner to appear
+      await waitFor(() => {
+        const spinner = container.querySelector('mdc-spinner');
+        expect(spinner).toBeInTheDocument();
+      });
+
+      // Remove IDs to avoid snapshot issues with dynamic IDs
+      container.querySelectorAll('[id^="mdc-input"]').forEach((el) => el.removeAttribute('id'));
+      expect(container).toMatchSnapshot();
+
+      // Clean up
+      resolvePromise!({
+        data: [],
+        total: 50,
+      });
+
+      delete (global as {IntersectionObserver?: typeof IntersectionObserver}).IntersectionObserver;
+    });
+
+    it('renders address book without sentinel when no more entries', async () => {
+      // Mock IntersectionObserver
+      const mockIntersectionObserver = jest.fn().mockImplementation(() => ({
+        observe: jest.fn(),
+        unobserve: jest.fn(),
+        disconnect: jest.fn(),
+      }));
+      global.IntersectionObserver = mockIntersectionObserver as unknown as typeof IntersectionObserver;
+
+      const completeProps = {
+        ...addressBookProps,
+        getAddressBookEntries: jest.fn().mockResolvedValue({
+          data: Array.from({length: 10}, (_, i) => ({
+            id: `${i}`,
+            name: `Contact ${i}`,
+            number: `+1469000${i}`,
+          })),
+          total: 10, // Less than page size, no more entries
+        }),
+      };
+
+      const {container} = render(<OutdialCallComponent {...completeProps} />);
+      const tabList = await waitFor(() => getTabList(container));
+      const tabs = within(tabList as HTMLElement).getAllByRole('tab');
+      const addressBookTab = tabs[0];
+      fireEvent.click(addressBookTab);
+      await screen.findByText('Contact 0');
+
+      // Wait for render to complete
+      await waitFor(() => {
+        const observerElement = container.querySelector('.address-book-observer');
+        expect(observerElement).not.toBeInTheDocument();
+      });
+
+      // Remove IDs to avoid snapshot issues with dynamic IDs
+      container.querySelectorAll('[id^="mdc-input"]').forEach((el) => el.removeAttribute('id'));
+      expect(container).toMatchSnapshot();
+
+      delete (global as {IntersectionObserver?: typeof IntersectionObserver}).IntersectionObserver;
+    });
   });
 });
