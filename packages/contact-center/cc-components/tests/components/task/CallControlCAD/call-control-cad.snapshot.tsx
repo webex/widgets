@@ -119,7 +119,6 @@ describe('CallControlCADComponent Snapshots', () => {
     consultCall: jest.fn(),
     endConsultCall: jest.fn(),
     consultTransfer: jest.fn(),
-    consultStartTimeStamp: 1234567890000,
     callControlAudio: null,
     consultAgentName: '',
     setConsultAgentName: jest.fn(),
@@ -127,6 +126,10 @@ describe('CallControlCADComponent Snapshots', () => {
     callControlClassName: '',
     callControlConsultClassName: '',
     startTimestamp: 1234567890000,
+    stateTimerLabel: null,
+    stateTimerTimestamp: 0,
+    consultTimerLabel: 'Consulting',
+    consultTimerTimestamp: 0,
     allowConsultToQueue: true,
     lastTargetType: 'agent',
     setLastTargetType: jest.fn(),
@@ -272,7 +275,6 @@ describe('CallControlCADComponent Snapshots', () => {
         isConsultInitiatedOrAccepted: true,
       },
       consultAgentName: 'Consult Agent',
-      consultStartTimeStamp: 1234567890000,
     };
     screen = render(<CallControlCADComponent {...consultAcceptedProps} />);
     mainContainer = screen.container.querySelector('.call-control-container');

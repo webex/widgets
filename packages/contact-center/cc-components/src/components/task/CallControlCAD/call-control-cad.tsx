@@ -28,7 +28,6 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
     isRecording,
     holdTime,
     consultAgentName,
-    consultStartTimeStamp,
     consultTimerLabel,
     consultTimerTimestamp,
     endConsultCall,
@@ -281,7 +280,6 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
         <div className={`call-control-consult-container ${callControlConsultClassName || ''}`}>
           <CallControlConsultComponent
             agentName={consultAgentName}
-            startTimeStamp={consultStartTimeStamp}
             consultTimerLabel={consultTimerLabel}
             consultTimerTimestamp={consultTimerTimestamp}
             endConsultCall={endConsultCall}

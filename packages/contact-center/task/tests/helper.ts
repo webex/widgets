@@ -3435,110 +3435,6 @@ describe('useCallControl', () => {
       consultCallHeld: false,
     };
 
-    it('should extract consultStartTimeStamp from consultTimestamp', () => {
-      mockGetControlsVisibility.mockImplementation(() => mockControlVisibility);
-      const mockTaskWithConsult = {
-        ...mockCurrentTask,
-        data: {
-          ...mockCurrentTask.data,
-          interaction: {
-            ...mockCurrentTask.data.interaction,
-            participants: {
-              agent1: {
-                joinTimestamp: 1000,
-                consultTimestamp: 2000,
-                pType: 'Agent',
-              },
-            },
-          },
-        },
-      };
-
-      const {result} = renderHook(() =>
-        useCallControl({
-          currentTask: mockTaskWithConsult,
-          logger,
-          deviceType: 'BROWSER',
-          featureFlags: {},
-          isMuted: false,
-          conferenceEnabled: false,
-          agentId: 'agent1',
-        })
-      );
-
-      expect(result.current.consultStartTimeStamp).toBe(2000);
-    });
-
-    it('should extract wrapUpTimestamp when in wrapup state', () => {
-      mockGetControlsVisibility.mockImplementation(() => mockControlVisibility);
-      const mockTaskInWrapup = {
-        ...mockCurrentTask,
-        data: {
-          ...mockCurrentTask.data,
-          interaction: {
-            ...mockCurrentTask.data.interaction,
-            participants: {
-              agent1: {
-                joinTimestamp: 1000,
-                isWrapUp: true,
-                lastUpdated: 3000,
-                pType: 'Agent',
-              },
-            },
-          },
-        },
-      };
-
-      const {result} = renderHook(() =>
-        useCallControl({
-          currentTask: mockTaskInWrapup,
-          logger,
-          deviceType: 'BROWSER',
-          featureFlags: {},
-          isMuted: false,
-          conferenceEnabled: false,
-          agentId: 'agent1',
-        })
-      );
-
-      expect(result.current.wrapUpTimestamp).toBe(3000);
-    });
-
-    it('should extract postCallTimestamp from currentStateTimestamp', () => {
-      mockGetControlsVisibility.mockImplementation(() => mockControlVisibility);
-      const mockTaskInPostCall = {
-        ...mockCurrentTask,
-        data: {
-          ...mockCurrentTask.data,
-          interaction: {
-            ...mockCurrentTask.data.interaction,
-            state: 'post_call',
-            participants: {
-              agent1: {
-                joinTimestamp: 1000,
-                currentStateTimestamp: 4000,
-                pType: 'Agent',
-              },
-            },
-          },
-        },
-      };
-
-      const {result} = renderHook(() =>
-        useCallControl({
-          currentTask: mockTaskInPostCall,
-          logger,
-          deviceType: 'BROWSER',
-          featureFlags: {},
-          isMuted: false,
-          conferenceEnabled: false,
-          agentId: 'agent1',
-        })
-      );
-
-      expect(result.current.postCallTimestamp).toBe(4000);
-    });
-
     it('should set stateTimerLabel to "Wrap Up" when in wrapup state', async () => {
       const mockTaskInWrapup = {
         ...mockCurrentTask,
@@ -3706,7 +3602,7 @@ describe('useCallControl', () => {
       });
     });
 
-    it('should use consultStartTimeStamp for active consult timer', async () => {
+    it('should use consultTimestamp for active consult timer', async () => {
       const mockTaskWithActiveConsult = {
         ...mockCurrentTask,
         data: {
@@ -3751,7 +3647,7 @@ describe('useCallControl', () => {
       );
 
       await waitFor(() => {
-        // The timer should use the consultStartTimeStamp (2000)
+        // The timer should use the consultTimestamp (2000)
         expect(result.current.consultTimerTimestamp).toBe(2000);
         // The label should be "Consulting" or "Consult Requested" depending on state
         expect(result.current.consultTimerLabel).toMatch(/Consult/);

@@ -106,7 +106,6 @@ describe('CallControlConsultComponent Snapshots', () => {
 
   const defaultProps = {
     agentName: 'Alice',
-    startTimeStamp: Date.now(),
     consultTimerLabel: 'Consulting',
     consultTimerTimestamp: Date.now(),
     consultTransfer: mockOnTransfer,

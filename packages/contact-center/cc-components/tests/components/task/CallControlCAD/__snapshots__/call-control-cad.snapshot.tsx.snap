@@ -235,6 +235,7 @@ exports[`CallControlCADComponent Snapshots should handle edge cases and control 
           <mdc-text
             class="md-text-wrapper consult-sub-text"
           >
+            Consulting
              • 
             <span
               data-testid="TaskTimer"
@@ -2038,6 +2039,7 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
           <mdc-text
             class="md-text-wrapper consult-sub-text"
           >
+            Consulting
              • 
             <span
               data-testid="TaskTimer"

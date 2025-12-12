@@ -7,7 +7,6 @@ import {createConsultButtons, getVisibleButtons, createTimerKey} from './call-co
 
 const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> = ({
   agentName,
-  startTimeStamp,
   consultTimerLabel,
   consultTimerTimestamp,
   consultTransfer,
@@ -20,11 +19,11 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
   toggleConsultMute,
 }) => {
   // Use the label and timestamp calculated in helper.ts
-  // Stable key based on original start time to prevent timer resets
-  const timerKey = createTimerKey(startTimeStamp);
+  // Stable key based on timestamp to prevent timer resets
+  const timerKey = createTimerKey(consultTimerTimestamp);
 
-  // Use consultTimerTimestamp if available, otherwise fallback to startTimeStamp
-  const effectiveTimestamp = consultTimerTimestamp || startTimeStamp || Date.now();
+  // Use consultTimerTimestamp with fallback
+  const effectiveTimestamp = consultTimerTimestamp || Date.now();
 
   const buttons = createConsultButtons(
     isMuted,

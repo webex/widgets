@@ -323,26 +323,6 @@ export interface ControlProps {
   consultTransfer: () => void;
 
   /**
-   * Timestamp when the consult call started.
-   */
-  consultStartTimeStamp?: number;
-
-  /**
-   * Timestamp when wrap-up state started.
-   */
-  wrapUpTimestamp?: number;
-
-  /**
-   * Timestamp when post-call state started.
-   */
-  postCallTimestamp?: number;
-
-  /**
-   * Timestamp when consult call was put on hold.
-   */
-  consultHoldTimestamp?: number;
-
-  /**
    * Label for the state timer (e.g., "Wrap Up", "Post Call").
    */
   stateTimerLabel?: string | null;
@@ -495,7 +475,6 @@ export type CallControlComponentProps = Pick<
   | 'exitConference'
   | 'endConsultCall'
   | 'consultTransfer'
-  | 'consultStartTimeStamp'
   | 'callControlAudio'
   | 'consultAgentName'
   | 'setConsultAgentName'
@@ -503,9 +482,6 @@ export type CallControlComponentProps = Pick<
   | 'callControlClassName'
   | 'callControlConsultClassName'
   | 'startTimestamp'
-  | 'wrapUpTimestamp'
-  | 'postCallTimestamp'
-  | 'consultHoldTimestamp'
   | 'stateTimerLabel'
   | 'stateTimerTimestamp'
   | 'consultTimerLabel'
@@ -625,7 +601,6 @@ export interface ConsultTransferPopoverComponentProps {
  */
 export interface CallControlConsultComponentsProps {
   agentName: string;
-  startTimeStamp: number;
   consultTimerLabel: string;
   consultTimerTimestamp: number;
   consultTransfer: () => void;
