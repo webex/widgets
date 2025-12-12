@@ -6,6 +6,7 @@ export const OutdialStrings = {
   DN_PLACEHOLDER: 'Enter number to dial',
   INCORRECT_DN_FORMAT: 'Incorrect format.',
   OUTDIAL_CALL: 'Outdial Call',
+  ADDRESS_BOOK_SEARCH_PLACEHOLDER: 'Search by Name/Number',
 };
 
 // Utility Constants

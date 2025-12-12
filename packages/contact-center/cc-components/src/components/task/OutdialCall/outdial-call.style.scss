@@ -1,11 +1,15 @@
-.keypad {
+.outdial-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   border-radius: 0.625rem;
   width: 15.625rem;
+  height: 26.5rem;
 
-  
+  .keypad {
+    width: 100%;
+  }
+
   mdc-input {
     padding-bottom: 0; // default is 1 rem, 1.5 rem needed but provided by .keys
   }
@@ -32,14 +36,14 @@
     align-items: center;
     pointer-events: none;
     z-index: 1;
-}
+  }
 
-.outdial-ani-option-name {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-  
+  .outdial-ani-option-name {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
   .keys {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -47,14 +51,14 @@
     column-gap: 1.5rem;
     padding: 1.5rem 0;
     list-style-type: none;
-    margin: 0;
+    margin: 0 20%;
   }
 
   .key {
     justify-content: center;
     background: var(--mds-color-theme-background-alert-default-normal);
     color: var(--mds-color-theme-text-primary-normal);
-    
+
     transition: background-color 0.2s ease;
 
     &:hover {
@@ -65,4 +69,72 @@
       background: var(--mds-color-theme-background-primary-active);
     }
   }
+
+  .address-book-container {
+    width: 100%;
+  }
+
+  .address-book {
+    height: 16rem;
+    width: 100%;
+  }
+
+  .address-book-search-input {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .address-book-entries {
+    width: 100%;
+    height: 14rem;
+    overflow-y: auto;
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+  }
+
+  .address-book-loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+  }
+
+  .address-book-entry {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    padding: 0 1rem;
+  }
+
+  .address-book-entry:hover {
+    background: var(--mds-color-theme-background-primary-hover);
+  }
+
+  .address-book-entry.selected {
+    background: var(--mds-color-theme-background-primary-hover);
+  }
+
+  .tab-list {
+    mdc-button {
+      display: none;
+    }
+
+    mdc-tab {
+      width: 7.395rem;
+      padding: 0;
+    }
+  }
+
+  .ani-select-input {
+    margin-top: 1rem;
+  }
+}
+
+.height-auto {
+  height: auto;
+}
+
+.height-28-5rem {
+  height: 28.5rem;
 }
