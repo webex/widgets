@@ -414,12 +414,12 @@ export interface ControlProps {
   /**
    * Function to set the last target type
    */
-  lastTargetType: 'queue' | 'agent';
+  lastTargetType: 'queue' | 'agent' | 'entryPoint' | 'dialNumber';
 
   /**
    * Function to set the last target type
    */
-  setLastTargetType: (targetType: 'queue' | 'agent') => void;
+  setLastTargetType: (targetType: 'queue' | 'agent' | 'entryPoint' | 'dialNumber') => void;
 
   controlVisibility: ControlVisibility;
 

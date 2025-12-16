@@ -3694,6 +3694,370 @@ describe('useCallControl', () => {
       expect(result.current.consultTimerTimestamp).toBe(2000);
     });
 
+    it('should select agent with consultState="consulting" in multi-agent conference', async () => {
+      const mockTaskWithMultiAgentConference = {
+        ...mockCurrentTask,
+        data: {
+          ...mockCurrentTask.data,
+          interaction: {
+            ...mockCurrentTask.data.interaction,
+            media: {
+              main: {
+                mType: 'telephony',
+                isHold: false,
+                mediaResourceId: 'main',
+                participants: ['agent2', 'agent3', 'agent4', 'customer1'],
+              },
+            },
+            participants: {
+              agent2: {
+                id: 'agent2',
+                name: 'Agent 2',
+                pType: 'Agent',
+                joinTimestamp: 1000,
+                consultTimestamp: 2000,
+                consultState: 'conferencing',
+              },
+              agent3: {
+                id: 'agent3',
+                name: 'Agent 3',
+                pType: 'Agent',
+                joinTimestamp: 3000,
+                consultTimestamp: 4000,
+                consultState: 'conferencing',
+              },
+              agent4: {
+                id: 'agent4',
+                name: 'Agent 4',
+                pType: 'Agent',
+                joinTimestamp: 5000,
+                consultTimestamp: 6000,
+                consultState: 'consulting',
+                isConsulted: true,
+              },
+              customer1: {
+                id: 'customer1',
+                name: 'Customer',
+                pType: 'Customer',
+                joinTimestamp: 500,
+              },
+            },
+          },
+        },
+      };
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: mockTaskWithMultiAgentConference,
+          logger,
+          deviceType: 'BROWSER',
+          featureFlags: {},
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'agent2',
+        })
+      );
+
+      await waitFor(() => {
+        // Should select Agent 4 as they have consultState="consulting"
+        expect(result.current.consultAgentName).toBe('Agent 4');
+      });
+    });
+
+    it('should fallback to most recent timestamp when no agent has consultState="consulting"', async () => {
+      const mockTaskWithMultiAgentConference = {
+        ...mockCurrentTask,
+        data: {
+          ...mockCurrentTask.data,
+          interaction: {
+            ...mockCurrentTask.data.interaction,
+            media: {
+              main: {
+                mType: 'telephony',
+                isHold: false,
+                mediaResourceId: 'main',
+                participants: ['agent2', 'agent3', 'agent4', 'customer1'],
+              },
+            },
+            participants: {
+              agent2: {
+                id: 'agent2',
+                name: 'Agent 2',
+                pType: 'Agent',
+                joinTimestamp: 1000,
+                consultTimestamp: 2000,
+              },
+              agent3: {
+                id: 'agent3',
+                name: 'Agent 3',
+                pType: 'Agent',
+                joinTimestamp: 3000,
+                consultTimestamp: 4000,
+              },
+              agent4: {
+                id: 'agent4',
+                name: 'Agent 4',
+                pType: 'Agent',
+                joinTimestamp: 5000,
+                consultTimestamp: 6000,
+              },
+              customer1: {
+                id: 'customer1',
+                name: 'Customer',
+                pType: 'Customer',
+                joinTimestamp: 500,
+              },
+            },
+          },
+        },
+      };
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: mockTaskWithMultiAgentConference,
+          logger,
+          deviceType: 'BROWSER',
+          featureFlags: {},
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'agent2',
+        })
+      );
+
+      await waitFor(() => {
+        // Should select Agent 4 as they have the most recent consultTimestamp (6000)
+        expect(result.current.consultAgentName).toBe('Agent 4');
+      });
+    });
+
+    it('should correctly identify single agent in simple consult scenario', async () => {
+      const mockTaskWithSingleConsult = {
+        ...mockCurrentTask,
+        data: {
+          ...mockCurrentTask.data,
+          interaction: {
+            ...mockCurrentTask.data.interaction,
+            media: {
+              main: {
+                mType: 'telephony',
+                isHold: false,
+                mediaResourceId: 'main',
+                participants: ['agent2', 'agent3', 'customer1'],
+              },
+            },
+            participants: {
+              agent2: {
+                id: 'agent2',
+                name: 'Agent 2',
+                pType: 'Agent',
+                joinTimestamp: 1000,
+              },
+              agent3: {
+                id: 'agent3',
+                name: 'Agent 3',
+                pType: 'Agent',
+                joinTimestamp: 3000,
+                consultTimestamp: 4000,
+              },
+              customer1: {
+                id: 'customer1',
+                name: 'Customer',
+                pType: 'Customer',
+                joinTimestamp: 500,
+              },
+            },
+          },
+        },
+      };
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: mockTaskWithSingleConsult,
+          logger,
+          deviceType: 'BROWSER',
+          featureFlags: {},
+          isMuted: false,
+          conferenceEnabled: false,
+          agentId: 'agent2',
+        })
+      );
+
+      await waitFor(() => {
+        // Should select Agent 3 as they are the only other agent
+        expect(result.current.consultAgentName).toBe('Agent 3');
+      });
+    });
+
+    it('should handle agents without timestamps (backward compatibility)', async () => {
+      const mockTaskWithoutTimestamps = {
+        ...mockCurrentTask,
+        data: {
+          ...mockCurrentTask.data,
+          interaction: {
+            ...mockCurrentTask.data.interaction,
+            participants: {
+              agent2: {
+                id: 'agent2',
+                name: 'Agent 2',
+                pType: 'Agent',
+              },
+              agent3: {
+                id: 'agent3',
+                name: 'Agent 3',
+                pType: 'Agent',
+              },
+              customer1: {
+                id: 'customer1',
+                name: 'Customer',
+                pType: 'Customer',
+              },
+            },
+          },
+        },
+      };
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: mockTaskWithoutTimestamps,
+          logger,
+          deviceType: 'BROWSER',
+          featureFlags: {},
+          isMuted: false,
+          conferenceEnabled: false,
+          agentId: 'agent2',
+        })
+      );
+
+      await waitFor(() => {
+        // Should select Agent 3 (first other agent found) when no timestamps are available
+        expect(result.current.consultAgentName).toBe('Agent 3');
+      });
+    });
+
+    it('should preserve entry point name when consulting to entry point', async () => {
+      const mockTaskWithAgents = {
+        ...mockCurrentTask,
+        data: {
+          ...mockCurrentTask.data,
+          interaction: {
+            ...mockCurrentTask.data.interaction,
+            participants: {
+              agent2: {
+                id: 'agent2',
+                name: 'Agent 2',
+                pType: 'Agent',
+                consultState: 'conferencing',
+                consultTimestamp: 1000,
+              },
+              agent3: {
+                id: 'agent3',
+                name: 'Agent 3',
+                pType: 'Agent',
+                consultState: 'conferencing',
+                consultTimestamp: 2000,
+              },
+              customer1: {
+                id: 'customer1',
+                name: 'Customer',
+                pType: 'Customer',
+              },
+            },
+          },
+        },
+      };
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: mockTaskWithAgents,
+          logger,
+          deviceType: 'BROWSER',
+          featureFlags: {},
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'agent2',
+        })
+      );
+
+      // Simulate setting the entry point name (as done by handleTargetSelect)
+      act(() => {
+        result.current.setConsultAgentName('Support Entry Point');
+        result.current.setLastTargetType('entryPoint');
+      });
+
+      // Wait to ensure extractConsultingAgent doesn't override the name
+      await waitFor(
+        () => {
+          expect(result.current.consultAgentName).toBe('Support Entry Point');
+        },
+        {timeout: 1000}
+      );
+
+      // Verify the name is still the entry point name and wasn't overridden by agent extraction
+      expect(result.current.consultAgentName).toBe('Support Entry Point');
+    });
+
+    it('should preserve dial number when consulting to dial number', async () => {
+      const mockTaskWithAgents = {
+        ...mockCurrentTask,
+        data: {
+          ...mockCurrentTask.data,
+          interaction: {
+            ...mockCurrentTask.data.interaction,
+            participants: {
+              agent2: {
+                id: 'agent2',
+                name: 'Agent 2',
+                pType: 'Agent',
+                consultState: 'conferencing',
+                consultTimestamp: 1000,
+              },
+              agent3: {
+                id: 'agent3',
+                name: 'Agent 3',
+                pType: 'Agent',
+                consultState: 'conferencing',
+                consultTimestamp: 2000,
+              },
+              customer1: {
+                id: 'customer1',
+                name: 'Customer',
+                pType: 'Customer',
+              },
+            },
+          },
+        },
+      };
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: mockTaskWithAgents,
+          logger,
+          deviceType: 'BROWSER',
+          featureFlags: {},
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'agent2',
+        })
+      );
+
+      // Simulate setting the dial number (as done by handleTargetSelect)
+      act(() => {
+        result.current.setConsultAgentName('+1234567890');
+        result.current.setLastTargetType('dialNumber');
+      });
+
+      // Wait to ensure extractConsultingAgent doesn't override the name
+      await waitFor(
+        () => {
+          expect(result.current.consultAgentName).toBe('+1234567890');
+        },
+        {timeout: 1000}
+      );
+
+      // Verify the name is still the dial number and wasn't overridden by agent extraction
+      expect(result.current.consultAgentName).toBe('+1234567890');
+    });
+
     it('should preserve consult timer when resuming from hold', async () => {
       const mockTaskWithConsultHeld = {
         ...mockCurrentTask,
