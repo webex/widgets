@@ -40,7 +40,6 @@ const defaultWidgets = {
   callControlCAD: true,
   outdialCall: true,
 };
-window['AGENTX_SERVICE'] = {}; // Make it available in the window object for global access for engage widgets
 
 function App() {
   const [isSdkReady, setIsSdkReady] = useState(false);
@@ -994,7 +993,12 @@ function App() {
             )}
 
             {isSdkReady && (store.isAgentLoggedIn || isLoggedIn) && (
-              <EngageWidget accessToken={accessToken} currentTheme={currentTheme} isSdkReady={isSdkReady} />
+               <EngageWidget
+                accessToken={accessToken}
+                currentTheme={currentTheme}
+                isSdkReady={isSdkReady}
+                dataCenter={'' + (integrationEnv ? 'intgus1' : 'produs1') /* Default to US1 for non-integration envs */} // Use dataCenter prop
+              />
             )}
           </div>
         </IconProvider>
