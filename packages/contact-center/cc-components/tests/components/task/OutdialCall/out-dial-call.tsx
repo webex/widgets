@@ -363,6 +363,19 @@ describe('OutdialCallComponent', () => {
       expect(tabList).not.toBeInTheDocument();
     });
 
+    it('shows tabs by default when isAddressBookEnabled prop is not provided', async () => {
+      const propsWithoutAddressBookFlag = {
+        logger: mockCC.LoggerProxy,
+        startOutdial: jest.fn(),
+        getOutdialANIEntries: jest.fn().mockResolvedValue([]),
+        isTelephonyTaskActive: false,
+        getAddressBookEntries: jest.fn().mockResolvedValue({data: [], total: 0}),
+      };
+      const {container} = render(<OutdialCallComponent {...propsWithoutAddressBookFlag} />);
+      const tabList = await waitFor(() => container.querySelector('mdc-tablist'));
+      expect(tabList).toBeInTheDocument();
+    });
+
     it('shows tabs when address book is enabled', async () => {
       const {container} = render(<OutdialCallComponent {...addressBookProps} />);
       const tabList = await waitFor(() => getTabList(container));

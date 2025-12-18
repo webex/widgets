@@ -35,8 +35,9 @@ export type useOutdialCallProps = Pick<OutdialCallProps, 'cc' | 'logger'>;
 export interface OutdialProps {
   /**
    * Flag to determine if the address book is enabled.
+   * Defaults to true if not provided.
    */
-  isAddressBookEnabled: boolean;
+  isAddressBookEnabled?: boolean;
 }
 
 /**
