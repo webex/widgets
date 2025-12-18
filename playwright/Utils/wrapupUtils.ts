@@ -12,6 +12,7 @@ export async function submitWrapup(page: Page, reason: WrapupReason): Promise<vo
   if (!reason || reason.trim() === '') {
     throw new Error('Wrapup reason is required');
   }
+  await page.bringToFront();
 
   // Dismiss any open popovers that might be blocking interactions
   await page.keyboard.press('Escape');
@@ -26,7 +27,7 @@ export async function submitWrapup(page: Page, reason: WrapupReason): Promise<vo
   if (!isWrapupBoxVisible) throw new Error('Wrapup box is not visible');
 
   // Check if dropdown is already open (aria-expanded="true")
-  const isAlreadyOpen = await wrapupBox.first().getAttribute('aria-expanded') === 'true';
+  const isAlreadyOpen = (await wrapupBox.first().getAttribute('aria-expanded')) === 'true';
   if (!isAlreadyOpen) {
     await wrapupBox.first().click({timeout: AWAIT_TIMEOUT});
     await page.waitForTimeout(UI_SETTLE_TIMEOUT);

@@ -246,7 +246,7 @@ export async function createEmailTask(to: string) {
  * @throws Error if accept button is not found
  */
 export async function acceptIncomingTask(page: Page, type: TaskType) {
-  await page.waitForTimeout(2000);
+  await page.bringToFront();
   let incomingTaskDiv;
   if (type === TASK_TYPES.CALL) {
     incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();

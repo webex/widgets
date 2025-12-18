@@ -130,9 +130,9 @@ export default function createAdvancedTaskControlsTests() {
       // Agent 2 accepts the transfer
       const incomingTransferDiv = testManager.agent2Page.getByTestId('samples:incoming-task-telephony').first();
       await incomingTransferDiv.waitFor({state: 'visible', timeout: 60000});
-      await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
       await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL);
-      await testManager.agent2Page.waitForTimeout(3000);
+      await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
+      await testManager.agent1Page.waitForTimeout(3000);
       verifyTransferSuccessLogs();
       await verifyCurrentState(testManager.agent2Page, USER_STATES.ENGAGED);
       await endTask(testManager.agent2Page);
