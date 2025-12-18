@@ -11,7 +11,7 @@ import {changeUserState, verifyCurrentState} from '../Utils/userStateUtils';
 import {createCallTask, acceptIncomingTask, acceptExtensionCall, endCallTask} from '../Utils/incomingTaskUtils';
 import {submitWrapup} from '../Utils/wrapupUtils';
 import {USER_STATES, TASK_TYPES, WRAPUP_REASONS} from '../constants';
-import {waitForState, clearPendingCallAndWrapup} from '../Utils/helperUtils';
+import {waitForState, clearPendingCallAndWrapup, handleStrayTasks} from '../Utils/helperUtils';
 import {endTask, holdCallToggle} from '../Utils/taskControlUtils';
 import {TestManager} from '../test-manager';
 
@@ -23,6 +23,11 @@ export default function createAdvanceCombinationsTests() {
       const projectName = testInfo.project.name;
       testManager = new TestManager(projectName);
       await testManager.setupForAdvancedCombinations(browser);
+    });
+
+    test.beforeEach(async () => {
+      await handleStrayTasks(testManager.agent1Page);
+      await handleStrayTasks(testManager.agent2Page);
     });
 
     test('Transfer from one agent to another, then transfer back to the first agent', async () => {
@@ -274,7 +279,7 @@ export default function createAdvanceCombinationsTests() {
     test('Dial Number: consult then end consult returns UI to normal', async () => {
       test.skip(!process.env.PW_DIAL_NUMBER_NAME, 'PW_DIAL_NUMBER_NAME not set');
 
-      await testManager.resetDialNumberSession();
+      await testManager.resetSession('dialNumber');
       await changeUserState(testManager.agent2Page, USER_STATES.MEETING);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
@@ -295,7 +300,7 @@ export default function createAdvanceCombinationsTests() {
     test('Dial Number: consult then transfer completes and remote ends', async () => {
       test.skip(!process.env.PW_DIAL_NUMBER_NAME, 'PW_DIAL_NUMBER_NAME not set');
 
-      await testManager.resetDialNumberSession();
+      await testManager.resetSession('dialNumber');
       await changeUserState(testManager.agent2Page, USER_STATES.MEETING);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
@@ -338,7 +343,7 @@ export default function createAdvanceCombinationsTests() {
 
       await clearPendingCallAndWrapup(testManager.agent1Page);
       await clearPendingCallAndWrapup(testManager.agent2Page);
-      await testManager.resetDialNumberSession();
+      await testManager.resetSession('dialNumber');
       await changeUserState(testManager.agent2Page, USER_STATES.MEETING);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);

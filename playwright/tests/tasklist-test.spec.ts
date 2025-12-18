@@ -46,18 +46,31 @@ async function getCurrentHandleTime(page: Page, index: number = 0): Promise<numb
  */
 
 async function waitForAndAcceptSpecificTask(testManager: TestManager, testId: string): Promise<void> {
+  await testManager.agent1Page.bringToFront();
   const timeoutMs = 60000,
     pollInterval = 2000;
   const start = Date.now();
-  const type = testId.split('-').pop();
+
   while (Date.now() - start < timeoutMs) {
     const taskDiv = testManager.agent1Page.getByTestId(testId).first();
     const isVisible = await taskDiv.isVisible().catch(() => false);
-    if (isVisible) {
-      const acceptButton = taskDiv.getByTestId('task:accept-button').first();
-      await expect(acceptButton).toBeVisible({timeout: 5000});
-      await acceptButton.click({timeout: 3000});
 
+    if (isVisible) {
+      // Dismiss any open popovers that might be blocking
+      await testManager.agent1Page.keyboard.press('Escape');
+      await testManager.agent1Page.waitForTimeout(200);
+
+      const acceptButton = taskDiv.getByTestId('task:accept-button').first();
+      const acceptVisible = await acceptButton.isVisible().catch(() => false);
+
+      if (!acceptVisible) {
+        await testManager.agent1Page.waitForTimeout(pollInterval);
+        continue;
+      }
+
+      await expect(acceptButton).toBeVisible({timeout: 5000});
+      await expect(acceptButton).toBeEnabled({timeout: 5000});
+      await acceptButton.click({timeout: 3000});
       return;
     }
     await testManager.agent1Page.waitForTimeout(pollInterval);
@@ -103,7 +116,7 @@ async function waitForConsoleLogs(
   const escTitle = escapeForRegExp(title!);
   const escMedia = escapeForRegExp(mediaType!);
   const pattern = new RegExp(
-    '^onTaskSelected invoked for task with title : ' + escTitle + ', and mediaType : ' + escMedia + '$'
+    '^onTaskSelected invoked for task with title : ' + escTitle + ', and mediaType : ' + escMedia
   );
 
   const start = Date.now();

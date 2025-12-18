@@ -591,15 +591,18 @@ export class TestManager {
     await Promise.all(cleanupOperations);
   }
 
-  // Helper method to hard-reset the dial number login session
-  public async resetDialNumberSession(): Promise<void> {
-    if (!this.dialNumberPage || !this.dialNumberContext) {
+  // Helper method to hard-reset a session (caller, dialNumber, or extension)
+  public async resetSession(sessionType: 'caller' | 'dialNumber' | 'extension'): Promise<void> {
+    const {page, context, username, password, label} = this.getSessionConfig(sessionType);
+
+    if (!page || !context) {
       return;
     }
+
     const envTokens = this.getEnvTokens();
     try {
-      await this.dialNumberContext.clearCookies();
-      await this.dialNumberPage.evaluate(() => {
+      await context.clearCookies();
+      await page.evaluate(() => {
         try {
           localStorage.clear();
         } catch {}
@@ -608,11 +611,51 @@ export class TestManager {
         } catch {}
       });
       // Navigate fresh and login again
-      await this.dialNumberPage.goto(CALL_URL);
-      await loginExtension(this.dialNumberPage, envTokens.dialNumberUsername!, envTokens.dialNumberPassword!);
-      await this.enforceSingleDialNumberInOwnContext();
+      await page.goto(CALL_URL);
+      await loginExtension(page, username(envTokens), password(envTokens));
+
+      // Enforce single page for dialNumber context
+      if (sessionType === 'dialNumber') {
+        await this.enforceSingleDialNumberInOwnContext();
+      }
     } catch (error) {
-      throw new Error(`Failed to reset dial number session: ${error}`);
+      throw new Error(`Failed to reset ${label} session: ${error}`);
+    }
+  }
+
+  // Helper to get session configuration based on type
+  private getSessionConfig(sessionType: 'caller' | 'dialNumber' | 'extension'): {
+    page: Page | undefined;
+    context: BrowserContext | undefined;
+    username: (env: EnvTokens) => string;
+    password: (env: EnvTokens) => string;
+    label: string;
+  } {
+    switch (sessionType) {
+      case 'caller':
+        return {
+          page: this.callerPage,
+          context: this.callerExtensionContext,
+          username: (env) => env.agent2Username,
+          password: (env) => env.password,
+          label: 'caller',
+        };
+      case 'dialNumber':
+        return {
+          page: this.dialNumberPage,
+          context: this.dialNumberContext,
+          username: (env) => env.dialNumberUsername!,
+          password: (env) => env.dialNumberPassword!,
+          label: 'dial number',
+        };
+      case 'extension':
+        return {
+          page: this.agent1ExtensionPage,
+          context: this.extensionContext,
+          username: (env) => env.agent1Username,
+          password: (env) => env.password,
+          label: 'extension',
+        };
     }
   }
 

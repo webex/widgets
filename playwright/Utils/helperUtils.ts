@@ -315,130 +315,128 @@ export function isColorClose(receivedColor: string, expectedColor: ThemeColor, t
 export const handleStrayTasks = async (
   page: Page,
   extensionPage: Page | null = null,
-  maxIterations: number = 10
+  maxIterations: number = 20
 ): Promise<void> => {
-  await page.waitForTimeout(1000);
+  const startTime = Date.now();
+  const timestamp = () => `[${new Date().toISOString()}]`;
 
+  // Quick check for state-select visibility
   const stateSelectVisible = await page
     .getByTestId('state-select')
-    .waitFor({state: 'visible', timeout: 30000})
-    .then(() => true)
+    .isVisible()
     .catch(() => false);
 
   if (stateSelectVisible) {
     const ronapopupVisible = await page
       .getByTestId('samples:rona-popup')
-      .waitFor({state: 'visible', timeout: AWAIT_TIMEOUT})
-      .then(() => true)
+      .isVisible()
       .catch(() => false);
 
     if (ronapopupVisible) {
+      console.log(`handleStrayTasks: Submitting RONA popup`);
       await submitRonaPopup(page, RONA_OPTIONS.AVAILABLE);
     }
 
     await changeUserState(page, USER_STATES.AVAILABLE);
-    await page.waitForTimeout(4000);
   }
+
   const incomingTaskDiv = page.getByTestId(/^samples:incoming-task(-\w+)?$/);
 
-  let iterations = 0;
-  while (iterations < maxIterations) {
-    iterations++;
-    let flag1 = false;
-    let flag2 = true;
+  let tasksAccepted = 0;
+  let tasksCleared = 0;
 
-    // Check if there's actually anything to handle before processing
-    const hasIncomingTask = await incomingTaskDiv
-      .first()
-      .isVisible()
-      .catch(() => false);
-    const hasEndButton = await page
-      .getByTestId('call-control:end-call')
-      .first()
-      .isVisible()
-      .catch(() => false);
-    const hasWrapupButton = await page
-      .getByTestId('call-control:wrapup-button')
-      .first()
-      .isVisible()
-      .catch(() => false);
+  // ============================================
+  // PHASE 1: Accept all incoming tasks first
+  // ============================================
+  console.log(`handleStrayTasks: Phase 1 - Accepting incoming tasks`);
+  let acceptIterations = 0;
+  while (acceptIterations < maxIterations) {
+    acceptIterations++;
 
-    if (!hasIncomingTask && !hasEndButton && !hasWrapupButton) {
-      // Nothing to handle, exit early
+    const task = incomingTaskDiv.first();
+    const isTaskVisible = await task.isVisible().catch(() => false);
+    if (!isTaskVisible) {
+      console.log(`handleStrayTasks: No more incoming tasks to accept`);
       break;
     }
 
-    // Inner task acceptance loop with timeout protection
-    let taskAttempts = 0;
-    const maxTaskAttempts = 5;
+    const acceptButton = task.getByTestId('task:accept-button').first();
+    const taskText = await task.innerText().catch(() => '');
+    const isExtensionCall = taskText.includes('Ringing...');
 
-    while (taskAttempts < maxTaskAttempts) {
-      taskAttempts++;
-      const task = incomingTaskDiv.first();
-      let isTaskVisible = await task.isVisible().catch(() => false);
-      if (!isTaskVisible) break;
-
-      const acceptButton = task.getByTestId('task:accept-button').first();
-      const acceptButtonVisible = await acceptButton.isVisible().catch(() => false);
-      const isExtensionCall = await (await task.innerText()).includes('Ringing...');
-
-      if (isExtensionCall) {
-        if (!extensionPage) {
-          throw new Error('Extension page is not available for handling extension call');
-        }
-        const extensionCallVisible = await extensionPage
-          .locator('[data-test="right-action-button"]')
-          .waitFor({state: 'visible', timeout: 40000}) // Restored original timeout
-          .then(() => true)
-          .catch(() => false);
-        if (extensionCallVisible) {
-          await acceptExtensionCall(extensionPage);
-          flag1 = true;
-        } else {
-          console.warn('Extension call timeout - skipping task');
-          break; // Skip this task instead of throwing error
-        }
-      } else {
-        try {
-          await acceptButton.click({timeout: AWAIT_TIMEOUT});
-          flag1 = true;
-        } catch (error) {
-          console.warn('Failed to click accept button:', error);
-        }
+    if (isExtensionCall) {
+      if (!extensionPage) {
+        throw new Error('Extension page is not available for handling extension call');
       }
-      await page.waitForTimeout(1000);
-    }
-
-    const endButton = page.getByTestId('call-control:end-call').first();
-    const endButtonVisible = await endButton
-      .waitFor({state: 'visible', timeout: 2000})
-      .then(() => true)
-      .catch(() => false);
-    if (endButtonVisible) {
-      await page.waitForTimeout(2000);
-      await endButton.click({timeout: AWAIT_TIMEOUT});
-      await submitWrapup(page, WRAPUP_REASONS.SALE);
-    } else {
-      const wrapupBox = page.getByTestId('call-control:wrapup-button').first();
-      const isWrapupBoxVisible = await wrapupBox
-        .waitFor({state: 'visible', timeout: 2000})
+      console.log(`handleStrayTasks: Handling extension call`);
+      const extensionCallVisible = await extensionPage
+        .locator('[data-test="right-action-button"]')
+        .waitFor({state: 'visible', timeout: 40000})
         .then(() => true)
         .catch(() => false);
-      if (isWrapupBoxVisible) {
-        await page.waitForTimeout(2000);
-        await submitWrapup(page, WRAPUP_REASONS.SALE);
-        await page.waitForTimeout(2000);
+      if (extensionCallVisible) {
+        await acceptExtensionCall(extensionPage);
+        tasksAccepted++;
+        console.log(`handleStrayTasks: Accepted extension call (${tasksAccepted} total)`);
       } else {
-        flag2 = false;
+        console.warn(`handleStrayTasks: Extension call timeout - skipping task`);
+      }
+    } else {
+      const acceptVisible = await acceptButton.isVisible().catch(() => false);
+      if (acceptVisible) {
+        try {
+          await acceptButton.click({timeout: AWAIT_TIMEOUT});
+          tasksAccepted++;
+          console.log(`handleStrayTasks: Accepted incoming task (${tasksAccepted} total)`);
+        } catch (error) {
+          console.warn(`handleStrayTasks: Failed to click accept button:`, error);
+        }
+      } else {
+        // Task visible but no accept button - might already be accepted, break
+        break;
       }
     }
 
-    if (!flag1 && !flag2) {
-      break;
-    }
+    // Small wait for UI to update
+    await page.waitForTimeout(200);
   }
 
-  console.log(`Completed stray task handling after ${iterations} iterations`);
+  // ============================================
+  // PHASE 2: Clear all pending calls/wrapups
+  // ============================================
+  console.log(`andleStrayTasks: Phase 2 - Clearing pending calls/wrapups`);
+  let clearIterations = 0;
+  while (clearIterations < maxIterations) {
+    clearIterations++;
+
+    const endButton = page.getByTestId('call-control:end-call').first();
+    const wrapupBox = page.getByTestId('call-control:wrapup-button').first();
+    const endButtonVisible = await endButton.isVisible().catch(() => false);
+    const wrapupBoxVisible = await wrapupBox.isVisible().catch(() => false);
+
+    if (!endButtonVisible && !wrapupBoxVisible) {
+      console.log(`handleStrayTasks: No more pending calls/wrapups`);
+      break;
+    }
+
+    console.log(
+      `handleStrayTasks: Clearing task (iteration ${clearIterations}) - ` +
+        `endButton: ${endButtonVisible}, wrapupButton: ${wrapupBoxVisible}`
+    );
+
+    await clearPendingCallAndWrapup(page);
+    tasksCleared++;
+    console.log(`handleStrayTasks: Cleared task (${tasksCleared} total)`);
+    // Small wait for UI to update
+    await page.waitForTimeout(200);
+  }
+
+  const duration = Date.now() - startTime;
+  const totalHandled = tasksAccepted + tasksCleared;
+  console.log(
+    `handleStrayTasks: Completed in ${duration}ms - ` +
+      `${tasksAccepted} task(s) accepted, ${tasksCleared} task(s) cleared, ${totalHandled} total`
+  );
 };
 
 /**

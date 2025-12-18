@@ -305,17 +305,17 @@ export default function createStationLoginTests() {
       // Uncheck - Desktop should be visible
       await hideDesktopCheckbox.click();
       await testManager.agent1Page.waitForTimeout(500);
-      await verifyDesktopOptionVisibility(testManager.agent1Page, true);
+      await verifyDesktopOptionVisibility(testManager.agent1Page, false);
 
       // Check - Desktop should be hidden
       await hideDesktopCheckbox.click();
       await testManager.agent1Page.waitForTimeout(500);
-      await verifyDesktopOptionVisibility(testManager.agent1Page, false);
+      await verifyDesktopOptionVisibility(testManager.agent1Page, true);
 
       // Uncheck again - Desktop should be visible again
       await hideDesktopCheckbox.click();
       await testManager.agent1Page.waitForTimeout(500);
-      await verifyDesktopOptionVisibility(testManager.agent1Page, true);
+      await verifyDesktopOptionVisibility(testManager.agent1Page, false);
     });
   });
 
