@@ -1,6 +1,13 @@
-import React, {useState, useCallback} from 'react';
-import {store} from '@webex/cc-widgets';
-import {DigitalChannels} from '@webex/cc-widgets';
+import React, { useState, useCallback } from 'react';
+import { store, DigitalChannels } from '@webex/cc-widgets';
+import {
+  SUPPORTED_DIGITAL_MEDIA_TYPES,
+  DEFAULT_DATA_CENTER,
+  UI_CONSTANTS,
+  MESSAGES,
+  getMediaTypeIcon,
+  getMediaTypeTitle,
+} from './constants';
 import './EngageWidget.css';
 
 // Define the component props interface
@@ -11,7 +18,12 @@ interface EngageWidgetProps {
   dataCenter?: string;
 }
 
-const EngageWidget: React.FC<EngageWidgetProps> = ({accessToken, currentTheme, isSdkReady, dataCenter = 'intgus1'}) => {
+const EngageWidget: React.FC<EngageWidgetProps> = ({
+  accessToken,
+  currentTheme,
+  isSdkReady,
+  dataCenter = DEFAULT_DATA_CENTER,
+}) => {
   const [isFloatingWindowOpen, setIsFloatingWindowOpen] = useState(false);
   const [hasNewTask, setHasNewTask] = useState(false);
 
@@ -21,7 +33,7 @@ const EngageWidget: React.FC<EngageWidgetProps> = ({accessToken, currentTheme, i
 
   // Check if we have a supported digital channel task
   const isSupportedTask =
-    currentTask && ['chat', 'social', 'email'].includes(mediaType) && !currentTask.data.wrapUpRequired;
+    currentTask && SUPPORTED_DIGITAL_MEDIA_TYPES.includes(mediaType) && !currentTask.data.wrapUpRequired;
 
   // Handle error from DigitalChannels component
   const handleError = useCallback((error: unknown): boolean => {
@@ -36,36 +48,31 @@ const EngageWidget: React.FC<EngageWidgetProps> = ({accessToken, currentTheme, i
   }, [isFloatingWindowOpen]);
 
   // Get the icon and title based on task type
-  const getTaskIcon = () => {
-    if (mediaType === 'chat' || mediaType === 'social') {
-      return {icon: '💬', title: `${mediaType} Task`};
-    } else if (mediaType === 'email') {
-      return {icon: '✉️', title: 'Email Task'};
-    }
-    return {icon: '📋', title: 'Task'};
-  };
-
-  const {icon, title} = getTaskIcon();
+  const icon = getMediaTypeIcon(mediaType);
+  const title = getMediaTypeTitle(mediaType);
 
   // Determine button class based on task state
   const getButtonClass = () => {
-    const baseClass = 'engage-floating-button';
+    const { FLOATING_BUTTON, HAS_NEW_TASK, HAS_TASK, NO_TASK } = UI_CONSTANTS.CSS_CLASSES;
     if (hasNewTask) {
-      return `${baseClass} has-new-task`;
+      return `${FLOATING_BUTTON} ${HAS_NEW_TASK}`;
     } else if (isSupportedTask) {
-      return `${baseClass} has-task`;
+      return `${FLOATING_BUTTON} ${HAS_TASK}`;
     }
-    return `${baseClass} no-task`;
+    return `${FLOATING_BUTTON} ${NO_TASK}`;
   };
 
   // Show notification when new task arrives
   React.useEffect(() => {
     if (isSupportedTask) {
       setHasNewTask(true);
-      const timer = setTimeout(() => setHasNewTask(false), 5000);
+      const timer = setTimeout(() => setHasNewTask(false), UI_CONSTANTS.NOTIFICATION_TIMEOUT);
       return () => clearTimeout(timer);
     }
   }, [currentTask?.data?.interactionId, isSupportedTask]);
+
+  const { CSS_CLASSES, THEMES, THEME_CLASSES } = UI_CONSTANTS;
+  const themeClass = currentTheme === THEMES.DARK ? THEME_CLASSES.DARK : THEME_CLASSES.LIGHT;
 
   return (
     <>
@@ -73,32 +80,27 @@ const EngageWidget: React.FC<EngageWidgetProps> = ({accessToken, currentTheme, i
       <button
         onClick={toggleFloatingWindow}
         className={getButtonClass()}
-        title={isSupportedTask ? `Open ${title}` : 'No active tasks'}
+        title={isSupportedTask ? `Open ${title}` : MESSAGES.NO_ACTIVE_TASKS_TITLE}
         disabled={!isSdkReady}
       >
         {isSupportedTask ? icon : '💬'}
-        <div className={`engage-notification ${!hasNewTask ? 'hidden' : ''}`}>!</div>
+        <div className={`${CSS_CLASSES.NOTIFICATION} ${!hasNewTask ? CSS_CLASSES.HIDDEN : ''}`}>!</div>
       </button>
 
       {/* Floating window */}
-      <div className={`engage-floating-window ${!isFloatingWindowOpen ? 'hidden' : ''}`}>
-        <div className={`engage-window-header ${currentTheme === 'DARK' ? 'dark' : 'light'}`}>
-          <h3 className="engage-window-title">{isSupportedTask ? title : 'No Active Task'}</h3>
-          <button
-            className={`engage-close-button ${currentTheme === 'DARK' ? 'dark' : 'light'}`}
-            onClick={toggleFloatingWindow}
-          >
+      <div className={`${CSS_CLASSES.FLOATING_WINDOW} ${!isFloatingWindowOpen ? CSS_CLASSES.HIDDEN : ''}`}>
+        <div className={`${CSS_CLASSES.WINDOW_HEADER} ${themeClass}`}>
+          <h3 className={CSS_CLASSES.WINDOW_TITLE}>{isSupportedTask ? title : MESSAGES.NO_ACTIVE_TASK}</h3>
+          <button className={`${CSS_CLASSES.CLOSE_BUTTON} ${themeClass}`} onClick={toggleFloatingWindow}>
             ×
           </button>
         </div>
-        <div className="engage-content-area">
+        <div className={CSS_CLASSES.CONTENT_AREA}>
           {isSupportedTask && isSdkReady ? (
             <DigitalChannels jwtToken={accessToken} dataCenter={dataCenter} onError={handleError} />
           ) : (
-            <div className="engage-content-placeholder">
-              {!isSdkReady
-                ? 'Initializing...'
-                : 'No active digital channel tasks available. When you receive a chat, social, or email task, it will appear here.'}
+            <div className={CSS_CLASSES.CONTENT_PLACEHOLDER}>
+              {!isSdkReady ? MESSAGES.INITIALIZING : MESSAGES.NO_ACTIVE_TASKS}
             </div>
           )}
         </div>
