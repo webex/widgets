@@ -34,7 +34,7 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
     getOutdialANIEntries,
     isTelephonyTaskActive,
     getAddressBookEntries,
-    isAddressBookEnabled,
+    isAddressBookEnabled = true,
   } = props;
 
   const TABS = {

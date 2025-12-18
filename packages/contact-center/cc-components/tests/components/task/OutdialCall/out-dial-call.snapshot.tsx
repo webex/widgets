@@ -182,6 +182,23 @@ describe('Outdial Call Component', () => {
       }),
     };
 
+    it('renders with address book enabled by default when prop not provided', async () => {
+      const propsWithoutAddressBookFlag = {
+        logger: mockCC.LoggerProxy,
+        startOutdial: jest.fn(),
+        getOutdialANIEntries: jest.fn().mockResolvedValue([]),
+        isTelephonyTaskActive: false,
+        getAddressBookEntries: jest.fn().mockResolvedValue({data: [], total: 0}),
+      };
+      const {container} = render(<OutdialCallComponent {...propsWithoutAddressBookFlag} />);
+      await screen.findByTestId('outdial-number-input');
+      const tabList = container.querySelector('mdc-tablist');
+      expect(tabList).toBeInTheDocument();
+      // Remove IDs to avoid snapshot issues with dynamic IDs
+      container.querySelectorAll('[id^="mdc-input"]').forEach((el) => el.removeAttribute('id'));
+      expect(container).toMatchSnapshot();
+    });
+
     it('renders with address book enabled', async () => {
       const {container} = render(<OutdialCallComponent {...addressBookProps} />);
       await screen.findByTestId('outdial-number-input');
