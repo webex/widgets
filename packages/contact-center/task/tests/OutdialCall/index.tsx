@@ -77,6 +77,23 @@ describe('OutdialCall Component', () => {
     expect(container.querySelector('.height-28-5rem')).toBeInTheDocument();
   });
 
+  it('enables address book by default when isAddressBookEnabled prop is not provided', () => {
+    const useOutdialCallSpy = jest.spyOn(helper, 'useOutdialCall').mockReturnValue({
+      startOutdial: jest.fn(),
+      getOutdialANIEntries: jest.fn(),
+      getAddressBookEntries: jest.fn(),
+      isTelephonyTaskActive: false,
+    });
+
+    const {container} = render(<OutdialCall />);
+
+    expect(useOutdialCallSpy).toHaveBeenCalled();
+    // When no prop is provided, address book should be enabled by default
+    expect(container.querySelector('mdc-tablist')).toBeInTheDocument();
+    // The container should have the additional height class
+    expect(container.querySelector('.height-28-5rem')).toBeInTheDocument();
+  });
+
   describe('ErrorBoundary Tests', () => {
     it('should render empty fragment when ErrorBoundary catches an error and call the callback', () => {
       // Mock the useOutdialCall to throw an error
