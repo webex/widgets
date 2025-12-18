@@ -348,7 +348,7 @@ export const handleStrayTasks = async (
   // ============================================
   // PHASE 1: Accept all incoming tasks first
   // ============================================
-  console.log(`handleStrayTasks: Phase 1 - Accepting incoming tasks`);
+  console.log(`${timestamp()} handleStrayTasks: Phase 1 - Accepting incoming tasks`);
   let acceptIterations = 0;
   while (acceptIterations < maxIterations) {
     acceptIterations++;
@@ -404,9 +404,12 @@ export const handleStrayTasks = async (
   // ============================================
   // PHASE 2: Clear all pending calls/wrapups
   // ============================================
-  console.log(`andleStrayTasks: Phase 2 - Clearing pending calls/wrapups`);
+  console.log(`${timestamp()} handleStrayTasks: Phase 2 - Clearing pending calls/wrapups`);
   let clearIterations = 0;
-  while (clearIterations < maxIterations) {
+  let failedAttempts = 0;
+  const maxFailedAttempts = 3;
+
+  while (clearIterations < maxIterations && failedAttempts < maxFailedAttempts) {
     clearIterations++;
 
     const endButton = page.getByTestId('call-control:end-call').first();
@@ -415,20 +418,41 @@ export const handleStrayTasks = async (
     const wrapupBoxVisible = await wrapupBox.isVisible().catch(() => false);
 
     if (!endButtonVisible && !wrapupBoxVisible) {
-      console.log(`handleStrayTasks: No more pending calls/wrapups`);
+      console.log(`${timestamp()} handleStrayTasks: No more pending calls/wrapups`);
       break;
     }
 
     console.log(
-      `handleStrayTasks: Clearing task (iteration ${clearIterations}) - ` +
+      `${timestamp()} handleStrayTasks: Clearing task (iteration ${clearIterations}) - ` +
         `endButton: ${endButtonVisible}, wrapupButton: ${wrapupBoxVisible}`
     );
 
+    // Remember current state before clearing
+    const hadEndButton = endButtonVisible;
+    const hadWrapup = wrapupBoxVisible;
+
     await clearPendingCallAndWrapup(page);
-    tasksCleared++;
-    console.log(`handleStrayTasks: Cleared task (${tasksCleared} total)`);
-    // Small wait for UI to update
-    await page.waitForTimeout(200);
+
+    // Wait for UI to update
+    await page.waitForTimeout(500);
+
+    // Check if state actually changed
+    const endStillVisible = await endButton.isVisible().catch(() => false);
+    const wrapupStillVisible = await wrapupBox.isVisible().catch(() => false);
+
+    // Only count as cleared if the state actually changed
+    if ((hadEndButton && !endStillVisible) || (hadWrapup && !wrapupStillVisible)) {
+      tasksCleared++;
+      failedAttempts = 0; // Reset failed attempts on success
+      console.log(`${timestamp()} handleStrayTasks: Cleared task (${tasksCleared} total)`);
+    } else {
+      failedAttempts++;
+      console.log(`${timestamp()} handleStrayTasks: Clear attempt failed (${failedAttempts}/${maxFailedAttempts})`);
+    }
+  }
+
+  if (failedAttempts >= maxFailedAttempts) {
+    console.log(`${timestamp()} handleStrayTasks: Stopping after ${maxFailedAttempts} failed attempts`);
   }
 
   const duration = Date.now() - startTime;
