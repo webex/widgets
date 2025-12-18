@@ -167,7 +167,7 @@ export default function createAdvancedTaskControlsTests() {
     test('Call Blind Transferred to Queue with DialNumber', async () => {
       await testManager.resetSession('dialNumber');
       // First transfer from Agent 1 to Agent 2
-      await consultOrTransfer(testManager.agent1Page, 'queue', 'transfer', 'queue with dn e2e');
+      await consultOrTransfer(testManager.agent1Page, 'queue', 'transfer', 'queue with dn');
 
       //DialNumber accepts the transfer
       await ensureDialNumberLoggedIn(testManager.dialNumberPage);
