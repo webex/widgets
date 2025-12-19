@@ -125,6 +125,7 @@ interface IStore {
   agentProfile: AgentLoginProfile;
   isMuted: boolean;
   isAddressBookEnabled: boolean;
+  isDigitalChannelsInitialized: boolean;
   init(params: InitParams, callback: (ccSDK: IContactCenter) => void): Promise<void>;
   registerCC(webex?: WithWebex['webex']): Promise<void>;
 }
@@ -153,6 +154,7 @@ interface IStoreWrapper extends IStore {
   setTeamId(id: string): void;
   setIsMuted(value: boolean): void;
   setIsDeclineButtonEnabled(value: boolean): void;
+  setDigitalChannelsInitialized(value: boolean): void;
   setOnError(callback: (widgetName: string, error: Error) => void): void;
 }
 

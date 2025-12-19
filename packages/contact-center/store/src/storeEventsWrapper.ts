@@ -136,6 +136,10 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.isDeclineButtonEnabled;
   }
 
+  get isDigitalChannelsInitialized() {
+    return this.store.isDigitalChannelsInitialized;
+  }
+
   get currentConsultQueueId() {
     return this.store.currentConsultQueueId;
   }
@@ -159,6 +163,12 @@ class StoreWrapper implements IStoreWrapper {
   get isAddressBookEnabled() {
     return this.store.isAddressBookEnabled;
   }
+
+  setDigitalChannelsInitialized = (value: boolean): void => {
+    runInAction(() => {
+      this.store.isDigitalChannelsInitialized = value;
+    });
+  };
 
   setIsMuted = (value: boolean): void => {
     runInAction(() => {
@@ -759,6 +769,7 @@ class StoreWrapper implements IStoreWrapper {
       this.setShowMultipleLoginAlert(false);
       this.setConsultStartTimeStamp(undefined);
       this.setTeamId('');
+      this.setDigitalChannelsInitialized(false);
     });
   };
 

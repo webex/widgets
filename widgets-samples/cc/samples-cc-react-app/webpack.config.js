@@ -13,6 +13,7 @@ const PKG_SRC = [
   'packages/contact-center/task/src',
   'packages/contact-center/cc-components/src',
   'packages/contact-center/ui-logging/src',
+  'packages/contact-center/cc-digital-channels/src',
 ].map((p) => resolveMonorepoRoot(p));
 
 module.exports = {

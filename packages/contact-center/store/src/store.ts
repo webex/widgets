@@ -49,6 +49,7 @@ class Store implements IStore {
   allowConsultToQueue: boolean = false;
   agentProfile: AgentLoginProfile = {};
   isMuted: boolean = false;
+  isDigitalChannelsInitialized: boolean = false;
 
   constructor() {
     makeAutoObservable(this, {
