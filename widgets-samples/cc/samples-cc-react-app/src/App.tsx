@@ -63,6 +63,7 @@ function App() {
   const [selectedState, setSelectedState] = useState('');
   const [showOutdialFailedModal, setShowOutdialFailedModal] = useState(false);
   const [outdialFailedReason, setOutdialFailedReason] = useState('');
+  const [isAddressBookEnabled, setIsAddressBookEnabled] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [incomingTasks, setIncomingTasks] = useState([]);
   const [loginType, setLoginType] = useState('token');
@@ -917,7 +918,16 @@ function App() {
                         <section className="section-box">
                           <fieldset className="fieldset">
                             <legend className="legend-box">Outdial Call</legend>
-                            <OutdialCall />
+                            <Checkbox
+                              checked={isAddressBookEnabled}
+                              aria-label="address book enabled checkbox"
+                              id="address-book-enabled-checkbox"
+                              label="Enable Address Book"
+                              className="margin-bottom-1rem"
+                              // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
+                              onchange={() => setIsAddressBookEnabled(!isAddressBookEnabled)}
+                            />
+                            <OutdialCall isAddressBookEnabled={isAddressBookEnabled} />
                           </fieldset>
                         </section>
                       </div>

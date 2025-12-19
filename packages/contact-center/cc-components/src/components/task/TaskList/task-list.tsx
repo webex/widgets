@@ -48,6 +48,7 @@ const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (prop
             onTaskSelect={createTaskSelectHandler(task, currentTask, onTaskSelect, agentId)}
             acceptText={taskData.acceptText}
             disableAccept={taskData.disableAccept}
+            disableDecline={taskData.disableDecline}
             declineText={taskData.declineText}
             mediaType={taskData.mediaType as MEDIA_CHANNEL}
             mediaChannel={taskData.mediaChannel as MEDIA_CHANNEL}

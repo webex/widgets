@@ -132,6 +132,10 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.isQueueConsultInProgress;
   }
 
+  get isDeclineButtonEnabled() {
+    return this.store.isDeclineButtonEnabled;
+  }
+
   get currentConsultQueueId() {
     return this.store.currentConsultQueueId;
   }
@@ -282,6 +286,12 @@ class StoreWrapper implements IStoreWrapper {
     });
   };
 
+  setIsDeclineButtonEnabled = (value: boolean): void => {
+    runInAction(() => {
+      this.store.isDeclineButtonEnabled = value;
+    });
+  };
+
   setCurrentConsultQueueId = (queueId: string | null): void => {
     runInAction(() => {
       this.store.currentConsultQueueId = queueId;
@@ -390,6 +400,7 @@ class StoreWrapper implements IStoreWrapper {
       taskToRemove.off(TASK_EVENTS.AGENT_WRAPPEDUP, this.refreshTaskList);
       taskToRemove.off(TASK_EVENTS.TASK_CONSULTING, this.handleConsulting);
       taskToRemove.off(TASK_EVENTS.TASK_OFFER_CONSULT, this.handleConsultOffer);
+      taskToRemove.off(TASK_EVENTS.TASK_AUTO_ANSWERED, this.handleAutoAnswer);
       taskToRemove.off(TASK_EVENTS.TASK_CONSULT_END, this.refreshTaskList);
       taskToRemove.off(TASK_EVENTS.TASK_CONSULT_ACCEPTED, this.handleConsultAccepted);
       taskToRemove.off(TASK_EVENTS.AGENT_CONSULT_CREATED, this.handleConsultCreated);
@@ -437,6 +448,7 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   handleTaskEnd = () => {
+    this.setIsDeclineButtonEnabled(false);
     this.refreshTaskList();
   };
 
@@ -477,6 +489,11 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   handleConsultOffer = () => {
+    this.refreshTaskList();
+  };
+
+  handleAutoAnswer = () => {
+    this.setIsDeclineButtonEnabled(true);
     this.refreshTaskList();
   };
 
@@ -541,6 +558,7 @@ class StoreWrapper implements IStoreWrapper {
     task.on(TASK_EVENTS.TASK_CONSULTING, this.handleConsulting);
     task.on(TASK_EVENTS.TASK_CONSULT_ACCEPTED, this.handleConsultAccepted);
     task.on(TASK_EVENTS.TASK_OFFER_CONSULT, this.handleConsultOffer);
+    task.on(TASK_EVENTS.TASK_AUTO_ANSWERED, this.handleAutoAnswer);
     task.on(TASK_EVENTS.TASK_CONSULT_END, this.refreshTaskList);
     task.on(TASK_EVENTS.TASK_HOLD, this.refreshTaskList);
     task.on(TASK_EVENTS.TASK_RESUME, this.refreshTaskList);

@@ -116,6 +116,7 @@ interface IStore {
   currentTheme: string;
   customState: ICustomState;
   isQueueConsultInProgress: boolean;
+  isDeclineButtonEnabled: boolean;
   currentConsultQueueId: string;
   consultStartTimeStamp?: number;
   callControlAudio: MediaStream | null;
@@ -151,6 +152,7 @@ interface IStoreWrapper extends IStore {
   setAgentProfile(profile: Profile): void;
   setTeamId(id: string): void;
   setIsMuted(value: boolean): void;
+  setIsDeclineButtonEnabled(value: boolean): void;
   setOnError(callback: (widgetName: string, error: Error) => void): void;
 }
 
@@ -185,6 +187,7 @@ enum TASK_EVENTS {
   TASK_RECORDING_PAUSED = 'task:recordingPaused',
   TASK_RECORDING_RESUMED = 'task:recordingResumed',
   TASK_OFFER_CONSULT = 'task:offerConsult',
+  TASK_AUTO_ANSWERED = 'task:autoAnswered',
   TASK_CONFERENCE_ESTABLISHING = 'task:conferenceEstablishing',
   TASK_CONFERENCE_STARTED = 'task:conferenceStarted',
   TASK_CONFERENCE_FAILED = 'task:conferenceFailed',

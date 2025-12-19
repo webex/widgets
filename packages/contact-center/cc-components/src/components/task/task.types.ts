@@ -10,6 +10,8 @@ import {
   EntryPointRecord,
   FetchPaginatedList,
   Participant,
+  AddressBookEntrySearchParams,
+  AddressBookEntriesResponse,
 } from '@webex/cc-store';
 
 type Enum<T extends Record<string, unknown>> = T[keyof T];
@@ -124,10 +126,14 @@ export interface TaskProps {
    * Agent ID of the logged-in user
    */
   agentId: string;
+  /**
+   * Flag to enable decline button on incoming task component
+   */
+  isDeclineButtonEnabled?: boolean;
 }
 
 export type IncomingTaskComponentProps = Pick<TaskProps, 'isBrowser' | 'accept' | 'reject' | 'logger'> &
-  Partial<Pick<TaskProps, 'incomingTask'>>;
+  Partial<Pick<TaskProps, 'incomingTask' | 'isDeclineButtonEnabled'>>;
 
 export type TaskListComponentProps = Pick<
   TaskProps,
@@ -319,9 +325,24 @@ export interface ControlProps {
   consultTransfer: () => void;
 
   /**
-   * Timestamp when the consult call started.
+   * Label for the state timer (e.g., "Wrap Up", "Post Call").
    */
-  consultStartTimeStamp?: number;
+  stateTimerLabel?: string | null;
+
+  /**
+   * Timestamp for the state timer.
+   */
+  stateTimerTimestamp?: number;
+
+  /**
+   * Label for the consult timer (e.g., "Consulting", "Consult on Hold").
+   */
+  consultTimerLabel?: string;
+
+  /**
+   * Timestamp for the consult timer.
+   */
+  consultTimerTimestamp?: number;
 
   /**
    * Audio stream for the call control.
@@ -456,7 +477,6 @@ export type CallControlComponentProps = Pick<
   | 'exitConference'
   | 'endConsultCall'
   | 'consultTransfer'
-  | 'consultStartTimeStamp'
   | 'callControlAudio'
   | 'consultAgentName'
   | 'setConsultAgentName'
@@ -464,6 +484,10 @@ export type CallControlComponentProps = Pick<
   | 'callControlClassName'
   | 'callControlConsultClassName'
   | 'startTimestamp'
+  | 'stateTimerLabel'
+  | 'stateTimerTimestamp'
+  | 'consultTimerLabel'
+  | 'consultTimerTimestamp'
   | 'allowConsultToQueue'
   | 'lastTargetType'
   | 'setLastTargetType'
@@ -516,9 +540,34 @@ export interface OutdialCallProps {
    * Logger instance for logging purpose.
    */
   logger: ILogger;
+
+  /**
+   * Function to get a list of address book entries.
+   */
+  getAddressBookEntries: (params: AddressBookEntrySearchParams) => Promise<AddressBookEntriesResponse>;
+
+  /**
+   * Flag to determine if the address book is enabled.
+   * Defaults to true if not provided.
+   */
+  isAddressBookEnabled?: boolean;
+
+  /**
+   * Boolean indicating if there's an active telephony task.
+   * Used to disable the outdial button when a telephony task is in progress.
+   */
+  isTelephonyTaskActive?: boolean;
 }
 
-export type OutdialCallComponentProps = Pick<OutdialCallProps, 'logger' | 'startOutdial' | 'getOutdialANIEntries'>;
+export type OutdialCallComponentProps = Pick<
+  OutdialCallProps,
+  | 'logger'
+  | 'startOutdial'
+  | 'getOutdialANIEntries'
+  | 'isTelephonyTaskActive'
+  | 'getAddressBookEntries'
+  | 'isAddressBookEnabled'
+>;
 
 /**
  * Interface representing the properties for CallControlListItem component.
@@ -570,7 +619,8 @@ export interface ConsultTransferPopoverComponentProps {
  */
 export interface CallControlConsultComponentsProps {
   agentName: string;
-  startTimeStamp: number;
+  consultTimerLabel: string;
+  consultTimerTimestamp: number;
   consultTransfer: () => void;
   endConsultCall: () => void;
   consultConference: () => void;
@@ -697,6 +747,7 @@ export interface TaskListItemData {
   declineText: string | undefined;
   title: string;
   disableAccept: boolean;
+  disableDecline: boolean;
   displayState: string;
 }
 

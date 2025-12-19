@@ -95,6 +95,7 @@ jest.mock('../src/store', () => ({
     currentConsultQueueId: null,
     isEndConsultEnabled: true,
     allowConsultToQueue: false,
+    isDeclineButtonEnabled: false,
     setShowMultipleLoginAlert: jest.fn(),
     setCurrentState: jest.fn(),
     setLastStateChangeTimestamp: jest.fn(),
@@ -248,6 +249,20 @@ describe('storeEventsWrapper', () => {
 
     it('should proxy allowConsultToQueue', () => {
       expect(storeWrapper.allowConsultToQueue).toBe(storeWrapper['store'].allowConsultToQueue);
+    });
+
+    it('should proxy isDeclineButtonEnabled', () => {
+      expect(storeWrapper.isDeclineButtonEnabled).toBe(false);
+    });
+
+    it('should setIsDeclineButtonEnabled', () => {
+      expect(storeWrapper.setIsDeclineButtonEnabled).toBeInstanceOf(Function);
+
+      storeWrapper.setIsDeclineButtonEnabled(true);
+      expect(storeWrapper['store'].isDeclineButtonEnabled).toBe(true);
+
+      storeWrapper.setIsDeclineButtonEnabled(false);
+      expect(storeWrapper['store'].isDeclineButtonEnabled).toBe(false);
     });
 
     it('should proxy consultStartTimeStamp', () => {
@@ -558,6 +573,7 @@ describe('storeEventsWrapper', () => {
       expect(mockTask2.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_CONSULT_END, expect.any(Function));
       expect(mockTask2.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_CONSULT_QUEUE_CANCELLED, expect.any(Function));
       expect(mockTask2.on).toHaveBeenCalledWith(TASK_EVENTS.AGENT_WRAPPEDUP, expect.any(Function));
+      expect(mockTask2.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_AUTO_ANSWERED, expect.any(Function));
       expect(mockTask2.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_HOLD, storeWrapper.refreshTaskList);
       expect(mockTask2.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_RESUME, storeWrapper.refreshTaskList);
     });
@@ -691,6 +707,7 @@ describe('storeEventsWrapper', () => {
 
       expect(mockTask.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function));
       expect(mockTask.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));
+      expect(mockTask.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_AUTO_ANSWERED, expect.any(Function));
       expect(mockTask.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_HOLD, storeWrapper.refreshTaskList);
       expect(mockTask.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_RESUME, storeWrapper.refreshTaskList);
 
@@ -1020,6 +1037,7 @@ describe('storeEventsWrapper', () => {
 
       expect(mockTask.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function));
       expect(mockTask.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));
+      expect(mockTask.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_AUTO_ANSWERED, expect.any(Function));
 
       expect(refreshTaskListSpy).toHaveBeenCalledWith();
       expect(setCurrentTaskSpy).toHaveBeenCalledWith(null);
@@ -1536,6 +1554,54 @@ describe('storeEventsWrapper', () => {
 
       // Verify the TASK_CONSULT_QUEUE_CANCELLED handler was registered
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_CONSULT_QUEUE_CANCELLED, expect.any(Function));
+    });
+
+    it('should register TASK_AUTO_ANSWERED handler on incoming task', () => {
+      const mockTask: ITask = {
+        data: {
+          interactionId: 'interaction1',
+          interaction: {
+            state: 'connected',
+          },
+        },
+        on: jest.fn(),
+        off: jest.fn(),
+      } as unknown as ITask;
+
+      storeWrapper['store'].taskList = {};
+      storeWrapper.handleIncomingTask(mockTask);
+
+      // Verify the TASK_AUTO_ANSWERED handler was registered
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_AUTO_ANSWERED, expect.any(Function));
+    });
+
+    it('should handle auto answer event and enable decline button', () => {
+      const autoAnswerTask: ITask = {
+        data: {interactionId: 'autoAnswerTest', interaction: {state: 'connected'}},
+        on: jest.fn(),
+        off: jest.fn(),
+      } as unknown as ITask;
+
+      const autoAnswerTaskOnSpy = jest.spyOn(autoAnswerTask, 'on');
+      const setIsDeclineButtonEnabledSpy = jest.spyOn(storeWrapper, 'setIsDeclineButtonEnabled');
+      const refreshTaskListSpy = jest.spyOn(storeWrapper, 'refreshTaskList');
+
+      storeWrapper['store'].cc.taskManager.getAllTasks = jest
+        .fn()
+        .mockReturnValue({[autoAnswerTask.data.interactionId]: autoAnswerTask});
+      storeWrapper.refreshTaskList();
+      storeWrapper.handleIncomingTask(autoAnswerTask);
+
+      const autoAnswerCall = autoAnswerTaskOnSpy.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_AUTO_ANSWERED);
+
+      expect(autoAnswerCall).toBeDefined();
+
+      const autoAnswerCallback = autoAnswerCall[1];
+
+      autoAnswerCallback();
+
+      expect(setIsDeclineButtonEnabledSpy).toHaveBeenCalledWith(true);
+      expect(refreshTaskListSpy).toHaveBeenCalled();
     });
   });
 

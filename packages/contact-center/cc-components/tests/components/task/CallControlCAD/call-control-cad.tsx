@@ -129,7 +129,6 @@ describe('CallControlCADComponent', () => {
     consultCall: jest.fn(),
     endConsultCall: jest.fn(),
     consultTransfer: jest.fn(),
-    consultStartTimeStamp: Date.now(),
     callControlAudio: null as unknown as MediaStream,
     consultAgentName: '',
     setConsultAgentName: jest.fn(),
@@ -137,6 +136,10 @@ describe('CallControlCADComponent', () => {
     callControlClassName: '',
     callControlConsultClassName: '',
     startTimestamp: Date.now(),
+    stateTimerLabel: null,
+    stateTimerTimestamp: 0,
+    consultTimerLabel: 'Consulting',
+    consultTimerTimestamp: 0,
     allowConsultToQueue: true,
     lastTargetType: 'agent',
     setLastTargetType: jest.fn(),
@@ -232,7 +235,6 @@ describe('CallControlCADComponent', () => {
     const consultProps = {
       ...defaultProps,
       consultAgentName: 'Consult Agent',
-      consultStartTimeStamp: Date.now(),
       controlVisibility: {
         ...mockControlVisibility,
         isConsultInitiatedOrAccepted: true,
