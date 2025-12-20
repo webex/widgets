@@ -118,6 +118,7 @@ export async function consultOrTransfer(
   action: 'consult' | 'transfer',
   value: string
 ): Promise<void> {
+  await page.bringToFront();
   await openConsultOrTransferMenu(page, action);
   const popover = await getPopover(page);
 
@@ -139,14 +140,13 @@ export async function consultOrTransfer(
 
 // ===== Internal helper functions =====
 async function openConsultOrTransferMenu(page: Page, action: 'consult' | 'transfer'): Promise<void> {
+  await page.bringToFront();
+  await dismissOverlays(page);
+
   if (action === 'consult') {
-    await dismissOverlays(page);
-    await page.getByTestId('call-control:consult').nth(1).click({timeout: AWAIT_TIMEOUT});
+    await page.getByTestId('call-control:consult').first().click({timeout: AWAIT_TIMEOUT});
   } else {
-    await page
-      .getByRole('group', {name: 'Call Control with Call'})
-      .getByLabel('Transfer Call')
-      .click({timeout: AWAIT_TIMEOUT});
+    await page.getByTestId('call-control:transfer').first().click({timeout: AWAIT_TIMEOUT});
   }
 }
 

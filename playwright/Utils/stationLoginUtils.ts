@@ -118,13 +118,14 @@ export const dialLogin = async (page: Page, dialNumber?: string): Promise<void> 
  * ```
  */
 export const stationLogout = async (page: Page): Promise<void> => {
-  // Ensure the logout button is visible before clicking
+  // Wait for the logout button to be visible before clicking
   const logoutButton = page.getByTestId('samples:station-logout-button');
-  const isLogoutButtonVisible = await logoutButton.isVisible().catch(() => false);
-  if (!isLogoutButtonVisible) {
+  try {
+    await logoutButton.waitFor({state: 'visible', timeout: AWAIT_TIMEOUT});
+  } catch {
     throw new Error('Station logout button is not visible. Cannot perform logout.');
   }
-  await page.getByTestId('samples:station-logout-button').click({timeout: AWAIT_TIMEOUT});
+  await logoutButton.click({timeout: AWAIT_TIMEOUT});
   //check if the station logout button is hidden after logouts
   const isLogoutButtonHidden = await page
     .getByTestId('samples:station-logout-button')
@@ -147,6 +148,8 @@ export const stationLogout = async (page: Page): Promise<void> => {
     } catch (e) {
       throw new Error(`Station logout failed: ${e instanceof Error ? e.message : 'Unknown error'}`);
     }
+  } else {
+    await page.waitForTimeout(5000);
   }
 };
 

@@ -7,27 +7,34 @@ import {
   verifyDesktopOptionVisibility,
 } from '../Utils/stationLoginUtils';
 import {changeUserState, verifyCurrentState, getStateElapsedTime} from '../Utils/userStateUtils';
-import {parseTimeString, waitForWebSocketDisconnection, waitForWebSocketReconnection} from '../Utils/helperUtils';
+import {parseTimeString, waitForWebSocketDisconnection, waitForWebSocketReconnection, createLogger} from '../Utils/helperUtils';
 import {USER_STATES, LOGIN_MODE, LONG_WAIT} from '../constants';
 import {TestManager} from '../test-manager';
+
+const log = createLogger('StationLogin');
 
 export default function createStationLoginTests() {
   test.describe('Station Login Tests - Dial Number Mode', () => {
     let testManager: TestManager;
 
     test.beforeAll(async ({browser}, testInfo) => {
+      log('beforeAll: Setting up test manager');
       const projectName = testInfo.project.name;
       testManager = new TestManager(projectName);
       await testManager.setupForStationLogin(browser);
+      log('beforeAll: Setup complete');
     });
 
     test.afterAll(async () => {
+      log('afterAll: Cleanup starting');
       if (testManager) {
         await testManager.cleanup();
       }
+      log('afterAll: Cleanup complete');
     });
 
     test('should login with Dial Number mode and verify all fields are visible', async () => {
+      log('DialNumber: Login + verify fields - Starting');
       await expect(testManager.agent1Page.getByTestId('station-login-widget')).toBeVisible({timeout: 2000});
       const loginModeSelector = testManager.agent1Page.getByTestId('login-option-select');
       await expect(loginModeSelector).toBeVisible({timeout: 2000});
@@ -45,9 +52,11 @@ export default function createStationLoginTests() {
       );
       await expect(testManager.agent1Page.getByTestId('state-select')).toBeVisible({timeout: LONG_WAIT});
       await verifyLoginMode(testManager.agent1Page, 'Dial Number');
+      log('DialNumber: Login + verify fields - Complete');
     });
 
     test('should handle page reload and maintain Dial Number login state', async () => {
+      log('DialNumber: Reload persistence - Starting');
       await ensureUserStateVisible(
         testManager.agent1Page,
         LOGIN_MODE.DIAL_NUMBER,
@@ -61,9 +70,11 @@ export default function createStationLoginTests() {
         await expect(testManager.agent1Page.getByTestId('dial-number-input').locator('input')).toHaveValue(dialNumber);
       }
       await expect(testManager.agent1Page.getByTestId('state-select')).toBeVisible({timeout: 2000});
+      log('DialNumber: Reload persistence - Complete');
     });
 
     test('should retain user state timer and switch to Meeting state after network disconnection with Dial Number mode', async () => {
+      log('DialNumber: Network disconnect - Starting');
       await ensureUserStateVisible(
         testManager.agent1Page,
         LOGIN_MODE.DIAL_NUMBER,
@@ -91,10 +102,12 @@ export default function createStationLoginTests() {
       const secondsAfterReconnection = parseTimeString(timerAfterReconnection);
       expect(secondsAfterReconnection).toBeGreaterThan(secondsBeforeDisconnection);
       await verifyLoginMode(testManager.agent1Page, 'Dial Number');
+      log('DialNumber: Network disconnect - Complete');
     });
 
     // TODO: The bug of timer reset for Available state should be fixed before implementing this test case
     test.skip('should reset user state timer and maintain Available state after network disconnection with Dial Number mode', async () => {
+      log('DialNumber: Available network disconnect - Starting');
       await ensureUserStateVisible(
         testManager.agent1Page,
         LOGIN_MODE.DIAL_NUMBER,
@@ -125,9 +138,11 @@ export default function createStationLoginTests() {
       );
       expect(agentStateChangeLog).toBeTruthy();
       await verifyLoginMode(testManager.agent1Page, 'Dial Number');
+      log('DialNumber: Available network disconnect - Complete');
     });
 
     test('should support multi-login synchronization for Dial Number Mode ', async () => {
+      log('DialNumber: Multi-login sync - Starting');
       await ensureUserStateVisible(
         testManager.agent1Page,
         LOGIN_MODE.DIAL_NUMBER,
@@ -144,6 +159,7 @@ export default function createStationLoginTests() {
         .isVisible()
         .catch(() => false);
       expect(isLogoutButtonVisible).toBe(false);
+      log('DialNumber: Multi-login sync - Complete');
     });
   });
 
@@ -163,6 +179,7 @@ export default function createStationLoginTests() {
     });
 
     test('should login with Extension mode and verify all fields are visible', async () => {
+      log('Extension: Login + verify fields - Starting');
       await expect(testManager.agent1Page.getByTestId('station-login-widget')).toBeVisible({timeout: 2000});
       const loginModeSelector = testManager.agent1Page.getByTestId('login-option-select');
       await expect(loginModeSelector).toBeVisible({timeout: 2000});
@@ -180,9 +197,11 @@ export default function createStationLoginTests() {
       );
       await expect(testManager.agent1Page.getByTestId('state-select')).toBeVisible({timeout: LONG_WAIT});
       await verifyLoginMode(testManager.agent1Page, 'Extension');
+      log('Extension: Login + verify fields - Complete');
     });
 
     test('should handle page reload and maintain Extension login state', async () => {
+      log('Extension: Reload persistence - Starting');
       await ensureUserStateVisible(
         testManager.agent1Page,
         LOGIN_MODE.EXTENSION,
@@ -198,9 +217,11 @@ export default function createStationLoginTests() {
         );
       }
       await expect(testManager.agent1Page.getByTestId('state-select')).toBeVisible({timeout: 2000});
+      log('Extension: Reload persistence - Complete');
     });
 
     test('should retain user state timer and switch to Meeting state after network disconnection with Extension mode', async () => {
+      log('Extension: Network disconnect - Starting');
       await ensureUserStateVisible(
         testManager.agent1Page,
         LOGIN_MODE.EXTENSION,
@@ -228,10 +249,12 @@ export default function createStationLoginTests() {
       const secondsAfterReconnection = parseTimeString(timerAfterReconnection);
       expect(secondsAfterReconnection).toBeGreaterThan(secondsBeforeDisconnection);
       await verifyLoginMode(testManager.agent1Page, 'Extension');
+      log('Extension: Network disconnect - Complete');
     });
 
     // TODO: The bug of timer reset for Available state should be fixed before implementing this test case
     test.skip('should reset user state timer and maintain Available state after network disconnection with Extension mode', async () => {
+      log('Extension: Available network disconnect - Starting');
       await ensureUserStateVisible(
         testManager.agent1Page,
         LOGIN_MODE.EXTENSION,
@@ -262,9 +285,11 @@ export default function createStationLoginTests() {
       );
       expect(agentStateChangeLog).toBeTruthy();
       await verifyLoginMode(testManager.agent1Page, 'Extension');
+      log('Extension: Available network disconnect - Complete');
     });
 
     test('should support multi-login synchronization for Extension Mode', async () => {
+      log('Extension: Multi-login sync - Starting');
       await ensureUserStateVisible(
         testManager.agent1Page,
         LOGIN_MODE.EXTENSION,
@@ -280,6 +305,7 @@ export default function createStationLoginTests() {
         .isVisible()
         .catch(() => false);
       expect(isLogoutButtonVisible).toBe(false);
+      log('Extension: Multi-login sync - Complete');
     });
   });
 
@@ -299,6 +325,7 @@ export default function createStationLoginTests() {
     });
 
     test('should toggle Desktop option visibility when hideDesktopLogin checkbox is toggled', async () => {
+      log('HideDesktop: Toggle visibility - Starting');
       await expect(testManager.agent1Page.getByTestId('station-login-widget')).toBeVisible({timeout: 2000});
       const hideDesktopCheckbox = testManager.agent1Page.getByTestId('samples:hide-desktop-login-checkbox');
 
@@ -316,6 +343,7 @@ export default function createStationLoginTests() {
       await hideDesktopCheckbox.click();
       await testManager.agent1Page.waitForTimeout(500);
       await verifyDesktopOptionVisibility(testManager.agent1Page, false);
+      log('HideDesktop: Toggle visibility - Complete');
     });
   });
 
@@ -335,6 +363,7 @@ export default function createStationLoginTests() {
     });
 
     test('should login with Desktop mode and verify all fields are visible', async () => {
+      log('Desktop: Login + verify fields - Starting');
       await expect(testManager.agent1Page.getByTestId('station-login-widget')).toBeVisible({timeout: 2000});
       const loginModeSelector = testManager.agent1Page.getByTestId('login-option-select');
       await expect(loginModeSelector).toBeVisible({timeout: 2000});
@@ -346,17 +375,21 @@ export default function createStationLoginTests() {
       await telephonyLogin(testManager.agent1Page, LOGIN_MODE.DESKTOP);
       await expect(testManager.agent1Page.getByTestId('state-select')).toBeVisible({timeout: 3000});
       await verifyLoginMode(testManager.agent1Page, 'Desktop');
+      log('Desktop: Login + verify fields - Complete');
     });
 
     test.skip('should handle page reload and maintain Desktop login state', async () => {
+      log('Desktop: Reload persistence - Starting');
       await ensureUserStateVisible(testManager.agent1Page, LOGIN_MODE.DESKTOP);
       await agentRelogin(testManager.agent1Page);
       await expect(testManager.agent1Page.getByTestId('station-login-widget')).toBeVisible({timeout: 2000});
       await verifyLoginMode(testManager.agent1Page, 'Desktop');
       await expect(testManager.agent1Page.getByTestId('state-select')).toBeVisible({timeout: 2000});
+      log('Desktop: Reload persistence - Complete');
     });
 
     test('should retain user state timer and switch to Meeting state after network disconnection with Desktop mode', async () => {
+      log('Desktop: Network disconnect - Starting');
       await ensureUserStateVisible(testManager.agent1Page, LOGIN_MODE.DESKTOP);
       await changeUserState(testManager.agent1Page, USER_STATES.MEETING);
       await verifyCurrentState(testManager.agent1Page, USER_STATES.MEETING);
@@ -380,10 +413,12 @@ export default function createStationLoginTests() {
       const secondsAfterReconnection = parseTimeString(timerAfterReconnection);
       expect(secondsAfterReconnection).toBeGreaterThan(secondsBeforeDisconnection);
       await verifyLoginMode(testManager.agent1Page, 'Desktop');
+      log('Desktop: Network disconnect - Complete');
     });
 
     // TODO: The bug of timer reset for Available state should be fixed before implementing this test case
     test.skip('should reset user state timer and maintain Available state after network disconnection with Desktop mode', async () => {
+      log('Desktop: Available network disconnect - Starting');
       await ensureUserStateVisible(testManager.agent1Page, LOGIN_MODE.DESKTOP);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       await verifyCurrentState(testManager.agent1Page, USER_STATES.AVAILABLE);
@@ -410,6 +445,7 @@ export default function createStationLoginTests() {
       );
       expect(agentStateChangeLog).toBeTruthy();
       await verifyLoginMode(testManager.agent1Page, 'Desktop');
+      log('Desktop: Available network disconnect - Complete');
     });
   });
 }

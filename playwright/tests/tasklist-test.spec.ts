@@ -1,11 +1,13 @@
 import {test, Page, expect} from '@playwright/test';
 import {TestManager} from '../test-manager';
 import {changeUserState} from '../Utils/userStateUtils';
-import {createCallTask, createChatTask, createEmailTask} from '../Utils/incomingTaskUtils';
+import {createCallTask, createChatTask, createEmailTask, waitForIncomingTask} from '../Utils/incomingTaskUtils';
 import {TASK_TYPES, USER_STATES, WRAPUP_REASONS} from '../constants';
 import {verifyTaskControls} from '../Utils/taskControlUtils';
 import {submitWrapup} from '../Utils/wrapupUtils';
-import {waitForState} from '../Utils/helperUtils';
+import {waitForState, createLogger} from '../Utils/helperUtils';
+
+const log = createLogger('TaskList');
 
 let capturedLogs: string[] = [];
 
@@ -136,6 +138,7 @@ export default function createTaskListTests() {
   });
 
   test.beforeAll(async ({browser}, testInfo) => {
+    log('beforeAll: Setting up test manager');
     const projectName = testInfo.project.name;
     testManager = new TestManager(projectName);
     await testManager.setup(browser, {
@@ -145,13 +148,22 @@ export default function createTaskListTests() {
       enableConsoleLogging: true,
     });
     setupConsoleLogging(testManager.agent1Page);
+    log('beforeAll: Setup complete');
+  });
+
+  test.afterAll(async () => {
+    log('afterAll: Cleanup starting');
+    if (testManager) {
+      await testManager.cleanup();
+    }
+    log('afterAll: Cleanup complete');
   });
 
   test('Verify Task List for incoming Call', async () => {
+    log('Test: Task List for Call - Starting');
     await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
     await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
-    let incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
-    await incomingTaskDiv.waitFor({state: 'visible', timeout: 40000});
+    let incomingTaskDiv = await waitForIncomingTask(testManager.agent1Page, TASK_TYPES.CALL);
     await testManager.agent1Page.waitForTimeout(1000);
     const taskListItem = testManager.agent1Page.getByTestId('task-list').getByRole('listitem').first();
     expect(taskListItem).toBeVisible();
@@ -190,9 +202,11 @@ export default function createTaskListTests() {
     await testManager.agent1Page.waitForTimeout(500);
     await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
     await waitForState(testManager.agent1Page, USER_STATES.AVAILABLE);
+    log('Test: Task List for Call - Complete');
   });
 
   test('Verify Task List for incoming Chat Task', async () => {
+    log('Test: Task List for Chat - Starting');
     await createChatTask(testManager.chatPage, process.env[`${testManager.projectName}_CHAT_URL`]!);
     await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
     const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-chat').first();
@@ -239,9 +253,11 @@ export default function createTaskListTests() {
     await testManager.agent1Page.waitForTimeout(2000);
     await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
     await waitForState(testManager.agent1Page, USER_STATES.AVAILABLE);
+    log('Test: Task List for Chat - Complete');
   });
 
   test('Verify Task List for incoming Email Task', async () => {
+    log('Test: Task List for Email - Starting');
     await createEmailTask(process.env[`${testManager.projectName}_EMAIL_ENTRY_POINT`]!);
     await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
     const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-email').first();
@@ -291,9 +307,11 @@ export default function createTaskListTests() {
     await testManager.agent1Page.waitForTimeout(2000);
     await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
     await waitForState(testManager.agent1Page, USER_STATES.AVAILABLE);
+    log('Test: Task List for Email - Complete');
   });
 
   test('Task List Test with Multiple Tasks', async () => {
+    log('Test: Multiple Tasks - Starting');
     await changeUserState(testManager.agent1Page, USER_STATES.MEETING);
     await waitForState(testManager.agent1Page, USER_STATES.MEETING);
     await Promise.all([
@@ -336,9 +354,8 @@ export default function createTaskListTests() {
       );
       capturedLogs.length = 0;
     }
+    log('Test: Multiple Tasks - Complete');
   });
 
-  test.afterAll(async () => {
-    await testManager.cleanup();
-  });
+  // No afterAll here - suite handles cleanup
 }

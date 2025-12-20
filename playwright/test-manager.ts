@@ -4,7 +4,7 @@ import {stationLogout, telephonyLogin} from './Utils/stationLoginUtils';
 import {loginExtension} from './Utils/incomingTaskUtils';
 import {setupConsoleLogging} from './Utils/taskControlUtils';
 import {setupAdvancedConsoleLogging} from './Utils/advancedTaskControlUtils';
-import {pageSetup} from './Utils/helperUtils';
+import {pageSetup, handleStrayTasks} from './Utils/helperUtils';
 import {
   LOGIN_MODE,
   LoginMode,
@@ -537,7 +537,31 @@ export class TestManager {
     });
   }
 
+  /**
+   * Soft cleanup - only handles stray tasks without logging out or closing browsers.
+   * Use this in afterAll to clean up state between test files.
+   */
+  async softCleanup(): Promise<void> {
+    const cleanupOps: Promise<void>[] = [];
+
+    if (this.agent1Page) {
+      cleanupOps.push(handleStrayTasks(this.agent1Page, this.agent1ExtensionPage));
+    }
+    if (this.agent2Page) {
+      cleanupOps.push(handleStrayTasks(this.agent2Page));
+    }
+
+    await Promise.all(cleanupOps);
+  }
+
+  /**
+   * Full cleanup - logs out and closes all pages/contexts.
+   * Use this only at the end of the entire test suite.
+   */
   async cleanup(): Promise<void> {
+    // First handle any stray tasks
+    await this.softCleanup().catch(() => {});
+
     // Logout operations - can be done in parallel
     const logoutOperations: Promise<void>[] = [];
 

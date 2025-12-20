@@ -22,6 +22,18 @@ import {
   enableAllWidgets,
 } from './initUtils';
 import {stationLogout, telephonyLogin} from './stationLoginUtils';
+
+/**
+ * Creates a prefixed logger function for consistent test logging
+ * @param prefix - The prefix to use for all log messages (e.g., 'TaskList', 'UserState')
+ * @returns A function that logs messages with the specified prefix
+ * @example
+ * ```typescript
+ * const log = createLogger('TaskList');
+ * log('Starting test'); // Outputs: [TaskList] Starting test
+ * ```
+ */
+export const createLogger = (prefix: string) => (msg: string) => console.log(`[${prefix}] ${msg}`);
 /**
  * Parses a time string in MM:SS format and converts it to total seconds
  * @param timeString - Time string in format "MM:SS" (e.g., "01:30" for 1 minute 30 seconds)
@@ -120,6 +132,7 @@ export async function waitForWebSocketReconnection(
 
 export const waitForState = async (page: Page, expectedState: userState): Promise<void> => {
   try {
+    await page.bringToFront();
     await page.waitForFunction(
       async (expectedStateArg) => {
         // Re-import getCurrentState in the browser context
@@ -303,215 +316,392 @@ export function isColorClose(receivedColor: string, expectedColor: ThemeColor, t
  * Handles stray incoming tasks by accepting them and performing wrap-up actions, to be used for clean up before tests
  * @param page - Playwright Page object
  * @param extensionPage - Optional extension page for handling calls (default: null)
- * @param maxIterations - Maximum number of task handling iterations to prevent infinite loops (default: 10)
+ * @param maxIterations - Maximum number of iterations to prevent infinite loops (default: 10)
  * @returns Promise<void>
- * @description Continuously checks for incoming tasks, accepts them, and performs wrap-up actions until no more tasks are available
+ * @description Checks in order: RONA popup → incoming tasks → end button → wrapup button
+ *              Continues until nothing actionable is found or maxIterations reached
  * @example
  * ```typescript
  * await handleStrayTasks(page, extensionPage);
  * ```
  */
-
 export const handleStrayTasks = async (
   page: Page,
   extensionPage: Page | null = null,
-  maxIterations: number = 20
+  maxIterations: number = 10
 ): Promise<void> => {
   const startTime = Date.now();
-  const timestamp = () => `[${new Date().toISOString()}]`;
+  const log = (msg: string) => console.log(`[handleStrayTasks] ${msg}`);
 
-  // Quick check for state-select visibility
+  let iteration = 0;
+  let tasksHandled = 0;
+
+  while (iteration < maxIterations) {
+    iteration++;
+    let actionTaken = false;
+
+    // Dismiss any overlays/popovers first
+    await page.keyboard.press('Escape').catch(() => {});
+    await page.waitForTimeout(100);
+
+    // ============================================
+    // STEP 1: Check for RONA popup
+    // ============================================
+    const ronaPopup = page.getByTestId('samples:rona-popup');
+    const ronaVisible = await ronaPopup.isVisible().catch(() => false);
+
+    if (ronaVisible) {
+      log(`Iteration ${iteration}: RONA popup visible, submitting`);
+      try {
+        await submitRonaPopup(page, RONA_OPTIONS.AVAILABLE);
+        actionTaken = true;
+        log('RONA popup submitted');
+        await page.waitForTimeout(300);
+        continue; // Start fresh after RONA
+      } catch (e) {
+        log(`RONA popup submission failed: ${e}`);
+      }
+    }
+
+    // ============================================
+    // STEP 2: Check for wrapup FIRST (complete pending tasks before accepting new ones)
+    // ============================================
+    const wrapupButton = page.getByTestId('call-control:wrapup-button').first();
+    const wrapupVisible = await wrapupButton.isVisible().catch(() => false);
+
+    if (wrapupVisible) {
+      log(`Iteration ${iteration}: Wrapup visible, submitting`);
+      try {
+        await submitWrapup(page, WRAPUP_REASONS.SALE);
+        tasksHandled++;
+        actionTaken = true;
+        log(`Wrapup submitted (${tasksHandled} total)`);
+        await page.waitForTimeout(300);
+        continue; // Check for more pending tasks
+      } catch (e) {
+        log(`Wrapup submission failed: ${e}`);
+      }
+    }
+
+    // ============================================
+    // STEP 3: Check for end button (end active calls before accepting new ones)
+    // ============================================
+    const endButton = page.getByTestId('call-control:end-call').first();
+    const endButtonVisible = await endButton.isVisible().catch(() => false);
+
+    if (endButtonVisible) {
+      let endButtonEnabled = await endButton.isEnabled().catch(() => false);
+
+      if (!endButtonEnabled) {
+        // End button disabled - try to resume from hold first
+        const holdToggle = page.getByTestId('call-control:hold-toggle').first();
+        const holdToggleVisible = await holdToggle.isVisible().catch(() => false);
+
+        if (holdToggleVisible) {
+          log(`Iteration ${iteration}: End button disabled, attempting resume from hold`);
+          try {
+            await holdCallToggle(page);
+            await page.waitForTimeout(500);
+            endButtonEnabled = await endButton.isEnabled().catch(() => false);
+          } catch (e) {
+            log(`Resume from hold failed: ${e}`);
+          }
+        } else {
+          log(`Iteration ${iteration}: End button disabled, no hold toggle visible`);
+        }
+      }
+
+      if (endButtonEnabled) {
+        log(`Iteration ${iteration}: Clicking end button`);
+        try {
+          await endButton.click({timeout: AWAIT_TIMEOUT});
+          await page.waitForTimeout(500);
+
+          // Verify the click worked - either end button gone or wrapup appeared
+          const endStillVisible = await endButton.isVisible().catch(() => false);
+          const wrapupNowVisible = await wrapupButton.isVisible().catch(() => false);
+
+          if (!endStillVisible || wrapupNowVisible) {
+            actionTaken = true;
+            log('End button clicked - state changed');
+            // Don't continue - fall through to check wrapup immediately
+          } else {
+            log('End button clicked but still visible - click may not have worked');
+          }
+        } catch (e) {
+          log(`End call click failed: ${e}`);
+        }
+      }
+
+      // After clicking end, check for wrapup immediately (same iteration)
+      const wrapupAfterEnd = await wrapupButton.isVisible().catch(() => false);
+      if (wrapupAfterEnd) {
+        log(`Iteration ${iteration}: Wrapup appeared after end, submitting`);
+        try {
+          await submitWrapup(page, WRAPUP_REASONS.SALE);
+          tasksHandled++;
+          actionTaken = true;
+          log(`Wrapup submitted (${tasksHandled} total)`);
+          await page.waitForTimeout(300);
+          continue;
+        } catch (e) {
+          log(`Wrapup submission failed: ${e}`);
+        }
+      }
+
+      if (actionTaken) {
+        continue;
+      }
+    }
+
+    // ============================================
+    // STEP 4: Check for incoming tasks (only accept if no active task to handle)
+    // ============================================
+    const incomingTaskDiv = page.getByTestId(/^samples:incoming-task(-\w+)?$/);
+    const hasIncomingTask = await incomingTaskDiv
+      .first()
+      .isVisible()
+      .catch(() => false);
+
+    if (hasIncomingTask) {
+      const task = incomingTaskDiv.first();
+      const taskText = await task.innerText().catch(() => '');
+      const isExtensionCall = taskText.includes('Ringing...');
+
+      if (isExtensionCall) {
+        // Extension call - try extensionPage first, fallback to waiting for RONA
+        if (extensionPage) {
+          log(`Iteration ${iteration}: Extension call detected`);
+          try {
+            // Dismiss any dialogs on extension page first
+            await extensionPage.keyboard.press('Escape').catch(() => {});
+            await extensionPage.waitForTimeout(200);
+
+            const extButton = extensionPage.locator('[data-test="right-action-button"]');
+            const extButtonVisible = await extButton
+              .waitFor({state: 'visible', timeout: 5000})
+              .then(() => true)
+              .catch(() => false);
+
+            if (extButtonVisible) {
+              await acceptExtensionCall(extensionPage);
+              log(`Extension call accepted`);
+              await page.waitForTimeout(500);
+              // After accepting, immediately try to end and wrapup
+              const endBtnAfterAccept = page.getByTestId('call-control:end-call').first();
+              const endVisibleAfterAccept = await endBtnAfterAccept.isVisible().catch(() => false);
+              if (endVisibleAfterAccept) {
+                const endEnabledAfterAccept = await endBtnAfterAccept.isEnabled().catch(() => false);
+                if (endEnabledAfterAccept) {
+                  log(`Iteration ${iteration}: Ending accepted extension call`);
+                  await endBtnAfterAccept.click({timeout: AWAIT_TIMEOUT}).catch(() => {});
+                  await page.waitForTimeout(500);
+                  const wrapupAfterEnd = await wrapupButton.isVisible().catch(() => false);
+                  if (wrapupAfterEnd) {
+                    await submitWrapup(page, WRAPUP_REASONS.SALE).catch(() => {});
+                    tasksHandled++;
+                    log(`Task fully handled (${tasksHandled} total)`);
+                    await page.waitForTimeout(300);
+                  }
+                }
+              }
+              actionTaken = true;
+              continue;
+            }
+          } catch (e) {
+            log(`Extension call accept failed: ${e}`);
+          }
+        } else {
+          // No extensionPage - wait for RONA timeout
+          log(`Iteration ${iteration}: Extension call detected, no extensionPage - waiting for timeout`);
+          await page.waitForTimeout(2000);
+          // Check if RONA appeared
+          const ronaAfterWait = await ronaPopup.isVisible().catch(() => false);
+          if (ronaAfterWait) {
+            continue; // Handle RONA on next iteration
+          }
+          // If still no RONA, we can't handle this - exit
+          const stillHasExtCall = await incomingTaskDiv
+            .first()
+            .isVisible()
+            .catch(() => false);
+          if (stillHasExtCall) {
+            log(`Iteration ${iteration}: Extension call still present, cannot handle without extensionPage - exiting`);
+            break;
+          }
+        }
+      } else {
+        // Regular task - check if accept button is enabled
+        const acceptButton = task.getByTestId('task:accept-button').first();
+        const acceptVisible = await acceptButton.isVisible().catch(() => false);
+        const acceptEnabled = await acceptButton.isEnabled().catch(() => false);
+
+        if (acceptVisible && acceptEnabled) {
+          log(`Iteration ${iteration}: Incoming task found, accepting`);
+          try {
+            await acceptButton.click({timeout: AWAIT_TIMEOUT});
+            log(`Task accepted`);
+            await page.waitForTimeout(2000);
+            // After accepting, immediately try to end and wrapup (same iteration)
+            const endBtnAfterAccept = page.getByTestId('call-control:end-call').first();
+            const endVisibleAfterAccept = await endBtnAfterAccept.isVisible().catch(() => false);
+            if (endVisibleAfterAccept) {
+              const endEnabledAfterAccept = await endBtnAfterAccept.isEnabled().catch(() => false);
+              if (endEnabledAfterAccept) {
+                log(`Iteration ${iteration}: Ending accepted task`);
+                await endBtnAfterAccept.click({timeout: AWAIT_TIMEOUT}).catch(() => {});
+                await page.waitForTimeout(500);
+                const wrapupAfterEnd = await wrapupButton.isVisible().catch(() => false);
+                if (wrapupAfterEnd) {
+                  log(`Iteration ${iteration}: Wrapup appeared, submitting`);
+                  await submitWrapup(page, WRAPUP_REASONS.SALE).catch(() => {});
+                  tasksHandled++;
+                  log(`Task fully handled (${tasksHandled} total)`);
+                  await page.waitForTimeout(300);
+                }
+              }
+            }
+            actionTaken = true;
+            continue;
+          } catch (e) {
+            log(`Accept click failed: ${e}`);
+          }
+        } else if (acceptVisible && !acceptEnabled) {
+          log(`Iteration ${iteration}: Accept button visible but disabled - skipping`);
+        }
+      }
+    }
+
+    // ============================================
+    // Check if anything is still pending that we couldn't handle
+    // ============================================
+    if (!actionTaken) {
+      const stillHasTask = await incomingTaskDiv
+        .first()
+        .isVisible()
+        .catch(() => false);
+      const stillHasEnd = await endButton.isVisible().catch(() => false);
+      const stillHasWrapup = await wrapupButton.isVisible().catch(() => false);
+
+      // Check if end button is visible but disabled (stuck state)
+      if (stillHasEnd && !stillHasWrapup) {
+        const endEnabled = await endButton.isEnabled().catch(() => false);
+        const holdToggle = page.getByTestId('call-control:hold-toggle').first();
+        const holdVisible = await holdToggle.isVisible().catch(() => false);
+
+        if (!endEnabled && !holdVisible) {
+          log(`Iteration ${iteration}: End button disabled with no way to enable - cannot handle, exiting`);
+          break;
+        }
+      }
+
+      if (stillHasWrapup) {
+        log(`Iteration ${iteration}: Wrapup visible but couldn't submit - will retry`);
+        await page.waitForTimeout(500);
+      } else if (stillHasEnd) {
+        const endEnabled = await endButton.isEnabled().catch(() => false);
+        if (endEnabled) {
+          if (iteration >= 3) {
+            log(`Iteration ${iteration}: End button clicks not working after ${iteration} attempts - exiting`);
+            break;
+          }
+          log(`Iteration ${iteration}: End button click didn't work - will retry`);
+          await page.waitForTimeout(500);
+        }
+      } else if (stillHasTask) {
+        log(`Iteration ${iteration}: Task visible but cannot act - will retry`);
+        await page.waitForTimeout(500);
+      } else {
+        log(`Iteration ${iteration}: Nothing found, cleanup complete`);
+        break;
+      }
+    }
+  }
+
+  if (iteration >= maxIterations) {
+    log(`Max iterations (${maxIterations}) reached`);
+  }
+
+  // Ensure user is in Available state at the end
   const stateSelectVisible = await page
     .getByTestId('state-select')
     .isVisible()
     .catch(() => false);
 
   if (stateSelectVisible) {
-    const ronapopupVisible = await page
-      .getByTestId('samples:rona-popup')
-      .isVisible()
-      .catch(() => false);
-
-    if (ronapopupVisible) {
-      console.log(`handleStrayTasks: Submitting RONA popup`);
-      await submitRonaPopup(page, RONA_OPTIONS.AVAILABLE);
+    try {
+      await changeUserState(page, USER_STATES.AVAILABLE);
+    } catch (e) {
+      log(`Failed to set Available state: ${e}`);
     }
-
-    await changeUserState(page, USER_STATES.AVAILABLE);
-  }
-
-  const incomingTaskDiv = page.getByTestId(/^samples:incoming-task(-\w+)?$/);
-
-  let tasksAccepted = 0;
-  let tasksCleared = 0;
-
-  // ============================================
-  // PHASE 1: Accept all incoming tasks first
-  // ============================================
-  console.log(`${timestamp()} handleStrayTasks: Phase 1 - Accepting incoming tasks`);
-  let acceptIterations = 0;
-  while (acceptIterations < maxIterations) {
-    acceptIterations++;
-
-    const task = incomingTaskDiv.first();
-    const isTaskVisible = await task.isVisible().catch(() => false);
-    if (!isTaskVisible) {
-      console.log(`handleStrayTasks: No more incoming tasks to accept`);
-      break;
-    }
-
-    const acceptButton = task.getByTestId('task:accept-button').first();
-    const taskText = await task.innerText().catch(() => '');
-    const isExtensionCall = taskText.includes('Ringing...');
-
-    if (isExtensionCall) {
-      if (!extensionPage) {
-        throw new Error('Extension page is not available for handling extension call');
-      }
-      console.log(`handleStrayTasks: Handling extension call`);
-      const extensionCallVisible = await extensionPage
-        .locator('[data-test="right-action-button"]')
-        .waitFor({state: 'visible', timeout: 40000})
-        .then(() => true)
-        .catch(() => false);
-      if (extensionCallVisible) {
-        await acceptExtensionCall(extensionPage);
-        tasksAccepted++;
-        console.log(`handleStrayTasks: Accepted extension call (${tasksAccepted} total)`);
-      } else {
-        console.warn(`handleStrayTasks: Extension call timeout - skipping task`);
-      }
-    } else {
-      const acceptVisible = await acceptButton.isVisible().catch(() => false);
-      if (acceptVisible) {
-        try {
-          await acceptButton.click({timeout: AWAIT_TIMEOUT});
-          tasksAccepted++;
-          console.log(`handleStrayTasks: Accepted incoming task (${tasksAccepted} total)`);
-        } catch (error) {
-          console.warn(`handleStrayTasks: Failed to click accept button:`, error);
-        }
-      } else {
-        // Task visible but no accept button - might already be accepted, break
-        break;
-      }
-    }
-
-    // Small wait for UI to update
-    await page.waitForTimeout(200);
-  }
-
-  // ============================================
-  // PHASE 2: Clear all pending calls/wrapups
-  // ============================================
-  console.log(`${timestamp()} handleStrayTasks: Phase 2 - Clearing pending calls/wrapups`);
-  let clearIterations = 0;
-  let failedAttempts = 0;
-  const maxFailedAttempts = 3;
-
-  while (clearIterations < maxIterations && failedAttempts < maxFailedAttempts) {
-    clearIterations++;
-
-    const endButton = page.getByTestId('call-control:end-call').first();
-    const wrapupBox = page.getByTestId('call-control:wrapup-button').first();
-    const endButtonVisible = await endButton.isVisible().catch(() => false);
-    const wrapupBoxVisible = await wrapupBox.isVisible().catch(() => false);
-
-    if (!endButtonVisible && !wrapupBoxVisible) {
-      console.log(`${timestamp()} handleStrayTasks: No more pending calls/wrapups`);
-      break;
-    }
-
-    console.log(
-      `${timestamp()} handleStrayTasks: Clearing task (iteration ${clearIterations}) - ` +
-        `endButton: ${endButtonVisible}, wrapupButton: ${wrapupBoxVisible}`
-    );
-
-    // Remember current state before clearing
-    const hadEndButton = endButtonVisible;
-    const hadWrapup = wrapupBoxVisible;
-
-    await clearPendingCallAndWrapup(page);
-
-    // Wait for UI to update
-    await page.waitForTimeout(500);
-
-    // Check if state actually changed
-    const endStillVisible = await endButton.isVisible().catch(() => false);
-    const wrapupStillVisible = await wrapupBox.isVisible().catch(() => false);
-
-    // Only count as cleared if the state actually changed
-    if ((hadEndButton && !endStillVisible) || (hadWrapup && !wrapupStillVisible)) {
-      tasksCleared++;
-      failedAttempts = 0; // Reset failed attempts on success
-      console.log(`${timestamp()} handleStrayTasks: Cleared task (${tasksCleared} total)`);
-    } else {
-      failedAttempts++;
-      console.log(`${timestamp()} handleStrayTasks: Clear attempt failed (${failedAttempts}/${maxFailedAttempts})`);
-    }
-  }
-
-  if (failedAttempts >= maxFailedAttempts) {
-    console.log(`${timestamp()} handleStrayTasks: Stopping after ${maxFailedAttempts} failed attempts`);
   }
 
   const duration = Date.now() - startTime;
-  const totalHandled = tasksAccepted + tasksCleared;
-  console.log(
-    `handleStrayTasks: Completed in ${duration}ms - ` +
-      `${tasksAccepted} task(s) accepted, ${tasksCleared} task(s) cleared, ${totalHandled} total`
-  );
+  log(`Completed in ${duration}ms - ${tasksHandled} task(s) handled in ${iteration} iteration(s)`);
 };
 
 /**
  * Clears any pending call UI on the page by ending the call and/or submitting wrapup if visible.
- * Does nothing if neither end-call nor wrapup controls are present.
+ * Follows same logic as handleStrayTasks: end button (resume if disabled) → wrapup
+ * @returns true if something was cleared, false otherwise
  */
-export async function clearPendingCallAndWrapup(page: Page): Promise<void> {
-  // If wrapup is available, submit it
-  const wrapupBtn = page.getByTestId('call-control:wrapup-button').first();
-  const wrapupVisible = await wrapupBtn.isVisible().catch(() => false);
-  if (wrapupVisible) {
-    await submitWrapup(page, WRAPUP_REASONS.SALE);
-    await page.waitForTimeout(500);
-    return;
-  }
+export async function clearPendingCallAndWrapup(page: Page): Promise<boolean> {
+  const log = (msg: string) => console.log(`[clearPendingCallAndWrapup] ${msg}`);
+
+  // Dismiss any open popovers first
+  await page.keyboard.press('Escape').catch(() => {});
+  await page.waitForTimeout(200);
 
   const endBtn = page.getByTestId('call-control:end-call').first();
+  const wrapupBtn = page.getByTestId('call-control:wrapup-button').first();
+
+  // Check end button first
   const endVisible = await endBtn.isVisible().catch(() => false);
+
   if (endVisible) {
-    const endEnabled = await endBtn.isEnabled().catch(() => false);
-    if (endEnabled) {
-      try {
-        await endBtn.click({timeout: AWAIT_TIMEOUT});
-        await submitWrapup(page, WRAPUP_REASONS.SALE);
-        await page.waitForTimeout(500);
-      } catch {}
-    } else {
-      // If end button is disabled, try resuming from hold then end; otherwise, see if wrapup is available
+    let endEnabled = await endBtn.isEnabled().catch(() => false);
+
+    // If disabled, try to resume from hold
+    if (!endEnabled) {
+      log('End button disabled, attempting resume from hold');
       try {
         await holdCallToggle(page);
-      } catch {}
-      const endEnabledAfterResume = await endBtn.isEnabled().catch(() => false);
-      if (endEnabledAfterResume) {
-        try {
-          await endBtn.click({timeout: AWAIT_TIMEOUT});
-          await submitWrapup(page, WRAPUP_REASONS.SALE);
-          await page.waitForTimeout(500);
-          return;
-        } catch {}
+        await page.waitForTimeout(500);
+        endEnabled = await endBtn.isEnabled().catch(() => false);
+      } catch (e) {
+        log(`Resume failed: ${e}`);
       }
+    }
 
-      // If resume path failed, see if wrapup became available instead; otherwise, skip silently
-      const wrapupNowVisible = await wrapupBtn.isVisible().catch(() => false);
-      if (wrapupNowVisible) {
-        try {
-          await submitWrapup(page, WRAPUP_REASONS.SALE);
-          await page.waitForTimeout(500);
-        } catch {}
+    // Try to end the call
+    if (endEnabled) {
+      try {
+        log('Clicking end button');
+        await endBtn.click({timeout: AWAIT_TIMEOUT});
+        await page.waitForTimeout(500);
+      } catch (e) {
+        log(`End click failed: ${e}`);
       }
     }
   }
+
+  // Check wrapup button
+  const wrapupVisible = await wrapupBtn.isVisible().catch(() => false);
+
+  if (wrapupVisible) {
+    try {
+      log('Submitting wrapup');
+      await submitWrapup(page, WRAPUP_REASONS.SALE);
+      await page.waitForTimeout(500);
+      return true;
+    } catch (e) {
+      log(`Wrapup failed: ${e}`);
+      return false;
+    }
+  }
+
+  // Return true if end button was clicked (even without wrapup)
+  return endVisible;
 }
 
 /*

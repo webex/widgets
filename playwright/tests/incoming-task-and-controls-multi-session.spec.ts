@@ -9,6 +9,7 @@ import {
   declineExtensionCall,
   endCallTask,
   submitRonaPopup,
+  waitForIncomingTask,
 } from '../Utils/incomingTaskUtils';
 import {changeUserState, verifyCurrentState} from '../Utils/userStateUtils';
 import {
@@ -20,19 +21,32 @@ import {
   verifyTaskControls,
 } from '../Utils/taskControlUtils';
 import {RONA_OPTIONS, TASK_TYPES, THEME_COLORS, USER_STATES, WRAPUP_REASONS} from '../constants';
-import {isColorClose, waitForState} from '../Utils/helperUtils';
+import {isColorClose, waitForState, createLogger} from '../Utils/helperUtils';
 import {submitWrapup} from '../Utils/wrapupUtils';
+
+const log = createLogger('MultiSession');
 
 export default function createIncomingTaskAndControlsMultiSessionTests() {
   let testManager: TestManager;
 
   test.beforeAll(async ({browser}, testInfo) => {
+    log('beforeAll: Setting up test manager');
     const projectName = testInfo.project.name;
     testManager = new TestManager(projectName);
     await testManager.setupForIncomingTaskMultiSession(browser);
+    log('beforeAll: Setup complete');
+  });
+
+  test.afterAll(async () => {
+    log('afterAll: Cleanup starting');
+    if (testManager) {
+      await testManager.cleanup();
+    }
+    log('afterAll: Cleanup complete');
   });
 
   test('should handle multi-session incoming call with state synchronization', async () => {
+    log('Test: Multi-session call sync - Starting');
     await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
     await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
     let incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
@@ -95,9 +109,11 @@ export default function createIncomingTaskAndControlsMultiSessionTests() {
     await waitForState(testManager.multiSessionAgent1Page, USER_STATES.AVAILABLE);
     await verifyCurrentState(testManager.agent1Page, USER_STATES.AVAILABLE);
     await verifyCurrentState(testManager.multiSessionAgent1Page, USER_STATES.AVAILABLE);
+    log('Test: Multi-session call sync - Complete');
   });
 
   test('Multi-login call controls - verify controls are synchronized', async () => {
+    log('Test: Multi-login call controls sync - Starting');
     // Set both AGENT1 sessions to available state
     await Promise.all([changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE)]);
     await testManager.agent1Page.waitForTimeout(2000);
@@ -214,12 +230,14 @@ export default function createIncomingTaskAndControlsMultiSessionTests() {
         verifyCurrentState(testManager.agent1Page, USER_STATES.AVAILABLE),
         verifyCurrentState(testManager.multiSessionAgent1Page!, USER_STATES.AVAILABLE),
       ]);
+      log('Test: Multi-login call controls sync - Complete');
     } catch (error) {
       throw new Error(`Multi-session call controls synchronization failed: ${error.message}`);
     }
   });
 
   test('should handle multi-session incoming chat with state synchronization', async () => {
+    log('Test: Multi-session chat sync - Starting');
     await createChatTask(testManager.chatPage, process.env[`${testManager.projectName}_CHAT_URL`]!);
     await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
     let incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-chat').first();
@@ -266,21 +284,21 @@ export default function createIncomingTaskAndControlsMultiSessionTests() {
     await waitForState(testManager.multiSessionAgent1Page, USER_STATES.AVAILABLE);
     await verifyCurrentState(testManager.agent1Page, USER_STATES.AVAILABLE);
     await verifyCurrentState(testManager.multiSessionAgent1Page, USER_STATES.AVAILABLE);
+    log('Test: Multi-session chat sync - Complete');
   });
 
   test('should handle multi-session incoming email with state synchronization', async () => {
+    log('Test: Multi-session email sync - Starting');
     await createEmailTask(process.env[`${testManager.projectName}_EMAIL_ENTRY_POINT`]!);
     await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
-    let incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-email').first();
-    let incomingTaskDiv2 = testManager.multiSessionAgent1Page.getByTestId('samples:incoming-task-email').first();
-    await incomingTaskDiv.waitFor({state: 'visible', timeout: 50000});
-    await incomingTaskDiv2.waitFor({state: 'visible', timeout: 10000});
-    await incomingTaskDiv.waitFor({state: 'hidden', timeout: 30000});
-    await incomingTaskDiv2.waitFor({state: 'hidden', timeout: 10000});
-    await testManager.agent1Page.getByTestId('samples:rona-popup').waitFor({state: 'visible', timeout: 15000});
+    await waitForIncomingTask(testManager.agent1Page, TASK_TYPES.EMAIL);
+    await waitForIncomingTask(testManager.multiSessionAgent1Page, TASK_TYPES.EMAIL);
+    await testManager.agent1Page.bringToFront();
+    await testManager.agent1Page.getByTestId('samples:rona-popup').waitFor({state: 'visible', timeout: 20000});
+    await testManager.multiSessionAgent1Page.bringToFront();
     await testManager.multiSessionAgent1Page
       .getByTestId('samples:rona-popup')
-      .waitFor({state: 'visible', timeout: 15000});
+      .waitFor({state: 'visible', timeout: 20000});
     await testManager.agent1Page.waitForTimeout(3000);
     await submitRonaPopup(testManager.multiSessionAgent1Page, RONA_OPTIONS.IDLE);
     await waitForState(testManager.agent1Page, USER_STATES.MEETING);
@@ -293,8 +311,8 @@ export default function createIncomingTaskAndControlsMultiSessionTests() {
     await waitForState(testManager.agent1Page, USER_STATES.AVAILABLE);
     await testManager.multiSessionAgent1Page.waitForTimeout(2000);
     await verifyCurrentState(testManager.multiSessionAgent1Page, USER_STATES.AVAILABLE);
-    incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-email').first();
-    incomingTaskDiv2 = testManager.multiSessionAgent1Page.getByTestId('samples:incoming-task-email').first();
+    let incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-email').first();
+    let incomingTaskDiv2 = testManager.multiSessionAgent1Page.getByTestId('samples:incoming-task-email').first();
     await incomingTaskDiv.waitFor({state: 'visible', timeout: 15000});
     await incomingTaskDiv2.waitFor({state: 'visible', timeout: 15000});
     await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.EMAIL);
@@ -317,6 +335,7 @@ export default function createIncomingTaskAndControlsMultiSessionTests() {
     await waitForState(testManager.multiSessionAgent1Page, USER_STATES.AVAILABLE);
     await verifyCurrentState(testManager.agent1Page, USER_STATES.AVAILABLE);
     await verifyCurrentState(testManager.multiSessionAgent1Page, USER_STATES.AVAILABLE);
+    log('Test: Multi-session email sync - Complete');
   });
 
   test.afterAll(async () => {

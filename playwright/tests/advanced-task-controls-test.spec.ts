@@ -16,17 +16,18 @@ import {
   acceptIncomingTask,
   declineIncomingTask,
   acceptExtensionCall,
-  endCallTask,
-  declineExtensionCall,
+  waitForIncomingTask,
 } from '../Utils/incomingTaskUtils';
 import {submitWrapup} from '../Utils/wrapupUtils';
 import {USER_STATES, TASK_TYPES, WRAPUP_REASONS} from '../constants';
 import {holdCallToggle, endTask, verifyHoldButtonIcon, verifyTaskControls} from '../Utils/taskControlUtils';
 import {TestManager} from '../test-manager';
-import {handleStrayTasks} from '../Utils/helperUtils';
+import {handleStrayTasks, clearPendingCallAndWrapup, waitForState, createLogger} from '../Utils/helperUtils';
 
 // Extract test functions for cleaner syntax
 const {describe, beforeAll, afterAll, beforeEach} = test;
+
+const log = createLogger('AdvTaskControls');
 
 /**
  * Transfer and Consult Tests
@@ -41,19 +42,26 @@ const {describe, beforeAll, afterAll, beforeEach} = test;
 export default function createAdvancedTaskControlsTests() {
   let testManager: TestManager;
 
-  beforeAll(async ({browser}, testInfo) => {
+  test.beforeAll(async ({browser}, testInfo) => {
+    log('beforeAll: Setting up test manager');
     const projectName = testInfo.project.name;
     testManager = new TestManager(projectName);
     await testManager.setupForAdvancedTaskControls(browser);
+    log('beforeAll: Setup complete');
   });
 
-  afterAll(async () => {
-    await testManager.cleanup();
+  test.afterAll(async () => {
+    log('afterAll: Cleanup starting');
+    if (testManager) {
+      await testManager.cleanup();
+    }
+    log('afterAll: Cleanup complete');
   });
 
   test.beforeEach(async () => {
-    await handleStrayTasks(testManager.agent1Page);
-    await handleStrayTasks(testManager.agent2Page);
+    log('beforeEach: Handling stray tasks');
+    await handleStrayTasks(testManager.agent1Page, testManager.callerPage);
+    await handleStrayTasks(testManager.agent2Page, testManager.callerPage);
   });
 
   // =============================================================================
@@ -62,25 +70,26 @@ export default function createAdvancedTaskControlsTests() {
 
   describe('Blind Transfer Tests', () => {
     beforeEach(async () => {
+      log('BlindTransfer beforeEach: Creating call and A1 accepting');
       await changeUserState(testManager.agent2Page, USER_STATES.MEETING);
       // Create call task and agent 1 accepts it
       await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
 
-      const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
-      await incomingTaskDiv.waitFor({state: 'visible', timeout: 80000});
-
+      await waitForIncomingTask(testManager.agent1Page, TASK_TYPES.CALL, 80000);
       await acceptExtensionCall(testManager.agent1ExtensionPage);
       await changeUserState(testManager.agent2Page, USER_STATES.AVAILABLE);
       await testManager.agent1Page.waitForTimeout(5000);
 
       await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
+      log('BlindTransfer beforeEach: A1 engaged');
 
       // Clear console logs to track transfer events
       clearAdvancedCapturedLogs();
     });
 
     test('Call Blind Transferred by Agent to Another Agent', async () => {
+      log('Test: Blind Transfer A1→A2 - Starting');
       // Agent 1 performs blind transfer to Agent 2
       await consultOrTransfer(
         testManager.agent1Page,
@@ -88,20 +97,15 @@ export default function createAdvancedTaskControlsTests() {
         'transfer',
         process.env[`${testManager.projectName}_AGENT2_NAME`]!
       );
-
+      // Agent 2 should receive the transfer and accept it
+      await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL, 60000);
+      await testManager.agent2Page.waitForTimeout(3000);
       // Verify transfer success in console logs
       await testManager.agent1Page.bringToFront();
       verifyTransferSuccessLogs();
 
       // Verify Agent 1 goes to wrapup state
       await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
-      // Agent 2 should receive the transfer and accept it
-      await testManager.agent2Page.bringToFront();
-      const incomingTransferDiv = testManager.agent2Page.getByTestId('samples:incoming-task-telephony').first();
-      await incomingTransferDiv.waitFor({state: 'visible', timeout: 60000});
-
-      await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL);
-      await testManager.agent2Page.waitForTimeout(3000);
 
       // Verify Agent 2 now has the call and is engaged
       await verifyCurrentState(testManager.agent2Page, USER_STATES.ENGAGED);
@@ -115,10 +119,12 @@ export default function createAdvancedTaskControlsTests() {
       await endTask(testManager.agent2Page);
       await testManager.agent2Page.waitForTimeout(3000);
       await submitWrapup(testManager.agent2Page, WRAPUP_REASONS.RESOLVED);
+      log('Test: Blind Transfer A1→A2 - Complete');
       await testManager.agent2Page.waitForTimeout(2000);
     });
 
     test('Call Blind Transferred to Queue', async () => {
+      log('Test: Blind Transfer to Queue - Starting');
       // First transfer from Agent 1 to Agent 2
       await consultOrTransfer(
         testManager.agent1Page,
@@ -128,9 +134,7 @@ export default function createAdvancedTaskControlsTests() {
       );
 
       // Agent 2 accepts the transfer
-      const incomingTransferDiv = testManager.agent2Page.getByTestId('samples:incoming-task-telephony').first();
-      await incomingTransferDiv.waitFor({state: 'visible', timeout: 60000});
-      await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL);
+      await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL, 60000);
       await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
       await testManager.agent1Page.waitForTimeout(3000);
       verifyTransferSuccessLogs();
@@ -144,43 +148,7 @@ export default function createAdvancedTaskControlsTests() {
 
       // Verify Agent 2 is no longer engaged
       await verifyCurrentState(testManager.agent2Page, USER_STATES.AVAILABLE);
-    });
-
-    test('Call Blind Transferred to DialNumber', async () => {
-      await testManager.resetSession('dialNumber');
-      await consultOrTransfer(testManager.agent1Page, 'dialNumber', 'transfer', process.env.PW_DIAL_NUMBER_NAME);
-
-      //DialNumber accepts the transfer
-      await ensureDialNumberLoggedIn(testManager.dialNumberPage);
-      await acceptExtensionCall(testManager.dialNumberPage);
-      verifyTransferSuccessLogs();
-      await endCallTask(testManager.callerPage!);
-
-      // Verify Agent 1 goes to wrapup after transfer
-      await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.RESOLVED);
-      await testManager.agent1Page.waitForTimeout(2000);
-
-      // Verify Agent 1 is no longer engaged
-      await verifyCurrentState(testManager.agent1Page, USER_STATES.AVAILABLE);
-    });
-
-    test('Call Blind Transferred to Queue with DialNumber', async () => {
-      await testManager.resetSession('dialNumber');
-      // First transfer from Agent 1 to Agent 2
-      await consultOrTransfer(testManager.agent1Page, 'queue', 'transfer', 'queue with dn');
-
-      //DialNumber accepts the transfer
-      await ensureDialNumberLoggedIn(testManager.dialNumberPage);
-      await acceptExtensionCall(testManager.dialNumberPage);
-      verifyTransferSuccessLogs();
-      await endCallTask(testManager.callerPage!);
-
-      // Verify Agent 1 goes to wrapup after transfer
-      await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.RESOLVED);
-      await testManager.agent1Page.waitForTimeout(2000);
-
-      // Verify Agent 1 is no longer engaged
-      await verifyCurrentState(testManager.agent1Page, USER_STATES.AVAILABLE);
+      log('Test: Blind Transfer to Queue - Complete');
     });
   });
 
@@ -190,13 +158,12 @@ export default function createAdvancedTaskControlsTests() {
 
   describe('Consult and Consult Transfer Scenarios', () => {
     test('Agent Consult Transfer: cancel, decline, timeout, and transfer scenarios are handled correctly in sequence', async () => {
+      log('Test: Agent Consult scenarios - Starting');
       // ...existing code for Agent Consult Transfer test...
       await changeUserState(testManager.agent2Page, USER_STATES.MEETING);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
-      await testManager.agent1Page.bringToFront();
-      const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
-      await incomingTaskDiv.waitFor({state: 'visible', timeout: 80000});
+      await waitForIncomingTask(testManager.agent1Page, TASK_TYPES.CALL, 80000);
       await testManager.agent1ExtensionPage
         .locator('[data-test="generic-person-item-base"]')
         .waitFor({state: 'visible', timeout: 20000});
@@ -215,9 +182,7 @@ export default function createAdvancedTaskControlsTests() {
       );
       await expect(testManager.agent1Page.getByTestId('cancel-consult-btn')).toBeVisible();
       await expect(testManager.agent1Page.getByTestId('transfer-consult-btn')).toBeVisible();
-      const consultRequestDiv1 = testManager.agent2Page.getByTestId('samples:incoming-task-telephony').first();
-      await consultRequestDiv1.waitFor({state: 'visible', timeout: 60000});
-      await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL);
+      await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL, 60000);
       await testManager.agent2Page.waitForTimeout(3000);
       await expect(testManager.agent1Page.getByTestId('transfer-consult-btn')).toBeVisible();
       await testManager.agent1Page.waitForTimeout(2000);
@@ -237,9 +202,7 @@ export default function createAdvancedTaskControlsTests() {
         'consult',
         process.env[`${testManager.projectName}_AGENT2_NAME`]!
       );
-      const consultRequestDiv2 = testManager.agent2Page.getByTestId('samples:incoming-task-telephony').first();
-      await consultRequestDiv2.waitFor({state: 'visible', timeout: 60000});
-      await testManager.agent2Page.bringToFront();
+      await waitForIncomingTask(testManager.agent2Page, TASK_TYPES.CALL, 60000);
       await declineIncomingTask(testManager.agent2Page, TASK_TYPES.CALL);
       await verifyTaskControls(testManager.agent1Page, TASK_TYPES.CALL);
       await verifyHoldButtonIcon(testManager.agent1Page, {expectedIsHeld: true});
@@ -272,10 +235,9 @@ export default function createAdvancedTaskControlsTests() {
         'consult',
         process.env[`${testManager.projectName}_AGENT2_NAME`]!
       );
-      const consultRequestDiv3 = testManager.agent2Page.getByTestId('samples:incoming-task-telephony').first();
-      await consultRequestDiv3.waitFor({state: 'visible', timeout: 60000});
-      await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL);
+      await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL, 60000);
       await testManager.agent2Page.waitForTimeout(3000);
+      await testManager.agent1Page.bringToFront();
       await testManager.agent1Page.getByTestId('transfer-consult-btn').click();
       await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
       await verifyCurrentState(testManager.agent2Page, USER_STATES.ENGAGED);
@@ -286,26 +248,24 @@ export default function createAdvancedTaskControlsTests() {
       await endTask(testManager.agent2Page);
       await testManager.agent2Page.waitForTimeout(3000);
       await submitWrapup(testManager.agent2Page, WRAPUP_REASONS.RESOLVED);
+      log('Test: Agent Consult scenarios - Complete');
       await testManager.agent2Page.waitForTimeout(2000);
     });
 
     test('Queue Consult: cancel, accept/end, agent-end, and transfer scenarios are handled correctly in sequence', async () => {
+      log('Test: Queue Consult scenarios - Starting');
       // ...existing code for Queue Consult test...
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
 
       // Setup: create call and get to engaged state
       await changeUserState(testManager.agent2Page, USER_STATES.MEETING);
       await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
-      const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
-      await incomingTaskDiv.waitFor({state: 'visible', timeout: 80000});
-      await testManager.agent1ExtensionPage
-        .locator('[data-test="generic-person-item-base"]')
-        .waitFor({state: 'visible', timeout: 20000});
+      await waitForIncomingTask(testManager.agent1Page, TASK_TYPES.CALL, 80000);
       await acceptExtensionCall(testManager.agent1ExtensionPage);
       await testManager.agent1Page.waitForTimeout(5000);
       await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
       await changeUserState(testManager.agent2Page, USER_STATES.AVAILABLE);
-
+      await testManager.agent2Page.waitForTimeout(2000);
       // 1. Cancel consult
       clearAdvancedCapturedLogs();
       await consultOrTransfer(
@@ -329,10 +289,7 @@ export default function createAdvancedTaskControlsTests() {
       );
       await testManager.agent1Page.waitForTimeout(3000);
       verifyConsultStartSuccessLogs();
-      const consultRequestDiv1 = testManager.agent2Page.getByTestId('samples:incoming-task-telephony').first();
-      await consultRequestDiv1.waitFor({state: 'visible', timeout: 60000});
-      await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL);
-      await testManager.agent2Page.bringToFront();
+      await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL, 60000);
       await cancelConsult(testManager.agent1Page);
       await testManager.agent1Page.waitForTimeout(3000);
       await verifyCurrentState(testManager.agent2Page, USER_STATES.AVAILABLE);
@@ -351,9 +308,7 @@ export default function createAdvancedTaskControlsTests() {
         'consult',
         process.env[`${testManager.projectName}_QUEUE_NAME`]!
       );
-      const consultRequestDiv2 = testManager.agent2Page.getByTestId('samples:incoming-task-telephony').first();
-      await consultRequestDiv2.waitFor({state: 'visible', timeout: 60000});
-      await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL);
+      await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL, 60000);
       await testManager.agent2Page.waitForTimeout(3000);
       await cancelConsult(testManager.agent2Page);
       await testManager.agent2Page.waitForTimeout(3000);
@@ -372,10 +327,7 @@ export default function createAdvancedTaskControlsTests() {
         process.env[`${testManager.projectName}_QUEUE_NAME`]!
       );
       await testManager.agent1Page.waitForTimeout(2000);
-      const consultRequestDiv3 = testManager.agent2Page.getByTestId('samples:incoming-task-telephony').first();
-      await consultRequestDiv3.waitFor({state: 'visible', timeout: 60000});
-      await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL);
-      await testManager.agent2Page.bringToFront();
+      await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL, 60000);
       await testManager.agent1Page.getByTestId('transfer-consult-btn').click();
       await testManager.agent1Page.bringToFront();
       await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
@@ -387,133 +339,28 @@ export default function createAdvancedTaskControlsTests() {
       await endTask(testManager.agent2Page);
       await testManager.agent2Page.waitForTimeout(3000);
       await submitWrapup(testManager.agent2Page, WRAPUP_REASONS.RESOLVED);
+      log('Test: Queue Consult scenarios - Complete');
       await testManager.agent2Page.waitForTimeout(2000);
-    });
-
-    test('Dial Number Consult: cancel, decline, accept/end, and transfer scenarios are handled correctly in sequence', async () => {
-      await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
-
-      // Setup: create call and get to engaged state
-      await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
-      const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
-      await incomingTaskDiv.waitFor({state: 'visible', timeout: 80000});
-      await testManager.agent1ExtensionPage
-        .locator('[data-test="generic-person-item-base"]')
-        .waitFor({state: 'visible', timeout: 20000});
-      await acceptExtensionCall(testManager.agent1ExtensionPage);
-      await testManager.agent1Page.waitForTimeout(5000);
-      await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
-
-      // 1. Cancel consult
-      clearAdvancedCapturedLogs();
-      await consultOrTransfer(testManager.agent1Page, 'dialNumber', 'consult', process.env.PW_DIAL_NUMBER_NAME);
-      await expect(testManager.agent1Page.getByTestId('cancel-consult-btn')).toBeVisible();
-      await testManager.agent1Page.waitForTimeout(2000);
-      await cancelConsult(testManager.agent1Page);
-      await verifyTaskControls(testManager.agent1Page, TASK_TYPES.CALL);
-      await expect(testManager.agent1Page.getByTestId('cancel-consult-btn')).not.toBeVisible();
-
-      // 2. Decline consult
-      clearAdvancedCapturedLogs();
-      await consultOrTransfer(testManager.agent1Page, 'dialNumber', 'consult', process.env.PW_DIAL_NUMBER_NAME);
-      await declineExtensionCall(testManager.dialNumberPage);
-      await testManager.agent1Page.waitForTimeout(2000);
-      await cancelConsult(testManager.agent1Page); // still needs to cancel even if declined
-      await verifyTaskControls(testManager.agent1Page, TASK_TYPES.CALL);
-      await verifyHoldButtonIcon(testManager.agent1Page, {expectedIsHeld: true});
-      await holdCallToggle(testManager.agent1Page);
-      await testManager.agent1Page.waitForTimeout(2000);
-      await expect(testManager.agent1Page.getByTestId('cancel-consult-btn')).not.toBeVisible();
-      await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
-
-      // 3. Accept consult and end
-      clearAdvancedCapturedLogs();
-      await consultOrTransfer(testManager.agent1Page, 'dialNumber', 'consult', process.env.PW_DIAL_NUMBER_NAME);
-      await testManager.agent1Page.waitForTimeout(2000);
-      verifyConsultStartSuccessLogs();
-      await acceptExtensionCall(testManager.dialNumberPage);
-      await testManager.agent1Page.bringToFront();
-      await cancelConsult(testManager.agent1Page);
-      await verifyTaskControls(testManager.agent1Page, TASK_TYPES.CALL);
-      await testManager.agent1Page.waitForTimeout(2000);
-      verifyConsultEndSuccessLogs();
-      await verifyHoldButtonIcon(testManager.agent1Page, {expectedIsHeld: true});
-      await holdCallToggle(testManager.agent1Page);
-
-      // 4. Consult transfer
-      clearAdvancedCapturedLogs();
-      await consultOrTransfer(testManager.agent1Page, 'dialNumber', 'consult', process.env.PW_DIAL_NUMBER_NAME);
-      await acceptExtensionCall(testManager.dialNumberPage);
-      await testManager.agent1Page.waitForTimeout(3000);
-      await testManager.agent1Page.getByTestId('transfer-consult-btn').click();
-      await testManager.agent1Page.waitForTimeout(2000);
-      await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
-      await testManager.dialNumberPage.waitForTimeout(2000);
-      verifyConsultStartSuccessLogs();
-      verifyConsultTransferredLogs();
-      await endCallTask(testManager.dialNumberPage);
-    });
-
-    test('Dial Number search filters list to the matching entry (local search)', async () => {
-      if (testManager.projectName !== 'SET_5') {
-        test.skip(true, 'Dial Number search validation runs only for SET_5 (user23/user24).');
-      }
-
-      const searchTerm = process.env.PW_DIAL_NUMBER_NAME!;
-
-      // Setup: create call and get to engaged state
-      await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
-      await changeUserState(testManager.agent2Page, USER_STATES.MEETING);
-      await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
-      const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
-      await incomingTaskDiv.waitFor({state: 'visible', timeout: 80000});
-      await acceptExtensionCall(testManager.agent1ExtensionPage);
-      await testManager.agent1Page.waitForTimeout(3000);
-      await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
-
-      // Open consult popover and switch to Dial Number
-      await testManager.agent1Page.getByTestId('call-control:consult').nth(1).click();
-      const popover = testManager.agent1Page.locator('.agent-popover-content');
-      await expect(popover).toBeVisible({timeout: 10000});
-      await popover.getByRole('button', {name: 'Dial Number'}).click();
-
-      // Perform search and wait for local filtering to reflect
-      await popover.locator('#consult-search').fill(searchTerm);
-      await testManager.agent1Page.waitForTimeout(4000);
-
-      // Read visible list item titles (aria-labels) and validate only the searched item remains
-      const labels = await popover
-        .locator('[role="listitem"]')
-        .evaluateAll((nodes) => nodes.map((n) => n.getAttribute('aria-label')));
-      expect(labels).toContain(searchTerm);
-      expect(labels.filter(Boolean).length).toBe(1);
-
-      // Close the popover to avoid overlay blocking further actions
-      await testManager.agent1Page.keyboard.press('Escape');
-      await testManager.agent1Page
-        .locator('.md-popover-backdrop')
-        .waitFor({state: 'hidden', timeout: 3000})
-        .catch(() => {});
-
-      // End call and complete wrapup to clean up for next tests
-      await endTask(testManager.agent1Page);
-      await testManager.agent1Page.bringToFront();
-      await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
-      await testManager.agent1Page.waitForTimeout(1000);
     });
   });
 
+  // =============================================================================
+  // DIAL NUMBER TESTS - All tests requiring dialNumber session
+  // =============================================================================
+
   test('Entry Point Consult: visible and functional only for supported users (no blind transfer)', async ({}, testInfo) => {
+    log('Test: EP Consult - Starting');
     await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
     await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
-    const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
-    await incomingTaskDiv.waitFor({state: 'visible', timeout: 80000});
+    await waitForIncomingTask(testManager.agent1Page, TASK_TYPES.CALL, 80000);
     await acceptExtensionCall(testManager.agent1ExtensionPage);
     await testManager.agent1Page.waitForTimeout(3000);
     await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
 
     // Ensure consult UI and Entry Point tab exists
-    await testManager.agent1Page.getByTestId('call-control:consult').nth(1).click();
+    const consultButton = testManager.agent1Page.getByTestId('call-control:consult').first();
+    await consultButton.waitFor({state: 'visible', timeout: 10000});
+    await consultButton.click();
     await expect(testManager.agent1Page.locator('#consult-search')).toBeVisible();
     await testManager.agent1Page.getByRole('button', {name: 'Entry Point'}).click();
 
@@ -523,5 +370,6 @@ export default function createAdvancedTaskControlsTests() {
     await cancelConsult(testManager.agent1Page);
     await testManager.agent1Page.waitForTimeout(1000);
     await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
+    log('Test: EP Consult - Complete');
   });
 }

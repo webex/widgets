@@ -19,9 +19,12 @@ import {
 import {submitWrapup} from '../Utils/wrapupUtils';
 import {USER_STATES, TASK_TYPES, WRAPUP_REASONS} from '../constants';
 import {TestManager} from '../test-manager';
+import {createLogger} from '../Utils/helperUtils';
 
 // Extract test functions for cleaner syntax
 const {describe, beforeAll, afterAll, beforeEach} = test;
+
+const log = createLogger('BasicTaskControls');
 
 export default function createCallTaskControlsTests() {
   let testManager: TestManager;
@@ -31,12 +34,15 @@ export default function createCallTaskControlsTests() {
   });
 
   beforeAll(async ({browser}, testInfo) => {
+    log('beforeAll: Setting up test manager');
     const projectName = testInfo.project.name;
     testManager = new TestManager(projectName);
     await testManager.setupForIncomingTaskDesktop(browser);
+    log('beforeAll: Setup complete');
   });
 
   afterAll(async () => {
+    log('afterAll: Cleanup starting');
     if ((await getCurrentState(testManager.agent1Page)) === USER_STATES.ENGAGED) {
       // If still engaged, end the call to clean up
       await endTask(testManager.agent1Page);
@@ -47,19 +53,17 @@ export default function createCallTaskControlsTests() {
     if (testManager) {
       await testManager.cleanup();
     }
+    log('afterAll: Cleanup complete');
   });
 
   test('Call task - create call and verify all control buttons are visible', async () => {
+    log('Test: Create call and verify controls - Starting');
     // Create call task
     await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
     await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
 
-    // Wait for incoming call notification
-    const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
-    await incomingTaskDiv.waitFor({state: 'visible', timeout: 80000});
-
-    // Accept the incoming call
-    await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CALL);
+    // Accept the incoming call (waits for task to be visible)
+    await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CALL, 80000);
     await testManager.agent1Page.waitForTimeout(5000);
 
     // Verify agent state changed to engaged
@@ -68,24 +72,28 @@ export default function createCallTaskControlsTests() {
     // Use utility to check all call control buttons are visible
     try {
       await verifyTaskControls(testManager.agent1Page, TASK_TYPES.CALL);
+      log('Test: Create call and verify controls - Complete');
     } catch (error) {
       throw new Error(`Call control buttons verification failed: ${error.message}`);
     }
   });
 
   test('Call task - verify remote audio tracks from caller to browser', async () => {
+    log('Test: Verify remote audio tracks - Starting');
     // Verify we're still in an engaged call from previous test
     await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
 
     try {
       // Then verify the audio tracks with the exact structure you provided
       await verifyRemoteAudioTracks(testManager.agent1Page);
+      log('Test: Verify remote audio tracks - Complete');
     } catch (error) {
       throw new Error(`Remote audio tracks verification failed: ${error.message}`);
     }
   });
 
   test('Call task - verify hold and resume functionality with callbacks, timer, and hold music', async () => {
+    log('Test: Verify hold/resume - Starting');
     // Verify we're still in an engaged call from previous test
     await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
 
@@ -126,6 +134,7 @@ export default function createCallTaskControlsTests() {
       await verifyHoldButtonIcon(testManager.agent1Page, {expectedIsHeld: false});
 
       verifyHoldTimer(testManager.agent1Page, {shouldBeVisible: false});
+      log('Test: Verify hold/resume - Complete');
     } catch (error) {
       throw new Error(
         `Hold/Resume functionality with callbacks, timer, and hold music verification failed: ${error.message}`
@@ -134,6 +143,7 @@ export default function createCallTaskControlsTests() {
   });
 
   test('Call task - verify recording pause and resume functionality with callbacks', async () => {
+    log('Test: Verify recording pause/resume - Starting');
     // Verify we're still in an engaged call from previous tests
     await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
 
@@ -162,12 +172,14 @@ export default function createCallTaskControlsTests() {
 
       // Verify record button icon changed back to pause icon (when recording is active)
       await verifyRecordButtonIcon(testManager.agent1Page, {expectedIsRecording: true});
+      log('Test: Verify recording pause/resume - Complete');
     } catch (error) {
       throw new Error(`Recording pause/resume functionality verification failed: ${error.message}`);
     }
   });
 
   test('Call task - end call and complete wrapup', async () => {
+    log('Test: End call and wrapup - Starting');
     // Verify we're still in an engaged call from previous tests
     await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
 
@@ -182,6 +194,7 @@ export default function createCallTaskControlsTests() {
       // Submit wrapup
       await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.RESOLVED);
       await testManager.agent1Page.waitForTimeout(2000);
+      log('Test: End call and wrapup - Complete');
     } catch (error) {
       throw new Error(`Call task end and wrapup failed: ${error.message}`);
     }

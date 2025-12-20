@@ -11,13 +11,15 @@ import {
 } from '../Utils/userStateUtils';
 import {USER_STATES, THEME_COLORS, LOGIN_MODE} from '../constants';
 import {TestManager} from '../test-manager';
+import {createLogger} from '../Utils/helperUtils';
 
-// Shared login and setup before all tests
+const log = createLogger('UserState');
 
 export default function createUserStateTests() {
   let testManager: TestManager;
 
   test.beforeAll(async ({browser}, testInfo) => {
+    log('beforeAll: Setting up test manager');
     const projectName = testInfo.project.name;
     testManager = new TestManager(projectName);
     await testManager.basicSetup(browser);
@@ -44,28 +46,34 @@ export default function createUserStateTests() {
   });
 
   test.afterAll(async () => {
+    log('afterAll: Cleanup starting');
     if (testManager) {
       await testManager.cleanup();
     }
+    log('afterAll: Cleanup complete');
   });
 
   test('should verify initial state is Meeting', async () => {
+    log('Test: Verify initial state - Starting');
     const state = await getCurrentState(testManager.agent1Page);
     if (state !== USER_STATES.MEETING) throw new Error('Initial state is not Meeting');
+    log('Test: Verify initial state - Complete');
   });
 
   test('should verify Meeting state theme color', async () => {
+    log('Test: Meeting theme color - Starting');
     const meetingThemeElement = testManager.agent1Page.getByTestId('state-select');
     const meetingThemeColor = await meetingThemeElement.evaluate((el) => getComputedStyle(el).backgroundColor);
     expect(meetingThemeColor).toBe(THEME_COLORS.MEETING);
+    log('Test: Meeting theme color - Complete');
   });
 
   test('should change state to Available and verify theme and timer reset', async () => {
+    log('Test: Change to Available - Starting');
     await verifyCurrentState(testManager.agent1Page, USER_STATES.MEETING);
-    await testManager.agent1Page.waitForTimeout(5000);
+    await testManager.agent1Page.waitForTimeout(10000);
     const timerBefore = await getStateElapsedTime(testManager.agent1Page);
     await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
-    await testManager.agent1Page.waitForTimeout(3000);
     const timerAfter = await getStateElapsedTime(testManager.agent1Page);
 
     const parseTimer = (timer: string) => {
@@ -78,9 +86,11 @@ export default function createUserStateTests() {
     const themeElement = testManager.agent1Page.getByTestId('state-select');
     const themeColor = await themeElement.evaluate((el) => getComputedStyle(el).backgroundColor);
     expect(themeColor).toBe(THEME_COLORS.AVAILABLE);
+    log('Test: Change to Available - Complete');
   });
 
   test('should verify existence and order in which callback and API success are logged for Available state', async () => {
+    log('Test: Callback order for Available - Starting');
     await changeUserState(testManager.agent1Page, USER_STATES.MEETING);
     await testManager.agent1Page.waitForTimeout(3000);
     testManager.consoleMessages.length = 0;
@@ -92,9 +102,11 @@ export default function createUserStateTests() {
       testManager.consoleMessages
     );
     if (!isCallbackSuccessful) throw new Error('Callback for Available state not successful');
+    log('Test: Callback order for Available - Complete');
   });
 
   test('should verify state persistence after page reload', async () => {
+    log('Test: State persistence after reload - Starting');
     await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
     await verifyCurrentState(testManager.agent1Page, USER_STATES.AVAILABLE);
     await testManager.agent1Page.waitForTimeout(3000);
@@ -115,9 +127,11 @@ export default function createUserStateTests() {
 
     const state = await getCurrentState(testManager.agent1Page);
     if (state !== USER_STATES.AVAILABLE) throw new Error('State is not Available after reload');
+    log('Test: State persistence after reload - Complete');
   });
 
   test('should test multi-session synchronization', async () => {
+    log('Test: Multi-session sync - Starting');
     // Create multi-session page since basicSetup doesn't include it
     if (!testManager.multiSessionAgent1Page) {
       if (!testManager.multiSessionContext) {
@@ -152,9 +166,14 @@ export default function createUserStateTests() {
     if (Math.abs(timer1Parsed - timer2Parsed) > 1) {
       throw new Error(`Multi-session timer synchronization failed: Primary=${timer1Parsed}, Secondary=${timer2Parsed}`);
     }
+    log('Test: Multi-session sync - Complete');
   });
 
   test('should test idle state transition and dual timer', async () => {
+    log('Test: Idle state + dual timer - Starting');
+    // Dismiss any open dropdowns/popovers from previous tests
+    await testManager.agent1Page.keyboard.press('Escape');
+    await testManager.agent1Page.waitForTimeout(500);
     await verifyCurrentState(testManager.agent1Page, USER_STATES.MEETING);
     await testManager.agent1Page.waitForTimeout(2000);
     testManager.consoleMessages.length = 0;
@@ -192,5 +211,6 @@ export default function createUserStateTests() {
     expect(secondTimer.length === 2 || secondTimer.length === 3).toBe(true);
 
     await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
+    log('Test: Idle state + dual timer - Complete');
   });
 }
