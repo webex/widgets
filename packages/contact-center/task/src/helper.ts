@@ -319,66 +319,114 @@ export const useCallControl = (props: useCallControlProps) => {
     try {
       if (!currentTask?.data?.interaction?.participants) return;
 
-      // Skip extraction if consulting to Entry Point or Dial Number
-      // The name is already set correctly via handleTargetSelect
-      if (lastTargetType === 'entryPoint' || lastTargetType === 'dialNumber') {
-        logger.info(
-          `Skipping agent extraction for ${lastTargetType} consult - using pre-set name: ${consultAgentName}`,
-          {
-            module: 'widget-cc-task#helper.ts',
-            method: 'useCallControl#extractConsultingAgent',
-          }
-        );
-        return;
-      }
-
       const {interaction} = currentTask.data;
       const myAgentId = store.cc.agentConfig?.agentId;
 
-      // Find all agent participants except the current agent
-      const otherAgents = Object.values(interaction.participants || {}).filter(
-        (participant): participant is Participant =>
-          (participant as Participant).pType === 'Agent' && (participant as Participant).id !== myAgentId
-      );
-
-      // In a conference with multiple agents, find the agent currently being consulted
-      // Priority: 1) consultState="consulting" 2) most recent consultTimestamp 3) isConsulted=true
-      let foundAgent: {id: string; name: string} | null = null;
-
-      if (otherAgents.length > 0) {
+      // For Entry Point or Dial Number consults, check if destination agent has joined
+      if (lastTargetType === 'entryPoint' || lastTargetType === 'dialNumber') {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const consultingAgent = otherAgents.find((agent: any) => agent.consultState === 'consulting');
+        const consultDestinationAgentName = (interaction as any).callProcessingDetails?.consultDestinationAgentName;
 
-        if (consultingAgent) {
-          // Found an agent currently in "consulting" state - this is the active consult
-          foundAgent = {
-            id: consultingAgent.id,
-            name: consultingAgent.name,
-          };
+        if (consultDestinationAgentName) {
+          // Destination agent has joined, show their name
+          setConsultAgentName(consultDestinationAgentName);
+          logger.info(`${lastTargetType} consult answered - showing agent name: ${consultDestinationAgentName}`, {
+            module: 'widget-cc-task#helper.ts',
+            method: 'useCallControl#extractConsultingAgent',
+          });
         } else {
-          // Fallback: Find agent with most recent consultTimestamp
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const agentWithMostRecentTimestamp = otherAgents.reduce((latest: any, current: any) => {
-            const currentTimestamp = current.consultTimestamp || current.joinTimestamp || 0;
-            const latestTimestamp = latest ? latest.consultTimestamp || latest.joinTimestamp || 0 : 0;
-            return currentTimestamp > latestTimestamp ? current : latest;
-          }, null);
+          // Still ringing - find the EP/DN participant in the consult media
+          const consultMediaResourceId = findMediaResourceId(currentTask, 'consult');
 
-          if (agentWithMostRecentTimestamp) {
-            foundAgent = {
-              id: agentWithMostRecentTimestamp.id,
-              name: agentWithMostRecentTimestamp.name,
-            };
+          if (consultMediaResourceId && interaction.media?.[consultMediaResourceId]) {
+            const consultMedia = interaction.media[consultMediaResourceId];
+            // Find the participant in consult media who is not the current agent
+            const consultParticipantId = consultMedia.participants?.find(
+              (participantId: string) => participantId !== myAgentId
+            );
+
+            if (consultParticipantId && interaction.participants[consultParticipantId]) {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const participant = interaction.participants[consultParticipantId] as any;
+              const phoneNumber = participant.dn || participant.id;
+
+              if (phoneNumber && phoneNumber !== consultAgentName) {
+                setConsultAgentName(phoneNumber);
+                logger.info(`${lastTargetType} consult ringing - showing phone number: ${phoneNumber}`, {
+                  module: 'widget-cc-task#helper.ts',
+                  method: 'useCallControl#extractConsultingAgent',
+                });
+              }
+            }
           }
         }
+        return;
       }
 
-      if (foundAgent) {
-        setConsultAgentName(foundAgent.name);
-        logger.info(`Consulting agent detected: ${foundAgent.name} ${foundAgent.id}`, {
-          module: 'widget-cc-task#helper.ts',
-          method: 'useCallControl#extractConsultingAgent',
+      // For regular agent consults, find the agent in the consult media
+      const consultMediaResourceId = findMediaResourceId(currentTask, 'consult');
+
+      if (consultMediaResourceId && interaction.media?.[consultMediaResourceId]) {
+        const consultMedia = interaction.media[consultMediaResourceId];
+        // Find the agent participant in consult media who is not the current agent
+        const consultParticipantId = consultMedia.participants?.find((participantId: string) => {
+          const participant = interaction.participants[participantId];
+          return participant && participant.id !== myAgentId && participant.pType === 'Agent';
         });
+
+        if (consultParticipantId && interaction.participants[consultParticipantId]) {
+          const consultAgent = interaction.participants[consultParticipantId];
+          setConsultAgentName(consultAgent.name || consultAgent.id);
+          logger.info(`Consulting agent detected: ${consultAgent.name} ${consultAgent.id}`, {
+            module: 'widget-cc-task#helper.ts',
+            method: 'useCallControl#extractConsultingAgent',
+          });
+        }
+      } else {
+        // Fallback: Use old logic if consult media not found
+        const otherAgents = Object.values(interaction.participants || {}).filter(
+          (participant): participant is Participant =>
+            (participant as Participant).pType === 'Agent' && (participant as Participant).id !== myAgentId
+        );
+
+        // In a conference with multiple agents, find the agent currently being consulted
+        // Priority: 1) consultState="consulting" 2) most recent consultTimestamp
+        let foundAgent: {id: string; name: string} | null = null;
+
+        if (otherAgents.length > 0) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const consultingAgent = otherAgents.find((agent: any) => agent.consultState === 'consulting');
+
+          if (consultingAgent) {
+            foundAgent = {
+              id: consultingAgent.id,
+              name: consultingAgent.name,
+            };
+          } else {
+            // Fallback: Find agent with most recent consultTimestamp
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const agentWithMostRecentTimestamp = otherAgents.reduce((latest: any, current: any) => {
+              const currentTimestamp = current.consultTimestamp || current.joinTimestamp || 0;
+              const latestTimestamp = latest ? latest.consultTimestamp || latest.joinTimestamp || 0 : 0;
+              return currentTimestamp > latestTimestamp ? current : latest;
+            }, null);
+
+            if (agentWithMostRecentTimestamp) {
+              foundAgent = {
+                id: agentWithMostRecentTimestamp.id,
+                name: agentWithMostRecentTimestamp.name,
+              };
+            }
+          }
+        }
+
+        if (foundAgent) {
+          setConsultAgentName(foundAgent.name);
+          logger.info(`Consulting agent detected (fallback): ${foundAgent.name} ${foundAgent.id}`, {
+            module: 'widget-cc-task#helper.ts',
+            method: 'useCallControl#extractConsultingAgent',
+          });
+        }
       }
     } catch (error) {
       console.log('error', error);
@@ -387,7 +435,7 @@ export const useCallControl = (props: useCallControlProps) => {
         method: 'extractConsultingAgent',
       });
     }
-  }, [currentTask, logger, lastTargetType, consultAgentName]);
+  }, [currentTask, logger, lastTargetType, consultAgentName, setConsultAgentName]);
 
   // Extract main call timestamp whenever currentTask changes
   useEffect(() => {
