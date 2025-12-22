@@ -277,7 +277,7 @@ export default function createDialNumberTaskControlTests() {
         await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
         clearAdvancedCapturedLogs();
 
-        await consultOrTransfer(testManager.agent1Page, 'queue', 'transfer', 'queue with dn');
+        await consultOrTransfer(testManager.agent1Page, 'queue', 'transfer', 'queue with dn e2e');
         await ensureDialNumberLoggedIn(testManager.dialNumberPage);
         await acceptExtensionCall(testManager.dialNumberPage);
         verifyTransferSuccessLogs();
