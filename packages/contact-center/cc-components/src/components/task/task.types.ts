@@ -548,8 +548,9 @@ export interface OutdialCallProps {
 
   /**
    * Flag to determine if the address book is enabled.
+   * Defaults to true if not provided.
    */
-  isAddressBookEnabled: boolean;
+  isAddressBookEnabled?: boolean;
 
   /**
    * Boolean indicating if there's an active telephony task.

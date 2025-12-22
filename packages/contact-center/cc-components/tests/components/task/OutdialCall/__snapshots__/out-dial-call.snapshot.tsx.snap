@@ -103,7 +103,7 @@ exports[`Outdial Call Component Address Book functionality displays address book
         style="--local-width: 100%;"
       >
         <label
-          id="react-aria-:r2o:"
+          id="react-aria-:r2u:"
         >
           <mdc-text
             class="md-text-wrapper"
@@ -151,7 +151,7 @@ exports[`Outdial Call Component Address Book functionality displays address book
           aria-controls="outdial-ani-option-select"
           aria-expanded="false"
           aria-haspopup="listbox"
-          aria-labelledby="react-aria-:r2o: react-aria-:r2q:"
+          aria-labelledby="react-aria-:r2u: react-aria-:r30:"
           class="md-select-dropdown-input"
           data-testid="outdial-ani-option-select"
           id="outdial-ani-option-select"
@@ -160,7 +160,7 @@ exports[`Outdial Call Component Address Book functionality displays address book
         >
           <span
             class="md-select-selected-item-wrapper"
-            id="react-aria-:r2q:"
+            id="react-aria-:r30:"
           >
             Enter Outdial ANI
           </span>
@@ -304,7 +304,7 @@ exports[`Outdial Call Component Address Book functionality renders address book 
         style="--local-width: 100%;"
       >
         <label
-          id="react-aria-:r34:"
+          id="react-aria-:r3a:"
         >
           <mdc-text
             class="md-text-wrapper"
@@ -352,7 +352,7 @@ exports[`Outdial Call Component Address Book functionality renders address book 
           aria-controls="outdial-ani-option-select"
           aria-expanded="false"
           aria-haspopup="listbox"
-          aria-labelledby="react-aria-:r34: react-aria-:r36:"
+          aria-labelledby="react-aria-:r3a: react-aria-:r3c:"
           class="md-select-dropdown-input"
           data-testid="outdial-ani-option-select"
           id="outdial-ani-option-select"
@@ -361,7 +361,7 @@ exports[`Outdial Call Component Address Book functionality renders address book 
         >
           <span
             class="md-select-selected-item-wrapper"
-            id="react-aria-:r36:"
+            id="react-aria-:r3c:"
           >
             Enter Outdial ANI
           </span>
@@ -922,7 +922,7 @@ exports[`Outdial Call Component Address Book functionality renders address book 
         style="--local-width: 100%;"
       >
         <label
-          id="react-aria-:r3m:"
+          id="react-aria-:r3s:"
         >
           <mdc-text
             class="md-text-wrapper"
@@ -970,7 +970,7 @@ exports[`Outdial Call Component Address Book functionality renders address book 
           aria-controls="outdial-ani-option-select"
           aria-expanded="false"
           aria-haspopup="listbox"
-          aria-labelledby="react-aria-:r3m: react-aria-:r3o:"
+          aria-labelledby="react-aria-:r3s: react-aria-:r3u:"
           class="md-select-dropdown-input"
           data-testid="outdial-ani-option-select"
           id="outdial-ani-option-select"
@@ -979,7 +979,7 @@ exports[`Outdial Call Component Address Book functionality renders address book 
         >
           <span
             class="md-select-selected-item-wrapper"
-            id="react-aria-:r3o:"
+            id="react-aria-:r3u:"
           >
             Enter Outdial ANI
           </span>
@@ -1267,7 +1267,7 @@ exports[`Outdial Call Component Address Book functionality renders address book 
         style="--local-width: 100%;"
       >
         <label
-          id="react-aria-:r42:"
+          id="react-aria-:r48:"
         >
           <mdc-text
             class="md-text-wrapper"
@@ -1315,7 +1315,7 @@ exports[`Outdial Call Component Address Book functionality renders address book 
           aria-controls="outdial-ani-option-select"
           aria-expanded="false"
           aria-haspopup="listbox"
-          aria-labelledby="react-aria-:r42: react-aria-:r44:"
+          aria-labelledby="react-aria-:r48: react-aria-:r4a:"
           class="md-select-dropdown-input"
           data-testid="outdial-ani-option-select"
           id="outdial-ani-option-select"
@@ -1324,7 +1324,7 @@ exports[`Outdial Call Component Address Book functionality renders address book 
         >
           <span
             class="md-select-selected-item-wrapper"
-            id="react-aria-:r44:"
+            id="react-aria-:r4a:"
           >
             Enter Outdial ANI
           </span>
@@ -1894,7 +1894,7 @@ exports[`Outdial Call Component Address Book functionality renders loading spinn
         style="--local-width: 100%;"
       >
         <label
-          id="react-aria-:r3s:"
+          id="react-aria-:r42:"
         >
           <mdc-text
             class="md-text-wrapper"
@@ -1942,7 +1942,7 @@ exports[`Outdial Call Component Address Book functionality renders loading spinn
           aria-controls="outdial-ani-option-select"
           aria-expanded="false"
           aria-haspopup="listbox"
-          aria-labelledby="react-aria-:r3s: react-aria-:r3u:"
+          aria-labelledby="react-aria-:r42: react-aria-:r44:"
           class="md-select-dropdown-input"
           data-testid="outdial-ani-option-select"
           id="outdial-ani-option-select"
@@ -1951,7 +1951,7 @@ exports[`Outdial Call Component Address Book functionality renders loading spinn
         >
           <span
             class="md-select-selected-item-wrapper"
-            id="react-aria-:r3u:"
+            id="react-aria-:r44:"
           >
             Enter Outdial ANI
           </span>
@@ -2229,7 +2229,7 @@ exports[`Outdial Call Component Address Book functionality renders with address 
         style="--local-width: 100%;"
       >
         <label
-          id="react-aria-:r2c:"
+          id="react-aria-:r2i:"
         >
           <mdc-text
             class="md-text-wrapper"
@@ -2269,6 +2269,331 @@ exports[`Outdial Call Component Address Book functionality renders with address 
                 value="2"
               >
                 name 2
+              </option>
+            </select>
+          </label>
+        </div>
+        <button
+          aria-controls="outdial-ani-option-select"
+          aria-expanded="false"
+          aria-haspopup="listbox"
+          aria-labelledby="react-aria-:r2i: react-aria-:r2k:"
+          class="md-select-dropdown-input"
+          data-testid="outdial-ani-option-select"
+          id="outdial-ani-option-select"
+          role="combobox"
+          type="button"
+        >
+          <span
+            class="md-select-selected-item-wrapper"
+            id="react-aria-:r2k:"
+          >
+            Enter Outdial ANI
+          </span>
+          <span
+            aria-hidden="true"
+            class="md-select-icon-wrapper"
+          >
+            <div
+              class="md-icon-wrapper"
+            >
+              <div
+                class="md-icon-not-found"
+                data-autoscale="false"
+                data-scale="16"
+              >
+                ⃞
+              </div>
+            </div>
+          </span>
+        </button>
+      </div>
+    </div>
+    <mdc-button
+      aria-disabled="true"
+      class="outDialCallButton"
+      color="default"
+      data-btn-type="icon"
+      data-testid="outdial-call-button"
+      disabled=""
+      prefix-icon="handset-regular"
+      role="button"
+      size="40"
+      tabindex="-1"
+      type="button"
+      variant="primary"
+    />
+  </article>
+</div>
+`;
+
+exports[`Outdial Call Component Address Book functionality renders with address book enabled by default when prop not provided 1`] = `
+<div>
+  <article
+    class="outdial-container height-28-5rem"
+  >
+    <mdc-tablist
+      active-tab-id="dial_pad"
+      class="tab-list"
+    >
+      <mdc-tab
+        aria-controls="address_book"
+        aria-selected="false"
+        ariastatekey="aria-selected"
+        role="tab"
+        tab-id="address_book"
+        tabindex="-1"
+        variant="glass"
+      />
+      <mdc-tab
+        active=""
+        aria-controls="dial_pad"
+        aria-selected="true"
+        ariastatekey="aria-selected"
+        role="tab"
+        tab-id="dial_pad"
+        tabindex="0"
+        variant="glass"
+      />
+    </mdc-tablist>
+    <div
+      aria-labelledby="dial_pad"
+      class="keypad"
+      id="dial_pad"
+      role="tabpanel"
+    >
+      <section
+        class="keypad"
+        data-testid="outdial-call-container"
+      >
+        <mdc-input
+          class="outdial-input"
+          data-testid="outdial-number-input"
+          help-text=""
+          help-text-type="default"
+          name="outdial-number-input"
+          value=""
+        />
+        <ul
+          class="keys"
+          data-testid="outdial-keypad-keys"
+        >
+          <li>
+            <mdc-button
+              class="key button"
+              color="default"
+              data-btn-type="pill"
+              role="button"
+              size="32"
+              tabindex="0"
+              type="button"
+              variant="primary"
+            >
+              1
+            </mdc-button>
+          </li>
+          <li>
+            <mdc-button
+              class="key button"
+              color="default"
+              data-btn-type="pill"
+              role="button"
+              size="32"
+              tabindex="0"
+              type="button"
+              variant="primary"
+            >
+              2
+            </mdc-button>
+          </li>
+          <li>
+            <mdc-button
+              class="key button"
+              color="default"
+              data-btn-type="pill"
+              role="button"
+              size="32"
+              tabindex="0"
+              type="button"
+              variant="primary"
+            >
+              3
+            </mdc-button>
+          </li>
+          <li>
+            <mdc-button
+              class="key button"
+              color="default"
+              data-btn-type="pill"
+              role="button"
+              size="32"
+              tabindex="0"
+              type="button"
+              variant="primary"
+            >
+              4
+            </mdc-button>
+          </li>
+          <li>
+            <mdc-button
+              class="key button"
+              color="default"
+              data-btn-type="pill"
+              role="button"
+              size="32"
+              tabindex="0"
+              type="button"
+              variant="primary"
+            >
+              5
+            </mdc-button>
+          </li>
+          <li>
+            <mdc-button
+              class="key button"
+              color="default"
+              data-btn-type="pill"
+              role="button"
+              size="32"
+              tabindex="0"
+              type="button"
+              variant="primary"
+            >
+              6
+            </mdc-button>
+          </li>
+          <li>
+            <mdc-button
+              class="key button"
+              color="default"
+              data-btn-type="pill"
+              role="button"
+              size="32"
+              tabindex="0"
+              type="button"
+              variant="primary"
+            >
+              7
+            </mdc-button>
+          </li>
+          <li>
+            <mdc-button
+              class="key button"
+              color="default"
+              data-btn-type="pill"
+              role="button"
+              size="32"
+              tabindex="0"
+              type="button"
+              variant="primary"
+            >
+              8
+            </mdc-button>
+          </li>
+          <li>
+            <mdc-button
+              class="key button"
+              color="default"
+              data-btn-type="pill"
+              role="button"
+              size="32"
+              tabindex="0"
+              type="button"
+              variant="primary"
+            >
+              9
+            </mdc-button>
+          </li>
+          <li>
+            <mdc-button
+              class="key button"
+              color="default"
+              data-btn-type="pill"
+              role="button"
+              size="32"
+              tabindex="0"
+              type="button"
+              variant="primary"
+            >
+              *
+            </mdc-button>
+          </li>
+          <li>
+            <mdc-button
+              class="key button"
+              color="default"
+              data-btn-type="pill"
+              role="button"
+              size="32"
+              tabindex="0"
+              type="button"
+              variant="primary"
+            >
+              0
+            </mdc-button>
+          </li>
+          <li>
+            <mdc-button
+              class="key button"
+              color="default"
+              data-btn-type="pill"
+              role="button"
+              size="32"
+              tabindex="0"
+              type="button"
+              variant="primary"
+            >
+              #
+            </mdc-button>
+          </li>
+        </ul>
+      </section>
+    </div>
+    <div
+      class="outdial-ani-select-container"
+    >
+      <mdc-icon
+        class="outdial-select-arrow-icon"
+        data-testid="select-arrow-icon"
+        name="arrow-down-bold"
+        title=""
+      />
+      <div
+        class="outdial-input md-select-wrapper"
+        id="outdial-ani-option-select"
+        style="--local-width: 100%;"
+      >
+        <label
+          id="react-aria-:r2c:"
+        >
+          <mdc-text
+            class="md-text-wrapper"
+            tagname="p"
+            type="body-large-regular"
+          >
+            Outdial ANI
+          </mdc-text>
+        </label>
+        <div
+          aria-hidden="true"
+          style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
+        >
+          <input
+            style="font-size: 16px;"
+            tabindex="0"
+            type="text"
+          />
+          <label>
+            Outdial ANI
+            <select
+              size="1"
+              tabindex="-1"
+            >
+              <option />
+              <option
+                value="none"
+              >
+                Enter Outdial ANI
               </option>
             </select>
           </label>
@@ -2430,7 +2755,7 @@ exports[`Outdial Call Component Address Book functionality selects an address bo
         style="--local-width: 100%;"
       >
         <label
-          id="react-aria-:r2u:"
+          id="react-aria-:r34:"
         >
           <mdc-text
             class="md-text-wrapper"
@@ -2478,7 +2803,7 @@ exports[`Outdial Call Component Address Book functionality selects an address bo
           aria-controls="outdial-ani-option-select"
           aria-expanded="false"
           aria-haspopup="listbox"
-          aria-labelledby="react-aria-:r2u: react-aria-:r30:"
+          aria-labelledby="react-aria-:r34: react-aria-:r36:"
           class="md-select-dropdown-input"
           data-testid="outdial-ani-option-select"
           id="outdial-ani-option-select"
@@ -2487,7 +2812,7 @@ exports[`Outdial Call Component Address Book functionality selects an address bo
         >
           <span
             class="md-select-selected-item-wrapper"
-            id="react-aria-:r30:"
+            id="react-aria-:r36:"
           >
             Enter Outdial ANI
           </span>
@@ -2598,7 +2923,7 @@ exports[`Outdial Call Component Address Book functionality shows empty state whe
         style="--local-width: 100%;"
       >
         <label
-          id="react-aria-:r3a:"
+          id="react-aria-:r3g:"
         >
           <mdc-text
             class="md-text-wrapper"
@@ -2646,7 +2971,7 @@ exports[`Outdial Call Component Address Book functionality shows empty state whe
           aria-controls="outdial-ani-option-select"
           aria-expanded="false"
           aria-haspopup="listbox"
-          aria-labelledby="react-aria-:r3a: react-aria-:r3c:"
+          aria-labelledby="react-aria-:r3g: react-aria-:r3i:"
           class="md-select-dropdown-input"
           data-testid="outdial-ani-option-select"
           id="outdial-ani-option-select"
@@ -2655,7 +2980,7 @@ exports[`Outdial Call Component Address Book functionality shows empty state whe
         >
           <span
             class="md-select-selected-item-wrapper"
-            id="react-aria-:r3c:"
+            id="react-aria-:r3i:"
           >
             Enter Outdial ANI
           </span>
@@ -2933,7 +3258,7 @@ exports[`Outdial Call Component Address Book functionality switches back to dial
         style="--local-width: 100%;"
       >
         <label
-          id="react-aria-:r3g:"
+          id="react-aria-:r3m:"
         >
           <mdc-text
             class="md-text-wrapper"
@@ -2981,7 +3306,7 @@ exports[`Outdial Call Component Address Book functionality switches back to dial
           aria-controls="outdial-ani-option-select"
           aria-expanded="false"
           aria-haspopup="listbox"
-          aria-labelledby="react-aria-:r3g: react-aria-:r3i:"
+          aria-labelledby="react-aria-:r3m: react-aria-:r3o:"
           class="md-select-dropdown-input"
           data-testid="outdial-ani-option-select"
           id="outdial-ani-option-select"
@@ -2990,7 +3315,7 @@ exports[`Outdial Call Component Address Book functionality switches back to dial
         >
           <span
             class="md-select-selected-item-wrapper"
-            id="react-aria-:r3i:"
+            id="react-aria-:r3o:"
           >
             Enter Outdial ANI
           </span>
@@ -3134,7 +3459,7 @@ exports[`Outdial Call Component Address Book functionality switches to address b
         style="--local-width: 100%;"
       >
         <label
-          id="react-aria-:r2i:"
+          id="react-aria-:r2o:"
         >
           <mdc-text
             class="md-text-wrapper"
@@ -3182,7 +3507,7 @@ exports[`Outdial Call Component Address Book functionality switches to address b
           aria-controls="outdial-ani-option-select"
           aria-expanded="false"
           aria-haspopup="listbox"
-          aria-labelledby="react-aria-:r2i: react-aria-:r2k:"
+          aria-labelledby="react-aria-:r2o: react-aria-:r2q:"
           class="md-select-dropdown-input"
           data-testid="outdial-ani-option-select"
           id="outdial-ani-option-select"
@@ -3191,7 +3516,7 @@ exports[`Outdial Call Component Address Book functionality switches to address b
         >
           <span
             class="md-select-selected-item-wrapper"
-            id="react-aria-:r2k:"
+            id="react-aria-:r2q:"
           >
             Enter Outdial ANI
           </span>
