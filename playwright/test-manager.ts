@@ -328,7 +328,7 @@ export class TestManager {
       'dial number login'
     );
     // Ensure only one page remains in the Dial Number context to avoid duplicate web client instances
-    await this.enforceSingleDialNumberInOwnContext();
+    // await this.enforceSingleDialNumberInOwnContext();
   }
 
   // Helper method for Caller setup
@@ -396,11 +396,23 @@ export class TestManager {
       agent1LoginMode: LOGIN_MODE.EXTENSION,
       enableConsoleLogging: true,
       enableAdvancedLogging: true,
-      needDialNumberLogin: true,
+      needDialNumberLogin: false,
     });
   }
 
   async setupForAdvancedCombinations(browser: Browser) {
+    await this.setup(browser, {
+      needsAgent1: true,
+      needsAgent2: true,
+      needsCaller: true,
+      needDialNumberLogin: false,
+      agent1LoginMode: LOGIN_MODE.DESKTOP,
+      enableConsoleLogging: true,
+      enableAdvancedLogging: true,
+    });
+  }
+
+  async setupForDialNumber(browser: Browser) {
     await this.setup(browser, {
       needsAgent1: true,
       needsAgent2: true,

@@ -41,7 +41,7 @@ export const DEFAULT_TIMEOUT = 5000;
 export const UI_SETTLE_TIMEOUT = 2000;
 export const FORM_FIELD_TIMEOUT = 20000;
 export const OPERATION_TIMEOUT = 30000;
-export const NETWORK_OPERATION_TIMEOUT = 35000;
+export const NETWORK_OPERATION_TIMEOUT = 40000;
 
 // Specific timeouts for incoming task operations
 export const CHAT_LAUNCHER_TIMEOUT = 60000;

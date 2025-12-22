@@ -58,4 +58,15 @@ export const USER_SETS = {
     ENTRY_POINT: env.PW_ENTRY_POINT5,
     TEST_SUITE: 'advanced-task-controls-tests.spec.ts',
   },
+  SET_6: {
+    AGENTS: {
+      AGENT1: {username: 'user17', extension: '1017', agentName: 'User17 Agent17'},
+      AGENT2: {username: 'user18', extension: '1018', agentName: 'User18 Agent18'},
+    },
+    QUEUE_NAME: 'Queue e2e 6',
+    CHAT_URL: `${env.PW_CHAT_URL}-e2e-6.html`,
+    EMAIL_ENTRY_POINT: `${env.PW_SANDBOX}.e2e6@gmail.com`,
+    ENTRY_POINT: env.PW_ENTRY_POINT6,
+    TEST_SUITE: 'dial-number-tests.spec.ts',
+  },
 };

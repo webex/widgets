@@ -33,7 +33,7 @@ export default function createDialNumberTaskControlTests() {
       log('beforeAll: Setting up test manager');
       const projectName = testInfo.project.name;
       testManager = new TestManager(projectName);
-      await testManager.setupForAdvancedCombinations(browser);
+      await testManager.setupForDialNumber(browser);
       log('beforeAll: Setup complete');
     });
 
@@ -41,12 +41,12 @@ export default function createDialNumberTaskControlTests() {
       log('beforeEach: Handling stray tasks');
       await handleStrayTasks(testManager.agent1Page);
       await handleStrayTasks(testManager.agent2Page);
+      await testManager.resetSession('dialNumber');
     });
     test.describe('Dial Number Tests', () => {
       test.beforeAll(async () => {
         log('DialNumber beforeAll: Setting up dialNumber session');
         test.skip(!process.env.PW_DIAL_NUMBER_NAME, 'PW_DIAL_NUMBER_NAME not set');
-        await testManager.resetSession('dialNumber');
         log('DialNumber beforeAll: Setup complete');
       });
 
