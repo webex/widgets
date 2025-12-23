@@ -79,12 +79,6 @@ describe('DigitalChannels Component - Integration Tests with Real Components', (
     // 1. AGENTX_SERVICE global (minimal requirement)
     // 2. @webex/cc-store (external dependency)
     // 3. mobx-react-lite observer (to simplify MobX in tests)
-
-    // Everything else uses real components:
-    // ✅ Real @webex-engage/wxengage-conversations
-    // ✅ Real @momentum-ui/web-components
-    // ✅ Real component logic and helper functions
-
     expect(true).toBe(true); // Placeholder assertion
   });
 });

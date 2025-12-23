@@ -26346,13 +26346,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mobx@npm:^6.0.0":
-  version: 6.15.0
-  resolution: "mobx@npm:6.15.0"
-  checksum: 10c0/afbfdc5659caac4ba620d1caca8eb471bbe56746403a8023ae402e27f9e04856394e1529ccf46feb7fdad0c6d695fa1972e8421e7fbfcb1cf453131739a12ac4
-  languageName: node
-  linkType: hard
-
 "modify-values@npm:^1.0.0":
   version: 1.0.1
   resolution: "modify-values@npm:1.0.1"
@@ -31181,7 +31174,6 @@ __metadata:
     html-webpack-plugin: "npm:^5.6.3"
     lit-element: "npm:2.3.1"
     lit-html: "npm:^1.2.1"
-    mobx: "npm:^6.0.0"
     prettier: "npm:^3.5.1"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
