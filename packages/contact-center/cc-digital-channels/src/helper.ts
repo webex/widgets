@@ -19,8 +19,9 @@ export const useDigitalChannels = (props: UseDigitalChannelsProps) => {
     console.debug('Webex Engage component error:', errorMessage);
     return false; // Prevent default error handling
   };
-  //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
-  const conversationId = currentTask.data.interaction.callAssociatedDetails.mediaResourceId;
+
+  const conversationId = (currentTask.data.interaction as {callAssociatedDetails?: {mediaResourceId?: string}})
+    .callAssociatedDetails?.mediaResourceId;
 
   return {
     name: 'DigitalChannels',

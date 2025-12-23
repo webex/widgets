@@ -1,45 +1,45 @@
-// Set up the minimal global that @webex-engage/wxengage-conversations expects
-// This needs to be done before any imports
-(global as any).AGENTX_SERVICE = {};
-
 import React from 'react';
-import {render, screen} from '@testing-library/react';
+import {render} from '@testing-library/react';
 import '@testing-library/jest-dom';
-import {mockTask, mockCC} from '@webex/test-fixtures';
 
 // Mock mobx-react-lite to make observer work properly in tests
 jest.mock('mobx-react-lite', () => ({
-  observer: (component: any) => component, // Pass through the component without MobX observation
+  observer: <T,>(component: T) => component, // Pass through the component without MobX observation
 }));
 
 // No mocking of UI components - test with real Engage component!
 
-// Mock the store using fixtures
-const mockCurrentTaskWithConversationId = {
-  ...mockTask,
-  data: {
-    ...mockTask.data,
-    interaction: {
-      ...mockTask.data.interaction,
-      callAssociatedDetails: {
-        mediaResourceId: 'test-conversation-id',
+// Mock the store using fixtures - define inside the factory to avoid hoisting issues
+jest.mock('@webex/cc-store', () => {
+  const {mockTask} = jest.requireActual('@webex/test-fixtures');
+  const mockCurrentTaskWithConversationId = {
+    ...mockTask,
+    data: {
+      ...mockTask.data,
+      interaction: {
+        ...mockTask.data.interaction,
+        callAssociatedDetails: {
+          mediaResourceId: 'test-conversation-id',
+        },
       },
     },
-  },
-};
+  };
 
-jest.mock('@webex/cc-store', () => ({
-  default: {
-    logger: {
-      log: jest.fn(),
-      error: jest.fn(),
-      warn: jest.fn(),
-      info: jest.fn(),
-      trace: jest.fn(),
+  return {
+    default: {
+      logger: {
+        log: jest.fn(),
+        error: jest.fn(),
+        warn: jest.fn(),
+        info: jest.fn(),
+        trace: jest.fn(),
+      },
+      currentTask: mockCurrentTaskWithConversationId,
+      isDigitalChannelsInitialized: false,
+      setDigitalChannelsInitialized: jest.fn(),
     },
-    currentTask: mockCurrentTaskWithConversationId,
-  },
-}));
+  };
+});
 
 import {DigitalChannels} from '../../src/digital-channels';
 
@@ -58,15 +58,10 @@ describe('DigitalChannels Component - Integration Tests with Real Components', (
     expect(() => {
       render(<DigitalChannels {...mockProps} />);
     }).not.toThrow();
-
-    // The fact that we get here means:
-    // 1. Real @webex-engage/wxengage-conversations loaded successfully
-    // 2. Real @momentum-ui/web-components loaded successfully
-    // 3. No runtime errors occurred
-    // 4. All dependencies were satisfied with minimal mocking
   });
 
   it('should have proper store integration', () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const storeModule = require('@webex/cc-store');
     expect(storeModule.default.currentTask).toBeTruthy();
     expect(storeModule.default.logger).toBeTruthy();

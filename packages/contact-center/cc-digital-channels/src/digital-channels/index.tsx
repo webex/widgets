@@ -68,7 +68,7 @@ const DigitalChannels: React.FunctionComponent<DigitalChannelsProps> = observer(
 
   const {handleError, conversationId} = result;
 
-// Create a stable key based on critical props to force remount when they change
+  // Create a stable key based on critical props to force remount when they change
   // This prevents issues with the Froala editor trying to cleanup/reinitialize improperly
   const componentKey = useMemo(() => {
     return `${conversationId}-${jwtToken.slice(-8)}-${dataCenter}`;

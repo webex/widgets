@@ -1,4 +1,3 @@
-import React from 'react';
 import {ITask} from '@webex/cc-store';
 
 export interface UseDigitalChannelsProps {
@@ -7,8 +6,8 @@ export interface UseDigitalChannelsProps {
   dataCenter: string;
   onError?: (error: unknown) => boolean;
   logger?: {
-    log: (message: string, meta?: any) => void;
-    error: (message: string, error?: any, meta?: any) => void;
+    log: (message: string, meta?: Record<string, unknown>) => void;
+    error: (message: string, error?: unknown, meta?: Record<string, unknown>) => void;
   };
 }
 
