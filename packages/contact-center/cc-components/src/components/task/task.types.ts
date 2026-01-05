@@ -17,6 +17,18 @@ import {
 type Enum<T extends Record<string, unknown>> = T[keyof T];
 
 /**
+ * Target types for consult/transfer operations
+ */
+export const TARGET_TYPE = {
+  AGENT: 'agent',
+  QUEUE: 'queue',
+  ENTRY_POINT: 'entryPoint',
+  DIAL_NUMBER: 'dialNumber',
+} as const;
+
+export type TargetType = (typeof TARGET_TYPE)[keyof typeof TARGET_TYPE];
+
+/**
  * Interface representing the TaskProps of a user.
  */
 export interface TaskProps {
@@ -414,12 +426,12 @@ export interface ControlProps {
   /**
    * Function to set the last target type
    */
-  lastTargetType: 'queue' | 'agent';
+  lastTargetType: TargetType;
 
   /**
    * Function to set the last target type
    */
-  setLastTargetType: (targetType: 'queue' | 'agent') => void;
+  setLastTargetType: (targetType: TargetType) => void;
 
   controlVisibility: ControlVisibility;
 

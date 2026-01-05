@@ -2,7 +2,7 @@ import React from 'react';
 import {render, fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import CallControlComponent from '../../../../src/components/task/CallControl/call-control';
-import {CallControlComponentProps, CallControlMenuType} from '../../../../src/components/task/task.types';
+import {CallControlComponentProps, CallControlMenuType, TARGET_TYPE} from '../../../../src/components/task/task.types';
 import * as callControlUtils from '../../../../src/components/task/CallControl/call-control.utils';
 import {mockTask} from '@webex/test-fixtures';
 
@@ -121,7 +121,7 @@ describe('CallControlComponent', () => {
     consultTimerLabel: 'Consulting',
     consultTimerTimestamp: 0,
     allowConsultToQueue: true,
-    lastTargetType: 'agent',
+    lastTargetType: TARGET_TYPE.AGENT,
     setLastTargetType: jest.fn(),
     controlVisibility: mockControlVisibility,
     logger: mockLogger,

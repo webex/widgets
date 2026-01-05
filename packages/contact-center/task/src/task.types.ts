@@ -48,3 +48,15 @@ export interface DeviceTypeFlags {
   isAgentDN: boolean;
   isExtension: boolean;
 }
+
+/**
+ * Target types for consult/transfer operations
+ */
+export const TARGET_TYPE = {
+  AGENT: 'agent',
+  QUEUE: 'queue',
+  ENTRY_POINT: 'entryPoint',
+  DIAL_NUMBER: 'dialNumber',
+} as const;
+
+export type TargetType = (typeof TARGET_TYPE)[keyof typeof TARGET_TYPE];
