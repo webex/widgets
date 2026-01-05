@@ -1,6 +1,13 @@
 import {useEffect, useCallback, useState, useMemo} from 'react';
 import {AddressBookEntriesResponse, AddressBookEntrySearchParams, ITask} from '@webex/contact-center';
-import {useCallControlProps, UseTaskListProps, UseTaskProps, useOutdialCallProps} from './task.types';
+import {
+  useCallControlProps,
+  UseTaskListProps,
+  UseTaskProps,
+  useOutdialCallProps,
+  TargetType,
+  TARGET_TYPE,
+} from './task.types';
 import store, {
   TASK_EVENTS,
   BuddyDetails,
@@ -302,7 +309,7 @@ export const useCallControl = (props: useCallControlProps) => {
   // Consult timer labels and timestamps
   const [consultTimerLabel, setConsultTimerLabel] = useState<string>(TIMER_LABEL_CONSULTING);
   const [consultTimerTimestamp, setConsultTimerTimestamp] = useState<number>(0);
-  const [lastTargetType, setLastTargetType] = useState<'agent' | 'queue' | 'entryPoint' | 'dialNumber'>('agent');
+  const [lastTargetType, setLastTargetType] = useState<TargetType>(TARGET_TYPE.AGENT);
   const [conferenceParticipants, setConferenceParticipants] = useState<Participant[]>([]);
 
   // Use custom hook for hold timer management
@@ -323,7 +330,7 @@ export const useCallControl = (props: useCallControlProps) => {
       const myAgentId = store.cc.agentConfig?.agentId;
 
       // For Entry Point or Dial Number consults, check if destination agent has joined
-      if (lastTargetType === 'entryPoint' || lastTargetType === 'dialNumber') {
+      if (lastTargetType === TARGET_TYPE.ENTRY_POINT || lastTargetType === TARGET_TYPE.DIAL_NUMBER) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const consultDestinationAgentName = (interaction as any).callProcessingDetails?.consultDestinationAgentName;
 
@@ -408,7 +415,7 @@ export const useCallControl = (props: useCallControlProps) => {
             const agentWithMostRecentTimestamp = otherAgents.reduce((latest: any, current: any) => {
               const currentTimestamp = current.consultTimestamp || current.joinTimestamp || 0;
               const latestTimestamp = latest ? latest.consultTimestamp || latest.joinTimestamp || 0 : 0;
-              return currentTimestamp > latestTimestamp ? current : latest;
+              return currentTimestamp >= latestTimestamp ? current : latest;
             }, null);
 
             if (agentWithMostRecentTimestamp) {
