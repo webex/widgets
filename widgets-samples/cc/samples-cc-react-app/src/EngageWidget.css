@@ -206,3 +206,14 @@
     font-size: 0.625rem;
   }
 }
+
+@media (max-width: 550px) {
+  .engage-content-area {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: scroll;
+  padding: 0;
+  min-height: 0;
+  -webkit-overflow-scrolling: touch;
+ }
+}
