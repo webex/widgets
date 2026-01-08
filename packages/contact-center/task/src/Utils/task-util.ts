@@ -86,12 +86,14 @@ export function getEndButtonVisibility(
   isConsultInitiatedOrAcceptedOrBeingConsulted: boolean,
   isConferenceInProgress: boolean,
   isConsultCompleted: boolean,
-  isHeld: boolean
+  isHeld: boolean,
+  consultCallHeld: boolean
 ): Visibility {
   const isVisible = isBrowser || (isEndCallEnabled && isCall) || !isCall;
-  // Disable if: held (except when in conference and consult not completed) OR consult in progress
+  // Disable if: held (except when in conference and consult not completed) OR consult in progress (unless consult call is held - meaning we're back on main)
   const isEnabled =
-    (!isHeld || (isConferenceInProgress && !isConsultCompleted)) && !isConsultInitiatedOrAcceptedOrBeingConsulted;
+    (!isHeld || (isConferenceInProgress && !isConsultCompleted)) &&
+    (!isConsultInitiatedOrAcceptedOrBeingConsulted || consultCallHeld);
 
   return {isVisible, isEnabled};
 }
@@ -441,7 +443,8 @@ export function getControlsVisibility(
         isConsultInitiatedOrAcceptedOrBeingConsulted,
         isConferenceInProgress,
         isConsultCompleted,
-        isHeld
+        isHeld,
+        consultCallHeld
       ),
       muteUnmute: getMuteUnmuteButtonVisibility(isBrowser, webRtcEnabled, isCall, isBeingConsulted),
       holdResume: getHoldResumeButtonVisibility(

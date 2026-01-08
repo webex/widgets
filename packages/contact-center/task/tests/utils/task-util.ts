@@ -421,6 +421,211 @@ describe('getControlsVisibility', () => {
       consultCallHeld: false,
     });
   });
+
+  it('should enable end button when in conference and switched back from consult (consultCallHeld = true)', () => {
+    const deviceType = 'BROWSER';
+    const featureFlags = {
+      isEndCallEnabled: true,
+      isEndConsultEnabled: true,
+      webRtcEnabled: true,
+    };
+
+    // Mock a task with conference in progress and consult call held
+    const task = {
+      ...mockTask,
+      data: {
+        ...mockTask.data,
+        isConferenceInProgress: true,
+        consultMediaResourceId: 'consult',
+        interaction: {
+          ...mockTask.data.interaction,
+          mediaType: 'telephony',
+          state: 'conferencing', // Conference state
+          media: {
+            main: {
+              mediaResourceId: 'main',
+              mType: 'mainCall',
+              isHold: false,
+              participants: ['agent1', 'agent2', 'customer1'],
+            },
+            consult: {
+              mediaResourceId: 'consult',
+              mType: 'consult',
+              isHold: true, // Consult is on hold - we've switched back to main
+              participants: ['agent1', 'agent3'],
+            },
+          },
+          participants: {
+            agent1: {
+              id: 'agent1',
+              pType: 'Agent',
+              name: 'Agent One',
+              consultState: 'Conferencing',
+              isConsulted: false,
+              hasLeft: false,
+            },
+            agent2: {
+              id: 'agent2',
+              pType: 'Agent',
+              name: 'Agent Two',
+              hasLeft: false,
+            },
+            agent3: {
+              id: 'agent3',
+              pType: 'Agent',
+              name: 'Agent Three',
+              hasLeft: false,
+            },
+            customer1: {
+              id: 'customer1',
+              pType: 'Customer',
+              name: 'Customer',
+              hasLeft: false,
+            },
+          },
+        },
+      },
+    } as ITask;
+
+    const result = getControlsVisibility(deviceType, featureFlags, task, 'agent1', true);
+
+    // End button should be enabled when switched back to main call from consult
+    expect(result.end.isEnabled).toBe(true);
+    expect(result.end.isVisible).toBe(true);
+  });
+
+  it('should enable end button when in regular consult and switched back to main call (consultCallHeld = true)', () => {
+    const deviceType = 'BROWSER';
+    const featureFlags = {
+      isEndCallEnabled: true,
+      isEndConsultEnabled: true,
+      webRtcEnabled: true,
+    };
+
+    // Mock a task with consult (not conference) and consult call held
+    const task = {
+      ...mockTask,
+      data: {
+        ...mockTask.data,
+        isConferenceInProgress: false,
+        consultMediaResourceId: 'consult',
+        interaction: {
+          ...mockTask.data.interaction,
+          mediaType: 'telephony',
+          state: 'consulting', // Consult state
+          media: {
+            main: {
+              mediaResourceId: 'main',
+              mType: 'mainCall',
+              isHold: false,
+              participants: ['agent1', 'customer1'],
+            },
+            consult: {
+              mediaResourceId: 'consult',
+              mType: 'consult',
+              isHold: true, // Consult is on hold - we've switched back to main
+              participants: ['agent1', 'agent2'],
+            },
+          },
+          participants: {
+            agent1: {
+              id: 'agent1',
+              pType: 'Agent',
+              name: 'Agent One',
+              consultState: 'Initiated',
+              isConsulted: false,
+              hasLeft: false,
+            },
+            agent2: {
+              id: 'agent2',
+              pType: 'Agent',
+              name: 'Agent Two',
+              hasLeft: false,
+            },
+            customer1: {
+              id: 'customer1',
+              pType: 'Customer',
+              name: 'Customer',
+              hasLeft: false,
+            },
+          },
+        },
+      },
+    } as ITask;
+
+    const result = getControlsVisibility(deviceType, featureFlags, task, 'agent1', false);
+
+    // End button should be enabled when switched back to main call from consult
+    expect(result.end.isEnabled).toBe(true);
+    expect(result.end.isVisible).toBe(true);
+  });
+
+  it('should disable end button when consult is active (not on hold)', () => {
+    const deviceType = 'BROWSER';
+    const featureFlags = {
+      isEndCallEnabled: true,
+      isEndConsultEnabled: true,
+      webRtcEnabled: true,
+    };
+
+    // Mock a task with active consult (not on hold)
+    const task = {
+      ...mockTask,
+      data: {
+        ...mockTask.data,
+        isConferenceInProgress: false,
+        consultMediaResourceId: 'consult',
+        interaction: {
+          ...mockTask.data.interaction,
+          mediaType: 'telephony',
+          state: 'consulting', // Active consult state
+          media: {
+            main: {
+              mediaResourceId: 'main',
+              mType: 'mainCall',
+              isHold: true, // Main is on hold - we're on consult call
+              participants: ['agent1', 'customer1'],
+            },
+            consult: {
+              mediaResourceId: 'consult',
+              mType: 'consult',
+              isHold: false, // Consult is active
+              participants: ['agent1', 'agent2'],
+            },
+          },
+          participants: {
+            agent1: {
+              id: 'agent1',
+              pType: 'Agent',
+              name: 'Agent One',
+              consultState: 'Initiated', // Indicate consult was initiated
+              isConsulted: false,
+              hasLeft: false,
+            },
+            agent2: {
+              id: 'agent2',
+              pType: 'Agent',
+              name: 'Agent Two',
+              isConsulted: false,
+              hasLeft: false,
+            },
+            customer1: {
+              id: 'customer1',
+              pType: 'Customer',
+              name: 'Customer',
+              hasLeft: false,
+            },
+          },
+        },
+      },
+    } as ITask;
+
+    const result = getControlsVisibility(deviceType, featureFlags, task, 'agent1', false);
+
+    // End button should be disabled when on active consult call
+    expect(result.end.isEnabled).toBe(false);
+    expect(result.end.isVisible).toBe(true);
+  });
 });
 
 describe('findHoldTimestamp', () => {

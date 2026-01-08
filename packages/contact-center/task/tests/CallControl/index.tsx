@@ -4,6 +4,7 @@ import * as helper from '../../src/helper';
 import {CallControl} from '../../src';
 import store from '@webex/cc-store';
 import {mockTask} from '@webex/test-fixtures';
+import {TARGET_TYPE} from '../../src/task.types';
 import '@testing-library/jest-dom';
 
 const onHoldResumeCb = jest.fn();
@@ -46,7 +47,7 @@ describe('CallControl Component', () => {
       setConsultAgentName: jest.fn(),
       holdTime: 0,
       startTimestamp: 0,
-      lastTargetType: 'agent' as const,
+      lastTargetType: TARGET_TYPE.AGENT,
       setLastTargetType: jest.fn(),
       controlVisibility: {
         accept: defaultVisibility,

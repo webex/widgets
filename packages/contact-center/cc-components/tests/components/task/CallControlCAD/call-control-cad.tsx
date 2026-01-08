@@ -1,7 +1,7 @@
 import React from 'react';
 import {render} from '@testing-library/react';
 import CallControlCADComponent from '../../../../src/components/task/CallControlCAD/call-control-cad';
-import {CallControlComponentProps} from '../../../../src/components/task/task.types';
+import {CallControlComponentProps, TARGET_TYPE} from '../../../../src/components/task/task.types';
 import {mockTask} from '@webex/test-fixtures';
 import {BuddyDetails} from '@webex/cc-store';
 import '@testing-library/jest-dom';
@@ -141,7 +141,7 @@ describe('CallControlCADComponent', () => {
     consultTimerLabel: 'Consulting',
     consultTimerTimestamp: 0,
     allowConsultToQueue: true,
-    lastTargetType: 'agent',
+    lastTargetType: TARGET_TYPE.AGENT,
     setLastTargetType: jest.fn(),
     controlVisibility: mockControlVisibility,
     logger: mockLogger,
