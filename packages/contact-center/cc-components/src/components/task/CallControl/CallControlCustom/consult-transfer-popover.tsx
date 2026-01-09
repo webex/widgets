@@ -150,7 +150,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
             variant="small"
             className="tooltip"
           >
-            <p>{`Reload ${selectedCategory}`}</p>
+            <Text tagName="p">{`Reload ${selectedCategory}`}</Text>
           </TooltipNext>
         </div>
         {consultTransferManualAction.visible && (

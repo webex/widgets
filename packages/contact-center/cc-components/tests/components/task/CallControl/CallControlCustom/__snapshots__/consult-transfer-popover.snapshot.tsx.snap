@@ -62,9 +62,13 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
         class="md-tooltip-label"
         id="react-aria-:r2m:"
       >
-        <p>
+        <mdc-text
+          class="md-text-wrapper"
+          tagname="p"
+          type="body-large-regular"
+        >
           Reload Agents
-        </p>
+        </mdc-text>
       </div>
     </div>
   </div>
@@ -349,9 +353,13 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
         class="md-tooltip-label"
         id="react-aria-:r2u:"
       >
-        <p>
+        <mdc-text
+          class="md-text-wrapper"
+          tagname="p"
+          type="body-large-regular"
+        >
           Reload Queues
-        </p>
+        </mdc-text>
       </div>
     </div>
   </div>
@@ -563,9 +571,13 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
         class="md-tooltip-label"
         id="react-aria-:r2f:"
       >
-        <p>
+        <mdc-text
+          class="md-text-wrapper"
+          tagname="p"
+          type="body-large-regular"
+        >
           Reload Queues
-        </p>
+        </mdc-text>
       </div>
     </div>
   </div>
@@ -777,9 +789,13 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         class="md-tooltip-label"
         id="react-aria-:r6:"
       >
-        <p>
+        <mdc-text
+          class="md-text-wrapper"
+          tagname="p"
+          type="body-large-regular"
+        >
           Reload Agents
-        </p>
+        </mdc-text>
       </div>
     </div>
   </div>
@@ -1082,9 +1098,13 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         class="md-tooltip-label"
         id="react-aria-:r27:"
       >
-        <p>
+        <mdc-text
+          class="md-text-wrapper"
+          tagname="p"
+          type="body-large-regular"
+        >
           Reload Agents
-        </p>
+        </mdc-text>
       </div>
     </div>
   </div>
@@ -1444,9 +1464,13 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         class="md-tooltip-label"
         id="react-aria-:r1a:"
       >
-        <p>
+        <mdc-text
+          class="md-text-wrapper"
+          tagname="p"
+          type="body-large-regular"
+        >
           Reload Agents
-        </p>
+        </mdc-text>
       </div>
     </div>
   </div>
@@ -1713,9 +1737,13 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         class="md-tooltip-label"
         id="react-aria-:r1h:"
       >
-        <p>
+        <mdc-text
+          class="md-text-wrapper"
+          tagname="p"
+          type="body-large-regular"
+        >
           Reload Agents
-        </p>
+        </mdc-text>
       </div>
     </div>
   </div>
@@ -1858,9 +1886,13 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         class="md-tooltip-label"
         id="react-aria-:rk:"
       >
-        <p>
+        <mdc-text
+          class="md-text-wrapper"
+          tagname="p"
+          type="body-large-regular"
+        >
           Reload Agents
-        </p>
+        </mdc-text>
       </div>
     </div>
   </div>
@@ -2145,9 +2177,13 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         class="md-tooltip-label"
         id="react-aria-:rr:"
       >
-        <p>
+        <mdc-text
+          class="md-text-wrapper"
+          tagname="p"
+          type="body-large-regular"
+        >
           Reload Agents
-        </p>
+        </mdc-text>
       </div>
     </div>
   </div>
@@ -2289,9 +2325,11 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         class="md-tooltip-label"
         id="react-aria-:r13:"
       >
-        <p>
+        <mdc-text
+          class="md-text-wrapper"
+        >
           Reload Queues
-        </p>
+        </mdc-text>
       </div>
     </div>
   </div>
@@ -2427,9 +2465,13 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         class="md-tooltip-label"
         id="react-aria-:r1o:"
       >
-        <p>
+        <mdc-text
+          class="md-text-wrapper"
+          tagname="p"
+          type="body-large-regular"
+        >
           Reload Agents
-        </p>
+        </mdc-text>
       </div>
     </div>
   </div>
@@ -2639,9 +2681,13 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         class="md-tooltip-label"
         id="react-aria-:r20:"
       >
-        <p>
+        <mdc-text
+          class="md-text-wrapper"
+          tagname="p"
+          type="body-large-regular"
+        >
           Reload Queues
-        </p>
+        </mdc-text>
       </div>
     </div>
   </div>
@@ -2853,9 +2899,13 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         class="md-tooltip-label"
         id="react-aria-:rd:"
       >
-        <p>
+        <mdc-text
+          class="md-text-wrapper"
+          tagname="p"
+          type="body-large-regular"
+        >
           Reload Agents
-        </p>
+        </mdc-text>
       </div>
     </div>
   </div>
@@ -3140,9 +3190,13 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
         class="md-tooltip-label"
         id="react-aria-:r3c:"
       >
-        <p>
+        <mdc-text
+          class="md-text-wrapper"
+          tagname="p"
+          type="body-large-regular"
+        >
           Reload Agents
-        </p>
+        </mdc-text>
       </div>
     </div>
   </div>
@@ -3348,9 +3402,13 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
         class="md-tooltip-label"
         id="react-aria-:r35:"
       >
-        <p>
+        <mdc-text
+          class="md-text-wrapper"
+          tagname="p"
+          type="body-large-regular"
+        >
           Reload Agents
-        </p>
+        </mdc-text>
       </div>
     </div>
   </div>
@@ -3635,9 +3693,13 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
         class="md-tooltip-label"
         id="react-aria-:r3k:"
       >
-        <p>
+        <mdc-text
+          class="md-text-wrapper"
+          tagname="p"
+          type="body-large-regular"
+        >
           Reload Queues
-        </p>
+        </mdc-text>
       </div>
     </div>
   </div>
