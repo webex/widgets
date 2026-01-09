@@ -9507,7 +9507,7 @@ __metadata:
     "@testing-library/jest-dom": "npm:6.6.2"
     "@testing-library/react": "npm:16.0.1"
     "@types/jest": "npm:29.5.14"
-    "@webex/cc-digital-interactions": "npm:^3.0.4"
+    "@webex/cc-digital-interactions": "npm:3.0.4-beta.3"
     "@webex/cc-store": "workspace:*"
     "@webex/test-fixtures": "workspace:*"
     babel-jest: "npm:29.7.0"
@@ -9543,9 +9543,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@webex/cc-digital-interactions@npm:^3.0.4":
-  version: 3.0.4
-  resolution: "@webex/cc-digital-interactions@npm:3.0.4::__archiveUrl=https%3A%2F%2Fengci-maven-master.cisco.com%2Fartifactory%2Fapi%2Fnpm%2Fwebex-release-npm%2F%40webex%2Fcc-digital-interactions%2F-%2F%40webex%2Fcc-digital-interactions-3.0.4.tgz"
+"@webex/cc-digital-interactions@npm:3.0.4-beta.3":
+  version: 3.0.4-beta.3
+  resolution: "@webex/cc-digital-interactions@npm:3.0.4-beta.3::__archiveUrl=https%3A%2F%2Fengci-maven-master.cisco.com%2Fartifactory%2Fapi%2Fnpm%2Fwebex-release-npm%2F%40webex%2Fcc-digital-interactions%2F-%2F%40webex%2Fcc-digital-interactions-3.0.4-beta.3.tgz"
   dependencies:
     "@microsoft/signalr": "npm:^8.0.7"
     "@wxcc-desktop/sdk": "npm:^2.0.11"
@@ -9562,7 +9562,7 @@ __metadata:
     "@momentum-ui/web-components": ^2.26.20
     react: ^18.3.1
     react-dom: ^18.3.1
-  checksum: 10c0/3e144002e4a9a389d5fe490f223eb5c165f56bd4016b528fac40f0655a80aac9719d88545d22b3e3c7f0e7e2ce59805bee563115d88da2e4d564e927290f43ad
+  checksum: 10c0/cf529bd41d77407f0015dd80fddb5a04a04ee055c628a5f9deb3c5493eb4f1522fa6b844efdb355d1c9003bd662b4361a3211c5cbfdf7ac01c12de54c9ec5399
   languageName: node
   linkType: hard
 
