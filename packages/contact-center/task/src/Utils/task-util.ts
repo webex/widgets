@@ -17,6 +17,7 @@ import {
   MEDIA_TYPE_CHAT,
   MEDIA_TYPE_EMAIL,
   MAX_PARTICIPANTS_IN_MULTIPARTY_CONFERENCE,
+  DestinationAgentType,
 } from './constants';
 import {DeviceTypeFlags} from '../task.types';
 
@@ -53,7 +54,10 @@ function isConsultingWithEpDnAgent(task: ITask): boolean {
   const destAgentType = (task.data.interaction as any).destAgentType;
 
   return (
-    destAgentType === 'EpDn' || destAgentType === 'EPDN' || destAgentType === 'EntryPoint' || destAgentType === 'EP'
+    destAgentType === DestinationAgentType.EP_DN ||
+    destAgentType === DestinationAgentType.EPDN ||
+    destAgentType === DestinationAgentType.ENTRY_POINT ||
+    destAgentType === DestinationAgentType.EP
   );
 }
 

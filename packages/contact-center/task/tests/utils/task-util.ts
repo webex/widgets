@@ -2,6 +2,7 @@ import {mockTask} from '@webex/test-fixtures';
 import {findHoldTimestamp, getControlsVisibility} from '../../src/Utils/task-util';
 import {getIsConferenceInProgress, getConferenceParticipants} from '@webex/cc-store';
 import {ITask, TaskData, Interaction} from '@webex/contact-center';
+import {DestinationAgentType} from '../../src/Utils/constants';
 
 // Helper function to create properly typed partial task objects for testing
 const createMockTask = (data: Partial<TaskData>): ITask => {
@@ -627,7 +628,7 @@ describe('getEndButtonVisibility - EP_DN consult scenarios', () => {
       consultMediaResourceId: 'consult',
       interaction: createPartialInteraction({
         mediaType: 'telephony',
-        destAgentType: 'EpDn',
+        destAgentType: DestinationAgentType.EP_DN,
         state: 'consulting',
         media: {
           main: {
@@ -675,7 +676,7 @@ describe('getEndButtonVisibility - EP_DN consult scenarios', () => {
       consultMediaResourceId: 'consult',
       interaction: createPartialInteraction({
         mediaType: 'telephony',
-        destAgentType: 'EPDN',
+        destAgentType: DestinationAgentType.EPDN,
         state: 'consulting',
         media: {
           main: {
@@ -724,7 +725,7 @@ describe('getEndButtonVisibility - EP_DN consult scenarios', () => {
       consultMediaResourceId: 'consult',
       interaction: createPartialInteraction({
         mediaType: 'telephony',
-        destAgentType: 'EntryPoint',
+        destAgentType: DestinationAgentType.ENTRY_POINT,
         state: 'conferencing',
         media: {
           main: {
@@ -769,7 +770,7 @@ describe('getEndButtonVisibility - EP_DN consult scenarios', () => {
     const task = createMockTask({
       consultMediaResourceId: 'consult',
       interaction: createPartialInteraction({
-        destAgentType: 'EP',
+        destAgentType: DestinationAgentType.EP,
         mediaType: 'telephony',
         state: 'consulting',
         media: {
