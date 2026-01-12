@@ -346,7 +346,7 @@ export default function createAdvancedTaskControlsTests() {
   // =============================================================================
 
   test('Entry Point Consult: visible and functional only for supported users (no blind transfer)', async ({}, testInfo) => {
-    log('Test: EP Consult - Starting');
+    log('Test: EP Consult - Starting...');
     await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
     await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
     await waitForIncomingTask(testManager.agent1Page, TASK_TYPES.CALL, 80000);
