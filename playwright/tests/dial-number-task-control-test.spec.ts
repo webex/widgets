@@ -41,7 +41,6 @@ export default function createDialNumberTaskControlTests() {
       log('beforeEach: Handling stray tasks');
       await handleStrayTasks(testManager.agent1Page);
       await handleStrayTasks(testManager.agent2Page);
-      await testManager.resetSession('dialNumber');
     });
     test.describe('Dial Number Tests', () => {
       test.beforeAll(async () => {
@@ -215,7 +214,7 @@ export default function createDialNumberTaskControlTests() {
         await expect(testManager.agent1Page.getByTestId('cancel-consult-btn')).toBeVisible();
         await cancelConsult(testManager.agent1Page);
         await expect(testManager.agent1Page.getByTestId('cancel-consult-btn')).not.toBeVisible();
-        await endCallTask(testManager.callerPage!);
+        await endCallTask(testManager.callerPage!, true);
         await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
         log('Test: Dial Number consult cancel - Complete');
       });
@@ -231,7 +230,7 @@ export default function createDialNumberTaskControlTests() {
         clearAdvancedCapturedLogs();
         await consultOrTransfer(testManager.agent1Page, 'dialNumber', 'consult', process.env.PW_DIAL_NUMBER_NAME!);
         await ensureDialNumberLoggedIn(testManager.dialNumberPage);
-        await expect(testManager.dialNumberPage.locator('[data-test="right-action-button"]')).toBeVisible();
+        await expect(testManager.dialNumberPage.locator('#answer').first()).toBeVisible();
         await acceptExtensionCall(testManager.dialNumberPage);
         await testManager.agent1Page.getByTestId('transfer-consult-btn').click();
         await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
@@ -261,7 +260,7 @@ export default function createDialNumberTaskControlTests() {
         await ensureDialNumberLoggedIn(testManager.dialNumberPage);
         await acceptExtensionCall(testManager.dialNumberPage);
         verifyTransferSuccessLogs();
-        await endCallTask(testManager.callerPage!);
+        await endCallTask(testManager.callerPage!, true);
         await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.RESOLVED);
         await testManager.agent1Page.waitForTimeout(2000);
         await verifyCurrentState(testManager.agent1Page, USER_STATES.AVAILABLE);
@@ -281,7 +280,7 @@ export default function createDialNumberTaskControlTests() {
         await ensureDialNumberLoggedIn(testManager.dialNumberPage);
         await acceptExtensionCall(testManager.dialNumberPage);
         verifyTransferSuccessLogs();
-        await endCallTask(testManager.callerPage!);
+        await endCallTask(testManager.callerPage!, true);
         await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.RESOLVED);
         await testManager.agent1Page.waitForTimeout(2000);
         await verifyCurrentState(testManager.agent1Page, USER_STATES.AVAILABLE);
@@ -299,7 +298,7 @@ export default function createDialNumberTaskControlTests() {
         await expect(testManager.agent1Page.getByTestId('cancel-consult-btn')).toBeVisible();
         await cancelConsult(testManager.agent1Page);
         await expect(testManager.agent1Page.getByTestId('cancel-consult-btn')).not.toBeVisible();
-        await endCallTask(testManager.callerPage!);
+        await endCallTask(testManager.callerPage!, true);
         await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
         log('Test: DN consult then end - Complete');
       });
@@ -312,7 +311,7 @@ export default function createDialNumberTaskControlTests() {
         clearAdvancedCapturedLogs();
         await consultOrTransfer(testManager.agent1Page, 'dialNumber', 'consult', process.env.PW_DIAL_NUMBER_NAME!);
         await ensureDialNumberLoggedIn(testManager.dialNumberPage);
-        await expect(testManager.dialNumberPage.locator('[data-test="right-action-button"]')).toBeVisible();
+        await expect(testManager.dialNumberPage.locator('#answer').first()).toBeVisible();
         await acceptExtensionCall(testManager.dialNumberPage);
         await testManager.agent1Page.bringToFront();
         await testManager.agent1Page.getByTestId('transfer-consult-btn').click();

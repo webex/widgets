@@ -163,7 +163,7 @@ export default function createIncomingTelephonyTaskTests() {
       const userStateElement = testManager.agent1Page.getByTestId('state-select');
       const userStateElementColor = await userStateElement.evaluate((el) => getComputedStyle(el).backgroundColor);
       expect(isColorClose(userStateElementColor, THEME_COLORS.MEETING)).toBe(true);
-      await endCallTask(testManager.callerPage!);
+      await endCallTask(testManager.callerPage!, true);
       await submitRonaPopup(testManager.agent1Page, RONA_OPTIONS.IDLE);
       await waitForState(testManager.agent1Page, USER_STATES.MEETING);
       log('Desktop: Decline call → RONA - Complete');
@@ -178,7 +178,7 @@ export default function createIncomingTelephonyTaskTests() {
       await incomingTaskDiv.waitFor({state: 'hidden', timeout: 30000});
       await testManager.agent1Page.getByTestId('samples:rona-popup').waitFor({state: 'visible', timeout: 15000});
       await expect(testManager.agent1Page.getByTestId('samples:rona-popup')).toBeVisible();
-      await endCallTask(testManager.callerPage!);
+      await endCallTask(testManager.callerPage!, true);
       await submitRonaPopup(testManager.agent1Page, RONA_OPTIONS.IDLE);
       await waitForState(testManager.agent1Page, USER_STATES.MEETING);
       log('Desktop: Ignore call → RONA - Complete');
@@ -205,7 +205,7 @@ export default function createIncomingTelephonyTaskTests() {
       await declineIncomingTask(testManager.agent1Page, TASK_TYPES.CALL);
       await testManager.agent1Page.getByTestId('samples:rona-popup').waitFor({state: 'visible', timeout: 15000});
       await expect(testManager.agent1Page.getByTestId('samples:rona-popup')).toBeVisible();
-      await endCallTask(testManager.callerPage!);
+      await endCallTask(testManager.callerPage!, true);
       await submitRonaPopup(testManager.agent1Page, RONA_OPTIONS.IDLE);
       await waitForState(testManager.agent1Page, USER_STATES.MEETING);
       log('Desktop: Available + another call - Complete');
@@ -229,7 +229,7 @@ export default function createIncomingTelephonyTaskTests() {
       await verifyCurrentState(testManager.agent1Page, USER_STATES.MEETING);
       const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await expect(incomingTaskDiv).toBeHidden();
-      await endCallTask(testManager.callerPage!);
+      await endCallTask(testManager.callerPage!, true);
       log('Desktop: Decline → busy - Complete');
       await testManager.agent1Page.waitForTimeout(2000);
     });
@@ -239,7 +239,7 @@ export default function createIncomingTelephonyTaskTests() {
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       const incomingTaskDiv = await waitForIncomingTask(testManager.agent1Page, TASK_TYPES.CALL, 40000);
-      await endCallTask(testManager.callerPage!);
+      await endCallTask(testManager.callerPage!, true);
       await incomingTaskDiv.waitFor({state: 'hidden', timeout: 30000});
       await expect(incomingTaskDiv).toBeHidden();
       await waitForState(testManager.agent1Page, USER_STATES.AVAILABLE);
@@ -272,9 +272,7 @@ export default function createIncomingTelephonyTaskTests() {
       await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       await waitForIncomingTask(testManager.agent1Page, TASK_TYPES.CALL, 40000);
-      await testManager.agent1ExtensionPage
-        .locator('[data-test="generic-person-item-base"]')
-        .waitFor({state: 'visible', timeout: 20000});
+      await expect(testManager.agent1ExtensionPage.locator('#answer').first()).toBeEnabled({timeout: 20000});
       await testManager.agent1Page.waitForTimeout(3000);
       await acceptExtensionCall(testManager.agent1ExtensionPage);
       await testManager.agent1Page.waitForTimeout(3000);
@@ -304,19 +302,14 @@ export default function createIncomingTelephonyTaskTests() {
       await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       await waitForIncomingTask(testManager.agent1Page, TASK_TYPES.CALL, 40000);
-      await testManager.agent1ExtensionPage
-        .locator('[data-test="generic-person-item-base"]')
-        .waitFor({state: 'visible', timeout: 20000});
+      await expect(testManager.agent1ExtensionPage.locator('#answer').first()).toBeEnabled({timeout: 20000});
       await testManager.agent1Page.waitForTimeout(5000);
       await declineExtensionCall(testManager.agent1ExtensionPage);
-      await testManager.agent1ExtensionPage
-        .locator('[data-test="generic-person-item-base"]')
-        .first()
-        .waitFor({state: 'hidden', timeout: 5000});
+      await expect(testManager.agent1ExtensionPage.locator('#answer').first()).toBeDisabled({timeout: 5000});
       await testManager.agent1Page.getByTestId('samples:rona-popup').waitFor({state: 'visible', timeout: 15000});
       await waitForState(testManager.agent1Page, USER_STATES.AGENT_DECLINED);
       await verifyCurrentState(testManager.agent1Page, USER_STATES.AGENT_DECLINED);
-      await endCallTask(testManager.callerPage!);
+      await endCallTask(testManager.callerPage!, true);
       await testManager.agent1Page.waitForTimeout(3000);
       const userStateElement = testManager.agent1Page.getByTestId('state-select');
       const userStateElementColor = await userStateElement.evaluate((el) => getComputedStyle(el).backgroundColor);
@@ -333,18 +326,12 @@ export default function createIncomingTelephonyTaskTests() {
       await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       const incomingTaskDiv = await waitForIncomingTask(testManager.agent1Page, TASK_TYPES.CALL, 40000);
-      await testManager.agent1ExtensionPage
-        .locator('[data-test="generic-person-item-base"]')
-        .first()
-        .waitFor({state: 'visible', timeout: 20000});
+      await expect(testManager.agent1ExtensionPage.locator('#answer').first()).toBeEnabled({timeout: 20000});
       await incomingTaskDiv.waitFor({state: 'hidden', timeout: 30000});
-      await testManager.agent1ExtensionPage
-        .locator('[data-test="generic-person-item-base"]')
-        .first()
-        .waitFor({state: 'hidden', timeout: 10000});
+      await expect(testManager.agent1ExtensionPage.locator('#answer').first()).toBeDisabled({timeout: 10000});
       await testManager.agent1Page.getByTestId('samples:rona-popup').waitFor({state: 'visible', timeout: 15000});
       await expect(testManager.agent1Page.getByTestId('samples:rona-popup')).toBeVisible();
-      await endCallTask(testManager.callerPage!);
+      await endCallTask(testManager.callerPage!, true);
       await waitForState(testManager.agent1Page, USER_STATES.RONA);
       await verifyCurrentState(testManager.agent1Page, USER_STATES.RONA);
       await waitForStateLogs(capturedLogs, USER_STATES.RONA);
@@ -359,9 +346,7 @@ export default function createIncomingTelephonyTaskTests() {
       await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       await waitForIncomingTask(testManager.agent1Page, TASK_TYPES.CALL, 40000);
-      await testManager.agent1ExtensionPage
-        .locator('[data-test="generic-person-item-base"]')
-        .waitFor({state: 'visible', timeout: 20000});
+      await expect(testManager.agent1ExtensionPage.locator('#answer').first()).toBeEnabled({timeout: 20000});
       await testManager.agent1Page.waitForTimeout(5000);
       await declineExtensionCall(testManager.agent1ExtensionPage);
       await testManager.agent1Page.getByTestId('samples:rona-popup').waitFor({state: 'visible', timeout: 15000});
@@ -376,7 +361,7 @@ export default function createIncomingTelephonyTaskTests() {
       await verifyCurrentState(testManager.agent1Page, USER_STATES.AVAILABLE);
       const incomingTaskDiv = await waitForIncomingTask(testManager.agent1Page, TASK_TYPES.CALL, 10000);
       await expect(incomingTaskDiv).toBeVisible();
-      await endCallTask(testManager.callerPage!);
+      await endCallTask(testManager.callerPage!, true);
       log('Extension: Available + another call - Complete');
       await testManager.agent1Page.waitForTimeout(8000);
     });
@@ -386,10 +371,7 @@ export default function createIncomingTelephonyTaskTests() {
       await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       const incomingTaskDiv = await waitForIncomingTask(testManager.agent1Page, TASK_TYPES.CALL, 40000);
-      await testManager.agent1ExtensionPage
-        .locator('[data-test="generic-person-item-base"]')
-        .first()
-        .waitFor({state: 'visible', timeout: 20000});
+      await expect(testManager.agent1ExtensionPage.locator('#answer').first()).toBeEnabled({timeout: 20000});
       await testManager.agent1Page.waitForTimeout(5000);
       await declineExtensionCall(testManager.agent1ExtensionPage);
       await testManager.agent1Page.getByTestId('samples:rona-popup').waitFor({state: 'visible', timeout: 15000});
@@ -402,11 +384,9 @@ export default function createIncomingTelephonyTaskTests() {
       await waitForState(testManager.agent1Page, USER_STATES.MEETING);
       await expect(testManager.agent1Page.getByTestId('samples:rona-popup')).not.toBeVisible();
       await expect(incomingTaskDiv).toBeHidden();
-      await expect(
-        testManager.agent1ExtensionPage.locator('[data-test="generic-person-item-base"]').first()
-      ).toBeHidden();
+      await expect(testManager.agent1ExtensionPage.locator('#answer').first()).toBeDisabled();
       await verifyCurrentState(testManager.agent1Page, USER_STATES.MEETING);
-      await endCallTask(testManager.callerPage!);
+      await endCallTask(testManager.callerPage!, true);
       log('Extension: Decline → busy - Complete');
       await testManager.agent1Page.waitForTimeout(10000);
     });
@@ -417,7 +397,7 @@ export default function createIncomingTelephonyTaskTests() {
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       const incomingTaskDiv = await waitForIncomingTask(testManager.agent1Page, TASK_TYPES.CALL, 40000);
       await testManager.agent1Page.waitForTimeout(5000);
-      await endCallTask(testManager.callerPage!);
+      await endCallTask(testManager.callerPage!, true);
       await testManager.agent1Page.waitForTimeout(5000);
       await incomingTaskDiv.waitFor({state: 'hidden', timeout: 20000});
       await expect(incomingTaskDiv).toBeHidden();

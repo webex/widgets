@@ -164,9 +164,7 @@ export default function createAdvancedTaskControlsTests() {
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       await waitForIncomingTask(testManager.agent1Page, TASK_TYPES.CALL, 80000);
-      await testManager.agent1ExtensionPage
-        .locator('[data-test="generic-person-item-base"]')
-        .waitFor({state: 'visible', timeout: 20000});
+      await expect(testManager.agent1ExtensionPage.locator('#answer').first()).toBeEnabled({timeout: 20000});
       await acceptExtensionCall(testManager.agent1ExtensionPage);
       await changeUserState(testManager.agent2Page, USER_STATES.AVAILABLE);
       await testManager.agent1Page.waitForTimeout(3000);

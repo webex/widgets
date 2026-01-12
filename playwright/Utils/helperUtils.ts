@@ -477,15 +477,23 @@ export const handleStrayTasks = async (
             await extensionPage.keyboard.press('Escape').catch(() => {});
             await extensionPage.waitForTimeout(200);
 
-            const extButton = extensionPage.locator('[data-test="right-action-button"]');
+            const extButton = extensionPage.locator('#answer').first();
             const extButtonVisible = await extButton
               .waitFor({state: 'visible', timeout: 5000})
               .then(() => true)
               .catch(() => false);
 
             if (extButtonVisible) {
-              await acceptExtensionCall(extensionPage);
-              log(`Extension call accepted`);
+              // Use shorter timeout for cleanup - don't block for 40s like acceptExtensionCall does
+              const isEnabled = await extButton.isEnabled({timeout: 5000}).catch(() => false);
+              if (isEnabled) {
+                await extButton.click({timeout: AWAIT_TIMEOUT});
+                log(`Extension call accepted`);
+              } else {
+                log(`Extension call answer button visible but disabled - skipping`);
+                actionTaken = true;
+                continue;
+              }
               await page.waitForTimeout(500);
               // After accepting, immediately try to end and wrapup
               const endBtnAfterAccept = page.getByTestId('call-control:end-call').first();
@@ -646,8 +654,6 @@ export const handleStrayTasks = async (
  * @returns true if something was cleared, false otherwise
  */
 export async function clearPendingCallAndWrapup(page: Page): Promise<boolean> {
-  const log = (msg: string) => console.log(`[clearPendingCallAndWrapup] ${msg}`);
-
   // Dismiss any open popovers first
   await page.keyboard.press('Escape').catch(() => {});
   await page.waitForTimeout(200);
@@ -663,24 +669,22 @@ export async function clearPendingCallAndWrapup(page: Page): Promise<boolean> {
 
     // If disabled, try to resume from hold
     if (!endEnabled) {
-      log('End button disabled, attempting resume from hold');
       try {
         await holdCallToggle(page);
         await page.waitForTimeout(500);
         endEnabled = await endBtn.isEnabled().catch(() => false);
-      } catch (e) {
-        log(`Resume failed: ${e}`);
+      } catch {
+        // Resume failed, continue
       }
     }
 
     // Try to end the call
     if (endEnabled) {
       try {
-        log('Clicking end button');
         await endBtn.click({timeout: AWAIT_TIMEOUT});
         await page.waitForTimeout(500);
-      } catch (e) {
-        log(`End click failed: ${e}`);
+      } catch {
+        // End click failed, continue
       }
     }
   }
@@ -690,12 +694,10 @@ export async function clearPendingCallAndWrapup(page: Page): Promise<boolean> {
 
   if (wrapupVisible) {
     try {
-      log('Submitting wrapup');
       await submitWrapup(page, WRAPUP_REASONS.SALE);
       await page.waitForTimeout(500);
       return true;
-    } catch (e) {
-      log(`Wrapup failed: ${e}`);
+    } catch {
       return false;
     }
   }
@@ -763,7 +765,7 @@ export const pageSetup = async (
   if (loginButtonExists) {
     await telephonyLogin(page, loginMode, extensionNumber);
   } else {
-    await stationLogout(page);
+    await stationLogout(page, false); // Don't throw during setup - just try to logout
     await telephonyLogin(page, loginMode, extensionNumber);
   }
 

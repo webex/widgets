@@ -35,7 +35,7 @@ export default function createUserStateTests() {
         process.env[`${testManager.projectName}_AGENT1_EXTENSION_NUMBER`]
       );
     } else {
-      await stationLogout(testManager.agent1Page);
+      await stationLogout(testManager.agent1Page, false); // Don't throw during setup
       await telephonyLogin(
         testManager.agent1Page,
         LOGIN_MODE.EXTENSION,

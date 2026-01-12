@@ -1,7 +1,7 @@
 import {Page, expect} from '@playwright/test';
 import {loginExtension} from './incomingTaskUtils';
 import {dismissOverlays} from './helperUtils';
-import {AWAIT_TIMEOUT, FORM_FIELD_TIMEOUT} from '../constants';
+import {AWAIT_TIMEOUT, FORM_FIELD_TIMEOUT, LONG_WAIT} from '../constants';
 
 /**
  * Utility functions for advanced task controls testing.
@@ -271,10 +271,9 @@ export async function cancelConsult(page: Page): Promise<void> {
 export async function ensureDialNumberLoggedIn(page: Page): Promise<void> {
   const currentUrl = page?.url?.() || '';
   if (!/\.webex\.com\/calling/.test(currentUrl)) {
-    const user = process.env.PW_DIAL_NUMBER_LOGIN_USERNAME;
-    const pass = process.env.PW_DIAL_NUMBER_LOGIN_PASSWORD;
-    if (user && pass) {
-      await loginExtension(page, user, pass);
+    const accessToken = process.env.PW_DIAL_NUMBER_LOGIN_ACCESS_TOKEN;
+    if (accessToken) {
+      await loginExtension(page, accessToken);
     }
   }
 
@@ -286,5 +285,5 @@ export async function ensureDialNumberLoggedIn(page: Page): Promise<void> {
 
   // Wait for the incoming call to appear on the dial number page
   // Use extended timeout to handle network routing delays and test interference
-  await page.locator('[data-test="right-action-button"]').waitFor({state: 'visible', timeout: AWAIT_TIMEOUT * 2.5});
+  await page.locator('#answer').first().waitFor({state: 'visible', timeout: LONG_WAIT});
 }

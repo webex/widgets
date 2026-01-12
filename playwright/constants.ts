@@ -75,7 +75,7 @@ export const PAGE_TYPES = {
 
 export type PageType = (typeof PAGE_TYPES)[keyof typeof PAGE_TYPES];
 
-export const CALL_URL = 'https://web.webex.com/calling?calling';
+export const CALL_URL = 'https://web-sdk.webex.com/samples/calling/';
 
 export const TASK_TYPES = {
   CALL: 'Call',

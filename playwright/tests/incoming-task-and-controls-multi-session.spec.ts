@@ -53,10 +53,7 @@ export default function createIncomingTaskAndControlsMultiSessionTests() {
     let incomingTaskDiv2 = testManager.multiSessionAgent1Page.getByTestId('samples:incoming-task-telephony').first();
     await incomingTaskDiv.waitFor({state: 'visible', timeout: 40000});
     await testManager.agent1ExtensionPage.waitForTimeout(2000);
-    await testManager.agent1ExtensionPage
-      .locator('[data-test="generic-person-item-base"]')
-      .first()
-      .waitFor({state: 'visible', timeout: 20000});
+    await expect(testManager.agent1ExtensionPage.locator('#answer').first()).toBeEnabled({timeout: 20000});
     await incomingTaskDiv2.waitFor({state: 'visible', timeout: 10000});
     await testManager.agent1Page.waitForTimeout(5000);
     await testManager.agent1ExtensionPage.waitForTimeout(1000);
@@ -81,10 +78,7 @@ export default function createIncomingTaskAndControlsMultiSessionTests() {
     incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
     await incomingTaskDiv.waitFor({state: 'visible', timeout: 10000});
     await testManager.agent1ExtensionPage.waitForTimeout(2000);
-    await testManager.agent1ExtensionPage
-      .locator('[data-test="generic-person-item-base"]')
-      .first()
-      .waitFor({state: 'visible', timeout: 10000});
+    await expect(testManager.agent1ExtensionPage.locator('#answer').first()).toBeEnabled({timeout: 10000});
     incomingTaskDiv2 = testManager.multiSessionAgent1Page.getByTestId('samples:incoming-task-telephony').first();
     await incomingTaskDiv2.waitFor({state: 'visible', timeout: 10000});
     await testManager.agent1Page.waitForTimeout(2000);
@@ -134,9 +128,7 @@ export default function createIncomingTaskAndControlsMultiSessionTests() {
 
     // Wait for extension caller to be visible and accept the call
     await testManager.agent1ExtensionPage.waitForTimeout(2000);
-    await testManager.agent1ExtensionPage
-      .locator('[data-test="generic-person-item-base"]')
-      .waitFor({state: 'visible', timeout: 20000});
+    await expect(testManager.agent1ExtensionPage.locator('#answer').first()).toBeEnabled({timeout: 20000});
     await acceptExtensionCall(testManager.agent1ExtensionPage);
     await testManager.agent1Page.waitForTimeout(2000);
     await testManager.multiSessionAgent1Page!.waitForTimeout(2000);

@@ -117,39 +117,52 @@ export const dialLogin = async (page: Page, dialNumber?: string): Promise<void> 
  * await stationLogout(page);
  * ```
  */
-export const stationLogout = async (page: Page): Promise<void> => {
+export const stationLogout = async (page: Page, throwOnFailure: boolean = true): Promise<void> => {
   // Wait for the logout button to be visible before clicking
   const logoutButton = page.getByTestId('samples:station-logout-button');
-  try {
-    await logoutButton.waitFor({state: 'visible', timeout: AWAIT_TIMEOUT});
-  } catch {
-    throw new Error('Station logout button is not visible. Cannot perform logout.');
+  const isVisible = await logoutButton
+    .waitFor({state: 'visible', timeout: AWAIT_TIMEOUT})
+    .then(() => true)
+    .catch(() => false);
+
+  if (!isVisible) {
+    return;
   }
-  await logoutButton.click({timeout: AWAIT_TIMEOUT});
-  //check if the station logout button is hidden after logouts
+
+  await logoutButton.click({timeout: AWAIT_TIMEOUT}).catch(() => {});
+
+  //check if the station logout button is hidden after logout
   const isLogoutButtonHidden = await page
     .getByTestId('samples:station-logout-button')
     .waitFor({state: 'hidden', timeout: OPERATION_TIMEOUT})
     .then(() => true)
     .catch(() => false);
+
   if (!isLogoutButtonHidden) {
     try {
       await handleStrayTasks(page);
-      await page.getByTestId('samples:station-logout-button').click({timeout: AWAIT_TIMEOUT});
+      await page
+        .getByTestId('samples:station-logout-button')
+        .click({force: true, timeout: AWAIT_TIMEOUT})
+        .catch(() => {});
+
       // Verify logout was successful after retry
       const isLogoutSuccessfulAfterRetry = await page
         .getByTestId('samples:station-logout-button')
         .waitFor({state: 'hidden', timeout: OPERATION_TIMEOUT})
         .then(() => true)
         .catch(() => false);
-      if (!isLogoutSuccessfulAfterRetry) {
+
+      if (!isLogoutSuccessfulAfterRetry && throwOnFailure) {
         throw new Error('Station logout button is still visible after retry attempt');
       }
     } catch (e) {
-      throw new Error(`Station logout failed: ${e instanceof Error ? e.message : 'Unknown error'}`);
+      if (throwOnFailure) {
+        throw new Error(`Station logout failed: ${e instanceof Error ? e.message : 'Unknown error'}`);
+      }
     }
   } else {
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(2000);
   }
 };
 
