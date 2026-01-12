@@ -7,7 +7,6 @@ import {
   verifyConsultStartSuccessLogs,
   verifyConsultEndSuccessLogs,
   verifyConsultTransferredLogs,
-  ensureDialNumberLoggedIn,
 } from '../Utils/advancedTaskControlUtils';
 
 import {changeUserState, verifyCurrentState} from '../Utils/userStateUtils';

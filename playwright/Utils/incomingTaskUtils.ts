@@ -8,14 +8,11 @@ import {
   DEFAULT_MAX_RETRIES,
   CHAT_LAUNCHER_TIMEOUT,
   FORM_FIELD_TIMEOUT,
-  OPERATION_TIMEOUT,
-  NETWORK_OPERATION_TIMEOUT,
   TEST_DATA,
   UI_SETTLE_TIMEOUT,
   LONG_WAIT,
 } from '../constants';
 import nodemailer from 'nodemailer';
-import {dismissOverlays} from './helperUtils';
 
 const transporter = nodemailer.createTransport({
   service: 'gmail', // Make sure to use Secure Port for Gmail SMTP
