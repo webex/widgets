@@ -161,7 +161,7 @@ async function clickCategory(
   popover: ReturnType<Page['locator']>,
   name: 'Agents' | 'Queues' | 'Dial Number' | 'Entry Point'
 ): Promise<void> {
-  const button = popover.getByRole('button', {name});
+  const button = popover.getByRole('button', {name, exact: true});
   await button.click({timeout: AWAIT_TIMEOUT});
   await page.waitForTimeout(200);
 }
