@@ -431,61 +431,56 @@ describe('getControlsVisibility', () => {
     };
 
     // Mock a task with conference in progress and consult call held
-    const task = {
-      ...mockTask,
-      data: {
-        ...mockTask.data,
-        isConferenceInProgress: true,
-        consultMediaResourceId: 'consult',
-        interaction: {
-          ...mockTask.data.interaction,
-          mediaType: 'telephony',
-          state: 'conferencing', // Conference state
-          media: {
-            main: {
-              mediaResourceId: 'main',
-              mType: 'mainCall',
-              isHold: false,
-              participants: ['agent1', 'agent2', 'customer1'],
-            },
-            consult: {
-              mediaResourceId: 'consult',
-              mType: 'consult',
-              isHold: true, // Consult is on hold - we've switched back to main
-              participants: ['agent1', 'agent3'],
-            },
+    const task = createMockTask({
+      isConferenceInProgress: true,
+      consultMediaResourceId: 'consult',
+      interaction: createPartialInteraction({
+        mediaType: 'telephony',
+        state: 'conferencing', // Conference state
+        media: {
+          main: {
+            mediaResourceId: 'main',
+            mType: 'mainCall',
+            isHold: false,
+            participants: ['agent1', 'agent2', 'customer1'],
           },
-          participants: {
-            agent1: {
-              id: 'agent1',
-              pType: 'Agent',
-              name: 'Agent One',
-              consultState: 'Conferencing',
-              isConsulted: false,
-              hasLeft: false,
-            },
-            agent2: {
-              id: 'agent2',
-              pType: 'Agent',
-              name: 'Agent Two',
-              hasLeft: false,
-            },
-            agent3: {
-              id: 'agent3',
-              pType: 'Agent',
-              name: 'Agent Three',
-              hasLeft: false,
-            },
-            customer1: {
-              id: 'customer1',
-              pType: 'Customer',
-              name: 'Customer',
-              hasLeft: false,
-            },
+          consult: {
+            mediaResourceId: 'consult',
+            mType: 'consult',
+            isHold: true, // Consult is on hold - we've switched back to main
+            participants: ['agent1', 'agent3'],
           },
         },
-      },
-    } as ITask;
+        participants: {
+          agent1: {
+            id: 'agent1',
+            pType: 'Agent',
+            name: 'Agent One',
+            consultState: 'Conferencing',
+            isConsulted: false,
+            hasLeft: false,
+          },
+          agent2: {
+            id: 'agent2',
+            pType: 'Agent',
+            name: 'Agent Two',
+            hasLeft: false,
+          },
+          agent3: {
+            id: 'agent3',
+            pType: 'Agent',
+            name: 'Agent Three',
+            hasLeft: false,
+          },
+          customer1: {
+            id: 'customer1',
+            pType: 'Customer',
+            name: 'Customer',
+            hasLeft: false,
+          },
+        },
+      }),
+    });
 
     const result = getControlsVisibility(deviceType, featureFlags, task, 'agent1', true);
 
@@ -503,55 +498,50 @@ describe('getControlsVisibility', () => {
     };
 
     // Mock a task with consult (not conference) and consult call held
-    const task = {
-      ...mockTask,
-      data: {
-        ...mockTask.data,
-        isConferenceInProgress: false,
-        consultMediaResourceId: 'consult',
-        interaction: {
-          ...mockTask.data.interaction,
-          mediaType: 'telephony',
-          state: 'consulting', // Consult state
-          media: {
-            main: {
-              mediaResourceId: 'main',
-              mType: 'mainCall',
-              isHold: false,
-              participants: ['agent1', 'customer1'],
-            },
-            consult: {
-              mediaResourceId: 'consult',
-              mType: 'consult',
-              isHold: true, // Consult is on hold - we've switched back to main
-              participants: ['agent1', 'agent2'],
-            },
+    const task = createMockTask({
+      isConferenceInProgress: false,
+      consultMediaResourceId: 'consult',
+      interaction: createPartialInteraction({
+        mediaType: 'telephony',
+        state: 'consulting', // Consult state
+        media: {
+          main: {
+            mediaResourceId: 'main',
+            mType: 'mainCall',
+            isHold: false,
+            participants: ['agent1', 'customer1'],
           },
-          participants: {
-            agent1: {
-              id: 'agent1',
-              pType: 'Agent',
-              name: 'Agent One',
-              consultState: 'Initiated',
-              isConsulted: false,
-              hasLeft: false,
-            },
-            agent2: {
-              id: 'agent2',
-              pType: 'Agent',
-              name: 'Agent Two',
-              hasLeft: false,
-            },
-            customer1: {
-              id: 'customer1',
-              pType: 'Customer',
-              name: 'Customer',
-              hasLeft: false,
-            },
+          consult: {
+            mediaResourceId: 'consult',
+            mType: 'consult',
+            isHold: true, // Consult is on hold - we've switched back to main
+            participants: ['agent1', 'agent2'],
           },
         },
-      },
-    } as ITask;
+        participants: {
+          agent1: {
+            id: 'agent1',
+            pType: 'Agent',
+            name: 'Agent One',
+            consultState: 'Initiated',
+            isConsulted: false,
+            hasLeft: false,
+          },
+          agent2: {
+            id: 'agent2',
+            pType: 'Agent',
+            name: 'Agent Two',
+            hasLeft: false,
+          },
+          customer1: {
+            id: 'customer1',
+            pType: 'Customer',
+            name: 'Customer',
+            hasLeft: false,
+          },
+        },
+      }),
+    });
 
     const result = getControlsVisibility(deviceType, featureFlags, task, 'agent1', false);
 
@@ -569,56 +559,51 @@ describe('getControlsVisibility', () => {
     };
 
     // Mock a task with active consult (not on hold)
-    const task = {
-      ...mockTask,
-      data: {
-        ...mockTask.data,
-        isConferenceInProgress: false,
-        consultMediaResourceId: 'consult',
-        interaction: {
-          ...mockTask.data.interaction,
-          mediaType: 'telephony',
-          state: 'consulting', // Active consult state
-          media: {
-            main: {
-              mediaResourceId: 'main',
-              mType: 'mainCall',
-              isHold: true, // Main is on hold - we're on consult call
-              participants: ['agent1', 'customer1'],
-            },
-            consult: {
-              mediaResourceId: 'consult',
-              mType: 'consult',
-              isHold: false, // Consult is active
-              participants: ['agent1', 'agent2'],
-            },
+    const task = createMockTask({
+      isConferenceInProgress: false,
+      consultMediaResourceId: 'consult',
+      interaction: createPartialInteraction({
+        mediaType: 'telephony',
+        state: 'consulting', // Active consult state
+        media: {
+          main: {
+            mediaResourceId: 'main',
+            mType: 'mainCall',
+            isHold: true, // Main is on hold - we're on consult call
+            participants: ['agent1', 'customer1'],
           },
-          participants: {
-            agent1: {
-              id: 'agent1',
-              pType: 'Agent',
-              name: 'Agent One',
-              consultState: 'Initiated', // Indicate consult was initiated
-              isConsulted: false,
-              hasLeft: false,
-            },
-            agent2: {
-              id: 'agent2',
-              pType: 'Agent',
-              name: 'Agent Two',
-              isConsulted: false,
-              hasLeft: false,
-            },
-            customer1: {
-              id: 'customer1',
-              pType: 'Customer',
-              name: 'Customer',
-              hasLeft: false,
-            },
+          consult: {
+            mediaResourceId: 'consult',
+            mType: 'consult',
+            isHold: false, // Consult is active
+            participants: ['agent1', 'agent2'],
           },
         },
-      },
-    } as ITask;
+        participants: {
+          agent1: {
+            id: 'agent1',
+            pType: 'Agent',
+            name: 'Agent One',
+            consultState: 'Initiated', // Indicate consult was initiated
+            isConsulted: false,
+            hasLeft: false,
+          },
+          agent2: {
+            id: 'agent2',
+            pType: 'Agent',
+            name: 'Agent Two',
+            isConsulted: false,
+            hasLeft: false,
+          },
+          customer1: {
+            id: 'customer1',
+            pType: 'Customer',
+            name: 'Customer',
+            hasLeft: false,
+          },
+        },
+      }),
+    });
 
     const result = getControlsVisibility(deviceType, featureFlags, task, 'agent1', false);
 
@@ -638,49 +623,44 @@ describe('getEndButtonVisibility - EP_DN consult scenarios', () => {
 
   it('should enable end button during EP_DN consult when main call is active (not held)', () => {
     // Mock a task with EP_DN consult - switching back to main call (consult on hold)
-    const task = {
-      ...mockTask,
-      data: {
-        ...mockTask.data,
-        consultMediaResourceId: 'consult',
-        interaction: {
-          ...mockTask.data.interaction,
-          mediaType: 'telephony',
-          destAgentType: 'EpDn',
-          state: 'consulting',
-          media: {
-            main: {
-              mediaResourceId: 'main',
-              mType: 'mainCall',
-              isHold: false, // Main call is active - switched back to main
-              participants: ['agent1', 'customer1'],
-            },
-            consult: {
-              mediaResourceId: 'consult',
-              mType: 'consult',
-              isHold: true, // Consult is on hold - we're on main call
-              participants: ['agent1', 'epdn-agent'],
-            },
+    const task = createMockTask({
+      consultMediaResourceId: 'consult',
+      interaction: createPartialInteraction({
+        mediaType: 'telephony',
+        destAgentType: 'EpDn',
+        state: 'consulting',
+        media: {
+          main: {
+            mediaResourceId: 'main',
+            mType: 'mainCall',
+            isHold: false, // Main call is active - switched back to main
+            participants: ['agent1', 'customer1'],
           },
-          participants: {
-            agent1: {
-              id: 'agent1',
-              pType: 'Agent',
-              name: 'Agent One',
-              consultState: 'Initiated',
-              isConsulted: false,
-              hasLeft: false,
-            },
-            customer1: {
-              id: 'customer1',
-              pType: 'Customer',
-              name: 'Customer',
-              hasLeft: false,
-            },
+          consult: {
+            mediaResourceId: 'consult',
+            mType: 'consult',
+            isHold: true, // Consult is on hold - we're on main call
+            participants: ['agent1', 'epdn-agent'],
           },
         },
-      },
-    } as ITask;
+        participants: {
+          agent1: {
+            id: 'agent1',
+            pType: 'Agent',
+            name: 'Agent One',
+            consultState: 'Initiated',
+            isConsulted: false,
+            hasLeft: false,
+          },
+          customer1: {
+            id: 'customer1',
+            pType: 'Customer',
+            name: 'Customer',
+            hasLeft: false,
+          },
+        },
+      }),
+    });
 
     const result = getControlsVisibility(deviceType, featureFlags, task, 'agent1', false);
 
@@ -691,49 +671,44 @@ describe('getEndButtonVisibility - EP_DN consult scenarios', () => {
 
   it('should disable end button during EP_DN consult when switched to EP_DN agent (main call held)', () => {
     // Mock a task with EP_DN consult - switched to EP_DN agent (main call on hold)
-    const task = {
-      ...mockTask,
-      data: {
-        ...mockTask.data,
-        consultMediaResourceId: 'consult',
-        interaction: {
-          ...mockTask.data.interaction,
-          mediaType: 'telephony',
-          destAgentType: 'EPDN',
-          state: 'consulting',
-          media: {
-            main: {
-              mediaResourceId: 'main',
-              mType: 'mainCall',
-              isHold: true, // Main call is held - switched to EP_DN consult
-              participants: ['agent1', 'customer1'],
-            },
-            consult: {
-              mediaResourceId: 'consult',
-              mType: 'consult',
-              isHold: false, // Consult is active - talking to EP_DN
-              participants: ['agent1', 'epdn-agent'],
-            },
+    const task = createMockTask({
+      consultMediaResourceId: 'consult',
+      interaction: createPartialInteraction({
+        mediaType: 'telephony',
+        destAgentType: 'EPDN',
+        state: 'consulting',
+        media: {
+          main: {
+            mediaResourceId: 'main',
+            mType: 'mainCall',
+            isHold: true, // Main call is held - switched to EP_DN consult
+            participants: ['agent1', 'customer1'],
           },
-          participants: {
-            agent1: {
-              id: 'agent1',
-              pType: 'Agent',
-              name: 'Agent One',
-              consultState: 'Initiated',
-              isConsulted: false,
-              hasLeft: false,
-            },
-            customer1: {
-              id: 'customer1',
-              pType: 'Customer',
-              name: 'Customer',
-              hasLeft: false,
-            },
+          consult: {
+            mediaResourceId: 'consult',
+            mType: 'consult',
+            isHold: false, // Consult is active - talking to EP_DN
+            participants: ['agent1', 'epdn-agent'],
           },
         },
-      },
-    } as ITask;
+        participants: {
+          agent1: {
+            id: 'agent1',
+            pType: 'Agent',
+            name: 'Agent One',
+            consultState: 'Initiated',
+            isConsulted: false,
+            hasLeft: false,
+          },
+          customer1: {
+            id: 'customer1',
+            pType: 'Customer',
+            name: 'Customer',
+            hasLeft: false,
+          },
+        },
+      }),
+    });
 
     const result = getControlsVisibility(deviceType, featureFlags, task, 'agent1', false);
 
@@ -744,50 +719,45 @@ describe('getEndButtonVisibility - EP_DN consult scenarios', () => {
 
   it('should enable end button during EP_DN consult conference when main call is held but conference in progress', () => {
     // Mock a task with EP_DN consult in conference state
-    const task = {
-      ...mockTask,
-      data: {
-        ...mockTask.data,
-        isConferenceInProgress: true,
-        consultMediaResourceId: 'consult',
-        interaction: {
-          ...mockTask.data.interaction,
-          mediaType: 'telephony',
-          destAgentType: 'EntryPoint',
-          state: 'conferencing',
-          media: {
-            main: {
-              mediaResourceId: 'main',
-              mType: 'mainCall',
-              isHold: true, // Main call is held during conference
-              participants: ['agent1', 'customer1', 'epdn-agent'],
-            },
-          },
-          participants: {
-            agent1: {
-              id: 'agent1',
-              pType: 'Agent',
-              name: 'Agent One',
-              consultState: 'Conferencing',
-              isConsulted: false,
-              hasLeft: false,
-            },
-            customer1: {
-              id: 'customer1',
-              pType: 'Customer',
-              name: 'Customer',
-              hasLeft: false,
-            },
-            'epdn-agent': {
-              id: 'epdn-agent',
-              pType: 'Agent',
-              name: 'EP DN Agent',
-              hasLeft: false,
-            },
+    const task = createMockTask({
+      isConferenceInProgress: true,
+      consultMediaResourceId: 'consult',
+      interaction: createPartialInteraction({
+        mediaType: 'telephony',
+        destAgentType: 'EntryPoint',
+        state: 'conferencing',
+        media: {
+          main: {
+            mediaResourceId: 'main',
+            mType: 'mainCall',
+            isHold: true, // Main call is held during conference
+            participants: ['agent1', 'customer1', 'epdn-agent'],
           },
         },
-      },
-    } as ITask;
+        participants: {
+          agent1: {
+            id: 'agent1',
+            pType: 'Agent',
+            name: 'Agent One',
+            consultState: 'Conferencing',
+            isConsulted: false,
+            hasLeft: false,
+          },
+          customer1: {
+            id: 'customer1',
+            pType: 'Customer',
+            name: 'Customer',
+            hasLeft: false,
+          },
+          'epdn-agent': {
+            id: 'epdn-agent',
+            pType: 'Agent',
+            name: 'EP DN Agent',
+            hasLeft: false,
+          },
+        },
+      }),
+    });
 
     const result = getControlsVisibility(deviceType, featureFlags, task, 'agent1', true);
 
@@ -796,49 +766,44 @@ describe('getEndButtonVisibility - EP_DN consult scenarios', () => {
   });
 
   it('should recognize EP destAgentType variant', () => {
-    const task = {
-      ...mockTask,
-      data: {
-        ...mockTask.data,
-        consultMediaResourceId: 'consult',
-        interaction: {
-          ...mockTask.data.interaction,
-          destAgentType: 'EP',
-          mediaType: 'telephony',
-          state: 'consulting',
-          media: {
-            main: {
-              mediaResourceId: 'main',
-              mType: 'mainCall',
-              isHold: false, // Main call active - we're on main call
-              participants: ['agent1', 'customer1'],
-            },
-            consult: {
-              mediaResourceId: 'consult',
-              mType: 'consult',
-              isHold: true, // Consult on hold
-              participants: ['agent1', 'ep-agent'],
-            },
+    const task = createMockTask({
+      consultMediaResourceId: 'consult',
+      interaction: createPartialInteraction({
+        destAgentType: 'EP',
+        mediaType: 'telephony',
+        state: 'consulting',
+        media: {
+          main: {
+            mediaResourceId: 'main',
+            mType: 'mainCall',
+            isHold: false, // Main call active - we're on main call
+            participants: ['agent1', 'customer1'],
           },
-          participants: {
-            agent1: {
-              id: 'agent1',
-              pType: 'Agent',
-              name: 'Agent One',
-              consultState: 'Initiated',
-              isConsulted: false,
-              hasLeft: false,
-            },
-            customer1: {
-              id: 'customer1',
-              pType: 'Customer',
-              name: 'Customer',
-              hasLeft: false,
-            },
+          consult: {
+            mediaResourceId: 'consult',
+            mType: 'consult',
+            isHold: true, // Consult on hold
+            participants: ['agent1', 'ep-agent'],
           },
         },
-      },
-    } as ITask;
+        participants: {
+          agent1: {
+            id: 'agent1',
+            pType: 'Agent',
+            name: 'Agent One',
+            consultState: 'Initiated',
+            isConsulted: false,
+            hasLeft: false,
+          },
+          customer1: {
+            id: 'customer1',
+            pType: 'Customer',
+            name: 'Customer',
+            hasLeft: false,
+          },
+        },
+      }),
+    });
 
     const result = getControlsVisibility(deviceType, featureFlags, task, 'agent1', false);
 
@@ -848,40 +813,35 @@ describe('getEndButtonVisibility - EP_DN consult scenarios', () => {
   });
 
   it('should handle missing destAgentType as non-EP_DN consult', () => {
-    const task = {
-      ...mockTask,
-      data: {
-        ...mockTask.data,
-        consultMediaResourceId: 'consult',
-        interaction: {
-          ...mockTask.data.interaction,
-          mediaType: 'telephony',
-          state: 'consulting',
-          media: {
-            main: {
-              mediaResourceId: 'main',
-              mType: 'mainCall',
-              isHold: true,
-              participants: ['agent1', 'customer1'],
-            },
-            consult: {
-              mediaResourceId: 'consult',
-              mType: 'consult',
-              isHold: false,
-              participants: ['agent1', 'agent2'],
-            },
+    const task = createMockTask({
+      consultMediaResourceId: 'consult',
+      interaction: createPartialInteraction({
+        mediaType: 'telephony',
+        state: 'consulting',
+        media: {
+          main: {
+            mediaResourceId: 'main',
+            mType: 'mainCall',
+            isHold: true,
+            participants: ['agent1', 'customer1'],
           },
-          participants: {
-            agent1: {
-              id: 'agent1',
-              pType: 'Agent',
-              consultState: 'Initiated',
-              hasLeft: false,
-            },
+          consult: {
+            mediaResourceId: 'consult',
+            mType: 'consult',
+            isHold: false,
+            participants: ['agent1', 'agent2'],
           },
         },
-      },
-    } as ITask;
+        participants: {
+          agent1: {
+            id: 'agent1',
+            pType: 'Agent',
+            consultState: 'Initiated',
+            hasLeft: false,
+          },
+        },
+      }),
+    });
 
     const result = getControlsVisibility(deviceType, featureFlags, task, 'agent1', false);
 
@@ -894,7 +854,7 @@ describe('getEndButtonVisibility - EP_DN consult scenarios', () => {
     const task = {
       ...mockTask,
       data: undefined,
-    } as unknown as ITask;
+    } as ITask;
 
     const result = getControlsVisibility(deviceType, featureFlags, task, 'agent1', false);
 
@@ -905,13 +865,9 @@ describe('getEndButtonVisibility - EP_DN consult scenarios', () => {
   });
 
   it('should handle missing interaction data gracefully', () => {
-    const task = {
-      ...mockTask,
-      data: {
-        ...mockTask.data,
-        interaction: undefined,
-      },
-    } as unknown as ITask;
+    const task = createMockTask({
+      interaction: undefined,
+    });
 
     const result = getControlsVisibility(deviceType, featureFlags, task, 'agent1', false);
 
