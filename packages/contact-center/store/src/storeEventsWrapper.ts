@@ -384,7 +384,15 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   init(options: InitParams): Promise<void> {
-    return this.store.init(options, this.setupIncomingTaskHandler);
+    return this.store.init(options, this.setupIncomingTaskHandler).catch((error) => {
+      const err = error instanceof Error ? error : new Error(String(error));
+
+      if (this.onErrorCallback) {
+        this.onErrorCallback('Store', err);
+      }
+
+      throw err;
+    });
   }
 
   registerCC = (webex?: WithWebex['webex']) => {

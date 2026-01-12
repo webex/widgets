@@ -179,15 +179,34 @@ describe('Store', () => {
       expect(storeInstance.registerCC).toHaveBeenCalledWith(mockWebex);
     });
 
-    it('should reject the promise if registerCC fails in init method', async () => {
+    it('should log an error and reject the promise if registerCC fails in init method', async () => {
       const initParams = {
         webexConfig: {anyConfig: true},
         access_token: 'fake_token',
       };
 
-      jest.spyOn(storeInstance, 'registerCC').mockRejectedValue(new Error('registerCC failed'));
+      const error = new Error('registerCC failed');
+      jest.spyOn(storeInstance, 'registerCC').mockRejectedValue(error);
+
+      // Provide a logger so the init() error handler can log without failing
+      // @ts-expect-error partial logger mock for test
+      storeInstance.logger = {
+        error: jest.fn(),
+        log: jest.fn(),
+        warn: jest.fn(),
+        info: jest.fn(),
+        trace: jest.fn(),
+      };
 
       await expect(storeInstance.init(initParams, jest.fn())).rejects.toThrow('registerCC failed');
+
+      expect(storeInstance.logger.error).toHaveBeenCalledWith(
+        'CC-Widgets: Store init(): registration failed - Error: registerCC failed',
+        {
+          module: 'cc-store#store.ts',
+          method: 'init',
+        }
+      );
     });
 
     it('should reject the promise if Webex SDK fails to initialize', async () => {
@@ -205,6 +224,28 @@ describe('Store', () => {
       jest.runAllTimers(); // Fast-forward the timers to simulate timeout
 
       await expect(initPromise).rejects.toThrow('Webex SDK failed to initialize');
+    });
+
+    it('should clear timeout and reject if Webex.init throws synchronously', async () => {
+      const initParams = {
+        webexConfig: {anyConfig: true},
+        access_token: 'fake_token',
+      };
+
+      const syncError = new Error('sync init error');
+      // @ts-expect-error overriding mock implementation for this test
+      const initSpy = jest.spyOn(Webex, 'init').mockImplementation(() => {
+        throw syncError;
+      });
+
+      await expect(storeInstance.init(initParams, jest.fn())).rejects.toThrow('sync init error');
+
+      expect(initSpy).toHaveBeenCalledWith({
+        config: initParams.webexConfig,
+        credentials: {
+          access_token: initParams.access_token,
+        },
+      });
     });
   });
 });

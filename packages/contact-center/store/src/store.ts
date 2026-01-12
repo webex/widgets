@@ -133,33 +133,38 @@ class Store implements IStore {
         reject(new Error('Webex SDK failed to initialize'));
       }, 6000);
 
-      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
-      const webex = Webex.init({
-        config: options.webexConfig,
-        credentials: {
-          access_token: options.access_token,
-        },
-      });
+      try {
+        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+        const webex = Webex.init({
+          config: options.webexConfig,
+          credentials: {
+            access_token: options.access_token,
+          },
+        });
 
-      webex.once('ready', () => {
-        setupEventListeners(webex.cc);
+        webex.once('ready', () => {
+          setupEventListeners(webex.cc);
+          clearTimeout(timer);
+          this.registerCC(webex)
+            .then(() => {
+              this.logger.log('CC-Widgets: Store init(): store initialization complete', {
+                module: 'cc-store#store.ts',
+                method: 'init',
+              });
+              resolve();
+            })
+            .catch((error) => {
+              this.logger.error(`CC-Widgets: Store init(): registration failed - ${error}`, {
+                module: 'cc-store#store.ts',
+                method: 'init',
+              });
+              reject(error);
+            });
+        });
+      } catch (error) {
         clearTimeout(timer);
-        this.registerCC(webex)
-          .then(() => {
-            this.logger.log('CC-Widgets: Store init(): store initialization complete', {
-              module: 'cc-store#store.ts',
-              method: 'init',
-            });
-            resolve();
-          })
-          .catch((error) => {
-            this.logger.error(`CC-Widgets: Store init(): registration failed - ${error}`, {
-              module: 'cc-store#store.ts',
-              method: 'init',
-            });
-            reject(error);
-          });
-      });
+        reject(error);
+      }
     });
   }
 }

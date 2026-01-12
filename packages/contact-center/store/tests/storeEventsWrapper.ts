@@ -645,6 +645,52 @@ describe('storeEventsWrapper', () => {
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.AGENT_CONSULT_CREATED, expect.any(Function));
     });
 
+    it('should call onErrorCallback and rethrow when store.init rejects with an Error', async () => {
+      const cc = storeWrapper['store'].cc;
+      const logger = storeWrapper['store'].logger;
+      const error = new Error('init failed');
+      const onErrorCallback = jest.fn();
+
+      storeWrapper['store'].init = jest.fn().mockRejectedValue(error);
+      // Directly set onErrorCallback to focus on init error handling behavior
+      storeWrapper.onErrorCallback = onErrorCallback;
+
+      const options = {
+        webex: {
+          cc,
+          logger,
+        },
+      };
+
+      await expect(storeWrapper.init(options)).rejects.toThrow('init failed');
+
+      expect(onErrorCallback).toHaveBeenCalledWith('Store', error);
+    });
+
+    it('should wrap non-Error rejections and pass wrapped Error to onErrorCallback', async () => {
+      const cc = storeWrapper['store'].cc;
+      const logger = storeWrapper['store'].logger;
+      const rawError = 'init failed as string';
+      const onErrorCallback = jest.fn();
+
+      storeWrapper['store'].init = jest.fn().mockRejectedValue(rawError);
+      storeWrapper.onErrorCallback = onErrorCallback;
+
+      const options = {
+        webex: {
+          cc,
+          logger,
+        },
+      };
+
+      await expect(storeWrapper.init(options)).rejects.toThrow('init failed as string');
+
+      expect(onErrorCallback).toHaveBeenCalledWith('Store', expect.any(Error));
+      const [, wrappedError] = onErrorCallback.mock.calls[0];
+      expect(wrappedError).toBeInstanceOf(Error);
+      expect(wrappedError.message).toBe('init failed as string');
+    });
+
     it('should handle task assignment and call onTaskAssigned callback', () => {
       const mockTaskAssignedCallback = jest.fn();
       storeWrapper.setTaskAssigned(mockTaskAssignedCallback);
