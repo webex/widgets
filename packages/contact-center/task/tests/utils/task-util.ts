@@ -852,10 +852,7 @@ describe('getEndButtonVisibility - EP_DN consult scenarios', () => {
   });
 
   it('should handle missing task data gracefully', () => {
-    const task = {
-      ...mockTask,
-      data: undefined,
-    } as ITask;
+    const task = {} as Partial<ITask> as ITask;
 
     const result = getControlsVisibility(deviceType, featureFlags, task, 'agent1', false);
 
