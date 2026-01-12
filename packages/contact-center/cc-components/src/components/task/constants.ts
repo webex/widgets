@@ -22,9 +22,6 @@ export const QUEUES = 'Queues';
 export const SEARCH_PLACEHOLDER = 'Search...';
 export const CLEAR_SEARCH = 'Clear search';
 export const SCROLL_TO_LOAD_MORE = 'Scroll to load more';
-export const LOADING_MORE_QUEUES = 'Loading more queues...';
-export const LOADING_MORE_DIAL_NUMBERS = 'Loading more dial numbers...';
-export const LOADING_MORE_ENTRY_POINTS = 'Loading more entry points...';
 export const NO_DATA_AVAILABLE_CONSULT_TRANSFER = 'No data available for consult transfer.';
 export const VIA_SEARCH_SUFFIX = ' via search';
 // Pagination
