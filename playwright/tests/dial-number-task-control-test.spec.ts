@@ -5,7 +5,6 @@ import {
   clearAdvancedCapturedLogs,
   verifyConsultStartSuccessLogs,
   verifyConsultTransferredLogs,
-  ensureDialNumberLoggedIn,
   verifyTransferSuccessLogs,
   verifyConsultEndSuccessLogs,
 } from '../Utils/advancedTaskControlUtils';
@@ -229,7 +228,6 @@ export default function createDialNumberTaskControlTests() {
         await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CALL);
         clearAdvancedCapturedLogs();
         await consultOrTransfer(testManager.agent1Page, 'dialNumber', 'consult', process.env.PW_DIAL_NUMBER_NAME!);
-        await ensureDialNumberLoggedIn(testManager.dialNumberPage);
         await expect(testManager.dialNumberPage.locator('#answer').first()).toBeVisible();
         await acceptExtensionCall(testManager.dialNumberPage);
         await testManager.agent1Page.getByTestId('transfer-consult-btn').click();
@@ -257,7 +255,6 @@ export default function createDialNumberTaskControlTests() {
         clearAdvancedCapturedLogs();
 
         await consultOrTransfer(testManager.agent1Page, 'dialNumber', 'transfer', process.env.PW_DIAL_NUMBER_NAME);
-        await ensureDialNumberLoggedIn(testManager.dialNumberPage);
         await acceptExtensionCall(testManager.dialNumberPage);
         verifyTransferSuccessLogs();
         await endCallTask(testManager.callerPage!, true);
@@ -277,7 +274,6 @@ export default function createDialNumberTaskControlTests() {
         clearAdvancedCapturedLogs();
 
         await consultOrTransfer(testManager.agent1Page, 'queue', 'transfer', 'queue with dn e2e');
-        await ensureDialNumberLoggedIn(testManager.dialNumberPage);
         await acceptExtensionCall(testManager.dialNumberPage);
         verifyTransferSuccessLogs();
         await endCallTask(testManager.callerPage!, true);
@@ -310,7 +306,6 @@ export default function createDialNumberTaskControlTests() {
 
         clearAdvancedCapturedLogs();
         await consultOrTransfer(testManager.agent1Page, 'dialNumber', 'consult', process.env.PW_DIAL_NUMBER_NAME!);
-        await ensureDialNumberLoggedIn(testManager.dialNumberPage);
         await expect(testManager.dialNumberPage.locator('#answer').first()).toBeVisible();
         await acceptExtensionCall(testManager.dialNumberPage);
         await testManager.agent1Page.bringToFront();

@@ -262,28 +262,3 @@ export async function cancelConsult(page: Page): Promise<void> {
   // Click cancel consult button
   await page.getByTestId('cancel-consult-btn').click({timeout: AWAIT_TIMEOUT});
 }
-
-/**
- * Ensures the Dial Number softphone (web.webex.com) page is logged in using env creds.
- * Uses: PW_DIAL_NUMBER_LOGIN_USERNAME, PW_DIAL_NUMBER_LOGIN_PASSWORD
- * Also dismisses any stale overlays/popovers (e.g., "Media failed") that might block interaction.
- */
-export async function ensureDialNumberLoggedIn(page: Page): Promise<void> {
-  const currentUrl = page?.url?.() || '';
-  if (!/\.webex\.com\/calling/.test(currentUrl)) {
-    const accessToken = process.env.PW_DIAL_NUMBER_LOGIN_ACCESS_TOKEN;
-    if (accessToken) {
-      await loginExtension(page, accessToken);
-    }
-  }
-
-  // Dismiss any stale overlays/popovers (e.g., "Media failed" from previous calls)
-  await dismissOverlays(page);
-
-  // Ensure the dial number page is in the foreground to avoid background throttling
-  await page.bringToFront();
-
-  // Wait for the incoming call to appear on the dial number page
-  // Use extended timeout to handle network routing delays and test interference
-  await page.locator('#answer').first().waitFor({state: 'visible', timeout: LONG_WAIT});
-}
