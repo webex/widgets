@@ -8,7 +8,7 @@ import {DigitalChannelsComponent} from './DigitalChannelsComponent';
 import {DigitalChannelsProps} from './digital-channels.types';
 
 const DigitalChannelsInternal: React.FunctionComponent<DigitalChannelsProps> = observer(
-  ({jwtToken, dataCenter, onError}) => {
+  ({jwtToken, dataCenter, currentTheme, isVisualRebrand = true, onError}) => {
     const {logger, currentTask, isDigitalChannelsInitialized, setDigitalChannelsInitialized} = store;
 
     if (!currentTask) {
@@ -25,7 +25,7 @@ const DigitalChannelsInternal: React.FunctionComponent<DigitalChannelsProps> = o
       setDigitalChannelsInitialized,
     });
 
-    const {handleError, conversationId} = useDigitalChannels({
+    const {conversationId} = useDigitalChannels({
       currentTask,
       jwtToken,
       dataCenter,
@@ -42,7 +42,8 @@ const DigitalChannelsInternal: React.FunctionComponent<DigitalChannelsProps> = o
         conversationId={conversationId}
         jwtToken={jwtToken}
         dataCenter={dataCenter}
-        handleError={handleError}
+        currentTheme={currentTheme}
+        isVisualRebrand={isVisualRebrand}
       />
     );
   }

@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from 'react';
-import { store, DigitalChannels } from '@webex/cc-widgets';
+import React, {useState, useCallback} from 'react';
+import {store, DigitalChannels} from '@webex/cc-widgets';
 import {
   SUPPORTED_DIGITAL_MEDIA_TYPES,
   DEFAULT_DATA_CENTER,
@@ -16,6 +16,7 @@ interface EngageWidgetProps {
   currentTheme: string;
   isSdkReady: boolean;
   dataCenter?: string;
+  isVisualRebrand?: boolean;
 }
 
 const EngageWidget: React.FC<EngageWidgetProps> = ({
@@ -23,6 +24,7 @@ const EngageWidget: React.FC<EngageWidgetProps> = ({
   currentTheme,
   isSdkReady,
   dataCenter = DEFAULT_DATA_CENTER,
+  isVisualRebrand = true,
 }) => {
   const [isFloatingWindowOpen, setIsFloatingWindowOpen] = useState(false);
   const [hasNewTask, setHasNewTask] = useState(false);
@@ -34,12 +36,6 @@ const EngageWidget: React.FC<EngageWidgetProps> = ({
   // Check if we have a supported digital channel task
   const isSupportedTask =
     currentTask && SUPPORTED_DIGITAL_MEDIA_TYPES.includes(mediaType) && !currentTask.data.wrapUpRequired;
-
-  // Handle error from DigitalChannels component
-  const handleError = useCallback((error: unknown): boolean => {
-    console.error('DigitalChannels error:', error);
-    return false; // Prevent default error handling
-  }, []);
 
   // Toggle floating window
   const toggleFloatingWindow = useCallback(() => {
@@ -53,7 +49,7 @@ const EngageWidget: React.FC<EngageWidgetProps> = ({
 
   // Determine button class based on task state
   const getButtonClass = () => {
-    const { FLOATING_BUTTON, HAS_NEW_TASK, HAS_TASK, NO_TASK } = UI_CONSTANTS.CSS_CLASSES;
+    const {FLOATING_BUTTON, HAS_NEW_TASK, HAS_TASK, NO_TASK} = UI_CONSTANTS.CSS_CLASSES;
     if (hasNewTask) {
       return `${FLOATING_BUTTON} ${HAS_NEW_TASK}`;
     } else if (isSupportedTask) {
@@ -71,7 +67,7 @@ const EngageWidget: React.FC<EngageWidgetProps> = ({
     }
   }, [currentTask?.data?.interactionId, isSupportedTask]);
 
-  const { CSS_CLASSES, THEMES, THEME_CLASSES } = UI_CONSTANTS;
+  const {CSS_CLASSES, THEMES, THEME_CLASSES} = UI_CONSTANTS;
   const themeClass = currentTheme === THEMES.DARK ? THEME_CLASSES.DARK : THEME_CLASSES.LIGHT;
 
   return (
@@ -95,9 +91,14 @@ const EngageWidget: React.FC<EngageWidgetProps> = ({
             ×
           </button>
         </div>
-        <div className={CSS_CLASSES.CONTENT_AREA}>
+        <div className={`${CSS_CLASSES.CONTENT_AREA} ${themeClass}`}>
           {isSupportedTask && isSdkReady ? (
-            <DigitalChannels jwtToken={accessToken} dataCenter={dataCenter} onError={handleError} />
+            <DigitalChannels
+              jwtToken={accessToken}
+              dataCenter={dataCenter}
+              currentTheme={currentTheme}
+              isVisualRebrand={isVisualRebrand}
+            />
           ) : (
             <div className={CSS_CLASSES.CONTENT_PLACEHOLDER}>
               {!isSdkReady ? MESSAGES.INITIALIZING : MESSAGES.NO_ACTIVE_TASKS}

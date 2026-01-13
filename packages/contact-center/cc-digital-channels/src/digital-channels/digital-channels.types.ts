@@ -27,5 +27,15 @@ export interface UseDigitalChannelsProps {
 export interface DigitalChannelsProps {
   jwtToken: string;
   dataCenter: string;
+  currentTheme?: string;
+  isVisualRebrand?: boolean;
   onError?: (error: unknown) => boolean;
+}
+
+export interface DigitalChannelsComponentProps {
+  conversationId: string;
+  jwtToken: string;
+  dataCenter: string;
+  currentTheme?: string;
+  isVisualRebrand?: boolean;
 }

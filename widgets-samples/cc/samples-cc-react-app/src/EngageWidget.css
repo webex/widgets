@@ -38,7 +38,7 @@
   right: 1.25rem;
   width: auto;
   max-width: 60rem;
-  height: auto;
+  height: 100vh;
   max-height: calc(100vh - 7.5rem);
   background-color: #fff;
   box-shadow: 0 0.25rem 1.25rem rgba(0, 0, 0, 0.15);
@@ -125,6 +125,16 @@
   padding: 0;
   min-height: 0;
   -webkit-overflow-scrolling: touch;
+}
+
+.engage-content-area.dark {
+  background-color: #2d2d2d;
+  color: #ffffff;
+}
+
+.engage-content-area.light {
+  background-color: #f5f5f5;
+  color: #333333;
 }
 
 .engage-content-placeholder {

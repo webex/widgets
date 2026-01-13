@@ -2,13 +2,7 @@ import React, {useMemo} from 'react';
 import Engage from '@webex/cc-digital-interactions';
 
 import '@momentum-ui/web-components';
-
-export interface DigitalChannelsComponentProps {
-  conversationId: string;
-  jwtToken: string;
-  dataCenter: string;
-  handleError: (error: unknown) => boolean;
-}
+import {DigitalChannelsComponentProps} from './digital-channels.types';
 
 /**
  * Presentation component for Digital Channels.
@@ -18,7 +12,8 @@ const DigitalChannelsComponent: React.FunctionComponent<DigitalChannelsComponent
   conversationId,
   jwtToken,
   dataCenter,
-  handleError,
+  currentTheme = 'DARK',
+  isVisualRebrand = true,
 }) => {
   // Create a stable key based on critical props to force remount when they change
   // This prevents issues with the Froala editor trying to cleanup/reinitialize improperly
@@ -26,15 +21,20 @@ const DigitalChannelsComponent: React.FunctionComponent<DigitalChannelsComponent
     return `${conversationId}-${jwtToken.slice(-8)}-${dataCenter}`;
   }, [conversationId, jwtToken, dataCenter]);
 
+  const isDarkTheme = currentTheme === 'DARK';
+
   return (
     <div>
-      <md-theme id="app-theme" theme="momentumV2" class="is-visual-rebrand">
+      <md-theme id="app-theme" theme="momentumV2" {...(isDarkTheme ? {darktheme: true} : {lighttheme: true})}>
         <Engage
           key={componentKey}
           conversationId={conversationId}
           jwtToken={jwtToken}
           dataCenter={dataCenter}
-          onError={handleError}
+          interactionId=""
+          readonly={false}
+          theme={isDarkTheme ? 'dark' : 'light'}
+          isVisualRebrand={isVisualRebrand}
         />
       </md-theme>
     </div>

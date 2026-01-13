@@ -997,7 +997,8 @@ function App() {
                 accessToken={accessToken}
                 currentTheme={currentTheme}
                 isSdkReady={isSdkReady}
-                dataCenter={'' + (integrationEnv ? 'intgus1' : 'produs1') /* Default to US1 for non-integration envs */} // Use dataCenter prop
+                dataCenter={'' + (integrationEnv ? 'intgus1' : 'produs1') /* Default to US1 for non-integration envs */}
+                isVisualRebrand={true}
               />
             )}
           </div>
