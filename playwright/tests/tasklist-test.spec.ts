@@ -299,23 +299,26 @@ export default function createTaskListTests() {
   });
 
   test('Task List Test with Multiple Tasks', async () => {
-    await changeUserState(testManager.agent1Page, USER_STATES.MEETING);
-    await waitForState(testManager.agent1Page, USER_STATES.MEETING);
-    await Promise.all([
-      createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!),
-      createChatTask(testManager.chatPage, process.env[`${testManager.projectName}_CHAT_URL`]!),
-      createEmailTask(process.env[`${testManager.projectName}_EMAIL_ENTRY_POINT`]!),
-    ]);
-
     await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
+    await waitForState(testManager.agent1Page, USER_STATES.AVAILABLE);
 
-    await Promise.all([
-      waitForAndAcceptSpecificTask(testManager, 'samples:incoming-task-telephony'),
-      waitForAndAcceptSpecificTask(testManager, 'samples:incoming-task-chat'),
-      waitForAndAcceptSpecificTask(testManager, 'samples:incoming-task-email'),
-    ]);
-    await testManager.agent1Page.waitForTimeout(3000);
+    // Create and accept tasks one by one to avoid flakiness
+    // 1. Create and accept call task
+    await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
+    await waitForAndAcceptSpecificTask(testManager, 'samples:incoming-task-telephony');
+    await testManager.agent1Page.waitForTimeout(2000);
 
+    // 2. Create and accept chat task
+    await createChatTask(testManager.chatPage, process.env[`${testManager.projectName}_CHAT_URL`]!);
+    await waitForAndAcceptSpecificTask(testManager, 'samples:incoming-task-chat');
+    await testManager.agent1Page.waitForTimeout(2000);
+
+    // 3. Create and accept email task
+    await createEmailTask(process.env[`${testManager.projectName}_EMAIL_ENTRY_POINT`]!);
+    await waitForAndAcceptSpecificTask(testManager, 'samples:incoming-task-email');
+    await testManager.agent1Page.waitForTimeout(2000);
+
+    // Verify all 3 tasks are in the task list
     for (let i = 0; i < 3; i++) {
       const taskListItem = testManager.agent1Page.getByTestId('task-list').getByRole('listitem').nth(i);
 
