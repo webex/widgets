@@ -1,8 +1,8 @@
-# Contact Center Widgets
+# Widgets Monorepo – Contact Center Focus
 
-Monorepo for Webex Contact Center UI widgets built with React, MobX, and Web Components.
+This repository is the widgets monorepo, which includes both Contact Center and meeting widgets.
 
----
+## This document specifically focuses on the Webex Contact Center UI widgets built with React, MobX, and Web Components.
 
 ## Overview
 
@@ -32,30 +32,36 @@ Monorepo for Webex Contact Center UI widgets built with React, MobX, and Web Com
 ### Active Widgets
 
 **station-login** - Agent login with team and device selection
+
 - Location: `packages/contact-center/station-login/`
 - Docs: [ai-docs/](../packages/contact-center/station-login/ai-docs/)
 
 **user-state** - Agent state management with timer and idle codes
+
 - Location: `packages/contact-center/user-state/`
 - Docs: [ai-docs/](../packages/contact-center/user-state/ai-docs/)
+
+**task** - Bundle of task-related widgets (IncomingTask, TaskList, CallControl, CallControlCAD, OutdialCall)
+
+- Location: `packages/contact-center/task/`
+- Docs: [ai-docs/](../packages/contact-center/task/ai-docs/)
 
 ### Shared Packages
 
 **store** - Centralized MobX state (singleton)
+
 - Location: `packages/contact-center/store/`
 - Docs: [ai-docs/](../packages/contact-center/store/ai-docs/)
 
 **cc-components** - React UI primitives
+
 - Location: `packages/contact-center/cc-components/`
+- Docs: [ai-docs/](../packages/contact-center/store/ai-docs/)
 
 **cc-widgets** - Web Component wrappers
+
 - Location: `packages/contact-center/cc-widgets/`
-
-### Future Widgets
-
-<!-- TODO: Task widgets (IncomingTask, TaskList, CallControl, CallControlCAD, OutdialCall) -->
-
----
+- Docs: [ai-docs/](../packages/contact-center/cc-widgets/ai-docs/)
 
 ## Component Dependencies
 

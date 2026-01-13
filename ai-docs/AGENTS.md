@@ -11,16 +11,19 @@ This is the main orchestrator for AI assistants working on this repository. It r
 **When developer provides a task, follow this workflow:**
 
 1. **Understand the task** - Identify what type of work is needed
-2. **Route to appropriate template** - Use modular templates for guidance
-3. **Generate/fix code** - Follow established patterns
-4. **Update documentation** - Keep ai-docs in sync with code changes
-5. **Ask for review** - Confirm completion with developer
+2. **Break down large or multi-part tasks** - If the prompt mixes multiple tasks (for example, "create new widget" **and** "fix a bug" or "add a feature"), or the task is very large, split it into smaller, clearly scoped subtasks and handle them one by one
+3. **Route to appropriate template** - Use modular templates for guidance
+4. **Generate/fix code** - Follow established patterns
+5. **Update documentation** - Keep ai-docs in sync with code changes
+6. **Ask for review** - Confirm completion with developer
 
 ---
 
 ## Step 1: Identify Task Type
 
 **Ask developer:** "What do you need help with?"
+
+If the developer's message contains multiple distinct task types (for example, "create new widget", "fix a bug", and "add a feature" in one prompt), treat each as a separate internal task. Clarify priorities or ordering with the developer when needed, and then execute the subtasks sequentially rather than trying to complete everything at once.
 
 ### Task Types
 
@@ -287,7 +290,7 @@ SDK (Contact Center API)
 ```
 
 **Key Rules:**
-- Widget NEVER calls SDK directly (use hook)
+- Widget consumes SDK methods via the store (through a hook) — it NEVER calls the SDK directly
 - Component NEVER accesses store (receives props)
 - Always use `observer` HOC for widgets
 - Always use `runInAction` for store mutations
@@ -461,6 +464,7 @@ yarn build
    - No layer violations
    - Error handling present
    - Types are correct
+   - Code is precise and concise (no unnecessary complexity or dead code)
 
 3. **Documentation checks**
    - AGENTS.md updated if needed

@@ -3,7 +3,6 @@
 ## Architectural principles
 
 - Clear layering: Widgets → UI components (`cc-components`) → Store (MobX) → SDK/backends (where applicable).
-- Web Components are thin wrappers over React widgets via r2wc.
 
 ## Naming & structure
 
@@ -50,5 +49,3 @@
 - Keep docs in sync when APIs change.
 
 <!-- TODOs -->
-
-
