@@ -20,11 +20,8 @@ import {
   waitForWrapupReasonLogs,
   getLastWrapupReasonFromLogs,
   isColorClose,
-  createLogger,
 } from '../Utils/helperUtils';
 import {TestManager} from '../test-manager';
-
-const log = createLogger('DigitalTask');
 
 let capturedLogs: string[] = [];
 
@@ -116,24 +113,19 @@ export default function createDigitalIncomingTaskAndTaskControlsTests() {
   });
 
   test.beforeAll(async ({browser}, testInfo) => {
-    log('beforeAll: Setting up test manager');
     const projectName = testInfo.project.name;
     testManager = new TestManager(projectName);
     await testManager.setupForIncomingTaskExtension(browser);
     setupConsoleLogging(testManager.agent1Page);
-    log('beforeAll: Setup complete');
   });
 
   test.afterAll(async () => {
-    log('afterAll: Cleanup starting');
     if (testManager) {
       await testManager.cleanup();
     }
-    log('afterAll: Cleanup complete');
   });
 
   test('should ignore incoming chat task and wait for RONA popup', async () => {
-    log('Test: Ignore chat → RONA popup - Starting');
     await createChatTask(testManager.chatPage, process.env[`${testManager.projectName}_CHAT_URL`]!);
     await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
     const incomingTaskDiv = await waitForIncomingTask(testManager.agent1Page, TASK_TYPES.CHAT, 60000);
@@ -150,11 +142,9 @@ export default function createDigitalIncomingTaskAndTaskControlsTests() {
     expect(isColorClose(userStateElementColor, THEME_COLORS.RONA)).toBe(true);
     await submitRonaPopup(testManager.agent1Page, RONA_OPTIONS.IDLE);
     await waitForState(testManager.agent1Page, USER_STATES.MEETING);
-    log('Test: Ignore chat → RONA popup - Complete');
   });
 
   test('should set agent to Available and verify chat task behavior', async () => {
-    log('Test: Available + chat behavior - Starting');
     await testManager.agent1Page.waitForTimeout(2000);
     await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
     const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-chat').first();
@@ -178,11 +168,9 @@ export default function createDigitalIncomingTaskAndTaskControlsTests() {
     await testManager.agent1Page.getByTestId('samples:rona-popup').waitFor({state: 'visible', timeout: 15000});
     await submitRonaPopup(testManager.agent1Page, RONA_OPTIONS.IDLE);
     await waitForState(testManager.agent1Page, USER_STATES.MEETING);
-    log('Test: Available + chat behavior - Complete');
   });
 
   test('should set agent state to busy after ignoring chat task', async () => {
-    log('Test: Ignore chat → busy - Starting');
     await testManager.agent1Page.waitForTimeout(2000);
     await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
     const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-chat').first();
@@ -199,11 +187,9 @@ export default function createDigitalIncomingTaskAndTaskControlsTests() {
     await expect(testManager.agent1Page.getByTestId('samples:rona-popup')).not.toBeVisible();
     await testManager.agent1Page.waitForTimeout(3000);
     await verifyCurrentState(testManager.agent1Page, USER_STATES.MEETING);
-    log('Test: Ignore chat → busy - Complete');
   });
 
   test('should accept incoming chat, end chat and complete wrapup with callback verification', async () => {
-    log('Test: Accept chat + wrapup - Starting');
     await testManager.agent1Page.waitForTimeout(2000);
     await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
     const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-chat').first();
@@ -227,11 +213,9 @@ export default function createDigitalIncomingTaskAndTaskControlsTests() {
     await waitForWrapupReasonLogs(capturedLogs, WRAPUP_REASONS.SALE);
     expect(await getLastWrapupReasonFromLogs(capturedLogs)).toBe(WRAPUP_REASONS.SALE);
     expect(await verifyCallbackLogs(capturedLogs, WRAPUP_REASONS.SALE, USER_STATES.AVAILABLE)).toBe(true);
-    log('Test: Accept chat + wrapup - Complete');
   });
 
   test('should handle chat disconnect before agent answers', async () => {
-    log('Test: Chat disconnect before answer - Starting');
     await createChatTask(testManager.chatPage, process.env[`${testManager.projectName}_CHAT_URL`]!);
     await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
     const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-chat').first();
@@ -240,11 +224,9 @@ export default function createDigitalIncomingTaskAndTaskControlsTests() {
     await incomingTaskDiv.waitFor({state: 'hidden', timeout: 30000});
     await waitForState(testManager.agent1Page, USER_STATES.AVAILABLE);
     await verifyCurrentState(testManager.agent1Page, USER_STATES.AVAILABLE);
-    log('Test: Chat disconnect before answer - Complete');
   });
 
   test('should ignore incoming email task and wait for RONA popup and accept and wrapup', async () => {
-    log('Test: Ignore email → RONA → accept - Starting');
     await createEmailTask(process.env[`${testManager.projectName}_EMAIL_ENTRY_POINT`]!);
     await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
     const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-email').first();
@@ -274,12 +256,10 @@ export default function createDigitalIncomingTaskAndTaskControlsTests() {
     await waitForWrapupReasonLogs(capturedLogs, WRAPUP_REASONS.SALE);
     expect(await getLastWrapupReasonFromLogs(capturedLogs)).toBe(WRAPUP_REASONS.SALE);
     expect(await verifyCallbackLogs(capturedLogs, WRAPUP_REASONS.SALE, USER_STATES.AVAILABLE)).toBe(true);
-    log('Test: Ignore email → RONA → accept - Complete');
     await testManager.agent1Page.waitForTimeout(2000);
   });
 
   test('should set agent to Available and verify email task behavior', async () => {
-    log('Test: Available + email behavior - Starting');
     await createEmailTask(process.env[`${testManager.projectName}_EMAIL_ENTRY_POINT`]!);
     await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
     const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-email').first();
@@ -305,12 +285,10 @@ export default function createDigitalIncomingTaskAndTaskControlsTests() {
     await testManager.agent1Page.waitForTimeout(1000);
     await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
     await waitForState(testManager.agent1Page, USER_STATES.AVAILABLE);
-    log('Test: Available + email behavior - Complete');
     await testManager.agent1Page.waitForTimeout(2000);
   });
 
   test('should set agent state to busy after ignoring email task', async () => {
-    log('Test: Ignore email → busy - Starting');
     await createEmailTask(process.env[`${testManager.projectName}_EMAIL_ENTRY_POINT`]!);
     await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
     const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-email').first();
@@ -330,11 +308,9 @@ export default function createDigitalIncomingTaskAndTaskControlsTests() {
     await testManager.agent1Page.getByTestId('call-control:end-call').first().click({timeout: 5000});
     await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
     await waitForState(testManager.agent1Page, USER_STATES.AVAILABLE);
-    log('Test: Ignore email → busy - Complete');
   });
 
   test('should handle multiple incoming tasks with callback verifications', async () => {
-    log('Test: Multiple incoming tasks - Starting');
 
     // First become available, then create tasks so they arrive fresh
     await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
@@ -407,11 +383,9 @@ export default function createDigitalIncomingTaskAndTaskControlsTests() {
       ).toBe(true);
       count--;
     }
-    log('Test: Multiple incoming tasks - Complete');
   });
 
   test('Chat task - verify transfer and end buttons are visible, end chat, and wrap up', async () => {
-    log('Test: Chat controls + wrapup - Starting');
     // Create chat task
     await createChatTask(testManager.chatPage, process.env[`${testManager.projectName}_CHAT_URL`]!);
     await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
@@ -441,14 +415,12 @@ export default function createDigitalIncomingTaskAndTaskControlsTests() {
       // Submit wrapup
       await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.RESOLVED);
       await testManager.agent1Page.waitForTimeout(2000);
-      log('Test: Chat controls + wrapup - Complete');
     } catch (error) {
       throw new Error(`Chat task control test failed: ${error.message}`);
     }
   });
 
   test('Email task - verify transfer and end buttons are visible, end email, and wrap up', async () => {
-    log('Test: Email controls + wrapup - Starting');
     // Create email task
     await createEmailTask(process.env[`${testManager.projectName}_EMAIL_ENTRY_POINT`]!);
     await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
@@ -478,7 +450,6 @@ export default function createDigitalIncomingTaskAndTaskControlsTests() {
       // Submit wrapup
       await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.RESOLVED);
       await testManager.agent1Page.waitForTimeout(2000);
-      log('Test: Email controls + wrapup - Complete');
     } catch (error) {
       throw new Error(`Email task control test failed: ${error.message}`);
     }

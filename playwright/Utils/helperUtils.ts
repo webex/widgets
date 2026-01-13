@@ -24,17 +24,6 @@ import {
 import {stationLogout, telephonyLogin} from './stationLoginUtils';
 
 /**
- * Creates a prefixed logger function for consistent test logging
- * @param prefix - The prefix to use for all log messages (e.g., 'TaskList', 'UserState')
- * @returns A function that logs messages with the specified prefix
- * @example
- * ```typescript
- * const log = createLogger('TaskList');
- * log('Starting test'); // Outputs: [TaskList] Starting test
- * ```
- */
-export const createLogger = (prefix: string) => (msg: string) => console.log(`[${prefix}] ${msg}`);
-/**
  * Parses a time string in MM:SS format and converts it to total seconds
  * @param timeString - Time string in format "MM:SS" (e.g., "01:30" for 1 minute 30 seconds)
  * @returns Total number of seconds
@@ -331,7 +320,6 @@ export const handleStrayTasks = async (
   maxIterations: number = 10
 ): Promise<void> => {
   const startTime = Date.now();
-  const log = (msg: string) => console.log(`[handleStrayTasks] ${msg}`);
 
   let iteration = 0;
   let tasksHandled = 0;
@@ -351,15 +339,12 @@ export const handleStrayTasks = async (
     const ronaVisible = await ronaPopup.isVisible().catch(() => false);
 
     if (ronaVisible) {
-      log(`Iteration ${iteration}: RONA popup visible, submitting`);
       try {
         await submitRonaPopup(page, RONA_OPTIONS.AVAILABLE);
         actionTaken = true;
-        log('RONA popup submitted');
         await page.waitForTimeout(300);
         continue; // Start fresh after RONA
       } catch (e) {
-        log(`RONA popup submission failed: ${e}`);
       }
     }
 
@@ -370,16 +355,13 @@ export const handleStrayTasks = async (
     const wrapupVisible = await wrapupButton.isVisible().catch(() => false);
 
     if (wrapupVisible) {
-      log(`Iteration ${iteration}: Wrapup visible, submitting`);
       try {
         await submitWrapup(page, WRAPUP_REASONS.SALE);
         tasksHandled++;
         actionTaken = true;
-        log(`Wrapup submitted (${tasksHandled} total)`);
         await page.waitForTimeout(300);
         continue; // Check for more pending tasks
       } catch (e) {
-        log(`Wrapup submission failed: ${e}`);
       }
     }
 
@@ -398,21 +380,17 @@ export const handleStrayTasks = async (
         const holdToggleVisible = await holdToggle.isVisible().catch(() => false);
 
         if (holdToggleVisible) {
-          log(`Iteration ${iteration}: End button disabled, attempting resume from hold`);
           try {
             await holdCallToggle(page);
             await page.waitForTimeout(500);
             endButtonEnabled = await endButton.isEnabled().catch(() => false);
           } catch (e) {
-            log(`Resume from hold failed: ${e}`);
           }
         } else {
-          log(`Iteration ${iteration}: End button disabled, no hold toggle visible`);
         }
       }
 
       if (endButtonEnabled) {
-        log(`Iteration ${iteration}: Clicking end button`);
         try {
           await endButton.click({timeout: AWAIT_TIMEOUT});
           await page.waitForTimeout(500);
@@ -423,29 +401,23 @@ export const handleStrayTasks = async (
 
           if (!endStillVisible || wrapupNowVisible) {
             actionTaken = true;
-            log('End button clicked - state changed');
             // Don't continue - fall through to check wrapup immediately
           } else {
-            log('End button clicked but still visible - click may not have worked');
           }
         } catch (e) {
-          log(`End call click failed: ${e}`);
         }
       }
 
       // After clicking end, check for wrapup immediately (same iteration)
       const wrapupAfterEnd = await wrapupButton.isVisible().catch(() => false);
       if (wrapupAfterEnd) {
-        log(`Iteration ${iteration}: Wrapup appeared after end, submitting`);
         try {
           await submitWrapup(page, WRAPUP_REASONS.SALE);
           tasksHandled++;
           actionTaken = true;
-          log(`Wrapup submitted (${tasksHandled} total)`);
           await page.waitForTimeout(300);
           continue;
         } catch (e) {
-          log(`Wrapup submission failed: ${e}`);
         }
       }
 
@@ -471,7 +443,6 @@ export const handleStrayTasks = async (
       if (isExtensionCall) {
         // Extension call - try extensionPage first, fallback to waiting for RONA
         if (extensionPage) {
-          log(`Iteration ${iteration}: Extension call detected`);
           try {
             // Dismiss any dialogs on extension page first
             await extensionPage.keyboard.press('Escape').catch(() => {});
@@ -488,9 +459,7 @@ export const handleStrayTasks = async (
               const isEnabled = await extButton.isEnabled({timeout: 5000}).catch(() => false);
               if (isEnabled) {
                 await extButton.click({timeout: AWAIT_TIMEOUT});
-                log(`Extension call accepted`);
               } else {
-                log(`Extension call answer button visible but disabled - skipping`);
                 actionTaken = true;
                 continue;
               }
@@ -501,14 +470,12 @@ export const handleStrayTasks = async (
               if (endVisibleAfterAccept) {
                 const endEnabledAfterAccept = await endBtnAfterAccept.isEnabled().catch(() => false);
                 if (endEnabledAfterAccept) {
-                  log(`Iteration ${iteration}: Ending accepted extension call`);
                   await endBtnAfterAccept.click({timeout: AWAIT_TIMEOUT}).catch(() => {});
                   await page.waitForTimeout(500);
                   const wrapupAfterEnd = await wrapupButton.isVisible().catch(() => false);
                   if (wrapupAfterEnd) {
                     await submitWrapup(page, WRAPUP_REASONS.SALE).catch(() => {});
                     tasksHandled++;
-                    log(`Task fully handled (${tasksHandled} total)`);
                     await page.waitForTimeout(300);
                   }
                 }
@@ -517,11 +484,9 @@ export const handleStrayTasks = async (
               continue;
             }
           } catch (e) {
-            log(`Extension call accept failed: ${e}`);
           }
         } else {
           // No extensionPage - wait for RONA timeout
-          log(`Iteration ${iteration}: Extension call detected, no extensionPage - waiting for timeout`);
           await page.waitForTimeout(2000);
           // Check if RONA appeared
           const ronaAfterWait = await ronaPopup.isVisible().catch(() => false);
@@ -534,7 +499,6 @@ export const handleStrayTasks = async (
             .isVisible()
             .catch(() => false);
           if (stillHasExtCall) {
-            log(`Iteration ${iteration}: Extension call still present, cannot handle without extensionPage - exiting`);
             break;
           }
         }
@@ -545,10 +509,8 @@ export const handleStrayTasks = async (
         const acceptEnabled = await acceptButton.isEnabled().catch(() => false);
 
         if (acceptVisible && acceptEnabled) {
-          log(`Iteration ${iteration}: Incoming task found, accepting`);
           try {
             await acceptButton.click({timeout: AWAIT_TIMEOUT});
-            log(`Task accepted`);
             await page.waitForTimeout(2000);
             // After accepting, immediately try to end and wrapup (same iteration)
             const endBtnAfterAccept = page.getByTestId('call-control:end-call').first();
@@ -556,15 +518,12 @@ export const handleStrayTasks = async (
             if (endVisibleAfterAccept) {
               const endEnabledAfterAccept = await endBtnAfterAccept.isEnabled().catch(() => false);
               if (endEnabledAfterAccept) {
-                log(`Iteration ${iteration}: Ending accepted task`);
                 await endBtnAfterAccept.click({timeout: AWAIT_TIMEOUT}).catch(() => {});
                 await page.waitForTimeout(500);
                 const wrapupAfterEnd = await wrapupButton.isVisible().catch(() => false);
                 if (wrapupAfterEnd) {
-                  log(`Iteration ${iteration}: Wrapup appeared, submitting`);
                   await submitWrapup(page, WRAPUP_REASONS.SALE).catch(() => {});
                   tasksHandled++;
-                  log(`Task fully handled (${tasksHandled} total)`);
                   await page.waitForTimeout(300);
                 }
               }
@@ -572,10 +531,8 @@ export const handleStrayTasks = async (
             actionTaken = true;
             continue;
           } catch (e) {
-            log(`Accept click failed: ${e}`);
           }
         } else if (acceptVisible && !acceptEnabled) {
-          log(`Iteration ${iteration}: Accept button visible but disabled - skipping`);
         }
       }
     }
@@ -598,36 +555,29 @@ export const handleStrayTasks = async (
         const holdVisible = await holdToggle.isVisible().catch(() => false);
 
         if (!endEnabled && !holdVisible) {
-          log(`Iteration ${iteration}: End button disabled with no way to enable - cannot handle, exiting`);
           break;
         }
       }
 
       if (stillHasWrapup) {
-        log(`Iteration ${iteration}: Wrapup visible but couldn't submit - will retry`);
         await page.waitForTimeout(500);
       } else if (stillHasEnd) {
         const endEnabled = await endButton.isEnabled().catch(() => false);
         if (endEnabled) {
           if (iteration >= 3) {
-            log(`Iteration ${iteration}: End button clicks not working after ${iteration} attempts - exiting`);
             break;
           }
-          log(`Iteration ${iteration}: End button click didn't work - will retry`);
           await page.waitForTimeout(500);
         }
       } else if (stillHasTask) {
-        log(`Iteration ${iteration}: Task visible but cannot act - will retry`);
         await page.waitForTimeout(500);
       } else {
-        log(`Iteration ${iteration}: Nothing found, cleanup complete`);
         break;
       }
     }
   }
 
   if (iteration >= maxIterations) {
-    log(`Max iterations (${maxIterations}) reached`);
   }
 
   // Ensure user is in Available state at the end
@@ -640,12 +590,10 @@ export const handleStrayTasks = async (
     try {
       await changeUserState(page, USER_STATES.AVAILABLE);
     } catch (e) {
-      log(`Failed to set Available state: ${e}`);
     }
   }
 
   const duration = Date.now() - startTime;
-  log(`Completed in ${duration}ms - ${tasksHandled} task(s) handled in ${iteration} iteration(s)`);
 };
 
 /**

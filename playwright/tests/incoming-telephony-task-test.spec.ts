@@ -19,11 +19,8 @@ import {
   waitForWrapupReasonLogs,
   getLastWrapupReasonFromLogs,
   isColorClose,
-  createLogger,
 } from '../Utils/helperUtils';
 import {TestManager} from '../test-manager';
-
-const log = createLogger('TelephonyTask');
 
 let capturedLogs: string[] = [];
 
@@ -124,7 +121,6 @@ export default function createIncomingTelephonyTaskTests() {
     });
 
     test('should accept incoming call, end call and complete wrapup in desktop mode', async () => {
-      log('Desktop: Accept call + wrapup - Starting');
       await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CALL, 40000);
@@ -146,11 +142,9 @@ export default function createIncomingTelephonyTaskTests() {
       await waitForWrapupReasonLogs(capturedLogs, WRAPUP_REASONS.SALE);
       expect(await getLastWrapupReasonFromLogs(capturedLogs)).toBe(WRAPUP_REASONS.SALE);
       expect(await verifyCallbackLogs(capturedLogs, WRAPUP_REASONS.SALE, USER_STATES.AVAILABLE)).toBe(true);
-      log('Desktop: Accept call + wrapup - Complete');
     });
 
     test('should decline incoming call and verify RONA state in desktop mode', async () => {
-      log('Desktop: Decline call → RONA - Starting');
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       await waitForIncomingTask(testManager.agent1Page, TASK_TYPES.CALL, 40000);
@@ -166,11 +160,9 @@ export default function createIncomingTelephonyTaskTests() {
       await endCallTask(testManager.callerPage!, true);
       await submitRonaPopup(testManager.agent1Page, RONA_OPTIONS.IDLE);
       await waitForState(testManager.agent1Page, USER_STATES.MEETING);
-      log('Desktop: Decline call → RONA - Complete');
     });
 
     test('should ignore incoming call and wait for RONA popup in desktop mode', async () => {
-      log('Desktop: Ignore call → RONA - Starting');
       await testManager.agent1Page.waitForTimeout(2000);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
@@ -181,11 +173,9 @@ export default function createIncomingTelephonyTaskTests() {
       await endCallTask(testManager.callerPage!, true);
       await submitRonaPopup(testManager.agent1Page, RONA_OPTIONS.IDLE);
       await waitForState(testManager.agent1Page, USER_STATES.MEETING);
-      log('Desktop: Ignore call → RONA - Complete');
     });
 
     test('should set agent state to Available and receive another call in desktop mode', async () => {
-      log('Desktop: Available + another call - Starting');
       await testManager.agent1Page.waitForTimeout(2000);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
@@ -208,11 +198,9 @@ export default function createIncomingTelephonyTaskTests() {
       await endCallTask(testManager.callerPage!, true);
       await submitRonaPopup(testManager.agent1Page, RONA_OPTIONS.IDLE);
       await waitForState(testManager.agent1Page, USER_STATES.MEETING);
-      log('Desktop: Available + another call - Complete');
     });
 
     test('should set agent state to busy after declining call in desktop mode', async () => {
-      log('Desktop: Decline → busy - Starting');
       await testManager.agent1Page.waitForTimeout(2000);
       await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
@@ -230,12 +218,10 @@ export default function createIncomingTelephonyTaskTests() {
       const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
       await expect(incomingTaskDiv).toBeHidden();
       await endCallTask(testManager.callerPage!, true);
-      log('Desktop: Decline → busy - Complete');
       await testManager.agent1Page.waitForTimeout(2000);
     });
 
     test('should handle customer disconnect before agent answers in desktop mode', async () => {
-      log('Desktop: Customer disconnect - Starting');
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       const incomingTaskDiv = await waitForIncomingTask(testManager.agent1Page, TASK_TYPES.CALL, 40000);
@@ -244,7 +230,6 @@ export default function createIncomingTelephonyTaskTests() {
       await expect(incomingTaskDiv).toBeHidden();
       await waitForState(testManager.agent1Page, USER_STATES.AVAILABLE);
       await verifyCurrentState(testManager.agent1Page, USER_STATES.AVAILABLE);
-      log('Desktop: Customer disconnect - Complete');
     });
 
     test.afterAll(async () => {
@@ -267,7 +252,6 @@ export default function createIncomingTelephonyTaskTests() {
     });
 
     test('should accept incoming call, end call and complete wrapup in extension mode', async () => {
-      log('Extension: Accept call + wrapup - Starting');
       await testManager.agent1Page.waitForTimeout(2000);
       await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
@@ -293,12 +277,10 @@ export default function createIncomingTelephonyTaskTests() {
       await waitForWrapupReasonLogs(capturedLogs, WRAPUP_REASONS.SALE);
       expect(await getLastWrapupReasonFromLogs(capturedLogs)).toBe(WRAPUP_REASONS.SALE);
       expect(await verifyCallbackLogs(capturedLogs, WRAPUP_REASONS.SALE, USER_STATES.AVAILABLE)).toBe(true);
-      log('Extension: Accept call + wrapup - Complete');
       await testManager.agent1Page.waitForTimeout(10000);
     });
 
     test('should decline incoming call and verify RONA state in extension mode', async () => {
-      log('Extension: Decline call → RONA - Starting');
       await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       await waitForIncomingTask(testManager.agent1Page, TASK_TYPES.CALL, 40000);
@@ -317,12 +299,10 @@ export default function createIncomingTelephonyTaskTests() {
       await waitForStateLogs(capturedLogs, USER_STATES.AGENT_DECLINED);
       expect(await getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.AGENT_DECLINED);
       await submitRonaPopup(testManager.agent1Page, RONA_OPTIONS.IDLE);
-      log('Extension: Decline call → RONA - Complete');
       await testManager.agent1Page.waitForTimeout(10000);
     });
 
     test('should ignore incoming call and wait for RONA popup in extension mode', async () => {
-      log('Extension: Ignore call → RONA - Starting');
       await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       const incomingTaskDiv = await waitForIncomingTask(testManager.agent1Page, TASK_TYPES.CALL, 40000);
@@ -337,12 +317,10 @@ export default function createIncomingTelephonyTaskTests() {
       await waitForStateLogs(capturedLogs, USER_STATES.RONA);
       expect(await getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.RONA);
       await submitRonaPopup(testManager.agent1Page, RONA_OPTIONS.IDLE);
-      log('Extension: Ignore call → RONA - Complete');
       await testManager.agent1Page.waitForTimeout(10000);
     });
 
     test('should set agent state to Available and receive another call in extension mode', async () => {
-      log('Extension: Available + another call - Starting');
       await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       await waitForIncomingTask(testManager.agent1Page, TASK_TYPES.CALL, 40000);
@@ -362,12 +340,10 @@ export default function createIncomingTelephonyTaskTests() {
       const incomingTaskDiv = await waitForIncomingTask(testManager.agent1Page, TASK_TYPES.CALL, 10000);
       await expect(incomingTaskDiv).toBeVisible();
       await endCallTask(testManager.callerPage!, true);
-      log('Extension: Available + another call - Complete');
       await testManager.agent1Page.waitForTimeout(8000);
     });
 
     test('should set agent state to busy after declining call in extension mode', async () => {
-      log('Extension: Decline → busy - Starting');
       await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       const incomingTaskDiv = await waitForIncomingTask(testManager.agent1Page, TASK_TYPES.CALL, 40000);
@@ -387,12 +363,10 @@ export default function createIncomingTelephonyTaskTests() {
       await expect(testManager.agent1ExtensionPage.locator('#answer').first()).toBeDisabled();
       await verifyCurrentState(testManager.agent1Page, USER_STATES.MEETING);
       await endCallTask(testManager.callerPage!, true);
-      log('Extension: Decline → busy - Complete');
       await testManager.agent1Page.waitForTimeout(10000);
     });
 
     test('should handle call disconnect before agent answers in extension mode', async () => {
-      log('Extension: Call disconnect - Starting');
       await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       const incomingTaskDiv = await waitForIncomingTask(testManager.agent1Page, TASK_TYPES.CALL, 40000);
@@ -403,7 +377,6 @@ export default function createIncomingTelephonyTaskTests() {
       await expect(incomingTaskDiv).toBeHidden();
       await waitForState(testManager.agent1Page, USER_STATES.AVAILABLE);
       await verifyCurrentState(testManager.agent1Page, USER_STATES.AVAILABLE);
-      log('Extension: Call disconnect - Complete');
     });
 
     test.afterAll(async () => {

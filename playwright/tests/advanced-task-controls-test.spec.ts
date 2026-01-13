@@ -21,12 +21,10 @@ import {submitWrapup} from '../Utils/wrapupUtils';
 import {USER_STATES, TASK_TYPES, WRAPUP_REASONS} from '../constants';
 import {holdCallToggle, endTask, verifyHoldButtonIcon, verifyTaskControls} from '../Utils/taskControlUtils';
 import {TestManager} from '../test-manager';
-import {handleStrayTasks, clearPendingCallAndWrapup, waitForState, createLogger} from '../Utils/helperUtils';
+import {handleStrayTasks, clearPendingCallAndWrapup, waitForState} from '../Utils/helperUtils';
 
 // Extract test functions for cleaner syntax
 const {describe, beforeAll, afterAll, beforeEach} = test;
-
-const log = createLogger('AdvTaskControls');
 
 /**
  * Transfer and Consult Tests
@@ -42,23 +40,18 @@ export default function createAdvancedTaskControlsTests() {
   let testManager: TestManager;
 
   test.beforeAll(async ({browser}, testInfo) => {
-    log('beforeAll: Setting up test manager');
     const projectName = testInfo.project.name;
     testManager = new TestManager(projectName);
     await testManager.setupForAdvancedTaskControls(browser);
-    log('beforeAll: Setup complete');
   });
 
   test.afterAll(async () => {
-    log('afterAll: Cleanup starting');
     if (testManager) {
       await testManager.cleanup();
     }
-    log('afterAll: Cleanup complete');
   });
 
   test.beforeEach(async () => {
-    log('beforeEach: Handling stray tasks');
     await handleStrayTasks(testManager.agent1Page, testManager.callerPage);
     await handleStrayTasks(testManager.agent2Page, testManager.callerPage);
   });
@@ -69,7 +62,6 @@ export default function createAdvancedTaskControlsTests() {
 
   describe('Blind Transfer Tests', () => {
     beforeEach(async () => {
-      log('BlindTransfer beforeEach: Creating call and A1 accepting');
       await changeUserState(testManager.agent2Page, USER_STATES.MEETING);
       // Create call task and agent 1 accepts it
       await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
@@ -81,14 +73,12 @@ export default function createAdvancedTaskControlsTests() {
       await testManager.agent1Page.waitForTimeout(5000);
 
       await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
-      log('BlindTransfer beforeEach: A1 engaged');
 
       // Clear console logs to track transfer events
       clearAdvancedCapturedLogs();
     });
 
     test('Call Blind Transferred by Agent to Another Agent', async () => {
-      log('Test: Blind Transfer A1→A2 - Starting');
       // Agent 1 performs blind transfer to Agent 2
       await consultOrTransfer(
         testManager.agent1Page,
@@ -118,12 +108,10 @@ export default function createAdvancedTaskControlsTests() {
       await endTask(testManager.agent2Page);
       await testManager.agent2Page.waitForTimeout(3000);
       await submitWrapup(testManager.agent2Page, WRAPUP_REASONS.RESOLVED);
-      log('Test: Blind Transfer A1→A2 - Complete');
       await testManager.agent2Page.waitForTimeout(2000);
     });
 
     test('Call Blind Transferred to Queue', async () => {
-      log('Test: Blind Transfer to Queue - Starting');
       // First transfer from Agent 1 to Agent 2
       await consultOrTransfer(
         testManager.agent1Page,
@@ -147,7 +135,6 @@ export default function createAdvancedTaskControlsTests() {
 
       // Verify Agent 2 is no longer engaged
       await verifyCurrentState(testManager.agent2Page, USER_STATES.AVAILABLE);
-      log('Test: Blind Transfer to Queue - Complete');
     });
   });
 
@@ -157,7 +144,6 @@ export default function createAdvancedTaskControlsTests() {
 
   describe('Consult and Consult Transfer Scenarios', () => {
     test('Agent Consult Transfer: cancel, decline, timeout, and transfer scenarios are handled correctly in sequence', async () => {
-      log('Test: Agent Consult scenarios - Starting');
       // ...existing code for Agent Consult Transfer test...
       await changeUserState(testManager.agent2Page, USER_STATES.MEETING);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
@@ -245,12 +231,10 @@ export default function createAdvancedTaskControlsTests() {
       await endTask(testManager.agent2Page);
       await testManager.agent2Page.waitForTimeout(3000);
       await submitWrapup(testManager.agent2Page, WRAPUP_REASONS.RESOLVED);
-      log('Test: Agent Consult scenarios - Complete');
       await testManager.agent2Page.waitForTimeout(2000);
     });
 
     test('Queue Consult: cancel, accept/end, agent-end, and transfer scenarios are handled correctly in sequence', async () => {
-      log('Test: Queue Consult scenarios - Starting');
       // ...existing code for Queue Consult test...
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
 
@@ -336,7 +320,6 @@ export default function createAdvancedTaskControlsTests() {
       await endTask(testManager.agent2Page);
       await testManager.agent2Page.waitForTimeout(3000);
       await submitWrapup(testManager.agent2Page, WRAPUP_REASONS.RESOLVED);
-      log('Test: Queue Consult scenarios - Complete');
       await testManager.agent2Page.waitForTimeout(2000);
     });
   });
@@ -346,7 +329,6 @@ export default function createAdvancedTaskControlsTests() {
   // =============================================================================
 
   test('Entry Point Consult: visible and functional only for supported users (no blind transfer)', async ({}, testInfo) => {
-    log('Test: EP Consult - Starting...');
     await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
     await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
     await waitForIncomingTask(testManager.agent1Page, TASK_TYPES.CALL, 80000);
@@ -367,6 +349,5 @@ export default function createAdvancedTaskControlsTests() {
     await cancelConsult(testManager.agent1Page);
     await testManager.agent1Page.waitForTimeout(1000);
     await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
-    log('Test: EP Consult - Complete');
   });
 }

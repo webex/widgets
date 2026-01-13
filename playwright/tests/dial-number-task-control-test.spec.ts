@@ -18,39 +18,31 @@ import {
 } from '../Utils/incomingTaskUtils';
 import {submitWrapup} from '../Utils/wrapupUtils';
 import {USER_STATES, TASK_TYPES, WRAPUP_REASONS} from '../constants';
-import {waitForState, clearPendingCallAndWrapup, handleStrayTasks, createLogger} from '../Utils/helperUtils';
+import {waitForState, clearPendingCallAndWrapup, handleStrayTasks} from '../Utils/helperUtils';
 import {endTask, holdCallToggle, verifyHoldButtonIcon, verifyTaskControls} from '../Utils/taskControlUtils';
 import {TestManager} from '../test-manager';
-
-const log = createLogger('AdvCombinations');
 
 export default function createDialNumberTaskControlTests() {
   test.describe('Dial Number Task Control Tests ', () => {
     let testManager: TestManager;
 
     test.beforeAll(async ({browser}, testInfo) => {
-      log('beforeAll: Setting up test manager');
       const projectName = testInfo.project.name;
       testManager = new TestManager(projectName);
       await testManager.setupForDialNumber(browser);
-      log('beforeAll: Setup complete');
     });
 
     test.beforeEach(async () => {
-      log('beforeEach: Handling stray tasks');
       await handleStrayTasks(testManager.agent1Page);
       await handleStrayTasks(testManager.agent2Page);
     });
     test.describe('Dial Number Tests', () => {
       test.beforeAll(async () => {
-        log('DialNumber beforeAll: Setting up dialNumber session');
         test.skip(!process.env.PW_DIAL_NUMBER_NAME, 'PW_DIAL_NUMBER_NAME not set');
-        log('DialNumber beforeAll: Setup complete');
       });
 
       test('Two-hop: consult to Agent then consult-transfer to Dial Number', async () => {
         test.skip(!process.env.PW_DIAL_NUMBER_NAME, 'PW_DIAL_NUMBER_NAME not set');
-        log('Test: Two-hop consult transfer - Starting');
 
         await clearPendingCallAndWrapup(testManager.agent1Page);
         await clearPendingCallAndWrapup(testManager.agent2Page);
@@ -86,11 +78,9 @@ export default function createDialNumberTaskControlTests() {
         await submitWrapup(testManager.agent2Page, WRAPUP_REASONS.SALE);
         await verifyConsultTransferredLogs();
         await endCallTask(testManager.dialNumberPage);
-        log('Test: Two-hop consult transfer - Complete');
       });
 
       test('Dial Number Consult: cancel, decline, accept/end, and transfer scenarios are handled correctly in sequence', async () => {
-        log('Test: DN Consult scenarios - Starting');
         await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
         // Setup: create call and get to engaged state
         await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
@@ -146,11 +136,9 @@ export default function createDialNumberTaskControlTests() {
         verifyConsultStartSuccessLogs();
         verifyConsultTransferredLogs();
         await endCallTask(testManager.dialNumberPage);
-        log('Test: DN Consult scenarios - Complete');
       });
 
       test('Dial Number search filters list to the matching entry (local search)', async () => {
-        log('Test: DN search filter - Starting');
         if (testManager.projectName !== 'SET_5') {
           test.skip(true, 'Dial Number search validation runs only for SET_5 (user23/user24).');
         }
@@ -195,13 +183,11 @@ export default function createDialNumberTaskControlTests() {
         await endTask(testManager.agent1Page);
         await testManager.agent1Page.bringToFront();
         await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
-        log('Test: DN search filter - Complete');
         await testManager.agent1Page.waitForTimeout(1000);
       });
 
       test('Dial Number: consult then end consult returns UI to normal', async () => {
         test.skip(!process.env.PW_DIAL_NUMBER_NAME, 'PW_DIAL_NUMBER_NAME not set');
-        log('Test: Dial Number consult cancel - Starting');
 
         await changeUserState(testManager.agent2Page, USER_STATES.MEETING);
         await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
@@ -215,12 +201,10 @@ export default function createDialNumberTaskControlTests() {
         await expect(testManager.agent1Page.getByTestId('cancel-consult-btn')).not.toBeVisible();
         await endCallTask(testManager.callerPage!, true);
         await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
-        log('Test: Dial Number consult cancel - Complete');
       });
 
       test('Dial Number: consult then transfer completes and remote ends', async () => {
         test.skip(!process.env.PW_DIAL_NUMBER_NAME, 'PW_DIAL_NUMBER_NAME not set');
-        log('Test: Dial Number consult transfer - Starting');
 
         await changeUserState(testManager.agent2Page, USER_STATES.MEETING);
         await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
@@ -235,18 +219,15 @@ export default function createDialNumberTaskControlTests() {
         await verifyConsultStartSuccessLogs();
         await verifyConsultTransferredLogs();
         await endCallTask(testManager.dialNumberPage);
-        log('Test: Dial Number consult transfer - Complete');
       });
 
       test.beforeEach(async () => {
-        log('DialNumber beforeEach: Cleaning up and setting states');
         testManager.softCleanup();
         await changeUserState(testManager.agent2Page, USER_STATES.MEETING);
         await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       });
 
       test('Blind Transfer to DialNumber', async () => {
-        log('Test: Blind Transfer to DN - Starting');
         // Create call and agent 1 accepts
         await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
         await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CALL);
@@ -261,11 +242,9 @@ export default function createDialNumberTaskControlTests() {
         await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.RESOLVED);
         await testManager.agent1Page.waitForTimeout(2000);
         await verifyCurrentState(testManager.agent1Page, USER_STATES.AVAILABLE);
-        log('Test: Blind Transfer to DN - Complete');
       });
 
       test('Blind Transfer to Queue with DialNumber', async () => {
-        log('Test: Blind Transfer to Queue+DN - Starting');
         // Create call and agent 1 accepts
         await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
         await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CALL);
@@ -280,11 +259,9 @@ export default function createDialNumberTaskControlTests() {
         await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.RESOLVED);
         await testManager.agent1Page.waitForTimeout(2000);
         await verifyCurrentState(testManager.agent1Page, USER_STATES.AVAILABLE);
-        log('Test: Blind Transfer to Queue+DN - Complete');
       });
 
       test('Consult then end consult returns UI to normal', async () => {
-        log('Test: DN consult then end - Starting');
         await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
         await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CALL);
         await waitForState(testManager.agent1Page, USER_STATES.ENGAGED);
@@ -296,11 +273,9 @@ export default function createDialNumberTaskControlTests() {
         await expect(testManager.agent1Page.getByTestId('cancel-consult-btn')).not.toBeVisible();
         await endCallTask(testManager.callerPage!, true);
         await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
-        log('Test: DN consult then end - Complete');
       });
 
       test('Consult then transfer completes and remote ends', async () => {
-        log('Test: DN consult then transfer - Starting');
         await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
         await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CALL);
 
@@ -314,7 +289,6 @@ export default function createDialNumberTaskControlTests() {
         await verifyConsultStartSuccessLogs();
         await verifyConsultTransferredLogs();
         await endCallTask(testManager.dialNumberPage);
-        log('Test: DN consult then transfer - Complete');
       });
     });
   });
