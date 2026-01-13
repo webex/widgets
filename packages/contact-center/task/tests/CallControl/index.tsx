@@ -39,6 +39,7 @@ describe('CallControl Component', () => {
       setIsRecording: jest.fn(),
       buddyAgents: [],
       loadBuddyAgents: jest.fn(),
+      loadingBuddyAgents: false,
       transferCall: jest.fn(),
       consultCall: jest.fn(),
       endConsultCall: jest.fn(),

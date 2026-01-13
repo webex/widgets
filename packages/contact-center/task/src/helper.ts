@@ -298,6 +298,7 @@ export const useCallControl = (props: useCallControlProps) => {
   } = props;
   const [isRecording, setIsRecording] = useState(true);
   const [buddyAgents, setBuddyAgents] = useState<BuddyDetails[]>([]);
+  const [loadingBuddyAgents, setLoadingBuddyAgents] = useState(false);
   const [consultAgentName, setConsultAgentName] = useState<string>('Consult Agent');
   const [startTimestamp, setStartTimestamp] = useState<number>(0);
   const [secondsUntilAutoWrapup, setsecondsUntilAutoWrapup] = useState<number | null>(null);
@@ -466,6 +467,7 @@ export const useCallControl = (props: useCallControlProps) => {
 
   const loadBuddyAgents = useCallback(async () => {
     try {
+      setLoadingBuddyAgents(true);
       const agents = await store.getBuddyAgents();
       logger.info(`Loaded ${agents.length} buddy agents`, {module: 'helper.ts', method: 'loadBuddyAgents'});
       setBuddyAgents(agents);
@@ -475,6 +477,8 @@ export const useCallControl = (props: useCallControlProps) => {
         method: 'loadBuddyAgents',
       });
       setBuddyAgents([]);
+    } finally {
+      setLoadingBuddyAgents(false);
     }
   }, [logger]);
 
@@ -990,6 +994,7 @@ export const useCallControl = (props: useCallControlProps) => {
     isRecording,
     setIsRecording,
     buddyAgents,
+    loadingBuddyAgents,
     loadBuddyAgents,
     transferCall,
     consultCall,

@@ -125,6 +125,7 @@ describe('CallControlCADComponent', () => {
     setIsRecording: jest.fn(),
     buddyAgents: mockBuddyAgents,
     loadBuddyAgents: jest.fn(),
+    loadingBuddyAgents: false,
     transferCall: jest.fn(),
     consultCall: jest.fn(),
     endConsultCall: jest.fn(),

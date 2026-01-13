@@ -283,6 +283,11 @@ export interface ControlProps {
   buddyAgents: BuddyDetails[];
 
   /**
+   * Flag to indicate if buddy agents are being loaded
+   */
+  loadingBuddyAgents: boolean;
+
+  /**
    * Function to load buddy agents
    */
   loadBuddyAgents: () => Promise<void>;
@@ -480,6 +485,7 @@ export type CallControlComponentProps = Pick<
   | 'isRecording'
   | 'setIsRecording'
   | 'buddyAgents'
+  | 'loadingBuddyAgents'
   | 'loadBuddyAgents'
   | 'transferCall'
   | 'consultCall'
@@ -612,6 +618,8 @@ export interface ConsultTransferPopoverComponentProps {
   heading: string;
   buttonIcon: string;
   buddyAgents: BuddyDetails[];
+  loadingBuddyAgents: boolean;
+  loadBuddyAgents?: () => Promise<void>;
   getAddressBookEntries?: FetchPaginatedList<AddressBookEntry>;
   getEntryPoints?: FetchPaginatedList<EntryPointRecord>;
   getQueues?: FetchPaginatedList<ContactServiceQueue>;
