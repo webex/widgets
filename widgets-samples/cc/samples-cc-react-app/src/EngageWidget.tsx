@@ -12,7 +12,6 @@ import './EngageWidget.css';
 
 // Define the component props interface
 interface EngageWidgetProps {
-  accessToken: string;
   currentTheme: string;
   isSdkReady: boolean;
   dataCenter?: string;
@@ -20,7 +19,6 @@ interface EngageWidgetProps {
 }
 
 const EngageWidget: React.FC<EngageWidgetProps> = ({
-  accessToken,
   currentTheme,
   isSdkReady,
   dataCenter = DEFAULT_DATA_CENTER,
@@ -93,12 +91,7 @@ const EngageWidget: React.FC<EngageWidgetProps> = ({
         </div>
         <div className={`${CSS_CLASSES.CONTENT_AREA} ${themeClass}`}>
           {isSupportedTask && isSdkReady ? (
-            <DigitalChannels
-              jwtToken={accessToken}
-              dataCenter={dataCenter}
-              currentTheme={currentTheme}
-              isVisualRebrand={isVisualRebrand}
-            />
+            <DigitalChannels dataCenter={dataCenter} currentTheme={currentTheme} isVisualRebrand={isVisualRebrand} />
           ) : (
             <div className={CSS_CLASSES.CONTENT_PLACEHOLDER}>
               {!isSdkReady ? MESSAGES.INITIALIZING : MESSAGES.NO_ACTIVE_TASKS}

@@ -37,6 +37,7 @@ jest.mock('@webex/cc-store', () => {
       currentTask: mockCurrentTaskWithConversationId,
       isDigitalChannelsInitialized: false,
       setDigitalChannelsInitialized: jest.fn(),
+      getAccessToken: jest.fn().mockResolvedValue('test-jwt-token'),
     },
   };
 });
@@ -44,7 +45,6 @@ jest.mock('@webex/cc-store', () => {
 import {DigitalChannels} from '../../src/digital-channels';
 
 const mockProps = {
-  jwtToken: 'test-jwt-token',
   dataCenter: 'https://test-api.example.com',
 };
 

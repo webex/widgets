@@ -1,93 +1,106 @@
-import {renderHook} from '@testing-library/react';
-import '@testing-library/jest-dom';
-import {useDigitalChannels} from '../src/helper';
-import {mockTask, mockCC} from '@webex/test-fixtures';
+import {renderHook, waitFor} from '@testing-library/react';
+import {initializeApp} from '@webex/cc-digital-interactions';
 
-// Use fixtures for mock objects
-const mockCurrentTask = {
-  ...mockTask,
-  data: {
-    ...mockTask.data,
-    interaction: {
-      ...mockTask.data.interaction,
-      callAssociatedDetails: {
-        mediaResourceId: 'test-conversation-id',
+import {useDigitalChannelsInit} from '../src/helper';
+
+// Mock the cc-digital-interactions module
+jest.mock('@webex/cc-digital-interactions', () => ({
+  initializeApp: jest.fn().mockResolvedValue(undefined),
+}));
+
+describe('useDigitalChannelsInit', () => {
+  const mockLogger = {
+    log: jest.fn(),
+    error: jest.fn(),
+  };
+
+  const mockSetDigitalChannelsInitialized = jest.fn();
+
+  const defaultProps = {
+    currentTask: {
+      data: {
+        interaction: {
+          callAssociatedDetails: {
+            mediaResourceId: 'test-conversation-id',
+          },
+        },
       },
     },
-  },
-};
+    jwtToken: 'test-jwt-token',
+    dataCenter: 'test-datacenter',
+    logger: mockLogger,
+    isDigitalChannelsInitialized: false,
+    setDigitalChannelsInitialized: mockSetDigitalChannelsInitialized,
+    skipInit: false,
+  };
 
-const mockProps = {
-  currentTask: mockCurrentTask,
-  jwtToken: 'test-jwt-token',
-  dataCenter: 'https://test-api.example.com',
-  logger: mockCC.LoggerProxy,
-};
-
-describe('useDigitalChannels', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should return correct configuration when all required props are provided', () => {
-    const {result} = renderHook(() => useDigitalChannels(mockProps));
+  it('should initialize app when not already initialized', async () => {
+    const {result} = renderHook(() => useDigitalChannelsInit(defaultProps));
 
-    expect(result.current.name).toBe('DigitalChannels');
-    expect(result.current.conversationId).toBe('test-conversation-id');
-    expect(result.current.jwtToken).toBe('test-jwt-token');
-    expect(result.current.dataCenter).toBe('https://test-api.example.com');
-    expect(typeof result.current.handleError).toBe('function');
+    await waitFor(() => {
+      expect(result.current.initialized).toBe(true);
+    });
+
+    expect(initializeApp).toHaveBeenCalledWith('test-datacenter', 'test-jwt-token');
+    expect(mockSetDigitalChannelsInitialized).toHaveBeenCalledWith(true);
+    expect(mockLogger.log).toHaveBeenCalledWith(
+      expect.stringContaining('Starting Digital Channels initialization'),
+      expect.any(Object)
+    );
   });
 
-  it('should call onError when provided and return its result', () => {
-    const mockOnError = jest.fn().mockReturnValue(true);
+  it('should skip initialization when already initialized', async () => {
     const props = {
-      ...mockProps,
+      ...defaultProps,
+      isDigitalChannelsInitialized: true,
+    };
+
+    const {result} = renderHook(() => useDigitalChannelsInit(props));
+
+    await waitFor(() => {
+      expect(result.current.initialized).toBe(true);
+    });
+
+    expect(initializeApp).not.toHaveBeenCalled();
+    expect(mockLogger.log).toHaveBeenCalledWith(expect.stringContaining('App already initialized'), expect.any(Object));
+  });
+
+  it('should skip initialization when skipInit is true', async () => {
+    const props = {
+      ...defaultProps,
+      skipInit: true,
+    };
+
+    const {result} = renderHook(() => useDigitalChannelsInit(props));
+
+    // When skipInit is true, initialized should remain false
+    expect(result.current.initialized).toBe(false);
+    expect(initializeApp).not.toHaveBeenCalled();
+  });
+
+  it('should handle initialization error', async () => {
+    const mockError = new Error('Initialization failed');
+    (initializeApp as jest.Mock).mockRejectedValueOnce(mockError);
+
+    const mockOnError = jest.fn();
+    const props = {
+      ...defaultProps,
       onError: mockOnError,
     };
 
-    const {result} = renderHook(() => useDigitalChannels(props));
-    const testError = new Error('Test error');
+    renderHook(() => useDigitalChannelsInit(props));
 
-    const handleErrorResult = result.current.handleError(testError);
-
-    expect(mockOnError).toHaveBeenCalledWith(testError);
-    expect(handleErrorResult).toBe(true);
-  });
-
-  it('should handle error without onError callback', () => {
-    const consoleSpy = jest.spyOn(console, 'debug').mockImplementation();
-
-    const {result} = renderHook(() => useDigitalChannels(mockProps));
-    const testError = new Error('Test error');
-
-    const handleErrorResult = result.current.handleError(testError);
-
-    expect(mockProps.logger.error).toHaveBeenCalledWith('Digital channels error', 'Test error', {
-      module: 'widget-cc-digital-channels#helper.ts',
-      method: 'handleError',
+    await waitFor(() => {
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to initialize Digital Channels app'),
+        expect.any(Object)
+      );
     });
-    expect(consoleSpy).toHaveBeenCalledWith('Webex Engage component error:', 'Test error');
-    expect(handleErrorResult).toBe(false);
 
-    consoleSpy.mockRestore();
-  });
-
-  it('should handle unknown error types', () => {
-    const consoleSpy = jest.spyOn(console, 'debug').mockImplementation();
-
-    const {result} = renderHook(() => useDigitalChannels(mockProps));
-    const unknownError = 'String error';
-
-    const handleErrorResult = result.current.handleError(unknownError);
-
-    expect(mockProps.logger.error).toHaveBeenCalledWith('Digital channels error', 'Unknown error', {
-      module: 'widget-cc-digital-channels#helper.ts',
-      method: 'handleError',
-    });
-    expect(consoleSpy).toHaveBeenCalledWith('Webex Engage component error:', 'Unknown error');
-    expect(handleErrorResult).toBe(false);
-
-    consoleSpy.mockRestore();
+    expect(mockOnError).toHaveBeenCalledWith(mockError);
   });
 });

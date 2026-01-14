@@ -1,7 +1,7 @@
 import {useEffect, useState} from 'react';
 import {initializeApp} from '@webex/cc-digital-interactions';
 
-import {UseDigitalChannelsProps, UseDigitalChannelsInitProps} from './digital-channels/digital-channels.types';
+import {UseDigitalChannelsInitProps} from './digital-channels/digital-channels.types';
 
 /**
  * Hook to handle Digital Channels initialization.
@@ -16,11 +16,17 @@ export const useDigitalChannelsInit = (props: UseDigitalChannelsInitProps) => {
     logger,
     isDigitalChannelsInitialized,
     setDigitalChannelsInitialized,
+    skipInit = false,
   } = props;
 
   const [initialized, setInitialized] = useState(isDigitalChannelsInitialized);
 
   useEffect(() => {
+    // Skip initialization if required data is not available
+    if (skipInit) {
+      return;
+    }
+
     const initialize = async () => {
       // Initialize the digital channels app only once per session
       if (!isDigitalChannelsInitialized) {
@@ -61,43 +67,7 @@ export const useDigitalChannelsInit = (props: UseDigitalChannelsInitProps) => {
     };
 
     initialize();
-  }, [currentTask]);
+  }, [currentTask, skipInit, jwtToken]);
 
   return {initialized};
-};
-
-/**
- * Hook to derive props for Digital Channels component.
- * Extracts conversationId and provides error handling.
- */
-export const useDigitalChannels = (props: UseDigitalChannelsProps) => {
-  const {jwtToken, dataCenter, onError, logger, currentTask} = props;
-
-  const handleError = (error: unknown): boolean => {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-
-    logger?.error('Digital channels error', errorMessage, {
-      module: 'widget-cc-digital-channels#helper.ts',
-      method: 'handleError',
-    });
-
-    if (onError) {
-      return onError(error);
-    }
-
-    // Default error handling
-    console.debug('Webex Engage component error:', errorMessage);
-    return false; // Prevent default error handling
-  };
-
-  const conversationId = (currentTask.data.interaction as {callAssociatedDetails?: {mediaResourceId?: string}})
-    .callAssociatedDetails?.mediaResourceId;
-
-  return {
-    name: 'DigitalChannels',
-    handleError,
-    conversationId,
-    jwtToken,
-    dataCenter,
-  };
 };

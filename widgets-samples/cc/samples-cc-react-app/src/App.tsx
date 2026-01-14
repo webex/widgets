@@ -993,8 +993,7 @@ function App() {
             )}
 
             {isSdkReady && (store.isAgentLoggedIn || isLoggedIn) && (
-               <EngageWidget
-                accessToken={accessToken}
+              <EngageWidget
                 currentTheme={currentTheme}
                 isSdkReady={isSdkReady}
                 dataCenter={'' + (integrationEnv ? 'intgus1' : 'produs1') /* Default to US1 for non-integration envs */}
