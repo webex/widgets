@@ -1361,6 +1361,112 @@ describe('useCallControl', () => {
     getBuddyAgentsSpy.mockRestore();
   });
 
+  it('should set loadingBuddyAgents to false initially', () => {
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
+        isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
+      })
+    );
+    expect(result.current.loadingBuddyAgents).toBe(false);
+  });
+
+  it('should set loadingBuddyAgents to true during loading and false after success', async () => {
+    // Create a promise that we can control
+    let resolveGetBuddyAgents: (value: typeof mockAgents) => void;
+    const getBuddyAgentsPromise = new Promise<typeof mockAgents>((resolve) => {
+      resolveGetBuddyAgents = resolve;
+    });
+
+    const getBuddyAgentsSpy = jest.spyOn(store, 'getBuddyAgents').mockReturnValue(getBuddyAgentsPromise);
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
+        isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
+      })
+    );
+
+    // Initially false
+    expect(result.current.loadingBuddyAgents).toBe(false);
+
+    // Start loading
+    let loadPromise: Promise<void>;
+    act(() => {
+      loadPromise = result.current.loadBuddyAgents();
+    });
+
+    // Should be true while loading
+    await waitFor(() => {
+      expect(result.current.loadingBuddyAgents).toBe(true);
+    });
+
+    // Resolve the promise
+    act(() => {
+      resolveGetBuddyAgents!(mockAgents);
+    });
+
+    // Wait for the load to complete
+    await act(async () => {
+      await loadPromise!;
+    });
+
+    // Should be false after loading completes
+    expect(result.current.loadingBuddyAgents).toBe(false);
+    expect(result.current.buddyAgents).toEqual(mockAgents);
+
+    getBuddyAgentsSpy.mockRestore();
+  });
+
+  it('should set loadingBuddyAgents to false after error', async () => {
+    const getBuddyAgentsSpy = jest.spyOn(store, 'getBuddyAgents').mockRejectedValue(new Error('Load failed'));
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
+        isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
+      })
+    );
+
+    // Initially false
+    expect(result.current.loadingBuddyAgents).toBe(false);
+
+    // Load and handle error
+    await act(async () => {
+      await result.current.loadBuddyAgents();
+    });
+
+    // Should be false after error
+    expect(result.current.loadingBuddyAgents).toBe(false);
+    expect(result.current.buddyAgents).toEqual([]);
+
+    getBuddyAgentsSpy.mockRestore();
+  });
+
   it('should handle rejection when transferring call', async () => {
     const transferError = new Error('Transfer failed');
     const transferSpy = jest.fn().mockRejectedValue(transferError);

@@ -2,7 +2,7 @@ import React from 'react';
 import {render, fireEvent, waitFor, act} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ConsultTransferPopoverComponent from '../../../../../src/components/task/CallControl/CallControlCustom/consult-transfer-popover';
-import {ContactServiceQueue} from '@webex/cc-store';
+import {ContactServiceQueue, EntryPointRecord, AddressBookEntry} from '@webex/cc-store';
 import {DEFAULT_PAGE_SIZE} from '../../../../../src/components/task/constants';
 
 const loggerMock = {
@@ -60,6 +60,7 @@ describe('ConsultTransferPopoverComponent', () => {
     onDialNumberSelect: jest.fn(),
     onEntryPointSelect: jest.fn(),
     allowConsultToQueue: true,
+    loadingBuddyAgents: false,
     logger: loggerMock,
   };
 
@@ -305,6 +306,258 @@ describe('ConsultTransferPopoverComponent', () => {
         jest.advanceTimersByTime(500);
       });
       expect(getQueuesMock).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Reload button functionality', () => {
+    it('renders reload button with correct attributes', async () => {
+      const screen = await render(<ConsultTransferPopoverComponent {...baseProps} />);
+
+      const reloadButton = screen.getByTestId('consult-reload-button');
+      expect(reloadButton).toBeInTheDocument();
+      expect(reloadButton).toHaveAttribute('aria-label', 'Reload Agents');
+
+      // Check icon is present
+      const icon = reloadButton.querySelector('mdc-icon[name="refresh-bold"]');
+      expect(icon).toBeInTheDocument();
+    });
+
+    it('calls loadBuddyAgents when reload button clicked on Agents tab', async () => {
+      const mockLoadBuddyAgents = jest.fn().mockResolvedValue(undefined);
+      const screen = await render(
+        <ConsultTransferPopoverComponent {...baseProps} loadBuddyAgents={mockLoadBuddyAgents} />
+      );
+
+      // Default tab is Agents
+      const reloadButton = screen.getByTestId('consult-reload-button');
+      fireEvent.click(reloadButton);
+
+      expect(mockLoadBuddyAgents).toHaveBeenCalledTimes(1);
+    });
+
+    it('reloads queues when reload button clicked on Queues tab', async () => {
+      const getQueuesMock = jest.fn().mockResolvedValue({
+        data: [
+          {id: 'queue1', name: 'Queue One'} as ContactServiceQueue,
+          {id: 'queue2', name: 'Queue Two'} as ContactServiceQueue,
+        ],
+        meta: {page: 0, totalPages: 1},
+      });
+
+      const screen = await render(<ConsultTransferPopoverComponent {...baseProps} getQueues={getQueuesMock} />);
+
+      // Switch to Queues tab
+      fireEvent.click(screen.getByText('Queues'));
+
+      await waitFor(() => {
+        expect(getQueuesMock).toHaveBeenCalledTimes(1);
+      });
+
+      // Click reload button
+      const reloadButton = screen.getByTestId('consult-reload-button');
+      fireEvent.click(reloadButton);
+
+      await waitFor(() => {
+        expect(getQueuesMock).toHaveBeenCalledTimes(2);
+        expect(loggerMock.info).toHaveBeenCalledWith('CC-Components: Reloading Queues data', {
+          module: 'cc-components#consult-transfer-popover-hooks.ts',
+          method: 'useConsultTransferPopover#handleReload',
+        });
+      });
+    });
+
+    it('disables reload button when loadingBuddyAgents is true', async () => {
+      const screen = await render(<ConsultTransferPopoverComponent {...baseProps} loadingBuddyAgents={true} />);
+
+      const reloadButton = screen.getByTestId('consult-reload-button');
+      expect(reloadButton).toBeDisabled();
+    });
+
+    it('updates aria-label when switching tabs', async () => {
+      // Add getEntryPoints and getAddressBookEntries to enable all tabs
+      // Note: Entry Point tab only shows when heading is 'Consult'
+      const propsWithAllTabs = {
+        ...baseProps,
+        heading: 'Consult', // Required for Entry Point tab to be visible
+        getAddressBookEntries: async () => ({
+          data: [
+            {
+              id: 'dn1',
+              name: 'Dial Number One',
+              number: '12345',
+              type: 'DN',
+            } as AddressBookEntry,
+          ],
+          meta: {page: 0, totalPages: 1},
+        }),
+        getEntryPoints: async () => ({
+          data: [
+            {
+              id: 'ep1',
+              name: 'Entry Point One',
+              type: 'EP',
+              isActive: true,
+              orgId: 'org1',
+            } as EntryPointRecord,
+          ],
+          meta: {page: 0, totalPages: 1},
+        }),
+      };
+
+      const screen = await render(<ConsultTransferPopoverComponent {...propsWithAllTabs} />);
+
+      // Default is Agents
+      let reloadButton = screen.getByTestId('consult-reload-button');
+      expect(reloadButton).toHaveAttribute('aria-label', 'Reload Agents');
+
+      // Switch to Queues
+      fireEvent.click(screen.getByText('Queues'));
+      reloadButton = screen.getByTestId('consult-reload-button');
+      expect(reloadButton).toHaveAttribute('aria-label', 'Reload Queues');
+
+      // Switch to Dial Number
+      fireEvent.click(screen.getByText('Dial Number'));
+      reloadButton = screen.getByTestId('consult-reload-button');
+      expect(reloadButton).toHaveAttribute('aria-label', 'Reload Dial Number');
+
+      // Switch to Entry Point
+      fireEvent.click(screen.getByText('Entry Point'));
+      reloadButton = screen.getByTestId('consult-reload-button');
+      expect(reloadButton).toHaveAttribute('aria-label', 'Reload Entry Point');
+    });
+  });
+
+  describe('Loading states', () => {
+    it('shows spinner when loadingBuddyAgents is true and no agents', async () => {
+      const screen = await render(
+        <ConsultTransferPopoverComponent {...baseProps} buddyAgents={[]} loadingBuddyAgents={true} />
+      );
+
+      const spinner = screen.container.querySelector('.consult-loading-spinner mdc-spinner');
+      expect(spinner).toBeInTheDocument();
+    });
+
+    it('shows agents list when loadingBuddyAgents is false', async () => {
+      const screen = await render(<ConsultTransferPopoverComponent {...baseProps} loadingBuddyAgents={false} />);
+
+      const agentList = screen.container.querySelector('.agent-list');
+      expect(agentList).toBeInTheDocument();
+
+      const listItems = screen.container.querySelectorAll('.call-control-list-item');
+      expect(listItems).toHaveLength(2);
+    });
+
+    it('shows spinner for queues when loading and no data', async () => {
+      const getQueuesMock = jest.fn().mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            setTimeout(() => resolve({data: [], meta: {page: 0, totalPages: 0}}), 100);
+          })
+      );
+
+      const screen = await render(<ConsultTransferPopoverComponent {...baseProps} getQueues={getQueuesMock} />);
+
+      // Switch to Queues tab
+      fireEvent.click(screen.getByText('Queues'));
+
+      // Should show spinner while loading
+      await waitFor(() => {
+        const spinner = screen.container.querySelector('.consult-loading-spinner mdc-spinner');
+        expect(spinner).toBeInTheDocument();
+      });
+    });
+
+    it('shows spinner in load more area when loading more queues', async () => {
+      const getQueuesMock = jest.fn().mockResolvedValue({
+        data: [
+          {id: 'queue1', name: 'Queue One'} as ContactServiceQueue,
+          {id: 'queue2', name: 'Queue Two'} as ContactServiceQueue,
+        ],
+        meta: {page: 0, totalPages: 2},
+      });
+
+      const screen = await render(<ConsultTransferPopoverComponent {...baseProps} getQueues={getQueuesMock} />);
+
+      // Switch to Queues tab
+      fireEvent.click(screen.getByText('Queues'));
+
+      await waitFor(() => {
+        const listItems = screen.container.querySelectorAll('.call-control-list-item');
+        expect(listItems.length).toBeGreaterThan(0);
+      });
+
+      // Should have a load more area
+      const loadMoreArea = screen.container.querySelector('.consult-load-more');
+      expect(loadMoreArea).toBeInTheDocument();
+    });
+
+    it('shows empty state instead of spinner when not loading', async () => {
+      const screen = await render(
+        <ConsultTransferPopoverComponent {...baseProps} buddyAgents={[]} loadingBuddyAgents={false} />
+      );
+
+      const spinner = screen.container.querySelector('.consult-loading-spinner mdc-spinner');
+      expect(spinner).not.toBeInTheDocument();
+
+      const emptyState = screen.container.querySelector('.consult-empty-state');
+      expect(emptyState).toBeInTheDocument();
+    });
+  });
+
+  describe('Reload with search query', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('reloads with current search query on Queues tab', async () => {
+      const getQueuesMock = jest.fn().mockResolvedValue({
+        data: [{id: 'queue1', name: 'Queue One'} as ContactServiceQueue],
+        meta: {page: 0, totalPages: 1},
+      });
+
+      const screen = await render(<ConsultTransferPopoverComponent {...baseProps} getQueues={getQueuesMock} />);
+
+      // Switch to Queues tab
+      fireEvent.click(screen.getByText('Queues'));
+
+      await waitFor(() => {
+        expect(getQueuesMock).toHaveBeenCalledTimes(1);
+      });
+
+      // Enter search query
+      const input = screen.getByPlaceholderText('Search...') as HTMLInputElement;
+      fireEvent.change(input, {target: {value: 'test query'}});
+
+      await act(async () => {
+        jest.advanceTimersByTime(500);
+      });
+
+      // Should have called with search query
+      expect(getQueuesMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          page: 0,
+          pageSize: DEFAULT_PAGE_SIZE,
+          search: 'test query',
+        })
+      );
+
+      // Click reload - should reload with the same search query
+      const reloadButton = screen.getByTestId('consult-reload-button');
+      fireEvent.click(reloadButton);
+
+      await waitFor(() => {
+        expect(getQueuesMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            page: 0,
+            pageSize: DEFAULT_PAGE_SIZE,
+            search: 'test query',
+          })
+        );
+      });
     });
   });
 });
