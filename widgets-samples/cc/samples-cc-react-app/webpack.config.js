@@ -55,7 +55,7 @@ module.exports = {
       // TS/TSX → transpile only (skip type-checking)
       {
         test: /\.[jt]sx?$/,
-        include: [path.resolve(__dirname, 'src'), ...PKG_SRC],
+        include: [path.resolve(__dirname, 'src'), ...PKG_SRC, resolveMonorepoRoot('node_modules/xxh3-ts')],
         loader: 'ts-loader',
         options: {
           transpileOnly: true, // ✅ disables type-checking
