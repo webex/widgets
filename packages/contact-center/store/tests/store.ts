@@ -189,7 +189,6 @@ describe('Store', () => {
       jest.spyOn(storeInstance, 'registerCC').mockRejectedValue(error);
 
       // Provide a logger so the init() error handler can log without failing
-      // @ts-expect-error partial logger mock for test
       storeInstance.logger = {
         error: jest.fn(),
         log: jest.fn(),

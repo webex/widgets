@@ -143,23 +143,34 @@ class Store implements IStore {
         });
 
         webex.once('ready', () => {
-          setupEventListeners(webex.cc);
-          clearTimeout(timer);
-          this.registerCC(webex)
-            .then(() => {
-              this.logger.log('CC-Widgets: Store init(): store initialization complete', {
+          try {
+            setupEventListeners(webex.cc);
+            clearTimeout(timer);
+            this.registerCC(webex)
+              .then(() => {
+                this.logger.log('CC-Widgets: Store init(): store initialization complete', {
+                  module: 'cc-store#store.ts',
+                  method: 'init',
+                });
+                resolve();
+              })
+              .catch((error) => {
+                this.logger.error(`CC-Widgets: Store init(): registration failed - ${error}`, {
+                  module: 'cc-store#store.ts',
+                  method: 'init',
+                });
+                reject(error);
+              });
+          } catch (error) {
+            clearTimeout(timer);
+            if (this.logger) {
+              this.logger.error(`CC-Widgets: Store init(): setupEventListeners failed - ${error}`, {
                 module: 'cc-store#store.ts',
                 method: 'init',
               });
-              resolve();
-            })
-            .catch((error) => {
-              this.logger.error(`CC-Widgets: Store init(): registration failed - ${error}`, {
-                module: 'cc-store#store.ts',
-                method: 'init',
-              });
-              reject(error);
-            });
+            }
+            reject(error);
+          }
         });
       } catch (error) {
         clearTimeout(timer);

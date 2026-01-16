@@ -385,7 +385,7 @@ class StoreWrapper implements IStoreWrapper {
 
   init(options: InitParams): Promise<void> {
     return this.store.init(options, this.setupIncomingTaskHandler).catch((error) => {
-      const err = error instanceof Error ? error : new Error(String(error));
+      const err = error instanceof Error ? error : new Error(`Store initialization failed: ${String(error)}`);
 
       if (this.onErrorCallback) {
         this.onErrorCallback('Store', err);
@@ -771,6 +771,7 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   setupIncomingTaskHandler = (ccSDK: IContactCenter) => {
+    console.log('setupIncomingTaskHandler', ccSDK);
     let listenersAdded = false;
 
     const handleLogOut = () => {
