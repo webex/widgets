@@ -771,7 +771,6 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   setupIncomingTaskHandler = (ccSDK: IContactCenter) => {
-    console.log('setupIncomingTaskHandler', ccSDK);
     let listenersAdded = false;
 
     const handleLogOut = () => {
