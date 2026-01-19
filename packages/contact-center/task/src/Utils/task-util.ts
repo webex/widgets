@@ -122,12 +122,7 @@ export function getEndButtonVisibility(
 
   // Agent-to-agent consult during conference: End button enabled when switched back to main call
   if (isConsultInitiatedOrAcceptedOrBeingConsulted && isConferenceInProgress) {
-    return {isVisible, isEnabled: consultCallHeld};
-  }
-
-  // Regular consult without conference: End button enabled only when on main call
-  if (isConsultInitiatedOrAcceptedOrBeingConsulted && !isConferenceInProgress) {
-    return {isVisible, isEnabled: consultCallHeld};
+    return {isVisible, isEnabled: false};
   }
 
   // Default logic for other states

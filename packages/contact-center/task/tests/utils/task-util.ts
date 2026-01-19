@@ -423,7 +423,7 @@ describe('getControlsVisibility', () => {
     });
   });
 
-  it('should enable end button when in conference and switched back from consult (consultCallHeld = true)', () => {
+  it('should disable end button when in conference with active consult (consultCallHeld = true)', () => {
     const deviceType = 'BROWSER';
     const featureFlags = {
       isEndCallEnabled: true,
@@ -485,8 +485,8 @@ describe('getControlsVisibility', () => {
 
     const result = getControlsVisibility(deviceType, featureFlags, task, 'agent1', true);
 
-    // End button should be enabled when switched back to main call from consult
-    expect(result.end.isEnabled).toBe(true);
+    // End button should be disabled during agent-to-agent consult in conference
+    expect(result.end.isEnabled).toBe(false);
     expect(result.end.isVisible).toBe(true);
   });
 
@@ -609,6 +609,73 @@ describe('getControlsVisibility', () => {
     const result = getControlsVisibility(deviceType, featureFlags, task, 'agent1', false);
 
     // End button should be disabled when on active consult call
+    expect(result.end.isEnabled).toBe(false);
+    expect(result.end.isVisible).toBe(true);
+  });
+
+  it('should disable end button during conference when consult is active (not held)', () => {
+    const deviceType = 'BROWSER';
+    const featureFlags = {
+      isEndCallEnabled: true,
+      isEndConsultEnabled: true,
+      webRtcEnabled: true,
+    };
+
+    // Mock a task with conference in progress and agent switched to consult
+    const task = createMockTask({
+      isConferenceInProgress: true,
+      consultMediaResourceId: 'consult',
+      interaction: createPartialInteraction({
+        mediaType: 'telephony',
+        state: 'conferencing',
+        media: {
+          main: {
+            mediaResourceId: 'main',
+            mType: 'mainCall',
+            isHold: true, // Main is held - switched to consult
+            participants: ['agent1', 'agent2', 'customer1'],
+          },
+          consult: {
+            mediaResourceId: 'consult',
+            mType: 'consult',
+            isHold: false, // Consult is active
+            participants: ['agent1', 'agent3'],
+          },
+        },
+        participants: {
+          agent1: {
+            id: 'agent1',
+            pType: 'Agent',
+            name: 'Agent One',
+            consultState: 'Conferencing',
+            isConsulted: false,
+            hasLeft: false,
+          },
+          agent2: {
+            id: 'agent2',
+            pType: 'Agent',
+            name: 'Agent Two',
+            hasLeft: false,
+          },
+          agent3: {
+            id: 'agent3',
+            pType: 'Agent',
+            name: 'Agent Three',
+            hasLeft: false,
+          },
+          customer1: {
+            id: 'customer1',
+            pType: 'Customer',
+            name: 'Customer',
+            hasLeft: false,
+          },
+        },
+      }),
+    });
+
+    const result = getControlsVisibility(deviceType, featureFlags, task, 'agent1', true);
+
+    // End button should be disabled during conference with active consult
     expect(result.end.isEnabled).toBe(false);
     expect(result.end.isVisible).toBe(true);
   });
