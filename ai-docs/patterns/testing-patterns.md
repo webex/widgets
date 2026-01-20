@@ -9,7 +9,7 @@
 - **MUST** use Jest for unit tests
 - **MUST** use React Testing Library for component tests
 - **MUST** use Playwright for E2E tests
-- **MUST** mock the store using `@webex/cc-test-fixtures`
+- **MUST** mock the store using `@webex/test-fixtures`
 - **MUST** use `data-testid` attributes for test selectors
 - **MUST** place unit tests in `tests/` folder within each package
 - **MUST** place E2E tests in `playwright/` folder at repo root
@@ -46,8 +46,8 @@ playwright/
 ```typescript
 // tests/{widget}/index.test.tsx
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { UserState } from '../../src/user-state';
-import { mockStore } from '@webex/cc-test-fixtures';
+import { UserState } from '@webex/cc-user-state';
+import { mockStore } from '@webex/test-fixtures';
 
 // Mock the store
 jest.mock('@webex/cc-store', () => ({
@@ -123,7 +123,7 @@ jest.mock('@webex/cc-store', () => ({
 ```typescript
 import { renderHook, act } from '@testing-library/react';
 import { useUserState } from '../../src/helper';
-import { mockStore } from '@webex/cc-test-fixtures';
+import { mockStore } from '@webex/test-fixtures';
 
 describe('useUserState', () => {
   it('should handle state change', async () => {
@@ -195,6 +195,52 @@ test.describe('Station Login', () => {
     await utils.clickLogin();
 
     await expect(page.getByTestId('error-message')).toBeVisible();
+  });
+});
+```
+
+### TestManager Pattern
+
+```typescript
+// playwright/tests/station-login-test.spec.ts
+import {test, expect} from '@playwright/test';
+import {TestManager} from '../test-manager';
+import {
+  telephonyLogin,
+  verifyLoginMode,
+  ensureUserStateVisible,
+} from '../Utils/stationLoginUtils';
+import {LOGIN_MODE} from '../constants';
+
+test.describe('Station Login Tests - Dial Number Mode', () => {
+  let testManager: TestManager;
+
+  test.beforeAll(async ({browser}, testInfo) => {
+    const projectName = testInfo.project.name;
+    testManager = new TestManager(projectName);
+    await testManager.setupForStationLogin(browser);
+  });
+
+  test.afterAll(async () => {
+    if (testManager) {
+      await testManager.cleanup();
+    }
+  });
+
+  test('should login with Dial Number mode and verify login state', async () => {
+    await ensureUserStateVisible(
+      testManager.agent1Page,
+      LOGIN_MODE.DIAL_NUMBER,
+      process.env[`${testManager.projectName}_ENTRY_POINT`],
+    );
+
+    await telephonyLogin(
+      testManager.agent1Page,
+      LOGIN_MODE.DIAL_NUMBER,
+      process.env[`${testManager.projectName}_ENTRY_POINT`],
+    );
+
+    await verifyLoginMode(testManager.agent1Page, 'Dial Number');
   });
 });
 ```
@@ -283,8 +329,8 @@ act(() => {
 ## Snapshot Testing Pattern
 
 ```typescript
-it('should match snapshot', () => {
-  const { container } = render(<UserStateComponent {...defaultProps} />);
+it('should match snapshot', async () => {
+  const { container } = await render(<UserStateComponent {...defaultProps} />);
   expect(container).toMatchSnapshot();
 });
 ```
@@ -295,16 +341,23 @@ it('should match snapshot', () => {
 
 ```bash
 # Run all unit tests
-yarn test
+yarn test:unit
+
+# Run all style tests
+yarn test:styles
+
+# Run all E2E tests
+yarn test:e2e
+
+
+# Run all tests for tooling
+yarn test:tooling
 
 # Run specific package tests
-yarn workspace @webex/cc-station-login test
+yarn workspace @webex/cc-station-login test:unit
 
 # Run with coverage
-yarn test --coverage
-
-# Run E2E tests
-yarn test:e2e
+yarn run test:unit --coverage
 
 # Run specific E2E test
 npx playwright test tests/station-login-test.spec.ts

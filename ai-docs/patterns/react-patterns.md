@@ -6,15 +6,20 @@
 
 ## Rules
 
-- **MUST** use functional components with hooks (no class components)
-- **MUST** wrap every widget with `ErrorBoundary` from `react-error-boundary`
-- **MUST** use the three-layer pattern: Widget → Hook → Component
-- **MUST** use `observer` HOC from `mobx-react-lite` for widgets that access store
-- **MUST** keep presentational components in `cc-components` package
-- **MUST** encapsulate business logic in custom hooks (`helper.ts`)
-- **NEVER** access store directly in presentational components
-- **NEVER** call SDK methods directly in components (use hooks)
-- **NEVER** use class components
+- **Component style**
+  - **MUST** use functional components with hooks
+  - **MUST NOT** use class components
+
+- **Three-layer architecture (Widget → Hook → Component)**
+  - **MUST** follow the pattern: **Widget → Hook → Presentational Component**
+  - **MUST** encapsulate business logic and SDK calls inside custom hooks (`helper.ts`)
+  - **MUST** keep presentational components in the `cc-components` package
+  - **MUST NOT** access store directly in presentational components
+  - **MUST NOT** call SDK methods directly from widgets or presentational components (only from hooks)
+
+- **MobX + Error handling**
+  - **MUST** wrap every widget with `ErrorBoundary` from `react-error-boundary`
+  - **MUST** use `observer` from `mobx-react-lite` for widgets that access the store
 
 ---
 
@@ -31,6 +36,56 @@
 │  Presentational Component           │  ← Pure UI, props only
 │  packages/cc-components/src/...     │
 └─────────────────────────────────────┘
+```
+
+---
+## Widget Pattern
+
+```typescript
+// index.tsx
+import { observer } from 'mobx-react-lite';
+import { ErrorBoundary } from 'react-error-boundary';
+import store from '@webex/cc-store';
+import { UserStateComponent } from '@webex/cc-components';
+import { useUserState } from '../helper';
+import { IUserStateProps } from './user-state.types';
+
+const UserStateInternal: React.FC<IUserStateProps> = observer((props) => {
+  const { onStateChange } = props;
+  
+  // Get data from store
+  const { cc, idleCodes, currentState, agentId } = store;
+
+  // Use custom hook for logic
+  const { selectedState, isLoading, handleSetState } = useUserState({
+    cc,
+    idleCodes,
+    currentState,
+    onStateChange,
+  });
+
+  // Render presentational component
+  return (
+    <UserStateComponent
+      idleCodes={idleCodes}
+      currentState={currentState}
+      selectedState={selectedState}
+      isLoading={isLoading}
+      onStateSelect={handleSetState}
+    />
+  );
+});
+
+const UserState: React.FC<IUserStateProps> = (props) => (
+  <ErrorBoundary
+    fallbackRender={() => <></>}
+    onError={(error) => store.onErrorCallback?.('UserState', error)}
+  >
+    <UserStateInternal {...props} />
+  </ErrorBoundary>
+);
+
+export { UserState };
 ```
 
 ---
@@ -119,56 +174,6 @@ export const useUserState = (props: UseUserStateProps) => {
 
 ---
 
-## Widget Pattern
-
-```typescript
-// index.tsx
-import { observer } from 'mobx-react-lite';
-import { ErrorBoundary } from 'react-error-boundary';
-import store from '@webex/cc-store';
-import { UserStateComponent } from '@webex/cc-components';
-import { useUserState } from '../helper';
-import { IUserStateProps } from './user-state.types';
-
-const UserStateInternal: React.FC<IUserStateProps> = observer((props) => {
-  const { onStateChange } = props;
-  
-  // Get data from store
-  const { cc, idleCodes, currentState, agentId } = store;
-
-  // Use custom hook for logic
-  const { selectedState, isLoading, handleSetState } = useUserState({
-    cc,
-    idleCodes,
-    currentState,
-    onStateChange,
-  });
-
-  // Render presentational component
-  return (
-    <UserStateComponent
-      idleCodes={idleCodes}
-      currentState={currentState}
-      selectedState={selectedState}
-      isLoading={isLoading}
-      onStateSelect={handleSetState}
-    />
-  );
-});
-
-const UserState: React.FC<IUserStateProps> = (props) => (
-  <ErrorBoundary
-    fallbackRender={() => <></>}
-    onError={(error) => store.onErrorCallback?.('UserState', error)}
-  >
-    <UserStateInternal {...props} />
-  </ErrorBoundary>
-);
-
-export { UserState };
-```
-
----
 
 ## Presentational Component Pattern
 

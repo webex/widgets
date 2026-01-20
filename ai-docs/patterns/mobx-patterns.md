@@ -26,12 +26,11 @@ import { makeObservable, observable, action, runInAction } from 'mobx';
 
 class Store {
   private static instance: Store;
-  
   // Observable state
-  @observable agentId: string = '';
-  @observable currentState: string = '';
-  @observable idleCodes: IdleCode[] = [];
-  @observable isLoggedIn: boolean = false;
+  agentId: string = '';
+  currentState: string = '';
+  idleCodes: IdleCode[] = [];
+  isLoggedIn: boolean = false;
   
   private constructor() {
     makeObservable(this);
@@ -50,19 +49,29 @@ export default Store.getInstance();
 
 ---
 
-## Observable Decorator Pattern
+## makeAutoObservable Pattern
+
+**ALWAYS use `makeAutoObservable` for store classes in this repository.**
 
 ```typescript
-import { observable, makeObservable } from 'mobx';
+import { makeAutoObservable, observable } from 'mobx';
 
-class Store {
-  @observable agentId: string = '';
-  @observable teams: Team[] = [];
-  @observable currentState: string = 'Available';
-  @observable tasks: ITask[] = [];
+class Store implement IStore{
+  // Plain property declarations (no decorators)
+
+  private static instance: Store;
+  agentId: string = '';
+  teams: Team[] = [];
+  currentState: string = '';
+  isLoggedIn: boolean = false;
+  cc: ContactCenter | null = null;
   
   constructor() {
-    makeObservable(this);
+    // makeAutoObservable automatically makes properties observable
+    makeAutoObservable(this, {
+      // Only specify overrides for special cases
+      cc: observable.ref, // Don't observe nested properties on the SDK instance
+    });
   }
 }
 ```
@@ -170,18 +179,16 @@ class Store {
 import { observable, computed, makeObservable } from 'mobx';
 
 class Store {
-  @observable tasks: ITask[] = [];
+  tasks: ITask[] = [];
   
   constructor() {
     makeObservable(this);
   }
   
-  @computed
   get activeTasks(): ITask[] {
     return this.tasks.filter(task => task.status === 'active');
   }
   
-  @computed
   get taskCount(): number {
     return this.tasks.length;
   }
