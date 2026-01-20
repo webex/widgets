@@ -1,4 +1,4 @@
-# Station Login Widget
+# StationLogin Widget
 
 ## Overview
 
@@ -22,16 +22,16 @@ The widget integrates with the Webex Contact Center SDK and follows the standard
 
 ### Purpose
 
-The Station Login widget enables contact center agents to:
+The StationLogin widget enables contact center agents to:
 - **Login to their station** with appropriate device settings
 - **Select their team** from available teams
-- **Choose device type** (Extension, Agent DN, Browser-based)
-- **Logout from their station** when ending their shift
-- **Change station loggin mode** while logged in (profile mode)
+- **Choose device type** (Extension, Agent DN, desktop-based)
+- **Logout from their station** to login to another login type
+- **Change station login mode** while logged in (profile mode)
 
 ### Key Capabilities
 
-- **Device Type Support**: Extension, Agent DN (Mobile), and Browser-based login
+- **Device Type Support**: Extension, Agent DN, and Desktop-based login
 - **Team Selection**: Dropdown selection for multi-team agents
 - **Profile Mode**: Update agent profile settings without full re-login
 - **Error Handling**: Comprehensive error boundary with callback support
@@ -286,7 +286,7 @@ The widget requires the **Webex Contact Center SDK** (`@webex/contact-center`) t
 
 | Prop | Type | Required | Default | Description |
 |------|------|----------|---------|-------------|
-| `profileMode` | `boolean` | Yes | - | Shows save button (true) or login/logout (false) |
+| `profileMode` | `boolean` | Yes | `false` | Shows save button (true) or login/logout (false) |
 | `onLogin` | `() => void` | No | - | Callback when login succeeds |
 | `onLogout` | `() => void` | No | - | Callback when logout succeeds |
 | `onCCSignOut` | `() => void` | No | - | Callback when CC sign out is triggered |
