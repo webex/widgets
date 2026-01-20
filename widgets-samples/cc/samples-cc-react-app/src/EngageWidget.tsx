@@ -1,29 +1,15 @@
 import React, {useState, useCallback} from 'react';
 import {store, DigitalChannels} from '@webex/cc-widgets';
-import {
-  SUPPORTED_DIGITAL_MEDIA_TYPES,
-  DEFAULT_DATA_CENTER,
-  UI_CONSTANTS,
-  MESSAGES,
-  getMediaTypeIcon,
-  getMediaTypeTitle,
-} from './constants';
+import {SUPPORTED_DIGITAL_MEDIA_TYPES, UI_CONSTANTS, MESSAGES, getMediaTypeIcon, getMediaTypeTitle} from './constants';
 import './EngageWidget.css';
 
 // Define the component props interface
 interface EngageWidgetProps {
   currentTheme: string;
   isSdkReady: boolean;
-  dataCenter?: string;
-  isVisualRebrand?: boolean;
 }
 
-const EngageWidget: React.FC<EngageWidgetProps> = ({
-  currentTheme,
-  isSdkReady,
-  dataCenter = DEFAULT_DATA_CENTER,
-  isVisualRebrand = true,
-}) => {
+const EngageWidget: React.FC<EngageWidgetProps> = ({currentTheme, isSdkReady}) => {
   const [isFloatingWindowOpen, setIsFloatingWindowOpen] = useState(false);
   const [hasNewTask, setHasNewTask] = useState(false);
 
@@ -91,7 +77,7 @@ const EngageWidget: React.FC<EngageWidgetProps> = ({
         </div>
         <div className={`${CSS_CLASSES.CONTENT_AREA} ${themeClass}`}>
           {isSupportedTask && isSdkReady ? (
-            <DigitalChannels dataCenter={dataCenter} currentTheme={currentTheme} isVisualRebrand={isVisualRebrand} />
+            <DigitalChannels currentTheme={currentTheme} />
           ) : (
             <div className={CSS_CLASSES.CONTENT_PLACEHOLDER}>
               {!isSdkReady ? MESSAGES.INITIALIZING : MESSAGES.NO_ACTIVE_TASKS}

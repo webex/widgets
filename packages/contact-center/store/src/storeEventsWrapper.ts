@@ -24,6 +24,7 @@ import {
   ERROR_TRIGGERING_IDLE_CODES,
 } from './store.types';
 import Store from './store';
+import {extractRegionFromRtmsDomain} from './util';
 import {
   DEVICE_TYPE_BROWSER,
   MEDIA_TYPE_TELEPHONY_LOWER,
@@ -774,6 +775,45 @@ class StoreWrapper implements IStoreWrapper {
         error,
       });
       throw error;
+    }
+  };
+
+  getDataCenter = async (): Promise<string | undefined> => {
+    try {
+      // Get RTMS domain from store
+      // @ts-expect-error - webex internal services API not typed
+      const rtmsDomain = this.store.cc?.webex?.internal?.services?.get('wcc-calling-rtms-domain');
+      if (!rtmsDomain) {
+        this.store.logger.error('CC-Widgets: getDataCenter(): RTMS domain not found in store', {
+          module: 'storeEventsWrapper.ts',
+          method: 'getDataCenter',
+        });
+        return undefined;
+      }
+
+      // Extract and normalize the region using utility function
+      const region = extractRegionFromRtmsDomain(rtmsDomain);
+
+      if (!region) {
+        this.store.logger.error(`CC-Widgets: getDataCenter(): Failed to extract region from RTMS domain`, {
+          module: 'storeEventsWrapper.ts',
+          method: 'getDataCenter',
+        });
+        return undefined;
+      }
+
+      this.store.logger.log(`CC-Widgets: getDataCenter(): Extracted datacenter: ${region} from RTMS domain`, {
+        module: 'storeEventsWrapper.ts',
+        method: 'getDataCenter',
+      });
+      return region;
+    } catch (error) {
+      this.store.logger.error('CC-Widgets: getDataCenter(): Failed to get datacenter from store', {
+        module: 'storeEventsWrapper.ts',
+        method: 'getDataCenter',
+        error,
+      });
+      return undefined;
     }
   };
 

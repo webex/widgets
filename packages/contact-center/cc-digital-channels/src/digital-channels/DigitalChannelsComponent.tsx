@@ -12,8 +12,7 @@ const DigitalChannelsComponent: React.FunctionComponent<DigitalChannelsComponent
   conversationId,
   jwtToken,
   dataCenter,
-  currentTheme = 'DARK',
-  isVisualRebrand = true,
+  currentTheme = 'LIGHT',
 }) => {
   // Create a stable key based on critical props to force remount when they change
   // This prevents issues with the Froala editor trying to cleanup/reinitialize improperly
@@ -34,7 +33,7 @@ const DigitalChannelsComponent: React.FunctionComponent<DigitalChannelsComponent
           interactionId=""
           readonly={false}
           theme={isDarkTheme ? 'dark' : 'light'}
-          isVisualRebrand={isVisualRebrand}
+          isVisualRebrand={true}
         />
       </md-theme>
     </div>

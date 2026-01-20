@@ -4,7 +4,6 @@ export interface UseDigitalChannelsInitProps {
   currentTask: ITask;
   jwtToken: string;
   dataCenter: string;
-  onError?: (error: unknown) => boolean;
   logger: {
     log: (message: string, meta?: Record<string, unknown>) => void;
     error: (message: string, error?: unknown, meta?: Record<string, unknown>) => void;
@@ -14,11 +13,18 @@ export interface UseDigitalChannelsInitProps {
   skipInit?: boolean;
 }
 
+export interface UseDigitalChannelsDataProps {
+  getAccessToken: () => Promise<string>;
+  getDataCenter: () => Promise<string | undefined>;
+  currentTask: ITask | null;
+  logger?: {
+    log: (message: string, meta?: Record<string, unknown>) => void;
+    error: (message: string, meta?: Record<string, unknown>) => void;
+  };
+}
+
 export interface DigitalChannelsProps {
-  dataCenter: string;
   currentTheme?: string;
-  isVisualRebrand?: boolean;
-  onError?: (error: unknown) => boolean;
 }
 
 export interface DigitalChannelsComponentProps {
@@ -26,5 +32,4 @@ export interface DigitalChannelsComponentProps {
   jwtToken: string;
   dataCenter: string;
   currentTheme?: string;
-  isVisualRebrand?: boolean;
 }

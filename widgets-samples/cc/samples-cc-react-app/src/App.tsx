@@ -999,12 +999,7 @@ function App() {
             )}
 
             {isSdkReady && (store.isAgentLoggedIn || isLoggedIn) && (
-              <EngageWidget
-                currentTheme={currentTheme}
-                isSdkReady={isSdkReady}
-                dataCenter={'' + (integrationEnv ? 'intgus1' : 'produs1') /* Default to US1 for non-integration envs */}
-                isVisualRebrand={true}
-              />
+              <EngageWidget currentTheme={currentTheme} isSdkReady={isSdkReady} />
             )}
           </div>
         </IconProvider>

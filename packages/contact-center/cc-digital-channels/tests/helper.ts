@@ -86,13 +86,7 @@ describe('useDigitalChannelsInit', () => {
     const mockError = new Error('Initialization failed');
     (initializeApp as jest.Mock).mockRejectedValueOnce(mockError);
 
-    const mockOnError = jest.fn();
-    const props = {
-      ...defaultProps,
-      onError: mockOnError,
-    };
-
-    renderHook(() => useDigitalChannelsInit(props));
+    renderHook(() => useDigitalChannelsInit(defaultProps));
 
     await waitFor(() => {
       expect(mockLogger.error).toHaveBeenCalledWith(
@@ -100,7 +94,5 @@ describe('useDigitalChannelsInit', () => {
         expect.any(Object)
       );
     });
-
-    expect(mockOnError).toHaveBeenCalledWith(mockError);
   });
 });

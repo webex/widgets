@@ -38,15 +38,14 @@ jest.mock('@webex/cc-store', () => {
       isDigitalChannelsInitialized: false,
       setDigitalChannelsInitialized: jest.fn(),
       getAccessToken: jest.fn().mockResolvedValue('test-jwt-token'),
+      getDataCenter: jest.fn().mockResolvedValue('produs1'),
     },
   };
 });
 
 import {DigitalChannels} from '../../src/digital-channels';
 
-const mockProps = {
-  dataCenter: 'https://test-api.example.com',
-};
+const mockProps = {};
 
 describe('DigitalChannels Component - Integration Tests with Real Components', () => {
   beforeEach(() => {

@@ -60,6 +60,7 @@ interface IContactCenter {
   setAgentState(data: StateChange): Promise<SetStateResponse>;
   getOutdialAniEntries(params: OutdialAniParams): Promise<OutdialAniEntriesResponse>;
   getAccessToken(): Promise<string>;
+  getDataCenter(): Promise<string | undefined>;
 }
 //  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
 type IWebex = {
@@ -158,6 +159,7 @@ interface IStoreWrapper extends IStore {
   setDigitalChannelsInitialized(value: boolean): void;
   setOnError(callback: (widgetName: string, error: Error) => void): void;
   getAccessToken(): Promise<string>;
+  getDataCenter(): Promise<string | undefined>;
 }
 
 interface IWrapupCode {
