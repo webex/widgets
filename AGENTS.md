@@ -29,23 +29,23 @@ If the developer's message contains multiple distinct task types (for example, "
 
 **A. Create New Widget**
 - Developer wants to build a completely new widget from scratch
-- **Route to:** [templates/new-widget/00-master.md](./templates/new-widget/00-master.md)
+- **Route to:** [templates/new-widget/00-master.md](./ai-docs/templates/new-widget/00-master.md)
 - **Follow:** All 7 modules (pre-questions → validation)
 - **⚠️ MANDATORY FIRST STEP:** Collect design input (see below)
 
 **B. Fix Bug in Existing Widget**
 - Developer reports a bug or issue in existing code
-- **Route to:** [templates/existing-widget/bug-fix.md](./templates/existing-widget/bug-fix.md)
+- **Route to:** [templates/existing-widget/bug-fix.md](./ai-docs/templates/existing-widget/bug-fix.md)
 - **Follow:** Bug fix workflow with root cause analysis
 
 **C. Add Feature to Existing Widget**
 - Developer wants to enhance existing widget with new functionality
-- **Route to:** [templates/existing-widget/feature-enhancement.md](./templates/existing-widget/feature-enhancement.md)
+- **Route to:** [templates/existing-widget/feature-enhancement.md](./ai-docs/templates/existing-widget/feature-enhancement.md)
 - **Follow:** Feature addition workflow with backward compatibility
 
 **D. Generate/Update Documentation Only**
 - Developer needs documentation for existing code
-- **Route to:** [templates/documentation/create-agent-md.md](./templates/documentation/create-agent-md.md) and [templates/documentation/create-architecture-md.md](./templates/documentation/create-architecture-md.md)
+- **Route to:** [templates/documentation/create-agent-md.md](./ai-docs/templates/documentation/create-agent-md.md) and [templates/documentation/create-architecture-md.md](./ai-docs/templates/documentation/create-architecture-md.md)
 - **Follow:** Documentation templates (reusable for all packages)
 
 **E. Understanding Architecture**
@@ -155,12 +155,12 @@ Once provided, I'll analyze it and generate the widget accordingly.
 **Before generating code, load appropriate context:**
 
 ### Always Read (Minimal Context)
-1. **Pattern documentation** - [patterns/](./patterns/) folder
-   - [typescript-patterns.md](./patterns/typescript-patterns.md) - Type safety, naming conventions
-   - [react-patterns.md](./patterns/react-patterns.md) - Component patterns, hooks
-   - [mobx-patterns.md](./patterns/mobx-patterns.md) - State management with observer HOC
-   - [web-component-patterns.md](./patterns/web-component-patterns.md) - r2wc patterns
-   - [testing-patterns.md](./patterns/testing-patterns.md) - Jest, RTL, Playwright
+1. **Pattern documentation** - [patterns/](./ai-docs/patterns/) folder
+   - [typescript-patterns.md](./ai-docs/patterns/typescript-patterns.md) - Type safety, naming conventions
+   - [react-patterns.md](./ai-docs/patterns/react-patterns.md) - Component patterns, hooks
+   - [mobx-patterns.md](./ai-docs/patterns/mobx-patterns.md) - State management with observer HOC
+   - [web-component-patterns.md](./ai-docs/patterns/web-component-patterns.md) - r2wc patterns
+   - [testing-patterns.md](./ai-docs/patterns/testing-patterns.md) - Jest, RTL, Playwright
 
 2. **Package documentation** - If working on existing widget
    - `packages/contact-center/{widget-name}/ai-docs/AGENTS.md` - Usage and API
@@ -443,7 +443,7 @@ yarn build
 - Update: `packages/contact-center/cc-components/ai-docs/AGENTS.md`
 
 **If new pattern established:**
-- Update: Relevant pattern file in [patterns/](./patterns/)
+- Update: Relevant pattern file in [patterns/](./ai-docs/patterns/)
 
 **If architecture changed:**
 - Update: Relevant architecture documentation as needed
@@ -563,7 +563,7 @@ ccWidgets/
 ## Related Documentation
 
 - **Repository Rules:** [RULES.md](./RULES.md)
-- **Templates Overview:** [templates/README.md](./templates/README.md)
+- **Templates Overview:** [templates/README.md](./ai-docs/templates/README.md)
 
 ---
 
