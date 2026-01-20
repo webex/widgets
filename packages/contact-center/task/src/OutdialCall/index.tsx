@@ -4,20 +4,22 @@ import {observer} from 'mobx-react-lite';
 import {ErrorBoundary} from 'react-error-boundary';
 import {OutdialCallComponent} from '@webex/cc-components';
 import {useOutdialCall} from '../helper';
+import {OutdialProps} from '../task.types';
 
-const OutdialCallInternal: React.FunctionComponent = observer(() => {
+const OutdialCallInternal: React.FunctionComponent<OutdialProps> = observer((props: OutdialProps) => {
   const {cc, logger} = store;
 
   const result = useOutdialCall({cc, logger});
-  const props = {
+  const resultProps = {
     logger,
     ...result,
+    ...props,
   };
 
-  return <OutdialCallComponent {...props} />;
+  return <OutdialCallComponent {...resultProps} />;
 });
 
-const OutdialCall: React.FunctionComponent = (props) => {
+const OutdialCall: React.FunctionComponent<OutdialProps> = (props) => {
   return (
     <ErrorBoundary
       fallbackRender={() => <></>}
