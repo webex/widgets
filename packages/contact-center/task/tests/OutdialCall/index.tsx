@@ -1,5 +1,6 @@
 import React from 'react';
 import {render} from '@testing-library/react';
+import '@testing-library/jest-dom';
 import * as helper from '../../src/helper';
 import {OutdialCall} from '../../src/OutdialCall';
 import store from '@webex/cc-store';
@@ -29,7 +30,7 @@ describe('OutdialCall Component', () => {
 
   it('render OutdialCallComponent with correct props', () => {
     const useOutdialCallSpy = jest.spyOn(helper, 'useOutdialCall');
-    render(<OutdialCall />);
+    render(<OutdialCall isAddressBookEnabled={false} />);
     expect(useOutdialCallSpy).toHaveBeenCalledTimes(1);
     expect(useOutdialCallSpy).toHaveBeenCalledWith({
       cc: {},
@@ -42,6 +43,51 @@ describe('OutdialCall Component', () => {
     });
   });
 
+  it('passes isAddressBookEnabled prop correctly when set to false', () => {
+    const useOutdialCallSpy = jest.spyOn(helper, 'useOutdialCall').mockReturnValue({
+      startOutdial: jest.fn(),
+      getOutdialANIEntries: jest.fn(),
+      getAddressBookEntries: jest.fn(),
+      isTelephonyTaskActive: false,
+    });
+
+    const {container} = render(<OutdialCall isAddressBookEnabled={false} />);
+
+    expect(useOutdialCallSpy).toHaveBeenCalled();
+    // When address book is disabled, there should be no tablist
+    expect(container.querySelector('mdc-tablist')).not.toBeInTheDocument();
+  });
+
+  it('passes isAddressBookEnabled prop correctly when set to true', () => {
+    const useOutdialCallSpy = jest.spyOn(helper, 'useOutdialCall').mockReturnValue({
+      startOutdial: jest.fn(),
+      getOutdialANIEntries: jest.fn(),
+      getAddressBookEntries: jest.fn(),
+      isTelephonyTaskActive: false,
+    });
+
+    const {container} = render(<OutdialCall isAddressBookEnabled={true} />);
+
+    expect(useOutdialCallSpy).toHaveBeenCalled();
+    // When address book is enabled, there should be a tablist
+    expect(container.querySelector('mdc-tablist')).toBeInTheDocument();
+  });
+
+  it('enables address book by default when isAddressBookEnabled prop is not provided', () => {
+    const useOutdialCallSpy = jest.spyOn(helper, 'useOutdialCall').mockReturnValue({
+      startOutdial: jest.fn(),
+      getOutdialANIEntries: jest.fn(),
+      getAddressBookEntries: jest.fn(),
+      isTelephonyTaskActive: false,
+    });
+
+    const {container} = render(<OutdialCall />);
+
+    expect(useOutdialCallSpy).toHaveBeenCalled();
+    // When no prop is provided, address book should be enabled by default
+    expect(container.querySelector('mdc-tablist')).toBeInTheDocument();
+  });
+
   describe('ErrorBoundary Tests', () => {
     it('should render empty fragment when ErrorBoundary catches an error and call the callback', () => {
       // Mock the useOutdialCall to throw an error
@@ -49,7 +95,7 @@ describe('OutdialCall Component', () => {
         throw new Error('Test error in useOutdialCall');
       });
 
-      const {container} = render(<OutdialCall />);
+      const {container} = render(<OutdialCall isAddressBookEnabled={false} />);
 
       // The fallback should render an empty fragment (no content)
       expect(container.firstChild).toBeNull();
@@ -62,7 +108,7 @@ describe('OutdialCall Component', () => {
       });
       store.onErrorCallback = undefined;
 
-      const {container} = render(<OutdialCall />);
+      const {container} = render(<OutdialCall isAddressBookEnabled={false} />);
 
       // The fallback should render an empty fragment (no content)
       expect(container.firstChild).toBeNull();

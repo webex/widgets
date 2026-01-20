@@ -10,9 +10,23 @@ import {
   EntryPointRecord,
   FetchPaginatedList,
   Participant,
+  AddressBookEntrySearchParams,
+  AddressBookEntriesResponse,
 } from '@webex/cc-store';
 
 type Enum<T extends Record<string, unknown>> = T[keyof T];
+
+/**
+ * Target types for consult/transfer operations
+ */
+export const TARGET_TYPE = {
+  AGENT: 'agent',
+  QUEUE: 'queue',
+  ENTRY_POINT: 'entryPoint',
+  DIAL_NUMBER: 'dialNumber',
+} as const;
+
+export type TargetType = (typeof TARGET_TYPE)[keyof typeof TARGET_TYPE];
 
 /**
  * Interface representing the TaskProps of a user.
@@ -269,6 +283,11 @@ export interface ControlProps {
   buddyAgents: BuddyDetails[];
 
   /**
+   * Flag to indicate if buddy agents are being loaded
+   */
+  loadingBuddyAgents: boolean;
+
+  /**
    * Function to load buddy agents
    */
   loadBuddyAgents: () => Promise<void>;
@@ -323,9 +342,24 @@ export interface ControlProps {
   consultTransfer: () => void;
 
   /**
-   * Timestamp when the consult call started.
+   * Label for the state timer (e.g., "Wrap Up", "Post Call").
    */
-  consultStartTimeStamp?: number;
+  stateTimerLabel?: string | null;
+
+  /**
+   * Timestamp for the state timer.
+   */
+  stateTimerTimestamp?: number;
+
+  /**
+   * Label for the consult timer (e.g., "Consulting", "Consult on Hold").
+   */
+  consultTimerLabel?: string;
+
+  /**
+   * Timestamp for the consult timer.
+   */
+  consultTimerTimestamp?: number;
 
   /**
    * Audio stream for the call control.
@@ -397,12 +431,12 @@ export interface ControlProps {
   /**
    * Function to set the last target type
    */
-  lastTargetType: 'queue' | 'agent';
+  lastTargetType: TargetType;
 
   /**
    * Function to set the last target type
    */
-  setLastTargetType: (targetType: 'queue' | 'agent') => void;
+  setLastTargetType: (targetType: TargetType) => void;
 
   controlVisibility: ControlVisibility;
 
@@ -451,6 +485,7 @@ export type CallControlComponentProps = Pick<
   | 'isRecording'
   | 'setIsRecording'
   | 'buddyAgents'
+  | 'loadingBuddyAgents'
   | 'loadBuddyAgents'
   | 'transferCall'
   | 'consultCall'
@@ -460,7 +495,6 @@ export type CallControlComponentProps = Pick<
   | 'exitConference'
   | 'endConsultCall'
   | 'consultTransfer'
-  | 'consultStartTimeStamp'
   | 'callControlAudio'
   | 'consultAgentName'
   | 'setConsultAgentName'
@@ -468,6 +502,10 @@ export type CallControlComponentProps = Pick<
   | 'callControlClassName'
   | 'callControlConsultClassName'
   | 'startTimestamp'
+  | 'stateTimerLabel'
+  | 'stateTimerTimestamp'
+  | 'consultTimerLabel'
+  | 'consultTimerTimestamp'
   | 'allowConsultToQueue'
   | 'lastTargetType'
   | 'setLastTargetType'
@@ -522,6 +560,17 @@ export interface OutdialCallProps {
   logger: ILogger;
 
   /**
+   * Function to get a list of address book entries.
+   */
+  getAddressBookEntries: (params: AddressBookEntrySearchParams) => Promise<AddressBookEntriesResponse>;
+
+  /**
+   * Flag to determine if the address book is enabled.
+   * Defaults to true if not provided.
+   */
+  isAddressBookEnabled?: boolean;
+
+  /**
    * Boolean indicating if there's an active telephony task.
    * Used to disable the outdial button when a telephony task is in progress.
    */
@@ -530,7 +579,12 @@ export interface OutdialCallProps {
 
 export type OutdialCallComponentProps = Pick<
   OutdialCallProps,
-  'logger' | 'startOutdial' | 'getOutdialANIEntries' | 'isTelephonyTaskActive'
+  | 'logger'
+  | 'startOutdial'
+  | 'getOutdialANIEntries'
+  | 'isTelephonyTaskActive'
+  | 'getAddressBookEntries'
+  | 'isAddressBookEnabled'
 >;
 
 /**
@@ -564,6 +618,8 @@ export interface ConsultTransferPopoverComponentProps {
   heading: string;
   buttonIcon: string;
   buddyAgents: BuddyDetails[];
+  loadingBuddyAgents: boolean;
+  loadBuddyAgents?: () => Promise<void>;
   getAddressBookEntries?: FetchPaginatedList<AddressBookEntry>;
   getEntryPoints?: FetchPaginatedList<EntryPointRecord>;
   getQueues?: FetchPaginatedList<ContactServiceQueue>;
@@ -583,7 +639,8 @@ export interface ConsultTransferPopoverComponentProps {
  */
 export interface CallControlConsultComponentsProps {
   agentName: string;
-  startTimeStamp: number;
+  consultTimerLabel: string;
+  consultTimerTimestamp: number;
   consultTransfer: () => void;
   endConsultCall: () => void;
   consultConference: () => void;

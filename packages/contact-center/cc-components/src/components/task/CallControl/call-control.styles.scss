@@ -230,8 +230,22 @@
       min-width: 0;
     }
 
+    .consult-action-buttons {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-shrink: 0;
+    }
+
+    .consult-reload-button,
     .consult-quick-action-button {
       flex: 0 0 2rem; /* 32px */
+    }
+
+    .consult-reload-button {
+      mdc-icon {
+        --mdc-icon-fill-color: var(--mds-color-theme-text-primary-normal);
+      }
     }
 
     .consult-category-buttons {
@@ -269,6 +283,15 @@
       display: flex;
       justify-content: center;
       align-items: center;
+    }
+
+    .consult-loading-spinner {
+      // Centering the spinner in the loading area
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 10rem;
+      width: 100%;
     }
 
     .consult-list-container {

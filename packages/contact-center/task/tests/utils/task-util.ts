@@ -2,6 +2,7 @@ import {mockTask} from '@webex/test-fixtures';
 import {findHoldTimestamp, getControlsVisibility} from '../../src/Utils/task-util';
 import {getIsConferenceInProgress, getConferenceParticipants} from '@webex/cc-store';
 import {ITask, TaskData, Interaction} from '@webex/contact-center';
+import {DestinationAgentType} from '../../src/Utils/constants';
 
 // Helper function to create properly typed partial task objects for testing
 const createMockTask = (data: Partial<TaskData>): ITask => {
@@ -420,6 +421,457 @@ describe('getControlsVisibility', () => {
       isHeld: false,
       consultCallHeld: false,
     });
+  });
+
+  it('should enable end button when in conference and switched back from consult (consultCallHeld = true)', () => {
+    const deviceType = 'BROWSER';
+    const featureFlags = {
+      isEndCallEnabled: true,
+      isEndConsultEnabled: true,
+      webRtcEnabled: true,
+    };
+
+    // Mock a task with conference in progress and consult call held
+    const task = createMockTask({
+      isConferenceInProgress: true,
+      consultMediaResourceId: 'consult',
+      interaction: createPartialInteraction({
+        mediaType: 'telephony',
+        state: 'conferencing', // Conference state
+        media: {
+          main: {
+            mediaResourceId: 'main',
+            mType: 'mainCall',
+            isHold: false,
+            participants: ['agent1', 'agent2', 'customer1'],
+          },
+          consult: {
+            mediaResourceId: 'consult',
+            mType: 'consult',
+            isHold: true, // Consult is on hold - we've switched back to main
+            participants: ['agent1', 'agent3'],
+          },
+        },
+        participants: {
+          agent1: {
+            id: 'agent1',
+            pType: 'Agent',
+            name: 'Agent One',
+            consultState: 'Conferencing',
+            isConsulted: false,
+            hasLeft: false,
+          },
+          agent2: {
+            id: 'agent2',
+            pType: 'Agent',
+            name: 'Agent Two',
+            hasLeft: false,
+          },
+          agent3: {
+            id: 'agent3',
+            pType: 'Agent',
+            name: 'Agent Three',
+            hasLeft: false,
+          },
+          customer1: {
+            id: 'customer1',
+            pType: 'Customer',
+            name: 'Customer',
+            hasLeft: false,
+          },
+        },
+      }),
+    });
+
+    const result = getControlsVisibility(deviceType, featureFlags, task, 'agent1', true);
+
+    // End button should be enabled when switched back to main call from consult
+    expect(result.end.isEnabled).toBe(true);
+    expect(result.end.isVisible).toBe(true);
+  });
+
+  it('should enable end button when in regular consult and switched back to main call (consultCallHeld = true)', () => {
+    const deviceType = 'BROWSER';
+    const featureFlags = {
+      isEndCallEnabled: true,
+      isEndConsultEnabled: true,
+      webRtcEnabled: true,
+    };
+
+    // Mock a task with consult (not conference) and consult call held
+    const task = createMockTask({
+      isConferenceInProgress: false,
+      consultMediaResourceId: 'consult',
+      interaction: createPartialInteraction({
+        mediaType: 'telephony',
+        state: 'consulting', // Consult state
+        media: {
+          main: {
+            mediaResourceId: 'main',
+            mType: 'mainCall',
+            isHold: false,
+            participants: ['agent1', 'customer1'],
+          },
+          consult: {
+            mediaResourceId: 'consult',
+            mType: 'consult',
+            isHold: true, // Consult is on hold - we've switched back to main
+            participants: ['agent1', 'agent2'],
+          },
+        },
+        participants: {
+          agent1: {
+            id: 'agent1',
+            pType: 'Agent',
+            name: 'Agent One',
+            consultState: 'Initiated',
+            isConsulted: false,
+            hasLeft: false,
+          },
+          agent2: {
+            id: 'agent2',
+            pType: 'Agent',
+            name: 'Agent Two',
+            hasLeft: false,
+          },
+          customer1: {
+            id: 'customer1',
+            pType: 'Customer',
+            name: 'Customer',
+            hasLeft: false,
+          },
+        },
+      }),
+    });
+
+    const result = getControlsVisibility(deviceType, featureFlags, task, 'agent1', false);
+
+    // End button should be enabled when switched back to main call from consult
+    expect(result.end.isEnabled).toBe(true);
+    expect(result.end.isVisible).toBe(true);
+  });
+
+  it('should disable end button when consult is active (not on hold)', () => {
+    const deviceType = 'BROWSER';
+    const featureFlags = {
+      isEndCallEnabled: true,
+      isEndConsultEnabled: true,
+      webRtcEnabled: true,
+    };
+
+    // Mock a task with active consult (not on hold)
+    const task = createMockTask({
+      isConferenceInProgress: false,
+      consultMediaResourceId: 'consult',
+      interaction: createPartialInteraction({
+        mediaType: 'telephony',
+        state: 'consulting', // Active consult state
+        media: {
+          main: {
+            mediaResourceId: 'main',
+            mType: 'mainCall',
+            isHold: true, // Main is on hold - we're on consult call
+            participants: ['agent1', 'customer1'],
+          },
+          consult: {
+            mediaResourceId: 'consult',
+            mType: 'consult',
+            isHold: false, // Consult is active
+            participants: ['agent1', 'agent2'],
+          },
+        },
+        participants: {
+          agent1: {
+            id: 'agent1',
+            pType: 'Agent',
+            name: 'Agent One',
+            consultState: 'Initiated', // Indicate consult was initiated
+            isConsulted: false,
+            hasLeft: false,
+          },
+          agent2: {
+            id: 'agent2',
+            pType: 'Agent',
+            name: 'Agent Two',
+            isConsulted: false,
+            hasLeft: false,
+          },
+          customer1: {
+            id: 'customer1',
+            pType: 'Customer',
+            name: 'Customer',
+            hasLeft: false,
+          },
+        },
+      }),
+    });
+
+    const result = getControlsVisibility(deviceType, featureFlags, task, 'agent1', false);
+
+    // End button should be disabled when on active consult call
+    expect(result.end.isEnabled).toBe(false);
+    expect(result.end.isVisible).toBe(true);
+  });
+});
+
+describe('getEndButtonVisibility - EP_DN consult scenarios', () => {
+  const deviceType = 'BROWSER';
+  const featureFlags = {
+    isEndCallEnabled: true,
+    isEndConsultEnabled: true,
+    webRtcEnabled: true,
+  };
+
+  it('should enable end button during EP_DN consult when main call is active (not held)', () => {
+    // Mock a task with EP_DN consult - switching back to main call (consult on hold)
+    const task = createMockTask({
+      consultMediaResourceId: 'consult',
+      interaction: createPartialInteraction({
+        mediaType: 'telephony',
+        destAgentType: DestinationAgentType.EP_DN,
+        state: 'consulting',
+        media: {
+          main: {
+            mediaResourceId: 'main',
+            mType: 'mainCall',
+            isHold: false, // Main call is active - switched back to main
+            participants: ['agent1', 'customer1'],
+          },
+          consult: {
+            mediaResourceId: 'consult',
+            mType: 'consult',
+            isHold: true, // Consult is on hold - we're on main call
+            participants: ['agent1', 'epdn-agent'],
+          },
+        },
+        participants: {
+          agent1: {
+            id: 'agent1',
+            pType: 'Agent',
+            name: 'Agent One',
+            consultState: 'Initiated',
+            isConsulted: false,
+            hasLeft: false,
+          },
+          customer1: {
+            id: 'customer1',
+            pType: 'Customer',
+            name: 'Customer',
+            hasLeft: false,
+          },
+        },
+      }),
+    });
+
+    const result = getControlsVisibility(deviceType, featureFlags, task, 'agent1', false);
+
+    // EP_DN consult: End button should be enabled when on main call
+    expect(result.end.isVisible).toBe(true);
+    expect(result.end.isEnabled).toBe(true);
+  });
+
+  it('should disable end button during EP_DN consult when switched to EP_DN agent (main call held)', () => {
+    // Mock a task with EP_DN consult - switched to EP_DN agent (main call on hold)
+    const task = createMockTask({
+      consultMediaResourceId: 'consult',
+      interaction: createPartialInteraction({
+        mediaType: 'telephony',
+        destAgentType: DestinationAgentType.EPDN,
+        state: 'consulting',
+        media: {
+          main: {
+            mediaResourceId: 'main',
+            mType: 'mainCall',
+            isHold: true, // Main call is held - switched to EP_DN consult
+            participants: ['agent1', 'customer1'],
+          },
+          consult: {
+            mediaResourceId: 'consult',
+            mType: 'consult',
+            isHold: false, // Consult is active - talking to EP_DN
+            participants: ['agent1', 'epdn-agent'],
+          },
+        },
+        participants: {
+          agent1: {
+            id: 'agent1',
+            pType: 'Agent',
+            name: 'Agent One',
+            consultState: 'Initiated',
+            isConsulted: false,
+            hasLeft: false,
+          },
+          customer1: {
+            id: 'customer1',
+            pType: 'Customer',
+            name: 'Customer',
+            hasLeft: false,
+          },
+        },
+      }),
+    });
+
+    const result = getControlsVisibility(deviceType, featureFlags, task, 'agent1', false);
+
+    // EP_DN consult: End button should be disabled when main call is held (talking to EP_DN)
+    expect(result.end.isVisible).toBe(true);
+    expect(result.end.isEnabled).toBe(false);
+  });
+
+  it('should enable end button during EP_DN consult conference when main call is held but conference in progress', () => {
+    // Mock a task with EP_DN consult in conference state
+    const task = createMockTask({
+      isConferenceInProgress: true,
+      consultMediaResourceId: 'consult',
+      interaction: createPartialInteraction({
+        mediaType: 'telephony',
+        destAgentType: DestinationAgentType.ENTRY_POINT,
+        state: 'conferencing',
+        media: {
+          main: {
+            mediaResourceId: 'main',
+            mType: 'mainCall',
+            isHold: true, // Main call is held during conference
+            participants: ['agent1', 'customer1', 'epdn-agent'],
+          },
+        },
+        participants: {
+          agent1: {
+            id: 'agent1',
+            pType: 'Agent',
+            name: 'Agent One',
+            consultState: 'Conferencing',
+            isConsulted: false,
+            hasLeft: false,
+          },
+          customer1: {
+            id: 'customer1',
+            pType: 'Customer',
+            name: 'Customer',
+            hasLeft: false,
+          },
+          'epdn-agent': {
+            id: 'epdn-agent',
+            pType: 'Agent',
+            name: 'EP DN Agent',
+            hasLeft: false,
+          },
+        },
+      }),
+    });
+
+    const result = getControlsVisibility(deviceType, featureFlags, task, 'agent1', true);
+
+    expect(result.end.isVisible).toBe(true);
+    expect(result.end.isEnabled).toBe(true);
+  });
+
+  it('should recognize EP destAgentType variant', () => {
+    const task = createMockTask({
+      consultMediaResourceId: 'consult',
+      interaction: createPartialInteraction({
+        destAgentType: DestinationAgentType.EP,
+        mediaType: 'telephony',
+        state: 'consulting',
+        media: {
+          main: {
+            mediaResourceId: 'main',
+            mType: 'mainCall',
+            isHold: false, // Main call active - we're on main call
+            participants: ['agent1', 'customer1'],
+          },
+          consult: {
+            mediaResourceId: 'consult',
+            mType: 'consult',
+            isHold: true, // Consult on hold
+            participants: ['agent1', 'ep-agent'],
+          },
+        },
+        participants: {
+          agent1: {
+            id: 'agent1',
+            pType: 'Agent',
+            name: 'Agent One',
+            consultState: 'Initiated',
+            isConsulted: false,
+            hasLeft: false,
+          },
+          customer1: {
+            id: 'customer1',
+            pType: 'Customer',
+            name: 'Customer',
+            hasLeft: false,
+          },
+        },
+      }),
+    });
+
+    const result = getControlsVisibility(deviceType, featureFlags, task, 'agent1', false);
+
+    // EP_DN consult: End button should be enabled when on main call
+    expect(result.end.isVisible).toBe(true);
+    expect(result.end.isEnabled).toBe(true);
+  });
+
+  it('should handle missing destAgentType as non-EP_DN consult', () => {
+    const task = createMockTask({
+      consultMediaResourceId: 'consult',
+      interaction: createPartialInteraction({
+        mediaType: 'telephony',
+        state: 'consulting',
+        media: {
+          main: {
+            mediaResourceId: 'main',
+            mType: 'mainCall',
+            isHold: true,
+            participants: ['agent1', 'customer1'],
+          },
+          consult: {
+            mediaResourceId: 'consult',
+            mType: 'consult',
+            isHold: false,
+            participants: ['agent1', 'agent2'],
+          },
+        },
+        participants: {
+          agent1: {
+            id: 'agent1',
+            pType: 'Agent',
+            consultState: 'Initiated',
+            hasLeft: false,
+          },
+        },
+      }),
+    });
+
+    const result = getControlsVisibility(deviceType, featureFlags, task, 'agent1', false);
+
+    // Should follow regular consult logic (disabled when on consult call)
+    expect(result.end.isVisible).toBe(true);
+    expect(result.end.isEnabled).toBe(false);
+  });
+
+  it('should handle missing task data gracefully', () => {
+    const task = {} as Partial<ITask> as ITask;
+
+    const result = getControlsVisibility(deviceType, featureFlags, task, 'agent1', false);
+
+    // Should still return valid visibility structure
+    expect(result.end).toBeDefined();
+    expect(result.end.isVisible).toBeDefined();
+    expect(result.end.isEnabled).toBeDefined();
+  });
+
+  it('should handle missing interaction data gracefully', () => {
+    const task = createMockTask({
+      interaction: undefined,
+    });
+
+    const result = getControlsVisibility(deviceType, featureFlags, task, 'agent1', false);
+
+    expect(result.end).toBeDefined();
+    expect(result.end.isVisible).toBeDefined();
+    expect(result.end.isEnabled).toBeDefined();
   });
 });
 

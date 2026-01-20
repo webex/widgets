@@ -4,6 +4,7 @@ import * as helper from '../../src/helper';
 import {CallControl} from '../../src';
 import store from '@webex/cc-store';
 import {mockTask} from '@webex/test-fixtures';
+import {TARGET_TYPE} from '../../src/task.types';
 import '@testing-library/jest-dom';
 
 const onHoldResumeCb = jest.fn();
@@ -38,6 +39,7 @@ describe('CallControl Component', () => {
       setIsRecording: jest.fn(),
       buddyAgents: [],
       loadBuddyAgents: jest.fn(),
+      loadingBuddyAgents: false,
       transferCall: jest.fn(),
       consultCall: jest.fn(),
       endConsultCall: jest.fn(),
@@ -46,7 +48,7 @@ describe('CallControl Component', () => {
       setConsultAgentName: jest.fn(),
       holdTime: 0,
       startTimestamp: 0,
-      lastTargetType: 'agent' as const,
+      lastTargetType: TARGET_TYPE.AGENT,
       setLastTargetType: jest.fn(),
       controlVisibility: {
         accept: defaultVisibility,
@@ -89,6 +91,10 @@ describe('CallControl Component', () => {
       getAddressBookEntries: jest.fn().mockResolvedValue({data: [], meta: {page: 0, totalPages: 0}}),
       getEntryPoints: jest.fn().mockResolvedValue({data: [], meta: {page: 0, totalPages: 0}}),
       getQueuesFetcher: jest.fn().mockResolvedValue({data: [], meta: {page: 0, totalPages: 0}}),
+      stateTimerLabel: null,
+      stateTimerTimestamp: 0,
+      consultTimerLabel: 'Consulting',
+      consultTimerTimestamp: 0,
     });
 
     render(
