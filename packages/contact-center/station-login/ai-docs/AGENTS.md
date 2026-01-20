@@ -2,7 +2,15 @@
 
 ## Overview
 
-The Station Login widget provides a user interface for contact center agents to log in and out of their station. It handles device type selection (Extension, Mobile, Browser), team selection, and agent profile management. The widget integrates with the Webex Contact Center SDK and follows the standard three-layer architecture pattern (Widget → Hook → Component → Store).
+The `StationLogin` component allows agents to perform station login and select the type of channel they want to use for establishing voice connections.
+
+It provides a user interface for agents to log in to their contact center station and choose from different connection types:
+
+- **Desktop**: Uses WebRTC for voice communication
+- **Extension**: Allows using a softphone or a hardphone extension
+- **Dial Number**: Allows using a PSTN phone number
+
+The widget integrates with the Webex Contact Center SDK and follows the standard three-layer architecture pattern (Widget → Hook → Component → Store).
 
 **Package:** `@webex/cc-station-login`
 
@@ -19,13 +27,12 @@ The Station Login widget enables contact center agents to:
 - **Select their team** from available teams
 - **Choose device type** (Extension, Agent DN, Browser-based)
 - **Logout from their station** when ending their shift
-- **Update their profile settings** while logged in (profile mode)
-- **Handle multiple login scenarios** with continuation prompts
+- **Change station loggin mode** while logged in (profile mode)
 
 ### Key Capabilities
 
 - **Device Type Support**: Extension, Agent DN (Mobile), and Browser-based login
-- **Team Management**: Dropdown selection for multi-team agents
+- **Team Selection**: Dropdown selection for multi-team agents
 - **Profile Mode**: Update agent profile settings without full re-login
 - **Error Handling**: Comprehensive error boundary with callback support
 - **Multiple Login Detection**: Alerts and continuation flow for agents logged in elsewhere
@@ -41,7 +48,7 @@ The Station Login widget enables contact center agents to:
 #### Basic Usage (React)
 
 ```typescript
-import { StationLogin } from '@webex/cc-station-login';
+import { StationLogin } from '@webex/cc-widgets';
 import React from 'react';
 
 function MyApp() {
@@ -63,39 +70,16 @@ function MyApp() {
       onLogout={handleLogout}
       onCCSignOut={handleCCSignOut}
       profileMode={false}
+      doStationLogout={false}
     />
   );
 }
 ```
 
-#### Web Component Usage
-
-```html
-<!-- Include the widget bundle -->
-<script src="path/to/cc-widgets.js"></script>
-
-<!-- Use the web component -->
-<cc-station-login
-  profile-mode="false"
-></cc-station-login>
-
-<script>
-  const widget = document.querySelector('cc-station-login');
-  
-  widget.addEventListener('login', () => {
-    console.log('Agent logged in');
-  });
-  
-  widget.addEventListener('logout', () => {
-    console.log('Agent logged out');
-  });
-</script>
-```
-
 #### Profile Mode Usage
 
 ```typescript
-import { StationLogin } from '@webex/cc-station-login';
+import { StationLogin } from '@webex/cc-widgets';
 
 function AgentProfile() {
   const handleSaveStart = () => {
@@ -167,6 +151,8 @@ function AgentProfile() {
 ```typescript
 // Widget automatically detects if agent is logged in elsewhere
 // Shows alert and provides continuation option
+// While initializing the store we need to pass
+// allowMultiLogin flag as true
 <StationLogin
   onLogin={() => {
     console.log('Successfully continued session');
@@ -180,72 +166,78 @@ function AgentProfile() {
 ```typescript
 import store from '@webex/cc-store';
 
-// Set error callback before rendering widget
-store.onErrorCallback = (componentName, error) => {
-  console.error(`Error in ${componentName}:`, error);
-  // Send to error tracking service
-  trackError(componentName, error);
+// Configure a global error callback before rendering the widget.
+// The StationLogin widget will invoke this callback whenever an error occurs
+// during station login/logout, profile updates, or underlying SDK operations.
+store.onErrorCallback = (component, error) => {
+  if (component === 'StationLogin') {
+    // Handle StationLogin‑specific errors in your application shell
+    console.error('StationLogin error:', error);
+
+    // Example: surface a user‑friendly notification
+    showToast(error.userMessage ?? 'Unable to complete station login. Please try again.');
+  }
 };
 
-// Widget will call this callback on errors
+// When an error occurs inside StationLogin, it will call store.onErrorCallback
+// with componentName === 'StationLogin' and the error object.
 <StationLogin profileMode={false} />
 ```
 
 ### Integration Patterns
 
-#### With Custom Authentication
+#### With store initialization
 
 ```typescript
-import { StationLogin } from '@webex/cc-station-login';
-import store from '@webex/cc-store';
+import { store, StationLogin } from '@webex/cc-widgets';
+import {useState} from 'react'
 
-function AuthenticatedApp() {
+
+function App() {
   // Initialize store with SDK instance
+  const [ready,setStoreReady] = useState(false)
+  const access_token = 'agents_access_token'
+
   useEffect(() => {
-    const initializeCC = async () => {
-      // Initialize Contact Center SDK
-      const cc = await ContactCenter.init({
-        token: authToken,
-        region: 'us1'
+    const initializeStore = async () => {
+      // Initialize store 
+      const cc = await store.init({
+        webexConfig,
+        access_token: access_token
+      }).then(()=>{
+        setStoreReady(true)
       });
       
-      // Set CC instance in store
-      store.setCC(cc);
     };
     
-    initializeCC();
-  }, [authToken]);
+    initializeStore();
+  }, []);
 
-  return <StationLogin profileMode={false} onLogin={handleLogin} />;
+  return {ready && <StationLogin profileMode={false} />};
 }
 ```
 
-#### With State Management
+#### With props
 
 ```typescript
-import { StationLogin } from '@webex/cc-station-login';
-import { observer } from 'mobx-react-lite';
-import store from '@webex/cc-store';
+import { store, StationLogin } from '@webex/cc-widgets';
 
-// Observer component that reacts to store changes
-const LoginContainer = observer(() => {
+function App() {
   const { isAgentLoggedIn, teams, deviceType } = store;
 
-  if (isAgentLoggedIn) {
-    return <AgentDesktop />;
-  }
-
   return (
-    <StationLogin
-      onLogin={() => {
-        // Store automatically updates isAgentLoggedIn
-        console.log('Teams available:', teams);
-        console.log('Device type:', deviceType);
-      }}
-      profileMode={false}
-    />
+    <ThemeProvider themeclass={currentTheme === 'LIGHT' ? 'mds-theme-stable-lightWebex' : 'mds-theme-stable-darkWebex'}>
+      <IconProvider iconSet="momentum-icons">
+        <StationLogin
+          onLogin={onLogin}
+          onLogout={onLogout}
+          onCCSignOut={onCCSignOut}
+          profileMode={false}
+        />
+      </IconProvider>
+    </ThemeProvider>
   );
-});
+};
 ```
 
 ---
@@ -310,9 +302,11 @@ The widget requires the **Webex Contact Center SDK** (`@webex/contact-center`) t
 ```bash
 # Install as part of contact center widgets
 yarn add @webex/cc-station-login
+npm install @webex/cc-station-login
 
 # Or install the entire widgets bundle
 yarn add @webex/cc-widgets
+npm install @webex/cc-widgets
 ```
 
 ---

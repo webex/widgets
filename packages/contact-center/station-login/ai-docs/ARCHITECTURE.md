@@ -395,16 +395,33 @@ sequenceDiagram
 **Solutions:**
 
 ```typescript
-// Check if store has CC instance
-import store from '@webex/cc-store';
-console.log('CC instance:', store.cc); // Should not be undefined
+import { store, StationLogin } from '@webex/cc-widgets';
+import {useState} from 'react'
 
-// Ensure SDK is initialized before rendering widget
-const initializeApp = async () => {
-  const cc = await ContactCenter.init({ token, region });
-  store.setCC(cc);
-  // Now render widget
-};
+
+function App() {
+  // Initialize store with SDK instance
+  // Only render when store is ready
+  const [ready,setStoreReady] = useState(false)
+  const access_token = 'agents_access_token'
+
+  useEffect(() => {
+    const initializeStore = async () => {
+      // Initialize store 
+      const cc = await store.init({
+        webexConfig,
+        access_token: access_token
+      }).then(()=>{
+        setStoreReady(true)
+      });
+      
+    };
+    
+    initializeStore();
+  }, []);
+
+  return {ready && <StationLogin profileMode={false} />};
+}
 ```
 
 #### 2. Login Fails Silently
@@ -417,7 +434,6 @@ const initializeApp = async () => {
 - SDK not initialized
 - Network issues
 - Invalid credentials
-- Missing logger
 
 **Solutions:**
 
@@ -425,8 +441,6 @@ const initializeApp = async () => {
 // Check logger
 console.log('Logger:', store.logger); // Should be defined
 
-// Enable detailed logging
-store.logger.setLevel('debug');
 
 // Check SDK events
 store.setCCCallback('error', (error) => {
