@@ -36,6 +36,41 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
         style="clip-path: inset(50%); height: 1px; overflow: hidden; position: absolute; width: 1px; white-space: nowrap;"
       />
     </div>
+    <div
+      class="consult-action-buttons"
+    >
+      <button
+        aria-describedby="react-aria-:r2m:"
+        aria-label="Reload Agents"
+        class="md-button-circle-wrapper consult-reload-button call-control-button md-button-simple-wrapper"
+        data-color="primary"
+        data-disabled="false"
+        data-ghost="false"
+        data-inverted="false"
+        data-multiple-children="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="32"
+        data-testid="consult-reload-button"
+        type="button"
+      >
+        <mdc-icon
+          name="refresh-bold"
+        />
+      </button>
+      <div
+        class="md-tooltip-label"
+        id="react-aria-:r2m:"
+      >
+        <mdc-text
+          class="md-text-wrapper"
+          tagname="p"
+          type="body-large-regular"
+        >
+          Reload Agents
+        </mdc-text>
+      </div>
+    </div>
   </div>
   <div
     class="consult-category-buttons"
@@ -292,6 +327,41 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
         style="clip-path: inset(50%); height: 1px; overflow: hidden; position: absolute; width: 1px; white-space: nowrap;"
       />
     </div>
+    <div
+      class="consult-action-buttons"
+    >
+      <button
+        aria-describedby="react-aria-:r2u:"
+        aria-label="Reload Queues"
+        class="md-button-circle-wrapper consult-reload-button call-control-button md-button-simple-wrapper"
+        data-color="primary"
+        data-disabled="false"
+        data-ghost="false"
+        data-inverted="false"
+        data-multiple-children="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="32"
+        data-testid="consult-reload-button"
+        type="button"
+      >
+        <mdc-icon
+          name="refresh-bold"
+        />
+      </button>
+      <div
+        class="md-tooltip-label"
+        id="react-aria-:r2u:"
+      >
+        <mdc-text
+          class="md-text-wrapper"
+          tagname="p"
+          type="body-large-regular"
+        >
+          Reload Queues
+        </mdc-text>
+      </div>
+    </div>
   </div>
   <div
     class="consult-category-buttons"
@@ -475,6 +545,41 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
         style="clip-path: inset(50%); height: 1px; overflow: hidden; position: absolute; width: 1px; white-space: nowrap;"
       />
     </div>
+    <div
+      class="consult-action-buttons"
+    >
+      <button
+        aria-describedby="react-aria-:r2f:"
+        aria-label="Reload Queues"
+        class="md-button-circle-wrapper consult-reload-button call-control-button md-button-simple-wrapper"
+        data-color="primary"
+        data-disabled="false"
+        data-ghost="false"
+        data-inverted="false"
+        data-multiple-children="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="32"
+        data-testid="consult-reload-button"
+        type="button"
+      >
+        <mdc-icon
+          name="refresh-bold"
+        />
+      </button>
+      <div
+        class="md-tooltip-label"
+        id="react-aria-:r2f:"
+      >
+        <mdc-text
+          class="md-text-wrapper"
+          tagname="p"
+          type="body-large-regular"
+        >
+          Reload Queues
+        </mdc-text>
+      </div>
+    </div>
   </div>
   <div
     class="consult-category-buttons"
@@ -657,6 +762,41 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         data-testid="screen-reader-announcer"
         style="clip-path: inset(50%); height: 1px; overflow: hidden; position: absolute; width: 1px; white-space: nowrap;"
       />
+    </div>
+    <div
+      class="consult-action-buttons"
+    >
+      <button
+        aria-describedby="react-aria-:r6:"
+        aria-label="Reload Agents"
+        class="md-button-circle-wrapper consult-reload-button call-control-button md-button-simple-wrapper"
+        data-color="primary"
+        data-disabled="false"
+        data-ghost="false"
+        data-inverted="false"
+        data-multiple-children="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="32"
+        data-testid="consult-reload-button"
+        type="button"
+      >
+        <mdc-icon
+          name="refresh-bold"
+        />
+      </button>
+      <div
+        class="md-tooltip-label"
+        id="react-aria-:r6:"
+      >
+        <mdc-text
+          class="md-text-wrapper"
+          tagname="p"
+          type="body-large-regular"
+        >
+          Reload Agents
+        </mdc-text>
+      </div>
     </div>
   </div>
   <div
@@ -931,6 +1071,41 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         data-testid="screen-reader-announcer"
         style="clip-path: inset(50%); height: 1px; overflow: hidden; position: absolute; width: 1px; white-space: nowrap;"
       />
+    </div>
+    <div
+      class="consult-action-buttons"
+    >
+      <button
+        aria-describedby="react-aria-:r27:"
+        aria-label="Reload Agents"
+        class="md-button-circle-wrapper consult-reload-button call-control-button md-button-simple-wrapper"
+        data-color="primary"
+        data-disabled="false"
+        data-ghost="false"
+        data-inverted="false"
+        data-multiple-children="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="32"
+        data-testid="consult-reload-button"
+        type="button"
+      >
+        <mdc-icon
+          name="refresh-bold"
+        />
+      </button>
+      <div
+        class="md-tooltip-label"
+        id="react-aria-:r27:"
+      >
+        <mdc-text
+          class="md-text-wrapper"
+          tagname="p"
+          type="body-large-regular"
+        >
+          Reload Agents
+        </mdc-text>
+      </div>
     </div>
   </div>
   <div
@@ -1263,6 +1438,41 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         style="clip-path: inset(50%); height: 1px; overflow: hidden; position: absolute; width: 1px; white-space: nowrap;"
       />
     </div>
+    <div
+      class="consult-action-buttons"
+    >
+      <button
+        aria-describedby="react-aria-:r1a:"
+        aria-label="Reload Agents"
+        class="md-button-circle-wrapper consult-reload-button call-control-button md-button-simple-wrapper"
+        data-color="primary"
+        data-disabled="false"
+        data-ghost="false"
+        data-inverted="false"
+        data-multiple-children="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="32"
+        data-testid="consult-reload-button"
+        type="button"
+      >
+        <mdc-icon
+          name="refresh-bold"
+        />
+      </button>
+      <div
+        class="md-tooltip-label"
+        id="react-aria-:r1a:"
+      >
+        <mdc-text
+          class="md-text-wrapper"
+          tagname="p"
+          type="body-large-regular"
+        >
+          Reload Agents
+        </mdc-text>
+      </div>
+    </div>
   </div>
   <div
     class="consult-category-buttons"
@@ -1501,6 +1711,41 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         style="clip-path: inset(50%); height: 1px; overflow: hidden; position: absolute; width: 1px; white-space: nowrap;"
       />
     </div>
+    <div
+      class="consult-action-buttons"
+    >
+      <button
+        aria-describedby="react-aria-:r1h:"
+        aria-label="Reload Agents"
+        class="md-button-circle-wrapper consult-reload-button call-control-button md-button-simple-wrapper"
+        data-color="primary"
+        data-disabled="false"
+        data-ghost="false"
+        data-inverted="false"
+        data-multiple-children="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="32"
+        data-testid="consult-reload-button"
+        type="button"
+      >
+        <mdc-icon
+          name="refresh-bold"
+        />
+      </button>
+      <div
+        class="md-tooltip-label"
+        id="react-aria-:r1h:"
+      >
+        <mdc-text
+          class="md-text-wrapper"
+          tagname="p"
+          type="body-large-regular"
+        >
+          Reload Agents
+        </mdc-text>
+      </div>
+    </div>
   </div>
   <div
     class="consult-category-buttons"
@@ -1614,6 +1859,41 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         data-testid="screen-reader-announcer"
         style="clip-path: inset(50%); height: 1px; overflow: hidden; position: absolute; width: 1px; white-space: nowrap;"
       />
+    </div>
+    <div
+      class="consult-action-buttons"
+    >
+      <button
+        aria-describedby="react-aria-:rk:"
+        aria-label="Reload Agents"
+        class="md-button-circle-wrapper consult-reload-button call-control-button md-button-simple-wrapper"
+        data-color="primary"
+        data-disabled="false"
+        data-ghost="false"
+        data-inverted="false"
+        data-multiple-children="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="32"
+        data-testid="consult-reload-button"
+        type="button"
+      >
+        <mdc-icon
+          name="refresh-bold"
+        />
+      </button>
+      <div
+        class="md-tooltip-label"
+        id="react-aria-:rk:"
+      >
+        <mdc-text
+          class="md-text-wrapper"
+          tagname="p"
+          type="body-large-regular"
+        >
+          Reload Agents
+        </mdc-text>
+      </div>
     </div>
   </div>
   <div
@@ -1871,6 +2151,41 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         style="clip-path: inset(50%); height: 1px; overflow: hidden; position: absolute; width: 1px; white-space: nowrap;"
       />
     </div>
+    <div
+      class="consult-action-buttons"
+    >
+      <button
+        aria-describedby="react-aria-:rr:"
+        aria-label="Reload Agents"
+        class="md-button-circle-wrapper consult-reload-button call-control-button md-button-simple-wrapper"
+        data-color="primary"
+        data-disabled="false"
+        data-ghost="false"
+        data-inverted="false"
+        data-multiple-children="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="32"
+        data-testid="consult-reload-button"
+        type="button"
+      >
+        <mdc-icon
+          name="refresh-bold"
+        />
+      </button>
+      <div
+        class="md-tooltip-label"
+        id="react-aria-:rr:"
+      >
+        <mdc-text
+          class="md-text-wrapper"
+          tagname="p"
+          type="body-large-regular"
+        >
+          Reload Agents
+        </mdc-text>
+      </div>
+    </div>
   </div>
   <div
     class="consult-category-buttons"
@@ -1985,6 +2300,38 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         style="clip-path: inset(50%); height: 1px; overflow: hidden; position: absolute; width: 1px; white-space: nowrap;"
       />
     </div>
+    <div
+      class="consult-action-buttons"
+    >
+      <button
+        aria-describedby="react-aria-:r13:"
+        aria-label="Reload Queues"
+        class="md-button-circle-wrapper consult-reload-button call-control-button md-button-simple-wrapper"
+        data-color="primary"
+        data-disabled="true"
+        data-ghost="false"
+        data-inverted="false"
+        data-multiple-children="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="32"
+        data-testid="consult-reload-button"
+        disabled=""
+        type="button"
+      >
+        <mdc-icon />
+      </button>
+      <div
+        class="md-tooltip-label"
+        id="react-aria-:r13:"
+      >
+        <mdc-text
+          class="md-text-wrapper"
+        >
+          Reload Queues
+        </mdc-text>
+      </div>
+    </div>
   </div>
   <div
     class="consult-category-buttons"
@@ -2048,16 +2395,9 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     class="consult-list-container"
   >
     <div
-      class="consult-empty-state"
+      class="consult-loading-spinner"
     >
-      <div
-        class="consult-empty-state-svg"
-      />
-      <div
-        class="consult-empty-message"
-      >
-        No data available for consult transfer.
-      </div>
+      <mdc-spinner />
     </div>
   </div>
 </div>
@@ -2098,6 +2438,41 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         data-testid="screen-reader-announcer"
         style="clip-path: inset(50%); height: 1px; overflow: hidden; position: absolute; width: 1px; white-space: nowrap;"
       />
+    </div>
+    <div
+      class="consult-action-buttons"
+    >
+      <button
+        aria-describedby="react-aria-:r1o:"
+        aria-label="Reload Agents"
+        class="md-button-circle-wrapper consult-reload-button call-control-button md-button-simple-wrapper"
+        data-color="primary"
+        data-disabled="false"
+        data-ghost="false"
+        data-inverted="false"
+        data-multiple-children="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="32"
+        data-testid="consult-reload-button"
+        type="button"
+      >
+        <mdc-icon
+          name="refresh-bold"
+        />
+      </button>
+      <div
+        class="md-tooltip-label"
+        id="react-aria-:r1o:"
+      >
+        <mdc-text
+          class="md-text-wrapper"
+          tagname="p"
+          type="body-large-regular"
+        >
+          Reload Agents
+        </mdc-text>
+      </div>
     </div>
   </div>
   <div
@@ -2279,6 +2654,41 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         data-testid="screen-reader-announcer"
         style="clip-path: inset(50%); height: 1px; overflow: hidden; position: absolute; width: 1px; white-space: nowrap;"
       />
+    </div>
+    <div
+      class="consult-action-buttons"
+    >
+      <button
+        aria-describedby="react-aria-:r20:"
+        aria-label="Reload Queues"
+        class="md-button-circle-wrapper consult-reload-button call-control-button md-button-simple-wrapper"
+        data-color="primary"
+        data-disabled="false"
+        data-ghost="false"
+        data-inverted="false"
+        data-multiple-children="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="32"
+        data-testid="consult-reload-button"
+        type="button"
+      >
+        <mdc-icon
+          name="refresh-bold"
+        />
+      </button>
+      <div
+        class="md-tooltip-label"
+        id="react-aria-:r20:"
+      >
+        <mdc-text
+          class="md-text-wrapper"
+          tagname="p"
+          type="body-large-regular"
+        >
+          Reload Queues
+        </mdc-text>
+      </div>
     </div>
   </div>
   <div
@@ -2462,6 +2872,41 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         data-testid="screen-reader-announcer"
         style="clip-path: inset(50%); height: 1px; overflow: hidden; position: absolute; width: 1px; white-space: nowrap;"
       />
+    </div>
+    <div
+      class="consult-action-buttons"
+    >
+      <button
+        aria-describedby="react-aria-:rd:"
+        aria-label="Reload Agents"
+        class="md-button-circle-wrapper consult-reload-button call-control-button md-button-simple-wrapper"
+        data-color="primary"
+        data-disabled="false"
+        data-ghost="false"
+        data-inverted="false"
+        data-multiple-children="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="32"
+        data-testid="consult-reload-button"
+        type="button"
+      >
+        <mdc-icon
+          name="refresh-bold"
+        />
+      </button>
+      <div
+        class="md-tooltip-label"
+        id="react-aria-:rd:"
+      >
+        <mdc-text
+          class="md-text-wrapper"
+          tagname="p"
+          type="body-large-regular"
+        >
+          Reload Agents
+        </mdc-text>
+      </div>
     </div>
   </div>
   <div
@@ -2719,6 +3164,41 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
         style="clip-path: inset(50%); height: 1px; overflow: hidden; position: absolute; width: 1px; white-space: nowrap;"
       />
     </div>
+    <div
+      class="consult-action-buttons"
+    >
+      <button
+        aria-describedby="react-aria-:r3c:"
+        aria-label="Reload Agents"
+        class="md-button-circle-wrapper consult-reload-button call-control-button md-button-simple-wrapper"
+        data-color="primary"
+        data-disabled="false"
+        data-ghost="false"
+        data-inverted="false"
+        data-multiple-children="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="32"
+        data-testid="consult-reload-button"
+        type="button"
+      >
+        <mdc-icon
+          name="refresh-bold"
+        />
+      </button>
+      <div
+        class="md-tooltip-label"
+        id="react-aria-:r3c:"
+      >
+        <mdc-text
+          class="md-text-wrapper"
+          tagname="p"
+          type="body-large-regular"
+        >
+          Reload Agents
+        </mdc-text>
+      </div>
+    </div>
   </div>
   <div
     class="consult-category-buttons"
@@ -2895,6 +3375,41 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
         data-testid="screen-reader-announcer"
         style="clip-path: inset(50%); height: 1px; overflow: hidden; position: absolute; width: 1px; white-space: nowrap;"
       />
+    </div>
+    <div
+      class="consult-action-buttons"
+    >
+      <button
+        aria-describedby="react-aria-:r35:"
+        aria-label="Reload Agents"
+        class="md-button-circle-wrapper consult-reload-button call-control-button md-button-simple-wrapper"
+        data-color="primary"
+        data-disabled="false"
+        data-ghost="false"
+        data-inverted="false"
+        data-multiple-children="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="32"
+        data-testid="consult-reload-button"
+        type="button"
+      >
+        <mdc-icon
+          name="refresh-bold"
+        />
+      </button>
+      <div
+        class="md-tooltip-label"
+        id="react-aria-:r35:"
+      >
+        <mdc-text
+          class="md-text-wrapper"
+          tagname="p"
+          type="body-large-regular"
+        >
+          Reload Agents
+        </mdc-text>
+      </div>
     </div>
   </div>
   <div
@@ -3151,6 +3666,41 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
         data-testid="screen-reader-announcer"
         style="clip-path: inset(50%); height: 1px; overflow: hidden; position: absolute; width: 1px; white-space: nowrap;"
       />
+    </div>
+    <div
+      class="consult-action-buttons"
+    >
+      <button
+        aria-describedby="react-aria-:r3k:"
+        aria-label="Reload Queues"
+        class="md-button-circle-wrapper consult-reload-button call-control-button md-button-simple-wrapper"
+        data-color="primary"
+        data-disabled="false"
+        data-ghost="false"
+        data-inverted="false"
+        data-multiple-children="false"
+        data-outline="false"
+        data-shallow-disabled="false"
+        data-size="32"
+        data-testid="consult-reload-button"
+        type="button"
+      >
+        <mdc-icon
+          name="refresh-bold"
+        />
+      </button>
+      <div
+        class="md-tooltip-label"
+        id="react-aria-:r3k:"
+      >
+        <mdc-text
+          class="md-text-wrapper"
+          tagname="p"
+          type="body-large-regular"
+        >
+          Reload Queues
+        </mdc-text>
+      </div>
     </div>
   </div>
   <div

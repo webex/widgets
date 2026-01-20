@@ -2,7 +2,7 @@ import React from 'react';
 import '@testing-library/jest-dom';
 import {render, fireEvent, act} from '@testing-library/react';
 import CallControlComponent from '../../../../src/components/task/CallControl/call-control';
-import {CallControlComponentProps} from '../../../../src/components/task/task.types';
+import {CallControlComponentProps, TARGET_TYPE} from '../../../../src/components/task/task.types';
 import {mockTask, mockAgents, mockProfile, mockCC} from '@webex/test-fixtures';
 import {BuddyDetails, IWrapupCode} from '@webex/cc-store';
 
@@ -83,11 +83,11 @@ describe('CallControlComponent Snapshots', () => {
     setIsRecording: jest.fn(),
     buddyAgents: mockBuddyAgents,
     loadBuddyAgents: jest.fn(),
+    loadingBuddyAgents: false,
     transferCall: jest.fn(),
     consultCall: jest.fn(),
     endConsultCall: jest.fn(),
     consultTransfer: jest.fn(),
-    consultStartTimeStamp: undefined,
     callControlAudio: null,
     consultAgentName: '',
     setConsultAgentName: jest.fn(),
@@ -95,8 +95,12 @@ describe('CallControlComponent Snapshots', () => {
     callControlClassName: '',
     callControlConsultClassName: '',
     startTimestamp: Date.now(),
+    stateTimerLabel: null,
+    stateTimerTimestamp: 0,
+    consultTimerLabel: 'Consulting',
+    consultTimerTimestamp: 0,
     allowConsultToQueue: mockProfile.allowConsultToQueue,
-    lastTargetType: 'agent',
+    lastTargetType: TARGET_TYPE.AGENT,
     setLastTargetType: jest.fn(),
     controlVisibility: {
       accept: {isVisible: true, isEnabled: true},

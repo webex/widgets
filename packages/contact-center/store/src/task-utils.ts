@@ -331,3 +331,32 @@ export const findHoldStatus = (task: ITask, mType: string, agentId: string): boo
       : false
     : (interaction.media[mediaId] && interaction.media[mediaId].isHold) || false; // For all the other agent for main whatever is the status of main call hold
 };
+
+/**
+ * Finds the hold timestamp for a specific media type (mainCall, consult, etc.)
+ * Used for timer alignment in Consult & Conference scenarios to match Agent Desktop behavior.
+ *
+ * @param task - The task object containing interaction data
+ * @param mType - The media type to search for ('mainCall', 'consult', 'conference')
+ * @returns The hold timestamp in milliseconds or null if not on hold
+ */
+export const findHoldTimestamp = (task: ITask, mType: string): number | null => {
+  const interaction = task?.data?.interaction;
+
+  if (!interaction || !interaction.media) {
+    return null;
+  }
+
+  // Adjust mType if agent is secondary EPDN agent
+  mType = setmTypeForEPDN(task, mType);
+
+  // Find media ID for the specified type (mainCall, consult, etc.)
+  const mediaId = findMediaResourceId(task, mType);
+
+  // Return the holdTimestamp if media exists and has a hold timestamp
+  if (mediaId && interaction.media[mediaId]?.holdTimestamp !== undefined) {
+    return interaction.media[mediaId].holdTimestamp;
+  }
+
+  return null;
+};

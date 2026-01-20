@@ -4,6 +4,7 @@ import * as helper from '../../src/helper';
 import {CallControlCAD} from '../../src';
 import store from '@webex/cc-store';
 import {mockTask} from '@webex/test-fixtures';
+import {TARGET_TYPE} from '../../src/task.types';
 import '@testing-library/jest-dom';
 
 const onHoldResumeCb = jest.fn();
@@ -34,6 +35,7 @@ describe('CallControlCAD Component', () => {
       setIsRecording: jest.fn(),
       buddyAgents: [],
       loadBuddyAgents: jest.fn(),
+      loadingBuddyAgents: false,
       transferCall: jest.fn(),
       consultCall: jest.fn(),
       endConsultCall: jest.fn(),
@@ -42,7 +44,7 @@ describe('CallControlCAD Component', () => {
       setConsultAgentName: jest.fn(),
       holdTime: 0,
       startTimestamp: 0,
-      lastTargetType: 'agent' as const,
+      lastTargetType: TARGET_TYPE.AGENT,
       setLastTargetType: jest.fn(),
       controlVisibility: {
         accept: {isVisible: false, isEnabled: false},
@@ -85,6 +87,10 @@ describe('CallControlCAD Component', () => {
       getAddressBookEntries: jest.fn(),
       getEntryPoints: jest.fn(),
       getQueuesFetcher: jest.fn(),
+      stateTimerLabel: null,
+      stateTimerTimestamp: 0,
+      consultTimerLabel: 'Consulting',
+      consultTimerTimestamp: 0,
     });
 
     render(
@@ -127,6 +133,7 @@ describe('CallControlCAD Component', () => {
       setIsRecording: jest.fn(),
       buddyAgents: [],
       loadBuddyAgents: jest.fn(),
+      loadingBuddyAgents: false,
       transferCall: jest.fn(),
       consultCall: jest.fn(),
       endConsultCall: jest.fn(),
@@ -135,7 +142,7 @@ describe('CallControlCAD Component', () => {
       setConsultAgentName: jest.fn(),
       holdTime: 0,
       startTimestamp: 0,
-      lastTargetType: 'agent' as const,
+      lastTargetType: TARGET_TYPE.AGENT,
       setLastTargetType: jest.fn(),
       controlVisibility: {
         accept: {isVisible: false, isEnabled: false},
@@ -178,6 +185,10 @@ describe('CallControlCAD Component', () => {
       getAddressBookEntries: jest.fn(),
       getEntryPoints: jest.fn(),
       getQueuesFetcher: jest.fn(),
+      stateTimerLabel: null,
+      stateTimerTimestamp: 0,
+      consultTimerLabel: 'Consulting',
+      consultTimerTimestamp: 0,
     });
 
     render(<CallControlCAD onHoldResume={onHoldResumeCb} onEnd={onEndCb} onWrapUp={onWrapUpCb} />);
@@ -201,6 +212,7 @@ describe('CallControlCAD Component', () => {
       setIsRecording: jest.fn(),
       buddyAgents: [],
       loadBuddyAgents: jest.fn(),
+      loadingBuddyAgents: false,
       transferCall: jest.fn(),
       consultCall: jest.fn(),
       endConsultCall: jest.fn(),
@@ -209,7 +221,7 @@ describe('CallControlCAD Component', () => {
       setConsultAgentName: jest.fn(),
       holdTime: 0,
       startTimestamp: 0,
-      lastTargetType: 'agent' as const,
+      lastTargetType: TARGET_TYPE.AGENT,
       setLastTargetType: jest.fn(),
       controlVisibility: {
         accept: {isVisible: false, isEnabled: false},
@@ -252,6 +264,10 @@ describe('CallControlCAD Component', () => {
       getAddressBookEntries: jest.fn(),
       getEntryPoints: jest.fn(),
       getQueuesFetcher: jest.fn(),
+      stateTimerLabel: null,
+      stateTimerTimestamp: 0,
+      consultTimerLabel: 'Consulting',
+      consultTimerTimestamp: 0,
     });
 
     render(
@@ -277,6 +293,7 @@ describe('CallControlCAD Component', () => {
       setIsRecording: jest.fn(),
       buddyAgents: [],
       loadBuddyAgents: jest.fn(),
+      loadingBuddyAgents: false,
       transferCall: jest.fn(),
       consultCall: jest.fn(),
       endConsultCall: jest.fn(),
@@ -285,7 +302,7 @@ describe('CallControlCAD Component', () => {
       setConsultAgentName: jest.fn(),
       holdTime: 0,
       startTimestamp: 0,
-      lastTargetType: 'agent' as const,
+      lastTargetType: TARGET_TYPE.AGENT,
       setLastTargetType: jest.fn(),
       controlVisibility: {
         accept: {isVisible: false, isEnabled: false},
@@ -328,6 +345,10 @@ describe('CallControlCAD Component', () => {
       getAddressBookEntries: jest.fn(),
       getEntryPoints: jest.fn(),
       getQueuesFetcher: jest.fn(),
+      stateTimerLabel: null,
+      stateTimerTimestamp: 0,
+      consultTimerLabel: 'Consulting',
+      consultTimerTimestamp: 0,
     });
 
     const {container} = render(
