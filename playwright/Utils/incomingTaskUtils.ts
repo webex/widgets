@@ -10,7 +10,8 @@ import {
   FORM_FIELD_TIMEOUT,
   TEST_DATA,
   UI_SETTLE_TIMEOUT,
-  LONG_WAIT,
+  EXTENSION_REGISTRATION_TIMEOUT,
+  ACCEPT_TASK_TIMEOUT,
 } from '../constants';
 import nodemailer from 'nodemailer';
 
@@ -242,7 +243,7 @@ export function getIncomingTaskLocator(page: Page, type: TaskType) {
  * @param timeout Optional timeout in ms (default: 40000)
  * @returns Locator for the incoming task div
  */
-export async function waitForIncomingTask(page: Page, type: TaskType, timeout: number = 40000) {
+export async function waitForIncomingTask(page: Page, type: TaskType, timeout: number = ACCEPT_TASK_TIMEOUT) {
   await page.bringToFront();
   const incomingTaskDiv = getIncomingTaskLocator(page, type);
   await incomingTaskDiv.waitFor({state: 'visible', timeout});
@@ -257,7 +258,7 @@ export async function waitForIncomingTask(page: Page, type: TaskType, timeout: n
  * @param timeout Optional timeout in ms for waiting for task (default: 40000)
  * @throws Error if accept button is not found or if this is an extension call
  */
-export async function acceptIncomingTask(page: Page, type: TaskType, timeout: number = 40000) {
+export async function acceptIncomingTask(page: Page, type: TaskType, timeout: number = ACCEPT_TASK_TIMEOUT) {
   await page.bringToFront();
 
   const incomingTaskDiv = await waitForIncomingTask(page, type, timeout);
@@ -337,7 +338,7 @@ export async function declineIncomingTask(page: Page, type: TaskType) {
  */
 export async function acceptExtensionCall(page: Page) {
   await page.bringToFront();
-  await expect(page.locator('#answer').first()).toBeEnabled({timeout: LONG_WAIT});
+  await expect(page.locator('#answer').first()).toBeEnabled({timeout: EXTENSION_REGISTRATION_TIMEOUT});
   await page.waitForTimeout(2000);
   await page.locator('#answer').first().click({timeout: AWAIT_TIMEOUT});
 }
@@ -386,9 +387,11 @@ export async function loginExtension(page: Page, token: string) {
   await page.goto(CALL_URL);
   await page.locator('#access-token').fill(token);
   await page.locator('#access-token-save').click();
-  await expect(page.locator('#registration-register')).toBeEnabled({timeout: LONG_WAIT});
+  await expect(page.locator('#registration-register')).toBeEnabled({timeout: EXTENSION_REGISTRATION_TIMEOUT});
   await page.locator('#registration-register').click();
-  await expect(page.locator('#registration-status')).toContainText('Registered, deviceId', {timeout: LONG_WAIT});
+  await expect(page.locator('#registration-status')).toContainText('Registered, deviceId', {
+    timeout: EXTENSION_REGISTRATION_TIMEOUT,
+  });
   await page.locator('#sd-get-media-streams').click();
 }
 

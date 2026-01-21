@@ -1,6 +1,12 @@
 import {Page, expect} from '@playwright/test';
 import dotenv from 'dotenv';
-import {LOGIN_MODE, LONG_WAIT, AWAIT_TIMEOUT, DROPDOWN_SETTLE_TIMEOUT, OPERATION_TIMEOUT} from '../constants';
+import {
+  LOGIN_MODE,
+  EXTENSION_REGISTRATION_TIMEOUT,
+  AWAIT_TIMEOUT,
+  DROPDOWN_SETTLE_TIMEOUT,
+  OPERATION_TIMEOUT,
+} from '../constants';
 import {handleStrayTasks} from './helperUtils';
 
 dotenv.config();
@@ -240,7 +246,7 @@ export async function ensureUserStateVisible(page: Page, loginMode: string, numb
     .catch(() => false);
   if (!isUserStateWidgetVisible) {
     await telephonyLogin(page, loginMode, number);
-    await expect(page.getByTestId('state-select')).toBeVisible({timeout: LONG_WAIT});
+    await expect(page.getByTestId('state-select')).toBeVisible({timeout: EXTENSION_REGISTRATION_TIMEOUT});
   }
 }
 

@@ -345,6 +345,4 @@ export default function createTaskListTests() {
       capturedLogs.length = 0;
     }
   });
-
-  // No afterAll here - suite handles cleanup
 }

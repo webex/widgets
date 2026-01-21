@@ -28,7 +28,7 @@ export const LOGIN_MODE = {
 
 export type LoginMode = (typeof LOGIN_MODE)[keyof typeof LOGIN_MODE];
 
-export const LONG_WAIT = 40000;
+export const EXTENSION_REGISTRATION_TIMEOUT = 40000;
 
 // Universal timeout for all await operations in Playwright tests
 export const AWAIT_TIMEOUT = 10000;
@@ -45,6 +45,7 @@ export const NETWORK_OPERATION_TIMEOUT = 40000;
 
 // Specific timeouts for incoming task operations
 export const CHAT_LAUNCHER_TIMEOUT = 60000;
+export const ACCEPT_TASK_TIMEOUT = 60000;
 
 // Widget initialization timeouts
 export const WIDGET_INIT_TIMEOUT = 50000;

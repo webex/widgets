@@ -18,7 +18,7 @@ import {
   waitForIncomingTask,
 } from '../Utils/incomingTaskUtils';
 import {submitWrapup} from '../Utils/wrapupUtils';
-import {USER_STATES, TASK_TYPES, WRAPUP_REASONS} from '../constants';
+import {USER_STATES, TASK_TYPES, WRAPUP_REASONS, ACCEPT_TASK_TIMEOUT} from '../constants';
 import {holdCallToggle, endTask, verifyHoldButtonIcon, verifyTaskControls} from '../Utils/taskControlUtils';
 import {TestManager} from '../test-manager';
 import {handleStrayTasks, clearPendingCallAndWrapup, waitForState} from '../Utils/helperUtils';
@@ -67,7 +67,7 @@ export default function createAdvancedTaskControlsTests() {
       await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
 
-      await waitForIncomingTask(testManager.agent1Page, TASK_TYPES.CALL, 80000);
+      await waitForIncomingTask(testManager.agent1Page, TASK_TYPES.CALL, ACCEPT_TASK_TIMEOUT);
       await acceptExtensionCall(testManager.agent1ExtensionPage);
       await changeUserState(testManager.agent2Page, USER_STATES.AVAILABLE);
       await testManager.agent1Page.waitForTimeout(5000);
@@ -87,7 +87,7 @@ export default function createAdvancedTaskControlsTests() {
         process.env[`${testManager.projectName}_AGENT2_NAME`]!
       );
       // Agent 2 should receive the transfer and accept it
-      await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL, 60000);
+      await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL, ACCEPT_TASK_TIMEOUT);
       await testManager.agent2Page.waitForTimeout(3000);
       // Verify transfer success in console logs
       await testManager.agent1Page.bringToFront();
@@ -121,7 +121,7 @@ export default function createAdvancedTaskControlsTests() {
       );
 
       // Agent 2 accepts the transfer
-      await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL, 60000);
+      await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL, ACCEPT_TASK_TIMEOUT);
       await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
       await testManager.agent1Page.waitForTimeout(3000);
       verifyTransferSuccessLogs();
@@ -148,7 +148,7 @@ export default function createAdvancedTaskControlsTests() {
       await changeUserState(testManager.agent2Page, USER_STATES.MEETING);
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
-      await waitForIncomingTask(testManager.agent1Page, TASK_TYPES.CALL, 80000);
+      await waitForIncomingTask(testManager.agent1Page, TASK_TYPES.CALL, ACCEPT_TASK_TIMEOUT);
       await expect(testManager.agent1ExtensionPage.locator('#answer').first()).toBeEnabled({timeout: 20000});
       await acceptExtensionCall(testManager.agent1ExtensionPage);
       await changeUserState(testManager.agent2Page, USER_STATES.AVAILABLE);
@@ -165,7 +165,7 @@ export default function createAdvancedTaskControlsTests() {
       );
       await expect(testManager.agent1Page.getByTestId('cancel-consult-btn')).toBeVisible();
       await expect(testManager.agent1Page.getByTestId('transfer-consult-btn')).toBeVisible();
-      await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL, 60000);
+      await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL, ACCEPT_TASK_TIMEOUT);
       await testManager.agent2Page.waitForTimeout(3000);
       await expect(testManager.agent1Page.getByTestId('transfer-consult-btn')).toBeVisible();
       await testManager.agent1Page.waitForTimeout(2000);
@@ -185,7 +185,7 @@ export default function createAdvancedTaskControlsTests() {
         'consult',
         process.env[`${testManager.projectName}_AGENT2_NAME`]!
       );
-      await waitForIncomingTask(testManager.agent2Page, TASK_TYPES.CALL, 60000);
+      await waitForIncomingTask(testManager.agent2Page, TASK_TYPES.CALL, ACCEPT_TASK_TIMEOUT);
       await declineIncomingTask(testManager.agent2Page, TASK_TYPES.CALL);
       await verifyTaskControls(testManager.agent1Page, TASK_TYPES.CALL);
       await verifyHoldButtonIcon(testManager.agent1Page, {expectedIsHeld: true});
@@ -218,7 +218,7 @@ export default function createAdvancedTaskControlsTests() {
         'consult',
         process.env[`${testManager.projectName}_AGENT2_NAME`]!
       );
-      await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL, 60000);
+      await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL, ACCEPT_TASK_TIMEOUT);
       await testManager.agent2Page.waitForTimeout(3000);
       await testManager.agent1Page.bringToFront();
       await testManager.agent1Page.getByTestId('transfer-consult-btn').click();
@@ -241,7 +241,7 @@ export default function createAdvancedTaskControlsTests() {
       // Setup: create call and get to engaged state
       await changeUserState(testManager.agent2Page, USER_STATES.MEETING);
       await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
-      await waitForIncomingTask(testManager.agent1Page, TASK_TYPES.CALL, 80000);
+      await waitForIncomingTask(testManager.agent1Page, TASK_TYPES.CALL, ACCEPT_TASK_TIMEOUT);
       await acceptExtensionCall(testManager.agent1ExtensionPage);
       await testManager.agent1Page.waitForTimeout(5000);
       await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
@@ -270,7 +270,7 @@ export default function createAdvancedTaskControlsTests() {
       );
       await testManager.agent1Page.waitForTimeout(3000);
       verifyConsultStartSuccessLogs();
-      await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL, 60000);
+      await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL, ACCEPT_TASK_TIMEOUT);
       await cancelConsult(testManager.agent1Page);
       await testManager.agent1Page.waitForTimeout(3000);
       await verifyCurrentState(testManager.agent2Page, USER_STATES.AVAILABLE);
@@ -289,7 +289,7 @@ export default function createAdvancedTaskControlsTests() {
         'consult',
         process.env[`${testManager.projectName}_QUEUE_NAME`]!
       );
-      await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL, 60000);
+      await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL, ACCEPT_TASK_TIMEOUT);
       await testManager.agent2Page.waitForTimeout(3000);
       await cancelConsult(testManager.agent2Page);
       await testManager.agent2Page.waitForTimeout(3000);
@@ -308,7 +308,7 @@ export default function createAdvancedTaskControlsTests() {
         process.env[`${testManager.projectName}_QUEUE_NAME`]!
       );
       await testManager.agent1Page.waitForTimeout(2000);
-      await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL, 60000);
+      await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL, ACCEPT_TASK_TIMEOUT);
       await testManager.agent1Page.getByTestId('transfer-consult-btn').click();
       await testManager.agent1Page.bringToFront();
       await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
@@ -331,7 +331,7 @@ export default function createAdvancedTaskControlsTests() {
   test('Entry Point Consult: visible and functional only for supported users (no blind transfer)', async ({}, testInfo) => {
     await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
     await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
-    await waitForIncomingTask(testManager.agent1Page, TASK_TYPES.CALL, 80000);
+    await waitForIncomingTask(testManager.agent1Page, TASK_TYPES.CALL, ACCEPT_TASK_TIMEOUT);
     await acceptExtensionCall(testManager.agent1ExtensionPage);
     await testManager.agent1Page.waitForTimeout(3000);
     await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);

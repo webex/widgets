@@ -17,7 +17,7 @@ import {
   verifyRecordButtonIcon,
 } from '../Utils/taskControlUtils';
 import {submitWrapup} from '../Utils/wrapupUtils';
-import {USER_STATES, TASK_TYPES, WRAPUP_REASONS} from '../constants';
+import {USER_STATES, TASK_TYPES, WRAPUP_REASONS, ACCEPT_TASK_TIMEOUT} from '../constants';
 import {TestManager} from '../test-manager';
 
 // Extract test functions for cleaner syntax
@@ -55,7 +55,7 @@ export default function createCallTaskControlsTests() {
     await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
 
     // Accept the incoming call (waits for task to be visible)
-    await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CALL, 80000);
+    await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CALL, ACCEPT_TASK_TIMEOUT);
     await testManager.agent1Page.waitForTimeout(5000);
 
     // Verify agent state changed to engaged

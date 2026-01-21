@@ -1,7 +1,7 @@
 import {Page, expect} from '@playwright/test';
 import {loginExtension} from './incomingTaskUtils';
 import {dismissOverlays} from './helperUtils';
-import {AWAIT_TIMEOUT, FORM_FIELD_TIMEOUT, LONG_WAIT} from '../constants';
+import {AWAIT_TIMEOUT, FORM_FIELD_TIMEOUT, EXTENSION_REGISTRATION_TIMEOUT} from '../constants';
 
 /**
  * Utility functions for advanced task controls testing.
