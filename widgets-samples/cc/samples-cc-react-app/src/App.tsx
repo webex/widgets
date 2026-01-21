@@ -647,10 +647,16 @@ function App() {
                 disabled={accessToken.trim() === ''}
                 onClick={() => {
                   setShowLoader(true);
-                  store.init({webexConfig, access_token: accessToken}).then(() => {
-                    setIsSdkReady(true);
-                    setShowLoader(false);
-                  });
+                  store
+                    .init({webexConfig, access_token: accessToken})
+                    .then(() => {
+                      setIsSdkReady(true);
+                      setShowLoader(false);
+                    })
+                    .catch((error) => {
+                      console.error('Failed to initialize widgets:', error);
+                      setShowLoader(false);
+                    });
                 }}
                 data-testid="samples:init-widgets-button"
               >
