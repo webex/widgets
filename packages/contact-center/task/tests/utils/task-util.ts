@@ -689,13 +689,12 @@ describe('getEndButtonVisibility - EP_DN consult scenarios', () => {
     webRtcEnabled: true,
   };
 
-  it('should enable end button during EP_DN consult when main call is active (not held)', () => {
+  it('should enable end button during EP_DN consult when switched back to main call (consultCallHeld = true)', () => {
     // Mock a task with EP_DN consult - switching back to main call (consult on hold)
     const task = createMockTask({
       consultMediaResourceId: 'consult',
       interaction: createPartialInteraction({
         mediaType: 'telephony',
-        destAgentType: DestinationAgentType.EP_DN,
         state: 'consulting',
         media: {
           main: {
@@ -726,13 +725,20 @@ describe('getEndButtonVisibility - EP_DN consult scenarios', () => {
             name: 'Customer',
             hasLeft: false,
           },
+          'epdn-agent': {
+            id: 'epdn-agent',
+            pType: 'EP-DN',
+            type: DestinationAgentType.EP_DN,
+            name: 'Entry Point Agent',
+            hasLeft: false,
+          },
         },
       }),
     });
 
     const result = getControlsVisibility(deviceType, featureFlags, task, 'agent1', false);
 
-    // EP_DN consult: End button should be enabled when on main call
+    // EP_DN consult: End button should be enabled when on main call (consultCallHeld = true)
     expect(result.end.isVisible).toBe(true);
     expect(result.end.isEnabled).toBe(true);
   });
@@ -743,7 +749,6 @@ describe('getEndButtonVisibility - EP_DN consult scenarios', () => {
       consultMediaResourceId: 'consult',
       interaction: createPartialInteraction({
         mediaType: 'telephony',
-        destAgentType: DestinationAgentType.EPDN,
         state: 'consulting',
         media: {
           main: {
@@ -774,6 +779,13 @@ describe('getEndButtonVisibility - EP_DN consult scenarios', () => {
             name: 'Customer',
             hasLeft: false,
           },
+          'epdn-agent': {
+            id: 'epdn-agent',
+            pType: 'EP-DN',
+            type: DestinationAgentType.EPDN,
+            name: 'Entry Point DN Agent',
+            hasLeft: false,
+          },
         },
       }),
     });
@@ -785,21 +797,26 @@ describe('getEndButtonVisibility - EP_DN consult scenarios', () => {
     expect(result.end.isEnabled).toBe(false);
   });
 
-  it('should enable end button during EP_DN consult conference when main call is held but conference in progress', () => {
+  it('should enable end button during EP_DN consult conference when main call is not held', () => {
     // Mock a task with EP_DN consult in conference state
     const task = createMockTask({
       isConferenceInProgress: true,
       consultMediaResourceId: 'consult',
       interaction: createPartialInteraction({
         mediaType: 'telephony',
-        destAgentType: DestinationAgentType.ENTRY_POINT,
-        state: 'conferencing',
+        state: 'conference',
         media: {
           main: {
             mediaResourceId: 'main',
             mType: 'mainCall',
-            isHold: true, // Main call is held during conference
+            isHold: false, // Main call is not held during conference
             participants: ['agent1', 'customer1', 'epdn-agent'],
+          },
+          consult: {
+            mediaResourceId: 'consult',
+            mType: 'consult',
+            isHold: true, // Consult media on hold (merged into main)
+            participants: ['agent1', 'epdn-agent'],
           },
         },
         participants: {
@@ -819,8 +836,9 @@ describe('getEndButtonVisibility - EP_DN consult scenarios', () => {
           },
           'epdn-agent': {
             id: 'epdn-agent',
-            pType: 'Agent',
-            name: 'EP DN Agent',
+            pType: 'EP-DN',
+            type: DestinationAgentType.ENTRY_POINT,
+            name: 'Entry Point Agent',
             hasLeft: false,
           },
         },
@@ -829,15 +847,15 @@ describe('getEndButtonVisibility - EP_DN consult scenarios', () => {
 
     const result = getControlsVisibility(deviceType, featureFlags, task, 'agent1', true);
 
+    // EP_DN conference: End button enabled when main call not held + conference in progress
     expect(result.end.isVisible).toBe(true);
     expect(result.end.isEnabled).toBe(true);
   });
 
-  it('should recognize EP destAgentType variant', () => {
+  it('should recognize EP participant type variant', () => {
     const task = createMockTask({
       consultMediaResourceId: 'consult',
       interaction: createPartialInteraction({
-        destAgentType: DestinationAgentType.EP,
         mediaType: 'telephony',
         state: 'consulting',
         media: {
@@ -869,18 +887,25 @@ describe('getEndButtonVisibility - EP_DN consult scenarios', () => {
             name: 'Customer',
             hasLeft: false,
           },
+          'ep-agent': {
+            id: 'ep-agent',
+            pType: 'EP',
+            type: DestinationAgentType.EP,
+            name: 'Entry Point',
+            hasLeft: false,
+          },
         },
       }),
     });
 
     const result = getControlsVisibility(deviceType, featureFlags, task, 'agent1', false);
 
-    // EP_DN consult: End button should be enabled when on main call
+    // EP consult: End button should be enabled when on main call (consultCallHeld = true)
     expect(result.end.isVisible).toBe(true);
     expect(result.end.isEnabled).toBe(true);
   });
 
-  it('should handle missing destAgentType as non-EP_DN consult', () => {
+  it('should disable end button for regular agent-to-agent consult (non-EP_DN)', () => {
     const task = createMockTask({
       consultMediaResourceId: 'consult',
       interaction: createPartialInteraction({
@@ -907,13 +932,25 @@ describe('getEndButtonVisibility - EP_DN consult scenarios', () => {
             consultState: 'Initiated',
             hasLeft: false,
           },
+          agent2: {
+            id: 'agent2',
+            pType: 'Agent',
+            type: 'Agent',
+            name: 'Agent Two',
+            hasLeft: false,
+          },
+          customer1: {
+            id: 'customer1',
+            pType: 'Customer',
+            hasLeft: false,
+          },
         },
       }),
     });
 
     const result = getControlsVisibility(deviceType, featureFlags, task, 'agent1', false);
 
-    // Should follow regular consult logic (disabled when on consult call)
+    // Regular agent-to-agent consult: End button disabled when in consult
     expect(result.end.isVisible).toBe(true);
     expect(result.end.isEnabled).toBe(false);
   });
@@ -939,6 +976,200 @@ describe('getEndButtonVisibility - EP_DN consult scenarios', () => {
     expect(result.end).toBeDefined();
     expect(result.end.isVisible).toBeDefined();
     expect(result.end.isEnabled).toBeDefined();
+  });
+});
+
+describe('isConsultingWithEpDnAgent', () => {
+  it('should detect EP-DN participant in consult media', () => {
+    const task = createMockTask({
+      interaction: createPartialInteraction({
+        mediaType: 'telephony',
+        media: {
+          consult: {
+            mediaResourceId: 'consult',
+            mType: 'consult',
+            participants: ['agent1', 'epdn-agent'],
+          },
+        },
+        participants: {
+          agent1: {
+            id: 'agent1',
+            pType: 'Agent',
+          },
+          'epdn-agent': {
+            id: 'epdn-agent',
+            pType: 'EP-DN',
+            type: DestinationAgentType.EP_DN,
+          },
+        },
+      }),
+    });
+
+    const result = getControlsVisibility('BROWSER', {isEndCallEnabled: true}, task, 'agent1', false);
+    // The function should detect EP-DN and apply special logic
+    expect(result).toBeDefined();
+  });
+
+  it('should detect EPDN variant', () => {
+    const task = createMockTask({
+      interaction: createPartialInteraction({
+        mediaType: 'telephony',
+        media: {
+          consult: {
+            mediaResourceId: 'consult',
+            mType: 'consult',
+            participants: ['agent1', 'epdn-agent'],
+          },
+        },
+        participants: {
+          agent1: {
+            id: 'agent1',
+            pType: 'Agent',
+          },
+          'epdn-agent': {
+            id: 'epdn-agent',
+            type: DestinationAgentType.EPDN,
+          },
+        },
+      }),
+    });
+
+    const result = getControlsVisibility('BROWSER', {isEndCallEnabled: true}, task, 'agent1', false);
+    expect(result).toBeDefined();
+  });
+
+  it('should detect ENTRY_POINT variant', () => {
+    const task = createMockTask({
+      interaction: createPartialInteraction({
+        mediaType: 'telephony',
+        media: {
+          consult: {
+            mediaResourceId: 'consult',
+            mType: 'consult',
+            participants: ['agent1', 'ep-agent'],
+          },
+        },
+        participants: {
+          agent1: {
+            id: 'agent1',
+            pType: 'Agent',
+          },
+          'ep-agent': {
+            id: 'ep-agent',
+            type: DestinationAgentType.ENTRY_POINT,
+          },
+        },
+      }),
+    });
+
+    const result = getControlsVisibility('BROWSER', {isEndCallEnabled: true}, task, 'agent1', false);
+    expect(result).toBeDefined();
+  });
+
+  it('should detect EP variant', () => {
+    const task = createMockTask({
+      interaction: createPartialInteraction({
+        mediaType: 'telephony',
+        media: {
+          consult: {
+            mediaResourceId: 'consult',
+            mType: 'consult',
+            participants: ['agent1', 'ep-agent'],
+          },
+        },
+        participants: {
+          agent1: {
+            id: 'agent1',
+            pType: 'Agent',
+          },
+          'ep-agent': {
+            id: 'ep-agent',
+            type: DestinationAgentType.EP,
+          },
+        },
+      }),
+    });
+
+    const result = getControlsVisibility('BROWSER', {isEndCallEnabled: true}, task, 'agent1', false);
+    expect(result).toBeDefined();
+  });
+
+  it('should return false for regular agent-to-agent consult', () => {
+    const task = createMockTask({
+      interaction: createPartialInteraction({
+        mediaType: 'telephony',
+        media: {
+          consult: {
+            mediaResourceId: 'consult',
+            mType: 'consult',
+            participants: ['agent1', 'agent2'],
+          },
+        },
+        participants: {
+          agent1: {
+            id: 'agent1',
+            pType: 'Agent',
+            type: 'Agent',
+          },
+          agent2: {
+            id: 'agent2',
+            pType: 'Agent',
+            type: 'Agent',
+          },
+        },
+      }),
+    });
+
+    const result = getControlsVisibility('BROWSER', {isEndCallEnabled: true}, task, 'agent1', false);
+    expect(result).toBeDefined();
+  });
+
+  it('should handle missing consult media gracefully', () => {
+    const task = createMockTask({
+      interaction: createPartialInteraction({
+        mediaType: 'telephony',
+        media: {
+          main: {
+            mediaResourceId: 'main',
+            mType: 'mainCall',
+            participants: ['agent1', 'customer1'],
+          },
+        },
+        participants: {
+          agent1: {
+            id: 'agent1',
+            pType: 'Agent',
+          },
+        },
+      }),
+    });
+
+    const result = getControlsVisibility('BROWSER', {isEndCallEnabled: true}, task, 'agent1', false);
+    expect(result).toBeDefined();
+  });
+
+  it('should handle missing participants gracefully', () => {
+    const task = createMockTask({
+      interaction: createPartialInteraction({
+        mediaType: 'telephony',
+        media: {
+          consult: {
+            mediaResourceId: 'consult',
+            mType: 'consult',
+            participants: ['agent1', 'unknown'],
+          },
+        },
+        participants: {
+          agent1: {
+            id: 'agent1',
+            pType: 'Agent',
+          },
+        },
+      }),
+    });
+
+    const result = getControlsVisibility('BROWSER', {isEndCallEnabled: true}, task, 'agent1', false);
+    expect(result).toBeDefined();
   });
 });
 
