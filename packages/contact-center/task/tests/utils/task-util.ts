@@ -490,7 +490,7 @@ describe('getControlsVisibility', () => {
     expect(result.end.isVisible).toBe(true);
   });
 
-  it('should enable end button when in regular consult and switched back to main call (consultCallHeld = true)', () => {
+  it('should disable end button for regular consult even when switched back to main call (consultCallHeld = true)', () => {
     const deviceType = 'BROWSER';
     const featureFlags = {
       isEndCallEnabled: true,
@@ -546,8 +546,8 @@ describe('getControlsVisibility', () => {
 
     const result = getControlsVisibility(deviceType, featureFlags, task, 'agent1', false);
 
-    // End button should be enabled when switched back to main call from consult
-    expect(result.end.isEnabled).toBe(true);
+    // End button should be disabled for regular (non-EP-DN) consults regardless of consultCallHeld
+    expect(result.end.isEnabled).toBe(false);
     expect(result.end.isVisible).toBe(true);
   });
 

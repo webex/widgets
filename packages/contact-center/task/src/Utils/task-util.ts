@@ -132,12 +132,6 @@ export function getEndButtonVisibility(
     if (isEpDnConsult) {
       // EP-DN consult: enabled when on main call OR during conference when main not held
       isEnabled = consultCallHeld || (!isHeld && isConferenceInProgress && !isConsultCompleted);
-    } else if (isConferenceInProgress) {
-      // Regular consult during conference: disabled to prevent ending conference prematurely
-      isEnabled = false;
-    } else {
-      // Regular consult without conference: enabled when on main call (consultCallHeld = true)
-      isEnabled = consultCallHeld;
     }
     return {isVisible, isEnabled};
   }
