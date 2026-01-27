@@ -43,22 +43,35 @@ function isTelephonySupported(deviceType: string, webRtcEnabled: boolean): boole
 }
 
 /**
- * Check if consulting with an EP_DN agent (matches Agent Desktop's isEPorEPDN)
+ * Check if consulting with an EP_DN agent (Entry Point Dial Number)
+ * This function looks for EP-DN participants in the consult media
  */
 function isConsultingWithEpDnAgent(task: ITask): boolean {
-  if (!task?.data?.interaction) {
+  if (!task?.data?.interaction?.media || !task?.data?.interaction?.participants) {
     return false;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const destAgentType = (task.data.interaction as any).destAgentType;
+  // Find the consult media
+  const consultMedia = Object.values(task.data.interaction.media).find((media) => media.mType === 'consult');
 
-  return (
-    destAgentType === DestinationAgentType.EP_DN ||
-    destAgentType === DestinationAgentType.EPDN ||
-    destAgentType === DestinationAgentType.ENTRY_POINT ||
-    destAgentType === DestinationAgentType.EP
-  );
+  if (!consultMedia || !consultMedia.participants) {
+    return false;
+  }
+
+  // Check if any participant in the consult media is an EP-DN
+  const participants = task.data.interaction.participants;
+  return consultMedia.participants.some((participantId: string) => {
+    const participant = participants[participantId];
+    if (!participant) return false;
+
+    // Check for EP-DN participant types using the type field
+    return (
+      participant.type === DestinationAgentType.EP_DN ||
+      participant.type === DestinationAgentType.EPDN ||
+      participant.type === DestinationAgentType.ENTRY_POINT ||
+      participant.type === DestinationAgentType.EP
+    );
+  });
 }
 
 export function findHoldTimestamp(interaction: Interaction, mType = 'mainCall'): number | null {
@@ -114,20 +127,13 @@ export function getEndButtonVisibility(
   const isVisible = isBrowser || (isEndCallEnabled && isCall) || !isCall;
   const isEpDnConsult = task && agentId ? isConsultingWithEpDnAgent(task) : false;
 
-  // EP_DN consult: End button enabled unless main call is held
-  if (isEpDnConsult && isConsultInitiatedOrAcceptedOrBeingConsulted) {
-    const isEnabled = !isHeld || (isConferenceInProgress && !isConsultCompleted);
+  if (isConsultInitiatedOrAcceptedOrBeingConsulted) {
+    let isEnabled = false;
+    if (isEpDnConsult) {
+      // EP-DN consult: enabled when on main call OR during conference when main not held
+      isEnabled = consultCallHeld || (!isHeld && isConferenceInProgress && !isConsultCompleted);
+    }
     return {isVisible, isEnabled};
-  }
-
-  // Agent-to-agent consult during conference: End button enabled when switched back to main call
-  if (isConsultInitiatedOrAcceptedOrBeingConsulted && isConferenceInProgress) {
-    return {isVisible, isEnabled: consultCallHeld};
-  }
-
-  // Regular consult without conference: End button enabled only when on main call
-  if (isConsultInitiatedOrAcceptedOrBeingConsulted && !isConferenceInProgress) {
-    return {isVisible, isEnabled: consultCallHeld};
   }
 
   // Default logic for other states
