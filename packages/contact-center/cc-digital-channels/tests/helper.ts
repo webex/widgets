@@ -1,10 +1,10 @@
 import {renderHook, waitFor} from '@testing-library/react';
-import {initializeApp} from '@webex/cc-digital-interactions';
+import {initializeApp} from 'cc-digital-interactions';
 
 import {useDigitalChannelsInit} from '../src/helper';
 
 // Mock the cc-digital-interactions module
-jest.mock('@webex/cc-digital-interactions', () => ({
+jest.mock('cc-digital-interactions', () => ({
   initializeApp: jest.fn().mockResolvedValue(undefined),
 }));
 

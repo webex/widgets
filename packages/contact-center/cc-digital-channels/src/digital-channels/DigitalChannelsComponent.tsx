@@ -1,5 +1,5 @@
 import React, {useMemo} from 'react';
-import Engage from '@webex/cc-digital-interactions';
+import Engage from 'cc-digital-interactions';
 
 import '@momentum-ui/web-components';
 import {DigitalChannelsComponentProps} from './digital-channels.types';

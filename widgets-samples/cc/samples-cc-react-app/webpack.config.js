@@ -54,7 +54,7 @@ module.exports = {
       react: resolveMonorepoRoot('node_modules/react'),
       'react-dom': resolveMonorepoRoot('node_modules/react-dom'),
       // Force ES module version for proper named exports
-      '@webex/cc-digital-interactions': resolveMonorepoRoot('node_modules/@webex/cc-digital-interactions/dist/wxengage-conversations.es.js'),
+      'cc-digital-interactions': resolveMonorepoRoot('node_modules/cc-digital-interactions/dist/wxengage-conversations.es.js'),
       'process/browser': require.resolve('process/browser.js'),
     },
     // Prefer ES modules over CommonJS/UMD

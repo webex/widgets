@@ -1,5 +1,5 @@
 import {useEffect, useState, useMemo} from 'react';
-import {initializeApp} from '@webex/cc-digital-interactions';
+import {initializeApp} from 'cc-digital-interactions';
 
 import {UseDigitalChannelsInitProps, UseDigitalChannelsDataProps} from './digital-channels/digital-channels.types';
 

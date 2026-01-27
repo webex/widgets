@@ -23,8 +23,8 @@
     "deploy:npm": "yarn npm publish"
   },
   "dependencies": {
-    "@webex/cc-digital-interactions": "3.0.4-beta.3",
     "@webex/cc-store": "workspace:*",
+    "cc-digital-interactions": "3.0.6-beta.1",
     "mobx-react-lite": "^4.1.0"
   },
   "devDependencies": {

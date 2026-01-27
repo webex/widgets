@@ -9498,11 +9498,11 @@ __metadata:
     "@testing-library/jest-dom": "npm:6.6.2"
     "@testing-library/react": "npm:16.0.1"
     "@types/jest": "npm:29.5.14"
-    "@webex/cc-digital-interactions": "npm:3.0.4-beta.3"
     "@webex/cc-store": "workspace:*"
     "@webex/test-fixtures": "workspace:*"
     babel-jest: "npm:29.7.0"
     babel-loader: "npm:9.2.1"
+    cc-digital-interactions: "npm:3.0.6-beta.1"
     css-loader: "npm:7.1.2"
     eslint: "npm:^9.20.1"
     eslint-config-prettier: "npm:^10.0.1"
@@ -9533,29 +9533,6 @@ __metadata:
     react-dom: ">=18.3.1"
   languageName: unknown
   linkType: soft
-
-"@webex/cc-digital-interactions@npm:3.0.4-beta.3":
-  version: 3.0.4-beta.3
-  resolution: "@webex/cc-digital-interactions@npm:3.0.4-beta.3::__archiveUrl=https%3A%2F%2Fengci-maven-master.cisco.com%2Fartifactory%2Fapi%2Fnpm%2Fwebex-release-npm%2F%40webex%2Fcc-digital-interactions%2F-%2F%40webex%2Fcc-digital-interactions-3.0.4-beta.3.tgz"
-  dependencies:
-    "@microsoft/signalr": "npm:^8.0.7"
-    "@wxcc-desktop/sdk": "npm:^2.0.11"
-    "@wxcc-desktop/sdk-types": "npm:^1.0.28"
-    axios: "npm:^1.12.0"
-    dompurify: "npm:^3.2.3"
-    i18next: "npm:^24.2.2"
-    i18next-browser-languagedetector: "npm:^8.0.2"
-    i18next-http-backend: "npm:^3.0.2"
-    react-froala-wysiwyg: "npm:^4.7.0"
-    react-i18next: "npm:^15.4.0"
-    showdown: "npm:2.1.0"
-  peerDependencies:
-    "@momentum-ui/web-components": ^2.26.20
-    react: ^18.3.1
-    react-dom: ^18.3.1
-  checksum: 10c0/cf529bd41d77407f0015dd80fddb5a04a04ee055c628a5f9deb3c5493eb4f1522fa6b844efdb355d1c9003bd662b4361a3211c5cbfdf7ac01c12de54c9ec5399
-  languageName: node
-  linkType: hard
 
 "@webex/cc-station-login@workspace:*, @webex/cc-station-login@workspace:packages/contact-center/station-login":
   version: 0.0.0-use.local
@@ -15017,6 +14994,29 @@ __metadata:
   version: 0.12.0
   resolution: "caseless@npm:0.12.0"
   checksum: 10c0/ccf64bcb6c0232cdc5b7bd91ddd06e23a4b541f138336d4725233ac538041fb2f29c2e86c3c4a7a61ef990b665348db23a047060b9414c3a6603e9fa61ad4626
+  languageName: node
+  linkType: hard
+
+"cc-digital-interactions@npm:3.0.6-beta.1":
+  version: 3.0.6-beta.1
+  resolution: "cc-digital-interactions@npm:3.0.6-beta.1"
+  dependencies:
+    "@microsoft/signalr": "npm:^8.0.7"
+    "@wxcc-desktop/sdk": "npm:^2.0.11"
+    "@wxcc-desktop/sdk-types": "npm:^1.0.28"
+    axios: "npm:^1.12.0"
+    dompurify: "npm:^3.2.3"
+    i18next: "npm:^24.2.2"
+    i18next-browser-languagedetector: "npm:^8.0.2"
+    i18next-http-backend: "npm:^3.0.2"
+    react-froala-wysiwyg: "npm:^4.7.0"
+    react-i18next: "npm:^15.4.0"
+    showdown: "npm:2.1.0"
+  peerDependencies:
+    "@momentum-ui/web-components": ^2.26.20
+    react: ^18.3.1
+    react-dom: ^18.3.1
+  checksum: 10c0/071e508afe3e0aa184a69a40d9dd61558e0708943fa094f6195402e78d80284df18404abc646d1c035c8c81c390fb63ccaa92257600a4ae4d089c66e28dda99e
   languageName: node
   linkType: hard
 

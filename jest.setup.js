@@ -2,7 +2,7 @@
 // This is a workaround for the fact that JSDOM does not support canvas methods like getContext.
 import 'jest-canvas-mock';
 
-// Set up the global that @webex/cc-digital-interactions expects
+// Set up the global that cc-digital-interactions expects
 global.AGENTX_SERVICE = {};
 
 // Web components used in @momentum-design imports rely on browser-only APIs like attachInternals.
