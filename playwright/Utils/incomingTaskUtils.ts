@@ -8,13 +8,12 @@ import {
   DEFAULT_MAX_RETRIES,
   CHAT_LAUNCHER_TIMEOUT,
   FORM_FIELD_TIMEOUT,
-  OPERATION_TIMEOUT,
-  NETWORK_OPERATION_TIMEOUT,
   TEST_DATA,
   UI_SETTLE_TIMEOUT,
+  EXTENSION_REGISTRATION_TIMEOUT,
+  ACCEPT_TASK_TIMEOUT,
 } from '../constants';
 import nodemailer from 'nodemailer';
-import {dismissOverlays} from './helperUtils';
 
 const transporter = nodemailer.createTransport({
   service: 'gmail', // Make sure to use Secure Port for Gmail SMTP
@@ -39,39 +38,22 @@ const transporter = nodemailer.createTransport({
  * @param number Phone number to dial (defaults to PW_ENTRY_POINT env variable)
  */
 export async function createCallTask(page: Page, number: string) {
+  await page.bringToFront();
   if (!number || number.trim() === '') {
     throw new Error('Dial number is required');
   }
-  try {
-    await expect(page).toHaveURL(/.*\.webex\.com\/calling.*/);
-  } catch (error) {
-    throw new Error('The Input Page should be logged into calling web-client.');
-  }
 
-  // Ensure page is foregrounded and clean of overlays
-  await page.bringToFront();
-  await dismissOverlays(page);
-
-  const endBtn = page.locator('[data-test="call-end"]');
-  if (await endBtn.isVisible({timeout: 500}).catch(() => false)) {
+  const endBtn = page.getByTestId('end');
+  if (await endBtn.isEnabled({timeout: 500}).catch(() => false)) {
     await endBtn.click({timeout: AWAIT_TIMEOUT});
     await page.waitForTimeout(500);
   }
 
-  await page
-    .locator('[data-test="statusMessage"]')
-    .waitFor({state: 'hidden', timeout: NETWORK_OPERATION_TIMEOUT})
-    .catch(() => {});
+  await page.locator('#destination').waitFor({state: 'visible', timeout: AWAIT_TIMEOUT});
+  await page.locator('#destination').fill(number, {timeout: AWAIT_TIMEOUT});
 
-  await page.getByRole('textbox', {name: 'Dial'}).waitFor({state: 'visible', timeout: AWAIT_TIMEOUT});
-  await page.getByRole('textbox', {name: 'Dial'}).fill(number, {timeout: AWAIT_TIMEOUT});
-
-  const callButton = page.locator('[data-test="calling-ui-keypad-control"]').getByRole('button', {name: 'Call'});
-  await expect(callButton).toBeVisible({timeout: AWAIT_TIMEOUT});
-  // Ensure button is enabled before clicking
-  await callButton.waitFor({state: 'visible', timeout: AWAIT_TIMEOUT});
-  await callButton.click({timeout: AWAIT_TIMEOUT});
-  await page.waitForTimeout(2000);
+  await expect(page.locator('#create-call-action')).toBeVisible({timeout: AWAIT_TIMEOUT});
+  await page.locator('#create-call-action').click({timeout: AWAIT_TIMEOUT});
 }
 
 /**
@@ -79,15 +61,11 @@ export async function createCallTask(page: Page, number: string) {
  * Prerequisite: The calling webclient must be logged in.
  * @param page Playwright Page object
  */
-export async function endCallTask(page: Page) {
-  try {
-    await expect(page).toHaveURL(/.*\.webex\.com\/calling.*/);
-  } catch (error) {
-    throw new Error('The Input Page should be logged into calling web-client.');
-  }
-  await page.locator('[data-test="call-end"]').waitFor({state: 'visible', timeout: 4000});
-  await page.locator('[data-test="call-end"]').click({timeout: AWAIT_TIMEOUT});
-  await page.waitForTimeout(500);
+export async function endCallTask(page: Page, isCaller: boolean = false) {
+  await page.bringToFront();
+  const endBtn = isCaller ? page.locator('#end-call').first() : page.locator('#end').first();
+  await expect(endBtn).toBeEnabled({timeout: AWAIT_TIMEOUT});
+  await endBtn.click({timeout: AWAIT_TIMEOUT});
 }
 
 /**
@@ -239,47 +217,85 @@ export async function createEmailTask(to: string) {
 }
 
 /**
- * Accepts an incoming task of the given type (call, chat, email, social).
- * Expects the incoming task to be already there.
+ * Gets the incoming task div locator for a given task type.
  * @param page Playwright Page object
  * @param type Task type (see TASK_TYPES)
- * @throws Error if accept button is not found
+ * @returns Locator for the incoming task div
  */
-export async function acceptIncomingTask(page: Page, type: TaskType) {
-  await page.waitForTimeout(2000);
-  let incomingTaskDiv;
+export function getIncomingTaskLocator(page: Page, type: TaskType) {
   if (type === TASK_TYPES.CALL) {
-    incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
-    const isExtensionCall = await (await incomingTaskDiv.innerText()).includes(TEST_DATA.EXTENSION_CALL_INDICATOR);
-    if (isExtensionCall) {
+    return page.getByTestId('samples:incoming-task-telephony').first();
+  } else if (type === TASK_TYPES.CHAT) {
+    return page.getByTestId('samples:incoming-task-chat').first();
+  } else if (type === TASK_TYPES.EMAIL) {
+    return page.getByTestId('samples:incoming-task-email').first();
+  } else if (type === TASK_TYPES.SOCIAL) {
+    return page.locator('samples:incoming-task-social').first();
+  }
+  throw new Error(`Unknown task type: ${type}`);
+}
+
+/**
+ * Waits for an incoming task of the given type to be visible.
+ * Brings the page to front and waits for the task div to appear.
+ * @param page Playwright Page object
+ * @param type Task type (see TASK_TYPES)
+ * @param timeout Optional timeout in ms (default: 40000)
+ * @returns Locator for the incoming task div
+ */
+export async function waitForIncomingTask(page: Page, type: TaskType, timeout: number = ACCEPT_TASK_TIMEOUT) {
+  await page.bringToFront();
+  const incomingTaskDiv = getIncomingTaskLocator(page, type);
+  await incomingTaskDiv.waitFor({state: 'visible', timeout});
+  return incomingTaskDiv;
+}
+
+/**
+ * Accepts an incoming task of the given type (call, chat, email, social).
+ * Waits for the task to appear, then clicks the accept button.
+ * @param page Playwright Page object
+ * @param type Task type (see TASK_TYPES)
+ * @param timeout Optional timeout in ms for waiting for task (default: 40000)
+ * @throws Error if accept button is not found or if this is an extension call
+ */
+export async function acceptIncomingTask(page: Page, type: TaskType, timeout: number = ACCEPT_TASK_TIMEOUT) {
+  await page.bringToFront();
+
+  const incomingTaskDiv = await waitForIncomingTask(page, type, timeout);
+
+  // Check if this is an extension call (only for CALL type)
+  if (type === TASK_TYPES.CALL) {
+    const taskText = await incomingTaskDiv.innerText();
+    if (taskText.includes(TEST_DATA.EXTENSION_CALL_INDICATOR)) {
       throw new Error('This is an extension call, use acceptExtensionCall instead');
     }
-  } else if (type === TASK_TYPES.CHAT) {
-    incomingTaskDiv = page.getByTestId('samples:incoming-task-chat').first();
-  } else if (type === TASK_TYPES.EMAIL) {
-    incomingTaskDiv = page.getByTestId('samples:incoming-task-email').first();
-  } else if (type === TASK_TYPES.SOCIAL) {
-    incomingTaskDiv = page.locator('samples:incoming-task-social').first();
-  }
-  incomingTaskDiv = incomingTaskDiv.first();
-  await expect(incomingTaskDiv).toBeVisible({timeout: AWAIT_TIMEOUT});
-  const acceptButton = incomingTaskDiv.getByTestId('task:accept-button').first();
-  if (!(await acceptButton.isVisible())) {
-    throw new Error('Accept button not found');
   }
 
-  // Wait for button to be enabled and clickable
+  const acceptButton = incomingTaskDiv.getByTestId('task:accept-button').first();
   await acceptButton.waitFor({state: 'visible', timeout: AWAIT_TIMEOUT});
   await expect(acceptButton).toBeEnabled({timeout: AWAIT_TIMEOUT});
 
-  // Use force click as backup or add retry logic
   try {
+    await page.waitForTimeout(2000);
     await acceptButton.click({timeout: AWAIT_TIMEOUT});
-  } catch (error) {
+  } catch {
     // Retry with force click if normal click fails
     await acceptButton.click({force: true, timeout: AWAIT_TIMEOUT});
   }
+
   await page.waitForTimeout(2000);
+
+  // Verify the task was actually accepted by checking if incoming task div is gone
+  let isStillVisible = await incomingTaskDiv.isVisible().catch(() => false);
+  if (isStillVisible) {
+    // Retry clicking the accept button one more time
+    const retryAcceptButton = incomingTaskDiv.getByTestId('task:accept-button').first();
+    const isRetryButtonVisible = await retryAcceptButton.isVisible().catch(() => false);
+    if (isRetryButtonVisible) {
+      await retryAcceptButton.click({force: true, timeout: AWAIT_TIMEOUT});
+      await page.waitForTimeout(2000);
+    }
+  }
 }
 
 /**
@@ -290,6 +306,7 @@ export async function acceptIncomingTask(page: Page, type: TaskType) {
  * @throws Error if decline button is not found
  */
 export async function declineIncomingTask(page: Page, type: TaskType) {
+  await page.bringToFront();
   let incomingTaskDiv;
   if (type === TASK_TYPES.CALL) {
     incomingTaskDiv = page.getByTestId('samples:incoming-task-telephony').first();
@@ -320,15 +337,10 @@ export async function declineIncomingTask(page: Page, type: TaskType) {
  * @param page Playwright Page object
  */
 export async function acceptExtensionCall(page: Page) {
-  try {
-    await page.waitForTimeout(2000);
-    await expect(page).toHaveURL(/.*\.webex\.com\/calling.*/);
-  } catch (error) {
-    throw new Error('The Input Page should be logged into calling web-client.');
-  }
-  await page.locator('[data-test="right-action-button"]').waitFor({state: 'visible', timeout: AWAIT_TIMEOUT});
-  await page.locator('[data-test="right-action-button"]').click({timeout: AWAIT_TIMEOUT});
-  await page.waitForTimeout(500);
+  await page.bringToFront();
+  await expect(page.locator('#answer').first()).toBeEnabled({timeout: EXTENSION_REGISTRATION_TIMEOUT});
+  await page.waitForTimeout(2000);
+  await page.locator('#answer').first().click({timeout: AWAIT_TIMEOUT});
 }
 
 /**
@@ -336,14 +348,11 @@ export async function acceptExtensionCall(page: Page) {
  * @param page Playwright Page object
  */
 export async function declineExtensionCall(page: Page) {
-  try {
-    await page.waitForTimeout(2000);
-    await expect(page).toHaveURL(/.*\.webex\.com\/calling.*/);
-  } catch (error) {
-    throw new Error('The Input Page should be logged into calling web-client.');
-  }
-  await page.locator('[data-test="left-action-button"]').waitFor({state: 'visible', timeout: AWAIT_TIMEOUT});
-  await page.locator('[data-test="left-action-button"]').click({timeout: AWAIT_TIMEOUT});
+  await page.bringToFront();
+  const endBtn = page.locator('#end').first();
+  await expect(endBtn).toBeEnabled({timeout: AWAIT_TIMEOUT});
+  await page.waitForTimeout(2000);
+  await endBtn.click({timeout: AWAIT_TIMEOUT});
 }
 
 /**
@@ -351,15 +360,10 @@ export async function declineExtensionCall(page: Page) {
  * @param page Playwright Page object
  */
 export async function endExtensionCall(page: Page) {
-  try {
-    await page.waitForTimeout(2000);
-    await expect(page).toHaveURL(/.*\.webex\.com\/calling.*/);
-  } catch (error) {
-    throw new Error('The Input Page should be logged into calling web-client.');
-  }
-  await page.locator('[data-test="end-call"]').waitFor({state: 'visible', timeout: AWAIT_TIMEOUT});
-  await page.locator('[data-test="end-call"]').click({timeout: AWAIT_TIMEOUT});
-  await page.waitForTimeout(500);
+  await page.bringToFront();
+  const endBtn = page.locator('#end-call').first();
+  await expect(endBtn).toBeEnabled({timeout: AWAIT_TIMEOUT});
+  await endBtn.click({timeout: AWAIT_TIMEOUT});
 }
 
 /**
@@ -370,53 +374,25 @@ export async function endExtensionCall(page: Page) {
  * @param password User password
  * @throws Error if login fails after maxRetries
  */
-export async function loginExtension(page: Page, email: string, password: string) {
-  if (!email || !password) {
-    throw new Error('Email and password are required for loginExtension');
+export async function loginExtension(page: Page, token: string) {
+  await page.bringToFront();
+  if (!token) {
+    throw new Error('Token is required for loginExtension');
   }
 
-  if (email.trim() === '' || password.trim() === '') {
-    throw new Error('Email and password cannot be empty strings for loginExtension');
-  }
-  if (!CALL_URL) {
-    throw new Error('CALL_URL is not defined. Please check your constants file.');
+  if (token.trim() === '') {
+    throw new Error('Token cannot be empty strings for loginExtension');
   }
 
-  for (let i = 0; i < DEFAULT_MAX_RETRIES; i++) {
-    try {
-      await page.goto(CALL_URL);
-      break;
-    } catch (error) {
-      if (i === DEFAULT_MAX_RETRIES - 1) {
-        throw new Error(`Failed to login via extension after ${DEFAULT_MAX_RETRIES} attempts: ${error}`);
-      }
-    }
-  }
-  const isLoginPageVisible = await page
-    .getByRole('textbox', {name: 'Email address (required)'})
-    .waitFor({state: 'visible', timeout: OPERATION_TIMEOUT})
-    .then(() => true)
-    .catch(() => false);
-  if (!isLoginPageVisible) {
-    await expect(page.getByRole('button', {name: 'Back to sign in'})).toBeVisible({timeout: AWAIT_TIMEOUT});
-    await page.getByRole('button', {name: 'Back to sign in'}).click({timeout: AWAIT_TIMEOUT});
-    await page.getByRole('button', {name: 'Sign in'}).waitFor({state: 'visible', timeout: AWAIT_TIMEOUT});
-    await page.getByRole('button', {name: 'Sign in'}).click({timeout: AWAIT_TIMEOUT});
-  }
-  await page
-    .getByRole('textbox', {name: 'Email address (required)'})
-    .waitFor({state: 'visible', timeout: FORM_FIELD_TIMEOUT});
-  await page.getByRole('textbox', {name: 'Email address (required)'}).fill(email, {timeout: AWAIT_TIMEOUT});
-  await page.getByRole('textbox', {name: 'Email address (required)'}).press('Enter', {timeout: AWAIT_TIMEOUT});
-  await page.getByRole('textbox', {name: 'Password'}).waitFor({state: 'visible', timeout: FORM_FIELD_TIMEOUT});
-  await page.getByRole('textbox', {name: 'Password'}).fill(password, {timeout: AWAIT_TIMEOUT});
-  await page.getByRole('textbox', {name: 'Password'}).press('Enter', {timeout: AWAIT_TIMEOUT});
-  await page.getByRole('textbox', {name: 'Dial'}).waitFor({state: 'visible', timeout: NETWORK_OPERATION_TIMEOUT});
-  try {
-    await page.locator('[data-test="statusMessage"]').waitFor({state: 'hidden', timeout: NETWORK_OPERATION_TIMEOUT});
-  } catch (e) {
-    throw new Error('Unable to Login to the webex calling web-client');
-  }
+  await page.goto(CALL_URL);
+  await page.locator('#access-token').fill(token);
+  await page.locator('#access-token-save').click();
+  await expect(page.locator('#registration-register')).toBeEnabled({timeout: EXTENSION_REGISTRATION_TIMEOUT});
+  await page.locator('#registration-register').click();
+  await expect(page.locator('#registration-status')).toContainText('Registered, deviceId', {
+    timeout: EXTENSION_REGISTRATION_TIMEOUT,
+  });
+  await page.locator('#sd-get-media-streams').click();
 }
 
 /**
@@ -429,7 +405,7 @@ export async function submitRonaPopup(page: Page, nextState: RonaOption) {
   if (!nextState) {
     throw new Error('RONA next state selection is required');
   }
-  await page.waitForTimeout(1000);
+  await page.bringToFront();
   await page.getByTestId('samples:rona-popup').waitFor({state: 'visible', timeout: AWAIT_TIMEOUT});
   await page.waitForTimeout(1000);
   await expect(page.getByTestId('samples:rona-select-state')).toBeVisible({timeout: AWAIT_TIMEOUT});
