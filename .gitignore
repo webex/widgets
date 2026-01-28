@@ -38,6 +38,7 @@ reports/
 
 #Local stuff
 *.json
+!docs/changelog/logs/*.json
 .env*
 !.env.default
 !package.json
