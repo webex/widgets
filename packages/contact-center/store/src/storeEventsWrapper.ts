@@ -766,7 +766,6 @@ class StoreWrapper implements IStoreWrapper {
     try {
       // @ts-expect-error - webex credentials API not typed
       const tokenInfo = await this.store.cc.webex.credentials.getUserToken();
-      console.log('Retrieved access token:', tokenInfo);
       return tokenInfo.access_token;
     } catch (error) {
       this.store.logger.error('CC-Widgets: getAccessToken(): failed to get access token', {
