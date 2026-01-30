@@ -15,7 +15,6 @@ export interface UseDigitalChannelsInitProps {
 
 export interface UseDigitalChannelsDataProps {
   getAccessToken: () => Promise<string>;
-  getDataCenter: () => Promise<string | undefined>;
   currentTask: ITask | null;
   logger?: {
     log: (message: string, meta?: Record<string, unknown>) => void;

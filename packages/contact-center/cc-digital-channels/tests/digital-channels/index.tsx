@@ -38,7 +38,7 @@ jest.mock('@webex/cc-store', () => {
       isDigitalChannelsInitialized: false,
       setDigitalChannelsInitialized: jest.fn(),
       getAccessToken: jest.fn().mockResolvedValue('test-jwt-token'),
-      getDataCenter: jest.fn().mockResolvedValue('produs1'),
+      dataCenter: 'produs1',
     },
   };
 });

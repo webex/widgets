@@ -8,19 +8,12 @@ import {DigitalChannelsComponent} from './DigitalChannelsComponent';
 import {DigitalChannelsProps} from './digital-channels.types';
 
 const DigitalChannelsInternal: React.FunctionComponent<DigitalChannelsProps> = observer(({currentTheme}) => {
-  const {
-    logger,
-    currentTask,
-    isDigitalChannelsInitialized,
-    setDigitalChannelsInitialized,
-    getAccessToken,
-    getDataCenter,
-  } = store;
+  const {logger, currentTask, isDigitalChannelsInitialized, setDigitalChannelsInitialized, getAccessToken, dataCenter} =
+    store;
 
-  // Fetch all required data (token, datacenter, conversationId)
-  const {jwtToken, dataCenter, conversationId, hasError} = useDigitalChannelsData({
+  // Fetch JWT token and conversation ID
+  const {jwtToken, conversationId, hasError} = useDigitalChannelsData({
     getAccessToken,
-    getDataCenter,
     currentTask,
     logger,
   });

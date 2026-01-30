@@ -9596,7 +9596,7 @@ __metadata:
     "@testing-library/react": "npm:16.0.1"
     "@types/jest": "npm:29.5.14"
     "@types/react-test-renderer": "npm:18"
-    "@webex/contact-center": "npm:3.11.0-next.4"
+    "@webex/contact-center": "npm:3.11.0-next.5"
     "@webex/test-fixtures": "workspace:*"
     babel-jest: "npm:29.7.0"
     babel-loader: "npm:9.2.1"
@@ -9942,9 +9942,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/contact-center@npm:3.11.0-next.4":
-  version: 3.11.0-next.4
-  resolution: "@webex/contact-center@npm:3.11.0-next.4"
+"@webex/contact-center@npm:3.11.0-next.5":
+  version: 3.11.0-next.5
+  resolution: "@webex/contact-center@npm:3.11.0-next.5"
   dependencies:
     "@types/platform": "npm:1.3.4"
     "@webex/calling": "npm:3.11.0-next.1"
@@ -9956,7 +9956,7 @@ __metadata:
     "@webex/webex-core": "npm:3.11.0-next.1"
     jest-html-reporters: "npm:3.0.11"
     lodash: "npm:^4.17.21"
-  checksum: 10c0/b2b360e6812674b14790bf675c413be6b12da35330b694fe716a64ee23ca993e4b019af4df38686ef05c07cba610f353a9335a11c7ebebfd032713954175f92f
+  checksum: 10c0/fe33bd7b20b4668ed637691c7d07ef56bb9250e9ec75c195386d7dc24fcf888cdeefd5ce458023b0db467fbbbdc9b7a369ec17331bcf8c0718e481c1a3c29ca9
   languageName: node
   linkType: hard
 
