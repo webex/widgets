@@ -152,31 +152,7 @@ const AgentStatusPanel = observer(() => {
 });
 ```
 
-#### 2. Supervisor Dashboard Integration
-
-```typescript
-// Track multiple agents' state changes
-import { UserState } from '@webex/cc-user-state';
-
-function SupervisorDashboard({ agentId }) {
-  const handleAgentStateChange = (state) => {
-    // Send state change to analytics
-    trackAgentState(agentId, state);
-    
-    // Update dashboard
-    updateAgentStatus(agentId, state.name);
-    
-    // Check if agent needs assistance
-    if (state.name === 'Idle' && state.duration > 900) {
-      notifySupervisor(`Agent ${agentId} idle for 15+ minutes`);
-    }
-  };
-
-  return <UserState onStateChange={handleAgentStateChange} />;
-}
-```
-
-#### 3. State Change Validation
+#### 2. State Change Validation
 
 ```typescript
 // Validate state changes before allowing
@@ -207,7 +183,7 @@ function ValidatedUserState() {
 }
 ```
 
-#### 4. Custom Error Handling
+#### 3. Custom Error Handling
 
 ```typescript
 import store from '@webex/cc-store';

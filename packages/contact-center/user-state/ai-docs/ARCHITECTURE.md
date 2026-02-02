@@ -411,9 +411,6 @@ console.log('Current state:', store.currentState);
 
 // Check idle codes availability
 console.log('Idle codes:', store.idleCodes);
-
-// Enable detailed logging
-store.logger.setLevel('debug');
 ```
 
 #### 3. Idle Codes Not Displaying
