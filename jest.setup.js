@@ -13,3 +13,27 @@ window.HTMLElement.prototype.attachInternals = function () {
     setFormValue: () => {},
   };
 };
+
+// Mock scrollIntoView for TabList component
+window.HTMLElement.prototype.scrollIntoView = function () {};
+
+// Mock IntersectionObserver for infinite scroll tests
+global.IntersectionObserver = class IntersectionObserver {
+  constructor(callback, options) {
+    this.callback = callback;
+    this.options = options;
+  }
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+};
+
+// Mock ResizeObserver for TabList component
+global.ResizeObserver = class ResizeObserver {
+  constructor(callback) {
+    this.callback = callback;
+  }
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+};
