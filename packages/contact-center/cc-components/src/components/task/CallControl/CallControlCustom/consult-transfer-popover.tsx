@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {Text, ListNext, TextInput, Button, ButtonCircle, TooltipNext} from '@momentum-ui/react-collaboration';
-import {Icon, Checkbox} from '@momentum-design/components/dist/react';
+import {Icon, Checkbox, Spinner} from '@momentum-design/components/dist/react';
 import ConsultTransferListComponent from './consult-transfer-list-item';
 import {ConsultTransferPopoverComponentProps} from '../../task.types';
 import ConsultTransferEmptyState from './consult-transfer-empty-state';
@@ -16,9 +16,6 @@ import {
   SEARCH_PLACEHOLDER,
   CLEAR_SEARCH,
   SCROLL_TO_LOAD_MORE,
-  LOADING_MORE_QUEUES,
-  LOADING_MORE_DIAL_NUMBERS,
-  LOADING_MORE_ENTRY_POINTS,
   NO_DATA_AVAILABLE_CONSULT_TRANSFER,
 } from '../../constants';
 import {CATEGORY_AGENTS, CATEGORY_DIAL_NUMBER, CATEGORY_ENTRY_POINT, CATEGORY_QUEUES} from '../../task.types';
@@ -27,6 +24,8 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
   heading,
   buttonIcon,
   buddyAgents,
+  loadingBuddyAgents,
+  loadBuddyAgents,
   getAddressBookEntries,
   getEntryPoints,
   getQueues,
@@ -59,6 +58,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
     handleQueuesClick,
     handleDialNumberClick,
     handleEntryPointClick,
+    handleReload,
   } = useConsultTransferPopover({
     showDialNumberTab,
     showEntryPointTab: isEntryPointTabVisible,
@@ -122,6 +122,37 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
           aria-labelledby="consult-search-label"
           className="consult-search-input"
         />
+        <div className="consult-action-buttons">
+          <TooltipNext
+            key={`reload-button-${selectedCategory}`}
+            triggerComponent={
+              <ButtonCircle
+                className="consult-reload-button call-control-button"
+                aria-label={`Reload ${selectedCategory}`}
+                size={32}
+                data-testid="consult-reload-button"
+                onPress={() => {
+                  if (selectedCategory === CATEGORY_AGENTS && loadBuddyAgents) {
+                    loadBuddyAgents();
+                  } else {
+                    handleReload();
+                  }
+                }}
+                disabled={loadingBuddyAgents || loadingDialNumbers || loadingEntryPoints || loadingQueues}
+              >
+                <Icon name="refresh-bold" />
+              </ButtonCircle>
+            }
+            color="secondary"
+            delay={[0, 0]}
+            placement="bottom-start"
+            type="description"
+            variant="small"
+            className="tooltip"
+          >
+            <Text tagName="p">{`Reload ${selectedCategory}`}</Text>
+          </TooltipNext>
+        </div>
         {consultTransferManualAction.visible && (
           <TooltipNext
             triggerComponent={
@@ -199,7 +230,11 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
 
       <div className="consult-list-container">
         {selectedCategory === 'Agents' &&
-          (getAgentsForDisplay(selectedCategory, buddyAgents, searchQuery).length === 0 ? (
+          (loadingBuddyAgents ? (
+            <div className="consult-loading-spinner">
+              <Spinner />
+            </div>
+          ) : getAgentsForDisplay(selectedCategory, buddyAgents, searchQuery).length === 0 ? (
             <ConsultTransferEmptyState message={NO_DATA_AVAILABLE_CONSULT_TRANSFER} />
           ) : (
             renderList(
@@ -212,7 +247,11 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
           ))}
 
         {selectedCategory === 'Queues' &&
-          (noQueues ? (
+          (loadingQueues && queuesData.length === 0 ? (
+            <div className="consult-loading-spinner">
+              <Spinner />
+            </div>
+          ) : noQueues ? (
             <ConsultTransferEmptyState message={NO_DATA_AVAILABLE_CONSULT_TRANSFER} />
           ) : (
             <div>
@@ -223,9 +262,9 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
               {hasMoreQueues && (
                 <div ref={loadMoreRef} className="consult-load-more">
                   {loadingQueues ? (
-                    <Text tagName="small" type="body-secondary">
-                      {LOADING_MORE_QUEUES}
-                    </Text>
+                    <div className="consult-loading-spinner">
+                      <Spinner />
+                    </div>
                   ) : (
                     <Text tagName="small" type="body-secondary">
                       {SCROLL_TO_LOAD_MORE}
@@ -238,7 +277,11 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
 
         {showDialNumberTab &&
           selectedCategory === CATEGORY_DIAL_NUMBER &&
-          (noDialNumbers ? (
+          (loadingDialNumbers && dialNumbers.length === 0 ? (
+            <div className="consult-loading-spinner">
+              <Spinner />
+            </div>
+          ) : noDialNumbers ? (
             <ConsultTransferEmptyState message={NO_DATA_AVAILABLE_CONSULT_TRANSFER} />
           ) : (
             <div>
@@ -253,9 +296,9 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
               {hasMoreDialNumbers && (
                 <div ref={loadMoreRef} className="consult-load-more">
                   {loadingDialNumbers ? (
-                    <Text tagName="small" type="body-secondary">
-                      {LOADING_MORE_DIAL_NUMBERS}
-                    </Text>
+                    <div className="consult-loading-spinner">
+                      <Spinner />
+                    </div>
                   ) : (
                     <Text tagName="small" type="body-secondary">
                       {SCROLL_TO_LOAD_MORE}
@@ -268,7 +311,11 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
 
         {isEntryPointTabVisible &&
           selectedCategory === CATEGORY_ENTRY_POINT &&
-          (noEntryPoints ? (
+          (loadingEntryPoints && entryPoints.length === 0 ? (
+            <div className="consult-loading-spinner">
+              <Spinner />
+            </div>
+          ) : noEntryPoints ? (
             <ConsultTransferEmptyState message={NO_DATA_AVAILABLE_CONSULT_TRANSFER} />
           ) : (
             <div>
@@ -281,9 +328,9 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
               {hasMoreEntryPoints && (
                 <div ref={loadMoreRef} className="consult-load-more">
                   {loadingEntryPoints ? (
-                    <Text tagName="small" type="body-secondary">
-                      {LOADING_MORE_ENTRY_POINTS}
-                    </Text>
+                    <div className="consult-loading-spinner">
+                      <Spinner />
+                    </div>
                   ) : (
                     <Text tagName="small" type="body-secondary">
                       {SCROLL_TO_LOAD_MORE}

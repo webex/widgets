@@ -12,8 +12,6 @@ import {
 import {USER_STATES, THEME_COLORS, LOGIN_MODE} from '../constants';
 import {TestManager} from '../test-manager';
 
-// Shared login and setup before all tests
-
 export default function createUserStateTests() {
   let testManager: TestManager;
 
@@ -33,7 +31,7 @@ export default function createUserStateTests() {
         process.env[`${testManager.projectName}_AGENT1_EXTENSION_NUMBER`]
       );
     } else {
-      await stationLogout(testManager.agent1Page);
+      await stationLogout(testManager.agent1Page, false); // Don't throw during setup
       await telephonyLogin(
         testManager.agent1Page,
         LOGIN_MODE.EXTENSION,
@@ -62,10 +60,9 @@ export default function createUserStateTests() {
 
   test('should change state to Available and verify theme and timer reset', async () => {
     await verifyCurrentState(testManager.agent1Page, USER_STATES.MEETING);
-    await testManager.agent1Page.waitForTimeout(5000);
+    await testManager.agent1Page.waitForTimeout(10000);
     const timerBefore = await getStateElapsedTime(testManager.agent1Page);
     await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
-    await testManager.agent1Page.waitForTimeout(3000);
     const timerAfter = await getStateElapsedTime(testManager.agent1Page);
 
     const parseTimer = (timer: string) => {
@@ -155,6 +152,9 @@ export default function createUserStateTests() {
   });
 
   test('should test idle state transition and dual timer', async () => {
+    // Dismiss any open dropdowns/popovers from previous tests
+    await testManager.agent1Page.keyboard.press('Escape');
+    await testManager.agent1Page.waitForTimeout(500);
     await verifyCurrentState(testManager.agent1Page, USER_STATES.MEETING);
     await testManager.agent1Page.waitForTimeout(2000);
     testManager.consoleMessages.length = 0;

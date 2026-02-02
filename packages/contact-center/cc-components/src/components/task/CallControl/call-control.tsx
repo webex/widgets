@@ -45,6 +45,7 @@ function CallControlComponent(props: CallControlComponentProps) {
     isRecording,
     setIsRecording,
     buddyAgents,
+    loadingBuddyAgents,
     loadBuddyAgents,
     transferCall,
     consultCall,
@@ -221,6 +222,8 @@ function CallControlComponent(props: CallControlComponentProps) {
                         heading={button.menuType}
                         buttonIcon={button.icon}
                         buddyAgents={buddyAgents}
+                        loadingBuddyAgents={loadingBuddyAgents}
+                        loadBuddyAgents={loadBuddyAgents}
                         getAddressBookEntries={getAddressBookEntries}
                         getEntryPoints={getEntryPoints}
                         getQueues={getQueuesFetcher}

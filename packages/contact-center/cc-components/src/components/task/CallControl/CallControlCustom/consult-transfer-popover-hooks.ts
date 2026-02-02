@@ -315,6 +315,14 @@ export function useConsultTransferPopover({
     }
   }, [selectedCategory]);
 
+  const handleReload = useCallback(() => {
+    logger?.info(`CC-Components: Reloading ${selectedCategory} data`, {
+      module: 'cc-components#consult-transfer-popover-hooks.ts',
+      method: 'useConsultTransferPopover#handleReload',
+    });
+    loadCategory(selectedCategory, 0, searchQuery, true);
+  }, [selectedCategory, searchQuery, loadDialNumbers, loadEntryPoints, loadQueues, logger]);
+
   return {
     selectedCategory,
     searchQuery,
@@ -333,5 +341,6 @@ export function useConsultTransferPopover({
     handleQueuesClick,
     handleDialNumberClick,
     handleEntryPointClick,
+    handleReload,
   };
 }
