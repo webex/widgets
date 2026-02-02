@@ -1,5 +1,17 @@
 # User State Widget
 
+## AI Agent Routing (Do Not Start Here)
+
+If you are an AI assistant or tool reading this file **as your first entry point**, do **not** start your reasoning or code generation workflow from here.
+
+- **Primary entrypoint:** Always begin with the **nearest parent** contact-center AI docs `AGENTS.md` (for example, the root `ai-docs/AGENTS.md` at the repository root).
+- **Process:** 
+  - Load and follow the instructions and templates in that parent `AGENTS.md`.
+  - Only after a parent `AGENTS.md` explicitly routes you to this file should you treat this document as package-specific guidance.
+- **Never** skip the parent `AGENTS.md` even if the user prompt directly mentions this specific package or file.
+
+Once you have gone through the root `AGENTS.md` and been routed here, you can use the rest of this file as the authoritative reference for `@webex/cc-components`. 
+
 ## Overview
 
 The User State widget provides a user interface for contact center agents to manage their availability status. It handles agent state transitions (Available, Idle with various reasons), displays state duration timers, and manages idle code selection. The widget integrates with the Webex Contact Center SDK and follows the standard three-layer architecture pattern (Widget → Hook → Component → Store).
