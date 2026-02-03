@@ -19,10 +19,8 @@ Demonstrates how to integrate Contact Center widgets into a React application. U
 ### Step 1: Import the Widget
 
 ```tsx
-import { NewWidget } from '@webex/cc-widgets';
+import {NewWidget} from '@webex/cc-widgets';
 ```
-
-**Add to imports section (lines 1-28)** with other widgets.
 
 ### Step 2: Add to defaultWidgets
 
@@ -31,11 +29,9 @@ const defaultWidgets = {
   stationLogin: true,
   userState: true,
   // ... existing widgets
-  newWidget: false,  // ← Add here (false by default for user opt-in)
+  newWidget: false, // ← Add here (false by default for user opt-in)
 };
 ```
-
-**Location:** Line 33-42 in `App.tsx`
 
 ### Step 3: Add Checkbox for Widget Selection
 
@@ -51,49 +47,48 @@ const defaultWidgets = {
 </Checkbox>
 ```
 
-**Location:** Widget selector section in render (around line 300-400)
-
 ### Step 4: Conditional Rendering with Standard Layout
 
 ```tsx
-{selectedWidgets.newWidget && (
-  <div className="box">
-    <section className="section-box">
-      <fieldset className="fieldset">
-        <legend className="legend-box">New Widget</legend>
-        <NewWidget
-          onEvent={(data) => handleNewWidgetEvent(data)}
-          onError={(error) => onError('NewWidget', error)}
-        />
-      </fieldset>
-    </section>
-  </div>
-)}
+{
+  selectedWidgets.newWidget && (
+    <div className="box">
+      <section className="section-box">
+        <fieldset className="fieldset">
+          <legend className="legend-box">New Widget</legend>
+          <NewWidget onEvent={(data) => handleNewWidgetEvent(data)} onError={(error) => onError('NewWidget', error)} />
+        </fieldset>
+      </section>
+    </div>
+  );
+}
 ```
 
-**Location:** Main render section, grouped by widget category
-
-### Step 5: Add Event Handlers (if needed)
+### Step 5: Add callbacks (if needed)
 
 ```tsx
-const handleNewWidgetEvent = (data) => {
-  console.log('New widget event:', data);
-  // Handle event logic
+const handleNewWidgetCallback = (data) => {
+  console.log('New widget callback:', data);
+  // Handle callback logic
 };
 ```
-
-**Location:** With other event handlers in component
 
 ## Layout Structure Rules
 
 ### Container Hierarchy (ALWAYS use this)
 
 ```tsx
-<div className="box">           {/* Outer container with background */}
-  <section className="section-box">  {/* Inner section with padding */}
-    <fieldset className="fieldset">  {/* Fieldset for grouping */}
-      <legend className="legend-box">Title</legend>  {/* Title/legend */}
-      <WidgetComponent />            {/* Actual widget */}
+<div className="box">
+  {' '}
+  {/* Outer container with background */}
+  <section className="section-box">
+    {' '}
+    {/* Inner section with padding */}
+    <fieldset className="fieldset">
+      {' '}
+      {/* Fieldset for grouping */}
+      <legend className="legend-box">Title</legend> {/* Title/legend */}
+      <WidgetComponent /> {/* Actual widget */}
     </fieldset>
   </section>
 </div>
@@ -149,10 +144,10 @@ var(--mds-font-size-body-medium)
 ### Standard onError Handler
 
 ```tsx
-const onError = (source: string, error: Error) => {
-  console.error(`${source} error:`, error);
+const onError = (widgetName: string, error: Error) => {
+  console.error(`${widgetName} error:`, error);
   // Optional: Show toast notification
-  setToast({ type: 'error' });
+  setToast({type: 'error'});
 };
 ```
 
@@ -162,10 +157,10 @@ const onError = (source: string, error: Error) => {
 
 ```tsx
 // IncomingTask
-const onIncomingTaskCB = ({ task }) => {
+const onIncomingTaskCB = ({task}) => {
   console.log('Incoming task:', task);
-  setIncomingTasks(prev => [...prev, task]);
-  playNotificationSound();  // Custom logic
+  setIncomingTasks((prev) => [...prev, task]);
+  playNotificationSound(); // Custom logic
 };
 
 // UserState
@@ -175,22 +170,31 @@ const onAgentStateChangedCB = (newState: AgentState, oldState: AgentState) => {
 };
 
 // CallControl
-const onRecordingToggleCB = ({ isRecording, task }) => {
+const onRecordingToggleCB = ({isRecording, task}) => {
   console.log('Recording:', isRecording, 'for task:', task.data.interactionId);
 };
 ```
 
 ## Theme Integration
 
-Widgets automatically use MobX store theme:
+Theme is controlled by `@momentum-ui`'s `ThemeProvider`:
 
 ```tsx
-// Theme is managed by store.currentTheme
-// Widget CSS uses CSS variables that respond to theme changes
-// No manual theme passing needed
+import {ThemeProvider} from '@momentum-design/components/dist/react';
+
+<ThemeProvider
+  themeclass={store.currentTheme === 'LIGHT' ? 'mds-theme-stable-lightWebex' : 'mds-theme-stable-darkWebex'}
+>
+  {/* Your widgets */}
+</ThemeProvider>;
 ```
 
-**User can toggle theme via UI dropdown** - widgets update automatically.
+- **Theme provider**: `@momentum-ui` library manages the theme through `ThemeProvider`
+- **Theme storage**: `store.currentTheme` stores the theme as a string ('LIGHT' or 'DARK')
+- **Theme classes**: Theme class names (`mds-theme-stable-lightWebex` / `mds-theme-stable-darkWebex`) are passed to ThemeProvider
+- **Automatic updates**: All widgets automatically respond to theme changes through the ThemeProvider context
+
+**User can toggle theme via UI checkbox** - widgets update automatically through the provider.
 
 ## State Management
 
@@ -198,13 +202,13 @@ Widgets automatically use MobX store theme:
 
 ```tsx
 // Access store for global state
-import { store } from '@webex/cc-widgets';
+import {store} from '@webex/cc-widgets';
 
 // Examples:
-store.currentTask       // Current active task
-store.taskList          // All tasks
-store.incomingTask      // Incoming task
-store.agentState        // Current agent state
+store.currentTask; // Current active task
+store.taskList; // All tasks
+store.incomingTask; // Incoming task
+store.agentState; // Current agent state
 ```
 
 ### When to Use Local State
@@ -219,7 +223,7 @@ const [selectedOption, setSelectedOption] = useState('');
 
 ```tsx
 // 1. Import
-import { NewAwesomeWidget } from '@webex/cc-widgets';
+import {NewAwesomeWidget} from '@webex/cc-widgets';
 
 // 2. Add to defaultWidgets
 const defaultWidgets = {
@@ -235,28 +239,30 @@ const defaultWidgets = {
   htmlId="newAwesomeWidget-checkbox"
 >
   <Text>New Awesome Widget</Text>
-</Checkbox>
+</Checkbox>;
 
-// 4. Event handler (if needed)
-const handleAwesomeEvent = (data) => {
-  console.log('Awesome event:', data);
+// 4. Setup callback handler (if needed)
+const handleCallback = (data) => {
+  console.log('Callback:', data);
 };
 
 // 5. Render with standard layout
-{selectedWidgets.newAwesomeWidget && (
-  <div className="box">
-    <section className="section-box">
-      <fieldset className="fieldset">
-        <legend className="legend-box">New Awesome Widget</legend>
-        <NewAwesomeWidget
-          onAwesomeEvent={handleAwesomeEvent}
-          onError={(error) => onError('NewAwesomeWidget', error)}
-          customProp={someValue}
-        />
-      </fieldset>
-    </section>
-  </div>
-)}
+{
+  selectedWidgets.newAwesomeWidget && (
+    <div className="box">
+      <section className="section-box">
+        <fieldset className="fieldset">
+          <legend className="legend-box">New Awesome Widget</legend>
+          <NewAwesomeWidget
+            handleCallback={handleCallback}
+            onError={(error) => onError('NewAwesomeWidget', error)}
+            customProp={someValue}
+          />
+        </fieldset>
+      </section>
+    </div>
+  );
+}
 ```
 
 ## Common Mistakes to AVOID
@@ -287,7 +293,9 @@ const handleAwesomeEvent = (data) => {
 
 ```tsx
 // WRONG - Widget renders immediately, user can't disable
-{selectedWidgets.newWidget && <NewWidget />}
+{
+  selectedWidgets.newWidget && <NewWidget />;
+}
 // But newWidget not in defaultWidgets!
 ```
 
@@ -296,11 +304,13 @@ const handleAwesomeEvent = (data) => {
 ```tsx
 // In defaultWidgets
 const defaultWidgets = {
-  newWidget: false,  // ← MUST ADD HERE
+  newWidget: false, // ← MUST ADD HERE
 };
 
 // Then render
-{selectedWidgets.newWidget && <NewWidget />}
+{
+  selectedWidgets.newWidget && <NewWidget />;
+}
 ```
 
 ### ❌ Missing error handler
@@ -313,10 +323,7 @@ const defaultWidgets = {
 ### ✅ Correct
 
 ```tsx
-<NewWidget
-  onEvent={handleEvent}
-  onError={(error) => onError('NewWidget', error)}
-/>
+<NewWidget onEvent={handleEvent} onError={(error) => onError('NewWidget', error)} />
 ```
 
 ### ❌ Hardcoding colors
@@ -343,7 +350,7 @@ After adding a new widget:
 - [ ] Renders with correct layout (box > section-box > fieldset)
 - [ ] Has legend/title
 - [ ] Uses Momentum CSS variables (no hardcoded colors)
-- [ ] Event handlers fire correctly
+- [ ] Callbacks are handled correctly
 - [ ] onError handler present and logs errors
 - [ ] Works in both light and dark themes
 - [ ] No console errors when enabled/disabled
@@ -353,14 +360,8 @@ After adding a new widget:
 
 - **Main App:** `src/App.tsx`
 - **Styles:** `src/App.scss`
-- **Widget Imports:** Line 1-28 in `App.tsx`
-- **defaultWidgets:** Line 33-42 in `App.tsx`
-- **Widget Selector:** Around line 300-400 in render method
-- **Widget Render:** Main render section grouped by category
 
 ## Additional Resources
 
-- [Momentum Design System Docs](https://momentum.design/)
 - [MobX Store Package](../../packages/contact-center/store/ai-docs/agent.md)
 - [cc-widgets Package](../../packages/contact-center/cc-widgets/ai-docs/agent.md)
-
