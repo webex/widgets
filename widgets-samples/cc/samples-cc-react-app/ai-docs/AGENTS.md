@@ -45,6 +45,7 @@ const defaultWidgets = {
   name="newWidget"
   checked={selectedWidgets.newWidget}
   htmlId="newWidget-checkbox"
+  aria-label="new widget checkbox"
 >
   <Text>New Widget</Text>
 </Checkbox>
