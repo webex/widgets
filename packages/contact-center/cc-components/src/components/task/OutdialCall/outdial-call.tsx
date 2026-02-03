@@ -9,7 +9,7 @@ import {SelectNext} from '@momentum-ui/react-collaboration';
 import {Item} from '@react-stately/collections';
 
 import {OutdialAniEntry, OutdialCallComponentProps} from '../task.types';
-import {OutdialStrings, KEY_LIST} from './constants';
+import {OutdialStrings, KEY_LIST, TABS} from './constants';
 import {DEFAULT_PAGE_SIZE} from '../constants';
 import {createInitials, debounce} from '../CallControl/CallControlCustom/call-control-custom.utils';
 import {useIntersectionObserver} from '../../../hooks';
@@ -36,11 +36,6 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
     getAddressBookEntries,
     isAddressBookEnabled = true,
   } = props;
-
-  const TABS = {
-    DIAL_PAD: 'dial_pad',
-    ADDRESS_BOOK: 'address_book',
-  };
 
   // State Hooks
   const [selectedTab, setSelectedTab] = useState(TABS.DIAL_PAD);
@@ -140,7 +135,7 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
     }
   };
 
-  const handleDiapadTabClick = () => {
+  const handleDialpadTabClick = () => {
     setSelectedAddressBookEntry(null);
     // Don't clear destination - preserve selected address book entry number
     setSelectedTab(TABS.DIAL_PAD);
@@ -252,16 +247,16 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
               <Spinner variant="button" />
             </div>
           ) : (
-            <p>No address book entries found.</p>
+            <p>{OutdialStrings.ADDRESS_BOOK_NO_RESULTS}</p>
           )}
         </ul>
       </section>
     );
   };
 
-  const renderDiapad = () => {
+  const renderDialpad = () => {
     return (
-      <section className="keypad" data-testid="outdial-call-container">
+      <>
         <Input
           className="outdial-input"
           id="outdial-number-input"
@@ -280,18 +275,18 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
         <ul className="keys" data-testid="outdial-keypad-keys">
           {KEY_LIST.map((key) => (
             <li key={key}>
-              <Button className="key button" onClick={() => handleOnClick(key)}>
+              <Button className="key" onClick={() => handleOnClick(key)}>
                 {key}
               </Button>
             </li>
           ))}
         </ul>
-      </section>
+      </>
     );
   };
 
   return (
-    <article className={`outdial-container ${isAddressBookEnabled ? 'height-28-5rem' : ''}`}>
+    <article className="outdial-container" data-testid="outdial-call-container">
       {isAddressBookEnabled && (
         <>
           <TabList activeTabId={selectedTab} dataAriaLabel="Outdial call tabs" className="tab-list">
@@ -301,6 +296,7 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
               aria-controls={TABS.ADDRESS_BOOK}
               variant="glass"
               onClick={handleAddressBookTabClick}
+              text={OutdialStrings.TAB_ADDRESS_BOOK}
             ></Tab>
 
             <Tab
@@ -308,29 +304,35 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
               tabId={TABS.DIAL_PAD}
               aria-controls={TABS.DIAL_PAD}
               variant="glass"
-              onClick={handleDiapadTabClick}
+              onClick={handleDialpadTabClick}
+              text={OutdialStrings.TAB_DIALPAD}
             ></Tab>
           </TabList>
 
           {selectedTab === TABS.ADDRESS_BOOK && (
-            <div
+            <section
               id={TABS.ADDRESS_BOOK}
               role="tabpanel"
               aria-labelledby={TABS.ADDRESS_BOOK}
               className="address-book-container"
             >
               {renderAddressBook()}
-            </div>
+            </section>
           )}
           {selectedTab === TABS.DIAL_PAD && (
-            <div id={TABS.DIAL_PAD} role="tabpanel" aria-labelledby={TABS.DIAL_PAD} className="keypad">
-              {renderDiapad()}
-            </div>
+            <section
+              id={TABS.DIAL_PAD}
+              role="tabpanel"
+              aria-labelledby={TABS.DIAL_PAD}
+              className="dialpad-tab-container"
+            >
+              {renderDialpad()}
+            </section>
           )}
         </>
       )}
 
-      {!isAddressBookEnabled && renderDiapad()}
+      {!isAddressBookEnabled && renderDialpad()}
 
       <div className="outdial-ani-select-container">
         <Icon
@@ -371,7 +373,6 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
       <Button
         data-testid="outdial-call-button"
         prefixIcon={'handset-regular'}
-        className="outDialCallButton"
         onClick={() => {
           startOutdial(destination, selectedANI);
           // Clear input field after initiating the call

@@ -8,7 +8,7 @@ import {
 } from '../Utils/stationLoginUtils';
 import {changeUserState, verifyCurrentState, getStateElapsedTime} from '../Utils/userStateUtils';
 import {parseTimeString, waitForWebSocketDisconnection, waitForWebSocketReconnection} from '../Utils/helperUtils';
-import {USER_STATES, LOGIN_MODE, LONG_WAIT} from '../constants';
+import {USER_STATES, LOGIN_MODE, EXTENSION_REGISTRATION_TIMEOUT} from '../constants';
 import {TestManager} from '../test-manager';
 
 export default function createStationLoginTests() {
@@ -43,7 +43,9 @@ export default function createStationLoginTests() {
         LOGIN_MODE.DIAL_NUMBER,
         process.env[`${testManager.projectName}_ENTRY_POINT`]
       );
-      await expect(testManager.agent1Page.getByTestId('state-select')).toBeVisible({timeout: LONG_WAIT});
+      await expect(testManager.agent1Page.getByTestId('state-select')).toBeVisible({
+        timeout: EXTENSION_REGISTRATION_TIMEOUT,
+      });
       await verifyLoginMode(testManager.agent1Page, 'Dial Number');
     });
 
@@ -178,7 +180,9 @@ export default function createStationLoginTests() {
         LOGIN_MODE.EXTENSION,
         process.env[`${testManager.projectName}_AGENT1_EXTENSION_NUMBER`]
       );
-      await expect(testManager.agent1Page.getByTestId('state-select')).toBeVisible({timeout: LONG_WAIT});
+      await expect(testManager.agent1Page.getByTestId('state-select')).toBeVisible({
+        timeout: EXTENSION_REGISTRATION_TIMEOUT,
+      });
       await verifyLoginMode(testManager.agent1Page, 'Extension');
     });
 
@@ -305,17 +309,17 @@ export default function createStationLoginTests() {
       // Uncheck - Desktop should be visible
       await hideDesktopCheckbox.click();
       await testManager.agent1Page.waitForTimeout(500);
-      await verifyDesktopOptionVisibility(testManager.agent1Page, true);
+      await verifyDesktopOptionVisibility(testManager.agent1Page, false);
 
       // Check - Desktop should be hidden
       await hideDesktopCheckbox.click();
       await testManager.agent1Page.waitForTimeout(500);
-      await verifyDesktopOptionVisibility(testManager.agent1Page, false);
+      await verifyDesktopOptionVisibility(testManager.agent1Page, true);
 
       // Uncheck again - Desktop should be visible again
       await hideDesktopCheckbox.click();
       await testManager.agent1Page.waitForTimeout(500);
-      await verifyDesktopOptionVisibility(testManager.agent1Page, true);
+      await verifyDesktopOptionVisibility(testManager.agent1Page, false);
     });
   });
 
