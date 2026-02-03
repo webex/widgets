@@ -1,6 +1,6 @@
 import {ITask} from '@webex/cc-store';
 
-export interface UseDigitalChannelsInitProps {
+export interface DigitalChannelsInitHookProps {
   currentTask: ITask;
   jwtToken: string;
   dataCenter: string;
@@ -13,7 +13,7 @@ export interface UseDigitalChannelsInitProps {
   skipInit?: boolean;
 }
 
-export interface UseDigitalChannelsDataProps {
+export interface DigitalChannelsDataHookProps {
   getAccessToken: () => Promise<string>;
   currentTask: ITask | null;
   logger?: {

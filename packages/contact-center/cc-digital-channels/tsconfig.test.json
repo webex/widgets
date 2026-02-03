@@ -1,4 +1,3 @@
-// This config is to do type checking in our files while running tests.
 {
   "extends": "./tsconfig.json",
   "include": ["./tests"],

@@ -1,13 +1,13 @@
 import {useEffect, useState, useMemo} from 'react';
 import {initializeApp} from 'cc-digital-interactions';
 
-import {UseDigitalChannelsInitProps, UseDigitalChannelsDataProps} from './digital-channels/digital-channels.types';
+import {DigitalChannelsInitHookProps, DigitalChannelsDataHookProps} from './digital-channels/digital-channels.types';
 
 /**
  * Hook to handle Digital Channels initialization.
  * Ensures initialization happens only once per session using store flag.
  */
-export const useDigitalChannelsInit = (props: UseDigitalChannelsInitProps) => {
+export const useDigitalChannelsInit = (props: DigitalChannelsInitHookProps) => {
   const {
     currentTask,
     jwtToken,
@@ -30,7 +30,7 @@ export const useDigitalChannelsInit = (props: UseDigitalChannelsInitProps) => {
       // Initialize the digital channels app only once per session
       if (!isDigitalChannelsInitialized) {
         logger.log(
-          `[DIGITAL_CHANNELS_INIT] 🚀 Starting Digital Channels initialization for the FIRST TIME (dataCenter: ${dataCenter})...`,
+          `[DIGITAL_CHANNELS_INIT] Starting Digital Channels initialization for the FIRST TIME (dataCenter: ${dataCenter})...`,
           {
             module: 'cc-digital-channels',
             method: 'useDigitalChannelsInit',
@@ -72,7 +72,7 @@ export const useDigitalChannelsInit = (props: UseDigitalChannelsInitProps) => {
  * Hook to handle fetching Digital Channels data (token and conversationId).
  * Centralizes token fetching logic to keep the component clean.
  */
-export const useDigitalChannelsData = (props: UseDigitalChannelsDataProps) => {
+export const useDigitalChannelsData = (props: DigitalChannelsDataHookProps) => {
   const {getAccessToken, currentTask, logger} = props;
 
   const [jwtToken, setJwtToken] = useState<string>('');
