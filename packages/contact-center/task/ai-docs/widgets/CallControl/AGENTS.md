@@ -1,28 +1,41 @@
 # CallControl Widget
 
+## AI Agent Routing (Do Not Start Here)
+
+If you are an AI assistant or tool reading this file **as your first entry point**, do **not** start your reasoning or code generation workflow from here.
+
+- **Primary entrypoint:** Always begin with the **nearest parent** contact-center AI docs `AGENTS.md` (for example, the root `ai-docs/AGENTS.md` at the repository root).
+- **Process:**
+  - Load and follow the instructions and templates in that parent `AGENTS.md`.
+  - Only after a parent `AGENTS.md` explicitly routes you to this file should you treat this document as package-specific guidance.
+- **Never** skip the parent `AGENTS.md` even if the user prompt directly mentions this specific package or file.
+
+Once you have gone through the parent `AGENTS.md` and been routed here, you can use the rest of this file as the authoritative reference for the `CallControl` widget.
+
 ## Overview
 
-Provides call control functionality (hold, mute, transfer, consult, conference, end, wrapup) for active telephony tasks. Includes both standard and CAD (Customer Attached Data) variants.
+Provides unified **interaction control** functionality (hold, mute, transfer, consult, conference, end, wrapup) for active tasks across **voice calls and digital channels**. Includes both standard and CAD (Customer Attached Data) variants.
 
 ## Why This Widget?
 
-**Problem:** Agents need comprehensive call control during active conversations.
+**Problem:** Agents need comprehensive control during active customer interactions (voice and digital).
 
-**Solution:** Unified interface for all call operations with two variants:
-- **CallControl:** Standard call controls
-- **CallControlCAD:** Call controls + CAD panel for customer data
+**Solution:** Unified interface for all task/call operations with two variants:
+
+- **CallControl:** Standard interaction controls (optimized for both telephony and digital tasks)
+- **CallControlCAD:** Interaction controls + CAD panel for customer data
 
 ## What It Does
 
-- Hold/Resume active call
-- Mute/Unmute microphone
-- Transfer call (to agent/queue/number)
-- Consult with agent before transfer
-- Conference multiple parties
-- Recording controls (pause/resume)
-- End call
-- Wrapup with codes
-- Auto-wrapup timer
+- Hold/Resume active **voice** task (telephony only)
+- Mute/Unmute microphone (telephony only)
+- Transfer task/call (to agent/queue/number; telephony only)
+- Consult with agent before transfer (telephony only)
+- Conference multiple parties (telephony only)
+- Recording controls (pause/resume; telephony only)
+- End task (call or digital interaction)
+- Wrapup with codes for completed tasks
+- Auto-wrapup timer for tasks that end
 - CAD panel (CallControlCAD variant only)
 
 ## Usage
@@ -30,26 +43,29 @@ Provides call control functionality (hold, mute, transfer, consult, conference, 
 ### React
 
 ```tsx
-import { CallControl, CallControlCAD } from '@webex/cc-widgets';
+import {CallControl, CallControlCAD} from '@webex/cc-widgets';
 
 function App() {
   return (
     <>
-      {/* Standard call controls */}
+      {/* Standard interaction controls (voice + digital) */}
       <CallControl
-        onHoldResume={(isHeld) => console.log('Hold:', isHeld)}
-        onEnd={() => console.log('Call ended')}
-        onWrapUp={() => console.log('Wrapup complete')}
-        onRecordingToggle={({ isRecording }) => console.log('Recording:', isRecording)}
-        onToggleMute={(isMuted) => console.log('Muted:', isMuted)}
+        onHoldResume={({isHeld, task}) => console.log('Hold:', {isHeld, task})}
+        onEnd={({task}) => console.log('Call ended', {task})}
+        onWrapUp={({task, wrapUpReason}) => console.log('Wrapup complete', {task, wrapUpReason})}
+        onRecordingToggle={({isRecording, task}) => console.log('Recording:', {isRecording, task})}
+        onToggleMute={({isMuted, task}) => console.log('Muted:', {isMuted, task})}
         conferenceEnabled={true}
-        consultTransferOptions={{ showAgents: true, showQueues: true }}
+        consultTransferOptions={{showAgents: true, showQueues: true}}
       />
 
-      {/* With CAD panel */}
+      {/* With CAD panel for richer customer context */}
       <CallControlCAD
-        onHoldResume={(isHeld) => console.log('Hold:', isHeld)}
-        onEnd={() => console.log('Call ended')}
+        onHoldResume={({isHeld, task}) => console.log('Hold:', {isHeld, task})}
+        onEnd={({task}) => console.log('Call ended', {task})}
+        onWrapUp={({task, wrapUpReason}) => console.log('Wrapup complete', {task, wrapUpReason})}
+        onRecordingToggle={({isRecording, task}) => console.log('Recording:', {isRecording, task})}
+        onToggleMute={({isMuted, task}) => console.log('Muted:', {isMuted, task})}
         callControlClassName="custom-class"
       />
     </>
@@ -57,33 +73,19 @@ function App() {
 }
 ```
 
-### Web Component
-
-```html
-<widget-cc-call-control></widget-cc-call-control>
-<widget-cc-call-control-cad></widget-cc-call-control-cad>
-
-<script>
-  const callControl = document.querySelector('widget-cc-call-control');
-  callControl.onHoldResume = (isHeld) => console.log('Hold:', isHeld);
-  callControl.onEnd = () => console.log('Call ended');
-  callControl.conferenceEnabled = true;
-</script>
-```
-
 ## Props API
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `onHoldResume` | `(isHeld: boolean) => void` | - | Callback when hold state changes |
-| `onEnd` | `() => void` | - | Callback when call ends |
-| `onWrapUp` | `() => void` | - | Callback when wrapup completes |
-| `onRecordingToggle` | `({ isRecording: boolean, task: ITask }) => void` | - | Callback when recording toggled |
-| `onToggleMute` | `(isMuted: boolean) => void` | - | Callback when mute toggled |
-| `conferenceEnabled` | `boolean` | `true` | Enable conference functionality |
-| `consultTransferOptions` | `{ showAgents?: boolean, showQueues?: boolean, showAddressBook?: boolean }` | - | Configure transfer options |
-| `callControlClassName` | `string` | - | Custom CSS class (CAD variant) |
-| `callControlConsultClassName` | `string` | - | Custom CSS class for consult (CAD variant) |
+| Prop                          | Type                                                                        | Default | Description                                                      |
+| ----------------------------- | --------------------------------------------------------------------------- | ------- | ---------------------------------------------------------------- |
+| `onHoldResume`                | `({ isHeld, task }: { isHeld: boolean; task: ITask }) => void`              | -       | Callback when hold state changes                                 |
+| `onEnd`                       | `({ task }: { task: ITask }) => void`                                       | -       | Callback when call ends                                          |
+| `onWrapUp`                    | `({ task, wrapUpReason }: { task: ITask; wrapUpReason: string }) => void`   | -       | Callback when wrapup completes (includes wrapup reason and task) |
+| `onRecordingToggle`           | `({ isRecording, task }: { isRecording: boolean; task: ITask }) => void`    | -       | Callback when recording toggled                                  |
+| `onToggleMute`                | `({ isMuted, task }: { isMuted: boolean; task: ITask }) => void`            | -       | Callback when mute toggled                                       |
+| `conferenceEnabled`           | `boolean`                                                                   | `true`  | Enable conference functionality                                  |
+| `consultTransferOptions`      | `{ showAgents?: boolean, showQueues?: boolean, showAddressBook?: boolean }` | -       | Configure transfer options                                       |
+| `callControlClassName`        | `string`                                                                    | -       | Custom CSS class (CAD variant)                                   |
+| `callControlConsultClassName` | `string`                                                                    | -       | Custom CSS class for consult (CAD variant)                       |
 
 ## Examples
 
@@ -92,9 +94,9 @@ function App() {
 ```tsx
 <CallControl
   consultTransferOptions={{
-    showAgents: true,       // Show buddy agents
-    showQueues: true,       // Show queues
-    showAddressBook: false  // Hide address book
+    showAgents: true, // Show buddy agents
+    showQueues: true, // Show queues
+    showAddressBook: false, // Hide address book
   }}
 />
 ```
@@ -104,8 +106,8 @@ function App() {
 ```tsx
 <CallControl
   conferenceEnabled={false}
-  onEnd={() => {
-    console.log('Call ended without conference option');
+  onEnd={({task}) => {
+    console.log('Call ended without conference option', {task});
   }}
 />
 ```
@@ -116,21 +118,21 @@ function App() {
 <CallControlCAD
   callControlClassName="my-call-controls"
   callControlConsultClassName="my-consult-panel"
-  onWrapUp={() => {
-    console.log('Wrapup complete, CAD data saved');
+  onWrapUp={({task, wrapUpReason}) => {
+    console.log('Wrapup complete, CAD data saved', {task, wrapUpReason});
   }}
 />
 ```
 
 ## Differences: CallControl vs CallControlCAD
 
-| Feature | CallControl | CallControlCAD |
-|---------|-------------|----------------|
-| Call controls | ✅ | ✅ |
-| CAD panel | ❌ | ✅ |
-| Customer data display | ❌ | ✅ |
-| Layout | Compact | Extended with CAD sidebar |
-| Use case | Simple call handling | CRM integration scenarios |
+| Feature               | CallControl          | CallControlCAD            |
+| --------------------- | -------------------- | ------------------------- |
+| Call controls         | ✅                   | ✅                        |
+| CAD panel             | ❌                   | ✅                        |
+| Customer data display | ❌                   | ✅                        |
+| Layout                | Compact              | Extended with CAD sidebar |
+| Use case              | Simple call handling | CRM integration scenarios |
 
 **Note:** Both use the same `useCallControl` hook and share 90% of logic.
 
@@ -138,9 +140,9 @@ function App() {
 
 ```json
 {
-  "@webex/cc-components": "workspace:*",
-  "@webex/cc-store": "workspace:*",
-  "@webex/cc-ui-logging": "workspace:*",
+  "@webex/cc-components": "1.28.0-next.7",
+  "@webex/cc-store": "1.28.0-next.7",
+  "@webex/cc-ui-logging": "1.28.0-next.7",
   "mobx-react-lite": "^4.1.0",
   "react-error-boundary": "^6.0.0"
 }
@@ -151,4 +153,3 @@ See [package.json](../../package.json) for versions.
 ## Additional Resources
 
 - [Architecture Details](architecture.md) - Component internals, data flows, diagrams
-

@@ -2,12 +2,12 @@
 
 ## Component Overview
 
-| Layer | File | Purpose | Key Responsibilities |
-|-------|------|---------|---------------------|
-| **Widget** | `src/CallControl/index.tsx`<br>`src/CallControlCAD/index.tsx` | Smart container | - Observer HOC<br>- Error boundary<br>- Delegates to hook<br>- Props: callbacks, options |
-| **Hook** | `src/helper.ts` (useCallControl) | Business logic | - All call operations<br>- Task event subscriptions<br>- State management (hold, mute, recording)<br>- Buddy agents, transfer, consult<br>- Auto-wrapup timer |
-| **Component** | `@webex/cc-components` (CallControlComponent) | Presentation | - Call control UI<br>- Buttons (hold, mute, transfer, etc.)<br>- Transfer/consult modals<br>- Wrapup dropdown<br>- Auto-wrapup timer display |
-| **Store** | `@webex/cc-store` | State/SDK | - currentTask observable<br>- Task event callbacks<br>- wrapupCodes<br>- Task SDK methods (hold, resume, etc.) |
+| Layer         | File                                                          | Purpose         | Key Responsibilities                                                                                                                                                                                      |
+| ------------- | ------------------------------------------------------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Widget**    | `src/CallControl/index.tsx`<br>`src/CallControlCAD/index.tsx` | Smart container | - Observer HOC<br>- Error boundary<br>- Delegates to hook<br>- Props: callbacks, options                                                                                                                  |
+| **Hook**      | `src/helper.ts` (useCallControl)                              | Business logic  | - All call operations<br>- Task event subscriptions<br>- State management (hold, mute, recording)<br>- Buddy agents, transfer, consult<br>- Auto-wrapup timer <br>- Task SDK methods (hold, resume, etc.) |
+| **Component** | `@webex/cc-components` (CallControlComponent)                 | Presentation    | - Call control UI<br>- Buttons (hold, mute, transfer, etc.)<br>- Transfer/consult modals<br>- Wrapup dropdown<br>- Auto-wrapup timer display                                                              |
+| **Store**     | `@webex/cc-store`                                             | State/SDK       | - currentTask observable<br>- Task event callbacks<br>- wrapupCodes                                                                                                                                       |
 
 ## File Structure
 
@@ -37,20 +37,24 @@ cc-components/src/components/task/CallControl/
 
 ```mermaid
 graph TD
-    A[CallControl Widget] --> B[useCallControl Hook]
-    B --> C[Store]
-    C --> D[currentTask]
-    B --> E[CallControlComponent]
-    E --> F[User Actions]
-    F --> E
+
+    subgraph "CallControl Widget"
+        B[CallControlComponent]
+        E
+    end
+
+    A[User Action] --> B[CallControlComponent]
+    C --> G[Task SDK Methods]
+    B --> E[useCallControl Hook]
+    E --> C[Store]
     E --> B
-    D --> G[Task SDK Methods]
-    G --> H[Backend]
+    G --> H[SDK]
 ```
 
 ### Hook: useCallControl
 
 **Inputs:**
+
 - `currentTask` - Active ITask from store
 - `onHoldResume` - Hold state change callback
 - `onEnd` - Call end callback
@@ -62,6 +66,7 @@ graph TD
 - `logger` - Logger instance
 
 **Manages State:**
+
 - `isMuted` - Microphone mute state
 - `isRecording` - Recording state
 - `holdTime` - Duration of current hold
@@ -71,6 +76,7 @@ graph TD
 - `secondsUntilAutoWrapup` - Auto-wrapup countdown
 
 **Subscribes to Task Events:**
+
 - `TASK_HOLD` - Task put on hold
 - `TASK_RESUME` - Task resumed from hold
 - `TASK_END` - Task ended
@@ -92,7 +98,7 @@ sequenceDiagram
     participant T as Task Object
     participant S as Store
     participant B as Backend
-    
+
     U->>C: Click Hold button
     C->>H: toggleHold(true)
     H->>T: task.hold()
@@ -102,14 +108,14 @@ sequenceDiagram
         T-->>S: Emit TASK_HOLD event
         S->>H: holdCallback()
         H->>H: Start holdTime timer
-        H->>H: onHoldResume(true)
+        H->>H: onHoldResume({ isHeld: true, task })
         H-->>C: Update UI (show Resume)
     else Error
         B-->>T: Error
         T-->>H: Promise rejected
         H->>H: logger.error('Hold failed')
     end
-    
+
     Note over U,B: Resume flow similar with task.resume()
 ```
 
@@ -122,11 +128,11 @@ sequenceDiagram
     participant H as useCallControl Hook
     participant T as Task Object
     participant B as Backend
-    
+
     U->>C: Click Transfer button
     C->>C: Show transfer modal
     U->>C: Select agent from list
-    C->>H: transferCall(agentId, name, 'AGENT')
+    C->>H: transferCall(agentId, 'AGENT')
     H->>H: logger.info('transferCall')
     H->>T: task.transfer({targetAgentId, destinationType})
     T->>B: POST /task/transfer
@@ -152,19 +158,19 @@ sequenceDiagram
     participant T as Task Object
     participant S as Store
     participant B as Backend
-    
+
     U->>C: Click Consult button
     C->>C: Show consult modal
     U->>C: Select agent
-    C->>H: consultCall(agentId, name, 'AGENT')
+    C->>H: consultCall(agentId, 'AGENT', true)
     H->>T: task.consultCall({targetAgentId, destinationType})
     T->>B: POST /task/consult
     B-->>T: Consult call created
     T-->>S: Emit TASK_CONSULT_STARTED
     S-->>C: Update UI (show consult controls)
-    
+
     Note over U,B: Agent talks with consultant
-    
+
     U->>C: Click "Complete Transfer"
     C->>H: consultTransfer()
     H->>T: task.consultTransfer()
@@ -189,15 +195,15 @@ sequenceDiagram
     participant H as useCallControl Hook
     participant T as Task Object
     participant B as Backend
-    
+
     U->>C: Click Conference button
     C->>C: Show conference modal
     U->>C: Select agent
-    C->>H: consultCall(agentId, name, 'AGENT')
-    H->>T: task.consultCall()
+    C->>H: consultCall(agentId, 'AGENT', true)
+    H->>T: task.consultCall({ targetAgentId, destinationType, allowParticipantsToInteract })
     T->>B: POST /task/consult
     B-->>T: Consult created
-    
+
     U->>C: Click "Add to Conference"
     C->>H: consultConference()
     H->>T: task.consultConference()
@@ -224,25 +230,25 @@ sequenceDiagram
     participant S as Store
     participant T as Task Object
     participant B as Backend
-    
+
     Note over U: Call ended
-    
+
     S->>S: Fetch wrapupCodes from config
     S-->>C: Display wrapup dropdown
     C->>U: Show wrapup codes
-    
+
     U->>C: Select wrapup code
     C->>C: setSelectedWrapupReason(code)
-    
+
     U->>C: Click Submit Wrapup
-    C->>H: wrapupCall(reason, id, auxCode)
+    C->>H: wrapupCall(wrapupReason, wrapupId)
     H->>T: task.wrapup({wrapupReason, auxCodeId})
     T->>B: POST /task/wrapup
     alt Success
         B-->>T: Wrapup saved
         T-->>S: Emit AGENT_WRAPPEDUP
         S->>H: wrapupCallCallback()
-        H->>H: onWrapUp()
+        H->>H: onWrapUp({ task, wrapUpReason })
         H->>U: Parent notified
     else Error
         B-->>T: Error
@@ -259,20 +265,20 @@ sequenceDiagram
     participant H as useCallControl Hook
     participant C as CallControlComponent
     participant U as User
-    
+
     Note over S: Task ends, auto-wrapup configured
-    
+
     S->>S: currentTask.autoWrapup = {enabled: true, timeout: 60}
     S-->>H: Observable update
     H->>H: Start auto-wrapup interval (1 second)
     H->>H: secondsUntilAutoWrapup = 60
-    
+
     loop Every 1 second
         H->>H: secondsUntilAutoWrapup--
         H-->>C: Re-render with new countdown
         C->>U: Display "Auto-wrapup in 59s..."
     end
-    
+
     alt User clicks Cancel
         U->>C: Click Cancel Auto-Wrapup
         C->>H: cancelAutoWrapup()
@@ -280,7 +286,7 @@ sequenceDiagram
         H-->>C: Hide timer
     else Timer reaches 0
         H->>H: Auto-wrapup triggered
-        H->>H: wrapupCall(null, null, null)
+        H->>H: wrapupCall(autoWrapupReason, autoWrapupId)
         Note over H: Proceeds with default wrapup
     end
 ```
@@ -289,52 +295,56 @@ sequenceDiagram
 
 ### Button Actions
 
-| Button | Hook Function | Task Method | Description |
-|--------|---------------|-------------|-------------|
-| Hold | `toggleHold(true)` | `task.hold()` | Put call on hold |
-| Resume | `toggleHold(false)` | `task.resume()` | Resume from hold |
-| Mute | `toggleMute()` | N/A (local) | Mute microphone |
-| Transfer | `transferCall(...)` | `task.transfer(...)` | Direct transfer |
-| Consult | `consultCall(...)` | `task.consultCall(...)` | Initiate consult |
-| Conference | `consultConference()` | `task.consultConference()` | Add to conference |
-| End Call | `endCall()` | `task.end()` | End the call |
-| Wrapup | `wrapupCall(...)` | `task.wrapup(...)` | Submit wrapup |
-| Recording | `toggleRecording()` | `task.pauseRecording()` / `task.resumeRecording()` | Toggle recording |
+| Button     | Hook Function         | Task Method                                        | Description       |
+| ---------- | --------------------- | -------------------------------------------------- | ----------------- |
+| Hold       | `toggleHold(true)`    | `task.hold()`                                      | Put call on hold  |
+| Resume     | `toggleHold(false)`   | `task.resume()`                                    | Resume from hold  |
+| Mute       | `toggleMute()`        | N/A (local)                                        | Mute microphone   |
+| Transfer   | `transferCall(...)`   | `task.transfer(...)`                               | Direct transfer   |
+| Consult    | `consultCall(...)`    | `task.consultCall(...)`                            | Initiate consult  |
+| Conference | `consultConference()` | `task.consultConference()`                         | Add to conference |
+| End Call   | `endCall()`           | `task.end()`                                       | End the call      |
+| Wrapup     | `wrapupCall(...)`     | `task.wrapup(...)`                                 | Submit wrapup     |
+| Recording  | `toggleRecording()`   | `task.pauseRecording()` / `task.resumeRecording()` | Toggle recording  |
 
 ### Transfer/Consult Options
 
 **Destination Types:**
+
 - `AGENT` - Transfer to buddy agent
 - `QUEUE` - Transfer to queue/entry point
 - `DN` - Transfer to phone number
 - `ADDRESS_BOOK` - Transfer to address book entry
 
 **Configured via `consultTransferOptions` prop:**
+
 - `showAgents` - Show buddy agents list
 - `showQueues` - Show queues/entry points
 - `showAddressBook` - Show address book entries
 
 ## Error Handling
 
-| Error | Source | Handled By | Action |
-|-------|--------|------------|--------|
-| Hold failed | Task SDK | Hook catch | Log error |
-| Transfer failed | Task SDK | Hook catch | Log error, show alert |
-| Consult failed | Task SDK | Hook catch | Log error, show alert |
-| Wrapup failed | Task SDK | Hook catch | Log error |
-| Recording failed | Task SDK | Hook catch | Log error |
-| Component crash | React | ErrorBoundary | Call store.onErrorCallback |
+| Error            | Source   | Handled By    | Action                     |
+| ---------------- | -------- | ------------- | -------------------------- |
+| Hold failed      | Task SDK | Hook catch    | Log error                  |
+| Transfer failed  | Task SDK | Hook catch    | Log error, show alert      |
+| Consult failed   | Task SDK | Hook catch    | Log error, show alert      |
+| Wrapup failed    | Task SDK | Hook catch    | Log error                  |
+| Recording failed | Task SDK | Hook catch    | Log error                  |
+| Component crash  | React    | ErrorBoundary | Call store.onErrorCallback |
 
 ## Troubleshooting
 
 ### Issue: Hold button disabled/doesn't work
 
 **Possible Causes:**
+
 1. Task not in active state
 2. Task type doesn't support hold
 3. SDK error
 
 **Solution:**
+
 - Check `task.data.state`
 - Verify task media type is TELEPHONY
 - Check console for "Hold failed" logs
@@ -342,11 +352,13 @@ sequenceDiagram
 ### Issue: Transfer options not showing
 
 **Possible Causes:**
+
 1. `consultTransferOptions` not configured
 2. No buddy agents loaded
 3. No queues configured
 
 **Solution:**
+
 - Pass `consultTransferOptions` prop
 - Check `buddyAgents` array in hook
 - Verify `loadBuddyAgents()` was called
@@ -355,11 +367,13 @@ sequenceDiagram
 ### Issue: Consult call fails
 
 **Possible Causes:**
+
 1. Invalid target agent
 2. Agent not available
 3. Insufficient permissions
 
 **Solution:**
+
 - Verify agent exists and is logged in
 - Check agent state (Available)
 - Check console for SDK error details
@@ -367,11 +381,13 @@ sequenceDiagram
 ### Issue: Auto-wrapup timer not showing
 
 **Possible Causes:**
+
 1. Auto-wrapup not configured in backend
 2. `controlVisibility.wrapup` is false
 3. Task not in wrapup state
 
 **Solution:**
+
 - Check `currentTask.autoWrapup` object
 - Verify wrapup is visible: `controlVisibility.wrapup === true`
 - Check task state is WRAP_UP
@@ -379,11 +395,13 @@ sequenceDiagram
 ### Issue: Recording button doesn't work
 
 **Possible Causes:**
+
 1. Recording not enabled for tenant
 2. Agent doesn't have recording permissions
 3. Task type doesn't support recording
 
 **Solution:**
+
 - Check tenant recording configuration
 - Verify agent profile has recording permission
 - Check `task.data.isRecordingEnabled`
@@ -401,11 +419,13 @@ sequenceDiagram
 ### Unit Tests
 
 **Widget Tests:**
+
 - Renders without crashing
 - Passes props to hook correctly
 - Error boundary catches errors
 
 **Hook Tests:**
+
 - toggleHold() calls task.hold()/resume()
 - toggleMute() updates isMuted state
 - transferCall() calls task.transfer()
@@ -416,6 +436,7 @@ sequenceDiagram
 - Cleanup removes all callbacks
 
 **Component Tests:**
+
 - All buttons render correctly
 - Buttons call correct handlers
 - Transfer modal opens/closes
@@ -430,4 +451,3 @@ sequenceDiagram
 - Active call → Consult → Conference → Success
 - Active call → End → Wrapup with code → Success
 - Active call → Auto-wrapup countdown → Cancel → Success
-
