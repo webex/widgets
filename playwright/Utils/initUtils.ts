@@ -33,7 +33,8 @@ export const loginViaAccessToken = async (page: Page, accessToken: string): Prom
  * Performs OAuth login with Webex using agent credentials from environment variables
  * @param page - The Playwright page object
  * @param agentId - Agent identifier to validate against environment variables (e.g., 'SET_1_AGENT1', 'SET_2_AGENT2')
- * @description Validates credentials against {agentId}_USERNAME and PW_SANDBOX_PASSWORD
+ * @param customPassword - Optional custom password. If not provided, uses PW_SANDBOX_PASSWORD from environment
+ * @description Validates credentials against {agentId}_USERNAME and PW_SANDBOX_PASSWORD (or custom password)
  * @throws {Error} When agent credentials are not found in environment variables
  * @example
  * ```typescript
@@ -41,9 +42,10 @@ export const loginViaAccessToken = async (page: Page, accessToken: string): Prom
  * await oauthLogin(page, 'SET_1_AGENT1'); // validates against SET_1_AGENT1_USERNAME/PW_SANDBOX_PASSWORD
  * await oauthLogin(page, 'SET_1_AGENT2'); // validates against SET_1_AGENT2_USERNAME/PW_SANDBOX_PASSWORD
  * await oauthLogin(page, 'SET_2_AGENT1'); // validates against SET_2_AGENT1_USERNAME/PW_SANDBOX_PASSWORD
+ * await oauthLogin(page, 'custom_user', 'custom_password'); // uses custom password
  * ```
  */
-export const oauthLogin = async (page: Page, username: string): Promise<void> => {
+export const oauthLogin = async (page: Page, username: string, customPassword?: string): Promise<void> => {
   // Check 1: Validate username parameter is provided
   if (!username) {
     throw new Error('Username parameter is required');
@@ -54,8 +56,8 @@ export const oauthLogin = async (page: Page, username: string): Promise<void> =>
     throw new Error('Username cannot be empty string');
   }
 
-  // Check 3: Get credentials from environment variables
-  const password = process.env[`PW_SANDBOX_PASSWORD`];
+  // Check 3: Get credentials from environment variables or use custom password
+  const password = customPassword || process.env[`PW_SANDBOX_PASSWORD`];
   // Check 6: Validate environment variables are set
   if (!username || !password) {
     throw new Error(`Environment variables ${username} and PW_SANDBOX_PASSWORD must be set`);
