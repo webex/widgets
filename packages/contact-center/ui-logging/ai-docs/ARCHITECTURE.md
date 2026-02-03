@@ -6,11 +6,11 @@ UI Logging is a utility package that provides logging and metrics tracking throu
 
 ### Module Table
 
-| Module | File | Exports | Purpose | Dependencies |
-|--------|------|---------|---------|--------------|
-| **withMetrics HOC** | `src/withMetrics.tsx` | `withMetrics` (default) | Wraps components with lifecycle tracking | React, metricsLogger |
-| **metricsLogger** | `src/metricsLogger.ts` | `logMetrics`, `havePropsChanged`, `WidgetMetrics` (type) | Logging functions and utilities | @webex/cc-store |
-| **Package Entry** | `src/index.ts` | All exports | Main package export | Both modules above |
+| Module              | File                   | Exports                                                  | Purpose                                  | Dependencies         |
+| ------------------- | ---------------------- | -------------------------------------------------------- | ---------------------------------------- | -------------------- |
+| **withMetrics HOC** | `src/withMetrics.tsx`  | `withMetrics` (default)                                  | Wraps components with lifecycle tracking | React, metricsLogger |
+| **metricsLogger**   | `src/metricsLogger.ts` | `logMetrics`, `havePropsChanged`, `WidgetMetrics` (type) | Logging functions and utilities          | @webex/cc-store      |
+| **Package Entry**   | `src/index.ts`         | All exports                                              | Main package export                      | Both modules above   |
 
 ### File Structure
 
@@ -45,26 +45,26 @@ graph LR
         Component[React Component]
         Event[User Event/Lifecycle]
     end
-    
+
     subgraph "UI Logging"
         HOC[withMetrics HOC]
         LogFn[logMetrics Function]
     end
-    
+
     subgraph "Store"
         Logger[store.logger]
     end
-    
+
     subgraph "Backend/Console"
         Output[Log Output]
     end
-    
+
     Component -->|Wrapped by| HOC
     HOC -->|Mount/Unmount| LogFn
     Event -->|Custom logging| LogFn
     LogFn -->|JSON metrics| Logger
     Logger -->|Formatted logs| Output
-    
+
     style HOC fill:#e1f5ff
     style LogFn fill:#ffe1e1
     style Logger fill:#fff4e1
@@ -82,7 +82,7 @@ sequenceDiagram
 
     App->>HOC: Render withMetrics(Component)
     activate HOC
-    
+
     HOC->>HOC: useEffect (mount)
     HOC->>Logger: logMetrics({event: 'WIDGET_MOUNTED'})
     activate Logger
@@ -94,17 +94,17 @@ sequenceDiagram
         Logger->>Logger: console.warn('No logger found')
     end
     deactivate Logger
-    
+
     HOC->>Component: Render with props
     activate Component
     Component-->>HOC: Rendered
     deactivate Component
-    
+
     HOC-->>App: Rendered widget
     deactivate HOC
 
     Note over App,Store: Component unmounts
-    
+
     App->>HOC: Unmount
     activate HOC
     HOC->>HOC: useEffect cleanup
@@ -151,14 +151,13 @@ export default function withMetrics<P extends object>(
       }, []);
 
       return <Component {...props} />;
-    },
-    // Custom comparison function
-    (prevProps, nextProps) => !havePropsChanged(prevProps, nextProps)
+    }
   );
 }
 ```
 
 **Key Features:**
+
 - Uses `React.memo` for performance optimization
 - Custom props comparison via `havePropsChanged`
 - Single `useEffect` with cleanup for lifecycle tracking
@@ -178,17 +177,15 @@ export const logMetrics = (metric: WidgetMetrics) => {
     console.warn('CC-Widgets: UI Metrics: No logger found');
     return;
   }
-  store.logger.log(
-    `CC-Widgets: UI Metrics: ${JSON.stringify(metric, null, 2)}`,
-    {
-      module: 'metricsLogger.tsx',
-      method: 'logMetrics',
-    }
-  );
+  store.logger.log(`CC-Widgets: UI Metrics: ${JSON.stringify(metric, null, 2)}`, {
+    module: 'metricsLogger.tsx',
+    method: 'logMetrics',
+  });
 };
 ```
 
 **Behavior:**
+
 - Checks for `store.logger` existence
 - Warns to console if logger missing (doesn't throw)
 - Formats metrics as JSON string
@@ -198,22 +195,20 @@ export const logMetrics = (metric: WidgetMetrics) => {
 
 ### Event Types
 
-| Event | When Fired | Use Case |
-|-------|-----------|----------|
-| `WIDGET_MOUNTED` | Component mounted to DOM | Track widget usage, initialization time |
-| `WIDGET_UNMOUNTED` | Component unmounted from DOM | Track session duration, cleanup |
-| `ERROR` | Error occurred | Track failures, debug issues |
-| `PROPS_UPDATED` | Props changed (future) | Track configuration changes |
+| Event              | When Fired                   | Use Case                                |
+| ------------------ | ---------------------------- | --------------------------------------- |
+| `WIDGET_MOUNTED`   | Component mounted to DOM     | Track widget usage, initialization time |
+| `WIDGET_UNMOUNTED` | Component unmounted from DOM | Track session duration, cleanup         |
+| `ERROR`            | Error occurred               | Track failures, debug issues            |
+| `PROPS_UPDATED`    | Props changed (future)       | Track configuration changes             |
 
 ### Metrics Data Structure
 
 ```typescript
 type WidgetMetrics = {
-  widgetName: string;           // e.g., 'StationLogin'
-  event: string;                // e.g., 'WIDGET_MOUNTED'
-  props?: Record<string, any>;  // Optional props snapshot
-  timestamp: number;            // Unix timestamp
-  additionalContext?: Record<string, any>; // Custom data
+  widgetName: string; // e.g., 'StationLogin'
+  event: string; // e.g., 'WIDGET_MOUNTED'
+  timestamp: number; // Unix timestampdata
 };
 ```
 
@@ -223,19 +218,12 @@ type WidgetMetrics = {
 {
   "widgetName": "StationLogin",
   "event": "WIDGET_MOUNTED",
-  "timestamp": 1700000000000,
-  "props": {
-    "profileMode": false,
-    "teamId": "team123"
-  },
-  "additionalContext": {
-    "userAgent": "Chrome/120.0",
-    "sessionId": "session-abc"
-  }
+  "timestamp": 1700000000000
 }
 ```
 
 ---
+
 ## Store Integration
 
 ### Logger Dependency
@@ -258,6 +246,7 @@ logMetrics({ ... });
 ```
 
 **Graceful Degradation:**
+
 - If `store.logger` is undefined, logs warning to console
 - Does NOT throw error (allows widgets to work without logger)
 
@@ -270,10 +259,12 @@ logMetrics({ ... });
 #### 1. Metrics Not Logging
 
 **Symptoms:**
+
 - No metrics appearing in logs
 - Silent failures
 
 **Possible Causes:**
+
 - `store.logger` not initialized
 - Logger object missing methods
 
@@ -293,22 +284,23 @@ store.setLogger({
 });
 
 // Verify logging works
-import { logMetrics } from '@webex/cc-ui-logging';
+import {logMetrics} from '@webex/cc-ui-logging';
 logMetrics({
   widgetName: 'Test',
   event: 'WIDGET_MOUNTED',
-  timestamp: Date.now()
+  timestamp: Date.now(),
 });
 ```
 
 #### 2. Component Re-rendering Too Often
 
 **Symptoms:**
+
 - Component re-renders on every parent update
 - Performance degradation
 
 **Possible Causes:**
-- Props comparison not working
+
 - Passing new object/function references
 
 **Solutions:**
@@ -320,7 +312,7 @@ import { useCallback, useMemo } from 'react';
 const Parent = () => {
   // ✅ Memoized callback
   const handleChange = useCallback(() => {}, []);
-  
+
   // ✅ Memoized object
   const config = useMemo(() => ({ option: 'value' }), []);
 
@@ -328,7 +320,7 @@ const Parent = () => {
 };
 
 // ❌ Avoid inline functions/objects
-<WidgetWithMetrics 
+<WidgetWithMetrics
   onChange={() => {}}        // New function every render
   config={{ option: 'value' }}  // New object every render
 />
@@ -337,10 +329,12 @@ const Parent = () => {
 #### 3. TypeScript Type Errors
 
 **Symptoms:**
+
 - Type errors with WidgetMetrics
 - Event type not recognized
 
 **Possible Causes:**
+
 - Using incorrect event type
 - Missing type import
 
@@ -348,13 +342,13 @@ const Parent = () => {
 
 ```typescript
 // Import type
-import type { WidgetMetrics } from '@webex/cc-ui-logging';
+import type {WidgetMetrics} from '@webex/cc-ui-logging';
 
 // Use correct event types
 const metric: WidgetMetrics = {
   widgetName: 'MyWidget',
   event: 'WIDGET_MOUNTED', // Must be one of the allowed event types
-  timestamp: Date.now()
+  timestamp: Date.now(),
 };
 
 // For custom events, use WIDGET_MOUNTED with additionalContext
@@ -362,19 +356,18 @@ const customMetric: WidgetMetrics = {
   widgetName: 'MyWidget',
   event: 'WIDGET_MOUNTED',
   timestamp: Date.now(),
-  additionalContext: {
-    customEvent: 'button_clicked'
-  }
 };
 ```
 
 #### 4. HOC Not Tracking Unmount
 
 **Symptoms:**
+
 - WIDGET_MOUNTED logged
 - WIDGET_UNMOUNTED never logged
 
 **Possible Causes:**
+
 - Component never unmounted
 - Cleanup function not running
 - Page refreshed before unmount
@@ -385,7 +378,7 @@ const customMetric: WidgetMetrics = {
 // Verify component actually unmounts
 useEffect(() => {
   console.log('Component mounted');
-  
+
   return () => {
     console.log('Component cleanup'); // Should see this
   };
@@ -397,7 +390,7 @@ window.addEventListener('beforeunload', () => {
   logMetrics({
     widgetName: 'MyWidget',
     event: 'WIDGET_UNMOUNTED',
-    timestamp: Date.now()
+    timestamp: Date.now(),
   });
 });
 ```
@@ -413,4 +406,3 @@ window.addEventListener('beforeunload', () => {
 ---
 
 _Last Updated: 2025-11-26_
-

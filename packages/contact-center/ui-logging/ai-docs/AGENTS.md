@@ -1,5 +1,17 @@
 # UI Logging - Metrics Tracking Utility
 
+## AI Agent Routing (Do Not Start Here)
+
+If you are an AI assistant or tool reading this file **as your first entry point**, do **not** start your reasoning or code generation workflow from here.
+
+- **Primary entrypoint:** Always begin with the **nearest parent** contact-center AI docs `AGENTS.md` (for example, the root `ai-docs/AGENTS.md` at the repository root).
+- **Process:**
+  - Load and follow the instructions and templates in that parent `AGENTS.md`.
+  - Only after a parent `AGENTS.md` explicitly routes you to this file should you treat this document as package-specific guidance.
+- **Never** skip the parent `AGENTS.md` even if the user prompt directly mentions this specific package or file.
+
+Once you have gone through the parent `AGENTS.md` and been routed here, you can use the rest of this file as the authoritative reference for the `@webex/cc-ui-logging` package.
+
 ## Overview
 
 UI Logging is a lightweight utility package that provides logging and metrics tracking capabilities for contact center widgets. It includes a Higher-Order Component (HOC) called `withMetrics` that automatically tracks widget lifecycle events, and a `logMetrics` function for custom event logging.
@@ -15,6 +27,7 @@ UI Logging is a lightweight utility package that provides logging and metrics tr
 ### Purpose
 
 The UI Logging package enables observability and monitoring for contact center widgets. It:
+
 - **Tracks widget lifecycle** - Automatically logs mount, unmount, and updates
 - **Provides HOC wrapper** - Easy integration with minimal code changes
 - **Logs to store logger** - Integrates with existing logging infrastructure
@@ -54,29 +67,6 @@ function App() {
 // - WIDGET_UNMOUNTED when component unmounts
 ```
 
-#### Manual Metrics Logging
-
-```typescript
-import { logMetrics } from '@webex/cc-ui-logging';
-
-function MyComponent() {
-  const handleButtonClick = () => {
-    // Log custom event
-    logMetrics({
-      widgetName: 'MyComponent',
-      event: 'ERROR',
-      timestamp: Date.now(),
-      additionalContext: {
-        errorCode: 'LOGIN_FAILED',
-        reason: 'Invalid credentials'
-      }
-    });
-  };
-
-  return <button onClick={handleButtonClick}>Login</button>;
-}
-```
-
 ### Common Use Cases
 
 #### 1. Tracking Widget Lifecycle
@@ -87,7 +77,7 @@ import { StationLogin } from '@webex/cc-widget';
 
 // Automatically tracks mount/unmount
 const StationLoginWithMetrics = withMetrics(
-  StationLogin, 
+  StationLogin,
   'StationLogin'
 );
 
@@ -107,91 +97,6 @@ const StationLoginWithMetrics = withMetrics(
 //   event: 'WIDGET_UNMOUNTED',
 //   timestamp: 1700000100000
 // }
-```
-
-#### 2. Logging Errors
-
-```typescript
-import { logMetrics } from '@webex/cc-ui-logging';
-
-function UserState() {
-  const handleStateChange = async (newState) => {
-    try {
-      await updateState(newState);
-    } catch (error) {
-      // Log error with context
-      logMetrics({
-        widgetName: 'UserState',
-        event: 'ERROR',
-        timestamp: Date.now(),
-        props: { attemptedState: newState },
-        additionalContext: {
-          error: error.message,
-          stack: error.stack
-        }
-      });
-    }
-  };
-
-  return <button onClick={() => handleStateChange('Idle')}>Go Idle</button>;
-}
-```
-
-#### 3. Performance Tracking
-
-```typescript
-import { logMetrics } from '@webex/cc-ui-logging';
-import { useEffect } from 'react';
-
-function TaskList({ tasks }) {
-  useEffect(() => {
-    const startTime = performance.now();
-    
-    // Render tasks
-    renderTasks(tasks);
-    
-    const endTime = performance.now();
-    
-    // Log render performance
-    logMetrics({
-      widgetName: 'TaskList',
-      event: 'WIDGET_MOUNTED',
-      timestamp: Date.now(),
-      additionalContext: {
-        renderTime: endTime - startTime,
-        taskCount: tasks.length
-      }
-    });
-  }, [tasks]);
-
-  return <div>{/* task list */}</div>;
-}
-```
-
-#### 4. User Interaction Tracking
-
-```typescript
-import { logMetrics } from '@webex/cc-ui-logging';
-
-function CallControl({ task }) {
-  const handleHold = () => {
-    logMetrics({
-      widgetName: 'CallControl',
-      event: 'WIDGET_MOUNTED', // Using WIDGET_MOUNTED for custom events
-      timestamp: Date.now(),
-      props: { taskId: task.id },
-      additionalContext: {
-        action: 'hold_clicked',
-        callDuration: task.duration
-      }
-    });
-
-    // Perform hold action
-    task.hold();
-  };
-
-  return <button onClick={handleHold}>Hold</button>;
-}
 ```
 
 ### Integration Patterns
@@ -224,62 +129,32 @@ export { UserState };
 
 #### With Error Boundaries
 
-```typescript
-import { logMetrics } from '@webex/cc-ui-logging';
+````typescript
+import { withMetrics } from '@webex/cc-ui-logging';
 import { ErrorBoundary } from 'react-error-boundary';
+
+const UserStateInternal = observer(({ onStateChange }) => {
+  const props = {
+    idleCodes: store.idleCodes,
+    currentState: store.currentState,
+    setAgentStatus: (code) => store.setCurrentState(code),
+    onStateChange,
+  };
+
+  return <UserStateComponent {...props} />;
+});
 
 function Widget(props) {
   const handleError = (error: Error) => {
     // Log error via metrics
-    logMetrics({
-      widgetName: 'MyWidget',
-      event: 'ERROR',
-      timestamp: Date.now(),
-      additionalContext: {
-        error: error.message,
-        componentStack: error.stack
-      }
-    });
   };
 
   return (
     <ErrorBoundary onError={handleError}>
-      <MyWidget {...props} />
+      <UserStateInternal {...props} />
     </ErrorBoundary>
   );
 }
-```
-
-#### Custom Metrics in Hooks
-
-```typescript
-import { logMetrics } from '@webex/cc-ui-logging';
-import { useEffect } from 'react';
-
-function useCustomHook(widgetName: string) {
-  useEffect(() => {
-    // Log when hook initializes
-    logMetrics({
-      widgetName,
-      event: 'WIDGET_MOUNTED',
-      timestamp: Date.now(),
-      additionalContext: {
-        hookInitialized: true
-      }
-    });
-
-    return () => {
-      // Log when hook cleans up
-      logMetrics({
-        widgetName,
-        event: 'WIDGET_UNMOUNTED',
-        timestamp: Date.now()
-      });
-    };
-  }, [widgetName]);
-}
-```
-
 ---
 
 ## Dependencies
@@ -288,20 +163,21 @@ function useCustomHook(widgetName: string) {
 
 ### Runtime Dependencies
 
-| Package | Purpose |
-|---------|---------|
+| Package           | Purpose                            |
+| ----------------- | ---------------------------------- |
 | `@webex/cc-store` | Access to store.logger for logging |
 
 ### Peer Dependencies
 
-| Package | Purpose |
-|---------|---------|
-| `react` | React framework (for HOC) |
-| `react-dom` | React DOM (for HOC) |
+| Package     | Purpose                   |
+| ----------- | ------------------------- |
+| `react`     | React framework (for HOC) |
+| `react-dom` | React DOM (for HOC)       |
 
 ### Development Dependencies
 
 Key development tools (see [package.json](../package.json) for versions):
+
 - TypeScript
 - Jest (testing)
 - Webpack (bundling)
@@ -316,16 +192,18 @@ Key development tools (see [package.json](../package.json) for versions):
 function withMetrics<P extends object>(
   Component: React.ComponentType<P>,
   widgetName: string
-): React.MemoExoticComponent<React.FC<P>>
-```
+): React.MemoExoticComponent<React.FC<P>>;
+````
 
 **Parameters:**
+
 - `Component` - React component to wrap
 - `widgetName` - Name for metric identification
 
 **Returns:** Memoized component with automatic metrics tracking
 
 **Behavior:**
+
 - Wraps component with React.memo
 - Logs WIDGET_MOUNTED on mount
 - Logs WIDGET_UNMOUNTED on unmount
@@ -335,7 +213,7 @@ function withMetrics<P extends object>(
 ### logMetrics Function
 
 ```typescript
-function logMetrics(metric: WidgetMetrics): void
+function logMetrics(metric: WidgetMetrics): void;
 
 type WidgetMetrics = {
   widgetName: string;
@@ -347,6 +225,7 @@ type WidgetMetrics = {
 ```
 
 **Parameters:**
+
 - `metric.widgetName` - Widget identifier
 - `metric.event` - Event type
 - `metric.props` - Optional widget props snapshot
@@ -354,6 +233,7 @@ type WidgetMetrics = {
 - `metric.additionalContext` - Optional additional data
 
 **Behavior:**
+
 - Checks if `store.logger` exists
 - Logs warning if no logger available
 - Calls `store.logger.log()` with formatted JSON
@@ -363,8 +243,8 @@ type WidgetMetrics = {
 ## Installation
 
 ```bash
-# Install as development or runtime dependency
-yarn add @webex/cc-ui-logging
+# Install as dependency
+yarn add @webex/cc-widget
 
 # Used internally by widgets, usually not directly installed
 ```
@@ -378,4 +258,3 @@ For detailed HOC implementation, metrics flow, and performance optimization, see
 ---
 
 _Last Updated: 2025-11-26_
-
