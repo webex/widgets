@@ -166,7 +166,7 @@ sequenceDiagram
     H->>T: task.consultCall({targetAgentId, destinationType})
     T->>B: POST /task/consult
     B-->>T: Consult call created
-    T-->>S: Emit TASK_CONSULT_STARTED
+    T-->>S: Emit TASK_CONSULT
     S-->>C: Update UI (show consult controls)
 
     Note over U,B: Agent talks with consultant
