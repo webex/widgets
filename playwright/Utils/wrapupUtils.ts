@@ -12,6 +12,12 @@ export async function submitWrapup(page: Page, reason: WrapupReason): Promise<vo
   if (!reason || reason.trim() === '') {
     throw new Error('Wrapup reason is required');
   }
+  await page.bringToFront();
+
+  // Dismiss any open popovers that might be blocking interactions
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(UI_SETTLE_TIMEOUT);
+
   const wrapupBox = page.getByTestId('call-control:wrapup-button');
   const isWrapupBoxVisible = await wrapupBox
     .first()
@@ -19,8 +25,13 @@ export async function submitWrapup(page: Page, reason: WrapupReason): Promise<vo
     .then(() => true)
     .catch(() => false);
   if (!isWrapupBoxVisible) throw new Error('Wrapup box is not visible');
-  await wrapupBox.first().click({timeout: AWAIT_TIMEOUT});
-  await page.waitForTimeout(UI_SETTLE_TIMEOUT);
+
+  // Check if dropdown is already open (aria-expanded="true")
+  const isAlreadyOpen = (await wrapupBox.first().getAttribute('aria-expanded')) === 'true';
+  if (!isAlreadyOpen) {
+    await wrapupBox.first().click({timeout: AWAIT_TIMEOUT});
+    await page.waitForTimeout(UI_SETTLE_TIMEOUT);
+  }
   await expect(page.getByTestId('call-control:wrapup-select').first()).toBeVisible({timeout: AWAIT_TIMEOUT});
   await page.getByTestId('call-control:wrapup-select').first().click({timeout: AWAIT_TIMEOUT});
   await page.waitForTimeout(UI_SETTLE_TIMEOUT);
