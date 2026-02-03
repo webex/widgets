@@ -3,12 +3,7 @@
   flex-direction: column;
   align-items: center;
   border-radius: 0.625rem;
-  width: 15.625rem;
-  height: 26.5rem;
-
-  .keypad {
-    width: 100%;
-  }
+  width: 16.5rem;
 
   mdc-input {
     padding-bottom: 0; // default is 1 rem, 1.5 rem needed but provided by .keys
@@ -21,21 +16,25 @@
   .outdial-ani-select-container {
     position: relative;
     width: 100%;
-  }
-
-  .outDialCallButton {
-    margin-top: 1.5rem;
+    padding-bottom: 1rem;
   }
 
   .outdial-select-arrow-icon {
     position: absolute;
-    right: 0;
-    top: 83%;
+    right: 0.375rem;
+    top: 71%;
     transform: translateY(-50%);
     display: flex;
     align-items: center;
     pointer-events: none;
     z-index: 1;
+  }
+
+  #outdial-ani-option-select {
+    width: 100%;
+    label {
+      margin: 0;
+    }
   }
 
   .outdial-ani-option-name {
@@ -51,7 +50,7 @@
     column-gap: 1.5rem;
     padding: 1.5rem 0;
     list-style-type: none;
-    margin: 0 20%;
+    margin: 0;
   }
 
   .key {
@@ -68,6 +67,13 @@
     &:active {
       background: var(--mds-color-theme-background-primary-active);
     }
+  }
+
+  .dialpad-tab-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 16.5rem;
   }
 
   .address-book-container {
@@ -116,25 +122,26 @@
   }
 
   .tab-list {
+    padding-bottom: 1rem;
+
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      flex: 2;
+    }
+    
     mdc-button {
       display: none;
     }
 
     mdc-tab {
-      width: 7.395rem;
-      padding: 0;
+      --mdc-tab-glass-active-color: #000000F2;
+      --mdc-tab-glass-active-background-color-hover: #b2b2b2;
+      --mdc-tab-glass-active-background-color-normal: #DEDEDE;
     }
-  }
-
-  .ani-select-input {
-    margin-top: 1rem;
+    
   }
 }
 
-.height-auto {
-  height: auto;
-}
-
-.height-28-5rem {
-  height: 28.5rem;
-}

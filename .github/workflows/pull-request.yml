@@ -44,7 +44,7 @@ jobs:
           TITLE="${{ github.event.pull_request.title }}"
           echo "PR Title is: '$TITLE'"
 
-          regex="^(fix|feat|chore)\([^()]+\): .+"
+          regex="^(fix|feat|chore|docs)\([^()]+\): .+"
 
           if [[ $TITLE =~ $regex ]]; then
             echo "PR title is valid."

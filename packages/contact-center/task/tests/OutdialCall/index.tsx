@@ -56,8 +56,6 @@ describe('OutdialCall Component', () => {
     expect(useOutdialCallSpy).toHaveBeenCalled();
     // When address book is disabled, there should be no tablist
     expect(container.querySelector('mdc-tablist')).not.toBeInTheDocument();
-    // The container should not have the additional height class
-    expect(container.querySelector('.height-28-5rem')).not.toBeInTheDocument();
   });
 
   it('passes isAddressBookEnabled prop correctly when set to true', () => {
@@ -73,8 +71,6 @@ describe('OutdialCall Component', () => {
     expect(useOutdialCallSpy).toHaveBeenCalled();
     // When address book is enabled, there should be a tablist
     expect(container.querySelector('mdc-tablist')).toBeInTheDocument();
-    // The container should have the additional height class
-    expect(container.querySelector('.height-28-5rem')).toBeInTheDocument();
   });
 
   it('enables address book by default when isAddressBookEnabled prop is not provided', () => {
@@ -90,8 +86,6 @@ describe('OutdialCall Component', () => {
     expect(useOutdialCallSpy).toHaveBeenCalled();
     // When no prop is provided, address book should be enabled by default
     expect(container.querySelector('mdc-tablist')).toBeInTheDocument();
-    // The container should have the additional height class
-    expect(container.querySelector('.height-28-5rem')).toBeInTheDocument();
   });
 
   describe('ErrorBoundary Tests', () => {

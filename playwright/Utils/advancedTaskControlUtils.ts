@@ -1,7 +1,7 @@
 import {Page, expect} from '@playwright/test';
 import {loginExtension} from './incomingTaskUtils';
 import {dismissOverlays} from './helperUtils';
-import {AWAIT_TIMEOUT, FORM_FIELD_TIMEOUT} from '../constants';
+import {AWAIT_TIMEOUT, FORM_FIELD_TIMEOUT, EXTENSION_REGISTRATION_TIMEOUT} from '../constants';
 
 /**
  * Utility functions for advanced task controls testing.
@@ -118,6 +118,7 @@ export async function consultOrTransfer(
   action: 'consult' | 'transfer',
   value: string
 ): Promise<void> {
+  await page.bringToFront();
   await openConsultOrTransferMenu(page, action);
   const popover = await getPopover(page);
 
@@ -139,14 +140,13 @@ export async function consultOrTransfer(
 
 // ===== Internal helper functions =====
 async function openConsultOrTransferMenu(page: Page, action: 'consult' | 'transfer'): Promise<void> {
+  await page.bringToFront();
+  await dismissOverlays(page);
+
   if (action === 'consult') {
-    await dismissOverlays(page);
-    await page.getByTestId('call-control:consult').nth(1).click({timeout: AWAIT_TIMEOUT});
+    await page.getByTestId('call-control:consult').first().click({timeout: AWAIT_TIMEOUT});
   } else {
-    await page
-      .getByRole('group', {name: 'Call Control with Call'})
-      .getByLabel('Transfer Call')
-      .click({timeout: AWAIT_TIMEOUT});
+    await page.getByTestId('call-control:transfer').first().click({timeout: AWAIT_TIMEOUT});
   }
 }
 
@@ -161,7 +161,7 @@ async function clickCategory(
   popover: ReturnType<Page['locator']>,
   name: 'Agents' | 'Queues' | 'Dial Number' | 'Entry Point'
 ): Promise<void> {
-  const button = popover.getByRole('button', {name});
+  const button = popover.getByRole('button', {name, exact: true});
   await button.click({timeout: AWAIT_TIMEOUT});
   await page.waitForTimeout(200);
 }
@@ -261,30 +261,4 @@ async function performEntryPointSelection(
 export async function cancelConsult(page: Page): Promise<void> {
   // Click cancel consult button
   await page.getByTestId('cancel-consult-btn').click({timeout: AWAIT_TIMEOUT});
-}
-
-/**
- * Ensures the Dial Number softphone (web.webex.com) page is logged in using env creds.
- * Uses: PW_DIAL_NUMBER_LOGIN_USERNAME, PW_DIAL_NUMBER_LOGIN_PASSWORD
- * Also dismisses any stale overlays/popovers (e.g., "Media failed") that might block interaction.
- */
-export async function ensureDialNumberLoggedIn(page: Page): Promise<void> {
-  const currentUrl = page?.url?.() || '';
-  if (!/\.webex\.com\/calling/.test(currentUrl)) {
-    const user = process.env.PW_DIAL_NUMBER_LOGIN_USERNAME;
-    const pass = process.env.PW_DIAL_NUMBER_LOGIN_PASSWORD;
-    if (user && pass) {
-      await loginExtension(page, user, pass);
-    }
-  }
-
-  // Dismiss any stale overlays/popovers (e.g., "Media failed" from previous calls)
-  await dismissOverlays(page);
-
-  // Ensure the dial number page is in the foreground to avoid background throttling
-  await page.bringToFront();
-
-  // Wait for the incoming call to appear on the dial number page
-  // Use extended timeout to handle network routing delays and test interference
-  await page.locator('[data-test="right-action-button"]').waitFor({state: 'visible', timeout: AWAIT_TIMEOUT * 2.5});
 }

@@ -8,6 +8,7 @@ import {
   acceptExtensionCall,
   createEmailTask,
   submitRonaPopup,
+  waitForIncomingTask,
 } from '../Utils/incomingTaskUtils';
 import {verifyTaskControls, endTask, verifyEndLogs} from '../Utils/taskControlUtils';
 import {TASK_TYPES, USER_STATES, THEME_COLORS, WRAPUP_REASONS, RONA_OPTIONS} from '../constants';
@@ -118,11 +119,16 @@ export default function createDigitalIncomingTaskAndTaskControlsTests() {
     setupConsoleLogging(testManager.agent1Page);
   });
 
+  test.afterAll(async () => {
+    if (testManager) {
+      await testManager.cleanup();
+    }
+  });
+
   test('should ignore incoming chat task and wait for RONA popup', async () => {
     await createChatTask(testManager.chatPage, process.env[`${testManager.projectName}_CHAT_URL`]!);
     await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
-    const incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-chat').first();
-    await incomingTaskDiv.waitFor({state: 'visible', timeout: 60000});
+    const incomingTaskDiv = await waitForIncomingTask(testManager.agent1Page, TASK_TYPES.CHAT, 60000);
     await incomingTaskDiv.waitFor({state: 'hidden', timeout: 20000});
     await expect(incomingTaskDiv).toBeHidden();
     await testManager.agent1Page.getByTestId('samples:rona-popup').waitFor({state: 'visible', timeout: 15000});
@@ -298,40 +304,37 @@ export default function createDigitalIncomingTaskAndTaskControlsTests() {
     await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
     await incomingTaskDiv.waitFor({state: 'visible', timeout: 10000});
     await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.EMAIL);
-    await testManager.agent1Page.waitForTimeout(1000);
+    await testManager.agent1Page.waitForTimeout(3000);
     await testManager.agent1Page.getByTestId('call-control:end-call').first().click({timeout: 5000});
     await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
     await waitForState(testManager.agent1Page, USER_STATES.AVAILABLE);
   });
 
   test('should handle multiple incoming tasks with callback verifications', async () => {
-    await changeUserState(testManager.agent1Page, USER_STATES.MEETING);
+
+    // First become available, then create tasks so they arrive fresh
+    await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
     await testManager.agent1Page.waitForTimeout(1000);
 
-    await Promise.all([
-      createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!),
-      createChatTask(testManager.chatPage, process.env[`${testManager.projectName}_CHAT_URL`]!),
-      createEmailTask(process.env[`${testManager.projectName}_EMAIL_ENTRY_POINT`]!),
-    ]);
-
-    await testManager.agent1Page.waitForTimeout(50000);
-
-    await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
+    // Create call first and handle it before other tasks
+    await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
 
     const incomingCallTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
     const incomingChatTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-chat').first();
     const incomingEmailTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-email').first();
 
-    await incomingCallTaskDiv.waitFor({state: 'visible', timeout: 5000});
-    await testManager.agent1ExtensionPage
-      .locator('[data-test="generic-person-item-base"]')
-      .first()
-      .waitFor({state: 'visible', timeout: 5000});
+    await incomingCallTaskDiv.waitFor({state: 'visible', timeout: 40000});
     await acceptExtensionCall(testManager.agent1ExtensionPage);
     await testManager.agent1Page.waitForTimeout(3000);
-    await incomingChatTaskDiv.waitFor({state: 'visible', timeout: 3000});
+
+    // Now create chat and email tasks
+    await Promise.all([
+      createChatTask(testManager.chatPage, process.env[`${testManager.projectName}_CHAT_URL`]!),
+      createEmailTask(process.env[`${testManager.projectName}_EMAIL_ENTRY_POINT`]!),
+    ]);
+    await incomingChatTaskDiv.waitFor({state: 'visible', timeout: 40000});
     await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CHAT);
-    await incomingEmailTaskDiv.waitFor({state: 'visible', timeout: 3000});
+    await incomingEmailTaskDiv.waitFor({state: 'visible', timeout: 40000});
     await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.EMAIL);
     await waitForState(testManager.agent1Page, USER_STATES.ENGAGED);
     await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
