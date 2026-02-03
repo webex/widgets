@@ -1,5 +1,17 @@
 # CC Components Library
 
+## AI Agent Routing (Do Not Start Here)
+
+If you are an AI assistant or tool reading this file **as your first entry point**, do **not** start your reasoning or code generation workflow from here.
+
+- **Primary entrypoint:** Always begin with the **nearest parent** contact-center AI docs `AGENTS.md` (for example, the root `ai-docs/AGENTS.md` at the repository root).
+- **Process:** 
+  - Load and follow the instructions and templates in that parent `AGENTS.md`.
+  - Only after a parent `AGENTS.md` explicitly routes you to this file should you treat this document as package-specific guidance.
+- **Never** skip the parent `AGENTS.md` even if the user prompt directly mentions this specific package or file.
+
+Once you have gone through the parent `AGENTS.md` and been routed here, you can use the rest of this file as the authoritative reference for the `@webex/cc-components` library.
+
 ## Overview
 
 The CC Components library is a shared React component library that provides presentational components for building contact center widgets. It contains all the UI components used by widgets like StationLogin, UserState, TaskList, CallControl, and more. These components are built using Momentum UI and follow a consistent design system.
