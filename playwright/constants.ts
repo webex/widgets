@@ -28,7 +28,7 @@ export const LOGIN_MODE = {
 
 export type LoginMode = (typeof LOGIN_MODE)[keyof typeof LOGIN_MODE];
 
-export const LONG_WAIT = 40000;
+export const EXTENSION_REGISTRATION_TIMEOUT = 40000;
 
 // Universal timeout for all await operations in Playwright tests
 export const AWAIT_TIMEOUT = 10000;
@@ -41,10 +41,11 @@ export const DEFAULT_TIMEOUT = 5000;
 export const UI_SETTLE_TIMEOUT = 2000;
 export const FORM_FIELD_TIMEOUT = 20000;
 export const OPERATION_TIMEOUT = 30000;
-export const NETWORK_OPERATION_TIMEOUT = 35000;
+export const NETWORK_OPERATION_TIMEOUT = 40000;
 
 // Specific timeouts for incoming task operations
 export const CHAT_LAUNCHER_TIMEOUT = 60000;
+export const ACCEPT_TASK_TIMEOUT = 60000;
 
 // Widget initialization timeouts
 export const WIDGET_INIT_TIMEOUT = 50000;
@@ -75,7 +76,7 @@ export const PAGE_TYPES = {
 
 export type PageType = (typeof PAGE_TYPES)[keyof typeof PAGE_TYPES];
 
-export const CALL_URL = 'https://web.webex.com/calling?calling';
+export const CALL_URL = 'https://web-sdk.webex.com/samples/calling/';
 
 export const TASK_TYPES = {
   CALL: 'Call',
