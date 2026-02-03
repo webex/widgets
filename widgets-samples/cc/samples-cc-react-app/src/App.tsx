@@ -180,8 +180,12 @@ function App() {
 
   const onTaskSelected = ({task, isClicked}) => {
     console.log('onTaskSelected invoked for task:', task, 'isClicked:', isClicked);
+    const callAssociatedDetails = task?.data?.interaction?.callAssociatedDetails;
+    const mediaType = task?.data?.interaction?.mediaType;
+    const isSocial = mediaType === 'social';
+    const title = isSocial ? callAssociatedDetails?.customerName : callAssociatedDetails?.ani;
     console.log(
-      `onTaskSelected invoked for task with title : ${task?.data?.interaction?.callAssociatedDetails?.ani}, and mediaType : ${task?.data?.mediaType}`
+      `onTaskSelected invoked for task with title : ${title}, and mediaType : ${mediaType}`
     );
   };
 
@@ -643,10 +647,16 @@ function App() {
                 disabled={accessToken.trim() === ''}
                 onClick={() => {
                   setShowLoader(true);
-                  store.init({webexConfig, access_token: accessToken}).then(() => {
-                    setIsSdkReady(true);
-                    setShowLoader(false);
-                  });
+                  store
+                    .init({webexConfig, access_token: accessToken})
+                    .then(() => {
+                      setIsSdkReady(true);
+                      setShowLoader(false);
+                    })
+                    .catch((error) => {
+                      console.error('Failed to initialize widgets:', error);
+                      setShowLoader(false);
+                    });
                 }}
                 data-testid="samples:init-widgets-button"
               >
@@ -876,7 +886,7 @@ function App() {
                                     setCollapsedTasks((prev) => prev.filter((id) => id !== task.data.interactionId));
                                   }
                                 }}
-                                data-testid={`samples:incoming-task-${task.data.mediaType}`}
+                                data-testid={`samples:incoming-task-${task.data.interaction?.mediaType}`}
                               >
                                 <>
                                   <button

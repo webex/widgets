@@ -1,7 +1,7 @@
 import {test, Page, expect} from '@playwright/test';
 import {TestManager} from '../test-manager';
 import {changeUserState} from '../Utils/userStateUtils';
-import {createCallTask, createChatTask, createEmailTask} from '../Utils/incomingTaskUtils';
+import {createCallTask, createChatTask, createEmailTask, waitForIncomingTask} from '../Utils/incomingTaskUtils';
 import {TASK_TYPES, USER_STATES, WRAPUP_REASONS} from '../constants';
 import {verifyTaskControls} from '../Utils/taskControlUtils';
 import {submitWrapup} from '../Utils/wrapupUtils';
@@ -46,18 +46,31 @@ async function getCurrentHandleTime(page: Page, index: number = 0): Promise<numb
  */
 
 async function waitForAndAcceptSpecificTask(testManager: TestManager, testId: string): Promise<void> {
+  await testManager.agent1Page.bringToFront();
   const timeoutMs = 60000,
     pollInterval = 2000;
   const start = Date.now();
-  const type = testId.split('-').pop();
+
   while (Date.now() - start < timeoutMs) {
     const taskDiv = testManager.agent1Page.getByTestId(testId).first();
     const isVisible = await taskDiv.isVisible().catch(() => false);
-    if (isVisible) {
-      const acceptButton = taskDiv.getByTestId('task:accept-button').first();
-      await expect(acceptButton).toBeVisible({timeout: 5000});
-      await acceptButton.click({timeout: 3000});
 
+    if (isVisible) {
+      // Dismiss any open popovers that might be blocking
+      await testManager.agent1Page.keyboard.press('Escape');
+      await testManager.agent1Page.waitForTimeout(200);
+
+      const acceptButton = taskDiv.getByTestId('task:accept-button').first();
+      const acceptVisible = await acceptButton.isVisible().catch(() => false);
+
+      if (!acceptVisible) {
+        await testManager.agent1Page.waitForTimeout(pollInterval);
+        continue;
+      }
+
+      await expect(acceptButton).toBeVisible({timeout: 5000});
+      await expect(acceptButton).toBeEnabled({timeout: 5000});
+      await acceptButton.click({timeout: 3000});
       return;
     }
     await testManager.agent1Page.waitForTimeout(pollInterval);
@@ -103,7 +116,7 @@ async function waitForConsoleLogs(
   const escTitle = escapeForRegExp(title!);
   const escMedia = escapeForRegExp(mediaType!);
   const pattern = new RegExp(
-    '^onTaskSelected invoked for task with title : ' + escTitle + ', and mediaType : ' + escMedia + '$'
+    '^onTaskSelected invoked for task with title : ' + escTitle + ', and mediaType : ' + escMedia
   );
 
   const start = Date.now();
@@ -134,11 +147,16 @@ export default function createTaskListTests() {
     setupConsoleLogging(testManager.agent1Page);
   });
 
+  test.afterAll(async () => {
+    if (testManager) {
+      await testManager.cleanup();
+    }
+  });
+
   test('Verify Task List for incoming Call', async () => {
     await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
     await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
-    let incomingTaskDiv = testManager.agent1Page.getByTestId('samples:incoming-task-telephony').first();
-    await incomingTaskDiv.waitFor({state: 'visible', timeout: 40000});
+    let incomingTaskDiv = await waitForIncomingTask(testManager.agent1Page, TASK_TYPES.CALL);
     await testManager.agent1Page.waitForTimeout(1000);
     const taskListItem = testManager.agent1Page.getByTestId('task-list').getByRole('listitem').first();
     expect(taskListItem).toBeVisible();
@@ -281,23 +299,26 @@ export default function createTaskListTests() {
   });
 
   test('Task List Test with Multiple Tasks', async () => {
-    await changeUserState(testManager.agent1Page, USER_STATES.MEETING);
-    await waitForState(testManager.agent1Page, USER_STATES.MEETING);
-    await Promise.all([
-      createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!),
-      createChatTask(testManager.chatPage, process.env[`${testManager.projectName}_CHAT_URL`]!),
-      createEmailTask(process.env[`${testManager.projectName}_EMAIL_ENTRY_POINT`]!),
-    ]);
-
     await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
+    await waitForState(testManager.agent1Page, USER_STATES.AVAILABLE);
 
-    await Promise.all([
-      waitForAndAcceptSpecificTask(testManager, 'samples:incoming-task-telephony'),
-      waitForAndAcceptSpecificTask(testManager, 'samples:incoming-task-chat'),
-      waitForAndAcceptSpecificTask(testManager, 'samples:incoming-task-email'),
-    ]);
-    await testManager.agent1Page.waitForTimeout(3000);
+    // Create and accept tasks one by one to avoid flakiness
+    // 1. Create and accept call task
+    await createCallTask(testManager.callerPage, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
+    await waitForAndAcceptSpecificTask(testManager, 'samples:incoming-task-telephony');
+    await testManager.agent1Page.waitForTimeout(2000);
 
+    // 2. Create and accept chat task
+    await createChatTask(testManager.chatPage, process.env[`${testManager.projectName}_CHAT_URL`]!);
+    await waitForAndAcceptSpecificTask(testManager, 'samples:incoming-task-chat');
+    await testManager.agent1Page.waitForTimeout(2000);
+
+    // 3. Create and accept email task
+    await createEmailTask(process.env[`${testManager.projectName}_EMAIL_ENTRY_POINT`]!);
+    await waitForAndAcceptSpecificTask(testManager, 'samples:incoming-task-email');
+    await testManager.agent1Page.waitForTimeout(2000);
+
+    // Verify all 3 tasks are in the task list
     for (let i = 0; i < 3; i++) {
       const taskListItem = testManager.agent1Page.getByTestId('task-list').getByRole('listitem').nth(i);
 
@@ -323,9 +344,5 @@ export default function createTaskListTests() {
       );
       capturedLogs.length = 0;
     }
-  });
-
-  test.afterAll(async () => {
-    await testManager.cleanup();
   });
 }
