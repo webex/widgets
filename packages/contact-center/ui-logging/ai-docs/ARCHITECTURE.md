@@ -2,7 +2,7 @@
 
 ## Component Overview
 
-UI Logging is a utility package that provides metrics tracking through a Higher-Order Component (HOC) pattern and direct logging functions. It integrates with the store's logger to provide centralized metrics collection.
+UI Logging is a utility package that provides logging and metrics tracking through a Higher-Order Component (HOC) pattern and direct logging functions. It integrates with the store's logger to provide centralized metrics collection.
 
 ### Module Table
 
@@ -26,7 +26,6 @@ ui-logging/
 ├── dist/
 │   ├── index.js                # Build output
 │   └── types/
-│       ├── index.d.ts
 │       ├── metricsLogger.d.ts
 │       └── withMetrics.d.ts
 ├── package.json
@@ -195,53 +194,6 @@ export const logMetrics = (metric: WidgetMetrics) => {
 - Formats metrics as JSON string
 - Includes module/method context
 
----
-
-### havePropsChanged Function
-
-**File:** `src/metricsLogger.ts`
-
-Performs shallow comparison to detect prop changes:
-
-```typescript
-export function havePropsChanged(prev: any, next: any): boolean {
-  if (prev === next) return false;
-
-  // Type check
-  if (typeof prev !== typeof next) return true;
-  if (!prev || !next) return prev !== next;
-
-  // Compare keys
-  const prevKeys = Object.keys(prev);
-  const nextKeys = Object.keys(next);
-  if (prevKeys.length !== nextKeys.length) return true;
-
-  // Compare primitive values (shallow)
-  for (const key of prevKeys) {
-    const prevVal = prev[key];
-    const nextVal = next[key];
-
-    if (prevVal === nextVal) continue;
-    if (typeof prevVal !== 'object' || prevVal === null) return true;
-    if (typeof nextVal !== 'object' || nextVal === null) return true;
-  }
-
-  return false;
-}
-```
-
-**Logic:**
-- Reference equality check first (fastest)
-- Type comparison
-- Key count comparison
-- Shallow primitive comparison
-- **Does NOT** deep compare nested objects (intentional for performance)
-
-**Use Case:**
-Used by `React.memo` to prevent unnecessary re-renders when props haven't actually changed.
-
----
-
 ## Metrics Events
 
 ### Event Types
@@ -284,39 +236,6 @@ type WidgetMetrics = {
 ```
 
 ---
-
-## Performance Optimization
-
-### React.memo with Custom Comparison
-
-The HOC uses `React.memo` with `havePropsChanged` to optimize re-renders:
-
-```mermaid
-graph TD
-    Start[Props Update]
-    Compare{havePropsChanged?}
-    Rerender[Re-render Component]
-    Skip[Skip Re-render]
-    
-    Start --> Compare
-    Compare -->|true| Rerender
-    Compare -->|false| Skip
-    
-    style Compare fill:#ffe1e1
-    style Skip fill:#e1ffe1
-```
-
-**Benefits:**
-- Prevents unnecessary re-renders
-- Reduces PROPS_UPDATED events
-- Improves performance for widgets with frequent parent updates
-
-**Trade-off:**
-- Shallow comparison only (nested object changes might be missed)
-- Intentional design choice to avoid deep comparison overhead
-
----
-
 ## Store Integration
 
 ### Logger Dependency

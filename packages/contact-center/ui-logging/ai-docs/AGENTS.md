@@ -2,7 +2,7 @@
 
 ## Overview
 
-UI Logging is a lightweight utility package that provides metrics tracking capabilities for contact center widgets. It includes a Higher-Order Component (HOC) called `withMetrics` that automatically tracks widget lifecycle events, and a `logMetrics` function for custom event logging.
+UI Logging is a lightweight utility package that provides logging and metrics tracking capabilities for contact center widgets. It includes a Higher-Order Component (HOC) called `withMetrics` that automatically tracks widget lifecycle events, and a `logMetrics` function for custom event logging.
 
 **Package:** `@webex/cc-ui-logging`
 
@@ -19,7 +19,7 @@ The UI Logging package enables observability and monitoring for contact center w
 - **Provides HOC wrapper** - Easy integration with minimal code changes
 - **Logs to store logger** - Integrates with existing logging infrastructure
 - **Supports custom metrics** - Log custom events with additional context
-- **Optimizes re-renders** - Includes shallow props comparison for performance
+- **[WIP]Optimizes re-renders** - Includes shallow props comparison for performance
 
 ### Key Capabilities
 
@@ -83,7 +83,7 @@ function MyComponent() {
 
 ```typescript
 import { withMetrics } from '@webex/cc-ui-logging';
-import { StationLogin } from './StationLogin';
+import { StationLogin } from '@webex/cc-widget';
 
 // Automatically tracks mount/unmount
 const StationLoginWithMetrics = withMetrics(
@@ -327,7 +327,6 @@ function withMetrics<P extends object>(
 
 **Behavior:**
 - Wraps component with React.memo
-- Uses custom comparison function (`havePropsChanged`)
 - Logs WIDGET_MOUNTED on mount
 - Logs WIDGET_UNMOUNTED on unmount
 
@@ -358,27 +357,6 @@ type WidgetMetrics = {
 - Checks if `store.logger` exists
 - Logs warning if no logger available
 - Calls `store.logger.log()` with formatted JSON
-
----
-
-### havePropsChanged Function
-
-```typescript
-function havePropsChanged(prev: any, next: any): boolean
-```
-
-**Parameters:**
-- `prev` - Previous props object
-- `next` - Next props object
-
-**Returns:** `true` if props have changed, `false` otherwise
-
-**Behavior:**
-- Performs shallow comparison
-- Compares object keys length
-- Compares primitive values
-- Does NOT deep compare nested objects
-- Used by React.memo to prevent re-renders
 
 ---
 
