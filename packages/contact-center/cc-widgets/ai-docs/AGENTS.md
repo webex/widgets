@@ -14,20 +14,99 @@ CC Widgets is an aggregator package that bundles all contact center widgets and 
 
 ### Purpose
 
-CC Widgets serves as the main entry point and bundle for contact center widgets. It:
-- **Aggregates all widgets** from individual packages into a single bundle
-- **Provides dual exports** - React components and Web Components
-- **Registers Web Components** automatically in the browser
-- **Simplifies integration** with a single package installation
-- **Bundles dependencies** for production use
+CC Widgets serves as the main entry point for contact center widgets. It:
+
+- **Eliminates dependency complexity** - Install one package (`@webex/cc-widgets`) instead of multiple widget packages (`@webex/cc-station-login`, `@webex/cc-user-state`, `@webex/cc-task`, etc.)
+- **Provides complete widget suite** - All widgets (StationLogin, UserState, TaskList, CallControl, OutdialCall, etc.) are bundled and ready to use
+- **Simplifies dependency management** - No need to track versions, peer dependencies, or compatibility across individual widget packages
+- **Delivers production-ready bundles** - Pre-built, optimized webpack bundles with all dependencies included
+- **Reduces integration effort** - One installation, one import, immediate access to all widgets
 
 ### Key Capabilities
 
-- **Dual Export System**: Import as React components or use as Web Components
-- **Automatic Registration**: Web Components auto-register when imported
-- **Framework Agnostic**: Web Components work with any framework (Angular, Vue, vanilla JS)
-- **Single Package**: All widgets in one npm package
-- **Production Ready**: Optimized webpack bundle with all dependencies
+- **Dual Export System**:
+
+  - Import as React components for React applications
+  - Use as Web Components (`<widget-cc-*>`) for framework-agnostic integration
+  - Both formats available from the same package
+
+- **Automatic Web Component Registration**:
+
+  - Web Components auto-register in the browser when bundle is loaded
+  - No manual `customElements.define()` required
+  - Ready to use immediately in HTML
+
+- **Single Package Management**:
+
+  - All widgets bundled in one npm package
+  - Guaranteed compatibility between widgets
+  - Simplified version management and updates
+
+- **Production Optimized**:
+
+  - Webpack-bundled with code splitting
+  - React and dependencies included in Web Component bundle
+  - Minimal bundle size for React component exports (re-exports only)
+
+- **Event System**:
+
+  - React components use standard props and callbacks
+  - Web Components emit CustomEvents for framework-agnostic communication
+  - Consistent event handling across both formats
+
+- **Shared Store Access**:
+  - Global MobX store accessible from both React and Web Components
+  - Single source of truth for agent state, tasks, and SDK interactions
+  - No store duplication or synchronization needed
+
+---
+
+## Dependencies
+
+**Note:** For exact versions, see [package.json](../package.json)
+
+### Runtime Dependencies
+
+| Package                        | Purpose                                                  |
+| ------------------------------ | -------------------------------------------------------- |
+| `@r2wc/react-to-web-component` | React to Web Component conversion                        |
+| `@webex/cc-station-login`      | Station Login widget                                     |
+| `@webex/cc-user-state`         | User State widget                                        |
+| `@webex/cc-task`               | Task widgets (TaskList, IncomingTask, CallControl, etc.) |
+| `@webex/cc-store`              | MobX singleton store                                     |
+
+### Peer Dependencies
+
+| Package                            | Purpose                                      |
+| ---------------------------------- | -------------------------------------------- |
+| `@momentum-ui/react-collaboration` | Momentum UI components (required by widgets) |
+
+### Note on React Dependencies
+
+React and ReactDOM are **not** listed as dependencies because:
+
+- React components expect the host app to provide React
+- Web Components bundle includes React internally
+- This prevents duplicate React instances
+
+---
+
+## Available Widgets
+
+### React Component Exports
+
+```typescript
+import {
+  StationLogin, // Agent station login
+  UserState, // Agent state management
+  IncomingTask, // Incoming task notifications
+  TaskList, // Active tasks list
+  CallControl, // Call control buttons
+  CallControlCAD, // CAD-enabled call control
+  OutdialCall, // Outbound dialing
+  store, // MobX store singleton
+} from '@webex/cc-widgets';
+```
 
 ---
 
@@ -45,14 +124,14 @@ import React from 'react';
 function MyApp() {
   return (
     <div>
-      <StationLogin 
+      <StationLogin
         onLogin={() => console.log('Logged in')}
         profileMode={false}
       />
-      <UserState 
+      <UserState
         onStateChange={(state) => console.log('State:', state)}
       />
-      <TaskList 
+      <TaskList
         onTaskSelected={(id) => console.log('Task:', id)}
       />
     </div>
@@ -65,42 +144,31 @@ function MyApp() {
 ```html
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Contact Center Widgets</title>
-  <!-- Import Momentum UI CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@momentum-ui/core/css/momentum-ui.min.css">
-</head>
-<body>
-  <!-- Use Web Components -->
-  <widget-cc-station-login></widget-cc-station-login>
-  <widget-cc-user-state></widget-cc-user-state>
-  <widget-cc-task-list></widget-cc-task-list>
+  <head>
+    <title>Contact Center Widgets</title>
+    <!-- Import Momentum UI CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@momentum-ui/core/css/momentum-ui.min.css" />
+  </head>
+  <body>
+    <!-- Use Web Components -->
+    <widget-cc-station-login></widget-cc-station-login>
+    <widget-cc-user-state></widget-cc-user-state>
+    <widget-cc-task-list></widget-cc-task-list>
 
-  <!-- Import the Web Components bundle -->
-  <script src="path/to/cc-widgets/dist/wc.js"></script>
+    <!-- Import the Web Components bundle -->
+    <script src="path/to/cc-widgets/dist/wc.js"></script>
 
-  <script>
-    // Access store for initialization
-    const { store } = window.ccWidgets;
-    
-    // Initialize Contact Center SDK
-    const initCC = async () => {
-      const cc = await ContactCenter.init({
-        token: 'your-token',
-        region: 'us1'
+    <script>
+      // Initialize the widget store and set your access token BEFORE using any widgets
+      const store = window['ccWidgetStore'];
+      store.init({
+        access_token: '<YOUR_ACCESS_TOKEN>',
+        webexConfig: {
+          // Optionally configure Webex SDK here
+        },
       });
-      store.setCC(cc);
-    };
-
-    initCC();
-
-    // Add event listeners
-    const loginWidget = document.querySelector('widget-cc-station-login');
-    loginWidget.addEventListener('login', () => {
-      console.log('Agent logged in');
-    });
-  </script>
-</body>
+    </script>
+  </body>
 </html>
 ```
 
@@ -112,42 +180,23 @@ function MyApp() {
 <!-- Angular, Vue, or vanilla JS app -->
 <!DOCTYPE html>
 <html>
-<body>
-  <div id="app">
-    <!-- Web Components work anywhere -->
-    <widget-cc-user-state></widget-cc-user-state>
-    <widget-cc-call-control></widget-cc-call-control>
-  </div>
+  <body>
+    <div id="app">
+      <!-- Web Components work anywhere -->
+      <widget-cc-user-state></widget-cc-user-state>
+      <widget-cc-call-control></widget-cc-call-control>
+    </div>
 
-  <script src="cc-widgets/dist/wc.js"></script>
-  <script>
-    // Configure via JavaScript
-    const userState = document.querySelector('widget-cc-user-state');
-    userState.addEventListener('statechange', (event) => {
-      updateUI(event.detail);
-    });
-  </script>
-</body>
+    <script src="cc-widgets/dist/wc.js"></script>
+    <script>
+      // Initialize the widget store and set Webex configuration and access token
+      store.init({
+        webexConfig,
+        access_token: '<YOUR_ACCESS_TOKEN>',
+      });
+    </script>
+  </body>
 </html>
-```
-
-#### 2. React Application with Lazy Loading
-
-```typescript
-import React, { lazy, Suspense } from 'react';
-
-// Lazy load widgets
-const StationLogin = lazy(() => 
-  import('@webex/cc-widgets').then(m => ({ default: m.StationLogin }))
-);
-
-function App() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <StationLogin profileMode={false} />
-    </Suspense>
-  );
-}
 ```
 
 #### 3. Micro-Frontend Architecture
@@ -156,6 +205,12 @@ function App() {
 // Host application
 import { StationLogin, UserState } from '@webex/cc-widgets';
 import store from '@webex/cc-widgets';
+
+// Initialize the store before using it and before sharing across micro-frontends
+store.init({
+  access_token: '<YOUR_ACCESS_TOKEN>',
+  // Add any other necessary configuration here
+});
 
 // Share store across micro-frontends
 window.ccStore = store;
@@ -170,63 +225,17 @@ function HostApp() {
 }
 ```
 
-#### 4. Custom Web Component Wrapper
-
-```html
-<!-- Create custom element with additional logic -->
-<script type="module">
-  import './cc-widgets/dist/wc.js';
-
-  class CustomAgentPanel extends HTMLElement {
-    constructor() {
-      super();
-      this.attachShadow({ mode: 'open' });
-    }
-
-    connectedCallback() {
-      this.shadowRoot.innerHTML = `
-        <style>
-          .panel { border: 1px solid #ccc; padding: 1rem; }
-        </style>
-        <div class="panel">
-          <h2>Agent Panel</h2>
-          <widget-cc-station-login></widget-cc-station-login>
-          <widget-cc-user-state></widget-cc-user-state>
-        </div>
-      `;
-    }
-  }
-
-  customElements.define('custom-agent-panel', CustomAgentPanel);
-</script>
-
-<custom-agent-panel></custom-agent-panel>
-```
-
 ### Integration Patterns
 
 #### Initializing Store Before Widget Use
 
 ```typescript
-import { store } from '@webex/cc-widgets';
-import { ContactCenter } from '@webex/contact-center';
+import {store} from '@webex/cc-widgets';
 
 async function initialize() {
-  // 1. Initialize SDK
-  const cc = await ContactCenter.init({
-    token: localStorage.getItem('authToken'),
-    region: 'us1'
-  });
-
-  // 2. Set SDK instance in store
-  store.setCC(cc);
-
-  // 3. Configure logger (optional)
-  store.setLogger({
-    log: console.log,
-    error: console.error,
-    warn: console.warn,
-    info: console.info
+  await store.init({
+    webexConfig,
+    access_token: <ACCESS_TOKEN>,
   });
 
   // 4. Now widgets are ready to use
@@ -236,110 +245,67 @@ async function initialize() {
 
 #### Event Handling with Web Components
 
-```javascript
-// Get references to Web Components
-const stationLogin = document.querySelector('widget-cc-station-login');
-const userState = document.querySelector('widget-cc-user-state');
-const taskList = document.querySelector('widget-cc-task-list');
+Web Components use **property assignment** for event handlers (not `addEventListener`). Assign callback functions directly to event properties:
 
-// Add event listeners
-stationLogin.addEventListener('login', () => {
+```javascript
+// Create or get references to Web Components
+const ccStationLogin = document.createElement('widget-cc-station-login');
+const ccUserState = document.createElement('widget-cc-user-state');
+const ccIncomingTask = document.createElement('widget-cc-incoming-task');
+const ccTaskList = document.createElement('widget-cc-task-list');
+const ccCallControl = document.createElement('widget-cc-call-control');
+const ccOutdial = document.createElement('widget-cc-outdial-call');
+
+// Assign event handler callbacks directly to properties
+ccStationLogin.onLogin = () => {
   console.log('Login successful');
   showAgentDashboard();
-});
-
-stationLogin.addEventListener('logout', () => {
-  console.log('Logout successful');
-  showLoginScreen();
-});
-
-userState.addEventListener('statechange', (event) => {
-  console.log('Agent state changed:', event.detail);
-  updateStatusIndicator(event.detail);
-});
-
-taskList.addEventListener('taskselected', (event) => {
-  console.log('Task selected:', event.detail);
-  loadTaskDetails(event.detail.taskId);
-});
-```
-
-#### Using with Module Bundlers
-
-```typescript
-// webpack.config.js - External dependencies
-module.exports = {
-  externals: {
-    'react': 'React',
-    'react-dom': 'ReactDOM',
-    '@webex/cc-widgets': 'ccWidgets'
-  }
 };
 
-// In your app
-import { StationLogin } from '@webex/cc-widgets';
-// Bundler won't include @webex/cc-widgets in bundle
+ccStationLogin.onLogout = () => {
+  console.log('Logout successful');
+  showLoginScreen();
+};
+
+ccUserState.onStateChange = (status) => {
+  console.log('Agent state changed:', status);
+  updateStatusIndicator(status);
+};
+
+ccIncomingTask.onAccepted = () => {
+  console.log('Task accepted');
+};
+
+ccIncomingTask.onDeclined = () => {
+  console.log('Task declined');
+};
+
+ccTaskList.onTaskAccepted = () => {
+  console.log('Task accepted from task list');
+};
+
+ccTaskList.onTaskDeclined = () => {
+  console.log('Task declined from task list');
+};
+
+ccCallControl.onHoldResume = () => {
+  console.log('Hold/Resume toggled');
+};
+
+ccCallControl.onEnd = () => {
+  console.log('Call ended');
+};
+
+ccCallControl.onWrapUp = (params) => {
+  console.log('Wrap-up completed', params);
+};
+
+// Append widgets to DOM after assigning event handlers
+document.body.appendChild(ccStationLogin);
+document.body.appendChild(ccUserState);
+document.body.appendChild(ccTaskList);
+document.body.appendChild(ccCallControl);
 ```
-
----
-
-## Dependencies
-
-**Note:** For exact versions, see [package.json](../package.json)
-
-### Runtime Dependencies
-
-| Package | Purpose |
-|---------|---------|
-| `@r2wc/react-to-web-component` | React to Web Component conversion |
-| `@webex/cc-station-login` | Station Login widget |
-| `@webex/cc-user-state` | User State widget |
-| `@webex/cc-task` | Task widgets (TaskList, IncomingTask, CallControl, etc.) |
-| `@webex/cc-store` | MobX singleton store |
-
-### Peer Dependencies
-
-| Package | Purpose |
-|---------|---------|
-| `@momentum-ui/react-collaboration` | Momentum UI components (required by widgets) |
-
-### Note on React Dependencies
-
-React and ReactDOM are **not** listed as dependencies because:
-- React components expect the host app to provide React
-- Web Components bundle includes React internally
-- This prevents duplicate React instances
-
----
-
-## Available Widgets
-
-### React Component Exports
-
-```typescript
-import {
-  StationLogin,      // Agent station login
-  UserState,         // Agent state management
-  IncomingTask,      // Incoming task notifications
-  TaskList,          // Active tasks list
-  CallControl,       // Call control buttons
-  CallControlCAD,    // CAD-enabled call control
-  OutdialCall,       // Outbound dialing
-  store              // MobX store singleton
-} from '@webex/cc-widgets';
-```
-
-### Web Component Names
-
-| React Component | Web Component Tag | Purpose |
-|----------------|-------------------|---------|
-| `StationLogin` | `<widget-cc-station-login>` | Agent login/logout |
-| `UserState` | `<widget-cc-user-state>` | Agent state selector |
-| `IncomingTask` | `<widget-cc-incoming-task>` | Incoming task notification |
-| `TaskList` | `<widget-cc-task-list>` | Active tasks list |
-| `CallControl` | `<widget-cc-call-control>` | Standard call controls |
-| `CallControlCAD` | `<widget-cc-call-control-cad>` | CAD-enabled controls |
-| `OutdialCall` | `<widget-cc-outdial-call>` | Outbound dialing UI |
 
 ---
 
@@ -349,10 +315,6 @@ import {
 # Install the widgets bundle
 yarn add @webex/cc-widgets
 
-# If using React components, you need React (peer dependency)
-yarn add react react-dom @momentum-ui/react-collaboration
-
-# If using Web Components only, no additional dependencies needed
 ```
 
 ---
@@ -363,20 +325,11 @@ The package produces two bundles:
 
 ### 1. React Bundle (`dist/index.js`)
 
-```typescript
-// Used with: import { StationLogin } from '@webex/cc-widgets'
-// Contains: Re-exports of React widgets + store
-// Size: Small (just re-exports, no bundled code)
-```
+Used with: import { StationLogin } from '@webex/cc-widgets'. Contains: Re-exports of React widgets + store. Size: Small (just re-exports, no bundled code)
 
 ### 2. Web Components Bundle (`dist/wc.js`)
 
-```typescript
-// Used with: <script src="dist/wc.js"></script>
-// Contains: All widgets + React + dependencies bundled
-// Size: Large (self-contained bundle)
-// Includes: r2wc wrappers + custom element registration
-```
+Used with: <script src="dist/wc.js"></script>. Contains: All widgets + React + dependencies bundled.Size: Large (self-contained bundle).Includes: r2wc wrappers + custom element registration
 
 ---
 
@@ -387,4 +340,3 @@ For detailed architecture, r2wc integration patterns, and troubleshooting, see [
 ---
 
 _Last Updated: 2025-11-26_
-
