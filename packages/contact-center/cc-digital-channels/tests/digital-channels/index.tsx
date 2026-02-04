@@ -1,13 +1,19 @@
 import React from 'react';
-import {render, waitFor} from '@testing-library/react';
+import {render, waitFor, act} from '@testing-library/react';
 import '@testing-library/jest-dom';
+import {runInAction} from 'mobx';
 
 // Mock cc-digital-interactions module
 jest.mock('cc-digital-interactions', () => ({
   initializeApp: jest.fn().mockResolvedValue(undefined),
   __esModule: true,
-  default: (props: {conversationId?: string}) => (
-    <div data-testid="engage-widget" data-conversation-id={props.conversationId}>
+  default: (props: {conversationId?: string; theme?: string; isVisualRebrand?: boolean}) => (
+    <div
+      data-testid="engage-widget"
+      data-conversation-id={props.conversationId}
+      data-theme={props.theme}
+      data-visual-rebrand={String(props.isVisualRebrand)}
+    >
       Engage Widget
     </div>
   ),
@@ -66,6 +72,21 @@ import {DigitalChannels} from '../../src/digital-channels';
 import {mockTask as mockTaskFixture} from '@webex/test-fixtures';
 
 const mockProps = {};
+let mockShouldThrow = false;
+
+jest.mock('../../src/digital-channels/DigitalChannelsComponent', () => {
+  const actual = jest.requireActual('../../src/digital-channels/DigitalChannelsComponent');
+  return {
+    __esModule: true,
+    ...actual,
+    DigitalChannelsComponent: (props: Record<string, unknown>) => {
+      if (mockShouldThrow) {
+        throw new Error('boom');
+      }
+      return actual.DigitalChannelsComponent(props);
+    },
+  };
+});
 
 describe('DigitalChannels Component - Integration Tests with Real Components', () => {
   beforeEach(() => {
@@ -123,8 +144,12 @@ describe('DigitalChannels Component - Integration Tests with Real Components', (
     const storeModule = require('@webex/cc-store');
     const store = storeModule.default;
 
-    store.currentTask = null;
-    store.isDigitalChannelsInitialized = true;
+    act(() => {
+      runInAction(() => {
+        store.currentTask = null;
+        store.isDigitalChannelsInitialized = true;
+      });
+    });
 
     const {container} = render(<DigitalChannels {...mockProps} />);
     expect(container.querySelector('md-theme')).toBeNull();
@@ -140,10 +165,36 @@ describe('DigitalChannels Component - Integration Tests with Real Components', (
       },
     };
 
-    store.currentTask = updatedTask;
+    act(() => {
+      runInAction(() => {
+        store.currentTask = updatedTask;
+      });
+    });
 
     await waitFor(() => {
       expect(container.querySelector('md-theme')).not.toBeNull();
     });
+  });
+});
+
+describe('DigitalChannels ErrorBoundary', () => {
+  it('should call onErrorCallback when child throws', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const storeModule = require('@webex/cc-store');
+    const store = storeModule.default;
+    const onErrorCallback = jest.fn();
+    store.onErrorCallback = onErrorCallback;
+
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    mockShouldThrow = true;
+
+    render(<DigitalChannels {...mockProps} />);
+
+    await waitFor(() => {
+      expect(onErrorCallback).toHaveBeenCalledWith('DigitalChannels', expect.any(Error));
+    });
+
+    mockShouldThrow = false;
+    consoleErrorSpy.mockRestore();
   });
 });
