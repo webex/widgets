@@ -6,9 +6,13 @@ module.exports = {
   entry: './src/index.ts',
   resolve: {
     extensions: ['.ts', '.tsx', '.js', '.jsx', '.scss'],
+    alias: {
+      'process/browser': require.resolve('process/browser.js'),
+    },
     fallback: {
       fs: false,
       process: require.resolve('process/browser'),
+      'process/browser': require.resolve('process/browser.js'),
       crypto: require.resolve('crypto-browserify'),
       querystring: require.resolve('querystring-es3'),
       os: require.resolve('os-browserify/browser'),

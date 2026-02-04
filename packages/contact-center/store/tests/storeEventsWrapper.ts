@@ -96,6 +96,7 @@ jest.mock('../src/store', () => ({
     isEndConsultEnabled: true,
     allowConsultToQueue: false,
     isDeclineButtonEnabled: false,
+    isDigitalChannelsInitialized: false,
     setShowMultipleLoginAlert: jest.fn(),
     setCurrentState: jest.fn(),
     setLastStateChangeTimestamp: jest.fn(),
@@ -290,6 +291,20 @@ describe('storeEventsWrapper', () => {
 
     it('should proxy agentProfile', () => {
       expect(storeWrapper.agentProfile).toBe(storeWrapper['store'].agentProfile);
+    });
+
+    it('should proxy isDigitalChannelsInitialized', () => {
+      expect(storeWrapper.isDigitalChannelsInitialized).toBe(storeWrapper['store'].isDigitalChannelsInitialized);
+    });
+
+    it('should setDigitalChannelsInitialized', () => {
+      expect(storeWrapper.setDigitalChannelsInitialized).toBeInstanceOf(Function);
+
+      storeWrapper.setDigitalChannelsInitialized(true);
+      expect(storeWrapper['store'].isDigitalChannelsInitialized).toBe(true);
+
+      storeWrapper.setDigitalChannelsInitialized(false);
+      expect(storeWrapper['store'].isDigitalChannelsInitialized).toBe(false);
     });
 
     describe('setState', () => {
