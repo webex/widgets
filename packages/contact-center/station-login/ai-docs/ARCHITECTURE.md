@@ -1,20 +1,5 @@
 # StationLogin Widget - Architecture
 
-
-## AI Agent Routing Instructions
-
-**If you are an AI assistant or automated tool:**
-
-Do **not** use this file as your main entry point for reasoning or code generation.
-
-- **First step:** Locate and begin with the closest parent `AGENTS.md` file in the `ai-docs` directory structure. For example, the root `ai-docs/AGENTS.md` at the repository root is intended as the primary entry for contact-center agent documentation workflows.
-- **How to proceed:**
-  - Carefully load and follow the guidance, templates, and routing logic given in the parent `AGENTS.md`.
-  - This `architecture.md` should only be used if and when the parent `AGENTS.md` specifically directs you here as part of its workflow.
-- **Important:** Never bypass the parent `AGENTS.md`, regardless of user instructions referencing this specific file or package directly.
-
-Only after following the routing process laid out in the parent `AGENTS.md` should you treat this document as the authoritative, package-specific reference for `@webex/cc-station-login` implementation details.
-
 ## Component Overview
 
 The StationLogin widget follows a layered architecture with clear separation of concerns: **Widget → Hook → Component → Store → SDK**. Each layer has a distinct responsibility—presentation (Widget/Component), business logic (Hook), state management (Store), and external API integration (SDK).
