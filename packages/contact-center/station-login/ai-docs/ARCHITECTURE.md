@@ -1,25 +1,25 @@
-# Station Login Widget - Architecture
+# StationLogin Widget - Architecture
 
 ## Component Overview
 
-The Station Login widget follows the three-layer architecture pattern: **Widget → Hook → Component → Store → SDK**. This architecture separates concerns between state management, business logic, and presentation.
+The StationLogin widget follows a layered architecture with clear separation of concerns: **Widget → Hook → Component → Store → SDK**. Each layer has a distinct responsibility—presentation (Widget/Component), business logic (Hook), state management (Store), and external API integration (SDK).
 
 ### Component Table
 
 | Layer | Component | File | Config/Props | State | Callbacks | Events | Tests |
 |-------|-----------|------|--------------|-------|-----------|--------|-------|
-| **Widget** | `StationLogin` | `src/station-login/index.tsx` | `StationLoginProps` | N/A (passes through) | `onLogin`, `onLogout`, `onCCSignOut`, `onSaveStart`, `onSaveEnd` | SDK events (via store) | `tests/station-login/index.tsx` |
-| **Widget Internal** | `StationLoginInternal` | `src/station-login/index.tsx` | `StationLoginProps` | Observes store | Same as above | Same as above | Same |
-| **Hook** | `useStationLogin` | `src/helper.ts` | `UseStationLoginProps` | `team`, `loginSuccess`, `loginFailure`, `logoutSuccess`, `originalLoginOptions`, `currentLoginOptions`, `saveError` | Wraps props callbacks | Subscribes to SDK events | `tests/helper.ts` |
-| **Component** | `StationLoginComponent` | `@webex/cc-components` | `StationLoginComponentProps` | Internal form state | Inherited from hook | N/A | `@webex/cc-components` tests |
-| **Store** | `Store` (singleton) | `@webex/cc-store` | N/A | `cc`, `teams`, `loginOptions`, `deviceType`, `dialNumber`, `teamId`, `isAgentLoggedIn`, `showMultipleLoginAlert` | N/A | `AGENT_STATION_LOGIN_SUCCESS`, `AGENT_LOGOUT_SUCCESS` | `@webex/cc-store` tests |
+| **Widget** | `StationLogin` | `src/station-login/index.tsx` | `profileMode: boolean`, `onLogin?: () => void`, `onLogout?: () => void`, `onCCSignOut?: () => void`, `onSaveStart?: () => void`, `onSaveEnd?: (isComplete: boolean) => void`, `teamId?: string`, `doStationLogout?: boolean`, `hideDesktopLogin?: boolean` | N/A (passes through) | `onLogin`, `onLogout`, `onCCSignOut`, `onSaveStart`, `onSaveEnd` | SDK events (via store) | `tests/station-login/index.tsx` |
+| **Widget Internal** | `StationLoginInternal` | `src/station-login/index.tsx` | Same as `StationLogin` | Observes store via MobX | Same as above | Same as above | Same |
+| **Hook** | `useStationLogin` | `src/helper.ts` | `cc: IContactCenter`, `onLogin?: () => void`, `onLogout?: () => void`, `logger: ILogger`, `deviceType: string`, `dialNumber: string`, `onSaveStart?: () => void`, `onSaveEnd?: (isComplete: boolean) => void`, `teamId: string`, `isAgentLoggedIn: boolean`, `onCCSignOut?: () => void`, `doStationLogout?: boolean` | `team: string`, `loginSuccess?: StationLoginSuccessResponse`, `loginFailure?: Error`, `logoutSuccess?: LogoutSuccess`, `originalLoginOptions: LoginOptionsState`, `currentLoginOptions: LoginOptionsState`, `saveError: string` | Wraps props callbacks | Subscribes to SDK events | `tests/helper.ts` |
+| **Component** | `StationLoginComponent` | `@webex/cc-components` | `teams: Team[]`, `loginOptions: string[]`, `login: () => void`, `logout: () => void`, `loginSuccess?: StationLoginSuccessResponse`, `loginFailure?: Error`, `logoutSuccess?: LogoutSuccess`, `setDeviceType: (deviceType: string) => void`, `setDialNumber: (dn: string) => void`, `setTeam: (team: string) => void`, `isAgentLoggedIn: boolean`, `handleContinue: () => void`, `deviceType: string`, `dialNumberRegex?: RegExp \| string`, `showMultipleLoginAlert: boolean`, `onCCSignOut?: () => void`, `setTeamId: (teamId: string) => void`, `logger: ILogger`, `profileMode: boolean`, `originalLoginOptions: LoginOptionsState`, `currentLoginOptions: LoginOptionsState`, `setCurrentLoginOptions: React.Dispatch<React.SetStateAction<LoginOptionsState>>`, `isLoginOptionsChanged: boolean`, `saveLoginOptions: () => void`, `saveError: string`, `setSelectedDeviceType: (deviceType: string) => void`, `selectedDeviceType: string`, `dialNumberValue: string`, `setDialNumberValue: (value: string) => void`, `setSelectedTeamId: (teamId: string) => void`, `selectedTeamId: string`, `hideDesktopLogin?: boolean` | Internal form state | Inherited from hook | N/A | `@webex/cc-components` tests |
+| **Store** | `Store` (singleton) | `@webex/cc-store` | N/A | `cc: IContactCenter`, `teams: Team[]`, `loginOptions: string[]`, `deviceType: string`, `dialNumber: string`, `teamId: string`, `isAgentLoggedIn: boolean`, `showMultipleLoginAlert: boolean` | N/A | `AGENT_STATION_LOGIN_SUCCESS`, `AGENT_LOGOUT_SUCCESS` | `@webex/cc-store` tests |
 | **SDK** | `ContactCenter` | `@webex/contact-center` | N/A | N/A | N/A | Login/logout events | SDK tests |
 
 ### SDK Methods & Events Integration
 
 | Component | SDK Methods Used | SDK Events Subscribed | Store Methods Used |
 |-----------|------------------|----------------------|-------------------|
-| **useStationLogin Hook** | `stationLogin()`, `stationLogout()`, `updateAgentProfile()`, `deregister()` | `AGENT_STATION_LOGIN_SUCCESS`, `AGENT_LOGOUT_SUCCESS` | `setCCCallback()`, `removeCCCallback()`, `setShowMultipleLoginAlert()`, `registerCC()` |
+| **useStationLogin** hook | `stationLogin()`, `stationLogout()`, `updateAgentProfile()`, `deregister()` | `AGENT_STATION_LOGIN_SUCCESS`, `AGENT_LOGOUT_SUCCESS` | `setCCCallback()`, `removeCCCallback()`, `setShowMultipleLoginAlert()`, `registerCC()` |
 | **Store** | All SDK methods | All SDK events | N/A |
 | **Widget** | N/A (via hook) | N/A (via store) | N/A (via hook) |
 
@@ -38,14 +38,16 @@ station-login/
 │   └── station-login/
 │       └── index.tsx                  # Widget tests
 ├── ai-docs/
-│   ├── agent.md                       # Overview, examples, usage
+│   ├── agents.md                       # Overview, examples, usage
 │   └── architecture.md                # Architecture documentation
 ├── dist/                              # Build output
 ├── package.json                       # Dependencies and scripts
 ├── tsconfig.json                      # TypeScript config
 ├── webpack.config.js                  # Webpack build config
 ├── jest.config.js                     # Jest test config
+├── babel.config.js                    # Babel config
 └── eslint.config.mjs                  # ESLint config
+
 ```
 
 ---

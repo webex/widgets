@@ -301,10 +301,6 @@ The widget requires the **Webex Contact Center SDK** (`@webex/contact-center`) t
 
 ```bash
 # Install as part of contact center widgets
-yarn add @webex/cc-station-login
-npm install @webex/cc-station-login
-
-# Or install the entire widgets bundle
 yarn add @webex/cc-widgets
 npm install @webex/cc-widgets
 ```
@@ -314,6 +310,9 @@ npm install @webex/cc-widgets
 ## Additional Resources
 
 For detailed component architecture, data flows, and sequence diagrams, see [architecture.md](./architecture.md).
+
+For multi-login configuration and store initialization options, see [store/ai-docs](../../../store/ai-docs).
+
 
 ---
 
