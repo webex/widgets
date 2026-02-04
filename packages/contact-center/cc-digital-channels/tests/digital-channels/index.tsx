@@ -175,6 +175,33 @@ describe('DigitalChannels Component - Integration Tests with Real Components', (
       expect(container.querySelector('md-theme')).not.toBeNull();
     });
   });
+
+  it('should not render when dataCenter is empty', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const storeModule = require('@webex/cc-store');
+    const store = storeModule.default;
+    const originalDataCenter = store.dataCenter;
+
+    act(() => {
+      runInAction(() => {
+        store.dataCenter = '';
+      });
+    });
+
+    const {container} = render(<DigitalChannels {...mockProps} />);
+
+    // Wait for any async updates to complete
+    await waitFor(() => {
+      expect(container.querySelector('md-theme')).toBeNull();
+    });
+
+    // Restore dataCenter for other tests
+    act(() => {
+      runInAction(() => {
+        store.dataCenter = originalDataCenter;
+      });
+    });
+  });
 });
 
 describe('DigitalChannels ErrorBoundary', () => {
@@ -195,6 +222,30 @@ describe('DigitalChannels ErrorBoundary', () => {
     });
 
     mockShouldThrow = false;
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('should handle error gracefully when onErrorCallback is undefined', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const storeModule = require('@webex/cc-store');
+    const store = storeModule.default;
+    const originalCallback = store.onErrorCallback;
+    store.onErrorCallback = undefined;
+
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    mockShouldThrow = true;
+
+    // Render should not throw when onErrorCallback is undefined
+    const {container} = render(<DigitalChannels {...mockProps} />);
+
+    // Wait for error boundary to catch and handle the error
+    await waitFor(() => {
+      // ErrorBoundary renders empty fragment as fallback
+      expect(container.innerHTML).toBe('');
+    });
+
+    mockShouldThrow = false;
+    store.onErrorCallback = originalCallback;
     consoleErrorSpy.mockRestore();
   });
 });
