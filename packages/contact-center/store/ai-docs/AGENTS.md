@@ -2,7 +2,7 @@
 
 ## Overview
 
-`@webex/cc-store` is the shared, singleton MobX store for all Contact Center widgets. It holds global agent,session and task state, proxies SDK events, and exposes convenience APIs for fetching lists (queues, entry points, address book), task lifecycle handling, and common mutations.
+`@webex/cc-store` is the shared, singleton MobX store for all Contact Center widgets. It holds global agent, session and task state, proxies SDK events, and exposes convenience APIs for fetching lists (queues, entry points, address book), task lifecycle handling, and common mutations.
 
 **Package:** `@webex/cc-store`  
 **Version:** See package.json
@@ -14,6 +14,7 @@
 ### Purpose
 
 The store enables Contact Center widgets to:
+
 - **Initialize and register** with the Webex Contact Center SDK
 - **Observe global state** (teams, device type, login options, agent state, tasks and many more)
 - **Handle SDK events** (login, logout, multi-login, task lifecycle, agent state changes)
@@ -23,9 +24,10 @@ The store enables Contact Center widgets to:
 ### Key Capabilities
 
 - **Singleton** state via MobX observables
-- **Event wiring** to SDK (TASK_EVENTS and CC_EVENTS)
+- **Event wiring** to SDK (TASK_EVENTS and CC_EVENTS from the SDK)
 - **Task list management** and current task tracking
-- **Helpers** for buddy agents, queues, entry points, address book
+- **Data-fetching helpers** - Async methods that fetch domain data from SDK APIs (buddy agents, queues, entry points, address book, access token)
+- **State management methods** - Setters and mutators for store observables (device type, dial number, team ID, current task, etc.)
 - **Error propagation** via `setOnError`
 - **Feature flags** parsing from SDK profile
 
@@ -40,13 +42,15 @@ import store from '@webex/cc-store';
 
 // Option A: If you already have a Webex instance, best for existing webex enabled apps
 await store.init({
-  webex: someWebexInstance, // must include cc
+  webex: webexInstance,
 });
 
 // Option B: Let the store initialize Webex for you, best for new apps
 await store.init({
-  webexConfig: {/* sdk config */},
-  access_token: authToken,
+  webexConfig: {
+    /* sdk config */
+  },
+  access_token: authToken /* to be provided by the user */,
 });
 ```
 
@@ -95,7 +99,7 @@ const onLogin = (payload) => console.log('Login success:', payload);
 store.setCCCallback(CC_EVENTS.AGENT_STATION_LOGIN_SUCCESS, onLogin);
 
 // Later
-store.removeCCCallback(CC_EVENTS.AGENT_STATION_LOGIN_SUCCESS);
+store.removeCCCallback(CC_EVENTS.AGENT_STATION_LOGIN_SUCCESS, onLogin);
 ```
 
 ### Subscribing/Unsubscribing to Task Events on task object
@@ -120,6 +124,8 @@ if (taskId) {
 ```
 
 ### Fetching Lists
+
+These helper methods centralize SDK data-fetching in the store so widgets can access domain data (agents, queues, contacts) without directly importing the SDK. This ensures consistent error handling, avoids circular dependencies, and enables data transformation (like filtering queues by media type). Widgets like Transfer/Consult use `getBuddyAgents()` and `getQueues()` for populating dropdowns, while Outdial widgets use `getEntryPoints()` and `getAddressBookEntries()` for contact selection.
 
 ```typescript
 // Buddy agents for current task media type
@@ -146,15 +152,17 @@ store.setState({id: 'Available', name: 'Available', isSystem: true, isDefault: t
 
 ---
 
-## Key API (Selected)
+## Key properties and methods
 
 Properties (observable via MobX):
+
 - `teams`, `loginOptions`, `idleCodes`, `wrapupCodes`, `featureFlags`
 - `agentId`, `agentProfile`, `isAgentLoggedIn`, `deviceType`, `dialNumber`, `teamId`
 - `currentTask`, `taskList`, `currentState`, `lastStateChangeTimestamp`, `lastIdleCodeChangeTimestamp`
 - `showMultipleLoginAlert`, `currentTheme`, `customState`, `isMuted`, `isAddressBookEnabled`
 
 Methods:
+
 - `init(params)`, `registerCC(webex?)`
 - `setOnError(cb)`, `setCCCallback(event, cb)`, `removeCCCallback(event)`
 - `refreshTaskList()`, `setCurrentTask(task, isClicked?)`
@@ -173,10 +181,10 @@ See exact versions in package.json
 
 ### Runtime
 
-| Package | Purpose |
-|---------|---------|
+| Package                 | Purpose                          |
+| ----------------------- | -------------------------------- |
 | `@webex/contact-center` | SDK integration (methods/events) |
-| `mobx` | Observable state management |
+| `mobx`                  | Observable state management      |
 
 ### Dev/Test
 
@@ -196,10 +204,8 @@ yarn add @webex/cc-store
 
 For detailed store architecture, event flows, and sequence diagrams, see [architecture.md](./architecture.md).
 
+To obtain Webex access tokens for development and testing, visit the [Webex Developer Portal](https://developer.webex.com/).
+
 ---
 
 _Last Updated: 2025-11-26_
-
-
-
-
