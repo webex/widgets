@@ -15,6 +15,13 @@ module.exports = merge(baseConfig, {
       import: './src/index.ts',
     },
   },
+  resolve: {
+    fallback: {
+      ...baseConfig.resolve?.fallback,
+      http: false,
+      https: false,
+    },
+  },
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].js', // Set the output filename to index.js
