@@ -17,6 +17,7 @@ import {
   MEDIA_TYPE_CHAT,
   MEDIA_TYPE_EMAIL,
   MAX_PARTICIPANTS_IN_MULTIPARTY_CONFERENCE,
+  DestinationAgentType,
 } from './constants';
 import {DeviceTypeFlags} from '../task.types';
 
@@ -39,6 +40,38 @@ function getDeviceTypeFlags(deviceType: string): DeviceTypeFlags {
 function isTelephonySupported(deviceType: string, webRtcEnabled: boolean): boolean {
   const {isBrowser, isAgentDN, isExtension} = getDeviceTypeFlags(deviceType);
   return (isBrowser && webRtcEnabled) || isAgentDN || isExtension;
+}
+
+/**
+ * Check if consulting with an EP_DN agent (Entry Point Dial Number)
+ * This function looks for EP-DN participants in the consult media
+ */
+function isConsultingWithEpDnAgent(task: ITask): boolean {
+  if (!task?.data?.interaction?.media || !task?.data?.interaction?.participants) {
+    return false;
+  }
+
+  // Find the consult media
+  const consultMedia = Object.values(task.data.interaction.media).find((media) => media.mType === 'consult');
+
+  if (!consultMedia || !consultMedia.participants) {
+    return false;
+  }
+
+  // Check if any participant in the consult media is an EP-DN
+  const participants = task.data.interaction.participants;
+  return consultMedia.participants.some((participantId: string) => {
+    const participant = participants[participantId];
+    if (!participant) return false;
+
+    // Check for EP-DN participant types using the type field
+    return (
+      participant.type === DestinationAgentType.EP_DN ||
+      participant.type === DestinationAgentType.EPDN ||
+      participant.type === DestinationAgentType.ENTRY_POINT ||
+      participant.type === DestinationAgentType.EP
+    );
+  });
 }
 
 export function findHoldTimestamp(interaction: Interaction, mType = 'mainCall'): number | null {
@@ -77,7 +110,7 @@ export function getDeclineButtonVisibility(isBrowser: boolean, webRtcEnabled: bo
 }
 
 /**
- * Get visibility for End button
+ * Get visibility for End button (matches Agent Desktop behavior)
  */
 export function getEndButtonVisibility(
   isBrowser: boolean,
@@ -86,12 +119,27 @@ export function getEndButtonVisibility(
   isConsultInitiatedOrAcceptedOrBeingConsulted: boolean,
   isConferenceInProgress: boolean,
   isConsultCompleted: boolean,
-  isHeld: boolean
+  isHeld: boolean,
+  consultCallHeld: boolean,
+  task?: ITask,
+  agentId?: string
 ): Visibility {
   const isVisible = isBrowser || (isEndCallEnabled && isCall) || !isCall;
-  // Disable if: held (except when in conference and consult not completed) OR consult in progress
+  const isEpDnConsult = task && agentId ? isConsultingWithEpDnAgent(task) : false;
+
+  if (isConsultInitiatedOrAcceptedOrBeingConsulted) {
+    let isEnabled = false;
+    if (isEpDnConsult) {
+      // EP-DN consult: enabled when on main call OR during conference when main not held
+      isEnabled = consultCallHeld || (!isHeld && isConferenceInProgress && !isConsultCompleted);
+    }
+    return {isVisible, isEnabled};
+  }
+
+  // Default logic for other states
   const isEnabled =
-    (!isHeld || (isConferenceInProgress && !isConsultCompleted)) && !isConsultInitiatedOrAcceptedOrBeingConsulted;
+    (!isHeld || (isConferenceInProgress && !isConsultCompleted)) &&
+    (!isConsultInitiatedOrAcceptedOrBeingConsulted || consultCallHeld);
 
   return {isVisible, isEnabled};
 }
@@ -441,7 +489,10 @@ export function getControlsVisibility(
         isConsultInitiatedOrAcceptedOrBeingConsulted,
         isConferenceInProgress,
         isConsultCompleted,
-        isHeld
+        isHeld,
+        consultCallHeld,
+        task,
+        agentId
       ),
       muteUnmute: getMuteUnmuteButtonVisibility(isBrowser, webRtcEnabled, isCall, isBeingConsulted),
       holdResume: getHoldResumeButtonVisibility(

@@ -6,7 +6,15 @@ export const OutdialStrings = {
   DN_PLACEHOLDER: 'Enter number to dial',
   INCORRECT_DN_FORMAT: 'Incorrect format.',
   OUTDIAL_CALL: 'Outdial Call',
+  ADDRESS_BOOK_SEARCH_PLACEHOLDER: 'Search by Name/Number',
+  ADDRESS_BOOK_NO_RESULTS: 'No address book entries found.',
+  TAB_ADDRESS_BOOK: 'Address Book',
+  TAB_DIALPAD: 'Dialpad',
 };
 
 // Utility Constants
 export const KEY_LIST = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '*', '0', '#'];
+export const TABS = {
+  DIAL_PAD: 'dial_pad',
+  ADDRESS_BOOK: 'address_book',
+};

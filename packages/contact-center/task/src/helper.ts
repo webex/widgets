@@ -1,6 +1,13 @@
-import {useEffect, useCallback, useState, useRef, useMemo} from 'react';
-import {ITask} from '@webex/contact-center';
-import {useCallControlProps, UseTaskListProps, UseTaskProps, useOutdialCallProps} from './task.types';
+import {useEffect, useCallback, useState, useMemo} from 'react';
+import {AddressBookEntriesResponse, AddressBookEntrySearchParams, ITask} from '@webex/contact-center';
+import {
+  useCallControlProps,
+  UseTaskListProps,
+  UseTaskProps,
+  useOutdialCallProps,
+  TargetType,
+  TARGET_TYPE,
+} from './task.types';
 import store, {
   TASK_EVENTS,
   BuddyDetails,
@@ -11,7 +18,10 @@ import store, {
   findMediaResourceId,
   MEDIA_TYPE_TELEPHONY_LOWER,
 } from '@webex/cc-store';
-import {findHoldTimestamp, getControlsVisibility} from './Utils/task-util';
+import {getControlsVisibility} from './Utils/task-util';
+import {TIMER_LABEL_CONSULTING} from './Utils/constants';
+import {calculateStateTimerData, calculateConsultTimerData} from './Utils/timer-utils';
+import {useHoldTimer} from './Utils/useHoldTimer';
 import {OutdialAniEntriesResponse} from '@webex/contact-center/dist/types/services/config/types';
 
 const ENGAGED_LABEL = 'ENGAGED';
@@ -288,77 +298,23 @@ export const useCallControl = (props: useCallControlProps) => {
   } = props;
   const [isRecording, setIsRecording] = useState(true);
   const [buddyAgents, setBuddyAgents] = useState<BuddyDetails[]>([]);
+  const [loadingBuddyAgents, setLoadingBuddyAgents] = useState(false);
   const [consultAgentName, setConsultAgentName] = useState<string>('Consult Agent');
-  const [holdTime, setHoldTime] = useState(0);
   const [startTimestamp, setStartTimestamp] = useState<number>(0);
   const [secondsUntilAutoWrapup, setsecondsUntilAutoWrapup] = useState<number | null>(null);
-  const workerRef = useRef<Worker | null>(null);
-  const [lastTargetType, setLastTargetType] = useState<'agent' | 'queue'>('agent');
+
+  // State timer labels and timestamps
+  const [stateTimerLabel, setStateTimerLabel] = useState<string | null>(null);
+  const [stateTimerTimestamp, setStateTimerTimestamp] = useState<number>(0);
+
+  // Consult timer labels and timestamps
+  const [consultTimerLabel, setConsultTimerLabel] = useState<string>(TIMER_LABEL_CONSULTING);
+  const [consultTimerTimestamp, setConsultTimerTimestamp] = useState<number>(0);
+  const [lastTargetType, setLastTargetType] = useState<TargetType>(TARGET_TYPE.AGENT);
   const [conferenceParticipants, setConferenceParticipants] = useState<Participant[]>([]);
 
-  const workerScript = `
-    let intervalId = null;
-    self.onmessage = function(e) {
-      if (e.data.type === 'start') {
-        const eventTime = e.data.eventTime;
-        if (intervalId) clearInterval(intervalId);
-        intervalId = setInterval(() => {
-          const elapsed = Math.floor((Date.now() - eventTime) / 1000);
-          self.postMessage({ type: 'elapsedTime', elapsed });
-        }, 1000);
-      }
-      if (e.data.type === 'stop') {
-        if (intervalId) clearInterval(intervalId);
-        intervalId = null;
-      }
-    };
-  `;
-
-  useEffect(() => {
-    // Clean up previous worker if any
-    if (workerRef.current) {
-      if (typeof workerRef.current.postMessage === 'function') {
-        workerRef.current.postMessage({type: 'stop'});
-      }
-      if (typeof workerRef.current.terminate === 'function') {
-        workerRef.current.terminate();
-      }
-      workerRef.current = null;
-    }
-
-    // Get holdTimestamp from the interaction object
-    const holdTimestamp = currentTask?.data?.interaction
-      ? findHoldTimestamp(currentTask.data.interaction, 'mainCall')
-      : null;
-
-    if (holdTimestamp) {
-      const holdTimeMs = holdTimestamp < 10000000000 ? holdTimestamp * 1000 : holdTimestamp;
-      const blob = new Blob([workerScript], {type: 'application/javascript'});
-      const workerUrl = URL.createObjectURL(blob);
-      workerRef.current = new Worker(workerUrl);
-
-      // Set initial holdTime immediately for instant UI update
-      setHoldTime(Math.floor((Date.now() - holdTimeMs) / 1000));
-
-      workerRef.current.onmessage = (e) => {
-        if (e.data.type === 'elapsedTime') setHoldTime(e.data.elapsed);
-        if (e.data.type === 'stop') setHoldTime(0);
-      };
-
-      workerRef.current.postMessage({type: 'start', eventTime: holdTimeMs});
-    } else {
-      setHoldTime(0);
-    }
-
-    // Cleanup on unmount or when dependencies change
-    return () => {
-      if (workerRef.current) {
-        workerRef.current.postMessage({type: 'stop'});
-        workerRef.current.terminate();
-        workerRef.current = null;
-      }
-    };
-  }, [currentTask]);
+  // Use custom hook for hold timer management
+  const holdTime = useHoldTimer(currentTask);
 
   useEffect(() => {
     if (currentTask && store?.cc?.agentConfig?.agentId) {
@@ -374,21 +330,111 @@ export const useCallControl = (props: useCallControlProps) => {
       const {interaction} = currentTask.data;
       const myAgentId = store.cc.agentConfig?.agentId;
 
-      // Find all agent participants except the current agent
-      const otherAgents = Object.values(interaction.participants || {}).filter(
-        (participant): participant is Participant =>
-          (participant as Participant).pType === 'Agent' && (participant as Participant).id !== myAgentId
-      );
+      // For Entry Point or Dial Number consults, check if destination agent has joined
+      if (lastTargetType === TARGET_TYPE.ENTRY_POINT || lastTargetType === TARGET_TYPE.DIAL_NUMBER) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const consultDestinationAgentName = (interaction as any).callProcessingDetails?.consultDestinationAgentName;
 
-      // Pick the first other agent (should only be one in a consult)
-      const foundAgent = otherAgents.length > 0 ? {id: otherAgents[0].id, name: otherAgents[0].name} : null;
+        if (consultDestinationAgentName) {
+          // Destination agent has joined, show their name
+          setConsultAgentName(consultDestinationAgentName);
+          logger.info(`${lastTargetType} consult answered - showing agent name: ${consultDestinationAgentName}`, {
+            module: 'widget-cc-task#helper.ts',
+            method: 'useCallControl#extractConsultingAgent',
+          });
+        } else {
+          // Still ringing - find the EP/DN participant in the consult media
+          const consultMediaResourceId = findMediaResourceId(currentTask, 'consult');
 
-      if (foundAgent) {
-        setConsultAgentName(foundAgent.name);
-        logger.info(`Consulting agent detected: ${foundAgent.name} ${foundAgent.id}`, {
-          module: 'widget-cc-task#helper.ts',
-          method: 'useCallControl#extractConsultingAgent',
+          if (consultMediaResourceId && interaction.media?.[consultMediaResourceId]) {
+            const consultMedia = interaction.media[consultMediaResourceId];
+            // Find the participant in consult media who is not the current agent
+            const consultParticipantId = consultMedia.participants?.find(
+              (participantId: string) => participantId !== myAgentId
+            );
+
+            if (consultParticipantId && interaction.participants[consultParticipantId]) {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const participant = interaction.participants[consultParticipantId] as any;
+              const phoneNumber = participant.dn || participant.id;
+
+              if (phoneNumber && phoneNumber !== consultAgentName) {
+                setConsultAgentName(phoneNumber);
+                logger.info(`${lastTargetType} consult ringing - showing phone number: ${phoneNumber}`, {
+                  module: 'widget-cc-task#helper.ts',
+                  method: 'useCallControl#extractConsultingAgent',
+                });
+              }
+            }
+          }
+        }
+        return;
+      }
+
+      // For regular agent consults, find the agent in the consult media
+      const consultMediaResourceId = findMediaResourceId(currentTask, 'consult');
+
+      if (consultMediaResourceId && interaction.media?.[consultMediaResourceId]) {
+        const consultMedia = interaction.media[consultMediaResourceId];
+        // Find the agent participant in consult media who is not the current agent
+        const consultParticipantId = consultMedia.participants?.find((participantId: string) => {
+          const participant = interaction.participants[participantId];
+          return participant && participant.id !== myAgentId && participant.pType === 'Agent';
         });
+
+        if (consultParticipantId && interaction.participants[consultParticipantId]) {
+          const consultAgent = interaction.participants[consultParticipantId];
+          setConsultAgentName(consultAgent.name || consultAgent.id);
+          logger.info(`Consulting agent detected: ${consultAgent.name} ${consultAgent.id}`, {
+            module: 'widget-cc-task#helper.ts',
+            method: 'useCallControl#extractConsultingAgent',
+          });
+        }
+      } else {
+        // Fallback: Use old logic if consult media not found
+        const otherAgents = Object.values(interaction.participants || {}).filter(
+          (participant): participant is Participant =>
+            (participant as Participant).pType === 'Agent' && (participant as Participant).id !== myAgentId
+        );
+
+        // In a conference with multiple agents, find the agent currently being consulted
+        // Priority: 1) consultState="consulting" 2) most recent consultTimestamp
+        let foundAgent: {id: string; name: string} | null = null;
+
+        if (otherAgents.length > 0) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const consultingAgent = otherAgents.find((agent: any) => agent.consultState === 'consulting');
+
+          if (consultingAgent) {
+            foundAgent = {
+              id: consultingAgent.id,
+              name: consultingAgent.name,
+            };
+          } else {
+            // Fallback: Find agent with most recent consultTimestamp
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const agentWithMostRecentTimestamp = otherAgents.reduce((latest: any, current: any) => {
+              const currentTimestamp = current.consultTimestamp || current.joinTimestamp || 0;
+              const latestTimestamp = latest ? latest.consultTimestamp || latest.joinTimestamp || 0 : 0;
+              return currentTimestamp >= latestTimestamp ? current : latest;
+            }, null);
+
+            if (agentWithMostRecentTimestamp) {
+              foundAgent = {
+                id: agentWithMostRecentTimestamp.id,
+                name: agentWithMostRecentTimestamp.name,
+              };
+            }
+          }
+        }
+
+        if (foundAgent) {
+          setConsultAgentName(foundAgent.name);
+          logger.info(`Consulting agent detected (fallback): ${foundAgent.name} ${foundAgent.id}`, {
+            module: 'widget-cc-task#helper.ts',
+            method: 'useCallControl#extractConsultingAgent',
+          });
+        }
       }
     } catch (error) {
       console.log('error', error);
@@ -397,22 +443,31 @@ export const useCallControl = (props: useCallControlProps) => {
         method: 'extractConsultingAgent',
       });
     }
-  }, [currentTask, logger]);
+  }, [currentTask, logger, lastTargetType, consultAgentName, setConsultAgentName]);
 
-  // Check for consulting agent whenever currentTask changes
+  // Extract main call timestamp whenever currentTask changes
   useEffect(() => {
     extractConsultingAgent();
-    if (
-      currentTask?.data?.interaction?.participants &&
-      store?.cc?.agentConfig?.agentId &&
-      currentTask.data.interaction.participants[store.cc.agentConfig.agentId]?.joinTimestamp
-    ) {
-      setStartTimestamp(currentTask.data.interaction.participants[store.cc.agentConfig.agentId].joinTimestamp);
+
+    if (!currentTask?.data?.interaction?.participants || !agentId) {
+      return;
     }
-  }, [currentTask, extractConsultingAgent]);
+
+    const participant = currentTask.data.interaction.participants[agentId];
+
+    if (!participant) {
+      return;
+    }
+
+    // Main call timer - use joinTimestamp
+    if (participant.joinTimestamp) {
+      setStartTimestamp(participant.joinTimestamp);
+    }
+  }, [currentTask, agentId, extractConsultingAgent]);
 
   const loadBuddyAgents = useCallback(async () => {
     try {
+      setLoadingBuddyAgents(true);
       const agents = await store.getBuddyAgents();
       logger.info(`Loaded ${agents.length} buddy agents`, {module: 'helper.ts', method: 'loadBuddyAgents'});
       setBuddyAgents(agents);
@@ -422,6 +477,8 @@ export const useCallControl = (props: useCallControlProps) => {
         method: 'loadBuddyAgents',
       });
       setBuddyAgents([]);
+    } finally {
+      setLoadingBuddyAgents(false);
     }
   }, [logger]);
 
@@ -911,6 +968,21 @@ export const useCallControl = (props: useCallControlProps) => {
     };
   }, [currentTask?.autoWrapup, controlVisibility?.wrapup]);
 
+  // Calculate state timer label and timestamp using utils
+  // Priority: Wrap Up > Post Call
+  useEffect(() => {
+    const stateTimerData = calculateStateTimerData(currentTask, controlVisibility, agentId);
+    setStateTimerLabel(stateTimerData.label);
+    setStateTimerTimestamp(stateTimerData.timestamp);
+  }, [currentTask, controlVisibility, agentId]);
+
+  // Calculate consult timer label and timestamp using utils
+  useEffect(() => {
+    const consultTimerData = calculateConsultTimerData(currentTask, controlVisibility, agentId);
+    setConsultTimerLabel(consultTimerData.label);
+    setConsultTimerTimestamp(consultTimerData.timestamp);
+  }, [currentTask, controlVisibility, agentId]);
+
   return {
     currentTask,
     endCall,
@@ -922,6 +994,7 @@ export const useCallControl = (props: useCallControlProps) => {
     isRecording,
     setIsRecording,
     buddyAgents,
+    loadingBuddyAgents,
     loadBuddyAgents,
     transferCall,
     consultCall,
@@ -935,6 +1008,10 @@ export const useCallControl = (props: useCallControlProps) => {
     setConsultAgentName,
     holdTime,
     startTimestamp,
+    stateTimerLabel,
+    stateTimerTimestamp,
+    consultTimerLabel,
+    consultTimerTimestamp,
     lastTargetType,
     setLastTargetType,
     controlVisibility,
@@ -1025,9 +1102,24 @@ export const useOutdialCall = (props: useOutdialCallProps) => {
     }
   };
 
+  const getAddressBookEntries = async (params: AddressBookEntrySearchParams): Promise<AddressBookEntriesResponse> => {
+    try {
+      const result = await cc.addressBook.getEntries(params);
+      return result;
+    } catch (error) {
+      logger.error(`CC-Widgets: Task: Error fetching address book entries: ${error}`, {
+        module: 'useOutdialCall',
+        method: 'getAddressBookEntries',
+      });
+
+      throw error;
+    }
+  };
+
   return {
     startOutdial,
     getOutdialANIEntries,
+    getAddressBookEntries,
     isTelephonyTaskActive,
   };
 };

@@ -19,6 +19,7 @@ dotenv.config();
 export const changeUserState = async (page: Page, userState: string): Promise<void> => {
   // Get the current state name with timeout, return early if not found
   try {
+    await page.bringToFront();
     const currentState = await page
       .getByTestId('state-select')
       .getByTestId('state-name')
@@ -40,7 +41,7 @@ export const changeUserState = async (page: Page, userState: string): Promise<vo
   }
 
   await stateItem.click({timeout: AWAIT_TIMEOUT});
-  await page.waitForTimeout(1000);
+  await page.waitForTimeout(3000);
 };
 
 /**
@@ -54,6 +55,7 @@ export const changeUserState = async (page: Page, userState: string): Promise<vo
  * ```
  */
 export const getCurrentState = async (page: Page): Promise<string> => {
+  await page.bringToFront();
   const stateName = await page
     .getByTestId('state-select')
     .getByTestId('state-name')
@@ -74,6 +76,7 @@ export const getCurrentState = async (page: Page): Promise<string> => {
  * ```
  */
 export const verifyCurrentState = async (page: Page, expectedState: string): Promise<void> => {
+  await page.bringToFront();
   const currentState = await getCurrentState(page);
   if (currentState !== expectedState) {
     throw new Error(`Expected state "${expectedState}" but found "${currentState}".`);
@@ -93,6 +96,7 @@ export const verifyCurrentState = async (page: Page, expectedState: string): Pro
  * ```
  */
 export const getStateElapsedTime = async (page: Page): Promise<string> => {
+  await page.bringToFront();
   // Directly select the timer by its test id
   const timerText = await page.getByTestId('elapsed-time').innerText({timeout: AWAIT_TIMEOUT});
   return timerText.trim();
