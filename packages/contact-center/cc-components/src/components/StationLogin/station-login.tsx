@@ -60,6 +60,14 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
   const [dnErrorText, setDNErrorText] = useState<string>('');
   const {multiSignInModalRef, ccSignOutModalRef, saveConfirmDialogRef} = createStationLoginRefs(logger);
 
+  // Disable phone number input if device type and team haven't changed in profile mode
+  const isPhoneNumberDisabled =
+    profileMode &&
+    isAgentLoggedIn &&
+    selectedDeviceType !== DESKTOP &&
+    selectedDeviceType === originalLoginOptions.deviceType &&
+    selectedTeamId === originalLoginOptions.teamId;
+
   // Filter out Desktop mode if hideDesktopLogin is true
   const filteredLoginOptions = hideDesktopLogin ? loginOptions.filter((option) => option !== DESKTOP) : loginOptions;
 
@@ -255,6 +263,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
               label={dialNumberLabel}
               placeholder={dialNumberPlaceholder}
               value={dialNumberValue}
+              disabled={isPhoneNumberDisabled}
               onInput={(event) => {
                 handleDNInputChanged(
                   event,

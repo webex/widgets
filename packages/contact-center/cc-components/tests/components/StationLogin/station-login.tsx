@@ -919,4 +919,260 @@ describe('Station Login Component', () => {
       global.RegExp = originalRegExp;
     });
   });
+
+  describe('Phone Number Input Disable Logic in Profile Mode', () => {
+    it('should disable phone number input when device type has not changed in profile mode', async () => {
+      const profileModeProps = {
+        ...props,
+        profileMode: true,
+        isAgentLoggedIn: true,
+        selectedDeviceType: 'AGENT_DN',
+        dialNumberValue: '1234567890',
+        originalLoginOptions: {
+          deviceType: 'AGENT_DN',
+          dialNumber: '1234567890',
+          teamId: 'team123',
+        },
+        currentLoginOptions: {
+          deviceType: 'AGENT_DN',
+          dialNumber: '1234567890',
+          teamId: 'team123',
+        },
+      };
+
+      const screen = await render(<StationLoginComponent {...profileModeProps} />);
+      const numberInput = screen.getByTestId('dial-number-input');
+
+      expect(numberInput).toHaveAttribute('disabled');
+    });
+
+    it('should enable phone number input when device type changes from DN to Extension in profile mode', async () => {
+      const profileModeProps = {
+        ...props,
+        profileMode: true,
+        isAgentLoggedIn: true,
+        selectedDeviceType: 'EXTENSION',
+        dialNumberValue: '',
+        originalLoginOptions: {
+          deviceType: 'AGENT_DN',
+          dialNumber: '1234567890',
+          teamId: 'team123',
+        },
+        currentLoginOptions: {
+          deviceType: 'EXTENSION',
+          dialNumber: '',
+          teamId: 'team123',
+        },
+      };
+
+      const screen = await render(<StationLoginComponent {...profileModeProps} />);
+      const numberInput = screen.getByTestId('dial-number-input');
+
+      expect(numberInput).not.toHaveAttribute('disabled');
+    });
+
+    it('should enable phone number input when device type changes from Extension to DN in profile mode', async () => {
+      const profileModeProps = {
+        ...props,
+        profileMode: true,
+        isAgentLoggedIn: true,
+        selectedDeviceType: 'AGENT_DN',
+        dialNumberValue: '',
+        originalLoginOptions: {
+          deviceType: 'EXTENSION',
+          dialNumber: '5678',
+          teamId: 'team123',
+        },
+        currentLoginOptions: {
+          deviceType: 'AGENT_DN',
+          dialNumber: '',
+          teamId: 'team123',
+        },
+      };
+
+      const screen = await render(<StationLoginComponent {...profileModeProps} />);
+      const numberInput = screen.getByTestId('dial-number-input');
+
+      expect(numberInput).not.toHaveAttribute('disabled');
+    });
+
+    it('should disable phone number input when device type remains Extension in profile mode', async () => {
+      const profileModeProps = {
+        ...props,
+        profileMode: true,
+        isAgentLoggedIn: true,
+        selectedDeviceType: 'EXTENSION',
+        dialNumberValue: '5678',
+        originalLoginOptions: {
+          deviceType: 'EXTENSION',
+          dialNumber: '5678',
+          teamId: 'team123',
+        },
+        currentLoginOptions: {
+          deviceType: 'EXTENSION',
+          dialNumber: '5678',
+          teamId: 'team123',
+        },
+      };
+
+      const screen = await render(<StationLoginComponent {...profileModeProps} />);
+      const numberInput = screen.getByTestId('dial-number-input');
+
+      expect(numberInput).toHaveAttribute('disabled');
+    });
+
+    it('should enable phone number input in login mode (not profile mode)', async () => {
+      const loginModeProps = {
+        ...props,
+        profileMode: false,
+        isAgentLoggedIn: false,
+        selectedDeviceType: 'AGENT_DN',
+        dialNumberValue: '',
+        originalLoginOptions: {
+          deviceType: 'AGENT_DN',
+          dialNumber: '1234567890',
+          teamId: 'team123',
+        },
+        currentLoginOptions: {
+          deviceType: 'AGENT_DN',
+          dialNumber: '',
+          teamId: 'team123',
+        },
+      };
+
+      const screen = await render(<StationLoginComponent {...loginModeProps} />);
+      const numberInput = screen.getByTestId('dial-number-input');
+
+      expect(numberInput).not.toHaveAttribute('disabled');
+    });
+
+    it('should not render phone number input when device type is DESKTOP', async () => {
+      const desktopProps = {
+        ...props,
+        profileMode: true,
+        isAgentLoggedIn: true,
+        selectedDeviceType: 'BROWSER',
+        dialNumberValue: '',
+        originalLoginOptions: {
+          deviceType: 'BROWSER',
+          dialNumber: '',
+          teamId: 'team123',
+        },
+        currentLoginOptions: {
+          deviceType: 'BROWSER',
+          dialNumber: '',
+          teamId: 'team123',
+        },
+      };
+
+      const screen = await render(<StationLoginComponent {...desktopProps} />);
+      const numberInput = screen.queryByTestId('dial-number-input');
+
+      expect(numberInput).not.toBeInTheDocument();
+    });
+
+    it('should enable phone number input when team changes but device type remains the same (DN)', async () => {
+      const teamChangedProps = {
+        ...props,
+        profileMode: true,
+        isAgentLoggedIn: true,
+        selectedDeviceType: 'AGENT_DN',
+        selectedTeamId: 'team456',
+        dialNumberValue: '1234567890',
+        originalLoginOptions: {
+          deviceType: 'AGENT_DN',
+          dialNumber: '1234567890',
+          teamId: 'team123',
+        },
+        currentLoginOptions: {
+          deviceType: 'AGENT_DN',
+          dialNumber: '1234567890',
+          teamId: 'team456',
+        },
+      };
+
+      const screen = await render(<StationLoginComponent {...teamChangedProps} />);
+      const numberInput = screen.getByTestId('dial-number-input');
+
+      expect(numberInput).not.toHaveAttribute('disabled');
+    });
+
+    it('should enable phone number input when team changes but device type remains the same (Extension)', async () => {
+      const teamChangedProps = {
+        ...props,
+        profileMode: true,
+        isAgentLoggedIn: true,
+        selectedDeviceType: 'EXTENSION',
+        selectedTeamId: 'team456',
+        dialNumberValue: '5678',
+        originalLoginOptions: {
+          deviceType: 'EXTENSION',
+          dialNumber: '5678',
+          teamId: 'team123',
+        },
+        currentLoginOptions: {
+          deviceType: 'EXTENSION',
+          dialNumber: '5678',
+          teamId: 'team456',
+        },
+      };
+
+      const screen = await render(<StationLoginComponent {...teamChangedProps} />);
+      const numberInput = screen.getByTestId('dial-number-input');
+
+      expect(numberInput).not.toHaveAttribute('disabled');
+    });
+
+    it('should disable phone number input only when both device type and team remain unchanged', async () => {
+      const noChangesProps = {
+        ...props,
+        profileMode: true,
+        isAgentLoggedIn: true,
+        selectedDeviceType: 'AGENT_DN',
+        selectedTeamId: 'team123',
+        dialNumberValue: '1234567890',
+        originalLoginOptions: {
+          deviceType: 'AGENT_DN',
+          dialNumber: '1234567890',
+          teamId: 'team123',
+        },
+        currentLoginOptions: {
+          deviceType: 'AGENT_DN',
+          dialNumber: '1234567890',
+          teamId: 'team123',
+        },
+      };
+
+      const screen = await render(<StationLoginComponent {...noChangesProps} />);
+      const numberInput = screen.getByTestId('dial-number-input');
+
+      expect(numberInput).toHaveAttribute('disabled');
+    });
+
+    it('should enable phone number input when both device type and team change', async () => {
+      const bothChangedProps = {
+        ...props,
+        profileMode: true,
+        isAgentLoggedIn: true,
+        selectedDeviceType: 'EXTENSION',
+        selectedTeamId: 'team456',
+        dialNumberValue: '',
+        originalLoginOptions: {
+          deviceType: 'AGENT_DN',
+          dialNumber: '1234567890',
+          teamId: 'team123',
+        },
+        currentLoginOptions: {
+          deviceType: 'EXTENSION',
+          dialNumber: '',
+          teamId: 'team456',
+        },
+      };
+
+      const screen = await render(<StationLoginComponent {...bothChangedProps} />);
+      const numberInput = screen.getByTestId('dial-number-input');
+
+      expect(numberInput).not.toHaveAttribute('disabled');
+    });
+  });
 });

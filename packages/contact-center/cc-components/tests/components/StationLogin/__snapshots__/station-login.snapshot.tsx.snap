@@ -244,6 +244,7 @@ exports[`Station Login Component Actions ProfileMode interaction confirmation Po
       </div>
       <mdc-input
         data-testid="dial-number-input"
+        disabled=""
         label=""
         name=""
         value=""
@@ -547,6 +548,7 @@ exports[`Station Login Component Actions ProfileMode interaction confirmation Po
       </div>
       <mdc-input
         data-testid="dial-number-input"
+        disabled=""
         label=""
         name=""
         value=""
@@ -3335,6 +3337,7 @@ exports[`Station Login Component Rendering hides Desktop login option in profile
       </div>
       <mdc-input
         data-testid="dial-number-input"
+        disabled=""
         label=""
         name=""
         value=""
@@ -4924,6 +4927,7 @@ exports[`Station Login Component Rendering renders the component correctly in pr
       </div>
       <mdc-input
         data-testid="dial-number-input"
+        disabled=""
         label=""
         name=""
         value=""
