@@ -29,7 +29,7 @@ The store enables Contact Center widgets to:
 - **Data-fetching helpers** - Async methods that fetch domain data from SDK APIs (buddy agents, queues, entry points, address book, access token)
 - **State management methods** - Setters and mutators for store observables (device type, dial number, team ID, current task, etc.)
 - **Error propagation** via `setOnError`
-- **Feature flags** parsing from SDK profile
+- **Feature flags** parsing from Agent's profile received from SDK
 
 ---
 
