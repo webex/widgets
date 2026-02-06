@@ -16,9 +16,8 @@ CC Widgets is an aggregator package that bundles all contact center widgets and 
 
 CC Widgets serves as the main entry point for contact center widgets. It:
 
-- **Eliminates dependency complexity** - Install one package (`@webex/cc-widgets`) instead of multiple widget packages (`@webex/cc-station-login`, `@webex/cc-user-state`, `@webex/cc-task`, etc.)
+- **Single package, no dependency sprawl** - Install one package (`@webex/cc-widgets`) instead of multiple widget packages; no need to track versions, peer dependencies, or compatibility across `@webex/cc-station-login`, `@webex/cc-user-state`, `@webex/cc-task`, etc.
 - **Provides complete widget suite** - All widgets (StationLogin, UserState, TaskList, CallControl, OutdialCall, etc.) are bundled and ready to use
-- **Simplifies dependency management** - No need to track versions, peer dependencies, or compatibility across individual widget packages
 - **Delivers production-ready bundles** - Pre-built, optimized webpack bundles with all dependencies included
 - **Reduces integration effort** - One installation, one import, immediate access to all widgets
 
