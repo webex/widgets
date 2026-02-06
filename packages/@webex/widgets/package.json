@@ -92,7 +92,6 @@
     "husky": "^4.2.3",
     "mini-css-extract-plugin": "^2.10.0",
     "os-browserify": "^0.3.0",
-    "postcss": "^8.2.13",
     "prettier": "^1.19.1",
     "prop-types": "^15.7.2",
     "querystring-es3": "^0.2.1",
