@@ -16,11 +16,10 @@ const { entry, ...baseConfig } = baseConfigOriginal;
 const outputConfig = {
   dist: {
     path: path.resolve(__dirname, './dist'),
-    filename: 'webexWidgets.esm.js',
+    filename: 'webexWidgets.mjs',
     library: {
       type: 'module',
     },
-    chunkFormat: 'module',
   },
   demo: {
     path: path.resolve(__dirname, './docs'),
@@ -49,12 +48,13 @@ module.exports = function(env, argv) {
     devtool: mode === 'production' ? 'source-map' : 'inline-source-map',
 
 
-    externals: isDemo ? {} : {
-      'prop-types': 'PropTypes',
-      react: 'React',
-      'react-dom': 'ReactDOM',
-      webex: 'webex',
-      '@webex/common': '@webex/common',},
+    externals: isDemo ? {} : [
+        'prop-types',
+        'react',
+        'react-dom',
+        'webex',
+        '@webex/common',
+      ],
 
     // // CSS minimization for dist builds
     optimization: isDist ? {
