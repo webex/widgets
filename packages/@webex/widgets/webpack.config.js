@@ -11,7 +11,7 @@ const baseConfigOriginal = require('../../../webpack.config');
 
 const resolveMonorepoRoot = (...segments) => path.resolve(__dirname, '../../../', ...segments);
 
-const { entry, ...baseConfig } = baseConfigOriginal;
+const {entry, ...baseConfig} = baseConfigOriginal;
 
 const outputConfig = {
   dist: {
@@ -24,7 +24,7 @@ const outputConfig = {
   demo: {
     path: path.resolve(__dirname, './docs'),
     filename: 'demo.bundle.[contenthash].js',
-  }
+  },
 };
 
 module.exports = function(env, argv) {
@@ -41,28 +41,25 @@ module.exports = function(env, argv) {
     output: mode === 'development' ? undefined : outputConfig[buildType],
 
     // Enable ESM output
-    experiments: isDist ? {
-      outputModule: true,
-    } : {},
+    experiments: isDist
+      ? {
+          outputModule: true,
+        }
+      : {},
 
     devtool: mode === 'production' ? 'source-map' : 'inline-source-map',
 
-
-    externals: isDemo ? {} : [
-        'prop-types',
-        'react',
-        'react-dom',
-        'webex',
-        '@webex/common',
-      ],
+    externals: isDemo ? {} : ['prop-types', 'react', 'react-dom', 'webex', '@webex/common'],
 
     // // CSS minimization for dist builds
-    optimization: isDist ? {
-      minimizer: [
-        `...`,  // Keep default JS minimizer
-        new CssMinimizerPlugin(),
-      ],
-    } : {},
+    optimization: isDist
+      ? {
+          minimizer: [
+            `...`, // Keep default JS minimizer
+            new CssMinimizerPlugin(),
+          ],
+        }
+      : {},
     module: {
       rules: [
         {
@@ -74,10 +71,7 @@ module.exports = function(env, argv) {
         },
         {
           test: /\.css$/,
-          use: [
-            isDemo ? 'style-loader' : MiniCssExtractPlugin.loader,
-            'css-loader'
-          ],
+          use: [isDemo ? 'style-loader' : MiniCssExtractPlugin.loader, 'css-loader'],
           include: [
             resolveMonorepoRoot('node_modules/@momentum-ui'),
             resolveMonorepoRoot('node_modules/@webex/components'),
@@ -86,14 +80,8 @@ module.exports = function(env, argv) {
         },
         {
           test: /\.scss$/,
-          use: [
-            isDemo ? 'style-loader' : MiniCssExtractPlugin.loader,
-            'css-loader',
-            'sass-loader'
-          ],
-          include: [
-            path.resolve(__dirname, 'packages'),
-          ],
+          use: [isDemo ? 'style-loader' : MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'],
+          include: [path.resolve(__dirname, 'packages')],
         },
         {
           test: /\.html$/,
@@ -120,37 +108,39 @@ module.exports = function(env, argv) {
     devServer:
       argv.mode === 'development'
         ? {
-          static: {
-            directory: path.resolve(__dirname, './demo'),
-          },
-          open: true,
-          hot: true,
-          port: 9000,
-          client: {
-            overlay: false,
-          },
-          server: {
-            type: 'https',
-          },
-        }
+            static: {
+              directory: path.resolve(__dirname, './demo'),
+            },
+            open: true,
+            hot: true,
+            port: 9000,
+            client: {
+              overlay: false,
+            },
+            server: {
+              type: 'https',
+            },
+          }
         : undefined,
     plugins: [
       new CleanWebpackPlugin(),
-      isDemo && new HtmlWebpackPlugin({
-        filename: 'index.html',
-        template: 'demo/index.html',
-        favicon: 'demo/webex-logo.png',
-      }),
+      isDemo &&
+        new HtmlWebpackPlugin({
+          filename: 'index.html',
+          template: 'demo/index.html',
+          favicon: 'demo/webex-logo.png',
+        }),
       isDemo && new webpack.HotModuleReplacementPlugin(),
-      !isDemo && new MiniCssExtractPlugin({
-        filename: 'css/webex-widgets.css',
-      }),
+      !isDemo &&
+        new MiniCssExtractPlugin({
+          filename: 'css/webex-widgets.css',
+        }),
       new webpack.DefinePlugin({
-        __appVersion__: JSON.stringify(version)
+        __appVersion__: JSON.stringify(version),
       }),
       new webpack.ProvidePlugin({
         Buffer: ['buffer', 'Buffer'],
       }),
-    ]}
-)
-  }
+    ],
+  });
+};
