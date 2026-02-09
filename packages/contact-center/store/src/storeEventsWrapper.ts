@@ -136,6 +136,18 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.isDeclineButtonEnabled;
   }
 
+  get isDigitalChannelsInitialized() {
+    return this.store.isDigitalChannelsInitialized;
+  }
+
+  get dataCenter() {
+    return this.store.dataCenter;
+  }
+
+  setDataCenter = (value: string): void => {
+    this.store.dataCenter = value;
+  };
+
   get currentConsultQueueId() {
     return this.store.currentConsultQueueId;
   }
@@ -159,6 +171,12 @@ class StoreWrapper implements IStoreWrapper {
   get isAddressBookEnabled() {
     return this.store.isAddressBookEnabled;
   }
+
+  setDigitalChannelsInitialized = (value: boolean): void => {
+    runInAction(() => {
+      this.store.isDigitalChannelsInitialized = value;
+    });
+  };
 
   setIsMuted = (value: boolean): void => {
     runInAction(() => {
@@ -384,7 +402,15 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   init(options: InitParams): Promise<void> {
-    return this.store.init(options, this.setupIncomingTaskHandler);
+    return this.store.init(options, this.setupIncomingTaskHandler).catch((error) => {
+      const err = error instanceof Error ? error : new Error(`Store initialization failed: ${String(error)}`);
+
+      if (this.onErrorCallback) {
+        this.onErrorCallback('Store', err);
+      }
+
+      throw err;
+    });
   }
 
   registerCC = (webex?: WithWebex['webex']) => {
@@ -743,6 +769,21 @@ class StoreWrapper implements IStoreWrapper {
     }
   };
 
+  getAccessToken = async (): Promise<string> => {
+    try {
+      // @ts-expect-error - webex credentials API not typed
+      const tokenInfo = await this.store.cc.webex.credentials.getUserToken();
+      return tokenInfo.access_token;
+    } catch (error) {
+      this.store.logger.error('CC-Widgets: getAccessToken(): failed to get access token', {
+        module: 'storeEventsWrapper.ts',
+        method: 'getAccessToken',
+        error,
+      });
+      throw error;
+    }
+  };
+
   cleanUpStore = () => {
     this.store.logger.info('CC-Widgets: cleanUpStore(): resetting store on logout', {
       module: 'storeEventsWrapper.ts',
@@ -759,6 +800,7 @@ class StoreWrapper implements IStoreWrapper {
       this.setShowMultipleLoginAlert(false);
       this.setConsultStartTimeStamp(undefined);
       this.setTeamId('');
+      this.setDigitalChannelsInitialized(false);
     });
   };
 
