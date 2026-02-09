@@ -1,0 +1,512 @@
+/*
+object-assign
+(c) Sindre Sorhus
+@license MIT
+*/
+
+/*!
+  	Copyright (c) 2018 Jed Watson.
+  	Licensed under the MIT License (MIT), see
+  	http://jedwatson.github.io/classnames
+  */
+
+/*!
+ * @overview es6-promise - a tiny implementation of Promises/A+.
+ * @copyright Copyright (c) 2014 Yehuda Katz, Tom Dale, Stefan Penner and contributors (Conversion to ES6 API by Jake Archibald)
+ * @license   Licensed under MIT license
+ *            See https://raw.githubusercontent.com/stefanpenner/es6-promise/master/LICENSE
+ * @version   v4.2.8+1e68dce6
+ */
+
+/*!
+ * Copyright (c) 2014, GMO GlobalSign
+ * Copyright (c) 2015-2022, Peculiar Ventures
+ * All rights reserved.
+ * 
+ * Author 2014-2019, Yury Strozhevsky
+ * 
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ * 
+ * * Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ * 
+ * * Redistributions in binary form must reproduce the above copyright notice, this
+ *   list of conditions and the following disclaimer in the documentation and/or
+ *   other materials provided with the distribution.
+ * 
+ * * Neither the name of the copyright holder nor the names of its
+ *   contributors may be used to endorse or promote products derived from
+ *   this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ */
+
+/*!
+ * Copyright (c) 2015-2017 Cisco Systems, Inc. See LICENSE file.
+ */
+
+/*!
+ * Copyright (c) 2015-2020 Cisco Systems, Inc. See LICENSE file.
+ */
+
+/*!
+ * The buffer module from node.js, for the browser.
+ *
+ * @author   Feross Aboukhadijeh <https://feross.org>
+ * @license  MIT
+ */
+
+/*!
+ * algorithms/aes-cbc-hmac-sha2.js - AES-CBC-HMAC-SHA2 Composited Encryption
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc.  See LICENSE file.
+ */
+
+/*!
+ * algorithms/aes-gcm.js - AES-GCM Encryption and Key-Wrapping
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc.  See LICENSE file.
+ */
+
+/*!
+ * algorithms/aes-kw.js - AES-KW Key-Wrapping
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc.  See LICENSE file.
+ */
+
+/*!
+ * algorithms/concat.js - Concat Key Derivation
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc.  See LICENSE file.
+ */
+
+/*!
+ * algorithms/constants.js - Constants used in Cryptographic Algorithms
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc.  See LICENSE file.
+ */
+
+/*!
+ * algorithms/dir.js - Direct key mode
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc.  See LICENSE file.
+ */
+
+/*!
+ * algorithms/ec-util.js - Elliptic Curve Utility Functions
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc.  See LICENSE file.
+ */
+
+/*!
+ * algorithms/ecdh.js - Elliptic Curve Diffie-Hellman algorithms
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc.  See LICENSE file.
+ */
+
+/*!
+ * algorithms/ecdsa.js - Elliptic Curve Digitial Signature Algorithms
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc.  See LICENSE file.
+ */
+
+/*!
+ * algorithms/helpers.js - Internal functions and fields used in Cryptographic
+ * Algorithms
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc.  See LICENSE file.
+ */
+
+/*!
+ * algorithms/hkdf.js - HMAC-based Extract-and-Expand Key Derivation
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc.  See LICENSE file.
+ */
+
+/*!
+ * algorithms/hmac.js - HMAC-based "signatures"
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc.  See LICENSE file.
+ */
+
+/*!
+ * algorithms/index.js - Cryptographic Algorithms Entry Point
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc.  See LICENSE file.
+ */
+
+/*!
+ * algorithms/pbes2.js - Password-Based Encryption (v2) Algorithms
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc.  See LICENSE file.
+ */
+
+/*!
+ * algorithms/rsa-util.js - RSA Utility Functions
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc.  See LICENSE file.
+ */
+
+/*!
+ * algorithms/rsaes.js - RSA Signatures
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc.  See LICENSE file.
+ */
+
+/*!
+ * algorithms/rsassa.js - RSA Signatures
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc.  See LICENSE file.
+ */
+
+/*!
+ * algorithms/sha.js - Cryptographic Secure Hash Algorithms, versions 1 and 2
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc.  See LICENSE file.
+ */
+
+/*!
+ * deps/ciphermodes/gcm/helpers.js - AES-GCM Helper Functions
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc.  See LICENSE file.
+ */
+
+/*!
+ * deps/ciphermodes/gcm/index.js - AES-GCM implementation Entry Point
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc.  See LICENSE file.
+ */
+
+/*!
+ * deps/ciphermodes/gcm/multipliers.js - AES-GCM Multipliers
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc.  See LICENSE file.
+ */
+
+/*!
+ * deps/ciphermodes/helpers.js - Cipher Helper Functions
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc.  See LICENSE file.
+ */
+
+/*!
+ * deps/ciphermodes/pack.js - Pack/Unpack Functions
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc.  See LICENSE file.
+ */
+
+/*!
+ * deps/forge.js - Forge Package Customization
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc.  See LICENSE file.
+ */
+
+/*!
+ * index.js - Main Entry Point
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc. See LICENSE file.
+ */
+
+/*!
+ * jwe/decrypt.js - Decrypt from a JWE
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc. See LICENSE file.
+ */
+
+/*!
+ * jwe/defaults.js - Defaults for JWEs
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc. See LICENSE file.
+ */
+
+/*!
+ * jwe/encrypt.js - Encrypt to a JWE
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc. See LICENSE file.
+ */
+
+/*!
+ * jwe/helpers.js - JWE Internal Helper Functions
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc. See LICENSE file.
+ */
+
+/*!
+ * jwe/index.js - JSON Web Encryption (JWE) Entry Point
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc. See LICENSE file.
+ */
+
+/*!
+ * jwk/basekey.js - JWK Key Base Class Implementation
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc. See LICENSE file.
+ */
+
+/*!
+ * jwk/constants.js - Constants for JWKs
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc. See LICENSE file.
+ */
+
+/*!
+ * jwk/helpers.js - JWK Internal Helper Functions and Constants
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc. See LICENSE file.
+ */
+
+/*!
+ * jwk/index.js - JSON Web Key (JWK) Entry Point
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc. See LICENSE file.
+ */
+
+/*!
+ * jwk/keystore.js - JWK KeyStore Implementation
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc. See LICENSE file.
+ */
+
+/*!
+ * jwk/octkey.js - Symmetric Octet Key Representation
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc. See LICENSE file.
+ */
+
+/*!
+ * jwk/rsa.js - RSA Key Representation
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc. See LICENSE file.
+ */
+
+/*!
+ * jws/defaults.js - Defaults for JWSs
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc. See LICENSE file.
+ */
+
+/*!
+ * jws/helpers.js - JWS Internal Helper Functions
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc. See LICENSE file.
+ */
+
+/*!
+ * jws/index.js - JSON Web Signature (JWS) Entry Point
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc. See LICENSE file.
+ */
+
+/*!
+ * jws/sign.js - Sign to JWS
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc. See LICENSE file.
+ */
+
+/*!
+ * jws/verify.js - Verifies from a JWS
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc. See LICENSE file.
+ */
+
+/*!
+ * parse/compact.js - JOSE Compact Serialization Parser
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc. See LICENSE file.
+ */
+
+/*!
+ * parse/compact.js - JOSE JSON Serialization Parser
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc. See LICENSE file.
+ */
+
+/*!
+ * parse/index.js - JOSE Parser Entry Point
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc. See LICENSE file.
+ */
+
+/*!
+ * urlsafe-base64
+ */
+
+/*!
+ * util/algconfig.js - Functions for managing algorithm set options
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc. See LICENSE file.
+ */
+
+/*!
+ * util/base64url.js - Implementation of web-safe Base64 Encoder/Decoder
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc. See LICENSE file.
+ */
+
+/*!
+ * util/databuffer.js - Forge-compatible Buffer based on Node.js Buffers
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc. See LICENSE file.
+ */
+
+/*!
+ * util/index.js - Utilities Entry Point
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc. See LICENSE file.
+ */
+
+/*!
+ * util/utf8.js - Implementation of UTF-8 Encoder/Decoder
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc. See LICENSE file.
+ */
+
+/*! *****************************************************************************
+Copyright (c) Microsoft Corporation.
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+PERFORMANCE OF THIS SOFTWARE.
+***************************************************************************** */
+
+/*! https://mths.be/punycode v1.4.1 by @mathias */
+
+/*! ieee754. BSD-3-Clause License. Feross Aboukhadijeh <https://feross.org/opensource> */
+
+/*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */
+
+/*! safe-buffer. MIT License. Feross Aboukhadijeh <https://feross.org/opensource> */
+
+/**
+   * @license
+   * Copyright 2009 The Closure Library Authors
+   * Copyright 2020 Daniel Wirtz / The long.js Authors.
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *     http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *
+   * SPDX-License-Identifier: Apache-2.0
+   */
+
+/**
+ * @file Web Cryptography API shim
+ * @author Artem S Vybornov <vybornov@gmail.com>
+ * @license MIT
+ */
+
+/**
+ * @license React
+ * react-dom.production.min.js
+ *
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/**
+ * @license React
+ * react.production.min.js
+ *
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/**
+ * @license React
+ * scheduler.production.min.js
+ *
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/**
+ * core-decorators.js
+ * (c) 2017 Jay Phelps and contributors
+ * MIT Licensed
+ * https://github.com/jayphelps/core-decorators.js
+ * @license
+ */
+
+/** @license React v0.19.1
+ * scheduler.production.min.js
+ *
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/** @license React v16.14.0
+ * react-dom.production.min.js
+ *
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/**!
+ * lib/index.js -- KMS Entry Point
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc. See LICENSE file.
+ */
+
+/**!
+ * lib/index.js -- SCR Implementation
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc. See LICENSE file.
+ */
+
+/**!
+ * lib/keyobject.js -- KMS Key Representation
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc. See LICENSE file.
+ */
+
+/**!
+ * lib/request.js -- KMS (Generic) Request
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc. See LICENSE file.
+ */
+
+/**!
+ * lib/response.js -- KMS (Generic) Response
+ *
+ * Copyright (c) 2015 Cisco Systems, Inc. See LICENSE file.
+ */
+
+//! moment.js
+
+//! moment.js locale configuration
