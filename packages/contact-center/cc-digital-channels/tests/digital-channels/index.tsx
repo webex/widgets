@@ -3,6 +3,11 @@ import {render, waitFor, act} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import {runInAction} from 'mobx';
 
+// Test constants for mock values
+const MOCK_DATA_CENTER = 'produs1';
+const MOCK_JWT_TOKEN = 'test-jwt-token';
+const MOCK_CONVERSATION_ID = 'test-conversation-id';
+
 // Mock cc-digital-interactions module with all props that Engage component receives
 jest.mock('cc-digital-interactions', () => ({
   initializeApp: jest.fn().mockResolvedValue(undefined),
@@ -35,6 +40,12 @@ jest.mock('cc-digital-interactions', () => ({
 jest.mock('@webex/cc-store', () => {
   const {makeAutoObservable, observable, runInAction} = jest.requireActual('mobx');
   const {mockTask} = jest.requireActual('@webex/test-fixtures');
+
+  // Mock values must be defined inside factory (Jest hoisting requirement)
+  const mockDataCenter = 'produs1';
+  const mockJwtToken = 'test-jwt-token';
+  const mockConversationId = 'test-conversation-id';
+
   const mockCurrentTaskWithConversationId = {
     ...mockTask,
     data: {
@@ -42,7 +53,7 @@ jest.mock('@webex/cc-store', () => {
       interaction: {
         ...mockTask.data.interaction,
         callAssociatedDetails: {
-          mediaResourceId: 'test-conversation-id',
+          mediaResourceId: mockConversationId,
         },
       },
     },
@@ -58,7 +69,7 @@ jest.mock('@webex/cc-store', () => {
     };
     currentTask = mockCurrentTaskWithConversationId;
     isDigitalChannelsInitialized = false;
-    dataCenter = 'produs1';
+    dataCenter = mockDataCenter;
     onErrorCallback = jest.fn();
 
     constructor() {
@@ -74,7 +85,7 @@ jest.mock('@webex/cc-store', () => {
       });
     });
 
-    getAccessToken = jest.fn().mockResolvedValue('test-jwt-token');
+    getAccessToken = jest.fn().mockResolvedValue(mockJwtToken);
   }
 
   return {__esModule: true, default: new MockStore()};
@@ -135,9 +146,9 @@ describe('DigitalChannels Component - Integration Tests with Real Components', (
     expect(engageWidget).toBeInTheDocument();
     expect(engageWidget).toHaveTextContent('Engage Widget');
     expect(engageWidget).toHaveAttribute('data-testid', 'engage-widget');
-    expect(engageWidget).toHaveAttribute('data-conversation-id', 'test-conversation-id');
-    expect(engageWidget).toHaveAttribute('data-jwt-token', 'test-jwt-token');
-    expect(engageWidget).toHaveAttribute('data-datacenter', 'produs1');
+    expect(engageWidget).toHaveAttribute('data-conversation-id', MOCK_CONVERSATION_ID);
+    expect(engageWidget).toHaveAttribute('data-jwt-token', MOCK_JWT_TOKEN);
+    expect(engageWidget).toHaveAttribute('data-datacenter', MOCK_DATA_CENTER);
     expect(engageWidget).toHaveAttribute('data-interaction-id', '');
     expect(engageWidget).toHaveAttribute('data-readonly', 'false');
     expect(engageWidget).toHaveAttribute('data-theme', 'light');
@@ -175,7 +186,8 @@ describe('DigitalChannels Component - Integration Tests with Real Components', (
     const storeModule = require('@webex/cc-store');
     expect(storeModule.default.currentTask).toBeTruthy();
     expect(storeModule.default.logger).toBeTruthy();
-    expect(storeModule.default.dataCenter).toBe('produs1');
+    // Verify dataCenter matches our mock value (not a default - this is configured in the mock)
+    expect(storeModule.default.dataCenter).toBe(MOCK_DATA_CENTER);
     expect(typeof storeModule.default.isDigitalChannelsInitialized).toBe('boolean');
     expect(storeModule.default.getAccessToken).toBeDefined();
     expect(storeModule.default.setDigitalChannelsInitialized).toBeDefined();
@@ -202,9 +214,9 @@ describe('DigitalChannels Component - Integration Tests with Real Components', (
     // Verify Engage widget received correct props from store
     const engageWidget = screen.getByTestId('engage-widget');
     expect(engageWidget).toBeInTheDocument();
-    expect(engageWidget).toHaveAttribute('data-conversation-id', 'test-conversation-id');
-    expect(engageWidget).toHaveAttribute('data-jwt-token', 'test-jwt-token');
-    expect(engageWidget).toHaveAttribute('data-datacenter', 'produs1');
+    expect(engageWidget).toHaveAttribute('data-conversation-id', MOCK_CONVERSATION_ID);
+    expect(engageWidget).toHaveAttribute('data-jwt-token', MOCK_JWT_TOKEN);
+    expect(engageWidget).toHaveAttribute('data-datacenter', MOCK_DATA_CENTER);
   });
 
   it('should re-render when store updates are received by the widget', async () => {
