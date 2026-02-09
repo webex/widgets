@@ -39,7 +39,7 @@ describe('OutdialCallComponent', () => {
       render(<OutdialCallComponent {...props} />);
       const article = await screen.findByTestId('outdial-call-container');
       expect(article).toBeInTheDocument();
-      expect(article).toHaveClass('keypad');
+      expect(article).toHaveClass('outdial-container');
     });
 
     it('dial number input', async () => {
@@ -59,7 +59,7 @@ describe('OutdialCallComponent', () => {
       const keypadKeys = within(keypadContainer).getAllByRole('button');
       expect(keypadKeys).toHaveLength(KEY_LIST.length);
       keypadKeys.forEach((button) => {
-        expect(button).toHaveClass('key button');
+        expect(button).toHaveClass('key');
         expect(button).toHaveAttribute('color', 'default');
         expect(button).toHaveAttribute('data-btn-type', 'pill');
         expect(button).toHaveAttribute('size', '32');

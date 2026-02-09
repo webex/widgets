@@ -4,7 +4,7 @@ import {stationLogout, telephonyLogin} from './Utils/stationLoginUtils';
 import {loginExtension} from './Utils/incomingTaskUtils';
 import {setupConsoleLogging} from './Utils/taskControlUtils';
 import {setupAdvancedConsoleLogging} from './Utils/advancedTaskControlUtils';
-import {pageSetup} from './Utils/helperUtils';
+import {pageSetup, handleStrayTasks} from './Utils/helperUtils';
 import {
   LOGIN_MODE,
   LoginMode,
@@ -44,8 +44,7 @@ interface EnvTokens {
   agent2Username: string;
   agent1ExtensionNumber: string;
   password: string;
-  dialNumberUsername?: string;
-  dialNumberPassword?: string;
+  dialNumberLoginAccessToken?: string;
 }
 
 // Context creation result interface
@@ -105,15 +104,14 @@ export class TestManager {
       agent2Username: process.env[`${this.projectName}_AGENT2_USERNAME`] ?? '',
       agent1ExtensionNumber: process.env[`${this.projectName}_AGENT1_EXTENSION_NUMBER`] ?? '',
       password: process.env.PW_SANDBOX_PASSWORD ?? '',
-      dialNumberUsername: process.env.PW_DIAL_NUMBER_LOGIN_USERNAME ?? '',
-      dialNumberPassword: process.env.PW_DIAL_NUMBER_LOGIN_PASSWORD ?? '',
+      dialNumberLoginAccessToken: process.env.DIAL_NUMBER_LOGIN_ACCESS_TOKEN ?? '',
     };
   }
 
   // Helper method to create context with error handling
   private async createContextWithPage(browser: Browser, type: PageType): Promise<ContextCreationResult> {
     try {
-      const context = await browser.newContext();
+      const context = await browser.newContext({ignoreHTTPSErrors: true});
       const page = await context.newPage();
       return {context, page, type};
     } catch (error) {
@@ -141,7 +139,6 @@ export class TestManager {
         if (attempt === maxRetries - 1) {
           throw new Error(`Failed ${operationName} after ${maxRetries} attempts: ${error}`);
         }
-        console.warn(`${operationName} attempt ${attempt + 1} failed, retrying...`);
         // Simple exponential backoff
         await new Promise((resolve) => setTimeout(resolve, Math.pow(2, attempt) * 1000));
       }
@@ -309,7 +306,7 @@ export class TestManager {
           envTokens.agent1ExtensionNumber
         ),
         this.retryOperation(
-          () => loginExtension(this.agent1ExtensionPage, envTokens.agent1Username, envTokens.password),
+          () => loginExtension(this.agent1ExtensionPage, envTokens.agent1AccessToken),
           'agent1 extension login'
         ),
       ]);
@@ -324,17 +321,17 @@ export class TestManager {
   // Helper method for Dial Number setup
   private async setupDialNumber(envTokens: EnvTokens): Promise<void> {
     await this.retryOperation(
-      () => loginExtension(this.dialNumberPage, envTokens.dialNumberUsername, envTokens.dialNumberPassword),
+      () => loginExtension(this.dialNumberPage, envTokens.dialNumberLoginAccessToken),
       'dial number login'
     );
     // Ensure only one page remains in the Dial Number context to avoid duplicate web client instances
-    await this.enforceSingleDialNumberInOwnContext();
+    // await this.enforceSingleDialNumberInOwnContext();
   }
 
   // Helper method for Caller setup
   private async setupCaller(envTokens: EnvTokens): Promise<void> {
     await this.retryOperation(
-      () => loginExtension(this.callerPage!, envTokens.agent2Username, envTokens.password),
+      () => loginExtension(this.callerPage!, envTokens.agent2AccessToken),
       'caller extension login'
     );
   }
@@ -396,11 +393,23 @@ export class TestManager {
       agent1LoginMode: LOGIN_MODE.EXTENSION,
       enableConsoleLogging: true,
       enableAdvancedLogging: true,
-      needDialNumberLogin: true,
+      needDialNumberLogin: false,
     });
   }
 
   async setupForAdvancedCombinations(browser: Browser) {
+    await this.setup(browser, {
+      needsAgent1: true,
+      needsAgent2: true,
+      needsCaller: true,
+      needDialNumberLogin: false,
+      agent1LoginMode: LOGIN_MODE.DESKTOP,
+      enableConsoleLogging: true,
+      enableAdvancedLogging: true,
+    });
+  }
+
+  async setupForDialNumber(browser: Browser) {
     await this.setup(browser, {
       needsAgent1: true,
       needsAgent2: true,
@@ -416,13 +425,13 @@ export class TestManager {
     const envTokens = this.getEnvTokens();
 
     // Create browser context and page
-    this.agent1Context = await browser.newContext();
+    this.agent1Context = await browser.newContext({ignoreHTTPSErrors: true});
     this.agent1Page = await this.agent1Context.newPage();
     this.consoleMessages = [];
     this.setupPageConsoleLogging(this.agent1Page, true);
 
     // Create multi-session context and page for multi-login tests
-    this.multiSessionContext = await browser.newContext();
+    this.multiSessionContext = await browser.newContext({ignoreHTTPSErrors: true});
     this.multiSessionAgent1Page = await this.multiSessionContext.newPage();
 
     // Define page setup operations
@@ -460,12 +469,12 @@ export class TestManager {
 
     // Logout from station if already logged in on main page
     if (await this.isLogoutButtonVisible(this.agent1Page)) {
-      logoutOperations.push(stationLogout(this.agent1Page));
+      logoutOperations.push(stationLogout(this.agent1Page, false)); // Don't throw during setup cleanup
     }
 
     // Logout from station if already logged in on multi-session page
     if (!isDesktopMode && (await this.isLogoutButtonVisible(this.multiSessionAgent1Page))) {
-      logoutOperations.push(stationLogout(this.multiSessionAgent1Page));
+      logoutOperations.push(stationLogout(this.multiSessionAgent1Page, false)); // Don't throw during setup cleanup
     }
 
     await Promise.all(logoutOperations);
@@ -537,16 +546,40 @@ export class TestManager {
     });
   }
 
+  /**
+   * Soft cleanup - only handles stray tasks without logging out or closing browsers.
+   * Use this in afterAll to clean up state between test files.
+   */
+  async softCleanup(): Promise<void> {
+    const cleanupOps: Promise<void>[] = [];
+
+    if (this.agent1Page) {
+      cleanupOps.push(handleStrayTasks(this.agent1Page, this.agent1ExtensionPage));
+    }
+    if (this.agent2Page) {
+      cleanupOps.push(handleStrayTasks(this.agent2Page));
+    }
+
+    await Promise.all(cleanupOps);
+  }
+
+  /**
+   * Full cleanup - logs out and closes all pages/contexts.
+   * Use this only at the end of the entire test suite.
+   */
   async cleanup(): Promise<void> {
+    // First handle any stray tasks
+    await this.softCleanup().catch(() => {});
+
     // Logout operations - can be done in parallel
     const logoutOperations: Promise<void>[] = [];
 
     if (this.agent1Page && (await this.isLogoutButtonVisible(this.agent1Page))) {
-      logoutOperations.push(stationLogout(this.agent1Page));
+      logoutOperations.push(stationLogout(this.agent1Page, false)); // Don't throw during cleanup
     }
 
     if (this.agent2Page && (await this.isLogoutButtonVisible(this.agent2Page))) {
-      logoutOperations.push(stationLogout(this.agent2Page));
+      logoutOperations.push(stationLogout(this.agent2Page, false)); // Don't throw during cleanup
     }
 
     await Promise.all(logoutOperations);
@@ -589,46 +622,5 @@ export class TestManager {
     });
 
     await Promise.all(cleanupOperations);
-  }
-
-  // Helper method to hard-reset the dial number login session
-  public async resetDialNumberSession(): Promise<void> {
-    if (!this.dialNumberPage || !this.dialNumberContext) {
-      return;
-    }
-    const envTokens = this.getEnvTokens();
-    try {
-      await this.dialNumberContext.clearCookies();
-      await this.dialNumberPage.evaluate(() => {
-        try {
-          localStorage.clear();
-        } catch {}
-        try {
-          sessionStorage.clear();
-        } catch {}
-      });
-      // Navigate fresh and login again
-      await this.dialNumberPage.goto(CALL_URL);
-      await loginExtension(this.dialNumberPage, envTokens.dialNumberUsername!, envTokens.dialNumberPassword!);
-      await this.enforceSingleDialNumberInOwnContext();
-    } catch (error) {
-      throw new Error(`Failed to reset dial number session: ${error}`);
-    }
-  }
-
-  // Ensures at most one page exists in the dedicated Dial Number context we manage.
-  // Closes any extra tabs/pages opened in that context to prevent multiple web.webex.com instances for the Dial Number user.
-  private async enforceSingleDialNumberInOwnContext(): Promise<void> {
-    if (!this.dialNumberContext) return;
-    try {
-      const pages = this.dialNumberContext.pages();
-      for (const p of pages) {
-        if (p !== this.dialNumberPage) {
-          try {
-            await p.close();
-          } catch {}
-        }
-      }
-    } catch {}
   }
 }
