@@ -271,73 +271,95 @@ describe('DigitalChannels Component - Integration Tests with Real Components', (
     expect(engageWidget).toHaveAttribute('data-visual-rebrand', 'true');
   });
 
-  it('should not render when dataCenter is empty', async () => {
+  describe('when dataCenter is empty', () => {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const storeModule = require('@webex/cc-store');
     const store = storeModule.default;
-    const originalDataCenter = store.dataCenter;
+    let originalDataCenter: string;
 
-    act(() => {
-      runInAction(() => {
-        store.dataCenter = '';
+    beforeEach(() => {
+      originalDataCenter = store.dataCenter;
+      act(() => {
+        runInAction(() => {
+          store.dataCenter = '';
+        });
       });
     });
 
-    const screen = render(<DigitalChannels {...mockProps} />);
-
-    // Wait for any async updates to complete
-    await waitFor(() => {
-      expect(screen.container.querySelector('md-theme')).toBeNull();
+    afterEach(() => {
+      act(() => {
+        runInAction(() => {
+          store.dataCenter = originalDataCenter;
+        });
+      });
     });
 
-    // Verify no DOM elements are rendered when dataCenter is empty
-    expect(screen.container.querySelector('md-theme#app-theme')).toBeNull();
-    expect(screen.container.querySelector('div > md-theme')).toBeNull();
-    expect(screen.queryByTestId('engage-widget')).toBeNull();
-    expect(screen.container.innerHTML).toBe('');
+    it('should not render', async () => {
+      const screen = render(<DigitalChannels {...mockProps} />);
 
-    // Restore dataCenter for other tests
-    act(() => {
-      runInAction(() => {
-        store.dataCenter = originalDataCenter;
+      // Wait for any async updates to complete
+      await waitFor(() => {
+        expect(screen.container.querySelector('md-theme')).toBeNull();
       });
+
+      // Verify no DOM elements are rendered when dataCenter is empty
+      expect(screen.container.querySelector('md-theme#app-theme')).toBeNull();
+      expect(screen.queryByTestId('engage-widget')).toBeNull();
+      expect(screen.container.innerHTML).toBe('');
     });
   });
 
-  it('should not render when currentTask is null', async () => {
+  describe('when currentTask is null', () => {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const storeModule = require('@webex/cc-store');
     const store = storeModule.default;
-    const originalTask = store.currentTask;
+    let originalTask: unknown;
 
-    act(() => {
-      runInAction(() => {
-        store.currentTask = null;
+    beforeEach(() => {
+      originalTask = store.currentTask;
+      act(() => {
+        runInAction(() => {
+          store.currentTask = null;
+        });
       });
     });
 
-    const screen = render(<DigitalChannels {...mockProps} />);
-
-    // Wait for any async updates to complete
-    await waitFor(() => {
-      expect(screen.container.querySelector('md-theme')).toBeNull();
+    afterEach(() => {
+      act(() => {
+        runInAction(() => {
+          store.currentTask = originalTask;
+        });
+      });
     });
 
-    // Verify no DOM elements are rendered when currentTask is null
-    expect(screen.container.querySelector('md-theme#app-theme')).toBeNull();
-    expect(screen.queryByTestId('engage-widget')).toBeNull();
-    expect(screen.container.innerHTML).toBe('');
+    it('should not render', async () => {
+      const screen = render(<DigitalChannels {...mockProps} />);
 
-    // Restore currentTask for other tests
-    act(() => {
-      runInAction(() => {
-        store.currentTask = originalTask;
+      // Wait for any async updates to complete
+      await waitFor(() => {
+        expect(screen.container.querySelector('md-theme')).toBeNull();
       });
+
+      // Verify no DOM elements are rendered when currentTask is null
+      expect(screen.container.querySelector('md-theme#app-theme')).toBeNull();
+      expect(screen.queryByTestId('engage-widget')).toBeNull();
+      expect(screen.container.innerHTML).toBe('');
     });
   });
 });
 
 describe('DigitalChannels ErrorBoundary', () => {
+  let consoleErrorSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    mockShouldThrow = false;
+    consoleErrorSpy.mockRestore();
+  });
+
   it('should call onErrorCallback when child throws', async () => {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const storeModule = require('@webex/cc-store');
@@ -345,7 +367,6 @@ describe('DigitalChannels ErrorBoundary', () => {
     const onErrorCallback = jest.fn();
     store.onErrorCallback = onErrorCallback;
 
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     mockShouldThrow = true;
 
     const screen = render(<DigitalChannels {...mockProps} />);
@@ -359,9 +380,6 @@ describe('DigitalChannels ErrorBoundary', () => {
     expect(screen.container.querySelector('md-theme')).toBeNull();
     expect(screen.container.querySelector('md-theme#app-theme')).toBeNull();
     expect(screen.queryByTestId('engage-widget')).toBeNull();
-
-    mockShouldThrow = false;
-    consoleErrorSpy.mockRestore();
   });
 
   it('should handle error gracefully when onErrorCallback is undefined', async () => {
@@ -371,7 +389,6 @@ describe('DigitalChannels ErrorBoundary', () => {
     const originalCallback = store.onErrorCallback;
     store.onErrorCallback = undefined;
 
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     mockShouldThrow = true;
 
     // Render should not throw when onErrorCallback is undefined
@@ -388,8 +405,6 @@ describe('DigitalChannels ErrorBoundary', () => {
     expect(screen.container.querySelector('md-theme#app-theme')).toBeNull();
     expect(screen.queryByTestId('engage-widget')).toBeNull();
 
-    mockShouldThrow = false;
     store.onErrorCallback = originalCallback;
-    consoleErrorSpy.mockRestore();
   });
 });

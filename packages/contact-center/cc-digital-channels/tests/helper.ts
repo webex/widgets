@@ -208,7 +208,7 @@ describe('useDigitalChannelsData', () => {
     );
   });
 
-  it('should not throw when logger is undefined', async () => {
+  it('should handle token fetch error gracefully when logger is undefined', async () => {
     const getAccessToken = jest.fn().mockRejectedValue(new Error('token error'));
 
     const {result} = renderHook(() =>
