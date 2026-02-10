@@ -16,22 +16,38 @@ Test Fixtures is a testing utility package that provides realistic mock data for
 | **mockEntryPointsResponse** | `EntryPointListResponse` | `src/fixtures.ts` | Entry points for outdial | Via object spread |
 | **mockAddressBookEntriesResponse** | `AddressBookEntriesResponse` | `src/fixtures.ts` | Address book contacts | Via object spread |
 | **makeMockAddressBook** | `Function` | `src/fixtures.ts` | Factory for custom address book | Via function parameter |
+| **mockIncomingTaskData** | `object` | `src/incomingTaskFixtures.ts` | webRTC, extension, social, chat (ani, customerName, mediaType, acceptText, etc.) | Via object key access |
+| **mockTaskData** | `object` | `src/taskListFixtures.ts` | active, incoming, action, selection (task list UI data by scenario) | Via object key access |
+| **mockOutdialCallProps** | `object` | `src/components/task/outdialCallFixtures.ts` | mockCC + startOutdial, getOutdialANIEntries | Via jest mocking |
+| **mockAniEntries** | `object[]` | `src/components/task/outdialCallFixtures.ts` | ANI entries (organizationId, id, name, number) | Via array modification |
+| **mockCCWithAni** | `IContactCenter` | `src/components/task/outdialCallFixtures.ts` | mockCC + agentConfig.outdialANIId, getOutdialAniEntries | Via object spread / jest |
 
 ### File Structure
 
 ```
 test-fixtures/
 ├── src/
-│   ├── index.ts                # Package exports
-│   └── fixtures.ts             # All fixture definitions
+│   ├── index.ts                          # Package exports (fixtures, incomingTaskFixtures, taskListFixtures, outdialCallFixtures)
+│   ├── fixtures.ts                       # Core SDK fixtures (mockCC, mockProfile, mockTask, etc.)
+│   ├── incomingTaskFixtures.ts           # Incoming task UI data (mockIncomingTaskData)
+│   ├── taskListFixtures.ts               # Task list UI data by scenario (mockTaskData)
+│   └── components/
+│       └── task/
+│           └── outdialCallFixtures.ts    # Outdial call props and ANI fixtures (mockOutdialCallProps, mockAniEntries, mockCCWithAni)
 ├── dist/
-│   ├── index.js                # Build output
+│   ├── index.js                          # Build output
 │   └── types/
 │       ├── index.d.ts
-│       └── fixtures.d.ts
+│       ├── fixtures.d.ts
+│       ├── incomingTaskFixtures.d.ts
+│       ├── taskListFixtures.d.ts
+│       └── components/
+│           └── task/
+│               └── outdialCallFixtures.d.ts
 ├── package.json
 ├── tsconfig.json
 └── webpack.config.js
+└── babel.config.js
 ```
 
 ---
@@ -50,15 +66,15 @@ const mockCC: IContactCenter = {
   setUserState: jest.fn(),
   
   // Task methods
-  acceptTask: jest.fn(),
-  endTask: jest.fn(),
-  holdTask: jest.fn(),
-  resumeTask: jest.fn(),
-  wrapupTask: jest.fn(),
+  accept: jest.fn(),
+  end: jest.fn(),
+  hold: jest.fn(),
+  resume: jest.fn(),
+  wrapup: jest.fn(),
   
   // Transfer/Consult methods
-  consultTask: jest.fn(),
-  transferTask: jest.fn(),
+  consult: jest.fn(),
+  transfer: jest.fn(),
   cancelConsult: jest.fn(),
   completeConsult: jest.fn(),
   
@@ -85,9 +101,11 @@ const mockCC: IContactCenter = {
 **Usage:**
 
 ```typescript
-// Basic usage
+// Basic usage — teamId from mockProfile.teams (shape: { teamId, teamName }), loginOption from loginVoiceOptions (string[])
 test('calls stationLogin', async () => {
-  await mockCC.stationLogin({ teamId: 'team1', loginOption: 'BROWSER', dialNumber: '' });
+  const [team] = mockProfile.teams;
+  const loginOption = mockProfile.loginVoiceOptions[0];
+  await mockCC.stationLogin({ teamId: team.teamId, loginOption, dialNumber: '' });
   expect(mockCC.stationLogin).toHaveBeenCalled();
 });
 
@@ -107,27 +125,15 @@ Complete agent profile with teams, idle codes, wrapup codes:
 
 ```typescript
 const mockProfile: Profile = {
-  agentId: 'agent123',
-  teams: [
-    {
-      id: 'team1',
-      name: 'Team One',
-      isDefault: true,
-      // ... other team properties
-    }
-  ],
+  agentId: 'agent1',
+  teams: [{ teamId: 'team1', teamName: 'Team 1' }],
   idleCodes: [
-    { id: 'idle1', name: 'Break', isSystem: true, isDefault: false },
-    { id: 'idle2', name: 'Lunch', isSystem: false, isDefault: true },
+    { id: 'code1', name: 'Code 1', isSystem: false, isDefault: false },
   ],
   wrapupCodes: [
-    { id: 'wrap1', name: 'Resolved', isDefault: true },
-    { id: 'wrap2', name: 'Escalated', isDefault: false },
+    { id: 'wrap1', name: 'Wrap Code 1', isSystem: false, isDefault: false },
   ],
-  loginVoiceOptions: [
-    { label: 'Browser', value: 'BROWSER' },
-    { label: 'Extension', value: 'EXTENSION' },
-  ],
+  loginVoiceOptions: ['BROWSER'],
   // ... other profile properties
 };
 ```

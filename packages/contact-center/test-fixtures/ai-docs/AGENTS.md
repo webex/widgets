@@ -23,7 +23,7 @@ Test Fixtures provides realistic mock data for testing widgets and components. I
 
 ### Key Capabilities
 
-- **Complete SDK Mock**: Mock `IContactCenter` with all methods
+- **SDK Mock**: Mock SDK methods to be used in testing
 - **Task Fixtures**: Mock tasks with various states and media types
 - **Profile Data**: Mock agent profiles with teams, dial plans, idle codes
 - **Address Book**: Mock contact entries and search results
@@ -132,19 +132,26 @@ import { mockTask } from '@webex/test-fixtures';
 
 test('can hold and resume task', async () => {
   // Task has pre-configured jest mocks
-  await mockTask.hold();
-  expect(mockTask.hold).toHaveBeenCalled();
 
-  await mockTask.resume();
-  expect(mockTask.resume).toHaveBeenCalled();
+  const holdSpy = jest.spyOn(mockTask,'hold')
+  const resumeSpy = jest.spyOn(mockTask,'resume')
+
+  await mockTask.hold()
+  await mockTask.resume()
+  await mockTask.hold()
+
+  expect(holdSpy).toHaveBeenCalledTimes(2)
+  expect(resumeSpy).toHaveBeenCalledTimes(1)
 });
 
 test('can end task with wrapup', async () => {
+  const mockData = { success: true } 
   const wrapupSpy = jest.spyOn(mockTask, 'wrapup')
-    .mockResolvedValue({ success: true });
+    .mockResolvedValue(mockData);
 
-  await mockTask.wrapup();
+  const res = await mockTask.wrapup();
   expect(wrapupSpy).toHaveBeenCalled();
+  expect(res).toEqual(mockData)
 });
 ```
 
@@ -217,7 +224,7 @@ jest.mock('@webex/cc-store', () => ({
   idleCodes: mockProfile.idleCodes,
   agentId: mockProfile.agentId,
   currentState: 'Available',
-  lastStateChangeTimestamp: Date.now(),
+  lastStateChangeTimestamp: 'mock-date',
   customState: null,
   logger: mockCC.LoggerProxy,
   setCurrentState: jest.fn(),
@@ -242,8 +249,8 @@ import { render } from '@testing-library/react';
 import { TaskList } from '@webex/cc-task';
 import { mockTask } from '@webex/test-fixtures';
 
-test('task list matches snapshot', () => {
-  const { container } = render(
+test('task list matches snapshot', async() => {
+  const { container } = await render(
     <TaskList 
       tasks={[mockTask]}
       selectedTaskId={mockTask.data.interactionId}
@@ -266,6 +273,7 @@ test('task list matches snapshot', () => {
 |---------|---------|
 | `@webex/cc-store` | Store types and interfaces |
 | `typescript` | TypeScript support |
+| `@webex/contact-center` | Types import from SDK |
 
 ### Development Dependencies
 
@@ -293,6 +301,11 @@ Key development tools (see [package.json](../package.json) for versions):
 | `mockEntryPointsResponse` | `EntryPointListResponse` | Entry points for outdial |
 | `mockAddressBookEntriesResponse` | `AddressBookEntriesResponse` | Address book contacts |
 | `makeMockAddressBook` | `Function` | Factory for custom address book mock |
+| `mockIncomingTaskData` | `Record<string, IncomingTaskData>` | Incoming task data variants for incoming task tests |
+| `mockTaskData` | `Record<string, Record<string, TaskListItemData>>` | Task list item data variants for task list tests |
+| `mockOutdialCallProps` | `OutdialCallComponentProps` | Outdial call component props mock with jest functions |
+| `mockAniEntries` | `Array<OutdialAniEntry>` | Outdial ANI entries list |
+| `mockCCWithAni` | `IContactCenter` | CC mock with outdial ANI configured |
 
 ### Importing Fixtures
 
