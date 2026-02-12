@@ -46,6 +46,11 @@ jest.mock('../src/store', () => ({
       taskManager: {
         getAllTasks: jest.fn().mockReturnValue({}),
       },
+      webex: {
+        credentials: {
+          getUserToken: jest.fn(),
+        },
+      },
     },
     logger: {
       log: jest.fn(),
@@ -88,6 +93,7 @@ jest.mock('../src/store', () => ({
     lastIdleCodeChangeTimestamp: 'mockLastIdleCodeChangeTimestamp',
     showMultipleLoginAlert: 'mockShowMultipleLoginAlert',
     currentTheme: 'mockCurrentTheme',
+    dataCenter: 'mockDataCenter',
     customState: 'mockCustomState',
     consultStartTimeStamp: null,
     callControlAudio: null,
@@ -96,6 +102,7 @@ jest.mock('../src/store', () => ({
     isEndConsultEnabled: true,
     allowConsultToQueue: false,
     isDeclineButtonEnabled: false,
+    isDigitalChannelsInitialized: false,
     setShowMultipleLoginAlert: jest.fn(),
     setCurrentState: jest.fn(),
     setLastStateChangeTimestamp: jest.fn(),
@@ -103,7 +110,10 @@ jest.mock('../src/store', () => ({
     setDeviceType: jest.fn(),
     setDialNumber: jest.fn(),
     setTeamId: jest.fn(),
-    init: jest.fn().mockResolvedValue({}),
+    init: jest.fn().mockImplementation((_options, setupIncomingTaskHandler) => {
+      setupIncomingTaskHandler(mockCC);
+      return Promise.resolve();
+    }),
     setCurrentTask: jest.fn(),
     refreshTaskList: jest.fn(),
     setCurrentTheme: jest.fn(),
@@ -289,6 +299,20 @@ describe('storeEventsWrapper', () => {
       expect(storeWrapper.agentProfile).toBe(storeWrapper['store'].agentProfile);
     });
 
+    it('should proxy isDigitalChannelsInitialized', () => {
+      expect(storeWrapper.isDigitalChannelsInitialized).toBe(storeWrapper['store'].isDigitalChannelsInitialized);
+    });
+
+    it('should setDigitalChannelsInitialized', () => {
+      expect(storeWrapper.setDigitalChannelsInitialized).toBeInstanceOf(Function);
+
+      storeWrapper.setDigitalChannelsInitialized(true);
+      expect(storeWrapper['store'].isDigitalChannelsInitialized).toBe(true);
+
+      storeWrapper.setDigitalChannelsInitialized(false);
+      expect(storeWrapper['store'].isDigitalChannelsInitialized).toBe(false);
+    });
+
     describe('setState', () => {
       it('should call setCurrentState if idleCode is passed', () => {
         const idleCode = storeWrapper.idleCodes[0];
@@ -347,6 +371,17 @@ describe('storeEventsWrapper', () => {
 
     it('should currentTheme', () => {
       expect(storeWrapper.currentTheme).toBe('mockCurrentTheme');
+    });
+
+    it('should proxy dataCenter', () => {
+      expect(storeWrapper.dataCenter).toBe('mockDataCenter');
+    });
+
+    it('should setDataCenter', () => {
+      expect(storeWrapper.setDataCenter).toBeInstanceOf(Function);
+
+      storeWrapper.setDataCenter('newDataCenter');
+      expect(storeWrapper['store'].dataCenter).toBe('newDataCenter');
     });
 
     it('should setCurrentTheme', () => {
@@ -645,6 +680,58 @@ describe('storeEventsWrapper', () => {
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.AGENT_CONSULT_CREATED, expect.any(Function));
     });
 
+    it('should call onErrorCallback and rethrow when store.init rejects with an Error', async () => {
+      const cc = storeWrapper['store'].cc;
+      const logger = storeWrapper['store'].logger;
+      const error = new Error('init failed');
+      const onErrorCallback = jest.fn();
+
+      storeWrapper['store'].init = jest.fn().mockImplementation((_options, setupIncomingTaskHandler) => {
+        setupIncomingTaskHandler(cc);
+        return Promise.reject(error);
+      });
+      // Directly set onErrorCallback to focus on init error handling behavior
+      storeWrapper.onErrorCallback = onErrorCallback;
+
+      const options = {
+        webex: {
+          cc,
+          logger,
+        },
+      };
+
+      await expect(storeWrapper.init(options)).rejects.toThrow('init failed');
+
+      expect(onErrorCallback).toHaveBeenCalledWith('Store', error);
+    });
+
+    it('should wrap non-Error rejections and pass wrapped Error to onErrorCallback', async () => {
+      const cc = storeWrapper['store'].cc;
+      const logger = storeWrapper['store'].logger;
+      const rawError = 'init failed as string';
+      const onErrorCallback = jest.fn();
+
+      storeWrapper['store'].init = jest.fn().mockImplementation((_options, setupIncomingTaskHandler) => {
+        setupIncomingTaskHandler(cc);
+        return Promise.reject(rawError);
+      });
+      storeWrapper.onErrorCallback = onErrorCallback;
+
+      const options = {
+        webex: {
+          cc,
+          logger,
+        },
+      };
+
+      await expect(storeWrapper.init(options)).rejects.toThrow('init failed as string');
+
+      expect(onErrorCallback).toHaveBeenCalledWith('Store', expect.any(Error));
+      const [, wrappedError] = onErrorCallback.mock.calls[0];
+      expect(wrappedError).toBeInstanceOf(Error);
+      expect(wrappedError.message).toBe('Store initialization failed: init failed as string');
+    });
+
     it('should handle task assignment and call onTaskAssigned callback', () => {
       const mockTaskAssignedCallback = jest.fn();
       storeWrapper.setTaskAssigned(mockTaskAssignedCallback);
@@ -846,6 +933,56 @@ describe('storeEventsWrapper', () => {
       expect(result).toEqual({data: [], meta: {page: 0, totalPages: 0}});
       expect(getEntriesSpy).not.toHaveBeenCalled();
     });
+
+    describe('getAccessToken', () => {
+      beforeEach(() => {
+        jest.clearAllMocks();
+      });
+
+      it('should return the access token on success', async () => {
+        const mockAccessToken = 'mock-access-token-12345';
+        // @ts-expect-error - webex credentials API not typed on IContactCenter
+        storeWrapper['store'].cc.webex.credentials.getUserToken = jest
+          .fn()
+          .mockResolvedValue({access_token: mockAccessToken});
+
+        const result = await storeWrapper.getAccessToken();
+
+        // @ts-expect-error - webex credentials API not typed on IContactCenter
+        expect(storeWrapper['store'].cc.webex.credentials.getUserToken).toHaveBeenCalled();
+        expect(result).toBe(mockAccessToken);
+      });
+
+      it('should log error and rethrow when getUserToken fails', async () => {
+        const mockError = new Error('Token retrieval failed');
+        // @ts-expect-error - webex credentials API not typed on IContactCenter
+        storeWrapper['store'].cc.webex.credentials.getUserToken = jest.fn().mockRejectedValue(mockError);
+        const loggerErrorSpy = jest.spyOn(storeWrapper['store'].logger, 'error');
+
+        await expect(storeWrapper.getAccessToken()).rejects.toThrow('Token retrieval failed');
+
+        expect(loggerErrorSpy).toHaveBeenCalledWith('CC-Widgets: getAccessToken(): failed to get access token', {
+          module: 'storeEventsWrapper.ts',
+          method: 'getAccessToken',
+          error: mockError,
+        });
+      });
+
+      it('should handle non-Error rejection and rethrow', async () => {
+        const rawError = 'String error message';
+        // @ts-expect-error - webex credentials API not typed on IContactCenter
+        storeWrapper['store'].cc.webex.credentials.getUserToken = jest.fn().mockRejectedValue(rawError);
+        const loggerErrorSpy = jest.spyOn(storeWrapper['store'].logger, 'error');
+
+        await expect(storeWrapper.getAccessToken()).rejects.toBe(rawError);
+
+        expect(loggerErrorSpy).toHaveBeenCalledWith('CC-Widgets: getAccessToken(): failed to get access token', {
+          module: 'storeEventsWrapper.ts',
+          method: 'getAccessToken',
+          error: rawError,
+        });
+      });
+    });
   });
 
   describe('storeEventsWrapper events reactions', () => {
@@ -879,7 +1016,10 @@ describe('storeEventsWrapper', () => {
 
     it('should initialize the store and set up event handlers for login and logout', async () => {
       const cc = storeWrapper['store'].cc;
-      storeWrapper['store'].init = jest.fn().mockReturnValue(storeWrapper.setupIncomingTaskHandler(cc));
+      storeWrapper['store'].init = jest.fn().mockImplementation((_options, setupIncomingTaskHandler) => {
+        setupIncomingTaskHandler(cc);
+        return Promise.resolve();
+      });
 
       await storeWrapper.init(options);
 
@@ -893,7 +1033,10 @@ describe('storeEventsWrapper', () => {
       const cc = storeWrapper['store'].cc;
       const onSpy = jest.spyOn(storeWrapper['cc'], 'on');
       const setAgentProfileSpy = jest.spyOn(storeWrapper, 'setAgentProfile');
-      storeWrapper['store'].init = jest.fn().mockReturnValue(storeWrapper.setupIncomingTaskHandler(cc));
+      storeWrapper['store'].init = jest.fn().mockImplementation((_options, setupIncomingTaskHandler) => {
+        setupIncomingTaskHandler(cc);
+        return Promise.resolve();
+      });
 
       await storeWrapper.init(options);
 
@@ -916,7 +1059,10 @@ describe('storeEventsWrapper', () => {
     it('should handle task:incoming event ', async () => {
       const cc = storeWrapper['store'].cc;
       const onSpy = jest.spyOn(storeWrapper['cc'], 'on');
-      storeWrapper['store'].init = jest.fn().mockReturnValue(storeWrapper.setupIncomingTaskHandler(cc));
+      storeWrapper['store'].init = jest.fn().mockImplementation((_options, setupIncomingTaskHandler) => {
+        setupIncomingTaskHandler(cc);
+        return Promise.resolve();
+      });
 
       await storeWrapper.init(options);
 
@@ -934,7 +1080,10 @@ describe('storeEventsWrapper', () => {
     it('should handle task:end event with wrapupRequired', async () => {
       const cc = storeWrapper['store'].cc;
       const onSpy = jest.spyOn(storeWrapper['cc'], 'on');
-      storeWrapper['store'].init = jest.fn().mockReturnValue(storeWrapper.setupIncomingTaskHandler(cc));
+      storeWrapper['store'].init = jest.fn().mockImplementation((_options, setupIncomingTaskHandler) => {
+        setupIncomingTaskHandler(cc);
+        return Promise.resolve();
+      });
 
       await storeWrapper.init(options);
 
@@ -987,7 +1136,10 @@ describe('storeEventsWrapper', () => {
     it('should handle AgentWrappedUp event ', async () => {
       const cc = storeWrapper['store'].cc;
       const onSpy = jest.spyOn(storeWrapper['cc'], 'on');
-      storeWrapper['store'].init = jest.fn().mockReturnValue(storeWrapper.setupIncomingTaskHandler(cc));
+      storeWrapper['store'].init = jest.fn().mockImplementation((_options, setupIncomingTaskHandler) => {
+        setupIncomingTaskHandler(cc);
+        return Promise.resolve();
+      });
 
       await storeWrapper.init(options);
 
@@ -1055,7 +1207,10 @@ describe('storeEventsWrapper', () => {
       const onSpy = jest.spyOn(storeWrapper['cc'], 'on');
       jest.spyOn(storeWrapper, 'setShowMultipleLoginAlert');
       const cc = storeWrapper['store'].cc;
-      storeWrapper['store'].init = jest.fn().mockReturnValue(storeWrapper.setupIncomingTaskHandler(cc));
+      storeWrapper['store'].init = jest.fn().mockImplementation((_options, setupIncomingTaskHandler) => {
+        setupIncomingTaskHandler(cc);
+        return Promise.resolve();
+      });
       await storeWrapper.init(options);
 
       act(() => {
@@ -1068,7 +1223,10 @@ describe('storeEventsWrapper', () => {
     it('should handle multilogin session modal with correct data', async () => {
       const cc = storeWrapper['store'].cc;
       const onSpy = jest.spyOn(cc, 'on');
-      storeWrapper['store'].init = jest.fn().mockReturnValue(storeWrapper.setupIncomingTaskHandler(cc));
+      storeWrapper['store'].init = jest.fn().mockImplementation((_options, setupIncomingTaskHandler) => {
+        setupIncomingTaskHandler(cc);
+        return Promise.resolve();
+      });
       jest.spyOn(storeWrapper, 'setShowMultipleLoginAlert');
 
       await storeWrapper.init(options);
@@ -1097,7 +1255,10 @@ describe('storeEventsWrapper', () => {
     it('should handle state change event  with incorrect data', async () => {
       const cc = storeWrapper['store'].cc;
       const onSpy = jest.spyOn(cc, 'on');
-      storeWrapper['store'].init = jest.fn().mockReturnValue(storeWrapper.setupIncomingTaskHandler(cc));
+      storeWrapper['store'].init = jest.fn().mockImplementation((_options, setupIncomingTaskHandler) => {
+        setupIncomingTaskHandler(cc);
+        return Promise.resolve();
+      });
       jest.spyOn(storeWrapper, 'setCurrentState');
 
       await storeWrapper.init(options);
@@ -1111,7 +1272,10 @@ describe('storeEventsWrapper', () => {
     it('should handle state change event  with correct data and emplty auxcodeId', async () => {
       const cc = storeWrapper['store'].cc;
       const onSpy = jest.spyOn(cc, 'on');
-      storeWrapper['store'].init = jest.fn().mockReturnValue(storeWrapper.setupIncomingTaskHandler(cc));
+      storeWrapper['store'].init = jest.fn().mockImplementation((_options, setupIncomingTaskHandler) => {
+        setupIncomingTaskHandler(cc);
+        return Promise.resolve();
+      });
       jest.spyOn(storeWrapper, 'setCurrentState');
 
       await storeWrapper.init(options);
@@ -1131,7 +1295,10 @@ describe('storeEventsWrapper', () => {
     it('should handle state change event  with correct data', async () => {
       const cc = storeWrapper['store'].cc;
       const onSpy = jest.spyOn(cc, 'on');
-      storeWrapper['store'].init = jest.fn().mockReturnValue(storeWrapper.setupIncomingTaskHandler(cc));
+      storeWrapper['store'].init = jest.fn().mockImplementation((_options, setupIncomingTaskHandler) => {
+        setupIncomingTaskHandler(cc);
+        return Promise.resolve();
+      });
       jest.spyOn(storeWrapper, 'setCurrentState');
 
       await storeWrapper.init(options);
@@ -1155,7 +1322,10 @@ describe('storeEventsWrapper', () => {
       const handleTaskRemoveSpy = jest.spyOn(storeWrapper, 'handleTaskRemove');
 
       const cc = storeWrapper['store'].cc;
-      storeWrapper['store'].init = jest.fn().mockReturnValue(storeWrapper.setupIncomingTaskHandler(cc));
+      storeWrapper['store'].init = jest.fn().mockImplementation((_options, setupIncomingTaskHandler) => {
+        setupIncomingTaskHandler(cc);
+        return Promise.resolve();
+      });
 
       await storeWrapper.init(options);
       storeWrapper['store'].taskList = {};
@@ -1214,7 +1384,10 @@ describe('storeEventsWrapper', () => {
       const refreshTaskListSpy = jest.spyOn(storeWrapper, 'refreshTaskList');
 
       const cc = storeWrapper['store'].cc;
-      storeWrapper['store'].init = jest.fn().mockReturnValue(storeWrapper.setupIncomingTaskHandler(cc));
+      storeWrapper['store'].init = jest.fn().mockImplementation((_options, setupIncomingTaskHandler) => {
+        setupIncomingTaskHandler(cc);
+        return Promise.resolve();
+      });
 
       await storeWrapper.init(options);
 
@@ -1255,7 +1428,10 @@ describe('storeEventsWrapper', () => {
 
         const cc = storeWrapper['store'].cc;
         const onSpy = jest.spyOn(cc, 'on');
-        storeWrapper['store'].init = jest.fn().mockReturnValue(storeWrapper.setupIncomingTaskHandler(cc));
+        storeWrapper['store'].init = jest.fn().mockImplementation((_options, setupIncomingTaskHandler) => {
+          setupIncomingTaskHandler(cc);
+          return Promise.resolve();
+        });
 
         await storeWrapper.init(options);
         storeWrapper['store'].taskList = {};
@@ -1294,12 +1470,19 @@ describe('storeEventsWrapper', () => {
 
       it('should handle custom state correctly when wrapup is not required', async () => {
         const setStateSpy = jest.spyOn(storeWrapper, 'setState');
-        const cc = storeWrapper['store'].cc;
+        storeWrapper['store'].cc = mockCC;
+        const cc = mockCC;
         const onSpy = jest.spyOn(cc, 'on');
+
+        storeWrapper['store'].init = jest.fn().mockImplementation((_options, setupIncomingTaskHandler) => {
+          setupIncomingTaskHandler(cc);
+          return Promise.resolve();
+        });
 
         // Set the store's agentId to match the task's agentId
         storeWrapper['store'].agentId = 'agent1';
-        storeWrapper['store'].init = jest.fn().mockReturnValue(storeWrapper.setupIncomingTaskHandler(cc));
+        await storeWrapper.init(options);
+
         storeWrapper['store'].taskList = {};
 
         const mockTask = {
@@ -1341,7 +1524,10 @@ describe('storeEventsWrapper', () => {
 
       const cc = storeWrapper['store'].cc;
       const onSpy = jest.spyOn(cc, 'on');
-      storeWrapper['store'].init = jest.fn().mockReturnValue(storeWrapper.setupIncomingTaskHandler(cc));
+      storeWrapper['store'].init = jest.fn().mockImplementation((_options, setupIncomingTaskHandler) => {
+        setupIncomingTaskHandler(cc);
+        return Promise.resolve();
+      });
 
       await storeWrapper.init(options);
       storeWrapper['store'].taskList = {};
@@ -1378,7 +1564,10 @@ describe('storeEventsWrapper', () => {
     it('should remove event listeners on successful logout and clear agentProfile', async () => {
       const cc = storeWrapper['store'].cc;
       const onSpy = jest.spyOn(cc, 'on');
-      storeWrapper['store'].init = jest.fn().mockReturnValue(storeWrapper.setupIncomingTaskHandler(cc));
+      storeWrapper['store'].init = jest.fn().mockImplementation((_options, setupIncomingTaskHandler) => {
+        setupIncomingTaskHandler(cc);
+        return Promise.resolve();
+      });
       const setAgentProfileSpy = jest.spyOn(storeWrapper, 'setAgentProfile');
 
       await storeWrapper.init(options);

@@ -60,6 +60,8 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
   const mediaChannel = currentTask.data.interaction.mediaType as MediaChannelType;
   const isSocial = mediaChannel === MediaChannelType.SOCIAL;
   const isTelephony = mediaChannel === MediaChannelType.TELEPHONY;
+  const participantsCount = conferenceParticipants?.length || 1;
+  const participantsLabel = participantsCount === 1 ? 'Participant' : 'Participants';
 
   //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
   const customerName = currentTask?.data?.interaction?.callAssociatedDetails?.customerName;
@@ -180,21 +182,15 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
                   <>
                     <div className="vertical-divider"></div>
                     <div className="participants-section">
-                      <div className="participants-indicator">
-                        <Text type="body-secondary" tagName={'small'} className="participants-count">
-                          +{Object.keys(conferenceParticipants).length || 1}
-                        </Text>
-                        <Icon name="participant-list-regular" size={0.875} className="participants-icon" />
-                      </div>
                       <PopoverNext
                         color="secondary"
                         delay={[0, 0]}
-                        placement="bottom-start"
-                        showArrow
+                        placement="bottom-end"
+                        showArrow={false}
                         trigger="click"
                         variant="medium"
                         interactive
-                        offsetDistance={2}
+                        offsetDistance={6}
                         className="participants-popover"
                         triggerComponent={
                           <Button
@@ -205,6 +201,9 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
                             color="default"
                             variant="tertiary"
                           >
+                            <Text type="body-secondary" tagName={'small'} className="participants-count">
+                              +{participantsCount} {participantsLabel}
+                            </Text>
                             <Icon name="arrow-down-bold" className="dropdown-arrow" />
                           </Button>
                         }
@@ -218,7 +217,8 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
                               tabIndex={0}
                               data-testid={`call-control:participant-${participant.name?.toLowerCase()}`}
                             >
-                              {participant.name}
+                              <Icon name="meet-regular" size={1.125} className="participant-menu-icon" />
+                              <span className="participant-menu-text">{participant.name}</span>
                             </div>
                           ))}
                         </div>
