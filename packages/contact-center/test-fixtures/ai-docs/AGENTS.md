@@ -54,9 +54,11 @@ jest.mock('@webex/cc-store', () => ({
   isAgentLoggedIn: false,
 }));
 
-test('renders station login', () => {
-  const { getByText } = render(<StationLogin profileMode={false} />);
-  expect(getByText('Login')).toBeInTheDocument();
+describe('station login', () => {
+  it('renders station login', () => {
+    const { getByText } = render(<StationLogin profileMode={false} />);
+    expect(getByText('Login')).toBeInTheDocument();
+  })
 });
 ```
 
@@ -67,7 +69,7 @@ import { render } from '@testing-library/react';
 import { CallControl } from '@webex/cc-task';
 import { mockTask } from '@webex/test-fixtures';
 
-test('renders call control for active task', () => {
+it('renders call control for active task', () => {
   const { getByRole } = render(
     <CallControl task={mockTask} />
   );
@@ -85,7 +87,7 @@ test('renders call control for active task', () => {
 import { mockCC } from '@webex/test-fixtures';
 
 // Use in tests
-test('calls SDK stationLogin method', async () => {
+it('calls SDK stationLogin method', async () => {
   const loginSpy = jest.spyOn(mockCC, 'stationLogin')
     .mockResolvedValue({ success: true });
 
@@ -108,7 +110,7 @@ test('calls SDK stationLogin method', async () => {
 ```typescript
 import { mockProfile } from '@webex/test-fixtures';
 
-test('handles agent with custom idle codes', () => {
+it('handles agent with custom idle codes', () => {
   // Customize fixture
   const customProfile = {
     ...mockProfile,
@@ -130,7 +132,7 @@ test('handles agent with custom idle codes', () => {
 ```typescript
 import { mockTask } from '@webex/test-fixtures';
 
-test('can hold and resume task', async () => {
+it('can hold and resume task', async () => {
   // Task has pre-configured jest mocks
 
   const holdSpy = jest.spyOn(mockTask,'hold')
@@ -144,7 +146,7 @@ test('can hold and resume task', async () => {
   expect(resumeSpy).toHaveBeenCalledTimes(1)
 });
 
-test('can end task with wrapup', async () => {
+it('can end task with wrapup', async () => {
   const mockData = { success: true } 
   const wrapupSpy = jest.spyOn(mockTask, 'wrapup')
     .mockResolvedValue(mockData);
@@ -160,7 +162,7 @@ test('can end task with wrapup', async () => {
 ```typescript
 import { mockAgents } from '@webex/test-fixtures';
 
-test('displays buddy agents for transfer', () => {
+it('displays buddy agents for transfer', () => {
   const { getByText } = render(
     <BuddyAgentList agents={mockAgents} />
   );
@@ -175,7 +177,7 @@ test('displays buddy agents for transfer', () => {
 ```typescript
 import { mockQueueDetails } from '@webex/test-fixtures';
 
-test('allows selecting transfer queue', () => {
+it('allows selecting transfer queue', () => {
   const { getByRole } = render(
     <QueueSelector queues={mockQueueDetails} />
   );
@@ -190,7 +192,7 @@ test('allows selecting transfer queue', () => {
 ```typescript
 import { makeMockAddressBook } from '@webex/test-fixtures';
 
-test('searches address book entries', async () => {
+it('searches address book entries', async () => {
   const mockGetEntries = jest.fn().mockResolvedValue({
     data: [
       { id: 'c1', name: 'John', number: '123' },
@@ -232,7 +234,7 @@ jest.mock('@webex/cc-store', () => ({
   setLastIdleCodeChangeTimestamp: jest.fn(),
 }));
 
-test('user state widget', () => {
+it('user state widget', () => {
   const onStateChange = jest.fn();
   
   render(<UserState onStateChange={onStateChange} />);
@@ -249,7 +251,7 @@ import { render } from '@testing-library/react';
 import { TaskList } from '@webex/cc-task';
 import { mockTask } from '@webex/test-fixtures';
 
-test('task list matches snapshot', async() => {
+it('task list matches snapshot', async() => {
   const { container } = await render(
     <TaskList 
       tasks={[mockTask]}
@@ -323,7 +325,7 @@ import {
 } from '@webex/test-fixtures';
 
 // Use in tests
-test('example', () => {
+it('example', () => {
   expect(mockCC.stationLogin).toBeDefined();
   expect(mockProfile.teams).toHaveLength(1);
   expect(mockTask.data.interactionId).toBe('interaction123');

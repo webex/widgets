@@ -102,7 +102,7 @@ const mockCC: IContactCenter = {
 
 ```typescript
 // Basic usage — teamId from mockProfile.teams (shape: { teamId, teamName }), loginOption from loginVoiceOptions (string[])
-test('calls stationLogin', async () => {
+it('calls stationLogin', async () => {
   const [team] = mockProfile.teams;
   const loginOption = mockProfile.loginVoiceOptions[0];
   await mockCC.stationLogin({ teamId: team.teamId, loginOption, dialNumber: '' });
@@ -110,7 +110,7 @@ test('calls stationLogin', async () => {
 });
 
 // Custom mock implementation
-test('handles login error', async () => {
+it('handles login error', async () => {
   mockCC.stationLogin.mockRejectedValue(new Error('Login failed'));
   
   await expect(mockCC.stationLogin({})).rejects.toThrow('Login failed');
@@ -142,12 +142,12 @@ const mockProfile: Profile = {
 
 ```typescript
 // Use as-is
-test('renders teams', () => {
+it('renders teams', () => {
   render(<TeamSelector teams={mockProfile.teams} />);
 });
 
 // Customize
-test('handles single team', () => {
+it('handles single team', () => {
   const singleTeamProfile = {
     ...mockProfile,
     teams: [mockProfile.teams[0]]
@@ -196,7 +196,7 @@ const mockTask: ITask = {
 
 ```typescript
 // Use task methods
-test('can hold task', async () => {
+it('can hold task', async () => {
   mockTask.hold.mockResolvedValue({ success: true });
   
   await mockTask.hold();
@@ -204,7 +204,7 @@ test('can hold task', async () => {
 });
 
 // Customize task data
-test('handles inbound call', () => {
+it('handles inbound call', () => {
   const inboundTask = {
     ...mockTask,
     data: {
@@ -285,7 +285,7 @@ const makeMockAddressBook = (
 **Usage:**
 
 ```typescript
-test('searches address book', async () => {
+it('searches address book', async () => {
   const mockGetEntries = jest.fn().mockResolvedValue({
     data: [
       { id: 'c1', name: 'Contact1', number: '123' },
@@ -385,7 +385,7 @@ const consultingTask = {
 };
 
 // Use customized fixture
-test('handles consulting state', () => {
+it('handles consulting state', () => {
   render(<CallControl task={consultingTask} />);
   expect(screen.getByText('Consulting...')).toBeInTheDocument();
 });
@@ -567,7 +567,7 @@ const createMockTask = () => ({
   // ... other properties
 });
 
-test('test 1', () => {
+it('test 1', () => {
   const task = createMockTask(); // Fresh instance
 });
 ```
@@ -592,7 +592,7 @@ const createCustomTask = (overrides = {}) => ({
   data: { ...mockTask.data, ...overrides }
 });
 
-test('handles escalated task', () => {
+it('handles escalated task', () => {
   const task = createCustomTask({ escalated: true });
   // ... test logic
 });
