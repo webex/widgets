@@ -704,8 +704,33 @@ const comparePackages = (packagesA, packagesB, changelogA, changelogB, stableVer
     let onlyInACount = 0;
     let onlyInBCount = 0;
     
-    // Helper function to find earliest (first) version of a package in changelog
- // Helper function to find stable version first, then highest pre-release version
+    // Helper function to find earliest version by published date (for full version comparison)
+    const findEarliestVersion = (changelog, packageName) => {
+        if (!changelog[packageName]) return null;
+        
+        const versions = Object.keys(changelog[packageName]);
+        if (versions.length === 0) return null;
+        
+        // Find version with earliest published_date
+        let earliestVersion = versions[0];
+        let earliestDate = changelog[packageName][versions[0]]?.published_date || Infinity;
+        
+        for (const version of versions) {
+            const publishedDate = changelog[packageName][version]?.published_date || Infinity;
+            if (publishedDate < earliestDate) {
+                earliestDate = publishedDate;
+                earliestVersion = version;
+            }
+        }
+        
+        // Debug logging
+        console.log(`[${packageName}] Found earliest version: ${earliestVersion} (date: ${new Date(earliestDate).toISOString()})`);
+        console.log(`[${packageName}] Total versions available: ${versions.length}`);
+        
+        return earliestVersion;
+    };
+    
+    // Helper function to find stable version first, then highest pre-release version
 const findStableVersion = (changelog, packageName, stableVersion) => {
     if (!changelog[packageName]) return null;
     
@@ -744,9 +769,9 @@ const findStableVersion = (changelog, packageName, stableVersion) => {
 };
     
     allPackageNames.forEach(packageName => {
-        // Find the earliest (first) version for this package in each changelog
-        const versionA = findStableVersion(changelogA, packageName, stableVersionA);
-        const versionB = findStableVersion(changelogB, packageName, stableVersionB);
+        // Find the earliest version by published_date for full version comparison
+        const versionA = findEarliestVersion(changelogA, packageName);
+        const versionB = findEarliestVersion(changelogB, packageName);
         
         let status, changeClass;//Declare variables for status label and CSS class
         
@@ -1239,6 +1264,25 @@ const determinePackageStatus = (versionA, versionB, dataA, dataB) => {
  * @param {Object} statusInfo - Status information {status, changeClass}
  * @returns {Object} Package row object
  */
+/**
+ * The following utility functions provide key capabilities for the version/package comparison view:
+ * 
+ * 1. getEffectiveVersion:
+ *    - Purpose: Determines which version to use for a given package and version request.
+ *    - Use: If a requested version exists for a package in the changelog, returns it. If not, finds and returns the latest available version as a fallback.
+ *    - This ensures the UI always displays the closest or most relevant version data even for invalid or outdated requests.
+ *
+ * 2. determinePackageStatus:
+ *    - Purpose: Figures out the "status" and visual CSS class for a package when comparing two sets of package versions.
+ *    - Use: Identifies if a package is only present in set B ("Added"), only in set A ("Removed"), present in both with a different version ("Version Changed"), or unchanged.
+ *    - Powers the comparison table's status/appearance in the UI.
+ *
+ * 3. createPackageComparisonRow:
+ *    - Purpose: Constructs a row object for each package to be displayed in the comparison view.
+ *    - Use: Aggregates name, versions, status, and presentational class into a single object for template/UI rendering.
+ *    - Used when building the comparison results.
+ */
+
 const createPackageComparisonRow = (packageName, versionA, versionB, statusInfo) => {
     return {
         packageName,
@@ -1398,8 +1442,8 @@ const generatePackageComparisonData = (packageName, versionASpecific, versionBSp
   
     // Step 7: Return complete comparison data with commits
     return {
-        versionA: effectiveVersionA,
-        versionB: effectiveVersionB,
+        versionA: effectiveVersionA || versionASelect.value,
+        versionB: effectiveVersionB || versionBSelect.value,
         packages: packages,
         totalPackages: packages.length,
         packageName: packageName,
