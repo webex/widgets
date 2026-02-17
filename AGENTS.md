@@ -51,7 +51,7 @@ If the developer's message contains multiple distinct task types (for example, "
 **E. Understanding Architecture**
 - Developer needs to understand how something works
 - **Read:** Package's `ai-docs/AGENTS.md` (usage) and `ai-docs/ARCHITECTURE.md` (technical details)
-- **Available for:** station-login, user-state, store, cc-components, cc-widgets, ui-logging, test-fixtures
+- **Available for:** station-login, user-state, store, cc-components, cc-widgets, ui-logging, test-fixtures, playwright
 
 ---
 
@@ -182,6 +182,10 @@ Once provided, I'll analyze it and generate the widget accordingly.
 
 **If working with metrics/logging:**
 - Read: `packages/contact-center/ui-logging/ai-docs/AGENTS.md`
+
+**If working with Playwright E2E tests/specs:**
+- Read: `playwright/ai-docs/AGENTS.md`
+- Read relevant specs in: `playwright/ai-docs/specs/`
 
 ---
 
@@ -448,6 +452,10 @@ yarn build
 **If architecture changed:**
 - Update: Relevant architecture documentation as needed
 
+**If Playwright E2E framework/docs changed:**
+- Update: `playwright/ai-docs/AGENTS.md`
+- Update relevant spec files in: `playwright/ai-docs/specs/`
+
 ---
 
 ## Step 7: Validation & Review
@@ -495,7 +503,7 @@ ccWidgets/
 │   └── cc/
 │       ├── samples-cc-react-app/       # React sample
 │       └── samples-cc-wc-app/          # Web Component sample
-├── playwright/                 # E2E tests
+├── playwright/                 # E2E tests with ai-docs/ (AGENTS.md + specs/)
 └── ai-docs/
     ├── AGENTS.md              # This file
     ├── RULES.md               # Repository rules
