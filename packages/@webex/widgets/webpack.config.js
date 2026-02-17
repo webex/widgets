@@ -38,7 +38,7 @@ module.exports = function(env, argv) {
   return merge(baseConfig, {
     cache: true,
     entry: entryPoint,
-    output: mode === 'development' ? undefined : outputConfig[buildType],
+    output: outputConfig[buildType],
 
     // Enable ESM output
     experiments: isDist
