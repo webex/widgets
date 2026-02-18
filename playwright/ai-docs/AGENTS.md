@@ -34,6 +34,7 @@ playwright/
 ├── suites/         # Suite orchestration files; imports test factories
 ├── tests/          # Test factory implementations
 ├── Utils/          # Shared helper modules
+├── wav/            # Audio files for media stream testing
 ├── test-manager.ts # Setup/teardown orchestration
 ├── test-data.ts    # USER_SETS and TEST_SUITE mapping
 ├── constants.ts    # Shared constants/types/timeouts
@@ -106,6 +107,7 @@ Prefer reusable changes in:
 
 Primary setup helpers in `playwright/test-manager.ts`:
 
+- `setup` (universal setup method - orchestrator)
 - `basicSetup`
 - `setupForStationLogin`
 - `setupForIncomingTaskDesktop`
@@ -114,10 +116,34 @@ Primary setup helpers in `playwright/test-manager.ts`:
 - `setupForAdvancedTaskControls`
 - `setupForAdvancedCombinations`
 - `setupForDialNumber`
+- `setupMultiSessionPage`
 - `softCleanup`
 - `cleanup`
 
 Use these before introducing custom setup logic.
+
+---
+
+## Universal Setup Method
+
+The `setup()` method is the foundation for all convenience methods. It accepts a config object:
+
+```typescript
+interface SetupConfig {
+  needsAgent1?: boolean;
+  needsAgent2?: boolean;
+  needsCaller?: boolean;
+  needsExtension?: boolean;
+  needsChat?: boolean;
+  needsMultiSession?: boolean;
+  agent1LoginMode?: LoginMode;
+  enableConsoleLogging?: boolean;
+  enableAdvancedLogging?: boolean;
+  needDialNumberLogin?: boolean;
+}
+```
+
+All convenience methods (`basicSetup`, `setupForAdvancedTaskControls`, etc.) internally call `setup()` with pre-configured options.
 
 ---
 
@@ -143,6 +169,7 @@ Common env keys used by the framework:
 - `PW_CHAT_URL`
 - `PW_ENTRY_POINT1..PW_ENTRY_POINT6` (and additional as needed)
 - `PW_DIAL_NUMBER_LOGIN_USERNAME` / `PW_DIAL_NUMBER_LOGIN_PASSWORD` (dial-number flows)
+- `DIAL_NUMBER_LOGIN_ACCESS_TOKEN` (dial-number access token)
 
 `playwright/global.setup.ts` expands set-scoped env keys and writes access tokens into `.env`.
 
