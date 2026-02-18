@@ -2,309 +2,167 @@
 
 ## Overview
 
-The `playwright` directory contains the end-to-end testing framework for Contact Center widgets in this monorepo. It provides reusable setup/teardown orchestration, shared utilities for agent and task flows, and dynamic project generation by user set.
+The `playwright` directory contains the end-to-end testing framework for Contact Center widgets in this monorepo.
 
-**Package:** `playwright` (internal test framework directory)
+It provides:
+- Project/set-driven execution from `playwright/test-data.ts`
+- Reusable setup/cleanup orchestration via `TestManager`
+- Shared flow utilities under `playwright/Utils/`
+- Suite-level composition via `playwright/suites/`
 
-**Version:** See [root package.json](../../package.json)
-
----
-
-## Why and What is This Used For?
-
-### Purpose
-
-This framework validates real widget behavior in browser-driven flows such as station login, user state transitions, incoming tasks, task controls, transfer/consult operations, and dial-number login. It centralizes environment setup and cleanup through `TestManager` so test files can focus on behavior assertions. It also reduces duplication by exposing utility modules for common interactions and verification patterns.
-
-### Key Capabilities
-
-- **Dynamic project generation** - Playwright projects are built from `playwright/test-data.ts` (`USER_SETS`).
-- **Reusable test setup** - `TestManager` provisions contexts/pages and performs login/widget initialization.
-- **Flow-specific utilities** - Shared helpers for station login, user state, incoming tasks, task controls, and wrapup.
-- **Parallel execution model** - Worker count scales with the number of configured user sets.
-- **Deterministic cleanup and retries** - Built-in retry and cleanup patterns reduce flaky state carry-over.
+**Package context:** Internal E2E framework directory (`playwright/`)
 
 ---
 
-## Examples and Use Cases
+## Why This Exists
 
-### Getting Started
+This framework validates real widget behavior for:
+- Station login
+- User state transitions
+- Incoming telephony/chat/email tasks
+- Task controls (hold, resume, record, end, wrapup)
+- Consult/transfer and advanced combinations
+- Dial number task control flows
+- Multi-session synchronization
 
-#### Basic Usage (Suite + TestManager)
+---
 
-```typescript
-import {test} from '@playwright/test';
-import {TestManager} from '../test-manager';
+## Folder Layout
 
-export default function createStationLoginTests() {
-  let testManager: TestManager;
-
-  test.beforeAll(async ({browser}, testInfo) => {
-    testManager = new TestManager(testInfo.project.name);
-    await testManager.setupForStationLogin(browser);
-  });
-
-  test.afterAll(async () => {
-    await testManager.cleanup();
-  });
-
-  test('should render station login widget', async () => {
-    await testManager.agent1Page.getByTestId('station-login-widget').isVisible();
-  });
-}
+```text
+playwright/
+├── suites/         # Suite orchestration files; imports test factories
+├── tests/          # Test factory implementations
+├── Utils/          # Shared helper modules
+├── test-manager.ts # Setup/teardown orchestration
+├── test-data.ts    # USER_SETS and TEST_SUITE mapping
+├── constants.ts    # Shared constants/types/timeouts
+└── global.setup.ts # OAuth + .env expansion by set
 ```
 
-#### Running Tests
+---
+
+## Current Set-to-Suite Mapping
+
+From `playwright/test-data.ts`:
+
+- `SET_1` -> `digital-incoming-task-tests.spec.ts`
+- `SET_2` -> `task-list-multi-session-tests.spec.ts`
+- `SET_3` -> `station-login-user-state-tests.spec.ts`
+- `SET_4` -> `basic-advanced-task-controls-tests.spec.ts`
+- `SET_5` -> `advanced-task-controls-tests.spec.ts`
+- `SET_6` -> `dial-number-tests.spec.ts`
+
+---
+
+## Common Commands
 
 ```bash
-# Run all configured sets
-
+# Run all E2E tests
 yarn test:e2e
 
-# Run one suite
+# List resolved tests/projects
+yarn playwright test --config=playwright.config.ts --list
 
+# Run one suite
 yarn test:e2e playwright/suites/station-login-user-state-tests.spec.ts
 
-# Run one project (set)
-
+# Run one set/project
 yarn test:e2e --project=SET_3
 ```
 
-### Common Use Cases
+---
 
-#### 1. Incoming Telephony Task Validation
+## Working Patterns
 
-```typescript
-import {createCallTask, acceptIncomingTask, endCallTask} from '../Utils/incomingTaskUtils';
-import {TASK_TYPES} from '../constants';
+### 1. Add Tests to Existing Suite
 
-await createCallTask(testManager.callerPage, process.env[`${testInfo.project.name}_ENTRY_POINT`]!);
-await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CALL);
-await endCallTask(testManager.agent1Page);
-```
+1. Add/update factory in `playwright/tests/*.spec.ts`
+2. Import factory in matching `playwright/suites/*.spec.ts`
+3. Register via `test.describe('...', createFactory)`
 
-**Key Points:**
-- Use `TestManager.setupForIncomingTaskDesktop()` or `setupForIncomingTaskExtension()`.
-- Prefer constants from `constants.ts` for task and state values.
-- Always clean up call state in teardown.
+### 2. Create New Suite
 
-#### 2. State Transition Assertions
+1. Create `playwright/suites/<name>-tests.spec.ts`
+2. Map suite in `playwright/test-data.ts` through `TEST_SUITE`
+3. Validate with `--list`
 
-```typescript
-import {changeUserState, verifyCurrentState} from '../Utils/userStateUtils';
-import {USER_STATES} from '../constants';
+### 3. Add New Set
 
-await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
-await verifyCurrentState(testManager.agent1Page, USER_STATES.AVAILABLE);
-```
+1. Add `SET_X` in `playwright/test-data.ts`
+2. Provide required values (`AGENTS`, `QUEUE_NAME`, `CHAT_URL`, `EMAIL_ENTRY_POINT`, `ENTRY_POINT`, `TEST_SUITE`)
+3. Ensure base env keys exist (for example `PW_ENTRY_POINTX`)
 
-**Key Points:**
-- Use shared helpers instead of direct selector logic.
-- Keep test assertions tied to domain constants.
+### 4. Update Shared Behavior
 
-#### 3. Advanced Consult/Transfer Flow
-
-```typescript
-import {consultOrTransfer, verifyTransferSuccessLogs} from '../Utils/advancedTaskControlUtils';
-
-await consultOrTransfer(testManager.agent1Page, 'agent', 'transfer', process.env[`${testInfo.project.name}_AGENT2_NAME`]!);
-verifyTransferSuccessLogs();
-```
-
-**Key Points:**
-- Use `setupForAdvancedTaskControls()` for extension and second-agent context.
-- Validate both UI state and captured console metrics/log patterns.
-
-#### 4. Multi-Session Setup
-
-```typescript
-await testManager.setupForIncomingTaskMultiSession(browser);
-
-// Validate secondary session page behavior
-await testManager.multiSessionAgent1Page.getByTestId('station-login-widget').isVisible();
-```
-
-**Key Points:**
-- Multi-session tests require `needsMultiSession` flow.
-- Keep both sessions in sync with deterministic setup and cleanup.
-
-#### 5. Defensive Cleanup in Failure Paths
-
-```typescript
-try {
-  // test actions
-} finally {
-  await testManager.softCleanup();
-}
-```
-
-**Key Points:**
-- Use `softCleanup()` between heavy scenarios.
-- Use full `cleanup()` only at end-of-suite boundaries.
-
-### Integration Patterns
-
-#### Pattern 1: Add a New Test File to an Existing Suite
-
-```typescript
-// playwright/suites/station-login-user-state-tests.spec.ts
-import createMyNewTest from '../tests/my-new-test.spec';
-
-test.describe('My New Test', createMyNewTest);
-```
-
-#### Pattern 2: Add a New User Set (Project)
-
-```typescript
-// playwright/test-data.ts
-export const USER_SETS = {
-  // ...existing sets
-  SET_7: {
-    AGENTS: {
-      AGENT1: {username: 'user25', extension: '1025', agentName: 'User25 Agent25'},
-      AGENT2: {username: 'user26', extension: '1026', agentName: 'User26 Agent26'},
-    },
-    QUEUE_NAME: 'Queue e2e 7',
-    CHAT_URL: `${env.PW_CHAT_URL}-e2e-7.html`,
-    EMAIL_ENTRY_POINT: `${env.PW_SANDBOX}.e2e7@gmail.com`,
-    ENTRY_POINT: env.PW_ENTRY_POINT7,
-    TEST_SUITE: 'my-new-suite.spec.ts',
-  },
-};
-```
+Prefer reusable changes in:
+- `playwright/Utils/*.ts`
+- `playwright/test-manager.ts`
+- `playwright/constants.ts`
 
 ---
 
-## Dependencies
+## TestManager Convenience Methods
 
-**Note:** Exact versions are in [root package.json](../../package.json).
+Primary setup helpers in `playwright/test-manager.ts`:
 
-### Runtime Dependencies
+- `basicSetup`
+- `setupForStationLogin`
+- `setupForIncomingTaskDesktop`
+- `setupForIncomingTaskExtension`
+- `setupForIncomingTaskMultiSession`
+- `setupForAdvancedTaskControls`
+- `setupForAdvancedCombinations`
+- `setupForDialNumber`
+- `softCleanup`
+- `cleanup`
 
-| Package | Purpose |
-|---------|---------|
-| `@playwright/test` | Browser automation, assertions, and test runner |
-| `dotenv` | Loads test environment variables from `.env` |
-| `nodemailer` | Creates inbound email tasks for email-channel scenarios |
-
-### Peer Dependencies
-
-| Package | Purpose |
-|---------|---------|
-| `Node.js 20+` | Runtime required by tooling and scripts |
-| `yarn 4+` | Workspace-aware dependency and script runner |
-
-### Development Dependencies
-
-Key tooling lives in the root workspace:
-- TypeScript
-- Jest (unit/tooling checks)
-- ESLint/style tooling
+Use these before introducing custom setup logic.
 
 ---
 
-## API Reference
+## Key Utility Modules
 
-### Core Class: `TestManager`
-
-| Method | Parameters | Returns | Description |
-|--------|------------|---------|-------------|
-| `new TestManager()` | `projectName: string, maxRetries?: number` | `TestManager` | Creates manager bound to a Playwright project/set name |
-| `setup()` | `browser: Browser, config?: SetupConfig` | `Promise<void>` | Universal context/page setup with configurable resources |
-| `basicSetup()` | `browser: Browser` | `Promise<void>` | Agent1-only desktop setup |
-| `setupForStationLogin()` | `browser: Browser, isDesktopMode?: boolean` | `Promise<void>` | Setup specialized for station login flows |
-| `setupForIncomingTaskDesktop()` | `browser: Browser` | `Promise<void>` | Setup for desktop incoming task flows |
-| `setupForIncomingTaskExtension()` | `browser: Browser` | `Promise<void>` | Setup for extension incoming task flows |
-| `setupForIncomingTaskMultiSession()` | `browser: Browser` | `Promise<void>` | Setup for extension + multi-session flows |
-| `setupForAdvancedTaskControls()` | `browser: Browser` | `Promise<void>` | Setup for consult/transfer flows with advanced logging |
-| `setupForAdvancedCombinations()` | `browser: Browser` | `Promise<void>` | Setup for advanced mixed control combinations |
-| `setupForDialNumber()` | `browser: Browser` | `Promise<void>` | Setup for dial-number login task flows |
-| `setupMultiSessionPage()` | none | `Promise<void>` | Initializes multi-session page when already provisioned |
-| `softCleanup()` | none | `Promise<void>` | Clears stray tasks without full logout/context teardown |
-| `cleanup()` | none | `Promise<void>` | Full cleanup: stray tasks, logout, close pages/contexts |
-
-### `SetupConfig` (for `TestManager.setup`)
-
-| Property | Type | Required | Default | Description |
-|----------|------|----------|---------|-------------|
-| `needsAgent1` | `boolean` | No | `true` | Create/setup primary agent page |
-| `needsAgent2` | `boolean` | No | `false` | Create/setup secondary agent page |
-| `needsCaller` | `boolean` | No | `false` | Create/setup caller page |
-| `needsExtension` | `boolean` | No | `false` | Create/setup extension page |
-| `needsChat` | `boolean` | No | `false` | Create/setup chat launcher page |
-| `needsMultiSession` | `boolean` | No | `false` | Create/setup second session for agent1 |
-| `needDialNumberLogin` | `boolean` | No | `false` | Create/setup dial-number login page |
-| `agent1LoginMode` | `LoginMode` | No | `LOGIN_MODE.DESKTOP` | Login mode for agent1 setup |
-| `enableConsoleLogging` | `boolean` | No | `true` | Capture page console logs |
-| `enableAdvancedLogging` | `boolean` | No | `false` | Capture advanced transfer/consult log patterns |
-
-### Data Configuration: `USER_SETS`
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `AGENTS.AGENT1/AGENT2.username` | `string` | Sandbox username for each agent |
-| `AGENTS.AGENT1/AGENT2.extension` | `string` | Extension value for extension-mode tests |
-| `AGENTS.AGENT1/AGENT2.agentName` | `string` | Display name used in assertions/transfers |
-| `QUEUE_NAME` | `string` | Queue for routing validations |
-| `CHAT_URL` | `string` | Chat launcher URL for digital task tests |
-| `EMAIL_ENTRY_POINT` | `string` | Email target for inbound email task creation |
-| `ENTRY_POINT` | `string \| undefined` | Entry point number used for inbound telephony routing |
-| `TEST_SUITE` | `string` | Suite file under `playwright/suites/` mapped to the set |
-
-### Utility Modules (Selected)
-
-| Module | Function(s) | Description |
-|--------|-------------|-------------|
-| `Utils/initUtils.ts` | `loginViaAccessToken`, `oauthLogin`, `initialiseWidgets` | Auth and widget bootstrapping |
-| `Utils/stationLoginUtils.ts` | `desktopLogin`, `extensionLogin`, `dialLogin`, `stationLogout` | Station login/logout actions |
-| `Utils/userStateUtils.ts` | `changeUserState`, `verifyCurrentState` | Agent state changes and assertions |
-| `Utils/incomingTaskUtils.ts` | `createCallTask`, `createChatTask`, `acceptIncomingTask`, `submitRonaPopup` | Incoming task lifecycle utilities |
-| `Utils/taskControlUtils.ts` | `holdCallToggle`, `recordCallToggle`, `endTask`, log verifiers | Basic task control and logging checks |
-| `Utils/advancedTaskControlUtils.ts` | `consultOrTransfer`, `cancelConsult`, log verifiers | Advanced consult/transfer controls |
-| `Utils/helperUtils.ts` | `waitForState`, `handleStrayTasks`, `pageSetup`, `dismissOverlays` | Polling, cleanup, and setup helpers |
-| `Utils/wrapupUtils.ts` | `submitWrapup` | Wrapup submission helper |
+- `Utils/initUtils.ts`
+- `Utils/stationLoginUtils.ts`
+- `Utils/userStateUtils.ts`
+- `Utils/incomingTaskUtils.ts`
+- `Utils/taskControlUtils.ts`
+- `Utils/advancedTaskControlUtils.ts`
+- `Utils/helperUtils.ts`
+- `Utils/wrapupUtils.ts`
 
 ---
 
-## Installation
+## Environment Prerequisites
 
-This framework is part of the repository and is not published as a standalone npm package.
+Common env keys used by the framework:
 
-```bash
-yarn install
-```
+- `PW_SANDBOX`
+- `PW_SANDBOX_PASSWORD`
+- `PW_CHAT_URL`
+- `PW_ENTRY_POINT1..PW_ENTRY_POINT6` (and additional as needed)
+- `PW_DIAL_NUMBER_LOGIN_USERNAME` / `PW_DIAL_NUMBER_LOGIN_PASSWORD` (dial-number flows)
 
-### Required Environment Variables
-
-Set these in the root `.env` file:
-
-```env
-PW_CHAT_URL=<chat-base-url>
-PW_SANDBOX=<sandbox-name>
-PW_SANDBOX_PASSWORD=<sandbox-password>
-PW_ENTRY_POINT1=<entry-point>
-PW_ENTRY_POINT2=<entry-point>
-PW_ENTRY_POINT3=<entry-point>
-PW_ENTRY_POINT4=<entry-point>
-PW_ENTRY_POINT5=<entry-point>
-PW_ENTRY_POINT6=<entry-point>
-```
-
-Project-scoped OAuth tokens/user values are generated and consumed by `global.setup.ts` + project naming conventions.
+`playwright/global.setup.ts` expands set-scoped env keys and writes access tokens into `.env`.
 
 ---
 
-## Additional Resources
+## Documentation Rules
 
-For detailed framework behavior, project mapping, and troubleshooting, see [playwright README](../README.md).
+When Playwright behavior changes:
 
-For conference test planning and assumptions, see [multiparty conference spec](./specs/multiparty-conference.spec.md).
-
-For implementation-level details, read:
-- [playwright.config.ts](../../playwright.config.ts)
-- [playwright/test-manager.ts](../test-manager.ts)
-- [playwright/test-data.ts](../test-data.ts)
+- Update this file (`playwright/ai-docs/AGENTS.md`) for usage/runbook changes
+- Update `playwright/ai-docs/ARCHITECTURE.md` for technical/flow changes
 
 ---
 
-_Last Updated: 2026-02-17_
+## Related
+
+- Framework README: [../README.md](../README.md)
+- Architecture: [./ARCHITECTURE.md](./ARCHITECTURE.md)
+- Root Playwright template flow: [../../ai-docs/templates/playwright/00-master.md](../../ai-docs/templates/playwright/00-master.md)
+
+---
+
+_Last Updated: 2026-02-18_

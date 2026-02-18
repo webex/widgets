@@ -10,7 +10,8 @@ Templates for generating and maintaining contact center widgets and components.
 templates/
 ├── new-widget/          # Widget generation (7 modules)
 ├── existing-widget/     # Bug fixes, features (2 modules)
-└── documentation/       # Documentation generation (2 modules, reusable for all packages)
+├── documentation/       # Documentation generation (2 modules, reusable for all packages)
+└── playwright/           # Playwright test-spec generation templates
 ```
 
 ## Templates
@@ -46,6 +47,17 @@ templates/
 - [create-agent-md.md](./documentation/create-agent-md.md) - Generate AGENTS.md
 - [create-architecture-md.md](./documentation/create-architecture-md.md) - Generate ARCHITECTURE.md
 
+### 4. Playwright Test Work
+
+**Directory:** [playwright/](./playwright/)
+
+**Modules:**
+- [00-master.md](./playwright/00-master.md) - Orchestrator and simplified workflow
+- [01-pre-questions.md](./playwright/01-pre-questions.md) - Mandatory requirement intake
+- [02-test-implementation.md](./playwright/02-test-implementation.md) - Suite/test/set implementation
+- [03-framework-and-doc-updates.md](./playwright/03-framework-and-doc-updates.md) - Framework + docs updates
+- [04-validation.md](./playwright/04-validation.md) - Validation checklist
+
 ---
 
 ## Usage
@@ -58,6 +70,8 @@ templates/
 
 **Documentation Only:** Use [documentation/](./documentation/) templates
 
+**Playwright Spec/Test Tasks:** Start with [playwright/00-master.md](./playwright/00-master.md)
+
 ## Pattern References
 
 - [TypeScript Patterns](../patterns/typescript-patterns.md)
@@ -68,4 +82,4 @@ templates/
 
 ---
 
-_Last Updated: 2025-11-26_
+_Last Updated: 2026-02-18_

@@ -51,7 +51,14 @@ If the developer's message contains multiple distinct task types (for example, "
 **E. Understanding Architecture**
 - Developer needs to understand how something works
 - **Read:** Package's `ai-docs/AGENTS.md` (usage) and `ai-docs/ARCHITECTURE.md` (technical details)
+- **Playwright exception:** Read `playwright/ai-docs/AGENTS.md` and `playwright/ai-docs/ARCHITECTURE.md`
 - **Available for:** station-login, user-state, store, cc-components, cc-widgets, ui-logging, test-fixtures, playwright
+
+**F. Playwright E2E Test Spec / Test Work**
+- Developer wants to create/update Playwright test specs or implement Playwright E2E tests
+- **Route to:** [templates/playwright/00-master.md](./ai-docs/templates/playwright/00-master.md)
+- **Follow:** Simplified Playwright workflow (new suite, new tests, update tests, user-set/env, framework updates, docs, validation)
+- **Task values:** `new_test_suite`, `new_test_file`, `add_scenarios_to_existing_test`, `update_existing_test_logic`, `add_or_update_user_set`, `add_or_update_utils`, `add_or_update_test_manager`, `add_or_update_constants`, `add_or_update_global_setup`, `update_playwright_docs`, `stabilize_flaky_tests`
 
 ---
 
@@ -185,7 +192,8 @@ Once provided, I'll analyze it and generate the widget accordingly.
 
 **If working with Playwright E2E tests/specs:**
 - Read: `playwright/ai-docs/AGENTS.md`
-- Read relevant specs in: `playwright/ai-docs/specs/`
+- Read: `playwright/ai-docs/ARCHITECTURE.md`
+- Use template: `ai-docs/templates/playwright/00-master.md`
 
 ---
 
@@ -454,7 +462,8 @@ yarn build
 
 **If Playwright E2E framework/docs changed:**
 - Update: `playwright/ai-docs/AGENTS.md`
-- Update relevant spec files in: `playwright/ai-docs/specs/`
+- Update: `playwright/ai-docs/ARCHITECTURE.md`
+- Update relevant modules in: `ai-docs/templates/playwright/`
 
 ---
 
@@ -503,12 +512,12 @@ ccWidgets/
 │   └── cc/
 │       ├── samples-cc-react-app/       # React sample
 │       └── samples-cc-wc-app/          # Web Component sample
-├── playwright/                 # E2E tests with ai-docs/ (AGENTS.md + specs/)
+├── playwright/                 # E2E tests with ai-docs/ (AGENTS.md + ARCHITECTURE.md)
 └── ai-docs/
     ├── AGENTS.md              # This file
     ├── RULES.md               # Repository rules
     ├── patterns/              # Repo-wide patterns
-    ├── templates/             # Code generation templates
+    ├── templates/             # Code generation templates (widgets + Playwright)
     └── contact-centre-sdk-apis/  # SDK API reference
 ```
 
@@ -575,4 +584,4 @@ ccWidgets/
 
 ---
 
-_Last Updated: 2025-11-26_
+_Last Updated: 2026-02-18_

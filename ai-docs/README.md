@@ -176,6 +176,7 @@ Widget (Observer) → Custom Hook (Business Logic) → Component (UI) → Store 
 
 **Repository Patterns:**
 - `ai-docs/patterns/` - TypeScript, MobX, React, Web Components, Testing patterns
+- `ai-docs/templates/` - Task templates (new widget, bug fix, feature enhancement, documentation, Playwright spec generation)
 
 **Component Documentation:**
 - `packages/*/ai-docs/README.md` - API and usage
@@ -199,4 +200,4 @@ See [AGENTS.md](./AGENTS.md) for AI navigation guidance, task-based workflows, a
 
 ---
 
-_Last Updated: 2025-11-23_
+_Last Updated: 2026-02-18_
