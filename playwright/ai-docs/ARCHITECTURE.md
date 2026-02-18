@@ -35,6 +35,7 @@ playwright/
 ├── test-data.ts
 ├── constants.ts
 ├── global.setup.ts
+├── wav/
 └── ai-docs/
     ├── AGENTS.md
     └── ARCHITECTURE.md
@@ -86,6 +87,8 @@ This avoids manual per-project duplication in config.
 - Multi-session page
 - Dial-number page
 
+Page types are defined in `PAGE_TYPES` constant (see Constants section).
+
 ### Main setup entrypoints
 
 - `setup(browser, config)` (generic)
@@ -97,6 +100,7 @@ This avoids manual per-project duplication in config.
 - `setupForAdvancedTaskControls`
 - `setupForAdvancedCombinations`
 - `setupForDialNumber`
+- `setupMultiSessionPage`
 
 ### Cleanup entrypoints
 
@@ -127,14 +131,34 @@ This avoids manual per-project duplication in config.
 ## Constants and Shared Types
 
 `playwright/constants.ts` centralizes:
+- Base configuration (`BASE_URL`, `CALL_URL`)
 - User states (`USER_STATES`)
+- Theme colors (`THEME_COLORS`)
 - Login modes (`LOGIN_MODE`)
+- Page types (`PAGE_TYPES`)
 - Task types (`TASK_TYPES`)
 - Wrapup reasons (`WRAPUP_REASONS`)
+- RONA options (`RONA_OPTIONS`)
+- Console patterns (`CONSOLE_PATTERNS`)
 - Timeout values (for setup/tasks/operations)
-- Common test data strings
+- Common test data strings (`TEST_DATA`)
 
 Tests should consume these constants rather than hardcoding values.
+
+---
+
+## Page Type System
+
+`PAGE_TYPES` constant defines type-safe identifiers for all managed pages:
+- `AGENT1` - Main agent desktop/extension page
+- `AGENT2` - Second agent page (for multi-agent scenarios)
+- `CALLER` - Extension page for making calls
+- `EXTENSION` - Agent1 extension login page
+- `CHAT` - Chat widget page
+- `MULTI_SESSION` - Multi-session agent1 page
+- `DIAL_NUMBER` - Dial number login page
+
+These types ensure consistency across `TestManager` context creation and page management.
 
 ---
 
