@@ -11,7 +11,7 @@
     "clean:dist": "rm -rf dist",
     "build:src": "yarn clean:dist && webpack ./src/index.js --env buildType=dist --mode production",
     "demo:serve": "webpack serve ./demo/App.jsx --env buildType=demo --mode development",
-    "demo:build": "webpack ./demo/App.jsx --env buildType=demo --mode production",
+    "demo:build": "webpack ./demo/App.jsx --env buildType=demo --mode development",
     "deploy:npm": "yarn npm publish",
     "release": "semantic-release",
     "release:debug": "semantic-release --debug",

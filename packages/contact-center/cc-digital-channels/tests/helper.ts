@@ -1,7 +1,7 @@
 import {renderHook, waitFor} from '@testing-library/react';
 import {initializeApp} from 'cc-digital-interactions';
 
-import {useDigitalChannelsInit} from '../src/helper';
+import {useDigitalChannelsData, useDigitalChannelsInit} from '../src/helper';
 
 // Mock the cc-digital-interactions module
 jest.mock('cc-digital-interactions', () => ({
@@ -31,7 +31,6 @@ describe('useDigitalChannelsInit', () => {
     logger: mockLogger,
     isDigitalChannelsInitialized: false,
     setDigitalChannelsInitialized: mockSetDigitalChannelsInitialized,
-    skipInit: false,
   };
 
   beforeEach(() => {
@@ -93,6 +92,134 @@ describe('useDigitalChannelsInit', () => {
         expect.stringContaining('Failed to initialize Digital Channels app'),
         expect.any(Object)
       );
+    });
+  });
+
+  it('should log unknown error message when initialization throws non-Error', async () => {
+    (initializeApp as jest.Mock).mockRejectedValueOnce('failure');
+
+    renderHook(() => useDigitalChannelsInit(defaultProps));
+
+    await waitFor(() => {
+      expect(mockLogger.error).toHaveBeenCalledWith(expect.stringContaining('Unknown error'), expect.any(Object));
+    });
+  });
+});
+
+describe('useDigitalChannelsData', () => {
+  const mockLogger = {
+    error: jest.fn(),
+  };
+
+  const defaultTask = {
+    data: {
+      interaction: {
+        callAssociatedDetails: {
+          mediaResourceId: 'test-conversation-id',
+        },
+      },
+    },
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should fetch access token and extract conversationId', async () => {
+    const getAccessToken = jest.fn().mockResolvedValue('jwt-token');
+
+    const {result} = renderHook(() =>
+      useDigitalChannelsData({
+        getAccessToken,
+        currentTask: defaultTask,
+        logger: mockLogger,
+      })
+    );
+
+    await waitFor(() => {
+      expect(result.current.jwtToken).toBe('jwt-token');
+    });
+
+    expect(result.current.conversationId).toBe('test-conversation-id');
+    expect(result.current.tokenError).toBe(false);
+    expect(result.current.hasError).toBe(false);
+  });
+
+  it('should return empty conversationId when currentTask is missing', async () => {
+    const getAccessToken = jest.fn().mockResolvedValue('jwt-token');
+
+    const {result} = renderHook(() =>
+      useDigitalChannelsData({
+        getAccessToken,
+        currentTask: null,
+        logger: mockLogger,
+      })
+    );
+
+    await waitFor(() => {
+      expect(result.current.jwtToken).toBe('jwt-token');
+    });
+    expect(result.current.conversationId).toBe('');
+  });
+
+  it('should return empty conversationId when mediaResourceId is missing', async () => {
+    const getAccessToken = jest.fn().mockResolvedValue('jwt-token');
+    const taskWithoutMediaId = {
+      data: {
+        interaction: {
+          callAssociatedDetails: {},
+        },
+      },
+    };
+
+    const {result} = renderHook(() =>
+      useDigitalChannelsData({
+        getAccessToken,
+        currentTask: taskWithoutMediaId,
+        logger: mockLogger,
+      })
+    );
+
+    await waitFor(() => {
+      expect(result.current.jwtToken).toBe('jwt-token');
+    });
+    expect(result.current.conversationId).toBe('');
+  });
+
+  it('should handle token fetch error and set error flags', async () => {
+    const getAccessToken = jest.fn().mockRejectedValue(new Error('token error'));
+
+    const {result} = renderHook(() =>
+      useDigitalChannelsData({
+        getAccessToken,
+        currentTask: defaultTask,
+        logger: mockLogger,
+      })
+    );
+
+    await waitFor(() => {
+      expect(result.current.tokenError).toBe(true);
+    });
+
+    expect(result.current.hasError).toBe(true);
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      '[DIGITAL_CHANNELS] ❌ Failed to get access token',
+      expect.any(Object)
+    );
+  });
+
+  it('should handle token fetch error gracefully when logger is undefined', async () => {
+    const getAccessToken = jest.fn().mockRejectedValue(new Error('token error'));
+
+    const {result} = renderHook(() =>
+      useDigitalChannelsData({
+        getAccessToken,
+        currentTask: defaultTask,
+      })
+    );
+
+    await waitFor(() => {
+      expect(result.current.tokenError).toBe(true);
     });
   });
 });
