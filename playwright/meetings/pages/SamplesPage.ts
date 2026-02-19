@@ -9,6 +9,8 @@ export class SamplesPage {
   readonly meetingNavItem: Locator;
   readonly meetingDestInput: Locator;
 
+  TEST_URL = 'https://localhost:9000/';
+
   constructor(page: Page) {
     this.page = page;
     this.accessToken = page.locator('input[placeholder="Access Token"]');
@@ -20,7 +22,7 @@ export class SamplesPage {
   }
 
   async open(): Promise<void> {
-    await this.page.goto(process.env.WEBEX_TEST_PAGE_URL, {timeout: 60000});
+    await this.page.goto(TEST_URL, {timeout: 60000});
   }
 
   async setAccessToken(accessToken: string): Promise<void> {
