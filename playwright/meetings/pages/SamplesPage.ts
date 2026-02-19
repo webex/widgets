@@ -1,5 +1,6 @@
 import {Page, Locator, expect} from '@playwright/test';
 
+const TEST_URL = 'https://localhost:9000/';
 export class SamplesPage {
   readonly page: Page;
   readonly accessToken: Locator;
@@ -8,8 +9,6 @@ export class SamplesPage {
   readonly sidebarNav: Locator;
   readonly meetingNavItem: Locator;
   readonly meetingDestInput: Locator;
-
-  TEST_URL = 'https://localhost:9000/';
 
   constructor(page: Page) {
     this.page = page;
