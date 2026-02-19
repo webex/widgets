@@ -4,14 +4,14 @@
   "engines": {
     "node": ">=20.13.1"
   },
-  "main": "dist/webexWidgets.esm.js",
-  "module": "dist/webexWidgets.esm.js",
+  "main": "dist/webexWidgets.mjs",
+  "module": "dist/webexWidgets.mjs",
   "scripts": {
     "clean": "rm -rf dist && rm -rf node_modules",
     "clean:dist": "rm -rf dist",
     "build:src": "yarn clean:dist && webpack ./src/index.js --env buildType=dist --mode production",
     "demo:serve": "webpack serve ./demo/App.jsx --env buildType=demo --mode development",
-    "demo:build": "webpack ./demo/App.jsx --env buildType=demo --mode production",
+    "demo:build": "webpack ./demo/App.jsx --env buildType=demo --mode development",
     "deploy:npm": "yarn npm publish",
     "release": "semantic-release",
     "release:debug": "semantic-release --debug",
@@ -92,7 +92,6 @@
     "husky": "^4.2.3",
     "mini-css-extract-plugin": "^2.10.0",
     "os-browserify": "^0.3.0",
-    "postcss": "^8.2.13",
     "prettier": "^1.19.1",
     "prop-types": "^15.7.2",
     "querystring-es3": "^0.2.1",

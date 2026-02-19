@@ -100,4 +100,35 @@ setup('OAuth', async ({browser}) => {
       await page.close();
     }
   }
+
+  // OAuth for Dial Number Login user
+  const dialNumberUsername = process.env.PW_DIAL_NUMBER_LOGIN_USERNAME;
+  const dialNumberPassword = process.env.PW_DIAL_NUMBER_LOGIN_PASSWORD;
+
+  if (dialNumberUsername && dialNumberPassword) {
+    const page = await browser.newPage();
+
+    await oauthLogin(page, dialNumberUsername, dialNumberPassword);
+
+    await page.getByRole('textbox').click();
+    const accessToken = await page.getByRole('textbox').inputValue();
+
+    const envPath = path.resolve(__dirname, '../.env');
+    let envContent = '';
+    if (fs.existsSync(envPath)) {
+      envContent = fs.readFileSync(envPath, 'utf8');
+      // Remove any existing DIAL_NUMBER_LOGIN_ACCESS_TOKEN line
+      const accessTokenPattern = new RegExp(`^DIAL_NUMBER_LOGIN_ACCESS_TOKEN=.*$\\n?`, 'm');
+      envContent = envContent.replace(accessTokenPattern, '');
+
+      // Ensure trailing newline
+      if (!envContent.endsWith('\n')) envContent += '\n';
+    }
+    envContent += `DIAL_NUMBER_LOGIN_ACCESS_TOKEN=${accessToken}\n`;
+    // Clean up multiple consecutive empty lines
+    envContent = envContent.replace(/\n{3,}/g, '\n\n');
+    fs.writeFileSync(envPath, envContent, 'utf8');
+
+    await page.close();
+  }
 });

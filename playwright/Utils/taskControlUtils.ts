@@ -402,22 +402,26 @@ export async function verifyRemoteAudioTracks(page: Page): Promise<void> {
 export async function verifyHoldMusicElement(page: Page): Promise<void> {
   try {
     const holdMusicExists = await page.evaluate(() => {
-      // Look for audio elements with both autoplay and loop attributes
-      const audioElements = document.querySelectorAll('audio[autoplay][loop]');
+      // Look for remote-audio element which handles hold music
+      const remoteAudio = document.getElementById('remote-audio') as HTMLAudioElement;
 
-      if (audioElements.length === 0) {
+      if (!remoteAudio) {
         return false;
       }
 
-      // Check if at least one element has the correct attributes
-      return Array.from(audioElements).some((audio) => {
-        const a = audio as HTMLAudioElement;
-        return a.hasAttribute('autoplay') && a.hasAttribute('loop') && a.autoplay === true && a.loop === true;
-      });
+      // Check if the audio element has an active srcObject with active tracks
+      const srcObject = remoteAudio.srcObject as MediaStream;
+      if (!srcObject) {
+        return false;
+      }
+
+      // Verify there are active audio tracks
+      const audioTracks = srcObject.getAudioTracks();
+      return audioTracks.length > 0 && audioTracks.some((track) => track.enabled && track.readyState === 'live');
     });
 
     if (!holdMusicExists) {
-      throw new Error('❌ No hold music audio elements found with autoplay and loop attributes');
+      throw new Error('❌ No hold music audio found on remote-audio element');
     }
   } catch (error) {
     throw new Error(`❌ Hold music element verification failed: ${error.message}`);

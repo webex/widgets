@@ -13,6 +13,7 @@ const PKG_SRC = [
   'packages/contact-center/task/src',
   'packages/contact-center/cc-components/src',
   'packages/contact-center/ui-logging/src',
+  'packages/contact-center/cc-digital-channels/src',
 ].map((p) => resolveMonorepoRoot(p));
 
 module.exports = {
@@ -37,6 +38,7 @@ module.exports = {
       vm: require.resolve('vm-browserify'),
       util: require.resolve('util/'),
       url: require.resolve('url/'),
+      worker_threads: false,
     },
     extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
     alias: {
@@ -47,7 +49,16 @@ module.exports = {
       '@webex/cc-task': path.resolve(__dirname, '../../../packages/contact-center/task/src'),
       '@webex/cc-components': path.resolve(__dirname, '../../../packages/contact-center/cc-components/src'),
       '@webex/cc-ui-logging': path.resolve(__dirname, '../../../packages/contact-center/ui-logging/src'),
+      '@webex/cc-digital-channels': path.resolve(__dirname, '../../../packages/contact-center/cc-digital-channels/src'),
+      // Ensure single React instance across all packages
+      react: resolveMonorepoRoot('node_modules/react'),
+      'react-dom': resolveMonorepoRoot('node_modules/react-dom'),
+      // Force ES module version for proper named exports
+      'cc-digital-interactions': resolveMonorepoRoot('node_modules/cc-digital-interactions/dist/wxengage-conversations.es.js'),
+      'process/browser': require.resolve('process/browser.js'),
     },
+    // Prefer ES modules over CommonJS/UMD
+    mainFields: ['module', 'browser', 'main'],
     symlinks: true,
   },
   module: {
@@ -55,7 +66,7 @@ module.exports = {
       // TS/TSX → transpile only (skip type-checking)
       {
         test: /\.[jt]sx?$/,
-        include: [path.resolve(__dirname, 'src'), ...PKG_SRC],
+        include: [path.resolve(__dirname, 'src'), ...PKG_SRC, resolveMonorepoRoot('node_modules/xxh3-ts')],
         loader: 'ts-loader',
         options: {
           transpileOnly: true, // ✅ disables type-checking
@@ -124,6 +135,8 @@ module.exports = {
     }),
     new ProvidePlugin({
       process: 'process/browser',
+      React: 'react',
+      ReactDOM: 'react-dom',
     }),
     new HotModuleReplacementPlugin(),
   ],
