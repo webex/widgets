@@ -33,13 +33,13 @@
 
 ::-webkit-scrollbar {
     -webkit-appearance: none;
-    width: 7px;
+    width: 0.4375rem; /* 7px */
 }
 
 ::-webkit-scrollbar-thumb {
-    border-radius: 4px;
+    border-radius: 0.25rem; /* 4px */
     background-color: rgba(0, 0, 0, .5);
-    box-shadow: 0 0 1px rgba(255, 255, 255, .5);
+    box-shadow: 0 0 0.0625rem rgba(255, 255, 255, .5); /* 1px */
 }
 
 body {
@@ -60,24 +60,24 @@ body {
     top: 0;
     background-color: var(--color-webex-blue);
     color: white;
-    padding: 20px;
+    padding: 1.25rem; /* 20px */
     margin: 0;
     text-align: left; /* Align the title text to the left */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 0.125rem 0.3125rem rgba(0, 0, 0, 0.2); /* 2px 5px */
     font-size: 1.5rem;
     z-index: 1000; /* Ensure the header is above other content */
 }
 
 #body {
     flex: 1;
-    padding: 20px;
+    padding: 1.25rem; /* 20px */
 }
 
 #footer {
     background-color: var(--color-background);
     text-align: center;
-    padding: 10px;
-    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
+    padding: 0.625rem; /* 10px */
+    box-shadow: 0 -0.125rem 0.3125rem rgba(0, 0, 0, 0.2); /* -2px 5px */
 }
 
 #footer a {
@@ -93,33 +93,33 @@ body {
 /* Rest of the CSS for form and results remains the same */
 
 form#search-form {
-    padding: 10px;
+    padding: 0.625rem; /* 10px */
 }
 
 label {
     display: block;
-    margin-bottom: 8px;
+    margin-bottom: 0.5rem; /* 8px */
     color: #333;
 }
 
 input[type="text"],
 select {
     width: 100%;
-    padding: 10px;
-    margin-bottom: 20px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    padding: 0.625rem; /* 10px */
+    margin-bottom: 1.25rem; /* 20px */
+    border: 0.0625rem solid #ccc; /* 1px */
+    border-radius: 0.25rem; /* 4px */
     box-sizing: border-box;
 }
 
 button {
     background-color: var(--color-webex-blue);
     color: white;
-    padding: 10px 20px;
+    padding: 0.625rem 1.25rem; /* 10px 20px */
     border: none;
-    border-radius: 4px;
+    border-radius: 0.25rem; /* 4px */
     cursor: pointer;
-    font-size: 16px;
+    font-size: 1rem; /* 16px */
     transition: background-color 0.3s;
 }
 
@@ -133,11 +133,11 @@ table {
 }
 
 table, th, td {
-    border: 1px solid #ccc;
+    border: 0.0625rem solid #ccc; /* 1px */
 }
 
 th, td {
-    padding: 10px;
+    padding: 0.625rem; /* 10px */
     text-align: left;
 }
 
@@ -147,77 +147,77 @@ th {
 
 .search-container {
     background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 0.5rem; /* 8px */
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.1); /* 2px 4px */
     margin: auto;
     width: 100%;
-    padding: 20px; /* Add padding for spacing */
+    padding: 1.25rem; /* 20px */
     box-sizing: border-box; /* Include padding in the width calculation */
 }
 
 .form-row {
     display: flex;
     flex-wrap: wrap;
-    margin-bottom: 20px;
+    margin-bottom: 1.25rem; /* 20px */
 }
 
 .form-group {
     flex: 1 1 25%; /* Each form group will take up half the width of the form-row */
-    padding: 0 10px;
+    padding: 0 0.625rem; /* 10px */
     box-sizing: border-box;
 }
 
 .full-width {
-    margin: 0 10px; /* Add margin to maintain spacing */
+    margin: 0 0.625rem; /* 10px */
 }
 
 .results-container {
     width: 100%;
     background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 1.25rem; /* 20px */
+    border-radius: 0.5rem; /* 8px */
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.1); /* 2px 4px */
     margin: auto;
-    margin-top: 20px;
+    margin-top: 1.25rem; /* 20px */
 }
 
 /* Responsive styles */
-@media (max-width: 768px) {
+@media (max-width: 48rem) { /* 768px */
     .form-group {
         flex: 1 1 100%; /* Each form group will take up the full width on smaller screens */
-        padding: 0 10px; /* Adjust padding for smaller screens */
+        padding: 0 0.625rem; /* 10px */
     }
 }
 
 .changelog-item {
-    padding-bottom: 20px;
-    margin-bottom: 20px; /* Space between changelog items */
-    border-bottom: 3px solid #e4e5e6;
+    padding-bottom: 1.25rem; /* 20px */
+    margin-bottom: 1.25rem; /* 20px */
+    border-bottom: 0.1875rem solid #e4e5e6; /* 3px */
 }
 
 .changelog-item h2, .changelog-item h3 {
     color: #333;
-    margin-bottom: 10px;
+    margin-bottom: 0.625rem; /* 10px */
 }
 
 .changelog-item .commits{
-    margin-top: 20px;
-    margin-bottom: 20px;
+    margin-top: 1.25rem; /* 20px */
+    margin-bottom: 1.25rem; /* 20px */
 }
 
 .changelog-item .commits ul {
-    margin-top: 10px;
+    margin-top: 0.625rem; /* 10px */
     list-style-type: none;
     padding: 0;
-    max-height: 200px;
+    max-height: 12.5rem; /* 200px */
     overflow: scroll;
 }
 
 .changelog-item .commits ul li {
     background-color: #eee;
-    margin-bottom: 5px;
-    padding: 10px;
-    border-radius: 3px;
+    margin-bottom: 0.3125rem; /* 5px */
+    padding: 0.625rem; /* 10px */
+    border-radius: 0.1875rem; /* 3px */
     word-wrap: break-word;
 }
 
@@ -230,10 +230,10 @@ th {
 }
 
 .changelog-item .related-packages .table-wrapper{
-    max-height: 200px;
+    max-height: 12.5rem; /* 200px */
     overflow: scroll;
-    border: 1px solid #ddd;
-    margin-top: 10px;
+    border: 0.0625rem solid #ddd; /* 1px */
+    margin-top: 0.625rem; /* 10px */
 }
 
 .changelog-item .related-packages table {
@@ -244,15 +244,15 @@ th {
 
 .changelog-item table thead{
     position: sticky;
-    top: -1px;
+    top: -0.0625rem; /* -1px */
 }
 
 .changelog-item th, .changelog-item td {
-    border: 1px solid #ddd;
+    border: 0.0625rem solid #ddd; /* 1px */
 }
 
 .changelog-item th, .changelog-item td {
-    padding: 10px;
+    padding: 0.625rem; /* 10px */
     text-align: left;
 }
 
@@ -271,19 +271,19 @@ th {
 .copy-button {
     display: inline;
     position: absolute;
-    margin-left: 5px;
+    margin-left: 0.3125rem; /* 5px */
     cursor: pointer;
-    right: 0px;
+    right: 0;
 }
 
 .copy-button img {
-    width: 20px;
+    width: 1.25rem; /* 20px */
     height: auto;
-    margin-right: 5px;
+    margin-right: 0.3125rem; /* 5px */
 }
 
 footer {
-    margin: 20px 0px;
+    margin: 1.25rem 0; /* 20px 0px */
 }
 
 footer .copyright {
@@ -293,10 +293,10 @@ footer .copyright {
 
 .alert-info {
     background-color: #f0f9ff;
-    border-left: 6px solid var(--color-webex-blue);
+    border-left: 0.375rem solid var(--color-webex-blue); /* 6px */
     color: #333;
-    padding: 10px;
-    margin-bottom: 20px;
+    padding: 0.625rem; /* 10px */
+    margin-bottom: 1.25rem; /* 20px */
 }
 
 .alert-info p.note {
@@ -317,19 +317,19 @@ footer .copyright {
 /* Mode Toggle Buttons */
 .mode-toggle {
     display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
+    gap: 0.625rem; /* 10px */
+    margin-bottom: 1.25rem; /* 20px */
 }
 
 .mode-toggle button {
     flex: 1;
-    padding: 12px 20px;
-    border: 2px solid var(--color-webex-blue);
+    padding: 0.75rem 1.25rem; /* 12px 20px */
+    border: 0.125rem solid var(--color-webex-blue); /* 2px */
     background-color: white;
     color: var(--color-webex-blue);
     cursor: pointer;
     transition: all 0.3s;
-    border-radius: 4px;
+    border-radius: 0.25rem; /* 4px */
     font-weight: 500;
 }
 
@@ -349,17 +349,17 @@ footer .copyright {
 
 /* Comparison Form */
 #comparison-form {
-    margin-top: 20px;
+    margin-top: 1.25rem; /* 20px */
 }
 
 /* Comparison Results Table */
 #comparison-results .table-wrapper {
-    max-height: 500px;
+    max-height: 31.25rem; /* 500px */
     overflow-y: auto;
     overflow-x: auto;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    margin-top: 10px;
+    border: 0.0625rem solid #ddd; /* 1px */
+    border-radius: 0.25rem; /* 4px */
+    margin-top: 0.625rem; /* 10px */
     position: relative;
 }
 
@@ -367,14 +367,14 @@ footer .copyright {
     width: 100%;
     border-collapse: collapse;
     margin-top: 0;
-    font-size: 14px;
+    font-size: 0.875rem; /* 14px */
 }
 
 .comparison-table th,
 .comparison-table td {
-    padding: 12px;
+    padding: 0.75rem; /* 12px */
     text-align: left;
-    border: 1px solid #ddd;
+    border: 0.0625rem solid #ddd; /* 1px */
 }
 
 .comparison-table th {
@@ -397,17 +397,17 @@ footer .copyright {
 /* Color Coding for Changes */
 .comparison-table tr.version-changed {
     background-color: #fff3cd; /* Yellow - version changed */
-    border-left: 4px solid #ffc107;
+    border-left: 0.25rem solid #ffc107; /* 4px */
 }
 
 .comparison-table tr.only-in-a {
     background-color: #f8d7da; /* Red - removed in B */
-    border-left: 4px solid #dc3545;
+    border-left: 0.25rem solid #dc3545; /* 4px */
 }
 
 .comparison-table tr.only-in-b {
     background-color: #d4edda; /* Green - added in B */
-    border-left: 4px solid #28a745;
+    border-left: 0.25rem solid #28a745; /* 4px */
 }
 
 .comparison-table tr.unchanged {
@@ -417,15 +417,15 @@ footer .copyright {
 /* Comparison Summary */
 .comparison-summary {
     background: linear-gradient(135deg, #e7f3ff 0%, #f0f9ff 100%);
-    padding: 25px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    border-left: 5px solid var(--color-webex-blue);
+    padding: 1.5625rem; /* 25px */
+    border-radius: 0.5rem; /* 8px */
+    margin-bottom: 1.25rem; /* 20px */
+    border-left: 0.3125rem solid var(--color-webex-blue); /* 5px */
 }
 
 .comparison-summary h3 {
     margin-top: 0;
-    margin-bottom: 15px;
+    margin-bottom: 0.9375rem; /* 15px */
     color: var(--color-webex-blue);
     font-size: 1.5em;
 }
@@ -433,32 +433,32 @@ footer .copyright {
 .summary-stats {
     display: flex;
     flex-wrap: wrap;
-    gap: 15px;
-    margin-top: 15px;
+    gap: 0.9375rem; /* 15px */
+    margin-top: 0.9375rem; /* 15px */
 }
 
 .stat-item {
-    padding: 10px 20px;
+    padding: 0.625rem 1.25rem; /* 10px 20px */
     background-color: white;
-    border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    font-size: 14px;
+    border-radius: 0.3125rem; /* 5px */
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.1); /* 2px 4px */
+    font-size: 0.875rem; /* 14px */
 }
 
 .stat-item.changed {
-    border-left: 4px solid #ffc107;
+    border-left: 0.25rem solid #ffc107; /* 4px */
 }
 
 .stat-item.unchanged {
-    border-left: 4px solid #6c757d;
+    border-left: 0.25rem solid #6c757d; /* 4px */
 }
 
 .stat-item.added {
-    border-left: 4px solid #28a745;
+    border-left: 0.25rem solid #28a745; /* 4px */
 }
 
 .stat-item.removed {
-    border-left: 4px solid #dc3545;
+    border-left: 0.25rem solid #dc3545; /* 4px */
 }
 
 .stat-item strong {
