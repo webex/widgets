@@ -1192,7 +1192,7 @@ const handleStableVersionChange = async () => {
     resetComparisonSelections();
     updateCompareButtonState();
     
-    if (stableA && stableB && stableA !== stableB) {
+    if (stableA && stableB ) {
         try {
             const [changelogA, changelogB] = await Promise.all([
                 fetch(versionPaths[stableA]).then(res => res.json()),
@@ -1300,10 +1300,10 @@ const validateComparisonInputs = (stableA, stableB, selectedPackage, versionASpe
         return false;
     }
     
-    if (stableA === stableB) {
-        alert('Please select two different stable versions');
-        return false;
-    }
+    // if (stableA === stableB && !selectedPackage) {
+    //     alert('To compare within the same version, please select a specific package');
+    //     return false;
+    // }
     
     if (selectedPackage && !versionASpecific && !versionBSpecific) {
         alert('Please select at least one pre-release version, or leave package empty for full version comparison');
