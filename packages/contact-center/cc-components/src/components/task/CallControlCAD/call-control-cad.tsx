@@ -13,12 +13,10 @@ import {
   NO_CALLER_ID,
   NO_PHONE_NUMBER,
   NO_TEAM_NAME,
-  NO_RONA,
   ON_HOLD,
   QUEUE,
   PHONE_NUMBER,
   CUSTOMER_NAME,
-  RONA,
 } from '../constants';
 import {withMetrics} from '@webex/cc-ui-logging';
 
@@ -68,6 +66,8 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
 
   //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
   const ani = currentTask?.data?.interaction?.callAssociatedDetails?.ani;
+  //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+  const dn = currentTask?.data?.interaction?.callAssociatedDetails?.dn;
 
   // Create unique IDs for tooltips
   const customerNameTriggerId = `customer-name-trigger-${currentTask.data.interaction.interactionId}`;
@@ -113,7 +113,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
   };
 
   const renderPhoneNumber = () => {
-    const phoneText = isSocial ? customerName || NO_CUSTOMER_NAME : ani || NO_PHONE_NUMBER;
+    const phoneText = isSocial ? customerName || NO_CUSTOMER_NAME : dn || NO_PHONE_NUMBER;
     const labelText = isSocial ? CUSTOMER_NAME : PHONE_NUMBER;
 
     const textComponent = (
@@ -264,16 +264,6 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
             </span>
           </Text>
           {renderPhoneNumber()}
-          <Text className="rona" type="body-secondary" tagName={'small'}>
-            <strong>{RONA}</strong>{' '}
-            <span>
-              {
-                //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
-
-                currentTask?.data?.interaction?.callAssociatedDetails?.ronaTimeout || NO_RONA
-              }
-            </span>
-          </Text>
         </div>
       </div>
       {controlVisibility.isConsultInitiatedOrAccepted && !controlVisibility.wrapup.isVisible && (
