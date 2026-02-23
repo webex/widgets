@@ -15,6 +15,13 @@ module.exports = merge(baseConfig, {
       import: './src/index.ts',
     },
   },
+  resolve: {
+    fallback: {
+      ...baseConfig.resolve?.fallback,
+      http: false,
+      https: false,
+    },
+  },
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].js', // Set the output filename to index.js
@@ -25,6 +32,7 @@ module.exports = merge(baseConfig, {
     'react-dom': 'react-dom',
     '@webex/cc-store': '@webex/cc-store',
     '@momentum-ui/react-collaboration': '@momentum-ui/react-collaboration',
+    '@momentum-ui/web-components': '@momentum-ui/web-components',
   },
   module: {
     rules: [

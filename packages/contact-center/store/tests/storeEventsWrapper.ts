@@ -46,6 +46,11 @@ jest.mock('../src/store', () => ({
       taskManager: {
         getAllTasks: jest.fn().mockReturnValue({}),
       },
+      webex: {
+        credentials: {
+          getUserToken: jest.fn(),
+        },
+      },
     },
     logger: {
       log: jest.fn(),
@@ -88,6 +93,7 @@ jest.mock('../src/store', () => ({
     lastIdleCodeChangeTimestamp: 'mockLastIdleCodeChangeTimestamp',
     showMultipleLoginAlert: 'mockShowMultipleLoginAlert',
     currentTheme: 'mockCurrentTheme',
+    dataCenter: 'mockDataCenter',
     customState: 'mockCustomState',
     consultStartTimeStamp: null,
     callControlAudio: null,
@@ -96,6 +102,7 @@ jest.mock('../src/store', () => ({
     isEndConsultEnabled: true,
     allowConsultToQueue: false,
     isDeclineButtonEnabled: false,
+    isDigitalChannelsInitialized: false,
     setShowMultipleLoginAlert: jest.fn(),
     setCurrentState: jest.fn(),
     setLastStateChangeTimestamp: jest.fn(),
@@ -292,6 +299,20 @@ describe('storeEventsWrapper', () => {
       expect(storeWrapper.agentProfile).toBe(storeWrapper['store'].agentProfile);
     });
 
+    it('should proxy isDigitalChannelsInitialized', () => {
+      expect(storeWrapper.isDigitalChannelsInitialized).toBe(storeWrapper['store'].isDigitalChannelsInitialized);
+    });
+
+    it('should setDigitalChannelsInitialized', () => {
+      expect(storeWrapper.setDigitalChannelsInitialized).toBeInstanceOf(Function);
+
+      storeWrapper.setDigitalChannelsInitialized(true);
+      expect(storeWrapper['store'].isDigitalChannelsInitialized).toBe(true);
+
+      storeWrapper.setDigitalChannelsInitialized(false);
+      expect(storeWrapper['store'].isDigitalChannelsInitialized).toBe(false);
+    });
+
     describe('setState', () => {
       it('should call setCurrentState if idleCode is passed', () => {
         const idleCode = storeWrapper.idleCodes[0];
@@ -350,6 +371,17 @@ describe('storeEventsWrapper', () => {
 
     it('should currentTheme', () => {
       expect(storeWrapper.currentTheme).toBe('mockCurrentTheme');
+    });
+
+    it('should proxy dataCenter', () => {
+      expect(storeWrapper.dataCenter).toBe('mockDataCenter');
+    });
+
+    it('should setDataCenter', () => {
+      expect(storeWrapper.setDataCenter).toBeInstanceOf(Function);
+
+      storeWrapper.setDataCenter('newDataCenter');
+      expect(storeWrapper['store'].dataCenter).toBe('newDataCenter');
     });
 
     it('should setCurrentTheme', () => {
@@ -900,6 +932,56 @@ describe('storeEventsWrapper', () => {
       const result = await storeWrapper.getAddressBookEntries({page: 0, pageSize: 25});
       expect(result).toEqual({data: [], meta: {page: 0, totalPages: 0}});
       expect(getEntriesSpy).not.toHaveBeenCalled();
+    });
+
+    describe('getAccessToken', () => {
+      beforeEach(() => {
+        jest.clearAllMocks();
+      });
+
+      it('should return the access token on success', async () => {
+        const mockAccessToken = 'mock-access-token-12345';
+        // @ts-expect-error - webex credentials API not typed on IContactCenter
+        storeWrapper['store'].cc.webex.credentials.getUserToken = jest
+          .fn()
+          .mockResolvedValue({access_token: mockAccessToken});
+
+        const result = await storeWrapper.getAccessToken();
+
+        // @ts-expect-error - webex credentials API not typed on IContactCenter
+        expect(storeWrapper['store'].cc.webex.credentials.getUserToken).toHaveBeenCalled();
+        expect(result).toBe(mockAccessToken);
+      });
+
+      it('should log error and rethrow when getUserToken fails', async () => {
+        const mockError = new Error('Token retrieval failed');
+        // @ts-expect-error - webex credentials API not typed on IContactCenter
+        storeWrapper['store'].cc.webex.credentials.getUserToken = jest.fn().mockRejectedValue(mockError);
+        const loggerErrorSpy = jest.spyOn(storeWrapper['store'].logger, 'error');
+
+        await expect(storeWrapper.getAccessToken()).rejects.toThrow('Token retrieval failed');
+
+        expect(loggerErrorSpy).toHaveBeenCalledWith('CC-Widgets: getAccessToken(): failed to get access token', {
+          module: 'storeEventsWrapper.ts',
+          method: 'getAccessToken',
+          error: mockError,
+        });
+      });
+
+      it('should handle non-Error rejection and rethrow', async () => {
+        const rawError = 'String error message';
+        // @ts-expect-error - webex credentials API not typed on IContactCenter
+        storeWrapper['store'].cc.webex.credentials.getUserToken = jest.fn().mockRejectedValue(rawError);
+        const loggerErrorSpy = jest.spyOn(storeWrapper['store'].logger, 'error');
+
+        await expect(storeWrapper.getAccessToken()).rejects.toBe(rawError);
+
+        expect(loggerErrorSpy).toHaveBeenCalledWith('CC-Widgets: getAccessToken(): failed to get access token', {
+          module: 'storeEventsWrapper.ts',
+          method: 'getAccessToken',
+          error: rawError,
+        });
+      });
     });
   });
 

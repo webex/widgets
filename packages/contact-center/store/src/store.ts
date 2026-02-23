@@ -49,6 +49,8 @@ class Store implements IStore {
   allowConsultToQueue: boolean = false;
   agentProfile: AgentLoginProfile = {};
   isMuted: boolean = false;
+  isDigitalChannelsInitialized: boolean = false;
+  dataCenter: string = '';
 
   constructor() {
     makeAutoObservable(this, {
@@ -111,6 +113,7 @@ class Store implements IStore {
         this.isAddressBookEnabled = Boolean(response.addressBookId);
         this.allowConsultToQueue = response.allowConsultToQueue;
         this.agentProfile.agentName = response.agentName;
+        this.dataCenter = (response as {environment?: string}).environment || '';
       })
       .catch((error) => {
         this.logger.error(`CC-Widgets: Contact-center registerCC(): failed - ${error}`, {
