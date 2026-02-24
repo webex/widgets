@@ -2,36 +2,64 @@ const path = require('path');
 const webpack = require('webpack');
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const {version} = require('./package.json');
+const merge = require('webpack-merge').merge;
+
+const baseConfigOriginal = require('../../../webpack.config');
+
+const resolveMonorepoRoot = (...segments) => path.resolve(__dirname, '../../../', ...segments);
+
+const {entry, ...baseConfig} = baseConfigOriginal;
+
+const outputConfig = {
+  dist: {
+    path: path.resolve(__dirname, './dist'),
+    filename: 'webexWidgets.mjs',
+    library: {
+      type: 'module',
+    },
+  },
+  demo: {
+    path: path.resolve(__dirname, './docs'),
+    filename: 'demo.bundle.[contenthash].js',
+  },
+};
 
 module.exports = function(env, argv) {
-  return {
+  const buildType = env.buildType;
+  const mode = argv.mode;
+  const isDemo = buildType === 'demo';
+  const isDist = buildType === 'dist';
+
+  const entryPoint = env.entry;
+
+  return merge(baseConfig, {
     cache: true,
-    output:
-      argv.mode === 'production'
-        ? {
-            path: path.resolve(__dirname, './docs'),
-            filename: 'demo.bundle.[hash].js',
-          }
-        : undefined, // Otherwise the CleanWebpackPlugin will wipe our build during devserver
-    devtool: argv.mode === 'production' ? 'source-map' : 'inline-source-map',
-    resolve: {
-      extensions: ['.js', '.jsx'],
-      fallback: {
-        "buffer": require.resolve("buffer/"),
-        "crypto": require.resolve("crypto-browserify"),
-        "os": require.resolve("os-browserify/browser"),
-        "stream": require.resolve("stream-browserify"),
-        "util": require.resolve("util/"),
-        "url": require.resolve("url/"),
-        "vm": require.resolve("vm-browserify"),
-        "querystring": require.resolve('querystring-es3'),
-        "fs": false
-      } /*
-         * In order to include polyfills for node.js core modules, we need to add a fallback 
-         * for the relevant packages as webpack 5 doesn't include them by default
-         */ 
-    },
+    entry: entryPoint,
+    output: outputConfig[buildType],
+
+    // Enable ESM output
+    experiments: isDist
+      ? {
+          outputModule: true,
+        }
+      : {},
+
+    devtool: mode === 'production' ? 'source-map' : 'inline-source-map',
+
+    externals: isDemo ? {} : ['prop-types', 'react', 'react-dom', 'webex', '@webex/common'],
+
+    // // CSS minimization for dist builds
+    optimization: isDist
+      ? {
+          minimizer: [
+            `...`, // Keep default JS minimizer
+            new CssMinimizerPlugin(),
+          ],
+        }
+      : {},
     module: {
       rules: [
         {
@@ -42,6 +70,20 @@ module.exports = function(env, argv) {
           },
         },
         {
+          test: /\.css$/,
+          use: [isDemo ? 'style-loader' : MiniCssExtractPlugin.loader, 'css-loader'],
+          include: [
+            resolveMonorepoRoot('node_modules/@momentum-ui'),
+            resolveMonorepoRoot('node_modules/@webex/components'),
+            path.resolve(__dirname, 'packages'),
+          ],
+        },
+        {
+          test: /\.scss$/,
+          use: [isDemo ? 'style-loader' : MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'],
+          include: [path.resolve(__dirname, 'packages')],
+        },
+        {
           test: /\.html$/,
           use: [
             {
@@ -50,21 +92,13 @@ module.exports = function(env, argv) {
           ],
         },
         {
-          test: /\.css$/,
-          use: ['style-loader', 'css-loader'],
-        },
-        {
-          test: /\.scss$/,
-          exclude: /node_modules/,
-          use: ['style-loader', 'css-loader', 'sass-loader'],
-        },
-        {
           test: /\.(woff(2)?|ttf|eot|svg|png|gif)(\?v=\d+\.\d+\.\d+)?$/,
           use: [
             {
               loader: 'file-loader',
               options: {
-                outputPath: 'assets/',
+                outputPath: isDemo ? 'assets/' : 'css/assets/',
+                name: '[name].[contenthash].[ext]',
               },
             },
           ],
@@ -86,23 +120,27 @@ module.exports = function(env, argv) {
             server: {
               type: 'https',
             },
-          } // After upgrading webpack dev server to the latest version, config required changes as existing options were deprecated
+          }
         : undefined,
     plugins: [
       new CleanWebpackPlugin(),
-      new HtmlWebpackPlugin({
-        filename: 'index.html',
-        template: 'demo/index.html',
-        favicon: 'demo/webex-logo.png',
-      }),
-      new webpack.HotModuleReplacementPlugin(),
+      isDemo &&
+        new HtmlWebpackPlugin({
+          filename: 'index.html',
+          template: 'demo/index.html',
+          favicon: 'demo/webex-logo.png',
+        }),
+      isDemo && new webpack.HotModuleReplacementPlugin(),
+      !isDemo &&
+        new MiniCssExtractPlugin({
+          filename: 'css/webex-widgets.css',
+        }),
       new webpack.DefinePlugin({
-        __appVersion__: JSON.stringify(version)
+        __appVersion__: JSON.stringify(version),
       }),
-      new webpack.ProvidePlugin({  //Fixes 'process is not defined' and 'Buffer not defined' errors
-        process: 'process/browser',
+      new webpack.ProvidePlugin({
         Buffer: ['buffer', 'Buffer'],
       }),
     ],
-  };
+  });
 };

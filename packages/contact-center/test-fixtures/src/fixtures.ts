@@ -71,6 +71,7 @@ const mockProfile: Profile = {
   lastStateAuxCodeId: 'auxCodeId',
   lastStateChangeTimestamp: 123456789,
   lastIdleCodeChangeTimestamp: 123456789,
+  environment: 'produs1',
 };
 
 const mockEntryPointsResponse: EntryPointListResponse = {
@@ -510,6 +511,7 @@ const mockCC: IContactCenter = {
   addressBook: mockAddressBook,
   setAgentState: jest.fn().mockResolvedValue({}),
   getOutdialAniEntries: jest.fn().mockResolvedValue({entries: []}),
+  getAccessToken: jest.fn().mockResolvedValue('mock-access-token'),
 };
 
 export {

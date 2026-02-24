@@ -62,6 +62,7 @@ describe('Store', () => {
     expect(storeInstance.loginOptions).toEqual([]);
     expect(storeInstance.idleCodes).toEqual([]);
     expect(storeInstance.agentId).toBe('');
+    expect(storeInstance.dataCenter).toBe('');
     expect(storeInstance.wrapupCodes).toEqual([]);
     expect(storeInstance.currentTask).toBeNull();
     expect(storeInstance.isAgentLoggedIn).toBe(false);
@@ -89,6 +90,7 @@ describe('Store', () => {
         lastStateAuxCodeId: 'auxCodeId',
         lastStateChangeTimestamp: date,
         agentName: mockAgentName,
+        environment: 'produs1',
       };
       mockWebex.cc.register.mockResolvedValue(mockResponse);
 
@@ -103,6 +105,7 @@ describe('Store', () => {
       expect(storeInstance.currentState).toEqual(mockResponse.lastStateAuxCodeId);
       expect(storeInstance.lastStateChangeTimestamp).toEqual(date);
       expect(storeInstance.agentProfile).toEqual({agentName: mockAgentName});
+      expect(storeInstance.dataCenter).toEqual(mockResponse.environment);
     });
 
     it('should log an error on failed register', async () => {
