@@ -2,7 +2,7 @@
 let currentChangelog;
 const versionPaths = {};
 let comparisonListenersInitialized = false;
-const github_base_url = "https://github.com/webex/widgets/";
+const githubBaseUrl = "https://github.com/webex/widgets/";
 import{
     comparisonState, 
     extractPackagesFromVersion, 
@@ -82,10 +82,10 @@ Handlebars.registerHelper('json', function(context, pacakage, version) {
 Handlebars.registerHelper('github_linking', function(string, type) {
     switch (type) {
         case 'hash':
-            return `<a href='${github_base_url}commit/${string}' target='_blank'>${string}</a>`;
+            return `<a href='${githubBaseUrl}commit/${string}' target='_blank'>${string}</a>`;
         case 'message':
             // if commit message has a pr number, replace that pr number with pr anchor link and send back the transformed commit message
-            return string.replace(/#(\d+)/g, `<a href="${github_base_url}pull/$1" target="_blank">#$1</a>`);
+            return string.replace(/#(\d+)/g, `<a href="${githubBaseUrl}pull/$1" target="_blank">#$1</a>`);
     }
 });
 
@@ -119,12 +119,11 @@ const populateFormFieldsFromURL = async () => {
       });
     }
   
-    if (searchParams.package) {
-        if (!packageNameInputDropdown.disabled) {
+    if (searchParams.package && !packageNameInputDropdown.disabled) {
             packageNameInputDropdown.value = searchParams.package;
             packageNameInputDropdown.dispatchEvent(new Event('change'));
             hasAtleastOneParam = true;
-        }
+        
     }
   
     if (searchParams.version) {
@@ -211,19 +210,6 @@ const populatePackageNames = (changelog) => {
         }
         optionsHtml += `<option value="${packageName}">${packageName}</option>`;
     });
-    
-    // Set default intelligently:
-    // 1. First existing special package
-    // 2. Or first available package
-    // 3. Or empty if no packages
-    if (existingSpecialPackages.length > 0) {
-        packageNameInputDropdown.value = existingSpecialPackages[0];
-    } else if (otherPackages.length > 0) {
-        packageNameInputDropdown.value = otherPackages[0];
-    } else {
-        packageNameInputDropdown.value = "";
-    }
-    
     packageNameInputDropdown.innerHTML = optionsHtml;
 };
 
@@ -374,28 +360,28 @@ const updateFormState = (formParams) => {
     }
 };
 // Search changelog by commit message or hash.(A single commit can appear in multiple package versions.)
-const doSearch_commit = (searchParams, drill_down) => {
-    let resulting_versions = new Set(),
-        resulting_commit_messages = new Set(),
-        resulting_commit_hash = new Set(),
-        search_results = [];
-    for (let pacakage in drill_down){
-        const thisPackage = drill_down[pacakage];
+const doSearch_commit = (searchParams, drillDown) => {
+    let resultingVersions = new Set(),
+        resultingCommitMessages = new Set(),
+        resultingCommitHash = new Set(),
+        searchResults = [];
+    for (let pacakage in drillDown){
+        const thisPackage = drillDown[pacakage];
         for (let version in thisPackage){
             const thisVersion = thisPackage[version];
             let allHashes = new Set(), discontinueSearch = false;
             for (let hash in thisVersion.commits){
                 const thisCommit = thisVersion.commits[hash];
                 if (discontinueSearch){
-                    resulting_versions.add(`${pacakage}-${version}`);
-                    resulting_commit_messages.add(thisCommit);
-                    allHashes.forEach(h => resulting_commit_hash.add(h));
+                    resultingVersions.add(`${pacakage}-${version}`);
+                    resultingCommitMessages.add(thisCommit);
+                    allHashes.forEach(h => resultingCommitHash.add(h));
                 }
                 else {
                     allHashes.add(hash);
-                    if(!resulting_versions.has(`${pacakage}-${version}`) && 
-                        !resulting_commit_messages.has(thisCommit) &&
-                        !resulting_commit_hash.has(hash)
+                    if(!resultingVersions.has(`${pacakage}-${version}`) && 
+                        !resultingCommitMessages.has(thisCommit) &&
+                        !resultingCommitHash.has(hash)
                     ){
                         if (
                             (
@@ -406,12 +392,12 @@ const doSearch_commit = (searchParams, drill_down) => {
                                 searchParams.commitHash && (hash.includes(searchParams.commitHash) || searchParams.commitHash.startsWith(hash))
                             )
                         ){
-                            resulting_versions.add(`${pacakage}-${version}`);
-                            resulting_commit_messages.add(thisCommit);
-                            allHashes.forEach(h => resulting_commit_hash.add(h));
+                            resultingVersions.add(`${pacakage}-${version}`);
+                            resultingCommitMessages.add(thisCommit);
+                            allHashes.forEach(h => resultingCommitHash.add(h));
                             allHashes = new Set();
                             discontinueSearch = true;
-                            search_results.push({
+                            searchResults.push({
                                 pacakage,
                                 version,
                                 published_date: thisVersion.published_date,
@@ -424,56 +410,68 @@ const doSearch_commit = (searchParams, drill_down) => {
             }
         }
     }
-    return search_results;
+    return searchResults;
 }
 
 const doSearch = (searchParams) => {
-    const { pacakage, version } = searchParams;
-    let drill_down = {...currentChangelog}, shouldTransform = true, search_results = [];
-// If package selected → filter to that package
-    if (pacakage !== null && pacakage?.trim() !== ""){
-        drill_down = {
-            [pacakage]: drill_down[pacakage]
+    const pkg = searchParams.package;
+    const version = searchParams.version;
+    let drillDown = {...currentChangelog}, shouldTransform = true, results = [];
+    console.log('>>>>>>>>>>', drillDown)
+    // If package selected → filter to that package
+    if (pkg !== null && pkg?.trim() !== ""){
+        drillDown = {
+            [pkg]: drillDown[pkg]
         };
     }
-// If version selected → filter to that version
-    if (version !== null && version?.trim() !== ""){
-        drill_down = drill_down[pacakage][version] ? {
-            [pacakage]: {
-                [version]: drill_down[pacakage][version]
-            }
-        } : {};
-    }
-    else if (// If searching by commit → call doSearch_commit()
-        searchParams.commitMessage !== null && searchParams.commitMessage?.trim() !== "" || 
-        searchParams.commitHash !== null && searchParams.commitHash?.trim() !== ""
+
+    // If version selected → filter to that version (only when package and version exist)
+    if (version !== null && version?.trim() !== "") {
+        if (pkg && drillDown[pkg] && drillDown[pkg][version]) {
+            drillDown = {
+                [pkg]: {
+                    [version]: drillDown[pkg][version]
+                }
+            };
+        } else {
+            drillDown = {};
+        }
+    } else if (
+        (searchParams.commitMessage !== null && searchParams.commitMessage?.trim() !== "") ||
+        (searchParams.commitHash !== null && searchParams.commitHash?.trim() !== "")
     ){
-        search_results = doSearch_commit(searchParams, drill_down);
+        results = doSearch_commit(searchParams, drillDown);
         shouldTransform = false;
     }
 
     if (shouldTransform) {
-        Object.keys(drill_down).forEach((pacakage) => {
-            Object.keys(drill_down[pacakage]).forEach((version) => {
-                search_results.push({
-                    pacakage,
-                    version,
-                    published_date: drill_down[pacakage][version].published_date,
-                    commits: drill_down[pacakage][version].commits,
-                    alongWith: drill_down[pacakage][version].alongWith,
+        Object.keys(drillDown).forEach((pkgKey) => {
+            const versions = drillDown[pkgKey];
+            console.log('>>>>>>>>>>', versions)
+            if (versions != null && typeof versions === 'object') {
+                Object.keys(versions).forEach((ver) => {
+                    results.push({
+                        package: pkgKey,
+                        version: ver,
+                        published_date: versions[ver].published_date,
+                        commits: versions[ver].commits,
+                        alongWith: versions[ver].alongWith,
+                    });
                 });
-            });
+            }
         });
     }
 
-    // sort search results based on published date which will be in Unit timestamp
-    search_results.sort((a, b) => b.published_date - a.published_date);
+    // sort search results based on published date (Unix timestamp)
+    results.sort((a, b) => b.published_date - a.published_date);
 
-    const searchResultsHtml = changelogUI({data: {
-        search_results,
-        stable_version: searchParams.stable_version,
-    }});
-    
+    const searchResultsHtml = changelogUI({
+        data: {
+            search_results: results,
+            stable_version: searchParams.stable_version,
+        }
+    });
+
     searchResults.innerHTML = searchResultsHtml;
     searchResults.classList.remove('hide');
 };
@@ -1299,11 +1297,6 @@ const validateComparisonInputs = (stableA, stableB, selectedPackage, versionASpe
         alert('Please select both stable versions');
         return false;
     }
-    
-    // if (stableA === stableB && !selectedPackage) {
-    //     alert('To compare within the same version, please select a specific package');
-    //     return false;
-    // }
     
     if (selectedPackage && !versionASpecific && !versionBSpecific) {
         alert('Please select at least one pre-release version, or leave package empty for full version comparison');

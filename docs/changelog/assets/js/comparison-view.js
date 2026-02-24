@@ -229,12 +229,7 @@ const comparePackages = (packagesA, packagesB, changelogA, changelogB, stableVer
                 earliestDate = publishedDate;
                 earliestVersion = version;
             }
-        }
-        
-        // Debug logging
-        console.log(`[${packageName}] Found earliest version: ${earliestVersion} (date: ${new Date(earliestDate).toISOString()})`);
-        console.log(`[${packageName}] Total versions available: ${versions.length}`);
-        
+        }        
         return earliestVersion;
     };
     
@@ -382,8 +377,8 @@ const generatePackageComparisonData = (packageName, versionASpecific, versionBSp
     // Return pure data object
     return {
         packageName,
-        versionA: effectiveVersionA,
-        versionB: effectiveVersionB,
+        versionA: effectiveVersionA ,
+        versionB: effectiveVersionB ,
         packages: packagesArray,
         totalPackages: packagesArray.length,
         ...stats
