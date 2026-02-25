@@ -445,13 +445,13 @@ const doSearch = (searchParams) => {
     }
 
     if (shouldTransform) {
-        Object.keys(drillDown).forEach((pkgKey) => {
-            const versions = drillDown[pkgKey];
+        Object.keys(drillDown).forEach((pkg) => {
+            const versions = drillDown[pkg];
             console.log('>>>>>>>>>>', versions)
             if (versions != null && typeof versions === 'object') {
                 Object.keys(versions).forEach((ver) => {
                     results.push({
-                        package: pkgKey,
+                        package: pkg,
                         version: ver,
                         published_date: versions[ver].published_date,
                         commits: versions[ver].commits,
@@ -519,12 +519,23 @@ searchForm.addEventListener('submit', (event) => {
 });
 
 const copyToClipboard = (copyButton) => {
-    navigator.clipboard.writeText(JSON.stringify(JSON.parse(copyButton.dataset.alongWith), null, 4));
-    const copyText = copyButton.querySelector('span');
-    copyText.textContent = 'Copied!';
-    setTimeout(() => { 
-        copyText.textContent = 'Copy';
-    },2000);
+    let textToCopy;
+    try {
+        textToCopy = JSON.stringify(JSON.parse(copyButton.dataset.alongWith), null, 4);
+    } catch (e) {
+        console.error('copyToClipboard: invalid data-along-with', e);
+        return;
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(textToCopy)
+            .then(() => showCopySuccess(copyButton))
+            .catch((err) => {
+                console.error('Clipboard API failed:', err);
+                fallbackCopyToClipboard(textToCopy, copyButton);
+            });
+    } else {
+        fallbackCopyToClipboard(textToCopy, copyButton);
+    }
 }
 
 /**
@@ -548,7 +559,8 @@ const copyComparisonLink = () => {
         fallbackCopyToClipboard(currentURL, copyComparisonLinkBtn);
     }
 }
-
+window.copyToClipboard = copyToClipboard;
+window.copyComparisonLink = copyComparisonLink;
 /**
  * Show success feedback on copy button
  */
@@ -631,17 +643,8 @@ window.onhashchange = () => {
 
 populateVersions();
 
-/**
- * Populate package dropdown for comparison
- * @param {string} selectId - ID of the select element
- */
-/* ============================================
-   VERSION COMPARISON FUNCTIONALITY
-   ============================================ */
 
-// Global state for comparison mode
 let comparisonMode = false;
-
 /* ============================================
    UI HELPER FUNCTIONS
    ============================================ */
@@ -676,13 +679,7 @@ const showComparisonError = (error) => {
    DATA LAYER FUNCTIONS
    ============================================ */
 
-/**
- * DATA LAYER: Fetch and compare versions (Pure data logic, no DOM manipulation)
- * @param {string} versionA - Base version
- * @param {string} versionB - Target version
- * @returns {Promise<Object>} Comparison data with versionA, versionB, and comparisonData
- * @throws {Error} If fetch fails or comparison fails
- */
+
 
 /**
  * UI LAYER: Handle version comparison UI updates

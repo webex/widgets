@@ -41,6 +41,7 @@ const extractPackagesFromVersion = (changelog, specificVersions = null) => {
         // Check if user specified a specific version for this package
         if (specificVersions && specificVersions[packageName]) {
             const requestedVersion = specificVersions[packageName];
+            
             if (packageVersions[requestedVersion]) {
                 selectedVersion = requestedVersion;
             }
@@ -212,26 +213,6 @@ const comparePackages = (packagesA, packagesB, changelogA, changelogB, stableVer
     let onlyInACount = 0;
     let onlyInBCount = 0;
     
-    // Helper function to find earliest version by published date (for full version comparison)
-    const findEarliestVersion = (changelog, packageName) => {
-        if (!changelog[packageName]) return null;
-        
-        const versions = Object.keys(changelog[packageName]);
-        if (versions.length === 0) return null;
-        
-        // Find version with earliest published_date
-        let earliestVersion = versions[0];
-        let earliestDate = changelog[packageName][versions[0]]?.published_date || Infinity;
-        
-        for (const version of versions) {
-            const publishedDate = changelog[packageName][version]?.published_date || Infinity;
-            if (publishedDate < earliestDate) {
-                earliestDate = publishedDate;
-                earliestVersion = version;
-            }
-        }        
-        return earliestVersion;
-    };
     
     // Helper function to find stable version first, then highest pre-release version
 const findStableVersion = (changelog, packageName, stableVersion) => {
@@ -264,7 +245,7 @@ const findStableVersion = (changelog, packageName, stableVersion) => {
             
             const numA = parseInt(matchA[2], 10);
             const numB = parseInt(matchB[2], 10);
-            return numB - numA; // Sort descending (highest first)
+            return numA - numB; // Sort ascending (lowest first)
         });
     
     // Return highest pre-release version, or fallback to first available
@@ -272,9 +253,9 @@ const findStableVersion = (changelog, packageName, stableVersion) => {
 };
     
     allPackageNames.forEach(packageName => {
-        // Find the earliest version by published_date for full version comparison
-        const versionA = findEarliestVersion(changelogA, packageName);
-        const versionB = findEarliestVersion(changelogB, packageName);
+        // Use release version per stable train (exact stable or highest prerelease), not chronologically earliest
+        const versionA = findStableVersion(changelogA, packageName, stableVersionA);
+        const versionB = findStableVersion(changelogB, packageName, stableVersionB);
         
         let status, changeClass;//Declare variables for status label and CSS class
         
@@ -347,18 +328,20 @@ const fetchAndCompareVersions = async (versionA, versionB,versionPaths) => {
     };
 };
 const generatePackageComparisonData = (packageName, versionASpecific, versionBSpecific, changelogA, changelogB) => {
+    const effectiveVersionA = getEffectiveVersion(changelogA, packageName, versionASpecific);
+    const effectiveVersionB = getEffectiveVersion(changelogB, packageName, versionBSpecific);
+    console.log('effectiveVersionA', effectiveVersionA);
+    console.log('effectiveVersionB', effectiveVersionB);
     // Get package data from changelogs
-    const pkgDataA = changelogA[packageName]?.[versionASpecific];
-    const pkgDataB = changelogB[packageName]?.[versionBSpecific];
+    const pkgDataA = changelogA[packageName]?.[effectiveVersionA];
+    const pkgDataB = changelogB[packageName]?.[effectiveVersionB];
+    console.log('pkgDataA', pkgDataA);
+    console.log('pkgDataB', pkgDataB);
     
     // Validate versions exist
     if (!pkgDataA && !pkgDataB) {
         throw new Error(`Could not find version data for ${packageName}`);
     }
-    
-    // Get effective versions
-    const effectiveVersionA = getEffectiveVersion(changelogA, packageName, versionASpecific);
-    const effectiveVersionB = getEffectiveVersion(changelogB, packageName, versionBSpecific);
     
     // Build packages list including main package and all related packages
     const packagesArray = buildPackagesList(
