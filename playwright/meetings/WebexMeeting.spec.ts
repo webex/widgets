@@ -1,17 +1,14 @@
 import { test, expect } from '@playwright/test';
+import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import { SamplesPage } from './pages/SamplesPage';
 import { MeetingWidgetPage } from './pages/MeetingWidgetPage';
-import dotenv from 'dotenv';
 
-dotenv.config();
 
 test.describe('Meeting Widget', () => {
   let samplesPage: SamplesPage;
   let meetingPage: MeetingWidgetPage;
-  let accessToken: string;
-  let meetingDestination: string;
 
   test.beforeAll(async ({ browser }) => {
     // Re-read .env fresh so we pick up the token written by Meetings Setup
@@ -20,19 +17,14 @@ test.describe('Meeting Widget', () => {
     for (const key in envConfig) {
       process.env[key] = envConfig[key];
     }
-
-    accessToken = process.env.PW_MEETING_ACCESS_TOKEN!;
-    meetingDestination = process.env.PW_MEETING_DESTINATION!;
-
+    const accessToken = process.env.PW_MEETING_ACCESS_TOKEN!;
+    const meetingDestination = process.env.PW_MEETING_DESTINATION!;
     expect(accessToken, 'PW_MEETING_ACCESS_TOKEN must be set').toBeTruthy();
     expect(meetingDestination, 'PW_MEETING_DESTINATION must be set').toBeTruthy();
-
     const context = await browser.newContext();
     const page = await context.newPage();
-
     samplesPage = new SamplesPage(page);
     meetingPage = new MeetingWidgetPage(page);
-
     await samplesPage.open();
     await samplesPage.setAccessToken(accessToken);
     await meetingPage.destination.fill(meetingDestination);
