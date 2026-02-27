@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@webex/cc-store": "workspace:*",
-    "cc-digital-interactions": "3.0.6-beta.1",
+    "cc-digital-interactions": "3.0.8",
     "mobx-react-lite": "^4.1.0"
   },
   "devDependencies": {
