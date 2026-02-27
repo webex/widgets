@@ -39,7 +39,26 @@ export const extractTaskListItemData = (
     const declineText = isTaskIncoming && isTelephony && isBrowser ? 'Decline' : undefined;
 
     // Compute title based on media type
-    const title = isSocial ? customerName : ani;
+    // For outdial calls, use the customer participant's DN (dialed number) if available
+    // For inbound calls, use ANI (caller's number)
+    let title = isSocial ? customerName : ani;
+
+    if (isTelephony && task?.data?.interaction?.participants) {
+      // Find customer participant to get the dialed number for outdial calls
+      const customerParticipant = Object.values(task.data.interaction.participants).find(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (participant: any) => participant.pType === 'Customer'
+      );
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const customerDn = (customerParticipant as any)?.dn;
+
+      // If customer has a DN, use it (this is an outdial call)
+      // Otherwise, fall back to ANI (inbound call)
+      if (customerDn) {
+        title = customerDn;
+      }
+    }
 
     const isAutoAnswering = task.data.isAutoAnswering || false;
 

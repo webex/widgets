@@ -105,6 +105,107 @@ describe('incoming-task.utils', () => {
       });
     });
 
+    describe('Outdial calls', () => {
+      it('should use customer DN for outdial telephony task', () => {
+        const originalParticipants = mockTask.data.interaction.participants;
+        const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+
+        // Set up an outdial scenario with customer participant having DN
+        mockTask.data.interaction.callAssociatedDetails = {
+          ani: '+11234567890', // Entrypoint number
+          customerName: 'Outdial Customer',
+          virtualTeamName: 'Sales Team',
+        };
+
+        mockTask.data.interaction.participants = {
+          agent1: {
+            hasJoined: true,
+            pType: 'Agent',
+            id: 'agent1',
+            name: 'Agent Smith',
+            hasLeft: false,
+          },
+          customer1: {
+            hasJoined: true,
+            pType: 'Customer',
+            id: 'customer1',
+            name: 'Customer',
+            dn: '+19876543210', // Dialed number
+            hasLeft: false,
+          },
+        };
+
+        const result = extractIncomingTaskData(mockTask, true);
+
+        expect(result.isTelephony).toBe(true);
+        expect(result.ani).toBe('+11234567890');
+        expect(result.title).toBe('+19876543210'); // Should use customer DN, not ANI
+
+        // Restore original values
+        mockTask.data.interaction.participants = originalParticipants;
+        mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
+      });
+
+      it('should fall back to ANI when customer participant has no DN', () => {
+        const originalParticipants = mockTask.data.interaction.participants;
+        const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+
+        // Set up an inbound scenario without customer DN
+        mockTask.data.interaction.callAssociatedDetails = {
+          ani: '+15551234567',
+          customerName: 'Inbound Caller',
+          virtualTeamName: 'Support Team',
+        };
+
+        mockTask.data.interaction.participants = {
+          agent1: {
+            hasJoined: true,
+            pType: 'Agent',
+            id: 'agent1',
+            name: 'Agent Jones',
+            hasLeft: false,
+          },
+          customer1: {
+            hasJoined: true,
+            pType: 'Customer',
+            id: 'customer1',
+            name: 'Customer',
+            hasLeft: false,
+          },
+        };
+
+        const result = extractIncomingTaskData(mockTask, true);
+
+        expect(result.isTelephony).toBe(true);
+        expect(result.ani).toBe('+15551234567');
+        expect(result.title).toBe('+15551234567'); // Should fall back to ANI
+
+        // Restore original values
+        mockTask.data.interaction.participants = originalParticipants;
+        mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
+      });
+
+      it('should handle missing participants gracefully', () => {
+        const originalParticipants = mockTask.data.interaction.participants;
+        const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+
+        mockTask.data.interaction.callAssociatedDetails = {
+          ani: '+15559999999',
+          customerName: 'Test Customer',
+        };
+
+        mockTask.data.interaction.participants = undefined;
+
+        const result = extractIncomingTaskData(mockTask, true);
+
+        expect(result.title).toBe('+15559999999'); // Should fall back to ANI
+
+        // Restore original values
+        mockTask.data.interaction.participants = originalParticipants;
+        mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
+      });
+    });
+
     describe('Edge cases', () => {
       it('should handle missing call association details', () => {
         const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
