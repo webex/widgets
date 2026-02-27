@@ -6,6 +6,8 @@ import { MEETING_SERVER_COMMAND, MEETING_SERVER_URL, MEETING_BASE_URL } from './
 
 dotenv.config({ path: path.resolve(__dirname, '.env') });
 
+const testScope = process.env.TEST_SCOPE as 'cc' | 'meetings' | undefined;
+
 const dummyAudioPath = path.resolve(__dirname, './playwright/wav/dummyAudio.wav');
 
 const e2eConfig = [
@@ -21,6 +23,60 @@ const e2eConfig = [
   `--disable-plugins`, // Prevents browser plugins from loading and interfering with tests
   `--window-size=1280,720`, // Sets a consistent viewport size for visual reproducibility
 ];
+
+const ccProjects = [
+  {
+    name: 'OAuth: Get Access Token',
+    testMatch: /global\.setup\.ts/,
+  },
+  ...Object.entries(USER_SETS).map(([setName, setData], index) => ({
+    name: setName,
+    dependencies: ['OAuth: Get Access Token'],
+    fullyParallel: false,
+    retries: 1,
+    testMatch: [`**/suites/${setData.TEST_SUITE}`],
+    use: {
+      ...devices['Desktop Chrome'],
+      channel: 'chrome',
+      storageState: undefined,
+      launchOptions: {
+        args: [`--remote-debugging-port=${9221 + index}`, `--window-position=${index * 1300},0`, ...e2eConfig],
+      },
+    },
+  })),
+];
+
+const meetingsProjects = [
+  {
+    name: 'OAuth: Get Meeting Access Token',
+    testMatch: /meetings\.setup\.ts/,
+    use: {
+      permissions: ['clipboard-read', 'clipboard-write'],
+    },
+  },
+  {
+    name: 'Meetings Widget Test',
+    dependencies: ['OAuth: Get Meeting Access Token'],
+    testMatch: '**/meetings/*.spec.ts',
+    timeout: 60000,
+    fullyParallel: false,
+    retries: 1,
+    use: {
+      baseURL: MEETING_BASE_URL,
+      trace: 'retain-on-failure' as const,
+      permissions: ['microphone', 'camera'],
+      ...devices['Desktop Chrome'],
+      channel: 'chrome',
+      launchOptions: {
+        args: ['--ignore-certificate-errors', ...e2eConfig],
+      },
+    },
+  },
+];
+
+const projects = testScope === 'cc' ? ccProjects
+  : testScope === 'meetings' ? meetingsProjects
+    : [...ccProjects, ...meetingsProjects];
 
 export default defineConfig({
   testDir: './playwright',
@@ -44,59 +100,11 @@ export default defineConfig({
   ],
   retries: 0,
   fullyParallel: true,
-  workers: Object.keys(USER_SETS).length, // Dynamic worker count based on USER_SETS
+  workers: Object.keys(USER_SETS).length,
   reporter: 'html',
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'retain-on-failure',
   },
-  projects: [
-    {
-      name: 'OAuth: Get Access Token',
-      testMatch: /global\.setup\.ts/,
-    },
-    // Dynamically generate test projects from USER_SETS
-    ...Object.entries(USER_SETS).map(([setName, setData], index) => {
-      return {
-        name: setName,
-        dependencies: ['OAuth: Get Access Token'],
-        fullyParallel: false,
-        retries: 1,
-        testMatch: [`**/suites/${setData.TEST_SUITE}`],
-        use: {
-          ...devices['Desktop Chrome'],
-          channel: 'chrome',
-          storageState: undefined,
-          launchOptions: {
-            args: [`--remote-debugging-port=${9221 + index}`, `--window-position=${index * 1300},0`, ...e2eConfig],
-          },
-        },
-      };
-    }),
-    {
-      name: 'OAuth: Get Meeting Access Token',
-      testMatch: /meetings\.setup\.ts/,
-      use: {
-        permissions: ['clipboard-read', 'clipboard-write'],
-      },
-    },
-    {
-      name: 'Meetings Widget Test',
-      dependencies: ['OAuth: Get Meeting Access Token'],
-      testMatch: '**/meetings/*.spec.ts',
-      timeout: 60000,
-      fullyParallel: false,
-      retries: 1,
-      use: {
-        baseURL: MEETING_BASE_URL,
-        trace: 'retain-on-failure',
-        permissions: ['microphone', 'camera'],
-        ...devices['Desktop Chrome'],
-        channel: 'chrome',
-        launchOptions: {
-          args: ['--ignore-certificate-errors', ...e2eConfig],
-        },
-      },
-    },
-  ],
+  projects: projects,
 });

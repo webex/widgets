@@ -52,6 +52,8 @@
     "clean": "yarn workspaces foreach --all --topological --parallel run clean && rm -rf node_modules",
     "clean:dist": "yarn workspaces foreach --all --topological --parallel run clean:dist",
     "test:unit": "yarn run test:tooling && yarn run test:cc-widgets",
+    "test:e2e:cc": "TEST_SCOPE=cc yarn playwright test",
+    "test:e2e:meetings": "TEST_SCOPE=meetings yarn playwright test",
     "test:e2e": "yarn playwright test",
     "test:styles": "yarn workspaces foreach --all --exclude webex-widgets run test:styles",
     "test:tooling": "jest --coverage",

@@ -17,7 +17,7 @@
     "release:debug": "semantic-release --debug",
     "release:dry-run": "semantic-release --dry-run",
     "start": "npm run demo:serve",
-    "test:e2e": "npm run demo:build && yarn playwright test --config=../../../playwright.config.ts --project='Meetings Widget Test'",
+    "test:e2e": "npm run demo:build && cd ../../.. && yarn run test:e2e:meetings",
     "test:eslint": "echo 'Broken eslint tests'",
     "test:eslint:broken": "eslint src/"
   },
