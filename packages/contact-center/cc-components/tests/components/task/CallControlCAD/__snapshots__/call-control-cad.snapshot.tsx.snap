@@ -198,18 +198,7 @@ exports[`CallControlCADComponent Snapshots should handle edge cases and control 
         </strong>
          
         <span>
-          555-123-4567
-        </span>
-      </mdc-text>
-      <mdc-text
-        class="md-text-wrapper rona"
-      >
-        <strong>
-          RONA:
-        </strong>
-         
-        <span>
-          30
+          No Phone Number
         </span>
       </mdc-text>
     </div>
@@ -387,18 +376,7 @@ exports[`CallControlCADComponent Snapshots should handle edge cases and control 
       </strong>
        
       <span>
-        555-123-4567
-      </span>
-    </mdc-text>
-    <mdc-text
-      class="md-text-wrapper rona"
-    >
-      <strong>
-        RONA:
-      </strong>
-       
-      <span>
-        30
+        No Phone Number
       </span>
     </mdc-text>
   </div>
@@ -659,17 +637,6 @@ exports[`CallControlCADComponent Snapshots should handle edge cases and control 
        
       <span>
         No Phone Number
-      </span>
-    </mdc-text>
-    <mdc-text
-      class="md-text-wrapper rona"
-    >
-      <strong>
-        RONA:
-      </strong>
-       
-      <span>
-        No RONA
       </span>
     </mdc-text>
   </div>
@@ -941,7 +908,7 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
       </strong>
        
       <span>
-        chat-customer@example.com
+        No Phone Number
       </span>
     </mdc-text>
     <mdc-tooltip
@@ -951,20 +918,9 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
       <mdc-text
         class="md-text-wrapper"
       >
-        chat-customer@example.com
+        No Phone Number
       </mdc-text>
     </mdc-tooltip>
-    <mdc-text
-      class="md-text-wrapper rona"
-    >
-      <strong>
-        RONA:
-      </strong>
-       
-      <span>
-        45
-      </span>
-    </mdc-text>
   </div>
 </div>
 `;
@@ -1222,18 +1178,7 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
       </strong>
        
       <span>
-        555-123-4567
-      </span>
-    </mdc-text>
-    <mdc-text
-      class="md-text-wrapper rona"
-    >
-      <strong>
-        RONA:
-      </strong>
-       
-      <span>
-        30
+        No Phone Number
       </span>
     </mdc-text>
   </div>
@@ -1493,18 +1438,7 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
       </strong>
        
       <span>
-        555-123-4567
-      </span>
-    </mdc-text>
-    <mdc-text
-      class="md-text-wrapper rona"
-    >
-      <strong>
-        RONA:
-      </strong>
-       
-      <span>
-        30
+        No Phone Number
       </span>
     </mdc-text>
   </div>
@@ -1789,17 +1723,6 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
         Social Customer
       </mdc-text>
     </mdc-tooltip>
-    <mdc-text
-      class="md-text-wrapper rona"
-    >
-      <strong>
-        RONA:
-      </strong>
-       
-      <span>
-        60
-      </span>
-    </mdc-text>
   </div>
 </div>
 `;
@@ -2002,18 +1925,7 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
         </strong>
          
         <span>
-          555-123-4567
-        </span>
-      </mdc-text>
-      <mdc-text
-        class="md-text-wrapper rona"
-      >
-        <strong>
-          RONA:
-        </strong>
-         
-        <span>
-          30
+          No Phone Number
         </span>
       </mdc-text>
     </div>
@@ -2307,18 +2219,7 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
       </strong>
        
       <span>
-        555-123-4567
-      </span>
-    </mdc-text>
-    <mdc-text
-      class="md-text-wrapper rona"
-    >
-      <strong>
-        RONA:
-      </strong>
-       
-      <span>
-        30
+        No Phone Number
       </span>
     </mdc-text>
   </div>
@@ -2579,18 +2480,7 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
         </strong>
          
         <span>
-          555-123-4567
-        </span>
-      </mdc-text>
-      <mdc-text
-        class="md-text-wrapper rona"
-      >
-        <strong>
-          RONA:
-        </strong>
-         
-        <span>
-          30
+          No Phone Number
         </span>
       </mdc-text>
     </div>
@@ -2851,18 +2741,7 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
       </strong>
        
       <span>
-        555-123-4567
-      </span>
-    </mdc-text>
-    <mdc-text
-      class="md-text-wrapper rona"
-    >
-      <strong>
-        RONA:
-      </strong>
-       
-      <span>
-        30
+        No Phone Number
       </span>
     </mdc-text>
   </div>
