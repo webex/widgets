@@ -17,7 +17,7 @@
     "release:debug": "semantic-release --debug",
     "release:dry-run": "semantic-release --dry-run",
     "start": "yarn run demo:serve",
-    "test:e2e": "yarn run demo:build && cd ../../.. && yarn run test:e2e:meetings",
+    "test:e2e": "yarn run build:src && cd ../../.. && yarn run test:e2e:meetings",
     "test:eslint": "echo 'Broken eslint tests'",
     "test:eslint:broken": "eslint src/"
   },
