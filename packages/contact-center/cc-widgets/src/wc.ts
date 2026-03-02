@@ -54,11 +54,7 @@ const WebCallControlCAD = r2wc(CallControlCAD, {
 
 const WebOutdialCall = r2wc(OutdialCall, {});
 
-const WebDigitalChannels = r2wc(DigitalChannels, {
-  props: {
-    currentTheme: 'string',
-  },
-});
+const WebDigitalChannels = r2wc(DigitalChannels, {});
 
 // Whenever there is a new component, add the name of the component
 // and the web-component to the components object
