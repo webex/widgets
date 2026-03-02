@@ -21,7 +21,7 @@
     "@momentum-ui/react-collaboration": "26.197.0",
     "@momentum-ui/tokens": "1.7.1",
     "@momentum-ui/utils": "6.2.15",
-    "@momentum-ui/web-components": "^2.23.35",
+    "@momentum-ui/web-components": "^2.26.20",
     "@webex/cc-widgets": "workspace:*",
     "babel-loader": "^9.2.1",
     "file-loader": "^6.2.0",
