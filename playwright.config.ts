@@ -74,30 +74,35 @@ const meetingsProjects = [
   },
 ];
 
+const ccWebServer = {
+  command: 'yarn workspace samples-cc-react-app serve',
+  url: 'http://localhost:3000',
+  reuseExistingServer: !process.env.CI,
+  stdout: 'ignore' as const,
+  stderr: 'pipe' as const,
+};
+
+const meetingsWebServer = {
+  command: MEETING_SERVER_COMMAND,
+  url: MEETING_SERVER_URL,
+  reuseExistingServer: !process.env.CI,
+  stdout: 'ignore' as const,
+  stderr: 'pipe' as const,
+  ignoreHTTPSErrors: true,
+};
+
 const projects = testScope === 'cc' ? ccProjects
   : testScope === 'meetings' ? meetingsProjects
-    : [...ccProjects, ...meetingsProjects];
+  : [...ccProjects, ...meetingsProjects];
+
+const webServers = testScope === 'cc' ? [ccWebServer]
+  : testScope === 'meetings' ? [meetingsWebServer]
+  : [ccWebServer, meetingsWebServer];
 
 export default defineConfig({
   testDir: './playwright',
   timeout: 180000,
-  webServer: [
-    {
-      command: 'yarn workspace samples-cc-react-app serve',
-      url: 'http://localhost:3000',
-      reuseExistingServer: !process.env.CI,
-      stdout: 'ignore',
-      stderr: 'pipe',
-    },
-    {
-      command: MEETING_SERVER_COMMAND,
-      url: MEETING_SERVER_URL,
-      reuseExistingServer: !process.env.CI,
-      stdout: 'ignore',
-      stderr: 'pipe',
-      ignoreHTTPSErrors: true,
-    },
-  ],
+  webServer: webServers,
   retries: 0,
   fullyParallel: true,
   workers: Object.keys(USER_SETS).length,
