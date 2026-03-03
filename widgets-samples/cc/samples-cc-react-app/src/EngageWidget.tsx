@@ -77,7 +77,7 @@ const EngageWidget: React.FC<EngageWidgetProps> = ({currentTheme, isSdkReady}) =
         </div>
         <div className={`${CSS_CLASSES.CONTENT_AREA} ${themeClass}`}>
           {isSupportedTask && isSdkReady ? (
-            <DigitalChannels currentTheme={currentTheme} />
+            <DigitalChannels />
           ) : (
             <div className={CSS_CLASSES.CONTENT_PLACEHOLDER}>
               {!isSdkReady ? MESSAGES.INITIALIZING : MESSAGES.NO_ACTIVE_TASKS}
