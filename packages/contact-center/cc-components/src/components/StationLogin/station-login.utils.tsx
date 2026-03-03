@@ -116,7 +116,7 @@ const validateDialNumber = (
   logger
 ): boolean => {
   try {
-    const regexForDn = new RegExp(dialNumberRegex ?? '1[0-9]{3}[2-9][0-9]{6}([,]{1,10}[0-9]+){0,1}');
+    const regexForDn = new RegExp(dialNumberRegex ?? '^\\+?[0-9]{7,15}([,]{1,10}[0-9]+)?$');
     if (regexForDn.test(input)) {
       return false;
     }
