@@ -22,10 +22,6 @@ export interface DigitalChannelsDataHookProps {
   };
 }
 
-export interface DigitalChannelsProps {
-  currentTheme?: string;
-}
-
 export interface DigitalChannelsComponentProps {
   conversationId: string;
   jwtToken: string;
