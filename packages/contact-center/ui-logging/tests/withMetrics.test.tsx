@@ -102,4 +102,114 @@ describe('withMetrics HOC', () => {
     rerender(<WrappedSpy name="different" />);
     expect(renderSpy).toHaveBeenCalledTimes(2);
   });
+
+  it('should log PROPS_UPDATED when watched props change', () => {
+    const renderSpy = jest.fn();
+    const SpyComponent: React.FC<TestComponentProps> = (props) => {
+      renderSpy();
+      return <div>Test Component {props.name}</div>;
+    };
+
+    const WrappedComponentWithProps = withMetrics<TestComponentProps>(SpyComponent, 'TestWidget', ['name', 'status']);
+
+    const {rerender} = render(<WrappedComponentWithProps name="test" status="idle" />);
+    expect(renderSpy).toHaveBeenCalledTimes(1);
+
+    // Clear mount log and render spy
+    (store.logger.log as jest.Mock).mockClear();
+    renderSpy.mockClear();
+
+    // Re-render with changed watched prop
+    rerender(<WrappedComponentWithProps name="updated" status="idle" />);
+
+    // Component should re-render
+    expect(renderSpy).toHaveBeenCalledTimes(1);
+
+    // Should log PROPS_UPDATED via store.logger.log
+    const logCalls = (store.logger.log as jest.Mock).mock.calls;
+    const propsUpdatedCall = logCalls.find((call) => call[0].includes('PROPS_UPDATED'));
+
+    expect(propsUpdatedCall).toBeDefined();
+    const loggedMetric = JSON.parse(propsUpdatedCall[0].replace('CC-Widgets: UI Metrics: ', ''));
+    expect(loggedMetric).toMatchObject({
+      widgetName: 'TestWidget',
+      event: 'PROPS_UPDATED',
+      additionalContext: {
+        changedProps: {
+          name: {prev: 'test', next: 'updated'},
+        },
+      },
+    });
+  });
+
+  it('should not log PROPS_UPDATED when unwatched props change', () => {
+    const WrappedComponent = withMetrics<TestComponentProps>(TestComponent, 'TestWidget', ['name']);
+
+    const {rerender} = render(<WrappedComponent name="test" status="idle" timer={100} />);
+
+    // Clear mount log
+    logMetricsSpy.mockClear();
+
+    // Re-render with only unwatched props changed
+    rerender(<WrappedComponent name="test" status="active" timer={200} />);
+
+    // Should not log PROPS_UPDATED since watched props haven't changed
+    expect(logMetricsSpy).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: 'PROPS_UPDATED',
+      })
+    );
+  });
+
+  it('should not log PROPS_UPDATED when no propsToWatch specified', () => {
+    const WrappedComponent = withMetrics<TestComponentProps>(TestComponent, 'TestWidget');
+
+    const {rerender} = render(<WrappedComponent name="test" />);
+
+    // Clear mount log
+    logMetricsSpy.mockClear();
+
+    // Re-render with changed props
+    rerender(<WrappedComponent name="updated" />);
+
+    // Should not log PROPS_UPDATED
+    expect(logMetricsSpy).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: 'PROPS_UPDATED',
+      })
+    );
+  });
+
+  it('should track multiple watched prop changes', () => {
+    const WrappedComponent = withMetrics<TestComponentProps>(TestComponent, 'TestWidget', ['name', 'status', 'count']);
+
+    const {rerender} = render(<WrappedComponent name="test" status="idle" count={1} timer={100} />);
+
+    // Clear mount log
+    (store.logger.log as jest.Mock).mockClear();
+
+    // Re-render with multiple watched props changed
+    rerender(<WrappedComponent name="updated" status="active" count={2} timer={200} />);
+
+    // Should log all changed watched props via store.logger.log
+    const logCalls = (store.logger.log as jest.Mock).mock.calls;
+    const propsUpdatedCall = logCalls.find((call) => call[0].includes('PROPS_UPDATED'));
+
+    expect(propsUpdatedCall).toBeDefined();
+    const loggedMetric = JSON.parse(propsUpdatedCall[0].replace('CC-Widgets: UI Metrics: ', ''));
+    expect(loggedMetric).toMatchObject({
+      widgetName: 'TestWidget',
+      event: 'PROPS_UPDATED',
+      additionalContext: {
+        changedProps: {
+          name: {prev: 'test', next: 'updated'},
+          status: {prev: 'idle', next: 'active'},
+          count: {prev: 1, next: 2},
+        },
+      },
+    });
+
+    // Verify timer is not included since it's not watched
+    expect(loggedMetric.additionalContext.changedProps.timer).toBeUndefined();
+  });
 });

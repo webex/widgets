@@ -45,6 +45,65 @@ export const logMetrics = (metric: WidgetMetrics) => {
 };
 
 /**
+ * Logs a PROPS_UPDATED event when specific props have changed.
+ *
+ * This function checks if any of the specified props have changed between
+ * the previous and next props objects. It performs a shallow comparison
+ * for each watched prop and only logs if at least one has changed.
+ *
+ * @param widgetName - Name of the widget generating the metric
+ * @param propsToWatch - Array of prop names to monitor for changes
+ * @param prevProps - The previous props object
+ * @param nextProps - The next props object to compare against
+ *
+ * @example
+ * ```typescript
+ * // Only log when 'status' or 'taskId' props change
+ * logPropsUpdated('CallControl', ['status', 'taskId'], oldProps, newProps);
+ * ```
+ */
+export const logPropsUpdated = (
+  widgetName: string,
+  propsToWatch: string[],
+  prevProps: Record<string, any>,
+  nextProps: Record<string, any>
+): void => {
+  if (!propsToWatch || propsToWatch.length === 0) {
+    return;
+  }
+
+  // Check if any watched props have changed
+  const changedProps: Record<string, {prev: any; next: any}> = {};
+  let hasChanges = false;
+
+  for (const propName of propsToWatch) {
+    const prevVal = prevProps[propName];
+    const nextVal = nextProps[propName];
+
+    // Shallow comparison for watched prop
+    if (prevVal !== nextVal) {
+      hasChanges = true;
+      changedProps[propName] = {
+        prev: prevVal,
+        next: nextVal,
+      };
+    }
+  }
+
+  // Only log if at least one watched prop changed
+  if (hasChanges) {
+    logMetrics({
+      widgetName,
+      event: 'PROPS_UPDATED',
+      timestamp: Date.now(),
+      additionalContext: {
+        changedProps,
+      },
+    });
+  }
+};
+
+/**
  * Determines if props have changed between two objects using shallow comparison.
  *
  * This function performs a shallow comparison between two objects to detect changes.

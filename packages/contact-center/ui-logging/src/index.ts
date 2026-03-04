@@ -1,5 +1,5 @@
 import withMetrics from './withMetrics';
-import {WidgetMetrics} from './metricsLogger';
+import {WidgetMetrics, logPropsUpdated} from './metricsLogger';
 
-export {withMetrics};
+export {withMetrics, logPropsUpdated};
 export type {WidgetMetrics};
