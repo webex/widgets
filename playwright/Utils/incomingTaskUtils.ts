@@ -396,6 +396,70 @@ export async function loginExtension(page: Page, token: string) {
 }
 
 /**
+ * Best-effort deregistration for Webex calling sample page.
+ * Used during cleanup to release extension/device registrations and reduce backend throttling.
+ * This function never throws.
+ * @param page Playwright Page object
+ */
+export async function deregisterExtension(page: Page): Promise<void> {
+  if (!page || page.isClosed()) {
+    return;
+  }
+
+  try {
+    await page.bringToFront();
+
+    // End active calls first so deregister is not blocked by active media sessions.
+    const endCallBtn = page.locator('#end-call').first();
+    if (await endCallBtn.isEnabled({timeout: 1000}).catch(() => false)) {
+      await endCallBtn.click({timeout: AWAIT_TIMEOUT}).catch(() => {});
+      await page.waitForTimeout(500);
+    }
+    const endBtn = page.locator('#end').first();
+    if (await endBtn.isEnabled({timeout: 1000}).catch(() => false)) {
+      await endBtn.click({timeout: AWAIT_TIMEOUT}).catch(() => {});
+      await page.waitForTimeout(500);
+    }
+
+    const status = page.locator('#registration-status');
+    const statusVisible = await status.isVisible({timeout: 2000}).catch(() => false);
+    if (!statusVisible) {
+      return;
+    }
+
+    const statusText = (await status.textContent().catch(() => '')) ?? '';
+    if (/not\s+registered|unregistered/i.test(statusText)) {
+      return;
+    }
+
+    const deregisterCandidates = [
+      page.locator('#registration-deregister').first(),
+      page.locator('#registration-unregister').first(),
+      page.getByRole('button', {name: /deregister|unregister/i}).first(),
+    ];
+
+    let clicked = false;
+    for (const button of deregisterCandidates) {
+      if (await button.isVisible({timeout: 1000}).catch(() => false)) {
+        await button.click({timeout: AWAIT_TIMEOUT}).catch(() => {});
+        clicked = true;
+        break;
+      }
+    }
+
+    if (!clicked) {
+      return;
+    }
+
+    await expect(status).toContainText(/not\s+registered|unregistered/i, {
+      timeout: 10000,
+    });
+  } catch {
+    // Best-effort cleanup only.
+  }
+}
+
+/**
  * Submits the RONA popup by selecting the given state and confirming.
  * @param page Playwright Page object
  * @param select State to select (e.g., 'Available', 'Idle')

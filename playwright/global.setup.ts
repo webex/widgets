@@ -1,4 +1,4 @@
-import {test as setup} from '@playwright/test';
+import {test as setup, Browser} from '@playwright/test';
 import {oauthLogin} from './Utils/initUtils';
 import {USER_SETS} from './test-data';
 const fs = require('fs');
@@ -62,46 +62,72 @@ export const UpdateENVWithUserSets = () => {
   fs.writeFileSync(envPath, envContent, 'utf8');
 };
 
-setup('OAuth', async ({browser}) => {
-  // Update environment variables with user sets before starting OAuth
-  UpdateENVWithUserSets();
+const updateEnvVariables = (updates: Record<string, string>): void => {
+  const envPath = path.resolve(__dirname, '../.env');
+  let envContent = fs.existsSync(envPath) ? fs.readFileSync(envPath, 'utf8') : '';
 
-  // Directly iterate through USER_SETS and their agents
-  for (const setKey of Object.keys(USER_SETS)) {
-    const userSet = USER_SETS[setKey];
+  Object.entries(updates).forEach(([key, value]) => {
+    const keyPattern = new RegExp(`^${key}=.*$\\n?`, 'm');
+    envContent = envContent.replace(keyPattern, '');
+    if (!envContent.endsWith('\n') && envContent.length > 0) envContent += '\n';
+    envContent += `${key}=${value}\n`;
+  });
 
-    for (const agentKey of Object.keys(userSet.AGENTS)) {
-      const page = await browser.newPage();
+  envContent = envContent.replace(/\n{3,}/g, '\n\n');
+  fs.writeFileSync(envPath, envContent, 'utf8');
+};
 
-      // Construct the OAuth agent ID directly
-      const oauthAgentId = `${userSet.AGENTS[agentKey].username}@${process.env.PW_SANDBOX}`;
+// Helper function to fetch OAuth token for a single agent
+const fetchOAuthTokenForAgent = async (
+  browser: Browser,
+  setKey: string,
+  agentKey: string,
+  agent: {username: string}
+): Promise<{key: string; token: string}> => {
+  const page = await browser.newPage();
 
-      await oauthLogin(page, oauthAgentId);
+  // Construct the OAuth agent ID directly
+  const oauthAgentId = `${agent.username}@${process.env.PW_SANDBOX}`;
 
-      await page.getByRole('textbox').click();
-      const accessToken = await page.getByRole('textbox').inputValue();
+  await oauthLogin(page, oauthAgentId);
 
-      const envPath = path.resolve(__dirname, '../.env');
-      let envContent = '';
-      if (fs.existsSync(envPath)) {
-        envContent = fs.readFileSync(envPath, 'utf8');
-        // Remove any existing ACCESS_TOKEN line for this set-agent combination
-        const accessTokenPattern = new RegExp(`^${setKey}_${agentKey}_ACCESS_TOKEN=.*$\\n?`, 'm');
-        envContent = envContent.replace(accessTokenPattern, '');
+  await page.getByRole('textbox').click();
+  const token = await page.getByRole('textbox').inputValue();
 
-        // Ensure trailing newline
-        if (!envContent.endsWith('\n')) envContent += '\n';
-      }
-      envContent += `${setKey}_${agentKey}_ACCESS_TOKEN=${accessToken}\n`;
-      // Clean up multiple consecutive empty lines
-      envContent = envContent.replace(/\n{3,}/g, '\n\n');
-      fs.writeFileSync(envPath, envContent, 'utf8');
+  await page.close();
+  return {
+    key: `${setKey}_${agentKey}_ACCESS_TOKEN`,
+    token,
+  };
+};
 
-      await page.close();
-    }
-  }
+// Helper function to fetch OAuth tokens for all agents in a set
+const fetchOAuthTokensForSet = async (browser: Browser, setKey: string): Promise<Record<string, string>> => {
+  const userSet = USER_SETS[setKey];
+  const tokenEntries = await Promise.all(
+    Object.keys(userSet.AGENTS).map((agentKey) =>
+      fetchOAuthTokenForAgent(browser, setKey, agentKey, userSet.AGENTS[agentKey])
+    )
+  );
 
-  // OAuth for Dial Number Login user
+  return tokenEntries.reduce(
+    (acc, entry) => {
+      acc[entry.key] = entry.token;
+      return acc;
+    },
+    {} as Record<string, string>
+  );
+};
+
+// Helper function to fetch OAuth tokens for a given list of set keys.
+// Fetching is parallel, but env file updates are done once at the end to prevent write races.
+const fetchOAuthTokensForSets = async (browser: Browser, setKeys: string[]): Promise<Record<string, string>> => {
+  const tokenMaps = await Promise.all(setKeys.map((setKey) => fetchOAuthTokensForSet(browser, setKey)));
+  return tokenMaps.reduce((acc, tokenMap) => ({...acc, ...tokenMap}), {} as Record<string, string>);
+};
+
+// Helper function to fetch dial number OAuth token
+const fetchDialNumberToken = async (browser: Browser): Promise<string | undefined> => {
   const dialNumberUsername = process.env.PW_DIAL_NUMBER_LOGIN_USERNAME;
   const dialNumberPassword = process.env.PW_DIAL_NUMBER_LOGIN_PASSWORD;
 
@@ -113,22 +139,23 @@ setup('OAuth', async ({browser}) => {
     await page.getByRole('textbox').click();
     const accessToken = await page.getByRole('textbox').inputValue();
 
-    const envPath = path.resolve(__dirname, '../.env');
-    let envContent = '';
-    if (fs.existsSync(envPath)) {
-      envContent = fs.readFileSync(envPath, 'utf8');
-      // Remove any existing DIAL_NUMBER_LOGIN_ACCESS_TOKEN line
-      const accessTokenPattern = new RegExp(`^DIAL_NUMBER_LOGIN_ACCESS_TOKEN=.*$\\n?`, 'm');
-      envContent = envContent.replace(accessTokenPattern, '');
-
-      // Ensure trailing newline
-      if (!envContent.endsWith('\n')) envContent += '\n';
-    }
-    envContent += `DIAL_NUMBER_LOGIN_ACCESS_TOKEN=${accessToken}\n`;
-    // Clean up multiple consecutive empty lines
-    envContent = envContent.replace(/\n{3,}/g, '\n\n');
-    fs.writeFileSync(envPath, envContent, 'utf8');
-
     await page.close();
+    return accessToken;
   }
+  return undefined;
+};
+
+setup('OAuth: Get Access Token', async ({browser}) => {
+  // Update environment variables with user sets before starting OAuth.
+  UpdateENVWithUserSets();
+
+  const allSetKeys = Object.keys(USER_SETS);
+  const oauthTokenUpdates = await fetchOAuthTokensForSets(browser, allSetKeys);
+  const dialNumberToken = await fetchDialNumberToken(browser);
+
+  if (dialNumberToken) {
+    oauthTokenUpdates.DIAL_NUMBER_LOGIN_ACCESS_TOKEN = dialNumberToken;
+  }
+
+  updateEnvVariables(oauthTokenUpdates);
 });

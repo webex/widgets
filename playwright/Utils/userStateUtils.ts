@@ -5,6 +5,28 @@ import {USER_STATES, AWAIT_TIMEOUT, CONSOLE_PATTERNS} from '../constants';
 dotenv.config();
 
 /**
+ * Dismisses the multi-sign-in modal if it appears
+ * This modal appears when the same user is logged in from multiple sessions
+ * @param page - The Playwright page object
+ */
+const dismissMultiSignInModal = async (page: Page): Promise<void> => {
+  try {
+    const modal = page.getByTestId('multi-sign-in-modal');
+    const isVisible = await modal.isVisible({timeout: 1000}).catch(() => false);
+    if (isVisible) {
+      // Click the primary button to dismiss the modal (usually "Continue" or "OK")
+      const continueBtn = modal.locator('button').first();
+      if (await continueBtn.isVisible({timeout: 500}).catch(() => false)) {
+        await continueBtn.click({timeout: 2000}).catch(() => {});
+        await page.waitForTimeout(500);
+      }
+    }
+  } catch (e) {
+    // Ignore errors - modal might not be present
+  }
+};
+
+/**
  * Changes the user state in the contact center widget
  * @param page - The Playwright page object
  * @param userState - The target user state (e.g., 'Available', 'Meeting', 'Lunch Break')
@@ -17,6 +39,9 @@ dotenv.config();
  * ```
  */
 export const changeUserState = async (page: Page, userState: string): Promise<void> => {
+  // Dismiss multi-sign-in modal if present
+  await dismissMultiSignInModal(page);
+
   // Get the current state name with timeout, return early if not found
   try {
     await page.bringToFront();

@@ -69,8 +69,13 @@ export default function createAdvancedTaskControlsTests() {
 
       await waitForIncomingTask(testManager.agent1Page, TASK_TYPES.CALL, ACCEPT_TASK_TIMEOUT);
       await acceptExtensionCall(testManager.agent1ExtensionPage);
+
+      // Set agent2 to available and wait for state to fully propagate
       await changeUserState(testManager.agent2Page, USER_STATES.AVAILABLE);
-      await testManager.agent1Page.waitForTimeout(5000);
+      await waitForState(testManager.agent2Page, USER_STATES.AVAILABLE);
+      await verifyCurrentState(testManager.agent2Page, USER_STATES.AVAILABLE);
+      // Extra wait for backend to process state change and update agent directory
+      await testManager.agent1Page.waitForTimeout(2000);
 
       await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
 
@@ -152,7 +157,8 @@ export default function createAdvancedTaskControlsTests() {
       await expect(testManager.agent1ExtensionPage.locator('#answer').first()).toBeEnabled({timeout: 20000});
       await acceptExtensionCall(testManager.agent1ExtensionPage);
       await changeUserState(testManager.agent2Page, USER_STATES.AVAILABLE);
-      await testManager.agent1Page.waitForTimeout(3000);
+      await waitForState(testManager.agent2Page, USER_STATES.AVAILABLE);
+      await testManager.agent1Page.waitForTimeout(2000);
       await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
 
       // 1. Accept consult and end
@@ -197,6 +203,8 @@ export default function createAdvancedTaskControlsTests() {
       // 3. Not picked up (timeout)
       clearAdvancedCapturedLogs();
       await changeUserState(testManager.agent2Page, USER_STATES.AVAILABLE);
+      await waitForState(testManager.agent2Page, USER_STATES.AVAILABLE);
+      await testManager.agent1Page.waitForTimeout(1000);
       await consultOrTransfer(
         testManager.agent1Page,
         'agent',
@@ -212,6 +220,8 @@ export default function createAdvancedTaskControlsTests() {
       // 4. Consult transfer
       clearAdvancedCapturedLogs();
       await changeUserState(testManager.agent2Page, USER_STATES.AVAILABLE);
+      await waitForState(testManager.agent2Page, USER_STATES.AVAILABLE);
+      await testManager.agent1Page.waitForTimeout(1000);
       await consultOrTransfer(
         testManager.agent1Page,
         'agent',
@@ -246,7 +256,8 @@ export default function createAdvancedTaskControlsTests() {
       await testManager.agent1Page.waitForTimeout(5000);
       await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
       await changeUserState(testManager.agent2Page, USER_STATES.AVAILABLE);
-      await testManager.agent2Page.waitForTimeout(2000);
+      await waitForState(testManager.agent2Page, USER_STATES.AVAILABLE);
+      await testManager.agent1Page.waitForTimeout(2000);
       // 1. Cancel consult
       clearAdvancedCapturedLogs();
       await consultOrTransfer(
@@ -282,6 +293,8 @@ export default function createAdvancedTaskControlsTests() {
 
       // 3. Accept consult and Agent 2 ends
       await changeUserState(testManager.agent2Page, USER_STATES.AVAILABLE);
+      await waitForState(testManager.agent2Page, USER_STATES.AVAILABLE);
+      await testManager.agent1Page.waitForTimeout(1000);
       clearAdvancedCapturedLogs();
       await consultOrTransfer(
         testManager.agent1Page,
@@ -300,6 +313,8 @@ export default function createAdvancedTaskControlsTests() {
 
       // 4. Consult transfer
       await changeUserState(testManager.agent2Page, USER_STATES.AVAILABLE);
+      await waitForState(testManager.agent2Page, USER_STATES.AVAILABLE);
+      await testManager.agent1Page.waitForTimeout(1000);
       clearAdvancedCapturedLogs();
       await consultOrTransfer(
         testManager.agent1Page,

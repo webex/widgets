@@ -27,8 +27,8 @@ async function getCurrentHandleTime(page: Page, index: number = 0): Promise<numb
   const taskListItem = page.getByTestId('task-list').getByRole('listitem').nth(index);
   const interactionId = await taskListItem.getAttribute('id');
 
-  // read the dynamic handle-time test-id
-  const full = await page.getByTestId(`${interactionId}-handle-time`).textContent();
+  // read the dynamic handle-time test-id scoped to task list to avoid ambiguity with incoming task widget
+  const full = await page.getByTestId('task-list').getByTestId(`${interactionId}-handle-time`).textContent();
 
   // 2. Pull out the MM:SS via regex
   const match = full?.match(/(\d{2}:\d{2})/);

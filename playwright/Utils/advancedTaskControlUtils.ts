@@ -207,11 +207,28 @@ async function clickListItemPrimaryButton(
 
 async function performAgentSelection(page: Page, popover: ReturnType<Page['locator']>, value: string): Promise<void> {
   await clickCategory(page, popover, 'Agents');
+
+  // Use search to ensure agent list is fresh and to handle large agent lists
+  // This is critical when agents have recently changed state (e.g., MEETING -> AVAILABLE)
+  const search = popover.locator('#consult-search');
+  if (await search.isVisible({timeout: 500}).catch(() => false)) {
+    await search.fill(value, {timeout: AWAIT_TIMEOUT});
+    await page.waitForTimeout(500); // Wait for search results to filter/load
+  }
+
   await clickListItemPrimaryButton(page, popover, value, 'Agent');
 }
 
 async function performQueueSelection(page: Page, popover: ReturnType<Page['locator']>, value: string): Promise<void> {
   await clickCategory(page, popover, 'Queues');
+
+  // Use search to handle large queue lists and ensure fresh data
+  const search = popover.locator('#consult-search');
+  if (await search.isVisible({timeout: 500}).catch(() => false)) {
+    await search.fill(value, {timeout: AWAIT_TIMEOUT});
+    await page.waitForTimeout(500); // Wait for search results to filter/load
+  }
+
   await clickListItemPrimaryButton(page, popover, value, 'Queue');
 }
 

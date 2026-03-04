@@ -12,6 +12,28 @@ import {handleStrayTasks} from './helperUtils';
 dotenv.config();
 
 /**
+ * Dismisses the multi-sign-in modal if it appears
+ * This modal appears when the same user is logged in from multiple sessions
+ * @param page - The Playwright page object
+ */
+const dismissMultiSignInModal = async (page: Page): Promise<void> => {
+  try {
+    const modal = page.getByTestId('multi-sign-in-modal');
+    const isVisible = await modal.isVisible({timeout: 1000}).catch(() => false);
+    if (isVisible) {
+      // Click the primary button to dismiss the modal (usually "Continue" or "OK")
+      const continueBtn = modal.locator('button').first();
+      if (await continueBtn.isVisible({timeout: 500}).catch(() => false)) {
+        await continueBtn.click({timeout: 2000}).catch(() => {});
+        await page.waitForTimeout(500);
+      }
+    }
+  } catch (e) {
+    // Ignore errors - modal might not be present
+  }
+};
+
+/**
  * Performs desktop login for contact center agents
  * @param page - The Playwright page object
  * @throws {Error} When login fails or required elements are not found
@@ -21,6 +43,7 @@ dotenv.config();
  * ```
  */
 export const desktopLogin = async (page: Page): Promise<void> => {
+  await dismissMultiSignInModal(page);
   await page.getByTestId('login-option-select').locator('#select-base-triggerid svg').click({timeout: AWAIT_TIMEOUT});
   await page.getByTestId('login-option-Desktop').click({timeout: AWAIT_TIMEOUT});
   await page.getByTestId('teams-select-dropdown').locator('#select-base-triggerid div').click({timeout: AWAIT_TIMEOUT});
@@ -34,6 +57,8 @@ export const desktopLogin = async (page: Page): Promise<void> => {
   await page.waitForTimeout(DROPDOWN_SETTLE_TIMEOUT);
 
   await page.getByTestId('login-button').click({timeout: AWAIT_TIMEOUT});
+  await page.waitForTimeout(1000);
+  await dismissMultiSignInModal(page);
 };
 
 /**
