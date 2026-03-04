@@ -5,11 +5,17 @@ import {ErrorBoundary} from 'react-error-boundary';
 import store from '@webex/cc-store';
 import {useDigitalChannelsInit, useDigitalChannelsData} from '../helper';
 import {DigitalChannelsComponent} from './DigitalChannelsComponent';
-import {DigitalChannelsProps} from './digital-channels.types';
 
-const DigitalChannelsInternal: React.FunctionComponent<DigitalChannelsProps> = observer(({currentTheme}) => {
-  const {logger, currentTask, isDigitalChannelsInitialized, setDigitalChannelsInitialized, getAccessToken, dataCenter} =
-    store;
+const DigitalChannelsInternal: React.FunctionComponent = observer(() => {
+  const {
+    logger,
+    currentTask,
+    isDigitalChannelsInitialized,
+    setDigitalChannelsInitialized,
+    getAccessToken,
+    dataCenter,
+    currentTheme,
+  } = store;
 
   // Fetch JWT token and conversation ID
   const {jwtToken, conversationId, hasError} = useDigitalChannelsData({
@@ -45,7 +51,7 @@ const DigitalChannelsInternal: React.FunctionComponent<DigitalChannelsProps> = o
   );
 });
 
-const DigitalChannels: React.FunctionComponent<DigitalChannelsProps> = (props) => {
+const DigitalChannels: React.FunctionComponent = () => {
   return (
     <ErrorBoundary
       fallbackRender={() => <></>}
@@ -53,7 +59,7 @@ const DigitalChannels: React.FunctionComponent<DigitalChannelsProps> = (props) =
         if (store.onErrorCallback) store.onErrorCallback('DigitalChannels', error);
       }}
     >
-      <DigitalChannelsInternal {...props} />
+      <DigitalChannelsInternal />
     </ErrorBoundary>
   );
 };

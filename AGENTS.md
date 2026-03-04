@@ -4,6 +4,8 @@
 
 This is the main orchestrator for AI assistants working on this repository. It routes you to the correct templates and documentation based on the developer's task.
 
+**For every developer request:** (1) Identify task type (A–E below). (2) If the work is in an existing package or widget, load that scope's ai-docs (see [Package and widget ai-docs reference](#package-and-widget-ai-docs-reference)) and follow its AGENTS.md. (3) Open the template for that type and complete its mandatory pre-steps (see [Mandatory pre-steps by task type](#mandatory-pre-steps-by-task-type)). (4) Then follow the rest of this guide and the template.
+
 ---
 
 ## Quick Start
@@ -13,9 +15,11 @@ This is the main orchestrator for AI assistants working on this repository. It r
 1. **Understand the task** - Identify what type of work is needed
 2. **Break down large or multi-part tasks** - If the prompt mixes multiple tasks (for example, "create new widget" **and** "fix a bug" or "add a feature"), or the task is very large, split it into smaller, clearly scoped subtasks and handle them one by one
 3. **Route to appropriate template** - Use modular templates for guidance
-4. **Generate/fix code** - Follow established patterns
-5. **Update documentation** - Keep ai-docs in sync with code changes
-6. **Ask for review** - Confirm completion with developer
+4. **Load package/widget ai-docs when working in that scope** - If fixing, generating, or enhancing code in an existing package or widget, read that scope's [ai-docs/AGENTS.md and ARCHITECTURE.md](#package-and-widget-ai-docs-reference) and follow them (see CRITICAL RULES rule 3).
+5. **Complete that template's mandatory pre-step section** - See [Mandatory pre-steps by task type](#mandatory-pre-steps-by-task-type) in CRITICAL RULES. Do not generate code until pre-steps are done or the developer explicitly waives them.
+6. **Generate/fix code** - Follow established patterns
+7. **Update documentation** - Keep ai-docs in sync with code changes
+8. **Ask for review** - Confirm completion with developer
 
 ---
 
@@ -50,15 +54,8 @@ If the developer's message contains multiple distinct task types (for example, "
 
 **E. Understanding Architecture**
 - Developer needs to understand how something works
-- **Read:** Package's `ai-docs/AGENTS.md` (usage) and `ai-docs/ARCHITECTURE.md` (technical details)
-- **Playwright exception:** Read `playwright/ai-docs/AGENTS.md` and `playwright/ai-docs/ARCHITECTURE.md`
-- **Available for:** station-login, user-state, store, cc-components, cc-widgets, ui-logging, test-fixtures, playwright
-
-**F. Playwright E2E Test Spec / Test Work**
-- Developer wants to create/update Playwright test specs or implement Playwright E2E tests
-- **Route to:** [templates/playwright/00-master.md](./ai-docs/templates/playwright/00-master.md)
-- **Follow:** Simplified Playwright workflow (new suite, new tests, update tests, user-set/env, framework updates, docs, validation)
-- **Task values:** `new_test_suite`, `new_test_file`, `add_scenarios_to_existing_test`, `update_existing_test_logic`, `add_or_update_user_set`, `add_or_update_utils`, `add_or_update_test_manager`, `add_or_update_constants`, `add_or_update_global_setup`, `update_playwright_docs`, `stabilize_flaky_tests`
+- **Read:** That scope's `ai-docs/AGENTS.md` (usage) and `ai-docs/ARCHITECTURE.md` (technical details); use [Package and widget ai-docs reference](#package-and-widget-ai-docs-reference) to find the path.
+- **Available for:** station-login, user-state, store, cc-components, cc-widgets, ui-logging, test-fixtures; for task package use per-widget ai-docs (CallControl, IncomingTask, OutdialCall, TaskList).
 
 ---
 
@@ -155,6 +152,24 @@ Once provided, I'll analyze it and generate the widget accordingly.
 
 **DO NOT proceed without design input.**
 
+### 3. Use Package/Widget ai-docs When Working in That Scope
+
+When fixing, generating, or enhancing code in a package or widget, you MUST read and follow that scope's `ai-docs/AGENTS.md` (and `ai-docs/ARCHITECTURE.md` where available). See [Package and widget ai-docs reference](#package-and-widget-ai-docs-reference) in Step 2. The root AGENTS.md is the orchestrator; each package/widget AGENTS.md is the authoritative reference for that scope—use both.
+
+### 4. Complete Template Pre-Steps Before Code
+
+Before generating or changing any code, you MUST complete the **pre-step section** of the template for the task type (see table below). Either fill it from the developer's message and confirm, or ask the developer for missing items. Do not proceed to implementation steps until pre-steps are done or the developer explicitly asks to skip them.
+
+#### Mandatory pre-steps by task type (Rule 4)
+
+| Task type | Template | Mandatory pre-step (complete before code) |
+| --------- | -------- | ----------------------------------------- |
+| **A. Create New Widget** | [new-widget/00-master.md](./ai-docs/templates/new-widget/00-master.md) | Design input + [01-pre-questions.md](./ai-docs/templates/new-widget/01-pre-questions.md) (widget name, 4 technical inputs) |
+| **B. Fix Bug** | [existing-widget/bug-fix.md](./ai-docs/templates/existing-widget/bug-fix.md) | [Pre-Fix Questions](./ai-docs/templates/existing-widget/bug-fix.md) (bug info, scope, impact, existing tests) |
+| **C. Add Feature** | [existing-widget/feature-enhancement.md](./ai-docs/templates/existing-widget/feature-enhancement.md) | [Pre-Enhancement Questions](./ai-docs/templates/existing-widget/feature-enhancement.md) (feature info, requirements, compatibility, design input) |
+| **D. Documentation only** | documentation templates | Optional: confirm scope with developer (no code change) |
+| **E. Understanding** | Package ai-docs | None (read-only) |
+
 ---
 
 ## Step 2: Load Context
@@ -169,9 +184,26 @@ Once provided, I'll analyze it and generate the widget accordingly.
    - [web-component-patterns.md](./ai-docs/patterns/web-component-patterns.md) - r2wc patterns
    - [testing-patterns.md](./ai-docs/patterns/testing-patterns.md) - Jest, RTL, Playwright
 
-2. **Package documentation** - If working on existing widget
-   - `packages/contact-center/{widget-name}/ai-docs/AGENTS.md` - Usage and API
-   - `packages/contact-center/{widget-name}/ai-docs/ARCHITECTURE.md` - Technical details
+2. **Package/widget ai-docs (mandatory when working in that scope)**  
+   When fixing, generating, or enhancing code in a package or widget, you **MUST** read that scope's `ai-docs/AGENTS.md` (and `ARCHITECTURE.md` where listed) and follow its instructions. The root AGENTS.md orchestrates; package/widget AGENTS.md is the authoritative reference for that scope. Use the table below to find the right path.
+
+#### Package and widget ai-docs reference
+
+| Scope you're working on | AGENTS.md | ARCHITECTURE.md |
+| ----------------------- | --------- | --------------- |
+| **station-login** | [packages/contact-center/station-login/ai-docs/AGENTS.md](packages/contact-center/station-login/ai-docs/AGENTS.md) | Same folder |
+| **user-state** | [packages/contact-center/user-state/ai-docs/AGENTS.md](packages/contact-center/user-state/ai-docs/AGENTS.md) | Same folder |
+| **task – CallControl** | [packages/contact-center/task/ai-docs/widgets/CallControl/AGENTS.md](packages/contact-center/task/ai-docs/widgets/CallControl/AGENTS.md) | Same folder |
+| **task – IncomingTask** | [packages/contact-center/task/ai-docs/widgets/IncomingTask/AGENTS.md](packages/contact-center/task/ai-docs/widgets/IncomingTask/AGENTS.md) | Same folder |
+| **task – OutdialCall** | [packages/contact-center/task/ai-docs/widgets/OutdialCall/AGENTS.md](packages/contact-center/task/ai-docs/widgets/OutdialCall/AGENTS.md) | Same folder |
+| **task – TaskList** | [packages/contact-center/task/ai-docs/widgets/TaskList/AGENTS.md](packages/contact-center/task/ai-docs/widgets/TaskList/AGENTS.md) | Same folder |
+| **store** | [packages/contact-center/store/ai-docs/AGENTS.md](packages/contact-center/store/ai-docs/AGENTS.md) | Same folder |
+| **cc-components** | [packages/contact-center/cc-components/ai-docs/AGENTS.md](packages/contact-center/cc-components/ai-docs/AGENTS.md) | Same folder |
+| **cc-widgets** | [packages/contact-center/cc-widgets/ai-docs/AGENTS.md](packages/contact-center/cc-widgets/ai-docs/AGENTS.md) | Same folder |
+| **ui-logging** | [packages/contact-center/ui-logging/ai-docs/AGENTS.md](packages/contact-center/ui-logging/ai-docs/AGENTS.md) | Same folder |
+| **samples-cc-react-app** | [widgets-samples/cc/samples-cc-react-app/ai-docs/AGENTS.md](widgets-samples/cc/samples-cc-react-app/ai-docs/AGENTS.md) | Same folder if present |
+
+**Task package note:** The task package has multiple widgets (CallControl, IncomingTask, OutdialCall, TaskList). When working on one of them, use that widget's ai-docs path above, not a generic task path.
 
 ### Conditionally Read
 
@@ -179,21 +211,6 @@ Once provided, I'll analyze it and generate the widget accordingly.
 - Scan: [contact-centre-sdk-apis/contact-center.json](./contact-centre-sdk-apis/contact-center.json)
 - Find available methods, events, types
 - Check method signatures before using
-
-**If modifying store:**
-- Read: `packages/contact-center/store/ai-docs/AGENTS.md`
-- Read: `packages/contact-center/store/ai-docs/ARCHITECTURE.md`
-
-**If creating/using components:**
-- Read: `packages/contact-center/cc-components/ai-docs/AGENTS.md`
-
-**If working with metrics/logging:**
-- Read: `packages/contact-center/ui-logging/ai-docs/AGENTS.md`
-
-**If working with Playwright E2E tests/specs:**
-- Read: `playwright/ai-docs/AGENTS.md`
-- Read: `playwright/ai-docs/ARCHITECTURE.md`
-- Use template: `ai-docs/templates/playwright/00-master.md`
 
 ---
 
@@ -314,6 +331,8 @@ SDK (Contact Center API)
 ## Step 5: Generate/Fix Code
 
 **Follow the template you were routed to in Step 1**
+
+You must have already completed that template's pre-step section (Pre-Enhancement Questions, Pre-Fix Questions, or 01-pre-questions as applicable); if not, do that first.
 
 **During code generation:**
 1. Follow pattern documentation strictly
@@ -460,11 +479,6 @@ yarn build
 **If architecture changed:**
 - Update: Relevant architecture documentation as needed
 
-**If Playwright E2E framework/docs changed:**
-- Update: `playwright/ai-docs/AGENTS.md`
-- Update: `playwright/ai-docs/ARCHITECTURE.md`
-- Update relevant modules in: `ai-docs/templates/playwright/`
-
 ---
 
 ## Step 7: Validation & Review
@@ -512,12 +526,12 @@ ccWidgets/
 │   └── cc/
 │       ├── samples-cc-react-app/       # React sample
 │       └── samples-cc-wc-app/          # Web Component sample
-├── playwright/                 # E2E tests with ai-docs/ (AGENTS.md + ARCHITECTURE.md)
+├── playwright/                 # E2E tests
 └── ai-docs/
     ├── AGENTS.md              # This file
     ├── RULES.md               # Repository rules
     ├── patterns/              # Repo-wide patterns
-    ├── templates/             # Code generation templates (widgets + Playwright)
+    ├── templates/             # Code generation templates
     └── contact-centre-sdk-apis/  # SDK API reference
 ```
 
@@ -584,4 +598,4 @@ ccWidgets/
 
 ---
 
-_Last Updated: 2026-02-18_
+_Last Updated: 2025-11-26_
