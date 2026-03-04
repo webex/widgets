@@ -35,21 +35,13 @@ Use one or more values from:
 
 ## Current Set-to-Suite Mapping
 
-From `playwright/test-data.ts`:
+Use `playwright/test-data.ts` as the source of truth for current set/suite mappings.
 
-| Set     | Suite File                                   | Agents | Focus                    |
-| ------- | -------------------------------------------- | ------ | ------------------------ |
-| SET_1   | `digital-incoming-task-tests.spec.ts`        | 2      | Digital incoming tasks   |
-| SET_2   | `task-list-multi-session-tests.spec.ts`      | 2      | Task lists & multi       |
-| SET_3   | `station-login-user-state-tests.spec.ts`     | 2      | Login & user states      |
-| SET_4   | `basic-advanced-task-controls-tests.spec.ts` | 2      | Task controls            |
-| SET_5   | `advanced-task-controls-tests.spec.ts`       | 2      | Advanced controls        |
-| SET_6   | `dial-number-tests.spec.ts`                  | 2      | Dial number              |
-| SET_7   | `conference-tests1.spec.ts`                  | 4      | Multi-agent scenarios    |
-| SET_8   | `conference-tests2.spec.ts`                  | 4      | Multi-agent scenarios    |
-| SET_9   | `conference-tests3.spec.ts`                  | 4      | Multi-agent scenarios    |
-
-**Note:** Create new sets as needed for different test scenarios. Sets can have 1-4 agents.
+Guidance:
+- Read existing `USER_SETS` entries before proposing changes
+- Reuse an existing set when possible
+- Create a new set only when required by scenario isolation, credentials, or participant count
+- Keep set design generic so any scenario can be added via requirements intake
 
 ---
 

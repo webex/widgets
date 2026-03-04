@@ -161,9 +161,7 @@ export default function createDigitalIncomingTaskAndTaskControlsTests() {
     await testManager.agent1Page.waitForTimeout(2000);
     await waitForState(testManager.agent1Page, USER_STATES.AVAILABLE);
     await expect(testManager.agent1Page.getByTestId('samples:rona-popup')).not.toBeVisible();
-    // Task re-routes from queue immediately when agent becomes available
-    // Under load, task may arrive and auto-decline before we can verify AVAILABLE state
-    // So we wait for task arrival instead of verifying intermediate state
+    await verifyCurrentState(testManager.agent1Page, USER_STATES.AVAILABLE);
     await incomingTaskDiv.waitFor({state: 'visible', timeout: 10000});
     await expect(incomingTaskDiv).toBeVisible();
     await incomingTaskDiv.waitFor({state: 'hidden', timeout: 30000});

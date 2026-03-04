@@ -4,7 +4,7 @@
 
 This is the main orchestrator for AI assistants working on this repository. It routes you to the correct templates and documentation based on the developer's task.
 
-**For every developer request:** (1) Identify task type (A–E below). (2) If the work is in an existing package or widget, load that scope's ai-docs (see [Package and widget ai-docs reference](#package-and-widget-ai-docs-reference)) and follow its AGENTS.md. (3) Open the template for that type and complete its mandatory pre-steps (see [Mandatory pre-steps by task type](#mandatory-pre-steps-by-task-type)). (4) Then follow the rest of this guide and the template.
+**For every developer request:** (1) Identify task type (A–F below). (2) If the work is in an existing package, widget, or test framework scope, load that scope's ai-docs (see [Package and widget ai-docs reference](#package-and-widget-ai-docs-reference)) and follow its AGENTS.md. (3) Open the template for that type and complete its mandatory pre-steps (see [Mandatory pre-steps by task type](#mandatory-pre-steps-by-task-type)). (4) Then follow the rest of this guide and the template.
 
 ---
 
@@ -32,35 +32,36 @@ If the developer's message contains multiple distinct task types (for example, "
 ### Task Types
 
 **A. Create New Widget**
-
 - Developer wants to build a completely new widget from scratch
 - **Route to:** [templates/new-widget/00-master.md](./ai-docs/templates/new-widget/00-master.md)
 - **Follow:** All 7 modules (pre-questions → validation)
 - **⚠️ MANDATORY FIRST STEP:** Collect design input (see below)
 
 **B. Fix Bug in Existing Widget**
-
 - Developer reports a bug or issue in existing code
 - **Route to:** [templates/existing-widget/bug-fix.md](./ai-docs/templates/existing-widget/bug-fix.md)
 - **Follow:** Bug fix workflow with root cause analysis
 
 **C. Add Feature to Existing Widget**
-
 - Developer wants to enhance existing widget with new functionality
 - **Route to:** [templates/existing-widget/feature-enhancement.md](./ai-docs/templates/existing-widget/feature-enhancement.md)
 - **Follow:** Feature addition workflow with backward compatibility
 
 **D. Generate/Update Documentation Only**
-
 - Developer needs documentation for existing code
 - **Route to:** [templates/documentation/create-agent-md.md](./ai-docs/templates/documentation/create-agent-md.md) and [templates/documentation/create-architecture-md.md](./ai-docs/templates/documentation/create-architecture-md.md)
 - **Follow:** Documentation templates (reusable for all packages)
 
 **E. Understanding Architecture**
-
 - Developer needs to understand how something works
 - **Read:** That scope's `ai-docs/AGENTS.md` (usage) and `ai-docs/ARCHITECTURE.md` (technical details); use [Package and widget ai-docs reference](#package-and-widget-ai-docs-reference) to find the path.
-- **Available for:** station-login, user-state, store, cc-components, cc-widgets, ui-logging, test-fixtures; for task package use per-widget ai-docs (CallControl, IncomingTask, OutdialCall, TaskList).
+- **Available for:** station-login, user-state, store, cc-components, cc-widgets, ui-logging, test-fixtures, playwright; for task package use per-widget ai-docs (CallControl, IncomingTask, OutdialCall, TaskList).
+
+**F. Playwright E2E Test Work**
+- Developer wants to add/update/stabilize Playwright tests, suites, sets, or test framework docs
+- **Route to:** [templates/playwright/00-master.md](./ai-docs/templates/playwright/00-master.md)
+- **Follow:** Playwright template workflow (pre-questions → implementation → validation)
+- **⚠️ MANDATORY FIRST STEP:** Complete pre-questions in [templates/playwright/01-pre-questions.md](./ai-docs/templates/playwright/01-pre-questions.md)
 
 ---
 
@@ -72,8 +73,8 @@ If the developer's message contains multiple distinct task types (for example, "
 
 ```typescript
 // ❌ WRONG - Circular dependencies
-import {Widget} from '@webex/cc-widgets'; // In widget package code
-import {Widget} from '@webex/cc-widget-name'; // In cc-components code
+import { Widget } from '@webex/cc-widgets';      // In widget package code
+import { Widget } from '@webex/cc-widget-name';  // In cc-components code
 ```
 
 **ALWAYS use this pattern:**
@@ -81,12 +82,12 @@ import {Widget} from '@webex/cc-widget-name'; // In cc-components code
 ```typescript
 // ✅ CORRECT - Proper dependency flow
 // In widget code:
-import {Component} from '@webex/cc-components';
+import { Component } from '@webex/cc-components';
 import store from '@webex/cc-store';
-import {withMetrics} from '@webex/cc-ui-logging';
+import { withMetrics } from '@webex/cc-ui-logging';
 
 // In cc-widgets aggregator (ONLY):
-import {Widget} from '@webex/cc-widget-name';
+import { Widget } from '@webex/cc-widget-name';
 ```
 
 **Dependency Flow (One Direction Only):**
@@ -111,12 +112,10 @@ cc-widgets → widget packages → cc-components → store → SDK
 #### Required Input (ONE of these):
 
 1. **Figma Link/File**
-
    - Share Figma link or file
    - LLM will extract design tokens, components, interactions
 
 2. **Screenshot/Mockup**
-
    - Upload image of desired widget UI
    - LLM will analyze colors, layout, components, spacing
 
@@ -131,7 +130,6 @@ cc-widgets → widget packages → cc-components → store → SDK
 #### If Design Input Provided:
 
 **Analyze and document:**
-
 - **Colors:** Extract hex/RGB values or Momentum tokens
 - **Components:** Identify Momentum UI components to use
 - **Layout:** Grid, flex, spacing patterns (8px/0.5rem grid)
@@ -177,6 +175,7 @@ Before generating or changing any code, you MUST complete the **pre-step section
 | **C. Add Feature** | [existing-widget/feature-enhancement.md](./ai-docs/templates/existing-widget/feature-enhancement.md) | [Pre-Enhancement Questions](./ai-docs/templates/existing-widget/feature-enhancement.md) (feature info, requirements, compatibility, design input) |
 | **D. Documentation only** | documentation templates | Optional: confirm scope with developer (no code change) |
 | **E. Understanding** | Package ai-docs | None (read-only) |
+| **F. Playwright E2E Test Work** | [playwright/00-master.md](./ai-docs/templates/playwright/00-master.md) | [Pre-Questions](./ai-docs/templates/playwright/01-pre-questions.md) (scope, scenarios, setup/utilities, stability expectations) |
 
 ---
 
@@ -185,9 +184,7 @@ Before generating or changing any code, you MUST complete the **pre-step section
 **Before generating code, load appropriate context:**
 
 ### Always Read (Minimal Context)
-
 1. **Pattern documentation** - [patterns/](./ai-docs/patterns/) folder
-
    - [typescript-patterns.md](./ai-docs/patterns/typescript-patterns.md) - Type safety, naming conventions
    - [react-patterns.md](./ai-docs/patterns/react-patterns.md) - Component patterns, hooks
    - [mobx-patterns.md](./ai-docs/patterns/mobx-patterns.md) - State management with observer HOC
@@ -212,29 +209,22 @@ Before generating or changing any code, you MUST complete the **pre-step section
 | **cc-widgets** | [packages/contact-center/cc-widgets/ai-docs/AGENTS.md](packages/contact-center/cc-widgets/ai-docs/AGENTS.md) | Same folder |
 | **ui-logging** | [packages/contact-center/ui-logging/ai-docs/AGENTS.md](packages/contact-center/ui-logging/ai-docs/AGENTS.md) | Same folder |
 | **samples-cc-react-app** | [widgets-samples/cc/samples-cc-react-app/ai-docs/AGENTS.md](widgets-samples/cc/samples-cc-react-app/ai-docs/AGENTS.md) | Same folder if present |
+| **playwright framework** | [playwright/ai-docs/AGENTS.md](playwright/ai-docs/AGENTS.md) | [playwright/ai-docs/ARCHITECTURE.md](playwright/ai-docs/ARCHITECTURE.md) |
 
 **Task package note:** The task package has multiple widgets (CallControl, IncomingTask, OutdialCall, TaskList). When working on one of them, use that widget's ai-docs path above, not a generic task path.
 
 ### Conditionally Read
 
 **If using SDK APIs:**
-
 - Scan: [contact-centre-sdk-apis/contact-center.json](./contact-centre-sdk-apis/contact-center.json)
 - Find available methods, events, types
 - Check method signatures before using
 
-**If modifying store:**
+**If working on Playwright tests/framework:**
+- Read: `playwright/ai-docs/AGENTS.md`
+- Read: `playwright/ai-docs/ARCHITECTURE.md`
+- Use: `ai-docs/templates/playwright/00-master.md` and complete `01-pre-questions.md` before implementation
 
-- Read: `packages/contact-center/store/ai-docs/AGENTS.md`
-- Read: `packages/contact-center/store/ai-docs/ARCHITECTURE.md`
-
-**If creating/using components:**
-
-- Read: `packages/contact-center/cc-components/ai-docs/AGENTS.md`
-
-**If working with metrics/logging:**
-
-- Read: `packages/contact-center/ui-logging/ai-docs/AGENTS.md`
 ---
 
 ## Step 3: SDK API Consultation (Before Code Generation)
@@ -246,7 +236,6 @@ Before generating or changing any code, you MUST complete the **pre-step section
 #### 1. Identify Required SDK Functionality
 
 Based on widget requirements, list needed operations:
-
 - Making calls? → Search: "call", "dial", "telephony", "outdial"
 - Fetching agents? → Search: "agent", "buddy", "team"
 - Managing tasks? → Search: "task", "interaction", "contact"
@@ -257,7 +246,6 @@ Based on widget requirements, list needed operations:
 **File:** [contact-centre-sdk-apis/contact-center.json](./contact-centre-sdk-apis/contact-center.json)
 
 **Search Strategy:**
-
 - Use keyword search in JSON
 - Look for method names, descriptions
 - Check similar/related methods
@@ -265,7 +253,6 @@ Based on widget requirements, list needed operations:
 #### 3. Verify API Signature
 
 For each method found, confirm:
-
 - ✅ Method name (exact spelling)
 - ✅ Parameters (names, types, required vs optional)
 - ✅ Return type
@@ -345,7 +332,6 @@ SDK (Contact Center API)
 ```
 
 **Key Rules:**
-
 - Widget consumes SDK methods via the store (through a hook) — it NEVER calls the SDK directly
 - Component NEVER accesses store (receives props)
 - Always use `observer` HOC for widgets
@@ -362,7 +348,6 @@ SDK (Contact Center API)
 You must have already completed that template's pre-step section (Pre-Enhancement Questions, Pre-Fix Questions, or 01-pre-questions as applicable); if not, do that first.
 
 **During code generation:**
-
 1. Follow pattern documentation strictly
 2. Reference existing widgets for examples
 3. Use proper TypeScript types (no `any`)
@@ -468,7 +453,6 @@ yarn build
 ```
 
 **Common errors:**
-
 - Missing types → Add type definitions
 - Import errors → Check paths and exports
 - Circular dependencies → Refactor imports
@@ -487,38 +471,32 @@ yarn build
 ### Documentation to Consider
 
 **If new widget created:**
-
 - Generated via templates (AGENTS.md + ARCHITECTURE.md)
 
 **If widget modified:**
-
 - Update: `packages/contact-center/{widget-name}/ai-docs/AGENTS.md` (if API changed)
 - Update: `packages/contact-center/{widget-name}/ai-docs/ARCHITECTURE.md` (if architecture changed)
 - Add: New examples to AGENTS.md (if new use cases)
 - Update: Troubleshooting in ARCHITECTURE.md (if new issues discovered)
 
 **If store modified:**
-
 - Update: `packages/contact-center/store/ai-docs/AGENTS.md`
 - Update: `packages/contact-center/store/ai-docs/ARCHITECTURE.md`
 
 **If component library modified:**
-
 - Update: `packages/contact-center/cc-components/ai-docs/AGENTS.md`
 
 **If new pattern established:**
-
 - Update: Relevant pattern file in [patterns/](./ai-docs/patterns/)
 
 **If architecture changed:**
-
 - Update: Relevant architecture documentation as needed
 
 **If Playwright E2E framework/docs changed:**
-
 - Update: `playwright/ai-docs/AGENTS.md`
 - Update: `playwright/ai-docs/ARCHITECTURE.md`
 - Update relevant modules in: `ai-docs/templates/playwright/`
+
 ---
 
 ## Step 7: Validation & Review
@@ -526,13 +504,11 @@ yarn build
 **Before marking task complete:**
 
 1. **Run validation checks**
-
    - Tests pass: `yarn test:unit`
    - Linting passes: `yarn test:styles`
    - Build succeeds: `yarn build`
 
 2. **Code quality checks**
-
    - Follows patterns
    - No layer violations
    - Error handling present
@@ -540,7 +516,6 @@ yarn build
    - Code is precise and concise (no unnecessary complexity or dead code)
 
 3. **Documentation checks**
-
    - AGENTS.md updated if needed
    - ARCHITECTURE.md updated if needed
    - Examples work
@@ -583,19 +558,16 @@ ccWidgets/
 ## Common Questions to Ask
 
 **Before starting any work:**
-
 - "What component/widget are you working on?"
 - "Is this a new widget, bug fix, or enhancement?"
 - "Do you have design specifications (Figma, screenshots)?"
 
 **During code generation:**
-
 - "Should I add/update tests?"
 - "Do you want examples in documentation?"
 - "Should I update the sample apps?"
 
 **After code generation:**
-
 - "The code is complete. Should I update documentation?"
 - "Would you like to review before I mark this complete?"
 - "Should I check for any other impacted components?"
@@ -607,14 +579,12 @@ ccWidgets/
 **Location:** [contact-centre-sdk-apis/contact-center.json](./contact-centre-sdk-apis/contact-center.json)
 
 **Contents:**
-
 - All exposed SDK APIs (methods, events, types)
 - Method signatures and parameters
 - Event names and data structures
 - Links to SDK source code (next branch)
 
 **Usage:**
-
 - Scan JSON when using SDK methods
 - Search for API by name or functionality
 - Check parameter types and return values
@@ -627,7 +597,6 @@ ccWidgets/
 ## Success Criteria
 
 **Code generation/fix is successful when:**
-
 - ✅ Follows architecture pattern (Widget → Hook → Component → Store → SDK)
 - ✅ Uses patterns correctly (TypeScript, React, MobX, WC)
 - ✅ Includes proper error handling

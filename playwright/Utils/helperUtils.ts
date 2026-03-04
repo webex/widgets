@@ -24,28 +24,6 @@ import {
 import {stationLogout, telephonyLogin} from './stationLoginUtils';
 
 /**
- * Dismisses the multi-sign-in modal if it appears
- * This modal appears when the same user is logged in from multiple sessions
- * @param page - The Playwright page object
- */
-const dismissMultiSignInModal = async (page: Page): Promise<void> => {
-  try {
-    const modal = page.getByTestId('multi-sign-in-modal');
-    const isVisible = await modal.isVisible({timeout: 1000}).catch(() => false);
-    if (isVisible) {
-      // Click the primary button to dismiss the modal (usually "Continue" or "OK")
-      const continueBtn = modal.locator('button').first();
-      if (await continueBtn.isVisible({timeout: 500}).catch(() => false)) {
-        await continueBtn.click({timeout: 2000}).catch(() => {});
-        await page.waitForTimeout(500);
-      }
-    }
-  } catch (e) {
-    // Ignore errors - modal might not be present
-  }
-};
-
-/**
  * Parses a time string in MM:SS format and converts it to total seconds
  * @param timeString - Time string in format "MM:SS" (e.g., "01:30" for 1 minute 30 seconds)
  * @returns Total number of seconds
@@ -388,23 +366,7 @@ export const handleStrayTasks = async (
     }
 
     // ============================================
-    // STEP 3: Check for exit conference button (for conference participants)
-    // ============================================
-    const exitConferenceButton = page.getByTestId('call-control:exit-conference').first();
-    const exitConferenceVisible = await exitConferenceButton.isVisible().catch(() => false);
-
-    if (exitConferenceVisible) {
-      try {
-        await exitConferenceButton.click({timeout: AWAIT_TIMEOUT});
-        actionTaken = true;
-        await page.waitForTimeout(500);
-        continue; // Check for wrapup after exit
-      } catch (e) {
-      }
-    }
-
-    // ============================================
-    // STEP 4: Check for end button (end active calls before accepting new ones)
+    // STEP 3: Check for end button (end active calls before accepting new ones)
     // ============================================
     const endButton = page.getByTestId('call-control:end-call').first();
     const endButtonVisible = await endButton.isVisible().catch(() => false);
@@ -465,7 +427,7 @@ export const handleStrayTasks = async (
     }
 
     // ============================================
-    // STEP 5: Check for incoming tasks (only accept if no active task to handle)
+    // STEP 4: Check for incoming tasks (only accept if no active task to handle)
     // ============================================
     const incomingTaskDiv = page.getByTestId(/^samples:incoming-task(-\w+)?$/);
     const hasIncomingTask = await incomingTaskDiv
@@ -618,8 +580,7 @@ export const handleStrayTasks = async (
   if (iteration >= maxIterations) {
   }
 
-  // Wait for agent to reach Available state naturally (don't force it)
-  // Backend sends wrapup event asynchronously after ending calls/exiting conferences
+  // Ensure user is in Available state at the end
   const stateSelectVisible = await page
     .getByTestId('state-select')
     .isVisible()
@@ -627,40 +588,8 @@ export const handleStrayTasks = async (
 
   if (stateSelectVisible) {
     try {
-      // Wait up to 5 seconds for agent to reach a stable state
-      const maxWaitTime = 5000;
-      const startWait = Date.now();
-
-      while (Date.now() - startWait < maxWaitTime) {
-        const currentState = await getCurrentState(page).catch(() => null);
-
-        if (currentState === USER_STATES.AVAILABLE) {
-          // Agent reached available state - success
-          break;
-        }
-
-        // Check if wrapup popup appeared (backend event)
-        const wrapupBtn = page.getByTestId('call-control:wrapup-button').first();
-        const wrapupVisible = await wrapupBtn.isVisible().catch(() => false);
-
-        if (wrapupVisible) {
-          // Wrapup event received from backend - submit it
-          await submitWrapup(page, WRAPUP_REASONS.SALE).catch(() => {});
-          await page.waitForTimeout(1000);
-          continue;
-        }
-
-        // If still engaged/meeting and no wrapup, try to transition to available
-        if (currentState === USER_STATES.ENGAGED || currentState === USER_STATES.MEETING) {
-          await changeUserState(page, USER_STATES.AVAILABLE).catch(() => {});
-          await page.waitForTimeout(500);
-        } else {
-          // Other state - wait a bit for it to settle
-          await page.waitForTimeout(500);
-        }
-      }
+      await changeUserState(page, USER_STATES.AVAILABLE);
     } catch (e) {
-      // Cleanup failed - agent may be in bad state for next test
     }
   }
 
@@ -787,9 +716,6 @@ export const pageSetup = async (
     await stationLogout(page, false); // Don't throw during setup - just try to logout
     await telephonyLogin(page, loginMode, extensionNumber);
   }
-
-  // Dismiss multi-sign-in modal if it appears after login
-  await dismissMultiSignInModal(page);
 
   await page.getByTestId('state-select').waitFor({state: 'visible', timeout: 30000});
 };

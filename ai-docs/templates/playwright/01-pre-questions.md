@@ -53,7 +53,7 @@ Mandatory intake checklist to ensure the user provides complete implementation d
 
 ### 3. Execution Target
 
-- Which set(s) should run this? (`SET_1`..`SET_9` or new set)
+- Which set(s) should run this? (`SET_1`..`SET_N` or new set)
 - If new set is needed:
   - What suite filename should `TEST_SUITE` map to?
   - How many agents are required? (1-4)

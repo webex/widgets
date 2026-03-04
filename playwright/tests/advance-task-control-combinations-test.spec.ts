@@ -246,13 +246,6 @@ export default function createAdvanceCombinationsTests() {
       await verifyConsultStartSuccessLogs();
       await cancelConsult(testManager.agent1Page);
       await testManager.agent1Page.waitForTimeout(1000);
-      await expect(testManager.agent1Page.getByTestId('cancel-consult-btn')).not.toBeVisible();
-
-      // Clean up the active call to prevent afterAll timeout
-      await endTask(testManager.agent1Page);
-      await testManager.agent1Page.waitForTimeout(2000);
-      await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
-      await testManager.agent1Page.waitForTimeout(1000);
     });
 
     test.afterAll(async () => {

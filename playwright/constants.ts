@@ -67,8 +67,6 @@ export const CONSOLE_PATTERNS = {
 export const PAGE_TYPES = {
   AGENT1: 'agent1',
   AGENT2: 'agent2',
-  AGENT3: 'agent3',
-  AGENT4: 'agent4',
   CALLER: 'caller',
   EXTENSION: 'extension',
   CHAT: 'chat',

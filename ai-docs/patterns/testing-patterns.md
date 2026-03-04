@@ -30,22 +30,13 @@ packages/contact-center/{package}/
         └── index.test.tsx
 
 playwright/
-├── suites/                         # Test suite orchestration
-│   ├── digital-incoming-task-tests.spec.ts
-│   ├── station-login-user-state-tests.spec.ts
-│   ├── conference-tests1.spec.ts
-│   └── ... (other suites)
-├── tests/                          # Individual test implementations
+├── tests/
 │   ├── station-login-test.spec.ts
 │   ├── user-state-test.spec.ts
-│   ├── tasklist-test.spec.ts
-│   ├── conference-set7-tests.spec.ts
-│   └── ... (other test factories)
+│   └── tasklist-test.spec.ts
 └── Utils/
     ├── stationLoginUtils.ts
-    ├── userStateUtils.ts
-    ├── conferenceUtils.ts          # Multi-agent coordination
-    └── ... (other utilities)
+    └── userStateUtils.ts
 ```
 
 ---
@@ -254,83 +245,6 @@ test.describe('Station Login Tests - Dial Number Mode', () => {
 });
 ```
 
-### Multi-Agent Testing Pattern
-
-```typescript
-// playwright/tests/multi-agent-feature-test.spec.ts
-import {test, expect} from '@playwright/test';
-import {TestManager} from '../test-manager';
-import {performMultiAgentOperation} from '../Utils/featureUtils';
-import {verifyCurrentState} from '../Utils/userStateUtils';
-import {USER_STATES} from '../constants';
-
-export default function createMultiAgentTests() {
-  return () => {
-    let testManager: TestManager;
-
-    test.beforeAll(async ({browser}, testInfo) => {
-      testManager = new TestManager(testInfo.project.name);
-      // Configure based on test requirements (2-4 agents)
-      await testManager.setup(browser, {
-        needsAgent1: true,
-        needsAgent2: true,
-        needsAgent3: true,  // Optional: for 3+ agent scenarios
-        needsAgent4: true,  // Optional: for 4 agent scenarios
-        needsCaller: true,
-        enableConsoleLogging: true,
-      });
-    });
-
-    test.afterAll(async () => {
-      await testManager.cleanup();
-    });
-
-    test('should perform multi-agent operation and verify all participants', async () => {
-      // Perform multi-agent operation
-      await performMultiAgentOperation(
-        testManager.agent1Page,
-        testManager.agent2Page,
-        testManager.agent3Page,
-        testManager.agent4Page,
-        testManager.callerPage,
-        testManager.projectName
-      );
-
-      // Verify states
-      await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
-      await verifyCurrentState(testManager.agent2Page, USER_STATES.ENGAGED);
-      await verifyCurrentState(testManager.agent3Page, USER_STATES.ENGAGED);
-    });
-
-    test('should handle participant state transitions', async () => {
-      // Setup multi-agent scenario
-      await performMultiAgentOperation(
-        testManager.agent1Page,
-        testManager.agent2Page,
-        testManager.agent3Page,
-        testManager.agent4Page,
-        testManager.callerPage,
-        testManager.projectName
-      );
-
-      // Perform state transition
-      await someStateTransitionOperation(testManager.agent3Page);
-
-      // Verify other agents remain in expected state
-      await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
-      await verifyCurrentState(testManager.agent2Page, USER_STATES.ENGAGED);
-    });
-  };
-}
-```
-
-**Key Points for Multi-Agent Tests:**
-- Use `needsAgent3` and `needsAgent4` configuration flags for 3-4 agent scenarios
-- Configure agent count based on test requirements (not all tests need 4 agents)
-- Create feature-specific utility modules for reusable multi-agent operations
-- Each agent has independent browser context and page
-- Adjust timeouts only when justified by actual operation requirements
-
 ---
 
 ## Playwright Utils Pattern
@@ -447,10 +361,6 @@ yarn run test:unit --coverage
 
 # Run specific E2E test
 npx playwright test tests/station-login-test.spec.ts
-
-# Run specific test set (project)
-yarn test:e2e --project=SET_1       # Digital incoming tasks
-yarn test:e2e --project=SET_7       # Multi-agent scenarios (4-agent)
 ```
 
 ---

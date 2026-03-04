@@ -11,7 +11,7 @@ templates/
 ├── new-widget/          # Widget generation (7 modules)
 ├── existing-widget/     # Bug fixes, features (2 modules)
 ├── documentation/       # Documentation generation (2 modules, reusable for all packages)
-└── playwright/           # Playwright test-spec generation templates
+└── playwright/          # Playwright E2E templates
 ```
 
 ## Templates
@@ -47,15 +47,15 @@ templates/
 - [create-agent-md.md](./documentation/create-agent-md.md) - Generate AGENTS.md
 - [create-architecture-md.md](./documentation/create-architecture-md.md) - Generate ARCHITECTURE.md
 
-### 4. Playwright Test Work
+### 4. Playwright E2E Work
 
 **Directory:** [playwright/](./playwright/)
 
 **Modules:**
-- [00-master.md](./playwright/00-master.md) - Orchestrator and simplified workflow
-- [01-pre-questions.md](./playwright/01-pre-questions.md) - Mandatory requirement intake
-- [02-test-implementation.md](./playwright/02-test-implementation.md) - Suite/test/set implementation
-- [03-framework-and-doc-updates.md](./playwright/03-framework-and-doc-updates.md) - Framework + docs updates
+- [00-master.md](./playwright/00-master.md) - Orchestrator and workflow
+- [01-pre-questions.md](./playwright/01-pre-questions.md) - Mandatory intake
+- [02-test-implementation.md](./playwright/02-test-implementation.md) - Suites/tests/sets implementation
+- [03-framework-and-doc-updates.md](./playwright/03-framework-and-doc-updates.md) - Shared framework/docs updates
 - [04-validation.md](./playwright/04-validation.md) - Validation checklist
 
 ---
@@ -70,7 +70,7 @@ templates/
 
 **Documentation Only:** Use [documentation/](./documentation/) templates
 
-**Playwright Spec/Test Tasks:** Start with [playwright/00-master.md](./playwright/00-master.md)
+**Playwright E2E Work:** Start with [playwright/00-master.md](./playwright/00-master.md)
 
 ## Pattern References
 
@@ -82,4 +82,4 @@ templates/
 
 ---
 
-_Last Updated: 2026-02-18_
+_Last Updated: 2026-03-04_

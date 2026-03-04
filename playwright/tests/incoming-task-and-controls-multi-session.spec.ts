@@ -94,8 +94,6 @@ export default function createIncomingTaskAndControlsMultiSessionTests() {
     await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
     await waitForState(testManager.agent1Page, USER_STATES.AVAILABLE);
     await waitForState(testManager.multiSessionAgent1Page, USER_STATES.AVAILABLE);
-    // Allow backend time to sync state before verification to prevent race with re-routing tasks
-    await testManager.agent1Page.waitForTimeout(1000);
     await verifyCurrentState(testManager.agent1Page, USER_STATES.AVAILABLE);
     await verifyCurrentState(testManager.multiSessionAgent1Page, USER_STATES.AVAILABLE);
   });
@@ -212,12 +210,6 @@ export default function createIncomingTaskAndControlsMultiSessionTests() {
 
       // Verify both AGENT1 sessions return to available state
       await Promise.all([
-        waitForState(testManager.agent1Page, USER_STATES.AVAILABLE),
-        waitForState(testManager.multiSessionAgent1Page!, USER_STATES.AVAILABLE),
-      ]);
-      // Allow backend time to sync state before verification to prevent race with re-routing tasks
-      await testManager.agent1Page.waitForTimeout(1000);
-      await Promise.all([
         verifyCurrentState(testManager.agent1Page, USER_STATES.AVAILABLE),
         verifyCurrentState(testManager.multiSessionAgent1Page!, USER_STATES.AVAILABLE),
       ]);
@@ -271,8 +263,6 @@ export default function createIncomingTaskAndControlsMultiSessionTests() {
     await submitWrapup(testManager.multiSessionAgent1Page, WRAPUP_REASONS.SALE);
     await waitForState(testManager.agent1Page, USER_STATES.AVAILABLE);
     await waitForState(testManager.multiSessionAgent1Page, USER_STATES.AVAILABLE);
-    // Allow backend time to sync state before verification to prevent race with re-routing tasks
-    await testManager.agent1Page.waitForTimeout(1000);
     await verifyCurrentState(testManager.agent1Page, USER_STATES.AVAILABLE);
     await verifyCurrentState(testManager.multiSessionAgent1Page, USER_STATES.AVAILABLE);
   });

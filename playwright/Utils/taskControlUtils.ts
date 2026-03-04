@@ -333,82 +333,58 @@ export function verifyEndLogs(): void {
  */
 export async function verifyRemoteAudioTracks(page: Page): Promise<void> {
   try {
-    // Wait for audio track to be fully established (WebRTC negotiation can take time)
-    let audioTrack: any = null;
-    let attempts = 0;
-    const maxAttempts = 10;
+    // Execute the exact console command for audio tracks
+    const consoleResult = await page.evaluate(() => {
+      // This is the exact command from your console
+      const audioElem = document.querySelector('#remote-audio') as HTMLAudioElement;
 
-    while (attempts < maxAttempts) {
-      attempts++;
+      if (!audioElem) {
+        return [];
+      }
 
-      const consoleResult = await page.evaluate(() => {
-        const audioElem = document.querySelector('#remote-audio') as HTMLAudioElement;
+      if (!audioElem.srcObject) {
+        return [];
+      }
 
-        if (!audioElem) {
-          return [];
-        }
+      const mediaStream = audioElem.srcObject as MediaStream;
+      const audioTracks = mediaStream.getAudioTracks();
 
-        if (!audioElem.srcObject) {
-          return [];
-        }
-
-        const mediaStream = audioElem.srcObject as MediaStream;
-        const audioTracks = mediaStream.getAudioTracks();
-
-        // Convert MediaStreamTrack objects to serializable format
-        const result = audioTracks.map((track, index) => {
-          return {
-            index,
-            kind: track.kind,
-            id: track.id,
-            label: track.label,
-            enabled: track.enabled,
-            muted: track.muted,
-            readyState: track.readyState,
-            onended: track.onended,
-            onmute: track.onmute,
-            onunmute: track.onunmute,
-          };
-        });
-
-        return result;
+      // Convert MediaStreamTrack objects to serializable format (like console shows)
+      const result = audioTracks.map((track, index) => {
+        return {
+          index,
+          kind: track.kind,
+          id: track.id,
+          label: track.label,
+          enabled: track.enabled,
+          muted: track.muted,
+          readyState: track.readyState,
+          onended: track.onended,
+          onmute: track.onmute,
+          onunmute: track.onunmute,
+        };
       });
 
-      // Verify we got exactly 1 audio track
-      if (consoleResult.length !== 1) {
-        if (attempts === maxAttempts) {
-          throw new Error(`Expected 1 audio track, found ${consoleResult.length}`);
-        }
-        await page.waitForTimeout(500);
-        continue;
-      }
+      return result;
+    });
 
-      audioTrack = consoleResult[0];
+    // Verify we got exactly 1 audio track (no more, no less)
+    expect(consoleResult.length).toBe(1);
 
-      // Verify it's an audio track
-      if (audioTrack.kind !== 'audio') {
-        throw new Error(
-          `❌ Expected audio track but found ${audioTrack.kind} track. Track details: { kind: "${audioTrack.kind}", label: "${audioTrack.label}", id: "${audioTrack.id}" }`
-        );
-      }
+    // Get the single audio track (since we verified there's exactly 1)
+    const audioTrack = consoleResult[0];
 
-      // Check if track is ready (enabled and live)
-      // Note: In test environments with fake media streams, muted=true is expected
-      if (audioTrack.enabled && audioTrack.readyState === 'live') {
-        break; // Track is ready
-      }
-
-      // If not ready and we haven't reached max attempts, wait and retry
-      if (attempts < maxAttempts) {
-        await page.waitForTimeout(500);
-      }
+    // Verify it's an audio track
+    if (audioTrack.kind !== 'audio') {
+      throw new Error(
+        `❌ Expected audio track but found ${audioTrack.kind} track. Track details: { kind: "${audioTrack.kind}", label: "${audioTrack.label}", id: "${audioTrack.id}" }`
+      );
     }
 
-    // Final verification
+    // Verify essential track properties for audio transfer
     expect(audioTrack.kind).toBe('audio');
     expect(audioTrack.enabled).toBe(true);
-    // Note: Don't check muted property in test environment - fake media streams are always muted
-    // expect(audioTrack.muted).toBe(false);
+    expect(audioTrack.muted).toBe(false);
     expect(audioTrack.readyState).toBe('live');
   } catch (error) {
     throw new Error(`❌ Audio transfer verification failed: ${error.message}`);

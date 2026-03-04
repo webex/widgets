@@ -69,43 +69,4 @@ export const USER_SETS = {
     ENTRY_POINT: env.PW_ENTRY_POINT6,
     TEST_SUITE: 'dial-number-tests.spec.ts',
   },
-  SET_7: {
-    AGENTS: {
-      AGENT1: {username: 'user25', extension: '1025', agentName: 'User25 Agent25'},
-      AGENT2: {username: 'user26', extension: '1026', agentName: 'User26 Agent26'},
-      AGENT3: {username: 'user27', extension: '1027', agentName: 'User27 Agent27'},
-      AGENT4: {username: 'user28', extension: '1028', agentName: 'User28 Agent28'},
-    },
-    QUEUE_NAME: 'Queue e2e 7',
-    CHAT_URL: `${env.PW_CHAT_URL}-e2e-7.html`,
-    EMAIL_ENTRY_POINT: `${env.PW_SANDBOX}.e2e7@gmail.com`,
-    ENTRY_POINT: env.PW_ENTRY_POINT7,
-    TEST_SUITE: 'conference-tests1.spec.ts',
-  },
-  SET_8: {
-    AGENTS: {
-      AGENT1: {username: 'user29', extension: '1029', agentName: 'User29 Agent29'},
-      AGENT2: {username: 'user30', extension: '1030', agentName: 'User30 Agent30'},
-      AGENT3: {username: 'user31', extension: '1031', agentName: 'User31 Agent31'},
-      AGENT4: {username: 'user32', extension: '1032', agentName: 'User32 Agent32'},
-    },
-    QUEUE_NAME: 'Queue e2e 8',
-    CHAT_URL: `${env.PW_CHAT_URL}-e2e-8.html`,
-    EMAIL_ENTRY_POINT: `${env.PW_SANDBOX}.e2e8@gmail.com`,
-    ENTRY_POINT: env.PW_ENTRY_POINT8,
-    TEST_SUITE: 'conference-tests2.spec.ts',
-  },
-  SET_9: {
-    AGENTS: {
-      AGENT1: {username: 'user33', extension: '1033', agentName: 'User33 Agent33'},
-      AGENT2: {username: 'user34', extension: '1034', agentName: 'User34 Agent34'},
-      AGENT3: {username: 'user35', extension: '1035', agentName: 'User35 Agent35'},
-      AGENT4: {username: 'user36', extension: '1036', agentName: 'User36 Agent36'},
-    },
-    QUEUE_NAME: 'Queue e2e 9',
-    CHAT_URL: `${env.PW_CHAT_URL}-e2e-9.html`,
-    EMAIL_ENTRY_POINT: `${env.PW_SANDBOX}.e2e9@gmail.com`,
-    ENTRY_POINT: env.PW_ENTRY_POINT9,
-    TEST_SUITE: 'conference-tests3.spec.ts',
-  },
 };
