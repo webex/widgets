@@ -38,8 +38,30 @@ export const extractTaskListItemData = (
 
     const declineText = isTaskIncoming && isTelephony && isBrowser ? 'Decline' : undefined;
 
-    // Compute title based on media type
-    const title = isSocial ? customerName : ani;
+    // Compute title based on media type and call direction
+    // For outdial calls (direction: "OUTBOUND"), use customer participant's DN instead of ANI
+    // ANI represents the entrypoint/DNIS for outdial, not the dialed number
+    let title = isSocial ? customerName : ani;
+
+    if (isTelephony) {
+      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      const direction = task?.data?.interaction?.direction;
+
+      if (direction === 'OUTBOUND') {
+        // Find customer participant's DN for outdial calls
+        const participants = task?.data?.interaction?.participants;
+        if (participants) {
+          const customerParticipant = Object.values(participants).find(
+            //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+            (p) => p.pType === 'Customer'
+          );
+          if (customerParticipant) {
+            //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+            title = customerParticipant.dn || customerParticipant.id || ani;
+          }
+        }
+      }
+    }
 
     const isAutoAnswering = task.data.isAutoAnswering || false;
 

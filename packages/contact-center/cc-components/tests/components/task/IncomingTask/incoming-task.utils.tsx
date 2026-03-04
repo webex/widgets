@@ -105,6 +105,129 @@ describe('incoming-task.utils', () => {
       });
     });
 
+    describe('Outdial calls', () => {
+      it('should display dialed number (customer DN) for OUTBOUND telephony tasks instead of ANI', () => {
+        const originalDirection = mockTask.data.interaction.direction;
+        const originalParticipants = mockTask.data.interaction.participants;
+
+        // Setup OUTBOUND call with customer participant
+        mockTask.data.interaction.direction = 'OUTBOUND';
+        mockTask.data.interaction.participants = {
+          agent1: {
+            id: 'agent1',
+            pType: 'Agent',
+            name: 'Agent Name',
+            dn: '1001',
+          },
+          customer1: {
+            id: 'customer1',
+            pType: 'Customer',
+            name: 'Customer Name',
+            dn: '+15551234567', // Dialed number
+          },
+        };
+
+        const result = extractIncomingTaskData(mockTask, true);
+
+        // For outdial, title should be the customer's DN (dialed number), not ANI
+        expect(result.title).toBe('+15551234567');
+        expect(result.title).not.toBe(result.ani);
+
+        // Restore original values
+        mockTask.data.interaction.direction = originalDirection;
+        mockTask.data.interaction.participants = originalParticipants;
+      });
+
+      it('should fall back to customer ID if DN is not available in OUTBOUND calls', () => {
+        const originalDirection = mockTask.data.interaction.direction;
+        const originalParticipants = mockTask.data.interaction.participants;
+
+        // Setup OUTBOUND call with customer participant without DN
+        mockTask.data.interaction.direction = 'OUTBOUND';
+        mockTask.data.interaction.participants = {
+          agent1: {
+            id: 'agent1',
+            pType: 'Agent',
+            name: 'Agent Name',
+            dn: '1001',
+          },
+          customer1: {
+            id: '+15559876543',
+            pType: 'Customer',
+            name: 'Customer Name',
+            // No DN field
+          },
+        };
+
+        const result = extractIncomingTaskData(mockTask, true);
+
+        // Should fall back to customer ID
+        expect(result.title).toBe('+15559876543');
+
+        // Restore original values
+        mockTask.data.interaction.direction = originalDirection;
+        mockTask.data.interaction.participants = originalParticipants;
+      });
+
+      it('should fall back to ANI if customer participant is not found in OUTBOUND calls', () => {
+        const originalDirection = mockTask.data.interaction.direction;
+        const originalParticipants = mockTask.data.interaction.participants;
+
+        // Setup OUTBOUND call without customer participant
+        mockTask.data.interaction.direction = 'OUTBOUND';
+        mockTask.data.interaction.participants = {
+          agent1: {
+            id: 'agent1',
+            pType: 'Agent',
+            name: 'Agent Name',
+            dn: '1001',
+          },
+        };
+
+        const result = extractIncomingTaskData(mockTask, true);
+
+        // Should fall back to ANI
+        expect(result.title).toBe(result.ani);
+
+        // Restore original values
+        mockTask.data.interaction.direction = originalDirection;
+        mockTask.data.interaction.participants = originalParticipants;
+      });
+
+      it('should use ANI for INBOUND telephony tasks (default behavior)', () => {
+        const originalDirection = mockTask.data.interaction.direction;
+
+        // Explicitly set as INBOUND
+        mockTask.data.interaction.direction = 'INBOUND';
+
+        const result = extractIncomingTaskData(mockTask, true);
+
+        // For inbound, title should be ANI as before
+        expect(result.title).toBe(result.ani);
+
+        // Restore original value
+        mockTask.data.interaction.direction = originalDirection;
+      });
+
+      it('should not affect social media tasks for OUTBOUND direction', () => {
+        const originalMediaType = mockTask.data.interaction.mediaType;
+        const originalDirection = mockTask.data.interaction.direction;
+
+        mockTask.data.interaction.mediaType = MEDIA_CHANNEL.SOCIAL;
+        mockTask.data.interaction.direction = 'OUTBOUND';
+
+        const result = extractIncomingTaskData(mockTask, true);
+
+        // For social, title should still be customerName regardless of direction
+        expect(result.title).toBe(result.customerName);
+        expect(result.isSocial).toBe(true);
+
+        // Restore original values
+        mockTask.data.interaction.mediaType = originalMediaType;
+        mockTask.data.interaction.direction = originalDirection;
+      });
+    });
+
     describe('Edge cases', () => {
       it('should handle missing call association details', () => {
         const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
