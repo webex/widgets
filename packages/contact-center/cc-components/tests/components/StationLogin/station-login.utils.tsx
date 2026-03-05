@@ -226,65 +226,42 @@ describe('Station Login Utils', () => {
 
     it('should return false for valid US dial number with default regex', () => {
       const validNumber = '15552234567';
-      const result = validateDialNumber(validNumber, null, mockSetDNErrorText, loggerMock);
+      const result = validateDialNumber(validNumber, mockSetDNErrorText, loggerMock);
       expect(result).toBe(false);
       expect(mockSetDNErrorText).not.toHaveBeenCalled();
     });
 
     it('should return false for valid international dial number with + prefix', () => {
       const validNumber = '+442071234567'; // UK number
-      const result = validateDialNumber(validNumber, null, mockSetDNErrorText, loggerMock);
+      const result = validateDialNumber(validNumber, mockSetDNErrorText, loggerMock);
       expect(result).toBe(false);
       expect(mockSetDNErrorText).not.toHaveBeenCalled();
     });
 
     it('should return false for valid international dial number without + prefix', () => {
       const validNumber = '442071234567'; // UK number without +
-      const result = validateDialNumber(validNumber, null, mockSetDNErrorText, loggerMock);
+      const result = validateDialNumber(validNumber, mockSetDNErrorText, loggerMock);
       expect(result).toBe(false);
       expect(mockSetDNErrorText).not.toHaveBeenCalled();
     });
 
     it('should return false for valid short international dial number', () => {
       const validNumber = '1234567'; // 7 digit minimum
-      const result = validateDialNumber(validNumber, null, mockSetDNErrorText, loggerMock);
+      const result = validateDialNumber(validNumber, mockSetDNErrorText, loggerMock);
       expect(result).toBe(false);
       expect(mockSetDNErrorText).not.toHaveBeenCalled();
     });
 
     it('should return true for invalid dial number (too short) and set error text', () => {
       const invalidNumber = '911'; // Too short (less than 7 digits)
-      const result = validateDialNumber(invalidNumber, null, mockSetDNErrorText, loggerMock);
+      const result = validateDialNumber(invalidNumber, mockSetDNErrorText, loggerMock);
       expect(result).toBe(true);
       expect(mockSetDNErrorText).toHaveBeenCalledWith(StationLoginLabels.DN_FORMAT_ERROR);
     });
 
     it('should return true for invalid dial number (too long) and set error text', () => {
       const invalidNumber = '1234567890123456'; // Too long (more than 15 digits)
-      const result = validateDialNumber(invalidNumber, null, mockSetDNErrorText, loggerMock);
-      expect(result).toBe(true);
-      expect(mockSetDNErrorText).toHaveBeenCalledWith(StationLoginLabels.DN_FORMAT_ERROR);
-    });
-
-    it('should accept any input when empty string regex is provided', () => {
-      const anyNumber = '911'; // With empty string regex, this becomes /(?:)/ which matches everything
-      const result = validateDialNumber(anyNumber, '', mockSetDNErrorText, loggerMock);
-      expect(result).toBe(false); // Should return false (no error) because empty regex matches everything
-      expect(mockSetDNErrorText).not.toHaveBeenCalled();
-    });
-
-    it('should use custom regex when provided', () => {
-      const customRegex = '^\\d{10}$';
-      const validNumber = '1234567890';
-      const result = validateDialNumber(validNumber, customRegex, mockSetDNErrorText, loggerMock);
-      expect(result).toBe(false);
-      expect(mockSetDNErrorText).not.toHaveBeenCalled();
-    });
-
-    it('should return true for invalid number with custom regex', () => {
-      const customRegex = '^\\d{10}$';
-      const invalidNumber = '123';
-      const result = validateDialNumber(invalidNumber, customRegex, mockSetDNErrorText, loggerMock);
+      const result = validateDialNumber(invalidNumber, mockSetDNErrorText, loggerMock);
       expect(result).toBe(true);
       expect(mockSetDNErrorText).toHaveBeenCalledWith(StationLoginLabels.DN_FORMAT_ERROR);
     });
@@ -858,7 +835,7 @@ describe('Station Login Utils', () => {
       }) as unknown as typeof RegExp;
 
       const mockSetError = jest.fn();
-      const result = validateDialNumber('15551234567', null, mockSetError, loggerMock);
+      const result = validateDialNumber('15551234567', mockSetError, loggerMock);
 
       expect(loggerMock.error).toHaveBeenCalledWith('CC-Widgets: StationLogin: Error in validateDialNumber', {
         module: 'cc-components#station-login.utils.tsx',
