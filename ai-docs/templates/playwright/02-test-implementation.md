@@ -45,6 +45,7 @@ Implement new or updated Playwright suites/tests/sets using current framework co
 - Reuse `playwright/Utils/*.ts` before adding new helper logic
 - Use shared constants from `playwright/constants.ts`
 - Keep set-scoped env access via `${testManager.projectName}_...`
+- For flaky test fixes, record root cause and update docs if behavior/expectations changed
 
 ---
 
@@ -53,7 +54,10 @@ Implement new or updated Playwright suites/tests/sets using current framework co
 - [ ] Suite/test wiring complete
 - [ ] Set mapping correct (if changed)
 - [ ] Cleanup path present for new/changed scenarios
+- [ ] `playwright/ai-docs/AGENTS.md` baseline updated (if suites/sets/workflow changed)
+- [ ] `playwright/ai-docs/ARCHITECTURE.md` topology/mapping/runtime docs updated (if files/sets/framework behavior changed)
+- [ ] Fix/stabilization changes include a doc update loop when behavior or constraints changed
 
 ---
 
-_Last Updated: 2026-02-18_
+_Last Updated: 2026-03-05_
