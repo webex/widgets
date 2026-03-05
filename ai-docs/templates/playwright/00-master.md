@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Orchestrator for Playwright E2E work in this repository, with a simplified module flow.
+Orchestrator for Playwright E2E work in this repository.
 
 ---
 
@@ -10,8 +10,10 @@ Orchestrator for Playwright E2E work in this repository, with a simplified modul
 
 1. Gather complete requirements -> [01-pre-questions.md](./01-pre-questions.md)
 2. Implement tests/suites/sets -> [02-test-implementation.md](./02-test-implementation.md)
-3. Apply framework/docs updates if needed -> [03-framework-and-doc-updates.md](./03-framework-and-doc-updates.md)
+3. Apply framework updates and documentation alignment -> [03-framework-and-doc-updates.md](./03-framework-and-doc-updates.md)
 4. Validate before completion -> [04-validation.md](./04-validation.md)
+
+Doc alignment is mandatory when any suite/test/set/framework behavior changes.
 
 ---
 
@@ -48,9 +50,10 @@ Guidance:
 ## Execution Guidance
 
 - Always start with [01-pre-questions.md](./01-pre-questions.md).
-- Keep implementations aligned with current framework files (`playwright/suites`, `playwright/tests`, `playwright/Utils`, `playwright/test-manager.ts`, `playwright/test-data.ts`, `playwright/constants.ts`, `playwright/global.setup.ts`).
+- Keep implementations aligned with current framework files (`playwright/suites`, `playwright/tests`, `playwright/Utils`, `playwright/test-manager.ts`, `playwright/test-data.ts`, `playwright/constants.ts`, `playwright/global.setup.ts`, `playwright.config.ts`).
+- For all test/suite/set/framework changes, update `playwright/ai-docs/AGENTS.md` and/or `playwright/ai-docs/ARCHITECTURE.md` as part of the same task.
 - End with [04-validation.md](./04-validation.md).
 
 ---
 
-_Last Updated: 2026-03-04_
+_Last Updated: 2026-03-05_
