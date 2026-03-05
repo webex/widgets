@@ -50,6 +50,14 @@ export const ACCEPT_TASK_TIMEOUT = 60000;
 // Widget initialization timeouts
 export const WIDGET_INIT_TIMEOUT = 50000;
 
+// Conference scenario timing controls
+export const CONFERENCE_ACTION_SETTLE_TIMEOUT = 2000;
+export const CONFERENCE_SWITCH_TOGGLE_TIMEOUT = 1000;
+export const CONFERENCE_END_TASK_SETTLE_TIMEOUT = 1500;
+export const CONFERENCE_CUSTOMER_DISCONNECT_TIMEOUT = 3000;
+export const CONFERENCE_RECONNECT_SETTLE_TIMEOUT = 4000;
+export const CONSULT_NO_ANSWER_TIMEOUT = 12000;
+
 // Wrapup timeouts
 export const WRAPUP_TIMEOUT = 15000;
 
@@ -67,6 +75,8 @@ export const CONSOLE_PATTERNS = {
 export const PAGE_TYPES = {
   AGENT1: 'agent1',
   AGENT2: 'agent2',
+  AGENT3: 'agent3',
+  AGENT4: 'agent4',
   CALLER: 'caller',
   EXTENSION: 'extension',
   CHAT: 'chat',

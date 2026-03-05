@@ -39,7 +39,9 @@ playwright/
 │   ├── station-login-user-state-tests.spec.ts
 │   ├── basic-advanced-task-controls-tests.spec.ts
 │   ├── advanced-task-controls-tests.spec.ts
-│   └── dial-number-tests.spec.ts
+│   ├── dial-number-tests.spec.ts
+│   ├── multiparty-conference-set-7-tests.spec.ts
+│   └── multiparty-conference-set-8-tests.spec.ts
 ├── tests/
 │   ├── digital-incoming-task-and-task-controls.spec.ts
 │   ├── incoming-task-and-controls-multi-session.spec.ts
@@ -50,7 +52,9 @@ playwright/
 │   ├── advanced-task-controls-test.spec.ts
 │   ├── advance-task-control-combinations-test.spec.ts
 │   ├── dial-number-task-control-test.spec.ts
-│   └── tasklist-test.spec.ts
+│   ├── tasklist-test.spec.ts
+│   ├── multiparty-conference-set-7-test.spec.ts
+│   └── multiparty-conference-set-8-test.spec.ts
 ├── Utils/
 │   ├── initUtils.ts
 │   ├── helperUtils.ts
@@ -92,8 +96,8 @@ Any set added to `USER_SETS` becomes runnable automatically through this mapping
 `global.setup.ts`:
 
 1. expands `USER_SETS` into set-scoped env keys (`<SET>_...`)
-2. fetches OAuth tokens for agents in each set
-3. writes token/env updates to `.env`
+2. fetches OAuth tokens in batches of 4 parallel browser contexts
+3. writes token/env updates to `.env` in one upsert pass after token collection
 
 `test-manager.ts`:
 

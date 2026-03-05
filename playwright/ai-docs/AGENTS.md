@@ -33,6 +33,8 @@ At the time of this doc update, the baseline suites are:
 - `basic-advanced-task-controls-tests.spec.ts`
 - `advanced-task-controls-tests.spec.ts`
 - `dial-number-tests.spec.ts`
+- `multiparty-conference-set-7-tests.spec.ts`
+- `multiparty-conference-set-8-tests.spec.ts`
 
 Do not assume additional sets/suites exist unless they are present in code.
 
@@ -94,6 +96,14 @@ yarn test:e2e --project=SET_1
 
 ---
 
+## OAuth Setup Model
+
+- `playwright/global.setup.ts` updates set-scoped env keys from `USER_SETS` first.
+- OAuth token collection runs in batches of 4 parallel contexts (`OAUTH_BATCH_SIZE=4`).
+- All collected tokens are written to `.env` in one upsert pass after collection completes.
+
+---
+
 ## Documentation Rules
 
 When Playwright behavior changes:
@@ -102,6 +112,21 @@ When Playwright behavior changes:
 - Update `playwright/ai-docs/ARCHITECTURE.md` for technical architecture changes
 - Keep docs aligned with actual files in `playwright/`
 - Avoid hardcoding future/nonexistent sets or suite names
+
+---
+
+## Conference Coverage (SET_7, SET_8)
+
+- Multiparty conference scenarios are split across:
+  - `playwright/tests/multiparty-conference-set-7-test.spec.ts`
+  - `playwright/tests/multiparty-conference-set-8-test.spec.ts`
+- Scenario IDs use prefixes:
+  - `CTS-MPC-*` (Multi-Party Conference matrix)
+  - `CTS-TC-*` (Transfer Conference scenarios)
+  - `CTS-SW-*` (Switch Conference scenarios)
+- Skip policy used in implementation:
+  - `EP_DN`/`EPDN` scenarios are retained as `test.skip(...)`
+  - scenarios requiring more than 4 agents are retained as `test.skip(...)`
 
 ---
 

@@ -1,18 +1,111 @@
-import {test as setup} from '@playwright/test';
+import {test as setup, Browser} from '@playwright/test';
 import {oauthLogin} from './Utils/initUtils';
 import {USER_SETS} from './test-data';
 const fs = require('fs');
 const path = require('path');
 
+const ENV_PATH = path.resolve(__dirname, '../.env');
+const OAUTH_BATCH_SIZE = 4;
+
+type EnvUpdateMap = Record<string, string>;
+
+interface OAuthTask {
+  envKey: string;
+  username: string;
+  password?: string;
+}
+
+const readEnvFile = (): string => {
+  if (!fs.existsSync(ENV_PATH)) {
+    return '';
+  }
+  return fs.readFileSync(ENV_PATH, 'utf8');
+};
+
+const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const upsertEnvVariables = (updates: EnvUpdateMap): void => {
+  let envContent = readEnvFile();
+
+  for (const [key, value] of Object.entries(updates)) {
+    const keyPattern = new RegExp(`^${escapeRegExp(key)}=.*$\\n?`, 'm');
+    envContent = envContent.replace(keyPattern, '');
+
+    if (!envContent.endsWith('\n') && envContent.length > 0) {
+      envContent += '\n';
+    }
+    envContent += `${key}=${value}\n`;
+    process.env[key] = value;
+  }
+
+  envContent = envContent.replace(/\n{3,}/g, '\n\n');
+  fs.writeFileSync(ENV_PATH, envContent, 'utf8');
+};
+
+const buildOAuthTasks = (): OAuthTask[] => {
+  const domain = process.env.PW_SANDBOX;
+  const tasks: OAuthTask[] = [];
+
+  for (const setKey of Object.keys(USER_SETS)) {
+    const userSet = USER_SETS[setKey];
+
+    for (const agentKey of Object.keys(userSet.AGENTS)) {
+      const username = `${userSet.AGENTS[agentKey].username}@${domain}`;
+      tasks.push({
+        envKey: `${setKey}_${agentKey}_ACCESS_TOKEN`,
+        username,
+      });
+    }
+  }
+
+  const dialNumberUsername = process.env.PW_DIAL_NUMBER_LOGIN_USERNAME;
+  const dialNumberPassword = process.env.PW_DIAL_NUMBER_LOGIN_PASSWORD;
+
+  if (dialNumberUsername && dialNumberPassword) {
+    tasks.push({
+      envKey: 'DIAL_NUMBER_LOGIN_ACCESS_TOKEN',
+      username: dialNumberUsername,
+      password: dialNumberPassword,
+    });
+  }
+
+  return tasks;
+};
+
+const fetchOAuthAccessToken = async (browser: Browser, username: string, password?: string): Promise<string> => {
+  const context = await browser.newContext({ignoreHTTPSErrors: true});
+  const page = await context.newPage();
+
+  try {
+    await oauthLogin(page, username, password);
+    await page.getByRole('textbox').click();
+    return await page.getByRole('textbox').inputValue();
+  } finally {
+    await context.close().catch(() => {});
+  }
+};
+
+const collectTokensInBatches = async (browser: Browser, tasks: OAuthTask[]): Promise<EnvUpdateMap> => {
+  const tokenUpdates: EnvUpdateMap = {};
+
+  for (let index = 0; index < tasks.length; index += OAUTH_BATCH_SIZE) {
+    const batch = tasks.slice(index, index + OAUTH_BATCH_SIZE);
+    const batchTokens = await Promise.all(
+      batch.map((task) => fetchOAuthAccessToken(browser, task.username, task.password))
+    );
+
+    batch.forEach((task, batchIndex) => {
+      tokenUpdates[task.envKey] = batchTokens[batchIndex];
+    });
+  }
+
+  return tokenUpdates;
+};
+
 export const UpdateENVWithUserSets = () => {
   // Constants
   const DOMAIN = process.env.PW_SANDBOX;
-  const envPath = path.resolve(__dirname, '../.env');
-
-  let envContent = '';
-  if (fs.existsSync(envPath)) {
-    envContent = fs.readFileSync(envPath, 'utf8');
-  }
+  const updates: EnvUpdateMap = {};
 
   // Dynamically set environment variables for all user sets
   Object.keys(USER_SETS).forEach((setKey) => {
@@ -22,113 +115,24 @@ export const UpdateENVWithUserSets = () => {
     Object.keys(userSet.AGENTS).forEach((agentKey) => {
       const agent = userSet.AGENTS[agentKey];
 
-      // Remove existing lines for this agent if they exist
-      const usernamePattern = new RegExp(`^${setKey}_${agentKey}_USERNAME=.*$\\n?`, 'm');
-      const extensionPattern = new RegExp(`^${setKey}_${agentKey}_EXTENSION_NUMBER=.*$\\n?`, 'm');
-      const namePattern = new RegExp(`^${setKey}_${agentKey}_NAME=.*$\\n?`, 'm');
-
-      envContent = envContent.replace(usernamePattern, '');
-      envContent = envContent.replace(extensionPattern, '');
-      envContent = envContent.replace(namePattern, '');
-
-      // Add new lines
-      if (!envContent.endsWith('\n') && envContent.length > 0) envContent += '\n';
-      envContent += `${setKey}_${agentKey}_USERNAME=${agent.username}@${DOMAIN}\n`;
-      envContent += `${setKey}_${agentKey}_EXTENSION_NUMBER=${agent.extension}\n`;
-      envContent += `${setKey}_${agentKey}_NAME=${agent.agentName || ''}\n`;
+      updates[`${setKey}_${agentKey}_USERNAME`] = `${agent.username}@${DOMAIN}`;
+      updates[`${setKey}_${agentKey}_EXTENSION_NUMBER`] = agent.extension;
+      updates[`${setKey}_${agentKey}_NAME`] = agent.agentName || '';
     });
 
-    // Map to corresponding SET environment variables
-    const dialPattern = new RegExp(`^${setKey}_ENTRY_POINT=.*$\\n?`, 'm');
-    const emailPattern = new RegExp(`^${setKey}_EMAIL_ENTRY_POINT=.*$\\n?`, 'm');
-    const queuePattern = new RegExp(`^${setKey}_QUEUE_NAME=.*$\\n?`, 'm');
-    const chatPattern = new RegExp(`^${setKey}_CHAT_URL=.*$\\n?`, 'm');
-
-    envContent = envContent.replace(dialPattern, '');
-    envContent = envContent.replace(emailPattern, '');
-    envContent = envContent.replace(queuePattern, '');
-    envContent = envContent.replace(chatPattern, '');
-
-    if (!envContent.endsWith('\n') && envContent.length > 0) envContent += '\n';
-    envContent += `${setKey}_ENTRY_POINT=${userSet.ENTRY_POINT || ''}\n`;
-    envContent += `${setKey}_EMAIL_ENTRY_POINT=${userSet.EMAIL_ENTRY_POINT || ''}\n`;
-    envContent += `${setKey}_QUEUE_NAME=${userSet.QUEUE_NAME || ''}\n`;
-    envContent += `${setKey}_CHAT_URL=${userSet.CHAT_URL || ''}\n`;
+    updates[`${setKey}_ENTRY_POINT`] = userSet.ENTRY_POINT || '';
+    updates[`${setKey}_EMAIL_ENTRY_POINT`] = userSet.EMAIL_ENTRY_POINT || '';
+    updates[`${setKey}_QUEUE_NAME`] = userSet.QUEUE_NAME || '';
+    updates[`${setKey}_CHAT_URL`] = userSet.CHAT_URL || '';
   });
 
-  // Write the updated content back to .env file
-  // Clean up multiple consecutive empty lines
-  envContent = envContent.replace(/\n{3,}/g, '\n\n');
-  fs.writeFileSync(envPath, envContent, 'utf8');
+  upsertEnvVariables(updates);
 };
 
 setup('OAuth', async ({browser}) => {
   // Update environment variables with user sets before starting OAuth
   UpdateENVWithUserSets();
-
-  // Directly iterate through USER_SETS and their agents
-  for (const setKey of Object.keys(USER_SETS)) {
-    const userSet = USER_SETS[setKey];
-
-    for (const agentKey of Object.keys(userSet.AGENTS)) {
-      const page = await browser.newPage();
-
-      // Construct the OAuth agent ID directly
-      const oauthAgentId = `${userSet.AGENTS[agentKey].username}@${process.env.PW_SANDBOX}`;
-
-      await oauthLogin(page, oauthAgentId);
-
-      await page.getByRole('textbox').click();
-      const accessToken = await page.getByRole('textbox').inputValue();
-
-      const envPath = path.resolve(__dirname, '../.env');
-      let envContent = '';
-      if (fs.existsSync(envPath)) {
-        envContent = fs.readFileSync(envPath, 'utf8');
-        // Remove any existing ACCESS_TOKEN line for this set-agent combination
-        const accessTokenPattern = new RegExp(`^${setKey}_${agentKey}_ACCESS_TOKEN=.*$\\n?`, 'm');
-        envContent = envContent.replace(accessTokenPattern, '');
-
-        // Ensure trailing newline
-        if (!envContent.endsWith('\n')) envContent += '\n';
-      }
-      envContent += `${setKey}_${agentKey}_ACCESS_TOKEN=${accessToken}\n`;
-      // Clean up multiple consecutive empty lines
-      envContent = envContent.replace(/\n{3,}/g, '\n\n');
-      fs.writeFileSync(envPath, envContent, 'utf8');
-
-      await page.close();
-    }
-  }
-
-  // OAuth for Dial Number Login user
-  const dialNumberUsername = process.env.PW_DIAL_NUMBER_LOGIN_USERNAME;
-  const dialNumberPassword = process.env.PW_DIAL_NUMBER_LOGIN_PASSWORD;
-
-  if (dialNumberUsername && dialNumberPassword) {
-    const page = await browser.newPage();
-
-    await oauthLogin(page, dialNumberUsername, dialNumberPassword);
-
-    await page.getByRole('textbox').click();
-    const accessToken = await page.getByRole('textbox').inputValue();
-
-    const envPath = path.resolve(__dirname, '../.env');
-    let envContent = '';
-    if (fs.existsSync(envPath)) {
-      envContent = fs.readFileSync(envPath, 'utf8');
-      // Remove any existing DIAL_NUMBER_LOGIN_ACCESS_TOKEN line
-      const accessTokenPattern = new RegExp(`^DIAL_NUMBER_LOGIN_ACCESS_TOKEN=.*$\\n?`, 'm');
-      envContent = envContent.replace(accessTokenPattern, '');
-
-      // Ensure trailing newline
-      if (!envContent.endsWith('\n')) envContent += '\n';
-    }
-    envContent += `DIAL_NUMBER_LOGIN_ACCESS_TOKEN=${accessToken}\n`;
-    // Clean up multiple consecutive empty lines
-    envContent = envContent.replace(/\n{3,}/g, '\n\n');
-    fs.writeFileSync(envPath, envContent, 'utf8');
-
-    await page.close();
-  }
+  const oauthTasks = buildOAuthTasks();
+  const tokenUpdates = await collectTokensInBatches(browser, oauthTasks);
+  upsertEnvVariables(tokenUpdates);
 });

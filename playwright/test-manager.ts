@@ -22,6 +22,8 @@ interface SetupConfig {
   // Core requirements
   needsAgent1?: boolean;
   needsAgent2?: boolean;
+  needsAgent3?: boolean;
+  needsAgent4?: boolean;
   needsCaller?: boolean;
   needsExtension?: boolean;
   needsChat?: boolean;
@@ -40,8 +42,12 @@ interface SetupConfig {
 interface EnvTokens {
   agent1AccessToken: string;
   agent2AccessToken: string;
+  agent3AccessToken: string;
+  agent4AccessToken: string;
   agent1Username: string;
   agent2Username: string;
+  agent3Username: string;
+  agent4Username: string;
   agent1ExtensionNumber: string;
   password: string;
   dialNumberLoginAccessToken?: string;
@@ -67,6 +73,14 @@ export class TestManager {
   // Agent 2 main widget page (Agent 2 login)
   public agent2Page: Page;
   public agent2Context: BrowserContext;
+
+  // Agent 3 main widget page (Agent 3 login)
+  public agent3Page: Page;
+  public agent3Context: BrowserContext;
+
+  // Agent 4 main widget page (Agent 4 login)
+  public agent4Page: Page;
+  public agent4Context: BrowserContext;
 
   // Caller extension page (Agent 2 for making calls)
   public callerPage: Page;
@@ -100,8 +114,12 @@ export class TestManager {
     return {
       agent1AccessToken: process.env[`${this.projectName}_AGENT1_ACCESS_TOKEN`] ?? '',
       agent2AccessToken: process.env[`${this.projectName}_AGENT2_ACCESS_TOKEN`] ?? '',
+      agent3AccessToken: process.env[`${this.projectName}_AGENT3_ACCESS_TOKEN`] ?? '',
+      agent4AccessToken: process.env[`${this.projectName}_AGENT4_ACCESS_TOKEN`] ?? '',
       agent1Username: process.env[`${this.projectName}_AGENT1_USERNAME`] ?? '',
       agent2Username: process.env[`${this.projectName}_AGENT2_USERNAME`] ?? '',
+      agent3Username: process.env[`${this.projectName}_AGENT3_USERNAME`] ?? '',
+      agent4Username: process.env[`${this.projectName}_AGENT4_USERNAME`] ?? '',
       agent1ExtensionNumber: process.env[`${this.projectName}_AGENT1_EXTENSION_NUMBER`] ?? '',
       password: process.env.PW_SANDBOX_PASSWORD ?? '',
       dialNumberLoginAccessToken: process.env.DIAL_NUMBER_LOGIN_ACCESS_TOKEN ?? '',
@@ -161,6 +179,8 @@ export class TestManager {
     const defaults: SetupConfig = {
       needsAgent1: true,
       needsAgent2: false,
+      needsAgent3: false,
+      needsAgent4: false,
       needsCaller: false,
       needsExtension: false,
       needsChat: false,
@@ -201,6 +221,12 @@ export class TestManager {
     if (config.needsAgent2) {
       promises.push(this.createContextWithPage(browser, PAGE_TYPES.AGENT2));
     }
+    if (config.needsAgent3) {
+      promises.push(this.createContextWithPage(browser, PAGE_TYPES.AGENT3));
+    }
+    if (config.needsAgent4) {
+      promises.push(this.createContextWithPage(browser, PAGE_TYPES.AGENT4));
+    }
     if (config.needsCaller) {
       promises.push(this.createContextWithPage(browser, PAGE_TYPES.CALLER));
     }
@@ -239,6 +265,16 @@ export class TestManager {
           this.agent2Context = result.context;
           this.agent2Page = result.page;
           this.setupPageConsoleLogging(this.agent2Page, config.enableConsoleLogging);
+          break;
+        case PAGE_TYPES.AGENT3:
+          this.agent3Context = result.context;
+          this.agent3Page = result.page;
+          this.setupPageConsoleLogging(this.agent3Page, config.enableConsoleLogging);
+          break;
+        case PAGE_TYPES.AGENT4:
+          this.agent4Context = result.context;
+          this.agent4Page = result.page;
+          this.setupPageConsoleLogging(this.agent4Page, config.enableConsoleLogging);
           break;
         case PAGE_TYPES.CALLER:
           this.callerExtensionContext = result.context;
@@ -280,6 +316,16 @@ export class TestManager {
       setupPromises.push(this.setupAgent2(envTokens));
     }
 
+    // Agent3 setup
+    if (config.needsAgent3) {
+      setupPromises.push(this.setupAgent3(envTokens));
+    }
+
+    // Agent4 setup
+    if (config.needsAgent4) {
+      setupPromises.push(this.setupAgent4(envTokens));
+    }
+
     // Caller extension setup
     if (config.needsCaller && this.callerPage) {
       setupPromises.push(this.setupCaller(envTokens));
@@ -316,6 +362,16 @@ export class TestManager {
   // Helper method for Agent2 setup
   private async setupAgent2(envTokens: EnvTokens): Promise<void> {
     await pageSetup(this.agent2Page, LOGIN_MODE.DESKTOP, envTokens.agent2AccessToken);
+  }
+
+  // Helper method for Agent3 setup
+  private async setupAgent3(envTokens: EnvTokens): Promise<void> {
+    await pageSetup(this.agent3Page, LOGIN_MODE.DESKTOP, envTokens.agent3AccessToken);
+  }
+
+  // Helper method for Agent4 setup
+  private async setupAgent4(envTokens: EnvTokens): Promise<void> {
+    await pageSetup(this.agent4Page, LOGIN_MODE.DESKTOP, envTokens.agent4AccessToken);
   }
 
   // Helper method for Dial Number setup
@@ -370,6 +426,22 @@ export class TestManager {
       setupOperations.push(() => setupAdvancedConsoleLogging(this.agent2Page));
     }
 
+    if (config.enableConsoleLogging && config.needsAgent3) {
+      setupOperations.push(() => setupConsoleLogging(this.agent3Page));
+    }
+
+    if (config.enableAdvancedLogging && config.needsAgent3) {
+      setupOperations.push(() => setupAdvancedConsoleLogging(this.agent3Page));
+    }
+
+    if (config.enableConsoleLogging && config.needsAgent4) {
+      setupOperations.push(() => setupConsoleLogging(this.agent4Page));
+    }
+
+    if (config.enableAdvancedLogging && config.needsAgent4) {
+      setupOperations.push(() => setupAdvancedConsoleLogging(this.agent4Page));
+    }
+
     // Execute all setup operations synchronously since they don't return promises
     setupOperations.forEach((operation) => operation());
   }
@@ -415,6 +487,20 @@ export class TestManager {
       needsAgent2: true,
       needsCaller: true,
       needDialNumberLogin: true,
+      agent1LoginMode: LOGIN_MODE.DESKTOP,
+      enableConsoleLogging: true,
+      enableAdvancedLogging: true,
+    });
+  }
+
+  async setupForMultipartyConference(browser: Browser) {
+    await this.setup(browser, {
+      needsAgent1: true,
+      needsAgent2: true,
+      needsAgent3: true,
+      needsAgent4: true,
+      needsCaller: true,
+      needDialNumberLogin: false,
       agent1LoginMode: LOGIN_MODE.DESKTOP,
       enableConsoleLogging: true,
       enableAdvancedLogging: true,
@@ -559,6 +645,12 @@ export class TestManager {
     if (this.agent2Page) {
       cleanupOps.push(handleStrayTasks(this.agent2Page));
     }
+    if (this.agent3Page) {
+      cleanupOps.push(handleStrayTasks(this.agent3Page));
+    }
+    if (this.agent4Page) {
+      cleanupOps.push(handleStrayTasks(this.agent4Page));
+    }
 
     await Promise.all(cleanupOps);
   }
@@ -582,6 +674,14 @@ export class TestManager {
       logoutOperations.push(stationLogout(this.agent2Page, false)); // Don't throw during cleanup
     }
 
+    if (this.agent3Page && (await this.isLogoutButtonVisible(this.agent3Page))) {
+      logoutOperations.push(stationLogout(this.agent3Page, false)); // Don't throw during cleanup
+    }
+
+    if (this.agent4Page && (await this.isLogoutButtonVisible(this.agent4Page))) {
+      logoutOperations.push(stationLogout(this.agent4Page, false)); // Don't throw during cleanup
+    }
+
     await Promise.all(logoutOperations);
 
     // Close pages and contexts in parallel
@@ -592,6 +692,8 @@ export class TestManager {
       this.agent1Page,
       this.multiSessionAgent1Page,
       this.agent2Page,
+      this.agent3Page,
+      this.agent4Page,
       this.callerPage,
       this.agent1ExtensionPage,
       this.chatPage,
@@ -609,6 +711,8 @@ export class TestManager {
       this.agent1Context,
       this.multiSessionContext,
       this.agent2Context,
+      this.agent3Context,
+      this.agent4Context,
       this.callerExtensionContext,
       this.extensionContext,
       this.chatContext,

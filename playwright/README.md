@@ -11,7 +11,9 @@ playwright/
 │   ├── task-list-multi-session-tests.spec.ts # Task list and multi-session orchestration
 │   ├── station-login-user-state-tests.spec.ts # Station login and user state orchestration
 │   ├── basic-advanced-task-controls-tests.spec.ts # Basic and advanced task controls orchestration
-│   └── advanced-task-controls-tests.spec.ts  # Advanced task controls orchestration
+│   ├── advanced-task-controls-tests.spec.ts  # Advanced task controls orchestration
+│   ├── multiparty-conference-set-7-tests.spec.ts # Multiparty conference set 7 orchestration
+│   └── multiparty-conference-set-8-tests.spec.ts # Multiparty conference set 8 orchestration
 ├── tests/                                     # Individual test implementations
 ├── Utils/                                     # Utility functions
 ├── test-data.ts                              # **CENTRAL CONFIG** - Test data & suite mapping
@@ -29,13 +31,16 @@ playwright/
 - ✅ Positions browser windows automatically
 - ✅ Maps test suites to user sets
 
-| Set       | Focus                             | Port | Suite File                                   |
-| --------- | --------------------------------- | ---- | -------------------------------------------- |
-| **SET_1** | Digital incoming tasks & controls | 9221 | `digital-incoming-task-tests.spec.ts`        |
-| **SET_2** | Task lists & multi-session        | 9222 | `task-list-multi-session-tests.spec.ts`      |
-| **SET_3** | Authentication & user management  | 9223 | `station-login-user-state-tests.spec.ts`     |
-| **SET_4** | Task controls & combinations      | 9224 | `basic-advanced-task-controls-tests.spec.ts` |
-| **SET_5** | Advanced task operations          | 9225 | `advanced-task-controls-tests.spec.ts`       |
+| Set       | Focus                              | Port | Suite File                                   |
+| --------- | ---------------------------------- | ---- | -------------------------------------------- |
+| **SET_1** | Digital incoming tasks & controls  | 9221 | `digital-incoming-task-tests.spec.ts`        |
+| **SET_2** | Task lists & multi-session         | 9222 | `task-list-multi-session-tests.spec.ts`      |
+| **SET_3** | Authentication & user management   | 9223 | `station-login-user-state-tests.spec.ts`     |
+| **SET_4** | Task controls & combinations       | 9224 | `basic-advanced-task-controls-tests.spec.ts` |
+| **SET_5** | Advanced task operations           | 9225 | `advanced-task-controls-tests.spec.ts`       |
+| **SET_6** | Dial number scenarios              | 9226 | `dial-number-tests.spec.ts`                  |
+| **SET_7** | Multiparty conference (team 25-28) | 9227 | `multiparty-conference-set-7-tests.spec.ts`  |
+| **SET_8** | Multiparty conference (team 29-32) | 9228 | `multiparty-conference-set-8-tests.spec.ts`  |
 
 ### Where to Add New Tests?
 
@@ -46,6 +51,8 @@ playwright/
 | Authentication/User states   | SET_3   | User management             |
 | Basic/Advanced task controls | SET_4   | Task control operations     |
 | Complex advanced scenarios   | SET_5   | Advanced operations         |
+| Dial number scenarios        | SET_6   | Dial number flows           |
+| Multiparty conference        | SET_7/8 | 4-agent conference coverage |
 
 ## 🧪 Adding New Tests
 
@@ -170,6 +177,11 @@ PW_ENTRY_POINT2=entry-point-2
 
 Test data is automatically handled by TestManager based on the running test set.
 
+OAuth setup behavior (`playwright/global.setup.ts`):
+- expands `USER_SETS` into set-scoped env keys
+- fetches OAuth tokens in batches of 4 parallel browser contexts
+- writes all token/env updates to `.env` in a single upsert pass
+
 ## 🚀 Running Tests
 
 ```bash
@@ -182,6 +194,9 @@ yarn test:e2e suites/task-list-multi-session-tests.spec.ts
 yarn test:e2e suites/station-login-user-state-tests.spec.ts
 yarn test:e2e suites/basic-advanced-task-controls-tests.spec.ts
 yarn test:e2e suites/advanced-task-controls-tests.spec.ts
+yarn test:e2e suites/dial-number-tests.spec.ts
+yarn test:e2e suites/multiparty-conference-set-7-tests.spec.ts
+yarn test:e2e suites/multiparty-conference-set-8-tests.spec.ts
 
 # Run specific test sets (projects) - names match USER_SETS keys
 yarn test:e2e --project=SET_1         # Digital incoming tasks
@@ -189,9 +204,12 @@ yarn test:e2e --project=SET_2         # Task list & multi-session
 yarn test:e2e --project=SET_3         # Station login & user state
 yarn test:e2e --project=SET_4         # Basic & advanced task controls
 yarn test:e2e --project=SET_5         # Advanced task controls
-# yarn test:e2e --project=SET_6       # Your new set (auto-available)
+yarn test:e2e --project=SET_6         # Dial number scenarios
+yarn test:e2e --project=SET_7         # Multiparty conference (team 25-28)
+yarn test:e2e --project=SET_8         # Multiparty conference (team 29-32)
 
 # Development & debugging
+yarn playwright test --config=playwright.config.ts --project="OAuth: Get Access Token"  # Run OAuth setup only
 yarn test:e2e --ui                    # UI mode
 yarn test:e2e --debug                 # Debug mode
 yarn test:e2e --headed                # Run with browser visible
@@ -221,7 +239,7 @@ yarn test:e2e --headed                # Run with browser visible
 **Common Issues:**
 
 - Browser launch fails → Check Chrome and ports 9221+ (auto-assigned)
-- Auth errors → Verify OAuth in `global.setup.ts`
+- Auth errors → Verify OAuth in `global.setup.ts` and confirm `OAUTH_BATCH_SIZE`/credentials are valid
 - Widget timeouts → Increase `WIDGET_INIT_TIMEOUT`
 - Test conflicts → Ports/positions are auto-managed per `USER_SETS`
 - New set not appearing → Check `TEST_SUITE` property in `test-data.ts`
