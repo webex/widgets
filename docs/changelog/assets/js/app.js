@@ -809,6 +809,13 @@ const updateComparisonURL = (versionA, versionB) => {
   url.searchParams.delete('version');
   url.searchParams.delete('commitMessage');
   url.searchParams.delete('commitHash');
+  // Clear enhanced (package-level) comparison params so full comparison link is not stale
+  url.searchParams.delete('compareStableA');
+  url.searchParams.delete('compareStableB');
+  url.searchParams.delete('comparePackage');
+  url.searchParams.delete('compareVersionA');
+  url.searchParams.delete('compareVersionB');
+
 
   // Set comparison parameters
   url.searchParams.set('compare', `${versionA}vs${versionB}`);

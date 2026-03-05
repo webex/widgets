@@ -233,7 +233,7 @@ const comparePackages = (packagesA, packagesB, changelogA, changelogB, stableVer
       return exactStableVersion;
     }
 
-    // Priority 2: Find highest pre-release version (any tag: next, alpha, beta, rc, etc.)
+    // Priority 2: Find oldest pre-release version (any tag: next, alpha, beta, rc, etc.)
     // Pattern: 3.4.0-{tag}.{number} -> captures tag and number
     const prereleasePattern = new RegExp(`^${escapedVersion}-([a-z]+)\\.(\\d+)$`, 'i');
 
@@ -242,15 +242,13 @@ const comparePackages = (packagesA, packagesB, changelogA, changelogB, stableVer
       .sort((a, b) => {
         const matchA = a.match(prereleasePattern);
         const matchB = b.match(prereleasePattern);
-        console.log('Package:', packageName, '| matchA:', matchA, '| matchB:', matchB);
         if (!matchA || !matchB) return 0;
-
         const numA = parseInt(matchA[2], 10);
-        const numB = parseInt(matchB[2], 10);        console.log('numB', numB);
+        const numB = parseInt(matchB[2], 10);        
         return numA - numB; // Sort ascending (lowest first)
       });
-    console.log('prereleaseVersions', prereleaseVersions);
-    console.log('versions', versions);
+    //console.log('prereleaseVersions', prereleaseVersions);
+    //console.log('versions', versions);
     // Return highest pre-release version, or fallback to first available
     return prereleaseVersions[0] || versions[0];
   };
