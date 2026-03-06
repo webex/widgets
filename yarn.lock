@@ -9450,7 +9450,7 @@ __metadata:
     "@webex/test-fixtures": "workspace:*"
     babel-jest: "npm:29.7.0"
     babel-loader: "npm:9.2.1"
-    cc-digital-interactions: "npm:3.0.8"
+    cc-digital-interactions: "npm:3.0.8-beta.2"
     css-loader: "npm:7.1.2"
     eslint: "npm:^9.20.1"
     eslint-config-prettier: "npm:^10.0.1"
@@ -15263,9 +15263,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cc-digital-interactions@npm:3.0.8":
-  version: 3.0.8
-  resolution: "cc-digital-interactions@npm:3.0.8"
+"cc-digital-interactions@npm:3.0.8-beta.2":
+  version: 3.0.8-beta.2
+  resolution: "cc-digital-interactions@npm:3.0.8-beta.2"
   dependencies:
     "@microsoft/signalr": "npm:^8.0.7"
     "@wxcc-desktop/sdk": "npm:^2.0.11"
@@ -15282,7 +15282,7 @@ __metadata:
     "@momentum-ui/web-components": ^2.26.20
     react: ">=18.3.1"
     react-dom: ">=18.3.1"
-  checksum: 10c0/306326e32c37ce05ab2c0d170f72bd987a648f8819b09bcea82f2dc61adaaf8bf46d24020fe691b08d5b467a6d72956312ef207451e756eec21710024383f95e
+  checksum: 10c0/710711276fd92e96bac74367d75079b68b7b00560a084b488b20a50cd34cb6ca335789ad943c2073255ec7bc86d96b22b17aefeb20123168e22dc0ae518efdcb
   languageName: node
   linkType: hard
 
