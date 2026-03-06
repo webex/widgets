@@ -6,7 +6,9 @@ The Meetings Widget provides a full-featured Webex meeting experience as an embe
 
 **Widget:** Meetings
 
-**Location:** `widgets/packages/meetings/`
+**Package:** `@webex/widgets`
+
+**Location:** `packages/@webex/widgets`
 
 ---
 
@@ -35,40 +37,46 @@ The Meetings Widget lets consuming applications embed a complete meeting experie
 
 #### Basic Usage (React)
 
+The widget handles SDK initialization, adapter creation, meeting creation, and all internal wiring via the `withAdapter` and `withMeeting` HOCs. Consumers just import and render with props:
+
 ```jsx
-import Webex from 'webex';
-import WebexSDKAdapter from '@webex/sdk-component-adapter';
-import {WebexMeeting, AdapterContext} from '@webex/components';
+import {WebexMeetingsWidget} from '@webex/widgets';
 
-function MeetingsWidget({accessToken, meetingDestination}) {
-  const [adapter, setAdapter] = useState(null);
-  const [meetingID, setMeetingID] = useState(null);
-
-  useEffect(() => {
-    const webex = Webex.init({
-      credentials: { access_token: accessToken }
-    });
-    const sdkAdapter = new WebexSDKAdapter(webex);
-
-    sdkAdapter.connect().then(() => {
-      setAdapter(sdkAdapter);
-      return sdkAdapter.meetingsAdapter.createMeeting(meetingDestination);
-    }).then((meeting) => {
-      setMeetingID(meeting.ID);
-    });
-
-    return () => sdkAdapter.disconnect();
-  }, [accessToken, meetingDestination]);
-
-  if (!adapter || !meetingID) return <div>Loading...</div>;
-
+function App() {
   return (
-    <AdapterContext.Provider value={adapter}>
-      <WebexMeeting meetingID={meetingID} />
-    </AdapterContext.Provider>
+    <WebexMeetingsWidget
+      accessToken="your-access-token"
+      meetingDestination="user@example.com"
+    />
   );
 }
 ```
+
+#### With All Optional Props
+
+```jsx
+<WebexMeetingsWidget
+  accessToken={token}
+  meetingDestination={destination}
+  meetingPasswordOrPin={pinOrPassword}
+  participantName="Guest User"
+  layout="Grid"
+  fedramp={false}
+  className="my-custom-class"
+  style={{height: '100vh'}}
+/>
+```
+
+#### What Happens Internally
+
+When `WebexMeetingsWidget` mounts, the `withAdapter` HOC:
+
+1. Creates a `Webex` instance using the `accessToken` prop
+2. Wraps it in a `WebexSDKAdapter`
+3. Calls `adapter.connect()` (registers device, opens WebSocket, syncs meetings)
+4. Provides the adapter via `AdapterContext`
+
+The `withMeeting` HOC then creates a meeting from `meetingDestination` and passes the meeting object as a prop. The widget renders the appropriate view based on meeting state.
 
 ### Common Use Cases
 
@@ -185,22 +193,44 @@ graph LR
 
 ## API Reference
 
-### WebexMeeting Component Props
+### WebexMeetingsWidget Props (Public API)
+
+These are the props consumers pass when using the widget. The widget handles SDK/adapter setup internally.
 
 
-| Prop                   | Type          | Required | Default | Description                                  |
-| ---------------------- | ------------- | -------- | ------- | -------------------------------------------- |
-| `meetingID`            | `string`      | No       | —       | The meeting ID returned by `createMeeting()` |
-| `meetingPasswordOrPin` | `string`      | No       | —       | Password or host pin for protected meetings  |
-| `participantName`      | `string`      | No       | —       | Display name for guest participants          |
-| `controls`             | `Function`    | No       | —       | Function returning control IDs to render     |
-| `layout`               | `string`      | No       | —       | Meeting layout variant                       |
-| `logo`                 | `JSX.Element` | No       | —       | Custom logo for loading state                |
-| `className`            | `string`      | No       | —       | CSS class for the root element               |
-| `style`                | `object`      | No       | —       | Inline styles for the root element           |
+| Prop                        | Type       | Required | Default     | Description                                                    |
+| --------------------------- | ---------- | -------- | ----------- | -------------------------------------------------------------- |
+| `accessToken`               | `string`   | **Yes**  | —           | Webex access token for authentication                          |
+| `meetingDestination`        | `string`   | **Yes**  | —           | Meeting URL, SIP address, email, or Personal Meeting Room link |
+| `meetingPasswordOrPin`      | `string`   | No       | `''`        | Password or host pin for protected meetings                    |
+| `participantName`           | `string`   | No       | `''`        | Display name for guest participants                            |
+| `fedramp`                   | `bool`     | No       | `false`     | Enable FedRAMP-compliant environment                           |
+| `layout`                    | `string`   | No       | `'Grid'`    | Remote video layout (`Grid`, `Stack`, `Overlay`, `Prominent`, `Focus`) |
+| `controls`                  | `Function` | No       | `undefined` | Function returning control IDs to render                       |
+| `controlsCollapseRangeStart`| `number`   | No       | `undefined` | Zero-based index of the first collapsible control              |
+| `controlsCollapseRangeEnd`  | `number`   | No       | `undefined` | Zero-based index before the last collapsible control           |
+| `className`                 | `string`   | No       | `''`        | Custom CSS class for the root element                          |
+| `style`                     | `object`   | No       | `{}`        | Inline styles for the root element                             |
 
 
-The `WebexMeeting` component also requires an `AdapterContext.Provider` ancestor with a valid `WebexSDKAdapter` instance as its value.
+**Source:** `src/widgets/WebexMeetings/WebexMeetings.jsx` (see `WebexMeetingsWidget.propTypes` and `WebexMeetingsWidget.defaultProps`)
+
+### Internal Component Props (WebexMeeting from @webex/components)
+
+These are passed internally by `WebexMeetingsWidget` to the `WebexMeeting` component from `@webex/components`. Consumers do not interact with these directly.
+
+
+| Prop                   | Type          | Description                                                    |
+| ---------------------- | ------------- | -------------------------------------------------------------- |
+| `meetingID`            | `string`      | Injected by `withMeeting` HOC from `meetingDestination`        |
+| `meetingPasswordOrPin` | `string`      | Forwarded from widget prop                                     |
+| `participantName`      | `string`      | Forwarded from widget prop                                     |
+| `controls`             | `Function`    | Forwarded from widget prop                                     |
+| `layout`               | `string`      | Forwarded from widget prop                                     |
+| `logo`                 | `JSX.Element` | Hard-coded `<WebexLogo />` SVG                                 |
+| `className`            | `string`      | Always `'webex-meetings-widget__content'`                      |
+
+The `WebexMeeting` component receives its adapter via `AdapterContext.Provider`, which is set up by the `withAdapter` HOC wrapping the widget.
 
 ### Hooks (from `components`)
 
