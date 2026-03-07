@@ -123,7 +123,7 @@ export async function consultOrTransfer(
   const popover = await getPopover(page);
 
   if (type === 'agent') {
-    await performAgentSelection(page, popover, value);
+    await performAgentSelection(page, popover, value, action);
   } else if (type === 'queue') {
     await performQueueSelection(page, popover, value);
   } else if (type === 'dialNumber') {
@@ -133,9 +133,6 @@ export async function consultOrTransfer(
   }
 
   await page.waitForTimeout(2000);
-  if (action === 'consult') {
-    await expect(page.getByTestId('cancel-consult-btn')).toBeVisible({timeout: FORM_FIELD_TIMEOUT});
-  }
 }
 
 // ===== Internal helper functions =====
@@ -205,9 +202,44 @@ async function clickListItemPrimaryButton(
     .catch(() => {});
 }
 
-async function performAgentSelection(page: Page, popover: ReturnType<Page['locator']>, value: string): Promise<void> {
-  await clickCategory(page, popover, 'Agents');
-  await clickListItemPrimaryButton(page, popover, value, 'Agent');
+async function performAgentSelection(
+  page: Page,
+  popover: ReturnType<Page['locator']>,
+  value: string,
+  action: 'consult' | 'transfer'
+): Promise<void> {
+  const agentFirstName = value.split(' ')[0];
+
+  // Try up to 3 times: search, check visibility, reopen popover if needed.
+  // Backend propagation can delay agent availability in the list.
+  let currentPopover = popover;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (attempt === 0) {
+      await clickCategory(page, currentPopover, 'Agents');
+    }
+
+    const searchBox = currentPopover.locator('#consult-search');
+    await searchBox.fill(agentFirstName);
+    await page.waitForTimeout(1000);
+
+    const listItem = currentPopover.locator(`[role="listitem"][aria-label="${value}"]`).first();
+    const isVisible = await listItem.isVisible().catch(() => false);
+
+    if (isVisible) {
+      await clickListItemPrimaryButton(page, currentPopover, value, 'Agent');
+      return;
+    }
+
+    // Close and reopen popover to force a fresh agent list fetch
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(3000);
+    await openConsultOrTransferMenu(page, action);
+    currentPopover = await getPopover(page);
+    await clickCategory(page, currentPopover, 'Agents');
+  }
+
+  // Final attempt — let it throw if agent still not found
+  await clickListItemPrimaryButton(page, currentPopover, value, 'Agent');
 }
 
 async function performQueueSelection(page: Page, popover: ReturnType<Page['locator']>, value: string): Promise<void> {

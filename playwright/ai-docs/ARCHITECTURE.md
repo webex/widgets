@@ -39,7 +39,9 @@ playwright/
 │   ├── station-login-user-state-tests.spec.ts
 │   ├── basic-advanced-task-controls-tests.spec.ts
 │   ├── advanced-task-controls-tests.spec.ts
-│   └── dial-number-tests.spec.ts
+│   ├── dial-number-tests.spec.ts
+│   ├── multiparty-conference-set-7-tests.spec.ts
+│   └── multiparty-conference-set-8-tests.spec.ts
 ├── tests/
 │   ├── digital-incoming-task-and-task-controls.spec.ts
 │   ├── incoming-task-and-controls-multi-session.spec.ts
@@ -50,7 +52,9 @@ playwright/
 │   ├── advanced-task-controls-test.spec.ts
 │   ├── advance-task-control-combinations-test.spec.ts
 │   ├── dial-number-task-control-test.spec.ts
-│   └── tasklist-test.spec.ts
+│   ├── tasklist-test.spec.ts
+│   ├── multiparty-conference-set-7-test.spec.ts
+│   └── multiparty-conference-set-8-test.spec.ts
 ├── Utils/
 │   ├── initUtils.ts
 │   ├── helperUtils.ts
@@ -83,8 +87,12 @@ Keep this section aligned to real repository contents.
 | `SET_4` | `basic-advanced-task-controls-tests.spec.ts` | `basic-task-controls-test.spec.ts`, `advance-task-control-combinations-test.spec.ts` |
 | `SET_5` | `advanced-task-controls-tests.spec.ts` | `advanced-task-controls-test.spec.ts` |
 | `SET_6` | `dial-number-tests.spec.ts` | `dial-number-task-control-test.spec.ts` |
+| `SET_7` | `multiparty-conference-set-7-tests.spec.ts` | `multiparty-conference-set-7-test.spec.ts` |
+| `SET_8` | `multiparty-conference-set-8-tests.spec.ts` | `multiparty-conference-set-8-test.spec.ts` |
 
 Use this mapping to decide where new tests should be added and wired.
+
+Conference scenario consolidation is implemented inside the SET_7/SET_8 test files to reduce repeated call setup while preserving scenario ID traceability in test titles.
 
 ---
 
@@ -96,7 +104,8 @@ Use this mapping to decide where new tests should be added and wired.
 - Suite binding: `testMatch = **/suites/${TEST_SUITE}`
 - Worker count: `Object.keys(USER_SETS).length`
 - Global timeout: `180000`
-- Per-project retries: `1`
+- Per-project retries: `0`
+- Trace: `on-first-retry` (effectively disabled since retries=0; avoids `tracing.stopChunk` ENOENT race condition that `retain-on-failure` triggered)
 
 Any set added to `USER_SETS` becomes runnable through this model.
 
@@ -129,8 +138,14 @@ These flags are part of baseline runtime behavior and should be preserved unless
 `global.setup.ts`:
 
 1. Expands `USER_SETS` into set-scoped env keys (`<SET>_...`)
-2. Fetches OAuth tokens for agents in each set
-3. Writes token/env updates to `.env`
+2. Runs OAuth token fetch in 4 parallel groups (2 sets per group):
+   - `GROUP_1`: `SET_1`, `SET_2`
+   - `GROUP_2`: `SET_3`, `SET_4`
+   - `GROUP_3`: `SET_5`, `SET_6`
+   - `GROUP_4`: `SET_7`, `SET_8`
+   Each group uses batch size 4 internally (`OAUTH_BATCH_SIZE=4`).
+3. Optionally fetches dial-number OAuth token
+4. Performs one final `.env` upsert in the same OAuth setup run
 
 Test files:
 
@@ -184,6 +199,8 @@ When enabled by setup config/method, these page properties are created and avail
 
 - `agent1Page`
 - `agent2Page`
+- `agent3Page` (conference sets only)
+- `agent4Page` (conference sets only)
 - `callerPage`
 - `agent1ExtensionPage`
 - `chatPage`
@@ -210,6 +227,7 @@ When enabled by setup config/method, these page properties are created and avail
 | `setupForIncomingTaskExtension()` | Calls `setup()` for extension incoming-task flow |
 | `setupForIncomingTaskMultiSession()` | Calls `setup()` for multi-session incoming-task flow |
 | `setupForStationLogin()` | Custom path (does not call `setup()`), purpose-built station-login + multi-login bootstrap |
+| `setupForMultipartyConference()` | Sets up 4 agents + caller for conference tests (agent1–4 pages + callerPage) |
 | `setupMultiSessionPage()` | Targeted helper to initialize only multi-session page when needed |
 
 ### Cleanup
@@ -233,10 +251,10 @@ When enabled by setup config/method, these page properties are created and avail
 | `stationLoginUtils.ts` | `desktopLogin`, `extensionLogin`, `dialLogin`, `telephonyLogin`, `stationLogout`, `verifyLoginMode`, `ensureUserStateVisible` | Station login/logout validation for Desktop/Extension/Dial Number |
 | `userStateUtils.ts` | `changeUserState`, `getCurrentState`, `verifyCurrentState`, `getStateElapsedTime`, `validateConsoleStateChange`, `checkCallbackSequence` | User-state actions and console/state validation |
 | `taskControlUtils.ts` | `holdCallToggle`, `recordCallToggle`, `endTask`, `verifyHoldTimer`, `verifyHoldButtonIcon`, `verifyRecordButtonIcon`, `setupConsoleLogging`, `verifyHoldLogs`, `verifyRecordingLogs`, `verifyEndLogs`, `verifyRemoteAudioTracks` | Basic call control actions + callback/event log assertions |
-| `advancedTaskControlUtils.ts` | `consultOrTransfer`, `cancelConsult`, `setupAdvancedConsoleLogging`, `verifyTransferSuccessLogs`, `verifyConsultStartSuccessLogs`, `verifyConsultEndSuccessLogs`, `verifyConsultTransferredLogs` | Consult/transfer operations + advanced callback/event log assertions |
+| `advancedTaskControlUtils.ts` | `consultOrTransfer`, `cancelConsult`, `setupAdvancedConsoleLogging`, `verifyTransferSuccessLogs`, `verifyConsultStartSuccessLogs`, `verifyConsultEndSuccessLogs`, `verifyConsultTransferredLogs` | Consult/transfer operations + advanced callback/event log assertions. Agent selection retries with popover reopen to handle backend propagation delays. |
 | `incomingTaskUtils.ts` | `createCallTask`, `createChatTask`, `createEmailTask`, `waitForIncomingTask`, `acceptIncomingTask`, `declineIncomingTask`, `acceptExtensionCall`, `loginExtension`, `submitRonaPopup` | Incoming task creation/acceptance/decline and extension helpers |
 | `wrapupUtils.ts` | `submitWrapup` | Wrapup submission |
-| `helperUtils.ts` | `handleStrayTasks`, `pageSetup`, `waitForState`, `waitForStateLogs`, `waitForWebSocketDisconnection`, `waitForWebSocketReconnection`, `clearPendingCallAndWrapup`, `dismissOverlays` | Shared setup/cleanup/state polling/network-watch helpers |
+| `helperUtils.ts` | `handleStrayTasks`, `pageSetup`, `waitForState`, `waitForStateLogs`, `waitForWebSocketDisconnection`, `waitForWebSocketReconnection`, `clearPendingCallAndWrapup`, `dismissOverlays` | Shared setup/cleanup/state polling/network-watch helpers. `handleStrayTasks` handles exit-conference, dual call control groups (iterates all end-call buttons to find enabled one), cancel-consult with switch-leg fallback. |
 
 Use existing helpers first; add new utilities only when behavior is not already covered.
 
@@ -272,6 +290,12 @@ Use existing helpers first; add new utilities only when behavior is not already 
 | `WIDGET_INIT_TIMEOUT` | `50000` ms | Widget initialization |
 | `CHAT_LAUNCHER_TIMEOUT` | `60000` ms | Chat launcher iframe loading |
 | `ACCEPT_TASK_TIMEOUT` | `60000` ms | Incoming-task acceptance waits |
+| `CONFERENCE_SWITCH_TOGGLE_TIMEOUT` | `1000` ms | Wait after switching conference call legs |
+| `CONFERENCE_END_TASK_SETTLE_TIMEOUT` | `1500` ms | Wait after ending task in conference |
+| `CONFERENCE_ACTION_SETTLE_TIMEOUT` | `2000` ms | Wait after conference merge/exit actions |
+| `CONFERENCE_CUSTOMER_DISCONNECT_TIMEOUT` | `3000` ms | Wait for customer disconnect propagation |
+| `CONFERENCE_RECONNECT_SETTLE_TIMEOUT` | `4000` ms | Wait after network reconnect in conference |
+| `CONSULT_NO_ANSWER_TIMEOUT` | `12000` ms | Wait for consult no-answer (RONA) scenario |
 
 Choose the smallest fitting timeout and document reasons for any increases.
 
@@ -343,6 +367,35 @@ Do not document future files/sets before they exist in code.
 
 ---
 
+## Conference-Specific Patterns
+
+### handleStrayTasks cleanup order for conference state
+
+`handleStrayTasks` handles conference teardown in this priority:
+
+1. Exit-conference button → click → check wrapup → submit if visible
+2. End-call button → iterate all instances to find enabled one (conference pages render dual control groups: simple + CAD)
+3. Cancel-consult → if end-call is disabled, try cancel-consult; if not visible, switch leg first via `switchToMainCall-consult-btn`
+4. Resume from hold → if end-call still disabled after cancel-consult attempts
+
+### Queue routing constraint
+
+Queue routing will **not** re-route to an agent who RONA'd (Ring On No Answer) in the same call session. When designing tests that share a queue across scenarios, use different agents for queue-routed consults after a RONA test.
+
+### cleanSlate for conference tests
+
+Conference tests must clean agents **sequentially** (not in parallel) because agents share the same call. Parallel cleanup causes race conditions where ending one agent's call triggers unexpected state transitions on another.
+
+### Agent popover propagation
+
+After setting an agent to Available, the agent may not immediately appear in the consult/transfer popover. `performAgentSelection` retries up to 3 times — closing and reopening the popover to force a fresh agent list fetch from the backend.
+
+### resetCallerPage workaround
+
+After a call ends, the Make Call button on the caller page may stay disabled. Clicking `#sd-get-media-streams` re-enables it. This is a known workaround (marked with TODO).
+
+---
+
 ## Stability Principles
 
 - Prefer explicit state assertions over blind waits
@@ -350,6 +403,7 @@ Do not document future files/sets before they exist in code.
 - Keep setup and cleanup deterministic
 - Reuse existing utilities to avoid divergent selectors/flows
 - Keep tests independently runnable by set/suite
+- For parallel set execution, pre-start the web server to avoid port 3000 race conditions
 
 ---
 
@@ -361,4 +415,4 @@ Do not document future files/sets before they exist in code.
 
 ---
 
-_Last Updated: 2026-03-05_
+_Last Updated: 2026-03-07_

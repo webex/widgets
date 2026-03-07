@@ -12,6 +12,7 @@ playwright/
 │   ├── station-login-user-state-tests.spec.ts # Station login and user state orchestration
 │   ├── basic-advanced-task-controls-tests.spec.ts # Basic and advanced task controls orchestration
 │   ├── advanced-task-controls-tests.spec.ts  # Advanced task controls orchestration
+│   ├── dial-number-tests.spec.ts            # Dial number task control orchestration
 │   ├── multiparty-conference-set-7-tests.spec.ts # Multiparty conference set 7 orchestration
 │   └── multiparty-conference-set-8-tests.spec.ts # Multiparty conference set 8 orchestration
 ├── tests/                                     # Individual test implementations
@@ -53,6 +54,22 @@ playwright/
 | Complex advanced scenarios   | SET_5   | Advanced operations         |
 | Dial number scenarios        | SET_6   | Dial number flows           |
 | Multiparty conference        | SET_7/8 | 4-agent conference coverage |
+
+## Multiparty Conference Consolidation
+
+To reduce runtime and repeated call initialization, conference scenarios are consolidated into combined tests while preserving scenario IDs in test names.
+
+- `SET_7` (`playwright/tests/multiparty-conference-set-7-test.spec.ts`)
+  - Combined: `CTS-MPC-01+02`, `CTS-MPC-03+04`, `CTS-MPC-07+09+10`
+  - Combined: `CTS-TC-01+02+03`, `CTS-TC-04+05`
+  - Standalone: `CTS-MPC-05`, `CTS-MPC-06`, `CTS-TC-06`, `CTS-TC-07`, `CTS-TC-08`
+  - Split: `CTS-TC-06` and `CTS-TC-07` run as separate tests (queue routing won't re-route to RONA'd agent in same session)
+  - Skipped: `CTS-MPC-08` (>4 agents)
+- `SET_8` (`playwright/tests/multiparty-conference-set-8-test.spec.ts`)
+  - Combined: `CTS-TC-09+10`, `CTS-TC-11+13`, `CTS-TC-14+15`
+  - Combined: `CTS-SW-02+03`, `CTS-SW-05+06`
+  - Standalone: `CTS-TC-16`, `CTS-SW-04`, `CTS-SW-07`
+  - Skipped: `CTS-TC-12` (feature-flag gated), `CTS-TC-17` (>4 agents), `CTS-TC-18` (EPDN), `CTS-SW-01` (EP_DN), `CTS-SW-08` (>4 agents)
 
 ## 🧪 Adding New Tests
 
@@ -179,8 +196,14 @@ Test data is automatically handled by TestManager based on the running test set.
 
 OAuth setup behavior (`playwright/global.setup.ts`):
 - expands `USER_SETS` into set-scoped env keys
-- fetches OAuth tokens in batches of 4 parallel browser contexts
-- writes all token/env updates to `.env` in a single upsert pass
+- runs 4 parallel OAuth groups with 2 sets per group:
+  - `GROUP_1`: `SET_1`, `SET_2`
+  - `GROUP_2`: `SET_3`, `SET_4`
+  - `GROUP_3`: `SET_5`, `SET_6`
+  - `GROUP_4`: `SET_7`, `SET_8`
+  - each group uses `OAUTH_BATCH_SIZE=4`
+- optionally collects dial-number token
+- writes all token/env updates in one final upsert pass
 
 ## 🚀 Running Tests
 

@@ -98,9 +98,15 @@ yarn test:e2e --project=SET_1
 
 ## OAuth Setup Model
 
-- `playwright/global.setup.ts` updates set-scoped env keys from `USER_SETS` first.
-- OAuth token collection runs in batches of 4 parallel contexts (`OAUTH_BATCH_SIZE=4`).
-- All collected tokens are written to `.env` in one upsert pass after collection completes.
+- `playwright/global.setup.ts` runs one `OAuth` setup test.
+- Inside that test, token collection runs in 4 parallel groups:
+  - `GROUP_1`: `SET_1`, `SET_2`
+  - `GROUP_2`: `SET_3`, `SET_4`
+  - `GROUP_3`: `SET_5`, `SET_6`
+  - `GROUP_4`: `SET_7`, `SET_8`
+- Each group uses batch size 4 internally (`OAUTH_BATCH_SIZE=4`).
+- Dial-number token is collected when configured.
+- All env/token updates are written once via single `.env` upsert.
 
 ---
 
@@ -127,7 +133,13 @@ When Playwright behavior changes:
 - Skip policy used in implementation:
   - `EP_DN`/`EPDN` scenarios are retained as `test.skip(...)`
   - scenarios requiring more than 4 agents are retained as `test.skip(...)`
+- Consolidation policy used in implementation:
+  - repeated call-init flows are merged into single tests when scenario steps are sequentially compatible
+  - consolidated IDs remain explicit in test names for traceability (for example `CTS-TC-09 and CTS-TC-10 ...`)
+  - current combined groups include:
+    - `SET_7`: `CTS-MPC-01+02`, `CTS-MPC-03+04`, `CTS-MPC-07+09+10`, `CTS-TC-01+02+03`, `CTS-TC-04+05` (CTS-TC-06 and CTS-TC-07 are split — queue routing won't re-route to RONA'd agent)
+    - `SET_8`: `CTS-TC-09+10`, `CTS-TC-11+13`, `CTS-TC-14+15`, `CTS-SW-02+03`, `CTS-SW-05+06`
 
 ---
 
-_Last Updated: 2026-03-04_
+_Last Updated: 2026-03-07_

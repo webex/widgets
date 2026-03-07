@@ -15,6 +15,8 @@ interface OAuthTask {
   password?: string;
 }
 
+type UserSetKey = keyof typeof USER_SETS;
+
 const readEnvFile = (): string => {
   if (!fs.existsSync(ENV_PATH)) {
     return '';
@@ -42,34 +44,39 @@ const upsertEnvVariables = (updates: EnvUpdateMap): void => {
   fs.writeFileSync(ENV_PATH, envContent, 'utf8');
 };
 
-const buildOAuthTasks = (): OAuthTask[] => {
+const buildOAuthTasksForSet = (setKey: UserSetKey): OAuthTask[] => {
   const domain = process.env.PW_SANDBOX;
   const tasks: OAuthTask[] = [];
+  const userSet = USER_SETS[setKey];
 
-  for (const setKey of Object.keys(USER_SETS)) {
-    const userSet = USER_SETS[setKey];
-
-    for (const agentKey of Object.keys(userSet.AGENTS)) {
-      const username = `${userSet.AGENTS[agentKey].username}@${domain}`;
-      tasks.push({
-        envKey: `${setKey}_${agentKey}_ACCESS_TOKEN`,
-        username,
-      });
-    }
-  }
-
-  const dialNumberUsername = process.env.PW_DIAL_NUMBER_LOGIN_USERNAME;
-  const dialNumberPassword = process.env.PW_DIAL_NUMBER_LOGIN_PASSWORD;
-
-  if (dialNumberUsername && dialNumberPassword) {
+  for (const agentKey of Object.keys(userSet.AGENTS)) {
+    const username = `${userSet.AGENTS[agentKey].username}@${domain}`;
     tasks.push({
-      envKey: 'DIAL_NUMBER_LOGIN_ACCESS_TOKEN',
-      username: dialNumberUsername,
-      password: dialNumberPassword,
+      envKey: `${setKey}_${agentKey}_ACCESS_TOKEN`,
+      username,
     });
   }
 
   return tasks;
+};
+
+const buildOAuthTasksForSetGroup = (setKeys: UserSetKey[]): OAuthTask[] => {
+  return setKeys.flatMap((setKey) => buildOAuthTasksForSet(setKey));
+};
+
+const buildDialNumberTask = (): OAuthTask | null => {
+  const dialNumberUsername = process.env.PW_DIAL_NUMBER_LOGIN_USERNAME;
+  const dialNumberPassword = process.env.PW_DIAL_NUMBER_LOGIN_PASSWORD;
+
+  if (dialNumberUsername && dialNumberPassword) {
+    return {
+      envKey: 'DIAL_NUMBER_LOGIN_ACCESS_TOKEN',
+      username: dialNumberUsername,
+      password: dialNumberPassword,
+    };
+  }
+
+  return null;
 };
 
 const fetchOAuthAccessToken = async (browser: Browser, username: string, password?: string): Promise<string> => {
@@ -126,13 +133,36 @@ export const UpdateENVWithUserSets = () => {
     updates[`${setKey}_CHAT_URL`] = userSet.CHAT_URL || '';
   });
 
-  upsertEnvVariables(updates);
+  return updates;
+};
+
+const OAUTH_SET_GROUPS: UserSetKey[][] = [
+  ['SET_1', 'SET_2'],
+  ['SET_3', 'SET_4'],
+  ['SET_5', 'SET_6'],
+  ['SET_7', 'SET_8'],
+];
+
+const runOAuthSetGroup = async (browser: Browser, setGroup: UserSetKey[]) => {
+  const tasks = buildOAuthTasksForSetGroup(setGroup);
+  return collectTokensInBatches(browser, tasks);
 };
 
 setup('OAuth', async ({browser}) => {
-  // Update environment variables with user sets before starting OAuth
-  UpdateENVWithUserSets();
-  const oauthTasks = buildOAuthTasks();
-  const tokenUpdates = await collectTokensInBatches(browser, oauthTasks);
-  upsertEnvVariables(tokenUpdates);
+  // Collect all environment updates
+  const userSetUpdates = UpdateENVWithUserSets();
+  const groupedTokenUpdates = await Promise.all(OAUTH_SET_GROUPS.map((setGroup) => runOAuthSetGroup(browser, setGroup)));
+  const tokenUpdates = groupedTokenUpdates.reduce<EnvUpdateMap>((acc, groupTokens) => ({...acc, ...groupTokens}), {});
+
+  // Fetch dial number token (if configured)
+  const dialNumberTask = buildDialNumberTask();
+  if (dialNumberTask) {
+    const dialNumberToken = await fetchOAuthAccessToken(browser, dialNumberTask.username, dialNumberTask.password);
+    tokenUpdates[dialNumberTask.envKey] = dialNumberToken;
+  }
+
+  const allUpdates = {...userSetUpdates, ...tokenUpdates};
+
+  // Write everything at once
+  upsertEnvVariables(allUpdates);
 });

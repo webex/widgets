@@ -13,10 +13,12 @@ import {handleStrayTasks} from '../Utils/helperUtils';
 import {endTask} from '../Utils/taskControlUtils';
 import {submitWrapup} from '../Utils/wrapupUtils';
 import {
+  AWAIT_TIMEOUT,
   ACCEPT_TASK_TIMEOUT,
   CONFERENCE_ACTION_SETTLE_TIMEOUT,
   CONFERENCE_SWITCH_TOGGLE_TIMEOUT,
   CONFERENCE_END_TASK_SETTLE_TIMEOUT,
+  WRAPUP_TIMEOUT,
   TASK_TYPES,
   USER_STATES,
   WRAPUP_REASONS,
@@ -70,7 +72,23 @@ export default function createMultipartyConferenceSet8Tests() {
     }
   };
 
+  // TODO: Workaround — clicking getMediaStreams re-enables the Make Call button
+  // after a previous call ends. Without this, Make Call stays disabled between tests.
+  const resetCallerPage = async () => {
+    const callerPage = testManager.callerPage;
+    if (!callerPage || callerPage.isClosed()) return;
+    const endBtn = callerPage.getByTestId('end');
+    const isEnabled = await endBtn.isEnabled({timeout: 1000}).catch(() => false);
+    if (isEnabled) {
+      await endBtn.click({timeout: AWAIT_TIMEOUT});
+      await callerPage.waitForTimeout(1000);
+    }
+    await callerPage.locator('#sd-get-media-streams').click({timeout: AWAIT_TIMEOUT});
+    await callerPage.waitForTimeout(500);
+  };
+
   const cleanSlate = async () => {
+    await resetCallerPage();
     for (const agentId of AGENT_IDS) {
       await handleStrayTasks(getAgentPage(agentId), testManager.callerPage);
     }
@@ -115,6 +133,18 @@ export default function createMultipartyConferenceSet8Tests() {
     await submitWrapup(page, WRAPUP_REASONS.SALE);
   };
 
+  const toggleSwitchLegIfVisible = async (agentId: AgentId) => {
+    const page = getAgentPage(agentId);
+    const switchButton = page.getByTestId('switchToMainCall-consult-btn');
+    const canToggle = await switchButton.isVisible().catch(() => false);
+    if (!canToggle) {
+      return false;
+    }
+    await switchButton.click();
+    await page.waitForTimeout(CONFERENCE_SWITCH_TOGGLE_TIMEOUT);
+    return true;
+  };
+
   const leaveConference = async (agentId: AgentId) => {
     const page = getAgentPage(agentId);
     const exitButton = page.getByTestId('call-control:exit-conference').first();
@@ -123,6 +153,17 @@ export default function createMultipartyConferenceSet8Tests() {
     if (canExit) {
       await exitButton.click();
       await page.waitForTimeout(CONFERENCE_ACTION_SETTLE_TIMEOUT);
+      // After exit-conference, the agent may or may not enter wrapup
+      // depending on whether they are the conference owner. Submit wrapup
+      // if the wrapup box appears so the ownership handoff completes.
+      const wrapupBox = page.getByTestId('call-control:wrapup-button').first();
+      const needsWrapup = await wrapupBox
+        .waitFor({state: 'visible', timeout: WRAPUP_TIMEOUT})
+        .then(() => true)
+        .catch(() => false);
+      if (needsWrapup) {
+        await submitWrapup(page, WRAPUP_REASONS.SALE);
+      }
       return;
     }
 
@@ -151,43 +192,33 @@ export default function createMultipartyConferenceSet8Tests() {
   });
 
   test.describe('TRANSFER CONFERENCE SCENARIOS - Set 8', () => {
-    test('CTS-TC-09 should support queue consult accepted by available agent and resumed main call', async () => {
+    test('CTS-TC-09 and CTS-TC-10 should validate queue consult resume and customer-end wrapup in one call', async () => {
       await startCallOnAgent1();
       await setAgentsAvailable([2]);
 
       await consultQueueAndAccept(1, 2);
       await cancelConsult(getAgentPage(1));
       await verifyCurrentState(getAgentPage(1), USER_STATES.ENGAGED);
-    });
-
-    test('CTS-TC-10 should show wrapup when customer ends during queue consult', async () => {
-      await startCallOnAgent1();
-      await setAgentsAvailable([2]);
 
       await consultOrTransfer(getAgentPage(1), 'queue', 'consult', getRequiredEnv('QUEUE_NAME'));
       await endCallTask(testManager.callerPage, true);
 
-      await expect(getAgentPage(1).getByTestId('call-control:wrapup-button')).toBeVisible({timeout: ACCEPT_TASK_TIMEOUT});
+      await expect(getAgentPage(1).getByTestId('call-control:wrapup-button').first()).toBeVisible({timeout: ACCEPT_TASK_TIMEOUT});
     });
 
-    test('CTS-TC-11 should allow agent1 to end consult and return to call', async () => {
+    test('CTS-TC-11 and CTS-TC-13 should allow consult cancel, then queue consult transfer', async () => {
       await startCallOnAgent1();
       await consultAndAccept(1, 2);
       await cancelConsult(getAgentPage(1));
       await verifyCurrentState(getAgentPage(1), USER_STATES.ENGAGED);
-    });
-
-    test.skip('CTS-TC-12 should allow agent2 to end consult when isEndConsultEnabled flag is enabled', async () => {});
-
-    test('CTS-TC-13 should consult to queue and transfer to connected target agent', async () => {
-      await startCallOnAgent1();
-      await setAgentsAvailable([2]);
 
       await consultQueueAndAccept(1, 2);
       await transferConsultInteraction(1);
 
       await verifyCurrentState(getAgentPage(2), USER_STATES.ENGAGED);
     });
+
+    test.skip('CTS-TC-12 should allow agent2 to end consult when isEndConsultEnabled flag is enabled', async () => {});
 
     test('CTS-TC-14 and CTS-TC-15 should transfer back to agent1 via agent and queue paths', async () => {
       await startCallOnAgent1();
@@ -226,30 +257,27 @@ export default function createMultipartyConferenceSet8Tests() {
   test.describe('Switch Conference', () => {
     test.skip('CTS-SW-01 should switch conference via EP_DN handoff', async () => {});
 
-    test('CTS-SW-02 should switch between consult leg and main conference leg', async () => {
+    test('CTS-SW-02 and CTS-SW-03 should switch legs and merge lobby participants into conference', async () => {
       await startCallOnAgent1();
       await consultAndAccept(1, 2);
       await mergeConsultIntoConference(1);
       await consultAndAccept(1, 3);
 
-      const switchButton = getAgentPage(1).getByTestId('switchToMainCall-consult-btn');
-      await expect(switchButton).toBeVisible({timeout: ACCEPT_TASK_TIMEOUT});
-      await switchButton.click();
-      await getAgentPage(1).waitForTimeout(CONFERENCE_SWITCH_TOGGLE_TIMEOUT);
-      await switchButton.click();
-      await getAgentPage(1).waitForTimeout(CONFERENCE_SWITCH_TOGGLE_TIMEOUT);
+      const page = getAgentPage(1);
+      const switchToMainButton = page.getByTestId('switchToMainCall-consult-btn');
+      const switchToConsultButton = page.getByTestId('call-control:switch-to-consult').first();
+
+      // Switch from consult leg to main call leg
+      await expect(switchToMainButton).toBeVisible({timeout: ACCEPT_TASK_TIMEOUT});
+      await switchToMainButton.click();
+      await page.waitForTimeout(CONFERENCE_SWITCH_TOGGLE_TIMEOUT);
+
+      // Switch back from main call leg to consult leg
+      await expect(switchToConsultButton).toBeVisible({timeout: ACCEPT_TASK_TIMEOUT});
+      await switchToConsultButton.click();
+      await page.waitForTimeout(CONFERENCE_SWITCH_TOGGLE_TIMEOUT);
 
       await mergeConsultIntoConference(1);
-      await verifyCurrentState(getAgentPage(1), USER_STATES.ENGAGED);
-    });
-
-    test('CTS-SW-03 should merge lobby participants into conference from consult state', async () => {
-      await startCallOnAgent1();
-      await consultAndAccept(1, 2);
-      await mergeConsultIntoConference(1);
-      await consultAndAccept(1, 3);
-      await mergeConsultIntoConference(1);
-
       await verifyCurrentState(getAgentPage(1), USER_STATES.ENGAGED);
       await verifyCurrentState(getAgentPage(3), USER_STATES.ENGAGED);
     });
@@ -265,7 +293,7 @@ export default function createMultipartyConferenceSet8Tests() {
       await verifyCurrentState(getAgentPage(3), USER_STATES.ENGAGED);
     });
 
-    test('CTS-SW-05 should block another agent consult while consult is active', async () => {
+    test('CTS-SW-05 and CTS-SW-06 should block consult during active consult and restore it after lobby closes', async () => {
       await startCallOnAgent1();
       await consultAndAccept(1, 2);
       await mergeConsultIntoConference(1);
@@ -279,16 +307,9 @@ export default function createMultipartyConferenceSet8Tests() {
       } else {
         expect(consultVisible).toBeFalsy();
       }
-    });
 
-    test('CTS-SW-06 should restore consult option after consult lobby closes', async () => {
-      await startCallOnAgent1();
-      await consultAndAccept(1, 2);
-      await mergeConsultIntoConference(1);
-      await consultAndAccept(1, 3);
       await mergeConsultIntoConference(1);
 
-      const agent2Consult = getAgentPage(2).getByTestId('call-control:consult').first();
       await expect(agent2Consult).toBeVisible({timeout: ACCEPT_TASK_TIMEOUT});
     });
 
