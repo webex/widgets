@@ -63,6 +63,7 @@ export const WRAPUP_TIMEOUT = 15000;
 
 // Station login timeouts
 export const DROPDOWN_SETTLE_TIMEOUT = 200;
+export const STATION_LOGOUT_UNREGISTER_SETTLE_TIMEOUT = 4000;
 
 // Console log patterns for state changes
 export const CONSOLE_PATTERNS = {

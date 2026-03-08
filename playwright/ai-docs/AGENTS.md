@@ -99,11 +99,13 @@ yarn test:e2e --project=SET_1
 ## OAuth Setup Model
 
 - `playwright/global.setup.ts` runs one `OAuth` setup test.
-- Inside that test, token collection runs in 4 parallel groups:
-  - `GROUP_1`: `SET_1`, `SET_2`
-  - `GROUP_2`: `SET_3`, `SET_4`
-  - `GROUP_3`: `SET_5`, `SET_6`
-  - `GROUP_4`: `SET_7`, `SET_8`
+- Inside that test, token collection groups are generated dynamically from `USER_SETS` using chunk size `2`.
+- One parallel OAuth worker runs per generated group.
+- With current `SET_1..SET_8`, this resolves to 4 groups:
+  - `[SET_1, SET_2]`
+  - `[SET_3, SET_4]`
+  - `[SET_5, SET_6]`
+  - `[SET_7, SET_8]`
 - Each group uses batch size 4 internally (`OAUTH_BATCH_SIZE=4`).
 - Dial-number token is collected when configured.
 - All env/token updates are written once via single `.env` upsert.
@@ -142,4 +144,4 @@ When Playwright behavior changes:
 
 ---
 
-_Last Updated: 2026-03-07_
+_Last Updated: 2026-03-08_

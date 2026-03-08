@@ -138,12 +138,13 @@ These flags are part of baseline runtime behavior and should be preserved unless
 `global.setup.ts`:
 
 1. Expands `USER_SETS` into set-scoped env keys (`<SET>_...`)
-2. Runs OAuth token fetch in 4 parallel groups (2 sets per group):
-   - `GROUP_1`: `SET_1`, `SET_2`
-   - `GROUP_2`: `SET_3`, `SET_4`
-   - `GROUP_3`: `SET_5`, `SET_6`
-   - `GROUP_4`: `SET_7`, `SET_8`
+2. Builds OAuth groups dynamically from `USER_SETS` with group size `2` and runs them in parallel.
    Each group uses batch size 4 internally (`OAUTH_BATCH_SIZE=4`).
+   With current `SET_1..SET_8`, this resolves to 4 groups:
+   - `[SET_1, SET_2]`
+   - `[SET_3, SET_4]`
+   - `[SET_5, SET_6]`
+   - `[SET_7, SET_8]`
 3. Optionally fetches dial-number OAuth token
 4. Performs one final `.env` upsert in the same OAuth setup run
 
@@ -238,6 +239,7 @@ When enabled by setup config/method, these page properties are created and avail
 - `cleanup()`:
   - Runs `softCleanup()` first
   - Performs station logout where applicable
+  - Waits for post-logout settle (`login-button` visible + unregister settle timeout) before closing contexts
   - Closes all created pages/contexts
   - Intended for end-of-suite full cleanup
 
@@ -285,6 +287,7 @@ Use existing helpers first; add new utilities only when behavior is not already 
 | `WRAPUP_TIMEOUT` | `15000` ms | Wrapup UI timing |
 | `FORM_FIELD_TIMEOUT` | `20000` ms | Popover/form field loading |
 | `OPERATION_TIMEOUT` | `30000` ms | Longer user operations (for example logout checks) |
+| `STATION_LOGOUT_UNREGISTER_SETTLE_TIMEOUT` | `4000` ms | Post-logout wait for backend unregister to settle before next login |
 | `EXTENSION_REGISTRATION_TIMEOUT` | `40000` ms | Extension registration waits |
 | `NETWORK_OPERATION_TIMEOUT` | `40000` ms | Network-dependent operations |
 | `WIDGET_INIT_TIMEOUT` | `50000` ms | Widget initialization |
@@ -415,4 +418,4 @@ After a call ends, the Make Call button on the caller page may stay disabled. Cl
 
 ---
 
-_Last Updated: 2026-03-07_
+_Last Updated: 2026-03-08_

@@ -6,6 +6,7 @@ const path = require('path');
 
 const ENV_PATH = path.resolve(__dirname, '../.env');
 const OAUTH_BATCH_SIZE = 4;
+const OAUTH_SET_GROUP_SIZE = 2;
 
 type EnvUpdateMap = Record<string, string>;
 
@@ -62,6 +63,18 @@ const buildOAuthTasksForSet = (setKey: UserSetKey): OAuthTask[] => {
 
 const buildOAuthTasksForSetGroup = (setKeys: UserSetKey[]): OAuthTask[] => {
   return setKeys.flatMap((setKey) => buildOAuthTasksForSet(setKey));
+};
+
+const buildSetGroups = (setKeys: UserSetKey[], groupSize: number): UserSetKey[][] => {
+  if (groupSize <= 0) {
+    throw new Error('groupSize must be greater than 0');
+  }
+
+  const groups: UserSetKey[][] = [];
+  for (let index = 0; index < setKeys.length; index += groupSize) {
+    groups.push(setKeys.slice(index, index + groupSize));
+  }
+  return groups;
 };
 
 const buildDialNumberTask = (): OAuthTask | null => {
@@ -136,22 +149,18 @@ export const UpdateENVWithUserSets = () => {
   return updates;
 };
 
-const OAUTH_SET_GROUPS: UserSetKey[][] = [
-  ['SET_1', 'SET_2'],
-  ['SET_3', 'SET_4'],
-  ['SET_5', 'SET_6'],
-  ['SET_7', 'SET_8'],
-];
-
 const runOAuthSetGroup = async (browser: Browser, setGroup: UserSetKey[]) => {
   const tasks = buildOAuthTasksForSetGroup(setGroup);
   return collectTokensInBatches(browser, tasks);
 };
 
 setup('OAuth', async ({browser}) => {
+  const userSetKeys = Object.keys(USER_SETS) as UserSetKey[];
+  const oauthSetGroups = buildSetGroups(userSetKeys, OAUTH_SET_GROUP_SIZE);
+
   // Collect all environment updates
   const userSetUpdates = UpdateENVWithUserSets();
-  const groupedTokenUpdates = await Promise.all(OAUTH_SET_GROUPS.map((setGroup) => runOAuthSetGroup(browser, setGroup)));
+  const groupedTokenUpdates = await Promise.all(oauthSetGroups.map((setGroup) => runOAuthSetGroup(browser, setGroup)));
   const tokenUpdates = groupedTokenUpdates.reduce<EnvUpdateMap>((acc, groupTokens) => ({...acc, ...groupTokens}), {});
 
   // Fetch dial number token (if configured)

@@ -196,12 +196,10 @@ Test data is automatically handled by TestManager based on the running test set.
 
 OAuth setup behavior (`playwright/global.setup.ts`):
 - expands `USER_SETS` into set-scoped env keys
-- runs 4 parallel OAuth groups with 2 sets per group:
-  - `GROUP_1`: `SET_1`, `SET_2`
-  - `GROUP_2`: `SET_3`, `SET_4`
-  - `GROUP_3`: `SET_5`, `SET_6`
-  - `GROUP_4`: `SET_7`, `SET_8`
-  - each group uses `OAUTH_BATCH_SIZE=4`
+- builds OAuth set groups dynamically from `USER_SETS` (chunk size `2`)
+- runs one parallel OAuth worker per generated group
+- each group uses `OAUTH_BATCH_SIZE=4` internally
+- with current 8 sets this resolves to 4 groups: `[SET_1,SET_2]`, `[SET_3,SET_4]`, `[SET_5,SET_6]`, `[SET_7,SET_8]`
 - optionally collects dial-number token
 - writes all token/env updates in one final upsert pass
 
