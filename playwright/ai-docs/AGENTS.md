@@ -123,6 +123,15 @@ When Playwright behavior changes:
 
 ---
 
+## Flakiness Guardrails
+
+- `pageSetup` has a single bounded station logout/re-login recovery if `state-select` does not appear after telephony login.
+- Multi-incoming digital scenarios should create/accept chat/email sequentially to reduce avoidable RONA races.
+- `afterAll` cleanup in chained-call suites should guard state reads when setup never reached user-state visibility.
+- Conference suite `cleanSlate` should clean shared-call agents sequentially (not in parallel) to avoid leg ownership races across participants.
+
+---
+
 ## Conference Coverage (SET_7, SET_8)
 
 - Multiparty conference scenarios are split across:

@@ -37,7 +37,11 @@ export default function createCallTaskControlsTests() {
   });
 
   afterAll(async () => {
-    if ((await getCurrentState(testManager.agent1Page)) === USER_STATES.ENGAGED) {
+    const isStateWidgetVisible = await testManager.agent1Page
+      .getByTestId('state-select')
+      .isVisible()
+      .catch(() => false);
+    if (isStateWidgetVisible && (await getCurrentState(testManager.agent1Page)) === USER_STATES.ENGAGED) {
       // If still engaged, end the call to clean up
       await endTask(testManager.agent1Page);
       await testManager.agent1Page.waitForTimeout(3000);
@@ -50,9 +54,12 @@ export default function createCallTaskControlsTests() {
   });
 
   test('Call task - create call and verify all control buttons are visible', async () => {
+    // Ensure routable state before creating call task.
+    await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
+    await verifyCurrentState(testManager.agent1Page, USER_STATES.AVAILABLE);
+
     // Create call task
     await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
-    await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
 
     // Accept the incoming call (waits for task to be visible)
     await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CALL, ACCEPT_TASK_TIMEOUT);

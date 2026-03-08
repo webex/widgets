@@ -10,6 +10,7 @@ import {
   LoginMode,
   DEFAULT_MAX_RETRIES,
   DEFAULT_TIMEOUT,
+  OPERATION_TIMEOUT,
   UI_SETTLE_TIMEOUT,
   AWAIT_TIMEOUT,
   PAGE_TYPES,
@@ -171,6 +172,32 @@ export class TestManager {
     } catch {
       return false;
     }
+  }
+
+  // Best-effort guard to prevent cleanup/setup hooks from hanging indefinitely.
+  private async runBestEffortWithTimeout(operation: () => Promise<void>, timeout: number = OPERATION_TIMEOUT): Promise<void> {
+    const guardedOperation = operation().catch(() => {});
+    const timeoutGuard = new Promise<void>((resolve) => setTimeout(resolve, timeout));
+    await Promise.race([guardedOperation, timeoutGuard]);
+  }
+
+  private async safeHandleStrayTasks(page?: Page, extensionPage: Page | null = null): Promise<void> {
+    if (!page || page.isClosed()) {
+      return;
+    }
+    const validExtension = extensionPage && !extensionPage.isClosed() ? extensionPage : null;
+    await this.runBestEffortWithTimeout(() => handleStrayTasks(page, validExtension));
+  }
+
+  private async safeStationLogout(page?: Page): Promise<void> {
+    if (!page || page.isClosed()) {
+      return;
+    }
+    const hasLogoutButton = await this.isLogoutButtonVisible(page);
+    if (!hasLogoutButton) {
+      return;
+    }
+    await this.runBestEffortWithTimeout(() => stationLogout(page, false), OPERATION_TIMEOUT + UI_SETTLE_TIMEOUT * 10);
   }
 
   // 🎯 Universal Setup Method - Handles all test scenarios (Parallelized)
@@ -520,19 +547,11 @@ export class TestManager {
     this.multiSessionContext = await browser.newContext({ignoreHTTPSErrors: true});
     this.multiSessionAgent1Page = await this.multiSessionContext.newPage();
 
-    // Define page setup operations
-    const pageSetupOperations: Promise<void>[] = [
-      // Main page setup
-      this.setupPageWithWidgets(this.agent1Page, envTokens.agent1AccessToken),
-    ];
-
-    // Add multi-session page setup only if not in desktop mode
+    // Run station-login widget initialization sequentially to avoid multi-session init contention.
+    await this.setupPageWithWidgets(this.agent1Page, envTokens.agent1AccessToken);
     if (!isDesktopMode) {
-      pageSetupOperations.push(this.setupPageWithWidgets(this.multiSessionAgent1Page, envTokens.agent1AccessToken));
+      await this.setupPageWithWidgets(this.multiSessionAgent1Page, envTokens.agent1AccessToken);
     }
-
-    // Execute page setups in parallel
-    await Promise.all(pageSetupOperations);
 
     // Handle station logout for both pages
     await this.handleStationLogouts(isDesktopMode);
@@ -544,6 +563,8 @@ export class TestManager {
   // Helper method to setup page with widgets
   private async setupPageWithWidgets(page: Page, accessToken: string): Promise<void> {
     await loginViaAccessToken(page, accessToken);
+    await page.waitForLoadState('domcontentloaded');
+    await expect(page.getByTestId('samples:init-widgets-button')).toBeVisible({timeout: OPERATION_TIMEOUT});
     await enableMultiLogin(page);
     await enableAllWidgets(page);
     await initialiseWidgets(page);
@@ -551,19 +572,15 @@ export class TestManager {
 
   // Helper method to handle station logouts
   private async handleStationLogouts(isDesktopMode: boolean): Promise<void> {
-    const logoutOperations: Promise<void>[] = [];
-
     // Logout from station if already logged in on main page
     if (await this.isLogoutButtonVisible(this.agent1Page)) {
-      logoutOperations.push(stationLogout(this.agent1Page, false)); // Don't throw during setup cleanup
+      await stationLogout(this.agent1Page, false); // Don't throw during setup cleanup
     }
 
     // Logout from station if already logged in on multi-session page
     if (!isDesktopMode && (await this.isLogoutButtonVisible(this.multiSessionAgent1Page))) {
-      logoutOperations.push(stationLogout(this.multiSessionAgent1Page, false)); // Don't throw during setup cleanup
+      await stationLogout(this.multiSessionAgent1Page, false); // Don't throw during setup cleanup
     }
-
-    await Promise.all(logoutOperations);
   }
 
   // Helper method to verify station login widgets
@@ -640,16 +657,22 @@ export class TestManager {
     const cleanupOps: Promise<void>[] = [];
 
     if (this.agent1Page) {
-      cleanupOps.push(handleStrayTasks(this.agent1Page, this.agent1ExtensionPage));
+      cleanupOps.push(this.safeHandleStrayTasks(this.agent1Page, this.agent1ExtensionPage));
+    }
+    if (this.multiSessionAgent1Page) {
+      cleanupOps.push(this.safeHandleStrayTasks(this.multiSessionAgent1Page, this.agent1ExtensionPage));
     }
     if (this.agent2Page) {
-      cleanupOps.push(handleStrayTasks(this.agent2Page));
+      cleanupOps.push(this.safeHandleStrayTasks(this.agent2Page));
     }
     if (this.agent3Page) {
-      cleanupOps.push(handleStrayTasks(this.agent3Page));
+      cleanupOps.push(this.safeHandleStrayTasks(this.agent3Page));
     }
     if (this.agent4Page) {
-      cleanupOps.push(handleStrayTasks(this.agent4Page));
+      cleanupOps.push(this.safeHandleStrayTasks(this.agent4Page));
+    }
+    if (this.callerPage) {
+      cleanupOps.push(this.safeHandleStrayTasks(this.callerPage));
     }
 
     await Promise.all(cleanupOps);
@@ -666,20 +689,24 @@ export class TestManager {
     // Logout operations - can be done in parallel
     const logoutOperations: Promise<void>[] = [];
 
-    if (this.agent1Page && (await this.isLogoutButtonVisible(this.agent1Page))) {
-      logoutOperations.push(stationLogout(this.agent1Page, false)); // Don't throw during cleanup
+    if (this.agent1Page) {
+      logoutOperations.push(this.safeStationLogout(this.agent1Page));
     }
 
-    if (this.agent2Page && (await this.isLogoutButtonVisible(this.agent2Page))) {
-      logoutOperations.push(stationLogout(this.agent2Page, false)); // Don't throw during cleanup
+    if (this.multiSessionAgent1Page) {
+      logoutOperations.push(this.safeStationLogout(this.multiSessionAgent1Page));
     }
 
-    if (this.agent3Page && (await this.isLogoutButtonVisible(this.agent3Page))) {
-      logoutOperations.push(stationLogout(this.agent3Page, false)); // Don't throw during cleanup
+    if (this.agent2Page) {
+      logoutOperations.push(this.safeStationLogout(this.agent2Page));
     }
 
-    if (this.agent4Page && (await this.isLogoutButtonVisible(this.agent4Page))) {
-      logoutOperations.push(stationLogout(this.agent4Page, false)); // Don't throw during cleanup
+    if (this.agent3Page) {
+      logoutOperations.push(this.safeStationLogout(this.agent3Page));
+    }
+
+    if (this.agent4Page) {
+      logoutOperations.push(this.safeStationLogout(this.agent4Page));
     }
 
     await Promise.all(logoutOperations);

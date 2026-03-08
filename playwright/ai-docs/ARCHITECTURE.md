@@ -227,7 +227,7 @@ When enabled by setup config/method, these page properties are created and avail
 | `setupForIncomingTaskDesktop()` | Calls `setup()` for desktop incoming-task flow |
 | `setupForIncomingTaskExtension()` | Calls `setup()` for extension incoming-task flow |
 | `setupForIncomingTaskMultiSession()` | Calls `setup()` for multi-session incoming-task flow |
-| `setupForStationLogin()` | Custom path (does not call `setup()`), purpose-built station-login + multi-login bootstrap |
+| `setupForStationLogin()` | Custom path (does not call `setup()`), purpose-built station-login + multi-login bootstrap. Station-login page initialization runs sequentially (main then multi-session) to reduce init contention. |
 | `setupForMultipartyConference()` | Sets up 4 agents + caller for conference tests (agent1–4 pages + callerPage) |
 | `setupMultiSessionPage()` | Targeted helper to initialize only multi-session page when needed |
 
@@ -235,10 +235,13 @@ When enabled by setup config/method, these page properties are created and avail
 
 - `softCleanup()`:
   - Handles stray tasks only (`handleStrayTasks`)
+  - Covers `agent1Page`, `multiSessionAgent1Page`, `agent2Page`, `agent3Page`, `agent4Page`, and `callerPage`
+  - Uses best-effort timeout guards so one stuck page does not block suite teardown
   - Intended for between-file cleanup via `afterAll`
 - `cleanup()`:
   - Runs `softCleanup()` first
-  - Performs station logout where applicable
+  - Performs station logout where applicable (including `multiSessionAgent1Page`)
+  - Uses best-effort timeout guards for logout operations
   - Waits for post-logout settle (`login-button` visible + unregister settle timeout) before closing contexts
   - Closes all created pages/contexts
   - Intended for end-of-suite full cleanup
@@ -256,7 +259,7 @@ When enabled by setup config/method, these page properties are created and avail
 | `advancedTaskControlUtils.ts` | `consultOrTransfer`, `cancelConsult`, `setupAdvancedConsoleLogging`, `verifyTransferSuccessLogs`, `verifyConsultStartSuccessLogs`, `verifyConsultEndSuccessLogs`, `verifyConsultTransferredLogs` | Consult/transfer operations + advanced callback/event log assertions. Agent selection retries with popover reopen to handle backend propagation delays. |
 | `incomingTaskUtils.ts` | `createCallTask`, `createChatTask`, `createEmailTask`, `waitForIncomingTask`, `acceptIncomingTask`, `declineIncomingTask`, `acceptExtensionCall`, `loginExtension`, `submitRonaPopup` | Incoming task creation/acceptance/decline and extension helpers |
 | `wrapupUtils.ts` | `submitWrapup` | Wrapup submission |
-| `helperUtils.ts` | `handleStrayTasks`, `pageSetup`, `waitForState`, `waitForStateLogs`, `waitForWebSocketDisconnection`, `waitForWebSocketReconnection`, `clearPendingCallAndWrapup`, `dismissOverlays` | Shared setup/cleanup/state polling/network-watch helpers. `handleStrayTasks` handles exit-conference, dual call control groups (iterates all end-call buttons to find enabled one), cancel-consult with switch-leg fallback. |
+| `helperUtils.ts` | `handleStrayTasks`, `pageSetup`, `waitForState`, `waitForStateLogs`, `waitForWebSocketDisconnection`, `waitForWebSocketReconnection`, `clearPendingCallAndWrapup`, `dismissOverlays` | Shared setup/cleanup/state polling/network-watch helpers. `waitForState` polls visible state text (`state-name`) to align with `verifyCurrentState`. `pageSetup` includes one bounded station logout/re-login recovery if `state-select` is still missing after login. `handleStrayTasks` handles exit-conference, dual call control groups (iterates all end-call buttons to find enabled one), cancel-consult with switch-leg fallback. |
 
 Use existing helpers first; add new utilities only when behavior is not already covered.
 
@@ -387,11 +390,13 @@ Queue routing will **not** re-route to an agent who RONA'd (Ring On No Answer) i
 
 ### cleanSlate for conference tests
 
-Conference tests must clean agents **sequentially** (not in parallel) because agents share the same call. Parallel cleanup causes race conditions where ending one agent's call triggers unexpected state transitions on another.
+Conference suites use guarded cleanup wrappers (`safeHandleStrayTasks`) with closed-page checks and per-page timeout limits. For shared-call conference flows, cleanup runs sequentially across agents to avoid ownership/leg race conditions; each task remains best-effort to avoid failing hooks when teardown has already started.
 
 ### Agent popover propagation
 
 After setting an agent to Available, the agent may not immediately appear in the consult/transfer popover. `performAgentSelection` retries up to 3 times — closing and reopening the popover to force a fresh agent list fetch from the backend.
+
+Conference helpers should verify target-agent state is `Available` before opening consult/transfer popovers, and verify consult control visibility/enabled state on the source agent before launching consult.
 
 ### resetCallerPage workaround
 
@@ -406,6 +411,7 @@ After a call ends, the Make Call button on the caller page may stay disabled. Cl
 - Keep setup and cleanup deterministic
 - Reuse existing utilities to avoid divergent selectors/flows
 - Keep tests independently runnable by set/suite
+- For mixed incoming digital load, create and accept tasks sequentially (not burst `Promise.all`) to reduce avoidable RONA transitions
 - For parallel set execution, pre-start the web server to avoid port 3000 race conditions
 
 ---

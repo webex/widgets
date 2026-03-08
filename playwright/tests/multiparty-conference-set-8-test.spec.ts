@@ -9,7 +9,7 @@ import {
   waitForIncomingTask,
 } from '../Utils/incomingTaskUtils';
 import {consultOrTransfer, cancelConsult} from '../Utils/advancedTaskControlUtils';
-import {handleStrayTasks} from '../Utils/helperUtils';
+import {handleStrayTasks, waitForState} from '../Utils/helperUtils';
 import {endTask} from '../Utils/taskControlUtils';
 import {submitWrapup} from '../Utils/wrapupUtils';
 import {
@@ -27,6 +27,7 @@ import {
 type AgentId = 1 | 2 | 3 | 4;
 
 const AGENT_IDS: AgentId[] = [1, 2, 3, 4];
+const CLEAN_SLATE_TASK_TIMEOUT = 60000;
 
 export default function createMultipartyConferenceSet8Tests() {
   let testManager: TestManager;
@@ -56,6 +57,27 @@ export default function createMultipartyConferenceSet8Tests() {
 
   const getAgentName = (agentId: AgentId): string => getRequiredEnv(`AGENT${agentId}_NAME`);
 
+  const safeHandleStrayTasks = async (page?: Page, auxiliaryPage?: Page) => {
+    if (!page || page.isClosed()) {
+      return;
+    }
+    const validAuxiliaryPage = auxiliaryPage && !auxiliaryPage.isClosed() ? auxiliaryPage : undefined;
+    let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      timeoutHandle = setTimeout(() => reject(new Error('cleanSlate timeout')), CLEAN_SLATE_TASK_TIMEOUT);
+    });
+
+    try {
+      await Promise.race([handleStrayTasks(page, validAuxiliaryPage), timeoutPromise]);
+    } catch {
+      // Ignore cleanup errors/timeouts so hook teardown does not fail test execution.
+    } finally {
+      if (timeoutHandle) {
+        clearTimeout(timeoutHandle);
+      }
+    }
+  };
+
   // Baseline helper: use before creating a call to force deterministic routing state.
   const setBaselineAvailability = async (availableAgents: AgentId[]) => {
     for (const agentId of AGENT_IDS) {
@@ -68,8 +90,16 @@ export default function createMultipartyConferenceSet8Tests() {
   // Mid-call helper: only change specified agents; do not force others to MEETING.
   const setAgentsAvailable = async (agentIds: AgentId[]) => {
     for (const agentId of agentIds) {
-      await changeUserState(getAgentPage(agentId), USER_STATES.AVAILABLE);
+      const page = getAgentPage(agentId);
+      await changeUserState(page, USER_STATES.AVAILABLE);
+      await verifyCurrentState(page, USER_STATES.AVAILABLE);
     }
+  };
+
+  const waitForControlReady = async (agentId: AgentId, controlTestId: string) => {
+    const control = getAgentPage(agentId).getByTestId(controlTestId).first();
+    await expect(control).toBeVisible({timeout: ACCEPT_TASK_TIMEOUT});
+    await expect(control).toBeEnabled({timeout: ACCEPT_TASK_TIMEOUT});
   };
 
   // TODO: Workaround — clicking getMediaStreams re-enables the Make Call button
@@ -89,15 +119,19 @@ export default function createMultipartyConferenceSet8Tests() {
 
   const cleanSlate = async () => {
     await resetCallerPage();
+    // Clean agents sequentially — they share the same call, so parallel cleanup
+    // can race on leg ownership and leave inconsistent routing state for next test.
     for (const agentId of AGENT_IDS) {
-      await handleStrayTasks(getAgentPage(agentId), testManager.callerPage);
+      await safeHandleStrayTasks(getAgentPage(agentId), testManager.callerPage);
     }
-    await handleStrayTasks(testManager.callerPage);
+    await safeHandleStrayTasks(testManager.callerPage);
   };
 
   const startCallOnAgent1 = async () => {
     const entryPoint = getRequiredEnv('ENTRY_POINT');
     await setBaselineAvailability([1]);
+    await waitForState(getAgentPage(1), USER_STATES.AVAILABLE);
+    await verifyCurrentState(getAgentPage(1), USER_STATES.AVAILABLE);
     await createCallTask(testManager.callerPage, entryPoint);
     await acceptIncomingTask(getAgentPage(1), TASK_TYPES.CALL, ACCEPT_TASK_TIMEOUT);
     await verifyCurrentState(getAgentPage(1), USER_STATES.ENGAGED);
@@ -105,6 +139,7 @@ export default function createMultipartyConferenceSet8Tests() {
 
   const consultAndAccept = async (fromAgent: AgentId, toAgent: AgentId) => {
     await setAgentsAvailable([toAgent]);
+    await waitForControlReady(fromAgent, 'call-control:consult');
     await consultOrTransfer(getAgentPage(fromAgent), 'agent', 'consult', getAgentName(toAgent));
     await acceptIncomingTask(getAgentPage(toAgent), TASK_TYPES.CALL, ACCEPT_TASK_TIMEOUT);
     await verifyCurrentState(getAgentPage(toAgent), USER_STATES.ENGAGED);
@@ -112,6 +147,7 @@ export default function createMultipartyConferenceSet8Tests() {
 
   const consultQueueAndAccept = async (fromAgent: AgentId, toAgent: AgentId) => {
     await setAgentsAvailable([toAgent]);
+    await waitForControlReady(fromAgent, 'call-control:consult');
     await consultOrTransfer(getAgentPage(fromAgent), 'queue', 'consult', getRequiredEnv('QUEUE_NAME'));
     await acceptIncomingTask(getAgentPage(toAgent), TASK_TYPES.CALL, ACCEPT_TASK_TIMEOUT);
     await verifyCurrentState(getAgentPage(toAgent), USER_STATES.ENGAGED);

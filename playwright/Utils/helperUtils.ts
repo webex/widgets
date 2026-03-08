@@ -1,4 +1,4 @@
-import {Page} from '@playwright/test';
+import {Page, expect} from '@playwright/test';
 import {getCurrentState, changeUserState} from './userStateUtils';
 import {
   WRAPUP_REASONS,
@@ -10,6 +10,8 @@ import {
   userState,
   WrapupReason,
   AWAIT_TIMEOUT,
+  OPERATION_TIMEOUT,
+  EXTENSION_REGISTRATION_TIMEOUT,
 } from '../constants';
 import {submitWrapup} from './wrapupUtils';
 import {holdCallToggle} from './taskControlUtils';
@@ -122,18 +124,14 @@ export async function waitForWebSocketReconnection(
 export const waitForState = async (page: Page, expectedState: userState): Promise<void> => {
   try {
     await page.bringToFront();
-    await page.waitForFunction(
-      async (expectedStateArg) => {
-        // Re-import getCurrentState in the browser context
-        const stateSelect = document.querySelector('[data-test="state-select"]') as HTMLSelectElement;
-        if (!stateSelect) return false;
-
-        const currentState = stateSelect.value?.trim();
-        return currentState === expectedStateArg;
-      },
-      expectedState,
-      {timeout: 10000, polling: 'raf'} // Use requestAnimationFrame for optimal performance
-    );
+    await expect
+      .poll(
+        async () => {
+          return await getCurrentState(page);
+        },
+        {timeout: 10000, intervals: [200, 400, 800, 1200]}
+      )
+      .toBe(expectedState);
   } catch (error) {
     // Get current state for better error message
     const currentState = await getCurrentState(page);
@@ -772,19 +770,36 @@ export const pageSetup = async (
     return; // Skip further setup for multi-session tests
   }
 
-  let loginButtonExists = await page
-    .getByTestId('login-button')
-    .isVisible()
-    .catch(() => false);
+  const stateSelect = page.getByTestId('state-select');
+  const loginButton = page.getByTestId('login-button');
+  const isStateAlreadyVisible = await stateSelect.isVisible().catch(() => false);
 
-  if (loginButtonExists) {
-    await telephonyLogin(page, loginMode, extensionNumber);
-  } else {
-    await stationLogout(page, false); // Don't throw during setup - just try to logout
+  if (!isStateAlreadyVisible) {
+    let loginButtonExists = await loginButton.isVisible().catch(() => false);
+
+    if (!loginButtonExists) {
+      await stationLogout(page, false); // Best-effort logout if still logged in from previous run.
+      loginButtonExists = await loginButton.isVisible().catch(() => false);
+      if (!loginButtonExists) {
+        await loginButton.waitFor({state: 'visible', timeout: OPERATION_TIMEOUT});
+      }
+    }
+
     await telephonyLogin(page, loginMode, extensionNumber);
   }
 
-  await page.getByTestId('state-select').waitFor({state: 'visible', timeout: 30000});
+  const isStateVisible = await stateSelect
+    .waitFor({state: 'visible', timeout: EXTENSION_REGISTRATION_TIMEOUT})
+    .then(() => true)
+    .catch(() => false);
+
+  if (!isStateVisible) {
+    // Single bounded recovery for stale station/device registration state.
+    await stationLogout(page, false);
+    await loginButton.waitFor({state: 'visible', timeout: OPERATION_TIMEOUT});
+    await telephonyLogin(page, loginMode, extensionNumber);
+    await stateSelect.waitFor({state: 'visible', timeout: EXTENSION_REGISTRATION_TIMEOUT});
+  }
 };
 
 /**
