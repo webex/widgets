@@ -12,10 +12,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@aml-org/amf-antlr-parsers@npm:0.8.28":
-  version: 0.8.28
-  resolution: "@aml-org/amf-antlr-parsers@npm:0.8.28"
-  checksum: 10c0/ef31cfe06b35017d7855eb3eb3d9c64853e36ea7ad0398cb0754c70c48bfa6abd70d5b7906853877e1ab479c4b01fab3804526eebdfb6adf983ceda35426b16e
+"@aml-org/amf-antlr-parsers@npm:0.8.34":
+  version: 0.8.34
+  resolution: "@aml-org/amf-antlr-parsers@npm:0.8.34"
+  checksum: 10c0/0a8fa2f13df8dd027364e27a258ae23fe6592ea8c55cd898424132b663d3b39ab98d1f1e44f63d808b1c5b47f1e9ec55752ac495b9a56159944c506579eef778
   languageName: node
   linkType: hard
 
@@ -8085,9 +8085,9 @@ __metadata:
   linkType: hard
 
 "@types/lodash@npm:^4.14.182":
-  version: 4.17.16
-  resolution: "@types/lodash@npm:4.17.16"
-  checksum: 10c0/cf017901b8ab1d7aabc86d5189d9288f4f99f19a75caf020c0e2c77b8d4cead4db0d0b842d009b029339f92399f49f34377dd7c2721053388f251778b4c23534
+  version: 4.17.24
+  resolution: "@types/lodash@npm:4.17.24"
+  checksum: 10c0/b72f60d4daacdad1fa643edb3faba204c02a01eb1ac00a83ff73496a6d236fc55e459c06106e8ced42277dba932d087d8fc090f8de4ef590d3f91e6d6f7ce85a
   languageName: node
   linkType: hard
 
@@ -9934,15 +9934,15 @@ __metadata:
   linkType: hard
 
 "@webex/event-dictionary-ts@npm:^1.0.1930":
-  version: 1.0.1947
-  resolution: "@webex/event-dictionary-ts@npm:1.0.1947"
+  version: 1.0.2091
+  resolution: "@webex/event-dictionary-ts@npm:1.0.2091"
   dependencies:
     amf-client-js: "npm:^5.2.6"
     json-schema-to-typescript: "npm:^12.0.0"
     minimist: "npm:^1.2.8"
     shelljs: "npm:^0.8.5"
     webapi-parser: "npm:^0.5.0"
-  checksum: 10c0/3b563f15ca895134a7ed24707daf1a937d78e237fe272f5f77e937628b6063e273eb2888d4f14d6a0d8460546d94f9da42819e74142e3d4d931ce7186361fc6c
+  checksum: 10c0/20d0983cebc323593d7a15c8dd26cb7c9d373b0d5e810d6dd818cbb891d42fba844c45fe859ceda810c9daf283fffe939fafcfe0b0068563d34c9731bf8e183e
   languageName: node
   linkType: hard
 
@@ -12556,7 +12556,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/ts-sdp@npm:1.8.2":
+"@webex/ts-sdp@npm:1.8.2, @webex/ts-sdp@npm:^1.8.1":
   version: 1.8.2
   resolution: "@webex/ts-sdp@npm:1.8.2"
   checksum: 10c0/d336f6d3599cbee418de6f02621028266a53c07a0a965e82eb18c9e3993ab9d29d569f5398072de43d9448972776734ca76c1ae2f257859a38793e33f8a519aa
@@ -12567,13 +12567,6 @@ __metadata:
   version: 1.7.0
   resolution: "@webex/ts-sdp@npm:1.7.0"
   checksum: 10c0/e6c7abdf86b2ad8a222caa936bf650961f98ca6e9f1126fb929042890b41d893e0a16327dcd2efedc766a13245bab28549d4e77eeda6b78b924d920167d15392
-  languageName: node
-  linkType: hard
-
-"@webex/ts-sdp@npm:^1.8.1":
-  version: 1.8.1
-  resolution: "@webex/ts-sdp@npm:1.8.1"
-  checksum: 10c0/9dc7c63d3274cdbf1cf42c17a2d7bc5afef640bf8200e7c812732c9a19f97d3a84df5bfecba9abc349c19c199ede22c9b7d0db32c1cf802af3d5eb56fda3fefa
   languageName: node
   linkType: hard
 
@@ -12777,6 +12770,9 @@ __metadata:
     "@momentum-ui/react": "npm:^23.21.4"
     "@semantic-release/changelog": "npm:^6.0.0"
     "@semantic-release/git": "npm:^10.0.0"
+    "@testing-library/dom": "npm:10.4.0"
+    "@testing-library/jest-dom": "npm:6.6.2"
+    "@testing-library/react": "npm:16.0.1"
     "@wdio/cli": "npm:^7.3.1"
     "@wdio/jasmine-framework": "npm:^7.4.6"
     "@wdio/junit-reporter": "npm:^7.4.2"
@@ -13207,15 +13203,15 @@ __metadata:
   linkType: hard
 
 "amf-client-js@npm:^5.2.6":
-  version: 5.7.0
-  resolution: "amf-client-js@npm:5.7.0"
+  version: 5.10.0
+  resolution: "amf-client-js@npm:5.10.0"
   dependencies:
-    "@aml-org/amf-antlr-parsers": "npm:0.8.28"
+    "@aml-org/amf-antlr-parsers": "npm:0.8.34"
     ajv: "npm:6.12.6"
     avro-js: "npm:1.11.3"
   bin:
     amf: bin/amf
-  checksum: 10c0/0bea2694b22de128d90696115ea2e716179841d5c076eef8e7ca4dba87f6a24090bac2cb8fb702641b3cc0ea445a000cf5f7260d7a3555ae6c6d3d2502f84909
+  checksum: 10c0/50f7b9d546a719df4ddb2ae40dbf3721849c3be9a2544db3bf133c2336cb047a95057bbaf3c89df539d9c6ec0609a4f6ac934cb82e53ca404aa1407f3032a714
   languageName: node
   linkType: hard
 
@@ -34489,9 +34485,9 @@ __metadata:
   linkType: hard
 
 "underscore@npm:^1.13.2":
-  version: 1.13.7
-  resolution: "underscore@npm:1.13.7"
-  checksum: 10c0/fad2b4aac48847674aaf3c30558f383399d4fdafad6dd02dd60e4e1b8103b52c5a9e5937e0cc05dacfd26d6a0132ed0410ab4258241240757e4a4424507471cd
+  version: 1.13.8
+  resolution: "underscore@npm:1.13.8"
+  checksum: 10c0/6677688daeda30484823e77c0b89ce4dcf29964a77d5a06f37299c007ab4bb1c66a0ff75e0d274620b62a1fe2a6ba29879f8214533ca611d71a1ae504f2bfc9b
   languageName: node
   linkType: hard
 
