@@ -7,6 +7,7 @@ import {submitWrapup} from '../Utils/wrapupUtils';
 import {
   AgentId,
   CONFERENCE_AGENT_IDS,
+  cleanupConferencePageWithTimeout,
   cleanupConferenceState,
   consultAgentAndAcceptCall,
   consultQueueAndAcceptCall,
@@ -292,7 +293,7 @@ export default function createMultipartyConferenceSet7Tests() {
       await transferConsultAndWrapup(1);
       await verifyCurrentState(getAgentPage(3), USER_STATES.ENGAGED);
 
-      await safeHandleStrayTasks(getAgentPage(1), testManager.callerPage);
+      await cleanupConferencePageWithTimeout(getAgentPage(1), testManager.callerPage);
       await consultAgentAndAccept(3, 1);
       await transferConsultAndWrapup(3);
       await verifyCurrentState(getAgentPage(1), USER_STATES.ENGAGED);
