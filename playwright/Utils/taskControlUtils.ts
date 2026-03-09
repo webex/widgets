@@ -473,15 +473,32 @@ export async function verifyHoldMusicElement(page: Page): Promise<void> {
  * @returns Promise<void>
  */
 export async function endTask(page: Page): Promise<void> {
-  const endButton = page.getByTestId('call-control:end-call').nth(0);
-  await endButton.waitFor({state: 'visible', timeout: OPERATION_TIMEOUT});
+  const allEndButtons = page.getByTestId('call-control:end-call');
+  await allEndButtons.first().waitFor({state: 'visible', timeout: OPERATION_TIMEOUT});
 
-  // Check if button is disabled and wait for it to be enabled
-  const isDisabled = await endButton.isDisabled();
-  if (isDisabled) {
-    await holdCallToggle(page);
-    await expect(endButton).toBeEnabled({timeout: AWAIT_TIMEOUT});
+  const buttonCount = await allEndButtons.count();
+  let selectedEndButton = allEndButtons.first();
+  let hasEnabledEndButton = false;
+
+  for (let i = 0; i < buttonCount; i++) {
+    const candidate = allEndButtons.nth(i);
+    const isVisible = await candidate.isVisible().catch(() => false);
+    if (!isVisible) {
+      continue;
+    }
+
+    selectedEndButton = candidate;
+    const isEnabled = await candidate.isEnabled().catch(() => false);
+    if (isEnabled) {
+      hasEnabledEndButton = true;
+      break;
+    }
   }
 
-  await endButton.click({timeout: AWAIT_TIMEOUT});
+  if (!hasEnabledEndButton) {
+    await holdCallToggle(page);
+    await expect(selectedEndButton).toBeEnabled({timeout: AWAIT_TIMEOUT});
+  }
+
+  await selectedEndButton.click({timeout: AWAIT_TIMEOUT});
 }
