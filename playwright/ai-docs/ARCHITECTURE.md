@@ -79,16 +79,16 @@ Keep this section aligned to real repository contents.
 
 ## Set -> Suite -> Test Mapping
 
-| Set | Suite File (`TEST_SUITE`) | Test Files Imported By Suite |
-| --- | --- | --- |
-| `SET_1` | `digital-incoming-task-tests.spec.ts` | `digital-incoming-task-and-task-controls.spec.ts`, `dial-number-task-control-test.spec.ts` |
-| `SET_2` | `task-list-multi-session-tests.spec.ts` | `incoming-task-and-controls-multi-session.spec.ts`, `tasklist-test.spec.ts` |
-| `SET_3` | `station-login-user-state-tests.spec.ts` | `station-login-test.spec.ts`, `user-state-test.spec.ts`, `incoming-telephony-task-test.spec.ts` |
-| `SET_4` | `basic-advanced-task-controls-tests.spec.ts` | `basic-task-controls-test.spec.ts`, `advance-task-control-combinations-test.spec.ts` |
-| `SET_5` | `advanced-task-controls-tests.spec.ts` | `advanced-task-controls-test.spec.ts` |
-| `SET_6` | `dial-number-tests.spec.ts` | `dial-number-task-control-test.spec.ts` |
-| `SET_7` | `multiparty-conference-set-7-tests.spec.ts` | `multiparty-conference-set-7-test.spec.ts` |
-| `SET_8` | `multiparty-conference-set-8-tests.spec.ts` | `multiparty-conference-set-8-test.spec.ts` |
+| Set     | Suite File (`TEST_SUITE`)                    | Test Files Imported By Suite                                                                    |
+| ------- | -------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `SET_1` | `digital-incoming-task-tests.spec.ts`        | `digital-incoming-task-and-task-controls.spec.ts`, `dial-number-task-control-test.spec.ts`      |
+| `SET_2` | `task-list-multi-session-tests.spec.ts`      | `incoming-task-and-controls-multi-session.spec.ts`, `tasklist-test.spec.ts`                     |
+| `SET_3` | `station-login-user-state-tests.spec.ts`     | `station-login-test.spec.ts`, `user-state-test.spec.ts`, `incoming-telephony-task-test.spec.ts` |
+| `SET_4` | `basic-advanced-task-controls-tests.spec.ts` | `basic-task-controls-test.spec.ts`, `advance-task-control-combinations-test.spec.ts`            |
+| `SET_5` | `advanced-task-controls-tests.spec.ts`       | `advanced-task-controls-test.spec.ts`                                                           |
+| `SET_6` | `dial-number-tests.spec.ts`                  | `dial-number-task-control-test.spec.ts`                                                         |
+| `SET_7` | `multiparty-conference-set-7-tests.spec.ts`  | `multiparty-conference-set-7-test.spec.ts`                                                      |
+| `SET_8` | `multiparty-conference-set-8-tests.spec.ts`  | `multiparty-conference-set-8-test.spec.ts`                                                      |
 
 Use this mapping to decide where new tests should be added and wired.
 
@@ -217,18 +217,18 @@ When enabled by setup config/method, these page properties are created and avail
 
 ### Convenience Methods
 
-| Method | Behavior |
-| --- | --- |
-| `basicSetup()` | Calls `setup()` with desktop agent1 defaults |
-| `setupForAdvancedTaskControls()` | Calls `setup()` with agent1+agent2+caller+extension and advanced logging |
-| `setupForAdvancedCombinations()` | Calls `setup()` with agent1+agent2+caller and advanced logging |
-| `setupForDialNumber()` | Calls `setup()` with dial-number login enabled |
-| `setupForIncomingTaskDesktop()` | Calls `setup()` for desktop incoming-task flow |
-| `setupForIncomingTaskExtension()` | Calls `setup()` for extension incoming-task flow |
-| `setupForIncomingTaskMultiSession()` | Calls `setup()` for multi-session incoming-task flow |
-| `setupForStationLogin()` | Custom path (does not call `setup()`), purpose-built station-login + multi-login bootstrap. Station-login page initialization runs sequentially (main then multi-session) to reduce init contention. |
-| `setupForMultipartyConference()` | Sets up 4 agents + caller for conference tests (agent1–4 pages + callerPage) |
-| `setupMultiSessionPage()` | Targeted helper to initialize only multi-session page when needed |
+| Method                               | Behavior                                                                                                                                                                                             |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `basicSetup()`                       | Calls `setup()` with desktop agent1 defaults                                                                                                                                                         |
+| `setupForAdvancedTaskControls()`     | Calls `setup()` with agent1+agent2+caller+extension and advanced logging                                                                                                                             |
+| `setupForAdvancedCombinations()`     | Calls `setup()` with agent1+agent2+caller and advanced logging                                                                                                                                       |
+| `setupForDialNumber()`               | Calls `setup()` with dial-number login enabled                                                                                                                                                       |
+| `setupForIncomingTaskDesktop()`      | Calls `setup()` for desktop incoming-task flow                                                                                                                                                       |
+| `setupForIncomingTaskExtension()`    | Calls `setup()` for extension incoming-task flow                                                                                                                                                     |
+| `setupForIncomingTaskMultiSession()` | Calls `setup()` for multi-session incoming-task flow                                                                                                                                                 |
+| `setupForStationLogin()`             | Custom path (does not call `setup()`), purpose-built station-login + multi-login bootstrap. Station-login page initialization runs sequentially (main then multi-session) to reduce init contention. |
+| `setupForMultipartyConference()`     | Sets up 4 agents + caller for conference tests (agent1–4 pages + callerPage)                                                                                                                         |
+| `setupMultiSessionPage()`            | Targeted helper to initialize only multi-session page when needed                                                                                                                                    |
 
 ### Cleanup
 
@@ -249,16 +249,17 @@ When enabled by setup config/method, these page properties are created and avail
 
 ## Utils Reference
 
-| File | Key Exports | Purpose |
-| --- | --- | --- |
-| `initUtils.ts` | `loginViaAccessToken`, `oauthLogin`, `enableAllWidgets`, `enableMultiLogin`, `initialiseWidgets`, `agentRelogin`, `setupMultiLoginPage` | Auth/bootstrap/widget init helpers |
-| `stationLoginUtils.ts` | `desktopLogin`, `extensionLogin`, `dialLogin`, `telephonyLogin`, `stationLogout`, `verifyLoginMode`, `ensureUserStateVisible` | Station login/logout validation for Desktop/Extension/Dial Number |
-| `userStateUtils.ts` | `changeUserState`, `getCurrentState`, `verifyCurrentState`, `getStateElapsedTime`, `validateConsoleStateChange`, `checkCallbackSequence` | User-state actions and console/state validation |
-| `taskControlUtils.ts` | `holdCallToggle`, `recordCallToggle`, `endTask`, `verifyHoldTimer`, `verifyHoldButtonIcon`, `verifyRecordButtonIcon`, `setupConsoleLogging`, `verifyHoldLogs`, `verifyRecordingLogs`, `verifyEndLogs`, `verifyRemoteAudioTracks` | Basic call control actions + callback/event log assertions |
-| `advancedTaskControlUtils.ts` | `consultOrTransfer`, `cancelConsult`, `setupAdvancedConsoleLogging`, `verifyTransferSuccessLogs`, `verifyConsultStartSuccessLogs`, `verifyConsultEndSuccessLogs`, `verifyConsultTransferredLogs` | Consult/transfer operations + advanced callback/event log assertions. Agent selection retries with popover reopen to handle backend propagation delays. |
-| `incomingTaskUtils.ts` | `createCallTask`, `createChatTask`, `createEmailTask`, `waitForIncomingTask`, `acceptIncomingTask`, `declineIncomingTask`, `acceptExtensionCall`, `loginExtension`, `submitRonaPopup` | Incoming task creation/acceptance/decline and extension helpers |
-| `wrapupUtils.ts` | `submitWrapup` | Wrapup submission |
-| `helperUtils.ts` | `handleStrayTasks`, `pageSetup`, `waitForState`, `waitForStateLogs`, `waitForWebSocketDisconnection`, `waitForWebSocketReconnection`, `clearPendingCallAndWrapup`, `dismissOverlays` | Shared setup/cleanup/state polling/network-watch helpers. `waitForState` polls visible state text (`state-name`) to align with `verifyCurrentState`. `pageSetup` includes one bounded station logout/re-login recovery if `state-select` is still missing after login. `handleStrayTasks` handles exit-conference, dual call control groups (iterates all end-call buttons to find enabled one), cancel-consult with switch-leg fallback. |
+| File                          | Key Exports                                                                                                                                                                                                                                                   | Purpose                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `initUtils.ts`                | `loginViaAccessToken`, `oauthLogin`, `enableAllWidgets`, `enableMultiLogin`, `initialiseWidgets`, `agentRelogin`, `setupMultiLoginPage`                                                                                                                       | Auth/bootstrap/widget init helpers                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `stationLoginUtils.ts`        | `desktopLogin`, `extensionLogin`, `dialLogin`, `telephonyLogin`, `stationLogout`, `verifyLoginMode`, `ensureUserStateVisible`                                                                                                                                 | Station login/logout validation for Desktop/Extension/Dial Number                                                                                                                                                                                                                                                                                                                                                                         |
+| `userStateUtils.ts`           | `changeUserState`, `getCurrentState`, `verifyCurrentState`, `getStateElapsedTime`, `validateConsoleStateChange`, `checkCallbackSequence`                                                                                                                      | User-state actions and console/state validation                                                                                                                                                                                                                                                                                                                                                                                           |
+| `taskControlUtils.ts`         | `holdCallToggle`, `recordCallToggle`, `endTask`, `verifyHoldTimer`, `verifyHoldButtonIcon`, `verifyRecordButtonIcon`, `setupConsoleLogging`, `verifyHoldLogs`, `verifyRecordingLogs`, `verifyEndLogs`, `verifyRemoteAudioTracks`                              | Basic call control actions + callback/event log assertions                                                                                                                                                                                                                                                                                                                                                                                |
+| `advancedTaskControlUtils.ts` | `consultOrTransfer`, `cancelConsult`, `setupAdvancedConsoleLogging`, `verifyTransferSuccessLogs`, `verifyConsultStartSuccessLogs`, `verifyConsultEndSuccessLogs`, `verifyConsultTransferredLogs`                                                              | Consult/transfer operations + advanced callback/event log assertions. Agent selection retries with popover reopen to handle backend propagation delays.                                                                                                                                                                                                                                                                                   |
+| `incomingTaskUtils.ts`        | `createCallTask`, `createChatTask`, `createEmailTask`, `waitForIncomingTask`, `acceptIncomingTask`, `declineIncomingTask`, `acceptExtensionCall`, `loginExtension`, `submitRonaPopup`                                                                         | Incoming task creation/acceptance/decline and extension helpers                                                                                                                                                                                                                                                                                                                                                                           |
+| `wrapupUtils.ts`              | `submitWrapup`                                                                                                                                                                                                                                                | Wrapup submission                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `helperUtils.ts`              | `handleStrayTasks`, `pageSetup`, `waitForState`, `waitForStateLogs`, `waitForWebSocketDisconnection`, `waitForWebSocketReconnection`, `clearPendingCallAndWrapup`, `dismissOverlays`                                                                          | Shared setup/cleanup/state polling/network-watch helpers. `waitForState` polls visible state text (`state-name`) to align with `verifyCurrentState`. `pageSetup` includes one bounded station logout/re-login recovery if `state-select` is still missing after login. `handleStrayTasks` handles exit-conference, dual call control groups (iterates all end-call buttons to find enabled one), cancel-consult with switch-leg fallback. |
+| `conferenceUtils.ts`          | `cleanupConferenceState`, `startBaselineCallOnAgent1`, `consultAgentAndAcceptCall`, `consultQueueAndAcceptCall`, `mergeConsultIntoConference`, `transferConsultAndSubmitWrapup`, `toggleConferenceLegIfSwitchAvailable`, `exitConferenceParticipantOrEndTask` | Shared conference helpers used by Set 7 and Set 8 to keep call setup/cleanup and consult-transfer flows consistent and reusable.                                                                                                                                                                                                                                                                                                          |
 
 Use existing helpers first; add new utilities only when behavior is not already covered.
 
@@ -268,39 +269,39 @@ Use existing helpers first; add new utilities only when behavior is not already 
 
 ### Key Enums/Objects
 
-| Constant | Values (Current) | Used For |
-| --- | --- | --- |
-| `USER_STATES` | `MEETING`, `AVAILABLE`, `LUNCH` (`Lunch Break`), `RONA`, `ENGAGED`, `AGENT_DECLINED` | Agent state change/validation |
-| `LOGIN_MODE` | `DESKTOP` (`Desktop`), `EXTENSION` (`Extension`), `DIAL_NUMBER` (`Dial Number`) | Station login mode selection |
-| `PAGE_TYPES` | `AGENT1`, `AGENT2`, `CALLER`, `EXTENSION`, `CHAT`, `MULTI_SESSION`, `DIAL_NUMBER` | TestManager page/context identity |
-| `TASK_TYPES` | `CALL`, `CHAT`, `EMAIL`, `SOCIAL` | Incoming task typing |
-| `WRAPUP_REASONS` | `SALE`, `RESOLVED` | Wrapup flow |
-| `RONA_OPTIONS` | `AVAILABLE`, `IDLE` | RONA popup next-state selection |
-| `CONSOLE_PATTERNS` | `SDK_STATE_CHANGE_SUCCESS`, `ON_STATE_CHANGE_REGEX`, `ON_STATE_CHANGE_KEYWORDS` | State-change console pattern matching |
+| Constant           | Values (Current)                                                                     | Used For                              |
+| ------------------ | ------------------------------------------------------------------------------------ | ------------------------------------- |
+| `USER_STATES`      | `MEETING`, `AVAILABLE`, `LUNCH` (`Lunch Break`), `RONA`, `ENGAGED`, `AGENT_DECLINED` | Agent state change/validation         |
+| `LOGIN_MODE`       | `DESKTOP` (`Desktop`), `EXTENSION` (`Extension`), `DIAL_NUMBER` (`Dial Number`)      | Station login mode selection          |
+| `PAGE_TYPES`       | `AGENT1`, `AGENT2`, `CALLER`, `EXTENSION`, `CHAT`, `MULTI_SESSION`, `DIAL_NUMBER`    | TestManager page/context identity     |
+| `TASK_TYPES`       | `CALL`, `CHAT`, `EMAIL`, `SOCIAL`                                                    | Incoming task typing                  |
+| `WRAPUP_REASONS`   | `SALE`, `RESOLVED`                                                                   | Wrapup flow                           |
+| `RONA_OPTIONS`     | `AVAILABLE`, `IDLE`                                                                  | RONA popup next-state selection       |
+| `CONSOLE_PATTERNS` | `SDK_STATE_CHANGE_SUCCESS`, `ON_STATE_CHANGE_REGEX`, `ON_STATE_CHANGE_KEYWORDS`      | State-change console pattern matching |
 
 ### Timeout Hierarchy
 
-| Constant | Value | Typical Use |
-| --- | --- | --- |
-| `DROPDOWN_SETTLE_TIMEOUT` | `200` ms | Dropdown animation settle |
-| `UI_SETTLE_TIMEOUT` | `2000` ms | Generic UI settle |
-| `DEFAULT_TIMEOUT` | `5000` ms | Default visibility/check timeout |
-| `AWAIT_TIMEOUT` | `10000` ms | Standard element interactions |
-| `WRAPUP_TIMEOUT` | `15000` ms | Wrapup UI timing |
-| `FORM_FIELD_TIMEOUT` | `20000` ms | Popover/form field loading |
-| `OPERATION_TIMEOUT` | `30000` ms | Longer user operations (for example logout checks) |
-| `STATION_LOGOUT_UNREGISTER_SETTLE_TIMEOUT` | `4000` ms | Post-logout wait for backend unregister to settle before next login |
-| `EXTENSION_REGISTRATION_TIMEOUT` | `40000` ms | Extension registration waits |
-| `NETWORK_OPERATION_TIMEOUT` | `40000` ms | Network-dependent operations |
-| `WIDGET_INIT_TIMEOUT` | `50000` ms | Widget initialization |
-| `CHAT_LAUNCHER_TIMEOUT` | `60000` ms | Chat launcher iframe loading |
-| `ACCEPT_TASK_TIMEOUT` | `60000` ms | Incoming-task acceptance waits |
-| `CONFERENCE_SWITCH_TOGGLE_TIMEOUT` | `1000` ms | Wait after switching conference call legs |
-| `CONFERENCE_END_TASK_SETTLE_TIMEOUT` | `1500` ms | Wait after ending task in conference |
-| `CONFERENCE_ACTION_SETTLE_TIMEOUT` | `2000` ms | Wait after conference merge/exit actions |
-| `CONFERENCE_CUSTOMER_DISCONNECT_TIMEOUT` | `3000` ms | Wait for customer disconnect propagation |
-| `CONFERENCE_RECONNECT_SETTLE_TIMEOUT` | `4000` ms | Wait after network reconnect in conference |
-| `CONSULT_NO_ANSWER_TIMEOUT` | `12000` ms | Wait for consult no-answer (RONA) scenario |
+| Constant                                   | Value      | Typical Use                                                         |
+| ------------------------------------------ | ---------- | ------------------------------------------------------------------- |
+| `DROPDOWN_SETTLE_TIMEOUT`                  | `200` ms   | Dropdown animation settle                                           |
+| `UI_SETTLE_TIMEOUT`                        | `2000` ms  | Generic UI settle                                                   |
+| `DEFAULT_TIMEOUT`                          | `5000` ms  | Default visibility/check timeout                                    |
+| `AWAIT_TIMEOUT`                            | `10000` ms | Standard element interactions                                       |
+| `WRAPUP_TIMEOUT`                           | `15000` ms | Wrapup UI timing                                                    |
+| `FORM_FIELD_TIMEOUT`                       | `20000` ms | Popover/form field loading                                          |
+| `OPERATION_TIMEOUT`                        | `30000` ms | Longer user operations (for example logout checks)                  |
+| `STATION_LOGOUT_UNREGISTER_SETTLE_TIMEOUT` | `4000` ms  | Post-logout wait for backend unregister to settle before next login |
+| `EXTENSION_REGISTRATION_TIMEOUT`           | `40000` ms | Extension registration waits                                        |
+| `NETWORK_OPERATION_TIMEOUT`                | `40000` ms | Network-dependent operations                                        |
+| `WIDGET_INIT_TIMEOUT`                      | `50000` ms | Widget initialization                                               |
+| `CHAT_LAUNCHER_TIMEOUT`                    | `60000` ms | Chat launcher iframe loading                                        |
+| `ACCEPT_TASK_TIMEOUT`                      | `60000` ms | Incoming-task acceptance waits                                      |
+| `CONFERENCE_SWITCH_TOGGLE_TIMEOUT`         | `1000` ms  | Wait after switching conference call legs                           |
+| `CONFERENCE_END_TASK_SETTLE_TIMEOUT`       | `1500` ms  | Wait after ending task in conference                                |
+| `CONFERENCE_ACTION_SETTLE_TIMEOUT`         | `2000` ms  | Wait after conference merge/exit actions                            |
+| `CONFERENCE_CUSTOMER_DISCONNECT_TIMEOUT`   | `3000` ms  | Wait for customer disconnect propagation                            |
+| `CONFERENCE_RECONNECT_SETTLE_TIMEOUT`      | `4000` ms  | Wait after network reconnect in conference                          |
+| `CONSULT_NO_ANSWER_TIMEOUT`                | `12000` ms | Wait for consult no-answer (RONA) scenario                          |
 
 Choose the smallest fitting timeout and document reasons for any increases.
 
@@ -387,9 +388,9 @@ Do not document future files/sets before they exist in code.
 
 Queue routing will **not** re-route to an agent who RONA'd (Ring On No Answer) in the same call session. When designing tests that share a queue across scenarios, use different agents for queue-routed consults after a RONA test.
 
-### cleanSlate for conference tests
+### Conference State Cleanup
 
-Conference suites use guarded cleanup wrappers (`safeHandleStrayTasks`) with closed-page checks and per-page timeout limits. For shared-call conference flows, cleanup runs sequentially across agents to avoid ownership/leg race conditions; each task remains best-effort to avoid failing hooks when teardown has already started.
+Conference suites use guarded cleanup wrappers (`cleanupConferencePageWithTimeout`) with closed-page checks and per-page timeout limits. For shared-call conference flows, cleanup runs sequentially across agents to avoid ownership/leg race conditions; each task remains best-effort to avoid failing hooks when teardown has already started.
 
 ### Agent popover propagation
 
