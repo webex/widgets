@@ -104,7 +104,7 @@ export default function createCallTaskControlsTests() {
       await testManager.agent1Page.waitForTimeout(3000); // Allow time for hold to take effect
 
       // Verify hold callback logs
-      verifyHoldLogs({expectedIsHeld: true});
+      await verifyHoldLogs({expectedIsHeld: true});
 
       // Verify hold button icon changed to play icon (when call is on hold)
       await verifyHoldButtonIcon(testManager.agent1Page, {expectedIsHeld: true});
@@ -123,7 +123,7 @@ export default function createCallTaskControlsTests() {
       await testManager.agent1Page.waitForTimeout(2000);
 
       // Verify resume callback logs
-      verifyHoldLogs({expectedIsHeld: false});
+      await verifyHoldLogs({expectedIsHeld: false});
 
       // Verify hold button icon changed back to pause icon (when call is active)
       await verifyHoldButtonIcon(testManager.agent1Page, {expectedIsHeld: false});
@@ -149,7 +149,7 @@ export default function createCallTaskControlsTests() {
       await testManager.agent1Page.waitForTimeout(2000);
 
       // Verify pause recording callback logs
-      verifyRecordingLogs({expectedIsRecording: false});
+      await verifyRecordingLogs({expectedIsRecording: false});
 
       // Verify record button icon changed to record icon (when recording is paused)
       await verifyRecordButtonIcon(testManager.agent1Page, {expectedIsRecording: false});
@@ -161,7 +161,7 @@ export default function createCallTaskControlsTests() {
       await testManager.agent1Page.waitForTimeout(2000);
 
       // Verify resume recording callback logs
-      verifyRecordingLogs({expectedIsRecording: true});
+      await verifyRecordingLogs({expectedIsRecording: true});
 
       // Verify record button icon changed back to pause icon (when recording is active)
       await verifyRecordButtonIcon(testManager.agent1Page, {expectedIsRecording: true});

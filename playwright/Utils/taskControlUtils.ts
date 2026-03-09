@@ -255,26 +255,45 @@ export function clearCapturedLogs(): void {
  * @param options.expectedIsHeld - Expected hold state (true for hold, false for resume)
  * @throws Error if verification fails with detailed error message
  */
-export function verifyHoldLogs({expectedIsHeld}: {expectedIsHeld: boolean}): void {
-  const holdResumeLogs = capturedLogs.filter((log) => log.includes('onHoldResume invoked'));
-  const statusLogs = capturedLogs.filter((log) =>
-    log.includes(expectedIsHeld ? 'WXCC_SDK_TASK_HOLD_SUCCESS' : 'WXCC_SDK_TASK_RESUME_SUCCESS')
-  );
+export async function verifyHoldLogs({expectedIsHeld}: {expectedIsHeld: boolean}): Promise<void> {
+  const expectedStatus = expectedIsHeld ? 'WXCC_SDK_TASK_HOLD_SUCCESS' : 'WXCC_SDK_TASK_RESUME_SUCCESS';
 
-  if (holdResumeLogs.length === 0) {
+  try {
+    await expect
+      .poll(
+        () => {
+          const holdResumeLogs = capturedLogs.filter((log) => log.includes('onHoldResume invoked'));
+          const statusLogs = capturedLogs.filter((log) => log.includes(expectedStatus));
+          const lastHoldLog = holdResumeLogs[holdResumeLogs.length - 1] ?? '';
+          return (
+            holdResumeLogs.length > 0 && statusLogs.length > 0 && lastHoldLog.includes(`isHeld: ${expectedIsHeld}`)
+          );
+        },
+        {timeout: OPERATION_TIMEOUT, intervals: [200, 400, 800, 1200]}
+      )
+      .toBeTruthy();
+  } catch {
+    const holdResumeLogs = capturedLogs.filter((log) => log.includes('onHoldResume invoked'));
+    const statusLogs = capturedLogs.filter((log) => log.includes(expectedStatus));
+    const lastHoldLog = holdResumeLogs[holdResumeLogs.length - 1];
+
+    if (holdResumeLogs.length === 0) {
+      throw new Error(
+        `No 'onHoldResume invoked' logs found. Expected logs for isHeld: ${expectedIsHeld}. Captured logs: ${JSON.stringify(capturedLogs)}`
+      );
+    }
+
+    if (statusLogs.length === 0) {
+      throw new Error(`No '${expectedStatus}' logs found. Captured logs: ${JSON.stringify(capturedLogs)}`);
+    }
+
+    if (!lastHoldLog?.includes(`isHeld: ${expectedIsHeld}`)) {
+      throw new Error(`Expected 'isHeld: ${expectedIsHeld}' in log but found: ${lastHoldLog}`);
+    }
+
     throw new Error(
-      `No 'onHoldResume invoked' logs found. Expected logs for isHeld: ${expectedIsHeld}. Captured logs: ${JSON.stringify(capturedLogs)}`
+      `Timed out validating hold logs for isHeld: ${expectedIsHeld}. Captured logs: ${JSON.stringify(capturedLogs)}`
     );
-  }
-
-  if (statusLogs.length === 0) {
-    const expectedStatus = expectedIsHeld ? 'WXCC_SDK_TASK_HOLD_SUCCESS' : 'WXCC_SDK_TASK_RESUME_SUCCESS';
-    throw new Error(`No '${expectedStatus}' logs found. Captured logs: ${JSON.stringify(capturedLogs)}`);
-  }
-
-  const lastHoldLog = holdResumeLogs[holdResumeLogs.length - 1];
-  if (!lastHoldLog.includes(`isHeld: ${expectedIsHeld}`)) {
-    throw new Error(`Expected 'isHeld: ${expectedIsHeld}' in log but found: ${lastHoldLog}`);
   }
 }
 
@@ -284,30 +303,49 @@ export function verifyHoldLogs({expectedIsHeld}: {expectedIsHeld: boolean}): voi
  * @param options.expectedIsRecording - Expected recording state (true for recording, false for paused)
  * @throws Error if verification fails with detailed error message
  */
-export function verifyRecordingLogs({expectedIsRecording}: {expectedIsRecording: boolean}): void {
-  const recordingLogs = capturedLogs.filter((log) => log.includes('onRecordingToggle invoked'));
-  const statusLogs = capturedLogs.filter((log) =>
-    log.includes(
-      expectedIsRecording ? 'WXCC_SDK_TASK_RESUME_RECORDING_SUCCESS' : 'WXCC_SDK_TASK_PAUSE_RECORDING_SUCCESS'
-    )
-  );
+export async function verifyRecordingLogs({expectedIsRecording}: {expectedIsRecording: boolean}): Promise<void> {
+  const expectedStatus = expectedIsRecording
+    ? 'WXCC_SDK_TASK_RESUME_RECORDING_SUCCESS'
+    : 'WXCC_SDK_TASK_PAUSE_RECORDING_SUCCESS';
 
-  if (recordingLogs.length === 0) {
+  try {
+    await expect
+      .poll(
+        () => {
+          const recordingLogs = capturedLogs.filter((log) => log.includes('onRecordingToggle invoked'));
+          const statusLogs = capturedLogs.filter((log) => log.includes(expectedStatus));
+          const lastRecordingLog = recordingLogs[recordingLogs.length - 1] ?? '';
+          return (
+            recordingLogs.length > 0 &&
+            statusLogs.length > 0 &&
+            lastRecordingLog.includes(`isRecording: ${expectedIsRecording}`)
+          );
+        },
+        {timeout: OPERATION_TIMEOUT, intervals: [200, 400, 800, 1200]}
+      )
+      .toBeTruthy();
+  } catch {
+    const recordingLogs = capturedLogs.filter((log) => log.includes('onRecordingToggle invoked'));
+    const statusLogs = capturedLogs.filter((log) => log.includes(expectedStatus));
+    const lastRecordingLog = recordingLogs[recordingLogs.length - 1];
+
+    if (recordingLogs.length === 0) {
+      throw new Error(
+        `No 'onRecordingToggle invoked' logs found. Expected logs for isRecording: ${expectedIsRecording}. Captured logs: ${JSON.stringify(capturedLogs)}`
+      );
+    }
+
+    if (statusLogs.length === 0) {
+      throw new Error(`No '${expectedStatus}' logs found. Captured logs: ${JSON.stringify(capturedLogs)}`);
+    }
+
+    if (!lastRecordingLog?.includes(`isRecording: ${expectedIsRecording}`)) {
+      throw new Error(`Expected 'isRecording: ${expectedIsRecording}' in log but found: ${lastRecordingLog}`);
+    }
+
     throw new Error(
-      `No 'onRecordingToggle invoked' logs found. Expected logs for isRecording: ${expectedIsRecording}. Captured logs: ${JSON.stringify(capturedLogs)}`
+      `Timed out validating recording logs for isRecording: ${expectedIsRecording}. Captured logs: ${JSON.stringify(capturedLogs)}`
     );
-  }
-
-  if (statusLogs.length === 0) {
-    const expectedStatus = expectedIsRecording
-      ? 'WXCC_SDK_TASK_RESUME_RECORDING_SUCCESS'
-      : 'WXCC_SDK_TASK_PAUSE_RECORDING_SUCCESS';
-    throw new Error(`No '${expectedStatus}' logs found. Captured logs: ${JSON.stringify(capturedLogs)}`);
-  }
-
-  const lastRecordingLog = recordingLogs[recordingLogs.length - 1];
-  if (!lastRecordingLog.includes(`isRecording: ${expectedIsRecording}`)) {
-    throw new Error(`Expected 'isRecording: ${expectedIsRecording}' in log but found: ${lastRecordingLog}`);
   }
 }
 
