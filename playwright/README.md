@@ -14,7 +14,8 @@ playwright/
 │   ├── advanced-task-controls-tests.spec.ts  # Advanced task controls orchestration
 │   ├── dial-number-tests.spec.ts            # Dial number task control orchestration
 │   ├── multiparty-conference-set-7-tests.spec.ts # Multiparty conference set 7 orchestration
-│   └── multiparty-conference-set-8-tests.spec.ts # Multiparty conference set 8 orchestration
+│   ├── multiparty-conference-set-8-tests.spec.ts # Multiparty conference set 8 orchestration
+│   └── multiparty-conference-set-9-tests.spec.ts # Multiparty conference set 9 orchestration
 ├── tests/                                     # Individual test implementations
 ├── Utils/                                     # Utility functions
 ├── test-data.ts                              # **CENTRAL CONFIG** - Test data & suite mapping
@@ -42,18 +43,19 @@ playwright/
 | **SET_6** | Dial number scenarios              | 9226 | `dial-number-tests.spec.ts`                  |
 | **SET_7** | Multiparty conference (team 25-28) | 9227 | `multiparty-conference-set-7-tests.spec.ts`  |
 | **SET_8** | Multiparty conference (team 29-32) | 9228 | `multiparty-conference-set-8-tests.spec.ts`  |
+| **SET_9** | Multiparty conference (team 33-36) | 9229 | `multiparty-conference-set-9-tests.spec.ts`  |
 
 ### Where to Add New Tests?
 
-| Test Type                    | Use Set | Why                         |
-| ---------------------------- | ------- | --------------------------- |
-| Digital channels tasks       | SET_1   | Digital channels configured |
-| Task list operations         | SET_2   | Task list focus             |
-| Authentication/User states   | SET_3   | User management             |
-| Basic/Advanced task controls | SET_4   | Task control operations     |
-| Complex advanced scenarios   | SET_5   | Advanced operations         |
-| Dial number scenarios        | SET_6   | Dial number flows           |
-| Multiparty conference        | SET_7/8 | 4-agent conference coverage |
+| Test Type                    | Use Set   | Why                         |
+| ---------------------------- | --------- | --------------------------- |
+| Digital channels tasks       | SET_1     | Digital channels configured |
+| Task list operations         | SET_2     | Task list focus             |
+| Authentication/User states   | SET_3     | User management             |
+| Basic/Advanced task controls | SET_4     | Task control operations     |
+| Complex advanced scenarios   | SET_5     | Advanced operations         |
+| Dial number scenarios        | SET_6     | Dial number flows           |
+| Multiparty conference        | SET_7/8/9 | 4-agent conference coverage |
 
 ## Multiparty Conference Consolidation
 
@@ -61,15 +63,19 @@ To reduce runtime and repeated call initialization, conference scenarios are con
 
 - `SET_7` (`playwright/tests/multiparty-conference-set-7-test.spec.ts`)
   - Combined: `CTS-MPC-01+02`, `CTS-MPC-03+04`, `CTS-MPC-07+09+10`
-  - Combined: `CTS-TC-01+02+03`, `CTS-TC-04+05`
-  - Standalone: `CTS-MPC-05`, `CTS-MPC-06`, `CTS-TC-06`, `CTS-TC-07`, `CTS-TC-08`
-  - Split: `CTS-TC-06` and `CTS-TC-07` run as separate tests (queue routing won't re-route to RONA'd agent in same session)
+  - Standalone: `CTS-MPC-05`, `CTS-MPC-06`, `CTS-SW-04`
+  - Combined: `CTS-SW-02+03`
   - Skipped: `CTS-MPC-08` (>4 agents)
 - `SET_8` (`playwright/tests/multiparty-conference-set-8-test.spec.ts`)
   - Combined: `CTS-TC-09+10`, `CTS-TC-11+13`, `CTS-TC-14+15`
-  - Combined: `CTS-SW-02+03`, `CTS-SW-05+06`
-  - Standalone: `CTS-TC-16`, `CTS-SW-04`, `CTS-SW-07`
-  - Skipped: `CTS-TC-12` (feature-flag gated), `CTS-TC-17` (>4 agents), `CTS-TC-18` (EPDN), `CTS-SW-01` (EP_DN), `CTS-SW-08` (>4 agents)
+  - Standalone: `CTS-TC-16`, `CTS-SW-07`
+  - Skipped: `CTS-TC-12` (feature-flag gated), `CTS-TC-17` (>4 agents), `CTS-TC-18` (EPDN)
+- `SET_9` (`playwright/tests/multiparty-conference-set-9-test.spec.ts`)
+  - Combined: `CTS-TC-01+02+03`, `CTS-TC-04+05`
+  - Standalone: `CTS-TC-06`, `CTS-TC-07`, `CTS-TC-08`
+  - Split: `CTS-TC-06` and `CTS-TC-07` run as separate tests (queue routing won't re-route to RONA'd agent in same session)
+  - Combined: `CTS-SW-05+06`
+  - Skipped: `CTS-SW-01` (EP_DN), `CTS-SW-08` (>4 agents)
 
 ## 🧪 Adding New Tests
 
@@ -189,17 +195,18 @@ PW_CHAT_URL=https://your-chat-url
 PW_SANDBOX=your-sandbox-name
 PW_ENTRY_POINT1=entry-point-1
 PW_ENTRY_POINT2=entry-point-2
-# ... PW_ENTRY_POINT3, 4, 5
+# ... PW_ENTRY_POINT3 ... PW_ENTRY_POINT9
 ```
 
 Test data is automatically handled by TestManager based on the running test set.
 
 OAuth setup behavior (`playwright/global.setup.ts`):
+
 - expands `USER_SETS` into set-scoped env keys
 - builds OAuth set groups dynamically from `USER_SETS` (chunk size `2`)
 - runs one parallel OAuth worker per generated group
 - each group uses `OAUTH_BATCH_SIZE=4` internally
-- with current 8 sets this resolves to 4 groups: `[SET_1,SET_2]`, `[SET_3,SET_4]`, `[SET_5,SET_6]`, `[SET_7,SET_8]`
+- with current 9 sets this resolves to 5 groups: `[SET_1,SET_2]`, `[SET_3,SET_4]`, `[SET_5,SET_6]`, `[SET_7,SET_8]`, `[SET_9]`
 - optionally collects dial-number token
 - writes all token/env updates in one final upsert pass
 
@@ -218,6 +225,7 @@ yarn test:e2e suites/advanced-task-controls-tests.spec.ts
 yarn test:e2e suites/dial-number-tests.spec.ts
 yarn test:e2e suites/multiparty-conference-set-7-tests.spec.ts
 yarn test:e2e suites/multiparty-conference-set-8-tests.spec.ts
+yarn test:e2e suites/multiparty-conference-set-9-tests.spec.ts
 
 # Run specific test sets (projects) - names match USER_SETS keys
 yarn test:e2e --project=SET_1         # Digital incoming tasks
@@ -228,6 +236,7 @@ yarn test:e2e --project=SET_5         # Advanced task controls
 yarn test:e2e --project=SET_6         # Dial number scenarios
 yarn test:e2e --project=SET_7         # Multiparty conference (team 25-28)
 yarn test:e2e --project=SET_8         # Multiparty conference (team 29-32)
+yarn test:e2e --project=SET_9         # Multiparty conference (team 33-36)
 
 # Development & debugging
 yarn playwright test --config=playwright.config.ts --project="OAuth: Get Access Token"  # Run OAuth setup only

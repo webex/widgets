@@ -35,6 +35,7 @@ At the time of this doc update, the baseline suites are:
 - `dial-number-tests.spec.ts`
 - `multiparty-conference-set-7-tests.spec.ts`
 - `multiparty-conference-set-8-tests.spec.ts`
+- `multiparty-conference-set-9-tests.spec.ts`
 
 Do not assume additional sets/suites exist unless they are present in code.
 
@@ -101,11 +102,12 @@ yarn test:e2e --project=SET_1
 - `playwright/global.setup.ts` runs one `OAuth` setup test.
 - Inside that test, token collection groups are generated dynamically from `USER_SETS` using chunk size `2`.
 - One parallel OAuth worker runs per generated group.
-- With current `SET_1..SET_8`, this resolves to 4 groups:
+- With current `SET_1..SET_9`, this resolves to 5 groups:
   - `[SET_1, SET_2]`
   - `[SET_3, SET_4]`
   - `[SET_5, SET_6]`
   - `[SET_7, SET_8]`
+  - `[SET_9]`
 - Each group uses batch size 4 internally (`OAUTH_BATCH_SIZE=4`).
 - Dial-number token is collected when configured.
 - All env/token updates are written once via single `.env` upsert.
@@ -132,11 +134,12 @@ When Playwright behavior changes:
 
 ---
 
-## Conference Coverage (SET_7, SET_8)
+## Conference Coverage (SET_7, SET_8, SET_9)
 
 - Multiparty conference scenarios are split across:
   - `playwright/tests/multiparty-conference-set-7-test.spec.ts`
   - `playwright/tests/multiparty-conference-set-8-test.spec.ts`
+  - `playwright/tests/multiparty-conference-set-9-test.spec.ts`
 - Scenario IDs use prefixes:
   - `CTS-MPC-*` (Multi-Party Conference matrix)
   - `CTS-TC-*` (Transfer Conference scenarios)
@@ -148,9 +151,16 @@ When Playwright behavior changes:
   - repeated call-init flows are merged into single tests when scenario steps are sequentially compatible
   - consolidated IDs remain explicit in test names for traceability (for example `CTS-TC-09 and CTS-TC-10 ...`)
   - current combined groups include:
-    - `SET_7`: `CTS-MPC-01+02`, `CTS-MPC-03+04`, `CTS-MPC-07+09+10`, `CTS-TC-01+02+03`, `CTS-TC-04+05` (CTS-TC-06 and CTS-TC-07 are split — queue routing won't re-route to RONA'd agent)
-    - `SET_8`: `CTS-TC-09+10`, `CTS-TC-11+13`, `CTS-TC-14+15`, `CTS-SW-02+03`, `CTS-SW-05+06`
+    - `SET_7`: `CTS-MPC-01+02`, `CTS-MPC-03+04`, `CTS-MPC-07+09+10`, `CTS-SW-02+03`
+    - `SET_8`: `CTS-TC-09+10`, `CTS-TC-11+13`, `CTS-TC-14+15`
+    - `SET_9`: `CTS-TC-01+02+03`, `CTS-TC-04+05`, `CTS-SW-05+06`
+  - standalone conference-only scenarios are intentionally distributed for runtime parity:
+    - `SET_7`: `CTS-SW-04`
+    - `SET_8`: `CTS-SW-07`
+    - `SET_9`: `CTS-TC-06`, `CTS-TC-07`, `CTS-TC-08`
+  - scenario split note:
+    - `CTS-TC-06` and `CTS-TC-07` run as separate tests (queue routing will not reliably re-route to an agent that RONA'd in the same session)
 
 ---
 
-_Last Updated: 2026-03-08_
+_Last Updated: 2026-03-09_

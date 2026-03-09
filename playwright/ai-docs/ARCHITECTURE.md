@@ -41,7 +41,8 @@ playwright/
 │   ├── advanced-task-controls-tests.spec.ts
 │   ├── dial-number-tests.spec.ts
 │   ├── multiparty-conference-set-7-tests.spec.ts
-│   └── multiparty-conference-set-8-tests.spec.ts
+│   ├── multiparty-conference-set-8-tests.spec.ts
+│   └── multiparty-conference-set-9-tests.spec.ts
 ├── tests/
 │   ├── digital-incoming-task-and-task-controls.spec.ts
 │   ├── incoming-task-and-controls-multi-session.spec.ts
@@ -54,7 +55,8 @@ playwright/
 │   ├── dial-number-task-control-test.spec.ts
 │   ├── tasklist-test.spec.ts
 │   ├── multiparty-conference-set-7-test.spec.ts
-│   └── multiparty-conference-set-8-test.spec.ts
+│   ├── multiparty-conference-set-8-test.spec.ts
+│   └── multiparty-conference-set-9-test.spec.ts
 ├── Utils/
 │   ├── initUtils.ts
 │   ├── helperUtils.ts
@@ -89,10 +91,11 @@ Keep this section aligned to real repository contents.
 | `SET_6` | `dial-number-tests.spec.ts`                  | `dial-number-task-control-test.spec.ts`                                                         |
 | `SET_7` | `multiparty-conference-set-7-tests.spec.ts`  | `multiparty-conference-set-7-test.spec.ts`                                                      |
 | `SET_8` | `multiparty-conference-set-8-tests.spec.ts`  | `multiparty-conference-set-8-test.spec.ts`                                                      |
+| `SET_9` | `multiparty-conference-set-9-tests.spec.ts`  | `multiparty-conference-set-9-test.spec.ts`                                                      |
 
 Use this mapping to decide where new tests should be added and wired.
 
-Conference scenario consolidation is implemented inside the SET_7/SET_8 test files to reduce repeated call setup while preserving scenario ID traceability in test titles.
+Conference scenario consolidation is implemented inside the SET_7/SET_8/SET_9 test files to reduce repeated call setup while preserving scenario ID traceability in test titles.
 
 ---
 
@@ -139,11 +142,12 @@ These flags are part of baseline runtime behavior and should be preserved unless
 1. Expands `USER_SETS` into set-scoped env keys (`<SET>_...`)
 2. Builds OAuth groups dynamically from `USER_SETS` with group size `2` and runs them in parallel.
    Each group uses batch size 4 internally (`OAUTH_BATCH_SIZE=4`).
-   With current `SET_1..SET_8`, this resolves to 4 groups:
+   With current `SET_1..SET_9`, this resolves to 5 groups:
    - `[SET_1, SET_2]`
    - `[SET_3, SET_4]`
    - `[SET_5, SET_6]`
    - `[SET_7, SET_8]`
+   - `[SET_9]`
 3. Optionally fetches dial-number OAuth token
 4. Performs one final `.env` upsert in the same OAuth setup run
 
@@ -259,7 +263,7 @@ When enabled by setup config/method, these page properties are created and avail
 | `incomingTaskUtils.ts`        | `createCallTask`, `createChatTask`, `createEmailTask`, `waitForIncomingTask`, `acceptIncomingTask`, `declineIncomingTask`, `acceptExtensionCall`, `loginExtension`, `submitRonaPopup`                                                                         | Incoming task creation/acceptance/decline and extension helpers                                                                                                                                                                                                                                                                                                                                                                           |
 | `wrapupUtils.ts`              | `submitWrapup`                                                                                                                                                                                                                                                | Wrapup submission                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | `helperUtils.ts`              | `handleStrayTasks`, `pageSetup`, `waitForState`, `waitForStateLogs`, `waitForWebSocketDisconnection`, `waitForWebSocketReconnection`, `clearPendingCallAndWrapup`, `dismissOverlays`                                                                          | Shared setup/cleanup/state polling/network-watch helpers. `waitForState` polls visible state text (`state-name`) to align with `verifyCurrentState`. `pageSetup` includes one bounded station logout/re-login recovery if `state-select` is still missing after login. `handleStrayTasks` handles exit-conference, dual call control groups (iterates all end-call buttons to find enabled one), cancel-consult with switch-leg fallback. |
-| `conferenceUtils.ts`          | `cleanupConferenceState`, `startBaselineCallOnAgent1`, `consultAgentAndAcceptCall`, `consultQueueAndAcceptCall`, `mergeConsultIntoConference`, `transferConsultAndSubmitWrapup`, `toggleConferenceLegIfSwitchAvailable`, `exitConferenceParticipantOrEndTask` | Shared conference helpers used by Set 7 and Set 8 to keep call setup/cleanup and consult-transfer flows consistent and reusable.                                                                                                                                                                                                                                                                                                          |
+| `conferenceUtils.ts`          | `cleanupConferenceState`, `startBaselineCallOnAgent1`, `consultAgentAndAcceptCall`, `consultQueueAndAcceptCall`, `mergeConsultIntoConference`, `transferConsultAndSubmitWrapup`, `toggleConferenceLegIfSwitchAvailable`, `exitConferenceParticipantOrEndTask` | Shared conference helpers used by Set 7, Set 8, and Set 9 to keep call setup/cleanup and consult-transfer flows consistent and reusable.                                                                                                                                                                                                                                                                                                  |
 
 Use existing helpers first; add new utilities only when behavior is not already covered.
 
@@ -426,4 +430,4 @@ After a call ends, the Make Call button on the caller page may stay disabled. Cl
 
 ---
 
-_Last Updated: 2026-03-08_
+_Last Updated: 2026-03-09_
