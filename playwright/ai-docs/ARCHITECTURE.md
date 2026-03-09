@@ -104,8 +104,7 @@ Conference scenario consolidation is implemented inside the SET_7/SET_8 test fil
 - Suite binding: `testMatch = **/suites/${TEST_SUITE}`
 - Worker count: `Object.keys(USER_SETS).length`
 - Global timeout: `180000`
-- Per-project retries: `0`
-- Trace: `on-first-retry` (effectively disabled since retries=0; avoids `tracing.stopChunk` ENOENT race condition that `retain-on-failure` triggered)
+- Per-project retries: `1`
 
 Any set added to `USER_SETS` becomes runnable through this model.
 
