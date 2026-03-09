@@ -398,6 +398,8 @@ After setting an agent to Available, the agent may not immediately appear in the
 
 Conference helpers should verify target-agent state is `Available` before opening consult/transfer popovers, and verify consult control visibility/enabled state on the source agent before launching consult.
 
+After transferring a consult lobby leg, participant states can settle asynchronously. Tests should wait for `Engaged` via state polling before strict equality assertions.
+
 ### resetCallerPage workaround
 
 After a call ends, the Make Call button on the caller page may stay disabled. Clicking `#sd-get-media-streams` re-enables it. This is a known workaround (marked with TODO).

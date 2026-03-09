@@ -325,6 +325,9 @@ export default function createMultipartyConferenceSet8Tests() {
       await consultAndAccept(1, 3);
       await transferConsultInteraction(1);
 
+      // Transfer handoff settles asynchronously; wait for both participants to reflect engaged state.
+      await waitForState(getAgentPage(2), USER_STATES.ENGAGED);
+      await waitForState(getAgentPage(3), USER_STATES.ENGAGED);
       await verifyCurrentState(getAgentPage(2), USER_STATES.ENGAGED);
       await verifyCurrentState(getAgentPage(3), USER_STATES.ENGAGED);
     });
