@@ -74,7 +74,7 @@ Many events that currently trigger `refreshTaskList()` will no longer need it be
 | `TASK_MEDIA` | `handleTaskMedia` | **Keep** (browser WebRTC setup) |
 | `TASK_UI_CONTROLS_UPDATED` | **NEW** — `handleUIControlsUpdated` | **Add** — trigger widget re-renders |
 | `TASK_WRAPUP` | `handleWrapup` | **Simplify** — no need to refresh |
-| `TASK_WRAPPEDUP` | `handleWrappedup` | **Simplify** — no need to refresh |
+| `AGENT_WRAPPEDUP` | `handleWrappedup` | **Simplify** — no need to refresh |
 | `TASK_HOLD` | Fire callback only | **Simplify** — no `refreshTaskList()` |
 | `TASK_RESUME` | Fire callback only | **Simplify** — no `refreshTaskList()` |
 | `TASK_CONSULT_*` | Fire callback only | **Simplify** — SDK manages state |

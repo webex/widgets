@@ -561,7 +561,7 @@ No changes needed.
 | Aspect | Old | New |
 |--------|-----|-----|
 | Conference check | `currentTask.data.isConferenceInProgress` | `controls.transferConference.isVisible` (or keep data check) |
-| Transfer button | Separate `consultTransferConsult` control | Unified `transfer` control handles all transfer types |
+| Transfer button | Separate `consultTransferConsult` control | `controls.transfer` (consult transfer) / `controls.transferConference` (conference transfer) |
 
 ---
 

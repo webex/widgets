@@ -63,7 +63,7 @@ CC Widgets defines its own types for control visibility, task state, and constan
 | `TASK_EVENTS.TASK_END` | `TASK_EVENTS.TASK_END` | Same |
 | — | `TASK_EVENTS.TASK_UI_CONTROLS_UPDATED` | **NEW** |
 | `TASK_EVENTS.TASK_WRAPUP` | `TASK_EVENTS.TASK_WRAPUP` | Same |
-| `TASK_EVENTS.TASK_WRAPPEDUP` | `TASK_EVENTS.TASK_WRAPPEDUP` | Same |
+| `TASK_EVENTS.AGENT_WRAPPEDUP` | `TASK_EVENTS.AGENT_WRAPPEDUP` | Same |
 | All consult/conference events | Same event names | Same |
 
 ### Media Type Constants
@@ -104,7 +104,7 @@ export interface useCallControlProps {
   currentTask: ITask;
   deviceType: string;            // Used for control visibility computation
   featureFlags: {[key: string]: boolean}; // Used for control visibility
-  agentId: string;               // Used for control visibility
+  agentId: string;               // Used for control visibility AND timer participant lookup
   conferenceEnabled: boolean;    // Used for control visibility
   isMuted: boolean;
   logger: ILogger;
@@ -124,8 +124,9 @@ import {ITask, TaskUIControls} from '@webex/contact-center';
 
 export interface useCallControlProps {
   currentTask: ITask;
-  // REMOVED: deviceType, featureFlags, agentId, conferenceEnabled
+  // REMOVED: deviceType, featureFlags, conferenceEnabled
   //          (SDK computes controls via UIControlConfig, set at task creation)
+  agentId: string;  // RETAINED — still needed by timer utils for participant lookup
   isMuted: boolean;
   logger: ILogger;
   onHoldResume?: (data: any) => void;
@@ -218,7 +219,7 @@ export const MEDIA_TYPE_CONSULT = 'consult'; // Used by findMediaResourceId
 - `isRecordingEnabled` — from `callProcessingDetails.pauseResumeEnabled`
 - `agentId` — from `taskManager.setAgentId()`
 
-This means the widget no longer needs to pass `deviceType`, `featureFlags`, or `agentId` for control computation.
+This means the widget no longer needs to pass `deviceType`, `featureFlags`, or `conferenceEnabled` for control computation. **Note:** `agentId` is retained — it is still needed by timer utilities for participant lookup.
 
 ---
 

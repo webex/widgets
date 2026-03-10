@@ -103,8 +103,8 @@ The largest single change in this migration. CC Widgets currently computes all c
 | `end` | `end` | Same |
 | `muteUnmute` | `mute` | **Renamed** |
 | `holdResume` | `hold` | **Renamed** (hold state still togglable) |
-| `pauseResumeRecording` | `recording` | **Renamed** |
-| `recordingIndicator` | `recording` | **Merged** into `recording` control |
+| `pauseResumeRecording` | `recording` | **Renamed** — toggle button (pause/resume) |
+| `recordingIndicator` | `recording` | **Maps to same SDK control** — but widget must keep a separate UI indicator (status badge). Use `recording.isVisible` for the indicator badge and `recording.isEnabled` for the toggle button's interactive state. See note below. |
 | `transfer` | `transfer` | Same |
 | `conference` | `conference` | Same |
 | `exitConference` | `exitConference` | Same |
@@ -112,7 +112,7 @@ The largest single change in this migration. CC Widgets currently computes all c
 | `consult` | `consult` | Same |
 | `endConsult` | `endConsult` | Same |
 | `consultTransfer` | `consultTransfer` | Same (always hidden in new SDK) |
-| `consultTransferConsult` | `transfer` | **Removed** — transfer button handles consult transfer |
+| `consultTransferConsult` | `transfer` / `transferConference` | **Split** — `transfer` for consult transfer, `transferConference` for conference transfer |
 | `mergeConferenceConsult` | `mergeToConference` | **Merged** into `mergeToConference` |
 | `muteUnmuteConsult` | `mute` | **Merged** into `mute` |
 | `switchToMainCall` | `switchToMainCall` | Same |

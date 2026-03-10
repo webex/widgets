@@ -99,8 +99,8 @@
 | `end` | `controls.end` | Nested under `controls` |
 | `muteUnmute` | `controls.mute` | **Renamed** + nested |
 | `holdResume` | `controls.hold` | **Renamed** + nested |
-| `pauseResumeRecording` | `controls.recording` | **Renamed** + nested |
-| `recordingIndicator` | `controls.recording` | **Merged** with recording |
+| `pauseResumeRecording` | `controls.recording` | **Renamed** — toggle button (pause/resume) |
+| `recordingIndicator` | `controls.recording` | **Same SDK control** — widget must keep separate UI for recording status badge vs toggle. Use `recording.isVisible` for badge, `recording.isEnabled` for toggle interactivity |
 | `transfer` | `controls.transfer` | Nested |
 | `conference` | `controls.conference` | Nested |
 | `exitConference` | `controls.exitConference` | Nested |
@@ -108,7 +108,7 @@
 | `consult` | `controls.consult` | Nested |
 | `endConsult` | `controls.endConsult` | Nested |
 | `consultTransfer` | `controls.consultTransfer` | Nested (always hidden in new) |
-| `consultTransferConsult` | `controls.transfer` | **Removed** — use `transfer` |
+| `consultTransferConsult` | `controls.transfer` / `controls.transferConference` | **Split** — `transfer` for consult transfer, `transferConference` for conference transfer |
 | `mergeConferenceConsult` | `controls.mergeToConference` | **Merged** |
 | `muteUnmuteConsult` | `controls.mute` | **Merged** |
 | `switchToMainCall` | `controls.switchToMainCall` | Nested |
@@ -337,7 +337,7 @@ Widgets do NOT need to provide UIControlConfig. The SDK builds it from:
 - Voice/WebRTC layer → `voiceVariant` (pstn/webrtc)
 - `taskManager.setAgentId()` → `agentId`
 
-This means `deviceType`, `featureFlags`, `agentId`, and `conferenceEnabled` props can be removed from `useCallControlProps`.
+This means `deviceType`, `featureFlags`, and `conferenceEnabled` props can be removed from `useCallControlProps`. **Note:** `agentId` must be retained — it is still required by `calculateStateTimerData()` and `calculateConsultTimerData()` to look up the agent's participant record from `interaction.participants`.
 
 ### 9. `task:wrapup` Race Condition
 

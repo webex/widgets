@@ -17,10 +17,10 @@ The `cc-components` package contains the presentational React components for tas
 |----------|----------|--------|
 | `holdResume` | `hold` | **Rename** |
 | `muteUnmute` | `mute` | **Rename** |
-| `pauseResumeRecording` | `recording` | **Rename** |
-| `recordingIndicator` | `recording` | **Merge** with recording control |
+| `pauseResumeRecording` | `recording` | **Rename** — toggle button (pause/resume) |
+| `recordingIndicator` | `recording` | **Same SDK control** — widget must preserve separate recording status badge UI. Use `recording.isVisible` for badge, `recording.isEnabled` for toggle |
 | `mergeConference` | `mergeToConference` | **Rename** |
-| `consultTransferConsult` | — | **Remove** (use `transfer`) |
+| `consultTransferConsult` | `transfer` / `transferConference` | **Split** — use `transfer` for consult transfer, `transferConference` for conference transfer |
 | `mergeConferenceConsult` | — | **Remove** (use `mergeToConference`) |
 | `muteUnmuteConsult` | — | **Remove** (use `mute`) |
 | `isConferenceInProgress` | — | **Remove** (derive from controls) |
@@ -359,7 +359,7 @@ This function builds the consult-mode button array. It references **5 old contro
 | `controlVisibility.muteUnmuteConsult` | `controls.mute` |
 | `controlVisibility.switchToMainCall` | `controls.switchToMainCall` |
 | `controlVisibility.isConferenceInProgress` | Derive: `controls.exitConference.isVisible` |
-| `controlVisibility.consultTransferConsult` | `controls.transfer` |
+| `controlVisibility.consultTransferConsult` | `controls.transfer` (consult) / `controls.transferConference` (conference) |
 | `controlVisibility.mergeConferenceConsult` | `controls.mergeToConference` |
 | `controlVisibility.endConsult` | `controls.endConsult` |
 

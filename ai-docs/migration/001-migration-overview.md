@@ -130,7 +130,7 @@ Should be consolidated to one function during migration.
 
 ### UIControlConfig Is Built by SDK (Not by Widgets)
 
-Widgets do NOT need to provide `UIControlConfig`. The SDK builds it internally from agent profile, `callProcessingDetails`, media type, and voice variant. This means `deviceType`, `featureFlags`, `agentId`, and `conferenceEnabled` **can be removed** from `useCallControlProps` — they are only used for `getControlsVisibility()` which is being eliminated.
+Widgets do NOT need to provide `UIControlConfig`. The SDK builds it internally from agent profile, `callProcessingDetails`, media type, and voice variant. This means `deviceType`, `featureFlags`, and `conferenceEnabled` **can be removed** from `useCallControlProps` — they are only used for `getControlsVisibility()` which is being eliminated. **Note:** `agentId` must be retained because it is also used by timer utilities (`calculateStateTimerData`, `calculateConsultTimerData`) to look up the agent's participant record from `interaction.participants`.
 
 ### Timer Utils Dependency on `controlVisibility`
 
