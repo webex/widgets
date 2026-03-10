@@ -140,11 +140,27 @@ async function openConsultOrTransferMenu(page: Page, action: 'consult' | 'transf
   await page.bringToFront();
   await dismissOverlays(page);
 
-  if (action === 'consult') {
-    await page.getByTestId('call-control:consult').first().click({timeout: AWAIT_TIMEOUT});
-  } else {
-    await page.getByTestId('call-control:transfer').first().click({timeout: AWAIT_TIMEOUT});
+  const testId = action === 'consult' ? 'call-control:consult' : 'call-control:transfer';
+  const controls = page.getByTestId(testId);
+  const controlCount = await controls.count().catch(() => 0);
+
+  for (let i = 0; i < controlCount; i++) {
+    const control = controls.nth(i);
+    const isVisible = await control.isVisible().catch(() => false);
+    if (!isVisible) {
+      continue;
+    }
+
+    const isEnabled = await control.isEnabled().catch(() => false);
+    if (!isEnabled) {
+      continue;
+    }
+
+    await control.click({timeout: AWAIT_TIMEOUT});
+    return;
   }
+
+  throw new Error(`No visible enabled ${action} control found`);
 }
 
 async function getPopover(page: Page) {
@@ -291,6 +307,24 @@ async function performEntryPointSelection(
  * @returns Promise<void>
  */
 export async function cancelConsult(page: Page): Promise<void> {
-  // Click cancel consult button
-  await page.getByTestId('cancel-consult-btn').click({timeout: AWAIT_TIMEOUT});
+  const controls = page.getByTestId('cancel-consult-btn');
+  const count = await controls.count().catch(() => 0);
+
+  for (let i = 0; i < count; i++) {
+    const control = controls.nth(i);
+    const isVisible = await control.isVisible().catch(() => false);
+    if (!isVisible) {
+      continue;
+    }
+
+    const isEnabled = await control.isEnabled().catch(() => false);
+    if (!isEnabled) {
+      continue;
+    }
+
+    await control.click({timeout: AWAIT_TIMEOUT});
+    return;
+  }
+
+  throw new Error('No visible enabled cancel consult control found');
 }

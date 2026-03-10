@@ -8,6 +8,79 @@ import {TASK_TYPES, AWAIT_TIMEOUT, OPERATION_TIMEOUT} from '../constants';
  * @packageDocumentation
  */
 
+async function findFirstVisibleEnabledControlIndex(page: Page, testId: string): Promise<number> {
+  const controls = page.getByTestId(testId);
+  const count = await controls.count().catch(() => 0);
+
+  for (let i = 0; i < count; i++) {
+    const control = controls.nth(i);
+    const isVisible = await control.isVisible().catch(() => false);
+    if (!isVisible) {
+      continue;
+    }
+
+    const isEnabled = await control.isEnabled().catch(() => false);
+    if (isEnabled) {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
+async function findFirstVisibleControlIndex(page: Page, testId: string): Promise<number> {
+  const controls = page.getByTestId(testId);
+  const count = await controls.count().catch(() => 0);
+
+  for (let i = 0; i < count; i++) {
+    const control = controls.nth(i);
+    const isVisible = await control.isVisible().catch(() => false);
+    if (isVisible) {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
+async function waitForVisibleControlIndex(page: Page, testId: string): Promise<number> {
+  await expect
+    .poll(() => findFirstVisibleControlIndex(page, testId), {
+      timeout: AWAIT_TIMEOUT,
+      intervals: [200, 500, 1000],
+    })
+    .not.toBe(-1);
+
+  return findFirstVisibleControlIndex(page, testId);
+}
+
+async function clickFirstVisibleEnabledControl(page: Page, testId: string): Promise<void> {
+  const startedAt = Date.now();
+  let lastError: unknown;
+
+  while (Date.now() - startedAt < AWAIT_TIMEOUT) {
+    const enabledIndex = await findFirstVisibleEnabledControlIndex(page, testId);
+    if (enabledIndex === -1) {
+      await page.waitForTimeout(200);
+      continue;
+    }
+
+    try {
+      await page.getByTestId(testId).nth(enabledIndex).click({timeout: AWAIT_TIMEOUT});
+      return;
+    } catch (error) {
+      lastError = error;
+      await page.waitForTimeout(200);
+    }
+  }
+
+  if (lastError instanceof Error) {
+    throw lastError;
+  }
+
+  throw new Error(`No enabled visible control found for ${testId}`);
+}
+
 /**
  * Verifies that all call task control buttons are visible and accessible.
  * Checks for hold, recording, transfer, consult, and end buttons.
@@ -97,12 +170,8 @@ export async function verifyTaskControls(page: Page, taskType: string): Promise<
  * @returns Promise<void>
  */
 export async function holdCallToggle(page: Page): Promise<void> {
-  // Wait for hold toggle button to be visible and clickable
-  const holdButton = page.getByTestId('call-control:hold-toggle').nth(0);
-  await expect(holdButton).toBeVisible({timeout: AWAIT_TIMEOUT});
-
-  // Click the hold toggle button
-  await holdButton.click({timeout: AWAIT_TIMEOUT});
+  await expect(page.getByTestId('call-control:hold-toggle').first()).toBeVisible({timeout: AWAIT_TIMEOUT});
+  await clickFirstVisibleEnabledControl(page, 'call-control:hold-toggle');
 }
 
 /**
@@ -112,12 +181,8 @@ export async function holdCallToggle(page: Page): Promise<void> {
  * @returns Promise<void>
  */
 export async function recordCallToggle(page: Page): Promise<void> {
-  // Wait for recording toggle button to be visible and clickable
-  const recordButton = page.getByTestId('call-control:recording-toggle').nth(0);
-  await expect(recordButton).toBeVisible({timeout: AWAIT_TIMEOUT});
-
-  // Click the recording toggle button
-  await recordButton.click({timeout: AWAIT_TIMEOUT});
+  await expect(page.getByTestId('call-control:recording-toggle').first()).toBeVisible({timeout: AWAIT_TIMEOUT});
+  await clickFirstVisibleEnabledControl(page, 'call-control:recording-toggle');
 }
 
 /**
@@ -160,7 +225,8 @@ export async function verifyHoldTimer(
  * @throws Error if icon verification fails
  */
 export async function verifyHoldButtonIcon(page: Page, {expectedIsHeld}: {expectedIsHeld: boolean}): Promise<void> {
-  const holdButton = page.getByTestId('call-control:hold-toggle').nth(0);
+  const holdButtonIndex = await waitForVisibleControlIndex(page, 'call-control:hold-toggle');
+  const holdButton = page.getByTestId('call-control:hold-toggle').nth(holdButtonIndex);
   await expect(holdButton).toBeVisible({timeout: AWAIT_TIMEOUT});
 
   // Get the icon element within the hold button
@@ -169,9 +235,12 @@ export async function verifyHoldButtonIcon(page: Page, {expectedIsHeld}: {expect
 
   // Verify the correct icon based on hold state
   const expectedIcon = expectedIsHeld ? 'play-bold' : 'pause-bold';
-  const actualIcon = await iconElement.getAttribute('name');
-
-  if (actualIcon !== expectedIcon) {
+  try {
+    await expect
+      .poll(async () => iconElement.getAttribute('name'), {timeout: AWAIT_TIMEOUT, intervals: [200, 500, 1000]})
+      .toBe(expectedIcon);
+  } catch {
+    const actualIcon = await iconElement.getAttribute('name');
     throw new Error(
       `Hold button icon mismatch. Expected: '${expectedIcon}' (isHeld: ${expectedIsHeld}), but found: '${actualIcon}'`
     );
@@ -192,7 +261,8 @@ export async function verifyRecordButtonIcon(
   page: Page,
   {expectedIsRecording}: {expectedIsRecording: boolean}
 ): Promise<void> {
-  const recordButton = page.getByTestId('call-control:recording-toggle').nth(0);
+  const recordButtonIndex = await waitForVisibleControlIndex(page, 'call-control:recording-toggle');
+  const recordButton = page.getByTestId('call-control:recording-toggle').nth(recordButtonIndex);
   await expect(recordButton).toBeVisible({timeout: AWAIT_TIMEOUT});
 
   // Get the icon element within the record button
@@ -201,9 +271,12 @@ export async function verifyRecordButtonIcon(
 
   // Verify the correct icon based on recording state
   const expectedIcon = expectedIsRecording ? 'record-paused-bold' : 'record-bold';
-  const actualIcon = await iconElement.getAttribute('name');
-
-  if (actualIcon !== expectedIcon) {
+  try {
+    await expect
+      .poll(async () => iconElement.getAttribute('name'), {timeout: AWAIT_TIMEOUT, intervals: [200, 500, 1000]})
+      .toBe(expectedIcon);
+  } catch {
+    const actualIcon = await iconElement.getAttribute('name');
     throw new Error(
       `Record button icon mismatch. Expected: '${expectedIcon}' (isRecording: ${expectedIsRecording}), but found: '${actualIcon}'`
     );
@@ -495,22 +568,7 @@ export async function verifyHoldMusicElement(page: Page): Promise<void> {
  */
 export async function endTask(page: Page): Promise<void> {
   const scanEndButtons = async (): Promise<{enabledIndex: number}> => {
-    const allEndButtons = page.getByTestId('call-control:end-call');
-    const buttonCount = await allEndButtons.count().catch(() => 0);
-
-    for (let i = 0; i < buttonCount; i++) {
-      const candidate = allEndButtons.nth(i);
-      const isVisible = await candidate.isVisible().catch(() => false);
-      if (!isVisible) {
-        continue;
-      }
-
-      if (await candidate.isEnabled().catch(() => false)) {
-        return {enabledIndex: i};
-      }
-    }
-
-    return {enabledIndex: -1};
+    return {enabledIndex: await findFirstVisibleEnabledControlIndex(page, 'call-control:end-call')};
   };
 
   await page.getByTestId('call-control:end-call').first().waitFor({state: 'visible', timeout: OPERATION_TIMEOUT});
@@ -573,5 +631,5 @@ export async function endTask(page: Page): Promise<void> {
     return;
   }
 
-  await page.getByTestId('call-control:end-call').nth(buttonState.enabledIndex).click({timeout: AWAIT_TIMEOUT});
+  await clickFirstVisibleEnabledControl(page, 'call-control:end-call');
 }

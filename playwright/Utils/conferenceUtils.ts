@@ -63,6 +63,38 @@ interface SingleAgentActionOptions {
   acceptTimeout?: number;
 }
 
+const hasAnyVisibleControl = async (page: Page, testId: string): Promise<boolean> => {
+  const controls = page.getByTestId(testId);
+  const count = await controls.count().catch(() => 0);
+
+  for (let i = 0; i < count; i++) {
+    if (await controls.nth(i).isVisible().catch(() => false)) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
+const hasAnyVisibleEnabledControl = async (page: Page, testId: string): Promise<boolean> => {
+  const controls = page.getByTestId(testId);
+  const count = await controls.count().catch(() => 0);
+
+  for (let i = 0; i < count; i++) {
+    const control = controls.nth(i);
+    const isVisible = await control.isVisible().catch(() => false);
+    if (!isVisible) {
+      continue;
+    }
+
+    if (await control.isEnabled().catch(() => false)) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
 export const getConferenceRequiredEnv = (projectName: string, suffix: string): string => {
   const value = process.env[`${projectName}_${suffix}`];
   if (!value) {
@@ -126,9 +158,13 @@ export const waitForConferenceControlReady = async (
   controlTestId: string,
   timeout: number = ACCEPT_TASK_TIMEOUT
 ) => {
-  const control = getAgentPage(agentId).getByTestId(controlTestId).first();
-  await expect(control).toBeVisible({timeout});
-  await expect(control).toBeEnabled({timeout});
+  const page = getAgentPage(agentId);
+  await expect
+    .poll(() => hasAnyVisibleEnabledControl(page, controlTestId), {
+      timeout,
+      intervals: [250, 500, 1000, 2000],
+    })
+    .toBeTruthy();
 };
 
 export const resetCallerPageForNextConferenceCall = async (callerPage?: Page) => {
@@ -176,7 +212,32 @@ export const startBaselineCallOnAgent1 = async ({
 
   await createCallTask(callerPage, getRequiredEnv('ENTRY_POINT'));
   await acceptIncomingTask(getAgentPage(1), TASK_TYPES.CALL, acceptTimeout);
-  await verifyCurrentState(getAgentPage(1), USER_STATES.ENGAGED);
+  await expect
+    .poll(
+      async () => {
+        const currentState = await getAgentPage(1)
+          .getByTestId('state-select')
+          .getByTestId('state-name')
+          .innerText()
+          .then((text) => text.trim())
+          .catch(() => '');
+        const hasEndControl = await getAgentPage(1)
+          .getByTestId('call-control:end-call')
+          .first()
+          .isVisible()
+          .catch(() => false);
+
+        return {
+          currentState,
+          hasEndControl,
+        };
+      },
+      {timeout: acceptTimeout, intervals: [250, 500, 1000, 2000]}
+    )
+    .toMatchObject({
+      currentState: USER_STATES.ENGAGED,
+      hasEndControl: true,
+    });
 };
 
 export const consultAgentAndAcceptCall = async ({
@@ -191,11 +252,40 @@ export const consultAgentAndAcceptCall = async ({
   const firstAttemptTimeout = Math.min(15000, acceptTimeout);
   let lastError: unknown;
 
+  const waitForConferenceConsultToSettle = async () => {
+    await expect
+      .poll(
+        async () => {
+          const consultReady = await hasAnyVisibleEnabledControl(fromAgentPage, 'call-control:consult');
+          const hasCancelConsult = await hasAnyVisibleControl(fromAgentPage, 'cancel-consult-btn');
+
+          return consultReady && !hasCancelConsult;
+        },
+        {timeout: acceptTimeout, intervals: [250, 500, 1000, 2000]}
+      )
+      .toBeTruthy();
+  };
+
+  const waitForConsultToStart = async () => {
+    await expect
+      .poll(() => hasAnyVisibleControl(fromAgentPage, 'cancel-consult-btn'), {
+        timeout: Math.min(10000, acceptTimeout),
+        intervals: [250, 500, 1000],
+      })
+      .toBeTruthy();
+  };
+
   for (const currentAcceptTimeout of [firstAttemptTimeout, acceptTimeout]) {
     await waitForState(fromAgentPage, USER_STATES.ENGAGED);
     await setConferenceAgentsAvailable(getAgentPage, [toAgent]);
-    await waitForConferenceControlReady(getAgentPage, fromAgent, 'call-control:consult', acceptTimeout);
-    await consultOrTransfer(fromAgentPage, 'agent', 'consult', getAgentName(toAgent));
+    await waitForConferenceConsultToSettle();
+    try {
+      await consultOrTransfer(fromAgentPage, 'agent', 'consult', getAgentName(toAgent));
+      await waitForConsultToStart();
+    } catch (error) {
+      lastError = error;
+      continue;
+    }
 
     try {
       await acceptIncomingTask(toAgentPage, TASK_TYPES.CALL, currentAcceptTimeout);
@@ -204,11 +294,7 @@ export const consultAgentAndAcceptCall = async ({
     } catch (error) {
       lastError = error;
 
-      const cancelConsultVisible = await fromAgentPage
-        .getByTestId('cancel-consult-btn')
-        .first()
-        .isVisible()
-        .catch(() => false);
+      const cancelConsultVisible = await hasAnyVisibleControl(fromAgentPage, 'cancel-consult-btn');
 
       if (cancelConsultVisible) {
         await cancelConsult(fromAgentPage);
