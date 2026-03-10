@@ -74,7 +74,7 @@ Many events that currently trigger `refreshTaskList()` will no longer need it be
 | `TASK_MEDIA` | `handleTaskMedia` | **Keep** (browser WebRTC setup) |
 | `TASK_UI_CONTROLS_UPDATED` | **NEW** — `handleUIControlsUpdated` | **Add** — trigger widget re-renders |
 | `TASK_WRAPUP` | `handleWrapup` | **Simplify** — no need to refresh |
-| `AGENT_WRAPPEDUP` | `handleWrappedup` | **Simplify** — no need to refresh |
+| `AGENT_WRAPPEDUP` | `handleWrappedup` | **Keep refresh or add explicit task removal** — task must be removed from `taskList`/`currentTask` after wrapup completion to prevent stale UI |
 | `TASK_HOLD` | Fire callback only | **Simplify** — no `refreshTaskList()` |
 | `TASK_RESUME` | Fire callback only | **Simplify** — no `refreshTaskList()` |
 | `TASK_CONSULT_*` | Fire callback only | **Simplify** — SDK manages state |
@@ -158,7 +158,11 @@ registerTaskEventListeners(task: ITask) {
   // SIMPLIFIED: Events that only need callback firing (SDK keeps task.data in sync)
   task.on(TASK_EVENTS.TASK_HOLD, () => this.fireTaskCallbacks(TASK_EVENTS.TASK_HOLD, interactionId));
   task.on(TASK_EVENTS.TASK_RESUME, () => this.fireTaskCallbacks(TASK_EVENTS.TASK_RESUME, interactionId));
-  task.on(TASK_EVENTS.AGENT_WRAPPEDUP, (data) => this.fireTaskCallbacks(TASK_EVENTS.AGENT_WRAPPEDUP, interactionId, data));
+  // AGENT_WRAPPEDUP: still needs task cleanup — refresh or explicitly remove from taskList/currentTask
+  task.on(TASK_EVENTS.AGENT_WRAPPEDUP, (data) => {
+    this.refreshTaskList(); // retain: task must be removed from list after wrapup completion
+    this.fireTaskCallbacks(TASK_EVENTS.AGENT_WRAPPEDUP, interactionId, data);
+  });
   task.on(TASK_EVENTS.TASK_RECORDING_PAUSED, () => this.fireTaskCallbacks(TASK_EVENTS.TASK_RECORDING_PAUSED, interactionId));
   task.on(TASK_EVENTS.TASK_RECORDING_RESUMED, () => this.fireTaskCallbacks(TASK_EVENTS.TASK_RECORDING_RESUMED, interactionId));
   // ... consult/conference events: fire callbacks only, no refreshTaskList()

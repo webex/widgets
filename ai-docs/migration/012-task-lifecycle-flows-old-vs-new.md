@@ -376,8 +376,8 @@ This document traces **every task scenario from start to finish**, showing exact
 1. User clicks Pause Recording
 2. Hook: toggleRecording() → currentTask.pauseRecording()
 3. SDK: sends TaskEvent.PAUSE_RECORDING → context.recordingInProgress = false
-4. SDK: computeUIControls → recording: { isVisible: true, isEnabled: false }
-         (visible but disabled = recording paused)
+4. SDK: computeUIControls → recording: { isVisible: true, isEnabled: true }
+         (visible and enabled = agent can click to resume recording)
 5. SDK: API call
 6. WebSocket: ContactRecordingPaused
 7. SDK emits: task:recordingPaused, task:ui-controls-updated

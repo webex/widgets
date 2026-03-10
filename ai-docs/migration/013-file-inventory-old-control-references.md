@@ -12,7 +12,7 @@ This is the definitive inventory of **every file** in CC Widgets that references
 |----------|-------------------|-----------------|
 | Widget hooks (`task/src/`) | 4 | 1 (`index.ts`) |
 | Widget utils (`task/src/Utils/`) | 4 | 0 |
-| Widget entry points (`task/src/*/index.tsx`) | 3 | 2 (`OutdialCall`, `IncomingTask`) |
+| Widget entry points (`task/src/*/index.tsx`) | 4 | 1 (`OutdialCall`) |
 | cc-components types | 1 (central type file) | 0 |
 | cc-components utils | 2 | 3+ (unaffected) |
 | cc-components components | 4 | 8+ (unaffected) |
@@ -55,6 +55,7 @@ This is the definitive inventory of **every file** in CC Widgets that references
 | 11 | `task/src/CallControl/index.tsx` | Passes `deviceType`, `featureFlags`, `agentId`, `conferenceEnabled` from store to `useCallControl` | [Doc 004](./004-call-control-hook-migration.md) |
 | 12 | `task/src/CallControlCAD/index.tsx` | Same as #11 — passes `deviceType`, `featureFlags`, `agentId`, `conferenceEnabled` | [Doc 010](./010-component-layer-migration.md) |
 | 13 | `task/src/TaskList/index.tsx` | Passes `deviceType` from store for `isBrowser` computation | [Doc 006](./006-task-list-migration.md) |
+| 13b | `task/src/IncomingTask/index.tsx` | Passes `deviceType` from store to `useIncomingTask` — migrate to `task.uiControls.accept`/`decline` | [Doc 005](./005-incoming-task-migration.md) |
 
 ### Tier 5: Utility Files (Low-Medium Impact)
 
@@ -87,7 +88,6 @@ This is the definitive inventory of **every file** in CC Widgets that references
 | File | Reason |
 |------|--------|
 | `task/src/OutdialCall/index.tsx` | CC-level API, no task controls |
-| `task/src/IncomingTask/index.tsx` | Minimal — accept/decline passed through, not computed here |
 | `task/src/index.ts` | Re-exports only |
 | `cc-components/.../AutoWrapupTimer/AutoWrapupTimer.tsx` | Uses `secondsUntilAutoWrapup` only |
 | `cc-components/.../AutoWrapupTimer/AutoWrapupTimer.utils.ts` | Pure timer formatting |
@@ -153,7 +153,8 @@ Based on dependencies:
 14. CallControl/index.tsx            — Remove old props from useCallControl call
 15. CallControlCAD/index.tsx         — Remove old props from useCallControl call
 16. TaskList/index.tsx               — Remove deviceType usage
-17. All test files                   — Update mocks and assertions
+17. IncomingTask/index.tsx           — Remove deviceType, migrate to task.uiControls
+18. All test files                   — Update mocks and assertions
 ```
 
 ---
