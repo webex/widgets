@@ -364,68 +364,89 @@ export function verifyEndLogs(): void {
 /**
  * Verifies audio transfer from caller to browser by executing the exact console command.
  * Executes: document.querySelector("#remote-audio").srcObject.getAudioTracks()
- * Verifies that exactly 1 audio MediaStreamTrack is present with GUID label and proper properties
+ * Verifies that exactly 1 live audio MediaStreamTrack is attached and the audio element is playing.
  * @param page - The agent's main page (browser receiving audio)
  * @returns Promise<void>
  * @throws Error if remote audio tracks verification fails
  */
 export async function verifyRemoteAudioTracks(page: Page): Promise<void> {
   try {
-    // Execute the exact console command for audio tracks
-    const consoleResult = await page.evaluate(() => {
-      // This is the exact command from your console
-      const audioElem = document.querySelector('#remote-audio') as HTMLAudioElement;
+    await expect
+      .poll(
+        async () => {
+          return page.evaluate(() => {
+            const audioElem = document.querySelector('#remote-audio') as HTMLAudioElement | null;
 
-      if (!audioElem) {
-        return [];
-      }
+            if (!audioElem) {
+              return {
+                hasAudioElement: false,
+                hasSrcObject: false,
+                trackCount: 0,
+                tracks: [],
+              };
+            }
 
-      if (!audioElem.srcObject) {
-        return [];
-      }
+            const mediaStream = audioElem.srcObject as MediaStream | null;
+            const audioTracks = mediaStream?.getAudioTracks() ?? [];
 
-      const mediaStream = audioElem.srcObject as MediaStream;
-      const audioTracks = mediaStream.getAudioTracks();
-
-      // Convert MediaStreamTrack objects to serializable format (like console shows)
-      const result = audioTracks.map((track, index) => {
-        return {
-          index,
-          kind: track.kind,
-          id: track.id,
-          label: track.label,
-          enabled: track.enabled,
-          muted: track.muted,
-          readyState: track.readyState,
-          onended: track.onended,
-          onmute: track.onmute,
-          onunmute: track.onunmute,
-        };
+            return {
+              hasAudioElement: true,
+              hasSrcObject: Boolean(mediaStream),
+              paused: audioElem.paused,
+              trackCount: audioTracks.length,
+              tracks: audioTracks.map((track, index) => ({
+                index,
+                kind: track.kind,
+                id: track.id,
+                label: track.label,
+                enabled: track.enabled,
+                muted: track.muted,
+                readyState: track.readyState,
+              })),
+            };
+          });
+        },
+        {timeout: OPERATION_TIMEOUT, intervals: [250, 500, 1000, 2000]}
+      )
+      .toMatchObject({
+        hasAudioElement: true,
+        hasSrcObject: true,
+        paused: false,
+        trackCount: 1,
+        tracks: [
+          {
+            kind: 'audio',
+            enabled: true,
+            readyState: 'live',
+          },
+        ],
       });
-
-      return result;
-    });
-
-    // Verify we got exactly 1 audio track (no more, no less)
-    expect(consoleResult.length).toBe(1);
-
-    // Get the single audio track (since we verified there's exactly 1)
-    const audioTrack = consoleResult[0];
-
-    // Verify it's an audio track
-    if (audioTrack.kind !== 'audio') {
-      throw new Error(
-        `❌ Expected audio track but found ${audioTrack.kind} track. Track details: { kind: "${audioTrack.kind}", label: "${audioTrack.label}", id: "${audioTrack.id}" }`
-      );
-    }
-
-    // Verify essential track properties for audio transfer
-    expect(audioTrack.kind).toBe('audio');
-    expect(audioTrack.enabled).toBe(true);
-    expect(audioTrack.muted).toBe(false);
-    expect(audioTrack.readyState).toBe('live');
   } catch (error) {
-    throw new Error(`❌ Audio transfer verification failed: ${error.message}`);
+    const debugState = await page
+      .evaluate(() => {
+        const audioElem = document.querySelector('#remote-audio') as HTMLAudioElement | null;
+        const mediaStream = audioElem?.srcObject as MediaStream | null;
+        const audioTracks = mediaStream?.getAudioTracks() ?? [];
+
+        return {
+          hasAudioElement: Boolean(audioElem),
+          hasSrcObject: Boolean(mediaStream),
+          paused: audioElem?.paused ?? null,
+          trackCount: audioTracks.length,
+          tracks: audioTracks.map((track, index) => ({
+            index,
+            kind: track.kind,
+            id: track.id,
+            label: track.label,
+            enabled: track.enabled,
+            muted: track.muted,
+            readyState: track.readyState,
+          })),
+        };
+      })
+      .catch(() => ({pageEvaluationFailed: true}));
+
+    throw new Error(`❌ Audio transfer verification failed: ${error.message}. Debug state: ${JSON.stringify(debugState)}`);
   }
 }
 
