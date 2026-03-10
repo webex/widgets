@@ -528,11 +528,12 @@ export async function endTask(page: Page): Promise<void> {
       if (switchVisible) {
         await switchToConsultBtn.click({timeout: AWAIT_TIMEOUT});
         await page.waitForTimeout(1000);
+        buttonState = await scanEndButtons();
         cancelConsultVisible = await cancelConsultBtn.isVisible().catch(() => false);
       }
     }
 
-    if (cancelConsultVisible) {
+    if (buttonState.enabledIndex === -1 && cancelConsultVisible) {
       await cancelConsultBtn.click({timeout: AWAIT_TIMEOUT});
       await page.waitForTimeout(1000);
       buttonState = await scanEndButtons();
@@ -553,9 +554,24 @@ export async function endTask(page: Page): Promise<void> {
   await expect
     .poll(async () => {
       buttonState = await scanEndButtons();
+      const wrapupVisible = await page
+        .getByTestId('call-control:wrapup-button')
+        .first()
+        .isVisible()
+        .catch(() => false);
+
+      if (wrapupVisible) {
+        return 'wrapup';
+      }
+
       return buttonState.enabledIndex;
     }, {timeout: AWAIT_TIMEOUT, intervals: [200, 500, 1000]})
     .not.toBe(-1);
+
+  const wrapupVisible = await page.getByTestId('call-control:wrapup-button').first().isVisible().catch(() => false);
+  if (wrapupVisible && buttonState.enabledIndex === -1) {
+    return;
+  }
 
   await page.getByTestId('call-control:end-call').nth(buttonState.enabledIndex).click({timeout: AWAIT_TIMEOUT});
 }
