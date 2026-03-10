@@ -5,18 +5,12 @@ import path from 'path';
 import { SamplesPage } from './pages/SamplesPage';
 import { MeetingWidgetPage } from './pages/MeetingWidgetPage';
 
-
+dotenv.config({ override: true });
 test.describe('Meeting Widget', () => {
   let samplesPage: SamplesPage;
   let meetingPage: MeetingWidgetPage;
 
   test.beforeAll(async ({ browser }) => {
-    // Re-read .env fresh so we pick up the token written by Meetings Setup
-    const envPath = path.resolve(__dirname, '../../.env');
-    const envConfig = dotenv.parse(fs.readFileSync(envPath));
-    for (const key in envConfig) {
-      process.env[key] = envConfig[key];
-    }
     const accessToken = process.env.PW_MEETING_ACCESS_TOKEN!;
     const meetingDestination = process.env.PW_MEETING_DESTINATION!;
     expect(accessToken, 'PW_MEETING_ACCESS_TOKEN must be set').toBeTruthy();
