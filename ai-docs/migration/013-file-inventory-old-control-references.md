@@ -17,7 +17,7 @@ This is the definitive inventory of **every file** in CC Widgets that references
 | cc-components utils | 2 | 3+ (unaffected) |
 | cc-components components | 4 | 8+ (unaffected) |
 | Store | 3 | 1 (`store.ts`) |
-| **Total files to modify** | **~21** | **~15 unaffected** |
+| **Total files to modify** | **~23** | **~15 unaffected** |
 
 ---
 
@@ -47,6 +47,8 @@ This is the definitive inventory of **every file** in CC Widgets that references
 | 8 | `cc-components/.../CallControl/call-control.tsx` | Receives `controlVisibility` as prop, passes to `buildCallControlButtons()`, `createConsultButtons()`, `filterButtonsForConsultation()` | [Doc 010](./010-component-layer-migration.md) |
 | 9 | `cc-components/.../CallControlCustom/call-control-consult.tsx` | Receives `controlVisibility` from `CallControlConsultComponentsProps`, passes to `createConsultButtons()` | [Doc 010](./010-component-layer-migration.md) |
 | 10 | `cc-components/.../CallControlCustom/consult-transfer-popover.tsx` | Receives `isConferenceInProgress` prop | [Doc 010](./010-component-layer-migration.md) |
+| 10b | `cc-components/.../CallControlCAD/call-control-cad.tsx` | Directly references `controlVisibility.isConferenceInProgress`, `controlVisibility.isHeld`, `controlVisibility.isConsultReceived`, `controlVisibility.consultCallHeld`, `controlVisibility.recordingIndicator`, `controlVisibility.wrapup`, `controlVisibility.isConsultInitiatedOrAccepted` | [Doc 010](./010-component-layer-migration.md) |
+| 10c | `cc-components/src/wc.ts` | Registers `WebCallControlCADComponent` with `commonPropsForCallControl` — props must align with new `TaskUIControls` shape | [Doc 010](./010-component-layer-migration.md) |
 
 ### Tier 4: Widget Entry Points (Medium Impact)
 
@@ -116,18 +118,18 @@ This shows exactly which files reference each old control name:
 | `muteUnmuteConsult` | `task-util.ts`, `call-control-custom.utils.ts`, `task.types.ts` |
 | `holdResume` | `task-util.ts`, `call-control.utils.ts`, `task.types.ts` |
 | `pauseResumeRecording` | `task-util.ts`, `call-control.utils.ts`, `task.types.ts` |
-| `recordingIndicator` | `task-util.ts`, `task.types.ts` |
+| `recordingIndicator` | `task-util.ts`, `task.types.ts`, `call-control-cad.tsx` |
 | `mergeConference` | `task-util.ts`, `call-control.utils.ts`, `task.types.ts` |
 | `consultTransferConsult` | `task-util.ts`, `call-control-custom.utils.ts`, `task.types.ts` |
 | `mergeConferenceConsult` | `task-util.ts`, `call-control-custom.utils.ts`, `task.types.ts` |
 | `isConferenceInProgress` | `task-util.ts`, `call-control.utils.ts`, `call-control-custom.utils.ts`, `task.types.ts`, `consult-transfer-popover.tsx` |
 | `isConsultInitiated` | `task-util.ts`, `call-control.utils.ts`, `timer-utils.ts`, `task.types.ts` |
 | `isConsultInitiatedAndAccepted` | `task-util.ts`, `task.types.ts` |
-| `isConsultReceived` | `task-util.ts`, `task.types.ts` |
+| `isConsultReceived` | `task-util.ts`, `task.types.ts`, `call-control-cad.tsx` |
 | `isConsultInitiatedOrAccepted` | `task-util.ts`, `helper.ts`, `timer-utils.ts`, `task.types.ts` |
-| `isHeld` | `task-util.ts`, `call-control.utils.ts`, `task.types.ts` |
-| `consultCallHeld` | `task-util.ts`, `timer-utils.ts`, `task.types.ts` |
-| `controlVisibility` (param name) | `helper.ts`, `timer-utils.ts`, `call-control.utils.ts`, `call-control-custom.utils.ts`, `call-control.tsx`, `call-control-consult.tsx`, `task.types.ts` |
+| `isHeld` | `task-util.ts`, `call-control.utils.ts`, `task.types.ts`, `call-control-cad.tsx` |
+| `consultCallHeld` | `task-util.ts`, `timer-utils.ts`, `task.types.ts`, `call-control-cad.tsx` |
+| `controlVisibility` (param name) | `helper.ts`, `timer-utils.ts`, `call-control.utils.ts`, `call-control-custom.utils.ts`, `call-control.tsx`, `call-control-consult.tsx`, `call-control-cad.tsx`, `task.types.ts` |
 | `ControlVisibility` (type) | `task.types.ts` (definition), `call-control.utils.ts`, `call-control-custom.utils.ts` (imports) |
 
 ---
@@ -150,6 +152,8 @@ Based on dependencies:
 11. call-control.tsx                 — Update to accept controls: TaskUIControls
 12. call-control-consult.tsx         — Update consult component props
 13. consult-transfer-popover.tsx     — Update isConferenceInProgress derivation
+13b. call-control-cad.tsx            — Replace all controlVisibility refs (isHeld, isConferenceInProgress, recordingIndicator, wrapup, isConsultInitiatedOrAccepted, isConsultReceived, consultCallHeld)
+13c. wc.ts                           — Update commonPropsForCallControl to align with TaskUIControls shape
 14. CallControl/index.tsx            — Remove old props from useCallControl call
 15. CallControlCAD/index.tsx         — Remove old props from useCallControl call
 16. TaskList/index.tsx               — Remove deviceType usage

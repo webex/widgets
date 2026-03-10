@@ -162,7 +162,7 @@ describe('calculateStateTimerData with TaskUIControls', () => {
 **Steps:**
 1. Update `calculateStateTimerData(task, controls, agentId)` signature
 2. Replace `controlVisibility.isConsultInitiatedOrAccepted` → `controls.endConsult.isVisible`
-3. Replace `controlVisibility.isHeld` → derive from `controls.hold`
+3. Replace `controlVisibility.isHeld` → derive from task data via `findHoldStatus(task, 'mainCall', agentId)` (do NOT derive from `controls.hold.isEnabled` — hold can be disabled in consult/transition states even when call is not held)
 4. Update `calculateConsultTimerData(task, controls, agentId)` similarly
 5. Update all test cases
 
