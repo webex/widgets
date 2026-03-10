@@ -189,6 +189,9 @@ jobs:
           path: '**/dist'
           key: dist-${{ env.rid }}
 
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
       - name: Test E2E
         run: yarn workspace @webex/widgets run test:e2e
 
