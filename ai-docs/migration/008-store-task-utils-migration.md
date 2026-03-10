@@ -178,7 +178,10 @@ export function getTaskStatus(task: ITask): string {
   if (controls.wrapup.isVisible) return 'Wrap Up';
   if (controls.endConsult.isVisible) return 'Consulting';
   if (controls.exitConference.isVisible) return 'Conference';
-  if (controls.hold.isVisible && !controls.hold.isEnabled) return 'Held';
+  // NOTE: Do NOT derive held state from controls.hold.isEnabled — hold can be
+  // disabled in consult/transition states even when call is not held.
+  // Use task data instead:
+  if (findHoldStatus(task, 'mainCall', agentId)) return 'Held';
   if (controls.end.isVisible) return 'Connected';
   if (controls.accept.isVisible) return 'Offered';
   return 'Unknown';

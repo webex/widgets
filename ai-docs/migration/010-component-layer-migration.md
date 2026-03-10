@@ -232,10 +232,12 @@ const isConferenceInProgress = controls.exitConference.isVisible;
 // New: derive from controls
 const isConsulting = controls.endConsult.isVisible;
 
-// Old: isHeld (boolean prop)
-// New: derive from hold control
-const isHeld = controls.hold.isVisible && !controls.hold.isEnabled;
-// (Note: hold is visible but disabled when held + in conference)
+// Old: isHeld (boolean state flag from getControlsVisibility)
+// New: derive from task data, NOT from control enabled state
+// IMPORTANT: Do NOT use `controls.hold.isEnabled` to determine held state —
+// hold can be disabled in consult/transition states even when call is not held.
+const isHeld = findHoldStatus(currentTask, 'mainCall', agentId);
+// (Uses task.data.interaction.participants to check actual hold state)
 ```
 
 ---
@@ -291,7 +293,7 @@ This function builds the main call control button array. It references **12 old 
 |--------------|---------------|
 | `controlVisibility.muteUnmute.isVisible` | `controls.mute.isVisible` |
 | `controlVisibility.switchToConsult.isEnabled` | `controls.switchToConsult.isEnabled` |
-| `controlVisibility.isHeld` | Derive: `controls.hold.isVisible && !controls.hold.isEnabled` |
+| `controlVisibility.isHeld` | Derive from task data: `findHoldStatus(task, 'mainCall', agentId)` — do NOT derive from `controls.hold.isEnabled` |
 | `controlVisibility.holdResume.isEnabled` | `controls.hold.isEnabled` |
 | `controlVisibility.holdResume.isVisible` | `controls.hold.isVisible` |
 | `controlVisibility.consult.isEnabled` | `controls.consult.isEnabled` |
@@ -335,7 +337,7 @@ export const buildCallControlButtons = (
   controls: TaskUIControls,  // NEW type from SDK
   ...handlers
 ): CallControlButton[] => {
-  const isHeld = controls.hold.isVisible && !controls.hold.isEnabled;
+  const isHeld = findHoldStatus(currentTask, 'mainCall', agentId); // from task data, NOT control state
   const isConferencing = controls.exitConference.isVisible;
   return [
     { id: 'mute', isVisible: controls.mute.isVisible, ... },
@@ -402,7 +404,7 @@ export const createConsultButtons = (
 
 **File:** `task/src/CallControlCAD/index.tsx`
 
-This is an **alternative CallControl widget** (CAD = Call Associated Data). It passes `deviceType`, `featureFlags`, `agentId`, and `conferenceEnabled` from the store to `useCallControl`. These will all be removed when `useCallControlProps` is updated.
+This is an **alternative CallControl widget** (CAD = Call Associated Data). It passes `deviceType`, `featureFlags`, `agentId`, and `conferenceEnabled` from the store to `useCallControl`. When `useCallControlProps` is updated, `deviceType`, `featureFlags`, and `conferenceEnabled` will be removed. `agentId` is retained — it is still needed for timer participant lookup.
 
 #### Before
 ```tsx
@@ -423,8 +425,8 @@ const { isMuted } = store;
 const result = {
   ...useCallControl({
     currentTask, onHoldResume, onEnd, onWrapUp, onRecordingToggle, onToggleMute,
-    logger, isMuted
-    // REMOVED: deviceType, featureFlags, conferenceEnabled, agentId
+    logger, isMuted, agentId  // agentId RETAINED — needed for timer participant lookup
+    // REMOVED: deviceType, featureFlags, conferenceEnabled
   }),
   // ...
 };
@@ -467,7 +469,7 @@ Has these migration-affected fields:
 - `deviceType: string` (line 251) → REMOVE (SDK handles)
 - `featureFlags: {[key: string]: boolean}` (line 389) → REMOVE (SDK handles)
 - `conferenceEnabled: boolean` (line 429) → REMOVE (SDK handles)
-- `agentId: string` (line 472) → REMOVE from controls (keep for display uses)
+- `agentId: string` (line 472) → RETAIN (needed for timer participant lookup, not just controls)
 
 ### 8. `CallControlComponentProps` — Picks `controlVisibility`
 
@@ -537,7 +539,7 @@ export const getConsultStatusText = (consultInitiated: boolean) => {
 | `cc-components/.../CallControlCustom/consult-transfer-popover.tsx` | Update `isConferenceInProgress` prop | **LOW** |
 | `cc-components/.../IncomingTask/incoming-task.tsx` | Minor prop updates | **LOW** |
 | `cc-components/.../TaskList/task-list.tsx` | Minor prop updates | **LOW** |
-| `task/src/CallControlCAD/index.tsx` | Remove `deviceType`, `featureFlags`, `agentId`, `conferenceEnabled` from `useCallControl` call | **MEDIUM** |
+| `task/src/CallControlCAD/index.tsx` | Remove `deviceType`, `featureFlags`, `conferenceEnabled` from `useCallControl` call (retain `agentId` for timers) | **MEDIUM** |
 | All test files for above | Update mocks and assertions | **HIGH** |
 
 ---
