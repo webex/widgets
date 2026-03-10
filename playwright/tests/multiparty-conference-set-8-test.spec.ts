@@ -10,7 +10,7 @@ import {
   cleanupConferenceState,
   consultAgentAndAcceptCall,
   consultQueueAndAcceptCall,
-  exitConferenceParticipantOrEndTask,
+  exitConferenceParticipantAndWrapup,
   getConferenceAgentName,
   getConferenceRequiredEnv,
   mergeConsultIntoConference as mergeConsultIntoConferenceUtil,
@@ -90,7 +90,7 @@ export default function createMultipartyConferenceSet8Tests() {
   };
 
   const removeConferenceParticipant = async (agentId: AgentId) =>
-    exitConferenceParticipantOrEndTask(getAgentPage, agentId);
+    exitConferenceParticipantAndWrapup(getAgentPage, agentId);
 
   test.beforeAll(async ({browser}, testInfo) => {
     testManager = new TestManager(testInfo.project.name);

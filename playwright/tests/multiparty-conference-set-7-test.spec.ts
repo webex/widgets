@@ -8,7 +8,7 @@ import {
   CONFERENCE_AGENT_IDS,
   cleanupConferenceState,
   consultAgentAndAcceptCall,
-  exitConferenceParticipantOrEndTask,
+  exitConferenceParticipantAndWrapup,
   getConferenceAgentName,
   getConferenceRequiredEnv,
   mergeConsultIntoConference as mergeConsultIntoConferenceUtil,
@@ -88,7 +88,7 @@ export default function createMultipartyConferenceSet7Tests() {
   };
 
   const removeConferenceParticipant = async (agentId: AgentId) =>
-    exitConferenceParticipantOrEndTask(getAgentPage, agentId);
+    exitConferenceParticipantAndWrapup(getAgentPage, agentId);
 
   const expectPostCustomerLeaveControls = async (agentId: AgentId) => {
     const page = getAgentPage(agentId);

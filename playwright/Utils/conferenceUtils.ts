@@ -1,6 +1,12 @@
 import {expect, Page} from '@playwright/test';
-import {cancelConsult, consultOrTransfer} from './advancedTaskControlUtils';
-import {acceptIncomingTask, createCallTask} from './incomingTaskUtils';
+import {
+  ACTIVE_CONSULT_CONTROL_TEST_IDS,
+  cancelConsult,
+  consultOrTransfer,
+  hasAnyVisibleControlFromList,
+} from './advancedTaskControlUtils';
+import {hasAnyVisibleControl, hasAnyVisibleEnabledControl} from './controlUtils';
+import {acceptIncomingTask, createCallTask, getIncomingTaskLocator} from './incomingTaskUtils';
 import {handleStrayTasks, waitForState} from './helperUtils';
 import {endTask} from './taskControlUtils';
 import {changeUserState, verifyCurrentState} from './userStateUtils';
@@ -62,38 +68,6 @@ interface SingleAgentActionOptions {
   getAgentPage: GetAgentPage;
   acceptTimeout?: number;
 }
-
-const hasAnyVisibleControl = async (page: Page, testId: string): Promise<boolean> => {
-  const controls = page.getByTestId(testId);
-  const count = await controls.count().catch(() => 0);
-
-  for (let i = 0; i < count; i++) {
-    if (await controls.nth(i).isVisible().catch(() => false)) {
-      return true;
-    }
-  }
-
-  return false;
-};
-
-const hasAnyVisibleEnabledControl = async (page: Page, testId: string): Promise<boolean> => {
-  const controls = page.getByTestId(testId);
-  const count = await controls.count().catch(() => 0);
-
-  for (let i = 0; i < count; i++) {
-    const control = controls.nth(i);
-    const isVisible = await control.isVisible().catch(() => false);
-    if (!isVisible) {
-      continue;
-    }
-
-    if (await control.isEnabled().catch(() => false)) {
-      return true;
-    }
-  }
-
-  return false;
-};
 
 export const getConferenceRequiredEnv = (projectName: string, suffix: string): string => {
   const value = process.env[`${projectName}_${suffix}`];
@@ -212,32 +186,8 @@ export const startBaselineCallOnAgent1 = async ({
 
   await createCallTask(callerPage, getRequiredEnv('ENTRY_POINT'));
   await acceptIncomingTask(getAgentPage(1), TASK_TYPES.CALL, acceptTimeout);
-  await expect
-    .poll(
-      async () => {
-        const currentState = await getAgentPage(1)
-          .getByTestId('state-select')
-          .getByTestId('state-name')
-          .innerText()
-          .then((text) => text.trim())
-          .catch(() => '');
-        const hasEndControl = await getAgentPage(1)
-          .getByTestId('call-control:end-call')
-          .first()
-          .isVisible()
-          .catch(() => false);
-
-        return {
-          currentState,
-          hasEndControl,
-        };
-      },
-      {timeout: acceptTimeout, intervals: [250, 500, 1000, 2000]}
-    )
-    .toMatchObject({
-      currentState: USER_STATES.ENGAGED,
-      hasEndControl: true,
-    });
+  await waitForState(getAgentPage(1), USER_STATES.ENGAGED);
+  await waitForConferenceControlReady(getAgentPage, 1, 'call-control:end-call', acceptTimeout);
 };
 
 export const consultAgentAndAcceptCall = async ({
@@ -257,9 +207,12 @@ export const consultAgentAndAcceptCall = async ({
       .poll(
         async () => {
           const consultReady = await hasAnyVisibleEnabledControl(fromAgentPage, 'call-control:consult');
-          const hasCancelConsult = await hasAnyVisibleControl(fromAgentPage, 'cancel-consult-btn');
+          const hasActiveConsultControls = await hasAnyVisibleControlFromList(
+            fromAgentPage,
+            ACTIVE_CONSULT_CONTROL_TEST_IDS
+          );
 
-          return consultReady && !hasCancelConsult;
+          return consultReady && !hasActiveConsultControls;
         },
         {timeout: acceptTimeout, intervals: [250, 500, 1000, 2000]}
       )
@@ -268,10 +221,20 @@ export const consultAgentAndAcceptCall = async ({
 
   const waitForConsultToStart = async () => {
     await expect
-      .poll(() => hasAnyVisibleControl(fromAgentPage, 'cancel-consult-btn'), {
-        timeout: Math.min(10000, acceptTimeout),
-        intervals: [250, 500, 1000],
-      })
+      .poll(
+        async () => {
+          const sourceConsultVisible = await hasAnyVisibleControlFromList(fromAgentPage, ACTIVE_CONSULT_CONTROL_TEST_IDS);
+          const incomingTaskVisible = await getIncomingTaskLocator(toAgentPage, TASK_TYPES.CALL)
+            .isVisible()
+            .catch(() => false);
+
+          return sourceConsultVisible || incomingTaskVisible;
+        },
+        {
+          timeout: Math.min(10000, acceptTimeout),
+          intervals: [250, 500, 1000],
+        }
+      )
       .toBeTruthy();
   };
 
@@ -356,25 +319,24 @@ export const toggleConferenceLegIfSwitchAvailable = async (getAgentPage: GetAgen
   return true;
 };
 
-export const exitConferenceParticipantOrEndTask = async (getAgentPage: GetAgentPage, agentId: AgentId) => {
+export const exitConferenceParticipantAndWrapup = async (getAgentPage: GetAgentPage, agentId: AgentId) => {
   const page = getAgentPage(agentId);
   const exitButton = page.getByTestId('call-control:exit-conference').first();
-  const canExit = await exitButton.isVisible().catch(() => false);
-
-  if (canExit) {
-    await exitButton.click();
-    await page.waitForTimeout(CONFERENCE_ACTION_SETTLE_TIMEOUT);
-    const wrapupBox = page.getByTestId('call-control:wrapup-button').first();
-    const needsWrapup = await wrapupBox
-      .waitFor({state: 'visible', timeout: WRAPUP_TIMEOUT})
-      .then(() => true)
-      .catch(() => false);
-    if (needsWrapup) {
-      await submitWrapup(page, WRAPUP_REASONS.SALE);
-    }
-    return;
+  await expect(exitButton).toBeVisible({timeout: AWAIT_TIMEOUT});
+  await exitButton.click();
+  await page.waitForTimeout(CONFERENCE_ACTION_SETTLE_TIMEOUT);
+  const wrapupBox = page.getByTestId('call-control:wrapup-button').first();
+  const needsWrapup = await wrapupBox
+    .waitFor({state: 'visible', timeout: WRAPUP_TIMEOUT})
+    .then(() => true)
+    .catch(() => false);
+  if (needsWrapup) {
+    await submitWrapup(page, WRAPUP_REASONS.SALE);
   }
+};
 
+export const endConferenceTaskAndWrapup = async (getAgentPage: GetAgentPage, agentId: AgentId) => {
+  const page = getAgentPage(agentId);
   await endTask(page);
   await page.waitForTimeout(CONFERENCE_END_TASK_SETTLE_TIMEOUT);
   await submitWrapup(page, WRAPUP_REASONS.SALE);

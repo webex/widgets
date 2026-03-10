@@ -1,5 +1,10 @@
 import {Page, expect} from '@playwright/test';
 import {TASK_TYPES, AWAIT_TIMEOUT, OPERATION_TIMEOUT} from '../constants';
+import {
+  clickFirstVisibleEnabledControl,
+  findFirstVisibleControlIndex,
+  findFirstVisibleEnabledControlIndex,
+} from './controlUtils';
 
 /**
  * Utility functions for task controls testing.
@@ -8,77 +13,19 @@ import {TASK_TYPES, AWAIT_TIMEOUT, OPERATION_TIMEOUT} from '../constants';
  * @packageDocumentation
  */
 
-async function findFirstVisibleEnabledControlIndex(page: Page, testId: string): Promise<number> {
-  const controls = page.getByTestId(testId);
-  const count = await controls.count().catch(() => 0);
-
-  for (let i = 0; i < count; i++) {
-    const control = controls.nth(i);
-    const isVisible = await control.isVisible().catch(() => false);
-    if (!isVisible) {
-      continue;
-    }
-
-    const isEnabled = await control.isEnabled().catch(() => false);
-    if (isEnabled) {
-      return i;
-    }
+async function getVisibleControlIconName(page: Page, testId: string): Promise<string | null> {
+  const controlIndex = await findFirstVisibleControlIndex(page, testId);
+  if (controlIndex === -1) {
+    return null;
   }
 
-  return -1;
-}
-
-async function findFirstVisibleControlIndex(page: Page, testId: string): Promise<number> {
-  const controls = page.getByTestId(testId);
-  const count = await controls.count().catch(() => 0);
-
-  for (let i = 0; i < count; i++) {
-    const control = controls.nth(i);
-    const isVisible = await control.isVisible().catch(() => false);
-    if (isVisible) {
-      return i;
-    }
+  const iconElement = page.getByTestId(testId).nth(controlIndex).locator('mdc-icon').nth(0);
+  const isVisible = await iconElement.isVisible().catch(() => false);
+  if (!isVisible) {
+    return null;
   }
 
-  return -1;
-}
-
-async function waitForVisibleControlIndex(page: Page, testId: string): Promise<number> {
-  await expect
-    .poll(() => findFirstVisibleControlIndex(page, testId), {
-      timeout: AWAIT_TIMEOUT,
-      intervals: [200, 500, 1000],
-    })
-    .not.toBe(-1);
-
-  return findFirstVisibleControlIndex(page, testId);
-}
-
-async function clickFirstVisibleEnabledControl(page: Page, testId: string): Promise<void> {
-  const startedAt = Date.now();
-  let lastError: unknown;
-
-  while (Date.now() - startedAt < AWAIT_TIMEOUT) {
-    const enabledIndex = await findFirstVisibleEnabledControlIndex(page, testId);
-    if (enabledIndex === -1) {
-      await page.waitForTimeout(200);
-      continue;
-    }
-
-    try {
-      await page.getByTestId(testId).nth(enabledIndex).click({timeout: AWAIT_TIMEOUT});
-      return;
-    } catch (error) {
-      lastError = error;
-      await page.waitForTimeout(200);
-    }
-  }
-
-  if (lastError instanceof Error) {
-    throw lastError;
-  }
-
-  throw new Error(`No enabled visible control found for ${testId}`);
+  return iconElement.getAttribute('name');
 }
 
 /**
@@ -174,6 +121,11 @@ export async function holdCallToggle(page: Page): Promise<void> {
   await clickFirstVisibleEnabledControl(page, 'call-control:hold-toggle');
 }
 
+export async function isCallHeld(page: Page): Promise<boolean> {
+  const iconName = await getVisibleControlIconName(page, 'call-control:hold-toggle');
+  return iconName === 'play-bold';
+}
+
 /**
  * Toggles the recording state of a call by clicking the recording pause/resume button.
  * This function will pause recording if it's currently active, or resume it if it's paused.
@@ -225,22 +177,17 @@ export async function verifyHoldTimer(
  * @throws Error if icon verification fails
  */
 export async function verifyHoldButtonIcon(page: Page, {expectedIsHeld}: {expectedIsHeld: boolean}): Promise<void> {
-  const holdButtonIndex = await waitForVisibleControlIndex(page, 'call-control:hold-toggle');
-  const holdButton = page.getByTestId('call-control:hold-toggle').nth(holdButtonIndex);
-  await expect(holdButton).toBeVisible({timeout: AWAIT_TIMEOUT});
-
-  // Get the icon element within the hold button
-  const iconElement = holdButton.locator('mdc-icon').nth(0);
-  await expect(iconElement).toBeVisible({timeout: AWAIT_TIMEOUT});
-
   // Verify the correct icon based on hold state
   const expectedIcon = expectedIsHeld ? 'play-bold' : 'pause-bold';
   try {
     await expect
-      .poll(async () => iconElement.getAttribute('name'), {timeout: AWAIT_TIMEOUT, intervals: [200, 500, 1000]})
+      .poll(() => getVisibleControlIconName(page, 'call-control:hold-toggle'), {
+        timeout: AWAIT_TIMEOUT,
+        intervals: [200, 500, 1000],
+      })
       .toBe(expectedIcon);
   } catch {
-    const actualIcon = await iconElement.getAttribute('name');
+    const actualIcon = await getVisibleControlIconName(page, 'call-control:hold-toggle');
     throw new Error(
       `Hold button icon mismatch. Expected: '${expectedIcon}' (isHeld: ${expectedIsHeld}), but found: '${actualIcon}'`
     );
@@ -261,22 +208,17 @@ export async function verifyRecordButtonIcon(
   page: Page,
   {expectedIsRecording}: {expectedIsRecording: boolean}
 ): Promise<void> {
-  const recordButtonIndex = await waitForVisibleControlIndex(page, 'call-control:recording-toggle');
-  const recordButton = page.getByTestId('call-control:recording-toggle').nth(recordButtonIndex);
-  await expect(recordButton).toBeVisible({timeout: AWAIT_TIMEOUT});
-
-  // Get the icon element within the record button
-  const iconElement = recordButton.locator('mdc-icon').nth(0);
-  await expect(iconElement).toBeVisible({timeout: AWAIT_TIMEOUT});
-
   // Verify the correct icon based on recording state
   const expectedIcon = expectedIsRecording ? 'record-paused-bold' : 'record-bold';
   try {
     await expect
-      .poll(async () => iconElement.getAttribute('name'), {timeout: AWAIT_TIMEOUT, intervals: [200, 500, 1000]})
+      .poll(() => getVisibleControlIconName(page, 'call-control:recording-toggle'), {
+        timeout: AWAIT_TIMEOUT,
+        intervals: [200, 500, 1000],
+      })
       .toBe(expectedIcon);
   } catch {
-    const actualIcon = await iconElement.getAttribute('name');
+    const actualIcon = await getVisibleControlIconName(page, 'call-control:recording-toggle');
     throw new Error(
       `Record button icon mismatch. Expected: '${expectedIcon}' (isRecording: ${expectedIsRecording}), but found: '${actualIcon}'`
     );
@@ -567,67 +509,19 @@ export async function verifyHoldMusicElement(page: Page): Promise<void> {
  * @returns Promise<void>
  */
 export async function endTask(page: Page): Promise<void> {
-  const scanEndButtons = async (): Promise<{enabledIndex: number}> => {
-    return {enabledIndex: await findFirstVisibleEnabledControlIndex(page, 'call-control:end-call')};
-  };
-
-  await page.getByTestId('call-control:end-call').first().waitFor({state: 'visible', timeout: OPERATION_TIMEOUT});
-
-  let buttonState = await scanEndButtons();
-
-  if (buttonState.enabledIndex === -1) {
-    const cancelConsultBtn = page.getByTestId('cancel-consult-btn').first();
-    let cancelConsultVisible = await cancelConsultBtn.isVisible().catch(() => false);
-
-    if (!cancelConsultVisible) {
-      const switchToConsultBtn = page.getByTestId('switchToMainCall-consult-btn').first();
-      const switchVisible = await switchToConsultBtn.isVisible().catch(() => false);
-
-      if (switchVisible) {
-        await switchToConsultBtn.click({timeout: AWAIT_TIMEOUT});
-        await page.waitForTimeout(1000);
-        buttonState = await scanEndButtons();
-        cancelConsultVisible = await cancelConsultBtn.isVisible().catch(() => false);
-      }
-    }
-
-    if (buttonState.enabledIndex === -1 && cancelConsultVisible) {
-      await cancelConsultBtn.click({timeout: AWAIT_TIMEOUT});
-      await page.waitForTimeout(1000);
-      buttonState = await scanEndButtons();
-    }
-  }
-
-  if (buttonState.enabledIndex === -1) {
-    const holdToggle = page.getByTestId('call-control:hold-toggle').first();
-    const holdVisible = await holdToggle.isVisible().catch(() => false);
-
-    if (holdVisible) {
-      await holdCallToggle(page);
-      await page.waitForTimeout(500);
-      buttonState = await scanEndButtons();
-    }
-  }
-
   await expect
-    .poll(async () => {
-      buttonState = await scanEndButtons();
-      const wrapupVisible = await page
-        .getByTestId('call-control:wrapup-button')
-        .first()
-        .isVisible()
-        .catch(() => false);
-
-      if (wrapupVisible) {
-        return 'wrapup';
-      }
-
-      return buttonState.enabledIndex;
-    }, {timeout: AWAIT_TIMEOUT, intervals: [200, 500, 1000]})
-    .not.toBe(-1);
+    .poll(
+      async () => {
+        const wrapupVisible = await page.getByTestId('call-control:wrapup-button').first().isVisible().catch(() => false);
+        const enabledEndIndex = await findFirstVisibleEnabledControlIndex(page, 'call-control:end-call');
+        return wrapupVisible || enabledEndIndex !== -1;
+      },
+      {timeout: OPERATION_TIMEOUT, intervals: [250, 500, 1000]}
+    )
+    .toBeTruthy();
 
   const wrapupVisible = await page.getByTestId('call-control:wrapup-button').first().isVisible().catch(() => false);
-  if (wrapupVisible && buttonState.enabledIndex === -1) {
+  if (wrapupVisible && (await findFirstVisibleEnabledControlIndex(page, 'call-control:end-call')) === -1) {
     return;
   }
 

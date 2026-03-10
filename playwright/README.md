@@ -169,7 +169,7 @@ test.describe('My New Feature Tests', createMyTests());
 | Module              | Key Functions                                               |
 | ------------------- | ----------------------------------------------------------- |
 | `incomingTaskUtils` | `createChatTask()`, `acceptIncomingTask()`, `endChatTask()` |
-| `taskControlUtils`  | `holdTask()`, `resumeTask()`, `endTask()`                   |
+| `taskControlUtils`  | `holdCallToggle()`, `recordCallToggle()`, `endTask()`       |
 | `userStateUtils`    | `changeUserState()`, `verifyCurrentState()`                 |
 | `stationLoginUtils` | `telephonyLogin()`, `stationLogout()`                       |
 

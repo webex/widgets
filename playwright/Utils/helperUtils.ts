@@ -14,7 +14,7 @@ import {
   EXTENSION_REGISTRATION_TIMEOUT,
 } from '../constants';
 import {submitWrapup} from './wrapupUtils';
-import {holdCallToggle} from './taskControlUtils';
+import {holdCallToggle, isCallHeld} from './taskControlUtils';
 import {acceptExtensionCall, submitRonaPopup} from './incomingTaskUtils';
 import {
   loginViaAccessToken,
@@ -439,12 +439,12 @@ export const handleStrayTasks = async (
           }
         }
 
-        // Still disabled - try to resume from hold
+        // Still disabled - resume only if the visible control state says the call is held
         if (!endButtonEnabled) {
           const holdToggle = page.getByTestId('call-control:hold-toggle').first();
           const holdToggleVisible = await holdToggle.isVisible().catch(() => false);
 
-          if (holdToggleVisible) {
+          if (holdToggleVisible && (await isCallHeld(page))) {
             try {
               await holdCallToggle(page);
               await page.waitForTimeout(500);
@@ -680,8 +680,8 @@ export async function clearPendingCallAndWrapup(page: Page): Promise<boolean> {
   if (endVisible) {
     let endEnabled = await endBtn.isEnabled().catch(() => false);
 
-    // If disabled, try to resume from hold
-    if (!endEnabled) {
+    // If disabled, try to resume only when the visible hold control indicates the call is held
+    if (!endEnabled && (await isCallHeld(page))) {
       try {
         await holdCallToggle(page);
         await page.waitForTimeout(500);

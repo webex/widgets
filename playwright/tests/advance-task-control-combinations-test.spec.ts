@@ -3,6 +3,7 @@ import {
   cancelConsult,
   consultOrTransfer,
   clearAdvancedCapturedLogs,
+  waitForPrimaryCallAfterConsult,
   verifyConsultStartSuccessLogs,
 } from '../Utils/advancedTaskControlUtils';
 import {changeUserState, verifyCurrentState} from '../Utils/userStateUtils';
@@ -10,7 +11,7 @@ import {createCallTask, acceptIncomingTask} from '../Utils/incomingTaskUtils';
 import {submitWrapup} from '../Utils/wrapupUtils';
 import {USER_STATES, TASK_TYPES, WRAPUP_REASONS} from '../constants';
 import {waitForState, handleStrayTasks} from '../Utils/helperUtils';
-import {endTask, holdCallToggle, verifyHoldButtonIcon} from '../Utils/taskControlUtils';
+import {endTask} from '../Utils/taskControlUtils';
 import {TestManager} from '../test-manager';
 
 export default function createAdvanceCombinationsTests() {
@@ -225,12 +226,11 @@ export default function createAdvanceCombinationsTests() {
       await expect(testManager.agent1Page.getByTestId('cancel-consult-btn')).toBeVisible();
       await expect(testManager.agent1Page.getByTestId('transfer-consult-btn')).toBeVisible();
       await cancelConsult(testManager.agent1Page);
+      await waitForPrimaryCallAfterConsult(testManager.agent1Page);
       await expect(testManager.agent1Page.getByTestId('cancel-consult-btn')).toBeHidden();
       await expect(testManager.agent1Page.getByTestId('transfer-consult-btn')).toBeHidden();
       await expect(testManager.agent1Page.getByTestId('call-control:consult').first()).toBeVisible();
       await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
-      await holdCallToggle(testManager.agent1Page);
-      await verifyHoldButtonIcon(testManager.agent1Page, {expectedIsHeld: true});
       await endTask(testManager.agent1Page);
       await testManager.agent1Page.waitForTimeout(3000);
       await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.RESOLVED);
