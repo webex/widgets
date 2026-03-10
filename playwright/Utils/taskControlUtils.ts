@@ -494,32 +494,68 @@ export async function verifyHoldMusicElement(page: Page): Promise<void> {
  * @returns Promise<void>
  */
 export async function endTask(page: Page): Promise<void> {
-  const allEndButtons = page.getByTestId('call-control:end-call');
-  await allEndButtons.first().waitFor({state: 'visible', timeout: OPERATION_TIMEOUT});
+  const scanEndButtons = async (): Promise<{enabledIndex: number}> => {
+    const allEndButtons = page.getByTestId('call-control:end-call');
+    const buttonCount = await allEndButtons.count().catch(() => 0);
 
-  const buttonCount = await allEndButtons.count();
-  let selectedEndButton = allEndButtons.first();
-  let hasEnabledEndButton = false;
+    for (let i = 0; i < buttonCount; i++) {
+      const candidate = allEndButtons.nth(i);
+      const isVisible = await candidate.isVisible().catch(() => false);
+      if (!isVisible) {
+        continue;
+      }
 
-  for (let i = 0; i < buttonCount; i++) {
-    const candidate = allEndButtons.nth(i);
-    const isVisible = await candidate.isVisible().catch(() => false);
-    if (!isVisible) {
-      continue;
+      if (await candidate.isEnabled().catch(() => false)) {
+        return {enabledIndex: i};
+      }
     }
 
-    selectedEndButton = candidate;
-    const isEnabled = await candidate.isEnabled().catch(() => false);
-    if (isEnabled) {
-      hasEnabledEndButton = true;
-      break;
+    return {enabledIndex: -1};
+  };
+
+  await page.getByTestId('call-control:end-call').first().waitFor({state: 'visible', timeout: OPERATION_TIMEOUT});
+
+  let buttonState = await scanEndButtons();
+
+  if (buttonState.enabledIndex === -1) {
+    const cancelConsultBtn = page.getByTestId('cancel-consult-btn').first();
+    let cancelConsultVisible = await cancelConsultBtn.isVisible().catch(() => false);
+
+    if (!cancelConsultVisible) {
+      const switchToConsultBtn = page.getByTestId('switchToMainCall-consult-btn').first();
+      const switchVisible = await switchToConsultBtn.isVisible().catch(() => false);
+
+      if (switchVisible) {
+        await switchToConsultBtn.click({timeout: AWAIT_TIMEOUT});
+        await page.waitForTimeout(1000);
+        cancelConsultVisible = await cancelConsultBtn.isVisible().catch(() => false);
+      }
+    }
+
+    if (cancelConsultVisible) {
+      await cancelConsultBtn.click({timeout: AWAIT_TIMEOUT});
+      await page.waitForTimeout(1000);
+      buttonState = await scanEndButtons();
     }
   }
 
-  if (!hasEnabledEndButton) {
-    await holdCallToggle(page);
-    await expect(selectedEndButton).toBeEnabled({timeout: AWAIT_TIMEOUT});
+  if (buttonState.enabledIndex === -1) {
+    const holdToggle = page.getByTestId('call-control:hold-toggle').first();
+    const holdVisible = await holdToggle.isVisible().catch(() => false);
+
+    if (holdVisible) {
+      await holdCallToggle(page);
+      await page.waitForTimeout(500);
+      buttonState = await scanEndButtons();
+    }
   }
 
-  await selectedEndButton.click({timeout: AWAIT_TIMEOUT});
+  await expect
+    .poll(async () => {
+      buttonState = await scanEndButtons();
+      return buttonState.enabledIndex;
+    }, {timeout: AWAIT_TIMEOUT, intervals: [200, 500, 1000]})
+    .not.toBe(-1);
+
+  await page.getByTestId('call-control:end-call').nth(buttonState.enabledIndex).click({timeout: AWAIT_TIMEOUT});
 }

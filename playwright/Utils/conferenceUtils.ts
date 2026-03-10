@@ -186,9 +186,29 @@ export const consultAgentAndAcceptCall = async ({
   getAgentName,
   acceptTimeout = ACCEPT_TASK_TIMEOUT,
 }: ConferenceConsultOptions) => {
+  await waitForState(getAgentPage(fromAgent), USER_STATES.ENGAGED);
   await setConferenceAgentsAvailable(getAgentPage, [toAgent]);
   await waitForConferenceControlReady(getAgentPage, fromAgent, 'call-control:consult', acceptTimeout);
   await consultOrTransfer(getAgentPage(fromAgent), 'agent', 'consult', getAgentName(toAgent));
+  await expect
+    .poll(
+      async () => {
+        const fromAgentPage = getAgentPage(fromAgent);
+        const hasCancelConsult = await fromAgentPage
+          .getByTestId('cancel-consult-btn')
+          .first()
+          .isVisible()
+          .catch(() => false);
+        const hasTransferConsult = await fromAgentPage
+          .getByTestId('transfer-consult-btn')
+          .first()
+          .isVisible()
+          .catch(() => false);
+        return hasCancelConsult && hasTransferConsult;
+      },
+      {timeout: acceptTimeout, intervals: [250, 500, 1000]}
+    )
+    .toBeTruthy();
   await acceptIncomingTask(getAgentPage(toAgent), TASK_TYPES.CALL, acceptTimeout);
   await verifyCurrentState(getAgentPage(toAgent), USER_STATES.ENGAGED);
 };

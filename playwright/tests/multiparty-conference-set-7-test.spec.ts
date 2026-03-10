@@ -239,6 +239,8 @@ export default function createMultipartyConferenceSet7Tests() {
       await startBaselineCallOnAgent1();
       await consultAgentAndAccept(1, 2);
       await mergeConsultIntoConference(1);
+      await waitForState(getAgentPage(1), USER_STATES.ENGAGED);
+      await waitForState(getAgentPage(2), USER_STATES.ENGAGED);
       await consultAgentAndAccept(1, 3);
       await transferConsultAndWrapup(1);
 
