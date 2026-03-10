@@ -172,7 +172,7 @@ export function getTaskStatus(task: ITask, agentId: string): string {
 #### After (enhanced with SDK controls)
 ```typescript
 // store/task-utils.ts — can now derive status from uiControls
-export function getTaskStatus(task: ITask): string {
+export function getTaskStatus(task: ITask, agentId: string): string {
   const controls = task.uiControls;
   if (!controls) return 'Unknown';
   if (controls.wrapup.isVisible) return 'Wrap Up';
@@ -180,7 +180,7 @@ export function getTaskStatus(task: ITask): string {
   if (controls.exitConference.isVisible) return 'Conference';
   // NOTE: Do NOT derive held state from controls.hold.isEnabled — hold can be
   // disabled in consult/transition states even when call is not held.
-  // Use task data instead:
+  // Use task data instead (agentId needed for participant lookup):
   if (findHoldStatus(task, 'mainCall', agentId)) return 'Held';
   if (controls.end.isVisible) return 'Connected';
   if (controls.accept.isVisible) return 'Offered';

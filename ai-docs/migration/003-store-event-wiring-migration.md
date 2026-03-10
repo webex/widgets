@@ -77,8 +77,13 @@ Many events that currently trigger `refreshTaskList()` will no longer need it be
 | `AGENT_WRAPPEDUP` | `handleWrappedup` | **Keep refresh or add explicit task removal** — task must be removed from `taskList`/`currentTask` after wrapup completion to prevent stale UI |
 | `TASK_HOLD` | Fire callback only | **Simplify** — no `refreshTaskList()` |
 | `TASK_RESUME` | Fire callback only | **Simplify** — no `refreshTaskList()` |
-| `TASK_CONSULT_*` | Fire callback only | **Simplify** — SDK manages state |
-| `TASK_CONFERENCE_*` | Fire callback only | **Simplify** — SDK manages state |
+| `TASK_CONSULT_END` | `handleConsultEnd` | **Keep handler** — must reset `isQueueConsultInProgress`, `currentConsultQueueId`, `consultStartTimeStamp` + fire callback |
+| `TASK_CONSULT_QUEUE_CANCELLED` | `handleConsultQueueCancelled` | **Keep handler** — must reset `isQueueConsultInProgress`, `currentConsultQueueId`, `consultStartTimeStamp` + fire callback |
+| `TASK_CONSULTING` | `handleConsulting` | **Keep handler** — sets `consultStartTimeStamp` + fire callback |
+| Other `TASK_CONSULT_*` | Fire callback only | **Simplify** — SDK manages task state |
+| `TASK_PARTICIPANT_JOINED` / `TASK_CONFERENCE_STARTED` | `handleConferenceStarted` | **Keep handler** — must reset `isQueueConsultInProgress`, `currentConsultQueueId`, `consultStartTimeStamp` |
+| `TASK_CONFERENCE_ENDED` / `TASK_PARTICIPANT_LEFT` | `handleConferenceEnded` | **Keep handler** — conference cleanup logic |
+| Other `TASK_CONFERENCE_*` | Fire callback only | **Simplify** — SDK manages task state |
 | `AGENT_OFFER_CONTACT` | Fire callback only | **Simplify** — SDK updates task.data |
 | `TASK_POST_CALL_ACTIVITY` | Fire callback only | **Simplify** |
 | All other `refreshTaskList()` handlers | Remove or fire callback only | **Simplify** |
