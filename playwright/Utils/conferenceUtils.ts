@@ -1,5 +1,5 @@
 import {expect, Page} from '@playwright/test';
-import {consultOrTransfer} from './advancedTaskControlUtils';
+import {cancelConsult, consultOrTransfer} from './advancedTaskControlUtils';
 import {acceptIncomingTask, createCallTask} from './incomingTaskUtils';
 import {handleStrayTasks, waitForState} from './helperUtils';
 import {endTask} from './taskControlUtils';
@@ -186,12 +186,38 @@ export const consultAgentAndAcceptCall = async ({
   getAgentName,
   acceptTimeout = ACCEPT_TASK_TIMEOUT,
 }: ConferenceConsultOptions) => {
-  await waitForState(getAgentPage(fromAgent), USER_STATES.ENGAGED);
-  await setConferenceAgentsAvailable(getAgentPage, [toAgent]);
-  await waitForConferenceControlReady(getAgentPage, fromAgent, 'call-control:consult', acceptTimeout);
-  await consultOrTransfer(getAgentPage(fromAgent), 'agent', 'consult', getAgentName(toAgent));
-  await acceptIncomingTask(getAgentPage(toAgent), TASK_TYPES.CALL, acceptTimeout);
-  await verifyCurrentState(getAgentPage(toAgent), USER_STATES.ENGAGED);
+  const fromAgentPage = getAgentPage(fromAgent);
+  const toAgentPage = getAgentPage(toAgent);
+  const firstAttemptTimeout = Math.min(15000, acceptTimeout);
+  let lastError: unknown;
+
+  for (const currentAcceptTimeout of [firstAttemptTimeout, acceptTimeout]) {
+    await waitForState(fromAgentPage, USER_STATES.ENGAGED);
+    await setConferenceAgentsAvailable(getAgentPage, [toAgent]);
+    await waitForConferenceControlReady(getAgentPage, fromAgent, 'call-control:consult', acceptTimeout);
+    await consultOrTransfer(fromAgentPage, 'agent', 'consult', getAgentName(toAgent));
+
+    try {
+      await acceptIncomingTask(toAgentPage, TASK_TYPES.CALL, currentAcceptTimeout);
+      await verifyCurrentState(toAgentPage, USER_STATES.ENGAGED);
+      return;
+    } catch (error) {
+      lastError = error;
+
+      const cancelConsultVisible = await fromAgentPage
+        .getByTestId('cancel-consult-btn')
+        .first()
+        .isVisible()
+        .catch(() => false);
+
+      if (cancelConsultVisible) {
+        await cancelConsult(fromAgentPage);
+        await fromAgentPage.waitForTimeout(CONFERENCE_ACTION_SETTLE_TIMEOUT);
+      }
+    }
+  }
+
+  throw lastError;
 };
 
 export const consultQueueAndAcceptCall = async ({
