@@ -20,7 +20,7 @@ export default function createOutdialCallTests() {
     test('should make an outdial call in Desktop mode and complete wrapup', async () => {
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       await expect(testManager.agent1Page.getByTestId('outdial-call-container')).toBeVisible();
-      await enterOutdialNumber(testManager.agent1Page, process.env.PW_DIAL_NUMBER_PSTN!);
+      await enterOutdialNumber(testManager.agent1Page, process.env.PW_DIAL_NUMBER!);
       await clickOutdialButton(testManager.agent1Page);
       await acceptCustomerCall(testManager.callerPage);
       await waitForState(testManager.agent1Page, USER_STATES.ENGAGED);
@@ -50,7 +50,7 @@ export default function createOutdialCallTests() {
     test('should make an outdial call in Extension mode and complete wrapup', async () => {
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       await expect(testManager.agent1Page.getByTestId('outdial-call-container')).toBeVisible();
-      await enterOutdialNumber(testManager.agent1Page, process.env.PW_DIAL_NUMBER_PSTN!);
+      await enterOutdialNumber(testManager.agent1Page, process.env.PW_DIAL_NUMBER!);
       await clickOutdialButton(testManager.agent1Page);
       await expect(testManager.agent1ExtensionPage.locator('#answer').first()).toBeEnabled({timeout: 40000});
       await acceptExtensionCall(testManager.agent1ExtensionPage);
