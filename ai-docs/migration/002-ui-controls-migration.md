@@ -125,7 +125,7 @@ The following state flags were returned by `getControlsVisibility()` but are no 
 | Old State Flag | Replacement |
 |----------------|-------------|
 | `isConferenceInProgress` | **Caution with `exitConference.isVisible`** — In the old widget code, exit-conference was hidden during conference + active consult. In the **new SDK** (`uiControlsComputer.ts`), `exitConference` is `VISIBLE_DISABLED` (not hidden) during consulting-from-conference, making `isVisible` more reliable. However, for consulted agents not in conferencing state, `exitConference` is `DISABLED`. If you need a definitive conference-in-progress flag independent of agent role, use `task.data` (e.g., `getIsConferenceInProgress(taskData)` which the SDK itself uses internally) rather than relying solely on `exitConference.isVisible` |
-| `isConsultInitiated` | **Do NOT derive from `endConsult.isVisible`** — SDK shows `endConsult` for all consulting states (`CONSULT_INITIATING`, `CONSULTING`, `CONF_INITIATING`), not just initiated. If initiated-only semantics are needed (e.g., consult timer labeling in `calculateConsultTimerData`), use SDK `TaskState` directly: `state === TaskState.CONSULT_INITIATING` |
+| `isConsultInitiated` | **Do NOT derive from `endConsult.isVisible`** — SDK shows `endConsult` for all consulting states (`CONSULT_INITIATING`, `CONSULTING`, `CONF_INITIATING`), not just initiated. If initiated-only semantics are needed (e.g., consult timer labeling in `calculateConsultTimerData`), use SDK `TaskState` directly: `state === TaskState.CONSULT_INITIATING`. **Note:** This requires `TaskState` to be exported from SDK — tracked in the [SDK missing items Confluence page](./confluence-sdk-missing-items.md) and 009 pending exports. |
 | `isConsultInitiatedAndAccepted` | No longer needed — SDK handles via controls |
 | `isConsultReceived` | No longer needed — SDK handles via controls |
 | `isConsultInitiatedOrAccepted` | No longer needed — SDK handles via controls |
@@ -158,20 +158,22 @@ return {
 ### After (in `useCallControl` hook)
 ```typescript
 // helper.ts — new approach
-const task = store.currentTask;
-const uiControls = task?.uiControls ?? getDefaultUIControls();
+// These imports require pending SDK entry point additions (tracked via Jira).
+// See 001-migration-overview.md § SDK Package Entry Point — Pending Additions.
+import {TaskUIControls, TASK_EVENTS, getDefaultUIControls} from '@webex/contact-center';
 
-// Subscribe to UI control updates
+const task = store.currentTask;
+const uiControls: TaskUIControls = task?.uiControls ?? getDefaultUIControls();
+
 useEffect(() => {
   if (!task) return;
   const handler = () => {
     // MobX or setState to trigger re-render
   };
-  task.on('task:ui-controls-updated', handler);
-  return () => task.off('task:ui-controls-updated', handler);
+  task.on(TASK_EVENTS.TASK_UI_CONTROLS_UPDATED, handler);
+  return () => task.off(TASK_EVENTS.TASK_UI_CONTROLS_UPDATED, handler);
 }, [task]);
 
-// Pass SDK-computed controls directly to component
 return {
   controls: uiControls,
   // additional hook state (timers, mute state, etc.)
@@ -185,7 +187,7 @@ return {
 | File | Action |
 |------|--------|
 | `task/src/Utils/task-util.ts` | **DELETE** or reduce to `findHoldTimestamp()` only |
-| `task/src/helper.ts` (`useCallControl`) | Remove `getControlsVisibility()` call, use `task.uiControls` |
+| `task/src/helper.ts` (`useCallControl`) | Remove `getControlsVisibility()` call, use `task.uiControls`. Note: voice tasks use `holdResume()` toggle internally (see 001 § SDK Export Gaps), but `task.hold()`/`task.resume()` delegate correctly, so existing widget calls are safe. |
 | `task/src/task.types.ts` | Import `TaskUIControls` from SDK, remove old control types |
 | `cc-components/src/components/task/task.types.ts` | Align `ControlProps` with new control names |
 | `cc-components/src/components/task/CallControl/call-control.tsx` | Update prop names (`holdResume` → `hold`, etc.) |
@@ -208,3 +210,4 @@ return {
 ---
 
 _Parent: [001-migration-overview.md](./001-migration-overview.md)_
+_Updated: 2026-03-11 (SDK export gap notes, import examples, holdResume clarification)_

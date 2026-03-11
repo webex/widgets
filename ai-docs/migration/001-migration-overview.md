@@ -144,6 +144,62 @@ The CC Widgets migration depends on the CC SDK `task-refactor` branch being merg
 
 ---
 
+## SDK Package Entry Point — Pending Additions
+
+> **As of the `task-refactor` branch snapshot reviewed,** the items below are properly exported from their individual source files within the SDK but are **not yet re-exported** from the package-level entry point (`src/index.ts`). This means widgets cannot `import { ... } from '@webex/contact-center'` for these items until the SDK team adds them.
+>
+> **A Jira ticket is being created** to track adding these missing exports to the SDK `src/index.ts` before the widget migration begins.
+
+### 1. Add `uiControls` to `ITask` interface
+
+The `uiControls` getter is defined on the **concrete `Task` class** and works at runtime on all task instances (Voice, Digital, WebRTC). However, it is not yet declared on the `ITask` interface — only on `IDigital`. Since widgets import `ITask`, TypeScript won't recognize `task.uiControls` until the interface is updated.
+
+**SDK change:** Add `uiControls: TaskUIControls` to `ITask` interface in `services/task/types.ts`.
+
+### 2. Add `TaskUIControls` type to package exports
+
+`TaskUIControls` is exported from `services/task/types.ts` but not re-exported from `src/index.ts`. Similarly, `TaskUIControlState` (the `{ isVisible, isEnabled }` shape) is a local type — should be exported if widgets need it for prop typing.
+
+**SDK change:** Add to the "Task related types" export block in `src/index.ts`:
+```typescript
+export type { TaskUIControls, TaskUIControlState } from './services/task/types';
+```
+
+### 3. Add `getDefaultUIControls()` to package exports
+
+`getDefaultUIControls()` is exported from `uiControlsComputer.ts` and the state-machine `index.ts`, but not from `src/index.ts`. Widgets need it as a fallback: `task?.uiControls ?? getDefaultUIControls()`.
+
+**SDK change:** Add to `src/index.ts`:
+```typescript
+export { getDefaultUIControls } from './services/task/state-machine/uiControlsComputer';
+```
+
+### 4. Add `TaskState` enum to package exports
+
+`TaskState` is exported from the state-machine internal module but not from the package entry point. Widgets need it for consult timer labeling — `calculateConsultTimerData` must distinguish `CONSULT_INITIATING` (consult requested) from `CONSULTING` (consult accepted) for correct timer labels.
+
+**SDK change:** Add to `src/index.ts`:
+```typescript
+export { TaskState } from './services/task/state-machine/constants';
+```
+
+### 5. Add `IVoice`, `IDigital`, `IWebRTC` to package exports
+
+These task subtype interfaces are defined but not re-exported. Widgets may need them for type narrowing (e.g., to access `holdResume()` on voice tasks).
+
+**SDK change:** Add to `src/index.ts`:
+```typescript
+export type { IVoice, IDigital, IWebRTC } from './services/task/types';
+```
+
+### 6. `holdResume()` only on Voice tasks (informational — no SDK change needed)
+
+The base `Task` class defines `hold()` and `resume()` that throw `unsupportedMethodError`. **Voice** tasks override both to delegate to `holdResume()` — a single toggle. The `ITask` interface exposes `hold(mediaResourceId?)` and `resume(mediaResourceId?)`, but voice tasks actually use `holdResume()` internally (from `IVoice`).
+
+**Widget impact:** Widgets calling `task.hold()` / `task.resume()` will work correctly on voice tasks (they delegate to `holdResume`). No widget change needed unless widgets want to call `holdResume()` directly — in which case they need `IVoice` typing (covered in item 4 above).
+
+---
+
 ## Pre-existing Bugs Found During Analysis
 
 These bugs exist in the current codebase and should be fixed during migration:
@@ -159,6 +215,16 @@ Two `findHoldTimestamp` functions with different signatures:
 - `task/src/Utils/task-util.ts`: `findHoldTimestamp(interaction: Interaction, mType: string)`
 
 Should be consolidated to one function during migration.
+
+### 3. Event Name Mismatches Between Widget and SDK
+Widget `store.types.ts` declares a local `TASK_EVENTS` enum (line 210: `TODO: remove this once cc sdk exports this enum`) with 5 events using CC-level naming that differ from SDK task-level naming:
+- `AGENT_WRAPPEDUP = 'AgentWrappedUp'` → SDK: `TASK_WRAPPEDUP = 'task:wrappedup'`
+- `AGENT_CONSULT_CREATED = 'AgentConsultCreated'` → SDK: `TASK_CONSULT_CREATED = 'task:consultCreated'`
+- `AGENT_OFFER_CONTACT = 'AgentOfferContact'` → SDK: `TASK_OFFER_CONTACT = 'task:offerContact'`
+- `CONTACT_RECORDING_PAUSED = 'ContactRecordingPaused'` → SDK: `TASK_RECORDING_PAUSED = 'task:recordingPaused'`
+- `CONTACT_RECORDING_RESUMED = 'ContactRecordingResumed'` → SDK: `TASK_RECORDING_RESUMED = 'task:recordingResumed'`
+
+See [009-types-and-constants-migration.md § Event Constants](./009-types-and-constants-migration.md) for the complete mapping.
 
 ---
 
@@ -200,3 +266,4 @@ function applyControlState(element, control) {
 
 _Created: 2026-03-09_
 _Updated: 2026-03-09 (added deep scan findings, before/after examples, bug reports)_
+_Updated: 2026-03-11 (SDK export gaps, holdResume, event name mismatches — from deep SDK comparison)_

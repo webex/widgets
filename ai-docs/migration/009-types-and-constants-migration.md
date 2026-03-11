@@ -29,15 +29,28 @@ CC Widgets defines its own types for control visibility, task state, and constan
 
 ### Task State Constants
 
-| Old (CC Widgets Store) | New (CC SDK) |
-|------------------------|--------------|
-| `TASK_STATE_CONSULT` | **Not a 1:1 map** — represents `CONSULT_STATE_INITIATED` specifically (consult requested, not yet accepted). SDK equivalent is `TaskState.CONSULT_INITIATING` (intermediate async state). Note: SDK also has `TaskState.CONSULT_INITIATED` but it is marked "NOT IMPLEMENTED". Do NOT collapse with `TASK_STATE_CONSULTING` which maps to `TaskState.CONSULTING` |
-| `TASK_STATE_CONSULTING` | `TaskState.CONSULTING` (consult accepted, actively consulting) |
-| `TASK_STATE_CONSULT_COMPLETED` | `TaskState.CONNECTED` (consult ended, back to connected) |
-| `INTERACTION_STATE_WRAPUP` | `TaskState.WRAPPING_UP` |
-| `POST_CALL` | `TaskState.POST_CALL` (not implemented) |
-| `CONNECTED` | `TaskState.CONNECTED` |
-| `CONFERENCE` | `TaskState.CONFERENCING` |
+| Old (CC Widgets Store) | New (CC SDK) | Notes |
+|------------------------|--------------|-------|
+| `TASK_STATE_CONSULT` | `TaskState.CONSULT_INITIATING` | **Not a 1:1 map** — old constant represents consult requested, not yet accepted. SDK `CONSULT_INITIATING` is the intermediate async state. SDK also has `TaskState.CONSULT_INITIATED` but it is **"NOT IMPLEMENTED"**. Do NOT collapse with `TASK_STATE_CONSULTING` |
+| `TASK_STATE_CONSULTING` | `TaskState.CONSULTING` | Consult accepted, actively consulting |
+| `TASK_STATE_CONSULT_COMPLETED` | `TaskState.CONNECTED` | Consult ended, back to connected state |
+| `INTERACTION_STATE_WRAPUP` | `TaskState.WRAPPING_UP` | |
+| `INTERACTION_STATE_POST_CALL` | `TaskState.POST_CALL` | SDK marks this **"NOT IMPLEMENTED"** |
+| `INTERACTION_STATE_CONNECTED` | `TaskState.CONNECTED` | |
+| `INTERACTION_STATE_CONFERENCE` | `TaskState.CONFERENCING` | |
+| *(no old equivalent)* | `TaskState.IDLE` | New — task created but not yet offered |
+| *(no old equivalent)* | `TaskState.OFFERED` | New — task offered to agent |
+| *(no old equivalent)* | `TaskState.HOLD_INITIATING` | New — intermediate async state for hold request |
+| *(no old equivalent)* | `TaskState.HELD` | New — task is on hold |
+| *(no old equivalent)* | `TaskState.RESUME_INITIATING` | New — intermediate async state for resume request |
+| *(no old equivalent)* | `TaskState.CONF_INITIATING` | New — intermediate async state for conference merge |
+| *(no old equivalent)* | `TaskState.COMPLETED` | New — task completed |
+| *(no old equivalent)* | `TaskState.TERMINATED` | New — task terminated |
+| *(no old equivalent)* | `TaskState.CONSULT_COMPLETED` | **"NOT IMPLEMENTED"** in SDK |
+| *(no old equivalent)* | `TaskState.PARKED` | **"NOT IMPLEMENTED"** in SDK |
+| *(no old equivalent)* | `TaskState.MONITORING` | **"NOT IMPLEMENTED"** in SDK |
+
+**Full `TaskState` enum (SDK):** `IDLE`, `OFFERED`, `CONNECTED`, `HOLD_INITIATING`, `HELD`, `RESUME_INITIATING`, `CONSULT_INITIATING`, `CONSULTING`, `CONF_INITIATING`, `CONFERENCING`, `WRAPPING_UP`, `COMPLETED`, `TERMINATED`, `CONSULT_INITIATED` (not impl), `CONSULT_COMPLETED` (not impl), `POST_CALL` (not impl), `PARKED` (not impl), `MONITORING` (not impl)
 
 ### Consult Status Constants
 
@@ -54,39 +67,101 @@ CC Widgets defines its own types for control visibility, task state, and constan
 
 ### Event Constants
 
-| Old (CC Widgets) | New (CC SDK) | Change |
-|------------------|--------------|--------|
-| `TASK_EVENTS.TASK_INCOMING` | `TASK_EVENTS.TASK_INCOMING` | Same |
-| `TASK_EVENTS.TASK_ASSIGNED` | `TASK_EVENTS.TASK_ASSIGNED` | Same |
-| `TASK_EVENTS.TASK_HOLD` | `TASK_EVENTS.TASK_HOLD` | Same |
-| `TASK_EVENTS.TASK_RESUME` | `TASK_EVENTS.TASK_RESUME` | Same |
-| `TASK_EVENTS.TASK_END` | `TASK_EVENTS.TASK_END` | Same |
-| — | `TASK_EVENTS.TASK_UI_CONTROLS_UPDATED` | **NEW** |
-| `TASK_EVENTS.TASK_WRAPUP` | `TASK_EVENTS.TASK_WRAPUP` | Same |
-| `TASK_EVENTS.AGENT_WRAPPEDUP` | `TASK_EVENTS.AGENT_WRAPPEDUP` | Same |
-| All consult/conference events | Same event names | Same |
+| Old (CC Widgets) | Old Value | New (CC SDK) | New Value | Change |
+|------------------|-----------|--------------|-----------|--------|
+| `TASK_EVENTS.TASK_INCOMING` | `'task:incoming'` | `TASK_EVENTS.TASK_INCOMING` | `'task:incoming'` | Same |
+| `TASK_EVENTS.TASK_ASSIGNED` | `'task:assigned'` | `TASK_EVENTS.TASK_ASSIGNED` | `'task:assigned'` | Same |
+| `TASK_EVENTS.TASK_HOLD` | `'task:hold'` | `TASK_EVENTS.TASK_HOLD` | `'task:hold'` | Same |
+| `TASK_EVENTS.TASK_RESUME` | `'task:resume'` | `TASK_EVENTS.TASK_RESUME` | `'task:resume'` | Same |
+| `TASK_EVENTS.TASK_END` | `'task:end'` | `TASK_EVENTS.TASK_END` | `'task:end'` | Same |
+| `TASK_EVENTS.TASK_WRAPUP` | `'task:wrapup'` | `TASK_EVENTS.TASK_WRAPUP` | `'task:wrapup'` | Same |
+| `TASK_EVENTS.AGENT_WRAPPEDUP` | `'AgentWrappedUp'` | `TASK_EVENTS.TASK_WRAPPEDUP` | `'task:wrappedup'` | **Renamed + value changed** — widget uses CC-level event name, SDK uses task-level |
+| `TASK_EVENTS.AGENT_CONSULT_CREATED` | `'AgentConsultCreated'` | `TASK_EVENTS.TASK_CONSULT_CREATED` | `'task:consultCreated'` | **Renamed + value changed** |
+| `TASK_EVENTS.AGENT_OFFER_CONTACT` | `'AgentOfferContact'` | `TASK_EVENTS.TASK_OFFER_CONTACT` | `'task:offerContact'` | **Renamed + value changed** |
+| `TASK_EVENTS.CONTACT_RECORDING_PAUSED` | `'ContactRecordingPaused'` | `TASK_EVENTS.TASK_RECORDING_PAUSED` | `'task:recordingPaused'` | **Renamed + value changed** |
+| `TASK_EVENTS.CONTACT_RECORDING_RESUMED` | `'ContactRecordingResumed'` | `TASK_EVENTS.TASK_RECORDING_RESUMED` | `'task:recordingResumed'` | **Renamed + value changed** |
+| — | — | `TASK_EVENTS.TASK_UI_CONTROLS_UPDATED` | `'task:ui-controls-updated'` | **NEW** |
+| — | — | `TASK_EVENTS.TASK_UNASSIGNED` | `'task:unassigned'` | **NEW** |
+| — | — | `TASK_EVENTS.TASK_CLEANUP` | `'task:cleanup'` | **NEW** — state machine terminal state cleanup |
+| — | — | `TASK_EVENTS.TASK_RECORDING_STARTED` | `'task:recordingStarted'` | **NEW** |
+| — | — | `TASK_EVENTS.TASK_RECORDING_PAUSE_FAILED` | `'task:recordingPauseFailed'` | **NEW** |
+| — | — | `TASK_EVENTS.TASK_RECORDING_RESUME_FAILED` | `'task:recordingResumeFailed'` | **NEW** |
+| — | — | `TASK_EVENTS.TASK_CONSULT_QUEUE_FAILED` | `'task:consultQueueFailed'` | **NEW** |
+| — | — | `TASK_EVENTS.TASK_EXIT_CONFERENCE` | `'task:exitConference'` | **NEW** |
+| — | — | `TASK_EVENTS.TASK_TRANSFER_CONFERENCE` | `'task:transferConference'` | **NEW** |
+| `TASK_EVENTS.TASK_CONSULT_END` | Same | `TASK_EVENTS.TASK_CONSULT_END` | Same | Same |
+| `TASK_EVENTS.TASK_CONSULT_ACCEPTED` | Same | `TASK_EVENTS.TASK_CONSULT_ACCEPTED` | Same | Same |
+| `TASK_EVENTS.TASK_CONSULTING` | Same | `TASK_EVENTS.TASK_CONSULTING` | Same | Same |
+| `TASK_EVENTS.TASK_OFFER_CONSULT` | Same | `TASK_EVENTS.TASK_OFFER_CONSULT` | Same | Same |
+| All conference events | Same | Same | Same | Same |
 
-### Media Type Constants
+> **Critical:** Five widget event names (`AGENT_WRAPPEDUP`, `AGENT_CONSULT_CREATED`, `AGENT_OFFER_CONTACT`, `CONTACT_RECORDING_PAUSED`, `CONTACT_RECORDING_RESUMED`) use CC-level naming convention (`'AgentWrappedUp'`, etc.) but the SDK uses task-level naming (`'task:wrappedup'`, etc.). Widget `store.types.ts` re-declares these and must be updated to match SDK values.
 
-| Old (CC Widgets) | New (CC SDK) |
-|------------------|--------------|
-| `MEDIA_TYPE_TELEPHONY` = `'telephony'` | `TASK_CHANNEL_TYPE.VOICE` = `'voice'` |
-| `MEDIA_TYPE_CHAT` = `'chat'` | `TASK_CHANNEL_TYPE.DIGITAL` = `'digital'` |
-| `MEDIA_TYPE_EMAIL` = `'email'` | `TASK_CHANNEL_TYPE.DIGITAL` = `'digital'` |
+**Widget-only events (no SDK equivalent — must verify or remove):**
 
-**Note:** SDK uses channel type (`VOICE`/`DIGITAL`) for UI control computation. Widget media types may still be needed for display purposes.
+| Widget Event | Widget Value | SDK Status |
+|-------------|-------------|------------|
+| `TASK_UNHOLD` | `'task:unhold'` | SDK uses `TASK_RESUME` (`'task:resume'`) instead — no separate unhold event |
+| `TASK_CONSULT` | `'task:consult'` | Not in SDK `TASK_EVENTS` — SDK uses `TASK_CONSULT_CREATED` / `TASK_CONSULTING` |
+| `TASK_PAUSE` | `'task:pause'` | Not in SDK `TASK_EVENTS` — SDK uses recording events instead |
+| `AGENT_CONTACT_ASSIGNED` | `'AgentContactAssigned'` | CC-level event — may still be needed for `cc.on()` subscriptions |
+
+**Note:** Widget `store.types.ts` line 210 has `TODO: remove this once cc sdk exports this enum`. The SDK now exports `TASK_EVENTS` from `@webex/contact-center`. During migration, **delete the local `TASK_EVENTS` enum** and import from SDK directly.
+
+### Media Type / Channel Type Constants
+
+| Old (CC Widgets) | New (CC SDK) | SDK Source |
+|------------------|--------------|------------|
+| `MEDIA_TYPE_TELEPHONY` = `'telephony'` | `TASK_CHANNEL_TYPE.VOICE` = `'voice'` | `services/task/types.ts` |
+| `MEDIA_TYPE_CHAT` = `'chat'` | `TASK_CHANNEL_TYPE.DIGITAL` = `'digital'` | `services/task/types.ts` |
+| `MEDIA_TYPE_EMAIL` = `'email'` | `TASK_CHANNEL_TYPE.DIGITAL` = `'digital'` | `services/task/types.ts` |
+
+**Note:** SDK uses `TASK_CHANNEL_TYPE` (`VOICE`/`DIGITAL`) for UI control computation. Widget media types may still be needed for display purposes.
+
+**Type:** `TaskChannelType = 'voice' | 'digital'` (derived from `typeof TASK_CHANNEL_TYPE`)
+
+### Voice Variant Constants (NEW)
+
+| Constant | Value | Purpose |
+|----------|-------|---------|
+| `VOICE_VARIANT.PSTN` | `'pstn'` | PSTN telephony — no `decline`/`toggleMute` in UI controls |
+| `VOICE_VARIANT.WEBRTC` | `'webrtc'` | WebRTC browser — `decline` and `toggleMute` available |
+
+**Type:** `VoiceVariant = 'pstn' | 'webrtc'` (derived from `typeof VOICE_VARIANT`)
+
+**Widget impact:** Widgets do NOT set voice variant directly — the SDK resolves it internally when creating the task. But widgets should understand this affects which controls appear (e.g., PSTN tasks won't show decline button).
 
 ---
 
 ## New Types to Import from SDK
 
-| Type | Source | Purpose |
-|------|--------|---------|
-| `TaskUIControls` | `@webex/contact-center` | Pre-computed control states |
-| `TaskUIControlState` | `@webex/contact-center` | Single control `{ isVisible, isEnabled }` |
-| `TASK_EVENTS.TASK_UI_CONTROLS_UPDATED` | `@webex/contact-center` | New event |
+| Type | Source | Purpose | Package Entry Point Status |
+|------|--------|---------|---------------------------|
+| `TaskUIControls` | `@webex/contact-center` | Pre-computed control states (17 controls) | Exported from source file; pending addition to `src/index.ts` (Jira tracked) |
+| `TaskUIControlState` | `@webex/contact-center` | Single control `{ isVisible, isEnabled }` | Local type in source file; pending export + addition to `src/index.ts` |
+| `TASK_EVENTS.TASK_UI_CONTROLS_UPDATED` | `@webex/contact-center` | New event | Available — part of `TASK_EVENTS` enum already exported |
+| `TASK_CHANNEL_TYPE` | `@webex/contact-center` | `{ VOICE, DIGITAL }` constant | Exported from source file; pending addition to `src/index.ts` |
+| `VoiceVariant` | `@webex/contact-center` | `'pstn' \| 'webrtc'` | Exported from source file; pending addition to `src/index.ts` |
+| `Participant` | `@webex/contact-center` | `{ id, name?, pType? }` for conference UI | Exported from source file; pending addition to `src/index.ts` |
+| `getDefaultUIControls` | `@webex/contact-center` | Default controls fallback (all disabled) | Exported from source file; pending addition to `src/index.ts` |
+| `TaskState` | `@webex/contact-center` | Enum for explicit task states — needed for consult timer labeling (`CONSULT_INITIATING` vs `CONSULTING`) | Exported from state-machine module; pending addition to `src/index.ts` |
 
-**Note:** `TaskState` and `TaskEvent` enums are internal to SDK and NOT exported to consumers. Widgets should not depend on them directly — use `task.uiControls` instead.
+> **See [001-migration-overview.md § SDK Package Entry Point — Pending Additions](./001-migration-overview.md)** for the full list and exact `src/index.ts` changes needed. A Jira ticket is being created to track these SDK-side additions.
+
+**Note:** `TaskState` and `TaskEvent` enums are exported from the state-machine internal module but NOT from the package-level `index.ts`. Widgets should use `task.uiControls` for control state. However, widgets **do need `TaskState`** for consult timer labeling (`calculateConsultTimerData` needs to distinguish `CONSULT_INITIATING` from `CONSULTING`). `TaskState` must be added to SDK package exports — tracked in the [SDK missing items Confluence page](./confluence-sdk-missing-items.md).
+
+### SDK Task Subtype Interfaces
+
+The SDK defines three task subtype interfaces. Widgets currently use `ITask` but may need these for type narrowing:
+
+| Interface | Extends | Additional Members | Package Entry Point Status |
+|-----------|---------|-------------------|---------------------------|
+| `ITask` | `EventEmitter` | `data`, `webCallMap`, `autoWrapup`, `accept()`, `decline()`, `hold()`, `resume()`, `end()`, `wrapup()`, `pauseRecording()`, `resumeRecording()`, `consult()`, `endConsult()`, `transfer()`, `consultConference()`, `exitConference()`, `transferConference()`, `toggleMute()`, `consultTransfer()`, `cancelAutoWrapupTimer()` | Available in `src/index.ts` |
+| `IVoice` | `ITask` | `holdResume()` — single hold/resume toggle for voice | Defined in source; pending addition to `src/index.ts` |
+| `IDigital` | `Omit<ITask, 'updateTaskData'>` | `uiControls: TaskUIControls`, `updateTaskData()` returns `IDigital` | Defined in source; pending addition to `src/index.ts` |
+| `IWebRTC` | `IVoice` | `toggleMute()`, `decline()`, `unregisterWebCallListeners()` | Defined in source; pending addition to `src/index.ts` |
+
+**Important:** `uiControls` is currently only declared on `IDigital`, not on `ITask`. The concrete `Task` class has a `public get uiControls()` getter inherited by all subclasses (Voice, Digital, WebRTC). Adding `uiControls` to `ITask` is tracked in the Jira ticket — see 001 for details.
 
 ---
 
@@ -229,9 +304,10 @@ This means the widget no longer needs to pass `deviceType`, `featureFlags`, or `
 |------|--------|
 | `task/src/task.types.ts` | Import `TaskUIControls` from SDK; update hook return types |
 | `cc-components/.../task/task.types.ts` | Add `TaskUIControls` prop type for CallControl |
-| `store/src/store.types.ts` | Ensure `TASK_UI_CONTROLS_UPDATED` is available |
+| `store/src/store.types.ts` | **Delete local `TASK_EVENTS` enum** — import from SDK `@webex/contact-center` instead. Update all 5 CC-level event names to SDK task-level names. Delete local `CC_EVENTS` if SDK exports it. |
 | `store/src/constants.ts` | Review/remove consult state constants |
 | `task/src/Utils/constants.ts` | Review/remove media type constants used only for controls |
+| All files importing from `store.types.ts` | Update imports to use SDK `TASK_EVENTS` |
 
 ---
 
@@ -246,3 +322,4 @@ This means the widget no longer needs to pass `deviceType`, `featureFlags`, or `
 ---
 
 _Parent: [001-migration-overview.md](./001-migration-overview.md)_
+_Updated: 2026-03-11 (complete TaskState enum, event name mapping with values, SDK interfaces, VoiceVariant, TASK_CHANNEL_TYPE, SDK export gaps)_

@@ -72,7 +72,7 @@ Registers on each task:
 - TASK_PARTICIPANT_LEFT → handleConferenceEnded
 - TASK_PARTICIPANT_LEFT_FAILED → refreshTaskList
 - TASK_CONFERENCE_STARTED → handleConferenceStarted
-- TASK_CONFERENCE_TRANSFERRED → handleConferenceEnded
+- TASK_CONFERENCE_TRANSFERRED → **refreshTaskList** (registration) / **handleConferenceEnded** (cleanup) — ⚠️ callback reference mismatch, listener never removed
 - TASK_CONFERENCE_TRANSFER_FAILED → refreshTaskList
 - TASK_POST_CALL_ACTIVITY → refreshTaskList
 - TASK_MEDIA (browser only) → handleTaskMedia
@@ -165,6 +165,36 @@ Registers on each task:
 | `findHoldTimestamp(task, mType)` | Hold timestamp (task, mType) |
 
 **Note:** Store `findHoldTimestamp(task, mType)` vs task package `findHoldTimestamp(interaction, mType)` — different signatures.
+
+### SDK TaskUtils — Overlapping Functions with Signature Differences
+
+The SDK (`TaskUtils.ts`) provides utility functions used internally by `uiControlsComputer.ts`. Some overlap with widget `task-utils.ts` but have **different signatures** (SDK takes `Interaction`/`TaskData` instead of `ITask`):
+
+| Widget Function | Widget Signature | SDK Function | SDK Signature | Signature Diff |
+|----------------|-----------------|--------------|---------------|----------------|
+| `getIsConferenceInProgress` | `(task: ITask): boolean` | `getIsConferenceInProgress` | `(data: TaskData): boolean` | Takes `TaskData` not `ITask` |
+| `getIsCustomerInCall` | `(task: ITask): boolean` | `getIsCustomerInCall` | `(interaction: Interaction, interactionId: string): boolean` | Takes `Interaction` + `interactionId` |
+| `getConferenceParticipantsCount` | `(task: ITask): number` | `getConferenceParticipantsCount` | `(data: TaskData, agentId: string): number` | Takes `TaskData` + `agentId` |
+| `isSecondaryAgent` | `(task: ITask): boolean` | `isSecondaryAgent` | `(interaction: Interaction): boolean` | Takes `Interaction` not `ITask` |
+| `isSecondaryEpDnAgent` | `(task: ITask): boolean` | `isSecondaryEpDnAgent` | `(interaction: Interaction): boolean` | Takes `Interaction` not `ITask` |
+
+SDK-only utilities (no widget equivalent):
+
+| SDK Function | Signature | Purpose |
+|-------------|-----------|---------|
+| `isPrimary(task, agentId)` | `(task: ITask, agentId: string): boolean` | Checks if agent is primary owner |
+| `isParticipantInMainInteraction(task, agentId)` | `(task: ITask, agentId: string): boolean` | Agent is in main interaction |
+| `checkParticipantNotInInteraction(task, agentId)` | `(task: ITask, agentId: string): boolean` | Agent not in any interaction media |
+| `getIsConsultInProgressForConferenceControls(...)` | `(data, agentId): boolean` | Consult check for conference |
+| `getIsConsultedAgentForControls(...)` | `(data, agentId): boolean` | Is consulted agent |
+| `getServerHoldStateForControls(...)` | `(data, agentId): boolean\|undefined` | Server-side hold state |
+| `isAutoAnswerEnabled(interaction, agentId)` | `(interaction, agentId): boolean` | Auto-answer check |
+| `isWebRTCCall(interaction, voiceVariant)` | `(interaction, voiceVariant?): boolean` | WebRTC detection |
+| `isDigitalOutbound(interaction)` | `(interaction): boolean` | Digital outbound check |
+| `hasAgentInitiatedOutdial(interaction, agentId)` | `(interaction, agentId): boolean` | Agent initiated outdial |
+| `shouldAutoAnswerTask(interaction, agentId)` | `(interaction, agentId): boolean` | Should auto-answer |
+
+**Migration impact:** Widget `task-utils.ts` functions used for control computation will be deleted (SDK handles this). Functions like `findHoldStatus`, `findHoldTimestamp`, `findMediaResourceId` that serve widget-specific purposes (timers, hold indicator) will be **retained**. SDK utility functions are used internally by `uiControlsComputer.ts` and are NOT exported to consumers.
 
 ---
 
@@ -333,7 +363,10 @@ Registers on each task:
 ### 5. Store Task Flow
 - refreshTaskList → cc.taskManager.getAllTasks()
 - setCurrentTask uses isIncomingTask(task, agentId) to skip incoming
-- handleTaskRemove attempts to unregister task listeners, but has a **pre-existing listener leak bug**: `TASK_REJECT` and `TASK_OUTDIAL_FAILED` are registered with inline lambdas (`(reason) => this.handleTaskReject(task, reason)`) in `registerTaskEventListeners` but removed with *different* inline lambdas in `handleTaskRemove`, so those listeners are never actually removed. Fix during migration by using stored function references
+- handleTaskRemove attempts to unregister task listeners, but has **pre-existing listener leak bugs**:
+  - `TASK_REJECT` and `TASK_OUTDIAL_FAILED`: registered with inline lambdas (`(reason) => this.handleTaskReject(task, reason)`) in `registerTaskEventListeners` but removed with *different* inline lambdas in `handleTaskRemove` — listeners never removed
+  - `TASK_CONFERENCE_TRANSFERRED`: registered with `this.refreshTaskList` (line 599) but removed with `this.handleConferenceEnded` (line 445) — different function references, listener never removed
+  - **Fix during migration:** Use stored function references for all event registrations
 
 ---
 
@@ -359,3 +392,4 @@ Registers on each task:
 ---
 
 _Parent: [001-migration-overview.md](./001-migration-overview.md)_
+_Updated: 2026-03-11 (SDK TaskUtils comparison table, signature differences, SDK-only utilities)_
