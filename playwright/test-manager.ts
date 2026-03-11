@@ -540,17 +540,8 @@ export class TestManager {
     await this.setupOutdialCustomer(browser);
   }
 
-  async setupForOutdialDN(browser: Browser): Promise<void> {
-    await this.setup(browser, {
-      needsAgent1: true,
-      agent1LoginMode: LOGIN_MODE.DIAL_NUMBER,
-      needDialNumberLogin: true,
-    });
-    await this.setupOutdialCustomer(browser);
-  }
-
   private async setupOutdialCustomer(browser: Browser): Promise<void> {
-    const customerToken = process.env.CUSTOMER_OUTDIAL_ACCESS_TOKEN ?? '';
+    const customerToken = process.env.DIAL_NUMBER_LOGIN_ACCESS_TOKEN ?? '';
     const result = await this.createContextWithPage(browser, PAGE_TYPES.CALLER);
     this.callerExtensionContext = result.context;
     this.callerPage = result.page;
