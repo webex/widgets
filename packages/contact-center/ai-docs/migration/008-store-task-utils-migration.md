@@ -86,8 +86,6 @@ The store's `task-utils.ts` contains ~15 utility functions that inspect raw task
 
 ---
 
----
-
 ## Before/After: Removing `getConsultStatus` Usage
 
 ### Before (consumed in `task-util.ts::getControlsVisibility`)
@@ -190,19 +188,6 @@ export function getTaskStatus(task: ITask, agentId: string): string {
   return 'Unknown';
 }
 ```
-
----
-
-## `findHoldTimestamp` Signature Mismatch (Pre-existing Issue)
-
-**Discovery:** Two different `findHoldTimestamp` functions exist with different signatures:
-
-| Location | Signature | Used By |
-|----------|-----------|---------|
-| `store/src/task-utils.ts` | `findHoldTimestamp(task: ITask, mType: string)` | `timer-utils.ts` |
-| `task/src/Utils/task-util.ts` | `findHoldTimestamp(interaction: Interaction, mType: string)` | `useHoldTimer.ts` |
-
-Both should be consolidated during migration. Recommend keeping only the store version (accepts `ITask`) for consistency.
 
 ---
 

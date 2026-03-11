@@ -119,8 +119,6 @@ Many events that currently trigger `refreshTaskList()` will no longer need it be
 
 ---
 
----
-
 ## Refactor Patterns (Before/After)
 
 ### Pattern 1: `registerTaskEventListeners()` — Adding UI Controls Handler
