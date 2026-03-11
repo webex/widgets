@@ -74,8 +74,6 @@ const declineVisibility = task?.uiControls?.decline ?? { isVisible: false, isEna
 
 ---
 
----
-
 ## Full Before/After: `useIncomingTask` Hook
 
 ### Before (current code in `helper.ts`)

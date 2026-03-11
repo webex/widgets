@@ -87,8 +87,6 @@ interface CallControlComponentProps {
 
 ---
 
----
-
 ## Full Before/After: CallControlComponent
 
 ### Before

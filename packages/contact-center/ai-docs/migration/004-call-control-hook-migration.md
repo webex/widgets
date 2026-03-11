@@ -223,8 +223,6 @@ export function useCallControl(props: useCallControlProps) {
 
 ---
 
----
-
 ## Newly Discovered Items (Deep Scan)
 
 ### 1. Pre-existing Bug: Recording Callback Cleanup Mismatch

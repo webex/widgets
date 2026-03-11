@@ -49,8 +49,6 @@ The TaskList widget displays all active tasks and allows accept/decline/select. 
 
 ---
 
----
-
 ## Before/After: Per-Task Accept/Decline in TaskList
 
 ### Before (TaskList component renders accept/decline per task)
