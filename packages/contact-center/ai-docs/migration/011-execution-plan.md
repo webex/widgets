@@ -166,9 +166,6 @@ describe('calculateStateTimerData with TaskUIControls', () => {
 4. Update `calculateConsultTimerData(task, controls, agentId)` similarly
 5. Update all test cases
 
-**Also fix during this milestone:**
-- Consolidate `findHoldTimestamp` dual signatures (store vs task-util versions)
-
 ---
 
 ### M4: CallControl Hook Refactor (3-5 days) — CRITICAL PATH
@@ -346,7 +343,6 @@ describe('useIncomingTask with uiControls', () => {
 
 2. **Bug fixes (found during analysis):**
    - Fix recording callback cleanup mismatch (`TASK_RECORDING_PAUSED` vs `CONTACT_RECORDING_PAUSED`)
-   - Consolidate `findHoldTimestamp` dual signatures (store vs task-util)
    - Add `task:wrapup` race guard if needed
 
 3. **Dead code removal:**
