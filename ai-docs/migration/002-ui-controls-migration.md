@@ -192,7 +192,7 @@ return {
 | `cc-components/src/components/task/task.types.ts` | Align `ControlProps` with new control names |
 | `cc-components/src/components/task/CallControl/call-control.tsx` | Update prop names (`holdResume` → `hold`, etc.) |
 | `cc-components/src/components/task/CallControl/call-control.utils.ts` | Simplify/remove old control derivation |
-| `store/src/task-utils.ts` | Remove `getConsultStatus`, `findHoldStatus` if no longer consumed |
+| `store/src/task-utils.ts` | Remove `getConsultStatus` if no longer consumed. **KEEP `findHoldStatus`** — still needed for `isHeld` derivation (see Removed State Flags table above) |
 | All test files for above | Update to test new contract |
 
 ---
