@@ -42,7 +42,7 @@ The store's `task-utils.ts` contains ~15 utility functions that inspect raw task
 | `getConferenceParticipantsCount(task)` | Used only for control visibility computation | SDK computes max participant check internally |
 | `getIsCustomerInCall(task)` | Used only for control visibility computation | SDK computes internally |
 | `getIsConsultInProgress(task)` | Used only for control visibility computation | SDK computes internally |
-| `findHoldStatus(task, mType, agentId)` | Used for control visibility | SDK tracks hold state in context |
+| ~~`findHoldStatus(task, mType, agentId)`~~ | ~~Used for control visibility~~ | **MOVED TO KEEP** — still needed for `getTaskStatus()` held-state derivation and component layer `isHeld` (see below) |
 
 ### Keep (Widget-layer concerns)
 
@@ -54,6 +54,7 @@ The store's `task-utils.ts` contains ~15 utility functions that inspect raw task
 | `isInteractionOnHold(task)` | Timer logic needs this |
 | `findMediaResourceId(task, mType)` | Switch-call actions need media resource IDs |
 | `findHoldTimestamp(task, mType)` | Hold timer needs timestamp |
+| `findHoldStatus(task, mType, agentId)` | Needed for `getTaskStatus()` held-state derivation and component layer `isHeld` — cannot derive from `controls.hold.isEnabled` |
 
 ### Review (may simplify)
 
@@ -75,7 +76,7 @@ The store's `task-utils.ts` contains ~15 utility functions that inspect raw task
 | `getConferenceParticipantsCount()` | **REMOVE** | SDK internal check |
 | `getIsCustomerInCall()` | **REMOVE** | SDK internal check |
 | `getIsConsultInProgress()` | **REMOVE** | SDK internal check |
-| `findHoldStatus()` | **REMOVE** | SDK tracks in `TaskContext` |
+| `findHoldStatus()` | **KEEP** | Still needed for `getTaskStatus()` held-state derivation and component layer `isHeld` — do NOT derive from `controls.hold` |
 | `isIncomingTask()` | **KEEP** | — |
 | `getTaskStatus()` | **KEEP** | Could enhance with SDK TaskState |
 | `getConferenceParticipants()` | **KEEP** | Display only |
@@ -120,15 +121,17 @@ export function getControlsVisibility(deviceType, featureFlags, task, agentId, c
 
 ### After (all above replaced by `task.uiControls`)
 ```typescript
-// task-util.ts — DELETED or reduced to:
-export { findHoldTimestamp } from './task-util'; // Only keep for timer display
+// task-util.ts — DELETED or reduced to only keep timer/hold helpers:
+// findHoldTimestamp() — retained in task-util.ts for hold timer display
+// findHoldStatus() — retained in task-util.ts for isHeld derivation (used by getTaskStatus, component layer)
+// All other functions (getConsultStatus, getIsConsultInProgress, getConferenceParticipantsCount, etc.) — DELETED
 
 // In useCallControl hook — no imports from store task-utils for controls:
 const controls = currentTask?.uiControls ?? getDefaultUIControls();
 // All 17 controls come pre-computed from SDK. Zero store util calls needed.
 ```
 
-### Before/After: `findHoldStatus` Removal
+### Before/After: `findHoldStatus` — RETAINED (not removed)
 
 #### Before (used in controls computation)
 ```typescript

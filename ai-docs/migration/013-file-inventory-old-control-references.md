@@ -17,7 +17,7 @@ This is the definitive inventory of **every file** in CC Widgets that references
 | cc-components utils | 2 | 3+ (unaffected) |
 | cc-components components | 4 | 8+ (unaffected) |
 | Store | 3 | 1 (`store.ts`) |
-| **Total files to modify** | **~23** | **~15 unaffected** |
+| **Total files to modify** | **~25** | **~13 unaffected** |
 
 ---
 
@@ -49,6 +49,8 @@ This is the definitive inventory of **every file** in CC Widgets that references
 | 10 | `cc-components/.../CallControlCustom/consult-transfer-popover.tsx` | Receives `isConferenceInProgress` prop | [Doc 010](./010-component-layer-migration.md) |
 | 10b | `cc-components/.../CallControlCAD/call-control-cad.tsx` | Directly references `controlVisibility.isConferenceInProgress`, `controlVisibility.isHeld`, `controlVisibility.isConsultReceived`, `controlVisibility.consultCallHeld`, `controlVisibility.recordingIndicator`, `controlVisibility.wrapup`, `controlVisibility.isConsultInitiatedOrAccepted` | [Doc 010](./010-component-layer-migration.md) |
 | 10c | `cc-components/src/wc.ts` | Registers `WebCallControlCADComponent` with `commonPropsForCallControl` — props must align with new `TaskUIControls` shape | [Doc 010](./010-component-layer-migration.md) |
+| 10d | `cc-components/.../TaskList/task-list.utils.ts` | `extractTaskListItemData(task, isBrowser, agentId)` — uses `isBrowser` for accept/decline text, `disableAccept`, `disableDecline` computation; `store.isDeclineButtonEnabled` | [Doc 006](./006-task-list-migration.md) |
+| 10e | `cc-components/.../IncomingTask/incoming-task.utils.tsx` | `extractIncomingTaskData(incomingTask, isBrowser, logger, isDeclineButtonEnabled)` — uses `isBrowser` for accept/decline text, `disableAccept`, `disableDecline` computation | [Doc 005](./005-incoming-task-migration.md) |
 
 ### Tier 4: Widget Entry Points (Medium Impact)
 
@@ -100,9 +102,7 @@ This is the definitive inventory of **every file** in CC Widgets that references
 | `cc-components/.../TaskTimer/index.tsx` | Timer display |
 | `cc-components/.../Task/index.tsx` | Task card display |
 | `cc-components/.../Task/task.utils.ts` | Task data extraction for display |
-| `cc-components/.../TaskList/task-list.utils.ts` | Task list data formatting |
 | `cc-components/.../OutdialCall/outdial-call.tsx` | No task controls |
-| `cc-components/.../IncomingTask/incoming-task.utils.tsx` | Incoming task display utils |
 | `cc-components/.../constants.ts` | UI string constants |
 | `cc-components/.../OutdialCall/constants.ts` | Outdial constants |
 
@@ -131,6 +131,8 @@ This shows exactly which files reference each old control name:
 | `consultCallHeld` | `task-util.ts`, `timer-utils.ts`, `task.types.ts`, `call-control-cad.tsx` |
 | `controlVisibility` (param name) | `helper.ts`, `timer-utils.ts`, `call-control.utils.ts`, `call-control-custom.utils.ts`, `call-control.tsx`, `call-control-consult.tsx`, `call-control-cad.tsx`, `task.types.ts` |
 | `ControlVisibility` (type) | `task.types.ts` (definition), `call-control.utils.ts`, `call-control-custom.utils.ts` (imports) |
+| `isBrowser` (legacy flag) | `task-list.utils.ts`, `incoming-task.utils.tsx`, `task-list.tsx`, `incoming-task.tsx` — replace with `task.uiControls.accept`/`decline` |
+| `isDeclineButtonEnabled` (legacy flag) | `incoming-task.utils.tsx`, `incoming-task.tsx`, `task-list.utils.ts` — replace with `task.uiControls.decline.isEnabled` |
 
 ---
 
@@ -154,6 +156,8 @@ Based on dependencies:
 13. consult-transfer-popover.tsx     — Update isConferenceInProgress derivation
 13b. call-control-cad.tsx            — Replace all controlVisibility refs (isHeld, isConferenceInProgress, recordingIndicator, wrapup, isConsultInitiatedOrAccepted, isConsultReceived, consultCallHeld)
 13c. wc.ts                           — Update commonPropsForCallControl to align with TaskUIControls shape
+13d. task-list.utils.ts              — Replace isBrowser/isDeclineButtonEnabled with task.uiControls for accept/decline logic
+13e. incoming-task.utils.tsx         — Replace isBrowser/isDeclineButtonEnabled with task.uiControls for accept/decline logic
 14. CallControl/index.tsx            — Remove old props from useCallControl call
 15. CallControlCAD/index.tsx         — Remove old props from useCallControl call
 16. TaskList/index.tsx               — Remove deviceType usage
