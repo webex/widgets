@@ -1,6 +1,51 @@
 import {expect, Page} from '@playwright/test';
 import {WrapupReason, AWAIT_TIMEOUT, UI_SETTLE_TIMEOUT, WRAPUP_TIMEOUT} from '../constants';
 
+async function findFirstVisibleWrapupIndex(page: Page): Promise<number> {
+  const wrapupButtons = page.getByTestId('call-control:wrapup-button');
+  const count = await wrapupButtons.count().catch(() => 0);
+
+  for (let i = 0; i < count; i++) {
+    const button = wrapupButtons.nth(i);
+    if (await button.isVisible().catch(() => false)) {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
+export async function waitForWrapupAfterCallEnd(page: Page): Promise<void> {
+  await page.bringToFront();
+
+  await expect
+    .poll(
+      async () => {
+        const endControls = page.getByTestId('call-control:end-call');
+        const endCount = await endControls.count().catch(() => 0);
+        let hasVisibleEndControl = false;
+
+        for (let i = 0; i < endCount; i++) {
+          if (await endControls.nth(i).isVisible().catch(() => false)) {
+            hasVisibleEndControl = true;
+            break;
+          }
+        }
+
+        const wrapupIndex = await findFirstVisibleWrapupIndex(page);
+        return {
+          hasVisibleEndControl,
+          hasVisibleWrapup: wrapupIndex !== -1,
+        };
+      },
+      {timeout: WRAPUP_TIMEOUT, intervals: [250, 500, 1000, 2000]}
+    )
+    .toMatchObject({
+      hasVisibleEndControl: false,
+      hasVisibleWrapup: true,
+    });
+}
+
 /**
  * Submits the wrap-up popup for a task in the UI.
  *
@@ -18,18 +63,20 @@ export async function submitWrapup(page: Page, reason: WrapupReason): Promise<vo
   await page.keyboard.press('Escape');
   await page.waitForTimeout(UI_SETTLE_TIMEOUT);
 
-  const wrapupBox = page.getByTestId('call-control:wrapup-button');
-  const isWrapupBoxVisible = await wrapupBox
-    .first()
-    .waitFor({state: 'visible', timeout: WRAPUP_TIMEOUT})
-    .then(() => true)
-    .catch(() => false);
-  if (!isWrapupBoxVisible) throw new Error('Wrapup box is not visible');
+  await expect
+    .poll(() => findFirstVisibleWrapupIndex(page), {
+      timeout: WRAPUP_TIMEOUT,
+      intervals: [250, 500, 1000, 2000],
+    })
+    .not.toBe(-1);
+
+  const wrapupIndex = await findFirstVisibleWrapupIndex(page);
+  const wrapupBox = page.getByTestId('call-control:wrapup-button').nth(wrapupIndex);
 
   // Check if dropdown is already open (aria-expanded="true")
-  const isAlreadyOpen = (await wrapupBox.first().getAttribute('aria-expanded')) === 'true';
+  const isAlreadyOpen = (await wrapupBox.getAttribute('aria-expanded')) === 'true';
   if (!isAlreadyOpen) {
-    await wrapupBox.first().click({timeout: AWAIT_TIMEOUT});
+    await wrapupBox.click({timeout: AWAIT_TIMEOUT});
     await page.waitForTimeout(UI_SETTLE_TIMEOUT);
   }
   await expect(page.getByTestId('call-control:wrapup-select').first()).toBeVisible({timeout: AWAIT_TIMEOUT});
