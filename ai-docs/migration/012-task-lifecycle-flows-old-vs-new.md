@@ -318,7 +318,7 @@ This document traces **every task scenario from start to finish**, showing exact
 14. SDK: State: WRAPPING_UP → COMPLETED
 15. SDK: computeUIControls(COMPLETED) → all controls disabled
 16. SDK: emitTaskWrappedup action → cleanupResources action
-17. SDK emits: task:wrappedup, task:ui-controls-updated, task:cleanup
+17. SDK emits: AGENT_WRAPPEDUP (AgentWrappedUp), task:ui-controls-updated, task:cleanup
 18. Store: handleTaskEnd/cleanup → remove task from list
 19. Hook: AGENT_WRAPPEDUP callback fires → onWrapUp({task, wrapUpReason})
 20. Post-wrapup: store.setCurrentTask(nextTask), store.setState(ENGAGED)
@@ -634,7 +634,7 @@ No changes needed.
 | Hold | `hold()` → `task:hold` | `hold()` → `HOLD_INITIATED` → `HOLD_SUCCESS` → `task:hold` + `task:ui-controls-updated` |
 | Resume | `resume()` → `task:resume` | `resume()` → `UNHOLD_INITIATED` → `UNHOLD_SUCCESS` → `task:resume` + `task:ui-controls-updated` |
 | End call | `end()` → `task:end` | `end()` → `CONTACT_ENDED` → `task:end` + `task:ui-controls-updated` |
-| Wrapup | `wrapup()` → `task:wrappedup` | `wrapup()` → `WRAPUP_COMPLETE` → `task:wrappedup` + `task:ui-controls-updated` |
+| Wrapup | `wrapup()` → `task:wrappedup` | `wrapup()` → `WRAPUP_COMPLETE` → `AGENT_WRAPPEDUP` (AgentWrappedUp) + `task:ui-controls-updated` |
 | Transfer | `transfer()` → `task:end` | `transfer()` → `TRANSFER_SUCCESS` → `task:end` + `task:ui-controls-updated` |
 | Start consult | `consult()` → `task:consultCreated` | `consult()` → `CONSULT` → `CONSULT_SUCCESS` → `CONSULTING_ACTIVE` → `task:consulting` + `task:ui-controls-updated` |
 | End consult | `endConsult()` → `task:consultEnd` | `endConsult()` → `CONSULT_END` → `task:consultEnd` + `task:ui-controls-updated` |

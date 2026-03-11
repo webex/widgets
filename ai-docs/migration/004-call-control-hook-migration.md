@@ -23,7 +23,7 @@
 8. **Consult**: `consultCall()` → `task.consult()`, `endConsultCall()` → `task.endConsult()`
 9. **Consult transfer**: `consultTransfer()` → `task.consultTransfer()` / `task.transferConference()`
 10. **Conference**: `consultConference()` → `task.consultConference()`, `exitConference()` → `task.exitConference()`
-11. **Switch calls**: `switchToConsult()` → `task.hold(mainMedia)` + `task.resume(consultMedia)`, `switchToMainCall()` → reverse
+11. **Switch calls**: `switchToConsult()` → `task.hold(mainMediaId)` (single call), `switchToMainCall()` → `task.resume(consultMediaId)` (single call)
 12. **Auto-wrapup timer**: `cancelAutoWrapup()` → `task.cancelAutoWrapupTimer()`
 13. **Hold timer**: via `useHoldTimer(currentTask)` hook
 14. **Event callbacks**: Registers hold/resume/end/wrapup/recording callbacks via `setTaskCallback`
@@ -142,8 +142,8 @@
 | `consultTransfer` | `task.consultTransfer()` / `task.transferConference()` | None |
 | `consultConference` | `task.consultConference()` | None |
 | `exitConference` | `task.exitConference()` | None |
-| `switchToConsult` | `task.hold(mainMediaId)` + `task.resume(consultMediaId)` | None |
-| `switchToMainCall` | `task.hold(consultMediaId)` + `task.resume(mainMediaId)` | None |
+| `switchToConsult` | `task.hold(mainMediaId)` | Single SDK call — holds main call; SDK auto-switches to consult leg |
+| `switchToMainCall` | `task.resume(consultMediaId)` | Single SDK call — resumes consult leg; SDK auto-switches to main call |
 | `cancelAutoWrapup` | `task.cancelAutoWrapupTimer()` | None |
 
 ---
