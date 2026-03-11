@@ -1,4 +1,4 @@
-import {Page} from '@playwright/test';
+import {Page, expect} from '@playwright/test';
 import {getCurrentState, changeUserState} from './userStateUtils';
 import {
   WRAPUP_REASONS,
@@ -10,9 +10,11 @@ import {
   userState,
   WrapupReason,
   AWAIT_TIMEOUT,
+  OPERATION_TIMEOUT,
+  EXTENSION_REGISTRATION_TIMEOUT,
 } from '../constants';
 import {submitWrapup} from './wrapupUtils';
-import {holdCallToggle} from './taskControlUtils';
+import {holdCallToggle, isCallHeld} from './taskControlUtils';
 import {acceptExtensionCall, submitRonaPopup} from './incomingTaskUtils';
 import {
   loginViaAccessToken,
@@ -122,18 +124,14 @@ export async function waitForWebSocketReconnection(
 export const waitForState = async (page: Page, expectedState: userState): Promise<void> => {
   try {
     await page.bringToFront();
-    await page.waitForFunction(
-      async (expectedStateArg) => {
-        // Re-import getCurrentState in the browser context
-        const stateSelect = document.querySelector('[data-test="state-select"]') as HTMLSelectElement;
-        if (!stateSelect) return false;
-
-        const currentState = stateSelect.value?.trim();
-        return currentState === expectedStateArg;
-      },
-      expectedState,
-      {timeout: 10000, polling: 'raf'} // Use requestAnimationFrame for optimal performance
-    );
+    await expect
+      .poll(
+        async () => {
+          return await getCurrentState(page);
+        },
+        {timeout: 10000, intervals: [200, 400, 800, 1200]}
+      )
+      .toBe(expectedState);
   } catch (error) {
     // Get current state for better error message
     const currentState = await getCurrentState(page);
@@ -366,27 +364,94 @@ export const handleStrayTasks = async (
     }
 
     // ============================================
-    // STEP 3: Check for end button (end active calls before accepting new ones)
+    // STEP 3a: Check for exit-conference button
     // ============================================
-    const endButton = page.getByTestId('call-control:end-call').first();
-    const endButtonVisible = await endButton.isVisible().catch(() => false);
+    const exitConferenceButton = page.getByTestId('call-control:exit-conference').first();
+    const exitConferenceVisible = await exitConferenceButton.isVisible().catch(() => false);
+
+    if (exitConferenceVisible) {
+      try {
+        await exitConferenceButton.click({timeout: AWAIT_TIMEOUT});
+        await page.waitForTimeout(500);
+        const wrapupAfterExit = await wrapupButton.isVisible().catch(() => false);
+        if (wrapupAfterExit) {
+          await submitWrapup(page, WRAPUP_REASONS.SALE);
+          tasksHandled++;
+        }
+        actionTaken = true;
+        await page.waitForTimeout(300);
+        continue;
+      } catch (e) {
+      }
+    }
+
+    // ============================================
+    // STEP 3b: Check for end button (end active calls before accepting new ones)
+    // ============================================
+    // Conference pages may render two call control groups (simple + CAD).
+    // Find an enabled end-call button rather than always using .first().
+    const allEndButtons = page.getByTestId('call-control:end-call');
+    const endButtonCount = await allEndButtons.count().catch(() => 0);
+    let endButton = allEndButtons.first();
+    let endButtonVisible = false;
+    let endButtonEnabled = false;
+
+    for (let i = 0; i < endButtonCount; i++) {
+      const btn = allEndButtons.nth(i);
+      const visible = await btn.isVisible().catch(() => false);
+      if (!visible) continue;
+      endButtonVisible = true;
+      const enabled = await btn.isEnabled().catch(() => false);
+      if (enabled) {
+        endButton = btn;
+        endButtonEnabled = true;
+        break;
+      }
+      endButton = btn;
+    }
 
     if (endButtonVisible) {
-      let endButtonEnabled = await endButton.isEnabled().catch(() => false);
-
       if (!endButtonEnabled) {
-        // End button disabled - try to resume from hold first
-        const holdToggle = page.getByTestId('call-control:hold-toggle').first();
-        const holdToggleVisible = await holdToggle.isVisible().catch(() => false);
+        // End button disabled - try to cancel consult first
+        const cancelConsultBtn = page.getByTestId('cancel-consult-btn').first();
+        let cancelConsultVisible = await cancelConsultBtn.isVisible().catch(() => false);
 
-        if (holdToggleVisible) {
+        // Cancel-consult may be hidden if on the main call leg — switch to consult leg first
+        if (!cancelConsultVisible) {
+          const switchBtn = page.getByTestId('switchToMainCall-consult-btn').first();
+          const switchVisible = await switchBtn.isVisible().catch(() => false);
+          if (switchVisible) {
+            try {
+              await switchBtn.click({timeout: AWAIT_TIMEOUT});
+              await page.waitForTimeout(1000);
+              cancelConsultVisible = await cancelConsultBtn.isVisible().catch(() => false);
+            } catch (e) {
+            }
+          }
+        }
+
+        if (cancelConsultVisible) {
           try {
-            await holdCallToggle(page);
-            await page.waitForTimeout(500);
+            await cancelConsultBtn.click({timeout: AWAIT_TIMEOUT});
+            await page.waitForTimeout(1000);
             endButtonEnabled = await endButton.isEnabled().catch(() => false);
           } catch (e) {
           }
-        } else {
+        }
+
+        // Still disabled - resume only if the visible control state says the call is held
+        if (!endButtonEnabled) {
+          const holdToggle = page.getByTestId('call-control:hold-toggle').first();
+          const holdToggleVisible = await holdToggle.isVisible().catch(() => false);
+
+          if (holdToggleVisible && (await isCallHeld(page))) {
+            try {
+              await holdCallToggle(page);
+              await page.waitForTimeout(500);
+              endButtonEnabled = await endButton.isEnabled().catch(() => false);
+            } catch (e) {
+            }
+          }
         }
       }
 
@@ -615,8 +680,8 @@ export async function clearPendingCallAndWrapup(page: Page): Promise<boolean> {
   if (endVisible) {
     let endEnabled = await endBtn.isEnabled().catch(() => false);
 
-    // If disabled, try to resume from hold
-    if (!endEnabled) {
+    // If disabled, try to resume only when the visible hold control indicates the call is held
+    if (!endEnabled && (await isCallHeld(page))) {
       try {
         await holdCallToggle(page);
         await page.waitForTimeout(500);
@@ -705,19 +770,36 @@ export const pageSetup = async (
     return; // Skip further setup for multi-session tests
   }
 
-  let loginButtonExists = await page
-    .getByTestId('login-button')
-    .isVisible()
-    .catch(() => false);
+  const stateSelect = page.getByTestId('state-select');
+  const loginButton = page.getByTestId('login-button');
+  const isStateAlreadyVisible = await stateSelect.isVisible().catch(() => false);
 
-  if (loginButtonExists) {
-    await telephonyLogin(page, loginMode, extensionNumber);
-  } else {
-    await stationLogout(page, false); // Don't throw during setup - just try to logout
+  if (!isStateAlreadyVisible) {
+    let loginButtonExists = await loginButton.isVisible().catch(() => false);
+
+    if (!loginButtonExists) {
+      await stationLogout(page, false); // Best-effort logout if still logged in from previous run.
+      loginButtonExists = await loginButton.isVisible().catch(() => false);
+      if (!loginButtonExists) {
+        await loginButton.waitFor({state: 'visible', timeout: OPERATION_TIMEOUT});
+      }
+    }
+
     await telephonyLogin(page, loginMode, extensionNumber);
   }
 
-  await page.getByTestId('state-select').waitFor({state: 'visible', timeout: 30000});
+  const isStateVisible = await stateSelect
+    .waitFor({state: 'visible', timeout: EXTENSION_REGISTRATION_TIMEOUT})
+    .then(() => true)
+    .catch(() => false);
+
+  if (!isStateVisible) {
+    // Single bounded recovery for stale station/device registration state.
+    await stationLogout(page, false);
+    await loginButton.waitFor({state: 'visible', timeout: OPERATION_TIMEOUT});
+    await telephonyLogin(page, loginMode, extensionNumber);
+    await stateSelect.waitFor({state: 'visible', timeout: EXTENSION_REGISTRATION_TIMEOUT});
+  }
 };
 
 /**
