@@ -1,7 +1,8 @@
 import {Page, expect} from '@playwright/test';
-import {loginExtension} from './incomingTaskUtils';
 import {dismissOverlays} from './helperUtils';
-import {AWAIT_TIMEOUT, FORM_FIELD_TIMEOUT, EXTENSION_REGISTRATION_TIMEOUT} from '../constants';
+import {holdCallToggle, isCallHeld} from './taskControlUtils';
+import {hasAnyVisibleControl, hasAnyVisibleEnabledControl} from './controlUtils';
+import {AWAIT_TIMEOUT, FORM_FIELD_TIMEOUT} from '../constants';
 
 /**
  * Utility functions for advanced task controls testing.
@@ -13,6 +14,24 @@ import {AWAIT_TIMEOUT, FORM_FIELD_TIMEOUT, EXTENSION_REGISTRATION_TIMEOUT} from 
 
 // Array to store captured console logs for verification
 let capturedAdvancedLogs: string[] = [];
+
+export const ACTIVE_CONSULT_CONTROL_TEST_IDS = [
+  'cancel-consult-btn',
+  'transfer-consult-btn',
+  'conference-consult-btn',
+  'switchToMainCall-consult-btn',
+  'call-control:switch-to-consult',
+];
+
+export async function hasAnyVisibleControlFromList(page: Page, testIds: string[]): Promise<boolean> {
+  for (const testId of testIds) {
+    if (await hasAnyVisibleControl(page, testId)) {
+      return true;
+    }
+  }
+
+  return false;
+}
 
 /**
  * Sets up console logging to capture transfer and consult related callback logs.
@@ -116,14 +135,15 @@ export async function consultOrTransfer(
   page: Page,
   type: 'agent' | 'queue' | 'dialNumber' | 'entryPoint',
   action: 'consult' | 'transfer',
-  value: string
+  value: string,
+  options?: {consultStartTimeout?: number}
 ): Promise<void> {
   await page.bringToFront();
   await openConsultOrTransferMenu(page, action);
   const popover = await getPopover(page);
 
   if (type === 'agent') {
-    await performAgentSelection(page, popover, value);
+    await performAgentSelection(page, popover, value, action);
   } else if (type === 'queue') {
     await performQueueSelection(page, popover, value);
   } else if (type === 'dialNumber') {
@@ -132,9 +152,10 @@ export async function consultOrTransfer(
     await performEntryPointSelection(page, popover, value);
   }
 
-  await page.waitForTimeout(2000);
+  await waitForPopoverToClose(page);
+
   if (action === 'consult') {
-    await expect(page.getByTestId('cancel-consult-btn')).toBeVisible({timeout: FORM_FIELD_TIMEOUT});
+    await waitForConsultToStart(page, options?.consultStartTimeout);
   }
 }
 
@@ -143,11 +164,27 @@ async function openConsultOrTransferMenu(page: Page, action: 'consult' | 'transf
   await page.bringToFront();
   await dismissOverlays(page);
 
-  if (action === 'consult') {
-    await page.getByTestId('call-control:consult').first().click({timeout: AWAIT_TIMEOUT});
-  } else {
-    await page.getByTestId('call-control:transfer').first().click({timeout: AWAIT_TIMEOUT});
+  const testId = action === 'consult' ? 'call-control:consult' : 'call-control:transfer';
+  const controls = page.getByTestId(testId);
+  const controlCount = await controls.count().catch(() => 0);
+
+  for (let i = 0; i < controlCount; i++) {
+    const control = controls.nth(i);
+    const isVisible = await control.isVisible().catch(() => false);
+    if (!isVisible) {
+      continue;
+    }
+
+    const isEnabled = await control.isEnabled().catch(() => false);
+    if (!isEnabled) {
+      continue;
+    }
+
+    await control.click({timeout: AWAIT_TIMEOUT});
+    return;
   }
+
+  throw new Error(`No visible enabled ${action} control found`);
 }
 
 async function getPopover(page: Page) {
@@ -156,14 +193,35 @@ async function getPopover(page: Page) {
   return popover;
 }
 
+async function waitForPopoverToClose(page: Page): Promise<void> {
+  await expect
+    .poll(
+      async () => {
+        const backdropVisible = await page.locator('.md-popover-backdrop').isVisible().catch(() => false);
+        const popoverVisible = await page.locator('.agent-popover-content').isVisible().catch(() => false);
+        return !backdropVisible && !popoverVisible;
+      },
+      {timeout: AWAIT_TIMEOUT, intervals: [100, 250, 500]}
+    )
+    .toBeTruthy();
+}
+
+async function waitForConsultToStart(page: Page, timeout: number = AWAIT_TIMEOUT): Promise<void> {
+  await expect
+    .poll(() => hasAnyVisibleControlFromList(page, ACTIVE_CONSULT_CONTROL_TEST_IDS), {
+      timeout,
+      intervals: [200, 500, 1000],
+    })
+    .toBeTruthy();
+}
+
 async function clickCategory(
-  page: Page,
   popover: ReturnType<Page['locator']>,
   name: 'Agents' | 'Queues' | 'Dial Number' | 'Entry Point'
 ): Promise<void> {
   const button = popover.getByRole('button', {name, exact: true});
   await button.click({timeout: AWAIT_TIMEOUT});
-  await page.waitForTimeout(200);
+  await expect(popover.locator('#consult-search')).toBeVisible({timeout: FORM_FIELD_TIMEOUT});
 }
 
 async function clickListItemPrimaryButton(
@@ -205,13 +263,75 @@ async function clickListItemPrimaryButton(
     .catch(() => {});
 }
 
-async function performAgentSelection(page: Page, popover: ReturnType<Page['locator']>, value: string): Promise<void> {
-  await clickCategory(page, popover, 'Agents');
-  await clickListItemPrimaryButton(page, popover, value, 'Agent');
+async function performAgentSelection(
+  page: Page,
+  popover: ReturnType<Page['locator']>,
+  value: string,
+  action: 'consult' | 'transfer'
+): Promise<void> {
+  const agentFirstName = value.split(' ')[0];
+
+  let currentPopover = popover;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (attempt === 0) {
+      await clickCategory(currentPopover, 'Agents');
+    }
+
+    const searchBox = currentPopover.locator('#consult-search');
+    await searchBox.fill(agentFirstName);
+
+    const listItem = currentPopover.locator(`[role="listitem"][aria-label="${value}"]`).first();
+    const isVisible = await expect
+      .poll(() => listItem.isVisible().catch(() => false), {
+        timeout: 2500,
+        intervals: [200, 400, 800],
+      })
+      .toBeTruthy()
+      .then(() => true)
+      .catch(() => false);
+
+    if (isVisible) {
+      await clickListItemPrimaryButton(page, currentPopover, value, 'Agent');
+      return;
+    }
+
+    await page.keyboard.press('Escape');
+    await waitForPopoverToClose(page);
+    await openConsultOrTransferMenu(page, action);
+    currentPopover = await getPopover(page);
+    await clickCategory(currentPopover, 'Agents');
+  }
+
+  await clickListItemPrimaryButton(page, currentPopover, value, 'Agent');
+}
+
+export async function waitForPrimaryCallAfterConsult(page: Page): Promise<void> {
+  const consultControlsGone = async () => !(await hasAnyVisibleControlFromList(page, ACTIVE_CONSULT_CONTROL_TEST_IDS));
+
+  await expect
+    .poll(consultControlsGone, {timeout: AWAIT_TIMEOUT, intervals: [200, 500, 1000]})
+    .toBeTruthy();
+
+  if (await isCallHeld(page)) {
+    await holdCallToggle(page);
+    await expect.poll(() => isCallHeld(page), {timeout: AWAIT_TIMEOUT, intervals: [200, 500, 1000]}).toBeFalsy();
+  }
+
+  await expect
+    .poll(
+      async () => {
+        const consultVisible = await hasAnyVisibleEnabledControl(page, 'call-control:consult');
+        const endVisible = await hasAnyVisibleControl(page, 'call-control:end-call');
+        const endEnabled = await hasAnyVisibleEnabledControl(page, 'call-control:end-call');
+        return consultVisible && endVisible && endEnabled;
+      },
+      {timeout: AWAIT_TIMEOUT, intervals: [200, 500, 1000]}
+    )
+    .toBeTruthy();
 }
 
 async function performQueueSelection(page: Page, popover: ReturnType<Page['locator']>, value: string): Promise<void> {
-  await clickCategory(page, popover, 'Queues');
+  await clickCategory(popover, 'Queues');
   await clickListItemPrimaryButton(page, popover, value, 'Queue');
 }
 
@@ -225,7 +345,7 @@ async function performDialNumberSelection(
       'PW_DIAL_NUMBER_NAME is not set. Please provide the Dial Number list item name (e.g., cypher_pstn).'
     );
   }
-  await clickCategory(page, popover, 'Dial Number');
+  await clickCategory(popover, 'Dial Number');
   const search = popover.locator('#consult-search');
   if (await search.isVisible({timeout: 500}).catch(() => false)) {
     await search.fill(value, {timeout: AWAIT_TIMEOUT});
@@ -242,7 +362,7 @@ async function performEntryPointSelection(
   popover: ReturnType<Page['locator']>,
   value: string
 ): Promise<void> {
-  await clickCategory(page, popover, 'Entry Point');
+  await clickCategory(popover, 'Entry Point');
   if (value) {
     const search = popover.locator('#consult-search');
     if (await search.isVisible({timeout: 500}).catch(() => false)) {
@@ -259,6 +379,24 @@ async function performEntryPointSelection(
  * @returns Promise<void>
  */
 export async function cancelConsult(page: Page): Promise<void> {
-  // Click cancel consult button
-  await page.getByTestId('cancel-consult-btn').click({timeout: AWAIT_TIMEOUT});
+  const controls = page.getByTestId('cancel-consult-btn');
+  const count = await controls.count().catch(() => 0);
+
+  for (let i = 0; i < count; i++) {
+    const control = controls.nth(i);
+    const isVisible = await control.isVisible().catch(() => false);
+    if (!isVisible) {
+      continue;
+    }
+
+    const isEnabled = await control.isEnabled().catch(() => false);
+    if (!isEnabled) {
+      continue;
+    }
+
+    await control.click({timeout: AWAIT_TIMEOUT});
+    return;
+  }
+
+  throw new Error('No visible enabled cancel consult control found');
 }

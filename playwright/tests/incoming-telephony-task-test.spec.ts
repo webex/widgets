@@ -11,7 +11,7 @@ import {
   waitForIncomingTask,
 } from '../Utils/incomingTaskUtils';
 import {TASK_TYPES, USER_STATES, THEME_COLORS, WRAPUP_REASONS, RONA_OPTIONS} from '../constants';
-import {submitWrapup} from '../Utils/wrapupUtils';
+import {submitWrapup, waitForWrapupAfterCallEnd} from '../Utils/wrapupUtils';
 import {
   waitForState,
   waitForStateLogs,
@@ -269,7 +269,7 @@ export default function createIncomingTelephonyTaskTests() {
       await waitForStateLogs(capturedLogs, USER_STATES.ENGAGED);
       expect(await getLastStateFromLogs(capturedLogs)).toBe(USER_STATES.ENGAGED);
       await endCallTask(testManager.agent1ExtensionPage);
-      await testManager.agent1Page.waitForTimeout(5000);
+      await waitForWrapupAfterCallEnd(testManager.agent1Page);
       await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
       await waitForState(testManager.agent1Page, USER_STATES.AVAILABLE);
       await waitForStateLogs(capturedLogs, USER_STATES.AVAILABLE);
