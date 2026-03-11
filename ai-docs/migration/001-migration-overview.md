@@ -95,6 +95,42 @@ Components receive {isVisible, isEnabled} per control
 
 ---
 
+## CC SDK Task-Refactor Branch Reference
+
+> **Repo:** [webex/webex-js-sdk (task-refactor)](https://github.com/webex/webex-js-sdk/tree/task-refactor)
+> **Local path:** `/Users/akulakum/Documents/CC_SDK/webex-js-sdk` (branch: `task-refactor`)
+
+### Key SDK Source Files
+
+| File | Purpose |
+|------|---------|
+| `uiControlsComputer.ts` | Computes `TaskUIControls` from `TaskState` + `TaskContext` — the single source of truth for all control visibility/enabled states |
+| `constants.ts` | `TaskState` enum (IDLE, OFFERED, CONNECTED, HELD, CONSULT_INITIATING, CONSULTING, CONF_INITIATING, CONFERENCING, WRAPPING_UP, COMPLETED, TERMINATED, etc.) and `TaskEvent` enum |
+| `types.ts` | `TaskContext`, `UIControlConfig`, `TaskStateMachineConfig` |
+| `TaskStateMachine.ts` | State machine configuration with transitions, guards, and actions |
+| `actions.ts` | State machine action implementations |
+| `guards.ts` | Transition guard conditions |
+| `../Task.ts` | Task service exposing `task.uiControls` getter and `task:ui-controls-updated` event |
+| `../TaskUtils.ts` | Shared utility functions used by `uiControlsComputer.ts` (e.g., `getIsConferenceInProgress`, `getIsCustomerInCall`) |
+
+### Key SDK Architectural Decisions
+
+These decisions in the SDK directly impact how the migration docs should be interpreted:
+
+1. **`exitConference` visibility:** In the SDK, `exitConference` is `VISIBLE_DISABLED` (not hidden) during consulting-from-conference. This differs from the old widget logic where it was hidden. `exitConference.isVisible` is therefore more reliable in the new SDK for detecting conference state, but consulted agents not in conferencing state still see `DISABLED`.
+
+2. **`TaskState.CONSULT_INITIATING` vs `CONSULTING`:** The SDK has `CONSULT_INITIATING` (consult requested, async in-progress) and `CONSULTING` (consult accepted, actively consulting) as distinct states. The old widget constant `TASK_STATE_CONSULT` ('consult') maps to `CONSULT_INITIATING`, NOT `CONSULTING`. `TaskState.CONSULT_INITIATED` exists in the enum but is marked "NOT IMPLEMENTED".
+
+3. **Recording control:** `recording.isEnabled = true` when recording is in progress (allows pause/resume toggle). `recording.isEnabled = false` when recording is not active (allows starting). This means paused recordings show `{ isVisible: true, isEnabled: true }` to allow resumption.
+
+4. **`isHeld` derivation:** The SDK computes `isHeld` from `serverHold ?? state === TaskState.HELD` (line 81 of `uiControlsComputer.ts`). Hold control can be `VISIBLE_DISABLED` in conference/consulting states without meaning the call is held. Widgets must derive `isHeld` from task data (`findHoldStatus`), not from `controls.hold.isEnabled`.
+
+5. **`UIControlConfig` built internally:** The SDK builds `UIControlConfig` from agent profile, `callProcessingDetails`, media type, and voice variant. Widgets do NOT need to provide it.
+
+6. **Conference state (`inConference`):** The SDK computes `inConference` as `conferenceActive && (isConferencing || selfInMainCall || consultInitiator)` (line 97). This is broader than `isConferencing` state alone, accounting for backend conference flags and consult-from-conference flows.
+
+---
+
 ## SDK Version Requirements
 
 The CC Widgets migration depends on the CC SDK `task-refactor` branch being merged and released. Key new APIs:

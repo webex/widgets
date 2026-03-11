@@ -124,7 +124,7 @@ The following state flags were returned by `getControlsVisibility()` but are no 
 
 | Old State Flag | Replacement |
 |----------------|-------------|
-| `isConferenceInProgress` | **Do NOT derive from `exitConference.isVisible`** — exit-conference is hidden during conference + active consult (`isConferenceInProgress && !isConsultInitiatedOrAccepted`). Use `task.data.isConferenceInProgress` from task data instead, or check if SDK exposes this as a dedicated flag |
+| `isConferenceInProgress` | **Caution with `exitConference.isVisible`** — In the old widget code, exit-conference was hidden during conference + active consult. In the **new SDK** (`uiControlsComputer.ts`), `exitConference` is `VISIBLE_DISABLED` (not hidden) during consulting-from-conference, making `isVisible` more reliable. However, for consulted agents not in conferencing state, `exitConference` is `DISABLED`. If you need a definitive conference-in-progress flag independent of agent role, use `task.data` (e.g., `getIsConferenceInProgress(taskData)` which the SDK itself uses internally) rather than relying solely on `exitConference.isVisible` |
 | `isConsultInitiated` | Derive from `task.uiControls.endConsult.isVisible` if needed |
 | `isConsultInitiatedAndAccepted` | No longer needed — SDK handles via controls |
 | `isConsultReceived` | No longer needed — SDK handles via controls |
