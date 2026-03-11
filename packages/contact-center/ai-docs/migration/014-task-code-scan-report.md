@@ -326,7 +326,28 @@ SDK-only utilities (no widget equivalent):
 
 ---
 
-## 19. `widgets-samples/cc/samples-cc-react-app/`
+## 19. `packages/contact-center/cc-components/src/components/task/CallControlCAD/call-control-cad.tsx`
+
+- **Props:** Uses `controlVisibility` from props (same shape as `call-control.tsx`)
+- **Old references:**
+  - `controlVisibility.isConferenceInProgress` — conference participant display
+  - `controlVisibility.wrapup.isVisible` — conditional rendering
+  - `controlVisibility.isHeld`, `controlVisibility.isConsultReceived`, `controlVisibility.consultCallHeld` — hold status indicator
+  - `controlVisibility.recordingIndicator.isVisible` — recording badge display
+  - `controlVisibility.isConsultInitiatedOrAccepted` — consult panel toggle
+- **Migration:** Must update to accept `TaskUIControls` prop and map old control names to new. Same migration pattern as `call-control.tsx` (Doc 010).
+
+---
+
+## 20. `widgets-samples/cc/samples-cc-wc-app/app.js`
+
+- **Web Component usage:** Creates `widget-cc-incoming-task`, `widget-cc-task-list`, `widget-cc-call-control`, `widget-cc-call-control-cad`, `widget-cc-outdial-call`
+- **Callback wiring:** `ccCallControl.onHoldResume`, `ccCallControl.onEnd`, `ccCallControl.onWrapUp`, `ccCallControlCAD.onHoldResume`, etc.
+- **Migration:** Callback prop names may change if WC attribute names are updated to match new SDK control names. Review after component migration.
+
+---
+
+## 21. `widgets-samples/cc/samples-cc-react-app/`
 
 - **App.tsx:** IncomingTask, TaskList, CallControl; onIncomingTaskCB, onAccepted, onRejected, onTaskAccepted, onTaskDeclined, onTaskSelected; store.currentTask, store.setIncomingTaskCb
 - **EngageWidget.tsx:** store.currentTask, mediaType, isSupportedTask
@@ -384,12 +405,15 @@ SDK-only utilities (no widget equivalent):
 | task/src/Utils/timer-utils.ts | ✅ Timer computation |
 | task/src/Utils/useHoldTimer.ts | ✅ Hold timer |
 | cc-components CallControl/* | ✅ Props, utils |
+| cc-components CallControlCAD/* | ✅ controlVisibility, isHeld, recordingIndicator |
 | cc-components Task/* | ✅ Display |
 | cc-components TaskList/* | ✅ Utils, isIncomingTask |
 | cc-components IncomingTask/* | ✅ Utils |
+| samples-cc-wc-app | ✅ WC callback wiring |
 | samples-cc-react-app | ✅ Full usage |
 
 ---
 
 _Parent: [001-migration-overview.md](./001-migration-overview.md)_
 _Updated: 2026-03-11 (SDK TaskUtils comparison table, signature differences, SDK-only utilities)_
+_Updated: 2026-03-11 (added CallControlCAD, WC sample app — per reviewer feedback)_

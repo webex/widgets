@@ -8,90 +8,96 @@ This document set guides the migration of CC Widgets from the **old ad-hoc task 
 
 ## Migration Document Index
 
-| # | Document | Scope | Risk | Priority |
-|---|----------|-------|------|----------|
-| 002 | [002-ui-controls-migration.md](./002-ui-controls-migration.md) | Replace `getControlsVisibility()` with `task.uiControls` | **High** (core UX) | P0 |
-| 003 | [003-store-event-wiring-migration.md](./003-store-event-wiring-migration.md) | Refactor store event handlers to leverage state machine events | **Medium** | P1 |
-| 004 | [004-call-control-hook-migration.md](./004-call-control-hook-migration.md) | Refactor `useCallControl` hook, timer utils, fix bugs | **High** (largest widget) | P0 |
-| 005 | [005-incoming-task-migration.md](./005-incoming-task-migration.md) | Refactor `useIncomingTask` for state-machine offer/assign flow | **Low** | P2 |
-| 006 | [006-task-list-migration.md](./006-task-list-migration.md) | Refactor `useTaskList` for per-task `uiControls` | **Low** | P2 |
-| 007 | [007-outdial-call-migration.md](./007-outdial-call-migration.md) | No changes needed (CC-level, not task-level) | **Low** | P3 |
-| 008 | [008-store-task-utils-migration.md](./008-store-task-utils-migration.md) | Retire or thin out `task-utils.ts`, fix `findHoldTimestamp` dual signatures | **Medium** | P1 |
-| 009 | [009-types-and-constants-migration.md](./009-types-and-constants-migration.md) | Align types/constants with SDK, document `UIControlConfig` | **Medium** | P1 |
-| 010 | [010-component-layer-migration.md](./010-component-layer-migration.md) | Update `cc-components` to accept new control shape from SDK | **Medium** | P1 |
-| 011 | [011-execution-plan.md](./011-execution-plan.md) | Step-by-step spec-first execution plan with 10 milestones | — | — |
-| 012 | [012-task-lifecycle-flows-old-vs-new.md](./012-task-lifecycle-flows-old-vs-new.md) | End-to-end task flows (14 scenarios) with old vs new tracing | — | Reference |
-| 013 | [013-file-inventory-old-control-references.md](./013-file-inventory-old-control-references.md) | Complete file-by-file inventory of every old control reference | — | Reference |
-| 014 | [014-task-code-scan-report.md](./014-task-code-scan-report.md) | Deep code scan findings across both CC SDK and CC Widgets repos | — | Reference |
+| # | Document | Scope |
+|---|----------|-------|
+| 002 | [002-ui-controls-migration.md](./002-ui-controls-migration.md) | Replace `getControlsVisibility()` with `task.uiControls` |
+| 003 | [003-store-event-wiring-migration.md](./003-store-event-wiring-migration.md) | Update store event handlers — same events, now emitted via state machine; task state updates handled by SDK (e.g., remove `refreshTaskList` calls) |
+| 004 | [004-call-control-hook-migration.md](./004-call-control-hook-migration.md) | Refactor `useCallControl` hook and timer utils to consume `task.uiControls` |
+| 005 | [005-incoming-task-migration.md](./005-incoming-task-migration.md) | Refactor `useIncomingTask` for state-machine offer/assign flow |
+| 006 | [006-task-list-migration.md](./006-task-list-migration.md) | Refactor `useTaskList` for per-task `uiControls` |
+| 008 | [008-store-task-utils-migration.md](./008-store-task-utils-migration.md) | Retire control-computation utils from `task-utils.ts` — SDK handles these now |
+| 009 | [009-types-and-constants-migration.md](./009-types-and-constants-migration.md) | Align types/constants with SDK `TaskUIControls` and `TaskState` |
+| 010 | [010-component-layer-migration.md](./010-component-layer-migration.md) | Update `cc-components` to accept `TaskUIControls` shape |
+| 011 | [011-execution-plan.md](./011-execution-plan.md) | Step-by-step execution plan with milestones |
+| 012 | [012-task-lifecycle-flows-old-vs-new.md](./012-task-lifecycle-flows-old-vs-new.md) | End-to-end task flows (14 scenarios) with old vs new tracing |
+| 013 | [013-file-inventory-old-control-references.md](./013-file-inventory-old-control-references.md) | File-by-file inventory of every old control reference |
+| 014 | [014-task-code-scan-report.md](./014-task-code-scan-report.md) | Deep code scan findings across both CC SDK and CC Widgets repos |
 
 ---
 
-## Key Architectural Shift
+## Architectural Change: Old vs New
 
-### Before (Old Approach)
-```
-SDK emits 30+ events → Store handlers manually update observables →
-Widgets compute UI controls via getControlsVisibility() →
-Components receive {isVisible, isEnabled} per control
-```
+### Old Approach
 
-**Problems:**
-- Control visibility logic duplicated between SDK and widgets
-- Ad-hoc state derivation from raw task data (consult status, hold status, conference flags)
-- Fragile: every new state requires changes in widgets, store utils, AND component logic
-- No single source of truth for "what state is this task in?"
+Widgets derive control visibility from raw task data using `getControlsVisibility()`:
 
-### After (New Approach)
 ```
-SDK state machine handles all transitions →
-SDK computes task.uiControls automatically →
-SDK emits task:ui-controls-updated →
-Widgets consume task.uiControls directly →
-Components receive {isVisible, isEnabled} per control
+SDK emits 30+ task events →
+Store handlers manually call refreshTaskList() and update observables →
+Hooks call getControlsVisibility(deviceType, featureFlags, task, agentId, conferenceEnabled) →
+Hooks derive state flags (isHeld, isConsultInitiated, isConferenceInProgress, etc.) →
+Components receive a flat ControlVisibility object
 ```
 
-**Benefits:**
-- Single source of truth: `task.uiControls` from SDK
-- Widget code dramatically simplified (remove ~600 lines of control visibility logic)
-- Store utils thinned (most consult/conference/hold status checks no longer needed)
-- New states automatically handled by SDK, zero widget changes needed
-- Parity with Agent Desktop guaranteed by SDK
+Each hook and utility function independently interprets raw task data to decide which buttons to show/enable. Control logic is spread across `task-util.ts`, `task-utils.ts`, `timer-utils.ts`, and component utils.
+
+### New Approach
+
+SDK computes all control states internally via a state machine and exposes `task.uiControls`:
+
+```
+SDK state machine transitions on task events →
+SDK computes TaskUIControls from (TaskState + TaskContext) in uiControlsComputer.ts →
+SDK emits 'task:ui-controls-updated' event →
+Widgets read task.uiControls directly →
+Components receive TaskUIControls (structured per-control object)
+```
+
+The `TaskUIControls` type provides a per-control `{ isVisible, isEnabled }` shape for 17 controls:
+
+```typescript
+type TaskUIControlState = { isVisible: boolean; isEnabled: boolean };
+
+type TaskUIControls = {
+  accept: TaskUIControlState;
+  decline: TaskUIControlState;
+  hold: TaskUIControlState;
+  transfer: TaskUIControlState;
+  consult: TaskUIControlState;
+  end: TaskUIControlState;
+  recording: TaskUIControlState;
+  mute: TaskUIControlState;
+  consultTransfer: TaskUIControlState;
+  endConsult: TaskUIControlState;
+  conference: TaskUIControlState;
+  exitConference: TaskUIControlState;
+  transferConference: TaskUIControlState;
+  mergeToConference: TaskUIControlState;
+  wrapup: TaskUIControlState;
+  switchToMainCall: TaskUIControlState;
+  switchToConsult: TaskUIControlState;
+};
+```
+
+Widgets no longer derive control visibility — they consume `task.uiControls` as the single source of truth.
 
 ---
 
-## Repo Paths Reference
+## CC Widgets Files Affected
 
-### CC Widgets (this repo)
 | Area | Path |
 |------|------|
-| Task widgets | `packages/contact-center/task/src/` |
 | Task hooks | `packages/contact-center/task/src/helper.ts` |
-| Task UI utils (OLD) | `packages/contact-center/task/src/Utils/task-util.ts` |
-| Task constants | `packages/contact-center/task/src/Utils/constants.ts` |
+| Task UI utils (OLD — to be removed) | `packages/contact-center/task/src/Utils/task-util.ts` |
 | Task timer utils | `packages/contact-center/task/src/Utils/timer-utils.ts` |
 | Hold timer hook | `packages/contact-center/task/src/Utils/useHoldTimer.ts` |
 | Task types | `packages/contact-center/task/src/task.types.ts` |
-| Store | `packages/contact-center/store/src/store.ts` |
 | Store event wrapper | `packages/contact-center/store/src/storeEventsWrapper.ts` |
-| Store task utils (OLD) | `packages/contact-center/store/src/task-utils.ts` |
+| Store task utils | `packages/contact-center/store/src/task-utils.ts` |
 | Store constants | `packages/contact-center/store/src/constants.ts` |
-| CC Components task | `packages/contact-center/cc-components/src/components/task/` |
+| CC Components — CallControl | `packages/contact-center/cc-components/src/components/task/CallControl/` |
+| CC Components — CallControlCAD | `packages/contact-center/cc-components/src/components/task/CallControlCAD/` |
 | CC Components types | `packages/contact-center/cc-components/src/components/task/task.types.ts` |
-
-### CC SDK (task-refactor branch)
-| Area | Path |
-|------|------|
-| State machine | `packages/@webex/contact-center/src/services/task/state-machine/` |
-| UI controls computer | `.../state-machine/uiControlsComputer.ts` |
-| State machine config | `.../state-machine/TaskStateMachine.ts` |
-| Guards | `.../state-machine/guards.ts` |
-| Actions | `.../state-machine/actions.ts` |
-| Constants (TaskState, TaskEvent) | `.../state-machine/constants.ts` |
-| Types | `.../state-machine/types.ts` |
-| Task service | `.../task/Task.ts` |
-| Task manager | `.../task/TaskManager.ts` |
-| Task types | `.../task/types.ts` |
-| Sample app | `docs/samples/contact-center/app.js` |
 
 ---
 
@@ -128,19 +134,6 @@ These decisions in the SDK directly impact how the migration docs should be inte
 5. **`UIControlConfig` built internally:** The SDK builds `UIControlConfig` from agent profile, `callProcessingDetails`, media type, and voice variant. Widgets do NOT need to provide it.
 
 6. **Conference state (`inConference`):** The SDK computes `inConference` as `conferenceActive && (isConferencing || selfInMainCall || consultInitiator)` (line 97). This is broader than `isConferencing` state alone, accounting for backend conference flags and consult-from-conference flows.
-
----
-
-## SDK Version Requirements
-
-The CC Widgets migration depends on the CC SDK `task-refactor` branch being merged and released. Key new APIs:
-
-| API | Type | Description |
-|-----|------|-------------|
-| `task.uiControls` | Property (getter) | Pre-computed `TaskUIControls` object |
-| `task:ui-controls-updated` | Event | Emitted when any control's visibility/enabled state changes |
-| `TaskUIControls` | Type | `{ [controlName]: { isVisible: boolean, isEnabled: boolean } }` |
-| `TaskState` | Enum | Explicit task states (IDLE, OFFERED, CONNECTED, HELD, etc.) |
 
 ---
 
@@ -209,14 +202,7 @@ These bugs exist in the current codebase and should be fixed during migration:
 
 Setup uses `TASK_EVENTS.TASK_RECORDING_PAUSED` / `TASK_EVENTS.TASK_RECORDING_RESUMED`, but cleanup uses `TASK_EVENTS.CONTACT_RECORDING_PAUSED` / `TASK_EVENTS.CONTACT_RECORDING_RESUMED`. Callbacks are never properly removed.
 
-### 2. `findHoldTimestamp` Dual Signatures
-Two `findHoldTimestamp` functions with different signatures:
-- `store/src/task-utils.ts`: `findHoldTimestamp(task: ITask, mType: string)`
-- `task/src/Utils/task-util.ts`: `findHoldTimestamp(interaction: Interaction, mType: string)`
-
-Should be consolidated to one function during migration.
-
-### 3. Event Name Mismatches Between Widget and SDK
+### 2. Event Name Mismatches Between Widget and SDK
 Widget `store.types.ts` declares a local `TASK_EVENTS` enum (line 210: `TODO: remove this once cc sdk exports this enum`) with 5 events using CC-level naming that differ from SDK task-level naming:
 - `AGENT_WRAPPEDUP = 'AgentWrappedUp'` → SDK: `TASK_WRAPPEDUP = 'task:wrappedup'`
 - `AGENT_CONSULT_CREATED = 'AgentConsultCreated'` → SDK: `TASK_CONSULT_CREATED = 'task:consultCreated'`
@@ -228,42 +214,17 @@ See [009-types-and-constants-migration.md § Event Constants](./009-types-and-co
 
 ---
 
-## Critical Migration Notes
+## Migration Notes
 
-### UIControlConfig Is Built by SDK (Not by Widgets)
+These are specific implementation details that migration work must account for:
 
-Widgets do NOT need to provide `UIControlConfig`. The SDK builds it internally from agent profile, `callProcessingDetails`, media type, and voice variant. This means `deviceType`, `featureFlags`, and `conferenceEnabled` **can be removed** from `useCallControlProps` — they are only used for `getControlsVisibility()` which is being eliminated. **Note:** `agentId` must be retained because it is also used by timer utilities (`calculateStateTimerData`, `calculateConsultTimerData`) to look up the agent's participant record from `interaction.participants`.
+1. **`UIControlConfig` is built by SDK:** Widgets do NOT provide it. `deviceType`, `featureFlags`, `conferenceEnabled` can be removed from `useCallControlProps`. **`agentId` must be retained** — timer utilities need it for participant lookup.
 
-### Timer Utils Dependency on `controlVisibility`
+2. **Timer utils depend on old `controlVisibility`:** `calculateStateTimerData()` and `calculateConsultTimerData()` in `timer-utils.ts` must be updated to accept `TaskUIControls` instead.
 
-`calculateStateTimerData()` and `calculateConsultTimerData()` in `timer-utils.ts` accept `controlVisibility` as a parameter with old control names. These functions must be migrated to accept `TaskUIControls` (new control names).
-
-### `task:wrapup` Race Condition
-
-The SDK sample app uses `setTimeout(..., 0)` before updating UI after `task:wrapup`. Consider adding a similar guard in the hook to avoid control flickering during wrapup transition.
-
-### Sample App Reference Pattern
-
-The CC SDK sample app (`docs/samples/contact-center/app.js`) demonstrates the canonical pattern:
-
-```javascript
-task.on('task:ui-controls-updated', () => {
-  updateCallControlUI(task);
-});
-
-function updateCallControlUI(task) {
-  const uiControls = task.uiControls || {};
-  applyAllControlsFromUIControls(uiControls);
-}
-
-function applyControlState(element, control) {
-  element.style.display = control?.isVisible ? 'inline-block' : 'none';
-  element.disabled = !control?.isEnabled;
-}
-```
+3. **`task:wrapup` timing:** The SDK sample app uses `setTimeout(..., 0)` before UI update after `task:wrapup` to avoid control flickering during the transition.
 
 ---
 
 _Created: 2026-03-09_
-_Updated: 2026-03-09 (added deep scan findings, before/after examples, bug reports)_
-_Updated: 2026-03-11 (SDK export gaps, holdResume, event name mismatches — from deep SDK comparison)_
+_Updated: 2026-03-11 (restructured per reviewer feedback: simplified architecture section, removed Priority column and doc 007 row, removed SDK Version Requirements, simplified migration notes, added CallControlCAD to file list)_
