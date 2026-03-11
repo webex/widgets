@@ -121,7 +121,7 @@ These decisions in the SDK directly impact how the migration docs should be inte
 
 2. **`TaskState.CONSULT_INITIATING` vs `CONSULTING`:** The SDK has `CONSULT_INITIATING` (consult requested, async in-progress) and `CONSULTING` (consult accepted, actively consulting) as distinct states. The old widget constant `TASK_STATE_CONSULT` ('consult') maps to `CONSULT_INITIATING`, NOT `CONSULTING`. `TaskState.CONSULT_INITIATED` exists in the enum but is marked "NOT IMPLEMENTED".
 
-3. **Recording control:** `recording.isEnabled = true` when recording is in progress (allows pause/resume toggle). `recording.isEnabled = false` when recording is not active (allows starting). This means paused recordings show `{ isVisible: true, isEnabled: true }` to allow resumption.
+3. **Recording control:** SDK computes: `recordingInProgress ? VISIBLE_ENABLED : VISIBLE_DISABLED` (line 228 of `uiControlsComputer.ts`). So: `recording.isEnabled = true` when recording is active (button clickable to pause). `recording.isEnabled = false` when recording is NOT active (button visible but disabled — nothing to pause/resume). Recording start is handled separately, not via this control's `isEnabled` flag. Widget button wiring (`disabled: !isEnabled`) is correct with this semantic.
 
 4. **`isHeld` derivation:** The SDK computes `isHeld` from `serverHold ?? state === TaskState.HELD` (line 81 of `uiControlsComputer.ts`). Hold control can be `VISIBLE_DISABLED` in conference/consulting states without meaning the call is held. Widgets must derive `isHeld` from task data (`findHoldStatus`), not from `controls.hold.isEnabled`.
 

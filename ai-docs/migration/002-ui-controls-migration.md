@@ -125,11 +125,11 @@ The following state flags were returned by `getControlsVisibility()` but are no 
 | Old State Flag | Replacement |
 |----------------|-------------|
 | `isConferenceInProgress` | **Caution with `exitConference.isVisible`** — In the old widget code, exit-conference was hidden during conference + active consult. In the **new SDK** (`uiControlsComputer.ts`), `exitConference` is `VISIBLE_DISABLED` (not hidden) during consulting-from-conference, making `isVisible` more reliable. However, for consulted agents not in conferencing state, `exitConference` is `DISABLED`. If you need a definitive conference-in-progress flag independent of agent role, use `task.data` (e.g., `getIsConferenceInProgress(taskData)` which the SDK itself uses internally) rather than relying solely on `exitConference.isVisible` |
-| `isConsultInitiated` | Derive from `task.uiControls.endConsult.isVisible` if needed |
+| `isConsultInitiated` | **Do NOT derive from `endConsult.isVisible`** — SDK shows `endConsult` for all consulting states (`CONSULT_INITIATING`, `CONSULTING`, `CONF_INITIATING`), not just initiated. If initiated-only semantics are needed (e.g., consult timer labeling in `calculateConsultTimerData`), use SDK `TaskState` directly: `state === TaskState.CONSULT_INITIATING` |
 | `isConsultInitiatedAndAccepted` | No longer needed — SDK handles via controls |
 | `isConsultReceived` | No longer needed — SDK handles via controls |
 | `isConsultInitiatedOrAccepted` | No longer needed — SDK handles via controls |
-| `isHeld` | Derive from `task.uiControls.hold` state or SDK task state |
+| `isHeld` | **Do NOT derive from `controls.hold`** — hold control is `VISIBLE_DISABLED` in consult/conference states even when call is not held. Derive from task data using `findHoldStatus(task, 'mainCall', agentId)` which checks `interaction.media[mediaId].isHold` directly |
 | `consultCallHeld` | No longer needed — SDK handles switch controls |
 
 ---

@@ -333,7 +333,7 @@ Registers on each task:
 ### 5. Store Task Flow
 - refreshTaskList → cc.taskManager.getAllTasks()
 - setCurrentTask uses isIncomingTask(task, agentId) to skip incoming
-- handleTaskRemove unregisters all task listeners
+- handleTaskRemove attempts to unregister task listeners, but has a **pre-existing listener leak bug**: `TASK_REJECT` and `TASK_OUTDIAL_FAILED` are registered with inline lambdas (`(reason) => this.handleTaskReject(task, reason)`) in `registerTaskEventListeners` but removed with *different* inline lambdas in `handleTaskRemove`, so those listeners are never actually removed. Fix during migration by using stored function references
 
 ---
 
