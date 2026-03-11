@@ -124,7 +124,7 @@ The following state flags were returned by `getControlsVisibility()` but are no 
 
 | Old State Flag | Replacement |
 |----------------|-------------|
-| `isConferenceInProgress` | Derive from `task.uiControls.exitConference.isVisible` if needed |
+| `isConferenceInProgress` | **Do NOT derive from `exitConference.isVisible`** — exit-conference is hidden during conference + active consult (`isConferenceInProgress && !isConsultInitiatedOrAccepted`). Use `task.data.isConferenceInProgress` from task data instead, or check if SDK exposes this as a dedicated flag |
 | `isConsultInitiated` | Derive from `task.uiControls.endConsult.isVisible` if needed |
 | `isConsultInitiatedAndAccepted` | No longer needed — SDK handles via controls |
 | `isConsultReceived` | No longer needed — SDK handles via controls |

@@ -16,6 +16,11 @@
 ### useIncomingTask (lines 147–281)
 - **setTaskCallback usage:** TASK_ASSIGNED, TASK_CONSULT_ACCEPTED, TASK_END, TASK_REJECT, TASK_CONSULT_END
 - **removeTaskCallback:** Same events in cleanup
+- **⚠️ Pre-existing bug — TASK_ASSIGNED callback mismatch:**
+  - `setTaskCallback(TASK_ASSIGNED, ...)` registers an **inline anonymous function** (line ~180)
+  - `removeTaskCallback(TASK_ASSIGNED, taskAssignCallback, ...)` removes with the **named `taskAssignCallback`** reference (line ~200)
+  - These are different function references, so the inline listener is **never removed** — potential listener leak / duplicate callback on task reassignment
+  - **Migration action:** Fix during migration by using the same function reference for both register and cleanup, or consolidate to SDK event subscription model
 - **SDK methods:** `incomingTask.accept()`, `incomingTask.decline()`
 - **Migration:** Per-task event subscriptions; must migrate to new event model
 

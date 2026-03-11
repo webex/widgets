@@ -31,8 +31,8 @@ CC Widgets defines its own types for control visibility, task state, and constan
 
 | Old (CC Widgets Store) | New (CC SDK) |
 |------------------------|--------------|
-| `TASK_STATE_CONSULT` | `TaskState.CONSULTING` |
-| `TASK_STATE_CONSULTING` | `TaskState.CONSULTING` |
+| `TASK_STATE_CONSULT` | **Not a 1:1 map** — represents `CONSULT_STATE_INITIATED` specifically (consult requested, not yet accepted). SDK may use a distinct initiating state; verify with SDK `TaskState` enum. Do NOT collapse with `TASK_STATE_CONSULTING` |
+| `TASK_STATE_CONSULTING` | `TaskState.CONSULTING` (consult accepted, actively consulting) |
 | `TASK_STATE_CONSULT_COMPLETED` | `TaskState.CONNECTED` (consult ended, back to connected) |
 | `INTERACTION_STATE_WRAPUP` | `TaskState.WRAPPING_UP` |
 | `POST_CALL` | `TaskState.POST_CALL` (not implemented) |
