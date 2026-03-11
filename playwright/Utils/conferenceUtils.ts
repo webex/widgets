@@ -243,7 +243,9 @@ export const consultAgentAndAcceptCall = async ({
     await setConferenceAgentsAvailable(getAgentPage, [toAgent]);
     await waitForConferenceConsultToSettle();
     try {
-      await consultOrTransfer(fromAgentPage, 'agent', 'consult', getAgentName(toAgent));
+      await consultOrTransfer(fromAgentPage, 'agent', 'consult', getAgentName(toAgent), {
+        consultStartTimeout: currentAcceptTimeout,
+      });
       await waitForConsultToStart();
     } catch (error) {
       lastError = error;

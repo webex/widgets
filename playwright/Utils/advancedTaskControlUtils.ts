@@ -135,7 +135,8 @@ export async function consultOrTransfer(
   page: Page,
   type: 'agent' | 'queue' | 'dialNumber' | 'entryPoint',
   action: 'consult' | 'transfer',
-  value: string
+  value: string,
+  options?: {consultStartTimeout?: number}
 ): Promise<void> {
   await page.bringToFront();
   await openConsultOrTransferMenu(page, action);
@@ -154,7 +155,7 @@ export async function consultOrTransfer(
   await waitForPopoverToClose(page);
 
   if (action === 'consult') {
-    await waitForConsultToStart(page);
+    await waitForConsultToStart(page, options?.consultStartTimeout);
   }
 }
 
@@ -205,10 +206,10 @@ async function waitForPopoverToClose(page: Page): Promise<void> {
     .toBeTruthy();
 }
 
-async function waitForConsultToStart(page: Page): Promise<void> {
+async function waitForConsultToStart(page: Page, timeout: number = AWAIT_TIMEOUT): Promise<void> {
   await expect
     .poll(() => hasAnyVisibleControlFromList(page, ACTIVE_CONSULT_CONTROL_TEST_IDS), {
-      timeout: AWAIT_TIMEOUT,
+      timeout,
       intervals: [200, 500, 1000],
     })
     .toBeTruthy();
