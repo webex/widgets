@@ -92,6 +92,21 @@ const buildDialNumberTask = (): OAuthTask | null => {
   return null;
 };
 
+const buildCustomerOutdialTask = (): OAuthTask | null => {
+  const username = process.env.PW_DIAL_NUMBER_LOGIN_USERNAME1;
+  const password = process.env.PW_DIAL_NUMBER_LOGIN_PASSWORD1;
+
+  if (username && password) {
+    return {
+      envKey: 'CUSTOMER_OUTDIAL_ACCESS_TOKEN',
+      username,
+      password,
+    };
+  }
+
+  return null;
+};
+
 const fetchOAuthAccessToken = async (browser: Browser, username: string, password?: string): Promise<string> => {
   const context = await browser.newContext({ignoreHTTPSErrors: true});
   const page = await context.newPage();
@@ -168,6 +183,13 @@ setup('OAuth', async ({browser}) => {
   if (dialNumberTask) {
     const dialNumberToken = await fetchOAuthAccessToken(browser, dialNumberTask.username, dialNumberTask.password);
     tokenUpdates[dialNumberTask.envKey] = dialNumberToken;
+  }
+
+  // Fetch customer outdial token (if configured)
+  const customerOutdialTask = buildCustomerOutdialTask();
+  if (customerOutdialTask) {
+    const customerToken = await fetchOAuthAccessToken(browser, customerOutdialTask.username, customerOutdialTask.password);
+    tokenUpdates[customerOutdialTask.envKey] = customerToken;
   }
 
   const allUpdates = {...userSetUpdates, ...tokenUpdates};

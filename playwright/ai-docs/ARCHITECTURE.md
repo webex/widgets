@@ -52,6 +52,7 @@ playwright/
 │   ├── basic-task-controls-test.spec.ts
 │   ├── advanced-task-controls-test.spec.ts
 │   ├── advance-task-control-combinations-test.spec.ts
+│   ├── outdial-call-test.spec.ts
 │   ├── dial-number-task-control-test.spec.ts
 │   ├── tasklist-test.spec.ts
 │   ├── multiparty-conference-set-7-test.spec.ts
@@ -66,6 +67,7 @@ playwright/
 │   ├── userStateUtils.ts
 │   ├── taskControlUtils.ts
 │   ├── advancedTaskControlUtils.ts
+│   ├── outdialUtils.ts
 │   └── wrapupUtils.ts
 ├── test-manager.ts
 ├── test-data.ts
@@ -86,7 +88,7 @@ Keep this section aligned to real repository contents.
 | ------- | -------------------------------------------- | ----------------------------------------------------------------------------------------------- |
 | `SET_1` | `digital-incoming-task-tests.spec.ts`        | `digital-incoming-task-and-task-controls.spec.ts`, `dial-number-task-control-test.spec.ts`      |
 | `SET_2` | `task-list-multi-session-tests.spec.ts`      | `incoming-task-and-controls-multi-session.spec.ts`, `tasklist-test.spec.ts`                     |
-| `SET_3` | `station-login-user-state-tests.spec.ts`     | `station-login-test.spec.ts`, `user-state-test.spec.ts`, `incoming-telephony-task-test.spec.ts` |
+| `SET_3` | `station-login-user-state-tests.spec.ts`     | `station-login-test.spec.ts`, `user-state-test.spec.ts`, `incoming-telephony-task-test.spec.ts`, `outdial-call-test.spec.ts` |
 | `SET_4` | `basic-advanced-task-controls-tests.spec.ts` | `basic-task-controls-test.spec.ts`, `advance-task-control-combinations-test.spec.ts`            |
 | `SET_5` | `advanced-task-controls-tests.spec.ts`       | `advanced-task-controls-test.spec.ts`                                                           |
 | `SET_6` | `dial-number-tests.spec.ts`                  | `dial-number-task-control-test.spec.ts`                                                         |
@@ -150,7 +152,8 @@ These flags are part of baseline runtime behavior and should be preserved unless
    - `[SET_7, SET_8]`
    - `[SET_9]`
 3. Optionally fetches dial-number OAuth token
-4. Performs one final `.env` upsert in the same OAuth setup run
+4. Optionally fetches customer outdial OAuth token (for outdial E2E tests)
+5. Performs one final `.env` upsert in the same OAuth setup run
 
 Test files:
 
@@ -232,6 +235,9 @@ When enabled by setup config/method, these page properties are created and avail
 | `setupForIncomingTaskExtension()`    | Calls `setup()` for extension incoming-task flow                                                                                                                                                     |
 | `setupForIncomingTaskMultiSession()` | Calls `setup()` for multi-session incoming-task flow                                                                                                                                                 |
 | `setupForStationLogin()`             | Custom path (does not call `setup()`), purpose-built station-login + multi-login bootstrap. Station-login page initialization runs sequentially (main then multi-session) to reduce init contention. |
+| `setupForOutdialDesktop()`           | Calls `setup()` with desktop agent1 + outdial customer login                                                                                                                                         |
+| `setupForOutdialExtension()`         | Calls `setup()` with extension agent1 + outdial customer login                                                                                                                                       |
+| `setupForOutdialDN()`                | Calls `setup()` with dial-number agent1 + dial-number phone login + outdial customer login                                                                                                           |
 | `setupForMultipartyConference()`     | Sets up 4 agents + caller for conference tests (agent1–4 pages + callerPage)                                                                                                                         |
 | `setupMultiSessionPage()`            | Targeted helper to initialize only multi-session page when needed                                                                                                                                    |
 
@@ -263,6 +269,7 @@ When enabled by setup config/method, these page properties are created and avail
 | `taskControlUtils.ts`         | `holdCallToggle`, `recordCallToggle`, `isCallHeld`, `endTask`, `verifyHoldTimer`, `verifyHoldButtonIcon`, `verifyRecordButtonIcon`, `setupConsoleLogging`, `verifyHoldLogs`, `verifyRecordingLogs`, `verifyEndLogs`, `verifyRemoteAudioTracks`               | Basic call control actions + callback/event log assertions. `endTask` now stays generic and assumes the caller has already restored the page to a normal endable state.                                                                                                                                                                                                                                                                  |
 | `advancedTaskControlUtils.ts` | `consultOrTransfer`, `cancelConsult`, `waitForPrimaryCallAfterConsult`, `setupAdvancedConsoleLogging`, `verifyTransferSuccessLogs`, `verifyConsultStartSuccessLogs`, `verifyConsultEndSuccessLogs`, `verifyConsultTransferredLogs`, `ACTIVE_CONSULT_CONTROL_TEST_IDS` | Consult/transfer operations + advanced callback/event log assertions. Includes consult-state polling and post-consult primary-call restoration before generic end-task operations.                                                                                                                                                                                                                                                       |
 | `incomingTaskUtils.ts`        | `createCallTask`, `createChatTask`, `createEmailTask`, `waitForIncomingTask`, `acceptIncomingTask`, `declineIncomingTask`, `acceptExtensionCall`, `loginExtension`, `submitRonaPopup`                                                                         | Incoming task creation/acceptance/decline and extension helpers                                                                                                                                                                                                                                                                                                                                                                           |
+| `outdialUtils.ts`             | `enterOutdialNumber`, `clickOutdialButton`, `acceptCustomerCall`, `endCustomerCall`                                                                                                                                                                            | Outdial call helpers for entering number, clicking dial, accepting/ending customer-side calls                                                                                                                                                                                                                                                                                                                                             |
 | `wrapupUtils.ts`              | `submitWrapup`                                                                                                                                                                                                                                                | Wrapup submission                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | `helperUtils.ts`              | `handleStrayTasks`, `pageSetup`, `waitForState`, `waitForStateLogs`, `waitForWebSocketDisconnection`, `waitForWebSocketReconnection`, `clearPendingCallAndWrapup`, `dismissOverlays`                                                                          | Shared setup/cleanup/state polling/network-watch helpers. `waitForState` polls visible state text (`state-name`) to align with `verifyCurrentState`. `pageSetup` includes one bounded station logout/re-login recovery if `state-select` is still missing after login. `handleStrayTasks` handles exit-conference, dual call control groups (iterates all end-call buttons to find enabled one), cancel-consult with switch-leg fallback. |
 | `conferenceUtils.ts`          | `cleanupConferenceState`, `startBaselineCallOnAgent1`, `consultAgentAndAcceptCall`, `consultQueueAndAcceptCall`, `mergeConsultIntoConference`, `transferConsultAndSubmitWrapup`, `toggleConferenceLegIfSwitchAvailable`, `exitConferenceParticipantAndWrapup`, `endConferenceTaskAndWrapup` | Shared conference helpers used by Set 7, Set 8, and Set 9 to keep call setup/cleanup and consult-transfer flows consistent and reusable. Conference callers now choose explicit exit-vs-end behavior instead of using one mixed helper.                                                                                                                                                                                              |
@@ -432,4 +439,4 @@ After a call ends, the Make Call button on the caller page may stay disabled. Cl
 
 ---
 
-_Last Updated: 2026-03-09_
+_Last Updated: 2026-03-11_
