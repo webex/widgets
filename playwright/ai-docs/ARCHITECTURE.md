@@ -88,10 +88,10 @@ Keep this section aligned to real repository contents.
 | ------- | -------------------------------------------- | ----------------------------------------------------------------------------------------------- |
 | `SET_1` | `digital-incoming-task-tests.spec.ts`        | `digital-incoming-task-and-task-controls.spec.ts`, `dial-number-task-control-test.spec.ts`      |
 | `SET_2` | `task-list-multi-session-tests.spec.ts`      | `incoming-task-and-controls-multi-session.spec.ts`, `tasklist-test.spec.ts`                     |
-| `SET_3` | `station-login-user-state-tests.spec.ts`     | `station-login-test.spec.ts`, `user-state-test.spec.ts`, `incoming-telephony-task-test.spec.ts`, `outdial-call-test.spec.ts` |
+| `SET_3` | `station-login-user-state-tests.spec.ts`     | `station-login-test.spec.ts`, `user-state-test.spec.ts`, `incoming-telephony-task-test.spec.ts` |
 | `SET_4` | `basic-advanced-task-controls-tests.spec.ts` | `basic-task-controls-test.spec.ts`, `advance-task-control-combinations-test.spec.ts`            |
 | `SET_5` | `advanced-task-controls-tests.spec.ts`       | `advanced-task-controls-test.spec.ts`                                                           |
-| `SET_6` | `dial-number-tests.spec.ts`                  | `dial-number-task-control-test.spec.ts`                                                         |
+| `SET_6` | `dial-number-tests.spec.ts`                  | `dial-number-task-control-test.spec.ts`, `outdial-call-test.spec.ts`                            |
 | `SET_7` | `multiparty-conference-set-7-tests.spec.ts`  | `multiparty-conference-set-7-test.spec.ts`                                                      |
 | `SET_8` | `multiparty-conference-set-8-tests.spec.ts`  | `multiparty-conference-set-8-test.spec.ts`                                                      |
 | `SET_9` | `multiparty-conference-set-9-tests.spec.ts`  | `multiparty-conference-set-9-test.spec.ts`                                                      |
@@ -237,7 +237,6 @@ When enabled by setup config/method, these page properties are created and avail
 | `setupForStationLogin()`             | Custom path (does not call `setup()`), purpose-built station-login + multi-login bootstrap. Station-login page initialization runs sequentially (main then multi-session) to reduce init contention. |
 | `setupForOutdialDesktop()`           | Calls `setup()` with desktop agent1 + outdial customer login                                                                                                                                         |
 | `setupForOutdialExtension()`         | Calls `setup()` with extension agent1 + outdial customer login                                                                                                                                       |
-| `setupForOutdialDN()`                | Calls `setup()` with dial-number agent1 + dial-number phone login + outdial customer login                                                                                                           |
 | `setupForMultipartyConference()`     | Sets up 4 agents + caller for conference tests (agent1–4 pages + callerPage)                                                                                                                         |
 | `setupMultiSessionPage()`            | Targeted helper to initialize only multi-session page when needed                                                                                                                                    |
 

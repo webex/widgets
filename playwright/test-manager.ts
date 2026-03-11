@@ -383,9 +383,6 @@ export class TestManager {
           'agent1 extension login'
         ),
       ]);
-    } else if (config.agent1LoginMode === LOGIN_MODE.DIAL_NUMBER) {
-      const dialNumber = process.env.PW_DIAL_NUMBER_PSTN ?? '';
-      await pageSetup(this.agent1Page, LOGIN_MODE.DIAL_NUMBER, envTokens.agent1AccessToken, null, dialNumber);
     }
   }
 
