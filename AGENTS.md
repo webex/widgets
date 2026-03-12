@@ -614,7 +614,7 @@ ccWidgets/
 
 - **Repository Rules:** [RULES.md](./RULES.md)
 - **Templates Overview:** [templates/README.md](./ai-docs/templates/README.md)
-- **Task Refactor Migration (Contact Center):** [packages/contact-center/ai-docs/migration/001-migration-overview.md](./packages/contact-center/ai-docs/migration/001-migration-overview.md) — master index for CC SDK task-refactor migration docs
+- **Task Refactor Migration (Contact Center):** [packages/contact-center/ai-docs/migration/migration-overview.md](./packages/contact-center/ai-docs/migration/migration-overview.md) — overview and entry point for CC SDK task-refactor migration docs
 
 ---
 
