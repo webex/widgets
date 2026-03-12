@@ -1,4 +1,4 @@
-# Migration Doc 005: IncomingTask Widget Migration
+# IncomingTask Widget Migration
 
 ## Summary
 
@@ -233,4 +233,4 @@ const IncomingTaskComponent = ({ acceptControl, declineControl, onAccept, onReje
 
 ---
 
-_Parent: [001-migration-overview.md](./001-migration-overview.md)_
+_Parent: [migration-overview.md](./migration-overview.md)_

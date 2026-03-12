@@ -1,4 +1,4 @@
-# Migration Doc 004: CallControl Hook (`useCallControl`) Migration
+# CallControl Hook (`useCallControl`) Migration
 
 ## Summary
 
@@ -124,7 +124,7 @@
 | `isConsultInitiatedAndAccepted` | Removed — SDK handles |
 | `isConsultReceived` | Removed — SDK handles |
 | `isConsultInitiatedOrAccepted` | `controls.endConsult.isVisible` |
-| `isHeld` | `controls.hold` state (visible + disabled = held) |
+| `isHeld` | **Do NOT derive from `controls.hold.isEnabled`** — use `findHoldStatus(task, 'mainCall', agentId)` from task data |
 | `consultCallHeld` | `controls.switchToConsult.isVisible` |
 
 ### Actions (Unchanged)
@@ -380,6 +380,18 @@ export function calculateStateTimerData(
 
 ---
 
+## Migration Gotchas
+
+1. **`UIControlConfig` is built by SDK:** Widgets do NOT provide it. Remove `deviceType`, `featureFlags`, `conferenceEnabled` from `useCallControlProps`. **Retain `agentId`** — timer utils need it for participant lookup.
+
+2. **`isHeld` derivation:** Hold control can be `VISIBLE_DISABLED` in conference/consulting states without meaning the call is held. Do NOT derive from `controls.hold.isEnabled`. Use `findHoldStatus(task, 'mainCall', agentId)` from task data.
+
+3. **Recording control semantics:** `recording.isEnabled = true` means recording is active (button clickable to pause). `recording.isEnabled = false` means not active (visible but disabled).
+
+4. **`exitConference` visibility change:** In the new SDK, `exitConference` is `VISIBLE_DISABLED` (not hidden) during consulting-from-conference. Old widget logic hid it.
+
+---
+
 ## Files to Modify
 
 | File | Action |
@@ -410,4 +422,4 @@ export function calculateStateTimerData(
 
 ---
 
-_Parent: [001-migration-overview.md](./001-migration-overview.md)_
+_Parent: [migration-overview.md](./migration-overview.md)_
