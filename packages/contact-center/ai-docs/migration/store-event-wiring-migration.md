@@ -2,13 +2,15 @@
 
 ## Summary
 
-The store's `storeEventsWrapper.ts` currently registers 30+ individual task event handlers that manually call `refreshTaskList()` and update observables. With the state machine, the SDK handles state transitions internally. Many event handlers can be simplified or removed, and the new `task:ui-controls-updated` event replaces manual state derivation.
+The store's `storeEventsWrapper.ts` currently registers 27 individual task event handlers via `registerTaskEventListeners()` that manually call `refreshTaskList()` and update observables. A companion method `handleTaskRemove()` unregisters them. With the state machine, the SDK handles state transitions internally. Many event handlers can be simplified or removed, and the new `task:ui-controls-updated` event replaces manual state derivation.
 
 ---
 
-## Event Names — 5 Renamed
+## Event Names — Renamed and Deleted
 
-The widget's local `TASK_EVENTS` enum (in `store/src/store.types.ts`) uses CC-level naming that differs from the SDK's task-level naming. These must be aligned:
+The widget's local `TASK_EVENTS` enum (in `store/src/store.types.ts`) uses CC-level naming that differs from the SDK's task-level naming.
+
+### 5 Renamed Events
 
 | Old (Widget) | Old Value | New (SDK) | New Value |
 |---|---|---|---|
@@ -18,13 +20,34 @@ The widget's local `TASK_EVENTS` enum (in `store/src/store.types.ts`) uses CC-le
 | `CONTACT_RECORDING_PAUSED` | `'ContactRecordingPaused'` | `TASK_RECORDING_PAUSED` | `'task:recordingPaused'` |
 | `CONTACT_RECORDING_RESUMED` | `'ContactRecordingResumed'` | `TASK_RECORDING_RESUMED` | `'task:recordingResumed'` |
 
-New event: `TASK_UI_CONTROLS_UPDATED` (`'task:ui-controls-updated'`) — subscribe to this for control updates.
+### 4 Store-Only Enum Members (no SDK equivalent — delete)
 
-**Action:** Delete the local `TASK_EVENTS` enum from `store/src/store.types.ts` and import from SDK instead.
+| Widget Enum Member | Value | Note |
+|---|---|---|
+| `TASK_UNHOLD` | `'task:unhold'` | SDK uses `TASK_RESUME` instead |
+| `TASK_CONSULT` | `'task:consult'` | No SDK equivalent; consult flow uses multiple events |
+| `TASK_PAUSE` | `'task:pause'` | No SDK equivalent; SDK uses `TASK_HOLD` |
+| `AGENT_CONTACT_ASSIGNED` | `'AgentContactAssigned'` | SDK uses `TASK_ASSIGNED` (`'task:assigned'`) |
+
+### New SDK Events (not in current widget enum)
+
+| SDK Event | Value | Widget Action Needed |
+|---|---|---|
+| `TASK_UI_CONTROLS_UPDATED` | `'task:ui-controls-updated'` | **Must subscribe** — triggers widget re-renders |
+| `TASK_UNASSIGNED` | `'task:unassigned'` | Evaluate if widget needs to handle |
+| `TASK_CONSULT_QUEUE_FAILED` | `'task:consultQueueFailed'` | Evaluate if widget needs to handle |
+| `TASK_RECORDING_STARTED` | `'task:recordingStarted'` | Evaluate for recording indicator |
+| `TASK_RECORDING_PAUSE_FAILED` | `'task:recordingPauseFailed'` | Evaluate for error handling |
+| `TASK_RECORDING_RESUME_FAILED` | `'task:recordingResumeFailed'` | Evaluate for error handling |
+| `TASK_EXIT_CONFERENCE` | `'task:exitConference'` | Evaluate for conference flow |
+| `TASK_TRANSFER_CONFERENCE` | `'task:transferConference'` | Evaluate for conference flow |
+| `TASK_CLEANUP` | `'task:cleanup'` | SDK internal — likely no widget action |
+
+**Action:** Delete the local `TASK_EVENTS` enum from `store/src/store.types.ts` and import from SDK instead. SDK's `TASK_EVENTS` already includes all needed events including `TASK_UI_CONTROLS_UPDATED`.
 
 ### Pre-existing Bug: Event Name Mismatches
 
-The 5 renamed events above are currently hardcoded in `store.types.ts` with a TODO comment: `// TODO: remove this once cc sdk exports this enum`. During migration, align these to SDK's exported `TASK_EVENTS` enum.
+The 5 renamed events above are currently hardcoded in `store.types.ts` with a TODO comment: `// TODO: remove this once cc sdk exports this enum`. During migration, replace the entire local enum with SDK's exported `TASK_EVENTS` enum.
 
 ---
 
@@ -32,46 +55,67 @@ The 5 renamed events above are currently hardcoded in `store.types.ts` with a TO
 
 ### Entry Point
 **File:** `packages/contact-center/store/src/storeEventsWrapper.ts`
-**Method:** `registerTaskEventListeners(task: ITask)`
+**Register:** `registerTaskEventListeners(task: ITask)` — registers 27 event listeners
+**Cleanup:** `handleTaskRemove(taskToRemove: ITask)` — unregisters all listeners + resets state
 
 ### How It Works (Old)
-1. On task creation, store registers individual listeners for 30+ task events
-2. Each handler manually updates store observables (taskList, currentTask)
+1. On task creation, store registers individual listeners for 27 task events
+2. Each handler manually updates store observables (`taskList`, `currentTask`, `consultStartTimeStamp`, `isQueueConsultInProgress`, `currentConsultQueueId`)
 3. Many handlers simply call `refreshTaskList()` to re-fetch task state
 4. Some handlers have specialized logic (consult, conference lifecycle)
 5. Widgets subscribe to store callbacks via `setTaskCallback(event, cb, taskId)`
 
-### Old Event Handlers
+### Store Observables Affected by Event Handlers
 
-| Event | Handler | Action |
-|-------|---------|--------|
-| `TASK_END` | `handleTaskEnd` | Remove task from list, clear current task |
-| `TASK_ASSIGNED` | `handleTaskAssigned` | Update task list, set current task |
-| `AGENT_OFFER_CONTACT` | `refreshTaskList` | Re-fetch all tasks |
-| `AGENT_CONSULT_CREATED` | `handleConsultCreated` | Update task list, fire callbacks |
-| `TASK_CONSULT_QUEUE_CANCELLED` | `handleConsultQueueCancelled` | Refresh + fire callbacks |
-| `TASK_REJECT` | `handleTaskReject` | Remove task, fire callbacks |
-| `TASK_OUTDIAL_FAILED` | `handleOutdialFailed` | Remove task, fire callbacks |
-| `AGENT_WRAPPEDUP` | `refreshTaskList` | Re-fetch all tasks |
-| `TASK_CONSULTING` | `handleConsulting` | Refresh + fire callbacks |
-| `TASK_CONSULT_ACCEPTED` | `handleConsultAccepted` | Refresh + fire callbacks |
-| `TASK_OFFER_CONSULT` | `handleConsultOffer` | Refresh + fire callbacks |
-| `TASK_AUTO_ANSWERED` | `handleAutoAnswer` | Refresh + fire callbacks |
-| `TASK_CONSULT_END` | `refreshTaskList` | Re-fetch all tasks |
-| `TASK_HOLD` | `refreshTaskList` | Re-fetch all tasks |
-| `TASK_RESUME` | `refreshTaskList` | Re-fetch all tasks |
-| `TASK_CONFERENCE_ENDED` | `handleConferenceEnded` | Refresh + fire callbacks |
-| `TASK_CONFERENCE_END_FAILED` | `refreshTaskList` | Re-fetch all tasks |
-| `TASK_CONFERENCE_ESTABLISHING` | `refreshTaskList` | Re-fetch all tasks |
-| `TASK_CONFERENCE_FAILED` | `refreshTaskList` | Re-fetch all tasks |
-| `TASK_PARTICIPANT_JOINED` | `handleConferenceStarted` | Refresh + fire callbacks |
-| `TASK_PARTICIPANT_LEFT` | `handleConferenceEnded` | Refresh + fire callbacks |
-| `TASK_PARTICIPANT_LEFT_FAILED` | `refreshTaskList` | Re-fetch all tasks |
-| `TASK_CONFERENCE_STARTED` | `handleConferenceStarted` | Refresh + fire callbacks |
-| `TASK_CONFERENCE_TRANSFERRED` | `refreshTaskList` | Re-fetch all tasks |
-| `TASK_CONFERENCE_TRANSFER_FAILED` | `refreshTaskList` | Re-fetch all tasks |
-| `TASK_POST_CALL_ACTIVITY` | `refreshTaskList` | Re-fetch all tasks |
-| `TASK_MEDIA` | `handleTaskMedia` | Browser-only media setup |
+These live in `store/src/store.ts` and are mutated via setters in `storeEventsWrapper.ts`:
+
+| Observable | Type | Mutated By |
+|---|---|---|
+| `currentTask` | `ITask \| null` | `handleTaskAssigned`, `handleTaskEnd`, `handleTaskRemove` |
+| `taskList` | `Record<string, ITask>` | `refreshTaskList` |
+| `consultStartTimeStamp` | `number \| undefined` | `handleConsultCreated`, `handleConsulting`, `handleConsultAccepted`, `handleConsultEnd`, `handleConsultQueueCancelled`, `handleConferenceStarted` |
+| `isQueueConsultInProgress` | `boolean` | `handleConsultEnd`, `handleConsultQueueCancelled`, `handleConferenceStarted` |
+| `currentConsultQueueId` | `string` | `handleConsultEnd`, `handleConsultQueueCancelled`, `handleConferenceStarted` |
+
+### Old Event Handlers (27 events)
+
+| # | Event | Handler | Action |
+|---|-------|---------|--------|
+| 1 | `TASK_END` | `handleTaskEnd` | Remove task from list, clear current task |
+| 2 | `TASK_ASSIGNED` | `handleTaskAssigned` | Update task list, set current task |
+| 3 | `AGENT_OFFER_CONTACT` | `refreshTaskList` | Re-fetch all tasks |
+| 4 | `AGENT_CONSULT_CREATED` | `handleConsultCreated` | `refreshTaskList()` + `setConsultStartTimeStamp(Date.now())` |
+| 5 | `TASK_CONSULT_QUEUE_CANCELLED` | `handleConsultQueueCancelled` | Reset `isQueueConsultInProgress`, `currentConsultQueueId`, `consultStartTimeStamp` + `refreshTaskList()` |
+| 6 | `TASK_REJECT` | `handleTaskReject` | Remove task, fire callbacks |
+| 7 | `TASK_OUTDIAL_FAILED` | `handleOutdialFailed` | Remove task, fire callbacks |
+| 8 | `AGENT_WRAPPEDUP` | `refreshTaskList` | Re-fetch all tasks |
+| 9 | `TASK_CONSULTING` | `handleConsulting` | `refreshTaskList()` + `setConsultStartTimeStamp(Date.now())` |
+| 10 | `TASK_CONSULT_ACCEPTED` | `handleConsultAccepted` | `refreshTaskList()` + `setConsultStartTimeStamp(Date.now())` + set ENGAGED state + **registers `TASK_MEDIA` listener on consult task (browser only)** |
+| 11 | `TASK_OFFER_CONSULT` | `handleConsultOffer` | `refreshTaskList()` |
+| 12 | `TASK_AUTO_ANSWERED` | `handleAutoAnswer` | `setIsDeclineButtonEnabled(true)` + `refreshTaskList()` |
+| 13 | `TASK_CONSULT_END` | `refreshTaskList` | Re-fetch all tasks (**Note:** `handleConsultEnd` method exists but is NOT wired — see pre-existing bug below) |
+| 14 | `TASK_HOLD` | `refreshTaskList` | Re-fetch all tasks |
+| 15 | `TASK_RESUME` | `refreshTaskList` | Re-fetch all tasks |
+| 16 | `TASK_CONFERENCE_ENDED` | `handleConferenceEnded` | `refreshTaskList()` |
+| 17 | `TASK_CONFERENCE_END_FAILED` | `refreshTaskList` | Re-fetch all tasks |
+| 18 | `TASK_CONFERENCE_ESTABLISHING` | `refreshTaskList` | Re-fetch all tasks |
+| 19 | `TASK_CONFERENCE_FAILED` | `refreshTaskList` | Re-fetch all tasks |
+| 20 | `TASK_PARTICIPANT_JOINED` | `handleConferenceStarted` | Reset `isQueueConsultInProgress`, `currentConsultQueueId`, `consultStartTimeStamp` + `refreshTaskList()` |
+| 21 | `TASK_PARTICIPANT_LEFT` | `handleConferenceEnded` | `refreshTaskList()` |
+| 22 | `TASK_PARTICIPANT_LEFT_FAILED` | `refreshTaskList` | Re-fetch all tasks |
+| 23 | `TASK_CONFERENCE_STARTED` | `handleConferenceStarted` | (same as #20) |
+| 24 | `TASK_CONFERENCE_TRANSFERRED` | `refreshTaskList` | Re-fetch all tasks |
+| 25 | `TASK_CONFERENCE_TRANSFER_FAILED` | `refreshTaskList` | Re-fetch all tasks |
+| 26 | `TASK_POST_CALL_ACTIVITY` | `refreshTaskList` | Re-fetch all tasks |
+| 27 | `TASK_MEDIA` | `handleTaskMedia` | Browser-only: `setCallControlAudio(new MediaStream([track]))` |
+
+### Pre-existing Bugs in Old Code
+
+**Bug 1: `handleConsultEnd` is dead code.**
+A `handleConsultEnd` method exists (resets `isQueueConsultInProgress`, `currentConsultQueueId`, `consultStartTimeStamp`) but `TASK_CONSULT_END` is wired to `refreshTaskList()` instead. The method's consult state cleanup never runs.
+
+**Bug 2: `handleTaskRemove` listener mismatch.**
+`registerTaskEventListeners` wires `TASK_CONFERENCE_TRANSFERRED → this.refreshTaskList`. But `handleTaskRemove` calls `taskToRemove.off(TASK_EVENTS.TASK_CONFERENCE_TRANSFERRED, this.handleConferenceEnded)` — wrong handler reference. This listener is **never actually removed**, causing a listener leak.
 
 ---
 
@@ -83,32 +127,42 @@ The 5 renamed events above are currently hardcoded in `store.types.ts` with a TO
 3. `task.uiControls` is recomputed after every state transition
 4. `task:ui-controls-updated` is emitted when controls change
 
-### Proposed New Event Registration
+### Definitive New Event Registration
 
-Many events that currently trigger `refreshTaskList()` will no longer need it because `task.data` is kept in sync by the SDK. The store should:
+Many events that currently trigger `refreshTaskList()` will no longer need it because `task.data` is kept in sync by the SDK. Below is the single authoritative table for all event handler changes:
 
-| Event | New Handler | Change |
-|-------|-------------|--------|
-| `TASK_END` | `handleTaskEnd` | **Keep** (need to remove from task list) |
-| `TASK_ASSIGNED` | `handleTaskAssigned` | **Keep** (need to update current task) |
-| `TASK_REJECT` | `handleTaskReject` | **Keep** (need to remove from task list) |
-| `TASK_OUTDIAL_FAILED` | `handleOutdialFailed` | **Keep** (need to remove from task list) |
-| `TASK_MEDIA` | `handleTaskMedia` | **Keep** (browser WebRTC setup) |
-| `TASK_UI_CONTROLS_UPDATED` | **NEW** — `handleUIControlsUpdated` | **Add** — trigger widget re-renders |
-| `TASK_WRAPUP` | `handleWrapup` | **Simplify** — no need to refresh |
-| `AGENT_WRAPPEDUP` | `handleWrappedup` | **Keep refresh or add explicit task removal** — task must be removed from `taskList`/`currentTask` after wrapup completion to prevent stale UI |
-| `TASK_HOLD` | Fire callback only | **Simplify** — no `refreshTaskList()` |
-| `TASK_RESUME` | Fire callback only | **Simplify** — no `refreshTaskList()` |
-| `TASK_CONSULT_END` | `handleConsultEnd` | **Keep handler** — must reset `isQueueConsultInProgress`, `currentConsultQueueId`, `consultStartTimeStamp` + fire callback |
-| `TASK_CONSULT_QUEUE_CANCELLED` | `handleConsultQueueCancelled` | **Keep handler** — must reset `isQueueConsultInProgress`, `currentConsultQueueId`, `consultStartTimeStamp` + fire callback |
-| `TASK_CONSULTING` | `handleConsulting` | **Keep handler** — sets `consultStartTimeStamp` + fire callback |
-| Other `TASK_CONSULT_*` | Fire callback only | **Simplify** — SDK manages task state |
-| `TASK_PARTICIPANT_JOINED` / `TASK_CONFERENCE_STARTED` | `handleConferenceStarted` | **Keep handler** — must reset `isQueueConsultInProgress`, `currentConsultQueueId`, `consultStartTimeStamp` |
-| `TASK_CONFERENCE_ENDED` / `TASK_PARTICIPANT_LEFT` | `handleConferenceEnded` | **Keep handler** — conference cleanup logic |
-| Other `TASK_CONFERENCE_*` | Fire callback only | **Simplify** — SDK manages task state |
-| `AGENT_OFFER_CONTACT` | Fire callback only | **Simplify** — SDK updates task.data |
-| `TASK_POST_CALL_ACTIVITY` | Fire callback only | **Simplify** |
-| All other `refreshTaskList()` handlers | Remove or fire callback only | **Simplify** |
+| # | Event | New Handler | Change | Detail |
+|---|-------|-------------|--------|--------|
+| 1 | `TASK_END` | `handleTaskEnd` | **Keep** | Remove from task list, clear current task |
+| 2 | `TASK_ASSIGNED` | `handleTaskAssigned` | **Keep** | Update task list, set current task |
+| 3 | `TASK_REJECT` | `handleTaskReject` | **Keep** | Remove from task list |
+| 4 | `TASK_OUTDIAL_FAILED` | `handleOutdialFailed` | **Keep** | Remove from task list |
+| 5 | `TASK_MEDIA` | `handleTaskMedia` | **Keep** | Browser-only WebRTC setup (conditional registration) |
+| 6 | `TASK_UI_CONTROLS_UPDATED` | `handleUIControlsUpdated` | **Add new** | Fire callbacks to trigger widget re-renders |
+| 7 | `TASK_WRAPPEDUP` | `handleWrappedup` | **Keep + rename** | Was `AGENT_WRAPPEDUP`. Keep `refreshTaskList()` — task must be removed from list after wrapup. Fire callback. |
+| 8 | `TASK_CONSULT_END` | `handleConsultEnd` | **Fix wiring** | Wire the existing (currently dead) `handleConsultEnd` method. Resets `isQueueConsultInProgress`, `currentConsultQueueId`, `consultStartTimeStamp`. Remove `refreshTaskList()`. Fire callback. |
+| 9 | `TASK_CONSULT_QUEUE_CANCELLED` | `handleConsultQueueCancelled` | **Simplify** | Keep consult state reset. Remove `refreshTaskList()`. Fire callback. |
+| 10 | `TASK_CONSULTING` | `handleConsulting` | **Simplify** | Keep `setConsultStartTimeStamp(Date.now())`. Remove `refreshTaskList()`. Fire callback. |
+| 11 | `TASK_CONSULT_CREATED` | `handleConsultCreated` | **Simplify + rename** | Was `AGENT_CONSULT_CREATED`. Keep `setConsultStartTimeStamp(Date.now())`. Remove `refreshTaskList()`. Fire callback. |
+| 12 | `TASK_CONSULT_ACCEPTED` | `handleConsultAccepted` | **Simplify** | Keep `setConsultStartTimeStamp(Date.now())`, keep ENGAGED state, **keep `TASK_MEDIA` listener registration (browser)**. Remove `refreshTaskList()`. Fire callback. |
+| 13 | `TASK_AUTO_ANSWERED` | `handleAutoAnswer` | **Simplify** | Keep `setIsDeclineButtonEnabled(true)`. Remove `refreshTaskList()`. Fire callback. |
+| 14 | `TASK_OFFER_CONTACT` | Fire callback only | **Simplify + rename** | Was `AGENT_OFFER_CONTACT`. Remove `refreshTaskList()`. |
+| 15 | `TASK_OFFER_CONSULT` | Fire callback only | **Simplify** | Remove `refreshTaskList()`. |
+| 16 | `TASK_PARTICIPANT_JOINED` | `handleConferenceStarted` | **Simplify** | Keep consult state reset (`isQueueConsultInProgress`, `currentConsultQueueId`, `consultStartTimeStamp`). Remove `refreshTaskList()`. Fire callback. |
+| 17 | `TASK_CONFERENCE_STARTED` | `handleConferenceStarted` | **Simplify** | Same as #16 |
+| 18 | `TASK_CONFERENCE_ENDED` | `handleConferenceEnded` | **Simplify** | Remove `refreshTaskList()`. Fire callback. |
+| 19 | `TASK_PARTICIPANT_LEFT` | `handleConferenceEnded` | **Simplify** | Same as #18 |
+| 20 | `TASK_HOLD` | Fire callback only | **Simplify** | Remove `refreshTaskList()`. |
+| 21 | `TASK_RESUME` | Fire callback only | **Simplify** | Remove `refreshTaskList()`. |
+| 22 | `TASK_RECORDING_PAUSED` | Fire callback only | **Simplify + rename** | Was `CONTACT_RECORDING_PAUSED`. |
+| 23 | `TASK_RECORDING_RESUMED` | Fire callback only | **Simplify + rename** | Was `CONTACT_RECORDING_RESUMED`. |
+| 24 | `TASK_POST_CALL_ACTIVITY` | Fire callback only | **Simplify** | Remove `refreshTaskList()`. |
+| 25 | `TASK_CONFERENCE_ESTABLISHING` | Fire callback only | **Simplify** | Remove `refreshTaskList()`. |
+| 26 | `TASK_CONFERENCE_FAILED` | Fire callback only | **Simplify** | Remove `refreshTaskList()`. |
+| 27 | `TASK_CONFERENCE_END_FAILED` | Fire callback only | **Simplify** | Remove `refreshTaskList()`. |
+| 28 | `TASK_PARTICIPANT_LEFT_FAILED` | Fire callback only | **Simplify** | Remove `refreshTaskList()`. |
+| 29 | `TASK_CONFERENCE_TRANSFERRED` | Fire callback only | **Simplify** | Remove `refreshTaskList()`. |
+| 30 | `TASK_CONFERENCE_TRANSFER_FAILED` | Fire callback only | **Simplify** | Remove `refreshTaskList()`. |
 
 ### Key Insight: `refreshTaskList()` Elimination
 
@@ -117,27 +171,7 @@ Many events that currently trigger `refreshTaskList()` will no longer need it be
 **New:** SDK keeps `task.data` updated via state machine actions. The store can read `task.data` directly instead of re-fetching. `refreshTaskList()` should only be called for:
 - Initial load / hydration
 - Full page refresh recovery
-- Edge cases where task data is stale
-
----
-
-## Old → New Event Handler Mapping
-
-| Old Handler | Old Action | New Action |
-|-------------|-----------|------------|
-| `refreshTaskList` (15+ events) | Re-fetch ALL tasks from SDK | **Remove** — task.data is live; fire callbacks only |
-| `handleTaskEnd` | Remove from list + cleanup | **Keep** — still need list management |
-| `handleTaskAssigned` | Set current task | **Keep** — still need list management |
-| `handleConsultCreated` | Refresh + callbacks | **Simplify** — callbacks only |
-| `handleConsulting` | Refresh + callbacks | **Simplify** — callbacks only |
-| `handleConsultAccepted` | Refresh + callbacks | **Simplify** — callbacks only |
-| `handleConsultOffer` | Refresh + callbacks | **Simplify** — callbacks only |
-| `handleConferenceStarted` | Refresh + callbacks | **Simplify** — callbacks only |
-| `handleConferenceEnded` | Refresh + callbacks | **Simplify** — callbacks only |
-| `handleAutoAnswer` | Refresh + callbacks | **Simplify** — callbacks only |
-| `handleTaskReject` | Remove from list | **Keep** |
-| `handleOutdialFailed` | Remove from list | **Keep** |
-| `handleTaskMedia` | WebRTC media setup | **Keep** |
+- `TASK_WRAPPEDUP` (task must be removed from list — may be replaceable with explicit list removal)
 
 ---
 
@@ -147,24 +181,22 @@ Many events that currently trigger `refreshTaskList()` will no longer need it be
 
 #### Before
 ```typescript
-// storeEventsWrapper.ts — registerTaskEventListeners(task)
 registerTaskEventListeners(task: ITask) {
   const interactionId = task.data.interactionId;
-  task.on(TASK_EVENTS.TASK_END, (data) => this.handleTaskEnd(data, interactionId));
-  task.on(TASK_EVENTS.TASK_ASSIGNED, (data) => this.handleTaskAssigned(data, interactionId));
-  task.on(TASK_EVENTS.AGENT_OFFER_CONTACT, () => this.refreshTaskList());
-  task.on(TASK_EVENTS.TASK_HOLD, () => this.refreshTaskList());
-  task.on(TASK_EVENTS.TASK_RESUME, () => this.refreshTaskList());
-  task.on(TASK_EVENTS.TASK_CONSULT_END, () => this.refreshTaskList());
-  task.on(TASK_EVENTS.TASK_CONFERENCE_ESTABLISHING, () => this.refreshTaskList());
-  task.on(TASK_EVENTS.TASK_CONFERENCE_STARTED, (data) => this.handleConferenceStarted(data, interactionId));
-  // ... 20+ more event registrations, most calling refreshTaskList()
+  task.on(TASK_EVENTS.TASK_END, this.handleTaskEnd);
+  task.on(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
+  task.on(TASK_EVENTS.AGENT_OFFER_CONTACT, this.refreshTaskList);
+  task.on(TASK_EVENTS.TASK_HOLD, this.refreshTaskList);
+  task.on(TASK_EVENTS.TASK_RESUME, this.refreshTaskList);
+  task.on(TASK_EVENTS.TASK_CONSULT_END, this.refreshTaskList);
+  task.on(TASK_EVENTS.TASK_CONFERENCE_ESTABLISHING, this.refreshTaskList);
+  task.on(TASK_EVENTS.TASK_CONFERENCE_STARTED, this.handleConferenceStarted);
+  // ... 19 more event registrations, most calling refreshTaskList()
 }
 ```
 
 #### After
 ```typescript
-// storeEventsWrapper.ts — registerTaskEventListeners(task)
 registerTaskEventListeners(task: ITask) {
   const interactionId = task.data.interactionId;
 
@@ -174,23 +206,54 @@ registerTaskEventListeners(task: ITask) {
   });
 
   // KEEP: Task lifecycle events that need store-level management
-  task.on(TASK_EVENTS.TASK_END, (data) => this.handleTaskEnd(data, interactionId));
-  task.on(TASK_EVENTS.TASK_ASSIGNED, (data) => this.handleTaskAssigned(data, interactionId));
-  task.on(TASK_EVENTS.TASK_REJECT, (data) => this.handleTaskReject(data, interactionId));
-  task.on(TASK_EVENTS.TASK_OUTDIAL_FAILED, (data) => this.handleOutdialFailed(data, interactionId));
-  task.on(TASK_EVENTS.TASK_MEDIA, (data) => this.handleTaskMedia(data, interactionId));
+  task.on(TASK_EVENTS.TASK_END, this.handleTaskEnd);
+  task.on(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
+  task.on(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(task, reason));
+  task.on(TASK_EVENTS.TASK_OUTDIAL_FAILED, (reason) => this.handleOutdialFailed(reason));
+
+  // KEEP + FIX WIRING: Wire handleConsultEnd (was dead code)
+  task.on(TASK_EVENTS.TASK_CONSULT_END, this.handleConsultEnd);
+
+  // KEEP: Consult state management (remove refreshTaskList, keep state mutations)
+  task.on(TASK_EVENTS.TASK_CONSULT_CREATED, this.handleConsultCreated);  // renamed from AGENT_CONSULT_CREATED
+  task.on(TASK_EVENTS.TASK_CONSULTING, this.handleConsulting);
+  task.on(TASK_EVENTS.TASK_CONSULT_ACCEPTED, this.handleConsultAccepted);
+  task.on(TASK_EVENTS.TASK_CONSULT_QUEUE_CANCELLED, this.handleConsultQueueCancelled);
+
+  // KEEP: Conference state management (remove refreshTaskList, keep consult state reset)
+  task.on(TASK_EVENTS.TASK_PARTICIPANT_JOINED, this.handleConferenceStarted);
+  task.on(TASK_EVENTS.TASK_CONFERENCE_STARTED, this.handleConferenceStarted);
+  task.on(TASK_EVENTS.TASK_CONFERENCE_ENDED, this.handleConferenceEnded);
+  task.on(TASK_EVENTS.TASK_PARTICIPANT_LEFT, this.handleConferenceEnded);
+
+  // KEEP: Auto-answer sets decline button state
+  task.on(TASK_EVENTS.TASK_AUTO_ANSWERED, this.handleAutoAnswer);
+
+  // KEEP: Wrapup completion — task must be removed from list
+  task.on(TASK_EVENTS.TASK_WRAPPEDUP, (data) => {  // renamed from AGENT_WRAPPEDUP
+    this.refreshTaskList();
+    this.fireTaskCallbacks(TASK_EVENTS.TASK_WRAPPEDUP, interactionId, data);
+  });
 
   // SIMPLIFIED: Events that only need callback firing (SDK keeps task.data in sync)
   task.on(TASK_EVENTS.TASK_HOLD, () => this.fireTaskCallbacks(TASK_EVENTS.TASK_HOLD, interactionId));
   task.on(TASK_EVENTS.TASK_RESUME, () => this.fireTaskCallbacks(TASK_EVENTS.TASK_RESUME, interactionId));
-  // AGENT_WRAPPEDUP: still needs task cleanup — refresh or explicitly remove from taskList/currentTask
-  task.on(TASK_EVENTS.AGENT_WRAPPEDUP, (data) => {
-    this.refreshTaskList(); // retain: task must be removed from list after wrapup completion
-    this.fireTaskCallbacks(TASK_EVENTS.AGENT_WRAPPEDUP, interactionId, data);
-  });
-  task.on(TASK_EVENTS.TASK_RECORDING_PAUSED, () => this.fireTaskCallbacks(TASK_EVENTS.TASK_RECORDING_PAUSED, interactionId));
-  task.on(TASK_EVENTS.TASK_RECORDING_RESUMED, () => this.fireTaskCallbacks(TASK_EVENTS.TASK_RECORDING_RESUMED, interactionId));
-  // ... consult/conference events: fire callbacks only, no refreshTaskList()
+  task.on(TASK_EVENTS.TASK_OFFER_CONTACT, () => this.fireTaskCallbacks(TASK_EVENTS.TASK_OFFER_CONTACT, interactionId));  // renamed
+  task.on(TASK_EVENTS.TASK_OFFER_CONSULT, () => this.fireTaskCallbacks(TASK_EVENTS.TASK_OFFER_CONSULT, interactionId));
+  task.on(TASK_EVENTS.TASK_RECORDING_PAUSED, () => this.fireTaskCallbacks(TASK_EVENTS.TASK_RECORDING_PAUSED, interactionId));  // renamed
+  task.on(TASK_EVENTS.TASK_RECORDING_RESUMED, () => this.fireTaskCallbacks(TASK_EVENTS.TASK_RECORDING_RESUMED, interactionId));  // renamed
+  task.on(TASK_EVENTS.TASK_POST_CALL_ACTIVITY, () => this.fireTaskCallbacks(TASK_EVENTS.TASK_POST_CALL_ACTIVITY, interactionId));
+  task.on(TASK_EVENTS.TASK_CONFERENCE_ESTABLISHING, () => this.fireTaskCallbacks(TASK_EVENTS.TASK_CONFERENCE_ESTABLISHING, interactionId));
+  task.on(TASK_EVENTS.TASK_CONFERENCE_FAILED, () => this.fireTaskCallbacks(TASK_EVENTS.TASK_CONFERENCE_FAILED, interactionId));
+  task.on(TASK_EVENTS.TASK_CONFERENCE_END_FAILED, () => this.fireTaskCallbacks(TASK_EVENTS.TASK_CONFERENCE_END_FAILED, interactionId));
+  task.on(TASK_EVENTS.TASK_PARTICIPANT_LEFT_FAILED, () => this.fireTaskCallbacks(TASK_EVENTS.TASK_PARTICIPANT_LEFT_FAILED, interactionId));
+  task.on(TASK_EVENTS.TASK_CONFERENCE_TRANSFERRED, () => this.fireTaskCallbacks(TASK_EVENTS.TASK_CONFERENCE_TRANSFERRED, interactionId));
+  task.on(TASK_EVENTS.TASK_CONFERENCE_TRANSFER_FAILED, () => this.fireTaskCallbacks(TASK_EVENTS.TASK_CONFERENCE_TRANSFER_FAILED, interactionId));
+
+  // Browser-only: WebRTC media setup
+  if (this.deviceType === DEVICE_TYPE_BROWSER) {
+    task.on(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
+  }
 }
 ```
 
@@ -198,7 +261,6 @@ registerTaskEventListeners(task: ITask) {
 
 #### Before
 ```typescript
-// 15+ events all trigger a full re-fetch
 task.on(TASK_EVENTS.TASK_HOLD, () => this.refreshTaskList());
 task.on(TASK_EVENTS.TASK_RESUME, () => this.refreshTaskList());
 task.on(TASK_EVENTS.AGENT_WRAPPEDUP, () => this.refreshTaskList());
@@ -210,13 +272,12 @@ task.on(TASK_EVENTS.TASK_PARTICIPANT_LEFT_FAILED, () => this.refreshTaskList());
 task.on(TASK_EVENTS.TASK_CONFERENCE_TRANSFERRED, () => this.refreshTaskList());
 task.on(TASK_EVENTS.TASK_CONFERENCE_TRANSFER_FAILED, () => this.refreshTaskList());
 task.on(TASK_EVENTS.TASK_POST_CALL_ACTIVITY, () => this.refreshTaskList());
-// refreshTaskList() does: cc.taskManager.getAllTasks() → update store.taskList
 ```
 
 #### After
 ```typescript
 // SDK keeps task.data in sync via state machine.
-// refreshTaskList() only called on initialization/hydration.
+// refreshTaskList() only called on initialization/hydration and TASK_WRAPPEDUP.
 // Individual events just fire callbacks for widget-layer side effects.
 
 task.on(TASK_EVENTS.TASK_HOLD, () => {
@@ -225,41 +286,75 @@ task.on(TASK_EVENTS.TASK_HOLD, () => {
 task.on(TASK_EVENTS.TASK_RESUME, () => {
   this.fireTaskCallbacks(TASK_EVENTS.TASK_RESUME, interactionId);
 });
-// No refreshTaskList() — task.data already updated by SDK
 ```
 
 ### Pattern 3: Conference Handler Simplification
 
 #### Before
 ```typescript
-handleConferenceStarted(data: any, interactionId: string) {
-  this.refreshTaskList();  // Re-fetch all tasks from SDK
-  this.fireTaskCallbacks(TASK_EVENTS.TASK_CONFERENCE_STARTED, interactionId, data);
-  this.fireTaskCallbacks(TASK_EVENTS.TASK_PARTICIPANT_JOINED, interactionId, data);
-}
+handleConferenceStarted = () => {
+  runInAction(() => {
+    this.setIsQueueConsultInProgress(false);
+    this.setCurrentConsultQueueId(null);
+    this.setConsultStartTimeStamp(null);
+  });
+  this.refreshTaskList();
+};
 
-handleConferenceEnded(data: any, interactionId: string) {
-  this.refreshTaskList();  // Re-fetch all tasks from SDK
-  this.fireTaskCallbacks(TASK_EVENTS.TASK_CONFERENCE_ENDED, interactionId, data);
-  this.fireTaskCallbacks(TASK_EVENTS.TASK_PARTICIPANT_LEFT, interactionId, data);
-}
+handleConferenceEnded = () => {
+  this.refreshTaskList();
+};
 ```
 
 #### After
 ```typescript
 // SDK state machine handles CONFERENCING state transitions.
 // task.data and task.uiControls already reflect conference state.
-// Store just fires callbacks for widget-layer side effects.
+// Keep consult state reset in handleConferenceStarted; remove refreshTaskList() from both.
 
-handleConferenceStarted(data: any, interactionId: string) {
-  this.fireTaskCallbacks(TASK_EVENTS.TASK_CONFERENCE_STARTED, interactionId, data);
-  this.fireTaskCallbacks(TASK_EVENTS.TASK_PARTICIPANT_JOINED, interactionId, data);
-}
+handleConferenceStarted = () => {
+  runInAction(() => {
+    this.setIsQueueConsultInProgress(false);
+    this.setCurrentConsultQueueId(null);
+    this.setConsultStartTimeStamp(null);
+  });
+  this.fireTaskCallbacks(TASK_EVENTS.TASK_CONFERENCE_STARTED, interactionId);
+  this.fireTaskCallbacks(TASK_EVENTS.TASK_PARTICIPANT_JOINED, interactionId);
+};
 
-handleConferenceEnded(data: any, interactionId: string) {
-  this.fireTaskCallbacks(TASK_EVENTS.TASK_CONFERENCE_ENDED, interactionId, data);
-  this.fireTaskCallbacks(TASK_EVENTS.TASK_PARTICIPANT_LEFT, interactionId, data);
-}
+handleConferenceEnded = () => {
+  this.fireTaskCallbacks(TASK_EVENTS.TASK_CONFERENCE_ENDED, interactionId);
+  this.fireTaskCallbacks(TASK_EVENTS.TASK_PARTICIPANT_LEFT, interactionId);
+};
+```
+
+### Pattern 4: `handleTaskRemove()` — Update Cleanup
+
+#### Before
+```typescript
+handleTaskRemove = (taskToRemove: ITask) => {
+  if (taskToRemove) {
+    taskToRemove.off(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
+    taskToRemove.off(TASK_EVENTS.TASK_END, this.handleTaskEnd);
+    // ... all 27 .off() calls using OLD event names
+    // BUG: TASK_CONFERENCE_TRANSFERRED uses wrong handler (handleConferenceEnded instead of refreshTaskList)
+  }
+};
+```
+
+#### After
+```typescript
+handleTaskRemove = (taskToRemove: ITask) => {
+  if (taskToRemove) {
+    // Use renamed SDK event names; add TASK_UI_CONTROLS_UPDATED; fix handler references
+    taskToRemove.off(TASK_EVENTS.TASK_UI_CONTROLS_UPDATED, this.handleUIControlsUpdated);  // NEW
+    taskToRemove.off(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
+    taskToRemove.off(TASK_EVENTS.TASK_END, this.handleTaskEnd);
+    taskToRemove.off(TASK_EVENTS.TASK_CONSULT_END, this.handleConsultEnd);  // FIX: was refreshTaskList
+    taskToRemove.off(TASK_EVENTS.TASK_CONFERENCE_TRANSFERRED, ...);  // FIX: match registered handler
+    // ... all other .off() calls matching their .on() counterparts exactly
+  }
+};
 ```
 
 ---
@@ -268,20 +363,26 @@ handleConferenceEnded(data: any, interactionId: string) {
 
 | File | Action |
 |------|--------|
-| `store/src/storeEventsWrapper.ts` | Refactor `registerTaskEventListeners`, simplify/remove handlers |
+| `store/src/storeEventsWrapper.ts` | Refactor `registerTaskEventListeners` (see definitive table), update `handleTaskRemove` (fix listener mismatches + add `TASK_UI_CONTROLS_UPDATED`), simplify handlers (remove `refreshTaskList()` from all except `TASK_WRAPPEDUP`), wire `handleConsultEnd` to `TASK_CONSULT_END` |
 | `store/src/store.ts` | No changes expected (observables stay) |
-| `store/src/store.types.ts` | Add `TASK_UI_CONTROLS_UPDATED` if not re-exported from SDK |
+| `store/src/store.types.ts` | Delete local `TASK_EVENTS` enum; import from SDK (which includes `TASK_UI_CONTROLS_UPDATED`) |
+| `store/tests/*` | Update tests for renamed events, new `TASK_UI_CONTROLS_UPDATED` handler, simplified handlers |
 
 ---
 
 ## Validation Criteria
 
 - [ ] Task list stays in sync on all lifecycle events (incoming, assigned, end, reject)
-- [ ] `refreshTaskList()` only called on init/hydration, not on every event
+- [ ] `refreshTaskList()` only called on init/hydration and `TASK_WRAPPEDUP`, not on every event
 - [ ] Widget callbacks still fire correctly for events that require UI updates
 - [ ] `task:ui-controls-updated` triggers re-renders in widgets
 - [ ] No regression in consult/conference/hold flows
 - [ ] Task removal from list on end/reject works correctly
+- [ ] `handleTaskRemove` unregisters all listeners correctly (no listener leaks)
+- [ ] `handleConsultEnd` is properly wired and resets consult state on `TASK_CONSULT_END`
+- [ ] `handleConsultAccepted` still registers `TASK_MEDIA` listener on consult task (browser)
+- [ ] `handleAutoAnswer` still sets `isDeclineButtonEnabled = true`
+- [ ] All 5 renamed events use SDK names (`TASK_WRAPPEDUP`, `TASK_CONSULT_CREATED`, `TASK_OFFER_CONTACT`, `TASK_RECORDING_PAUSED`, `TASK_RECORDING_RESUMED`)
 
 ---
 
