@@ -3,20 +3,6 @@ let currentChangelog;
 const versionPaths = {};
 let comparisonListenersInitialized = false;
 const githubBaseUrl = 'https://github.com/webex/widgets/';
-import {
-  comparisonState,
-  extractPackagesFromVersion,
-  findLatestPackageVersion,
-  getEffectiveVersion,
-  getPackageVersion,
-  determinePackageStatus,
-  createPackageComparisonRow,
-  calculateComparisonStats,
-  buildPackagesList,
-  comparePackages,
-  fetchAndCompareVersions,
-  generatePackageComparisonData,
-} from './comparison-view.js';
 
 // DOM elements
 const versionSelectDropdown = document.getElementById('version-select');
@@ -48,8 +34,11 @@ const versionBPrereleaseSelect = document.getElementById('version-b-prerelease-s
 const prereleaseRow = document.getElementById('comparison-prerelease-row');
 const compareButton = document.getElementById('compare-button');
 const clearComparisonButton = document.getElementById('clear-comparison-button');
+const clearBaseVersionBtn = document.getElementById('clear-base-version');
+const clearTargetVersionBtn = document.getElementById('clear-target-version');
 const copyComparisonLinkBtn = document.getElementById('copy-comparison-link');
 const comparisonHelper = document.getElementById('comparison-helper');
+const changelogFormContainer = document.getElementById('changelog-form-container');
 
 // DOM elements - Shared
 const helperSection = document.getElementById('helper-section');
@@ -75,6 +64,244 @@ const uiVisibilityStates = {
     hidden: ['searchForm', 'searchResults', 'helperSection', 'comparisonResults'],
   },
 };
+
+/* ========== Version Comparison – data extraction and comparison logic (inlined from single app) ========== */
+const comparisonState = {
+  cachedChangelogA: null,
+  cachedChangelogB: null,
+  currentStableA: null,
+  currentStableB: null,
+
+  reset() {
+    this.cachedChangelogA = null;
+    this.cachedChangelogB = null;
+    this.currentStableA = null;
+    this.currentStableB = null;
+  },
+
+  update(changelogA, changelogB, stableA, stableB) {
+    this.cachedChangelogA = changelogA;
+    this.cachedChangelogB = changelogB;
+    this.currentStableA = stableA;
+    this.currentStableB = stableB;
+  },
+};
+
+const extractPackagesFromVersion = (changelog, specificVersions = null) => {
+  const packageMap = {};
+  for (const packageName of Object.keys(changelog)) {
+    const packageVersions = changelog[packageName];
+    if (!packageVersions || typeof packageVersions !== 'object') continue;
+    const versionKeys = Object.keys(packageVersions);
+    if (versionKeys.length === 0) continue;
+    let selectedVersion = null;
+    if (specificVersions && specificVersions[packageName]) {
+      const requestedVersion = specificVersions[packageName];
+      if (packageVersions[requestedVersion]) selectedVersion = requestedVersion;
+    }
+    if (!selectedVersion) {
+      let earliestVersion = versionKeys[0];
+      let earliestDate = packageVersions[earliestVersion]?.published_date || Infinity;
+      for (const version of versionKeys) {
+        const publishedDate = packageVersions[version]?.published_date || Infinity;
+        if (publishedDate < earliestDate) {
+          earliestDate = publishedDate;
+          earliestVersion = version;
+        }
+      }
+      selectedVersion = earliestVersion;
+    }
+    packageMap[packageName] = selectedVersion;
+  }
+  return packageMap;
+};
+
+const findLatestPackageVersion = (changelog, packageName) => {
+  if (!changelog[packageName]) return null;
+  const versions = Object.keys(changelog[packageName]);
+  if (versions.length === 0) return null;
+  let latestVersion = versions[0];
+  let latestDate = changelog[packageName][versions[0]].published_date || 0;
+  versions.forEach((ver) => {
+    const publishedDate = changelog[packageName][ver].published_date || 0;
+    if (publishedDate > latestDate) {
+      latestDate = publishedDate;
+      latestVersion = ver;
+    }
+  });
+  return latestVersion;
+};
+
+const getEffectiveVersion = (changelog, packageName, requestedVersion) => {
+  if (changelog[packageName]?.[requestedVersion]) return requestedVersion;
+  return findLatestPackageVersion(changelog, packageName);
+};
+
+const getPackageVersion = (packageName, alongWithData, changelog) => {
+  if (alongWithData[packageName]) return alongWithData[packageName];
+  return findLatestPackageVersion(changelog, packageName);
+};
+
+const determinePackageStatus = (versionA, versionB, dataA, dataB) => {
+  if (!dataA && dataB) return { status: 'Added', changeClass: 'only-in-b' };
+  if (dataA && !dataB) return { status: 'Removed', changeClass: 'only-in-a' };
+  if (versionA !== versionB) return { status: 'Version Changed', changeClass: 'version-changed' };
+  return { status: 'Unchanged', changeClass: 'unchanged' };
+};
+
+const createPackageComparisonRow = (packageName, versionA, versionB, statusInfo) => ({
+  packageName,
+  versionA: versionA || 'N/A',
+  versionB: versionB || 'N/A',
+  status: statusInfo.status,
+  changeClass: statusInfo.changeClass,
+});
+
+const calculateComparisonStats = (packages) => {
+  const stats = { changedCount: 0, unchangedCount: 0, onlyInACount: 0, onlyInBCount: 0 };
+  packages.forEach((pkg) => {
+    switch (pkg.status) {
+      case 'Version Changed': stats.changedCount++; break;
+      case 'Unchanged': stats.unchangedCount++; break;
+      case 'Removed': stats.onlyInACount++; break;
+      case 'Added': stats.onlyInBCount++; break;
+    }
+  });
+  return stats;
+};
+
+const buildPackagesList = (
+  mainPackage,
+  effectiveVersionA,
+  effectiveVersionB,
+  pkgDataA,
+  pkgDataB,
+  changelogA,
+  changelogB
+) => {
+  const packagesArray = [];
+  const mainStatus = determinePackageStatus(effectiveVersionA, effectiveVersionB, pkgDataA, pkgDataB);
+  packagesArray.push(createPackageComparisonRow(mainPackage, effectiveVersionA, effectiveVersionB, mainStatus));
+  const alongWithA = pkgDataA?.alongWith || {};
+  const alongWithB = pkgDataB?.alongWith || {};
+  const allPackages = new Set([...Object.keys(changelogA), ...Object.keys(changelogB)]);
+  allPackages.delete(mainPackage);
+  allPackages.forEach((pkg) => {
+    const pkgVerA = getPackageVersion(pkg, alongWithA, changelogA);
+    const pkgVerB = getPackageVersion(pkg, alongWithB, changelogB);
+    const statusInfo = determinePackageStatus(pkgVerA, pkgVerB, pkgVerA ? {} : null, pkgVerB ? {} : null);
+    packagesArray.push(createPackageComparisonRow(pkg, pkgVerA, pkgVerB, statusInfo));
+  });
+  packagesArray.sort((a, b) => a.packageName.localeCompare(b.packageName));
+  return packagesArray;
+};
+
+const comparePackages = (packagesA, packagesB, changelogA, changelogB, stableVersionA, stableVersionB) => {
+  const allPackageNames = new Set([...Object.keys(changelogA), ...Object.keys(changelogB)]);
+  const packages = [];
+  let changedCount = 0, unchangedCount = 0, onlyInACount = 0, onlyInBCount = 0;
+
+  const findStableVersion = (changelog, packageName, stableVersion) => {
+    if (!changelog[packageName]) return null;
+    const versions = Object.keys(changelog[packageName]);
+    if (versions.length === 0) return null;
+    const escapedVersion = stableVersion.replace(/\./g, '\\.');
+    const exactStablePattern = new RegExp(`^${escapedVersion}$`);
+    const exactStableVersion = versions.find((ver) => exactStablePattern.test(ver));
+    if (exactStableVersion) return exactStableVersion;
+    const prereleasePattern = new RegExp(`^${escapedVersion}-([a-z]+)\\.(\\d+)$`, 'i');
+    const prereleaseVersions = versions
+      .filter((ver) => prereleasePattern.test(ver))
+      .sort((a, b) => {
+        const matchA = a.match(prereleasePattern);
+        const matchB = b.match(prereleasePattern);
+        if (!matchA || !matchB) return 0;
+        return parseInt(matchA[2], 10) - parseInt(matchB[2], 10);
+      });
+    return prereleaseVersions[0] || versions[0];
+  };
+
+  allPackageNames.forEach((packageName) => {
+    const versionA = findStableVersion(changelogA, packageName, stableVersionA);
+    const versionB = findStableVersion(changelogB, packageName, stableVersionB);
+    let status, changeClass;
+    if (versionA && versionB) {
+      if (versionA === versionB) {
+        status = 'Unchanged';
+        changeClass = 'unchanged';
+        unchangedCount++;
+      } else {
+        status = 'Version Changed';
+        changeClass = 'version-changed';
+        changedCount++;
+      }
+    } else if (versionA && !versionB) {
+      status = 'Removed';
+      changeClass = 'only-in-a';
+      onlyInACount++;
+    } else if (!versionA && versionB) {
+      status = 'Added';
+      changeClass = 'only-in-b';
+      onlyInBCount++;
+    }
+    packages.push({ packageName, versionA: versionA || 'N/A', versionB: versionB || 'N/A', status, changeClass });
+  });
+  packages.sort((a, b) => a.packageName.localeCompare(b.packageName));
+  return {
+    packages,
+    totalPackages: allPackageNames.size,
+    changedCount,
+    unchangedCount,
+    onlyInACount,
+    onlyInBCount,
+  };
+};
+
+const fetchAndCompareVersions = async (versionA, versionB, versionPathsMap) => {
+  const [changelogA, changelogB] = await Promise.all([
+    fetch(versionPathsMap[versionA]).then((res) => {
+      if (!res.ok) throw new Error(`Failed to fetch ${versionA}`);
+      return res.json();
+    }),
+    fetch(versionPathsMap[versionB]).then((res) => {
+      if (!res.ok) throw new Error(`Failed to fetch ${versionB}`);
+      return res.json();
+    }),
+  ]);
+  const packagesA = extractPackagesFromVersion(changelogA);
+  const packagesB = extractPackagesFromVersion(changelogB);
+  const comparisonData = comparePackages(packagesA, packagesB, changelogA, changelogB, versionA, versionB);
+  return { versionA, versionB, comparisonData };
+};
+
+const generatePackageComparisonData = (packageName, versionASpecific, versionBSpecific, changelogA, changelogB) => {
+  const effectiveVersionA = getEffectiveVersion(changelogA, packageName, versionASpecific);
+  const effectiveVersionB = getEffectiveVersion(changelogB, packageName, versionBSpecific);
+  const pkgDataA = changelogA[packageName]?.[effectiveVersionA];
+  const pkgDataB = changelogB[packageName]?.[effectiveVersionB];
+  if (!pkgDataA && !pkgDataB) {
+    throw new Error(`Could not find version data for ${packageName}`);
+  }
+  const packagesArray = buildPackagesList(
+    packageName,
+    effectiveVersionA,
+    effectiveVersionB,
+    pkgDataA,
+    pkgDataB,
+    changelogA,
+    changelogB
+  );
+  const stats = calculateComparisonStats(packagesArray);
+  return {
+    packageName,
+    versionA: effectiveVersionA,
+    versionB: effectiveVersionB,
+    packages: packagesArray,
+    totalPackages: packagesArray.length,
+    ...stats,
+  };
+};
+/* ========== End Version Comparison logic ========== */
 
 /**
  * Updates visibility of main UI sections based on view state ('search' | 'comparison').
@@ -220,29 +447,18 @@ const fetchChangelog = async (versionPath) => {
   }
 };
 
+/** Note packages always shown first (match "Available packages" in UI note) */
+const NOTE_PACKAGES_ORDER = ['@webex/widgets', '@webex/cc-widgets', '@webex/cc-components'];
+
 const populatePackageNames = (changelog) => {
-  let specialPackages = ['@webex/widgets', '@webex/cc-widgets'];
+  let allPackages = Object.keys(changelog || {});
 
-  // Get all packages that actually exist in this version's changelog
-  let allPackages = Object.keys(changelog);
-
-  // Filter special packages that ACTUALLY EXIST in this version
-  let existingSpecialPackages = specialPackages.filter((pkg) => allPackages.includes(pkg));
-
-  // Get remaining packages (excluding special ones)
-  let otherPackages = allPackages.filter((pkg) => !specialPackages.includes(pkg));
-
-  // Sort the remaining packages alphabetically
+  // Other packages from changelog (excluding Note ones), sorted
+  let otherPackages = allPackages.filter((pkg) => !NOTE_PACKAGES_ORDER.includes(pkg));
   otherPackages.sort();
 
-  // Build the sorted list - only add separator if special packages exist
-  let sortedPackages;
-  if (existingSpecialPackages.length > 0) {
-    sortedPackages = ['separator', ...existingSpecialPackages, 'separator', ...otherPackages];
-  } else {
-    // No special packages exist, just show others
-    sortedPackages = otherPackages;
-  }
+  // Always show @webex/widgets, @webex/cc-widgets, @webex/cc-components first (per Note), then rest
+  let sortedPackages = ['separator', ...NOTE_PACKAGES_ORDER, 'separator', ...otherPackages];
 
   let optionsHtml = '<option value="">Select a package</option>';
 
@@ -873,8 +1089,12 @@ const switchToComparisonMode = (versionA = null, versionB = null) => {
 
   // Update form visibility (centralized view state)
   updateUIVisibility('comparison');
+  // Full-width form layout in comparison mode (same as when user clicks Version Comparison)
+  if (changelogFormContainer) changelogFormContainer.classList.add('comparison-form-full-width');
   // Hide package-level comparison section in version comparison mode
   if (packageLevelSection) packageLevelSection.classList.add('hide');
+  // Pre-release row only shown after base and target are selected
+  if (prereleaseRow) prereleaseRow.style.display = 'none';
 
   // Populate version dropdowns
   if (versionSelectDropdown && versionSelectDropdown.innerHTML) {
@@ -912,6 +1132,58 @@ const getUnionPackages = (changelogA, changelogB) => {
 
   return [...specialPackages.filter((pkg) => allPackages.has(pkg)), ...filtered];
 };
+
+/**
+ * Full package list for Version Comparison dropdown (always show this exact list, per Note + related packages).
+ */
+const COMPARISON_PACKAGE_LIST = [
+  '@webex/widgets',
+  '@webex/cc-widgets',
+  '@webex/cc-components',
+  '@webex/cc-digital-channels',
+  '@webex/cc-station-login',
+  '@webex/cc-store',
+  '@webex/cc-task',
+  '@webex/cc-ui-logging',
+  '@webex/cc-user-state',
+  '@webex/test-fixtures',
+  'samples-cc-react-app',
+  'samples-cc-wc-app',
+  'samples-meeting-app',
+];
+
+/**
+ * Enable or disable Base/Target version dropdowns only (clear buttons are controlled separately).
+ */
+const setBaseTargetVersionDisabled = (disabled) => {
+  if (versionASelect) versionASelect.disabled = disabled;
+  if (versionBSelect) versionBSelect.disabled = disabled;
+};
+
+/**
+ * Enable or disable the clear (X) buttons next to Base and Target version (disabled only when no package selected).
+ * After base and target are selected, clear buttons stay enabled so user can clear and pick different versions.
+ */
+const setComparisonClearButtonsDisabled = (disabled) => {
+  if (clearBaseVersionBtn) clearBaseVersionBtn.disabled = disabled;
+  if (clearTargetVersionBtn) clearTargetVersionBtn.disabled = disabled;
+};
+
+/**
+ * Populate Version Comparison package dropdown with the full package list (no dependency on changelog).
+ */
+const populateComparisonPackagesInitial = async () => {
+  if (!comparisonPackageSelect || !comparisonPackageRow) return;
+  let optionsHtml = '<option value="">Select a package</option>';
+  COMPARISON_PACKAGE_LIST.forEach((pkg) => {
+    optionsHtml += `<option value="${pkg}">${pkg}</option>`;
+  });
+  comparisonPackageSelect.innerHTML = optionsHtml;
+  comparisonPackageRow.style.display = 'flex';
+  setBaseTargetVersionDisabled(true);
+  setComparisonClearButtonsDisabled(true);
+};
+
 /**
  * UI LAYER: Compare specific package versions and render results
  * @param {string} packageName - Package name
@@ -922,7 +1194,7 @@ const getUnionPackages = (changelogA, changelogB) => {
  */
 const compareAndRenderPackageVersions = (packageName, versionASpecific, versionBSpecific, changelogA, changelogB) => {
   try {
-    // Generate comparison data (pure data logic from comparison-view.js)
+    // Generate comparison data
     const comparisonData = generatePackageComparisonData(
       packageName,
       versionASpecific,
@@ -1024,11 +1296,13 @@ const populatePrereleaseVersions = (packageName, changelog, selectId, stableVers
     return;
   }
 
-  // Check if package exists in this changelog (it might not for union packages)
+  // If package is not in this changelog, show stable version so user can still compare (e.g. base pre-release vs target stable)
   if (!changelog[packageName]) {
     if (versionSelect) {
-      versionSelect.innerHTML = '<option value="">Package not available in this version</option>';
-      versionSelect.disabled = true;
+      versionSelect.innerHTML =
+        '<option value="">Select pre-release version</option>' +
+        `<option value="${stableVersion}">${stableVersion} (Stable)</option>`;
+      versionSelect.disabled = false;
     }
     return;
   }
@@ -1049,15 +1323,18 @@ const populatePrereleaseVersions = (packageName, changelog, selectId, stableVers
 
   let optionsHtml = '<option value="">Select pre-release version</option>';
 
-  // Also add the stable version itself as an option
-  if (changelog[packageName][stableVersion]) {
+  // Always add the stable version as an option (for base/target when there are no pre-releases)
+  const hasStableInChangelog = changelog[packageName][stableVersion];
+  if (hasStableInChangelog) {
     const stableDate = changelog[packageName][stableVersion]?.published_date;
     const dateStr = stableDate ? new Date(stableDate).toLocaleDateString() : '';
     optionsHtml += `<option value="${stableVersion}">${stableVersion} (Stable) ${dateStr ? '- ' + dateStr : ''}</option>`;
-
     if (prereleaseVersions.length > 0) {
       optionsHtml += `<option disabled>──────────</option>`;
     }
+  } else if (prereleaseVersions.length === 0) {
+    // No pre-release versions: show stable so user can select base/target version for comparison
+    optionsHtml += `<option value="${stableVersion}">${stableVersion} (Stable)</option>`;
   }
 
   // Add pre-release versions
@@ -1130,14 +1407,24 @@ const populateComparisonVersions = () => {
 };
 
 /**
- * Reset comparison form selections
+ * Reset only pre-release selections and hide pre-release row (used when base/target change; package is kept)
+ */
+const resetPrereleaseOnly = () => {
+  if (versionAPrereleaseSelect) versionAPrereleaseSelect.value = '';
+  if (versionBPrereleaseSelect) versionBPrereleaseSelect.value = '';
+  if (prereleaseRow) prereleaseRow.style.display = 'none';
+};
+
+/**
+ * Reset comparison form selections (full reset e.g. on Clear; clears package and disables base/target)
  */
 const resetComparisonSelections = () => {
   if (comparisonPackageSelect) comparisonPackageSelect.value = '';
   if (versionAPrereleaseSelect) versionAPrereleaseSelect.value = '';
   if (versionBPrereleaseSelect) versionBPrereleaseSelect.value = '';
-  if (comparisonPackageRow) comparisonPackageRow.style.display = 'none';
   if (prereleaseRow) prereleaseRow.style.display = 'none';
+  setBaseTargetVersionDisabled(true);
+  setComparisonClearButtonsDisabled(true);
 };
 
 /**
@@ -1177,27 +1464,29 @@ const clearComparisonURLParams = () => {
 };
 
 /**
- * Check and update comparison button state based on form selections
+ * Check and update comparison button state (package required, then base and target)
  */
 const updateCompareButtonState = () => {
   if (!compareButton) return;
 
   const selectedPackage = comparisonPackageSelect ? comparisonPackageSelect.value : null;
+  const stableA = versionASelect ? versionASelect.value : null;
+  const stableB = versionBSelect ? versionBSelect.value : null;
   const versionASpecific = versionAPrereleaseSelect ? versionAPrereleaseSelect.value : null;
   const versionBSpecific = versionBPrereleaseSelect ? versionBPrereleaseSelect.value : null;
   const prereleaseRowVisible = prereleaseRow && prereleaseRow.style.display !== 'none';
 
-  if (selectedPackage) {
-    // Package selected - require at least one pre-release version
-    if (!prereleaseRowVisible || (!versionASpecific && !versionBSpecific)) {
-      compareButton.disabled = true;
-    } else {
-      compareButton.disabled = false;
-    }
-  } else {
-    // No package selected - enable for full version comparison
-    compareButton.disabled = false;
+  if (!selectedPackage || !stableA || !stableB) {
+    compareButton.disabled = true;
+    return;
   }
+
+  if (prereleaseRowVisible && (!versionASpecific && !versionBSpecific)) {
+    compareButton.disabled = true;
+    return;
+  }
+
+  compareButton.disabled = false;
 };
 
 /**
@@ -1213,14 +1502,14 @@ const updatePrereleaseLabels = () => {
 };
 
 /**
- * Handle stable version changes - fetch changelogs and populate packages
+ * Handle stable version changes - fetch changelogs; if package already selected, populate pre-release
  */
 const handleStableVersionChange = async () => {
   console.log('🟢 handleStableVersionChange FIRED');
   const stableA = versionASelect.value;
   const stableB = versionBSelect.value;
 
-  resetComparisonSelections();
+  resetPrereleaseOnly();
   updateCompareButtonState();
 
   if (stableA && stableB) {
@@ -1231,21 +1520,77 @@ const handleStableVersionChange = async () => {
       ]);
 
       comparisonState.update(changelogA, changelogB, stableA, stableB);
-      populateUnionPackages(changelogA, changelogB);
+      const selectedPackage = comparisonPackageSelect ? comparisonPackageSelect.value : '';
+      if (selectedPackage) {
+        populatePrereleaseVersions(
+          selectedPackage,
+          changelogA,
+          'version-a-prerelease-select',
+          stableA
+        );
+        populatePrereleaseVersions(
+          selectedPackage,
+          changelogB,
+          'version-b-prerelease-select',
+          stableB
+        );
+        if (prereleaseRow) {
+          prereleaseRow.style.display = 'flex';
+          updatePrereleaseLabels();
+        }
+      }
+      // After base and target are selected, disable dropdowns but keep clear (X) buttons enabled so user can clear and pick different versions
+      setBaseTargetVersionDisabled(true);
+      setComparisonClearButtonsDisabled(false);
       updateCompareButtonState();
     } catch (error) {
       console.error('Error loading changelogs:', error);
       alert('Error loading version data. Please try again.');
     }
+  } else {
+    // Base or target cleared: re-enable base/target dropdowns and clear buttons
+    setBaseTargetVersionDisabled(false);
+    setComparisonClearButtonsDisabled(false);
   }
 };
 
 /**
- * Handle package selection - populate pre-release versions
+ * Clear one stable version and re-enable dropdowns so user can change base or target (used by X buttons)
+ */
+const handleClearBaseVersion = () => {
+  if (versionASelect) versionASelect.value = '';
+  setBaseTargetVersionDisabled(false);
+  setComparisonClearButtonsDisabled(false);
+  resetPrereleaseOnly();
+  updateCompareButtonState();
+};
+
+const handleClearTargetVersion = () => {
+  if (versionBSelect) versionBSelect.value = '';
+  setBaseTargetVersionDisabled(false);
+  setComparisonClearButtonsDisabled(false);
+  resetPrereleaseOnly();
+  updateCompareButtonState();
+};
+
+/**
+ * Handle package selection - enable/disable base and target; populate pre-release when base/target already set
  */
 const handlePackageChange = () => {
   console.log('🟢 handlePackageChange FIRED');
   const selectedPackage = comparisonPackageSelect.value;
+
+  if (selectedPackage) {
+    setBaseTargetVersionDisabled(false);
+    setComparisonClearButtonsDisabled(false);
+  } else {
+    setBaseTargetVersionDisabled(true);
+    setComparisonClearButtonsDisabled(true);
+    if (versionASelect) versionASelect.value = '';
+    if (versionBSelect) versionBSelect.value = '';
+    if (comparisonState) comparisonState.reset();
+    if (prereleaseRow) prereleaseRow.style.display = 'none';
+  }
 
   if (versionAPrereleaseSelect) versionAPrereleaseSelect.value = '';
   if (versionBPrereleaseSelect) versionBPrereleaseSelect.value = '';
@@ -1291,13 +1636,14 @@ const switchToSingleViewMode = () => {
   // Toggle visibility (centralized view state)
   updateUIVisibility('search');
 
+  if (changelogFormContainer) changelogFormContainer.classList.remove('comparison-form-full-width');
   clearComparisonURLParams();
 };
 
 /**
- * Switch to comparison view mode
+ * Switch to comparison view mode (package-first flow: package required, then base/target)
  */
-const switchToComparisonViewMode = () => {
+const switchToComparisonViewMode = async () => {
   console.log('🔵 Switching to COMPARISON VIEW mode');
   comparisonMode = true;
 
@@ -1310,20 +1656,30 @@ const switchToComparisonViewMode = () => {
   // Toggle visibility (centralized view state)
   updateUIVisibility('comparison');
 
+  if (changelogFormContainer) changelogFormContainer.classList.add('comparison-form-full-width');
+
   populateComparisonVersions();
+  await populateComparisonPackagesInitial();
+  if (prereleaseRow) prereleaseRow.style.display = 'none';
+  updateCompareButtonState();
 };
 
 /**
- * Validate comparison form inputs
+ * Validate comparison form inputs (package required first, then base and target)
  */
 const validateComparisonInputs = (stableA, stableB, selectedPackage, versionASpecific, versionBSpecific) => {
+  if (!selectedPackage) {
+    alert('Please select a package first.');
+    return false;
+  }
+
   if (!stableA || !stableB) {
-    alert('Please select both stable versions');
+    alert('Please select both Base Version and Target Version.');
     return false;
   }
 
   if (selectedPackage && !versionASpecific && !versionBSpecific) {
-    alert('Please select at least one pre-release version, or leave package empty for full version comparison');
+    alert('Please select at least one pre-release version for package-level comparison.');
     return false;
   }
 
@@ -1394,6 +1750,9 @@ const setupComparisonEventListeners = () => {
   if (versionASelect) versionASelect.addEventListener('change', handleStableVersionChange);
   if (versionBSelect) versionBSelect.addEventListener('change', handleStableVersionChange);
 
+  if (clearBaseVersionBtn) clearBaseVersionBtn.addEventListener('click', handleClearBaseVersion);
+  if (clearTargetVersionBtn) clearTargetVersionBtn.addEventListener('click', handleClearTargetVersion);
+
   if (comparisonPackageSelect) comparisonPackageSelect.addEventListener('change', handlePackageChange);
 
   // Pre-release version selectors
@@ -1415,16 +1774,22 @@ const setupComparisonEventListeners = () => {
  */
 const loadEnhancedComparisonFromURL = async (enhancedParams) => {
   switchToComparisonMode();
+  populateComparisonVersions();
+  await populateComparisonPackagesInitial();
 
   await new Promise((resolve) => setTimeout(resolve, 300));
 
+  if (enhancedParams.packageName) {
+    comparisonPackageSelect.value = enhancedParams.packageName;
+    setBaseTargetVersionDisabled(false);
+    setComparisonClearButtonsDisabled(false);
+  }
   versionASelect.value = enhancedParams.stableA;
   versionBSelect.value = enhancedParams.stableB;
   await handleStableVersionChange();
 
   await new Promise((resolve) => setTimeout(resolve, 300));
 
-  comparisonPackageSelect.value = enhancedParams.packageName;
   handlePackageChange();
 
   await new Promise((resolve) => setTimeout(resolve, 300));

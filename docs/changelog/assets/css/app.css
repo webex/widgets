@@ -63,23 +63,28 @@ body {
   top: 0;
   background-color: var(--color-webex-blue);
   color: white;
-  padding: 1.25rem; /* 20px */
+  padding: 1.25rem;
+  /* 20px */
   margin: 0;
-  text-align: left; /* Align the title text to the left */
+  text-align: left;
+  /* Align the title text to the left */
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   font-size: 1.5rem;
-  z-index: 1000; /* Ensure the header is above other content */
+  z-index: 1000;
+  /* Ensure the header is above other content */
 }
 
 #body {
   flex: 1;
-  padding: 1.25rem; /* 20px */
+  padding: 1.25rem;
+  /* 20px */
 }
 
 #footer {
   background-color: var(--color-background);
   text-align: center;
-  padding: 0.625rem; /* 10px */
+  padding: 0.625rem;
+  /* 10px */
   box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
 }
 
@@ -96,12 +101,14 @@ body {
 /* Rest of the CSS for form and results remains the same */
 
 form#search-form {
-  padding: 0.625rem; /* 10px */
+  padding: 0.625rem;
+  /* 10px */
 }
 
 label {
   display: block;
-  margin-bottom: 0.5rem; /* 8px */
+  margin-bottom: 0.5rem;
+  /* 8px */
   color: #333;
 }
 
@@ -118,11 +125,14 @@ select {
 button {
   background-color: var(--color-webex-blue);
   color: white;
-  padding: 0.625rem 1.25rem; /* 10px 20px */
+  padding: 0.625rem 1.25rem;
+  /* 10px 20px */
   border: none;
-  border-radius: 0.25rem; /* 4px */
+  border-radius: 0.25rem;
+  /* 4px */
   cursor: pointer;
-  font-size: 1rem; /* 16px */
+  font-size: 1rem;
+  /* 16px */
   transition: background-color 0.3s;
 }
 
@@ -143,7 +153,8 @@ td {
 
 th,
 td {
-  padding: 0.625rem; /* 10px */
+  padding: 0.625rem;
+  /* 10px */
   text-align: left;
 }
 
@@ -153,79 +164,103 @@ th {
 
 .search-container {
   background: white;
-  border-radius: 0.5rem; /* 8px */
+  border-radius: 0.5rem;
+  /* 8px */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin: auto;
   width: 100%;
-  padding: 1.25rem; /* 20px */
-  box-sizing: border-box; /* Include padding in the width calculation */
+  padding: 1.25rem;
+  /* 20px */
+  box-sizing: border-box;
+  /* Include padding in the width calculation */
 }
 
 .form-row {
   display: flex;
   flex-wrap: wrap;
-  margin-bottom: 1.25rem; /* 20px */
+  margin-bottom: 1.25rem;
+  /* 20px */
 }
 
 .form-group {
-  flex: 1 1 25%; /* Each form group will take up half the width of the form-row */
-  padding: 0 0.625rem; /* 10px */
+  flex: 1 1 25%;
+  /* Each form group will take up half the width of the form-row */
+  padding: 0 0.625rem;
+  /* 10px */
   box-sizing: border-box;
 }
 
 .full-width {
-  margin: 0 0.625rem; /* 10px */
+  margin: 0 0.625rem;
+  /* 10px */
 }
 
 .results-container {
   width: 100%;
   background: white;
-  padding: 1.25rem; /* 20px */
-  border-radius: 0.5rem; /* 8px */
+  padding: 1.25rem;
+  /* 20px */
+  border-radius: 0.5rem;
+  /* 8px */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin: auto;
-  margin-top: 1.25rem; /* 20px */
+  margin-top: 1.25rem;
+  /* 20px */
 }
 
 /* Responsive styles */
 @media (max-width: 48rem) {
+
   /* 768px */
   .form-group {
-    flex: 1 1 100%; /* Each form group will take up the full width on smaller screens */
-    padding: 0 0.625rem; /* 10px */
+    flex: 1 1 100%;
+    /* Each form group will take up the full width on smaller screens */
+    padding: 0 0.625rem;
+    /* 10px */
   }
 }
 
 .changelog-item {
-  padding-bottom: 1.25rem; /* 20px */
-  margin-bottom: 1.25rem; /* 20px */
-  border-bottom: 0.1875rem solid #e4e5e6; /* 3px */
+  padding-bottom: 1.25rem;
+  /* 20px */
+  margin-bottom: 1.25rem;
+  /* 20px */
+  border-bottom: 0.1875rem solid #e4e5e6;
+  /* 3px */
 }
 
 .changelog-item h2,
 .changelog-item h3 {
   color: #333;
-  margin-bottom: 0.625rem; /* 10px */
+  margin-bottom: 0.625rem;
+  /* 10px */
 }
 
 .changelog-item .commits {
-  margin-top: 1.25rem; /* 20px */
-  margin-bottom: 1.25rem; /* 20px */
+  margin-top: 1.25rem;
+  /* 20px */
+  margin-bottom: 1.25rem;
+  /* 20px */
 }
 
 .changelog-item .commits ul {
-  margin-top: 0.625rem; /* 10px */
+  margin-top: 0.625rem;
+  /* 10px */
   list-style-type: none;
   padding: 0;
-  max-height: 12.5rem; /* 200px */
+  max-height: 12.5rem;
+  /* 200px */
   overflow: scroll;
 }
 
 .changelog-item .commits ul li {
   background-color: #eee;
-  margin-bottom: 0.3125rem; /* 5px */
-  padding: 0.625rem; /* 10px */
-  border-radius: 0.1875rem; /* 3px */
+  margin-bottom: 0.3125rem;
+  /* 5px */
+  padding: 0.625rem;
+  /* 10px */
+  border-radius: 0.1875rem;
+  /* 3px */
   word-wrap: break-word;
 }
 
@@ -261,7 +296,8 @@ th {
 
 .changelog-item th,
 .changelog-item td {
-  padding: 0.625rem; /* 10px */
+  padding: 0.625rem;
+  /* 10px */
   text-align: left;
 }
 
@@ -280,19 +316,23 @@ th {
 .copy-button {
   display: inline;
   position: absolute;
-  margin-left: 0.3125rem; /* 5px */
+  margin-left: 0.3125rem;
+  /* 5px */
   cursor: pointer;
   right: 0;
 }
 
 .copy-button img {
-  width: 1.25rem; /* 20px */
+  width: 1.25rem;
+  /* 20px */
   height: auto;
-  margin-right: 0.3125rem; /* 5px */
+  margin-right: 0.3125rem;
+  /* 5px */
 }
 
 footer {
-  margin: 1.25rem 0; /* 20px 0px */
+  margin: 1.25rem 0;
+  /* 20px 0px */
 }
 
 footer .copyright {
@@ -302,10 +342,13 @@ footer .copyright {
 
 .alert-info {
   background-color: #f0f9ff;
-  border-left: 0.375rem solid var(--color-webex-blue); /* 6px */
+  border-left: 0.375rem solid var(--color-webex-blue);
+  /* 6px */
   color: #333;
-  padding: 0.625rem; /* 10px */
-  margin-bottom: 1.25rem; /* 20px */
+  padding: 0.625rem;
+  /* 10px */
+  margin-bottom: 1.25rem;
+  /* 20px */
 }
 
 .alert-info p.note {
@@ -326,8 +369,10 @@ footer .copyright {
 /* Mode Toggle Buttons */
 .mode-toggle {
   display: flex;
-  gap: 0.625rem; /* 10px */
-  margin-bottom: 1.25rem; /* 20px */
+  gap: 0.625rem;
+  /* 10px */
+  margin-bottom: 1.25rem;
+  /* 20px */
 }
 
 .mode-toggle button {
@@ -338,7 +383,8 @@ footer .copyright {
   color: var(--color-webex-blue);
   cursor: pointer;
   transition: all 0.3s;
-  border-radius: 0.25rem; /* 4px */
+  border-radius: 0.25rem;
+  /* 4px */
   font-weight: 500;
 }
 
@@ -356,9 +402,78 @@ footer .copyright {
   display: none !important;
 }
 
+/* Comparison Form - when active, form column is full width (same as Note and tabs above) */
+#changelog-form-container.comparison-form-full-width>.col-md-6:first-child {
+  width: 100%;
+  max-width: 100%;
+  flex: 0 0 100%;
+}
+
+#changelog-form-container.comparison-form-full-width>.col-md-6:last-child {
+  display: none;
+}
+
 /* Comparison Form */
+#comparison-form .required-star {
+  color: #c00;
+}
+
 #comparison-form {
-  margin-top: 1.25rem; /* 20px */
+  margin-top: 1.25rem;
+  /* 20px */
+}
+
+#comparison-form select:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+  background-color: var(--color-background);
+}
+
+.version-select-with-clear {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.version-select-with-clear .full-width {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Clear button circle: larger size, centered; disabled until package is selected */
+.version-clear-btn {
+  flex-shrink: 0;
+  width: 3rem;
+  height: 3rem;
+  padding: 0;
+  border: 1px solid #ccc;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--color-danger);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s, border-color 0.2s, opacity 0.2s;
+  box-sizing: border-box;
+  vertical-align: middle;
+}
+
+.version-clear-btn:hover:not(:disabled) {
+  background-color: #fee;
+  border-color: var(--color-danger);
+}
+
+.version-clear-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  background-color: var(--color-background);
+}
+
+.version-clear-btn::after {
+  content: "×";
 }
 
 /* Comparison Results Table */
@@ -376,7 +491,8 @@ footer .copyright {
   width: 100%;
   border-collapse: collapse;
   margin-top: 0;
-  font-size: 0.875rem; /* 14px */
+  font-size: 0.875rem;
+  /* 14px */
 }
 
 .comparison-table th,
@@ -405,36 +521,48 @@ footer .copyright {
 
 /* Color Coding for Changes */
 .comparison-table tr.version-changed {
-  background-color: #fff3cd; /* Yellow - version changed */
-  border-left: 0.25rem solid #ffc107; /* 4px */
+  background-color: #fff3cd;
+  /* Yellow - version changed */
+  border-left: 0.25rem solid #ffc107;
+  /* 4px */
 }
 
 .comparison-table tr.only-in-a {
-  background-color: #f8d7da; /* Red - removed in B */
-  border-left: 0.25rem solid #dc3545; /* 4px */
+  background-color: #f8d7da;
+  /* Red - removed in B */
+  border-left: 0.25rem solid #dc3545;
+  /* 4px */
 }
 
 .comparison-table tr.only-in-b {
-  background-color: #d4edda; /* Green - added in B */
-  border-left: 0.25rem solid #28a745; /* 4px */
+  background-color: #d4edda;
+  /* Green - added in B */
+  border-left: 0.25rem solid #28a745;
+  /* 4px */
 }
 
 .comparison-table tr.unchanged {
-  background-color: #ffffff; /* White - no change */
+  background-color: #ffffff;
+  /* White - no change */
 }
 
 /* Comparison Summary */
 .comparison-summary {
   background: linear-gradient(135deg, #e7f3ff 0%, #f0f9ff 100%);
-  padding: 1.5625rem; /* 25px */
-  border-radius: 0.5rem; /* 8px */
-  margin-bottom: 1.25rem; /* 20px */
-  border-left: 0.3125rem solid var(--color-webex-blue); /* 5px */
+  padding: 1.5625rem;
+  /* 25px */
+  border-radius: 0.5rem;
+  /* 8px */
+  margin-bottom: 1.25rem;
+  /* 20px */
+  border-left: 0.3125rem solid var(--color-webex-blue);
+  /* 5px */
 }
 
 .comparison-summary h3 {
   margin-top: 0;
-  margin-bottom: 0.9375rem; /* 15px */
+  margin-bottom: 0.9375rem;
+  /* 15px */
   color: var(--color-webex-blue);
   font-size: 1.5em;
 }
@@ -442,8 +570,10 @@ footer .copyright {
 .summary-stats {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.9375rem; /* 15px */
-  margin-top: 0.9375rem; /* 15px */
+  gap: 0.9375rem;
+  /* 15px */
+  margin-top: 0.9375rem;
+  /* 15px */
 }
 
 .stat-item {
@@ -455,19 +585,23 @@ footer .copyright {
 }
 
 .stat-item.changed {
-  border-left: 0.25rem solid #ffc107; /* 4px */
+  border-left: 0.25rem solid #ffc107;
+  /* 4px */
 }
 
 .stat-item.unchanged {
-  border-left: 0.25rem solid #6c757d; /* 4px */
+  border-left: 0.25rem solid #6c757d;
+  /* 4px */
 }
 
 .stat-item.added {
-  border-left: 0.25rem solid #28a745; /* 4px */
+  border-left: 0.25rem solid #28a745;
+  /* 4px */
 }
 
 .stat-item.removed {
-  border-left: 0.25rem solid #dc3545; /* 4px */
+  border-left: 0.25rem solid #dc3545;
+  /* 4px */
 }
 
 .stat-item strong {
