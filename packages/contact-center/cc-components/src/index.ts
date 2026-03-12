@@ -5,6 +5,7 @@ import CallControlCADComponent from './components/task/CallControlCAD/call-contr
 import IncomingTaskComponent from './components/task/IncomingTask/incoming-task';
 import TaskListComponent from './components/task/TaskList/task-list';
 import OutdialCallComponent from './components/task/OutdialCall/outdial-call';
+import TaskTranscriptComponent from './components/task/TaskTranscript/task-transcript';
 
 export {
   UserStateComponent,
@@ -14,6 +15,7 @@ export {
   IncomingTaskComponent,
   TaskListComponent,
   OutdialCallComponent,
+  TaskTranscriptComponent,
 };
 export * from './components/StationLogin/constants';
 export * from './components/StationLogin/station-login.types';

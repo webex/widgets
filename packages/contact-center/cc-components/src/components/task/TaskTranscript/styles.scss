@@ -1,0 +1,103 @@
+.task-transcript {
+  background: var(--mds-color-theme-background-primary-normal);
+  border-radius: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 12rem;
+  padding: 0.75rem 0.875rem;
+}
+
+.task-transcript__tabs {
+  align-items: center;
+  column-gap: 1.5rem;
+  display: flex;
+  margin-bottom: 0.75rem;
+}
+
+.task-transcript__tab {
+  background: transparent;
+  border: 0;
+  border-bottom: 0.125rem solid transparent;
+  color: var(--mds-color-theme-text-secondary-normal);
+  cursor: pointer;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+  padding: 0.125rem 0;
+}
+
+.task-transcript__tab--active {
+  border-bottom-color: var(--mds-color-theme-text-primary-normal);
+  color: var(--mds-color-theme-text-primary-normal);
+  font-weight: 700;
+}
+
+.task-transcript__content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  overflow-y: auto;
+  row-gap: 0.875rem;
+}
+
+.task-transcript__event {
+  color: var(--mds-color-theme-text-secondary-normal);
+  font-size: 0.75rem;
+  line-height: 1rem;
+  text-align: center;
+}
+
+.task-transcript__item {
+  align-items: flex-start;
+  column-gap: 0.625rem;
+  display: flex;
+}
+
+.task-transcript__avatar-wrap {
+  flex-shrink: 0;
+  height: 1.75rem;
+  width: 1.75rem;
+}
+
+.task-transcript__avatar-image {
+  border-radius: 50%;
+  display: block;
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.task-transcript__avatar-fallback {
+  --mdc-avatar-size: 1.75rem;
+}
+
+.task-transcript__text-block {
+  min-width: 0;
+}
+
+.task-transcript__meta {
+  color: var(--mds-color-theme-text-secondary-normal);
+  display: flex;
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.task-transcript__time {
+  color: #2e6de5;
+  margin-left: 0.5rem;
+  text-decoration: underline;
+}
+
+.task-transcript__message {
+  color: var(--mds-color-theme-text-primary-normal);
+  font-size: 1.0625rem;
+  line-height: 1.5rem;
+  margin: 0.125rem 0 0;
+}
+
+.task-transcript__empty {
+  color: var(--mds-color-theme-text-secondary-normal);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  padding: 1rem 0.125rem;
+}

@@ -4,6 +4,7 @@ import {
   useCallControlProps,
   UseTaskListProps,
   UseTaskProps,
+  UseTaskTranscriptProps,
   useOutdialCallProps,
   TargetType,
   TARGET_TYPE,
@@ -144,6 +145,18 @@ export const useTaskList = (props: UseTaskListProps) => {
   };
 
   return {taskList, acceptTask, declineTask, onTaskSelect, isBrowser};
+};
+
+export const useTaskTranscript = (props: UseTaskTranscriptProps) => {
+  const {ivrTranscript = '', liveTranscriptEntries = [], activeTab = 'live', onTabChange, className} = props;
+
+  return {
+    ivrTranscript,
+    liveTranscriptEntries,
+    activeTab,
+    onTabChange,
+    className,
+  };
 };
 
 export const useIncomingTask = (props: UseTaskProps) => {

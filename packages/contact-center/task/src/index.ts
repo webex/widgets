@@ -3,4 +3,5 @@ import {TaskList} from './TaskList';
 import {CallControl} from './CallControl';
 import {OutdialCall} from './OutdialCall';
 import {CallControlCAD} from './CallControlCAD';
-export {IncomingTask, TaskList, CallControl, OutdialCall, CallControlCAD};
+import {TaskTranscript} from './TaskTranscript';
+export {IncomingTask, TaskList, CallControl, OutdialCall, CallControlCAD, TaskTranscript};

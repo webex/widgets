@@ -1,4 +1,11 @@
-import {TaskProps, ControlProps, OutdialCallProps} from '@webex/cc-components';
+import {
+  TaskProps,
+  ControlProps,
+  OutdialCallProps,
+  TaskTranscriptComponentProps,
+  TaskTranscriptEntry,
+  TranscriptTab,
+} from '@webex/cc-components';
 
 export type UseTaskProps = Pick<TaskProps, 'incomingTask' | 'deviceType' | 'logger'> &
   Partial<Pick<TaskProps, 'onAccepted' | 'onRejected'>>;
@@ -9,6 +16,11 @@ export type UseTaskListProps = Pick<TaskProps, 'cc' | 'taskList' | 'deviceType' 
 export type IncomingTaskProps = Pick<TaskProps, 'incomingTask'> & Partial<Pick<TaskProps, 'onAccepted' | 'onRejected'>>;
 
 export type TaskListProps = Partial<Pick<TaskProps, 'onTaskAccepted' | 'onTaskDeclined' | 'onTaskSelected'>>;
+
+export type TaskTranscriptProps = Pick<TaskTranscriptComponentProps, 'ivrTranscript' | 'liveTranscriptEntries'> &
+  Partial<Pick<TaskTranscriptComponentProps, 'activeTab' | 'onTabChange' | 'className'>>;
+
+export type UseTaskTranscriptProps = TaskTranscriptProps;
 
 export type CallControlProps = Partial<
   Pick<
@@ -32,6 +44,8 @@ export type useCallControlProps = Pick<
   Partial<Pick<ControlProps, 'onHoldResume' | 'onEnd' | 'onWrapUp' | 'onRecordingToggle' | 'onToggleMute'>>;
 
 export type useOutdialCallProps = Pick<OutdialCallProps, 'cc' | 'logger'>;
+
+export type {TaskTranscriptEntry, TranscriptTab};
 export interface OutdialProps {
   /**
    * Flag to determine if the address book is enabled.
