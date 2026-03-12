@@ -177,7 +177,18 @@ Many events that currently trigger `refreshTaskList()` will no longer need it be
 
 ## Refactor Patterns (Before/After)
 
-### Pattern 1: `registerTaskEventListeners()` — Adding UI Controls Handler
+### Architectural Note: Bound-Handler Map
+
+Handlers registered via `task.on()` that need per-task context (`interactionId`) **cannot** use inline arrows — `task.off()` in `handleTaskRemove` requires the exact same function reference to detach a listener. Conversely, class-level methods don't have access to the `interactionId` local variable from `registerTaskEventListeners`.
+
+**Solution:** Store bound handler references in a per-task map at registration time. `handleTaskRemove` retrieves them for cleanup.
+
+```typescript
+// Class property — keyed by interactionId
+private taskBoundHandlers = new Map<string, Record<string, Function>>();
+```
+
+### Pattern 1: `registerTaskEventListeners()` — Bound-Handler Registration
 
 #### Before
 ```typescript
@@ -200,15 +211,45 @@ registerTaskEventListeners(task: ITask) {
 registerTaskEventListeners(task: ITask) {
   const interactionId = task.data.interactionId;
 
-  // NEW: Subscribe to SDK-computed UI control updates
-  // Use a named method (not inline arrow) so handleTaskRemove can .off() the same reference
-  task.on(TASK_EVENTS.TASK_UI_CONTROLS_UPDATED, this.handleUIControlsUpdated);
+  // Create bound handlers that close over this task's interactionId.
+  // Stored in map so handleTaskRemove can .off() the exact same references.
+  const bound: Record<string, Function> = {
+    uiControlsUpdated: (uiControls: TaskUIControls) => {
+      this.fireTaskCallbacks(TASK_EVENTS.TASK_UI_CONTROLS_UPDATED, interactionId, uiControls);
+    },
+    wrappedup: (data: unknown) => {
+      this.refreshTaskList();
+      this.fireTaskCallbacks(TASK_EVENTS.TASK_WRAPPEDUP, interactionId, data);
+    },
+    confStarted_participantJoined: () => this.handleConferenceStarted(TASK_EVENTS.TASK_PARTICIPANT_JOINED, interactionId),
+    confStarted_conferenceStarted: () => this.handleConferenceStarted(TASK_EVENTS.TASK_CONFERENCE_STARTED, interactionId),
+    confEnded_conferenceEnded: () => this.handleConferenceEnded(TASK_EVENTS.TASK_CONFERENCE_ENDED, interactionId),
+    confEnded_participantLeft: () => this.handleConferenceEnded(TASK_EVENTS.TASK_PARTICIPANT_LEFT, interactionId),
+    // Callback-only events — each bound to this task's interactionId
+    hold: () => this.fireTaskCallbacks(TASK_EVENTS.TASK_HOLD, interactionId),
+    resume: () => this.fireTaskCallbacks(TASK_EVENTS.TASK_RESUME, interactionId),
+    offerContact: () => this.fireTaskCallbacks(TASK_EVENTS.TASK_OFFER_CONTACT, interactionId),
+    offerConsult: () => this.fireTaskCallbacks(TASK_EVENTS.TASK_OFFER_CONSULT, interactionId),
+    recordingPaused: () => this.fireTaskCallbacks(TASK_EVENTS.TASK_RECORDING_PAUSED, interactionId),
+    recordingResumed: () => this.fireTaskCallbacks(TASK_EVENTS.TASK_RECORDING_RESUMED, interactionId),
+    postCallActivity: () => this.fireTaskCallbacks(TASK_EVENTS.TASK_POST_CALL_ACTIVITY, interactionId),
+    confEstablishing: () => this.fireTaskCallbacks(TASK_EVENTS.TASK_CONFERENCE_ESTABLISHING, interactionId),
+    confFailed: () => this.fireTaskCallbacks(TASK_EVENTS.TASK_CONFERENCE_FAILED, interactionId),
+    confEndFailed: () => this.fireTaskCallbacks(TASK_EVENTS.TASK_CONFERENCE_END_FAILED, interactionId),
+    participantLeftFailed: () => this.fireTaskCallbacks(TASK_EVENTS.TASK_PARTICIPANT_LEFT_FAILED, interactionId),
+    confTransferred: () => this.fireTaskCallbacks(TASK_EVENTS.TASK_CONFERENCE_TRANSFERRED, interactionId),
+    confTransferFailed: () => this.fireTaskCallbacks(TASK_EVENTS.TASK_CONFERENCE_TRANSFER_FAILED, interactionId),
+  };
+  this.taskBoundHandlers.set(interactionId, bound);
 
-  // KEEP: Task lifecycle events that need store-level management
+  // NEW: SDK-computed UI control updates (bound to emitting task's interactionId)
+  task.on(TASK_EVENTS.TASK_UI_CONTROLS_UPDATED, bound.uiControlsUpdated);
+
+  // KEEP: Task lifecycle events that need store-level management (class methods — no interactionId needed)
   task.on(TASK_EVENTS.TASK_END, this.handleTaskEnd);
   task.on(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
-  task.on(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(task, reason));
-  task.on(TASK_EVENTS.TASK_OUTDIAL_FAILED, (reason) => this.handleOutdialFailed(reason));
+  task.on(TASK_EVENTS.TASK_REJECT, this.handleTaskReject);
+  task.on(TASK_EVENTS.TASK_OUTDIAL_FAILED, this.handleOutdialFailed);
 
   // KEEP + FIX WIRING: Wire handleConsultEnd (was dead code)
   task.on(TASK_EVENTS.TASK_CONSULT_END, this.handleConsultEnd);
@@ -219,36 +260,32 @@ registerTaskEventListeners(task: ITask) {
   task.on(TASK_EVENTS.TASK_CONSULT_ACCEPTED, this.handleConsultAccepted);
   task.on(TASK_EVENTS.TASK_CONSULT_QUEUE_CANCELLED, this.handleConsultQueueCancelled);
 
-  // KEEP: Conference state management (remove refreshTaskList, keep consult state reset)
-  // Pass event type so handler fires only the correct callback (not both)
-  task.on(TASK_EVENTS.TASK_PARTICIPANT_JOINED, () => this.handleConferenceStarted(TASK_EVENTS.TASK_PARTICIPANT_JOINED));
-  task.on(TASK_EVENTS.TASK_CONFERENCE_STARTED, () => this.handleConferenceStarted(TASK_EVENTS.TASK_CONFERENCE_STARTED));
-  task.on(TASK_EVENTS.TASK_CONFERENCE_ENDED, () => this.handleConferenceEnded(TASK_EVENTS.TASK_CONFERENCE_ENDED));
-  task.on(TASK_EVENTS.TASK_PARTICIPANT_LEFT, () => this.handleConferenceEnded(TASK_EVENTS.TASK_PARTICIPANT_LEFT));
+  // KEEP: Conference state management — bound handlers pass event type + interactionId
+  task.on(TASK_EVENTS.TASK_PARTICIPANT_JOINED, bound.confStarted_participantJoined);
+  task.on(TASK_EVENTS.TASK_CONFERENCE_STARTED, bound.confStarted_conferenceStarted);
+  task.on(TASK_EVENTS.TASK_CONFERENCE_ENDED, bound.confEnded_conferenceEnded);
+  task.on(TASK_EVENTS.TASK_PARTICIPANT_LEFT, bound.confEnded_participantLeft);
 
   // KEEP: Auto-answer sets decline button state
   task.on(TASK_EVENTS.TASK_AUTO_ANSWERED, this.handleAutoAnswer);
 
-  // KEEP: Wrapup completion — task must be removed from list
-  task.on(TASK_EVENTS.TASK_WRAPPEDUP, (data) => {  // renamed from AGENT_WRAPPEDUP
-    this.refreshTaskList();
-    this.fireTaskCallbacks(TASK_EVENTS.TASK_WRAPPEDUP, interactionId, data);
-  });
+  // KEEP: Wrapup completion — bound handler retains refreshTaskList + correct interactionId
+  task.on(TASK_EVENTS.TASK_WRAPPEDUP, bound.wrappedup);  // renamed from AGENT_WRAPPEDUP
 
-  // SIMPLIFIED: Events that only need callback firing (SDK keeps task.data in sync)
-  task.on(TASK_EVENTS.TASK_HOLD, () => this.fireTaskCallbacks(TASK_EVENTS.TASK_HOLD, interactionId));
-  task.on(TASK_EVENTS.TASK_RESUME, () => this.fireTaskCallbacks(TASK_EVENTS.TASK_RESUME, interactionId));
-  task.on(TASK_EVENTS.TASK_OFFER_CONTACT, () => this.fireTaskCallbacks(TASK_EVENTS.TASK_OFFER_CONTACT, interactionId));  // renamed
-  task.on(TASK_EVENTS.TASK_OFFER_CONSULT, () => this.fireTaskCallbacks(TASK_EVENTS.TASK_OFFER_CONSULT, interactionId));
-  task.on(TASK_EVENTS.TASK_RECORDING_PAUSED, () => this.fireTaskCallbacks(TASK_EVENTS.TASK_RECORDING_PAUSED, interactionId));  // renamed
-  task.on(TASK_EVENTS.TASK_RECORDING_RESUMED, () => this.fireTaskCallbacks(TASK_EVENTS.TASK_RECORDING_RESUMED, interactionId));  // renamed
-  task.on(TASK_EVENTS.TASK_POST_CALL_ACTIVITY, () => this.fireTaskCallbacks(TASK_EVENTS.TASK_POST_CALL_ACTIVITY, interactionId));
-  task.on(TASK_EVENTS.TASK_CONFERENCE_ESTABLISHING, () => this.fireTaskCallbacks(TASK_EVENTS.TASK_CONFERENCE_ESTABLISHING, interactionId));
-  task.on(TASK_EVENTS.TASK_CONFERENCE_FAILED, () => this.fireTaskCallbacks(TASK_EVENTS.TASK_CONFERENCE_FAILED, interactionId));
-  task.on(TASK_EVENTS.TASK_CONFERENCE_END_FAILED, () => this.fireTaskCallbacks(TASK_EVENTS.TASK_CONFERENCE_END_FAILED, interactionId));
-  task.on(TASK_EVENTS.TASK_PARTICIPANT_LEFT_FAILED, () => this.fireTaskCallbacks(TASK_EVENTS.TASK_PARTICIPANT_LEFT_FAILED, interactionId));
-  task.on(TASK_EVENTS.TASK_CONFERENCE_TRANSFERRED, () => this.fireTaskCallbacks(TASK_EVENTS.TASK_CONFERENCE_TRANSFERRED, interactionId));
-  task.on(TASK_EVENTS.TASK_CONFERENCE_TRANSFER_FAILED, () => this.fireTaskCallbacks(TASK_EVENTS.TASK_CONFERENCE_TRANSFER_FAILED, interactionId));
+  // SIMPLIFIED: Callback-only events — all use bound handlers with correct interactionId
+  task.on(TASK_EVENTS.TASK_HOLD, bound.hold);
+  task.on(TASK_EVENTS.TASK_RESUME, bound.resume);
+  task.on(TASK_EVENTS.TASK_OFFER_CONTACT, bound.offerContact);  // renamed
+  task.on(TASK_EVENTS.TASK_OFFER_CONSULT, bound.offerConsult);
+  task.on(TASK_EVENTS.TASK_RECORDING_PAUSED, bound.recordingPaused);  // renamed
+  task.on(TASK_EVENTS.TASK_RECORDING_RESUMED, bound.recordingResumed);  // renamed
+  task.on(TASK_EVENTS.TASK_POST_CALL_ACTIVITY, bound.postCallActivity);
+  task.on(TASK_EVENTS.TASK_CONFERENCE_ESTABLISHING, bound.confEstablishing);
+  task.on(TASK_EVENTS.TASK_CONFERENCE_FAILED, bound.confFailed);
+  task.on(TASK_EVENTS.TASK_CONFERENCE_END_FAILED, bound.confEndFailed);
+  task.on(TASK_EVENTS.TASK_PARTICIPANT_LEFT_FAILED, bound.participantLeftFailed);
+  task.on(TASK_EVENTS.TASK_CONFERENCE_TRANSFERRED, bound.confTransferred);
+  task.on(TASK_EVENTS.TASK_CONFERENCE_TRANSFER_FAILED, bound.confTransferFailed);
 
   // Browser-only: WebRTC media setup
   if (this.deviceType === DEVICE_TYPE_BROWSER) {
@@ -288,16 +325,23 @@ task.on(TASK_EVENTS.TASK_RESUME, () => {
 });
 ```
 
-### Pattern 3: New `handleUIControlsUpdated` Method
+### Pattern 3: `TASK_UI_CONTROLS_UPDATED` — Bound Handler (Not a Class Method)
+
+**Why not a class method?** A class-level `handleUIControlsUpdated` would need to derive `interactionId` from `this.store.currentTask`, which is wrong in multi-task/consult scenarios — the emitting task may not be the currently selected one. Using a bound handler (see Pattern 1) captures the correct `interactionId` at registration time.
 
 ```typescript
-// NEW method — must be a class property (not inline arrow) so .off() can detach it
+// WRONG — class method reads currentTask (may be a different task than the emitter):
 handleUIControlsUpdated = (uiControls: TaskUIControls) => {
-  const interactionId = this.store.currentTask?.data.interactionId;
-  if (interactionId) {
-    this.fireTaskCallbacks(TASK_EVENTS.TASK_UI_CONTROLS_UPDATED, interactionId, uiControls);
-  }
+  const interactionId = this.store.currentTask?.data.interactionId;  // ← BUG in multi-task
+  this.fireTaskCallbacks(TASK_EVENTS.TASK_UI_CONTROLS_UPDATED, interactionId, uiControls);
 };
+
+// CORRECT — bound handler from Pattern 1 captures emitting task's interactionId:
+// (created in registerTaskEventListeners per task)
+uiControlsUpdated: (uiControls: TaskUIControls) => {
+  this.fireTaskCallbacks(TASK_EVENTS.TASK_UI_CONTROLS_UPDATED, interactionId, uiControls);
+  // interactionId is from the closure: const interactionId = task.data.interactionId;
+},
 ```
 
 ### Pattern 4: Conference Handler Simplification
@@ -324,11 +368,11 @@ handleConferenceEnded = () => {
 // task.data and task.uiControls already reflect conference state.
 // Keep consult state reset in handleConferenceStarted; remove refreshTaskList() from both.
 //
-// IMPORTANT: Do NOT fire both TASK_CONFERENCE_STARTED and TASK_PARTICIPANT_JOINED from one handler.
-// Both events are wired to this same handler, so one incoming event would produce two different
-// callback notifications. Instead, accept the event type as a parameter.
+// Both eventType and interactionId are passed by the bound handlers in Pattern 1.
+// This avoids: (a) dual callback firing, (b) unresolved interactionId in class scope,
+// and (c) inline arrows that can't be detached by handleTaskRemove.
 
-handleConferenceStarted = (eventType: TASK_EVENTS) => {
+handleConferenceStarted = (eventType: TASK_EVENTS, interactionId: string) => {
   runInAction(() => {
     this.setIsQueueConsultInProgress(false);
     this.setCurrentConsultQueueId(null);
@@ -337,12 +381,12 @@ handleConferenceStarted = (eventType: TASK_EVENTS) => {
   this.fireTaskCallbacks(eventType, interactionId);
 };
 
-handleConferenceEnded = (eventType: TASK_EVENTS) => {
+handleConferenceEnded = (eventType: TASK_EVENTS, interactionId: string) => {
   this.fireTaskCallbacks(eventType, interactionId);
 };
 ```
 
-### Pattern 5: `handleTaskRemove()` — Update Cleanup
+### Pattern 5: `handleTaskRemove()` — Cleanup via Bound-Handler Map
 
 #### Before
 ```typescript
@@ -359,15 +403,50 @@ handleTaskRemove = (taskToRemove: ITask) => {
 #### After
 ```typescript
 handleTaskRemove = (taskToRemove: ITask) => {
-  if (taskToRemove) {
-    // Use renamed SDK event names; add TASK_UI_CONTROLS_UPDATED; fix handler references
-    taskToRemove.off(TASK_EVENTS.TASK_UI_CONTROLS_UPDATED, this.handleUIControlsUpdated);  // NEW
-    taskToRemove.off(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
-    taskToRemove.off(TASK_EVENTS.TASK_END, this.handleTaskEnd);
-    taskToRemove.off(TASK_EVENTS.TASK_CONSULT_END, this.handleConsultEnd);  // FIX: was refreshTaskList
-    taskToRemove.off(TASK_EVENTS.TASK_CONFERENCE_TRANSFERRED, ...);  // FIX: match registered handler
-    // ... all other .off() calls matching their .on() counterparts exactly
+  if (!taskToRemove) return;
+
+  const interactionId = taskToRemove.data.interactionId;
+  const bound = this.taskBoundHandlers.get(interactionId);
+
+  // Class-method handlers — stable references, no map needed
+  taskToRemove.off(TASK_EVENTS.TASK_END, this.handleTaskEnd);
+  taskToRemove.off(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
+  taskToRemove.off(TASK_EVENTS.TASK_REJECT, this.handleTaskReject);
+  taskToRemove.off(TASK_EVENTS.TASK_OUTDIAL_FAILED, this.handleOutdialFailed);
+  taskToRemove.off(TASK_EVENTS.TASK_CONSULT_END, this.handleConsultEnd);  // FIX: was refreshTaskList
+  taskToRemove.off(TASK_EVENTS.TASK_CONSULT_CREATED, this.handleConsultCreated);
+  taskToRemove.off(TASK_EVENTS.TASK_CONSULTING, this.handleConsulting);
+  taskToRemove.off(TASK_EVENTS.TASK_CONSULT_ACCEPTED, this.handleConsultAccepted);
+  taskToRemove.off(TASK_EVENTS.TASK_CONSULT_QUEUE_CANCELLED, this.handleConsultQueueCancelled);
+  taskToRemove.off(TASK_EVENTS.TASK_AUTO_ANSWERED, this.handleAutoAnswer);
+  taskToRemove.off(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
+
+  // Bound handlers — retrieve exact references from map for correct .off() detachment
+  if (bound) {
+    taskToRemove.off(TASK_EVENTS.TASK_UI_CONTROLS_UPDATED, bound.uiControlsUpdated);
+    taskToRemove.off(TASK_EVENTS.TASK_WRAPPEDUP, bound.wrappedup);
+    taskToRemove.off(TASK_EVENTS.TASK_PARTICIPANT_JOINED, bound.confStarted_participantJoined);
+    taskToRemove.off(TASK_EVENTS.TASK_CONFERENCE_STARTED, bound.confStarted_conferenceStarted);
+    taskToRemove.off(TASK_EVENTS.TASK_CONFERENCE_ENDED, bound.confEnded_conferenceEnded);
+    taskToRemove.off(TASK_EVENTS.TASK_PARTICIPANT_LEFT, bound.confEnded_participantLeft);
+    taskToRemove.off(TASK_EVENTS.TASK_HOLD, bound.hold);
+    taskToRemove.off(TASK_EVENTS.TASK_RESUME, bound.resume);
+    taskToRemove.off(TASK_EVENTS.TASK_OFFER_CONTACT, bound.offerContact);
+    taskToRemove.off(TASK_EVENTS.TASK_OFFER_CONSULT, bound.offerConsult);
+    taskToRemove.off(TASK_EVENTS.TASK_RECORDING_PAUSED, bound.recordingPaused);
+    taskToRemove.off(TASK_EVENTS.TASK_RECORDING_RESUMED, bound.recordingResumed);
+    taskToRemove.off(TASK_EVENTS.TASK_POST_CALL_ACTIVITY, bound.postCallActivity);
+    taskToRemove.off(TASK_EVENTS.TASK_CONFERENCE_ESTABLISHING, bound.confEstablishing);
+    taskToRemove.off(TASK_EVENTS.TASK_CONFERENCE_FAILED, bound.confFailed);
+    taskToRemove.off(TASK_EVENTS.TASK_CONFERENCE_END_FAILED, bound.confEndFailed);
+    taskToRemove.off(TASK_EVENTS.TASK_PARTICIPANT_LEFT_FAILED, bound.participantLeftFailed);
+    taskToRemove.off(TASK_EVENTS.TASK_CONFERENCE_TRANSFERRED, bound.confTransferred);  // FIX: was handleConferenceEnded
+    taskToRemove.off(TASK_EVENTS.TASK_CONFERENCE_TRANSFER_FAILED, bound.confTransferFailed);
+    this.taskBoundHandlers.delete(interactionId);
   }
+
+  // Reset store state
+  // ... existing currentTask/taskList cleanup logic
 };
 ```
 
@@ -392,7 +471,8 @@ handleTaskRemove = (taskToRemove: ITask) => {
 - [ ] `task:ui-controls-updated` triggers re-renders in widgets
 - [ ] No regression in consult/conference/hold flows
 - [ ] Task removal from list on end/reject works correctly
-- [ ] `handleTaskRemove` unregisters all listeners correctly (no listener leaks)
+- [ ] `handleTaskRemove` unregisters all listeners correctly via bound-handler map (no listener leaks)
+- [ ] `taskBoundHandlers` map is cleaned up (`.delete()`) when a task is removed
 - [ ] `handleConsultEnd` is properly wired and resets consult state on `TASK_CONSULT_END`
 - [ ] `handleConsultAccepted` still registers `TASK_MEDIA` listener on consult task (browser)
 - [ ] `handleAutoAnswer` still sets `isDeclineButtonEnabled = true`
