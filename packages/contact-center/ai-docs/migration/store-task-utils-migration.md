@@ -111,11 +111,16 @@ Two different `findHoldTimestamp` functions exist with different signatures:
 
 ---
 
-## Before/After: Removing `getConsultStatus` and `getControlsVisibility`
+## Before/After: Downstream Impact — `getControlsVisibility` Deletion
 
-### Before (consumed in `task-util.ts::getControlsVisibility`)
+> **Note:** `getControlsVisibility` is NOT in the store. It lives in the **task package** at
+> `task/src/Utils/task-util.ts` (hook/widget layer). It is shown here because it is the
+> **primary consumer** of the 5 store functions being removed above. When those store
+> functions are deleted, this entire function chain becomes deletable — replaced by `task.uiControls`.
+
+### Before (`task/src/Utils/task-util.ts` — imports 5 store functions)
 ```typescript
-// task/src/Utils/task-util.ts — old approach
+// task/src/Utils/task-util.ts (hook layer, NOT store)
 import { getConsultStatus, ConsultStatus, getIsConsultInProgress, getIsCustomerInCall,
          getConferenceParticipantsCount, findHoldStatus } from '@webex/cc-store';
 
@@ -139,9 +144,10 @@ export function getControlsVisibility(deviceType, featureFlags, task, agentId, c
 }
 ```
 
-### After (entire `getControlsVisibility` + 22 visibility functions deleted)
+### After (`task/src/Utils/task-util.ts` — entire `getControlsVisibility` + 22 visibility functions deleted)
 ```typescript
-// task/src/Utils/task-util.ts — DELETE getControlsVisibility and all 22 get*ButtonVisibility functions:
+// task/src/Utils/task-util.ts (hook layer, NOT store)
+// DELETE getControlsVisibility and all 22 get*ButtonVisibility functions:
 //   getAcceptButtonVisibility, getDeclineButtonVisibility, getEndButtonVisibility,
 //   getMuteUnmuteButtonVisibility, getHoldResumeButtonVisibility,
 //   getPauseResumeRecordingButtonVisibility, getRecordingIndicatorVisibility,
