@@ -18,6 +18,7 @@ export default function createOutdialCallTests() {
     });
 
     test('should make an outdial call in Desktop mode and complete wrapup', async () => {
+      test.skip(!process.env.PW_DIAL_NUMBER, 'PW_DIAL_NUMBER not set');
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       await expect(testManager.agent1Page.getByTestId('outdial-call-container')).toBeVisible();
       await enterOutdialNumber(testManager.agent1Page, process.env.PW_DIAL_NUMBER!);
@@ -48,6 +49,7 @@ export default function createOutdialCallTests() {
     });
 
     test('should make an outdial call in Extension mode and complete wrapup', async () => {
+      test.skip(!process.env.PW_DIAL_NUMBER, 'PW_DIAL_NUMBER not set');
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       await expect(testManager.agent1Page.getByTestId('outdial-call-container')).toBeVisible();
       await enterOutdialNumber(testManager.agent1Page, process.env.PW_DIAL_NUMBER!);
