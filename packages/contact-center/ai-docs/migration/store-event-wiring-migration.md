@@ -1,8 +1,30 @@
-# Migration Doc 003: Store Event Wiring Refactor
+# Store Event Wiring Migration
 
 ## Summary
 
 The store's `storeEventsWrapper.ts` currently registers 30+ individual task event handlers that manually call `refreshTaskList()` and update observables. With the state machine, the SDK handles state transitions internally. Many event handlers can be simplified or removed, and the new `task:ui-controls-updated` event replaces manual state derivation.
+
+---
+
+## Event Names — 5 Renamed
+
+The widget's local `TASK_EVENTS` enum (in `store/src/store.types.ts`) uses CC-level naming that differs from the SDK's task-level naming. These must be aligned:
+
+| Old (Widget) | Old Value | New (SDK) | New Value |
+|---|---|---|---|
+| `AGENT_WRAPPEDUP` | `'AgentWrappedUp'` | `TASK_WRAPPEDUP` | `'task:wrappedup'` |
+| `AGENT_CONSULT_CREATED` | `'AgentConsultCreated'` | `TASK_CONSULT_CREATED` | `'task:consultCreated'` |
+| `AGENT_OFFER_CONTACT` | `'AgentOfferContact'` | `TASK_OFFER_CONTACT` | `'task:offerContact'` |
+| `CONTACT_RECORDING_PAUSED` | `'ContactRecordingPaused'` | `TASK_RECORDING_PAUSED` | `'task:recordingPaused'` |
+| `CONTACT_RECORDING_RESUMED` | `'ContactRecordingResumed'` | `TASK_RECORDING_RESUMED` | `'task:recordingResumed'` |
+
+New event: `TASK_UI_CONTROLS_UPDATED` (`'task:ui-controls-updated'`) — subscribe to this for control updates.
+
+**Action:** Delete the local `TASK_EVENTS` enum from `store/src/store.types.ts` and import from SDK instead.
+
+### Pre-existing Bug: Event Name Mismatches
+
+The 5 renamed events above are currently hardcoded in `store.types.ts` with a TODO comment: `// TODO: remove this once cc sdk exports this enum`. During migration, align these to SDK's exported `TASK_EVENTS` enum.
 
 ---
 
@@ -263,4 +285,4 @@ handleConferenceEnded(data: any, interactionId: string) {
 
 ---
 
-_Parent: [001-migration-overview.md](./001-migration-overview.md)_
+_Parent: [migration-overview.md](./migration-overview.md)_

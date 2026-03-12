@@ -1,8 +1,29 @@
-# Migration Doc 008: Store Task Utils Migration
+# Store Task Utils Migration
 
 ## Summary
 
 The store's `task-utils.ts` contains ~15 utility functions that inspect raw task data to derive state flags (consult status, hold status, conference state, participant info). Many of these become redundant when `task.uiControls` is the source of truth. This document maps which utils to keep, simplify, or remove.
+
+---
+
+## Constants to Delete
+
+| Delete | Reason |
+|--------|--------|
+| Local `TASK_EVENTS` enum (`store/src/store.types.ts`) | SDK exports this — delete local copy |
+| `TASK_STATE_CONSULT`, `TASK_STATE_CONSULTING`, `TASK_STATE_CONSULT_COMPLETED` | SDK handles via state machine |
+| `INTERACTION_STATE_*` constants | SDK handles via `TaskState` |
+| `CONSULT_STATE_*` constants | SDK handles via context |
+
+## Constants to Keep
+
+| Keep | Reason |
+|------|--------|
+| `RELATIONSHIP_TYPE_CONSULT`, `MEDIA_TYPE_CONSULT` | Still used by `findMediaResourceId` |
+
+## Gotcha: `TaskState.CONSULT_INITIATING` vs `CONSULTING`
+
+The SDK has `CONSULT_INITIATING` (consult requested, async in-progress) and `CONSULTING` (consult accepted, actively consulting) as distinct states. The old widget constant `TASK_STATE_CONSULT` ('consult') maps to `CONSULT_INITIATING`, NOT `CONSULTING`. Do not collapse these when updating `getTaskStatus()` or any consult timer logic.
 
 ---
 
@@ -149,10 +170,13 @@ const consultCallHeld = findHoldStatus(task, 'consult', agentId);
 
 #### After
 ```typescript
-// REMOVED from store/task-utils.ts — SDK tracks hold state in TaskContext:
-// - task.uiControls.hold.isEnabled indicates holdable
-// - task.uiControls.switchToConsult.isVisible indicates consult call is held
-// No widget-side derivation needed.
+// KEPT in store/task-utils.ts — still needed for:
+// 1. getTaskStatus() held-state derivation
+// 2. Component layer isHeld (cannot derive from controls.hold.isEnabled)
+// Usage unchanged — widgets still call findHoldStatus(task, 'mainCall', agentId)
+export function findHoldStatus(task: ITask, mType: string, agentId: string): boolean {
+  // Implementation unchanged — reads from task.data.interaction.participants
+}
 ```
 
 ### Before/After: `getTaskStatus` (KEPT but enhanced)
@@ -213,4 +237,4 @@ export function getTaskStatus(task: ITask, agentId: string): string {
 
 ---
 
-_Parent: [001-migration-overview.md](./001-migration-overview.md)_
+_Parent: [migration-overview.md](./migration-overview.md)_
