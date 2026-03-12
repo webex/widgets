@@ -273,21 +273,18 @@ The `WebexMeeting` component receives its adapter via `AdapterContext.Provider`,
 
 ### Control Action Parameters
 
-All control `action()` methods take a **destructured object**, not a plain string.
-
-
-| Control                   | `action()` Parameters                                  | Adapter Method Called                        |
-| ------------------------- | ------------------------------------------------------ | -------------------------------------------- |
-| `AudioControl`            | `{ meetingID }`                                        | `handleLocalAudio(meetingID)`                |
-| `VideoControl`            | `{ meetingID }`                                        | `handleLocalVideo(meetingID)`                |
-| `ShareControl`            | `{ meetingID }`                                        | `handleLocalShare(meetingID)`                |
-| `JoinControl`             | `{ meetingID, meetingPasswordOrPin, participantName }` | `joinMeeting(meetingID, { password, name })` |
-| `ExitControl`             | `{ meetingID }`                                        | `leaveMeeting(meetingID)`                    |
-| `RosterControl`           | `{ meetingID }`                                        | `toggleRoster(meetingID)`                    |
-| `SettingsControl`         | `{ meetingID }`                                        | `toggleSettings(meetingID)`                  |
-| `SwitchCameraControl`     | `{ meetingID, cameraId }`                              | `switchCamera(meetingID, cameraId)`          |
-| `SwitchMicrophoneControl` | `{ meetingID, microphoneId }`                          | `switchMicrophone(meetingID, microphoneId)`  |
-| `SwitchSpeakerControl`    | `{ meetingID, speakerId }`                             | `switchSpeaker(meetingID, speakerId)`        |
+| Control                   | Adapter Method Called                        |
+| ------------------------- | -------------------------------------------- |
+| `AudioControl`            | `handleLocalAudio(meetingID)`                |
+| `VideoControl`            | `handleLocalVideo(meetingID)`                |
+| `ShareControl`            | `handleLocalShare(meetingID)`                |
+| `JoinControl`             | `joinMeeting(meetingID, { password, name })` |
+| `ExitControl`             | `leaveMeeting(meetingID)`                    |
+| `RosterControl`           | `toggleRoster(meetingID)`                    |
+| `SettingsControl`         | `toggleSettings(meetingID)`                  |
+| `SwitchCameraControl`     | `switchCamera(meetingID, cameraId)`          |
+| `SwitchMicrophoneControl` | `switchMicrophone(meetingID, microphoneId)`  |
+| `SwitchSpeakerControl`    | `switchSpeaker(meetingID, speakerId)`        |
 
 
 ### Control IDs for WebexMeetingControlBar
