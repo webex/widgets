@@ -50,6 +50,9 @@ const compareButton = document.getElementById('compare-button');
 const clearComparisonButton = document.getElementById('clear-comparison-button');
 const copyComparisonLinkBtn = document.getElementById('copy-comparison-link');
 const comparisonHelper = document.getElementById('comparison-helper');
+const clearVersionABtn = document.getElementById('clear-version-a-btn');
+const clearVersionBBtn = document.getElementById('clear-version-b-btn');
+const changelogFormRow = document.getElementById('changelog-form-row');
 
 // DOM elements - Shared
 const helperSection = document.getElementById('helper-section');
@@ -71,8 +74,8 @@ const uiVisibilityStates = {
     hidden: ['comparisonForm', 'comparisonResults', 'comparisonHelper'],
   },
   comparison: {
-    visible: ['comparisonForm', 'comparisonHelper'],
-    hidden: ['searchForm', 'searchResults', 'helperSection', 'comparisonResults'],
+    visible: ['comparisonForm'],
+    hidden: ['searchForm', 'searchResults', 'helperSection', 'comparisonResults', 'comparisonHelper'],
   },
 };
 
@@ -95,6 +98,10 @@ function updateUIVisibility(viewState) {
     const el = uiViewElements[key];
     if (el) el.classList.remove('hide');
   });
+  if (changelogFormRow) {
+    if (viewState === 'comparison') changelogFormRow.classList.add('comparison-view-active');
+    else changelogFormRow.classList.remove('comparison-view-active');
+  }
 }
 
 // Initialize UI to search view on load (single source of truth for visibility)
@@ -190,6 +197,43 @@ const populateFormFieldsFromURL = async () => {
   if (hasAtleastOneParam) {
     doSearch(searchParams);
   }
+};
+
+/**
+ * Return the latest version key from versionPaths (by semver).
+ */
+const getLatestVersionKey = () => {
+  const keys = Object.keys(versionPaths);
+  if (keys.length === 0) return null;
+  keys.sort((a, b) => {
+    const pa = a.split('.').map(Number);
+    const pb = b.split('.').map(Number);
+    for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+      const na = pa[i] || 0;
+      const nb = pb[i] || 0;
+      if (na !== nb) return nb - na; // descending: latest first
+    }
+    return 0;
+  });
+  return keys[0];
+};
+
+/**
+ * Fetch all version changelogs and return merged package list (union) so dropdown shows every package.
+ */
+const fetchMergedChangelogPackages = async () => {
+  const paths = Object.values(versionPaths);
+  if (paths.length === 0) return {};
+  const results = await Promise.all(paths.map((p) => fetch(p).then((r) => r.json()).catch(() => ({}))));
+  const merged = {};
+  results.forEach((changelog) => {
+    if (changelog && typeof changelog === 'object') {
+      Object.keys(changelog).forEach((pkg) => {
+        if (!merged[pkg]) merged[pkg] = changelog[pkg];
+      });
+    }
+  });
+  return merged;
 };
 
 const populateVersions = async () => {
@@ -779,10 +823,6 @@ const displayComparison = (versionA, versionB, comparisonData) => {
     } else {
       console.warn('Copy link button not found in DOM');
     }
-    if (comparisonHelper) {
-      comparisonHelper.classList.remove('hide');
-    }
-
     // Scroll to results smoothly
     setTimeout(() => {
       comparisonResults.scrollIntoView({behavior: 'smooth', block: 'start'});
@@ -859,11 +899,9 @@ const handleComparisonURLParams = async () => {
  * @param {string} versionA - Base version (optional)
  * @param {string} versionB - Target version (optional)
  */
-const switchToComparisonMode = (versionA = null, versionB = null) => {
-  // Update mode
+const switchToComparisonMode = async (versionA = null, versionB = null) => {
   comparisonMode = true;
 
-  // Update button states
   if (comparisonViewBtn && singleViewBtn) {
     comparisonViewBtn.classList.add('active', 'btn-primary');
     comparisonViewBtn.classList.remove('btn-default');
@@ -871,21 +909,35 @@ const switchToComparisonMode = (versionA = null, versionB = null) => {
     singleViewBtn.classList.add('btn-default');
   }
 
-  // Update form visibility (centralized view state)
   updateUIVisibility('comparison');
-  // Hide package-level comparison section in version comparison mode
   if (packageLevelSection) packageLevelSection.classList.add('hide');
 
-  // Populate version dropdowns
   if (versionSelectDropdown && versionSelectDropdown.innerHTML) {
     const options = versionSelectDropdown.innerHTML;
     if (versionASelect) versionASelect.innerHTML = options;
     if (versionBSelect) versionBSelect.innerHTML = options;
   }
 
-  // Set selected versions if provided
+  try {
+    const changelog = await fetchMergedChangelogPackages();
+    populateComparisonPackagesFromChangelog(changelog);
+  } catch (e) {
+    console.error('Error loading packages for comparison:', e);
+    populateComparisonPackagesFromChangelog({});
+  }
+
   if (versionA && versionASelect) versionASelect.value = versionA;
   if (versionB && versionBSelect) versionBSelect.value = versionB;
+
+  if (!versionA && !versionB) {
+    resetComparisonSelections();
+    if (compareButton) compareButton.disabled = true;
+  } else {
+    versionASelect.disabled = false;
+    versionBSelect.disabled = false;
+    if (clearVersionABtn) clearVersionABtn.disabled = false;
+    if (clearVersionBBtn) clearVersionBBtn.disabled = false;
+  }
 };
 
 /* ============================================
@@ -961,9 +1013,7 @@ const compareAndRenderPackageVersions = (packageName, versionASpecific, versionB
       comparisonData.versionB
     );
 
-    // Show copy link button and helper
     if (copyComparisonLinkBtn) copyComparisonLinkBtn.classList.remove('hide');
-    if (comparisonHelper) comparisonHelper.classList.remove('hide');
 
     // Scroll to results
     setTimeout(() => {
@@ -981,6 +1031,28 @@ const compareAndRenderPackageVersions = (packageName, versionASpecific, versionB
   }
 };
 /**
+ * Populate comparison package dropdown from a changelog.
+ * Always includes @webex/widgets and @webex/cc-widgets first, then separator, then rest from changelog alphabetically.
+ */
+const populateComparisonPackagesFromChangelog = (changelog) => {
+  if (!comparisonPackageSelect) return;
+  const specialPackagesAlways = ['@webex/widgets', '@webex/cc-widgets'];
+  const allPackages = Object.keys(changelog || {});
+  const otherPackages = allPackages.filter((pkg) => !specialPackagesAlways.includes(pkg)).sort();
+  const sortedPackages = ['separator', ...specialPackagesAlways, 'separator', ...otherPackages];
+
+  let optionsHtml = '<option value="">Select a package</option>';
+  sortedPackages.forEach((packageName) => {
+    if (packageName === 'separator') {
+      optionsHtml += `<option disabled>──────────</option>`;
+      return;
+    }
+    optionsHtml += `<option value="${packageName}">${packageName}</option>`;
+  });
+  comparisonPackageSelect.innerHTML = optionsHtml;
+};
+
+/**
  * Populate the package dropdown with union of packages from both versions
  * @param {Object} changelogA - Changelog for base version
  * @param {Object} changelogB - Changelog for target version
@@ -996,7 +1068,7 @@ const populateUnionPackages = (changelogA, changelogB) => {
     return;
   }
 
-  let optionsHtml = '<option value="">Select a package (optional)</option>';
+  let optionsHtml = '<option value="">Select a package</option>';
   allPackages.forEach((pkg) => {
     optionsHtml += `<option value="${pkg}">${pkg}</option>`;
   });
@@ -1024,11 +1096,13 @@ const populatePrereleaseVersions = (packageName, changelog, selectId, stableVers
     return;
   }
 
-  // Check if package exists in this changelog (it might not for union packages)
+  // If package not in this changelog, show the selected stable version as the only option (so user can still compare)
   if (!changelog[packageName]) {
-    if (versionSelect) {
-      versionSelect.innerHTML = '<option value="">Package not available in this version</option>';
-      versionSelect.disabled = true;
+    if (versionSelect && stableVersion) {
+      let optionsHtml = '<option value="">Select pre-release version</option>';
+      optionsHtml += `<option value="${stableVersion}">${stableVersion} (Stable)</option>`;
+      versionSelect.innerHTML = optionsHtml;
+      versionSelect.disabled = false;
     }
     return;
   }
@@ -1130,13 +1204,22 @@ const populateComparisonVersions = () => {
 };
 
 /**
- * Reset comparison form selections
+ * Reset comparison form selections and disable version/clear controls until package is selected
  */
 const resetComparisonSelections = () => {
   if (comparisonPackageSelect) comparisonPackageSelect.value = '';
   if (versionAPrereleaseSelect) versionAPrereleaseSelect.value = '';
   if (versionBPrereleaseSelect) versionBPrereleaseSelect.value = '';
-  if (comparisonPackageRow) comparisonPackageRow.style.display = 'none';
+  if (versionASelect) {
+    versionASelect.value = '';
+    versionASelect.disabled = true;
+  }
+  if (versionBSelect) {
+    versionBSelect.value = '';
+    versionBSelect.disabled = true;
+  }
+  if (clearVersionABtn) clearVersionABtn.disabled = true;
+  if (clearVersionBBtn) clearVersionBBtn.disabled = true;
   if (prereleaseRow) prereleaseRow.style.display = 'none';
 };
 
@@ -1144,8 +1227,14 @@ const resetComparisonSelections = () => {
  * Clear all comparison form inputs and state
  */
 const clearComparisonForm = () => {
-  if (versionASelect) versionASelect.value = '';
-  if (versionBSelect) versionBSelect.value = '';
+  if (versionASelect) {
+    versionASelect.value = '';
+    versionASelect.disabled = true;
+  }
+  if (versionBSelect) {
+    versionBSelect.value = '';
+    versionBSelect.disabled = true;
+  }
   resetComparisonSelections();
   if (comparisonResults) comparisonResults.classList.add('hide');
 
@@ -1153,7 +1242,7 @@ const clearComparisonForm = () => {
 
   if (copyComparisonLinkBtn) copyComparisonLinkBtn.classList.add('hide');
   if (comparisonHelper) comparisonHelper.classList.add('hide');
-  if (compareButton) compareButton.disabled = false;
+  if (compareButton) compareButton.disabled = true;
 };
 
 /**
@@ -1177,27 +1266,26 @@ const clearComparisonURLParams = () => {
 };
 
 /**
- * Check and update comparison button state based on form selections
+ * Check and update comparison button state based on form selections.
+ * Compare enables only when: package + base version + target version + both pre-release selections.
  */
 const updateCompareButtonState = () => {
   if (!compareButton) return;
 
   const selectedPackage = comparisonPackageSelect ? comparisonPackageSelect.value : null;
+  const baseVersion = versionASelect ? versionASelect.value : null;
+  const targetVersion = versionBSelect ? versionBSelect.value : null;
   const versionASpecific = versionAPrereleaseSelect ? versionAPrereleaseSelect.value : null;
   const versionBSpecific = versionBPrereleaseSelect ? versionBPrereleaseSelect.value : null;
   const prereleaseRowVisible = prereleaseRow && prereleaseRow.style.display !== 'none';
 
-  if (selectedPackage) {
-    // Package selected - require at least one pre-release version
-    if (!prereleaseRowVisible || (!versionASpecific && !versionBSpecific)) {
-      compareButton.disabled = true;
-    } else {
-      compareButton.disabled = false;
-    }
-  } else {
-    // No package selected - enable for full version comparison
-    compareButton.disabled = false;
-  }
+  const hasAll =
+    selectedPackage &&
+    baseVersion &&
+    targetVersion &&
+    (!prereleaseRowVisible || (versionASpecific && versionBSpecific));
+
+  compareButton.disabled = !hasAll;
 };
 
 /**
@@ -1213,65 +1301,112 @@ const updatePrereleaseLabels = () => {
 };
 
 /**
- * Handle stable version changes - fetch changelogs and populate packages
+ * Handle stable version (base/target) change - fetch changelogs and populate pre-release dropdowns when package selected
  */
 const handleStableVersionChange = async () => {
-  console.log('🟢 handleStableVersionChange FIRED');
   const stableA = versionASelect.value;
   const stableB = versionBSelect.value;
+  const selectedPackage = comparisonPackageSelect ? comparisonPackageSelect.value : '';
 
-  resetComparisonSelections();
-  updateCompareButtonState();
-
-  if (stableA && stableB) {
-    try {
-      const [changelogA, changelogB] = await Promise.all([
-        fetch(versionPaths[stableA]).then((res) => res.json()),
-        fetch(versionPaths[stableB]).then((res) => res.json()),
-      ]);
-
-      comparisonState.update(changelogA, changelogB, stableA, stableB);
-      populateUnionPackages(changelogA, changelogB);
-      updateCompareButtonState();
-    } catch (error) {
-      console.error('Error loading changelogs:', error);
-      alert('Error loading version data. Please try again.');
-    }
+  if (versionAPrereleaseSelect) {
+    versionAPrereleaseSelect.value = '';
+    versionAPrereleaseSelect.disabled = true;
   }
+  if (versionBPrereleaseSelect) {
+    versionBPrereleaseSelect.value = '';
+    versionBPrereleaseSelect.disabled = true;
+  }
+
+  try {
+    if (stableA) {
+      const changelogA = await fetch(versionPaths[stableA]).then((r) => r.json());
+      comparisonState.cachedChangelogA = changelogA;
+      comparisonState.currentStableA = stableA;
+      if (selectedPackage) {
+        populatePrereleaseVersions(
+          selectedPackage,
+          changelogA,
+          'version-a-prerelease-select',
+          stableA
+        );
+      } else if (versionAPrereleaseSelect) {
+        versionAPrereleaseSelect.innerHTML = '<option value="">Select base version first</option>';
+      }
+    } else if (versionAPrereleaseSelect) {
+      versionAPrereleaseSelect.innerHTML = '<option value="">Select base version first</option>';
+    }
+    if (stableB) {
+      const changelogB = await fetch(versionPaths[stableB]).then((r) => r.json());
+      comparisonState.cachedChangelogB = changelogB;
+      comparisonState.currentStableB = stableB;
+      if (selectedPackage) {
+        populatePrereleaseVersions(
+          selectedPackage,
+          changelogB,
+          'version-b-prerelease-select',
+          stableB
+        );
+      } else if (versionBPrereleaseSelect) {
+        versionBPrereleaseSelect.innerHTML = '<option value="">Select target version first</option>';
+      }
+    } else if (versionBPrereleaseSelect) {
+      versionBPrereleaseSelect.innerHTML = '<option value="">Select target version first</option>';
+    }
+    if (prereleaseRow) updatePrereleaseLabels();
+
+    // After both base and target are selected, disable version dropdowns so user picks pre-release only
+    if (stableA && stableB && selectedPackage) {
+      versionASelect.disabled = true;
+      versionBSelect.disabled = true;
+    }
+  } catch (error) {
+    console.error('Error loading changelogs:', error);
+    alert('Error loading version data. Please try again.');
+  }
+  updateCompareButtonState();
 };
 
 /**
- * Handle package selection - populate pre-release versions
+ * Handle package selection - enable version dropdowns and clear buttons, show pre-release row
  */
 const handlePackageChange = () => {
-  console.log('🟢 handlePackageChange FIRED');
-  const selectedPackage = comparisonPackageSelect.value;
+  const selectedPackage = comparisonPackageSelect ? comparisonPackageSelect.value : '';
 
-  if (versionAPrereleaseSelect) versionAPrereleaseSelect.value = '';
-  if (versionBPrereleaseSelect) versionBPrereleaseSelect.value = '';
+  if (!selectedPackage) {
+    resetComparisonSelections();
+    if (compareButton) compareButton.disabled = true;
+    return;
+  }
 
-  if (selectedPackage && comparisonState.cachedChangelogA && comparisonState.cachedChangelogB) {
+  versionASelect.disabled = false;
+  versionBSelect.disabled = false;
+  if (clearVersionABtn) clearVersionABtn.disabled = false;
+  if (clearVersionBBtn) clearVersionBBtn.disabled = false;
+  if (prereleaseRow) prereleaseRow.style.display = 'flex';
+
+  if (versionASelect.value && comparisonState.cachedChangelogA) {
     populatePrereleaseVersions(
       selectedPackage,
       comparisonState.cachedChangelogA,
       'version-a-prerelease-select',
       comparisonState.currentStableA
     );
+  } else if (versionAPrereleaseSelect) {
+    versionAPrereleaseSelect.innerHTML = '<option value="">Select base version first</option>';
+    versionAPrereleaseSelect.disabled = true;
+  }
+  if (versionBSelect.value && comparisonState.cachedChangelogB) {
     populatePrereleaseVersions(
       selectedPackage,
       comparisonState.cachedChangelogB,
       'version-b-prerelease-select',
       comparisonState.currentStableB
     );
-
-    if (prereleaseRow) {
-      prereleaseRow.style.display = 'flex';
-      updatePrereleaseLabels();
-    }
-  } else {
-    if (prereleaseRow) prereleaseRow.style.display = 'none';
+  } else if (versionBPrereleaseSelect) {
+    versionBPrereleaseSelect.innerHTML = '<option value="">Select target version first</option>';
+    versionBPrereleaseSelect.disabled = true;
   }
-
+  if (prereleaseRow) updatePrereleaseLabels();
   updateCompareButtonState();
 };
 
@@ -1297,41 +1432,49 @@ const switchToSingleViewMode = () => {
 /**
  * Switch to comparison view mode
  */
-const switchToComparisonViewMode = () => {
-  console.log('🔵 Switching to COMPARISON VIEW mode');
+const switchToComparisonViewMode = async () => {
   comparisonMode = true;
 
-  // Update button styles
   comparisonViewBtn.classList.add('active', 'btn-primary');
   comparisonViewBtn.classList.remove('btn-default');
   singleViewBtn.classList.remove('active', 'btn-primary');
   singleViewBtn.classList.add('btn-default');
 
-  // Toggle visibility (centralized view state)
   updateUIVisibility('comparison');
 
   populateComparisonVersions();
+  try {
+    const changelog = await fetchMergedChangelogPackages();
+    populateComparisonPackagesFromChangelog(changelog);
+  } catch (e) {
+    console.error('Error loading packages for comparison:', e);
+    populateComparisonPackagesFromChangelog({});
+  }
+  resetComparisonSelections();
+  if (compareButton) compareButton.disabled = true;
 };
 
 /**
- * Validate comparison form inputs
+ * Validate comparison form inputs (package and both versions required)
  */
 const validateComparisonInputs = (stableA, stableB, selectedPackage, versionASpecific, versionBSpecific) => {
+  if (!selectedPackage) {
+    alert('Please select a package');
+    return false;
+  }
   if (!stableA || !stableB) {
-    alert('Please select both stable versions');
+    alert('Please select both base and target stable versions');
     return false;
   }
-
-  if (selectedPackage && !versionASpecific && !versionBSpecific) {
-    alert('Please select at least one pre-release version, or leave package empty for full version comparison');
+  if (!versionASpecific || !versionBSpecific) {
+    alert('Please select pre-release (or stable) for both base and target');
     return false;
   }
-
   return true;
 };
 
 /**
- * Handle comparison form submission
+ * Handle comparison form submission (package-level only)
  */
 const handleComparisonSubmit = (event) => {
   event.preventDefault();
@@ -1346,25 +1489,16 @@ const handleComparisonSubmit = (event) => {
     return;
   }
 
-  if (selectedPackage && (versionASpecific || versionBSpecific)) {
-    // Package-level comparison
-    const finalVersionA = versionASpecific || stableA;
-    const finalVersionB = versionBSpecific || stableB;
-    console.log('Comparing:', finalVersionA, 'vs', finalVersionB);
+  const finalVersionA = versionASpecific || stableA;
+  const finalVersionB = versionBSpecific || stableB;
 
-    compareAndRenderPackageVersions(
-      selectedPackage,
-      finalVersionA,
-      finalVersionB,
-      comparisonState.cachedChangelogA,
-      comparisonState.cachedChangelogB
-    );
-  } else {
-    // Full version comparison
-    performVersionComparison(stableA, stableB);
-  }
-
-  if (compareButton) compareButton.disabled = false;
+  compareAndRenderPackageVersions(
+    selectedPackage,
+    finalVersionA,
+    finalVersionB,
+    comparisonState.cachedChangelogA,
+    comparisonState.cachedChangelogB
+  );
 };
 
 /**
@@ -1405,6 +1539,34 @@ const setupComparisonEventListeners = () => {
   if (comparisonForm) comparisonForm.addEventListener('submit', handleComparisonSubmit);
   if (clearComparisonButton) clearComparisonButton.addEventListener('click', handleClearClick);
   if (copyComparisonLinkBtn) copyComparisonLinkBtn.addEventListener('click', copyComparisonLink);
+  if (clearVersionABtn) {
+    clearVersionABtn.addEventListener('click', () => {
+      if (versionASelect) {
+        versionASelect.value = '';
+        versionASelect.disabled = false;
+        if (versionAPrereleaseSelect) {
+          versionAPrereleaseSelect.innerHTML = '<option value="">Select base version first</option>';
+          versionAPrereleaseSelect.value = '';
+          versionAPrereleaseSelect.disabled = true;
+        }
+        updateCompareButtonState();
+      }
+    });
+  }
+  if (clearVersionBBtn) {
+    clearVersionBBtn.addEventListener('click', () => {
+      if (versionBSelect) {
+        versionBSelect.value = '';
+        versionBSelect.disabled = false;
+        if (versionBPrereleaseSelect) {
+          versionBPrereleaseSelect.innerHTML = '<option value="">Select target version first</option>';
+          versionBPrereleaseSelect.value = '';
+          versionBPrereleaseSelect.disabled = true;
+        }
+        updateCompareButtonState();
+      }
+    });
+  }
 
   comparisonListenersInitialized = true;
   console.log('comparison listeners are initialized sucessfully......');
@@ -1414,7 +1576,7 @@ const setupComparisonEventListeners = () => {
  * Handle enhanced comparison URL parameters on page load
  */
 const loadEnhancedComparisonFromURL = async (enhancedParams) => {
-  switchToComparisonMode();
+  await switchToComparisonMode();
 
   await new Promise((resolve) => setTimeout(resolve, 300));
 
@@ -1445,7 +1607,7 @@ const loadEnhancedComparisonFromURL = async (enhancedParams) => {
  * Handle standard comparison URL parameters on page load
  */
 const loadStandardComparisonFromURL = async (urlParams) => {
-  switchToComparisonMode(urlParams.versionA, urlParams.versionB);
+  await switchToComparisonMode(urlParams.versionA, urlParams.versionB);
 
   await new Promise((resolve) => setTimeout(resolve, 300));
 

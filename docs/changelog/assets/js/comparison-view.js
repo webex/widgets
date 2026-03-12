@@ -24,13 +24,11 @@ const extractPackagesFromVersion = (changelog, specificVersions = null) => {
 
   for (const packageName of Object.keys(changelog)) {
     const packageVersions = changelog[packageName];
-    console.log('packageVersions', packageVersions);
 
     // Safety check: ensure packageVersions is an object
     if (!packageVersions || typeof packageVersions !== 'object') continue;
 
     const versionKeys = Object.keys(packageVersions);
-    console.log('versionKeys', versionKeys);
 
     if (versionKeys.length === 0) continue;
 
@@ -370,6 +368,22 @@ const generatePackageComparisonData = (packageName, versionASpecific, versionBSp
     ...stats,
   };
 };
+
+/**
+ * Get sorted widget-related package names from a changelog (for comparison package dropdown).
+ * Puts @webex/widgets and @webex/cc-widgets first, then remaining packages alphabetically.
+ * @param {Object} changelog - Changelog data (package name -> versions)
+ * @returns {string[]} Sorted array of package names
+ */
+const getWidgetPackagesFromChangelog = (changelog) => {
+  if (!changelog || typeof changelog !== 'object') return [];
+  const specialPackages = ['@webex/widgets', '@webex/cc-widgets'];
+  const allPackages = Object.keys(changelog);
+  const existingSpecial = specialPackages.filter((p) => allPackages.includes(p));
+  const other = allPackages.filter((p) => !specialPackages.includes(p)).sort();
+  return [...existingSpecial, ...other];
+};
+
 //Export All the functions
 export {
   comparisonState,
@@ -384,4 +398,5 @@ export {
   comparePackages,
   fetchAndCompareVersions,
   generatePackageComparisonData,
+  getWidgetPackagesFromChangelog,
 };
