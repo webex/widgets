@@ -59,6 +59,35 @@ graph TB
 
 
 
+### File Structure
+
+```
+packages/@webex/widgets/
+├── src/
+│   ├── index.js                           # Package exports
+│   └── widgets/
+│       └── WebexMeetings/
+│           ├── WebexMeetings.jsx           # Widget component (main source)
+│           ├── WebexMeetings.css            # Widget styles
+│           ├── WebexLogo.jsx               # SVG logo component
+│           ├── webex-logo.svg              # Logo asset
+│           └── README.md                   # Component README
+├── tests/
+│   ├── WebexMeetings/
+│   │   └── WebexMeetings.test.jsx          # Unit tests
+│   ├── WebexMeeting.e2e.js                 # E2E tests
+│   ├── pages/
+│   │   ├── MeetingWidget.page.js           # Page object for E2E
+│   │   └── Samples.page.js                # Samples page object
+│   └── util.js                            # Test utilities
+├── demo/                                   # Demo app
+├── ai-docs/
+│   ├── AGENTS.md                          # Usage, API, examples
+│   └── ARCHITECTURE.md                    # This file
+├── jest.config.js                          # Jest configuration
+└── package.json                            # Package manifest
+```
+
 ### Component Table
 
 
@@ -85,7 +114,7 @@ graph TB
 
 | Area              | SDK Methods                                                                  | Adapter Methods                                                                   | Control Class             |
 | ----------------- | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------- |
-| Initialization    | `Webex.init()`, `device.register()`, `mercury.connect()`                     | `sdkAdapter.connect()` → calls `meetings.register()` + `syncMeetings()`           | —                         |
+| Initialization    | `new Webex()`, `device.register()`, `mercury.connect()`                      | `sdkAdapter.connect()` → calls `meetings.register()` + `syncMeetings()`           | —                         |
 | Meeting creation  | `webex.meetings.create(destination)`                                         | `adapter.meetingsAdapter.createMeeting(dest)`                                     | —                         |
 | Join              | `sdkMeeting.verifyPassword()`, `sdkMeeting.join({ pin, moderator, alias })`  | `adapter.meetingsAdapter.joinMeeting(ID, options)`                                | `JoinControl`             |
 | Leave             | `sdkMeeting.leave()`                                                         | `adapter.meetingsAdapter.leaveMeeting(ID)` (also calls `removeMedia`)             | `ExitControl`             |
@@ -112,7 +141,7 @@ graph TB
 User clicks control button
   → Component (WebexMeetingControl)
     → useMeetingControl hook
-      → Control.action({ meetingID })
+      → Control.action(meetingID)
         → sdk-component-adapter method
           → webex-js-sdk meeting method
             → Backend (REST/WebSocket)
@@ -143,12 +172,12 @@ This is the real shape emitted by `adapter.meetingsAdapter.getMeeting(ID)`:
 
   localAudio: {
     stream:            MediaStream | null
-    permission:        string | null          // 'ALLOWED' | 'ERROR' | null
+    permission:        string | null          // 'ASKING' | 'ALLOWED' | 'ERROR' | null
     muting:            boolean | undefined    // true = muting in progress, false = unmuting, undefined = idle
   }
   localVideo: {
     stream:            MediaStream | null
-    permission:        string | null
+    permission:        string | null          // 'ASKING' | 'ALLOWED' | 'ERROR' | null
     muting:            boolean | undefined
     error:             string | null          // e.g. 'Video not supported on iOS 15.1'
   }
@@ -195,7 +224,7 @@ sequenceDiagram
     participant Backend
 
     User->>Component: Mount widget with accessToken
-    Component->>SDK: Webex.init({ credentials: { access_token } })
+    Component->>SDK: new Webex({ credentials: { access_token } })
     Component->>Adapter: new WebexSDKAdapter(webex)
     Adapter->>Adapter: Create MeetingsSDKAdapter(webex) with controls
 
@@ -258,7 +287,7 @@ sequenceDiagram
     participant Backend
 
     User->>Component: Click "Join Meeting" button
-    Component->>Adapter: action({ meetingID, meetingPasswordOrPin, participantName })
+    Component->>Adapter: action(meetingID)
     Adapter->>Adapter: joinMeeting(ID, { password, name })
 
     alt Password Required
@@ -300,7 +329,7 @@ sequenceDiagram
     Note over User: Audio is currently UNMUTED
 
     User->>Component: Click microphone button
-    Component->>Adapter: action({ meetingID })
+    Component->>Adapter: action(meetingID)
     Adapter->>Adapter: handleLocalAudio(ID)
     Adapter->>Adapter: Set localAudio.muting = true
     Adapter->>SDK: sdkMeeting.muteAudio()
@@ -314,7 +343,7 @@ sequenceDiagram
     Note over User: Audio is now MUTED — click again to unmute
 
     User->>Component: Click microphone button
-    Component->>Adapter: action({ meetingID })
+    Component->>Adapter: action(meetingID)
     Adapter->>Adapter: handleLocalAudio(ID)
     Adapter->>Adapter: Set localAudio.muting = false
     Adapter->>SDK: sdkMeeting.unmuteAudio()
@@ -343,7 +372,7 @@ sequenceDiagram
     Note over User: Video is currently ON
 
     User->>Component: Click camera button
-    Component->>Adapter: action({ meetingID })
+    Component->>Adapter: action(meetingID)
     Adapter->>Adapter: handleLocalVideo(ID)
     Adapter->>Adapter: Set localVideo.muting = true
     Adapter->>SDK: sdkMeeting.muteVideo()
@@ -356,7 +385,7 @@ sequenceDiagram
     Note over User: Video is now OFF — click again to start
 
     User->>Component: Click camera button
-    Component->>Adapter: action({ meetingID })
+    Component->>Adapter: action(meetingID)
     Adapter->>Adapter: handleLocalVideo(ID)
     Adapter->>Adapter: Set localVideo.muting = false
     Adapter->>SDK: sdkMeeting.unmuteVideo()
@@ -382,7 +411,7 @@ sequenceDiagram
     participant Backend
 
     User->>Component: Click share screen button
-    Component->>Adapter: action({ meetingID })
+    Component->>Adapter: action(meetingID)
     Adapter->>Adapter: handleLocalShare(ID)
     Adapter->>SDK: sdkMeeting.getMediaStreams({ sendShare: true })
     SDK->>User: Browser screen picker dialog (getDisplayMedia)
@@ -398,7 +427,7 @@ sequenceDiagram
     Note over User: Sharing active — click again to stop
 
     User->>Component: Click stop sharing
-    Component->>Adapter: action({ meetingID })
+    Component->>Adapter: action(meetingID)
     Adapter->>Adapter: handleLocalShare(ID)
     Adapter->>Adapter: stopStream(localShare.stream)
     Adapter->>SDK: sdkMeeting.updateShare({ sendShare: false, receiveShare: true })
@@ -424,7 +453,7 @@ sequenceDiagram
     Note over Adapter: Client-side only — no Backend call
 
     User->>Component: Click roster button
-    Component->>Adapter: action({ meetingID })
+    Component->>Adapter: action(meetingID)
     Adapter->>Adapter: toggleRoster(ID)
     Adapter->>Adapter: meeting.showRoster = !meeting.showRoster
     Adapter->>Adapter: Emit observable { showRoster: true }
@@ -432,7 +461,7 @@ sequenceDiagram
     Component->>Component: Render WebexMemberRoster panel
 
     User->>Component: Click roster button (close)
-    Component->>Adapter: action({ meetingID })
+    Component->>Adapter: action(meetingID)
     Adapter->>Adapter: toggleRoster(ID)
     Adapter->>Adapter: Emit { showRoster: false }
     Adapter-->>Component: Observable emits
@@ -453,7 +482,7 @@ sequenceDiagram
     participant SDK as webex-js-sdk
 
     User->>Component: Click settings button
-    Component->>Adapter: SettingsControl.action({ meetingID })
+    Component->>Adapter: SettingsControl.action(meetingID)
     Adapter->>Adapter: toggleSettings(ID)
     Adapter->>Adapter: Clone current streams to settings.preview
     Adapter->>Adapter: Emit { settings.visible: true }
@@ -463,7 +492,7 @@ sequenceDiagram
     Note over User: User selects a different camera
 
     User->>Component: Select new camera from dropdown
-    Component->>Adapter: SwitchCameraControl.action({ meetingID, cameraId })
+    Component->>Adapter: SwitchCameraControl.action(meetingID, cameraId)
     Adapter->>Adapter: switchCamera(ID, cameraId)
     Adapter->>SDK: sdkMeeting.getMediaStreams({ sendVideo: true }, { video: { deviceId } })
     SDK->>SDK: getUserMedia with new deviceId
@@ -472,7 +501,7 @@ sequenceDiagram
     Adapter-->>Component: Settings preview re-renders with new camera
 
     User->>Component: Close settings modal
-    Component->>Adapter: SettingsControl.action({ meetingID })
+    Component->>Adapter: SettingsControl.action(meetingID)
     Adapter->>Adapter: toggleSettings(ID)
     Adapter->>Adapter: Replace meeting streams with preview streams
 
@@ -500,7 +529,7 @@ sequenceDiagram
     participant Backend
 
     User->>Component: Click leave meeting button
-    Component->>Adapter: action({ meetingID })
+    Component->>Adapter: action(meetingID)
     Adapter->>Adapter: leaveMeeting(ID)
     Adapter->>Adapter: removeMedia(ID) — stop all local streams
     Adapter->>SDK: sdkMeeting.leave()
@@ -534,7 +563,7 @@ sequenceDiagram
     Component->>Component: Open WebexMeetingGuestAuthentication modal
 
     User->>Component: Enter password, click "Join as Guest"
-    Component->>Adapter: action({ meetingID, meetingPasswordOrPin: password })
+    Component->>Adapter: action(meetingID)
     Adapter->>SDK: joinMeeting(ID, { password })
     SDK->>Backend: Verify password and join
     Backend-->>SDK: Result
@@ -554,7 +583,7 @@ sequenceDiagram
     User->>Component: Click "I'm the host"
     Component->>Component: Switch to WebexMeetingHostAuthentication modal
     User->>Component: Enter host pin, click "Start Meeting"
-    Component->>Adapter: action({ meetingID, meetingPasswordOrPin: hostPin })
+    Component->>Adapter: action(meetingID)
     Adapter->>SDK: joinMeeting(ID, { hostKey: hostPin })
 ```
 
@@ -743,13 +772,13 @@ Renders as a CANCEL type button.
 
 - React strict mode causing double initialization
 - Missing cleanup on prop changes
-- Missing dependency array in useEffect
+- `componentWillUnmount` not disconnecting adapter or cleaning up observers
 
 **Solutions:**
 
-- Use a ref to track initialization state
-- Implement proper cleanup in useEffect return
-- Guard against re-initialization
+- Use an instance property to track initialization state
+- Implement proper cleanup in `componentWillUnmount`
+- Guard against re-initialization in `componentDidMount`
 
 ---
 
@@ -772,6 +801,12 @@ Renders as a CANCEL type button.
 ## Related Documentation
 
 - [Agent Documentation](./AGENTS.md) - Widget usage and API reference
+- [React Patterns](../../../ai-docs/patterns/react-patterns.md) - Component patterns
+- [TypeScript Patterns](../../../ai-docs/patterns/typescript-patterns.md) - Type safety and naming conventions
+- [Web Component Patterns](../../../ai-docs/patterns/web-component-patterns.md) - r2wc patterns
+- [Testing Patterns](../../../ai-docs/patterns/testing-patterns.md) - Jest, RTL, Playwright guidelines
 
 ---
+
+_Last Updated: 2026-03-12_
 

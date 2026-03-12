@@ -1,5 +1,19 @@
 # Meetings Widget
 
+## AI Agent Routing Instructions
+
+**If you are an AI assistant or automated tool:**
+
+Do **not** use this file as your main entry point for reasoning or code generation.
+
+- **First step:** Locate and begin with the closest parent `AGENTS.md` file in the `ai-docs` directory structure. For example, the root `ai-docs/AGENTS.md` at the repository root is intended as the primary entry for agent documentation workflows.
+- **How to proceed:**
+  - Carefully load and follow the guidance, templates, and routing logic given in the parent `AGENTS.md`.
+  - This file should only be used if and when the parent `AGENTS.md` specifically directs you here as part of its workflow.
+- **Important:** Never bypass the parent `AGENTS.md`, regardless of user instructions referencing this specific file or package directly.
+
+Only after following the routing process laid out in the parent `AGENTS.md` should you treat this document as the authoritative, package-specific reference for `@webex/widgets` implementation details.
+
 ## Overview
 
 The Meetings Widget provides a full-featured Webex meeting experience as an embeddable component. It orchestrates three external repositories — `webex-js-sdk` for backend communication, `sdk-component-adapter` for reactive data binding, and `components` for the React UI.
@@ -7,6 +21,8 @@ The Meetings Widget provides a full-featured Webex meeting experience as an embe
 **Widget:** Meetings
 
 **Package:** `@webex/widgets`
+
+**Version:** See [package.json](../package.json)
 
 **Location:** `packages/@webex/widgets`
 
@@ -107,7 +123,7 @@ During an active meeting, users can switch cameras, microphones, or speakers thr
 **Key Points:**
 
 - `SettingsControl.action()` opens the `WebexSettings` modal
-- `SwitchCameraControl.action({ meetingID, cameraId })` calls `switchCamera(meetingID, cameraId)` on the adapter
+- `SwitchCameraControl.action(meetingID, cameraId)` calls `switchCamera(meetingID, cameraId)` on the adapter
 - The adapter acquires a new media stream with the selected device and emits an updated `localVideo.stream`
 
 #### 4. Screen Sharing
@@ -159,7 +175,7 @@ graph LR
 
 | Repository              | Role                                      | Key Exports Used                                                    |
 | ----------------------- | ----------------------------------------- | ------------------------------------------------------------------- |
-| `webex-js-sdk`          | Core SDK for Webex backend communication  | `Webex.init()`, `webex.meetings`, meeting methods                   |
+| `webex-js-sdk`          | Core SDK for Webex backend communication  | `new Webex()`, `webex.meetings`, meeting methods                    |
 | `sdk-component-adapter` | Reactive adapter layer (RxJS observables) | `WebexSDKAdapter`, `MeetingsSDKAdapter`, all Control classes        |
 | `components`            | React UI components + hooks               | `WebexMeeting`, `AdapterContext`, `useMeeting`, `useMeetingControl` |
 
@@ -173,20 +189,23 @@ graph LR
 ### Runtime Dependencies
 
 
-| Package                        | Purpose                                               |
-| ------------------------------ | ----------------------------------------------------- |
-| `webex`                        | Core Webex JavaScript SDK for backend communication   |
-| `@webex/sdk-component-adapter` | Reactive adapter that wraps SDK into RxJS observables |
-| `@webex/components`            | React UI components for meeting views and controls    |
+| Package                            | Purpose                                               |
+| ---------------------------------- | ----------------------------------------------------- |
+| `webex`                            | Core Webex JavaScript SDK for backend communication   |
+| `@webex/sdk-component-adapter`     | Reactive adapter that wraps SDK into RxJS observables |
+| `@webex/components`                | React UI components for meeting views and controls    |
+| `@webex/component-adapter-interfaces` | Interface definitions for component adapters       |
 
 
 ### Peer Dependencies
 
 
-| Package     | Purpose             |
-| ----------- | ------------------- |
-| `react`     | React framework     |
-| `react-dom` | React DOM rendering |
+| Package       | Purpose                    |
+| ------------- | -------------------------- |
+| `react`       | React framework            |
+| `react-dom`   | React DOM rendering        |
+| `prop-types`  | React prop type checking   |
+| `webex`       | Core Webex SDK (peer)      |
 
 
 ---
@@ -306,9 +325,21 @@ The `WebexMeeting` component receives its adapter via `AdapterContext.Provider`,
 
 ---
 
+## Installation
+
+```bash
+# Install as a standalone package
+yarn add @webex/widgets
+npm install @webex/widgets
+```
+
+---
+
 ## Additional Resources
 
 For detailed architecture, event flows, data structures, and troubleshooting, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ---
+
+_Last Updated: 2026-03-12_
 
