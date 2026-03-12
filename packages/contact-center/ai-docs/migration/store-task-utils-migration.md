@@ -14,9 +14,9 @@ The store's `task-utils.ts` contains 16 exported utility functions that inspect 
 |--------|------|--------|
 | Local `TASK_EVENTS` enum | `store/src/store.types.ts` | SDK exports this — delete local copy (covered in detail in [store-event-wiring-migration.md](./store-event-wiring-migration.md)) |
 | `ConsultStatus` enum | `store/src/store.types.ts` | All consumers (`getConsultStatus`, `getControlsVisibility`) are being removed |
-| `TASK_STATE_CONSULT` | `store/src/constants.ts` | SDK handles via `TaskState.CONSULT_INITIATING` |
-| `TASK_STATE_CONSULTING` | `store/src/constants.ts` | SDK handles via `TaskState.CONSULTING` |
-| `TASK_STATE_CONSULT_COMPLETED` | `store/src/constants.ts` | SDK handles via context |
+| `TASK_STATE_CONSULT` | `store/src/constants.ts` | SDK `TaskState.CONSULT_INITIATING` — **delete ONLY AFTER rewriting `findHoldStatus`** (see ordering note below) |
+| `TASK_STATE_CONSULTING` | `store/src/constants.ts` | SDK `TaskState.CONSULTING` — **same ordering constraint** |
+| `TASK_STATE_CONSULT_COMPLETED` | `store/src/constants.ts` | SDK handles via context — **same ordering constraint** |
 | `INTERACTION_STATE_WRAPUP` | `store/src/constants.ts` | SDK handles via `TaskState.WRAPPING_UP` |
 | `INTERACTION_STATE_POST_CALL` | `store/src/constants.ts` | SDK handles via `TaskState.POST_CALL` |
 | `INTERACTION_STATE_CONNECTED` | `store/src/constants.ts` | SDK handles via `TaskState.CONNECTED` |
@@ -36,6 +36,15 @@ The store's `task-utils.ts` contains 16 exported utility functions that inspect 
 | `SUPERVISOR` | `store/src/constants.ts` | Used by `EXCLUDED_PARTICIPANT_TYPES` |
 | `VVA` | `store/src/constants.ts` | Used by `EXCLUDED_PARTICIPANT_TYPES` |
 | `EXCLUDED_PARTICIPANT_TYPES` | `store/src/constants.ts` | Used by `getConferenceParticipants` (KEEP) for participant filtering |
+
+## Ordering Constraint: Consult State Constants
+
+`findHoldStatus` (KEEP) depends on `TASK_STATE_CONSULT`, `TASK_STATE_CONSULTING`, and `TASK_STATE_CONSULT_COMPLETED` via:
+- **Direct usage:** Line 328 — `mType === TASK_STATE_CONSULT`
+- **Via `isConsultOnHoldMPC`:** Line 303 — `[TASK_STATE_CONSULT, TASK_STATE_CONSULTING].includes(getConsultMPCState(...))`
+- **Via `getConsultMPCState`:** Line 321 — `[TASK_STATE_CONSULT_COMPLETED].includes(getConsultMPCState(...))`
+
+**Do NOT delete these 3 constants until `findHoldStatus` and `isConsultOnHoldMPC` are rewritten** to use SDK `TaskState` equivalents. Deleting them first will break compilation.
 
 ## Gotcha: `TaskState.CONSULT_INITIATING` vs `CONSULTING`
 

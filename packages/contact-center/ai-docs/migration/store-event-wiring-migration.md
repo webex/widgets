@@ -201,9 +201,8 @@ registerTaskEventListeners(task: ITask) {
   const interactionId = task.data.interactionId;
 
   // NEW: Subscribe to SDK-computed UI control updates
-  task.on(TASK_EVENTS.TASK_UI_CONTROLS_UPDATED, (uiControls) => {
-    this.fireTaskCallbacks(TASK_EVENTS.TASK_UI_CONTROLS_UPDATED, interactionId, uiControls);
-  });
+  // Use a named method (not inline arrow) so handleTaskRemove can .off() the same reference
+  task.on(TASK_EVENTS.TASK_UI_CONTROLS_UPDATED, this.handleUIControlsUpdated);
 
   // KEEP: Task lifecycle events that need store-level management
   task.on(TASK_EVENTS.TASK_END, this.handleTaskEnd);
@@ -221,10 +220,11 @@ registerTaskEventListeners(task: ITask) {
   task.on(TASK_EVENTS.TASK_CONSULT_QUEUE_CANCELLED, this.handleConsultQueueCancelled);
 
   // KEEP: Conference state management (remove refreshTaskList, keep consult state reset)
-  task.on(TASK_EVENTS.TASK_PARTICIPANT_JOINED, this.handleConferenceStarted);
-  task.on(TASK_EVENTS.TASK_CONFERENCE_STARTED, this.handleConferenceStarted);
-  task.on(TASK_EVENTS.TASK_CONFERENCE_ENDED, this.handleConferenceEnded);
-  task.on(TASK_EVENTS.TASK_PARTICIPANT_LEFT, this.handleConferenceEnded);
+  // Pass event type so handler fires only the correct callback (not both)
+  task.on(TASK_EVENTS.TASK_PARTICIPANT_JOINED, () => this.handleConferenceStarted(TASK_EVENTS.TASK_PARTICIPANT_JOINED));
+  task.on(TASK_EVENTS.TASK_CONFERENCE_STARTED, () => this.handleConferenceStarted(TASK_EVENTS.TASK_CONFERENCE_STARTED));
+  task.on(TASK_EVENTS.TASK_CONFERENCE_ENDED, () => this.handleConferenceEnded(TASK_EVENTS.TASK_CONFERENCE_ENDED));
+  task.on(TASK_EVENTS.TASK_PARTICIPANT_LEFT, () => this.handleConferenceEnded(TASK_EVENTS.TASK_PARTICIPANT_LEFT));
 
   // KEEP: Auto-answer sets decline button state
   task.on(TASK_EVENTS.TASK_AUTO_ANSWERED, this.handleAutoAnswer);
@@ -288,7 +288,19 @@ task.on(TASK_EVENTS.TASK_RESUME, () => {
 });
 ```
 
-### Pattern 3: Conference Handler Simplification
+### Pattern 3: New `handleUIControlsUpdated` Method
+
+```typescript
+// NEW method — must be a class property (not inline arrow) so .off() can detach it
+handleUIControlsUpdated = (uiControls: TaskUIControls) => {
+  const interactionId = this.store.currentTask?.data.interactionId;
+  if (interactionId) {
+    this.fireTaskCallbacks(TASK_EVENTS.TASK_UI_CONTROLS_UPDATED, interactionId, uiControls);
+  }
+};
+```
+
+### Pattern 4: Conference Handler Simplification
 
 #### Before
 ```typescript
@@ -311,24 +323,26 @@ handleConferenceEnded = () => {
 // SDK state machine handles CONFERENCING state transitions.
 // task.data and task.uiControls already reflect conference state.
 // Keep consult state reset in handleConferenceStarted; remove refreshTaskList() from both.
+//
+// IMPORTANT: Do NOT fire both TASK_CONFERENCE_STARTED and TASK_PARTICIPANT_JOINED from one handler.
+// Both events are wired to this same handler, so one incoming event would produce two different
+// callback notifications. Instead, accept the event type as a parameter.
 
-handleConferenceStarted = () => {
+handleConferenceStarted = (eventType: TASK_EVENTS) => {
   runInAction(() => {
     this.setIsQueueConsultInProgress(false);
     this.setCurrentConsultQueueId(null);
     this.setConsultStartTimeStamp(null);
   });
-  this.fireTaskCallbacks(TASK_EVENTS.TASK_CONFERENCE_STARTED, interactionId);
-  this.fireTaskCallbacks(TASK_EVENTS.TASK_PARTICIPANT_JOINED, interactionId);
+  this.fireTaskCallbacks(eventType, interactionId);
 };
 
-handleConferenceEnded = () => {
-  this.fireTaskCallbacks(TASK_EVENTS.TASK_CONFERENCE_ENDED, interactionId);
-  this.fireTaskCallbacks(TASK_EVENTS.TASK_PARTICIPANT_LEFT, interactionId);
+handleConferenceEnded = (eventType: TASK_EVENTS) => {
+  this.fireTaskCallbacks(eventType, interactionId);
 };
 ```
 
-### Pattern 4: `handleTaskRemove()` — Update Cleanup
+### Pattern 5: `handleTaskRemove()` — Update Cleanup
 
 #### Before
 ```typescript
