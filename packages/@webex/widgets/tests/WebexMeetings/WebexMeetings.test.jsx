@@ -41,6 +41,7 @@ const Webex = require('webex');
 const WebexSDKAdapter = require('@webex/sdk-component-adapter');
 
 const WebexMeetingsWidget = require('../../src/widgets/WebexMeetings/WebexMeetings').default;
+const adapterFactory = capturedAdapterFactory;
 
 class TestErrorBoundary extends Component {
   constructor(props) {
@@ -80,6 +81,7 @@ const baseProps = {
 
 describe('WebexMeetingsWidget', () => {
   beforeEach(() => {
+    capturedAdapterFactory = undefined;
     jest.clearAllMocks();
     jest.spyOn(console, 'error').mockImplementation(() => {});
     jest.useFakeTimers();
@@ -282,22 +284,31 @@ describe('WebexMeetingsWidget', () => {
       joinButton.focus = jest.fn();
       wrapper.appendChild(joinButton);
 
+      const originalActiveElement = Object.getOwnPropertyDescriptor(document, 'activeElement');
       Object.defineProperty(document, 'activeElement', {
         value: mediaContainer,
         writable: true,
         configurable: true,
       });
 
-      const tabEvent = new KeyboardEvent('keydown', {
-        key: 'Tab',
-        code: 'Tab',
-        bubbles: true,
-        cancelable: true,
-      });
-      Object.defineProperty(tabEvent, 'currentTarget', {value: mediaContainer});
-      mediaContainer.dispatchEvent(tabEvent);
+      try {
+        const tabEvent = new KeyboardEvent('keydown', {
+          key: 'Tab',
+          code: 'Tab',
+          bubbles: true,
+          cancelable: true,
+        });
+        Object.defineProperty(tabEvent, 'currentTarget', {value: mediaContainer});
+        mediaContainer.dispatchEvent(tabEvent);
 
-      expect(joinButton.focus).toHaveBeenCalled();
+        expect(joinButton.focus).toHaveBeenCalled();
+      } finally {
+        if (originalActiveElement) {
+          Object.defineProperty(document, 'activeElement', originalActiveElement);
+        } else {
+          delete document.activeElement;
+        }
+      }
     });
 
     it('Shift+Tab on media container focuses widget container', () => {
@@ -315,23 +326,32 @@ describe('WebexMeetingsWidget', () => {
 
       wrapper.focus = jest.fn();
 
+      const originalActiveElement = Object.getOwnPropertyDescriptor(document, 'activeElement');
       Object.defineProperty(document, 'activeElement', {
         value: mediaContainer,
         writable: true,
         configurable: true,
       });
 
-      const shiftTabEvent = new KeyboardEvent('keydown', {
-        key: 'Tab',
-        code: 'Tab',
-        shiftKey: true,
-        bubbles: true,
-        cancelable: true,
-      });
-      Object.defineProperty(shiftTabEvent, 'currentTarget', {value: mediaContainer});
-      mediaContainer.dispatchEvent(shiftTabEvent);
+      try {
+        const shiftTabEvent = new KeyboardEvent('keydown', {
+          key: 'Tab',
+          code: 'Tab',
+          shiftKey: true,
+          bubbles: true,
+          cancelable: true,
+        });
+        Object.defineProperty(shiftTabEvent, 'currentTarget', {value: mediaContainer});
+        mediaContainer.dispatchEvent(shiftTabEvent);
 
-      expect(wrapper.focus).toHaveBeenCalled();
+        expect(wrapper.focus).toHaveBeenCalled();
+      } finally {
+        if (originalActiveElement) {
+          Object.defineProperty(document, 'activeElement', originalActiveElement);
+        } else {
+          delete document.activeElement;
+        }
+      }
     });
 
     it('content div focus polls for inner meeting media container and focuses it', () => {
@@ -434,33 +454,35 @@ describe('WebexMeetingsWidget', () => {
         disconnect() {}
       };
 
-      const {container} = render(<WebexMeetingsWidget {...baseProps} />);
-      const wrapper = container.firstChild;
+      try {
+        const {container} = render(<WebexMeetingsWidget {...baseProps} />);
+        const wrapper = container.firstChild;
 
-      const controlBar = document.createElement('div');
-      controlBar.classList.add('wxc-meeting-control-bar__controls');
+        const controlBar = document.createElement('div');
+        controlBar.classList.add('wxc-meeting-control-bar__controls');
 
-      const btn1 = document.createElement('button');
-      controlBar.appendChild(btn1);
-      wrapper.appendChild(controlBar);
+        const btn1 = document.createElement('button');
+        controlBar.appendChild(btn1);
+        wrapper.appendChild(controlBar);
 
-      act(() => {
-        jest.advanceTimersByTime(700);
-      });
+        act(() => {
+          jest.advanceTimersByTime(700);
+        });
 
-      expect(btn1.onkeydown).toBeTruthy();
+        expect(btn1.onkeydown).toBeTruthy();
 
-      const newBtn = document.createElement('button');
-      newBtn.focus = jest.fn();
-      controlBar.appendChild(newBtn);
+        const newBtn = document.createElement('button');
+        newBtn.focus = jest.fn();
+        controlBar.appendChild(newBtn);
 
-      act(() => {
-        observerCallback();
-      });
+        act(() => {
+          observerCallback();
+        });
 
-      expect(newBtn.onkeydown).toBeTruthy();
-
-      window.MutationObserver = OriginalMutationObserver;
+        expect(newBtn.onkeydown).toBeTruthy();
+      } finally {
+        window.MutationObserver = OriginalMutationObserver;
+      }
     });
   });
 
@@ -479,19 +501,21 @@ describe('WebexMeetingsWidget', () => {
         }
       };
 
-      const {unmount} = render(<WebexMeetingsWidget {...baseProps} />);
+      try {
+        const {unmount} = render(<WebexMeetingsWidget {...baseProps} />);
 
-      unmount();
+        unmount();
 
-      expect(disconnectSpy).toHaveBeenCalled();
-
-      window.MutationObserver = OriginalMutationObserver;
+        expect(disconnectSpy).toHaveBeenCalled();
+      } finally {
+        window.MutationObserver = OriginalMutationObserver;
+      }
     });
   });
 
   describe('Adapter Factory', () => {
     it('creates Webex with correct access_token', () => {
-      capturedAdapterFactory({accessToken: 'my-token', fedramp: false});
+      adapterFactory({accessToken: 'my-token', fedramp: false});
 
       expect(Webex).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -501,7 +525,7 @@ describe('WebexMeetingsWidget', () => {
     });
 
     it('passes fedramp config', () => {
-      capturedAdapterFactory({accessToken: 'token', fedramp: true});
+      adapterFactory({accessToken: 'token', fedramp: true});
 
       expect(Webex).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -511,7 +535,7 @@ describe('WebexMeetingsWidget', () => {
     });
 
     it('passes meeting experimental config', () => {
-      capturedAdapterFactory({accessToken: 'token', fedramp: false});
+      adapterFactory({accessToken: 'token', fedramp: false});
 
       expect(Webex).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -528,7 +552,7 @@ describe('WebexMeetingsWidget', () => {
     });
 
     it('passes appVersion from __appVersion__ global', () => {
-      capturedAdapterFactory({accessToken: 'token', fedramp: false});
+      adapterFactory({accessToken: 'token', fedramp: false});
 
       expect(Webex).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -538,7 +562,7 @@ describe('WebexMeetingsWidget', () => {
     });
 
     it('creates WebexSDKAdapter from Webex instance', () => {
-      capturedAdapterFactory({accessToken: 'token', fedramp: false});
+      adapterFactory({accessToken: 'token', fedramp: false});
 
       expect(WebexSDKAdapter).toHaveBeenCalledTimes(1);
       const webexInstance = Webex.mock.results[Webex.mock.results.length - 1].value;
@@ -546,7 +570,7 @@ describe('WebexMeetingsWidget', () => {
     });
 
     it('uses dev appName when NODE_ENV is not production', () => {
-      capturedAdapterFactory({accessToken: 'token', fedramp: false});
+      adapterFactory({accessToken: 'token', fedramp: false});
 
       expect(Webex).toHaveBeenCalledWith(
         expect.objectContaining({
