@@ -196,6 +196,36 @@ const controls = currentTask?.uiControls ?? getDefaultUIControls();
 // All 17 controls come pre-computed from SDK. Zero store util calls needed.
 ```
 
+> **CRITICAL: Feature-Flag Gating Overlay**
+>
+> The old `getControlsVisibility` applied integrator-provided widget props (`featureFlags`
+> and `conferenceEnabled`) that the SDK has **no knowledge of**. SDK-computed `task.uiControls`
+> reflects task-state-only visibility. The widget layer **must** still overlay these gates on
+> top of the SDK controls to honour integrator configuration.
+>
+> | Widget Prop | Controls Affected | Gate Logic |
+> |-------------|-------------------|------------|
+> | `featureFlags.webRtcEnabled` | accept, decline, muteUnmute, conference, muteUnmuteConsult, + telephony support (holdResume, endConsult) | Hide control when `webRtcEnabled` is `false` and channel is voice in browser |
+> | `featureFlags.isEndCallEnabled` | end | Hide end button when `isEndCallEnabled` is `false` (phone device only) |
+> | `featureFlags.isEndConsultEnabled` | endConsult | Hide end-consult when `isEndConsultEnabled` is `false` |
+> | `conferenceEnabled` (widget prop) | conference, exitConference, mergeConference, consultTransferConsult | Hide all conference-related controls when `conferenceEnabled` is `false` |
+>
+> **Implementation pattern — apply after reading SDK controls:**
+> ```typescript
+> const sdkControls = currentTask?.uiControls ?? getDefaultUIControls();
+>
+> // Overlay integrator feature-flag gates
+> const controls = applyFeatureGates(sdkControls, {
+>   deviceType,
+>   featureFlags,       // { webRtcEnabled, isEndCallEnabled, isEndConsultEnabled }
+>   conferenceEnabled,
+>   channelType,        // voice vs digital — needed for webRtc gate
+> });
+> ```
+> The `applyFeatureGates` helper is a thin function that sets `isVisible = false`
+> on any control whose integrator gate is off. It does **not** re-derive state; it only
+> narrows visibility that the SDK already computed.
+
 ### Before/After: `findHoldStatus` — RETAINED (not removed)
 
 #### Before (used in controls computation and task status)
@@ -309,6 +339,7 @@ export function getTaskStatus(task: ITask, agentId: string): string {
 - [ ] 9 deleted constants have no remaining consumers
 - [ ] `findHoldTimestamp` dual-signature (task vs interaction) not confused during migration
 - [ ] `task-util.ts` `getControlsVisibility` + 22 visibility functions fully deleted
+- [ ] Feature-flag overlay (`applyFeatureGates`) preserves `webRtcEnabled`, `isEndCallEnabled`, `isEndConsultEnabled`, and `conferenceEnabled` gating on top of SDK controls
 
 ---
 
