@@ -461,6 +461,7 @@ handleTaskRemove = (taskToRemove: ITask) => {
 | `store/src/storeEventsWrapper.ts` | Refactor `registerTaskEventListeners` (see definitive table), update `handleTaskRemove` (fix listener mismatches + add `TASK_UI_CONTROLS_UPDATED`), simplify handlers (remove `refreshTaskList()` from all except `TASK_WRAPPEDUP`), wire `handleConsultEnd` to `TASK_CONSULT_END` |
 | `store/src/store.ts` | No changes expected (observables stay) |
 | `store/src/store.types.ts` | Delete local `TASK_EVENTS` enum; import from SDK (which includes `TASK_UI_CONTROLS_UPDATED`) |
+| **Task-layer consumers of `TASK_EVENTS`** | **Must be updated in the same step** so that removing the store’s local enum does not break the build. `task/src/helper.ts` imports `TASK_EVENTS` from `@webex/cc-store` and uses legacy names: `AGENT_WRAPPEDUP`, `CONTACT_RECORDING_PAUSED`, `CONTACT_RECORDING_RESUMED` (and `TASK_RECORDING_PAUSED` / `TASK_RECORDING_RESUMED` in setTaskCallback). Replace with SDK event names: `TASK_WRAPPEDUP`, `TASK_RECORDING_PAUSED`, `TASK_RECORDING_RESUMED` in both `setTaskCallback` and `removeTaskCallback`. Either update `task/src/helper.ts` (and any other task files using `TASK_EVENTS`) in this PR or sequence the migration so store switches to SDK enum only after task package is updated. |
 | `store/tests/*` | Update tests for renamed events, new `TASK_UI_CONTROLS_UPDATED` handler, simplified handlers |
 
 ---

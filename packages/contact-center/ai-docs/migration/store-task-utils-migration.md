@@ -283,31 +283,40 @@ export function getTaskStatus(task: ITask, agentId: string): string {
 // getConsultStatus() calls getTaskStatus() and maps the string to ConsultStatus enum values
 ```
 
-#### After (rewritten to use SDK controls)
+#### After (rewritten to use SDK controls — preserve return contract)
 ```typescript
 // store/task-utils.ts — rewritten to use task.uiControls
-// NOTE: getConsultStatus() is deleted, so getTaskStatus() no longer needs to produce
-// values that feed into ConsultStatus. It becomes a pure display-status function.
+// CONTRACT: getTaskStatus is barrel-exported from @webex/cc-store. Downstream consumers
+// may compare return values to INTERACTION_STATE_* / TASK_STATE_* constants. Preserve the
+// existing machine-readable return values; do NOT switch to display labels here.
+// Display labels ('Wrap Up', 'Conference', etc.) are a UI concern — implement via a
+// separate helper or mapping layer if needed.
 export function getTaskStatus(task: ITask, agentId: string): string {
+  const interaction = task.data.interaction;
   const controls = task.uiControls;
-  if (!controls) return 'Unknown';
+  if (!controls) return interaction?.state ?? '';
+  // EP-DN secondary agent (same as Before)
+  if (isSecondaryEpDnAgent(task)) {
+    if (interaction.state === INTERACTION_STATE_CONFERENCE) return INTERACTION_STATE_CONFERENCE;
+    return TASK_STATE_CONSULTING;
+  }
+  // Wrapup / post-call with consult completed (same as Before)
+  if (
+    (interaction.state === INTERACTION_STATE_WRAPUP || interaction.state === INTERACTION_STATE_POST_CALL) &&
+    interaction.participants[agentId]?.consultState === CONSULT_STATE_COMPLETED
+  ) {
+    return TASK_STATE_CONSULT_COMPLETED;
+  }
 
-  if (controls.wrapup.isVisible) return 'Wrap Up';
-  if (controls.endConsult.isVisible) return 'Consulting';
-  if (controls.exitConference.isVisible) return 'Conference';
-
-  // Do NOT derive held state from controls.hold.isEnabled — hold can be
-  // disabled in consult/transition states even when call is not held.
-  // Use task data instead (agentId needed for participant lookup):
-  if (findHoldStatus(task, 'mainCall', agentId)) return 'Held';
-
-  if (controls.end.isVisible) return 'Connected';
-  if (controls.accept.isVisible) return 'Offered';  // NEW: not in old version
-  return 'Unknown';  // NEW: safe default
+  // Map from uiControls to same constant values as old getConsultMPCState / getTaskStatus
+  if (controls.wrapup.isVisible) return INTERACTION_STATE_WRAPUP;
+  if (controls.endConsult.isVisible) return TASK_STATE_CONSULTING;
+  if (controls.exitConference.isVisible) return INTERACTION_STATE_CONFERENCE;
+  if (findHoldStatus(task, 'mainCall', agentId)) return INTERACTION_STATE_CONNECTED; // held → connected
+  if (controls.end.isVisible) return INTERACTION_STATE_CONNECTED;
+  if (controls.accept.isVisible) return interaction?.state ?? 'new'; // offered
+  return getConsultMPCState(task, agentId); // fallback preserves legacy behaviour
 }
-// NOTE: New states 'Offered' and 'Unknown' are additions not present in old code.
-// EP-DN secondary agent handling and consultState-based wrapup may need review —
-// verify that task.uiControls correctly handles these edge cases in SDK.
 ```
 
 ---
