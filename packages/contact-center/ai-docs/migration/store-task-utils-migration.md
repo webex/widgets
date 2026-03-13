@@ -294,7 +294,23 @@ export function getTaskStatus(task: ITask, agentId: string): string {
 export function getTaskStatus(task: ITask, agentId: string): string {
   const interaction = task.data.interaction;
   const controls = task.uiControls;
-  if (!controls) return interaction?.state ?? '';
+
+  // When uiControls is missing (hydration/race), run full legacy path so EP-DN and
+  // consult-completed derivation are preserved; avoid falling back to raw interaction.state only.
+  if (!controls) {
+    if (isSecondaryEpDnAgent(task)) {
+      if (interaction.state === INTERACTION_STATE_CONFERENCE) return INTERACTION_STATE_CONFERENCE;
+      return TASK_STATE_CONSULTING;
+    }
+    if (
+      (interaction.state === INTERACTION_STATE_WRAPUP || interaction.state === INTERACTION_STATE_POST_CALL) &&
+      interaction.participants[agentId]?.consultState === CONSULT_STATE_COMPLETED
+    ) {
+      return TASK_STATE_CONSULT_COMPLETED;
+    }
+    return getConsultMPCState(task, agentId);
+  }
+
   // EP-DN secondary agent (same as Before)
   if (isSecondaryEpDnAgent(task)) {
     if (interaction.state === INTERACTION_STATE_CONFERENCE) return INTERACTION_STATE_CONFERENCE;
@@ -310,7 +326,9 @@ export function getTaskStatus(task: ITask, agentId: string): string {
 
   // Map from uiControls to same constant values as old getConsultMPCState / getTaskStatus
   if (controls.wrapup.isVisible) return INTERACTION_STATE_WRAPUP;
-  if (controls.endConsult.isVisible) return TASK_STATE_CONSULTING;
+  // endConsult.isVisible is true for both consult-initiating and consulting; use getConsultMPCState
+  // so we return TASK_STATE_CONSULT vs TASK_STATE_CONSULTING correctly (see gotcha in this doc).
+  if (controls.endConsult.isVisible) return getConsultMPCState(task, agentId);
   if (controls.exitConference.isVisible) return INTERACTION_STATE_CONFERENCE;
   if (findHoldStatus(task, 'mainCall', agentId)) return INTERACTION_STATE_CONNECTED; // held → connected
   if (controls.end.isVisible) return INTERACTION_STATE_CONNECTED;
