@@ -225,21 +225,22 @@ export function useCallControl(props: useCallControlProps) {
 
 ## Newly Discovered Items (Deep Scan)
 
-### 1. Pre-existing Bug: Recording Callback Cleanup Mismatch
+### 1. Recording Callback Cleanup — Event Name Alignment (Fixed)
 
 **File:** `task/src/helper.ts`, lines 634-653
 
+**Rule:** Use the same event name in both `setTaskCallback` and `removeTaskCallback` so cleanup matches registration. The store registers with `task.on(event, callback)` and removes with `task.off(event, callback)`; mismatched event names leave listeners attached.
+
 ```typescript
-// SETUP uses TASK_EVENTS:
+// Correct: use TASK_RECORDING_* in BOTH set and remove
 store.setTaskCallback(TASK_EVENTS.TASK_RECORDING_PAUSED, pauseRecordingCallback, interactionId);
 store.setTaskCallback(TASK_EVENTS.TASK_RECORDING_RESUMED, resumeRecordingCallback, interactionId);
-
-// CLEANUP uses CONTACT_RECORDING (different event name!):
-store.removeTaskCallback(TASK_EVENTS.CONTACT_RECORDING_PAUSED, pauseRecordingCallback, interactionId);
-store.removeTaskCallback(TASK_EVENTS.CONTACT_RECORDING_RESUMED, resumeRecordingCallback, interactionId);
+// ...
+store.removeTaskCallback(TASK_EVENTS.TASK_RECORDING_PAUSED, pauseRecordingCallback, interactionId);
+store.removeTaskCallback(TASK_EVENTS.TASK_RECORDING_RESUMED, resumeRecordingCallback, interactionId);
 ```
 
-**Impact:** Callbacks are never properly removed on cleanup. Fix during migration by using consistent event names.
+**Note:** Keep `AGENT_WRAPPEDUP` for wrapup until SDK migration renames to `TASK_WRAPPEDUP`; then align both set and remove to the new name.
 
 ### 2. `controlVisibility` Used as `useMemo` + Timer Effect Dependencies
 
@@ -335,7 +336,7 @@ Widgets do NOT need to provide UIControlConfig. The SDK builds it from:
 - Voice/WebRTC layer → `voiceVariant` (pstn/webrtc)
 - `taskManager.setAgentId()` → `agentId`
 
-This means `deviceType`, `featureFlags`, and `conferenceEnabled` props can be removed from `useCallControlProps`. **Note:** `agentId` must be retained — it is still required by `calculateStateTimerData()` and `calculateConsultTimerData()` to look up the agent's participant record from `interaction.participants`.
+**Retain** `deviceType`, `featureFlags`, and `conferenceEnabled` for the feature-flag overlay (`applyFeatureGates`) applied on top of SDK controls. **Retain** `agentId` — required by `calculateStateTimerData()` and `calculateConsultTimerData()` to look up the agent's participant record from `interaction.participants`.
 
 ### 9. `task:wrapup` Race Condition
 
@@ -380,9 +381,22 @@ export function calculateStateTimerData(
 
 ---
 
+## helper.ts useCallControl — Exact Code Locations
+
+| Area | Lines | What to change |
+|------|-------|----------------|
+| Event registration/cleanup | 634-653 | Use same event names in set and remove (e.g. TASK_RECORDING_* in both). |
+| controlVisibility useMemo | 930-933 | Replace with `controls` from `currentTask.uiControls` + `applyFeatureGates(..., deviceType, featureFlags, conferenceEnabled)`. |
+| toggleMute guard | 704-705 | Change `controlVisibility?.muteUnmute` to `controls?.mute?.isVisible`. |
+| Auto-wrapup effect | 935-968 | Depend on `controls?.wrapup` instead of `controlVisibility?.wrapup`. |
+| State/consult timer effects | 970-984 | Pass `controls` into `calculateStateTimerData` / `calculateConsultTimerData`; update timer-utils to accept `TaskUIControls`. |
+| Return object | 1016 | Return `controls` instead of `controlVisibility`. |
+
+---
+
 ## Migration Gotchas
 
-1. **`UIControlConfig` is built by SDK:** Widgets do NOT provide it. Remove `deviceType`, `featureFlags`, `conferenceEnabled` from `useCallControlProps`. **Retain `agentId`** — timer utils need it for participant lookup.
+1. **`UIControlConfig` is built by SDK:** Widgets do NOT provide it. **Retain** `deviceType`, `featureFlags`, and `conferenceEnabled` in `useCallControlProps` for the feature-flag overlay (`applyFeatureGates`). **Retain `agentId`** — timer utils need it for participant lookup.
 
 2. **`isHeld` derivation:** Hold control can be `VISIBLE_DISABLED` in conference/consulting states without meaning the call is held. Do NOT derive from `controls.hold.isEnabled`. Use `findHoldStatus(task, 'mainCall', agentId)` from task data.
 
