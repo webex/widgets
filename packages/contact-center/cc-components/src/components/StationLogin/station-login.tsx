@@ -330,7 +330,14 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
               </Button>
             )}
             {!isAgentLoggedIn && (
-              <Button onClick={login} disabled={showDNError} data-testid="login-button">
+              <Button
+                onClick={login}
+                disabled={
+                  !selectedTeamId ||
+                  (selectedDeviceType !== DESKTOP && (dialNumberValue.trim().length === 0 || showDNError))
+                }
+                data-testid="login-button"
+              >
                 {StationLoginLabels.SAVE_AND_CONTINUE}
               </Button>
             )}
