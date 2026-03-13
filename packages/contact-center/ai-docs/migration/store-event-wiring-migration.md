@@ -138,7 +138,7 @@ Many events that currently trigger `refreshTaskList()` will no longer need it be
 | 3 | `TASK_REJECT` | `handleTaskReject` | **Keep** | Remove from task list |
 | 4 | `TASK_OUTDIAL_FAILED` | `handleOutdialFailed` | **Keep** | Remove from task list |
 | 5 | `TASK_MEDIA` | `handleTaskMedia` | **Keep** | Browser-only WebRTC setup (conditional registration) |
-| 6 | `TASK_UI_CONTROLS_UPDATED` | `handleUIControlsUpdated` | **Add new** | Fire callbacks to trigger widget re-renders |
+| 6 | `TASK_UI_CONTROLS_UPDATED` | `bound.uiControlsUpdated` (per-task; see Pattern 1 & 3) | **Add new** | Fire callbacks to trigger widget re-renders. Do **not** use a class-level handler — it would resolve the wrong `interactionId` in multi-task scenarios. |
 | 7 | `TASK_WRAPPEDUP` | `handleWrappedup` | **Keep + rename** | Was `AGENT_WRAPPEDUP`. Keep `refreshTaskList()` — task must be removed from list after wrapup. Fire callback. |
 | 8 | `TASK_CONSULT_END` | `handleConsultEnd` | **Fix wiring** | Wire the existing (currently dead) `handleConsultEnd` method. Resets `isQueueConsultInProgress`, `currentConsultQueueId`, `consultStartTimeStamp`. Remove `refreshTaskList()`. Fire callback. |
 | 9 | `TASK_CONSULT_QUEUE_CANCELLED` | `handleConsultQueueCancelled` | **Simplify** | Keep consult state reset. Remove `refreshTaskList()`. Fire callback. |
@@ -483,4 +483,4 @@ handleTaskRemove = (taskToRemove: ITask) => {
 
 ---
 
-_Parent: [migration-overview.md](./migration-overview.md)_
+_Parent: [migration-overview.md](./migration-overview.md) — overview doc is added in PR 1/4; link resolves once that PR is merged._

@@ -112,7 +112,7 @@ Two different `findHoldTimestamp` functions exist with different signatures:
 
 | # | Function | Reason | SDK Replacement | Impact on Other Functions |
 |---|----------|--------|-----------------|--------------------------|
-| 1 | `getConsultStatus(task, agentId)` | Primary consumer `getControlsVisibility` is deleted | `task.uiControls` encodes all consult control states | `getTaskStatus()` calls this — must be updated (see After code below) |
+| 1 | `getConsultStatus(task, agentId)` | Primary consumer `getControlsVisibility` is deleted | `task.uiControls` encodes all consult control states | `getConsultStatus()` **calls** `getTaskStatus()` (not the reverse). When we delete `getConsultStatus`, update `getTaskStatus` to use `task.uiControls` (see After code below). |
 | 2 | `getIsConferenceInProgress(task)` | `task-util.ts` already uses `task?.data?.isConferenceInProgress` directly; function only used in tests | `task.uiControls.exitConference.isVisible` | None |
 | 3 | `getConferenceParticipantsCount(task)` | Used only in `getControlsVisibility` | SDK computes max participant check internally | None |
 | 4 | `getIsCustomerInCall(task)` | Used only in `getControlsVisibility` | SDK computes internally | None |
