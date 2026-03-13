@@ -6,9 +6,12 @@ import {submitWrapup, waitForWrapupAfterCallEnd} from '../Utils/wrapupUtils';
 import {waitForState} from '../Utils/helperUtils';
 import {TestManager} from '../test-manager';
 import {enterOutdialNumber, clickOutdialButton, acceptCustomerCall} from '../Utils/outdialUtils';
+import {endTask} from '../Utils/taskControlUtils';
 
 export default function createOutdialCallTests() {
   test.describe('Outdial Call - Desktop Mode', () => {
+    test.skip(!process.env.PW_DIAL_NUMBER || !process.env.DIAL_NUMBER_LOGIN_ACCESS_TOKEN,
+      'Required outdial env vars not set');
     let testManager: TestManager;
 
     test.beforeAll(async ({browser}, testInfo) => {
@@ -18,7 +21,6 @@ export default function createOutdialCallTests() {
     });
 
     test('should make an outdial call in Desktop mode and complete wrapup', async () => {
-      test.skip(!process.env.PW_DIAL_NUMBER, 'PW_DIAL_NUMBER not set');
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       await expect(testManager.agent1Page.getByTestId('outdial-call-container')).toBeVisible();
       await enterOutdialNumber(testManager.agent1Page, process.env.PW_DIAL_NUMBER!);
@@ -26,20 +28,23 @@ export default function createOutdialCallTests() {
       await acceptCustomerCall(testManager.callerPage);
       await waitForState(testManager.agent1Page, USER_STATES.ENGAGED);
       await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
-      await testManager.agent1Page.waitForTimeout(3000);
-      await testManager.agent1Page.getByTestId('call-control:end-call').first().click({timeout: 5000});
-      await testManager.agent1Page.waitForTimeout(2000);
+      await endTask(testManager.agent1Page);
+      await waitForWrapupAfterCallEnd(testManager.agent1Page);
       await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
       await waitForState(testManager.agent1Page, USER_STATES.AVAILABLE);
       await verifyCurrentState(testManager.agent1Page, USER_STATES.AVAILABLE);
     });
 
     test.afterAll(async () => {
-      await testManager.cleanup();
+      if (testManager) {
+        await testManager.cleanup();
+      }
     });
   });
 
   test.describe('Outdial Call - Extension Mode', () => {
+    test.skip(!process.env.PW_DIAL_NUMBER || !process.env.DIAL_NUMBER_LOGIN_ACCESS_TOKEN,
+      'Required outdial env vars not set');
     let testManager: TestManager;
 
     test.beforeAll(async ({browser}, testInfo) => {
@@ -49,7 +54,6 @@ export default function createOutdialCallTests() {
     });
 
     test('should make an outdial call in Extension mode and complete wrapup', async () => {
-      test.skip(!process.env.PW_DIAL_NUMBER, 'PW_DIAL_NUMBER not set');
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       await expect(testManager.agent1Page.getByTestId('outdial-call-container')).toBeVisible();
       await enterOutdialNumber(testManager.agent1Page, process.env.PW_DIAL_NUMBER!);
@@ -59,7 +63,6 @@ export default function createOutdialCallTests() {
       await acceptCustomerCall(testManager.callerPage);
       await waitForState(testManager.agent1Page, USER_STATES.ENGAGED);
       await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
-      await testManager.agent1Page.waitForTimeout(3000);
       await endCallTask(testManager.agent1ExtensionPage);
       await waitForWrapupAfterCallEnd(testManager.agent1Page);
       await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
@@ -68,7 +71,9 @@ export default function createOutdialCallTests() {
     });
 
     test.afterAll(async () => {
-      await testManager.cleanup();
+      if (testManager) {
+        await testManager.cleanup();
+      }
     });
   });
 

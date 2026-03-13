@@ -538,7 +538,11 @@ export class TestManager {
   }
 
   private async setupOutdialCustomer(browser: Browser): Promise<void> {
-    const customerToken = process.env.DIAL_NUMBER_LOGIN_ACCESS_TOKEN ?? '';
+    const envTokens = this.getEnvTokens();
+    const customerToken = envTokens.dialNumberLoginAccessToken;
+    if (!customerToken) {
+      throw new Error('Environment variable DIAL_NUMBER_LOGIN_ACCESS_TOKEN is missing or empty');
+    }
     const result = await this.createContextWithPage(browser, PAGE_TYPES.CALLER);
     this.callerExtensionContext = result.context;
     this.callerPage = result.page;
