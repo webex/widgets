@@ -134,19 +134,27 @@ export const useIncomingTask = (props: UseTaskProps) => {
   const acceptControl = incomingTask?.uiControls?.accept ?? {isVisible: false, isEnabled: false};
   const declineControl = incomingTask?.uiControls?.decline ?? {isVisible: false, isEnabled: false};
 
-  // Event callbacks — UNCHANGED (still need lifecycle callbacks for onAccepted/onRejected)
+  // Event callbacks — use NAMED callbacks so removeTaskCallback(task.off) gets the same reference
+  const taskAssignCallback = useCallback(() => {
+    if (onAccepted) onAccepted({task: incomingTask});
+  }, [onAccepted, incomingTask]);
+
   useEffect(() => {
     if (!incomingTask) return;
-    store.setTaskCallback(TASK_EVENTS.TASK_ASSIGNED, () => {
-      if (onAccepted) onAccepted({task: incomingTask});
-    }, incomingTask.data.interactionId);
+    store.setTaskCallback(TASK_EVENTS.TASK_ASSIGNED, taskAssignCallback, incomingTask.data.interactionId);
     store.setTaskCallback(TASK_EVENTS.TASK_CONSULT_ACCEPTED, taskAssignCallback, incomingTask?.data.interactionId);
     store.setTaskCallback(TASK_EVENTS.TASK_END, taskRejectCallback, incomingTask?.data.interactionId);
     store.setTaskCallback(TASK_EVENTS.TASK_REJECT, taskRejectCallback, incomingTask?.data.interactionId);
     store.setTaskCallback(TASK_EVENTS.TASK_CONSULT_END, taskRejectCallback, incomingTask?.data.interactionId);
 
-    return () => { /* cleanup — same as before */ };
-  }, [incomingTask]);
+    return () => {
+      store.removeTaskCallback(TASK_EVENTS.TASK_ASSIGNED, taskAssignCallback, incomingTask?.data.interactionId);
+      store.removeTaskCallback(TASK_EVENTS.TASK_CONSULT_ACCEPTED, taskAssignCallback, incomingTask?.data.interactionId);
+      store.removeTaskCallback(TASK_EVENTS.TASK_END, taskRejectCallback, incomingTask?.data.interactionId);
+      store.removeTaskCallback(TASK_EVENTS.TASK_REJECT, taskRejectCallback, incomingTask?.data.interactionId);
+      store.removeTaskCallback(TASK_EVENTS.TASK_CONSULT_END, taskRejectCallback, incomingTask?.data.interactionId);
+    };
+  }, [incomingTask, taskAssignCallback, taskRejectCallback]);
 
   // Actions — UNCHANGED
   const accept = () => {

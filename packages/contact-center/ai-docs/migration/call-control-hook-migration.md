@@ -107,7 +107,7 @@
 | `mergeConference` | `controls.mergeToConference` | **Renamed** + nested |
 | `consult` | `controls.consult` | Nested |
 | `endConsult` | `controls.endConsult` | Nested |
-| `consultTransfer` | `controls.consultTransfer` | Nested (always hidden in new) |
+| `consultTransfer` | **Use `controls.transfer` or `controls.transferConference`** for consult/conference transfer button visibility | `controls.consultTransfer` is always hidden in new SDK — do not wire UI to it |
 | `consultTransferConsult` | `controls.transfer` / `controls.transferConference` | **Split** — `transfer` for consult transfer, `transferConference` for conference transfer |
 | `mergeConferenceConsult` | `controls.mergeToConference` | **Merged** |
 | `muteUnmuteConsult` | `controls.mute` | **Merged** |
@@ -120,12 +120,12 @@
 | Old Flag | New Approach |
 |----------|-------------|
 | `isConferenceInProgress` | `controls.exitConference.isVisible` |
-| `isConsultInitiated` | `controls.endConsult.isVisible` |
+| `isConsultInitiated` | **Do NOT use `controls.endConsult.isVisible` as "initiated only"** — that control is visible for both initiated and accepted consult. Use task/participant state if you need to distinguish "consult requested" vs "consult active". |
 | `isConsultInitiatedAndAccepted` | Removed — SDK handles |
 | `isConsultReceived` | Removed — SDK handles |
 | `isConsultInitiatedOrAccepted` | `controls.endConsult.isVisible` |
 | `isHeld` | **Do NOT derive from `controls.hold.isEnabled`** — use `findHoldStatus(task, 'mainCall', agentId)` from task data |
-| `consultCallHeld` | `controls.switchToConsult.isVisible` |
+| `consultCallHeld` | **Do NOT use `controls.switchToConsult.isVisible`** — that reflects button visibility, not actual hold state. Use `findHoldStatus(task, 'consult', agentId)` from task/participant data |
 
 ### Actions (Unchanged)
 
@@ -201,9 +201,10 @@ export function useCallControl(props: useCallControlProps) {
     const onControlsUpdated = (updatedControls: TaskUIControls) => {
       setControls(updatedControls);
     };
-    task.on(TASK_EVENTS.TASK_UI_CONTROLS_UPDATED, onControlsUpdated);
+    // Event name: SDK may expose TASK_EVENTS.TASK_UI_CONTROLS_UPDATED later; until then use literal
+    task.on('task:ui-controls-updated', onControlsUpdated);
     return () => {
-      task.off(TASK_EVENTS.TASK_UI_CONTROLS_UPDATED, onControlsUpdated);
+      task.off('task:ui-controls-updated', onControlsUpdated);
     };
   }, [task]);
 
