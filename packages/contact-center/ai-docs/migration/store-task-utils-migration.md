@@ -17,10 +17,10 @@ The store's `task-utils.ts` contains 16 exported utility functions that inspect 
 | `TASK_STATE_CONSULT` | `store/src/constants.ts` | SDK `TaskState.CONSULT_INITIATING` — **delete ONLY AFTER rewriting `findHoldStatus`** (see ordering note below) |
 | `TASK_STATE_CONSULTING` | `store/src/constants.ts` | SDK `TaskState.CONSULTING` — **same ordering constraint** |
 | `TASK_STATE_CONSULT_COMPLETED` | `store/src/constants.ts` | SDK handles via context — **same ordering constraint** |
-| `INTERACTION_STATE_WRAPUP` | `store/src/constants.ts` | SDK handles via `TaskState.WRAPPING_UP` |
-| `INTERACTION_STATE_POST_CALL` | `store/src/constants.ts` | SDK handles via `TaskState.POST_CALL` |
-| `INTERACTION_STATE_CONNECTED` | `store/src/constants.ts` | SDK handles via `TaskState.CONNECTED` |
-| `INTERACTION_STATE_CONFERENCE` | `store/src/constants.ts` | SDK handles via `TaskState.CONFERENCING` |
+| `INTERACTION_STATE_WRAPUP` | `store/src/constants.ts` | SDK `TaskState.WRAPPING_UP` — **delete ONLY AFTER rewriting `getTaskStatus`** (see ordering note below) |
+| `INTERACTION_STATE_POST_CALL` | `store/src/constants.ts` | SDK `TaskState.POST_CALL` — **same ordering constraint** |
+| `INTERACTION_STATE_CONNECTED` | `store/src/constants.ts` | SDK `TaskState.CONNECTED` — **same ordering constraint** |
+| `INTERACTION_STATE_CONFERENCE` | `store/src/constants.ts` | SDK `TaskState.CONFERENCING` — **same ordering constraint** |
 | `CONSULT_STATE_INITIATED` | `store/src/constants.ts` | SDK handles via context |
 | `CONSULT_STATE_COMPLETED` | `store/src/constants.ts` | SDK handles via context |
 | `CONSULT_STATE_CONFERENCING` | `store/src/constants.ts` | SDK handles via context |
@@ -45,6 +45,17 @@ The store's `task-utils.ts` contains 16 exported utility functions that inspect 
 - **Via `getConsultMPCState`:** Line 321 — `[TASK_STATE_CONSULT_COMPLETED].includes(getConsultMPCState(...))`
 
 **Do NOT delete these 3 constants until `findHoldStatus` and `isConsultOnHoldMPC` are rewritten** to use SDK `TaskState` equivalents. Deleting them first will break compilation.
+
+## Ordering Constraint: Interaction State Constants
+
+`getTaskStatus` (KEEP) depends on `INTERACTION_STATE_WRAPUP`, `INTERACTION_STATE_POST_CALL`, `INTERACTION_STATE_CONNECTED`, and `INTERACTION_STATE_CONFERENCE` extensively:
+- **`isIncomingTask`:** Line 46 — `task.data.interaction.state !== INTERACTION_STATE_WRAPUP`
+- **`getTaskStatus`:** Lines 56–60 — returns `INTERACTION_STATE_CONNECTED` or `INTERACTION_STATE_CONFERENCE`
+- **`getTaskStatus`:** Lines 99–100 — conference state check
+- **`getTaskStatus`:** Lines 105–106 — wrapup/post-call consult-completed check
+- **`getConsultMPCState`:** Lines 137–139 — connected/conference branching
+
+**Do NOT delete these 4 constants until `getTaskStatus` and `getConsultMPCState` are rewritten** to use SDK `TaskState` equivalents. Deleting them first will break compilation.
 
 ## Gotcha: `TaskState.CONSULT_INITIATING` vs `CONSULTING`
 

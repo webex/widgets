@@ -315,14 +315,12 @@ task.on(TASK_EVENTS.TASK_POST_CALL_ACTIVITY, () => this.refreshTaskList());
 ```typescript
 // SDK keeps task.data in sync via state machine.
 // refreshTaskList() only called on initialization/hydration and TASK_WRAPPEDUP.
-// Individual events just fire callbacks for widget-layer side effects.
+// Individual events use bound handlers (from taskBoundHandlers map) so
+// handleTaskRemove can .off() the exact same reference. See Pattern 1.
 
-task.on(TASK_EVENTS.TASK_HOLD, () => {
-  this.fireTaskCallbacks(TASK_EVENTS.TASK_HOLD, interactionId);
-});
-task.on(TASK_EVENTS.TASK_RESUME, () => {
-  this.fireTaskCallbacks(TASK_EVENTS.TASK_RESUME, interactionId);
-});
+task.on(TASK_EVENTS.TASK_HOLD, bound.hold);
+task.on(TASK_EVENTS.TASK_RESUME, bound.resume);
+// ... all other callback-only events use bound.* references
 ```
 
 ### Pattern 3: `TASK_UI_CONTROLS_UPDATED` — Bound Handler (Not a Class Method)
