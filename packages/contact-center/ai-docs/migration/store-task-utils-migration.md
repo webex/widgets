@@ -205,10 +205,10 @@ const controls = currentTask?.uiControls ?? getDefaultUIControls();
 >
 > | Widget Prop | Controls Affected | Gate Logic |
 > |-------------|-------------------|------------|
-> | `featureFlags.webRtcEnabled` | accept, decline, muteUnmute, conference, muteUnmuteConsult, + telephony support (holdResume, endConsult) | Hide control when `webRtcEnabled` is `false` and channel is voice in browser |
+> | `featureFlags.webRtcEnabled` | accept, decline, muteUnmute, conference, muteUnmuteConsult, **transfer** (browser: `isTransferVisibility`), + telephony support (holdResume, endConsult) | Hide control when `webRtcEnabled` is `false` and channel is voice in browser |
 > | `featureFlags.isEndCallEnabled` | end | Hide end button when `isEndCallEnabled` is `false` (phone device only) |
 > | `featureFlags.isEndConsultEnabled` | endConsult | Hide end-consult when `isEndConsultEnabled` is `false` |
-> | `conferenceEnabled` (widget prop) | conference, exitConference, mergeConference, consultTransferConsult | Hide all conference-related controls when `conferenceEnabled` is `false` |
+> | `conferenceEnabled` (widget prop) | conference, exitConference, mergeConference, **mergeConferenceConsult**, consultTransferConsult | Hide all conference-related controls when `conferenceEnabled` is `false` |
 >
 > **Implementation pattern — apply after reading SDK controls:**
 > ```typescript
