@@ -21,9 +21,9 @@ The store's `task-utils.ts` contains 16 exported utility functions that inspect 
 | `INTERACTION_STATE_POST_CALL` | `store/src/constants.ts` | SDK `TaskState.POST_CALL` — **same ordering constraint** |
 | `INTERACTION_STATE_CONNECTED` | `store/src/constants.ts` | SDK `TaskState.CONNECTED` — **same ordering constraint** |
 | `INTERACTION_STATE_CONFERENCE` | `store/src/constants.ts` | SDK `TaskState.CONFERENCING` — **same ordering constraint** |
-| `CONSULT_STATE_INITIATED` | `store/src/constants.ts` | SDK handles via context |
-| `CONSULT_STATE_COMPLETED` | `store/src/constants.ts` | SDK handles via context |
-| `CONSULT_STATE_CONFERENCING` | `store/src/constants.ts` | SDK handles via context |
+| `CONSULT_STATE_INITIATED` | `store/src/constants.ts` | SDK handles via context — **delete ONLY AFTER rewriting `getConsultMPCState`** (see ordering note below) |
+| `CONSULT_STATE_COMPLETED` | `store/src/constants.ts` | SDK handles via context — **same ordering constraint** |
+| `CONSULT_STATE_CONFERENCING` | `store/src/constants.ts` | SDK handles via context — **same ordering constraint** |
 
 ## Constants to Keep
 
@@ -56,6 +56,16 @@ The store's `task-utils.ts` contains 16 exported utility functions that inspect 
 - **`getConsultMPCState`:** Lines 137–139 — connected/conference branching
 
 **Do NOT delete these 4 constants until `getTaskStatus` and `getConsultMPCState` are rewritten** to use SDK `TaskState` equivalents. Deleting them first will break compilation.
+
+## Ordering Constraint: Consult State Constants (`CONSULT_STATE_*`)
+
+`getConsultMPCState` (used by `getTaskStatus` and `findHoldStatus`) depends on `CONSULT_STATE_INITIATED`, `CONSULT_STATE_COMPLETED`, and `CONSULT_STATE_CONFERENCING`:
+- **Line 53:** `case CONSULT_STATE_INITIATED:` — returns `TASK_STATE_CONSULT`
+- **Line 55:** `case CONSULT_STATE_COMPLETED:` — returns connected or consult-completed
+- **Line 59:** `case CONSULT_STATE_CONFERENCING:` — returns `INTERACTION_STATE_CONFERENCE`
+- **Line 107:** `consultState === CONSULT_STATE_COMPLETED` — wrapup path in `getTaskStatus`
+
+**Do NOT delete these 3 constants until `getConsultMPCState` is rewritten** to use SDK equivalents. Deleting them first will break compilation.
 
 ## Gotcha: `TaskState.CONSULT_INITIATING` vs `CONSULTING`
 

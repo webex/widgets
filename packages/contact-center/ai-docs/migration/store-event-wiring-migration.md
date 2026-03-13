@@ -214,6 +214,8 @@ registerTaskEventListeners(task: ITask) {
   // Create bound handlers that close over this task's interactionId.
   // Stored in map so handleTaskRemove can .off() the exact same references.
   const bound: Record<string, Function> = {
+    reject: (reason: string) => this.handleTaskReject(task, reason),
+    outdialFailed: (reason: string) => this.handleOutdialFailed(reason),
     uiControlsUpdated: (uiControls: TaskUIControls) => {
       this.fireTaskCallbacks(TASK_EVENTS.TASK_UI_CONTROLS_UPDATED, interactionId, uiControls);
     },
@@ -245,11 +247,13 @@ registerTaskEventListeners(task: ITask) {
   // NEW: SDK-computed UI control updates (bound to emitting task's interactionId)
   task.on(TASK_EVENTS.TASK_UI_CONTROLS_UPDATED, bound.uiControlsUpdated);
 
-  // KEEP: Task lifecycle events that need store-level management (class methods — no interactionId needed)
+  // KEEP: Task lifecycle events that need store-level management (class methods)
   task.on(TASK_EVENTS.TASK_END, this.handleTaskEnd);
   task.on(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
-  task.on(TASK_EVENTS.TASK_REJECT, this.handleTaskReject);
-  task.on(TASK_EVENTS.TASK_OUTDIAL_FAILED, this.handleOutdialFailed);
+  // TASK_REJECT: handleTaskReject(task, reason) needs the emitting task reference —
+  // must use a bound handler, not a direct class method reference
+  task.on(TASK_EVENTS.TASK_REJECT, bound.reject);
+  task.on(TASK_EVENTS.TASK_OUTDIAL_FAILED, bound.outdialFailed);
 
   // KEEP + FIX WIRING: Wire handleConsultEnd (was dead code)
   task.on(TASK_EVENTS.TASK_CONSULT_END, this.handleConsultEnd);
@@ -409,8 +413,6 @@ handleTaskRemove = (taskToRemove: ITask) => {
   // Class-method handlers — stable references, no map needed
   taskToRemove.off(TASK_EVENTS.TASK_END, this.handleTaskEnd);
   taskToRemove.off(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
-  taskToRemove.off(TASK_EVENTS.TASK_REJECT, this.handleTaskReject);
-  taskToRemove.off(TASK_EVENTS.TASK_OUTDIAL_FAILED, this.handleOutdialFailed);
   taskToRemove.off(TASK_EVENTS.TASK_CONSULT_END, this.handleConsultEnd);  // FIX: was refreshTaskList
   taskToRemove.off(TASK_EVENTS.TASK_CONSULT_CREATED, this.handleConsultCreated);
   taskToRemove.off(TASK_EVENTS.TASK_CONSULTING, this.handleConsulting);
@@ -421,6 +423,8 @@ handleTaskRemove = (taskToRemove: ITask) => {
 
   // Bound handlers — retrieve exact references from map for correct .off() detachment
   if (bound) {
+    taskToRemove.off(TASK_EVENTS.TASK_REJECT, bound.reject);
+    taskToRemove.off(TASK_EVENTS.TASK_OUTDIAL_FAILED, bound.outdialFailed);
     taskToRemove.off(TASK_EVENTS.TASK_UI_CONTROLS_UPDATED, bound.uiControlsUpdated);
     taskToRemove.off(TASK_EVENTS.TASK_WRAPPEDUP, bound.wrappedup);
     taskToRemove.off(TASK_EVENTS.TASK_PARTICIPANT_JOINED, bound.confStarted_participantJoined);
