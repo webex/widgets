@@ -139,6 +139,10 @@ export const useIncomingTask = (props: UseTaskProps) => {
     if (onAccepted) onAccepted({task: incomingTask});
   }, [onAccepted, incomingTask]);
 
+  const taskRejectCallback = useCallback(() => {
+    if (onRejected) onRejected({task: incomingTask});
+  }, [onRejected, incomingTask]);
+
   useEffect(() => {
     if (!incomingTask) return;
     store.setTaskCallback(TASK_EVENTS.TASK_ASSIGNED, taskAssignCallback, incomingTask.data.interactionId);
