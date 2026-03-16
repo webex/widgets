@@ -93,7 +93,7 @@ interface CallControlComponentProps {
   onToggleMute: () => void;
   onToggleRecording: () => void;
   onEndCall: () => void;
-  onWrapupCall: (reason: string, auxCodeId: string) => void;
+  onWrapupCall: (reason: string, auxCodeId: string) => void;  // Invoked from wrap-up UI on submit
   onTransferCall: (payload: TransferPayLoad) => void;  // Invoked from transfer popover on submit
   onConsultCall: (payload: ConsultPayload) => void;   // Invoked from consult popover on submit
   onEndConsultCall: () => void;
@@ -199,7 +199,7 @@ const CallControlComponent = ({
   onConsultTransfer, onConsultConference, onExitConference,
   onSwitchToMainCall, onSwitchToConsult, ...
 }: CallControlComponentProps) => {
-  // Implement openTransferPopover / openConsultPopover (e.g. set state to show popover); popover on submit calls onTransferCall(payload) / onConsultCall(payload).
+  // Implement openTransferPopover / openConsultPopover / openWrapupPopover (e.g. set state to show popover); popover on submit calls onTransferCall(payload) / onConsultCall(payload) / onWrapupCall(reason, auxCodeId).
   // Derive display-only flags from controls (replaces old state flag props)
   const isConsulting = controls.endConsult.isVisible;
   const isConferencing = controls.exitConference.isVisible;
@@ -253,9 +253,9 @@ const CallControlComponent = ({
           {isRecording ? 'Pause' : 'Resume'} Recording
         </Button>
       )}
-      {/* Wrapup */}
+      {/* Wrap Up: button opens wrap-up UI; UI on submit calls onWrapupCall(reason, auxCodeId) */}
       {controls.wrapup.isVisible && (
-        <Button disabled={!controls.wrapup.isEnabled}>Wrap Up</Button>
+        <Button onClick={openWrapupPopover} disabled={!controls.wrapup.isEnabled}>Wrap Up</Button>
       )}
     </div>
   );
