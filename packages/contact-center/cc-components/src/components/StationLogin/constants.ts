@@ -16,7 +16,8 @@ export const StationLoginLabels = {
     'This is your preferred method for receiving and making calls. Choose between your phone number, extension (if available), or your web browser.',
   YOUR_TEAM: 'Your Team',
   IS_REQUIRED: ' is required',
-  DN_FORMAT_ERROR: 'Enter a valid US dial number. For help, reach out to your administrator or support team.',
+  DN_FORMAT_ERROR:
+    'Enter a valid US or international dial number. For help, reach out to your administrator or support team.',
   DEFAULT_ERROR: 'Error logging in: ',
   CONFIRM: 'Confirm',
   CONFIRM_INTERACTION_PREFERENCE_CHANGES_TITLE: 'Confirm interaction preference changes',
