@@ -324,14 +324,17 @@ This function builds the main call control button array. It references 12 old co
 
 ```typescript
 // OLD: uses consultInitiated flag
-// NEW: derive consultInitiated from controls.endConsult.isVisible
+// NEW: do NOT derive consult-init state from controls.endConsult.isVisible (it spans both initiated and accepted).
+//      Use task/participant state or SDK consult phase for "initiated only" if needed.
 ```
 
 ### 4. `getConsultStatusText()` — call-control-custom.utils.ts
 
 ```typescript
 // OLD: uses consultInitiated boolean
-// NEW: derive from controls.endConsult.isVisible && !controls.mergeToConference.isEnabled
+// NEW: do NOT derive from control visibility (endConsult.isVisible, mergeToConference.isEnabled);
+//      visibility can change for feature gating or temporary disable and misclassify phase.
+//      Use task/participant state or SDK consult phase for accurate status/timer text.
 ```
 
 ---
