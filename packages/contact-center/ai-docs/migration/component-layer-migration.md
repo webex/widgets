@@ -44,8 +44,8 @@ export interface ControlVisibility {
   consultCallHeld: boolean;         // → derive from findHoldStatus(task, 'consult', agentId). Do NOT use controls.switchToConsult.isVisible (that is button visibility, not hold state).
 }
 
-// NEW — import from SDK
-import type { TaskUIControls } from '@webex/contact-center';
+// NEW — import via store to preserve layering (cc-components → store → SDK). Store re-exports TaskUIControls from SDK.
+import type { TaskUIControls } from '@webex/cc-store';
 ```
 
 ---
@@ -221,10 +221,10 @@ const CallControlComponent = ({
       )}
       {/* Transfer and Consult initiation */}
       {controls.transfer.isVisible && (
-        <Button disabled={!controls.transfer.isEnabled}>Transfer</Button>
+        <Button onClick={onTransferCall} disabled={!controls.transfer.isEnabled}>Transfer</Button>
       )}
       {controls.consult.isVisible && (
-        <Button disabled={!controls.consult.isEnabled}>Consult</Button>
+        <Button onClick={onConsultCall} disabled={!controls.consult.isEnabled}>Consult</Button>
       )}
       {/* Active consult controls */}
       {controls.endConsult.isVisible && (
