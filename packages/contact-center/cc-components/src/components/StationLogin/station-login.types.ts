@@ -215,7 +215,7 @@ export interface IStationLoginProps {
    * If false or undefined, uses dialNumberRegex from agentConfig or falls back to US regex.
    * Default: undefined (uses dialNumberRegex or US fallback)
    */
-  internationalDialNumber?: boolean;
+  allowInternationDn?: boolean;
 }
 
 export interface LoginOptionsState {
@@ -258,5 +258,5 @@ export type StationLoginComponentProps = Pick<
   | 'setSelectedTeamId'
   | 'selectedTeamId'
   | 'hideDesktopLogin'
-  | 'internationalDialNumber'
+  | 'allowInternationDn'
 >;
