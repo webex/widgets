@@ -16,6 +16,7 @@ import {
   saveConfirmCancelClicked,
   updateDialNumberLabel,
   handleCCSignoutKeyDown,
+  INTERNATIONAL_DIAL_NUMBER_REGEX,
 } from './station-login.utils';
 import {withMetrics} from '@webex/cc-ui-logging';
 
@@ -49,7 +50,14 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
     dialNumberValue,
     setSelectedTeamId,
     hideDesktopLogin,
+    internationalDialNumber,
   } = props;
+
+  // Determine the regex to use for dial number validation:
+  // 1. If internationalDialNumber is true, use international regex
+  // 2. Otherwise, use dialNumberRegex from agentConfig (if provided)
+  // 3. If dialNumberRegex is null/undefined, validateDialNumber will fall back to US regex
+  const resolvedDialNumberRegex = internationalDialNumber ? INTERNATIONAL_DIAL_NUMBER_REGEX : dialNumberRegex;
 
   const [dialNumberLabel, setDialNumberLabel] = useState<string>('');
 
@@ -262,7 +270,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
                   setDialNumber,
                   setShowDNError,
                   setDNErrorText,
-                  dialNumberRegex,
+                  resolvedDialNumberRegex,
                   setCurrentLoginOptions,
                   selectedDeviceType,
                   logger
