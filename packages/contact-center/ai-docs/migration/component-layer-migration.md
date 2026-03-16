@@ -195,7 +195,7 @@ const CallControlComponent = ({
   controls,         // TaskUIControls — all 17 controls from SDK
   isHeld,           // From parent: findHoldStatus(task, 'mainCall', agentId)
   isMuted, isRecording, holdTime,
-  onToggleHold, onToggleMute, onEndCall, onEndConsult,
+  onToggleHold, onToggleMute, onEndCall, onEndConsultCall,
   onConsultTransfer, onConsultConference, onExitConference,
   onSwitchToMainCall, onSwitchToConsult, ...
 }: CallControlComponentProps) => {
@@ -228,7 +228,7 @@ const CallControlComponent = ({
       )}
       {/* Active consult controls */}
       {controls.endConsult.isVisible && (
-        <Button onClick={onEndConsult} disabled={!controls.endConsult.isEnabled}>End Consult</Button>
+        <Button onClick={onEndConsultCall} disabled={!controls.endConsult.isEnabled}>End Consult</Button>
       )}
       {controls.mergeToConference.isVisible && (
         <Button onClick={onConsultConference} disabled={!controls.mergeToConference.isEnabled}>Merge</Button>

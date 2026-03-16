@@ -130,6 +130,7 @@ export const useTaskList = (props: UseTaskListProps) => {
 | `task/src/helper.ts` (`useTaskList`) | Remove `isBrowser`, use per-task `uiControls` for accept/decline |
 | `task/src/TaskList/index.tsx` | Remove `isBrowser` prop pass-through |
 | `cc-components/.../TaskList/task-list.tsx` | Use `task.uiControls.accept/decline` per task |
+| `cc-components/.../TaskList/task-list.utils.ts` | Update `extractTaskListItemData()` to use `task.uiControls.accept/decline`; remove `isBrowser`-based gating |
 | `cc-components/.../Task/task.utils.ts` | Update task data extraction if status source changes |
 | `store/src/task-utils.ts` (`getTaskStatus`) | Consider deprecation if SDK provides equivalent |
 
