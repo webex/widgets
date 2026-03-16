@@ -94,8 +94,8 @@ interface CallControlComponentProps {
   onToggleRecording: () => void;
   onEndCall: () => void;
   onWrapupCall: (reason: string, auxCodeId: string) => void;
-  onTransferCall: (payload: TransferPayLoad) => void;
-  onConsultCall: (payload: ConsultPayload) => void;
+  onTransferCall: (payload: TransferPayLoad) => void;  // Invoked from transfer popover on submit
+  onConsultCall: (payload: ConsultPayload) => void;   // Invoked from consult popover on submit
   onEndConsultCall: () => void;
   onConsultTransfer: () => void;
   onConsultConference: () => void;
@@ -199,6 +199,7 @@ const CallControlComponent = ({
   onConsultTransfer, onConsultConference, onExitConference,
   onSwitchToMainCall, onSwitchToConsult, ...
 }: CallControlComponentProps) => {
+  // Implement openTransferPopover / openConsultPopover (e.g. set state to show popover); popover on submit calls onTransferCall(payload) / onConsultCall(payload).
   // Derive display-only flags from controls (replaces old state flag props)
   const isConsulting = controls.endConsult.isVisible;
   const isConferencing = controls.exitConference.isVisible;
@@ -219,12 +220,12 @@ const CallControlComponent = ({
       {controls.end.isVisible && (
         <Button onClick={onEndCall} disabled={!controls.end.isEnabled}>End</Button>
       )}
-      {/* Transfer and Consult initiation */}
+      {/* Transfer and Consult: buttons open popover/menu; popover invokes onTransferCall(payload) / onConsultCall(payload) on confirm */}
       {controls.transfer.isVisible && (
-        <Button onClick={onTransferCall} disabled={!controls.transfer.isEnabled}>Transfer</Button>
+        <Button onClick={openTransferPopover} disabled={!controls.transfer.isEnabled}>Transfer</Button>
       )}
       {controls.consult.isVisible && (
-        <Button onClick={onConsultCall} disabled={!controls.consult.isEnabled}>Consult</Button>
+        <Button onClick={openConsultPopover} disabled={!controls.consult.isEnabled}>Consult</Button>
       )}
       {/* Active consult controls */}
       {controls.endConsult.isVisible && (
