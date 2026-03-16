@@ -88,8 +88,8 @@ interface CallControlComponentProps {
   secondsUntilAutoWrapup: number;
   buddyAgents: Agent[];
   consultAgentName: string;
-  // Actions
-  onToggleHold: () => void;
+  // Actions. onToggleHold(hold) — pass intended hold state (true = hold, false = resume); matches toggleHold(hold: boolean) in task.types.
+  onToggleHold: (hold: boolean) => void;
   onToggleMute: () => void;
   onToggleRecording: () => void;
   onEndCall: () => void;
@@ -387,7 +387,7 @@ Retain `deviceType`, `featureFlags`, `conferenceEnabled` in `useCallControl` for
 | `cc-components/.../CallControlCustom/consult-transfer-popover.tsx` | Update `isConferenceInProgress` prop | **LOW** |
 | `cc-components/.../IncomingTask/incoming-task.tsx` | Minor prop updates | **LOW** |
 | `cc-components/.../TaskList/task-list.tsx` | Minor prop updates | **LOW** |
-| `task/src/CallControlCAD/index.tsx` | Remove `deviceType`, `featureFlags`, `conferenceEnabled` (retain `agentId`) | **MEDIUM** |
+| `task/src/CallControlCAD/index.tsx` | **Retain** `deviceType`, `featureFlags`, `conferenceEnabled` for `applyFeatureGates` overlay; retain `agentId` | **MEDIUM** |
 | All test files for above | Update mocks and assertions | **HIGH** |
 
 ---
